@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>hiro, your AI teammate that works 24/7</title>
+<meta name="description" content="hiro turns your Jira tickets into tested pull requests 24/7. Self-hosted on your own server or computer. $10 a month.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='12' fill='%23FF5B1F'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:inherit}a:hover{color:inherit}
+.p-wrap *{box-sizing:border-box}
+.p-mono{font-family:'Geist Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
+.p-link{text-decoration:none;transition:opacity .2s ease}
+.p-link:hover{opacity:.55}
+.p-btn{display:inline-flex;align-items:center;gap:10px;text-decoration:none}
+.p-btn svg{transition:transform .25s ease}
+.p-btn:hover svg{transform:translateX(4px)}
+
+@keyframes p-rise{from{opacity:0;transform:translateY(0.5em)}to{opacity:1;transform:none}}
+@keyframes p-fade{from{opacity:0}to{opacity:1}}
+.p-word{display:inline-block;opacity:0;animation:p-rise .9s cubic-bezier(.2,.7,.2,1) forwards}
+.p-in{opacity:0;animation:p-fade 1s ease forwards}
+@keyframes p-draw{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.p-under{position:absolute;left:0;right:0;bottom:0.06em;height:0.11em;background:var(--a);transform-origin:left;transform:scaleX(0);animation:p-draw 1s cubic-bezier(.7,0,.2,1) 1s forwards;z-index:-1}
+@keyframes p-pulse{0%{box-shadow:0 0 0 0 var(--a)}70%{box-shadow:0 0 0 9px rgba(255,255,255,0)}100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}}
+.p-dot{border-radius:50%;background:var(--a);animation:p-pulse 2.2s ease-out infinite}
+@keyframes p-spin{to{transform:rotate(360deg)}}
+@keyframes p-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes p-line{0%,4%{opacity:0;transform:translateY(4px)}10%,92%{opacity:1;transform:none}100%{opacity:0}}
+@keyframes p-bar{0%{transform:scaleX(0)}75%,92%{transform:scaleX(1)}100%{transform:scaleX(1);opacity:0}}
+@keyframes p-blink{50%{opacity:0}}
+.p-log>div{opacity:0;animation:p-line 10s ease infinite}
+@keyframes p-marq{to{transform:translateX(-50%)}}
+@keyframes p-travel{0%{left:0%}100%{left:100%}}
+
+.p-rev{transition:opacity .9s ease, transform .9s cubic-bezier(.2,.7,.2,1)}
+.p-rev.p-wait{opacity:0;transform:translateY(24px)}
+.p-rule{position:relative;height:1px;background:#E8E8E8;overflow:hidden}
+.p-rule::after{content:"";position:absolute;inset:0;background:#0A0A0A;transform:scaleX(1);transform-origin:left;transition:transform 1.2s cubic-bezier(.7,0,.2,1) .15s}
+.p-rev.p-wait .p-rule::after{transform:scaleX(0)}
+.p-barfill{transform-origin:left;transform:scaleX(1);transition:transform 1.4s cubic-bezier(.7,0,.2,1) .2s}
+.p-rev.p-wait .p-barfill{transform:scaleX(0)}
+
+.p-calc{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:56px;align-items:start}
+.p-out{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 32px}
+.p-field{display:flex;flex-direction:column;gap:10px;padding:18px 0;border-bottom:1px solid #E8E8E8}
+.p-field label{display:flex;justify-content:space-between;gap:16px;font-size:15.5px}
+.p-range{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;cursor:pointer;margin:0}
+.p-range::-webkit-slider-runnable-track{height:2px;background:#0A0A0A}
+.p-range::-moz-range-track{height:2px;background:#0A0A0A}
+.p-range::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--a);border:2px solid #0A0A0A;margin-top:-10px}
+.p-range::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--a);border:2px solid #0A0A0A}
+.p-range:focus-visible{outline:2px solid #0A0A0A;outline-offset:4px}
+.p-num{transition:color .3s ease}
+@media (max-width:1000px){.p-calc{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:640px){.p-out{grid-template-columns:minmax(0,1fr)}}
+.p-price{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:64px;align-items:start}
+.p-li{display:flex;gap:14px;align-items:baseline;padding:13px 0;border-bottom:1px solid #E8E8E8;font-size:16.5px}
+.p-chk{flex:none;width:10px;height:10px;border-radius:50%;background:var(--a);transform:translateY(-1px)}
+.p-dash{flex:none;width:10px;height:2px;background:#0A0A0A;transform:translateY(-4px)}
+.p-faq{border-bottom:1px solid #E8E8E8}
+.p-faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:24px;padding:22px 0;font-size:19px;font-weight:500;letter-spacing:-0.015em;min-height:48px}
+.p-faq summary::-webkit-details-marker{display:none}
+.p-faq summary::after{content:"+";flex:none;width:32px;height:32px;border-radius:50%;border:1px solid #0A0A0A;display:flex;align-items:center;justify-content:center;font-weight:400;font-size:20px;transition:transform .3s ease, background .3s ease}
+.p-faq[open] summary::after{transform:rotate(45deg);background:var(--a)}
+.p-faq summary:focus-visible{outline:2px solid #0A0A0A;outline-offset:4px}
+.p-faq p{margin:0 0 24px;color:#5C5C5C;max-width:680px}
+@media (max-width:1000px){.p-price{grid-template-columns:minmax(0,1fr);gap:48px}}
+html{scroll-behavior:smooth}
+.p-top{position:fixed;right:24px;bottom:calc(24px + env(safe-area-inset-bottom, 0px));z-index:50;width:52px;height:52px;border-radius:50%;border:none;background:#0A0A0A;color:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity .3s ease, transform .3s ease, background .2s ease, color .2s ease}
+.p-top.p-show{opacity:1;transform:none;pointer-events:auto}
+.p-top:hover{background:var(--a);color:#0A0A0A}
+.p-top:focus-visible{outline:2px solid var(--a);outline-offset:3px}
+.p-top svg{transition:transform .25s ease}
+.p-top:hover svg{transform:translateY(-3px)}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+.p-cmp{width:100%;border-collapse:collapse;font-size:15.5px;min-width:640px}
+.p-cmp th,.p-cmp td{text-align:left;padding:16px 12px;border-bottom:1px solid #E8E8E8;vertical-align:top}
+.p-cmp th{font-weight:500;font-size:14px;color:#6B6B6B}
+.p-cmp td:first-child{color:#0A0A0A}
+.p-cmp .p-us{background:#FFF3EC;font-weight:500}
+
+@media (prefers-reduced-motion: reduce){
+.p-wrap *{animation:none !important;transition:none !important}
+.p-word,.p-in,.p-log>div{opacity:1 !important}
+.p-under,.p-barfill{transform:none !important}
+.p-rev.p-wait{opacity:1;transform:none}
+}
+
+.p-row{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,9fr);gap:40px}
+.p-hero{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:64px;align-items:center}
+.p-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:32px}
+.p-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:48px}
+.p-three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:48px}
+.p-road{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:24px}
+.p-team{display:grid;grid-template-columns:160px minmax(0,1fr);gap:40px;align-items:start}
+.p-nav{display:flex;gap:28px;align-items:center}
+@media (max-width:1000px){
+.p-row,.p-hero{grid-template-columns:minmax(0,1fr)}
+.p-row{gap:20px}
+.p-facts,.p-road{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:28px}
+.p-three{grid-template-columns:repeat(2,minmax(0,1fr))}
+.p-sun{display:none !important}
+}
+@media (max-width:640px){
+.p-nav{display:none}
+.p-two,.p-three,.p-facts,.p-road{grid-template-columns:minmax(0,1fr)}
+.p-team{grid-template-columns:minmax(0,1fr)}
+.p-h1{font-size:46px !important}
+.p-h2{font-size:32px !important}
+.p-big{font-size:56px !important}
+.p-cta{font-size:40px !important}
+}
+</style>
+</head>
+<body>
+<div class="p-wrap" style="--a: #FF5B1F; font-family: 'Geist', 'Helvetica Neue', Helvetica, sans-serif; color: #0A0A0A; background: #FFFFFF; font-size: 17px; line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden">
+
+<header style="max-width: 1200px; margin: 0 auto; padding: 28px 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px">
+  <a href="#top" class="p-link" style="display: flex; align-items: center; gap: 9px">
+    <span style="font-size: 20px; font-weight: 600; letter-spacing: -0.03em">hiro</span>
+    <span class="p-dot" aria-hidden="true" style="width: 7px; height: 7px; margin-top: 5px"></span>
+  </a>
+  <nav class="p-nav" aria-label="Main" style="font-size: 15px; color: #555555">
+    <a class="p-link" href="#how">How it works</a>
+    <a class="p-link" href="#savings">Savings</a>
+    <a class="p-link" href="#privacy">Privacy</a>
+    <a class="p-link" href="#pricing">Pricing</a>
+    <a class="p-link" href="#faq">FAQ</a>
+  </nav>
+  <a class="p-btn" href="#pricing" style="font-size: 15px; font-weight: 500; background: var(--a); color: #0A0A0A; padding: 10px 18px; border-radius: 999px; min-height: 44px">Get hiro · $10/mo</a>
+</header>
+
+<section id="top" style="max-width: 1200px; margin: 0 auto; padding: 88px 32px 96px">
+  <p class="p-mono p-in" style="margin: 0 0 28px; font-size: 13px; color: #6B6B6B; letter-spacing: 0.02em; animation-delay: .1s">Used by 20 developers  ·  Self-hosted  ·  $10 a month</p>
+  <div class="p-hero">
+    <div>
+      <h1 class="p-h1" style="margin: 0; font-size: 88px; line-height: 0.98; font-weight: 500; letter-spacing: -0.055em">
+        <span class="p-word" style="animation-delay: .15s">Your</span>
+        <span class="p-word" style="animation-delay: .25s">AI</span>
+        <span class="p-word" style="animation-delay: .35s">teammate</span>
+        <span class="p-word" style="animation-delay: .45s">that</span>
+        <span class="p-word" style="animation-delay: .55s">works</span>
+        <span style="position: relative; display: inline-block; z-index: 0"><span class="p-word" style="animation-delay: .7s">24/7.</span><span class="p-under" aria-hidden="true"></span></span>
+      </h1>
+      <p class="p-in" style="margin: 32px 0 32px; font-size: 19px; color: #4D4D4D; max-width: 520px; animation-delay: 1s">Label a Jira ticket and hiro turns it into a tested pull request, during your workday or while you're offline. It runs on your own server or computer, asks before it guesses, and never pushes without your approval.</p>
+      <div class="p-in" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; animation-delay: 1.15s">
+        <a class="p-btn" href="#pricing" style="background: #0A0A0A; color: #FFFFFF; font-weight: 500; font-size: 15px; padding: 14px 24px; border-radius: 999px; min-height: 48px">Get your license key
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+        </a>
+        <a class="p-link" href="#how" style="font-size: 15px; font-weight: 500; padding: 14px 8px; min-height: 48px; display: inline-flex; align-items: center; border-bottom: 1px solid #0A0A0A">See how it works</a>
+      </div>
+    </div>
+    <div class="p-sun p-in" aria-hidden="true" style="position: relative; height: 400px; animation-delay: .4s">
+      <div style="position: absolute; left: 50%; top: 50%; width: 210px; height: 210px; margin: -105px 0 0 -105px; border-radius: 50%; background: var(--a); animation: p-breathe 6s ease-in-out infinite"></div>
+      <div style="position: absolute; left: 50%; top: 50%; width: 330px; height: 330px; margin: -165px 0 0 -165px; border-radius: 50%; border: 1px solid #E2E2E2; animation: p-spin 18s linear infinite"><span style="position: absolute; left: 50%; top: -5px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: #0A0A0A"></span></div>
+      <div style="position: absolute; left: 50%; top: 50%; width: 396px; height: 396px; margin: -198px 0 0 -198px; border-radius: 50%; border: 1px dashed #E2E2E2; animation: p-spin 40s linear infinite reverse"><span style="position: absolute; left: -4px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; background: var(--a)"></span></div>
+    </div>
+  </div>
+
+  <div class="p-in" style="margin-top: 88px; border-top: 1px solid #0A0A0A; border-bottom: 1px solid #E8E8E8; padding: 26px 0; animation-delay: 1.3s">
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: baseline; margin-bottom: 16px">
+      <div style="display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap">
+        <span class="p-mono" style="font-size: 13px; color: #6B6B6B">PAY-214</span>
+        <span style="font-size: 17px; font-weight: 500">Require idempotency key on transfer creation</span>
+      </div>
+      <span style="display: inline-flex; align-items: center; gap: 9px; font-size: 14px; font-weight: 500"><span class="p-dot" aria-hidden="true" style="width: 8px; height: 8px"></span>Ready for your review</span>
+    </div>
+    <div style="height: 2px; background: #F0F0F0; margin-bottom: 18px; overflow: hidden"><div style="height: 100%; background: var(--a); transform-origin: left; animation: p-bar 10s cubic-bezier(.5,0,.3,1) infinite"></div></div>
+    <div class="p-mono p-log" style="font-size: 13.5px; line-height: 2; color: #3A3A3A; min-height: 108px">
+      <div style="animation-delay: 0s"><span style="color: #8A8A8A; margin-right: 20px">14:02</span>asked 2 questions, answered from phone</div>
+      <div style="animation-delay: .8s"><span style="color: #8A8A8A; margin-right: 20px">14:11</span>edit internal/transfer/handler.go</div>
+      <div style="animation-delay: 1.6s"><span style="color: #8A8A8A; margin-right: 20px">14:24</span>go test ./...  <span style="background: var(--a); color: #0A0A0A; padding: 1px 6px">48 passed</span></div>
+      <div style="animation-delay: 2.4s"><span style="color: #8A8A8A; margin-right: 20px">14:25</span>waiting for your review<span style="animation: p-blink 1.1s steps(1) infinite">_</span></div>
+    </div>
+  </div>
+</section>
+
+<div aria-hidden="true" style="border-top: 1px solid #E8E8E8; border-bottom: 1px solid #E8E8E8; overflow: hidden; padding: 18px 0">
+  <div class="p-mono" style="display: flex; width: max-content; gap: 48px; font-size: 14px; color: #8A8A8A; white-space: nowrap; animation: p-marq 40s linear infinite">
+    <span>Jira</span><span style="color: var(--a)">●</span><span>GitHub</span><span style="color: var(--a)">●</span><span>GitLab</span><span style="color: var(--a)">●</span><span>Claude Code</span><span style="color: var(--a)">●</span><span>Works 24/7</span><span style="color: var(--a)">●</span><span>Self-hosted</span><span style="color: var(--a)">●</span><span>English · Русский · O'zbek</span><span style="color: var(--a)">●</span>
+    <span>Jira</span><span style="color: var(--a)">●</span><span>GitHub</span><span style="color: var(--a)">●</span><span>GitLab</span><span style="color: var(--a)">●</span><span>Claude Code</span><span style="color: var(--a)">●</span><span>Works 24/7</span><span style="color: var(--a)">●</span><span>Self-hosted</span><span style="color: var(--a)">●</span><span>English · Русский · O'zbek</span><span style="color: var(--a)">●</span>
+  </div>
+</div>
+
+<section id="how" style="max-width: 1200px; margin: 0 auto; padding: 150px 32px">
+  <div class="p-row">
+    <p class="p-mono p-rev" style="margin: 6px 0 0; font-size: 13px; color: #6B6B6B"><span style="color: #0A0A0A; background: var(--a); padding: 1px 6px">01</span>  How it works</p>
+    <div>
+      <h2 class="p-h2 p-rev" style="margin: 0 0 24px; font-size: 48px; line-height: 1.05; font-weight: 500; letter-spacing: -0.045em; max-width: 760px">Label a ticket. Get a tested pull request back.</h2>
+      <p class="p-rev" style="margin: 0 0 56px; color: #5C5C5C; max-width: 600px">Junior, mid-level or senior: hand hiro the routine tickets and keep your hours for the work that needs you.</p>
+      <div class="p-two">
+        <div class="p-rev" style="padding-bottom: 40px"><div class="p-rule"></div>
+          <span class="p-mono" style="display: block; margin-top: 22px; font-size: 13px; color: #6B6B6B">1</span>
+          <h3 style="margin: 10px 0 8px; font-size: 20px; font-weight: 500; letter-spacing: -0.02em">Add the hiro label</h3>
+          <p style="margin: 0; color: #5C5C5C; font-size: 16px">Tag a ticket in Jira, any time of day. hiro picks it up and reads the ticket and your codebase.</p>
+        </div>
+        <div class="p-rev" style="padding-bottom: 40px; transition-delay: .12s"><div class="p-rule"></div>
+          <span class="p-mono" style="display: block; margin-top: 22px; font-size: 13px; color: #6B6B6B">2</span>
+          <h3 style="margin: 10px 0 8px; font-size: 20px; font-weight: 500; letter-spacing: -0.02em">Answer its questions</h3>
+          <p style="margin: 0; color: #5C5C5C; font-size: 16px">Anything unclear becomes a short question with options. Answer in one tap from your phone.</p>
+        </div>
+        <div class="p-rev" style="padding-bottom: 40px"><div class="p-rule"></div>
+          <span class="p-mono" style="display: block; margin-top: 22px; font-size: 13px; color: #6B6B6B">3</span>
+          <h3 style="margin: 10px 0 8px; font-size: 20px; font-weight: 500; letter-spacing: -0.02em">hiro codes and tests</h3>
+          <p style="margin: 0; color: #5C5C5C; font-size: 16px">In a fresh container on its own branch. Build, lint and tests must pass before you see it.</p>
+        </div>
+        <div class="p-rev" style="padding-bottom: 40px; transition-delay: .12s"><div class="p-rule"></div>
+          <span class="p-mono" style="display: block; margin-top: 22px; font-size: 13px; color: #6B6B6B">4</span>
+          <h3 style="margin: 10px 0 8px; font-size: 20px; font-weight: 500; letter-spacing: -0.02em">You approve</h3>
+          <p style="margin: 0; color: #5C5C5C; font-size: 16px">Read the summary and the diff. Approve and hiro pushes as you, opens the pull request and updates Jira.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="savings" style="max-width: 1200px; margin: 0 auto; padding: 0 32px 150px">
+  <div class="p-row">
+    <p class="p-mono p-rev" style="margin: 6px 0 0; font-size: 13px; color: #6B6B6B"><span style="color: #0A0A0A; background: var(--a); padding: 1px 6px">02</span>  Time saved</p>
+    <div>
+      <h2 class="p-h2 p-rev" style="margin: 0 0 20px; font-size: 48px; line-height: 1.05; font-weight: 500; letter-spacing: -0.045em; max-width: 760px">$10 a month. See what it gives back.</h2>
+      <p class="p-rev" style="margin: 0 0 48px; color: #5C5C5C; max-width: 600px">Move the sliders to match your week. hiro does the coding and testing; you only spend a few minutes reviewing.</p>
+      <div class="p-calc p-rev">
+        <div style="border-top: 1px solid #0A0A0A">
+          <div class="p-field">
+            <label for="calc-tickets"><span>Tickets hiro handles per week</span><span class="p-mono" style="font-weight: 500" id="o-tickets">5</span></label>
+            <input id="calc-tickets" class="p-range" type="range" min="1" max="30" step="1" value="5">
+          </div>
+          <div class="p-field">
+            <label for="calc-hours"><span>Hours you would spend per ticket</span><span class="p-mono" style="font-weight: 500" id="o-hours">3 h</span></label>
+            <input id="calc-hours" class="p-range" type="range" min="0.5" max="12" step="0.5" value="3">
+          </div>
+          <div class="p-field">
+            <label for="calc-review"><span>Minutes to review hiro's pull request</span><span class="p-mono" style="font-weight: 500"><span id="o-review">20</span> min</span></label>
+            <input id="calc-review" class="p-range" type="range" min="5" max="60" step="5" value="20">
+          </div>
+          <div class="p-field">
+            <label for="calc-rate"><span>Your hourly rate</span><span class="p-mono" style="font-weight: 500">$<span id="o-rate">10</span> / h</span></label>
+            <input id="calc-rate" class="p-range" type="range" min="3" max="60" step="1" value="10">
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid #0A0A0A; padding-top: 24px">
+          <div class="p-out">
+            <div>
+              <div class="p-mono" style="font-size: 12.5px; color: #6B6B6B; margin-bottom: 6px">Hours saved per month</div>
+              <div class="p-num" style="font-size: 64px; line-height: 1; font-weight: 500; letter-spacing: -0.05em" id="o-saved">58</div>
+              <div style="font-size: 14.5px; color: #5C5C5C; margin-top: 6px">about <span id="o-days">7.2</span> full workdays</div>
+            </div>
+            <div>
+              <div class="p-mono" style="font-size: 12.5px; color: #6B6B6B; margin-bottom: 6px">Value of that time</div>
+              <div class="p-num" style="font-size: 64px; line-height: 1; font-weight: 500; letter-spacing: -0.05em" id="o-value">$577</div>
+              <div style="font-size: 14.5px; color: #5C5C5C; margin-top: 6px">per month, <span id="o-year">$6,928</span> per year</div>
+            </div>
+          </div>
+
+          <div style="margin-top: 36px">
+            <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px"><span>Without hiro</span><span class="p-mono"><span id="o-manual">65</span> h / month</span></div>
+            <div style="height: 10px; background: #F0F0F0"><div style="height: 100%; width: 100%; background: #0A0A0A"></div></div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px; margin: 16px 0 6px"><span>With hiro (review only)</span><span class="p-mono"><span id="o-rev">7.2</span> h / month</span></div>
+            <div style="height: 10px; background: #F0F0F0"><div id="o-bar" style="height: 100%; width: 11.1%; min-width: 4px; background: var(--a); transition: width .4s ease"></div></div>
+          </div>
+
+          <div style="margin-top: 36px; background: var(--a); padding: 22px 24px; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 12px">
+            <span style="font-size: 17px; font-weight: 500">Every $1 you spend on hiro returns</span>
+            <span style="font-size: 44px; line-height: 1; font-weight: 500; letter-spacing: -0.04em">$<span id="o-roi">58</span></span>
+          </div>
+          <p style="margin: 14px 0 0; font-size: 13.5px; color: #6B6B6B">Estimate from the inputs above, using 4.33 weeks per month and 8-hour workdays. Real savings depend on the tickets. Excludes your own Claude plan.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features" style="max-width: 1200px; margin: 0 auto; padding: 0 32px 150px">
+  <div class="p-row">
+    <p class="p-mono p-rev" style="margin: 6px 0 0; font-size: 13px; color: #6B6B6B"><span style="color: #0A0A0A; background: var(--a); padding: 1px 6px">03</span>  Features</p>
+    <div>
+      <h2 class="p-h2 p-rev" style="margin: 0 0 56px; font-size: 48px; line-height: 1.05; font-weight: 500; letter-spacing: -0.045em; max-width: 760px">Built like a careful teammate.</h2>
+      <div class="p-three">
+        <div class="p-rev" style="padding-bottom: 40px"><div class="p-rule"></div>
+          <h3 style="margin: 24px 0 8px; font-size: 18px; font-weight: 500">Asks before it guesses</h3>
+          <p style="margin: 0; color: #5C5C5C; font-size: 16px">Vague tickets get questions, not invented features. Your answers go straight into the coding prompt.</p>
+        </div>
+        <div class="p-rev" style="padding-bottom: 40px; transition-delay: .1s"><div class="p-rule"></div>
+          <h3 style="margin: 24px 0 8px; font-size: 18px; font-weight: 500">Runs on your Claude plan</h3>
+          <p style="margin: 0; color: #5C5C5C; font-size: 16px">No surprise bills. hiro tracks session and weekly limits and pauses before it runs out.</p>
+        </div>
+        <div class="p-rev" style="padding-bottom: 40px; transition-delay: .2s"><div class="p-rule"></div>
+          <h3 style="margin: 24px 0 8px; font-size: 18px; font-weight: 500">A model for every step</h3>
+          <p style="margin: 0; color: #5C5C5C; font-size: 16px">Sonnet to code, Opus for hard retries, Haiku for summaries. Override per ticket.</p>
+        </div>
+        <div class="p-rev" style="padding-bottom: 40px"><div class="p-rule"></div>
+          <h3 style="margin: 24px 0 8px; font-size: 18px; font-weight: 500">Mobile app and Claude chat</h3>
+          <p style="margin: 0; color: #5C5C5C; font-size: 16px">Answer, review and deploy from your phone, or manage hiro from Claude chat through its MCP server.</p>
+        </div>
+        <div class="p-rev" style="padding-bottom: 40px; transition-delay: .1s"><div class="p-rule"></div>
+          <h3 style="margin: 24px 0 8px; font-size: 18px; font-weight: 500">Every step on record</h3>
+          <p style="margin: 0; color: #5C5C5C; font-size: 16px">Tool calls, commands, your actions and limits, with timings. See why a run stopped in seconds.</p>
+        </div>
+        <div class="p-rev" style="padding-bottom: 40px; transition-delay: .2s"><div class="p-rule"></div>
+          <h3 style="margin: 24px 0 8px; font-size: 18px; font-weight: 500">English, Russian, Uzbek</h3>
+          <p style="margin: 0; color: #5C5C5C; font-size: 16px">Day and night themes in the admin panel and the mobile app.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="privacy" style="background: var(--a); color: #0A0A0A; position: relative; overflow: hidden">
+  <div aria-hidden="true" style="position: absolute; right: -160px; top: -160px; width: 520px; height: 520px; border-radius: 50%; border: 1px solid rgba(10,10,10,.25); animation: p-spin 30s linear infinite"><span style="position: absolute; left: 50%; bottom: -6px; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: #0A0A0A"></span></div>
+  <div style="max-width: 1200px; margin: 0 auto; padding: 130px 32px; position: relative">
+    <div class="p-row">
+      <p class="p-mono p-rev" style="margin: 6px 0 0; font-size: 13px"><span style="color: var(--a); background: #0A0A0A; padding: 1px 6px">04</span>  Privacy</p>
+      <div>
+        <h2 class="p-h2 p-rev" style="margin: 0 0 20px; font-size: 48px; line-height: 1.05; font-weight: 500; letter-spacing: -0.045em; max-width: 760px">Your code stays on your machine.</h2>
+        <p class="p-rev" style="margin: 0 0 56px; font-size: 17px; color: #1F1F1F; max-width: 560px">hiro is installed on your own server or computer. No strangers, no shared cloud, no copy of your repository on our side.</p>
+        <div class="p-two">
+          <div class="p-rev" style="border-top: 1px solid #0A0A0A; padding: 24px 0 32px">
+            <h3 style="margin: 0 0 8px; font-size: 19px; font-weight: 500">Self-hosted</h3>
+            <p style="margin: 0; font-size: 16px; color: #1F1F1F">One machine with Docker. Your repositories are stored and run there, and nowhere else.</p>
+          </div>
+          <div class="p-rev" style="border-top: 1px solid #0A0A0A; padding: 24px 0 32px; transition-delay: .12s">
+            <h3 style="margin: 0 0 8px; font-size: 19px; font-weight: 500">A fresh box per run</h3>
+            <p style="margin: 0; font-size: 16px; color: #1F1F1F">Each task runs in an isolated container with limited network, removed when the run ends.</p>
+          </div>
+          <div class="p-rev" style="border-top: 1px solid #0A0A0A; padding: 24px 0 32px">
+            <h3 style="margin: 0 0 8px; font-size: 19px; font-weight: 500">Encrypted tokens</h3>
+            <p style="margin: 0; font-size: 16px; color: #1F1F1F">Jira, Git and Claude tokens are encrypted on your machine and never shown again.</p>
+          </div>
+          <div class="p-rev" style="border-top: 1px solid #0A0A0A; padding: 24px 0 32px; transition-delay: .12s">
+            <h3 style="margin: 0 0 8px; font-size: 19px; font-weight: 500">Nothing ships without you</h3>
+            <p style="margin: 0; font-size: 16px; color: #1F1F1F">The agent can't push or deploy. hiro pushes only after you approve, and deploys only when you press the button.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="compare" style="max-width: 1200px; margin: 0 auto; padding: 150px 32px 0">
+  <div class="p-row">
+    <p class="p-mono p-rev" style="margin: 6px 0 0; font-size: 13px; color: #6B6B6B"><span style="color: #0A0A0A; background: var(--a); padding: 1px 6px">05</span>  Compare</p>
+    <div>
+      <h2 class="p-h2 p-rev" style="margin: 0 0 40px; font-size: 48px; line-height: 1.05; font-weight: 500; letter-spacing: -0.045em; max-width: 760px">How hiro compares.</h2>
+      <div class="p-rev" style="overflow-x: auto">
+        <table class="p-cmp">
+          <thead>
+            <tr><th scope="col"></th><th scope="col">IDE coding assistants</th><th scope="col">Cloud coding agents</th><th scope="col" class="p-us" style="color: #0A0A0A">hiro</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Works without a developer at the keyboard</td><td>No</td><td>Yes</td><td class="p-us">Yes</td></tr>
+            <tr><td>Starts from Jira tickets</td><td>No</td><td>Partly</td><td class="p-us">Yes</td></tr>
+            <tr><td>Asks clarifying questions before coding</td><td>When prompted</td><td>Rarely</td><td class="p-us">Always</td></tr>
+            <tr><td>Code stays on your own server or computer</td><td>Varies</td><td>No</td><td class="p-us">Yes</td></tr>
+            <tr><td>Approve from a phone</td><td>No</td><td>Varies</td><td class="p-us">Yes</td></tr>
+            <tr><td>Uzbek and Russian interface</td><td>Rarely</td><td>Rarely</td><td class="p-us">Yes</td></tr>
+            <tr><td>Price</td><td>Varies</td><td>Varies</td><td class="p-us">$10 / month</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing" style="max-width: 1200px; margin: 0 auto; padding: 150px 32px">
+  <div class="p-row">
+    <p class="p-mono p-rev" style="margin: 6px 0 0; font-size: 13px; color: #6B6B6B"><span style="color: #0A0A0A; background: var(--a); padding: 1px 6px">06</span>  Pricing</p>
+    <div>
+      <h2 class="p-h2 p-rev" style="margin: 0 0 48px; font-size: 48px; line-height: 1.05; font-weight: 500; letter-spacing: -0.045em; max-width: 760px">One plan. Everything included.</h2>
+      <div class="p-price p-rev">
+        <div style="border-top: 2px solid #0A0A0A; padding-top: 28px">
+          <p class="p-mono" style="margin: 0 0 10px; font-size: 13px; color: #6B6B6B">hiro license</p>
+          <div style="display: flex; align-items: baseline; gap: 10px"><span class="p-big" style="font-size: 112px; line-height: 0.9; font-weight: 500; letter-spacing: -0.06em">$10</span><span style="font-size: 17px; color: #5C5C5C">/ month</span></div>
+          <p style="margin: 20px 0 28px; color: #5C5C5C; max-width: 380px">A subscription key activates hiro on your own server or computer.</p>
+          <a class="p-btn" href="https://t.me/rustambek_abdusalomov" style="background: var(--a); color: #0A0A0A; font-weight: 500; font-size: 16px; padding: 16px 28px; border-radius: 999px; min-height: 52px">Get your license key
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+          </a>
+          <p style="margin: 14px 0 0; font-size: 14px; color: #6B6B6B">Early access: keys are issued on Telegram.</p>
+        </div>
+        <div style="display: grid; grid-template-columns: minmax(0,1fr); gap: 36px">
+          <div>
+            <p class="p-mono" style="margin: 0 0 6px; font-size: 13px; color: #6B6B6B">Included</p>
+            <ul style="list-style: none; margin: 0; padding: 0">
+              <li class="p-li"><span class="p-chk" aria-hidden="true"></span>The hiro agent, unlimited tickets</li>
+              <li class="p-li"><span class="p-chk" aria-hidden="true"></span>Admin panel with full run history</li>
+              <li class="p-li"><span class="p-chk" aria-hidden="true"></span>Mobile app for answers, reviews and deploys</li>
+              <li class="p-li"><span class="p-chk" aria-hidden="true"></span>MCP server to manage hiro from Claude chat</li>
+              <li class="p-li"><span class="p-chk" aria-hidden="true"></span>Jira, GitHub and GitLab integrations</li>
+              <li class="p-li"><span class="p-chk" aria-hidden="true"></span>Updates while your subscription is active</li>
+            </ul>
+          </div>
+          <div>
+            <p class="p-mono" style="margin: 0 0 6px; font-size: 13px; color: #6B6B6B">You bring</p>
+            <ul style="list-style: none; margin: 0; padding: 0">
+              <li class="p-li"><span class="p-dash" aria-hidden="true"></span>A server or computer with Docker</li>
+              <li class="p-li"><span class="p-dash" aria-hidden="true"></span>Your own Claude plan</li>
+              <li class="p-li"><span class="p-dash" aria-hidden="true"></span>Access to your Jira and Git repositories</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="start" style="max-width: 1200px; margin: 0 auto; padding: 0 32px 150px">
+  <div class="p-row">
+    <p class="p-mono p-rev" style="margin: 6px 0 0; font-size: 13px; color: #6B6B6B"><span style="color: #0A0A0A; background: var(--a); padding: 1px 6px">07</span>  Get started</p>
+    <div>
+      <h2 class="p-h2 p-rev" style="margin: 0 0 48px; font-size: 48px; line-height: 1.05; font-weight: 500; letter-spacing: -0.045em; max-width: 760px">Running in three steps.</h2>
+      <div class="p-three">
+        <div class="p-rev" style="padding-bottom: 32px"><div class="p-rule"></div>
+          <div style="margin-top: 22px; width: 40px; height: 40px; border-radius: 50%; background: var(--a); display: flex; align-items: center; justify-content: center; font-weight: 500">1</div>
+          <h3 style="margin: 16px 0 8px; font-size: 19px; font-weight: 500">Get a license key</h3>
+          <p style="margin: 0; color: #5C5C5C; font-size: 16px">Subscribe for $10 a month and receive your key.</p>
+        </div>
+        <div class="p-rev" style="padding-bottom: 32px; transition-delay: .12s"><div class="p-rule"></div>
+          <div style="margin-top: 22px; width: 40px; height: 40px; border-radius: 50%; background: #0A0A0A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 500">2</div>
+          <h3 style="margin: 16px 0 8px; font-size: 19px; font-weight: 500">Install with Docker</h3>
+          <p style="margin: 0; color: #5C5C5C; font-size: 16px">On your server or your own computer. Enter the key to activate.</p>
+        </div>
+        <div class="p-rev" style="padding-bottom: 32px; transition-delay: .24s"><div class="p-rule"></div>
+          <div style="margin-top: 22px; width: 40px; height: 40px; border-radius: 50%; background: #0A0A0A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 500">3</div>
+          <h3 style="margin: 16px 0 8px; font-size: 19px; font-weight: 500">Connect and label</h3>
+          <p style="margin: 0; color: #5C5C5C; font-size: 16px">Connect Jira, Git and your Claude plan, then label your first ticket.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" style="max-width: 1200px; margin: 0 auto; padding: 0 32px 150px">
+  <div class="p-row">
+    <p class="p-mono p-rev" style="margin: 6px 0 0; font-size: 13px; color: #6B6B6B"><span style="color: #0A0A0A; background: var(--a); padding: 1px 6px">08</span>  FAQ</p>
+    <div>
+      <h2 class="p-h2 p-rev" style="margin: 0 0 40px; font-size: 48px; line-height: 1.05; font-weight: 500; letter-spacing: -0.045em; max-width: 760px">Questions developers ask.</h2>
+      <div class="p-rev" style="border-top: 1px solid #0A0A0A">
+        <details class="p-faq">
+          <summary>Does my code leave my machine?</summary>
+          <p>Your repositories live and run only on your server or computer. While hiro works on a ticket, Claude Code sends the relevant code to Claude through your own Claude plan, exactly as when you use Claude Code yourself. Nothing is sent to us.</p>
+        </details>
+        <details class="p-faq">
+          <summary>Can hiro push code or deploy on its own?</summary>
+          <p>No. The agent inside the container can't push or deploy. hiro pushes only after you approve the diff, and production deploys happen only when you press the button.</p>
+        </details>
+        <details class="p-faq">
+          <summary>What happens when a ticket is unclear?</summary>
+          <p>hiro reads the code first, then asks short questions with options. Coding starts only after you answer, so you don't get invented features.</p>
+        </details>
+        <details class="p-faq">
+          <summary>Why do I need my own Claude plan?</summary>
+          <p>hiro runs Claude Code on your plan, so you control the model costs and there are no surprise bills from us. hiro tracks your limits and pauses before they run out.</p>
+        </details>
+        <details class="p-faq">
+          <summary>Does it work for side projects without Jira?</summary>
+          <p>Yes. You can create tasks for side projects directly in hiro.</p>
+        </details>
+        <details class="p-faq">
+          <summary>Is it only for senior developers?</summary>
+          <p>No. Juniors use it to move faster and learn from the diffs; seniors use it to clear routine tickets and stay on the hard problems.</p>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact" style="background: #0A0A0A; color: #FFFFFF">
+  <div style="max-width: 1200px; margin: 0 auto; padding: 130px 32px 140px">
+    <h2 class="p-cta p-rev" style="margin: 0 0 20px; font-size: 80px; line-height: 1; font-weight: 500; letter-spacing: -0.055em; max-width: 900px">Join the 20 developers who got their <span style="background: var(--a); color: #0A0A0A; padding: 0 0.12em">time</span> back.</h2>
+    <p class="p-rev" style="margin: 0 0 40px; color: #A8A8A8; max-width: 480px">$10 a month. Your server, your code, your approval on every push.</p>
+    <div class="p-rev" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center">
+      <a class="p-btn" href="https://t.me/rustambek_abdusalomov" style="background: var(--a); color: #0A0A0A; font-weight: 500; font-size: 15px; padding: 14px 24px; border-radius: 999px; min-height: 52px">Get your license key
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+      </a>
+      <a class="p-link" href="mailto:abdusalomovrustambek@gmail.com" style="font-size: 15px; font-weight: 500; padding: 14px 8px; min-height: 52px; display: inline-flex; align-items: center; border-bottom: 1px solid #FFFFFF">Questions? Email us</a>
+    </div>
+  </div>
+</section>
+
+<footer style="max-width: 1200px; margin: 0 auto; padding: 28px 32px 48px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; font-size: 14px; color: #6B6B6B">
+  <span style="display: inline-flex; align-items: center; gap: 8px"><span style="color: #0A0A0A; font-weight: 600; letter-spacing: -0.03em">hiro</span><span class="p-dot" aria-hidden="true" style="width: 6px; height: 6px"></span>  Your AI teammate that works 24/7</span>
+  <nav aria-label="Footer" style="display: flex; flex-wrap: wrap; gap: 24px">
+    <a class="p-link" href="#how">How it works</a>
+    <a class="p-link" href="#privacy">Privacy</a>
+    <a class="p-link" href="#pricing">Pricing</a>
+    <a class="p-link" href="#faq">FAQ</a>
+    <a class="p-link" href="https://t.me/rustambek_abdusalomov">Telegram</a>
+  </nav>
+  <span>Made in Tashkent · 2026</span>
+</footer>
+
+<button type="button" class="p-top" id="toTop" aria-label="Scroll to top">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"></path></svg>
+</button>
+
+</div>
+<script>
+(function () {
+  var wrap = document.querySelector('.p-wrap');
+  var $ = function (id) { return document.getElementById(id); };
+
+  // Calculator
+  var inputs = { t: $('calc-tickets'), h: $('calc-hours'), r: $('calc-review'), rate: $('calc-rate') };
+  var money = function (n) { return '$' + Math.round(n).toLocaleString('en-US'); };
+  function calc() {
+    var t = +inputs.t.value, h = +inputs.h.value, r = +inputs.r.value, rate = +inputs.rate.value;
+    var weeks = 4.33, manual = t * h * weeks, rev = t * (r / 60) * weeks;
+    var saved = Math.max(0, manual - rev), value = saved * rate;
+    $('o-tickets').textContent = t;
+    $('o-hours').textContent = (h % 1 === 0 ? h : h.toFixed(1)) + ' h';
+    $('o-review').textContent = r;
+    $('o-rate').textContent = rate;
+    $('o-saved').textContent = Math.round(saved).toLocaleString('en-US');
+    $('o-days').textContent = (saved / 8).toFixed(1);
+    $('o-value').textContent = money(value);
+    $('o-year').textContent = money(value * 12);
+    $('o-manual').textContent = Math.round(manual);
+    $('o-rev').textContent = Math.round(rev * 10) / 10;
+    $('o-bar').style.width = (manual > 0 ? Math.min(100, rev / manual * 100) : 0).toFixed(1) + '%';
+    $('o-roi').textContent = Math.round(value / 10).toLocaleString('en-US');
+  }
+  Object.keys(inputs).forEach(function (k) { inputs[k].addEventListener('input', calc); });
+  calc();
+
+  // Scroll-to-top button
+  var top = $('toTop');
+  function onScroll() { top.classList.toggle('p-show', (window.scrollY || document.documentElement.scrollTop) > 600); }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+  top.addEventListener('click', function () {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+  });
+
+  // Scroll reveal (content stays visible if this never runs)
+  if ('IntersectionObserver' in window) {
+    var vh = window.innerHeight || 800;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.remove('p-wait'); io.unobserve(e.target); } });
+    }, { threshold: 0.1 });
+    wrap.querySelectorAll('.p-rev').forEach(function (el) {
+      if (el.getBoundingClientRect().top > vh) { el.classList.add('p-wait'); io.observe(el); }
+    });
+    setTimeout(function () { wrap.querySelectorAll('.p-wait').forEach(function (el) { el.classList.remove('p-wait'); }); }, 5000);
+  }
+})();
+</script>
+</body>
+</html>
