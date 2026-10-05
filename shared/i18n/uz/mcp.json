@@ -1,0 +1,25 @@
+{
+  "mcp": {
+    "title": "Claude chat (MCP)",
+    "sub": "hiro ni brauzer, kompyuter va telefondagi Claude orqali boshqaring",
+    "url": "Konnektor URL",
+    "connections": "Ulangan Claude ilovalari",
+    "staticToken": "Statik token",
+    "set": "Oʻrnatilgan",
+    "notSet": "Oʻrnatilmagan",
+    "howTo": "Claude da Sozlamalar → Konnektorlar → Maxsus konnektor qoʻshish ni oching va URL ni qoʻying. Claude ulanishni tasdiqlash uchun sizni shu yerga yuboradi. Chatda har bir oʻzgarish (javoblar, tasdiqlash, rad etish, yangi vazifalar) avval tayyorlanadi va faqat siz tasdiqlagandan keyin bajariladi. Claude Code yoki Claude Desktop uchun statik tokenni Authorization: Bearer sarlavhasida yuborish mumkin.",
+    "newToken": "Yangi token",
+    "shownOnce": "Hozir nusxa oling: u faqat bir marta koʻrsatiladi. Oldingi token endi ishlamaydi.",
+    "create": "Statik token yaratish",
+    "rotate": "Statik tokenni almashtirish",
+    "revoke": "Hammasini uzish",
+    "revokeConfirm": "Barcha Claude ilovalari uzilsinmi va statik token oʻchirilsinmi?",
+    "revoked": "Barcha Claude ulanishlari oʻchirildi",
+    "consentTitle": "Claude ni hiro ga ulash",
+    "consentAsk": "{client} hiro dan {user} nomidan foydalanmoqchi.",
+    "consentWhat": "U tiketlar, loglar, limitlar va repozitoriylarni oʻqiy oladi hamda amallarni tayyorlaydi. Har bir amalni chatda tasdiqlamaguningizcha hech narsa oʻzgarmaydi. Deploy, sozlamalar va integratsiyalar unga ochiq emas.",
+    "consentRedirect": "Siz {host} ga qaytasiz.",
+    "allow": "Ruxsat berish",
+    "deny": "Rad etish"
+  }
+}

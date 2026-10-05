@@ -1,0 +1,2026 @@
+openapi: 3.0.3
+info:
+  title: hiro API
+  version: 0.1.0
+  description: |
+    REST API shared by the admin panel (Vue) and the mobile app (Flutter).
+    Both clients are generated from this file with `make gen`.
+
+    Web clients authenticate with the `hiro_session` cookie; mobile clients
+    send the same session token as `Authorization: Bearer <token>`.
+servers:
+  - url: /api
+security:
+  - cookieAuth: []
+  - bearerAuth: []
+
+paths:
+  /auth/login:
+    post:
+      operationId: login
+      summary: Sign in with password and TOTP code
+      tags: [auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Signed in. Web clients get the session cookie; mobile clients get the token in the body.
+          headers:
+            Set-Cookie:
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LoginResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /auth/logout:
+    post:
+      operationId: logout
+      summary: End the current session
+      tags: [auth]
+      responses:
+        '204': { description: Signed out }
+
+  /auth/me:
+    get:
+      operationId: getMe
+      summary: The signed-in user
+      tags: [auth]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /meta:
+    get:
+      operationId: getMeta
+      summary: Server version and build information
+      tags: [meta]
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Meta' }
+
+  /tickets:
+    get:
+      operationId: listTickets
+      summary: Tickets, most recently active first
+      tags: [tickets]
+      parameters:
+        - name: state
+          in: query
+          description: Only tickets in these states
+          schema:
+            type: array
+            items: { $ref: '#/components/schemas/TicketState' }
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Ticket' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /tickets/{key}:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    get:
+      operationId: getTicket
+      summary: A ticket with its questions, analysis and latest result
+      tags: [tickets]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TicketDetail' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/events:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    get:
+      operationId: listTicketEvents
+      summary: The ticket's log, oldest first; poll with `after` for live updates
+      tags: [tickets]
+      parameters:
+        - name: after
+          in: query
+          description: Only events with a larger id
+          schema: { type: integer, format: int64, default: 0 }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 1000, default: 500 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Event' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /tickets/{key}/answers:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    put:
+      operationId: answerQuestions
+      summary: Answer the ticket's questions; when all are answered, coding starts
+      tags: [tickets]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AnswersRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /tickets/{key}/approve:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: approveTicket
+      summary: Approve the reviewed changes; hiro pushes the branch and opens the PR
+      tags: [tickets]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                assignees:
+                  type: array
+                  maxItems: 10
+                  description: Git host usernames to assign the pull request to
+                  items: { type: string, minLength: 1, maxLength: 100 }
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /tickets/{key}/request-changes:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: requestChanges
+      summary: Send the ticket back to coding with feedback
+      tags: [tickets]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [feedback]
+              properties:
+                feedback: { type: string, minLength: 1, maxLength: 20000 }
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /tickets/{key}/reject:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: rejectTicket
+      summary: Stop work on the ticket for good
+      tags: [tickets]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: { type: string, maxLength: 2000 }
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /tickets/{key}/retry:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: retryTicket
+      summary: Resume a failed or rate-limited ticket where it stopped
+      tags: [tickets]
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /tickets/{key}/analyze:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: startTicket
+      summary: Start a held ticket now (it is queued for the next free slot)
+      tags: [tickets]
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /tickets/{key}/learn:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: learnFromTicket
+      summary: Queue a learn run for a pushed ticket (again, if it already ran)
+      tags: [learn]
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/stop:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: stopTicket
+      summary: Stop the running stage; the ticket moves to failed and can be retried
+      tags: [tickets]
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /tickets/{key}/models:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    put:
+      operationId: setTicketModels
+      summary: Override models for this ticket; omit a stage to use the default
+      tags: [tickets]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ModelOverrides' }
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/repo:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    put:
+      operationId: setTicketRepo
+      summary: Link the ticket to a repository
+      description: >-
+        Allowed on a new ticket, or a failed or rate-limited one that has not
+        pushed. A stopped ticket starts over from analysis on retry, since its
+        analysis and branch belonged to the old repository.
+      tags: [tickets]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TicketRepo' }
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /tasks:
+    post:
+      operationId: createTask
+      summary: Create a side-project task
+      tags: [tasks]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TaskCreate' }
+      responses:
+        '201': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /tasks/{key}:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    patch:
+      operationId: updateTask
+      summary: Edit a task that has not started
+      tags: [tasks]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TaskUpdate' }
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+    delete:
+      operationId: deleteTask
+      summary: Delete a task that has not started
+      tags: [tasks]
+      responses:
+        '204': { description: Deleted }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /events:
+    get:
+      operationId: listEvents
+      summary: The global log, newest first, with filters and a cursor
+      tags: [logs]
+      parameters:
+        - name: type
+          in: query
+          schema: { type: string, enum: [all, state, tool, command, user, limit, problems], default: all }
+        - name: key
+          in: query
+          description: Ticket key, or a prefix of one
+          schema: { type: string, maxLength: 64 }
+        - name: errors
+          in: query
+          schema: { type: boolean, default: false }
+        - name: before
+          in: query
+          description: Only events with a smaller id (pagination)
+          schema: { type: integer, format: int64 }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 500, default: 100 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EventPage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /events/summary:
+    get:
+      operationId: getEventSummary
+      summary: Run statistics and time per step, for the Logs page
+      tags: [logs]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EventSummary' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /events/export:
+    get:
+      operationId: exportEvents
+      summary: Download the log (last 90 days) as JSON lines or CSV
+      tags: [logs]
+      parameters:
+        - name: format
+          in: query
+          schema: { type: string, enum: [json, csv], default: json }
+      responses:
+        '200':
+          description: A file download
+          content:
+            application/x-ndjson:
+              schema: { type: string }
+            text/csv:
+              schema: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /events/stream:
+    get:
+      operationId: streamEvents
+      summary: Server-Sent Events with every new event row (resume with Last-Event-ID)
+      tags: [logs]
+      responses:
+        '200':
+          description: 'An event stream; each message is an Event as JSON, with id set to the event id'
+          content:
+            text/event-stream:
+              schema: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /dashboard:
+    get:
+      operationId: getDashboard
+      summary: Everything the dashboard shows, in one call
+      tags: [dashboard]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Dashboard' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /usage:
+    get:
+      operationId: getUsage
+      summary: Plan usage from Claude Code's rate limit events
+      tags: [usage]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Usage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /usage/refresh:
+    post:
+      operationId: refreshUsage
+      summary: Start a tiny Claude run to read fresh limits; a usage_updated event follows
+      tags: [usage]
+      responses:
+        '202':
+          description: Refresh started
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Usage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Settings' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    put:
+      operationId: putSettings
+      tags: [settings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Settings' }
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Settings' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /repos:
+    get:
+      operationId: listRepos
+      tags: [repos]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Repository' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      operationId: createRepo
+      tags: [repos]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RepositoryInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Repository' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /repos/{id}:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    get:
+      operationId: getRepo
+      tags: [repos]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Repository' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      operationId: updateRepo
+      tags: [repos]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RepositoryInput' }
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Repository' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /integrations:
+    get:
+      operationId: listIntegrations
+      tags: [integrations]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Integration' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /integrations/{provider}:
+    parameters:
+      - $ref: '#/components/parameters/Provider'
+    put:
+      operationId: updateIntegration
+      summary: Change an integration's settings (never its token)
+      tags: [integrations]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [settings]
+              properties:
+                settings:
+                  type: object
+                  additionalProperties: { type: string }
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Integration' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /integrations/{provider}/connect:
+    parameters:
+      - $ref: '#/components/parameters/Provider'
+    post:
+      operationId: connectIntegration
+      summary: Save a token (and settings), check it against the provider, and connect
+      tags: [integrations]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token: { type: string, minLength: 8, maxLength: 4096 }
+                settings:
+                  type: object
+                  additionalProperties: { type: string }
+      responses:
+        '200':
+          description: Connected
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ConnectResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /integrations/{provider}/test:
+    parameters:
+      - $ref: '#/components/parameters/Provider'
+    post:
+      operationId: testIntegration
+      tags: [integrations]
+      responses:
+        '200':
+          description: Result of the check
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Integration' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /integrations/{provider}/disconnect:
+    parameters:
+      - $ref: '#/components/parameters/Provider'
+    post:
+      operationId: disconnectIntegration
+      summary: Forget the token
+      tags: [integrations]
+      responses:
+        '200':
+          description: Disconnected
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Integration' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /integrations/{provider}/repos:
+    parameters:
+      - $ref: '#/components/parameters/Provider'
+    get:
+      operationId: listRemoteRepos
+      summary: Repositories the connected GitHub or GitLab token can reach, for import
+      tags: [integrations]
+      responses:
+        '200':
+          description: OK, most recently updated first
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/RemoteRepository' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+
+  /integrations/jira/sync:
+    post:
+      operationId: syncJira
+      summary: Pick up labelled Jira issues now
+      tags: [integrations]
+      responses:
+        '200':
+          description: Sync result
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [found, created]
+                properties:
+                  found: { type: integer }
+                  created: { type: integer }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /docs/{page}:
+    get:
+      operationId: getPageDoc
+      summary: The "How this page works" text, as Markdown
+      tags: [docs]
+      parameters:
+        - name: page
+          in: path
+          required: true
+          schema: { type: string, pattern: '^[a-z][a-z-]*$', maxLength: 32 }
+        - name: lang
+          in: query
+          schema: { type: string, enum: [en, ru, uz], default: en }
+      responses:
+        '200':
+          description: Markdown
+          content:
+            text/markdown:
+              schema: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /devices:
+    post:
+      operationId: registerDevice
+      summary: Register this phone for push notifications (call again when the token changes)
+      tags: [devices]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DeviceRegistration' }
+      responses:
+        '204': { description: Registered }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /devices/unregister:
+    post:
+      operationId: unregisterDevice
+      summary: Stop push notifications to this phone (on sign-out)
+      tags: [devices]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fcmToken]
+              properties:
+                fcmToken: { type: string, minLength: 1, maxLength: 4096 }
+      responses:
+        '204': { description: Unregistered }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /oauth/consent:
+    get:
+      operationId: getConsent
+      summary: Details of a pending Claude connection request, for the consent page
+      tags: [mcp]
+      parameters:
+        - { name: client_id, in: query, required: true, schema: { type: string } }
+        - { name: redirect_uri, in: query, required: true, schema: { type: string } }
+        - { name: code_challenge, in: query, required: true, schema: { type: string } }
+        - { name: code_challenge_method, in: query, required: true, schema: { type: string } }
+        - { name: resource, in: query, schema: { type: string } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [clientName, redirectHost]
+                properties:
+                  clientName: { type: string }
+                  redirectHost: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      operationId: decideConsent
+      summary: Approve or deny a Claude connection; returns where to send the browser
+      tags: [mcp]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [clientId, redirectUri, codeChallenge, codeChallengeMethod, approve]
+              properties:
+                clientId: { type: string }
+                redirectUri: { type: string }
+                codeChallenge: { type: string }
+                codeChallengeMethod: { type: string }
+                state: { type: string }
+                resource: { type: string }
+                approve: { type: boolean }
+      responses:
+        '200':
+          description: Redirect target
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [redirect]
+                properties:
+                  redirect: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /mcp-settings:
+    get:
+      operationId: getMcpSettings
+      summary: The MCP connector URL and current connections
+      tags: [mcp]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/McpStatus' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /mcp-settings/token:
+    post:
+      operationId: rotateMcpToken
+      summary: Create a new static MCP bearer token (shown once; the old one stops working)
+      tags: [mcp]
+      responses:
+        '200':
+          description: The new token
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [token]
+                properties:
+                  token: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /mcp-settings/revoke:
+    post:
+      operationId: revokeMcp
+      summary: Disconnect every Claude connection and delete the static token
+      tags: [mcp]
+      responses:
+        '204': { description: Revoked }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /lessons:
+    get:
+      operationId: listLessons
+      summary: Lessons hiro learned from pushed tickets, newest first
+      tags: [learn]
+      parameters:
+        - name: repo
+          in: query
+          schema: { type: integer, format: int64 }
+        - name: ticket
+          in: query
+          schema: { type: string, maxLength: 64 }
+        - name: status
+          in: query
+          description: new (not learned yet), learned, or all (default)
+          schema: { type: string, enum: [new, learned, all] }
+        - name: q
+          in: query
+          description: Search in titles and summaries
+          schema: { type: string, maxLength: 200 }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 500 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LessonList' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /lessons/queue:
+    get:
+      operationId: getLearnQueue
+      summary: Done tickets whose learn run is running, queued, failed or never happened
+      tags: [learn]
+      responses:
+        '200':
+          description: Running first, then queued in run order, then failed and never learned
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/LearnQueueItem' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /lessons/{id}:
+    parameters:
+      - $ref: '#/components/parameters/LessonID'
+    get:
+      operationId: getLesson
+      summary: One lesson with its explanation, code references, quiz and reading
+      tags: [learn]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Lesson' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /lessons/{id}/learned:
+    parameters:
+      - $ref: '#/components/parameters/LessonID'
+    put:
+      operationId: markLessonLearned
+      summary: Mark a lesson learned
+      tags: [learn]
+      responses:
+        '200':
+          description: The lesson after the change
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Lesson' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      operationId: unmarkLessonLearned
+      summary: Mark a lesson as not learned yet
+      tags: [learn]
+      responses:
+        '200':
+          description: The lesson after the change
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Lesson' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /analytics:
+    get:
+      operationId: getAnalytics
+      summary: Throughput, quality, time and plan statistics for a period
+      tags: [analytics]
+      parameters:
+        - name: days
+          in: query
+          schema: { type: integer, enum: [7, 30, 90], default: 30 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Analytics' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /repos/{id}/archive:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    post:
+      operationId: archiveRepo
+      summary: Archive the repository; it keeps its history but takes no new tickets or tasks
+      tags: [repos]
+      responses:
+        '200':
+          description: Archived
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Repository' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /repos/{id}/unarchive:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    post:
+      operationId: unarchiveRepo
+      summary: Restore an archived repository
+      tags: [repos]
+      responses:
+        '200':
+          description: Restored
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Repository' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /repos/{id}/local-branches:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    get:
+      operationId: listRepoLocalBranches
+      summary: Branches in hiro's own clones on the server, and whether origin has them
+      tags: [repos]
+      responses:
+        '200':
+          description: OK, newest commit first
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/LocalBranch' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+
+  /repos/{id}/members:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    get:
+      operationId: listRepoMembers
+      summary: People with access to the repository on its git host
+      tags: [repos]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/RepoMember' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+
+  /repos/{id}/branches:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    get:
+      operationId: listRepoBranches
+      summary: Branches with their tip, ahead/behind the default branch and checks
+      tags: [repos]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Branch' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+
+  /repos/{id}/commits:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    get:
+      operationId: listRepoCommits
+      summary: Commits on the default branch, newest first, 50 per page; a shorter page is the last
+      tags: [repos]
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 1000, default: 1 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Commit' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+
+  /repos/{id}/pipelines:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    get:
+      operationId: listRepoPipelines
+      summary: CI runs with their stages, newest first, 20 per page; a shorter page is the last
+      tags: [repos]
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 1000, default: 1 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Pipeline' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+
+  /repos/{id}/environments:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    get:
+      operationId: listRepoEnvironments
+      summary: Deployment environments and what runs there
+      tags: [repos]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Environment' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+
+  /repos/{id}/deploy:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    post:
+      operationId: deployRepo
+      summary: Start a deployment (GitLab manual job, or the GitHub deploy workflow). Never available from MCP.
+      tags: [repos]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                jobId: { type: integer, format: int64, description: GitLab manual job to start }
+                ref: { type: string, description: 'GitHub: branch to deploy (default branch if empty)' }
+      responses:
+        '202': { description: Started }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+components:
+  parameters:
+    RepoID:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
+    Provider:
+      name: provider
+      in: path
+      required: true
+      schema: { type: string, enum: [jira, github, claude, telegram, gitlab] }
+    LessonID:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
+    TicketKey:
+      name: key
+      in: path
+      required: true
+      schema: { type: string, pattern: '^[A-Za-z0-9][A-Za-z0-9_-]*$', maxLength: 64 }
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: hiro_session
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+  schemas:
+    LoginRequest:
+      type: object
+      required: [username, password, code, client]
+      properties:
+        username: { type: string, minLength: 1, maxLength: 64 }
+        password: { type: string, minLength: 1, maxLength: 256 }
+        code:
+          type: string
+          description: Six-digit code from the authenticator app
+          pattern: '^[0-9]{6}$'
+        client:
+          type: string
+          enum: [web, mobile]
+
+    LoginResponse:
+      type: object
+      required: [user, expiresAt]
+      properties:
+        user: { $ref: '#/components/schemas/User' }
+        expiresAt: { type: string, format: date-time }
+        token:
+          type: string
+          description: Session token, returned only when client is mobile
+
+    User:
+      type: object
+      required: [id, username]
+      properties:
+        id: { type: integer, format: int64 }
+        username: { type: string }
+
+    Meta:
+      type: object
+      required: [version, commit]
+      properties:
+        version: { type: string }
+        commit: { type: string }
+
+    TicketState:
+      type: string
+      enum: [new, analyzing, waiting_for_answers, coding, testing, waiting_for_review, pushing, done, rejected, failed, rate_limited]
+
+    Ticket:
+      type: object
+      required: [key, source, title, description, priority, state, revision, turns, branch, prUrl, createdAt, updatedAt]
+      properties:
+        key: { type: string }
+        source: { type: string, enum: [jira, local] }
+        repoId: { type: integer, format: int64 }
+        title: { type: string }
+        description: { type: string }
+        priority: { type: string }
+        state: { $ref: '#/components/schemas/TicketState' }
+        resumeState: { $ref: '#/components/schemas/TicketState' }
+        revision: { type: integer }
+        turns: { type: integer }
+        branch: { type: string }
+        prNumber: { type: integer }
+        prUrl: { type: string }
+        assignees:
+          type: array
+          description: Git host usernames the pull request is (or will be) assigned to
+          items: { type: string }
+        afterApprove: { type: string, enum: [pr, main] }
+        held: { type: boolean, description: Kept in the queue until started }
+        askFirst: { type: boolean }
+        repoName: { type: string }
+        models: { $ref: '#/components/schemas/ModelOverrides' }
+        since: { type: string, format: date-time, description: When the ticket entered its current state }
+        stopReason: { type: string, description: Why it failed or paused }
+        mergedAt: { type: string, format: date-time }
+        learnState:
+          type: string
+          enum: [none, pending, done, failed]
+          description: The learn run after push; pending also while it runs
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    Question:
+      type: object
+      required: [id, position, text, options, note]
+      properties:
+        id: { type: integer, format: int64 }
+        position: { type: integer }
+        text: { type: string }
+        options:
+          type: array
+          items: { type: string }
+        answer: { type: string }
+        note: { type: string }
+
+    Analysis:
+      type: object
+      required: [summary, plan]
+      properties:
+        summary: { type: string }
+        plan:
+          type: array
+          items: { type: string }
+
+    CheckStep:
+      type: object
+      required: [name, command, exitCode, durationMs]
+      properties:
+        name: { type: string }
+        command: { type: string }
+        exitCode: { type: integer }
+        durationMs: { type: integer, format: int64 }
+        timedOut: { type: boolean }
+        output: { type: string }
+
+    FileChange:
+      type: object
+      required: [path, add, del, diff]
+      properties:
+        path: { type: string }
+        add: { type: integer }
+        del: { type: integer }
+        diff: { type: string }
+
+    Result:
+      type: object
+      required: [summary, notes, checks, files, createdAt]
+      properties:
+        summary: { type: string }
+        notes:
+          type: array
+          items: { type: string }
+        checks:
+          type: array
+          items: { $ref: '#/components/schemas/CheckStep' }
+        files:
+          type: array
+          items: { $ref: '#/components/schemas/FileChange' }
+        createdAt: { type: string, format: date-time }
+
+    TicketDetail:
+      type: object
+      required: [ticket, questions]
+      properties:
+        ticket: { $ref: '#/components/schemas/Ticket' }
+        questions:
+          type: array
+          items: { $ref: '#/components/schemas/Question' }
+        analysis: { $ref: '#/components/schemas/Analysis' }
+        result: { $ref: '#/components/schemas/Result' }
+        history:
+          type: array
+          items: { $ref: '#/components/schemas/HistoryItem' }
+        maxTurns: { type: integer }
+        effectiveModels: { $ref: '#/components/schemas/StageModels' }
+
+    Event:
+      type: object
+      required: [id, ticketKey, step, type, level, origin, message, data, createdAt]
+      properties:
+        id: { type: integer, format: int64 }
+        ticketKey: { type: string }
+        runId: { type: integer, format: int64 }
+        step: { type: string }
+        type: { type: string }
+        level: { type: string, enum: [debug, info, warn, error] }
+        origin: { type: string, enum: [system, web, mobile, mcp, telegram, webhook] }
+        message: { type: string }
+        data:
+          type: object
+          additionalProperties: true
+        durationMs: { type: integer, format: int64 }
+        createdAt: { type: string, format: date-time }
+
+    AnswersRequest:
+      type: object
+      required: [answers]
+      properties:
+        answers:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [questionId, answer]
+            properties:
+              questionId: { type: integer, format: int64 }
+              answer: { type: string, minLength: 1, maxLength: 5000 }
+              note: { type: string, maxLength: 5000 }
+
+    Model:
+      type: string
+      enum: [haiku, sonnet, opus]
+
+    StageModels:
+      type: object
+      required: [analyze, coding, retry, helper]
+      properties:
+        analyze: { $ref: '#/components/schemas/Model' }
+        coding: { $ref: '#/components/schemas/Model' }
+        retry: { $ref: '#/components/schemas/Model' }
+        helper: { $ref: '#/components/schemas/Model' }
+        learn: { $ref: '#/components/schemas/Model' }
+
+    TicketRepo:
+      type: object
+      required: [repoId]
+      properties:
+        repoId: { type: integer, format: int64 }
+
+    ModelOverrides:
+      type: object
+      properties:
+        analyze: { $ref: '#/components/schemas/Model' }
+        coding: { $ref: '#/components/schemas/Model' }
+        retry: { $ref: '#/components/schemas/Model' }
+
+    HistoryItem:
+      type: object
+      required: [at, state, message, origin]
+      properties:
+        at: { type: string, format: date-time }
+        state: { $ref: '#/components/schemas/TicketState' }
+        message: { type: string }
+        origin: { type: string }
+
+    TaskCreate:
+      type: object
+      required: [repoId, title, priority, afterApprove, start]
+      properties:
+        repoId: { type: integer, format: int64 }
+        title: { type: string, minLength: 1, maxLength: 300 }
+        description: { type: string, maxLength: 20000 }
+        priority: { type: string, enum: [low, medium, high] }
+        afterApprove: { type: string, enum: [pr, main] }
+        start:
+          type: string
+          enum: [ask, code, queue]
+          description: ask = analyse and ask first, code = no questions, queue = keep until started
+
+    TaskUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 1, maxLength: 300 }
+        description: { type: string, maxLength: 20000 }
+        priority: { type: string, enum: [low, medium, high] }
+        afterApprove: { type: string, enum: [pr, main] }
+
+    EventPage:
+      type: object
+      required: [events]
+      properties:
+        events:
+          type: array
+          items: { $ref: '#/components/schemas/Event' }
+        nextBefore: { type: integer, format: int64 }
+
+    StepDuration:
+      type: object
+      required: [state, count]
+      properties:
+        state: { $ref: '#/components/schemas/TicketState' }
+        avgMs: { type: integer, format: int64 }
+        count: { type: integer }
+
+    EventSummary:
+      type: object
+      required: [runsStarted, reachedReview, avgTurns, stops, errors, steps]
+      properties:
+        runsStarted: { type: integer }
+        reachedReview: { type: integer }
+        avgTurns: { type: integer }
+        stops: { type: integer }
+        errors: { type: integer }
+        steps:
+          type: array
+          items: { $ref: '#/components/schemas/StepDuration' }
+
+    UsageWindow:
+      type: object
+      properties:
+        utilization: { type: number, format: double, description: 0 to 1 }
+        resetsAt: { type: string, format: date-time }
+
+    Usage:
+      type: object
+      required: [fiveHour, sevenDay, status, paused, pauseAbove, refreshing]
+      properties:
+        fiveHour: { $ref: '#/components/schemas/UsageWindow' }
+        sevenDay: { $ref: '#/components/schemas/UsageWindow' }
+        status: { type: string, enum: [allowed, allowed_warning, rejected, unknown] }
+        updatedAt: { type: string, format: date-time }
+        paused: { type: boolean, description: New runs are held back }
+        pausedUntil: { type: string, format: date-time }
+        pauseAbove: { type: integer }
+        refreshing: { type: boolean }
+
+    GitSettings:
+      type: object
+      required: [authorName, authorEmail, coAuthor, prTitle, draft]
+      properties:
+        authorName: { type: string, maxLength: 200 }
+        authorEmail: { type: string, maxLength: 200 }
+        coAuthor: { type: boolean, description: Add a Co-authored-by hiro line }
+        prTitle: { type: string, maxLength: 200, description: '{key} and {title} are replaced' }
+        draft: { type: boolean }
+
+    Settings:
+      type: object
+      required: [models, maxTurns, timeoutMin, allow, deny, askFirst, autoResume, pauseAbove, parallel, git]
+      properties:
+        models: { $ref: '#/components/schemas/StageModels' }
+        maxTurns: { type: integer, minimum: 20, maximum: 200 }
+        timeoutMin: { type: integer, minimum: 10, maximum: 120 }
+        allow:
+          type: array
+          maxItems: 100
+          items: { type: string, maxLength: 200 }
+        deny:
+          type: array
+          maxItems: 100
+          items: { type: string, maxLength: 200 }
+        askFirst: { type: boolean }
+        autoResume: { type: boolean }
+        autoLearn: { type: boolean, description: Learn from every pushed ticket }
+        pauseAbove: { type: integer, minimum: 50, maximum: 100 }
+        parallel: { type: integer, minimum: 1, maximum: 3 }
+        git: { $ref: '#/components/schemas/GitSettings' }
+        notify: { $ref: '#/components/schemas/NotifySettings' }
+
+    NotifySettings:
+      type: object
+      required: [push, telegram, needsYou, stopped, done]
+      properties:
+        push: { type: boolean }
+        telegram: { type: boolean }
+        needsYou: { type: boolean }
+        stopped: { type: boolean }
+        done: { type: boolean }
+        lessons: { type: boolean, description: New lessons were found }
+
+    Repository:
+      type: object
+      required: [id, name, kind, provider, cloneUrl, defaultBranch, buildCmd, lintCmd, testCmd, branchPrefix, taskPrefix, instructions, jiraProject, claudeMd, openTickets]
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        kind:
+          type: string
+          enum: [jira, side]
+          description: jira when the repository has a Jira project key, else side. Every repository takes side-project tasks.
+        provider: { type: string, enum: [github, gitlab] }
+        cloneUrl: { type: string }
+        defaultBranch: { type: string }
+        buildCmd: { type: string }
+        lintCmd: { type: string }
+        testCmd: { type: string }
+        branchPrefix: { type: string }
+        taskPrefix: { type: string }
+        instructions: { type: string, description: Extra instructions added to every prompt }
+        jiraProject: { type: string }
+        claudeMd: { type: string, enum: [found, missing, unknown] }
+        openTickets: { type: integer }
+        deployWorkflow: { type: string }
+        archivedAt: { type: string, format: date-time, description: Set while the repository is archived }
+
+    RepositoryInput:
+      type: object
+      required: [name, cloneUrl]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 100 }
+        kind:
+          type: string
+          enum: [jira, side]
+          deprecated: true
+          description: Ignored; derived from jiraProject.
+        cloneUrl: { type: string, minLength: 1, maxLength: 500 }
+        defaultBranch: { type: string, maxLength: 100 }
+        buildCmd: { type: string, maxLength: 500 }
+        lintCmd: { type: string, maxLength: 500 }
+        testCmd: { type: string, maxLength: 500 }
+        branchPrefix: { type: string, maxLength: 50 }
+        taskPrefix: { type: string, maxLength: 8 }
+        instructions: { type: string, maxLength: 20000 }
+        jiraProject: { type: string, maxLength: 20 }
+        deployWorkflow: { type: string, maxLength: 200, description: 'GitHub workflow file run by Deploy, e.g. deploy.yml' }
+
+    RepoMember:
+      type: object
+      required: [username, role]
+      properties:
+        username: { type: string }
+        name: { type: string }
+        avatarUrl: { type: string }
+        url: { type: string, description: Profile page on the git host }
+        role: { type: string, description: 'The host''s role name, e.g. admin, write (GitHub) or Maintainer, Developer (GitLab)' }
+
+    RemoteRepository:
+      type: object
+      required: [fullName, cloneUrl, defaultBranch, private, added]
+      properties:
+        fullName: { type: string, description: 'owner/name, or group/sub/project on GitLab' }
+        cloneUrl: { type: string }
+        defaultBranch: { type: string }
+        private: { type: boolean }
+        description: { type: string }
+        updatedAt: { type: string, format: date-time }
+        added: { type: boolean, description: Already added to hiro }
+
+    Integration:
+      type: object
+      required: [provider, connected, settings]
+      properties:
+        provider: { type: string }
+        connected: { type: boolean }
+        checkedAt: { type: string, format: date-time }
+        account: { type: string }
+        tokenHint: { type: string, description: Last four characters }
+        lastError: { type: string }
+        settings:
+          type: object
+          additionalProperties: { type: string }
+        webhookUrl: { type: string }
+        webhookSecret: { type: string, description: 'GitHub and GitLab: secret to enter in the webhook settings' }
+
+    ConnectResult:
+      type: object
+      required: [integration]
+      properties:
+        integration: { $ref: '#/components/schemas/Integration' }
+        webhookSecret: { type: string, description: Shown once; paste it into the provider's webhook settings }
+
+    DashboardCounts:
+      type: object
+      required: [needs, answers, reviews, stopped, running, queued]
+      properties:
+        needs: { type: integer }
+        answers: { type: integer }
+        reviews: { type: integer }
+        stopped: { type: integer }
+        running: { type: integer }
+        queued: { type: integer }
+
+    LiveRun:
+      type: object
+      required: [ticket, model, turns, maxTurns, lastMessage]
+      properties:
+        ticket: { $ref: '#/components/schemas/Ticket' }
+        model: { type: string }
+        turns: { type: integer }
+        maxTurns: { type: integer }
+        lastMessage: { type: string }
+
+    HourBucket:
+      type: object
+      required: [hour, hiro, you, problems]
+      properties:
+        hour: { type: integer }
+        hiro: { type: integer }
+        you: { type: integer }
+        problems: { type: integer }
+
+    WeekStats:
+      type: object
+      required: [picked, pushed, firstTryPct, avgTurns, avgWaitMin, stopped]
+      properties:
+        picked: { type: integer }
+        pushed: { type: integer }
+        firstTryPct: { type: integer }
+        avgTurns: { type: integer }
+        avgWaitMin: { type: integer }
+        stopped: { type: integer }
+
+    RepoActivity:
+      type: object
+      required: [repo, open]
+      properties:
+        repo: { $ref: '#/components/schemas/Repository' }
+        open: { type: integer }
+        latest: { $ref: '#/components/schemas/Ticket' }
+
+    Dashboard:
+      type: object
+      required: [counts, waiting, live, pipeline, todayByHour, week, lastWeek, repos, recent, usage, parallel]
+      properties:
+        counts: { $ref: '#/components/schemas/DashboardCounts' }
+        waiting:
+          type: array
+          items: { $ref: '#/components/schemas/Ticket' }
+        live:
+          type: array
+          items: { $ref: '#/components/schemas/LiveRun' }
+        pipeline:
+          type: object
+          additionalProperties: { type: integer }
+          description: Open tickets per state
+        todayByHour:
+          type: array
+          items: { $ref: '#/components/schemas/HourBucket' }
+        week: { $ref: '#/components/schemas/WeekStats' }
+        lastWeek: { $ref: '#/components/schemas/WeekStats' }
+        repos:
+          type: array
+          items: { $ref: '#/components/schemas/RepoActivity' }
+        recent:
+          type: array
+          items: { $ref: '#/components/schemas/Event' }
+        usage: { $ref: '#/components/schemas/Usage' }
+        parallel: { type: integer }
+
+    DeviceRegistration:
+      type: object
+      required: [platform, fcmToken]
+      properties:
+        platform: { type: string, enum: [ios, android] }
+        fcmToken: { type: string, minLength: 1, maxLength: 4096 }
+        appVersion: { type: string, maxLength: 50 }
+
+    McpStatus:
+      type: object
+      required: [url, staticToken, connections]
+      properties:
+        url: { type: string, description: The connector URL to add in Claude }
+        staticToken: { type: boolean }
+        connections: { type: integer, description: Claude connections authorised with OAuth }
+
+    CI:
+      type: string
+      enum: [ok, fail, run, pending, manual, skip, canceled, none]
+
+    Branch:
+      type: object
+      required: [name, default, sha, message, author, ahead, behind, ci]
+      properties:
+        name: { type: string }
+        default: { type: boolean }
+        sha: { type: string }
+        message: { type: string }
+        author: { type: string }
+        date: { type: string, format: date-time }
+        ahead: { type: integer }
+        behind: { type: integer }
+        ci: { $ref: '#/components/schemas/CI' }
+        ticketKey: { type: string }
+
+    LocalBranch:
+      type: object
+      required: [name, sha, message, author, ahead, behind, status, unpushed]
+      properties:
+        name: { type: string }
+        sha: { type: string }
+        message: { type: string }
+        author: { type: string }
+        date: { type: string, format: date-time }
+        ahead: { type: integer, description: Commits not on the default branch }
+        behind: { type: integer, description: Default branch commits the branch lacks }
+        status:
+          type: string
+          enum: [local, pushed, unpushed, differs]
+          description: 'local: not on origin; pushed: origin has the same commit; unpushed: origin is behind; differs: origin has commits the local branch lacks'
+        unpushed: { type: integer, description: Commits origin lacks (status unpushed) }
+        ticketKey: { type: string }
+
+    Commit:
+      type: object
+      required: [sha, message, author, add, del, ci]
+      properties:
+        sha: { type: string }
+        message: { type: string }
+        author: { type: string }
+        date: { type: string, format: date-time }
+        add: { type: integer }
+        del: { type: integer }
+        ci: { $ref: '#/components/schemas/CI' }
+        url: { type: string }
+        ticketKey: { type: string }
+
+    Stage:
+      type: object
+      required: [id, name, status, durationMs, manual]
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        status: { $ref: '#/components/schemas/CI' }
+        durationMs: { type: integer, format: int64 }
+        manual: { type: boolean }
+
+    Pipeline:
+      type: object
+      required: [id, name, branch, sha, message, trigger, status, durationMs, url, stages]
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        branch: { type: string }
+        sha: { type: string }
+        message: { type: string }
+        trigger: { type: string }
+        status: { $ref: '#/components/schemas/CI' }
+        created: { type: string, format: date-time }
+        durationMs: { type: integer, format: int64 }
+        url: { type: string }
+        stages:
+          type: array
+          items: { $ref: '#/components/schemas/Stage' }
+
+    Environment:
+      type: object
+      required: [name, sha, url]
+      properties:
+        name: { type: string }
+        sha: { type: string }
+        deployedAt: { type: string, format: date-time }
+        url: { type: string }
+
+    PeriodStats:
+      type: object
+      required: [picked, pushed, rejected, stopped, firstTry, afterChanges, hiroMin, waitMin, reviewMin, answerMin, turns]
+      properties:
+        picked: { type: integer }
+        pushed: { type: integer }
+        rejected: { type: integer }
+        stopped: { type: integer }
+        firstTry: { type: integer }
+        afterChanges: { type: integer }
+        hiroMin: { type: number }
+        waitMin: { type: number }
+        reviewMin: { type: number }
+        answerMin: { type: number }
+        turns: { type: number }
+
+    DayStat:
+      type: object
+      required: [date, picked, pushed, rejected, stopped, hiroMin, waitMin, turns]
+      properties:
+        date: { type: string, format: date }
+        picked: { type: integer }
+        pushed: { type: integer }
+        rejected: { type: integer }
+        stopped: { type: integer }
+        hiroMin: { type: number }
+        waitMin: { type: number }
+        turns: { type: number }
+        peakUsage: { type: number }
+
+    Analytics:
+      type: object
+      required: [days, current, previous, perDay, steps, stops, models, repos, hours, insights]
+      properties:
+        days: { type: integer }
+        current: { $ref: '#/components/schemas/PeriodStats' }
+        previous: { $ref: '#/components/schemas/PeriodStats' }
+        perDay:
+          type: array
+          items: { $ref: '#/components/schemas/DayStat' }
+        steps:
+          type: object
+          additionalProperties: { type: number }
+          description: Average minutes per state
+        stops:
+          type: object
+          additionalProperties: { type: integer }
+          description: 'Stopped runs by reason: tests, limit, you, turns, other'
+        models:
+          type: array
+          items:
+            type: object
+            required: [model, runs, reachedReview, avgTurns]
+            properties:
+              model: { type: string }
+              runs: { type: integer }
+              reachedReview: { type: integer }
+              avgTurns: { type: number }
+        repos:
+          type: array
+          items:
+            type: object
+            required: [repoId, name, kind, claudeMd, tickets, done, finished, avgTurns, hiroMin]
+            properties:
+              repoId: { type: integer, format: int64 }
+              name: { type: string }
+              kind: { type: string }
+              claudeMd: { type: string }
+              tickets: { type: integer }
+              done: { type: integer }
+              finished: { type: integer }
+              avgTurns: { type: number }
+              hiroMin: { type: number }
+        hours:
+          type: array
+          items: { type: integer }
+          description: hiro's events per hour of day (server time zone)
+        insights:
+          type: array
+          items:
+            type: object
+            required: [kind, values]
+            properties:
+              kind: { type: string, enum: [claudeMd, waiting, stopsTests, stopsLimit, night] }
+              values:
+                type: object
+                additionalProperties: { type: string }
+
+    LessonCategory:
+      type: string
+      enum: [pattern, architecture, algorithm, library, language, testing, security, performance, tooling, other]
+
+    LessonLevel:
+      type: string
+      enum: [beginner, intermediate, advanced]
+
+    LessonBrief:
+      type: object
+      required: [id, repoId, repoName, ticketKey, slug, title, category, level, summary, quizCount, readMinutes, createdAt]
+      properties:
+        id: { type: integer, format: int64 }
+        repoId: { type: integer, format: int64 }
+        repoName: { type: string }
+        ticketKey: { type: string }
+        slug: { type: string, description: 'Concept id, unique per repository' }
+        title: { type: string }
+        category: { $ref: '#/components/schemas/LessonCategory' }
+        level: { $ref: '#/components/schemas/LessonLevel' }
+        summary: { type: string }
+        quizCount: { type: integer }
+        readMinutes: { type: integer, description: 'Estimated minutes to read the lesson and take its quiz' }
+        learnedAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    LearnQueueItem:
+      type: object
+      required: [key, title, repoName, status, lessons, updatedAt]
+      properties:
+        key: { type: string }
+        title: { type: string }
+        repoName: { type: string }
+        status:
+          type: string
+          enum: [running, pending, failed, none]
+          description: 'none: the ticket was never learned from'
+        lessons: { type: integer, description: Lessons it produced so far }
+        updatedAt: { type: string, format: date-time }
+
+    LessonList:
+      type: object
+      required: [items, total, unlearned]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/LessonBrief' }
+        total: { type: integer, description: 'All lessons, ignoring filters' }
+        unlearned: { type: integer, description: 'Lessons not learned yet, ignoring filters' }
+
+    LessonRef:
+      type: object
+      required: [path]
+      properties:
+        path: { type: string, description: Relative to the repository root }
+        line: { type: integer }
+        note: { type: string }
+
+    QuizQuestion:
+      type: object
+      required: [question, options, answer]
+      properties:
+        question: { type: string }
+        options:
+          type: array
+          items: { type: string }
+        answer: { type: integer, description: Index of the correct option }
+        explanation: { type: string }
+
+    Link:
+      type: object
+      required: [title, url]
+      properties:
+        title: { type: string }
+        url: { type: string, description: Always https }
+
+    Lesson:
+      type: object
+      required: [id, repoId, repoName, ticketKey, slug, title, category, level, summary, explanation, whyHere, refs, quiz, reading, readMinutes, createdAt]
+      properties:
+        id: { type: integer, format: int64 }
+        repoId: { type: integer, format: int64 }
+        repoName: { type: string }
+        ticketKey: { type: string }
+        slug: { type: string }
+        title: { type: string }
+        category: { $ref: '#/components/schemas/LessonCategory' }
+        level: { $ref: '#/components/schemas/LessonLevel' }
+        summary: { type: string }
+        explanation: { type: string, description: 'Plain text; paragraphs are separated by blank lines' }
+        whyHere: { type: string, description: Why this change needed it }
+        readMinutes: { type: integer, description: 'Estimated minutes to read the lesson and take its quiz' }
+        refs:
+          type: array
+          items: { $ref: '#/components/schemas/LessonRef' }
+        quiz:
+          type: array
+          items: { $ref: '#/components/schemas/QuizQuestion' }
+        reading:
+          type: array
+          items: { $ref: '#/components/schemas/Link' }
+        learnedAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          description: Stable machine-readable code, e.g. unauthorized, bad_request
+        message: { type: string }
+
+  responses:
+    BadGateway:
+      description: The git host returned an error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    TicketOK:
+      description: The ticket after the change
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Ticket' }
+    NotFound:
+      description: No such ticket
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Conflict:
+      description: Not allowed in the ticket's current state
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    BadRequest:
+      description: The request is malformed
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: Not signed in, or the credentials are wrong
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    TooManyRequests:
+      description: Rate limit hit; retry later
+      headers:
+        Retry-After:
+          schema: { type: integer }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }

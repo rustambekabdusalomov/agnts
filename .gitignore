@@ -1,0 +1,21 @@
+# Build output
+/bin/
+**/dist/
+**/node_modules/
+
+# Secrets and local data
+deploy/.env
+deploy/backups/
+*.dump
+
+# Flutter
+apps/mobile/.dart_tool/
+apps/mobile/build/
+apps/mobile/.flutter-plugins*
+apps/mobile/packages/hiro_api/.dart_tool/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+/.dev-data/

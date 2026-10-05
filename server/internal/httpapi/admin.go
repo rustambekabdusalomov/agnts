@@ -1,0 +1,725 @@
+package httpapi
+
+import (
+	"context"
+	"encoding/csv"
+	"encoding/json"
+	"errors"
+	"net/http"
+	"strconv"
+	"time"
+
+	"hiro/internal/admin"
+	"hiro/internal/docs"
+	"hiro/internal/domain"
+	"hiro/internal/httpapi/gen"
+	"hiro/internal/orchestrator"
+	"hiro/internal/store/postgres"
+	"hiro/internal/usage"
+)
+
+// Admin groups the services behind the Phase 2 pages.
+type Admin struct {
+	Settings interface {
+		Get(ctx context.Context) (domain.Settings, error)
+		Put(ctx context.Context, s domain.Settings, origin domain.Origin) (domain.Settings, error)
+	}
+	Usage        *usage.Tracker
+	Refresher    *usage.Refresher
+	Logs         *postgres.Agent
+	Dashboard    *admin.Dashboard
+	Integrations *admin.Integrations
+	Repos        *admin.Repos
+	Docs         *docs.Docs
+}
+
+func (s *Server) adminReady(w http.ResponseWriter) bool {
+	if s.opt.Admin == nil {
+		writeError(w, http.StatusNotImplemented, "unsupported", "not available")
+		return false
+	}
+	return true
+}
+
+// ---- ticket extras ----
+
+// StartTicket implements gen.ServerInterface.
+func (s *Server) StartTicket(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) { return s.opt.Tickets.Start(ctx, key, origin(r)) })
+}
+
+// StopTicket implements gen.ServerInterface.
+func (s *Server) StopTicket(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) { return s.opt.Tickets.Stop(ctx, key, origin(r)) })
+}
+
+// SetTicketModels implements gen.ServerInterface.
+func (s *Server) SetTicketModels(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	var req gen.ModelOverrides
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	m := map[string]string{}
+	if req.Analyze != nil {
+		m[domain.ModelAnalyze] = string(*req.Analyze)
+	}
+	if req.Coding != nil {
+		m[domain.ModelCoding] = string(*req.Coding)
+	}
+	if req.Retry != nil {
+		m[domain.ModelRetry] = string(*req.Retry)
+	}
+	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
+		return s.opt.Tickets.SetModels(ctx, key, m, origin(r))
+	})
+}
+
+// SetTicketRepo implements gen.ServerInterface.
+func (s *Server) SetTicketRepo(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	var req gen.TicketRepo
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
+		return s.opt.Tickets.SetRepo(ctx, key, req.RepoId, origin(r))
+	})
+}
+
+// CreateTask implements gen.ServerInterface.
+func (s *Server) CreateTask(w http.ResponseWriter, r *http.Request) {
+	var req gen.TaskCreate
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	in := orchestrator.TaskInput{RepoID: req.RepoId, Title: req.Title, Priority: string(req.Priority),
+		AfterApprove: string(req.AfterApprove), Start: string(req.Start)}
+	if req.Description != nil {
+		in.Description = *req.Description
+	}
+	t, err := s.opt.Tickets.CreateTask(r.Context(), in, origin(r))
+	if err != nil {
+		s.writeUseCaseError(w, r, err)
+		return
+	}
+	s.writeTicket(w, r, http.StatusCreated, t)
+}
+
+// UpdateTask implements gen.ServerInterface.
+func (s *Server) UpdateTask(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	var req gen.TaskUpdate
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	var in orchestrator.TaskInput
+	if req.Title != nil {
+		in.Title = *req.Title
+	}
+	if req.Description != nil {
+		in.Description = *req.Description
+	}
+	if req.Priority != nil {
+		in.Priority = string(*req.Priority)
+	}
+	if req.AfterApprove != nil {
+		in.AfterApprove = string(*req.AfterApprove)
+	}
+	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
+		return s.opt.Tickets.UpdateTask(ctx, key, in, origin(r))
+	})
+}
+
+// DeleteTask implements gen.ServerInterface.
+func (s *Server) DeleteTask(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	if err := s.opt.Tickets.DeleteTask(r.Context(), key, origin(r)); err != nil {
+		s.writeUseCaseError(w, r, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// ---- logs ----
+
+// ListEvents implements gen.ServerInterface.
+func (s *Server) ListEvents(w http.ResponseWriter, r *http.Request, p gen.ListEventsParams) {
+	if !s.adminReady(w) {
+		return
+	}
+	f := postgres.LogFilter{Type: "all", Limit: 100}
+	if p.Type != nil {
+		f.Type = string(*p.Type)
+	}
+	if p.Key != nil {
+		f.Key = *p.Key
+	}
+	if p.Errors != nil {
+		f.Errors = *p.Errors
+	}
+	if p.Before != nil {
+		f.Before = *p.Before
+	}
+	if p.Limit != nil {
+		f.Limit = *p.Limit
+	}
+	evs, err := s.opt.Admin.Logs.ListEvents(r.Context(), f)
+	if err != nil {
+		s.writeInternal(w, r, err)
+		return
+	}
+	out := gen.EventPage{Events: make([]gen.Event, len(evs))}
+	for i, e := range evs {
+		out.Events[i] = toEvent(e)
+	}
+	if len(evs) == f.Limit {
+		next := evs[len(evs)-1].ID
+		out.NextBefore = &next
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+// GetEventSummary implements gen.ServerInterface.
+func (s *Server) GetEventSummary(w http.ResponseWriter, r *http.Request) {
+	if !s.adminReady(w) {
+		return
+	}
+	sum, err := s.opt.Admin.Logs.EventSummary(r.Context())
+	if err != nil {
+		s.writeInternal(w, r, err)
+		return
+	}
+	out := gen.EventSummary{RunsStarted: sum.RunsStarted, ReachedReview: sum.ReachedReview, AvgTurns: sum.AvgTurns,
+		Stops: sum.Stops, Errors: sum.Errors, Steps: make([]gen.StepDuration, len(sum.Steps))}
+	for i, st := range sum.Steps {
+		ms := st.Avg.Milliseconds()
+		out.Steps[i] = gen.StepDuration{State: gen.TicketState(st.State), AvgMs: &ms, Count: st.Count}
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+// ExportEvents implements gen.ServerInterface.
+func (s *Server) ExportEvents(w http.ResponseWriter, r *http.Request, p gen.ExportEventsParams) {
+	if !s.adminReady(w) {
+		return
+	}
+	format := "json"
+	if p.Format != nil {
+		format = string(*p.Format)
+	}
+	name := "hiro-events-" + time.Now().Format("2006-01-02")
+	var err error
+	if format == "csv" {
+		w.Header().Set("Content-Type", "text/csv; charset=utf-8")
+		w.Header().Set("Content-Disposition", `attachment; filename="`+name+`.csv"`)
+		cw := csv.NewWriter(w)
+		_ = cw.Write([]string{"id", "time", "ticket", "step", "type", "level", "origin", "message", "duration_ms", "data"})
+		err = s.opt.Admin.Logs.ExportEvents(r.Context(), func(e domain.Event) error {
+			data, _ := json.Marshal(e.Data)
+			dur := ""
+			if e.DurationMS != nil {
+				dur = strconv.FormatInt(*e.DurationMS, 10)
+			}
+			return cw.Write([]string{strconv.FormatInt(e.ID, 10), e.CreatedAt.UTC().Format(time.RFC3339), e.TicketKey, e.Step,
+				e.Type, string(e.Level), string(e.Origin), csvSafe(e.Message), dur, string(data)})
+		})
+		cw.Flush()
+	} else {
+		w.Header().Set("Content-Type", "application/x-ndjson")
+		w.Header().Set("Content-Disposition", `attachment; filename="`+name+`.jsonl"`)
+		enc := json.NewEncoder(w)
+		err = s.opt.Admin.Logs.ExportEvents(r.Context(), func(e domain.Event) error { return enc.Encode(toEvent(e)) })
+	}
+	if err != nil {
+		s.opt.Log.Error("export events", "err", err)
+	}
+}
+
+// csvSafe stops spreadsheet formula injection from event text.
+func csvSafe(s string) string {
+	if s != "" && (s[0] == '=' || s[0] == '+' || s[0] == '-' || s[0] == '@') {
+		return "'" + s
+	}
+	return s
+}
+
+// ---- dashboard and usage ----
+
+// GetDashboard implements gen.ServerInterface.
+func (s *Server) GetDashboard(w http.ResponseWriter, r *http.Request) {
+	if !s.adminReady(w) {
+		return
+	}
+	d, err := s.opt.Admin.Dashboard.Build(r.Context())
+	if err != nil {
+		s.writeInternal(w, r, err)
+		return
+	}
+	out := gen.Dashboard{
+		Counts: gen.DashboardCounts{Needs: d.Counts["needs"], Answers: d.Counts["answers"], Reviews: d.Counts["reviews"],
+			Stopped: d.Counts["stopped"], Running: d.Counts["running"], Queued: d.Counts["queued"]},
+		Waiting: make([]gen.Ticket, len(d.Waiting)), Live: make([]gen.LiveRun, len(d.Live)),
+		Pipeline: d.Pipeline, TodayByHour: make([]gen.HourBucket, len(d.TodayByHour)),
+		Week: toWeek(d.Week), LastWeek: toWeek(d.LastWeek), Repos: make([]gen.RepoActivity, len(d.Repos)),
+		Recent: make([]gen.Event, len(d.Recent)), Usage: toUsage(d.Usage), Parallel: d.Parallel,
+	}
+	for i, row := range d.Waiting {
+		out.Waiting[i] = toTicketRow(row)
+	}
+	for i, l := range d.Live {
+		out.Live[i] = gen.LiveRun{Ticket: toTicketRow(l.Row), Model: l.Model, Turns: l.Turns, MaxTurns: l.MaxTurns, LastMessage: l.LastMessage}
+	}
+	for i, b := range d.TodayByHour {
+		out.TodayByHour[i] = gen.HourBucket{Hour: b.Hour, Hiro: b.Hiro, You: b.You, Problems: b.Problems}
+	}
+	for i, a := range d.Repos {
+		out.Repos[i] = gen.RepoActivity{Repo: toRepo(a.Repo), Open: a.Repo.Open}
+		if a.Latest != nil {
+			t := toTicketRow(*a.Latest)
+			out.Repos[i].Latest = &t
+		}
+	}
+	for i, e := range d.Recent {
+		out.Recent[i] = toEvent(e)
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+func toWeek(w postgres.WeekStats) gen.WeekStats {
+	return gen.WeekStats{Picked: w.Picked, Pushed: w.Pushed, FirstTryPct: w.FirstTryPct, AvgTurns: w.AvgTurns, AvgWaitMin: w.AvgWaitMin, Stopped: w.Stopped}
+}
+
+func toUsage(v usage.View) gen.Usage {
+	return gen.Usage{
+		FiveHour: gen.UsageWindow{Utilization: v.FiveHour, ResetsAt: v.FiveHourResets},
+		SevenDay: gen.UsageWindow{Utilization: v.SevenDay, ResetsAt: v.SevenDayResets},
+		Status:   gen.UsageStatus(v.Status), UpdatedAt: v.UpdatedAt, Paused: v.Paused, PausedUntil: v.PausedUntil,
+		PauseAbove: v.PauseAbove, Refreshing: v.Refreshing,
+	}
+}
+
+// GetUsage implements gen.ServerInterface.
+func (s *Server) GetUsage(w http.ResponseWriter, r *http.Request) {
+	if !s.adminReady(w) {
+		return
+	}
+	st, err := s.opt.Admin.Settings.Get(r.Context())
+	if err != nil {
+		s.writeInternal(w, r, err)
+		return
+	}
+	v, err := s.opt.Admin.Usage.Current(r.Context(), st)
+	if err != nil {
+		s.writeInternal(w, r, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, toUsage(v))
+}
+
+// RefreshUsage implements gen.ServerInterface.
+func (s *Server) RefreshUsage(w http.ResponseWriter, r *http.Request) {
+	if !s.adminReady(w) {
+		return
+	}
+	if s.opt.Admin.Refresher == nil {
+		writeError(w, http.StatusConflict, "conflict", "the agent loop is off, so usage cannot be refreshed")
+		return
+	}
+	if err := s.opt.Admin.Refresher.Refresh(r.Context()); errors.Is(err, usage.ErrBusy) {
+		writeError(w, http.StatusConflict, "conflict", err.Error())
+		return
+	} else if err != nil {
+		s.writeInternal(w, r, err)
+		return
+	}
+	st, _ := s.opt.Admin.Settings.Get(r.Context())
+	v, err := s.opt.Admin.Usage.Current(r.Context(), st)
+	if err != nil {
+		s.writeInternal(w, r, err)
+		return
+	}
+	writeJSON(w, http.StatusAccepted, toUsage(v))
+}
+
+// ---- settings ----
+
+func toSettings(v domain.Settings) gen.Settings {
+	learn, autoLearn, lessons := gen.Model(v.Models.Learn), v.AutoLearn, v.Notify.Lessons
+	return gen.Settings{
+		Models: gen.StageModels{Analyze: gen.Model(v.Models.Analyze), Coding: gen.Model(v.Models.Coding),
+			Retry: gen.Model(v.Models.Retry), Helper: gen.Model(v.Models.Helper), Learn: &learn},
+		MaxTurns: v.MaxTurns, TimeoutMin: v.TimeoutMin, Allow: v.Allow, Deny: v.Deny,
+		AskFirst: v.AskFirst, AutoResume: v.AutoResume, PauseAbove: v.PauseAbove, Parallel: v.Parallel, AutoLearn: &autoLearn,
+		Git: gen.GitSettings{AuthorName: v.Git.AuthorName, AuthorEmail: v.Git.AuthorEmail, CoAuthor: v.Git.CoAuthor,
+			PrTitle: v.Git.PRTitle, Draft: v.Git.Draft},
+		Notify: &gen.NotifySettings{Push: v.Notify.Push, Telegram: v.Notify.Telegram, NeedsYou: v.Notify.NeedsYou,
+			Stopped: v.Notify.Stopped, Done: v.Notify.Done, Lessons: &lessons},
+	}
+}
+
+// GetSettings implements gen.ServerInterface.
+func (s *Server) GetSettings(w http.ResponseWriter, r *http.Request) {
+	if !s.adminReady(w) {
+		return
+	}
+	v, err := s.opt.Admin.Settings.Get(r.Context())
+	if err != nil {
+		s.writeInternal(w, r, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, toSettings(v))
+}
+
+// PutSettings implements gen.ServerInterface.
+func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
+	if !s.adminReady(w) {
+		return
+	}
+	var req gen.Settings
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	cur, err := s.opt.Admin.Settings.Get(r.Context())
+	if err != nil {
+		s.writeInternal(w, r, err)
+		return
+	}
+	v := domain.Settings{
+		Models: domain.StageModels{Analyze: string(req.Models.Analyze), Coding: string(req.Models.Coding),
+			Retry: string(req.Models.Retry), Helper: string(req.Models.Helper), Learn: cur.Models.Learn},
+		MaxTurns: req.MaxTurns, TimeoutMin: req.TimeoutMin, Allow: req.Allow, Deny: req.Deny,
+		AskFirst: req.AskFirst, AutoResume: req.AutoResume, PauseAbove: req.PauseAbove, Parallel: req.Parallel, AutoLearn: cur.AutoLearn,
+		Git: domain.GitSettings{AuthorName: req.Git.AuthorName, AuthorEmail: req.Git.AuthorEmail, CoAuthor: req.Git.CoAuthor,
+			PRTitle: req.Git.PrTitle, Draft: req.Git.Draft},
+		Notify: cur.Notify,
+	}
+	if req.Notify != nil {
+		v.Notify = domain.NotifySettings{Push: req.Notify.Push, Telegram: req.Notify.Telegram, NeedsYou: req.Notify.NeedsYou,
+			Stopped: req.Notify.Stopped, Done: req.Notify.Done, Lessons: cur.Notify.Lessons}
+		if req.Notify.Lessons != nil {
+			v.Notify.Lessons = *req.Notify.Lessons
+		}
+	}
+	if req.Models.Learn != nil {
+		v.Models.Learn = string(*req.Models.Learn)
+	}
+	if req.AutoLearn != nil {
+		v.AutoLearn = *req.AutoLearn
+	}
+	saved, err := s.opt.Admin.Settings.Put(r.Context(), v, origin(r))
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	s.opt.Tickets.Wake()
+	writeJSON(w, http.StatusOK, toSettings(saved))
+}
+
+// ---- repositories ----
+
+func toRepo(x admin.RepoView) gen.Repository {
+	st := x.ClaudeMDState
+	if st == "" {
+		st = "unknown"
+	}
+	return gen.Repository{Id: x.ID, Name: x.Name, Kind: gen.RepositoryKind(x.Kind), Provider: gen.RepositoryProvider(x.Provider),
+		CloneUrl: x.CloneURL, DefaultBranch: x.DefaultBranch, BuildCmd: x.BuildCmd, LintCmd: x.LintCmd, TestCmd: x.TestCmd,
+		BranchPrefix: x.BranchPrefix, TaskPrefix: orchestrator.TaskPrefix(x.Repository), Instructions: x.ClaudeMD,
+		JiraProject: x.JiraProject, ClaudeMd: gen.RepositoryClaudeMd(st), OpenTickets: x.Open, DeployWorkflow: &x.DeployWorkflow,
+		ArchivedAt: x.ArchivedAt}
+}
+
+// ArchiveRepo implements gen.ServerInterface.
+func (s *Server) ArchiveRepo(w http.ResponseWriter, r *http.Request, id int64) {
+	s.setArchived(w, r, id, true)
+}
+
+// UnarchiveRepo implements gen.ServerInterface.
+func (s *Server) UnarchiveRepo(w http.ResponseWriter, r *http.Request, id int64) {
+	s.setArchived(w, r, id, false)
+}
+
+func (s *Server) setArchived(w http.ResponseWriter, r *http.Request, id int64, archived bool) {
+	if !s.adminReady(w) {
+		return
+	}
+	x, err := s.opt.Admin.Repos.SetArchived(r.Context(), id, archived, origin(r))
+	if err != nil {
+		s.writeAdminError(w, r, err, "")
+		return
+	}
+	writeJSON(w, http.StatusOK, toRepo(x))
+}
+
+// ListRepos implements gen.ServerInterface.
+func (s *Server) ListRepos(w http.ResponseWriter, r *http.Request) {
+	if !s.adminReady(w) {
+		return
+	}
+	list, err := s.opt.Admin.Repos.List(r.Context())
+	if err != nil {
+		s.writeInternal(w, r, err)
+		return
+	}
+	out := make([]gen.Repository, len(list))
+	for i, x := range list {
+		out[i] = toRepo(x)
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+// GetRepo implements gen.ServerInterface.
+func (s *Server) GetRepo(w http.ResponseWriter, r *http.Request, id int64) {
+	if !s.adminReady(w) {
+		return
+	}
+	x, err := s.opt.Admin.Repos.Get(r.Context(), id)
+	if err != nil {
+		s.writeAdminError(w, r, err, "no such repository")
+		return
+	}
+	writeJSON(w, http.StatusOK, toRepo(x))
+}
+
+func repoFromInput(in gen.RepositoryInput) domain.Repository {
+	x := domain.Repository{Name: in.Name, CloneURL: in.CloneUrl} // kind is derived in admin.Validate
+	str := func(p *string) string {
+		if p == nil {
+			return ""
+		}
+		return *p
+	}
+	x.DefaultBranch, x.BuildCmd, x.LintCmd, x.TestCmd = str(in.DefaultBranch), str(in.BuildCmd), str(in.LintCmd), str(in.TestCmd)
+	x.BranchPrefix, x.TaskPrefix, x.ClaudeMD, x.JiraProject = str(in.BranchPrefix), str(in.TaskPrefix), str(in.Instructions), str(in.JiraProject)
+	x.DeployWorkflow = str(in.DeployWorkflow)
+	return x
+}
+
+// CreateRepo implements gen.ServerInterface.
+func (s *Server) CreateRepo(w http.ResponseWriter, r *http.Request) {
+	if !s.adminReady(w) {
+		return
+	}
+	var in gen.RepositoryInput
+	if err := decodeJSON(r, &in); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	x, err := s.opt.Admin.Repos.Save(r.Context(), repoFromInput(in))
+	if err != nil {
+		s.writeAdminError(w, r, err, "a repository with that name or Jira project already exists")
+		return
+	}
+	writeJSON(w, http.StatusCreated, toRepo(x))
+}
+
+// UpdateRepo implements gen.ServerInterface.
+func (s *Server) UpdateRepo(w http.ResponseWriter, r *http.Request, id int64) {
+	if !s.adminReady(w) {
+		return
+	}
+	var in gen.RepositoryInput
+	if err := decodeJSON(r, &in); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	x := repoFromInput(in)
+	x.ID = id
+	saved, err := s.opt.Admin.Repos.Save(r.Context(), x)
+	if err != nil {
+		s.writeAdminError(w, r, err, "a repository with that name or Jira project already exists")
+		return
+	}
+	writeJSON(w, http.StatusOK, toRepo(saved))
+}
+
+func (s *Server) writeAdminError(w http.ResponseWriter, r *http.Request, err error, conflictMsg string) {
+	switch {
+	case errors.Is(err, domain.ErrNotFound):
+		writeError(w, http.StatusNotFound, "not_found", "not found")
+	case errors.Is(err, domain.ErrConflict):
+		writeError(w, http.StatusConflict, "conflict", conflictMsg)
+	case errors.Is(err, admin.ErrInvalid):
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+	default:
+		s.writeInternal(w, r, err)
+	}
+}
+
+// ---- integrations ----
+
+func toIntegration(v admin.View) gen.Integration {
+	out := gen.Integration{Provider: v.Provider, Connected: v.Connected, Settings: v.Settings}
+	if v.CheckedAt != nil {
+		if t, err := time.Parse(time.RFC3339, *v.CheckedAt); err == nil {
+			out.CheckedAt = &t
+		}
+	}
+	if v.Account != "" {
+		out.Account = &v.Account
+	}
+	if v.TokenHint != "" {
+		out.TokenHint = &v.TokenHint
+	}
+	if v.LastError != "" {
+		out.LastError = &v.LastError
+	}
+	if v.WebhookURL != "" {
+		out.WebhookUrl = &v.WebhookURL
+	}
+	if v.WebhookSecret != "" {
+		out.WebhookSecret = &v.WebhookSecret
+	}
+	return out
+}
+
+// ListIntegrations implements gen.ServerInterface.
+func (s *Server) ListIntegrations(w http.ResponseWriter, r *http.Request) {
+	if !s.adminReady(w) {
+		return
+	}
+	list, err := s.opt.Admin.Integrations.List(r.Context())
+	if err != nil {
+		s.writeInternal(w, r, err)
+		return
+	}
+	out := make([]gen.Integration, len(list))
+	for i, v := range list {
+		out[i] = toIntegration(v)
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+// ConnectIntegration implements gen.ServerInterface.
+func (s *Server) ConnectIntegration(w http.ResponseWriter, r *http.Request, provider gen.Provider) {
+	if !s.adminReady(w) {
+		return
+	}
+	var req gen.ConnectIntegrationJSONRequestBody
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	settings := map[string]string{}
+	if req.Settings != nil {
+		settings = *req.Settings
+	}
+	v, secret, err := s.opt.Admin.Integrations.Connect(r.Context(), string(provider), req.Token, settings, origin(r))
+	if err != nil {
+		s.writeAdminError(w, r, err, "")
+		return
+	}
+	out := gen.ConnectResult{Integration: toIntegration(v)}
+	if secret != "" {
+		out.WebhookSecret = &secret
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+// TestIntegration implements gen.ServerInterface.
+func (s *Server) TestIntegration(w http.ResponseWriter, r *http.Request, provider gen.Provider) {
+	if !s.adminReady(w) {
+		return
+	}
+	v, err := s.opt.Admin.Integrations.Test(r.Context(), string(provider))
+	if err != nil {
+		s.writeAdminError(w, r, err, "")
+		return
+	}
+	writeJSON(w, http.StatusOK, toIntegration(v))
+}
+
+// ListRemoteRepos implements gen.ServerInterface.
+func (s *Server) ListRemoteRepos(w http.ResponseWriter, r *http.Request, provider gen.Provider) {
+	if !s.adminReady(w) {
+		return
+	}
+	list, err := s.opt.Admin.Repos.Remote(r.Context(), string(provider))
+	if err != nil {
+		if errors.Is(err, admin.ErrInvalid) {
+			s.writeAdminError(w, r, err, "")
+			return
+		}
+		s.opt.Log.Warn("list remote repositories", "provider", provider, "err", err)
+		writeError(w, http.StatusBadGateway, "git_host", err.Error())
+		return
+	}
+	out := make([]gen.RemoteRepository, len(list))
+	for i, x := range list {
+		out[i] = gen.RemoteRepository{FullName: x.FullName, CloneUrl: x.CloneURL, DefaultBranch: x.DefaultBranch, Private: x.Private, Added: x.Added}
+		if x.Description != "" {
+			out[i].Description = &x.Description
+		}
+		if !x.UpdatedAt.IsZero() {
+			out[i].UpdatedAt = &x.UpdatedAt
+		}
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+// DisconnectIntegration implements gen.ServerInterface.
+func (s *Server) DisconnectIntegration(w http.ResponseWriter, r *http.Request, provider gen.Provider) {
+	if !s.adminReady(w) {
+		return
+	}
+	v, err := s.opt.Admin.Integrations.Disconnect(r.Context(), string(provider), origin(r))
+	if err != nil {
+		s.writeAdminError(w, r, err, "")
+		return
+	}
+	writeJSON(w, http.StatusOK, toIntegration(v))
+}
+
+// UpdateIntegration implements gen.ServerInterface.
+func (s *Server) UpdateIntegration(w http.ResponseWriter, r *http.Request, provider gen.Provider) {
+	if !s.adminReady(w) {
+		return
+	}
+	var req gen.UpdateIntegrationJSONRequestBody
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	v, err := s.opt.Admin.Integrations.Update(r.Context(), string(provider), req.Settings, origin(r))
+	if err != nil {
+		s.writeAdminError(w, r, err, "")
+		return
+	}
+	writeJSON(w, http.StatusOK, toIntegration(v))
+}
+
+// SyncJira implements gen.ServerInterface.
+func (s *Server) SyncJira(w http.ResponseWriter, r *http.Request) {
+	if !s.adminReady(w) {
+		return
+	}
+	found, created, err := s.opt.Admin.Integrations.SyncJira(r.Context())
+	if err != nil {
+		s.writeAdminError(w, r, err, "")
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]int{"found": found, "created": created})
+}
+
+// ---- docs ----
+
+// GetPageDoc implements gen.ServerInterface.
+func (s *Server) GetPageDoc(w http.ResponseWriter, r *http.Request, page string, p gen.GetPageDocParams) {
+	if !s.adminReady(w) {
+		return
+	}
+	lang := "en"
+	if p.Lang != nil {
+		lang = string(*p.Lang)
+	}
+	b, err := s.opt.Admin.Docs.Get(page, lang)
+	if err != nil {
+		s.writeAdminError(w, r, err, "")
+		return
+	}
+	w.Header().Set("Content-Type", "text/markdown; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-cache")
+	_, _ = w.Write(b)
+}

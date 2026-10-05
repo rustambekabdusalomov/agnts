@@ -1,0 +1,185 @@
+/* Sign-in page. Everything else uses the demo's classes in demo.css. */
+.login-wrap { min-height: 100vh; display: grid; place-content: center; gap: 18px; padding: 32px 16px; background: radial-gradient(ellipse 70% 50% at 50% 0%, var(--primary-soft), transparent 70%), var(--bg); }
+.login { width: min(400px, calc(100vw - 32px)); display: flex; flex-direction: column; gap: 16px; padding: 30px 28px 28px; border-radius: 18px; box-shadow: 0 24px 48px -28px var(--shadow); }
+.login-brand { display: flex; align-items: center; gap: 12px; padding-bottom: 18px; border-bottom: 1px solid var(--line-2); }
+.login-brand .brand-name { font-size: 22px; }
+.login-head h1 { font-family: var(--display); font-size: 24px; line-height: 1.15; margin: 4px 0 0; }
+.login-head p { margin: 6px 0 0; color: var(--ink-3); font-size: 14px; line-height: 1.45; }
+.login .field { gap: 7px; }
+
+/* Inputs with a leading icon and an optional trailing action. */
+.in-wrap { position: relative; display: flex; align-items: center; }
+.in-wrap .cfg-in { width: 100%; min-height: 46px; padding-left: 40px; background: var(--field); }
+.in-wrap .cfg-in:focus { background: var(--surface); }
+.in-ic { position: absolute; left: 13px; width: 18px; height: 18px; fill: none; stroke: var(--ink-3); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; transition: stroke .15s; }
+.in-wrap:focus-within .in-ic { stroke: var(--primary); }
+.in-act { position: absolute; right: 5px; width: 36px; height: 36px; border: 0; border-radius: 8px; background: none; color: var(--ink-3); cursor: pointer; display: grid; place-items: center; }
+.in-act:hover { background: var(--hover); color: var(--ink); }
+.in-act svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.in-wrap .in-act ~ .cfg-in, .in-wrap .cfg-in:has(~ .in-act) { padding-right: 46px; }
+.code-in { font-family: var(--mono); font-size: 19px !important; font-weight: 600; letter-spacing: .42em; }
+.code-in::placeholder { color: var(--line-3); }
+
+.login-err { display: flex; align-items: flex-start; gap: 8px; margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--bad-soft); color: var(--bad-ink); font-size: 13.5px; font-weight: 600; line-height: 1.4; }
+.login-err svg { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.login-submit { width: 100%; min-height: 46px; margin-top: 4px; font-size: 15px; }
+.login-submit svg { transition: transform .18s; }
+.login-submit:not(:disabled):hover svg { transform: translateX(3px); }
+.spin { width: 16px; height: 16px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: spin .7s linear infinite; }
+.prefs { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+
+/* Confirm modal (ui/ConfirmDialog.vue). */
+.cdlg { width: min(400px, calc(100vw - 32px)); padding: 0; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--ink); box-shadow: 0 30px 60px -24px var(--shadow); }
+.cdlg[open] { animation: cdlgIn .2s cubic-bezier(.2,.7,.2,1); }
+.cdlg::backdrop { background: rgba(22, 24, 29, .42); backdrop-filter: blur(2px); animation: cdlgFade .2s ease; }
+.cdlg-in { display: flex; flex-direction: column; align-items: flex-start; padding: 24px; }
+.cdlg-ic { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: 14px; border-radius: 12px; background: var(--primary-soft); color: var(--primary-ink); }
+.cdlg-ic.bad { background: var(--bad-soft); color: var(--bad-ink); }
+.cdlg-ic:empty { display: none; }
+.cdlg-ic svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.cdlg h2 { margin: 0; font-family: var(--display); font-size: 20px; line-height: 1.2; }
+.cdlg p { margin: 8px 0 0; color: var(--ink-2); font-size: 14.5px; line-height: 1.5; white-space: pre-line; }
+.cdlg-f { display: flex; justify-content: flex-end; gap: 10px; width: 100%; margin-top: 22px; }
+.btn-danger { background: var(--bad); border-color: var(--bad); color: var(--surface); }
+.btn-danger:hover { background: var(--bad-ink); border-color: var(--bad-ink); }
+@keyframes cdlgIn { from { opacity: 0; transform: translateY(8px) scale(.97); } }
+@keyframes cdlgFade { from { opacity: 0; } }
+@media (max-width: 480px) { .cdlg-f { flex-direction: column-reverse; } .cdlg-f .btn { width: 100%; } }
+
+/* "How to get the token" box on the connect form. */
+.token-how { margin-bottom: 14px; }
+.token-how ol { margin: 6px 0 12px; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+.token-how .btn { white-space: normal; }
+
+/* Repositories list: a repo can carry both the Jira and the side-project badge. */
+.srcs { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+
+/* Import picker on the Repositories page. */
+.imp-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.imp-row { display: flex; align-items: center; gap: 12px; padding: 12px 2px; border-bottom: 1px solid var(--line); }
+.imp-row:last-child { border-bottom: 0; }
+.imp-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.imp-name { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.imp-name b { font-family: var(--mono); font-size: 14px; overflow-wrap: anywhere; }
+.imp-desc { margin: 0; color: var(--ink-2); font-size: 13.5px; overflow-wrap: anywhere; }
+.gd-b .search { flex: none; max-width: none; }
+
+/* Repository members (Members tab, and the assignee picker on reviews). */
+.mem-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.mem { display: flex; align-items: center; gap: 12px; padding: 10px 2px; border-bottom: 1px solid var(--line); }
+.mem:last-child { border-bottom: 0; }
+.mem-av { flex: none; width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: var(--hover); }
+.mem-av-x { display: grid; place-items: center; font-weight: 700; font-size: 14px; color: var(--ink-2); }
+.mem-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.mem-name { font-weight: 700; color: var(--ink); overflow-wrap: anywhere; }
+a.mem-name:hover { color: var(--primary-ink); }
+.mono { font-family: var(--mono); }
+.assignees { display: flex; flex-wrap: wrap; gap: 8px; }
+.assignee { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px 0 4px; border-radius: 18px; border: 1px solid var(--line-3); background: var(--surface); color: var(--ink); font-size: 14px; cursor: pointer; }
+.assignee .mem-av { width: 26px; height: 26px; font-size: 12px; }
+.assignee[aria-pressed="true"] { border-color: var(--primary); background: var(--primary-soft); color: var(--primary-ink); font-weight: 700; }
+
+/* "Board" view of tickets and tasks (TicketBoard.vue): columns scroll
+   sideways on narrow screens instead of squeezing. */
+.board { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(240px, 1fr); gap: 12px; overflow-x: auto; padding-bottom: 4px; }
+.bcol { display: flex; flex-direction: column; min-width: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; }
+.bcol-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; font-weight: 700; font-size: 14px; border-bottom: 1px solid var(--line); border-top: 3px solid var(--line-3); border-radius: 12px 12px 0 0; }
+.bcol-h.bt-info { border-top-color: var(--primary); }
+.bcol-h.bt-warn { border-top-color: var(--warn-ink); }
+.bcol-h.bt-ok { border-top-color: var(--ok-ink); }
+.bcol-h.bt-bad { border-top-color: var(--bad-ink); }
+.bcol-n { color: var(--ink-3); font-weight: 600; }
+.bcol-b { display: flex; flex-direction: column; gap: 8px; padding: 10px; max-height: 70vh; overflow-y: auto; }
+.bcard { display: flex; flex-direction: column; gap: 6px; padding: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
+.bcard:hover, .bcard:focus-visible { border-color: var(--primary); }
+.bcard-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.bcard-title { font-weight: 700; color: var(--ink); overflow-wrap: anywhere; }
+.bcard-meta { display: flex; align-items: center; gap: 4px 10px; flex-wrap: wrap; color: var(--ink-3); font-size: 12.5px; }
+.bcol-empty { margin: 4px 2px; color: var(--ink-3); font-size: 13px; }
+
+/* Commits tab: the next page loads when this comes into view. */
+.cm-more { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 0 4px; }
+.cm-more .hint { margin: 0; }
+
+/* Diff line numbers (DiffView.vue): old and new numbers in a gutter that
+   stays put when long lines scroll sideways and is left out when copying. */
+.diff .dl { display: flex; padding: 0; background: var(--code); }
+.diff .dl.add { background: var(--code-add); }
+.diff .dl.del { background: var(--code-del); }
+.diff .dl.hunk { background: var(--code-hunk); }
+.diff .dl .lns { position: sticky; left: 0; display: flex; flex: none; padding: 0; background: inherit; user-select: none; -webkit-user-select: none; }
+.diff .dl .ln { display: block; width: var(--ln, 4ch); padding: 0 6px 0 0; text-align: right; opacity: 0.55; }
+.diff .dl .ln + .ln { border-right: 1px solid rgb(127 127 127 / 0.25); padding-right: 8px; }
+.diff .dl .tx { display: block; flex: 1; padding: 0 14px 0 10px; }
+
+/* Syntax highlighting in diffs (highlight.js classes). The code block is
+   dark in both themes, so one dark palette serves both. */
+.diff .tx span { display: inline; padding: 0; }
+.diff .hljs-comment, .diff .hljs-quote { color: #8B949E; font-style: italic; }
+.diff .hljs-keyword, .diff .hljs-selector-tag, .diff .hljs-literal, .diff .hljs-doctag, .diff .hljs-meta .hljs-keyword { color: #FF7B72; }
+.diff .hljs-string, .diff .hljs-regexp, .diff .hljs-meta .hljs-string, .diff .hljs-template-tag { color: #A5D6FF; }
+.diff .hljs-number, .diff .hljs-symbol, .diff .hljs-bullet, .diff .hljs-variable.constant_, .diff .hljs-attr, .diff .hljs-attribute { color: #79C0FF; }
+.diff .hljs-title, .diff .hljs-title.function_, .diff .hljs-section { color: #D2A8FF; }
+.diff .hljs-title.class_, .diff .hljs-type, .diff .hljs-built_in, .diff .hljs-selector-class, .diff .hljs-selector-id { color: #FFA657; }
+.diff .hljs-name, .diff .hljs-tag, .diff .hljs-selector-pseudo { color: #7EE787; }
+.diff .hljs-meta, .diff .hljs-params, .diff .hljs-subst, .diff .hljs-variable, .diff .hljs-property { color: #E6EDF3; }
+.diff .hljs-emphasis { font-style: italic; }
+.diff .hljs-strong { font-weight: 700; }
+.diff .hljs-addition { color: #AFF5B4; }
+.diff .hljs-deletion { color: #FFDCD7; }
+
+/* ---- Learn ---- */
+.lesson-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.lesson-row { display: block; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; color: inherit; text-decoration: none; }
+.lesson-row:hover, .lesson-row:focus-visible { background: var(--row-hover); }
+.lesson-row-top { display: flex; gap: 10px; align-items: center; }
+.lesson-row-top .ttitle { flex: 1; min-width: 0; }
+.lesson-sum { margin: 6px 0 0; color: var(--ink-2); font-size: 14.5px; }
+.lesson-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+.lesson-text p { margin: 0 0 12px; line-height: 1.6; white-space: pre-line; }
+.lesson-text p:last-child { margin-bottom: 0; }
+.lesson-code { margin: 0 0 12px; padding: 12px 14px; border-radius: 10px; background: var(--code); color: var(--code-ink); font-family: var(--mono); font-size: 13.5px; overflow-x: auto; white-space: pre; }
+.lesson-side { min-width: 0; }
+.lesson-refs { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.lesson-refs li { min-width: 0; }
+.lesson-refs a { overflow-wrap: anywhere; font-weight: 600; }
+.lesson-refs p { margin: 4px 0 0; font-size: 14px; color: var(--ink-2); overflow-wrap: anywhere; }
+.lesson-refs .lesson-url { font-family: var(--mono); font-size: 12.5px; color: var(--ink-3); }
+/* A file reference: dim folder, bold file name, line number as an accent. */
+.lesson-path { display: inline-block; max-width: 100%; padding: 4px 8px; border-radius: 8px; background: var(--primary-soft); border: 1px solid var(--ring); font-family: var(--mono); font-size: 12.5px; line-height: 1.5; overflow-wrap: anywhere; }
+.lesson-path .dir { color: var(--ink-3); }
+.lesson-path .file { color: var(--primary-ink); font-weight: 700; }
+.lesson-path .line { color: var(--warn-ink); font-weight: 700; }
+.quiz { margin: 0; padding-left: 20px; display: grid; gap: 18px; }
+.quiz-text { margin: 0 0 8px; font-weight: 600; }
+.quiz-opts { display: grid; gap: 6px; }
+.quiz-opt { text-align: left; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; }
+.quiz-opt:hover:not(:disabled) { background: var(--hover); }
+.quiz-opt:disabled { cursor: default; }
+.quiz-opt.right { border-color: var(--ok); background: var(--ok-soft); color: var(--ok-ink); }
+.quiz-opt.wrong { border-color: var(--bad); background: var(--bad-soft); color: var(--bad-ink); }
+.quiz-opt.dim { opacity: .6; }
+.quiz-why { margin: 8px 0 0; font-size: 14px; }
+.quiz-why.ok { color: var(--ok-ink); }
+.quiz-why.bad { color: var(--bad-ink); }
+
+/* ---- InputSelect ---- */
+.isel { position: relative; display: inline-block; width: 280px; max-width: 100%; }
+.isel-trigger { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; color: var(--ink); cursor: pointer; font: inherit; font-size: 15px; }
+.isel-trigger:disabled { cursor: default; opacity: .6; }
+.isel.open .isel-trigger { border-color: var(--primary); box-shadow: 0 0 0 3px var(--ring); }
+.isel-value { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.isel-placeholder { color: var(--ink-3); }
+.isel-chev { flex: none; width: 16px; height: 16px; fill: none; stroke: var(--ink-3); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform .15s; }
+.isel.open .isel-chev { transform: rotate(180deg); }
+.isel-pop { position: absolute; z-index: 40; top: calc(100% + 6px); left: 0; min-width: 100%; max-width: min(420px, 90vw); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 12px 32px -12px var(--shadow); overflow: hidden; }
+.isel-search { display: block; width: 100%; min-height: 40px; padding: 0 12px; border: 0; border-bottom: 1px solid var(--line); background: var(--field); color: var(--ink); font: inherit; font-size: 14.5px; outline: none; }
+.isel-list { list-style: none; margin: 0; padding: 4px; max-height: 280px; overflow-y: auto; outline: none; }
+.isel-opt { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 14.5px; color: var(--ink); }
+.isel-opt.active { background: var(--hover); }
+.isel-opt.selected .isel-label { font-weight: 700; }
+.isel-opt[aria-disabled="true"] { color: var(--ink-3); cursor: default; }
+.isel-label { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.isel-hint { flex: none; font-size: 12.5px; color: var(--ink-3); font-family: var(--mono); }
+.isel-check { flex: none; width: 16px; height: 16px; fill: none; stroke: var(--primary); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.isel-empty { padding: 10px; font-size: 14px; color: var(--ink-3); }

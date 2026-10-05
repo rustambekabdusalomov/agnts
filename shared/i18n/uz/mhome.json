@@ -1,0 +1,13 @@
+{
+  "mhome": {
+    "runningNote": "Bir vaqtda: {parallel}, navbatda: {queued}",
+    "waiting": "{time} kutmoqda",
+    "actAnswers": "hiro savollariga javob bering",
+    "actReview": "Oʻzgarishlarni koʻrib chiqing",
+    "actStopped": "Toʻxtadi. hiro nimani sinashini ayting",
+    "actResume": "Tayyor boʻlganingizda davom ettiring",
+    "actStart": "Navbatda turibdi. Boshlash uchun bosing",
+    "liveFallback": "Ishlamoqda…",
+    "searchEmpty": "Qidiruvingiz boʻyicha tiketlar topilmadi."
+  }
+}

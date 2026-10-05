@@ -1,0 +1,13 @@
+{
+  "mhome": {
+    "runningNote": "{parallel} at a time allowed, {queued} in queue",
+    "waiting": "Waiting {time}",
+    "actAnswers": "Answer hiro's questions",
+    "actReview": "Review the changes",
+    "actStopped": "Stopped. Tell hiro what to try",
+    "actResume": "Resume when you're ready",
+    "actStart": "Kept in queue. Tap to start",
+    "liveFallback": "Working…",
+    "searchEmpty": "No tickets match your search."
+  }
+}

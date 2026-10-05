@@ -1,0 +1,18 @@
+# Local development database. `make dev-db` starts it.
+name: hiro-dev
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: hiro
+      POSTGRES_PASSWORD: hiro
+      POSTGRES_DB: hiro
+    ports:
+      - "127.0.0.1:5442:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - ./dev-init.sql:/docker-entrypoint-initdb.d/dev-init.sql:ro
+
+volumes:
+  pgdata:

@@ -1,0 +1,15 @@
+{
+  "state": {
+    "new": "Navbatda",
+    "analyzing": "Kodni oʻqiyapti",
+    "waiting_for_answers": "Javoblaringiz kerak",
+    "coding": "Kod yozish",
+    "testing": "Testlar ishlamoqda",
+    "waiting_for_review": "Tekshiruvga tayyor",
+    "pushing": "Yuborilmoqda",
+    "done": "Yuborildi",
+    "rejected": "Rad etildi",
+    "failed": "Toʻxtatildi",
+    "rate_limited": "Pauza: tarif limiti"
+  }
+}

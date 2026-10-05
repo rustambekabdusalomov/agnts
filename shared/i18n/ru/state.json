@@ -1,0 +1,15 @@
+{
+  "state": {
+    "new": "В очереди",
+    "analyzing": "Читает код",
+    "waiting_for_answers": "Нужны ваши ответы",
+    "coding": "Разработка",
+    "testing": "Идут тесты",
+    "waiting_for_review": "Готово к ревью",
+    "pushing": "Отправка",
+    "done": "Отправлено",
+    "rejected": "Отклонено",
+    "failed": "Остановлено",
+    "rate_limited": "Пауза: лимит тарифа"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "mtasks": {
+    "actAnswers": "hiro savollariga javob bering",
+    "actReview": "Oʻzgarishlarni koʻrib chiqing",
+    "actFailed": "Toʻxtadi. hiro nimani sinab koʻrishini ayting",
+    "actResume": "Tayyor boʻlganingizda davom ettiring",
+    "actAnalyze": "Tahlil qilish uchun bosing",
+    "actHeld": "Navbatda turibdi. Boshlash uchun bosing",
+    "yesterday": "Kecha"
+  }
+}

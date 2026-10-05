@@ -1,0 +1,12 @@
+{
+  "manalytics": {
+    "tickets": "{n, plural, one {{n} тикет} few {{n} тикета} many {{n} тикетов} other {{n} тикета}}",
+    "turns": "{n, plural, one {{n} шаг} few {{n} шага} many {{n} шагов} other {{n} шага}}",
+    "shareOfRuns": "{n}% запусков",
+    "reachedReview": "{n}% дошли до ревью",
+    "about": "Об аналитике",
+    "stopped": "{n, plural, one {{n} остановленный запуск за период} few {{n} остановленных запуска за период} many {{n} остановленных запусков за период} other {{n} остановленного запуска за период}}",
+    "days": "{n, plural, one {{n} день} few {{n} дня} many {{n} дней} other {{n} дня}}",
+    "compared": "Изменения сравниваются с предыдущими {n, plural, one {{n} днём} few {{n} днями} many {{n} днями} other {{n} днями}}. Зелёный — лучше."
+  }
+}

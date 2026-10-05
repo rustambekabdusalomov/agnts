@@ -1,0 +1,2188 @@
+{
+  "@@locale": "en",
+  "analyticsTitle": "Analytics",
+  "analyticsLede": "How well hiro works for you over time: throughput, quality, where time goes, and what it costs your plan.",
+  "analyticsPeriod": "Period",
+  "analyticsDays": "{n} days",
+  "@analyticsDays": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "analyticsExportCsv": "Export CSV",
+  "analyticsLoading": "Loading analytics…",
+  "analyticsError": "Could not load analytics. Try again.",
+  "analyticsEmptyTitle": "No data for this period yet",
+  "analyticsEmpty": "Charts fill in as hiro picks up tickets and runs. Label a Jira issue or create a task to get started.",
+  "analyticsKpiPushed": "Tickets pushed",
+  "analyticsKpiPushedNote": "of {n} picked up",
+  "@analyticsKpiPushedNote": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsKpiSuccess": "Success rate",
+  "analyticsKpiSuccessNote": "Pushed out of picked up",
+  "analyticsKpiFirstTry": "Approved on first try",
+  "analyticsKpiFirstTryNote": "No changes requested",
+  "analyticsKpiHiro": "hiro time per ticket",
+  "analyticsKpiHiroNote": "Analyze, coding and tests",
+  "analyticsKpiWait": "Waiting on you",
+  "analyticsKpiWaitNote": "Average per ticket",
+  "analyticsKpiTurns": "Average turns",
+  "analyticsKpiTurnsNote": "Per ticket",
+  "analyticsCompared": "Changes are compared with the previous {n} days. Green means better.",
+  "@analyticsCompared": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "analyticsThroughput": "Throughput",
+  "analyticsThroughputSub": "Tickets picked up and how they ended, per day",
+  "analyticsPushed": "Pushed",
+  "analyticsRejected": "Rejected",
+  "analyticsStopped": "Stopped",
+  "analyticsOutcomes": "Outcomes",
+  "analyticsOutcomesSub": "How finished tickets ended",
+  "analyticsFirstTry": "Approved on first try",
+  "analyticsAfterChanges": "Approved after changes",
+  "analyticsDonutSub": "pushed",
+  "analyticsSpeed": "Speed",
+  "analyticsSpeedSub": "Average minutes per ticket: hiro working versus waiting on you",
+  "analyticsHiroWorking": "hiro working",
+  "analyticsWaitingOnYou": "Waiting on you",
+  "analyticsSteps": "Where the time goes",
+  "analyticsStepsSub": "Average per ticket, by step",
+  "analyticsTurns": "Turns per ticket",
+  "analyticsTurnsSub": "Fewer turns means hiro finds its way faster and uses less of your plan",
+  "analyticsAvgTurns": "Average turns",
+  "analyticsStops": "Why runs stop",
+  "analyticsStopsSub": "{n, plural, one {{n} stopped run in this period} other {{n} stopped runs in this period}}",
+  "@analyticsStopsSub": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "analyticsStopTests": "Tests kept failing",
+  "analyticsStopLimit": "Plan limit reached",
+  "analyticsStopYou": "Stopped by you",
+  "analyticsStopTurns": "Turn limit reached",
+  "analyticsStopOther": "Other errors",
+  "analyticsModels": "Models",
+  "analyticsModelsSub": "Runs per model and how they turned out",
+  "analyticsChangeModels": "Change models",
+  "analyticsColModel": "Model",
+  "analyticsColRuns": "Runs",
+  "analyticsColShare": "Share",
+  "analyticsColReview": "Reached review",
+  "analyticsColTurns": "Average turns",
+  "analyticsNoRuns": "No runs in this period.",
+  "analyticsUsage": "Plan usage",
+  "analyticsUsageSub": "Peak session usage per day",
+  "analyticsSession": "Session",
+  "analyticsAvgPeak": "Average peak",
+  "analyticsDaysAbove": "Days above 80%",
+  "analyticsNoUsage": "No usage readings in this period.",
+  "analyticsRepos": "By repository",
+  "analyticsReposSub": "Where hiro works best, and where it struggles",
+  "analyticsColRepo": "Repository",
+  "analyticsColSource": "Source",
+  "analyticsColTickets": "Tickets",
+  "analyticsColSuccess": "Success rate",
+  "analyticsColHiro": "hiro time",
+  "analyticsColClaudeMd": "CLAUDE.md",
+  "analyticsSrcJira": "Jira",
+  "analyticsSrcTask": "Task",
+  "analyticsMdFound": "Found",
+  "analyticsMdMissing": "Missing",
+  "analyticsMdUnknown": "Unknown",
+  "analyticsNoRepos": "No repository had tickets in this period.",
+  "analyticsHours": "Activity by hour",
+  "analyticsHoursSub": "When hiro works, summed over the period. Busiest hour: {hour}:00",
+  "@analyticsHoursSub": {
+    "placeholders": {
+      "hour": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsEvents": "Events",
+  "analyticsInsights": "Insights",
+  "analyticsInsightsSub": "What the numbers suggest",
+  "analyticsNoInsights": "Not enough data for insights yet.",
+  "analyticsInsightClaudeMd": "Repositories with a CLAUDE.md finish in {gain}% fewer turns. Adding one to {repos} is the quickest win.",
+  "@analyticsInsightClaudeMd": {
+    "placeholders": {
+      "gain": {
+        "type": "String"
+      },
+      "repos": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsInsightWaiting": "{share}% of a ticket's total time is spent waiting on you. Reviews take about {review} min on average.",
+  "@analyticsInsightWaiting": {
+    "placeholders": {
+      "share": {
+        "type": "String"
+      },
+      "review": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsInsightStopsTests": "Most stopped runs ({n}) end on failing tests. Clearer acceptance criteria in tickets help hiro know when it's done.",
+  "@analyticsInsightStopsTests": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsInsightStopsLimit": "Plan limits stop more runs ({n}) than anything else. Fewer parallel runs or Haiku for summaries save usage.",
+  "@analyticsInsightStopsLimit": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsInsightNight": "{pct}% of hiro's work happens between 22:00 and 07:00, while you're offline.",
+  "@analyticsInsightNight": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsMinutes": "{n} min",
+  "@analyticsMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsHoursMinutes": "{h} h {m} min",
+  "@analyticsHoursMinutes": {
+    "placeholders": {
+      "h": {
+        "type": "String"
+      },
+      "m": {
+        "type": "String"
+      }
+    }
+  },
+  "appName": "hiro",
+  "appTagline": "Your no sleep agent",
+  "authTitle": "Sign in",
+  "authLede": "Use your account and the code from your authenticator app.",
+  "authUsername": "Username",
+  "authPassword": "Password",
+  "authShowPassword": "Show password",
+  "authHidePassword": "Hide password",
+  "authCode": "Authenticator code",
+  "authCodeHint": "6 digits from your authenticator app",
+  "authSubmit": "Sign in",
+  "authSubmitting": "Signing in…",
+  "authSignOut": "Sign out",
+  "authSignOutTitle": "Sign out?",
+  "authSignOutBody": "You’ll need your password and authenticator code to sign back in.",
+  "authWrongCredentials": "Wrong username, password or code.",
+  "authRateLimited": "Too many attempts. Try again in {seconds, plural, one {{seconds} second} other {{seconds} seconds}}.",
+  "@authRateLimited": {
+    "placeholders": {
+      "seconds": {
+        "type": "num"
+      }
+    }
+  },
+  "commonLoading": "Loading…",
+  "commonError": "Something went wrong. Try again.",
+  "commonSignedInAs": "Signed in as {username}",
+  "@commonSignedInAs": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "commonVersion": "Version {version}",
+  "@commonVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardGreetNight": "Good night, {name}",
+  "@dashboardGreetNight": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardGreetMorning": "Good morning, {name}",
+  "@dashboardGreetMorning": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardGreetAfternoon": "Good afternoon, {name}",
+  "@dashboardGreetAfternoon": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardGreetEvening": "Good evening, {name}",
+  "@dashboardGreetEvening": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardLede": "{date}. Here's what hiro is doing and what's waiting on you.",
+  "@dashboardLede": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardOpenAnalytics": "Open analytics",
+  "dashboardNeedsYou": "Needs you",
+  "dashboardNeedsNote": "{answers} answers, {reviews} reviews, {stopped} stopped",
+  "@dashboardNeedsNote": {
+    "placeholders": {
+      "answers": {
+        "type": "String"
+      },
+      "reviews": {
+        "type": "String"
+      },
+      "stopped": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardRunningNow": "Running now",
+  "dashboardRunningNote": "{n} at a time allowed",
+  "@dashboardRunningNote": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardPushedWeek": "Pushed this week",
+  "dashboardPushedNote": "vs {n} last week",
+  "@dashboardPushedNote": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardPlanSession": "Plan session",
+  "dashboardWaitingTitle": "Waiting on you",
+  "dashboardWaitingSub": "Oldest first. Every minute here is a minute hiro can't work.",
+  "dashboardOpenInbox": "Open inbox",
+  "dashboardNothingWaiting": "Nothing is waiting on you. hiro will show tickets here when it needs answers or a review.",
+  "dashboardColTicket": "Ticket",
+  "dashboardColStatus": "Status",
+  "dashboardColWaiting": "Waiting",
+  "dashboardActAnswer": "Answer",
+  "dashboardActReview": "Review",
+  "dashboardActRetry": "Retry",
+  "dashboardActResume": "Resume",
+  "dashboardUsageTitle": "Plan usage",
+  "dashboardUpdated": "Updated {time}",
+  "@dashboardUpdated": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardNotUpdated": "No reading yet",
+  "dashboardSession": "Current session",
+  "dashboardWeek": "This week",
+  "dashboardPaused": "New runs are paused until the limit resets.",
+  "dashboardLiveTitle": "Live runs",
+  "dashboardLiveSub": "Tickets in containers right now",
+  "dashboardNoRuns": "No runs at the moment.",
+  "dashboardTurns": "{n} / {max} turns",
+  "@dashboardTurns": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardPipelineTitle": "Pipeline",
+  "dashboardPipelineSub": "Open tickets by step",
+  "dashboardPipeQueue": "In queue",
+  "dashboardPipeAnalyze": "Analyze",
+  "dashboardPipeAnswers": "Your answers",
+  "dashboardPipeCoding": "Coding",
+  "dashboardPipeReview": "Your review",
+  "dashboardPipeStopped": "Stopped",
+  "dashboardTodayTitle": "Today by hour",
+  "dashboardTodaySub": "Events recorded today. hiro keeps working while you sleep.",
+  "dashboardTodayAria": "Events today by hour",
+  "dashboardLegendHiro": "hiro working",
+  "dashboardLegendYou": "Your actions",
+  "dashboardLegendProblems": "Warnings and errors",
+  "dashboardWeekTitle": "This week",
+  "dashboardWeekSub": "Compared with last week",
+  "dashboardPicked": "Tickets picked up",
+  "dashboardFirstTry": "Approved on first try",
+  "dashboardAvgTurns": "Average turns",
+  "dashboardAvgWait": "Waiting on you, average",
+  "dashboardStoppedRuns": "Stopped runs",
+  "dashboardReposTitle": "Repositories",
+  "dashboardReposSub": "Open work and the latest ticket in each",
+  "dashboardAllRepos": "All repositories",
+  "dashboardColRepo": "Repository",
+  "dashboardColOpen": "Open",
+  "dashboardColLatest": "Latest ticket",
+  "dashboardColClaudeMd": "CLAUDE.md",
+  "dashboardFound": "Found",
+  "dashboardMissing": "Missing",
+  "dashboardUnknown": "Unknown",
+  "dashboardNoRepos": "No repository has open work.",
+  "dashboardRecentTitle": "Recent activity",
+  "dashboardLogs": "Logs",
+  "dashboardNoActivity": "No activity yet.",
+  "formSave": "Save changes",
+  "formSaving": "Saving…",
+  "formDiscard": "Discard",
+  "formCancel": "Cancel",
+  "formUnsaved": "You have unsaved changes",
+  "formClose": "Close",
+  "formAdd": "Add",
+  "formRemove": "Remove {name}",
+  "@formRemove": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "formAddCommand": "Add command",
+  "formDecrease": "Decrease",
+  "formIncrease": "Increase",
+  "formCopy": "Copy",
+  "formCopied": "Copied",
+  "formSaved": "Saved",
+  "integrationsTitle": "Integrations",
+  "integrationsLede": "The services hiro works with. Tokens are stored encrypted on your server and only used for the actions listed on each page.",
+  "integrationsName_jira": "Jira",
+  "integrationsName_github": "GitHub",
+  "integrationsName_claude": "Claude",
+  "integrationsDesc_jira": "Pick up tickets with the hiro label and keep their status up to date.",
+  "integrationsDesc_github": "Clone code, push branches and open pull requests.",
+  "integrationsDesc_claude": "Your Claude subscription, which runs Claude Code.",
+  "integrationsConnected": "Connected",
+  "integrationsNotConnected": "Not connected",
+  "integrationsConnect": "Connect",
+  "integrationsManage": "Manage",
+  "integrationsTest": "Test connection",
+  "integrationsDisconnect": "Disconnect",
+  "integrationsDisconnectConfirm": "Disconnect {name}? hiro forgets the token and stops using it.",
+  "@integrationsDisconnectConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "integrationsDisconnected": "{name} disconnected",
+  "@integrationsDisconnected": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "integrationsAccount": "Account",
+  "integrationsToken": "Token",
+  "integrationsLastChecked": "Last checked",
+  "integrationsLastError": "Last error",
+  "integrationsNever": "Never",
+  "integrationsComing": "Coming later",
+  "integrationsComingSub": "Planned integrations",
+  "integrationsBack": "Back to integrations",
+  "integrationsConnectedAs": "Connected as {account}. Last checked {time}.",
+  "@integrationsConnectedAs": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "integrationsNotYet": "Not connected yet.",
+  "integrationsConnectTitle": "Connect {name}",
+  "@integrationsConnectTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "integrationsConnectSub_jira": "Use an API token from your Atlassian account.",
+  "integrationsTokenOpen_jira": "Open Atlassian API tokens",
+  "integrationsTokenStep1_jira": "Sign in to the Atlassian account hiro should act as, and open Account settings → Security → API tokens (or use the button below).",
+  "integrationsTokenStep2_jira": "Click Create API token (not the one with scopes), name it (for example hiro) and pick an expiration date.",
+  "integrationsTokenStep3_jira": "Copy the token and paste it below. Atlassian shows it only once.",
+  "integrationsTokenStep4_jira": "For Site, enter your Jira address (https://your-team.atlassian.net), and for Account email the email of that same account. It needs access to the Jira projects hiro works on.",
+  "integrationsConnectSub_github": "Create a fine-grained personal access token with the permissions below, then paste it here.",
+  "integrationsTokenHow": "How to get the token",
+  "integrationsTokenCommand": "Command",
+  "integrationsTokenOpen_github": "Open GitHub token page",
+  "integrationsTokenStep1_github": "On GitHub, open Settings → Developer settings → Personal access tokens → Fine-grained tokens and click Generate new token (or use the button below).",
+  "integrationsTokenStep2_github": "Name it (for example hiro), pick an expiration, set Resource owner to the account or organization that owns your repositories, and under Repository access choose the repositories hiro may work on.",
+  "integrationsTokenStep3_github": "Under Repository permissions set Contents and Pull requests to Read and write. For the Pipelines tab also set Actions to Read (Read and write to use Deploy) and Deployments to Read. Metadata (read) is added automatically.",
+  "integrationsTokenStep4_github": "Click Generate token, copy it (it starts with github_pat_) and paste it below. GitHub shows it only once. For an organization, an owner may need to approve the token first.",
+  "integrationsConnectSub_claude": "Run `claude setup-token` on a machine where you are signed in to your Claude plan, then paste the token.",
+  "integrationsTokenStep1_claude": "You need a Claude Pro or Max plan. On any computer, install Claude Code: npm install -g @anthropic-ai/claude-code",
+  "integrationsTokenStep2_claude": "Run claude once in a terminal and sign in with your Claude account.",
+  "integrationsTokenStep3_claude": "Run the command below. It opens the browser to approve access and then prints a long-lived token.",
+  "integrationsTokenStep4_claude": "Copy the token (it starts with sk-ant-) and paste it below. It lasts about a year, and runs count against your plan's usage.",
+  "integrationsSite": "Site",
+  "integrationsSiteHelp": "For example https://your-team.atlassian.net",
+  "integrationsEmail": "Account email",
+  "integrationsApiToken": "API token",
+  "integrationsApiTokenHelp": "id.atlassian.com → Security → API tokens",
+  "integrationsAccessToken": "Access token",
+  "integrationsTokenHelp": "Stored encrypted on your server. hiro never shows it again.",
+  "integrationsScopes": "Required permissions",
+  "integrationsPermContents": "Read and write. Clone code and push branches.",
+  "integrationsPermPulls": "Read and write. Open pull requests.",
+  "integrationsPermMetadata": "Read. List repositories and branches.",
+  "integrationsPermActions": "Read for the Pipelines tab and environments; Read and write to use Deploy.",
+  "integrationsPermDeployments": "Read. Shows what is deployed to each environment.",
+  "integrationsRequired": "Required",
+  "integrationsRecommended": "Recommended",
+  "integrationsConnecting": "Checking the token…",
+  "integrationsConnectedToast": "{name} connected",
+  "@integrationsConnectedToast": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "integrationsTestOk": "{name}: connection works",
+  "@integrationsTestOk": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "integrationsTestFail": "{name}: {error}",
+  "@integrationsTestFail": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "integrationsWebhookTitle": "Set up the Jira webhook",
+  "integrationsWebhookSteps": "In Jira, open Settings → System → WebHooks → Create, and enter:",
+  "integrationsWebhookUrl": "URL",
+  "integrationsWebhookSecret": "Secret",
+  "integrationsWebhookOnce": "This secret is shown only once. Paste it into Jira now.",
+  "integrationsEvents": "Events",
+  "integrationsEventsValue": "Issue created, Issue updated",
+  "integrationsConnection": "Connection",
+  "integrationsPickup": "Pickup rules",
+  "integrationsPickupSub": "Which tickets hiro takes",
+  "integrationsLabel": "Label",
+  "integrationsLabelHelp": "Add this label to a ticket to hand it to hiro",
+  "integrationsQuery": "The query hiro runs",
+  "integrationsStatuses": "Status updates",
+  "integrationsStatusesSub": "How hiro moves tickets on your board. Leave empty to keep the status.",
+  "integrationsMapStarted": "When hiro starts",
+  "integrationsMapReview": "When changes are pushed",
+  "integrationsMapRejected": "When you reject the changes",
+  "integrationsKeepStatus": "Keep status",
+  "integrationsComments": "Comments",
+  "integrationsCommentsSub": "What hiro writes on the ticket",
+  "integrationsCQuestions": "hiro's questions",
+  "integrationsCQuestionsHelp": "So teammates can see what was unclear",
+  "integrationsCPlan": "The plan before coding",
+  "integrationsCPr": "Link to the pull request",
+  "integrationsCSummary": "Summary of the changes",
+  "integrationsCStatus": "Pauses at the plan limit",
+  "integrationsSync": "Sync",
+  "integrationsSyncNow": "Sync now",
+  "integrationsSynced": "{found} open issues, {created} new",
+  "@integrationsSynced": {
+    "placeholders": {
+      "found": {
+        "type": "String"
+      },
+      "created": {
+        "type": "String"
+      }
+    }
+  },
+  "integrationsSyncHelp": "Jira sends new tickets to the webhook right away; hiro also checks every hour in case a delivery was missed.",
+  "integrationsWebhook": "Webhook",
+  "integrationsSaved": "{name} settings saved",
+  "@integrationsSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "integrationsSecretsHelp": "hiro only reads tickets that match the query, and only writes the status changes and comments you turn on here.",
+  "integrationsGithubHelp": "Use a token from an account that can push to your repositories. Commits are authored with the name and email in Settings.",
+  "integrationsClaudeHelp": "The token lasts about a year. Renew it with `claude setup-token` before it expires.",
+  "integrationsName_telegram": "Telegram",
+  "integrationsDesc_telegram": "Messages when something needs you. Answer questions and approve or request changes right from the chat.",
+  "integrationsConnectSub_telegram": "Create a bot with @BotFather, paste its token, and add your chat id. hiro registers the webhook for you.",
+  "integrationsTokenOpen_telegram": "Open @BotFather",
+  "integrationsChatIdFind": "Find my chat id",
+  "integrationsTokenStep1_telegram": "In Telegram, open @BotFather (button below), send /newbot and choose a name and a username ending in bot.",
+  "integrationsTokenStep2_telegram": "BotFather replies with the bot token (like 123456789:AA…). Paste it into Access token below.",
+  "integrationsTokenStep3_telegram": "Open your new bot in Telegram and press Start, so it has a message from you.",
+  "integrationsTokenStep4_telegram": "Click Find my chat id (it appears once the token is pasted). In the page that opens, find \"chat\" and copy the number after \"id\" into Your chat id. If the page shows no messages, write to the bot again and reload it.",
+  "integrationsChatId": "Your chat id",
+  "integrationsChatIdHelp": "The chat allowed to use the bot. Only this chat can act.",
+  "integrationsTelegramHelp": "Approve and Reject ask for a second tap to confirm, and confirmations expire after 10 minutes.",
+  "integrationsTelegramHttps": "Telegram only sends updates to a public HTTPS address, and this hiro runs on {url}, so connecting will fail here. Connect Telegram on a deployment with HTTPS, where HIRO_PUBLIC_URL is an https:// address.",
+  "@integrationsTelegramHttps": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "integrationsName_gitlab": "GitLab",
+  "integrationsDesc_gitlab": "Clone code, push branches and open merge requests on gitlab.com or your own GitLab.",
+  "integrationsConnectSub_gitlab": "Create a personal access token with the scopes below, then paste it here.",
+  "integrationsTokenOpen_gitlab": "Open GitLab token page",
+  "integrationsTokenStep1_gitlab": "Fill in the instance URL below first. Then in GitLab open your avatar → Edit profile → Access tokens → Add new token (or use the button below).",
+  "integrationsTokenStep2_gitlab": "Name it (for example hiro) and set an expiration date. Use an account that can push to your projects.",
+  "integrationsTokenStep3_gitlab": "Select the scopes api, read_repository and write_repository.",
+  "integrationsTokenStep4_gitlab": "Click Create token, copy it (it starts with glpat-) and paste it below. GitLab shows it only once.",
+  "integrationsGitlabUrl": "Instance URL",
+  "integrationsGitlabUrlHelp": "https://gitlab.com or your own GitLab server.",
+  "integrationsGlApi": "Full API access. Open merge requests and read pipelines.",
+  "integrationsGlRead": "Clone code.",
+  "integrationsGlWrite": "Push branches.",
+  "integrationsGitlabHelp": "Use a token from an account that can push to your projects. Run containers never see it; pushes happen on the server after you approve.",
+  "integrationsMapMerged": "When the pull request is merged",
+  "integrationsGitWebhookSteps_github": "In the repository (or organisation) go to Settings → Webhooks → Add webhook. Content type application/json, paste the URL and secret below.",
+  "integrationsGitWebhookSteps_gitlab": "In the project go to Settings → Webhooks. Paste the URL, put the secret below in Secret token.",
+  "integrationsGitEvents_github": "Pull requests, Workflow runs",
+  "integrationsGitEvents_gitlab": "Merge request events, Pipeline events",
+  "integrationsGitWebhookWhy": "When a pull or merge request is merged, hiro marks the ticket merged and moves the Jira issue to the merged status set on the Jira page. Pipeline events keep the repository page current.",
+  "learnTitle": "Learn",
+  "learnLede": "When a change hiro ships does something this codebase never did before, hiro explains it here: what it is, why the change needed it, where to look, and a short quiz.",
+  "learnViewNew": "New ({n})",
+  "@learnViewNew": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "learnViewLearned": "Learned",
+  "learnViewAll": "All ({n})",
+  "@learnViewAll": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "learnViewLabel": "Show",
+  "learnAllRepos": "All repositories",
+  "learnRepoLabel": "Repository",
+  "learnNone": "No lessons yet. When hiro pushes a change that does something new for its repository, the lesson appears here.",
+  "learnNoneNew": "You're up to date: every lesson is marked learned.",
+  "learnNoMatch": "No lessons match the search.",
+  "learnFromTicket": "From {key}",
+  "@learnFromTicket": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "learnQuizCount": "{n, plural, one {{n} quiz question} other {{n} quiz questions}}",
+  "@learnQuizCount": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "learnNewBadge": "New",
+  "learnLearned": "Learned",
+  "learnMarkLearned": "Mark as learned",
+  "learnMarkUnlearned": "Mark as not learned",
+  "learnMarkedLearned": "Marked as learned",
+  "learnBack": "Back to lessons",
+  "learnNotFound": "This lesson does not exist.",
+  "learnWhatTitle": "What it is",
+  "learnWhyTitle": "Why this change needed it",
+  "learnWhereTitle": "Where to look",
+  "learnWhereSub": "Files in {repo} at the time of {key}.",
+  "@learnWhereSub": {
+    "placeholders": {
+      "repo": {
+        "type": "String"
+      },
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "learnQuizTitle": "Check yourself",
+  "learnQuizSub": "Pick an answer to see whether it's right.",
+  "learnCorrect": "Correct.",
+  "learnWrong": "Not quite.",
+  "learnScore": "{right} of {total} right",
+  "@learnScore": {
+    "placeholders": {
+      "right": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "learnRetry": "Try again",
+  "learnReadingTitle": "Further reading",
+  "learnReadingNote": "Claude suggested these links. Check them before relying on them.",
+  "learnCategory_pattern": "Pattern",
+  "learnCategory_architecture": "Architecture",
+  "learnCategory_algorithm": "Algorithm",
+  "learnCategory_library": "Library",
+  "learnCategory_language": "Language",
+  "learnCategory_testing": "Testing",
+  "learnCategory_security": "Security",
+  "learnCategory_performance": "Performance",
+  "learnCategory_tooling": "Tooling",
+  "learnCategory_other": "Other",
+  "learnLevel_beginner": "Beginner",
+  "learnLevel_intermediate": "Intermediate",
+  "learnLevel_advanced": "Advanced",
+  "learnTicketTitle": "What's new in this change",
+  "learnTicketSub": "Techniques this change brought to the repository for the first time.",
+  "learnTicketPending": "hiro is reading this change for anything the repository never did before.",
+  "learnTicketNone": "Nothing new: this change only used techniques the repository already had.",
+  "learnTicketFailed": "hiro could not finish reading this change. The log shows why.",
+  "learnTicketIdle": "hiro has not looked at this change for lessons yet.",
+  "learnLearnNow": "Find what's new",
+  "learnLearnAgain": "Look again",
+  "learnQueued": "Queued: hiro will look at this change for something new.",
+  "learnQueueTitle": "Learning queue",
+  "learnQueueSub": "Pushed tickets hiro reads for new techniques, one at a time when no ticket needs a worker.",
+  "learnStatus_running": "Learning now",
+  "learnStatus_pending": "Queued",
+  "learnStatus_failed": "Failed",
+  "learnStatus_none": "Not learned yet",
+  "learnQueuePosition": "#{n} in queue",
+  "@learnQueuePosition": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "learnQueueBtn": "Learn",
+  "learnRetryBtn": "Retry",
+  "learnQueueAll": "Learn from all ({n})",
+  "@learnQueueAll": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "learnQueuedAll": "{n, plural, one {{n} ticket queued} other {{n} tickets queued}}",
+  "@learnQueuedAll": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "learnReadTime": "{n} min read",
+  "@learnReadTime": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "learnQueueLede": "Pushed tickets hiro reads for techniques the codebase never used before. Queue any done ticket, or retry one that failed.",
+  "learnQueueEmpty": "Nothing to learn from right now: every pushed ticket has been read.",
+  "logsTitle": "Logs",
+  "logsLede": "Every step hiro takes, recorded as it happens. Use it to see where time goes and why runs stop.",
+  "logsLive": "Live",
+  "logsExportJson": "Export JSON",
+  "logsExportCsv": "Export CSV",
+  "logsRunsStarted": "Runs started",
+  "logsRunsNote": "Coding sessions, including retries",
+  "logsReached": "Reached your review",
+  "logsReachedNote": "{n} of {total} runs passed tests",
+  "@logsReachedNote": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "logsAvgTurns": "Average turns",
+  "logsAvgTurnsNote": "Per ticket",
+  "logsStops": "Stops and pauses",
+  "logsStopsNote": "{n, plural, one {{n} error event in total} other {{n} error events in total}}",
+  "@logsStopsNote": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "logsPeriod": "Last 30 days",
+  "logsWhereTime": "Where the time goes",
+  "logsWhereTimeSub": "Average time spent in each step, across all tickets and tasks",
+  "logsNoData": "No data",
+  "logsLegendHiro": "hiro working",
+  "logsLegendYou": "Waiting on you",
+  "logsEventsTitle": "Events",
+  "logsEventsSub": "{n, plural, one {{n} event shown} other {{n} events shown}}, newest first. Select a row to see its raw data.",
+  "@logsEventsSub": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "logsTabAll": "All",
+  "logsTabState": "State changes",
+  "logsTabTool": "Tool calls",
+  "logsTabCommand": "Commands",
+  "logsTabUser": "Your actions",
+  "logsTabLimit": "Plan limits",
+  "logsTabProblems": "Warnings and errors",
+  "logsKeyFilter": "Ticket key, e.g. PAY-214",
+  "logsKeyFilterLabel": "Filter by ticket key",
+  "logsErrorsOnly": "Errors only",
+  "logsClear": "Clear filters",
+  "logsColTime": "Time",
+  "logsColTicket": "Ticket",
+  "logsColStep": "Step",
+  "logsColType": "Type",
+  "logsColEvent": "Event",
+  "logsColDuration": "Duration",
+  "logsNoEvents": "No events match these filters.",
+  "logsNoDetail": "No extra data for this event.",
+  "logsShowMore": "Show more",
+  "logsTypeState": "State",
+  "logsTypeTool": "Tool",
+  "logsTypeCommand": "Command",
+  "logsTypeYou": "You",
+  "logsTypeLimit": "Limit",
+  "logsTypeError": "Error",
+  "logsTypeEvent": "Event",
+  "manalyticsTickets": "{n, plural, one {{n} ticket} other {{n} tickets}}",
+  "@manalyticsTickets": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "manalyticsTurns": "{n, plural, one {{n} turn} other {{n} turns}}",
+  "@manalyticsTurns": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "manalyticsShareOfRuns": "{n}% of runs",
+  "@manalyticsShareOfRuns": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "manalyticsReachedReview": "{n}% reached review",
+  "@manalyticsReachedReview": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "manalyticsAbout": "About analytics",
+  "manalyticsStopped": "{n, plural, one {{n} stopped run in this period} other {{n} stopped runs in this period}}",
+  "@manalyticsStopped": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "manalyticsDays": "{n} days",
+  "@manalyticsDays": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "manalyticsCompared": "Changes are compared with the previous {n} days. Green means better.",
+  "@manalyticsCompared": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "mcpTitle": "Claude chat (MCP)",
+  "mcpSub": "Manage hiro from Claude on the web, desktop and phone",
+  "mcpUrl": "Connector URL",
+  "mcpConnections": "Connected Claude apps",
+  "mcpStaticToken": "Static token",
+  "mcpSet": "Set",
+  "mcpNotSet": "Not set",
+  "mcpHowTo": "In Claude, open Settings → Connectors → Add custom connector and paste the URL. Claude sends you here to approve the connection. In chat, every change (answers, approve, reject, new tasks) is prepared first and only runs after you confirm it. For Claude Code or Claude Desktop you can use a static token instead: send it as Authorization: Bearer.",
+  "mcpNewToken": "New token",
+  "mcpShownOnce": "Copy it now: it is shown only once. The previous token no longer works.",
+  "mcpCreate": "Create static token",
+  "mcpRotate": "Replace static token",
+  "mcpRevoke": "Disconnect all",
+  "mcpRevokeConfirm": "Disconnect every Claude app and delete the static token?",
+  "mcpRevoked": "All Claude connections removed",
+  "mcpConsentTitle": "Connect Claude to hiro",
+  "mcpConsentAsk": "{client} wants to use hiro as {user}.",
+  "@mcpConsentAsk": {
+    "placeholders": {
+      "client": {
+        "type": "String"
+      },
+      "user": {
+        "type": "String"
+      }
+    }
+  },
+  "mcpConsentWhat": "It can read your tickets, logs, usage and repositories, and prepare actions. Nothing changes until you confirm each action in the chat. Deploys, settings and integrations are not available to it.",
+  "mcpConsentRedirect": "You will return to {host}.",
+  "@mcpConsentRedirect": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "mcpAllow": "Allow",
+  "mcpDeny": "Deny",
+  "mdetailApprove": "Approve",
+  "mdetailWorking": "hiro is working. You'll get a notification when it needs you.",
+  "mdetailCopyPr": "Copy pull request link",
+  "mdetailCopied": "Link copied",
+  "mdetailFactTime": "Time",
+  "mhomeRunningNote": "{parallel} at a time allowed, {queued} in queue",
+  "@mhomeRunningNote": {
+    "placeholders": {
+      "parallel": {
+        "type": "String"
+      },
+      "queued": {
+        "type": "String"
+      }
+    }
+  },
+  "mhomeWaiting": "Waiting {time}",
+  "@mhomeWaiting": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "mhomeActAnswers": "Answer hiro's questions",
+  "mhomeActReview": "Review the changes",
+  "mhomeActStopped": "Stopped. Tell hiro what to try",
+  "mhomeActResume": "Resume when you're ready",
+  "mhomeActStart": "Kept in queue. Tap to start",
+  "mhomeLiveFallback": "Working…",
+  "mhomeSearchEmpty": "No tickets match your search.",
+  "mmoreAgo": "{time} ago",
+  "@mmoreAgo": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "mmoreJustNow": "just now",
+  "mmoreLangPhone": "Phone language",
+  "mmoreSignedInTo": "Signed in to {server}",
+  "@mmoreSignedInTo": {
+    "placeholders": {
+      "server": {
+        "type": "String"
+      }
+    }
+  },
+  "mmorePipelineRuns": "Pipeline runs",
+  "mmoreLoginLede": "Sign in to your hiro server to answer questions, review changes and follow runs.",
+  "mobileServer": "Server address",
+  "mobileServerHint": "https://hiro.example.com",
+  "mobileServerInvalid": "Enter the https address of your hiro server.",
+  "mobileHome": "Home",
+  "mobileActivity": "Activity",
+  "mobileMore": "More",
+  "mobileGreeting": "Hi, {name}",
+  "@mobileGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mobileNeedsYou": "Needs you",
+  "mobileRunningNow": "Running now",
+  "mobileInQueue": "In queue",
+  "mobileNothingWaiting": "Nothing is waiting on you.",
+  "mobileNoRuns": "No runs at the moment.",
+  "mobileLiveRuns": "Live runs",
+  "mobileTurnsOf": "{turns} of {max} turns",
+  "@mobileTurnsOf": {
+    "placeholders": {
+      "turns": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "mobileWaitingFor": "waiting {time}",
+  "@mobileWaitingFor": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "mobileUsage": "Plan usage",
+  "mobileSession": "Current session",
+  "mobileWeek": "This week",
+  "mobileRefresh": "Refresh",
+  "mobilePaused": "New runs are paused until the limit resets.",
+  "mobileAppearance": "Appearance",
+  "mobileTheme": "Theme",
+  "mobileThemeSystem": "System",
+  "mobileThemeLight": "Day",
+  "mobileThemeDark": "Night",
+  "mobileLanguage": "Language",
+  "mobileDefaultModels": "Default models",
+  "mobilePush": "Push notifications",
+  "mobilePushOn": "Send to this phone",
+  "mobilePushNeeds": "When something needs you",
+  "mobilePushStopped": "When a run stops or pauses",
+  "mobilePushDone": "When changes are pushed",
+  "mobilePushUnavailable": "Push is not set up on this server.",
+  "mobileIntegrations": "Integrations",
+  "mobileRepositories": "Repositories",
+  "mobileConnected": "Connected",
+  "mobileNotConnected": "Not connected",
+  "mobileSaved": "Saved",
+  "mobileSignOut": "Sign out",
+  "mobileNewTask": "New task",
+  "mobileTaskTitle": "Title",
+  "mobileTaskDescription": "What should be done",
+  "mobileTaskRepo": "Repository",
+  "mobileTaskPriority": "Priority",
+  "mobilePriorityLow": "Low",
+  "mobilePriorityMedium": "Medium",
+  "mobilePriorityHigh": "High",
+  "mobileAfterApprove": "After you approve",
+  "mobileAfterMain": "Push to main",
+  "mobileAfterPr": "Open pull request",
+  "mobileStart": "How to start",
+  "mobileStartAsk": "Ask questions first",
+  "mobileStartCode": "Start coding right away",
+  "mobileStartQueue": "Keep in queue",
+  "mobileCreate": "Create",
+  "mobileNoSideRepos": "Add a side-project repository in the admin panel first.",
+  "mobileNoTasks": "No tasks yet.",
+  "mobileNoEvents": "Nothing here yet.",
+  "mobileFilterAll": "All",
+  "mobileFilterProblems": "Problems",
+  "mobileFilterYou": "Your actions",
+  "mobileAnswer": "Answer",
+  "mobileReview": "Review",
+  "mobileConfirm": "Confirm",
+  "mobileCancel": "Cancel",
+  "mobileRetry": "Retry",
+  "mobileStop": "Stop",
+  "mobileOffline": "Can't reach the server. Pull to retry.",
+  "mobileOpenInBrowser": "Open in browser",
+  "mobileVersion": "Version {version}",
+  "@mobileVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "mobileBranches": "Branches",
+  "mobileCommits": "Commits",
+  "mobilePipelines": "Pipelines",
+  "mobileDeploy": "Deploy",
+  "mobileDeployConfirm": "Start {stage}? This deploys to a live environment.",
+  "@mobileDeployConfirm": {
+    "placeholders": {
+      "stage": {
+        "type": "String"
+      }
+    }
+  },
+  "mobileDeployStarted": "Deploy started",
+  "mobileAheadBehind": "↑{ahead} ↓{behind}",
+  "@mobileAheadBehind": {
+    "placeholders": {
+      "ahead": {
+        "type": "String"
+      },
+      "behind": {
+        "type": "String"
+      }
+    }
+  },
+  "mobileCiOk": "Passed",
+  "mobileCiFail": "Failed",
+  "mobileCiRun": "Running",
+  "mobileCiWaiting": "Waiting",
+  "mobileCiManual": "Waiting for you",
+  "mobileCiNone": "No pipeline",
+  "mobileGitHostError": "The git host returned an error. Check the integration.",
+  "mobileLastDays": "Last 7 days",
+  "mobilePushed": "Pushed",
+  "mobileFirstTry": "First try",
+  "mobileWaitingAvg": "Waiting on you",
+  "mobileMinutes": "{n} min",
+  "@mobileMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "mtasksActAnswers": "Answer hiro's questions",
+  "mtasksActReview": "Review the changes",
+  "mtasksActFailed": "Stopped. Tell hiro what to try",
+  "mtasksActResume": "Resume when you're ready",
+  "mtasksActAnalyze": "Tap to analyze",
+  "mtasksActHeld": "Kept in queue. Tap to start",
+  "mtasksYesterday": "Yesterday",
+  "navOverview": "Overview",
+  "navDashboard": "Dashboard",
+  "navAnalytics": "Analytics",
+  "navTickets": "Tickets",
+  "navNeeds": "Needs you",
+  "navRunning": "Running",
+  "navQueue": "In queue",
+  "navDone": "Finished",
+  "navAll": "All tickets",
+  "navSideProjects": "Side projects",
+  "navTasks": "Tasks",
+  "navMonitor": "Monitor",
+  "navLogs": "Logs",
+  "navUsage": "Plan usage",
+  "navSetup": "Setup",
+  "navIntegrations": "Integrations",
+  "navRepos": "Repositories",
+  "navSettings": "Settings",
+  "navSearch": "Search tickets and tasks",
+  "navSyncJira": "Sync Jira",
+  "navSynced": "Jira synced: {found} open, {created} new",
+  "@navSynced": {
+    "placeholders": {
+      "found": {
+        "type": "String"
+      },
+      "created": {
+        "type": "String"
+      }
+    }
+  },
+  "navSession": "Current session",
+  "navWeek": "This week",
+  "navDayMode": "Switch to day mode",
+  "navNightMode": "Switch to night mode",
+  "navCollapseSidebar": "Collapse sidebar",
+  "navExpandSidebar": "Expand sidebar",
+  "navLanguage": "Language",
+  "navGuide": "How this page works",
+  "navClose": "Close",
+  "navMain": "Main",
+  "navLive": "Live",
+  "navOffline": "Reconnecting…",
+  "navResetsIn": "Resets in {time}",
+  "@navResetsIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "navResettingNow": "Resetting now",
+  "navUsageUnknown": "Usage unknown",
+  "navBack": "Back",
+  "navLedeNeeds": "Tickets waiting on your answers or your review, plus runs that stopped.",
+  "navLedeRunning": "Tickets hiro is working on right now.",
+  "navLedeQueue": "Tickets with the hiro label that haven't been analyzed yet.",
+  "navLedeDone": "Pushed or rejected tickets.",
+  "navLedeAll": "Every ticket hiro has picked up from Jira.",
+  "navKnowledge": "Knowledge",
+  "navLearn": "Learn",
+  "navLearnQueue": "Learning queue",
+  "repoBack": "Back to repositories",
+  "repoNotFound": "No such repository.",
+  "repoEdit": "Edit settings",
+  "repoBranches": "Branches",
+  "repoCommits": "Commits",
+  "repoPipelines": "Pipelines",
+  "repoMembers": "Members",
+  "repoMembersSub_github": "Collaborators on GitHub. Pull requests can be assigned to them when you approve a review.",
+  "repoMembersSub_gitlab": "Project members on GitLab, including those from groups. Merge requests can be assigned to them when you approve a review.",
+  "repoMembersSearch": "Search members",
+  "repoMembersNone": "No members found. The token may not be allowed to list them.",
+  "repoBranchesSub": "hiro works on its own branch for every ticket and never commits to {branch}.",
+  "@repoBranchesSub": {
+    "placeholders": {
+      "branch": {
+        "type": "String"
+      }
+    }
+  },
+  "repoArchivedBanner": "Archived {time}. hiro takes no new tickets or tasks for this repository until you restore it.",
+  "@repoArchivedBanner": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "repoSrcLabel": "Where",
+  "repoSrcOrigin": "Origin",
+  "repoSrcLocal": "Local",
+  "repoSrcLocalN": "Local ({n})",
+  "@repoSrcLocalN": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "repoLocalSub": "Branches in hiro's own clones on your server. hiro commits here first and pushes only after you approve; it never commits to {branch}.",
+  "@repoLocalSub": {
+    "placeholders": {
+      "branch": {
+        "type": "String"
+      }
+    }
+  },
+  "repoColPush": "On origin",
+  "repoPush_local": "Not pushed",
+  "repoPush_pushed": "Pushed",
+  "repoPush_unpushed": "{n, plural, one {{n} commit not pushed} other {{n} commits not pushed}}",
+  "@repoPush_unpushed": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "repoPush_differs": "Origin changed",
+  "repoPush_local_help": "Only on the server. hiro pushes it when you approve the review.",
+  "repoPush_pushed_help": "Origin has the same commit.",
+  "repoPush_unpushed_help": "Origin has the branch, but not the newest commits.",
+  "repoPush_differs_help": "Someone pushed commits to this branch that hiro's copy does not have.",
+  "repoLocalNone": "No local branches yet. hiro creates one when it starts work on a ticket.",
+  "repoCommitsSub": "Recent commits on the default branch, newest first.",
+  "repoLoadMore": "Load more",
+  "repoMoreError": "Could not load more.",
+  "repoCommitsEnd": "{n, plural, one {{n} commit} other {All {n} commits}} shown",
+  "@repoCommitsEnd": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "repoPipelinesSub": "Build, test and deploy runs on the git host.",
+  "repoPipelinesEnd": "{n, plural, one {{n} run} other {All {n} runs}} shown",
+  "@repoPipelinesEnd": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "repoFilterAll": "All",
+  "repoFilterOthers": "Others",
+  "repoColBranch": "Branch",
+  "repoColCommit": "Latest commit",
+  "repoColAuthor": "Author",
+  "repoColAheadBehind": "Ahead / behind",
+  "repoColChecks": "Checks",
+  "repoColUpdated": "Updated",
+  "repoDefault": "Default",
+  "repoNone": "Nothing here yet.",
+  "repoCi_ok": "Passed",
+  "repoCi_fail": "Failed",
+  "repoCi_run": "Running",
+  "repoCi_pending": "Waiting",
+  "repoCi_manual": "Waiting for you",
+  "repoCi_skip": "Skipped",
+  "repoCi_canceled": "Canceled",
+  "repoCi_none": "No pipeline",
+  "repoKpiBranches": "Branches",
+  "repoKpiBranchesNote": "{n} by hiro",
+  "@repoKpiBranchesNote": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "repoKpiCommits": "Commits this week",
+  "repoKpiCommitsNote": "{n} written by hiro",
+  "@repoKpiCommitsNote": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "repoKpiPipelines": "Pipeline success",
+  "repoKpiPipelinesNote": "Last {n} finished runs",
+  "@repoKpiPipelinesNote": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "repoKpiProd": "Production",
+  "repoDeployedAgo": "Deployed {time}",
+  "@repoDeployedAgo": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "repoNotDeployed": "Not deployed yet",
+  "repoDeployed": "Deployed",
+  "repoEmpty": "Empty",
+  "repoCommit": "Commit",
+  "repoOpen": "Open",
+  "repoNoEnvironments": "No deployment environments on the git host.",
+  "repoDeployHelp": "hiro waits for checks before a ticket reaches your review. Deploying is always your decision, and it is never available from Claude chat.",
+  "repoDeployBranch": "Deploy {branch}",
+  "@repoDeployBranch": {
+    "placeholders": {
+      "branch": {
+        "type": "String"
+      }
+    }
+  },
+  "repoDeploy": "Deploy",
+  "repoDeployConfirm": "Start {stage} for {sha}?",
+  "@repoDeployConfirm": {
+    "placeholders": {
+      "stage": {
+        "type": "String"
+      },
+      "sha": {
+        "type": "String"
+      }
+    }
+  },
+  "repoDeployWorkflowConfirm": "Run {workflow} on {branch}?",
+  "@repoDeployWorkflowConfirm": {
+    "placeholders": {
+      "workflow": {
+        "type": "String"
+      },
+      "branch": {
+        "type": "String"
+      }
+    }
+  },
+  "repoDeployStarted": "Deploy started",
+  "repoStage": "Stage",
+  "repoStatus": "Status",
+  "repoDuration": "Duration",
+  "repoOpenRun": "Open on the git host",
+  "reposTitle": "Repositories",
+  "reposLede": "Code hiro can work in. Each run clones the repository into a fresh container on your server, then runs these checks before anything reaches your review.",
+  "reposAdd": "Add repository",
+  "reposViewLabel": "Show",
+  "reposViewActive": "Active ({n})",
+  "@reposViewActive": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "reposViewArchived": "Archived ({n})",
+  "@reposViewArchived": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "reposArchivedSub": "Archived repositories keep their history but take no new tickets or tasks. Restore one to work on it again.",
+  "reposArchive": "Archive",
+  "reposRestore": "Restore",
+  "reposArchived": "{name} archived",
+  "@reposArchived": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reposRestored": "{name} restored",
+  "@reposRestored": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reposArchiveConfirm": "Archive {name}? It moves to the archive and keeps its tickets and history, but hiro stops picking up new Jira tickets and tasks for it. Work already started still finishes. You can restore it any time.",
+  "@reposArchiveConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reposNoArchived": "No archived repositories.",
+  "reposImport": "Import from GitHub/GitLab",
+  "reposImportTitle": "Import a repository",
+  "reposImportSub": "Repositories your GitHub or GitLab token can reach. Pick one, then set its checks.",
+  "reposImportFrom": "Import from",
+  "reposImportSearch": "Search repositories",
+  "reposImportLoading": "Loading repositories…",
+  "reposImportEmpty": "The token cannot reach any repositories. Check which repositories it was given access to.",
+  "reposImportNone": "Connect GitHub or GitLab first.",
+  "reposImportConnect": "Open Integrations",
+  "reposImportPrivate": "Private",
+  "reposImportUpdated": "updated {time}",
+  "@reposImportUpdated": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "reposImportAdded": "Added",
+  "reposImportPick": "Add",
+  "reposMissingHelp": "{count, plural, one {{count} repository has} other {{count} repositories have}} no CLAUDE.md. hiro still works, but spends more turns finding its way around. Add one with the project's structure, conventions and test commands.",
+  "@reposMissingHelp": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "reposColRepo": "Repository",
+  "reposColSource": "Source",
+  "reposColBranch": "Branch",
+  "reposColTest": "Test command",
+  "reposColClaude": "CLAUDE.md",
+  "reposColOpen": "Open",
+  "reposJira": "Jira {project}",
+  "@reposJira": {
+    "placeholders": {
+      "project": {
+        "type": "String"
+      }
+    }
+  },
+  "reposSide": "Side project",
+  "reposFound": "Found",
+  "reposMissing": "Missing",
+  "reposUnknown": "Not checked",
+  "reposNoMatch": "No repositories match your search.",
+  "reposNone": "No repositories yet. Add the first one to let hiro work on it.",
+  "reposDrawerSub": "Takes side-project tasks, and Jira tickets once it has a Jira project key",
+  "reposName": "Name",
+  "reposCloneUrl": "Clone URL",
+  "reposCloneHelp": "An https URL on github.com or your connected GitLab. hiro uses that host's token to clone and push.",
+  "reposJiraProject": "Jira project key",
+  "reposJiraHelp": "Optional. Tickets from this Jira project with the hiro label run here.",
+  "reposTaskPrefix": "Task key prefix",
+  "reposTaskPrefixHelp": "Side-project tasks are numbered like {prefix}-1, {prefix}-2. Must differ from the Jira project key.",
+  "@reposTaskPrefixHelp": {
+    "placeholders": {
+      "prefix": {
+        "type": "String"
+      }
+    }
+  },
+  "reposBranch": "Default branch",
+  "reposBranchHelp": "Work branches start from here.",
+  "reposBuild": "Build command",
+  "reposLint": "Lint command",
+  "reposTest": "Test command",
+  "reposTestHelp": "Must pass before a ticket reaches your review.",
+  "reposInstructions": "Extra instructions",
+  "reposInstructionsHelp": "Added to every prompt for this repository, on top of its CLAUDE.md.",
+  "reposClaudeFound": "Found in the repository root",
+  "reposClaudeMissing": "Missing. hiro still works, but a CLAUDE.md saves turns.",
+  "reposClaudeUnknown": "Checked after saving",
+  "reposSaved": "Repository saved",
+  "reposEdit": "Edit",
+  "reposDeployWorkflow": "Deploy workflow",
+  "reposDeployWorkflowHelp": "GitHub Actions workflow file with workflow_dispatch, e.g. deploy.yml. Deploy on the repository page runs it.",
+  "settingsTitle": "Settings",
+  "settingsLede": "How hiro connects to your tools and how it behaves during runs.",
+  "settingsAppearance": "Appearance",
+  "settingsAppearanceSub": "Saved in this browser, applied right away",
+  "settingsTheme": "Theme",
+  "settingsThemeHelp": "System follows your device's day or night setting",
+  "settingsSystem": "System",
+  "settingsDay": "Day",
+  "settingsNight": "Night",
+  "settingsLanguage": "Language",
+  "settingsIntegrations": "Integrations",
+  "settingsIntegrationsSub": "Where tickets come from and where code is pushed",
+  "settingsManageAll": "Manage",
+  "settingsManage": "Manage",
+  "settingsConnect": "Connect",
+  "settingsConnected": "Connected",
+  "settingsNotConnected": "Not connected",
+  "settingsClaude": "Claude Code",
+  "settingsClaudeSub": "The engine that does the coding",
+  "settingsModels": "Models by stage",
+  "settingsModelsHelp": "Pick which model runs each step. Haiku uses the least of your plan, Opus the most.",
+  "settingsStageAnalyze": "Reading the ticket and asking questions",
+  "settingsStageAnalyzeHelp": "Read-only. Runs once per ticket.",
+  "settingsStageCoding": "Coding",
+  "settingsStageCodingHelp": "The main run. Uses most of your plan.",
+  "settingsStageRetry": "Retries and requested changes",
+  "settingsStageRetryHelp": "After failed tests, your feedback or a stopped run.",
+  "settingsStageHelper": "Usage refresh and short writing",
+  "settingsStageHelperHelp": "Small tasks like the idle usage refresh.",
+  "settingsStageLearn": "Lessons from finished work",
+  "settingsStageLearnHelp": "Reads each pushed change and writes lessons about what is new to the repository.",
+  "settingsMaxTurns": "Turn limit per run",
+  "settingsMaxTurnsHelp": "The run stops and reports when it reaches this",
+  "settingsTimeout": "Run timeout",
+  "settingsMinutes": "{n} min",
+  "@settingsMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsAllow": "Allowed commands",
+  "settingsAllowHelp": "Claude Code can run these without asking",
+  "settingsDeny": "Blocked commands",
+  "settingsDenyHelp": "Always refused, even if a ticket asks for them. Pushing is done by hiro, never by Claude Code.",
+  "settingsCommits": "Commits and pull requests",
+  "settingsCommitsSub": "Who commits appear from, and how pull requests open",
+  "settingsAuthorName": "Author name",
+  "settingsAuthorNameHelp": "Commits are made as you",
+  "settingsAuthorEmail": "Author email",
+  "settingsAuthorEmailHelp": "Must match your GitHub account to show as yours",
+  "settingsCoAuthor": "Add a Co-authored-by: hiro line",
+  "settingsCoAuthorHelp": "Teammates can see which commits hiro wrote",
+  "settingsPrTitle": "Pull request title",
+  "settingsPrTitleHelp": "'{key}' and '{title}' are replaced with the ticket's key and title",
+  "@settingsPrTitleHelp": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsDraft": "Open as draft",
+  "settingsRuns": "Runs",
+  "settingsRunsSub": "Defaults for every ticket and task",
+  "settingsAskFirst": "Ask questions before coding",
+  "settingsAskFirstHelp": "Default for new Jira tickets. Tasks choose this when you create them.",
+  "settingsAutoResume": "Resume paused runs after the limit resets",
+  "settingsAutoLearn": "Learn from every pushed change",
+  "settingsAutoLearnHelp": "After a push, hiro looks for techniques the repository never used before and writes lessons under Learn. Uses plan usage only when no ticket is waiting.",
+  "settingsPauseAbove": "Don't start new runs above",
+  "settingsPauseAboveHelp": "Session usage. Runs already going keep going.",
+  "settingsParallel": "Runs at the same time",
+  "settingsParallelHelp": "More runs finish sooner but use your plan limit faster",
+  "settingsNotify": "Notifications",
+  "settingsNotifySub": "Push to your phone and Telegram messages",
+  "settingsPush": "Push notifications",
+  "settingsPushHelp": "To the hiro app on your phone",
+  "settingsTelegram": "Telegram messages",
+  "settingsTelegramHelp": "Only sent once Telegram is connected on the Integrations page",
+  "settingsNeedsYou": "When something needs you",
+  "settingsNeedsYouHelp": "Questions to answer or changes to review",
+  "settingsStopped": "When a run stops or pauses",
+  "settingsDone": "When changes are pushed",
+  "settingsLessons": "When hiro finds something new to learn",
+  "settingsOnThisPage": "On this page",
+  "settingsSecretsHelp": "Tokens for Jira, GitHub and Claude are stored encrypted on your server. This page never shows them.",
+  "settingsSaved": "Settings saved",
+  "stateNew": "In queue",
+  "stateAnalyzing": "Reading the code",
+  "stateWaiting_for_answers": "Needs your answers",
+  "stateCoding": "Coding",
+  "stateTesting": "Running tests",
+  "stateWaiting_for_review": "Ready for review",
+  "statePushing": "Pushing",
+  "stateDone": "Pushed",
+  "stateRejected": "Rejected",
+  "stateFailed": "Stopped",
+  "stateRate_limited": "Paused at plan limit",
+  "tasksTitle": "Tasks",
+  "tasksLede": "Work for your side projects. Tasks stay in hiro and never touch Jira. Everything else works the same: questions, coding, your review.",
+  "tasksNew": "New task",
+  "tasksAllRepos": "All repositories {count}",
+  "@tasksAllRepos": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "tasksFilterLabel": "Filter by repository",
+  "tasksColTask": "Task",
+  "tasksColRepo": "Repository",
+  "tasksColStatus": "Status",
+  "tasksColUpdated": "Updated",
+  "tasksNoMatch": "No tasks match your search.",
+  "tasksEmpty": "No tasks in this repository yet.",
+  "tasksRepos": "Repositories",
+  "tasksReposSub": "Your side-project repositories on this server",
+  "tasksRepoLine": "tests: {test}, {open} open",
+  "@tasksRepoLine": {
+    "placeholders": {
+      "test": {
+        "type": "String"
+      },
+      "open": {
+        "type": "String"
+      }
+    }
+  },
+  "tasksNoTest": "none",
+  "tasksNoRepos": "No side-project repositories yet.",
+  "tasksHelp": "For repositories only you work on, you can let hiro push straight to main after you approve. It still never pushes without your review.",
+  "tasksDrawerSub": "For your side projects. Not synced to Jira.",
+  "tasksRepository": "Repository",
+  "tasksFieldTitle": "Title",
+  "tasksTitlePh": "For example: Add a rest timer between sets",
+  "tasksFieldDesc": "What should be done",
+  "tasksDescPh": "Describe the result you want. The clearer this is, the fewer questions hiro asks.",
+  "tasksPriority": "Priority",
+  "tasksLow": "Low",
+  "tasksMedium": "Medium",
+  "tasksHigh": "High",
+  "tasksAfter": "After you approve",
+  "tasksAfterMain": "Push to main",
+  "tasksAfterPr": "Open pull request",
+  "tasksStart": "How to start",
+  "tasksStartAsk": "Ask questions first",
+  "tasksStartAskHint": "hiro reads the code and asks before coding. Best for anything unclear.",
+  "tasksStartCode": "Start coding right away",
+  "tasksStartCodeHint": "Skip questions. Good for small, well-described tasks.",
+  "tasksStartQueue": "Keep in queue",
+  "tasksStartQueueHint": "Save it and start later.",
+  "tasksCreate": "Create task",
+  "tasksCreateStart": "Create and start",
+  "tasksAddRepoFirst": "Add a side-project repository first.",
+  "tasksTitleRequired": "Enter a title.",
+  "tasksCreated": "Task {key} created",
+  "@tasksCreated": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "tasksCount": "{n, plural, one {{n} task} other {{n} tasks}}",
+  "@tasksCount": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "ticketBack": "All tickets",
+  "ticketPlan": "Plan",
+  "ticketAnalysis": "What hiro found",
+  "ticketQuestions": "Questions",
+  "ticketYourAnswer": "Your answer",
+  "ticketNote": "Note (optional)",
+  "ticketSendAnswers": "Send answers and start coding",
+  "ticketChanges": "Changes",
+  "ticketFilesChanged": "{count, plural, one {{count} file changed} other {{count} files changed}}",
+  "@ticketFilesChanged": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "ticketChecks": "Checks",
+  "ticketPassed": "passed",
+  "ticketFailedCheck": "failed",
+  "ticketNotes": "Notes for the reviewer",
+  "ticketApprove": "Approve and push",
+  "ticketApproveConfirm": "Push {branch} and open a pull request?",
+  "@ticketApproveConfirm": {
+    "placeholders": {
+      "branch": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketRequestChanges": "Request changes",
+  "ticketFeedbackPlaceholder": "What should change?",
+  "ticketSend": "Send",
+  "ticketCancel": "Cancel",
+  "ticketReject": "Reject",
+  "ticketRejectConfirm": "Stop all work on {key}? This cannot be undone.",
+  "@ticketRejectConfirm": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketRetry": "Retry",
+  "ticketPullRequest": "Pull request #{number}",
+  "@ticketPullRequest": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketBranch": "Branch",
+  "ticketRevision": "Revision {n}",
+  "@ticketRevision": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketLog": "Live log",
+  "ticketLogEmpty": "Nothing logged yet.",
+  "ticketNotFound": "No ticket {key}.",
+  "@ticketNotFound": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketConflict": "The ticket moved on; refreshed.",
+  "ticketStopAnalyze": "Analyze",
+  "ticketStopAnswers": "Your answers",
+  "ticketStopCoding": "Coding",
+  "ticketStopTests": "Tests",
+  "ticketStopReview": "Your review",
+  "ticketStopPushed": "Pushed",
+  "ticketProgress": "Progress",
+  "ticketBackTo": "Back to {page}",
+  "@ticketBackTo": {
+    "placeholders": {
+      "page": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketQueuedTitle": "Waiting in queue",
+  "ticketQueuedSub": "hiro reads the ticket and the related code, then comes back with a plan and questions. Nothing is changed in this step.",
+  "ticketHeldSub": "This task is kept in the queue until you start it.",
+  "ticketStart": "Start now",
+  "ticketStartHint": "Starts when a run slot is free",
+  "ticketAnalyzingTitle": "Reading the code",
+  "ticketAnalyzingSub": "Looking through {repo} to build a plan.",
+  "@ticketAnalyzingSub": {
+    "placeholders": {
+      "repo": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketQuestionsTitle": "{n, plural, one {{n} question before coding} other {{n} questions before coding}}",
+  "@ticketQuestionsTitle": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "ticketQuestionsSub": "Pick an option or write your own answer. Answers go into the coding prompt with the plan.",
+  "ticketAddDetails": "Add details (optional)",
+  "ticketDetailsFor": "Details for question {n}",
+  "@ticketDetailsFor": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketAnswerFor": "Answer to question {n}",
+  "@ticketAnswerFor": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketStartCoding": "Start coding",
+  "ticketQuestionsLeft": "{n, plural, one {{n} question left to answer} other {{n} questions left to answer}}",
+  "@ticketQuestionsLeft": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "ticketAllAnswered": "All questions answered",
+  "ticketCodingTitle": "Coding",
+  "ticketTestingTitle": "Running tests",
+  "ticketRevisionSuffix": "{title}, revision {n}",
+  "@ticketRevisionSuffix": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketCodingSub": "Working in a fresh container on {branch}. You review the diff before anything is pushed.",
+  "@ticketCodingSub": {
+    "placeholders": {
+      "branch": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketFactModel": "Model",
+  "ticketFactTurns": "Turns",
+  "ticketFactTurnLimit": "Turn limit",
+  "ticketFactSession": "Session usage",
+  "ticketFactTests": "Tests",
+  "ticketFactChanged": "Changed",
+  "ticketChangedValue": "{n, plural, one {{n} file} other {{n} files}}, +{add} −{del}",
+  "@ticketChangedValue": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      },
+      "add": {
+        "type": "String"
+      },
+      "del": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketChecksPassed": "{n, plural, one {{n} check passed} other {{n} checks passed}}",
+  "@ticketChecksPassed": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "ticketNoChecks": "No checks configured",
+  "ticketStopRun": "Stop run",
+  "ticketStopConfirm": "Stop the run on {key}? You can retry it later.",
+  "@ticketStopConfirm": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketReviewTitle": "Review the changes",
+  "ticketReviewSubPr": "Nothing has left the server yet. Approving pushes {branch} and opens a pull request.",
+  "@ticketReviewSubPr": {
+    "placeholders": {
+      "branch": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketReviewSubJira": "Nothing has left the server yet. Approving pushes {branch}, opens a pull request and updates the Jira ticket.",
+  "@ticketReviewSubJira": {
+    "placeholders": {
+      "branch": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketReviewSubMain": "Nothing has left the server yet. Approving pushes straight to the default branch.",
+  "ticketWhatHiroDid": "What hiro did",
+  "ticketDiff": "Diff",
+  "ticketFeedback": "Feedback",
+  "ticketAssignTitle": "Assign the pull request",
+  "ticketAssignSub": "Optional. Pick who it is assigned to on the git host when hiro opens it.",
+  "ticketAssignError": "Could not load the repository members: {error}. You can still approve without assignees.",
+  "@ticketAssignError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketAssignNone": "No repository members to pick from.",
+  "ticketApproveAssignees": "Assign it to {names}.",
+  "@ticketApproveAssignees": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketKvAssignees": "Assignees",
+  "ticketFeedbackHint": "Describe what to change. Required for Request changes.",
+  "ticketApproveMainConfirm": "Push the changes straight to the default branch?",
+  "ticketPushingTitle": "Pushing",
+  "ticketPushingSub": "Committing as you and opening the pull request.",
+  "ticketDoneTitle": "Pushed",
+  "ticketDoneMain": "Committed as you and pushed to the default branch of {repo}.",
+  "@ticketDoneMain": {
+    "placeholders": {
+      "repo": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketDonePr": "Pull request #{number} is open on {branch}.",
+  "@ticketDonePr": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "branch": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketOpenPr": "Open pull request #{number}",
+  "@ticketOpenPr": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketRejectedTitle": "Rejected",
+  "ticketRejectedSub": "hiro stopped working on this ticket. The branch was not pushed.",
+  "ticketFailedTitle": "hiro stopped",
+  "ticketFailedUnknown": "The run stopped. Check the run log for details.",
+  "ticketTakeItMyself": "Take it myself",
+  "ticketRateTitle": "Paused at plan limit",
+  "ticketResume": "Resume run",
+  "ticketRateHint": "Session usage is {pct}% now.",
+  "@ticketRateHint": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketModelsTitle": "Models for this ticket",
+  "ticketModelsHint": "Override the defaults from Settings for this ticket only.",
+  "ticketModelDefault": "Default ({model})",
+  "@ticketModelDefault": {
+    "placeholders": {
+      "model": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketStageAnalyze": "Reading the ticket and asking questions",
+  "ticketStageCoding": "Coding",
+  "ticketStageRetry": "Retries and requested changes",
+  "ticketSideTicket": "Ticket",
+  "ticketSideTask": "Task",
+  "ticketKvKey": "Key",
+  "ticketKvSource": "Source",
+  "ticketKvRepo": "Repository",
+  "ticketKvAfter": "After approval",
+  "ticketKvPriority": "Priority",
+  "ticketKvBranch": "Branch",
+  "ticketKvRevision": "Revision",
+  "ticketKvTurns": "Turns used",
+  "ticketKvCodingModel": "Coding model",
+  "ticketKvRetryModel": "Retry model",
+  "ticketSrcJira": "Jira",
+  "ticketSrcTask": "hiro task",
+  "ticketAfterMain": "Push to main",
+  "ticketAfterPr": "Open pull request",
+  "ticketHistoryTitle": "History",
+  "ticketHistoryEmpty": "No history yet.",
+  "ticketAnswersTitle": "Your answers",
+  "ticketAnswersSub": "Sent with the coding prompt",
+  "ticketRunLog": "Run log",
+  "ticketRunLogSub": "{n, plural, one {{n} event} other {{n} events}}, grouped by step",
+  "@ticketRunLogSub": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "ticketGroupEvents": "{n, plural, one {{n} event} other {{n} events}}",
+  "@ticketGroupEvents": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "ticketGroupErrors": "{n, plural, one {{n} error} other {{n} errors}}",
+  "@ticketGroupErrors": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "ticketOpenInLogs": "Open in Logs",
+  "ticketStepOther": "General",
+  "ticketDelete": "Delete",
+  "ticketDeleteConfirm": "Delete task {key}?",
+  "@ticketDeleteConfirm": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketUsageTitle": "Plan usage",
+  "ticketUsageSession": "Current session",
+  "ticketUsageWeek": "This week",
+  "ticketMerged": "Merged",
+  "ticketMergedAt": "Merged {time}.",
+  "@ticketMergedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketRepoTitle": "Repository",
+  "ticketRepoHint": "Where hiro analyzes and codes this ticket.",
+  "ticketRepoNone": "Choose a repository…",
+  "ticketRepoMissing": "No repository is linked to this ticket. Choose one, then retry.",
+  "ticketRepoRestartTitle": "Change repository?",
+  "ticketRepoRestart": "This ticket made progress in {repo}. In {next} it starts over from analysis when you retry.",
+  "@ticketRepoRestart": {
+    "placeholders": {
+      "repo": {
+        "type": "String"
+      },
+      "next": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketRepoChange": "Change",
+  "ticketRepoChanged": "Repository set to {repo}",
+  "@ticketRepoChanged": {
+    "placeholders": {
+      "repo": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketsTitle": "Tickets",
+  "ticketsNeedsYou": "Needs you",
+  "ticketsRunning": "Running",
+  "ticketsFinished": "Finished",
+  "ticketsAll": "All",
+  "ticketsEmpty": "No tickets here.",
+  "ticketsEmptyHint": "Label a Jira issue “{label}” and hiro picks it up.",
+  "@ticketsEmptyHint": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketsUpdated": "Updated {time}",
+  "@ticketsUpdated": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketsColTicket": "Ticket",
+  "ticketsColSource": "Source",
+  "ticketsColRepo": "Repository",
+  "ticketsColStatus": "Status",
+  "ticketsColUpdated": "Updated",
+  "ticketsSourceJira": "Jira",
+  "ticketsSourceTask": "Task",
+  "ticketsRev": "rev {n}",
+  "@ticketsRev": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketsCount": "{n, plural, one {{n} ticket} other {{n} tickets}}",
+  "@ticketsCount": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "ticketsViewLabel": "View",
+  "ticketsViewTable": "Table",
+  "ticketsViewBoard": "Board",
+  "ticketsBoardEmpty": "Nothing here",
+  "ticketsListSub": "Jira tickets with the hiro label, plus tasks you create for side projects.",
+  "ticketsNoMatch": "No tickets match your search.",
+  "ticketsEmptyNeeds": "Nothing is waiting on you. Tickets show up here when hiro has questions or changes to review.",
+  "ticketsEmptyOther": "No tickets here yet.",
+  "ticketsStatNeeds": "Needs you",
+  "ticketsStatNeedsNote": "Answers or reviews waiting",
+  "ticketsStatRunning": "Running",
+  "ticketsStatRunningNote": "In containers right now",
+  "ticketsStatPushed": "Pushed this week",
+  "ticketsStatPushedNote": "Pull requests opened",
+  "ticketsStatSession": "Plan session",
+  "usageTitle": "Plan usage",
+  "usageLede": "hiro runs on your Claude subscription. These limits are shared with your own Claude and Claude Code use.",
+  "usageCard": "Plan usage",
+  "usageUpdated": "Updated {time}",
+  "@usageUpdated": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "usageNoReading": "No reading yet",
+  "usageRefresh": "Refresh",
+  "usageRefreshing": "Refreshing…",
+  "usageRefreshStarted": "Refresh started. New numbers arrive in a minute.",
+  "usageSession": "Current session",
+  "usageWeek": "This week",
+  "usageUnknown": "Usage unknown",
+  "usageResetsIn": "Resets in {time}",
+  "@usageResetsIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "usageResetsAt": "Resets {time}",
+  "@usageResetsAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "usageResettingNow": "Resetting now",
+  "usageNoReset": "Reset time unknown",
+  "usageWarn80": "Session usage is above 80%. New runs may pause before they finish.",
+  "usagePaused": "New runs are paused at the plan limit until {time}.",
+  "@usagePaused": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "usagePausedNoTime": "New runs are paused at the plan limit.",
+  "usageStatus": "Status",
+  "usageStatus_allowed": "Allowed",
+  "usageStatus_allowed_warning": "Close to the limit",
+  "usageStatus_rejected": "Limit reached",
+  "usageStatus_unknown": "Unknown",
+  "usageSource": "Read from Claude Code's rate limit events. Includes your own Claude use on this account.",
+  "usageLimitTitle": "When a limit is reached",
+  "usageLimitSub": "How hiro behaves near the limit",
+  "usageAbove": "Above {pct}% of the session",
+  "@usageAbove": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "usageAboveDo": "Don't start new runs; runs already going keep going",
+  "usageMidRun": "Limit reached mid-run",
+  "usageMidRunDo": "Pause, keep the branch",
+  "usageAfterReset": "After reset",
+  "usageResumeAuto": "Resume paused runs automatically",
+  "usageResumeManual": "Wait for you to resume",
+  "usageIdle": "Idle refresh",
+  "usageIdleDo": "Every 30 min",
+  "usageHelp": "Numbers come from the rate limit events Claude Code emits during each run. When hiro is idle, a tiny refresh run keeps them current."
+}

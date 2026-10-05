@@ -1,0 +1,20 @@
+{
+  "form": {
+    "save": "Save changes",
+    "saving": "Saving…",
+    "discard": "Discard",
+    "cancel": "Cancel",
+    "unsaved": "You have unsaved changes",
+    "close": "Close",
+    "add": "Add",
+    "remove": "Remove {name}",
+    "addCommand": "Add command",
+    "decrease": "Decrease",
+    "increase": "Increase",
+    "copy": "Copy",
+    "copied": "Copied",
+    "saved": "Saved",
+    "search": "Search",
+    "noMatch": "No matches"
+  }
+}

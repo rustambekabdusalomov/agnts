@@ -1,0 +1,25 @@
+{
+  "mcp": {
+    "title": "Claude chat (MCP)",
+    "sub": "Manage hiro from Claude on the web, desktop and phone",
+    "url": "Connector URL",
+    "connections": "Connected Claude apps",
+    "staticToken": "Static token",
+    "set": "Set",
+    "notSet": "Not set",
+    "howTo": "In Claude, open Settings → Connectors → Add custom connector and paste the URL. Claude sends you here to approve the connection. In chat, every change (answers, approve, reject, new tasks) is prepared first and only runs after you confirm it. For Claude Code or Claude Desktop you can use a static token instead: send it as Authorization: Bearer.",
+    "newToken": "New token",
+    "shownOnce": "Copy it now: it is shown only once. The previous token no longer works.",
+    "create": "Create static token",
+    "rotate": "Replace static token",
+    "revoke": "Disconnect all",
+    "revokeConfirm": "Disconnect every Claude app and delete the static token?",
+    "revoked": "All Claude connections removed",
+    "consentTitle": "Connect Claude to hiro",
+    "consentAsk": "{client} wants to use hiro as {user}.",
+    "consentWhat": "It can read your tickets, logs, usage and repositories, and prepare actions. Nothing changes until you confirm each action in the chat. Deploys, settings and integrations are not available to it.",
+    "consentRedirect": "You will return to {host}.",
+    "allow": "Allow",
+    "deny": "Deny"
+  }
+}

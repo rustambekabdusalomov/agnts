@@ -1,0 +1,7 @@
+**/node_modules
+**/dist
+.git
+apps/mobile
+deploy
+admin.html
+mobile.html

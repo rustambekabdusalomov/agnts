@@ -1,0 +1,39 @@
+# hiro_api.model.Ticket
+
+## Load the model package
+```dart
+import 'package:hiro_api/api.dart';
+```
+
+## Properties
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**key** | **String** |  | 
+**source_** | **String** |  | 
+**repoId** | **int** |  | [optional] 
+**title** | **String** |  | 
+**description** | **String** |  | 
+**priority** | **String** |  | 
+**state** | [**TicketState**](TicketState.md) |  | 
+**resumeState** | [**TicketState**](TicketState.md) |  | [optional] 
+**revision** | **int** |  | 
+**turns** | **int** |  | 
+**branch** | **String** |  | 
+**prNumber** | **int** |  | [optional] 
+**prUrl** | **String** |  | 
+**assignees** | **List&lt;String&gt;** | Git host usernames the pull request is (or will be) assigned to | [optional] 
+**afterApprove** | **String** |  | [optional] 
+**held** | **bool** | Kept in the queue until started | [optional] 
+**askFirst** | **bool** |  | [optional] 
+**repoName** | **String** |  | [optional] 
+**models** | [**ModelOverrides**](ModelOverrides.md) |  | [optional] 
+**since** | [**DateTime**](DateTime.md) | When the ticket entered its current state | [optional] 
+**stopReason** | **String** | Why it failed or paused | [optional] 
+**mergedAt** | [**DateTime**](DateTime.md) |  | [optional] 
+**learnState** | **String** | The learn run after push; pending also while it runs | [optional] 
+**createdAt** | [**DateTime**](DateTime.md) |  | 
+**updatedAt** | [**DateTime**](DateTime.md) |  | 
+
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

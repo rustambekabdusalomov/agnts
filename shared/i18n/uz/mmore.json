@@ -1,0 +1,10 @@
+{
+  "mmore": {
+    "ago": "{time} oldin",
+    "justNow": "hozirgina",
+    "langPhone": "Telefon tili",
+    "signedInTo": "{server} serveriga kirilgan",
+    "pipelineRuns": "Pipeline ishga tushirishlari",
+    "loginLede": "Savollarga javob berish, oʻzgarishlarni koʻrib chiqish va ishlarni kuzatish uchun hiro serveringizga kiring."
+  }
+}

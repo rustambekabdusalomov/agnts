@@ -1,0 +1,20 @@
+{
+  "form": {
+    "save": "Oʻzgarishlarni saqlash",
+    "saving": "Saqlanmoqda…",
+    "discard": "Bekor qilish",
+    "cancel": "Bekor qilish",
+    "unsaved": "Saqlanmagan oʻzgarishlar bor",
+    "close": "Yopish",
+    "add": "Qoʻshish",
+    "remove": "{name} ni olib tashlash",
+    "addCommand": "Buyruq qoʻshish",
+    "decrease": "Kamaytirish",
+    "increase": "Koʻpaytirish",
+    "copy": "Nusxalash",
+    "copied": "Nusxalandi",
+    "saved": "Saqlandi",
+    "search": "Qidirish",
+    "noMatch": "Hech narsa topilmadi"
+  }
+}

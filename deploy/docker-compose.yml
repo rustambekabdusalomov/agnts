@@ -1,0 +1,122 @@
+# Production stack: Caddy (HTTPS) -> hiro -> PostgreSQL, plus nightly backups.
+# Usage on the server, from this directory:
+#   cp .env.example .env   # fill it in
+#   docker compose up -d
+#   docker compose exec hiro hiro user create <username>
+name: hiro
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      HIRO_DOMAIN: ${HIRO_DOMAIN:?set HIRO_DOMAIN in .env}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - hiro
+    logging: &logging
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  hiro:
+    image: ${HIRO_IMAGE:-ghcr.io/OWNER/hiro:latest}
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      HIRO_DATABASE_URL: postgres://hiro:${POSTGRES_PASSWORD}@postgres:5432/hiro?sslmode=disable
+      HIRO_DATA_DIR: /var/lib/hiro
+      # Run containers live on an internal network; the egress proxy is their
+      # only way out (Claude API, git hosts, package registries).
+      HIRO_RUN_NETWORK: hiro-runs
+      HIRO_RUN_PROXY: http://egress:3128
+      HIRO_RUNNER_IMAGE: ${HIRO_RUNNER_IMAGE:-hiro-runner:latest}
+    # hiro starts one container per run through the Docker socket. That makes
+    # the hiro container root-equivalent on the host; run containers never get
+    # the socket. DOCKER_GID is the host's docker group (getent group docker).
+    group_add:
+      - "${DOCKER_GID:-999}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - hirodata:/var/lib/hiro
+    # Not published: only Caddy reaches hiro, which is why hiro trusts the
+    # X-Forwarded-For entry Caddy writes.
+    expose:
+      - "8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    logging: *logging
+
+  egress:
+    image: ${HIRO_IMAGE:-ghcr.io/OWNER/hiro:latest}
+    restart: unless-stopped
+    command: ["egress-proxy"]
+    environment:
+      # Comma-separated; empty uses the built-in list (Anthropic, GitHub,
+      # GitLab.com, Go, npm and PyPI registries). Add your own GitLab host here.
+      HIRO_EGRESS_ALLOW: ${HIRO_EGRESS_ALLOW:-}
+    networks: [default, runs]
+    logging: *logging
+
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: hiro
+      POSTGRES_DB: hiro
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hiro -d hiro"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    logging: *logging
+
+  backup:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "/backup.sh"]
+    environment:
+      PGHOST: postgres
+      PGUSER: hiro
+      PGDATABASE: hiro
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+      TZ: ${TZ:-UTC}
+    volumes:
+      - ./backup.sh:/backup.sh:ro
+      - ./backups:/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+    logging: *logging
+
+  # Build-only: the image run containers start from.
+  #   docker compose --profile build build runner
+  runner:
+    image: ${HIRO_RUNNER_IMAGE:-hiro-runner:latest}
+    build: ./runner
+    profiles: ["build"]
+
+networks:
+  runs:
+    name: hiro-runs
+    internal: true
+
+volumes:
+  hirodata:
+  pgdata:
+  caddy_data:
+  caddy_config:

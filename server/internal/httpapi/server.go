@@ -1,0 +1,165 @@
+// Package httpapi is the REST adapter: it maps HTTP requests to use cases.
+// Routes and models are generated from shared/openapi/openapi.yaml into gen/.
+package httpapi
+
+//go:generate go tool oapi-codegen -config gen/oapi-codegen.yaml ../../../shared/openapi/openapi.yaml
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"log/slog"
+	"net/http"
+	"net/url"
+	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+
+	"hiro/internal/auth"
+	"hiro/internal/httpapi/gen"
+)
+
+// SessionCookie is the name of the web session cookie.
+const SessionCookie = "hiro_session"
+
+const maxBodyBytes = 1 << 20
+
+// Pinger reports whether a dependency is reachable.
+type Pinger interface {
+	Ping(ctx context.Context) error
+}
+
+// Options configure the HTTP server.
+type Options struct {
+	Auth    *auth.Service
+	Tickets Tickets
+	Admin   *Admin       // Phase 2 pages; nil answers 501
+	Broker  *Broker      // live event stream; nil answers 501
+	Devices Devices      // push registrations
+	Lessons Lessons      // Learn pages; nil answers 501
+	OAuth   OAuth        // MCP connector authorization; nil disables /mcp
+	MCP     http.Handler // the MCP streamable HTTP handler
+	DB      Pinger
+	// Webhooks are mounted at /webhooks/{name}. They authenticate with
+	// provider signatures, not sessions.
+	Webhooks     map[string]http.Handler
+	Log          *slog.Logger
+	PublicURL    *url.URL
+	CookieSecure bool
+	WebDir       string // built admin panel; empty disables static serving
+	Version      string
+	Commit       string
+}
+
+// Server implements gen.ServerInterface.
+type Server struct {
+	opt          Options
+	loginLimiter *ipLimiter
+	public       map[string]bool
+}
+
+var _ gen.ServerInterface = (*Server)(nil)
+
+// NewHandler returns the root HTTP handler.
+func NewHandler(opt Options) (http.Handler, error) {
+	public, err := publicRoutes()
+	if err != nil {
+		return nil, fmt.Errorf("httpapi: load embedded spec: %w", err)
+	}
+	s := &Server{opt: opt, loginLimiter: newIPLimiter(5, time.Minute), public: public}
+
+	r := chi.NewRouter()
+	r.Use(middleware.RequestID)
+	r.Use(clientIP)
+	r.Use(s.logRequests)
+	r.Use(middleware.Recoverer)
+
+	r.Get("/healthz", s.healthz)
+	if opt.OAuth != nil && opt.MCP != nil {
+		s.mountMCP(r)
+	}
+	for name, h := range opt.Webhooks {
+		r.With(middleware.RequestSize(maxBodyBytes)).Handle("/webhooks/"+name, h)
+	}
+
+	r.Route("/api", func(api chi.Router) {
+		api.Use(middleware.RequestSize(maxBodyBytes))
+		api.Use(s.checkOrigin)
+		api.Use(middleware.NoCache)
+		gen.HandlerWithOptions(s, gen.ChiServerOptions{
+			BaseRouter:  api,
+			Middlewares: []gen.MiddlewareFunc{s.requireAuth},
+			ErrorHandlerFunc: func(w http.ResponseWriter, _ *http.Request, err error) {
+				writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+			},
+		})
+		api.NotFound(func(w http.ResponseWriter, _ *http.Request) {
+			writeError(w, http.StatusNotFound, "not_found", "no such endpoint")
+		})
+	})
+
+	if opt.WebDir != "" {
+		r.NotFound(spaHandler(opt.WebDir).ServeHTTP)
+	}
+	return r, nil
+}
+
+func (s *Server) healthz(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
+	defer cancel()
+	if err := s.opt.DB.Ping(ctx); err != nil {
+		s.opt.Log.Warn("health check failed", "err", err)
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"status": "unavailable", "db": "down"})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"status": "ok", "db": "ok"})
+}
+
+// GetMeta implements gen.ServerInterface.
+func (s *Server) GetMeta(w http.ResponseWriter, _ *http.Request) {
+	writeJSON(w, http.StatusOK, gen.Meta{Version: s.opt.Version, Commit: s.opt.Commit})
+}
+
+func writeJSON(w http.ResponseWriter, status int, v any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(v)
+}
+
+func writeError(w http.ResponseWriter, status int, code, msg string) {
+	writeJSON(w, status, gen.Error{Code: code, Message: msg})
+}
+
+// writeInternal logs err and returns a generic 500.
+func (s *Server) writeInternal(w http.ResponseWriter, r *http.Request, err error) {
+	s.opt.Log.Error("request failed", "err", err, "path", r.URL.Path, "request_id", middleware.GetReqID(r.Context()))
+	writeError(w, http.StatusInternalServerError, "internal", "internal error")
+}
+
+func decodeJSON(r *http.Request, v any) error {
+	return decode(r, v, false)
+}
+
+// decodeOptionalJSON is decodeJSON for endpoints whose body may be left out.
+func decodeOptionalJSON(r *http.Request, v any) error {
+	return decode(r, v, true)
+}
+
+func decode(r *http.Request, v any, optional bool) error {
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(v); err != nil {
+		if optional && errors.Is(err, io.EOF) {
+			return nil
+		}
+		var tooBig *http.MaxBytesError
+		if errors.As(err, &tooBig) {
+			return errors.New("request body too large")
+		}
+		return errors.New("invalid JSON body")
+	}
+	return nil
+}

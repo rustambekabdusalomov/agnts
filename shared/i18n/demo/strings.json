@@ -1,0 +1,2586 @@
+{
+  "Your no sleep agent": {
+    "ru": "Ваш агент, который не спит",
+    "uz": "Hech uxlamaydigan agentingiz"
+  },
+  "Claude Max plan": {
+    "ru": "Тариф Claude Max",
+    "uz": "Claude Max tarifi"
+  },
+  "Tickets": {
+    "ru": "Тикеты",
+    "uz": "Tiketlar"
+  },
+  "Needs you": {
+    "ru": "Ждёт вас",
+    "uz": "Sizni kutmoqda"
+  },
+  "Running": {
+    "ru": "Выполняется",
+    "uz": "Bajarilmoqda"
+  },
+  "In queue": {
+    "ru": "В очереди",
+    "uz": "Navbatda"
+  },
+  "Finished": {
+    "ru": "Завершённые",
+    "uz": "Yakunlangan"
+  },
+  "All tickets": {
+    "ru": "Все тикеты",
+    "uz": "Barcha tiketlar"
+  },
+  "Side projects": {
+    "ru": "Свои проекты",
+    "uz": "Shaxsiy loyihalar"
+  },
+  "Tasks": {
+    "ru": "Задачи",
+    "uz": "Vazifalar"
+  },
+  "Monitor": {
+    "ru": "Мониторинг",
+    "uz": "Monitoring"
+  },
+  "Logs": {
+    "ru": "Логи",
+    "uz": "Loglar"
+  },
+  "Plan usage": {
+    "ru": "Лимиты тарифа",
+    "uz": "Tarif limitlari"
+  },
+  "Setup": {
+    "ru": "Настройка",
+    "uz": "Sozlash"
+  },
+  "Repositories": {
+    "ru": "Репозитории",
+    "uz": "Repozitoriylar"
+  },
+  "Settings": {
+    "ru": "Настройки",
+    "uz": "Sozlamalar"
+  },
+  "Main": {
+    "ru": "Главное меню",
+    "uz": "Asosiy menyu"
+  },
+  "Search tickets and tasks": {
+    "ru": "Поиск тикетов и задач",
+    "uz": "Tiket va vazifalarni qidirish"
+  },
+  "Search tickets": {
+    "ru": "Поиск тикетов",
+    "uz": "Tiketlarni qidirish"
+  },
+  "Sync Jira": {
+    "ru": "Синхронизировать Jira",
+    "uz": "Jira bilan sinxronlash"
+  },
+  "Switch to day mode": {
+    "ru": "Включить дневной режим",
+    "uz": "Kunduzgi rejimga oʻtish"
+  },
+  "Switch to night mode": {
+    "ru": "Включить ночной режим",
+    "uz": "Tungi rejimga oʻtish"
+  },
+  "Language": {
+    "ru": "Язык",
+    "uz": "Til"
+  },
+  "Close": {
+    "ru": "Закрыть",
+    "uz": "Yopish"
+  },
+  "Tickets waiting on your answers or your review, plus runs that stopped.": {
+    "ru": "Тикеты, которые ждут ваших ответов или ревью, а также остановленные запуски.",
+    "uz": "Javobingiz yoki tekshiruvingizni kutayotgan tiketlar hamda toʻxtagan ishga tushirishlar."
+  },
+  "Tickets hiro is working on right now.": {
+    "ru": "Тикеты, над которыми hiro работает прямо сейчас.",
+    "uz": "hiro hozir ishlayotgan tiketlar."
+  },
+  "Tickets with the hiro label that haven't been analyzed yet.": {
+    "ru": "Тикеты с меткой hiro, которые ещё не проанализированы.",
+    "uz": "hiro belgisi bor, hali tahlil qilinmagan tiketlar."
+  },
+  "Pushed or rejected tickets.": {
+    "ru": "Отправленные или отклонённые тикеты.",
+    "uz": "Yuborilgan yoki rad etilgan tiketlar."
+  },
+  "Every ticket hiro has picked up from Jira.": {
+    "ru": "Все тикеты, которые hiro взял из Jira.",
+    "uz": "hiro Jira'dan olgan barcha tiketlar."
+  },
+  "Reading the code": {
+    "ru": "Читает код",
+    "uz": "Kodni oʻqiyapti"
+  },
+  "Needs your answers": {
+    "ru": "Нужны ваши ответы",
+    "uz": "Javoblaringiz kerak"
+  },
+  "Coding": {
+    "ru": "Разработка",
+    "uz": "Kod yozish"
+  },
+  "Running tests": {
+    "ru": "Идут тесты",
+    "uz": "Testlar ishlamoqda"
+  },
+  "Ready for review": {
+    "ru": "Готово к ревью",
+    "uz": "Tekshiruvga tayyor"
+  },
+  "Pushing": {
+    "ru": "Отправка",
+    "uz": "Yuborilmoqda"
+  },
+  "Pushed": {
+    "ru": "Отправлено",
+    "uz": "Yuborildi"
+  },
+  "Rejected": {
+    "ru": "Отклонено",
+    "uz": "Rad etildi"
+  },
+  "Stopped": {
+    "ru": "Остановлено",
+    "uz": "Toʻxtatildi"
+  },
+  "Paused at plan limit": {
+    "ru": "Пауза: лимит тарифа",
+    "uz": "Pauza: tarif limiti"
+  },
+  "Analyze": {
+    "ru": "Анализ",
+    "uz": "Tahlil"
+  },
+  "Your answers": {
+    "ru": "Ваши ответы",
+    "uz": "Javoblaringiz"
+  },
+  "Tests": {
+    "ru": "Тесты",
+    "uz": "Testlar"
+  },
+  "Your review": {
+    "ru": "Ваше ревью",
+    "uz": "Sizning tekshiruvingiz"
+  },
+  "Push": {
+    "ru": "Отправка",
+    "uz": "Yuborish"
+  },
+  "Pickup": {
+    "ru": "Получение",
+    "uz": "Qabul qilish"
+  },
+  "Paused": {
+    "ru": "Пауза",
+    "uz": "Pauza"
+  },
+  "Progress": {
+    "ru": "Прогресс",
+    "uz": "Jarayon"
+  },
+  "Answers or reviews waiting": {
+    "ru": "Ждут ответы или ревью",
+    "uz": "Javob yoki tekshiruv kutilmoqda"
+  },
+  "In containers right now": {
+    "ru": "Сейчас в контейнерах",
+    "uz": "Hozir konteynerlarda"
+  },
+  "Pushed this week": {
+    "ru": "Отправлено за неделю",
+    "uz": "Shu hafta yuborilgan"
+  },
+  "Pull requests opened": {
+    "ru": "Открыто пул-реквестов",
+    "uz": "Ochilgan pull requestlar"
+  },
+  "Plan session": {
+    "ru": "Сессия тарифа",
+    "uz": "Tarif sessiyasi"
+  },
+  "Jira tickets with the hiro label, plus tasks you create for side projects.": {
+    "ru": "Тикеты Jira с меткой hiro, а также задачи, которые вы создаёте для своих проектов.",
+    "uz": "hiro belgili Jira tiketlari hamda shaxsiy loyihalaringiz uchun yaratgan vazifalaringiz."
+  },
+  "Ticket": {
+    "ru": "Тикет",
+    "uz": "Tiket"
+  },
+  "Source": {
+    "ru": "Источник",
+    "uz": "Manba"
+  },
+  "Project": {
+    "ru": "Проект",
+    "uz": "Loyiha"
+  },
+  "Status": {
+    "ru": "Статус",
+    "uz": "Holat"
+  },
+  "Updated": {
+    "ru": "Обновлено",
+    "uz": "Yangilangan"
+  },
+  "Task": {
+    "ru": "Задача",
+    "uz": "Vazifa"
+  },
+  "No tickets match your search.": {
+    "ru": "Нет тикетов по вашему запросу.",
+    "uz": "Qidiruvingiz boʻyicha tiket topilmadi."
+  },
+  "Nothing is waiting on you. Tickets show up here when hiro has questions or changes to review.": {
+    "ru": "Сейчас ничего не ждёт вас. Тикеты появятся здесь, когда у hiro будут вопросы или изменения на ревью.",
+    "uz": "Hozir sizni hech narsa kutmayapti. hiro savol bersa yoki oʻzgarishlarni tekshirishingiz kerak boʻlsa, tiketlar shu yerda chiqadi."
+  },
+  "No tickets here yet.": {
+    "ru": "Здесь пока нет тикетов.",
+    "uz": "Bu yerda hozircha tiket yoʻq."
+  },
+  "Yesterday": {
+    "ru": "Вчера",
+    "uz": "Kecha"
+  },
+  "Yest.": {
+    "ru": "Вчера",
+    "uz": "Kecha"
+  },
+  "Mon": {
+    "ru": "Пн",
+    "uz": "Du"
+  },
+  "Analyze ticket": {
+    "ru": "Анализировать тикет",
+    "uz": "Tiketni tahlil qilish"
+  },
+  "Waiting in queue": {
+    "ru": "Ожидает в очереди",
+    "uz": "Navbatda kutmoqda"
+  },
+  "hiro reads the ticket and the related code, then comes back with a plan and questions. Nothing is changed in this step.": {
+    "ru": "hiro читает тикет и связанный код, затем возвращается с планом и вопросами. На этом шаге ничего не меняется.",
+    "uz": "hiro tiket va unga bogʻliq kodni oʻqiydi, soʻng reja va savollar bilan qaytadi. Bu bosqichda hech narsa oʻzgartirilmaydi."
+  },
+  "Pick an option or write your own answer. Answers go into the coding prompt with the plan.": {
+    "ru": "Выберите вариант или напишите свой ответ. Ответы попадут в промпт вместе с планом.",
+    "uz": "Variantni tanlang yoki oʻz javobingizni yozing. Javoblar reja bilan birga promptga qoʻshiladi."
+  },
+  "Plan": {
+    "ru": "План",
+    "uz": "Reja"
+  },
+  "Questions": {
+    "ru": "Вопросы",
+    "uz": "Savollar"
+  },
+  "Add details (optional)": {
+    "ru": "Добавьте детали (необязательно)",
+    "uz": "Tafsilot qoʻshing (ixtiyoriy)"
+  },
+  "Extra instructions": {
+    "ru": "Дополнительные указания",
+    "uz": "Qoʻshimcha koʻrsatmalar"
+  },
+  "Anything hiro didn't ask about, like files to avoid or naming conventions": {
+    "ru": "Всё, о чём hiro не спросил: например, какие файлы не трогать или как называть",
+    "uz": "hiro soʻramagan narsalar, masalan tegmaslik kerak boʻlgan fayllar yoki nomlash qoidalari"
+  },
+  "Start coding": {
+    "ru": "Начать разработку",
+    "uz": "Kod yozishni boshlash"
+  },
+  "All questions answered": {
+    "ru": "На все вопросы есть ответы",
+    "uz": "Barcha savollarga javob berildi"
+  },
+  "Turns": {
+    "ru": "Шаги",
+    "uz": "Qadamlar"
+  },
+  "Turn limit": {
+    "ru": "Лимит шагов",
+    "uz": "Qadamlar limiti"
+  },
+  "Session usage": {
+    "ru": "Использование сессии",
+    "uz": "Sessiya sarfi"
+  },
+  "Live log": {
+    "ru": "Лог в реальном времени",
+    "uz": "Jonli log"
+  },
+  "Stop run": {
+    "ru": "Остановить запуск",
+    "uz": "Ishni toʻxtatish"
+  },
+  "Review the changes": {
+    "ru": "Проверьте изменения",
+    "uz": "Oʻzgarishlarni tekshiring"
+  },
+  "Lint": {
+    "ru": "Линтер",
+    "uz": "Linter"
+  },
+  "Clean": {
+    "ru": "Чисто",
+    "uz": "Toza"
+  },
+  "Changed": {
+    "ru": "Изменено",
+    "uz": "Oʻzgargan"
+  },
+  "Time": {
+    "ru": "Время",
+    "uz": "Vaqt"
+  },
+  "What hiro did": {
+    "ru": "Что сделал hiro",
+    "uz": "hiro nima qildi"
+  },
+  "Diff": {
+    "ru": "Изменения",
+    "uz": "Oʻzgarishlar"
+  },
+  "Feedback": {
+    "ru": "Комментарий",
+    "uz": "Fikr-mulohaza"
+  },
+  "Describe what to change. Required for Request changes.": {
+    "ru": "Опишите, что изменить. Обязательно для «Запросить изменения».",
+    "uz": "Nimani oʻzgartirish kerakligini yozing. «Oʻzgartirish soʻrash» uchun majburiy."
+  },
+  "Approve and push": {
+    "ru": "Одобрить и отправить",
+    "uz": "Tasdiqlash va yuborish"
+  },
+  "Request changes": {
+    "ru": "Запросить изменения",
+    "uz": "Oʻzgartirish soʻrash"
+  },
+  "Reject": {
+    "ru": "Отклонить",
+    "uz": "Rad etish"
+  },
+  "Committing as you and opening the pull request.": {
+    "ru": "Коммит от вашего имени и открытие пул-реквеста.",
+    "uz": "Sizning nomingizdan commit qilinmoqda va pull request ochilmoqda."
+  },
+  "Send back to queue": {
+    "ru": "Вернуть в очередь",
+    "uz": "Navbatga qaytarish"
+  },
+  "hiro stopped": {
+    "ru": "hiro остановился",
+    "uz": "hiro toʻxtadi"
+  },
+  "What should hiro try?": {
+    "ru": "Что попробовать hiro?",
+    "uz": "hiro nimani sinab koʻrsin?"
+  },
+  "For example: streaming is fine, target is under 10 seconds for 100k rows": {
+    "ru": "Например: стриминг подходит, цель — меньше 10 секунд на 100 тыс. строк",
+    "uz": "Masalan: striming mumkin, maqsad 100 ming qator uchun 10 soniyadan kam"
+  },
+  "Retry with these instructions": {
+    "ru": "Повторить с этими указаниями",
+    "uz": "Shu koʻrsatmalar bilan qayta urinish"
+  },
+  "Take it myself": {
+    "ru": "Сделаю сам",
+    "uz": "Oʻzim qilaman"
+  },
+  "Resume run": {
+    "ru": "Продолжить запуск",
+    "uz": "Ishni davom ettirish"
+  },
+  "Sent with the coding prompt": {
+    "ru": "Отправлены вместе с промптом",
+    "uz": "Prompt bilan birga yuborilgan"
+  },
+  "Key": {
+    "ru": "Ключ",
+    "uz": "Kalit"
+  },
+  "Repository": {
+    "ru": "Репозиторий",
+    "uz": "Repozitoriy"
+  },
+  "Priority": {
+    "ru": "Приоритет",
+    "uz": "Muhimlik"
+  },
+  "Branch": {
+    "ru": "Ветка",
+    "uz": "Branch"
+  },
+  "Revision": {
+    "ru": "Ревизия",
+    "uz": "Reviziya"
+  },
+  "Turns used": {
+    "ru": "Использовано шагов",
+    "uz": "Sarflangan qadamlar"
+  },
+  "History": {
+    "ru": "История",
+    "uz": "Tarix"
+  },
+  "After approval": {
+    "ru": "После одобрения",
+    "uz": "Tasdiqlangandan keyin"
+  },
+  "Push to main": {
+    "ru": "Отправить в main",
+    "uz": "main'ga yuborish"
+  },
+  "Open pull request": {
+    "ru": "Открыть пул-реквест",
+    "uz": "Pull request ochish"
+  },
+  "hiro task": {
+    "ru": "Задача hiro",
+    "uz": "hiro vazifasi"
+  },
+  "Jira": {
+    "ru": "Jira",
+    "uz": "Jira"
+  },
+  "High": {
+    "ru": "Высокий",
+    "uz": "Yuqori"
+  },
+  "Medium": {
+    "ru": "Средний",
+    "uz": "Oʻrta"
+  },
+  "Low": {
+    "ru": "Низкий",
+    "uz": "Past"
+  },
+  "Edit task": {
+    "ru": "Изменить задачу",
+    "uz": "Vazifani tahrirlash"
+  },
+  "Delete": {
+    "ru": "Удалить",
+    "uz": "Oʻchirish"
+  },
+  "Run log": {
+    "ru": "Лог запуска",
+    "uz": "Ishga tushirish logi"
+  },
+  "Open in Logs": {
+    "ru": "Открыть в логах",
+    "uz": "Loglarda ochish"
+  },
+  "Refresh": {
+    "ru": "Обновить",
+    "uz": "Yangilash"
+  },
+  "Current session": {
+    "ru": "Текущая сессия",
+    "uz": "Joriy sessiya"
+  },
+  "This week": {
+    "ru": "Эта неделя",
+    "uz": "Shu hafta"
+  },
+  "Read from Claude Code's rate limit events. Includes your own Claude use on this account.": {
+    "ru": "Берётся из событий лимитов Claude Code. Включает ваше собственное использование Claude на этом аккаунте.",
+    "uz": "Claude Code limit hodisalaridan olinadi. Shu akkauntdagi oʻzingizning Claude sarfingiz ham kiradi."
+  },
+  "Session usage is above 80%. New runs may pause before they finish.": {
+    "ru": "Использование сессии выше 80%. Новые запуски могут встать на паузу до завершения.",
+    "uz": "Sessiya sarfi 80% dan oshdi. Yangi ishlar tugamasdan pauzaga tushishi mumkin."
+  },
+  "Updated just now": {
+    "ru": "Обновлено только что",
+    "uz": "Hozirgina yangilandi"
+  },
+  "Resetting now": {
+    "ru": "Сбрасывается сейчас",
+    "uz": "Hozir yangilanmoqda"
+  },
+  "Not part of this demo": {
+    "ru": "Не входит в это демо",
+    "uz": "Bu demoga kirmaydi"
+  },
+  "Links are disabled in this demo": {
+    "ru": "Ссылки в демо отключены",
+    "uz": "Demoda havolalar oʻchirilgan"
+  },
+  "Add or update tests": {
+    "ru": "Добавить или обновить тесты",
+    "uz": "Testlarni qoʻshish yoki yangilash"
+  },
+  "Add tests": {
+    "ru": "Добавить тесты",
+    "uz": "Test qoʻshish"
+  },
+  "Manual check is fine": {
+    "ru": "Хватит ручной проверки",
+    "uz": "Qoʻlda tekshirish yetarli"
+  },
+  "Is there an existing screen or module I should follow for style and structure?": {
+    "ru": "Есть ли экран или модуль, на который мне ориентироваться по стилю и структуре?",
+    "uz": "Uslub va tuzilma boʻyicha qaysidir ekran yoki modulga tayanishim kerakmi?"
+  },
+  "Yes, I'll name it": {
+    "ru": "Да, я назову",
+    "uz": "Ha, nomini aytaman"
+  },
+  "Use your judgment": {
+    "ru": "На твоё усмотрение",
+    "uz": "Oʻzing hal qil"
+  },
+  "Followed the existing structure of the project.": {
+    "ru": "Следовал текущей структуре проекта.",
+    "uz": "Loyihaning mavjud tuzilmasiga amal qilindi."
+  },
+  "Added tests for the new behavior.": {
+    "ru": "Добавил тесты для нового поведения.",
+    "uz": "Yangi xatti-harakat uchun testlar qoʻshildi."
+  },
+  "No new tests, as you asked. Existing tests still pass.": {
+    "ru": "Новых тестов нет, как вы просили. Существующие тесты проходят.",
+    "uz": "Siz soʻraganingizdek yangi test yoʻq. Mavjud testlar oʻtmoqda."
+  },
+  "Changes applied according to the plan.": {
+    "ru": "Изменения внесены по плану.",
+    "uz": "Oʻzgarishlar reja boʻyicha kiritildi."
+  },
+  "Apply your instructions": {
+    "ru": "Применить ваши указания",
+    "uz": "Koʻrsatmalaringizni qoʻllash"
+  },
+  "Implement the change": {
+    "ru": "Внести изменение",
+    "uz": "Oʻzgarishni amalga oshirish"
+  },
+  "Tests failed 3 times in a row. TestStatementExport_Large still times out after 30s, so hiro stopped instead of guessing further. The ticket doesn't say what export time is acceptable or whether streaming the CSV is allowed.": {
+    "ru": "Тесты упали 3 раза подряд. TestStatementExport_Large всё ещё не укладывается в 30 с, поэтому hiro остановился, а не стал гадать дальше. В тикете не сказано, какое время экспорта допустимо и можно ли отдавать CSV потоком.",
+    "uz": "Testlar ketma-ket 3 marta yiqildi. TestStatementExport_Large hali ham 30 soniyada tugamayapti, shuning uchun hiro taxmin qilishda davom etmay, toʻxtadi. Tiketda qaysi eksport vaqti maqbul ekani va CSV'ni oqim bilan berish mumkinligi aytilmagan."
+  },
+  "The session limit was reached during coding at 07:18. The run is saved on its branch. The limit has reset since then, so it can continue.": {
+    "ru": "Лимит сессии закончился во время разработки в 07:18. Работа сохранена в своей ветке. С тех пор лимит обновился, можно продолжать.",
+    "uz": "Kod yozish vaqtida, 07:18 da sessiya limiti tugadi. Ish oʻz branchida saqlangan. Shundan beri limit yangilandi, davom ettirish mumkin."
+  },
+  "You stopped this run. The branch is kept so you can retry with new instructions.": {
+    "ru": "Вы остановили запуск. Ветка сохранена, можно повторить с новыми указаниями.",
+    "uz": "Siz ishni toʻxtatdingiz. Branch saqlandi, yangi koʻrsatmalar bilan qayta urinish mumkin."
+  },
+  "Picked up from Jira": {
+    "ru": "Взят из Jira",
+    "uz": "Jira'dan olindi"
+  },
+  "Picked up from Jira (label: hiro)": {
+    "ru": "Взят из Jira (метка: hiro)",
+    "uz": "Jira'dan olindi (belgi: hiro)"
+  },
+  "Started analysis": {
+    "ru": "Начат анализ",
+    "uz": "Tahlil boshlandi"
+  },
+  "Analysis finished": {
+    "ru": "Анализ завершён",
+    "uz": "Tahlil yakunlandi"
+  },
+  "No questions, started the run": {
+    "ru": "Вопросов нет, запуск начат",
+    "uz": "Savol yoʻq, ish boshlandi"
+  },
+  "You answered and started the run": {
+    "ru": "Вы ответили и запустили работу",
+    "uz": "Javob berib, ishni boshladingiz"
+  },
+  "Tests passed, waiting for your review": {
+    "ru": "Тесты прошли, ждёт вашего ревью",
+    "uz": "Testlar oʻtdi, tekshiruvingiz kutilmoqda"
+  },
+  "Coding finished, running checks": {
+    "ru": "Код готов, идут проверки",
+    "uz": "Kod tayyor, tekshiruvlar ketmoqda"
+  },
+  "Stopped after 3 failed test runs": {
+    "ru": "Остановлено после 3 неудачных прогонов тестов",
+    "uz": "3 marta muvaffaqiyatsiz test oʻtkazilgach toʻxtatildi"
+  },
+  "You approved the changes": {
+    "ru": "Вы одобрили изменения",
+    "uz": "Oʻzgarishlarni tasdiqladingiz"
+  },
+  "You rejected the changes": {
+    "ru": "Вы отклонили изменения",
+    "uz": "Oʻzgarishlarni rad etdingiz"
+  },
+  "You rejected the changes and took it yourself": {
+    "ru": "Вы отклонили изменения и взяли задачу себе",
+    "uz": "Oʻzgarishlarni rad etib, ishni oʻzingiz oldingiz"
+  },
+  "You rejected the changes. Branch discarded": {
+    "ru": "Вы отклонили изменения. Ветка удалена",
+    "uz": "Oʻzgarishlarni rad etdingiz. Branch oʻchirildi"
+  },
+  "You created this task": {
+    "ru": "Вы создали эту задачу",
+    "uz": "Bu vazifani siz yaratdingiz"
+  },
+  "Pushed to main": {
+    "ru": "Отправлено в main",
+    "uz": "main'ga yuborildi"
+  },
+  "You stopped the run": {
+    "ru": "Вы остановили запуск",
+    "uz": "Ishni toʻxtatdingiz"
+  },
+  "You resumed the run": {
+    "ru": "Вы продолжили запуск",
+    "uz": "Ishni davom ettirdingiz"
+  },
+  "Sent back to queue": {
+    "ru": "Возвращено в очередь",
+    "uz": "Navbatga qaytarildi"
+  },
+  "You edited the task": {
+    "ru": "Вы изменили задачу",
+    "uz": "Vazifani tahrirladingiz"
+  },
+  "Started without questions": {
+    "ru": "Запущено без вопросов",
+    "uz": "Savollarsiz boshlandi"
+  },
+  "Jira: transition to In Review": {
+    "ru": "Jira: перевод в In Review",
+    "uz": "Jira: In Review holatiga oʻtkazish"
+  },
+  "Work for your side projects. Tasks stay in hiro and never touch Jira. Everything else works the same: questions, coding, your review.": {
+    "ru": "Работа над вашими проектами. Задачи живут в hiro и не попадают в Jira. Всё остальное так же: вопросы, разработка, ваше ревью.",
+    "uz": "Shaxsiy loyihalaringiz uchun ishlar. Vazifalar hiro'da qoladi va Jira'ga tegmaydi. Qolgani bir xil: savollar, kod yozish, sizning tekshiruvingiz."
+  },
+  "New task": {
+    "ru": "Новая задача",
+    "uz": "Yangi vazifa"
+  },
+  "Filter by project": {
+    "ru": "Фильтр по проекту",
+    "uz": "Loyiha boʻyicha saralash"
+  },
+  "No tasks match your search.": {
+    "ru": "Нет задач по вашему запросу.",
+    "uz": "Qidiruvingiz boʻyicha vazifa topilmadi."
+  },
+  "No tasks in this repository yet.": {
+    "ru": "В этом репозитории пока нет задач.",
+    "uz": "Bu repozitoriyda hozircha vazifa yoʻq."
+  },
+  "Projects": {
+    "ru": "Проекты",
+    "uz": "Loyihalar"
+  },
+  "Repositories on your server": {
+    "ru": "Репозитории на вашем сервере",
+    "uz": "Serveringizdagi repozitoriylar"
+  },
+  "Add": {
+    "ru": "Добавить",
+    "uz": "Qoʻshish"
+  },
+  "For solo projects you can let hiro push straight to main after you approve. It still never pushes without your review.": {
+    "ru": "В соло-проектах можно разрешить hiro отправлять сразу в main после вашего одобрения. Без вашего ревью он всё равно ничего не отправляет.",
+    "uz": "Yakka loyihalarda tasdiqlaganingizdan soʻng hiro'ga toʻgʻridan-toʻgʻri main'ga yuborishga ruxsat berishingiz mumkin. Baribir tekshiruvingizsiz hech narsa yubormaydi."
+  },
+  "For your side projects. Not synced to Jira.": {
+    "ru": "Для ваших проектов. Не синхронизируется с Jira.",
+    "uz": "Shaxsiy loyihalaringiz uchun. Jira bilan sinxronlanmaydi."
+  },
+  "New project": {
+    "ru": "Новый проект",
+    "uz": "Yangi loyiha"
+  },
+  "Title": {
+    "ru": "Название",
+    "uz": "Sarlavha"
+  },
+  "For example: Add a rest timer between sets": {
+    "ru": "Например: таймер отдыха между подходами",
+    "uz": "Masalan: yondashuvlar orasida dam olish taymeri"
+  },
+  "What should be done": {
+    "ru": "Что нужно сделать",
+    "uz": "Nima qilish kerak"
+  },
+  "Describe the result you want. The clearer this is, the fewer questions hiro asks.": {
+    "ru": "Опишите нужный результат. Чем яснее, тем меньше вопросов задаст hiro.",
+    "uz": "Qanday natija kerakligini yozing. Qanchalik aniq boʻlsa, hiro shuncha kam savol beradi."
+  },
+  "After you approve": {
+    "ru": "После вашего одобрения",
+    "uz": "Tasdiqlaganingizdan keyin"
+  },
+  "How to start": {
+    "ru": "Как начать",
+    "uz": "Qanday boshlash"
+  },
+  "Ask questions first": {
+    "ru": "Сначала задать вопросы",
+    "uz": "Avval savol berish"
+  },
+  "hiro reads the code and asks before coding. Best for anything unclear.": {
+    "ru": "hiro читает код и спрашивает до разработки. Лучше для неясных задач.",
+    "uz": "hiro kodni oʻqib, kod yozishdan oldin soʻraydi. Noaniq ishlar uchun eng yaxshisi."
+  },
+  "Start coding right away": {
+    "ru": "Сразу начать разработку",
+    "uz": "Darhol kod yozishni boshlash"
+  },
+  "Skip questions. Good for small, well-described tasks.": {
+    "ru": "Без вопросов. Подходит для небольших и понятных задач.",
+    "uz": "Savolsiz. Kichik va aniq yozilgan vazifalar uchun."
+  },
+  "Keep in queue": {
+    "ru": "Оставить в очереди",
+    "uz": "Navbatda qoldirish"
+  },
+  "Save it and start later.": {
+    "ru": "Сохранить и начать позже.",
+    "uz": "Saqlab, keyinroq boshlash."
+  },
+  "Cancel": {
+    "ru": "Отмена",
+    "uz": "Bekor qilish"
+  },
+  "Create task": {
+    "ru": "Создать задачу",
+    "uz": "Vazifa yaratish"
+  },
+  "Create and start": {
+    "ru": "Создать и запустить",
+    "uz": "Yaratish va boshlash"
+  },
+  "Save changes": {
+    "ru": "Сохранить изменения",
+    "uz": "Oʻzgarishlarni saqlash"
+  },
+  "Give the task a title.": {
+    "ru": "Дайте задаче название.",
+    "uz": "Vazifaga sarlavha bering."
+  },
+  "Add project": {
+    "ru": "Добавить проект",
+    "uz": "Loyiha qoʻshish"
+  },
+  "A repository on your server that hiro can work in.": {
+    "ru": "Репозиторий на вашем сервере, в котором может работать hiro.",
+    "uz": "Serveringizdagi, hiro ishlay oladigan repozitoriy."
+  },
+  "Name": {
+    "ru": "Название",
+    "uz": "Nomi"
+  },
+  "hiro clones it into a fresh container for each task.": {
+    "ru": "hiro клонирует его в новый контейнер для каждой задачи.",
+    "uz": "hiro uni har bir vazifa uchun yangi konteynerga klonlaydi."
+  },
+  "Task key prefix": {
+    "ru": "Префикс ключа задачи",
+    "uz": "Vazifa kaliti prefiksi"
+  },
+  "Test command": {
+    "ru": "Команда тестов",
+    "uz": "Test buyrugʻi"
+  },
+  "Must pass before a task reaches your review.": {
+    "ru": "Должна пройти, прежде чем задача попадёт к вам на ревью.",
+    "uz": "Vazifa tekshiruvingizga yetib kelishidan oldin oʻtishi shart."
+  },
+  "Must pass before a ticket reaches your review.": {
+    "ru": "Должна пройти, прежде чем тикет попадёт к вам на ревью.",
+    "uz": "Tiket tekshiruvingizga yetib kelishidan oldin oʻtishi shart."
+  },
+  "Add a name and a clone URL.": {
+    "ru": "Укажите название и URL для клонирования.",
+    "uz": "Nom va klonlash URL manzilini kiriting."
+  },
+  "Filter by repository": {
+    "ru": "Фильтр по репозиторию",
+    "uz": "Repozitoriy boʻyicha saralash"
+  },
+  "Your side-project repositories on this server": {
+    "ru": "Репозитории ваших проектов на этом сервере",
+    "uz": "Shu serverdagi shaxsiy loyiha repozitoriylaringiz"
+  },
+  "For repositories only you work on, you can let hiro push straight to main after you approve. It still never pushes without your review.": {
+    "ru": "В репозиториях, где работаете только вы, можно разрешить hiro отправлять сразу в main после вашего одобрения. Без вашего ревью он всё равно ничего не отправляет.",
+    "uz": "Faqat siz ishlaydigan repozitoriylarda tasdiqlaganingizdan soʻng hiro'ga toʻgʻridan-toʻgʻri main'ga yuborishga ruxsat berishingiz mumkin. Baribir tekshiruvingizsiz hech narsa yubormaydi."
+  },
+  "New repository": {
+    "ru": "Новый репозиторий",
+    "uz": "Yangi repozitoriy"
+  },
+  "A side-project repository on your server that hiro can work in.": {
+    "ru": "Репозиторий вашего проекта на сервере, в котором может работать hiro.",
+    "uz": "Serveringizdagi, hiro ishlay oladigan shaxsiy loyiha repozitoriysi."
+  },
+  "Task form": {
+    "ru": "Форма задачи",
+    "uz": "Vazifa shakli"
+  },
+  "Project form": {
+    "ru": "Форма проекта",
+    "uz": "Loyiha shakli"
+  },
+  "Repository form": {
+    "ru": "Форма репозитория",
+    "uz": "Repozitoriy shakli"
+  },
+  "Task updated": {
+    "ru": "Задача обновлена",
+    "uz": "Vazifa yangilandi"
+  },
+  "Every step hiro takes, recorded as it happens. Use it to see where time goes and why runs stop.": {
+    "ru": "Каждый шаг hiro записывается в момент выполнения. Здесь видно, куда уходит время и почему запуски останавливаются.",
+    "uz": "hiro har bir qadami sodir boʻlishi bilan yoziladi. Vaqt qayerga ketayotgani va ishlar nega toʻxtayotganini shu yerda koʻrasiz."
+  },
+  "Live": {
+    "ru": "В эфире",
+    "uz": "Jonli"
+  },
+  "Export JSON": {
+    "ru": "Экспорт JSON",
+    "uz": "JSON eksport"
+  },
+  "Runs started": {
+    "ru": "Запусков начато",
+    "uz": "Boshlangan ishlar"
+  },
+  "Coding sessions, including retries": {
+    "ru": "Сессии разработки, включая повторы",
+    "uz": "Kod yozish sessiyalari, qayta urinishlar bilan"
+  },
+  "Reached your review": {
+    "ru": "Дошли до ревью",
+    "uz": "Tekshiruvgacha yetgan"
+  },
+  "Average turns": {
+    "ru": "Среднее число шагов",
+    "uz": "Oʻrtacha qadamlar"
+  },
+  "Per ticket, limit is 80": {
+    "ru": "На тикет, лимит 80",
+    "uz": "Har bir tiketga, limit 80"
+  },
+  "Stops and pauses": {
+    "ru": "Остановки и паузы",
+    "uz": "Toʻxtash va pauzalar"
+  },
+  "Where the time goes": {
+    "ru": "Куда уходит время",
+    "uz": "Vaqt qayerga ketyapti"
+  },
+  "Average time spent in each step, across all tickets and tasks": {
+    "ru": "Среднее время на каждом шаге по всем тикетам и задачам",
+    "uz": "Barcha tiket va vazifalar boʻyicha har bir bosqichdagi oʻrtacha vaqt"
+  },
+  "Waiting for your answers": {
+    "ru": "Ожидание ваших ответов",
+    "uz": "Javoblaringizni kutish"
+  },
+  "Waiting for your review": {
+    "ru": "Ожидание вашего ревью",
+    "uz": "Tekshiruvingizni kutish"
+  },
+  "hiro working": {
+    "ru": "hiro работает",
+    "uz": "hiro ishlayapti"
+  },
+  "Waiting on you": {
+    "ru": "Ожидание вас",
+    "uz": "Sizni kutish"
+  },
+  "No data": {
+    "ru": "Нет данных",
+    "uz": "Maʼlumot yoʻq"
+  },
+  "Events": {
+    "ru": "События",
+    "uz": "Hodisalar"
+  },
+  "All": {
+    "ru": "Все",
+    "uz": "Barchasi"
+  },
+  "State changes": {
+    "ru": "Смена статусов",
+    "uz": "Holat oʻzgarishlari"
+  },
+  "Tool calls": {
+    "ru": "Вызовы инструментов",
+    "uz": "Vosita chaqiruvlari"
+  },
+  "Commands": {
+    "ru": "Команды",
+    "uz": "Buyruqlar"
+  },
+  "Your actions": {
+    "ru": "Ваши действия",
+    "uz": "Sizning harakatlaringiz"
+  },
+  "Plan limits": {
+    "ru": "Лимиты тарифа",
+    "uz": "Tarif limitlari"
+  },
+  "Warnings and errors": {
+    "ru": "Предупреждения и ошибки",
+    "uz": "Ogohlantirish va xatolar"
+  },
+  "Ticket key, e.g. PAY-214": {
+    "ru": "Ключ тикета, например PAY-214",
+    "uz": "Tiket kaliti, masalan PAY-214"
+  },
+  "Filter by ticket key": {
+    "ru": "Фильтр по ключу тикета",
+    "uz": "Tiket kaliti boʻyicha saralash"
+  },
+  "Errors only": {
+    "ru": "Только ошибки",
+    "uz": "Faqat xatolar"
+  },
+  "Clear filters": {
+    "ru": "Сбросить фильтры",
+    "uz": "Filtrlarni tozalash"
+  },
+  "Step": {
+    "ru": "Шаг",
+    "uz": "Bosqich"
+  },
+  "Type": {
+    "ru": "Тип",
+    "uz": "Turi"
+  },
+  "Event": {
+    "ru": "Событие",
+    "uz": "Hodisa"
+  },
+  "Duration": {
+    "ru": "Длительность",
+    "uz": "Davomiyligi"
+  },
+  "No events match these filters.": {
+    "ru": "Нет событий по этим фильтрам.",
+    "uz": "Bu filtrlar boʻyicha hodisa yoʻq."
+  },
+  "State": {
+    "ru": "Статус",
+    "uz": "Holat"
+  },
+  "Tool": {
+    "ru": "Инструмент",
+    "uz": "Vosita"
+  },
+  "Command": {
+    "ru": "Команда",
+    "uz": "Buyruq"
+  },
+  "You": {
+    "ru": "Вы",
+    "uz": "Siz"
+  },
+  "Limit": {
+    "ru": "Лимит",
+    "uz": "Limit"
+  },
+  "Error": {
+    "ru": "Ошибка",
+    "uz": "Xato"
+  },
+  "No extra data for this event.": {
+    "ru": "Для этого события нет дополнительных данных.",
+    "uz": "Bu hodisa uchun qoʻshimcha maʼlumot yoʻq."
+  },
+  "In the real app this downloads a JSON file": {
+    "ru": "В настоящем приложении это скачивает JSON-файл",
+    "uz": "Haqiqiy ilovada bu JSON faylni yuklab oladi"
+  },
+  "Copy failed. In the real app this downloads a file": {
+    "ru": "Не удалось скопировать. В настоящем приложении это скачивает файл",
+    "uz": "Nusxalab boʻlmadi. Haqiqiy ilovada bu faylni yuklab oladi"
+  },
+  "hiro runs on your Claude subscription. These limits are shared with your own Claude and Claude Code use.": {
+    "ru": "hiro работает на вашей подписке Claude. Эти лимиты общие с вашим собственным использованием Claude и Claude Code.",
+    "uz": "hiro Claude obunangizda ishlaydi. Bu limitlar oʻzingizning Claude va Claude Code sarfingiz bilan umumiy."
+  },
+  "When a limit is reached": {
+    "ru": "Когда лимит исчерпан",
+    "uz": "Limit tugaganda"
+  },
+  "How hiro behaves near the limit": {
+    "ru": "Как hiro ведёт себя у лимита",
+    "uz": "Limitga yaqinlashganda hiro qanday ishlaydi"
+  },
+  "Above 80% of the session": {
+    "ru": "Выше 80% сессии",
+    "uz": "Sessiyaning 80% dan yuqori"
+  },
+  "Show a warning, keep running": {
+    "ru": "Показать предупреждение, продолжать",
+    "uz": "Ogohlantirish, ishni davom ettirish"
+  },
+  "Limit reached mid-run": {
+    "ru": "Лимит закончился во время запуска",
+    "uz": "Ish oʻrtasida limit tugadi"
+  },
+  "Pause, keep the branch": {
+    "ru": "Пауза, ветка сохраняется",
+    "uz": "Pauza, branch saqlanadi"
+  },
+  "After reset": {
+    "ru": "После сброса",
+    "uz": "Yangilangandan keyin"
+  },
+  "Resume paused runs automatically": {
+    "ru": "Автоматически продолжить остановленные запуски",
+    "uz": "Pauzadagi ishlarni avtomatik davom ettirish"
+  },
+  "Idle refresh": {
+    "ru": "Обновление в простое",
+    "uz": "Boʻsh turganda yangilash"
+  },
+  "Every 30 min": {
+    "ru": "Каждые 30 мин",
+    "uz": "Har 30 daqiqada"
+  },
+  "Numbers come from the rate limit events Claude Code emits during each run. When hiro is idle, a tiny refresh run keeps them current.": {
+    "ru": "Цифры берутся из событий лимитов, которые Claude Code отправляет при каждом запуске. Когда hiro простаивает, их обновляет крошечный служебный запуск.",
+    "uz": "Raqamlar Claude Code har bir ishda yuboradigan limit hodisalaridan olinadi. hiro boʻsh turganda ularni kichik yangilash ishi dolzarb saqlaydi."
+  },
+  "Code hiro can work in. Each run clones the repository into a fresh container on your server, then runs these checks before anything reaches your review.": {
+    "ru": "Код, с которым может работать hiro. Каждый запуск клонирует репозиторий в новый контейнер на вашем сервере и прогоняет эти проверки, прежде чем что-то попадёт к вам на ревью.",
+    "uz": "hiro ishlay oladigan kod. Har bir ish repozitoriyni serveringizdagi yangi konteynerga klonlaydi va tekshiruvingizga yetib borishidan oldin shu tekshiruvlarni oʻtkazadi."
+  },
+  "Add repository": {
+    "ru": "Добавить репозиторий",
+    "uz": "Repozitoriy qoʻshish"
+  },
+  "Found": {
+    "ru": "Есть",
+    "uz": "Bor"
+  },
+  "Missing": {
+    "ru": "Нет",
+    "uz": "Yoʻq"
+  },
+  "Open": {
+    "ru": "Открыть",
+    "uz": "Ochish"
+  },
+  "Clone URL": {
+    "ru": "URL для клонирования",
+    "uz": "Klonlash URL"
+  },
+  "hiro uses your GitHub token to clone and push.": {
+    "ru": "hiro использует ваш токен GitHub для клонирования и отправки.",
+    "uz": "hiro klonlash va yuborish uchun GitHub tokeningizdan foydalanadi."
+  },
+  "Jira project key": {
+    "ru": "Ключ проекта Jira",
+    "uz": "Jira loyiha kaliti"
+  },
+  "Tickets from this Jira project with the hiro label can run here.": {
+    "ru": "Здесь могут выполняться тикеты из этого проекта Jira с меткой hiro.",
+    "uz": "Shu Jira loyihasidagi hiro belgili tiketlar shu yerda ishlay oladi."
+  },
+  "Default branch": {
+    "ru": "Ветка по умолчанию",
+    "uz": "Asosiy branch"
+  },
+  "Work branches start from here.": {
+    "ru": "Рабочие ветки создаются отсюда.",
+    "uz": "Ish branchlari shu yerdan boshlanadi."
+  },
+  "Build command": {
+    "ru": "Команда сборки",
+    "uz": "Build buyrugʻi"
+  },
+  "Lint command": {
+    "ru": "Команда линтера",
+    "uz": "Linter buyrugʻi"
+  },
+  "Found in the repository root": {
+    "ru": "Найден в корне репозитория",
+    "uz": "Repozitoriy ildizida topildi"
+  },
+  "hiro can draft one from the code, as a normal task you review before it's pushed.": {
+    "ru": "hiro может набросать его по коду — как обычную задачу, которую вы проверите перед отправкой.",
+    "uz": "hiro uni koddan tayyorlab berishi mumkin — yuborishdan oldin tekshiradigan oddiy vazifa sifatida."
+  },
+  "Draft CLAUDE.md": {
+    "ru": "Набросать CLAUDE.md",
+    "uz": "CLAUDE.md tayyorlash"
+  },
+  "Repository for Jira tickets": {
+    "ru": "Репозиторий для тикетов Jira",
+    "uz": "Jira tiketlari uchun repozitoriy"
+  },
+  "Side project repository": {
+    "ru": "Репозиторий своего проекта",
+    "uz": "Shaxsiy loyiha repozitoriysi"
+  },
+  "Give the repository a name.": {
+    "ru": "Дайте репозиторию название.",
+    "uz": "Repozitoriyga nom bering."
+  },
+  "Add a clone URL.": {
+    "ru": "Укажите URL для клонирования.",
+    "uz": "Klonlash URL manzilini kiriting."
+  },
+  "Repository added": {
+    "ru": "Репозиторий добавлен",
+    "uz": "Repozitoriy qoʻshildi"
+  },
+  "Repository saved": {
+    "ru": "Репозиторий сохранён",
+    "uz": "Repozitoriy saqlandi"
+  },
+  "In the real app this creates a task to draft CLAUDE.md": {
+    "ru": "В настоящем приложении это создаёт задачу на CLAUDE.md",
+    "uz": "Haqiqiy ilovada bu CLAUDE.md uchun vazifa yaratadi"
+  },
+  "How hiro connects to your tools and how it behaves during runs.": {
+    "ru": "Как hiro подключается к вашим инструментам и как ведёт себя во время запусков.",
+    "uz": "hiro vositalaringizga qanday ulanadi va ish paytida qanday ishlaydi."
+  },
+  "Appearance": {
+    "ru": "Оформление",
+    "uz": "Koʻrinish"
+  },
+  "Saved in this browser, applied right away": {
+    "ru": "Сохраняется в этом браузере и применяется сразу",
+    "uz": "Shu brauzerda saqlanadi va darhol qoʻllanadi"
+  },
+  "Theme": {
+    "ru": "Тема",
+    "uz": "Mavzu"
+  },
+  "System follows your device's day or night setting": {
+    "ru": "«Системная» следует дневному или ночному режиму устройства",
+    "uz": "«Tizim» qurilmangizning kunduzgi yoki tungi rejimiga moslashadi"
+  },
+  "System": {
+    "ru": "Системная",
+    "uz": "Tizim"
+  },
+  "Day": {
+    "ru": "Дневная",
+    "uz": "Kunduzgi"
+  },
+  "Night": {
+    "ru": "Ночная",
+    "uz": "Tungi"
+  },
+  "Where work tickets come from": {
+    "ru": "Откуда приходят рабочие тикеты",
+    "uz": "Ish tiketlari qayerdan keladi"
+  },
+  "Connected": {
+    "ru": "Подключено",
+    "uz": "Ulangan"
+  },
+  "Site": {
+    "ru": "Сайт",
+    "uz": "Sayt"
+  },
+  "Account": {
+    "ru": "Аккаунт",
+    "uz": "Akkaunt"
+  },
+  "API token stored on your server": {
+    "ru": "API-токен хранится на вашем сервере",
+    "uz": "API token serveringizda saqlanadi"
+  },
+  "Pickup label": {
+    "ru": "Метка для подхвата",
+    "uz": "Olish belgisi"
+  },
+  "Only tickets with this label are picked up": {
+    "ru": "Берутся только тикеты с этой меткой",
+    "uz": "Faqat shu belgili tiketlar olinadi"
+  },
+  "Check for new tickets": {
+    "ru": "Проверять новые тикеты",
+    "uz": "Yangi tiketlarni tekshirish"
+  },
+  "Every minute": {
+    "ru": "Каждую минуту",
+    "uz": "Har daqiqada"
+  },
+  "Every 2 min": {
+    "ru": "Каждые 2 мин",
+    "uz": "Har 2 daqiqada"
+  },
+  "Every 10 min": {
+    "ru": "Каждые 10 мин",
+    "uz": "Har 10 daqiqada"
+  },
+  "Move ticket to In Review after push": {
+    "ru": "Переводить тикет в In Review после отправки",
+    "uz": "Yuborilgach tiketni In Review holatiga oʻtkazish"
+  },
+  "Uses your Jira workflow's transition": {
+    "ru": "Использует переход из вашего workflow в Jira",
+    "uz": "Jira workflow'ingizdagi oʻtishdan foydalanadi"
+  },
+  "Cloning, commits and pull requests": {
+    "ru": "Клонирование, коммиты и пул-реквесты",
+    "uz": "Klonlash, commitlar va pull requestlar"
+  },
+  "Commit author name": {
+    "ru": "Имя автора коммитов",
+    "uz": "Commit muallifi ismi"
+  },
+  "Commits are made as you": {
+    "ru": "Коммиты делаются от вашего имени",
+    "uz": "Commitlar sizning nomingizdan qilinadi"
+  },
+  "Commit author email": {
+    "ru": "Email автора коммитов",
+    "uz": "Commit muallifi emaili"
+  },
+  "Must match your GitHub account to show as yours": {
+    "ru": "Должен совпадать с аккаунтом GitHub, чтобы коммиты отображались как ваши",
+    "uz": "Commitlar sizniki boʻlib koʻrinishi uchun GitHub akkauntingizga mos kelishi kerak"
+  },
+  "Branch prefix": {
+    "ru": "Префикс веток",
+    "uz": "Branch prefiksi"
+  },
+  "The engine that does the coding": {
+    "ru": "Движок, который пишет код",
+    "uz": "Kod yozadigan dvigatel"
+  },
+  "Subscription token": {
+    "ru": "Токен подписки",
+    "uz": "Obuna tokeni"
+  },
+  "Sign-in": {
+    "ru": "Вход",
+    "uz": "Kirish"
+  },
+  "Claude Max plan via CLAUDE_CODE_OAUTH_TOKEN. Renew with claude setup-token before it expires.": {
+    "ru": "Тариф Claude Max через CLAUDE_CODE_OAUTH_TOKEN. Обновите командой claude setup-token до истечения.",
+    "uz": "CLAUDE_CODE_OAUTH_TOKEN orqali Claude Max tarifi. Muddati tugashidan oldin claude setup-token bilan yangilang."
+  },
+  "Model": {
+    "ru": "Модель",
+    "uz": "Model"
+  },
+  "Sonnet is faster on limits. Opus is stronger on hard tickets.": {
+    "ru": "Sonnet бережнее к лимитам. Opus сильнее на сложных тикетах.",
+    "uz": "Sonnet limitlarni kamroq sarflaydi. Opus murakkab tiketlarda kuchliroq."
+  },
+  "Use Opus when retrying a failed run": {
+    "ru": "Использовать Opus при повторе неудачного запуска",
+    "uz": "Muvaffaqiyatsiz ishni qayta urinishda Opus ishlatish"
+  },
+  "Turn limit per run": {
+    "ru": "Лимит шагов на запуск",
+    "uz": "Bir ish uchun qadamlar limiti"
+  },
+  "The run stops and reports when it reaches this": {
+    "ru": "При достижении запуск останавливается и сообщает об этом",
+    "uz": "Shunga yetganda ish toʻxtaydi va xabar beradi"
+  },
+  "Run timeout": {
+    "ru": "Тайм-аут запуска",
+    "uz": "Ish vaqti chegarasi"
+  },
+  "Allowed commands": {
+    "ru": "Разрешённые команды",
+    "uz": "Ruxsat etilgan buyruqlar"
+  },
+  "Claude Code can run these without asking": {
+    "ru": "Claude Code может выполнять их без вопросов",
+    "uz": "Claude Code bularni soʻramasdan bajara oladi"
+  },
+  "Blocked commands": {
+    "ru": "Запрещённые команды",
+    "uz": "Taqiqlangan buyruqlar"
+  },
+  "Always refused, even if a ticket asks for them. Pushing is done by hiro, never by Claude Code.": {
+    "ru": "Всегда запрещены, даже если тикет их просит. Отправку делает hiro, а не Claude Code.",
+    "uz": "Tiket soʻrasa ham doim rad etiladi. Yuborishni Claude Code emas, hiro bajaradi."
+  },
+  "Add command": {
+    "ru": "Добавить команду",
+    "uz": "Buyruq qoʻshish"
+  },
+  "Runs": {
+    "ru": "Запуски",
+    "uz": "Ishlar"
+  },
+  "Defaults for every ticket and task": {
+    "ru": "Значения по умолчанию для всех тикетов и задач",
+    "uz": "Barcha tiket va vazifalar uchun standart qiymatlar"
+  },
+  "Ask questions before coding": {
+    "ru": "Задавать вопросы до разработки",
+    "uz": "Kod yozishdan oldin savol berish"
+  },
+  "Default for new Jira tickets. Tasks choose this when you create them.": {
+    "ru": "По умолчанию для новых тикетов Jira. Для задач это выбирается при создании.",
+    "uz": "Yangi Jira tiketlari uchun standart. Vazifalarda bu yaratishda tanlanadi."
+  },
+  "Resume paused runs after the limit resets": {
+    "ru": "Продолжать остановленные запуски после сброса лимита",
+    "uz": "Limit yangilangach pauzadagi ishlarni davom ettirish"
+  },
+  "Don't start new runs above": {
+    "ru": "Не начинать новые запуски выше",
+    "uz": "Bundan yuqori boʻlsa yangi ish boshlamaslik"
+  },
+  "Session usage. Runs already going keep going.": {
+    "ru": "Использование сессии. Уже идущие запуски продолжаются.",
+    "uz": "Sessiya sarfi. Boshlangan ishlar davom etaveradi."
+  },
+  "Runs at the same time": {
+    "ru": "Одновременных запусков",
+    "uz": "Bir vaqtdagi ishlar"
+  },
+  "More runs finish sooner but use your plan limit faster": {
+    "ru": "Больше запусков — быстрее результат, но лимит тратится быстрее",
+    "uz": "Koʻproq ish tezroq tugaydi, lekin tarif limiti tezroq sarflanadi"
+  },
+  "Notifications": {
+    "ru": "Уведомления",
+    "uz": "Bildirishnomalar"
+  },
+  "Send Telegram messages": {
+    "ru": "Отправлять сообщения в Telegram",
+    "uz": "Telegram xabarlarini yuborish"
+  },
+  "When something needs you": {
+    "ru": "Когда что-то ждёт вас",
+    "uz": "Biror narsa sizni kutganda"
+  },
+  "Questions to answer or changes to review": {
+    "ru": "Вопросы или изменения на ревью",
+    "uz": "Javob kutayotgan savollar yoki tekshirish kerak boʻlgan oʻzgarishlar"
+  },
+  "When a run stops or pauses": {
+    "ru": "Когда запуск останавливается или встаёт на паузу",
+    "uz": "Ish toʻxtaganda yoki pauzaga tushganda"
+  },
+  "When changes are pushed": {
+    "ru": "Когда изменения отправлены",
+    "uz": "Oʻzgarishlar yuborilganda"
+  },
+  "Demo data": {
+    "ru": "Демо-данные",
+    "uz": "Demo maʼlumotlar"
+  },
+  "Only in this demo": {
+    "ru": "Только в этом демо",
+    "uz": "Faqat shu demoda"
+  },
+  "Reset everything": {
+    "ru": "Сбросить всё",
+    "uz": "Hammasini tiklash"
+  },
+  "Restores the sample tickets, tasks, logs and settings": {
+    "ru": "Возвращает примеры тикетов, задач, логов и настроек",
+    "uz": "Namuna tiketlar, vazifalar, loglar va sozlamalarni qaytaradi"
+  },
+  "Reset demo": {
+    "ru": "Сбросить демо",
+    "uz": "Demoni tiklash"
+  },
+  "You have unsaved changes": {
+    "ru": "Есть несохранённые изменения",
+    "uz": "Saqlanmagan oʻzgarishlar bor"
+  },
+  "Unsaved changes": {
+    "ru": "Несохранённые изменения",
+    "uz": "Saqlanmagan oʻzgarishlar"
+  },
+  "Discard": {
+    "ru": "Отменить",
+    "uz": "Bekor qilish"
+  },
+  "On this page": {
+    "ru": "На этой странице",
+    "uz": "Shu sahifada"
+  },
+  "Secrets like your Jira token, GitHub token and Claude token live in your server's environment. This page never shows them.": {
+    "ru": "Секреты — токены Jira, GitHub и Claude — хранятся в окружении вашего сервера. Эта страница их никогда не показывает.",
+    "uz": "Jira, GitHub va Claude tokenlari kabi maxfiy maʼlumotlar serveringiz muhitida saqlanadi. Bu sahifa ularni hech qachon koʻrsatmaydi."
+  },
+  "Expires Sep 2027": {
+    "ru": "Истекает в сент. 2027",
+    "uz": "2027-yil sentabrda tugaydi"
+  },
+  "Token valid until Mar 2027": {
+    "ru": "Токен действует до марта 2027",
+    "uz": "Token 2027-yil martgacha amal qiladi"
+  },
+  "Decrease": {
+    "ru": "Уменьшить",
+    "uz": "Kamaytirish"
+  },
+  "Increase": {
+    "ru": "Увеличить",
+    "uz": "Koʻpaytirish"
+  },
+  "Settings saved": {
+    "ru": "Настройки сохранены",
+    "uz": "Sozlamalar saqlandi"
+  },
+  "Changes discarded": {
+    "ru": "Изменения отменены",
+    "uz": "Oʻzgarishlar bekor qilindi"
+  },
+  "Demo reset": {
+    "ru": "Демо сброшено",
+    "uz": "Demo tiklandi"
+  },
+  "Plan usage refreshed": {
+    "ru": "Лимиты обновлены",
+    "uz": "Limitlar yangilandi"
+  },
+  "Run stopped": {
+    "ru": "Запуск остановлен",
+    "uz": "Ish toʻxtatildi"
+  },
+  "Synced. No new tickets with the hiro label": {
+    "ru": "Синхронизировано. Новых тикетов с меткой hiro нет",
+    "uz": "Sinxronlandi. hiro belgili yangi tiket yoʻq"
+  },
+  "Write what to change first": {
+    "ru": "Сначала напишите, что изменить",
+    "uz": "Avval nimani oʻzgartirishni yozing"
+  },
+  "Add instructions so hiro tries something different": {
+    "ru": "Добавьте указания, чтобы hiro попробовал по-другому",
+    "uz": "hiro boshqacha urinib koʻrishi uchun koʻrsatma qoʻshing"
+  },
+  "Night mode on": {
+    "ru": "Ночной режим включён",
+    "uz": "Tungi rejim yoqildi"
+  },
+  "Day mode on": {
+    "ru": "Дневной режим включён",
+    "uz": "Kunduzgi rejim yoqildi"
+  },
+  "Integrations": {
+    "ru": "Интеграции",
+    "uz": "Integratsiyalar"
+  },
+  "The services hiro works with. Tokens are stored on your server and only used for the actions listed on each page.": {
+    "ru": "Сервисы, с которыми работает hiro. Токены хранятся на вашем сервере и используются только для действий, указанных на странице каждого сервиса.",
+    "uz": "hiro ishlaydigan xizmatlar. Tokenlar serveringizda saqlanadi va faqat har bir sahifada koʻrsatilgan amallar uchun ishlatiladi."
+  },
+  "Clone code, push branches and open pull requests.": {
+    "ru": "Клонирует код, отправляет ветки и открывает пул-реквесты.",
+    "uz": "Kodni klonlash, branchlarni yuborish va pull request ochish."
+  },
+  "The same for repositories on GitLab.com or your own GitLab server.": {
+    "ru": "То же самое для репозиториев на GitLab.com или вашем собственном сервере GitLab.",
+    "uz": "GitLab.com yoki oʻz GitLab serveringizdagi repozitoriylar uchun ham xuddi shunday."
+  },
+  "Pick up tickets with the hiro label and keep their status up to date.": {
+    "ru": "Берёт тикеты с меткой hiro и обновляет их статус.",
+    "uz": "hiro belgili tiketlarni oladi va ularning holatini yangilab boradi."
+  },
+  "Not connected": {
+    "ru": "Не подключено",
+    "uz": "Ulanmagan"
+  },
+  "Manage": {
+    "ru": "Управлять",
+    "uz": "Boshqarish"
+  },
+  "Connect": {
+    "ru": "Подключить",
+    "uz": "Ulash"
+  },
+  "Test connection": {
+    "ru": "Проверить подключение",
+    "uz": "Ulanishni tekshirish"
+  },
+  "Disconnect": {
+    "ru": "Отключить",
+    "uz": "Uzish"
+  },
+  "Coming later": {
+    "ru": "Скоро",
+    "uz": "Keyinroq"
+  },
+  "Planned integrations": {
+    "ru": "Запланированные интеграции",
+    "uz": "Rejalashtirilgan integratsiyalar"
+  },
+  "Token expires": {
+    "ru": "Токен истекает",
+    "uz": "Token muddati"
+  },
+  "Back to integrations": {
+    "ru": "Назад к интеграциям",
+    "uz": "Integratsiyalarga qaytish"
+  },
+  "Not connected yet.": {
+    "ru": "Пока не подключено.",
+    "uz": "Hali ulanmagan."
+  },
+  "Checking the token": {
+    "ru": "Проверка токена",
+    "uz": "Token tekshirilmoqda"
+  },
+  "Reading your account": {
+    "ru": "Чтение аккаунта",
+    "uz": "Akkaunt oʻqilmoqda"
+  },
+  "Listing projects": {
+    "ru": "Получение списка проектов",
+    "uz": "Loyihalar roʻyxati olinmoqda"
+  },
+  "Create a personal access token with the scopes below, then paste it here.": {
+    "ru": "Создайте персональный токен доступа с правами ниже и вставьте его сюда.",
+    "uz": "Quyidagi huquqlar bilan shaxsiy kirish tokenini yarating va shu yerga joylang."
+  },
+  "Instance URL": {
+    "ru": "Адрес сервера",
+    "uz": "Server manzili"
+  },
+  "gitlab.com or your own GitLab server": {
+    "ru": "gitlab.com или ваш собственный сервер GitLab",
+    "uz": "gitlab.com yoki oʻz GitLab serveringiz"
+  },
+  "Access token": {
+    "ru": "Токен доступа",
+    "uz": "Kirish tokeni"
+  },
+  "Stored encrypted on your server. hiro never shows it again.": {
+    "ru": "Хранится зашифрованным на вашем сервере. hiro больше никогда его не покажет.",
+    "uz": "Serveringizda shifrlangan holda saqlanadi. hiro uni boshqa hech qachon koʻrsatmaydi."
+  },
+  "Required scopes": {
+    "ru": "Нужные права",
+    "uz": "Kerakli huquqlar"
+  },
+  "Use a token from an account that can push to your repositories. hiro commits under the name and email you set after connecting.": {
+    "ru": "Используйте токен аккаунта, который может отправлять изменения в ваши репозитории. hiro делает коммиты от имени и email, которые вы укажете после подключения.",
+    "uz": "Repozitoriylaringizga yubora oladigan akkaunt tokenidan foydalaning. hiro ulangandan keyin siz koʻrsatgan ism va email nomidan commit qiladi."
+  },
+  "hiro can use": {
+    "ru": "Доступно hiro",
+    "uz": "hiro foydalana oladi"
+  },
+  "Opened by hiro, last 30 days": {
+    "ru": "Открыто hiro за 30 дней",
+    "uz": "hiro ochgan, soʻnggi 30 kun"
+  },
+  "Merged": {
+    "ru": "Слито",
+    "uz": "Birlashtirilgan"
+  },
+  "API rate limit": {
+    "ru": "Лимит API",
+    "uz": "API limiti"
+  },
+  "Of 5,000 left this hour": {
+    "ru": "Из 5 000 осталось в этот час",
+    "uz": "Shu soatda 5 000 tadan qolgani"
+  },
+  "Connection": {
+    "ru": "Подключение",
+    "uz": "Ulanish"
+  },
+  "How hiro signs in": {
+    "ru": "Как hiro входит",
+    "uz": "hiro qanday kiradi"
+  },
+  "Method": {
+    "ru": "Способ",
+    "uz": "Usul"
+  },
+  "Personal access token": {
+    "ru": "Персональный токен",
+    "uz": "Shaxsiy kirish tokeni"
+  },
+  "GitHub App": {
+    "ru": "Приложение GitHub",
+    "uz": "GitHub ilovasi"
+  },
+  "OAuth application": {
+    "ru": "OAuth-приложение",
+    "uz": "OAuth ilova"
+  },
+  "A GitHub App can be limited to selected repositories": {
+    "ru": "Приложение GitHub можно ограничить выбранными репозиториями",
+    "uz": "GitHub ilovasini tanlangan repozitoriylar bilan cheklash mumkin"
+  },
+  "Token": {
+    "ru": "Токен",
+    "uz": "Token"
+  },
+  "Stored encrypted on your server": {
+    "ru": "Хранится зашифрованным на вашем сервере",
+    "uz": "Serveringizda shifrlangan holda saqlanadi"
+  },
+  "Expires": {
+    "ru": "Истекает",
+    "uz": "Muddati"
+  },
+  "Renew it soon so runs don't fail": {
+    "ru": "Обновите его заранее, чтобы запуски не падали",
+    "uz": "Ishlar yiqilmasligi uchun uni oldindan yangilang"
+  },
+  "Permissions": {
+    "ru": "Права",
+    "uz": "Huquqlar"
+  },
+  "What the token can do, checked on the last test": {
+    "ru": "Что может токен, по последней проверке",
+    "uz": "Token nima qila oladi, oxirgi tekshiruv boʻyicha"
+  },
+  "Required": {
+    "ru": "Обязательно",
+    "uz": "Majburiy"
+  },
+  "Optional": {
+    "ru": "Необязательно",
+    "uz": "Ixtiyoriy"
+  },
+  "Granted": {
+    "ru": "Выдано",
+    "uz": "Berilgan"
+  },
+  "Not granted": {
+    "ru": "Не выдано",
+    "uz": "Berilmagan"
+  },
+  "Contents": {
+    "ru": "Содержимое",
+    "uz": "Tarkib"
+  },
+  "Read and write. Clone code and push branches.": {
+    "ru": "Чтение и запись. Клонирование кода и отправка веток.",
+    "uz": "Oʻqish va yozish. Kodni klonlash va branchlarni yuborish."
+  },
+  "Read and write. Open pull requests and read reviews.": {
+    "ru": "Чтение и запись. Открытие пул-реквестов и чтение ревью.",
+    "uz": "Oʻqish va yozish. Pull request ochish va tekshiruvlarni oʻqish."
+  },
+  "Metadata": {
+    "ru": "Метаданные",
+    "uz": "Metamaʼlumotlar"
+  },
+  "Read. List repositories and branches.": {
+    "ru": "Чтение. Список репозиториев и веток.",
+    "uz": "Oʻqish. Repozitoriy va branchlar roʻyxati."
+  },
+  "Issues": {
+    "ru": "Задачи",
+    "uz": "Muammolar"
+  },
+  "Read. Link pull requests to issues.": {
+    "ru": "Чтение. Связь пул-реквестов с задачами.",
+    "uz": "Oʻqish. Pull requestlarni muammolar bilan bogʻlash."
+  },
+  "Workflows": {
+    "ru": "Воркфлоу",
+    "uz": "Workflowlar"
+  },
+  "Read and write. Only needed if hiro may change CI files.": {
+    "ru": "Чтение и запись. Нужно, только если hiro может менять файлы CI.",
+    "uz": "Oʻqish va yozish. Faqat hiro CI fayllarini oʻzgartira olsa kerak."
+  },
+  "Full API access. Open merge requests and read pipelines.": {
+    "ru": "Полный доступ к API. Открытие merge request и чтение пайплайнов.",
+    "uz": "API'ga toʻliq kirish. Merge request ochish va pipeline'larni oʻqish."
+  },
+  "Clone code.": {
+    "ru": "Клонирование кода.",
+    "uz": "Kodni klonlash."
+  },
+  "Push branches.": {
+    "ru": "Отправка веток.",
+    "uz": "Branchlarni yuborish."
+  },
+  "Repository access": {
+    "ru": "Доступ к репозиториям",
+    "uz": "Repozitoriyga kirish"
+  },
+  "Turn off a repository to stop hiro from cloning or pushing to it": {
+    "ru": "Отключите репозиторий, чтобы hiro не клонировал его и не отправлял туда изменения",
+    "uz": "hiro klonlamasligi va yubormasligi uchun repozitoriyni oʻchirib qoʻying"
+  },
+  "Used for": {
+    "ru": "Используется для",
+    "uz": "Nima uchun"
+  },
+  "Not used yet": {
+    "ru": "Пока не используется",
+    "uz": "Hali ishlatilmagan"
+  },
+  "Commits": {
+    "ru": "Коммиты",
+    "uz": "Commitlar"
+  },
+  "Who commits appear from": {
+    "ru": "От чьего имени коммиты",
+    "uz": "Commitlar kimning nomidan"
+  },
+  "Author name": {
+    "ru": "Имя автора",
+    "uz": "Muallif ismi"
+  },
+  "Author email": {
+    "ru": "Email автора",
+    "uz": "Muallif emaili"
+  },
+  "Sign commits": {
+    "ru": "Подписывать коммиты",
+    "uz": "Commitlarni imzolash"
+  },
+  "Uses the SSH key on your server": {
+    "ru": "Использует SSH-ключ на вашем сервере",
+    "uz": "Serveringizdagi SSH kalitdan foydalanadi"
+  },
+  "Add a Co-authored-by: hiro line": {
+    "ru": "Добавлять строку Co-authored-by: hiro",
+    "uz": "Co-authored-by: hiro qatorini qoʻshish"
+  },
+  "Teammates can see which commits hiro wrote": {
+    "ru": "Коллеги видят, какие коммиты написал hiro",
+    "uz": "Hamkasblar qaysi commitlarni hiro yozganini koʻradi"
+  },
+  "Pull requests": {
+    "ru": "Пул-реквесты",
+    "uz": "Pull requestlar"
+  },
+  "Merge requests": {
+    "ru": "Merge request'ы",
+    "uz": "Merge requestlar"
+  },
+  "How hiro opens them": {
+    "ru": "Как hiro их открывает",
+    "uz": "hiro ularni qanday ochadi"
+  },
+  "{key} and {title} are replaced with the ticket's key and title": {
+    "ru": "{key} и {title} заменяются ключом и названием тикета",
+    "uz": "{key} va {title} tiket kaliti va sarlavhasi bilan almashtiriladi"
+  },
+  "Open as draft": {
+    "ru": "Открывать как черновик",
+    "uz": "Qoralama sifatida ochish"
+  },
+  "Labels": {
+    "ru": "Метки",
+    "uz": "Belgilar"
+  },
+  "Comma separated": {
+    "ru": "Через запятую",
+    "uz": "Vergul bilan ajrating"
+  },
+  "Request review from": {
+    "ru": "Запрашивать ревью у",
+    "uz": "Tekshiruvni soʻrash"
+  },
+  "Usernames, comma separated": {
+    "ru": "Имена пользователей через запятую",
+    "uz": "Foydalanuvchi nomlari, vergul bilan"
+  },
+  "Delete the branch after merge": {
+    "ru": "Удалять ветку после слияния",
+    "uz": "Birlashtirilgandan keyin branchni oʻchirish"
+  },
+  "Move the Jira ticket to Done when merged": {
+    "ru": "Переводить тикет Jira в Done после слияния",
+    "uz": "Birlashtirilganda Jira tiketini Done'ga oʻtkazish"
+  },
+  "Needs the Jira integration": {
+    "ru": "Нужна интеграция с Jira",
+    "uz": "Jira integratsiyasi kerak"
+  },
+  "Webhooks": {
+    "ru": "Вебхуки",
+    "uz": "Webhooklar"
+  },
+  "Active": {
+    "ru": "Активно",
+    "uz": "Faol"
+  },
+  "Off": {
+    "ru": "Выключено",
+    "uz": "Oʻchiq"
+  },
+  "Last delivery": {
+    "ru": "Последняя доставка",
+    "uz": "Oxirgi yetkazish"
+  },
+  "3 min ago": {
+    "ru": "3 мин назад",
+    "uz": "3 daqiqa oldin"
+  },
+  "hiro learns about merges and review comments right away instead of checking every few minutes.": {
+    "ru": "hiro сразу узнаёт о слияниях и комментариях ревью, а не проверяет каждые несколько минут.",
+    "uz": "hiro har necha daqiqada tekshirmasdan, birlashtirish va tekshiruv izohlari haqida darhol biladi."
+  },
+  "No activity yet.": {
+    "ru": "Пока нет активности.",
+    "uz": "Hali faollik yoʻq."
+  },
+  "Sync now": {
+    "ru": "Синхронизировать",
+    "uz": "Hozir sinxronlash"
+  },
+  "Use an API token from your Atlassian account.": {
+    "ru": "Используйте API-токен вашего аккаунта Atlassian.",
+    "uz": "Atlassian akkauntingizdagi API tokendan foydalaning."
+  },
+  "Email": {
+    "ru": "Email",
+    "uz": "Email"
+  },
+  "Connect Jira": {
+    "ru": "Подключить Jira",
+    "uz": "Jira'ni ulash"
+  },
+  "Watched by hiro": {
+    "ru": "Отслеживает hiro",
+    "uz": "hiro kuzatadi"
+  },
+  "Open tickets": {
+    "ru": "Открытые тикеты",
+    "uz": "Ochiq tiketlar"
+  },
+  "Picked up": {
+    "ru": "Взято",
+    "uz": "Olingan"
+  },
+  "Last 30 days": {
+    "ru": "За 30 дней",
+    "uz": "Soʻnggi 30 kun"
+  },
+  "Comments posted": {
+    "ru": "Комментариев оставлено",
+    "uz": "Yozilgan izohlar"
+  },
+  "Questions, links and summaries": {
+    "ru": "Вопросы, ссылки и сводки",
+    "uz": "Savollar, havolalar va xulosalar"
+  },
+  "Which Jira projects hiro watches, and where their code lives": {
+    "ru": "Какие проекты Jira отслеживает hiro и где лежит их код",
+    "uz": "hiro qaysi Jira loyihalarini kuzatadi va ularning kodi qayerda"
+  },
+  "Watched": {
+    "ru": "Отслеживается",
+    "uz": "Kuzatiladi"
+  },
+  "No repository yet": {
+    "ru": "Репозитория пока нет",
+    "uz": "Hali repozitoriy yoʻq"
+  },
+  "Pickup rules": {
+    "ru": "Правила подхвата",
+    "uz": "Olish qoidalari"
+  },
+  "Which tickets hiro takes": {
+    "ru": "Какие тикеты берёт hiro",
+    "uz": "hiro qaysi tiketlarni oladi"
+  },
+  "Label": {
+    "ru": "Метка",
+    "uz": "Belgi"
+  },
+  "Add this label to a ticket to hand it to hiro": {
+    "ru": "Добавьте эту метку к тикету, чтобы передать его hiro",
+    "uz": "Tiketni hiro'ga topshirish uchun unga shu belgini qoʻshing"
+  },
+  "Issue types": {
+    "ru": "Типы задач",
+    "uz": "Vazifa turlari"
+  },
+  "Statuses": {
+    "ru": "Статусы",
+    "uz": "Holatlar"
+  },
+  "Tickets in other statuses are left alone": {
+    "ru": "Тикеты в других статусах не трогаются",
+    "uz": "Boshqa holatdagi tiketlarga tegilmaydi"
+  },
+  "Assignee": {
+    "ru": "Исполнитель",
+    "uz": "Ijrochi"
+  },
+  "Assigned to me": {
+    "ru": "Назначено мне",
+    "uz": "Menga biriktirilgan"
+  },
+  "Anyone": {
+    "ru": "Любой",
+    "uz": "Har kim"
+  },
+  "The query hiro runs": {
+    "ru": "Запрос, который выполняет hiro",
+    "uz": "hiro bajaradigan soʻrov"
+  },
+  "Status updates": {
+    "ru": "Обновление статусов",
+    "uz": "Holat yangilanishlari"
+  },
+  "How hiro moves tickets on your board": {
+    "ru": "Как hiro двигает тикеты по вашей доске",
+    "uz": "hiro tiketlarni doskangizda qanday siljitadi"
+  },
+  "When hiro starts coding": {
+    "ru": "Когда hiro начинает разработку",
+    "uz": "hiro kod yozishni boshlaganda"
+  },
+  "When you reject the changes": {
+    "ru": "Когда вы отклоняете изменения",
+    "uz": "Oʻzgarishlarni rad etganingizda"
+  },
+  "When the pull request is merged": {
+    "ru": "Когда пул-реквест слит",
+    "uz": "Pull request birlashtirilganda"
+  },
+  "Keep status": {
+    "ru": "Не менять статус",
+    "uz": "Holatni saqlash"
+  },
+  "Comments": {
+    "ru": "Комментарии",
+    "uz": "Izohlar"
+  },
+  "What hiro writes on the ticket": {
+    "ru": "Что hiro пишет в тикете",
+    "uz": "hiro tiketga nima yozadi"
+  },
+  "hiro's questions": {
+    "ru": "Вопросы hiro",
+    "uz": "hiro savollari"
+  },
+  "So teammates can see what was unclear": {
+    "ru": "Чтобы коллеги видели, что было неясно",
+    "uz": "Hamkasblar nima noaniq boʻlganini koʻrishi uchun"
+  },
+  "The plan before coding": {
+    "ru": "План перед разработкой",
+    "uz": "Kod yozishdan oldingi reja"
+  },
+  "Link to the pull request": {
+    "ru": "Ссылка на пул-реквест",
+    "uz": "Pull request havolasi"
+  },
+  "Summary of the changes": {
+    "ru": "Сводка изменений",
+    "uz": "Oʻzgarishlar xulosasi"
+  },
+  "Sync": {
+    "ru": "Синхронизация",
+    "uz": "Sinxronlash"
+  },
+  "Polling": {
+    "ru": "Опрос",
+    "uz": "Soʻrov"
+  },
+  "Last sync": {
+    "ru": "Последняя синхронизация",
+    "uz": "Oxirgi sinxronlash"
+  },
+  "Next sync": {
+    "ru": "Следующая синхронизация",
+    "uz": "Keyingi sinxronlash"
+  },
+  "in 1 min": {
+    "ru": "через 1 мин",
+    "uz": "1 daqiqadan keyin"
+  },
+  "in 2 min": {
+    "ru": "через 2 мин",
+    "uz": "2 daqiqadan keyin"
+  },
+  "in 10 min": {
+    "ru": "через 10 мин",
+    "uz": "10 daqiqadan keyin"
+  },
+  "A Jira webhook would deliver new tickets instantly. It needs a public URL for your server.": {
+    "ru": "Вебхук Jira доставлял бы новые тикеты мгновенно. Для него нужен публичный адрес вашего сервера.",
+    "uz": "Jira webhook yangi tiketlarni darhol yetkazardi. Buning uchun serveringizning ochiq manzili kerak."
+  },
+  "hiro only reads tickets that match the query, and only writes the status changes and comments you turn on here.": {
+    "ru": "hiro читает только тикеты, подходящие под запрос, и пишет только те статусы и комментарии, которые вы включили здесь.",
+    "uz": "hiro faqat soʻrovga mos tiketlarni oʻqiydi va faqat shu yerda yoqqan holat va izohlaringizni yozadi."
+  },
+  "just now": {
+    "ru": "только что",
+    "uz": "hozirgina"
+  },
+  "Use an https:// address.": {
+    "ru": "Укажите адрес, начинающийся с https://.",
+    "uz": "https:// bilan boshlanadigan manzil kiriting."
+  },
+  "Paste a valid access token.": {
+    "ru": "Вставьте действительный токен доступа.",
+    "uz": "Yaroqli kirish tokenini joylang."
+  },
+  "Connection works": {
+    "ru": "Подключение работает",
+    "uz": "Ulanish ishlayapti"
+  },
+  "Where tickets come from and where code is pushed": {
+    "ru": "Откуда приходят тикеты и куда отправляется код",
+    "uz": "Tiketlar qayerdan keladi va kod qayerga yuboriladi"
+  },
+  "Back to repositories": {
+    "ru": "Назад к репозиториям",
+    "uz": "Repozitoriylarga qaytish"
+  },
+  "Edit settings": {
+    "ru": "Изменить настройки",
+    "uz": "Sozlamalarni tahrirlash"
+  },
+  "Branches": {
+    "ru": "Ветки",
+    "uz": "Branchlar"
+  },
+  "Commits this week": {
+    "ru": "Коммитов за неделю",
+    "uz": "Shu haftadagi commitlar"
+  },
+  "Pipeline success": {
+    "ru": "Успешных пайплайнов",
+    "uz": "Muvaffaqiyatli pipeline'lar"
+  },
+  "Production": {
+    "ru": "Продакшн",
+    "uz": "Production"
+  },
+  "Staging": {
+    "ru": "Стейджинг",
+    "uz": "Staging"
+  },
+  "Pipelines": {
+    "ru": "Пайплайны",
+    "uz": "Pipeline'lar"
+  },
+  "Latest commit": {
+    "ru": "Последний коммит",
+    "uz": "Soʻnggi commit"
+  },
+  "Author": {
+    "ru": "Автор",
+    "uz": "Muallif"
+  },
+  "Ahead / behind": {
+    "ru": "Впереди / позади",
+    "uz": "Oldinda / ortda"
+  },
+  "Checks": {
+    "ru": "Проверки",
+    "uz": "Tekshiruvlar"
+  },
+  "Others": {
+    "ru": "Остальные",
+    "uz": "Boshqalar"
+  },
+  "Default": {
+    "ru": "По умолчанию",
+    "uz": "Asosiy"
+  },
+  "Passed": {
+    "ru": "Прошло",
+    "uz": "Oʻtdi"
+  },
+  "Failed": {
+    "ru": "Упало",
+    "uz": "Yiqildi"
+  },
+  "Waiting": {
+    "ru": "Ждёт",
+    "uz": "Kutmoqda"
+  },
+  "Skipped": {
+    "ru": "Пропущено",
+    "uz": "Oʻtkazib yuborildi"
+  },
+  "Waiting for you": {
+    "ru": "Ждёт вас",
+    "uz": "Sizni kutmoqda"
+  },
+  "No pipeline": {
+    "ru": "Нет пайплайна",
+    "uz": "Pipeline yoʻq"
+  },
+  "No commits yet": {
+    "ru": "Коммитов пока нет",
+    "uz": "Hali commit yoʻq"
+  },
+  "Every branch, newest first. hiro's commits name the ticket and you as co-author.": {
+    "ru": "Все ветки, сначала новые. В коммитах hiro указан тикет и вы как соавтор.",
+    "uz": "Barcha branchlar, avval yangilari. hiro commitlarida tiket va siz hammuallif sifatida koʻrsatilgan."
+  },
+  "Healthy": {
+    "ru": "В порядке",
+    "uz": "Yaxshi"
+  },
+  "Empty": {
+    "ru": "Пусто",
+    "uz": "Boʻsh"
+  },
+  "Not deployed yet": {
+    "ru": "Ещё не развёрнуто",
+    "uz": "Hali joylanmagan"
+  },
+  "Commit": {
+    "ru": "Коммит",
+    "uz": "Commit"
+  },
+  "Pipeline": {
+    "ru": "Конвейер",
+    "uz": "Jarayon zanjiri"
+  },
+  "hiro waits for the checks on its branch to pass before a ticket reaches your review. Deploying is always your decision.": {
+    "ru": "hiro ждёт, пока пройдут проверки его ветки, прежде чем тикет попадёт к вам на ревью. Развёртывание всегда решаете вы.",
+    "uz": "hiro tiket tekshiruvingizga kelishidan oldin oʻz branchidagi tekshiruvlar oʻtishini kutadi. Joylash har doim sizning qaroringiz."
+  },
+  "Pipeline runs": {
+    "ru": "Запуски пайплайнов",
+    "uz": "Pipeline ishga tushirishlari"
+  },
+  "Build, test and deploy for every push": {
+    "ru": "Сборка, тесты и развёртывание на каждую отправку",
+    "uz": "Har bir yuborishda build, test va joylash"
+  },
+  "Stage": {
+    "ru": "Этап",
+    "uz": "Bosqich"
+  },
+  "Build": {
+    "ru": "Сборка",
+    "uz": "Build"
+  },
+  "Test": {
+    "ru": "Тесты",
+    "uz": "Test"
+  },
+  "Deploy to staging": {
+    "ru": "Развернуть на стейджинг",
+    "uz": "Staging'ga joylash"
+  },
+  "Deploy to production": {
+    "ru": "Развернуть в продакшн",
+    "uz": "Production'ga joylash"
+  },
+  "Deploy": {
+    "ru": "Развернуть",
+    "uz": "Joylash"
+  },
+  "Deploying to production": {
+    "ru": "Развёртывание в продакшн",
+    "uz": "Production'ga joylanmoqda"
+  },
+  "pull request": {
+    "ru": "пул-реквест",
+    "uz": "pull request"
+  },
+  "merge": {
+    "ru": "слияние",
+    "uz": "birlashtirish"
+  },
+  "push": {
+    "ru": "отправка",
+    "uz": "push"
+  },
+  "Dashboard": {
+    "ru": "Дашборд",
+    "uz": "Boshqaruv paneli"
+  },
+  "Analytics": {
+    "ru": "Аналитика",
+    "uz": "Analitika"
+  },
+  "Overview": {
+    "ru": "Обзор",
+    "uz": "Umumiy"
+  },
+  "Good night, Rustam": {
+    "ru": "Доброй ночи, Рустам",
+    "uz": "Xayrli tun, Rustam"
+  },
+  "Good morning, Rustam": {
+    "ru": "Доброе утро, Рустам",
+    "uz": "Xayrli tong, Rustam"
+  },
+  "Good afternoon, Rustam": {
+    "ru": "Добрый день, Рустам",
+    "uz": "Xayrli kun, Rustam"
+  },
+  "Good evening, Rustam": {
+    "ru": "Добрый вечер, Рустам",
+    "uz": "Xayrli kech, Rustam"
+  },
+  "Open analytics": {
+    "ru": "Открыть аналитику",
+    "uz": "Analitikani ochish"
+  },
+  "Running now": {
+    "ru": "Сейчас в работе",
+    "uz": "Hozir bajarilmoqda"
+  },
+  "Oldest first. Every minute here is a minute hiro can't work.": {
+    "ru": "Сначала самые старые. Каждая минута здесь — минута, когда hiro не может работать.",
+    "uz": "Avval eng eskilari. Bu yerdagi har bir daqiqa — hiro ishlay olmaydigan daqiqa."
+  },
+  "Open inbox": {
+    "ru": "Открыть входящие",
+    "uz": "Kiruvchilarni ochish"
+  },
+  "Answer": {
+    "ru": "Ответить",
+    "uz": "Javob berish"
+  },
+  "Review": {
+    "ru": "Ревью",
+    "uz": "Tekshirish"
+  },
+  "Retry": {
+    "ru": "Повторить",
+    "uz": "Qayta urinish"
+  },
+  "Resume": {
+    "ru": "Продолжить",
+    "uz": "Davom ettirish"
+  },
+  "Nothing is waiting on you. hiro will show tickets here when it needs answers or a review.": {
+    "ru": "Сейчас ничего не ждёт вас. hiro покажет здесь тикеты, когда понадобятся ответы или ревью.",
+    "uz": "Hozir sizni hech narsa kutmayapti. Javob yoki tekshiruv kerak boʻlsa, hiro tiketlarni shu yerda koʻrsatadi."
+  },
+  "Runs left this session": {
+    "ru": "Запусков осталось в сессии",
+    "uz": "Sessiyada qolgan ishlar"
+  },
+  "Estimate based on the average run size on Sonnet.": {
+    "ru": "Оценка по среднему размеру запуска на Sonnet.",
+    "uz": "Sonnet'dagi oʻrtacha ish hajmi boʻyicha taxmin."
+  },
+  "Live runs": {
+    "ru": "Активные запуски",
+    "uz": "Faol ishlar"
+  },
+  "Tickets in containers right now": {
+    "ru": "Тикеты в контейнерах прямо сейчас",
+    "uz": "Hozir konteynerlardagi tiketlar"
+  },
+  "No runs at the moment.": {
+    "ru": "Сейчас запусков нет.",
+    "uz": "Hozircha ishlar yoʻq."
+  },
+  "Open tickets by step": {
+    "ru": "Открытые тикеты по шагам",
+    "uz": "Ochiq tiketlar bosqichlar boʻyicha"
+  },
+  "Today by hour": {
+    "ru": "Сегодня по часам",
+    "uz": "Bugun soatlar boʻyicha"
+  },
+  "Events recorded today. hiro keeps working while you sleep.": {
+    "ru": "События за сегодня. hiro работает, даже когда вы спите.",
+    "uz": "Bugungi hodisalar. Siz uxlayotganda ham hiro ishlayveradi."
+  },
+  "Compared with last week": {
+    "ru": "По сравнению с прошлой неделей",
+    "uz": "Oʻtgan hafta bilan solishtirganda"
+  },
+  "Tickets picked up": {
+    "ru": "Взято тикетов",
+    "uz": "Olingan tiketlar"
+  },
+  "Approved on first try": {
+    "ru": "Одобрено с первого раза",
+    "uz": "Birinchi urinishda tasdiqlangan"
+  },
+  "Waiting on you, average": {
+    "ru": "Ожидание вас, в среднем",
+    "uz": "Sizni kutish, oʻrtacha"
+  },
+  "Stopped runs": {
+    "ru": "Остановленные запуски",
+    "uz": "Toʻxtagan ishlar"
+  },
+  "Open work and the latest ticket in each": {
+    "ru": "Открытая работа и последний тикет в каждом",
+    "uz": "Ochiq ishlar va har biridagi soʻnggi tiket"
+  },
+  "All repositories": {
+    "ru": "Все репозитории",
+    "uz": "Barcha repozitoriylar"
+  },
+  "Latest ticket": {
+    "ru": "Последний тикет",
+    "uz": "Soʻnggi tiket"
+  },
+  "Recent activity": {
+    "ru": "Последние события",
+    "uz": "Soʻnggi faollik"
+  },
+  "How well hiro works for you over time: throughput, quality, where time goes, and what it costs your plan.": {
+    "ru": "Насколько хорошо hiro работает на вас со временем: пропускная способность, качество, куда уходит время и сколько это стоит вашему тарифу.",
+    "uz": "hiro vaqt oʻtishi bilan siz uchun qanchalik yaxshi ishlayapti: unumdorlik, sifat, vaqt qayerga ketadi va tarifingizga qanchaga tushadi."
+  },
+  "7 days": {
+    "ru": "7 дней",
+    "uz": "7 kun"
+  },
+  "30 days": {
+    "ru": "30 дней",
+    "uz": "30 kun"
+  },
+  "90 days": {
+    "ru": "90 дней",
+    "uz": "90 kun"
+  },
+  "Export CSV": {
+    "ru": "Экспорт CSV",
+    "uz": "CSV eksport"
+  },
+  "Tickets pushed": {
+    "ru": "Отправлено тикетов",
+    "uz": "Yuborilgan tiketlar"
+  },
+  "Success rate": {
+    "ru": "Доля успеха",
+    "uz": "Muvaffaqiyat darajasi"
+  },
+  "Pushed out of picked up": {
+    "ru": "Отправлено из взятых",
+    "uz": "Olinganlardan yuborilgani"
+  },
+  "No changes requested": {
+    "ru": "Без запроса изменений",
+    "uz": "Oʻzgartirish soʻralmagan"
+  },
+  "hiro time per ticket": {
+    "ru": "Время hiro на тикет",
+    "uz": "Bitta tiketga hiro vaqti"
+  },
+  "Analyze, coding and tests": {
+    "ru": "Анализ, разработка и тесты",
+    "uz": "Tahlil, kod yozish va testlar"
+  },
+  "Average per ticket": {
+    "ru": "В среднем на тикет",
+    "uz": "Har bir tiketga oʻrtacha"
+  },
+  "Per ticket": {
+    "ru": "На тикет",
+    "uz": "Har bir tiketga"
+  },
+  "Throughput": {
+    "ru": "Пропускная способность",
+    "uz": "Unumdorlik"
+  },
+  "Tickets picked up and how they ended, per day": {
+    "ru": "Взятые тикеты и их итог по дням",
+    "uz": "Olingan tiketlar va ularning yakuni, kunlar boʻyicha"
+  },
+  "Outcomes": {
+    "ru": "Итоги",
+    "uz": "Natijalar"
+  },
+  "How finished tickets ended": {
+    "ru": "Чем закончились тикеты",
+    "uz": "Tiketlar qanday yakunlangan"
+  },
+  "Approved after changes": {
+    "ru": "Одобрено после изменений",
+    "uz": "Oʻzgarishlardan keyin tasdiqlangan"
+  },
+  "pushed": {
+    "ru": "отправлено",
+    "uz": "yuborildi"
+  },
+  "Speed": {
+    "ru": "Скорость",
+    "uz": "Tezlik"
+  },
+  "Average minutes per ticket: hiro working versus waiting on you": {
+    "ru": "Среднее время на тикет: работа hiro и ожидание вас",
+    "uz": "Bitta tiketga oʻrtacha vaqt: hiro ishi va sizni kutish"
+  },
+  "Average per ticket, by step": {
+    "ru": "В среднем на тикет, по шагам",
+    "uz": "Har bir tiketga oʻrtacha, bosqichlar boʻyicha"
+  },
+  "Turns per ticket": {
+    "ru": "Шагов на тикет",
+    "uz": "Bitta tiketga qadamlar"
+  },
+  "Fewer turns means hiro finds its way faster and uses less of your plan": {
+    "ru": "Меньше шагов — hiro быстрее разбирается и тратит меньше лимита",
+    "uz": "Kamroq qadam — hiro tezroq yoʻl topadi va limitni kamroq sarflaydi"
+  },
+  "Why runs stop": {
+    "ru": "Почему запуски останавливаются",
+    "uz": "Ishlar nega toʻxtaydi"
+  },
+  "Tests kept failing": {
+    "ru": "Тесты продолжали падать",
+    "uz": "Testlar yiqilishda davom etdi"
+  },
+  "Plan limit reached": {
+    "ru": "Закончился лимит тарифа",
+    "uz": "Tarif limiti tugadi"
+  },
+  "Stopped by you": {
+    "ru": "Остановлено вами",
+    "uz": "Siz toʻxtatgansiz"
+  },
+  "Turn limit reached": {
+    "ru": "Достигнут лимит шагов",
+    "uz": "Qadamlar limitiga yetildi"
+  },
+  "Models": {
+    "ru": "Модели",
+    "uz": "Modellar"
+  },
+  "Runs per model and how they turned out": {
+    "ru": "Запуски по моделям и их результаты",
+    "uz": "Modellar boʻyicha ishlar va natijalari"
+  },
+  "Change models": {
+    "ru": "Изменить модели",
+    "uz": "Modellarni oʻzgartirish"
+  },
+  "Share": {
+    "ru": "Доля",
+    "uz": "Ulush"
+  },
+  "Plan per run": {
+    "ru": "Лимита на запуск",
+    "uz": "Bir ishga limit"
+  },
+  "Reached review": {
+    "ru": "Дошли до ревью",
+    "uz": "Tekshiruvgacha yetgan"
+  },
+  "Plan per run is the average share of a 5-hour session one run uses.": {
+    "ru": "«Лимита на запуск» — средняя доля 5-часовой сессии, которую тратит один запуск.",
+    "uz": "«Bir ishga limit» — bitta ish sarflaydigan 5 soatlik sessiyaning oʻrtacha ulushi."
+  },
+  "Peak session usage per day": {
+    "ru": "Пиковое использование сессии по дням",
+    "uz": "Kunlik eng yuqori sessiya sarfi"
+  },
+  "Average peak": {
+    "ru": "Средний пик",
+    "uz": "Oʻrtacha choʻqqi"
+  },
+  "Days above 80%": {
+    "ru": "Дней выше 80%",
+    "uz": "80% dan yuqori kunlar"
+  },
+  "By repository": {
+    "ru": "По репозиториям",
+    "uz": "Repozitoriylar boʻyicha"
+  },
+  "Where hiro works best, and where it struggles": {
+    "ru": "Где hiro работает лучше всего, а где ему трудно",
+    "uz": "hiro qayerda eng yaxshi ishlaydi va qayerda qiynaladi"
+  },
+  "hiro time": {
+    "ru": "Время hiro",
+    "uz": "hiro vaqti"
+  },
+  "Activity by hour": {
+    "ru": "Активность по часам",
+    "uz": "Soatlar boʻyicha faollik"
+  },
+  "Insights": {
+    "ru": "Выводы",
+    "uz": "Xulosalar"
+  },
+  "What the numbers suggest": {
+    "ru": "Что подсказывают цифры",
+    "uz": "Raqamlar nimani koʻrsatadi"
+  },
+  "Errors": {
+    "ru": "Ошибки",
+    "uz": "Xatolar"
+  },
+  "Session": {
+    "ru": "Сессия",
+    "uz": "Sessiya"
+  },
+  "Average minutes per ticket": {
+    "ru": "Среднее время на тикет",
+    "uz": "Bitta tiketga oʻrtacha vaqt"
+  },
+  "CSV export works in the real app": {
+    "ru": "Экспорт CSV работает в настоящем приложении",
+    "uz": "CSV eksport haqiqiy ilovada ishlaydi"
+  },
+  "Models by stage": {
+    "ru": "Модели по этапам",
+    "uz": "Bosqichlar boʻyicha modellar"
+  },
+  "Pick which model runs each step. Haiku uses the least of your plan, Opus the most.": {
+    "ru": "Выберите, какая модель работает на каждом шаге. Haiku тратит меньше всего лимита, Opus — больше всего.",
+    "uz": "Har bir bosqichda qaysi model ishlashini tanlang. Haiku tarif limitini eng kam, Opus eng koʻp sarflaydi."
+  },
+  "Reading the ticket and asking questions": {
+    "ru": "Чтение тикета и вопросы",
+    "uz": "Tiketni oʻqish va savollar"
+  },
+  "Read-only. Runs once per ticket.": {
+    "ru": "Только чтение. Один раз на тикет.",
+    "uz": "Faqat oʻqish. Har bir tiketga bir marta."
+  },
+  "The main run. Uses most of your plan.": {
+    "ru": "Основной запуск. Тратит больше всего лимита.",
+    "uz": "Asosiy ish. Limitning eng katta qismini sarflaydi."
+  },
+  "Retries and requested changes": {
+    "ru": "Повторы и запрошенные изменения",
+    "uz": "Qayta urinishlar va soʻralgan oʻzgarishlar"
+  },
+  "After failed tests, your feedback or a stopped run.": {
+    "ru": "После упавших тестов, вашего комментария или остановки.",
+    "uz": "Yiqilgan testlar, fikringiz yoki toʻxtatilgan ishdan keyin."
+  },
+  "PR description and summaries": {
+    "ru": "Описание PR и сводки",
+    "uz": "PR tavsifi va xulosalar"
+  },
+  "Short writing tasks after the run.": {
+    "ru": "Короткие тексты после запуска.",
+    "uz": "Ishdan keyingi qisqa matnlar."
+  },
+  "Models for this ticket": {
+    "ru": "Модели для этого тикета",
+    "uz": "Shu tiket uchun modellar"
+  },
+  "Override the defaults from Settings for this ticket only.": {
+    "ru": "Меняет настройки по умолчанию только для этого тикета.",
+    "uz": "Standart sozlamalarni faqat shu tiket uchun almashtiradi."
+  },
+  "Coding model": {
+    "ru": "Модель разработки",
+    "uz": "Kod yozish modeli"
+  },
+  "Retry model": {
+    "ru": "Модель для повторов",
+    "uz": "Qayta urinish modeli"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "common": {
+    "loading": "Yuklanmoqda…",
+    "error": "Nimadir xato ketdi. Qayta urining.",
+    "signedInAs": "{username} sifatida kirdingiz",
+    "version": "Versiya {version}"
+  }
+}

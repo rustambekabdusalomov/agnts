@@ -1,0 +1,12 @@
+{
+  "manalytics": {
+    "tickets": "{n, plural, one {{n} ticket} other {{n} tickets}}",
+    "turns": "{n, plural, one {{n} turn} other {{n} turns}}",
+    "shareOfRuns": "{n}% of runs",
+    "reachedReview": "{n}% reached review",
+    "about": "About analytics",
+    "stopped": "{n, plural, one {{n} stopped run in this period} other {{n} stopped runs in this period}}",
+    "days": "{n} days",
+    "compared": "Changes are compared with the previous {n} days. Green means better."
+  }
+}

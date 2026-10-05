@@ -1,0 +1,12 @@
+{
+  "manalytics": {
+    "tickets": "{n, plural, one {{n} tiket} other {{n} tiket}}",
+    "turns": "{n, plural, one {{n} qadam} other {{n} qadam}}",
+    "shareOfRuns": "Ishga tushirishlarning {n}%",
+    "reachedReview": "{n}% tekshiruvgacha yetdi",
+    "about": "Analitika haqida",
+    "stopped": "{n, plural, one {Bu davrda {n} ta toʻxtagan ish} other {Bu davrda {n} ta toʻxtagan ish}}",
+    "days": "{n} kun",
+    "compared": "Oʻzgarishlar oldingi {n} kun bilan solishtiriladi. Yashil — yaxshiroq."
+  }
+}

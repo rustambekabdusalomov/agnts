@@ -1,0 +1,10 @@
+{
+  "mmore": {
+    "ago": "{time} ago",
+    "justNow": "just now",
+    "langPhone": "Phone language",
+    "signedInTo": "Signed in to {server}",
+    "pipelineRuns": "Pipeline runs",
+    "loginLede": "Sign in to your hiro server to answer questions, review changes and follow runs."
+  }
+}

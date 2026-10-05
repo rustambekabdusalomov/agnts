@@ -1,0 +1,15 @@
+{
+  "state": {
+    "new": "In queue",
+    "analyzing": "Reading the code",
+    "waiting_for_answers": "Needs your answers",
+    "coding": "Coding",
+    "testing": "Running tests",
+    "waiting_for_review": "Ready for review",
+    "pushing": "Pushing",
+    "done": "Pushed",
+    "rejected": "Rejected",
+    "failed": "Stopped",
+    "rate_limited": "Paused at plan limit"
+  }
+}

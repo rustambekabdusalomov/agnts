@@ -1,0 +1,99 @@
+import 'package:test/test.dart';
+import 'package:hiro_api/hiro_api.dart';
+
+// tests for Repository
+void main() {
+  final Repository? instance = /* Repository(...) */ null;
+  // TODO add properties to the entity
+
+  group(Repository, () {
+    // int id
+    test('to test the property `id`', () async {
+      // TODO
+    });
+
+    // String name
+    test('to test the property `name`', () async {
+      // TODO
+    });
+
+    // jira when the repository has a Jira project key, else side. Every repository takes side-project tasks.
+    // String kind
+    test('to test the property `kind`', () async {
+      // TODO
+    });
+
+    // String provider
+    test('to test the property `provider`', () async {
+      // TODO
+    });
+
+    // String cloneUrl
+    test('to test the property `cloneUrl`', () async {
+      // TODO
+    });
+
+    // String defaultBranch
+    test('to test the property `defaultBranch`', () async {
+      // TODO
+    });
+
+    // String buildCmd
+    test('to test the property `buildCmd`', () async {
+      // TODO
+    });
+
+    // String lintCmd
+    test('to test the property `lintCmd`', () async {
+      // TODO
+    });
+
+    // String testCmd
+    test('to test the property `testCmd`', () async {
+      // TODO
+    });
+
+    // String branchPrefix
+    test('to test the property `branchPrefix`', () async {
+      // TODO
+    });
+
+    // String taskPrefix
+    test('to test the property `taskPrefix`', () async {
+      // TODO
+    });
+
+    // Extra instructions added to every prompt
+    // String instructions
+    test('to test the property `instructions`', () async {
+      // TODO
+    });
+
+    // String jiraProject
+    test('to test the property `jiraProject`', () async {
+      // TODO
+    });
+
+    // String claudeMd
+    test('to test the property `claudeMd`', () async {
+      // TODO
+    });
+
+    // int openTickets
+    test('to test the property `openTickets`', () async {
+      // TODO
+    });
+
+    // String deployWorkflow
+    test('to test the property `deployWorkflow`', () async {
+      // TODO
+    });
+
+    // Set while the repository is archived
+    // DateTime archivedAt
+    test('to test the property `archivedAt`', () async {
+      // TODO
+    });
+
+  });
+}

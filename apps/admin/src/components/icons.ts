@@ -1,0 +1,24 @@
+// SVG path data for the demo icons (24x24, stroked). Copied from admin.html.
+export const ICON: Record<string, string> = {
+  "needs": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v6M12 16.5h.01\"/>",
+  "running": "<path d=\"M3 12h4l3-8 4 16 3-8h4\"/>",
+  "queue": "<rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"3\"/><path d=\"M8 9h8M8 13h8M8 17h5\"/>",
+  "done": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M8 12l3 3 5-6\"/>",
+  "all": "<rect x=\"3\" y=\"4\" width=\"5\" height=\"16\" rx=\"1\"/><rect x=\"10\" y=\"4\" width=\"5\" height=\"11\" rx=\"1\"/><rect x=\"17\" y=\"4\" width=\"4\" height=\"7\" rx=\"1\"/>",
+  "usage": "<path d=\"M4 18a8 8 0 1 1 16 0\"/><path d=\"M12 18l4-6\"/>",
+  "repos": "<path d=\"M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z\"/><path d=\"M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3M9 7h6\"/>",
+  "settings": "<circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z\"/>",
+  "learn": "<path d=\"M2 9l10-5 10 5-10 5z\"/><path d=\"M6 11v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5M22 9v6\"/>",
+  "learnQueue": "<path d=\"M4 6h10M4 11h7M4 16h5\"/><circle cx=\"17\" cy=\"15\" r=\"4.5\"/><path d=\"M17 13v2.2l1.5 1\"/>",
+  "info": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 11v5M12 8h.01\"/>",
+  "back": "<path d=\"M15 18l-6-6 6-6\"/>",
+  "logs": "<path d=\"M4 6h16M4 10h16M4 14h10M4 18h7\"/>",
+  "dashboard": "<rect x=\"3\" y=\"3\" width=\"8\" height=\"9\" rx=\"2\"/><rect x=\"13\" y=\"3\" width=\"8\" height=\"5\" rx=\"2\"/><rect x=\"13\" y=\"10\" width=\"8\" height=\"11\" rx=\"2\"/><rect x=\"3\" y=\"14\" width=\"8\" height=\"7\" rx=\"2\"/>",
+  "analytics": "<path d=\"M4 20V10M10 20V4M16 20v-7M22 20H2\"/>",
+  "plug": "<path d=\"M9 7V3M15 7V3M7 7h10v4a5 5 0 0 1-10 0z\"/><path d=\"M12 16v5\"/>",
+  "tasks": "<rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"3\"/><path d=\"M8.5 12l2.5 2.5 4.5-5\"/>",
+  "plus": "<path d=\"M12 5v14M5 12h14\"/>",
+  "close": "<path d=\"M6 6l12 12M18 6L6 18\"/>",
+  "check": "<path d=\"M5 12.5l4.5 4.5L19 7.5\"/>",
+  "import": "<path d=\"M12 4v11M7.5 10.5L12 15l4.5-4.5\"/><path d=\"M4 19h16\"/>"
+}
