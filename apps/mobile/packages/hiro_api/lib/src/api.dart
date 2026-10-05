@@ -18,6 +18,7 @@ import 'package:hiro_api/src/api/logs_api.dart';
 import 'package:hiro_api/src/api/mcp_api.dart';
 import 'package:hiro_api/src/api/meta_api.dart';
 import 'package:hiro_api/src/api/repos_api.dart';
+import 'package:hiro_api/src/api/rules_api.dart';
 import 'package:hiro_api/src/api/settings_api.dart';
 import 'package:hiro_api/src/api/tasks_api.dart';
 import 'package:hiro_api/src/api/tickets_api.dart';
@@ -178,6 +179,12 @@ class HiroApi {
   /// by doing that all interceptors will not be executed
   ReposApi getReposApi() {
     return ReposApi(dio);
+  }
+
+  /// Get RulesApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  RulesApi getRulesApi() {
+    return RulesApi(dio);
   }
 
   /// Get SettingsApi instance, base route and serializer can be overridden by a given but be careful,

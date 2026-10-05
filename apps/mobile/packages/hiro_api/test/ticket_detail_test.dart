@@ -27,6 +27,17 @@ void main() {
       // TODO
     });
 
+    // The code task that implements this report, if any
+    // String childKey
+    test('to test the property `childKey`', () async {
+      // TODO
+    });
+
+    // CodeReview review
+    test('to test the property `review`', () async {
+      // TODO
+    });
+
     // List<HistoryItem> history
     test('to test the property `history`', () async {
       // TODO

@@ -4,6 +4,7 @@
 
 // ignore_for_file: unused_element
 import 'package:hiro_api/src/model/ticket.dart';
+import 'package:hiro_api/src/model/code_review.dart';
 import 'package:hiro_api/src/model/question.dart';
 import 'package:hiro_api/src/model/history_item.dart';
 import 'package:hiro_api/src/model/stage_models.dart';
@@ -33,6 +34,10 @@ class TicketDetail {
      this.analysis,
 
      this.result,
+
+     this.childKey,
+
+     this.review,
 
      this.history,
 
@@ -89,6 +94,31 @@ class TicketDetail {
 
 
 
+      /// The code task that implements this report, if any
+  @JsonKey(
+    
+    name: r'childKey',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? childKey;
+
+
+
+  @JsonKey(
+    
+    name: r'review',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final CodeReview? review;
+
+
+
   @JsonKey(
     
     name: r'history',
@@ -133,6 +163,8 @@ class TicketDetail {
       other.questions == questions &&
       other.analysis == analysis &&
       other.result == result &&
+      other.childKey == childKey &&
+      other.review == review &&
       other.history == history &&
       other.maxTurns == maxTurns &&
       other.effectiveModels == effectiveModels;
@@ -143,6 +175,8 @@ class TicketDetail {
         questions.hashCode +
         analysis.hashCode +
         result.hashCode +
+        childKey.hashCode +
+        review.hashCode +
         history.hashCode +
         maxTurns.hashCode +
         effectiveModels.hashCode;

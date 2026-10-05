@@ -7,6 +7,7 @@ import { api, unwrap } from '../api/client'
 import { FILTERS, TERMINAL, BOARD_GROUPS } from '../api/types'
 import PageHeader from '../components/PageHeader.vue'
 import StateBadge from '../components/StateBadge.vue'
+import KindBadge from '../components/ticket/KindBadge.vue'
 import TicketBoard, { type BoardColumn } from '../components/TicketBoard.vue'
 import SegButtons from '../components/form/SegButtons.vue'
 import { useListView } from '../composables/useListView'
@@ -103,14 +104,14 @@ const columns = computed<BoardColumn[]>(() =>
         </thead>
         <tbody>
           <tr v-for="tk in rows" :key="tk.key" tabindex="0" @click="open(tk.key)" @keydown.enter="open(tk.key)">
-            <td><div class="tkey">{{ tk.key }}</div><div class="ttitle">{{ tk.title }}</div></td>
+            <td><div class="tkey">{{ tk.key }} <KindBadge v-if="tk.kind !== 'code'" :ticket="tk" /></div><div class="ttitle">{{ tk.title }}</div></td>
             <td>
               <span v-if="tk.source === 'local'" class="src local">{{ t('tickets.sourceTask') }}</span>
               <span v-else class="src">{{ t('tickets.sourceJira') }}</span>
             </td>
             <td class="muted">{{ tk.repoName ?? '—' }}</td>
             <td>
-              <StateBadge :state="tk.state" />
+              <StateBadge :state="tk.state" :kind="tk.kind" />
               <span v-if="tk.revision > 0 && !TERMINAL.includes(tk.state)" class="hint"> {{ t('tickets.rev', { n: tk.revision }) }}</span>
             </td>
             <td class="muted">{{ ago(tk.updatedAt, locale) }}</td>

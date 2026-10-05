@@ -24,19 +24,20 @@ var _ orchestrator.Store = (*Agent)(nil)
 func NewAgent(db *pgxpool.Pool) *Agent { return &Agent{db: db} }
 
 const ticketCols = `id, key, source, repo_id, title, description, priority, state, resume_state,
-	revision, turns, models, after_approve, branch, head_sha, pr_number, pr_url, feedback, held, ask_first, merged_at, assignees, learn_state, created_at, updated_at`
+	revision, turns, models, after_approve, branch, head_sha, pr_number, pr_url, feedback, held, ask_first, merged_at, assignees, learn_state, review_state, kind, kind_auto, post_report, COALESCE(parent_key, ''), created_at, updated_at`
 
 func scanTicket(row pgx.Row) (domain.Ticket, error) {
 	var t domain.Ticket
-	var source, state, resume string
+	var source, state, resume, kind string
 	var models []byte
 	err := row.Scan(&t.ID, &t.Key, &source, &t.RepoID, &t.Title, &t.Description, &t.Priority, &state, &resume,
 		&t.Revision, &t.Turns, &models, &t.AfterApprove, &t.Branch, &t.HeadSHA, &t.PRNumber, &t.PRURL, &t.Feedback,
-		&t.Held, &t.AskFirst, &t.MergedAt, &t.Assignees, &t.LearnState, &t.CreatedAt, &t.UpdatedAt)
+		&t.Held, &t.AskFirst, &t.MergedAt, &t.Assignees, &t.LearnState, &t.ReviewState, &kind, &t.KindAuto, &t.PostReport, &t.ParentKey, &t.CreatedAt, &t.UpdatedAt)
 	if err != nil {
 		return t, notFound(err)
 	}
 	t.Source, t.State, t.ResumeState = domain.TicketSource(source), domain.TicketState(state), domain.TicketState(resume)
+	t.Kind = domain.TicketKind(kind)
 	if len(models) > 0 {
 		_ = json.Unmarshal(models, &t.Models)
 	}
@@ -83,10 +84,10 @@ func (s *Agent) CreateTicket(ctx context.Context, t domain.Ticket, ev domain.Eve
 		models, _ := json.Marshal(nonNilMap(t.Models))
 		var err error
 		out, err = scanTicket(tx.QueryRow(ctx, `INSERT INTO tickets
-			(key, source, repo_id, title, description, priority, state, resume_state, models, after_approve, held, ask_first)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING `+ticketCols,
+			(key, source, repo_id, title, description, priority, state, resume_state, models, after_approve, held, ask_first, kind, kind_auto, parent_key)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NULLIF($15, '')) RETURNING `+ticketCols,
 			t.Key, string(t.Source), t.RepoID, t.Title, t.Description, t.Priority, string(t.State),
-			string(t.ResumeState), models, t.AfterApprove, t.Held, t.AskFirst))
+			string(t.ResumeState), models, t.AfterApprove, t.Held, t.AskFirst, string(kindOr(t.Kind)), t.KindAuto, t.ParentKey))
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 			return domain.ErrConflict
@@ -154,10 +155,19 @@ func saveTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket) (domain.Ticket,
 	return scanTicket(tx.QueryRow(ctx, `UPDATE tickets SET
 		repo_id = $2, title = $3, description = $4, priority = $5, state = $6, resume_state = $7,
 		revision = $8, turns = $9, models = $10, after_approve = $11, branch = $12, head_sha = $13,
-		pr_number = $14, pr_url = $15, feedback = $16, held = $17, ask_first = $18, merged_at = $19, assignees = $20, learn_state = $21, updated_at = now()
+		pr_number = $14, pr_url = $15, feedback = $16, held = $17, ask_first = $18, merged_at = $19, assignees = $20, learn_state = $21,
+		kind = $22, kind_auto = $23, post_report = $24, review_state = $25, updated_at = now()
 		WHERE id = $1 RETURNING `+ticketCols,
 		t.ID, t.RepoID, t.Title, t.Description, t.Priority, string(t.State), string(t.ResumeState),
-		t.Revision, t.Turns, models, t.AfterApprove, t.Branch, t.HeadSHA, t.PRNumber, t.PRURL, t.Feedback, t.Held, t.AskFirst, t.MergedAt, nonNilSlice(t.Assignees), t.LearnState))
+		t.Revision, t.Turns, models, t.AfterApprove, t.Branch, t.HeadSHA, t.PRNumber, t.PRURL, t.Feedback, t.Held, t.AskFirst, t.MergedAt, nonNilSlice(t.Assignees), t.LearnState,
+		string(kindOr(t.Kind)), t.KindAuto, t.PostReport, t.ReviewState))
+}
+
+func kindOr(k domain.TicketKind) domain.TicketKind {
+	if k == "" {
+		return domain.KindCode
+	}
+	return k
 }
 
 func nonNilMap(m map[string]string) map[string]string {
@@ -177,8 +187,9 @@ func scanRun(row pgx.Row) (domain.Run, error) {
 	return r, notFound(err)
 }
 
-// ClaimNext starts a run for the oldest ticket waiting for a worker; learn
-// runs only take the worker when no ticket work is waiting.
+// ClaimNext starts a run for the oldest ticket waiting for a worker. Code
+// reviews come next (the reviewer may be reading the change already), and
+// learn runs only take the worker when nothing else is waiting.
 func (s *Agent) ClaimNext(ctx context.Context) (domain.Ticket, domain.Run, bool, error) {
 	var t domain.Ticket
 	var r domain.Run
@@ -191,6 +202,13 @@ func (s *Agent) ClaimNext(ctx context.Context) (domain.Ticket, domain.Run, bool,
 			LIMIT 1 FOR UPDATE SKIP LOCKED`))
 		if errors.Is(err, domain.ErrNotFound) {
 			t, err = scanTicket(tx.QueryRow(ctx, `SELECT `+ticketCols+` FROM tickets t
+				WHERE state = 'waiting_for_review' AND review_state = 'pending'
+				  AND NOT EXISTS (SELECT 1 FROM runs r WHERE r.ticket_id = t.id AND r.finished_at IS NULL)
+				ORDER BY updated_at
+				LIMIT 1 FOR UPDATE SKIP LOCKED`))
+		}
+		if errors.Is(err, domain.ErrNotFound) {
+			t, err = scanTicket(tx.QueryRow(ctx, `SELECT `+ticketCols+` FROM tickets t
 				WHERE state = 'done' AND learn_state = 'pending'
 				  AND NOT EXISTS (SELECT 1 FROM runs r WHERE r.ticket_id = t.id AND r.finished_at IS NULL)
 				ORDER BY updated_at
@@ -201,10 +219,15 @@ func (s *Agent) ClaimNext(ctx context.Context) (domain.Ticket, domain.Run, bool,
 		}
 		stage := map[domain.TicketState]domain.Stage{
 			domain.StateNew: domain.StageAnalyze, domain.StateCoding: domain.StageCode, domain.StatePushing: domain.StagePush,
-			domain.StateDone: domain.StageLearn,
+			domain.StateDone: domain.StageLearn, domain.StateWaitingForReview: domain.StageReview,
 		}[t.State]
 		if r, err = scanRun(tx.QueryRow(ctx, `INSERT INTO runs (ticket_id, stage, model) VALUES ($1, $2, '') RETURNING `+runCols,
 			t.ID, string(stage))); err != nil {
+			return err
+		}
+		if stage == domain.StageReview {
+			t.ReviewState = domain.ReviewRunning
+			t, err = saveTicket(ctx, tx, t)
 			return err
 		}
 		if t.State == domain.StateNew {
@@ -233,10 +256,11 @@ func (s *Agent) FinishRun(ctx context.Context, r domain.Run) error {
 	return err
 }
 
-// LastSessionID returns the newest Claude session of a ticket, or "".
+// LastSessionID returns the newest Claude session of a ticket's own work
+// (analysis and coding), or "". Learn and review sessions are not resumed.
 func (s *Agent) LastSessionID(ctx context.Context, ticketID int64) (string, error) {
 	var id string
-	err := s.db.QueryRow(ctx, `SELECT session_id FROM runs WHERE ticket_id = $1 AND session_id <> ''
+	err := s.db.QueryRow(ctx, `SELECT session_id FROM runs WHERE ticket_id = $1 AND session_id <> '' AND stage NOT IN ('learn', 'review')
 		ORDER BY started_at DESC LIMIT 1`, ticketID).Scan(&id)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return "", nil
@@ -269,6 +293,7 @@ func (s *Agent) RecoverInterrupted(ctx context.Context) (int, error) {
 		for _, p := range ps {
 			var key, from string
 			err := tx.QueryRow(ctx, `UPDATE tickets t SET state = CASE state WHEN 'analyzing' THEN 'new' WHEN 'testing' THEN 'coding' ELSE state END,
+				review_state = CASE review_state WHEN 'running' THEN 'pending' ELSE review_state END,
 				updated_at = now() FROM (SELECT state AS old FROM tickets WHERE id = $1) o
 				WHERE t.id = $1 RETURNING t.key, o.old`, p.ticket).Scan(&key, &from)
 			if err != nil {
@@ -352,9 +377,9 @@ func (s *Agent) SaveResult(ctx context.Context, r domain.Result) error {
 	if r.Files == nil {
 		files = []byte("[]")
 	}
-	_, err := s.db.Exec(ctx, `INSERT INTO results (run_id, summary, tests, lint, files) VALUES ($1, $2, $3, $4, $5)
-		ON CONFLICT (run_id) DO UPDATE SET summary = $2, tests = $3, lint = $4, files = $5`,
-		r.RunID, jsonOr(r.Summary, "{}"), jsonOr(r.Tests, "{}"), r.Lint, files)
+	_, err := s.db.Exec(ctx, `INSERT INTO results (run_id, summary, tests, lint, files, report) VALUES ($1, $2, $3, $4, $5, $6)
+		ON CONFLICT (run_id) DO UPDATE SET summary = $2, tests = $3, lint = $4, files = $5, report = $6`,
+		r.RunID, jsonOr(r.Summary, "{}"), jsonOr(r.Tests, "{}"), r.Lint, files, r.Report)
 	return err
 }
 
@@ -369,10 +394,10 @@ func jsonOr(b json.RawMessage, def string) []byte {
 func (s *Agent) LatestResult(ctx context.Context, ticketID int64, stage domain.Stage) (domain.Result, error) {
 	var r domain.Result
 	var files []byte
-	err := s.db.QueryRow(ctx, `SELECT res.id, res.run_id, res.summary, res.tests, res.lint, res.files, res.created_at
+	err := s.db.QueryRow(ctx, `SELECT res.id, res.run_id, res.summary, res.tests, res.lint, res.files, res.report, res.created_at
 		FROM results res JOIN runs ON runs.id = res.run_id
 		WHERE runs.ticket_id = $1 AND runs.stage = $2 ORDER BY res.created_at DESC LIMIT 1`, ticketID, string(stage)).
-		Scan(&r.ID, &r.RunID, &r.Summary, &r.Tests, &r.Lint, &files, &r.CreatedAt)
+		Scan(&r.ID, &r.RunID, &r.Summary, &r.Tests, &r.Lint, &files, &r.Report, &r.CreatedAt)
 	if err != nil {
 		return r, notFound(err)
 	}
@@ -520,10 +545,15 @@ func (s *Agent) SetClaudeMDState(ctx context.Context, id int64, state string) er
 	return err
 }
 
-// NextTaskNumber reserves the next task number of a repository.
-func (s *Agent) NextTaskNumber(ctx context.Context, repoID int64) (int, error) {
+// NextTaskNumber reserves the next task number of a repository, or of
+// tasks without one when repoID is nil.
+func (s *Agent) NextTaskNumber(ctx context.Context, repoID *int64) (int, error) {
 	var n int
-	err := s.db.QueryRow(ctx, `UPDATE repositories SET task_seq = task_seq + 1 WHERE id = $1 RETURNING task_seq`, repoID).Scan(&n)
+	if repoID == nil {
+		err := s.db.QueryRow(ctx, `SELECT nextval('task_seq')`).Scan(&n)
+		return n, err
+	}
+	err := s.db.QueryRow(ctx, `UPDATE repositories SET task_seq = task_seq + 1 WHERE id = $1 RETURNING task_seq`, *repoID).Scan(&n)
 	return n, notFound(err)
 }
 
@@ -582,6 +612,11 @@ func (s *Agent) SeenDelivery(ctx context.Context, provider, id string) (bool, er
 func (s *Agent) PruneDeliveries(ctx context.Context, d time.Duration) error {
 	_, err := s.db.Exec(ctx, `DELETE FROM webhook_deliveries WHERE received_at < now() - make_interval(secs => $1)`, d.Seconds())
 	return err
+}
+
+// ChildOf returns the ticket that implements parentKey, or ErrNotFound.
+func (s *Agent) ChildOf(ctx context.Context, parentKey string) (domain.Ticket, error) {
+	return scanTicket(s.db.QueryRow(ctx, `SELECT `+ticketCols+` FROM tickets WHERE parent_key = $1`, parentKey))
 }
 
 // TicketByPR finds the ticket whose pull request is url (or whose branch is

@@ -16,8 +16,12 @@ const (
 	ModelCoding  = "coding"
 	ModelRetry   = "retry" // fix attempts and requested changes
 	ModelHelper  = "helper"
-	ModelLearn   = "learn" // lessons from finished tickets
+	ModelLearn   = "learn"  // lessons from finished tickets
+	ModelReview  = "review" // code review while a ticket waits for review
 )
+
+// ModelAuto lets hiro pick the review model from how complex the ticket is.
+const ModelAuto = "auto"
 
 // StageModels is the default model per stage.
 type StageModels struct {
@@ -26,6 +30,7 @@ type StageModels struct {
 	Retry   string `json:"retry"`
 	Helper  string `json:"helper"`
 	Learn   string `json:"learn"`
+	Review  string `json:"review"` // a model or ModelAuto
 }
 
 // For returns the model for a stage name.
@@ -39,6 +44,8 @@ func (m StageModels) For(stage string) string {
 		return m.Helper
 	case ModelLearn:
 		return m.Learn
+	case ModelReview:
+		return m.Review
 	default:
 		return m.Coding
 	}
@@ -61,6 +68,7 @@ type NotifySettings struct {
 	Stopped  bool `json:"stopped"`
 	Done     bool `json:"done"`
 	Lessons  bool `json:"lessons"`
+	Review   bool `json:"review"` // a code review found something
 }
 
 // Settings are the runtime settings edited on the Settings page.
@@ -72,7 +80,8 @@ type Settings struct {
 	Deny       []string       `json:"deny"`
 	AskFirst   bool           `json:"askFirst"`
 	AutoResume bool           `json:"autoResume"`
-	AutoLearn  bool           `json:"autoLearn"` // learn run after every push
+	AutoLearn  bool           `json:"autoLearn"`  // learn run after every push
+	AutoReview bool           `json:"autoReview"` // code review of every result
 	PauseAbove int            `json:"pauseAbove"`
 	Parallel   int            `json:"parallel"`
 	Git        GitSettings    `json:"git"`
@@ -82,7 +91,7 @@ type Settings struct {
 // DefaultSettings returns the settings used before any are saved.
 func DefaultSettings() Settings {
 	return Settings{
-		Models:     StageModels{Analyze: "sonnet", Coding: "opus", Retry: "sonnet", Helper: "haiku", Learn: "sonnet"},
+		Models:     StageModels{Analyze: "sonnet", Coding: "opus", Retry: "sonnet", Helper: "haiku", Learn: "sonnet", Review: ModelAuto},
 		MaxTurns:   150,
 		TimeoutMin: 45,
 		Allow:      []string{},
@@ -90,10 +99,11 @@ func DefaultSettings() Settings {
 		AskFirst:   true,
 		AutoResume: true,
 		AutoLearn:  true,
+		AutoReview: true,
 		PauseAbove: 90,
 		Parallel:   1,
 		Git:        GitSettings{CoAuthor: true, PRTitle: "{key}: {title}"},
-		Notify:     NotifySettings{Push: true, Telegram: true, NeedsYou: true, Stopped: true, Done: true, Lessons: true},
+		Notify:     NotifySettings{Push: true, Telegram: true, NeedsYou: true, Stopped: true, Done: true, Lessons: true, Review: true},
 	}
 }
 
@@ -104,6 +114,9 @@ func (s *Settings) Validate() error {
 		if !slices.Contains(Models, m) {
 			errs = append(errs, fmt.Errorf("model for %s must be one of %s", name, strings.Join(Models, ", ")))
 		}
+	}
+	if s.Models.Review != ModelAuto && !slices.Contains(Models, s.Models.Review) {
+		errs = append(errs, fmt.Errorf("model for review must be %s or one of %s", ModelAuto, strings.Join(Models, ", ")))
 	}
 	check := func(name string, v, lo, hi int) {
 		if v < lo || v > hi {

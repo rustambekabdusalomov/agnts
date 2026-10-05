@@ -42,6 +42,8 @@
     "addRepoFirst": "Add a side-project repository first.",
     "titleRequired": "Enter a title.",
     "created": "Task {key} created",
-    "count": "{n, plural, one {# task} other {# tasks}}"
+    "count": "{n, plural, one {# task} other {# tasks}}",
+    "noRepo": "No repository",
+    "repoNeeded": "Code and tests need a repository: pick one, or choose another kind."
   }
 }

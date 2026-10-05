@@ -117,7 +117,7 @@ Analytics are SQL over `events` and `runs` (time per step, outcomes, stop reason
 Served at `https://<your-domain>/mcp`, streamable HTTP, bearer token checked on every request, rate-limited.
 
 - **Read tools:** `get_inbox`, `list_tickets`, `get_ticket`, `get_run_log`, `get_usage`, `get_analytics`, `list_repositories`, `get_repository`.
-- **Write tools (two-step):** `answer_questions`, `start_run`, `request_changes`, `retry_run`, `create_task`, `approve_ticket`, `reject_ticket` each create a `pending_action` and return its summary; only `confirm_action(id)` executes. Pending actions expire after 10 minutes.
+- **Write tools (two-step):** `answer_questions`, `start_run`, `request_changes`, `retry_run`, `create_task`, `set_ticket_kind`, `approve_ticket`, `reject_ticket` each create a `pending_action` and return its summary; only `confirm_action(id)` executes. Pending actions expire after 10 minutes.
 - **Not exposed:** deploys, disconnecting integrations, settings changes.
 - Tool annotations: `readOnlyHint` on reads, `destructiveHint` on approve and reject.
 

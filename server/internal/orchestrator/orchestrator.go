@@ -1,10 +1,13 @@
 package orchestrator
 
 import (
+	"archive/tar"
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"strings"
 	"sync"
@@ -58,6 +61,7 @@ type Deps struct {
 	Settings SettingsSource
 	Usage    UsageGate
 	Lessons  Lessons // nil disables the learn stage
+	Rules    Rules   // nil disables rules
 }
 
 // Orchestrator runs tickets through their stages.
@@ -72,6 +76,7 @@ type Orchestrator struct {
 	settings SettingsSource
 	usage    UsageGate
 	lessons  Lessons
+	rules    Rules
 	log      *slog.Logger
 
 	wake chan struct{}
@@ -86,7 +91,7 @@ type Orchestrator struct {
 func New(cfg Config, d Deps, log *slog.Logger) *Orchestrator {
 	return &Orchestrator{
 		cfg: cfg, store: d.Store, runner: d.Runner, git: d.Git, host: d.Host, tracker: d.Tracker, homes: d.Homes,
-		settings: d.Settings, usage: d.Usage, lessons: d.Lessons, log: log,
+		settings: d.Settings, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, log: log,
 		wake:    make(chan struct{}, 1),
 		cancels: map[string]context.CancelFunc{},
 	}
@@ -115,6 +120,13 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 	} else if n > 0 {
 		o.log.Warn("recovered interrupted runs", "count", n)
 	}
+	if o.rules != nil {
+		if n, err := o.rules.RecoverRules(ctx); err != nil {
+			return fmt.Errorf("recover interrupted rule reviews: %w", err)
+		} else if n > 0 {
+			o.log.Warn("requeued interrupted rule reviews", "count", n)
+		}
+	}
 
 	var wg sync.WaitGroup
 	defer wg.Wait()
@@ -132,7 +144,7 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 			o.AutoResume(ctx, s)
 		}
 		for err == nil && o.mayStart(ctx, s) {
-			t, run, ok, cerr := o.store.ClaimNext(ctx)
+			job, ok, cerr := o.claim(ctx)
 			if cerr != nil || !ok {
 				if cerr != nil && ctx.Err() == nil {
 					o.log.Error("claim", "err", cerr)
@@ -151,7 +163,7 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 					o.mu.Unlock()
 					o.Wake()
 				}()
-				o.work(ctx, t, run)
+				job(ctx)
 			}()
 		}
 		select {
@@ -192,12 +204,31 @@ func (o *Orchestrator) mayStart(ctx context.Context, s domain.Settings) bool {
 // RunOnce claims and works one stage synchronously, without the usage
 // pause or parallel limit. It reports false when there was nothing to do.
 func (o *Orchestrator) RunOnce(ctx context.Context) (bool, error) {
-	t, run, ok, err := o.store.ClaimNext(ctx)
+	job, ok, err := o.claim(ctx)
 	if err != nil || !ok {
 		return false, err
 	}
-	o.work(ctx, t, run)
+	job(ctx)
 	return true, nil
+}
+
+// claim takes the next piece of work. Rule reviews go first: they are short
+// and the user is waiting on them, and every later ticket follows the result.
+func (o *Orchestrator) claim(ctx context.Context) (func(context.Context), bool, error) {
+	if o.rules != nil {
+		r, ok, err := o.rules.ClaimRule(ctx)
+		if err != nil {
+			return nil, false, err
+		}
+		if ok {
+			return func(ctx context.Context) { o.reviewRule(ctx, r) }, true, nil
+		}
+	}
+	t, run, ok, err := o.store.ClaimNext(ctx)
+	if err != nil || !ok {
+		return nil, false, err
+	}
+	return func(ctx context.Context) { o.work(ctx, t, run) }, true, nil
 }
 
 // work runs one claimed stage and records how it ended.
@@ -221,11 +252,21 @@ func (o *Orchestrator) work(parent context.Context, t domain.Ticket, run domain.
 		case domain.StageAnalyze:
 			err = o.analyze(ctx, s, t, &run)
 		case domain.StageCode:
-			err = o.code(ctx, s, t, &run)
+			if t.Kind.Report() {
+				err = o.report(ctx, s, t, &run)
+			} else {
+				err = o.code(ctx, s, t, &run)
+			}
 		case domain.StagePush:
-			err = o.push(ctx, s, t, &run)
+			if t.Kind.Report() {
+				err = o.deliver(ctx, t, &run)
+			} else {
+				err = o.push(ctx, s, t, &run)
+			}
 		case domain.StageLearn:
 			err = o.learn(ctx, s, t, &run)
+		case domain.StageReview:
+			err = o.review(ctx, s, t, &run)
 		default:
 			err = fmt.Errorf("unknown stage %q", run.Stage)
 		}
@@ -268,6 +309,10 @@ func (o *Orchestrator) work(parent context.Context, t domain.Ticket, run domain.
 		// The ticket is done; only the lessons are missing.
 		log.Warn("learn run failed", "err", err)
 		o.learnFailed(bg, t.Key, run, err)
+	case run.Stage == domain.StageReview:
+		// The ticket stays in review; only the code review is missing.
+		log.Warn("review run failed", "err", err)
+		o.reviewFailed(bg, t, run, err)
 	default:
 		log.Error("stage failed", "err", err)
 		o.fail(bg, t.Key, run, err)
@@ -365,15 +410,20 @@ func rateStatus(data map[string]any) string {
 }
 
 // permissionSettings is passed to Claude Code with --settings; the
-// managed settings in the runner image still outrank it.
-func permissionSettings(s domain.Settings) string {
+// managed settings in the runner image still outrank it. readOnly keeps
+// Claude's edit tools out of /workspace (report kinds).
+func permissionSettings(s domain.Settings, readOnly bool) string {
 	allow := make([]string, 0, len(s.Allow))
 	for _, c := range s.Allow {
 		allow = append(allow, bashRule(c))
 	}
-	deny := make([]string, 0, len(s.Deny))
+	deny := make([]string, 0, len(s.Deny)+3)
 	for _, c := range s.Deny {
 		deny = append(deny, bashRule(c))
+	}
+	if readOnly {
+		// "//" makes the path absolute in Claude Code permission rules.
+		deny = append(deny, "Edit(//workspace/**)", "Write(//workspace/**)", "NotebookEdit(//workspace/**)")
 	}
 	b, _ := json.Marshal(map[string]any{"permissions": map[string]any{"allow": allow, "deny": deny}})
 	return string(b)
@@ -404,7 +454,7 @@ func (o *Orchestrator) claude(ctx context.Context, s domain.Settings, ws Workspa
 		MaxTurns: turns,
 		Resume:   resume,
 		Timeout:  time.Duration(s.TimeoutMin) * time.Minute,
-		Settings: permissionSettings(s),
+		Settings: permissionSettings(s, t.Kind.Report() || run.Stage == domain.StageReview),
 	}, o.streamTo(ctx, *t, run))
 	run.Turns += res.Turns
 	if res.SessionID != "" {
@@ -416,9 +466,9 @@ func (o *Orchestrator) claude(ctx context.Context, s domain.Settings, ws Workspa
 	if res.RateLimited {
 		o.usage.RecordLimited(ctx)
 		run.ExitReason = "rate_limited"
-		if run.Stage == domain.StageLearn {
-			// A done ticket keeps its state; the learn run stays pending
-			// and is claimed again once usage allows.
+		if run.Stage.Side() {
+			// A side run never moves the ticket; it is queued again and
+			// claimed once usage allows.
 			return res, &stopError{"rate limited"}
 		}
 		if err := o.transition(ctx, t, run, domain.StateRateLimited, "Claude plan limit reached; resumes after the limit resets", func(x *domain.Ticket) {
@@ -439,11 +489,29 @@ func (o *Orchestrator) claude(ctx context.Context, s domain.Settings, ws Workspa
 	return res, nil
 }
 
+var errNoRepo = errors.New("no repository is linked to this ticket; add one on the Repositories page and retry")
+
 func (o *Orchestrator) repoFor(ctx context.Context, t domain.Ticket) (domain.Repository, error) {
 	if t.RepoID == nil {
-		return domain.Repository{}, errors.New("no repository is linked to this ticket; add one on the Repositories page and retry")
+		return domain.Repository{}, errNoRepo
 	}
 	return o.store.RepositoryByID(ctx, *t.RepoID)
+}
+
+// optionalRepo returns the ticket's repository, or nil when it has none
+// and its kind can work without one (or hiro has yet to pick the kind).
+func (o *Orchestrator) optionalRepo(ctx context.Context, t domain.Ticket) (*domain.Repository, error) {
+	if t.RepoID == nil {
+		if t.Kind.Spec().NeedsRepo && !t.KindAuto {
+			return nil, errNoRepo
+		}
+		return nil, nil
+	}
+	repo, err := o.store.RepositoryByID(ctx, *t.RepoID)
+	if err != nil {
+		return nil, err
+	}
+	return &repo, nil
 }
 
 func branchFor(repo domain.Repository, key string) string {
@@ -454,15 +522,25 @@ func branchFor(repo domain.Repository, key string) string {
 	return prefix + key
 }
 
-func (o *Orchestrator) openWorkspace(ctx context.Context, t domain.Ticket, repo domain.Repository, branch string, run *domain.Run) (Workspace, error) {
-	if err := o.git.Prepare(ctx, repo, branch); err != nil {
-		return nil, fmt.Errorf("prepare repository: %w", err)
+// openWorkspace starts a container with repo checked out at branch, or an
+// empty /workspace when repo is nil.
+func (o *Orchestrator) openWorkspace(ctx context.Context, t domain.Ticket, repo *domain.Repository, branch string, run *domain.Run) (Workspace, error) {
+	var tree io.Reader
+	if repo != nil {
+		if err := o.git.Prepare(ctx, *repo, branch); err != nil {
+			return nil, fmt.Errorf("prepare repository: %w", err)
+		}
+		rc, err := o.git.Archive(ctx, *repo, branch)
+		if err != nil {
+			return nil, fmt.Errorf("archive repository: %w", err)
+		}
+		defer func() { _ = rc.Close() }()
+		tree = rc
+	} else {
+		var empty bytes.Buffer
+		_ = tar.NewWriter(&empty).Close()
+		tree = &empty
 	}
-	tree, err := o.git.Archive(ctx, repo, branch)
-	if err != nil {
-		return nil, fmt.Errorf("archive repository: %w", err)
-	}
-	defer func() { _ = tree.Close() }()
 	home, err := o.homes.Load(t.Key)
 	if err != nil {
 		return nil, fmt.Errorf("load claude home: %w", err)
@@ -489,13 +567,21 @@ func (o *Orchestrator) closeWorkspace(ctx context.Context, t domain.Ticket, ws W
 	}
 }
 
-// analyze reads the code and either asks questions or moves on to coding.
+// analyze reads the ticket (and the code, if it has a repository), settles
+// its kind, and either asks questions or moves on to the work.
 func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.Ticket, run *domain.Run) error {
-	repo, err := o.repoFor(ctx, t)
+	repo, err := o.optionalRepo(ctx, t)
 	if err != nil {
 		return err
 	}
-	branch := branchFor(repo, t.Key)
+	branch := ""
+	d := promptData{T: t, NoRepo: repo == nil, NoQuestions: !t.AskFirst}
+	if repo != nil {
+		d.Repo, branch = *repo, branchFor(*repo, t.Key)
+		if t.Kind.Report() && !t.KindAuto {
+			branch = repo.DefaultBranch // a report never commits
+		}
+	}
 	o.trackerMove(ctx, t, TrackerStarted)
 
 	ws, err := o.openWorkspace(ctx, t, repo, branch, run)
@@ -504,7 +590,13 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 	}
 	defer o.closeWorkspace(ctx, t, ws)
 
-	prompt, err := render("analyze", promptData{T: t, Repo: repo, NoQuestions: !t.AskFirst})
+	if d.Rules, err = o.teamRules(ctx, t.RepoID); err != nil {
+		return err
+	}
+	if len(d.Rules) > 0 {
+		o.event(ctx, rulesEvent(t.Key, run, d.Rules))
+	}
+	prompt, err := render("analyze", d)
 	if err != nil {
 		return err
 	}
@@ -522,6 +614,15 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 	if err := o.store.SaveResult(ctx, domain.Result{RunID: run.ID, Summary: raw}); err != nil {
 		return err
 	}
+	if t, err = o.settleKind(ctx, t, run, a); err != nil {
+		return err
+	}
+	if t.Kind.Spec().NeedsRepo && repo == nil {
+		return fmt.Errorf("hiro read this ticket as %s work, which needs a repository: link one and retry, or change the kind", t.Kind)
+	}
+	if t.Kind.Report() {
+		branch = "" // nothing is committed for a report
+	}
 
 	qs := make([]domain.Question, 0, len(a.Questions))
 	if t.AskFirst {
@@ -537,12 +638,42 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 	}
 
 	setBranch := func(x *domain.Ticket) { x.Branch = branch }
+	work := "code"
+	if t.Kind.Report() {
+		work = "write the report"
+	}
 	if len(qs) > 0 {
 		o.trackerComment(ctx, t, CommentQuestions, analysisComment(a, true))
-		return o.transition(ctx, &t, run, domain.StateWaitingForAnswers, fmt.Sprintf("%d questions before coding", len(qs)), setBranch)
+		return o.transition(ctx, &t, run, domain.StateWaitingForAnswers, fmt.Sprintf("%d questions before starting to %s", len(qs), work), setBranch)
 	}
 	o.trackerComment(ctx, t, CommentPlan, analysisComment(a, false))
-	return o.transition(ctx, &t, run, domain.StateCoding, "no questions, starting to code", setBranch)
+	return o.transition(ctx, &t, run, domain.StateCoding, "no questions, starting to "+work, setBranch)
+}
+
+// settleKind applies the kind the analysis read from the ticket. While hiro
+// picks the kind it takes that reading; a kind someone chose stays, and a
+// disagreement is only a warning on the ticket.
+func (o *Orchestrator) settleKind(ctx context.Context, t domain.Ticket, run *domain.Run, a Analysis) (domain.Ticket, error) {
+	if !a.Kind.Valid() || a.Kind == t.Kind {
+		return t, nil
+	}
+	data := map[string]any{"from": string(t.Kind), "to": string(a.Kind), "reason": a.KindReason}
+	if !t.KindAuto {
+		msg := fmt.Sprintf("this reads like %s work, not %s", a.Kind, t.Kind)
+		if a.KindReason != "" {
+			msg += ": " + a.KindReason
+		}
+		o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventKind,
+			Level: domain.LevelWarn, Message: msg + ". Kept " + string(t.Kind) + ", as it was chosen.", Data: data})
+		return t, nil
+	}
+	msg := fmt.Sprintf("hiro picked %s", a.Kind)
+	if a.KindReason != "" {
+		msg += ": " + a.KindReason
+	}
+	return o.store.UpdateTicket(ctx, t.Key, &domain.Event{
+		TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventKind, Message: msg, Data: data,
+	}, func(x *domain.Ticket) { x.Kind = a.Kind })
 }
 
 // code implements the ticket (or the review feedback), runs the checks with
@@ -556,7 +687,7 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 	if branch == "" {
 		branch = branchFor(repo, t.Key)
 	}
-	ws, err := o.openWorkspace(ctx, t, repo, branch, run)
+	ws, err := o.openWorkspace(ctx, t, &repo, branch, run)
 	if err != nil {
 		return err
 	}
@@ -574,6 +705,9 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		prompt, err = render("feedback", promptData{T: t, Feedback: feedback})
 	} else {
 		d := promptData{T: t, Repo: repo, Checks: checksLine(repo)}
+		if d.Rules, err = o.teamRules(ctx, t.RepoID); err != nil {
+			return err
+		}
 		if r, rerr := o.store.LatestResult(ctx, t.ID, domain.StageAnalyze); rerr == nil {
 			if a, aerr := parseAnalysis(r.Summary); aerr == nil {
 				d.Plan = a.Plan
@@ -660,7 +794,135 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 	return o.transition(ctx, &t, run, domain.StateWaitingForReview, fmt.Sprintf("%d files changed, ready for review", len(files)), func(x *domain.Ticket) {
 		x.Branch, x.HeadSHA = branch, sha
 		x.Turns += run.Turns
+		x.ReviewState = reviewState(s)
 	})
+}
+
+// report has Claude write the ticket's report (or rewrite it with the
+// reviewer's feedback) and stores it for review. Nothing in /workspace is
+// kept: the container's tree is never exported.
+func (o *Orchestrator) report(ctx context.Context, s domain.Settings, t domain.Ticket, run *domain.Run) error {
+	repo, err := o.optionalRepo(ctx, t)
+	if err != nil {
+		return err
+	}
+	d := promptData{T: t, NoRepo: repo == nil}
+	branch := ""
+	if repo != nil {
+		d.Repo, branch = *repo, repo.DefaultBranch
+	}
+	ws, err := o.openWorkspace(ctx, t, repo, branch, run)
+	if err != nil {
+		return err
+	}
+	defer o.closeWorkspace(ctx, t, ws)
+
+	session, err := o.store.LastSessionID(ctx, t.ID)
+	if err != nil {
+		return err
+	}
+	feedback := t.Feedback
+	modelStage := domain.ModelCoding
+	var prompt string
+	if feedback != "" {
+		modelStage = domain.ModelRetry
+		// The container is new: put the report under review back for Claude.
+		if r, rerr := o.store.LatestResult(ctx, t.ID, domain.StageCode); rerr == nil && r.Report != "" {
+			if err := ws.WriteFile(ctx, ReportPath, []byte(r.Report)); err != nil {
+				return fmt.Errorf("restore report: %w", err)
+			}
+		}
+	}
+	if feedback != "" && session != "" {
+		prompt, err = render("report-feedback", promptData{T: t, Feedback: feedback})
+	} else {
+		if d.Rules, err = o.teamRules(ctx, t.RepoID); err != nil {
+			return err
+		}
+		if r, rerr := o.store.LatestResult(ctx, t.ID, domain.StageAnalyze); rerr == nil {
+			if a, aerr := parseAnalysis(r.Summary); aerr == nil {
+				d.Plan = a.Plan
+			}
+		}
+		if d.Answers, err = o.store.Questions(ctx, t.ID); err != nil {
+			return err
+		}
+		prompt, err = render("report", d)
+		if err == nil && feedback != "" {
+			d.Feedback = feedback
+			extra, _ := render("report-feedback", d)
+			prompt += "\n" + extra
+		}
+	}
+	if err != nil {
+		return err
+	}
+
+	res, err := o.claude(ctx, s, ws, &t, run, modelStage, prompt, session)
+	if err != nil {
+		return err
+	}
+	if feedback != "" {
+		if _, err := o.store.UpdateTicket(ctx, t.Key, nil, func(x *domain.Ticket) { x.Feedback = "" }); err != nil {
+			return err
+		}
+	}
+	md, err := ws.ReadFile(ctx, ReportPath)
+	if err != nil {
+		return fmt.Errorf("claude did not write %s: %w", ReportPath, err)
+	}
+	if strings.TrimSpace(string(md)) == "" {
+		run.ExitReason = "no_report"
+		return errors.New("claude wrote an empty report")
+	}
+	summary, err := ws.ReadFile(ctx, SummaryPath)
+	if err != nil {
+		summary, _ = json.Marshal(Summary{Summary: res.Text})
+	}
+	if err := o.store.SaveResult(ctx, domain.Result{RunID: run.ID, Summary: summary, Report: string(md)}); err != nil {
+		return err
+	}
+	return o.transition(ctx, &t, run, domain.StateWaitingForReview, "report ready for review", func(x *domain.Ticket) {
+		x.Turns += run.Turns
+		x.ReviewState = reviewState(s)
+	})
+}
+
+// maxReportComment keeps a posted report under Jira's comment limit.
+const maxReportComment = 30000
+
+// deliver finishes an approved report: it stays in hiro, and goes to the
+// tracker issue when the reviewer asked for that.
+func (o *Orchestrator) deliver(ctx context.Context, t domain.Ticket, run *domain.Run) error {
+	r, err := o.store.LatestResult(ctx, t.ID, domain.StageCode)
+	if errors.Is(err, domain.ErrNotFound) || (err == nil && r.Report == "") {
+		return errors.New("nothing to deliver: this ticket has no report")
+	}
+	if err != nil {
+		return err
+	}
+	msg := "report approved"
+	if t.PostReport {
+		if t.Source != domain.SourceJira || o.tracker == nil {
+			o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: "push", Type: domain.EventTrackerComment, Level: domain.LevelWarn,
+				Message: "the report was not posted: this ticket has no tracker issue"})
+		} else {
+			text := r.Report
+			if len(text) > maxReportComment {
+				text = truncate(text, maxReportComment) + "\n\n(The full report is in hiro.)"
+			}
+			posted, err := o.tracker.Comment(ctx, t.Key, CommentReport, text)
+			if err != nil {
+				return fmt.Errorf("post the report to %s: %w", t.Key, err)
+			}
+			if !posted {
+				return fmt.Errorf("post the report to %s: the tracker is not connected", t.Key)
+			}
+			o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: "push", Type: domain.EventTrackerComment, Message: "report posted to the issue"})
+			msg = "report approved and posted to the issue"
+		}
+	}
+	return o.transition(ctx, &t, run, domain.StateDone, msg, nil)
 }
 
 // push sends the approved work: a branch and pull request, or (for side

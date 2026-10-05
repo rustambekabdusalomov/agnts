@@ -663,6 +663,41 @@ class AppLocalizationsRu extends AppLocalizations {
   String get formSaved => 'Сохранено';
 
   @override
+  String get formSearch => 'Поиск';
+
+  @override
+  String get formNoMatch => 'Ничего не найдено';
+
+  @override
+  String get implementTitle => 'Следующий шаг';
+
+  @override
+  String get implementSubPlan =>
+      'Пусть hiro выполнит план: задача на код, связанная с этой, с планом в качестве задания. Дифф вы проверяете как обычно.';
+
+  @override
+  String get implementSubBug =>
+      'Пусть hiro внесёт предложенное исправление: задача на код, связанная с этой, с разбором в качестве задания. Дифф вы проверяете как обычно.';
+
+  @override
+  String get implementImplement => 'Выполнить план';
+
+  @override
+  String get implementFix => 'Исправить баг';
+
+  @override
+  String get implementPickRepo => 'Репозиторий для изменений';
+
+  @override
+  String get implementQueue => 'Оставить задачу в очереди, не запускать';
+
+  @override
+  String get implementDoneBy => 'Выполняется в';
+
+  @override
+  String get implementImplements => 'Выполняет';
+
+  @override
   String get integrationsTitle => 'Интеграции';
 
   @override
@@ -1110,6 +1145,53 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get integrationsGitWebhookWhy =>
       'Когда пул- или merge request смёржен, hiro отмечает тикет и переводит задачу Jira в статус, выбранный на странице Jira. События пайплайнов обновляют страницу репозитория.';
+
+  @override
+  String get kindTitle => 'Тип';
+
+  @override
+  String get kindAuto => 'Авто';
+
+  @override
+  String get kindAutoHint => 'hiro сам определит тип, когда прочитает тикет';
+
+  @override
+  String get kindCode => 'Код';
+
+  @override
+  String get kindCodeHint => 'Внести изменение в код. Нужен репозиторий; итог — pull request.';
+
+  @override
+  String get kindTest => 'Тесты';
+
+  @override
+  String get kindTestHint => 'Написать или исправить автотесты. Нужен репозиторий; итог — pull request.';
+
+  @override
+  String get kindPlan => 'План';
+
+  @override
+  String get kindPlanHint => 'Написать план реализации. Код не меняется; итог — отчёт.';
+
+  @override
+  String get kindAnalysis => 'Анализ';
+
+  @override
+  String get kindAnalysisHint => 'Исследовать вопрос и описать выводы. Код не меняется.';
+
+  @override
+  String get kindBug => 'Разбор бага';
+
+  @override
+  String get kindBugHint => 'Найти причину бага и предложить исправление. Код не меняется.';
+
+  @override
+  String get kindPickerHint => 'Что сделает hiro. Выбранный тип не меняется; при «Авто» hiro решит сам, когда прочитает тикет.';
+
+  @override
+  String kindSwitchTo(String kind) {
+    return 'Сменить на «$kind»';
+  }
 
   @override
   String get learnTitle => 'Обучение';
@@ -2158,6 +2240,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get navLearnQueue => 'Очередь обучения';
 
   @override
+  String get navRules => 'Правила';
+
+  @override
   String get repoBack => 'Назад к репозиториям';
 
   @override
@@ -2586,22 +2671,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get reposNone => 'Репозиториев пока нет. Добавьте первый, чтобы hiro мог в нём работать.';
 
   @override
-  String get reposDrawerJira => 'Репозиторий для тикетов Jira';
-
-  @override
-  String get reposDrawerSide => 'Репозиторий своего проекта';
+  String get reposDrawerSub => 'Принимает задачи своего проекта, а с ключом проекта Jira — и тикеты Jira';
 
   @override
   String get reposName => 'Название';
-
-  @override
-  String get reposKind => 'Используется для';
-
-  @override
-  String get reposKindJira => 'Тикеты Jira';
-
-  @override
-  String get reposKindSide => 'Свой проект';
 
   @override
   String get reposCloneUrl => 'URL для клонирования';
@@ -2614,14 +2687,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get reposJiraProject => 'Ключ проекта Jira';
 
   @override
-  String get reposJiraHelp => 'Тикеты из этого проекта Jira с меткой hiro выполняются здесь.';
+  String get reposJiraHelp => 'Необязательно. Тикеты из этого проекта Jira с меткой hiro выполняются здесь.';
 
   @override
   String get reposTaskPrefix => 'Префикс ключа задач';
 
   @override
   String reposTaskPrefixHelp(String prefix) {
-    return 'Задачи нумеруются как $prefix-1, $prefix-2.';
+    return 'Задачи своего проекта нумеруются как $prefix-1, $prefix-2. Должен отличаться от ключа проекта Jira.';
   }
 
   @override
@@ -2669,6 +2742,375 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get reposDeployWorkflowHelp =>
       'Файл workflow GitHub Actions с workflow_dispatch, например deploy.yml. Кнопка «Деплой» на странице репозитория запускает его.';
+
+  @override
+  String get reviewTitle => 'Код-ревью hiro';
+
+  @override
+  String get reviewReportTitle => 'Ревью отчёта от hiro';
+
+  @override
+  String get reviewSub => 'Второе мнение, пока вы проверяете. Оно никогда не блокирует одобрение: решаете вы.';
+
+  @override
+  String get reviewPending => 'В очереди: hiro проверит это, как только освободится исполнитель. Пока можно проверить самому.';
+
+  @override
+  String get reviewRunning => 'hiro проверяет…';
+
+  @override
+  String get reviewFailed => 'Ревью не удалось. Проверьте сами или запустите снова.';
+
+  @override
+  String get reviewNone => 'hiro это не проверял.';
+
+  @override
+  String reviewStale(String n) {
+    return 'Это ревью ревизии $n; с тех пор работа изменилась.';
+  }
+
+  @override
+  String get reviewRun => 'Проверить с hiro';
+
+  @override
+  String get reviewRunAgain => 'Проверить снова';
+
+  @override
+  String get reviewVerdict_looks_good => 'Всё хорошо';
+
+  @override
+  String get reviewVerdict_has_concerns => 'Есть замечания';
+
+  @override
+  String get reviewVerdict_needs_changes => 'Нужны изменения';
+
+  @override
+  String get reviewSev_blocker => 'Блокер';
+
+  @override
+  String get reviewSev_major => 'Серьёзно';
+
+  @override
+  String get reviewSev_minor => 'Незначительно';
+
+  @override
+  String get reviewSev_nit => 'Мелочь';
+
+  @override
+  String get reviewCat_correctness => 'Корректность';
+
+  @override
+  String get reviewCat_security => 'Безопасность';
+
+  @override
+  String get reviewCat_performance => 'Производительность';
+
+  @override
+  String get reviewCat_tests => 'Тесты';
+
+  @override
+  String get reviewCat_rules => 'Правила команды';
+
+  @override
+  String get reviewCat_maintainability => 'Сопровождаемость';
+
+  @override
+  String get reviewCat_accuracy => 'Точность';
+
+  @override
+  String get reviewCat_completeness => 'Полнота';
+
+  @override
+  String get reviewCat_other => 'Другое';
+
+  @override
+  String reviewFindings(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count замечания',
+      many: '$count замечаний',
+      few: '$count замечания',
+      one: '$count замечание',
+      zero: 'Замечаний нет',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewNoFindings => 'hiro не нашёл проблем.';
+
+  @override
+  String get reviewStrengths => 'Сделано хорошо';
+
+  @override
+  String get reviewSuggestion => 'Предложение';
+
+  @override
+  String get reviewAddToFeedback => 'Добавить в отзыв';
+
+  @override
+  String get reviewAdded => 'В отзыве';
+
+  @override
+  String get reviewAddAll => 'Добавить всё в отзыв';
+
+  @override
+  String get reviewShowInDiff => 'Показать в диффе';
+
+  @override
+  String reviewModel(String model, String reason) {
+    return 'Проверил $model: $reason';
+  }
+
+  @override
+  String get rulesTitle => 'Правила';
+
+  @override
+  String get rulesLede =>
+      'Инструкции, которым hiro следует в каждом тикете: глобальные правила для всех репозиториев и правила для одного репозитория. Claude проверяет каждое правило и задаёт вопросы обо всём неясном, прежде чем оно начнёт действовать.';
+
+  @override
+  String get rulesAdd => 'Добавить правило';
+
+  @override
+  String get rulesAddSubmit => 'Добавить и проверить';
+
+  @override
+  String get rulesDrawerSub =>
+      'Пишите так, как объясняли бы новому коллеге. Claude проверит правило, прежде чем ему будет следовать какой-либо тикет.';
+
+  @override
+  String get rulesRuleTitle => 'Название';
+
+  @override
+  String get rulesTitlePlaceholder => 'Тесты для новых эндпоинтов';
+
+  @override
+  String get rulesScope => 'Где действует';
+
+  @override
+  String get rulesScopeHelp => 'Глобальные правила действуют во всех репозиториях. Если правила расходятся, побеждает правило репозитория.';
+
+  @override
+  String get rulesGlobal => 'Глобальное';
+
+  @override
+  String get rulesGlobalHint => 'Все репозитории';
+
+  @override
+  String get rulesBody => 'Правило';
+
+  @override
+  String get rulesBodyPlaceholder => 'Для каждого нового HTTP-эндпоинта пишется интеграционный тест рядом с обработчиком.';
+
+  @override
+  String get rulesBodyHelp => 'Скажите, что делать, где и как поступать, если правилу нельзя следовать.';
+
+  @override
+  String get rulesEnabled => 'Включено';
+
+  @override
+  String rulesEnabledFor(String title) {
+    return 'Правило $title включено';
+  }
+
+  @override
+  String get rulesRereviewHelp =>
+      'Вы изменили текст правила, поэтому Claude проверит его снова. Пока проверка не закончится, тикеты его не получают.';
+
+  @override
+  String get rulesSaved => 'Правило сохранено';
+
+  @override
+  String get rulesSavedReview => 'Правило сохранено; Claude проверяет его';
+
+  @override
+  String get rulesScopeLabel => 'Показать правила для';
+
+  @override
+  String rulesScopeAll(String n) {
+    return 'Все правила ($n)';
+  }
+
+  @override
+  String rulesScopeGlobal(String n) {
+    return 'Глобальные ($n)';
+  }
+
+  @override
+  String get rulesNone =>
+      'Правил пока нет. Добавьте правило, чтобы рассказать hiro, как работает ваша команда: тесты, именование, логирование, что нельзя трогать.';
+
+  @override
+  String get rulesNoMatch => 'Нет подходящих правил.';
+
+  @override
+  String rulesWaitingHelp(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n правила ждут ваших ответов. Пока ответов нет, они не применяются к тикетам.',
+      many: '$n правил ждут ваших ответов. Пока ответов нет, они не применяются к тикетам.',
+      few: '$n правила ждут ваших ответов. Пока ответов нет, они не применяются к тикетам.',
+      one: '$n правило ждёт ваших ответов. Пока ответов нет, оно не применяется к тикетам.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rulesStatus_pending => 'В очереди на проверку';
+
+  @override
+  String get rulesStatus_analyzing => 'Проверяется';
+
+  @override
+  String get rulesStatus_questions => 'Нужны ответы';
+
+  @override
+  String get rulesStatus_ready => 'Действует';
+
+  @override
+  String get rulesStatus_failed => 'Проверка не удалась';
+
+  @override
+  String get rulesOff => 'Выключено';
+
+  @override
+  String get rulesEdit => 'Изменить';
+
+  @override
+  String get rulesDelete => 'Удалить';
+
+  @override
+  String rulesDeleteBody(String title) {
+    return 'Удалить правило «$title»? Тикеты, начатые после этого, больше не будут ему следовать.';
+  }
+
+  @override
+  String get rulesPending => 'Ждёт свободного исполнителя. Claude проверяет правила до начала следующего тикета.';
+
+  @override
+  String get rulesAnalyzing => 'Claude читает правило и ищет в нём неясности и противоречия.';
+
+  @override
+  String rulesQuestionsTitle(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n вопроса, прежде чем правило начнёт действовать',
+      many: '$n вопросов, прежде чем правило начнёт действовать',
+      few: '$n вопроса, прежде чем правило начнёт действовать',
+      one: '$n вопрос, прежде чем правило начнёт действовать',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rulesQuestionsSub => 'Claude нашёл неясность. Ваши ответы станут частью правила.';
+
+  @override
+  String get rulesYourAnswer => 'Ваш ответ';
+
+  @override
+  String get rulesAddDetails => 'Добавьте детали (необязательно)';
+
+  @override
+  String rulesAnswerFor(String n) {
+    return 'Ответ на вопрос $n';
+  }
+
+  @override
+  String rulesDetailsFor(String n) {
+    return 'Детали к вопросу $n';
+  }
+
+  @override
+  String get rulesSendAnswers => 'Отправить ответы';
+
+  @override
+  String rulesQuestionsLeft(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Осталось $n вопроса',
+      many: 'Осталось $n вопросов',
+      few: 'Осталось $n вопроса',
+      one: 'Остался $n вопрос',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rulesAllAnswered => 'На все вопросы есть ответы';
+
+  @override
+  String get rulesAccept => 'Использовать как есть';
+
+  @override
+  String get rulesAcceptTitle => 'Использовать правило как есть?';
+
+  @override
+  String get rulesAcceptBody =>
+      'Тикеты получат правило в вашей формулировке вместе с уже данными ответами. Открытые вопросы будут отброшены.';
+
+  @override
+  String rulesFailed(String error) {
+    return 'Claude не смог проверить правило: $error';
+  }
+
+  @override
+  String get rulesReviewAgain => 'Проверить снова';
+
+  @override
+  String get rulesInterpretation => 'Как hiro его понимает';
+
+  @override
+  String get rulesClarified => 'Что получают тикеты';
+
+  @override
+  String get rulesAsWritten => 'Используется как написано.';
+
+  @override
+  String rulesAnswersTitle(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n вопроса с ответами',
+      many: '$n вопросов с ответами',
+      few: '$n вопроса с ответами',
+      one: '$n вопрос с ответом',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rulesReviewedAgo(String ago) {
+    return 'Проверено $ago';
+  }
+
+  @override
+  String rulesAddedAgo(String ago) {
+    return 'Добавлено $ago';
+  }
+
+  @override
+  String get rulesAnswered => 'Ответы отправлены; Claude снова проверяет правило';
+
+  @override
+  String get rulesAccepted => 'Правило действует как написано';
+
+  @override
+  String get rulesQueued => 'Поставлено в очередь на проверку';
+
+  @override
+  String get rulesDeleted => 'Правило удалено';
+
+  @override
+  String get rulesTurnedOn => 'Правило включено';
+
+  @override
+  String get rulesTurnedOff => 'Правило выключено';
 
   @override
   String get settingsTitle => 'Настройки';
@@ -2764,6 +3206,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsStageLearnHelp => 'Читает каждое отправленное изменение и пишет уроки о том, что ново для репозитория.';
 
   @override
+  String get settingsStageReview => 'Код-ревью';
+
+  @override
+  String get settingsStageReviewHelp =>
+      'Проверяет каждый результат, пока его проверяете вы. «Авто» берёт Opus для сложных тикетов и Sonnet для остальных.';
+
+  @override
+  String get settingsModelAuto => 'Авто';
+
+  @override
   String get settingsMaxTurns => 'Лимит шагов на запуск';
 
   @override
@@ -2847,6 +3299,13 @@ class AppLocalizationsRu extends AppLocalizations {
       'После отправки hiro ищет приёмы, которых в репозитории раньше не было, и пишет уроки в разделе «Обучение». Тратит лимит, только когда нет ожидающих тикетов.';
 
   @override
+  String get settingsAutoReview => 'Проверять каждый результат';
+
+  @override
+  String get settingsAutoReviewHelp =>
+      'Пока изменение или отчёт ждут вас, hiro проверяет их и показывает замечания рядом. Одобрение это никогда не блокирует.';
+
+  @override
   String get settingsPauseAbove => 'Не начинать новые запуски выше';
 
   @override
@@ -2892,6 +3351,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsLessons => 'Когда hiro находит что-то новое для изучения';
 
   @override
+  String get settingsReviewDone => 'Когда код-ревью hiro завершено';
+
+  @override
   String get settingsOnThisPage => 'На этой странице';
 
   @override
@@ -2933,6 +3395,15 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get stateRate_limited => 'Пауза: лимит тарифа';
+
+  @override
+  String get stateReportCoding => 'Пишет отчёт';
+
+  @override
+  String get stateReportPushing => 'Сдаёт';
+
+  @override
+  String get stateReportDone => 'Готово';
 
   @override
   String get tasksTitle => 'Задачи';
@@ -3073,6 +3544,12 @@ class AppLocalizationsRu extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n задачи', many: '$n задач', few: '$n задачи', one: '$n задача');
     return '$_temp0';
   }
+
+  @override
+  String get tasksNoRepo => 'Без репозитория';
+
+  @override
+  String get tasksRepoNeeded => 'Для кода и тестов нужен репозиторий: выберите его или другой тип.';
 
   @override
   String get ticketBack => 'Все тикеты';
@@ -3467,6 +3944,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ticketStageRetry => 'Повторы и запрошенные изменения';
 
   @override
+  String get ticketStageReview => 'Код-ревью hiro';
+
+  @override
+  String ticketModelAuto(String model) {
+    return 'Авто ($model)';
+  }
+
+  @override
   String get ticketSideTicket => 'Тикет';
 
   @override
@@ -3591,6 +4076,111 @@ class AppLocalizationsRu extends AppLocalizations {
   String ticketMergedAt(String time) {
     return 'Смёржено $time.';
   }
+
+  @override
+  String get ticketRepoTitle => 'Репозиторий';
+
+  @override
+  String get ticketRepoHint => 'Где hiro анализирует тикет и пишет код.';
+
+  @override
+  String get ticketRepoNone => 'Выберите репозиторий…';
+
+  @override
+  String get ticketRepoMissing => 'К тикету не привязан репозиторий. Выберите его и повторите.';
+
+  @override
+  String get ticketRepoRestartTitle => 'Сменить репозиторий?';
+
+  @override
+  String ticketRepoRestart(String repo, String next) {
+    return 'Работа по тикету уже шла в $repo. В $next он начнётся заново с анализа после повтора.';
+  }
+
+  @override
+  String get ticketRepoChange => 'Сменить';
+
+  @override
+  String ticketRepoChanged(String repo) {
+    return 'Репозиторий: $repo';
+  }
+
+  @override
+  String get ticketQueuedSubReport =>
+      'hiro прочитает тикет (и код, если есть репозиторий) и вернётся с планом и вопросами. Ничего не меняется.';
+
+  @override
+  String get ticketAnalyzingTitleNoRepo => 'Читает тикет';
+
+  @override
+  String get ticketAnalyzingSubNoRepo => 'Репозитория нет: hiro работает по тексту тикета.';
+
+  @override
+  String get ticketStartWriting => 'Начать отчёт';
+
+  @override
+  String get ticketWritingTitle => 'Пишет отчёт';
+
+  @override
+  String get ticketWritingSub => 'Работает в новом контейнере. Код не меняется; сначала вы проверите отчёт.';
+
+  @override
+  String get ticketReviewReportTitle => 'Проверьте отчёт';
+
+  @override
+  String get ticketReviewReportSub => 'После одобрения отчёт остаётся здесь, а задача закрывается.';
+
+  @override
+  String get ticketReviewReportSubJira =>
+      'После одобрения отчёт остаётся здесь, а тикет закрывается. В Jira он попадёт, только если отметить пункт ниже.';
+
+  @override
+  String get ticketReport => 'Отчёт';
+
+  @override
+  String get ticketReportMissing => 'Отчёт не сохранён.';
+
+  @override
+  String ticketPostReport(String key) {
+    return 'Также опубликовать отчёт комментарием в $key в Jira';
+  }
+
+  @override
+  String get ticketFeedbackReportHint => 'Что изменить или добавить в отчёт?';
+
+  @override
+  String get ticketApproveReport => 'Одобрить';
+
+  @override
+  String get ticketApproveReportConfirm => 'Одобрить отчёт и закрыть тикет?';
+
+  @override
+  String ticketApproveReportPostConfirm(String key) {
+    return 'Одобрить отчёт, закрыть тикет и опубликовать отчёт в $key в Jira?';
+  }
+
+  @override
+  String get ticketDeliveringTitle => 'Завершает';
+
+  @override
+  String get ticketDeliveringSub => 'Сохраняет одобренный отчёт и публикует его в Jira, если вы просили.';
+
+  @override
+  String get ticketDoneReportTitle => 'Отчёт одобрен';
+
+  @override
+  String get ticketDoneReport => 'Отчёт хранится здесь.';
+
+  @override
+  String ticketDoneReportPosted(String key) {
+    return 'Отчёт хранится здесь и опубликован в $key в Jira.';
+  }
+
+  @override
+  String get ticketStopWriting => 'Отчёт';
+
+  @override
+  String get ticketStopDone => 'Готово';
 
   @override
   String get ticketsTitle => 'Тикеты';

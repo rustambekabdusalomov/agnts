@@ -18,6 +18,10 @@ While hiro works you see each step, the model, turns used and session usage. Sto
 
 Read what hiro did and check the tests and diff. Approve and push commits as you. Request changes sends your feedback into the same session. Reject discards the branch.
 
+## hiro's code review
+
+While the work waits for you, hiro reviews it too: a diff for bugs, security, missing tests and your team rules; a report for accuracy and gaps. Findings appear above the diff, most severe first. It is a second opinion, never a gate: approve whenever you like. Add to feedback copies a finding's suggestion into your feedback, ready for Request changes. In Auto, Opus reviews complex tickets and Sonnet the rest.
+
 ## When hiro stops
 
 After repeated failed tests or a plan limit, hiro stops instead of guessing. Add instructions and retry, or take the ticket yourself.

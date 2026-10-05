@@ -19,7 +19,7 @@ import (
 type Actions interface {
 	View(ctx context.Context, key string) (orchestrator.TicketView, error)
 	AnswerOne(ctx context.Context, key string, a domain.Answer, origin domain.Origin) (bool, error)
-	Approve(ctx context.Context, key string, assignees []string, origin domain.Origin) (domain.Ticket, error)
+	Approve(ctx context.Context, key string, assignees []string, postReport bool, origin domain.Origin) (domain.Ticket, error)
 	RequestChanges(ctx context.Context, key, feedback string, origin domain.Origin) (domain.Ticket, error)
 	Reject(ctx context.Context, key, reason string, origin domain.Origin) (domain.Ticket, error)
 	Retry(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
@@ -138,6 +138,10 @@ func (n *Notifier) handle(ctx context.Context, e domain.Event) {
 		n.lessons(ctx, e)
 		return
 	}
+	if e.Type == domain.EventReview {
+		n.review(ctx, e)
+		return
+	}
 	to, _ := e.Data["to"].(string)
 	if e.TicketKey == "" || to == "" {
 		return
@@ -220,6 +224,56 @@ func (n *Notifier) lessons(ctx context.Context, e domain.Event) {
 	}
 }
 
+// review announces a finished code review while its ticket still waits
+// for the human review.
+func (n *Notifier) review(ctx context.Context, e domain.Event) {
+	s, err := n.settings.Get(ctx)
+	if err != nil || !s.Notify.Review || e.TicketKey == "" {
+		return
+	}
+	v, err := n.actions.View(ctx, e.TicketKey)
+	if err != nil || v.Ticket.State != domain.StateWaitingForReview || v.Review == nil || v.Review.Revision != v.Ticket.Revision {
+		return // approved or sent back since
+	}
+	verdict := map[string]string{
+		domain.VerdictLooksGood: "looks good", domain.VerdictHasConcerns: "has concerns", domain.VerdictNeedsChanges: "needs changes",
+	}[v.Review.Verdict]
+	title := fmt.Sprintf("%s: code review %s", v.Ticket.Key, verdict)
+	counts := v.Review.Counts()
+	var parts []string
+	for _, sev := range domain.FindingSeverities {
+		if c := counts[sev]; c > 0 {
+			parts = append(parts, fmt.Sprintf("%d %s", c, sev))
+		}
+	}
+	body := "No findings."
+	if len(parts) > 0 {
+		body = strings.Join(parts, ", ")
+	}
+	if s.Notify.Push && n.fcm != nil {
+		n.push(ctx, Push{Title: title, Body: body, Ticket: v.Ticket.Key})
+	}
+	if !s.Notify.Telegram {
+		return
+	}
+	b, cfg, ok := n.bot(ctx)
+	if !ok {
+		return
+	}
+	text := fmt.Sprintf("hiro reviewed its work on %s: %s.\n\n%s", v.Ticket.Key, verdict, v.Review.Summary)
+	for i, f := range v.Review.Findings {
+		if i == 5 {
+			text += fmt.Sprintf("\n… and %d more", len(v.Review.Findings)-5)
+			break
+		}
+		text += fmt.Sprintf("\n• [%s] %s", f.Severity, f.Title)
+	}
+	text += "\n\nThe full review is on the ticket in hiro."
+	if _, err := b.Send(ctx, cfg.ChatID, truncate(text, 3500), nil, false); err != nil {
+		n.log.Warn("telegram notify", "ticket", e.TicketKey, "err", err)
+	}
+}
+
 func pushText(v orchestrator.TicketView, e domain.Event) (string, string) {
 	k := v.Ticket.Key
 	switch v.Ticket.State {
@@ -232,6 +286,9 @@ func pushText(v orchestrator.TicketView, e domain.Event) (string, string) {
 	case domain.StateFailed:
 		return k + " stopped", truncate(e.Message, 180)
 	default:
+		if v.Ticket.Kind.Report() {
+			return k + " is done", v.Ticket.Title
+		}
 		return k + " pushed", v.Ticket.PRURL
 	}
 }
@@ -302,7 +359,18 @@ func (n *Notifier) sendTelegram(ctx context.Context, v orchestrator.TicketView, 
 		return nil
 	case domain.StateWaitingForReview:
 		text := fmt.Sprintf("%s is ready for review: %s", t.Key, t.Title)
-		if r := v.Result; r != nil {
+		approve := "Approve and push"
+		if t.Kind.Report() {
+			// A report keeps to hiro from here; posting it to Jira is a choice made in the app.
+			approve = "Approve"
+			text = fmt.Sprintf("The %s report on %s is ready for review: %s", t.Kind, t.Key, t.Title)
+			if r := v.Result; r != nil {
+				if sum := summaryText(r.Summary); sum != "" {
+					text += "\n\n" + truncate(sum, 900)
+				}
+			}
+			text += "\n\nRead the report in hiro before approving. Approving here keeps it in hiro; to post it to Jira, approve in the app."
+		} else if r := v.Result; r != nil {
 			add, del := 0, 0
 			for _, f := range r.Files {
 				add += f.Add
@@ -313,9 +381,11 @@ func (n *Notifier) sendTelegram(ctx context.Context, v orchestrator.TicketView, 
 				text += "\n\n" + truncate(sum, 900)
 			}
 		}
-		text += "\n\nOpen the diff in hiro before approving."
+		if !t.Kind.Report() {
+			text += "\n\nOpen the diff in hiro before approving."
+		}
 		id, err := b.Send(ctx, cfg.ChatID, text, [][]Button{
-			{{Text: "Approve and push", Data: "apr:" + t.Key}},
+			{{Text: approve, Data: "apr:" + t.Key}},
 			{{Text: "Request changes", Data: "chg:" + t.Key}, {Text: "Reject", Data: "rej:" + t.Key}},
 		}, false)
 		if err != nil {
@@ -334,7 +404,9 @@ func (n *Notifier) sendTelegram(ctx context.Context, v orchestrator.TicketView, 
 		return err
 	case domain.StateDone:
 		msg := t.Key + " is pushed."
-		if t.PRURL != "" {
+		if t.Kind.Report() {
+			msg = t.Key + ": report approved."
+		} else if t.PRURL != "" {
 			msg = fmt.Sprintf("%s: pull request opened\n%s", t.Key, t.PRURL)
 		}
 		_, err := b.Send(ctx, cfg.ChatID, msg, nil, false)

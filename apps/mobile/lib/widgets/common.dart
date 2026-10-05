@@ -7,18 +7,19 @@ import '../theme.dart';
 import 'ui.dart';
 
 /// Label for a ticket state, from the shared dictionaries.
-String stateLabel(AppLocalizations l, TicketState s) => stateLabelOf(l, s);
+String stateLabel(AppLocalizations l, TicketState s, [TicketKind? kind]) => stateLabelOf(l, s, kind);
 
 /// A state's text colour (its tone's ink), as in the demo.
 Color stateColor(BuildContext context, TicketState s) => stateTone(s).ink(Hiro.of(context));
 
 /// A state as a dotted pill (.badge).
 class StateBadge extends StatelessWidget {
-  const StateBadge(this.state, {super.key});
+  const StateBadge(this.state, {super.key, this.kind});
   final TicketState state;
+  final TicketKind? kind;
 
   @override
-  Widget build(BuildContext context) => ToneBadge(stateLabel(AppLocalizations.of(context), state), stateTone(state));
+  Widget build(BuildContext context) => ToneBadge(stateLabel(AppLocalizations.of(context), state, kind), stateTone(state));
 }
 
 /// A titled card section: grey heading above a card (.sec-h + .card).

@@ -5,6 +5,7 @@
 // ignore_for_file: unused_element
 import 'package:hiro_api/src/model/ticket_state.dart';
 import 'package:hiro_api/src/model/model_overrides.dart';
+import 'package:hiro_api/src/model/ticket_kind.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -56,6 +57,14 @@ class Ticket {
 
      this.askFirst,
 
+    required  this.kind,
+
+    required  this.kindAuto,
+
+     this.postReport,
+
+     this.parentKey,
+
      this.repoName,
 
      this.models,
@@ -67,6 +76,8 @@ class Ticket {
      this.mergedAt,
 
      this.learnState,
+
+     this.reviewState,
 
     required  this.createdAt,
 
@@ -281,6 +292,57 @@ class Ticket {
 
   @JsonKey(
     
+    name: r'kind',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final TicketKind kind;
+
+
+
+      /// hiro picks the kind; the analysis may still change it
+  @JsonKey(
+    
+    name: r'kindAuto',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool kindAuto;
+
+
+
+      /// The approved report is posted to the tracker issue
+  @JsonKey(
+    
+    name: r'postReport',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? postReport;
+
+
+
+      /// The plan or bug investigation this ticket implements
+  @JsonKey(
+    
+    name: r'parentKey',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? parentKey;
+
+
+
+  @JsonKey(
+    
     name: r'repoName',
     required: false,
     includeIfNull: false,
@@ -354,6 +416,19 @@ class Ticket {
 
 
 
+      /// The code review hiro runs beside the human review
+  @JsonKey(
+    
+    name: r'reviewState',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final TicketReviewStateEnum? reviewState;
+
+
+
   @JsonKey(
     
     name: r'createdAt',
@@ -399,12 +474,17 @@ class Ticket {
       other.afterApprove == afterApprove &&
       other.held == held &&
       other.askFirst == askFirst &&
+      other.kind == kind &&
+      other.kindAuto == kindAuto &&
+      other.postReport == postReport &&
+      other.parentKey == parentKey &&
       other.repoName == repoName &&
       other.models == models &&
       other.since == since &&
       other.stopReason == stopReason &&
       other.mergedAt == mergedAt &&
       other.learnState == learnState &&
+      other.reviewState == reviewState &&
       other.createdAt == createdAt &&
       other.updatedAt == updatedAt;
 
@@ -427,12 +507,17 @@ class Ticket {
         afterApprove.hashCode +
         held.hashCode +
         askFirst.hashCode +
+        kind.hashCode +
+        kindAuto.hashCode +
+        postReport.hashCode +
+        parentKey.hashCode +
         repoName.hashCode +
         models.hashCode +
         since.hashCode +
         stopReason.hashCode +
         mergedAt.hashCode +
         learnState.hashCode +
+        reviewState.hashCode +
         createdAt.hashCode +
         updatedAt.hashCode;
 
@@ -489,6 +574,28 @@ done(r'done'),
 failed(r'failed');
 
 const TicketLearnStateEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
+}
+
+
+/// The code review hiro runs beside the human review
+enum TicketReviewStateEnum {
+@JsonValue(r'none')
+none(r'none'),
+@JsonValue(r'pending')
+pending(r'pending'),
+@JsonValue(r'running')
+running(r'running'),
+@JsonValue(r'done')
+done(r'done'),
+@JsonValue(r'failed')
+failed(r'failed');
+
+const TicketReviewStateEnum(this.value);
 
 final String value;
 

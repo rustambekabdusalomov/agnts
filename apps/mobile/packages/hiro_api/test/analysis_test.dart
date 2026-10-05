@@ -17,5 +17,11 @@ void main() {
       // TODO
     });
 
+    // The analysis's rating; picks the review model on auto
+    // String complexity
+    test('to test the property `complexity`', () async {
+      // TODO
+    });
+
   });
 }

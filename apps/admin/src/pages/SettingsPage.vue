@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { api, HttpError, unwrap } from '../api/client'
-import { MODEL_NAME, MODELS, type Model, type Settings } from '../api/types'
+import { MODEL_NAME, MODELS, type Model, type ReviewModel, type Settings } from '../api/types'
 import PageHeader from '../components/PageHeader.vue'
 import CfgRow from '../components/form/CfgRow.vue'
 import CommandChips from '../components/form/CommandChips.vue'
@@ -27,6 +27,8 @@ const prefs = usePrefs()
 const integrations = useIntegrations()
 
 const settings = useQuery({ queryKey: ['settings'], queryFn: () => unwrap(api.GET('/settings')) })
+// Query data is a reactive Proxy, which structuredClone rejects; settings are plain JSON.
+const clone = (s: Settings): Settings => JSON.parse(JSON.stringify(s))
 const draft = ref<Settings | null>(null)
 const error = ref('')
 
@@ -37,7 +39,7 @@ watch(
   (s, old) => {
     // Replace the draft unless the user has edits against the old values.
     const untouched = !draft.value || JSON.stringify(draft.value) === JSON.stringify(old)
-    if (s && untouched) draft.value = structuredClone(s)
+    if (s && untouched) draft.value = clone(s)
   },
   { immediate: true },
 )
@@ -46,7 +48,7 @@ const save = useMutation({
   mutationFn: (s: Settings) => unwrap(api.PUT('/settings', { body: s })),
   onSuccess: (s) => {
     qc.setQueryData(['settings'], s)
-    draft.value = structuredClone(s)
+    draft.value = clone(s)
     error.value = ''
     ui.notify(t('settings.saved'))
   },
@@ -55,7 +57,7 @@ const save = useMutation({
   },
 })
 function discard() {
-  if (settings.data.value) draft.value = structuredClone(settings.data.value)
+  if (settings.data.value) draft.value = clone(settings.data.value)
   error.value = ''
 }
 
@@ -82,6 +84,8 @@ const percent = (n: number) => `${n}%`
 function setModel(stage: (typeof stages)[number], m: Model) {
   if (draft.value) draft.value.models[stage] = m
 }
+// The code review model can also be auto: Opus for complex tickets.
+const reviewModels = computed(() => [{ value: 'auto' as ReviewModel, label: t('settings.modelAuto') }, ...models])
 </script>
 
 <template>
@@ -140,6 +144,9 @@ function setModel(stage: (typeof stages)[number], m: Model) {
             @update:model-value="setModel(st, $event)"
           />
         </CfgRow>
+        <CfgRow v-if="draft.models.review !== undefined" :label="t('settings.stageReview')" :help="t('settings.stageReviewHelp')">
+          <SegButtons v-model="draft.models.review" :options="reviewModels" :label="t('settings.stageReview')" />
+        </CfgRow>
         <CfgRow :label="t('settings.maxTurns')" :help="t('settings.maxTurnsHelp')">
           <NumberStepper v-model="draft.maxTurns" :min="20" :max="200" :step="10" :label="t('settings.maxTurns')" />
         </CfgRow>
@@ -184,6 +191,9 @@ function setModel(stage: (typeof stages)[number], m: Model) {
         <CfgRow v-if="draft.autoLearn !== undefined" :label="t('settings.autoLearn')" :help="t('settings.autoLearnHelp')">
           <SwitchToggle v-model="draft.autoLearn" :label="t('settings.autoLearn')" />
         </CfgRow>
+        <CfgRow v-if="draft.autoReview !== undefined" :label="t('settings.autoReview')" :help="t('settings.autoReviewHelp')">
+          <SwitchToggle v-model="draft.autoReview" :label="t('settings.autoReview')" />
+        </CfgRow>
         <CfgRow :label="t('settings.pauseAbove')" :help="t('settings.pauseAboveHelp')">
           <NumberStepper v-model="draft.pauseAbove" :min="50" :max="100" :step="5" :label="t('settings.pauseAbove')" :format="percent" />
         </CfgRow>
@@ -211,6 +221,9 @@ function setModel(stage: (typeof stages)[number], m: Model) {
         </CfgRow>
         <CfgRow v-if="draft.notify.lessons !== undefined" :label="t('settings.lessons')">
           <SwitchToggle v-model="draft.notify.lessons" :label="t('settings.lessons')" />
+        </CfgRow>
+        <CfgRow v-if="draft.notify.review !== undefined" :label="t('settings.reviewDone')">
+          <SwitchToggle v-model="draft.notify.review" :label="t('settings.reviewDone')" />
         </CfgRow>
       </section>
       <McpCard />

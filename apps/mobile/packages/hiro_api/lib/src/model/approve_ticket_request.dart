@@ -21,9 +21,11 @@ class ApproveTicketRequest {
   ApproveTicketRequest({
 
      this.assignees,
+
+     this.postReport,
   });
 
-      /// Git host usernames to assign the pull request to
+      /// Git host usernames to assign the pull request to (changes only)
   @JsonKey(
     
     name: r'assignees',
@@ -36,15 +38,30 @@ class ApproveTicketRequest {
 
 
 
+      /// Post the approved report as a comment on the tracker issue (reports only)
+  @JsonKey(
+    
+    name: r'postReport',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? postReport;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is ApproveTicketRequest &&
-      other.assignees == assignees;
+      other.assignees == assignees &&
+      other.postReport == postReport;
 
     @override
     int get hashCode =>
-        assignees.hashCode;
+        assignees.hashCode +
+        postReport.hashCode;
 
   factory ApproveTicketRequest.fromJson(Map<String, dynamic> json) => _$ApproveTicketRequestFromJson(json);
 

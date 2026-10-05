@@ -8,7 +8,8 @@ import 'package:hiro_api/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**repoId** | **int** |  | 
+**repoId** | **int** | Omit for a task without a repository (report kinds or auto) | [optional] 
+**kind** | [**TicketKindChoice**](TicketKindChoice.md) |  | [optional] 
 **title** | **String** |  | 
 **description** | **String** |  | [optional] 
 **priority** | **String** |  | 

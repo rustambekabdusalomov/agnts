@@ -133,6 +133,7 @@ type fakeActions struct {
 	rejected []string
 	feedback []string
 	retried  []string
+	posted   bool
 }
 
 func (f *fakeActions) View(context.Context, string) (orchestrator.TicketView, error) {
@@ -150,7 +151,8 @@ func (f *fakeActions) AnswerOne(_ context.Context, _ string, a domain.Answer, _ 
 	}
 	return len(f.answered) == open, nil
 }
-func (f *fakeActions) Approve(_ context.Context, k string, _ []string, _ domain.Origin) (domain.Ticket, error) {
+func (f *fakeActions) Approve(_ context.Context, k string, _ []string, post bool, _ domain.Origin) (domain.Ticket, error) {
+	f.posted = f.posted || post
 	f.approved = append(f.approved, k)
 	return domain.Ticket{}, nil
 }
@@ -331,6 +333,23 @@ func TestApproveNeedsConfirmation(t *testing.T) {
 	}
 }
 
+func TestApproveReportStaysInHiro(t *testing.T) {
+	n, st, acts, tg := setup(t)
+	acts.view.Ticket.State = domain.StateWaitingForReview
+	acts.view.Ticket.Kind = domain.KindPlan
+	post(n, "sekret", callback(60, "apr:PAY-1"))
+	sent := tg.sent("sendMessage")
+	if text, _ := sent[len(sent)-1]["text"].(string); !strings.Contains(text, "report") || !strings.Contains(text, "not posted to Jira") {
+		t.Fatalf("confirm text: %q", text)
+	}
+	for id := range st.pending {
+		post(n, "sekret", callback(61, "ok:"+id))
+	}
+	if len(acts.approved) != 1 || acts.posted {
+		t.Fatalf("approved=%v posted=%v", acts.approved, acts.posted)
+	}
+}
+
 func TestFeedbackRetryAndSecurity(t *testing.T) {
 	n, st, acts, tg := setup(t)
 	post(n, "sekret", callback(60, "chg:PAY-1"))
@@ -479,5 +498,33 @@ func TestLessonsNotification(t *testing.T) {
 	n.handle(context.Background(), ev(1, "Outbox"))
 	if len(tg.sent("sendMessage")) != 1 {
 		t.Fatal("sent for an empty learn run or with lessons notifications off")
+	}
+}
+
+func TestReviewNotification(t *testing.T) {
+	n, _, acts, tg := setup(t)
+	acts.view.Ticket.State, acts.view.Ticket.Revision = domain.StateWaitingForReview, 1
+	acts.view.Review = &domain.Review{Revision: 1, Verdict: domain.VerdictNeedsChanges, Summary: "One caller still truncates.",
+		Findings: []domain.Finding{{Severity: "blocker", Title: "Caller still truncates"}, {Severity: "minor", Title: "No test"}}}
+	ev := domain.Event{ID: 1, TicketKey: "PAY-1", Type: domain.EventReview}
+	n.handle(context.Background(), ev)
+	msgs := tg.sent("sendMessage")
+	if len(msgs) != 1 {
+		t.Fatalf("messages: %v", msgs)
+	}
+	if text := msgs[0]["text"].(string); !strings.Contains(text, "needs changes") || !strings.Contains(text, "• [blocker] Caller still truncates") {
+		t.Fatalf("review message: %q", text)
+	}
+
+	// A review of an older revision, or a ticket that moved on, stays quiet.
+	acts.view.Ticket.Revision = 2
+	n.handle(context.Background(), ev)
+	acts.view.Ticket.Revision, acts.view.Ticket.State = 1, domain.StatePushing
+	n.handle(context.Background(), ev)
+	acts.view.Ticket.State = domain.StateWaitingForReview
+	n.settings = fakeSettings{s: func() domain.Settings { s := domain.DefaultSettings(); s.Notify.Review = false; return s }()}
+	n.handle(context.Background(), ev)
+	if len(tg.sent("sendMessage")) != 1 {
+		t.Fatal("sent for a stale review or with review notifications off")
 	}
 }

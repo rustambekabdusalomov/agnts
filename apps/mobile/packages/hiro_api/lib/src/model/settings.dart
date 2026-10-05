@@ -39,6 +39,8 @@ class Settings {
 
      this.autoLearn,
 
+     this.autoReview,
+
     required  this.pauseAbove,
 
     required  this.parallel,
@@ -149,6 +151,19 @@ class Settings {
 
 
 
+      /// Review every result while it waits for review
+  @JsonKey(
+    
+    name: r'autoReview',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? autoReview;
+
+
+
           // minimum: 50
           // maximum: 100
   @JsonKey(
@@ -213,6 +228,7 @@ class Settings {
       other.askFirst == askFirst &&
       other.autoResume == autoResume &&
       other.autoLearn == autoLearn &&
+      other.autoReview == autoReview &&
       other.pauseAbove == pauseAbove &&
       other.parallel == parallel &&
       other.git == git &&
@@ -228,6 +244,7 @@ class Settings {
         askFirst.hashCode +
         autoResume.hashCode +
         autoLearn.hashCode +
+        autoReview.hashCode +
         pauseAbove.hashCode +
         parallel.hashCode +
         git.hashCode +

@@ -10,8 +10,10 @@ import 'package:hiro_api/hiro_api.dart';
 import '../../core/api.dart';
 import '../../core/data.dart';
 import '../learn/ticket_lessons.dart';
+import 'code_review.dart';
 import 'diff_highlight.dart';
 import 'diff_lines.dart';
+import 'kinds.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme.dart';
 import '../../widgets/common.dart';
@@ -35,6 +37,8 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
   final _feedback = TextEditingController();
   bool _busy = false;
   bool _descOpen = false;
+  // Reports reach the Jira issue only when the reviewer ticks this.
+  bool _postReport = false;
 
   @override
   void dispose() {
@@ -81,6 +85,14 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
       if (mounted) setState(() => _busy = false);
     }
   }
+
+  /// hiro's code review card; queues a (re-)review like the other actions.
+  Widget _codeReview(TicketDetail d) => CodeReviewCard(
+        detail: d,
+        feedback: _feedback,
+        busy: _busy,
+        onRun: () => _run(() => _tickets.reviewTicket(key: d.ticket.key)),
+      );
 
   Future<bool> _confirm(String text) async {
     final l = AppLocalizations.of(context);
@@ -143,8 +155,9 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         DefaultTextStyle.merge(
           style: TextStyle(fontSize: 13, color: c.ink3),
           child: Wrap(spacing: 8, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
-            StateBadge(t.state),
+            StateBadge(t.state, kind: t.kind),
             SourceChip(isTask ? l.ticketsSourceTask : l.ticketsSourceJira, task: isTask),
+            KindChip(t),
             if (t.repoName != null && t.repoName!.isNotEmpty) Text(t.repoName!),
             if (t.priority.isNotEmpty) Text(t.priority),
             if (t.revision > 0) Text(l.ticketRevision(t.revision.toString())),
@@ -174,6 +187,14 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
             padding: const EdgeInsets.only(top: 4),
             child: SelectableText(t.prUrl, style: TextStyle(fontFamily: HiroFonts.mono, fontSize: 12.5, color: c.primary)),
           ),
+        if (t.parentKey != null && t.parentKey!.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: GestureDetector(
+              onTap: () => context.push('/tickets/${t.parentKey}'),
+              child: Text('${l.implementImplements} ${t.parentKey}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.primary)),
+            ),
+          ),
       ]),
     );
   }
@@ -184,15 +205,20 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     final l = AppLocalizations.of(context);
     final c = Hiro.of(context);
     final t = d.ticket;
+    final report = isReportKind(t.kind);
     String rev(String title) => t.revision > 0 ? l.ticketRevisionSuffix(title, t.revision.toString()) : title;
     final children = <Widget>[];
     switch (t.state) {
       case TicketState.new_:
-        children.addAll([_H2(l.ticketQueuedTitle), _Sub(t.held == true ? l.ticketHeldSub : l.ticketQueuedSub)]);
+        children.addAll([
+          _H2(l.ticketQueuedTitle),
+          _Sub(t.held == true ? l.ticketHeldSub : (report ? l.ticketQueuedSubReport : l.ticketQueuedSub)),
+          KindPicker(t),
+        ]);
       case TicketState.analyzing:
         children.addAll([
-          _H2(l.ticketAnalyzingTitle),
-          _Sub(l.ticketAnalyzingSub(t.repoName ?? '')),
+          _H2(t.repoId == null ? l.ticketAnalyzingTitleNoRepo : l.ticketAnalyzingTitle),
+          _Sub(t.repoId == null ? l.ticketAnalyzingSubNoRepo : l.ticketAnalyzingSub(t.repoName ?? '')),
           _H3(l.ticketLog),
           _liveLog(context, true),
         ]);
@@ -202,21 +228,37 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           _Sub(l.ticketQuestionsSub),
           if (d.analysis != null) _analysisFold(context, d.analysis!),
           for (final q in d.questions) _questionCard(context, q),
+          KindPicker(t),
         ]);
       case TicketState.coding:
       case TicketState.testing:
         children.addAll([
-          _H2(rev(t.state == TicketState.coding ? l.ticketCodingTitle : l.ticketTestingTitle)),
-          _Sub(l.ticketCodingSub(t.branch)),
+          _H2(rev(report ? l.ticketWritingTitle : t.state == TicketState.coding ? l.ticketCodingTitle : l.ticketTestingTitle)),
+          _Sub(report ? l.ticketWritingSub : l.ticketCodingSub(t.branch)),
           const SizedBox(height: 8),
           _runFacts(context, d),
           _H3(l.ticketLog),
           _liveLog(context, true),
         ]);
+      case TicketState.waitingForReview when report:
+        children.addAll([_H2(rev(l.ticketReviewReportTitle)), ..._reviewReport(context, d)]);
       case TicketState.waitingForReview:
         children.addAll([_H2(rev(l.ticketReviewTitle)), ..._review(context, d)]);
       case TicketState.pushing:
-        children.addAll([_H2(l.ticketPushingTitle), _Sub(l.ticketPushingSub), _H3(l.ticketLog), _liveLog(context, true)]);
+        children.addAll([
+          _H2(report ? l.ticketDeliveringTitle : l.ticketPushingTitle),
+          _Sub(report ? l.ticketDeliveringSub : l.ticketPushingSub),
+          _H3(l.ticketLog),
+          _liveLog(context, true),
+        ]);
+      case TicketState.done when report:
+        children.addAll([
+          _H2(l.ticketDoneReportTitle),
+          const SizedBox(height: 8),
+          HelpBox(t.postReport == true ? l.ticketDoneReportPosted(t.key) : l.ticketDoneReport, tone: Tone.ok),
+          if (t.kind == TicketKind.plan || t.kind == TicketKind.bug) ImplementReport(t, childKey: d.childKey),
+          if (d.result?.report != null) ...[_H3(l.ticketReport), ReportMarkdown(d.result!.report!)],
+        ]);
       case TicketState.done:
         final toMain = t.afterApprove == TicketAfterApproveEnum.main && t.source_ == TicketSource_Enum.local;
         final text = toMain
@@ -239,6 +281,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           _H2(l.ticketFailedTitle),
           const SizedBox(height: 8),
           HelpBox(t.stopReason ?? l.ticketFailedUnknown, tone: Tone.bad),
+          if (kindEditable(t)) KindPicker(t),
         ]);
       case TicketState.rateLimited:
         final u = ref.watch(usageProvider).value?.fiveHour.utilization;
@@ -251,7 +294,70 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     if (t.stopReason != null && t.state != TicketState.failed && t.state != TicketState.rateLimited) {
       children.addAll([const SizedBox(height: 10), HelpBox(t.stopReason!, tone: Tone.gray)]);
     }
+    final warning = _kindWarning(t);
+    if (warning != null) children.insert(0, Padding(padding: const EdgeInsets.only(bottom: 12), child: warning));
     return _Block(children: children);
+  }
+
+  /// The analysis disagreed with a kind someone chose: say so, and offer
+  /// the switch while the kind can still change.
+  Widget? _kindWarning(Ticket t) {
+    final l = AppLocalizations.of(context);
+    final evs = ref.watch(ticketEventsProvider(widget.ticketKey)).value ?? const <Event>[];
+    final ev = evs.where((e) => e.type == 'kind_changed').lastOrNull;
+    if (ev == null || ev.level != EventLevelEnum.warn || ev.data['from'] != t.kind.name || ev.data['to'] == t.kind.name) return null;
+    final to = TicketKindChoice.values.where((k) => k.name == ev.data['to']).firstOrNull;
+    return HelpBox(
+      ev.message,
+      tone: Tone.warn,
+      child: to == null || !kindEditable(t)
+          ? null
+          : Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton(
+                onPressed: _busy ? null : () => _run(() => _tickets.setTicketKind(key: t.key, ticketKindInput: TicketKindInput(kind: to))),
+                child: Text(l.kindSwitchTo(kindChoiceLabel(l, to))),
+              ),
+            ),
+    );
+  }
+
+  /// A report under review: summary, notes, the report, and whether to post it.
+  List<Widget> _reviewReport(BuildContext context, TicketDetail d) {
+    final l = AppLocalizations.of(context);
+    final c = Hiro.of(context);
+    final t = d.ticket;
+    final r = d.result;
+    final jira = t.source_ == TicketSource_Enum.jira;
+    return [
+      _Sub(jira ? l.ticketReviewReportSubJira : l.ticketReviewReportSub),
+      if (r != null && r.summary.isNotEmpty) ...[const SizedBox(height: 8), Text(r.summary, style: const TextStyle(fontSize: 15, height: 1.45))],
+      if (r != null && r.notes.isNotEmpty) ...[
+        _H3(l.ticketNotes),
+        for (final n in r.notes)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('•  ', style: TextStyle(color: c.ink3)),
+              Expanded(child: Text(n, style: const TextStyle(fontSize: 15, height: 1.4))),
+            ]),
+          ),
+      ],
+      _codeReview(d),
+      _H3(l.ticketReport),
+      if (r?.report != null) ReportMarkdown(r!.report!) else Text(l.ticketReportMissing, style: TextStyle(color: c.ink3)),
+      if (jira)
+        Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: CheckboxListTile(
+            value: _postReport,
+            onChanged: _busy ? null : (v) => setState(() => _postReport = v ?? false),
+            title: Text(l.ticketPostReport(t.key), style: const TextStyle(fontSize: 15)),
+            controlAffinity: ListTileControlAffinity.leading,
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
+    ];
   }
 
   /// Model, turns, turn limit and session usage of a running ticket (.facts).
@@ -279,7 +385,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
             ? l.ticketReviewSubJira(t.branch)
             : l.ticketReviewSubPr(t.branch);
     final r = d.result;
-    if (r == null) return [_Sub(sub)];
+    if (r == null) return [_Sub(sub), _codeReview(d)];
     final passed = r.checks.where((x) => x.exitCode == 0).length;
     final allOk = passed == r.checks.length;
     final time = _reviewTime(d);
@@ -293,6 +399,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         if (time != null) Fact(l.mdetailFactTime, shortDuration(time)),
         Fact(l.ticketFactTurns, '${t.turns}'),
       ]),
+      _codeReview(d),
       ..._resultBody(context, r),
     ];
   }
@@ -475,7 +582,9 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           ]),
         ),
       if (d.analysis != null && t.state != TicketState.waitingForAnswers) _analysisFold(context, d.analysis!),
-      if (d.result != null && t.state != TicketState.waitingForReview)
+      if (d.result?.report != null && t.state != TicketState.waitingForReview && t.state != TicketState.done)
+        Fold(title: l.ticketReport, child: ReportMarkdown(d.result!.report!))
+      else if (d.result != null && !isReportKind(t.kind) && t.state != TicketState.waitingForReview)
         Fold(
           title: l.ticketChanges,
           hint: _changed(l, d.result!),
@@ -509,7 +618,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
                                   : c.line3,
                         ),
                       ),
-                      Expanded(child: Text(h.message.isEmpty ? stateLabel(l, h.state) : h.message, style: const TextStyle(fontSize: 14, height: 1.4))),
+                      Expanded(child: Text(h.message.isEmpty ? stateLabel(l, h.state, t.kind) : h.message, style: const TextStyle(fontSize: 14, height: 1.4))),
                     ]),
                   ),
               ]),
@@ -593,11 +702,16 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
                         for (final q in d.questions) AnswersRequestAnswersInner(questionId: q.id, answer: _answerOf(q), note: _noteOf(q)),
                       ]),
                     )),
-            child: Text(l.ticketStartCoding),
+            child: Text(isReportKind(t.kind) ? l.ticketStartWriting : l.ticketStartCoding),
           ),
         ];
       case TicketState.waitingForReview:
+        final report = isReportKind(t.kind);
         final toMain = t.afterApprove == TicketAfterApproveEnum.main && t.source_ == TicketSource_Enum.local;
+        final post = report && _postReport && t.source_ == TicketSource_Enum.jira;
+        final confirm = report
+            ? (post ? l.ticketApproveReportPostConfirm(key) : l.ticketApproveReportConfirm)
+            : (toMain ? l.ticketApproveMainConfirm : l.ticketApproveConfirm(t.branch));
         buttons = [
           Tooltip(
             message: l.ticketReject,
@@ -621,11 +735,14 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
               onPressed: _busy
                   ? null
                   : () async {
-                      if (await _confirm(toMain ? l.ticketApproveMainConfirm : l.ticketApproveConfirm(t.branch))) {
-                        await _run(() => _tickets.approveTicket(key: key));
+                      if (await _confirm(confirm)) {
+                        await _run(() => _tickets.approveTicket(
+                              key: key,
+                              approveTicketRequest: report ? ApproveTicketRequest(postReport: post) : null,
+                            ));
                       }
                     },
-              child: Text(l.mdetailApprove, maxLines: 1, overflow: TextOverflow.ellipsis),
+              child: Text(report ? l.ticketApproveReport : l.mdetailApprove, maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
           ),
         ];
@@ -822,6 +939,18 @@ class _Track extends StatelessWidget {
   final Ticket ticket;
   final List<HistoryItem> history;
 
+  bool get _report => isReportKind(ticket.kind);
+
+  /// A report has no tests and nothing to push: five stops.
+  int? _indexOf(TicketState s) {
+    final i = _index(s);
+    if (!_report || i == null || i < 3) return i;
+    return switch (s) {
+      TicketState.testing => 2,
+      _ => i - 1,
+    };
+  }
+
   static int? _index(TicketState s) => switch (s) {
         TicketState.new_ => -1,
         TicketState.analyzing => 0,
@@ -837,12 +966,13 @@ class _Track extends StatelessWidget {
 
   /// Where a stopped run stopped: its resume state, else the last state it reached.
   int _failedAt() {
-    final r = ticket.resumeState == null ? null : _index(ticket.resumeState!);
-    if (r != null && r >= 0) return r.clamp(0, 5);
+    final last = _report ? 4 : 5;
+    final r = ticket.resumeState == null ? null : _indexOf(ticket.resumeState!);
+    if (r != null && r >= 0) return r.clamp(0, last);
     final h = history.toList()..sort((a, b) => b.at.compareTo(a.at));
     for (final x in h) {
-      final i = _index(x.state);
-      if (i != null && i >= 0) return i.clamp(0, 5);
+      final i = _indexOf(x.state);
+      if (i != null && i >= 0) return i.clamp(0, last);
     }
     return 0;
   }
@@ -851,9 +981,12 @@ class _Track extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = Hiro.of(context);
-    final labels = [l.ticketStopAnalyze, l.ticketStopAnswers, l.ticketStopCoding, l.ticketStopTests, l.ticketStopReview, l.ticketStopPushed];
-    const gates = [false, true, false, false, true, false];
-    var idx = _index(ticket.state);
+    final labels = _report
+        ? [l.ticketStopAnalyze, l.ticketStopAnswers, l.ticketStopWriting, l.ticketStopReview, l.ticketStopDone]
+        : [l.ticketStopAnalyze, l.ticketStopAnswers, l.ticketStopCoding, l.ticketStopTests, l.ticketStopReview, l.ticketStopPushed];
+    final gates = _report ? const [false, true, false, true, false] : const [false, true, false, false, true, false];
+    final n = labels.length;
+    var idx = _indexOf(ticket.state);
     var err = false;
     if (idx == null) {
       idx = _failedAt();
@@ -861,12 +994,12 @@ class _Track extends StatelessWidget {
     }
     _Stop kind(int i) {
       if (idx == -2) return i == 0 ? _Stop.done : _Stop.none;
-      if (i < idx! || idx == 6) return _Stop.done;
+      if (i < idx! || idx == n) return _Stop.done;
       if (i == idx) return err ? _Stop.error : _Stop.active;
       return _Stop.none;
     }
 
-    final kinds = [for (var i = 0; i < 6; i++) kind(i)];
+    final kinds = [for (var i = 0; i < n; i++) kind(i)];
     bool lit(int i) => kinds[i] != _Stop.none;
     return Semantics(
       label: l.ticketProgress,
@@ -875,7 +1008,7 @@ class _Track extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(6, 14, 6, 12),
         decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line), borderRadius: BorderRadius.circular(18)),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          for (var i = 0; i < 6; i++)
+          for (var i = 0; i < n; i++)
             Expanded(
               child: Column(children: [
                 SizedBox(
@@ -888,7 +1021,7 @@ class _Track extends StatelessWidget {
                       right: 0,
                       child: Row(children: [
                         Expanded(child: Container(height: 2, color: i == 0 ? Colors.transparent : (lit(i) ? c.primary : c.line))),
-                        Expanded(child: Container(height: 2, color: i == 5 ? Colors.transparent : (lit(i + 1) ? c.primary : c.line))),
+                        Expanded(child: Container(height: 2, color: i == n - 1 ? Colors.transparent : (lit(i + 1) ? c.primary : c.line))),
                       ]),
                     ),
                     _Mark(kind: kinds[i], gate: gates[i]),

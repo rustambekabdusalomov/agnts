@@ -70,6 +70,9 @@ func (s *Server) SetTicketModels(w http.ResponseWriter, r *http.Request, key gen
 	if req.Retry != nil {
 		m[domain.ModelRetry] = string(*req.Retry)
 	}
+	if req.Review != nil {
+		m[domain.ModelReview] = string(*req.Review)
+	}
 	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
 		return s.opt.Tickets.SetModels(ctx, key, m, origin(r))
 	})
@@ -87,6 +90,44 @@ func (s *Server) SetTicketRepo(w http.ResponseWriter, r *http.Request, key gen.T
 	})
 }
 
+// ImplementTicket implements gen.ServerInterface.
+func (s *Server) ImplementTicket(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	var req gen.ImplementInput
+	if err := decodeOptionalJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	var in orchestrator.ImplementInput
+	if req.RepoId != nil {
+		in.RepoID = *req.RepoId
+	}
+	if req.Start != nil {
+		in.Start = string(*req.Start)
+	}
+	t, err := s.opt.Tickets.Implement(r.Context(), key, in, origin(r))
+	if err != nil {
+		s.writeUseCaseError(w, r, err)
+		return
+	}
+	s.writeTicket(w, r, http.StatusCreated, t)
+}
+
+// SetTicketKind implements gen.ServerInterface.
+func (s *Server) SetTicketKind(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	var req gen.TicketKindInput
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	if !req.Kind.Valid() {
+		writeError(w, http.StatusBadRequest, "bad_request", "unknown kind "+string(req.Kind))
+		return
+	}
+	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
+		return s.opt.Tickets.SetKind(ctx, key, string(req.Kind), origin(r))
+	})
+}
+
 // CreateTask implements gen.ServerInterface.
 func (s *Server) CreateTask(w http.ResponseWriter, r *http.Request) {
 	var req gen.TaskCreate
@@ -94,8 +135,14 @@ func (s *Server) CreateTask(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
 		return
 	}
-	in := orchestrator.TaskInput{RepoID: req.RepoId, Title: req.Title, Priority: string(req.Priority),
+	in := orchestrator.TaskInput{Title: req.Title, Priority: string(req.Priority),
 		AfterApprove: string(req.AfterApprove), Start: string(req.Start)}
+	if req.RepoId != nil {
+		in.RepoID = *req.RepoId
+	}
+	if req.Kind != nil {
+		in.Kind = string(*req.Kind)
+	}
 	if req.Description != nil {
 		in.Description = *req.Description
 	}
@@ -126,6 +173,9 @@ func (s *Server) UpdateTask(w http.ResponseWriter, r *http.Request, key gen.Tick
 	}
 	if req.AfterApprove != nil {
 		in.AfterApprove = string(*req.AfterApprove)
+	}
+	if req.Kind != nil {
+		in.Kind = string(*req.Kind)
 	}
 	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
 		return s.opt.Tickets.UpdateTask(ctx, key, in, origin(r))
@@ -346,15 +396,17 @@ func (s *Server) RefreshUsage(w http.ResponseWriter, r *http.Request) {
 
 func toSettings(v domain.Settings) gen.Settings {
 	learn, autoLearn, lessons := gen.Model(v.Models.Learn), v.AutoLearn, v.Notify.Lessons
+	review, autoReview, reviewNote := gen.ReviewModel(v.Models.Review), v.AutoReview, v.Notify.Review
 	return gen.Settings{
 		Models: gen.StageModels{Analyze: gen.Model(v.Models.Analyze), Coding: gen.Model(v.Models.Coding),
-			Retry: gen.Model(v.Models.Retry), Helper: gen.Model(v.Models.Helper), Learn: &learn},
+			Retry: gen.Model(v.Models.Retry), Helper: gen.Model(v.Models.Helper), Learn: &learn, Review: &review},
 		MaxTurns: v.MaxTurns, TimeoutMin: v.TimeoutMin, Allow: v.Allow, Deny: v.Deny,
 		AskFirst: v.AskFirst, AutoResume: v.AutoResume, PauseAbove: v.PauseAbove, Parallel: v.Parallel, AutoLearn: &autoLearn,
+		AutoReview: &autoReview,
 		Git: gen.GitSettings{AuthorName: v.Git.AuthorName, AuthorEmail: v.Git.AuthorEmail, CoAuthor: v.Git.CoAuthor,
 			PrTitle: v.Git.PRTitle, Draft: v.Git.Draft},
 		Notify: &gen.NotifySettings{Push: v.Notify.Push, Telegram: v.Notify.Telegram, NeedsYou: v.Notify.NeedsYou,
-			Stopped: v.Notify.Stopped, Done: v.Notify.Done, Lessons: &lessons},
+			Stopped: v.Notify.Stopped, Done: v.Notify.Done, Lessons: &lessons, Review: &reviewNote},
 	}
 }
 
@@ -388,18 +440,22 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	v := domain.Settings{
 		Models: domain.StageModels{Analyze: string(req.Models.Analyze), Coding: string(req.Models.Coding),
-			Retry: string(req.Models.Retry), Helper: string(req.Models.Helper), Learn: cur.Models.Learn},
+			Retry: string(req.Models.Retry), Helper: string(req.Models.Helper), Learn: cur.Models.Learn, Review: cur.Models.Review},
 		MaxTurns: req.MaxTurns, TimeoutMin: req.TimeoutMin, Allow: req.Allow, Deny: req.Deny,
 		AskFirst: req.AskFirst, AutoResume: req.AutoResume, PauseAbove: req.PauseAbove, Parallel: req.Parallel, AutoLearn: cur.AutoLearn,
+		AutoReview: cur.AutoReview,
 		Git: domain.GitSettings{AuthorName: req.Git.AuthorName, AuthorEmail: req.Git.AuthorEmail, CoAuthor: req.Git.CoAuthor,
 			PRTitle: req.Git.PrTitle, Draft: req.Git.Draft},
 		Notify: cur.Notify,
 	}
 	if req.Notify != nil {
 		v.Notify = domain.NotifySettings{Push: req.Notify.Push, Telegram: req.Notify.Telegram, NeedsYou: req.Notify.NeedsYou,
-			Stopped: req.Notify.Stopped, Done: req.Notify.Done, Lessons: cur.Notify.Lessons}
+			Stopped: req.Notify.Stopped, Done: req.Notify.Done, Lessons: cur.Notify.Lessons, Review: cur.Notify.Review}
 		if req.Notify.Lessons != nil {
 			v.Notify.Lessons = *req.Notify.Lessons
+		}
+		if req.Notify.Review != nil {
+			v.Notify.Review = *req.Notify.Review
 		}
 	}
 	if req.Models.Learn != nil {
@@ -407,6 +463,12 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.AutoLearn != nil {
 		v.AutoLearn = *req.AutoLearn
+	}
+	if req.Models.Review != nil {
+		v.Models.Review = string(*req.Models.Review)
+	}
+	if req.AutoReview != nil {
+		v.AutoReview = *req.AutoReview
 	}
 	saved, err := s.opt.Admin.Settings.Put(r.Context(), v, origin(r))
 	if err != nil {

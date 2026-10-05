@@ -94,6 +94,29 @@ void main() {
       // TODO
     });
 
+    // TicketKind kind
+    test('to test the property `kind`', () async {
+      // TODO
+    });
+
+    // hiro picks the kind; the analysis may still change it
+    // bool kindAuto
+    test('to test the property `kindAuto`', () async {
+      // TODO
+    });
+
+    // The approved report is posted to the tracker issue
+    // bool postReport
+    test('to test the property `postReport`', () async {
+      // TODO
+    });
+
+    // The plan or bug investigation this ticket implements
+    // String parentKey
+    test('to test the property `parentKey`', () async {
+      // TODO
+    });
+
     // String repoName
     test('to test the property `repoName`', () async {
       // TODO
@@ -124,6 +147,12 @@ void main() {
     // The learn run after push; pending also while it runs
     // String learnState
     test('to test the property `learnState`', () async {
+      // TODO
+    });
+
+    // The code review hiro runs beside the human review
+    // String reviewState
+    test('to test the property `reviewState`', () async {
       // TODO
     });
 

@@ -111,6 +111,9 @@ func (n *Notifier) handleCallback(ctx context.Context, b *Bot, cfg TelegramConfi
 		return "This question is no longer open."
 	case "apr", "rej":
 		tool, what := "approve", "Approve and push "+arg+"? hiro pushes the branch and opens the pull request."
+		if v, err := n.actions.View(ctx, arg); err == nil && v.Ticket.Kind.Report() {
+			what = "Approve the report on " + arg + "? It stays in hiro and is not posted to Jira."
+		}
 		if verb == "rej" {
 			tool, what = "reject", "Reject "+arg+"? This stops all work on it."
 		}
@@ -138,7 +141,7 @@ func (n *Notifier) handleCallback(ctx context.Context, b *Bot, cfg TelegramConfi
 		}
 		switch a.Tool {
 		case "approve":
-			_, err = n.actions.Approve(ctx, a.TicketKey, nil, domain.OriginTelegram)
+			_, err = n.actions.Approve(ctx, a.TicketKey, nil, false, domain.OriginTelegram)
 		case "reject":
 			_, err = n.actions.Reject(ctx, a.TicketKey, "rejected from Telegram", domain.OriginTelegram)
 		}
@@ -146,7 +149,9 @@ func (n *Notifier) handleCallback(ctx context.Context, b *Bot, cfg TelegramConfi
 			n.say(ctx, b, cfg, a.TicketKey+": "+friendly(err))
 			return "Not done"
 		}
-		if a.Tool == "approve" {
+		if a.Tool == "approve" && strings.HasPrefix(a.Summary, "Approve the report") {
+			n.say(ctx, b, cfg, a.TicketKey+" approved.")
+		} else if a.Tool == "approve" {
 			n.say(ctx, b, cfg, a.TicketKey+" approved. hiro is pushing it now.")
 		} else {
 			n.say(ctx, b, cfg, a.TicketKey+" rejected.")

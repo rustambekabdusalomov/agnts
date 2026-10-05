@@ -40,6 +40,7 @@ type Options struct {
 	Broker  *Broker      // live event stream; nil answers 501
 	Devices Devices      // push registrations
 	Lessons Lessons      // Learn pages; nil answers 501
+	Rules   Rules        // Rules page; nil answers 501
 	OAuth   OAuth        // MCP connector authorization; nil disables /mcp
 	MCP     http.Handler // the MCP streamable HTTP handler
 	DB      Pinger

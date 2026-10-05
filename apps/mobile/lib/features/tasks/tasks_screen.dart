@@ -10,6 +10,7 @@ import '../../l10n/app_localizations.dart';
 import '../../theme.dart';
 import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
+import '../tickets/kinds.dart';
 
 /// Side-project tasks (scrTasks in mobile.html): a repository filter, the
 /// tasks as cards, and a "+" that opens the new-task sheet.
@@ -140,11 +141,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       return;
     }
     if (!mounted) return;
-    if (repos.isEmpty) {
-      showSnack(context, l.mobileNoSideRepos);
-      return;
-    }
-    final initial = repos.any((r) => r.id == _repo) ? _repo! : repos.first.id;
+    // Without repositories a task can still be a report (or let hiro pick).
+    final initial = repos.any((r) => r.id == _repo) ? _repo! : (repos.firstOrNull?.id ?? 0);
     final key = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
@@ -219,7 +217,7 @@ class _TaskCard extends StatelessWidget {
 class _NewTaskSheet extends ConsumerStatefulWidget {
   const _NewTaskSheet({required this.repos, required this.initialRepo});
   final List<Repository> repos;
-  final int initialRepo;
+  final int initialRepo; // 0: no repository
 
   @override
   ConsumerState<_NewTaskSheet> createState() => _NewTaskSheetState();
@@ -232,7 +230,17 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
   var _priority = TaskCreatePriorityEnum.medium;
   var _after = TaskCreateAfterApproveEnum.pr;
   var _start = TaskCreateStartEnum.ask;
+  var _kind = TicketKindChoice.auto;
   bool _busy = false;
+
+  bool get _changeKind => _kind == TicketKindChoice.code || _kind == TicketKindChoice.test;
+  bool get _reportKind => _kind == TicketKindChoice.plan || _kind == TicketKindChoice.analysis || _kind == TicketKindChoice.bug;
+
+  void _pickKind(TicketKindChoice k) => setState(() {
+        _kind = k;
+        // Code and tests need a repository: pick the first rather than show an error.
+        if (_changeKind && _repo == 0 && widget.repos.isNotEmpty) _repo = widget.repos.first.id;
+      });
   String? _err;
 
   @override
@@ -248,6 +256,10 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
       setState(() => _err = l.tasksTitleRequired);
       return;
     }
+    if (_changeKind && _repo == 0) {
+      setState(() => _err = l.tasksRepoNeeded);
+      return;
+    }
     setState(() {
       _busy = true;
       _err = null;
@@ -255,7 +267,8 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
     try {
       final res = await ref.read(apiProvider)!.getTasksApi().createTask(
             taskCreate: TaskCreate(
-              repoId: _repo,
+              repoId: _repo == 0 ? null : _repo,
+              kind: _kind,
               title: _title.text.trim(),
               description: _desc.text.trim(),
               priority: _priority,
@@ -300,9 +313,11 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
             child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              _Field(label: l.kindTitle, child: KindChoices(value: _kind, onPick: _pickKind, enabled: !_busy)),
               _Field(
                 label: l.mobileTaskRepo,
                 child: Wrap(spacing: 8, runSpacing: 8, children: [
+                  if (!_changeKind) FilterChipH(label: l.tasksNoRepo, selected: _repo == 0, onTap: () => setState(() => _repo = 0)),
                   for (final r in widget.repos)
                     FilterChipH(label: r.name, dot: _repoColor(r), selected: _repo == r.id, onTap: () => setState(() => _repo = r.id)),
                 ]),
@@ -343,18 +358,19 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
                   onChanged: (v) => setState(() => _priority = v),
                 ),
               ),
-              _Field(
-                label: l.mobileAfterApprove,
-                child: Segmented<TaskCreateAfterApproveEnum>(
-                  full: true,
-                  options: [
-                    (TaskCreateAfterApproveEnum.main, l.mobileAfterMain),
-                    (TaskCreateAfterApproveEnum.pr, l.mobileAfterPr),
-                  ],
-                  value: _after,
-                  onChanged: (v) => setState(() => _after = v),
+              if (!_reportKind)
+                _Field(
+                  label: l.mobileAfterApprove,
+                  child: Segmented<TaskCreateAfterApproveEnum>(
+                    full: true,
+                    options: [
+                      (TaskCreateAfterApproveEnum.main, l.mobileAfterMain),
+                      (TaskCreateAfterApproveEnum.pr, l.mobileAfterPr),
+                    ],
+                    value: _after,
+                    onChanged: (v) => setState(() => _after = v),
+                  ),
                 ),
-              ),
               _Field(
                 label: l.mobileStart,
                 last: true,

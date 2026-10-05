@@ -30,6 +30,8 @@ class Result {
 
     required  this.files,
 
+     this.report,
+
     required  this.createdAt,
   });
 
@@ -81,6 +83,19 @@ class Result {
 
 
 
+      /// The Markdown report, for report kinds
+  @JsonKey(
+    
+    name: r'report',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? report;
+
+
+
   @JsonKey(
     
     name: r'createdAt',
@@ -101,6 +116,7 @@ class Result {
       other.notes == notes &&
       other.checks == checks &&
       other.files == files &&
+      other.report == report &&
       other.createdAt == createdAt;
 
     @override
@@ -109,6 +125,7 @@ class Result {
         notes.hashCode +
         checks.hashCode +
         files.hashCode +
+        report.hashCode +
         createdAt.hashCode;
 
   factory Result.fromJson(Map<String, dynamic> json) => _$ResultFromJson(json);

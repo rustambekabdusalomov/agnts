@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:hiro_api/src/model/ticket_kind_choice.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -20,7 +21,9 @@ class TaskCreate {
   /// Returns a new [TaskCreate] instance.
   TaskCreate({
 
-    required  this.repoId,
+     this.repoId,
+
+     this.kind,
 
     required  this.title,
 
@@ -33,15 +36,28 @@ class TaskCreate {
     required  this.start,
   });
 
+      /// Omit for a task without a repository (report kinds or auto)
   @JsonKey(
     
     name: r'repoId',
-    required: true,
+    required: false,
     includeIfNull: false,
   )
 
 
-  final int repoId;
+  final int? repoId;
+
+
+
+  @JsonKey(
+    
+    name: r'kind',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final TicketKindChoice? kind;
 
 
 
@@ -111,6 +127,7 @@ class TaskCreate {
     @override
     bool operator ==(Object other) => identical(this, other) || other is TaskCreate &&
       other.repoId == repoId &&
+      other.kind == kind &&
       other.title == title &&
       other.description == description &&
       other.priority == priority &&
@@ -120,6 +137,7 @@ class TaskCreate {
     @override
     int get hashCode =>
         repoId.hashCode +
+        kind.hashCode +
         title.hashCode +
         description.hashCode +
         priority.hashCode +

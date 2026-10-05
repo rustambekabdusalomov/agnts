@@ -3,6 +3,8 @@ import type { components } from './schema.gen'
 type S = components['schemas']
 export type Ticket = S['Ticket']
 export type TicketState = S['TicketState']
+export type TicketKind = S['TicketKind']
+export type TicketKindChoice = S['TicketKindChoice']
 export type TicketDetail = S['TicketDetail']
 export type TicketEvent = S['Event']
 export type FileChange = S['FileChange']
@@ -15,8 +17,14 @@ export type RemoteRepository = S['RemoteRepository']
 export type Integration = S['Integration']
 export type EventSummary = S['EventSummary']
 export type Model = S['Model']
+export type ReviewModel = S['ReviewModel']
+export type CodeReview = S['CodeReview']
+export type Finding = S['Finding']
 export type Lesson = S['Lesson']
 export type LessonBrief = S['LessonBrief']
+export type Rule = S['Rule']
+export type RuleStatus = S['RuleStatus']
+export type RuleInput = S['RuleInput']
 
 /** Tone per state, as in the demo: drives badge colours (b-<tone>). */
 export const STATE_TONE: Record<TicketState, 'gray' | 'info' | 'warn' | 'ok' | 'bad'> = {
@@ -51,3 +59,29 @@ export const BOARD_GROUPS = ['queue', 'running', 'needs', 'done'].map((id) => FI
 
 export const MODELS: Model[] = ['haiku', 'sonnet', 'opus']
 export const MODEL_NAME: Record<Model, string> = { haiku: 'Haiku', sonnet: 'Sonnet', opus: 'Opus' }
+
+/** Badge tone per code review verdict and finding severity. */
+export const VERDICT_TONE: Record<CodeReview['verdict'], 'ok' | 'warn' | 'bad'> = { looks_good: 'ok', has_concerns: 'warn', needs_changes: 'bad' }
+export const SEVERITY_TONE: Record<Finding['severity'], 'bad' | 'warn' | 'info' | 'gray'> = { blocker: 'bad', major: 'warn', minor: 'info', nit: 'gray' }
+
+/** A finding as one line of review feedback for hiro. */
+export function findingFeedback(f: Finding): string {
+  const loc = f.file ? `${f.file}${f.line ? `:${f.line}` : ''}: ` : ''
+  return `- ${loc}${f.title}${f.suggestion ? `. ${f.suggestion}` : ''}`
+}
+
+/** Ticket kinds in the order the server lists them. */
+export const KINDS: TicketKind[] = ['code', 'test', 'plan', 'analysis', 'bug']
+/** Kinds whose work is a Markdown report instead of a change. */
+export const REPORT_KINDS: TicketKind[] = ['plan', 'analysis', 'bug']
+export const isReport = (t: Pick<Ticket, 'kind'>) => REPORT_KINDS.includes(t.kind)
+/** Mirrors the server: code and test need a repository, unless hiro still picks the kind. */
+export const needsRepo = (t: Pick<Ticket, 'kind' | 'kindAuto'>) => !t.kindAuto && !REPORT_KINDS.includes(t.kind)
+/** States in which the kind can still change (server: SetKind). */
+export const KIND_EDITABLE: TicketState[] = ['new', 'waiting_for_answers', 'failed', 'rate_limited']
+
+/** i18n key of a ticket's state: reports read "Writing" and "Done" where changes read "Coding" and "Pushed". */
+export function stateKey(state: TicketState, kind?: TicketKind): string {
+  if (kind && REPORT_KINDS.includes(kind) && ['coding', 'pushing', 'done'].includes(state)) return `state.report.${state}`
+  return `state.${state}`
+}

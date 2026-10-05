@@ -4,7 +4,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../../api/client'
-import type { Repository } from '../../api/types'
+import { KINDS, REPORT_KINDS, type Repository, type TicketKindChoice } from '../../api/types'
 import { useUi } from '../../stores/ui'
 import FormDrawer from '../form/FormDrawer.vue'
 import SegButtons from '../form/SegButtons.vue'
@@ -22,7 +22,16 @@ const ui = useUi()
 type Priority = 'low' | 'medium' | 'high'
 type After = 'main' | 'pr'
 type Start = 'ask' | 'code' | 'queue'
-const form = reactive({ repoId: 0, title: '', description: '', priority: 'medium' as Priority, after: 'pr' as After, start: 'ask' as Start })
+// repoId 0 is "no repository": allowed for reports, and for Auto (hiro
+// then picks a report kind, or stops and asks for a repository).
+const form = reactive({ repoId: 0, kind: 'auto' as TicketKindChoice, title: '', description: '', priority: 'medium' as Priority, after: 'pr' as After, start: 'ask' as Start })
+const kinds = computed(() => (['auto', ...KINDS] as TicketKindChoice[]).map((k) => ({ value: k, label: t(`kind.${k}`), hint: t(`kind.${k}Hint`) })))
+const reportKind = computed(() => REPORT_KINDS.some((k) => k === form.kind))
+const changeKind = computed(() => form.kind === 'code' || form.kind === 'test')
+// Code and test need a repository: pick the first one rather than show an error.
+watch(changeKind, (v) => {
+  if (v && !form.repoId) form.repoId = props.repos[0]?.id ?? 0
+})
 const error = ref('')
 
 watch(
@@ -51,7 +60,8 @@ const create = useMutation({
     unwrap(
       api.POST('/tasks', {
         body: {
-          repoId: form.repoId,
+          repoId: form.repoId || undefined,
+          kind: form.kind,
           title: form.title.trim(),
           description: form.description.trim(),
           priority: form.priority,
@@ -74,8 +84,8 @@ const create = useMutation({
 })
 
 function submit() {
-  if (!form.repoId) {
-    error.value = t('tasks.addRepoFirst')
+  if (!form.repoId && changeKind.value) {
+    error.value = t('tasks.repoNeeded')
     return
   }
   if (!form.title.trim()) {
@@ -90,8 +100,35 @@ function submit() {
   <FormDrawer v-model="open" :title="t('tasks.new')" :subtitle="t('tasks.drawerSub')">
     <form id="task-form" style="display: contents" @submit.prevent="submit">
       <div class="field">
+        <span class="flbl">{{ t('kind.title') }}</span>
+        <div class="tabs" role="group" :aria-label="t('kind.title')">
+          <button
+            v-for="k in kinds"
+            :key="k.value"
+            type="button"
+            class="tab"
+            :title="k.hint"
+            :aria-pressed="form.kind === k.value"
+            @click="form.kind = k.value"
+          >
+            {{ k.label }}
+          </button>
+        </div>
+        <span class="hint">{{ kinds.find((k) => k.value === form.kind)?.hint }}</span>
+      </div>
+      <div class="field">
         <span class="flbl">{{ t('tasks.repository') }}</span>
         <div class="tabs" role="group" :aria-label="t('tasks.repository')">
+          <button
+            type="button"
+            class="tab"
+            :aria-pressed="form.repoId === 0"
+            :disabled="changeKind"
+            :title="changeKind ? t('tasks.repoNeeded') : undefined"
+            @click="form.repoId = 0"
+          >
+            {{ t('tasks.noRepo') }}
+          </button>
           <button
             v-for="r in repos"
             :key="r.id"
@@ -120,7 +157,7 @@ function submit() {
         <span class="flbl">{{ t('tasks.priority') }}</span>
         <SegButtons v-model="form.priority" :options="priorities" :label="t('tasks.priority')" />
       </div>
-      <div class="field">
+      <div v-if="!reportKind" class="field">
         <span class="flbl">{{ t('tasks.after') }}</span>
         <SegButtons v-model="form.after" :options="afters" :label="t('tasks.after')" />
       </div>

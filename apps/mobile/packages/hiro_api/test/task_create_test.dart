@@ -7,8 +7,14 @@ void main() {
   // TODO add properties to the entity
 
   group(TaskCreate, () {
+    // Omit for a task without a repository (report kinds or auto)
     // int repoId
     test('to test the property `repoId`', () async {
+      // TODO
+    });
+
+    // TicketKindChoice kind
+    test('to test the property `kind`', () async {
       // TODO
     });
 

@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { Ticket, TicketState } from '../../api/types'
+import { isReport, type Ticket, type TicketState } from '../../api/types'
 import HiIcon from '../ui/HiIcon.vue'
 
 // The six stops from the demo; diamonds are where hiro waits for you.
 const props = defineProps<{ ticket: Ticket }>()
 const { t } = useI18n()
 
-const STOPS = [
+const CHANGE_STOPS = [
   { key: 'stopAnalyze', gate: false },
   { key: 'stopAnswers', gate: true },
   { key: 'stopCoding', gate: false },
@@ -16,7 +16,7 @@ const STOPS = [
   { key: 'stopReview', gate: true },
   { key: 'stopPushed', gate: false },
 ]
-const STOP_OF: Partial<Record<TicketState, number>> = {
+const CHANGE_STOP_OF: Partial<Record<TicketState, number>> = {
   new: -1,
   analyzing: 0,
   waiting_for_answers: 1,
@@ -27,19 +27,42 @@ const STOP_OF: Partial<Record<TicketState, number>> = {
   done: 6,
   rejected: -2,
 }
-const RESUME_STOP: Partial<Record<TicketState, number>> = { new: 0, coding: 2, pushing: 5 }
+// A report has no tests and nothing to push.
+const REPORT_STOPS = [
+  { key: 'stopAnalyze', gate: false },
+  { key: 'stopAnswers', gate: true },
+  { key: 'stopWriting', gate: false },
+  { key: 'stopReview', gate: true },
+  { key: 'stopDone', gate: false },
+]
+const REPORT_STOP_OF: Partial<Record<TicketState, number>> = {
+  new: -1,
+  analyzing: 0,
+  waiting_for_answers: 1,
+  coding: 2,
+  waiting_for_review: 3,
+  pushing: 4,
+  done: 5,
+  rejected: -2,
+}
+
+const report = computed(() => isReport(props.ticket))
+const STOPS = computed(() => (report.value ? REPORT_STOPS : CHANGE_STOPS))
 
 const classes = computed(() => {
   const st = props.ticket.state
-  let idx = STOP_OF[st]
+  const stopOf = report.value ? REPORT_STOP_OF : CHANGE_STOP_OF
+  const last = STOPS.value.length
+  let idx = stopOf[st]
   let err = false
   if (idx === undefined) {
-    idx = RESUME_STOP[props.ticket.resumeState ?? 'new'] ?? 0
+    idx = stopOf[props.ticket.resumeState ?? 'new'] ?? 0
+    if (idx < 0) idx = 0
     err = true
   }
-  return STOPS.map((_, i) => {
+  return STOPS.value.map((_, i) => {
     if (idx === -2) return i === 0 ? 'done' : ''
-    if (i < idx || idx === 6) return 'done'
+    if (i < idx || idx === last) return 'done'
     if (i === idx) return err ? 'error' : 'active'
     return ''
   })

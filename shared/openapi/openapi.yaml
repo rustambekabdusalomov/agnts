@@ -162,7 +162,11 @@ paths:
       - $ref: '#/components/parameters/TicketKey'
     post:
       operationId: approveTicket
-      summary: Approve the reviewed changes; hiro pushes the branch and opens the PR
+      summary: Approve the reviewed work
+      description: >-
+        For a change, hiro pushes the branch and opens the pull request. For a
+        report, the ticket is done; the report is posted to the tracker issue
+        only when postReport is true.
       tags: [tickets]
       requestBody:
         required: false
@@ -174,8 +178,11 @@ paths:
                 assignees:
                   type: array
                   maxItems: 10
-                  description: Git host usernames to assign the pull request to
+                  description: Git host usernames to assign the pull request to (changes only)
                   items: { type: string, minLength: 1, maxLength: 100 }
+                postReport:
+                  type: boolean
+                  description: Post the approved report as a comment on the tracker issue (reports only)
       responses:
         '200': { $ref: '#/components/responses/TicketOK' }
         '401': { $ref: '#/components/responses/Unauthorized' }
@@ -264,6 +271,19 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /tickets/{key}/review:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: reviewTicket
+      summary: Queue a code review of a ticket waiting for review (again, if one already ran)
+      tags: [tickets]
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /tickets/{key}/stop:
     parameters:
       - $ref: '#/components/parameters/TicketKey'
@@ -311,6 +331,52 @@ paths:
         content:
           application/json:
             schema: { $ref: '#/components/schemas/TicketRepo' }
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /tickets/{key}/implement:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: implementTicket
+      summary: Make the code task that carries out a done plan or bug investigation
+      description: >-
+        Creates a local code task linked back to the report (parentKey), with
+        the approved report in its description. A report is implemented once.
+        repoId is needed only when the report has no repository.
+      tags: [tickets]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ImplementInput' }
+      responses:
+        '201': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /tickets/{key}/kind:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    put:
+      operationId: setTicketKind
+      summary: Change what the ticket produces
+      description: >-
+        Allowed on a new ticket, while hiro waits for answers, and on a failed
+        or rate-limited one that has not pushed. auto lets the analysis pick
+        the kind again; any other kind is final.
+      tags: [tickets]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TicketKindInput' }
       responses:
         '200': { $ref: '#/components/responses/TicketOK' }
         '400': { $ref: '#/components/responses/BadRequest' }
@@ -948,6 +1014,134 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /rules:
+    get:
+      operationId: listRules
+      summary: Every rule, global ones first, then by repository
+      tags: [rules]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Rule' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      operationId: createRule
+      summary: Add a rule; Claude reviews it before tickets follow it
+      tags: [rules]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RuleInput' }
+      responses:
+        '201':
+          description: Created and queued for review
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Rule' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /rules/{id}:
+    parameters:
+      - $ref: '#/components/parameters/RuleID'
+    get:
+      operationId: getRule
+      tags: [rules]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Rule' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      operationId: updateRule
+      summary: Edit a rule. Changing its text or repository starts a new review; turning it on or off does not.
+      tags: [rules]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RuleInput' }
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Rule' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      operationId: deleteRule
+      tags: [rules]
+      responses:
+        '204': { description: Deleted }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /rules/{id}/answers:
+    parameters:
+      - $ref: '#/components/parameters/RuleID'
+    put:
+      operationId: answerRule
+      summary: Answer every open question of a rule; Claude then reviews it again
+      tags: [rules]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RuleAnswers' }
+      responses:
+        '200':
+          description: Answers saved, review queued
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Rule' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /rules/{id}/accept:
+    parameters:
+      - $ref: '#/components/parameters/RuleID'
+    post:
+      operationId: acceptRule
+      summary: Apply a rule as written, skipping its open questions or a failed review
+      tags: [rules]
+      responses:
+        '200':
+          description: The rule after the change
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Rule' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /rules/{id}/review:
+    parameters:
+      - $ref: '#/components/parameters/RuleID'
+    post:
+      operationId: reviewRule
+      summary: Have Claude review a rule again, keeping its answers
+      tags: [rules]
+      responses:
+        '200':
+          description: Queued for review
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Rule' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /analytics:
     get:
       operationId: getAnalytics
@@ -1155,6 +1349,11 @@ components:
       in: path
       required: true
       schema: { type: string, enum: [jira, github, claude, telegram, gitlab] }
+    RuleID:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
     LessonID:
       name: id
       in: path
@@ -1217,9 +1416,36 @@ components:
       type: string
       enum: [new, analyzing, waiting_for_answers, coding, testing, waiting_for_review, pushing, done, rejected, failed, rate_limited]
 
+    TicketKind:
+      type: string
+      enum: [code, test, plan, analysis, bug]
+      description: >-
+        What the work produces. code and test make a change (diff, checks,
+        pull request); plan, analysis and bug write a Markdown report.
+
+    TicketKindChoice:
+      type: string
+      enum: [auto, code, test, plan, analysis, bug]
+      description: A kind, or auto for hiro to pick one during analysis
+
+    ImplementInput:
+      type: object
+      properties:
+        repoId: { type: integer, format: int64, description: 'Where to implement it; defaults to the report''s repository' }
+        start:
+          type: string
+          enum: [code, queue]
+          description: 'code = start now without questions (default), queue = keep until started'
+
+    TicketKindInput:
+      type: object
+      required: [kind]
+      properties:
+        kind: { $ref: '#/components/schemas/TicketKindChoice' }
+
     Ticket:
       type: object
-      required: [key, source, title, description, priority, state, revision, turns, branch, prUrl, createdAt, updatedAt]
+      required: [key, source, title, description, priority, state, revision, turns, branch, prUrl, kind, kindAuto, createdAt, updatedAt]
       properties:
         key: { type: string }
         source: { type: string, enum: [jira, local] }
@@ -1241,6 +1467,10 @@ components:
         afterApprove: { type: string, enum: [pr, main] }
         held: { type: boolean, description: Kept in the queue until started }
         askFirst: { type: boolean }
+        kind: { $ref: '#/components/schemas/TicketKind' }
+        kindAuto: { type: boolean, description: 'hiro picks the kind; the analysis may still change it' }
+        postReport: { type: boolean, description: 'The approved report is posted to the tracker issue' }
+        parentKey: { type: string, description: 'The plan or bug investigation this ticket implements' }
         repoName: { type: string }
         models: { $ref: '#/components/schemas/ModelOverrides' }
         since: { type: string, format: date-time, description: When the ticket entered its current state }
@@ -1250,6 +1480,10 @@ components:
           type: string
           enum: [none, pending, done, failed]
           description: The learn run after push; pending also while it runs
+        reviewState:
+          type: string
+          enum: [none, pending, running, done, failed]
+          description: The code review hiro runs beside the human review
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
 
@@ -1274,6 +1508,44 @@ components:
         plan:
           type: array
           items: { type: string }
+        complexity:
+          type: string
+          enum: [simple, complex]
+          description: The analysis's rating; picks the review model on auto
+
+    Finding:
+      type: object
+      required: [severity, category, title]
+      properties:
+        severity: { type: string, enum: [blocker, major, minor, nit] }
+        category:
+          type: string
+          enum: [correctness, security, performance, tests, rules, maintainability, accuracy, completeness, other]
+        file: { type: string, description: Path relative to the repository }
+        line: { type: integer }
+        title: { type: string }
+        detail: { type: string }
+        suggestion: { type: string, description: 'What to change, written to be sent back as feedback' }
+
+    CodeReview:
+      type: object
+      required: [revision, model, modelReason, verdict, summary, findings, strengths, createdAt]
+      description: >-
+        hiro's review of the latest result, advice beside the human review.
+        It reviewed an older revision when revision is below the ticket's.
+      properties:
+        revision: { type: integer }
+        model: { $ref: '#/components/schemas/Model' }
+        modelReason: { type: string, description: Why this model reviewed it }
+        verdict: { type: string, enum: [looks_good, has_concerns, needs_changes] }
+        summary: { type: string }
+        findings:
+          type: array
+          items: { $ref: '#/components/schemas/Finding' }
+        strengths:
+          type: array
+          items: { type: string }
+        createdAt: { type: string, format: date-time }
 
     CheckStep:
       type: object
@@ -1309,6 +1581,7 @@ components:
         files:
           type: array
           items: { $ref: '#/components/schemas/FileChange' }
+        report: { type: string, description: 'The Markdown report, for report kinds' }
         createdAt: { type: string, format: date-time }
 
     TicketDetail:
@@ -1321,6 +1594,8 @@ components:
           items: { $ref: '#/components/schemas/Question' }
         analysis: { $ref: '#/components/schemas/Analysis' }
         result: { $ref: '#/components/schemas/Result' }
+        childKey: { type: string, description: 'The code task that implements this report, if any' }
+        review: { $ref: '#/components/schemas/CodeReview' }
         history:
           type: array
           items: { $ref: '#/components/schemas/HistoryItem' }
@@ -1364,6 +1639,11 @@ components:
       type: string
       enum: [haiku, sonnet, opus]
 
+    ReviewModel:
+      type: string
+      enum: [auto, haiku, sonnet, opus]
+      description: 'auto: opus for complex tickets, sonnet otherwise'
+
     StageModels:
       type: object
       required: [analyze, coding, retry, helper]
@@ -1373,6 +1653,7 @@ components:
         retry: { $ref: '#/components/schemas/Model' }
         helper: { $ref: '#/components/schemas/Model' }
         learn: { $ref: '#/components/schemas/Model' }
+        review: { $ref: '#/components/schemas/ReviewModel' }
 
     TicketRepo:
       type: object
@@ -1386,6 +1667,7 @@ components:
         analyze: { $ref: '#/components/schemas/Model' }
         coding: { $ref: '#/components/schemas/Model' }
         retry: { $ref: '#/components/schemas/Model' }
+        review: { $ref: '#/components/schemas/Model' }
 
     HistoryItem:
       type: object
@@ -1398,9 +1680,10 @@ components:
 
     TaskCreate:
       type: object
-      required: [repoId, title, priority, afterApprove, start]
+      required: [title, priority, afterApprove, start]
       properties:
-        repoId: { type: integer, format: int64 }
+        repoId: { type: integer, format: int64, description: 'Omit for a task without a repository (report kinds or auto)' }
+        kind: { $ref: '#/components/schemas/TicketKindChoice' }
         title: { type: string, minLength: 1, maxLength: 300 }
         description: { type: string, maxLength: 20000 }
         priority: { type: string, enum: [low, medium, high] }
@@ -1417,6 +1700,7 @@ components:
         description: { type: string, maxLength: 20000 }
         priority: { type: string, enum: [low, medium, high] }
         afterApprove: { type: string, enum: [pr, main] }
+        kind: { $ref: '#/components/schemas/TicketKindChoice' }
 
     EventPage:
       type: object
@@ -1495,6 +1779,7 @@ components:
         askFirst: { type: boolean }
         autoResume: { type: boolean }
         autoLearn: { type: boolean, description: Learn from every pushed ticket }
+        autoReview: { type: boolean, description: Review every result while it waits for review }
         pauseAbove: { type: integer, minimum: 50, maximum: 100 }
         parallel: { type: integer, minimum: 1, maximum: 3 }
         git: { $ref: '#/components/schemas/GitSettings' }
@@ -1510,6 +1795,7 @@ components:
         stopped: { type: boolean }
         done: { type: boolean }
         lessons: { type: boolean, description: New lessons were found }
+        review: { type: boolean, description: A code review finished }
 
     Repository:
       type: object
@@ -1975,6 +2261,71 @@ components:
           items: { $ref: '#/components/schemas/Link' }
         learnedAt: { type: string, format: date-time }
         createdAt: { type: string, format: date-time }
+
+    RuleStatus:
+      type: string
+      enum: [pending, analyzing, questions, ready, failed]
+      description: 'Where Claude''s review stands. Tickets follow a rule only when it is ready and enabled.'
+
+    RuleQuestion:
+      type: object
+      required: [index, text, options, round]
+      properties:
+        index: { type: integer, description: Position in the rule's questions; answers refer to it }
+        text: { type: string }
+        options:
+          type: array
+          items: { type: string }
+        answer: { type: string, description: Empty while the question is open }
+        note: { type: string }
+        round: { type: integer, description: The review round that asked it }
+
+    Rule:
+      type: object
+      required: [id, title, body, enabled, status, interpretation, clarified, text, questions, rounds, error, createdAt, updatedAt]
+      properties:
+        id: { type: integer, format: int64 }
+        repoId: { type: integer, format: int64, description: Absent for a global rule }
+        repoName: { type: string }
+        title: { type: string }
+        body: { type: string, description: The rule as written }
+        enabled: { type: boolean }
+        status: { $ref: '#/components/schemas/RuleStatus' }
+        interpretation: { type: string, description: 'What Claude will do because of the rule' }
+        clarified: { type: string, description: 'The rule rewritten with what the answers settled; empty when used as written' }
+        text: { type: string, description: What tickets are given }
+        questions:
+          type: array
+          items: { $ref: '#/components/schemas/RuleQuestion' }
+        rounds: { type: integer, description: Question rounds so far }
+        error: { type: string, description: Why the last review failed }
+        analyzedAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    RuleInput:
+      type: object
+      required: [title, body]
+      properties:
+        title: { type: string, maxLength: 200 }
+        body: { type: string, maxLength: 10000 }
+        repoId: { type: integer, format: int64, description: Leave out for a rule every repository follows }
+        enabled: { type: boolean, default: true }
+
+    RuleAnswers:
+      type: object
+      required: [answers]
+      properties:
+        answers:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [index, answer]
+            properties:
+              index: { type: integer, minimum: 0 }
+              answer: { type: string, maxLength: 2000 }
+              note: { type: string, maxLength: 2000 }
 
     Error:
       type: object

@@ -21,6 +21,24 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// Defines values for AnalysisComplexity.
+const (
+	Complex AnalysisComplexity = "complex"
+	Simple  AnalysisComplexity = "simple"
+)
+
+// Valid indicates whether the value is a known member of the AnalysisComplexity enum.
+func (e AnalysisComplexity) Valid() bool {
+	switch e {
+	case Complex:
+		return true
+	case Simple:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for AnalyticsInsightsKind.
 const (
 	ClaudeMd   AnalyticsInsightsKind = "claudeMd"
@@ -78,6 +96,27 @@ func (e CI) Valid() bool {
 	case CIRun:
 		return true
 	case CISkip:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CodeReviewVerdict.
+const (
+	HasConcerns  CodeReviewVerdict = "has_concerns"
+	LooksGood    CodeReviewVerdict = "looks_good"
+	NeedsChanges CodeReviewVerdict = "needs_changes"
+)
+
+// Valid indicates whether the value is a known member of the CodeReviewVerdict enum.
+func (e CodeReviewVerdict) Valid() bool {
+	switch e {
+	case HasConcerns:
+		return true
+	case LooksGood:
+		return true
+	case NeedsChanges:
 		return true
 	default:
 		return false
@@ -150,6 +189,87 @@ func (e EventOrigin) Valid() bool {
 	case EventOriginWeb:
 		return true
 	case EventOriginWebhook:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FindingCategory.
+const (
+	FindingCategoryAccuracy        FindingCategory = "accuracy"
+	FindingCategoryCompleteness    FindingCategory = "completeness"
+	FindingCategoryCorrectness     FindingCategory = "correctness"
+	FindingCategoryMaintainability FindingCategory = "maintainability"
+	FindingCategoryOther           FindingCategory = "other"
+	FindingCategoryPerformance     FindingCategory = "performance"
+	FindingCategoryRules           FindingCategory = "rules"
+	FindingCategorySecurity        FindingCategory = "security"
+	FindingCategoryTests           FindingCategory = "tests"
+)
+
+// Valid indicates whether the value is a known member of the FindingCategory enum.
+func (e FindingCategory) Valid() bool {
+	switch e {
+	case FindingCategoryAccuracy:
+		return true
+	case FindingCategoryCompleteness:
+		return true
+	case FindingCategoryCorrectness:
+		return true
+	case FindingCategoryMaintainability:
+		return true
+	case FindingCategoryOther:
+		return true
+	case FindingCategoryPerformance:
+		return true
+	case FindingCategoryRules:
+		return true
+	case FindingCategorySecurity:
+		return true
+	case FindingCategoryTests:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FindingSeverity.
+const (
+	Blocker FindingSeverity = "blocker"
+	Major   FindingSeverity = "major"
+	Minor   FindingSeverity = "minor"
+	Nit     FindingSeverity = "nit"
+)
+
+// Valid indicates whether the value is a known member of the FindingSeverity enum.
+func (e FindingSeverity) Valid() bool {
+	switch e {
+	case Blocker:
+		return true
+	case Major:
+		return true
+	case Minor:
+		return true
+	case Nit:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ImplementInputStart.
+const (
+	ImplementInputStartCode  ImplementInputStart = "code"
+	ImplementInputStartQueue ImplementInputStart = "queue"
+)
+
+// Valid indicates whether the value is a known member of the ImplementInputStart enum.
+func (e ImplementInputStart) Valid() bool {
+	switch e {
+	case ImplementInputStartCode:
+		return true
+	case ImplementInputStartQueue:
 		return true
 	default:
 		return false
@@ -287,19 +407,19 @@ func (e LoginRequestClient) Valid() bool {
 
 // Defines values for Model.
 const (
-	Haiku  Model = "haiku"
-	Opus   Model = "opus"
-	Sonnet Model = "sonnet"
+	ModelHaiku  Model = "haiku"
+	ModelOpus   Model = "opus"
+	ModelSonnet Model = "sonnet"
 )
 
 // Valid indicates whether the value is a known member of the Model enum.
 func (e Model) Valid() bool {
 	switch e {
-	case Haiku:
+	case ModelHaiku:
 		return true
-	case Opus:
+	case ModelOpus:
 		return true
-	case Sonnet:
+	case ModelSonnet:
 		return true
 	default:
 		return false
@@ -381,6 +501,57 @@ func (e RepositoryInputKind) Valid() bool {
 	}
 }
 
+// Defines values for ReviewModel.
+const (
+	ReviewModelAuto   ReviewModel = "auto"
+	ReviewModelHaiku  ReviewModel = "haiku"
+	ReviewModelOpus   ReviewModel = "opus"
+	ReviewModelSonnet ReviewModel = "sonnet"
+)
+
+// Valid indicates whether the value is a known member of the ReviewModel enum.
+func (e ReviewModel) Valid() bool {
+	switch e {
+	case ReviewModelAuto:
+		return true
+	case ReviewModelHaiku:
+		return true
+	case ReviewModelOpus:
+		return true
+	case ReviewModelSonnet:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for RuleStatus.
+const (
+	RuleStatusAnalyzing RuleStatus = "analyzing"
+	RuleStatusFailed    RuleStatus = "failed"
+	RuleStatusPending   RuleStatus = "pending"
+	RuleStatusQuestions RuleStatus = "questions"
+	RuleStatusReady     RuleStatus = "ready"
+)
+
+// Valid indicates whether the value is a known member of the RuleStatus enum.
+func (e RuleStatus) Valid() bool {
+	switch e {
+	case RuleStatusAnalyzing:
+		return true
+	case RuleStatusFailed:
+		return true
+	case RuleStatusPending:
+		return true
+	case RuleStatusQuestions:
+		return true
+	case RuleStatusReady:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for TaskCreateAfterApprove.
 const (
 	TaskCreateAfterApproveMain TaskCreateAfterApprove = "main"
@@ -422,19 +593,19 @@ func (e TaskCreatePriority) Valid() bool {
 
 // Defines values for TaskCreateStart.
 const (
-	Ask   TaskCreateStart = "ask"
-	Code  TaskCreateStart = "code"
-	Queue TaskCreateStart = "queue"
+	TaskCreateStartAsk   TaskCreateStart = "ask"
+	TaskCreateStartCode  TaskCreateStart = "code"
+	TaskCreateStartQueue TaskCreateStart = "queue"
 )
 
 // Valid indicates whether the value is a known member of the TaskCreateStart enum.
 func (e TaskCreateStart) Valid() bool {
 	switch e {
-	case Ask:
+	case TaskCreateStartAsk:
 		return true
-	case Code:
+	case TaskCreateStartCode:
 		return true
-	case Queue:
+	case TaskCreateStartQueue:
 		return true
 	default:
 		return false
@@ -522,6 +693,33 @@ func (e TicketLearnState) Valid() bool {
 	}
 }
 
+// Defines values for TicketReviewState.
+const (
+	TicketReviewStateDone    TicketReviewState = "done"
+	TicketReviewStateFailed  TicketReviewState = "failed"
+	TicketReviewStateNone    TicketReviewState = "none"
+	TicketReviewStatePending TicketReviewState = "pending"
+	TicketReviewStateRunning TicketReviewState = "running"
+)
+
+// Valid indicates whether the value is a known member of the TicketReviewState enum.
+func (e TicketReviewState) Valid() bool {
+	switch e {
+	case TicketReviewStateDone:
+		return true
+	case TicketReviewStateFailed:
+		return true
+	case TicketReviewStateNone:
+		return true
+	case TicketReviewStatePending:
+		return true
+	case TicketReviewStateRunning:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for TicketSource.
 const (
 	TicketSourceJira  TicketSource = "jira"
@@ -534,6 +732,63 @@ func (e TicketSource) Valid() bool {
 	case TicketSourceJira:
 		return true
 	case TicketSourceLocal:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TicketKind.
+const (
+	TicketKindAnalysis TicketKind = "analysis"
+	TicketKindBug      TicketKind = "bug"
+	TicketKindCode     TicketKind = "code"
+	TicketKindPlan     TicketKind = "plan"
+	TicketKindTest     TicketKind = "test"
+)
+
+// Valid indicates whether the value is a known member of the TicketKind enum.
+func (e TicketKind) Valid() bool {
+	switch e {
+	case TicketKindAnalysis:
+		return true
+	case TicketKindBug:
+		return true
+	case TicketKindCode:
+		return true
+	case TicketKindPlan:
+		return true
+	case TicketKindTest:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TicketKindChoice.
+const (
+	TicketKindChoiceAnalysis TicketKindChoice = "analysis"
+	TicketKindChoiceAuto     TicketKindChoice = "auto"
+	TicketKindChoiceBug      TicketKindChoice = "bug"
+	TicketKindChoiceCode     TicketKindChoice = "code"
+	TicketKindChoicePlan     TicketKindChoice = "plan"
+	TicketKindChoiceTest     TicketKindChoice = "test"
+)
+
+// Valid indicates whether the value is a known member of the TicketKindChoice enum.
+func (e TicketKindChoice) Valid() bool {
+	switch e {
+	case TicketKindChoiceAnalysis:
+		return true
+	case TicketKindChoiceAuto:
+		return true
+	case TicketKindChoiceBug:
+		return true
+	case TicketKindChoiceCode:
+		return true
+	case TicketKindChoicePlan:
+		return true
+	case TicketKindChoiceTest:
 		return true
 	default:
 		return false
@@ -752,9 +1007,14 @@ func (e ListLessonsParamsStatus) Valid() bool {
 
 // Analysis defines model for Analysis.
 type Analysis struct {
-	Plan    []string `json:"plan"`
-	Summary string   `json:"summary"`
+	// Complexity The analysis's rating; picks the review model on auto
+	Complexity *AnalysisComplexity `json:"complexity,omitempty"`
+	Plan       []string            `json:"plan"`
+	Summary    string              `json:"summary"`
 }
+
+// AnalysisComplexity The analysis's rating; picks the review model on auto
+type AnalysisComplexity string
 
 // Analytics defines model for Analytics.
 type Analytics struct {
@@ -832,6 +1092,23 @@ type CheckStep struct {
 	Output     *string `json:"output,omitempty"`
 	TimedOut   *bool   `json:"timedOut,omitempty"`
 }
+
+// CodeReview hiro's review of the latest result, advice beside the human review. It reviewed an older revision when revision is below the ticket's.
+type CodeReview struct {
+	CreatedAt time.Time `json:"createdAt"`
+	Findings  []Finding `json:"findings"`
+	Model     Model     `json:"model"`
+
+	// ModelReason Why this model reviewed it
+	ModelReason string            `json:"modelReason"`
+	Revision    int               `json:"revision"`
+	Strengths   []string          `json:"strengths"`
+	Summary     string            `json:"summary"`
+	Verdict     CodeReviewVerdict `json:"verdict"`
+}
+
+// CodeReviewVerdict defines model for CodeReview.Verdict.
+type CodeReviewVerdict string
 
 // Commit defines model for Commit.
 type Commit struct {
@@ -964,6 +1241,27 @@ type FileChange struct {
 	Path string `json:"path"`
 }
 
+// Finding defines model for Finding.
+type Finding struct {
+	Category FindingCategory `json:"category"`
+	Detail   *string         `json:"detail,omitempty"`
+
+	// File Path relative to the repository
+	File     *string         `json:"file,omitempty"`
+	Line     *int            `json:"line,omitempty"`
+	Severity FindingSeverity `json:"severity"`
+
+	// Suggestion What to change, written to be sent back as feedback
+	Suggestion *string `json:"suggestion,omitempty"`
+	Title      string  `json:"title"`
+}
+
+// FindingCategory defines model for Finding.Category.
+type FindingCategory string
+
+// FindingSeverity defines model for Finding.Severity.
+type FindingSeverity string
+
 // GitSettings defines model for GitSettings.
 type GitSettings struct {
 	AuthorEmail string `json:"authorEmail"`
@@ -992,6 +1290,18 @@ type HourBucket struct {
 	Problems int `json:"problems"`
 	You      int `json:"you"`
 }
+
+// ImplementInput defines model for ImplementInput.
+type ImplementInput struct {
+	// RepoId Where to implement it; defaults to the report's repository
+	RepoId *int64 `json:"repoId,omitempty"`
+
+	// Start code = start now without questions (default), queue = keep until started
+	Start *ImplementInputStart `json:"start,omitempty"`
+}
+
+// ImplementInputStart code = start now without questions (default), queue = keep until started
+type ImplementInputStart string
 
 // Integration defines model for Integration.
 type Integration struct {
@@ -1188,6 +1498,7 @@ type ModelOverrides struct {
 	Analyze *Model `json:"analyze,omitempty"`
 	Coding  *Model `json:"coding,omitempty"`
 	Retry   *Model `json:"retry,omitempty"`
+	Review  *Model `json:"review,omitempty"`
 }
 
 // NotifySettings defines model for NotifySettings.
@@ -1198,6 +1509,9 @@ type NotifySettings struct {
 	Lessons  *bool `json:"lessons,omitempty"`
 	NeedsYou bool  `json:"needsYou"`
 	Push     bool  `json:"push"`
+
+	// Review A code review finished
+	Review   *bool `json:"review,omitempty"`
 	Stopped  bool  `json:"stopped"`
 	Telegram bool  `json:"telegram"`
 }
@@ -1352,8 +1666,87 @@ type Result struct {
 	CreatedAt time.Time    `json:"createdAt"`
 	Files     []FileChange `json:"files"`
 	Notes     []string     `json:"notes"`
-	Summary   string       `json:"summary"`
+
+	// Report The Markdown report, for report kinds
+	Report  *string `json:"report,omitempty"`
+	Summary string  `json:"summary"`
 }
+
+// ReviewModel auto: opus for complex tickets, sonnet otherwise
+type ReviewModel string
+
+// Rule defines model for Rule.
+type Rule struct {
+	AnalyzedAt *time.Time `json:"analyzedAt,omitempty"`
+
+	// Body The rule as written
+	Body string `json:"body"`
+
+	// Clarified The rule rewritten with what the answers settled; empty when used as written
+	Clarified string    `json:"clarified"`
+	CreatedAt time.Time `json:"createdAt"`
+	Enabled   bool      `json:"enabled"`
+
+	// Error Why the last review failed
+	Error string `json:"error"`
+	Id    int64  `json:"id"`
+
+	// Interpretation What Claude will do because of the rule
+	Interpretation string         `json:"interpretation"`
+	Questions      []RuleQuestion `json:"questions"`
+
+	// RepoId Absent for a global rule
+	RepoId   *int64  `json:"repoId,omitempty"`
+	RepoName *string `json:"repoName,omitempty"`
+
+	// Rounds Question rounds so far
+	Rounds int `json:"rounds"`
+
+	// Status Where Claude's review stands. Tickets follow a rule only when it is ready and enabled.
+	Status RuleStatus `json:"status"`
+
+	// Text What tickets are given
+	Text      string    `json:"text"`
+	Title     string    `json:"title"`
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// RuleAnswers defines model for RuleAnswers.
+type RuleAnswers struct {
+	Answers []struct {
+		Answer string  `json:"answer"`
+		Index  int     `json:"index"`
+		Note   *string `json:"note,omitempty"`
+	} `json:"answers"`
+}
+
+// RuleInput defines model for RuleInput.
+type RuleInput struct {
+	Body    string `json:"body"`
+	Enabled *bool  `json:"enabled,omitempty"`
+
+	// RepoId Leave out for a rule every repository follows
+	RepoId *int64 `json:"repoId,omitempty"`
+	Title  string `json:"title"`
+}
+
+// RuleQuestion defines model for RuleQuestion.
+type RuleQuestion struct {
+	// Answer Empty while the question is open
+	Answer *string `json:"answer,omitempty"`
+
+	// Index Position in the rule's questions; answers refer to it
+	Index   int      `json:"index"`
+	Note    *string  `json:"note,omitempty"`
+	Options []string `json:"options"`
+
+	// Round The review round that asked it
+	Round int    `json:"round"`
+	Text  string `json:"text"`
+}
+
+// RuleStatus Where Claude's review stands. Tickets follow a rule only when it is ready and enabled.
+type RuleStatus string
 
 // Settings defines model for Settings.
 type Settings struct {
@@ -1361,8 +1754,11 @@ type Settings struct {
 	AskFirst bool     `json:"askFirst"`
 
 	// AutoLearn Learn from every pushed ticket
-	AutoLearn  *bool           `json:"autoLearn,omitempty"`
-	AutoResume bool            `json:"autoResume"`
+	AutoLearn  *bool `json:"autoLearn,omitempty"`
+	AutoResume bool  `json:"autoResume"`
+
+	// AutoReview Review every result while it waits for review
+	AutoReview *bool           `json:"autoReview,omitempty"`
 	Deny       []string        `json:"deny"`
 	Git        GitSettings     `json:"git"`
 	MaxTurns   int             `json:"maxTurns"`
@@ -1389,6 +1785,9 @@ type StageModels struct {
 	Helper  Model  `json:"helper"`
 	Learn   *Model `json:"learn,omitempty"`
 	Retry   Model  `json:"retry"`
+
+	// Review auto: opus for complex tickets, sonnet otherwise
+	Review *ReviewModel `json:"review,omitempty"`
 }
 
 // StepDuration defines model for StepDuration.
@@ -1402,8 +1801,13 @@ type StepDuration struct {
 type TaskCreate struct {
 	AfterApprove TaskCreateAfterApprove `json:"afterApprove"`
 	Description  *string                `json:"description,omitempty"`
-	Priority     TaskCreatePriority     `json:"priority"`
-	RepoId       int64                  `json:"repoId"`
+
+	// Kind A kind, or auto for hiro to pick one during analysis
+	Kind     *TicketKindChoice  `json:"kind,omitempty"`
+	Priority TaskCreatePriority `json:"priority"`
+
+	// RepoId Omit for a task without a repository (report kinds or auto)
+	RepoId *int64 `json:"repoId,omitempty"`
 
 	// Start ask = analyse and ask first, code = no questions, queue = keep until started
 	Start TaskCreateStart `json:"start"`
@@ -1423,8 +1827,11 @@ type TaskCreateStart string
 type TaskUpdate struct {
 	AfterApprove *TaskUpdateAfterApprove `json:"afterApprove,omitempty"`
 	Description  *string                 `json:"description,omitempty"`
-	Priority     *TaskUpdatePriority     `json:"priority,omitempty"`
-	Title        *string                 `json:"title,omitempty"`
+
+	// Kind A kind, or auto for hiro to pick one during analysis
+	Kind     *TicketKindChoice   `json:"kind,omitempty"`
+	Priority *TaskUpdatePriority `json:"priority,omitempty"`
+	Title    *string             `json:"title,omitempty"`
 }
 
 // TaskUpdateAfterApprove defines model for TaskUpdate.AfterApprove.
@@ -1448,17 +1855,32 @@ type Ticket struct {
 	Held *bool  `json:"held,omitempty"`
 	Key  string `json:"key"`
 
+	// Kind What the work produces. code and test make a change (diff, checks, pull request); plan, analysis and bug write a Markdown report.
+	Kind TicketKind `json:"kind"`
+
+	// KindAuto hiro picks the kind; the analysis may still change it
+	KindAuto bool `json:"kindAuto"`
+
 	// LearnState The learn run after push; pending also while it runs
-	LearnState  *TicketLearnState `json:"learnState,omitempty"`
-	MergedAt    *time.Time        `json:"mergedAt,omitempty"`
-	Models      *ModelOverrides   `json:"models,omitempty"`
-	PrNumber    *int              `json:"prNumber,omitempty"`
-	PrUrl       string            `json:"prUrl"`
-	Priority    string            `json:"priority"`
-	RepoId      *int64            `json:"repoId,omitempty"`
-	RepoName    *string           `json:"repoName,omitempty"`
-	ResumeState *TicketState      `json:"resumeState,omitempty"`
-	Revision    int               `json:"revision"`
+	LearnState *TicketLearnState `json:"learnState,omitempty"`
+	MergedAt   *time.Time        `json:"mergedAt,omitempty"`
+	Models     *ModelOverrides   `json:"models,omitempty"`
+
+	// ParentKey The plan or bug investigation this ticket implements
+	ParentKey *string `json:"parentKey,omitempty"`
+
+	// PostReport The approved report is posted to the tracker issue
+	PostReport  *bool        `json:"postReport,omitempty"`
+	PrNumber    *int         `json:"prNumber,omitempty"`
+	PrUrl       string       `json:"prUrl"`
+	Priority    string       `json:"priority"`
+	RepoId      *int64       `json:"repoId,omitempty"`
+	RepoName    *string      `json:"repoName,omitempty"`
+	ResumeState *TicketState `json:"resumeState,omitempty"`
+
+	// ReviewState The code review hiro runs beside the human review
+	ReviewState *TicketReviewState `json:"reviewState,omitempty"`
+	Revision    int                `json:"revision"`
 
 	// Since When the ticket entered its current state
 	Since  *time.Time   `json:"since,omitempty"`
@@ -1478,18 +1900,39 @@ type TicketAfterApprove string
 // TicketLearnState The learn run after push; pending also while it runs
 type TicketLearnState string
 
+// TicketReviewState The code review hiro runs beside the human review
+type TicketReviewState string
+
 // TicketSource defines model for Ticket.Source.
 type TicketSource string
 
 // TicketDetail defines model for TicketDetail.
 type TicketDetail struct {
-	Analysis        *Analysis      `json:"analysis,omitempty"`
+	Analysis *Analysis `json:"analysis,omitempty"`
+
+	// ChildKey The code task that implements this report, if any
+	ChildKey        *string        `json:"childKey,omitempty"`
 	EffectiveModels *StageModels   `json:"effectiveModels,omitempty"`
 	History         *[]HistoryItem `json:"history,omitempty"`
 	MaxTurns        *int           `json:"maxTurns,omitempty"`
 	Questions       []Question     `json:"questions"`
 	Result          *Result        `json:"result,omitempty"`
-	Ticket          Ticket         `json:"ticket"`
+
+	// Review hiro's review of the latest result, advice beside the human review. It reviewed an older revision when revision is below the ticket's.
+	Review *CodeReview `json:"review,omitempty"`
+	Ticket Ticket      `json:"ticket"`
+}
+
+// TicketKind What the work produces. code and test make a change (diff, checks, pull request); plan, analysis and bug write a Markdown report.
+type TicketKind string
+
+// TicketKindChoice A kind, or auto for hiro to pick one during analysis
+type TicketKindChoice string
+
+// TicketKindInput defines model for TicketKindInput.
+type TicketKindInput struct {
+	// Kind A kind, or auto for hiro to pick one during analysis
+	Kind TicketKindChoice `json:"kind"`
 }
 
 // TicketRepo defines model for TicketRepo.
@@ -1549,6 +1992,9 @@ type Provider string
 
 // RepoID defines model for RepoID.
 type RepoID = int64
+
+// RuleID defines model for RuleID.
+type RuleID = int64
 
 // TicketKey defines model for TicketKey.
 type TicketKey = string
@@ -1693,8 +2139,11 @@ type ListTicketsParams struct {
 
 // ApproveTicketJSONBody defines parameters for ApproveTicket.
 type ApproveTicketJSONBody struct {
-	// Assignees Git host usernames to assign the pull request to
+	// Assignees Git host usernames to assign the pull request to (changes only)
 	Assignees *[]string `json:"assignees,omitempty"`
+
+	// PostReport Post the approved report as a comment on the tracker issue (reports only)
+	PostReport *bool `json:"postReport,omitempty"`
 }
 
 // ListTicketEventsParams defines parameters for ListTicketEvents.
@@ -1741,6 +2190,15 @@ type UpdateRepoJSONRequestBody = RepositoryInput
 // DeployRepoJSONRequestBody defines body for DeployRepo for application/json ContentType.
 type DeployRepoJSONRequestBody DeployRepoJSONBody
 
+// CreateRuleJSONRequestBody defines body for CreateRule for application/json ContentType.
+type CreateRuleJSONRequestBody = RuleInput
+
+// UpdateRuleJSONRequestBody defines body for UpdateRule for application/json ContentType.
+type UpdateRuleJSONRequestBody = RuleInput
+
+// AnswerRuleJSONRequestBody defines body for AnswerRule for application/json ContentType.
+type AnswerRuleJSONRequestBody = RuleAnswers
+
 // PutSettingsJSONRequestBody defines body for PutSettings for application/json ContentType.
 type PutSettingsJSONRequestBody = Settings
 
@@ -1755,6 +2213,12 @@ type AnswerQuestionsJSONRequestBody = AnswersRequest
 
 // ApproveTicketJSONRequestBody defines body for ApproveTicket for application/json ContentType.
 type ApproveTicketJSONRequestBody ApproveTicketJSONBody
+
+// ImplementTicketJSONRequestBody defines body for ImplementTicket for application/json ContentType.
+type ImplementTicketJSONRequestBody = ImplementInput
+
+// SetTicketKindJSONRequestBody defines body for SetTicketKind for application/json ContentType.
+type SetTicketKindJSONRequestBody = TicketKindInput
 
 // SetTicketModelsJSONRequestBody defines body for SetTicketModels for application/json ContentType.
 type SetTicketModelsJSONRequestBody = ModelOverrides
@@ -1899,6 +2363,30 @@ type ServerInterface interface {
 	// UnarchiveRepo Restore an archived repository
 	// (POST /repos/{id}/unarchive)
 	UnarchiveRepo(w http.ResponseWriter, r *http.Request, id RepoID)
+	// ListRules Every rule, global ones first, then by repository
+	// (GET /rules)
+	ListRules(w http.ResponseWriter, r *http.Request)
+	// CreateRule Add a rule; Claude reviews it before tickets follow it
+	// (POST /rules)
+	CreateRule(w http.ResponseWriter, r *http.Request)
+
+	// (DELETE /rules/{id})
+	DeleteRule(w http.ResponseWriter, r *http.Request, id RuleID)
+
+	// (GET /rules/{id})
+	GetRule(w http.ResponseWriter, r *http.Request, id RuleID)
+	// UpdateRule Edit a rule. Changing its text or repository starts a new review; turning it on or off does not.
+	// (PUT /rules/{id})
+	UpdateRule(w http.ResponseWriter, r *http.Request, id RuleID)
+	// AcceptRule Apply a rule as written, skipping its open questions or a failed review
+	// (POST /rules/{id}/accept)
+	AcceptRule(w http.ResponseWriter, r *http.Request, id RuleID)
+	// AnswerRule Answer every open question of a rule; Claude then reviews it again
+	// (PUT /rules/{id}/answers)
+	AnswerRule(w http.ResponseWriter, r *http.Request, id RuleID)
+	// ReviewRule Have Claude review a rule again, keeping its answers
+	// (POST /rules/{id}/review)
+	ReviewRule(w http.ResponseWriter, r *http.Request, id RuleID)
 
 	// (GET /settings)
 	GetSettings(w http.ResponseWriter, r *http.Request)
@@ -1926,12 +2414,18 @@ type ServerInterface interface {
 	// AnswerQuestions Answer the ticket's questions; when all are answered, coding starts
 	// (PUT /tickets/{key}/answers)
 	AnswerQuestions(w http.ResponseWriter, r *http.Request, key TicketKey)
-	// ApproveTicket Approve the reviewed changes; hiro pushes the branch and opens the PR
+	// ApproveTicket Approve the reviewed work
 	// (POST /tickets/{key}/approve)
 	ApproveTicket(w http.ResponseWriter, r *http.Request, key TicketKey)
 	// ListTicketEvents The ticket's log, oldest first; poll with `after` for live updates
 	// (GET /tickets/{key}/events)
 	ListTicketEvents(w http.ResponseWriter, r *http.Request, key TicketKey, params ListTicketEventsParams)
+	// ImplementTicket Make the code task that carries out a done plan or bug investigation
+	// (POST /tickets/{key}/implement)
+	ImplementTicket(w http.ResponseWriter, r *http.Request, key TicketKey)
+	// SetTicketKind Change what the ticket produces
+	// (PUT /tickets/{key}/kind)
+	SetTicketKind(w http.ResponseWriter, r *http.Request, key TicketKey)
 	// LearnFromTicket Queue a learn run for a pushed ticket (again, if it already ran)
 	// (POST /tickets/{key}/learn)
 	LearnFromTicket(w http.ResponseWriter, r *http.Request, key TicketKey)
@@ -1950,6 +2444,9 @@ type ServerInterface interface {
 	// RetryTicket Resume a failed or rate-limited ticket where it stopped
 	// (POST /tickets/{key}/retry)
 	RetryTicket(w http.ResponseWriter, r *http.Request, key TicketKey)
+	// ReviewTicket Queue a code review of a ticket waiting for review (again, if one already ran)
+	// (POST /tickets/{key}/review)
+	ReviewTicket(w http.ResponseWriter, r *http.Request, key TicketKey)
 	// StopTicket Stop the running stage; the ticket moves to failed and can be retried
 	// (POST /tickets/{key}/stop)
 	StopTicket(w http.ResponseWriter, r *http.Request, key TicketKey)
@@ -2217,6 +2714,52 @@ func (_ Unimplemented) UnarchiveRepo(w http.ResponseWriter, r *http.Request, id 
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// ListRules Every rule, global ones first, then by repository
+// (GET /rules)
+func (_ Unimplemented) ListRules(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// CreateRule Add a rule; Claude reviews it before tickets follow it
+// (POST /rules)
+func (_ Unimplemented) CreateRule(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// (DELETE /rules/{id})
+func (_ Unimplemented) DeleteRule(w http.ResponseWriter, r *http.Request, id RuleID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// (GET /rules/{id})
+func (_ Unimplemented) GetRule(w http.ResponseWriter, r *http.Request, id RuleID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// UpdateRule Edit a rule. Changing its text or repository starts a new review; turning it on or off does not.
+// (PUT /rules/{id})
+func (_ Unimplemented) UpdateRule(w http.ResponseWriter, r *http.Request, id RuleID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// AcceptRule Apply a rule as written, skipping its open questions or a failed review
+// (POST /rules/{id}/accept)
+func (_ Unimplemented) AcceptRule(w http.ResponseWriter, r *http.Request, id RuleID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// AnswerRule Answer every open question of a rule; Claude then reviews it again
+// (PUT /rules/{id}/answers)
+func (_ Unimplemented) AnswerRule(w http.ResponseWriter, r *http.Request, id RuleID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// ReviewRule Have Claude review a rule again, keeping its answers
+// (POST /rules/{id}/review)
+func (_ Unimplemented) ReviewRule(w http.ResponseWriter, r *http.Request, id RuleID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // (GET /settings)
 func (_ Unimplemented) GetSettings(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
@@ -2269,7 +2812,7 @@ func (_ Unimplemented) AnswerQuestions(w http.ResponseWriter, r *http.Request, k
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// ApproveTicket Approve the reviewed changes; hiro pushes the branch and opens the PR
+// ApproveTicket Approve the reviewed work
 // (POST /tickets/{key}/approve)
 func (_ Unimplemented) ApproveTicket(w http.ResponseWriter, r *http.Request, key TicketKey) {
 	w.WriteHeader(http.StatusNotImplemented)
@@ -2278,6 +2821,18 @@ func (_ Unimplemented) ApproveTicket(w http.ResponseWriter, r *http.Request, key
 // ListTicketEvents The ticket's log, oldest first; poll with `after` for live updates
 // (GET /tickets/{key}/events)
 func (_ Unimplemented) ListTicketEvents(w http.ResponseWriter, r *http.Request, key TicketKey, params ListTicketEventsParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// ImplementTicket Make the code task that carries out a done plan or bug investigation
+// (POST /tickets/{key}/implement)
+func (_ Unimplemented) ImplementTicket(w http.ResponseWriter, r *http.Request, key TicketKey) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// SetTicketKind Change what the ticket produces
+// (PUT /tickets/{key}/kind)
+func (_ Unimplemented) SetTicketKind(w http.ResponseWriter, r *http.Request, key TicketKey) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -2314,6 +2869,12 @@ func (_ Unimplemented) RequestChanges(w http.ResponseWriter, r *http.Request, ke
 // RetryTicket Resume a failed or rate-limited ticket where it stopped
 // (POST /tickets/{key}/retry)
 func (_ Unimplemented) RetryTicket(w http.ResponseWriter, r *http.Request, key TicketKey) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// ReviewTicket Queue a code review of a ticket waiting for review (again, if one already ran)
+// (POST /tickets/{key}/review)
+func (_ Unimplemented) ReviewTicket(w http.ResponseWriter, r *http.Request, key TicketKey) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -3485,6 +4046,190 @@ func (siw *ServerInterfaceWrapper) UnarchiveRepo(w http.ResponseWriter, r *http.
 	handler.ServeHTTP(w, r)
 }
 
+// ListRules operation middleware
+func (siw *ServerInterfaceWrapper) ListRules(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListRules(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateRule operation middleware
+func (siw *ServerInterfaceWrapper) CreateRule(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateRule(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteRule operation middleware
+func (siw *ServerInterfaceWrapper) DeleteRule(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id RuleID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteRule(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetRule operation middleware
+func (siw *ServerInterfaceWrapper) GetRule(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id RuleID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRule(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateRule operation middleware
+func (siw *ServerInterfaceWrapper) UpdateRule(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id RuleID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateRule(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// AcceptRule operation middleware
+func (siw *ServerInterfaceWrapper) AcceptRule(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id RuleID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AcceptRule(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// AnswerRule operation middleware
+func (siw *ServerInterfaceWrapper) AnswerRule(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id RuleID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AnswerRule(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ReviewRule operation middleware
+func (siw *ServerInterfaceWrapper) ReviewRule(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id RuleID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ReviewRule(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // GetSettings operation middleware
 func (siw *ServerInterfaceWrapper) GetSettings(w http.ResponseWriter, r *http.Request) {
 
@@ -3771,6 +4516,58 @@ func (siw *ServerInterfaceWrapper) ListTicketEvents(w http.ResponseWriter, r *ht
 	handler.ServeHTTP(w, r)
 }
 
+// ImplementTicket operation middleware
+func (siw *ServerInterfaceWrapper) ImplementTicket(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "key" -------------
+	var key TicketKey
+
+	err = runtime.BindStyledParameterWithOptions("simple", "key", chi.URLParam(r, "key"), &key, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "key", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ImplementTicket(w, r, key)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// SetTicketKind operation middleware
+func (siw *ServerInterfaceWrapper) SetTicketKind(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "key" -------------
+	var key TicketKey
+
+	err = runtime.BindStyledParameterWithOptions("simple", "key", chi.URLParam(r, "key"), &key, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "key", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SetTicketKind(w, r, key)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // LearnFromTicket operation middleware
 func (siw *ServerInterfaceWrapper) LearnFromTicket(w http.ResponseWriter, r *http.Request) {
 
@@ -3918,6 +4715,32 @@ func (siw *ServerInterfaceWrapper) RetryTicket(w http.ResponseWriter, r *http.Re
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.RetryTicket(w, r, key)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ReviewTicket operation middleware
+func (siw *ServerInterfaceWrapper) ReviewTicket(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "key" -------------
+	var key TicketKey
+
+	err = runtime.BindStyledParameterWithOptions("simple", "key", chi.URLParam(r, "key"), &key, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "key", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ReviewTicket(w, r, key)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -4137,6 +4960,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Post(options.BaseURL+"/tickets/{key}/learn", wrapper.LearnFromTicket)
 	})
 	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/tickets/{key}/review", wrapper.ReviewTicket)
+	})
+	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/tickets/{key}/stop", wrapper.StopTicket)
 	})
 	r.Group(func(r chi.Router) {
@@ -4144,6 +4970,12 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Put(options.BaseURL+"/tickets/{key}/repo", wrapper.SetTicketRepo)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/tickets/{key}/implement", wrapper.ImplementTicket)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/tickets/{key}/kind", wrapper.SetTicketKind)
 	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/tasks", wrapper.CreateTask)
@@ -4254,6 +5086,30 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Put(options.BaseURL+"/lessons/{id}/learned", wrapper.MarkLessonLearned)
 	})
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/rules", wrapper.ListRules)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/rules", wrapper.CreateRule)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/rules/{id}", wrapper.DeleteRule)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/rules/{id}", wrapper.GetRule)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/rules/{id}", wrapper.UpdateRule)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/rules/{id}/answers", wrapper.AnswerRule)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/rules/{id}/accept", wrapper.AcceptRule)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/rules/{id}/review", wrapper.ReviewRule)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/analytics", wrapper.GetAnalytics)
 	})
 	r.Group(func(r chi.Router) {
@@ -4292,167 +5148,202 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // const string: with thousands of chunks the chained `+` fold is several
 // times slower for the Go compiler than parsing a slice literal.
 var swaggerSpec = []string{
-	"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",
+	"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",
 }
 
 // decodeSpec returns the embedded OpenAPI spec as raw JSON bytes,

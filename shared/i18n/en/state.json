@@ -10,6 +10,11 @@
     "done": "Pushed",
     "rejected": "Rejected",
     "failed": "Stopped",
-    "rate_limited": "Paused at plan limit"
+    "rate_limited": "Paused at plan limit",
+    "report": {
+      "coding": "Writing",
+      "pushing": "Delivering",
+      "done": "Done"
+    }
   }
 }

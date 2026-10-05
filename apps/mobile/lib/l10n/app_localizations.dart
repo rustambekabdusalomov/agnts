@@ -1257,6 +1257,72 @@ abstract class AppLocalizations {
   /// **'Saved'**
   String get formSaved;
 
+  /// No description provided for @formSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get formSearch;
+
+  /// No description provided for @formNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches'**
+  String get formNoMatch;
+
+  /// No description provided for @implementTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Next step'**
+  String get implementTitle;
+
+  /// No description provided for @implementSubPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Have hiro carry out this plan: a code task linked to this one, with the plan as its brief. You review the diff as usual.'**
+  String get implementSubPlan;
+
+  /// No description provided for @implementSubBug.
+  ///
+  /// In en, this message translates to:
+  /// **'Have hiro make the proposed fix: a code task linked to this one, with the investigation as its brief. You review the diff as usual.'**
+  String get implementSubBug;
+
+  /// No description provided for @implementImplement.
+  ///
+  /// In en, this message translates to:
+  /// **'Implement this plan'**
+  String get implementImplement;
+
+  /// No description provided for @implementFix.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix this bug'**
+  String get implementFix;
+
+  /// No description provided for @implementPickRepo.
+  ///
+  /// In en, this message translates to:
+  /// **'Repository to implement it in'**
+  String get implementPickRepo;
+
+  /// No description provided for @implementQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the task in the queue instead of starting it'**
+  String get implementQueue;
+
+  /// No description provided for @implementDoneBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Implemented by'**
+  String get implementDoneBy;
+
+  /// No description provided for @implementImplements.
+  ///
+  /// In en, this message translates to:
+  /// **'Implements'**
+  String get implementImplements;
+
   /// No description provided for @integrationsTitle.
   ///
   /// In en, this message translates to:
@@ -2060,6 +2126,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'When a pull or merge request is merged, hiro marks the ticket merged and moves the Jira issue to the merged status set on the Jira page. Pipeline events keep the repository page current.'**
   String get integrationsGitWebhookWhy;
+
+  /// No description provided for @kindTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Kind'**
+  String get kindTitle;
+
+  /// No description provided for @kindAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get kindAuto;
+
+  /// No description provided for @kindAutoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'hiro picks the kind while reading the ticket'**
+  String get kindAutoHint;
+
+  /// No description provided for @kindCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get kindCode;
+
+  /// No description provided for @kindCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Implement a change. Needs a repository; ends in a pull request.'**
+  String get kindCodeHint;
+
+  /// No description provided for @kindTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Tests'**
+  String get kindTest;
+
+  /// No description provided for @kindTestHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write or fix automated tests. Needs a repository; ends in a pull request.'**
+  String get kindTestHint;
+
+  /// No description provided for @kindPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get kindPlan;
+
+  /// No description provided for @kindPlanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write an implementation plan. Changes no code; ends in a report.'**
+  String get kindPlanHint;
+
+  /// No description provided for @kindAnalysis.
+  ///
+  /// In en, this message translates to:
+  /// **'Analysis'**
+  String get kindAnalysis;
+
+  /// No description provided for @kindAnalysisHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Research a question and report the findings. Changes no code.'**
+  String get kindAnalysisHint;
+
+  /// No description provided for @kindBug.
+  ///
+  /// In en, this message translates to:
+  /// **'Bug investigation'**
+  String get kindBug;
+
+  /// No description provided for @kindBugHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Find the root cause of a bug and propose a fix. Changes no code.'**
+  String get kindBugHint;
+
+  /// No description provided for @kindPickerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What hiro produces. Choosing a kind makes it final; Auto lets hiro decide while reading the ticket.'**
+  String get kindPickerHint;
+
+  /// No description provided for @kindSwitchTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to {kind}'**
+  String kindSwitchTo(String kind);
 
   /// No description provided for @learnTitle.
   ///
@@ -3897,6 +4053,12 @@ abstract class AppLocalizations {
   /// **'Learning queue'**
   String get navLearnQueue;
 
+  /// No description provided for @navRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Rules'**
+  String get navRules;
+
   /// No description provided for @repoBack.
   ///
   /// In en, this message translates to:
@@ -4593,41 +4755,17 @@ abstract class AppLocalizations {
   /// **'No repositories yet. Add the first one to let hiro work on it.'**
   String get reposNone;
 
-  /// No description provided for @reposDrawerJira.
+  /// No description provided for @reposDrawerSub.
   ///
   /// In en, this message translates to:
-  /// **'Repository for Jira tickets'**
-  String get reposDrawerJira;
-
-  /// No description provided for @reposDrawerSide.
-  ///
-  /// In en, this message translates to:
-  /// **'Side project repository'**
-  String get reposDrawerSide;
+  /// **'Takes side-project tasks, and Jira tickets once it has a Jira project key'**
+  String get reposDrawerSub;
 
   /// No description provided for @reposName.
   ///
   /// In en, this message translates to:
   /// **'Name'**
   String get reposName;
-
-  /// No description provided for @reposKind.
-  ///
-  /// In en, this message translates to:
-  /// **'Used for'**
-  String get reposKind;
-
-  /// No description provided for @reposKindJira.
-  ///
-  /// In en, this message translates to:
-  /// **'Jira tickets'**
-  String get reposKindJira;
-
-  /// No description provided for @reposKindSide.
-  ///
-  /// In en, this message translates to:
-  /// **'Side project'**
-  String get reposKindSide;
 
   /// No description provided for @reposCloneUrl.
   ///
@@ -4650,7 +4788,7 @@ abstract class AppLocalizations {
   /// No description provided for @reposJiraHelp.
   ///
   /// In en, this message translates to:
-  /// **'Tickets from this Jira project with the hiro label run here.'**
+  /// **'Optional. Tickets from this Jira project with the hiro label run here.'**
   String get reposJiraHelp;
 
   /// No description provided for @reposTaskPrefix.
@@ -4662,7 +4800,7 @@ abstract class AppLocalizations {
   /// No description provided for @reposTaskPrefixHelp.
   ///
   /// In en, this message translates to:
-  /// **'Tasks are numbered like {prefix}-1, {prefix}-2.'**
+  /// **'Side-project tasks are numbered like {prefix}-1, {prefix}-2. Must differ from the Jira project key.'**
   String reposTaskPrefixHelp(String prefix);
 
   /// No description provided for @reposBranch.
@@ -4754,6 +4892,588 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'GitHub Actions workflow file with workflow_dispatch, e.g. deploy.yml. Deploy on the repository page runs it.'**
   String get reposDeployWorkflowHelp;
+
+  /// No description provided for @reviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'hiro\'s code review'**
+  String get reviewTitle;
+
+  /// No description provided for @reviewReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'hiro\'s review of the report'**
+  String get reviewReportTitle;
+
+  /// No description provided for @reviewSub.
+  ///
+  /// In en, this message translates to:
+  /// **'A second opinion while you review. It never blocks approval: you decide.'**
+  String get reviewSub;
+
+  /// No description provided for @reviewPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued: hiro reviews this as soon as a worker is free. You can review it yourself meanwhile.'**
+  String get reviewPending;
+
+  /// No description provided for @reviewRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'hiro is reviewing this now…'**
+  String get reviewRunning;
+
+  /// No description provided for @reviewFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The review failed. Review it yourself, or run it again.'**
+  String get reviewFailed;
+
+  /// No description provided for @reviewNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not reviewed by hiro.'**
+  String get reviewNone;
+
+  /// No description provided for @reviewStale.
+  ///
+  /// In en, this message translates to:
+  /// **'This review is of revision {n}; the work changed since.'**
+  String reviewStale(String n);
+
+  /// No description provided for @reviewRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Review with hiro'**
+  String get reviewRun;
+
+  /// No description provided for @reviewRunAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Review again'**
+  String get reviewRunAgain;
+
+  /// No description provided for @reviewVerdict_looks_good.
+  ///
+  /// In en, this message translates to:
+  /// **'Looks good'**
+  String get reviewVerdict_looks_good;
+
+  /// No description provided for @reviewVerdict_has_concerns.
+  ///
+  /// In en, this message translates to:
+  /// **'Has concerns'**
+  String get reviewVerdict_has_concerns;
+
+  /// No description provided for @reviewVerdict_needs_changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs changes'**
+  String get reviewVerdict_needs_changes;
+
+  /// No description provided for @reviewSev_blocker.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocker'**
+  String get reviewSev_blocker;
+
+  /// No description provided for @reviewSev_major.
+  ///
+  /// In en, this message translates to:
+  /// **'Major'**
+  String get reviewSev_major;
+
+  /// No description provided for @reviewSev_minor.
+  ///
+  /// In en, this message translates to:
+  /// **'Minor'**
+  String get reviewSev_minor;
+
+  /// No description provided for @reviewSev_nit.
+  ///
+  /// In en, this message translates to:
+  /// **'Nit'**
+  String get reviewSev_nit;
+
+  /// No description provided for @reviewCat_correctness.
+  ///
+  /// In en, this message translates to:
+  /// **'Correctness'**
+  String get reviewCat_correctness;
+
+  /// No description provided for @reviewCat_security.
+  ///
+  /// In en, this message translates to:
+  /// **'Security'**
+  String get reviewCat_security;
+
+  /// No description provided for @reviewCat_performance.
+  ///
+  /// In en, this message translates to:
+  /// **'Performance'**
+  String get reviewCat_performance;
+
+  /// No description provided for @reviewCat_tests.
+  ///
+  /// In en, this message translates to:
+  /// **'Tests'**
+  String get reviewCat_tests;
+
+  /// No description provided for @reviewCat_rules.
+  ///
+  /// In en, this message translates to:
+  /// **'Team rules'**
+  String get reviewCat_rules;
+
+  /// No description provided for @reviewCat_maintainability.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintainability'**
+  String get reviewCat_maintainability;
+
+  /// No description provided for @reviewCat_accuracy.
+  ///
+  /// In en, this message translates to:
+  /// **'Accuracy'**
+  String get reviewCat_accuracy;
+
+  /// No description provided for @reviewCat_completeness.
+  ///
+  /// In en, this message translates to:
+  /// **'Completeness'**
+  String get reviewCat_completeness;
+
+  /// No description provided for @reviewCat_other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get reviewCat_other;
+
+  /// No description provided for @reviewFindings.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0 {No findings} one {{count} finding} other {{count} findings}}'**
+  String reviewFindings(num count);
+
+  /// No description provided for @reviewNoFindings.
+  ///
+  /// In en, this message translates to:
+  /// **'hiro found no problems.'**
+  String get reviewNoFindings;
+
+  /// No description provided for @reviewStrengths.
+  ///
+  /// In en, this message translates to:
+  /// **'Done well'**
+  String get reviewStrengths;
+
+  /// No description provided for @reviewSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestion'**
+  String get reviewSuggestion;
+
+  /// No description provided for @reviewAddToFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to feedback'**
+  String get reviewAddToFeedback;
+
+  /// No description provided for @reviewAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'In feedback'**
+  String get reviewAdded;
+
+  /// No description provided for @reviewAddAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Add all to feedback'**
+  String get reviewAddAll;
+
+  /// No description provided for @reviewShowInDiff.
+  ///
+  /// In en, this message translates to:
+  /// **'Show in diff'**
+  String get reviewShowInDiff;
+
+  /// No description provided for @reviewModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewed by {model}: {reason}'**
+  String reviewModel(String model, String reason);
+
+  /// No description provided for @rulesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rules'**
+  String get rulesTitle;
+
+  /// No description provided for @rulesLede.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions hiro follows on every ticket: global rules for all repositories and rules for one repository. Claude reviews each rule and asks about anything unclear before it applies.'**
+  String get rulesLede;
+
+  /// No description provided for @rulesAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add rule'**
+  String get rulesAdd;
+
+  /// No description provided for @rulesAddSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Add and review'**
+  String get rulesAddSubmit;
+
+  /// No description provided for @rulesDrawerSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Write it the way you would brief a new teammate. Claude checks it before any ticket follows it.'**
+  String get rulesDrawerSub;
+
+  /// No description provided for @rulesRuleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get rulesRuleTitle;
+
+  /// No description provided for @rulesTitlePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Tests for new endpoints'**
+  String get rulesTitlePlaceholder;
+
+  /// No description provided for @rulesScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies to'**
+  String get rulesScope;
+
+  /// No description provided for @rulesScopeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Global rules apply in every repository. A repository rule wins where the two disagree.'**
+  String get rulesScopeHelp;
+
+  /// No description provided for @rulesGlobal.
+  ///
+  /// In en, this message translates to:
+  /// **'Global'**
+  String get rulesGlobal;
+
+  /// No description provided for @rulesGlobalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Every repository'**
+  String get rulesGlobalHint;
+
+  /// No description provided for @rulesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule'**
+  String get rulesBody;
+
+  /// No description provided for @rulesBodyPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Every new HTTP endpoint gets an integration test next to its handler.'**
+  String get rulesBodyPlaceholder;
+
+  /// No description provided for @rulesBodyHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Say what to do, where, and what to do when it cannot be followed.'**
+  String get rulesBodyHelp;
+
+  /// No description provided for @rulesEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get rulesEnabled;
+
+  /// No description provided for @rulesEnabledFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule {title} on'**
+  String rulesEnabledFor(String title);
+
+  /// No description provided for @rulesRereviewHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'You changed what the rule says, so Claude reviews it again. Tickets stop getting it until the review is done.'**
+  String get rulesRereviewHelp;
+
+  /// No description provided for @rulesSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule saved'**
+  String get rulesSaved;
+
+  /// No description provided for @rulesSavedReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule saved; Claude is reviewing it'**
+  String get rulesSavedReview;
+
+  /// No description provided for @rulesScopeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Show rules for'**
+  String get rulesScopeLabel;
+
+  /// No description provided for @rulesScopeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All rules ({n})'**
+  String rulesScopeAll(String n);
+
+  /// No description provided for @rulesScopeGlobal.
+  ///
+  /// In en, this message translates to:
+  /// **'Global ({n})'**
+  String rulesScopeGlobal(String n);
+
+  /// No description provided for @rulesNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No rules yet. Add one to tell hiro how your team works: testing, naming, logging, what never to touch.'**
+  String get rulesNone;
+
+  /// No description provided for @rulesNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No rules match.'**
+  String get rulesNoMatch;
+
+  /// No description provided for @rulesWaitingHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} rule is waiting for your answers. It does not apply to tickets until it is answered.} other {{n} rules are waiting for your answers. They do not apply to tickets until they are answered.}}'**
+  String rulesWaitingHelp(num n);
+
+  /// No description provided for @rulesStatus_pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued for review'**
+  String get rulesStatus_pending;
+
+  /// No description provided for @rulesStatus_analyzing.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewing'**
+  String get rulesStatus_analyzing;
+
+  /// No description provided for @rulesStatus_questions.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs answers'**
+  String get rulesStatus_questions;
+
+  /// No description provided for @rulesStatus_ready.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies'**
+  String get rulesStatus_ready;
+
+  /// No description provided for @rulesStatus_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Review failed'**
+  String get rulesStatus_failed;
+
+  /// No description provided for @rulesOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get rulesOff;
+
+  /// No description provided for @rulesEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get rulesEdit;
+
+  /// No description provided for @rulesDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get rulesDelete;
+
+  /// No description provided for @rulesDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the rule “{title}”? Tickets that start after this no longer follow it.'**
+  String rulesDeleteBody(String title);
+
+  /// No description provided for @rulesPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for a free worker. Claude reviews rules before the next ticket starts.'**
+  String get rulesPending;
+
+  /// No description provided for @rulesAnalyzing.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude is reading the rule and checking it for anything unclear or conflicting.'**
+  String get rulesAnalyzing;
+
+  /// No description provided for @rulesQuestionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} question before this rule applies} other {{n} questions before this rule applies}}'**
+  String rulesQuestionsTitle(num n);
+
+  /// No description provided for @rulesQuestionsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude found something unclear. Your answers become part of the rule.'**
+  String get rulesQuestionsSub;
+
+  /// No description provided for @rulesYourAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Your answer'**
+  String get rulesYourAnswer;
+
+  /// No description provided for @rulesAddDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Add details (optional)'**
+  String get rulesAddDetails;
+
+  /// No description provided for @rulesAnswerFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer to question {n}'**
+  String rulesAnswerFor(String n);
+
+  /// No description provided for @rulesDetailsFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Details for question {n}'**
+  String rulesDetailsFor(String n);
+
+  /// No description provided for @rulesSendAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'Send answers'**
+  String get rulesSendAnswers;
+
+  /// No description provided for @rulesQuestionsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} question left to answer} other {{n} questions left to answer}}'**
+  String rulesQuestionsLeft(num n);
+
+  /// No description provided for @rulesAllAnswered.
+  ///
+  /// In en, this message translates to:
+  /// **'All questions answered'**
+  String get rulesAllAnswered;
+
+  /// No description provided for @rulesAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Use as written'**
+  String get rulesAccept;
+
+  /// No description provided for @rulesAcceptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the rule as written?'**
+  String get rulesAcceptTitle;
+
+  /// No description provided for @rulesAcceptBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets get the rule as you wrote it, with the answers given so far. Open questions are dropped.'**
+  String get rulesAcceptBody;
+
+  /// No description provided for @rulesFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude could not review this rule: {error}'**
+  String rulesFailed(String error);
+
+  /// No description provided for @rulesReviewAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Review again'**
+  String get rulesReviewAgain;
+
+  /// No description provided for @rulesInterpretation.
+  ///
+  /// In en, this message translates to:
+  /// **'How hiro reads it'**
+  String get rulesInterpretation;
+
+  /// No description provided for @rulesClarified.
+  ///
+  /// In en, this message translates to:
+  /// **'What tickets get'**
+  String get rulesClarified;
+
+  /// No description provided for @rulesAsWritten.
+  ///
+  /// In en, this message translates to:
+  /// **'Used as written.'**
+  String get rulesAsWritten;
+
+  /// No description provided for @rulesAnswersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} answered question} other {{n} answered questions}}'**
+  String rulesAnswersTitle(num n);
+
+  /// No description provided for @rulesReviewedAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewed {ago}'**
+  String rulesReviewedAgo(String ago);
+
+  /// No description provided for @rulesAddedAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {ago}'**
+  String rulesAddedAgo(String ago);
+
+  /// No description provided for @rulesAnswered.
+  ///
+  /// In en, this message translates to:
+  /// **'Answers sent; Claude is reviewing the rule again'**
+  String get rulesAnswered;
+
+  /// No description provided for @rulesAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'The rule applies as written'**
+  String get rulesAccepted;
+
+  /// No description provided for @rulesQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued for review'**
+  String get rulesQueued;
+
+  /// No description provided for @rulesDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule deleted'**
+  String get rulesDeleted;
+
+  /// No description provided for @rulesTurnedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule turned on'**
+  String get rulesTurnedOn;
+
+  /// No description provided for @rulesTurnedOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule turned off'**
+  String get rulesTurnedOff;
 
   /// No description provided for @settingsTitle.
   ///
@@ -4941,6 +5661,24 @@ abstract class AppLocalizations {
   /// **'Reads each pushed change and writes lessons about what is new to the repository.'**
   String get settingsStageLearnHelp;
 
+  /// No description provided for @settingsStageReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Code review'**
+  String get settingsStageReview;
+
+  /// No description provided for @settingsStageReviewHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews each result while you review it. Auto uses Opus for complex tickets and Sonnet for the rest.'**
+  String get settingsStageReviewHelp;
+
+  /// No description provided for @settingsModelAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get settingsModelAuto;
+
   /// No description provided for @settingsMaxTurns.
   ///
   /// In en, this message translates to:
@@ -5097,6 +5835,18 @@ abstract class AppLocalizations {
   /// **'After a push, hiro looks for techniques the repository never used before and writes lessons under Learn. Uses plan usage only when no ticket is waiting.'**
   String get settingsAutoLearnHelp;
 
+  /// No description provided for @settingsAutoReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review every result'**
+  String get settingsAutoReview;
+
+  /// No description provided for @settingsAutoReviewHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'While a change or report waits for you, hiro reviews it and shows its findings next to it. It never blocks approval.'**
+  String get settingsAutoReviewHelp;
+
   /// No description provided for @settingsPauseAbove.
   ///
   /// In en, this message translates to:
@@ -5187,6 +5937,12 @@ abstract class AppLocalizations {
   /// **'When hiro finds something new to learn'**
   String get settingsLessons;
 
+  /// No description provided for @settingsReviewDone.
+  ///
+  /// In en, this message translates to:
+  /// **'When hiro\'s code review finishes'**
+  String get settingsReviewDone;
+
   /// No description provided for @settingsOnThisPage.
   ///
   /// In en, this message translates to:
@@ -5270,6 +6026,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Paused at plan limit'**
   String get stateRate_limited;
+
+  /// No description provided for @stateReportCoding.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing'**
+  String get stateReportCoding;
+
+  /// No description provided for @stateReportPushing.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivering'**
+  String get stateReportPushing;
+
+  /// No description provided for @stateReportDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get stateReportDone;
 
   /// No description provided for @tasksTitle.
   ///
@@ -5528,6 +6302,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{n, plural, one {{n} task} other {{n} tasks}}'**
   String tasksCount(num n);
+
+  /// No description provided for @tasksNoRepo.
+  ///
+  /// In en, this message translates to:
+  /// **'No repository'**
+  String get tasksNoRepo;
+
+  /// No description provided for @tasksRepoNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Code and tests need a repository: pick one, or choose another kind.'**
+  String get tasksRepoNeeded;
 
   /// No description provided for @ticketBack.
   ///
@@ -6141,6 +6927,18 @@ abstract class AppLocalizations {
   /// **'Retries and requested changes'**
   String get ticketStageRetry;
 
+  /// No description provided for @ticketStageReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Code review by hiro'**
+  String get ticketStageReview;
+
+  /// No description provided for @ticketModelAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto ({model})'**
+  String ticketModelAuto(String model);
+
   /// No description provided for @ticketSideTicket.
   ///
   /// In en, this message translates to:
@@ -6338,6 +7136,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Merged {time}.'**
   String ticketMergedAt(String time);
+
+  /// No description provided for @ticketRepoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Repository'**
+  String get ticketRepoTitle;
+
+  /// No description provided for @ticketRepoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Where hiro analyzes and codes this ticket.'**
+  String get ticketRepoHint;
+
+  /// No description provided for @ticketRepoNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a repository…'**
+  String get ticketRepoNone;
+
+  /// No description provided for @ticketRepoMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'No repository is linked to this ticket. Choose one, then retry.'**
+  String get ticketRepoMissing;
+
+  /// No description provided for @ticketRepoRestartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change repository?'**
+  String get ticketRepoRestartTitle;
+
+  /// No description provided for @ticketRepoRestart.
+  ///
+  /// In en, this message translates to:
+  /// **'This ticket made progress in {repo}. In {next} it starts over from analysis when you retry.'**
+  String ticketRepoRestart(String repo, String next);
+
+  /// No description provided for @ticketRepoChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get ticketRepoChange;
+
+  /// No description provided for @ticketRepoChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Repository set to {repo}'**
+  String ticketRepoChanged(String repo);
+
+  /// No description provided for @ticketQueuedSubReport.
+  ///
+  /// In en, this message translates to:
+  /// **'hiro reads the ticket (and the code, if there is a repository) and comes back with a plan and questions. Nothing is changed.'**
+  String get ticketQueuedSubReport;
+
+  /// No description provided for @ticketAnalyzingTitleNoRepo.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the ticket'**
+  String get ticketAnalyzingTitleNoRepo;
+
+  /// No description provided for @ticketAnalyzingSubNoRepo.
+  ///
+  /// In en, this message translates to:
+  /// **'No repository: hiro works from the ticket text.'**
+  String get ticketAnalyzingSubNoRepo;
+
+  /// No description provided for @ticketStartWriting.
+  ///
+  /// In en, this message translates to:
+  /// **'Start writing'**
+  String get ticketStartWriting;
+
+  /// No description provided for @ticketWritingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing the report'**
+  String get ticketWritingTitle;
+
+  /// No description provided for @ticketWritingSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Working in a fresh container. Nothing in the code changes; you review the report first.'**
+  String get ticketWritingSub;
+
+  /// No description provided for @ticketReviewReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the report'**
+  String get ticketReviewReportTitle;
+
+  /// No description provided for @ticketReviewReportSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Approving keeps the report here and closes the task.'**
+  String get ticketReviewReportSub;
+
+  /// No description provided for @ticketReviewReportSubJira.
+  ///
+  /// In en, this message translates to:
+  /// **'Approving keeps the report here and closes the ticket. It goes to Jira only if you tick the box below.'**
+  String get ticketReviewReportSubJira;
+
+  /// No description provided for @ticketReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get ticketReport;
+
+  /// No description provided for @ticketReportMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'No report was stored.'**
+  String get ticketReportMissing;
+
+  /// No description provided for @ticketPostReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Also post the report as a comment on {key} in Jira'**
+  String ticketPostReport(String key);
+
+  /// No description provided for @ticketFeedbackReportHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What should the report change or cover?'**
+  String get ticketFeedbackReportHint;
+
+  /// No description provided for @ticketApproveReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get ticketApproveReport;
+
+  /// No description provided for @ticketApproveReportConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve the report and close this ticket?'**
+  String get ticketApproveReportConfirm;
+
+  /// No description provided for @ticketApproveReportPostConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve the report, close this ticket and post the report to {key} in Jira?'**
+  String ticketApproveReportPostConfirm(String key);
+
+  /// No description provided for @ticketDeliveringTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Finishing up'**
+  String get ticketDeliveringTitle;
+
+  /// No description provided for @ticketDeliveringSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving the approved report and posting it to Jira if you asked.'**
+  String get ticketDeliveringSub;
+
+  /// No description provided for @ticketDoneReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report approved'**
+  String get ticketDoneReportTitle;
+
+  /// No description provided for @ticketDoneReport.
+  ///
+  /// In en, this message translates to:
+  /// **'The report is kept here.'**
+  String get ticketDoneReport;
+
+  /// No description provided for @ticketDoneReportPosted.
+  ///
+  /// In en, this message translates to:
+  /// **'The report is kept here and was posted to {key} in Jira.'**
+  String ticketDoneReportPosted(String key);
+
+  /// No description provided for @ticketStopWriting.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing'**
+  String get ticketStopWriting;
+
+  /// No description provided for @ticketStopDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get ticketStopDone;
 
   /// No description provided for @ticketsTitle.
   ///

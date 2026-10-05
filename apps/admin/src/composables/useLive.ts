@@ -32,6 +32,9 @@ function stale(e: TicketEvent): string[] {
     case 'lessons_found':
       keys.push('lessons')
       break
+    case 'rule_changed':
+      keys.push('rules')
+      break
     case 'task_changed':
     case 'ticket_created':
       keys.push('tickets', 'repos')

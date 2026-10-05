@@ -25,6 +25,8 @@ type Incoming struct {
 	Title       string
 	Description string
 	Priority    string
+	// Kind comes from a kind label; empty means hiro picks it.
+	Kind domain.TicketKind
 }
 
 // Ingest records a ticket from the tracker. New tickets are queued for
@@ -41,7 +43,10 @@ func (o *Orchestrator) Ingest(ctx context.Context, in Incoming, origin domain.Or
 	t := domain.Ticket{
 		Key: in.Key, Source: domain.SourceJira, Title: in.Title, Description: in.Description,
 		Priority: strings.ToLower(in.Priority), State: domain.StateNew, ResumeState: domain.StateNew,
-		AfterApprove: "pr", AskFirst: st.AskFirst,
+		AfterApprove: "pr", AskFirst: st.AskFirst, Kind: in.Kind, KindAuto: in.Kind == "",
+	}
+	if t.KindAuto {
+		t.Kind = domain.KindCode
 	}
 	if t.Priority == "" {
 		t.Priority = "medium"
@@ -75,6 +80,9 @@ func (o *Orchestrator) Ingest(ctx context.Context, in Incoming, origin domain.Or
 	}, func(x *domain.Ticket) {
 		if x.State == domain.StateNew || x.State == domain.StateWaitingForAnswers {
 			x.Title, x.Description = in.Title, in.Description
+		}
+		if x.State == domain.StateNew && in.Kind != "" {
+			x.Kind, x.KindAuto = in.Kind, false // a kind label added before work started
 		}
 		if x.RepoID == nil {
 			x.RepoID = t.RepoID
@@ -182,8 +190,10 @@ func hasQuestion(qs []domain.Question, id int64) bool {
 const MaxAssignees = 10
 
 // Approve lets hiro push the reviewed branch and open the pull request,
-// assigned to the given git host usernames (none keeps it unassigned).
-func (o *Orchestrator) Approve(ctx context.Context, key string, assignees []string, origin domain.Origin) (domain.Ticket, error) {
+// assigned to the given git host usernames (none keeps it unassigned). For
+// a report it finishes the ticket, posting the report to the tracker issue
+// when postReport is set.
+func (o *Orchestrator) Approve(ctx context.Context, key string, assignees []string, postReport bool, origin domain.Origin) (domain.Ticket, error) {
 	clean := make([]string, 0, len(assignees))
 	for _, a := range assignees {
 		a = strings.TrimSpace(a)
@@ -198,14 +208,32 @@ func (o *Orchestrator) Approve(ctx context.Context, key string, assignees []stri
 	if len(clean) > MaxAssignees {
 		return domain.Ticket{}, invalid("a pull request can have at most %d assignees", MaxAssignees)
 	}
+	cur, err := o.store.TicketByKey(ctx, key)
+	if err != nil {
+		return cur, err
+	}
 	msg := "approved"
-	if len(clean) > 0 {
+	switch {
+	case cur.Kind.Report():
+		clean = nil // there is no pull request to assign
+		if postReport {
+			msg += ", posting the report to the issue"
+		}
+	case len(clean) > 0:
 		msg += ", assigned to " + strings.Join(clean, ", ")
 	}
+	reviewing := false
 	t, err := o.store.Transition(ctx, key, domain.StatePushing, domain.Event{
 		TicketKey: key, Type: domain.EventStateChanged, Origin: origin, Message: msg,
-	}, func(x *domain.Ticket) { x.Assignees = clean })
+	}, func(x *domain.Ticket) {
+		x.Assignees = clean
+		x.PostReport = postReport && x.Kind.Report()
+		reviewing = dropReview(x)
+	})
 	if err == nil {
+		if reviewing {
+			o.cancelRun(key) // the push waits for the run to end
+		}
 		o.Wake()
 	}
 	return t, err
@@ -217,13 +245,18 @@ func (o *Orchestrator) RequestChanges(ctx context.Context, key, feedback string,
 	if feedback == "" {
 		return domain.Ticket{}, invalid("feedback is required")
 	}
+	reviewing := false
 	t, err := o.store.Transition(ctx, key, domain.StateCoding, domain.Event{
 		TicketKey: key, Type: domain.EventFeedback, Origin: origin, Message: feedback,
 	}, func(x *domain.Ticket) {
 		x.Revision++
 		x.Feedback = feedback
+		reviewing = dropReview(x)
 	})
 	if err == nil {
+		if reviewing {
+			o.cancelRun(key) // coding waits for the run to end
+		}
 		o.Wake()
 	}
 	return t, err
@@ -237,7 +270,7 @@ func (o *Orchestrator) Reject(ctx context.Context, key, reason string, origin do
 	}
 	t, err := o.store.Transition(ctx, key, domain.StateRejected, domain.Event{
 		TicketKey: key, Type: domain.EventStateChanged, Origin: origin, Message: msg,
-	}, nil)
+	}, func(x *domain.Ticket) { dropReview(x) })
 	if err != nil {
 		return t, err
 	}
@@ -300,7 +333,7 @@ func (o *Orchestrator) Start(ctx context.Context, key string, origin domain.Orig
 func (o *Orchestrator) SetModels(ctx context.Context, key string, models map[string]string, origin domain.Origin) (domain.Ticket, error) {
 	clean := map[string]string{}
 	for stage, m := range models {
-		if stage != domain.ModelAnalyze && stage != domain.ModelCoding && stage != domain.ModelRetry {
+		if stage != domain.ModelAnalyze && stage != domain.ModelCoding && stage != domain.ModelRetry && stage != domain.ModelReview {
 			return domain.Ticket{}, invalid("unknown stage %q", stage)
 		}
 		if m == "" || m == "default" {
@@ -356,7 +389,8 @@ func (o *Orchestrator) SetRepo(ctx context.Context, key string, repoID int64, or
 
 // TaskInput creates or edits a side-project task.
 type TaskInput struct {
-	RepoID       int64
+	RepoID       int64  // 0: no repository (report kinds, or hiro picks)
+	Kind         string // a domain.TicketKind, or "" / "auto" for hiro to pick
 	Title        string
 	Description  string
 	Priority     string
@@ -379,32 +413,114 @@ func (o *Orchestrator) CreateTask(ctx context.Context, in TaskInput, origin doma
 	if !slices.Contains([]string{"ask", "code", "queue"}, in.Start) {
 		return domain.Ticket{}, invalid("start must be ask, code or queue")
 	}
-	repo, err := o.store.RepositoryByID(ctx, in.RepoID)
-	if errors.Is(err, domain.ErrNotFound) {
-		return domain.Ticket{}, invalid("no repository %d", in.RepoID)
-	}
+	kind, auto, err := parseKind(in.Kind)
 	if err != nil {
 		return domain.Ticket{}, err
 	}
-	if repo.ArchivedAt != nil {
-		return domain.Ticket{}, invalid("%s is archived: restore it on the Repositories page to add tasks", repo.Name)
+	var repoID *int64
+	prefix := NoRepoTaskPrefix
+	if in.RepoID != 0 {
+		repo, err := o.store.RepositoryByID(ctx, in.RepoID)
+		if errors.Is(err, domain.ErrNotFound) {
+			return domain.Ticket{}, invalid("no repository %d", in.RepoID)
+		}
+		if err != nil {
+			return domain.Ticket{}, err
+		}
+		if repo.ArchivedAt != nil {
+			return domain.Ticket{}, invalid("%s is archived: restore it on the Repositories page to add tasks", repo.Name)
+		}
+		repoID, prefix = &repo.ID, TaskPrefix(repo)
+	} else if !auto && kind.Spec().NeedsRepo {
+		return domain.Ticket{}, invalid("a %s task needs a repository", kind)
 	}
 	st, err := o.settings.Get(ctx)
 	if err != nil {
 		return domain.Ticket{}, err
 	}
-	n, err := o.store.NextTaskNumber(ctx, repo.ID)
-	if err != nil {
-		return domain.Ticket{}, err
-	}
-	t, err := o.store.CreateTicket(ctx, domain.Ticket{
-		Key: fmt.Sprintf("%s-%d", TaskPrefix(repo), n), Source: domain.SourceLocal, RepoID: &repo.ID,
+	return o.createTask(ctx, domain.Ticket{
+		Source: domain.SourceLocal, RepoID: repoID,
 		Title: strings.TrimSpace(in.Title), Description: strings.TrimSpace(in.Description), Priority: in.Priority,
 		State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: in.AfterApprove,
 		Held: in.Start == "queue", AskFirst: in.Start == "ask" || (in.Start == "queue" && st.AskFirst),
-	}, domain.Event{Type: domain.EventTicketCreated, Origin: origin, Message: strings.TrimSpace(in.Title)})
-	if err == nil && !t.Held {
-		o.Wake()
+		Kind: kind, KindAuto: auto,
+	}, prefix, origin)
+}
+
+// createTask stores a local task under the next free key with prefix
+// (numbered per repository, or among tasks without one) and wakes the loop.
+func (o *Orchestrator) createTask(ctx context.Context, t domain.Ticket, prefix string, origin domain.Origin) (domain.Ticket, error) {
+	// A key can be taken by a ticket from elsewhere with the same prefix;
+	// skip to the next number.
+	for range 5 {
+		n, err := o.store.NextTaskNumber(ctx, t.RepoID)
+		if err != nil {
+			return domain.Ticket{}, err
+		}
+		t.Key = fmt.Sprintf("%s-%d", prefix, n)
+		out, err := o.store.CreateTicket(ctx, t, domain.Event{Type: domain.EventTicketCreated, Origin: origin, Message: t.Title})
+		if errors.Is(err, domain.ErrConflict) {
+			continue
+		}
+		if err == nil && !out.Held {
+			o.Wake()
+		}
+		return out, err
+	}
+	return domain.Ticket{}, fmt.Errorf("no free task key with prefix %s", prefix)
+}
+
+// NoRepoTaskPrefix is the key prefix of tasks without a repository.
+const NoRepoTaskPrefix = "TASK"
+
+// parseKind reads a kind from input: "" or "auto" lets hiro pick (it
+// starts as code until the analysis says otherwise).
+func parseKind(s string) (domain.TicketKind, bool, error) {
+	if s == "" || s == "auto" {
+		return domain.KindCode, true, nil
+	}
+	k := domain.TicketKind(s)
+	if !k.Valid() {
+		return "", false, invalid("unknown kind %q", s)
+	}
+	return k, false, nil
+}
+
+// SetKind changes what a ticket produces. It is allowed before work starts,
+// while hiro waits for answers, and on a stopped ticket that pushed
+// nothing. The chosen kind is final: the analysis no longer changes it.
+func (o *Orchestrator) SetKind(ctx context.Context, key, kind string, origin domain.Origin) (domain.Ticket, error) {
+	k, auto, err := parseKind(kind)
+	if err != nil {
+		return domain.Ticket{}, err
+	}
+	var bad error
+	t, err := o.store.UpdateTicket(ctx, key, &domain.Event{
+		TicketKey: key, Type: domain.EventKind, Origin: origin, Message: "kind set to " + kind,
+		Data: map[string]any{"to": kind},
+	}, func(x *domain.Ticket) {
+		switch x.State {
+		case domain.StateNew, domain.StateWaitingForAnswers, domain.StateFailed, domain.StateRateLimited:
+		default:
+			bad = &domain.TransitionError{Key: key, From: x.State, To: x.State}
+			return
+		}
+		if x.PRURL != "" || x.ResumeState == domain.StatePushing {
+			bad = &domain.TransitionError{Key: key, From: x.State, To: x.State}
+			return
+		}
+		if !auto && k.Spec().NeedsRepo && x.RepoID == nil {
+			bad = invalid("%s work needs a repository: link one first", k)
+			return
+		}
+		if k.Report() != x.Kind.Report() {
+			// A change and a report share no work past the analysis.
+			x.Branch, x.HeadSHA, x.Feedback = "", "", ""
+		}
+		x.Kind, x.KindAuto = k, auto
+	})
+	if bad != nil {
+		return t, bad
 	}
 	return t, err
 }
@@ -448,6 +564,18 @@ func (o *Orchestrator) UpdateTask(ctx context.Context, key string, in TaskInput,
 		}
 		if in.AfterApprove == "pr" || in.AfterApprove == "main" {
 			x.AfterApprove = in.AfterApprove
+		}
+		if in.Kind != "" {
+			k, auto, err := parseKind(in.Kind)
+			if err != nil {
+				bad = err
+				return
+			}
+			if !auto && k.Spec().NeedsRepo && x.RepoID == nil {
+				bad = invalid("a %s task needs a repository", k)
+				return
+			}
+			x.Kind, x.KindAuto = k, auto
 		}
 	})
 	if bad != nil {
@@ -525,6 +653,8 @@ type TicketView struct {
 	Questions []domain.Question
 	Analysis  *Analysis
 	Result    *domain.Result
+	ChildKey  string         // the code task that implements this report, if any
+	Review    *domain.Review // newest code review; stale when its revision is older
 	History   []HistoryItem
 	Settings  domain.Settings
 }
@@ -593,6 +723,16 @@ func (o *Orchestrator) View(ctx context.Context, key string) (TicketView, error)
 	if r, err := o.store.LatestResult(ctx, t.ID, domain.StageCode); err == nil {
 		v.Result = &r
 	} else if !errors.Is(err, domain.ErrNotFound) {
+		return v, err
+	}
+	if t.Kind.Spec().Implementable {
+		if c, err := o.store.ChildOf(ctx, t.Key); err == nil {
+			v.ChildKey = c.Key
+		} else if !errors.Is(err, domain.ErrNotFound) {
+			return v, err
+		}
+	}
+	if v.Review, err = o.latestReview(ctx, t.ID); err != nil {
 		return v, err
 	}
 	return v, nil

@@ -17,7 +17,7 @@ type Tickets interface {
 	View(ctx context.Context, key string) (orchestrator.TicketView, error)
 	Events(ctx context.Context, f orchestrator.EventFilter) ([]domain.Event, error)
 	Answer(ctx context.Context, key string, answers []domain.Answer, origin domain.Origin) (domain.Ticket, error)
-	Approve(ctx context.Context, key string, assignees []string, origin domain.Origin) (domain.Ticket, error)
+	Approve(ctx context.Context, key string, assignees []string, postReport bool, origin domain.Origin) (domain.Ticket, error)
 	RequestChanges(ctx context.Context, key, feedback string, origin domain.Origin) (domain.Ticket, error)
 	Reject(ctx context.Context, key, reason string, origin domain.Origin) (domain.Ticket, error)
 	Retry(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
@@ -25,11 +25,14 @@ type Tickets interface {
 	Stop(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	SetModels(ctx context.Context, key string, models map[string]string, origin domain.Origin) (domain.Ticket, error)
 	SetRepo(ctx context.Context, key string, repoID int64, origin domain.Origin) (domain.Ticket, error)
+	SetKind(ctx context.Context, key, kind string, origin domain.Origin) (domain.Ticket, error)
+	Implement(ctx context.Context, key string, in orchestrator.ImplementInput, origin domain.Origin) (domain.Ticket, error)
 	CreateTask(ctx context.Context, in orchestrator.TaskInput, origin domain.Origin) (domain.Ticket, error)
 	UpdateTask(ctx context.Context, key string, in orchestrator.TaskInput, origin domain.Origin) (domain.Ticket, error)
 	DeleteTask(ctx context.Context, key string, origin domain.Origin) error
 	Rows(ctx context.Context, ts []domain.Ticket) ([]orchestrator.TicketRow, error)
 	Learn(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
+	Review(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	Wake()
 }
 
@@ -109,6 +112,8 @@ func (s *Server) GetTicket(w http.ResponseWriter, r *http.Request, key gen.Ticke
 		Retry:   gen.Model(v.Settings.ModelFor(v.Ticket, domain.ModelRetry)),
 		Helper:  gen.Model(v.Settings.Models.Helper),
 	}
+	rm := gen.ReviewModel(v.Settings.ModelFor(v.Ticket, domain.ModelReview))
+	em.Review = &rm
 	d.EffectiveModels = &em
 	for i, q := range v.Questions {
 		opts := q.Options
@@ -123,9 +128,19 @@ func (s *Server) GetTicket(w http.ResponseWriter, r *http.Request, key gen.Ticke
 			plan = []string{}
 		}
 		d.Analysis = &gen.Analysis{Summary: v.Analysis.Summary, Plan: plan}
+		if c := gen.AnalysisComplexity(v.Analysis.Complexity); c.Valid() {
+			d.Analysis.Complexity = &c
+		}
 	}
 	if v.Result != nil {
 		d.Result = toResult(*v.Result)
+	}
+	if v.ChildKey != "" {
+		child := v.ChildKey
+		d.ChildKey = &child
+	}
+	if v.Review != nil {
+		d.Review = toReview(*v.Review)
 	}
 	writeJSON(w, http.StatusOK, d)
 }
@@ -196,8 +211,9 @@ func (s *Server) ApproveTicket(w http.ResponseWriter, r *http.Request, key gen.T
 	if req.Assignees != nil {
 		assignees = *req.Assignees
 	}
+	post := req.PostReport != nil && *req.PostReport
 	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
-		return s.opt.Tickets.Approve(ctx, key, assignees, origin(r))
+		return s.opt.Tickets.Approve(ctx, key, assignees, post, origin(r))
 	})
 }
 
@@ -278,6 +294,18 @@ func toTicket(t domain.Ticket) gen.Ticket {
 		Key: t.Key, Source: gen.TicketSource(t.Source), RepoId: t.RepoID, Title: t.Title, Description: t.Description,
 		Priority: t.Priority, State: gen.TicketState(t.State), Revision: t.Revision, Turns: t.Turns,
 		Branch: t.Branch, PrNumber: t.PRNumber, PrUrl: t.PRURL, CreatedAt: t.CreatedAt, UpdatedAt: t.UpdatedAt,
+		Kind: gen.TicketKind(t.Kind), KindAuto: t.KindAuto,
+	}
+	if out.Kind == "" {
+		out.Kind = gen.TicketKindCode
+	}
+	if t.PostReport {
+		post := true
+		out.PostReport = &post
+	}
+	if t.ParentKey != "" {
+		parent := t.ParentKey
+		out.ParentKey = &parent
 	}
 	if t.State == domain.StateFailed || t.State == domain.StateRateLimited {
 		rs := gen.TicketState(t.ResumeState)
@@ -289,6 +317,11 @@ func toTicket(t domain.Ticket) gen.Ticket {
 		ls = gen.TicketLearnStateNone
 	}
 	out.LearnState = &ls
+	rs := gen.TicketReviewState(t.ReviewState)
+	if rs == "" {
+		rs = gen.TicketReviewStateNone
+	}
+	out.ReviewState = &rs
 	if len(t.Assignees) > 0 {
 		as := t.Assignees
 		out.Assignees = &as
@@ -310,7 +343,41 @@ func toTicket(t domain.Ticket) gen.Ticket {
 			mv := gen.Model(v)
 			m.Retry = &mv
 		}
+		if v, ok := t.Models[domain.ModelReview]; ok {
+			mv := gen.Model(v)
+			m.Review = &mv
+		}
 		out.Models = &m
+	}
+	return out
+}
+
+// ReviewTicket implements gen.ServerInterface.
+func (s *Server) ReviewTicket(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) { return s.opt.Tickets.Review(ctx, key, origin(r)) })
+}
+
+func toReview(rv domain.Review) *gen.CodeReview {
+	out := &gen.CodeReview{
+		Revision: rv.Revision, Model: gen.Model(rv.Model), ModelReason: rv.ModelReason, Verdict: gen.CodeReviewVerdict(rv.Verdict),
+		Summary: rv.Summary, Findings: make([]gen.Finding, len(rv.Findings)), Strengths: rv.Strengths, CreatedAt: rv.CreatedAt,
+	}
+	if out.Strengths == nil {
+		out.Strengths = []string{}
+	}
+	opt := func(s string) *string {
+		if s == "" {
+			return nil
+		}
+		return &s
+	}
+	for i, f := range rv.Findings {
+		out.Findings[i] = gen.Finding{Severity: gen.FindingSeverity(f.Severity), Category: gen.FindingCategory(f.Category), Title: f.Title,
+			File: opt(f.File), Detail: opt(f.Detail), Suggestion: opt(f.Suggestion)}
+		if f.Line > 0 {
+			line := f.Line
+			out.Findings[i].Line = &line
+		}
 	}
 	return out
 }
@@ -339,6 +406,10 @@ func toResult(r domain.Result) *gen.Result {
 	}
 	for i, f := range r.Files {
 		out.Files[i] = gen.FileChange{Path: f.Path, Add: f.Add, Del: f.Del, Diff: f.Diff}
+	}
+	if r.Report != "" {
+		report := r.Report
+		out.Report = &report
 	}
 	return out
 }

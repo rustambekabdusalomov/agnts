@@ -1,0 +1,13 @@
+{
+  "implement": {
+    "title": "Next step",
+    "subPlan": "Have hiro carry out this plan: a code task linked to this one, with the plan as its brief. You review the diff as usual.",
+    "subBug": "Have hiro make the proposed fix: a code task linked to this one, with the investigation as its brief. You review the diff as usual.",
+    "implement": "Implement this plan",
+    "fix": "Fix this bug",
+    "pickRepo": "Repository to implement it in",
+    "queue": "Keep the task in the queue instead of starting it",
+    "doneBy": "Implemented by",
+    "implements": "Implements"
+  }
+}

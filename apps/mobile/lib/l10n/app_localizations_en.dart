@@ -650,6 +650,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get formSaved => 'Saved';
 
   @override
+  String get formSearch => 'Search';
+
+  @override
+  String get formNoMatch => 'No matches';
+
+  @override
+  String get implementTitle => 'Next step';
+
+  @override
+  String get implementSubPlan =>
+      'Have hiro carry out this plan: a code task linked to this one, with the plan as its brief. You review the diff as usual.';
+
+  @override
+  String get implementSubBug =>
+      'Have hiro make the proposed fix: a code task linked to this one, with the investigation as its brief. You review the diff as usual.';
+
+  @override
+  String get implementImplement => 'Implement this plan';
+
+  @override
+  String get implementFix => 'Fix this bug';
+
+  @override
+  String get implementPickRepo => 'Repository to implement it in';
+
+  @override
+  String get implementQueue => 'Keep the task in the queue instead of starting it';
+
+  @override
+  String get implementDoneBy => 'Implemented by';
+
+  @override
+  String get implementImplements => 'Implements';
+
+  @override
   String get integrationsTitle => 'Integrations';
 
   @override
@@ -1097,6 +1132,53 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get integrationsGitWebhookWhy =>
       'When a pull or merge request is merged, hiro marks the ticket merged and moves the Jira issue to the merged status set on the Jira page. Pipeline events keep the repository page current.';
+
+  @override
+  String get kindTitle => 'Kind';
+
+  @override
+  String get kindAuto => 'Auto';
+
+  @override
+  String get kindAutoHint => 'hiro picks the kind while reading the ticket';
+
+  @override
+  String get kindCode => 'Code';
+
+  @override
+  String get kindCodeHint => 'Implement a change. Needs a repository; ends in a pull request.';
+
+  @override
+  String get kindTest => 'Tests';
+
+  @override
+  String get kindTestHint => 'Write or fix automated tests. Needs a repository; ends in a pull request.';
+
+  @override
+  String get kindPlan => 'Plan';
+
+  @override
+  String get kindPlanHint => 'Write an implementation plan. Changes no code; ends in a report.';
+
+  @override
+  String get kindAnalysis => 'Analysis';
+
+  @override
+  String get kindAnalysisHint => 'Research a question and report the findings. Changes no code.';
+
+  @override
+  String get kindBug => 'Bug investigation';
+
+  @override
+  String get kindBugHint => 'Find the root cause of a bug and propose a fix. Changes no code.';
+
+  @override
+  String get kindPickerHint => 'What hiro produces. Choosing a kind makes it final; Auto lets hiro decide while reading the ticket.';
+
+  @override
+  String kindSwitchTo(String kind) {
+    return 'Switch to $kind';
+  }
 
   @override
   String get learnTitle => 'Learn';
@@ -2103,6 +2185,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navLearnQueue => 'Learning queue';
 
   @override
+  String get navRules => 'Rules';
+
+  @override
   String get repoBack => 'Back to repositories';
 
   @override
@@ -2503,22 +2588,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reposNone => 'No repositories yet. Add the first one to let hiro work on it.';
 
   @override
-  String get reposDrawerJira => 'Repository for Jira tickets';
-
-  @override
-  String get reposDrawerSide => 'Side project repository';
+  String get reposDrawerSub => 'Takes side-project tasks, and Jira tickets once it has a Jira project key';
 
   @override
   String get reposName => 'Name';
-
-  @override
-  String get reposKind => 'Used for';
-
-  @override
-  String get reposKindJira => 'Jira tickets';
-
-  @override
-  String get reposKindSide => 'Side project';
 
   @override
   String get reposCloneUrl => 'Clone URL';
@@ -2530,14 +2603,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reposJiraProject => 'Jira project key';
 
   @override
-  String get reposJiraHelp => 'Tickets from this Jira project with the hiro label run here.';
+  String get reposJiraHelp => 'Optional. Tickets from this Jira project with the hiro label run here.';
 
   @override
   String get reposTaskPrefix => 'Task key prefix';
 
   @override
   String reposTaskPrefixHelp(String prefix) {
-    return 'Tasks are numbered like $prefix-1, $prefix-2.';
+    return 'Side-project tasks are numbered like $prefix-1, $prefix-2. Must differ from the Jira project key.';
   }
 
   @override
@@ -2585,6 +2658,346 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reposDeployWorkflowHelp =>
       'GitHub Actions workflow file with workflow_dispatch, e.g. deploy.yml. Deploy on the repository page runs it.';
+
+  @override
+  String get reviewTitle => 'hiro\'s code review';
+
+  @override
+  String get reviewReportTitle => 'hiro\'s review of the report';
+
+  @override
+  String get reviewSub => 'A second opinion while you review. It never blocks approval: you decide.';
+
+  @override
+  String get reviewPending => 'Queued: hiro reviews this as soon as a worker is free. You can review it yourself meanwhile.';
+
+  @override
+  String get reviewRunning => 'hiro is reviewing this now…';
+
+  @override
+  String get reviewFailed => 'The review failed. Review it yourself, or run it again.';
+
+  @override
+  String get reviewNone => 'Not reviewed by hiro.';
+
+  @override
+  String reviewStale(String n) {
+    return 'This review is of revision $n; the work changed since.';
+  }
+
+  @override
+  String get reviewRun => 'Review with hiro';
+
+  @override
+  String get reviewRunAgain => 'Review again';
+
+  @override
+  String get reviewVerdict_looks_good => 'Looks good';
+
+  @override
+  String get reviewVerdict_has_concerns => 'Has concerns';
+
+  @override
+  String get reviewVerdict_needs_changes => 'Needs changes';
+
+  @override
+  String get reviewSev_blocker => 'Blocker';
+
+  @override
+  String get reviewSev_major => 'Major';
+
+  @override
+  String get reviewSev_minor => 'Minor';
+
+  @override
+  String get reviewSev_nit => 'Nit';
+
+  @override
+  String get reviewCat_correctness => 'Correctness';
+
+  @override
+  String get reviewCat_security => 'Security';
+
+  @override
+  String get reviewCat_performance => 'Performance';
+
+  @override
+  String get reviewCat_tests => 'Tests';
+
+  @override
+  String get reviewCat_rules => 'Team rules';
+
+  @override
+  String get reviewCat_maintainability => 'Maintainability';
+
+  @override
+  String get reviewCat_accuracy => 'Accuracy';
+
+  @override
+  String get reviewCat_completeness => 'Completeness';
+
+  @override
+  String get reviewCat_other => 'Other';
+
+  @override
+  String reviewFindings(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count findings', one: '$count finding', zero: 'No findings');
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewNoFindings => 'hiro found no problems.';
+
+  @override
+  String get reviewStrengths => 'Done well';
+
+  @override
+  String get reviewSuggestion => 'Suggestion';
+
+  @override
+  String get reviewAddToFeedback => 'Add to feedback';
+
+  @override
+  String get reviewAdded => 'In feedback';
+
+  @override
+  String get reviewAddAll => 'Add all to feedback';
+
+  @override
+  String get reviewShowInDiff => 'Show in diff';
+
+  @override
+  String reviewModel(String model, String reason) {
+    return 'Reviewed by $model: $reason';
+  }
+
+  @override
+  String get rulesTitle => 'Rules';
+
+  @override
+  String get rulesLede =>
+      'Instructions hiro follows on every ticket: global rules for all repositories and rules for one repository. Claude reviews each rule and asks about anything unclear before it applies.';
+
+  @override
+  String get rulesAdd => 'Add rule';
+
+  @override
+  String get rulesAddSubmit => 'Add and review';
+
+  @override
+  String get rulesDrawerSub => 'Write it the way you would brief a new teammate. Claude checks it before any ticket follows it.';
+
+  @override
+  String get rulesRuleTitle => 'Title';
+
+  @override
+  String get rulesTitlePlaceholder => 'Tests for new endpoints';
+
+  @override
+  String get rulesScope => 'Applies to';
+
+  @override
+  String get rulesScopeHelp => 'Global rules apply in every repository. A repository rule wins where the two disagree.';
+
+  @override
+  String get rulesGlobal => 'Global';
+
+  @override
+  String get rulesGlobalHint => 'Every repository';
+
+  @override
+  String get rulesBody => 'Rule';
+
+  @override
+  String get rulesBodyPlaceholder => 'Every new HTTP endpoint gets an integration test next to its handler.';
+
+  @override
+  String get rulesBodyHelp => 'Say what to do, where, and what to do when it cannot be followed.';
+
+  @override
+  String get rulesEnabled => 'On';
+
+  @override
+  String rulesEnabledFor(String title) {
+    return 'Rule $title on';
+  }
+
+  @override
+  String get rulesRereviewHelp =>
+      'You changed what the rule says, so Claude reviews it again. Tickets stop getting it until the review is done.';
+
+  @override
+  String get rulesSaved => 'Rule saved';
+
+  @override
+  String get rulesSavedReview => 'Rule saved; Claude is reviewing it';
+
+  @override
+  String get rulesScopeLabel => 'Show rules for';
+
+  @override
+  String rulesScopeAll(String n) {
+    return 'All rules ($n)';
+  }
+
+  @override
+  String rulesScopeGlobal(String n) {
+    return 'Global ($n)';
+  }
+
+  @override
+  String get rulesNone => 'No rules yet. Add one to tell hiro how your team works: testing, naming, logging, what never to touch.';
+
+  @override
+  String get rulesNoMatch => 'No rules match.';
+
+  @override
+  String rulesWaitingHelp(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n rules are waiting for your answers. They do not apply to tickets until they are answered.',
+      one: '$n rule is waiting for your answers. It does not apply to tickets until it is answered.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rulesStatus_pending => 'Queued for review';
+
+  @override
+  String get rulesStatus_analyzing => 'Reviewing';
+
+  @override
+  String get rulesStatus_questions => 'Needs answers';
+
+  @override
+  String get rulesStatus_ready => 'Applies';
+
+  @override
+  String get rulesStatus_failed => 'Review failed';
+
+  @override
+  String get rulesOff => 'Off';
+
+  @override
+  String get rulesEdit => 'Edit';
+
+  @override
+  String get rulesDelete => 'Delete';
+
+  @override
+  String rulesDeleteBody(String title) {
+    return 'Delete the rule “$title”? Tickets that start after this no longer follow it.';
+  }
+
+  @override
+  String get rulesPending => 'Waiting for a free worker. Claude reviews rules before the next ticket starts.';
+
+  @override
+  String get rulesAnalyzing => 'Claude is reading the rule and checking it for anything unclear or conflicting.';
+
+  @override
+  String rulesQuestionsTitle(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n questions before this rule applies',
+      one: '$n question before this rule applies',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rulesQuestionsSub => 'Claude found something unclear. Your answers become part of the rule.';
+
+  @override
+  String get rulesYourAnswer => 'Your answer';
+
+  @override
+  String get rulesAddDetails => 'Add details (optional)';
+
+  @override
+  String rulesAnswerFor(String n) {
+    return 'Answer to question $n';
+  }
+
+  @override
+  String rulesDetailsFor(String n) {
+    return 'Details for question $n';
+  }
+
+  @override
+  String get rulesSendAnswers => 'Send answers';
+
+  @override
+  String rulesQuestionsLeft(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n questions left to answer', one: '$n question left to answer');
+    return '$_temp0';
+  }
+
+  @override
+  String get rulesAllAnswered => 'All questions answered';
+
+  @override
+  String get rulesAccept => 'Use as written';
+
+  @override
+  String get rulesAcceptTitle => 'Use the rule as written?';
+
+  @override
+  String get rulesAcceptBody => 'Tickets get the rule as you wrote it, with the answers given so far. Open questions are dropped.';
+
+  @override
+  String rulesFailed(String error) {
+    return 'Claude could not review this rule: $error';
+  }
+
+  @override
+  String get rulesReviewAgain => 'Review again';
+
+  @override
+  String get rulesInterpretation => 'How hiro reads it';
+
+  @override
+  String get rulesClarified => 'What tickets get';
+
+  @override
+  String get rulesAsWritten => 'Used as written.';
+
+  @override
+  String rulesAnswersTitle(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n answered questions', one: '$n answered question');
+    return '$_temp0';
+  }
+
+  @override
+  String rulesReviewedAgo(String ago) {
+    return 'Reviewed $ago';
+  }
+
+  @override
+  String rulesAddedAgo(String ago) {
+    return 'Added $ago';
+  }
+
+  @override
+  String get rulesAnswered => 'Answers sent; Claude is reviewing the rule again';
+
+  @override
+  String get rulesAccepted => 'The rule applies as written';
+
+  @override
+  String get rulesQueued => 'Queued for review';
+
+  @override
+  String get rulesDeleted => 'Rule deleted';
+
+  @override
+  String get rulesTurnedOn => 'Rule turned on';
+
+  @override
+  String get rulesTurnedOff => 'Rule turned off';
 
   @override
   String get settingsTitle => 'Settings';
@@ -2680,6 +3093,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsStageLearnHelp => 'Reads each pushed change and writes lessons about what is new to the repository.';
 
   @override
+  String get settingsStageReview => 'Code review';
+
+  @override
+  String get settingsStageReviewHelp =>
+      'Reviews each result while you review it. Auto uses Opus for complex tickets and Sonnet for the rest.';
+
+  @override
+  String get settingsModelAuto => 'Auto';
+
+  @override
   String get settingsMaxTurns => 'Turn limit per run';
 
   @override
@@ -2763,6 +3186,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'After a push, hiro looks for techniques the repository never used before and writes lessons under Learn. Uses plan usage only when no ticket is waiting.';
 
   @override
+  String get settingsAutoReview => 'Review every result';
+
+  @override
+  String get settingsAutoReviewHelp =>
+      'While a change or report waits for you, hiro reviews it and shows its findings next to it. It never blocks approval.';
+
+  @override
   String get settingsPauseAbove => 'Don\'t start new runs above';
 
   @override
@@ -2808,6 +3238,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLessons => 'When hiro finds something new to learn';
 
   @override
+  String get settingsReviewDone => 'When hiro\'s code review finishes';
+
+  @override
   String get settingsOnThisPage => 'On this page';
 
   @override
@@ -2848,6 +3281,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stateRate_limited => 'Paused at plan limit';
+
+  @override
+  String get stateReportCoding => 'Writing';
+
+  @override
+  String get stateReportPushing => 'Delivering';
+
+  @override
+  String get stateReportDone => 'Done';
 
   @override
   String get tasksTitle => 'Tasks';
@@ -2988,6 +3430,12 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n tasks', one: '$n task');
     return '$_temp0';
   }
+
+  @override
+  String get tasksNoRepo => 'No repository';
+
+  @override
+  String get tasksRepoNeeded => 'Code and tests need a repository: pick one, or choose another kind.';
 
   @override
   String get ticketBack => 'All tickets';
@@ -3354,6 +3802,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketStageRetry => 'Retries and requested changes';
 
   @override
+  String get ticketStageReview => 'Code review by hiro';
+
+  @override
+  String ticketModelAuto(String model) {
+    return 'Auto ($model)';
+  }
+
+  @override
   String get ticketSideTicket => 'Ticket';
 
   @override
@@ -3464,6 +3920,111 @@ class AppLocalizationsEn extends AppLocalizations {
   String ticketMergedAt(String time) {
     return 'Merged $time.';
   }
+
+  @override
+  String get ticketRepoTitle => 'Repository';
+
+  @override
+  String get ticketRepoHint => 'Where hiro analyzes and codes this ticket.';
+
+  @override
+  String get ticketRepoNone => 'Choose a repository…';
+
+  @override
+  String get ticketRepoMissing => 'No repository is linked to this ticket. Choose one, then retry.';
+
+  @override
+  String get ticketRepoRestartTitle => 'Change repository?';
+
+  @override
+  String ticketRepoRestart(String repo, String next) {
+    return 'This ticket made progress in $repo. In $next it starts over from analysis when you retry.';
+  }
+
+  @override
+  String get ticketRepoChange => 'Change';
+
+  @override
+  String ticketRepoChanged(String repo) {
+    return 'Repository set to $repo';
+  }
+
+  @override
+  String get ticketQueuedSubReport =>
+      'hiro reads the ticket (and the code, if there is a repository) and comes back with a plan and questions. Nothing is changed.';
+
+  @override
+  String get ticketAnalyzingTitleNoRepo => 'Reading the ticket';
+
+  @override
+  String get ticketAnalyzingSubNoRepo => 'No repository: hiro works from the ticket text.';
+
+  @override
+  String get ticketStartWriting => 'Start writing';
+
+  @override
+  String get ticketWritingTitle => 'Writing the report';
+
+  @override
+  String get ticketWritingSub => 'Working in a fresh container. Nothing in the code changes; you review the report first.';
+
+  @override
+  String get ticketReviewReportTitle => 'Review the report';
+
+  @override
+  String get ticketReviewReportSub => 'Approving keeps the report here and closes the task.';
+
+  @override
+  String get ticketReviewReportSubJira =>
+      'Approving keeps the report here and closes the ticket. It goes to Jira only if you tick the box below.';
+
+  @override
+  String get ticketReport => 'Report';
+
+  @override
+  String get ticketReportMissing => 'No report was stored.';
+
+  @override
+  String ticketPostReport(String key) {
+    return 'Also post the report as a comment on $key in Jira';
+  }
+
+  @override
+  String get ticketFeedbackReportHint => 'What should the report change or cover?';
+
+  @override
+  String get ticketApproveReport => 'Approve';
+
+  @override
+  String get ticketApproveReportConfirm => 'Approve the report and close this ticket?';
+
+  @override
+  String ticketApproveReportPostConfirm(String key) {
+    return 'Approve the report, close this ticket and post the report to $key in Jira?';
+  }
+
+  @override
+  String get ticketDeliveringTitle => 'Finishing up';
+
+  @override
+  String get ticketDeliveringSub => 'Saving the approved report and posting it to Jira if you asked.';
+
+  @override
+  String get ticketDoneReportTitle => 'Report approved';
+
+  @override
+  String get ticketDoneReport => 'The report is kept here.';
+
+  @override
+  String ticketDoneReportPosted(String key) {
+    return 'The report is kept here and was posted to $key in Jira.';
+  }
+
+  @override
+  String get ticketStopWriting => 'Writing';
+
+  @override
+  String get ticketStopDone => 'Done';
 
   @override
   String get ticketsTitle => 'Tickets';

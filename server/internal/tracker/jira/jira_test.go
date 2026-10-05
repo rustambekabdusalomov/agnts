@@ -87,12 +87,21 @@ func TestWebhook(t *testing.T) {
 		t.Fatalf("ingested %d times, want 1 (dedup)", len(ing.got))
 	}
 	in := ing.got[0]
-	if in.Key != "PAY-42" || in.Project != "PAY" || in.Priority != "High" || !strings.Contains(in.Description, "half up") {
+	if in.Key != "PAY-42" || in.Project != "PAY" || in.Priority != "High" || !strings.Contains(in.Description, "half up") || in.Kind != "" {
 		t.Fatalf("incoming: %+v", in)
 	}
 
+	// A kind label alone hands the issue to hiro with that kind.
+	planned := strings.Replace(payload, `"Hiro"`, `"hiro-plan"`, 1)
+	if c := post(planned, sign("s3cret", []byte(planned)), "d-3"); c != http.StatusNoContent || len(ing.got) != 2 {
+		t.Fatalf("kind label: %d, %d", c, len(ing.got))
+	}
+	if k := ing.got[1].Kind; k != domain.KindPlan {
+		t.Fatalf("kind from label: %q", k)
+	}
+
 	unlabelled := strings.Replace(payload, `"Hiro"`, `"other"`, 1)
-	if c := post(unlabelled, sign("s3cret", []byte(unlabelled)), "d-2"); c != http.StatusNoContent || len(ing.got) != 1 {
+	if c := post(unlabelled, sign("s3cret", []byte(unlabelled)), "d-2"); c != http.StatusNoContent || len(ing.got) != 2 {
 		t.Fatalf("unlabelled issue ingested: %d, %d", c, len(ing.got))
 	}
 
@@ -151,11 +160,15 @@ func TestClient(t *testing.T) {
 		case "POST /rest/api/3/search/jql":
 			var b map[string]any
 			_ = json.NewDecoder(r.Body).Decode(&b)
+			if !strings.HasPrefix(b["jql"].(string), `labels in ("hiro", "hiro-code", "hiro-test", "hiro-plan", "hiro-analysis", "hiro-bug")`) {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
 			if _, ok := b["nextPageToken"]; !ok {
 				_, _ = io.WriteString(w, `{"issues":[{"key":"PAY-1","fields":{"summary":"a","project":{"key":"PAY"}}}],"nextPageToken":"p2"}`)
 				return
 			}
-			_, _ = io.WriteString(w, `{"issues":[{"key":"PAY-2","fields":{"summary":"b"}}],"isLast":true}`)
+			_, _ = io.WriteString(w, `{"issues":[{"key":"PAY-2","fields":{"summary":"b","labels":["hiro-bug"]}}],"isLast":true}`)
 		default:
 			w.WriteHeader(http.StatusNotFound)
 		}
@@ -175,7 +188,7 @@ func TestClient(t *testing.T) {
 		t.Fatal(err)
 	}
 	issues, err := c.Search(ctx)
-	if err != nil || len(issues) != 2 || issues[1].Project != "PAY" {
+	if err != nil || len(issues) != 2 || issues[1].Project != "PAY" || issues[0].Kind != "" || issues[1].Kind != domain.KindBug {
 		t.Fatalf("search: %+v %v", issues, err)
 	}
 	if n := len(calls); n != 5 {

@@ -42,6 +42,8 @@
     "addRepoFirst": "Avval shaxsiy loyiha repozitoriysini qoʻshing.",
     "titleRequired": "Sarlavhani kiriting.",
     "created": "{key} vazifasi yaratildi",
-    "count": "{n} ta vazifa"
+    "count": "{n} ta vazifa",
+    "noRepo": "Repozitoriysiz",
+    "repoNeeded": "Kod va testlar uchun repozitoriy kerak: uni yoki boshqa turni tanlang."
   }
 }

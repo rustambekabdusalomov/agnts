@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **stopped** | **bool** |  | 
 **done** | **bool** |  | 
 **lessons** | **bool** | New lessons were found | [optional] 
+**review** | **bool** | A code review finished | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

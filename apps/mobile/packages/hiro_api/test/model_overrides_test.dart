@@ -22,5 +22,10 @@ void main() {
       // TODO
     });
 
+    // Model review
+    test('to test the property `review`', () async {
+      // TODO
+    });
+
   });
 }

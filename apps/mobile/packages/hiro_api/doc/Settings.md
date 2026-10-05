@@ -16,6 +16,7 @@ Name | Type | Description | Notes
 **askFirst** | **bool** |  | 
 **autoResume** | **bool** |  | 
 **autoLearn** | **bool** | Learn from every pushed ticket | [optional] 
+**autoReview** | **bool** | Review every result while it waits for review | [optional] 
 **pauseAbove** | **int** |  | 
 **parallel** | **int** |  | 
 **git** | [**GitSettings**](GitSettings.md) |  | 

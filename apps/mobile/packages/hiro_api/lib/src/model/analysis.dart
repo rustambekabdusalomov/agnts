@@ -23,6 +23,8 @@ class Analysis {
     required  this.summary,
 
     required  this.plan,
+
+     this.complexity,
   });
 
   @JsonKey(
@@ -49,17 +51,32 @@ class Analysis {
 
 
 
+      /// The analysis's rating; picks the review model on auto
+  @JsonKey(
+    
+    name: r'complexity',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final AnalysisComplexityEnum? complexity;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is Analysis &&
       other.summary == summary &&
-      other.plan == plan;
+      other.plan == plan &&
+      other.complexity == complexity;
 
     @override
     int get hashCode =>
         summary.hashCode +
-        plan.hashCode;
+        plan.hashCode +
+        complexity.hashCode;
 
   factory Analysis.fromJson(Map<String, dynamic> json) => _$AnalysisFromJson(json);
 
@@ -71,4 +88,20 @@ class Analysis {
   }
 
 }
+
+/// The analysis's rating; picks the review model on auto
+enum AnalysisComplexityEnum {
+@JsonValue(r'simple')
+simple(r'simple'),
+@JsonValue(r'complex')
+complex(r'complex');
+
+const AnalysisComplexityEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
+}
+
 

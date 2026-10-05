@@ -8,6 +8,7 @@ import 'package:hiro_api/src/model/answers_request_answers_inner.dart';
 import 'package:hiro_api/src/model/approve_ticket_request.dart';
 import 'package:hiro_api/src/model/branch.dart';
 import 'package:hiro_api/src/model/check_step.dart';
+import 'package:hiro_api/src/model/code_review.dart';
 import 'package:hiro_api/src/model/commit.dart';
 import 'package:hiro_api/src/model/connect_integration_request.dart';
 import 'package:hiro_api/src/model/connect_result.dart';
@@ -24,10 +25,12 @@ import 'package:hiro_api/src/model/event.dart';
 import 'package:hiro_api/src/model/event_page.dart';
 import 'package:hiro_api/src/model/event_summary.dart';
 import 'package:hiro_api/src/model/file_change.dart';
+import 'package:hiro_api/src/model/finding.dart';
 import 'package:hiro_api/src/model/get_consent200_response.dart';
 import 'package:hiro_api/src/model/git_settings.dart';
 import 'package:hiro_api/src/model/history_item.dart';
 import 'package:hiro_api/src/model/hour_bucket.dart';
+import 'package:hiro_api/src/model/implement_input.dart';
 import 'package:hiro_api/src/model/integration.dart';
 import 'package:hiro_api/src/model/learn_queue_item.dart';
 import 'package:hiro_api/src/model/lesson.dart';
@@ -56,6 +59,11 @@ import 'package:hiro_api/src/model/repository_input.dart';
 import 'package:hiro_api/src/model/request_changes_request.dart';
 import 'package:hiro_api/src/model/result.dart';
 import 'package:hiro_api/src/model/rotate_mcp_token200_response.dart';
+import 'package:hiro_api/src/model/rule.dart';
+import 'package:hiro_api/src/model/rule_answers.dart';
+import 'package:hiro_api/src/model/rule_answers_answers_inner.dart';
+import 'package:hiro_api/src/model/rule_input.dart';
+import 'package:hiro_api/src/model/rule_question.dart';
 import 'package:hiro_api/src/model/settings.dart';
 import 'package:hiro_api/src/model/stage.dart';
 import 'package:hiro_api/src/model/stage_models.dart';
@@ -65,6 +73,7 @@ import 'package:hiro_api/src/model/task_create.dart';
 import 'package:hiro_api/src/model/task_update.dart';
 import 'package:hiro_api/src/model/ticket.dart';
 import 'package:hiro_api/src/model/ticket_detail.dart';
+import 'package:hiro_api/src/model/ticket_kind_input.dart';
 import 'package:hiro_api/src/model/ticket_repo.dart';
 import 'package:hiro_api/src/model/unregister_device_request.dart';
 import 'package:hiro_api/src/model/update_integration_request.dart';
@@ -114,6 +123,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           
         case 'CheckStep':
           return CheckStep.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CodeReview':
+          return CodeReview.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Commit':
           return Commit.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ConnectIntegrationRequest':
@@ -146,6 +157,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return EventSummary.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'FileChange':
           return FileChange.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'Finding':
+          return Finding.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'GetConsent200Response':
           return GetConsent200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'GitSettings':
@@ -154,6 +167,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return HistoryItem.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'HourBucket':
           return HourBucket.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ImplementInput':
+          return ImplementInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Integration':
           return Integration.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'LearnQueueItem':
@@ -217,8 +232,24 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return RequestChangesRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Result':
           return Result.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ReviewModel':
+          
+          
         case 'RotateMcpToken200Response':
           return RotateMcpToken200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'Rule':
+          return Rule.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RuleAnswers':
+          return RuleAnswers.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RuleAnswersAnswersInner':
+          return RuleAnswersAnswersInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RuleInput':
+          return RuleInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RuleQuestion':
+          return RuleQuestion.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RuleStatus':
+          
+          
         case 'Settings':
           return Settings.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Stage':
@@ -237,6 +268,14 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return Ticket.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TicketDetail':
           return TicketDetail.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'TicketKind':
+          
+          
+        case 'TicketKindChoice':
+          
+          
+        case 'TicketKindInput':
+          return TicketKindInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TicketRepo':
           return TicketRepo.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TicketState':

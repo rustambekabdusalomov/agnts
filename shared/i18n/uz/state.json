@@ -10,6 +10,11 @@
     "done": "Yuborildi",
     "rejected": "Rad etildi",
     "failed": "Toʻxtatildi",
-    "rate_limited": "Pauza: tarif limiti"
+    "rate_limited": "Pauza: tarif limiti",
+    "report": {
+      "coding": "Hisobot yozmoqda",
+      "pushing": "Topshirmoqda",
+      "done": "Tayyor"
+    }
   }
 }

@@ -11,18 +11,22 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
+	"hiro/internal/domain"
 	"hiro/internal/orchestrator"
 )
 
 // Config is the Jira connection, stored encrypted in the integrations table.
 type Config struct {
-	Site          string            `json:"site"` // https://your-team.atlassian.net
-	Email         string            `json:"email"`
-	APIToken      string            `json:"api_token"`
-	Label         string            `json:"label"`          // tickets hiro picks up
+	Site     string `json:"site"` // https://your-team.atlassian.net
+	Email    string `json:"email"`
+	APIToken string `json:"api_token"`
+	// Label marks tickets hiro picks up and lets hiro pick their kind;
+	// Label-<kind> (hiro-plan, hiro-bug, ...) also picks them up, with that kind.
+	Label         string            `json:"label"`
 	WebhookSecret string            `json:"webhook_secret"` // HMAC key for deliveries
 	Statuses      map[string]string `json:"statuses"`       // hiro milestone -> Jira status name
 	// Comments says which kinds of comment hiro posts (questions, plan, pr,
@@ -198,7 +202,11 @@ func (c *Client) Search(ctx context.Context) ([]orchestrator.Incoming, error) {
 	if err != nil || !ok {
 		return nil, err
 	}
-	jql := fmt.Sprintf(`labels = %q AND statusCategory != Done ORDER BY created ASC`, cfg.Label)
+	quoted := make([]string, 0, len(domain.Kinds)+1)
+	for _, l := range labels(cfg.Label) {
+		quoted = append(quoted, strconv.Quote(l))
+	}
+	jql := fmt.Sprintf(`labels in (%s) AND statusCategory != Done ORDER BY created ASC`, strings.Join(quoted, ", "))
 	var out []orchestrator.Incoming
 	token := ""
 	for page := 0; page < 20; page++ {
@@ -218,7 +226,7 @@ func (c *Client) Search(ctx context.Context) ([]orchestrator.Incoming, error) {
 			return nil, err
 		}
 		for _, is := range resp.Issues {
-			out = append(out, is.incoming())
+			out = append(out, is.incoming(cfg.Label))
 		}
 		if resp.IsLast || resp.NextPageToken == "" {
 			break
@@ -243,10 +251,10 @@ type issue struct {
 	} `json:"fields"`
 }
 
-func (is issue) incoming() orchestrator.Incoming {
+func (is issue) incoming(label string) orchestrator.Incoming {
 	in := orchestrator.Incoming{
 		Key: is.Key, Project: is.Fields.Project.Key, Title: is.Fields.Summary,
-		Description: descriptionText(is.Fields.Description),
+		Description: descriptionText(is.Fields.Description), Kind: is.kind(label),
 	}
 	if in.Project == "" {
 		if i := strings.LastIndex(is.Key, "-"); i > 0 {
@@ -259,13 +267,39 @@ func (is issue) incoming() orchestrator.Incoming {
 	return in
 }
 
-func (is issue) hasLabel(label string) bool {
-	for _, l := range is.Fields.Labels {
-		if strings.EqualFold(l, label) {
-			return true
+// labels are the labels that hand an issue to hiro: the base label and
+// one per kind.
+func labels(base string) []string {
+	out := []string{base}
+	for _, k := range domain.Kinds {
+		out = append(out, base+"-"+string(k))
+	}
+	return out
+}
+
+// forHiro reports whether the issue carries any of hiro's labels.
+func (is issue) forHiro(base string) bool {
+	for _, want := range labels(base) {
+		for _, l := range is.Fields.Labels {
+			if strings.EqualFold(l, want) {
+				return true
+			}
 		}
 	}
 	return false
+}
+
+// kind is the kind its labels name (the first in domain.Kinds order when
+// there are several), or "" for hiro to pick.
+func (is issue) kind(base string) domain.TicketKind {
+	for _, k := range domain.Kinds {
+		for _, l := range is.Fields.Labels {
+			if strings.EqualFold(l, base+"-"+string(k)) {
+				return k
+			}
+		}
+	}
+	return ""
 }
 
 // descriptionText accepts a plain string or an Atlassian Document Format tree.

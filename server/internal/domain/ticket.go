@@ -42,8 +42,17 @@ type Ticket struct {
 	Held         bool       // kept in the queue until someone starts it
 	AskFirst     bool       // analysis may ask questions before coding
 	LearnState   string     // learn run after push: LearnNone, LearnPending, LearnDone, LearnFailed
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ReviewState  string     // code review while waiting for review: ReviewNone, ReviewPending, ...
+	Kind         TicketKind
+	// KindAuto is true while hiro picks the kind: the analysis may change
+	// it. A kind someone chose (label, form, hand edit) is never changed.
+	KindAuto bool
+	// PostReport posts an approved report to the tracker issue.
+	PostReport bool
+	// ParentKey is the plan or bug report this ticket implements, or "".
+	ParentKey string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 // transitions lists every allowed state change. Anything else is a bug.
@@ -51,14 +60,15 @@ var transitions = map[TicketState][]TicketState{
 	StateNew:               {StateAnalyzing, StateRejected},
 	StateAnalyzing:         {StateWaitingForAnswers, StateCoding, StateFailed, StateRateLimited, StateNew, StateRejected},
 	StateWaitingForAnswers: {StateCoding, StateRejected},
-	StateCoding:            {StateTesting, StateFailed, StateRateLimited, StateRejected},
-	StateTesting:           {StateWaitingForReview, StateCoding, StateFailed, StateRejected},
-	StateWaitingForReview:  {StatePushing, StateCoding, StateRejected},
-	StatePushing:           {StateDone, StateFailed},
-	StateFailed:            {StateNew, StateCoding, StatePushing, StateRejected},
-	StateRateLimited:       {StateNew, StateCoding, StateRejected},
-	StateDone:              {},
-	StateRejected:          {},
+	// A report skips testing: coding goes straight to review.
+	StateCoding:           {StateTesting, StateWaitingForReview, StateFailed, StateRateLimited, StateRejected},
+	StateTesting:          {StateWaitingForReview, StateCoding, StateFailed, StateRejected},
+	StateWaitingForReview: {StatePushing, StateCoding, StateRejected},
+	StatePushing:          {StateDone, StateFailed},
+	StateFailed:           {StateNew, StateCoding, StatePushing, StateRejected},
+	StateRateLimited:      {StateNew, StateCoding, StateRejected},
+	StateDone:             {},
+	StateRejected:         {},
 }
 
 // CanTransition reports whether a ticket may move from one state to another.
@@ -119,7 +129,14 @@ const (
 	// StageLearn runs on a done ticket and writes lessons; it never changes
 	// the ticket's state.
 	StageLearn Stage = "learn"
+	// StageReview runs while a ticket waits for review and writes a code
+	// review for the human reviewer; it never changes the ticket's state.
+	StageReview Stage = "review"
 )
+
+// Side reports whether runs of stage s work beside the ticket (learn,
+// review) instead of moving it through its states.
+func (s Stage) Side() bool { return s == StageLearn || s == StageReview }
 
 // Run is one container session (or the push step) for a ticket.
 type Run struct {
@@ -151,6 +168,7 @@ type Result struct {
 	Tests     json.RawMessage
 	Lint      string
 	Files     []FileChange
+	Report    string // Markdown, for report kinds
 	CreatedAt time.Time
 }
 
@@ -218,6 +236,9 @@ const (
 	EventDeploy         = "deploy"
 	EventRepoArchived   = "repo_archived"
 	EventLessons        = "lessons_found"
+	EventRule           = "rule_changed"
+	EventKind           = "kind_changed"
+	EventReview         = "review_done"
 )
 
 // Repository is a codebase hiro works on.

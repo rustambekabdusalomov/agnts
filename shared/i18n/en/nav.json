@@ -44,6 +44,7 @@
     "ledeAll": "Every ticket hiro has picked up from Jira.",
     "knowledge": "Knowledge",
     "learn": "Learn",
-    "learnQueue": "Learning queue"
+    "learnQueue": "Learning queue",
+    "rules": "Rules"
   }
 }

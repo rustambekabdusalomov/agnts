@@ -14,7 +14,9 @@ void main() {
       // TODO
     });
 
-    // Approve the reviewed changes; hiro pushes the branch and opens the PR
+    // Approve the reviewed work
+    //
+    // For a change, hiro pushes the branch and opens the pull request. For a report, the ticket is done; the report is posted to the tracker issue only when postReport is true.
     //
     //Future<Ticket> approveTicket(String key, { ApproveTicketRequest approveTicketRequest }) async
     test('test approveTicket', () async {
@@ -25,6 +27,15 @@ void main() {
     //
     //Future<TicketDetail> getTicket(String key) async
     test('test getTicket', () async {
+      // TODO
+    });
+
+    // Make the code task that carries out a done plan or bug investigation
+    //
+    // Creates a local code task linked back to the report (parentKey), with the approved report in its description. A report is implemented once. repoId is needed only when the report has no repository.
+    //
+    //Future<Ticket> implementTicket(String key, { ImplementInput implementInput }) async
+    test('test implementTicket', () async {
       // TODO
     });
 
@@ -60,6 +71,22 @@ void main() {
     //
     //Future<Ticket> retryTicket(String key) async
     test('test retryTicket', () async {
+      // TODO
+    });
+
+    // Queue a code review of a ticket waiting for review (again, if one already ran)
+    //
+    //Future<Ticket> reviewTicket(String key) async
+    test('test reviewTicket', () async {
+      // TODO
+    });
+
+    // Change what the ticket produces
+    //
+    // Allowed on a new ticket, while hiro waits for answers, and on a failed or rate-limited one that has not pushed. auto lets the analysis pick the kind again; any other kind is final.
+    //
+    //Future<Ticket> setTicketKind(String key, TicketKindInput ticketKindInput) async
+    test('test setTicketKind', () async {
       // TODO
     });
 

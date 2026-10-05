@@ -43,7 +43,8 @@ type tools struct{ d Deps }
 // NewServer builds the MCP server with hiro's tools.
 func NewServer(d Deps, version string) *mcp.Server {
 	s := mcp.NewServer(&mcp.Implementation{Name: "hiro", Title: "hiro", Version: version}, &mcp.ServerOptions{
-		Instructions: "hiro is the user's coding agent. Use get_inbox first to see what needs the user. " +
+		Instructions: "hiro is the user's agent for tickets: it codes changes and tests, and writes plans, analyses and bug investigations as reports. " +
+			"Use get_inbox first to see what needs the user. " +
 			"Write tools never act directly: they return an action_id and a summary. Show the summary to the user, " +
 			"and call confirm_action only after the user explicitly agrees. Never confirm on your own.",
 	})
@@ -55,7 +56,7 @@ func NewServer(d Deps, version string) *mcp.Server {
 
 	mcp.AddTool(s, &mcp.Tool{Name: "get_inbox", Description: "Tickets waiting on the user (questions to answer, changes to review, stopped runs), oldest first, plus what is running.", Annotations: ro}, t.getInbox)
 	mcp.AddTool(s, &mcp.Tool{Name: "list_tickets", Description: "List tickets. filter: needs, running, queue, done or all.", Annotations: ro}, t.listTickets)
-	mcp.AddTool(s, &mcp.Tool{Name: "get_ticket", Description: "One ticket: description, hiro's analysis and plan, questions with ids, the latest result (summary, checks, changed files) and history.", Annotations: ro}, t.getTicket)
+	mcp.AddTool(s, &mcp.Tool{Name: "get_ticket", Description: "One ticket: its kind, description, hiro's analysis and plan, questions with ids, the latest result (summary, checks and changed files for a change; the Markdown report for plan, analysis and bug tickets), hiro's code review of that result (advice; the user decides) and history.", Annotations: ro}, t.getTicket)
 	mcp.AddTool(s, &mcp.Tool{Name: "get_run_log", Description: "The newest log lines of a ticket's runs (tool calls, checks, state changes).", Annotations: ro}, t.getRunLog)
 	mcp.AddTool(s, &mcp.Tool{Name: "get_usage", Description: "Claude plan usage (session and weekly) and whether new runs are paused.", Annotations: ro}, t.getUsage)
 	mcp.AddTool(s, &mcp.Tool{Name: "get_analytics", Description: "Statistics for the last N days (7, 30 or 90): tickets picked up, pushed, first-try approvals, turns, waiting time, stops.", Annotations: ro}, t.getAnalytics)
@@ -68,8 +69,10 @@ func NewServer(d Deps, version string) *mcp.Server {
 	mcp.AddTool(s, &mcp.Tool{Name: "start_run", Description: "Prepare starting a ticket that is held in the queue. Returns an action_id to confirm.", Annotations: write}, t.startRun)
 	mcp.AddTool(s, &mcp.Tool{Name: "request_changes", Description: "Prepare sending a ticket under review back to coding with feedback. Returns an action_id to confirm.", Annotations: write}, t.requestChanges)
 	mcp.AddTool(s, &mcp.Tool{Name: "retry_run", Description: "Prepare retrying a stopped or paused ticket. Returns an action_id to confirm.", Annotations: write}, t.retryRun)
-	mcp.AddTool(s, &mcp.Tool{Name: "create_task", Description: "Prepare a new side-project task. Returns an action_id to confirm.", Annotations: write}, t.createTask)
-	mcp.AddTool(s, &mcp.Tool{Name: "approve_ticket", Description: "Prepare approving reviewed changes: hiro will push and open the pull request. Returns an action_id; confirm only if the user explicitly approves.", Annotations: destructive}, t.approveTicket)
+	mcp.AddTool(s, &mcp.Tool{Name: "create_task", Description: "Prepare a new task. kind says what hiro produces: code or test (a change, needs a repository), plan, analysis or bug (a Markdown report, repository optional), or auto (hiro picks while reading it). Returns an action_id to confirm.", Annotations: write}, t.createTask)
+	mcp.AddTool(s, &mcp.Tool{Name: "implement_ticket", Description: "Prepare the code task that carries out a done plan or bug investigation: a new task linked to the report, with the report as its brief. repository is needed only when the report has none. Returns an action_id to confirm.", Annotations: write}, t.implementTicket)
+	mcp.AddTool(s, &mcp.Tool{Name: "set_ticket_kind", Description: "Prepare changing what a ticket produces (code, test, plan, analysis, bug, or auto to let hiro pick). Only before work starts, while waiting for answers, or on a stopped ticket. Returns an action_id to confirm.", Annotations: write}, t.setKind)
+	mcp.AddTool(s, &mcp.Tool{Name: "approve_ticket", Description: "Prepare approving reviewed work. For a change hiro pushes and opens the pull request; for a report the ticket is done, and post_report also posts it to the Jira issue (only if the user asks). Returns an action_id; confirm only if the user explicitly approves.", Annotations: destructive}, t.approveTicket)
 	mcp.AddTool(s, &mcp.Tool{Name: "reject_ticket", Description: "Prepare rejecting a ticket (stops all work on it). Returns an action_id; confirm only if the user explicitly agrees.", Annotations: destructive}, t.rejectTicket)
 	mcp.AddTool(s, &mcp.Tool{Name: "confirm_action", Description: "Execute a prepared action after the user explicitly agreed to its summary. Actions expire after 10 minutes and run once.", Annotations: write}, t.confirmAction)
 	return s
@@ -81,6 +84,8 @@ func NewServer(d Deps, version string) *mcp.Server {
 type TicketBrief struct {
 	Key          string `json:"key"`
 	Title        string `json:"title"`
+	Kind         string `json:"kind"`
+	KindAuto     bool   `json:"kind_auto,omitempty"`
 	State        string `json:"state"`
 	Source       string `json:"source"`
 	Repository   string `json:"repository,omitempty"`
@@ -90,8 +95,8 @@ type TicketBrief struct {
 }
 
 func brief(r orchestrator.TicketRow) TicketBrief {
-	b := TicketBrief{Key: r.Ticket.Key, Title: r.Ticket.Title, State: string(r.Ticket.State), Source: string(r.Ticket.Source),
-		Repository: r.RepoName, PRURL: r.Ticket.PRURL}
+	b := TicketBrief{Key: r.Ticket.Key, Title: r.Ticket.Title, Kind: string(r.Ticket.Kind), KindAuto: r.Ticket.KindAuto,
+		State: string(r.Ticket.State), Source: string(r.Ticket.Source), Repository: r.RepoName, PRURL: r.Ticket.PRURL}
 	if !r.Info.Since.IsZero() {
 		b.InStateSince = r.Info.Since.UTC().Format(time.RFC3339)
 	}
@@ -221,7 +226,21 @@ type TicketOut struct {
 	Notes        []string      `json:"notes,omitempty"`
 	Checks       []string      `json:"checks,omitempty"`
 	ChangedFiles []FileOut     `json:"changed_files,omitempty"`
+	Report       string        `json:"report,omitempty"`
+	ParentKey    string        `json:"implements,omitempty"`
+	ChildKey     string        `json:"implemented_by,omitempty"`
+	CodeReview   *ReviewOut    `json:"code_review,omitempty"`
 	History      []string      `json:"history,omitempty"`
+}
+
+// ReviewOut is hiro's code review of the result under review: advice for
+// the user, who still decides.
+type ReviewOut struct {
+	State    string   `json:"state" jsonschema:"pending, running, done or failed"`
+	Verdict  string   `json:"verdict,omitempty"`
+	Summary  string   `json:"summary,omitempty"`
+	Findings []string `json:"findings,omitempty"`
+	Model    string   `json:"model,omitempty"`
 }
 
 func (t *tools) getTicket(ctx context.Context, _ *mcp.CallToolRequest, in KeyInput) (*mcp.CallToolResult, TicketOut, error) {
@@ -260,6 +279,29 @@ func (t *tools) getTicket(ctx context.Context, _ *mcp.CallToolRequest, in KeyInp
 		for _, f := range r.Files {
 			out.ChangedFiles = append(out.ChangedFiles, FileOut{Path: f.Path, Add: f.Add, Del: f.Del})
 		}
+		out.Report = r.Report
+	}
+	out.ParentKey, out.ChildKey = v.Ticket.ParentKey, v.ChildKey
+	if v.Ticket.State == domain.StateWaitingForReview && v.Ticket.ReviewState != domain.ReviewNone {
+		rv := &ReviewOut{State: v.Ticket.ReviewState}
+		if r := v.Review; r != nil && r.Revision == v.Ticket.Revision {
+			rv.Verdict, rv.Summary, rv.Model = r.Verdict, r.Summary, r.Model
+			for _, f := range r.Findings {
+				line := fmt.Sprintf("[%s/%s] %s", f.Severity, f.Category, f.Title)
+				if f.File != "" {
+					line += " (" + f.File
+					if f.Line > 0 {
+						line += fmt.Sprintf(":%d", f.Line)
+					}
+					line += ")"
+				}
+				if f.Suggestion != "" {
+					line += ". Suggestion: " + f.Suggestion
+				}
+				rv.Findings = append(rv.Findings, line)
+			}
+		}
+		out.CodeReview = rv
 	}
 	for i, h := range v.History {
 		if i < len(v.History)-10 {
@@ -517,7 +559,8 @@ func (t *tools) retryRun(ctx context.Context, _ *mcp.CallToolRequest, in KeyInpu
 
 // TaskInput creates a task.
 type TaskInput struct {
-	Repository   string `json:"repository" jsonschema:"side-project repository name"`
+	Kind         string `json:"kind,omitempty" jsonschema:"auto, code, test, plan, analysis or bug (default auto)"`
+	Repository   string `json:"repository,omitempty" jsonschema:"repository name; omit for a plan, analysis or bug task without one"`
 	Title        string `json:"title"`
 	Description  string `json:"description,omitempty"`
 	Priority     string `json:"priority,omitempty" jsonschema:"low, medium or high (default medium)"`
@@ -526,18 +569,31 @@ type TaskInput struct {
 }
 
 func (t *tools) createTask(ctx context.Context, _ *mcp.CallToolRequest, in TaskInput) (*mcp.CallToolResult, Pending, error) {
-	list, err := t.d.Repos.List(ctx)
-	if err != nil {
-		return nil, Pending{}, err
+	if in.Kind == "" {
+		in.Kind = "auto"
+	}
+	kind := domain.TicketKind(in.Kind)
+	if in.Kind != "auto" && !kind.Valid() {
+		return nil, Pending{}, fmt.Errorf("kind must be auto, code, test, plan, analysis or bug")
 	}
 	var repo *admin.RepoView
-	for i := range list {
-		if strings.EqualFold(list[i].Name, strings.TrimSpace(in.Repository)) {
-			repo = &list[i]
+	where := "without a repository"
+	if strings.TrimSpace(in.Repository) != "" {
+		list, err := t.d.Repos.List(ctx)
+		if err != nil {
+			return nil, Pending{}, err
 		}
-	}
-	if repo == nil {
-		return nil, Pending{}, fmt.Errorf("no repository named %q", in.Repository)
+		for i := range list {
+			if strings.EqualFold(list[i].Name, strings.TrimSpace(in.Repository)) {
+				repo = &list[i]
+			}
+		}
+		if repo == nil {
+			return nil, Pending{}, fmt.Errorf("no repository named %q", in.Repository)
+		}
+		where = "in " + repo.Name
+	} else if in.Kind != "auto" && kind.Spec().NeedsRepo {
+		return nil, Pending{}, fmt.Errorf("a %s task needs a repository", kind)
 	}
 	if in.Priority == "" {
 		in.Priority = "medium"
@@ -548,20 +604,114 @@ func (t *tools) createTask(ctx context.Context, _ *mcp.CallToolRequest, in TaskI
 	if in.Start == "" {
 		in.Start = "ask"
 	}
-	return t.prepare(ctx, "create_task", "", fmt.Sprintf("Create task in %s: %q (priority %s, after approval: %s, start: %s).",
-		repo.Name, in.Title, in.Priority, in.AfterApprove, in.Start), map[string]any{
-		"repo_id": repo.ID, "title": in.Title, "description": in.Description, "priority": in.Priority,
+	var repoID int64
+	if repo != nil {
+		repoID = repo.ID
+	}
+	after := ", after approval: " + in.AfterApprove
+	if in.Kind != "auto" && kind.Report() {
+		after = ""
+	}
+	return t.prepare(ctx, "create_task", "", fmt.Sprintf("Create a %s task %s: %q (priority %s%s, start: %s).",
+		in.Kind, where, in.Title, in.Priority, after, in.Start), map[string]any{
+		"repo_id": repoID, "kind": in.Kind, "title": in.Title, "description": in.Description, "priority": in.Priority,
 		"after_approve": in.AfterApprove, "start": in.Start,
 	})
 }
 
-func (t *tools) approveTicket(ctx context.Context, _ *mcp.CallToolRequest, in KeyInput) (*mcp.CallToolResult, Pending, error) {
+// ImplementInput makes the code task for a report.
+type ImplementInput struct {
+	Key        string `json:"key" jsonschema:"the done plan or bug investigation"`
+	Repository string `json:"repository,omitempty" jsonschema:"repository to implement it in; defaults to the report's"`
+	Queue      bool   `json:"queue,omitempty" jsonschema:"keep the task in the queue instead of starting it"`
+}
+
+func (t *tools) implementTicket(ctx context.Context, _ *mcp.CallToolRequest, in ImplementInput) (*mcp.CallToolResult, Pending, error) {
+	tk, err := t.ticket(ctx, in.Key)
+	if err != nil {
+		return nil, Pending{}, err
+	}
+	if !tk.Kind.Spec().Implementable {
+		return nil, Pending{}, fmt.Errorf("only a plan or a bug investigation can be implemented; %s is %s", tk.Key, tk.Kind)
+	}
+	if tk.State != domain.StateDone {
+		return nil, Pending{}, fmt.Errorf("%s is not done yet (it is %s): approve the report first", tk.Key, tk.State)
+	}
+	var repoID int64
+	where := "its repository"
+	if name := strings.TrimSpace(in.Repository); name != "" {
+		list, err := t.d.Repos.List(ctx)
+		if err != nil {
+			return nil, Pending{}, err
+		}
+		for i := range list {
+			if strings.EqualFold(list[i].Name, name) {
+				repoID, where = list[i].ID, list[i].Name
+			}
+		}
+		if repoID == 0 {
+			return nil, Pending{}, fmt.Errorf("no repository named %q", in.Repository)
+		}
+	} else if tk.RepoID == nil {
+		return nil, Pending{}, fmt.Errorf("%s has no repository: name the one to implement it in", tk.Key)
+	}
+	start, when := "code", "start it now"
+	if in.Queue {
+		start, when = "queue", "keep it in the queue"
+	}
+	return t.prepare(ctx, "implement_ticket", tk.Key, fmt.Sprintf("Create a code task in %s that carries out the %s on %s (%s), and %s.", where, tk.Kind, tk.Key, tk.Title, when),
+		map[string]any{"repo_id": repoID, "start": start})
+}
+
+// KindInput changes a ticket's kind.
+type KindInput struct {
+	Key  string `json:"key"`
+	Kind string `json:"kind" jsonschema:"auto, code, test, plan, analysis or bug"`
+}
+
+func (t *tools) setKind(ctx context.Context, _ *mcp.CallToolRequest, in KindInput) (*mcp.CallToolResult, Pending, error) {
+	tk, err := t.ticket(ctx, in.Key)
+	if err != nil {
+		return nil, Pending{}, err
+	}
+	if in.Kind != "auto" && !domain.TicketKind(in.Kind).Valid() {
+		return nil, Pending{}, fmt.Errorf("kind must be auto, code, test, plan, analysis or bug")
+	}
+	what := "make " + tk.Key + " a " + in.Kind + " ticket"
+	if in.Kind == "auto" {
+		what = "let hiro pick the kind of " + tk.Key + " while reading it"
+	}
+	return t.prepare(ctx, "set_ticket_kind", tk.Key, fmt.Sprintf("Change %s (%s, now %s): %s.", tk.Key, tk.Title, tk.Kind, what),
+		map[string]any{"kind": in.Kind})
+}
+
+// ApproveInput approves a ticket under review.
+type ApproveInput struct {
+	Key        string `json:"key"`
+	PostReport bool   `json:"post_report,omitempty" jsonschema:"for a report on a Jira ticket: also post it as a comment on the issue; only when the user asks"`
+}
+
+func (t *tools) approveTicket(ctx context.Context, _ *mcp.CallToolRequest, in ApproveInput) (*mcp.CallToolResult, Pending, error) {
 	tk, err := t.ticket(ctx, in.Key)
 	if err != nil {
 		return nil, Pending{}, err
 	}
 	if tk.State != domain.StateWaitingForReview {
 		return nil, Pending{}, fmt.Errorf("%s is not waiting for review (it is %s)", tk.Key, tk.State)
+	}
+	if tk.Kind.Report() {
+		if in.PostReport && tk.Source != domain.SourceJira {
+			return nil, Pending{}, fmt.Errorf("%s has no Jira issue to post the report to", tk.Key)
+		}
+		what := "close it and keep the report in hiro"
+		if in.PostReport {
+			what = "close it, keep the report in hiro and post it as a comment on the Jira issue"
+		}
+		return t.prepare(ctx, "approve_ticket", tk.Key, fmt.Sprintf("Approve the %s report on %s (%s): hiro will %s.", tk.Kind, tk.Key, tk.Title, what),
+			map[string]any{"post_report": in.PostReport})
+	}
+	if in.PostReport {
+		return nil, Pending{}, fmt.Errorf("%s is a change, not a report: post_report does not apply", tk.Key)
 	}
 	what := fmt.Sprintf("push %s and open a pull request", tk.Branch)
 	if tk.Source == domain.SourceLocal && tk.AfterApprove == "main" {
@@ -623,14 +773,22 @@ func (t *tools) confirmAction(ctx context.Context, _ *mcp.CallToolRequest, in Co
 	case "retry_run":
 		tk, err = o.Retry(ctx, a.TicketKey, domain.OriginMCP)
 	case "approve_ticket":
-		tk, err = o.Approve(ctx, a.TicketKey, nil, domain.OriginMCP)
+		post, _ := a.Args["post_report"].(bool)
+		tk, err = o.Approve(ctx, a.TicketKey, nil, post, domain.OriginMCP)
+	case "implement_ticket":
+		id, _ := a.Args["repo_id"].(float64)
+		start, _ := a.Args["start"].(string)
+		tk, err = o.Implement(ctx, a.TicketKey, orchestrator.ImplementInput{RepoID: int64(id), Start: start}, domain.OriginMCP)
+	case "set_ticket_kind":
+		kind, _ := a.Args["kind"].(string)
+		tk, err = o.SetKind(ctx, a.TicketKey, kind, domain.OriginMCP)
 	case "reject_ticket":
 		reason, _ := a.Args["reason"].(string)
 		tk, err = o.Reject(ctx, a.TicketKey, reason, domain.OriginMCP)
 	case "create_task":
 		id, _ := a.Args["repo_id"].(float64)
 		str := func(k string) string { s, _ := a.Args[k].(string); return s }
-		tk, err = o.CreateTask(ctx, orchestrator.TaskInput{RepoID: int64(id), Title: str("title"), Description: str("description"),
+		tk, err = o.CreateTask(ctx, orchestrator.TaskInput{RepoID: int64(id), Kind: str("kind"), Title: str("title"), Description: str("description"),
 			Priority: str("priority"), AfterApprove: str("after_approve"), Start: str("start")}, domain.OriginMCP)
 	default:
 		return nil, Done{}, fmt.Errorf("unknown action %q", a.Tool)

@@ -115,19 +115,30 @@ Class | Method | HTTP request | Description
 [*ReposApi*](doc/ReposApi.md) | [**listRepos**](doc/ReposApi.md#listrepos) | **GET** /repos | 
 [*ReposApi*](doc/ReposApi.md) | [**unarchiveRepo**](doc/ReposApi.md#unarchiverepo) | **POST** /repos/{id}/unarchive | Restore an archived repository
 [*ReposApi*](doc/ReposApi.md) | [**updateRepo**](doc/ReposApi.md#updaterepo) | **PUT** /repos/{id} | 
+[*RulesApi*](doc/RulesApi.md) | [**acceptRule**](doc/RulesApi.md#acceptrule) | **POST** /rules/{id}/accept | Apply a rule as written, skipping its open questions or a failed review
+[*RulesApi*](doc/RulesApi.md) | [**answerRule**](doc/RulesApi.md#answerrule) | **PUT** /rules/{id}/answers | Answer every open question of a rule; Claude then reviews it again
+[*RulesApi*](doc/RulesApi.md) | [**createRule**](doc/RulesApi.md#createrule) | **POST** /rules | Add a rule; Claude reviews it before tickets follow it
+[*RulesApi*](doc/RulesApi.md) | [**deleteRule**](doc/RulesApi.md#deleterule) | **DELETE** /rules/{id} | 
+[*RulesApi*](doc/RulesApi.md) | [**getRule**](doc/RulesApi.md#getrule) | **GET** /rules/{id} | 
+[*RulesApi*](doc/RulesApi.md) | [**listRules**](doc/RulesApi.md#listrules) | **GET** /rules | Every rule, global ones first, then by repository
+[*RulesApi*](doc/RulesApi.md) | [**reviewRule**](doc/RulesApi.md#reviewrule) | **POST** /rules/{id}/review | Have Claude review a rule again, keeping its answers
+[*RulesApi*](doc/RulesApi.md) | [**updateRule**](doc/RulesApi.md#updaterule) | **PUT** /rules/{id} | Edit a rule. Changing its text or repository starts a new review; turning it on or off does not.
 [*SettingsApi*](doc/SettingsApi.md) | [**getSettings**](doc/SettingsApi.md#getsettings) | **GET** /settings | 
 [*SettingsApi*](doc/SettingsApi.md) | [**putSettings**](doc/SettingsApi.md#putsettings) | **PUT** /settings | 
 [*TasksApi*](doc/TasksApi.md) | [**createTask**](doc/TasksApi.md#createtask) | **POST** /tasks | Create a side-project task
 [*TasksApi*](doc/TasksApi.md) | [**deleteTask**](doc/TasksApi.md#deletetask) | **DELETE** /tasks/{key} | Delete a task that has not started
 [*TasksApi*](doc/TasksApi.md) | [**updateTask**](doc/TasksApi.md#updatetask) | **PATCH** /tasks/{key} | Edit a task that has not started
 [*TicketsApi*](doc/TicketsApi.md) | [**answerQuestions**](doc/TicketsApi.md#answerquestions) | **PUT** /tickets/{key}/answers | Answer the ticket&#39;s questions; when all are answered, coding starts
-[*TicketsApi*](doc/TicketsApi.md) | [**approveTicket**](doc/TicketsApi.md#approveticket) | **POST** /tickets/{key}/approve | Approve the reviewed changes; hiro pushes the branch and opens the PR
+[*TicketsApi*](doc/TicketsApi.md) | [**approveTicket**](doc/TicketsApi.md#approveticket) | **POST** /tickets/{key}/approve | Approve the reviewed work
 [*TicketsApi*](doc/TicketsApi.md) | [**getTicket**](doc/TicketsApi.md#getticket) | **GET** /tickets/{key} | A ticket with its questions, analysis and latest result
+[*TicketsApi*](doc/TicketsApi.md) | [**implementTicket**](doc/TicketsApi.md#implementticket) | **POST** /tickets/{key}/implement | Make the code task that carries out a done plan or bug investigation
 [*TicketsApi*](doc/TicketsApi.md) | [**listTicketEvents**](doc/TicketsApi.md#listticketevents) | **GET** /tickets/{key}/events | The ticket&#39;s log, oldest first; poll with &#x60;after&#x60; for live updates
 [*TicketsApi*](doc/TicketsApi.md) | [**listTickets**](doc/TicketsApi.md#listtickets) | **GET** /tickets | Tickets, most recently active first
 [*TicketsApi*](doc/TicketsApi.md) | [**rejectTicket**](doc/TicketsApi.md#rejectticket) | **POST** /tickets/{key}/reject | Stop work on the ticket for good
 [*TicketsApi*](doc/TicketsApi.md) | [**requestChanges**](doc/TicketsApi.md#requestchanges) | **POST** /tickets/{key}/request-changes | Send the ticket back to coding with feedback
 [*TicketsApi*](doc/TicketsApi.md) | [**retryTicket**](doc/TicketsApi.md#retryticket) | **POST** /tickets/{key}/retry | Resume a failed or rate-limited ticket where it stopped
+[*TicketsApi*](doc/TicketsApi.md) | [**reviewTicket**](doc/TicketsApi.md#reviewticket) | **POST** /tickets/{key}/review | Queue a code review of a ticket waiting for review (again, if one already ran)
+[*TicketsApi*](doc/TicketsApi.md) | [**setTicketKind**](doc/TicketsApi.md#setticketkind) | **PUT** /tickets/{key}/kind | Change what the ticket produces
 [*TicketsApi*](doc/TicketsApi.md) | [**setTicketModels**](doc/TicketsApi.md#setticketmodels) | **PUT** /tickets/{key}/models | Override models for this ticket; omit a stage to use the default
 [*TicketsApi*](doc/TicketsApi.md) | [**setTicketRepo**](doc/TicketsApi.md#setticketrepo) | **PUT** /tickets/{key}/repo | Link the ticket to a repository
 [*TicketsApi*](doc/TicketsApi.md) | [**startTicket**](doc/TicketsApi.md#startticket) | **POST** /tickets/{key}/analyze | Start a held ticket now (it is queued for the next free slot)
@@ -149,6 +160,7 @@ Class | Method | HTTP request | Description
  - [Branch](doc/Branch.md)
  - [CI](doc/CI.md)
  - [CheckStep](doc/CheckStep.md)
+ - [CodeReview](doc/CodeReview.md)
  - [Commit](doc/Commit.md)
  - [ConnectIntegrationRequest](doc/ConnectIntegrationRequest.md)
  - [ConnectResult](doc/ConnectResult.md)
@@ -165,10 +177,12 @@ Class | Method | HTTP request | Description
  - [EventPage](doc/EventPage.md)
  - [EventSummary](doc/EventSummary.md)
  - [FileChange](doc/FileChange.md)
+ - [Finding](doc/Finding.md)
  - [GetConsent200Response](doc/GetConsent200Response.md)
  - [GitSettings](doc/GitSettings.md)
  - [HistoryItem](doc/HistoryItem.md)
  - [HourBucket](doc/HourBucket.md)
+ - [ImplementInput](doc/ImplementInput.md)
  - [Integration](doc/Integration.md)
  - [LearnQueueItem](doc/LearnQueueItem.md)
  - [Lesson](doc/Lesson.md)
@@ -199,7 +213,14 @@ Class | Method | HTTP request | Description
  - [RepositoryInput](doc/RepositoryInput.md)
  - [RequestChangesRequest](doc/RequestChangesRequest.md)
  - [Result](doc/Result.md)
+ - [ReviewModel](doc/ReviewModel.md)
  - [RotateMcpToken200Response](doc/RotateMcpToken200Response.md)
+ - [Rule](doc/Rule.md)
+ - [RuleAnswers](doc/RuleAnswers.md)
+ - [RuleAnswersAnswersInner](doc/RuleAnswersAnswersInner.md)
+ - [RuleInput](doc/RuleInput.md)
+ - [RuleQuestion](doc/RuleQuestion.md)
+ - [RuleStatus](doc/RuleStatus.md)
  - [Settings](doc/Settings.md)
  - [Stage](doc/Stage.md)
  - [StageModels](doc/StageModels.md)
@@ -209,6 +230,9 @@ Class | Method | HTTP request | Description
  - [TaskUpdate](doc/TaskUpdate.md)
  - [Ticket](doc/Ticket.md)
  - [TicketDetail](doc/TicketDetail.md)
+ - [TicketKind](doc/TicketKind.md)
+ - [TicketKindChoice](doc/TicketKindChoice.md)
+ - [TicketKindInput](doc/TicketKindInput.md)
  - [TicketRepo](doc/TicketRepo.md)
  - [TicketState](doc/TicketState.md)
  - [UnregisterDeviceRequest](doc/UnregisterDeviceRequest.md)

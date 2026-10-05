@@ -1,0 +1,447 @@
+package orchestrator
+
+import (
+	"archive/tar"
+	"bytes"
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"strings"
+	"time"
+
+	"hiro/internal/domain"
+)
+
+// Limits of a rule review: it reads a rule, not a ticket, so it gets a
+// small budget.
+const (
+	ruleMaxTurns     = 30
+	ruleTimeoutMin   = 10
+	ruleMaxQuestions = 5
+)
+
+// RuleInput is a rule as the user writes it.
+type RuleInput struct {
+	Title   string
+	Body    string
+	RepoID  *int64 // nil: every repository
+	Enabled bool
+}
+
+// RuleAnswer answers the rule question at Index (into Rule.Questions).
+type RuleAnswer struct {
+	Index  int
+	Answer string
+	Note   string
+}
+
+// RuleReview is what a rule review must write to RulePath.
+type RuleReview struct {
+	Interpretation string `json:"interpretation"`
+	Clarified      string `json:"clarified"`
+	Questions      []struct {
+		Text    string   `json:"text"`
+		Options []string `json:"options"`
+	} `json:"questions"`
+}
+
+var errStale = errors.New("the rule changed during its review")
+
+func (o *Orchestrator) rulesReady() error {
+	if o.rules == nil {
+		return invalid("rules are not available on this server")
+	}
+	return nil
+}
+
+func ruleEvent(r domain.Rule, origin domain.Origin, level domain.Level, msg string) *domain.Event {
+	if level == "" {
+		level = domain.LevelInfo
+	}
+	return &domain.Event{
+		Type: domain.EventRule, Step: "rules", Origin: origin, Level: level, Message: msg,
+		Data: map[string]any{"ruleId": r.ID, "status": string(r.Status), "title": r.Title},
+	}
+}
+
+// ListRules returns every rule.
+func (o *Orchestrator) ListRules(ctx context.Context) ([]domain.Rule, error) {
+	if err := o.rulesReady(); err != nil {
+		return nil, err
+	}
+	return o.rules.ListRules(ctx)
+}
+
+// Rule returns one rule.
+func (o *Orchestrator) Rule(ctx context.Context, id int64) (domain.Rule, error) {
+	if err := o.rulesReady(); err != nil {
+		return domain.Rule{}, err
+	}
+	return o.rules.Rule(ctx, id)
+}
+
+func (o *Orchestrator) checkRuleRepo(ctx context.Context, id *int64) error {
+	if id == nil {
+		return nil
+	}
+	if _, err := o.store.RepositoryByID(ctx, *id); errors.Is(err, domain.ErrNotFound) {
+		return invalid("no such repository")
+	} else if err != nil {
+		return err
+	}
+	return nil
+}
+
+// CreateRule saves a new rule and queues it for review. It applies to
+// tickets once the review finds it clear.
+func (o *Orchestrator) CreateRule(ctx context.Context, in RuleInput, origin domain.Origin) (domain.Rule, error) {
+	if err := o.rulesReady(); err != nil {
+		return domain.Rule{}, err
+	}
+	r := domain.Rule{Title: in.Title, Body: in.Body, RepoID: in.RepoID, Enabled: in.Enabled, Status: domain.RulePending}
+	if err := r.Validate(); err != nil {
+		return r, invalid("%s", err)
+	}
+	if err := o.checkRuleRepo(ctx, r.RepoID); err != nil {
+		return r, err
+	}
+	r, err := o.rules.CreateRule(ctx, r, func(x domain.Rule) domain.Event {
+		return *ruleEvent(x, origin, "", fmt.Sprintf("rule %q added; Claude is reviewing it", x.Title))
+	})
+	if err == nil {
+		o.Wake()
+	}
+	return r, err
+}
+
+// UpdateRule edits a rule. A change to what it says or where it applies
+// starts a new review; turning it on or off does not.
+func (o *Orchestrator) UpdateRule(ctx context.Context, id int64, in RuleInput, origin domain.Origin) (domain.Rule, error) {
+	if err := o.rulesReady(); err != nil {
+		return domain.Rule{}, err
+	}
+	next := domain.Rule{Title: in.Title, Body: in.Body}
+	if err := next.Validate(); err != nil {
+		return next, invalid("%s", err)
+	}
+	if err := o.checkRuleRepo(ctx, in.RepoID); err != nil {
+		return next, err
+	}
+	var msg string
+	r, err := o.rules.UpdateRule(ctx, id, func(x *domain.Rule) error {
+		changed := x.Title != next.Title || x.Body != next.Body || !sameRepo(x.RepoID, in.RepoID)
+		switch {
+		case changed:
+			msg = fmt.Sprintf("rule %q edited; Claude is reviewing it again", next.Title)
+			x.Title, x.Body, x.RepoID = next.Title, next.Body, in.RepoID
+			// The old answers and clarification were about the old text.
+			x.Questions, x.Rounds, x.Interpretation, x.Clarified = nil, 0, "", ""
+			x.Requeue()
+		case x.Enabled != in.Enabled && in.Enabled:
+			msg = fmt.Sprintf("rule %q turned on", x.Title)
+		case x.Enabled != in.Enabled:
+			msg = fmt.Sprintf("rule %q turned off", x.Title)
+		}
+		x.Enabled = in.Enabled
+		return nil
+	}, func(x domain.Rule) *domain.Event {
+		if msg == "" {
+			return nil
+		}
+		return ruleEvent(x, origin, "", msg)
+	})
+	if err == nil && r.Status == domain.RulePending {
+		o.Wake()
+	}
+	return r, err
+}
+
+func sameRepo(a, b *int64) bool {
+	return (a == nil && b == nil) || (a != nil && b != nil && *a == *b)
+}
+
+// AnswerRule records answers to a rule's open questions and reviews it
+// again with them. Every open question needs an answer.
+func (o *Orchestrator) AnswerRule(ctx context.Context, id int64, answers []RuleAnswer, origin domain.Origin) (domain.Rule, error) {
+	if err := o.rulesReady(); err != nil {
+		return domain.Rule{}, err
+	}
+	r, err := o.rules.UpdateRule(ctx, id, func(x *domain.Rule) error {
+		if x.Status != domain.RuleQuestions {
+			return invalid("this rule has no open questions")
+		}
+		for _, a := range answers {
+			if a.Index < 0 || a.Index >= len(x.Questions) || x.Questions[a.Index].Answer != "" {
+				return invalid("question %d is not open", a.Index)
+			}
+			ans := strings.TrimSpace(a.Answer)
+			if ans == "" {
+				continue
+			}
+			x.Questions[a.Index].Answer, x.Questions[a.Index].Note = ans, strings.TrimSpace(a.Note)
+		}
+		if n := len(x.Open()); n > 0 {
+			return invalid("%d %s still without an answer", n, plural(n, "question", "questions"))
+		}
+		x.Requeue()
+		return nil
+	}, func(x domain.Rule) *domain.Event {
+		return ruleEvent(x, origin, "", fmt.Sprintf("answered the questions on rule %q; Claude is reviewing it again", x.Title))
+	})
+	if err == nil {
+		o.Wake()
+	}
+	return r, err
+}
+
+// AcceptRule applies a rule as written, skipping open questions or a
+// failed review. Answers already given still go to tickets with it.
+func (o *Orchestrator) AcceptRule(ctx context.Context, id int64, origin domain.Origin) (domain.Rule, error) {
+	if err := o.rulesReady(); err != nil {
+		return domain.Rule{}, err
+	}
+	return o.rules.UpdateRule(ctx, id, func(x *domain.Rule) error {
+		if x.Status != domain.RuleQuestions && x.Status != domain.RuleFailed {
+			return invalid("only a rule with open questions or a failed review can be accepted as written")
+		}
+		x.Questions = x.Answered()
+		x.Status, x.Error, x.Clarified, x.Interpretation = domain.RuleReady, "", "", ""
+		return nil
+	}, func(x domain.Rule) *domain.Event {
+		return ruleEvent(x, origin, "", fmt.Sprintf("rule %q accepted as written", x.Title))
+	})
+}
+
+// ReviewRule queues a rule for another review, keeping its answers.
+func (o *Orchestrator) ReviewRule(ctx context.Context, id int64, origin domain.Origin) (domain.Rule, error) {
+	if err := o.rulesReady(); err != nil {
+		return domain.Rule{}, err
+	}
+	r, err := o.rules.UpdateRule(ctx, id, func(x *domain.Rule) error {
+		if x.Status == domain.RulePending || x.Status == domain.RuleAnalyzing {
+			return invalid("this rule is already being reviewed")
+		}
+		x.Questions = x.Answered()
+		x.Requeue()
+		return nil
+	}, func(x domain.Rule) *domain.Event {
+		return ruleEvent(x, origin, "", fmt.Sprintf("rule %q queued for another review", x.Title))
+	})
+	if err == nil {
+		o.Wake()
+	}
+	return r, err
+}
+
+// DeleteRule removes a rule. Tickets started after this no longer get it.
+func (o *Orchestrator) DeleteRule(ctx context.Context, id int64, origin domain.Origin) error {
+	if err := o.rulesReady(); err != nil {
+		return err
+	}
+	r, err := o.rules.Rule(ctx, id)
+	if err != nil {
+		return err
+	}
+	return o.rules.DeleteRule(ctx, id, *ruleEvent(r, origin, "", fmt.Sprintf("rule %q deleted", r.Title)))
+}
+
+// teamRules returns the rules tickets in repoID follow (nil: global only).
+func (o *Orchestrator) teamRules(ctx context.Context, repoID *int64) ([]domain.Rule, error) {
+	if o.rules == nil {
+		return nil, nil
+	}
+	rules, err := o.rules.ActiveRules(ctx, repoID)
+	if err != nil {
+		return nil, fmt.Errorf("load team rules: %w", err)
+	}
+	return rules, nil
+}
+
+// rulesEvent records which rules a ticket was given.
+func rulesEvent(key string, run *domain.Run, rules []domain.Rule) domain.Event {
+	ids, titles := make([]int64, len(rules)), make([]string, len(rules))
+	for i, r := range rules {
+		ids[i], titles[i] = r.ID, r.Title
+	}
+	return domain.Event{
+		TicketKey: key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventRule,
+		Message: fmt.Sprintf("following %d team %s: %s", len(rules), plural(len(rules), "rule", "rules"), strings.Join(titles, ", ")),
+		Data:    map[string]any{"ids": ids, "titles": titles},
+	}
+}
+
+// reviewRule has Claude check a claimed rule for ambiguity and conflicts,
+// then stores the outcome: questions for the author, or a clear rule.
+func (o *Orchestrator) reviewRule(ctx context.Context, r domain.Rule) {
+	log := o.log.With("rule", r.ID)
+	log.Info("rule review started")
+	review, err := o.runRuleReview(ctx, r)
+	if ctx.Err() != nil {
+		// Shutting down: RecoverRules requeues it on the next start.
+		log.Info("rule review interrupted")
+		return
+	}
+	var stop *stopError
+	limited := errors.As(err, &stop)
+	var msg string
+	level := domain.LevelInfo
+	_, uerr := o.rules.UpdateRule(ctx, r.ID, func(x *domain.Rule) error {
+		if x.Revision != r.Revision || x.Status != domain.RuleAnalyzing {
+			return errStale
+		}
+		switch {
+		case limited:
+			// Claimed again once plan usage allows.
+			x.Status = domain.RulePending
+		case err != nil:
+			x.Status, x.Error = domain.RuleFailed, err.Error()
+			level, msg = domain.LevelWarn, fmt.Sprintf("could not review rule %q: %v", x.Title, err)
+		default:
+			msg = applyReview(x, review)
+		}
+		return nil
+	}, func(x domain.Rule) *domain.Event {
+		if msg == "" {
+			return nil
+		}
+		return ruleEvent(x, domain.OriginSystem, level, msg)
+	})
+	switch {
+	case errors.Is(uerr, errStale), errors.Is(uerr, domain.ErrNotFound):
+		log.Info("rule changed or was deleted during its review; result dropped")
+	case uerr != nil:
+		log.Error("save rule review", "err", uerr)
+	case err != nil:
+		log.Warn("rule review failed", "err", err)
+	default:
+		log.Info("rule review finished")
+	}
+}
+
+// applyReview stores a finished review and returns its log line.
+func applyReview(x *domain.Rule, rv RuleReview) string {
+	now := time.Now()
+	x.AnalyzedAt, x.Error = &now, ""
+	x.Interpretation = strings.TrimSpace(rv.Interpretation)
+	var qs []domain.RuleQuestion
+	if x.Rounds < domain.RuleMaxRounds {
+		for _, q := range rv.Questions {
+			if text := strings.TrimSpace(q.Text); text != "" && len(qs) < ruleMaxQuestions {
+				qs = append(qs, domain.RuleQuestion{Text: text, Options: cleanOptions(q.Options), Round: x.Rounds + 1})
+			}
+		}
+	}
+	if len(qs) > 0 {
+		x.Rounds++
+		x.Questions = append(x.Answered(), qs...)
+		x.Status, x.Clarified = domain.RuleQuestions, ""
+		return fmt.Sprintf("rule %q: %d %s before it applies", x.Title, len(qs), plural(len(qs), "question", "questions"))
+	}
+	x.Status, x.Clarified = domain.RuleReady, strings.TrimSpace(rv.Clarified)
+	return fmt.Sprintf("rule %q is clear and applies to new tickets", x.Title)
+}
+
+func cleanOptions(in []string) []string {
+	out := []string{}
+	for _, o := range in {
+		if o = strings.TrimSpace(o); o != "" && len(out) < 4 {
+			out = append(out, o)
+		}
+	}
+	return out
+}
+
+func (o *Orchestrator) runRuleReview(ctx context.Context, r domain.Rule) (RuleReview, error) {
+	var rv RuleReview
+	s, err := o.settings.Get(ctx)
+	if err != nil {
+		return rv, err
+	}
+	d := promptData{Rule: r, Answered: r.Answered(), NoQuestions: r.Rounds >= domain.RuleMaxRounds}
+	var tree io.Reader
+	if r.RepoID != nil {
+		repo, err := o.store.RepositoryByID(ctx, *r.RepoID)
+		if err != nil {
+			return rv, err
+		}
+		d.RuleRepo = repo.Name
+		if err := o.git.Prepare(ctx, repo, repo.DefaultBranch); err != nil {
+			return rv, fmt.Errorf("prepare repository: %w", err)
+		}
+		rc, err := o.git.Archive(ctx, repo, repo.DefaultBranch)
+		if err != nil {
+			return rv, fmt.Errorf("archive repository: %w", err)
+		}
+		defer func() { _ = rc.Close() }()
+		tree = rc
+	} else {
+		var empty bytes.Buffer
+		_ = tar.NewWriter(&empty).Close()
+		tree = &empty
+	}
+	others, err := o.rules.ActiveRules(ctx, r.RepoID)
+	if err != nil {
+		return rv, err
+	}
+	for _, x := range others {
+		if x.ID != r.ID {
+			d.Rules = append(d.Rules, x)
+		}
+	}
+	prompt, err := render("rule", d)
+	if err != nil {
+		return rv, err
+	}
+
+	ws, err := o.runner.Open(ctx, WorkspaceSpec{TicketKey: fmt.Sprintf("rule-%d", r.ID), Image: o.cfg.Image, Repo: tree})
+	if err != nil {
+		return rv, fmt.Errorf("start container: %w", err)
+	}
+	defer func() {
+		if err := ws.Close(context.WithoutCancel(ctx)); err != nil {
+			o.log.Warn("remove container", "rule", r.ID, "err", err)
+		}
+	}()
+	res, err := ws.Claude(ctx, ClaudeRequest{
+		Prompt:   prompt,
+		Model:    s.Models.Analyze,
+		MaxTurns: min(s.MaxTurns, ruleMaxTurns),
+		Timeout:  time.Duration(min(s.TimeoutMin, ruleTimeoutMin)) * time.Minute,
+		Settings: permissionSettings(s, false),
+	}, func(e ClaudeEvent) {
+		if e.Kind == ClaudeRateLimit {
+			o.usage.Record(ctx, e.Data)
+		}
+	})
+	if err != nil {
+		return rv, err
+	}
+	if res.RateLimited {
+		o.usage.RecordLimited(ctx)
+		return rv, &stopError{"rate limited"}
+	}
+	if res.IsError {
+		if res.Subtype == "error_max_turns" {
+			return rv, fmt.Errorf("stopped at the turn limit (%d); shorten the rule or split it", min(s.MaxTurns, ruleMaxTurns))
+		}
+		return rv, fmt.Errorf("claude ended with %s: %s", res.Subtype, truncate(res.Text, 500))
+	}
+	raw, err := ws.ReadFile(ctx, RulePath)
+	if err != nil {
+		return rv, fmt.Errorf("claude did not write %s: %w", RulePath, err)
+	}
+	return parseRuleReview(raw)
+}
+
+func parseRuleReview(b []byte) (RuleReview, error) {
+	var rv RuleReview
+	if err := json.Unmarshal(b, &rv); err != nil {
+		return rv, fmt.Errorf("rule.json is not valid JSON: %w", err)
+	}
+	if strings.TrimSpace(rv.Interpretation) == "" {
+		return rv, errors.New("rule.json has no interpretation")
+	}
+	return rv, nil
+}

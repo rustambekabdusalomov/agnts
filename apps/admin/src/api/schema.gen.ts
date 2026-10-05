@@ -157,7 +157,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Approve the reviewed changes; hiro pushes the branch and opens the PR */
+        /**
+         * Approve the reviewed work
+         * @description For a change, hiro pushes the branch and opens the pull request. For a report, the ticket is done; the report is posted to the tracker issue only when postReport is true.
+         */
         post: operations["approveTicket"];
         delete?: never;
         options?: never;
@@ -260,6 +263,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tickets/{key}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Queue a code review of a ticket waiting for review (again, if one already ran) */
+        post: operations["reviewTicket"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tickets/{key}/stop": {
         parameters: {
             query?: never;
@@ -313,6 +335,50 @@ export interface paths {
          * @description Allowed on a new ticket, or a failed or rate-limited one that has not pushed. A stopped ticket starts over from analysis on retry, since its analysis and branch belonged to the old repository.
          */
         put: operations["setTicketRepo"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/implement": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Make the code task that carries out a done plan or bug investigation
+         * @description Creates a local code task linked back to the report (parentKey), with the approved report in its description. A report is implemented once. repoId is needed only when the report has no repository.
+         */
+        post: operations["implementTicket"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/kind": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Change what the ticket produces
+         * @description Allowed on a new ticket, while hiro waits for answers, and on a failed or rate-limited one that has not pushed. auto lets the analysis pick the kind again; any other kind is final.
+         */
+        put: operations["setTicketKind"];
         post?: never;
         delete?: never;
         options?: never;
@@ -846,6 +912,100 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every rule, global ones first, then by repository */
+        get: operations["listRules"];
+        put?: never;
+        /** Add a rule; Claude reviews it before tickets follow it */
+        post: operations["createRule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rules/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RuleID"];
+            };
+            cookie?: never;
+        };
+        get: operations["getRule"];
+        /** Edit a rule. Changing its text or repository starts a new review; turning it on or off does not. */
+        put: operations["updateRule"];
+        post?: never;
+        delete: operations["deleteRule"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rules/{id}/answers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RuleID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Answer every open question of a rule; Claude then reviews it again */
+        put: operations["answerRule"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rules/{id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RuleID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Apply a rule as written, skipping its open questions or a failed review */
+        post: operations["acceptRule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rules/{id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RuleID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Have Claude review a rule again, keeping its answers */
+        post: operations["reviewRule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/analytics": {
         parameters: {
             query?: never;
@@ -1064,6 +1224,31 @@ export interface components {
         };
         /** @enum {string} */
         TicketState: "new" | "analyzing" | "waiting_for_answers" | "coding" | "testing" | "waiting_for_review" | "pushing" | "done" | "rejected" | "failed" | "rate_limited";
+        /**
+         * @description What the work produces. code and test make a change (diff, checks, pull request); plan, analysis and bug write a Markdown report.
+         * @enum {string}
+         */
+        TicketKind: "code" | "test" | "plan" | "analysis" | "bug";
+        /**
+         * @description A kind, or auto for hiro to pick one during analysis
+         * @enum {string}
+         */
+        TicketKindChoice: "auto" | "code" | "test" | "plan" | "analysis" | "bug";
+        ImplementInput: {
+            /**
+             * Format: int64
+             * @description Where to implement it; defaults to the report's repository
+             */
+            repoId?: number;
+            /**
+             * @description code = start now without questions (default), queue = keep until started
+             * @enum {string}
+             */
+            start?: "code" | "queue";
+        };
+        TicketKindInput: {
+            kind: components["schemas"]["TicketKindChoice"];
+        };
         Ticket: {
             key: string;
             /** @enum {string} */
@@ -1087,6 +1272,13 @@ export interface components {
             /** @description Kept in the queue until started */
             held?: boolean;
             askFirst?: boolean;
+            kind: components["schemas"]["TicketKind"];
+            /** @description hiro picks the kind; the analysis may still change it */
+            kindAuto: boolean;
+            /** @description The approved report is posted to the tracker issue */
+            postReport?: boolean;
+            /** @description The plan or bug investigation this ticket implements */
+            parentKey?: string;
             repoName?: string;
             models?: components["schemas"]["ModelOverrides"];
             /**
@@ -1103,6 +1295,11 @@ export interface components {
              * @enum {string}
              */
             learnState?: "none" | "pending" | "done" | "failed";
+            /**
+             * @description The code review hiro runs beside the human review
+             * @enum {string}
+             */
+            reviewState?: "none" | "pending" | "running" | "done" | "failed";
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -1120,6 +1317,38 @@ export interface components {
         Analysis: {
             summary: string;
             plan: string[];
+            /**
+             * @description The analysis's rating; picks the review model on auto
+             * @enum {string}
+             */
+            complexity?: "simple" | "complex";
+        };
+        Finding: {
+            /** @enum {string} */
+            severity: "blocker" | "major" | "minor" | "nit";
+            /** @enum {string} */
+            category: "correctness" | "security" | "performance" | "tests" | "rules" | "maintainability" | "accuracy" | "completeness" | "other";
+            /** @description Path relative to the repository */
+            file?: string;
+            line?: number;
+            title: string;
+            detail?: string;
+            /** @description What to change, written to be sent back as feedback */
+            suggestion?: string;
+        };
+        /** @description hiro's review of the latest result, advice beside the human review. It reviewed an older revision when revision is below the ticket's. */
+        CodeReview: {
+            revision: number;
+            model: components["schemas"]["Model"];
+            /** @description Why this model reviewed it */
+            modelReason: string;
+            /** @enum {string} */
+            verdict: "looks_good" | "has_concerns" | "needs_changes";
+            summary: string;
+            findings: components["schemas"]["Finding"][];
+            strengths: string[];
+            /** Format: date-time */
+            createdAt: string;
         };
         CheckStep: {
             name: string;
@@ -1141,6 +1370,8 @@ export interface components {
             notes: string[];
             checks: components["schemas"]["CheckStep"][];
             files: components["schemas"]["FileChange"][];
+            /** @description The Markdown report, for report kinds */
+            report?: string;
             /** Format: date-time */
             createdAt: string;
         };
@@ -1149,6 +1380,9 @@ export interface components {
             questions: components["schemas"]["Question"][];
             analysis?: components["schemas"]["Analysis"];
             result?: components["schemas"]["Result"];
+            /** @description The code task that implements this report, if any */
+            childKey?: string;
+            review?: components["schemas"]["CodeReview"];
             history?: components["schemas"]["HistoryItem"][];
             maxTurns?: number;
             effectiveModels?: components["schemas"]["StageModels"];
@@ -1184,12 +1418,18 @@ export interface components {
         };
         /** @enum {string} */
         Model: "haiku" | "sonnet" | "opus";
+        /**
+         * @description auto: opus for complex tickets, sonnet otherwise
+         * @enum {string}
+         */
+        ReviewModel: "auto" | "haiku" | "sonnet" | "opus";
         StageModels: {
             analyze: components["schemas"]["Model"];
             coding: components["schemas"]["Model"];
             retry: components["schemas"]["Model"];
             helper: components["schemas"]["Model"];
             learn?: components["schemas"]["Model"];
+            review?: components["schemas"]["ReviewModel"];
         };
         TicketRepo: {
             /** Format: int64 */
@@ -1199,6 +1439,7 @@ export interface components {
             analyze?: components["schemas"]["Model"];
             coding?: components["schemas"]["Model"];
             retry?: components["schemas"]["Model"];
+            review?: components["schemas"]["Model"];
         };
         HistoryItem: {
             /** Format: date-time */
@@ -1208,8 +1449,12 @@ export interface components {
             origin: string;
         };
         TaskCreate: {
-            /** Format: int64 */
-            repoId: number;
+            /**
+             * Format: int64
+             * @description Omit for a task without a repository (report kinds or auto)
+             */
+            repoId?: number;
+            kind?: components["schemas"]["TicketKindChoice"];
             title: string;
             description?: string;
             /** @enum {string} */
@@ -1229,6 +1474,7 @@ export interface components {
             priority?: "low" | "medium" | "high";
             /** @enum {string} */
             afterApprove?: "pr" | "main";
+            kind?: components["schemas"]["TicketKindChoice"];
         };
         EventPage: {
             events: components["schemas"]["Event"][];
@@ -1291,6 +1537,8 @@ export interface components {
             autoResume: boolean;
             /** @description Learn from every pushed ticket */
             autoLearn?: boolean;
+            /** @description Review every result while it waits for review */
+            autoReview?: boolean;
             pauseAbove: number;
             parallel: number;
             git: components["schemas"]["GitSettings"];
@@ -1304,6 +1552,8 @@ export interface components {
             done: boolean;
             /** @description New lessons were found */
             lessons?: boolean;
+            /** @description A code review finished */
+            review?: boolean;
         };
         Repository: {
             /** Format: int64 */
@@ -1696,6 +1946,72 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
+        /**
+         * @description Where Claude's review stands. Tickets follow a rule only when it is ready and enabled.
+         * @enum {string}
+         */
+        RuleStatus: "pending" | "analyzing" | "questions" | "ready" | "failed";
+        RuleQuestion: {
+            /** @description Position in the rule's questions; answers refer to it */
+            index: number;
+            text: string;
+            options: string[];
+            /** @description Empty while the question is open */
+            answer?: string;
+            note?: string;
+            /** @description The review round that asked it */
+            round: number;
+        };
+        Rule: {
+            /** Format: int64 */
+            id: number;
+            /**
+             * Format: int64
+             * @description Absent for a global rule
+             */
+            repoId?: number;
+            repoName?: string;
+            title: string;
+            /** @description The rule as written */
+            body: string;
+            enabled: boolean;
+            status: components["schemas"]["RuleStatus"];
+            /** @description What Claude will do because of the rule */
+            interpretation: string;
+            /** @description The rule rewritten with what the answers settled; empty when used as written */
+            clarified: string;
+            /** @description What tickets are given */
+            text: string;
+            questions: components["schemas"]["RuleQuestion"][];
+            /** @description Question rounds so far */
+            rounds: number;
+            /** @description Why the last review failed */
+            error: string;
+            /** Format: date-time */
+            analyzedAt?: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        RuleInput: {
+            title: string;
+            body: string;
+            /**
+             * Format: int64
+             * @description Leave out for a rule every repository follows
+             */
+            repoId?: number;
+            /** @default true */
+            enabled: boolean;
+        };
+        RuleAnswers: {
+            answers: {
+                index: number;
+                answer: string;
+                note?: string;
+            }[];
+        };
         Error: {
             /** @description Stable machine-readable code, e.g. unauthorized, bad_request */
             code: string;
@@ -1771,6 +2087,7 @@ export interface components {
     parameters: {
         RepoID: number;
         Provider: "jira" | "github" | "claude" | "telegram" | "gitlab";
+        RuleID: number;
         LessonID: number;
         TicketKey: string;
     };
@@ -1976,8 +2293,10 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
-                    /** @description Git host usernames to assign the pull request to */
+                    /** @description Git host usernames to assign the pull request to (changes only) */
                     assignees?: string[];
+                    /** @description Post the approved report as a comment on the tracker issue (reports only) */
+                    postReport?: boolean;
                 };
             };
         };
@@ -2086,6 +2405,23 @@ export interface operations {
             404: components["responses"]["NotFound"];
         };
     };
+    reviewTicket: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
     stopTicket: {
         parameters: {
             query?: never;
@@ -2136,6 +2472,50 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["TicketRepo"];
+            };
+        };
+        responses: {
+            200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    implementTicket: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ImplementInput"];
+            };
+        };
+        responses: {
+            201: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    setTicketKind: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TicketKindInput"];
             };
         };
         responses: {
@@ -3025,6 +3405,207 @@ export interface operations {
                     "application/json": components["schemas"]["Lesson"];
                 };
             };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    listRules: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Rule"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    createRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuleInput"];
+            };
+        };
+        responses: {
+            /** @description Created and queued for review */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Rule"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    getRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RuleID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Rule"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    updateRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RuleID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuleInput"];
+            };
+        };
+        responses: {
+            /** @description Saved */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Rule"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    deleteRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RuleID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    answerRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RuleID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuleAnswers"];
+            };
+        };
+        responses: {
+            /** @description Answers saved, review queued */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Rule"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    acceptRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RuleID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The rule after the change */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Rule"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    reviewRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RuleID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Queued for review */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Rule"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
         };

@@ -62,7 +62,7 @@ func (h *harness) shipped(key string) {
 	)
 	h.step() // analyze
 	h.step() // code
-	if _, err := h.o.Approve(h.ctx, key, nil, domain.OriginWeb); err != nil {
+	if _, err := h.o.Approve(h.ctx, key, nil, false, domain.OriginWeb); err != nil {
 		h.t.Fatal(err)
 	}
 	h.step() // push

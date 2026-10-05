@@ -646,6 +646,41 @@ class AppLocalizationsUz extends AppLocalizations {
   String get formSaved => 'Saqlandi';
 
   @override
+  String get formSearch => 'Qidirish';
+
+  @override
+  String get formNoMatch => 'Hech narsa topilmadi';
+
+  @override
+  String get implementTitle => 'Keyingi qadam';
+
+  @override
+  String get implementSubPlan =>
+      'hiro shu rejani bajarsin: shu bilan bogʻlangan kod vazifasi, reja uning topshirigʻi boʻladi. Diffni odatdagidek siz tekshirasiz.';
+
+  @override
+  String get implementSubBug =>
+      'hiro taklif qilingan tuzatishni kiritsin: shu bilan bogʻlangan kod vazifasi, tekshiruv uning topshirigʻi boʻladi. Diffni odatdagidek siz tekshirasiz.';
+
+  @override
+  String get implementImplement => 'Rejani bajarish';
+
+  @override
+  String get implementFix => 'Xatoni tuzatish';
+
+  @override
+  String get implementPickRepo => 'Oʻzgartirish kiritiladigan repozitoriy';
+
+  @override
+  String get implementQueue => 'Vazifani boshlamasdan navbatda qoldirish';
+
+  @override
+  String get implementDoneBy => 'Bajaruvchi vazifa:';
+
+  @override
+  String get implementImplements => 'Bajaradi';
+
+  @override
   String get integrationsTitle => 'Integratsiyalar';
 
   @override
@@ -1095,6 +1130,53 @@ class AppLocalizationsUz extends AppLocalizations {
   @override
   String get integrationsGitWebhookWhy =>
       'Pull yoki merge request birlashtirilganda hiro tiketni belgilaydi va Jira vazifasini Jira sahifasida tanlangan holatga oʻtkazadi. Pipeline hodisalari repozitoriy sahifasini yangilab turadi.';
+
+  @override
+  String get kindTitle => 'Turi';
+
+  @override
+  String get kindAuto => 'Avto';
+
+  @override
+  String get kindAutoHint => 'hiro tiketni oʻqiyotganda turini oʻzi tanlaydi';
+
+  @override
+  String get kindCode => 'Kod';
+
+  @override
+  String get kindCodeHint => 'Kodga oʻzgartirish kiritish. Repozitoriy kerak; natijasi — pull request.';
+
+  @override
+  String get kindTest => 'Testlar';
+
+  @override
+  String get kindTestHint => 'Avtotestlarni yozish yoki tuzatish. Repozitoriy kerak; natijasi — pull request.';
+
+  @override
+  String get kindPlan => 'Reja';
+
+  @override
+  String get kindPlanHint => 'Amalga oshirish rejasini yozish. Kod oʻzgarmaydi; natijasi — hisobot.';
+
+  @override
+  String get kindAnalysis => 'Tahlil';
+
+  @override
+  String get kindAnalysisHint => 'Savolni oʻrganib, xulosalarni yozish. Kod oʻzgarmaydi.';
+
+  @override
+  String get kindBug => 'Xatoni tekshirish';
+
+  @override
+  String get kindBugHint => 'Xatoning asl sababini topib, tuzatishni taklif qilish. Kod oʻzgarmaydi.';
+
+  @override
+  String get kindPickerHint => 'hiro nima qiladi. Tanlangan tur oʻzgarmaydi; «Avto»da hiro tiketni oʻqib, oʻzi hal qiladi.';
+
+  @override
+  String kindSwitchTo(String kind) {
+    return '«$kind»ga oʻtkazish';
+  }
 
   @override
   String get learnTitle => 'Oʻrganish';
@@ -2102,6 +2184,9 @@ class AppLocalizationsUz extends AppLocalizations {
   String get navLearnQueue => 'Oʻrganish navbati';
 
   @override
+  String get navRules => 'Qoidalar';
+
+  @override
   String get repoBack => 'Repozitoriylarga qaytish';
 
   @override
@@ -2499,22 +2584,10 @@ class AppLocalizationsUz extends AppLocalizations {
   String get reposNone => 'Hali repozitoriylar yoʻq. hiro ishlashi uchun birinchisini qoʻshing.';
 
   @override
-  String get reposDrawerJira => 'Jira tiketlari uchun repozitoriy';
-
-  @override
-  String get reposDrawerSide => 'Shaxsiy loyiha repozitoriysi';
+  String get reposDrawerSub => 'Shaxsiy loyiha vazifalarini, Jira loyiha kaliti boʻlsa Jira tiketlarini ham qabul qiladi';
 
   @override
   String get reposName => 'Nomi';
-
-  @override
-  String get reposKind => 'Nima uchun';
-
-  @override
-  String get reposKindJira => 'Jira tiketlari';
-
-  @override
-  String get reposKindSide => 'Shaxsiy loyiha';
 
   @override
   String get reposCloneUrl => 'Klonlash URL manzili';
@@ -2526,14 +2599,14 @@ class AppLocalizationsUz extends AppLocalizations {
   String get reposJiraProject => 'Jira loyiha kaliti';
 
   @override
-  String get reposJiraHelp => 'Ushbu Jira loyihasidagi hiro belgisi bor tiketlar shu yerda bajariladi.';
+  String get reposJiraHelp => 'Ixtiyoriy. Ushbu Jira loyihasidagi hiro belgisi bor tiketlar shu yerda bajariladi.';
 
   @override
   String get reposTaskPrefix => 'Vazifa kaliti prefiksi';
 
   @override
   String reposTaskPrefixHelp(String prefix) {
-    return 'Vazifalar $prefix-1, $prefix-2 kabi raqamlanadi.';
+    return 'Shaxsiy loyiha vazifalari $prefix-1, $prefix-2 kabi raqamlanadi. Jira loyiha kalitidan farq qilishi kerak.';
   }
 
   @override
@@ -2581,6 +2654,335 @@ class AppLocalizationsUz extends AppLocalizations {
   @override
   String get reposDeployWorkflowHelp =>
       'workflow_dispatch li GitHub Actions workflow fayli, masalan deploy.yml. Repozitoriy sahifasidagi Deploy tugmasi uni ishga tushiradi.';
+
+  @override
+  String get reviewTitle => 'hiro kod sharhi';
+
+  @override
+  String get reviewReportTitle => 'hiro hisobot sharhi';
+
+  @override
+  String get reviewSub => 'Siz koʻrib chiqayotganda ikkinchi fikr. U hech qachon tasdiqlashni toʻsmaydi: qarorni siz qabul qilasiz.';
+
+  @override
+  String get reviewPending => 'Navbatda: ishchi boʻshashi bilan hiro buni koʻrib chiqadi. Bu orada oʻzingiz koʻrib chiqishingiz mumkin.';
+
+  @override
+  String get reviewRunning => 'hiro koʻrib chiqmoqda…';
+
+  @override
+  String get reviewFailed => 'Sharh bajarilmadi. Oʻzingiz koʻrib chiqing yoki qayta ishga tushiring.';
+
+  @override
+  String get reviewNone => 'hiro buni koʻrib chiqmagan.';
+
+  @override
+  String reviewStale(String n) {
+    return 'Bu $n-tahrir sharhi; shundan beri ish oʻzgargan.';
+  }
+
+  @override
+  String get reviewRun => 'hiro bilan koʻrib chiqish';
+
+  @override
+  String get reviewRunAgain => 'Qayta koʻrib chiqish';
+
+  @override
+  String get reviewVerdict_looks_good => 'Hammasi yaxshi';
+
+  @override
+  String get reviewVerdict_has_concerns => 'Eʼtirozlar bor';
+
+  @override
+  String get reviewVerdict_needs_changes => 'Oʻzgartirish kerak';
+
+  @override
+  String get reviewSev_blocker => 'Toʻsiq';
+
+  @override
+  String get reviewSev_major => 'Jiddiy';
+
+  @override
+  String get reviewSev_minor => 'Kichik';
+
+  @override
+  String get reviewSev_nit => 'Mayda';
+
+  @override
+  String get reviewCat_correctness => 'Toʻgʻrilik';
+
+  @override
+  String get reviewCat_security => 'Xavfsizlik';
+
+  @override
+  String get reviewCat_performance => 'Unumdorlik';
+
+  @override
+  String get reviewCat_tests => 'Testlar';
+
+  @override
+  String get reviewCat_rules => 'Jamoa qoidalari';
+
+  @override
+  String get reviewCat_maintainability => 'Qoʻllab-quvvatlash';
+
+  @override
+  String get reviewCat_accuracy => 'Aniqlik';
+
+  @override
+  String get reviewCat_completeness => 'Toʻliqlik';
+
+  @override
+  String get reviewCat_other => 'Boshqa';
+
+  @override
+  String reviewFindings(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count ta topilma', zero: 'Topilma yoʻq');
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewNoFindings => 'hiro muammo topmadi.';
+
+  @override
+  String get reviewStrengths => 'Yaxshi qilingan';
+
+  @override
+  String get reviewSuggestion => 'Taklif';
+
+  @override
+  String get reviewAddToFeedback => 'Fikrga qoʻshish';
+
+  @override
+  String get reviewAdded => 'Fikrda';
+
+  @override
+  String get reviewAddAll => 'Hammasini fikrga qoʻshish';
+
+  @override
+  String get reviewShowInDiff => 'Diffda koʻrsatish';
+
+  @override
+  String reviewModel(String model, String reason) {
+    return '$model koʻrib chiqdi: $reason';
+  }
+
+  @override
+  String get rulesTitle => 'Qoidalar';
+
+  @override
+  String get rulesLede =>
+      'hiro har bir tiketda amal qiladigan koʻrsatmalar: barcha repozitoriylar uchun global qoidalar va bitta repozitoriy uchun qoidalar. Claude har bir qoidani tekshiradi va u kuchga kirishidan oldin noaniq joylar haqida savol beradi.';
+
+  @override
+  String get rulesAdd => 'Qoida qoʻshish';
+
+  @override
+  String get rulesAddSubmit => 'Qoʻshish va tekshirish';
+
+  @override
+  String get rulesDrawerSub => 'Yangi hamkasbga tushuntirgandek yozing. Claude uni biror tiket amal qilishidan oldin tekshiradi.';
+
+  @override
+  String get rulesRuleTitle => 'Nomi';
+
+  @override
+  String get rulesTitlePlaceholder => 'Yangi endpointlar uchun testlar';
+
+  @override
+  String get rulesScope => 'Qayerda amal qiladi';
+
+  @override
+  String get rulesScopeHelp =>
+      'Global qoidalar barcha repozitoriylarda amal qiladi. Ular bir-biriga zid boʻlsa, repozitoriy qoidasi ustun.';
+
+  @override
+  String get rulesGlobal => 'Global';
+
+  @override
+  String get rulesGlobalHint => 'Barcha repozitoriylar';
+
+  @override
+  String get rulesBody => 'Qoida';
+
+  @override
+  String get rulesBodyPlaceholder => 'Har bir yangi HTTP endpoint uchun handler yonida integratsion test yoziladi.';
+
+  @override
+  String get rulesBodyHelp => 'Nima qilish, qayerda va qoidaga amal qilib boʻlmasa nima qilishni yozing.';
+
+  @override
+  String get rulesEnabled => 'Yoqilgan';
+
+  @override
+  String rulesEnabledFor(String title) {
+    return '$title qoidasi yoqilgan';
+  }
+
+  @override
+  String get rulesRereviewHelp =>
+      'Qoida matnini oʻzgartirdingiz, shuning uchun Claude uni qayta tekshiradi. Tekshiruv tugaguncha tiketlar uni olmaydi.';
+
+  @override
+  String get rulesSaved => 'Qoida saqlandi';
+
+  @override
+  String get rulesSavedReview => 'Qoida saqlandi; Claude uni tekshirmoqda';
+
+  @override
+  String get rulesScopeLabel => 'Qoidalarni koʻrsatish';
+
+  @override
+  String rulesScopeAll(String n) {
+    return 'Barcha qoidalar ($n)';
+  }
+
+  @override
+  String rulesScopeGlobal(String n) {
+    return 'Global ($n)';
+  }
+
+  @override
+  String get rulesNone =>
+      'Hali qoidalar yoʻq. Jamoangiz qanday ishlashini hiroga aytish uchun qoida qoʻshing: testlar, nomlash, loglash, nimaga tegmaslik kerak.';
+
+  @override
+  String get rulesNoMatch => 'Mos qoidalar yoʻq.';
+
+  @override
+  String rulesWaitingHelp(num n) {
+    return '$n ta qoida javoblaringizni kutmoqda. Javob berilmaguncha ular tiketlarga qoʻllanmaydi.';
+  }
+
+  @override
+  String get rulesStatus_pending => 'Tekshiruv navbatida';
+
+  @override
+  String get rulesStatus_analyzing => 'Tekshirilmoqda';
+
+  @override
+  String get rulesStatus_questions => 'Javob kerak';
+
+  @override
+  String get rulesStatus_ready => 'Amal qiladi';
+
+  @override
+  String get rulesStatus_failed => 'Tekshiruv muvaffaqiyatsiz';
+
+  @override
+  String get rulesOff => 'Oʻchirilgan';
+
+  @override
+  String get rulesEdit => 'Tahrirlash';
+
+  @override
+  String get rulesDelete => 'Oʻchirish';
+
+  @override
+  String rulesDeleteBody(String title) {
+    return '“$title” qoidasini oʻchirasizmi? Bundan keyin boshlangan tiketlar unga amal qilmaydi.';
+  }
+
+  @override
+  String get rulesPending => 'Boʻsh ishchini kutmoqda. Claude qoidalarni keyingi tiket boshlanishidan oldin tekshiradi.';
+
+  @override
+  String get rulesAnalyzing => 'Claude qoidani oʻqib, undagi noaniqlik va ziddiyatlarni qidirmoqda.';
+
+  @override
+  String rulesQuestionsTitle(num n) {
+    return 'Qoida kuchga kirishidan oldin $n ta savol';
+  }
+
+  @override
+  String get rulesQuestionsSub => 'Claude noaniq joy topdi. Javoblaringiz qoidaning bir qismiga aylanadi.';
+
+  @override
+  String get rulesYourAnswer => 'Javobingiz';
+
+  @override
+  String get rulesAddDetails => 'Tafsilot qoʻshing (ixtiyoriy)';
+
+  @override
+  String rulesAnswerFor(String n) {
+    return '$n-savolga javob';
+  }
+
+  @override
+  String rulesDetailsFor(String n) {
+    return '$n-savol uchun tafsilot';
+  }
+
+  @override
+  String get rulesSendAnswers => 'Javoblarni yuborish';
+
+  @override
+  String rulesQuestionsLeft(num n) {
+    return 'Javobsiz $n ta savol qoldi';
+  }
+
+  @override
+  String get rulesAllAnswered => 'Barcha savollarga javob berildi';
+
+  @override
+  String get rulesAccept => 'Yozilganicha ishlatish';
+
+  @override
+  String get rulesAcceptTitle => 'Qoidani yozilganicha ishlatasizmi?';
+
+  @override
+  String get rulesAcceptBody =>
+      'Tiketlar qoidani siz yozgandek, hozirgacha berilgan javoblar bilan oladi. Ochiq savollar tashlab yuboriladi.';
+
+  @override
+  String rulesFailed(String error) {
+    return 'Claude bu qoidani tekshira olmadi: $error';
+  }
+
+  @override
+  String get rulesReviewAgain => 'Qayta tekshirish';
+
+  @override
+  String get rulesInterpretation => 'hiro uni qanday tushunadi';
+
+  @override
+  String get rulesClarified => 'Tiketlar nimani oladi';
+
+  @override
+  String get rulesAsWritten => 'Yozilganicha ishlatiladi.';
+
+  @override
+  String rulesAnswersTitle(num n) {
+    return 'Javob berilgan $n ta savol';
+  }
+
+  @override
+  String rulesReviewedAgo(String ago) {
+    return '$ago tekshirilgan';
+  }
+
+  @override
+  String rulesAddedAgo(String ago) {
+    return '$ago qoʻshilgan';
+  }
+
+  @override
+  String get rulesAnswered => 'Javoblar yuborildi; Claude qoidani qayta tekshirmoqda';
+
+  @override
+  String get rulesAccepted => 'Qoida yozilganicha amal qiladi';
+
+  @override
+  String get rulesQueued => 'Tekshiruv navbatiga qoʻyildi';
+
+  @override
+  String get rulesDeleted => 'Qoida oʻchirildi';
+
+  @override
+  String get rulesTurnedOn => 'Qoida yoqildi';
+
+  @override
+  String get rulesTurnedOff => 'Qoida oʻchirildi';
 
   @override
   String get settingsTitle => 'Sozlamalar';
@@ -2676,6 +3078,16 @@ class AppLocalizationsUz extends AppLocalizations {
   String get settingsStageLearnHelp => 'Har bir yuborilgan oʻzgarishni oʻqiydi va repozitoriy uchun yangi narsalar haqida dars yozadi.';
 
   @override
+  String get settingsStageReview => 'Kod sharhi';
+
+  @override
+  String get settingsStageReviewHelp =>
+      'Har bir natijani siz koʻrib chiqayotganda tekshiradi. Avto murakkab tiketlar uchun Opus, qolganlari uchun Sonnet ishlatadi.';
+
+  @override
+  String get settingsModelAuto => 'Avto';
+
+  @override
   String get settingsMaxTurns => 'Har bir ish uchun qadamlar limiti';
 
   @override
@@ -2759,6 +3171,13 @@ class AppLocalizationsUz extends AppLocalizations {
       'Yuborilgandan keyin hiro repozitoriyda avval ishlatilmagan usullarni qidiradi va «Oʻrganish» boʻlimida dars yozadi. Limitni faqat kutayotgan tiket boʻlmaganda sarflaydi.';
 
   @override
+  String get settingsAutoReview => 'Har bir natijani koʻrib chiqish';
+
+  @override
+  String get settingsAutoReviewHelp =>
+      'Oʻzgarish yoki hisobot sizni kutayotganda hiro uni koʻrib chiqadi va topilmalarni yonida koʻrsatadi. Tasdiqlashni hech qachon toʻsmaydi.';
+
+  @override
   String get settingsPauseAbove => 'Bundan yuqorida yangi ish boshlamaslik';
 
   @override
@@ -2804,6 +3223,9 @@ class AppLocalizationsUz extends AppLocalizations {
   String get settingsLessons => 'hiro oʻrganish uchun yangi narsa topganda';
 
   @override
+  String get settingsReviewDone => 'hiro kod sharhi tugaganda';
+
+  @override
   String get settingsOnThisPage => 'Ushbu sahifada';
 
   @override
@@ -2845,6 +3267,15 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get stateRate_limited => 'Pauza: tarif limiti';
+
+  @override
+  String get stateReportCoding => 'Hisobot yozmoqda';
+
+  @override
+  String get stateReportPushing => 'Topshirmoqda';
+
+  @override
+  String get stateReportDone => 'Tayyor';
 
   @override
   String get tasksTitle => 'Vazifalar';
@@ -2984,6 +3415,12 @@ class AppLocalizationsUz extends AppLocalizations {
   String tasksCount(num n) {
     return '$n ta vazifa';
   }
+
+  @override
+  String get tasksNoRepo => 'Repozitoriysiz';
+
+  @override
+  String get tasksRepoNeeded => 'Kod va testlar uchun repozitoriy kerak: uni yoki boshqa turni tanlang.';
 
   @override
   String get ticketBack => 'Barcha tiketlar';
@@ -3345,6 +3782,14 @@ class AppLocalizationsUz extends AppLocalizations {
   String get ticketStageRetry => 'Qayta urinishlar va soʻralgan oʻzgarishlar';
 
   @override
+  String get ticketStageReview => 'hiro kod sharhi';
+
+  @override
+  String ticketModelAuto(String model) {
+    return 'Avto ($model)';
+  }
+
+  @override
   String get ticketSideTicket => 'Tiket';
 
   @override
@@ -3452,6 +3897,111 @@ class AppLocalizationsUz extends AppLocalizations {
   String ticketMergedAt(String time) {
     return 'Birlashtirildi: $time.';
   }
+
+  @override
+  String get ticketRepoTitle => 'Repozitoriy';
+
+  @override
+  String get ticketRepoHint => 'hiro shu tiketni qayerda tahlil qiladi va kod yozadi.';
+
+  @override
+  String get ticketRepoNone => 'Repozitoriyni tanlang…';
+
+  @override
+  String get ticketRepoMissing => 'Tiketga repozitoriy bogʻlanmagan. Birini tanlang va qayta urinib koʻring.';
+
+  @override
+  String get ticketRepoRestartTitle => 'Repozitoriy almashtirilsinmi?';
+
+  @override
+  String ticketRepoRestart(String repo, String next) {
+    return 'Bu tiket boʻyicha $repo da ish boshlangan edi. $next da qayta urinishda tahlildan boshlanadi.';
+  }
+
+  @override
+  String get ticketRepoChange => 'Almashtirish';
+
+  @override
+  String ticketRepoChanged(String repo) {
+    return 'Repozitoriy: $repo';
+  }
+
+  @override
+  String get ticketQueuedSubReport =>
+      'hiro tiketni (repozitoriy boʻlsa, kodni ham) oʻqiydi va reja hamda savollar bilan qaytadi. Hech narsa oʻzgarmaydi.';
+
+  @override
+  String get ticketAnalyzingTitleNoRepo => 'Tiketni oʻqiyapti';
+
+  @override
+  String get ticketAnalyzingSubNoRepo => 'Repozitoriy yoʻq: hiro tiket matni asosida ishlaydi.';
+
+  @override
+  String get ticketStartWriting => 'Hisobotni boshlash';
+
+  @override
+  String get ticketWritingTitle => 'Hisobot yozilmoqda';
+
+  @override
+  String get ticketWritingSub => 'Yangi konteynerda ishlayapti. Kod oʻzgarmaydi; avval hisobotni siz tekshirasiz.';
+
+  @override
+  String get ticketReviewReportTitle => 'Hisobotni tekshiring';
+
+  @override
+  String get ticketReviewReportSub => 'Tasdiqlansa, hisobot shu yerda qoladi va vazifa yopiladi.';
+
+  @override
+  String get ticketReviewReportSubJira =>
+      'Tasdiqlansa, hisobot shu yerda qoladi va tiket yopiladi. Quyidagi belgini qoʻysangizgina Jira\'ga yuboriladi.';
+
+  @override
+  String get ticketReport => 'Hisobot';
+
+  @override
+  String get ticketReportMissing => 'Hisobot saqlanmagan.';
+
+  @override
+  String ticketPostReport(String key) {
+    return 'Hisobotni Jira\'dagi $key ga izoh sifatida ham yuborish';
+  }
+
+  @override
+  String get ticketFeedbackReportHint => 'Hisobotda nimani oʻzgartirish yoki qoʻshish kerak?';
+
+  @override
+  String get ticketApproveReport => 'Tasdiqlash';
+
+  @override
+  String get ticketApproveReportConfirm => 'Hisobotni tasdiqlab, tiketni yopasizmi?';
+
+  @override
+  String ticketApproveReportPostConfirm(String key) {
+    return 'Hisobotni tasdiqlab, tiketni yopib, hisobotni Jira\'dagi $key ga yuborasizmi?';
+  }
+
+  @override
+  String get ticketDeliveringTitle => 'Yakunlamoqda';
+
+  @override
+  String get ticketDeliveringSub => 'Tasdiqlangan hisobotni saqlayapti va soʻragan boʻlsangiz, Jira\'ga yuboryapti.';
+
+  @override
+  String get ticketDoneReportTitle => 'Hisobot tasdiqlandi';
+
+  @override
+  String get ticketDoneReport => 'Hisobot shu yerda saqlanadi.';
+
+  @override
+  String ticketDoneReportPosted(String key) {
+    return 'Hisobot shu yerda saqlanadi va Jira\'dagi $key ga yuborildi.';
+  }
+
+  @override
+  String get ticketStopWriting => 'Hisobot';
+
+  @override
+  String get ticketStopDone => 'Tayyor';
 
   @override
   String get ticketsTitle => 'Tiketlar';

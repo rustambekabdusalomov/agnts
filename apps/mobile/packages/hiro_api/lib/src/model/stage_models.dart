@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:hiro_api/src/model/review_model.dart';
 import 'package:hiro_api/src/model/model.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -30,6 +31,8 @@ class StageModels {
     required  this.helper,
 
      this.learn,
+
+     this.review,
   });
 
   @JsonKey(
@@ -92,6 +95,18 @@ class StageModels {
 
 
 
+  @JsonKey(
+    
+    name: r'review',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final ReviewModel? review;
+
+
+
 
 
     @override
@@ -100,7 +115,8 @@ class StageModels {
       other.coding == coding &&
       other.retry == retry &&
       other.helper == helper &&
-      other.learn == learn;
+      other.learn == learn &&
+      other.review == review;
 
     @override
     int get hashCode =>
@@ -108,7 +124,8 @@ class StageModels {
         coding.hashCode +
         retry.hashCode +
         helper.hashCode +
-        learn.hashCode;
+        learn.hashCode +
+        review.hashCode;
 
   factory StageModels.fromJson(Map<String, dynamic> json) => _$StageModelsFromJson(json);
 

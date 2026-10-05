@@ -6,14 +6,22 @@ import { MODEL_NAME, MODELS, type Model, type Ticket } from '../../api/types'
 import { useUi } from '../../stores/ui'
 
 // Per-ticket model overrides; "Default" follows Settings.
-type Stage = 'analyze' | 'coding' | 'retry'
+type Stage = 'analyze' | 'coding' | 'retry' | 'review'
 const props = defineProps<{ ticket: Ticket; stages: Stage[] }>()
 const { t } = useI18n()
 const qc = useQueryClient()
 const ui = useUi()
 
 const settings = useQuery({ queryKey: ['settings'], queryFn: () => unwrap(api.GET('/settings')) })
-const LABEL: Record<Stage, string> = { analyze: 'stageAnalyze', coding: 'stageCoding', retry: 'stageRetry' }
+const LABEL: Record<Stage, string> = { analyze: 'stageAnalyze', coding: 'stageCoding', retry: 'stageRetry', review: 'stageReview' }
+
+// The review model may be auto in Settings: hiro picks by complexity.
+function defaultLabel(s: Stage): string {
+  const m = settings.data.value?.models[s]
+  if (!m) return t('ticket.modelDefault', { model: '…' })
+  if (m === 'auto') return t('ticket.modelAuto', { model: 'Sonnet / Opus' })
+  return t('ticket.modelDefault', { model: MODEL_NAME[m] })
+}
 
 const current = (s: Stage): Model | 'default' => props.ticket.models?.[s] ?? 'default'
 
@@ -40,7 +48,7 @@ function pick(stage: Stage, value: Model | 'default') {
       <div><div class="cfg-lbl" style="font-size: 14.5px">{{ t(`ticket.${LABEL[s]}`) }}</div></div>
       <div class="seg" role="group" :aria-label="t(`ticket.${LABEL[s]}`)">
         <button class="seg-b" type="button" :aria-pressed="current(s) === 'default'" :disabled="save.isPending.value" @click="pick(s, 'default')">
-          {{ t('ticket.modelDefault', { model: settings.data.value ? MODEL_NAME[settings.data.value.models[s]] : '…' }) }}
+          {{ defaultLabel(s) }}
         </button>
         <button v-for="m in MODELS" :key="m" class="seg-b" type="button" :aria-pressed="current(s) === m" :disabled="save.isPending.value" @click="pick(s, m)">
           {{ MODEL_NAME[m] }}

@@ -21,6 +21,7 @@ export const router = createRouter({
     { path: '/learn', name: 'learn', component: () => import('../pages/LearnPage.vue') },
     { path: '/learn-queue', name: 'learnQueue', component: () => import('../pages/LearnQueuePage.vue') },
     { path: '/learn/:id', name: 'lesson', component: () => import('../pages/LessonPage.vue') },
+    { path: '/rules', name: 'rules', component: () => import('../pages/RulesPage.vue') },
     { path: '/settings', name: 'settings', component: () => import('../pages/SettingsPage.vue') },
     { path: '/oauth/consent', name: 'consent', component: () => import('../pages/ConsentPage.vue'), meta: { bare: true } },
     { path: '/:pathMatch(.*)*', redirect: '/dashboard' },

@@ -1,0 +1,110 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'analysis.dart';
+
+// **************************************************************************
+// CopyWithGenerator
+// **************************************************************************
+
+abstract class _$AnalysisCWProxy {
+  Analysis summary(String summary);
+
+  Analysis plan(List<String> plan);
+
+  Analysis complexity(AnalysisComplexityEnum? complexity);
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Analysis(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// Analysis(...).copyWith(id: 12, name: "My name")
+  /// ````
+  Analysis call({
+    String summary,
+    List<String> plan,
+    AnalysisComplexityEnum? complexity,
+  });
+}
+
+/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfAnalysis.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfAnalysis.copyWith.fieldName(...)`
+class _$AnalysisCWProxyImpl implements _$AnalysisCWProxy {
+  const _$AnalysisCWProxyImpl(this._value);
+
+  final Analysis _value;
+
+  @override
+  Analysis summary(String summary) => this(summary: summary);
+
+  @override
+  Analysis plan(List<String> plan) => this(plan: plan);
+
+  @override
+  Analysis complexity(AnalysisComplexityEnum? complexity) =>
+      this(complexity: complexity);
+
+  @override
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Analysis(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// Analysis(...).copyWith(id: 12, name: "My name")
+  /// ````
+  Analysis call({
+    Object? summary = const $CopyWithPlaceholder(),
+    Object? plan = const $CopyWithPlaceholder(),
+    Object? complexity = const $CopyWithPlaceholder(),
+  }) {
+    return Analysis(
+      summary: summary == const $CopyWithPlaceholder()
+          ? _value.summary
+          // ignore: cast_nullable_to_non_nullable
+          : summary as String,
+      plan: plan == const $CopyWithPlaceholder()
+          ? _value.plan
+          // ignore: cast_nullable_to_non_nullable
+          : plan as List<String>,
+      complexity: complexity == const $CopyWithPlaceholder()
+          ? _value.complexity
+          // ignore: cast_nullable_to_non_nullable
+          : complexity as AnalysisComplexityEnum?,
+    );
+  }
+}
+
+extension $AnalysisCopyWith on Analysis {
+  /// Returns a callable class that can be used as follows: `instanceOfAnalysis.copyWith(...)` or like so:`instanceOfAnalysis.copyWith.fieldName(...)`.
+  // ignore: library_private_types_in_public_api
+  _$AnalysisCWProxy get copyWith => _$AnalysisCWProxyImpl(this);
+}
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+Analysis _$AnalysisFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('Analysis', json, ($checkedConvert) {
+      $checkKeys(json, requiredKeys: const ['summary', 'plan']);
+      final val = Analysis(
+        summary: $checkedConvert('summary', (v) => v as String),
+        plan: $checkedConvert(
+          'plan',
+          (v) => (v as List<dynamic>).map((e) => e as String).toList(),
+        ),
+        complexity: $checkedConvert(
+          'complexity',
+          (v) => $enumDecodeNullable(_$AnalysisComplexityEnumEnumMap, v),
+        ),
+      );
+      return val;
+    });
+
+Map<String, dynamic> _$AnalysisToJson(Analysis instance) => <String, dynamic>{
+  'summary': instance.summary,
+  'plan': instance.plan,
+  'complexity': ?_$AnalysisComplexityEnumEnumMap[instance.complexity],
+};
+
+const _$AnalysisComplexityEnumEnumMap = {
+  AnalysisComplexityEnum.simple: 'simple',
+  AnalysisComplexityEnum.complex: 'complex',
+};

@@ -48,6 +48,12 @@ void main() {
       // TODO
     });
 
+    // Review every result while it waits for review
+    // bool autoReview
+    test('to test the property `autoReview`', () async {
+      // TODO
+    });
+
     // int pauseAbove
     test('to test the property `pauseAbove`', () async {
       // TODO

@@ -53,13 +53,17 @@ type Store interface {
 
 	RepositoryByID(ctx context.Context, id int64) (domain.Repository, error)
 	RepositoryByJiraProject(ctx context.Context, project string) (domain.Repository, error)
-	NextTaskNumber(ctx context.Context, repoID int64) (int, error)
+	// NextTaskNumber reserves a task number in repoID, or among tasks
+	// without a repository when it is nil.
+	NextTaskNumber(ctx context.Context, repoID *int64) (int, error)
 	DeleteTicket(ctx context.Context, key string, ev domain.Event) error
 	// StateSince returns when each ticket entered its current state and,
 	// for failed or paused ones, the reason.
 	StateSince(ctx context.Context, keys []string) (map[string]StateInfo, error)
 	History(ctx context.Context, key string) ([]HistoryItem, error)
 	TicketByPR(ctx context.Context, url, branch string) (domain.Ticket, error)
+	// ChildOf returns the ticket that implements parentKey, or ErrNotFound.
+	ChildOf(ctx context.Context, parentKey string) (domain.Ticket, error)
 }
 
 // Lessons is the knowledge base the learn stage reads and adds to.
@@ -71,6 +75,26 @@ type Lessons interface {
 	// marks the ticket's learn state done, and appends the event ev builds
 	// from the lessons stored. It returns those stored.
 	SaveLessons(ctx context.Context, ticketKey string, ls []domain.Lesson, ev func(saved []domain.Lesson) domain.Event) ([]domain.Lesson, error)
+}
+
+// Rules are the instructions the user wrote for every ticket, and the queue
+// of rules waiting for Claude's review.
+type Rules interface {
+	Rule(ctx context.Context, id int64) (domain.Rule, error)
+	ListRules(ctx context.Context) ([]domain.Rule, error)
+	// ActiveRules returns the enabled, reviewed rules for tickets in repoID
+	// (global ones first); nil gives the global rules only.
+	ActiveRules(ctx context.Context, repoID *int64) ([]domain.Rule, error)
+	CreateRule(ctx context.Context, r domain.Rule, ev func(domain.Rule) domain.Event) (domain.Rule, error)
+	// UpdateRule applies mut to the locked rule and appends the event ev
+	// returns (nil for none) in the same transaction.
+	UpdateRule(ctx context.Context, id int64, mut func(*domain.Rule) error, ev func(domain.Rule) *domain.Event) (domain.Rule, error)
+	DeleteRule(ctx context.Context, id int64, ev domain.Event) error
+	// ClaimRule moves the oldest pending rule to analyzing; ok is false
+	// when none is waiting.
+	ClaimRule(ctx context.Context) (r domain.Rule, ok bool, err error)
+	// RecoverRules requeues reviews a crash left running.
+	RecoverRules(ctx context.Context) (int, error)
 }
 
 // StateInfo is when a ticket entered its state, and why it stopped.
@@ -231,6 +255,7 @@ const (
 	CommentPR        CommentKind = "pr"
 	CommentSummary   CommentKind = "summary"
 	CommentStatus    CommentKind = "status"
+	CommentReport    CommentKind = "report" // an approved report, posted on request
 )
 
 // Tracker posts back to the issue tracker. Failures are logged, never fatal.

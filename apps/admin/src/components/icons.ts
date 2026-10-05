@@ -20,5 +20,6 @@ export const ICON: Record<string, string> = {
   "plus": "<path d=\"M12 5v14M5 12h14\"/>",
   "close": "<path d=\"M6 6l12 12M18 6L6 18\"/>",
   "check": "<path d=\"M5 12.5l4.5 4.5L19 7.5\"/>",
+  "rules": "<path d=\"M7 3h8l4 4v14H7z\"/><path d=\"M15 3v4h4\"/><path d=\"M10 12h6M10 16h4\"/><path d=\"M4 7v13a1 1 0 0 0 1 1h1\"/>",
   "import": "<path d=\"M12 4v11M7.5 10.5L12 15l4.5-4.5\"/><path d=\"M4 19h16\"/>"
 }

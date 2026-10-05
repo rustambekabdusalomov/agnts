@@ -122,6 +122,7 @@ type fakeGit struct {
 	mu      sync.Mutex
 	commits int
 	pushed  []string
+	files   []domain.FileChange // what Commit reports, when set
 }
 
 func (g *fakeGit) Prepare(context.Context, domain.Repository, string) error { return nil }
@@ -137,6 +138,9 @@ func (g *fakeGit) Commit(_ context.Context, _ domain.Repository, _ string, tree 
 	g.mu.Lock()
 	defer g.mu.Unlock()
 	g.commits++
+	if g.files != nil {
+		return "sha" + string(rune('0'+g.commits)), g.files, nil
+	}
 	return "sha" + string(rune('0'+g.commits)), []domain.FileChange{{Path: "main.go", Add: 3, Del: 1, Diff: "+fix"}}, nil
 }
 
@@ -280,6 +284,7 @@ func newHarness(t *testing.T) *harness {
 	cfg.FixAttempts = 1
 	h.settings = &fakeSettings{s: domain.DefaultSettings()}
 	h.settings.s.Git.AuthorName, h.settings.s.Git.AuthorEmail = "Rustam", "r@example.com"
+	h.settings.s.AutoReview = false // review_test.go turns it on
 	h.usage = &fakeUsage{}
 	h.o = orchestrator.New(cfg, orchestrator.Deps{
 		Store: store, Runner: h.runner, Git: h.git, Host: h.host, Tracker: h.tracker, Homes: &memHomes{},
@@ -396,10 +401,10 @@ func TestHappyPathWithQuestions(t *testing.T) {
 		t.Fatal("pushed before approval")
 	}
 
-	if _, err := h.o.Approve(h.ctx, "PAY-1", nil, domain.OriginWeb); err != nil {
+	if _, err := h.o.Approve(h.ctx, "PAY-1", nil, false, domain.OriginWeb); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := h.o.Approve(h.ctx, "PAY-1", nil, domain.OriginWeb); !errors.Is(err, domain.ErrConflict) {
+	if _, err := h.o.Approve(h.ctx, "PAY-1", nil, false, domain.OriginWeb); !errors.Is(err, domain.ErrConflict) {
 		t.Fatalf("double approve: %v", err)
 	}
 	h.step() // push
@@ -508,10 +513,10 @@ func TestRequestChangesResumesSession(t *testing.T) {
 
 func TestRejectAndNoRepo(t *testing.T) {
 	h := newHarness(t)
-	if _, err := h.o.Ingest(h.ctx, orchestrator.Incoming{Key: "OPS-1", Project: "OPS", Title: "No repo"}, domain.OriginWebhook); err != nil {
+	if _, err := h.o.Ingest(h.ctx, orchestrator.Incoming{Key: "OPS-1", Project: "OPS", Title: "No repo", Kind: domain.KindCode}, domain.OriginWebhook); err != nil {
 		t.Fatal(err)
 	}
-	h.step()
+	h.step() // code was chosen, so there is nothing to analyse without a repository
 	tk := h.expect("OPS-1", domain.StateFailed)
 	if tk.ResumeState != domain.StateNew {
 		t.Fatalf("resume %s", tk.ResumeState)
@@ -600,7 +605,7 @@ func TestTaskLifecyclePushToMain(t *testing.T) {
 	}
 	h.step()
 	h.expect("VIS-1", domain.StateWaitingForReview)
-	if _, err := h.o.Approve(h.ctx, "VIS-1", nil, domain.OriginWeb); err != nil {
+	if _, err := h.o.Approve(h.ctx, "VIS-1", nil, false, domain.OriginWeb); err != nil {
 		t.Fatal(err)
 	}
 	h.step()
@@ -667,11 +672,11 @@ func TestModelsStopAndPRTemplate(t *testing.T) {
 	if len(models) != 2 || models[0] != "haiku" || models[1] != h.settings.s.Models.Coding {
 		t.Fatalf("models used: %v", models)
 	}
-	if _, err := h.o.Approve(h.ctx, "PAY-21", []string{"bad name"}, domain.OriginWeb); !errors.Is(err, orchestrator.ErrInvalid) {
+	if _, err := h.o.Approve(h.ctx, "PAY-21", []string{"bad name"}, false, domain.OriginWeb); !errors.Is(err, orchestrator.ErrInvalid) {
 		t.Fatalf("username with a space accepted: %v", err)
 	}
 	tk := h.expect("PAY-21", domain.StateWaitingForReview)
-	if _, err := h.o.Approve(h.ctx, "PAY-21", []string{" alice ", "bob", "alice", ""}, domain.OriginWeb); err != nil {
+	if _, err := h.o.Approve(h.ctx, "PAY-21", []string{" alice ", "bob", "alice", ""}, false, domain.OriginWeb); err != nil {
 		t.Fatal(err)
 	}
 	tk = h.expect("PAY-21", domain.StatePushing)

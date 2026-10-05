@@ -66,7 +66,7 @@ func parseLessons(b []byte, repoID int64, key string) ([]domain.Lesson, error) {
 
 // learnQueued reports whether a ticket that just got done should be learned from.
 func (o *Orchestrator) learnQueued(s domain.Settings, t domain.Ticket) bool {
-	return o.lessons != nil && s.AutoLearn && t.RepoID != nil
+	return o.lessons != nil && s.AutoLearn && t.RepoID != nil && t.Kind.Spec().Learn
 }
 
 // Learn queues a learn run for a done ticket (again, if it already ran).
@@ -121,7 +121,7 @@ func (o *Orchestrator) learn(ctx context.Context, s domain.Settings, t domain.Ti
 		topics = topics[:learnMaxTopics]
 	}
 
-	ws, err := o.openWorkspace(ctx, t, repo, t.Branch, run)
+	ws, err := o.openWorkspace(ctx, t, &repo, t.Branch, run)
 	if err != nil {
 		return err
 	}

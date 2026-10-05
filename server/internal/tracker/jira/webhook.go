@@ -85,11 +85,11 @@ func WebhookHandler(cfg ConfigSource, ing Ingester, dedup Deduper, log *slog.Log
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
-		if !p.Issue.hasLabel(c.Label) {
+		if !p.Issue.forHiro(c.Label) {
 			w.WriteHeader(http.StatusNoContent) // not for hiro (or the label was removed)
 			return
 		}
-		created, err := ing.Ingest(ctx, p.Issue.incoming(), domain.OriginWebhook)
+		created, err := ing.Ingest(ctx, p.Issue.incoming(c.Label), domain.OriginWebhook)
 		if err != nil {
 			log.Error("jira webhook: ingest", "issue", p.Issue.Key, "err", err)
 			w.WriteHeader(http.StatusInternalServerError) // Jira retries

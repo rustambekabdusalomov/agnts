@@ -7,6 +7,7 @@ import { api, unwrap } from '../api/client'
 import { BOARD_GROUPS, type RemoteRepository, type Repository } from '../api/types'
 import PageHeader from '../components/PageHeader.vue'
 import StateBadge from '../components/StateBadge.vue'
+import KindBadge from '../components/ticket/KindBadge.vue'
 import ImportDrawer from '../components/repos/ImportDrawer.vue'
 import RepoDrawer from '../components/repos/RepoDrawer.vue'
 import { useRepos } from '../components/repos/useRepos'
@@ -129,11 +130,11 @@ function repoSaved(r: Repository) {
                 @keydown.enter="router.push(`/tickets/${x.key}`)"
               >
                 <td>
-                  <div class="tkey">{{ x.key }}</div>
+                  <div class="tkey">{{ x.key }} <KindBadge v-if="x.kind !== 'code'" :ticket="x" /></div>
                   <div class="ttitle">{{ x.title }}</div>
                 </td>
                 <td class="muted">{{ x.repoName ?? '—' }}</td>
-                <td><StateBadge :state="x.state" /></td>
+                <td><StateBadge :state="x.state" :kind="x.kind" /></td>
                 <td class="muted">{{ ago(x.updatedAt, locale) }}</td>
               </tr>
             </tbody>

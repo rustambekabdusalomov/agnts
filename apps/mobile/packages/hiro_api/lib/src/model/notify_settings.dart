@@ -31,6 +31,8 @@ class NotifySettings {
     required  this.done,
 
      this.lessons,
+
+     this.review,
   });
 
   @JsonKey(
@@ -106,6 +108,19 @@ class NotifySettings {
 
 
 
+      /// A code review finished
+  @JsonKey(
+    
+    name: r'review',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? review;
+
+
+
 
 
     @override
@@ -115,7 +130,8 @@ class NotifySettings {
       other.needsYou == needsYou &&
       other.stopped == stopped &&
       other.done == done &&
-      other.lessons == lessons;
+      other.lessons == lessons &&
+      other.review == review;
 
     @override
     int get hashCode =>
@@ -124,7 +140,8 @@ class NotifySettings {
         needsYou.hashCode +
         stopped.hashCode +
         done.hashCode +
-        lessons.hashCode;
+        lessons.hashCode +
+        review.hashCode;
 
   factory NotifySettings.fromJson(Map<String, dynamic> json) => _$NotifySettingsFromJson(json);
 

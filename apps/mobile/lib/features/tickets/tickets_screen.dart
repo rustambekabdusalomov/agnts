@@ -172,7 +172,7 @@ class TicketTile extends StatelessWidget {
         t.source_ == TicketSource_Enum.local ? l.ticketsSourceTask : l.ticketsSourceJira,
         if (t.repoName != null) t.repoName!,
       ].join(' · ')),
-      trailing: StateBadge(t.state),
+      trailing: StateBadge(t.state, kind: t.kind),
       onTap: () => context.push('/tickets/${t.key}'),
     );
   }

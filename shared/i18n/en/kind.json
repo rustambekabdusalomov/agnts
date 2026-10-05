@@ -1,0 +1,19 @@
+{
+  "kind": {
+    "title": "Kind",
+    "auto": "Auto",
+    "autoHint": "hiro picks the kind while reading the ticket",
+    "code": "Code",
+    "codeHint": "Implement a change. Needs a repository; ends in a pull request.",
+    "test": "Tests",
+    "testHint": "Write or fix automated tests. Needs a repository; ends in a pull request.",
+    "plan": "Plan",
+    "planHint": "Write an implementation plan. Changes no code; ends in a report.",
+    "analysis": "Analysis",
+    "analysisHint": "Research a question and report the findings. Changes no code.",
+    "bug": "Bug investigation",
+    "bugHint": "Find the root cause of a bug and propose a fix. Changes no code.",
+    "pickerHint": "What hiro produces. Choosing a kind makes it final; Auto lets hiro decide while reading the ticket.",
+    "switchTo": "Switch to {kind}"
+  }
+}

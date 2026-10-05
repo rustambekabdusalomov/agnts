@@ -118,6 +118,43 @@ class ToneBadge extends StatelessWidget {
 }
 
 /// The small square source chip: "Jira" (gray) or "Task" (purple) (.src).
+/// Kinds whose work is a Markdown report instead of a change.
+bool isReportKind(TicketKind k) => k == TicketKind.plan || k == TicketKind.analysis || k == TicketKind.bug;
+
+/// A kind's name from the shared dictionaries.
+String kindLabel(AppLocalizations l, TicketKind k) => switch (k) {
+      TicketKind.code => l.kindCode,
+      TicketKind.test => l.kindTest,
+      TicketKind.plan => l.kindPlan,
+      TicketKind.analysis => l.kindAnalysis,
+      TicketKind.bug => l.kindBug,
+    };
+
+/// What a ticket produces, as a small chip; "· Auto" while hiro picks it.
+class KindChip extends StatelessWidget {
+  const KindChip(this.ticket, {super.key});
+  final Ticket ticket;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = Hiro.of(context);
+    final l = AppLocalizations.of(context);
+    final tone = switch (ticket.kind) {
+      TicketKind.plan || TicketKind.analysis => Tone.info,
+      TicketKind.bug => Tone.warn,
+      _ => Tone.gray,
+    };
+    final text = ticket.kindAuto ? '${kindLabel(l, ticket.kind)} · ${l.kindAuto}' : kindLabel(l, ticket.kind);
+    return Container(
+      height: 20,
+      padding: const EdgeInsets.symmetric(horizontal: 7),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(color: tone.soft(c), borderRadius: BorderRadius.circular(6)),
+      child: Text(text, style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: tone.ink(c))),
+    );
+  }
+}
+
 class SourceChip extends StatelessWidget {
   const SourceChip(this.text, {super.key, this.task = false});
   final String text;
@@ -290,7 +327,7 @@ class TicketCard extends StatelessWidget {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           Expanded(child: Text(ticket.key, style: TextStyle(fontFamily: HiroFonts.mono, fontSize: 12.5, color: c.ink3))),
-          ToneBadge(stateLabelOf(l, ticket.state), stateTone(ticket.state)),
+          ToneBadge(stateLabelOf(l, ticket.state, ticket.kind), stateTone(ticket.state)),
         ]),
         const SizedBox(height: 6),
         Text(ticket.title, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, height: 1.3, color: c.ink)),
@@ -299,6 +336,7 @@ class TicketCard extends StatelessWidget {
           style: TextStyle(fontSize: 13, color: c.ink3),
           child: Wrap(spacing: 8, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
             SourceChip(isTask ? l.ticketsSourceTask : l.ticketsSourceJira, task: isTask),
+            if (ticket.kind != TicketKind.code) KindChip(ticket),
             if (ticket.repoName != null) Text(ticket.repoName!),
             ...meta,
           ]),
@@ -326,8 +364,12 @@ class TicketCard extends StatelessWidget {
   }
 }
 
-/// The state's label from the shared dictionaries.
-String stateLabelOf(AppLocalizations l, TicketState s) => switch (s) {
+/// The state's label from the shared dictionaries. A report reads
+/// "Writing" and "Done" where a change reads "Coding" and "Pushed".
+String stateLabelOf(AppLocalizations l, TicketState s, [TicketKind? kind]) => switch (s) {
+      TicketState.coding when kind != null && isReportKind(kind) => l.stateReportCoding,
+      TicketState.pushing when kind != null && isReportKind(kind) => l.stateReportPushing,
+      TicketState.done when kind != null && isReportKind(kind) => l.stateReportDone,
       TicketState.new_ => l.stateNew,
       TicketState.analyzing => l.stateAnalyzing,
       TicketState.waitingForAnswers => l.stateWaiting_for_answers,

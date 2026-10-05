@@ -16,15 +16,24 @@ const (
 	AnalysisPath = "/hiro/out/analysis.json"
 	SummaryPath  = "/hiro/out/summary.json"
 	LessonsPath  = "/hiro/out/lessons.json"
-	// ChangePath is where hiro puts the reviewed diff for the learn run.
+	RulePath     = "/hiro/out/rule.json"
+	ReportPath   = "/hiro/out/report.md"
+	ReviewPath   = "/hiro/out/review.json"
+	// ChangePath is where hiro puts the reviewed diff for the learn and
+	// review runs.
 	ChangePath = "/hiro/out/change.diff"
 )
 
 // Analysis is what the analyze stage must write to AnalysisPath.
 type Analysis struct {
-	Summary   string   `json:"summary"`
-	Plan      []string `json:"plan"`
-	Questions []struct {
+	Summary string   `json:"summary"`
+	Plan    []string `json:"plan"`
+	// Kind is the kind of work the ticket asks for, in Claude's reading.
+	Kind       domain.TicketKind `json:"kind"`
+	KindReason string            `json:"kindReason"`
+	// Complexity is simple or complex; it picks the review model on auto.
+	Complexity string `json:"complexity"`
+	Questions  []struct {
 		Text    string   `json:"text"`
 		Options []string `json:"options"`
 	} `json:"questions"`
@@ -36,8 +45,19 @@ type Summary struct {
 	Notes   []string `json:"notes"`
 }
 
+// kindWork describes each kind's work to Claude.
+var kindWork = map[domain.TicketKind]string{
+	domain.KindCode:     "implement a change in the code",
+	domain.KindTest:     "write or fix automated tests",
+	domain.KindPlan:     "write an implementation plan for a change, without making it",
+	domain.KindAnalysis: "research a question (about the code, a design, the product or anything else) and report the findings",
+	domain.KindBug:      "find the root cause of a bug and propose a fix, without making it",
+}
+
 var prompts = template.Must(template.New("").Funcs(template.FuncMap{
 	"indent": func(s string) string { return "    " + strings.ReplaceAll(s, "\n", "\n    ") },
+	"work":   func(k domain.TicketKind) string { return kindWork[k] },
+	"kinds":  func() []domain.TicketKind { return domain.Kinds },
 }).Parse(`
 {{define "ticket"}}## Ticket {{.T.Key}}: {{.T.Title}}
 
@@ -46,7 +66,17 @@ var prompts = template.Must(template.New("").Funcs(template.FuncMap{
 ## Extra instructions for this repository
 
 {{.Repo.ClaudeMD}}
-{{end}}{{end}}
+{{end}}{{template "team" .}}{{end}}
+
+{{define "team"}}{{if .Rules}}
+## Team rules
+
+The team wrote these rules for every ticket. Follow them. A repository rule is more specific than a global one and wins where the two disagree.
+{{range .Rules}}
+### {{if .RepoID}}Repository rule{{else}}Global rule{{end}}: {{.Title}}
+
+{{.Text}}
+{{end}}{{end}}{{end}}
 
 {{define "rules"}}## Rules
 
@@ -55,22 +85,37 @@ var prompts = template.Must(template.New("").Funcs(template.FuncMap{
 - Keep changes focused on the ticket. Follow the repository's existing style and CLAUDE.md.
 {{end}}
 
-{{define "analyze"}}You are hiro, a careful software engineer. Analyse the ticket below in the repository at /workspace. Do not change any files in /workspace.
+{{define "analyze"}}You are hiro, a careful software engineer. Analyse the ticket below {{if .NoRepo}}before working on it. It has no repository: /workspace is empty, so work from the ticket text{{else}}in the repository at /workspace{{end}}. Do not change any files in /workspace.
 
 {{template "ticket" .}}
 {{template "rules" .}}
+## Kind of work
+
+hiro works these kinds of tickets:
+{{range kinds}}
+- {{.}}: {{work .}}{{end}}
+
+{{if .T.KindAuto}}Nobody chose a kind for this ticket. Pick the one it asks for; when it asks for a change to the code and nothing else fits, pick code.{{else}}The ticket was filed as {{.T.Kind}} ({{work .T.Kind}}). Keep that kind unless the ticket clearly asks for a different one; then name that kind, and hiro will tell the author.{{end}}{{if .NoRepo}} The code and test kinds need a repository; pick them only when the ticket really asks for a change to code.{{end}}
+
 ## What to produce
 
-Investigate the code, then write a JSON file to {{.AnalysisPath}} with exactly this shape:
+{{if .NoRepo}}Read the ticket{{else}}Investigate the code{{end}}, then write a JSON file to {{.AnalysisPath}} with exactly this shape:
 
-    {"summary": "one paragraph: what the ticket needs and where in the code",
+    {"kind": "one of {{range $i, $k := kinds}}{{if $i}}, {{end}}{{$k}}{{end}}",
+     "kindReason": "one sentence: why this kind",
+     "complexity": "simple or complex",
+     "summary": "one paragraph: what the ticket needs{{if not .NoRepo}} and where in the code{{end}}",
      "plan": ["step 1", "step 2"],
      "questions": [{"text": "a question only the ticket author can answer", "options": ["option A", "option B"]}]}
 
-{{if .NoQuestions}}Do not ask questions: use an empty "questions" list and make reasonable assumptions, noting them in the plan.{{else}}Ask questions only when the answer changes what you would build and you cannot find it in the code. Give two to four concrete options for each. Use an empty list when there is nothing to ask.{{end}}
+For a report kind (plan, analysis, bug) the plan lists how you will do the work and what the report will cover.
+
+Rate the complexity "complex" when the work spans several modules or layers, changes data or schemas, touches concurrency, security, money or public APIs, or needs careful design; otherwise "simple".
+
+{{if .NoQuestions}}Do not ask questions: use an empty "questions" list and make reasonable assumptions, noting them in the plan.{{else}}Ask questions only when the answer changes what you would build or conclude and you cannot find it{{if not .NoRepo}} in the code{{end}}. Give two to four concrete options for each. Use an empty list when there is nothing to ask.{{end}}{{if .Rules}} Plan the work so it follows the team rules; if the ticket asks for something a rule forbids, {{if .NoQuestions}}follow the rule and say so in the plan{{else}}ask which one wins{{end}}.{{end}}
 {{end}}
 
-{{define "code"}}You are hiro, a careful software engineer. Implement the ticket below in the repository at /workspace.
+{{define "code"}}You are hiro, a careful software engineer. Implement the ticket below in the repository at /workspace.{{if eq .T.Kind "test"}} This ticket is about tests: add or fix automated tests that follow the project's existing test style, and change other code only when the ticket asks for it or a test cannot be written without it (say so in the notes).{{end}}
 
 {{template "ticket" .}}
 {{if .Plan}}## Plan from the analysis
@@ -143,6 +188,151 @@ Write {{.LessonsPath}} with exactly this shape (an empty "lessons" list when not
 Give two or three quiz questions per lesson. Only link pages you are sure exist (official documentation first); leave "reading" empty rather than guess. Write plain text, not Markdown headings.
 {{end}}
 
+{{define "rule"}}You are hiro, an AI agent that implements tickets in code. The team wrote the rule below for you to follow on every ticket {{if .RuleRepo}}in the repository {{.RuleRepo}}{{else}}in every repository{{end}}. Before you rely on it, make sure it is clear: two engineers reading it should make the same change. Do not change any files in /workspace.
+
+## The rule
+
+Title: {{.Rule.Title}}
+
+{{indent .Rule.Body}}
+
+## Where it applies
+
+{{if .RuleRepo}}Every ticket in {{.RuleRepo}}, checked out at /workspace. Check the rule against the code: files, packages, libraries, commands and conventions it names should exist, and it should be possible to follow it here.{{else}}Every ticket in every repository. /workspace is empty: judge the rule on its own.{{end}}
+
+## Other rules in effect
+
+{{if .Rules}}{{range .Rules}}- {{if .RepoID}}[{{.RepoName}}]{{else}}[global]{{end}} {{.Title}}: {{.Text}}
+{{end}}{{else}}None yet.
+{{end}}
+{{if .Answered}}## Questions already answered
+
+{{range .Answered}}- Q: {{.Text}}
+  A: {{.Answer}}{{if .Note}} ({{.Note}}){{end}}
+{{end}}
+{{end}}## What to look for
+
+- Vague words with no measure ("small", "clean", "proper", "where needed", "if possible").
+- Missing scope: which files, layers, languages or kinds of tickets it covers.
+- Cases it does not say how to handle: exceptions, existing code that breaks it, what to do when it cannot be followed.
+- Conflicts with another rule above{{if .RuleRepo}} or with how the code base works today{{end}}.
+{{if .RuleRepo}}- Things it names that do not exist in the repository.
+{{end}}
+Do not ask about what the rule or the code already settles, about style you can infer, or about anything that would not change what you build.
+
+## What to produce
+
+Write {{.RulePath}} with exactly this shape:
+
+    {"interpretation": "one paragraph: what you will do differently on every ticket because of this rule, in concrete terms",
+     "clarified": "the rule rewritten as precise instructions to yourself, keeping the author's intent and everything the answers settled; plain text",
+     "questions": [{"text": "a question only the author can answer", "options": ["option A", "option B"]}]}
+
+{{if .NoQuestions}}Do not ask any more questions: use an empty "questions" list, resolve what is still open with the most reasonable reading, and state that reading in "clarified".{{else}}Ask at most five questions, each with two to four concrete options. Use an empty list when the rule is clear.{{end}}
+{{end}}
+
+{{define "report"}}You are hiro, a careful software engineer. Your task: {{work .T.Kind}}, for the ticket below. {{if .NoRepo}}The ticket has no repository: /workspace is empty.{{else}}The repository is at /workspace.{{end}} Do not change any files in /workspace: the result is a report, not a change.
+
+{{template "ticket" .}}
+{{if .Plan}}## Plan from the analysis
+
+{{range .Plan}}- {{.}}
+{{end}}{{end}}{{if .Answers}}
+## Answers from the ticket author
+
+{{range .Answers}}- Q: {{.Text}}
+  A: {{.Answer}}{{if .Note}} ({{.Note}}){{end}}
+{{end}}{{end}}
+## Rules
+
+- Do not change, commit or push anything in /workspace. Write only under /hiro/out; use /tmp for scratch files.
+- Do not read or print secrets (.env files, credentials).
+- Base every claim on what you checked.{{if not .NoRepo}} Cite code as path:line.{{end}} Say plainly what you could not verify.
+
+## What to produce
+
+Write the report in Markdown to {{.ReportPath}}. Start with a one-line title (# ...). Write for a developer who knows the product but not this ticket.
+{{if eq .T.Kind "plan"}}
+Sections: Goal; Current state{{if not .NoRepo}} (what exists today, with file references){{end}}; Approach, and the alternatives you rejected and why; Steps (numbered, each small enough for one pull request{{if not .NoRepo}}, naming the files it changes{{end}}); Risks and open questions; How to test it. Someone should be able to carry out the plan without asking you anything.
+{{else if eq .T.Kind "bug"}}
+Sections: Symptom; How to reproduce; Root cause, with the exact code path{{if not .NoRepo}} (path:line){{end}}; Why it happens; Proposed fix (concrete; a short diff sketch is welcome) and its risks; Other places with the same problem. You may run the code and its tests to confirm the cause, but leave /workspace as you found it.
+{{else}}
+Sections: Question (restated precisely); Short answer; Findings, each with its evidence; Options and trade-offs where there is a choice; Recommendation; Open questions.
+{{end}}
+Then write {{.SummaryPath}} as {"summary": "two or three sentences: the outcome", "notes": ["anything the reviewer should check"]}.
+{{end}}
+
+{{define "report-feedback"}}The reviewer asked for changes to your report on {{.T.Key}}:
+
+{{indent .Feedback}}
+
+Your last report is in {{.ReportPath}}. Rewrite it there in full with these changes, and update {{.SummaryPath}}. Do not change files in /workspace.
+{{end}}
+
+{{define "review"}}You are hiro's code reviewer. hiro, an AI agent, {{if .T.Kind.Report}}wrote a report for the ticket below ({{work .T.Kind}}){{else}}made a change for the ticket below{{end}}, and a developer is about to review it before {{if .T.Kind.Report}}accepting it{{else}}it is pushed{{end}}. Review it for them: find what they would want to know before deciding. Your review is advice shown next to the work; the developer decides. Do not change any files in /workspace.
+
+{{template "ticket" .}}
+{{if .Plan}}## Plan from the analysis
+
+{{range .Plan}}- {{.}}
+{{end}}{{end}}{{if .Answers}}
+## Answers from the ticket author
+
+{{range .Answers}}- Q: {{.Text}}
+  A: {{.Answer}}{{if .Note}} ({{.Note}}){{end}}
+{{end}}{{end}}
+## The work under review
+{{if .WorkSummary}}
+hiro's summary: {{.WorkSummary}}
+{{end}}{{range .Notes}}- note: {{.}}
+{{end}}{{if .T.Kind.Report}}
+The report is in {{.ReportPath}}. {{if .NoRepo}}The ticket has no repository: /workspace is empty, so judge the report on its own.{{else}}/workspace is the repository the report is about, at its default branch: check the report's claims against the code.{{end}}
+{{else}}
+The full diff is in {{.ChangePath}}. /workspace is checked out at the change. Changed files:
+{{range .Files}}
+- {{.Path}} (+{{.Add}} −{{.Del}}){{end}}
+{{if .CheckSteps}}
+Checks hiro ran after the change:
+{{range .CheckSteps}}
+- {{.Name}}: ` + "`{{.Command}}`" + ` {{if eq .ExitCode 0}}passed{{else}}failed (exit {{.ExitCode}}){{end}}{{end}}
+{{else}}
+No build, lint or test commands are configured for this repository.
+{{end}}{{end}}
+## What to look for
+
+{{if .T.Kind.Report}}- Accuracy: claims the code or the ticket contradicts, wrong paths or line references, wrong reasoning.
+- Completeness: what the ticket asked that the report does not answer; risks or options it misses.
+- Whether someone could act on it without asking anything.
+{{else}}- Correctness: bugs, missed edge cases, error handling, races, broken callers of changed code. Read the surrounding code, not only the diff.
+- Security: injection, secrets, missing authorization, unsafe input handling.
+- Whether the change does what the ticket and the plan ask, and nothing unrelated.
+- Tests: behaviour the change adds or alters with no test.
+- Performance problems that matter at this code's scale.
+- Maintainability: duplication of existing helpers, code that does not match the repository's style.
+{{end}}{{if .Rules}}- Team rules: anything that breaks one of the rules above (category "rules").
+{{end}}
+Report only real problems, each with a concrete case of what goes wrong; you may run the code or its tests to confirm, but leave /workspace as you found it. Skip praise-free filler, style nits a linter would catch, and guesses you could not check. Finding nothing is a fine result.
+
+## What to produce
+
+Write {{.ReviewPath}} with exactly this shape:
+
+    {"verdict": "looks_good, has_concerns or needs_changes",
+     "summary": "two to four sentences: your overall read, for the developer",
+     "findings": [{
+       "severity": "blocker (must fix before {{if .T.Kind.Report}}accepting{{else}}pushing{{end}}), major, minor or nit",
+       "category": "one of {{if .T.Kind.Report}}accuracy, completeness, {{end}}correctness, security, performance, tests, rules, maintainability, other",
+       "file": "{{if .T.Kind.Report}}the code file a finding is about, relative to /workspace, or empty{{else}}path/relative/to/workspace{{end}}",
+       "line": 42,
+       "title": "the problem in one line",
+       "detail": "why it is a problem: the case that goes wrong",
+       "suggestion": "what to change; written so it can be sent back to hiro as review feedback"
+     }],
+     "strengths": ["at most three things done well, only if notable"]}
+
+Order findings most severe first. Use an empty "findings" list when there is nothing to report.
+{{end}}
+
 {{define "fix"}}hiro ran the project's checks after your changes and they failed:
 
 {{indent .Output}}
@@ -167,10 +357,22 @@ type promptData struct {
 	MaxLessons   int
 	LessonsPath  string
 	ChangePath   string
+	Rules        []domain.Rule // team rules in effect
+	Rule         domain.Rule   // the rule under review
+	RuleRepo     string        // its repository; empty for a global rule
+	Answered     []domain.RuleQuestion
+	RulePath     string
+	ReportPath   string
+	NoRepo       bool // the ticket has no repository: /workspace is empty
+	ReviewPath   string
+	WorkSummary  string      // what the work run said it did (review)
+	Notes        []string    // its notes for the reviewer
+	CheckSteps   []CheckStep // its checks
 }
 
 func render(name string, d promptData) (string, error) {
-	d.AnalysisPath, d.SummaryPath, d.LessonsPath, d.ChangePath = AnalysisPath, SummaryPath, LessonsPath, ChangePath
+	d.AnalysisPath, d.SummaryPath, d.LessonsPath, d.ChangePath, d.RulePath = AnalysisPath, SummaryPath, LessonsPath, ChangePath, RulePath
+	d.ReportPath, d.ReviewPath = ReportPath, ReviewPath
 	var b bytes.Buffer
 	if err := prompts.ExecuteTemplate(&b, name, d); err != nil {
 		return "", fmt.Errorf("prompt %s: %w", name, err)

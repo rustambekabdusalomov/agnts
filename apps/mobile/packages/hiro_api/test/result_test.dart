@@ -27,6 +27,12 @@ void main() {
       // TODO
     });
 
+    // The Markdown report, for report kinds
+    // String report
+    test('to test the property `report`', () async {
+      // TODO
+    });
+
     // DateTime createdAt
     test('to test the property `createdAt`', () async {
       // TODO

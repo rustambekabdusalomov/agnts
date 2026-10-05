@@ -25,12 +25,17 @@ Name | Type | Description | Notes
 **afterApprove** | **String** |  | [optional] 
 **held** | **bool** | Kept in the queue until started | [optional] 
 **askFirst** | **bool** |  | [optional] 
+**kind** | [**TicketKind**](TicketKind.md) |  | 
+**kindAuto** | **bool** | hiro picks the kind; the analysis may still change it | 
+**postReport** | **bool** | The approved report is posted to the tracker issue | [optional] 
+**parentKey** | **String** | The plan or bug investigation this ticket implements | [optional] 
 **repoName** | **String** |  | [optional] 
 **models** | [**ModelOverrides**](ModelOverrides.md) |  | [optional] 
 **since** | [**DateTime**](DateTime.md) | When the ticket entered its current state | [optional] 
 **stopReason** | **String** | Why it failed or paused | [optional] 
 **mergedAt** | [**DateTime**](DateTime.md) |  | [optional] 
 **learnState** | **String** | The learn run after push; pending also while it runs | [optional] 
+**reviewState** | **String** | The code review hiro runs beside the human review | [optional] 
 **createdAt** | [**DateTime**](DateTime.md) |  | 
 **updatedAt** | [**DateTime**](DateTime.md) |  | 
 

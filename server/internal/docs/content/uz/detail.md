@@ -18,6 +18,10 @@ hiro ishlayotganda har bir qadam, model, sarflangan qadamlar va sessiya sarfi ko
 
 hiro nima qilganini oʻqing, testlar va oʻzgarishlarni tekshiring. «Tasdiqlash va yuborish» sizning nomingizdan commit qiladi. «Oʻzgartirish soʻrash» fikringizni oʻsha sessiyaga yuboradi. «Rad etish» branchni oʻchiradi.
 
+## hiro kod sharhi
+
+Ish sizni kutayotganda hiro ham uni koʻrib chiqadi: diffni xatolar, xavfsizlik, yetishmayotgan testlar va jamoa qoidalari boʻyicha; hisobotni aniqlik va boʻshliqlar boʻyicha. Topilmalar diff ustida, eng jiddiylari birinchi koʻrsatiladi. Bu ikkinchi fikr, toʻsiq emas: xohlagan paytda tasdiqlang. «Fikrga qoʻshish» taklifni fikringizga koʻchiradi. Avto rejimida murakkab tiketlarni Opus, qolganlarini Sonnet koʻrib chiqadi.
+
 ## hiro toʻxtaganda
 
 Testlar qayta-qayta yiqilsa yoki limit tugasa, hiro taxmin qilmay toʻxtaydi. Koʻrsatma qoʻshib qayta urining yoki tiketni oʻzingiz oling.

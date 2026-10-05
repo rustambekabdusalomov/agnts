@@ -99,6 +99,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		Broker:       broker,
 		Devices:      a.store,
 		Lessons:      a.lessons,
+		Rules:        a.orch,
 		OAuth:        a.oauth,
 		MCP:          mcpHandler,
 		DB:           pool,
@@ -241,7 +242,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	ocfg.Image = cfg.RunnerImage
 	a.orch = orchestrator.New(ocfg, orchestrator.Deps{
 		Store: a.store, Runner: run, Git: repos, Host: a.vcs, Tracker: a.jira, Homes: homes,
-		Settings: a.settings, Usage: a.usage, Lessons: a.lessons,
+		Settings: a.settings, Usage: a.usage, Lessons: a.lessons, Rules: postgres.NewRules(pool),
 	}, log.With("component", "orchestrator"))
 
 	a.repos = admin.NewRepos(a.store, gh, a.vcs, func(ctx context.Context) string {

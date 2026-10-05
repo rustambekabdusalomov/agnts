@@ -394,6 +394,17 @@
   "formCopy": "Copy",
   "formCopied": "Copied",
   "formSaved": "Saved",
+  "formSearch": "Search",
+  "formNoMatch": "No matches",
+  "implementTitle": "Next step",
+  "implementSubPlan": "Have hiro carry out this plan: a code task linked to this one, with the plan as its brief. You review the diff as usual.",
+  "implementSubBug": "Have hiro make the proposed fix: a code task linked to this one, with the investigation as its brief. You review the diff as usual.",
+  "implementImplement": "Implement this plan",
+  "implementFix": "Fix this bug",
+  "implementPickRepo": "Repository to implement it in",
+  "implementQueue": "Keep the task in the queue instead of starting it",
+  "implementDoneBy": "Implemented by",
+  "implementImplements": "Implements",
   "integrationsTitle": "Integrations",
   "integrationsLede": "The services hiro works with. Tokens are stored encrypted on your server and only used for the actions listed on each page.",
   "integrationsName_jira": "Jira",
@@ -607,6 +618,28 @@
   "integrationsGitEvents_github": "Pull requests, Workflow runs",
   "integrationsGitEvents_gitlab": "Merge request events, Pipeline events",
   "integrationsGitWebhookWhy": "When a pull or merge request is merged, hiro marks the ticket merged and moves the Jira issue to the merged status set on the Jira page. Pipeline events keep the repository page current.",
+  "kindTitle": "Kind",
+  "kindAuto": "Auto",
+  "kindAutoHint": "hiro picks the kind while reading the ticket",
+  "kindCode": "Code",
+  "kindCodeHint": "Implement a change. Needs a repository; ends in a pull request.",
+  "kindTest": "Tests",
+  "kindTestHint": "Write or fix automated tests. Needs a repository; ends in a pull request.",
+  "kindPlan": "Plan",
+  "kindPlanHint": "Write an implementation plan. Changes no code; ends in a report.",
+  "kindAnalysis": "Analysis",
+  "kindAnalysisHint": "Research a question and report the findings. Changes no code.",
+  "kindBug": "Bug investigation",
+  "kindBugHint": "Find the root cause of a bug and propose a fix. Changes no code.",
+  "kindPickerHint": "What hiro produces. Choosing a kind makes it final; Auto lets hiro decide while reading the ticket.",
+  "kindSwitchTo": "Switch to {kind}",
+  "@kindSwitchTo": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
   "learnTitle": "Learn",
   "learnLede": "When a change hiro ships does something this codebase never did before, hiro explains it here: what it is, why the change needed it, where to look, and a short quiz.",
   "learnViewNew": "New ({n})",
@@ -1182,6 +1215,7 @@
   "navKnowledge": "Knowledge",
   "navLearn": "Learn",
   "navLearnQueue": "Learning queue",
+  "navRules": "Rules",
   "repoBack": "Back to repositories",
   "repoNotFound": "No such repository.",
   "repoEdit": "Edit settings",
@@ -1488,6 +1522,218 @@
   "reposEdit": "Edit",
   "reposDeployWorkflow": "Deploy workflow",
   "reposDeployWorkflowHelp": "GitHub Actions workflow file with workflow_dispatch, e.g. deploy.yml. Deploy on the repository page runs it.",
+  "reviewTitle": "hiro's code review",
+  "reviewReportTitle": "hiro's review of the report",
+  "reviewSub": "A second opinion while you review. It never blocks approval: you decide.",
+  "reviewPending": "Queued: hiro reviews this as soon as a worker is free. You can review it yourself meanwhile.",
+  "reviewRunning": "hiro is reviewing this now…",
+  "reviewFailed": "The review failed. Review it yourself, or run it again.",
+  "reviewNone": "Not reviewed by hiro.",
+  "reviewStale": "This review is of revision {n}; the work changed since.",
+  "@reviewStale": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewRun": "Review with hiro",
+  "reviewRunAgain": "Review again",
+  "reviewVerdict_looks_good": "Looks good",
+  "reviewVerdict_has_concerns": "Has concerns",
+  "reviewVerdict_needs_changes": "Needs changes",
+  "reviewSev_blocker": "Blocker",
+  "reviewSev_major": "Major",
+  "reviewSev_minor": "Minor",
+  "reviewSev_nit": "Nit",
+  "reviewCat_correctness": "Correctness",
+  "reviewCat_security": "Security",
+  "reviewCat_performance": "Performance",
+  "reviewCat_tests": "Tests",
+  "reviewCat_rules": "Team rules",
+  "reviewCat_maintainability": "Maintainability",
+  "reviewCat_accuracy": "Accuracy",
+  "reviewCat_completeness": "Completeness",
+  "reviewCat_other": "Other",
+  "reviewFindings": "{count, plural, =0 {No findings} one {{count} finding} other {{count} findings}}",
+  "@reviewFindings": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "reviewNoFindings": "hiro found no problems.",
+  "reviewStrengths": "Done well",
+  "reviewSuggestion": "Suggestion",
+  "reviewAddToFeedback": "Add to feedback",
+  "reviewAdded": "In feedback",
+  "reviewAddAll": "Add all to feedback",
+  "reviewShowInDiff": "Show in diff",
+  "reviewModel": "Reviewed by {model}: {reason}",
+  "@reviewModel": {
+    "placeholders": {
+      "model": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "rulesTitle": "Rules",
+  "rulesLede": "Instructions hiro follows on every ticket: global rules for all repositories and rules for one repository. Claude reviews each rule and asks about anything unclear before it applies.",
+  "rulesAdd": "Add rule",
+  "rulesAddSubmit": "Add and review",
+  "rulesDrawerSub": "Write it the way you would brief a new teammate. Claude checks it before any ticket follows it.",
+  "rulesRuleTitle": "Title",
+  "rulesTitlePlaceholder": "Tests for new endpoints",
+  "rulesScope": "Applies to",
+  "rulesScopeHelp": "Global rules apply in every repository. A repository rule wins where the two disagree.",
+  "rulesGlobal": "Global",
+  "rulesGlobalHint": "Every repository",
+  "rulesBody": "Rule",
+  "rulesBodyPlaceholder": "Every new HTTP endpoint gets an integration test next to its handler.",
+  "rulesBodyHelp": "Say what to do, where, and what to do when it cannot be followed.",
+  "rulesEnabled": "On",
+  "rulesEnabledFor": "Rule {title} on",
+  "@rulesEnabledFor": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "rulesRereviewHelp": "You changed what the rule says, so Claude reviews it again. Tickets stop getting it until the review is done.",
+  "rulesSaved": "Rule saved",
+  "rulesSavedReview": "Rule saved; Claude is reviewing it",
+  "rulesScopeLabel": "Show rules for",
+  "rulesScopeAll": "All rules ({n})",
+  "@rulesScopeAll": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "rulesScopeGlobal": "Global ({n})",
+  "@rulesScopeGlobal": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "rulesNone": "No rules yet. Add one to tell hiro how your team works: testing, naming, logging, what never to touch.",
+  "rulesNoMatch": "No rules match.",
+  "rulesWaitingHelp": "{n, plural, one {{n} rule is waiting for your answers. It does not apply to tickets until it is answered.} other {{n} rules are waiting for your answers. They do not apply to tickets until they are answered.}}",
+  "@rulesWaitingHelp": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "rulesStatus_pending": "Queued for review",
+  "rulesStatus_analyzing": "Reviewing",
+  "rulesStatus_questions": "Needs answers",
+  "rulesStatus_ready": "Applies",
+  "rulesStatus_failed": "Review failed",
+  "rulesOff": "Off",
+  "rulesEdit": "Edit",
+  "rulesDelete": "Delete",
+  "rulesDeleteBody": "Delete the rule “{title}”? Tickets that start after this no longer follow it.",
+  "@rulesDeleteBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "rulesPending": "Waiting for a free worker. Claude reviews rules before the next ticket starts.",
+  "rulesAnalyzing": "Claude is reading the rule and checking it for anything unclear or conflicting.",
+  "rulesQuestionsTitle": "{n, plural, one {{n} question before this rule applies} other {{n} questions before this rule applies}}",
+  "@rulesQuestionsTitle": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "rulesQuestionsSub": "Claude found something unclear. Your answers become part of the rule.",
+  "rulesYourAnswer": "Your answer",
+  "rulesAddDetails": "Add details (optional)",
+  "rulesAnswerFor": "Answer to question {n}",
+  "@rulesAnswerFor": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "rulesDetailsFor": "Details for question {n}",
+  "@rulesDetailsFor": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "rulesSendAnswers": "Send answers",
+  "rulesQuestionsLeft": "{n, plural, one {{n} question left to answer} other {{n} questions left to answer}}",
+  "@rulesQuestionsLeft": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "rulesAllAnswered": "All questions answered",
+  "rulesAccept": "Use as written",
+  "rulesAcceptTitle": "Use the rule as written?",
+  "rulesAcceptBody": "Tickets get the rule as you wrote it, with the answers given so far. Open questions are dropped.",
+  "rulesFailed": "Claude could not review this rule: {error}",
+  "@rulesFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "rulesReviewAgain": "Review again",
+  "rulesInterpretation": "How hiro reads it",
+  "rulesClarified": "What tickets get",
+  "rulesAsWritten": "Used as written.",
+  "rulesAnswersTitle": "{n, plural, one {{n} answered question} other {{n} answered questions}}",
+  "@rulesAnswersTitle": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "rulesReviewedAgo": "Reviewed {ago}",
+  "@rulesReviewedAgo": {
+    "placeholders": {
+      "ago": {
+        "type": "String"
+      }
+    }
+  },
+  "rulesAddedAgo": "Added {ago}",
+  "@rulesAddedAgo": {
+    "placeholders": {
+      "ago": {
+        "type": "String"
+      }
+    }
+  },
+  "rulesAnswered": "Answers sent; Claude is reviewing the rule again",
+  "rulesAccepted": "The rule applies as written",
+  "rulesQueued": "Queued for review",
+  "rulesDeleted": "Rule deleted",
+  "rulesTurnedOn": "Rule turned on",
+  "rulesTurnedOff": "Rule turned off",
   "settingsTitle": "Settings",
   "settingsLede": "How hiro connects to your tools and how it behaves during runs.",
   "settingsAppearance": "Appearance",
@@ -1519,6 +1765,9 @@
   "settingsStageHelperHelp": "Small tasks like the idle usage refresh.",
   "settingsStageLearn": "Lessons from finished work",
   "settingsStageLearnHelp": "Reads each pushed change and writes lessons about what is new to the repository.",
+  "settingsStageReview": "Code review",
+  "settingsStageReviewHelp": "Reviews each result while you review it. Auto uses Opus for complex tickets and Sonnet for the rest.",
+  "settingsModelAuto": "Auto",
   "settingsMaxTurns": "Turn limit per run",
   "settingsMaxTurnsHelp": "The run stops and reports when it reaches this",
   "settingsTimeout": "Run timeout",
@@ -1562,6 +1811,8 @@
   "settingsAutoResume": "Resume paused runs after the limit resets",
   "settingsAutoLearn": "Learn from every pushed change",
   "settingsAutoLearnHelp": "After a push, hiro looks for techniques the repository never used before and writes lessons under Learn. Uses plan usage only when no ticket is waiting.",
+  "settingsAutoReview": "Review every result",
+  "settingsAutoReviewHelp": "While a change or report waits for you, hiro reviews it and shows its findings next to it. It never blocks approval.",
   "settingsPauseAbove": "Don't start new runs above",
   "settingsPauseAboveHelp": "Session usage. Runs already going keep going.",
   "settingsParallel": "Runs at the same time",
@@ -1577,6 +1828,7 @@
   "settingsStopped": "When a run stops or pauses",
   "settingsDone": "When changes are pushed",
   "settingsLessons": "When hiro finds something new to learn",
+  "settingsReviewDone": "When hiro's code review finishes",
   "settingsOnThisPage": "On this page",
   "settingsSecretsHelp": "Tokens for Jira, GitHub and Claude are stored encrypted on your server. This page never shows them.",
   "settingsSaved": "Settings saved",
@@ -1591,6 +1843,9 @@
   "stateRejected": "Rejected",
   "stateFailed": "Stopped",
   "stateRate_limited": "Paused at plan limit",
+  "stateReportCoding": "Writing",
+  "stateReportPushing": "Delivering",
+  "stateReportDone": "Done",
   "tasksTitle": "Tasks",
   "tasksLede": "Work for your side projects. Tasks stay in hiro and never touch Jira. Everything else works the same: questions, coding, your review.",
   "tasksNew": "New task",
@@ -1665,6 +1920,8 @@
       }
     }
   },
+  "tasksNoRepo": "No repository",
+  "tasksRepoNeeded": "Code and tests need a repository: pick one, or choose another kind.",
   "ticketBack": "All tickets",
   "ticketPlan": "Plan",
   "ticketAnalysis": "What hiro found",
@@ -1961,6 +2218,15 @@
   "ticketStageAnalyze": "Reading the ticket and asking questions",
   "ticketStageCoding": "Coding",
   "ticketStageRetry": "Retries and requested changes",
+  "ticketStageReview": "Code review by hiro",
+  "ticketModelAuto": "Auto ({model})",
+  "@ticketModelAuto": {
+    "placeholders": {
+      "model": {
+        "type": "String"
+      }
+    }
+  },
   "ticketSideTicket": "Ticket",
   "ticketSideTask": "Task",
   "ticketKvKey": "Key",
@@ -2054,6 +2320,50 @@
       }
     }
   },
+  "ticketQueuedSubReport": "hiro reads the ticket (and the code, if there is a repository) and comes back with a plan and questions. Nothing is changed.",
+  "ticketAnalyzingTitleNoRepo": "Reading the ticket",
+  "ticketAnalyzingSubNoRepo": "No repository: hiro works from the ticket text.",
+  "ticketStartWriting": "Start writing",
+  "ticketWritingTitle": "Writing the report",
+  "ticketWritingSub": "Working in a fresh container. Nothing in the code changes; you review the report first.",
+  "ticketReviewReportTitle": "Review the report",
+  "ticketReviewReportSub": "Approving keeps the report here and closes the task.",
+  "ticketReviewReportSubJira": "Approving keeps the report here and closes the ticket. It goes to Jira only if you tick the box below.",
+  "ticketReport": "Report",
+  "ticketReportMissing": "No report was stored.",
+  "ticketPostReport": "Also post the report as a comment on {key} in Jira",
+  "@ticketPostReport": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketFeedbackReportHint": "What should the report change or cover?",
+  "ticketApproveReport": "Approve",
+  "ticketApproveReportConfirm": "Approve the report and close this ticket?",
+  "ticketApproveReportPostConfirm": "Approve the report, close this ticket and post the report to {key} in Jira?",
+  "@ticketApproveReportPostConfirm": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketDeliveringTitle": "Finishing up",
+  "ticketDeliveringSub": "Saving the approved report and posting it to Jira if you asked.",
+  "ticketDoneReportTitle": "Report approved",
+  "ticketDoneReport": "The report is kept here.",
+  "ticketDoneReportPosted": "The report is kept here and was posted to {key} in Jira.",
+  "@ticketDoneReportPosted": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketStopWriting": "Writing",
+  "ticketStopDone": "Done",
   "ticketsTitle": "Tickets",
   "ticketsNeedsYou": "Needs you",
   "ticketsRunning": "Running",

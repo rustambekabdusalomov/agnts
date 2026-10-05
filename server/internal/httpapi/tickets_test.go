@@ -13,8 +13,12 @@ import (
 )
 
 type fakeTickets struct {
-	lastOrigin domain.Origin
-	lastAnswer []domain.Answer
+	lastPost      bool
+	lastKind      string
+	lastTask      orchestrator.TaskInput
+	lastImplement orchestrator.ImplementInput
+	lastOrigin    domain.Origin
+	lastAnswer    []domain.Answer
 }
 
 func (f *fakeTickets) ticket(key string, s domain.TicketState) (domain.Ticket, error) {
@@ -44,7 +48,10 @@ func (f *fakeTickets) View(_ context.Context, key string) (orchestrator.TicketVi
 			Summary: json.RawMessage(`{"summary":"did it","notes":["n"]}`),
 			Tests:   json.RawMessage(`[{"name":"test","command":"go test","exit_code":0,"duration_ms":1200}]`),
 			Files:   []domain.FileChange{{Path: "a.go", Add: 1, Diff: "+x"}},
+			Report:  "# Plan",
 		},
+		Review: &domain.Review{Revision: 0, Model: "opus", ModelReason: "a large change", Verdict: domain.VerdictHasConcerns, Summary: "ok",
+			Findings: []domain.Finding{{Severity: "major", Category: "tests", File: "a.go", Line: 3, Title: "untested"}}},
 	}, err
 }
 
@@ -57,8 +64,8 @@ func (f *fakeTickets) Answer(_ context.Context, key string, as []domain.Answer, 
 	return f.ticket(key, domain.StateCoding)
 }
 
-func (f *fakeTickets) Approve(_ context.Context, key string, _ []string, o domain.Origin) (domain.Ticket, error) {
-	f.lastOrigin = o
+func (f *fakeTickets) Approve(_ context.Context, key string, _ []string, post bool, o domain.Origin) (domain.Ticket, error) {
+	f.lastOrigin, f.lastPost = o, post
 	if key == "DONE-1" {
 		return domain.Ticket{}, &domain.TransitionError{Key: key, From: domain.StateDone, To: domain.StatePushing}
 	}
@@ -93,6 +100,13 @@ func (f *fakeTickets) Stop(_ context.Context, key string, o domain.Origin) (doma
 	return f.ticket(key, domain.StateFailed)
 }
 
+func (f *fakeTickets) Review(_ context.Context, key string, o domain.Origin) (domain.Ticket, error) {
+	f.lastOrigin = o
+	t, err := f.ticket(key, domain.StateWaitingForReview)
+	t.ReviewState = domain.ReviewPending
+	return t, err
+}
+
 func (f *fakeTickets) Learn(_ context.Context, key string, o domain.Origin) (domain.Ticket, error) {
 	f.lastOrigin = o
 	t, err := f.ticket(key, domain.StateDone)
@@ -104,11 +118,32 @@ func (f *fakeTickets) SetRepo(_ context.Context, key string, _ int64, _ domain.O
 	return f.ticket(key, domain.StateNew)
 }
 
+func (f *fakeTickets) SetKind(_ context.Context, key, kind string, _ domain.Origin) (domain.Ticket, error) {
+	f.lastKind = kind
+	t, err := f.ticket(key, domain.StateNew)
+	t.Kind, t.KindAuto = domain.TicketKind(kind), kind == "auto"
+	if t.KindAuto {
+		t.Kind = domain.KindCode
+	}
+	return t, err
+}
+
+func (f *fakeTickets) Implement(_ context.Context, key string, in orchestrator.ImplementInput, _ domain.Origin) (domain.Ticket, error) {
+	f.lastImplement = in
+	if key == "DONE-1" {
+		return domain.Ticket{}, fmt.Errorf("%w: DONE-1 is already implemented by VIS-2", orchestrator.ErrInvalid)
+	}
+	t, err := f.ticket("VIS-9", domain.StateNew)
+	t.Kind, t.ParentKey = domain.KindCode, key
+	return t, err
+}
+
 func (f *fakeTickets) SetModels(_ context.Context, key string, _ map[string]string, _ domain.Origin) (domain.Ticket, error) {
 	return f.ticket(key, domain.StateNew)
 }
 
 func (f *fakeTickets) CreateTask(_ context.Context, in orchestrator.TaskInput, _ domain.Origin) (domain.Ticket, error) {
+	f.lastTask = in
 	return domain.Ticket{Key: "VIS-1", Title: in.Title, State: domain.StateNew, Source: domain.SourceLocal}, nil
 }
 
@@ -152,6 +187,17 @@ func TestTicketEndpoints(t *testing.T) {
 		{"POST", "/api/tickets/PAY-1/approve", `{"assignees":["alice"]}`, 200, `"state":"pushing"`},
 		{"POST", "/api/tickets/PAY-1/approve", `{"assignees":"alice"}`, 400, `bad_request`},
 		{"POST", "/api/tickets/DONE-1/approve", "", 409, `conflict`},
+		{"POST", "/api/tickets/PAY-1/approve", `{"postReport":true}`, 200, `"kind":"code"`},
+		{"GET", "/api/tickets/PAY-1", "", 200, `"report":"# Plan"`},
+		{"GET", "/api/tickets/PAY-1", "", 200, `"findings":[{"category":"tests","file":"a.go","line":3,"severity":"major","title":"untested"}]`},
+		{"GET", "/api/tickets/PAY-1", "", 200, `"reviewState":"none"`},
+		{"POST", "/api/tickets/PAY-1/review", "", 200, `"reviewState":"pending"`},
+		{"PUT", "/api/tickets/PAY-1/kind", `{"kind":"plan"}`, 200, `"kind":"plan","kindAuto":false`},
+		{"PUT", "/api/tickets/PAY-1/kind", `{"kind":"deploy"}`, 400, `bad_request`},
+		{"POST", "/api/tickets/PAY-1/implement", ``, 201, `"parentKey":"PAY-1"`},
+		{"POST", "/api/tickets/DONE-1/implement", ``, 400, `already implemented by VIS-2`},
+		{"POST", "/api/tickets/PAY-1/implement", `{"repoId":3,"start":"queue"}`, 201, `"key":"VIS-9"`},
+		{"POST", "/api/tasks", `{"title":"Plan auth","priority":"low","afterApprove":"pr","start":"ask","kind":"analysis"}`, 201, `"key":"VIS-1"`},
 		{"POST", "/api/tickets/PAY-1/request-changes", `{"feedback":"  "}`, 400, `feedback is required`},
 		{"POST", "/api/tickets/PAY-1/request-changes", `{"feedback":"more tests"}`, 200, `"state":"coding"`},
 		{"POST", "/api/tickets/PAY-1/reject", "", 200, `"state":"rejected"`},
@@ -162,6 +208,12 @@ func TestTicketEndpoints(t *testing.T) {
 		if rec.Code != c.want || !strings.Contains(rec.Body.String(), c.contains) {
 			t.Errorf("%s %s: %d %s (want %d containing %q)", c.method, c.path, rec.Code, rec.Body, c.want, c.contains)
 		}
+	}
+	if h.tickets.lastImplement.RepoID != 3 || h.tickets.lastImplement.Start != "queue" {
+		t.Errorf("implement input not passed: %+v", h.tickets.lastImplement)
+	}
+	if !h.tickets.lastPost || h.tickets.lastKind != "plan" || h.tickets.lastTask.Kind != "analysis" || h.tickets.lastTask.RepoID != 0 {
+		t.Errorf("kind fields not passed: post=%v kind=%q task=%+v", h.tickets.lastPost, h.tickets.lastKind, h.tickets.lastTask)
 	}
 	if h.tickets.lastOrigin != domain.OriginWeb || len(h.tickets.lastAnswer) != 1 || h.tickets.lastAnswer[0].Note != "n" {
 		t.Errorf("web origin/answers not passed: %v %+v", h.tickets.lastOrigin, h.tickets.lastAnswer)

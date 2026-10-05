@@ -6,11 +6,13 @@ import { useRoute, useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../api/client'
 import { FILTERS, NEEDS, RUNNING } from '../api/types'
 import { useLive } from '../composables/useLive'
+import { useTabBadge } from '../composables/tabBadge'
 import { LOCALES, type Locale } from '../i18n'
 import { usePrefs } from '../stores/prefs'
 import { useSession } from '../stores/session'
 import { useUi } from '../stores/ui'
 import UsagePill from './UsagePill.vue'
+import { useRules } from './rules/useRules'
 import ConfirmDialog from './ui/ConfirmDialog.vue'
 import HiIcon from './ui/HiIcon.vue'
 
@@ -46,6 +48,14 @@ const learnQueue = useQuery({
   refetchInterval: 30_000,
 })
 const learning = computed(() => (learnQueue.data.value ?? []).filter((x) => x.status === 'running' || x.status === 'pending').length)
+// Rules whose review is waiting on your answers.
+const rules = useRules()
+const ruleQuestions = computed(() => (rules.data.value ?? []).filter((r) => r.status === 'questions').length)
+// The tab icon and title: what needs you, and whether hiro is working.
+useTabBadge(
+  computed(() => count(NEEDS)),
+  computed(() => count(RUNNING) > 0 || (learnQueue.data.value ?? []).some((x) => x.status === 'running')),
+)
 
 const isTicketList = computed(() => route.name === 'tickets')
 const activeFilter = computed(() => (isTicketList.value ? String(route.query.f ?? 'needs') : ''))
@@ -153,6 +163,9 @@ async function signOut() {
         <div class="grp">{{ t('nav.setup') }}</div>
         <RouterLink class="nav-a" active-class="on" to="/integrations" v-bind="tip(t('nav.integrations'))"><HiIcon name="plug" /><span class="lbl">{{ t('nav.integrations') }}</span></RouterLink>
         <RouterLink class="nav-a" active-class="on" to="/repos" v-bind="tip(t('nav.repos'))"><HiIcon name="repos" /><span class="lbl">{{ t('nav.repos') }}</span></RouterLink>
+        <RouterLink class="nav-a" active-class="on" to="/rules" v-bind="tip(t('nav.rules'))">
+          <HiIcon name="rules" /><span class="lbl">{{ t('nav.rules') }}</span><span v-if="ruleQuestions" class="cnt">{{ ruleQuestions }}</span>
+        </RouterLink>
         <RouterLink class="nav-a" active-class="on" to="/settings" v-bind="tip(t('nav.settings'))"><HiIcon name="settings" /><span class="lbl">{{ t('nav.settings') }}</span></RouterLink>
       </nav>
       <div class="me">

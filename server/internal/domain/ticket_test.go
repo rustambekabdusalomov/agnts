@@ -18,7 +18,7 @@ func TestTransitionMatrix(t *testing.T) {
 		{StateAnalyzing, StateWaitingForAnswers}, {StateAnalyzing, StateCoding}, {StateAnalyzing, StateFailed},
 		{StateAnalyzing, StateRateLimited}, {StateAnalyzing, StateNew}, {StateAnalyzing, StateRejected},
 		{StateWaitingForAnswers, StateCoding}, {StateWaitingForAnswers, StateRejected},
-		{StateCoding, StateTesting}, {StateCoding, StateFailed}, {StateCoding, StateRateLimited}, {StateCoding, StateRejected},
+		{StateCoding, StateTesting}, {StateCoding, StateWaitingForReview}, {StateCoding, StateFailed}, {StateCoding, StateRateLimited}, {StateCoding, StateRejected},
 		{StateTesting, StateWaitingForReview}, {StateTesting, StateCoding}, {StateTesting, StateFailed}, {StateTesting, StateRejected},
 		{StateWaitingForReview, StatePushing}, {StateWaitingForReview, StateCoding}, {StateWaitingForReview, StateRejected},
 		{StatePushing, StateDone}, {StatePushing, StateFailed},
@@ -62,5 +62,27 @@ func TestTransitionErrorIsConflict(t *testing.T) {
 	var err error = &TransitionError{Key: "A-1", From: StateDone, To: StateCoding}
 	if !errors.Is(err, ErrConflict) {
 		t.Fatal("TransitionError should match ErrConflict")
+	}
+}
+
+func TestKinds(t *testing.T) {
+	for _, k := range Kinds {
+		if !k.Valid() {
+			t.Errorf("%s is listed but not valid", k)
+		}
+	}
+	if TicketKind("deploy").Valid() || TicketKind("").Valid() {
+		t.Error("unknown kinds are valid")
+	}
+	for k, report := range map[TicketKind]bool{KindCode: false, KindTest: false, KindPlan: true, KindAnalysis: true, KindBug: true} {
+		if k.Report() != report {
+			t.Errorf("%s: report %v", k, k.Report())
+		}
+		if k.Spec().NeedsRepo == report {
+			t.Errorf("%s: a change needs a repository, a report does not", k)
+		}
+	}
+	if !TicketKind("").Spec().NeedsRepo {
+		t.Error("an unset kind must be worked as code")
 	}
 }

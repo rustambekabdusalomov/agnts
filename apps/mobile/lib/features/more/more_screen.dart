@@ -306,9 +306,41 @@ class _ModelsSection extends ConsumerWidget {
                 });
               },
             ),
+          _reviewRow(context, ref, l),
         ]),
       ),
     ]);
+  }
+
+  /// Code review may also be Auto: Opus for complex tickets, Sonnet for the rest.
+  Widget _reviewRow(BuildContext context, WidgetRef ref, AppLocalizations l) {
+    final model = s.models.review ?? ReviewModel.auto;
+    String name(ReviewModel m) => switch (m) {
+          ReviewModel.auto => l.settingsModelAuto,
+          ReviewModel.haiku => _modelName(Model.haiku),
+          ReviewModel.sonnet => _modelName(Model.sonnet),
+          ReviewModel.opus => _modelName(Model.opus),
+        };
+    return ListRow(
+      title: l.settingsStageReview,
+      subtitle: l.settingsStageReviewHelp,
+      value: name(model),
+      onTap: () async {
+        final picked = await _pickOne<ReviewModel>(
+          context,
+          title: l.settingsStageReview,
+          sub: l.settingsModelsHelp,
+          options: [for (final m in ReviewModel.values) (m, name(m))],
+          current: model,
+        );
+        if (picked == null || picked.$1 == model || !context.mounted) return;
+        await _save(context, ref, s, (j) {
+          final m = Map<String, dynamic>.from(j['models'] as Map);
+          m['review'] = picked.$1.value;
+          return {...j, 'models': m};
+        });
+      },
+    );
   }
 }
 
@@ -349,6 +381,7 @@ class _PushSection extends ConsumerWidget {
             sw(l.mobilePushStopped, n.stopped, 'stopped'),
             sw(l.mobilePushDone, n.done, 'done'),
             if (n.lessons != null) sw(l.settingsLessons, n.lessons!, 'lessons'),
+            if (n.review != null) sw(l.settingsReviewDone, n.review!, 'review'),
           ]),
         ),
     ]);

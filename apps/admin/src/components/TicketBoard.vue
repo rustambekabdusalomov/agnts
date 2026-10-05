@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { STATE_TONE, TERMINAL, type Ticket, type TicketState } from '../api/types'
 import { ago } from '../composables/format'
 import StateBadge from './StateBadge.vue'
+import KindBadge from './ticket/KindBadge.vue'
 
 // The "Board" view of tickets and tasks: one column per group of states,
 // cards in the order the list gives them (most recently updated first).
@@ -39,12 +40,13 @@ const tone = (c: BoardColumn) => STATE_TONE[c.states[0]]
             <span v-if="tk.revision > 0 && !TERMINAL.includes(tk.state)" class="hint">{{ t('tickets.rev', { n: tk.revision }) }}</span>
           </div>
           <div class="bcard-title">{{ tk.title }}</div>
-          <div v-if="c.states.length > 1"><StateBadge :state="tk.state" /></div>
+          <div v-if="c.states.length > 1"><StateBadge :state="tk.state" :kind="tk.kind" /></div>
           <div class="bcard-meta">
             <template v-if="showSource">
               <span v-if="tk.source === 'local'" class="src local">{{ t('tickets.sourceTask') }}</span>
               <span v-else class="src">{{ t('tickets.sourceJira') }}</span>
             </template>
+            <KindBadge v-if="tk.kind !== 'code'" :ticket="tk" />
             <span v-if="tk.repoName">{{ tk.repoName }}</span>
             <span>{{ ago(tk.updatedAt, locale) }}</span>
           </div>

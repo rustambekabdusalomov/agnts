@@ -120,7 +120,7 @@ func TestToolsAndAnnotations(t *testing.T) {
 			t.Errorf("%s should be marked destructive", n)
 		}
 	}
-	for _, n := range []string{"answer_questions", "start_run", "request_changes", "retry_run", "create_task", "confirm_action"} {
+	for _, n := range []string{"answer_questions", "start_run", "request_changes", "retry_run", "create_task", "set_ticket_kind", "implement_ticket", "confirm_action"} {
 		if byName[n] == nil {
 			t.Errorf("missing tool %s", n)
 		}
@@ -179,5 +179,128 @@ func TestTwoStepApprove(t *testing.T) {
 	}
 	if out, isErr = call(t, cs, "request_changes", map[string]any{"key": "PAY-1", "feedback": "  "}); !isErr {
 		t.Fatalf("empty feedback accepted: %v", out)
+	}
+}
+
+func TestReportKinds(t *testing.T) {
+	cs, store := setup(t)
+	ctx := context.Background()
+
+	// A plan ticket under review.
+	if _, err := store.CreateTicket(ctx, domain.Ticket{Key: "PAY-2", Source: domain.SourceJira, Title: "Plan expiry", Kind: domain.KindPlan,
+		State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: "pr"}, domain.Event{Type: domain.EventTicketCreated}); err != nil {
+		t.Fatal(err)
+	}
+	for _, st := range []domain.TicketState{domain.StateAnalyzing, domain.StateCoding, domain.StateWaitingForReview} {
+		if _, err := store.Transition(ctx, "PAY-2", st, domain.Event{TicketKey: "PAY-2", Type: domain.EventStateChanged}, nil); err != nil {
+			t.Fatal(err)
+		}
+	}
+	got, _ := call(t, cs, "get_ticket", map[string]any{"key": "PAY-2"})
+	if got["kind"] != "plan" {
+		t.Fatalf("get_ticket kind: %v", got)
+	}
+
+	if out, isErr := call(t, cs, "approve_ticket", map[string]any{"key": "PAY-1", "post_report": true}); !isErr {
+		t.Fatalf("post_report accepted for a change: %v", out)
+	}
+	out, isErr := call(t, cs, "approve_ticket", map[string]any{"key": "PAY-2", "post_report": true})
+	if isErr || !strings.Contains(out["summary"].(string), "Jira issue") {
+		t.Fatalf("approve report: %v", out)
+	}
+	if out, isErr = call(t, cs, "confirm_action", map[string]any{"action_id": out["action_id"]}); isErr {
+		t.Fatalf("confirm: %v", out)
+	}
+	if tk, _ := store.TicketByKey(ctx, "PAY-2"); tk.State != domain.StatePushing || !tk.PostReport {
+		t.Fatalf("approved report: state=%s post=%v", tk.State, tk.PostReport)
+	}
+
+	// Tasks without a repository: reports yes, code no.
+	if out, isErr = call(t, cs, "create_task", map[string]any{"kind": "code", "title": "x"}); !isErr {
+		t.Fatalf("code task without a repository: %v", out)
+	}
+	out, isErr = call(t, cs, "create_task", map[string]any{"kind": "analysis", "title": "Why is checkout slow?"})
+	if isErr || !strings.Contains(out["summary"].(string), "analysis task without a repository") {
+		t.Fatalf("analysis task: %v", out)
+	}
+	if out, isErr = call(t, cs, "confirm_action", map[string]any{"action_id": out["action_id"]}); isErr {
+		t.Fatalf("confirm task: %v", out)
+	}
+	key := out["ticket"].(map[string]any)["key"].(string)
+	tk, err := store.TicketByKey(ctx, key)
+	if err != nil || tk.Kind != domain.KindAnalysis || tk.RepoID != nil {
+		t.Fatalf("task: %+v %v", tk, err)
+	}
+
+	// Changing the kind takes a confirmation too.
+	out, isErr = call(t, cs, "set_ticket_kind", map[string]any{"key": key, "kind": "bug"})
+	if isErr {
+		t.Fatalf("set_ticket_kind: %v", out)
+	}
+	if tk, _ := store.TicketByKey(ctx, key); tk.Kind != domain.KindAnalysis {
+		t.Fatal("kind changed before confirmation")
+	}
+	if out, isErr = call(t, cs, "confirm_action", map[string]any{"action_id": out["action_id"]}); isErr {
+		t.Fatalf("confirm kind: %v", out)
+	}
+	if tk, _ := store.TicketByKey(ctx, key); tk.Kind != domain.KindBug || tk.KindAuto {
+		t.Fatalf("kind after confirm: %s auto=%v", tk.Kind, tk.KindAuto)
+	}
+	if out, isErr = call(t, cs, "set_ticket_kind", map[string]any{"key": key, "kind": "deploy"}); !isErr {
+		t.Fatalf("unknown kind accepted: %v", out)
+	}
+}
+
+func TestImplementTicket(t *testing.T) {
+	cs, store := setup(t)
+	ctx := context.Background()
+	if _, err := store.CreateTicket(ctx, domain.Ticket{Key: "PAY-3", Source: domain.SourceJira, Title: "Plan expiry", Kind: domain.KindPlan,
+		State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: "pr"}, domain.Event{Type: domain.EventTicketCreated}); err != nil {
+		t.Fatal(err)
+	}
+	move := func(states ...domain.TicketState) {
+		t.Helper()
+		for _, st := range states {
+			if _, err := store.Transition(ctx, "PAY-3", st, domain.Event{TicketKey: "PAY-3", Type: domain.EventStateChanged}, nil); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	move(domain.StateAnalyzing, domain.StateCoding)
+	if out, isErr := call(t, cs, "implement_ticket", map[string]any{"key": "PAY-3", "repository": "api"}); !isErr {
+		t.Fatalf("implemented before done: %v", out)
+	}
+	_, run, ok, err := store.ClaimNext(ctx)
+	if err != nil || !ok {
+		t.Fatalf("claim: %v %v", ok, err)
+	}
+	if err := store.SaveResult(ctx, domain.Result{RunID: run.ID, Report: "# Plan\n\n1. Expire tokens."}); err != nil {
+		t.Fatal(err)
+	}
+	now := time.Now()
+	run.FinishedAt = &now
+	if err := store.FinishRun(ctx, run); err != nil {
+		t.Fatal(err)
+	}
+	move(domain.StateWaitingForReview, domain.StatePushing, domain.StateDone)
+
+	if out, isErr := call(t, cs, "implement_ticket", map[string]any{"key": "PAY-3"}); !isErr {
+		t.Fatalf("no repository accepted: %v", out)
+	}
+	out, isErr := call(t, cs, "implement_ticket", map[string]any{"key": "PAY-3", "repository": "api", "queue": true})
+	if isErr || !strings.Contains(out["summary"].(string), "keep it in the queue") {
+		t.Fatalf("implement_ticket: %v", out)
+	}
+	if out, isErr = call(t, cs, "confirm_action", map[string]any{"action_id": out["action_id"]}); isErr {
+		t.Fatalf("confirm: %v", out)
+	}
+	key := out["ticket"].(map[string]any)["key"].(string)
+	child, err := store.TicketByKey(ctx, key)
+	if err != nil || child.ParentKey != "PAY-3" || !child.Held || child.Kind != domain.KindCode {
+		t.Fatalf("child: %+v %v", child, err)
+	}
+	got, _ := call(t, cs, "get_ticket", map[string]any{"key": "PAY-3"})
+	if got["implemented_by"] != key {
+		t.Fatalf("get_ticket: %v", got)
 	}
 }

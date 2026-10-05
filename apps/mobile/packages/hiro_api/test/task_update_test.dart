@@ -27,5 +27,10 @@ void main() {
       // TODO
     });
 
+    // TicketKindChoice kind
+    test('to test the property `kind`', () async {
+      // TODO
+    });
+
   });
 }

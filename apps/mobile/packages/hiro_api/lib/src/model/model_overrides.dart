@@ -26,6 +26,8 @@ class ModelOverrides {
      this.coding,
 
      this.retry,
+
+     this.review,
   });
 
   @JsonKey(
@@ -64,19 +66,33 @@ class ModelOverrides {
 
 
 
+  @JsonKey(
+    
+    name: r'review',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final Model? review;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is ModelOverrides &&
       other.analyze == analyze &&
       other.coding == coding &&
-      other.retry == retry;
+      other.retry == retry &&
+      other.review == review;
 
     @override
     int get hashCode =>
         analyze.hashCode +
         coding.hashCode +
-        retry.hashCode;
+        retry.hashCode +
+        review.hashCode;
 
   factory ModelOverrides.fromJson(Map<String, dynamic> json) => _$ModelOverridesFromJson(json);
 

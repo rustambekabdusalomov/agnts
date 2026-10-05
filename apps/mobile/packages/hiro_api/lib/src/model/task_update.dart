@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:hiro_api/src/model/ticket_kind_choice.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -27,6 +28,8 @@ class TaskUpdate {
      this.priority,
 
      this.afterApprove,
+
+     this.kind,
   });
 
   @JsonKey(
@@ -77,6 +80,18 @@ class TaskUpdate {
 
 
 
+  @JsonKey(
+    
+    name: r'kind',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final TicketKindChoice? kind;
+
+
+
 
 
     @override
@@ -84,14 +99,16 @@ class TaskUpdate {
       other.title == title &&
       other.description == description &&
       other.priority == priority &&
-      other.afterApprove == afterApprove;
+      other.afterApprove == afterApprove &&
+      other.kind == kind;
 
     @override
     int get hashCode =>
         title.hashCode +
         description.hashCode +
         priority.hashCode +
-        afterApprove.hashCode;
+        afterApprove.hashCode +
+        kind.hashCode;
 
   factory TaskUpdate.fromJson(Map<String, dynamic> json) => _$TaskUpdateFromJson(json);
 

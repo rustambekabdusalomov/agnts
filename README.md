@@ -78,6 +78,16 @@ build, lint and tests inside the container and sends failures back to Claude
 up to twice; you review the diff and approve; only then does hiro push
 `hiro/<KEY>` and open the pull request.
 
+**Code review.** While a ticket waits for your review, a review run reads
+the result in a read-only container (the diff with its checks, or the
+report against the code) and writes findings next to it: severity,
+category, file and line, and a suggestion you can add to your feedback in
+one click. It is advice, never a gate: approving or requesting changes
+cancels a review still running, and each new revision is reviewed again.
+With the review model on Auto (Settings), Opus reviews tickets the analysis
+rated complex or large changes, and Sonnet the rest. Turn it off in
+Settings, or run it again from the ticket.
+
 **Learn.** After each push, a short learn run reads the change in a
 container and checks the repository and its lesson list for anything the
 codebase never did before (a pattern, algorithm, library, architecture
@@ -86,6 +96,15 @@ a quiz and further reading, under Learn in the admin panel and the app, and
 through the `list_lessons` / `get_lesson` MCP tools. Learn runs only take the
 worker when no ticket is waiting. Turn them off or pick their model in
 Settings, or start one by hand from a finished ticket.
+
+**Rules.** Under Rules in the admin panel, write instructions hiro follows on
+every ticket: global ones, and ones for a single repository (which win where
+the two disagree). Saving a rule queues a short Claude review in a container
+(next to the repository's code for a repository rule) that looks for vague
+wording, missing scope and conflicts with other rules, and asks questions
+when something is unclear. A rule applies only once it is clear, or once you
+choose to use it as written; every analysis and coding prompt then gets it
+under "Team rules", and the ticket's log lists the rules it followed.
 
 Secrets are stored encrypted with `HIRO_ENC_KEY`. Run containers get the
 Claude token and a copy of the repository, never the GitHub token.
