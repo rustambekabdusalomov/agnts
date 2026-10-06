@@ -13,7 +13,7 @@ import (
 	"net/url"
 	"strings"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
 // Docker is a minimal Docker Engine API client over the Unix socket.
@@ -111,13 +111,13 @@ func (d *Docker) EnsureNetwork(ctx context.Context, name string, internal bool) 
 	if errors.As(err, &ae) && ae.Status == http.StatusNotFound {
 		return d.json(ctx, http.MethodPost, "/networks/create", nil, map[string]any{
 			"Name": name, "Driver": "bridge", "CheckDuplicate": true, "Internal": internal,
-			"Labels": map[string]string{"hiro": "runs"},
+			"Labels": map[string]string{"agnts": "runs"},
 		}, nil)
 	}
 	return err
 }
 
-// ContainerConfig is the subset of the create request hiro uses.
+// ContainerConfig is the subset of the create request agnts uses.
 type ContainerConfig struct {
 	Name       string
 	Image      string

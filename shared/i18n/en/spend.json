@@ -1,0 +1,30 @@
+{
+  "spend": {
+    "title": "Token spend",
+    "sub": "{tokens} tokens in and out · about {cost} at API prices",
+    "empty": "Nothing recorded yet. Spend appears after agnts's first Claude run on this ticket.",
+    "input": "Input",
+    "output": "Output",
+    "cache": "Cache: {read} read, {write} written",
+    "calls": "{n, plural, one {# run} other {# runs}}",
+    "partial": "A run was cut off, so its cost is unknown",
+    "costNote": "Cost is Claude Code's estimate of the same work at API prices. On a Claude plan you are not charged it; it shows the relative weight of each stage.",
+    "tokens": "{n} tokens",
+    "colTokens": "Tokens",
+    "stageAnalyze": "Analysis",
+    "stageCoding": "Coding",
+    "stageWriting": "Writing",
+    "stageRetry": "Fixes and changes",
+    "stageReview": "Code review",
+    "stageLearn": "Lessons",
+    "stageHelper": "Helper",
+    "topTitle": "Tickets by spend",
+    "topSub": "{tokens} tokens in and out · about {cost} at API prices",
+    "topSubEmpty": "Which tickets used the most of your plan",
+    "topEmpty": "No Claude runs recorded in this period.",
+    "topNote": "Ranked by Claude Code's cost estimate, which weighs cache traffic properly. Share is of the period's estimated cost. Only spend inside the period counts.",
+    "colStage": "Costliest stage",
+    "colCost": "Est. cost",
+    "colShare": "Share"
+  }
+}

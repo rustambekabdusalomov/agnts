@@ -1,10 +1,10 @@
 # Repozitoriylar
 
-hiro ishlay oladigan kod. Har bir ish repozitoriyni serveringizdagi yangi konteynerga klonlaydi.
+agnts ishlay oladigan kod. Har bir ish repozitoriyni serveringizdagi yangi konteynerga klonlaydi.
 
 ## Manbalar
 
-Jira repozitoriylari Jira loyihasidan tiket oladi. Shaxsiy loyiha repozitoriylari hiro'da yaratilgan vazifalarni oladi.
+Jira repozitoriylari Jira loyihasidan tiket oladi. Shaxsiy loyiha repozitoriylari agnts'da yaratilgan vazifalarni oladi.
 
 ## Tekshiruvlar
 
@@ -12,7 +12,7 @@ Kod yozilgach build, linter va testlar ishga tushadi. Tiket faqat ular oʻtganda
 
 ## CLAUDE.md
 
-Repozitoriy ildizidagi tuzilma, qoidalar va test buyruqlari yozilgan fayl. Usiz hiro yoʻl topish uchun koʻproq qadam sarflaydi.
+Repozitoriy ildizidagi tuzilma, qoidalar va test buyruqlari yozilgan fayl. Usiz agnts yoʻl topish uchun koʻproq qadam sarflaydi.
 
 ## Tahrirlash
 

@@ -27,7 +27,7 @@ const fileOf = (p: string) => p.slice(p.lastIndexOf('/') + 1)
   <p v-if="lesson.isPending.value" class="hint">{{ t('common.loading') }}</p>
   <p v-else-if="lesson.isError.value || !l" class="empty">{{ t('learn.notFound') }}</p>
   <template v-else>
-    <PageHeader :title="l.title" :lede="l.summary">
+    <PageHeader :title="l.title">
       <template #below>
         <div class="lesson-meta" style="margin-top: 10px">
           <span class="src">{{ t(`learn.category_${l.category}`) }}</span>
@@ -53,6 +53,7 @@ const fileOf = (p: string) => p.slice(p.lastIndexOf('/') + 1)
 
     <div class="cfg-grid">
       <div class="col">
+        <section v-if="l.summary" class="card summary"><p style="margin: 0">{{ l.summary }}</p></section>
         <section v-if="l.explanation" class="card">
           <div class="ch"><h2>{{ t('learn.whatTitle') }}</h2></div>
           <LessonText :text="l.explanation" />

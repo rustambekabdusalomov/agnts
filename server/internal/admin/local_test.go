@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"hiro/internal/domain"
-	"hiro/internal/vcs"
+	"agnts/internal/domain"
+	"agnts/internal/vcs"
 )
 
 type fakeLocal []vcs.LocalBranch
@@ -26,12 +26,12 @@ func (f fakeBrowser) Branches(context.Context, domain.Repository) ([]vcs.Branch,
 
 func TestLocalBranchStatus(t *testing.T) {
 	local := fakeLocal{
-		{Name: "hiro/A-1", SHA: "a1", Unpushed: -1}, // never pushed
-		{Name: "hiro/A-2", SHA: "a2", Unpushed: 0},  // pushed
-		{Name: "hiro/A-3", SHA: "a3", Unpushed: 2},  // two commits not pushed
-		{Name: "hiro/A-4", SHA: "a4", Unpushed: 0},  // someone pushed to origin since
+		{Name: "agnts/A-1", SHA: "a1", Unpushed: -1}, // never pushed
+		{Name: "agnts/A-2", SHA: "a2", Unpushed: 0},  // pushed
+		{Name: "agnts/A-3", SHA: "a3", Unpushed: 2},  // two commits not pushed
+		{Name: "agnts/A-4", SHA: "a4", Unpushed: 0},  // someone pushed to origin since
 	}
-	origin := []vcs.Branch{{Name: "main", SHA: "m"}, {Name: "hiro/A-2", SHA: "a2"}, {Name: "hiro/A-3", SHA: "old"}, {Name: "hiro/A-4", SHA: "theirs"}}
+	origin := []vcs.Branch{{Name: "main", SHA: "m"}, {Name: "agnts/A-2", SHA: "a2"}, {Name: "agnts/A-3", SHA: "old"}, {Name: "agnts/A-4", SHA: "theirs"}}
 
 	r := &Repos{local: local, browser: fakeBrowser{branches: origin}}
 	got, err := r.localBranches(context.Background(), domain.Repository{})

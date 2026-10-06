@@ -109,7 +109,7 @@ const pretty = (data: Record<string, unknown>) => (Object.keys(data).length ? JS
 </script>
 
 <template>
-  <PageHeader :title="t('logs.title')" :lede="t('logs.lede')" doc="logs">
+  <PageHeader :title="t('logs.title')" doc="logs">
     <div class="actions" style="margin: 0">
       <span v-if="running" class="live">{{ t('logs.live') }}</span>
       <a class="btn" href="/api/events/export?format=json" download>{{ t('logs.exportJson') }}</a>
@@ -149,7 +149,7 @@ const pretty = (data: Record<string, unknown>) => (Object.keys(data).length ? JS
         <b>{{ s.avg ? fmtDur(s.avg) : t('logs.noData') }}</b>
       </div>
     </div>
-    <ChartLegend :items="[['var(--primary)', t('logs.legendHiro')], ['var(--warn)', t('logs.legendYou')]]" />
+    <ChartLegend :items="[['var(--primary)', t('logs.legendAgnts')], ['var(--warn)', t('logs.legendYou')]]" />
   </section>
 
   <section class="card">

@@ -46,7 +46,10 @@ type Review struct {
 	Summary     string    `json:"summary"`
 	Findings    []Finding `json:"findings"`
 	Strengths   []string  `json:"strengths"`
-	CreatedAt   time.Time `json:"-"`
+	// FollowUps are what the reviewer found outside this change that the
+	// ticket still needs; they are stored as suggestions, not kept here.
+	FollowUps []FollowUp `json:"followUps,omitempty"`
+	CreatedAt time.Time  `json:"-"`
 }
 
 // Finding is one problem the review found.

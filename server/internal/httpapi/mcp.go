@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"hiro/internal/httpapi/gen"
-	"hiro/internal/oauth"
+	"agnts/internal/httpapi/gen"
+	"agnts/internal/oauth"
 )
 
 // OAuth is the authorization server behind the Claude connector.

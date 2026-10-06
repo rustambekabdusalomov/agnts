@@ -89,7 +89,7 @@ const reviewModels = computed(() => [{ value: 'auto' as ReviewModel, label: t('s
 </script>
 
 <template>
-  <PageHeader :title="t('settings.title')" :lede="t('settings.lede')" doc="settings" />
+  <PageHeader :title="t('settings.title')" doc="settings" />
   <p v-if="settings.isPending.value" class="hint">{{ t('common.loading') }}</p>
   <p v-else-if="settings.isError.value" class="ferr">{{ t('common.error') }}</p>
   <div v-else-if="draft" class="cfg-grid">
@@ -194,6 +194,9 @@ const reviewModels = computed(() => [{ value: 'auto' as ReviewModel, label: t('s
         <CfgRow v-if="draft.autoReview !== undefined" :label="t('settings.autoReview')" :help="t('settings.autoReviewHelp')">
           <SwitchToggle v-model="draft.autoReview" :label="t('settings.autoReview')" />
         </CfgRow>
+        <CfgRow v-if="draft.suggestFollowUps !== undefined" :label="t('followUps.settingLabel')" :help="t('followUps.settingHelp')">
+          <SwitchToggle v-model="draft.suggestFollowUps" :label="t('followUps.settingLabel')" />
+        </CfgRow>
         <CfgRow :label="t('settings.pauseAbove')" :help="t('settings.pauseAboveHelp')">
           <NumberStepper v-model="draft.pauseAbove" :min="50" :max="100" :step="5" :label="t('settings.pauseAbove')" :format="percent" />
         </CfgRow>
@@ -224,6 +227,9 @@ const reviewModels = computed(() => [{ value: 'auto' as ReviewModel, label: t('s
         </CfgRow>
         <CfgRow v-if="draft.notify.review !== undefined" :label="t('settings.reviewDone')">
           <SwitchToggle v-model="draft.notify.review" :label="t('settings.reviewDone')" />
+        </CfgRow>
+        <CfgRow v-if="draft.notify.followUps !== undefined" :label="t('followUps.notifyLabel')">
+          <SwitchToggle v-model="draft.notify.followUps" :label="t('followUps.notifyLabel')" />
         </CfgRow>
       </section>
       <McpCard />

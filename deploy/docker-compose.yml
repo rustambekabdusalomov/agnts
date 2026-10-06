@@ -1,9 +1,10 @@
-# Production stack: Caddy (HTTPS) -> hiro -> PostgreSQL, plus nightly backups.
-# Usage on the server, from this directory:
+# Production stack: Caddy (HTTPS) -> agnts -> PostgreSQL, plus nightly backups.
+# Installed and managed by the agnts CLI (`agnts install`, `agnts upgrade`).
+# By hand, on the server, from this directory:
 #   cp .env.example .env   # fill it in
 #   docker compose up -d
-#   docker compose exec hiro hiro user create <username>
-name: hiro
+#   docker compose exec agnts agnts user create <username>
+name: agnts
 
 services:
   caddy:
@@ -14,41 +15,41 @@ services:
       - "443:443"
       - "443:443/udp"
     environment:
-      HIRO_DOMAIN: ${HIRO_DOMAIN:?set HIRO_DOMAIN in .env}
+      AGNTS_DOMAIN: ${AGNTS_DOMAIN:?set AGNTS_DOMAIN in .env}
       ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
-      - hiro
+      - agnts
     logging: &logging
       driver: json-file
       options:
         max-size: "10m"
         max-file: "5"
 
-  hiro:
-    image: ${HIRO_IMAGE:-ghcr.io/OWNER/hiro:latest}
+  agnts:
+    image: ${AGNTS_IMAGE:-registry.agnts.uz/agnts:latest}
     restart: unless-stopped
     env_file: .env
     environment:
-      HIRO_DATABASE_URL: postgres://hiro:${POSTGRES_PASSWORD}@postgres:5432/hiro?sslmode=disable
-      HIRO_DATA_DIR: /var/lib/hiro
+      AGNTS_DATABASE_URL: postgres://hiro:${POSTGRES_PASSWORD}@postgres:5432/hiro?sslmode=disable
+      AGNTS_DATA_DIR: /var/lib/agnts
       # Run containers live on an internal network; the egress proxy is their
       # only way out (Claude API, git hosts, package registries).
-      HIRO_RUN_NETWORK: hiro-runs
-      HIRO_RUN_PROXY: http://egress:3128
-      HIRO_RUNNER_IMAGE: ${HIRO_RUNNER_IMAGE:-hiro-runner:latest}
-    # hiro starts one container per run through the Docker socket. That makes
-    # the hiro container root-equivalent on the host; run containers never get
+      AGNTS_RUN_NETWORK: agnts-runs
+      AGNTS_RUN_PROXY: http://egress:3128
+      AGNTS_RUNNER_IMAGE: ${AGNTS_RUNNER_IMAGE:-agnts-runner:latest}
+    # agnts starts one container per run through the Docker socket. That makes
+    # the agnts container root-equivalent on the host; run containers never get
     # the socket. DOCKER_GID is the host's docker group (getent group docker).
     group_add:
       - "${DOCKER_GID:-999}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - hirodata:/var/lib/hiro
-    # Not published: only Caddy reaches hiro, which is why hiro trusts the
+      - agntsdata:/var/lib/agnts
+    # Not published: only Caddy reaches agnts, which is why agnts trusts the
     # X-Forwarded-For entry Caddy writes.
     expose:
       - "8080"
@@ -58,13 +59,13 @@ services:
     logging: *logging
 
   egress:
-    image: ${HIRO_IMAGE:-ghcr.io/OWNER/hiro:latest}
+    image: ${AGNTS_IMAGE:-registry.agnts.uz/agnts:latest}
     restart: unless-stopped
     command: ["egress-proxy"]
     environment:
       # Comma-separated; empty uses the built-in list (Anthropic, GitHub,
       # GitLab.com, Go, npm and PyPI registries). Add your own GitLab host here.
-      HIRO_EGRESS_ALLOW: ${HIRO_EGRESS_ALLOW:-}
+      AGNTS_EGRESS_ALLOW: ${AGNTS_EGRESS_ALLOW:-}
     networks: [default, runs]
     logging: *logging
 
@@ -106,17 +107,23 @@ services:
   # Build-only: the image run containers start from.
   #   docker compose --profile build build runner
   runner:
-    image: ${HIRO_RUNNER_IMAGE:-hiro-runner:latest}
+    image: ${AGNTS_RUNNER_IMAGE:-agnts-runner:latest}
     build: ./runner
     profiles: ["build"]
 
 networks:
   runs:
-    name: hiro-runs
+    name: agnts-runs
     internal: true
 
+# Volume names are pinned to the ones created before the project was renamed
+# from hiro, so existing data, certificates and clones stay attached.
 volumes:
-  hirodata:
+  agntsdata:
+    name: hiro_hirodata
   pgdata:
+    name: hiro_pgdata
   caddy_data:
+    name: hiro_caddy_data
   caddy_config:
+    name: hiro_caddy_config

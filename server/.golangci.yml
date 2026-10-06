@@ -26,4 +26,4 @@ formatters:
     - goimports
   settings:
     goimports:
-      local-prefixes: [hiro]
+      local-prefixes: [agnts]

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hiro_api/hiro_api.dart';
+import 'package:agnts_api/agnts_api.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/data.dart';
@@ -9,6 +9,7 @@ import '../../l10n/app_localizations.dart';
 import '../../theme.dart';
 import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
+import 'spend.dart';
 
 /// The Tickets tab (scrTickets): big title, search, filter chips with counts
 /// and a stack of ticket cards. `/tickets?filter=running` opens on a filter.
@@ -131,7 +132,7 @@ String _when(BuildContext context, DateTime at) {
 /// the user, a live log line when it runs, otherwise the last update time.
 Widget ticketCardFor(BuildContext context, Ticket t, {LiveRun? live, bool showTurns = false}) {
   final l = AppLocalizations.of(context);
-  final c = Hiro.of(context);
+  final c = Agnts.of(context);
   final since = t.since;
   final needs = filterStates['needs']!.contains(t.state);
   final action = ticketAction(l, t);
@@ -141,8 +142,9 @@ Widget ticketCardFor(BuildContext context, Ticket t, {LiveRun? live, bool showTu
       Text(l.mhomeWaiting(shortDuration(DateTime.now().difference(since))))
     else
       Text(_when(context, t.updatedAt)),
+    if (t.spend != null) Text(l.spendTokens(fmtTokens(ioTokens(t.spend), Localizations.localeOf(context).toLanguageTag()))),
     if (showTurns && live != null) ...[
-      Text(live.model, style: TextStyle(fontFamily: HiroFonts.mono, fontSize: 12, color: c.ink3)),
+      Text(live.model, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12, color: c.ink3)),
       Text(l.mobileTurnsOf(live.turns.toString(), live.maxTurns.toString())),
       SizedBox(width: 48, child: Bar(value: live.maxTurns == 0 ? 0 : live.turns / live.maxTurns, height: 4)),
     ],

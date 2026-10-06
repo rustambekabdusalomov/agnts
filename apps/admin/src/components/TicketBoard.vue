@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { STATE_TONE, TERMINAL, type Ticket, type TicketState } from '../api/types'
-import { ago } from '../composables/format'
+import { ago, fmtTokens, ioTokens } from '../composables/format'
 import StateBadge from './StateBadge.vue'
 import KindBadge from './ticket/KindBadge.vue'
 
@@ -47,7 +47,9 @@ const tone = (c: BoardColumn) => STATE_TONE[c.states[0]]
               <span v-else class="src">{{ t('tickets.sourceJira') }}</span>
             </template>
             <KindBadge v-if="tk.kind !== 'code'" :ticket="tk" />
+            <span v-if="tk.openSuggestions" class="badge b-info">{{ t('followUps.openBadge', { count: tk.openSuggestions }) }}</span>
             <span v-if="tk.repoName">{{ tk.repoName }}</span>
+            <span v-if="tk.spend">{{ t('spend.tokens', { n: fmtTokens(ioTokens(tk.spend), locale) }) }}</span>
             <span>{{ ago(tk.updatedAt, locale) }}</span>
           </div>
         </article>

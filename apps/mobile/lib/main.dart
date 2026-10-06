@@ -17,17 +17,17 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final container = ProviderContainer();
   await Push.init((route) => container.read(routerProvider).push(route));
-  runApp(UncontrolledProviderScope(container: container, child: const HiroApp()));
+  runApp(UncontrolledProviderScope(container: container, child: const AgntsApp()));
 }
 
-class HiroApp extends ConsumerStatefulWidget {
-  const HiroApp({super.key});
+class AgntsApp extends ConsumerStatefulWidget {
+  const AgntsApp({super.key});
 
   @override
-  ConsumerState<HiroApp> createState() => _HiroAppState();
+  ConsumerState<AgntsApp> createState() => _AgntsAppState();
 }
 
-class _HiroAppState extends ConsumerState<HiroApp> {
+class _AgntsAppState extends ConsumerState<AgntsApp> {
   @override
   void initState() {
     super.initState();
@@ -50,8 +50,8 @@ class _HiroAppState extends ConsumerState<HiroApp> {
 
     return MaterialApp.router(
       onGenerateTitle: (context) => AppLocalizations.of(context).appName,
-      theme: hiroTheme(Brightness.light),
-      darkTheme: hiroTheme(Brightness.dark),
+      theme: agntsTheme(Brightness.light),
+      darkTheme: agntsTheme(Brightness.dark),
       themeMode: prefs.theme,
       locale: prefs.locale,
       localizationsDelegates: const [

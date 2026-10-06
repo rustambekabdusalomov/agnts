@@ -5,17 +5,17 @@ import (
 	"net/http"
 	"strings"
 
-	"hiro/internal/admin"
-	"hiro/internal/domain"
-	"hiro/internal/httpapi/gen"
-	"hiro/internal/store/postgres"
-	"hiro/internal/vcs"
+	"agnts/internal/admin"
+	"agnts/internal/domain"
+	"agnts/internal/httpapi/gen"
+	"agnts/internal/store/postgres"
+	"agnts/internal/vcs"
 )
 
 func toPeriod(p postgres.Period) gen.PeriodStats {
 	return gen.PeriodStats{Picked: p.Picked, Pushed: p.Pushed, Rejected: p.Rejected, Stopped: p.Stopped, FirstTry: p.FirstTry,
-		AfterChanges: p.AfterChanges, HiroMin: float32(p.HiroMin), WaitMin: float32(p.WaitMin), ReviewMin: float32(p.ReviewMin),
-		AnswerMin: float32(p.AnswerMin), Turns: float32(p.Turns)}
+		AfterChanges: p.AfterChanges, AgntsMin: float32(p.AgntsMin), WaitMin: float32(p.WaitMin), ReviewMin: float32(p.ReviewMin),
+		AnswerMin: float32(p.AnswerMin), Turns: float32(p.Turns), Spend: toTokenSpend(p.Spend)}
 }
 
 // GetAnalytics implements gen.ServerInterface.
@@ -33,7 +33,7 @@ func (s *Server) GetAnalytics(w http.ResponseWriter, r *http.Request, p gen.GetA
 		return
 	}
 	out := gen.Analytics{Days: days, Current: toPeriod(a.Current), Previous: toPeriod(a.Prev), Steps: map[string]float32{}, Stops: a.Stops,
-		PerDay: make([]gen.DayStat, len(a.Days)), Hours: a.Hours[:]}
+		PerDay: make([]gen.DayStat, len(a.Days)), Hours: a.Hours[:], SpendByStage: toStageSpend(a.Spend)}
 	for k, v := range a.Steps {
 		out.Steps[k] = float32(v)
 	}
@@ -42,7 +42,7 @@ func (s *Server) GetAnalytics(w http.ResponseWriter, r *http.Request, p gen.GetA
 	}
 	for i, d := range a.Days {
 		ds := gen.DayStat{Picked: d.Picked, Pushed: d.Pushed, Rejected: d.Rejected, Stopped: d.Stopped,
-			HiroMin: float32(d.HiroMin), WaitMin: float32(d.WaitMin), Turns: float32(d.Turns)}
+			AgntsMin: float32(d.AgntsMin), WaitMin: float32(d.WaitMin), Turns: float32(d.Turns), Spend: toTokenSpend(d.Spend)}
 		ds.Date.Time = d.Date
 		if d.PeakUsage != nil {
 			v := float32(*d.PeakUsage)
@@ -65,11 +65,11 @@ func (s *Server) GetAnalytics(w http.ResponseWriter, r *http.Request, p gen.GetA
 		}{AvgTurns: float32(m.AvgTurns), Model: m.Model, ReachedReview: m.ReachedReview, Runs: m.Runs})
 	}
 	out.Repos = make([]struct {
+		AgntsMin float32 `json:"agntsMin"`
 		AvgTurns float32 `json:"avgTurns"`
 		ClaudeMd string  `json:"claudeMd"`
 		Done     int     `json:"done"`
 		Finished int     `json:"finished"`
-		HiroMin  float32 `json:"hiroMin"`
 		Kind     string  `json:"kind"`
 		Name     string  `json:"name"`
 		RepoId   int64   `json:"repoId"`
@@ -77,7 +77,7 @@ func (s *Server) GetAnalytics(w http.ResponseWriter, r *http.Request, p gen.GetA
 	}, len(a.Repos))
 	for i, x := range a.Repos {
 		out.Repos[i].AvgTurns, out.Repos[i].ClaudeMd, out.Repos[i].Done, out.Repos[i].Finished = float32(x.AvgTurns), x.ClaudeMD, x.Done, x.Finished
-		out.Repos[i].HiroMin, out.Repos[i].Kind, out.Repos[i].Name, out.Repos[i].RepoId, out.Repos[i].Tickets = float32(x.HiroMin), x.Kind, x.Name, x.RepoID, x.Tickets
+		out.Repos[i].AgntsMin, out.Repos[i].Kind, out.Repos[i].Name, out.Repos[i].RepoId, out.Repos[i].Tickets = float32(x.AgntsMin), x.Kind, x.Name, x.RepoID, x.Tickets
 	}
 	out.Insights = make([]struct {
 		Kind   gen.AnalyticsInsightsKind `json:"kind"`
@@ -119,11 +119,11 @@ func (s *Server) browse(w http.ResponseWriter, r *http.Request, id int64, part s
 	return v, true
 }
 
-// ticketForBranch links hiro's branches (prefix + KEY) to tickets.
+// ticketForBranch links agnts's branches (prefix + KEY) to tickets.
 func ticketForBranch(v admin.RepoActivityView, branch string) *string {
 	prefix := v.Repo.BranchPrefix
 	if prefix == "" {
-		prefix = "hiro/"
+		prefix = "agnts/"
 	}
 	if k, ok := strings.CutPrefix(branch, prefix); ok && k != "" {
 		return &k

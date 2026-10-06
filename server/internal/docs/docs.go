@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
 //go:embed content

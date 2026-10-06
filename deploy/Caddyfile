@@ -2,7 +2,7 @@
 	email {$ACME_EMAIL}
 }
 
-{$HIRO_DOMAIN} {
+{$AGNTS_DOMAIN} {
 	encode zstd gzip
 
 	header {
@@ -14,7 +14,7 @@
 		-Server
 	}
 
-	# hiro serves the admin panel, /api, /healthz and (later) /mcp and webhooks.
+	# agnts serves the admin panel, /api, /healthz and (later) /mcp and webhooks.
 	# Server-Sent Events are flushed immediately by Caddy.
-	reverse_proxy hiro:8080
+	reverse_proxy agnts:8080
 }

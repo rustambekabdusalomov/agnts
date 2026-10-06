@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hiro_api/hiro_api.dart';
+import 'package:agnts_api/agnts_api.dart';
 
 import '../../core/api.dart';
 import '../../core/data.dart';
@@ -38,7 +38,7 @@ class _TicketLessonsState extends ConsumerState<TicketLessons> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final state = widget.ticket.learnState ?? TicketLearnStateEnum.none;
     final items = ref.watch(ticketLessonsProvider(widget.ticket.key)).value?.items ?? const <LessonBrief>[];
     final text = switch (state) {

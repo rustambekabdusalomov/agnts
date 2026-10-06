@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
 )
 
 type memEvents struct {

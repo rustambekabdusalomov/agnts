@@ -9,13 +9,13 @@ import (
 	"strconv"
 	"time"
 
-	"hiro/internal/admin"
-	"hiro/internal/docs"
-	"hiro/internal/domain"
-	"hiro/internal/httpapi/gen"
-	"hiro/internal/orchestrator"
-	"hiro/internal/store/postgres"
-	"hiro/internal/usage"
+	"agnts/internal/admin"
+	"agnts/internal/docs"
+	"agnts/internal/domain"
+	"agnts/internal/httpapi/gen"
+	"agnts/internal/orchestrator"
+	"agnts/internal/store/postgres"
+	"agnts/internal/usage"
 )
 
 // Admin groups the services behind the Phase 2 pages.
@@ -146,6 +146,14 @@ func (s *Server) CreateTask(w http.ResponseWriter, r *http.Request) {
 	if req.Description != nil {
 		in.Description = *req.Description
 	}
+	if req.FollowUps != nil {
+		on, ok := followUpsMode(*req.FollowUps)
+		if !ok {
+			writeError(w, http.StatusBadRequest, "bad_request", "followUps must be inherit, on or off")
+			return
+		}
+		in.FollowUps = on
+	}
 	t, err := s.opt.Tickets.CreateTask(r.Context(), in, origin(r))
 	if err != nil {
 		s.writeUseCaseError(w, r, err)
@@ -258,7 +266,7 @@ func (s *Server) ExportEvents(w http.ResponseWriter, r *http.Request, p gen.Expo
 	if p.Format != nil {
 		format = string(*p.Format)
 	}
-	name := "hiro-events-" + time.Now().Format("2006-01-02")
+	name := "agnts-events-" + time.Now().Format("2006-01-02")
 	var err error
 	if format == "csv" {
 		w.Header().Set("Content-Type", "text/csv; charset=utf-8")
@@ -321,7 +329,7 @@ func (s *Server) GetDashboard(w http.ResponseWriter, r *http.Request) {
 		out.Live[i] = gen.LiveRun{Ticket: toTicketRow(l.Row), Model: l.Model, Turns: l.Turns, MaxTurns: l.MaxTurns, LastMessage: l.LastMessage}
 	}
 	for i, b := range d.TodayByHour {
-		out.TodayByHour[i] = gen.HourBucket{Hour: b.Hour, Hiro: b.Hiro, You: b.You, Problems: b.Problems}
+		out.TodayByHour[i] = gen.HourBucket{Hour: b.Hour, Agnts: b.Agnts, You: b.You, Problems: b.Problems}
 	}
 	for i, a := range d.Repos {
 		out.Repos[i] = gen.RepoActivity{Repo: toRepo(a.Repo), Open: a.Repo.Open}
@@ -397,16 +405,17 @@ func (s *Server) RefreshUsage(w http.ResponseWriter, r *http.Request) {
 func toSettings(v domain.Settings) gen.Settings {
 	learn, autoLearn, lessons := gen.Model(v.Models.Learn), v.AutoLearn, v.Notify.Lessons
 	review, autoReview, reviewNote := gen.ReviewModel(v.Models.Review), v.AutoReview, v.Notify.Review
+	followUps, followUpsNote := v.SuggestFollowUps, v.Notify.FollowUps
 	return gen.Settings{
 		Models: gen.StageModels{Analyze: gen.Model(v.Models.Analyze), Coding: gen.Model(v.Models.Coding),
 			Retry: gen.Model(v.Models.Retry), Helper: gen.Model(v.Models.Helper), Learn: &learn, Review: &review},
 		MaxTurns: v.MaxTurns, TimeoutMin: v.TimeoutMin, Allow: v.Allow, Deny: v.Deny,
 		AskFirst: v.AskFirst, AutoResume: v.AutoResume, PauseAbove: v.PauseAbove, Parallel: v.Parallel, AutoLearn: &autoLearn,
-		AutoReview: &autoReview,
+		AutoReview: &autoReview, SuggestFollowUps: &followUps,
 		Git: gen.GitSettings{AuthorName: v.Git.AuthorName, AuthorEmail: v.Git.AuthorEmail, CoAuthor: v.Git.CoAuthor,
 			PrTitle: v.Git.PRTitle, Draft: v.Git.Draft},
 		Notify: &gen.NotifySettings{Push: v.Notify.Push, Telegram: v.Notify.Telegram, NeedsYou: v.Notify.NeedsYou,
-			Stopped: v.Notify.Stopped, Done: v.Notify.Done, Lessons: &lessons, Review: &reviewNote},
+			Stopped: v.Notify.Stopped, Done: v.Notify.Done, Lessons: &lessons, Review: &reviewNote, FollowUps: &followUpsNote},
 	}
 }
 
@@ -443,19 +452,23 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 			Retry: string(req.Models.Retry), Helper: string(req.Models.Helper), Learn: cur.Models.Learn, Review: cur.Models.Review},
 		MaxTurns: req.MaxTurns, TimeoutMin: req.TimeoutMin, Allow: req.Allow, Deny: req.Deny,
 		AskFirst: req.AskFirst, AutoResume: req.AutoResume, PauseAbove: req.PauseAbove, Parallel: req.Parallel, AutoLearn: cur.AutoLearn,
-		AutoReview: cur.AutoReview,
+		AutoReview: cur.AutoReview, SuggestFollowUps: cur.SuggestFollowUps,
 		Git: domain.GitSettings{AuthorName: req.Git.AuthorName, AuthorEmail: req.Git.AuthorEmail, CoAuthor: req.Git.CoAuthor,
 			PRTitle: req.Git.PrTitle, Draft: req.Git.Draft},
 		Notify: cur.Notify,
 	}
 	if req.Notify != nil {
 		v.Notify = domain.NotifySettings{Push: req.Notify.Push, Telegram: req.Notify.Telegram, NeedsYou: req.Notify.NeedsYou,
-			Stopped: req.Notify.Stopped, Done: req.Notify.Done, Lessons: cur.Notify.Lessons, Review: cur.Notify.Review}
+			Stopped: req.Notify.Stopped, Done: req.Notify.Done, Lessons: cur.Notify.Lessons, Review: cur.Notify.Review,
+			FollowUps: cur.Notify.FollowUps}
 		if req.Notify.Lessons != nil {
 			v.Notify.Lessons = *req.Notify.Lessons
 		}
 		if req.Notify.Review != nil {
 			v.Notify.Review = *req.Notify.Review
+		}
+		if req.Notify.FollowUps != nil {
+			v.Notify.FollowUps = *req.Notify.FollowUps
 		}
 	}
 	if req.Models.Learn != nil {
@@ -469,6 +482,9 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.AutoReview != nil {
 		v.AutoReview = *req.AutoReview
+	}
+	if req.SuggestFollowUps != nil {
+		v.SuggestFollowUps = *req.SuggestFollowUps
 	}
 	saved, err := s.opt.Admin.Settings.Put(r.Context(), v, origin(r))
 	if err != nil {

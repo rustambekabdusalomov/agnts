@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hiro_api/hiro_api.dart';
+import 'package:agnts_api/agnts_api.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/data.dart';
@@ -68,7 +68,7 @@ class _HomeBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final n = d.counts;
     final session = d.usage.fiveHour.utilization;
     final sessionTone = session == null ? Tone.gray : session >= 1 ? Tone.bad : session >= 0.8 ? Tone.warn : Tone.info;

@@ -1,6 +1,6 @@
 # Settings
 
-How hiro connects to your tools and behaves during runs. Changes apply after you press Save changes.
+How agnts connects to your tools and behaves during runs. Changes apply after you press Save changes.
 
 ## Appearance
 
@@ -8,7 +8,7 @@ Theme and language. Saved in this browser and applied right away.
 
 ## Jira and GitHub
 
-Where tickets come from, which label hiro picks up, and whose name commits are made under.
+Where tickets come from, which label agnts picks up, and whose name commits are made under.
 
 ## Claude Code
 

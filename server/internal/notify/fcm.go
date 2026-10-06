@@ -40,7 +40,7 @@ type FCM struct {
 
 // LoadFCM reads a Firebase service account JSON file.
 func LoadFCM(path string) (*FCM, error) {
-	b, err := os.ReadFile(path) //nolint:gosec // G304: path comes from HIRO_FCM_CREDENTIALS
+	b, err := os.ReadFile(path) //nolint:gosec // G304: path comes from AGNTS_FCM_CREDENTIALS
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +143,7 @@ func (f *FCM) Send(ctx context.Context, token string, p Push) error {
 		"token":        token,
 		"notification": map[string]string{"title": p.Title, "body": p.Body},
 		"data":         map[string]string{"ticket": p.Ticket, "route": route},
-		"android":      map[string]any{"priority": "high", "notification": map[string]string{"channel_id": "hiro"}},
+		"android":      map[string]any{"priority": "high", "notification": map[string]string{"channel_id": "agnts"}},
 		"apns":         map[string]any{"payload": map[string]any{"aps": map[string]any{"sound": "default"}}},
 	}}
 	b, _ := json.Marshal(msg)

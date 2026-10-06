@@ -26,7 +26,7 @@ const (
 	RuleMaxRounds = 3 // question rounds before the review must settle
 )
 
-// Rule is an instruction the user wrote for hiro to follow on every ticket:
+// Rule is an instruction the user wrote for agnts to follow on every ticket:
 // in every repository when RepoID is nil, else in that repository only.
 type Rule struct {
 	ID       int64
@@ -36,7 +36,7 @@ type Rule struct {
 	Body     string
 	Enabled  bool
 	Status   RuleStatus
-	// Interpretation is Claude's account of what the rule makes hiro do.
+	// Interpretation is Claude's account of what the rule makes agnts do.
 	Interpretation string
 	// Clarified is the rule rewritten with what the answers settled; tickets
 	// get it instead of Body when set.

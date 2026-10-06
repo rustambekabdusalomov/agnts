@@ -51,7 +51,7 @@ const learning = computed(() => (learnQueue.data.value ?? []).filter((x) => x.st
 // Rules whose review is waiting on your answers.
 const rules = useRules()
 const ruleQuestions = computed(() => (rules.data.value ?? []).filter((r) => r.status === 'questions').length)
-// The tab icon and title: what needs you, and whether hiro is working.
+// The tab icon and title: what needs you, and whether agnts is working.
 useTabBadge(
   computed(() => count(NEEDS)),
   computed(() => count(RUNNING) > 0 || (learnQueue.data.value ?? []).some((x) => x.status === 'running')),
@@ -116,7 +116,7 @@ async function signOut() {
   <div class="shell" :class="{ thin: prefs.thin }">
     <aside class="side" @mouseover="showTip" @focusin="showTip" @mouseleave="tipBox = null" @focusout="tipBox = null" @scroll.capture="tipBox = null" @click="tipBox = null">
       <div class="brandbox">
-        <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="1" width="28" height="28" rx="7" fill="var(--mark)" /><path d="M10 9v12M10 15c1.2-2 2.6-3 4.5-3 2.2 0 3.5 1.4 3.5 3.8V21" stroke="var(--mark-ink)" stroke-width="2.4" fill="none" stroke-linecap="round" /></svg>
+        <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="1" width="28" height="28" rx="7" fill="var(--mark)" /><path d="M19.75 10.25V19.75M19.75 15a4.75 4.75 0 1 1-9.5 0a4.75 4.75 0 1 1 9.5 0" stroke="var(--mark-ink)" stroke-width="2.4" fill="none" stroke-linecap="round" /></svg>
         <div class="brand-txt"><div class="brand-name">{{ t('app.name') }}</div><div class="brand-sub">{{ t('app.tagline') }}</div></div>
         <button
           class="thin-btn"

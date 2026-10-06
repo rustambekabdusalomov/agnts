@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-// DefaultAllow is used when HIRO_EGRESS_ALLOW is not set.
+// DefaultAllow is used when AGNTS_EGRESS_ALLOW is not set.
 var DefaultAllow = []string{
 	"api.anthropic.com", "statsig.anthropic.com", "sentry.io", ".sentry.io",
 	"github.com", ".github.com", ".githubusercontent.com", "gitlab.com",
@@ -104,7 +104,7 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (p *Proxy) deny(w http.ResponseWriter, target string) {
 	p.log.Warn("egress denied", "target", target)
-	http.Error(w, "hiro egress: "+target+" is not on the allowlist (HIRO_EGRESS_ALLOW)", http.StatusForbidden)
+	http.Error(w, "agnts egress: "+target+" is not on the allowlist (AGNTS_EGRESS_ALLOW)", http.StatusForbidden)
 }
 
 func (p *Proxy) connect(w http.ResponseWriter, r *http.Request) {

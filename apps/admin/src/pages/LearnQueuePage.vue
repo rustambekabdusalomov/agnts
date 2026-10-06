@@ -10,6 +10,6 @@ useLive()
 </script>
 
 <template>
-  <PageHeader :title="t('learn.queueTitle')" :lede="t('learn.queueLede')" doc="learn" />
+  <PageHeader :title="t('learn.queueTitle')" doc="learn" />
   <LearnQueue />
 </template>

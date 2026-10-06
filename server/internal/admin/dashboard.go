@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
-	"hiro/internal/store/postgres"
-	"hiro/internal/usage"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
+	"agnts/internal/store/postgres"
+	"agnts/internal/usage"
 )
 
 // Dashboard builds the dashboard and the logs summary.
@@ -113,7 +113,7 @@ func (d *Dashboard) Build(ctx context.Context) (Data, error) {
 			out.Counts["queued"]++
 		}
 	}
-	// Oldest wait first: every minute there is a minute hiro can't work.
+	// Oldest wait first: every minute there is a minute agnts can't work.
 	sortBySince(out.Waiting)
 	if len(out.Waiting) > 6 {
 		out.Waiting = out.Waiting[:6]

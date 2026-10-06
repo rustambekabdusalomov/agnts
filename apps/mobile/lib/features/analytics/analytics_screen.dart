@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hiro_api/hiro_api.dart';
+import 'package:agnts_api/agnts_api.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
 import '../../core/api.dart';
@@ -37,7 +37,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
   void _about() {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -86,7 +86,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
   Widget _dashboard(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final value = ref.watch(_analyticsFor(_days));
     return RefreshIndicator(
       onRefresh: () => ref.refresh(_analyticsFor(_days).future),
@@ -157,7 +157,7 @@ class _Dashboard {
 
   List<Widget> children(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final cur = a.current, prev = a.previous;
     final locale = Localizations.localeOf(context).toString();
 
@@ -192,10 +192,10 @@ class _Dashboard {
             delta: _delta(first, _pct(prev.firstTry, prev.pushed), upIsGood: true),
             note: l.analyticsKpiFirstTryNote),
         KpiCard(
-            label: l.analyticsKpiHiro,
-            value: _min(l, cur.hiroMin),
-            delta: _delta(cur.hiroMin, prev.hiroMin, upIsGood: false),
-            note: l.analyticsKpiHiroNote),
+            label: l.analyticsKpiAgnts,
+            value: _min(l, cur.agntsMin),
+            delta: _delta(cur.agntsMin, prev.agntsMin, upIsGood: false),
+            note: l.analyticsKpiAgntsNote),
         KpiCard(
             label: l.analyticsKpiWait,
             value: _min(l, cur.waitMin),
@@ -309,21 +309,21 @@ class _Dashboard {
         const SizedBox(height: 10),
         _LineChart(
           series: [
-            _Series(l.analyticsHiroWorking, [for (final d in a.perDay) d.hiroMin], c.primary, area: true),
+            _Series(l.analyticsAgntsWorking, [for (final d in a.perDay) d.agntsMin], c.primary, area: true),
             _Series(l.analyticsWaitingOnYou, [for (final d in a.perDay) d.waitMin], c.warn),
           ],
           labels: labels,
           maxLabels: maxLabels,
           fmt: (v) => _min(l, v),
         ),
-        _Legend([(c.primary, l.analyticsHiroWorking), (c.warn, l.analyticsWaitingOnYou)]),
+        _Legend([(c.primary, l.analyticsAgntsWorking), (c.warn, l.analyticsWaitingOnYou)]),
       ])),
       SectionHeader(l.analyticsSteps),
       _card(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         sub(l.analyticsStepsSub),
         const SizedBox(height: 6),
         _HBars(steps, fmt: (v) => _min(l, v)),
-        _Legend([(c.primary, l.analyticsHiroWorking), (c.warn, l.analyticsWaitingOnYou)]),
+        _Legend([(c.primary, l.analyticsAgntsWorking), (c.warn, l.analyticsWaitingOnYou)]),
       ])),
       SectionHeader(l.analyticsStops, trailing: Text('$stopsTotal')),
       _card(stopsTotal == 0
@@ -380,7 +380,7 @@ class _Dashboard {
                     subtitle: [
                       l.manalyticsTickets(r.tickets),
                       l.manalyticsTurns(r.avgTurns.round()),
-                      _min(l, r.hiroMin),
+                      _min(l, r.agntsMin),
                       '${l.analyticsColClaudeMd}: ${mdLabel(r.claudeMd)}',
                     ].join(' · '),
                     trailing: Text(
@@ -462,7 +462,7 @@ class _Legend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return Padding(
       padding: const EdgeInsets.only(top: 10),
       child: Wrap(spacing: 14, runSpacing: 6, children: [
@@ -486,7 +486,7 @@ class _MiniKv extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 9),
       decoration: BoxDecoration(border: last ? null : Border(bottom: BorderSide(color: c.line2))),
@@ -506,7 +506,7 @@ class _HBars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final max = rows.fold<num>(1, (m, r) => math.max(m, r.v));
     return Column(children: [
       for (final r in rows)
@@ -543,14 +543,14 @@ class _Donut extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return SizedBox(
       width: 120,
       height: 120,
       child: Stack(alignment: Alignment.center, children: [
         Positioned.fill(child: CustomPaint(painter: _DonutPainter(parts, c.line2))),
         Column(mainAxisSize: MainAxisSize.min, children: [
-          Text(center, style: TextStyle(fontFamily: HiroFonts.display, fontSize: 22, fontWeight: FontWeight.w700, color: c.ink, height: 1.1)),
+          Text(center, style: TextStyle(fontFamily: AgntsFonts.display, fontSize: 22, fontWeight: FontWeight.w700, color: c.ink, height: 1.1)),
           Text(sub, style: TextStyle(fontSize: 11.5, color: c.ink3)),
         ]),
       ]),
@@ -656,12 +656,12 @@ class _BarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return SizedBox(
       height: height,
       width: double.infinity,
       child: CustomPaint(
-        painter: _BarPainter(series, labels, maxLabels, c.line2, TextStyle(fontSize: 11, color: c.ink3, fontFamily: HiroFonts.sans)),
+        painter: _BarPainter(series, labels, maxLabels, c.line2, TextStyle(fontSize: 11, color: c.ink3, fontFamily: AgntsFonts.sans)),
       ),
     );
   }
@@ -715,12 +715,12 @@ class _LineChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return SizedBox(
       height: 200,
       width: double.infinity,
       child: CustomPaint(
-        painter: _LinePainter(series, labels, maxLabels, fmt, c.line2, TextStyle(fontSize: 11, color: c.ink3, fontFamily: HiroFonts.sans)),
+        painter: _LinePainter(series, labels, maxLabels, fmt, c.line2, TextStyle(fontSize: 11, color: c.ink3, fontFamily: AgntsFonts.sans)),
       ),
     );
   }

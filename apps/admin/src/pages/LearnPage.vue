@@ -56,7 +56,7 @@ const empty = computed(() => {
 </script>
 
 <template>
-  <PageHeader :title="t('learn.title')" :lede="t('learn.lede')" doc="learn" />
+  <PageHeader :title="t('learn.title')" doc="learn" />
 
   <section class="card">
     <div class="ch" style="flex-wrap: wrap; gap: 10px">

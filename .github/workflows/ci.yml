@@ -54,7 +54,7 @@ jobs:
           POSTGRES_DB: hiro_test
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U hiro -d hiro_test"
+          --health-cmd "pg_isready -U agnts -d hiro_test"
           --health-interval 5s --health-timeout 3s --health-retries 10
     defaults:
       run:
@@ -71,7 +71,7 @@ jobs:
           working-directory: server
       - run: go test -race -p 1 ./...
         env:
-          HIRO_TEST_DATABASE_URL: postgres://hiro:hiro@localhost:5432/hiro_test?sslmode=disable
+          AGNTS_TEST_DATABASE_URL: postgres://hiro:hiro@localhost:5432/hiro_test?sslmode=disable
       - run: go build ./...
 
   admin:
@@ -106,7 +106,7 @@ jobs:
           channel: stable
           cache: true
       - name: Build the generated API client
-        working-directory: apps/mobile/packages/hiro_api
+        working-directory: apps/mobile/packages/agnts_api
         run: |
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
@@ -115,6 +115,29 @@ jobs:
       - run: dart format --output=none --set-exit-if-changed lib test
       - run: flutter analyze
       - run: flutter test
+
+  cli:
+    name: CLI (${{ matrix.os }})
+    # The CLI runs on all three, even though servers are Linux only.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: cli
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: cli
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets --locked -- -D warnings
+      - run: cargo test --locked
 
   image:
     name: Docker image
@@ -178,4 +201,4 @@ jobs:
           echo "$SSH_KEY" > ~/.ssh/id_deploy && chmod 600 ~/.ssh/id_deploy
           echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
           ssh -i ~/.ssh/id_deploy "$TARGET" \
-            'cd /opt/hiro && docker compose --profile build pull hiro egress runner && docker compose up -d && docker image prune -f'
+            'cd /opt/agnts && docker compose --profile build pull agnts egress runner && docker compose up -d && docker image prune -f'

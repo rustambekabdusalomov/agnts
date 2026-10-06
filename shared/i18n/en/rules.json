@@ -1,7 +1,7 @@
 {
   "rules": {
     "title": "Rules",
-    "lede": "Instructions hiro follows on every ticket: global rules for all repositories and rules for one repository. Claude reviews each rule and asks about anything unclear before it applies.",
+    "lede": "Instructions agnts follows on every ticket: global rules for all repositories and rules for one repository. Claude reviews each rule and asks about anything unclear before it applies.",
     "add": "Add rule",
     "addSubmit": "Add and review",
     "drawerSub": "Write it the way you would brief a new teammate. Claude checks it before any ticket follows it.",
@@ -22,7 +22,7 @@
     "scopeLabel": "Show rules for",
     "scopeAll": "All rules ({n})",
     "scopeGlobal": "Global ({n})",
-    "none": "No rules yet. Add one to tell hiro how your team works: testing, naming, logging, what never to touch.",
+    "none": "No rules yet. Add one to tell agnts how your team works: testing, naming, logging, what never to touch.",
     "noMatch": "No rules match.",
     "waitingHelp": "{n, plural, one {# rule is waiting for your answers. It does not apply to tickets until it is answered.} other {# rules are waiting for your answers. They do not apply to tickets until they are answered.}}",
     "status_pending": "Queued for review",
@@ -50,7 +50,7 @@
     "acceptBody": "Tickets get the rule as you wrote it, with the answers given so far. Open questions are dropped.",
     "failed": "Claude could not review this rule: {error}",
     "reviewAgain": "Review again",
-    "interpretation": "How hiro reads it",
+    "interpretation": "How agnts reads it",
     "clarified": "What tickets get",
     "asWritten": "Used as written.",
     "answersTitle": "{n, plural, one {# answered question} other {# answered questions}}",

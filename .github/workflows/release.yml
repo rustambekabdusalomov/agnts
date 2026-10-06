@@ -1,0 +1,165 @@
+name: Release
+
+# Push a tag like v0.2.0 to release. The tag must match cli/Cargo.toml's
+# version: the CLI installs images with its own version, so both ship together.
+#
+# Secrets:
+#   AGNTS_REGISTRY_USER, AGNTS_REGISTRY_PASSWORD  push account on registry.agnts.uz
+#   AGNTS_RELEASE_TOKEN                           uploads CLI builds to agnts.uz
+#   HOMEBREW_TAP_TOKEN (optional)                 updates the Homebrew tap
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  version:
+    name: Check version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: v
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          crate=$(grep -m1 '^version' cli/Cargo.toml | cut -d'"' -f2)
+          if [ "$tag" != "$crate" ]; then
+            echo "::error::tag v$tag does not match cli/Cargo.toml version $crate"
+            exit 1
+          fi
+          echo "version=$tag" >> "$GITHUB_OUTPUT"
+
+  images:
+    name: Images
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: registry.agnts.uz
+          username: ${{ secrets.AGNTS_REGISTRY_USER }}
+          password: ${{ secrets.AGNTS_REGISTRY_PASSWORD }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          build-args: |
+            VERSION=${{ needs.version.outputs.version }}
+            COMMIT=${{ github.sha }}
+          tags: |
+            registry.agnts.uz/agnts:${{ needs.version.outputs.version }}
+            registry.agnts.uz/agnts:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - uses: docker/build-push-action@v6
+        with:
+          context: deploy/runner
+          push: true
+          tags: |
+            registry.agnts.uz/agnts-runner:${{ needs.version.outputs.version }}
+            registry.agnts.uz/agnts-runner:latest
+          cache-from: type=gha,scope=runner
+          cache-to: type=gha,mode=max,scope=runner
+
+  cli:
+    name: CLI ${{ matrix.target }}
+    needs: version
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { target: x86_64-unknown-linux-musl, os: ubuntu-latest }
+          - { target: aarch64-unknown-linux-musl, os: ubuntu-24.04-arm }
+          - { target: aarch64-apple-darwin, os: macos-latest }
+          - { target: x86_64-apple-darwin, os: macos-latest }
+          - { target: x86_64-pc-windows-msvc, os: windows-latest }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - if: contains(matrix.target, 'musl')
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq musl-tools
+      - name: Build
+        working-directory: cli
+        shell: bash
+        run: |
+          if [[ "${{ matrix.target }}" == *musl ]]; then
+            export CC_$(echo "${{ matrix.target }}" | tr - _)=musl-gcc
+          fi
+          cargo build --release --locked --target ${{ matrix.target }}
+      - name: Package
+        shell: bash
+        run: |
+          name=agnts-${{ matrix.target }}
+          dir=cli/target/${{ matrix.target }}/release
+          mkdir -p dist
+          if [[ "${{ matrix.target }}" == *windows* ]]; then
+            7z a "dist/$name.zip" "./$dir/agnts.exe" >/dev/null
+            file="dist/$name.zip"
+          else
+            tar -C "$dir" -czf "dist/$name.tar.gz" agnts
+            file="dist/$name.tar.gz"
+          fi
+          if command -v sha256sum >/dev/null; then sha256sum "$file" | cut -d' ' -f1 > "$file.sha256"
+          else shasum -a 256 "$file" | cut -d' ' -f1 > "$file.sha256"; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cli-${{ matrix.target }}
+          path: dist/*
+
+  publish:
+    name: Publish
+    needs: [version, images, cli]
+    runs-on: ubuntu-latest
+    env:
+      HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*
+            cli/install/install.sh
+            cli/install/install.ps1
+      - name: Upload to agnts.uz
+        # agnts.uz serves the builds at /cli/<version>/ and /cli/latest/, and
+        # answers GET /api/cli/latest from what this step sends.
+        env:
+          TOKEN: ${{ secrets.AGNTS_RELEASE_TOKEN }}
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          args=()
+          for f in dist/*; do args+=(-F "files=@$f"); done
+          args+=(-F "files=@cli/install/install.sh" -F "files=@cli/install/install.ps1")
+          curl -fsS -X POST "https://agnts.uz/api/cli/releases?version=$VERSION" \
+            -H "Authorization: Bearer $TOKEN" "${args[@]}"
+      - name: Homebrew tap
+        if: env.HOMEBREW_TAP_TOKEN != ''
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          sha() { cat "dist/agnts-$1.tar.gz.sha256"; }
+          sed -e "s/@VERSION@/$VERSION/g" \
+              -e "s/@SHA_MAC_ARM@/$(sha aarch64-apple-darwin)/" \
+              -e "s/@SHA_MAC_X86@/$(sha x86_64-apple-darwin)/" \
+              -e "s/@SHA_LINUX_ARM@/$(sha aarch64-unknown-linux-musl)/" \
+              -e "s/@SHA_LINUX_X86@/$(sha x86_64-unknown-linux-musl)/" \
+              cli/install/agnts.rb.in > agnts.rb
+          git clone "https://x-access-token:$HOMEBREW_TAP_TOKEN@github.com/${GITHUB_REPOSITORY_OWNER}/homebrew-tap.git" tap
+          mkdir -p tap/Formula && cp agnts.rb tap/Formula/agnts.rb
+          cd tap
+          git config user.name "agnts release" && git config user.email "release@agnts.uz"
+          git add Formula/agnts.rb && git commit -m "agnts $VERSION" && git push

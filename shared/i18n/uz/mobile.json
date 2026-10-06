@@ -1,8 +1,8 @@
 {
   "mobile": {
     "server": "Server manzili",
-    "serverHint": "https://hiro.example.com",
-    "serverInvalid": "hiro serveringizning https manzilini kiriting.",
+    "serverHint": "https://agnts.example.com",
+    "serverInvalid": "agnts serveringizning https manzilini kiriting.",
     "home": "Bosh sahifa",
     "activity": "Faollik",
     "more": "Yana",

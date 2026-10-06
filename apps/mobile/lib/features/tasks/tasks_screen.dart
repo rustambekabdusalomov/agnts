@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hiro_api/hiro_api.dart';
+import 'package:agnts_api/agnts_api.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/api.dart';
@@ -11,6 +11,7 @@ import '../../theme.dart';
 import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
 import '../tickets/kinds.dart';
+import '../tickets/spend.dart';
 
 /// Side-project tasks (scrTasks in mobile.html): a repository filter, the
 /// tasks as cards, and a "+" that opens the new-task sheet.
@@ -28,7 +29,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final all = ref.watch(ticketsProvider('all'));
     final repos = ref.watch(reposProvider);
     final sideRepos = _taskRepos(repos.value ?? const []);
@@ -111,7 +112,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
 
   void _showGuide(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -141,7 +142,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       return;
     }
     if (!mounted) return;
-    // Without repositories a task can still be a report (or let hiro pick).
+    // Without repositories a task can still be a report (or let agnts pick).
     final initial = repos.any((r) => r.id == _repo) ? _repo! : (repos.firstOrNull?.id ?? 0);
     final key = await showModalBottomSheet<String>(
       context: context,
@@ -192,7 +193,10 @@ class _TaskCard extends StatelessWidget {
     return TicketCard(
       ticket: t,
       onTap: () => context.push('/tickets/${t.key}'),
-      meta: [Text(_when(context, t.updatedAt))],
+      meta: [
+        Text(_when(context, t.updatedAt)),
+        if (t.spend != null) Text(l.spendTokens(fmtTokens(ioTokens(t.spend), Localizations.localeOf(context).toLanguageTag()))),
+      ],
       action: action,
       actionTone: tone,
     );
@@ -230,6 +234,7 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
   var _priority = TaskCreatePriorityEnum.medium;
   var _after = TaskCreateAfterApproveEnum.pr;
   var _start = TaskCreateStartEnum.ask;
+  var _followUps = FollowUpsMode.inherit;
   var _kind = TicketKindChoice.auto;
   bool _busy = false;
 
@@ -274,6 +279,7 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
               priority: _priority,
               afterApprove: _after,
               start: _start,
+              followUps: _followUps,
             ),
           );
       if (mounted) Navigator.pop(context, res.data?.key);
@@ -287,7 +293,7 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final t = Theme.of(context).textTheme;
     final keyboard = MediaQuery.viewInsetsOf(context).bottom;
     return Padding(
@@ -372,6 +378,19 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
                   ),
                 ),
               _Field(
+                label: l.followUpsMode,
+                child: Segmented<FollowUpsMode>(
+                  full: true,
+                  options: [
+                    (FollowUpsMode.inherit, l.followUpsModeInherit),
+                    (FollowUpsMode.on_, l.followUpsModeOn),
+                    (FollowUpsMode.off, l.followUpsModeOff),
+                  ],
+                  value: _followUps,
+                  onChanged: (v) => setState(() => _followUps = v),
+                ),
+              ),
+              _Field(
                 label: l.mobileStart,
                 last: true,
                 child: Column(children: [
@@ -424,7 +443,7 @@ class _Field extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return Padding(
       padding: EdgeInsets.only(bottom: last ? 0 : 16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -446,7 +465,7 @@ class _Choice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(14),
       side: BorderSide(color: selected ? c.primary : c.line, width: selected ? 2 : 1),

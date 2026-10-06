@@ -1,6 +1,6 @@
 // Package usage tracks the Claude plan limits from Claude Code's
 // rate_limit_event lines, decides when new runs must wait, and refreshes the
-// reading with a tiny run when hiro is idle.
+// reading with a tiny run when agnts is idle.
 package usage
 
 import (
@@ -15,9 +15,9 @@ import (
 	"sync"
 	"time"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
-	"hiro/internal/store/postgres"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
+	"agnts/internal/store/postgres"
 )
 
 // Store persists snapshots.

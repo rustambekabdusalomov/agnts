@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { api, HttpError, unwrap } from '../../api/client'
 import { findingFeedback, MODEL_NAME, SEVERITY_TONE, VERDICT_TONE, type CodeReview, type Finding, type Ticket } from '../../api/types'
 import { useUi } from '../../stores/ui'
 import HiIcon from '../ui/HiIcon.vue'
 
-// hiro's code review beside the human one: advice only, never a gate.
+// agnts's code review beside the human one: advice only, never a gate.
 // Findings can be copied into the feedback box, so sending them back to
-// hiro is one click away.
+// agnts is one click away.
 const props = defineProps<{ ticket: Ticket; review?: CodeReview; feedback: string; report?: boolean }>()
 const emit = defineEmits<{ add: [line: string]; show: [path: string] }>()
 const { t } = useI18n()
@@ -25,6 +25,18 @@ const busy = computed(() => state.value === 'pending' || state.value === 'runnin
 const run = useMutation({
   mutationFn: () => unwrap(api.POST('/tickets/{key}/review', { params: { path: { key: props.ticket.key } } })),
   onSettled: () => qc.invalidateQueries({ queryKey: ['ticket', props.ticket.key] }),
+  onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
+})
+
+// A finding outside this change can become a follow-up ticket instead.
+const suggested = ref(new Set<number>())
+const toFollowUp = useMutation({
+  mutationFn: (i: number) =>
+    unwrap(api.POST('/tickets/{key}/review/findings/{index}/follow-up', { params: { path: { key: props.ticket.key, index: i } } })),
+  onSuccess: (_, i) => {
+    suggested.value = new Set(suggested.value).add(i)
+    void qc.invalidateQueries({ queryKey: ['ticket', props.ticket.key] })
+  },
   onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
 })
 
@@ -77,6 +89,15 @@ function addAll() {
           >
             <HiIcon v-if="added(f)" name="check" />{{ added(f) ? t('review.added') : t('review.addToFeedback') }}
           </button>
+          <button
+            type="button"
+            class="btn btn-s cr-fu"
+            :disabled="suggested.has(i) || toFollowUp.isPending.value"
+            :title="t('followUps.fromFindingHint')"
+            @click="toFollowUp.mutate(i)"
+          >
+            <HiIcon v-if="suggested.has(i)" name="check" />{{ suggested.has(i) ? t('followUps.fromFindingDone') : t('followUps.fromFinding') }}
+          </button>
         </li>
       </ul>
 
@@ -112,6 +133,7 @@ button.cr-loc:hover { text-decoration: underline; }
 .cr-title { margin: 8px 0 0; font-weight: 700; }
 .cr-detail, .cr-sug { margin: 6px 0 0; font-size: 14px; white-space: pre-wrap; }
 .cr-f .btn { margin-top: 10px; }
+.cr-f .cr-fu { margin-left: 8px; }
 .cr-f .btn :deep(svg) { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.2; margin-right: 4px; }
 .cr-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 </style>

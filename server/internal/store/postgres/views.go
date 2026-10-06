@@ -7,8 +7,8 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
 )
 
 // StateSince returns, per ticket, when it entered its current state and,
@@ -197,7 +197,7 @@ func (s *Agent) EventSummary(ctx context.Context) (Summary, error) {
 }
 
 // HourBucket counts today's events by kind.
-type HourBucket struct{ Hour, Hiro, You, Problems int }
+type HourBucket struct{ Hour, Agnts, You, Problems int }
 
 // TodayByHour buckets today's events (server time zone) by hour.
 func (s *Agent) TodayByHour(ctx context.Context, tz *time.Location) ([]HourBucket, error) {
@@ -225,7 +225,7 @@ func (s *Agent) TodayByHour(ctx context.Context, tz *time.Location) ([]HourBucke
 		case origin == "web" || origin == "mobile" || origin == "mcp" || origin == "telegram":
 			b.You++
 		default:
-			b.Hiro++
+			b.Agnts++
 		}
 	}
 	return out, rows.Err()

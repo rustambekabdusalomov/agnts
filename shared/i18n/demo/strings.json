@@ -99,21 +99,21 @@
     "ru": "Тикеты, которые ждут ваших ответов или ревью, а также остановленные запуски.",
     "uz": "Javobingiz yoki tekshiruvingizni kutayotgan tiketlar hamda toʻxtagan ishga tushirishlar."
   },
-  "Tickets hiro is working on right now.": {
-    "ru": "Тикеты, над которыми hiro работает прямо сейчас.",
-    "uz": "hiro hozir ishlayotgan tiketlar."
+  "Tickets agnts is working on right now.": {
+    "ru": "Тикеты, над которыми agnts работает прямо сейчас.",
+    "uz": "agnts hozir ishlayotgan tiketlar."
   },
-  "Tickets with the hiro label that haven't been analyzed yet.": {
-    "ru": "Тикеты с меткой hiro, которые ещё не проанализированы.",
-    "uz": "hiro belgisi bor, hali tahlil qilinmagan tiketlar."
+  "Tickets with the agnts label that haven't been analyzed yet.": {
+    "ru": "Тикеты с меткой agnts, которые ещё не проанализированы.",
+    "uz": "agnts belgisi bor, hali tahlil qilinmagan tiketlar."
   },
   "Pushed or rejected tickets.": {
     "ru": "Отправленные или отклонённые тикеты.",
     "uz": "Yuborilgan yoki rad etilgan tiketlar."
   },
-  "Every ticket hiro has picked up from Jira.": {
-    "ru": "Все тикеты, которые hiro взял из Jira.",
-    "uz": "hiro Jira'dan olgan barcha tiketlar."
+  "Every ticket agnts has picked up from Jira.": {
+    "ru": "Все тикеты, которые agnts взял из Jira.",
+    "uz": "agnts Jira'dan olgan barcha tiketlar."
   },
   "Reading the code": {
     "ru": "Читает код",
@@ -207,9 +207,9 @@
     "ru": "Сессия тарифа",
     "uz": "Tarif sessiyasi"
   },
-  "Jira tickets with the hiro label, plus tasks you create for side projects.": {
-    "ru": "Тикеты Jira с меткой hiro, а также задачи, которые вы создаёте для своих проектов.",
-    "uz": "hiro belgili Jira tiketlari hamda shaxsiy loyihalaringiz uchun yaratgan vazifalaringiz."
+  "Jira tickets with the agnts label, plus tasks you create for side projects.": {
+    "ru": "Тикеты Jira с меткой agnts, а также задачи, которые вы создаёте для своих проектов.",
+    "uz": "agnts belgili Jira tiketlari hamda shaxsiy loyihalaringiz uchun yaratgan vazifalaringiz."
   },
   "Ticket": {
     "ru": "Тикет",
@@ -239,9 +239,9 @@
     "ru": "Нет тикетов по вашему запросу.",
     "uz": "Qidiruvingiz boʻyicha tiket topilmadi."
   },
-  "Nothing is waiting on you. Tickets show up here when hiro has questions or changes to review.": {
-    "ru": "Сейчас ничего не ждёт вас. Тикеты появятся здесь, когда у hiro будут вопросы или изменения на ревью.",
-    "uz": "Hozir sizni hech narsa kutmayapti. hiro savol bersa yoki oʻzgarishlarni tekshirishingiz kerak boʻlsa, tiketlar shu yerda chiqadi."
+  "Nothing is waiting on you. Tickets show up here when agnts has questions or changes to review.": {
+    "ru": "Сейчас ничего не ждёт вас. Тикеты появятся здесь, когда у agnts будут вопросы или изменения на ревью.",
+    "uz": "Hozir sizni hech narsa kutmayapti. agnts savol bersa yoki oʻzgarishlarni tekshirishingiz kerak boʻlsa, tiketlar shu yerda chiqadi."
   },
   "No tickets here yet.": {
     "ru": "Здесь пока нет тикетов.",
@@ -267,9 +267,9 @@
     "ru": "Ожидает в очереди",
     "uz": "Navbatda kutmoqda"
   },
-  "hiro reads the ticket and the related code, then comes back with a plan and questions. Nothing is changed in this step.": {
-    "ru": "hiro читает тикет и связанный код, затем возвращается с планом и вопросами. На этом шаге ничего не меняется.",
-    "uz": "hiro tiket va unga bogʻliq kodni oʻqiydi, soʻng reja va savollar bilan qaytadi. Bu bosqichda hech narsa oʻzgartirilmaydi."
+  "agnts reads the ticket and the related code, then comes back with a plan and questions. Nothing is changed in this step.": {
+    "ru": "agnts читает тикет и связанный код, затем возвращается с планом и вопросами. На этом шаге ничего не меняется.",
+    "uz": "agnts tiket va unga bogʻliq kodni oʻqiydi, soʻng reja va savollar bilan qaytadi. Bu bosqichda hech narsa oʻzgartirilmaydi."
   },
   "Pick an option or write your own answer. Answers go into the coding prompt with the plan.": {
     "ru": "Выберите вариант или напишите свой ответ. Ответы попадут в промпт вместе с планом.",
@@ -291,9 +291,9 @@
     "ru": "Дополнительные указания",
     "uz": "Qoʻshimcha koʻrsatmalar"
   },
-  "Anything hiro didn't ask about, like files to avoid or naming conventions": {
-    "ru": "Всё, о чём hiro не спросил: например, какие файлы не трогать или как называть",
-    "uz": "hiro soʻramagan narsalar, masalan tegmaslik kerak boʻlgan fayllar yoki nomlash qoidalari"
+  "Anything agnts didn't ask about, like files to avoid or naming conventions": {
+    "ru": "Всё, о чём agnts не спросил: например, какие файлы не трогать или как называть",
+    "uz": "agnts soʻramagan narsalar, masalan tegmaslik kerak boʻlgan fayllar yoki nomlash qoidalari"
   },
   "Start coding": {
     "ru": "Начать разработку",
@@ -343,9 +343,9 @@
     "ru": "Время",
     "uz": "Vaqt"
   },
-  "What hiro did": {
-    "ru": "Что сделал hiro",
-    "uz": "hiro nima qildi"
+  "What agnts did": {
+    "ru": "Что сделал agnts",
+    "uz": "agnts nima qildi"
   },
   "Diff": {
     "ru": "Изменения",
@@ -379,13 +379,13 @@
     "ru": "Вернуть в очередь",
     "uz": "Navbatga qaytarish"
   },
-  "hiro stopped": {
-    "ru": "hiro остановился",
-    "uz": "hiro toʻxtadi"
+  "agnts stopped": {
+    "ru": "agnts остановился",
+    "uz": "agnts toʻxtadi"
   },
-  "What should hiro try?": {
-    "ru": "Что попробовать hiro?",
-    "uz": "hiro nimani sinab koʻrsin?"
+  "What should agnts try?": {
+    "ru": "Что попробовать agnts?",
+    "uz": "agnts nimani sinab koʻrsin?"
   },
   "For example: streaming is fine, target is under 10 seconds for 100k rows": {
     "ru": "Например: стриминг подходит, цель — меньше 10 секунд на 100 тыс. строк",
@@ -447,9 +447,9 @@
     "ru": "Открыть пул-реквест",
     "uz": "Pull request ochish"
   },
-  "hiro task": {
-    "ru": "Задача hiro",
-    "uz": "hiro vazifasi"
+  "agnts task": {
+    "ru": "Задача agnts",
+    "uz": "agnts vazifasi"
   },
   "Jira": {
     "ru": "Jira",
@@ -567,9 +567,9 @@
     "ru": "Внести изменение",
     "uz": "Oʻzgarishni amalga oshirish"
   },
-  "Tests failed 3 times in a row. TestStatementExport_Large still times out after 30s, so hiro stopped instead of guessing further. The ticket doesn't say what export time is acceptable or whether streaming the CSV is allowed.": {
-    "ru": "Тесты упали 3 раза подряд. TestStatementExport_Large всё ещё не укладывается в 30 с, поэтому hiro остановился, а не стал гадать дальше. В тикете не сказано, какое время экспорта допустимо и можно ли отдавать CSV потоком.",
-    "uz": "Testlar ketma-ket 3 marta yiqildi. TestStatementExport_Large hali ham 30 soniyada tugamayapti, shuning uchun hiro taxmin qilishda davom etmay, toʻxtadi. Tiketda qaysi eksport vaqti maqbul ekani va CSV'ni oqim bilan berish mumkinligi aytilmagan."
+  "Tests failed 3 times in a row. TestStatementExport_Large still times out after 30s, so agnts stopped instead of guessing further. The ticket doesn't say what export time is acceptable or whether streaming the CSV is allowed.": {
+    "ru": "Тесты упали 3 раза подряд. TestStatementExport_Large всё ещё не укладывается в 30 с, поэтому agnts остановился, а не стал гадать дальше. В тикете не сказано, какое время экспорта допустимо и можно ли отдавать CSV потоком.",
+    "uz": "Testlar ketma-ket 3 marta yiqildi. TestStatementExport_Large hali ham 30 soniyada tugamayapti, shuning uchun agnts taxmin qilishda davom etmay, toʻxtadi. Tiketda qaysi eksport vaqti maqbul ekani va CSV'ni oqim bilan berish mumkinligi aytilmagan."
   },
   "The session limit was reached during coding at 07:18. The run is saved on its branch. The limit has reset since then, so it can continue.": {
     "ru": "Лимит сессии закончился во время разработки в 07:18. Работа сохранена в своей ветке. С тех пор лимит обновился, можно продолжать.",
@@ -583,9 +583,9 @@
     "ru": "Взят из Jira",
     "uz": "Jira'dan olindi"
   },
-  "Picked up from Jira (label: hiro)": {
-    "ru": "Взят из Jira (метка: hiro)",
-    "uz": "Jira'dan olindi (belgi: hiro)"
+  "Picked up from Jira (label: agnts)": {
+    "ru": "Взят из Jira (метка: agnts)",
+    "uz": "Jira'dan olindi (belgi: agnts)"
   },
   "Started analysis": {
     "ru": "Начат анализ",
@@ -663,9 +663,9 @@
     "ru": "Jira: перевод в In Review",
     "uz": "Jira: In Review holatiga oʻtkazish"
   },
-  "Work for your side projects. Tasks stay in hiro and never touch Jira. Everything else works the same: questions, coding, your review.": {
-    "ru": "Работа над вашими проектами. Задачи живут в hiro и не попадают в Jira. Всё остальное так же: вопросы, разработка, ваше ревью.",
-    "uz": "Shaxsiy loyihalaringiz uchun ishlar. Vazifalar hiro'da qoladi va Jira'ga tegmaydi. Qolgani bir xil: savollar, kod yozish, sizning tekshiruvingiz."
+  "Work for your side projects. Tasks stay in agnts and never touch Jira. Everything else works the same: questions, coding, your review.": {
+    "ru": "Работа над вашими проектами. Задачи живут в agnts и не попадают в Jira. Всё остальное так же: вопросы, разработка, ваше ревью.",
+    "uz": "Shaxsiy loyihalaringiz uchun ishlar. Vazifalar agnts'da qoladi va Jira'ga tegmaydi. Qolgani bir xil: savollar, kod yozish, sizning tekshiruvingiz."
   },
   "New task": {
     "ru": "Новая задача",
@@ -695,9 +695,9 @@
     "ru": "Добавить",
     "uz": "Qoʻshish"
   },
-  "For solo projects you can let hiro push straight to main after you approve. It still never pushes without your review.": {
-    "ru": "В соло-проектах можно разрешить hiro отправлять сразу в main после вашего одобрения. Без вашего ревью он всё равно ничего не отправляет.",
-    "uz": "Yakka loyihalarda tasdiqlaganingizdan soʻng hiro'ga toʻgʻridan-toʻgʻri main'ga yuborishga ruxsat berishingiz mumkin. Baribir tekshiruvingizsiz hech narsa yubormaydi."
+  "For solo projects you can let agnts push straight to main after you approve. It still never pushes without your review.": {
+    "ru": "В соло-проектах можно разрешить agnts отправлять сразу в main после вашего одобрения. Без вашего ревью он всё равно ничего не отправляет.",
+    "uz": "Yakka loyihalarda tasdiqlaganingizdan soʻng agnts'ga toʻgʻridan-toʻgʻri main'ga yuborishga ruxsat berishingiz mumkin. Baribir tekshiruvingizsiz hech narsa yubormaydi."
   },
   "For your side projects. Not synced to Jira.": {
     "ru": "Для ваших проектов. Не синхронизируется с Jira.",
@@ -719,9 +719,9 @@
     "ru": "Что нужно сделать",
     "uz": "Nima qilish kerak"
   },
-  "Describe the result you want. The clearer this is, the fewer questions hiro asks.": {
-    "ru": "Опишите нужный результат. Чем яснее, тем меньше вопросов задаст hiro.",
-    "uz": "Qanday natija kerakligini yozing. Qanchalik aniq boʻlsa, hiro shuncha kam savol beradi."
+  "Describe the result you want. The clearer this is, the fewer questions agnts asks.": {
+    "ru": "Опишите нужный результат. Чем яснее, тем меньше вопросов задаст agnts.",
+    "uz": "Qanday natija kerakligini yozing. Qanchalik aniq boʻlsa, agnts shuncha kam savol beradi."
   },
   "After you approve": {
     "ru": "После вашего одобрения",
@@ -735,9 +735,9 @@
     "ru": "Сначала задать вопросы",
     "uz": "Avval savol berish"
   },
-  "hiro reads the code and asks before coding. Best for anything unclear.": {
-    "ru": "hiro читает код и спрашивает до разработки. Лучше для неясных задач.",
-    "uz": "hiro kodni oʻqib, kod yozishdan oldin soʻraydi. Noaniq ishlar uchun eng yaxshisi."
+  "agnts reads the code and asks before coding. Best for anything unclear.": {
+    "ru": "agnts читает код и спрашивает до разработки. Лучше для неясных задач.",
+    "uz": "agnts kodni oʻqib, kod yozishdan oldin soʻraydi. Noaniq ishlar uchun eng yaxshisi."
   },
   "Start coding right away": {
     "ru": "Сразу начать разработку",
@@ -779,17 +779,17 @@
     "ru": "Добавить проект",
     "uz": "Loyiha qoʻshish"
   },
-  "A repository on your server that hiro can work in.": {
-    "ru": "Репозиторий на вашем сервере, в котором может работать hiro.",
-    "uz": "Serveringizdagi, hiro ishlay oladigan repozitoriy."
+  "A repository on your server that agnts can work in.": {
+    "ru": "Репозиторий на вашем сервере, в котором может работать agnts.",
+    "uz": "Serveringizdagi, agnts ishlay oladigan repozitoriy."
   },
   "Name": {
     "ru": "Название",
     "uz": "Nomi"
   },
-  "hiro clones it into a fresh container for each task.": {
-    "ru": "hiro клонирует его в новый контейнер для каждой задачи.",
-    "uz": "hiro uni har bir vazifa uchun yangi konteynerga klonlaydi."
+  "agnts clones it into a fresh container for each task.": {
+    "ru": "agnts клонирует его в новый контейнер для каждой задачи.",
+    "uz": "agnts uni har bir vazifa uchun yangi konteynerga klonlaydi."
   },
   "Task key prefix": {
     "ru": "Префикс ключа задачи",
@@ -819,17 +819,17 @@
     "ru": "Репозитории ваших проектов на этом сервере",
     "uz": "Shu serverdagi shaxsiy loyiha repozitoriylaringiz"
   },
-  "For repositories only you work on, you can let hiro push straight to main after you approve. It still never pushes without your review.": {
-    "ru": "В репозиториях, где работаете только вы, можно разрешить hiro отправлять сразу в main после вашего одобрения. Без вашего ревью он всё равно ничего не отправляет.",
-    "uz": "Faqat siz ishlaydigan repozitoriylarda tasdiqlaganingizdan soʻng hiro'ga toʻgʻridan-toʻgʻri main'ga yuborishga ruxsat berishingiz mumkin. Baribir tekshiruvingizsiz hech narsa yubormaydi."
+  "For repositories only you work on, you can let agnts push straight to main after you approve. It still never pushes without your review.": {
+    "ru": "В репозиториях, где работаете только вы, можно разрешить agnts отправлять сразу в main после вашего одобрения. Без вашего ревью он всё равно ничего не отправляет.",
+    "uz": "Faqat siz ishlaydigan repozitoriylarda tasdiqlaganingizdan soʻng agnts'ga toʻgʻridan-toʻgʻri main'ga yuborishga ruxsat berishingiz mumkin. Baribir tekshiruvingizsiz hech narsa yubormaydi."
   },
   "New repository": {
     "ru": "Новый репозиторий",
     "uz": "Yangi repozitoriy"
   },
-  "A side-project repository on your server that hiro can work in.": {
-    "ru": "Репозиторий вашего проекта на сервере, в котором может работать hiro.",
-    "uz": "Serveringizdagi, hiro ishlay oladigan shaxsiy loyiha repozitoriysi."
+  "A side-project repository on your server that agnts can work in.": {
+    "ru": "Репозиторий вашего проекта на сервере, в котором может работать agnts.",
+    "uz": "Serveringizdagi, agnts ishlay oladigan shaxsiy loyiha repozitoriysi."
   },
   "Task form": {
     "ru": "Форма задачи",
@@ -847,9 +847,9 @@
     "ru": "Задача обновлена",
     "uz": "Vazifa yangilandi"
   },
-  "Every step hiro takes, recorded as it happens. Use it to see where time goes and why runs stop.": {
-    "ru": "Каждый шаг hiro записывается в момент выполнения. Здесь видно, куда уходит время и почему запуски останавливаются.",
-    "uz": "hiro har bir qadami sodir boʻlishi bilan yoziladi. Vaqt qayerga ketayotgani va ishlar nega toʻxtayotganini shu yerda koʻrasiz."
+  "Every step agnts takes, recorded as it happens. Use it to see where time goes and why runs stop.": {
+    "ru": "Каждый шаг agnts записывается в момент выполнения. Здесь видно, куда уходит время и почему запуски останавливаются.",
+    "uz": "agnts har bir qadami sodir boʻlishi bilan yoziladi. Vaqt qayerga ketayotgani va ishlar nega toʻxtayotganini shu yerda koʻrasiz."
   },
   "Live": {
     "ru": "В эфире",
@@ -899,9 +899,9 @@
     "ru": "Ожидание вашего ревью",
     "uz": "Tekshiruvingizni kutish"
   },
-  "hiro working": {
-    "ru": "hiro работает",
-    "uz": "hiro ishlayapti"
+  "agnts working": {
+    "ru": "agnts работает",
+    "uz": "agnts ishlayapti"
   },
   "Waiting on you": {
     "ru": "Ожидание вас",
@@ -1015,17 +1015,17 @@
     "ru": "Не удалось скопировать. В настоящем приложении это скачивает файл",
     "uz": "Nusxalab boʻlmadi. Haqiqiy ilovada bu faylni yuklab oladi"
   },
-  "hiro runs on your Claude subscription. These limits are shared with your own Claude and Claude Code use.": {
-    "ru": "hiro работает на вашей подписке Claude. Эти лимиты общие с вашим собственным использованием Claude и Claude Code.",
-    "uz": "hiro Claude obunangizda ishlaydi. Bu limitlar oʻzingizning Claude va Claude Code sarfingiz bilan umumiy."
+  "agnts runs on your Claude subscription. These limits are shared with your own Claude and Claude Code use.": {
+    "ru": "agnts работает на вашей подписке Claude. Эти лимиты общие с вашим собственным использованием Claude и Claude Code.",
+    "uz": "agnts Claude obunangizda ishlaydi. Bu limitlar oʻzingizning Claude va Claude Code sarfingiz bilan umumiy."
   },
   "When a limit is reached": {
     "ru": "Когда лимит исчерпан",
     "uz": "Limit tugaganda"
   },
-  "How hiro behaves near the limit": {
-    "ru": "Как hiro ведёт себя у лимита",
-    "uz": "Limitga yaqinlashganda hiro qanday ishlaydi"
+  "How agnts behaves near the limit": {
+    "ru": "Как agnts ведёт себя у лимита",
+    "uz": "Limitga yaqinlashganda agnts qanday ishlaydi"
   },
   "Above 80% of the session": {
     "ru": "Выше 80% сессии",
@@ -1059,13 +1059,13 @@
     "ru": "Каждые 30 мин",
     "uz": "Har 30 daqiqada"
   },
-  "Numbers come from the rate limit events Claude Code emits during each run. When hiro is idle, a tiny refresh run keeps them current.": {
-    "ru": "Цифры берутся из событий лимитов, которые Claude Code отправляет при каждом запуске. Когда hiro простаивает, их обновляет крошечный служебный запуск.",
-    "uz": "Raqamlar Claude Code har bir ishda yuboradigan limit hodisalaridan olinadi. hiro boʻsh turganda ularni kichik yangilash ishi dolzarb saqlaydi."
+  "Numbers come from the rate limit events Claude Code emits during each run. When agnts is idle, a tiny refresh run keeps them current.": {
+    "ru": "Цифры берутся из событий лимитов, которые Claude Code отправляет при каждом запуске. Когда agnts простаивает, их обновляет крошечный служебный запуск.",
+    "uz": "Raqamlar Claude Code har bir ishda yuboradigan limit hodisalaridan olinadi. agnts boʻsh turganda ularni kichik yangilash ishi dolzarb saqlaydi."
   },
-  "Code hiro can work in. Each run clones the repository into a fresh container on your server, then runs these checks before anything reaches your review.": {
-    "ru": "Код, с которым может работать hiro. Каждый запуск клонирует репозиторий в новый контейнер на вашем сервере и прогоняет эти проверки, прежде чем что-то попадёт к вам на ревью.",
-    "uz": "hiro ishlay oladigan kod. Har bir ish repozitoriyni serveringizdagi yangi konteynerga klonlaydi va tekshiruvingizga yetib borishidan oldin shu tekshiruvlarni oʻtkazadi."
+  "Code agnts can work in. Each run clones the repository into a fresh container on your server, then runs these checks before anything reaches your review.": {
+    "ru": "Код, с которым может работать agnts. Каждый запуск клонирует репозиторий в новый контейнер на вашем сервере и прогоняет эти проверки, прежде чем что-то попадёт к вам на ревью.",
+    "uz": "agnts ishlay oladigan kod. Har bir ish repozitoriyni serveringizdagi yangi konteynerga klonlaydi va tekshiruvingizga yetib borishidan oldin shu tekshiruvlarni oʻtkazadi."
   },
   "Add repository": {
     "ru": "Добавить репозиторий",
@@ -1087,17 +1087,17 @@
     "ru": "URL для клонирования",
     "uz": "Klonlash URL"
   },
-  "hiro uses your GitHub token to clone and push.": {
-    "ru": "hiro использует ваш токен GitHub для клонирования и отправки.",
-    "uz": "hiro klonlash va yuborish uchun GitHub tokeningizdan foydalanadi."
+  "agnts uses your GitHub token to clone and push.": {
+    "ru": "agnts использует ваш токен GitHub для клонирования и отправки.",
+    "uz": "agnts klonlash va yuborish uchun GitHub tokeningizdan foydalanadi."
   },
   "Jira project key": {
     "ru": "Ключ проекта Jira",
     "uz": "Jira loyiha kaliti"
   },
-  "Tickets from this Jira project with the hiro label can run here.": {
-    "ru": "Здесь могут выполняться тикеты из этого проекта Jira с меткой hiro.",
-    "uz": "Shu Jira loyihasidagi hiro belgili tiketlar shu yerda ishlay oladi."
+  "Tickets from this Jira project with the agnts label can run here.": {
+    "ru": "Здесь могут выполняться тикеты из этого проекта Jira с меткой agnts.",
+    "uz": "Shu Jira loyihasidagi agnts belgili tiketlar shu yerda ishlay oladi."
   },
   "Default branch": {
     "ru": "Ветка по умолчанию",
@@ -1119,9 +1119,9 @@
     "ru": "Найден в корне репозитория",
     "uz": "Repozitoriy ildizida topildi"
   },
-  "hiro can draft one from the code, as a normal task you review before it's pushed.": {
-    "ru": "hiro может набросать его по коду — как обычную задачу, которую вы проверите перед отправкой.",
-    "uz": "hiro uni koddan tayyorlab berishi mumkin — yuborishdan oldin tekshiradigan oddiy vazifa sifatida."
+  "agnts can draft one from the code, as a normal task you review before it's pushed.": {
+    "ru": "agnts может набросать его по коду — как обычную задачу, которую вы проверите перед отправкой.",
+    "uz": "agnts uni koddan tayyorlab berishi mumkin — yuborishdan oldin tekshiradigan oddiy vazifa sifatida."
   },
   "Draft CLAUDE.md": {
     "ru": "Набросать CLAUDE.md",
@@ -1155,9 +1155,9 @@
     "ru": "В настоящем приложении это создаёт задачу на CLAUDE.md",
     "uz": "Haqiqiy ilovada bu CLAUDE.md uchun vazifa yaratadi"
   },
-  "How hiro connects to your tools and how it behaves during runs.": {
-    "ru": "Как hiro подключается к вашим инструментам и как ведёт себя во время запусков.",
-    "uz": "hiro vositalaringizga qanday ulanadi va ish paytida qanday ishlaydi."
+  "How agnts connects to your tools and how it behaves during runs.": {
+    "ru": "Как agnts подключается к вашим инструментам и как ведёт себя во время запусков.",
+    "uz": "agnts vositalaringizga qanday ulanadi va ish paytida qanday ishlaydi."
   },
   "Appearance": {
     "ru": "Оформление",
@@ -1315,9 +1315,9 @@
     "ru": "Запрещённые команды",
     "uz": "Taqiqlangan buyruqlar"
   },
-  "Always refused, even if a ticket asks for them. Pushing is done by hiro, never by Claude Code.": {
-    "ru": "Всегда запрещены, даже если тикет их просит. Отправку делает hiro, а не Claude Code.",
-    "uz": "Tiket soʻrasa ham doim rad etiladi. Yuborishni Claude Code emas, hiro bajaradi."
+  "Always refused, even if a ticket asks for them. Pushing is done by agnts, never by Claude Code.": {
+    "ru": "Всегда запрещены, даже если тикет их просит. Отправку делает agnts, а не Claude Code.",
+    "uz": "Tiket soʻrasa ham doim rad etiladi. Yuborishni Claude Code emas, agnts bajaradi."
   },
   "Add command": {
     "ru": "Добавить команду",
@@ -1459,17 +1459,17 @@
     "ru": "Запуск остановлен",
     "uz": "Ish toʻxtatildi"
   },
-  "Synced. No new tickets with the hiro label": {
-    "ru": "Синхронизировано. Новых тикетов с меткой hiro нет",
-    "uz": "Sinxronlandi. hiro belgili yangi tiket yoʻq"
+  "Synced. No new tickets with the agnts label": {
+    "ru": "Синхронизировано. Новых тикетов с меткой agnts нет",
+    "uz": "Sinxronlandi. agnts belgili yangi tiket yoʻq"
   },
   "Write what to change first": {
     "ru": "Сначала напишите, что изменить",
     "uz": "Avval nimani oʻzgartirishni yozing"
   },
-  "Add instructions so hiro tries something different": {
-    "ru": "Добавьте указания, чтобы hiro попробовал по-другому",
-    "uz": "hiro boshqacha urinib koʻrishi uchun koʻrsatma qoʻshing"
+  "Add instructions so agnts tries something different": {
+    "ru": "Добавьте указания, чтобы agnts попробовал по-другому",
+    "uz": "agnts boshqacha urinib koʻrishi uchun koʻrsatma qoʻshing"
   },
   "Night mode on": {
     "ru": "Ночной режим включён",
@@ -1483,9 +1483,9 @@
     "ru": "Интеграции",
     "uz": "Integratsiyalar"
   },
-  "The services hiro works with. Tokens are stored on your server and only used for the actions listed on each page.": {
-    "ru": "Сервисы, с которыми работает hiro. Токены хранятся на вашем сервере и используются только для действий, указанных на странице каждого сервиса.",
-    "uz": "hiro ishlaydigan xizmatlar. Tokenlar serveringizda saqlanadi va faqat har bir sahifada koʻrsatilgan amallar uchun ishlatiladi."
+  "The services agnts works with. Tokens are stored on your server and only used for the actions listed on each page.": {
+    "ru": "Сервисы, с которыми работает agnts. Токены хранятся на вашем сервере и используются только для действий, указанных на странице каждого сервиса.",
+    "uz": "agnts ishlaydigan xizmatlar. Tokenlar serveringizda saqlanadi va faqat har bir sahifada koʻrsatilgan amallar uchun ishlatiladi."
   },
   "Clone code, push branches and open pull requests.": {
     "ru": "Клонирует код, отправляет ветки и открывает пул-реквесты.",
@@ -1495,9 +1495,9 @@
     "ru": "То же самое для репозиториев на GitLab.com или вашем собственном сервере GitLab.",
     "uz": "GitLab.com yoki oʻz GitLab serveringizdagi repozitoriylar uchun ham xuddi shunday."
   },
-  "Pick up tickets with the hiro label and keep their status up to date.": {
-    "ru": "Берёт тикеты с меткой hiro и обновляет их статус.",
-    "uz": "hiro belgili tiketlarni oladi va ularning holatini yangilab boradi."
+  "Pick up tickets with the agnts label and keep their status up to date.": {
+    "ru": "Берёт тикеты с меткой agnts и обновляет их статус.",
+    "uz": "agnts belgili tiketlarni oladi va ularning holatini yangilab boradi."
   },
   "Not connected": {
     "ru": "Не подключено",
@@ -1567,25 +1567,25 @@
     "ru": "Токен доступа",
     "uz": "Kirish tokeni"
   },
-  "Stored encrypted on your server. hiro never shows it again.": {
-    "ru": "Хранится зашифрованным на вашем сервере. hiro больше никогда его не покажет.",
-    "uz": "Serveringizda shifrlangan holda saqlanadi. hiro uni boshqa hech qachon koʻrsatmaydi."
+  "Stored encrypted on your server. agnts never shows it again.": {
+    "ru": "Хранится зашифрованным на вашем сервере. agnts больше никогда его не покажет.",
+    "uz": "Serveringizda shifrlangan holda saqlanadi. agnts uni boshqa hech qachon koʻrsatmaydi."
   },
   "Required scopes": {
     "ru": "Нужные права",
     "uz": "Kerakli huquqlar"
   },
-  "Use a token from an account that can push to your repositories. hiro commits under the name and email you set after connecting.": {
-    "ru": "Используйте токен аккаунта, который может отправлять изменения в ваши репозитории. hiro делает коммиты от имени и email, которые вы укажете после подключения.",
-    "uz": "Repozitoriylaringizga yubora oladigan akkaunt tokenidan foydalaning. hiro ulangandan keyin siz koʻrsatgan ism va email nomidan commit qiladi."
+  "Use a token from an account that can push to your repositories. agnts commits under the name and email you set after connecting.": {
+    "ru": "Используйте токен аккаунта, который может отправлять изменения в ваши репозитории. agnts делает коммиты от имени и email, которые вы укажете после подключения.",
+    "uz": "Repozitoriylaringizga yubora oladigan akkaunt tokenidan foydalaning. agnts ulangandan keyin siz koʻrsatgan ism va email nomidan commit qiladi."
   },
-  "hiro can use": {
-    "ru": "Доступно hiro",
-    "uz": "hiro foydalana oladi"
+  "agnts can use": {
+    "ru": "Доступно agnts",
+    "uz": "agnts foydalana oladi"
   },
-  "Opened by hiro, last 30 days": {
-    "ru": "Открыто hiro за 30 дней",
-    "uz": "hiro ochgan, soʻnggi 30 kun"
+  "Opened by agnts, last 30 days": {
+    "ru": "Открыто agnts за 30 дней",
+    "uz": "agnts ochgan, soʻnggi 30 kun"
   },
   "Merged": {
     "ru": "Слито",
@@ -1603,9 +1603,9 @@
     "ru": "Подключение",
     "uz": "Ulanish"
   },
-  "How hiro signs in": {
-    "ru": "Как hiro входит",
-    "uz": "hiro qanday kiradi"
+  "How agnts signs in": {
+    "ru": "Как agnts входит",
+    "uz": "agnts qanday kiradi"
   },
   "Method": {
     "ru": "Способ",
@@ -1699,9 +1699,9 @@
     "ru": "Воркфлоу",
     "uz": "Workflowlar"
   },
-  "Read and write. Only needed if hiro may change CI files.": {
-    "ru": "Чтение и запись. Нужно, только если hiro может менять файлы CI.",
-    "uz": "Oʻqish va yozish. Faqat hiro CI fayllarini oʻzgartira olsa kerak."
+  "Read and write. Only needed if agnts may change CI files.": {
+    "ru": "Чтение и запись. Нужно, только если agnts может менять файлы CI.",
+    "uz": "Oʻqish va yozish. Faqat agnts CI fayllarini oʻzgartira olsa kerak."
   },
   "Full API access. Open merge requests and read pipelines.": {
     "ru": "Полный доступ к API. Открытие merge request и чтение пайплайнов.",
@@ -1719,9 +1719,9 @@
     "ru": "Доступ к репозиториям",
     "uz": "Repozitoriyga kirish"
   },
-  "Turn off a repository to stop hiro from cloning or pushing to it": {
-    "ru": "Отключите репозиторий, чтобы hiro не клонировал его и не отправлял туда изменения",
-    "uz": "hiro klonlamasligi va yubormasligi uchun repozitoriyni oʻchirib qoʻying"
+  "Turn off a repository to stop agnts from cloning or pushing to it": {
+    "ru": "Отключите репозиторий, чтобы agnts не клонировал его и не отправлял туда изменения",
+    "uz": "agnts klonlamasligi va yubormasligi uchun repozitoriyni oʻchirib qoʻying"
   },
   "Used for": {
     "ru": "Используется для",
@@ -1755,13 +1755,13 @@
     "ru": "Использует SSH-ключ на вашем сервере",
     "uz": "Serveringizdagi SSH kalitdan foydalanadi"
   },
-  "Add a Co-authored-by: hiro line": {
-    "ru": "Добавлять строку Co-authored-by: hiro",
-    "uz": "Co-authored-by: hiro qatorini qoʻshish"
+  "Add a Co-authored-by: agnts line": {
+    "ru": "Добавлять строку Co-authored-by: agnts",
+    "uz": "Co-authored-by: agnts qatorini qoʻshish"
   },
-  "Teammates can see which commits hiro wrote": {
-    "ru": "Коллеги видят, какие коммиты написал hiro",
-    "uz": "Hamkasblar qaysi commitlarni hiro yozganini koʻradi"
+  "Teammates can see which commits agnts wrote": {
+    "ru": "Коллеги видят, какие коммиты написал agnts",
+    "uz": "Hamkasblar qaysi commitlarni agnts yozganini koʻradi"
   },
   "Pull requests": {
     "ru": "Пул-реквесты",
@@ -1771,9 +1771,9 @@
     "ru": "Merge request'ы",
     "uz": "Merge requestlar"
   },
-  "How hiro opens them": {
-    "ru": "Как hiro их открывает",
-    "uz": "hiro ularni qanday ochadi"
+  "How agnts opens them": {
+    "ru": "Как agnts их открывает",
+    "uz": "agnts ularni qanday ochadi"
   },
   "{key} and {title} are replaced with the ticket's key and title": {
     "ru": "{key} и {title} заменяются ключом и названием тикета",
@@ -1831,9 +1831,9 @@
     "ru": "3 мин назад",
     "uz": "3 daqiqa oldin"
   },
-  "hiro learns about merges and review comments right away instead of checking every few minutes.": {
-    "ru": "hiro сразу узнаёт о слияниях и комментариях ревью, а не проверяет каждые несколько минут.",
-    "uz": "hiro har necha daqiqada tekshirmasdan, birlashtirish va tekshiruv izohlari haqida darhol biladi."
+  "agnts learns about merges and review comments right away instead of checking every few minutes.": {
+    "ru": "agnts сразу узнаёт о слияниях и комментариях ревью, а не проверяет каждые несколько минут.",
+    "uz": "agnts har necha daqiqada tekshirmasdan, birlashtirish va tekshiruv izohlari haqida darhol biladi."
   },
   "No activity yet.": {
     "ru": "Пока нет активности.",
@@ -1855,9 +1855,9 @@
     "ru": "Подключить Jira",
     "uz": "Jira'ni ulash"
   },
-  "Watched by hiro": {
-    "ru": "Отслеживает hiro",
-    "uz": "hiro kuzatadi"
+  "Watched by agnts": {
+    "ru": "Отслеживает agnts",
+    "uz": "agnts kuzatadi"
   },
   "Open tickets": {
     "ru": "Открытые тикеты",
@@ -1879,9 +1879,9 @@
     "ru": "Вопросы, ссылки и сводки",
     "uz": "Savollar, havolalar va xulosalar"
   },
-  "Which Jira projects hiro watches, and where their code lives": {
-    "ru": "Какие проекты Jira отслеживает hiro и где лежит их код",
-    "uz": "hiro qaysi Jira loyihalarini kuzatadi va ularning kodi qayerda"
+  "Which Jira projects agnts watches, and where their code lives": {
+    "ru": "Какие проекты Jira отслеживает agnts и где лежит их код",
+    "uz": "agnts qaysi Jira loyihalarini kuzatadi va ularning kodi qayerda"
   },
   "Watched": {
     "ru": "Отслеживается",
@@ -1895,17 +1895,17 @@
     "ru": "Правила подхвата",
     "uz": "Olish qoidalari"
   },
-  "Which tickets hiro takes": {
-    "ru": "Какие тикеты берёт hiro",
-    "uz": "hiro qaysi tiketlarni oladi"
+  "Which tickets agnts takes": {
+    "ru": "Какие тикеты берёт agnts",
+    "uz": "agnts qaysi tiketlarni oladi"
   },
   "Label": {
     "ru": "Метка",
     "uz": "Belgi"
   },
-  "Add this label to a ticket to hand it to hiro": {
-    "ru": "Добавьте эту метку к тикету, чтобы передать его hiro",
-    "uz": "Tiketni hiro'ga topshirish uchun unga shu belgini qoʻshing"
+  "Add this label to a ticket to hand it to agnts": {
+    "ru": "Добавьте эту метку к тикету, чтобы передать его agnts",
+    "uz": "Tiketni agnts'ga topshirish uchun unga shu belgini qoʻshing"
   },
   "Issue types": {
     "ru": "Типы задач",
@@ -1931,21 +1931,21 @@
     "ru": "Любой",
     "uz": "Har kim"
   },
-  "The query hiro runs": {
-    "ru": "Запрос, который выполняет hiro",
-    "uz": "hiro bajaradigan soʻrov"
+  "The query agnts runs": {
+    "ru": "Запрос, который выполняет agnts",
+    "uz": "agnts bajaradigan soʻrov"
   },
   "Status updates": {
     "ru": "Обновление статусов",
     "uz": "Holat yangilanishlari"
   },
-  "How hiro moves tickets on your board": {
-    "ru": "Как hiro двигает тикеты по вашей доске",
-    "uz": "hiro tiketlarni doskangizda qanday siljitadi"
+  "How agnts moves tickets on your board": {
+    "ru": "Как agnts двигает тикеты по вашей доске",
+    "uz": "agnts tiketlarni doskangizda qanday siljitadi"
   },
-  "When hiro starts coding": {
-    "ru": "Когда hiro начинает разработку",
-    "uz": "hiro kod yozishni boshlaganda"
+  "When agnts starts coding": {
+    "ru": "Когда agnts начинает разработку",
+    "uz": "agnts kod yozishni boshlaganda"
   },
   "When you reject the changes": {
     "ru": "Когда вы отклоняете изменения",
@@ -1963,13 +1963,13 @@
     "ru": "Комментарии",
     "uz": "Izohlar"
   },
-  "What hiro writes on the ticket": {
-    "ru": "Что hiro пишет в тикете",
-    "uz": "hiro tiketga nima yozadi"
+  "What agnts writes on the ticket": {
+    "ru": "Что agnts пишет в тикете",
+    "uz": "agnts tiketga nima yozadi"
   },
-  "hiro's questions": {
-    "ru": "Вопросы hiro",
-    "uz": "hiro savollari"
+  "agnts's questions": {
+    "ru": "Вопросы agnts",
+    "uz": "agnts savollari"
   },
   "So teammates can see what was unclear": {
     "ru": "Чтобы коллеги видели, что было неясно",
@@ -2019,9 +2019,9 @@
     "ru": "Вебхук Jira доставлял бы новые тикеты мгновенно. Для него нужен публичный адрес вашего сервера.",
     "uz": "Jira webhook yangi tiketlarni darhol yetkazardi. Buning uchun serveringizning ochiq manzili kerak."
   },
-  "hiro only reads tickets that match the query, and only writes the status changes and comments you turn on here.": {
-    "ru": "hiro читает только тикеты, подходящие под запрос, и пишет только те статусы и комментарии, которые вы включили здесь.",
-    "uz": "hiro faqat soʻrovga mos tiketlarni oʻqiydi va faqat shu yerda yoqqan holat va izohlaringizni yozadi."
+  "agnts only reads tickets that match the query, and only writes the status changes and comments you turn on here.": {
+    "ru": "agnts читает только тикеты, подходящие под запрос, и пишет только те статусы и комментарии, которые вы включили здесь.",
+    "uz": "agnts faqat soʻrovga mos tiketlarni oʻqiydi va faqat shu yerda yoqqan holat va izohlaringizni yozadi."
   },
   "just now": {
     "ru": "только что",
@@ -2127,9 +2127,9 @@
     "ru": "Коммитов пока нет",
     "uz": "Hali commit yoʻq"
   },
-  "Every branch, newest first. hiro's commits name the ticket and you as co-author.": {
-    "ru": "Все ветки, сначала новые. В коммитах hiro указан тикет и вы как соавтор.",
-    "uz": "Barcha branchlar, avval yangilari. hiro commitlarida tiket va siz hammuallif sifatida koʻrsatilgan."
+  "Every branch, newest first. agnts's commits name the ticket and you as co-author.": {
+    "ru": "Все ветки, сначала новые. В коммитах agnts указан тикет и вы как соавтор.",
+    "uz": "Barcha branchlar, avval yangilari. agnts commitlarida tiket va siz hammuallif sifatida koʻrsatilgan."
   },
   "Healthy": {
     "ru": "В порядке",
@@ -2151,9 +2151,9 @@
     "ru": "Конвейер",
     "uz": "Jarayon zanjiri"
   },
-  "hiro waits for the checks on its branch to pass before a ticket reaches your review. Deploying is always your decision.": {
-    "ru": "hiro ждёт, пока пройдут проверки его ветки, прежде чем тикет попадёт к вам на ревью. Развёртывание всегда решаете вы.",
-    "uz": "hiro tiket tekshiruvingizga kelishidan oldin oʻz branchidagi tekshiruvlar oʻtishini kutadi. Joylash har doim sizning qaroringiz."
+  "agnts waits for the checks on its branch to pass before a ticket reaches your review. Deploying is always your decision.": {
+    "ru": "agnts ждёт, пока пройдут проверки его ветки, прежде чем тикет попадёт к вам на ревью. Развёртывание всегда решаете вы.",
+    "uz": "agnts tiket tekshiruvingizga kelishidan oldin oʻz branchidagi tekshiruvlar oʻtishini kutadi. Joylash har doim sizning qaroringiz."
   },
   "Pipeline runs": {
     "ru": "Запуски пайплайнов",
@@ -2239,9 +2239,9 @@
     "ru": "Сейчас в работе",
     "uz": "Hozir bajarilmoqda"
   },
-  "Oldest first. Every minute here is a minute hiro can't work.": {
-    "ru": "Сначала самые старые. Каждая минута здесь — минута, когда hiro не может работать.",
-    "uz": "Avval eng eskilari. Bu yerdagi har bir daqiqa — hiro ishlay olmaydigan daqiqa."
+  "Oldest first. Every minute here is a minute agnts can't work.": {
+    "ru": "Сначала самые старые. Каждая минута здесь — минута, когда agnts не может работать.",
+    "uz": "Avval eng eskilari. Bu yerdagi har bir daqiqa — agnts ishlay olmaydigan daqiqa."
   },
   "Open inbox": {
     "ru": "Открыть входящие",
@@ -2263,9 +2263,9 @@
     "ru": "Продолжить",
     "uz": "Davom ettirish"
   },
-  "Nothing is waiting on you. hiro will show tickets here when it needs answers or a review.": {
-    "ru": "Сейчас ничего не ждёт вас. hiro покажет здесь тикеты, когда понадобятся ответы или ревью.",
-    "uz": "Hozir sizni hech narsa kutmayapti. Javob yoki tekshiruv kerak boʻlsa, hiro tiketlarni shu yerda koʻrsatadi."
+  "Nothing is waiting on you. agnts will show tickets here when it needs answers or a review.": {
+    "ru": "Сейчас ничего не ждёт вас. agnts покажет здесь тикеты, когда понадобятся ответы или ревью.",
+    "uz": "Hozir sizni hech narsa kutmayapti. Javob yoki tekshiruv kerak boʻlsa, agnts tiketlarni shu yerda koʻrsatadi."
   },
   "Runs left this session": {
     "ru": "Запусков осталось в сессии",
@@ -2295,9 +2295,9 @@
     "ru": "Сегодня по часам",
     "uz": "Bugun soatlar boʻyicha"
   },
-  "Events recorded today. hiro keeps working while you sleep.": {
-    "ru": "События за сегодня. hiro работает, даже когда вы спите.",
-    "uz": "Bugungi hodisalar. Siz uxlayotganda ham hiro ishlayveradi."
+  "Events recorded today. agnts keeps working while you sleep.": {
+    "ru": "События за сегодня. agnts работает, даже когда вы спите.",
+    "uz": "Bugungi hodisalar. Siz uxlayotganda ham agnts ishlayveradi."
   },
   "Compared with last week": {
     "ru": "По сравнению с прошлой неделей",
@@ -2335,9 +2335,9 @@
     "ru": "Последние события",
     "uz": "Soʻnggi faollik"
   },
-  "How well hiro works for you over time: throughput, quality, where time goes, and what it costs your plan.": {
-    "ru": "Насколько хорошо hiro работает на вас со временем: пропускная способность, качество, куда уходит время и сколько это стоит вашему тарифу.",
-    "uz": "hiro vaqt oʻtishi bilan siz uchun qanchalik yaxshi ishlayapti: unumdorlik, sifat, vaqt qayerga ketadi va tarifingizga qanchaga tushadi."
+  "How well agnts works for you over time: throughput, quality, where time goes, and what it costs your plan.": {
+    "ru": "Насколько хорошо agnts работает на вас со временем: пропускная способность, качество, куда уходит время и сколько это стоит вашему тарифу.",
+    "uz": "agnts vaqt oʻtishi bilan siz uchun qanchalik yaxshi ishlayapti: unumdorlik, sifat, vaqt qayerga ketadi va tarifingizga qanchaga tushadi."
   },
   "7 days": {
     "ru": "7 дней",
@@ -2371,9 +2371,9 @@
     "ru": "Без запроса изменений",
     "uz": "Oʻzgartirish soʻralmagan"
   },
-  "hiro time per ticket": {
-    "ru": "Время hiro на тикет",
-    "uz": "Bitta tiketga hiro vaqti"
+  "agnts time per ticket": {
+    "ru": "Время agnts на тикет",
+    "uz": "Bitta tiketga agnts vaqti"
   },
   "Analyze, coding and tests": {
     "ru": "Анализ, разработка и тесты",
@@ -2415,9 +2415,9 @@
     "ru": "Скорость",
     "uz": "Tezlik"
   },
-  "Average minutes per ticket: hiro working versus waiting on you": {
-    "ru": "Среднее время на тикет: работа hiro и ожидание вас",
-    "uz": "Bitta tiketga oʻrtacha vaqt: hiro ishi va sizni kutish"
+  "Average minutes per ticket: agnts working versus waiting on you": {
+    "ru": "Среднее время на тикет: работа agnts и ожидание вас",
+    "uz": "Bitta tiketga oʻrtacha vaqt: agnts ishi va sizni kutish"
   },
   "Average per ticket, by step": {
     "ru": "В среднем на тикет, по шагам",
@@ -2427,9 +2427,9 @@
     "ru": "Шагов на тикет",
     "uz": "Bitta tiketga qadamlar"
   },
-  "Fewer turns means hiro finds its way faster and uses less of your plan": {
-    "ru": "Меньше шагов — hiro быстрее разбирается и тратит меньше лимита",
-    "uz": "Kamroq qadam — hiro tezroq yoʻl topadi va limitni kamroq sarflaydi"
+  "Fewer turns means agnts finds its way faster and uses less of your plan": {
+    "ru": "Меньше шагов — agnts быстрее разбирается и тратит меньше лимита",
+    "uz": "Kamroq qadam — agnts tezroq yoʻl topadi va limitni kamroq sarflaydi"
   },
   "Why runs stop": {
     "ru": "Почему запуски останавливаются",
@@ -2495,13 +2495,13 @@
     "ru": "По репозиториям",
     "uz": "Repozitoriylar boʻyicha"
   },
-  "Where hiro works best, and where it struggles": {
-    "ru": "Где hiro работает лучше всего, а где ему трудно",
-    "uz": "hiro qayerda eng yaxshi ishlaydi va qayerda qiynaladi"
+  "Where agnts works best, and where it struggles": {
+    "ru": "Где agnts работает лучше всего, а где ему трудно",
+    "uz": "agnts qayerda eng yaxshi ishlaydi va qayerda qiynaladi"
   },
-  "hiro time": {
-    "ru": "Время hiro",
-    "uz": "hiro vaqti"
+  "agnts time": {
+    "ru": "Время agnts",
+    "uz": "agnts vaqti"
   },
   "Activity by hour": {
     "ru": "Активность по часам",

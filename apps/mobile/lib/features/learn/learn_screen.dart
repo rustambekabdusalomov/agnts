@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hiro_api/hiro_api.dart';
+import 'package:agnts_api/agnts_api.dart';
 
 import '../../core/data.dart';
 import '../../l10n/app_localizations.dart';
@@ -26,7 +26,7 @@ class _LearnScreenState extends ConsumerState<LearnScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final key = widget.ticketKey;
     final provider = key != null ? ticketLessonsProvider(key) : lessonsProvider(_status);
     final lessons = ref.watch(provider);
@@ -79,7 +79,7 @@ class LessonTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final x = lesson;
     return Padding(
       padding: EdgeInsets.fromLTRB(compact ? 0 : 16, 0, compact ? 0 : 16, 10),

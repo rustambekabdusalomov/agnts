@@ -1,0 +1,235 @@
+//
+// AUTO-GENERATED FILE, DO NOT MODIFY!
+//
+
+// ignore_for_file: unused_element
+import 'package:agnts_api/src/model/token_spend.dart';
+import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+part 'period_stats.g.dart';
+
+
+@CopyWith()
+@JsonSerializable(
+  checked: true,
+  createToJson: true,
+  disallowUnrecognizedKeys: false,
+  explicitToJson: true,
+)
+class PeriodStats {
+  /// Returns a new [PeriodStats] instance.
+  PeriodStats({
+
+    required  this.picked,
+
+    required  this.pushed,
+
+    required  this.rejected,
+
+    required  this.stopped,
+
+    required  this.firstTry,
+
+    required  this.afterChanges,
+
+    required  this.agntsMin,
+
+    required  this.waitMin,
+
+    required  this.reviewMin,
+
+    required  this.answerMin,
+
+    required  this.turns,
+
+    required  this.spend,
+  });
+
+  @JsonKey(
+    
+    name: r'picked',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final int picked;
+
+
+
+  @JsonKey(
+    
+    name: r'pushed',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final int pushed;
+
+
+
+  @JsonKey(
+    
+    name: r'rejected',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final int rejected;
+
+
+
+  @JsonKey(
+    
+    name: r'stopped',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final int stopped;
+
+
+
+  @JsonKey(
+    
+    name: r'firstTry',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final int firstTry;
+
+
+
+  @JsonKey(
+    
+    name: r'afterChanges',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final int afterChanges;
+
+
+
+  @JsonKey(
+    
+    name: r'agntsMin',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final num agntsMin;
+
+
+
+  @JsonKey(
+    
+    name: r'waitMin',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final num waitMin;
+
+
+
+  @JsonKey(
+    
+    name: r'reviewMin',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final num reviewMin;
+
+
+
+  @JsonKey(
+    
+    name: r'answerMin',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final num answerMin;
+
+
+
+  @JsonKey(
+    
+    name: r'turns',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final num turns;
+
+
+
+  @JsonKey(
+    
+    name: r'spend',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final TokenSpend spend;
+
+
+
+
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is PeriodStats &&
+      other.picked == picked &&
+      other.pushed == pushed &&
+      other.rejected == rejected &&
+      other.stopped == stopped &&
+      other.firstTry == firstTry &&
+      other.afterChanges == afterChanges &&
+      other.agntsMin == agntsMin &&
+      other.waitMin == waitMin &&
+      other.reviewMin == reviewMin &&
+      other.answerMin == answerMin &&
+      other.turns == turns &&
+      other.spend == spend;
+
+    @override
+    int get hashCode =>
+        picked.hashCode +
+        pushed.hashCode +
+        rejected.hashCode +
+        stopped.hashCode +
+        firstTry.hashCode +
+        afterChanges.hashCode +
+        agntsMin.hashCode +
+        waitMin.hashCode +
+        reviewMin.hashCode +
+        answerMin.hashCode +
+        turns.hashCode +
+        spend.hashCode;
+
+  factory PeriodStats.fromJson(Map<String, dynamic> json) => _$PeriodStatsFromJson(json);
+
+  Map<String, dynamic> toJson() => _$PeriodStatsToJson(this);
+
+  @override
+  String toString() {
+    return toJson().toString();
+  }
+
+}
+

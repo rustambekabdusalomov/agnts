@@ -1,8 +1,8 @@
 {
   "mtasks": {
-    "actAnswers": "Answer hiro's questions",
+    "actAnswers": "Answer agnts's questions",
     "actReview": "Review the changes",
-    "actFailed": "Stopped. Tell hiro what to try",
+    "actFailed": "Stopped. Tell agnts what to try",
     "actResume": "Resume when you're ready",
     "actAnalyze": "Tap to analyze",
     "actHeld": "Kept in queue. Tap to start",

@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
 )
 
 // Ingester receives tickets (the orchestrator).
@@ -31,7 +31,7 @@ type Deduper interface {
 //
 // In Jira: Settings → System → WebHooks, URL https://<domain>/webhooks/jira,
 // events "Issue created" and "Issue updated", and the same secret as in
-// hiro. Jira signs each delivery with X-Hub-Signature: sha256=<hmac>.
+// agnts. Jira signs each delivery with X-Hub-Signature: sha256=<hmac>.
 func WebhookHandler(cfg ConfigSource, ing Ingester, dedup Deduper, log *slog.Logger) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
@@ -85,8 +85,8 @@ func WebhookHandler(cfg ConfigSource, ing Ingester, dedup Deduper, log *slog.Log
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
-		if !p.Issue.forHiro(c.Label) {
-			w.WriteHeader(http.StatusNoContent) // not for hiro (or the label was removed)
+		if !p.Issue.forAgnts(c.Label) {
+			w.WriteHeader(http.StatusNoContent) // not for agnts (or the label was removed)
 			return
 		}
 		created, err := ing.Ingest(ctx, p.Issue.incoming(c.Label), domain.OriginWebhook)

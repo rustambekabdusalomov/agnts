@@ -11,16 +11,16 @@ import (
 	"testing"
 	"time"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
-// Runs against a real Docker daemon when HIRO_TEST_DOCKER=1, using the small
+// Runs against a real Docker daemon when AGNTS_TEST_DOCKER=1, using the small
 // alpine image (pulled once if missing).
 func TestDockerClient(t *testing.T) {
-	if os.Getenv("HIRO_TEST_DOCKER") != "1" {
-		t.Skip("HIRO_TEST_DOCKER=1 not set")
+	if os.Getenv("AGNTS_TEST_DOCKER") != "1" {
+		t.Skip("AGNTS_TEST_DOCKER=1 not set")
 	}
-	sock := os.Getenv("HIRO_DOCKER_SOCKET")
+	sock := os.Getenv("AGNTS_DOCKER_SOCKET")
 	if sock == "" {
 		sock = "/var/run/docker.sock"
 	}
@@ -30,23 +30,23 @@ func TestDockerClient(t *testing.T) {
 	if err := d.Ping(ctx); err != nil {
 		t.Fatal(err)
 	}
-	if err := d.EnsureNetwork(ctx, "hiro-test-runs", true); err != nil {
+	if err := d.EnsureNetwork(ctx, "agnts-test-runs", true); err != nil {
 		t.Fatal(err)
 	}
-	if err := d.EnsureNetwork(ctx, "hiro-test-runs", true); err != nil {
+	if err := d.EnsureNetwork(ctx, "agnts-test-runs", true); err != nil {
 		t.Fatalf("second ensure: %v", err)
 	}
-	t.Cleanup(func() { _ = d.json(context.Background(), "DELETE", "/networks/hiro-test-runs", nil, nil, nil) })
+	t.Cleanup(func() { _ = d.json(context.Background(), "DELETE", "/networks/agnts-test-runs", nil, nil, nil) })
 
 	id, err := d.Create(ctx, ContainerConfig{
-		Name:       "hiro-test-" + time.Now().Format("150405.000000"),
+		Name:       "agnts-test-" + time.Now().Format("150405.000000"),
 		Image:      "alpine:3.20",
 		WorkingDir: "/workspace",
 		Cmd:        []string{"sleep", "300"},
-		Labels:     map[string]string{"hiro.test": "1"},
-		Network:    "hiro-test-runs",
+		Labels:     map[string]string{"agnts.test": "1"},
+		Network:    "agnts-test-runs",
 		MemoryMB:   256, CPUs: 0.5, PIDs: 64,
-		Volumes: []string{"/workspace", "/hiro/out"},
+		Volumes: []string{"/workspace", "/agnts/out"},
 		Tmpfs:   map[string]string{"/tmp": "rw,size=16m"},
 	})
 	if err != nil {
@@ -60,7 +60,7 @@ func TestDockerClient(t *testing.T) {
 
 	var buf bytes.Buffer
 	tw := tar.NewWriter(&buf)
-	body := "hello from hiro\n"
+	body := "hello from agnts\n"
 	_ = tw.WriteHeader(&tar.Header{Name: "src/main.txt", Mode: 0o644, Size: int64(len(body)), Typeflag: tar.TypeReg})
 	_, _ = tw.Write([]byte(body))
 	_ = tw.Close()
@@ -82,17 +82,17 @@ func TestDockerClient(t *testing.T) {
 	if code == 0 {
 		t.Fatal("root filesystem is writable")
 	}
-	code, _ = d.Exec(ctx, id, ExecConfig{Cmd: []string{"sh", "-c", `echo '{"summary":"x"}' > /hiro/out/summary.json && touch /tmp/ok`}}, io.Discard, io.Discard)
+	code, _ = d.Exec(ctx, id, ExecConfig{Cmd: []string{"sh", "-c", `echo '{"summary":"x"}' > /agnts/out/summary.json && touch /tmp/ok`}}, io.Discard, io.Discard)
 	if code != 0 {
 		t.Fatal("volume or tmpfs not writable")
 	}
 
 	ws := &workspace{docker: d, id: id}
-	b, err := ws.ReadFile(ctx, "/hiro/out/summary.json")
+	b, err := ws.ReadFile(ctx, "/agnts/out/summary.json")
 	if err != nil || strings.TrimSpace(string(b)) != `{"summary":"x"}` {
 		t.Fatalf("read file: %q %v", b, err)
 	}
-	if _, err := ws.ReadFile(ctx, "/hiro/out/missing.json"); !errors.Is(err, domain.ErrNotFound) {
+	if _, err := ws.ReadFile(ctx, "/agnts/out/missing.json"); !errors.Is(err, domain.ErrNotFound) {
 		t.Fatalf("missing file: %v", err)
 	}
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hiro_api/hiro_api.dart';
+import 'package:agnts_api/agnts_api.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
 import '../../core/data.dart';
@@ -45,7 +45,7 @@ class _ActivityFeedState extends ConsumerState<ActivityFeed> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final types = {'all': l.mobileFilterAll, 'user': l.mobileFilterYou, 'problems': l.mobileFilterProblems};
     final events = ref.watch(activityProvider(_type));
 
@@ -88,11 +88,11 @@ class _EventRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final (label, tone) = _kind(l, e);
     final error = e.level == EventLevelEnum.error;
     final warn = e.level == EventLevelEnum.warn;
-    final mono = TextStyle(fontFamily: HiroFonts.mono, fontSize: 12.5, color: c.ink3);
+    final mono = TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3);
     final row = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -159,7 +159,7 @@ class _WeekStats extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final a = ref.watch(analyticsProvider).value;
     if (a == null) return const SizedBox.shrink();
     final cur = a.current;
@@ -174,7 +174,7 @@ class _WeekStats extends ConsumerWidget {
               FittedBox(
                 fit: BoxFit.scaleDown,
                 alignment: Alignment.centerLeft,
-                child: Text(value, style: TextStyle(fontFamily: HiroFonts.display, fontSize: 22, fontWeight: FontWeight.w700, color: c.ink)),
+                child: Text(value, style: TextStyle(fontFamily: AgntsFonts.display, fontSize: 22, fontWeight: FontWeight.w700, color: c.ink)),
               ),
             ]),
           ),

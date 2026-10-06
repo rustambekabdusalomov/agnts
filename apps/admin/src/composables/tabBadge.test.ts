@@ -22,8 +22,8 @@ describe('tab badge', () => {
   })
 
   it('puts the count in the title', () => {
-    expect(badgeTitle('hiro', 0)).toBe('hiro')
-    expect(badgeTitle('hiro', 3)).toBe('(3) hiro')
-    expect(badgeTitle('hiro', 120)).toBe('(99+) hiro')
+    expect(badgeTitle('agnts', 0)).toBe('agnts')
+    expect(badgeTitle('agnts', 3)).toBe('(3) agnts')
+    expect(badgeTitle('agnts', 120)).toBe('(99+) agnts')
   })
 })

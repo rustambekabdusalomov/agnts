@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hiro_api/hiro_api.dart';
+import 'package:agnts_api/agnts_api.dart';
 
-import 'package:hiro_mobile/features/tickets/kinds.dart';
-import 'package:hiro_mobile/l10n/app_localizations.dart';
-import 'package:hiro_mobile/theme.dart';
-import 'package:hiro_mobile/widgets/common.dart';
-import 'package:hiro_mobile/widgets/ui.dart';
+import 'package:agnts_mobile/features/tickets/kinds.dart';
+import 'package:agnts_mobile/l10n/app_localizations.dart';
+import 'package:agnts_mobile/theme.dart';
+import 'package:agnts_mobile/widgets/common.dart';
+import 'package:agnts_mobile/widgets/ui.dart';
 
 Widget _app(Widget child) => ProviderScope(
       child: MaterialApp(
-        theme: hiroTheme(Brightness.light),
+        theme: agntsTheme(Brightness.light),
         localizationsDelegates: const [
           AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
@@ -54,7 +54,7 @@ void main() {
     expect(find.text('Done'), findsOneWidget);
   });
 
-  testWidgets('the kind chip marks a kind hiro picked', (tester) async {
+  testWidgets('the kind chip marks a kind agnts picked', (tester) async {
     await tester.pumpWidget(_app(Column(children: [
       KindChip(_ticket(TicketKind.analysis)),
       KindChip(_ticket(TicketKind.code, auto: true)),

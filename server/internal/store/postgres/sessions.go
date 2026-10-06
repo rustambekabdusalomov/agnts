@@ -6,7 +6,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
 // Sessions is the sessions store.

@@ -46,7 +46,7 @@ async function submit() {
   <main class="login-wrap">
     <form class="card login" novalidate @submit.prevent="submit">
       <div class="login-brand">
-        <svg width="40" height="40" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="1" width="28" height="28" rx="7" fill="var(--mark)" /><path d="M10 9v12M10 15c1.2-2 2.6-3 4.5-3 2.2 0 3.5 1.4 3.5 3.8V21" stroke="var(--mark-ink)" stroke-width="2.4" fill="none" stroke-linecap="round" /></svg>
+        <svg width="40" height="40" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="1" width="28" height="28" rx="7" fill="var(--mark)" /><path d="M19.75 10.25V19.75M19.75 15a4.75 4.75 0 1 1-9.5 0a4.75 4.75 0 1 1 9.5 0" stroke="var(--mark-ink)" stroke-width="2.4" fill="none" stroke-linecap="round" /></svg>
         <div><div class="brand-name">{{ t('app.name') }}</div><div class="brand-sub">{{ t('app.tagline') }}</div></div>
       </div>
       <div class="login-head">

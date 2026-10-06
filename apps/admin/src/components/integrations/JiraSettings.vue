@@ -45,7 +45,7 @@ const commentOn = (k: string) => draft.value[k] !== 'false'
 function setComment(k: string, on: boolean) {
   draft.value = { ...draft.value, [k]: on ? 'true' : 'false' }
 }
-const label = computed(() => draft.value.label || 'hiro')
+const label = computed(() => draft.value.label || 'agnts')
 const jql = computed(() => `labels = "${label.value}" AND statusCategory != Done ORDER BY created ASC`)
 
 const save = useMutation({
@@ -70,12 +70,15 @@ function discard() {
   <section class="card">
     <div class="ch"><div><h2>{{ t('integrations.pickup') }}</h2><p class="sub">{{ t('integrations.pickupSub') }}</p></div></div>
     <CfgRow :label="t('integrations.label')" :help="t('integrations.labelHelp')">
-      <input v-model="draft.label" class="cfg-in mono" placeholder="hiro" :aria-label="t('integrations.label')">
+      <input v-model="draft.label" class="cfg-in mono" placeholder="agnts" :aria-label="t('integrations.label')">
     </CfgRow>
     <div class="sec">
       <h3>{{ t('integrations.query') }}</h3>
       <pre class="jql">{{ jql }}</pre>
     </div>
+    <CfgRow :label="t('followUps.jiraIssueType')" :help="t('followUps.jiraIssueTypeHelp')">
+      <input v-model="draft.issue_type" class="cfg-in" placeholder="Task" :aria-label="t('followUps.jiraIssueType')">
+    </CfgRow>
   </section>
   <section class="card">
     <div class="ch"><div><h2>{{ t('integrations.statuses') }}</h2><p class="sub">{{ t('integrations.statusesSub') }}</p></div></div>

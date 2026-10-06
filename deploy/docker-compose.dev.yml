@@ -1,5 +1,5 @@
 # Local development database. `make dev-db` starts it.
-name: hiro-dev
+name: agnts-dev
 
 services:
   postgres:
@@ -14,5 +14,7 @@ services:
       - pgdata:/var/lib/postgresql
       - ./dev-init.sql:/docker-entrypoint-initdb.d/dev-init.sql:ro
 
+# Pinned to the volume created before the rename from hiro, so local data stays.
 volumes:
   pgdata:
+    name: hiro-dev_pgdata

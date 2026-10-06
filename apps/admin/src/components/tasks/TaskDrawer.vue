@@ -4,7 +4,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../../api/client'
-import { KINDS, REPORT_KINDS, type Repository, type TicketKindChoice } from '../../api/types'
+import { KINDS, REPORT_KINDS, type FollowUpsMode, type Repository, type TicketKindChoice } from '../../api/types'
 import { useUi } from '../../stores/ui'
 import FormDrawer from '../form/FormDrawer.vue'
 import SegButtons from '../form/SegButtons.vue'
@@ -22,9 +22,18 @@ const ui = useUi()
 type Priority = 'low' | 'medium' | 'high'
 type After = 'main' | 'pr'
 type Start = 'ask' | 'code' | 'queue'
-// repoId 0 is "no repository": allowed for reports, and for Auto (hiro
+// repoId 0 is "no repository": allowed for reports, and for Auto (agnts
 // then picks a report kind, or stops and asks for a repository).
-const form = reactive({ repoId: 0, kind: 'auto' as TicketKindChoice, title: '', description: '', priority: 'medium' as Priority, after: 'pr' as After, start: 'ask' as Start })
+const form = reactive({
+  repoId: 0,
+  kind: 'auto' as TicketKindChoice,
+  title: '',
+  description: '',
+  priority: 'medium' as Priority,
+  after: 'pr' as After,
+  start: 'ask' as Start,
+  followUps: 'inherit' as FollowUpsMode,
+})
 const kinds = computed(() => (['auto', ...KINDS] as TicketKindChoice[]).map((k) => ({ value: k, label: t(`kind.${k}`), hint: t(`kind.${k}Hint`) })))
 const reportKind = computed(() => REPORT_KINDS.some((k) => k === form.kind))
 const changeKind = computed(() => form.kind === 'code' || form.kind === 'test')
@@ -49,6 +58,11 @@ const afters = computed(() => [
   { value: 'main' as After, label: t('tasks.afterMain') },
   { value: 'pr' as After, label: t('tasks.afterPr') },
 ])
+const followUpModes = computed(() => [
+  { value: 'inherit' as FollowUpsMode, label: t('followUps.modeInherit') },
+  { value: 'on' as FollowUpsMode, label: t('followUps.modeOn') },
+  { value: 'off' as FollowUpsMode, label: t('followUps.modeOff') },
+])
 const starts = computed(() => [
   { value: 'ask' as Start, label: t('tasks.startAsk'), hint: t('tasks.startAskHint') },
   { value: 'code' as Start, label: t('tasks.startCode'), hint: t('tasks.startCodeHint') },
@@ -67,6 +81,7 @@ const create = useMutation({
           priority: form.priority,
           afterApprove: form.after,
           start: form.start,
+          followUps: form.followUps,
         },
       }),
     ),
@@ -176,6 +191,11 @@ function submit() {
             <span><b>{{ o.label }}</b><span class="d">{{ o.hint }}</span></span>
           </button>
         </div>
+      </div>
+      <div class="field">
+        <span class="flbl">{{ t('followUps.mode') }}</span>
+        <SegButtons v-model="form.followUps" :options="followUpModes" :label="t('followUps.mode')" />
+        <span class="hint">{{ t('followUps.modeHint') }}</span>
       </div>
       <span v-if="error" class="ferr" role="alert">{{ error }}</span>
     </form>

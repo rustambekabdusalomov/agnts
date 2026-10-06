@@ -43,3 +43,20 @@ export function level(u: number | undefined | null): '' | 'warn' | 'bad' {
 export function pct(u: number | undefined | null): number {
   return u == null ? 0 : Math.min(100, Math.round(u * 100))
 }
+
+/** 1234 → "1.2K", in the reader's locale. */
+export function fmtTokens(n: number, locale: string): string {
+  return new Intl.NumberFormat(locale, { notation: 'compact', maximumFractionDigits: 1 }).format(n)
+}
+
+/** An API-price estimate in dollars; tiny non-zero amounts read "<$0.01". */
+export function fmtUsd(usd: number, locale: string): string {
+  const f = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  return usd > 0 && usd < 0.005 ? '<' + f.format(0.01) : f.format(usd)
+}
+
+/** The tokens shown as "spent": input and output. Cache reads are cheap and
+ * would dwarf them, so they are shown apart. */
+export function ioTokens(s: { input: number; output: number } | undefined): number {
+  return s ? s.input + s.output : 0
+}

@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
-	"hiro/internal/vcs"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
+	"agnts/internal/vcs"
 )
 
 func TestProjectPath(t *testing.T) {
@@ -72,12 +72,12 @@ func TestMergeRequestAndPipelines(t *testing.T) {
 	repo := domain.Repository{CloneURL: srv.URL + "/acme/api.git", DefaultBranch: "main", Provider: "gitlab"}
 	ctx := context.Background()
 
-	n, u, err := h.OpenPR(ctx, repo, orchestrator.PR{Branch: "hiro/X-1", Title: "X-1: fix", Draft: true})
+	n, u, err := h.OpenPR(ctx, repo, orchestrator.PR{Branch: "agnts/X-1", Title: "X-1: fix", Draft: true})
 	if err != nil || n != 5 || u == "" {
 		t.Fatalf("create MR: %d %s %v", n, u, err)
 	}
 	exists = true
-	if n, _, err = h.OpenPR(ctx, repo, orchestrator.PR{Branch: "hiro/X-1", Title: "X-1: fix"}); err != nil || n != 5 {
+	if n, _, err = h.OpenPR(ctx, repo, orchestrator.PR{Branch: "agnts/X-1", Title: "X-1: fix"}); err != nil || n != 5 {
 		t.Fatalf("existing MR: %d %v", n, err)
 	}
 

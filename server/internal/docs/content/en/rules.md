@@ -1,6 +1,6 @@
 # Rules
 
-Rules tell hiro how your team works: how to test, name, log, structure code, and what never to touch. hiro follows them on every ticket and task.
+Rules tell agnts how your team works: how to test, name, log, structure code, and what never to touch. agnts follows them on every ticket and task.
 
 ## Global and repository rules
 

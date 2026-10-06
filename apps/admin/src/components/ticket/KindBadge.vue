@@ -2,7 +2,7 @@
 import { useI18n } from 'vue-i18n'
 import type { Ticket } from '../../api/types'
 
-// What a ticket produces. A kind hiro picked is marked, since the analysis
+// What a ticket produces. A kind agnts picked is marked, since the analysis
 // may still change it.
 defineProps<{ ticket: Pick<Ticket, 'kind' | 'kindAuto'> }>()
 const { t } = useI18n()

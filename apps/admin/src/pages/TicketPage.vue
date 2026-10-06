@@ -13,6 +13,7 @@ import LiveLog from '../components/ticket/LiveLog.vue'
 import KindBadge from '../components/ticket/KindBadge.vue'
 import KindPicker from '../components/ticket/KindPicker.vue'
 import ImplementReport from '../components/ticket/ImplementReport.vue'
+import FollowUps from '../components/ticket/FollowUps.vue'
 import CodeReview from '../components/ticket/CodeReview.vue'
 import ModelPicker from '../components/ticket/ModelPicker.vue'
 import ReportView from '../components/ticket/ReportView.vue'
@@ -20,6 +21,7 @@ import RepoPicker from '../components/ticket/RepoPicker.vue'
 import ProgressTrack from '../components/ticket/ProgressTrack.vue'
 import { useRepoMembers } from '../components/repo/useRepoMembers'
 import RunLog from '../components/ticket/RunLog.vue'
+import SpendCard from '../components/ticket/SpendCard.vue'
 import HiIcon from '../components/ui/HiIcon.vue'
 import { useEventLog } from '../composables/useEventLog'
 import { ago, pct } from '../composables/format'
@@ -63,7 +65,7 @@ const answered = computed(() => (d.value?.questions ?? []).filter((q) => q.answe
 const feedback = ref('')
 const notice = ref('')
 
-// Assignees for the pull request hiro opens on approval (not for tasks that
+// Assignees for the pull request agnts opens on approval (not for tasks that
 // push straight to the default branch). Members load only while reviewing.
 const opensPr = computed(() => !report.value && !(isTask.value && tk.value?.afterApprove === 'main'))
 // Reports reach the Jira issue only when the reviewer ticks this.
@@ -174,7 +176,7 @@ async function deleteTask() {
   if (await askConfirm({ title: t('ticket.delete'), message: t('ticket.deleteConfirm', { key: key.value }), confirmLabel: t('ticket.delete'), danger: true })) del.mutate()
 }
 
-// Lines from hiro's code review go to the end of the feedback box.
+// Lines from agnts's code review go to the end of the feedback box.
 function addFeedback(line: string) {
   feedback.value = feedback.value.trim() ? `${feedback.value.trimEnd()}\n${line}` : line
 }
@@ -192,7 +194,10 @@ const totals = computed(() => {
   return { n: files.length, add: files.reduce((a, f) => a + f.add, 0), del: files.reduce((a, f) => a + f.del, 0) }
 })
 const checksOk = computed(() => (result.value?.checks ?? []).every((c) => c.exitCode === 0))
-const branch = computed(() => tk.value?.branch || `hiro/${key.value}`)
+// The latest diff stays readable after review: done, rejected, failed, or
+// while a new attempt runs. Review shows it inline already.
+const showChanges = computed(() => !report.value && !!result.value?.files.length && tk.value?.state !== 'waiting_for_review')
+const branch = computed(() => tk.value?.branch || `agnts/${key.value}`)
 const reviewSub = computed(() => {
   if (isTask.value && tk.value?.afterApprove === 'main') return t('ticket.reviewSubMain')
   return isTask.value ? t('ticket.reviewSubPr', { branch: branch.value }) : t('ticket.reviewSubJira', { branch: branch.value })
@@ -246,7 +251,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
 
     <div class="cfg-grid">
       <div class="col">
-        <section class="card"><ProgressTrack :ticket="tk" /></section>
+        <section class="card"><ProgressTrack :ticket="tk" :spend="d.spendByStage" /></section>
 
         <section class="card">
           <!-- new -->
@@ -361,7 +366,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
               </dl>
             </div>
             <div v-if="result?.summary" class="sec">
-              <h3>{{ t('ticket.whatHiroDid') }}</h3>
+              <h3>{{ t('ticket.whatAgntsDid') }}</h3>
               <div class="summary"><p>{{ result.summary }}</p></div>
               <template v-if="result.notes.length">
                 <h3>{{ t('ticket.notes') }}</h3>
@@ -489,6 +494,19 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
           </template>
         </section>
 
+        <FollowUps :ticket="tk" :follow-ups="d.followUps" />
+
+        <section v-if="showChanges && result" class="card">
+          <div class="ch">
+            <div>
+              <h2>{{ t('ticket.changes') }}</h2>
+              <p class="sub">{{ t('ticket.changedValue', { n: totals.n, add: totals.add, del: totals.del }) }} · {{ ago(result.createdAt, locale) }}</p>
+            </div>
+          </div>
+          <div v-if="result.summary" class="summary"><p>{{ result.summary }}</p></div>
+          <DiffView v-for="f in result.files" :id="`diff-${f.path}`" :key="f.path" :file="f" />
+        </section>
+
         <TicketLessons v-if="tk.state === 'done'" :ticket="tk" />
 
         <section v-if="answered.length && !['new', 'analyzing', 'waiting_for_answers'].includes(tk.state)" class="card">
@@ -502,12 +520,13 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
         <RunLog :events="events" :ticket-key="key" />
       </div>
 
-      <aside class="cfg-side">
+      <aside class="cfg-side tk-side">
         <section class="card">
           <div class="ch"><h2>{{ isTask ? t('ticket.sideTask') : t('ticket.sideTicket') }}</h2><span><StateBadge :state="tk.state" :kind="tk.kind" /> <span v-if="tk.mergedAt" class="badge b-ok">{{ t('ticket.merged') }}</span></span></div>
           <dl class="kv">
             <dt>{{ t('ticket.kvKey') }}</dt><dd>{{ tk.key }}</dd>
             <template v-if="tk.parentKey"><dt>{{ t('implement.implements') }}</dt><dd><RouterLink :to="`/tickets/${tk.parentKey}`">{{ tk.parentKey }}</RouterLink></dd></template>
+            <template v-if="tk.followUpOf"><dt>{{ t('followUps.followUpOf') }}</dt><dd><RouterLink :to="`/tickets/${tk.followUpOf}`">{{ tk.followUpOf }}</RouterLink></dd></template>
             <dt>{{ t('kind.title') }}</dt><dd><KindBadge :ticket="tk" /></dd>
             <dt>{{ t('ticket.kvSource') }}</dt><dd>{{ isTask ? t('ticket.srcTask') : t('ticket.srcJira') }}</dd>
             <dt>{{ t('ticket.kvRepo') }}</dt><dd>{{ tk.repoName ?? '—' }}</dd>
@@ -523,6 +542,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             </template>
           </dl>
         </section>
+        <SpendCard :spend="tk.spend" :stages="d.spendByStage ?? []" :report="report" />
         <section class="card">
           <div class="ch"><h2>{{ t('ticket.historyTitle') }}</h2></div>
           <ol v-if="d.history?.length" class="tl">

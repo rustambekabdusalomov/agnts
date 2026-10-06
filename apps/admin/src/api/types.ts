@@ -25,6 +25,11 @@ export type LessonBrief = S['LessonBrief']
 export type Rule = S['Rule']
 export type RuleStatus = S['RuleStatus']
 export type RuleInput = S['RuleInput']
+export type TokenSpend = S['TokenSpend']
+export type StageSpend = S['StageSpend']
+export type FollowUps = S['FollowUps']
+export type FollowUpSuggestion = S['FollowUpSuggestion']
+export type FollowUpsMode = S['FollowUpsMode']
 
 /** Tone per state, as in the demo: drives badge colours (b-<tone>). */
 export const STATE_TONE: Record<TicketState, 'gray' | 'info' | 'warn' | 'ok' | 'bad'> = {
@@ -59,12 +64,17 @@ export const BOARD_GROUPS = ['queue', 'running', 'needs', 'done'].map((id) => FI
 
 export const MODELS: Model[] = ['haiku', 'sonnet', 'opus']
 export const MODEL_NAME: Record<Model, string> = { haiku: 'Haiku', sonnet: 'Sonnet', opus: 'Opus' }
+/** "claude-opus-5-5" or "opus" → "Opus"; anything else as given. */
+export function modelLabel(id: string): string {
+  const m = MODELS.find((x) => id.toLowerCase().includes(x))
+  return m ? MODEL_NAME[m] : id
+}
 
 /** Badge tone per code review verdict and finding severity. */
 export const VERDICT_TONE: Record<CodeReview['verdict'], 'ok' | 'warn' | 'bad'> = { looks_good: 'ok', has_concerns: 'warn', needs_changes: 'bad' }
 export const SEVERITY_TONE: Record<Finding['severity'], 'bad' | 'warn' | 'info' | 'gray'> = { blocker: 'bad', major: 'warn', minor: 'info', nit: 'gray' }
 
-/** A finding as one line of review feedback for hiro. */
+/** A finding as one line of review feedback for agnts. */
 export function findingFeedback(f: Finding): string {
   const loc = f.file ? `${f.file}${f.line ? `:${f.line}` : ''}: ` : ''
   return `- ${loc}${f.title}${f.suggestion ? `. ${f.suggestion}` : ''}`
@@ -75,7 +85,7 @@ export const KINDS: TicketKind[] = ['code', 'test', 'plan', 'analysis', 'bug']
 /** Kinds whose work is a Markdown report instead of a change. */
 export const REPORT_KINDS: TicketKind[] = ['plan', 'analysis', 'bug']
 export const isReport = (t: Pick<Ticket, 'kind'>) => REPORT_KINDS.includes(t.kind)
-/** Mirrors the server: code and test need a repository, unless hiro still picks the kind. */
+/** Mirrors the server: code and test need a repository, unless agnts still picks the kind. */
 export const needsRepo = (t: Pick<Ticket, 'kind' | 'kindAuto'>) => !t.kindAuto && !REPORT_KINDS.includes(t.kind)
 /** States in which the kind can still change (server: SetKind). */
 export const KIND_EDITABLE: TicketState[] = ['new', 'waiting_for_answers', 'failed', 'rate_limited']

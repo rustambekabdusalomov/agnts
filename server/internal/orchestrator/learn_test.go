@@ -9,16 +9,16 @@ import (
 	"strings"
 	"testing"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
-	"hiro/internal/store/postgres"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
+	"agnts/internal/store/postgres"
 )
 
 // newLearnHarness is a harness whose orchestrator has the lessons store.
 func newLearnHarness(t *testing.T) (*harness, *postgres.Lessons) {
 	t.Helper()
 	h := newHarness(t)
-	pool, err := postgres.Open(h.ctx, os.Getenv("HIRO_TEST_DATABASE_URL"))
+	pool, err := postgres.Open(h.ctx, os.Getenv("AGNTS_TEST_DATABASE_URL"))
 	if err != nil {
 		t.Fatal(err)
 	}

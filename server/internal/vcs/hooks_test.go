@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
 type sink struct{ merged []string }
@@ -45,7 +45,7 @@ func TestGitHubWebhook(t *testing.T) {
 	sk, st := &sink{}, &store{}
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
 	h := GitHubWebhook("s3cret", sk, st, nil, log)
-	body := `{"action":"closed","pull_request":{"merged":true,"html_url":"https://github.com/a/b/pull/7","head":{"ref":"hiro/PAY-1"}}}`
+	body := `{"action":"closed","pull_request":{"merged":true,"html_url":"https://github.com/a/b/pull/7","head":{"ref":"agnts/PAY-1"}}}`
 	post := func(sig, id, event string) int {
 		req := httptest.NewRequest("POST", "/webhooks/github", strings.NewReader(body))
 		req.Header.Set("X-Hub-Signature-256", sig)
@@ -63,7 +63,7 @@ func TestGitHubWebhook(t *testing.T) {
 	}
 	post(good, "1", "pull_request")
 	post(good, "1", "pull_request") // redelivery
-	if len(sk.merged) != 1 || sk.merged[0] != "https://github.com/a/b/pull/7|hiro/PAY-1" {
+	if len(sk.merged) != 1 || sk.merged[0] != "https://github.com/a/b/pull/7|agnts/PAY-1" {
 		t.Fatalf("merged: %v", sk.merged)
 	}
 }
@@ -79,7 +79,7 @@ func TestGitLabWebhook(t *testing.T) {
 		h.ServeHTTP(rec, req)
 		return rec.Code
 	}
-	mr := `{"object_kind":"merge_request","object_attributes":{"action":"merge","url":"https://gitlab.com/a/b/-/merge_requests/3","source_branch":"hiro/X-1"}}`
+	mr := `{"object_kind":"merge_request","object_attributes":{"action":"merge","url":"https://gitlab.com/a/b/-/merge_requests/3","source_branch":"agnts/X-1"}}`
 	if c := post("wrong", mr); c != http.StatusUnauthorized {
 		t.Fatalf("bad token: %d", c)
 	}

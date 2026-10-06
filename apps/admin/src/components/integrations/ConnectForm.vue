@@ -22,7 +22,7 @@ const error = ref('')
 
 // "How to get the token" guide: a page to open, or a command to run.
 // Telegram also links to the bot's getUpdates once a token is pasted: before
-// hiro sets the webhook, that is where the chat id shows up.
+// agnts sets the webhook, that is where the chat id shows up.
 const guide = computed<{ link?: string; command?: string; chatIdLink?: string } | null>(() => {
   if (props.provider === 'github') return { link: 'https://github.com/settings/personal-access-tokens/new' }
   if (props.provider === 'gitlab') {

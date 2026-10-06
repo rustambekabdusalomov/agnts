@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:hiro_api/hiro_api.dart';
+import 'package:agnts_api/agnts_api.dart';
 
 /// A signed-in session: which server, and the bearer token for it.
 class Session {
@@ -32,7 +32,7 @@ class SessionNotifier extends AsyncNotifier<Session?> {
 
   Future<void> signIn(String server, String username, String password, String code) async {
     server = server.trim().replaceAll(RegExp(r'/+$'), '');
-    final api = HiroApi(dio: Dio(BaseOptions(baseUrl: '$server/api', connectTimeout: const Duration(seconds: 15))), interceptors: []);
+    final api = AgntsApi(dio: Dio(BaseOptions(baseUrl: '$server/api', connectTimeout: const Duration(seconds: 15))), interceptors: []);
     try {
       final res = await api.getAuthApi().login(
             loginRequest: LoginRequest(

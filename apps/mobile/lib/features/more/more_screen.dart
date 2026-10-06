@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hiro_api/hiro_api.dart';
+import 'package:agnts_api/agnts_api.dart';
 
 import '../../core/api.dart';
 import '../../core/data.dart';
@@ -22,7 +22,7 @@ class MoreScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final usage = ref.watch(usageProvider);
     final settings = ref.watch(settingsProvider);
     final prefs = ref.watch(prefsProvider);
@@ -224,7 +224,7 @@ Future<(T,)?> _pickOne<T>(BuildContext context, {required String title, String? 
   return showModalBottomSheet<(T,)>(
     context: context,
     builder: (ctx) {
-      final c = Hiro.of(ctx);
+      final c = Agnts.of(ctx);
       return SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -351,7 +351,7 @@ class _PushSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final n = s.notify;
     Widget sw(String label, bool value, String field, {String? help}) => ListRow(
           title: label,
@@ -382,6 +382,16 @@ class _PushSection extends ConsumerWidget {
             sw(l.mobilePushDone, n.done, 'done'),
             if (n.lessons != null) sw(l.settingsLessons, n.lessons!, 'lessons'),
             if (n.review != null) sw(l.settingsReviewDone, n.review!, 'review'),
+            if (n.followUps != null) sw(l.followUpsNotifyLabel, n.followUps!, 'followUps'),
+            if (s.suggestFollowUps != null)
+              ListRow(
+                title: l.followUpsSettingLabel,
+                subtitle: l.followUpsSettingHelp,
+                trailing: Switch(
+                  value: s.suggestFollowUps!,
+                  onChanged: (v) => _save(context, ref, s, (j) => {...j, 'suggestFollowUps': v}),
+                ),
+              ),
           ]),
         ),
     ]);
@@ -395,7 +405,7 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final parts = name.trim().split(RegExp(r'[\s._-]+')).where((p) => p.isNotEmpty).toList();
     final initials = parts.isEmpty
         ? '?'
@@ -421,7 +431,7 @@ class _RoundButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return Tooltip(
       message: tooltip,
       child: Material(

@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:hiro_api/hiro_api.dart';
+import 'package:agnts_api/agnts_api.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../theme.dart';
 import '../../widgets/ui.dart';
 
-/// hiro's own code review of a result waiting for review: advice beside the
+/// agnts's own code review of a result waiting for review: advice beside the
 /// human review that never blocks approval. Findings with a suggestion can be
 /// added to [feedback], the text the "Request changes" sheet starts with.
 class CodeReviewCard extends StatelessWidget {
-  const CodeReviewCard({super.key, required this.detail, required this.feedback, required this.busy, required this.onRun});
+  const CodeReviewCard({super.key, required this.detail, required this.feedback, required this.busy, required this.onRun, this.onFollowUp});
   final TicketDetail detail;
   final TextEditingController feedback;
   final bool busy;
@@ -17,10 +17,13 @@ class CodeReviewCard extends StatelessWidget {
   /// Queues a (re-)review.
   final VoidCallback onRun;
 
+  /// Suggests finding [index] as a follow-up ticket, for work outside this change.
+  final void Function(int index)? onFollowUp;
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final t = detail.ticket;
     final state = t.reviewState ?? TicketReviewStateEnum.none;
     final review = detail.review;
@@ -88,7 +91,7 @@ class CodeReviewCard extends StatelessWidget {
 
   List<Widget> _review(BuildContext context, CodeReview r) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final withSuggestion = [for (final f in r.findings) if (_line(f) != null) _line(f)!];
     return [
       if (r.summary.isNotEmpty)
@@ -126,7 +129,7 @@ class CodeReviewCard extends StatelessWidget {
               ),
           ]),
         ),
-        for (final (i, f) in r.findings.indexed) _finding(context, f, first: i == 0),
+        for (final (i, f) in r.findings.indexed) _finding(context, f, index: i),
       ],
       if (r.strengths.isNotEmpty) ...[
         Padding(
@@ -153,9 +156,10 @@ class CodeReviewCard extends StatelessWidget {
     ];
   }
 
-  Widget _finding(BuildContext context, Finding f, {required bool first}) {
+  Widget _finding(BuildContext context, Finding f, {required int index}) {
+    final first = index == 0;
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final loc = _location(f);
     final line = _line(f);
     return Container(
@@ -171,7 +175,7 @@ class CodeReviewCard extends StatelessWidget {
         if (loc.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 2),
-            child: Text(loc, style: TextStyle(fontFamily: HiroFonts.mono, fontSize: 12, color: c.ink3)),
+            child: Text(loc, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12, color: c.ink3)),
           ),
         if ((f.detail ?? '').isNotEmpty)
           Padding(
@@ -209,6 +213,15 @@ class CodeReviewCard extends StatelessWidget {
                 ),
               );
             },
+          ),
+        if (onFollowUp != null)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4), minimumSize: const Size(0, 32)),
+              onPressed: busy ? null : () => onFollowUp!(index),
+              child: Text(l.followUpsFromFinding),
+            ),
           ),
       ]),
     );

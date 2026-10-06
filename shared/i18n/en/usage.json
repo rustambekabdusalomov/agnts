@@ -1,7 +1,7 @@
 {
   "usage": {
     "title": "Plan usage",
-    "lede": "hiro runs on your Claude subscription. These limits are shared with your own Claude and Claude Code use.",
+    "lede": "agnts runs on your Claude subscription. These limits are shared with your own Claude and Claude Code use.",
     "card": "Plan usage",
     "updated": "Updated {time}",
     "noReading": "No reading yet",
@@ -25,7 +25,7 @@
     "status_unknown": "Unknown",
     "source": "Read from Claude Code's rate limit events. Includes your own Claude use on this account.",
     "limitTitle": "When a limit is reached",
-    "limitSub": "How hiro behaves near the limit",
+    "limitSub": "How agnts behaves near the limit",
     "above": "Above {pct}% of the session",
     "aboveDo": "Don't start new runs; runs already going keep going",
     "midRun": "Limit reached mid-run",
@@ -35,6 +35,6 @@
     "resumeManual": "Wait for you to resume",
     "idle": "Idle refresh",
     "idleDo": "Every 30 min",
-    "help": "Numbers come from the rate limit events Claude Code emits during each run. When hiro is idle, a tiny refresh run keeps them current."
+    "help": "Numbers come from the rate limit events Claude Code emits during each run. When agnts is idle, a tiny refresh run keeps them current."
   }
 }

@@ -1,6 +1,6 @@
 # Integrations
 
-The services hiro works with: Jira for tickets, and GitHub or GitLab for code. Each has its own page with connection status and options.
+The services agnts works with: Jira for tickets, and GitHub or GitLab for code. Each has its own page with connection status and options.
 
 ## Connecting
 
@@ -12,7 +12,7 @@ Each git page shows which permissions the token has. Required ones must be grant
 
 ## Repository access
 
-Turn a repository off to stop hiro from cloning or pushing to it, without removing it.
+Turn a repository off to stop agnts from cloning or pushing to it, without removing it.
 
 ## Commits and pull requests
 
@@ -20,8 +20,8 @@ Who commits appear from, a Co-authored-by line, title format, draft mode, labels
 
 ## Jira rules
 
-Which projects are watched, the label, issue types and statuses hiro picks up, shown as the exact query it runs.
+Which projects are watched, the label, issue types and statuses agnts picks up, shown as the exact query it runs.
 
 ## Status updates and comments
 
-How hiro moves tickets on your board and what it writes as comments.
+How agnts moves tickets on your board and what it writes as comments.

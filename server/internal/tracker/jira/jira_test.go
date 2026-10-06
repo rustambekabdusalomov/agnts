@@ -14,8 +14,8 @@ import (
 	"sync"
 	"testing"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
 )
 
 type fakeIngester struct {
@@ -51,12 +51,12 @@ func sign(secret string, body []byte) string {
 
 const payload = `{"webhookEvent":"jira:issue_created","issue":{"key":"PAY-42","fields":{
   "summary":"Fix refund rounding","description":"Refunds round down.\nShould round half up.",
-  "labels":["backend","Hiro"],"priority":{"name":"High"},"project":{"key":"PAY"}}}}`
+  "labels":["backend","Agnts"],"priority":{"name":"High"},"project":{"key":"PAY"}}}}`
 
 func TestWebhook(t *testing.T) {
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
 	ing := &fakeIngester{}
-	h := WebhookHandler(static(Config{WebhookSecret: "s3cret", Label: "hiro"}), ing, fakeDedup{}, log)
+	h := WebhookHandler(static(Config{WebhookSecret: "s3cret", Label: "agnts"}), ing, fakeDedup{}, log)
 
 	post := func(body, sig, id string) int {
 		req := httptest.NewRequest("POST", "/webhooks/jira", strings.NewReader(body))
@@ -91,8 +91,8 @@ func TestWebhook(t *testing.T) {
 		t.Fatalf("incoming: %+v", in)
 	}
 
-	// A kind label alone hands the issue to hiro with that kind.
-	planned := strings.Replace(payload, `"Hiro"`, `"hiro-plan"`, 1)
+	// A kind label alone hands the issue to agnts with that kind.
+	planned := strings.Replace(payload, `"Agnts"`, `"agnts-plan"`, 1)
 	if c := post(planned, sign("s3cret", []byte(planned)), "d-3"); c != http.StatusNoContent || len(ing.got) != 2 {
 		t.Fatalf("kind label: %d, %d", c, len(ing.got))
 	}
@@ -100,7 +100,7 @@ func TestWebhook(t *testing.T) {
 		t.Fatalf("kind from label: %q", k)
 	}
 
-	unlabelled := strings.Replace(payload, `"Hiro"`, `"other"`, 1)
+	unlabelled := strings.Replace(payload, `"Agnts"`, `"other"`, 1)
 	if c := post(unlabelled, sign("s3cret", []byte(unlabelled)), "d-2"); c != http.StatusNoContent || len(ing.got) != 2 {
 		t.Fatalf("unlabelled issue ingested: %d, %d", c, len(ing.got))
 	}
@@ -160,7 +160,7 @@ func TestClient(t *testing.T) {
 		case "POST /rest/api/3/search/jql":
 			var b map[string]any
 			_ = json.NewDecoder(r.Body).Decode(&b)
-			if !strings.HasPrefix(b["jql"].(string), `labels in ("hiro", "hiro-code", "hiro-test", "hiro-plan", "hiro-analysis", "hiro-bug")`) {
+			if !strings.HasPrefix(b["jql"].(string), `labels in ("agnts", "agnts-code", "agnts-test", "agnts-plan", "agnts-analysis", "agnts-bug")`) {
 				w.WriteHeader(http.StatusBadRequest)
 				return
 			}
@@ -168,15 +168,15 @@ func TestClient(t *testing.T) {
 				_, _ = io.WriteString(w, `{"issues":[{"key":"PAY-1","fields":{"summary":"a","project":{"key":"PAY"}}}],"nextPageToken":"p2"}`)
 				return
 			}
-			_, _ = io.WriteString(w, `{"issues":[{"key":"PAY-2","fields":{"summary":"b","labels":["hiro-bug"]}}],"isLast":true}`)
+			_, _ = io.WriteString(w, `{"issues":[{"key":"PAY-2","fields":{"summary":"b","labels":["agnts-bug"]}}],"isLast":true}`)
 		default:
 			w.WriteHeader(http.StatusNotFound)
 		}
 	}))
 	defer srv.Close()
 
-	c := New(static(Config{Site: srv.URL, Email: "me@x.com", APIToken: "tok", Label: "hiro",
-		Statuses: map[string]string{"in_review": "in review"}}))
+	c := New(static(Config{Site: srv.URL, Email: "me@x.com", APIToken: "tok", Label: "agnts",
+		Statuses: map[string]string{"in_review": "in review"}, IssueType: "Task"}))
 	ctx := context.Background()
 	if posted, err := c.Comment(ctx, "PAY-1", orchestrator.CommentPR, "hello\n\nworld"); err != nil || !posted {
 		t.Fatal(err)
@@ -193,5 +193,63 @@ func TestClient(t *testing.T) {
 	}
 	if n := len(calls); n != 5 {
 		t.Fatalf("calls: %v", calls)
+	}
+}
+
+func TestCreateLabelAndLinkIssue(t *testing.T) {
+	var mu sync.Mutex
+	var calls []string
+	var bodies []map[string]any
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var b map[string]any
+		_ = json.NewDecoder(r.Body).Decode(&b)
+		mu.Lock()
+		calls = append(calls, r.Method+" "+r.URL.Path)
+		bodies = append(bodies, b)
+		mu.Unlock()
+		switch r.Method + " " + r.URL.Path {
+		case "POST /rest/api/3/issue":
+			if _, ok := b["fields"].(map[string]any)["priority"]; ok {
+				w.WriteHeader(http.StatusBadRequest) // no priority on this create screen
+				_, _ = io.WriteString(w, `{"errors":{"priority":"Field 'priority' cannot be set."}}`)
+				return
+			}
+			w.WriteHeader(http.StatusCreated)
+			_, _ = io.WriteString(w, `{"id":"10001","key":"PAY-77"}`)
+		case "PUT /rest/api/3/issue/PAY-77", "POST /rest/api/3/issueLink":
+			w.WriteHeader(http.StatusNoContent)
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer srv.Close()
+
+	cfg, _, err := FromIntegration(`{"api_token":"tok"}`, map[string]string{"site": srv.URL, "email": "me@x.com"}, true)
+	if err != nil || cfg.IssueType != "Task" {
+		t.Fatalf("config: %+v %v", cfg, err)
+	}
+	c := New(static(cfg))
+	ctx := context.Background()
+	key, err := c.CreateIssue(ctx, orchestrator.NewIssue{Project: "PAY", Title: "Add refund_cents", Description: "Do it.\n\nFollow-up of PAY-1", Priority: "high"})
+	if err != nil || key != "PAY-77" {
+		t.Fatalf("create: %q %v", key, err)
+	}
+	f := bodies[1]["fields"].(map[string]any)
+	if f["project"].(map[string]any)["key"] != "PAY" || f["issuetype"].(map[string]any)["name"] != "Task" || f["summary"] != "Add refund_cents" ||
+		f["description"].(map[string]any)["type"] != "doc" {
+		t.Fatalf("create fields: %+v", f)
+	}
+	if err := c.LabelIssue(ctx, key, domain.KindTest); err != nil {
+		t.Fatal(err)
+	}
+	if l := bodies[2]["update"].(map[string]any)["labels"].([]any)[0].(map[string]any)["add"]; l != "agnts-test" {
+		t.Fatalf("label: %v", l)
+	}
+	if err := c.LinkIssues(ctx, key, "PAY-1"); err != nil {
+		t.Fatal(err)
+	}
+	want := "POST /rest/api/3/issue|POST /rest/api/3/issue|PUT /rest/api/3/issue/PAY-77|POST /rest/api/3/issueLink"
+	if got := strings.Join(calls, "|"); got != want {
+		t.Fatalf("calls: %s", got)
 	}
 }

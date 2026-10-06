@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { api, HttpError, unwrap } from '../api/client'
 import PageHeader from '../components/PageHeader.vue'
 import HiIcon from '../components/ui/HiIcon.vue'
+import TicketSpendCard from '../components/usage/TicketSpendCard.vue'
 import { ago, level, pct } from '../composables/format'
 import { useUsage } from '../composables/useUsage'
 import { useUi } from '../stores/ui'
@@ -48,7 +49,7 @@ const refresh = useMutation({
 </script>
 
 <template>
-  <PageHeader :title="t('usage.title')" :lede="t('usage.lede')" doc="usage" />
+  <PageHeader :title="t('usage.title')" doc="usage" />
   <div class="cfg-grid">
     <div class="col">
       <section class="card" :aria-label="t('usage.card')">
@@ -84,6 +85,8 @@ const refresh = useMutation({
           <p class="hint" style="margin: 10px 0 0">{{ t('usage.source') }}</p>
         </template>
       </section>
+
+      <TicketSpendCard />
 
       <section class="card">
         <div class="ch"><div><h2>{{ t('usage.limitTitle') }}</h2><p class="sub">{{ t('usage.limitSub') }}</p></div></div>

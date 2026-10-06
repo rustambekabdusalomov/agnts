@@ -2,9 +2,9 @@
   "mhome": {
     "runningNote": "Одновременно: {parallel}, в очереди: {queued}",
     "waiting": "Ждёт {time}",
-    "actAnswers": "Ответьте на вопросы hiro",
+    "actAnswers": "Ответьте на вопросы agnts",
     "actReview": "Проверьте изменения",
-    "actStopped": "Остановлено. Подскажите hiro, что попробовать",
+    "actStopped": "Остановлено. Подскажите agnts, что попробовать",
     "actResume": "Возобновите, когда будете готовы",
     "actStart": "Ждёт в очереди. Нажмите, чтобы запустить",
     "liveFallback": "Работает…",

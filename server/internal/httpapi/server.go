@@ -18,8 +18,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"hiro/internal/auth"
-	"hiro/internal/httpapi/gen"
+	"agnts/internal/auth"
+	"agnts/internal/httpapi/gen"
 )
 
 // SessionCookie is the name of the web session cookie.

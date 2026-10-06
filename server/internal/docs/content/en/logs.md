@@ -1,6 +1,6 @@
 # Logs
 
-Every step hiro takes is recorded. Use this page to see where time goes and why runs stop.
+Every step agnts takes is recorded. Use this page to see where time goes and why runs stop.
 
 ## Stats
 
@@ -8,11 +8,11 @@ Runs started, how many reached your review, average turns per ticket, and how ma
 
 ## Where the time goes
 
-Average time per step. Blue is hiro working, amber is time spent waiting for you. Only finished steps are counted.
+Average time per step. Blue is agnts working, amber is time spent waiting for you. Only finished steps are counted.
 
 ## Event types
 
-State changes, tool calls made by Claude Code, commands hiro ran, your actions, plan limit readings and errors.
+State changes, tool calls made by Claude Code, commands agnts ran, your actions, plan limit readings and errors.
 
 ## Filters
 

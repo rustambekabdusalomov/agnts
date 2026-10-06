@@ -8,7 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
 // Device is a phone registered for push notifications.

@@ -13,7 +13,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get analyticsLede =>
-      'Насколько хорошо hiro работает на вас со временем: пропускная способность, качество, куда уходит время и сколько это стоит вашему тарифу.';
+      'Насколько хорошо agnts работает на вас со временем: пропускная способность, качество, куда уходит время и сколько это стоит вашему тарифу.';
 
   @override
   String get analyticsPeriod => 'Период';
@@ -38,7 +38,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get analyticsEmpty =>
-      'Графики заполнятся, когда hiro начнёт брать тикеты и запускать работу. Добавьте метку задаче в Jira или создайте задачу, чтобы начать.';
+      'Графики заполнятся, когда agnts начнёт брать тикеты и запускать работу. Добавьте метку задаче в Jira или создайте задачу, чтобы начать.';
 
   @override
   String get analyticsKpiPushed => 'Отправлено тикетов';
@@ -61,10 +61,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get analyticsKpiFirstTryNote => 'Без запроса изменений';
 
   @override
-  String get analyticsKpiHiro => 'Время hiro на тикет';
+  String get analyticsKpiAgnts => 'Время agnts на тикет';
 
   @override
-  String get analyticsKpiHiroNote => 'Анализ, разработка и тесты';
+  String get analyticsKpiAgntsNote => 'Анализ, разработка и тесты';
 
   @override
   String get analyticsKpiWait => 'Ожидание вас';
@@ -118,10 +118,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get analyticsSpeed => 'Скорость';
 
   @override
-  String get analyticsSpeedSub => 'Среднее время на тикет: работа hiro и ожидание вас';
+  String get analyticsSpeedSub => 'Среднее время на тикет: работа agnts и ожидание вас';
 
   @override
-  String get analyticsHiroWorking => 'hiro работает';
+  String get analyticsAgntsWorking => 'agnts работает';
 
   @override
   String get analyticsWaitingOnYou => 'Ожидание вас';
@@ -136,7 +136,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get analyticsTurns => 'Шагов на тикет';
 
   @override
-  String get analyticsTurnsSub => 'Меньше шагов — hiro быстрее разбирается и тратит меньше лимита';
+  String get analyticsTurnsSub => 'Меньше шагов — agnts быстрее разбирается и тратит меньше лимита';
 
   @override
   String get analyticsAvgTurns => 'Среднее число шагов';
@@ -218,10 +218,31 @@ class AppLocalizationsRu extends AppLocalizations {
   String get analyticsNoUsage => 'За этот период нет данных о лимитах.';
 
   @override
+  String get analyticsSpend => 'Расход токенов';
+
+  @override
+  String get analyticsSpendSub => 'Токены, которые Claude потратил за день, на вход и выход';
+
+  @override
+  String get analyticsSpendTokens => 'Токены на вход и выход';
+
+  @override
+  String get analyticsSpendCost => 'По ценам API';
+
+  @override
+  String get analyticsSpendStages => 'Расход по этапам';
+
+  @override
+  String get analyticsSpendStagesSub => 'Куда ушли токены, самые дорогие сверху';
+
+  @override
+  String get analyticsNoSpend => 'За этот период запусков Claude нет.';
+
+  @override
   String get analyticsRepos => 'По репозиториям';
 
   @override
-  String get analyticsReposSub => 'Где hiro работает лучше всего, а где ему трудно';
+  String get analyticsReposSub => 'Где agnts работает лучше всего, а где ему трудно';
 
   @override
   String get analyticsColRepo => 'Репозиторий';
@@ -236,7 +257,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get analyticsColSuccess => 'Доля успеха';
 
   @override
-  String get analyticsColHiro => 'Время hiro';
+  String get analyticsColAgnts => 'Время agnts';
 
   @override
   String get analyticsColClaudeMd => 'CLAUDE.md';
@@ -264,7 +285,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String analyticsHoursSub(String hour) {
-    return 'Когда работает hiro, сумма за период. Самый загруженный час: $hour:00';
+    return 'Когда работает agnts, сумма за период. Самый загруженный час: $hour:00';
   }
 
   @override
@@ -291,7 +312,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String analyticsInsightStopsTests(String n) {
-    return 'Чаще всего запуски ($n) останавливаются из-за падающих тестов. Чёткие критерии приёмки в тикетах помогают hiro понять, когда работа готова.';
+    return 'Чаще всего запуски ($n) останавливаются из-за падающих тестов. Чёткие критерии приёмки в тикетах помогают agnts понять, когда работа готова.';
   }
 
   @override
@@ -301,7 +322,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String analyticsInsightNight(String pct) {
-    return '$pct% работы hiro приходится на время с 22:00 до 07:00, пока вы не в сети.';
+    return '$pct% работы agnts приходится на время с 22:00 до 07:00, пока вы не в сети.';
   }
 
   @override
@@ -315,7 +336,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get appName => 'hiro';
+  String get appName => 'agnts';
 
   @override
   String get appTagline => 'Ваш агент, который не спит';
@@ -413,7 +434,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String dashboardLede(String date) {
-    return '$date. Вот что делает hiro и что ждёт вас.';
+    return '$date. Вот что делает agnts и что ждёт вас.';
   }
 
   @override
@@ -450,13 +471,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get dashboardWaitingTitle => 'Ожидание вас';
 
   @override
-  String get dashboardWaitingSub => 'Сначала самые старые. Каждая минута здесь — минута, когда hiro не может работать.';
+  String get dashboardWaitingSub => 'Сначала самые старые. Каждая минута здесь — минута, когда agnts не может работать.';
 
   @override
   String get dashboardOpenInbox => 'Открыть входящие';
 
   @override
-  String get dashboardNothingWaiting => 'Сейчас ничего не ждёт вас. hiro покажет здесь тикеты, когда понадобятся ответы или ревью.';
+  String get dashboardNothingWaiting => 'Сейчас ничего не ждёт вас. agnts покажет здесь тикеты, когда понадобятся ответы или ревью.';
 
   @override
   String get dashboardColTicket => 'Тикет';
@@ -541,13 +562,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get dashboardTodayTitle => 'Сегодня по часам';
 
   @override
-  String get dashboardTodaySub => 'События за сегодня. hiro работает, даже когда вы спите.';
+  String get dashboardTodaySub => 'События за сегодня. agnts работает, даже когда вы спите.';
 
   @override
   String get dashboardTodayAria => 'События сегодня по часам';
 
   @override
-  String get dashboardLegendHiro => 'hiro работает';
+  String get dashboardLegendAgnts => 'agnts работает';
 
   @override
   String get dashboardLegendYou => 'Ваши действия';
@@ -619,6 +640,185 @@ class AppLocalizationsRu extends AppLocalizations {
   String get dashboardNoActivity => 'Пока ничего не произошло.';
 
   @override
+  String get followUpsTitle => 'Последующие тикеты';
+
+  @override
+  String get followUpsSub =>
+      'Что, по мнению agnts, ещё нужно, чтобы довести этот тикет до конца. Выберите нужные: они создаются в очереди и не запускаются, пока вы их не запустите.';
+
+  @override
+  String get followUpsMode => 'Предложения последующих тикетов';
+
+  @override
+  String get followUpsModeInherit => 'Как в настройках';
+
+  @override
+  String get followUpsModeOn => 'Вкл.';
+
+  @override
+  String get followUpsModeOff => 'Выкл.';
+
+  @override
+  String get followUpsModeHint =>
+      'Если включено, запуски agnts предлагают тикеты, которые ещё нужны этому. Каждый промпт становится немного длиннее.';
+
+  @override
+  String get followUpsOffEmpty =>
+      'Предложения выключены для этого тикета. Включите их, и следующий запуск предложит, что ещё нужно для его завершения.';
+
+  @override
+  String get followUpsOnEmpty => 'Пока ничего не предложено. Большинству тикетов продолжение не нужно.';
+
+  @override
+  String get followUpsType_prerequisite => 'Предусловие';
+
+  @override
+  String get followUpsType_split => 'Выделить отдельно';
+
+  @override
+  String get followUpsType_unfinished => 'Не сделано';
+
+  @override
+  String get followUpsType_gap => 'Пробел';
+
+  @override
+  String get followUpsSource_analyze => 'из анализа';
+
+  @override
+  String get followUpsSource_work => 'из работы';
+
+  @override
+  String get followUpsSource_review => 'из код-ревью';
+
+  @override
+  String get followUpsSource_manual => 'из замечания ревью';
+
+  @override
+  String followUpsPick(String title) {
+    return 'Создать «$title»';
+  }
+
+  @override
+  String get followUpsEditTitle => 'Название тикета';
+
+  @override
+  String get followUpsServes => 'Зачем';
+
+  @override
+  String get followUpsDetails => 'Подробнее';
+
+  @override
+  String get followUpsWaitsForDone => 'Опирается на работу этого тикета: создать можно, когда он будет завершён.';
+
+  @override
+  String get followUpsTarget => 'Создать как';
+
+  @override
+  String get followUpsTargetLocal => 'Локальная задача';
+
+  @override
+  String get followUpsTargetJira => 'Задача в Jira';
+
+  @override
+  String get followUpsJiraOff => 'Подключите Jira, чтобы создавать задачи там';
+
+  @override
+  String followUpsCreate(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Создать $count тикета',
+      many: 'Создать $count тикетов',
+      few: 'Создать $count тикета',
+      one: 'Создать $count тикет',
+      zero: 'Создать тикеты',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get followUpsQueuedHint => 'Созданные тикеты ждут в очереди, пока вы их не запустите.';
+
+  @override
+  String get followUpsDismiss => 'Отклонить';
+
+  @override
+  String followUpsDismissedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count отклонённого предложения',
+      many: '$count отклонённых предложений',
+      few: '$count отклонённых предложения',
+      one: '$count отклонённое предложение',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get followUpsChildren => 'Создано из этого тикета';
+
+  @override
+  String get followUpsFollowUpOf => 'Продолжение';
+
+  @override
+  String followUpsCreatedNotice(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Создано $count тикета',
+      many: 'Создано $count тикетов',
+      few: 'Создано $count тикета',
+      one: 'Создан $count тикет',
+    );
+    return '$_temp0, они в очереди до запуска.';
+  }
+
+  @override
+  String followUpsFailedItem(String title, String error) {
+    return '$title: $error';
+  }
+
+  @override
+  String get followUpsFromFinding => 'В последующий тикет';
+
+  @override
+  String get followUpsFromFindingDone => 'Предложено как продолжение';
+
+  @override
+  String get followUpsFromFindingHint => 'Для работы вне этого изменения: предложить отдельным тикетом вместо возврата на доработку';
+
+  @override
+  String followUpsOpenBadge(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count предложения',
+      many: '$count предложений',
+      few: '$count предложения',
+      one: '$count предложение',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get followUpsSettingLabel => 'Предлагать последующие тикеты';
+
+  @override
+  String get followUpsSettingHelp =>
+      'Запуски анализа, работы и ревью предлагают тикеты, которые ещё нужны для завершения тикета: предусловия, части для выделения, несделанное, пробелы из отчёта. Какие создать, решаете вы. По умолчанию выключено, так как каждый промпт становится немного длиннее; тикет может включить это для себя.';
+
+  @override
+  String get followUpsNotifyLabel => 'Предложены последующие тикеты';
+
+  @override
+  String get followUpsJiraIssueType => 'Тип задач для продолжений';
+
+  @override
+  String get followUpsJiraIssueTypeHelp =>
+      'Тип задач Jira, которые agnts создаёт, когда вы создаёте продолжение в Jira. По умолчанию: Task.';
+
+  @override
   String get formSave => 'Сохранить изменения';
 
   @override
@@ -673,11 +873,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get implementSubPlan =>
-      'Пусть hiro выполнит план: задача на код, связанная с этой, с планом в качестве задания. Дифф вы проверяете как обычно.';
+      'Пусть agnts выполнит план: задача на код, связанная с этой, с планом в качестве задания. Дифф вы проверяете как обычно.';
 
   @override
   String get implementSubBug =>
-      'Пусть hiro внесёт предложенное исправление: задача на код, связанная с этой, с разбором в качестве задания. Дифф вы проверяете как обычно.';
+      'Пусть agnts внесёт предложенное исправление: задача на код, связанная с этой, с разбором в качестве задания. Дифф вы проверяете как обычно.';
 
   @override
   String get implementImplement => 'Выполнить план';
@@ -702,7 +902,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get integrationsLede =>
-      'Сервисы, с которыми работает hiro. Токены хранятся на вашем сервере в зашифрованном виде и используются только для действий, указанных на каждой странице.';
+      'Сервисы, с которыми работает agnts. Токены хранятся на вашем сервере в зашифрованном виде и используются только для действий, указанных на каждой странице.';
 
   @override
   String get integrationsName_jira => 'Jira';
@@ -714,7 +914,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get integrationsName_claude => 'Claude';
 
   @override
-  String get integrationsDesc_jira => 'Брать тикеты с меткой hiro и поддерживать их статус в актуальном состоянии.';
+  String get integrationsDesc_jira => 'Брать тикеты с меткой agnts и поддерживать их статус в актуальном состоянии.';
 
   @override
   String get integrationsDesc_github => 'Клонировать код, отправлять ветки и открывать пул-реквесты.';
@@ -742,7 +942,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String integrationsDisconnectConfirm(String name) {
-    return 'Отключить $name? hiro забудет токен и перестанет его использовать.';
+    return 'Отключить $name? agnts забудет токен и перестанет его использовать.';
   }
 
   @override
@@ -795,18 +995,18 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get integrationsTokenStep1_jira =>
-      'Войдите в аккаунт Atlassian, от имени которого будет работать hiro, и откройте Account settings → Security → API tokens (или используйте кнопку ниже).';
+      'Войдите в аккаунт Atlassian, от имени которого будет работать agnts, и откройте Account settings → Security → API tokens (или используйте кнопку ниже).';
 
   @override
   String get integrationsTokenStep2_jira =>
-      'Нажмите Create API token (не вариант со scopes), задайте имя (например, hiro) и срок действия.';
+      'Нажмите Create API token (не вариант со scopes), задайте имя (например, agnts) и срок действия.';
 
   @override
   String get integrationsTokenStep3_jira => 'Скопируйте токен и вставьте ниже. Atlassian показывает его только один раз.';
 
   @override
   String get integrationsTokenStep4_jira =>
-      'В поле «Сайт» укажите адрес Jira (https://your-team.atlassian.net), а в «Email аккаунта» — email этого же аккаунта. У него должен быть доступ к проектам Jira, с которыми работает hiro.';
+      'В поле «Сайт» укажите адрес Jira (https://your-team.atlassian.net), а в «Email аккаунта» — email этого же аккаунта. У него должен быть доступ к проектам Jira, с которыми работает agnts.';
 
   @override
   String get integrationsConnectSub_github => 'Создайте fine-grained токен доступа с правами ниже и вставьте его сюда.';
@@ -826,7 +1026,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get integrationsTokenStep2_github =>
-      'Задайте имя (например, hiro) и срок действия, в Resource owner выберите аккаунт или организацию, которой принадлежат репозитории, а в Repository access — репозитории, с которыми будет работать hiro.';
+      'Задайте имя (например, agnts) и срок действия, в Resource owner выберите аккаунт или организацию, которой принадлежат репозитории, а в Repository access — репозитории, с которыми будет работать agnts.';
 
   @override
   String get integrationsTokenStep3_github =>
@@ -874,7 +1074,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get integrationsAccessToken => 'Токен доступа';
 
   @override
-  String get integrationsTokenHelp => 'Хранится на вашем сервере в зашифрованном виде. hiro больше его не покажет.';
+  String get integrationsTokenHelp => 'Хранится на вашем сервере в зашифрованном виде. agnts больше его не покажет.';
 
   @override
   String get integrationsScopes => 'Нужные права';
@@ -946,25 +1146,25 @@ class AppLocalizationsRu extends AppLocalizations {
   String get integrationsPickup => 'Правила выбора';
 
   @override
-  String get integrationsPickupSub => 'Какие тикеты берёт hiro';
+  String get integrationsPickupSub => 'Какие тикеты берёт agnts';
 
   @override
   String get integrationsLabel => 'Метка';
 
   @override
-  String get integrationsLabelHelp => 'Добавьте эту метку тикету, чтобы передать его hiro';
+  String get integrationsLabelHelp => 'Добавьте эту метку тикету, чтобы передать его agnts';
 
   @override
-  String get integrationsQuery => 'Запрос, который выполняет hiro';
+  String get integrationsQuery => 'Запрос, который выполняет agnts';
 
   @override
   String get integrationsStatuses => 'Обновления статуса';
 
   @override
-  String get integrationsStatusesSub => 'Как hiro двигает тикеты на доске. Оставьте пустым, чтобы не менять статус.';
+  String get integrationsStatusesSub => 'Как agnts двигает тикеты на доске. Оставьте пустым, чтобы не менять статус.';
 
   @override
-  String get integrationsMapStarted => 'Когда hiro начинает';
+  String get integrationsMapStarted => 'Когда agnts начинает';
 
   @override
   String get integrationsMapReview => 'Когда изменения отправлены';
@@ -979,10 +1179,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get integrationsComments => 'Комментарии';
 
   @override
-  String get integrationsCommentsSub => 'Что hiro пишет в тикете';
+  String get integrationsCommentsSub => 'Что agnts пишет в тикете';
 
   @override
-  String get integrationsCQuestions => 'Вопросы hiro';
+  String get integrationsCQuestions => 'Вопросы agnts';
 
   @override
   String get integrationsCQuestionsHelp => 'Чтобы коллеги видели, что было неясно';
@@ -1012,7 +1212,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get integrationsSyncHelp =>
-      'Jira сразу отправляет новые тикеты на вебхук; hiro также проверяет каждый час на случай пропущенной доставки.';
+      'Jira сразу отправляет новые тикеты на вебхук; agnts также проверяет каждый час на случай пропущенной доставки.';
 
   @override
   String get integrationsWebhook => 'Вебхук';
@@ -1024,7 +1224,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get integrationsSecretsHelp =>
-      'hiro читает только тикеты, подходящие под запрос, и пишет только те изменения статуса и комментарии, которые вы здесь включили.';
+      'agnts читает только тикеты, подходящие под запрос, и пишет только те изменения статуса и комментарии, которые вы здесь включили.';
 
   @override
   String get integrationsGithubHelp =>
@@ -1042,7 +1242,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get integrationsConnectSub_telegram =>
-      'Создайте бота через @BotFather, вставьте его токен и укажите ваш chat id. hiro сам зарегистрирует вебхук.';
+      'Создайте бота через @BotFather, вставьте его токен и укажите ваш chat id. agnts сам зарегистрирует вебхук.';
 
   @override
   String get integrationsTokenOpen_telegram => 'Открыть @BotFather';
@@ -1076,7 +1276,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String integrationsTelegramHttps(String url) {
-    return 'Telegram отправляет обновления только на публичный HTTPS-адрес, а этот hiro работает на $url, поэтому подключение здесь не получится. Подключите Telegram на развёртывании с HTTPS, где HIRO_PUBLIC_URL — адрес https://.';
+    return 'Telegram отправляет обновления только на публичный HTTPS-адрес, а этот agnts работает на $url, поэтому подключение здесь не получится. Подключите Telegram на развёртывании с HTTPS, где AGNTS_PUBLIC_URL — адрес https://.';
   }
 
   @override
@@ -1097,7 +1297,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get integrationsTokenStep2_gitlab =>
-      'Задайте имя (например, hiro) и срок действия. Используйте аккаунт с правом пуша в ваши проекты.';
+      'Задайте имя (например, agnts) и срок действия. Используйте аккаунт с правом пуша в ваши проекты.';
 
   @override
   String get integrationsTokenStep3_gitlab => 'Отметьте области api, read_repository и write_repository.';
@@ -1144,7 +1344,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get integrationsGitWebhookWhy =>
-      'Когда пул- или merge request смёржен, hiro отмечает тикет и переводит задачу Jira в статус, выбранный на странице Jira. События пайплайнов обновляют страницу репозитория.';
+      'Когда пул- или merge request смёржен, agnts отмечает тикет и переводит задачу Jira в статус, выбранный на странице Jira. События пайплайнов обновляют страницу репозитория.';
 
   @override
   String get kindTitle => 'Тип';
@@ -1153,7 +1353,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get kindAuto => 'Авто';
 
   @override
-  String get kindAutoHint => 'hiro сам определит тип, когда прочитает тикет';
+  String get kindAutoHint => 'agnts сам определит тип, когда прочитает тикет';
 
   @override
   String get kindCode => 'Код';
@@ -1186,7 +1386,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get kindBugHint => 'Найти причину бага и предложить исправление. Код не меняется.';
 
   @override
-  String get kindPickerHint => 'Что сделает hiro. Выбранный тип не меняется; при «Авто» hiro решит сам, когда прочитает тикет.';
+  String get kindPickerHint => 'Что сделает agnts. Выбранный тип не меняется; при «Авто» agnts решит сам, когда прочитает тикет.';
 
   @override
   String kindSwitchTo(String kind) {
@@ -1198,7 +1398,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get learnLede =>
-      'Когда изменение от hiro делает то, чего в этом коде раньше не было, hiro объясняет это здесь: что это, зачем понадобилось, где смотреть, и короткий тест.';
+      'Когда изменение от agnts делает то, чего в этом коде раньше не было, agnts объясняет это здесь: что это, зачем понадобилось, где смотреть, и короткий тест.';
 
   @override
   String learnViewNew(String n) {
@@ -1224,7 +1424,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get learnNone =>
-      'Уроков пока нет. Когда hiro отправит изменение, которое делает что-то новое для репозитория, урок появится здесь.';
+      'Уроков пока нет. Когда agnts отправит изменение, которое делает что-то новое для репозитория, урок появится здесь.';
 
   @override
   String get learnNoneNew => 'Всё изучено: каждый урок отмечен.';
@@ -1357,16 +1557,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get learnTicketSub => 'Приёмы, которые это изменение впервые принесло в репозиторий.';
 
   @override
-  String get learnTicketPending => 'hiro изучает это изменение: нет ли в нём того, чего в репозитории ещё не было.';
+  String get learnTicketPending => 'agnts изучает это изменение: нет ли в нём того, чего в репозитории ещё не было.';
 
   @override
   String get learnTicketNone => 'Ничего нового: изменение использует только уже знакомые репозиторию приёмы.';
 
   @override
-  String get learnTicketFailed => 'hiro не смог разобрать это изменение. Причина — в логе.';
+  String get learnTicketFailed => 'agnts не смог разобрать это изменение. Причина — в логе.';
 
   @override
-  String get learnTicketIdle => 'hiro ещё не искал уроков в этом изменении.';
+  String get learnTicketIdle => 'agnts ещё не искал уроков в этом изменении.';
 
   @override
   String get learnLearnNow => 'Найти новое';
@@ -1375,13 +1575,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get learnLearnAgain => 'Посмотреть ещё раз';
 
   @override
-  String get learnQueued => 'В очереди: hiro поищет в этом изменении что-то новое.';
+  String get learnQueued => 'В очереди: agnts поищет в этом изменении что-то новое.';
 
   @override
   String get learnQueueTitle => 'Очередь обучения';
 
   @override
-  String get learnQueueSub => 'Отправленные тикеты, в которых hiro ищет новые приёмы — по одному, когда тикетам не нужен исполнитель.';
+  String get learnQueueSub => 'Отправленные тикеты, в которых agnts ищет новые приёмы — по одному, когда тикетам не нужен исполнитель.';
 
   @override
   String get learnStatus_running => 'Изучается';
@@ -1439,7 +1639,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get learnQueueLede =>
-      'Отправленные тикеты, в которых hiro ищет приёмы, которых в коде раньше не было. Поставьте в очередь любой завершённый тикет или повторите неудачный.';
+      'Отправленные тикеты, в которых agnts ищет приёмы, которых в коде раньше не было. Поставьте в очередь любой завершённый тикет или повторите неудачный.';
 
   @override
   String get learnQueueEmpty => 'Сейчас изучать нечего: все отправленные тикеты прочитаны.';
@@ -1449,7 +1649,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get logsLede =>
-      'Каждый шаг hiro записывается в момент выполнения. Здесь видно, куда уходит время и почему запуски останавливаются.';
+      'Каждый шаг agnts записывается в момент выполнения. Здесь видно, куда уходит время и почему запуски останавливаются.';
 
   @override
   String get logsLive => 'В эфире';
@@ -1509,7 +1709,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get logsNoData => 'Нет данных';
 
   @override
-  String get logsLegendHiro => 'hiro работает';
+  String get logsLegendAgnts => 'agnts работает';
 
   @override
   String get logsLegendYou => 'Ожидание вас';
@@ -1665,7 +1865,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mcpTitle => 'Чат Claude (MCP)';
 
   @override
-  String get mcpSub => 'Управляйте hiro из Claude в браузере, на компьютере и телефоне';
+  String get mcpSub => 'Управляйте agnts из Claude в браузере, на компьютере и телефоне';
 
   @override
   String get mcpUrl => 'URL коннектора';
@@ -1708,11 +1908,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mcpRevoked => 'Все подключения Claude удалены';
 
   @override
-  String get mcpConsentTitle => 'Подключить Claude к hiro';
+  String get mcpConsentTitle => 'Подключить Claude к agnts';
 
   @override
   String mcpConsentAsk(String client, String user) {
-    return '$client хочет работать с hiro от имени $user.';
+    return '$client хочет работать с agnts от имени $user.';
   }
 
   @override
@@ -1734,7 +1934,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mdetailApprove => 'Одобрить';
 
   @override
-  String get mdetailWorking => 'hiro работает. Вы получите уведомление, когда он будет ждать вас.';
+  String get mdetailWorking => 'agnts работает. Вы получите уведомление, когда он будет ждать вас.';
 
   @override
   String get mdetailCopyPr => 'Скопировать ссылку на пул-реквест';
@@ -1756,13 +1956,13 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get mhomeActAnswers => 'Ответьте на вопросы hiro';
+  String get mhomeActAnswers => 'Ответьте на вопросы agnts';
 
   @override
   String get mhomeActReview => 'Проверьте изменения';
 
   @override
-  String get mhomeActStopped => 'Остановлено. Подскажите hiro, что попробовать';
+  String get mhomeActStopped => 'Остановлено. Подскажите agnts, что попробовать';
 
   @override
   String get mhomeActResume => 'Возобновите, когда будете готовы';
@@ -1796,16 +1996,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mmorePipelineRuns => 'Запуски пайплайнов';
 
   @override
-  String get mmoreLoginLede => 'Войдите на свой сервер hiro, чтобы отвечать на вопросы, проверять изменения и следить за запусками.';
+  String get mmoreLoginLede => 'Войдите на свой сервер agnts, чтобы отвечать на вопросы, проверять изменения и следить за запусками.';
 
   @override
   String get mobileServer => 'Адрес сервера';
 
   @override
-  String get mobileServerHint => 'https://hiro.example.com';
+  String get mobileServerHint => 'https://agnts.example.com';
 
   @override
-  String get mobileServerInvalid => 'Введите https-адрес вашего сервера hiro.';
+  String get mobileServerInvalid => 'Введите https-адрес вашего сервера agnts.';
 
   @override
   String get mobileHome => 'Главная';
@@ -2080,13 +2280,13 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get mtasksActAnswers => 'Ответьте на вопросы hiro';
+  String get mtasksActAnswers => 'Ответьте на вопросы agnts';
 
   @override
   String get mtasksActReview => 'Проверьте изменения';
 
   @override
-  String get mtasksActFailed => 'Остановлено. Подскажите hiro, что попробовать';
+  String get mtasksActFailed => 'Остановлено. Подскажите agnts, что попробовать';
 
   @override
   String get mtasksActResume => 'Продолжите, когда будете готовы';
@@ -2219,16 +2419,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get navLedeNeeds => 'Тикеты, которые ждут ваших ответов или ревью, а также остановленные запуски.';
 
   @override
-  String get navLedeRunning => 'Тикеты, над которыми hiro работает прямо сейчас.';
+  String get navLedeRunning => 'Тикеты, над которыми agnts работает прямо сейчас.';
 
   @override
-  String get navLedeQueue => 'Тикеты с меткой hiro, которые ещё не проанализированы.';
+  String get navLedeQueue => 'Тикеты с меткой agnts, которые ещё не проанализированы.';
 
   @override
   String get navLedeDone => 'Отправленные или отклонённые тикеты.';
 
   @override
-  String get navLedeAll => 'Все тикеты, которые hiro взял из Jira.';
+  String get navLedeAll => 'Все тикеты, которые agnts взял из Jira.';
 
   @override
   String get navKnowledge => 'Знания';
@@ -2278,12 +2478,12 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String repoBranchesSub(String branch) {
-    return 'hiro работает в отдельной ветке для каждого тикета и никогда не коммитит в $branch.';
+    return 'agnts работает в отдельной ветке для каждого тикета и никогда не коммитит в $branch.';
   }
 
   @override
   String repoArchivedBanner(String time) {
-    return 'Перемещён в архив $time. hiro не берёт новые тикеты и задачи для этого репозитория, пока вы его не восстановите.';
+    return 'Перемещён в архив $time. agnts не берёт новые тикеты и задачи для этого репозитория, пока вы его не восстановите.';
   }
 
   @override
@@ -2302,7 +2502,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String repoLocalSub(String branch) {
-    return 'Ветки в собственных клонах hiro на вашем сервере. hiro сначала коммитит сюда и отправляет только после вашего одобрения; в $branch он никогда не коммитит.';
+    return 'Ветки в собственных клонах agnts на вашем сервере. agnts сначала коммитит сюда и отправляет только после вашего одобрения; в $branch он никогда не коммитит.';
   }
 
   @override
@@ -2331,7 +2531,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get repoPush_differs => 'Origin изменился';
 
   @override
-  String get repoPush_local_help => 'Есть только на сервере. hiro отправит её, когда вы одобрите ревью.';
+  String get repoPush_local_help => 'Есть только на сервере. agnts отправит её, когда вы одобрите ревью.';
 
   @override
   String get repoPush_pushed_help => 'В origin тот же коммит.';
@@ -2340,10 +2540,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get repoPush_unpushed_help => 'В origin есть ветка, но без последних коммитов.';
 
   @override
-  String get repoPush_differs_help => 'Кто-то отправил в эту ветку коммиты, которых нет в копии hiro.';
+  String get repoPush_differs_help => 'Кто-то отправил в эту ветку коммиты, которых нет в копии agnts.';
 
   @override
-  String get repoLocalNone => 'Локальных веток пока нет. hiro создаёт ветку, когда начинает работу над тикетом.';
+  String get repoLocalNone => 'Локальных веток пока нет. agnts создаёт ветку, когда начинает работу над тикетом.';
 
   @override
   String get repoCommitsSub => 'Последние коммиты в основной ветке, новые сверху.';
@@ -2442,7 +2642,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String repoKpiBranchesNote(String n) {
-    return '$n от hiro';
+    return '$n от agnts';
   }
 
   @override
@@ -2450,7 +2650,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String repoKpiCommitsNote(String n) {
-    return '$n написано hiro';
+    return '$n написано agnts';
   }
 
   @override
@@ -2489,7 +2689,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get repoDeployHelp =>
-      'hiro ждёт проверок, прежде чем тикет попадёт к вам на ревью. Деплой всегда решаете вы, и из чата Claude он недоступен.';
+      'agnts ждёт проверок, прежде чем тикет попадёт к вам на ревью. Деплой всегда решаете вы, и из чата Claude он недоступен.';
 
   @override
   String repoDeployBranch(String branch) {
@@ -2529,7 +2729,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get reposLede =>
-      'Код, с которым может работать hiro. Каждый запуск клонирует репозиторий в новый контейнер на вашем сервере и выполняет эти проверки, прежде чем что-то попадёт к вам на ревью.';
+      'Код, с которым может работать agnts. Каждый запуск клонирует репозиторий в новый контейнер на вашем сервере и выполняет эти проверки, прежде чем что-то попадёт к вам на ревью.';
 
   @override
   String get reposAdd => 'Добавить репозиторий';
@@ -2569,7 +2769,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String reposArchiveConfirm(String name) {
-    return 'Переместить $name в архив? Тикеты и история сохранятся, но hiro перестанет брать для него новые тикеты Jira и задачи. Уже начатая работа будет завершена. Восстановить можно в любой момент.';
+    return 'Переместить $name в архив? Тикеты и история сохранятся, но agnts перестанет брать для него новые тикеты Jira и задачи. Уже начатая работа будет завершена. Восстановить можно в любой момент.';
   }
 
   @override
@@ -2626,7 +2826,7 @@ class AppLocalizationsRu extends AppLocalizations {
       few: 'У $count репозиториев',
       one: 'У $count репозитория',
     );
-    return '$_temp0 нет CLAUDE.md. hiro всё равно работает, но тратит больше шагов, чтобы разобраться. Добавьте файл со структурой проекта, соглашениями и командами тестов.';
+    return '$_temp0 нет CLAUDE.md. agnts всё равно работает, но тратит больше шагов, чтобы разобраться. Добавьте файл со структурой проекта, соглашениями и командами тестов.';
   }
 
   @override
@@ -2668,7 +2868,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get reposNoMatch => 'Нет репозиториев по вашему запросу.';
 
   @override
-  String get reposNone => 'Репозиториев пока нет. Добавьте первый, чтобы hiro мог в нём работать.';
+  String get reposNone => 'Репозиториев пока нет. Добавьте первый, чтобы agnts мог в нём работать.';
 
   @override
   String get reposDrawerSub => 'Принимает задачи своего проекта, а с ключом проекта Jira — и тикеты Jira';
@@ -2681,13 +2881,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get reposCloneHelp =>
-      'https-адрес на github.com или в подключённом GitLab. hiro клонирует и отправляет код с токеном этого хостинга.';
+      'https-адрес на github.com или в подключённом GitLab. agnts клонирует и отправляет код с токеном этого хостинга.';
 
   @override
   String get reposJiraProject => 'Ключ проекта Jira';
 
   @override
-  String get reposJiraHelp => 'Необязательно. Тикеты из этого проекта Jira с меткой hiro выполняются здесь.';
+  String get reposJiraHelp => 'Необязательно. Тикеты из этого проекта Jira с меткой agnts выполняются здесь.';
 
   @override
   String get reposTaskPrefix => 'Префикс ключа задач';
@@ -2725,7 +2925,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get reposClaudeFound => 'Найден в корне репозитория';
 
   @override
-  String get reposClaudeMissing => 'Нет. hiro всё равно работает, но CLAUDE.md экономит шаги.';
+  String get reposClaudeMissing => 'Нет. agnts всё равно работает, но CLAUDE.md экономит шаги.';
 
   @override
   String get reposClaudeUnknown => 'Проверяется после сохранения';
@@ -2744,25 +2944,25 @@ class AppLocalizationsRu extends AppLocalizations {
       'Файл workflow GitHub Actions с workflow_dispatch, например deploy.yml. Кнопка «Деплой» на странице репозитория запускает его.';
 
   @override
-  String get reviewTitle => 'Код-ревью hiro';
+  String get reviewTitle => 'Код-ревью agnts';
 
   @override
-  String get reviewReportTitle => 'Ревью отчёта от hiro';
+  String get reviewReportTitle => 'Ревью отчёта от agnts';
 
   @override
   String get reviewSub => 'Второе мнение, пока вы проверяете. Оно никогда не блокирует одобрение: решаете вы.';
 
   @override
-  String get reviewPending => 'В очереди: hiro проверит это, как только освободится исполнитель. Пока можно проверить самому.';
+  String get reviewPending => 'В очереди: agnts проверит это, как только освободится исполнитель. Пока можно проверить самому.';
 
   @override
-  String get reviewRunning => 'hiro проверяет…';
+  String get reviewRunning => 'agnts проверяет…';
 
   @override
   String get reviewFailed => 'Ревью не удалось. Проверьте сами или запустите снова.';
 
   @override
-  String get reviewNone => 'hiro это не проверял.';
+  String get reviewNone => 'agnts это не проверял.';
 
   @override
   String reviewStale(String n) {
@@ -2770,7 +2970,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get reviewRun => 'Проверить с hiro';
+  String get reviewRun => 'Проверить с agnts';
 
   @override
   String get reviewRunAgain => 'Проверить снова';
@@ -2838,7 +3038,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get reviewNoFindings => 'hiro не нашёл проблем.';
+  String get reviewNoFindings => 'agnts не нашёл проблем.';
 
   @override
   String get reviewStrengths => 'Сделано хорошо';
@@ -2868,7 +3068,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get rulesLede =>
-      'Инструкции, которым hiro следует в каждом тикете: глобальные правила для всех репозиториев и правила для одного репозитория. Claude проверяет каждое правило и задаёт вопросы обо всём неясном, прежде чем оно начнёт действовать.';
+      'Инструкции, которым agnts следует в каждом тикете: глобальные правила для всех репозиториев и правила для одного репозитория. Claude проверяет каждое правило и задаёт вопросы обо всём неясном, прежде чем оно начнёт действовать.';
 
   @override
   String get rulesAdd => 'Добавить правило';
@@ -2940,7 +3140,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get rulesNone =>
-      'Правил пока нет. Добавьте правило, чтобы рассказать hiro, как работает ваша команда: тесты, именование, логирование, что нельзя трогать.';
+      'Правил пока нет. Добавьте правило, чтобы рассказать agnts, как работает ваша команда: тесты, именование, логирование, что нельзя трогать.';
 
   @override
   String get rulesNoMatch => 'Нет подходящих правил.';
@@ -3063,7 +3263,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get rulesReviewAgain => 'Проверить снова';
 
   @override
-  String get rulesInterpretation => 'Как hiro его понимает';
+  String get rulesInterpretation => 'Как agnts его понимает';
 
   @override
   String get rulesClarified => 'Что получают тикеты';
@@ -3116,7 +3316,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsTitle => 'Настройки';
 
   @override
-  String get settingsLede => 'Как hiro подключается к вашим инструментам и как ведёт себя во время запусков.';
+  String get settingsLede => 'Как agnts подключается к вашим инструментам и как ведёт себя во время запусков.';
 
   @override
   String get settingsAppearance => 'Внешний вид';
@@ -3239,7 +3439,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsDeny => 'Запрещённые команды';
 
   @override
-  String get settingsDenyHelp => 'Всегда запрещены, даже если тикет их требует. Отправку кода выполняет hiro, а не Claude Code.';
+  String get settingsDenyHelp => 'Всегда запрещены, даже если тикет их требует. Отправку кода выполняет agnts, а не Claude Code.';
 
   @override
   String get settingsCommits => 'Коммиты и пул-реквесты';
@@ -3260,10 +3460,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsAuthorEmailHelp => 'Должен совпадать с вашим аккаунтом GitHub, чтобы коммиты отображались как ваши';
 
   @override
-  String get settingsCoAuthor => 'Добавлять строку Co-authored-by: hiro';
+  String get settingsCoAuthor => 'Добавлять строку Co-authored-by: agnts';
 
   @override
-  String get settingsCoAuthorHelp => 'Коллеги видят, какие коммиты написал hiro';
+  String get settingsCoAuthorHelp => 'Коллеги видят, какие коммиты написал agnts';
 
   @override
   String get settingsPrTitle => 'Заголовок пул-реквеста';
@@ -3296,14 +3496,14 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsAutoLearnHelp =>
-      'После отправки hiro ищет приёмы, которых в репозитории раньше не было, и пишет уроки в разделе «Обучение». Тратит лимит, только когда нет ожидающих тикетов.';
+      'После отправки agnts ищет приёмы, которых в репозитории раньше не было, и пишет уроки в разделе «Обучение». Тратит лимит, только когда нет ожидающих тикетов.';
 
   @override
   String get settingsAutoReview => 'Проверять каждый результат';
 
   @override
   String get settingsAutoReviewHelp =>
-      'Пока изменение или отчёт ждут вас, hiro проверяет их и показывает замечания рядом. Одобрение это никогда не блокирует.';
+      'Пока изменение или отчёт ждут вас, agnts проверяет их и показывает замечания рядом. Одобрение это никогда не блокирует.';
 
   @override
   String get settingsPauseAbove => 'Не начинать новые запуски выше';
@@ -3327,7 +3527,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsPush => 'Push-уведомления';
 
   @override
-  String get settingsPushHelp => 'В приложение hiro на телефоне';
+  String get settingsPushHelp => 'В приложение agnts на телефоне';
 
   @override
   String get settingsTelegram => 'Сообщения в Telegram';
@@ -3348,10 +3548,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsDone => 'Когда изменения отправлены';
 
   @override
-  String get settingsLessons => 'Когда hiro находит что-то новое для изучения';
+  String get settingsLessons => 'Когда agnts находит что-то новое для изучения';
 
   @override
-  String get settingsReviewDone => 'Когда код-ревью hiro завершено';
+  String get settingsReviewDone => 'Когда код-ревью agnts завершено';
 
   @override
   String get settingsOnThisPage => 'На этой странице';
@@ -3362,6 +3562,104 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsSaved => 'Настройки сохранены';
+
+  @override
+  String get spendTitle => 'Расход токенов';
+
+  @override
+  String spendSub(String tokens, String cost) {
+    return '$tokens токенов на вход и выход · около $cost по ценам API';
+  }
+
+  @override
+  String get spendEmpty => 'Пока ничего не записано. Расход появится после первого запуска Claude по этому тикету.';
+
+  @override
+  String get spendInput => 'Вход';
+
+  @override
+  String get spendOutput => 'Выход';
+
+  @override
+  String spendCache(String read, String write) {
+    return 'Кэш: прочитано $read, записано $write';
+  }
+
+  @override
+  String spendCalls(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n запуска',
+      many: '$n запусков',
+      few: '$n запуска',
+      one: '$n запуск',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get spendPartial => 'Запуск был прерван, его стоимость неизвестна';
+
+  @override
+  String get spendCostNote =>
+      'Стоимость — оценка Claude Code для той же работы по ценам API. На подписке Claude её не списывают; она показывает относительный вес каждого этапа.';
+
+  @override
+  String spendTokens(String n) {
+    return '$n токенов';
+  }
+
+  @override
+  String get spendColTokens => 'Токены';
+
+  @override
+  String get spendStageAnalyze => 'Анализ';
+
+  @override
+  String get spendStageCoding => 'Код';
+
+  @override
+  String get spendStageWriting => 'Написание';
+
+  @override
+  String get spendStageRetry => 'Исправления и правки';
+
+  @override
+  String get spendStageReview => 'Код-ревью';
+
+  @override
+  String get spendStageLearn => 'Уроки';
+
+  @override
+  String get spendStageHelper => 'Помощник';
+
+  @override
+  String get spendTopTitle => 'Тикеты по расходу';
+
+  @override
+  String spendTopSub(String tokens, String cost) {
+    return '$tokens токенов на вход и выход · около $cost по ценам API';
+  }
+
+  @override
+  String get spendTopSubEmpty => 'Какие тикеты расходуют подписку больше всего';
+
+  @override
+  String get spendTopEmpty => 'За этот период запусков Claude не записано.';
+
+  @override
+  String get spendTopNote =>
+      'Порядок — по оценке стоимости от Claude Code, которая правильно учитывает кэш. Доля — от оценки стоимости за период. Учитывается только расход внутри периода.';
+
+  @override
+  String get spendColStage => 'Самый дорогой этап';
+
+  @override
+  String get spendColCost => 'Оценка';
+
+  @override
+  String get spendColShare => 'Доля';
 
   @override
   String get stateNew => 'В очереди';
@@ -3410,7 +3708,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get tasksLede =>
-      'Работа для ваших проектов. Задачи остаются в hiro и не попадают в Jira. Всё остальное так же: вопросы, разработка, ваше ревью.';
+      'Работа для ваших проектов. Задачи остаются в agnts и не попадают в Jira. Всё остальное так же: вопросы, разработка, ваше ревью.';
 
   @override
   String get tasksNew => 'Новая задача';
@@ -3460,7 +3758,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get tasksHelp =>
-      'Для репозиториев, в которых работаете только вы, можно разрешить hiro отправлять сразу в main после одобрения. Без вашего ревью он всё равно ничего не отправляет.';
+      'Для репозиториев, в которых работаете только вы, можно разрешить agnts отправлять сразу в main после одобрения. Без вашего ревью он всё равно ничего не отправляет.';
 
   @override
   String get tasksDrawerSub => 'Для ваших проектов. Не синхронизируется с Jira.';
@@ -3478,7 +3776,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get tasksFieldDesc => 'Что нужно сделать';
 
   @override
-  String get tasksDescPh => 'Опишите нужный результат. Чем яснее, тем меньше вопросов задаст hiro.';
+  String get tasksDescPh => 'Опишите нужный результат. Чем яснее, тем меньше вопросов задаст agnts.';
 
   @override
   String get tasksPriority => 'Приоритет';
@@ -3508,7 +3806,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get tasksStartAsk => 'Сначала задать вопросы';
 
   @override
-  String get tasksStartAskHint => 'hiro читает код и задаёт вопросы перед разработкой. Лучше всего для неясных задач.';
+  String get tasksStartAskHint => 'agnts читает код и задаёт вопросы перед разработкой. Лучше всего для неясных задач.';
 
   @override
   String get tasksStartCode => 'Сразу начать разработку';
@@ -3558,7 +3856,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ticketPlan => 'План';
 
   @override
-  String get ticketAnalysis => 'Что нашёл hiro';
+  String get ticketAnalysis => 'Что нашёл agnts';
 
   @override
   String get ticketQuestions => 'Вопросы';
@@ -3689,7 +3987,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get ticketQueuedSub =>
-      'hiro читает тикет и связанный код, затем возвращается с планом и вопросами. На этом шаге ничего не меняется.';
+      'agnts читает тикет и связанный код, затем возвращается с планом и вопросами. На этом шаге ничего не меняется.';
 
   @override
   String get ticketHeldSub => 'Задача ждёт в очереди, пока вы её не запустите.';
@@ -3837,7 +4135,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ticketReviewSubMain => 'Ничего ещё не покинуло сервер. Одобрение отправит изменения прямо в основную ветку.';
 
   @override
-  String get ticketWhatHiroDid => 'Что сделал hiro';
+  String get ticketWhatAgntsDid => 'Что сделал agnts';
 
   @override
   String get ticketDiff => 'Изменения';
@@ -3849,7 +4147,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ticketAssignTitle => 'Назначить пул-реквест';
 
   @override
-  String get ticketAssignSub => 'Необязательно. Выберите, на кого он будет назначен, когда hiro его откроет.';
+  String get ticketAssignSub => 'Необязательно. Выберите, на кого он будет назначен, когда agnts его откроет.';
 
   @override
   String ticketAssignError(String error) {
@@ -3901,10 +4199,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ticketRejectedTitle => 'Отклонено';
 
   @override
-  String get ticketRejectedSub => 'hiro прекратил работу над этим тикетом. Ветка не отправлялась.';
+  String get ticketRejectedSub => 'agnts прекратил работу над этим тикетом. Ветка не отправлялась.';
 
   @override
-  String get ticketFailedTitle => 'hiro остановился';
+  String get ticketFailedTitle => 'agnts остановился';
 
   @override
   String get ticketFailedUnknown => 'Запуск остановлен. Подробности в логе запуска.';
@@ -3944,7 +4242,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ticketStageRetry => 'Повторы и запрошенные изменения';
 
   @override
-  String get ticketStageReview => 'Код-ревью hiro';
+  String get ticketStageReview => 'Код-ревью agnts';
 
   @override
   String ticketModelAuto(String model) {
@@ -3991,7 +4289,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ticketSrcJira => 'Jira';
 
   @override
-  String get ticketSrcTask => 'Задача hiro';
+  String get ticketSrcTask => 'Задача agnts';
 
   @override
   String get ticketAfterMain => 'Отправить в main';
@@ -4081,7 +4379,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ticketRepoTitle => 'Репозиторий';
 
   @override
-  String get ticketRepoHint => 'Где hiro анализирует тикет и пишет код.';
+  String get ticketRepoHint => 'Где agnts анализирует тикет и пишет код.';
 
   @override
   String get ticketRepoNone => 'Выберите репозиторий…';
@@ -4107,13 +4405,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get ticketQueuedSubReport =>
-      'hiro прочитает тикет (и код, если есть репозиторий) и вернётся с планом и вопросами. Ничего не меняется.';
+      'agnts прочитает тикет (и код, если есть репозиторий) и вернётся с планом и вопросами. Ничего не меняется.';
 
   @override
   String get ticketAnalyzingTitleNoRepo => 'Читает тикет';
 
   @override
-  String get ticketAnalyzingSubNoRepo => 'Репозитория нет: hiro работает по тексту тикета.';
+  String get ticketAnalyzingSubNoRepo => 'Репозитория нет: agnts работает по тексту тикета.';
 
   @override
   String get ticketStartWriting => 'Начать отчёт';
@@ -4202,7 +4500,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String ticketsEmptyHint(String label) {
-    return 'Добавьте задаче в Jira метку «$label», и hiro возьмёт её в работу.';
+    return 'Добавьте задаче в Jira метку «$label», и agnts возьмёт её в работу.';
   }
 
   @override
@@ -4255,13 +4553,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ticketsBoardEmpty => 'Пусто';
 
   @override
-  String get ticketsListSub => 'Тикеты Jira с меткой hiro, а также задачи, которые вы создаёте для своих проектов.';
+  String get ticketsListSub => 'Тикеты Jira с меткой agnts, а также задачи, которые вы создаёте для своих проектов.';
 
   @override
   String get ticketsNoMatch => 'Нет тикетов по вашему запросу.';
 
   @override
-  String get ticketsEmptyNeeds => 'Сейчас ничего не ждёт вас. Тикеты появятся здесь, когда у hiro будут вопросы или изменения на ревью.';
+  String get ticketsEmptyNeeds => 'Сейчас ничего не ждёт вас. Тикеты появятся здесь, когда у agnts будут вопросы или изменения на ревью.';
 
   @override
   String get ticketsEmptyOther => 'Здесь пока нет тикетов.';
@@ -4292,7 +4590,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get usageLede =>
-      'hiro работает на вашей подписке Claude. Эти лимиты общие с вашим собственным использованием Claude и Claude Code.';
+      'agnts работает на вашей подписке Claude. Эти лимиты общие с вашим собственным использованием Claude и Claude Code.';
 
   @override
   String get usageCard => 'Лимиты тарифа';
@@ -4372,7 +4670,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get usageLimitTitle => 'Когда достигнут лимит';
 
   @override
-  String get usageLimitSub => 'Как hiro ведёт себя у лимита';
+  String get usageLimitSub => 'Как agnts ведёт себя у лимита';
 
   @override
   String usageAbove(String pct) {
@@ -4405,5 +4703,5 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get usageHelp =>
-      'Данные берутся из событий лимитов, которые Claude Code отправляет во время каждого запуска. Когда hiro простаивает, небольшой запуск обновляет их.';
+      'Данные берутся из событий лимитов, которые Claude Code отправляет во время каждого запуска. Когда agnts простаивает, небольшой запуск обновляет их.';
 }

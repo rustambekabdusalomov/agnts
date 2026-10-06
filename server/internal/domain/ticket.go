@@ -16,7 +16,7 @@ const (
 	SourceLocal TicketSource = "local"
 )
 
-// Ticket is one unit of work hiro takes from intake to merge.
+// Ticket is one unit of work agnts takes from intake to merge.
 type Ticket struct {
 	ID          int64
 	Key         string
@@ -44,15 +44,20 @@ type Ticket struct {
 	LearnState   string     // learn run after push: LearnNone, LearnPending, LearnDone, LearnFailed
 	ReviewState  string     // code review while waiting for review: ReviewNone, ReviewPending, ...
 	Kind         TicketKind
-	// KindAuto is true while hiro picks the kind: the analysis may change
+	// KindAuto is true while agnts picks the kind: the analysis may change
 	// it. A kind someone chose (label, form, hand edit) is never changed.
 	KindAuto bool
 	// PostReport posts an approved report to the tracker issue.
 	PostReport bool
 	// ParentKey is the plan or bug report this ticket implements, or "".
 	ParentKey string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	// FollowUpOf is the ticket that suggested this one as a follow-up, or "".
+	FollowUpOf string
+	// SuggestFollowUps turns follow-up suggestions on or off for this
+	// ticket; nil follows Settings.
+	SuggestFollowUps *bool
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
 }
 
 // transitions lists every allowed state change. Anything else is a bug.
@@ -100,7 +105,7 @@ func (e *TransitionError) Error() string {
 // Is makes errors.Is(err, ErrConflict) true for transition errors.
 func (e *TransitionError) Is(target error) bool { return target == ErrConflict }
 
-// Question is something hiro asks before coding.
+// Question is something agnts asks before coding.
 type Question struct {
 	ID       int64
 	TicketID int64
@@ -150,6 +155,60 @@ type Run struct {
 	FinishedAt  *time.Time
 	Turns       int
 	ExitReason  string
+}
+
+// TokenUsage is what one or more Claude invocations used. CostUSD is what
+// Claude Code reports the same work would cost on the API; on a plan it is
+// an estimate, not a charge.
+type TokenUsage struct {
+	Input      int64
+	Output     int64
+	CacheRead  int64
+	CacheWrite int64
+	CostUSD    float64
+}
+
+// Total is every token counted, cache included.
+func (u TokenUsage) Total() int64 { return u.Input + u.Output + u.CacheRead + u.CacheWrite }
+
+// IsZero reports whether nothing was used.
+func (u TokenUsage) IsZero() bool { return u.Total() == 0 && u.CostUSD == 0 }
+
+// Add adds o to u.
+func (u *TokenUsage) Add(o TokenUsage) {
+	u.Input += o.Input
+	u.Output += o.Output
+	u.CacheRead += o.CacheRead
+	u.CacheWrite += o.CacheWrite
+	u.CostUSD += o.CostUSD
+}
+
+// ClaudeCall is one Claude Code invocation within a run. ModelStage is
+// the Model* constant it ran as (a code run has coding and retry calls).
+// Partial is true when the stream ended without a result, so the tokens
+// were summed from the messages seen and the cost is unknown.
+type ClaudeCall struct {
+	ID         int64
+	RunID      int64
+	TicketID   int64
+	ModelStage string
+	Model      string
+	Usage      TokenUsage
+	Turns      int
+	Duration   time.Duration
+	Partial    bool
+	CreatedAt  time.Time
+}
+
+// StageUsage is a ticket's spend for one model stage and model, in the
+// order the stage first ran.
+type StageUsage struct {
+	ModelStage string
+	Model      string
+	Calls      int
+	Turns      int
+	Partial    bool // at least one call was partial
+	Usage      TokenUsage
 }
 
 // FileChange is one changed file in a result.
@@ -239,9 +298,10 @@ const (
 	EventRule           = "rule_changed"
 	EventKind           = "kind_changed"
 	EventReview         = "review_done"
+	EventFollowUps      = "follow_ups_suggested"
 )
 
-// Repository is a codebase hiro works on.
+// Repository is a codebase agnts works on.
 type Repository struct {
 	ID             int64
 	Name           string

@@ -35,7 +35,7 @@ const (
 // Server issues and checks tokens.
 type Server struct {
 	db            *pgxpool.Pool
-	issuer        string   // public URL, e.g. https://hiro.example.com
+	issuer        string   // public URL, e.g. https://agnts.example.com
 	redirectHosts []string // hosts allowed in registered redirect URIs
 	log           *slog.Logger
 	now           func() time.Time
@@ -81,7 +81,7 @@ func (s *Server) ProtectedResource(w http.ResponseWriter, _ *http.Request) {
 		"resource":                 s.ResourceURL(),
 		"authorization_servers":    []string{s.issuer},
 		"bearer_methods_supported": []string{"header"},
-		"resource_name":            "hiro",
+		"resource_name":            "agnts",
 	})
 }
 
@@ -96,7 +96,7 @@ func (s *Server) AuthorizationServer(w http.ResponseWriter, _ *http.Request) {
 		"grant_types_supported":                 []string{"authorization_code", "refresh_token"},
 		"code_challenge_methods_supported":      []string{"S256"},
 		"token_endpoint_auth_methods_supported": []string{"none"},
-		"scopes_supported":                      []string{"hiro"},
+		"scopes_supported":                      []string{"agnts"},
 	})
 }
 
@@ -333,7 +333,7 @@ func (s *Server) issue(ctx context.Context, w http.ResponseWriter, clientID stri
 	}
 	writeJSON(w, http.StatusOK, map[string]any{
 		"access_token": access, "token_type": "Bearer", "expires_in": int(accessTTL.Seconds()),
-		"refresh_token": refresh, "scope": "hiro",
+		"refresh_token": refresh, "scope": "agnts",
 	})
 }
 

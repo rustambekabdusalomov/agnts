@@ -7,11 +7,11 @@ import { ago } from '../../composables/format'
 import SegButtons from '../form/SegButtons.vue'
 import CiDot from './CiDot.vue'
 
-// Origin: branches on GitHub or GitLab. Local: the branches in hiro's own
+// Origin: branches on GitHub or GitLab. Local: the branches in agnts's own
 // clones on the server, where it commits before anything is pushed.
 const props = defineProps<{ repoId: number; defaultBranch: string }>()
 const { t, locale } = useI18n()
-type Filter = 'all' | 'hiro' | 'others'
+type Filter = 'all' | 'agnts' | 'others'
 const filter = ref<Filter>('all')
 type Source = 'origin' | 'local'
 const source = ref<Source>('origin')
@@ -22,7 +22,7 @@ const branches = useQuery({
   refetchInterval: 30_000,
 })
 const rows = computed(() =>
-  (branches.data.value ?? []).filter((b) => filter.value === 'all' || (filter.value === 'hiro' ? !!b.ticketKey : !b.ticketKey)),
+  (branches.data.value ?? []).filter((b) => filter.value === 'all' || (filter.value === 'agnts' ? !!b.ticketKey : !b.ticketKey)),
 )
 const local = useQuery({
   queryKey: computed(() => ['repo', props.repoId, 'local-branches']),
@@ -37,7 +37,7 @@ const sources = computed(() => [
 const STATUS_TONE = { local: 'b-warn', unpushed: 'b-warn', pushed: 'b-ok', differs: 'b-bad' } as const
 const options = computed(() => [
   { value: 'all' as Filter, label: t('repo.filterAll') },
-  { value: 'hiro' as Filter, label: 'hiro' },
+  { value: 'agnts' as Filter, label: 'agnts' },
   { value: 'others' as Filter, label: t('repo.filterOthers') },
 ])
 </script>

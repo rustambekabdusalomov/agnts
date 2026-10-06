@@ -15,8 +15,8 @@ import (
 	"strings"
 	"time"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
 )
 
 // Config is the Jira connection, stored encrypted in the integrations table.
@@ -24,14 +24,16 @@ type Config struct {
 	Site     string `json:"site"` // https://your-team.atlassian.net
 	Email    string `json:"email"`
 	APIToken string `json:"api_token"`
-	// Label marks tickets hiro picks up and lets hiro pick their kind;
-	// Label-<kind> (hiro-plan, hiro-bug, ...) also picks them up, with that kind.
+	// Label marks tickets agnts picks up and lets agnts pick their kind;
+	// Label-<kind> (agnts-plan, agnts-bug, ...) also picks them up, with that kind.
 	Label         string            `json:"label"`
 	WebhookSecret string            `json:"webhook_secret"` // HMAC key for deliveries
-	Statuses      map[string]string `json:"statuses"`       // hiro milestone -> Jira status name
-	// Comments says which kinds of comment hiro posts (questions, plan, pr,
+	Statuses      map[string]string `json:"statuses"`       // agnts milestone -> Jira status name
+	// Comments says which kinds of comment agnts posts (questions, plan, pr,
 	// summary, status). A missing kind means on.
 	Comments map[string]bool `json:"comments"`
+	// IssueType is the type of the issues agnts files for follow-ups.
+	IssueType string `json:"issue_type"`
 }
 
 // FromIntegration builds the config from the stored integration: secrets
@@ -53,13 +55,17 @@ func FromIntegration(token string, settings map[string]string, connected bool) (
 			"started": settings["status_started"], "in_review": settings["status_in_review"], "rejected": settings["status_rejected"],
 			"merged": settings["status_merged"],
 		},
-		Comments: map[string]bool{},
+		Comments:  map[string]bool{},
+		IssueType: strings.TrimSpace(settings["issue_type"]),
 	}
 	for _, k := range []string{"questions", "plan", "pr", "summary", "status"} {
 		c.Comments[k] = settings["comment_"+k] != "false"
 	}
 	if c.Label == "" {
-		c.Label = "hiro"
+		c.Label = "agnts"
+	}
+	if c.IssueType == "" {
+		c.IssueType = "Task"
 	}
 	return c, connected && c.Site != "" && c.APIToken != "", nil
 }
@@ -72,7 +78,7 @@ func SecretsToken(apiToken, webhookSecret string) string {
 
 // SettingKeys are the settings the Jira integration accepts.
 var SettingKeys = []string{"site", "email", "label", "status_started", "status_in_review", "status_rejected", "status_merged",
-	"comment_questions", "comment_plan", "comment_pr", "comment_summary", "comment_status"}
+	"comment_questions", "comment_plan", "comment_pr", "comment_summary", "comment_status", "issue_type"}
 
 // Myself checks the credentials and returns the account's display name.
 func (c *Client) Myself(ctx context.Context) (string, error) {
@@ -99,7 +105,10 @@ type Client struct {
 	hc  *http.Client
 }
 
-var _ orchestrator.Tracker = (*Client)(nil)
+var (
+	_ orchestrator.Tracker      = (*Client)(nil)
+	_ orchestrator.IssueCreator = (*Client)(nil)
+)
 
 // New returns a Jira client.
 func New(cfg ConfigSource) *Client {
@@ -196,7 +205,81 @@ func (c *Client) MoveTo(ctx context.Context, key string, s orchestrator.TrackerS
 	return fmt.Errorf("no transition to %q from the issue's current status", want)
 }
 
-// Search returns open issues carrying the hiro label (the reconcile query).
+// CreateIssue files an issue of the configured type, without agnts's
+// labels. Projects whose create screen has no priority field reject one,
+// so a refused create is tried once more without it.
+func (c *Client) CreateIssue(ctx context.Context, in orchestrator.NewIssue) (string, error) {
+	cfg, ok, err := c.cfg(ctx)
+	if err != nil {
+		return "", err
+	}
+	if !ok {
+		return "", ErrNotConnected
+	}
+	fields := map[string]any{
+		"project":     map[string]string{"key": in.Project},
+		"issuetype":   map[string]string{"name": cfg.IssueType},
+		"summary":     in.Title,
+		"description": adfFromText(in.Description),
+	}
+	if p := jiraPriority(in.Priority); p != "" {
+		fields["priority"] = map[string]string{"name": p}
+	}
+	var out struct {
+		Key string `json:"key"`
+	}
+	err = c.call(ctx, http.MethodPost, "/rest/api/3/issue", map[string]any{"fields": fields}, &out)
+	if _, set := fields["priority"]; err != nil && set && strings.Contains(err.Error(), "400") {
+		delete(fields, "priority")
+		err = c.call(ctx, http.MethodPost, "/rest/api/3/issue", map[string]any{"fields": fields}, &out)
+	}
+	if err != nil {
+		return "", err
+	}
+	if out.Key == "" {
+		return "", errors.New("jira created the issue but returned no key")
+	}
+	return out.Key, nil
+}
+
+// jiraPriority is the default Jira priority name for an agnts priority.
+func jiraPriority(p string) string {
+	switch p {
+	case "low":
+		return "Low"
+	case "medium":
+		return "Medium"
+	case "high":
+		return "High"
+	}
+	return ""
+}
+
+// LabelIssue adds the kind label (agnts-code, agnts-plan, ...), which hands
+// the issue to agnts with that kind.
+func (c *Client) LabelIssue(ctx context.Context, key string, kind domain.TicketKind) error {
+	cfg, ok, err := c.cfg(ctx)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return ErrNotConnected
+	}
+	label := cfg.Label + "-" + string(kind)
+	return c.call(ctx, http.MethodPut, "/rest/api/3/issue/"+url.PathEscape(key),
+		map[string]any{"update": map[string]any{"labels": []map[string]string{{"add": label}}}}, nil)
+}
+
+// LinkIssues links key to other with Jira's standard "Relates" link.
+func (c *Client) LinkIssues(ctx context.Context, key, other string) error {
+	return c.call(ctx, http.MethodPost, "/rest/api/3/issueLink", map[string]any{
+		"type":         map[string]string{"name": "Relates"},
+		"inwardIssue":  map[string]string{"key": key},
+		"outwardIssue": map[string]string{"key": other},
+	}, nil)
+}
+
+// Search returns open issues carrying the agnts label (the reconcile query).
 func (c *Client) Search(ctx context.Context) ([]orchestrator.Incoming, error) {
 	cfg, ok, err := c.cfg(ctx)
 	if err != nil || !ok {
@@ -267,7 +350,7 @@ func (is issue) incoming(label string) orchestrator.Incoming {
 	return in
 }
 
-// labels are the labels that hand an issue to hiro: the base label and
+// labels are the labels that hand an issue to agnts: the base label and
 // one per kind.
 func labels(base string) []string {
 	out := []string{base}
@@ -277,8 +360,8 @@ func labels(base string) []string {
 	return out
 }
 
-// forHiro reports whether the issue carries any of hiro's labels.
-func (is issue) forHiro(base string) bool {
+// forAgnts reports whether the issue carries any of agnts's labels.
+func (is issue) forAgnts(base string) bool {
 	for _, want := range labels(base) {
 		for _, l := range is.Fields.Labels {
 			if strings.EqualFold(l, want) {
@@ -290,7 +373,7 @@ func (is issue) forHiro(base string) bool {
 }
 
 // kind is the kind its labels name (the first in domain.Kinds order when
-// there are several), or "" for hiro to pick.
+// there are several), or "" for agnts to pick.
 func (is issue) kind(base string) domain.TicketKind {
 	for _, k := range domain.Kinds {
 		for _, l := range is.Fields.Labels {

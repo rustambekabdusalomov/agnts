@@ -4,7 +4,8 @@ import (
 	"os"
 	"testing"
 
-	"hiro/internal/orchestrator"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
 )
 
 func parseFile(t *testing.T, name string) (orchestrator.ClaudeResult, []orchestrator.ClaudeEvent, error) {
@@ -62,5 +63,38 @@ func TestParseErrors(t *testing.T) {
 	}
 	if _, _, err = parseFile(t, "truncated.jsonl"); err == nil {
 		t.Fatal("stream without result should fail")
+	}
+}
+
+func TestParseUsage(t *testing.T) {
+	res, _, err := parseFile(t, "usage.jsonl")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// modelUsage wins over usage: the helper model's tokens count too.
+	want := domain.TokenUsage{Input: 530, Output: 420, CacheRead: 9000, CacheWrite: 1200, CostUSD: 0.125}
+	if res.Usage != want || res.Partial || res.Model != "claude-sonnet-5-5" {
+		t.Fatalf("usage %+v partial=%v model=%q, want %+v", res.Usage, res.Partial, res.Model, want)
+	}
+
+	// Without modelUsage or usage, only the cost is known.
+	res, _, _ = parseFile(t, "success.jsonl")
+	if res.Usage != (domain.TokenUsage{CostUSD: 0.31}) || res.Partial {
+		t.Fatalf("cost only: %+v", res.Usage)
+	}
+}
+
+func TestParseUsageCutOff(t *testing.T) {
+	res, _, err := parseFile(t, "usage_cut.jsonl")
+	if err == nil {
+		t.Fatal("stream without result should fail")
+	}
+	// msg_1 is counted once, with its last reading; no cost is known.
+	want := domain.TokenUsage{Input: 15, Output: 100, CacheRead: 2300, CacheWrite: 200}
+	if res.Usage != want || !res.Partial {
+		t.Fatalf("usage %+v partial=%v, want %+v", res.Usage, res.Partial, want)
+	}
+	if res, _, _ = parseFile(t, "truncated.jsonl"); res.Partial {
+		t.Fatal("a cut-off stream with no usage is not partial spend")
 	}
 }

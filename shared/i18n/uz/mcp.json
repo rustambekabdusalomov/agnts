@@ -1,7 +1,7 @@
 {
   "mcp": {
     "title": "Claude chat (MCP)",
-    "sub": "hiro ni brauzer, kompyuter va telefondagi Claude orqali boshqaring",
+    "sub": "agnts ni brauzer, kompyuter va telefondagi Claude orqali boshqaring",
     "url": "Konnektor URL",
     "connections": "Ulangan Claude ilovalari",
     "staticToken": "Statik token",
@@ -15,8 +15,8 @@
     "revoke": "Hammasini uzish",
     "revokeConfirm": "Barcha Claude ilovalari uzilsinmi va statik token oʻchirilsinmi?",
     "revoked": "Barcha Claude ulanishlari oʻchirildi",
-    "consentTitle": "Claude ni hiro ga ulash",
-    "consentAsk": "{client} hiro dan {user} nomidan foydalanmoqchi.",
+    "consentTitle": "Claude ni agnts ga ulash",
+    "consentAsk": "{client} agnts dan {user} nomidan foydalanmoqchi.",
     "consentWhat": "U tiketlar, loglar, limitlar va repozitoriylarni oʻqiy oladi hamda amallarni tayyorlaydi. Har bir amalni chatda tasdiqlamaguningizcha hech narsa oʻzgarmaydi. Deploy, sozlamalar va integratsiyalar unga ochiq emas.",
     "consentRedirect": "Siz {host} ga qaytasiz.",
     "allow": "Ruxsat berish",

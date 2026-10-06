@@ -13,13 +13,13 @@ import (
 	"strings"
 	"time"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
-	"hiro/internal/vcs"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
+	"agnts/internal/vcs"
 )
 
 // TokenSource returns the current GitHub token (fine-grained PAT with
-// contents and pull requests write access to the repositories hiro uses).
+// contents and pull requests write access to the repositories agnts uses).
 type TokenSource func(ctx context.Context) (string, error)
 
 // Host implements orchestrator.Host for GitHub.
@@ -59,7 +59,7 @@ func (h *Host) call(ctx context.Context, method, path string, in, out any) (int,
 		return 0, err
 	}
 	if tok == "" {
-		return 0, fmt.Errorf("github is %w; run `hiro integration set github`", vcs.ErrNotConnected)
+		return 0, fmt.Errorf("github is %w; run `agnts integration set github`", vcs.ErrNotConnected)
 	}
 	var body io.Reader
 	if in != nil {

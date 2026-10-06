@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hiro_api/hiro_api.dart';
+import 'package:agnts_api/agnts_api.dart';
 
 import '../../core/api.dart';
 import '../../core/data.dart';
@@ -13,7 +13,9 @@ import '../learn/ticket_lessons.dart';
 import 'code_review.dart';
 import 'diff_highlight.dart';
 import 'diff_lines.dart';
+import 'follow_ups.dart';
 import 'kinds.dart';
+import 'spend.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme.dart';
 import '../../widgets/common.dart';
@@ -86,12 +88,16 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     }
   }
 
-  /// hiro's code review card; queues a (re-)review like the other actions.
+  /// agnts's code review card; queues a (re-)review like the other actions.
   Widget _codeReview(TicketDetail d) => CodeReviewCard(
         detail: d,
         feedback: _feedback,
         busy: _busy,
         onRun: () => _run(() => _tickets.reviewTicket(key: d.ticket.key)),
+        onFollowUp: (i) => _run(() async {
+          await _tickets.followUpFromFinding(key: d.ticket.key, index: i);
+          if (mounted) showSnack(context, AppLocalizations.of(context).followUpsFromFindingDone);
+        }),
       );
 
   Future<bool> _confirm(String text) async {
@@ -112,7 +118,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final detail = ref.watch(ticketProvider(widget.ticketKey));
     return Scaffold(
       backgroundColor: c.bg,
@@ -147,7 +153,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
 
   Widget _header(BuildContext context, Ticket t) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final isTask = t.source_ == TicketSource_Enum.local;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
@@ -180,12 +186,12 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         if (t.branch.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 8),
-            child: Text('${l.ticketBranch}: ${t.branch}', style: TextStyle(fontFamily: HiroFonts.mono, fontSize: 12.5, color: c.ink3)),
+            child: Text('${l.ticketBranch}: ${t.branch}', style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3)),
           ),
         if (t.prUrl.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 4),
-            child: SelectableText(t.prUrl, style: TextStyle(fontFamily: HiroFonts.mono, fontSize: 12.5, color: c.primary)),
+            child: SelectableText(t.prUrl, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.primary)),
           ),
         if (t.parentKey != null && t.parentKey!.isNotEmpty)
           Padding(
@@ -193,6 +199,14 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
             child: GestureDetector(
               onTap: () => context.push('/tickets/${t.parentKey}'),
               child: Text('${l.implementImplements} ${t.parentKey}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.primary)),
+            ),
+          ),
+        if (t.followUpOf != null && t.followUpOf!.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: GestureDetector(
+              onTap: () => context.push('/tickets/${t.followUpOf}'),
+              child: Text('${l.followUpsFollowUpOf} ${t.followUpOf}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.primary)),
             ),
           ),
       ]),
@@ -203,7 +217,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
 
   Widget _stage(BuildContext context, TicketDetail d) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final t = d.ticket;
     final report = isReportKind(t.kind);
     String rev(String title) => t.revision > 0 ? l.ticketRevisionSuffix(title, t.revision.toString()) : title;
@@ -325,7 +339,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
   /// A report under review: summary, notes, the report, and whether to post it.
   List<Widget> _reviewReport(BuildContext context, TicketDetail d) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final t = d.ticket;
     final r = d.result;
     final jira = t.source_ == TicketSource_Enum.jira;
@@ -407,11 +421,11 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
   /// Summary, notes, checks and per-file diffs of a result.
   List<Widget> _resultBody(BuildContext context, Result r) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final paras = r.summary.split(RegExp(r'\n\s*\n')).map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
     return [
       if (paras.isNotEmpty) ...[
-        _H3(l.ticketWhatHiroDid),
+        _H3(l.ticketWhatAgntsDid),
         for (final p in paras) Padding(padding: const EdgeInsets.only(bottom: 8), child: Text(p, style: const TextStyle(fontSize: 15, height: 1.45))),
       ],
       if (r.notes.isNotEmpty) ...[
@@ -434,7 +448,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
               child: Row(children: [
                 HIcon(x.exitCode == 0 ? 'check' : 'close', size: 16, stroke: 2.6, color: x.exitCode == 0 ? c.okInk : c.badInk),
                 const SizedBox(width: 10),
-                Expanded(child: Text(x.command, style: TextStyle(fontFamily: HiroFonts.mono, fontSize: 12.5, color: c.ink))),
+                Expanded(child: Text(x.command, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink))),
                 Text(x.exitCode == 0 ? l.ticketPassed : l.ticketFailedCheck,
                     style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: x.exitCode == 0 ? c.okInk : c.badInk)),
               ]),
@@ -470,7 +484,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
 
   Widget _questionCard(BuildContext context, Question q) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final note = _noteFor(q);
     final enabled = !_busy;
     return Container(
@@ -509,7 +523,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
 
   Widget _analysisFold(BuildContext context, Analysis a) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return Padding(
       padding: const EdgeInsets.only(top: 10),
       child: Fold(
@@ -540,7 +554,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
   /// The live log of a running ticket on the dark code background (.log).
   Widget _liveLog(BuildContext context, bool live) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final events = ref.watch(ticketEventsProvider(widget.ticketKey));
     return events.when(
       data: (evs) {
@@ -558,7 +572,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
 
   Widget _folds(BuildContext context, TicketDetail d) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final t = d.ticket;
     final early = t.state == TicketState.new_ || t.state == TicketState.analyzing || t.state == TicketState.waitingForAnswers;
     final answered = d.questions.where((q) => (q.answer ?? '').isNotEmpty).toList();
@@ -590,6 +604,8 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           hint: _changed(l, d.result!),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: _resultBody(context, d.result!)),
         ),
+      if (d.followUps != null) FollowUpsFold(d),
+      SpendFold(spend: t.spend, stages: d.spendByStage ?? const [], report: isReportKind(t.kind)),
       Fold(
         title: l.ticketHistoryTitle,
         hint: '${history.length}',
@@ -642,7 +658,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
                         style: TextStyle(
                           fontSize: 13,
                           height: 1.4,
-                          fontFamily: e.type == 'claude_tool' ? HiroFonts.mono : null,
+                          fontFamily: e.type == 'claude_tool' ? AgntsFonts.mono : null,
                           color: e.level == EventLevelEnum.error
                               ? c.badInk
                               : e.level == EventLevelEnum.warn
@@ -682,7 +698,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
 
   Widget? _actionBar(BuildContext context, TicketDetail d) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final t = d.ticket;
     final key = t.key;
     final danger = OutlinedButton.styleFrom(foregroundColor: c.badInk);
@@ -824,7 +840,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Text(l.ticketRequestChanges, style: Theme.of(c).textTheme.titleLarge),
           const SizedBox(height: 4),
-          Text(l.ticketFeedbackHint, style: TextStyle(fontSize: 14, color: Hiro.of(c).ink3)),
+          Text(l.ticketFeedbackHint, style: TextStyle(fontSize: 14, color: Agnts.of(c).ink3)),
           const SizedBox(height: 12),
           TextField(
             controller: _feedback,
@@ -871,7 +887,7 @@ class _H2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(bottom: 4),
-        child: Text(text, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Hiro.of(context).ink)),
+        child: Text(text, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Agnts.of(context).ink)),
       );
 }
 
@@ -883,7 +899,7 @@ class _Sub extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(bottom: 4),
-        child: Text(text, style: TextStyle(fontSize: 14, height: 1.45, color: Hiro.of(context).ink3)),
+        child: Text(text, style: TextStyle(fontSize: 14, height: 1.45, color: Agnts.of(context).ink3)),
       );
 }
 
@@ -895,7 +911,7 @@ class _H3 extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(top: 18, bottom: 8),
-        child: Text(text, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Hiro.of(context).ink3)),
+        child: Text(text, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Agnts.of(context).ink3)),
       );
 }
 
@@ -908,7 +924,7 @@ class _OptionPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return Material(
       color: selected ? c.ink : c.surface,
       shape: StadiumBorder(side: BorderSide(color: selected ? c.ink : c.line4)),
@@ -980,7 +996,7 @@ class _Track extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final labels = _report
         ? [l.ticketStopAnalyze, l.ticketStopAnswers, l.ticketStopWriting, l.ticketStopReview, l.ticketStopDone]
         : [l.ticketStopAnalyze, l.ticketStopAnswers, l.ticketStopCoding, l.ticketStopTests, l.ticketStopReview, l.ticketStopPushed];
@@ -1057,7 +1073,7 @@ class _Mark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final (bg, border) = switch (kind) {
       _Stop.done => (c.primary, c.primary),
       _Stop.active => gate ? (c.warn, c.warn) : (c.primarySoft, c.primary),
@@ -1108,7 +1124,7 @@ class _FileDiffState extends State<_FileDiff> {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final f = widget.file;
     return Container(
       margin: const EdgeInsets.only(top: 8),
@@ -1121,7 +1137,7 @@ class _FileDiffState extends State<_FileDiff> {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Expanded(
-                child: Text(f.path, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: HiroFonts.mono, fontSize: 12.5, color: c.ink)),
+                child: Text(f.path, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink)),
               ),
               const SizedBox(width: 10),
               Text('+${f.add}', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: c.okInk)),
@@ -1184,8 +1200,8 @@ class _DiffState extends State<_Diff> {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
-    const style = TextStyle(fontFamily: HiroFonts.mono, fontSize: 11.5, height: 1.6);
+    final c = Agnts.of(context);
+    const style = TextStyle(fontFamily: AgntsFonts.mono, fontSize: 11.5, height: 1.6);
     final lines = _lines;
     // Gutter wide enough for the largest line number in the file.
     final digits = lines.fold(2, (w, l) => math.max(w, '${l.old ?? l.neu ?? ''}'.length));

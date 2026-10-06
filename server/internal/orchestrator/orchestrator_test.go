@@ -14,9 +14,9 @@ import (
 	"testing"
 	"time"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
-	"hiro/internal/store/postgres"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
+	"agnts/internal/store/postgres"
 )
 
 // ---- fakes ----
@@ -182,6 +182,39 @@ type fakeTracker struct {
 	mu       sync.Mutex
 	comments []string
 	moves    []orchestrator.TrackerStatus
+	issues   []orchestrator.NewIssue
+	calls    []string     // issue calls in order: create KEY, label KEY kind, link KEY OTHER
+	onLabel  func(string) // runs inside LabelIssue
+	issueErr error
+}
+
+func (t *fakeTracker) CreateIssue(_ context.Context, in orchestrator.NewIssue) (string, error) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	if t.issueErr != nil {
+		return "", t.issueErr
+	}
+	t.issues = append(t.issues, in)
+	key := in.Project + "-" + string(rune('0'+len(t.issues))) + "00"
+	t.calls = append(t.calls, "create "+key)
+	return key, nil
+}
+
+func (t *fakeTracker) LabelIssue(_ context.Context, key string, kind domain.TicketKind) error {
+	if t.onLabel != nil {
+		t.onLabel(key)
+	}
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.calls = append(t.calls, "label "+key+" "+string(kind))
+	return nil
+}
+
+func (t *fakeTracker) LinkIssues(_ context.Context, key, other string) error {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.calls = append(t.calls, "link "+key+" "+other)
+	return nil
 }
 
 func (t *fakeTracker) Comment(_ context.Context, _ string, _ orchestrator.CommentKind, text string) (bool, error) {
@@ -254,9 +287,9 @@ type harness struct {
 
 func newHarness(t *testing.T) *harness {
 	t.Helper()
-	url := os.Getenv("HIRO_TEST_DATABASE_URL")
+	url := os.Getenv("AGNTS_TEST_DATABASE_URL")
 	if url == "" {
-		t.Skip("HIRO_TEST_DATABASE_URL not set")
+		t.Skip("AGNTS_TEST_DATABASE_URL not set")
 	}
 	ctx := context.Background()
 	pool, err := postgres.Open(ctx, url)
@@ -382,7 +415,7 @@ func TestHappyPathWithQuestions(t *testing.T) {
 
 	h.step() // code + checks
 	tk := h.expect("PAY-1", domain.StateWaitingForReview)
-	if tk.Branch != "hiro/PAY-1" || tk.HeadSHA == "" || tk.Turns == 0 {
+	if tk.Branch != "agnts/PAY-1" || tk.HeadSHA == "" || tk.Turns == 0 {
 		t.Fatalf("ticket after coding: %+v", tk)
 	}
 	if !strings.Contains(h.runner.prompts[1], "A: half up") || !strings.Contains(h.runner.prompts[1], "Use math.Round") {
@@ -440,6 +473,73 @@ func TestCheckFailureIsFixed(t *testing.T) {
 	v, _ := h.o.View(h.ctx, "PAY-2")
 	if v.Result == nil || len(v.Result.Files) != 1 {
 		t.Fatalf("result: %+v", v.Result)
+	}
+}
+
+func TestTokenSpendPerStage(t *testing.T) {
+	h := newHarness(t)
+	h.ingest("PAY-20")
+	spend := func(session string, in, out int64, cost float64) orchestrator.ClaudeResult {
+		r := ok(session)
+		r.Model = "claude-opus-5-5"
+		r.Usage = domain.TokenUsage{Input: in, Output: out, CacheRead: 10 * in, CostUSD: cost}
+		return r
+	}
+	h.runner.scripts = []script{
+		{result: spend("s20", 100, 10, 0.01), files: map[string]string{orchestrator.AnalysisPath: analysis(0)}},
+		{result: spend("s20", 200, 20, 0.02), edit: "v1"},
+		{result: spend("s20", 300, 30, 0.03), edit: "v2"},
+	}
+	h.runner.execs["go test ./..."] = []orchestrator.ExecResult{{ExitCode: 1, Output: "--- FAIL"}, {ExitCode: 0}}
+
+	h.step() // analyze
+	h.step() // code, one failed check, one fix attempt
+	tk := h.expect("PAY-20", domain.StateWaitingForReview)
+
+	got, err := h.store.TicketUsage(h.ctx, tk.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []domain.StageUsage{
+		{ModelStage: domain.ModelAnalyze, Model: "claude-opus-5-5", Calls: 1, Turns: 5, Usage: domain.TokenUsage{Input: 100, Output: 10, CacheRead: 1000, CostUSD: 0.01}},
+		{ModelStage: domain.ModelCoding, Model: "claude-opus-5-5", Calls: 1, Turns: 5, Usage: domain.TokenUsage{Input: 200, Output: 20, CacheRead: 2000, CostUSD: 0.02}},
+		{ModelStage: domain.ModelRetry, Model: "claude-opus-5-5", Calls: 1, Turns: 5, Usage: domain.TokenUsage{Input: 300, Output: 30, CacheRead: 3000, CostUSD: 0.03}},
+	}
+	if len(got) != len(want) {
+		t.Fatalf("stages %+v, want %+v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("stage %d: %+v, want %+v", i, got[i], want[i])
+		}
+	}
+
+	v, err := h.o.View(h.ctx, "PAY-20")
+	total := domain.TokenUsage{Input: 600, Output: 60, CacheRead: 6000, CostUSD: 0.06}
+	if err != nil || len(v.Stages) != 3 || v.Spend.Total() != total.Total() || v.Spend.Input != total.Input {
+		t.Fatalf("view spend %+v stages %d: %v", v.Spend, len(v.Stages), err)
+	}
+	if d := v.Spend.CostUSD - total.CostUSD; d > 1e-9 || d < -1e-9 {
+		t.Fatalf("view cost %v, want %v", v.Spend.CostUSD, total.CostUSD)
+	}
+	h.ingest("PAY-22") // no runs yet
+	rows, err := h.o.Rows(h.ctx, []domain.Ticket{h.state("PAY-20"), h.state("PAY-22")})
+	if err != nil || rows[0].Spend.Total() != total.Total() || !rows[1].Spend.IsZero() {
+		t.Fatalf("rows spend: %+v %v", rows, err)
+	}
+}
+
+func TestPartialSpendIsRecorded(t *testing.T) {
+	h := newHarness(t)
+	h.ingest("PAY-21")
+	cut := orchestrator.ClaudeResult{Partial: true, Usage: domain.TokenUsage{Input: 40, Output: 7}}
+	h.runner.scripts = []script{{result: cut, err: errors.New("claude timed out after 1m0s")}}
+
+	h.step()
+	tk := h.expect("PAY-21", domain.StateFailed)
+	got, err := h.store.TicketUsage(h.ctx, tk.ID)
+	if err != nil || len(got) != 1 || !got[0].Partial || got[0].Usage != cut.Usage || got[0].ModelStage != domain.ModelAnalyze {
+		t.Fatalf("partial spend: %+v %v", got, err)
 	}
 }
 
@@ -521,7 +621,7 @@ func TestRejectAndNoRepo(t *testing.T) {
 	if tk.ResumeState != domain.StateNew {
 		t.Fatalf("resume %s", tk.ResumeState)
 	}
-	if _, err := h.o.Reject(h.ctx, "OPS-1", "not for hiro", domain.OriginWeb); err != nil {
+	if _, err := h.o.Reject(h.ctx, "OPS-1", "not for agnts", domain.OriginWeb); err != nil {
 		t.Fatal(err)
 	}
 	h.expect("OPS-1", domain.StateRejected)
@@ -610,7 +710,7 @@ func TestTaskLifecyclePushToMain(t *testing.T) {
 	}
 	h.step()
 	h.expect("VIS-1", domain.StateDone)
-	if len(h.git.pushed) != 1 || h.git.pushed[0] != "hiro/VIS-1->main" || h.host.opened != 0 {
+	if len(h.git.pushed) != 1 || h.git.pushed[0] != "agnts/VIS-1->main" || h.host.opened != 0 {
 		t.Fatalf("push to main: %v, PRs %d", h.git.pushed, h.host.opened)
 	}
 	if len(h.tracker.comments) != 0 || len(h.tracker.moves) != 0 {
@@ -827,7 +927,7 @@ func TestSetRepo(t *testing.T) {
 
 	// A ticket stopped mid-coding starts over from analysis in the new repository.
 	if _, err := h.store.Transition(h.ctx, "PAY-30", domain.StateFailed, domain.Event{TicketKey: "PAY-30", Type: domain.EventStateChanged},
-		func(x *domain.Ticket) { x.ResumeState, x.Branch = domain.StateCoding, "hiro/PAY-30" }); err != nil {
+		func(x *domain.Ticket) { x.ResumeState, x.Branch = domain.StateCoding, "agnts/PAY-30" }); err != nil {
 		t.Fatal(err)
 	}
 	tk, err = h.o.SetRepo(h.ctx, "PAY-30", side, domain.OriginWeb)

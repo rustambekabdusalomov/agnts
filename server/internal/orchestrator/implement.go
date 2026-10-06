@@ -7,7 +7,7 @@ import (
 	"slices"
 	"strings"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
 // ImplementInput makes a code task from an approved plan or bug report.
@@ -17,7 +17,7 @@ type ImplementInput struct {
 }
 
 // Implement creates the code task that carries out a done plan or bug
-// report. The task is local (hiro cannot file a Jira issue), linked back by
+// report. The task is local (agnts cannot file a Jira issue), linked back by
 // ParentKey, and has the approved report in its description, so the
 // analysis checks it against today's code and the coding prompt follows it.
 // A report is implemented once.
@@ -73,7 +73,7 @@ func (o *Orchestrator) Implement(ctx context.Context, key string, in ImplementIn
 	if p.Kind == domain.KindBug {
 		title, heading = "Fix: "+p.Title, "Approved bug investigation"
 	}
-	desc := fmt.Sprintf("Carries out %s, approved in hiro. Follow it unless the code has changed in a way it did not foresee; say so in the notes when you depart from it.\n\n## %s (%s)\n\n%s",
+	desc := fmt.Sprintf("Carries out %s, approved in agnts. Follow it unless the code has changed in a way it did not foresee; say so in the notes when you depart from it.\n\n## %s (%s)\n\n%s",
 		p.Key, heading, p.Key, strings.TrimSpace(r.Report))
 	if d := strings.TrimSpace(p.Description); d != "" {
 		desc += "\n\n## Original ticket " + p.Key + "\n\n" + d

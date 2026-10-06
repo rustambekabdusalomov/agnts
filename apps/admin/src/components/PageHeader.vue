@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import DocsPanel from './DocsPanel.vue'
 
 // Page title row with the "How this page works" button and an actions slot.
-defineProps<{ title: string; lede?: string; doc?: string }>()
+defineProps<{ title: string; doc?: string }>()
 const { t } = useI18n()
 const docsOpen = ref(false)
 </script>
@@ -19,7 +19,6 @@ const docsOpen = ref(false)
           {{ t('nav.guide') }}
         </button>
       </div>
-      <p v-if="lede">{{ lede }}</p>
       <slot name="below" />
     </div>
     <slot />

@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: hiro API
+  title: agnts API
   version: 0.1.0
   description: |
     REST API shared by the admin panel (Vue) and the mobile app (Flutter).
@@ -164,7 +164,7 @@ paths:
       operationId: approveTicket
       summary: Approve the reviewed work
       description: >-
-        For a change, hiro pushes the branch and opens the pull request. For a
+        For a change, agnts pushes the branch and opens the pull request. For a
         report, the ticket is done; the report is posted to the tracker issue
         only when postReport is true.
       tags: [tickets]
@@ -361,6 +361,111 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '409': { $ref: '#/components/responses/Conflict' }
 
+  /tickets/{key}/follow-ups:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    get:
+      operationId: listFollowUps
+      summary: Suggested follow-up tickets and the tickets made from them
+      tags: [tickets]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FollowUps' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      operationId: setFollowUps
+      summary: Turn follow-up suggestions on or off for this ticket
+      description: >-
+        inherit follows Settings (suggestFollowUps). Suggestions add a little
+        to every prompt of the ticket's runs, so they are off unless asked for.
+      tags: [tickets]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FollowUpsSetting' }
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/follow-ups/accept:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: acceptFollowUps
+      summary: Create tickets from chosen suggestions
+      description: >-
+        Each chosen suggestion becomes a queued (held) ticket, as a local task
+        or a new Jira issue. Nothing runs until it is started. Items are
+        handled one by one; each result says what happened to its suggestion.
+        What the analysis suggested can be created at once; what the work or
+        its review found waits until this ticket is done.
+      tags: [tickets]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AcceptFollowUps' }
+      responses:
+        '200':
+          description: One result per item
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AcceptFollowUpsResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/follow-ups/{id}/dismiss:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    post:
+      operationId: dismissFollowUp
+      summary: Decline a suggestion; later runs will not suggest it again
+      tags: [tickets]
+      responses:
+        '200':
+          description: The dismissed suggestion
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FollowUpSuggestion' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /tickets/{key}/review/findings/{index}/follow-up:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+      - name: index
+        in: path
+        required: true
+        description: The finding's position in the newest code review
+        schema: { type: integer, minimum: 0 }
+    post:
+      operationId: followUpFromFinding
+      summary: Turn a code review finding into a follow-up suggestion
+      description: No Claude run is involved.
+      tags: [tickets]
+      responses:
+        '201':
+          description: The new suggestion
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FollowUpSuggestion' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /tickets/{key}/kind:
     parameters:
       - $ref: '#/components/parameters/TicketKey'
@@ -368,7 +473,7 @@ paths:
       operationId: setTicketKind
       summary: Change what the ticket produces
       description: >-
-        Allowed on a new ticket, while hiro waits for answers, and on a failed
+        Allowed on a new ticket, while agnts waits for answers, and on a failed
         or rate-limited one that has not pushed. auto lets the analysis pick
         the kind again; any other kind is final.
       tags: [tickets]
@@ -542,6 +647,26 @@ paths:
               schema: { $ref: '#/components/schemas/Usage' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '409': { $ref: '#/components/responses/Conflict' }
+
+  /usage/tickets:
+    get:
+      operationId: getTicketSpend
+      summary: Tickets that used the most of the plan in a period, by Claude Code's cost estimate
+      tags: [usage]
+      parameters:
+        - name: days
+          in: query
+          schema: { type: integer, enum: [7, 30, 90], default: 30 }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 50, default: 10 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TicketSpendList' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
 
   /settings:
     get:
@@ -926,7 +1051,7 @@ paths:
   /lessons:
     get:
       operationId: listLessons
-      summary: Lessons hiro learned from pushed tickets, newest first
+      summary: Lessons agnts learned from pushed tickets, newest first
       tags: [learn]
       parameters:
         - name: repo
@@ -1196,7 +1321,7 @@ paths:
       - $ref: '#/components/parameters/RepoID'
     get:
       operationId: listRepoLocalBranches
-      summary: Branches in hiro's own clones on the server, and whether origin has them
+      summary: Branches in agnts's own clones on the server, and whether origin has them
       tags: [repos]
       responses:
         '200':
@@ -1426,7 +1551,7 @@ components:
     TicketKindChoice:
       type: string
       enum: [auto, code, test, plan, analysis, bug]
-      description: A kind, or auto for hiro to pick one during analysis
+      description: A kind, or auto for agnts to pick one during analysis
 
     ImplementInput:
       type: object
@@ -1436,6 +1561,108 @@ components:
           type: string
           enum: [code, queue]
           description: 'code = start now without questions (default), queue = keep until started'
+
+    FollowUpsMode:
+      type: string
+      enum: [inherit, 'on', 'off']
+      description: 'Follow-up suggestions for one ticket: inherit follows Settings'
+
+    FollowUpsSetting:
+      type: object
+      required: [mode]
+      properties:
+        mode: { $ref: '#/components/schemas/FollowUpsMode' }
+
+    FollowUpSuggestion:
+      type: object
+      required: [id, source, type, revision, title, description, serves, kind, priority, status, ready, createdAt]
+      properties:
+        id: { type: integer, format: int64 }
+        source:
+          type: string
+          enum: [analyze, work, review, manual]
+          description: 'The run that suggested it; manual = made from a review finding'
+        type:
+          type: string
+          enum: [prerequisite, split, unfinished, gap]
+          description: How it serves the parent ticket
+        revision: { type: integer, description: "The parent's revision when it was suggested" }
+        title: { type: string }
+        description: { type: string }
+        serves: { type: string, description: How it helps finish the parent ticket }
+        kind: { $ref: '#/components/schemas/TicketKind' }
+        priority: { type: string, enum: [low, medium, high] }
+        status: { type: string, enum: [open, accepted, dismissed] }
+        ready: { type: boolean, description: 'A ticket can be made from it now (open, and the parent is done unless the analysis suggested it)' }
+        childKey: { type: string, description: 'The ticket made from it' }
+        decidedAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    FollowUpTicket:
+      type: object
+      required: [key, title, state, kind, source]
+      properties:
+        key: { type: string }
+        title: { type: string }
+        state: { $ref: '#/components/schemas/TicketState' }
+        kind: { $ref: '#/components/schemas/TicketKind' }
+        source: { type: string, enum: [jira, local] }
+        held: { type: boolean }
+
+    FollowUps:
+      type: object
+      required: [enabled, suggestions, children]
+      properties:
+        enabled: { type: boolean, description: "This ticket's runs suggest follow-ups" }
+        suggestions:
+          type: array
+          items: { $ref: '#/components/schemas/FollowUpSuggestion' }
+        children:
+          type: array
+          description: Tickets made from the suggestions
+          items: { $ref: '#/components/schemas/FollowUpTicket' }
+
+    AcceptFollowUp:
+      type: object
+      required: [id]
+      description: A suggestion to create, with optional edits
+      properties:
+        id: { type: integer, format: int64 }
+        target:
+          type: string
+          enum: [local, jira]
+          description: 'local = an agnts task (default), jira = a new issue in the Jira project'
+        title: { type: string, maxLength: 300 }
+        description: { type: string, maxLength: 20000 }
+        kind: { $ref: '#/components/schemas/TicketKind' }
+        priority: { type: string, enum: [low, medium, high] }
+        repoId: { type: integer, format: int64, description: "Defaults to the parent ticket's repository" }
+
+    AcceptFollowUps:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items: { $ref: '#/components/schemas/AcceptFollowUp' }
+
+    AcceptFollowUpResult:
+      type: object
+      required: [id]
+      properties:
+        id: { type: integer, format: int64 }
+        ticket: { $ref: '#/components/schemas/Ticket' }
+        error: { type: string, description: 'Why no ticket was made from this suggestion' }
+
+    AcceptFollowUpsResult:
+      type: object
+      required: [results]
+      properties:
+        results:
+          type: array
+          items: { $ref: '#/components/schemas/AcceptFollowUpResult' }
 
     TicketKindInput:
       type: object
@@ -1468,9 +1695,12 @@ components:
         held: { type: boolean, description: Kept in the queue until started }
         askFirst: { type: boolean }
         kind: { $ref: '#/components/schemas/TicketKind' }
-        kindAuto: { type: boolean, description: 'hiro picks the kind; the analysis may still change it' }
+        kindAuto: { type: boolean, description: 'agnts picks the kind; the analysis may still change it' }
         postReport: { type: boolean, description: 'The approved report is posted to the tracker issue' }
         parentKey: { type: string, description: 'The plan or bug investigation this ticket implements' }
+        followUpOf: { type: string, description: 'The ticket that suggested this one as a follow-up' }
+        suggestFollowUps: { $ref: '#/components/schemas/FollowUpsMode' }
+        openSuggestions: { type: integer, description: 'Follow-up suggestions waiting for a decision' }
         repoName: { type: string }
         models: { $ref: '#/components/schemas/ModelOverrides' }
         since: { type: string, format: date-time, description: When the ticket entered its current state }
@@ -1483,9 +1713,70 @@ components:
         reviewState:
           type: string
           enum: [none, pending, running, done, failed]
-          description: The code review hiro runs beside the human review
+          description: The code review agnts runs beside the human review
+        spend: { $ref: '#/components/schemas/TokenSpend' }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
+
+    TokenSpend:
+      type: object
+      description: >-
+        Tokens Claude used (on a ticket: all its runs; absent until one is
+        recorded). costUsd is what Claude Code reports the same work
+        would cost on the API; on a Claude plan it is an estimate, not a charge.
+      required: [input, output, cacheRead, cacheWrite, total, costUsd]
+      properties:
+        input: { type: integer, format: int64 }
+        output: { type: integer, format: int64 }
+        cacheRead: { type: integer, format: int64 }
+        cacheWrite: { type: integer, format: int64 }
+        total: { type: integer, format: int64, description: All four counts added }
+        costUsd: { type: number, format: double }
+
+    TicketSpendList:
+      type: object
+      required: [days, total, tickets]
+      properties:
+        days: { type: integer }
+        total: { $ref: '#/components/schemas/TokenSpend' }
+        tickets:
+          type: array
+          description: Costliest first; partial runs have no cost, so ties fall back to tokens
+          items: { $ref: '#/components/schemas/TicketSpendRow' }
+
+    TicketSpendRow:
+      type: object
+      description: One ticket's spend within the period (not its lifetime spend)
+      required: [key, title, kind, state, calls, topStage, spend]
+      properties:
+        key: { type: string }
+        title: { type: string }
+        kind: { $ref: '#/components/schemas/TicketKind' }
+        state: { $ref: '#/components/schemas/TicketState' }
+        repoName: { type: string }
+        calls: { type: integer, description: Claude invocations in the period }
+        topStage:
+          type: string
+          enum: [analyze, coding, retry, helper, learn, review]
+          description: The stage that cost the most
+        spend: { $ref: '#/components/schemas/TokenSpend' }
+
+    StageSpend:
+      type: object
+      description: Spend for one stage and model; on a ticket, in the order the stage first ran
+      required: [stage, model, calls, turns, partial, spend]
+      properties:
+        stage:
+          type: string
+          enum: [analyze, coding, retry, helper, learn, review]
+          description: 'retry is fix attempts after failed checks and requested changes'
+        model: { type: string }
+        calls: { type: integer, description: Claude invocations }
+        turns: { type: integer }
+        partial:
+          type: boolean
+          description: A run was cut off, so its tokens are counted from the messages seen and its cost is unknown
+        spend: { $ref: '#/components/schemas/TokenSpend' }
 
     Question:
       type: object
@@ -1531,7 +1822,7 @@ components:
       type: object
       required: [revision, model, modelReason, verdict, summary, findings, strengths, createdAt]
       description: >-
-        hiro's review of the latest result, advice beside the human review.
+        agnts's review of the latest result, advice beside the human review.
         It reviewed an older revision when revision is below the ticket's.
       properties:
         revision: { type: integer }
@@ -1595,12 +1886,17 @@ components:
         analysis: { $ref: '#/components/schemas/Analysis' }
         result: { $ref: '#/components/schemas/Result' }
         childKey: { type: string, description: 'The code task that implements this report, if any' }
+        followUps: { $ref: '#/components/schemas/FollowUps' }
         review: { $ref: '#/components/schemas/CodeReview' }
         history:
           type: array
           items: { $ref: '#/components/schemas/HistoryItem' }
         maxTurns: { type: integer }
         effectiveModels: { $ref: '#/components/schemas/StageModels' }
+        spendByStage:
+          type: array
+          description: Empty until a Claude run is recorded
+          items: { $ref: '#/components/schemas/StageSpend' }
 
     Event:
       type: object
@@ -1692,6 +1988,7 @@ components:
           type: string
           enum: [ask, code, queue]
           description: ask = analyse and ask first, code = no questions, queue = keep until started
+        followUps: { $ref: '#/components/schemas/FollowUpsMode' }
 
     TaskUpdate:
       type: object
@@ -1757,7 +2054,7 @@ components:
       properties:
         authorName: { type: string, maxLength: 200 }
         authorEmail: { type: string, maxLength: 200 }
-        coAuthor: { type: boolean, description: Add a Co-authored-by hiro line }
+        coAuthor: { type: boolean, description: Add a Co-authored-by agnts line }
         prTitle: { type: string, maxLength: 200, description: '{key} and {title} are replaced' }
         draft: { type: boolean }
 
@@ -1780,6 +2077,7 @@ components:
         autoResume: { type: boolean }
         autoLearn: { type: boolean, description: Learn from every pushed ticket }
         autoReview: { type: boolean, description: Review every result while it waits for review }
+        suggestFollowUps: { type: boolean, description: 'Runs suggest follow-up tickets (off by default; a ticket can override it)' }
         pauseAbove: { type: integer, minimum: 50, maximum: 100 }
         parallel: { type: integer, minimum: 1, maximum: 3 }
         git: { $ref: '#/components/schemas/GitSettings' }
@@ -1796,6 +2094,7 @@ components:
         done: { type: boolean }
         lessons: { type: boolean, description: New lessons were found }
         review: { type: boolean, description: A code review finished }
+        followUps: { type: boolean, description: Follow-up tickets were suggested }
 
     Repository:
       type: object
@@ -1863,7 +2162,7 @@ components:
         private: { type: boolean }
         description: { type: string }
         updatedAt: { type: string, format: date-time }
-        added: { type: boolean, description: Already added to hiro }
+        added: { type: boolean, description: Already added to agnts }
 
     Integration:
       type: object
@@ -1911,10 +2210,10 @@ components:
 
     HourBucket:
       type: object
-      required: [hour, hiro, you, problems]
+      required: [hour, agnts, you, problems]
       properties:
         hour: { type: integer }
-        hiro: { type: integer }
+        agnts: { type: integer }
         you: { type: integer }
         problems: { type: integer }
 
@@ -2072,7 +2371,7 @@ components:
 
     PeriodStats:
       type: object
-      required: [picked, pushed, rejected, stopped, firstTry, afterChanges, hiroMin, waitMin, reviewMin, answerMin, turns]
+      required: [picked, pushed, rejected, stopped, firstTry, afterChanges, agntsMin, waitMin, reviewMin, answerMin, turns, spend]
       properties:
         picked: { type: integer }
         pushed: { type: integer }
@@ -2080,29 +2379,31 @@ components:
         stopped: { type: integer }
         firstTry: { type: integer }
         afterChanges: { type: integer }
-        hiroMin: { type: number }
+        agntsMin: { type: number }
         waitMin: { type: number }
         reviewMin: { type: number }
         answerMin: { type: number }
         turns: { type: number }
+        spend: { $ref: '#/components/schemas/TokenSpend' }
 
     DayStat:
       type: object
-      required: [date, picked, pushed, rejected, stopped, hiroMin, waitMin, turns]
+      required: [date, picked, pushed, rejected, stopped, agntsMin, waitMin, turns, spend]
       properties:
         date: { type: string, format: date }
         picked: { type: integer }
         pushed: { type: integer }
         rejected: { type: integer }
         stopped: { type: integer }
-        hiroMin: { type: number }
+        agntsMin: { type: number }
         waitMin: { type: number }
         turns: { type: number }
         peakUsage: { type: number }
+        spend: { $ref: '#/components/schemas/TokenSpend' }
 
     Analytics:
       type: object
-      required: [days, current, previous, perDay, steps, stops, models, repos, hours, insights]
+      required: [days, current, previous, perDay, steps, stops, models, repos, hours, insights, spendByStage]
       properties:
         days: { type: integer }
         current: { $ref: '#/components/schemas/PeriodStats' }
@@ -2132,7 +2433,7 @@ components:
           type: array
           items:
             type: object
-            required: [repoId, name, kind, claudeMd, tickets, done, finished, avgTurns, hiroMin]
+            required: [repoId, name, kind, claudeMd, tickets, done, finished, avgTurns, agntsMin]
             properties:
               repoId: { type: integer, format: int64 }
               name: { type: string }
@@ -2142,11 +2443,15 @@ components:
               done: { type: integer }
               finished: { type: integer }
               avgTurns: { type: number }
-              hiroMin: { type: number }
+              agntsMin: { type: number }
         hours:
           type: array
           items: { type: integer }
-          description: hiro's events per hour of day (server time zone)
+          description: agnts's events per hour of day (server time zone)
+        spendByStage:
+          type: array
+          items: { $ref: '#/components/schemas/StageSpend' }
+          description: Spend of every ticket in the period by stage and model, costliest first
         insights:
           type: array
           items:

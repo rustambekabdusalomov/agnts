@@ -20,7 +20,7 @@ const (
 	ModelReview  = "review" // code review while a ticket waits for review
 )
 
-// ModelAuto lets hiro pick the review model from how complex the ticket is.
+// ModelAuto lets agnts pick the review model from how complex the ticket is.
 const ModelAuto = "auto"
 
 // StageModels is the default model per stage.
@@ -69,23 +69,28 @@ type NotifySettings struct {
 	Done     bool `json:"done"`
 	Lessons  bool `json:"lessons"`
 	Review   bool `json:"review"` // a code review found something
+	// FollowUps announces suggested follow-up tickets.
+	FollowUps bool `json:"followUps"`
 }
 
 // Settings are the runtime settings edited on the Settings page.
 type Settings struct {
-	Models     StageModels    `json:"models"`
-	MaxTurns   int            `json:"maxTurns"`
-	TimeoutMin int            `json:"timeoutMin"`
-	Allow      []string       `json:"allow"`
-	Deny       []string       `json:"deny"`
-	AskFirst   bool           `json:"askFirst"`
-	AutoResume bool           `json:"autoResume"`
-	AutoLearn  bool           `json:"autoLearn"`  // learn run after every push
-	AutoReview bool           `json:"autoReview"` // code review of every result
-	PauseAbove int            `json:"pauseAbove"`
-	Parallel   int            `json:"parallel"`
-	Git        GitSettings    `json:"git"`
-	Notify     NotifySettings `json:"notify"`
+	Models     StageModels `json:"models"`
+	MaxTurns   int         `json:"maxTurns"`
+	TimeoutMin int         `json:"timeoutMin"`
+	Allow      []string    `json:"allow"`
+	Deny       []string    `json:"deny"`
+	AskFirst   bool        `json:"askFirst"`
+	AutoResume bool        `json:"autoResume"`
+	AutoLearn  bool        `json:"autoLearn"`  // learn run after every push
+	AutoReview bool        `json:"autoReview"` // code review of every result
+	// SuggestFollowUps has the runs suggest follow-up tickets. Off by
+	// default: it makes every prompt and answer a little longer.
+	SuggestFollowUps bool           `json:"suggestFollowUps"`
+	PauseAbove       int            `json:"pauseAbove"`
+	Parallel         int            `json:"parallel"`
+	Git              GitSettings    `json:"git"`
+	Notify           NotifySettings `json:"notify"`
 }
 
 // DefaultSettings returns the settings used before any are saved.
@@ -103,7 +108,7 @@ func DefaultSettings() Settings {
 		PauseAbove: 90,
 		Parallel:   1,
 		Git:        GitSettings{CoAuthor: true, PRTitle: "{key}: {title}"},
-		Notify:     NotifySettings{Push: true, Telegram: true, NeedsYou: true, Stopped: true, Done: true, Lessons: true, Review: true},
+		Notify:     NotifySettings{Push: true, Telegram: true, NeedsYou: true, Stopped: true, Done: true, Lessons: true, Review: true, FollowUps: true},
 	}
 }
 
@@ -144,6 +149,15 @@ func (s *Settings) Validate() error {
 		errs = append(errs, errors.New("git author email is not an email address"))
 	}
 	return errors.Join(errs...)
+}
+
+// FollowUpsOn reports whether runs of t suggest follow-up tickets: the
+// ticket's own choice wins over the setting.
+func (s Settings) FollowUpsOn(t Ticket) bool {
+	if t.SuggestFollowUps != nil {
+		return *t.SuggestFollowUps
+	}
+	return s.SuggestFollowUps
 }
 
 // ModelFor returns the model for a stage, honouring a ticket's override.

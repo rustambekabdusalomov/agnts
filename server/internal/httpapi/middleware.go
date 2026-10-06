@@ -13,8 +13,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"golang.org/x/time/rate"
 
-	"hiro/internal/domain"
-	"hiro/internal/httpapi/gen"
+	"agnts/internal/domain"
+	"agnts/internal/httpapi/gen"
 )
 
 type ctxKey int
@@ -100,7 +100,7 @@ func (s *Server) checkOrigin(next http.Handler) http.Handler {
 	})
 }
 
-// clientIP sets r.RemoteAddr to the client's IP without a port. hiro is
+// clientIP sets r.RemoteAddr to the client's IP without a port. agnts is
 // reachable only through Caddy, which overwrites X-Forwarded-For with the
 // address it saw unless configured to trust upstream proxies; the rightmost
 // entry is therefore the one Caddy wrote. Client-supplied entries to the

@@ -6,7 +6,7 @@ export type Theme = 'system' | 'light' | 'dark'
 /** How a list of tickets is shown. */
 export type ListView = 'table' | 'board'
 
-const KEY = 'hiro-prefs' // same key as the demo
+const KEY = 'agnts-prefs' // same key as the demo
 
 function read(): { theme?: Theme; lang?: string; views?: Record<string, ListView>; thin?: boolean } {
   try {

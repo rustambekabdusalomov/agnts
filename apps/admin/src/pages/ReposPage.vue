@@ -56,7 +56,7 @@ function onPick(r: RemoteRepository) {
 </script>
 
 <template>
-  <PageHeader :title="t('repos.title')" :lede="t('repos.lede')" doc="repos">
+  <PageHeader :title="t('repos.title')" doc="repos">
     <div class="actions" style="margin: 0">
       <button class="btn" type="button" @click="importOpen = true"><HiIcon name="import" />{{ t('repos.import') }}</button>
       <button class="btn btn-p" type="button" @click="openRepo(null)"><HiIcon name="plus" />{{ t('repos.add') }}</button>

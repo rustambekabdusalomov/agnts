@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hiro_mobile/features/tickets/diff_lines.dart';
+import 'package:agnts_mobile/features/tickets/diff_lines.dart';
 
 void main() {
   test('numbers added, removed and context lines from the hunk headers', () {

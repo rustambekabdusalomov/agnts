@@ -7,7 +7,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
 // Users is the users store.

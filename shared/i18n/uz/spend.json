@@ -1,0 +1,30 @@
+{
+  "spend": {
+    "title": "Token sarfi",
+    "sub": "Kirish va chiqishda {tokens} token · API narxlarida taxminan {cost}",
+    "empty": "Hali hech narsa yozilmagan. Sarf agnts bu tiket boʻyicha Claude'ni birinchi marta ishga tushirgandan keyin koʻrinadi.",
+    "input": "Kirish",
+    "output": "Chiqish",
+    "cache": "Kesh: {read} oʻqilgan, {write} yozilgan",
+    "calls": "{n, plural, one {# ta ishga tushirish} other {# ta ishga tushirish}}",
+    "partial": "Ishga tushirish toʻxtatilgan, shuning uchun narxi nomaʼlum",
+    "costNote": "Narx — Claude Code'ning xuddi shu ish uchun API narxlaridagi bahosi. Claude obunasida u toʻlanmaydi; u har bir bosqichning nisbiy ogʻirligini koʻrsatadi.",
+    "tokens": "{n} token",
+    "colTokens": "Tokenlar",
+    "stageAnalyze": "Tahlil",
+    "stageCoding": "Kod yozish",
+    "stageWriting": "Yozish",
+    "stageRetry": "Tuzatishlar va oʻzgarishlar",
+    "stageReview": "Kod tekshiruvi",
+    "stageLearn": "Saboqlar",
+    "stageHelper": "Yordamchi",
+    "topTitle": "Sarf boʻyicha tiketlar",
+    "topSub": "Kirish va chiqishda {tokens} token · API narxlarida taxminan {cost}",
+    "topSubEmpty": "Qaysi tiketlar obunangizni eng koʻp sarflagan",
+    "topEmpty": "Bu davrda Claude ishlari yozilmagan.",
+    "topNote": "Tartib Claude Code narx bahosi boʻyicha, u keshni toʻgʻri hisobga oladi. Ulush — davrdagi taxminiy narxdan. Faqat davr ichidagi sarf hisoblanadi.",
+    "colStage": "Eng qimmat bosqich",
+    "colCost": "Taxminiy narx",
+    "colShare": "Ulush"
+  }
+}

@@ -1,4 +1,4 @@
-// Package domain holds hiro's core types. It imports nothing from adapters.
+// Package domain holds agnts's core types. It imports nothing from adapters.
 package domain
 
 import (

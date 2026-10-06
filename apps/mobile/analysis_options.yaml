@@ -5,7 +5,7 @@ formatter:
 
 analyzer:
   exclude:
-    - packages/hiro_api/**
+    - packages/agnts_api/**
     - lib/l10n/*.dart
     - build/**
     - android/**

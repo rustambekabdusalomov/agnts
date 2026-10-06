@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
 const settingsKey = "runtime"

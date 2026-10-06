@@ -7,7 +7,7 @@ import { api, HttpError, unwrap } from '../api/client'
 import { useSession } from '../stores/session'
 
 // Claude's connector sign-in lands here (via /oauth/authorize). The user is
-// signed in to hiro, sees who is asking, and approves or denies.
+// signed in to agnts, sees who is asking, and approves or denies.
 const { t } = useI18n()
 const route = useRoute()
 const session = useSession()

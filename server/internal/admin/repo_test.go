@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
 func TestValidateDerivesKind(t *testing.T) {

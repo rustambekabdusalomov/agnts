@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"hiro/internal/domain"
-	"hiro/internal/store/postgres"
-	"hiro/internal/vcs"
+	"agnts/internal/domain"
+	"agnts/internal/store/postgres"
+	"agnts/internal/vcs"
 )
 
 // Insight is one observation; the client words it in the user's language.
@@ -71,7 +71,7 @@ func insights(a postgres.Analytics) []Insight {
 	}
 
 	c := a.Current
-	if total := c.WaitMin + c.HiroMin; total > 0 && c.WaitMin > 0 {
+	if total := c.WaitMin + c.AgntsMin; total > 0 && c.WaitMin > 0 {
 		out = append(out, Insight{Kind: "waiting", Values: map[string]string{
 			"share": itoa(c.WaitMin / total * 100), "review": itoa(c.ReviewMin)}})
 	}
@@ -125,7 +125,7 @@ type RepoActivityView struct {
 	Environments []vcs.Environment
 	Members      []vcs.Member
 	Local        []LocalBranchView
-	Tickets      map[string]string // branch -> ticket key, for hiro's branches
+	Tickets      map[string]string // branch -> ticket key, for agnts's branches
 }
 
 // Page sizes on the repository page.
@@ -183,7 +183,7 @@ type LocalBranchView struct {
 	Unpushed int // commits origin lacks (for LocalUnpushed)
 }
 
-// localBranches reads hiro's clones and compares each branch with the git
+// localBranches reads agnts's clones and compares each branch with the git
 // host's live branch list, or with the clone's last fetch when the host
 // cannot be reached.
 func (r *Repos) localBranches(ctx context.Context, repo domain.Repository) ([]LocalBranchView, error) {

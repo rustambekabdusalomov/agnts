@@ -5,6 +5,6 @@
     "langPhone": "Phone language",
     "signedInTo": "Signed in to {server}",
     "pipelineRuns": "Pipeline runs",
-    "loginLede": "Sign in to your hiro server to answer questions, review changes and follow runs."
+    "loginLede": "Sign in to your agnts server to answer questions, review changes and follow runs."
   }
 }

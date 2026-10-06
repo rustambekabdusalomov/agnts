@@ -1,4 +1,4 @@
-# hiro mobile (Flutter)
+# agnts mobile (Flutter)
 
 The phone app: home (what needs you, live runs, plan usage), tickets with a
 pinned action bar (answer, approve, request changes, reject, retry, stop),
@@ -16,24 +16,24 @@ Requires Flutter 3.44 or newer.
 ```sh
 flutter upgrade
 cd apps/mobile
-flutter create --platforms=ios,android --org dev.hiro --project-name hiro_mobile .
-(cd packages/hiro_api && dart run build_runner build --delete-conflicting-outputs)
+flutter create --platforms=ios,android --org dev.agnts --project-name agnts_mobile .
+(cd packages/agnts_api && dart run build_runner build --delete-conflicting-outputs)
 flutter pub get
-dart run flutter_launcher_icons   # app icon from assets/icon/ (hiro's mark)
+dart run flutter_launcher_icons   # app icon from assets/icon/ (agnts's mark)
 flutter run
 ```
 
 ### Push notifications
 
 1. Create a Firebase project and add an iOS and an Android app
-   (`dev.hiro.hiro_mobile`).
+   (`dev.agnts.agnts_mobile`).
 2. Run `flutterfire configure` here, or put `google-services.json` in
    `android/app/` and `GoogleService-Info.plist` in `ios/Runner/`.
 3. iOS: enable Push Notifications and Background Modes → Remote notifications
    in Xcode, and upload an APNs key in Firebase (Project settings → Cloud
    Messaging).
 4. On the server, download a service account key (Project settings → Service
-   accounts) and set `HIRO_FCM_CREDENTIALS` to its path.
+   accounts) and set `AGNTS_FCM_CREDENTIALS` to its path.
 
 Without Firebase files the app still works; push is simply off.
 
@@ -46,4 +46,4 @@ Without Firebase files the app still works; push is simply off.
 ## Generated code
 
 Run `make gen` from the repository root after changing the spec or the
-dictionaries. It writes `lib/l10n/app_*.arb` and `packages/hiro_api/`.
+dictionaries. It writes `lib/l10n/app_*.arb` and `packages/agnts_api/`.

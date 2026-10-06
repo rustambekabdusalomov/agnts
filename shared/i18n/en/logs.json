@@ -1,7 +1,7 @@
 {
   "logs": {
     "title": "Logs",
-    "lede": "Every step hiro takes, recorded as it happens. Use it to see where time goes and why runs stop.",
+    "lede": "Every step agnts takes, recorded as it happens. Use it to see where time goes and why runs stop.",
     "live": "Live",
     "exportJson": "Export JSON",
     "exportCsv": "Export CSV",
@@ -17,7 +17,7 @@
     "whereTime": "Where the time goes",
     "whereTimeSub": "Average time spent in each step, across all tickets and tasks",
     "noData": "No data",
-    "legendHiro": "hiro working",
+    "legendAgnts": "agnts working",
     "legendYou": "Waiting on you",
     "eventsTitle": "Events",
     "eventsSub": "{n, plural, one {# event shown} other {# events shown}}, newest first. Select a row to see its raw data.",

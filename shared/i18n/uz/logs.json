@@ -1,7 +1,7 @@
 {
   "logs": {
     "title": "Loglar",
-    "lede": "hiro har bir qadami sodir boʻlishi bilan yoziladi. Vaqt qayerga ketayotgani va ishlar nega toʻxtayotganini shu yerda koʻrasiz.",
+    "lede": "agnts har bir qadami sodir boʻlishi bilan yoziladi. Vaqt qayerga ketayotgani va ishlar nega toʻxtayotganini shu yerda koʻrasiz.",
     "live": "Jonli",
     "exportJson": "JSON eksport",
     "exportCsv": "CSV eksport",
@@ -17,7 +17,7 @@
     "whereTime": "Vaqt qayerga ketyapti",
     "whereTimeSub": "Barcha tiket va vazifalar boʻyicha har bir bosqichdagi oʻrtacha vaqt",
     "noData": "Maʼlumot yoʻq",
-    "legendHiro": "hiro ishlayapti",
+    "legendAgnts": "agnts ishlayapti",
     "legendYou": "Sizni kutish",
     "eventsTitle": "Hodisalar",
     "eventsSub": "{n} ta hodisa koʻrsatilgan, avval yangilari. Maʼlumotni koʻrish uchun qatorni tanlang.",

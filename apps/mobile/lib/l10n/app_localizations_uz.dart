@@ -13,7 +13,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get analyticsLede =>
-      'hiro vaqt oʻtishi bilan siz uchun qanchalik yaxshi ishlayapti: unumdorlik, sifat, vaqt qayerga ketadi va tarifingizga qanchaga tushadi.';
+      'agnts vaqt oʻtishi bilan siz uchun qanchalik yaxshi ishlayapti: unumdorlik, sifat, vaqt qayerga ketadi va tarifingizga qanchaga tushadi.';
 
   @override
   String get analyticsPeriod => 'Davr';
@@ -37,7 +37,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get analyticsEmpty =>
-      'hiro tiketlarni olib, ishga tushirganda grafiklar toʻladi. Boshlash uchun Jira vazifasiga belgi qoʻying yoki vazifa yarating.';
+      'agnts tiketlarni olib, ishga tushirganda grafiklar toʻladi. Boshlash uchun Jira vazifasiga belgi qoʻying yoki vazifa yarating.';
 
   @override
   String get analyticsKpiPushed => 'Yuborilgan tiketlar';
@@ -60,10 +60,10 @@ class AppLocalizationsUz extends AppLocalizations {
   String get analyticsKpiFirstTryNote => 'Oʻzgartirish soʻralmagan';
 
   @override
-  String get analyticsKpiHiro => 'Bitta tiketga hiro vaqti';
+  String get analyticsKpiAgnts => 'Bitta tiketga agnts vaqti';
 
   @override
-  String get analyticsKpiHiroNote => 'Tahlil, kod yozish va testlar';
+  String get analyticsKpiAgntsNote => 'Tahlil, kod yozish va testlar';
 
   @override
   String get analyticsKpiWait => 'Sizni kutish';
@@ -116,10 +116,10 @@ class AppLocalizationsUz extends AppLocalizations {
   String get analyticsSpeed => 'Tezlik';
 
   @override
-  String get analyticsSpeedSub => 'Bitta tiketga oʻrtacha vaqt: hiro ishi va sizni kutish';
+  String get analyticsSpeedSub => 'Bitta tiketga oʻrtacha vaqt: agnts ishi va sizni kutish';
 
   @override
-  String get analyticsHiroWorking => 'hiro ishlayapti';
+  String get analyticsAgntsWorking => 'agnts ishlayapti';
 
   @override
   String get analyticsWaitingOnYou => 'Sizni kutish';
@@ -134,7 +134,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get analyticsTurns => 'Bitta tiketga qadamlar';
 
   @override
-  String get analyticsTurnsSub => 'Kamroq qadam — hiro tezroq yoʻl topadi va limitni kamroq sarflaydi';
+  String get analyticsTurnsSub => 'Kamroq qadam — agnts tezroq yoʻl topadi va limitni kamroq sarflaydi';
 
   @override
   String get analyticsAvgTurns => 'Oʻrtacha qadamlar';
@@ -208,10 +208,31 @@ class AppLocalizationsUz extends AppLocalizations {
   String get analyticsNoUsage => 'Bu davrda limit maʼlumotlari yoʻq.';
 
   @override
+  String get analyticsSpend => 'Token sarfi';
+
+  @override
+  String get analyticsSpendSub => 'Claude kuniga sarflagan tokenlar, kirish va chiqish';
+
+  @override
+  String get analyticsSpendTokens => 'Kirish va chiqish tokenlari';
+
+  @override
+  String get analyticsSpendCost => 'API narxlarida';
+
+  @override
+  String get analyticsSpendStages => 'Bosqichlar boʻyicha sarf';
+
+  @override
+  String get analyticsSpendStagesSub => 'Tokenlar qayerga ketgani, eng qimmati yuqorida';
+
+  @override
+  String get analyticsNoSpend => 'Bu davrda Claude ishga tushirilmagan.';
+
+  @override
   String get analyticsRepos => 'Repozitoriylar boʻyicha';
 
   @override
-  String get analyticsReposSub => 'hiro qayerda eng yaxshi ishlaydi va qayerda qiynaladi';
+  String get analyticsReposSub => 'agnts qayerda eng yaxshi ishlaydi va qayerda qiynaladi';
 
   @override
   String get analyticsColRepo => 'Repozitoriy';
@@ -226,7 +247,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get analyticsColSuccess => 'Muvaffaqiyat darajasi';
 
   @override
-  String get analyticsColHiro => 'hiro vaqti';
+  String get analyticsColAgnts => 'agnts vaqti';
 
   @override
   String get analyticsColClaudeMd => 'CLAUDE.md';
@@ -254,7 +275,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String analyticsHoursSub(String hour) {
-    return 'hiro qachon ishlaydi, davr boʻyicha jami. Eng band soat: $hour:00';
+    return 'agnts qachon ishlaydi, davr boʻyicha jami. Eng band soat: $hour:00';
   }
 
   @override
@@ -281,7 +302,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String analyticsInsightStopsTests(String n) {
-    return 'Toʻxtagan ishlarning aksariyati ($n) yiqilgan testlar bilan tugaydi. Tiketlardagi aniq qabul mezonlari hiro\'ga ish qachon tayyorligini bilishga yordam beradi.';
+    return 'Toʻxtagan ishlarning aksariyati ($n) yiqilgan testlar bilan tugaydi. Tiketlardagi aniq qabul mezonlari agnts\'ga ish qachon tayyorligini bilishga yordam beradi.';
   }
 
   @override
@@ -291,7 +312,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String analyticsInsightNight(String pct) {
-    return 'hiro ishining $pct% siz oflayn boʻlgan 22:00 dan 07:00 gacha boʻlgan vaqtga toʻgʻri keladi.';
+    return 'agnts ishining $pct% siz oflayn boʻlgan 22:00 dan 07:00 gacha boʻlgan vaqtga toʻgʻri keladi.';
   }
 
   @override
@@ -305,7 +326,7 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
-  String get appName => 'hiro';
+  String get appName => 'agnts';
 
   @override
   String get appTagline => 'Hech uxlamaydigan agentingiz';
@@ -395,7 +416,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String dashboardLede(String date) {
-    return '$date. hiro nima qilayotgani va sizni nima kutayotgani.';
+    return '$date. agnts nima qilayotgani va sizni nima kutayotgani.';
   }
 
   @override
@@ -432,14 +453,14 @@ class AppLocalizationsUz extends AppLocalizations {
   String get dashboardWaitingTitle => 'Sizni kutish';
 
   @override
-  String get dashboardWaitingSub => 'Avval eng eskilari. Bu yerdagi har bir daqiqa — hiro ishlay olmaydigan daqiqa.';
+  String get dashboardWaitingSub => 'Avval eng eskilari. Bu yerdagi har bir daqiqa — agnts ishlay olmaydigan daqiqa.';
 
   @override
   String get dashboardOpenInbox => 'Kiruvchilarni ochish';
 
   @override
   String get dashboardNothingWaiting =>
-      'Hozir sizni hech narsa kutmayapti. Javob yoki tekshiruv kerak boʻlsa, hiro tiketlarni shu yerda koʻrsatadi.';
+      'Hozir sizni hech narsa kutmayapti. Javob yoki tekshiruv kerak boʻlsa, agnts tiketlarni shu yerda koʻrsatadi.';
 
   @override
   String get dashboardColTicket => 'Tiket';
@@ -524,13 +545,13 @@ class AppLocalizationsUz extends AppLocalizations {
   String get dashboardTodayTitle => 'Bugun soatlar boʻyicha';
 
   @override
-  String get dashboardTodaySub => 'Bugungi hodisalar. Siz uxlayotganda ham hiro ishlayveradi.';
+  String get dashboardTodaySub => 'Bugungi hodisalar. Siz uxlayotganda ham agnts ishlayveradi.';
 
   @override
   String get dashboardTodayAria => 'Bugungi hodisalar soatlar boʻyicha';
 
   @override
-  String get dashboardLegendHiro => 'hiro ishlayapti';
+  String get dashboardLegendAgnts => 'agnts ishlayapti';
 
   @override
   String get dashboardLegendYou => 'Sizning harakatlaringiz';
@@ -602,6 +623,155 @@ class AppLocalizationsUz extends AppLocalizations {
   String get dashboardNoActivity => 'Hozircha faollik yoʻq.';
 
   @override
+  String get followUpsTitle => 'Keyingi tiketlar';
+
+  @override
+  String get followUpsSub =>
+      'agnts fikricha, bu tiketni oxiriga yetkazish uchun yana nima kerak. Keraklilarini tanlang: ular navbatda yaratiladi va siz ishga tushirmaguningizcha ishlamaydi.';
+
+  @override
+  String get followUpsMode => 'Keyingi tiket takliflari';
+
+  @override
+  String get followUpsModeInherit => 'Sozlamalardagidek';
+
+  @override
+  String get followUpsModeOn => 'Yoqilgan';
+
+  @override
+  String get followUpsModeOff => 'Oʻchirilgan';
+
+  @override
+  String get followUpsModeHint =>
+      'Yoqilganda agnts ishlari bu tiketga yana kerak boʻlgan tiketlarni taklif qiladi. Har bir prompt biroz uzunroq boʻladi.';
+
+  @override
+  String get followUpsOffEmpty =>
+      'Bu tiket uchun takliflar oʻchirilgan. Yoqsangiz, keyingi ish uni tugatish uchun yana nima kerakligini taklif qiladi.';
+
+  @override
+  String get followUpsOnEmpty => 'Hozircha hech narsa taklif qilinmagan. Koʻp tiketlarga davom kerak emas.';
+
+  @override
+  String get followUpsType_prerequisite => 'Oldindan kerak';
+
+  @override
+  String get followUpsType_split => 'Alohida ajratish';
+
+  @override
+  String get followUpsType_unfinished => 'Bajarilmagan';
+
+  @override
+  String get followUpsType_gap => 'Boʻshliq';
+
+  @override
+  String get followUpsSource_analyze => 'tahlildan';
+
+  @override
+  String get followUpsSource_work => 'ishdan';
+
+  @override
+  String get followUpsSource_review => 'kod koʻrigidan';
+
+  @override
+  String get followUpsSource_manual => 'koʻrik izohidan';
+
+  @override
+  String followUpsPick(String title) {
+    return '“$title” ni yaratish';
+  }
+
+  @override
+  String get followUpsEditTitle => 'Tiket nomi';
+
+  @override
+  String get followUpsServes => 'Nima uchun';
+
+  @override
+  String get followUpsDetails => 'Batafsil';
+
+  @override
+  String get followUpsWaitsForDone => 'Bu tiket ishiga tayanadi: tiket tugagach yaratish mumkin.';
+
+  @override
+  String get followUpsTarget => 'Qanday yaratish';
+
+  @override
+  String get followUpsTargetLocal => 'Mahalliy vazifa';
+
+  @override
+  String get followUpsTargetJira => 'Jira vazifasi';
+
+  @override
+  String get followUpsJiraOff => 'U yerda vazifa ochish uchun Jira\'ni ulang';
+
+  @override
+  String followUpsCreate(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count ta tiket yaratish', zero: 'Tiketlarni yaratish');
+    return '$_temp0';
+  }
+
+  @override
+  String get followUpsQueuedHint => 'Yaratilgan tiketlar siz ishga tushirmaguningizcha navbatda turadi.';
+
+  @override
+  String get followUpsDismiss => 'Rad etish';
+
+  @override
+  String followUpsDismissedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count ta rad etilgan taklif');
+    return '$_temp0';
+  }
+
+  @override
+  String get followUpsChildren => 'Shu tiketdan yaratilgan';
+
+  @override
+  String get followUpsFollowUpOf => 'Davomi';
+
+  @override
+  String followUpsCreatedNotice(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count ta tiket yaratildi');
+    return '$_temp0, ishga tushirguningizcha navbatda.';
+  }
+
+  @override
+  String followUpsFailedItem(String title, String error) {
+    return '$title: $error';
+  }
+
+  @override
+  String get followUpsFromFinding => 'Keyingi tiketga';
+
+  @override
+  String get followUpsFromFindingDone => 'Davom sifatida taklif qilindi';
+
+  @override
+  String get followUpsFromFindingHint => 'Bu oʻzgarishdan tashqaridagi ish uchun: qaytarish oʻrniga alohida tiket sifatida taklif qilish';
+
+  @override
+  String followUpsOpenBadge(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count ta taklif');
+    return '$_temp0';
+  }
+
+  @override
+  String get followUpsSettingLabel => 'Keyingi tiketlarni taklif qilish';
+
+  @override
+  String get followUpsSettingHelp =>
+      'Tahlil, ish va koʻrik jarayonlari tiketni tugatish uchun yana kerak boʻlgan tiketlarni taklif qiladi: oldindan kerak ishlar, ajratiladigan qismlar, bajarilmagan ishlar, hisobot topgan boʻshliqlar. Qaysilarini yaratishni siz hal qilasiz. Har bir prompt biroz uzayishi sababli sukut boʻyicha oʻchirilgan; tiket buni oʻzi uchun yoqishi mumkin.';
+
+  @override
+  String get followUpsNotifyLabel => 'Keyingi tiketlar taklif qilindi';
+
+  @override
+  String get followUpsJiraIssueType => 'Davomlar uchun vazifa turi';
+
+  @override
+  String get followUpsJiraIssueTypeHelp => 'Davomni Jira\'da yaratganingizda agnts ochadigan Jira vazifalari turi. Sukut boʻyicha: Task.';
+
+  @override
   String get formSave => 'Oʻzgarishlarni saqlash';
 
   @override
@@ -656,11 +826,11 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get implementSubPlan =>
-      'hiro shu rejani bajarsin: shu bilan bogʻlangan kod vazifasi, reja uning topshirigʻi boʻladi. Diffni odatdagidek siz tekshirasiz.';
+      'agnts shu rejani bajarsin: shu bilan bogʻlangan kod vazifasi, reja uning topshirigʻi boʻladi. Diffni odatdagidek siz tekshirasiz.';
 
   @override
   String get implementSubBug =>
-      'hiro taklif qilingan tuzatishni kiritsin: shu bilan bogʻlangan kod vazifasi, tekshiruv uning topshirigʻi boʻladi. Diffni odatdagidek siz tekshirasiz.';
+      'agnts taklif qilingan tuzatishni kiritsin: shu bilan bogʻlangan kod vazifasi, tekshiruv uning topshirigʻi boʻladi. Diffni odatdagidek siz tekshirasiz.';
 
   @override
   String get implementImplement => 'Rejani bajarish';
@@ -685,7 +855,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get integrationsLede =>
-      'hiro ishlaydigan xizmatlar. Tokenlar serveringizda shifrlangan holda saqlanadi va faqat har bir sahifada koʻrsatilgan amallar uchun ishlatiladi.';
+      'agnts ishlaydigan xizmatlar. Tokenlar serveringizda shifrlangan holda saqlanadi va faqat har bir sahifada koʻrsatilgan amallar uchun ishlatiladi.';
 
   @override
   String get integrationsName_jira => 'Jira';
@@ -697,7 +867,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get integrationsName_claude => 'Claude';
 
   @override
-  String get integrationsDesc_jira => 'hiro belgisi bor tiketlarni olish va ularning holatini yangilab borish.';
+  String get integrationsDesc_jira => 'agnts belgisi bor tiketlarni olish va ularning holatini yangilab borish.';
 
   @override
   String get integrationsDesc_github => 'Kodni klonlash, branchlarni yuborish va pull requestlar ochish.';
@@ -725,7 +895,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String integrationsDisconnectConfirm(String name) {
-    return '$name uzilsinmi? hiro tokenni unutadi va undan foydalanishni toʻxtatadi.';
+    return '$name uzilsinmi? agnts tokenni unutadi va undan foydalanishni toʻxtatadi.';
   }
 
   @override
@@ -778,18 +948,18 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get integrationsTokenStep1_jira =>
-      'hiro nomidan ishlaydigan Atlassian hisobiga kiring va Account settings → Security → API tokens boʻlimini oching (yoki quyidagi tugmadan foydalaning).';
+      'agnts nomidan ishlaydigan Atlassian hisobiga kiring va Account settings → Security → API tokens boʻlimini oching (yoki quyidagi tugmadan foydalaning).';
 
   @override
   String get integrationsTokenStep2_jira =>
-      'Create API token ni bosing (scopes bilan boʻlganini emas), nom bering (masalan, hiro) va amal qilish muddatini tanlang.';
+      'Create API token ni bosing (scopes bilan boʻlganini emas), nom bering (masalan, agnts) va amal qilish muddatini tanlang.';
 
   @override
   String get integrationsTokenStep3_jira => 'Tokenni nusxalang va pastga joylang. Atlassian uni faqat bir marta koʻrsatadi.';
 
   @override
   String get integrationsTokenStep4_jira =>
-      'Sayt maydoniga Jira manzilingizni (https://your-team.atlassian.net), hisob emailiga esa oʻsha hisobning emailini kiriting. Hisob hiro ishlaydigan Jira loyihalariga kira olishi kerak.';
+      'Sayt maydoniga Jira manzilingizni (https://your-team.atlassian.net), hisob emailiga esa oʻsha hisobning emailini kiriting. Hisob agnts ishlaydigan Jira loyihalariga kira olishi kerak.';
 
   @override
   String get integrationsConnectSub_github =>
@@ -810,7 +980,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get integrationsTokenStep2_github =>
-      'Nom bering (masalan, hiro), amal qilish muddatini tanlang, Resource ownerʼda repozitoriylar egasi boʻlgan hisob yoki tashkilotni, Repository accessʼda esa hiro ishlaydigan repozitoriylarni tanlang.';
+      'Nom bering (masalan, agnts), amal qilish muddatini tanlang, Resource ownerʼda repozitoriylar egasi boʻlgan hisob yoki tashkilotni, Repository accessʼda esa agnts ishlaydigan repozitoriylarni tanlang.';
 
   @override
   String get integrationsTokenStep3_github =>
@@ -858,7 +1028,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get integrationsAccessToken => 'Kirish tokeni';
 
   @override
-  String get integrationsTokenHelp => 'Serveringizda shifrlangan holda saqlanadi. hiro uni boshqa koʻrsatmaydi.';
+  String get integrationsTokenHelp => 'Serveringizda shifrlangan holda saqlanadi. agnts uni boshqa koʻrsatmaydi.';
 
   @override
   String get integrationsScopes => 'Kerakli ruxsatlar';
@@ -930,25 +1100,25 @@ class AppLocalizationsUz extends AppLocalizations {
   String get integrationsPickup => 'Olish qoidalari';
 
   @override
-  String get integrationsPickupSub => 'hiro qaysi tiketlarni oladi';
+  String get integrationsPickupSub => 'agnts qaysi tiketlarni oladi';
 
   @override
   String get integrationsLabel => 'Belgi';
 
   @override
-  String get integrationsLabelHelp => 'Tiketni hiro\'ga topshirish uchun shu belgini qoʻshing';
+  String get integrationsLabelHelp => 'Tiketni agnts\'ga topshirish uchun shu belgini qoʻshing';
 
   @override
-  String get integrationsQuery => 'hiro bajaradigan soʻrov';
+  String get integrationsQuery => 'agnts bajaradigan soʻrov';
 
   @override
   String get integrationsStatuses => 'Holat yangilanishlari';
 
   @override
-  String get integrationsStatusesSub => 'hiro doskangizda tiketlarni qanday siljitadi. Holatni oʻzgartirmaslik uchun boʻsh qoldiring.';
+  String get integrationsStatusesSub => 'agnts doskangizda tiketlarni qanday siljitadi. Holatni oʻzgartirmaslik uchun boʻsh qoldiring.';
 
   @override
-  String get integrationsMapStarted => 'hiro boshlaganda';
+  String get integrationsMapStarted => 'agnts boshlaganda';
 
   @override
   String get integrationsMapReview => 'Oʻzgarishlar yuborilganda';
@@ -963,10 +1133,10 @@ class AppLocalizationsUz extends AppLocalizations {
   String get integrationsComments => 'Izohlar';
 
   @override
-  String get integrationsCommentsSub => 'hiro tiketga nima yozadi';
+  String get integrationsCommentsSub => 'agnts tiketga nima yozadi';
 
   @override
-  String get integrationsCQuestions => 'hiro savollari';
+  String get integrationsCQuestions => 'agnts savollari';
 
   @override
   String get integrationsCQuestionsHelp => 'Hamkasblar nima noaniq boʻlganini koʻrishi uchun';
@@ -996,7 +1166,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get integrationsSyncHelp =>
-      'Jira yangi tiketlarni darhol webhookga yuboradi; yetkazish oʻtkazib yuborilgan boʻlsa, hiro har soatda ham tekshiradi.';
+      'Jira yangi tiketlarni darhol webhookga yuboradi; yetkazish oʻtkazib yuborilgan boʻlsa, agnts har soatda ham tekshiradi.';
 
   @override
   String get integrationsWebhook => 'Webhook';
@@ -1008,7 +1178,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get integrationsSecretsHelp =>
-      'hiro faqat soʻrovga mos tiketlarni oʻqiydi va faqat shu yerda yoqqan holat oʻzgarishlari va izohlarni yozadi.';
+      'agnts faqat soʻrovga mos tiketlarni oʻqiydi va faqat shu yerda yoqqan holat oʻzgarishlari va izohlarni yozadi.';
 
   @override
   String get integrationsGithubHelp =>
@@ -1026,7 +1196,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get integrationsConnectSub_telegram =>
-      '@BotFather orqali bot yarating, tokenini qoʻying va chat id ingizni kiriting. hiro webhookni oʻzi roʻyxatdan oʻtkazadi.';
+      '@BotFather orqali bot yarating, tokenini qoʻying va chat id ingizni kiriting. agnts webhookni oʻzi roʻyxatdan oʻtkazadi.';
 
   @override
   String get integrationsTokenOpen_telegram => '@BotFatherʼni ochish';
@@ -1060,7 +1230,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String integrationsTelegramHttps(String url) {
-    return 'Telegram yangilanishlarni faqat ochiq HTTPS manzilga yuboradi, bu hiro esa $url da ishlayapti, shuning uchun bu yerda ulanish amalga oshmaydi. Telegramʼni HTTPS bilan ishlaydigan serverda ulang, u yerda HIRO_PUBLIC_URL https:// manzil boʻladi.';
+    return 'Telegram yangilanishlarni faqat ochiq HTTPS manzilga yuboradi, bu agnts esa $url da ishlayapti, shuning uchun bu yerda ulanish amalga oshmaydi. Telegramʼni HTTPS bilan ishlaydigan serverda ulang, u yerda AGNTS_PUBLIC_URL https:// manzil boʻladi.';
   }
 
   @override
@@ -1082,7 +1252,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get integrationsTokenStep2_gitlab =>
-      'Nom bering (masalan, hiro) va amal qilish muddatini belgilang. Loyihalaringizga push qila oladigan hisobdan foydalaning.';
+      'Nom bering (masalan, agnts) va amal qilish muddatini belgilang. Loyihalaringizga push qila oladigan hisobdan foydalaning.';
 
   @override
   String get integrationsTokenStep3_gitlab => 'api, read_repository va write_repository ruxsatlarini belgilang.';
@@ -1129,7 +1299,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get integrationsGitWebhookWhy =>
-      'Pull yoki merge request birlashtirilganda hiro tiketni belgilaydi va Jira vazifasini Jira sahifasida tanlangan holatga oʻtkazadi. Pipeline hodisalari repozitoriy sahifasini yangilab turadi.';
+      'Pull yoki merge request birlashtirilganda agnts tiketni belgilaydi va Jira vazifasini Jira sahifasida tanlangan holatga oʻtkazadi. Pipeline hodisalari repozitoriy sahifasini yangilab turadi.';
 
   @override
   String get kindTitle => 'Turi';
@@ -1138,7 +1308,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get kindAuto => 'Avto';
 
   @override
-  String get kindAutoHint => 'hiro tiketni oʻqiyotganda turini oʻzi tanlaydi';
+  String get kindAutoHint => 'agnts tiketni oʻqiyotganda turini oʻzi tanlaydi';
 
   @override
   String get kindCode => 'Kod';
@@ -1171,7 +1341,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get kindBugHint => 'Xatoning asl sababini topib, tuzatishni taklif qilish. Kod oʻzgarmaydi.';
 
   @override
-  String get kindPickerHint => 'hiro nima qiladi. Tanlangan tur oʻzgarmaydi; «Avto»da hiro tiketni oʻqib, oʻzi hal qiladi.';
+  String get kindPickerHint => 'agnts nima qiladi. Tanlangan tur oʻzgarmaydi; «Avto»da agnts tiketni oʻqib, oʻzi hal qiladi.';
 
   @override
   String kindSwitchTo(String kind) {
@@ -1183,7 +1353,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get learnLede =>
-      'hiro yuborgan oʻzgarish bu kodda avval boʻlmagan narsani qilsa, hiro uni shu yerda tushuntiradi: bu nima, nega kerak boʻldi, qayerga qarash kerak va qisqa test.';
+      'agnts yuborgan oʻzgarish bu kodda avval boʻlmagan narsani qilsa, agnts uni shu yerda tushuntiradi: bu nima, nega kerak boʻldi, qayerga qarash kerak va qisqa test.';
 
   @override
   String learnViewNew(String n) {
@@ -1209,7 +1379,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get learnNone =>
-      'Hozircha darslar yoʻq. hiro repozitoriy uchun yangi narsa qiladigan oʻzgarishni yuborganda, dars shu yerda paydo boʻladi.';
+      'Hozircha darslar yoʻq. agnts repozitoriy uchun yangi narsa qiladigan oʻzgarishni yuborganda, dars shu yerda paydo boʻladi.';
 
   @override
   String get learnNoneNew => 'Hammasi oʻrganilgan: har bir dars belgilangan.';
@@ -1335,16 +1505,16 @@ class AppLocalizationsUz extends AppLocalizations {
   String get learnTicketSub => 'Bu oʻzgarish repozitoriyga birinchi marta olib kirgan usullar.';
 
   @override
-  String get learnTicketPending => 'hiro bu oʻzgarishda repozitoriyda avval boʻlmagan narsani qidirmoqda.';
+  String get learnTicketPending => 'agnts bu oʻzgarishda repozitoriyda avval boʻlmagan narsani qidirmoqda.';
 
   @override
   String get learnTicketNone => 'Yangi narsa yoʻq: oʻzgarish faqat repozitoriyda bor usullardan foydalangan.';
 
   @override
-  String get learnTicketFailed => 'hiro bu oʻzgarishni oʻqib chiqa olmadi. Sababi logda.';
+  String get learnTicketFailed => 'agnts bu oʻzgarishni oʻqib chiqa olmadi. Sababi logda.';
 
   @override
-  String get learnTicketIdle => 'hiro bu oʻzgarishdan hali dars qidirmagan.';
+  String get learnTicketIdle => 'agnts bu oʻzgarishdan hali dars qidirmagan.';
 
   @override
   String get learnLearnNow => 'Yangisini topish';
@@ -1353,13 +1523,13 @@ class AppLocalizationsUz extends AppLocalizations {
   String get learnLearnAgain => 'Yana koʻrish';
 
   @override
-  String get learnQueued => 'Navbatda: hiro bu oʻzgarishda yangi narsa qidiradi.';
+  String get learnQueued => 'Navbatda: agnts bu oʻzgarishda yangi narsa qidiradi.';
 
   @override
   String get learnQueueTitle => 'Oʻrganish navbati';
 
   @override
-  String get learnQueueSub => 'Yuborilgan tiketlar: hiro ulardan yangi usullarni qidiradi, tiketlarga ishchi kerak boʻlmaganda bittadan.';
+  String get learnQueueSub => 'Yuborilgan tiketlar: agnts ulardan yangi usullarni qidiradi, tiketlarga ishchi kerak boʻlmaganda bittadan.';
 
   @override
   String get learnStatus_running => 'Oʻrganilmoqda';
@@ -1402,7 +1572,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get learnQueueLede =>
-      'Yuborilgan tiketlar: hiro ulardan kodda avval ishlatilmagan usullarni qidiradi. Istalgan tugagan tiketni navbatga qoʻying yoki xato boʻlganini qaytadan ishga tushiring.';
+      'Yuborilgan tiketlar: agnts ulardan kodda avval ishlatilmagan usullarni qidiradi. Istalgan tugagan tiketni navbatga qoʻying yoki xato boʻlganini qaytadan ishga tushiring.';
 
   @override
   String get learnQueueEmpty => 'Hozir oʻrganadigan narsa yoʻq: barcha yuborilgan tiketlar oʻqilgan.';
@@ -1412,7 +1582,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get logsLede =>
-      'hiro har bir qadami sodir boʻlishi bilan yoziladi. Vaqt qayerga ketayotgani va ishlar nega toʻxtayotganini shu yerda koʻrasiz.';
+      'agnts har bir qadami sodir boʻlishi bilan yoziladi. Vaqt qayerga ketayotgani va ishlar nega toʻxtayotganini shu yerda koʻrasiz.';
 
   @override
   String get logsLive => 'Jonli';
@@ -1464,7 +1634,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get logsNoData => 'Maʼlumot yoʻq';
 
   @override
-  String get logsLegendHiro => 'hiro ishlayapti';
+  String get logsLegendAgnts => 'agnts ishlayapti';
 
   @override
   String get logsLegendYou => 'Sizni kutish';
@@ -1608,7 +1778,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get mcpTitle => 'Claude chat (MCP)';
 
   @override
-  String get mcpSub => 'hiro ni brauzer, kompyuter va telefondagi Claude orqali boshqaring';
+  String get mcpSub => 'agnts ni brauzer, kompyuter va telefondagi Claude orqali boshqaring';
 
   @override
   String get mcpUrl => 'Konnektor URL';
@@ -1651,11 +1821,11 @@ class AppLocalizationsUz extends AppLocalizations {
   String get mcpRevoked => 'Barcha Claude ulanishlari oʻchirildi';
 
   @override
-  String get mcpConsentTitle => 'Claude ni hiro ga ulash';
+  String get mcpConsentTitle => 'Claude ni agnts ga ulash';
 
   @override
   String mcpConsentAsk(String client, String user) {
-    return '$client hiro dan $user nomidan foydalanmoqchi.';
+    return '$client agnts dan $user nomidan foydalanmoqchi.';
   }
 
   @override
@@ -1677,7 +1847,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get mdetailApprove => 'Tasdiqlash';
 
   @override
-  String get mdetailWorking => 'hiro ishlayapti. Sizni kutganda bildirishnoma olasiz.';
+  String get mdetailWorking => 'agnts ishlayapti. Sizni kutganda bildirishnoma olasiz.';
 
   @override
   String get mdetailCopyPr => 'Pull request havolasini nusxalash';
@@ -1699,13 +1869,13 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
-  String get mhomeActAnswers => 'hiro savollariga javob bering';
+  String get mhomeActAnswers => 'agnts savollariga javob bering';
 
   @override
   String get mhomeActReview => 'Oʻzgarishlarni koʻrib chiqing';
 
   @override
-  String get mhomeActStopped => 'Toʻxtadi. hiro nimani sinashini ayting';
+  String get mhomeActStopped => 'Toʻxtadi. agnts nimani sinashini ayting';
 
   @override
   String get mhomeActResume => 'Tayyor boʻlganingizda davom ettiring';
@@ -1740,16 +1910,16 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get mmoreLoginLede =>
-      'Savollarga javob berish, oʻzgarishlarni koʻrib chiqish va ishlarni kuzatish uchun hiro serveringizga kiring.';
+      'Savollarga javob berish, oʻzgarishlarni koʻrib chiqish va ishlarni kuzatish uchun agnts serveringizga kiring.';
 
   @override
   String get mobileServer => 'Server manzili';
 
   @override
-  String get mobileServerHint => 'https://hiro.example.com';
+  String get mobileServerHint => 'https://agnts.example.com';
 
   @override
-  String get mobileServerInvalid => 'hiro serveringizning https manzilini kiriting.';
+  String get mobileServerInvalid => 'agnts serveringizning https manzilini kiriting.';
 
   @override
   String get mobileHome => 'Bosh sahifa';
@@ -2024,13 +2194,13 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
-  String get mtasksActAnswers => 'hiro savollariga javob bering';
+  String get mtasksActAnswers => 'agnts savollariga javob bering';
 
   @override
   String get mtasksActReview => 'Oʻzgarishlarni koʻrib chiqing';
 
   @override
-  String get mtasksActFailed => 'Toʻxtadi. hiro nimani sinab koʻrishini ayting';
+  String get mtasksActFailed => 'Toʻxtadi. agnts nimani sinab koʻrishini ayting';
 
   @override
   String get mtasksActResume => 'Tayyor boʻlganingizda davom ettiring';
@@ -2163,16 +2333,16 @@ class AppLocalizationsUz extends AppLocalizations {
   String get navLedeNeeds => 'Javobingiz yoki tekshiruvingizni kutayotgan tiketlar hamda toʻxtagan ishga tushirishlar.';
 
   @override
-  String get navLedeRunning => 'hiro hozir ishlayotgan tiketlar.';
+  String get navLedeRunning => 'agnts hozir ishlayotgan tiketlar.';
 
   @override
-  String get navLedeQueue => 'hiro belgisi bor, hali tahlil qilinmagan tiketlar.';
+  String get navLedeQueue => 'agnts belgisi bor, hali tahlil qilinmagan tiketlar.';
 
   @override
   String get navLedeDone => 'Yuborilgan yoki rad etilgan tiketlar.';
 
   @override
-  String get navLedeAll => 'hiro Jira\'dan olgan barcha tiketlar.';
+  String get navLedeAll => 'agnts Jira\'dan olgan barcha tiketlar.';
 
   @override
   String get navKnowledge => 'Bilim';
@@ -2223,12 +2393,12 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String repoBranchesSub(String branch) {
-    return 'hiro har bir tiket uchun alohida branchda ishlaydi va hech qachon $branch ga commit qilmaydi.';
+    return 'agnts har bir tiket uchun alohida branchda ishlaydi va hech qachon $branch ga commit qilmaydi.';
   }
 
   @override
   String repoArchivedBanner(String time) {
-    return '$time arxivlangan. Siz tiklamaguningizcha hiro bu repozitoriy uchun yangi tiketlar va vazifalar olmaydi.';
+    return '$time arxivlangan. Siz tiklamaguningizcha agnts bu repozitoriy uchun yangi tiketlar va vazifalar olmaydi.';
   }
 
   @override
@@ -2247,7 +2417,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String repoLocalSub(String branch) {
-    return 'hiro serveringizdagi oʻz klonlaridagi branchlar. hiro avval shu yerga commit qiladi va faqat siz tasdiqlagandan keyin yuboradi; $branch ga hech qachon commit qilmaydi.';
+    return 'agnts serveringizdagi oʻz klonlaridagi branchlar. agnts avval shu yerga commit qiladi va faqat siz tasdiqlagandan keyin yuboradi; $branch ga hech qachon commit qilmaydi.';
   }
 
   @override
@@ -2268,7 +2438,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get repoPush_differs => 'Origin oʻzgargan';
 
   @override
-  String get repoPush_local_help => 'Faqat serverda. Koʻrib chiqishni tasdiqlaganingizda hiro uni yuboradi.';
+  String get repoPush_local_help => 'Faqat serverda. Koʻrib chiqishni tasdiqlaganingizda agnts uni yuboradi.';
 
   @override
   String get repoPush_pushed_help => 'Originda xuddi shu commit bor.';
@@ -2277,10 +2447,10 @@ class AppLocalizationsUz extends AppLocalizations {
   String get repoPush_unpushed_help => 'Originda branch bor, lekin oxirgi commitlarsiz.';
 
   @override
-  String get repoPush_differs_help => 'Kimdir bu branchga hiro nusxasida yoʻq commitlarni yubordi.';
+  String get repoPush_differs_help => 'Kimdir bu branchga agnts nusxasida yoʻq commitlarni yubordi.';
 
   @override
-  String get repoLocalNone => 'Hozircha lokal branchlar yoʻq. hiro tiket ustida ishlashni boshlaganda branch yaratadi.';
+  String get repoLocalNone => 'Hozircha lokal branchlar yoʻq. agnts tiket ustida ishlashni boshlaganda branch yaratadi.';
 
   @override
   String get repoCommitsSub => 'Asosiy branchdagi soʻnggi commitlar, yangilari yuqorida.';
@@ -2363,7 +2533,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String repoKpiBranchesNote(String n) {
-    return '$n tasi hiro dan';
+    return '$n tasi agnts dan';
   }
 
   @override
@@ -2371,7 +2541,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String repoKpiCommitsNote(String n) {
-    return '$n tasini hiro yozgan';
+    return '$n tasini agnts yozgan';
   }
 
   @override
@@ -2410,7 +2580,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get repoDeployHelp =>
-      'hiro tiket tekshiruvingizga kelishidan oldin tekshiruvlarni kutadi. Deploy har doim sizning qaroringiz va Claude chatidan mavjud emas.';
+      'agnts tiket tekshiruvingizga kelishidan oldin tekshiruvlarni kutadi. Deploy har doim sizning qaroringiz va Claude chatidan mavjud emas.';
 
   @override
   String repoDeployBranch(String branch) {
@@ -2450,7 +2620,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get reposLede =>
-      'hiro ishlashi mumkin boʻlgan kod. Har bir ishga tushirish repozitoriyni serveringizdagi yangi konteynerga klonlaydi va biror narsa tekshiruvingizga yetguncha shu tekshiruvlarni bajaradi.';
+      'agnts ishlashi mumkin boʻlgan kod. Har bir ishga tushirish repozitoriyni serveringizdagi yangi konteynerga klonlaydi va biror narsa tekshiruvingizga yetguncha shu tekshiruvlarni bajaradi.';
 
   @override
   String get reposAdd => 'Repozitoriy qoʻshish';
@@ -2490,7 +2660,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String reposArchiveConfirm(String name) {
-    return '$name arxivlansinmi? Tiketlari va tarixi saqlanadi, lekin hiro u uchun yangi Jira tiketlari va vazifalarni olmaydi. Boshlangan ishlar yakunlanadi. Istalgan vaqtda tiklashingiz mumkin.';
+    return '$name arxivlansinmi? Tiketlari va tarixi saqlanadi, lekin agnts u uchun yangi Jira tiketlari va vazifalarni olmaydi. Boshlangan ishlar yakunlanadi. Istalgan vaqtda tiklashingiz mumkin.';
   }
 
   @override
@@ -2539,7 +2709,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String reposMissingHelp(num count) {
-    return '$count ta repozitoriyda CLAUDE.md yoʻq. hiro baribir ishlaydi, lekin yoʻl topishga koʻproq qadam sarflaydi. Loyiha tuzilmasi, kelishuvlar va test buyruqlari bilan fayl qoʻshing.';
+    return '$count ta repozitoriyda CLAUDE.md yoʻq. agnts baribir ishlaydi, lekin yoʻl topishga koʻproq qadam sarflaydi. Loyiha tuzilmasi, kelishuvlar va test buyruqlari bilan fayl qoʻshing.';
   }
 
   @override
@@ -2581,7 +2751,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get reposNoMatch => 'Qidiruvingizga mos repozitoriy yoʻq.';
 
   @override
-  String get reposNone => 'Hali repozitoriylar yoʻq. hiro ishlashi uchun birinchisini qoʻshing.';
+  String get reposNone => 'Hali repozitoriylar yoʻq. agnts ishlashi uchun birinchisini qoʻshing.';
 
   @override
   String get reposDrawerSub => 'Shaxsiy loyiha vazifalarini, Jira loyiha kaliti boʻlsa Jira tiketlarini ham qabul qiladi';
@@ -2593,13 +2763,13 @@ class AppLocalizationsUz extends AppLocalizations {
   String get reposCloneUrl => 'Klonlash URL manzili';
 
   @override
-  String get reposCloneHelp => 'github.com yoki ulangan GitLab dagi https manzil. hiro shu xostning tokeni bilan klon qiladi va yuboradi.';
+  String get reposCloneHelp => 'github.com yoki ulangan GitLab dagi https manzil. agnts shu xostning tokeni bilan klon qiladi va yuboradi.';
 
   @override
   String get reposJiraProject => 'Jira loyiha kaliti';
 
   @override
-  String get reposJiraHelp => 'Ixtiyoriy. Ushbu Jira loyihasidagi hiro belgisi bor tiketlar shu yerda bajariladi.';
+  String get reposJiraHelp => 'Ixtiyoriy. Ushbu Jira loyihasidagi agnts belgisi bor tiketlar shu yerda bajariladi.';
 
   @override
   String get reposTaskPrefix => 'Vazifa kaliti prefiksi';
@@ -2637,7 +2807,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get reposClaudeFound => 'Repozitoriy ildizida topildi';
 
   @override
-  String get reposClaudeMissing => 'Yoʻq. hiro baribir ishlaydi, lekin CLAUDE.md qadamlarni tejaydi.';
+  String get reposClaudeMissing => 'Yoʻq. agnts baribir ishlaydi, lekin CLAUDE.md qadamlarni tejaydi.';
 
   @override
   String get reposClaudeUnknown => 'Saqlangandan keyin tekshiriladi';
@@ -2656,25 +2826,25 @@ class AppLocalizationsUz extends AppLocalizations {
       'workflow_dispatch li GitHub Actions workflow fayli, masalan deploy.yml. Repozitoriy sahifasidagi Deploy tugmasi uni ishga tushiradi.';
 
   @override
-  String get reviewTitle => 'hiro kod sharhi';
+  String get reviewTitle => 'agnts kod sharhi';
 
   @override
-  String get reviewReportTitle => 'hiro hisobot sharhi';
+  String get reviewReportTitle => 'agnts hisobot sharhi';
 
   @override
   String get reviewSub => 'Siz koʻrib chiqayotganda ikkinchi fikr. U hech qachon tasdiqlashni toʻsmaydi: qarorni siz qabul qilasiz.';
 
   @override
-  String get reviewPending => 'Navbatda: ishchi boʻshashi bilan hiro buni koʻrib chiqadi. Bu orada oʻzingiz koʻrib chiqishingiz mumkin.';
+  String get reviewPending => 'Navbatda: ishchi boʻshashi bilan agnts buni koʻrib chiqadi. Bu orada oʻzingiz koʻrib chiqishingiz mumkin.';
 
   @override
-  String get reviewRunning => 'hiro koʻrib chiqmoqda…';
+  String get reviewRunning => 'agnts koʻrib chiqmoqda…';
 
   @override
   String get reviewFailed => 'Sharh bajarilmadi. Oʻzingiz koʻrib chiqing yoki qayta ishga tushiring.';
 
   @override
-  String get reviewNone => 'hiro buni koʻrib chiqmagan.';
+  String get reviewNone => 'agnts buni koʻrib chiqmagan.';
 
   @override
   String reviewStale(String n) {
@@ -2682,7 +2852,7 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
-  String get reviewRun => 'hiro bilan koʻrib chiqish';
+  String get reviewRun => 'agnts bilan koʻrib chiqish';
 
   @override
   String get reviewRunAgain => 'Qayta koʻrib chiqish';
@@ -2742,7 +2912,7 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
-  String get reviewNoFindings => 'hiro muammo topmadi.';
+  String get reviewNoFindings => 'agnts muammo topmadi.';
 
   @override
   String get reviewStrengths => 'Yaxshi qilingan';
@@ -2772,7 +2942,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get rulesLede =>
-      'hiro har bir tiketda amal qiladigan koʻrsatmalar: barcha repozitoriylar uchun global qoidalar va bitta repozitoriy uchun qoidalar. Claude har bir qoidani tekshiradi va u kuchga kirishidan oldin noaniq joylar haqida savol beradi.';
+      'agnts har bir tiketda amal qiladigan koʻrsatmalar: barcha repozitoriylar uchun global qoidalar va bitta repozitoriy uchun qoidalar. Claude har bir qoidani tekshiradi va u kuchga kirishidan oldin noaniq joylar haqida savol beradi.';
 
   @override
   String get rulesAdd => 'Qoida qoʻshish';
@@ -2844,7 +3014,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get rulesNone =>
-      'Hali qoidalar yoʻq. Jamoangiz qanday ishlashini hiroga aytish uchun qoida qoʻshing: testlar, nomlash, loglash, nimaga tegmaslik kerak.';
+      'Hali qoidalar yoʻq. Jamoangiz qanday ishlashini agntsga aytish uchun qoida qoʻshing: testlar, nomlash, loglash, nimaga tegmaslik kerak.';
 
   @override
   String get rulesNoMatch => 'Mos qoidalar yoʻq.';
@@ -2943,7 +3113,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get rulesReviewAgain => 'Qayta tekshirish';
 
   @override
-  String get rulesInterpretation => 'hiro uni qanday tushunadi';
+  String get rulesInterpretation => 'agnts uni qanday tushunadi';
 
   @override
   String get rulesClarified => 'Tiketlar nimani oladi';
@@ -2988,7 +3158,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get settingsTitle => 'Sozlamalar';
 
   @override
-  String get settingsLede => 'hiro vositalaringizga qanday ulanadi va ish paytida qanday ishlaydi.';
+  String get settingsLede => 'agnts vositalaringizga qanday ulanadi va ish paytida qanday ishlaydi.';
 
   @override
   String get settingsAppearance => 'Koʻrinish';
@@ -3111,7 +3281,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get settingsDeny => 'Taqiqlangan buyruqlar';
 
   @override
-  String get settingsDenyHelp => 'Tiket soʻrasa ham doim rad etiladi. Kodni hiro yuboradi, hech qachon Claude Code emas.';
+  String get settingsDenyHelp => 'Tiket soʻrasa ham doim rad etiladi. Kodni agnts yuboradi, hech qachon Claude Code emas.';
 
   @override
   String get settingsCommits => 'Commitlar va pull requestlar';
@@ -3132,10 +3302,10 @@ class AppLocalizationsUz extends AppLocalizations {
   String get settingsAuthorEmailHelp => 'Sizniki boʻlib koʻrinishi uchun GitHub hisobingizga mos kelishi kerak';
 
   @override
-  String get settingsCoAuthor => 'Co-authored-by: hiro qatorini qoʻshish';
+  String get settingsCoAuthor => 'Co-authored-by: agnts qatorini qoʻshish';
 
   @override
-  String get settingsCoAuthorHelp => 'Hamkasblar qaysi commitlarni hiro yozganini koʻradi';
+  String get settingsCoAuthorHelp => 'Hamkasblar qaysi commitlarni agnts yozganini koʻradi';
 
   @override
   String get settingsPrTitle => 'Pull request sarlavhasi';
@@ -3168,14 +3338,14 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get settingsAutoLearnHelp =>
-      'Yuborilgandan keyin hiro repozitoriyda avval ishlatilmagan usullarni qidiradi va «Oʻrganish» boʻlimida dars yozadi. Limitni faqat kutayotgan tiket boʻlmaganda sarflaydi.';
+      'Yuborilgandan keyin agnts repozitoriyda avval ishlatilmagan usullarni qidiradi va «Oʻrganish» boʻlimida dars yozadi. Limitni faqat kutayotgan tiket boʻlmaganda sarflaydi.';
 
   @override
   String get settingsAutoReview => 'Har bir natijani koʻrib chiqish';
 
   @override
   String get settingsAutoReviewHelp =>
-      'Oʻzgarish yoki hisobot sizni kutayotganda hiro uni koʻrib chiqadi va topilmalarni yonida koʻrsatadi. Tasdiqlashni hech qachon toʻsmaydi.';
+      'Oʻzgarish yoki hisobot sizni kutayotganda agnts uni koʻrib chiqadi va topilmalarni yonida koʻrsatadi. Tasdiqlashni hech qachon toʻsmaydi.';
 
   @override
   String get settingsPauseAbove => 'Bundan yuqorida yangi ish boshlamaslik';
@@ -3199,7 +3369,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get settingsPush => 'Push bildirishnomalar';
 
   @override
-  String get settingsPushHelp => 'Telefoningizdagi hiro ilovasiga';
+  String get settingsPushHelp => 'Telefoningizdagi agnts ilovasiga';
 
   @override
   String get settingsTelegram => 'Telegram xabarlari';
@@ -3220,10 +3390,10 @@ class AppLocalizationsUz extends AppLocalizations {
   String get settingsDone => 'Oʻzgarishlar yuborilganda';
 
   @override
-  String get settingsLessons => 'hiro oʻrganish uchun yangi narsa topganda';
+  String get settingsLessons => 'agnts oʻrganish uchun yangi narsa topganda';
 
   @override
-  String get settingsReviewDone => 'hiro kod sharhi tugaganda';
+  String get settingsReviewDone => 'agnts kod sharhi tugaganda';
 
   @override
   String get settingsOnThisPage => 'Ushbu sahifada';
@@ -3234,6 +3404,98 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get settingsSaved => 'Sozlamalar saqlandi';
+
+  @override
+  String get spendTitle => 'Token sarfi';
+
+  @override
+  String spendSub(String tokens, String cost) {
+    return 'Kirish va chiqishda $tokens token · API narxlarida taxminan $cost';
+  }
+
+  @override
+  String get spendEmpty =>
+      'Hali hech narsa yozilmagan. Sarf agnts bu tiket boʻyicha Claude\'ni birinchi marta ishga tushirgandan keyin koʻrinadi.';
+
+  @override
+  String get spendInput => 'Kirish';
+
+  @override
+  String get spendOutput => 'Chiqish';
+
+  @override
+  String spendCache(String read, String write) {
+    return 'Kesh: $read oʻqilgan, $write yozilgan';
+  }
+
+  @override
+  String spendCalls(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ta ishga tushirish', one: '$n ta ishga tushirish');
+    return '$_temp0';
+  }
+
+  @override
+  String get spendPartial => 'Ishga tushirish toʻxtatilgan, shuning uchun narxi nomaʼlum';
+
+  @override
+  String get spendCostNote =>
+      'Narx — Claude Code\'ning xuddi shu ish uchun API narxlaridagi bahosi. Claude obunasida u toʻlanmaydi; u har bir bosqichning nisbiy ogʻirligini koʻrsatadi.';
+
+  @override
+  String spendTokens(String n) {
+    return '$n token';
+  }
+
+  @override
+  String get spendColTokens => 'Tokenlar';
+
+  @override
+  String get spendStageAnalyze => 'Tahlil';
+
+  @override
+  String get spendStageCoding => 'Kod yozish';
+
+  @override
+  String get spendStageWriting => 'Yozish';
+
+  @override
+  String get spendStageRetry => 'Tuzatishlar va oʻzgarishlar';
+
+  @override
+  String get spendStageReview => 'Kod tekshiruvi';
+
+  @override
+  String get spendStageLearn => 'Saboqlar';
+
+  @override
+  String get spendStageHelper => 'Yordamchi';
+
+  @override
+  String get spendTopTitle => 'Sarf boʻyicha tiketlar';
+
+  @override
+  String spendTopSub(String tokens, String cost) {
+    return 'Kirish va chiqishda $tokens token · API narxlarida taxminan $cost';
+  }
+
+  @override
+  String get spendTopSubEmpty => 'Qaysi tiketlar obunangizni eng koʻp sarflagan';
+
+  @override
+  String get spendTopEmpty => 'Bu davrda Claude ishlari yozilmagan.';
+
+  @override
+  String get spendTopNote =>
+      'Tartib Claude Code narx bahosi boʻyicha, u keshni toʻgʻri hisobga oladi. Ulush — davrdagi taxminiy narxdan. Faqat davr ichidagi sarf hisoblanadi.';
+
+  @override
+  String get spendColStage => 'Eng qimmat bosqich';
+
+  @override
+  String get spendColCost => 'Taxminiy narx';
+
+  @override
+  String get spendColShare => 'Ulush';
 
   @override
   String get stateNew => 'Navbatda';
@@ -3282,7 +3544,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get tasksLede =>
-      'Shaxsiy loyihalaringiz uchun ishlar. Vazifalar hiro ichida qoladi va Jira\'ga tushmaydi. Qolgani bir xil: savollar, kod yozish, sizning tekshiruvingiz.';
+      'Shaxsiy loyihalaringiz uchun ishlar. Vazifalar agnts ichida qoladi va Jira\'ga tushmaydi. Qolgani bir xil: savollar, kod yozish, sizning tekshiruvingiz.';
 
   @override
   String get tasksNew => 'Yangi vazifa';
@@ -3332,7 +3594,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get tasksHelp =>
-      'Faqat siz ishlaydigan repozitoriylar uchun hiro\'ga tasdiqlaganingizdan keyin toʻgʻridan-toʻgʻri main\'ga yuborishga ruxsat berishingiz mumkin. Baribir sizning tekshiruvingizsiz hech narsa yubormaydi.';
+      'Faqat siz ishlaydigan repozitoriylar uchun agnts\'ga tasdiqlaganingizdan keyin toʻgʻridan-toʻgʻri main\'ga yuborishga ruxsat berishingiz mumkin. Baribir sizning tekshiruvingizsiz hech narsa yubormaydi.';
 
   @override
   String get tasksDrawerSub => 'Shaxsiy loyihalaringiz uchun. Jira bilan sinxronlanmaydi.';
@@ -3350,7 +3612,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get tasksFieldDesc => 'Nima qilish kerak';
 
   @override
-  String get tasksDescPh => 'Kerakli natijani tasvirlang. Qanchalik aniq boʻlsa, hiro shuncha kam savol beradi.';
+  String get tasksDescPh => 'Kerakli natijani tasvirlang. Qanchalik aniq boʻlsa, agnts shuncha kam savol beradi.';
 
   @override
   String get tasksPriority => 'Muhimlik';
@@ -3380,7 +3642,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get tasksStartAsk => 'Avval savollar berish';
 
   @override
-  String get tasksStartAskHint => 'hiro kodni oʻqiydi va kod yozishdan oldin soʻraydi. Noaniq ishlar uchun eng yaxshisi.';
+  String get tasksStartAskHint => 'agnts kodni oʻqiydi va kod yozishdan oldin soʻraydi. Noaniq ishlar uchun eng yaxshisi.';
 
   @override
   String get tasksStartCode => 'Darhol kod yozishni boshlash';
@@ -3429,7 +3691,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get ticketPlan => 'Reja';
 
   @override
-  String get ticketAnalysis => 'hiro nimani topdi';
+  String get ticketAnalysis => 'agnts nimani topdi';
 
   @override
   String get ticketQuestions => 'Savollar';
@@ -3552,7 +3814,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get ticketQueuedSub =>
-      'hiro tiket va tegishli kodni oʻqiydi, keyin reja va savollar bilan qaytadi. Bu bosqichda hech narsa oʻzgartirilmaydi.';
+      'agnts tiket va tegishli kodni oʻqiydi, keyin reja va savollar bilan qaytadi. Bu bosqichda hech narsa oʻzgartirilmaydi.';
 
   @override
   String get ticketHeldSub => 'Bu vazifa siz boshlamaguningizcha navbatda turadi.';
@@ -3675,7 +3937,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get ticketReviewSubMain => 'Hali hech narsa serverdan chiqmagan. Tasdiqlash toʻgʻridan-toʻgʻri asosiy branchga yuboradi.';
 
   @override
-  String get ticketWhatHiroDid => 'hiro nima qildi';
+  String get ticketWhatAgntsDid => 'agnts nima qildi';
 
   @override
   String get ticketDiff => 'Oʻzgarishlar';
@@ -3687,7 +3949,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get ticketAssignTitle => 'Pull requestni biriktirish';
 
   @override
-  String get ticketAssignSub => 'Ixtiyoriy. hiro uni ochganda kimga biriktirilishini tanlang.';
+  String get ticketAssignSub => 'Ixtiyoriy. agnts uni ochganda kimga biriktirilishini tanlang.';
 
   @override
   String ticketAssignError(String error) {
@@ -3739,10 +4001,10 @@ class AppLocalizationsUz extends AppLocalizations {
   String get ticketRejectedTitle => 'Rad etildi';
 
   @override
-  String get ticketRejectedSub => 'hiro bu tiket ustida ishlashni toʻxtatdi. Branch yuborilmadi.';
+  String get ticketRejectedSub => 'agnts bu tiket ustida ishlashni toʻxtatdi. Branch yuborilmadi.';
 
   @override
-  String get ticketFailedTitle => 'hiro toʻxtadi';
+  String get ticketFailedTitle => 'agnts toʻxtadi';
 
   @override
   String get ticketFailedUnknown => 'Ish toʻxtadi. Tafsilotlar ish logida.';
@@ -3782,7 +4044,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get ticketStageRetry => 'Qayta urinishlar va soʻralgan oʻzgarishlar';
 
   @override
-  String get ticketStageReview => 'hiro kod sharhi';
+  String get ticketStageReview => 'agnts kod sharhi';
 
   @override
   String ticketModelAuto(String model) {
@@ -3829,7 +4091,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get ticketSrcJira => 'Jira';
 
   @override
-  String get ticketSrcTask => 'hiro vazifasi';
+  String get ticketSrcTask => 'agnts vazifasi';
 
   @override
   String get ticketAfterMain => 'main\'ga yuborish';
@@ -3902,7 +4164,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get ticketRepoTitle => 'Repozitoriy';
 
   @override
-  String get ticketRepoHint => 'hiro shu tiketni qayerda tahlil qiladi va kod yozadi.';
+  String get ticketRepoHint => 'agnts shu tiketni qayerda tahlil qiladi va kod yozadi.';
 
   @override
   String get ticketRepoNone => 'Repozitoriyni tanlang…';
@@ -3928,13 +4190,13 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get ticketQueuedSubReport =>
-      'hiro tiketni (repozitoriy boʻlsa, kodni ham) oʻqiydi va reja hamda savollar bilan qaytadi. Hech narsa oʻzgarmaydi.';
+      'agnts tiketni (repozitoriy boʻlsa, kodni ham) oʻqiydi va reja hamda savollar bilan qaytadi. Hech narsa oʻzgarmaydi.';
 
   @override
   String get ticketAnalyzingTitleNoRepo => 'Tiketni oʻqiyapti';
 
   @override
-  String get ticketAnalyzingSubNoRepo => 'Repozitoriy yoʻq: hiro tiket matni asosida ishlaydi.';
+  String get ticketAnalyzingSubNoRepo => 'Repozitoriy yoʻq: agnts tiket matni asosida ishlaydi.';
 
   @override
   String get ticketStartWriting => 'Hisobotni boshlash';
@@ -4023,7 +4285,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String ticketsEmptyHint(String label) {
-    return 'Jira vazifasiga “$label” belgisini qoʻying, hiro uni oladi.';
+    return 'Jira vazifasiga “$label” belgisini qoʻying, agnts uni oladi.';
   }
 
   @override
@@ -4075,14 +4337,14 @@ class AppLocalizationsUz extends AppLocalizations {
   String get ticketsBoardEmpty => 'Boʻsh';
 
   @override
-  String get ticketsListSub => 'hiro belgili Jira tiketlari hamda shaxsiy loyihalaringiz uchun yaratgan vazifalaringiz.';
+  String get ticketsListSub => 'agnts belgili Jira tiketlari hamda shaxsiy loyihalaringiz uchun yaratgan vazifalaringiz.';
 
   @override
   String get ticketsNoMatch => 'Qidiruvingiz boʻyicha tiket topilmadi.';
 
   @override
   String get ticketsEmptyNeeds =>
-      'Hozir sizni hech narsa kutmayapti. hiro savol bersa yoki oʻzgarishlarni tekshirishingiz kerak boʻlsa, tiketlar shu yerda chiqadi.';
+      'Hozir sizni hech narsa kutmayapti. agnts savol bersa yoki oʻzgarishlarni tekshirishingiz kerak boʻlsa, tiketlar shu yerda chiqadi.';
 
   @override
   String get ticketsEmptyOther => 'Bu yerda hozircha tiket yoʻq.';
@@ -4113,7 +4375,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get usageLede =>
-      'hiro Claude obunangizda ishlaydi. Bu limitlar Claude va Claude Code\'dan oʻzingiz foydalanishingiz bilan umumiy.';
+      'agnts Claude obunangizda ishlaydi. Bu limitlar Claude va Claude Code\'dan oʻzingiz foydalanishingiz bilan umumiy.';
 
   @override
   String get usageCard => 'Tarif limitlari';
@@ -4194,7 +4456,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get usageLimitTitle => 'Limitga yetilganda';
 
   @override
-  String get usageLimitSub => 'Limitga yaqin hiro qanday ishlaydi';
+  String get usageLimitSub => 'Limitga yaqin agnts qanday ishlaydi';
 
   @override
   String usageAbove(String pct) {
@@ -4227,5 +4489,5 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get usageHelp =>
-      'Raqamlar Claude Code har bir ish davomida yuboradigan limit hodisalaridan olinadi. hiro boʻsh turganda kichik yangilash ishi ularni dolzarb saqlaydi.';
+      'Raqamlar Claude Code har bir ish davomida yuboradigan limit hodisalaridan olinadi. agnts boʻsh turganda kichik yangilash ishi ularni dolzarb saqlaydi.';
 }

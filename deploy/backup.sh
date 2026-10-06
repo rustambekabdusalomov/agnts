@@ -7,15 +7,15 @@ keep_days="${BACKUP_KEEP_DAYS:-14}"
 
 dump() {
   ts=$(date +%Y-%m-%dT%H%M)
-  tmp="/backups/.hiro-$ts.dump.partial"
+  tmp="/backups/.agnts-$ts.dump.partial"
   if pg_dump --format=custom --file="$tmp"; then
-    mv "$tmp" "/backups/hiro-$ts.dump"
-    echo "backup: wrote hiro-$ts.dump ($(du -h "/backups/hiro-$ts.dump" | cut -f1))"
+    mv "$tmp" "/backups/agnts-$ts.dump"
+    echo "backup: wrote agnts-$ts.dump ($(du -h "/backups/agnts-$ts.dump" | cut -f1))"
   else
     rm -f "$tmp"
     echo "backup: pg_dump FAILED" >&2
   fi
-  find /backups -name 'hiro-*.dump' -mtime +"$keep_days" -print -delete
+  find /backups -name 'agnts-*.dump' -mtime +"$keep_days" -print -delete
 }
 
 while :; do

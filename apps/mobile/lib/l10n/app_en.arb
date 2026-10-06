@@ -1,7 +1,7 @@
 {
   "@@locale": "en",
   "analyticsTitle": "Analytics",
-  "analyticsLede": "How well hiro works for you over time: throughput, quality, where time goes, and what it costs your plan.",
+  "analyticsLede": "How well agnts works for you over time: throughput, quality, where time goes, and what it costs your plan.",
   "analyticsPeriod": "Period",
   "analyticsDays": "{n} days",
   "@analyticsDays": {
@@ -15,7 +15,7 @@
   "analyticsLoading": "Loading analytics…",
   "analyticsError": "Could not load analytics. Try again.",
   "analyticsEmptyTitle": "No data for this period yet",
-  "analyticsEmpty": "Charts fill in as hiro picks up tickets and runs. Label a Jira issue or create a task to get started.",
+  "analyticsEmpty": "Charts fill in as agnts picks up tickets and runs. Label a Jira issue or create a task to get started.",
   "analyticsKpiPushed": "Tickets pushed",
   "analyticsKpiPushedNote": "of {n} picked up",
   "@analyticsKpiPushedNote": {
@@ -29,8 +29,8 @@
   "analyticsKpiSuccessNote": "Pushed out of picked up",
   "analyticsKpiFirstTry": "Approved on first try",
   "analyticsKpiFirstTryNote": "No changes requested",
-  "analyticsKpiHiro": "hiro time per ticket",
-  "analyticsKpiHiroNote": "Analyze, coding and tests",
+  "analyticsKpiAgnts": "agnts time per ticket",
+  "analyticsKpiAgntsNote": "Analyze, coding and tests",
   "analyticsKpiWait": "Waiting on you",
   "analyticsKpiWaitNote": "Average per ticket",
   "analyticsKpiTurns": "Average turns",
@@ -54,13 +54,13 @@
   "analyticsAfterChanges": "Approved after changes",
   "analyticsDonutSub": "pushed",
   "analyticsSpeed": "Speed",
-  "analyticsSpeedSub": "Average minutes per ticket: hiro working versus waiting on you",
-  "analyticsHiroWorking": "hiro working",
+  "analyticsSpeedSub": "Average minutes per ticket: agnts working versus waiting on you",
+  "analyticsAgntsWorking": "agnts working",
   "analyticsWaitingOnYou": "Waiting on you",
   "analyticsSteps": "Where the time goes",
   "analyticsStepsSub": "Average per ticket, by step",
   "analyticsTurns": "Turns per ticket",
-  "analyticsTurnsSub": "Fewer turns means hiro finds its way faster and uses less of your plan",
+  "analyticsTurnsSub": "Fewer turns means agnts finds its way faster and uses less of your plan",
   "analyticsAvgTurns": "Average turns",
   "analyticsStops": "Why runs stop",
   "analyticsStopsSub": "{n, plural, one {{n} stopped run in this period} other {{n} stopped runs in this period}}",
@@ -91,13 +91,20 @@
   "analyticsAvgPeak": "Average peak",
   "analyticsDaysAbove": "Days above 80%",
   "analyticsNoUsage": "No usage readings in this period.",
+  "analyticsSpend": "Token spend",
+  "analyticsSpendSub": "Tokens Claude used per day, input and output",
+  "analyticsSpendTokens": "Tokens in and out",
+  "analyticsSpendCost": "At API prices",
+  "analyticsSpendStages": "Spend by stage",
+  "analyticsSpendStagesSub": "Where the tokens went, costliest first",
+  "analyticsNoSpend": "No Claude runs recorded in this period.",
   "analyticsRepos": "By repository",
-  "analyticsReposSub": "Where hiro works best, and where it struggles",
+  "analyticsReposSub": "Where agnts works best, and where it struggles",
   "analyticsColRepo": "Repository",
   "analyticsColSource": "Source",
   "analyticsColTickets": "Tickets",
   "analyticsColSuccess": "Success rate",
-  "analyticsColHiro": "hiro time",
+  "analyticsColAgnts": "agnts time",
   "analyticsColClaudeMd": "CLAUDE.md",
   "analyticsSrcJira": "Jira",
   "analyticsSrcTask": "Task",
@@ -106,7 +113,7 @@
   "analyticsMdUnknown": "Unknown",
   "analyticsNoRepos": "No repository had tickets in this period.",
   "analyticsHours": "Activity by hour",
-  "analyticsHoursSub": "When hiro works, summed over the period. Busiest hour: {hour}:00",
+  "analyticsHoursSub": "When agnts works, summed over the period. Busiest hour: {hour}:00",
   "@analyticsHoursSub": {
     "placeholders": {
       "hour": {
@@ -140,7 +147,7 @@
       }
     }
   },
-  "analyticsInsightStopsTests": "Most stopped runs ({n}) end on failing tests. Clearer acceptance criteria in tickets help hiro know when it's done.",
+  "analyticsInsightStopsTests": "Most stopped runs ({n}) end on failing tests. Clearer acceptance criteria in tickets help agnts know when it's done.",
   "@analyticsInsightStopsTests": {
     "placeholders": {
       "n": {
@@ -156,7 +163,7 @@
       }
     }
   },
-  "analyticsInsightNight": "{pct}% of hiro's work happens between 22:00 and 07:00, while you're offline.",
+  "analyticsInsightNight": "{pct}% of agnts's work happens between 22:00 and 07:00, while you're offline.",
   "@analyticsInsightNight": {
     "placeholders": {
       "pct": {
@@ -183,7 +190,7 @@
       }
     }
   },
-  "appName": "hiro",
+  "appName": "agnts",
   "appTagline": "Your no sleep agent",
   "authTitle": "Sign in",
   "authLede": "Use your account and the code from your authenticator app.",
@@ -257,7 +264,7 @@
       }
     }
   },
-  "dashboardLede": "{date}. Here's what hiro is doing and what's waiting on you.",
+  "dashboardLede": "{date}. Here's what agnts is doing and what's waiting on you.",
   "@dashboardLede": {
     "placeholders": {
       "date": {
@@ -301,9 +308,9 @@
   },
   "dashboardPlanSession": "Plan session",
   "dashboardWaitingTitle": "Waiting on you",
-  "dashboardWaitingSub": "Oldest first. Every minute here is a minute hiro can't work.",
+  "dashboardWaitingSub": "Oldest first. Every minute here is a minute agnts can't work.",
   "dashboardOpenInbox": "Open inbox",
-  "dashboardNothingWaiting": "Nothing is waiting on you. hiro will show tickets here when it needs answers or a review.",
+  "dashboardNothingWaiting": "Nothing is waiting on you. agnts will show tickets here when it needs answers or a review.",
   "dashboardColTicket": "Ticket",
   "dashboardColStatus": "Status",
   "dashboardColWaiting": "Waiting",
@@ -347,9 +354,9 @@
   "dashboardPipeReview": "Your review",
   "dashboardPipeStopped": "Stopped",
   "dashboardTodayTitle": "Today by hour",
-  "dashboardTodaySub": "Events recorded today. hiro keeps working while you sleep.",
+  "dashboardTodaySub": "Events recorded today. agnts keeps working while you sleep.",
   "dashboardTodayAria": "Events today by hour",
-  "dashboardLegendHiro": "hiro working",
+  "dashboardLegendAgnts": "agnts working",
   "dashboardLegendYou": "Your actions",
   "dashboardLegendProblems": "Warnings and errors",
   "dashboardWeekTitle": "This week",
@@ -373,6 +380,94 @@
   "dashboardRecentTitle": "Recent activity",
   "dashboardLogs": "Logs",
   "dashboardNoActivity": "No activity yet.",
+  "followUpsTitle": "Follow-up tickets",
+  "followUpsSub": "What finishing this ticket still needs, as agnts sees it. Pick the ones you want: they are created queued, so nothing runs until you start them.",
+  "followUpsMode": "Follow-up suggestions",
+  "followUpsModeInherit": "As in Settings",
+  "followUpsModeOn": "On",
+  "followUpsModeOff": "Off",
+  "followUpsModeHint": "When on, agnts's runs suggest tickets this one still needs. It makes every prompt a little longer.",
+  "followUpsOffEmpty": "Follow-up suggestions are off for this ticket. Turn them on to have the next run suggest what finishing it still needs.",
+  "followUpsOnEmpty": "Nothing suggested yet. Most tickets need no follow-up.",
+  "followUpsType_prerequisite": "Prerequisite",
+  "followUpsType_split": "Split off",
+  "followUpsType_unfinished": "Left undone",
+  "followUpsType_gap": "Gap",
+  "followUpsSource_analyze": "from the analysis",
+  "followUpsSource_work": "from the work",
+  "followUpsSource_review": "from the code review",
+  "followUpsSource_manual": "from a review finding",
+  "followUpsPick": "Create “{title}”",
+  "@followUpsPick": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "followUpsEditTitle": "Ticket title",
+  "followUpsServes": "Why",
+  "followUpsDetails": "Details",
+  "followUpsWaitsForDone": "It builds on this ticket's work: you can create it once this ticket is done.",
+  "followUpsTarget": "Create as",
+  "followUpsTargetLocal": "Local task",
+  "followUpsTargetJira": "Jira issue",
+  "followUpsJiraOff": "Connect Jira to file issues there",
+  "followUpsCreate": "{count, plural, =0 {Create tickets} one {Create {count} ticket} other {Create {count} tickets}}",
+  "@followUpsCreate": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "followUpsQueuedHint": "Created tickets wait in the queue until you start them.",
+  "followUpsDismiss": "Dismiss",
+  "followUpsDismissedCount": "{count, plural, one {{count} dismissed suggestion} other {{count} dismissed suggestions}}",
+  "@followUpsDismissedCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "followUpsChildren": "Created from this ticket",
+  "followUpsFollowUpOf": "Follow-up of",
+  "followUpsCreatedNotice": "{count, plural, one {{count} ticket created} other {{count} tickets created}}, queued until you start them.",
+  "@followUpsCreatedNotice": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "followUpsFailedItem": "{title}: {error}",
+  "@followUpsFailedItem": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "followUpsFromFinding": "Make follow-up",
+  "followUpsFromFindingDone": "Suggested as a follow-up",
+  "followUpsFromFindingHint": "For work outside this change: suggest it as a follow-up ticket instead of sending it back",
+  "followUpsOpenBadge": "{count, plural, one {{count} follow-up} other {{count} follow-ups}}",
+  "@followUpsOpenBadge": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "followUpsSettingLabel": "Suggest follow-up tickets",
+  "followUpsSettingHelp": "Analysis, work and review runs suggest tickets that finishing a ticket still needs: prerequisites, parts to split off, work left undone, gaps a report found. You pick which to create. Off by default because it makes every prompt a little longer; a ticket can turn it on for itself.",
+  "followUpsNotifyLabel": "Follow-up tickets suggested",
+  "followUpsJiraIssueType": "Issue type for follow-ups",
+  "followUpsJiraIssueTypeHelp": "The type of the Jira issues agnts files when you create a follow-up in Jira. Default: Task.",
   "formSave": "Save changes",
   "formSaving": "Saving…",
   "formDiscard": "Discard",
@@ -397,8 +492,8 @@
   "formSearch": "Search",
   "formNoMatch": "No matches",
   "implementTitle": "Next step",
-  "implementSubPlan": "Have hiro carry out this plan: a code task linked to this one, with the plan as its brief. You review the diff as usual.",
-  "implementSubBug": "Have hiro make the proposed fix: a code task linked to this one, with the investigation as its brief. You review the diff as usual.",
+  "implementSubPlan": "Have agnts carry out this plan: a code task linked to this one, with the plan as its brief. You review the diff as usual.",
+  "implementSubBug": "Have agnts make the proposed fix: a code task linked to this one, with the investigation as its brief. You review the diff as usual.",
   "implementImplement": "Implement this plan",
   "implementFix": "Fix this bug",
   "implementPickRepo": "Repository to implement it in",
@@ -406,11 +501,11 @@
   "implementDoneBy": "Implemented by",
   "implementImplements": "Implements",
   "integrationsTitle": "Integrations",
-  "integrationsLede": "The services hiro works with. Tokens are stored encrypted on your server and only used for the actions listed on each page.",
+  "integrationsLede": "The services agnts works with. Tokens are stored encrypted on your server and only used for the actions listed on each page.",
   "integrationsName_jira": "Jira",
   "integrationsName_github": "GitHub",
   "integrationsName_claude": "Claude",
-  "integrationsDesc_jira": "Pick up tickets with the hiro label and keep their status up to date.",
+  "integrationsDesc_jira": "Pick up tickets with the agnts label and keep their status up to date.",
   "integrationsDesc_github": "Clone code, push branches and open pull requests.",
   "integrationsDesc_claude": "Your Claude subscription, which runs Claude Code.",
   "integrationsConnected": "Connected",
@@ -419,7 +514,7 @@
   "integrationsManage": "Manage",
   "integrationsTest": "Test connection",
   "integrationsDisconnect": "Disconnect",
-  "integrationsDisconnectConfirm": "Disconnect {name}? hiro forgets the token and stops using it.",
+  "integrationsDisconnectConfirm": "Disconnect {name}? agnts forgets the token and stops using it.",
   "@integrationsDisconnectConfirm": {
     "placeholders": {
       "name": {
@@ -465,16 +560,16 @@
   },
   "integrationsConnectSub_jira": "Use an API token from your Atlassian account.",
   "integrationsTokenOpen_jira": "Open Atlassian API tokens",
-  "integrationsTokenStep1_jira": "Sign in to the Atlassian account hiro should act as, and open Account settings → Security → API tokens (or use the button below).",
-  "integrationsTokenStep2_jira": "Click Create API token (not the one with scopes), name it (for example hiro) and pick an expiration date.",
+  "integrationsTokenStep1_jira": "Sign in to the Atlassian account agnts should act as, and open Account settings → Security → API tokens (or use the button below).",
+  "integrationsTokenStep2_jira": "Click Create API token (not the one with scopes), name it (for example agnts) and pick an expiration date.",
   "integrationsTokenStep3_jira": "Copy the token and paste it below. Atlassian shows it only once.",
-  "integrationsTokenStep4_jira": "For Site, enter your Jira address (https://your-team.atlassian.net), and for Account email the email of that same account. It needs access to the Jira projects hiro works on.",
+  "integrationsTokenStep4_jira": "For Site, enter your Jira address (https://your-team.atlassian.net), and for Account email the email of that same account. It needs access to the Jira projects agnts works on.",
   "integrationsConnectSub_github": "Create a fine-grained personal access token with the permissions below, then paste it here.",
   "integrationsTokenHow": "How to get the token",
   "integrationsTokenCommand": "Command",
   "integrationsTokenOpen_github": "Open GitHub token page",
   "integrationsTokenStep1_github": "On GitHub, open Settings → Developer settings → Personal access tokens → Fine-grained tokens and click Generate new token (or use the button below).",
-  "integrationsTokenStep2_github": "Name it (for example hiro), pick an expiration, set Resource owner to the account or organization that owns your repositories, and under Repository access choose the repositories hiro may work on.",
+  "integrationsTokenStep2_github": "Name it (for example agnts), pick an expiration, set Resource owner to the account or organization that owns your repositories, and under Repository access choose the repositories agnts may work on.",
   "integrationsTokenStep3_github": "Under Repository permissions set Contents and Pull requests to Read and write. For the Pipelines tab also set Actions to Read (Read and write to use Deploy) and Deployments to Read. Metadata (read) is added automatically.",
   "integrationsTokenStep4_github": "Click Generate token, copy it (it starts with github_pat_) and paste it below. GitHub shows it only once. For an organization, an owner may need to approve the token first.",
   "integrationsConnectSub_claude": "Run `claude setup-token` on a machine where you are signed in to your Claude plan, then paste the token.",
@@ -488,7 +583,7 @@
   "integrationsApiToken": "API token",
   "integrationsApiTokenHelp": "id.atlassian.com → Security → API tokens",
   "integrationsAccessToken": "Access token",
-  "integrationsTokenHelp": "Stored encrypted on your server. hiro never shows it again.",
+  "integrationsTokenHelp": "Stored encrypted on your server. agnts never shows it again.",
   "integrationsScopes": "Required permissions",
   "integrationsPermContents": "Read and write. Clone code and push branches.",
   "integrationsPermPulls": "Read and write. Open pull requests.",
@@ -534,19 +629,19 @@
   "integrationsEventsValue": "Issue created, Issue updated",
   "integrationsConnection": "Connection",
   "integrationsPickup": "Pickup rules",
-  "integrationsPickupSub": "Which tickets hiro takes",
+  "integrationsPickupSub": "Which tickets agnts takes",
   "integrationsLabel": "Label",
-  "integrationsLabelHelp": "Add this label to a ticket to hand it to hiro",
-  "integrationsQuery": "The query hiro runs",
+  "integrationsLabelHelp": "Add this label to a ticket to hand it to agnts",
+  "integrationsQuery": "The query agnts runs",
   "integrationsStatuses": "Status updates",
-  "integrationsStatusesSub": "How hiro moves tickets on your board. Leave empty to keep the status.",
-  "integrationsMapStarted": "When hiro starts",
+  "integrationsStatusesSub": "How agnts moves tickets on your board. Leave empty to keep the status.",
+  "integrationsMapStarted": "When agnts starts",
   "integrationsMapReview": "When changes are pushed",
   "integrationsMapRejected": "When you reject the changes",
   "integrationsKeepStatus": "Keep status",
   "integrationsComments": "Comments",
-  "integrationsCommentsSub": "What hiro writes on the ticket",
-  "integrationsCQuestions": "hiro's questions",
+  "integrationsCommentsSub": "What agnts writes on the ticket",
+  "integrationsCQuestions": "agnts's questions",
   "integrationsCQuestionsHelp": "So teammates can see what was unclear",
   "integrationsCPlan": "The plan before coding",
   "integrationsCPr": "Link to the pull request",
@@ -565,7 +660,7 @@
       }
     }
   },
-  "integrationsSyncHelp": "Jira sends new tickets to the webhook right away; hiro also checks every hour in case a delivery was missed.",
+  "integrationsSyncHelp": "Jira sends new tickets to the webhook right away; agnts also checks every hour in case a delivery was missed.",
   "integrationsWebhook": "Webhook",
   "integrationsSaved": "{name} settings saved",
   "@integrationsSaved": {
@@ -575,12 +670,12 @@
       }
     }
   },
-  "integrationsSecretsHelp": "hiro only reads tickets that match the query, and only writes the status changes and comments you turn on here.",
+  "integrationsSecretsHelp": "agnts only reads tickets that match the query, and only writes the status changes and comments you turn on here.",
   "integrationsGithubHelp": "Use a token from an account that can push to your repositories. Commits are authored with the name and email in Settings.",
   "integrationsClaudeHelp": "The token lasts about a year. Renew it with `claude setup-token` before it expires.",
   "integrationsName_telegram": "Telegram",
   "integrationsDesc_telegram": "Messages when something needs you. Answer questions and approve or request changes right from the chat.",
-  "integrationsConnectSub_telegram": "Create a bot with @BotFather, paste its token, and add your chat id. hiro registers the webhook for you.",
+  "integrationsConnectSub_telegram": "Create a bot with @BotFather, paste its token, and add your chat id. agnts registers the webhook for you.",
   "integrationsTokenOpen_telegram": "Open @BotFather",
   "integrationsChatIdFind": "Find my chat id",
   "integrationsTokenStep1_telegram": "In Telegram, open @BotFather (button below), send /newbot and choose a name and a username ending in bot.",
@@ -590,7 +685,7 @@
   "integrationsChatId": "Your chat id",
   "integrationsChatIdHelp": "The chat allowed to use the bot. Only this chat can act.",
   "integrationsTelegramHelp": "Approve and Reject ask for a second tap to confirm, and confirmations expire after 10 minutes.",
-  "integrationsTelegramHttps": "Telegram only sends updates to a public HTTPS address, and this hiro runs on {url}, so connecting will fail here. Connect Telegram on a deployment with HTTPS, where HIRO_PUBLIC_URL is an https:// address.",
+  "integrationsTelegramHttps": "Telegram only sends updates to a public HTTPS address, and this agnts runs on {url}, so connecting will fail here. Connect Telegram on a deployment with HTTPS, where AGNTS_PUBLIC_URL is an https:// address.",
   "@integrationsTelegramHttps": {
     "placeholders": {
       "url": {
@@ -603,7 +698,7 @@
   "integrationsConnectSub_gitlab": "Create a personal access token with the scopes below, then paste it here.",
   "integrationsTokenOpen_gitlab": "Open GitLab token page",
   "integrationsTokenStep1_gitlab": "Fill in the instance URL below first. Then in GitLab open your avatar → Edit profile → Access tokens → Add new token (or use the button below).",
-  "integrationsTokenStep2_gitlab": "Name it (for example hiro) and set an expiration date. Use an account that can push to your projects.",
+  "integrationsTokenStep2_gitlab": "Name it (for example agnts) and set an expiration date. Use an account that can push to your projects.",
   "integrationsTokenStep3_gitlab": "Select the scopes api, read_repository and write_repository.",
   "integrationsTokenStep4_gitlab": "Click Create token, copy it (it starts with glpat-) and paste it below. GitLab shows it only once.",
   "integrationsGitlabUrl": "Instance URL",
@@ -617,10 +712,10 @@
   "integrationsGitWebhookSteps_gitlab": "In the project go to Settings → Webhooks. Paste the URL, put the secret below in Secret token.",
   "integrationsGitEvents_github": "Pull requests, Workflow runs",
   "integrationsGitEvents_gitlab": "Merge request events, Pipeline events",
-  "integrationsGitWebhookWhy": "When a pull or merge request is merged, hiro marks the ticket merged and moves the Jira issue to the merged status set on the Jira page. Pipeline events keep the repository page current.",
+  "integrationsGitWebhookWhy": "When a pull or merge request is merged, agnts marks the ticket merged and moves the Jira issue to the merged status set on the Jira page. Pipeline events keep the repository page current.",
   "kindTitle": "Kind",
   "kindAuto": "Auto",
-  "kindAutoHint": "hiro picks the kind while reading the ticket",
+  "kindAutoHint": "agnts picks the kind while reading the ticket",
   "kindCode": "Code",
   "kindCodeHint": "Implement a change. Needs a repository; ends in a pull request.",
   "kindTest": "Tests",
@@ -631,7 +726,7 @@
   "kindAnalysisHint": "Research a question and report the findings. Changes no code.",
   "kindBug": "Bug investigation",
   "kindBugHint": "Find the root cause of a bug and propose a fix. Changes no code.",
-  "kindPickerHint": "What hiro produces. Choosing a kind makes it final; Auto lets hiro decide while reading the ticket.",
+  "kindPickerHint": "What agnts produces. Choosing a kind makes it final; Auto lets agnts decide while reading the ticket.",
   "kindSwitchTo": "Switch to {kind}",
   "@kindSwitchTo": {
     "placeholders": {
@@ -641,7 +736,7 @@
     }
   },
   "learnTitle": "Learn",
-  "learnLede": "When a change hiro ships does something this codebase never did before, hiro explains it here: what it is, why the change needed it, where to look, and a short quiz.",
+  "learnLede": "When a change agnts ships does something this codebase never did before, agnts explains it here: what it is, why the change needed it, where to look, and a short quiz.",
   "learnViewNew": "New ({n})",
   "@learnViewNew": {
     "placeholders": {
@@ -662,7 +757,7 @@
   "learnViewLabel": "Show",
   "learnAllRepos": "All repositories",
   "learnRepoLabel": "Repository",
-  "learnNone": "No lessons yet. When hiro pushes a change that does something new for its repository, the lesson appears here.",
+  "learnNone": "No lessons yet. When agnts pushes a change that does something new for its repository, the lesson appears here.",
   "learnNoneNew": "You're up to date: every lesson is marked learned.",
   "learnNoMatch": "No lessons match the search.",
   "learnFromTicket": "From {key}",
@@ -735,15 +830,15 @@
   "learnLevel_advanced": "Advanced",
   "learnTicketTitle": "What's new in this change",
   "learnTicketSub": "Techniques this change brought to the repository for the first time.",
-  "learnTicketPending": "hiro is reading this change for anything the repository never did before.",
+  "learnTicketPending": "agnts is reading this change for anything the repository never did before.",
   "learnTicketNone": "Nothing new: this change only used techniques the repository already had.",
-  "learnTicketFailed": "hiro could not finish reading this change. The log shows why.",
-  "learnTicketIdle": "hiro has not looked at this change for lessons yet.",
+  "learnTicketFailed": "agnts could not finish reading this change. The log shows why.",
+  "learnTicketIdle": "agnts has not looked at this change for lessons yet.",
   "learnLearnNow": "Find what's new",
   "learnLearnAgain": "Look again",
-  "learnQueued": "Queued: hiro will look at this change for something new.",
+  "learnQueued": "Queued: agnts will look at this change for something new.",
   "learnQueueTitle": "Learning queue",
-  "learnQueueSub": "Pushed tickets hiro reads for new techniques, one at a time when no ticket needs a worker.",
+  "learnQueueSub": "Pushed tickets agnts reads for new techniques, one at a time when no ticket needs a worker.",
   "learnStatus_running": "Learning now",
   "learnStatus_pending": "Queued",
   "learnStatus_failed": "Failed",
@@ -782,10 +877,10 @@
       }
     }
   },
-  "learnQueueLede": "Pushed tickets hiro reads for techniques the codebase never used before. Queue any done ticket, or retry one that failed.",
+  "learnQueueLede": "Pushed tickets agnts reads for techniques the codebase never used before. Queue any done ticket, or retry one that failed.",
   "learnQueueEmpty": "Nothing to learn from right now: every pushed ticket has been read.",
   "logsTitle": "Logs",
-  "logsLede": "Every step hiro takes, recorded as it happens. Use it to see where time goes and why runs stop.",
+  "logsLede": "Every step agnts takes, recorded as it happens. Use it to see where time goes and why runs stop.",
   "logsLive": "Live",
   "logsExportJson": "Export JSON",
   "logsExportCsv": "Export CSV",
@@ -818,7 +913,7 @@
   "logsWhereTime": "Where the time goes",
   "logsWhereTimeSub": "Average time spent in each step, across all tickets and tasks",
   "logsNoData": "No data",
-  "logsLegendHiro": "hiro working",
+  "logsLegendAgnts": "agnts working",
   "logsLegendYou": "Waiting on you",
   "logsEventsTitle": "Events",
   "logsEventsSub": "{n, plural, one {{n} event shown} other {{n} events shown}}, newest first. Select a row to see its raw data.",
@@ -914,7 +1009,7 @@
     }
   },
   "mcpTitle": "Claude chat (MCP)",
-  "mcpSub": "Manage hiro from Claude on the web, desktop and phone",
+  "mcpSub": "Manage agnts from Claude on the web, desktop and phone",
   "mcpUrl": "Connector URL",
   "mcpConnections": "Connected Claude apps",
   "mcpStaticToken": "Static token",
@@ -928,8 +1023,8 @@
   "mcpRevoke": "Disconnect all",
   "mcpRevokeConfirm": "Disconnect every Claude app and delete the static token?",
   "mcpRevoked": "All Claude connections removed",
-  "mcpConsentTitle": "Connect Claude to hiro",
-  "mcpConsentAsk": "{client} wants to use hiro as {user}.",
+  "mcpConsentTitle": "Connect Claude to agnts",
+  "mcpConsentAsk": "{client} wants to use agnts as {user}.",
   "@mcpConsentAsk": {
     "placeholders": {
       "client": {
@@ -952,7 +1047,7 @@
   "mcpAllow": "Allow",
   "mcpDeny": "Deny",
   "mdetailApprove": "Approve",
-  "mdetailWorking": "hiro is working. You'll get a notification when it needs you.",
+  "mdetailWorking": "agnts is working. You'll get a notification when it needs you.",
   "mdetailCopyPr": "Copy pull request link",
   "mdetailCopied": "Link copied",
   "mdetailFactTime": "Time",
@@ -975,9 +1070,9 @@
       }
     }
   },
-  "mhomeActAnswers": "Answer hiro's questions",
+  "mhomeActAnswers": "Answer agnts's questions",
   "mhomeActReview": "Review the changes",
-  "mhomeActStopped": "Stopped. Tell hiro what to try",
+  "mhomeActStopped": "Stopped. Tell agnts what to try",
   "mhomeActResume": "Resume when you're ready",
   "mhomeActStart": "Kept in queue. Tap to start",
   "mhomeLiveFallback": "Working…",
@@ -1001,10 +1096,10 @@
     }
   },
   "mmorePipelineRuns": "Pipeline runs",
-  "mmoreLoginLede": "Sign in to your hiro server to answer questions, review changes and follow runs.",
+  "mmoreLoginLede": "Sign in to your agnts server to answer questions, review changes and follow runs.",
   "mobileServer": "Server address",
-  "mobileServerHint": "https://hiro.example.com",
-  "mobileServerInvalid": "Enter the https address of your hiro server.",
+  "mobileServerHint": "https://agnts.example.com",
+  "mobileServerInvalid": "Enter the https address of your agnts server.",
   "mobileHome": "Home",
   "mobileActivity": "Activity",
   "mobileMore": "More",
@@ -1146,9 +1241,9 @@
       }
     }
   },
-  "mtasksActAnswers": "Answer hiro's questions",
+  "mtasksActAnswers": "Answer agnts's questions",
   "mtasksActReview": "Review the changes",
-  "mtasksActFailed": "Stopped. Tell hiro what to try",
+  "mtasksActFailed": "Stopped. Tell agnts what to try",
   "mtasksActResume": "Resume when you're ready",
   "mtasksActAnalyze": "Tap to analyze",
   "mtasksActHeld": "Kept in queue. Tap to start",
@@ -1208,10 +1303,10 @@
   "navUsageUnknown": "Usage unknown",
   "navBack": "Back",
   "navLedeNeeds": "Tickets waiting on your answers or your review, plus runs that stopped.",
-  "navLedeRunning": "Tickets hiro is working on right now.",
-  "navLedeQueue": "Tickets with the hiro label that haven't been analyzed yet.",
+  "navLedeRunning": "Tickets agnts is working on right now.",
+  "navLedeQueue": "Tickets with the agnts label that haven't been analyzed yet.",
   "navLedeDone": "Pushed or rejected tickets.",
-  "navLedeAll": "Every ticket hiro has picked up from Jira.",
+  "navLedeAll": "Every ticket agnts has picked up from Jira.",
   "navKnowledge": "Knowledge",
   "navLearn": "Learn",
   "navLearnQueue": "Learning queue",
@@ -1227,7 +1322,7 @@
   "repoMembersSub_gitlab": "Project members on GitLab, including those from groups. Merge requests can be assigned to them when you approve a review.",
   "repoMembersSearch": "Search members",
   "repoMembersNone": "No members found. The token may not be allowed to list them.",
-  "repoBranchesSub": "hiro works on its own branch for every ticket and never commits to {branch}.",
+  "repoBranchesSub": "agnts works on its own branch for every ticket and never commits to {branch}.",
   "@repoBranchesSub": {
     "placeholders": {
       "branch": {
@@ -1235,7 +1330,7 @@
       }
     }
   },
-  "repoArchivedBanner": "Archived {time}. hiro takes no new tickets or tasks for this repository until you restore it.",
+  "repoArchivedBanner": "Archived {time}. agnts takes no new tickets or tasks for this repository until you restore it.",
   "@repoArchivedBanner": {
     "placeholders": {
       "time": {
@@ -1254,7 +1349,7 @@
       }
     }
   },
-  "repoLocalSub": "Branches in hiro's own clones on your server. hiro commits here first and pushes only after you approve; it never commits to {branch}.",
+  "repoLocalSub": "Branches in agnts's own clones on your server. agnts commits here first and pushes only after you approve; it never commits to {branch}.",
   "@repoLocalSub": {
     "placeholders": {
       "branch": {
@@ -1274,11 +1369,11 @@
     }
   },
   "repoPush_differs": "Origin changed",
-  "repoPush_local_help": "Only on the server. hiro pushes it when you approve the review.",
+  "repoPush_local_help": "Only on the server. agnts pushes it when you approve the review.",
   "repoPush_pushed_help": "Origin has the same commit.",
   "repoPush_unpushed_help": "Origin has the branch, but not the newest commits.",
-  "repoPush_differs_help": "Someone pushed commits to this branch that hiro's copy does not have.",
-  "repoLocalNone": "No local branches yet. hiro creates one when it starts work on a ticket.",
+  "repoPush_differs_help": "Someone pushed commits to this branch that agnts's copy does not have.",
+  "repoLocalNone": "No local branches yet. agnts creates one when it starts work on a ticket.",
   "repoCommitsSub": "Recent commits on the default branch, newest first.",
   "repoLoadMore": "Load more",
   "repoMoreError": "Could not load more.",
@@ -1318,7 +1413,7 @@
   "repoCi_canceled": "Canceled",
   "repoCi_none": "No pipeline",
   "repoKpiBranches": "Branches",
-  "repoKpiBranchesNote": "{n} by hiro",
+  "repoKpiBranchesNote": "{n} by agnts",
   "@repoKpiBranchesNote": {
     "placeholders": {
       "n": {
@@ -1327,7 +1422,7 @@
     }
   },
   "repoKpiCommits": "Commits this week",
-  "repoKpiCommitsNote": "{n} written by hiro",
+  "repoKpiCommitsNote": "{n} written by agnts",
   "@repoKpiCommitsNote": {
     "placeholders": {
       "n": {
@@ -1359,7 +1454,7 @@
   "repoCommit": "Commit",
   "repoOpen": "Open",
   "repoNoEnvironments": "No deployment environments on the git host.",
-  "repoDeployHelp": "hiro waits for checks before a ticket reaches your review. Deploying is always your decision, and it is never available from Claude chat.",
+  "repoDeployHelp": "agnts waits for checks before a ticket reaches your review. Deploying is always your decision, and it is never available from Claude chat.",
   "repoDeployBranch": "Deploy {branch}",
   "@repoDeployBranch": {
     "placeholders": {
@@ -1397,7 +1492,7 @@
   "repoDuration": "Duration",
   "repoOpenRun": "Open on the git host",
   "reposTitle": "Repositories",
-  "reposLede": "Code hiro can work in. Each run clones the repository into a fresh container on your server, then runs these checks before anything reaches your review.",
+  "reposLede": "Code agnts can work in. Each run clones the repository into a fresh container on your server, then runs these checks before anything reaches your review.",
   "reposAdd": "Add repository",
   "reposViewLabel": "Show",
   "reposViewActive": "Active ({n})",
@@ -1435,7 +1530,7 @@
       }
     }
   },
-  "reposArchiveConfirm": "Archive {name}? It moves to the archive and keeps its tickets and history, but hiro stops picking up new Jira tickets and tasks for it. Work already started still finishes. You can restore it any time.",
+  "reposArchiveConfirm": "Archive {name}? It moves to the archive and keeps its tickets and history, but agnts stops picking up new Jira tickets and tasks for it. Work already started still finishes. You can restore it any time.",
   "@reposArchiveConfirm": {
     "placeholders": {
       "name": {
@@ -1464,7 +1559,7 @@
   },
   "reposImportAdded": "Added",
   "reposImportPick": "Add",
-  "reposMissingHelp": "{count, plural, one {{count} repository has} other {{count} repositories have}} no CLAUDE.md. hiro still works, but spends more turns finding its way around. Add one with the project's structure, conventions and test commands.",
+  "reposMissingHelp": "{count, plural, one {{count} repository has} other {{count} repositories have}} no CLAUDE.md. agnts still works, but spends more turns finding its way around. Add one with the project's structure, conventions and test commands.",
   "@reposMissingHelp": {
     "placeholders": {
       "count": {
@@ -1491,13 +1586,13 @@
   "reposMissing": "Missing",
   "reposUnknown": "Not checked",
   "reposNoMatch": "No repositories match your search.",
-  "reposNone": "No repositories yet. Add the first one to let hiro work on it.",
+  "reposNone": "No repositories yet. Add the first one to let agnts work on it.",
   "reposDrawerSub": "Takes side-project tasks, and Jira tickets once it has a Jira project key",
   "reposName": "Name",
   "reposCloneUrl": "Clone URL",
-  "reposCloneHelp": "An https URL on github.com or your connected GitLab. hiro uses that host's token to clone and push.",
+  "reposCloneHelp": "An https URL on github.com or your connected GitLab. agnts uses that host's token to clone and push.",
   "reposJiraProject": "Jira project key",
-  "reposJiraHelp": "Optional. Tickets from this Jira project with the hiro label run here.",
+  "reposJiraHelp": "Optional. Tickets from this Jira project with the agnts label run here.",
   "reposTaskPrefix": "Task key prefix",
   "reposTaskPrefixHelp": "Side-project tasks are numbered like {prefix}-1, {prefix}-2. Must differ from the Jira project key.",
   "@reposTaskPrefixHelp": {
@@ -1516,19 +1611,19 @@
   "reposInstructions": "Extra instructions",
   "reposInstructionsHelp": "Added to every prompt for this repository, on top of its CLAUDE.md.",
   "reposClaudeFound": "Found in the repository root",
-  "reposClaudeMissing": "Missing. hiro still works, but a CLAUDE.md saves turns.",
+  "reposClaudeMissing": "Missing. agnts still works, but a CLAUDE.md saves turns.",
   "reposClaudeUnknown": "Checked after saving",
   "reposSaved": "Repository saved",
   "reposEdit": "Edit",
   "reposDeployWorkflow": "Deploy workflow",
   "reposDeployWorkflowHelp": "GitHub Actions workflow file with workflow_dispatch, e.g. deploy.yml. Deploy on the repository page runs it.",
-  "reviewTitle": "hiro's code review",
-  "reviewReportTitle": "hiro's review of the report",
+  "reviewTitle": "agnts's code review",
+  "reviewReportTitle": "agnts's review of the report",
   "reviewSub": "A second opinion while you review. It never blocks approval: you decide.",
-  "reviewPending": "Queued: hiro reviews this as soon as a worker is free. You can review it yourself meanwhile.",
-  "reviewRunning": "hiro is reviewing this now…",
+  "reviewPending": "Queued: agnts reviews this as soon as a worker is free. You can review it yourself meanwhile.",
+  "reviewRunning": "agnts is reviewing this now…",
   "reviewFailed": "The review failed. Review it yourself, or run it again.",
-  "reviewNone": "Not reviewed by hiro.",
+  "reviewNone": "Not reviewed by agnts.",
   "reviewStale": "This review is of revision {n}; the work changed since.",
   "@reviewStale": {
     "placeholders": {
@@ -1537,7 +1632,7 @@
       }
     }
   },
-  "reviewRun": "Review with hiro",
+  "reviewRun": "Review with agnts",
   "reviewRunAgain": "Review again",
   "reviewVerdict_looks_good": "Looks good",
   "reviewVerdict_has_concerns": "Has concerns",
@@ -1563,7 +1658,7 @@
       }
     }
   },
-  "reviewNoFindings": "hiro found no problems.",
+  "reviewNoFindings": "agnts found no problems.",
   "reviewStrengths": "Done well",
   "reviewSuggestion": "Suggestion",
   "reviewAddToFeedback": "Add to feedback",
@@ -1582,7 +1677,7 @@
     }
   },
   "rulesTitle": "Rules",
-  "rulesLede": "Instructions hiro follows on every ticket: global rules for all repositories and rules for one repository. Claude reviews each rule and asks about anything unclear before it applies.",
+  "rulesLede": "Instructions agnts follows on every ticket: global rules for all repositories and rules for one repository. Claude reviews each rule and asks about anything unclear before it applies.",
   "rulesAdd": "Add rule",
   "rulesAddSubmit": "Add and review",
   "rulesDrawerSub": "Write it the way you would brief a new teammate. Claude checks it before any ticket follows it.",
@@ -1624,7 +1719,7 @@
       }
     }
   },
-  "rulesNone": "No rules yet. Add one to tell hiro how your team works: testing, naming, logging, what never to touch.",
+  "rulesNone": "No rules yet. Add one to tell agnts how your team works: testing, naming, logging, what never to touch.",
   "rulesNoMatch": "No rules match.",
   "rulesWaitingHelp": "{n, plural, one {{n} rule is waiting for your answers. It does not apply to tickets until it is answered.} other {{n} rules are waiting for your answers. They do not apply to tickets until they are answered.}}",
   "@rulesWaitingHelp": {
@@ -1701,7 +1796,7 @@
     }
   },
   "rulesReviewAgain": "Review again",
-  "rulesInterpretation": "How hiro reads it",
+  "rulesInterpretation": "How agnts reads it",
   "rulesClarified": "What tickets get",
   "rulesAsWritten": "Used as written.",
   "rulesAnswersTitle": "{n, plural, one {{n} answered question} other {{n} answered questions}}",
@@ -1735,7 +1830,7 @@
   "rulesTurnedOn": "Rule turned on",
   "rulesTurnedOff": "Rule turned off",
   "settingsTitle": "Settings",
-  "settingsLede": "How hiro connects to your tools and how it behaves during runs.",
+  "settingsLede": "How agnts connects to your tools and how it behaves during runs.",
   "settingsAppearance": "Appearance",
   "settingsAppearanceSub": "Saved in this browser, applied right away",
   "settingsTheme": "Theme",
@@ -1782,15 +1877,15 @@
   "settingsAllow": "Allowed commands",
   "settingsAllowHelp": "Claude Code can run these without asking",
   "settingsDeny": "Blocked commands",
-  "settingsDenyHelp": "Always refused, even if a ticket asks for them. Pushing is done by hiro, never by Claude Code.",
+  "settingsDenyHelp": "Always refused, even if a ticket asks for them. Pushing is done by agnts, never by Claude Code.",
   "settingsCommits": "Commits and pull requests",
   "settingsCommitsSub": "Who commits appear from, and how pull requests open",
   "settingsAuthorName": "Author name",
   "settingsAuthorNameHelp": "Commits are made as you",
   "settingsAuthorEmail": "Author email",
   "settingsAuthorEmailHelp": "Must match your GitHub account to show as yours",
-  "settingsCoAuthor": "Add a Co-authored-by: hiro line",
-  "settingsCoAuthorHelp": "Teammates can see which commits hiro wrote",
+  "settingsCoAuthor": "Add a Co-authored-by: agnts line",
+  "settingsCoAuthorHelp": "Teammates can see which commits agnts wrote",
   "settingsPrTitle": "Pull request title",
   "settingsPrTitleHelp": "'{key}' and '{title}' are replaced with the ticket's key and title",
   "@settingsPrTitleHelp": {
@@ -1810,9 +1905,9 @@
   "settingsAskFirstHelp": "Default for new Jira tickets. Tasks choose this when you create them.",
   "settingsAutoResume": "Resume paused runs after the limit resets",
   "settingsAutoLearn": "Learn from every pushed change",
-  "settingsAutoLearnHelp": "After a push, hiro looks for techniques the repository never used before and writes lessons under Learn. Uses plan usage only when no ticket is waiting.",
+  "settingsAutoLearnHelp": "After a push, agnts looks for techniques the repository never used before and writes lessons under Learn. Uses plan usage only when no ticket is waiting.",
   "settingsAutoReview": "Review every result",
-  "settingsAutoReviewHelp": "While a change or report waits for you, hiro reviews it and shows its findings next to it. It never blocks approval.",
+  "settingsAutoReviewHelp": "While a change or report waits for you, agnts reviews it and shows its findings next to it. It never blocks approval.",
   "settingsPauseAbove": "Don't start new runs above",
   "settingsPauseAboveHelp": "Session usage. Runs already going keep going.",
   "settingsParallel": "Runs at the same time",
@@ -1820,18 +1915,88 @@
   "settingsNotify": "Notifications",
   "settingsNotifySub": "Push to your phone and Telegram messages",
   "settingsPush": "Push notifications",
-  "settingsPushHelp": "To the hiro app on your phone",
+  "settingsPushHelp": "To the agnts app on your phone",
   "settingsTelegram": "Telegram messages",
   "settingsTelegramHelp": "Only sent once Telegram is connected on the Integrations page",
   "settingsNeedsYou": "When something needs you",
   "settingsNeedsYouHelp": "Questions to answer or changes to review",
   "settingsStopped": "When a run stops or pauses",
   "settingsDone": "When changes are pushed",
-  "settingsLessons": "When hiro finds something new to learn",
-  "settingsReviewDone": "When hiro's code review finishes",
+  "settingsLessons": "When agnts finds something new to learn",
+  "settingsReviewDone": "When agnts's code review finishes",
   "settingsOnThisPage": "On this page",
   "settingsSecretsHelp": "Tokens for Jira, GitHub and Claude are stored encrypted on your server. This page never shows them.",
   "settingsSaved": "Settings saved",
+  "spendTitle": "Token spend",
+  "spendSub": "{tokens} tokens in and out · about {cost} at API prices",
+  "@spendSub": {
+    "placeholders": {
+      "tokens": {
+        "type": "String"
+      },
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "spendEmpty": "Nothing recorded yet. Spend appears after agnts's first Claude run on this ticket.",
+  "spendInput": "Input",
+  "spendOutput": "Output",
+  "spendCache": "Cache: {read} read, {write} written",
+  "@spendCache": {
+    "placeholders": {
+      "read": {
+        "type": "String"
+      },
+      "write": {
+        "type": "String"
+      }
+    }
+  },
+  "spendCalls": "{n, plural, one {{n} run} other {{n} runs}}",
+  "@spendCalls": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "spendPartial": "A run was cut off, so its cost is unknown",
+  "spendCostNote": "Cost is Claude Code's estimate of the same work at API prices. On a Claude plan you are not charged it; it shows the relative weight of each stage.",
+  "spendTokens": "{n} tokens",
+  "@spendTokens": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "spendColTokens": "Tokens",
+  "spendStageAnalyze": "Analysis",
+  "spendStageCoding": "Coding",
+  "spendStageWriting": "Writing",
+  "spendStageRetry": "Fixes and changes",
+  "spendStageReview": "Code review",
+  "spendStageLearn": "Lessons",
+  "spendStageHelper": "Helper",
+  "spendTopTitle": "Tickets by spend",
+  "spendTopSub": "{tokens} tokens in and out · about {cost} at API prices",
+  "@spendTopSub": {
+    "placeholders": {
+      "tokens": {
+        "type": "String"
+      },
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "spendTopSubEmpty": "Which tickets used the most of your plan",
+  "spendTopEmpty": "No Claude runs recorded in this period.",
+  "spendTopNote": "Ranked by Claude Code's cost estimate, which weighs cache traffic properly. Share is of the period's estimated cost. Only spend inside the period counts.",
+  "spendColStage": "Costliest stage",
+  "spendColCost": "Est. cost",
+  "spendColShare": "Share",
   "stateNew": "In queue",
   "stateAnalyzing": "Reading the code",
   "stateWaiting_for_answers": "Needs your answers",
@@ -1847,7 +2012,7 @@
   "stateReportPushing": "Delivering",
   "stateReportDone": "Done",
   "tasksTitle": "Tasks",
-  "tasksLede": "Work for your side projects. Tasks stay in hiro and never touch Jira. Everything else works the same: questions, coding, your review.",
+  "tasksLede": "Work for your side projects. Tasks stay in agnts and never touch Jira. Everything else works the same: questions, coding, your review.",
   "tasksNew": "New task",
   "tasksAllRepos": "All repositories {count}",
   "@tasksAllRepos": {
@@ -1879,13 +2044,13 @@
   },
   "tasksNoTest": "none",
   "tasksNoRepos": "No side-project repositories yet.",
-  "tasksHelp": "For repositories only you work on, you can let hiro push straight to main after you approve. It still never pushes without your review.",
+  "tasksHelp": "For repositories only you work on, you can let agnts push straight to main after you approve. It still never pushes without your review.",
   "tasksDrawerSub": "For your side projects. Not synced to Jira.",
   "tasksRepository": "Repository",
   "tasksFieldTitle": "Title",
   "tasksTitlePh": "For example: Add a rest timer between sets",
   "tasksFieldDesc": "What should be done",
-  "tasksDescPh": "Describe the result you want. The clearer this is, the fewer questions hiro asks.",
+  "tasksDescPh": "Describe the result you want. The clearer this is, the fewer questions agnts asks.",
   "tasksPriority": "Priority",
   "tasksLow": "Low",
   "tasksMedium": "Medium",
@@ -1895,7 +2060,7 @@
   "tasksAfterPr": "Open pull request",
   "tasksStart": "How to start",
   "tasksStartAsk": "Ask questions first",
-  "tasksStartAskHint": "hiro reads the code and asks before coding. Best for anything unclear.",
+  "tasksStartAskHint": "agnts reads the code and asks before coding. Best for anything unclear.",
   "tasksStartCode": "Start coding right away",
   "tasksStartCodeHint": "Skip questions. Good for small, well-described tasks.",
   "tasksStartQueue": "Keep in queue",
@@ -1924,7 +2089,7 @@
   "tasksRepoNeeded": "Code and tests need a repository: pick one, or choose another kind.",
   "ticketBack": "All tickets",
   "ticketPlan": "Plan",
-  "ticketAnalysis": "What hiro found",
+  "ticketAnalysis": "What agnts found",
   "ticketQuestions": "Questions",
   "ticketYourAnswer": "Your answer",
   "ticketNote": "Note (optional)",
@@ -2009,7 +2174,7 @@
     }
   },
   "ticketQueuedTitle": "Waiting in queue",
-  "ticketQueuedSub": "hiro reads the ticket and the related code, then comes back with a plan and questions. Nothing is changed in this step.",
+  "ticketQueuedSub": "agnts reads the ticket and the related code, then comes back with a plan and questions. Nothing is changed in this step.",
   "ticketHeldSub": "This task is kept in the queue until you start it.",
   "ticketStart": "Start now",
   "ticketStartHint": "Starts when a run slot is free",
@@ -2135,11 +2300,11 @@
     }
   },
   "ticketReviewSubMain": "Nothing has left the server yet. Approving pushes straight to the default branch.",
-  "ticketWhatHiroDid": "What hiro did",
+  "ticketWhatAgntsDid": "What agnts did",
   "ticketDiff": "Diff",
   "ticketFeedback": "Feedback",
   "ticketAssignTitle": "Assign the pull request",
-  "ticketAssignSub": "Optional. Pick who it is assigned to on the git host when hiro opens it.",
+  "ticketAssignSub": "Optional. Pick who it is assigned to on the git host when agnts opens it.",
   "ticketAssignError": "Could not load the repository members: {error}. You can still approve without assignees.",
   "@ticketAssignError": {
     "placeholders": {
@@ -2191,8 +2356,8 @@
     }
   },
   "ticketRejectedTitle": "Rejected",
-  "ticketRejectedSub": "hiro stopped working on this ticket. The branch was not pushed.",
-  "ticketFailedTitle": "hiro stopped",
+  "ticketRejectedSub": "agnts stopped working on this ticket. The branch was not pushed.",
+  "ticketFailedTitle": "agnts stopped",
   "ticketFailedUnknown": "The run stopped. Check the run log for details.",
   "ticketTakeItMyself": "Take it myself",
   "ticketRateTitle": "Paused at plan limit",
@@ -2218,7 +2383,7 @@
   "ticketStageAnalyze": "Reading the ticket and asking questions",
   "ticketStageCoding": "Coding",
   "ticketStageRetry": "Retries and requested changes",
-  "ticketStageReview": "Code review by hiro",
+  "ticketStageReview": "Code review by agnts",
   "ticketModelAuto": "Auto ({model})",
   "@ticketModelAuto": {
     "placeholders": {
@@ -2240,7 +2405,7 @@
   "ticketKvCodingModel": "Coding model",
   "ticketKvRetryModel": "Retry model",
   "ticketSrcJira": "Jira",
-  "ticketSrcTask": "hiro task",
+  "ticketSrcTask": "agnts task",
   "ticketAfterMain": "Push to main",
   "ticketAfterPr": "Open pull request",
   "ticketHistoryTitle": "History",
@@ -2296,7 +2461,7 @@
     }
   },
   "ticketRepoTitle": "Repository",
-  "ticketRepoHint": "Where hiro analyzes and codes this ticket.",
+  "ticketRepoHint": "Where agnts analyzes and codes this ticket.",
   "ticketRepoNone": "Choose a repository…",
   "ticketRepoMissing": "No repository is linked to this ticket. Choose one, then retry.",
   "ticketRepoRestartTitle": "Change repository?",
@@ -2320,9 +2485,9 @@
       }
     }
   },
-  "ticketQueuedSubReport": "hiro reads the ticket (and the code, if there is a repository) and comes back with a plan and questions. Nothing is changed.",
+  "ticketQueuedSubReport": "agnts reads the ticket (and the code, if there is a repository) and comes back with a plan and questions. Nothing is changed.",
   "ticketAnalyzingTitleNoRepo": "Reading the ticket",
-  "ticketAnalyzingSubNoRepo": "No repository: hiro works from the ticket text.",
+  "ticketAnalyzingSubNoRepo": "No repository: agnts works from the ticket text.",
   "ticketStartWriting": "Start writing",
   "ticketWritingTitle": "Writing the report",
   "ticketWritingSub": "Working in a fresh container. Nothing in the code changes; you review the report first.",
@@ -2370,7 +2535,7 @@
   "ticketsFinished": "Finished",
   "ticketsAll": "All",
   "ticketsEmpty": "No tickets here.",
-  "ticketsEmptyHint": "Label a Jira issue “{label}” and hiro picks it up.",
+  "ticketsEmptyHint": "Label a Jira issue “{label}” and agnts picks it up.",
   "@ticketsEmptyHint": {
     "placeholders": {
       "label": {
@@ -2413,9 +2578,9 @@
   "ticketsViewTable": "Table",
   "ticketsViewBoard": "Board",
   "ticketsBoardEmpty": "Nothing here",
-  "ticketsListSub": "Jira tickets with the hiro label, plus tasks you create for side projects.",
+  "ticketsListSub": "Jira tickets with the agnts label, plus tasks you create for side projects.",
   "ticketsNoMatch": "No tickets match your search.",
-  "ticketsEmptyNeeds": "Nothing is waiting on you. Tickets show up here when hiro has questions or changes to review.",
+  "ticketsEmptyNeeds": "Nothing is waiting on you. Tickets show up here when agnts has questions or changes to review.",
   "ticketsEmptyOther": "No tickets here yet.",
   "ticketsStatNeeds": "Needs you",
   "ticketsStatNeedsNote": "Answers or reviews waiting",
@@ -2425,7 +2590,7 @@
   "ticketsStatPushedNote": "Pull requests opened",
   "ticketsStatSession": "Plan session",
   "usageTitle": "Plan usage",
-  "usageLede": "hiro runs on your Claude subscription. These limits are shared with your own Claude and Claude Code use.",
+  "usageLede": "agnts runs on your Claude subscription. These limits are shared with your own Claude and Claude Code use.",
   "usageCard": "Plan usage",
   "usageUpdated": "Updated {time}",
   "@usageUpdated": {
@@ -2477,7 +2642,7 @@
   "usageStatus_unknown": "Unknown",
   "usageSource": "Read from Claude Code's rate limit events. Includes your own Claude use on this account.",
   "usageLimitTitle": "When a limit is reached",
-  "usageLimitSub": "How hiro behaves near the limit",
+  "usageLimitSub": "How agnts behaves near the limit",
   "usageAbove": "Above {pct}% of the session",
   "@usageAbove": {
     "placeholders": {
@@ -2494,5 +2659,5 @@
   "usageResumeManual": "Wait for you to resume",
   "usageIdle": "Idle refresh",
   "usageIdleDo": "Every 30 min",
-  "usageHelp": "Numbers come from the rate limit events Claude Code emits during each run. When hiro is idle, a tiny refresh run keeps them current."
+  "usageHelp": "Numbers come from the rate limit events Claude Code emits during each run. When agnts is idle, a tiny refresh run keeps them current."
 }

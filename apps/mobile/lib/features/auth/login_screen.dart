@@ -60,7 +60,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -71,7 +71,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               child: AutofillGroup(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                   Row(children: [
-                    // hiro's mark, as in the admin sidebar: light on a dark theme.
+                    // agnts's mark, as in the admin sidebar: light on a dark theme.
                     Image.asset(
                       theme.brightness == Brightness.dark ? 'assets/brand/logo_dark.png' : 'assets/brand/logo.png',
                       width: 44,
@@ -98,7 +98,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         controller: _server,
                         keyboardType: TextInputType.url,
                         autocorrect: false,
-                        style: const TextStyle(fontFamily: HiroFonts.mono, fontSize: 15),
+                        style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 15),
                         decoration: InputDecoration(labelText: l.mobileServer, hintText: l.mobileServerHint),
                       ),
                       const SizedBox(height: 12),
@@ -121,7 +121,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         keyboardType: TextInputType.number,
                         autofillHints: const [AutofillHints.oneTimeCode],
                         maxLength: 6,
-                        style: const TextStyle(fontFamily: HiroFonts.mono, fontSize: 17, letterSpacing: 4),
+                        style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 17, letterSpacing: 4),
                         decoration: InputDecoration(
                           labelText: l.authCode,
                           helperText: l.authCodeHint,
@@ -154,8 +154,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
 /// Plain http is allowed only to a server on the local network (a dev server
 /// on your computer), and only in debug builds or builds made with
-/// `--dart-define=HIRO_LOCAL_HTTP=true`. Other builds always require https.
-const allowLocalHttp = kDebugMode || bool.fromEnvironment('HIRO_LOCAL_HTTP');
+/// `--dart-define=AGNTS_LOCAL_HTTP=true`. Other builds always require https.
+const allowLocalHttp = kDebugMode || bool.fromEnvironment('AGNTS_LOCAL_HTTP');
 
 @visibleForTesting
 bool isLocalHost(String host) {

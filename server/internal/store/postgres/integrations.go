@@ -8,8 +8,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"hiro/internal/domain"
-	"hiro/internal/secret"
+	"agnts/internal/domain"
+	"agnts/internal/secret"
 )
 
 // Integration is a connected external service. Token is decrypted.

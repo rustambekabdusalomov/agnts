@@ -1,8 +1,8 @@
 {
   "implement": {
     "title": "Keyingi qadam",
-    "subPlan": "hiro shu rejani bajarsin: shu bilan bogʻlangan kod vazifasi, reja uning topshirigʻi boʻladi. Diffni odatdagidek siz tekshirasiz.",
-    "subBug": "hiro taklif qilingan tuzatishni kiritsin: shu bilan bogʻlangan kod vazifasi, tekshiruv uning topshirigʻi boʻladi. Diffni odatdagidek siz tekshirasiz.",
+    "subPlan": "agnts shu rejani bajarsin: shu bilan bogʻlangan kod vazifasi, reja uning topshirigʻi boʻladi. Diffni odatdagidek siz tekshirasiz.",
+    "subBug": "agnts taklif qilingan tuzatishni kiritsin: shu bilan bogʻlangan kod vazifasi, tekshiruv uning topshirigʻi boʻladi. Diffni odatdagidek siz tekshirasiz.",
     "implement": "Rejani bajarish",
     "fix": "Xatoni tuzatish",
     "pickRepo": "Oʻzgartirish kiritiladigan repozitoriy",

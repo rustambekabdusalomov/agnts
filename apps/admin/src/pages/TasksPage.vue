@@ -16,7 +16,7 @@ import TicketBoard from '../components/TicketBoard.vue'
 import SegButtons from '../components/form/SegButtons.vue'
 import { useListView } from '../composables/useListView'
 import HiIcon from '../components/ui/HiIcon.vue'
-import { ago } from '../composables/format'
+import { ago, fmtTokens, ioTokens } from '../composables/format'
 import { useUi } from '../stores/ui'
 
 const { t, locale } = useI18n()
@@ -83,89 +83,83 @@ function repoSaved(r: Repository) {
 </script>
 
 <template>
-  <PageHeader :title="t('tasks.title')" :lede="t('tasks.lede')" doc="tasks">
-    <button class="btn btn-p" type="button" @click="newTask"><HiIcon name="plus" />{{ t('tasks.new') }}</button>
+  <PageHeader :title="t('tasks.title')" doc="tasks">
+    <div class="actions" style="margin: 0">
+      <SegButtons v-model="view" :options="viewOptions" :label="t('tickets.viewLabel')" />
+      <button class="btn btn-p" type="button" @click="newTask"><HiIcon name="plus" />{{ t('tasks.new') }}</button>
+    </div>
   </PageHeader>
 
-  <div class="cfg-grid">
-    <div class="col">
-      <div class="tabs" role="group" :aria-label="t('tasks.filterLabel')">
-        <button type="button" class="tab" :aria-pressed="repoFilter === 'all'" @click="repoFilter = 'all'">
-          {{ t('tasks.allRepos', { count: tasks.length }) }}
-        </button>
-        <button
-          v-for="r in taskRepos"
-          :key="r.id"
-          type="button"
-          class="tab"
-          :aria-pressed="repoFilter === r.id"
-          @click="repoFilter = r.id"
-        >
-          {{ r.name }} {{ countFor(r.id) }}
-        </button>
-      </div>
-      <section class="card">
-        <div v-if="rows.length" class="ch">
-          <h2>{{ t('tasks.count', { n: rows.length }) }}</h2>
-          <SegButtons v-model="view" :options="viewOptions" :label="t('tickets.viewLabel')" />
-        </div>
-        <p v-if="tickets.isPending.value" class="hint">{{ t('common.loading') }}</p>
-        <TicketBoard v-else-if="rows.length && view === 'board'" :items="rows" :columns="columns" @open="(k) => router.push(`/tickets/${k}`)" />
-        <div v-else-if="rows.length" class="tw">
-          <table class="tbl">
-            <thead>
-              <tr>
-                <th>{{ t('tasks.colTask') }}</th>
-                <th>{{ t('tasks.colRepo') }}</th>
-                <th>{{ t('tasks.colStatus') }}</th>
-                <th>{{ t('tasks.colUpdated') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="x in rows"
-                :key="x.key"
-                tabindex="0"
-                @click="router.push(`/tickets/${x.key}`)"
-                @keydown.enter="router.push(`/tickets/${x.key}`)"
-              >
-                <td>
-                  <div class="tkey">{{ x.key }} <KindBadge v-if="x.kind !== 'code'" :ticket="x" /></div>
-                  <div class="ttitle">{{ x.title }}</div>
-                </td>
-                <td class="muted">{{ x.repoName ?? '—' }}</td>
-                <td><StateBadge :state="x.state" :kind="x.kind" /></td>
-                <td class="muted">{{ ago(x.updatedAt, locale) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div v-else class="empty">
-          <p style="margin: 0 0 12px">{{ ui.search ? t('tasks.noMatch') : t('tasks.empty') }}</p>
-          <button v-if="!ui.search" type="button" class="btn btn-p" @click="newTask"><HiIcon name="plus" />{{ t('tasks.new') }}</button>
-        </div>
-      </section>
+  <div class="col">
+    <div class="tabs" role="group" :aria-label="t('tasks.filterLabel')">
+      <button type="button" class="tab" :aria-pressed="repoFilter === 'all'" @click="repoFilter = 'all'">
+        {{ t('tasks.allRepos', { count: tasks.length }) }}
+      </button>
+      <button
+        v-for="r in taskRepos"
+        :key="r.id"
+        type="button"
+        class="tab"
+        :aria-pressed="repoFilter === r.id"
+        @click="repoFilter = r.id"
+      >
+        {{ r.name }} {{ countFor(r.id) }}
+      </button>
+      <button type="button" class="tab tab-add" @click="importRepo(false)"><HiIcon name="import" />{{ t('repos.import') }}</button>
     </div>
-    <aside class="cfg-side">
-      <section class="card">
-        <div class="ch">
-          <div>
-            <h2>{{ t('tasks.repos') }}</h2>
-            <p class="sub">{{ t('tasks.reposSub') }}</p>
-          </div>
-          <button type="button" class="btn btn-s" @click="importRepo(false)"><HiIcon name="import" />{{ t('repos.import') }}</button>
-        </div>
-        <p v-if="!taskRepos.length" class="hint">{{ t('tasks.noRepos') }}</p>
-        <div v-for="r in taskRepos" :key="r.id" class="ans">
-          <span><b>{{ r.name }}</b></span>
-          <span class="hint">{{ t('tasks.repoLine', { test: r.testCmd || t('tasks.noTest'), open: r.openTickets }) }}</span>
-        </div>
-      </section>
-      <div class="help"><HiIcon name="info" /><p>{{ t('tasks.help') }}</p></div>
-    </aside>
+    <div class="help"><HiIcon name="info" /><p>{{ t('tasks.help') }}</p></div>
+    <section class="card">
+      <div v-if="rows.length" class="ch">
+        <h2>{{ t('tasks.count', { n: rows.length }) }}</h2>
+      </div>
+      <p v-if="tickets.isPending.value" class="hint">{{ t('common.loading') }}</p>
+      <TicketBoard v-else-if="rows.length && view === 'board'" :items="rows" :columns="columns" @open="(k) => router.push(`/tickets/${k}`)" />
+      <div v-else-if="rows.length" class="tw">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>{{ t('tasks.colTask') }}</th>
+              <th>{{ t('tasks.colRepo') }}</th>
+              <th>{{ t('tasks.colStatus') }}</th>
+              <th class="num">{{ t('spend.colTokens') }}</th>
+              <th>{{ t('tasks.colUpdated') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="x in rows"
+              :key="x.key"
+              tabindex="0"
+              @click="router.push(`/tickets/${x.key}`)"
+              @keydown.enter="router.push(`/tickets/${x.key}`)"
+            >
+              <td>
+                <div class="tkey">{{ x.key }} <KindBadge v-if="x.kind !== 'code'" :ticket="x" /></div>
+                <div class="ttitle">{{ x.title }}</div>
+              </td>
+              <td class="muted">{{ x.repoName ?? '—' }}</td>
+              <td><StateBadge :state="x.state" :kind="x.kind" /></td>
+              <td class="muted num" :title="x.spend ? t('spend.tokens', { n: ioTokens(x.spend).toLocaleString(locale) }) : undefined">
+                {{ x.spend ? fmtTokens(ioTokens(x.spend), locale) : '—' }}
+              </td>
+              <td class="muted">{{ ago(x.updatedAt, locale) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div v-else class="empty">
+        <p style="margin: 0 0 12px">{{ ui.search ? t('tasks.noMatch') : t('tasks.empty') }}</p>
+        <button v-if="!ui.search" type="button" class="btn btn-p" @click="newTask"><HiIcon name="plus" />{{ t('tasks.new') }}</button>
+      </div>
+    </section>
   </div>
 
   <TaskDrawer v-model="taskOpen" :repos="taskRepos" :repo-id="preferredRepo" @add-repo="importRepo(true)" />
   <RepoDrawer v-model="repoOpen" :repo="null" :preset="preset" @saved="repoSaved" />
   <ImportDrawer v-model="importOpen" @pick="onPick" />
 </template>
+
+<style scoped>
+.tab-add { display: inline-flex; align-items: center; gap: 6px; border-style: dashed; color: var(--primary-ink); }
+.tab-add :deep(svg) { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+</style>

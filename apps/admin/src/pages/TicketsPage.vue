@@ -11,7 +11,7 @@ import KindBadge from '../components/ticket/KindBadge.vue'
 import TicketBoard, { type BoardColumn } from '../components/TicketBoard.vue'
 import SegButtons from '../components/form/SegButtons.vue'
 import { useListView } from '../composables/useListView'
-import { ago, level, pct } from '../composables/format'
+import { ago, fmtTokens, ioTokens, level, pct } from '../composables/format'
 import { useUi } from '../stores/ui'
 
 const { t, locale } = useI18n()
@@ -20,7 +20,6 @@ const router = useRouter()
 const ui = useUi()
 
 const filter = computed(() => FILTERS.find((f) => f.id === route.query.f) ?? FILTERS[0])
-const LEDE: Record<string, string> = { needs: 'ledeNeeds', running: 'ledeRunning', queue: 'ledeQueue', done: 'ledeDone', all: 'ledeAll' }
 
 const tickets = useQuery({
   queryKey: computed(() => ['tickets', filter.value.id]),
@@ -53,7 +52,7 @@ const columns = computed<BoardColumn[]>(() =>
 </script>
 
 <template>
-  <PageHeader :title="t(`nav.${filter.id}`)" :lede="t(`nav.${LEDE[filter.id]}`)" doc="list" />
+  <PageHeader :title="t(`nav.${filter.id}`)" doc="list" />
 
   <div v-if="filter.id === 'needs' && dash.data.value" class="g4">
     <div class="card stat">
@@ -99,12 +98,13 @@ const columns = computed<BoardColumn[]>(() =>
             <th>{{ t('tickets.colSource') }}</th>
             <th>{{ t('tickets.colRepo') }}</th>
             <th>{{ t('tickets.colStatus') }}</th>
+            <th class="num">{{ t('spend.colTokens') }}</th>
             <th>{{ t('tickets.colUpdated') }}</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="tk in rows" :key="tk.key" tabindex="0" @click="open(tk.key)" @keydown.enter="open(tk.key)">
-            <td><div class="tkey">{{ tk.key }} <KindBadge v-if="tk.kind !== 'code'" :ticket="tk" /></div><div class="ttitle">{{ tk.title }}</div></td>
+            <td><div class="tkey">{{ tk.key }} <KindBadge v-if="tk.kind !== 'code'" :ticket="tk" /> <span v-if="tk.openSuggestions" class="badge b-info">{{ t('followUps.openBadge', { count: tk.openSuggestions }) }}</span></div><div class="ttitle">{{ tk.title }}</div></td>
             <td>
               <span v-if="tk.source === 'local'" class="src local">{{ t('tickets.sourceTask') }}</span>
               <span v-else class="src">{{ t('tickets.sourceJira') }}</span>
@@ -113,6 +113,9 @@ const columns = computed<BoardColumn[]>(() =>
             <td>
               <StateBadge :state="tk.state" :kind="tk.kind" />
               <span v-if="tk.revision > 0 && !TERMINAL.includes(tk.state)" class="hint"> {{ t('tickets.rev', { n: tk.revision }) }}</span>
+            </td>
+            <td class="muted num" :title="tk.spend ? t('spend.tokens', { n: ioTokens(tk.spend).toLocaleString(locale) }) : undefined">
+              {{ tk.spend ? fmtTokens(ioTokens(tk.spend), locale) : '—' }}
             </td>
             <td class="muted">{{ ago(tk.updatedAt, locale) }}</td>
           </tr>

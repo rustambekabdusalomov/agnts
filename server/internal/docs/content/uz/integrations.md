@@ -1,6 +1,6 @@
 # Integratsiyalar
 
-hiro ishlaydigan xizmatlar: tiketlar uchun Jira, kod uchun GitHub yoki GitLab. Har birining ulanish holati va sozlamalari bilan alohida sahifasi bor.
+agnts ishlaydigan xizmatlar: tiketlar uchun Jira, kod uchun GitHub yoki GitLab. Har birining ulanish holati va sozlamalari bilan alohida sahifasi bor.
 
 ## Ulanish
 
@@ -12,7 +12,7 @@ Git sahifasida token qaysi huquqlarga ega ekani koʻrinadi. Majburiylari berilis
 
 ## Repozitoriyga kirish
 
-Repozitoriyni oʻchirmasdan, hiro uni klonlamasligi va unga yubormasligi uchun oʻchirib qoʻying.
+Repozitoriyni oʻchirmasdan, agnts uni klonlamasligi va unga yubormasligi uchun oʻchirib qoʻying.
 
 ## Commitlar va pull requestlar
 
@@ -20,8 +20,8 @@ Commitlar kimning nomidan, Co-authored-by qatori, sarlavha formati, qoralama, be
 
 ## Jira qoidalari
 
-Qaysi loyihalar kuzatiladi, belgi, hiro oladigan vazifa turlari va holatlari — aniq soʻrov koʻrinishida.
+Qaysi loyihalar kuzatiladi, belgi, agnts oladigan vazifa turlari va holatlari — aniq soʻrov koʻrinishida.
 
 ## Holatlar va izohlar
 
-hiro tiketlarni doskada qanday siljitadi va izohlarda nima yozadi.
+agnts tiketlarni doskada qanday siljitadi va izohlarda nima yozadi.

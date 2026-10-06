@@ -1,14 +1,14 @@
 # Repository
 
-One repository's branches, commits and pipelines, so you can see what hiro changed and whether it passed.
+One repository's branches, commits and pipelines, so you can see what agnts changed and whether it passed.
 
 ## Branches
 
-hiro creates its own branch for every ticket, like hiro/pay-214, and never commits to the default branch. Each branch shows its latest commit, how far ahead or behind it is, and its checks. Click a hiro branch to open its ticket.
+agnts creates its own branch for every ticket, like agnts/pay-214, and never commits to the default branch. Each branch shows its latest commit, how far ahead or behind it is, and its checks. Click a agnts branch to open its ticket.
 
 ## Commits
 
-All recent commits grouped by day. hiro's commits start with the ticket key and list you as co-author.
+All recent commits grouped by day. agnts's commits start with the ticket key and list you as co-author.
 
 ## Pipelines
 

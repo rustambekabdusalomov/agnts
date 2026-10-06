@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hiro_api/hiro_api.dart';
+import 'package:agnts_api/agnts_api.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../theme.dart';
@@ -53,7 +53,7 @@ class LessonText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       for (final b in lessonBlocks(text))
         Padding(
@@ -64,7 +64,7 @@ class LessonText extends StatelessWidget {
                   decoration: BoxDecoration(color: c.code, borderRadius: BorderRadius.circular(12)),
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
-                    child: Text(b.text, style: TextStyle(fontFamily: HiroFonts.mono, fontSize: 12.5, height: 1.5, color: c.codeInk)),
+                    child: Text(b.text, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, height: 1.5, color: c.codeInk)),
                   ),
                 )
               : Text(b.text, style: TextStyle(fontSize: 15, height: 1.5, color: c.ink)),

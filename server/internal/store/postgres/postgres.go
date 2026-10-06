@@ -1,4 +1,4 @@
-// Package postgres implements hiro's stores on PostgreSQL.
+// Package postgres implements agnts's stores on PostgreSQL.
 package postgres
 
 import (
@@ -12,8 +12,8 @@ import (
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
 
-	"hiro/internal/domain"
-	"hiro/migrations"
+	"agnts/internal/domain"
+	"agnts/migrations"
 )
 
 // Open connects to PostgreSQL and checks the connection.

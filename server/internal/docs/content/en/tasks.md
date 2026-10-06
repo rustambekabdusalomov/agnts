@@ -8,7 +8,7 @@ Pick a repository, describe the result you want, set the priority and choose how
 
 ## After you approve
 
-Choose for each task whether hiro opens a pull request or pushes straight to main. It never pushes without your review.
+Choose for each task whether agnts opens a pull request or pushes straight to main. It never pushes without your review.
 
 ## Repositories
 

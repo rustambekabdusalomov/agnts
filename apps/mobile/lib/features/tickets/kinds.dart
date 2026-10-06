@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hiro_api/hiro_api.dart';
+import 'package:agnts_api/agnts_api.dart';
 
 import '../../core/api.dart';
 import '../../core/data.dart';
@@ -47,7 +47,7 @@ class KindChoices extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -66,7 +66,7 @@ class KindChoices extends StatelessWidget {
   }
 }
 
-/// Changes a ticket's kind on the server; Auto hands the choice back to hiro.
+/// Changes a ticket's kind on the server; Auto hands the choice back to agnts.
 class KindPicker extends ConsumerStatefulWidget {
   const KindPicker(this.ticket, {super.key});
   final Ticket ticket;
@@ -103,7 +103,7 @@ class _KindPickerState extends ConsumerState<KindPicker> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final t = widget.ticket;
     return Padding(
       padding: const EdgeInsets.only(top: 14),
@@ -130,7 +130,7 @@ class ReportMarkdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final base = TextStyle(fontSize: 15, height: 1.5, color: c.ink);
     return MarkdownBody(
       data: markdown,
@@ -147,7 +147,7 @@ class ReportMarkdown extends StatelessWidget {
         h4: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c.ink),
         a: base.copyWith(color: c.primaryInk),
         // One style serves inline code and code blocks, so blocks share its light background.
-        code: TextStyle(fontFamily: HiroFonts.mono, fontSize: 12.5, color: c.ink, backgroundColor: c.graySoft),
+        code: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink, backgroundColor: c.graySoft),
         codeblockPadding: const EdgeInsets.all(12),
         codeblockDecoration: BoxDecoration(color: c.graySoft, borderRadius: BorderRadius.circular(12)),
         blockquoteDecoration: BoxDecoration(
@@ -219,7 +219,7 @@ class _ImplementReportState extends ConsumerState<ImplementReport> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final bug = widget.ticket.kind == TicketKind.bug;
     final child = widget.childKey;
     return Padding(

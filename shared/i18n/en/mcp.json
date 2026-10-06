@@ -1,7 +1,7 @@
 {
   "mcp": {
     "title": "Claude chat (MCP)",
-    "sub": "Manage hiro from Claude on the web, desktop and phone",
+    "sub": "Manage agnts from Claude on the web, desktop and phone",
     "url": "Connector URL",
     "connections": "Connected Claude apps",
     "staticToken": "Static token",
@@ -15,8 +15,8 @@
     "revoke": "Disconnect all",
     "revokeConfirm": "Disconnect every Claude app and delete the static token?",
     "revoked": "All Claude connections removed",
-    "consentTitle": "Connect Claude to hiro",
-    "consentAsk": "{client} wants to use hiro as {user}.",
+    "consentTitle": "Connect Claude to agnts",
+    "consentAsk": "{client} wants to use agnts as {user}.",
     "consentWhat": "It can read your tickets, logs, usage and repositories, and prepare actions. Nothing changes until you confirm each action in the chat. Deploys, settings and integrations are not available to it.",
     "consentRedirect": "You will return to {host}.",
     "allow": "Allow",

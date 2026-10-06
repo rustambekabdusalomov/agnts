@@ -1,18 +1,18 @@
 # Tiketlar roʻyxati
 
-hiro shugʻullanayotgan hamma narsa holati boʻyicha ajratilgan. Yon paneldagi filtrlar shu roʻyxatga olib boradi.
+agnts shugʻullanayotgan hamma narsa holati boʻyicha ajratilgan. Yon paneldagi filtrlar shu roʻyxatga olib boradi.
 
 ## Sizni kutmoqda
 
-Kiruvchi qutingiz. hiro savol berganda, tekshirish uchun oʻzgarishlar tayyor boʻlganda, ish toʻxtaganda yoki limit tufayli pauzaga tushganda tiketlar shu yerda kutadi. Siz harakat qilmaguningizcha hech narsa oldinga siljimaydi.
+Kiruvchi qutingiz. agnts savol berganda, tekshirish uchun oʻzgarishlar tayyor boʻlganda, ish toʻxtaganda yoki limit tufayli pauzaga tushganda tiketlar shu yerda kutadi. Siz harakat qilmaguningizcha hech narsa oldinga siljimaydi.
 
 ## Bajarilmoqda
 
-hiro hozir ishlayotgan tiketlar, har biri serveringizdagi alohida konteynerda.
+agnts hozir ishlayotgan tiketlar, har biri serveringizdagi alohida konteynerda.
 
 ## Navbatda
 
-hiro belgili Jira tiketlari va keyinga qoldirilgan vazifalar. Boshlash uchun tiketni ochib, «Tiketni tahlil qilish»ni bosing.
+agnts belgili Jira tiketlari va keyinga qoldirilgan vazifalar. Boshlash uchun tiketni ochib, «Tiketni tahlil qilish»ni bosing.
 
 ## Yakunlangan
 
@@ -20,7 +20,7 @@ Yuborilgan yoki rad etilgan ishlar. Yuborilganlarda pull request bor yoki ruxsat
 
 ## Manba
 
-Jira — tiket Jira'dan kelgan va hiro uning holatini oʻsha yerda yangilaydi. Vazifa — uni hiro'da oʻzingiz yaratgansiz.
+Jira — tiket Jira'dan kelgan va agnts uning holatini oʻsha yerda yangilaydi. Vazifa — uni agnts'da oʻzingiz yaratgansiz.
 
 ## Qidiruv
 

@@ -1,6 +1,6 @@
 # Learn
 
-hiro writes the code, so you might not notice when a change brings in something your codebase never did before. After each push, hiro reads the change and explains what is new here.
+agnts writes the code, so you might not notice when a change brings in something your codebase never did before. After each push, agnts reads the change and explains what is new here.
 
 ## What becomes a lesson
 
@@ -8,7 +8,7 @@ A pattern, architectural boundary, algorithm, library, language feature or testi
 
 ## Knowledge base
 
-Each repository keeps its own list of concepts. hiro checks the code and that list before writing, so the same idea is taught once per repository.
+Each repository keeps its own list of concepts. agnts checks the code and that list before writing, so the same idea is taught once per repository.
 
 ## Quiz and progress
 

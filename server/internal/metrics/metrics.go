@@ -27,13 +27,13 @@ func Handler(db *pgxpool.Pool, active func() int) http.Handler {
 func write(ctx context.Context, w io.Writer, db *pgxpool.Pool, active func() int) error {
 	p := func(format string, a ...any) { _, _ = fmt.Fprintf(w, format, a...) }
 
-	p("# HELP hiro_active_runs Stages running right now.\n# TYPE hiro_active_runs gauge\nhiro_active_runs %d\n", active())
+	p("# HELP agnts_active_runs Stages running right now.\n# TYPE agnts_active_runs gauge\nagnts_active_runs %d\n", active())
 
 	rows, err := db.Query(ctx, `SELECT state, count(*) FROM tickets GROUP BY state`)
 	if err != nil {
 		return err
 	}
-	p("# HELP hiro_tickets Tickets by state.\n# TYPE hiro_tickets gauge\n")
+	p("# HELP agnts_tickets Tickets by state.\n# TYPE agnts_tickets gauge\n")
 	for rows.Next() {
 		var st string
 		var n int
@@ -41,7 +41,7 @@ func write(ctx context.Context, w io.Writer, db *pgxpool.Pool, active func() int
 			rows.Close()
 			return err
 		}
-		p("hiro_tickets{state=%q} %d\n", st, n)
+		p("agnts_tickets{state=%q} %d\n", st, n)
 	}
 	rows.Close()
 
@@ -50,7 +50,7 @@ func write(ctx context.Context, w io.Writer, db *pgxpool.Pool, active func() int
 		AND NOT EXISTS (SELECT 1 FROM runs r WHERE r.ticket_id = t.id AND r.finished_at IS NULL)`).Scan(&queue); err != nil {
 		return err
 	}
-	p("# HELP hiro_queue_length Tickets waiting for a worker.\n# TYPE hiro_queue_length gauge\nhiro_queue_length %d\n", queue)
+	p("# HELP agnts_queue_length Tickets waiting for a worker.\n# TYPE agnts_queue_length gauge\nagnts_queue_length %d\n", queue)
 
 	rows, err = db.Query(ctx, `SELECT stage, exit_reason, count(*), COALESCE(sum(extract(epoch FROM finished_at - started_at)), 0)
 		FROM runs WHERE finished_at IS NOT NULL GROUP BY stage, exit_reason`)
@@ -73,18 +73,18 @@ func write(ctx context.Context, w io.Writer, db *pgxpool.Pool, active func() int
 		durCount[k.stage] += n
 	}
 	rows.Close()
-	p("# HELP hiro_runs_total Finished runs by stage and how they ended.\n# TYPE hiro_runs_total counter\n")
+	p("# HELP agnts_runs_total Finished runs by stage and how they ended.\n# TYPE agnts_runs_total counter\n")
 	for k, n := range counts {
-		p("hiro_runs_total{stage=%q,exit=%q} %d\n", k.stage, k.exit, n)
+		p("agnts_runs_total{stage=%q,exit=%q} %d\n", k.stage, k.exit, n)
 	}
-	p("# HELP hiro_run_duration_seconds Run durations.\n# TYPE hiro_run_duration_seconds summary\n")
+	p("# HELP agnts_run_duration_seconds Run durations.\n# TYPE agnts_run_duration_seconds summary\n")
 	for st, s := range durSum {
-		p("hiro_run_duration_seconds_sum{stage=%q} %f\nhiro_run_duration_seconds_count{stage=%q} %d\n", st, s, st, durCount[st])
+		p("agnts_run_duration_seconds_sum{stage=%q} %f\nagnts_run_duration_seconds_count{stage=%q} %d\n", st, s, st, durCount[st])
 	}
 	var errs int
 	if err := db.QueryRow(ctx, `SELECT count(*) FROM events WHERE level = 'error'`).Scan(&errs); err != nil {
 		return err
 	}
-	p("# HELP hiro_error_events_total Error events logged.\n# TYPE hiro_error_events_total counter\nhiro_error_events_total %d\n", errs)
+	p("# HELP agnts_error_events_total Error events logged.\n# TYPE agnts_error_events_total counter\nagnts_error_events_total %d\n", errs)
 	return nil
 }

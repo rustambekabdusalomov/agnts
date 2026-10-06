@@ -15,8 +15,8 @@ import (
 	"sync"
 	"time"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
 )
 
 // Paths inside the runner image (deploy/runner/Dockerfile).
@@ -24,9 +24,9 @@ const (
 	workDir    = "/workspace"
 	homeDir    = "/home/agent"
 	claudeHome = "/home/agent/.claude"
-	outDir     = "/hiro/out"
+	outDir     = "/agnts/out"
 	agentUser  = "agent"
-	agentUID   = 1000 // the image's agent user, owner of files hiro writes
+	agentUID   = 1000 // the image's agent user, owner of files agnts writes
 )
 
 // Config sets container limits.
@@ -40,7 +40,7 @@ type Config struct {
 
 // DefaultConfig returns limits for a small VPS.
 func DefaultConfig() Config {
-	return Config{Network: "hiro-runs", MemoryMB: 4096, CPUs: 2, PIDs: 1024}
+	return Config{Network: "agnts-runs", MemoryMB: 4096, CPUs: 2, PIDs: 1024}
 }
 
 // TokenSource returns the Claude OAuth token at the moment a run starts,
@@ -74,12 +74,12 @@ func (r *Runner) Open(ctx context.Context, spec orchestrator.WorkspaceSpec) (orc
 	suffix := make([]byte, 3)
 	_, _ = rand.Read(suffix)
 	id, err := r.docker.Create(ctx, ContainerConfig{
-		Name:       "hiro-" + sanitize(spec.TicketKey) + "-" + hex.EncodeToString(suffix),
+		Name:       "agnts-" + sanitize(spec.TicketKey) + "-" + hex.EncodeToString(suffix),
 		Image:      spec.Image,
 		User:       agentUser,
 		WorkingDir: workDir,
 		Cmd:        []string{"sleep", "infinity"},
-		Labels:     map[string]string{"hiro.ticket": spec.TicketKey},
+		Labels:     map[string]string{"agnts.ticket": spec.TicketKey},
 		Network:    r.cfg.Network,
 		MemoryMB:   r.cfg.MemoryMB,
 		CPUs:       r.cfg.CPUs,
@@ -147,7 +147,7 @@ func (w *workspace) Claude(ctx context.Context, req orchestrator.ClaudeRequest, 
 		return orchestrator.ClaudeResult{}, fmt.Errorf("claude token: %w", err)
 	}
 	if token == "" {
-		return orchestrator.ClaudeResult{}, errors.New("claude is not connected; run `hiro integration set claude`")
+		return orchestrator.ClaudeResult{}, errors.New("claude is not connected; run `agnts integration set claude`")
 	}
 	argv := []string{"claude", "-p", req.Prompt,
 		"--output-format", "stream-json", "--verbose",

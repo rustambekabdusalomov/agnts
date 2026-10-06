@@ -24,18 +24,18 @@ const (
 	// OutputChange is a diff: checks, review of the diff, push or pull request.
 	OutputChange Output = "change"
 	// OutputReport is a Markdown report: review of the report, then it is
-	// kept in hiro and, if the reviewer asks, posted to the tracker.
+	// kept in agnts and, if the reviewer asks, posted to the tracker.
 	OutputReport Output = "report"
 )
 
-// KindSpec says how hiro works a kind.
+// KindSpec says how agnts works a kind.
 type KindSpec struct {
 	Output Output
 	// NeedsRepo is false when the work can run on an empty workspace.
 	NeedsRepo bool
 	// Learn queues the learn stage after the work is pushed.
 	Learn bool
-	// Implementable reports end in a change hiro can be asked to make.
+	// Implementable reports end in a change agnts can be asked to make.
 	Implementable bool
 }
 
@@ -53,7 +53,7 @@ func (k TicketKind) Valid() bool {
 	return ok
 }
 
-// Spec returns how hiro works k; unknown kinds are worked as code.
+// Spec returns how agnts works k; unknown kinds are worked as code.
 func (k TicketKind) Spec() KindSpec {
 	if s, ok := kindSpecs[k]; ok {
 		return s

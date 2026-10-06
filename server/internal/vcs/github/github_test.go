@@ -11,9 +11,9 @@ import (
 	"sync"
 	"testing"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
-	"hiro/internal/vcs"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
+	"agnts/internal/vcs"
 )
 
 func TestOwnerRepo(t *testing.T) {
@@ -50,7 +50,7 @@ func TestOpenPR(t *testing.T) {
 			}
 			w.WriteHeader(http.StatusCreated)
 			_, _ = io.WriteString(w, `{"number":7,"html_url":"https://github.com/acme/api/pull/7"}`)
-		case r.Method == "GET" && r.URL.Path == "/repos/acme/api/pulls" && r.URL.Query().Get("head") == "acme:hiro/PAY-1":
+		case r.Method == "GET" && r.URL.Path == "/repos/acme/api/pulls" && r.URL.Query().Get("head") == "acme:agnts/PAY-1":
 			_, _ = io.WriteString(w, `[{"number":7,"html_url":"https://github.com/acme/api/pull/7"}]`)
 		default:
 			w.WriteHeader(http.StatusNotFound)
@@ -60,12 +60,12 @@ func TestOpenPR(t *testing.T) {
 
 	h := New(srv.URL, func(context.Context) (string, error) { return "tok", nil })
 	repo := domain.Repository{CloneURL: "https://github.com/acme/api.git", DefaultBranch: "main"}
-	n, u, err := h.OpenPR(context.Background(), repo, orchestrator.PR{Branch: "hiro/PAY-1", Title: "PAY-1: x", Body: "body"})
+	n, u, err := h.OpenPR(context.Background(), repo, orchestrator.PR{Branch: "agnts/PAY-1", Title: "PAY-1: x", Body: "body"})
 	if err != nil || n != 7 || u == "" {
 		t.Fatalf("create: %d %s %v", n, u, err)
 	}
 	exists = true
-	if n, _, err = h.OpenPR(context.Background(), repo, orchestrator.PR{Branch: "hiro/PAY-1", Title: "PAY-1: x", Body: "body"}); err != nil || n != 7 {
+	if n, _, err = h.OpenPR(context.Background(), repo, orchestrator.PR{Branch: "agnts/PAY-1", Title: "PAY-1: x", Body: "body"}); err != nil || n != 7 {
 		t.Fatalf("existing: %d %v", n, err)
 	}
 }

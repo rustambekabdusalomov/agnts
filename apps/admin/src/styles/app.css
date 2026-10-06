@@ -74,6 +74,7 @@
 .mem-name { font-weight: 700; color: var(--ink); overflow-wrap: anywhere; }
 a.mem-name:hover { color: var(--primary-ink); }
 .mono { font-family: var(--mono); }
+.tbl .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .assignees { display: flex; flex-wrap: wrap; gap: 8px; }
 .assignee { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px 0 4px; border-radius: 18px; border: 1px solid var(--line-3); background: var(--surface); color: var(--ink); font-size: 14px; cursor: pointer; }
 .assignee .mem-av { width: 26px; height: 26px; font-size: 12px; }
@@ -202,3 +203,24 @@ a.mem-name:hover { color: var(--primary-ink); }
 .report th, .report td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; }
 .report a { color: var(--primary-ink); }
 .check-row { display: flex; align-items: center; gap: 8px; font-size: 14.5px; cursor: pointer; }
+
+/* Sidebars are a fixed-width column: long unbroken text (branch names, URLs,
+   file paths, error output) must wrap inside them instead of widening the
+   column and scrolling the page sideways. */
+.cfg-side, .cfg-side > * { min-width: 0; max-width: 100%; }
+.cfg-side .card { overflow-wrap: anywhere; }
+.tl li > span:last-child { min-width: 0; overflow-wrap: anywhere; }
+
+/* Ticket page: the sidebar scrolls on its own, so its lower cards are
+   reachable without scrolling to the end of a long main column. Only in the
+   two-column layout; stacked, the page scrolls as a whole. */
+@media (min-width: 1101px) {
+  .tk-side {
+    max-height: calc(100vh - 88px - 16px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    padding-bottom: 2px;
+  }
+  .tk-side > * { flex-shrink: 0; } /* scroll, don't squash the cards */
+}

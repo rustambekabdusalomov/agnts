@@ -21,6 +21,45 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// Defines values for AcceptFollowUpPriority.
+const (
+	AcceptFollowUpPriorityHigh   AcceptFollowUpPriority = "high"
+	AcceptFollowUpPriorityLow    AcceptFollowUpPriority = "low"
+	AcceptFollowUpPriorityMedium AcceptFollowUpPriority = "medium"
+)
+
+// Valid indicates whether the value is a known member of the AcceptFollowUpPriority enum.
+func (e AcceptFollowUpPriority) Valid() bool {
+	switch e {
+	case AcceptFollowUpPriorityHigh:
+		return true
+	case AcceptFollowUpPriorityLow:
+		return true
+	case AcceptFollowUpPriorityMedium:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AcceptFollowUpTarget.
+const (
+	AcceptFollowUpTargetJira  AcceptFollowUpTarget = "jira"
+	AcceptFollowUpTargetLocal AcceptFollowUpTarget = "local"
+)
+
+// Valid indicates whether the value is a known member of the AcceptFollowUpTarget enum.
+func (e AcceptFollowUpTarget) Valid() bool {
+	switch e {
+	case AcceptFollowUpTargetJira:
+		return true
+	case AcceptFollowUpTargetLocal:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for AnalysisComplexity.
 const (
 	Complex AnalysisComplexity = "complex"
@@ -252,6 +291,135 @@ func (e FindingSeverity) Valid() bool {
 	case Minor:
 		return true
 	case Nit:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FollowUpSuggestionPriority.
+const (
+	FollowUpSuggestionPriorityHigh   FollowUpSuggestionPriority = "high"
+	FollowUpSuggestionPriorityLow    FollowUpSuggestionPriority = "low"
+	FollowUpSuggestionPriorityMedium FollowUpSuggestionPriority = "medium"
+)
+
+// Valid indicates whether the value is a known member of the FollowUpSuggestionPriority enum.
+func (e FollowUpSuggestionPriority) Valid() bool {
+	switch e {
+	case FollowUpSuggestionPriorityHigh:
+		return true
+	case FollowUpSuggestionPriorityLow:
+		return true
+	case FollowUpSuggestionPriorityMedium:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FollowUpSuggestionSource.
+const (
+	FollowUpSuggestionSourceAnalyze FollowUpSuggestionSource = "analyze"
+	FollowUpSuggestionSourceManual  FollowUpSuggestionSource = "manual"
+	FollowUpSuggestionSourceReview  FollowUpSuggestionSource = "review"
+	FollowUpSuggestionSourceWork    FollowUpSuggestionSource = "work"
+)
+
+// Valid indicates whether the value is a known member of the FollowUpSuggestionSource enum.
+func (e FollowUpSuggestionSource) Valid() bool {
+	switch e {
+	case FollowUpSuggestionSourceAnalyze:
+		return true
+	case FollowUpSuggestionSourceManual:
+		return true
+	case FollowUpSuggestionSourceReview:
+		return true
+	case FollowUpSuggestionSourceWork:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FollowUpSuggestionStatus.
+const (
+	Accepted  FollowUpSuggestionStatus = "accepted"
+	Dismissed FollowUpSuggestionStatus = "dismissed"
+	Open      FollowUpSuggestionStatus = "open"
+)
+
+// Valid indicates whether the value is a known member of the FollowUpSuggestionStatus enum.
+func (e FollowUpSuggestionStatus) Valid() bool {
+	switch e {
+	case Accepted:
+		return true
+	case Dismissed:
+		return true
+	case Open:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FollowUpSuggestionType.
+const (
+	Gap          FollowUpSuggestionType = "gap"
+	Prerequisite FollowUpSuggestionType = "prerequisite"
+	Split        FollowUpSuggestionType = "split"
+	Unfinished   FollowUpSuggestionType = "unfinished"
+)
+
+// Valid indicates whether the value is a known member of the FollowUpSuggestionType enum.
+func (e FollowUpSuggestionType) Valid() bool {
+	switch e {
+	case Gap:
+		return true
+	case Prerequisite:
+		return true
+	case Split:
+		return true
+	case Unfinished:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FollowUpTicketSource.
+const (
+	FollowUpTicketSourceJira  FollowUpTicketSource = "jira"
+	FollowUpTicketSourceLocal FollowUpTicketSource = "local"
+)
+
+// Valid indicates whether the value is a known member of the FollowUpTicketSource enum.
+func (e FollowUpTicketSource) Valid() bool {
+	switch e {
+	case FollowUpTicketSourceJira:
+		return true
+	case FollowUpTicketSourceLocal:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FollowUpsMode.
+const (
+	Inherit FollowUpsMode = "inherit"
+	Off     FollowUpsMode = "off"
+	On      FollowUpsMode = "on"
+)
+
+// Valid indicates whether the value is a known member of the FollowUpsMode enum.
+func (e FollowUpsMode) Valid() bool {
+	switch e {
+	case Inherit:
+		return true
+	case Off:
+		return true
+	case On:
 		return true
 	default:
 		return false
@@ -552,6 +720,36 @@ func (e RuleStatus) Valid() bool {
 	}
 }
 
+// Defines values for StageSpendStage.
+const (
+	StageSpendStageAnalyze StageSpendStage = "analyze"
+	StageSpendStageCoding  StageSpendStage = "coding"
+	StageSpendStageHelper  StageSpendStage = "helper"
+	StageSpendStageLearn   StageSpendStage = "learn"
+	StageSpendStageRetry   StageSpendStage = "retry"
+	StageSpendStageReview  StageSpendStage = "review"
+)
+
+// Valid indicates whether the value is a known member of the StageSpendStage enum.
+func (e StageSpendStage) Valid() bool {
+	switch e {
+	case StageSpendStageAnalyze:
+		return true
+	case StageSpendStageCoding:
+		return true
+	case StageSpendStageHelper:
+		return true
+	case StageSpendStageLearn:
+		return true
+	case StageSpendStageRetry:
+		return true
+	case StageSpendStageReview:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for TaskCreateAfterApprove.
 const (
 	TaskCreateAfterApproveMain TaskCreateAfterApprove = "main"
@@ -795,6 +993,36 @@ func (e TicketKindChoice) Valid() bool {
 	}
 }
 
+// Defines values for TicketSpendRowTopStage.
+const (
+	TicketSpendRowTopStageAnalyze TicketSpendRowTopStage = "analyze"
+	TicketSpendRowTopStageCoding  TicketSpendRowTopStage = "coding"
+	TicketSpendRowTopStageHelper  TicketSpendRowTopStage = "helper"
+	TicketSpendRowTopStageLearn   TicketSpendRowTopStage = "learn"
+	TicketSpendRowTopStageRetry   TicketSpendRowTopStage = "retry"
+	TicketSpendRowTopStageReview  TicketSpendRowTopStage = "review"
+)
+
+// Valid indicates whether the value is a known member of the TicketSpendRowTopStage enum.
+func (e TicketSpendRowTopStage) Valid() bool {
+	switch e {
+	case TicketSpendRowTopStageAnalyze:
+		return true
+	case TicketSpendRowTopStageCoding:
+		return true
+	case TicketSpendRowTopStageHelper:
+		return true
+	case TicketSpendRowTopStageLearn:
+		return true
+	case TicketSpendRowTopStageRetry:
+		return true
+	case TicketSpendRowTopStageReview:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for TicketState.
 const (
 	TicketStateAnalyzing         TicketState = "analyzing"
@@ -893,19 +1121,19 @@ func (e Provider) Valid() bool {
 
 // Defines values for GetAnalyticsParamsDays.
 const (
-	N30 GetAnalyticsParamsDays = 30
-	N7  GetAnalyticsParamsDays = 7
-	N90 GetAnalyticsParamsDays = 90
+	GetAnalyticsParamsDaysN30 GetAnalyticsParamsDays = 30
+	GetAnalyticsParamsDaysN7  GetAnalyticsParamsDays = 7
+	GetAnalyticsParamsDaysN90 GetAnalyticsParamsDays = 90
 )
 
 // Valid indicates whether the value is a known member of the GetAnalyticsParamsDays enum.
 func (e GetAnalyticsParamsDays) Valid() bool {
 	switch e {
-	case N30:
+	case GetAnalyticsParamsDaysN30:
 		return true
-	case N7:
+	case GetAnalyticsParamsDaysN7:
 		return true
-	case N90:
+	case GetAnalyticsParamsDaysN90:
 		return true
 	default:
 		return false
@@ -1005,6 +1233,68 @@ func (e ListLessonsParamsStatus) Valid() bool {
 	}
 }
 
+// Defines values for GetTicketSpendParamsDays.
+const (
+	GetTicketSpendParamsDaysN30 GetTicketSpendParamsDays = 30
+	GetTicketSpendParamsDaysN7  GetTicketSpendParamsDays = 7
+	GetTicketSpendParamsDaysN90 GetTicketSpendParamsDays = 90
+)
+
+// Valid indicates whether the value is a known member of the GetTicketSpendParamsDays enum.
+func (e GetTicketSpendParamsDays) Valid() bool {
+	switch e {
+	case GetTicketSpendParamsDaysN30:
+		return true
+	case GetTicketSpendParamsDaysN7:
+		return true
+	case GetTicketSpendParamsDaysN90:
+		return true
+	default:
+		return false
+	}
+}
+
+// AcceptFollowUp A suggestion to create, with optional edits
+type AcceptFollowUp struct {
+	Description *string `json:"description,omitempty"`
+	Id          int64   `json:"id"`
+
+	// Kind What the work produces. code and test make a change (diff, checks, pull request); plan, analysis and bug write a Markdown report.
+	Kind     *TicketKind             `json:"kind,omitempty"`
+	Priority *AcceptFollowUpPriority `json:"priority,omitempty"`
+
+	// RepoId Defaults to the parent ticket's repository
+	RepoId *int64 `json:"repoId,omitempty"`
+
+	// Target local = an agnts task (default), jira = a new issue in the Jira project
+	Target *AcceptFollowUpTarget `json:"target,omitempty"`
+	Title  *string               `json:"title,omitempty"`
+}
+
+// AcceptFollowUpPriority defines model for AcceptFollowUp.Priority.
+type AcceptFollowUpPriority string
+
+// AcceptFollowUpTarget local = an agnts task (default), jira = a new issue in the Jira project
+type AcceptFollowUpTarget string
+
+// AcceptFollowUpResult defines model for AcceptFollowUpResult.
+type AcceptFollowUpResult struct {
+	// Error Why no ticket was made from this suggestion
+	Error  *string `json:"error,omitempty"`
+	Id     int64   `json:"id"`
+	Ticket *Ticket `json:"ticket,omitempty"`
+}
+
+// AcceptFollowUps defines model for AcceptFollowUps.
+type AcceptFollowUps struct {
+	Items []AcceptFollowUp `json:"items"`
+}
+
+// AcceptFollowUpsResult defines model for AcceptFollowUpsResult.
+type AcceptFollowUpsResult struct {
+	Results []AcceptFollowUpResult `json:"results"`
+}
+
 // Analysis defines model for Analysis.
 type Analysis struct {
 	// Complexity The analysis's rating; picks the review model on auto
@@ -1021,7 +1311,7 @@ type Analytics struct {
 	Current PeriodStats `json:"current"`
 	Days    int         `json:"days"`
 
-	// Hours hiro's events per hour of day (server time zone)
+	// Hours agnts's events per hour of day (server time zone)
 	Hours    []int `json:"hours"`
 	Insights []struct {
 		Kind   AnalyticsInsightsKind `json:"kind"`
@@ -1036,16 +1326,19 @@ type Analytics struct {
 	PerDay   []DayStat   `json:"perDay"`
 	Previous PeriodStats `json:"previous"`
 	Repos    []struct {
+		AgntsMin float32 `json:"agntsMin"`
 		AvgTurns float32 `json:"avgTurns"`
 		ClaudeMd string  `json:"claudeMd"`
 		Done     int     `json:"done"`
 		Finished int     `json:"finished"`
-		HiroMin  float32 `json:"hiroMin"`
 		Kind     string  `json:"kind"`
 		Name     string  `json:"name"`
 		RepoId   int64   `json:"repoId"`
 		Tickets  int     `json:"tickets"`
 	} `json:"repos"`
+
+	// SpendByStage Spend of every ticket in the period by stage and model, costliest first
+	SpendByStage []StageSpend `json:"spendByStage"`
 
 	// Steps Average minutes per state
 	Steps map[string]float32 `json:"steps"`
@@ -1093,7 +1386,7 @@ type CheckStep struct {
 	TimedOut   *bool   `json:"timedOut,omitempty"`
 }
 
-// CodeReview hiro's review of the latest result, advice beside the human review. It reviewed an older revision when revision is below the ticket's.
+// CodeReview agnts's review of the latest result, advice beside the human review. It reviewed an older revision when revision is below the ticket's.
 type CodeReview struct {
 	CreatedAt time.Time `json:"createdAt"`
 	Findings  []Finding `json:"findings"`
@@ -1160,15 +1453,18 @@ type DashboardCounts struct {
 
 // DayStat defines model for DayStat.
 type DayStat struct {
+	AgntsMin  float32            `json:"agntsMin"`
 	Date      openapi_types.Date `json:"date"`
-	HiroMin   float32            `json:"hiroMin"`
 	PeakUsage *float32           `json:"peakUsage,omitempty"`
 	Picked    int                `json:"picked"`
 	Pushed    int                `json:"pushed"`
 	Rejected  int                `json:"rejected"`
-	Stopped   int                `json:"stopped"`
-	Turns     float32            `json:"turns"`
-	WaitMin   float32            `json:"waitMin"`
+
+	// Spend Tokens Claude used (on a ticket: all its runs; absent until one is recorded). costUsd is what Claude Code reports the same work would cost on the API; on a Claude plan it is an estimate, not a charge.
+	Spend   TokenSpend `json:"spend"`
+	Stopped int        `json:"stopped"`
+	Turns   float32    `json:"turns"`
+	WaitMin float32    `json:"waitMin"`
 }
 
 // DeviceRegistration defines model for DeviceRegistration.
@@ -1262,12 +1558,89 @@ type FindingCategory string
 // FindingSeverity defines model for Finding.Severity.
 type FindingSeverity string
 
+// FollowUpSuggestion defines model for FollowUpSuggestion.
+type FollowUpSuggestion struct {
+	// ChildKey The ticket made from it
+	ChildKey    *string    `json:"childKey,omitempty"`
+	CreatedAt   time.Time  `json:"createdAt"`
+	DecidedAt   *time.Time `json:"decidedAt,omitempty"`
+	Description string     `json:"description"`
+	Id          int64      `json:"id"`
+
+	// Kind What the work produces. code and test make a change (diff, checks, pull request); plan, analysis and bug write a Markdown report.
+	Kind     TicketKind                 `json:"kind"`
+	Priority FollowUpSuggestionPriority `json:"priority"`
+
+	// Ready A ticket can be made from it now (open, and the parent is done unless the analysis suggested it)
+	Ready bool `json:"ready"`
+
+	// Revision The parent's revision when it was suggested
+	Revision int `json:"revision"`
+
+	// Serves How it helps finish the parent ticket
+	Serves string `json:"serves"`
+
+	// Source The run that suggested it; manual = made from a review finding
+	Source FollowUpSuggestionSource `json:"source"`
+	Status FollowUpSuggestionStatus `json:"status"`
+	Title  string                   `json:"title"`
+
+	// Type How it serves the parent ticket
+	Type FollowUpSuggestionType `json:"type"`
+}
+
+// FollowUpSuggestionPriority defines model for FollowUpSuggestion.Priority.
+type FollowUpSuggestionPriority string
+
+// FollowUpSuggestionSource The run that suggested it; manual = made from a review finding
+type FollowUpSuggestionSource string
+
+// FollowUpSuggestionStatus defines model for FollowUpSuggestion.Status.
+type FollowUpSuggestionStatus string
+
+// FollowUpSuggestionType How it serves the parent ticket
+type FollowUpSuggestionType string
+
+// FollowUpTicket defines model for FollowUpTicket.
+type FollowUpTicket struct {
+	Held *bool  `json:"held,omitempty"`
+	Key  string `json:"key"`
+
+	// Kind What the work produces. code and test make a change (diff, checks, pull request); plan, analysis and bug write a Markdown report.
+	Kind   TicketKind           `json:"kind"`
+	Source FollowUpTicketSource `json:"source"`
+	State  TicketState          `json:"state"`
+	Title  string               `json:"title"`
+}
+
+// FollowUpTicketSource defines model for FollowUpTicket.Source.
+type FollowUpTicketSource string
+
+// FollowUps defines model for FollowUps.
+type FollowUps struct {
+	// Children Tickets made from the suggestions
+	Children []FollowUpTicket `json:"children"`
+
+	// Enabled This ticket's runs suggest follow-ups
+	Enabled     bool                 `json:"enabled"`
+	Suggestions []FollowUpSuggestion `json:"suggestions"`
+}
+
+// FollowUpsMode Follow-up suggestions for one ticket: inherit follows Settings
+type FollowUpsMode string
+
+// FollowUpsSetting defines model for FollowUpsSetting.
+type FollowUpsSetting struct {
+	// Mode Follow-up suggestions for one ticket: inherit follows Settings
+	Mode FollowUpsMode `json:"mode"`
+}
+
 // GitSettings defines model for GitSettings.
 type GitSettings struct {
 	AuthorEmail string `json:"authorEmail"`
 	AuthorName  string `json:"authorName"`
 
-	// CoAuthor Add a Co-authored-by hiro line
+	// CoAuthor Add a Co-authored-by agnts line
 	CoAuthor bool `json:"coAuthor"`
 	Draft    bool `json:"draft"`
 
@@ -1285,7 +1658,7 @@ type HistoryItem struct {
 
 // HourBucket defines model for HourBucket.
 type HourBucket struct {
-	Hiro     int `json:"hiro"`
+	Agnts    int `json:"agnts"`
 	Hour     int `json:"hour"`
 	Problems int `json:"problems"`
 	You      int `json:"you"`
@@ -1505,6 +1878,9 @@ type ModelOverrides struct {
 type NotifySettings struct {
 	Done bool `json:"done"`
 
+	// FollowUps Follow-up tickets were suggested
+	FollowUps *bool `json:"followUps,omitempty"`
+
 	// Lessons New lessons were found
 	Lessons  *bool `json:"lessons,omitempty"`
 	NeedsYou bool  `json:"needsYou"`
@@ -1519,16 +1895,19 @@ type NotifySettings struct {
 // PeriodStats defines model for PeriodStats.
 type PeriodStats struct {
 	AfterChanges int     `json:"afterChanges"`
+	AgntsMin     float32 `json:"agntsMin"`
 	AnswerMin    float32 `json:"answerMin"`
 	FirstTry     int     `json:"firstTry"`
-	HiroMin      float32 `json:"hiroMin"`
 	Picked       int     `json:"picked"`
 	Pushed       int     `json:"pushed"`
 	Rejected     int     `json:"rejected"`
 	ReviewMin    float32 `json:"reviewMin"`
-	Stopped      int     `json:"stopped"`
-	Turns        float32 `json:"turns"`
-	WaitMin      float32 `json:"waitMin"`
+
+	// Spend Tokens Claude used (on a ticket: all its runs; absent until one is recorded). costUsd is what Claude Code reports the same work would cost on the API; on a Claude plan it is an estimate, not a charge.
+	Spend   TokenSpend `json:"spend"`
+	Stopped int        `json:"stopped"`
+	Turns   float32    `json:"turns"`
+	WaitMin float32    `json:"waitMin"`
 }
 
 // Pipeline defines model for Pipeline.
@@ -1567,7 +1946,7 @@ type QuizQuestion struct {
 
 // RemoteRepository defines model for RemoteRepository.
 type RemoteRepository struct {
-	// Added Already added to hiro
+	// Added Already added to agnts
 	Added         bool    `json:"added"`
 	CloneUrl      string  `json:"cloneUrl"`
 	DefaultBranch string  `json:"defaultBranch"`
@@ -1766,7 +2145,10 @@ type Settings struct {
 	Notify     *NotifySettings `json:"notify,omitempty"`
 	Parallel   int             `json:"parallel"`
 	PauseAbove int             `json:"pauseAbove"`
-	TimeoutMin int             `json:"timeoutMin"`
+
+	// SuggestFollowUps Runs suggest follow-up tickets (off by default; a ticket can override it)
+	SuggestFollowUps *bool `json:"suggestFollowUps,omitempty"`
+	TimeoutMin       int   `json:"timeoutMin"`
 }
 
 // Stage defines model for Stage.
@@ -1790,6 +2172,26 @@ type StageModels struct {
 	Review *ReviewModel `json:"review,omitempty"`
 }
 
+// StageSpend Spend for one stage and model; on a ticket, in the order the stage first ran
+type StageSpend struct {
+	// Calls Claude invocations
+	Calls int    `json:"calls"`
+	Model string `json:"model"`
+
+	// Partial A run was cut off, so its tokens are counted from the messages seen and its cost is unknown
+	Partial bool `json:"partial"`
+
+	// Spend Tokens Claude used (on a ticket: all its runs; absent until one is recorded). costUsd is what Claude Code reports the same work would cost on the API; on a Claude plan it is an estimate, not a charge.
+	Spend TokenSpend `json:"spend"`
+
+	// Stage retry is fix attempts after failed checks and requested changes
+	Stage StageSpendStage `json:"stage"`
+	Turns int             `json:"turns"`
+}
+
+// StageSpendStage retry is fix attempts after failed checks and requested changes
+type StageSpendStage string
+
 // StepDuration defines model for StepDuration.
 type StepDuration struct {
 	AvgMs *int64      `json:"avgMs,omitempty"`
@@ -1802,7 +2204,10 @@ type TaskCreate struct {
 	AfterApprove TaskCreateAfterApprove `json:"afterApprove"`
 	Description  *string                `json:"description,omitempty"`
 
-	// Kind A kind, or auto for hiro to pick one during analysis
+	// FollowUps Follow-up suggestions for one ticket: inherit follows Settings
+	FollowUps *FollowUpsMode `json:"followUps,omitempty"`
+
+	// Kind A kind, or auto for agnts to pick one during analysis
 	Kind     *TicketKindChoice  `json:"kind,omitempty"`
 	Priority TaskCreatePriority `json:"priority"`
 
@@ -1828,7 +2233,7 @@ type TaskUpdate struct {
 	AfterApprove *TaskUpdateAfterApprove `json:"afterApprove,omitempty"`
 	Description  *string                 `json:"description,omitempty"`
 
-	// Kind A kind, or auto for hiro to pick one during analysis
+	// Kind A kind, or auto for agnts to pick one during analysis
 	Kind     *TicketKindChoice   `json:"kind,omitempty"`
 	Priority *TaskUpdatePriority `json:"priority,omitempty"`
 	Title    *string             `json:"title,omitempty"`
@@ -1851,6 +2256,9 @@ type Ticket struct {
 	CreatedAt   time.Time `json:"createdAt"`
 	Description string    `json:"description"`
 
+	// FollowUpOf The ticket that suggested this one as a follow-up
+	FollowUpOf *string `json:"followUpOf,omitempty"`
+
 	// Held Kept in the queue until started
 	Held *bool  `json:"held,omitempty"`
 	Key  string `json:"key"`
@@ -1858,13 +2266,16 @@ type Ticket struct {
 	// Kind What the work produces. code and test make a change (diff, checks, pull request); plan, analysis and bug write a Markdown report.
 	Kind TicketKind `json:"kind"`
 
-	// KindAuto hiro picks the kind; the analysis may still change it
+	// KindAuto agnts picks the kind; the analysis may still change it
 	KindAuto bool `json:"kindAuto"`
 
 	// LearnState The learn run after push; pending also while it runs
 	LearnState *TicketLearnState `json:"learnState,omitempty"`
 	MergedAt   *time.Time        `json:"mergedAt,omitempty"`
 	Models     *ModelOverrides   `json:"models,omitempty"`
+
+	// OpenSuggestions Follow-up suggestions waiting for a decision
+	OpenSuggestions *int `json:"openSuggestions,omitempty"`
 
 	// ParentKey The plan or bug investigation this ticket implements
 	ParentKey *string `json:"parentKey,omitempty"`
@@ -1878,20 +2289,26 @@ type Ticket struct {
 	RepoName    *string      `json:"repoName,omitempty"`
 	ResumeState *TicketState `json:"resumeState,omitempty"`
 
-	// ReviewState The code review hiro runs beside the human review
+	// ReviewState The code review agnts runs beside the human review
 	ReviewState *TicketReviewState `json:"reviewState,omitempty"`
 	Revision    int                `json:"revision"`
 
 	// Since When the ticket entered its current state
 	Since  *time.Time   `json:"since,omitempty"`
 	Source TicketSource `json:"source"`
-	State  TicketState  `json:"state"`
+
+	// Spend Tokens Claude used (on a ticket: all its runs; absent until one is recorded). costUsd is what Claude Code reports the same work would cost on the API; on a Claude plan it is an estimate, not a charge.
+	Spend *TokenSpend `json:"spend,omitempty"`
+	State TicketState `json:"state"`
 
 	// StopReason Why it failed or paused
-	StopReason *string   `json:"stopReason,omitempty"`
-	Title      string    `json:"title"`
-	Turns      int       `json:"turns"`
-	UpdatedAt  time.Time `json:"updatedAt"`
+	StopReason *string `json:"stopReason,omitempty"`
+
+	// SuggestFollowUps Follow-up suggestions for one ticket: inherit follows Settings
+	SuggestFollowUps *FollowUpsMode `json:"suggestFollowUps,omitempty"`
+	Title            string         `json:"title"`
+	Turns            int            `json:"turns"`
+	UpdatedAt        time.Time      `json:"updatedAt"`
 }
 
 // TicketAfterApprove defines model for Ticket.AfterApprove.
@@ -1900,7 +2317,7 @@ type TicketAfterApprove string
 // TicketLearnState The learn run after push; pending also while it runs
 type TicketLearnState string
 
-// TicketReviewState The code review hiro runs beside the human review
+// TicketReviewState The code review agnts runs beside the human review
 type TicketReviewState string
 
 // TicketSource defines model for Ticket.Source.
@@ -1913,25 +2330,29 @@ type TicketDetail struct {
 	// ChildKey The code task that implements this report, if any
 	ChildKey        *string        `json:"childKey,omitempty"`
 	EffectiveModels *StageModels   `json:"effectiveModels,omitempty"`
+	FollowUps       *FollowUps     `json:"followUps,omitempty"`
 	History         *[]HistoryItem `json:"history,omitempty"`
 	MaxTurns        *int           `json:"maxTurns,omitempty"`
 	Questions       []Question     `json:"questions"`
 	Result          *Result        `json:"result,omitempty"`
 
-	// Review hiro's review of the latest result, advice beside the human review. It reviewed an older revision when revision is below the ticket's.
+	// Review agnts's review of the latest result, advice beside the human review. It reviewed an older revision when revision is below the ticket's.
 	Review *CodeReview `json:"review,omitempty"`
-	Ticket Ticket      `json:"ticket"`
+
+	// SpendByStage Empty until a Claude run is recorded
+	SpendByStage *[]StageSpend `json:"spendByStage,omitempty"`
+	Ticket       Ticket        `json:"ticket"`
 }
 
 // TicketKind What the work produces. code and test make a change (diff, checks, pull request); plan, analysis and bug write a Markdown report.
 type TicketKind string
 
-// TicketKindChoice A kind, or auto for hiro to pick one during analysis
+// TicketKindChoice A kind, or auto for agnts to pick one during analysis
 type TicketKindChoice string
 
 // TicketKindInput defines model for TicketKindInput.
 type TicketKindInput struct {
-	// Kind A kind, or auto for hiro to pick one during analysis
+	// Kind A kind, or auto for agnts to pick one during analysis
 	Kind TicketKindChoice `json:"kind"`
 }
 
@@ -1940,8 +2361,53 @@ type TicketRepo struct {
 	RepoId int64 `json:"repoId"`
 }
 
+// TicketSpendList defines model for TicketSpendList.
+type TicketSpendList struct {
+	Days int `json:"days"`
+
+	// Tickets Costliest first; partial runs have no cost, so ties fall back to tokens
+	Tickets []TicketSpendRow `json:"tickets"`
+
+	// Total Tokens Claude used (on a ticket: all its runs; absent until one is recorded). costUsd is what Claude Code reports the same work would cost on the API; on a Claude plan it is an estimate, not a charge.
+	Total TokenSpend `json:"total"`
+}
+
+// TicketSpendRow One ticket's spend within the period (not its lifetime spend)
+type TicketSpendRow struct {
+	// Calls Claude invocations in the period
+	Calls int    `json:"calls"`
+	Key   string `json:"key"`
+
+	// Kind What the work produces. code and test make a change (diff, checks, pull request); plan, analysis and bug write a Markdown report.
+	Kind     TicketKind `json:"kind"`
+	RepoName *string    `json:"repoName,omitempty"`
+
+	// Spend Tokens Claude used (on a ticket: all its runs; absent until one is recorded). costUsd is what Claude Code reports the same work would cost on the API; on a Claude plan it is an estimate, not a charge.
+	Spend TokenSpend  `json:"spend"`
+	State TicketState `json:"state"`
+	Title string      `json:"title"`
+
+	// TopStage The stage that cost the most
+	TopStage TicketSpendRowTopStage `json:"topStage"`
+}
+
+// TicketSpendRowTopStage The stage that cost the most
+type TicketSpendRowTopStage string
+
 // TicketState defines model for TicketState.
 type TicketState string
+
+// TokenSpend Tokens Claude used (on a ticket: all its runs; absent until one is recorded). costUsd is what Claude Code reports the same work would cost on the API; on a Claude plan it is an estimate, not a charge.
+type TokenSpend struct {
+	CacheRead  int64   `json:"cacheRead"`
+	CacheWrite int64   `json:"cacheWrite"`
+	CostUsd    float64 `json:"costUsd"`
+	Input      int64   `json:"input"`
+	Output     int64   `json:"output"`
+
+	// Total All four counts added
+	Total int64 `json:"total"`
+}
 
 // Usage defines model for Usage.
 type Usage struct {
@@ -2163,6 +2629,15 @@ type RequestChangesJSONBody struct {
 	Feedback string `json:"feedback"`
 }
 
+// GetTicketSpendParams defines parameters for GetTicketSpend.
+type GetTicketSpendParams struct {
+	Days  *GetTicketSpendParamsDays `form:"days,omitempty" json:"days,omitempty"`
+	Limit *int                      `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
+// GetTicketSpendParamsDays defines parameters for GetTicketSpend.
+type GetTicketSpendParamsDays int
+
 // LoginJSONRequestBody defines body for Login for application/json ContentType.
 type LoginJSONRequestBody = LoginRequest
 
@@ -2213,6 +2688,12 @@ type AnswerQuestionsJSONRequestBody = AnswersRequest
 
 // ApproveTicketJSONRequestBody defines body for ApproveTicket for application/json ContentType.
 type ApproveTicketJSONRequestBody ApproveTicketJSONBody
+
+// SetFollowUpsJSONRequestBody defines body for SetFollowUps for application/json ContentType.
+type SetFollowUpsJSONRequestBody = FollowUpsSetting
+
+// AcceptFollowUpsJSONRequestBody defines body for AcceptFollowUps for application/json ContentType.
+type AcceptFollowUpsJSONRequestBody = AcceptFollowUps
 
 // ImplementTicketJSONRequestBody defines body for ImplementTicket for application/json ContentType.
 type ImplementTicketJSONRequestBody = ImplementInput
@@ -2291,7 +2772,7 @@ type ServerInterface interface {
 
 	// (POST /integrations/{provider}/test)
 	TestIntegration(w http.ResponseWriter, r *http.Request, provider Provider)
-	// ListLessons Lessons hiro learned from pushed tickets, newest first
+	// ListLessons Lessons agnts learned from pushed tickets, newest first
 	// (GET /lessons)
 	ListLessons(w http.ResponseWriter, r *http.Request, params ListLessonsParams)
 	// GetLearnQueue Done tickets whose learn run is running, queued, failed or never happened
@@ -2351,7 +2832,7 @@ type ServerInterface interface {
 	// ListRepoEnvironments Deployment environments and what runs there
 	// (GET /repos/{id}/environments)
 	ListRepoEnvironments(w http.ResponseWriter, r *http.Request, id RepoID)
-	// ListRepoLocalBranches Branches in hiro's own clones on the server, and whether origin has them
+	// ListRepoLocalBranches Branches in agnts's own clones on the server, and whether origin has them
 	// (GET /repos/{id}/local-branches)
 	ListRepoLocalBranches(w http.ResponseWriter, r *http.Request, id RepoID)
 	// ListRepoMembers People with access to the repository on its git host
@@ -2420,6 +2901,18 @@ type ServerInterface interface {
 	// ListTicketEvents The ticket's log, oldest first; poll with `after` for live updates
 	// (GET /tickets/{key}/events)
 	ListTicketEvents(w http.ResponseWriter, r *http.Request, key TicketKey, params ListTicketEventsParams)
+	// ListFollowUps Suggested follow-up tickets and the tickets made from them
+	// (GET /tickets/{key}/follow-ups)
+	ListFollowUps(w http.ResponseWriter, r *http.Request, key TicketKey)
+	// SetFollowUps Turn follow-up suggestions on or off for this ticket
+	// (PUT /tickets/{key}/follow-ups)
+	SetFollowUps(w http.ResponseWriter, r *http.Request, key TicketKey)
+	// AcceptFollowUps Create tickets from chosen suggestions
+	// (POST /tickets/{key}/follow-ups/accept)
+	AcceptFollowUps(w http.ResponseWriter, r *http.Request, key TicketKey)
+	// DismissFollowUp Decline a suggestion; later runs will not suggest it again
+	// (POST /tickets/{key}/follow-ups/{id}/dismiss)
+	DismissFollowUp(w http.ResponseWriter, r *http.Request, key TicketKey, id int64)
 	// ImplementTicket Make the code task that carries out a done plan or bug investigation
 	// (POST /tickets/{key}/implement)
 	ImplementTicket(w http.ResponseWriter, r *http.Request, key TicketKey)
@@ -2447,6 +2940,9 @@ type ServerInterface interface {
 	// ReviewTicket Queue a code review of a ticket waiting for review (again, if one already ran)
 	// (POST /tickets/{key}/review)
 	ReviewTicket(w http.ResponseWriter, r *http.Request, key TicketKey)
+	// FollowUpFromFinding Turn a code review finding into a follow-up suggestion
+	// (POST /tickets/{key}/review/findings/{index}/follow-up)
+	FollowUpFromFinding(w http.ResponseWriter, r *http.Request, key TicketKey, index int)
 	// StopTicket Stop the running stage; the ticket moves to failed and can be retried
 	// (POST /tickets/{key}/stop)
 	StopTicket(w http.ResponseWriter, r *http.Request, key TicketKey)
@@ -2456,6 +2952,9 @@ type ServerInterface interface {
 	// RefreshUsage Start a tiny Claude run to read fresh limits; a usage_updated event follows
 	// (POST /usage/refresh)
 	RefreshUsage(w http.ResponseWriter, r *http.Request)
+	// GetTicketSpend Tickets that used the most of the plan in a period, by Claude Code's cost estimate
+	// (GET /usage/tickets)
+	GetTicketSpend(w http.ResponseWriter, r *http.Request, params GetTicketSpendParams)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -2574,7 +3073,7 @@ func (_ Unimplemented) TestIntegration(w http.ResponseWriter, r *http.Request, p
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// ListLessons Lessons hiro learned from pushed tickets, newest first
+// ListLessons Lessons agnts learned from pushed tickets, newest first
 // (GET /lessons)
 func (_ Unimplemented) ListLessons(w http.ResponseWriter, r *http.Request, params ListLessonsParams) {
 	w.WriteHeader(http.StatusNotImplemented)
@@ -2690,7 +3189,7 @@ func (_ Unimplemented) ListRepoEnvironments(w http.ResponseWriter, r *http.Reque
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// ListRepoLocalBranches Branches in hiro's own clones on the server, and whether origin has them
+// ListRepoLocalBranches Branches in agnts's own clones on the server, and whether origin has them
 // (GET /repos/{id}/local-branches)
 func (_ Unimplemented) ListRepoLocalBranches(w http.ResponseWriter, r *http.Request, id RepoID) {
 	w.WriteHeader(http.StatusNotImplemented)
@@ -2824,6 +3323,30 @@ func (_ Unimplemented) ListTicketEvents(w http.ResponseWriter, r *http.Request, 
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// ListFollowUps Suggested follow-up tickets and the tickets made from them
+// (GET /tickets/{key}/follow-ups)
+func (_ Unimplemented) ListFollowUps(w http.ResponseWriter, r *http.Request, key TicketKey) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// SetFollowUps Turn follow-up suggestions on or off for this ticket
+// (PUT /tickets/{key}/follow-ups)
+func (_ Unimplemented) SetFollowUps(w http.ResponseWriter, r *http.Request, key TicketKey) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// AcceptFollowUps Create tickets from chosen suggestions
+// (POST /tickets/{key}/follow-ups/accept)
+func (_ Unimplemented) AcceptFollowUps(w http.ResponseWriter, r *http.Request, key TicketKey) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// DismissFollowUp Decline a suggestion; later runs will not suggest it again
+// (POST /tickets/{key}/follow-ups/{id}/dismiss)
+func (_ Unimplemented) DismissFollowUp(w http.ResponseWriter, r *http.Request, key TicketKey, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // ImplementTicket Make the code task that carries out a done plan or bug investigation
 // (POST /tickets/{key}/implement)
 func (_ Unimplemented) ImplementTicket(w http.ResponseWriter, r *http.Request, key TicketKey) {
@@ -2878,6 +3401,12 @@ func (_ Unimplemented) ReviewTicket(w http.ResponseWriter, r *http.Request, key 
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// FollowUpFromFinding Turn a code review finding into a follow-up suggestion
+// (POST /tickets/{key}/review/findings/{index}/follow-up)
+func (_ Unimplemented) FollowUpFromFinding(w http.ResponseWriter, r *http.Request, key TicketKey, index int) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // StopTicket Stop the running stage; the ticket moves to failed and can be retried
 // (POST /tickets/{key}/stop)
 func (_ Unimplemented) StopTicket(w http.ResponseWriter, r *http.Request, key TicketKey) {
@@ -2893,6 +3422,12 @@ func (_ Unimplemented) GetUsage(w http.ResponseWriter, r *http.Request) {
 // RefreshUsage Start a tiny Claude run to read fresh limits; a usage_updated event follows
 // (POST /usage/refresh)
 func (_ Unimplemented) RefreshUsage(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetTicketSpend Tickets that used the most of the plan in a period, by Claude Code's cost estimate
+// (GET /usage/tickets)
+func (_ Unimplemented) GetTicketSpend(w http.ResponseWriter, r *http.Request, params GetTicketSpendParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -4516,6 +5051,119 @@ func (siw *ServerInterfaceWrapper) ListTicketEvents(w http.ResponseWriter, r *ht
 	handler.ServeHTTP(w, r)
 }
 
+// ListFollowUps operation middleware
+func (siw *ServerInterfaceWrapper) ListFollowUps(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "key" -------------
+	var key TicketKey
+
+	err = runtime.BindStyledParameterWithOptions("simple", "key", chi.URLParam(r, "key"), &key, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "key", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFollowUps(w, r, key)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// SetFollowUps operation middleware
+func (siw *ServerInterfaceWrapper) SetFollowUps(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "key" -------------
+	var key TicketKey
+
+	err = runtime.BindStyledParameterWithOptions("simple", "key", chi.URLParam(r, "key"), &key, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "key", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SetFollowUps(w, r, key)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// AcceptFollowUps operation middleware
+func (siw *ServerInterfaceWrapper) AcceptFollowUps(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "key" -------------
+	var key TicketKey
+
+	err = runtime.BindStyledParameterWithOptions("simple", "key", chi.URLParam(r, "key"), &key, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "key", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AcceptFollowUps(w, r, key)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DismissFollowUp operation middleware
+func (siw *ServerInterfaceWrapper) DismissFollowUp(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "key" -------------
+	var key TicketKey
+
+	err = runtime.BindStyledParameterWithOptions("simple", "key", chi.URLParam(r, "key"), &key, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "key", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DismissFollowUp(w, r, key, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // ImplementTicket operation middleware
 func (siw *ServerInterfaceWrapper) ImplementTicket(w http.ResponseWriter, r *http.Request) {
 
@@ -4750,6 +5398,41 @@ func (siw *ServerInterfaceWrapper) ReviewTicket(w http.ResponseWriter, r *http.R
 	handler.ServeHTTP(w, r)
 }
 
+// FollowUpFromFinding operation middleware
+func (siw *ServerInterfaceWrapper) FollowUpFromFinding(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "key" -------------
+	var key TicketKey
+
+	err = runtime.BindStyledParameterWithOptions("simple", "key", chi.URLParam(r, "key"), &key, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "key", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "index" -------------
+	var index int
+
+	err = runtime.BindStyledParameterWithOptions("simple", "index", chi.URLParam(r, "index"), &index, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "index", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.FollowUpFromFinding(w, r, key, index)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // StopTicket operation middleware
 func (siw *ServerInterfaceWrapper) StopTicket(w http.ResponseWriter, r *http.Request) {
 
@@ -4795,6 +5478,52 @@ func (siw *ServerInterfaceWrapper) RefreshUsage(w http.ResponseWriter, r *http.R
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.RefreshUsage(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetTicketSpend operation middleware
+func (siw *ServerInterfaceWrapper) GetTicketSpend(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetTicketSpendParams
+
+	// ------------- Optional query parameter "days" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "days", r.URL.Query(), &params.Days, runtime.BindQueryParameterOptions{Type: "integer", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "days"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "days", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "limit", r.URL.Query(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "limit"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetTicketSpend(w, r, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -4975,6 +5704,21 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Post(options.BaseURL+"/tickets/{key}/implement", wrapper.ImplementTicket)
 	})
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/tickets/{key}/follow-ups", wrapper.ListFollowUps)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/tickets/{key}/follow-ups", wrapper.SetFollowUps)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/tickets/{key}/follow-ups/accept", wrapper.AcceptFollowUps)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/tickets/{key}/follow-ups/{id}/dismiss", wrapper.DismissFollowUp)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/tickets/{key}/review/findings/{index}/follow-up", wrapper.FollowUpFromFinding)
+	})
+	r.Group(func(r chi.Router) {
 		r.Put(options.BaseURL+"/tickets/{key}/kind", wrapper.SetTicketKind)
 	})
 	r.Group(func(r chi.Router) {
@@ -5006,6 +5750,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/usage/refresh", wrapper.RefreshUsage)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/usage/tickets", wrapper.GetTicketSpend)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/settings", wrapper.GetSettings)
@@ -5148,202 +5895,235 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // const string: with thousands of chunks the chained `+` fold is several
 // times slower for the Go compiler than parsing a slice literal.
 var swaggerSpec = []string{
-	"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",
+	"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",
 }
 
 // decodeSpec returns the embedded OpenAPI spec as raw JSON bytes,

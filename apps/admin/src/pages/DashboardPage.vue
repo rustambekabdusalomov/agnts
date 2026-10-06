@@ -27,7 +27,6 @@ const greeting = computed(() => {
   const key = h < 5 ? 'greetNight' : h < 12 ? 'greetMorning' : h < 18 ? 'greetAfternoon' : 'greetEvening'
   return t(`dashboard.${key}`, { name: session.user?.username ?? '' })
 })
-const today = computed(() => new Date().toLocaleDateString(locale.value, { weekday: 'long', day: 'numeric', month: 'long' }))
 
 const ACTION: Partial<Record<TicketState, string>> = {
   waiting_for_answers: 'actAnswer',
@@ -51,7 +50,7 @@ const pipeTotal = computed(() => pipe.value.reduce((a, p) => a + p.n, 0) || 1)
 
 const hours = computed(() => d.value?.todayByHour ?? [])
 const series = computed(() => [
-  { label: t('dashboard.legendHiro'), values: hours.value.map((h) => h.hiro), color: 'var(--primary)' },
+  { label: t('dashboard.legendAgnts'), values: hours.value.map((h) => h.agnts), color: 'var(--primary)' },
   { label: t('dashboard.legendYou'), values: hours.value.map((h) => h.you), color: 'var(--warn)' },
   { label: t('dashboard.legendProblems'), values: hours.value.map((h) => h.problems), color: 'var(--bad)' },
 ])
@@ -63,7 +62,7 @@ const fmtMin = (m: number) => (m < 60 ? `${Math.max(0, m)}m` : `${Math.floor(m /
 </script>
 
 <template>
-  <PageHeader :title="greeting" :lede="t('dashboard.lede', { date: today })" doc="dashboard">
+  <PageHeader :title="greeting" doc="dashboard">
     <div class="actions" style="margin: 0">
       <span v-if="d?.counts.running" class="live">{{ t('nav.live') }}</span>
       <RouterLink class="btn" to="/analytics">{{ t('dashboard.openAnalytics') }}</RouterLink>
@@ -155,7 +154,7 @@ const fmtMin = (m: number) => (m < 60 ? `${Math.max(0, m)}m` : `${Math.floor(m /
       <section class="card span2">
         <div class="ch"><div><h2>{{ t('dashboard.todayTitle') }}</h2><p class="sub">{{ t('dashboard.todaySub') }}</p></div></div>
         <StackedBars :series="series" :labels="hourLabels" :max-labels="12" :h="170" :aria="t('dashboard.todayAria')" />
-        <ChartLegend :items="[['var(--primary)', t('dashboard.legendHiro')], ['var(--warn)', t('dashboard.legendYou')], ['var(--bad)', t('dashboard.legendProblems')]]" />
+        <ChartLegend :items="[['var(--primary)', t('dashboard.legendAgnts')], ['var(--warn)', t('dashboard.legendYou')], ['var(--bad)', t('dashboard.legendProblems')]]" />
       </section>
 
       <section class="card">

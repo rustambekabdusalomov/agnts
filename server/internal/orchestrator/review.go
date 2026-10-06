@@ -8,7 +8,7 @@ import (
 	"slices"
 	"strings"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
 // Limits of the review stage: it runs beside the human review, so it gets
@@ -99,7 +99,7 @@ func (o *Orchestrator) Review(ctx context.Context, key string, origin domain.Ori
 		return t, err
 	}
 	if t.State != domain.StateWaitingForReview {
-		return t, invalid("hiro reviews a ticket while it waits for your review")
+		return t, invalid("agnts reviews a ticket while it waits for your review")
 	}
 	if t.ReviewState == domain.ReviewPending || t.ReviewState == domain.ReviewRunning {
 		return t, nil
@@ -183,6 +183,9 @@ func (o *Orchestrator) review(ctx context.Context, s domain.Settings, t domain.T
 	o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(domain.StageReview), Type: domain.EventClaudeText,
 		Message: fmt.Sprintf("reviewing with %s: %s", model, why), Data: map[string]any{"model": model, "reason": why}})
 	prompt, err := render("review", d)
+	if err == nil {
+		prompt, err = o.withFollowUps(ctx, s, t, d, domain.SuggestFromReview, ReviewPath, prompt)
+	}
 	if err != nil {
 		return err
 	}
@@ -207,6 +210,8 @@ func (o *Orchestrator) review(ctx context.Context, s domain.Settings, t domain.T
 		return err
 	}
 	rv.Revision, rv.Model, rv.ModelReason = t.Revision, model, why
+	o.saveFollowUps(ctx, s, t, run, domain.SuggestFromReview, rv.FollowUps)
+	rv.FollowUps = nil // kept as suggestions
 	b, _ := json.Marshal(rv)
 	if err := o.store.SaveResult(ctx, domain.Result{RunID: run.ID, Summary: b}); err != nil {
 		return err

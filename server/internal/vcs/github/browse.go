@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"hiro/internal/domain"
-	"hiro/internal/vcs"
+	"agnts/internal/domain"
+	"agnts/internal/vcs"
 )
 
 var _ vcs.Provider = (*Host)(nil)

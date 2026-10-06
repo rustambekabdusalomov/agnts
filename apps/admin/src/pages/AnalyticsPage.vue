@@ -12,6 +12,8 @@ import StackedBars from '../components/charts/StackedBars.vue'
 import DeltaTag from '../components/dashboard/DeltaTag.vue'
 import PageHeader from '../components/PageHeader.vue'
 import HiIcon from '../components/ui/HiIcon.vue'
+import { modelLabel, type StageSpend } from '../api/types'
+import { fmtTokens, fmtUsd, ioTokens } from '../composables/format'
 
 // Analytics: throughput, quality, time and plan cost over 7, 30 or 90 days,
 // compared with the period before. Ported from the demo's analyticsPage.
@@ -39,7 +41,12 @@ const isEmpty = computed(() => {
   const x = a.value
   if (!x) return false
   const c = x.current
-  return c.picked + c.pushed + c.rejected + c.stopped === 0 && x.models.length === 0 && x.hours.every((h) => h === 0)
+  return (
+    c.picked + c.pushed + c.rejected + c.stopped === 0 &&
+    x.models.length === 0 &&
+    x.hours.every((h) => h === 0) &&
+    x.spendByStage.length === 0
+  )
 })
 
 const labels = computed(() =>
@@ -65,7 +72,7 @@ const kpi = computed(() => {
   }
 })
 
-const day = (k: 'pushed' | 'rejected' | 'stopped' | 'hiroMin' | 'waitMin' | 'turns') => (a.value?.perDay ?? []).map((d) => d[k])
+const day = (k: 'pushed' | 'rejected' | 'stopped' | 'agntsMin' | 'waitMin' | 'turns') => (a.value?.perDay ?? []).map((d) => d[k])
 
 const throughput = computed(() => [
   { label: t('analytics.pushed'), values: day('pushed'), color: 'var(--primary)' },
@@ -85,7 +92,7 @@ const outcomes = computed(() => {
 })
 
 const speed = computed(() => [
-  { label: t('analytics.hiroWorking'), values: day('hiroMin'), color: 'var(--primary)', area: true },
+  { label: t('analytics.agntsWorking'), values: day('agntsMin'), color: 'var(--primary)', area: true },
   { label: t('analytics.waitingOnYou'), values: day('waitMin'), color: 'var(--warn)' },
 ])
 const turnsSeries = computed(() => [{ label: t('analytics.avgTurns'), values: day('turns'), color: '#7F95E8', area: true }])
@@ -117,6 +124,23 @@ const stopRows = computed(() => {
 const totalRuns = computed(() => (a.value?.models ?? []).reduce((x, m) => x + m.runs, 0))
 const modelName = (m: string) => ({ haiku: 'Haiku', sonnet: 'Sonnet', opus: 'Opus' })[m] ?? m
 
+// Token spend: input and output per day; cache traffic is listed apart so it
+// does not swamp them, as on the ticket page.
+const tok = (n: number) => fmtTokens(n, locale.value)
+const spendSeries = computed(() => [
+  { label: t('spend.input'), values: (a.value?.perDay ?? []).map((d) => d.spend.input), color: 'var(--primary)', area: true },
+  { label: t('spend.output'), values: (a.value?.perDay ?? []).map((d) => d.spend.output), color: '#7F95E8' },
+])
+const STAGE_KEY: Record<StageSpend['stage'], string> = {
+  analyze: 'spend.stageAnalyze',
+  coding: 'spend.stageCoding',
+  retry: 'spend.stageRetry',
+  review: 'spend.stageReview',
+  learn: 'spend.stageLearn',
+  helper: 'spend.stageHelper',
+}
+const spendTop = computed(() => Math.max(1, ...(a.value?.spendByStage ?? []).map((s) => ioTokens(s.spend))))
+
 const usageDays = computed(() => (a.value?.perDay ?? []).map((d) => (d.peakUsage == null ? 0 : Math.round(d.peakUsage * 100))))
 const usageKnown = computed(() => (a.value?.perDay ?? []).filter((d) => d.peakUsage != null))
 const avgPeak = computed(() => {
@@ -147,7 +171,12 @@ function mdLabel(s: string) {
 }
 
 function exportCsv() {
-  const rows = [['date', 'picked', 'pushed', 'rejected', 'stopped', 'hiro_minutes', 'waiting_minutes', 'avg_turns', 'peak_usage_pct']]
+  const rows = [
+    [
+      'date', 'picked', 'pushed', 'rejected', 'stopped', 'agnts_minutes', 'waiting_minutes', 'avg_turns', 'peak_usage_pct',
+      'input_tokens', 'output_tokens', 'cache_read_tokens', 'cache_write_tokens', 'cost_usd',
+    ],
+  ]
   for (const d of a.value?.perDay ?? []) {
     rows.push([
       d.date,
@@ -155,17 +184,22 @@ function exportCsv() {
       String(d.pushed),
       String(d.rejected),
       String(d.stopped),
-      d.hiroMin.toFixed(1),
+      d.agntsMin.toFixed(1),
       d.waitMin.toFixed(1),
       d.turns.toFixed(1),
       d.peakUsage == null ? '' : String(Math.round(d.peakUsage * 100)),
+      String(d.spend.input),
+      String(d.spend.output),
+      String(d.spend.cacheRead),
+      String(d.spend.cacheWrite),
+      d.spend.costUsd.toFixed(4),
     ])
   }
   const blob = new Blob([rows.map((r) => r.join(',')).join('\n') + '\n'], { type: 'text/csv;charset=utf-8' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
-  link.download = `hiro-analytics-${days.value}d.csv`
+  link.download = `agnts-analytics-${days.value}d.csv`
   document.body.appendChild(link)
   link.click()
   link.remove()
@@ -174,7 +208,7 @@ function exportCsv() {
 </script>
 
 <template>
-  <PageHeader :title="t('analytics.title')" :lede="t('analytics.lede')" doc="analytics">
+  <PageHeader :title="t('analytics.title')" doc="analytics">
     <div class="actions" style="margin: 0">
       <div class="seg" role="group" :aria-label="t('analytics.period')">
         <button v-for="p in PERIODS" :key="p" type="button" class="seg-b" :aria-pressed="days === p" @click="days = p">
@@ -211,9 +245,9 @@ function exportCsv() {
         <div class="note">{{ t('analytics.kpiFirstTryNote') }}</div>
       </div>
       <div class="card stat">
-        <div class="lbl">{{ t('analytics.kpiHiro') }}</div>
-        <div class="val">{{ fmtMin(a.current.hiroMin) }} <DeltaTag :cur="a.current.hiroMin" :prev="a.previous.hiroMin" :good-when-up="false" /></div>
-        <div class="note">{{ t('analytics.kpiHiroNote') }}</div>
+        <div class="lbl">{{ t('analytics.kpiAgnts') }}</div>
+        <div class="val">{{ fmtMin(a.current.agntsMin) }} <DeltaTag :cur="a.current.agntsMin" :prev="a.previous.agntsMin" :good-when-up="false" /></div>
+        <div class="note">{{ t('analytics.kpiAgntsNote') }}</div>
       </div>
       <div class="card stat">
         <div class="lbl">{{ t('analytics.kpiWait') }}</div>
@@ -248,13 +282,13 @@ function exportCsv() {
       <section class="card span2">
         <div class="ch"><div><h2>{{ t('analytics.speed') }}</h2><p class="sub">{{ t('analytics.speedSub') }}</p></div></div>
         <LineChart :series="speed" :labels="labels" :max-labels="maxLabels" :fmt="fmtMin" :aria="t('analytics.speed')" />
-        <ChartLegend :items="[['var(--primary)', t('analytics.hiroWorking')], ['var(--warn)', t('analytics.waitingOnYou')]]" />
+        <ChartLegend :items="[['var(--primary)', t('analytics.agntsWorking')], ['var(--warn)', t('analytics.waitingOnYou')]]" />
       </section>
 
       <section class="card">
         <div class="ch"><div><h2>{{ t('analytics.steps') }}</h2><p class="sub">{{ t('analytics.stepsSub') }}</p></div></div>
         <HBars :rows="steps" :fmt="fmtMin" />
-        <ChartLegend :items="[['var(--primary)', t('analytics.hiroWorking')], ['var(--warn)', t('analytics.waitingOnYou')]]" />
+        <ChartLegend :items="[['var(--primary)', t('analytics.agntsWorking')], ['var(--warn)', t('analytics.waitingOnYou')]]" />
       </section>
 
       <section class="card span2">
@@ -317,6 +351,43 @@ function exportCsv() {
         </template>
       </section>
 
+      <section class="card span2">
+        <div class="ch"><div><h2>{{ t('analytics.spend') }}</h2><p class="sub">{{ t('analytics.spendSub') }}</p></div></div>
+        <dl class="facts">
+          <div>
+            <dt>{{ t('analytics.spendTokens') }}</dt>
+            <dd>
+              {{ tok(ioTokens(a.current.spend)) }}
+              <DeltaTag :cur="ioTokens(a.current.spend)" :prev="ioTokens(a.previous.spend)" :good-when-up="false" />
+            </dd>
+          </div>
+          <div>
+            <dt>{{ t('analytics.spendCost') }}</dt>
+            <dd>
+              {{ fmtUsd(a.current.spend.costUsd, locale) }}
+              <DeltaTag :cur="a.current.spend.costUsd" :prev="a.previous.spend.costUsd" :good-when-up="false" />
+            </dd>
+          </div>
+        </dl>
+        <p class="hint">{{ t('spend.cache', { read: tok(a.current.spend.cacheRead), write: tok(a.current.spend.cacheWrite) }) }}</p>
+        <LineChart :series="spendSeries" :labels="labels" :max-labels="maxLabels" :fmt="tok" :aria="t('analytics.spend')" />
+        <ChartLegend :items="[['var(--primary)', t('spend.input')], ['#7F95E8', t('spend.output')]]" />
+        <p class="hint" style="margin: 10px 0 0; font-size: 12.5px">{{ t('spend.costNote') }}</p>
+      </section>
+
+      <section class="card">
+        <div class="ch"><div><h2>{{ t('analytics.spendStages') }}</h2><p class="sub">{{ t('analytics.spendStagesSub') }}</p></div></div>
+        <p v-if="!a.spendByStage.length" class="hint">{{ t('analytics.noSpend') }}</p>
+        <div v-for="s in a.spendByStage" :key="`${s.stage}-${s.model}`" class="lim">
+          <div class="lim-h">
+            <span>{{ t(STAGE_KEY[s.stage]) }} <span class="muted">· {{ modelLabel(s.model) }}</span></span>
+            <b>{{ tok(ioTokens(s.spend)) }}</b>
+          </div>
+          <div class="bar"><span :style="{ width: (100 * ioTokens(s.spend)) / spendTop + '%' }" /></div>
+          <span class="hint">{{ t('spend.calls', { n: s.calls }) }} · {{ s.partial && !s.spend.costUsd ? '—' : fmtUsd(s.spend.costUsd, locale) }}</span>
+        </div>
+      </section>
+
       <section class="card span3">
         <div class="ch"><div><h2>{{ t('analytics.repos') }}</h2><p class="sub">{{ t('analytics.reposSub') }}</p></div></div>
         <p v-if="!a.repos.length" class="hint">{{ t('analytics.noRepos') }}</p>
@@ -329,7 +400,7 @@ function exportCsv() {
                 <th>{{ t('analytics.colTickets') }}</th>
                 <th>{{ t('analytics.colSuccess') }}</th>
                 <th>{{ t('analytics.colTurns') }}</th>
-                <th>{{ t('analytics.colHiro') }}</th>
+                <th>{{ t('analytics.colAgnts') }}</th>
                 <th>{{ t('analytics.colClaudeMd') }}</th>
               </tr>
             </thead>
@@ -346,7 +417,7 @@ function exportCsv() {
                   <span v-else class="hint">—</span>
                 </td>
                 <td>{{ Math.round(r.avgTurns) }}</td>
-                <td>{{ fmtMin(r.hiroMin) }}</td>
+                <td>{{ fmtMin(r.agntsMin) }}</td>
                 <td><span :class="mdClass(r.claudeMd)">{{ mdLabel(r.claudeMd) }}</span></td>
               </tr>
             </tbody>

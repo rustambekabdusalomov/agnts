@@ -15,14 +15,14 @@ import (
 	"strings"
 	"testing"
 
-	"hiro/internal/store/postgres"
+	"agnts/internal/store/postgres"
 )
 
 func setup(t *testing.T) (*Server, int64) {
 	t.Helper()
-	dsn := os.Getenv("HIRO_TEST_DATABASE_URL")
+	dsn := os.Getenv("AGNTS_TEST_DATABASE_URL")
 	if dsn == "" {
-		t.Skip("HIRO_TEST_DATABASE_URL not set")
+		t.Skip("AGNTS_TEST_DATABASE_URL not set")
 	}
 	ctx := context.Background()
 	pool, err := postgres.Open(ctx, dsn)
@@ -41,7 +41,7 @@ func setup(t *testing.T) (*Server, int64) {
 		ON CONFLICT (username) DO UPDATE SET username = EXCLUDED.username RETURNING id`).Scan(&uid); err != nil {
 		t.Fatal(err)
 	}
-	return New(pool, "https://hiro.example.com", []string{"claude.ai", "claude.com"}, log), uid
+	return New(pool, "https://agnts.example.com", []string{"claude.ai", "claude.com"}, log), uid
 }
 
 func form(h http.HandlerFunc, v url.Values) (int, map[string]any) {

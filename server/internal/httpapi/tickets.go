@@ -6,9 +6,9 @@ import (
 	"errors"
 	"net/http"
 
-	"hiro/internal/domain"
-	"hiro/internal/httpapi/gen"
-	"hiro/internal/orchestrator"
+	"agnts/internal/domain"
+	"agnts/internal/httpapi/gen"
+	"agnts/internal/orchestrator"
 )
 
 // Tickets is the ticket use-case layer (the orchestrator).
@@ -33,6 +33,7 @@ type Tickets interface {
 	Rows(ctx context.Context, ts []domain.Ticket) ([]orchestrator.TicketRow, error)
 	Learn(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	Review(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
+	FollowUpTickets
 	Wake()
 }
 
@@ -55,6 +56,8 @@ func (s *Server) writeUseCaseError(w http.ResponseWriter, r *http.Request, err e
 		writeError(w, http.StatusConflict, "conflict", "not possible while the ticket is "+string(te.From))
 	case errors.Is(err, orchestrator.ErrInvalid):
 		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+	case errors.Is(err, domain.ErrConflict):
+		writeError(w, http.StatusConflict, "conflict", err.Error())
 	default:
 		s.writeInternal(w, r, err)
 	}
@@ -98,11 +101,14 @@ func (s *Server) GetTicket(w http.ResponseWriter, r *http.Request, key gen.Ticke
 		return
 	}
 	d := gen.TicketDetail{
-		Ticket:    toTicketRow(orchestrator.TicketRow{Ticket: v.Ticket, Info: v.Info, RepoName: v.RepoName}),
+		Ticket: toTicketRow(orchestrator.TicketRow{Ticket: v.Ticket, Info: v.Info, RepoName: v.RepoName, Spend: v.Spend,
+			OpenSuggestions: openSuggestions(v.FollowUps.Suggestions)}),
 		Questions: make([]gen.Question, len(v.Questions)),
 		History:   &[]gen.HistoryItem{},
 		MaxTurns:  &v.Settings.MaxTurns,
 	}
+	stages := toStageSpend(v.Stages)
+	d.SpendByStage = &stages
 	for _, h := range v.History {
 		*d.History = append(*d.History, gen.HistoryItem{At: h.At, State: gen.TicketState(h.State), Message: h.Message, Origin: string(h.Origin)})
 	}
@@ -142,6 +148,8 @@ func (s *Server) GetTicket(w http.ResponseWriter, r *http.Request, key gen.Ticke
 	if v.Review != nil {
 		d.Review = toReview(*v.Review)
 	}
+	fu := toFollowUps(v.FollowUps, v.FollowUpsOn, v.Ticket.State)
+	d.FollowUps = &fu
 	writeJSON(w, http.StatusOK, d)
 }
 
@@ -286,6 +294,38 @@ func toTicketRow(r orchestrator.TicketRow) gen.Ticket {
 		name := r.RepoName
 		out.RepoName = &name
 	}
+	if !r.Spend.IsZero() {
+		sp := toTokenSpend(r.Spend)
+		out.Spend = &sp
+	}
+	if r.OpenSuggestions > 0 {
+		n := r.OpenSuggestions
+		out.OpenSuggestions = &n
+	}
+	return out
+}
+
+func openSuggestions(ss []domain.Suggestion) int {
+	n := 0
+	for _, x := range ss {
+		if x.Status == domain.SuggestionOpen {
+			n++
+		}
+	}
+	return n
+}
+
+func toTokenSpend(u domain.TokenUsage) gen.TokenSpend {
+	return gen.TokenSpend{Input: u.Input, Output: u.Output, CacheRead: u.CacheRead, CacheWrite: u.CacheWrite,
+		Total: u.Total(), CostUsd: u.CostUSD}
+}
+
+func toStageSpend(stages []domain.StageUsage) []gen.StageSpend {
+	out := make([]gen.StageSpend, len(stages))
+	for i, st := range stages {
+		out[i] = gen.StageSpend{Stage: gen.StageSpendStage(st.ModelStage), Model: st.Model, Calls: st.Calls,
+			Turns: st.Turns, Partial: st.Partial, Spend: toTokenSpend(st.Usage)}
+	}
 	return out
 }
 
@@ -307,6 +347,12 @@ func toTicket(t domain.Ticket) gen.Ticket {
 		parent := t.ParentKey
 		out.ParentKey = &parent
 	}
+	if t.FollowUpOf != "" {
+		of := t.FollowUpOf
+		out.FollowUpOf = &of
+	}
+	mode := toFollowUpsMode(t.SuggestFollowUps)
+	out.SuggestFollowUps = &mode
 	if t.State == domain.StateFailed || t.State == domain.StateRateLimited {
 		rs := gen.TicketState(t.ResumeState)
 		out.ResumeState = &rs

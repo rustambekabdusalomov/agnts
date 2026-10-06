@@ -3,6 +3,8 @@ package postgres
 import (
 	"context"
 	"time"
+
+	"agnts/internal/domain"
 )
 
 // DayStats is one day of the Analytics page.
@@ -12,18 +14,20 @@ type DayStats struct {
 	Pushed    int
 	Rejected  int
 	Stopped   int
-	HiroMin   float64 // average minutes hiro worked per ticket active that day
+	AgntsMin  float64 // average minutes agnts worked per ticket active that day
 	WaitMin   float64 // average minutes tickets waited on you
 	Turns     float64 // average turns of coding runs that finished that day
 	PeakUsage *float64
+	Spend     domain.TokenUsage // Claude calls made that day
 }
 
 // Period sums a range of days.
 type Period struct {
 	Picked, Pushed, Rejected, Stopped int
 	FirstTry, AfterChanges            int
-	HiroMin, WaitMin, Turns           float64
+	AgntsMin, WaitMin, Turns          float64
 	ReviewMin, AnswerMin              float64
+	Spend                             domain.TokenUsage // all Claude calls in the range
 }
 
 // ModelStats is one model's runs.
@@ -44,7 +48,7 @@ type RepoStats struct {
 	Done     int
 	Finished int // done, rejected or failed
 	AvgTurns float64
-	HiroMin  float64
+	AgntsMin float64
 }
 
 // Analytics is everything the Analytics page shows for one period.
@@ -57,6 +61,7 @@ type Analytics struct {
 	Models  []ModelStats
 	Repos   []RepoStats
 	Hours   [24]int
+	Spend   []domain.StageUsage // by stage and model, costliest first
 }
 
 // stateSpans is a CTE of how long each ticket stayed in each state.
@@ -133,7 +138,7 @@ func (s *Agent) Analytics(ctx context.Context, days int, tz *time.Location) (Ana
 			return a, err
 		}
 		if d := byDay[day]; d != nil {
-			d.HiroMin, d.WaitMin = h, w
+			d.AgntsMin, d.WaitMin = h, w
 		}
 	}
 	rows.Close()
@@ -172,6 +177,45 @@ func (s *Agent) Analytics(ctx context.Context, days int, tz *time.Location) (Ana
 			v := u
 			d.PeakUsage = &v
 		}
+	}
+	rows.Close()
+
+	rows, err = s.db.Query(ctx, `SELECT to_char(created_at AT TIME ZONE $3, 'YYYY-MM-DD'),
+		sum(input_tokens), sum(output_tokens), sum(cache_read_tokens), sum(cache_write_tokens), sum(cost_usd)::float8
+		FROM claude_calls WHERE created_at >= $1 AND created_at < $2 GROUP BY 1`, start, end, tzName)
+	if err != nil {
+		return a, err
+	}
+	for rows.Next() {
+		var day string
+		var u domain.TokenUsage
+		if err := rows.Scan(&day, &u.Input, &u.Output, &u.CacheRead, &u.CacheWrite, &u.CostUSD); err != nil {
+			rows.Close()
+			return a, err
+		}
+		if d := byDay[day]; d != nil {
+			d.Spend = u
+		}
+	}
+	rows.Close()
+
+	// Spend by stage and model.
+	rows, err = s.db.Query(ctx, `SELECT model_stage, model, count(*), sum(turns), bool_or(partial),
+			sum(input_tokens), sum(output_tokens), sum(cache_read_tokens), sum(cache_write_tokens), sum(cost_usd)::float8
+		FROM claude_calls WHERE created_at >= $1 AND created_at < $2
+		GROUP BY model_stage, model ORDER BY sum(cost_usd) DESC, sum(input_tokens + output_tokens) DESC`, start, end)
+	if err != nil {
+		return a, err
+	}
+	for rows.Next() {
+		var su domain.StageUsage
+		u := &su.Usage
+		if err := rows.Scan(&su.ModelStage, &su.Model, &su.Calls, &su.Turns, &su.Partial,
+			&u.Input, &u.Output, &u.CacheRead, &u.CacheWrite, &u.CostUSD); err != nil {
+			rows.Close()
+			return a, err
+		}
+		a.Spend = append(a.Spend, su)
 	}
 	rows.Close()
 
@@ -234,7 +278,7 @@ func (s *Agent) Analytics(ctx context.Context, days int, tz *time.Location) (Ana
 
 	// Repositories: tickets active in the period and how they ended.
 	rows, err = s.db.Query(ctx, `WITH `+stateSpans+`,
-		hiro AS (SELECT ticket_key, sum(extract(epoch FROM left_at - entered)) / 60 AS mins FROM spans
+		agnts AS (SELECT ticket_key, sum(extract(epoch FROM left_at - entered)) / 60 AS mins FROM spans
 		         WHERE left_at IS NOT NULL AND state = ANY($3) AND entered >= $1 AND entered < $2 GROUP BY ticket_key)
 		SELECT r.id, r.name, r.kind, r.claude_md_status, count(t.id),
 		       count(t.id) FILTER (WHERE t.state = 'done'),
@@ -243,14 +287,14 @@ func (s *Agent) Analytics(ctx context.Context, days int, tz *time.Location) (Ana
 		       COALESCE(avg(h.mins), 0)
 		FROM repositories r
 		JOIN tickets t ON t.repo_id = r.id AND t.updated_at >= $1 AND t.updated_at < $2
-		LEFT JOIN hiro h ON h.ticket_key = t.key
+		LEFT JOIN agnts h ON h.ticket_key = t.key
 		GROUP BY r.id ORDER BY count(t.id) DESC`, start, end, working)
 	if err != nil {
 		return a, err
 	}
 	for rows.Next() {
 		var r RepoStats
-		if err := rows.Scan(&r.RepoID, &r.Name, &r.Kind, &r.ClaudeMD, &r.Tickets, &r.Done, &r.Finished, &r.AvgTurns, &r.HiroMin); err != nil {
+		if err := rows.Scan(&r.RepoID, &r.Name, &r.Kind, &r.ClaudeMD, &r.Tickets, &r.Done, &r.Finished, &r.AvgTurns, &r.AgntsMin); err != nil {
 			rows.Close()
 			return a, err
 		}
@@ -258,7 +302,7 @@ func (s *Agent) Analytics(ctx context.Context, days int, tz *time.Location) (Ana
 	}
 	rows.Close()
 
-	// Activity by hour of day, hiro's own events only.
+	// Activity by hour of day, agnts's own events only.
 	rows, err = s.db.Query(ctx, `SELECT extract(hour FROM created_at AT TIME ZONE $3)::int, count(*) FROM events
 		WHERE created_at >= $1 AND created_at < $2 AND origin = 'system' GROUP BY 1`, start, end, tzName)
 	if err != nil {
@@ -297,18 +341,25 @@ func (s *Agent) period(ctx context.Context, from, to time.Time) (Period, error) 
 	}
 	err = s.db.QueryRow(ctx, `WITH `+stateSpans+`,
 		per AS (SELECT ticket_key,
-			sum(extract(epoch FROM left_at - entered)) FILTER (WHERE state = ANY($3)) AS hiro,
+			sum(extract(epoch FROM left_at - entered)) FILTER (WHERE state = ANY($3)) AS agnts,
 			sum(extract(epoch FROM left_at - entered)) FILTER (WHERE state = ANY($4)) AS wait,
 			sum(extract(epoch FROM left_at - entered)) FILTER (WHERE state = 'waiting_for_review') AS review,
 			sum(extract(epoch FROM left_at - entered)) FILTER (WHERE state = 'waiting_for_answers') AS answer
 			FROM spans WHERE left_at IS NOT NULL AND entered >= $1 AND entered < $2 GROUP BY ticket_key)
-		SELECT COALESCE(avg(COALESCE(hiro, 0)), 0) / 60, COALESCE(avg(COALESCE(wait, 0)), 0) / 60, COALESCE(avg(review), 0) / 60, COALESCE(avg(answer), 0) / 60 FROM per`,
-		from, to, working, waiting).Scan(&p.HiroMin, &p.WaitMin, &p.ReviewMin, &p.AnswerMin)
+		SELECT COALESCE(avg(COALESCE(agnts, 0)), 0) / 60, COALESCE(avg(COALESCE(wait, 0)), 0) / 60, COALESCE(avg(review), 0) / 60, COALESCE(avg(answer), 0) / 60 FROM per`,
+		from, to, working, waiting).Scan(&p.AgntsMin, &p.WaitMin, &p.ReviewMin, &p.AnswerMin)
 	if err != nil {
 		return p, err
 	}
 	err = s.db.QueryRow(ctx, `SELECT COALESCE(avg(t), 0) FROM (
 		SELECT ticket_id, sum(turns) AS t FROM runs WHERE turns > 0 AND started_at >= $1 AND started_at < $2 GROUP BY ticket_id) x`,
 		from, to).Scan(&p.Turns)
+	if err != nil {
+		return p, err
+	}
+	err = s.db.QueryRow(ctx, `SELECT COALESCE(sum(input_tokens), 0), COALESCE(sum(output_tokens), 0),
+		COALESCE(sum(cache_read_tokens), 0), COALESCE(sum(cache_write_tokens), 0), COALESCE(sum(cost_usd), 0)::float8
+		FROM claude_calls WHERE created_at >= $1 AND created_at < $2`, from, to).
+		Scan(&p.Spend.Input, &p.Spend.Output, &p.Spend.CacheRead, &p.Spend.CacheWrite, &p.Spend.CostUSD)
 	return p, err
 }

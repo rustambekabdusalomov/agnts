@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
-import 'package:hiro_api/hiro_api.dart';
+import 'package:agnts_api/agnts_api.dart';
 
 /// Push notifications through Firebase Cloud Messaging. Firebase needs the
 /// platform config files (google-services.json, GoogleService-Info.plist);
@@ -40,7 +40,7 @@ class Push {
   }
 
   /// Asks permission and registers this device with the server.
-  static Future<void> register(HiroApi api, String appVersion) async {
+  static Future<void> register(AgntsApi api, String appVersion) async {
     if (!available) return;
     final settings = await FirebaseMessaging.instance.requestPermission();
     if (settings.authorizationStatus == AuthorizationStatus.denied) return;
@@ -54,7 +54,7 @@ class Push {
     });
   }
 
-  static Future<void> _send(HiroApi api, String token, String appVersion) async {
+  static Future<void> _send(AgntsApi api, String token, String appVersion) async {
     try {
       await api.getDevicesApi().registerDevice(
             deviceRegistration: DeviceRegistration(
@@ -69,7 +69,7 @@ class Push {
   }
 
   /// Stops pushes to this phone (on sign-out).
-  static Future<void> unregister(HiroApi api) async {
+  static Future<void> unregister(AgntsApi api) async {
     final t = _token;
     if (t == null) return;
     try {

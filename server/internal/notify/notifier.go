@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
-	"hiro/internal/store/postgres"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
+	"agnts/internal/store/postgres"
 )
 
 // Actions are the ticket use cases the bot can trigger.
@@ -142,6 +142,10 @@ func (n *Notifier) handle(ctx context.Context, e domain.Event) {
 		n.review(ctx, e)
 		return
 	}
+	if e.Type == domain.EventFollowUps {
+		n.followUps(ctx, e)
+		return
+	}
 	to, _ := e.Data["to"].(string)
 	if e.TicketKey == "" || to == "" {
 		return
@@ -214,11 +218,54 @@ func (n *Notifier) lessons(ctx context.Context, e domain.Event) {
 	if !ok {
 		return
 	}
-	text := fmt.Sprintf("hiro used something new in this codebase while working on %s:\n", e.TicketKey)
+	text := fmt.Sprintf("agnts used something new in this codebase while working on %s:\n", e.TicketKey)
 	for _, t := range titles {
 		text += "\n• " + t
 	}
-	text += "\n\nRead the lessons and take the quiz under Learn in hiro."
+	text += "\n\nRead the lessons and take the quiz under Learn in agnts."
+	if _, err := b.Send(ctx, cfg.ChatID, text, nil, false); err != nil {
+		n.log.Warn("telegram notify", "ticket", e.TicketKey, "err", err)
+	}
+}
+
+// followUps announces follow-up tickets a run suggested. They wait for
+// someone to pick them on the ticket page.
+func (n *Notifier) followUps(ctx context.Context, e domain.Event) {
+	count, _ := e.Data["count"].(float64) // numbers come back from JSON as float64
+	if count < 1 || e.TicketKey == "" {
+		return
+	}
+	s, err := n.settings.Get(ctx)
+	if err != nil || !s.Notify.FollowUps {
+		return
+	}
+	var titles []string
+	if ts, ok := e.Data["titles"].([]any); ok {
+		for _, t := range ts {
+			if t, ok := t.(string); ok {
+				titles = append(titles, t)
+			}
+		}
+	}
+	title := fmt.Sprintf("%s suggests %d follow-up tickets", e.TicketKey, int(count))
+	if count == 1 {
+		title = e.TicketKey + " suggests a follow-up ticket"
+	}
+	if s.Notify.Push && n.fcm != nil {
+		n.push(ctx, Push{Title: title, Body: truncate(strings.Join(titles, " · "), 180), Ticket: e.TicketKey})
+	}
+	if !s.Notify.Telegram {
+		return
+	}
+	b, cfg, ok := n.bot(ctx)
+	if !ok {
+		return
+	}
+	text := fmt.Sprintf("Finishing %s may need more tickets:\n", e.TicketKey)
+	for _, t := range titles {
+		text += "\n• " + t
+	}
+	text += "\n\nPick the ones you want on the ticket page in agnts; they are created queued."
 	if _, err := b.Send(ctx, cfg.ChatID, text, nil, false); err != nil {
 		n.log.Warn("telegram notify", "ticket", e.TicketKey, "err", err)
 	}
@@ -260,7 +307,7 @@ func (n *Notifier) review(ctx context.Context, e domain.Event) {
 	if !ok {
 		return
 	}
-	text := fmt.Sprintf("hiro reviewed its work on %s: %s.\n\n%s", v.Ticket.Key, verdict, v.Review.Summary)
+	text := fmt.Sprintf("agnts reviewed its work on %s: %s.\n\n%s", v.Ticket.Key, verdict, v.Review.Summary)
 	for i, f := range v.Review.Findings {
 		if i == 5 {
 			text += fmt.Sprintf("\n… and %d more", len(v.Review.Findings)-5)
@@ -268,7 +315,7 @@ func (n *Notifier) review(ctx context.Context, e domain.Event) {
 		}
 		text += fmt.Sprintf("\n• [%s] %s", f.Severity, f.Title)
 	}
-	text += "\n\nThe full review is on the ticket in hiro."
+	text += "\n\nThe full review is on the ticket in agnts."
 	if _, err := b.Send(ctx, cfg.ChatID, truncate(text, 3500), nil, false); err != nil {
 		n.log.Warn("telegram notify", "ticket", e.TicketKey, "err", err)
 	}
@@ -332,9 +379,9 @@ func (n *Notifier) sendTelegram(ctx context.Context, v orchestrator.TicketView, 
 	}
 	switch t.State {
 	case domain.StateWaitingForAnswers:
-		head := fmt.Sprintf("%s: %s\n\nhiro has %d question(s) before coding. Tap an option, or reply to a question with your own answer.", t.Key, t.Title, len(v.Questions))
+		head := fmt.Sprintf("%s: %s\n\nagnts has %d question(s) before coding. Tap an option, or reply to a question with your own answer.", t.Key, t.Title, len(v.Questions))
 		if v.Analysis != nil {
-			head += "\n\nWhat hiro found: " + truncate(v.Analysis.Summary, 600)
+			head += "\n\nWhat agnts found: " + truncate(v.Analysis.Summary, 600)
 		}
 		if _, err := b.Send(ctx, cfg.ChatID, head, nil, false); err != nil {
 			return err
@@ -361,7 +408,7 @@ func (n *Notifier) sendTelegram(ctx context.Context, v orchestrator.TicketView, 
 		text := fmt.Sprintf("%s is ready for review: %s", t.Key, t.Title)
 		approve := "Approve and push"
 		if t.Kind.Report() {
-			// A report keeps to hiro from here; posting it to Jira is a choice made in the app.
+			// A report keeps to agnts from here; posting it to Jira is a choice made in the app.
 			approve = "Approve"
 			text = fmt.Sprintf("The %s report on %s is ready for review: %s", t.Kind, t.Key, t.Title)
 			if r := v.Result; r != nil {
@@ -369,7 +416,7 @@ func (n *Notifier) sendTelegram(ctx context.Context, v orchestrator.TicketView, 
 					text += "\n\n" + truncate(sum, 900)
 				}
 			}
-			text += "\n\nRead the report in hiro before approving. Approving here keeps it in hiro; to post it to Jira, approve in the app."
+			text += "\n\nRead the report in agnts before approving. Approving here keeps it in agnts; to post it to Jira, approve in the app."
 		} else if r := v.Result; r != nil {
 			add, del := 0, 0
 			for _, f := range r.Files {
@@ -382,7 +429,7 @@ func (n *Notifier) sendTelegram(ctx context.Context, v orchestrator.TicketView, 
 			}
 		}
 		if !t.Kind.Report() {
-			text += "\n\nOpen the diff in hiro before approving."
+			text += "\n\nOpen the diff in agnts before approving."
 		}
 		id, err := b.Send(ctx, cfg.ChatID, text, [][]Button{
 			{{Text: approve, Data: "apr:" + t.Key}},

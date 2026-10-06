@@ -159,7 +159,7 @@ export interface paths {
         put?: never;
         /**
          * Approve the reviewed work
-         * @description For a change, hiro pushes the branch and opens the pull request. For a report, the ticket is done; the report is posted to the tracker issue only when postReport is true.
+         * @description For a change, agnts pushes the branch and opens the pull request. For a report, the ticket is done; the report is posted to the tracker issue only when postReport is true.
          */
         post: operations["approveTicket"];
         delete?: never;
@@ -364,6 +364,95 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tickets/{key}/follow-ups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        /** Suggested follow-up tickets and the tickets made from them */
+        get: operations["listFollowUps"];
+        /**
+         * Turn follow-up suggestions on or off for this ticket
+         * @description inherit follows Settings (suggestFollowUps). Suggestions add a little to every prompt of the ticket's runs, so they are off unless asked for.
+         */
+        put: operations["setFollowUps"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/follow-ups/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create tickets from chosen suggestions
+         * @description Each chosen suggestion becomes a queued (held) ticket, as a local task or a new Jira issue. Nothing runs until it is started. Items are handled one by one; each result says what happened to its suggestion. What the analysis suggested can be created at once; what the work or its review found waits until this ticket is done.
+         */
+        post: operations["acceptFollowUps"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/follow-ups/{id}/dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+                id: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decline a suggestion; later runs will not suggest it again */
+        post: operations["dismissFollowUp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/review/findings/{index}/follow-up": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+                /** @description The finding's position in the newest code review */
+                index: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Turn a code review finding into a follow-up suggestion
+         * @description No Claude run is involved.
+         */
+        post: operations["followUpFromFinding"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tickets/{key}/kind": {
         parameters: {
             query?: never;
@@ -376,7 +465,7 @@ export interface paths {
         get?: never;
         /**
          * Change what the ticket produces
-         * @description Allowed on a new ticket, while hiro waits for answers, and on a failed or rate-limited one that has not pushed. auto lets the analysis pick the kind again; any other kind is final.
+         * @description Allowed on a new ticket, while agnts waits for answers, and on a failed or rate-limited one that has not pushed. auto lets the analysis pick the kind again; any other kind is final.
          */
         put: operations["setTicketKind"];
         post?: never;
@@ -536,6 +625,23 @@ export interface paths {
         put?: never;
         /** Start a tiny Claude run to read fresh limits; a usage_updated event follows */
         post: operations["refreshUsage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/usage/tickets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Tickets that used the most of the plan in a period, by Claude Code's cost estimate */
+        get: operations["getTicketSpend"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -846,7 +952,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Lessons hiro learned from pushed tickets, newest first */
+        /** Lessons agnts learned from pushed tickets, newest first */
         get: operations["listLessons"];
         put?: never;
         post?: never;
@@ -1070,7 +1176,7 @@ export interface paths {
             };
             cookie?: never;
         };
-        /** Branches in hiro's own clones on the server, and whether origin has them */
+        /** Branches in agnts's own clones on the server, and whether origin has them */
         get: operations["listRepoLocalBranches"];
         put?: never;
         post?: never;
@@ -1230,7 +1336,7 @@ export interface components {
          */
         TicketKind: "code" | "test" | "plan" | "analysis" | "bug";
         /**
-         * @description A kind, or auto for hiro to pick one during analysis
+         * @description A kind, or auto for agnts to pick one during analysis
          * @enum {string}
          */
         TicketKindChoice: "auto" | "code" | "test" | "plan" | "analysis" | "bug";
@@ -1245,6 +1351,96 @@ export interface components {
              * @enum {string}
              */
             start?: "code" | "queue";
+        };
+        /**
+         * @description Follow-up suggestions for one ticket: inherit follows Settings
+         * @enum {string}
+         */
+        FollowUpsMode: "inherit" | "on" | "off";
+        FollowUpsSetting: {
+            mode: components["schemas"]["FollowUpsMode"];
+        };
+        FollowUpSuggestion: {
+            /** Format: int64 */
+            id: number;
+            /**
+             * @description The run that suggested it; manual = made from a review finding
+             * @enum {string}
+             */
+            source: "analyze" | "work" | "review" | "manual";
+            /**
+             * @description How it serves the parent ticket
+             * @enum {string}
+             */
+            type: "prerequisite" | "split" | "unfinished" | "gap";
+            /** @description The parent's revision when it was suggested */
+            revision: number;
+            title: string;
+            description: string;
+            /** @description How it helps finish the parent ticket */
+            serves: string;
+            kind: components["schemas"]["TicketKind"];
+            /** @enum {string} */
+            priority: "low" | "medium" | "high";
+            /** @enum {string} */
+            status: "open" | "accepted" | "dismissed";
+            /** @description A ticket can be made from it now (open, and the parent is done unless the analysis suggested it) */
+            ready: boolean;
+            /** @description The ticket made from it */
+            childKey?: string;
+            /** Format: date-time */
+            decidedAt?: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        FollowUpTicket: {
+            key: string;
+            title: string;
+            state: components["schemas"]["TicketState"];
+            kind: components["schemas"]["TicketKind"];
+            /** @enum {string} */
+            source: "jira" | "local";
+            held?: boolean;
+        };
+        FollowUps: {
+            /** @description This ticket's runs suggest follow-ups */
+            enabled: boolean;
+            suggestions: components["schemas"]["FollowUpSuggestion"][];
+            /** @description Tickets made from the suggestions */
+            children: components["schemas"]["FollowUpTicket"][];
+        };
+        /** @description A suggestion to create, with optional edits */
+        AcceptFollowUp: {
+            /** Format: int64 */
+            id: number;
+            /**
+             * @description local = an agnts task (default), jira = a new issue in the Jira project
+             * @enum {string}
+             */
+            target?: "local" | "jira";
+            title?: string;
+            description?: string;
+            kind?: components["schemas"]["TicketKind"];
+            /** @enum {string} */
+            priority?: "low" | "medium" | "high";
+            /**
+             * Format: int64
+             * @description Defaults to the parent ticket's repository
+             */
+            repoId?: number;
+        };
+        AcceptFollowUps: {
+            items: components["schemas"]["AcceptFollowUp"][];
+        };
+        AcceptFollowUpResult: {
+            /** Format: int64 */
+            id: number;
+            ticket?: components["schemas"]["Ticket"];
+            /** @description Why no ticket was made from this suggestion */
+            error?: string;
+        };
+        AcceptFollowUpsResult: {
+            results: components["schemas"]["AcceptFollowUpResult"][];
         };
         TicketKindInput: {
             kind: components["schemas"]["TicketKindChoice"];
@@ -1273,12 +1469,17 @@ export interface components {
             held?: boolean;
             askFirst?: boolean;
             kind: components["schemas"]["TicketKind"];
-            /** @description hiro picks the kind; the analysis may still change it */
+            /** @description agnts picks the kind; the analysis may still change it */
             kindAuto: boolean;
             /** @description The approved report is posted to the tracker issue */
             postReport?: boolean;
             /** @description The plan or bug investigation this ticket implements */
             parentKey?: string;
+            /** @description The ticket that suggested this one as a follow-up */
+            followUpOf?: string;
+            suggestFollowUps?: components["schemas"]["FollowUpsMode"];
+            /** @description Follow-up suggestions waiting for a decision */
+            openSuggestions?: number;
             repoName?: string;
             models?: components["schemas"]["ModelOverrides"];
             /**
@@ -1296,14 +1497,70 @@ export interface components {
              */
             learnState?: "none" | "pending" | "done" | "failed";
             /**
-             * @description The code review hiro runs beside the human review
+             * @description The code review agnts runs beside the human review
              * @enum {string}
              */
             reviewState?: "none" | "pending" | "running" | "done" | "failed";
+            spend?: components["schemas"]["TokenSpend"];
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        /** @description Tokens Claude used (on a ticket: all its runs; absent until one is recorded). costUsd is what Claude Code reports the same work would cost on the API; on a Claude plan it is an estimate, not a charge. */
+        TokenSpend: {
+            /** Format: int64 */
+            input: number;
+            /** Format: int64 */
+            output: number;
+            /** Format: int64 */
+            cacheRead: number;
+            /** Format: int64 */
+            cacheWrite: number;
+            /**
+             * Format: int64
+             * @description All four counts added
+             */
+            total: number;
+            /** Format: double */
+            costUsd: number;
+        };
+        TicketSpendList: {
+            days: number;
+            total: components["schemas"]["TokenSpend"];
+            /** @description Costliest first; partial runs have no cost, so ties fall back to tokens */
+            tickets: components["schemas"]["TicketSpendRow"][];
+        };
+        /** @description One ticket's spend within the period (not its lifetime spend) */
+        TicketSpendRow: {
+            key: string;
+            title: string;
+            kind: components["schemas"]["TicketKind"];
+            state: components["schemas"]["TicketState"];
+            repoName?: string;
+            /** @description Claude invocations in the period */
+            calls: number;
+            /**
+             * @description The stage that cost the most
+             * @enum {string}
+             */
+            topStage: "analyze" | "coding" | "retry" | "helper" | "learn" | "review";
+            spend: components["schemas"]["TokenSpend"];
+        };
+        /** @description Spend for one stage and model; on a ticket, in the order the stage first ran */
+        StageSpend: {
+            /**
+             * @description retry is fix attempts after failed checks and requested changes
+             * @enum {string}
+             */
+            stage: "analyze" | "coding" | "retry" | "helper" | "learn" | "review";
+            model: string;
+            /** @description Claude invocations */
+            calls: number;
+            turns: number;
+            /** @description A run was cut off, so its tokens are counted from the messages seen and its cost is unknown */
+            partial: boolean;
+            spend: components["schemas"]["TokenSpend"];
         };
         Question: {
             /** Format: int64 */
@@ -1336,7 +1593,7 @@ export interface components {
             /** @description What to change, written to be sent back as feedback */
             suggestion?: string;
         };
-        /** @description hiro's review of the latest result, advice beside the human review. It reviewed an older revision when revision is below the ticket's. */
+        /** @description agnts's review of the latest result, advice beside the human review. It reviewed an older revision when revision is below the ticket's. */
         CodeReview: {
             revision: number;
             model: components["schemas"]["Model"];
@@ -1382,10 +1639,13 @@ export interface components {
             result?: components["schemas"]["Result"];
             /** @description The code task that implements this report, if any */
             childKey?: string;
+            followUps?: components["schemas"]["FollowUps"];
             review?: components["schemas"]["CodeReview"];
             history?: components["schemas"]["HistoryItem"][];
             maxTurns?: number;
             effectiveModels?: components["schemas"]["StageModels"];
+            /** @description Empty until a Claude run is recorded */
+            spendByStage?: components["schemas"]["StageSpend"][];
         };
         Event: {
             /** Format: int64 */
@@ -1466,6 +1726,7 @@ export interface components {
              * @enum {string}
              */
             start: "ask" | "code" | "queue";
+            followUps?: components["schemas"]["FollowUpsMode"];
         };
         TaskUpdate: {
             title?: string;
@@ -1521,7 +1782,7 @@ export interface components {
         GitSettings: {
             authorName: string;
             authorEmail: string;
-            /** @description Add a Co-authored-by hiro line */
+            /** @description Add a Co-authored-by agnts line */
             coAuthor: boolean;
             /** @description {key} and {title} are replaced */
             prTitle: string;
@@ -1539,6 +1800,8 @@ export interface components {
             autoLearn?: boolean;
             /** @description Review every result while it waits for review */
             autoReview?: boolean;
+            /** @description Runs suggest follow-up tickets (off by default; a ticket can override it) */
+            suggestFollowUps?: boolean;
             pauseAbove: number;
             parallel: number;
             git: components["schemas"]["GitSettings"];
@@ -1554,6 +1817,8 @@ export interface components {
             lessons?: boolean;
             /** @description A code review finished */
             review?: boolean;
+            /** @description Follow-up tickets were suggested */
+            followUps?: boolean;
         };
         Repository: {
             /** Format: int64 */
@@ -1624,7 +1889,7 @@ export interface components {
             description?: string;
             /** Format: date-time */
             updatedAt?: string;
-            /** @description Already added to hiro */
+            /** @description Already added to agnts */
             added: boolean;
         };
         Integration: {
@@ -1665,7 +1930,7 @@ export interface components {
         };
         HourBucket: {
             hour: number;
-            hiro: number;
+            agnts: number;
             you: number;
             problems: number;
         };
@@ -1797,11 +2062,12 @@ export interface components {
             stopped: number;
             firstTry: number;
             afterChanges: number;
-            hiroMin: number;
+            agntsMin: number;
             waitMin: number;
             reviewMin: number;
             answerMin: number;
             turns: number;
+            spend: components["schemas"]["TokenSpend"];
         };
         DayStat: {
             /** Format: date */
@@ -1810,10 +2076,11 @@ export interface components {
             pushed: number;
             rejected: number;
             stopped: number;
-            hiroMin: number;
+            agntsMin: number;
             waitMin: number;
             turns: number;
             peakUsage?: number;
+            spend: components["schemas"]["TokenSpend"];
         };
         Analytics: {
             days: number;
@@ -1844,10 +2111,12 @@ export interface components {
                 done: number;
                 finished: number;
                 avgTurns: number;
-                hiroMin: number;
+                agntsMin: number;
             }[];
-            /** @description hiro's events per hour of day (server time zone) */
+            /** @description agnts's events per hour of day (server time zone) */
             hours: number[];
+            /** @description Spend of every ticket in the period by stage and model, costliest first */
+            spendByStage: components["schemas"]["StageSpend"][];
             insights: {
                 /** @enum {string} */
                 kind: "claudeMd" | "waiting" | "stopsTests" | "stopsLimit" | "night";
@@ -2504,6 +2773,133 @@ export interface operations {
             409: components["responses"]["Conflict"];
         };
     };
+    listFollowUps: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FollowUps"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    setFollowUps: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FollowUpsSetting"];
+            };
+        };
+        responses: {
+            200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    acceptFollowUps: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcceptFollowUps"];
+            };
+        };
+        responses: {
+            /** @description One result per item */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AcceptFollowUpsResult"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    dismissFollowUp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The dismissed suggestion */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FollowUpSuggestion"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    followUpFromFinding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+                /** @description The finding's position in the newest code review */
+                index: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The new suggestion */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FollowUpSuggestion"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
     setTicketKind: {
         parameters: {
             query?: never;
@@ -2746,6 +3142,30 @@ export interface operations {
             };
             401: components["responses"]["Unauthorized"];
             409: components["responses"]["Conflict"];
+        };
+    };
+    getTicketSpend: {
+        parameters: {
+            query?: {
+                days?: 7 | 30 | 90;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketSpendList"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
         };
     };
     getSettings: {

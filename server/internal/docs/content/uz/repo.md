@@ -1,14 +1,14 @@
 # Repozitoriy
 
-Bitta repozitoriyning branchlari, commitlari va pipeline'lari — hiro nimani oʻzgartirgani va tekshiruvdan oʻtganini koʻrasiz.
+Bitta repozitoriyning branchlari, commitlari va pipeline'lari — agnts nimani oʻzgartirgani va tekshiruvdan oʻtganini koʻrasiz.
 
 ## Branchlar
 
-hiro har bir tiket uchun hiro/pay-214 kabi alohida branch yaratadi va hech qachon asosiy branchga commit qilmaydi. Har bir branchning soʻnggi commiti, qanchalik oldinda yoki ortda ekani va tekshiruvlari koʻrinadi. Tiketini ochish uchun hiro branchini bosing.
+agnts har bir tiket uchun agnts/pay-214 kabi alohida branch yaratadi va hech qachon asosiy branchga commit qilmaydi. Har bir branchning soʻnggi commiti, qanchalik oldinda yoki ortda ekani va tekshiruvlari koʻrinadi. Tiketini ochish uchun agnts branchini bosing.
 
 ## Commitlar
 
-Soʻnggi commitlar kunlar boʻyicha. hiro commitlari tiket kaliti bilan boshlanadi va sizni hammuallif sifatida koʻrsatadi.
+Soʻnggi commitlar kunlar boʻyicha. agnts commitlari tiket kaliti bilan boshlanadi va sizni hammuallif sifatida koʻrsatadi.
 
 ## Pipeline'lar
 

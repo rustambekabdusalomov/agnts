@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:hiro_api/hiro_api.dart';
+import 'package:agnts_api/agnts_api.dart';
 
 import '../l10n/app_localizations.dart';
 import '../theme.dart';
 
-// hiro's mobile components, as mobile.html draws them. Class names in the
+// agnts's mobile components, as mobile.html draws them. Class names in the
 // comments are the demo's CSS classes.
 
 // ---- Icons (the demo's ICON set: 24x24, stroked) ----
@@ -47,7 +47,7 @@ class HIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final col = color ?? IconTheme.of(context).color ?? Hiro.of(context).ink;
+    final col = color ?? IconTheme.of(context).color ?? Agnts.of(context).ink;
     final hex = '#${(col.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
     final fill = name == 'more' ? hex : 'none';
     final svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="$fill" stroke="$hex" '
@@ -61,21 +61,21 @@ class HIcon extends StatelessWidget {
 enum Tone { info, warn, bad, ok, gray }
 
 extension ToneColors on Tone {
-  Color soft(Hiro c) => switch (this) {
+  Color soft(Agnts c) => switch (this) {
         Tone.info => c.primarySoft,
         Tone.warn => c.warnSoft,
         Tone.bad => c.badSoft,
         Tone.ok => c.okSoft,
         Tone.gray => c.graySoft,
       };
-  Color ink(Hiro c) => switch (this) {
+  Color ink(Agnts c) => switch (this) {
         Tone.info => c.primaryInk,
         Tone.warn => c.warnInk,
         Tone.bad => c.badInk,
         Tone.ok => c.okInk,
         Tone.gray => c.grayInk,
       };
-  Color solid(Hiro c) => switch (this) {
+  Color solid(Agnts c) => switch (this) {
         Tone.info => c.primary,
         Tone.warn => c.warn,
         Tone.bad => c.bad,
@@ -102,7 +102,7 @@ class ToneBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final ink = tone.ink(c);
     return Container(
       height: small ? 20 : 24,
@@ -130,14 +130,14 @@ String kindLabel(AppLocalizations l, TicketKind k) => switch (k) {
       TicketKind.bug => l.kindBug,
     };
 
-/// What a ticket produces, as a small chip; "· Auto" while hiro picks it.
+/// What a ticket produces, as a small chip; "· Auto" while agnts picks it.
 class KindChip extends StatelessWidget {
   const KindChip(this.ticket, {super.key});
   final Ticket ticket;
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final l = AppLocalizations.of(context);
     final tone = switch (ticket.kind) {
       TicketKind.plan || TicketKind.analysis => Tone.info,
@@ -162,7 +162,7 @@ class SourceChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return Container(
       height: 20,
       padding: const EdgeInsets.symmetric(horizontal: 7),
@@ -185,7 +185,7 @@ class PageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final t = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 14),
@@ -211,7 +211,7 @@ class RoundIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final b = Material(
       color: c.surface,
       shape: CircleBorder(side: BorderSide(color: c.line)),
@@ -230,7 +230,7 @@ class SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return Padding(
       padding: padding,
       child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
@@ -252,7 +252,7 @@ class HCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius), side: BorderSide(color: c.line));
     return Material(
       color: color ?? c.surface,
@@ -290,7 +290,7 @@ class _PressableState extends State<_Pressable> {
       child: AnimatedScale(
         scale: _down ? 0.985 : 1,
         duration: const Duration(milliseconds: 120),
-        child: ColoredBox(color: _down ? Hiro.of(context).hover : Colors.transparent, child: widget.child),
+        child: ColoredBox(color: _down ? Agnts.of(context).hover : Colors.transparent, child: widget.child),
       ),
     );
   }
@@ -317,7 +317,7 @@ class TicketCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final l = AppLocalizations.of(context);
     final isTask = ticket.source_ == TicketSource_Enum.local;
     final actColor = switch (actionTone) { Tone.warn => c.warnInk, Tone.bad => c.badInk, _ => c.primaryInk };
@@ -326,7 +326,7 @@ class TicketCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          Expanded(child: Text(ticket.key, style: TextStyle(fontFamily: HiroFonts.mono, fontSize: 12.5, color: c.ink3))),
+          Expanded(child: Text(ticket.key, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3))),
           ToneBadge(stateLabelOf(l, ticket.state, ticket.kind), stateTone(ticket.state)),
         ]),
         const SizedBox(height: 6),
@@ -337,6 +337,7 @@ class TicketCard extends StatelessWidget {
           child: Wrap(spacing: 8, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
             SourceChip(isTask ? l.ticketsSourceTask : l.ticketsSourceJira, task: isTask),
             if (ticket.kind != TicketKind.code) KindChip(ticket),
+            if ((ticket.openSuggestions ?? 0) > 0) ToneBadge(AppLocalizations.of(context).followUpsOpenBadge(ticket.openSuggestions!), Tone.info, small: true),
             if (ticket.repoName != null) Text(ticket.repoName!),
             ...meta,
           ]),
@@ -347,7 +348,7 @@ class TicketCard extends StatelessWidget {
             const Pulse(),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(live!, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: HiroFonts.mono, fontSize: 12.5, color: c.ink2)),
+              child: Text(live!, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink2)),
             ),
           ]),
         ] else if (action != null) ...[
@@ -404,7 +405,7 @@ class _PulseState extends State<Pulse> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final col = widget.color ?? Hiro.of(context).primary;
+    final col = widget.color ?? Agnts.of(context).primary;
     return AnimatedBuilder(
       animation: _c,
       builder: (_, __) => Opacity(
@@ -431,7 +432,7 @@ class FilterChipH extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final fg = selected ? c.surface : c.ink2;
     return Material(
       color: selected ? c.ink : c.surface,
@@ -483,7 +484,7 @@ class SearchBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: TextField(
@@ -514,7 +515,7 @@ class Segmented<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     Widget seg((T, String) o) {
       final on = o.$1 == value;
       final b = GestureDetector(
@@ -565,7 +566,7 @@ class KpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return HCard(
       onTap: onTap,
       padding: const EdgeInsets.all(14),
@@ -575,8 +576,8 @@ class KpiCard extends StatelessWidget {
         Wrap(crossAxisAlignment: WrapCrossAlignment.center, spacing: 6, children: [
           Text(value,
               style: mono
-                  ? TextStyle(fontFamily: HiroFonts.mono, fontSize: 22, fontWeight: FontWeight.w700, color: valueColor ?? c.ink)
-                  : TextStyle(fontFamily: HiroFonts.display, fontSize: 26, fontWeight: FontWeight.w700, height: 1.1, color: valueColor ?? c.ink)),
+                  ? TextStyle(fontFamily: AgntsFonts.mono, fontSize: 22, fontWeight: FontWeight.w700, color: valueColor ?? c.ink)
+                  : TextStyle(fontFamily: AgntsFonts.display, fontSize: 26, fontWeight: FontWeight.w700, height: 1.1, color: valueColor ?? c.ink)),
           if (delta != null) delta!,
         ]),
         if (bar != null) Padding(padding: const EdgeInsets.only(top: 6, bottom: 2), child: Bar(value: bar!, tone: barTone, height: 6)),
@@ -594,7 +595,7 @@ class Delta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final (bg, fg) = better == null ? (c.graySoft, c.grayInk) : better! ? (c.okSoft, c.okInk) : (c.badSoft, c.badInk);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -613,7 +614,7 @@ class Bar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return ClipRRect(
       borderRadius: BorderRadius.circular(height / 2),
       child: SizedBox(
@@ -666,7 +667,7 @@ class Fact extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line), borderRadius: BorderRadius.circular(14)),
@@ -688,7 +689,7 @@ class ListGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return Container(
       decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line), borderRadius: BorderRadius.circular(16)),
       clipBehavior: Clip.antiAlias,
@@ -712,7 +713,7 @@ class ListRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final row = Container(
       constraints: const BoxConstraints(minHeight: 52),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -750,7 +751,7 @@ class _FoldState extends State<Fold> {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return Container(
       decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line), borderRadius: BorderRadius.circular(14)),
       clipBehavior: Clip.antiAlias,
@@ -786,7 +787,7 @@ class HelpBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final (bg, fg, border) = tone == Tone.info ? (c.help, c.primaryInk, c.ring) : (tone.soft(c), tone.ink(c), Colors.transparent);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -815,8 +816,8 @@ class LogBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
-    const style = TextStyle(fontFamily: HiroFonts.mono, fontSize: 12, height: 1.65);
+    final c = Agnts.of(context);
+    const style = TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12, height: 1.65);
     return Container(
       constraints: BoxConstraints(maxHeight: maxHeight),
       decoration: BoxDecoration(color: c.code, borderRadius: BorderRadius.circular(14)),
@@ -845,7 +846,7 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 36),
       child: Column(children: [
@@ -873,14 +874,14 @@ class DetailBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return Container(
       color: c.bg,
       padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
       child: SizedBox(
         height: 52,
         child: Stack(alignment: Alignment.center, children: [
-          if (title != null) Text(title!, style: TextStyle(fontFamily: HiroFonts.mono, fontSize: 14, color: c.ink2)),
+          if (title != null) Text(title!, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 14, color: c.ink2)),
           Row(children: [
             const SizedBox(width: 4),
             TextButton(
@@ -907,7 +908,7 @@ class ActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return Container(
       decoration: BoxDecoration(color: c.surface, border: Border(top: BorderSide(color: c.line))),
       padding: EdgeInsets.fromLTRB(16, 10, 16, 10 + MediaQuery.paddingOf(context).bottom),
@@ -924,7 +925,7 @@ class HFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return Tooltip(
       message: tooltip,
       child: Container(

@@ -16,9 +16,9 @@ import (
 	"strings"
 	"time"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
-	"hiro/internal/vcs"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
+	"agnts/internal/vcs"
 )
 
 // Config is the GitLab connection.

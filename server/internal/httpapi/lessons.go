@@ -5,9 +5,9 @@ import (
 	"errors"
 	"net/http"
 
-	"hiro/internal/domain"
-	"hiro/internal/httpapi/gen"
-	"hiro/internal/store/postgres"
+	"agnts/internal/domain"
+	"agnts/internal/httpapi/gen"
+	"agnts/internal/store/postgres"
 )
 
 // Lessons is what the Learn pages read and change.

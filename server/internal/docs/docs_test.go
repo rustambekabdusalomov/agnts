@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
 func TestDocs(t *testing.T) {

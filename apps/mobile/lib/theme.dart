@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-/// hiro's design tokens, copied from mobile.html's CSS variables (:root and
+/// agnts's design tokens, copied from mobile.html's CSS variables (:root and
 /// the dark theme). Keep in sync with apps/admin/src/styles/tokens.css.
 @immutable
-class Hiro extends ThemeExtension<Hiro> {
-  const Hiro({
+class Agnts extends ThemeExtension<Agnts> {
+  const Agnts({
     required this.bg,
     required this.surface,
     required this.ink,
@@ -46,7 +46,7 @@ class Hiro extends ThemeExtension<Hiro> {
   final Color code, codeInk, codeDim;
   final Color taskSoft, taskInk; // the "Task" source chip
 
-  static const light = Hiro(
+  static const light = Agnts(
     bg: Color(0xFFF5F5F2), surface: Color(0xFFFFFFFF), ink: Color(0xFF16181D), ink2: Color(0xFF555A63), ink3: Color(0xFF6B6F78),
     line: Color(0xFFE4E2DC), line2: Color(0xFFEFEDE8), line3: Color(0xFFD2CFC6), line4: Color(0xFFD9D6CE),
     hover: Color(0xFFF2F1ED), field: Color(0xFFFAFAF8),
@@ -60,7 +60,7 @@ class Hiro extends ThemeExtension<Hiro> {
     taskSoft: Color(0xFFF0E8F8), taskInk: Color(0xFF5E3790),
   );
 
-  static const dark = Hiro(
+  static const dark = Agnts(
     bg: Color(0xFF121317), surface: Color(0xFF1B1D23), ink: Color(0xFFECEBE6), ink2: Color(0xFFB4B6BC), ink3: Color(0xFF8E9199),
     line: Color(0xFF2C2F37), line2: Color(0xFF24272E), line3: Color(0xFF3A3E46), line4: Color(0xFF3A3E46),
     hover: Color(0xFF24272E), field: Color(0xFF16181D),
@@ -74,27 +74,27 @@ class Hiro extends ThemeExtension<Hiro> {
     taskSoft: Color(0xFF2E2340), taskInk: Color(0xFFCDB4EE),
   );
 
-  /// The tokens for the current theme: `Hiro.of(context).primary`.
-  static Hiro of(BuildContext context) => Theme.of(context).extension<Hiro>()!;
+  /// The tokens for the current theme: `Agnts.of(context).primary`.
+  static Agnts of(BuildContext context) => Theme.of(context).extension<Agnts>()!;
 
   @override
-  Hiro copyWith() => this;
+  Agnts copyWith() => this;
 
   @override
-  Hiro lerp(ThemeExtension<Hiro>? other, double t) => t < 0.5 || other is! Hiro ? this : other;
+  Agnts lerp(ThemeExtension<Agnts>? other, double t) => t < 0.5 || other is! Agnts ? this : other;
 }
 
 /// Type families, as in the demo: a display face for titles and numbers, a
 /// highly legible text face, and its mono for keys, branches and code.
 /// Missing glyphs (Cyrillic, the Uzbek ʻ) fall back to the system font.
-class HiroFonts {
+class AgntsFonts {
   static const display = 'BricolageGrotesque';
   static const sans = 'AtkinsonHyperlegibleNext';
   static const mono = 'AtkinsonHyperlegibleMono';
 }
 
-ThemeData hiroTheme(Brightness brightness) {
-  final c = brightness == Brightness.light ? Hiro.light : Hiro.dark;
+ThemeData agntsTheme(Brightness brightness) {
+  final c = brightness == Brightness.light ? Agnts.light : Agnts.dark;
   final scheme = ColorScheme(
     brightness: brightness,
     primary: c.primary,
@@ -110,28 +110,28 @@ ThemeData hiroTheme(Brightness brightness) {
     outlineVariant: c.line,
     surfaceContainerHighest: c.hover,
   );
-  final base = ThemeData(brightness: brightness, useMaterial3: true, fontFamily: HiroFonts.sans);
+  final base = ThemeData(brightness: brightness, useMaterial3: true, fontFamily: AgntsFonts.sans);
   TextStyle disp(double size, {FontWeight w = FontWeight.w700, double ls = -0.02}) =>
-      TextStyle(fontFamily: HiroFonts.display, fontSize: size, fontWeight: w, letterSpacing: size * ls, height: 1.1, color: c.ink);
+      TextStyle(fontFamily: AgntsFonts.display, fontSize: size, fontWeight: w, letterSpacing: size * ls, height: 1.1, color: c.ink);
   final text = base.textTheme
-      .apply(fontFamily: HiroFonts.sans, bodyColor: c.ink, displayColor: c.ink)
+      .apply(fontFamily: AgntsFonts.sans, bodyColor: c.ink, displayColor: c.ink)
       .copyWith(
         displaySmall: disp(32),
         headlineMedium: disp(28),
         headlineSmall: disp(25, ls: -0.01),
         titleLarge: disp(22, ls: -0.01),
-        titleMedium: TextStyle(fontFamily: HiroFonts.sans, fontSize: 16, fontWeight: FontWeight.w700, color: c.ink),
-        titleSmall: TextStyle(fontFamily: HiroFonts.sans, fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink3),
-        bodyLarge: TextStyle(fontFamily: HiroFonts.sans, fontSize: 16, height: 1.45, color: c.ink),
-        bodyMedium: TextStyle(fontFamily: HiroFonts.sans, fontSize: 15, height: 1.45, color: c.ink),
-        bodySmall: TextStyle(fontFamily: HiroFonts.sans, fontSize: 13, height: 1.4, color: c.ink3),
-        labelLarge: TextStyle(fontFamily: HiroFonts.sans, fontSize: 15.5, fontWeight: FontWeight.w700),
+        titleMedium: TextStyle(fontFamily: AgntsFonts.sans, fontSize: 16, fontWeight: FontWeight.w700, color: c.ink),
+        titleSmall: TextStyle(fontFamily: AgntsFonts.sans, fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink3),
+        bodyLarge: TextStyle(fontFamily: AgntsFonts.sans, fontSize: 16, height: 1.45, color: c.ink),
+        bodyMedium: TextStyle(fontFamily: AgntsFonts.sans, fontSize: 15, height: 1.45, color: c.ink),
+        bodySmall: TextStyle(fontFamily: AgntsFonts.sans, fontSize: 13, height: 1.4, color: c.ink3),
+        labelLarge: TextStyle(fontFamily: AgntsFonts.sans, fontSize: 15.5, fontWeight: FontWeight.w700),
       );
   final radius12 = BorderRadius.circular(12);
   OutlineInputBorder field(Color col, [double w = 1]) => OutlineInputBorder(borderRadius: radius12, borderSide: BorderSide(color: col, width: w));
   final btnShape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(14));
   const btnSize = Size(48, 48);
-  final btnText = const TextStyle(fontFamily: HiroFonts.sans, fontSize: 15.5, fontWeight: FontWeight.w700);
+  final btnText = const TextStyle(fontFamily: AgntsFonts.sans, fontSize: 15.5, fontWeight: FontWeight.w700);
 
   return base.copyWith(
     colorScheme: scheme,
@@ -201,7 +201,7 @@ ThemeData hiroTheme(Brightness brightness) {
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
       backgroundColor: const Color(0xFF16181D),
-      contentTextStyle: const TextStyle(fontFamily: HiroFonts.sans, color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
+      contentTextStyle: const TextStyle(fontFamily: AgntsFonts.sans, color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
     ),
     dialogTheme: DialogThemeData(backgroundColor: c.surface, surfaceTintColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),

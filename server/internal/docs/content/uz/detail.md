@@ -1,10 +1,10 @@
 # Tiket sahifasi
 
-Bitta tiketning olinishidan yuborilishigacha boʻlgan yoʻli. Yuqoridagi shkala u hozir qayerdaligini koʻrsatadi. Romb shaklidagi bosqichlarda hiro sizni kutadi.
+Bitta tiketning olinishidan yuborilishigacha boʻlgan yoʻli. Yuqoridagi shkala u hozir qayerdaligini koʻrsatadi. Romb shaklidagi bosqichlarda agnts sizni kutadi.
 
 ## Savollar
 
-hiro avval kodni oʻqiydi va faqat oʻzi hal qila olmaydigan narsalarni soʻraydi. Variantni tanlang yoki oʻz javobingizni yozing, soʻng «Kod yozishni boshlash»ni bosing.
+agnts avval kodni oʻqiydi va faqat oʻzi hal qila olmaydigan narsalarni soʻraydi. Variantni tanlang yoki oʻz javobingizni yozing, soʻng «Kod yozishni boshlash»ni bosing.
 
 ## Shu tiket uchun modellar
 
@@ -12,20 +12,28 @@ Standart modelni faqat shu tiket uchun almashtiring, masalan murakkab oʻzgarish
 
 ## Jonli log
 
-hiro ishlayotganda har bir qadam, model, sarflangan qadamlar va sessiya sarfi koʻrinadi. «Ishni toʻxtatish» ishni toʻxtatadi va branchni saqlaydi.
+agnts ishlayotganda har bir qadam, model, sarflangan qadamlar va sessiya sarfi koʻrinadi. «Ishni toʻxtatish» ishni toʻxtatadi va branchni saqlaydi.
 
 ## Tekshiruv
 
-hiro nima qilganini oʻqing, testlar va oʻzgarishlarni tekshiring. «Tasdiqlash va yuborish» sizning nomingizdan commit qiladi. «Oʻzgartirish soʻrash» fikringizni oʻsha sessiyaga yuboradi. «Rad etish» branchni oʻchiradi.
+agnts nima qilganini oʻqing, testlar va oʻzgarishlarni tekshiring. «Tasdiqlash va yuborish» sizning nomingizdan commit qiladi. «Oʻzgartirish soʻrash» fikringizni oʻsha sessiyaga yuboradi. «Rad etish» branchni oʻchiradi.
 
-## hiro kod sharhi
+## agnts kod sharhi
 
-Ish sizni kutayotganda hiro ham uni koʻrib chiqadi: diffni xatolar, xavfsizlik, yetishmayotgan testlar va jamoa qoidalari boʻyicha; hisobotni aniqlik va boʻshliqlar boʻyicha. Topilmalar diff ustida, eng jiddiylari birinchi koʻrsatiladi. Bu ikkinchi fikr, toʻsiq emas: xohlagan paytda tasdiqlang. «Fikrga qoʻshish» taklifni fikringizga koʻchiradi. Avto rejimida murakkab tiketlarni Opus, qolganlarini Sonnet koʻrib chiqadi.
+Ish sizni kutayotganda agnts ham uni koʻrib chiqadi: diffni xatolar, xavfsizlik, yetishmayotgan testlar va jamoa qoidalari boʻyicha; hisobotni aniqlik va boʻshliqlar boʻyicha. Topilmalar diff ustida, eng jiddiylari birinchi koʻrsatiladi. Bu ikkinchi fikr, toʻsiq emas: xohlagan paytda tasdiqlang. «Fikrga qoʻshish» taklifni fikringizga koʻchiradi. Avto rejimida murakkab tiketlarni Opus, qolganlarini Sonnet koʻrib chiqadi.
 
-## hiro toʻxtaganda
+## Keyingi tiketlar
 
-Testlar qayta-qayta yiqilsa yoki limit tugasa, hiro taxmin qilmay toʻxtaydi. Koʻrsatma qoʻshib qayta urining yoki tiketni oʻzingiz oling.
+Sozlamalarda yoki bitta tiketda «Keyingi tiketlarni taklif qilish»ni yoqing, agnts tiketni tugatish uchun yana nima kerakligini koʻrsatadi: oldindan kerak ishlar va ajratiladigan qismlar (tahlildan), bajarilmagan ishlar (ishdan) hamda reja, tahlil yoki koʻrik topgan boʻshliqlar. Tiket maqsadidan tashqari hech narsa taklif qilmaydi; davom tiketida maqsad zanjirdagi birinchi tiket maqsadidir. Keraklilarini belgilang va mahalliy vazifa yoki Jira vazifasi sifatida yarating. Ular navbatda yaratiladi va siz ishga tushirmaguningizcha ishlamaydi. «Keyingi tiketga» koʻrik izohini taklifga aylantiradi. Ishdan kelgan takliflar tiket tugaguncha kutadi.
+
+## agnts toʻxtaganda
+
+Testlar qayta-qayta yiqilsa yoki limit tugasa, agnts taxmin qilmay toʻxtaydi. Koʻrsatma qoʻshib qayta urining yoki tiketni oʻzingiz oling.
 
 ## Tarix va ishga tushirish logi
 
 Tarix asosiy lahzalarni koʻrsatadi. Ishga tushirish logi barcha hodisalarni bosqichlar boʻyicha koʻrsatadi, «Loglarda ochish» esa ularni filtrlar bilan ochadi.
+
+## Token sarfi
+
+«Token sarfi» kartasi bu tiket boʻyicha Claude ishlari qancha token sarflaganini koʻrsatadi: jami kirish va chiqish, soʻng har bir bosqich (tahlil, kod yozish, tuzatishlar va oʻzgarishlar, kod tekshiruvi, saboqlar) uchun modeli bilan alohida qator. Kesh oʻqish va yozish alohida koʻrsatiladi: ular arzon va qolganini bosib ketardi. Xuddi shu tokenlar shkaladagi qadamlar ostida ham bor. Dollardagi summa — Claude Code'ning API narxlaridagi bahosi; Claude obunasida u toʻlanmaydi, lekin qaysi bosqichlar koʻproq yuk berishini koʻrsatadi. Toʻxtatilgan yoki vaqti tugagan ish ham hisobga olinadi, faqat narxi nomaʼlum.

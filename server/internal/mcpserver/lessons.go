@@ -8,8 +8,8 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"hiro/internal/domain"
-	"hiro/internal/store/postgres"
+	"agnts/internal/domain"
+	"agnts/internal/store/postgres"
 )
 
 // LessonsInput narrows list_lessons.

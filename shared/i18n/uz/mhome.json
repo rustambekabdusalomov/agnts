@@ -2,9 +2,9 @@
   "mhome": {
     "runningNote": "Bir vaqtda: {parallel}, navbatda: {queued}",
     "waiting": "{time} kutmoqda",
-    "actAnswers": "hiro savollariga javob bering",
+    "actAnswers": "agnts savollariga javob bering",
     "actReview": "Oʻzgarishlarni koʻrib chiqing",
-    "actStopped": "Toʻxtadi. hiro nimani sinashini ayting",
+    "actStopped": "Toʻxtadi. agnts nimani sinashini ayting",
     "actResume": "Tayyor boʻlganingizda davom ettiring",
     "actStart": "Navbatda turibdi. Boshlash uchun bosing",
     "liveFallback": "Ishlamoqda…",

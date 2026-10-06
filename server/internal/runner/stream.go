@@ -10,7 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"hiro/internal/orchestrator"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
 )
 
 // The stream-json format is only partly documented, and rate_limit_event not
@@ -18,22 +19,50 @@ import (
 // are zero, and nothing here can fail a run except an unreadable stream.
 
 type streamLine struct {
-	Type      string          `json:"type"`
-	Subtype   string          `json:"subtype"`
-	SessionID string          `json:"session_id"`
-	Message   *streamMessage  `json:"message"`
-	Content   []contentBlock  `json:"content"` // some versions put content at the top level
-	Result    string          `json:"result"`
-	IsError   bool            `json:"is_error"`
-	NumTurns  int             `json:"num_turns"`
-	Duration  int64           `json:"duration_ms"`
-	CostUSD   float64         `json:"total_cost_usd"`
-	Model     string          `json:"model"`
-	Raw       json.RawMessage `json:"-"`
+	Type      string         `json:"type"`
+	Subtype   string         `json:"subtype"`
+	SessionID string         `json:"session_id"`
+	Message   *streamMessage `json:"message"`
+	Content   []contentBlock `json:"content"` // some versions put content at the top level
+	Result    string         `json:"result"`
+	IsError   bool           `json:"is_error"`
+	NumTurns  int            `json:"num_turns"`
+	Duration  int64          `json:"duration_ms"`
+	CostUSD   float64        `json:"total_cost_usd"`
+	Model     string         `json:"model"`
+	Usage     *apiUsage      `json:"usage"`
+	// ModelUsage covers every model the invocation used (subagents and
+	// helper calls included), so it is preferred over Usage when present.
+	ModelUsage map[string]modelUsage `json:"modelUsage"`
+	Raw        json.RawMessage       `json:"-"`
 }
 
 type streamMessage struct {
+	ID      string         `json:"id"`
 	Content []contentBlock `json:"content"`
+	Usage   *apiUsage      `json:"usage"`
+}
+
+// apiUsage is the Messages API usage block, as found on assistant
+// messages and the result line.
+type apiUsage struct {
+	Input      int64 `json:"input_tokens"`
+	Output     int64 `json:"output_tokens"`
+	CacheRead  int64 `json:"cache_read_input_tokens"`
+	CacheWrite int64 `json:"cache_creation_input_tokens"`
+}
+
+func (u apiUsage) tokens() domain.TokenUsage {
+	return domain.TokenUsage{Input: u.Input, Output: u.Output, CacheRead: u.CacheRead, CacheWrite: u.CacheWrite}
+}
+
+// modelUsage is one entry of the result line's modelUsage map.
+type modelUsage struct {
+	Input      int64   `json:"inputTokens"`
+	Output     int64   `json:"outputTokens"`
+	CacheRead  int64   `json:"cacheReadInputTokens"`
+	CacheWrite int64   `json:"cacheCreationInputTokens"`
+	CostUSD    float64 `json:"costUSD"`
 }
 
 type contentBlock struct {
@@ -51,6 +80,11 @@ var rateLimitText = regexp.MustCompile(`(?i)(usage limit|rate limit|limit reache
 func ParseStream(r io.Reader, onEvent func(orchestrator.ClaudeEvent)) (orchestrator.ClaudeResult, error) {
 	var res orchestrator.ClaudeResult
 	gotResult := false
+	// Usage per assistant message, for a stream cut off before its result
+	// line. A message split over several lines repeats its usage, so the
+	// last reading per id wins.
+	seen := map[string]domain.TokenUsage{}
+	var unnamed domain.TokenUsage
 	sc := bufio.NewScanner(r)
 	sc.Buffer(make([]byte, 64*1024), 16*1024*1024) // tool results can be large
 
@@ -69,12 +103,20 @@ func ParseStream(r io.Reader, onEvent func(orchestrator.ClaudeEvent)) (orchestra
 
 		switch {
 		case l.Type == "system" && l.Subtype == "init":
+			res.Model = l.Model
 			emit(onEvent, orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeInit, Data: map[string]any{"session_id": l.SessionID, "model": l.Model}})
 
 		case l.Type == "assistant":
 			blocks := l.Content
 			if l.Message != nil {
 				blocks = l.Message.Content
+				if u := l.Message.Usage; u != nil {
+					if l.Message.ID != "" {
+						seen[l.Message.ID] = u.tokens()
+					} else {
+						unnamed.Add(u.tokens())
+					}
+				}
 			}
 			for _, b := range blocks {
 				switch b.Type {
@@ -104,7 +146,7 @@ func ParseStream(r io.Reader, onEvent func(orchestrator.ClaudeEvent)) (orchestra
 			res.IsError = l.IsError || (l.Subtype != "" && l.Subtype != "success")
 			res.Turns = l.NumTurns
 			res.Text = l.Result
-			res.CostUSD = l.CostUSD
+			res.Usage = resultUsage(l)
 			res.Duration = time.Duration(l.Duration) * time.Millisecond
 			if res.IsError && rateLimitText.MatchString(l.Result) {
 				res.RateLimited = true
@@ -119,9 +161,29 @@ func ParseStream(r io.Reader, onEvent func(orchestrator.ClaudeEvent)) (orchestra
 		return res, fmt.Errorf("read claude output: %w", err)
 	}
 	if !gotResult {
+		res.Usage = unnamed
+		for _, u := range seen {
+			res.Usage.Add(u)
+		}
+		res.Partial = !res.Usage.IsZero()
 		return res, fmt.Errorf("claude exited without a result")
 	}
 	return res, nil
+}
+
+// resultUsage reads the totals from a result line: modelUsage when it is
+// there, else usage, with total_cost_usd as the cost.
+func resultUsage(l streamLine) domain.TokenUsage {
+	var u domain.TokenUsage
+	if len(l.ModelUsage) > 0 {
+		for _, m := range l.ModelUsage {
+			u.Add(domain.TokenUsage{Input: m.Input, Output: m.Output, CacheRead: m.CacheRead, CacheWrite: m.CacheWrite})
+		}
+	} else if l.Usage != nil {
+		u = l.Usage.tokens()
+	}
+	u.CostUSD = l.CostUSD
+	return u
 }
 
 func emit(f func(orchestrator.ClaudeEvent), e orchestrator.ClaudeEvent) {

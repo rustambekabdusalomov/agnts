@@ -11,8 +11,8 @@ import (
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
 
-	"hiro/internal/domain"
-	"hiro/internal/secret"
+	"agnts/internal/domain"
+	"agnts/internal/secret"
 )
 
 // Users is the user store the service needs.
@@ -35,7 +35,7 @@ type Sessions interface {
 }
 
 // Issuer is the name shown in authenticator apps.
-const Issuer = "hiro"
+const Issuer = "agnts"
 
 const (
 	totpPeriod = 30
@@ -57,7 +57,7 @@ type Service struct {
 
 // New returns an auth service.
 func New(users Users, sessions Sessions, box *secret.Box, ttl time.Duration) (*Service, error) {
-	dummy, err := secret.HashPassword("hiro-dummy-password")
+	dummy, err := secret.HashPassword("agnts-dummy-password")
 	if err != nil {
 		return nil, err
 	}

@@ -10,9 +10,9 @@ import (
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
 
-	"hiro/internal/auth/authtest"
-	"hiro/internal/domain"
-	"hiro/internal/secret"
+	"agnts/internal/auth/authtest"
+	"agnts/internal/domain"
+	"agnts/internal/secret"
 )
 
 type fixture struct {

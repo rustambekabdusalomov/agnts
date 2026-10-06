@@ -2,7 +2,7 @@
   "kind": {
     "title": "Turi",
     "auto": "Avto",
-    "autoHint": "hiro tiketni oʻqiyotganda turini oʻzi tanlaydi",
+    "autoHint": "agnts tiketni oʻqiyotganda turini oʻzi tanlaydi",
     "code": "Kod",
     "codeHint": "Kodga oʻzgartirish kiritish. Repozitoriy kerak; natijasi — pull request.",
     "test": "Testlar",
@@ -13,7 +13,7 @@
     "analysisHint": "Savolni oʻrganib, xulosalarni yozish. Kod oʻzgarmaydi.",
     "bug": "Xatoni tekshirish",
     "bugHint": "Xatoning asl sababini topib, tuzatishni taklif qilish. Kod oʻzgarmaydi.",
-    "pickerHint": "hiro nima qiladi. Tanlangan tur oʻzgarmaydi; «Avto»da hiro tiketni oʻqib, oʻzi hal qiladi.",
+    "pickerHint": "agnts nima qiladi. Tanlangan tur oʻzgarmaydi; «Avto»da agnts tiketni oʻqib, oʻzi hal qiladi.",
     "switchTo": "«{kind}»ga oʻtkazish"
   }
 }

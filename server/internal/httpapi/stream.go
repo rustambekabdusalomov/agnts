@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
 )
 
 // EventSource reads events after a cursor.

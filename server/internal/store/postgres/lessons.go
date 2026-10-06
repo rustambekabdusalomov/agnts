@@ -10,11 +10,11 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
 )
 
-// Lessons stores what hiro learned from finished tickets.
+// Lessons stores what agnts learned from finished tickets.
 type Lessons struct{ db *pgxpool.Pool }
 
 var _ orchestrator.Lessons = (*Lessons)(nil)

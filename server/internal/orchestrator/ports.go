@@ -9,7 +9,7 @@ import (
 	"io"
 	"time"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
 // Store is the persistence the orchestrator needs. Every state change goes
@@ -35,6 +35,13 @@ type Store interface {
 	// idle.
 	ClaimNext(ctx context.Context) (t domain.Ticket, r domain.Run, ok bool, err error)
 	FinishRun(ctx context.Context, r domain.Run) error
+	// RecordClaudeCall stores the token spend of one Claude invocation.
+	RecordClaudeCall(ctx context.Context, c domain.ClaudeCall) error
+	// TicketUsage returns a ticket's spend by model stage and model.
+	TicketUsage(ctx context.Context, ticketID int64) ([]domain.StageUsage, error)
+	// SpendByKeys returns each ticket's total spend; tickets without any
+	// are absent.
+	SpendByKeys(ctx context.Context, keys []string) (map[string]domain.TokenUsage, error)
 	LastSessionID(ctx context.Context, ticketID int64) (string, error)
 	// RecoverInterrupted closes runs left unfinished by a crash and moves
 	// their tickets back to a claimable state.
@@ -64,6 +71,29 @@ type Store interface {
 	TicketByPR(ctx context.Context, url, branch string) (domain.Ticket, error)
 	// ChildOf returns the ticket that implements parentKey, or ErrNotFound.
 	ChildOf(ctx context.Context, parentKey string) (domain.Ticket, error)
+
+	// ReplaceSuggestions swaps the open suggestions source made for a
+	// ticket for ss, and appends ev (nil for none), in one transaction.
+	ReplaceSuggestions(ctx context.Context, ticketID int64, source string, ss []domain.Suggestion, ev *domain.Event) error
+	AddSuggestion(ctx context.Context, s domain.Suggestion, ev domain.Event) (domain.Suggestion, error)
+	Suggestions(ctx context.Context, ticketID int64) ([]domain.Suggestion, error)
+	OpenSuggestionCounts(ctx context.Context, keys []string) (map[string]int, error)
+	// DismissSuggestion and CreateFollowUp decide an open suggestion of a
+	// ticket; one already decided gives domain.ErrSuggestionDecided.
+	DismissSuggestion(ctx context.Context, ticketID, id int64, ev domain.Event) (domain.Suggestion, error)
+	// CreateFollowUp creates t from the suggestion and marks it accepted.
+	CreateFollowUp(ctx context.Context, ticketID, id int64, t domain.Ticket, ev domain.Event) (domain.Ticket, error)
+	// FollowUpsOf returns the tickets made from parentKey's suggestions.
+	FollowUpsOf(ctx context.Context, parentKey string) ([]domain.Ticket, error)
+	// OpenTicketRefs returns the newest unfinished tickets in repoID (nil:
+	// tasks without a repository).
+	OpenTicketRefs(ctx context.Context, repoID *int64, limit int) ([]TicketRef, error)
+}
+
+// TicketRef names a ticket.
+type TicketRef struct {
+	Key   string
+	Title string
 }
 
 // Lessons is the knowledge base the learn stage reads and adds to.
@@ -197,8 +227,15 @@ type ClaudeResult struct {
 	IsError     bool
 	RateLimited bool
 	Text        string
-	CostUSD     float64
 	Duration    time.Duration
+	// Model is the model Claude Code reported at start, which may differ
+	// from the one requested (an alias, or a fallback).
+	Model string
+	// Usage is the invocation's token spend. Partial means the stream had
+	// no result line (killed or timed out) and Usage was summed from the
+	// assistant messages seen, without a cost.
+	Usage   domain.TokenUsage
+	Partial bool
 }
 
 // ExecResult is the outcome of Workspace.Exec.
@@ -267,7 +304,26 @@ type Tracker interface {
 	MoveTo(ctx context.Context, key string, status TrackerStatus) error
 }
 
-// TrackerStatus is a hiro milestone mapped to a tracker status in settings.
+// IssueCreator files new issues in the tracker. A tracker may implement
+// it; follow-ups can then be filed there instead of as local tasks.
+type IssueCreator interface {
+	// CreateIssue files an issue without agnts's labels and returns its key.
+	CreateIssue(ctx context.Context, in NewIssue) (string, error)
+	// LabelIssue adds agnts's labels for kind, which hand the issue to agnts.
+	LabelIssue(ctx context.Context, key string, kind domain.TicketKind) error
+	// LinkIssues links key to other as related issues.
+	LinkIssues(ctx context.Context, key, other string) error
+}
+
+// NewIssue is an issue to file.
+type NewIssue struct {
+	Project     string
+	Title       string
+	Description string // plain text
+	Priority    string // low, medium or high
+}
+
+// TrackerStatus is a agnts milestone mapped to a tracker status in settings.
 type TrackerStatus string
 
 // Tracker milestones.

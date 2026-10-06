@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hiro_mobile/features/learn/lesson_text.dart';
+import 'package:agnts_mobile/features/learn/lesson_text.dart';
 
 void main() {
   test('splits paragraphs and fenced code', () {

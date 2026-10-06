@@ -8,11 +8,11 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
 )
 
-// Rules stores the rules hiro follows on tickets.
+// Rules stores the rules agnts follows on tickets.
 type Rules struct{ db *pgxpool.Pool }
 
 var _ orchestrator.Rules = (*Rules)(nil)

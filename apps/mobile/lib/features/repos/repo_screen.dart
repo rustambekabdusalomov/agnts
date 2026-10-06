@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hiro_api/hiro_api.dart';
+import 'package:agnts_api/agnts_api.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/api.dart';
@@ -57,7 +57,7 @@ class _RepoScreenState extends ConsumerState<RepoScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final id = widget.id;
     final repo = ref.watch(_repoProvider(id)).value;
     final branches = ref.watch(_branchesProvider(id));
@@ -93,7 +93,7 @@ class _RepoScreenState extends ConsumerState<RepoScreen> {
               if (repo != null && repo.cloneUrl.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
-                  child: SelectableText(repo.cloneUrl, style: TextStyle(fontFamily: HiroFonts.mono, fontSize: 12.5, color: c.ink2)),
+                  child: SelectableText(repo.cloneUrl, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink2)),
                 ),
             ]),
           ),
@@ -215,7 +215,7 @@ String _ago(AppLocalizations l, DateTime at) {
   return d.inMinutes < 1 ? l.mmoreJustNow : l.mmoreAgo(shortDuration(d));
 }
 
-/// The linked ticket's key and state badge, when hiro knows the ticket.
+/// The linked ticket's key and state badge, when agnts knows the ticket.
 class _TicketTag extends ConsumerWidget {
   const _TicketTag(this.ticketKey);
   final String ticketKey;
@@ -223,7 +223,7 @@ class _TicketTag extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     Ticket? t;
     for (final x in ref.watch(ticketsProvider('all')).value ?? const <Ticket>[]) {
       if (x.key == ticketKey) {
@@ -234,7 +234,7 @@ class _TicketTag extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 6),
       child: Wrap(spacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
-        Text(ticketKey, style: TextStyle(fontFamily: HiroFonts.mono, fontSize: 12, color: c.ink3)),
+        Text(ticketKey, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12, color: c.ink3)),
         if (t != null) ToneBadge(stateLabelOf(l, t.state), stateTone(t.state), small: true),
       ]),
     );
@@ -248,11 +248,11 @@ class _BrChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
       decoration: BoxDecoration(color: c.graySoft, borderRadius: BorderRadius.circular(6)),
-      child: Text(name, style: TextStyle(fontFamily: HiroFonts.mono, fontSize: 12, color: c.ink)),
+      child: Text(name, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12, color: c.ink)),
     );
   }
 }
@@ -266,7 +266,7 @@ class _GitRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final row = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
       child: Row(children: [
@@ -287,7 +287,7 @@ class _BranchRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final small = TextStyle(fontSize: 13, color: c.ink3);
     final meta = [
       if (b.author.isNotEmpty) b.author,
@@ -322,7 +322,7 @@ class _CommitRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final loc = Localizations.localeOf(context).toLanguageTag();
     final small = TextStyle(fontSize: 13, color: c.ink3);
     return _GitRow(
@@ -333,7 +333,7 @@ class _CommitRow extends StatelessWidget {
         const SizedBox(height: 2),
         Text.rich(
           TextSpan(style: small, children: [
-            TextSpan(text: _short(x.sha), style: TextStyle(fontFamily: HiroFonts.mono, fontSize: 12, color: c.ink3)),
+            TextSpan(text: _short(x.sha), style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12, color: c.ink3)),
             TextSpan(text: ' ${[if (x.author.isNotEmpty) x.author, if (x.date != null) DateFormat.Hm(loc).format(x.date!.toLocal())].join(', ')}'),
           ]),
         ),
@@ -379,7 +379,7 @@ class _PipelineCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final hint = TextStyle(fontSize: 13, color: c.ink3);
     return HCard(
       padding: const EdgeInsets.all(14),
@@ -403,7 +403,7 @@ class _PipelineCard extends ConsumerWidget {
           style: TextStyle(fontSize: 12.5, color: c.ink3),
           child: Wrap(spacing: 10, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
             if (p.branch.isNotEmpty) _BrChip(p.branch),
-            if (p.sha.isNotEmpty) Text(_short(p.sha), style: TextStyle(fontFamily: HiroFonts.mono, fontSize: 12, color: c.ink3)),
+            if (p.sha.isNotEmpty) Text(_short(p.sha), style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12, color: c.ink3)),
             if (p.trigger.isNotEmpty) Text(p.trigger),
             if (p.durationMs > 0) Text(shortDuration(Duration(milliseconds: p.durationMs))),
           ]),
@@ -430,7 +430,7 @@ class _StageChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final tone = switch (s.status) {
       CI.ok => Tone.ok,
       CI.fail => Tone.bad,
@@ -464,7 +464,7 @@ class _StageChip extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 9),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
-                textStyle: const TextStyle(fontFamily: HiroFonts.sans, fontSize: 12, fontWeight: FontWeight.w700),
+                textStyle: const TextStyle(fontFamily: AgntsFonts.sans, fontSize: 12, fontWeight: FontWeight.w700),
               ),
               child: Text(l.mobileDeploy),
             ),
@@ -494,7 +494,7 @@ class CiDot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final Widget dot = switch (s) {
       CI.run => Pulse(size: 10, color: c.primary),
       CI.ok || CI.fail || CI.manual => Container(

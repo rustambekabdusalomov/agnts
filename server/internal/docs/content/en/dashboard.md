@@ -1,6 +1,6 @@
 # Dashboard
 
-Your starting point. What hiro is doing right now, what is waiting on you, and how this week compares with the last.
+Your starting point. What agnts is doing right now, what is waiting on you, and how this week compares with the last.
 
 ## Top cards
 
@@ -8,7 +8,7 @@ Needs you, runs in progress, pushes this week and your plan session. Click a car
 
 ## Waiting on you
 
-Tickets that need answers, a review or a retry, oldest first, with how long they've waited. Clearing these keeps hiro busy.
+Tickets that need answers, a review or a retry, oldest first, with how long they've waited. Clearing these keeps agnts busy.
 
 ## Live runs
 

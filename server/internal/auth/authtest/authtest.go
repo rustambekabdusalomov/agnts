@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
 // Users is an in-memory auth.Users.

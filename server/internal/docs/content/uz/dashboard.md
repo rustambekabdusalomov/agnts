@@ -1,6 +1,6 @@
 # Boshqaruv paneli
 
-Boshlangʻich sahifa. hiro hozir nima qilyapti, sizni nima kutyapti va bu hafta oʻtgan hafta bilan qanday solishtiriladi.
+Boshlangʻich sahifa. agnts hozir nima qilyapti, sizni nima kutyapti va bu hafta oʻtgan hafta bilan qanday solishtiriladi.
 
 ## Yuqori kartalar
 
@@ -8,7 +8,7 @@ Sizni kutayotganlar, faol ishlar, haftalik yuborilganlar va tarif sessiyasi. Teg
 
 ## Sizni kutish
 
-Javob, tekshiruv yoki qayta urinish kerak boʻlgan tiketlar — avval eng eskilari, kutish vaqti bilan. Ularni hal qilsangiz, hiro boʻsh turmaydi.
+Javob, tekshiruv yoki qayta urinish kerak boʻlgan tiketlar — avval eng eskilari, kutish vaqti bilan. Ularni hal qilsangiz, agnts boʻsh turmaydi.
 
 ## Faol ishlar
 

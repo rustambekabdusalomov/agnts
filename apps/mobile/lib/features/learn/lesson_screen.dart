@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hiro_api/hiro_api.dart';
+import 'package:agnts_api/agnts_api.dart';
 
 import '../../core/api.dart';
 import '../../core/data.dart';
@@ -45,7 +45,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final lesson = ref.watch(lessonProvider(widget.id));
     final x = lesson.value;
     return Scaffold(
@@ -92,7 +92,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
                       padding: const EdgeInsets.only(bottom: 10),
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         SelectableText(r.line == null ? r.path : '${r.path}:${r.line}',
-                            style: TextStyle(fontFamily: HiroFonts.mono, fontSize: 12.5, color: c.ink)),
+                            style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink)),
                         if (r.note != null && r.note!.isNotEmpty)
                           Padding(padding: const EdgeInsets.only(top: 2), child: Text(r.note!, style: TextStyle(fontSize: 14, color: c.ink2))),
                       ]),
@@ -115,7 +115,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
                         padding: const EdgeInsets.only(bottom: 10),
                         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                           Text(k.title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: c.primary)),
-                          Text(k.url, style: TextStyle(fontFamily: HiroFonts.mono, fontSize: 12, color: c.ink3)),
+                          Text(k.url, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12, color: c.ink3)),
                         ]),
                       ),
                     ),
@@ -153,7 +153,7 @@ class _QuizState extends State<_Quiz> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final right = [for (final (i, q) in widget.quiz.indexed) if (_picked[i] == q.answer) i].length;
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Text(l.learnQuizSub, style: TextStyle(fontSize: 14, color: c.ink3)),
@@ -183,7 +183,7 @@ class _QuizState extends State<_Quiz> {
   }
 
   Widget _option(BuildContext context, int qi, int oi, String text, int answer) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final picked = _picked[qi];
     final done = picked != null;
     final (Color bg, Color fg, Color border) = !done

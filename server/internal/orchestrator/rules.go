@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
 // Limits of a rule review: it reads a rule, not a ticket, so it gets a

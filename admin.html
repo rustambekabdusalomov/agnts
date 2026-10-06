@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>hiro</title>
+<title>agnts</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;600&family=Atkinson+Hyperlegible+Next:wght@400;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Noto+Sans:wght@400;600;700&display=swap">
@@ -494,8 +494,8 @@ select.cfg-in{appearance:none; -webkit-appearance:none; padding-right:34px; back
 <div class="shell">
   <aside class="side">
     <div class="brandbox">
-      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="1" width="28" height="28" rx="7" fill="var(--mark)"/><path d="M10 9v12M10 15c1.2-2 2.6-3 4.5-3 2.2 0 3.5 1.4 3.5 3.8V21" stroke="var(--mark-ink)" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="20.2" y="7.2" width="3.6" height="3.6" rx="0.8" transform="rotate(45 22 9)" fill="#7F95E8"/></svg>
-      <div><div class="brand-name">hiro</div><div class="brand-sub">Your no sleep agent</div></div>
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="1" width="28" height="28" rx="7" fill="var(--mark)"/><path d="M18.75 11.25V20.75M18.75 16a4.75 4.75 0 1 1-9.5 0a4.75 4.75 0 1 1 9.5 0" stroke="var(--mark-ink)" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="20.2" y="7.2" width="3.6" height="3.6" rx="0.8" transform="rotate(45 22 9)" fill="#7F95E8"/></svg>
+      <div><div class="brand-name">agnts</div><div class="brand-sub">Your no sleep agent</div></div>
     </div>
     <nav class="navscroll" id="nav" aria-label="Main"></nav>
     <div class="me">
@@ -560,10 +560,10 @@ const STATE = {
 };
 const FILTERS = [
   {id:"needs", label:"Needs you", icon:"needs", states:["waiting_for_answers","waiting_for_review","failed","rate_limited"], lede:"Tickets waiting on your answers or your review, plus runs that stopped."},
-  {id:"running", label:"Running", icon:"running", states:["analyzing","coding","testing","pushing"], lede:"Tickets hiro is working on right now."},
-  {id:"queue", label:"In queue", icon:"queue", states:["new"], lede:"Tickets with the hiro label that haven't been analyzed yet."},
+  {id:"running", label:"Running", icon:"running", states:["analyzing","coding","testing","pushing"], lede:"Tickets agnts is working on right now."},
+  {id:"queue", label:"In queue", icon:"queue", states:["new"], lede:"Tickets with the agnts label that haven't been analyzed yet."},
   {id:"done", label:"Finished", icon:"done", states:["done","rejected"], lede:"Pushed or rejected tickets."},
-  {id:"all", label:"All tickets", icon:"all", states:null, lede:"Every ticket hiro has picked up from Jira."}
+  {id:"all", label:"All tickets", icon:"all", states:null, lede:"Every ticket agnts has picked up from Jira."}
 ];
 
 function seed(){ return [
@@ -684,7 +684,7 @@ function seed(){ return [
 { key:"PAY-227", title:"Speed up statement export for large accounts", priority:"Medium", repo:"payments-core", updated:"08:55",
   desc:"Monthly statement export times out for business accounts.",
   state:"failed", failedAt:3, revision:1, turns:41, duration:"14m 03s",
-  error:"Tests failed 3 times in a row. TestStatementExport_Large still times out after 30s, so hiro stopped instead of guessing further. The ticket doesn't say what export time is acceptable or whether streaming the CSV is allowed.",
+  error:"Tests failed 3 times in a row. TestStatementExport_Large still times out after 30s, so agnts stopped instead of guessing further. The ticket doesn't say what export time is acceptable or whether streaming the CSV is allowed.",
   plan:["Stream rows instead of loading the full month","Write CSV directly to the response"], questions:[], result:null,
   history:[["08:40","Picked up from Jira"],["08:41","No questions, started the run"],["08:55","Stopped after 3 failed test runs"]] },
 { key:"PAY-230", title:"Rename merchant status enum values", priority:"Low", repo:"merchants", updated:"07:18",
@@ -723,8 +723,8 @@ function seedRepos(){ return [
   {id:"infra", name:"infra", url:"git@github.com:kapital/infra.git", jira:"OPS", branch:"main", build:"make build", lint:"make lint", test:"make test", claudeMd:false}
 ];}
 function seedSettings(){ return { integ: seedInteg(),
-  jiraUrl:"https://kapital.atlassian.net", jiraEmail:"abdusalomovrustambek@gmail.com", jiraLabel:"hiro", jiraMove:true, jiraPoll:"2",
-  ghUser:"rustambekabdusalomov", authorName:"Rustambek Abdusalomov", authorEmail:"abdusalomovrustambek@gmail.com", branchPrefix:"hiro/",
+  jiraUrl:"https://kapital.atlassian.net", jiraEmail:"abdusalomovrustambek@gmail.com", jiraLabel:"agnts", jiraMove:true, jiraPoll:"2",
+  ghUser:"rustambekabdusalomov", authorName:"Rustambek Abdusalomov", authorEmail:"abdusalomovrustambek@gmail.com", branchPrefix:"agnts/",
   models:{analyze:"sonnet", coding:"sonnet", retry:"opus", helper:"haiku"}, maxTurns:80, timeout:30, allow:["go test","go build","go vet","golangci-lint","make","npm test","npm run"], deny:["curl","wget","git push","rm -rf","cat .env"],
   askFirst:true, autoResume:true, pauseAbove:90, parallel:1,
   tgOn:true, tgNeeds:true, tgErrors:true, tgDone:false
@@ -740,7 +740,7 @@ function seedUsage(){
   return { five_hour:{u:0.38, resetsAt:n + (2*60+14)*60000}, seven_day:{u:0.21, resetsAt:n + (3*24+9)*3600000}, updatedAt:n - 4*60000 };
 }
 
-const KEY = "hiro-demo-v5";
+const KEY = "agnts-demo-v5";
 const MODELS = {haiku:{name:"Haiku 4.5", w:0.4}, sonnet:{name:"Sonnet 5.5", w:1}, opus:{name:"Opus 5.5", w:2}};
 const STAGES = [
   {id:"analyze", label:"Reading the ticket and asking questions", help:"Read-only. Runs once per ticket."},
@@ -764,10 +764,10 @@ function seedEvents(tks){
     const move = (to, msg, you) => { ev(STEP_OF[to==="failed"||to==="rate_limited"?st:to] || "Pickup", you?"user":"state", msg, {from:st, to}); st = to; };
     const local = t.source === "local", test = o.test || "go test ./...";
     const files = (t.result && t.result.files.map(f=>f.path)) || ["src/main.ts"];
-    move("new", local ? "You created this task" : "Picked up from Jira (label: hiro)", local);
+    move("new", local ? "You created this task" : "Picked up from Jira (label: agnts)", local);
     if(o.upTo === "new") return;
     wait(60); move("analyzing", "Started analysis");
-    ev("Analyze","command",`claude -p --permission-mode plan --model sonnet --output-format stream-json`, {container:`hiro-${t.key.toLowerCase()}-a1`, mode:"read-only"});
+    ev("Analyze","command",`claude -p --permission-mode plan --model sonnet --output-format stream-json`, {container:`agnts-${t.key.toLowerCase()}-a1`, mode:"read-only"});
     wait(4); ev("Analyze","tool","Read CLAUDE.md",{tool:"Read",path:"CLAUDE.md",turn:++turn});
     wait(6); ev("Analyze","tool",`Grep "${t.title.split(" ").slice(-2).join(" ")}"`,{tool:"Grep",matches:7,turn:++turn});
     for(const f of files.slice(0,2)){ wait(5); ev("Analyze","tool",`Read ${f}`,{tool:"Read",path:f,turn:++turn}); }
@@ -780,7 +780,7 @@ function seedEvents(tks){
       wait(o.answerWait || 1500);
     }
     move("coding", qn ? `You answered ${qn} question${qn===1?"":"s"} and started the run` : "No questions, started the run", !!qn);
-    ev("Coding","command",`claude -p --model sonnet --output-format stream-json --max-turns 80`,{container:`hiro-${t.key.toLowerCase()}-r1`, branch:`hiro/${t.key.toLowerCase()}`});
+    ev("Coding","command",`claude -p --model sonnet --output-format stream-json --max-turns 80`,{container:`agnts-${t.key.toLowerCase()}-r1`, branch:`agnts/${t.key.toLowerCase()}`});
     const steps = t.plan.length ? t.plan : ["Implement the change"];
     for(let i=0;i<steps.length;i++){
       wait(20 + i*7); ev("Coding","tool",`Edit ${files[i % files.length]}`,{tool:"Edit",path:files[i % files.length],plan_step:steps[i],turn:(turn+=2)});
@@ -812,8 +812,8 @@ function seedEvents(tks){
     wait(3); ev("Push","command","git commit --author \"Rustambek Abdusalomov\"",{exit:0});
     wait(4);
     if(local && t.after==="main"){ ev("Push","command","git push origin main",{exit:0}); wait(2); move("done","Pushed to main"); return; }
-    ev("Push","command",`git push origin hiro/${t.key.toLowerCase()}`,{exit:0});
-    wait(3); ev("Push","command",`gh pr create --head hiro/${t.key.toLowerCase()}`,{exit:0, pr:t.pr||0});
+    ev("Push","command",`git push origin agnts/${t.key.toLowerCase()}`,{exit:0});
+    wait(3); ev("Push","command",`gh pr create --head agnts/${t.key.toLowerCase()}`,{exit:0, pr:t.pr||0});
     if(!local){ wait(2); ev("Push","command","Jira: transition to In Review",{status:200}); }
     wait(1); move("done",`PR #${t.pr} opened`);
   }
@@ -892,10 +892,10 @@ add("Language","Язык","Til");
 add("Close","Закрыть","Yopish");
 // Filters
 add("Tickets waiting on your answers or your review, plus runs that stopped.","Тикеты, которые ждут ваших ответов или ревью, а также остановленные запуски.","Javobingiz yoki tekshiruvingizni kutayotgan tiketlar hamda toʻxtagan ishga tushirishlar.");
-add("Tickets hiro is working on right now.","Тикеты, над которыми hiro работает прямо сейчас.","hiro hozir ishlayotgan tiketlar.");
-add("Tickets with the hiro label that haven't been analyzed yet.","Тикеты с меткой hiro, которые ещё не проанализированы.","hiro belgisi bor, hali tahlil qilinmagan tiketlar.");
+add("Tickets agnts is working on right now.","Тикеты, над которыми agnts работает прямо сейчас.","agnts hozir ishlayotgan tiketlar.");
+add("Tickets with the agnts label that haven't been analyzed yet.","Тикеты с меткой agnts, которые ещё не проанализированы.","agnts belgisi bor, hali tahlil qilinmagan tiketlar.");
 add("Pushed or rejected tickets.","Отправленные или отклонённые тикеты.","Yuborilgan yoki rad etilgan tiketlar.");
-add("Every ticket hiro has picked up from Jira.","Все тикеты, которые hiro взял из Jira.","hiro Jira'dan olgan barcha tiketlar.");
+add("Every ticket agnts has picked up from Jira.","Все тикеты, которые agnts взял из Jira.","agnts Jira'dan olgan barcha tiketlar.");
 // States
 add("Reading the code","Читает код","Kodni oʻqiyapti");
 add("Needs your answers","Нужны ваши ответы","Javoblaringiz kerak");
@@ -922,7 +922,7 @@ add("In containers right now","Сейчас в контейнерах","Hozir ko
 add("Pushed this week","Отправлено за неделю","Shu hafta yuborilgan");
 add("Pull requests opened","Открыто пул-реквестов","Ochilgan pull requestlar");
 add("Plan session","Сессия тарифа","Tarif sessiyasi");
-add("Jira tickets with the hiro label, plus tasks you create for side projects.","Тикеты Jira с меткой hiro, а также задачи, которые вы создаёте для своих проектов.","hiro belgili Jira tiketlari hamda shaxsiy loyihalaringiz uchun yaratgan vazifalaringiz.");
+add("Jira tickets with the agnts label, plus tasks you create for side projects.","Тикеты Jira с меткой agnts, а также задачи, которые вы создаёте для своих проектов.","agnts belgili Jira tiketlari hamda shaxsiy loyihalaringiz uchun yaratgan vazifalaringiz.");
 add("Ticket","Тикет","Tiket");
 add("Source","Источник","Manba");
 add("Project","Проект","Loyiha");
@@ -930,7 +930,7 @@ add("Status","Статус","Holat");
 add("Updated","Обновлено","Yangilangan");
 add("Task","Задача","Vazifa");
 add("No tickets match your search.","Нет тикетов по вашему запросу.","Qidiruvingiz boʻyicha tiket topilmadi.");
-add("Nothing is waiting on you. Tickets show up here when hiro has questions or changes to review.","Сейчас ничего не ждёт вас. Тикеты появятся здесь, когда у hiro будут вопросы или изменения на ревью.","Hozir sizni hech narsa kutmayapti. hiro savol bersa yoki oʻzgarishlarni tekshirishingiz kerak boʻlsa, tiketlar shu yerda chiqadi.");
+add("Nothing is waiting on you. Tickets show up here when agnts has questions or changes to review.","Сейчас ничего не ждёт вас. Тикеты появятся здесь, когда у agnts будут вопросы или изменения на ревью.","Hozir sizni hech narsa kutmayapti. agnts savol bersa yoki oʻzgarishlarni tekshirishingiz kerak boʻlsa, tiketlar shu yerda chiqadi.");
 add("No tickets here yet.","Здесь пока нет тикетов.","Bu yerda hozircha tiket yoʻq.");
 add("Yesterday","Вчера","Kecha");
 add("Yest.","Вчера","Kecha");
@@ -938,13 +938,13 @@ add("Mon","Пн","Du");
 // Detail
 add("Analyze ticket","Анализировать тикет","Tiketni tahlil qilish");
 add("Waiting in queue","Ожидает в очереди","Navbatda kutmoqda");
-add("hiro reads the ticket and the related code, then comes back with a plan and questions. Nothing is changed in this step.","hiro читает тикет и связанный код, затем возвращается с планом и вопросами. На этом шаге ничего не меняется.","hiro tiket va unga bogʻliq kodni oʻqiydi, soʻng reja va savollar bilan qaytadi. Bu bosqichda hech narsa oʻzgartirilmaydi.");
+add("agnts reads the ticket and the related code, then comes back with a plan and questions. Nothing is changed in this step.","agnts читает тикет и связанный код, затем возвращается с планом и вопросами. На этом шаге ничего не меняется.","agnts tiket va unga bogʻliq kodni oʻqiydi, soʻng reja va savollar bilan qaytadi. Bu bosqichda hech narsa oʻzgartirilmaydi.");
 add("Pick an option or write your own answer. Answers go into the coding prompt with the plan.","Выберите вариант или напишите свой ответ. Ответы попадут в промпт вместе с планом.","Variantni tanlang yoki oʻz javobingizni yozing. Javoblar reja bilan birga promptga qoʻshiladi.");
 add("Plan","План","Reja");
 add("Questions","Вопросы","Savollar");
 add("Add details (optional)","Добавьте детали (необязательно)","Tafsilot qoʻshing (ixtiyoriy)");
 add("Extra instructions","Дополнительные указания","Qoʻshimcha koʻrsatmalar");
-add("Anything hiro didn't ask about, like files to avoid or naming conventions","Всё, о чём hiro не спросил: например, какие файлы не трогать или как называть","hiro soʻramagan narsalar, masalan tegmaslik kerak boʻlgan fayllar yoki nomlash qoidalari");
+add("Anything agnts didn't ask about, like files to avoid or naming conventions","Всё, о чём agnts не спросил: например, какие файлы не трогать или как называть","agnts soʻramagan narsalar, masalan tegmaslik kerak boʻlgan fayllar yoki nomlash qoidalari");
 add("Start coding","Начать разработку","Kod yozishni boshlash");
 add("All questions answered","На все вопросы есть ответы","Barcha savollarga javob berildi");
 add("Turns","Шаги","Qadamlar");
@@ -957,7 +957,7 @@ add("Lint","Линтер","Linter");
 add("Clean","Чисто","Toza");
 add("Changed","Изменено","Oʻzgargan");
 add("Time","Время","Vaqt");
-add("What hiro did","Что сделал hiro","hiro nima qildi");
+add("What agnts did","Что сделал agnts","agnts nima qildi");
 add("Diff","Изменения","Oʻzgarishlar");
 add("Feedback","Комментарий","Fikr-mulohaza");
 add("Describe what to change. Required for Request changes.","Опишите, что изменить. Обязательно для «Запросить изменения».","Nimani oʻzgartirish kerakligini yozing. «Oʻzgartirish soʻrash» uchun majburiy.");
@@ -967,8 +967,8 @@ add("Reject","Отклонить","Rad etish");
 add("Pushing","Отправка","Yuborilmoqda");
 add("Committing as you and opening the pull request.","Коммит от вашего имени и открытие пул-реквеста.","Sizning nomingizdan commit qilinmoqda va pull request ochilmoqda.");
 add("Send back to queue","Вернуть в очередь","Navbatga qaytarish");
-add("hiro stopped","hiro остановился","hiro toʻxtadi");
-add("What should hiro try?","Что попробовать hiro?","hiro nimani sinab koʻrsin?");
+add("agnts stopped","agnts остановился","agnts toʻxtadi");
+add("What should agnts try?","Что попробовать agnts?","agnts nimani sinab koʻrsin?");
 add("For example: streaming is fine, target is under 10 seconds for 100k rows","Например: стриминг подходит, цель — меньше 10 секунд на 100 тыс. строк","Masalan: striming mumkin, maqsad 100 ming qator uchun 10 soniyadan kam");
 add("Retry with these instructions","Повторить с этими указаниями","Shu koʻrsatmalar bilan qayta urinish");
 add("Take it myself","Сделаю сам","Oʻzim qilaman");
@@ -984,7 +984,7 @@ add("History","История","Tarix");
 add("After approval","После одобрения","Tasdiqlangandan keyin");
 add("Push to main","Отправить в main","main'ga yuborish");
 add("Open pull request","Открыть пул-реквест","Pull request ochish");
-add("hiro task","Задача hiro","hiro vazifasi");
+add("agnts task","Задача agnts","agnts vazifasi");
 add("Jira","Jira","Jira");
 add("High","Высокий","Yuqori");
 add("Medium","Средний","Oʻrta");
@@ -1015,13 +1015,13 @@ add("No new tests, as you asked. Existing tests still pass.","Новых тес�
 add("Changes applied according to the plan.","Изменения внесены по плану.","Oʻzgarishlar reja boʻyicha kiritildi.");
 add("Apply your instructions","Применить ваши указания","Koʻrsatmalaringizni qoʻllash");
 add("Implement the change","Внести изменение","Oʻzgarishni amalga oshirish");
-// Errors written by hiro
-add("Tests failed 3 times in a row. TestStatementExport_Large still times out after 30s, so hiro stopped instead of guessing further. The ticket doesn't say what export time is acceptable or whether streaming the CSV is allowed.","Тесты упали 3 раза подряд. TestStatementExport_Large всё ещё не укладывается в 30 с, поэтому hiro остановился, а не стал гадать дальше. В тикете не сказано, какое время экспорта допустимо и можно ли отдавать CSV потоком.","Testlar ketma-ket 3 marta yiqildi. TestStatementExport_Large hali ham 30 soniyada tugamayapti, shuning uchun hiro taxmin qilishda davom etmay, toʻxtadi. Tiketda qaysi eksport vaqti maqbul ekani va CSV'ni oqim bilan berish mumkinligi aytilmagan.");
+// Errors written by agnts
+add("Tests failed 3 times in a row. TestStatementExport_Large still times out after 30s, so agnts stopped instead of guessing further. The ticket doesn't say what export time is acceptable or whether streaming the CSV is allowed.","Тесты упали 3 раза подряд. TestStatementExport_Large всё ещё не укладывается в 30 с, поэтому agnts остановился, а не стал гадать дальше. В тикете не сказано, какое время экспорта допустимо и можно ли отдавать CSV потоком.","Testlar ketma-ket 3 marta yiqildi. TestStatementExport_Large hali ham 30 soniyada tugamayapti, shuning uchun agnts taxmin qilishda davom etmay, toʻxtadi. Tiketda qaysi eksport vaqti maqbul ekani va CSV'ni oqim bilan berish mumkinligi aytilmagan.");
 add("The session limit was reached during coding at 07:18. The run is saved on its branch. The limit has reset since then, so it can continue.","Лимит сессии закончился во время разработки в 07:18. Работа сохранена в своей ветке. С тех пор лимит обновился, можно продолжать.","Kod yozish vaqtida, 07:18 da sessiya limiti tugadi. Ish oʻz branchida saqlangan. Shundan beri limit yangilandi, davom ettirish mumkin.");
 add("You stopped this run. The branch is kept so you can retry with new instructions.","Вы остановили запуск. Ветка сохранена, можно повторить с новыми указаниями.","Siz ishni toʻxtatdingiz. Branch saqlandi, yangi koʻrsatmalar bilan qayta urinish mumkin.");
-// History / events written by hiro
+// History / events written by agnts
 add("Picked up from Jira","Взят из Jira","Jira'dan olindi");
-add("Picked up from Jira (label: hiro)","Взят из Jira (метка: hiro)","Jira'dan olindi (belgi: hiro)");
+add("Picked up from Jira (label: agnts)","Взят из Jira (метка: agnts)","Jira'dan olindi (belgi: agnts)");
 add("Started analysis","Начат анализ","Tahlil boshlandi");
 add("Analysis finished","Анализ завершён","Tahlil yakunlandi");
 add("No questions, started the run","Вопросов нет, запуск начат","Savol yoʻq, ish boshlandi");
@@ -1043,7 +1043,7 @@ add("Started without questions","Запущено без вопросов","Savo
 add("Paused at plan limit","Пауза: лимит тарифа","Pauza: tarif limiti");
 add("Jira: transition to In Review","Jira: перевод в In Review","Jira: In Review holatiga oʻtkazish");
 // Tasks
-add("Work for your side projects. Tasks stay in hiro and never touch Jira. Everything else works the same: questions, coding, your review.","Работа над вашими проектами. Задачи живут в hiro и не попадают в Jira. Всё остальное так же: вопросы, разработка, ваше ревью.","Shaxsiy loyihalaringiz uchun ishlar. Vazifalar hiro'da qoladi va Jira'ga tegmaydi. Qolgani bir xil: savollar, kod yozish, sizning tekshiruvingiz.");
+add("Work for your side projects. Tasks stay in agnts and never touch Jira. Everything else works the same: questions, coding, your review.","Работа над вашими проектами. Задачи живут в agnts и не попадают в Jira. Всё остальное так же: вопросы, разработка, ваше ревью.","Shaxsiy loyihalaringiz uchun ishlar. Vazifalar agnts'da qoladi va Jira'ga tegmaydi. Qolgani bir xil: savollar, kod yozish, sizning tekshiruvingiz.");
 add("New task","Новая задача","Yangi vazifa");
 add("Filter by project","Фильтр по проекту","Loyiha boʻyicha saralash");
 add("No tasks match your search.","Нет задач по вашему запросу.","Qidiruvingiz boʻyicha vazifa topilmadi.");
@@ -1051,17 +1051,17 @@ add("No tasks in this repository yet.","В этом проекте пока не
 add("Projects","Проекты","Loyihalar");
 add("Repositories on your server","Репозитории на вашем сервере","Serveringizdagi repozitoriylar");
 add("Add","Добавить","Qoʻshish");
-add("For solo projects you can let hiro push straight to main after you approve. It still never pushes without your review.","В соло-проектах можно разрешить hiro отправлять сразу в main после вашего одобрения. Без вашего ревью он всё равно ничего не отправляет.","Yakka loyihalarda tasdiqlaganingizdan soʻng hiro'ga toʻgʻridan-toʻgʻri main'ga yuborishga ruxsat berishingiz mumkin. Baribir tekshiruvingizsiz hech narsa yubormaydi.");
+add("For solo projects you can let agnts push straight to main after you approve. It still never pushes without your review.","В соло-проектах можно разрешить agnts отправлять сразу в main после вашего одобрения. Без вашего ревью он всё равно ничего не отправляет.","Yakka loyihalarda tasdiqlaganingizdan soʻng agnts'ga toʻgʻridan-toʻgʻri main'ga yuborishga ruxsat berishingiz mumkin. Baribir tekshiruvingizsiz hech narsa yubormaydi.");
 add("For your side projects. Not synced to Jira.","Для ваших проектов. Не синхронизируется с Jira.","Shaxsiy loyihalaringiz uchun. Jira bilan sinxronlanmaydi.");
 add("New project","Новый проект","Yangi loyiha");
 add("Title","Название","Sarlavha");
 add("For example: Add a rest timer between sets","Например: таймер отдыха между подходами","Masalan: yondashuvlar orasida dam olish taymeri");
 add("What should be done","Что нужно сделать","Nima qilish kerak");
-add("Describe the result you want. The clearer this is, the fewer questions hiro asks.","Опишите нужный результат. Чем яснее, тем меньше вопросов задаст hiro.","Qanday natija kerakligini yozing. Qanchalik aniq boʻlsa, hiro shuncha kam savol beradi.");
+add("Describe the result you want. The clearer this is, the fewer questions agnts asks.","Опишите нужный результат. Чем яснее, тем меньше вопросов задаст agnts.","Qanday natija kerakligini yozing. Qanchalik aniq boʻlsa, agnts shuncha kam savol beradi.");
 add("After you approve","После вашего одобрения","Tasdiqlaganingizdan keyin");
 add("How to start","Как начать","Qanday boshlash");
 add("Ask questions first","Сначала задать вопросы","Avval savol berish");
-add("hiro reads the code and asks before coding. Best for anything unclear.","hiro читает код и спрашивает до разработки. Лучше для неясных задач.","hiro kodni oʻqib, kod yozishdan oldin soʻraydi. Noaniq ishlar uchun eng yaxshisi.");
+add("agnts reads the code and asks before coding. Best for anything unclear.","agnts читает код и спрашивает до разработки. Лучше для неясных задач.","agnts kodni oʻqib, kod yozishdan oldin soʻraydi. Noaniq ishlar uchun eng yaxshisi.");
 add("Start coding right away","Сразу начать разработку","Darhol kod yozishni boshlash");
 add("Skip questions. Good for small, well-described tasks.","Без вопросов. Подходит для небольших и понятных задач.","Savolsiz. Kichik va aniq yozilgan vazifalar uchun.");
 add("Keep in queue","Оставить в очереди","Navbatda qoldirish");
@@ -1072,9 +1072,9 @@ add("Create and start","Создать и запустить","Yaratish va boshl
 add("Save changes","Сохранить изменения","Oʻzgarishlarni saqlash");
 add("Give the task a title.","Дайте задаче название.","Vazifaga sarlavha bering.");
 add("Add project","Добавить проект","Loyiha qoʻshish");
-add("A repository on your server that hiro can work in.","Репозиторий на вашем сервере, в котором может работать hiro.","Serveringizdagi, hiro ishlay oladigan repozitoriy.");
+add("A repository on your server that agnts can work in.","Репозиторий на вашем сервере, в котором может работать agnts.","Serveringizdagi, agnts ishlay oladigan repozitoriy.");
 add("Name","Название","Nomi");
-add("hiro clones it into a fresh container for each task.","hiro клонирует его в новый контейнер для каждой задачи.","hiro uni har bir vazifa uchun yangi konteynerga klonlaydi.");
+add("agnts clones it into a fresh container for each task.","agnts клонирует его в новый контейнер для каждой задачи.","agnts uni har bir vazifa uchun yangi konteynerga klonlaydi.");
 add("Task key prefix","Префикс ключа задачи","Vazifa kaliti prefiksi");
 add("Test command","Команда тестов","Test buyrugʻi");
 add("Must pass before a task reaches your review.","Должна пройти, прежде чем задача попадёт к вам на ревью.","Vazifa tekshiruvingizga yetib kelishidan oldin oʻtishi shart.");
@@ -1083,15 +1083,15 @@ add("Add a name and a clone URL.","Укажите название и URL для
 add("Filter by repository","Фильтр по репозиторию","Repozitoriy boʻyicha saralash");
 add("No tasks in this repository yet.","В этом репозитории пока нет задач.","Bu repozitoriyda hozircha vazifa yoʻq.");
 add("Your side-project repositories on this server","Репозитории ваших проектов на этом сервере","Shu serverdagi shaxsiy loyiha repozitoriylaringiz");
-add("For repositories only you work on, you can let hiro push straight to main after you approve. It still never pushes without your review.","В репозиториях, где работаете только вы, можно разрешить hiro отправлять сразу в main после вашего одобрения. Без вашего ревью он всё равно ничего не отправляет.","Faqat siz ishlaydigan repozitoriylarda tasdiqlaganingizdan soʻng hiro'ga toʻgʻridan-toʻgʻri main'ga yuborishga ruxsat berishingiz mumkin. Baribir tekshiruvingizsiz hech narsa yubormaydi.");
+add("For repositories only you work on, you can let agnts push straight to main after you approve. It still never pushes without your review.","В репозиториях, где работаете только вы, можно разрешить agnts отправлять сразу в main после вашего одобрения. Без вашего ревью он всё равно ничего не отправляет.","Faqat siz ishlaydigan repozitoriylarda tasdiqlaganingizdan soʻng agnts'ga toʻgʻridan-toʻgʻri main'ga yuborishga ruxsat berishingiz mumkin. Baribir tekshiruvingizsiz hech narsa yubormaydi.");
 add("New repository","Новый репозиторий","Yangi repozitoriy");
-add("A side-project repository on your server that hiro can work in.","Репозиторий вашего проекта на сервере, в котором может работать hiro.","Serveringizdagi, hiro ishlay oladigan shaxsiy loyiha repozitoriysi.");
+add("A side-project repository on your server that agnts can work in.","Репозиторий вашего проекта на сервере, в котором может работать agnts.","Serveringizdagi, agnts ishlay oladigan shaxsiy loyiha repozitoriysi.");
 add("Task form","Форма задачи","Vazifa shakli");
 add("Project form","Форма проекта","Loyiha shakli");
 add("Repository form","Форма репозитория","Repozitoriy shakli");
 add("Task updated","Задача обновлена","Vazifa yangilandi");
 // Logs
-add("Every step hiro takes, recorded as it happens. Use it to see where time goes and why runs stop.","Каждый шаг hiro записывается в момент выполнения. Здесь видно, куда уходит время и почему запуски останавливаются.","hiro har bir qadami sodir boʻlishi bilan yoziladi. Vaqt qayerga ketayotgani va ishlar nega toʻxtayotganini shu yerda koʻrasiz.");
+add("Every step agnts takes, recorded as it happens. Use it to see where time goes and why runs stop.","Каждый шаг agnts записывается в момент выполнения. Здесь видно, куда уходит время и почему запуски останавливаются.","agnts har bir qadami sodir boʻlishi bilan yoziladi. Vaqt qayerga ketayotgani va ishlar nega toʻxtayotganini shu yerda koʻrasiz.");
 add("Live","В эфире","Jonli");
 add("Export JSON","Экспорт JSON","JSON eksport");
 add("Runs started","Запусков начато","Boshlangan ishlar");
@@ -1104,7 +1104,7 @@ add("Where the time goes","Куда уходит время","Vaqt qayerga ketya
 add("Average time spent in each step, across all tickets and tasks","Среднее время на каждом шаге по всем тикетам и задачам","Barcha tiket va vazifalar boʻyicha har bir bosqichdagi oʻrtacha vaqt");
 add("Waiting for your answers","Ожидание ваших ответов","Javoblaringizni kutish");
 add("Waiting for your review","Ожидание вашего ревью","Tekshiruvingizni kutish");
-add("hiro working","hiro работает","hiro ishlayapti");
+add("agnts working","agnts работает","agnts ishlayapti");
 add("Waiting on you","Ожидание вас","Sizni kutish");
 add("No data","Нет данных","Maʼlumot yoʻq");
 add("Events","События","Hodisalar");
@@ -1134,9 +1134,9 @@ add("No extra data for this event.","Для этого события нет д�
 add("In the real app this downloads a JSON file","В настоящем приложении это скачивает JSON-файл","Haqiqiy ilovada bu JSON faylni yuklab oladi");
 add("Copy failed. In the real app this downloads a file","Не удалось скопировать. В настоящем приложении это скачивает файл","Nusxalab boʻlmadi. Haqiqiy ilovada bu faylni yuklab oladi");
 // Usage page
-add("hiro runs on your Claude subscription. These limits are shared with your own Claude and Claude Code use.","hiro работает на вашей подписке Claude. Эти лимиты общие с вашим собственным использованием Claude и Claude Code.","hiro Claude obunangizda ishlaydi. Bu limitlar oʻzingizning Claude va Claude Code sarfingiz bilan umumiy.");
+add("agnts runs on your Claude subscription. These limits are shared with your own Claude and Claude Code use.","agnts работает на вашей подписке Claude. Эти лимиты общие с вашим собственным использованием Claude и Claude Code.","agnts Claude obunangizda ishlaydi. Bu limitlar oʻzingizning Claude va Claude Code sarfingiz bilan umumiy.");
 add("When a limit is reached","Когда лимит исчерпан","Limit tugaganda");
-add("How hiro behaves near the limit","Как hiro ведёт себя у лимита","Limitga yaqinlashganda hiro qanday ishlaydi");
+add("How agnts behaves near the limit","Как agnts ведёт себя у лимита","Limitga yaqinlashganda agnts qanday ishlaydi");
 add("Above 80% of the session","Выше 80% сессии","Sessiyaning 80% dan yuqori");
 add("Show a warning, keep running","Показать предупреждение, продолжать","Ogohlantirish, ishni davom ettirish");
 add("Limit reached mid-run","Лимит закончился во время запуска","Ish oʻrtasida limit tugadi");
@@ -1145,23 +1145,23 @@ add("After reset","После сброса","Yangilangandan keyin");
 add("Resume paused runs automatically","Автоматически продолжить остановленные запуски","Pauzadagi ishlarni avtomatik davom ettirish");
 add("Idle refresh","Обновление в простое","Boʻsh turganda yangilash");
 add("Every 30 min","Каждые 30 мин","Har 30 daqiqada");
-add("Numbers come from the rate limit events Claude Code emits during each run. When hiro is idle, a tiny refresh run keeps them current.","Цифры берутся из событий лимитов, которые Claude Code отправляет при каждом запуске. Когда hiro простаивает, их обновляет крошечный служебный запуск.","Raqamlar Claude Code har bir ishda yuboradigan limit hodisalaridan olinadi. hiro boʻsh turganda ularni kichik yangilash ishi dolzarb saqlaydi.");
+add("Numbers come from the rate limit events Claude Code emits during each run. When agnts is idle, a tiny refresh run keeps them current.","Цифры берутся из событий лимитов, которые Claude Code отправляет при каждом запуске. Когда agnts простаивает, их обновляет крошечный служебный запуск.","Raqamlar Claude Code har bir ishda yuboradigan limit hodisalaridan olinadi. agnts boʻsh turganda ularni kichik yangilash ishi dolzarb saqlaydi.");
 // Repositories
-add("Code hiro can work in. Each run clones the repository into a fresh container on your server, then runs these checks before anything reaches your review.","Код, с которым может работать hiro. Каждый запуск клонирует репозиторий в новый контейнер на вашем сервере и прогоняет эти проверки, прежде чем что-то попадёт к вам на ревью.","hiro ishlay oladigan kod. Har bir ish repozitoriyni serveringizdagi yangi konteynerga klonlaydi va tekshiruvingizga yetib borishidan oldin shu tekshiruvlarni oʻtkazadi.");
+add("Code agnts can work in. Each run clones the repository into a fresh container on your server, then runs these checks before anything reaches your review.","Код, с которым может работать agnts. Каждый запуск клонирует репозиторий в новый контейнер на вашем сервере и прогоняет эти проверки, прежде чем что-то попадёт к вам на ревью.","agnts ishlay oladigan kod. Har bir ish repozitoriyni serveringizdagi yangi konteynerga klonlaydi va tekshiruvingizga yetib borishidan oldin shu tekshiruvlarni oʻtkazadi.");
 add("Add repository","Добавить репозиторий","Repozitoriy qoʻshish");
 add("Found","Есть","Bor");
 add("Missing","Нет","Yoʻq");
 add("Open","Открыто","Ochiq");
 add("Clone URL","URL для клонирования","Klonlash URL");
-add("hiro uses your GitHub token to clone and push.","hiro использует ваш токен GitHub для клонирования и отправки.","hiro klonlash va yuborish uchun GitHub tokeningizdan foydalanadi.");
+add("agnts uses your GitHub token to clone and push.","agnts использует ваш токен GitHub для клонирования и отправки.","agnts klonlash va yuborish uchun GitHub tokeningizdan foydalanadi.");
 add("Jira project key","Ключ проекта Jira","Jira loyiha kaliti");
-add("Tickets from this Jira project with the hiro label can run here.","Здесь могут выполняться тикеты из этого проекта Jira с меткой hiro.","Shu Jira loyihasidagi hiro belgili tiketlar shu yerda ishlay oladi.");
+add("Tickets from this Jira project with the agnts label can run here.","Здесь могут выполняться тикеты из этого проекта Jira с меткой agnts.","Shu Jira loyihasidagi agnts belgili tiketlar shu yerda ishlay oladi.");
 add("Default branch","Ветка по умолчанию","Asosiy branch");
 add("Work branches start from here.","Рабочие ветки создаются отсюда.","Ish branchlari shu yerdan boshlanadi.");
 add("Build command","Команда сборки","Build buyrugʻi");
 add("Lint command","Команда линтера","Linter buyrugʻi");
 add("Found in the repository root","Найден в корне репозитория","Repozitoriy ildizida topildi");
-add("hiro can draft one from the code, as a normal task you review before it's pushed.","hiro может набросать его по коду — как обычную задачу, которую вы проверите перед отправкой.","hiro uni koddan tayyorlab berishi mumkin — yuborishdan oldin tekshiradigan oddiy vazifa sifatida.");
+add("agnts can draft one from the code, as a normal task you review before it's pushed.","agnts может набросать его по коду — как обычную задачу, которую вы проверите перед отправкой.","agnts uni koddan tayyorlab berishi mumkin — yuborishdan oldin tekshiradigan oddiy vazifa sifatida.");
 add("Draft CLAUDE.md","Набросать CLAUDE.md","CLAUDE.md tayyorlash");
 add("Repository for Jira tickets","Репозиторий для тикетов Jira","Jira tiketlari uchun repozitoriy");
 add("Side project repository","Репозиторий своего проекта","Shaxsiy loyiha repozitoriysi");
@@ -1171,7 +1171,7 @@ add("Repository added","Репозиторий добавлен","Repozitoriy qo
 add("Repository saved","Репозиторий сохранён","Repozitoriy saqlandi");
 add("In the real app this creates a task to draft CLAUDE.md","В настоящем приложении это создаёт задачу на CLAUDE.md","Haqiqiy ilovada bu CLAUDE.md uchun vazifa yaratadi");
 // Settings
-add("How hiro connects to your tools and how it behaves during runs.","Как hiro подключается к вашим инструментам и как ведёт себя во время запусков.","hiro vositalaringizga qanday ulanadi va ish paytida qanday ishlaydi.");
+add("How agnts connects to your tools and how it behaves during runs.","Как agnts подключается к вашим инструментам и как ведёт себя во время запусков.","agnts vositalaringizga qanday ulanadi va ish paytida qanday ishlaydi.");
 add("Appearance","Оформление","Koʻrinish");
 add("Saved in this browser, applied right away","Сохраняется в этом браузере и применяется сразу","Shu brauzerda saqlanadi va darhol qoʻllanadi");
 add("Theme","Тема","Mavzu");
@@ -1211,7 +1211,7 @@ add("Run timeout","Тайм-аут запуска","Ish vaqti chegarasi");
 add("Allowed commands","Разрешённые команды","Ruxsat etilgan buyruqlar");
 add("Claude Code can run these without asking","Claude Code может выполнять их без вопросов","Claude Code bularni soʻramasdan bajara oladi");
 add("Blocked commands","Запрещённые команды","Taqiqlangan buyruqlar");
-add("Always refused, even if a ticket asks for them. Pushing is done by hiro, never by Claude Code.","Всегда запрещены, даже если тикет их просит. Отправку делает hiro, а не Claude Code.","Tiket soʻrasa ham doim rad etiladi. Yuborishni Claude Code emas, hiro bajaradi.");
+add("Always refused, even if a ticket asks for them. Pushing is done by agnts, never by Claude Code.","Всегда запрещены, даже если тикет их просит. Отправку делает agnts, а не Claude Code.","Tiket soʻrasa ham doim rad etiladi. Yuborishni Claude Code emas, agnts bajaradi.");
 add("Add command","Добавить команду","Buyruq qoʻshish");
 add("Runs","Запуски","Ishlar");
 add("Defaults for every ticket and task","Значения по умолчанию для всех тикетов и задач","Barcha tiket va vazifalar uchun standart qiymatlar");
@@ -1247,16 +1247,16 @@ add("Changes discarded","Изменения отменены","Oʻzgarishlar bek
 add("Demo reset","Демо сброшено","Demo tiklandi");
 add("Plan usage refreshed","Лимиты обновлены","Limitlar yangilandi");
 add("Run stopped","Запуск остановлен","Ish toʻxtatildi");
-add("Synced. No new tickets with the hiro label","Синхронизировано. Новых тикетов с меткой hiro нет","Sinxronlandi. hiro belgili yangi tiket yoʻq");
+add("Synced. No new tickets with the agnts label","Синхронизировано. Новых тикетов с меткой agnts нет","Sinxronlandi. agnts belgili yangi tiket yoʻq");
 add("Write what to change first","Сначала напишите, что изменить","Avval nimani oʻzgartirishni yozing");
-add("Add instructions so hiro tries something different","Добавьте указания, чтобы hiro попробовал по-другому","hiro boshqacha urinib koʻrishi uchun koʻrsatma qoʻshing");
+add("Add instructions so agnts tries something different","Добавьте указания, чтобы agnts попробовал по-другому","agnts boshqacha urinib koʻrishi uchun koʻrsatma qoʻshing");
 add("Night mode on","Ночной режим включён","Tungi rejim yoqildi");
 add("Day mode on","Дневной режим включён","Kunduzgi rejim yoqildi");
 add("Integrations","Интеграции","Integratsiyalar");
-add("The services hiro works with. Tokens are stored on your server and only used for the actions listed on each page.","Сервисы, с которыми работает hiro. Токены хранятся на вашем сервере и используются только для действий, указанных на странице каждого сервиса.","hiro ishlaydigan xizmatlar. Tokenlar serveringizda saqlanadi va faqat har bir sahifada koʻrsatilgan amallar uchun ishlatiladi.");
+add("The services agnts works with. Tokens are stored on your server and only used for the actions listed on each page.","Сервисы, с которыми работает agnts. Токены хранятся на вашем сервере и используются только для действий, указанных на странице каждого сервиса.","agnts ishlaydigan xizmatlar. Tokenlar serveringizda saqlanadi va faqat har bir sahifada koʻrsatilgan amallar uchun ishlatiladi.");
 add("Clone code, push branches and open pull requests.","Клонирует код, отправляет ветки и открывает пул-реквесты.","Kodni klonlash, branchlarni yuborish va pull request ochish.");
 add("The same for repositories on GitLab.com or your own GitLab server.","То же самое для репозиториев на GitLab.com или вашем собственном сервере GitLab.","GitLab.com yoki oʻz GitLab serveringizdagi repozitoriylar uchun ham xuddi shunday.");
-add("Pick up tickets with the hiro label and keep their status up to date.","Берёт тикеты с меткой hiro и обновляет их статус.","hiro belgili tiketlarni oladi va ularning holatini yangilab boradi.");
+add("Pick up tickets with the agnts label and keep their status up to date.","Берёт тикеты с меткой agnts и обновляет их статус.","agnts belgili tiketlarni oladi va ularning holatini yangilab boradi.");
 add("Not connected","Не подключено","Ulanmagan");
 add("Manage","Управлять","Boshqarish");
 add("Connect","Подключить","Ulash");
@@ -1275,16 +1275,16 @@ add("Create a personal access token with the scopes below, then paste it here.",
 add("Instance URL","Адрес сервера","Server manzili");
 add("gitlab.com or your own GitLab server","gitlab.com или ваш собственный сервер GitLab","gitlab.com yoki oʻz GitLab serveringiz");
 add("Access token","Токен доступа","Kirish tokeni");
-add("Stored encrypted on your server. hiro never shows it again.","Хранится зашифрованным на вашем сервере. hiro больше никогда его не покажет.","Serveringizda shifrlangan holda saqlanadi. hiro uni boshqa hech qachon koʻrsatmaydi.");
+add("Stored encrypted on your server. agnts never shows it again.","Хранится зашифрованным на вашем сервере. agnts больше никогда его не покажет.","Serveringizda shifrlangan holda saqlanadi. agnts uni boshqa hech qachon koʻrsatmaydi.");
 add("Required scopes","Нужные права","Kerakli huquqlar");
-add("Use a token from an account that can push to your repositories. hiro commits under the name and email you set after connecting.","Используйте токен аккаунта, который может отправлять изменения в ваши репозитории. hiro делает коммиты от имени и email, которые вы укажете после подключения.","Repozitoriylaringizga yubora oladigan akkaunt tokenidan foydalaning. hiro ulangandan keyin siz koʻrsatgan ism va email nomidan commit qiladi.");
-add("hiro can use","Доступно hiro","hiro foydalana oladi");
-add("Opened by hiro, last 30 days","Открыто hiro за 30 дней","hiro ochgan, soʻnggi 30 kun");
+add("Use a token from an account that can push to your repositories. agnts commits under the name and email you set after connecting.","Используйте токен аккаунта, который может отправлять изменения в ваши репозитории. agnts делает коммиты от имени и email, которые вы укажете после подключения.","Repozitoriylaringizga yubora oladigan akkaunt tokenidan foydalaning. agnts ulangandan keyin siz koʻrsatgan ism va email nomidan commit qiladi.");
+add("agnts can use","Доступно agnts","agnts foydalana oladi");
+add("Opened by agnts, last 30 days","Открыто agnts за 30 дней","agnts ochgan, soʻnggi 30 kun");
 add("Merged","Слито","Birlashtirilgan");
 add("API rate limit","Лимит API","API limiti");
 add("Of 5,000 left this hour","Из 5 000 осталось в этот час","Shu soatda 5 000 tadan qolgani");
 add("Connection","Подключение","Ulanish");
-add("How hiro signs in","Как hiro входит","hiro qanday kiradi");
+add("How agnts signs in","Как agnts входит","agnts qanday kiradi");
 add("Method","Способ","Usul");
 add("Personal access token","Персональный токен","Shaxsiy kirish tokeni");
 add("GitHub App","Приложение GitHub","GitHub ilovasi");
@@ -1308,12 +1308,12 @@ add("Read. List repositories and branches.","Чтение. Список репо
 add("Issues","Задачи","Muammolar");
 add("Read. Link pull requests to issues.","Чтение. Связь пул-реквестов с задачами.","Oʻqish. Pull requestlarni muammolar bilan bogʻlash.");
 add("Workflows","Воркфлоу","Workflowlar");
-add("Read and write. Only needed if hiro may change CI files.","Чтение и запись. Нужно, только если hiro может менять файлы CI.","Oʻqish va yozish. Faqat hiro CI fayllarini oʻzgartira olsa kerak.");
+add("Read and write. Only needed if agnts may change CI files.","Чтение и запись. Нужно, только если agnts может менять файлы CI.","Oʻqish va yozish. Faqat agnts CI fayllarini oʻzgartira olsa kerak.");
 add("Full API access. Open merge requests and read pipelines.","Полный доступ к API. Открытие merge request и чтение пайплайнов.","API'ga toʻliq kirish. Merge request ochish va pipeline'larni oʻqish.");
 add("Clone code.","Клонирование кода.","Kodni klonlash.");
 add("Push branches.","Отправка веток.","Branchlarni yuborish.");
 add("Repository access","Доступ к репозиториям","Repozitoriyga kirish");
-add("Turn off a repository to stop hiro from cloning or pushing to it","Отключите репозиторий, чтобы hiro не клонировал его и не отправлял туда изменения","hiro klonlamasligi va yubormasligi uchun repozitoriyni oʻchirib qoʻying");
+add("Turn off a repository to stop agnts from cloning or pushing to it","Отключите репозиторий, чтобы agnts не клонировал его и не отправлял туда изменения","agnts klonlamasligi va yubormasligi uchun repozitoriyni oʻchirib qoʻying");
 add("Used for","Используется для","Nima uchun");
 add("Not used yet","Пока не используется","Hali ishlatilmagan");
 add("Commits","Коммиты","Commitlar");
@@ -1322,11 +1322,11 @@ add("Author name","Имя автора","Muallif ismi");
 add("Author email","Email автора","Muallif emaili");
 add("Sign commits","Подписывать коммиты","Commitlarni imzolash");
 add("Uses the SSH key on your server","Использует SSH-ключ на вашем сервере","Serveringizdagi SSH kalitdan foydalanadi");
-add("Add a Co-authored-by: hiro line","Добавлять строку Co-authored-by: hiro","Co-authored-by: hiro qatorini qoʻshish");
-add("Teammates can see which commits hiro wrote","Коллеги видят, какие коммиты написал hiro","Hamkasblar qaysi commitlarni hiro yozganini koʻradi");
+add("Add a Co-authored-by: agnts line","Добавлять строку Co-authored-by: agnts","Co-authored-by: agnts qatorini qoʻshish");
+add("Teammates can see which commits agnts wrote","Коллеги видят, какие коммиты написал agnts","Hamkasblar qaysi commitlarni agnts yozganini koʻradi");
 add("Pull requests","Пул-реквесты","Pull requestlar");
 add("Merge requests","Merge request'ы","Merge requestlar");
-add("How hiro opens them","Как hiro их открывает","hiro ularni qanday ochadi");
+add("How agnts opens them","Как agnts их открывает","agnts ularni qanday ochadi");
 add("{key} and {title} are replaced with the ticket's key and title","{key} и {title} заменяются ключом и названием тикета","{key} va {title} tiket kaliti va sarlavhasi bilan almashtiriladi");
 add("Open as draft","Открывать как черновик","Qoralama sifatida ochish");
 add("Labels","Метки","Belgilar");
@@ -1342,42 +1342,42 @@ add("Off","Выключено","Oʻchiq");
 add("Events","События","Hodisalar");
 add("Last delivery","Последняя доставка","Oxirgi yetkazish");
 add("3 min ago","3 мин назад","3 daqiqa oldin");
-add("hiro learns about merges and review comments right away instead of checking every few minutes.","hiro сразу узнаёт о слияниях и комментариях ревью, а не проверяет каждые несколько минут.","hiro har necha daqiqada tekshirmasdan, birlashtirish va tekshiruv izohlari haqida darhol biladi.");
+add("agnts learns about merges and review comments right away instead of checking every few minutes.","agnts сразу узнаёт о слияниях и комментариях ревью, а не проверяет каждые несколько минут.","agnts har necha daqiqada tekshirmasdan, birlashtirish va tekshiruv izohlari haqida darhol biladi.");
 add("No activity yet.","Пока нет активности.","Hali faollik yoʻq.");
 add("Sync now","Синхронизировать","Hozir sinxronlash");
 add("Use an API token from your Atlassian account.","Используйте API-токен вашего аккаунта Atlassian.","Atlassian akkauntingizdagi API tokendan foydalaning.");
 add("Email","Email","Email");
 add("Connect Jira","Подключить Jira","Jira'ni ulash");
-add("Watched by hiro","Отслеживает hiro","hiro kuzatadi");
+add("Watched by agnts","Отслеживает agnts","agnts kuzatadi");
 add("Open tickets","Открытые тикеты","Ochiq tiketlar");
 add("Picked up","Взято","Olingan");
 add("Last 30 days","За 30 дней","Soʻnggi 30 kun");
 add("Comments posted","Комментариев оставлено","Yozilgan izohlar");
 add("Questions, links and summaries","Вопросы, ссылки и сводки","Savollar, havolalar va xulosalar");
-add("Which Jira projects hiro watches, and where their code lives","Какие проекты Jira отслеживает hiro и где лежит их код","hiro qaysi Jira loyihalarini kuzatadi va ularning kodi qayerda");
+add("Which Jira projects agnts watches, and where their code lives","Какие проекты Jira отслеживает agnts и где лежит их код","agnts qaysi Jira loyihalarini kuzatadi va ularning kodi qayerda");
 add("Watched","Отслеживается","Kuzatiladi");
 add("No repository yet","Репозитория пока нет","Hali repozitoriy yoʻq");
 add("Pickup rules","Правила подхвата","Olish qoidalari");
-add("Which tickets hiro takes","Какие тикеты берёт hiro","hiro qaysi tiketlarni oladi");
+add("Which tickets agnts takes","Какие тикеты берёт agnts","agnts qaysi tiketlarni oladi");
 add("Label","Метка","Belgi");
-add("Add this label to a ticket to hand it to hiro","Добавьте эту метку к тикету, чтобы передать его hiro","Tiketni hiro'ga topshirish uchun unga shu belgini qoʻshing");
+add("Add this label to a ticket to hand it to agnts","Добавьте эту метку к тикету, чтобы передать его agnts","Tiketni agnts'ga topshirish uchun unga shu belgini qoʻshing");
 add("Issue types","Типы задач","Vazifa turlari");
 add("Statuses","Статусы","Holatlar");
 add("Tickets in other statuses are left alone","Тикеты в других статусах не трогаются","Boshqa holatdagi tiketlarga tegilmaydi");
 add("Assignee","Исполнитель","Ijrochi");
 add("Assigned to me","Назначено мне","Menga biriktirilgan");
 add("Anyone","Любой","Har kim");
-add("The query hiro runs","Запрос, который выполняет hiro","hiro bajaradigan soʻrov");
+add("The query agnts runs","Запрос, который выполняет agnts","agnts bajaradigan soʻrov");
 add("Status updates","Обновление статусов","Holat yangilanishlari");
-add("How hiro moves tickets on your board","Как hiro двигает тикеты по вашей доске","hiro tiketlarni doskangizda qanday siljitadi");
-add("When hiro starts coding","Когда hiro начинает разработку","hiro kod yozishni boshlaganda");
+add("How agnts moves tickets on your board","Как agnts двигает тикеты по вашей доске","agnts tiketlarni doskangizda qanday siljitadi");
+add("When agnts starts coding","Когда agnts начинает разработку","agnts kod yozishni boshlaganda");
 add("When changes are pushed","Когда изменения отправлены","Oʻzgarishlar yuborilganda");
 add("When you reject the changes","Когда вы отклоняете изменения","Oʻzgarishlarni rad etganingizda");
 add("When the pull request is merged","Когда пул-реквест слит","Pull request birlashtirilganda");
 add("Keep status","Не менять статус","Holatni saqlash");
 add("Comments","Комментарии","Izohlar");
-add("What hiro writes on the ticket","Что hiro пишет в тикете","hiro tiketga nima yozadi");
-add("hiro's questions","Вопросы hiro","hiro savollari");
+add("What agnts writes on the ticket","Что agnts пишет в тикете","agnts tiketga nima yozadi");
+add("agnts's questions","Вопросы agnts","agnts savollari");
 add("So teammates can see what was unclear","Чтобы коллеги видели, что было неясно","Hamkasblar nima noaniq boʻlganini koʻrishi uchun");
 add("The plan before coding","План перед разработкой","Kod yozishdan oldingi reja");
 add("Link to the pull request","Ссылка на пул-реквест","Pull request havolasi");
@@ -1390,7 +1390,7 @@ add("in 1 min","через 1 мин","1 daqiqadan keyin");
 add("in 2 min","через 2 мин","2 daqiqadan keyin");
 add("in 10 min","через 10 мин","10 daqiqadan keyin");
 add("A Jira webhook would deliver new tickets instantly. It needs a public URL for your server.","Вебхук Jira доставлял бы новые тикеты мгновенно. Для него нужен публичный адрес вашего сервера.","Jira webhook yangi tiketlarni darhol yetkazardi. Buning uchun serveringizning ochiq manzili kerak.");
-add("hiro only reads tickets that match the query, and only writes the status changes and comments you turn on here.","hiro читает только тикеты, подходящие под запрос, и пишет только те статусы и комментарии, которые вы включили здесь.","hiro faqat soʻrovga mos tiketlarni oʻqiydi va faqat shu yerda yoqqan holat va izohlaringizni yozadi.");
+add("agnts only reads tickets that match the query, and only writes the status changes and comments you turn on here.","agnts читает только тикеты, подходящие под запрос, и пишет только те статусы и комментарии, которые вы включили здесь.","agnts faqat soʻrovga mos tiketlarni oʻqiydi va faqat shu yerda yoqqan holat va izohlaringizni yozadi.");
 add("just now","только что","hozirgina");
 add("Use an https:// address.","Укажите адрес, начинающийся с https://.","https:// bilan boshlanadigan manzil kiriting.");
 add("Paste a valid access token.","Вставьте действительный токен доступа.","Yaroqli kirish tokenini joylang.");
@@ -1420,13 +1420,13 @@ add("Skipped","Пропущено","Oʻtkazib yuborildi");
 add("Waiting for you","Ждёт вас","Sizni kutmoqda");
 add("No pipeline","Нет пайплайна","Pipeline yoʻq");
 add("No commits yet","Коммитов пока нет","Hali commit yoʻq");
-add("Every branch, newest first. hiro's commits name the ticket and you as co-author.","Все ветки, сначала новые. В коммитах hiro указан тикет и вы как соавтор.","Barcha branchlar, avval yangilari. hiro commitlarida tiket va siz hammuallif sifatida koʻrsatilgan.");
+add("Every branch, newest first. agnts's commits name the ticket and you as co-author.","Все ветки, сначала новые. В коммитах agnts указан тикет и вы как соавтор.","Barcha branchlar, avval yangilari. agnts commitlarida tiket va siz hammuallif sifatida koʻrsatilgan.");
 add("Healthy","В порядке","Yaxshi");
 add("Empty","Пусто","Boʻsh");
 add("Not deployed yet","Ещё не развёрнуто","Hali joylanmagan");
 add("Commit","Коммит","Commit");
 add("Pipeline","Пайплайн","Pipeline");
-add("hiro waits for the checks on its branch to pass before a ticket reaches your review. Deploying is always your decision.","hiro ждёт, пока пройдут проверки его ветки, прежде чем тикет попадёт к вам на ревью. Развёртывание всегда решаете вы.","hiro tiket tekshiruvingizga kelishidan oldin oʻz branchidagi tekshiruvlar oʻtishini kutadi. Joylash har doim sizning qaroringiz.");
+add("agnts waits for the checks on its branch to pass before a ticket reaches your review. Deploying is always your decision.","agnts ждёт, пока пройдут проверки его ветки, прежде чем тикет попадёт к вам на ревью. Развёртывание всегда решаете вы.","agnts tiket tekshiruvingizga kelishidan oldin oʻz branchidagi tekshiruvlar oʻtishini kutadi. Joylash har doim sizning qaroringiz.");
 add("Pipeline runs","Запуски пайплайнов","Pipeline ishga tushirishlari");
 add("Build, test and deploy for every push","Сборка, тесты и развёртывание на каждую отправку","Har bir yuborishda build, test va joylash");
 add("Stage","Этап","Bosqich");
@@ -1450,14 +1450,14 @@ add("Good evening, Rustam","Добрый вечер, Рустам","Xayrli kech,
 add("Open analytics","Открыть аналитику","Analitikani ochish");
 add("Running now","Сейчас в работе","Hozir bajarilmoqda");
 add("Waiting on you","Ожидание вас","Sizni kutish");
-add("Oldest first. Every minute here is a minute hiro can't work.","Сначала самые старые. Каждая минута здесь — минута, когда hiro не может работать.","Avval eng eskilari. Bu yerdagi har bir daqiqa — hiro ishlay olmaydigan daqiqa.");
+add("Oldest first. Every minute here is a minute agnts can't work.","Сначала самые старые. Каждая минута здесь — минута, когда agnts не может работать.","Avval eng eskilari. Bu yerdagi har bir daqiqa — agnts ishlay olmaydigan daqiqa.");
 add("Open inbox","Открыть входящие","Kiruvchilarni ochish");
 add("Waiting","Ждёт","Kutmoqda");
 add("Answer","Ответить","Javob berish");
 add("Review","Ревью","Tekshirish");
 add("Retry","Повторить","Qayta urinish");
 add("Resume","Продолжить","Davom ettirish");
-add("Nothing is waiting on you. hiro will show tickets here when it needs answers or a review.","Сейчас ничего не ждёт вас. hiro покажет здесь тикеты, когда понадобятся ответы или ревью.","Hozir sizni hech narsa kutmayapti. Javob yoki tekshiruv kerak boʻlsa, hiro tiketlarni shu yerda koʻrsatadi.");
+add("Nothing is waiting on you. agnts will show tickets here when it needs answers or a review.","Сейчас ничего не ждёт вас. agnts покажет здесь тикеты, когда понадобятся ответы или ревью.","Hozir sizni hech narsa kutmayapti. Javob yoki tekshiruv kerak boʻlsa, agnts tiketlarni shu yerda koʻrsatadi.");
 add("Runs left this session","Запусков осталось в сессии","Sessiyada qolgan ishlar");
 add("Estimate based on the average run size on Sonnet.","Оценка по среднему размеру запуска на Sonnet.","Sonnet'dagi oʻrtacha ish hajmi boʻyicha taxmin.");
 add("Live runs","Активные запуски","Faol ishlar");
@@ -1466,7 +1466,7 @@ add("No runs at the moment.","Сейчас запусков нет.","Hozircha i
 add("Pipeline","Конвейер","Jarayon zanjiri");
 add("Open tickets by step","Открытые тикеты по шагам","Ochiq tiketlar bosqichlar boʻyicha");
 add("Today by hour","Сегодня по часам","Bugun soatlar boʻyicha");
-add("Events recorded today. hiro keeps working while you sleep.","События за сегодня. hiro работает, даже когда вы спите.","Bugungi hodisalar. Siz uxlayotganda ham hiro ishlayveradi.");
+add("Events recorded today. agnts keeps working while you sleep.","События за сегодня. agnts работает, даже когда вы спите.","Bugungi hodisalar. Siz uxlayotganda ham agnts ishlayveradi.");
 add("Your actions","Ваши действия","Sizning harakatlaringiz");
 add("Compared with last week","По сравнению с прошлой неделей","Oʻtgan hafta bilan solishtirganda");
 add("Tickets picked up","Взято тикетов","Olingan tiketlar");
@@ -1477,7 +1477,7 @@ add("Open work and the latest ticket in each","Открытая работа и 
 add("All repositories","Все репозитории","Barcha repozitoriylar");
 add("Latest ticket","Последний тикет","Soʻnggi tiket");
 add("Recent activity","Последние события","Soʻnggi faollik");
-add("How well hiro works for you over time: throughput, quality, where time goes, and what it costs your plan.","Насколько хорошо hiro работает на вас со временем: пропускная способность, качество, куда уходит время и сколько это стоит вашему тарифу.","hiro vaqt oʻtishi bilan siz uchun qanchalik yaxshi ishlayapti: unumdorlik, sifat, vaqt qayerga ketadi va tarifingizga qanchaga tushadi.");
+add("How well agnts works for you over time: throughput, quality, where time goes, and what it costs your plan.","Насколько хорошо agnts работает на вас со временем: пропускная способность, качество, куда уходит время и сколько это стоит вашему тарифу.","agnts vaqt oʻtishi bilan siz uchun qanchalik yaxshi ishlayapti: unumdorlik, sifat, vaqt qayerga ketadi va tarifingizga qanchaga tushadi.");
 add("7 days","7 дней","7 kun");
 add("30 days","30 дней","30 kun");
 add("90 days","90 дней","90 kun");
@@ -1486,7 +1486,7 @@ add("Tickets pushed","Отправлено тикетов","Yuborilgan tiketlar"
 add("Success rate","Доля успеха","Muvaffaqiyat darajasi");
 add("Pushed out of picked up","Отправлено из взятых","Olinganlardan yuborilgani");
 add("No changes requested","Без запроса изменений","Oʻzgartirish soʻralmagan");
-add("hiro time per ticket","Время hiro на тикет","Bitta tiketga hiro vaqti");
+add("agnts time per ticket","Время agnts на тикет","Bitta tiketga agnts vaqti");
 add("Analyze, coding and tests","Анализ, разработка и тесты","Tahlil, kod yozish va testlar");
 add("Average per ticket","В среднем на тикет","Har bir tiketga oʻrtacha");
 add("Per ticket","На тикет","Har bir tiketga");
@@ -1497,10 +1497,10 @@ add("How finished tickets ended","Чем закончились тикеты","T
 add("Approved after changes","Одобрено после изменений","Oʻzgarishlardan keyin tasdiqlangan");
 add("pushed","отправлено","yuborildi");
 add("Speed","Скорость","Tezlik");
-add("Average minutes per ticket: hiro working versus waiting on you","Среднее время на тикет: работа hiro и ожидание вас","Bitta tiketga oʻrtacha vaqt: hiro ishi va sizni kutish");
+add("Average minutes per ticket: agnts working versus waiting on you","Среднее время на тикет: работа agnts и ожидание вас","Bitta tiketga oʻrtacha vaqt: agnts ishi va sizni kutish");
 add("Average per ticket, by step","В среднем на тикет, по шагам","Har bir tiketga oʻrtacha, bosqichlar boʻyicha");
 add("Turns per ticket","Шагов на тикет","Bitta tiketga qadamlar");
-add("Fewer turns means hiro finds its way faster and uses less of your plan","Меньше шагов — hiro быстрее разбирается и тратит меньше лимита","Kamroq qadam — hiro tezroq yoʻl topadi va limitni kamroq sarflaydi");
+add("Fewer turns means agnts finds its way faster and uses less of your plan","Меньше шагов — agnts быстрее разбирается и тратит меньше лимита","Kamroq qadam — agnts tezroq yoʻl topadi va limitni kamroq sarflaydi");
 add("Average turns","Среднее число шагов","Oʻrtacha qadamlar");
 add("Why runs stop","Почему запуски останавливаются","Ishlar nega toʻxtaydi");
 add("Tests kept failing","Тесты продолжали падать","Testlar yiqilishda davom etdi");
@@ -1519,8 +1519,8 @@ add("Peak session usage per day","Пиковое использование се
 add("Average peak","Средний пик","Oʻrtacha choʻqqi");
 add("Days above 80%","Дней выше 80%","80% dan yuqori kunlar");
 add("By repository","По репозиториям","Repozitoriylar boʻyicha");
-add("Where hiro works best, and where it struggles","Где hiro работает лучше всего, а где ему трудно","hiro qayerda eng yaxshi ishlaydi va qayerda qiynaladi");
-add("hiro time","Время hiro","hiro vaqti");
+add("Where agnts works best, and where it struggles","Где agnts работает лучше всего, а где ему трудно","agnts qayerda eng yaxshi ishlaydi va qayerda qiynaladi");
+add("agnts time","Время agnts","agnts vaqti");
 add("Activity by hour","Активность по часам","Soatlar boʻyicha faollik");
 add("Insights","Выводы","Xulosalar");
 add("What the numbers suggest","Что подсказывают цифры","Raqamlar nimani koʻrsatadi");
@@ -1604,7 +1604,7 @@ function patterns(L){
     [/^Back to (.+)$/, m => (ru ? "Назад: " : "Orqaga: ") + (I18N[L].exact[m[1].replace(/^./, c=>c.toUpperCase())] || m[1]).toLowerCase()],
     [/^All repositories (\d+)$/, m => (ru ? "Все репозитории " : "Barcha repozitoriylar ") + m[1]],
     [/^(.+?), tests: (.+?), (\d+) open$/, m => ru ? `${m[1]}, тесты: ${m[2]}, открыто: ${m[3]}` : `${m[1]}, testlar: ${m[2]}, ochiq: ${m[3]}`],
-    [/^(\d+) repositor(?:y has|ies have) no CLAUDE\.md\. (.+)$/, m => ru ? `${m[1]} ${R(m[1],"репозиторий","репозитория","репозиториев")} без CLAUDE.md. hiro всё равно работает, но тратит больше шагов, чтобы разобраться. Добавьте файл со структурой проекта, соглашениями и командами тестов.` : `${m[1]} ta repozitoriyda CLAUDE.md yoʻq. hiro baribir ishlaydi, lekin yoʻl topish uchun koʻproq qadam sarflaydi. Loyiha tuzilmasi, qoidalari va test buyruqlari yozilgan fayl qoʻshing.`],
+    [/^(\d+) repositor(?:y has|ies have) no CLAUDE\.md\. (.+)$/, m => ru ? `${m[1]} ${R(m[1],"репозиторий","репозитория","репозиториев")} без CLAUDE.md. agnts всё равно работает, но тратит больше шагов, чтобы разобраться. Добавьте файл со структурой проекта, соглашениями и командами тестов.` : `${m[1]} ta repozitoriyda CLAUDE.md yoʻq. agnts baribir ishlaydi, lekin yoʻl topish uchun koʻproq qadam sarflaydi. Loyiha tuzilmasi, qoidalari va test buyruqlari yozilgan fayl qoʻshing.`],
     [/^Tasks are numbered like (\S+), (\S+)\.$/, m => ru ? `Задачи нумеруются так: ${m[1]}, ${m[2]}.` : `Vazifalar shunday raqamlanadi: ${m[1]}, ${m[2]}.`],
     [/^Branches look like (\S+)$/, m => ru ? `Ветки выглядят так: ${m[1]}` : `Branchlar shunday koʻrinadi: ${m[1]}`],
     [/^Telegram messages to (\S+)$/, m => ru ? `Сообщения в Telegram для ${m[1]}` : `${m[1]} ga Telegram xabarlari`],
@@ -1629,7 +1629,7 @@ function patterns(L){
     [/^Repository (.+) added$/, m => ru ? `Репозиторий ${m[1]} добавлен` : `${m[1]} repozitoriysi qoʻshildi`],
     [/^Pushed\. PR #(\d+) is open$/, m => ru ? `Отправлено. PR #${m[1]} открыт` : `Yuborildi. PR #${m[1]} ochiq`],
     [/^Copied (\d+) events as JSON$/, m => ru ? `Скопировано событий в JSON: ${m[1]}` : `${m[1]} ta hodisa JSON sifatida nusxalandi`],
-    [/^(.+?)\. Here's what hiro is doing and what's waiting on you\.$/, m => ru ? `${m[1]}. Вот что делает hiro и что ждёт вас.` : `${m[1]}. hiro nima qilayotgani va sizni nima kutayotgani.`],
+    [/^(.+?)\. Here's what agnts is doing and what's waiting on you\.$/, m => ru ? `${m[1]}. Вот что делает agnts и что ждёт вас.` : `${m[1]}. agnts nima qilayotgani va sizni nima kutayotgani.`],
     [/^(\d+) answers?, (\d+) reviews?, (\d+) stopped$/, m => ru ? `ответы: ${m[1]}, ревью: ${m[2]}, остановлено: ${m[3]}` : `javob: ${m[1]}, tekshiruv: ${m[2]}, toʻxtagan: ${m[3]}`],
     [/^(\d+) at a time allowed$/, m => ru ? `Разрешено одновременно: ${m[1]}` : `Bir vaqtda ruxsat: ${m[1]}`],
     [/^vs (\d+) last week$/, m => ru ? `против ${m[1]} на прошлой неделе` : `oʻtgan hafta ${m[1]} ta edi`],
@@ -1637,7 +1637,7 @@ function patterns(L){
     [/^of (\d+) picked up$/, m => ru ? `из ${m[1]} взятых` : `${m[1]} ta olingandan`],
     [/^Changes are compared with the previous (\d+) days\. Green means better\.$/, m => ru ? `Изменения сравниваются с предыдущими ${m[1]} днями. Зелёный — лучше.` : `Oʻzgarishlar oldingi ${m[1]} kun bilan solishtiriladi. Yashil — yaxshiroq.`],
     [/^(\d+) stopped runs in this period$/, m => ru ? `Остановленных запусков за период: ${m[1]}` : `Shu davrda toʻxtagan ishlar: ${m[1]}`],
-    [/^When hiro works, summed over the period\. Busiest hour: (\d\d:\d\d)$/, m => ru ? `Когда работает hiro, суммарно за период. Самый загруженный час: ${m[1]}` : `hiro qachon ishlaydi, davr boʻyicha jami. Eng band soat: ${m[1]}`],
+    [/^When agnts works, summed over the period\. Busiest hour: (\d\d:\d\d)$/, m => ru ? `Когда работает agnts, суммарно за период. Самый загруженный час: ${m[1]}` : `agnts qachon ishlaydi, davr boʻyicha jami. Eng band soat: ${m[1]}`],
     [/^Connected as @(\S+)\. Last checked (.+)\.$/, m => ru ? `Подключено как @${m[1]}. Последняя проверка: ${tr(m[2])}.` : `@${m[1]} sifatida ulangan. Oxirgi tekshiruv: ${tr(m[2])}.`],
     [/^Connected to (\S+)\. Last sync (.+)\.$/, m => ru ? `Подключено к ${m[1]}. Последняя синхронизация: ${tr(m[2])}.` : `${m[1]} ga ulangan. Oxirgi sinxronlash: ${tr(m[2])}.`],
     [/^(\d+) min ago$/, m => ru ? `${m[1]} мин назад` : `${m[1]} daqiqa oldin`],
@@ -1645,17 +1645,17 @@ function patterns(L){
     [/^(\d+) days$/, m => ru ? `${m[1]} ${plRu(+m[1],"день","дня","дней")}` : `${m[1]} kun`],
     [/^Connecting to (.+)$/, m => ru ? `Подключение к ${m[1]}` : `${m[1]} ga ulanmoqda`],
     [/^Connect (GitHub|GitLab)$/, m => ru ? `Подключить ${m[1]}` : `${m[1]} ni ulash`],
-    [/^Of (pull request|merge request)s hiro opened$/, m => ru ? (m[1]==="pull request" ? "Из пул-реквестов hiro" : "Из merge request'ов hiro") : (m[1]==="pull request" ? "hiro ochgan pull requestlardan" : "hiro ochgan merge requestlardan")],
+    [/^Of (pull request|merge request)s agnts opened$/, m => ru ? (m[1]==="pull request" ? "Из пул-реквестов agnts" : "Из merge request'ов agnts") : (m[1]==="pull request" ? "agnts ochgan pull requestlardan" : "agnts ochgan merge requestlardan")],
     [/^Must match your (\S+) account to show as yours$/, m => ru ? `Должен совпадать с аккаунтом ${m[1]}, чтобы коммиты отображались как ваши` : `Commitlar sizniki boʻlib koʻrinishi uchun ${m[1]} akkauntingizga mos kelishi kerak`],
     [/^Updates from (\S+)$/, m => ru ? `Обновления от ${m[1]}` : `${m[1]} dan yangilanishlar`],
     [/^With the (\S+) label$/, m => ru ? `С меткой ${m[1]}` : `${m[1]} belgisi bilan`],
     [/^(GitHub|GitLab|Jira) connected$/, m => ru ? `${m[1]} подключён` : `${m[1]} ulandi`],
     [/^(GitHub|GitLab|Jira) disconnected$/, m => ru ? `${m[1]} отключён` : `${m[1]} uzildi`],
-    [/^(\d+) by hiro$/, m => ru ? `${m[1]} от hiro` : `${m[1]} tasi hiro'dan`],
-    [/^(\d+) written by hiro$/, m => ru ? `${m[1]} написал hiro` : `${m[1]} tasini hiro yozgan`],
+    [/^(\d+) by agnts$/, m => ru ? `${m[1]} от agnts` : `${m[1]} tasi agnts'dan`],
+    [/^(\d+) written by agnts$/, m => ru ? `${m[1]} написал agnts` : `${m[1]} tasini agnts yozgan`],
     [/^Last (\d+) runs$/, m => ru ? `Последние ${m[1]} запусков` : `Oxirgi ${m[1]} ta ishga tushirish`],
     [/^Deployed (.+) ago$/, m => ru ? `Развёрнуто ${tr(m[1])} назад` : `${tr(m[1])} oldin joylangan`],
-    [/^hiro works on its own branch for every ticket and never commits to (\S+)$/, m => ru ? `hiro работает в отдельной ветке для каждого тикета и никогда не коммитит в ${m[1]}` : `hiro har bir tiket uchun alohida branchda ishlaydi va hech qachon ${m[1]} ga commit qilmaydi`],
+    [/^agnts works on its own branch for every ticket and never commits to (\S+)$/, m => ru ? `agnts работает в отдельной ветке для каждого тикета и никогда не коммитит в ${m[1]}` : `agnts har bir tiket uchun alohida branchda ishlaydi va hech qachon ${m[1]} ga commit qilmaydi`],
     [/^with (.+)$/, m => ru ? `вместе с ${m[1]}` : `${m[1]} bilan`],
     [/^(\d+[dhms](?: \d+[dhms])*) ago$/, m => ru ? `${tr(m[1])} назад` : `${tr(m[1])} oldin`],
     [/^Deployed (\S+) to production$/, m => ru ? `${m[1]} развёрнут в продакшн` : `${m[1]} production'ga joylandi`],
@@ -1667,7 +1667,7 @@ return {ru:{exact:ru, re:patterns("ru")}, uz:{exact:uz, re:patterns("uz")}};
 })();
 
 /* ---------- Preferences: theme + language ---------- */
-const PREF_KEY = "hiro-prefs";
+const PREF_KEY = "agnts-prefs";
 let prefs = {theme:"light", lang:"en"};
 try { Object.assign(prefs, JSON.parse(localStorage.getItem(PREF_KEY) || "{}")); } catch(e){}
 function savePrefs(){ try{ localStorage.setItem(PREF_KEY, JSON.stringify(prefs)); }catch(e){} }
@@ -1814,10 +1814,10 @@ function listPage(){
   const table = rows.length ? `<div class="tw"><table class="tbl"><thead><tr><th>Ticket</th><th>Source</th><th>Repository</th><th>Status</th><th>Updated</th></tr></thead><tbody>
     ${rows.map(t=>`<tr data-k="${t.key}" tabindex="0"><td><div class="tkey">${t.key}</div><div class="ttitle">${esc(t.title)}</div></td><td>${srcTag(t)}</td><td class="muted">${projName(t)}</td><td>${badge(t)}${t.revision>1&&!["done","rejected"].includes(t.state)?` <span class="hint">rev ${t.revision}</span>`:""}</td><td class="muted">${t.updated}</td></tr>`).join("")}
     </tbody></table></div>`
-    : `<p class="empty">${q ? "No tickets match your search." : view.filter==="needs" ? "Nothing is waiting on you. Tickets show up here when hiro has questions or changes to review." : "No tickets here yet."}</p>`;
+    : `<p class="empty">${q ? "No tickets match your search." : view.filter==="needs" ? "Nothing is waiting on you. Tickets show up here when agnts has questions or changes to review." : "No tickets here yet."}</p>`;
   return `<div class="ph"><div><h1>${f.label}</h1><p>${f.lede}</p></div></div>
     ${view.filter==="needs" ? stats : ""}
-    <section class="card"><div class="ch"><div><h2>${rows.length} ticket${rows.length===1?"":"s"}</h2><p class="sub">Jira tickets with the hiro label, plus tasks you create for side projects.</p></div></div>${table}</section>`;
+    <section class="card"><div class="ch"><div><h2>${rows.length} ticket${rows.length===1?"":"s"}</h2><p class="sub">Jira tickets with the agnts label, plus tasks you create for side projects.</p></div></div>${table}</section>`;
 }
 
 
@@ -1837,13 +1837,13 @@ function tasksPage(){
     const open = tickets.filter(t=>isLocal(t) && t.project===p.id && !["done","rejected"].includes(t.state)).length;
     return `<div class="ans"><span><b><span class="proj-dot" style="background:${p.color}"></span>${esc(p.name)}</b></span><span class="hint">${esc(p.repo)}, tests: ${esc(p.test)}, ${open} open</span></div>`;
   }).join("");
-  return `<div class="ph"><div><h1>Tasks</h1><p>Work for your side projects. Tasks stay in hiro and never touch Jira. Everything else works the same: questions, coding, your review.</p></div>
+  return `<div class="ph"><div><h1>Tasks</h1><p>Work for your side projects. Tasks stay in agnts and never touch Jira. Everything else works the same: questions, coding, your review.</p></div>
       <button class="btn btn-p" data-act="new-task">${svg("plus")}New task</button></div>
     <div class="cfg-grid">
       <div class="col">${tabs}<section class="card">${table}</section></div>
       <aside class="cfg-side">
         <section class="card"><div class="ch"><div><h2>Repositories</h2><p class="sub">Your side-project repositories on this server</p></div><button class="btn btn-s" data-act="add-project">${svg("plus")}Add</button></div>${projList}</section>
-        <div class="help">${svg("info")}<p>For repositories only you work on, you can let hiro push straight to main after you approve. It still never pushes without your review.</p></div>
+        <div class="help">${svg("info")}<p>For repositories only you work on, you can let agnts push straight to main after you approve. It still never pushes without your review.</p></div>
       </aside>
     </div>`;
 }
@@ -1860,11 +1860,11 @@ function renderDrawer(){
     body = `
       <div class="field"><span class="flbl">Repository</span>${editing ? `<span>${esc(projects.find(p=>p.id===d.project)?.name||"")}</span>` : `<div class="tabs">${projects.map(p=>`<button class="tab" data-set="project" data-val="${p.id}" aria-pressed="${d.project===p.id}">${esc(p.name)}</button>`).join("")}<button class="tab" data-act="add-project">${svg("plus").replace("<svg","<svg style='width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.4;vertical-align:-2px'")} New repository</button></div>`}</div>
       <div class="field"><label for="f-title">Title</label><input type="text" id="f-title" data-fld="title" value="${esc(d.title)}" placeholder="For example: Add a rest timer between sets"></div>
-      <div class="field"><label for="f-desc">What should be done</label><textarea id="f-desc" data-fld="desc" placeholder="Describe the result you want. The clearer this is, the fewer questions hiro asks.">${esc(d.desc)}</textarea></div>
+      <div class="field"><label for="f-desc">What should be done</label><textarea id="f-desc" data-fld="desc" placeholder="Describe the result you want. The clearer this is, the fewer questions agnts asks.">${esc(d.desc)}</textarea></div>
       <div class="field"><span class="flbl">Priority</span>${seg("priority", d.priority, [["Low","Low"],["Medium","Medium"],["High","High"]])}</div>
       <div class="field"><span class="flbl">After you approve</span>${seg("after", d.after, [["main","Push to main"],["pr","Open pull request"]])}</div>
       ${editing ? "" : `<div class="field"><span class="flbl">How to start</span><div class="opts">
-        ${[["ask","Ask questions first","hiro reads the code and asks before coding. Best for anything unclear."],["code","Start coding right away","Skip questions. Good for small, well-described tasks."],["queue","Keep in queue","Save it and start later."]].map(([v,l,h])=>`<button class="opt" data-set="start" data-val="${v}" aria-pressed="${d.start===v}"><span class="rd"></span><span><b>${l}</b><span class="d">${h}</span></span></button>`).join("")}
+        ${[["ask","Ask questions first","agnts reads the code and asks before coding. Best for anything unclear."],["code","Start coding right away","Skip questions. Good for small, well-described tasks."],["queue","Keep in queue","Save it and start later."]].map(([v,l,h])=>`<button class="opt" data-set="start" data-val="${v}" aria-pressed="${d.start===v}"><span class="rd"></span><span><b>${l}</b><span class="d">${h}</span></span></button>`).join("")}
       </div></div>`}
       ${err}`;
     foot = `<button class="btn" data-act="drawer-close">Cancel</button><button class="btn btn-p" data-act="save-task">${editing ? "Save changes" : d.start==="queue" ? "Create task" : "Create and start"}</button>`;
@@ -1873,10 +1873,10 @@ function renderDrawer(){
     body = repoDrawerBody(d);
     foot = `<button class="btn" data-act="drawer-close">Cancel</button><button class="btn btn-p" data-act="save-repo">${drawer.edit ? "Save changes" : "Add repository"}</button>`;
   } else {
-    head = `<h2>Add repository</h2><p>A side-project repository on your server that hiro can work in.</p>`;
+    head = `<h2>Add repository</h2><p>A side-project repository on your server that agnts can work in.</p>`;
     body = `
       <div class="field"><label for="p-name">Name</label><input type="text" id="p-name" data-fld="name" value="${esc(d.name)}" placeholder="Visper"></div>
-      <div class="field"><label for="p-repo">Clone URL</label><input type="text" id="p-repo" data-fld="repo" value="${esc(d.repo)}" placeholder="git@github.com:rustambekabdusalomov/visper.git"><span class="fhelp">hiro clones it into a fresh container for each task.</span></div>
+      <div class="field"><label for="p-repo">Clone URL</label><input type="text" id="p-repo" data-fld="repo" value="${esc(d.repo)}" placeholder="git@github.com:rustambekabdusalomov/visper.git"><span class="fhelp">agnts clones it into a fresh container for each task.</span></div>
       <div class="field"><label for="p-prefix">Task key prefix</label><input type="text" id="p-prefix" data-fld="prefix" value="${esc(d.prefix)}" placeholder="VIS" maxlength="5"><span class="fhelp">Tasks are numbered like ${esc(d.prefix||"VIS")}-1, ${esc(d.prefix||"VIS")}-2.</span></div>
       <div class="field"><label for="p-test">Test command</label><input type="text" id="p-test" data-fld="test" value="${esc(d.test)}" placeholder="make test"><span class="fhelp">Must pass before a task reaches your review.</span></div>
       ${err}`;
@@ -1971,7 +1971,7 @@ function logsPage(){
       <td class="ts">${fmtTs(e.ts)}</td><td><span class="tkey">${e.key}</span></td><td class="muted">${e.step}</td><td>${typeBadge(e)}</td><td class="msg">${esc(e.msg)}</td><td class="muted" style="white-space:nowrap">${fmtDur(e.dur)}</td></tr>
       ${open ? `<tr class="ev-detail"><td colspan="6">${e.detail ? `<pre>${esc(e.detail)}</pre>` : `<p class="hint" style="margin:0">No extra data for this event.</p>`}</td></tr>` : ""}`;
   }).join("");
-  return `<div class="ph"><div><h1>Logs</h1><p>Every step hiro takes, recorded as it happens. Use it to see where time goes and why runs stop.</p></div>
+  return `<div class="ph"><div><h1>Logs</h1><p>Every step agnts takes, recorded as it happens. Use it to see where time goes and why runs stop.</p></div>
       <div class="actions" style="margin:0">${running ? `<span class="live">Live</span>` : ""}<button class="btn" data-act="export">Export JSON</button></div></div>
     <div class="g4">
       <div class="card stat"><div class="lbl">Runs started</div><div class="val">${st.runs}</div><div class="note">Coding sessions, including retries</div></div>
@@ -1981,7 +1981,7 @@ function logsPage(){
     </div>
     <section class="card"><div class="ch"><div><h2>Where the time goes</h2><p class="sub">Average time spent in each step, across all tickets and tasks</p></div></div>
       <div class="tl-bars">${durs.map(d=>`<div class="tb"><span>${d.l} <span class="hint">${d.n ? "("+d.n+")" : ""}</span></span><div class="bar ${d.you?"you":""}"><span style="width:${d.v ? Math.max(2, d.v/max*100) : 0}%"></span></div><b>${d.v ? fmtDur(d.v) : "No data"}</b></div>`).join("")}</div>
-      <div class="legend"><span><i style="background:var(--primary)"></i>hiro working</span><span><i style="background:var(--warn)"></i>Waiting on you</span></div></section>
+      <div class="legend"><span><i style="background:var(--primary)"></i>agnts working</span><span><i style="background:var(--warn)"></i>Waiting on you</span></div></section>
     <section class="card"><div class="ch"><div><h2>Events</h2><p class="sub">${list.length} event${list.length===1?"":"s"}, newest first. Select a row to see its raw data.</p></div></div>
       <div class="filters">
         <div class="tabs">${tabs.map(([v,l])=>`<button class="tab" data-lt="${v}" aria-pressed="${logView.type===v}">${l}</button>`).join("")}</div>
@@ -2018,9 +2018,9 @@ function reposPage(){
   const list = allRepos(), q = query.toLowerCase();
   const rows = list.filter(r => !q || r.name.toLowerCase().includes(q));
   const missing = list.filter(r=>!r.claudeMd).length;
-  return `<div class="ph"><div><h1>Repositories</h1><p>Code hiro can work in. Each run clones the repository into a fresh container on your server, then runs these checks before anything reaches your review.</p></div>
+  return `<div class="ph"><div><h1>Repositories</h1><p>Code agnts can work in. Each run clones the repository into a fresh container on your server, then runs these checks before anything reaches your review.</p></div>
       <button class="btn btn-p" data-act="add-repo">${svg("plus")}Add repository</button></div>
-    ${missing ? `<div class="help warn">${svg("info")}<p>${missing} repositor${missing===1?"y has":"ies have"} no CLAUDE.md. hiro still works, but spends more turns finding its way around. Add one with the project's structure, conventions and test commands.</p></div>` : ""}
+    ${missing ? `<div class="help warn">${svg("info")}<p>${missing} repositor${missing===1?"y has":"ies have"} no CLAUDE.md. agnts still works, but spends more turns finding its way around. Add one with the project's structure, conventions and test commands.</p></div>` : ""}
     <section class="card"><div class="tw"><table class="tbl"><thead><tr><th>Repository</th><th>Source</th><th>Branch</th><th>Test command</th><th>CLAUDE.md</th><th>Open</th></tr></thead><tbody>
       ${rows.map(r=>`<tr data-repo="${r.id}" tabindex="0"><td><div class="ttitle">${r.project?`<span class="proj-dot" style="background:${r.project.color}"></span>`:""}${esc(r.name)}</div><div class="tkey">${esc(r.url)}</div></td>
         <td>${r.kind==="jira" ? `<span class="src">Jira ${esc(r.jira)}</span>` : `<span class="src local">${esc(r.project.name)}</span>`}</td>
@@ -2031,13 +2031,13 @@ function reposPage(){
 function repoDrawerBody(d){
   const f = (id, label, help, mono) => `<div class="field"><label for="r-${id}">${label}</label><input type="text" id="r-${id}" data-fld="${id}" value="${esc(d[id]||"")}" ${mono?'style="font-family:var(--mono);font-size:14px"':""}>${help?`<span class="fhelp">${help}</span>`:""}</div>`;
   return `${d.kind==="side" ? "" : f("name","Name","",false)}
-    ${f("url","Clone URL","hiro uses your GitHub token to clone and push.",true)}
-    ${d.kind==="jira" ? f("jira","Jira project key","Tickets from this Jira project with the hiro label can run here.",true) : ""}
+    ${f("url","Clone URL","agnts uses your GitHub token to clone and push.",true)}
+    ${d.kind==="jira" ? f("jira","Jira project key","Tickets from this Jira project with the agnts label can run here.",true) : ""}
     ${f("branch","Default branch","Work branches start from here.",true)}
     ${f("build","Build command","",true)}
     ${f("lint","Lint command","",true)}
     ${f("test","Test command","Must pass before a ticket reaches your review.",true)}
-    <div class="field"><span class="flbl">CLAUDE.md</span>${d.claudeMd ? `<span class="repo-ok">Found in the repository root</span>` : `<span class="repo-miss">Missing</span><span class="fhelp">hiro can draft one from the code, as a normal task you review before it's pushed.</span><button class="btn btn-s" data-act="draft-claudemd" style="align-self:flex-start">Draft CLAUDE.md</button>`}</div>
+    <div class="field"><span class="flbl">CLAUDE.md</span>${d.claudeMd ? `<span class="repo-ok">Found in the repository root</span>` : `<span class="repo-miss">Missing</span><span class="fhelp">agnts can draft one from the code, as a normal task you review before it's pushed.</span><button class="btn btn-s" data-act="draft-claudemd" style="align-self:flex-start">Draft CLAUDE.md</button>`}</div>
     ${drawer.err ? `<span class="ferr">${esc(drawer.err)}</span>` : ""}`;
 }
 
@@ -2052,7 +2052,7 @@ const row = (lbl, help, ctrl) => `<div class="cfg-row"><div><div class="cfg-lbl"
 function settingsPage(){
   if(!draftSettings) draftSettings = JSON.parse(JSON.stringify(settings));
   const dirty = JSON.stringify(draftSettings) !== JSON.stringify(settings);
-  return `<div class="ph"><div><h1>Settings</h1><p>How hiro connects to your tools and how it behaves during runs.</p></div></div>
+  return `<div class="ph"><div><h1>Settings</h1><p>How agnts connects to your tools and how it behaves during runs.</p></div></div>
   <div class="cfg-grid"><div class="col">
     <section class="card" id="s-look"><div class="ch"><div><h2>Appearance</h2><p class="sub">Saved in this browser, applied right away</p></div></div>
       ${row("Theme", "System follows your device's day or night setting", `<div class="seg">${[["system","System"],["light","Day"],["dark","Night"]].map(([v,l])=>`<button class="seg-b" data-theme-set="${v}" aria-pressed="${prefs.theme===v}">${l}</button>`).join("")}</div>`)}
@@ -2068,7 +2068,7 @@ function settingsPage(){
       ${row("Turn limit per run", "The run stops and reports when it reaches this", stepper("maxTurns","",20,200,10))}
       ${row("Run timeout", "", stepper("timeout"," min",10,120,5))}
       ${row("Allowed commands", "Claude Code can run these without asking", chips("allow"))}
-      ${row("Blocked commands", "Always refused, even if a ticket asks for them. Pushing is done by hiro, never by Claude Code.", chips("deny"))}
+      ${row("Blocked commands", "Always refused, even if a ticket asks for them. Pushing is done by agnts, never by Claude Code.", chips("deny"))}
     </section>
     <section class="card" id="s-runs"><div class="ch"><div><h2>Runs</h2><p class="sub">Defaults for every ticket and task</p></div></div>
       ${row("Ask questions before coding", "Default for new Jira tickets. Tasks choose this when you create them.", sw("askFirst", true))}
@@ -2093,213 +2093,213 @@ function settingsPage(){
 /* ---------- Page documentation ---------- */
 const DOCS = {
 en:{
- repo:{title:"Repository", intro:"One repository's branches, commits and pipelines, so you can see what hiro changed and whether it passed.", items:[
-  ["Branches","hiro creates its own branch for every ticket, like hiro/pay-214, and never commits to the default branch. Each branch shows its latest commit, how far ahead or behind it is, and its checks. Click a hiro branch to open its ticket."],
-  ["Commits","All recent commits grouped by day. hiro's commits start with the ticket key and list you as co-author."],
+ repo:{title:"Repository", intro:"One repository's branches, commits and pipelines, so you can see what agnts changed and whether it passed.", items:[
+  ["Branches","agnts creates its own branch for every ticket, like agnts/pay-214, and never commits to the default branch. Each branch shows its latest commit, how far ahead or behind it is, and its checks. Click a agnts branch to open its ticket."],
+  ["Commits","All recent commits grouped by day. agnts's commits start with the ticket key and list you as co-author."],
   ["Pipelines","Every pipeline run with its stages: build, test, lint and deploys. Click a run to see stage times and the failure output."],
   ["Environments","Which commit is on staging and production. Deploying to production waits for you: press Deploy on the stage."],
   ["Settings","Edit settings changes the clone URL, default branch and the build, lint and test commands."]]},
- integrations:{title:"Integrations", intro:"The services hiro works with: Jira for tickets, and GitHub or GitLab for code. Each has its own page with connection status and options.", items:[
+ integrations:{title:"Integrations", intro:"The services agnts works with: Jira for tickets, and GitHub or GitLab for code. Each has its own page with connection status and options.", items:[
   ["Connecting","Paste an access token with the listed scopes. It's stored encrypted on your server and never shown again. Test connection checks it at any time."],
   ["Permissions","Each git page shows which permissions the token has. Required ones must be granted for runs to work."],
-  ["Repository access","Turn a repository off to stop hiro from cloning or pushing to it, without removing it."],
+  ["Repository access","Turn a repository off to stop agnts from cloning or pushing to it, without removing it."],
   ["Commits and pull requests","Who commits appear from, a Co-authored-by line, title format, draft mode, labels, reviewers and what happens after merge."],
-  ["Jira rules","Which projects are watched, the label, issue types and statuses hiro picks up, shown as the exact query it runs."],
-  ["Status updates and comments","How hiro moves tickets on your board and what it writes as comments."]]},
- dashboard:{title:"Dashboard", intro:"Your starting point. What hiro is doing right now, what is waiting on you, and how this week compares with the last.", items:[
+  ["Jira rules","Which projects are watched, the label, issue types and statuses agnts picks up, shown as the exact query it runs."],
+  ["Status updates and comments","How agnts moves tickets on your board and what it writes as comments."]]},
+ dashboard:{title:"Dashboard", intro:"Your starting point. What agnts is doing right now, what is waiting on you, and how this week compares with the last.", items:[
   ["Top cards","Needs you, runs in progress, pushes this week and your plan session. Click a card to open the matching list or page."],
-  ["Waiting on you","Tickets that need answers, a review or a retry, oldest first, with how long they've waited. Clearing these keeps hiro busy."],
+  ["Waiting on you","Tickets that need answers, a review or a retry, oldest first, with how long they've waited. Clearing these keeps agnts busy."],
   ["Live runs","Each running ticket with its model, turns used against the limit, time in the current step and the latest log line."],
   ["Plan usage","Session and weekly usage, when they reset, and roughly how many more runs fit in this session."],
   ["Pipeline and today","Open tickets by step, and today's events by hour so you can see what happened overnight."],
   ["Repositories and activity","Open work and the latest ticket per repository, plus the most recent events."]]},
- analytics:{title:"Analytics", intro:"How well hiro works for you over time. Pick 7, 30 or 90 days; every number is compared with the period before it.", items:[
-  ["Key numbers","Tickets pushed, success rate, approval on the first try, hiro's time per ticket, time waiting on you, and turns per ticket. Green changes are improvements."],
+ analytics:{title:"Analytics", intro:"How well agnts works for you over time. Pick 7, 30 or 90 days; every number is compared with the period before it.", items:[
+  ["Key numbers","Tickets pushed, success rate, approval on the first try, agnts's time per ticket, time waiting on you, and turns per ticket. Green changes are improvements."],
   ["Throughput and outcomes","Tickets per day and how they ended: approved first time, approved after changes, rejected or stopped."],
-  ["Speed and time","Minutes hiro works versus minutes tickets wait for you, and which step takes the longest."],
+  ["Speed and time","Minutes agnts works versus minutes tickets wait for you, and which step takes the longest."],
   ["Why runs stop","Failing tests, plan limits, your stops and turn limits, ranked."],
   ["Models and repositories","Runs, success and plan cost per model, and how each repository performs, including the effect of CLAUDE.md."],
   ["Insights","Short conclusions drawn from the numbers, with what to change."]]},
- list:{title:"Ticket lists", intro:"Everything hiro is handling, split by where it stands. The sidebar filters are shortcuts to the same list.", items:[
-  ["Needs you","Your inbox. Tickets wait here when hiro has questions, has finished changes for review, stopped, or paused at the plan limit. Nothing moves forward until you act."],
-  ["Running","Tickets hiro is working on right now, each in its own container on your server."],
-  ["In queue","Jira tickets with the hiro label and tasks you saved for later. Open one and press Analyze ticket to start."],
+ list:{title:"Ticket lists", intro:"Everything agnts is handling, split by where it stands. The sidebar filters are shortcuts to the same list.", items:[
+  ["Needs you","Your inbox. Tickets wait here when agnts has questions, has finished changes for review, stopped, or paused at the plan limit. Nothing moves forward until you act."],
+  ["Running","Tickets agnts is working on right now, each in its own container on your server."],
+  ["In queue","Jira tickets with the agnts label and tasks you saved for later. Open one and press Analyze ticket to start."],
   ["Finished","Pushed or rejected work. Pushed tickets have a pull request, or went straight to main in repositories where you allowed it."],
-  ["Source","Jira means the ticket came from Jira and hiro updates its status there. Task means you created it in hiro."],
+  ["Source","Jira means the ticket came from Jira and agnts updates its status there. Task means you created it in agnts."],
   ["Search","The search box at the top filters by ticket key or title."]]},
- detail:{title:"Ticket page", intro:"Follow one ticket from pickup to push. The track at the top shows where it is. Diamond steps are where hiro waits for you.", items:[
-  ["Questions","hiro reads the code first and asks only what it can't decide itself. Pick an option or write your own answer, then press Start coding."],
+ detail:{title:"Ticket page", intro:"Follow one ticket from pickup to push. The track at the top shows where it is. Diamond steps are where agnts waits for you.", items:[
+  ["Questions","agnts reads the code first and asks only what it can't decide itself. Pick an option or write your own answer, then press Start coding."],
   ["Models for this ticket","Override the default model for this ticket only, for example Opus for a hard change or Haiku for a small one."],
-  ["Live log","While hiro works you see each step, the model, turns used and session usage. Stop run halts it and keeps the branch."],
-  ["Review","Read what hiro did and check the tests and diff. Approve and push commits as you. Request changes sends your feedback into the same session. Reject discards the branch."],
-  ["When hiro stops","After repeated failed tests or a plan limit, hiro stops instead of guessing. Add instructions and retry, or take the ticket yourself."],
+  ["Live log","While agnts works you see each step, the model, turns used and session usage. Stop run halts it and keeps the branch."],
+  ["Review","Read what agnts did and check the tests and diff. Approve and push commits as you. Request changes sends your feedback into the same session. Reject discards the branch."],
+  ["When agnts stops","After repeated failed tests or a plan limit, agnts stops instead of guessing. Add instructions and retry, or take the ticket yourself."],
   ["History and run log","History lists the main moments. Run log shows every event grouped by step, and Open in Logs shows them with filters."]]},
  tasks:{title:"Tasks", intro:"Tasks are for repositories outside Jira, like your side projects. They go through the same steps as Jira tickets.", items:[
   ["New task","Pick a repository, describe the result you want, set the priority and choose how to start: ask questions first, start coding right away, or keep it in the queue."],
-  ["After you approve","Choose for each task whether hiro opens a pull request or pushes straight to main. It never pushes without your review."],
+  ["After you approve","Choose for each task whether agnts opens a pull request or pushes straight to main. It never pushes without your review."],
   ["Repositories","Add a repository with its clone URL, a key prefix for task numbers, and the test command that must pass."],
   ["Editing","While a task is still in the queue you can edit or delete it from its page."]]},
- logs:{title:"Logs", intro:"Every step hiro takes is recorded. Use this page to see where time goes and why runs stop.", items:[
+ logs:{title:"Logs", intro:"Every step agnts takes is recorded. Use this page to see where time goes and why runs stop.", items:[
   ["Stats","Runs started, how many reached your review, average turns per ticket, and how many runs stopped or paused."],
-  ["Where the time goes","Average time per step. Blue is hiro working, amber is time spent waiting for you. Only finished steps are counted."],
-  ["Event types","State changes, tool calls made by Claude Code, commands hiro ran, your actions, plan limit readings and errors."],
+  ["Where the time goes","Average time per step. Blue is agnts working, amber is time spent waiting for you. Only finished steps are counted."],
+  ["Event types","State changes, tool calls made by Claude Code, commands agnts ran, your actions, plan limit readings and errors."],
   ["Filters","Filter by type or ticket key, or show errors only. Select a row to see its raw data."],
   ["Export","Export JSON copies the filtered events so you can analyze them elsewhere."]]},
- usage:{title:"Plan usage", intro:"hiro runs on your Claude subscription. This page shows how much of it is used.", items:[
+ usage:{title:"Plan usage", intro:"agnts runs on your Claude subscription. This page shows how much of it is used.", items:[
   ["Current session","Usage in the current 5-hour window and when it resets. The same numbers are at the bottom of the sidebar."],
   ["This week","Usage in the weekly window. It includes your own Claude and Claude Code use on the same account."],
-  ["Near the limit","Above 80% you get a warning. If the limit is reached mid-run, hiro pauses, keeps the branch and resumes after the reset."],
-  ["Where the numbers come from","Claude Code reports limits during every run. When hiro is idle, a tiny refresh run keeps them current."]]},
- repos:{title:"Repositories", intro:"The code hiro can work in. Every run clones the repository into a fresh container on your server.", items:[
-  ["Sources","Jira repositories take tickets from a Jira project. Side-project repositories take tasks you create in hiro."],
+  ["Near the limit","Above 80% you get a warning. If the limit is reached mid-run, agnts pauses, keeps the branch and resumes after the reset."],
+  ["Where the numbers come from","Claude Code reports limits during every run. When agnts is idle, a tiny refresh run keeps them current."]]},
+ repos:{title:"Repositories", intro:"The code agnts can work in. Every run clones the repository into a fresh container on your server.", items:[
+  ["Sources","Jira repositories take tickets from a Jira project. Side-project repositories take tasks you create in agnts."],
   ["Checks","Build, lint and test commands run after coding. A ticket reaches your review only when they pass."],
-  ["CLAUDE.md","A file in the repository root that describes structure, conventions and test commands. Without it hiro spends more turns finding its way."],
+  ["CLAUDE.md","A file in the repository root that describes structure, conventions and test commands. Without it agnts spends more turns finding its way."],
   ["Editing","Select a repository to change its clone URL, default branch or commands."]]},
- settings:{title:"Settings", intro:"How hiro connects to your tools and behaves during runs. Changes apply after you press Save changes.", items:[
+ settings:{title:"Settings", intro:"How agnts connects to your tools and behaves during runs. Changes apply after you press Save changes.", items:[
   ["Appearance","Theme and language. Saved in this browser and applied right away."],
-  ["Jira and GitHub","Where tickets come from, which label hiro picks up, and whose name commits are made under."],
+  ["Jira and GitHub","Where tickets come from, which label agnts picks up, and whose name commits are made under."],
   ["Claude Code","Which model runs each stage, the turn limit and timeout, and which commands Claude Code may or may never run."],
   ["Runs","Defaults for questions, resuming after limits, when to stop starting new runs, and how many run at once."],
   ["Notifications","Telegram messages when something needs you, a run stops, or changes are pushed."],
   ["Secrets","Tokens live in your server's environment and are never shown on this page."]]}
 },
 ru:{
- repo:{title:"Репозиторий", intro:"Ветки, коммиты и пайплайны одного репозитория — видно, что изменил hiro и прошли ли проверки.", items:[
-  ["Ветки","hiro создаёт отдельную ветку для каждого тикета, например hiro/pay-214, и никогда не коммитит в основную ветку. У каждой ветки видны последний коммит, насколько она впереди или позади и проверки. Нажмите на ветку hiro, чтобы открыть её тикет."],
-  ["Коммиты","Все последние коммиты по дням. Коммиты hiro начинаются с ключа тикета и указывают вас соавтором."],
+ repo:{title:"Репозиторий", intro:"Ветки, коммиты и пайплайны одного репозитория — видно, что изменил agnts и прошли ли проверки.", items:[
+  ["Ветки","agnts создаёт отдельную ветку для каждого тикета, например agnts/pay-214, и никогда не коммитит в основную ветку. У каждой ветки видны последний коммит, насколько она впереди или позади и проверки. Нажмите на ветку agnts, чтобы открыть её тикет."],
+  ["Коммиты","Все последние коммиты по дням. Коммиты agnts начинаются с ключа тикета и указывают вас соавтором."],
   ["Пайплайны","Каждый запуск пайплайна с этапами: сборка, тесты, линтер и развёртывания. Нажмите на запуск, чтобы увидеть время этапов и вывод ошибки."],
   ["Окружения","Какой коммит на стейджинге и в продакшне. Развёртывание в продакшн ждёт вас: нажмите «Развернуть» на этапе."],
   ["Настройки","«Изменить настройки» меняет URL клонирования, основную ветку и команды сборки, линтера и тестов."]]},
- integrations:{title:"Интеграции", intro:"Сервисы, с которыми работает hiro: Jira для тикетов и GitHub или GitLab для кода. У каждого своя страница со статусом подключения и настройками.", items:[
+ integrations:{title:"Интеграции", intro:"Сервисы, с которыми работает agnts: Jira для тикетов и GitHub или GitLab для кода. У каждого своя страница со статусом подключения и настройками.", items:[
   ["Подключение","Вставьте токен доступа с указанными правами. Он хранится зашифрованным на вашем сервере и больше не показывается. «Проверить подключение» проверяет его в любой момент."],
   ["Права","На странице git-сервиса видно, какие права есть у токена. Обязательные должны быть выданы, иначе запуски не сработают."],
-  ["Доступ к репозиториям","Отключите репозиторий, чтобы hiro не клонировал его и не отправлял туда изменения, не удаляя его."],
+  ["Доступ к репозиториям","Отключите репозиторий, чтобы agnts не клонировал его и не отправлял туда изменения, не удаляя его."],
   ["Коммиты и пул-реквесты","От чьего имени коммиты, строка Co-authored-by, формат заголовка, черновики, метки, ревьюеры и что происходит после слияния."],
-  ["Правила Jira","Какие проекты отслеживаются, метка, типы задач и статусы, которые берёт hiro, — в виде точного запроса."],
-  ["Статусы и комментарии","Как hiro двигает тикеты по доске и что пишет в комментариях."]]},
- dashboard:{title:"Дашборд", intro:"Стартовая страница. Что hiro делает прямо сейчас, что ждёт вас и как эта неделя выглядит на фоне прошлой.", items:[
+  ["Правила Jira","Какие проекты отслеживаются, метка, типы задач и статусы, которые берёт agnts, — в виде точного запроса."],
+  ["Статусы и комментарии","Как agnts двигает тикеты по доске и что пишет в комментариях."]]},
+ dashboard:{title:"Дашборд", intro:"Стартовая страница. Что agnts делает прямо сейчас, что ждёт вас и как эта неделя выглядит на фоне прошлой.", items:[
   ["Верхние карточки","Ждёт вас, активные запуски, отправки за неделю и сессия тарифа. Нажмите на карточку, чтобы открыть нужный список или страницу."],
-  ["Ожидание вас","Тикеты, которым нужны ответы, ревью или повтор, — сначала самые старые, с временем ожидания. Разберите их, и hiro не будет простаивать."],
+  ["Ожидание вас","Тикеты, которым нужны ответы, ревью или повтор, — сначала самые старые, с временем ожидания. Разберите их, и agnts не будет простаивать."],
   ["Активные запуски","Каждый запуск с моделью, числом шагов относительно лимита, временем на текущем шаге и последней строкой лога."],
   ["Лимиты тарифа","Использование за сессию и неделю, время сброса и примерно сколько ещё запусков поместится в сессию."],
   ["Конвейер и сегодня","Открытые тикеты по шагам и события за сегодня по часам — видно, что происходило ночью."],
   ["Репозитории и события","Открытая работа и последний тикет в каждом репозитории, плюс последние события."]]},
- analytics:{title:"Аналитика", intro:"Насколько хорошо hiro работает на вас со временем. Выберите 7, 30 или 90 дней; каждая цифра сравнивается с предыдущим периодом.", items:[
-  ["Ключевые цифры","Отправленные тикеты, доля успеха, одобрение с первого раза, время hiro на тикет, время ожидания вас и шаги на тикет. Зелёные изменения — улучшения."],
+ analytics:{title:"Аналитика", intro:"Насколько хорошо agnts работает на вас со временем. Выберите 7, 30 или 90 дней; каждая цифра сравнивается с предыдущим периодом.", items:[
+  ["Ключевые цифры","Отправленные тикеты, доля успеха, одобрение с первого раза, время agnts на тикет, время ожидания вас и шаги на тикет. Зелёные изменения — улучшения."],
   ["Пропускная способность и итоги","Тикеты по дням и чем они закончились: одобрено сразу, после изменений, отклонено или остановлено."],
-  ["Скорость и время","Сколько минут работает hiro и сколько тикеты ждут вас, а также какой шаг самый долгий."],
+  ["Скорость и время","Сколько минут работает agnts и сколько тикеты ждут вас, а также какой шаг самый долгий."],
   ["Почему запуски останавливаются","Падающие тесты, лимиты тарифа, ваши остановки и лимит шагов — по частоте."],
   ["Модели и репозитории","Запуски, успех и расход лимита по моделям, а также результаты по репозиториям, включая влияние CLAUDE.md."],
   ["Выводы","Короткие выводы из цифр и что стоит изменить."]]},
- list:{title:"Списки тикетов", intro:"Всё, чем занимается hiro, разложено по статусам. Фильтры в боковой панели ведут в этот же список.", items:[
-  ["Ждёт вас","Ваши входящие. Тикеты попадают сюда, когда у hiro есть вопросы, готовы изменения на ревью, запуск остановился или встал на паузу из-за лимита. Без вашего действия ничего не двигается."],
-  ["В работе","Тикеты, над которыми hiro работает прямо сейчас, каждый в своём контейнере на вашем сервере."],
-  ["В очереди","Тикеты Jira с меткой hiro и задачи, отложенные на потом. Откройте тикет и нажмите «Анализировать тикет», чтобы начать."],
+ list:{title:"Списки тикетов", intro:"Всё, чем занимается agnts, разложено по статусам. Фильтры в боковой панели ведут в этот же список.", items:[
+  ["Ждёт вас","Ваши входящие. Тикеты попадают сюда, когда у agnts есть вопросы, готовы изменения на ревью, запуск остановился или встал на паузу из-за лимита. Без вашего действия ничего не двигается."],
+  ["В работе","Тикеты, над которыми agnts работает прямо сейчас, каждый в своём контейнере на вашем сервере."],
+  ["В очереди","Тикеты Jira с меткой agnts и задачи, отложенные на потом. Откройте тикет и нажмите «Анализировать тикет», чтобы начать."],
   ["Завершённые","Отправленная или отклонённая работа. У отправленных есть пул-реквест, либо они ушли сразу в main там, где вы это разрешили."],
-  ["Источник","Jira — тикет пришёл из Jira, и hiro обновляет там его статус. Задача — вы создали её в hiro."],
+  ["Источник","Jira — тикет пришёл из Jira, и agnts обновляет там его статус. Задача — вы создали её в agnts."],
   ["Поиск","Поле поиска вверху фильтрует по ключу или названию тикета."]]},
- detail:{title:"Страница тикета", intro:"Путь одного тикета от получения до отправки. Шкала вверху показывает, где он сейчас. Шаги-ромбы — это места, где hiro ждёт вас.", items:[
-  ["Вопросы","hiro сначала читает код и спрашивает только то, что не может решить сам. Выберите вариант или напишите свой ответ, затем нажмите «Начать разработку»."],
+ detail:{title:"Страница тикета", intro:"Путь одного тикета от получения до отправки. Шкала вверху показывает, где он сейчас. Шаги-ромбы — это места, где agnts ждёт вас.", items:[
+  ["Вопросы","agnts сначала читает код и спрашивает только то, что не может решить сам. Выберите вариант или напишите свой ответ, затем нажмите «Начать разработку»."],
   ["Модели для этого тикета","Замените модель по умолчанию только для этого тикета, например Opus для сложного изменения или Haiku для небольшого."],
-  ["Лог в реальном времени","Пока hiro работает, видно каждый шаг, модель, число шагов и использование сессии. «Остановить запуск» прерывает работу и сохраняет ветку."],
-  ["Ревью","Прочитайте, что сделал hiro, проверьте тесты и изменения. «Одобрить и отправить» делает коммит от вашего имени. «Запросить изменения» передаёт ваш комментарий в ту же сессию. «Отклонить» удаляет ветку."],
-  ["Когда hiro останавливается","После повторных падений тестов или из-за лимита hiro останавливается, а не гадает. Добавьте указания и повторите или возьмите тикет себе."],
+  ["Лог в реальном времени","Пока agnts работает, видно каждый шаг, модель, число шагов и использование сессии. «Остановить запуск» прерывает работу и сохраняет ветку."],
+  ["Ревью","Прочитайте, что сделал agnts, проверьте тесты и изменения. «Одобрить и отправить» делает коммит от вашего имени. «Запросить изменения» передаёт ваш комментарий в ту же сессию. «Отклонить» удаляет ветку."],
+  ["Когда agnts останавливается","После повторных падений тестов или из-за лимита agnts останавливается, а не гадает. Добавьте указания и повторите или возьмите тикет себе."],
   ["История и лог запуска","История показывает ключевые моменты. Лог запуска — все события по шагам, а «Открыть в логах» показывает их с фильтрами."]]},
  tasks:{title:"Задачи", intro:"Задачи — для репозиториев вне Jira, например ваших личных проектов. Они проходят те же шаги, что и тикеты Jira.", items:[
   ["Новая задача","Выберите репозиторий, опишите нужный результат, задайте приоритет и способ старта: сначала вопросы, сразу разработка или оставить в очереди."],
-  ["После вашего одобрения","Для каждой задачи выберите, открывает ли hiro пул-реквест или отправляет сразу в main. Без вашего ревью он ничего не отправляет."],
+  ["После вашего одобрения","Для каждой задачи выберите, открывает ли agnts пул-реквест или отправляет сразу в main. Без вашего ревью он ничего не отправляет."],
   ["Репозитории","Добавьте репозиторий с URL для клонирования, префиксом для номеров задач и командой тестов, которая должна проходить."],
   ["Изменение","Пока задача в очереди, её можно изменить или удалить на её странице."]]},
- logs:{title:"Логи", intro:"Каждый шаг hiro записывается. Здесь видно, куда уходит время и почему запуски останавливаются.", items:[
+ logs:{title:"Логи", intro:"Каждый шаг agnts записывается. Здесь видно, куда уходит время и почему запуски останавливаются.", items:[
   ["Статистика","Сколько запусков начато, сколько дошло до ревью, среднее число шагов на тикет и сколько запусков остановилось или встало на паузу."],
-  ["Куда уходит время","Среднее время на каждом шаге. Синий — работает hiro, жёлтый — время ожидания вас. Учитываются только завершённые шаги."],
-  ["Типы событий","Смена статусов, вызовы инструментов Claude Code, команды hiro, ваши действия, показания лимитов и ошибки."],
+  ["Куда уходит время","Среднее время на каждом шаге. Синий — работает agnts, жёлтый — время ожидания вас. Учитываются только завершённые шаги."],
+  ["Типы событий","Смена статусов, вызовы инструментов Claude Code, команды agnts, ваши действия, показания лимитов и ошибки."],
   ["Фильтры","Фильтруйте по типу или ключу тикета либо показывайте только ошибки. Нажмите на строку, чтобы увидеть исходные данные."],
   ["Экспорт","«Экспорт JSON» копирует отфильтрованные события для анализа в другом месте."]]},
- usage:{title:"Лимиты тарифа", intro:"hiro работает на вашей подписке Claude. Здесь видно, какая её часть уже использована.", items:[
+ usage:{title:"Лимиты тарифа", intro:"agnts работает на вашей подписке Claude. Здесь видно, какая её часть уже использована.", items:[
   ["Текущая сессия","Использование в текущем 5-часовом окне и время сброса. Те же цифры внизу боковой панели."],
   ["Эта неделя","Использование в недельном окне. Сюда входит и ваше собственное использование Claude и Claude Code на том же аккаунте."],
-  ["У самого лимита","Выше 80% появляется предупреждение. Если лимит закончился во время запуска, hiro встаёт на паузу, сохраняет ветку и продолжает после сброса."],
-  ["Откуда цифры","Claude Code сообщает лимиты во время каждого запуска. Когда hiro простаивает, их обновляет крошечный служебный запуск."]]},
- repos:{title:"Репозитории", intro:"Код, с которым может работать hiro. Каждый запуск клонирует репозиторий в новый контейнер на вашем сервере.", items:[
-  ["Источники","Репозитории Jira получают тикеты из проекта Jira. Репозитории ваших проектов получают задачи, созданные в hiro."],
+  ["У самого лимита","Выше 80% появляется предупреждение. Если лимит закончился во время запуска, agnts встаёт на паузу, сохраняет ветку и продолжает после сброса."],
+  ["Откуда цифры","Claude Code сообщает лимиты во время каждого запуска. Когда agnts простаивает, их обновляет крошечный служебный запуск."]]},
+ repos:{title:"Репозитории", intro:"Код, с которым может работать agnts. Каждый запуск клонирует репозиторий в новый контейнер на вашем сервере.", items:[
+  ["Источники","Репозитории Jira получают тикеты из проекта Jira. Репозитории ваших проектов получают задачи, созданные в agnts."],
   ["Проверки","После разработки запускаются сборка, линтер и тесты. Тикет попадает на ревью, только если они прошли."],
-  ["CLAUDE.md","Файл в корне репозитория со структурой, соглашениями и командами тестов. Без него hiro тратит больше шагов, чтобы разобраться."],
+  ["CLAUDE.md","Файл в корне репозитория со структурой, соглашениями и командами тестов. Без него agnts тратит больше шагов, чтобы разобраться."],
   ["Изменение","Нажмите на репозиторий, чтобы изменить URL, ветку по умолчанию или команды."]]},
- settings:{title:"Настройки", intro:"Как hiro подключается к вашим инструментам и ведёт себя во время запусков. Изменения применяются после «Сохранить изменения».", items:[
+ settings:{title:"Настройки", intro:"Как agnts подключается к вашим инструментам и ведёт себя во время запусков. Изменения применяются после «Сохранить изменения».", items:[
   ["Оформление","Тема и язык. Сохраняются в этом браузере и применяются сразу."],
-  ["Jira и GitHub","Откуда приходят тикеты, какую метку берёт hiro и от чьего имени делаются коммиты."],
+  ["Jira и GitHub","Откуда приходят тикеты, какую метку берёт agnts и от чьего имени делаются коммиты."],
   ["Claude Code","Какая модель работает на каждом этапе, лимит шагов и тайм-аут, какие команды Claude Code можно и нельзя выполнять."],
   ["Запуски","Значения по умолчанию для вопросов, продолжения после лимитов, порога для новых запусков и числа одновременных запусков."],
   ["Уведомления","Сообщения в Telegram, когда что-то ждёт вас, запуск остановился или изменения отправлены."],
   ["Секреты","Токены хранятся в окружении вашего сервера и никогда не показываются на этой странице."]]}
 },
 uz:{
- repo:{title:"Repozitoriy", intro:"Bitta repozitoriyning branchlari, commitlari va pipeline'lari — hiro nimani oʻzgartirgani va tekshiruvdan oʻtganini koʻrasiz.", items:[
-  ["Branchlar","hiro har bir tiket uchun hiro/pay-214 kabi alohida branch yaratadi va hech qachon asosiy branchga commit qilmaydi. Har bir branchning soʻnggi commiti, qanchalik oldinda yoki ortda ekani va tekshiruvlari koʻrinadi. Tiketini ochish uchun hiro branchini bosing."],
-  ["Commitlar","Soʻnggi commitlar kunlar boʻyicha. hiro commitlari tiket kaliti bilan boshlanadi va sizni hammuallif sifatida koʻrsatadi."],
+ repo:{title:"Repozitoriy", intro:"Bitta repozitoriyning branchlari, commitlari va pipeline'lari — agnts nimani oʻzgartirgani va tekshiruvdan oʻtganini koʻrasiz.", items:[
+  ["Branchlar","agnts har bir tiket uchun agnts/pay-214 kabi alohida branch yaratadi va hech qachon asosiy branchga commit qilmaydi. Har bir branchning soʻnggi commiti, qanchalik oldinda yoki ortda ekani va tekshiruvlari koʻrinadi. Tiketini ochish uchun agnts branchini bosing."],
+  ["Commitlar","Soʻnggi commitlar kunlar boʻyicha. agnts commitlari tiket kaliti bilan boshlanadi va sizni hammuallif sifatida koʻrsatadi."],
   ["Pipeline'lar","Har bir pipeline ishga tushirishi bosqichlari bilan: build, test, linter va joylashlar. Bosqich vaqtlari va xato chiqishini koʻrish uchun bosing."],
   ["Muhitlar","Staging va production'da qaysi commit turibdi. Production'ga joylash sizni kutadi: bosqichdagi «Joylash»ni bosing."],
   ["Sozlamalar","«Sozlamalarni tahrirlash» klonlash URL, asosiy branch va build, linter, test buyruqlarini oʻzgartiradi."]]},
- integrations:{title:"Integratsiyalar", intro:"hiro ishlaydigan xizmatlar: tiketlar uchun Jira, kod uchun GitHub yoki GitLab. Har birining ulanish holati va sozlamalari bilan alohida sahifasi bor.", items:[
+ integrations:{title:"Integratsiyalar", intro:"agnts ishlaydigan xizmatlar: tiketlar uchun Jira, kod uchun GitHub yoki GitLab. Har birining ulanish holati va sozlamalari bilan alohida sahifasi bor.", items:[
   ["Ulanish","Koʻrsatilgan huquqlarga ega kirish tokenini joylang. U serveringizda shifrlangan holda saqlanadi va boshqa koʻrsatilmaydi. «Ulanishni tekshirish» uni istalgan payt tekshiradi."],
   ["Huquqlar","Git sahifasida token qaysi huquqlarga ega ekani koʻrinadi. Majburiylari berilishi shart, aks holda ishlar bajarilmaydi."],
-  ["Repozitoriyga kirish","Repozitoriyni oʻchirmasdan, hiro uni klonlamasligi va unga yubormasligi uchun oʻchirib qoʻying."],
+  ["Repozitoriyga kirish","Repozitoriyni oʻchirmasdan, agnts uni klonlamasligi va unga yubormasligi uchun oʻchirib qoʻying."],
   ["Commitlar va pull requestlar","Commitlar kimning nomidan, Co-authored-by qatori, sarlavha formati, qoralama, belgilar, tekshiruvchilar va birlashtirilgandan keyin nima boʻladi."],
-  ["Jira qoidalari","Qaysi loyihalar kuzatiladi, belgi, hiro oladigan vazifa turlari va holatlari — aniq soʻrov koʻrinishida."],
-  ["Holatlar va izohlar","hiro tiketlarni doskada qanday siljitadi va izohlarda nima yozadi."]]},
- dashboard:{title:"Boshqaruv paneli", intro:"Boshlangʻich sahifa. hiro hozir nima qilyapti, sizni nima kutyapti va bu hafta oʻtgan hafta bilan qanday solishtiriladi.", items:[
+  ["Jira qoidalari","Qaysi loyihalar kuzatiladi, belgi, agnts oladigan vazifa turlari va holatlari — aniq soʻrov koʻrinishida."],
+  ["Holatlar va izohlar","agnts tiketlarni doskada qanday siljitadi va izohlarda nima yozadi."]]},
+ dashboard:{title:"Boshqaruv paneli", intro:"Boshlangʻich sahifa. agnts hozir nima qilyapti, sizni nima kutyapti va bu hafta oʻtgan hafta bilan qanday solishtiriladi.", items:[
   ["Yuqori kartalar","Sizni kutayotganlar, faol ishlar, haftalik yuborilganlar va tarif sessiyasi. Tegishli roʻyxat yoki sahifani ochish uchun kartani bosing."],
-  ["Sizni kutish","Javob, tekshiruv yoki qayta urinish kerak boʻlgan tiketlar — avval eng eskilari, kutish vaqti bilan. Ularni hal qilsangiz, hiro boʻsh turmaydi."],
+  ["Sizni kutish","Javob, tekshiruv yoki qayta urinish kerak boʻlgan tiketlar — avval eng eskilari, kutish vaqti bilan. Ularni hal qilsangiz, agnts boʻsh turmaydi."],
   ["Faol ishlar","Har bir ish modeli, limitga nisbatan qadamlar, joriy bosqichdagi vaqt va soʻnggi log qatori bilan."],
   ["Tarif limitlari","Sessiya va haftalik sarf, yangilanish vaqti va shu sessiyaga taxminan yana nechta ish sigʻishi."],
   ["Jarayon zanjiri va bugun","Ochiq tiketlar bosqichlar boʻyicha va bugungi hodisalar soatlar boʻyicha — tunda nima boʻlganini koʻrasiz."],
   ["Repozitoriylar va faollik","Har bir repozitoriydagi ochiq ishlar va soʻnggi tiket, shuningdek soʻnggi hodisalar."]]},
- analytics:{title:"Analitika", intro:"hiro vaqt oʻtishi bilan siz uchun qanchalik yaxshi ishlayapti. 7, 30 yoki 90 kunni tanlang; har bir raqam oldingi davr bilan solishtiriladi.", items:[
-  ["Asosiy raqamlar","Yuborilgan tiketlar, muvaffaqiyat darajasi, birinchi urinishda tasdiqlash, bitta tiketga hiro vaqti, sizni kutish vaqti va qadamlar. Yashil oʻzgarishlar — yaxshilanish."],
+ analytics:{title:"Analitika", intro:"agnts vaqt oʻtishi bilan siz uchun qanchalik yaxshi ishlayapti. 7, 30 yoki 90 kunni tanlang; har bir raqam oldingi davr bilan solishtiriladi.", items:[
+  ["Asosiy raqamlar","Yuborilgan tiketlar, muvaffaqiyat darajasi, birinchi urinishda tasdiqlash, bitta tiketga agnts vaqti, sizni kutish vaqti va qadamlar. Yashil oʻzgarishlar — yaxshilanish."],
   ["Unumdorlik va natijalar","Kunlik tiketlar va ular qanday yakunlangani: darhol tasdiqlangan, oʻzgarishlardan keyin, rad etilgan yoki toʻxtagan."],
-  ["Tezlik va vaqt","hiro necha daqiqa ishlaydi va tiketlar sizni necha daqiqa kutadi, qaysi bosqich eng uzoq davom etadi."],
+  ["Tezlik va vaqt","agnts necha daqiqa ishlaydi va tiketlar sizni necha daqiqa kutadi, qaysi bosqich eng uzoq davom etadi."],
   ["Ishlar nega toʻxtaydi","Yiqilgan testlar, tarif limitlari, siz toʻxtatganlar va qadamlar limiti — tartib bilan."],
   ["Modellar va repozitoriylar","Modellar boʻyicha ishlar, muvaffaqiyat va limit sarfi hamda repozitoriylar natijalari, CLAUDE.md taʼsiri bilan."],
   ["Xulosalar","Raqamlardan qisqa xulosalar va nimani oʻzgartirish kerakligi."]]},
- list:{title:"Tiketlar roʻyxati", intro:"hiro shugʻullanayotgan hamma narsa holati boʻyicha ajratilgan. Yon paneldagi filtrlar shu roʻyxatga olib boradi.", items:[
-  ["Sizni kutmoqda","Kiruvchi qutingiz. hiro savol berganda, tekshirish uchun oʻzgarishlar tayyor boʻlganda, ish toʻxtaganda yoki limit tufayli pauzaga tushganda tiketlar shu yerda kutadi. Siz harakat qilmaguningizcha hech narsa oldinga siljimaydi."],
-  ["Bajarilmoqda","hiro hozir ishlayotgan tiketlar, har biri serveringizdagi alohida konteynerda."],
-  ["Navbatda","hiro belgili Jira tiketlari va keyinga qoldirilgan vazifalar. Boshlash uchun tiketni ochib, «Tiketni tahlil qilish»ni bosing."],
+ list:{title:"Tiketlar roʻyxati", intro:"agnts shugʻullanayotgan hamma narsa holati boʻyicha ajratilgan. Yon paneldagi filtrlar shu roʻyxatga olib boradi.", items:[
+  ["Sizni kutmoqda","Kiruvchi qutingiz. agnts savol berganda, tekshirish uchun oʻzgarishlar tayyor boʻlganda, ish toʻxtaganda yoki limit tufayli pauzaga tushganda tiketlar shu yerda kutadi. Siz harakat qilmaguningizcha hech narsa oldinga siljimaydi."],
+  ["Bajarilmoqda","agnts hozir ishlayotgan tiketlar, har biri serveringizdagi alohida konteynerda."],
+  ["Navbatda","agnts belgili Jira tiketlari va keyinga qoldirilgan vazifalar. Boshlash uchun tiketni ochib, «Tiketni tahlil qilish»ni bosing."],
   ["Yakunlangan","Yuborilgan yoki rad etilgan ishlar. Yuborilganlarda pull request bor yoki ruxsat bergan repozitoriylaringizda toʻgʻridan-toʻgʻri main'ga ketgan."],
-  ["Manba","Jira — tiket Jira'dan kelgan va hiro uning holatini oʻsha yerda yangilaydi. Vazifa — uni hiro'da oʻzingiz yaratgansiz."],
+  ["Manba","Jira — tiket Jira'dan kelgan va agnts uning holatini oʻsha yerda yangilaydi. Vazifa — uni agnts'da oʻzingiz yaratgansiz."],
   ["Qidiruv","Yuqoridagi qidiruv maydoni tiket kaliti yoki sarlavhasi boʻyicha saralaydi."]]},
- detail:{title:"Tiket sahifasi", intro:"Bitta tiketning olinishidan yuborilishigacha boʻlgan yoʻli. Yuqoridagi shkala u hozir qayerdaligini koʻrsatadi. Romb shaklidagi bosqichlarda hiro sizni kutadi.", items:[
-  ["Savollar","hiro avval kodni oʻqiydi va faqat oʻzi hal qila olmaydigan narsalarni soʻraydi. Variantni tanlang yoki oʻz javobingizni yozing, soʻng «Kod yozishni boshlash»ni bosing."],
+ detail:{title:"Tiket sahifasi", intro:"Bitta tiketning olinishidan yuborilishigacha boʻlgan yoʻli. Yuqoridagi shkala u hozir qayerdaligini koʻrsatadi. Romb shaklidagi bosqichlarda agnts sizni kutadi.", items:[
+  ["Savollar","agnts avval kodni oʻqiydi va faqat oʻzi hal qila olmaydigan narsalarni soʻraydi. Variantni tanlang yoki oʻz javobingizni yozing, soʻng «Kod yozishni boshlash»ni bosing."],
   ["Shu tiket uchun modellar","Standart modelni faqat shu tiket uchun almashtiring, masalan murakkab oʻzgarish uchun Opus yoki kichigi uchun Haiku."],
-  ["Jonli log","hiro ishlayotganda har bir qadam, model, sarflangan qadamlar va sessiya sarfi koʻrinadi. «Ishni toʻxtatish» ishni toʻxtatadi va branchni saqlaydi."],
-  ["Tekshiruv","hiro nima qilganini oʻqing, testlar va oʻzgarishlarni tekshiring. «Tasdiqlash va yuborish» sizning nomingizdan commit qiladi. «Oʻzgartirish soʻrash» fikringizni oʻsha sessiyaga yuboradi. «Rad etish» branchni oʻchiradi."],
-  ["hiro toʻxtaganda","Testlar qayta-qayta yiqilsa yoki limit tugasa, hiro taxmin qilmay toʻxtaydi. Koʻrsatma qoʻshib qayta urining yoki tiketni oʻzingiz oling."],
+  ["Jonli log","agnts ishlayotganda har bir qadam, model, sarflangan qadamlar va sessiya sarfi koʻrinadi. «Ishni toʻxtatish» ishni toʻxtatadi va branchni saqlaydi."],
+  ["Tekshiruv","agnts nima qilganini oʻqing, testlar va oʻzgarishlarni tekshiring. «Tasdiqlash va yuborish» sizning nomingizdan commit qiladi. «Oʻzgartirish soʻrash» fikringizni oʻsha sessiyaga yuboradi. «Rad etish» branchni oʻchiradi."],
+  ["agnts toʻxtaganda","Testlar qayta-qayta yiqilsa yoki limit tugasa, agnts taxmin qilmay toʻxtaydi. Koʻrsatma qoʻshib qayta urining yoki tiketni oʻzingiz oling."],
   ["Tarix va ishga tushirish logi","Tarix asosiy lahzalarni koʻrsatadi. Ishga tushirish logi barcha hodisalarni bosqichlar boʻyicha koʻrsatadi, «Loglarda ochish» esa ularni filtrlar bilan ochadi."]]},
  tasks:{title:"Vazifalar", intro:"Vazifalar Jira'dan tashqaridagi repozitoriylar, masalan shaxsiy loyihalaringiz uchun. Ular Jira tiketlari bilan bir xil bosqichlardan oʻtadi.", items:[
   ["Yangi vazifa","Repozitoriyni tanlang, kerakli natijani yozing, muhimlikni belgilang va qanday boshlashni tanlang: avval savollar, darhol kod yozish yoki navbatda qoldirish."],
-  ["Tasdiqlaganingizdan keyin","Har bir vazifa uchun hiro pull request ochishini yoki toʻgʻridan-toʻgʻri main'ga yuborishini tanlang. Tekshiruvingizsiz hech narsa yubormaydi."],
+  ["Tasdiqlaganingizdan keyin","Har bir vazifa uchun agnts pull request ochishini yoki toʻgʻridan-toʻgʻri main'ga yuborishini tanlang. Tekshiruvingizsiz hech narsa yubormaydi."],
   ["Repozitoriylar","Repozitoriyni klonlash URL manzili, vazifa raqamlari uchun prefiks va oʻtishi shart boʻlgan test buyrugʻi bilan qoʻshing."],
   ["Tahrirlash","Vazifa navbatda turganida uni sahifasida tahrirlash yoki oʻchirish mumkin."]]},
- logs:{title:"Loglar", intro:"hiro har bir qadami yoziladi. Vaqt qayerga ketayotgani va ishlar nega toʻxtayotganini shu yerda koʻrasiz.", items:[
+ logs:{title:"Loglar", intro:"agnts har bir qadami yoziladi. Vaqt qayerga ketayotgani va ishlar nega toʻxtayotganini shu yerda koʻrasiz.", items:[
   ["Statistika","Boshlangan ishlar, tekshiruvgacha yetganlari, har bir tiketga oʻrtacha qadamlar va toʻxtagan yoki pauzaga tushgan ishlar soni."],
-  ["Vaqt qayerga ketyapti","Har bir bosqichdagi oʻrtacha vaqt. Koʻk — hiro ishlayapti, sariq — sizni kutish vaqti. Faqat yakunlangan bosqichlar hisoblanadi."],
-  ["Hodisa turlari","Holat oʻzgarishlari, Claude Code vosita chaqiruvlari, hiro buyruqlari, sizning harakatlaringiz, limit koʻrsatkichlari va xatolar."],
+  ["Vaqt qayerga ketyapti","Har bir bosqichdagi oʻrtacha vaqt. Koʻk — agnts ishlayapti, sariq — sizni kutish vaqti. Faqat yakunlangan bosqichlar hisoblanadi."],
+  ["Hodisa turlari","Holat oʻzgarishlari, Claude Code vosita chaqiruvlari, agnts buyruqlari, sizning harakatlaringiz, limit koʻrsatkichlari va xatolar."],
   ["Filtrlar","Tur yoki tiket kaliti boʻyicha saralang yoki faqat xatolarni koʻrsating. Xom maʼlumotni koʻrish uchun qatorni bosing."],
   ["Eksport","«JSON eksport» saralangan hodisalarni boshqa joyda tahlil qilish uchun nusxalaydi."]]},
- usage:{title:"Tarif limitlari", intro:"hiro Claude obunangizda ishlaydi. Bu sahifa uning qancha qismi sarflanganini koʻrsatadi.", items:[
+ usage:{title:"Tarif limitlari", intro:"agnts Claude obunangizda ishlaydi. Bu sahifa uning qancha qismi sarflanganini koʻrsatadi.", items:[
   ["Joriy sessiya","Joriy 5 soatlik oynadagi sarf va qachon yangilanishi. Xuddi shu raqamlar yon panel pastida ham bor."],
   ["Shu hafta","Haftalik oynadagi sarf. Bunga shu akkauntdagi oʻzingizning Claude va Claude Code sarfingiz ham kiradi."],
-  ["Limitga yaqin","80% dan oshganda ogohlantirish chiqadi. Ish oʻrtasida limit tugasa, hiro pauza qiladi, branchni saqlaydi va yangilangach davom etadi."],
-  ["Raqamlar qayerdan","Claude Code har bir ishda limitlarni xabar qiladi. hiro boʻsh turganda ularni kichik yangilash ishi dolzarb saqlaydi."]]},
- repos:{title:"Repozitoriylar", intro:"hiro ishlay oladigan kod. Har bir ish repozitoriyni serveringizdagi yangi konteynerga klonlaydi.", items:[
-  ["Manbalar","Jira repozitoriylari Jira loyihasidan tiket oladi. Shaxsiy loyiha repozitoriylari hiro'da yaratilgan vazifalarni oladi."],
+  ["Limitga yaqin","80% dan oshganda ogohlantirish chiqadi. Ish oʻrtasida limit tugasa, agnts pauza qiladi, branchni saqlaydi va yangilangach davom etadi."],
+  ["Raqamlar qayerdan","Claude Code har bir ishda limitlarni xabar qiladi. agnts boʻsh turganda ularni kichik yangilash ishi dolzarb saqlaydi."]]},
+ repos:{title:"Repozitoriylar", intro:"agnts ishlay oladigan kod. Har bir ish repozitoriyni serveringizdagi yangi konteynerga klonlaydi.", items:[
+  ["Manbalar","Jira repozitoriylari Jira loyihasidan tiket oladi. Shaxsiy loyiha repozitoriylari agnts'da yaratilgan vazifalarni oladi."],
   ["Tekshiruvlar","Kod yozilgach build, linter va testlar ishga tushadi. Tiket faqat ular oʻtganda tekshiruvingizga keladi."],
-  ["CLAUDE.md","Repozitoriy ildizidagi tuzilma, qoidalar va test buyruqlari yozilgan fayl. Usiz hiro yoʻl topish uchun koʻproq qadam sarflaydi."],
+  ["CLAUDE.md","Repozitoriy ildizidagi tuzilma, qoidalar va test buyruqlari yozilgan fayl. Usiz agnts yoʻl topish uchun koʻproq qadam sarflaydi."],
   ["Tahrirlash","URL, asosiy branch yoki buyruqlarni oʻzgartirish uchun repozitoriyni bosing."]]},
- settings:{title:"Sozlamalar", intro:"hiro vositalaringizga qanday ulanadi va ish paytida qanday ishlaydi. Oʻzgarishlar «Oʻzgarishlarni saqlash»dan keyin qoʻllanadi.", items:[
+ settings:{title:"Sozlamalar", intro:"agnts vositalaringizga qanday ulanadi va ish paytida qanday ishlaydi. Oʻzgarishlar «Oʻzgarishlarni saqlash»dan keyin qoʻllanadi.", items:[
   ["Koʻrinish","Mavzu va til. Shu brauzerda saqlanadi va darhol qoʻllanadi."],
-  ["Jira va GitHub","Tiketlar qayerdan keladi, hiro qaysi belgini oladi va commitlar kimning nomidan qilinadi."],
+  ["Jira va GitHub","Tiketlar qayerdan keladi, agnts qaysi belgini oladi va commitlar kimning nomidan qilinadi."],
   ["Claude Code","Har bir bosqichda qaysi model ishlaydi, qadamlar limiti va vaqt chegarasi, Claude Code qaysi buyruqlarni bajara oladi va qaysilarini hech qachon bajarmaydi."],
   ["Ishlar","Savollar, limitdan keyin davom etish, yangi ish boshlash chegarasi va bir vaqtdagi ishlar soni uchun standart qiymatlar."],
   ["Bildirishnomalar","Biror narsa sizni kutganda, ish toʻxtaganda yoki oʻzgarishlar yuborilganda Telegram xabarlari."],
@@ -2395,7 +2395,7 @@ function dayStats(off){
   const repos = {}; const keys = Object.keys(REPO_W), tw = keys.reduce((a,k)=>a+REPO_W[k],0);
   let left = picked; keys.forEach((k,i)=>{ const v = i === keys.length-1 ? left : Math.min(left, Math.round(picked*REPO_W[k]/tw + (r()-0.5))); repos[k] = Math.max(0,v); left -= Math.max(0,v); });
   return {date:d, picked, pushed, rejected, stopped, firstTry, changes:pushed-firstTry, runs, models:m, repos,
-    turns: Math.round(26 - 7*trend + r()*6), hiroMin: Math.round(14 - 4*trend + r()*7), waitMin: Math.round(30 + r()*80 + (weekend?120:0)),
+    turns: Math.round(26 - 7*trend + r()*6), agntsMin: Math.round(14 - 4*trend + r()*7), waitMin: Math.round(30 + r()*80 + (weekend?120:0)),
     reviewMin: Math.round(20 + r()*55 + (weekend?90:0)), answerMin: Math.round(10 + r()*30), usage: Math.round(30 + r()*45),
     stops:{tests:Math.round(stopped*0.55), limit:Math.round(stopped*0.2), you:Math.round(stopped*0.15)}};
 }
@@ -2405,7 +2405,7 @@ function periodStats(days, from){
   const picked = sum(x=>x.picked), pushed = sum(x=>x.pushed);
   const st = sum(x=>x.stopped), stops = {tests:Math.round(st*0.52), limit:Math.round(st*0.21), you:Math.round(st*0.16)}; stops.turns = Math.max(0, st - stops.tests - stops.limit - stops.you);
   return {days:L, picked, pushed, rejected:sum(x=>x.rejected), stopped:sum(x=>x.stopped), firstTry:sum(x=>x.firstTry), changes:sum(x=>x.changes), runs:sum(x=>x.runs),
-    turns: picked ? sum(x=>x.turns*x.picked)/picked : 0, hiroMin: picked ? sum(x=>x.hiroMin*x.picked)/picked : 0,
+    turns: picked ? sum(x=>x.turns*x.picked)/picked : 0, agntsMin: picked ? sum(x=>x.agntsMin*x.picked)/picked : 0,
     reviewMin: avg(x=>x.reviewMin), answerMin: avg(x=>x.answerMin), waitMin: avg(x=>x.waitMin), usage: avg(x=>x.usage),
     models:{haiku:sum(x=>x.models.haiku), sonnet:sum(x=>x.models.sonnet), opus:sum(x=>x.models.opus)},
     repos:Object.keys(REPO_W).reduce((o,k)=>(o[k]=sum(x=>x.repos[k]),o),{}), stops};
@@ -2436,7 +2436,7 @@ function dashboardPage(){
   const pTotal = pipe.reduce((a,x)=>a+x.n,0) || 1;
   const recent = events.filter(e=>e.ts <= Date.now()).sort((a,b)=>b.ts-a.ts).slice(0,8);
   const repoRows = allRepos().map(r => { const ts = tickets.filter(t => (r.kind==="jira" ? !isLocal(t) && t.repo===r.name : isLocal(t) && "p:"+t.project===r.id)); const last = ts[0]; return {r, open:r.open, last}; }).filter(x=>x.open || x.last).slice(0,7);
-  return `<div class="ph"><div><h1>${greet}, Rustam</h1><p>${locDate(new Date(), {weekday:"long", day:"numeric", month:"long"})}. Here's what hiro is doing and what's waiting on you.</p></div>
+  return `<div class="ph"><div><h1>${greet}, Rustam</h1><p>${locDate(new Date(), {weekday:"long", day:"numeric", month:"long"})}. Here's what agnts is doing and what's waiting on you.</p></div>
       <div class="actions" style="margin:0">${running.length ? `<span class="live">Live</span>` : ""}<button class="btn" data-act="analytics">Open analytics</button></div></div>
     <div class="g4">
       <button class="card stat kpi-btn" data-f="needs"><div class="lbl">Needs you</div><div class="val" style="color:${needs.length?"var(--warn-ink)":"inherit"}">${needs.length}</div><div class="note">${nA} answer${nA===1?"":"s"}, ${nR} review${nR===1?"":"s"}, ${nS} stopped</div></button>
@@ -2445,10 +2445,10 @@ function dashboardPage(){
       <button class="card stat kpi-btn" data-act="usage"><div class="lbl">Plan session</div><div class="val" style="color:${l==="warn"?"var(--warn-ink)":l==="bad"?"var(--bad-ink)":"inherit"}">${p}%</div><div class="bar ${l}" style="margin:6px 0"><span style="width:${p}%"></span></div><div class="note">${resetText(usage.five_hour.resetsAt)}</div></button>
     </div>
     <div class="dash-grid">
-      <section class="card span2"><div class="ch"><div><h2>Waiting on you</h2><p class="sub">Oldest first. Every minute here is a minute hiro can't work.</p></div>${needs.length?`<button class="btn btn-s" data-f="needs">Open inbox</button>`:""}</div>
+      <section class="card span2"><div class="ch"><div><h2>Waiting on you</h2><p class="sub">Oldest first. Every minute here is a minute agnts can't work.</p></div>${needs.length?`<button class="btn btn-s" data-f="needs">Open inbox</button>`:""}</div>
         ${waitRows.length ? `<div class="tw"><table class="tbl"><thead><tr><th>Ticket</th><th>Status</th><th>Waiting</th><th></th></tr></thead><tbody>
         ${waitRows.map(({t,since})=>`<tr data-k="${t.key}" tabindex="0"><td><div class="tkey">${t.key}</div><div class="ttitle notr">${esc(t.title)}</div></td><td>${badge(t)}</td><td class="muted" style="white-space:nowrap">${since ? fmtDur(Math.max(60000, Date.now()-since)) : "—"}</td><td style="text-align:right"><span class="btn btn-s">${actLbl[t.state]}</span></td></tr>`).join("")}</tbody></table></div>`
-        : `<div class="help ok">${svg("check")}<p>Nothing is waiting on you. hiro will show tickets here when it needs answers or a review.</p></div>`}
+        : `<div class="help ok">${svg("check")}<p>Nothing is waiting on you. agnts will show tickets here when it needs answers or a review.</p></div>`}
       </section>
       <section class="card"><div class="ch"><div><h2>Plan usage</h2><p class="sub" id="ago">${agoText(usage.updatedAt)}</p></div></div>
         <div class="lim"><div class="lim-h"><span>Current session</span><b class="${l}">${p}%</b></div><div class="bar ${l}"><span style="width:${p}%"></span></div><span class="hint">${resetText(usage.five_hour.resetsAt)}</span></div>
@@ -2467,9 +2467,9 @@ function dashboardPage(){
         <div class="stackbar">${pipe.filter(x=>x.n).map(x=>`<span style="width:${x.n/pTotal*100}%; background:${x.c}" title="${x.lb}: ${x.n}"></span>`).join("")}</div>
         <div class="pipe-l">${pipe.map(x=>`<div><i style="background:${x.c}"></i><span>${x.lb}</span><b>${x.n}</b></div>`).join("")}</div>
       </section>
-      <section class="card span2"><div class="ch"><div><h2>Today by hour</h2><p class="sub">Events recorded today. hiro keeps working while you sleep.</p></div></div>
-        ${chartBars([{label:"hiro", values:byH.map(x=>x[0]), color:"var(--primary)"},{label:"You", values:byH.map(x=>x[1]), color:"var(--warn)"},{label:"Errors", values:byH.map(x=>x[2]), color:"var(--bad)"}], {labels:byH.map((_,i)=>String(i).padStart(2,"0")), maxLabels:12, h:170, aria:"Events today by hour"})}
-        ${legend([["var(--primary)","hiro working"],["var(--warn)","Your actions"],["var(--bad)","Warnings and errors"]])}
+      <section class="card span2"><div class="ch"><div><h2>Today by hour</h2><p class="sub">Events recorded today. agnts keeps working while you sleep.</p></div></div>
+        ${chartBars([{label:"agnts", values:byH.map(x=>x[0]), color:"var(--primary)"},{label:"You", values:byH.map(x=>x[1]), color:"var(--warn)"},{label:"Errors", values:byH.map(x=>x[2]), color:"var(--bad)"}], {labels:byH.map((_,i)=>String(i).padStart(2,"0")), maxLabels:12, h:170, aria:"Events today by hour"})}
+        ${legend([["var(--primary)","agnts working"],["var(--warn)","Your actions"],["var(--bad)","Warnings and errors"]])}
       </section>
       <section class="card"><div class="ch"><div><h2>This week</h2><p class="sub">Compared with last week</p></div></div>
         <div class="mini-kv"><span>Tickets picked up</span><b>${wk.picked} ${delta(wk.picked, pw.picked, true)}</b></div>
@@ -2503,13 +2503,13 @@ function analyticsPage(){
   const withMd = repoRows.filter(r=>r.md && r.n), noMd = repoRows.filter(r=>!r.md && r.n);
   const avgT = (rows) => rows.length ? rows.reduce((a,r)=>a+r.turns*r.n,0)/rows.reduce((a,r)=>a+r.n,0) : 0;
   const mdGain = noMd.length && withMd.length ? Math.round((1 - avgT(withMd)/avgT(noMd))*100) : 0;
-  const waitShare = pct(cur.waitMin, cur.waitMin + cur.hiroMin);
+  const waitShare = pct(cur.waitMin, cur.waitMin + cur.agntsMin);
   const hours = Array.from({length:24},(_,h)=>{ const r = rng(h*977+P*31); const shape = 0.18 + 0.55*Math.exp(-((h-11)**2)/6) + 0.65*Math.exp(-((h-15.5)**2)/7) + (h>=22||h<=2 ? 0.2 : 0); return Math.round((shape*26 + r()*6) * P/30); });
   const peak = hours.indexOf(Math.max(...hours)), night = hours.slice(0,7).reduce((a,b)=>a+b,0) + hours.slice(22).reduce((a,b)=>a+b,0), nightPct = pct(night, hours.reduce((a,b)=>a+b,0));
   const outcomes = [{label:"Approved on first try", v:cur.firstTry, color:"var(--ok)"},{label:"Approved after changes", v:cur.changes, color:"#7F95E8"},{label:"Rejected", v:cur.rejected, color:"var(--line-3)"},{label:"Stopped", v:cur.stopped, color:"var(--bad)"}];
   const stopRows = [{l:"Tests kept failing", v:cur.stops.tests, cls:"bad"},{l:"Plan limit reached", v:cur.stops.limit, cls:"warn"},{l:"Stopped by you", v:cur.stops.you},{l:"Turn limit reached", v:cur.stops.turns}].sort((a,b)=>b.v-a.v);
   const durs = stateDurations();
-  const steps = [{l:"Analyze", v:4.2},{l:"Waiting for your answers", v:cur.answerMin, cls:"warn"},{l:"Coding", v:cur.hiroMin*0.7},{l:"Tests", v:cur.hiroMin*0.3},{l:"Waiting for your review", v:cur.reviewMin, cls:"warn"},{l:"Push", v:0.4}];
+  const steps = [{l:"Analyze", v:4.2},{l:"Waiting for your answers", v:cur.answerMin, cls:"warn"},{l:"Coding", v:cur.agntsMin*0.7},{l:"Tests", v:cur.agntsMin*0.3},{l:"Waiting for your review", v:cur.reviewMin, cls:"warn"},{l:"Push", v:0.4}];
   const L = prefs.lang, T = (en, ru, uz) => ({en, ru, uz})[L];
   const noMdNames = noMd.map(r=>r.name).join(", ");
   const insights = [
@@ -2520,23 +2520,23 @@ function analyticsPage(){
       `${waitShare}% всего времени тикета уходит на ожидание вас. Дольше всего ждут ревью — в среднем ${tr(fmtMin(cur.reviewMin))}.`,
       `Tiket umumiy vaqtining ${waitShare}% sizni kutish bilan oʻtadi. Eng uzoq kutiladigani tekshiruv — oʻrtacha ${tr(fmtMin(cur.reviewMin))}.`),
     cur.stops.tests >= cur.stops.limit
-      ? T("Most stopped runs end on failing tests. Clearer acceptance criteria in tickets help hiro know when it's done.",
-          "Чаще всего запуски останавливаются из-за падающих тестов. Чёткие критерии приёмки в тикетах помогают hiro понять, когда работа готова.",
-          "Toʻxtagan ishlarning aksariyati yiqilgan testlar bilan tugaydi. Tiketlardagi aniq qabul mezonlari hiro'ga ish qachon tayyorligini bilishga yordam beradi.")
+      ? T("Most stopped runs end on failing tests. Clearer acceptance criteria in tickets help agnts know when it's done.",
+          "Чаще всего запуски останавливаются из-за падающих тестов. Чёткие критерии приёмки в тикетах помогают agnts понять, когда работа готова.",
+          "Toʻxtagan ishlarning aksariyati yiqilgan testlar bilan tugaydi. Tiketlardagi aniq qabul mezonlari agnts'ga ish qachon tayyorligini bilishga yordam beradi.")
       : T("Plan limits stop more runs than anything else. Fewer parallel runs or Haiku for summaries save usage.",
           "Чаще всего запуски останавливает лимит тарифа. Меньше одновременных запусков или Haiku для сводок экономят лимит.",
           "Ishlarni eng koʻp tarif limiti toʻxtatadi. Kamroq parallel ish yoki xulosalar uchun Haiku limitni tejaydi."),
-    T(`${nightPct}% of hiro's work happens between 22:00 and 07:00, while you're offline.`,
-      `${nightPct}% работы hiro приходится на время с 22:00 до 07:00, пока вы не в сети.`,
-      `hiro ishining ${nightPct}% siz oflayn boʻlgan 22:00 dan 07:00 gacha boʻlgan vaqtga toʻgʻri keladi.`)
+    T(`${nightPct}% of agnts's work happens between 22:00 and 07:00, while you're offline.`,
+      `${nightPct}% работы agnts приходится на время с 22:00 до 07:00, пока вы не в сети.`,
+      `agnts ishining ${nightPct}% siz oflayn boʻlgan 22:00 dan 07:00 gacha boʻlgan vaqtga toʻgʻri keladi.`)
   ].filter(Boolean);
-  return `<div class="ph"><div><h1>Analytics</h1><p>How well hiro works for you over time: throughput, quality, where time goes, and what it costs your plan.</p></div>
+  return `<div class="ph"><div><h1>Analytics</h1><p>How well agnts works for you over time: throughput, quality, where time goes, and what it costs your plan.</p></div>
       <div class="actions" style="margin:0"><div class="seg">${[[7,"7 days"],[30,"30 days"],[90,"90 days"]].map(([v,lb])=>`<button class="seg-b" data-period="${v}" aria-pressed="${anPeriod===v}">${lb}</button>`).join("")}</div><button class="btn" data-act="export-csv">Export CSV</button></div></div>
     <div class="g6">
       <div class="card stat"><div class="lbl">Tickets pushed</div><div class="val">${cur.pushed} ${delta(cur.pushed, prev.pushed, true)}</div><div class="note">of ${cur.picked} picked up</div></div>
       <div class="card stat"><div class="lbl">Success rate</div><div class="val">${success}% ${delta(success, prevSuccess, true)}</div><div class="note">Pushed out of picked up</div></div>
       <div class="card stat"><div class="lbl">Approved on first try</div><div class="val">${firstTryPct}% ${delta(firstTryPct, prevFirst, true)}</div><div class="note">No changes requested</div></div>
-      <div class="card stat"><div class="lbl">hiro time per ticket</div><div class="val">${fmtMin(cur.hiroMin)} ${delta(cur.hiroMin, prev.hiroMin, false)}</div><div class="note">Analyze, coding and tests</div></div>
+      <div class="card stat"><div class="lbl">agnts time per ticket</div><div class="val">${fmtMin(cur.agntsMin)} ${delta(cur.agntsMin, prev.agntsMin, false)}</div><div class="note">Analyze, coding and tests</div></div>
       <div class="card stat"><div class="lbl">Waiting on you</div><div class="val">${fmtMin(cur.waitMin)} ${delta(cur.waitMin, prev.waitMin, false)}</div><div class="note">Average per ticket</div></div>
       <div class="card stat"><div class="lbl">Average turns</div><div class="val">${Math.round(cur.turns)} ${delta(cur.turns, prev.turns, false)}</div><div class="note">Per ticket</div></div>
     </div>
@@ -2547,12 +2547,12 @@ function analyticsPage(){
         ${legend([["var(--primary)","Pushed"],["var(--line-3)","Rejected"],["var(--bad)","Stopped"]])}</section>
       <section class="card"><div class="ch"><div><h2>Outcomes</h2><p class="sub">How finished tickets ended</p></div></div>
         <div class="donut-wrap">${donut(outcomes, `${success}%`, "pushed")}<div class="dn-legend">${outcomes.map(o=>`<div><i style="background:${o.color}"></i><span>${o.label}</span><b>${o.v}</b></div>`).join("")}</div></div></section>
-      <section class="card span2"><div class="ch"><div><h2>Speed</h2><p class="sub">Average minutes per ticket: hiro working versus waiting on you</p></div></div>
-        ${chartLines([{label:"hiro working", values:cur.days.map(d=>d.hiroMin), color:"var(--primary)", area:true},{label:"Waiting on you", values:cur.days.map(d=>d.waitMin), color:"var(--warn)"}], {labels, maxLabels:P>30?9:10, fmt:(v)=>fmtMin(v), aria:"Minutes per ticket"})}
-        ${legend([["var(--primary)","hiro working"],["var(--warn)","Waiting on you"]])}</section>
+      <section class="card span2"><div class="ch"><div><h2>Speed</h2><p class="sub">Average minutes per ticket: agnts working versus waiting on you</p></div></div>
+        ${chartLines([{label:"agnts working", values:cur.days.map(d=>d.agntsMin), color:"var(--primary)", area:true},{label:"Waiting on you", values:cur.days.map(d=>d.waitMin), color:"var(--warn)"}], {labels, maxLabels:P>30?9:10, fmt:(v)=>fmtMin(v), aria:"Minutes per ticket"})}
+        ${legend([["var(--primary)","agnts working"],["var(--warn)","Waiting on you"]])}</section>
       <section class="card"><div class="ch"><div><h2>Where the time goes</h2><p class="sub">Average per ticket, by step</p></div></div>
-        ${hbars(steps.map(s=>({l:s.l, v:s.v, cls:s.cls})), fmtMin)}${legend([["var(--primary)","hiro working"],["var(--warn)","Waiting on you"]])}</section>
-      <section class="card span2"><div class="ch"><div><h2>Turns per ticket</h2><p class="sub">Fewer turns means hiro finds its way faster and uses less of your plan</p></div></div>
+        ${hbars(steps.map(s=>({l:s.l, v:s.v, cls:s.cls})), fmtMin)}${legend([["var(--primary)","agnts working"],["var(--warn)","Waiting on you"]])}</section>
+      <section class="card span2"><div class="ch"><div><h2>Turns per ticket</h2><p class="sub">Fewer turns means agnts finds its way faster and uses less of your plan</p></div></div>
         ${chartLines([{label:"Average turns", values:cur.days.map(d=>d.turns), color:"#7F95E8", area:true}], {labels, maxLabels:P>30?9:10, aria:"Average turns per ticket"})}</section>
       <section class="card"><div class="ch"><div><h2>Why runs stop</h2><p class="sub">${cur.stopped} stopped runs in this period</p></div></div>${hbars(stopRows)}</section>
       <section class="card span2"><div class="ch"><div><h2>Models</h2><p class="sub">Runs per model and how they turned out</p></div><button class="btn btn-s" data-act="settings">Change models</button></div>
@@ -2562,10 +2562,10 @@ function analyticsPage(){
       <section class="card"><div class="ch"><div><h2>Plan usage</h2><p class="sub">Peak session usage per day</p></div></div>
         ${chartBars([{label:"Session", values:cur.days.map(d=>d.usage), color:"var(--primary)"}], {labels, maxLabels:P>30?5:7, w:340, h:170, aria:"Peak session usage per day"})}
         <div class="mini-kv"><span>Average peak</span><b>${Math.round(cur.usage)}%</b></div><div class="mini-kv"><span>Days above 80%</span><b>${cur.days.filter(d=>d.usage>=80).length}</b></div></section>
-      <section class="card span3"><div class="ch"><div><h2>By repository</h2><p class="sub">Where hiro works best, and where it struggles</p></div></div>
-        <div class="tw"><table class="tbl"><thead><tr><th>Repository</th><th>Source</th><th>Tickets</th><th>Success rate</th><th>Average turns</th><th>hiro time</th><th>CLAUDE.md</th></tr></thead><tbody>
+      <section class="card span3"><div class="ch"><div><h2>By repository</h2><p class="sub">Where agnts works best, and where it struggles</p></div></div>
+        <div class="tw"><table class="tbl"><thead><tr><th>Repository</th><th>Source</th><th>Tickets</th><th>Success rate</th><th>Average turns</th><th>agnts time</th><th>CLAUDE.md</th></tr></thead><tbody>
         ${repoRows.map(r=>`<tr><td class="ttitle">${r.color?`<span class="proj-dot" style="background:${r.color}"></span>`:""}<span class="notr">${esc(r.name)}</span></td><td>${r.kind==="side"?`<span class="src local">Task</span>`:`<span class="src">Jira</span>`}</td><td>${r.n}</td><td><span class="${r.ok>=0.8?"repo-ok":"repo-miss"}">${Math.round(r.ok*100)}%</span></td><td>${r.turns}</td><td>${fmtMin(r.mins)}</td><td>${r.md ? `<span class="repo-ok">Found</span>` : `<span class="repo-miss">Missing</span>`}</td></tr>`).join("")}</tbody></table></div></section>
-      <section class="card span2"><div class="ch"><div><h2>Activity by hour</h2><p class="sub">When hiro works, summed over the period. Busiest hour: ${String(peak).padStart(2,"0")}:00</p></div></div>
+      <section class="card span2"><div class="ch"><div><h2>Activity by hour</h2><p class="sub">When agnts works, summed over the period. Busiest hour: ${String(peak).padStart(2,"0")}:00</p></div></div>
         ${chartBars([{label:"Events", values:hours, color:"#7F95E8"}], {labels:hours.map((_,i)=>String(i).padStart(2,"0")), maxLabels:12, h:160, aria:"Activity by hour"})}</section>
       <section class="card"><div class="ch"><div><h2>Insights</h2><p class="sub">What the numbers suggest</p></div></div>
         <div class="insights notr">${insights.map(x=>`<div class="help">${svg("info")}<p>${x}</p></div>`).join("")}</div></section>
@@ -2577,14 +2577,14 @@ function seedInteg(){ return {
   github:{connected:true, method:"pat", account:"rustambekabdusalomov", token:"4f2a", expires:"2027-03-14", checked:Date.now()-2*60000,
     perms:{contents:true, pulls:true, metadata:true, workflows:false, issues:true},
     access:{}, authorName:"Rustambek Abdusalomov", authorEmail:"abdusalomovrustambek@gmail.com", sign:false, coAuthor:true,
-    prTitle:"[{key}] {title}", draft:false, labels:"hiro", reviewers:"", deleteBranch:true, mergedDone:true, webhook:true},
+    prTitle:"[{key}] {title}", draft:false, labels:"agnts", reviewers:"", deleteBranch:true, mergedDone:true, webhook:true},
   gitlab:{connected:false, method:"pat", url:"https://gitlab.com", account:"", token:"", expires:"", checked:0,
     perms:{api:false, read_repository:false, write_repository:false},
     access:{}, authorName:"Rustambek Abdusalomov", authorEmail:"abdusalomovrustambek@gmail.com", sign:false, coAuthor:true,
-    prTitle:"[{key}] {title}", draft:true, labels:"hiro", reviewers:"", deleteBranch:true, mergedDone:true, webhook:false},
+    prTitle:"[{key}] {title}", draft:true, labels:"agnts", reviewers:"", deleteBranch:true, mergedDone:true, webhook:false},
   jira:{connected:true, site:"https://kapital.atlassian.net", email:"abdusalomovrustambek@gmail.com", token:"9c1e", checked:Date.now()-60000,
     projects:{PAY:{name:"Payments", on:true}, OPS:{name:"Operations", on:true}, MOB:{name:"Mobile app", on:false}},
-    label:"hiro", types:["Task","Bug","Story"], statuses:["To Do","Selected for Development"], assignee:"me", poll:"2",
+    label:"agnts", types:["Task","Bug","Story"], statuses:["To Do","Selected for Development"], assignee:"me", poll:"2",
     mapStart:"In Progress", mapPushed:"In Review", mapReject:"To Do", mapMerged:"Done",
     cQuestions:true, cPlan:false, cPr:true, cSummary:true}
 };}
@@ -2599,7 +2599,7 @@ const PROV_ICON = {
 };
 function provTile(id, size){ const p = PROV[id]; return `<span class="ptile" style="background:${p.tint};width:${size||40}px;height:${size||40}px"><svg viewBox="0 0 24 24" aria-hidden="true">${PROV_ICON[p.kind]}</svg></span>`; }
 const GIT_PERMS = {
-  github:[["contents","Contents","Read and write. Clone code and push branches.",true],["pulls","Pull requests","Read and write. Open pull requests and read reviews.",true],["metadata","Metadata","Read. List repositories and branches.",true],["issues","Issues","Read. Link pull requests to issues.",false],["workflows","Workflows","Read and write. Only needed if hiro may change CI files.",false]],
+  github:[["contents","Contents","Read and write. Clone code and push branches.",true],["pulls","Pull requests","Read and write. Open pull requests and read reviews.",true],["metadata","Metadata","Read. List repositories and branches.",true],["issues","Issues","Read. Link pull requests to issues.",false],["workflows","Workflows","Read and write. Only needed if agnts may change CI files.",false]],
   gitlab:[["api","api","Full API access. Open merge requests and read pipelines.",true],["read_repository","read_repository","Clone code.",true],["write_repository","write_repository","Push branches.",true]]
 };
 function jqlPreview(j){
@@ -2636,8 +2636,8 @@ function integCardSummary(id){
   return g.connected ? `<div class="mini-kv"><span>Account</span><b class="notr">@${esc(g.account)}</b></div><div class="mini-kv"><span>Repositories</span><b>${gitRepos(id).length}</b></div><div class="mini-kv"><span>Token expires</span><b>${daysUntil(g.expires)} days</b></div>` : "";
 }
 function integrationsPage(){
-  const desc = {github:"Clone code, push branches and open pull requests.", gitlab:"The same for repositories on GitLab.com or your own GitLab server.", jira:"Pick up tickets with the hiro label and keep their status up to date."};
-  return `<div class="ph"><div><h1>Integrations</h1><p>The services hiro works with. Tokens are stored on your server and only used for the actions listed on each page.</p></div></div>
+  const desc = {github:"Clone code, push branches and open pull requests.", gitlab:"The same for repositories on GitLab.com or your own GitLab server.", jira:"Pick up tickets with the agnts label and keep their status up to date."};
+  return `<div class="ph"><div><h1>Integrations</h1><p>The services agnts works with. Tokens are stored on your server and only used for the actions listed on each page.</p></div></div>
     <div class="integ-grid">${["jira","github","gitlab"].map(id=>{ const g = settings.integ[id];
       return `<section class="card integ-card"><div class="ic-h">${provTile(id)}<div><h2 class="notr">${PROV[id].name}</h2>${connBadge(g.connected)}</div></div>
         <p class="sub" style="margin:10px 0 8px">${desc[id]}</p>${integCardSummary(id)}
@@ -2650,7 +2650,7 @@ function connectCard(id){
   if(c) return `<section class="card"><div class="ch"><div><h2>Connecting to ${p.name}</h2></div></div><ol class="steps-l">${["Checking the token","Reading your account","Listing projects"].map((s,i)=>`<li class="${i<c.step?"done":i===c.step?"now":""}"><span class="sd">${i<c.step?svg("check"):""}</span>${s}</li>`).join("")}</ol></section>`;
   return `<section class="card"><div class="ch"><div><h2>Connect ${p.name}</h2><p class="sub">Create a personal access token with the scopes below, then paste it here.</p></div></div>
     ${id==="gitlab" ? row("Instance URL", "gitlab.com or your own GitLab server", `<input class="cfg-in mono" id="gl-url" value="${esc(draftSettings.integ.gitlab.url)}">`) : ""}
-    ${row("Access token", "Stored encrypted on your server. hiro never shows it again.", `<input class="cfg-in mono" id="gl-token" type="password" autocomplete="off" placeholder="glpat-…">`)}
+    ${row("Access token", "Stored encrypted on your server. agnts never shows it again.", `<input class="cfg-in mono" id="gl-token" type="password" autocomplete="off" placeholder="glpat-…">`)}
     <div class="sec"><h3>Required scopes</h3>${GIT_PERMS[id].map(([k,l,d])=>`<div class="perm"><span class="pk notr">${l}</span><span class="hint">${d}</span></div>`).join("")}</div>
     ${igErr ? `<p class="ferr" style="margin-top:12px">${igErr}</p>` : ""}
     <div class="actions"><button class="btn btn-p" data-ig-act="connect" data-id="${id}">Connect ${p.name}</button></div></section>`;
@@ -2660,16 +2660,16 @@ function gitPage(id){
   const head = `<button class="back-btn" data-act="integrations">${svg("back")}Back to integrations</button>
     <div class="ph"><div class="ph-row">${provTile(id, 48)}<div><h1 class="notr">${p.name}</h1><p>${live.connected ? `Connected as @${esc(live.account)}. Last checked ${agoShort(live.checked)}.` : "Not connected yet."}</p></div></div>
       ${live.connected ? `<div class="actions" style="margin:0"><button class="btn" data-ig-act="test" data-id="${id}">Test connection</button><button class="btn btn-d" data-ig-act="disconnect" data-id="${id}">Disconnect</button></div>` : ""}</div>`;
-  if(!live.connected) return head + `<div class="cfg-grid"><div class="col">${connectCard(id)}</div><aside class="cfg-side"><div class="help">${svg("info")}<p>Use a token from an account that can push to your repositories. hiro commits under the name and email you set after connecting.</p></div></aside></div>`;
+  if(!live.connected) return head + `<div class="cfg-grid"><div class="col">${connectCard(id)}</div><aside class="cfg-side"><div class="help">${svg("info")}<p>Use a token from an account that can push to your repositories. agnts commits under the name and email you set after connecting.</p></div></aside></div>`;
   const rs = gitRepos(id), days = daysUntil(live.expires), prs = id === "github" ? 64 : 0;
   const recent = events.filter(e=>e.type==="command" && /^(git push|gh pr|Opening pull)/.test(e.msg)).slice(-6).reverse();
   return head + `<div class="g4">
-      <div class="card stat"><div class="lbl">Repositories</div><div class="val">${rs.filter(r=>g.access[r.name] !== false).length}</div><div class="note">hiro can use</div></div>
-      <div class="card stat"><div class="lbl">${p.unit}</div><div class="val">${prs}</div><div class="note">Opened by hiro, last 30 days</div></div>
-      <div class="card stat"><div class="lbl">Merged</div><div class="val">${id==="github"?"86%":"—"}</div><div class="note">Of ${p.one}s hiro opened</div></div>
+      <div class="card stat"><div class="lbl">Repositories</div><div class="val">${rs.filter(r=>g.access[r.name] !== false).length}</div><div class="note">agnts can use</div></div>
+      <div class="card stat"><div class="lbl">${p.unit}</div><div class="val">${prs}</div><div class="note">Opened by agnts, last 30 days</div></div>
+      <div class="card stat"><div class="lbl">Merged</div><div class="val">${id==="github"?"86%":"—"}</div><div class="note">Of ${p.one}s agnts opened</div></div>
       <div class="card stat"><div class="lbl">API rate limit</div><div class="val">4,812</div><div class="note">Of 5,000 left this hour</div></div></div>
     <div class="cfg-grid"><div class="col">
-      <section class="card"><div class="ch"><div><h2>Connection</h2><p class="sub">How hiro signs in</p></div>${connBadge(true)}</div>
+      <section class="card"><div class="ch"><div><h2>Connection</h2><p class="sub">How agnts signs in</p></div>${connBadge(true)}</div>
         ${row("Method", id==="github" ? "A GitHub App can be limited to selected repositories" : "", igSeg(`${id}.method`, id==="github" ? [["pat","Personal access token"],["app","GitHub App"]] : [["pat","Personal access token"],["oauth","OAuth application"]]))}
         ${id==="gitlab" ? row("Instance URL", "", `<span class="conn notr">${esc(live.url)}</span>`) : ""}
         ${row("Token", "Stored encrypted on your server", `<span class="conn notr">•••• ${esc(live.token)}</span>`)}
@@ -2678,17 +2678,17 @@ function gitPage(id){
       <section class="card"><div class="ch"><div><h2>Permissions</h2><p class="sub">What the token can do, checked on the last test</p></div></div>
         ${GIT_PERMS[id].map(([k,l,d,req])=>{ const ok = live.perms[k]; return `<div class="perm"><span class="pk notr">${l}</span><span class="hint">${d}</span><span class="pr">${req?`<span class="hint">Required</span>`:`<span class="hint">Optional</span>`}${ok?`<span class="badge b-ok">Granted</span>`:`<span class="badge ${req?"b-bad":"b-gray"}">Not granted</span>`}</span></div>`; }).join("")}
       </section>
-      <section class="card"><div class="ch"><div><h2>Repository access</h2><p class="sub">Turn off a repository to stop hiro from cloning or pushing to it</p></div></div>
-        <div class="tw"><table class="tbl"><thead><tr><th>Repository</th><th>Used for</th><th>hiro can use</th></tr></thead><tbody>
+      <section class="card"><div class="ch"><div><h2>Repository access</h2><p class="sub">Turn off a repository to stop agnts from cloning or pushing to it</p></div></div>
+        <div class="tw"><table class="tbl"><thead><tr><th>Repository</th><th>Used for</th><th>agnts can use</th></tr></thead><tbody>
         ${rs.map(r=>`<tr><td><span class="tkey" style="color:var(--ink)">${r.color?`<span class="proj-dot" style="background:${r.color}"></span>`:""}${esc(r.name)}</span></td><td>${r.src==="Jira"?`<span class="src">Jira</span>`:r.src==="Task"?`<span class="src local">Task</span>`:`<span class="hint">Not used yet</span>`}</td><td><button class="sw on-ok" role="switch" aria-checked="${g.access[r.name] !== false}" data-ig-acc="${id}" data-val="${esc(r.name)}" aria-label="${esc(r.name)}"></button></td></tr>`).join("")}</tbody></table></div>
       </section>
       <section class="card"><div class="ch"><div><h2>Commits</h2><p class="sub">Who commits appear from</p></div></div>
         ${row("Author name", "Commits are made as you", igIn(`${id}.authorName`))}
         ${row("Author email", `Must match your ${p.name} account to show as yours`, igIn(`${id}.authorEmail`))}
         ${row("Sign commits", "Uses the SSH key on your server", igSw(`${id}.sign`))}
-        ${row("Add a Co-authored-by: hiro line", "Teammates can see which commits hiro wrote", igSw(`${id}.coAuthor`))}
+        ${row("Add a Co-authored-by: agnts line", "Teammates can see which commits agnts wrote", igSw(`${id}.coAuthor`))}
       </section>
-      <section class="card"><div class="ch"><div><h2>${p.unit}</h2><p class="sub">How hiro opens them</p></div></div>
+      <section class="card"><div class="ch"><div><h2>${p.unit}</h2><p class="sub">How agnts opens them</p></div></div>
         ${row("Title", "{key} and {title} are replaced with the ticket's key and title", igIn(`${id}.prTitle`, true))}
         ${row("Open as draft", "", igSw(`${id}.draft`))}
         ${row("Labels", "Comma separated", igIn(`${id}.labels`, true))}
@@ -2701,7 +2701,7 @@ function gitPage(id){
     <aside class="cfg-side">
       <section class="card"><div class="ch"><div><h2>Webhooks</h2><p class="sub">Updates from ${p.name}</p></div>${live.webhook ? `<span class="badge b-ok">Active</span>` : `<span class="badge b-gray">Off</span>`}</div>
         <div class="mini-kv"><span>Events</span><b class="notr">push, pull_request</b></div><div class="mini-kv"><span>Last delivery</span><b>${live.webhook ? "3 min ago" : "—"}</b></div>
-        <p class="hint" style="margin:8px 0 0">hiro learns about merges and review comments right away instead of checking every few minutes.</p></section>
+        <p class="hint" style="margin:8px 0 0">agnts learns about merges and review comments right away instead of checking every few minutes.</p></section>
       <section class="card"><div class="ch"><div><h2>Recent activity</h2></div></div>
         ${recent.length ? `<ul class="recent">${recent.map(e=>`<li data-k="${e.key}"><time>${fmtTs(e.ts).slice(0,5)}</time><span class="tkey">${e.key}</span><span class="rc-m notr">${esc(e.msg)}</span></li>`).join("")}</ul>` : `<p class="hint">No activity yet.</p>`}</section>
     </aside></div>`;
@@ -2717,30 +2717,30 @@ function jiraPage(){
   const labelled = tickets.filter(t=>!isLocal(t) && !["done","rejected"].includes(t.state)).length;
   const types = ["Task","Bug","Story","Sub-task","Epic"], statuses = ["Backlog","To Do","Selected for Development","In Progress"];
   return head + `<div class="g4">
-      <div class="card stat"><div class="lbl">Projects</div><div class="val">${Object.values(live.projects).filter(p=>p.on).length}</div><div class="note">Watched by hiro</div></div>
+      <div class="card stat"><div class="lbl">Projects</div><div class="val">${Object.values(live.projects).filter(p=>p.on).length}</div><div class="note">Watched by agnts</div></div>
       <div class="card stat"><div class="lbl">Open tickets</div><div class="val">${labelled}</div><div class="note">With the ${esc(live.label)} label</div></div>
       <div class="card stat"><div class="lbl">Picked up</div><div class="val">${periodStats(30,0).picked}</div><div class="note">Last 30 days</div></div>
       <div class="card stat"><div class="lbl">Comments posted</div><div class="val">97</div><div class="note">Questions, links and summaries</div></div></div>
     <div class="cfg-grid"><div class="col">
       <section class="card"><div class="ch"><div><h2>Connection</h2></div>${connBadge(true)}</div>
         ${row("Site", "", `<span class="conn notr">${esc(live.site)}</span>`)}${row("Account", "", `<span class="conn notr">${esc(live.email)}</span>`)}${row("API token", "Stored encrypted on your server", `<span class="conn notr">•••• ${esc(live.token)}</span>`)}</section>
-      <section class="card"><div class="ch"><div><h2>Projects</h2><p class="sub">Which Jira projects hiro watches, and where their code lives</p></div></div>
+      <section class="card"><div class="ch"><div><h2>Projects</h2><p class="sub">Which Jira projects agnts watches, and where their code lives</p></div></div>
         <div class="tw"><table class="tbl"><thead><tr><th>Project</th><th>Repositories</th><th>Watched</th></tr></thead><tbody>
         ${Object.entries(g.projects).map(([k,pp])=>`<tr><td><div class="tkey">${k}</div><div class="ttitle notr">${esc(pp.name)}</div></td><td>${repos.filter(r=>r.jira===k).map(r=>`<span class="src notr" style="margin:2px 4px 2px 0">${esc(r.name)}</span>`).join("") || `<span class="hint">No repository yet</span>`}</td><td><button class="sw on-ok" role="switch" aria-checked="${pp.on}" data-ig-sw="jira.projects.${k}.on" aria-label="${k}"></button></td></tr>`).join("")}</tbody></table></div></section>
-      <section class="card"><div class="ch"><div><h2>Pickup rules</h2><p class="sub">Which tickets hiro takes</p></div></div>
-        ${row("Label", "Add this label to a ticket to hand it to hiro", igIn("jira.label", true))}
+      <section class="card"><div class="ch"><div><h2>Pickup rules</h2><p class="sub">Which tickets agnts takes</p></div></div>
+        ${row("Label", "Add this label to a ticket to hand it to agnts", igIn("jira.label", true))}
         ${row("Issue types", "", igChips("jira.types", types))}
         ${row("Statuses", "Tickets in other statuses are left alone", igChips("jira.statuses", statuses))}
         ${row("Assignee", "", igSeg("jira.assignee", [["me","Assigned to me"],["any","Anyone"]]))}
         ${row("Check for new tickets", "", igSeg("jira.poll", [["1","Every minute"],["2","Every 2 min"],["10","Every 10 min"]]))}
-        <div class="sec"><h3>The query hiro runs</h3><pre class="jql">${esc(jqlPreview(g))}</pre></div></section>
-      <section class="card"><div class="ch"><div><h2>Status updates</h2><p class="sub">How hiro moves tickets on your board</p></div></div>
-        ${row("When hiro starts coding", "", igSel("jira.mapStart", ["In Progress","Keep status"]))}
+        <div class="sec"><h3>The query agnts runs</h3><pre class="jql">${esc(jqlPreview(g))}</pre></div></section>
+      <section class="card"><div class="ch"><div><h2>Status updates</h2><p class="sub">How agnts moves tickets on your board</p></div></div>
+        ${row("When agnts starts coding", "", igSel("jira.mapStart", ["In Progress","Keep status"]))}
         ${row("When changes are pushed", "", igSel("jira.mapPushed", ["In Review","Code Review","Keep status"]))}
         ${row("When you reject the changes", "", igSel("jira.mapReject", ["To Do","Backlog","Keep status"]))}
         ${row("When the pull request is merged", "", igSel("jira.mapMerged", ["Done","Keep status"]))}</section>
-      <section class="card"><div class="ch"><div><h2>Comments</h2><p class="sub">What hiro writes on the ticket</p></div></div>
-        ${row("hiro's questions", "So teammates can see what was unclear", igSw("jira.cQuestions"))}
+      <section class="card"><div class="ch"><div><h2>Comments</h2><p class="sub">What agnts writes on the ticket</p></div></div>
+        ${row("agnts's questions", "So teammates can see what was unclear", igSw("jira.cQuestions"))}
         ${row("The plan before coding", "", igSw("jira.cPlan"))}
         ${row("Link to the pull request", "", igSw("jira.cPr"))}
         ${row("Summary of the changes", "", igSw("jira.cSummary"))}</section>
@@ -2750,7 +2750,7 @@ function jiraPage(){
       <section class="card"><div class="ch"><div><h2>Sync</h2></div><span class="badge b-ok">Polling</span></div>
         <div class="mini-kv"><span>Last sync</span><b>${agoShort(live.checked)}</b></div><div class="mini-kv"><span>Next sync</span><b>${live.poll === "1" ? "in 1 min" : live.poll === "10" ? "in 10 min" : "in 2 min"}</b></div>
         <p class="hint" style="margin:8px 0 0">A Jira webhook would deliver new tickets instantly. It needs a public URL for your server.</p></section>
-      <div class="help">${svg("info")}<p>hiro only reads tickets that match the query, and only writes the status changes and comments you turn on here.</p></div>
+      <div class="help">${svg("info")}<p>agnts only reads tickets that match the query, and only writes the status changes and comments you turn on here.</p></div>
     </aside></div>`;
 }
 function agoShort(ts){ const m = Math.round((Date.now()-ts)/60000); return m < 1 ? "just now" : m < 60 ? `${m} min ago` : `${Math.floor(m/60)}h ago`; }
@@ -2770,7 +2770,7 @@ function runConnect(id){
 }
 
 /* ---------- Repository git data (demo) ---------- */
-const TEAM = {you:["Rustambek Abdusalomov","RA","#2E46A8"], dk:["Dilshod Karimov","DK","#0F766E"], ar:["Aziza Rahimova","AR","#B45309"], hiro:["hiro","h","#16181D"]};
+const TEAM = {you:["Rustambek Abdusalomov","RA","#2E46A8"], dk:["Dilshod Karimov","DK","#0F766E"], ar:["Aziza Rahimova","AR","#B45309"], agnts:["agnts","h","#16181D"]};
 const MSGS_GO = ["Fix nil pointer in ledger posting","Add metrics for outbox relay","Bump pgx to v5.7.1","Refactor transfer validation","Add index for transactions by account","Retry NATS publish with backoff","Update OpenAPI spec for refunds","Remove unused feature flag","Improve gateway error messages","Add integration test for refunds","Tune database connection pool","Log request id in middleware"];
 const MSGS_APP = ["Fix layout on small screens","Add loading state to lists","Update translations","Refactor API client","Add pull to refresh","Fix crash on empty list","Bump dependencies","Improve image caching","Add dark mode colors","Fix date formatting"];
 const FEAT = {go:["feature/refund-webhooks","fix/ledger-rounding","chore/upgrade-go-1.23"], app:["feature/onboarding","fix/android-keyboard"]};
@@ -2786,11 +2786,11 @@ function repoGit(id){
   const ciOf = (t) => t.state === "failed" ? "fail" : ["coding","testing"].includes(t.state) ? "run" : ["waiting_for_answers","rate_limited","rejected"].includes(t.state) ? "none" : "ok";
   const branches = [{name:def, def:true, author:"you", msg:msgs[0], ahead:0, behind:0, ts:now - 2*H, ci:"ok"}];
   tks.forEach((t,i) => { const hasCode = !["waiting_for_answers"].includes(t.state);
-    branches.push({name:"hiro/"+t.key.toLowerCase(), hiro:true, key:t.key, author:"hiro", msg: hasCode ? `${t.key}: ${t.result ? t.result.summary[0].split(". ")[0].replace(/\.$/,"") : t.title}` : "No commits yet", ahead: hasCode ? 1 + Math.floor(r()*4) : 0, behind: Math.floor(r()*3), ts: now - (i+1)*H*(1+r()*3), ci: ciOf(t), merged: t.state === "done"}); });
+    branches.push({name:"agnts/"+t.key.toLowerCase(), agnts:true, key:t.key, author:"agnts", msg: hasCode ? `${t.key}: ${t.result ? t.result.summary[0].split(". ")[0].replace(/\.$/,"") : t.title}` : "No commits yet", ahead: hasCode ? 1 + Math.floor(r()*4) : 0, behind: Math.floor(r()*3), ts: now - (i+1)*H*(1+r()*3), ci: ciOf(t), merged: t.state === "done"}); });
   (go ? FEAT.go : FEAT.app).forEach((b,i) => { const who = people[(i+1) % people.length]; branches.push({name:b, author:who, msg:msgs[(i*3+2) % msgs.length], ahead:1+Math.floor(r()*6), behind:Math.floor(r()*12), ts: now - (6+i*20)*H*(0.5+r()), ci: r() > 0.8 ? "fail" : "ok"}); });
   const commits = [];
-  tks.filter(t=>t.result && t.state !== "waiting_for_answers").forEach(t => { const b = "hiro/"+t.key.toLowerCase(), base = branches.find(x=>x.name===b);
-    t.result.files.slice(0,2).forEach((f,j) => commits.push({sha:shaOf(r), author:"hiro", coauthor:"you", key:t.key, msg: j === 0 ? `${t.key}: ${t.result.summary[0].split(". ")[0].replace(/\.$/,"")}` : `${t.key}: update ${f.path.split("/").pop()}`, branch:b, ts: base.ts - j*9*60000, ci: base.ci, add:f.add, del:f.del})); });
+  tks.filter(t=>t.result && t.state !== "waiting_for_answers").forEach(t => { const b = "agnts/"+t.key.toLowerCase(), base = branches.find(x=>x.name===b);
+    t.result.files.slice(0,2).forEach((f,j) => commits.push({sha:shaOf(r), author:"agnts", coauthor:"you", key:t.key, msg: j === 0 ? `${t.key}: ${t.result.summary[0].split(". ")[0].replace(/\.$/,"")}` : `${t.key}: update ${f.path.split("/").pop()}`, branch:b, ts: base.ts - j*9*60000, ci: base.ci, add:f.add, del:f.del})); });
   for(let i=0;i<14;i++){ const who = people[Math.floor(r()*people.length)]; commits.push({sha:shaOf(r), author:who, msg:msgs[Math.floor(r()*msgs.length)], branch: r() > 0.35 ? def : branches[branches.length-1-Math.floor(r()*2)].name, ts: now - (3 + i*9 + r()*8)*H, ci: r() > 0.88 ? "fail" : "ok", add:Math.floor(4+r()*120), del:Math.floor(r()*40)}); }
   commits.sort((a,b)=>b.ts-a.ts);
   const pipes = []; let pid = 1800 + (hashStr(name) % 200);
@@ -2801,7 +2801,7 @@ function repoGit(id){
     else if(c.ci === "fail") st = stages.map((s,k)=> k === 0 ? "ok" : k === 1 ? "fail" : "skip");
     else st = stages.map(()=> "ok");
     const durs = stages.map((s,k)=> [48, 140, 35, 70, 85][k] + Math.floor(r()*40));
-    pipes.push({id:pid - i, sha:c.sha, branch:c.branch, msg:c.msg, author:c.author, key:c.key, trigger: c.branch.startsWith("hiro/") ? "pull request" : onMain ? "merge" : "push", ts:c.ts + 60000, stages:stages.map((s,k)=>({name:s[0], st:st[k], dur:durs[k]}))});
+    pipes.push({id:pid - i, sha:c.sha, branch:c.branch, msg:c.msg, author:c.author, key:c.key, trigger: c.branch.startsWith("agnts/") ? "pull request" : onMain ? "merge" : "push", ts:c.ts + 60000, stages:stages.map((s,k)=>({name:s[0], st:st[k], dur:durs[k]}))});
   });
   const mainPipes = pipes.filter(p=>p.branch===def);
   const newest = mainPipes.find(p=>p.stages.every(x=>x.st==="ok")); if(newest) newest.stages[4].st = "manual";
@@ -2823,23 +2823,23 @@ function stagesViz(p, interactive){
 function repoPage(){
   const meta = repoMeta(view.repo); if(!meta){ view.page = "repos"; return reposPage(); }
   const g = repoGit(view.repo), tab = view.rtab || "branches";
-  const hb = g.branches.filter(b=>b.hiro).length, week = g.commits.filter(c=>Date.now()-c.ts < 7*86400000).length;
+  const hb = g.branches.filter(b=>b.agnts).length, week = g.commits.filter(c=>Date.now()-c.ts < 7*86400000).length;
   const done = g.pipes.filter(p=>pipeStatus(p) !== "run"), okRate = done.length ? Math.round(done.filter(p=>pipeStatus(p) !== "fail").length / done.length * 100) : 0;
   const prod = g.envs[1];
   const head = `<button class="back-btn" data-act="repos">${svg("back")}Back to repositories</button>
     <div class="ph"><div><h1 class="notr">${esc(meta.name)}</h1><p class="notr" style="font-family:var(--mono);font-size:14px">${esc(meta.url)}</p></div>
       <div class="actions" style="margin:0">${meta.kind==="jira" ? `<span class="src">Jira ${esc(meta.jira)}</span>` : `<span class="src local notr">${esc(meta.project.name)}</span>`}<button class="btn" data-act="edit-repo">Edit settings</button></div></div>
     <div class="g4">
-      <div class="card stat"><div class="lbl">Branches</div><div class="val">${g.branches.length}</div><div class="note">${hb} by hiro</div></div>
-      <div class="card stat"><div class="lbl">Commits this week</div><div class="val">${week}</div><div class="note">${g.commits.filter(c=>c.author==="hiro").length} written by hiro</div></div>
+      <div class="card stat"><div class="lbl">Branches</div><div class="val">${g.branches.length}</div><div class="note">${hb} by agnts</div></div>
+      <div class="card stat"><div class="lbl">Commits this week</div><div class="val">${week}</div><div class="note">${g.commits.filter(c=>c.author==="agnts").length} written by agnts</div></div>
       <div class="card stat"><div class="lbl">Pipeline success</div><div class="val">${okRate}%</div><div class="note">Last ${done.length} runs</div></div>
       <div class="card stat"><div class="lbl">Production</div><div class="val notr" style="font-family:var(--mono);font-size:22px">${prod.sha}</div><div class="note">Deployed ${agoTs(prod.ts)} ago</div></div></div>
     <div class="tabs" role="tablist">${[["branches","Branches"],["commits","Commits"],["pipelines","Pipelines"]].map(([v,l])=>`<button class="tab" role="tab" data-rtab="${v}" aria-pressed="${tab===v}">${l}</button>`).join("")}</div>`;
   let body = "";
   if(tab === "branches"){
-    const f = view.bfilter || "all", rows = g.branches.filter(b => f === "all" || (f === "hiro" ? b.hiro : !b.hiro));
-    body = `<section class="card"><div class="ch"><div><h2>Branches</h2><p class="sub">hiro works on its own branch for every ticket and never commits to ${esc(g.def)}</p></div>
-      <div class="seg">${[["all","All"],["hiro","hiro"],["others","Others"]].map(([v,l])=>`<button class="seg-b" data-bf="${v}" aria-pressed="${f===v}">${l}</button>`).join("")}</div></div>
+    const f = view.bfilter || "all", rows = g.branches.filter(b => f === "all" || (f === "agnts" ? b.agnts : !b.agnts));
+    body = `<section class="card"><div class="ch"><div><h2>Branches</h2><p class="sub">agnts works on its own branch for every ticket and never commits to ${esc(g.def)}</p></div>
+      <div class="seg">${[["all","All"],["agnts","agnts"],["others","Others"]].map(([v,l])=>`<button class="seg-b" data-bf="${v}" aria-pressed="${f===v}">${l}</button>`).join("")}</div></div>
       <div class="tw"><table class="tbl"><thead><tr><th>Branch</th><th>Latest commit</th><th>Author</th><th>Ahead / behind</th><th>Checks</th><th>Updated</th></tr></thead><tbody>
       ${rows.map(b=>`<tr ${b.key?`data-k="${b.key}"`:""} tabindex="0"><td><span class="br notr">${esc(b.name)}</span>${b.def?` <span class="badge b-info">Default</span>`:""}${b.key?`<div style="margin-top:4px">${badge(find(b.key))}</div>`:""}</td>
         <td class="${b.msg==="No commits yet"?"muted":"notr"}" style="max-width:340px">${esc(b.msg)}</td><td>${authorChip(b.author)}</td><td class="muted" style="white-space:nowrap">${b.def ? "—" : `<span style="color:var(--ok-ink)">↑${b.ahead}</span> <span style="color:var(--bad-ink)">↓${b.behind}</span>`}</td>
@@ -2847,7 +2847,7 @@ function repoPage(){
   }
   if(tab === "commits"){
     const groups = {}; g.commits.forEach(c => { const d = new Date(c.ts); d.setHours(0,0,0,0); (groups[d.getTime()] ||= []).push(c); });
-    body = `<section class="card"><div class="ch"><div><h2>Commits</h2><p class="sub">Every branch, newest first. hiro's commits name the ticket and you as co-author.</p></div></div>
+    body = `<section class="card"><div class="ch"><div><h2>Commits</h2><p class="sub">Every branch, newest first. agnts's commits name the ticket and you as co-author.</p></div></div>
       ${Object.entries(groups).sort((a,b)=>b[0]-a[0]).map(([d, cs])=>`<div class="cm-day">${locDate(new Date(+d), {weekday:"long", day:"numeric", month:"long"})}</div>
         <div class="cm-list">${cs.map(c=>`<div class="cm" ${c.key?`data-k="${c.key}"`:""}>${ciDot(c.ci)}<div class="cm-b"><div class="cm-m notr">${esc(c.msg)}</div>
           <div class="cm-meta">${authorChip(c.author)}${c.coauthor?`<span class="hint">with ${TEAM[c.coauthor][0]}</span>`:""}<span class="br notr">${esc(c.branch)}</span><span class="n"><span class="a">+${c.add}</span><span class="d">−${c.del}</span></span></div></div>
@@ -2856,10 +2856,10 @@ function repoPage(){
   if(tab === "pipelines"){
     body = `<div class="env-grid">${g.envs.map(e=>`<section class="card env"><div class="ch"><div><h2>${e.name}</h2><p class="sub">${e.ts ? `Deployed ${agoTs(e.ts)} ago` : "Not deployed yet"}</p></div><span class="badge ${e.ts?"b-ok":"b-gray"}">${e.ts?"Healthy":"Empty"}</span></div>
         <div class="mini-kv"><span>Commit</span><b class="notr" style="font-family:var(--mono)">${e.sha}</b></div><div class="mini-kv"><span>Pipeline</span><b>${e.pipe ? "#"+e.pipe : "—"}</b></div></section>`).join("")}
-      <div class="help">${svg("info")}<p>hiro waits for the checks on its branch to pass before a ticket reaches your review. Deploying is always your decision.</p></div></div>
+      <div class="help">${svg("info")}<p>agnts waits for the checks on its branch to pass before a ticket reaches your review. Deploying is always your decision.</p></div></div>
       <section class="card"><div class="ch"><div><h2>Pipeline runs</h2><p class="sub">Build, test and deploy for every push</p></div></div>
       ${g.pipes.map(p=>{ const s = pipeStatus(p), tot = p.stages.filter(x=>x.st==="ok"||x.st==="fail").reduce((a,x)=>a+x.dur,0), open = view.popen === p.id;
-        return `<div class="pp ${open?"open":""}"><button class="pp-h" data-pipe="${p.id}" aria-expanded="${open}">${ciDot(s)}<span class="pp-id">#${p.id}</span><span class="pp-m"><span class="notr">${esc(p.msg)}</span><span class="pp-sub"><span class="br notr">${esc(p.branch)}</span><span class="sha notr">${p.sha}</span><span>${p.trigger}</span>${p.author==="hiro"?`<span class="src">hiro</span>`:""}</span></span>
+        return `<div class="pp ${open?"open":""}"><button class="pp-h" data-pipe="${p.id}" aria-expanded="${open}">${ciDot(s)}<span class="pp-id">#${p.id}</span><span class="pp-m"><span class="notr">${esc(p.msg)}</span><span class="pp-sub"><span class="br notr">${esc(p.branch)}</span><span class="sha notr">${p.sha}</span><span>${p.trigger}</span>${p.author==="agnts"?`<span class="src">agnts</span>`:""}</span></span>
           <span class="pp-r"><span>${ciLabel(s)}</span>${tot ? `<span class="hint">${fmtDur(tot*1000)}</span>` : ""}<span class="hint">${agoTs(p.ts)} ago</span></span></button>
           ${stagesViz(p, true)}
           ${open ? `<div class="pp-d"><table class="tbl"><thead><tr><th>Stage</th><th>Status</th><th>Duration</th></tr></thead><tbody>${p.stages.map(x=>`<tr><td>${x.name}</td><td>${ciDot(x.st)} ${ciLabel(x.st)}</td><td class="muted">${x.st==="ok"||x.st==="fail"?fmtDur(x.dur*1000):"—"}</td></tr>`).join("")}</tbody></table>
@@ -2898,8 +2898,8 @@ function modelPicker(t, stages){
       return `<div class="cfg-row" style="padding:10px 0"><div><div class="cfg-lbl" style="font-size:14.5px">${st.label}</div></div><div class="seg">${opts(stId).map(([v,l])=>`<button class="seg-b" data-tm="${stId}" data-val="${v}" aria-pressed="${cur===v}">${l}</button>`).join("")}</div></div>`; }).join("")}</div>`;
 }
 function stage(t){
-  const st = t.state, br = "hiro/"+t.key.toLowerCase();
-  if(st === "new") return `<h2>Waiting in queue</h2><p class="sub">hiro reads the ticket and the related code, then comes back with a plan and questions. Nothing is changed in this step.</p>
+  const st = t.state, br = "agnts/"+t.key.toLowerCase();
+  if(st === "new") return `<h2>Waiting in queue</h2><p class="sub">agnts reads the ticket and the related code, then comes back with a plan and questions. Nothing is changed in this step.</p>
     ${modelPicker(t, ["analyze","coding"])}
     <div class="actions"><button class="btn btn-p" data-act="analyze">Analyze ticket</button><span class="hint">Read-only access to ${esc(t.repo)}</span></div>`;
   if(st === "analyzing") return `<h2>Reading the code</h2><p class="sub">Looking through ${esc(t.repo)} to build a plan.</p><div class="sec">${logBlock(t)}</div>`;
@@ -2911,7 +2911,7 @@ function stage(t){
       <div class="tabs">${q.options.map(o=>`<button class="tab" data-q="${i}" data-opt="${esc(o)}" aria-pressed="${q.answer===o}">${esc(o)}</button>`).join("")}</div>
       <textarea data-note="${i}" placeholder="Add details (optional)" aria-label="Details for question ${i+1}">${esc(q.note)}</textarea></div>`).join("")}</div>
     ${modelPicker(t, ["coding","retry"])}
-    <div class="sec"><h3>Extra instructions</h3><textarea id="extra" placeholder="Anything hiro didn't ask about, like files to avoid or naming conventions">${esc(t.extra||"")}</textarea></div>
+    <div class="sec"><h3>Extra instructions</h3><textarea id="extra" placeholder="Anything agnts didn't ask about, like files to avoid or naming conventions">${esc(t.extra||"")}</textarea></div>
     <div class="actions"><button class="btn btn-p" data-act="start" ${left?"disabled":""}>Start coding</button><span class="hint">${left ? left+" question"+(left===1?"":"s")+" left to answer" : "All questions answered"}</span></div>`;
   }
   if(st === "coding" || st === "testing") return `<h2>${st==="coding"?"Coding":"Running tests"}${t.revision>1?", revision "+t.revision:""}</h2><p class="sub">Working in a fresh container on ${br}. You review the diff before anything is pushed.</p>
@@ -2926,7 +2926,7 @@ function stage(t){
       <div><dt>Lint</dt><dd class="ok">${r.lint}</dd></div>
       <div><dt>Changed</dt><dd>${r.files.length} files, +${add} −${del}</dd></div>
       <div><dt>Time</dt><dd>${t.duration||"5m 30s"}</dd></div></dl></div>
-    <div class="sec"><h3>What hiro did</h3><div class="summary">${r.summary.map(p=>`<p>${esc(p)}</p>`).join("")}</div></div>
+    <div class="sec"><h3>What agnts did</h3><div class="summary">${r.summary.map(p=>`<p>${esc(p)}</p>`).join("")}</div></div>
     <div class="sec"><h3>Diff</h3>${diffBlock(r.files)}</div>
     ${modelPicker(t, ["retry"])}
     <div class="sec"><h3>Feedback</h3><textarea id="feedback" placeholder="Describe what to change. Required for Request changes."></textarea></div>
@@ -2939,8 +2939,8 @@ function stage(t){
     <div class="actions"><button class="btn" data-act="openpr">Open pull request #${t.pr}</button></div>`;
   }
   if(st === "rejected") return `<h2>Rejected</h2><p class="sub">The branch was discarded${isLocal(t)?".":" and the ticket went back to you in Jira."}</p><div class="actions"><button class="btn" data-act="requeue">Send back to queue</button></div>`;
-  if(st === "failed") return `<h2>hiro stopped</h2><div class="sec"><div class="help bad">${svg("info")}<p>${esc(t.error)}</p></div></div>
-    <div class="sec"><h3>What should hiro try?</h3><textarea id="retryNote" placeholder="For example: streaming is fine, target is under 10 seconds for 100k rows"></textarea></div>
+  if(st === "failed") return `<h2>agnts stopped</h2><div class="sec"><div class="help bad">${svg("info")}<p>${esc(t.error)}</p></div></div>
+    <div class="sec"><h3>What should agnts try?</h3><textarea id="retryNote" placeholder="For example: streaming is fine, target is under 10 seconds for 100k rows"></textarea></div>
     ${modelPicker(t, ["retry"])}
     <div class="actions"><button class="btn btn-p" data-act="retry">Retry with these instructions</button><button class="btn btn-d" data-act="reject">Take it myself</button></div>`;
   if(st === "rate_limited") return `<h2>Paused at plan limit</h2><div class="sec"><div class="help warn">${svg("info")}<p>${esc(t.error)}</p></div></div>
@@ -2970,7 +2970,7 @@ function detailPage(){
       </div>
       <aside class="cfg-side">
         <section class="card"><div class="ch"><h2>${isLocal(t)?"Task":"Ticket"}</h2>${badge(t)}</div>
-          <dl class="kv"><dt>Key</dt><dd>${t.key}</dd><dt>Source</dt><dd>${isLocal(t)?"hiro task":"Jira"}</dd><dt>Repository</dt><dd>${esc(t.repo)}</dd>${isLocal(t)?`<dt>After approval</dt><dd>${t.after==="main"?"Push to main":"Open pull request"}</dd>`:""}<dt>Priority</dt><dd>${t.priority}</dd><dt>Branch</dt><dd>hiro/${t.key.toLowerCase()}</dd><dt>Revision</dt><dd>${t.revision}</dd><dt>Turns used</dt><dd>${t.turns}</dd><dt>Coding model</dt><dd>${MODELS[modelFor(t,"coding")].name}</dd><dt>Retry model</dt><dd>${MODELS[modelFor(t,"retry")].name}</dd></dl></section>
+          <dl class="kv"><dt>Key</dt><dd>${t.key}</dd><dt>Source</dt><dd>${isLocal(t)?"agnts task":"Jira"}</dd><dt>Repository</dt><dd>${esc(t.repo)}</dd>${isLocal(t)?`<dt>After approval</dt><dd>${t.after==="main"?"Push to main":"Open pull request"}</dd>`:""}<dt>Priority</dt><dd>${t.priority}</dd><dt>Branch</dt><dd>agnts/${t.key.toLowerCase()}</dd><dt>Revision</dt><dd>${t.revision}</dd><dt>Turns used</dt><dd>${t.turns}</dd><dt>Coding model</dt><dd>${MODELS[modelFor(t,"coding")].name}</dd><dt>Retry model</dt><dd>${MODELS[modelFor(t,"retry")].name}</dd></dl></section>
         <section class="card"><div class="ch"><h2>History</h2></div>
           <ol class="tl">${t.history.slice().reverse().map(h=>`<li><time>${h[0]}</time><span class="dot ${h[2]||""}"></span><span>${esc(h[1])}</span></li>`).join("")}</ol></section>
         ${usageCard()}
@@ -2978,11 +2978,11 @@ function detailPage(){
     </div>`;
 }
 function usagePage(){
-  return `<div class="ph"><div><h1>Plan usage</h1><p>hiro runs on your Claude subscription. These limits are shared with your own Claude and Claude Code use.</p></div></div>
+  return `<div class="ph"><div><h1>Plan usage</h1><p>agnts runs on your Claude subscription. These limits are shared with your own Claude and Claude Code use.</p></div></div>
     <div class="cfg-grid"><div class="col">${usageCard()}
-      <section class="card"><div class="ch"><div><h2>When a limit is reached</h2><p class="sub">How hiro behaves near the limit</p></div></div>
+      <section class="card"><div class="ch"><div><h2>When a limit is reached</h2><p class="sub">How agnts behaves near the limit</p></div></div>
         <dl class="kv"><dt>Above 80% of the session</dt><dd>Show a warning, keep running</dd><dt>Limit reached mid-run</dt><dd>Pause, keep the branch</dd><dt>After reset</dt><dd>Resume paused runs automatically</dd><dt>Idle refresh</dt><dd>Every 30 min</dd></dl></section></div>
-    <aside class="cfg-side"><div class="help">${svg("info")}<p>Numbers come from the rate limit events Claude Code emits during each run. When hiro is idle, a tiny refresh run keeps them current.</p></div></aside></div>`;
+    <aside class="cfg-side"><div class="help">${svg("info")}<p>Numbers come from the rate limit events Claude Code emits during each run. When agnts is idle, a tiny refresh run keeps them current.</p></div></aside></div>`;
 }
 
 function render(){
@@ -3076,7 +3076,7 @@ function push(t){
     });
     return;
   }
-  const steps = [{log:`claude -p --model ${modelFor(t,"helper")}: write PR description`, wait:700},{log:"git commit as Rustambek Abdusalomov", wait:700},{log:`git push origin hiro/${t.key.toLowerCase()}`, wait:900},{log:"Opening pull request", wait:800}];
+  const steps = [{log:`claude -p --model ${modelFor(t,"helper")}: write PR description`, wait:700},{log:"git commit as Rustambek Abdusalomov", wait:700},{log:`git push origin agnts/${t.key.toLowerCase()}`, wait:900},{log:"Opening pull request", wait:800}];
   if(!isLocal(t)) steps.push({log:"Moving Jira ticket to In Review", wait:600});
   runSteps(t, steps, () => {
     t.pr = isLocal(t) ? 60 + Math.floor(Math.random()*20) : 480 + Math.floor(Math.random()*40); setState(t, "done", isLocal(t) ? `PR #${t.pr} opened` : `PR #${t.pr} opened, Jira moved to In Review`, "ok"); toast(`Pushed. PR #${t.pr} is open`);
@@ -3111,7 +3111,7 @@ document.addEventListener("click", e => {
   const iga = e.target.closest("[data-ig-acc]"); if(iga && draftSettings){ const acc = draftSettings.integ[iga.dataset.igAcc].access; acc[iga.dataset.val] = acc[iga.dataset.val] === false; render(); return; }
   const igx = e.target.closest("[data-ig-act]"); if(igx){ const id = igx.dataset.id, a2 = igx.dataset.igAct;
     if(a2 === "test"){ bothInteg(I => { I[id].checked = Date.now(); }); render(); toast("Connection works"); return; }
-    if(a2 === "sync"){ bothInteg(I => { I[id].checked = Date.now(); }); render(); toast("Synced. No new tickets with the hiro label"); return; }
+    if(a2 === "sync"){ bothInteg(I => { I[id].checked = Date.now(); }); render(); toast("Synced. No new tickets with the agnts label"); return; }
     if(a2 === "disconnect"){ bothInteg(I => { I[id].connected = false; }); render(); toast(`${PROV[id].name} disconnected`); return; }
     if(a2 === "connect"){ if(id === "jira"){ const tk = ($("jr-token")||{}).value||""; if(tk.trim().length < 8){ igErr = "Paste a valid access token."; render(); return; } igErr = ""; bothInteg(I => { I.jira.connected = true; I.jira.token = tk.trim().slice(-4); I.jira.checked = Date.now(); I.jira.site = $("jr-site").value; I.jira.email = $("jr-email").value; }); render(); toast("Jira connected"); return; }
       runConnect(id); return; }
@@ -3181,7 +3181,7 @@ document.addEventListener("click", e => {
     render(); window.scrollTo(0,0); toast(`${t.key} created`); return;
   }
   if(act === "refresh"){ usage.updatedAt = Date.now(); render(); toast("Plan usage refreshed"); return; }
-  if(act === "sync"){ toast("Synced. No new tickets with the hiro label"); return; }
+  if(act === "sync"){ toast("Synced. No new tickets with the agnts label"); return; }
   if(act === "docs"){ docsOpen = true; renderDocs(); return; }
   if(act === "docs-close"){ docsOpen = false; renderDocs(); const g = document.querySelector(".guide-btn"); if(g) g.focus(); return; }
   if(act === "lang-toggle"){ setLangOpen(!langOpen, !langOpen && e.detail === 0); return; }
@@ -3215,7 +3215,7 @@ document.addEventListener("click", e => {
   if(act === "approve") push(t);
   if(act === "changes"){ const fb = $("feedback").value.trim(); if(!fb){ toast("Write what to change first"); $("feedback").focus(); return; } t.revision++; setState(t, "coding", `You requested changes: ${fb}`, "you"); code(t, fb); }
   if(act === "reject"){ clearTimeout(timers[t.key]); setState(t, "rejected", "You rejected the changes. Branch discarded", "you"); toast(`${t.key} rejected`); }
-  if(act === "retry"){ const n = $("retryNote").value.trim(); if(!n){ toast("Add instructions so hiro tries something different"); $("retryNote").focus(); return; } t.revision++; if(!t.plan.length) t.plan = ["Apply your instructions"]; setState(t, "coding", `You retried with: ${n}`, "you"); code(t, n); }
+  if(act === "retry"){ const n = $("retryNote").value.trim(); if(!n){ toast("Add instructions so agnts tries something different"); $("retryNote").focus(); return; } t.revision++; if(!t.plan.length) t.plan = ["Apply your instructions"]; setState(t, "coding", `You retried with: ${n}`, "you"); code(t, n); }
   if(act === "resume"){ setState(t, "coding", "You resumed the run", "you"); code(t); }
   if(act === "edit-task"){ openDrawer("task", {project:t.project, title:t.title, desc:t.desc, priority:t.priority, after:t.after||"main", start:"queue"}, t.key); return; }
   if(act === "delete-task"){ tickets = tickets.filter(x=>x!==t); view.page = "tasks"; render(); toast(`${t.key} deleted`); return; }

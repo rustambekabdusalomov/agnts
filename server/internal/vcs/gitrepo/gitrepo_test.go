@@ -16,7 +16,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
 // upstream creates a bare repository with one commit on main.
@@ -81,12 +81,12 @@ func TestPrepareArchiveCommitPush(t *testing.T) {
 	g := newRepos(t)
 	repo := domain.Repository{Name: "demo", CloneURL: bare, DefaultBranch: "main", Provider: "github"}
 
-	if err := g.Prepare(ctx, repo, "hiro/PAY-1"); err != nil {
+	if err := g.Prepare(ctx, repo, "agnts/PAY-1"); err != nil {
 		t.Fatal(err)
 	}
 
 	// The archive carries the checkout and .git, owned by the agent user.
-	rc, err := g.Archive(ctx, repo, "hiro/PAY-1")
+	rc, err := g.Archive(ctx, repo, "agnts/PAY-1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -118,7 +118,7 @@ func TestPrepareArchiveCommitPush(t *testing.T) {
 		"refund.go":   "package main\n",
 		".git/config": "[remote \"origin\"]\nurl = https://evil.example/x.git\n",
 	})
-	sha, files, err := g.Commit(ctx, repo, "hiro/PAY-1", tree, "PAY-1: fix")
+	sha, files, err := g.Commit(ctx, repo, "agnts/PAY-1", tree, "PAY-1: fix")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -134,14 +134,14 @@ func TestPrepareArchiveCommitPush(t *testing.T) {
 	}
 
 	// Same tree again: no new commit, same diff against main.
-	sha2, files2, err := g.Commit(ctx, repo, "hiro/PAY-1", tarOf(t, map[string]string{
+	sha2, files2, err := g.Commit(ctx, repo, "agnts/PAY-1", tarOf(t, map[string]string{
 		"README.md": "# demo\n", "main.go": "package main\n\nfunc main() { println(\"hi\") }\n", "refund.go": "package main\n",
 	}), "PAY-1: again")
 	if err != nil || sha2 != sha || len(files2) != 3 {
 		t.Fatalf("unchanged commit: %s vs %s, %d files, %v", sha2, sha, len(files2), err)
 	}
 
-	r, _ := git.PlainOpen(g.checkoutDir(repo, "hiro/PAY-1"))
+	r, _ := git.PlainOpen(g.checkoutDir(repo, "agnts/PAY-1"))
 	c, _ := r.CommitObject(plumbing.NewHash(sha))
 	if c.Author.Email != "rustam@example.com" || c.Message != "PAY-1: fix" {
 		t.Fatalf("commit: %+v", c)
@@ -151,21 +151,21 @@ func TestPrepareArchiveCommitPush(t *testing.T) {
 		t.Fatal("remote was changed by the workspace tree")
 	}
 
-	if err := g.Push(ctx, repo, "hiro/PAY-1"); err != nil {
+	if err := g.Push(ctx, repo, "agnts/PAY-1"); err != nil {
 		t.Fatal(err)
 	}
 	up, _ := git.PlainOpen(bare)
-	ref, err := up.Reference(plumbing.NewBranchReferenceName("hiro/PAY-1"), true)
+	ref, err := up.Reference(plumbing.NewBranchReferenceName("agnts/PAY-1"), true)
 	if err != nil || ref.Hash().String() != sha {
 		t.Fatalf("pushed ref: %v %v", ref, err)
 	}
 
 	// A fresh checkout (e.g. after a restart) resumes from the pushed branch.
 	g2 := newRepos(t)
-	if err := g2.Prepare(ctx, repo, "hiro/PAY-1"); err != nil {
+	if err := g2.Prepare(ctx, repo, "agnts/PAY-1"); err != nil {
 		t.Fatal(err)
 	}
-	b, _ := os.ReadFile(filepath.Join(g2.checkoutDir(repo, "hiro/PAY-1"), "refund.go"))
+	b, _ := os.ReadFile(filepath.Join(g2.checkoutDir(repo, "agnts/PAY-1"), "refund.go"))
 	if string(b) != "package main\n" {
 		t.Fatal("second checkout did not start from the pushed branch")
 	}
@@ -228,25 +228,25 @@ func TestLocalBranches(t *testing.T) {
 	}
 
 	// PAY-1: two commits, never pushed.
-	for _, b := range []string{"hiro/PAY-1", "hiro/PAY-2"} {
+	for _, b := range []string{"agnts/PAY-1", "agnts/PAY-2"} {
 		if err := g.Prepare(ctx, repo, b); err != nil {
 			t.Fatal(err)
 		}
 	}
-	if _, _, err := g.Commit(ctx, repo, "hiro/PAY-1", tarOf(t, map[string]string{"README.md": "# one\n"}), "PAY-1: one"); err != nil {
+	if _, _, err := g.Commit(ctx, repo, "agnts/PAY-1", tarOf(t, map[string]string{"README.md": "# one\n"}), "PAY-1: one"); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, err := g.Commit(ctx, repo, "hiro/PAY-1", tarOf(t, map[string]string{"README.md": "# two\n"}), "PAY-1: two"); err != nil {
+	if _, _, err := g.Commit(ctx, repo, "agnts/PAY-1", tarOf(t, map[string]string{"README.md": "# two\n"}), "PAY-1: two"); err != nil {
 		t.Fatal(err)
 	}
 	// PAY-2: one commit, pushed.
-	if _, _, err := g.Commit(ctx, repo, "hiro/PAY-2", tarOf(t, map[string]string{"README.md": "# pay2\n"}), "PAY-2: change"); err != nil {
+	if _, _, err := g.Commit(ctx, repo, "agnts/PAY-2", tarOf(t, map[string]string{"README.md": "# pay2\n"}), "PAY-2: change"); err != nil {
 		t.Fatal(err)
 	}
-	if err := g.Push(ctx, repo, "hiro/PAY-2"); err != nil {
+	if err := g.Push(ctx, repo, "agnts/PAY-2"); err != nil {
 		t.Fatal(err)
 	}
-	if err := g.Prepare(ctx, repo, "hiro/PAY-2"); err != nil { // fetch: origin now has it
+	if err := g.Prepare(ctx, repo, "agnts/PAY-2"); err != nil { // fetch: origin now has it
 		t.Fatal(err)
 	}
 
@@ -258,7 +258,7 @@ func TestLocalBranches(t *testing.T) {
 	for i, b := range got {
 		by[b.Name] = i
 	}
-	one, two := got[by["hiro/PAY-1"]], got[by["hiro/PAY-2"]]
+	one, two := got[by["agnts/PAY-1"]], got[by["agnts/PAY-2"]]
 	if one.Ahead != 2 || one.Behind != 0 || one.Unpushed != -1 || one.Message != "PAY-1: two" || one.Author != "Rustam" {
 		t.Errorf("PAY-1 = %+v", one)
 	}

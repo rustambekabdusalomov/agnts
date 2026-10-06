@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
 )
 
 func codeReviewJSON(verdict string, findings ...map[string]any) string {

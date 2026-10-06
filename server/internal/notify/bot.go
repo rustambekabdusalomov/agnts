@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"hiro/internal/domain"
-	"hiro/internal/store/postgres"
+	"agnts/internal/domain"
+	"agnts/internal/store/postgres"
 )
 
 func jsonUnmarshal(b []byte, v any) error { return json.Unmarshal(b, v) }
@@ -66,9 +66,9 @@ func (n *Notifier) handleUpdate(ctx context.Context, cfg TelegramConfig, u Updat
 		return
 	}
 	if chat != cfg.ChatID {
-		// Strangers learn their chat id (to set up their own hiro) and nothing else.
+		// Strangers learn their chat id (to set up their own agnts) and nothing else.
 		if u.Message != nil && strings.HasPrefix(u.Message.Text, "/start") {
-			_, _ = b.Send(ctx, chat, "This hiro bot belongs to someone else. Your chat id is "+strconv.FormatInt(chat, 10)+".", nil, false)
+			_, _ = b.Send(ctx, chat, "This agnts bot belongs to someone else. Your chat id is "+strconv.FormatInt(chat, 10)+".", nil, false)
 		}
 		n.log.Warn("telegram: message from an unknown chat ignored", "chat", chat)
 		return
@@ -110,9 +110,9 @@ func (n *Notifier) handleCallback(ctx context.Context, b *Bot, cfg TelegramConfi
 		}
 		return "This question is no longer open."
 	case "apr", "rej":
-		tool, what := "approve", "Approve and push "+arg+"? hiro pushes the branch and opens the pull request."
+		tool, what := "approve", "Approve and push "+arg+"? agnts pushes the branch and opens the pull request."
 		if v, err := n.actions.View(ctx, arg); err == nil && v.Ticket.Kind.Report() {
-			what = "Approve the report on " + arg + "? It stays in hiro and is not posted to Jira."
+			what = "Approve the report on " + arg + "? It stays in agnts and is not posted to Jira."
 		}
 		if verb == "rej" {
 			tool, what = "reject", "Reject "+arg+"? This stops all work on it."
@@ -152,7 +152,7 @@ func (n *Notifier) handleCallback(ctx context.Context, b *Bot, cfg TelegramConfi
 		if a.Tool == "approve" && strings.HasPrefix(a.Summary, "Approve the report") {
 			n.say(ctx, b, cfg, a.TicketKey+" approved.")
 		} else if a.Tool == "approve" {
-			n.say(ctx, b, cfg, a.TicketKey+" approved. hiro is pushing it now.")
+			n.say(ctx, b, cfg, a.TicketKey+" approved. agnts is pushing it now.")
 		} else {
 			n.say(ctx, b, cfg, a.TicketKey+" rejected.")
 		}
@@ -188,7 +188,7 @@ func (n *Notifier) answer(ctx context.Context, b *Bot, cfg TelegramConfig, msg *
 		_ = b.ClearButtons(ctx, cfg.ChatID, msg.MessageID)
 	}
 	if started {
-		n.say(ctx, b, cfg, key+": all questions answered. hiro starts coding.")
+		n.say(ctx, b, cfg, key+": all questions answered. agnts starts coding.")
 	}
 	return "Saved: " + truncate(text, 40)
 }
@@ -196,11 +196,11 @@ func (n *Notifier) answer(ctx context.Context, b *Bot, cfg TelegramConfig, msg *
 func (n *Notifier) handleText(ctx context.Context, b *Bot, cfg TelegramConfig, msg *Message) {
 	text := strings.TrimSpace(msg.Text)
 	if strings.HasPrefix(text, "/start") || strings.HasPrefix(text, "/help") {
-		n.say(ctx, b, cfg, "hiro will message you here when a ticket needs answers or a review. Tap the buttons, or reply to a question with your own answer.")
+		n.say(ctx, b, cfg, "agnts will message you here when a ticket needs answers or a review. Tap the buttons, or reply to a question with your own answer.")
 		return
 	}
 	if msg.ReplyTo == nil || text == "" {
-		n.say(ctx, b, cfg, "Reply to one of hiro's messages (a question, or a Request changes prompt) so I know which ticket you mean.")
+		n.say(ctx, b, cfg, "Reply to one of agnts's messages (a question, or a Request changes prompt) so I know which ticket you mean.")
 		return
 	}
 	m, err := n.store.TelegramMessage(ctx, cfg.ChatID, msg.ReplyTo.MessageID)
@@ -218,7 +218,7 @@ func (n *Notifier) handleText(ctx context.Context, b *Bot, cfg TelegramConfig, m
 			n.say(ctx, b, cfg, m.TicketKey+": "+friendly(err))
 			return
 		}
-		n.say(ctx, b, cfg, m.TicketKey+": changes requested. hiro is on it.")
+		n.say(ctx, b, cfg, m.TicketKey+": changes requested. agnts is on it.")
 	default:
 		n.say(ctx, b, cfg, "Use the buttons on that message.")
 	}

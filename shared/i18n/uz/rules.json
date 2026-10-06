@@ -1,7 +1,7 @@
 {
   "rules": {
     "title": "Qoidalar",
-    "lede": "hiro har bir tiketda amal qiladigan koʻrsatmalar: barcha repozitoriylar uchun global qoidalar va bitta repozitoriy uchun qoidalar. Claude har bir qoidani tekshiradi va u kuchga kirishidan oldin noaniq joylar haqida savol beradi.",
+    "lede": "agnts har bir tiketda amal qiladigan koʻrsatmalar: barcha repozitoriylar uchun global qoidalar va bitta repozitoriy uchun qoidalar. Claude har bir qoidani tekshiradi va u kuchga kirishidan oldin noaniq joylar haqida savol beradi.",
     "add": "Qoida qoʻshish",
     "addSubmit": "Qoʻshish va tekshirish",
     "drawerSub": "Yangi hamkasbga tushuntirgandek yozing. Claude uni biror tiket amal qilishidan oldin tekshiradi.",
@@ -22,7 +22,7 @@
     "scopeLabel": "Qoidalarni koʻrsatish",
     "scopeAll": "Barcha qoidalar ({n})",
     "scopeGlobal": "Global ({n})",
-    "none": "Hali qoidalar yoʻq. Jamoangiz qanday ishlashini hiroga aytish uchun qoida qoʻshing: testlar, nomlash, loglash, nimaga tegmaslik kerak.",
+    "none": "Hali qoidalar yoʻq. Jamoangiz qanday ishlashini agntsga aytish uchun qoida qoʻshing: testlar, nomlash, loglash, nimaga tegmaslik kerak.",
     "noMatch": "Mos qoidalar yoʻq.",
     "waitingHelp": "{n} ta qoida javoblaringizni kutmoqda. Javob berilmaguncha ular tiketlarga qoʻllanmaydi.",
     "status_pending": "Tekshiruv navbatida",
@@ -50,7 +50,7 @@
     "acceptBody": "Tiketlar qoidani siz yozgandek, hozirgacha berilgan javoblar bilan oladi. Ochiq savollar tashlab yuboriladi.",
     "failed": "Claude bu qoidani tekshira olmadi: {error}",
     "reviewAgain": "Qayta tekshirish",
-    "interpretation": "hiro uni qanday tushunadi",
+    "interpretation": "agnts uni qanday tushunadi",
     "clarified": "Tiketlar nimani oladi",
     "asWritten": "Yozilganicha ishlatiladi.",
     "answersTitle": "Javob berilgan {n} ta savol",

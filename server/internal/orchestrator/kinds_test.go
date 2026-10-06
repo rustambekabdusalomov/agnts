@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
 )
 
 func analysisOfKind(kind string) string {
@@ -149,7 +149,7 @@ func TestReportPostedToJiraOnlyWhenAsked(t *testing.T) {
 
 func TestAnalysisPicksKind(t *testing.T) {
 	h := newHarness(t)
-	h.ingest("PAY-50") // bare label: hiro picks the kind
+	h.ingest("PAY-50") // bare label: agnts picks the kind
 	if tk := h.state("PAY-50"); tk.Kind != domain.KindCode || !tk.KindAuto {
 		t.Fatalf("new ticket: kind=%s auto=%v", tk.Kind, tk.KindAuto)
 	}

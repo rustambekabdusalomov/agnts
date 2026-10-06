@@ -27,7 +27,7 @@ const test = useMutation({
 </script>
 
 <template>
-  <PageHeader :title="t('integrations.title')" :lede="t('integrations.lede')" doc="integrations" />
+  <PageHeader :title="t('integrations.title')" doc="integrations" />
   <p v-if="list.isPending.value" class="hint">{{ t('common.loading') }}</p>
   <div v-else class="integ-grid">
     <section v-for="p in PROVIDERS" :key="p" class="card integ-card">

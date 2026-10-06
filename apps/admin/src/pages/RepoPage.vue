@@ -55,9 +55,9 @@ const kpi = computed(() => {
   const prod = es.find((e) => /prod/i.test(e.name)) ?? es[0]
   return {
     branches: bs.length,
-    hiroBranches: bs.filter((b) => b.ticketKey).length,
+    agntsBranches: bs.filter((b) => b.ticketKey).length,
     week: week.length,
-    hiroWeek: week.filter((c) => c.ticketKey).length,
+    agntsWeek: week.filter((c) => c.ticketKey).length,
     successPct: done.length ? Math.round((ok / done.length) * 100) : null,
     done: done.length,
     prod,
@@ -95,12 +95,12 @@ function setTab(v: Tab) {
       <div class="card stat">
         <div class="lbl">{{ t('repo.kpiBranches') }}</div>
         <div class="val">{{ kpi.branches }}</div>
-        <div class="note">{{ t('repo.kpiBranchesNote', { n: kpi.hiroBranches }) }}</div>
+        <div class="note">{{ t('repo.kpiBranchesNote', { n: kpi.agntsBranches }) }}</div>
       </div>
       <div class="card stat">
         <div class="lbl">{{ t('repo.kpiCommits') }}</div>
         <div class="val">{{ kpi.week }}</div>
-        <div class="note">{{ t('repo.kpiCommitsNote', { n: kpi.hiroWeek }) }}</div>
+        <div class="note">{{ t('repo.kpiCommitsNote', { n: kpi.agntsWeek }) }}</div>
       </div>
       <div class="card stat">
         <div class="lbl">{{ t('repo.kpiPipelines') }}</div>

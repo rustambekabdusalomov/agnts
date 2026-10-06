@@ -102,7 +102,7 @@ abstract class AppLocalizations {
   /// No description provided for @analyticsLede.
   ///
   /// In en, this message translates to:
-  /// **'How well hiro works for you over time: throughput, quality, where time goes, and what it costs your plan.'**
+  /// **'How well agnts works for you over time: throughput, quality, where time goes, and what it costs your plan.'**
   String get analyticsLede;
 
   /// No description provided for @analyticsPeriod.
@@ -144,7 +144,7 @@ abstract class AppLocalizations {
   /// No description provided for @analyticsEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Charts fill in as hiro picks up tickets and runs. Label a Jira issue or create a task to get started.'**
+  /// **'Charts fill in as agnts picks up tickets and runs. Label a Jira issue or create a task to get started.'**
   String get analyticsEmpty;
 
   /// No description provided for @analyticsKpiPushed.
@@ -183,17 +183,17 @@ abstract class AppLocalizations {
   /// **'No changes requested'**
   String get analyticsKpiFirstTryNote;
 
-  /// No description provided for @analyticsKpiHiro.
+  /// No description provided for @analyticsKpiAgnts.
   ///
   /// In en, this message translates to:
-  /// **'hiro time per ticket'**
-  String get analyticsKpiHiro;
+  /// **'agnts time per ticket'**
+  String get analyticsKpiAgnts;
 
-  /// No description provided for @analyticsKpiHiroNote.
+  /// No description provided for @analyticsKpiAgntsNote.
   ///
   /// In en, this message translates to:
   /// **'Analyze, coding and tests'**
-  String get analyticsKpiHiroNote;
+  String get analyticsKpiAgntsNote;
 
   /// No description provided for @analyticsKpiWait.
   ///
@@ -294,14 +294,14 @@ abstract class AppLocalizations {
   /// No description provided for @analyticsSpeedSub.
   ///
   /// In en, this message translates to:
-  /// **'Average minutes per ticket: hiro working versus waiting on you'**
+  /// **'Average minutes per ticket: agnts working versus waiting on you'**
   String get analyticsSpeedSub;
 
-  /// No description provided for @analyticsHiroWorking.
+  /// No description provided for @analyticsAgntsWorking.
   ///
   /// In en, this message translates to:
-  /// **'hiro working'**
-  String get analyticsHiroWorking;
+  /// **'agnts working'**
+  String get analyticsAgntsWorking;
 
   /// No description provided for @analyticsWaitingOnYou.
   ///
@@ -330,7 +330,7 @@ abstract class AppLocalizations {
   /// No description provided for @analyticsTurnsSub.
   ///
   /// In en, this message translates to:
-  /// **'Fewer turns means hiro finds its way faster and uses less of your plan'**
+  /// **'Fewer turns means agnts finds its way faster and uses less of your plan'**
   String get analyticsTurnsSub;
 
   /// No description provided for @analyticsAvgTurns.
@@ -471,6 +471,48 @@ abstract class AppLocalizations {
   /// **'No usage readings in this period.'**
   String get analyticsNoUsage;
 
+  /// No description provided for @analyticsSpend.
+  ///
+  /// In en, this message translates to:
+  /// **'Token spend'**
+  String get analyticsSpend;
+
+  /// No description provided for @analyticsSpendSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokens Claude used per day, input and output'**
+  String get analyticsSpendSub;
+
+  /// No description provided for @analyticsSpendTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokens in and out'**
+  String get analyticsSpendTokens;
+
+  /// No description provided for @analyticsSpendCost.
+  ///
+  /// In en, this message translates to:
+  /// **'At API prices'**
+  String get analyticsSpendCost;
+
+  /// No description provided for @analyticsSpendStages.
+  ///
+  /// In en, this message translates to:
+  /// **'Spend by stage'**
+  String get analyticsSpendStages;
+
+  /// No description provided for @analyticsSpendStagesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Where the tokens went, costliest first'**
+  String get analyticsSpendStagesSub;
+
+  /// No description provided for @analyticsNoSpend.
+  ///
+  /// In en, this message translates to:
+  /// **'No Claude runs recorded in this period.'**
+  String get analyticsNoSpend;
+
   /// No description provided for @analyticsRepos.
   ///
   /// In en, this message translates to:
@@ -480,7 +522,7 @@ abstract class AppLocalizations {
   /// No description provided for @analyticsReposSub.
   ///
   /// In en, this message translates to:
-  /// **'Where hiro works best, and where it struggles'**
+  /// **'Where agnts works best, and where it struggles'**
   String get analyticsReposSub;
 
   /// No description provided for @analyticsColRepo.
@@ -507,11 +549,11 @@ abstract class AppLocalizations {
   /// **'Success rate'**
   String get analyticsColSuccess;
 
-  /// No description provided for @analyticsColHiro.
+  /// No description provided for @analyticsColAgnts.
   ///
   /// In en, this message translates to:
-  /// **'hiro time'**
-  String get analyticsColHiro;
+  /// **'agnts time'**
+  String get analyticsColAgnts;
 
   /// No description provided for @analyticsColClaudeMd.
   ///
@@ -564,7 +606,7 @@ abstract class AppLocalizations {
   /// No description provided for @analyticsHoursSub.
   ///
   /// In en, this message translates to:
-  /// **'When hiro works, summed over the period. Busiest hour: {hour}:00'**
+  /// **'When agnts works, summed over the period. Busiest hour: {hour}:00'**
   String analyticsHoursSub(String hour);
 
   /// No description provided for @analyticsEvents.
@@ -606,7 +648,7 @@ abstract class AppLocalizations {
   /// No description provided for @analyticsInsightStopsTests.
   ///
   /// In en, this message translates to:
-  /// **'Most stopped runs ({n}) end on failing tests. Clearer acceptance criteria in tickets help hiro know when it\'s done.'**
+  /// **'Most stopped runs ({n}) end on failing tests. Clearer acceptance criteria in tickets help agnts know when it\'s done.'**
   String analyticsInsightStopsTests(String n);
 
   /// No description provided for @analyticsInsightStopsLimit.
@@ -618,7 +660,7 @@ abstract class AppLocalizations {
   /// No description provided for @analyticsInsightNight.
   ///
   /// In en, this message translates to:
-  /// **'{pct}% of hiro\'s work happens between 22:00 and 07:00, while you\'re offline.'**
+  /// **'{pct}% of agnts\'s work happens between 22:00 and 07:00, while you\'re offline.'**
   String analyticsInsightNight(String pct);
 
   /// No description provided for @analyticsMinutes.
@@ -636,7 +678,7 @@ abstract class AppLocalizations {
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:
-  /// **'hiro'**
+  /// **'agnts'**
   String get appName;
 
   /// No description provided for @appTagline.
@@ -786,7 +828,7 @@ abstract class AppLocalizations {
   /// No description provided for @dashboardLede.
   ///
   /// In en, this message translates to:
-  /// **'{date}. Here\'s what hiro is doing and what\'s waiting on you.'**
+  /// **'{date}. Here\'s what agnts is doing and what\'s waiting on you.'**
   String dashboardLede(String date);
 
   /// No description provided for @dashboardOpenAnalytics.
@@ -846,7 +888,7 @@ abstract class AppLocalizations {
   /// No description provided for @dashboardWaitingSub.
   ///
   /// In en, this message translates to:
-  /// **'Oldest first. Every minute here is a minute hiro can\'t work.'**
+  /// **'Oldest first. Every minute here is a minute agnts can\'t work.'**
   String get dashboardWaitingSub;
 
   /// No description provided for @dashboardOpenInbox.
@@ -858,7 +900,7 @@ abstract class AppLocalizations {
   /// No description provided for @dashboardNothingWaiting.
   ///
   /// In en, this message translates to:
-  /// **'Nothing is waiting on you. hiro will show tickets here when it needs answers or a review.'**
+  /// **'Nothing is waiting on you. agnts will show tickets here when it needs answers or a review.'**
   String get dashboardNothingWaiting;
 
   /// No description provided for @dashboardColTicket.
@@ -1020,7 +1062,7 @@ abstract class AppLocalizations {
   /// No description provided for @dashboardTodaySub.
   ///
   /// In en, this message translates to:
-  /// **'Events recorded today. hiro keeps working while you sleep.'**
+  /// **'Events recorded today. agnts keeps working while you sleep.'**
   String get dashboardTodaySub;
 
   /// No description provided for @dashboardTodayAria.
@@ -1029,11 +1071,11 @@ abstract class AppLocalizations {
   /// **'Events today by hour'**
   String get dashboardTodayAria;
 
-  /// No description provided for @dashboardLegendHiro.
+  /// No description provided for @dashboardLegendAgnts.
   ///
   /// In en, this message translates to:
-  /// **'hiro working'**
-  String get dashboardLegendHiro;
+  /// **'agnts working'**
+  String get dashboardLegendAgnts;
 
   /// No description provided for @dashboardLegendYou.
   ///
@@ -1173,6 +1215,264 @@ abstract class AppLocalizations {
   /// **'No activity yet.'**
   String get dashboardNoActivity;
 
+  /// No description provided for @followUpsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow-up tickets'**
+  String get followUpsTitle;
+
+  /// No description provided for @followUpsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'What finishing this ticket still needs, as agnts sees it. Pick the ones you want: they are created queued, so nothing runs until you start them.'**
+  String get followUpsSub;
+
+  /// No description provided for @followUpsMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow-up suggestions'**
+  String get followUpsMode;
+
+  /// No description provided for @followUpsModeInherit.
+  ///
+  /// In en, this message translates to:
+  /// **'As in Settings'**
+  String get followUpsModeInherit;
+
+  /// No description provided for @followUpsModeOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get followUpsModeOn;
+
+  /// No description provided for @followUpsModeOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get followUpsModeOff;
+
+  /// No description provided for @followUpsModeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'When on, agnts\'s runs suggest tickets this one still needs. It makes every prompt a little longer.'**
+  String get followUpsModeHint;
+
+  /// No description provided for @followUpsOffEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow-up suggestions are off for this ticket. Turn them on to have the next run suggest what finishing it still needs.'**
+  String get followUpsOffEmpty;
+
+  /// No description provided for @followUpsOnEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing suggested yet. Most tickets need no follow-up.'**
+  String get followUpsOnEmpty;
+
+  /// No description provided for @followUpsType_prerequisite.
+  ///
+  /// In en, this message translates to:
+  /// **'Prerequisite'**
+  String get followUpsType_prerequisite;
+
+  /// No description provided for @followUpsType_split.
+  ///
+  /// In en, this message translates to:
+  /// **'Split off'**
+  String get followUpsType_split;
+
+  /// No description provided for @followUpsType_unfinished.
+  ///
+  /// In en, this message translates to:
+  /// **'Left undone'**
+  String get followUpsType_unfinished;
+
+  /// No description provided for @followUpsType_gap.
+  ///
+  /// In en, this message translates to:
+  /// **'Gap'**
+  String get followUpsType_gap;
+
+  /// No description provided for @followUpsSource_analyze.
+  ///
+  /// In en, this message translates to:
+  /// **'from the analysis'**
+  String get followUpsSource_analyze;
+
+  /// No description provided for @followUpsSource_work.
+  ///
+  /// In en, this message translates to:
+  /// **'from the work'**
+  String get followUpsSource_work;
+
+  /// No description provided for @followUpsSource_review.
+  ///
+  /// In en, this message translates to:
+  /// **'from the code review'**
+  String get followUpsSource_review;
+
+  /// No description provided for @followUpsSource_manual.
+  ///
+  /// In en, this message translates to:
+  /// **'from a review finding'**
+  String get followUpsSource_manual;
+
+  /// No description provided for @followUpsPick.
+  ///
+  /// In en, this message translates to:
+  /// **'Create “{title}”'**
+  String followUpsPick(String title);
+
+  /// No description provided for @followUpsEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket title'**
+  String get followUpsEditTitle;
+
+  /// No description provided for @followUpsServes.
+  ///
+  /// In en, this message translates to:
+  /// **'Why'**
+  String get followUpsServes;
+
+  /// No description provided for @followUpsDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get followUpsDetails;
+
+  /// No description provided for @followUpsWaitsForDone.
+  ///
+  /// In en, this message translates to:
+  /// **'It builds on this ticket\'s work: you can create it once this ticket is done.'**
+  String get followUpsWaitsForDone;
+
+  /// No description provided for @followUpsTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Create as'**
+  String get followUpsTarget;
+
+  /// No description provided for @followUpsTargetLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Local task'**
+  String get followUpsTargetLocal;
+
+  /// No description provided for @followUpsTargetJira.
+  ///
+  /// In en, this message translates to:
+  /// **'Jira issue'**
+  String get followUpsTargetJira;
+
+  /// No description provided for @followUpsJiraOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect Jira to file issues there'**
+  String get followUpsJiraOff;
+
+  /// No description provided for @followUpsCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0 {Create tickets} one {Create {count} ticket} other {Create {count} tickets}}'**
+  String followUpsCreate(num count);
+
+  /// No description provided for @followUpsQueuedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Created tickets wait in the queue until you start them.'**
+  String get followUpsQueuedHint;
+
+  /// No description provided for @followUpsDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get followUpsDismiss;
+
+  /// No description provided for @followUpsDismissedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} dismissed suggestion} other {{count} dismissed suggestions}}'**
+  String followUpsDismissedCount(num count);
+
+  /// No description provided for @followUpsChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'Created from this ticket'**
+  String get followUpsChildren;
+
+  /// No description provided for @followUpsFollowUpOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow-up of'**
+  String get followUpsFollowUpOf;
+
+  /// No description provided for @followUpsCreatedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} ticket created} other {{count} tickets created}}, queued until you start them.'**
+  String followUpsCreatedNotice(num count);
+
+  /// No description provided for @followUpsFailedItem.
+  ///
+  /// In en, this message translates to:
+  /// **'{title}: {error}'**
+  String followUpsFailedItem(String title, String error);
+
+  /// No description provided for @followUpsFromFinding.
+  ///
+  /// In en, this message translates to:
+  /// **'Make follow-up'**
+  String get followUpsFromFinding;
+
+  /// No description provided for @followUpsFromFindingDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested as a follow-up'**
+  String get followUpsFromFindingDone;
+
+  /// No description provided for @followUpsFromFindingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For work outside this change: suggest it as a follow-up ticket instead of sending it back'**
+  String get followUpsFromFindingHint;
+
+  /// No description provided for @followUpsOpenBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} follow-up} other {{count} follow-ups}}'**
+  String followUpsOpenBadge(num count);
+
+  /// No description provided for @followUpsSettingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest follow-up tickets'**
+  String get followUpsSettingLabel;
+
+  /// No description provided for @followUpsSettingHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Analysis, work and review runs suggest tickets that finishing a ticket still needs: prerequisites, parts to split off, work left undone, gaps a report found. You pick which to create. Off by default because it makes every prompt a little longer; a ticket can turn it on for itself.'**
+  String get followUpsSettingHelp;
+
+  /// No description provided for @followUpsNotifyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow-up tickets suggested'**
+  String get followUpsNotifyLabel;
+
+  /// No description provided for @followUpsJiraIssueType.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue type for follow-ups'**
+  String get followUpsJiraIssueType;
+
+  /// No description provided for @followUpsJiraIssueTypeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The type of the Jira issues agnts files when you create a follow-up in Jira. Default: Task.'**
+  String get followUpsJiraIssueTypeHelp;
+
   /// No description provided for @formSave.
   ///
   /// In en, this message translates to:
@@ -1278,13 +1578,13 @@ abstract class AppLocalizations {
   /// No description provided for @implementSubPlan.
   ///
   /// In en, this message translates to:
-  /// **'Have hiro carry out this plan: a code task linked to this one, with the plan as its brief. You review the diff as usual.'**
+  /// **'Have agnts carry out this plan: a code task linked to this one, with the plan as its brief. You review the diff as usual.'**
   String get implementSubPlan;
 
   /// No description provided for @implementSubBug.
   ///
   /// In en, this message translates to:
-  /// **'Have hiro make the proposed fix: a code task linked to this one, with the investigation as its brief. You review the diff as usual.'**
+  /// **'Have agnts make the proposed fix: a code task linked to this one, with the investigation as its brief. You review the diff as usual.'**
   String get implementSubBug;
 
   /// No description provided for @implementImplement.
@@ -1332,7 +1632,7 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsLede.
   ///
   /// In en, this message translates to:
-  /// **'The services hiro works with. Tokens are stored encrypted on your server and only used for the actions listed on each page.'**
+  /// **'The services agnts works with. Tokens are stored encrypted on your server and only used for the actions listed on each page.'**
   String get integrationsLede;
 
   /// No description provided for @integrationsName_jira.
@@ -1356,7 +1656,7 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsDesc_jira.
   ///
   /// In en, this message translates to:
-  /// **'Pick up tickets with the hiro label and keep their status up to date.'**
+  /// **'Pick up tickets with the agnts label and keep their status up to date.'**
   String get integrationsDesc_jira;
 
   /// No description provided for @integrationsDesc_github.
@@ -1410,7 +1710,7 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsDisconnectConfirm.
   ///
   /// In en, this message translates to:
-  /// **'Disconnect {name}? hiro forgets the token and stops using it.'**
+  /// **'Disconnect {name}? agnts forgets the token and stops using it.'**
   String integrationsDisconnectConfirm(String name);
 
   /// No description provided for @integrationsDisconnected.
@@ -1500,13 +1800,13 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsTokenStep1_jira.
   ///
   /// In en, this message translates to:
-  /// **'Sign in to the Atlassian account hiro should act as, and open Account settings → Security → API tokens (or use the button below).'**
+  /// **'Sign in to the Atlassian account agnts should act as, and open Account settings → Security → API tokens (or use the button below).'**
   String get integrationsTokenStep1_jira;
 
   /// No description provided for @integrationsTokenStep2_jira.
   ///
   /// In en, this message translates to:
-  /// **'Click Create API token (not the one with scopes), name it (for example hiro) and pick an expiration date.'**
+  /// **'Click Create API token (not the one with scopes), name it (for example agnts) and pick an expiration date.'**
   String get integrationsTokenStep2_jira;
 
   /// No description provided for @integrationsTokenStep3_jira.
@@ -1518,7 +1818,7 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsTokenStep4_jira.
   ///
   /// In en, this message translates to:
-  /// **'For Site, enter your Jira address (https://your-team.atlassian.net), and for Account email the email of that same account. It needs access to the Jira projects hiro works on.'**
+  /// **'For Site, enter your Jira address (https://your-team.atlassian.net), and for Account email the email of that same account. It needs access to the Jira projects agnts works on.'**
   String get integrationsTokenStep4_jira;
 
   /// No description provided for @integrationsConnectSub_github.
@@ -1554,7 +1854,7 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsTokenStep2_github.
   ///
   /// In en, this message translates to:
-  /// **'Name it (for example hiro), pick an expiration, set Resource owner to the account or organization that owns your repositories, and under Repository access choose the repositories hiro may work on.'**
+  /// **'Name it (for example agnts), pick an expiration, set Resource owner to the account or organization that owns your repositories, and under Repository access choose the repositories agnts may work on.'**
   String get integrationsTokenStep2_github;
 
   /// No description provided for @integrationsTokenStep3_github.
@@ -1638,7 +1938,7 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsTokenHelp.
   ///
   /// In en, this message translates to:
-  /// **'Stored encrypted on your server. hiro never shows it again.'**
+  /// **'Stored encrypted on your server. agnts never shows it again.'**
   String get integrationsTokenHelp;
 
   /// No description provided for @integrationsScopes.
@@ -1770,7 +2070,7 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsPickupSub.
   ///
   /// In en, this message translates to:
-  /// **'Which tickets hiro takes'**
+  /// **'Which tickets agnts takes'**
   String get integrationsPickupSub;
 
   /// No description provided for @integrationsLabel.
@@ -1782,13 +2082,13 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsLabelHelp.
   ///
   /// In en, this message translates to:
-  /// **'Add this label to a ticket to hand it to hiro'**
+  /// **'Add this label to a ticket to hand it to agnts'**
   String get integrationsLabelHelp;
 
   /// No description provided for @integrationsQuery.
   ///
   /// In en, this message translates to:
-  /// **'The query hiro runs'**
+  /// **'The query agnts runs'**
   String get integrationsQuery;
 
   /// No description provided for @integrationsStatuses.
@@ -1800,13 +2100,13 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsStatusesSub.
   ///
   /// In en, this message translates to:
-  /// **'How hiro moves tickets on your board. Leave empty to keep the status.'**
+  /// **'How agnts moves tickets on your board. Leave empty to keep the status.'**
   String get integrationsStatusesSub;
 
   /// No description provided for @integrationsMapStarted.
   ///
   /// In en, this message translates to:
-  /// **'When hiro starts'**
+  /// **'When agnts starts'**
   String get integrationsMapStarted;
 
   /// No description provided for @integrationsMapReview.
@@ -1836,13 +2136,13 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsCommentsSub.
   ///
   /// In en, this message translates to:
-  /// **'What hiro writes on the ticket'**
+  /// **'What agnts writes on the ticket'**
   String get integrationsCommentsSub;
 
   /// No description provided for @integrationsCQuestions.
   ///
   /// In en, this message translates to:
-  /// **'hiro\'s questions'**
+  /// **'agnts\'s questions'**
   String get integrationsCQuestions;
 
   /// No description provided for @integrationsCQuestionsHelp.
@@ -1896,7 +2196,7 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsSyncHelp.
   ///
   /// In en, this message translates to:
-  /// **'Jira sends new tickets to the webhook right away; hiro also checks every hour in case a delivery was missed.'**
+  /// **'Jira sends new tickets to the webhook right away; agnts also checks every hour in case a delivery was missed.'**
   String get integrationsSyncHelp;
 
   /// No description provided for @integrationsWebhook.
@@ -1914,7 +2214,7 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsSecretsHelp.
   ///
   /// In en, this message translates to:
-  /// **'hiro only reads tickets that match the query, and only writes the status changes and comments you turn on here.'**
+  /// **'agnts only reads tickets that match the query, and only writes the status changes and comments you turn on here.'**
   String get integrationsSecretsHelp;
 
   /// No description provided for @integrationsGithubHelp.
@@ -1944,7 +2244,7 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsConnectSub_telegram.
   ///
   /// In en, this message translates to:
-  /// **'Create a bot with @BotFather, paste its token, and add your chat id. hiro registers the webhook for you.'**
+  /// **'Create a bot with @BotFather, paste its token, and add your chat id. agnts registers the webhook for you.'**
   String get integrationsConnectSub_telegram;
 
   /// No description provided for @integrationsTokenOpen_telegram.
@@ -2004,7 +2304,7 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsTelegramHttps.
   ///
   /// In en, this message translates to:
-  /// **'Telegram only sends updates to a public HTTPS address, and this hiro runs on {url}, so connecting will fail here. Connect Telegram on a deployment with HTTPS, where HIRO_PUBLIC_URL is an https:// address.'**
+  /// **'Telegram only sends updates to a public HTTPS address, and this agnts runs on {url}, so connecting will fail here. Connect Telegram on a deployment with HTTPS, where AGNTS_PUBLIC_URL is an https:// address.'**
   String integrationsTelegramHttps(String url);
 
   /// No description provided for @integrationsName_gitlab.
@@ -2040,7 +2340,7 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsTokenStep2_gitlab.
   ///
   /// In en, this message translates to:
-  /// **'Name it (for example hiro) and set an expiration date. Use an account that can push to your projects.'**
+  /// **'Name it (for example agnts) and set an expiration date. Use an account that can push to your projects.'**
   String get integrationsTokenStep2_gitlab;
 
   /// No description provided for @integrationsTokenStep3_gitlab.
@@ -2124,7 +2424,7 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsGitWebhookWhy.
   ///
   /// In en, this message translates to:
-  /// **'When a pull or merge request is merged, hiro marks the ticket merged and moves the Jira issue to the merged status set on the Jira page. Pipeline events keep the repository page current.'**
+  /// **'When a pull or merge request is merged, agnts marks the ticket merged and moves the Jira issue to the merged status set on the Jira page. Pipeline events keep the repository page current.'**
   String get integrationsGitWebhookWhy;
 
   /// No description provided for @kindTitle.
@@ -2142,7 +2442,7 @@ abstract class AppLocalizations {
   /// No description provided for @kindAutoHint.
   ///
   /// In en, this message translates to:
-  /// **'hiro picks the kind while reading the ticket'**
+  /// **'agnts picks the kind while reading the ticket'**
   String get kindAutoHint;
 
   /// No description provided for @kindCode.
@@ -2208,7 +2508,7 @@ abstract class AppLocalizations {
   /// No description provided for @kindPickerHint.
   ///
   /// In en, this message translates to:
-  /// **'What hiro produces. Choosing a kind makes it final; Auto lets hiro decide while reading the ticket.'**
+  /// **'What agnts produces. Choosing a kind makes it final; Auto lets agnts decide while reading the ticket.'**
   String get kindPickerHint;
 
   /// No description provided for @kindSwitchTo.
@@ -2226,7 +2526,7 @@ abstract class AppLocalizations {
   /// No description provided for @learnLede.
   ///
   /// In en, this message translates to:
-  /// **'When a change hiro ships does something this codebase never did before, hiro explains it here: what it is, why the change needed it, where to look, and a short quiz.'**
+  /// **'When a change agnts ships does something this codebase never did before, agnts explains it here: what it is, why the change needed it, where to look, and a short quiz.'**
   String get learnLede;
 
   /// No description provided for @learnViewNew.
@@ -2268,7 +2568,7 @@ abstract class AppLocalizations {
   /// No description provided for @learnNone.
   ///
   /// In en, this message translates to:
-  /// **'No lessons yet. When hiro pushes a change that does something new for its repository, the lesson appears here.'**
+  /// **'No lessons yet. When agnts pushes a change that does something new for its repository, the lesson appears here.'**
   String get learnNone;
 
   /// No description provided for @learnNoneNew.
@@ -2502,7 +2802,7 @@ abstract class AppLocalizations {
   /// No description provided for @learnTicketPending.
   ///
   /// In en, this message translates to:
-  /// **'hiro is reading this change for anything the repository never did before.'**
+  /// **'agnts is reading this change for anything the repository never did before.'**
   String get learnTicketPending;
 
   /// No description provided for @learnTicketNone.
@@ -2514,13 +2814,13 @@ abstract class AppLocalizations {
   /// No description provided for @learnTicketFailed.
   ///
   /// In en, this message translates to:
-  /// **'hiro could not finish reading this change. The log shows why.'**
+  /// **'agnts could not finish reading this change. The log shows why.'**
   String get learnTicketFailed;
 
   /// No description provided for @learnTicketIdle.
   ///
   /// In en, this message translates to:
-  /// **'hiro has not looked at this change for lessons yet.'**
+  /// **'agnts has not looked at this change for lessons yet.'**
   String get learnTicketIdle;
 
   /// No description provided for @learnLearnNow.
@@ -2538,7 +2838,7 @@ abstract class AppLocalizations {
   /// No description provided for @learnQueued.
   ///
   /// In en, this message translates to:
-  /// **'Queued: hiro will look at this change for something new.'**
+  /// **'Queued: agnts will look at this change for something new.'**
   String get learnQueued;
 
   /// No description provided for @learnQueueTitle.
@@ -2550,7 +2850,7 @@ abstract class AppLocalizations {
   /// No description provided for @learnQueueSub.
   ///
   /// In en, this message translates to:
-  /// **'Pushed tickets hiro reads for new techniques, one at a time when no ticket needs a worker.'**
+  /// **'Pushed tickets agnts reads for new techniques, one at a time when no ticket needs a worker.'**
   String get learnQueueSub;
 
   /// No description provided for @learnStatus_running.
@@ -2616,7 +2916,7 @@ abstract class AppLocalizations {
   /// No description provided for @learnQueueLede.
   ///
   /// In en, this message translates to:
-  /// **'Pushed tickets hiro reads for techniques the codebase never used before. Queue any done ticket, or retry one that failed.'**
+  /// **'Pushed tickets agnts reads for techniques the codebase never used before. Queue any done ticket, or retry one that failed.'**
   String get learnQueueLede;
 
   /// No description provided for @learnQueueEmpty.
@@ -2634,7 +2934,7 @@ abstract class AppLocalizations {
   /// No description provided for @logsLede.
   ///
   /// In en, this message translates to:
-  /// **'Every step hiro takes, recorded as it happens. Use it to see where time goes and why runs stop.'**
+  /// **'Every step agnts takes, recorded as it happens. Use it to see where time goes and why runs stop.'**
   String get logsLede;
 
   /// No description provided for @logsLive.
@@ -2727,11 +3027,11 @@ abstract class AppLocalizations {
   /// **'No data'**
   String get logsNoData;
 
-  /// No description provided for @logsLegendHiro.
+  /// No description provided for @logsLegendAgnts.
   ///
   /// In en, this message translates to:
-  /// **'hiro working'**
-  String get logsLegendHiro;
+  /// **'agnts working'**
+  String get logsLegendAgnts;
 
   /// No description provided for @logsLegendYou.
   ///
@@ -2970,7 +3270,7 @@ abstract class AppLocalizations {
   /// No description provided for @mcpSub.
   ///
   /// In en, this message translates to:
-  /// **'Manage hiro from Claude on the web, desktop and phone'**
+  /// **'Manage agnts from Claude on the web, desktop and phone'**
   String get mcpSub;
 
   /// No description provided for @mcpUrl.
@@ -3054,13 +3354,13 @@ abstract class AppLocalizations {
   /// No description provided for @mcpConsentTitle.
   ///
   /// In en, this message translates to:
-  /// **'Connect Claude to hiro'**
+  /// **'Connect Claude to agnts'**
   String get mcpConsentTitle;
 
   /// No description provided for @mcpConsentAsk.
   ///
   /// In en, this message translates to:
-  /// **'{client} wants to use hiro as {user}.'**
+  /// **'{client} wants to use agnts as {user}.'**
   String mcpConsentAsk(String client, String user);
 
   /// No description provided for @mcpConsentWhat.
@@ -3096,7 +3396,7 @@ abstract class AppLocalizations {
   /// No description provided for @mdetailWorking.
   ///
   /// In en, this message translates to:
-  /// **'hiro is working. You\'ll get a notification when it needs you.'**
+  /// **'agnts is working. You\'ll get a notification when it needs you.'**
   String get mdetailWorking;
 
   /// No description provided for @mdetailCopyPr.
@@ -3132,7 +3432,7 @@ abstract class AppLocalizations {
   /// No description provided for @mhomeActAnswers.
   ///
   /// In en, this message translates to:
-  /// **'Answer hiro\'s questions'**
+  /// **'Answer agnts\'s questions'**
   String get mhomeActAnswers;
 
   /// No description provided for @mhomeActReview.
@@ -3144,7 +3444,7 @@ abstract class AppLocalizations {
   /// No description provided for @mhomeActStopped.
   ///
   /// In en, this message translates to:
-  /// **'Stopped. Tell hiro what to try'**
+  /// **'Stopped. Tell agnts what to try'**
   String get mhomeActStopped;
 
   /// No description provided for @mhomeActResume.
@@ -3204,7 +3504,7 @@ abstract class AppLocalizations {
   /// No description provided for @mmoreLoginLede.
   ///
   /// In en, this message translates to:
-  /// **'Sign in to your hiro server to answer questions, review changes and follow runs.'**
+  /// **'Sign in to your agnts server to answer questions, review changes and follow runs.'**
   String get mmoreLoginLede;
 
   /// No description provided for @mobileServer.
@@ -3216,13 +3516,13 @@ abstract class AppLocalizations {
   /// No description provided for @mobileServerHint.
   ///
   /// In en, this message translates to:
-  /// **'https://hiro.example.com'**
+  /// **'https://agnts.example.com'**
   String get mobileServerHint;
 
   /// No description provided for @mobileServerInvalid.
   ///
   /// In en, this message translates to:
-  /// **'Enter the https address of your hiro server.'**
+  /// **'Enter the https address of your agnts server.'**
   String get mobileServerInvalid;
 
   /// No description provided for @mobileHome.
@@ -3744,7 +4044,7 @@ abstract class AppLocalizations {
   /// No description provided for @mtasksActAnswers.
   ///
   /// In en, this message translates to:
-  /// **'Answer hiro\'s questions'**
+  /// **'Answer agnts\'s questions'**
   String get mtasksActAnswers;
 
   /// No description provided for @mtasksActReview.
@@ -3756,7 +4056,7 @@ abstract class AppLocalizations {
   /// No description provided for @mtasksActFailed.
   ///
   /// In en, this message translates to:
-  /// **'Stopped. Tell hiro what to try'**
+  /// **'Stopped. Tell agnts what to try'**
   String get mtasksActFailed;
 
   /// No description provided for @mtasksActResume.
@@ -4014,13 +4314,13 @@ abstract class AppLocalizations {
   /// No description provided for @navLedeRunning.
   ///
   /// In en, this message translates to:
-  /// **'Tickets hiro is working on right now.'**
+  /// **'Tickets agnts is working on right now.'**
   String get navLedeRunning;
 
   /// No description provided for @navLedeQueue.
   ///
   /// In en, this message translates to:
-  /// **'Tickets with the hiro label that haven\'t been analyzed yet.'**
+  /// **'Tickets with the agnts label that haven\'t been analyzed yet.'**
   String get navLedeQueue;
 
   /// No description provided for @navLedeDone.
@@ -4032,7 +4332,7 @@ abstract class AppLocalizations {
   /// No description provided for @navLedeAll.
   ///
   /// In en, this message translates to:
-  /// **'Every ticket hiro has picked up from Jira.'**
+  /// **'Every ticket agnts has picked up from Jira.'**
   String get navLedeAll;
 
   /// No description provided for @navKnowledge.
@@ -4128,13 +4428,13 @@ abstract class AppLocalizations {
   /// No description provided for @repoBranchesSub.
   ///
   /// In en, this message translates to:
-  /// **'hiro works on its own branch for every ticket and never commits to {branch}.'**
+  /// **'agnts works on its own branch for every ticket and never commits to {branch}.'**
   String repoBranchesSub(String branch);
 
   /// No description provided for @repoArchivedBanner.
   ///
   /// In en, this message translates to:
-  /// **'Archived {time}. hiro takes no new tickets or tasks for this repository until you restore it.'**
+  /// **'Archived {time}. agnts takes no new tickets or tasks for this repository until you restore it.'**
   String repoArchivedBanner(String time);
 
   /// No description provided for @repoSrcLabel.
@@ -4164,7 +4464,7 @@ abstract class AppLocalizations {
   /// No description provided for @repoLocalSub.
   ///
   /// In en, this message translates to:
-  /// **'Branches in hiro\'s own clones on your server. hiro commits here first and pushes only after you approve; it never commits to {branch}.'**
+  /// **'Branches in agnts\'s own clones on your server. agnts commits here first and pushes only after you approve; it never commits to {branch}.'**
   String repoLocalSub(String branch);
 
   /// No description provided for @repoColPush.
@@ -4200,7 +4500,7 @@ abstract class AppLocalizations {
   /// No description provided for @repoPush_local_help.
   ///
   /// In en, this message translates to:
-  /// **'Only on the server. hiro pushes it when you approve the review.'**
+  /// **'Only on the server. agnts pushes it when you approve the review.'**
   String get repoPush_local_help;
 
   /// No description provided for @repoPush_pushed_help.
@@ -4218,13 +4518,13 @@ abstract class AppLocalizations {
   /// No description provided for @repoPush_differs_help.
   ///
   /// In en, this message translates to:
-  /// **'Someone pushed commits to this branch that hiro\'s copy does not have.'**
+  /// **'Someone pushed commits to this branch that agnts\'s copy does not have.'**
   String get repoPush_differs_help;
 
   /// No description provided for @repoLocalNone.
   ///
   /// In en, this message translates to:
-  /// **'No local branches yet. hiro creates one when it starts work on a ticket.'**
+  /// **'No local branches yet. agnts creates one when it starts work on a ticket.'**
   String get repoLocalNone;
 
   /// No description provided for @repoCommitsSub.
@@ -4380,7 +4680,7 @@ abstract class AppLocalizations {
   /// No description provided for @repoKpiBranchesNote.
   ///
   /// In en, this message translates to:
-  /// **'{n} by hiro'**
+  /// **'{n} by agnts'**
   String repoKpiBranchesNote(String n);
 
   /// No description provided for @repoKpiCommits.
@@ -4392,7 +4692,7 @@ abstract class AppLocalizations {
   /// No description provided for @repoKpiCommitsNote.
   ///
   /// In en, this message translates to:
-  /// **'{n} written by hiro'**
+  /// **'{n} written by agnts'**
   String repoKpiCommitsNote(String n);
 
   /// No description provided for @repoKpiPipelines.
@@ -4458,7 +4758,7 @@ abstract class AppLocalizations {
   /// No description provided for @repoDeployHelp.
   ///
   /// In en, this message translates to:
-  /// **'hiro waits for checks before a ticket reaches your review. Deploying is always your decision, and it is never available from Claude chat.'**
+  /// **'agnts waits for checks before a ticket reaches your review. Deploying is always your decision, and it is never available from Claude chat.'**
   String get repoDeployHelp;
 
   /// No description provided for @repoDeployBranch.
@@ -4524,7 +4824,7 @@ abstract class AppLocalizations {
   /// No description provided for @reposLede.
   ///
   /// In en, this message translates to:
-  /// **'Code hiro can work in. Each run clones the repository into a fresh container on your server, then runs these checks before anything reaches your review.'**
+  /// **'Code agnts can work in. Each run clones the repository into a fresh container on your server, then runs these checks before anything reaches your review.'**
   String get reposLede;
 
   /// No description provided for @reposAdd.
@@ -4584,7 +4884,7 @@ abstract class AppLocalizations {
   /// No description provided for @reposArchiveConfirm.
   ///
   /// In en, this message translates to:
-  /// **'Archive {name}? It moves to the archive and keeps its tickets and history, but hiro stops picking up new Jira tickets and tasks for it. Work already started still finishes. You can restore it any time.'**
+  /// **'Archive {name}? It moves to the archive and keeps its tickets and history, but agnts stops picking up new Jira tickets and tasks for it. Work already started still finishes. You can restore it any time.'**
   String reposArchiveConfirm(String name);
 
   /// No description provided for @reposNoArchived.
@@ -4674,7 +4974,7 @@ abstract class AppLocalizations {
   /// No description provided for @reposMissingHelp.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, one {{count} repository has} other {{count} repositories have}} no CLAUDE.md. hiro still works, but spends more turns finding its way around. Add one with the project\'s structure, conventions and test commands.'**
+  /// **'{count, plural, one {{count} repository has} other {{count} repositories have}} no CLAUDE.md. agnts still works, but spends more turns finding its way around. Add one with the project\'s structure, conventions and test commands.'**
   String reposMissingHelp(num count);
 
   /// No description provided for @reposColRepo.
@@ -4752,7 +5052,7 @@ abstract class AppLocalizations {
   /// No description provided for @reposNone.
   ///
   /// In en, this message translates to:
-  /// **'No repositories yet. Add the first one to let hiro work on it.'**
+  /// **'No repositories yet. Add the first one to let agnts work on it.'**
   String get reposNone;
 
   /// No description provided for @reposDrawerSub.
@@ -4776,7 +5076,7 @@ abstract class AppLocalizations {
   /// No description provided for @reposCloneHelp.
   ///
   /// In en, this message translates to:
-  /// **'An https URL on github.com or your connected GitLab. hiro uses that host\'s token to clone and push.'**
+  /// **'An https URL on github.com or your connected GitLab. agnts uses that host\'s token to clone and push.'**
   String get reposCloneHelp;
 
   /// No description provided for @reposJiraProject.
@@ -4788,7 +5088,7 @@ abstract class AppLocalizations {
   /// No description provided for @reposJiraHelp.
   ///
   /// In en, this message translates to:
-  /// **'Optional. Tickets from this Jira project with the hiro label run here.'**
+  /// **'Optional. Tickets from this Jira project with the agnts label run here.'**
   String get reposJiraHelp;
 
   /// No description provided for @reposTaskPrefix.
@@ -4860,7 +5160,7 @@ abstract class AppLocalizations {
   /// No description provided for @reposClaudeMissing.
   ///
   /// In en, this message translates to:
-  /// **'Missing. hiro still works, but a CLAUDE.md saves turns.'**
+  /// **'Missing. agnts still works, but a CLAUDE.md saves turns.'**
   String get reposClaudeMissing;
 
   /// No description provided for @reposClaudeUnknown.
@@ -4896,13 +5196,13 @@ abstract class AppLocalizations {
   /// No description provided for @reviewTitle.
   ///
   /// In en, this message translates to:
-  /// **'hiro\'s code review'**
+  /// **'agnts\'s code review'**
   String get reviewTitle;
 
   /// No description provided for @reviewReportTitle.
   ///
   /// In en, this message translates to:
-  /// **'hiro\'s review of the report'**
+  /// **'agnts\'s review of the report'**
   String get reviewReportTitle;
 
   /// No description provided for @reviewSub.
@@ -4914,13 +5214,13 @@ abstract class AppLocalizations {
   /// No description provided for @reviewPending.
   ///
   /// In en, this message translates to:
-  /// **'Queued: hiro reviews this as soon as a worker is free. You can review it yourself meanwhile.'**
+  /// **'Queued: agnts reviews this as soon as a worker is free. You can review it yourself meanwhile.'**
   String get reviewPending;
 
   /// No description provided for @reviewRunning.
   ///
   /// In en, this message translates to:
-  /// **'hiro is reviewing this now…'**
+  /// **'agnts is reviewing this now…'**
   String get reviewRunning;
 
   /// No description provided for @reviewFailed.
@@ -4932,7 +5232,7 @@ abstract class AppLocalizations {
   /// No description provided for @reviewNone.
   ///
   /// In en, this message translates to:
-  /// **'Not reviewed by hiro.'**
+  /// **'Not reviewed by agnts.'**
   String get reviewNone;
 
   /// No description provided for @reviewStale.
@@ -4944,7 +5244,7 @@ abstract class AppLocalizations {
   /// No description provided for @reviewRun.
   ///
   /// In en, this message translates to:
-  /// **'Review with hiro'**
+  /// **'Review with agnts'**
   String get reviewRun;
 
   /// No description provided for @reviewRunAgain.
@@ -5058,7 +5358,7 @@ abstract class AppLocalizations {
   /// No description provided for @reviewNoFindings.
   ///
   /// In en, this message translates to:
-  /// **'hiro found no problems.'**
+  /// **'agnts found no problems.'**
   String get reviewNoFindings;
 
   /// No description provided for @reviewStrengths.
@@ -5112,7 +5412,7 @@ abstract class AppLocalizations {
   /// No description provided for @rulesLede.
   ///
   /// In en, this message translates to:
-  /// **'Instructions hiro follows on every ticket: global rules for all repositories and rules for one repository. Claude reviews each rule and asks about anything unclear before it applies.'**
+  /// **'Instructions agnts follows on every ticket: global rules for all repositories and rules for one repository. Claude reviews each rule and asks about anything unclear before it applies.'**
   String get rulesLede;
 
   /// No description provided for @rulesAdd.
@@ -5238,7 +5538,7 @@ abstract class AppLocalizations {
   /// No description provided for @rulesNone.
   ///
   /// In en, this message translates to:
-  /// **'No rules yet. Add one to tell hiro how your team works: testing, naming, logging, what never to touch.'**
+  /// **'No rules yet. Add one to tell agnts how your team works: testing, naming, logging, what never to touch.'**
   String get rulesNone;
 
   /// No description provided for @rulesNoMatch.
@@ -5406,7 +5706,7 @@ abstract class AppLocalizations {
   /// No description provided for @rulesInterpretation.
   ///
   /// In en, this message translates to:
-  /// **'How hiro reads it'**
+  /// **'How agnts reads it'**
   String get rulesInterpretation;
 
   /// No description provided for @rulesClarified.
@@ -5484,7 +5784,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsLede.
   ///
   /// In en, this message translates to:
-  /// **'How hiro connects to your tools and how it behaves during runs.'**
+  /// **'How agnts connects to your tools and how it behaves during runs.'**
   String get settingsLede;
 
   /// No description provided for @settingsAppearance.
@@ -5724,7 +6024,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsDenyHelp.
   ///
   /// In en, this message translates to:
-  /// **'Always refused, even if a ticket asks for them. Pushing is done by hiro, never by Claude Code.'**
+  /// **'Always refused, even if a ticket asks for them. Pushing is done by agnts, never by Claude Code.'**
   String get settingsDenyHelp;
 
   /// No description provided for @settingsCommits.
@@ -5766,13 +6066,13 @@ abstract class AppLocalizations {
   /// No description provided for @settingsCoAuthor.
   ///
   /// In en, this message translates to:
-  /// **'Add a Co-authored-by: hiro line'**
+  /// **'Add a Co-authored-by: agnts line'**
   String get settingsCoAuthor;
 
   /// No description provided for @settingsCoAuthorHelp.
   ///
   /// In en, this message translates to:
-  /// **'Teammates can see which commits hiro wrote'**
+  /// **'Teammates can see which commits agnts wrote'**
   String get settingsCoAuthorHelp;
 
   /// No description provided for @settingsPrTitle.
@@ -5832,7 +6132,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsAutoLearnHelp.
   ///
   /// In en, this message translates to:
-  /// **'After a push, hiro looks for techniques the repository never used before and writes lessons under Learn. Uses plan usage only when no ticket is waiting.'**
+  /// **'After a push, agnts looks for techniques the repository never used before and writes lessons under Learn. Uses plan usage only when no ticket is waiting.'**
   String get settingsAutoLearnHelp;
 
   /// No description provided for @settingsAutoReview.
@@ -5844,7 +6144,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsAutoReviewHelp.
   ///
   /// In en, this message translates to:
-  /// **'While a change or report waits for you, hiro reviews it and shows its findings next to it. It never blocks approval.'**
+  /// **'While a change or report waits for you, agnts reviews it and shows its findings next to it. It never blocks approval.'**
   String get settingsAutoReviewHelp;
 
   /// No description provided for @settingsPauseAbove.
@@ -5892,7 +6192,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsPushHelp.
   ///
   /// In en, this message translates to:
-  /// **'To the hiro app on your phone'**
+  /// **'To the agnts app on your phone'**
   String get settingsPushHelp;
 
   /// No description provided for @settingsTelegram.
@@ -5934,13 +6234,13 @@ abstract class AppLocalizations {
   /// No description provided for @settingsLessons.
   ///
   /// In en, this message translates to:
-  /// **'When hiro finds something new to learn'**
+  /// **'When agnts finds something new to learn'**
   String get settingsLessons;
 
   /// No description provided for @settingsReviewDone.
   ///
   /// In en, this message translates to:
-  /// **'When hiro\'s code review finishes'**
+  /// **'When agnts\'s code review finishes'**
   String get settingsReviewDone;
 
   /// No description provided for @settingsOnThisPage.
@@ -5960,6 +6260,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings saved'**
   String get settingsSaved;
+
+  /// No description provided for @spendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Token spend'**
+  String get spendTitle;
+
+  /// No description provided for @spendSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{tokens} tokens in and out · about {cost} at API prices'**
+  String spendSub(String tokens, String cost);
+
+  /// No description provided for @spendEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing recorded yet. Spend appears after agnts\'s first Claude run on this ticket.'**
+  String get spendEmpty;
+
+  /// No description provided for @spendInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Input'**
+  String get spendInput;
+
+  /// No description provided for @spendOutput.
+  ///
+  /// In en, this message translates to:
+  /// **'Output'**
+  String get spendOutput;
+
+  /// No description provided for @spendCache.
+  ///
+  /// In en, this message translates to:
+  /// **'Cache: {read} read, {write} written'**
+  String spendCache(String read, String write);
+
+  /// No description provided for @spendCalls.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} run} other {{n} runs}}'**
+  String spendCalls(num n);
+
+  /// No description provided for @spendPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'A run was cut off, so its cost is unknown'**
+  String get spendPartial;
+
+  /// No description provided for @spendCostNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost is Claude Code\'s estimate of the same work at API prices. On a Claude plan you are not charged it; it shows the relative weight of each stage.'**
+  String get spendCostNote;
+
+  /// No description provided for @spendTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} tokens'**
+  String spendTokens(String n);
+
+  /// No description provided for @spendColTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokens'**
+  String get spendColTokens;
+
+  /// No description provided for @spendStageAnalyze.
+  ///
+  /// In en, this message translates to:
+  /// **'Analysis'**
+  String get spendStageAnalyze;
+
+  /// No description provided for @spendStageCoding.
+  ///
+  /// In en, this message translates to:
+  /// **'Coding'**
+  String get spendStageCoding;
+
+  /// No description provided for @spendStageWriting.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing'**
+  String get spendStageWriting;
+
+  /// No description provided for @spendStageRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixes and changes'**
+  String get spendStageRetry;
+
+  /// No description provided for @spendStageReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Code review'**
+  String get spendStageReview;
+
+  /// No description provided for @spendStageLearn.
+  ///
+  /// In en, this message translates to:
+  /// **'Lessons'**
+  String get spendStageLearn;
+
+  /// No description provided for @spendStageHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Helper'**
+  String get spendStageHelper;
+
+  /// No description provided for @spendTopTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets by spend'**
+  String get spendTopTitle;
+
+  /// No description provided for @spendTopSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{tokens} tokens in and out · about {cost} at API prices'**
+  String spendTopSub(String tokens, String cost);
+
+  /// No description provided for @spendTopSubEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Which tickets used the most of your plan'**
+  String get spendTopSubEmpty;
+
+  /// No description provided for @spendTopEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No Claude runs recorded in this period.'**
+  String get spendTopEmpty;
+
+  /// No description provided for @spendTopNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Ranked by Claude Code\'s cost estimate, which weighs cache traffic properly. Share is of the period\'s estimated cost. Only spend inside the period counts.'**
+  String get spendTopNote;
+
+  /// No description provided for @spendColStage.
+  ///
+  /// In en, this message translates to:
+  /// **'Costliest stage'**
+  String get spendColStage;
+
+  /// No description provided for @spendColCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Est. cost'**
+  String get spendColCost;
+
+  /// No description provided for @spendColShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get spendColShare;
 
   /// No description provided for @stateNew.
   ///
@@ -6054,7 +6510,7 @@ abstract class AppLocalizations {
   /// No description provided for @tasksLede.
   ///
   /// In en, this message translates to:
-  /// **'Work for your side projects. Tasks stay in hiro and never touch Jira. Everything else works the same: questions, coding, your review.'**
+  /// **'Work for your side projects. Tasks stay in agnts and never touch Jira. Everything else works the same: questions, coding, your review.'**
   String get tasksLede;
 
   /// No description provided for @tasksNew.
@@ -6144,7 +6600,7 @@ abstract class AppLocalizations {
   /// No description provided for @tasksHelp.
   ///
   /// In en, this message translates to:
-  /// **'For repositories only you work on, you can let hiro push straight to main after you approve. It still never pushes without your review.'**
+  /// **'For repositories only you work on, you can let agnts push straight to main after you approve. It still never pushes without your review.'**
   String get tasksHelp;
 
   /// No description provided for @tasksDrawerSub.
@@ -6180,7 +6636,7 @@ abstract class AppLocalizations {
   /// No description provided for @tasksDescPh.
   ///
   /// In en, this message translates to:
-  /// **'Describe the result you want. The clearer this is, the fewer questions hiro asks.'**
+  /// **'Describe the result you want. The clearer this is, the fewer questions agnts asks.'**
   String get tasksDescPh;
 
   /// No description provided for @tasksPriority.
@@ -6240,7 +6696,7 @@ abstract class AppLocalizations {
   /// No description provided for @tasksStartAskHint.
   ///
   /// In en, this message translates to:
-  /// **'hiro reads the code and asks before coding. Best for anything unclear.'**
+  /// **'agnts reads the code and asks before coding. Best for anything unclear.'**
   String get tasksStartAskHint;
 
   /// No description provided for @tasksStartCode.
@@ -6330,7 +6786,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketAnalysis.
   ///
   /// In en, this message translates to:
-  /// **'What hiro found'**
+  /// **'What agnts found'**
   String get ticketAnalysis;
 
   /// No description provided for @ticketQuestions.
@@ -6546,7 +7002,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketQueuedSub.
   ///
   /// In en, this message translates to:
-  /// **'hiro reads the ticket and the related code, then comes back with a plan and questions. Nothing is changed in this step.'**
+  /// **'agnts reads the ticket and the related code, then comes back with a plan and questions. Nothing is changed in this step.'**
   String get ticketQueuedSub;
 
   /// No description provided for @ticketHeldSub.
@@ -6741,11 +7197,11 @@ abstract class AppLocalizations {
   /// **'Nothing has left the server yet. Approving pushes straight to the default branch.'**
   String get ticketReviewSubMain;
 
-  /// No description provided for @ticketWhatHiroDid.
+  /// No description provided for @ticketWhatAgntsDid.
   ///
   /// In en, this message translates to:
-  /// **'What hiro did'**
-  String get ticketWhatHiroDid;
+  /// **'What agnts did'**
+  String get ticketWhatAgntsDid;
 
   /// No description provided for @ticketDiff.
   ///
@@ -6768,7 +7224,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketAssignSub.
   ///
   /// In en, this message translates to:
-  /// **'Optional. Pick who it is assigned to on the git host when hiro opens it.'**
+  /// **'Optional. Pick who it is assigned to on the git host when agnts opens it.'**
   String get ticketAssignSub;
 
   /// No description provided for @ticketAssignError.
@@ -6852,13 +7308,13 @@ abstract class AppLocalizations {
   /// No description provided for @ticketRejectedSub.
   ///
   /// In en, this message translates to:
-  /// **'hiro stopped working on this ticket. The branch was not pushed.'**
+  /// **'agnts stopped working on this ticket. The branch was not pushed.'**
   String get ticketRejectedSub;
 
   /// No description provided for @ticketFailedTitle.
   ///
   /// In en, this message translates to:
-  /// **'hiro stopped'**
+  /// **'agnts stopped'**
   String get ticketFailedTitle;
 
   /// No description provided for @ticketFailedUnknown.
@@ -6930,7 +7386,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketStageReview.
   ///
   /// In en, this message translates to:
-  /// **'Code review by hiro'**
+  /// **'Code review by agnts'**
   String get ticketStageReview;
 
   /// No description provided for @ticketModelAuto.
@@ -7020,7 +7476,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketSrcTask.
   ///
   /// In en, this message translates to:
-  /// **'hiro task'**
+  /// **'agnts task'**
   String get ticketSrcTask;
 
   /// No description provided for @ticketAfterMain.
@@ -7146,7 +7602,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketRepoHint.
   ///
   /// In en, this message translates to:
-  /// **'Where hiro analyzes and codes this ticket.'**
+  /// **'Where agnts analyzes and codes this ticket.'**
   String get ticketRepoHint;
 
   /// No description provided for @ticketRepoNone.
@@ -7188,7 +7644,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketQueuedSubReport.
   ///
   /// In en, this message translates to:
-  /// **'hiro reads the ticket (and the code, if there is a repository) and comes back with a plan and questions. Nothing is changed.'**
+  /// **'agnts reads the ticket (and the code, if there is a repository) and comes back with a plan and questions. Nothing is changed.'**
   String get ticketQueuedSubReport;
 
   /// No description provided for @ticketAnalyzingTitleNoRepo.
@@ -7200,7 +7656,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketAnalyzingSubNoRepo.
   ///
   /// In en, this message translates to:
-  /// **'No repository: hiro works from the ticket text.'**
+  /// **'No repository: agnts works from the ticket text.'**
   String get ticketAnalyzingSubNoRepo;
 
   /// No description provided for @ticketStartWriting.
@@ -7362,7 +7818,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketsEmptyHint.
   ///
   /// In en, this message translates to:
-  /// **'Label a Jira issue “{label}” and hiro picks it up.'**
+  /// **'Label a Jira issue “{label}” and agnts picks it up.'**
   String ticketsEmptyHint(String label);
 
   /// No description provided for @ticketsUpdated.
@@ -7452,7 +7908,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketsListSub.
   ///
   /// In en, this message translates to:
-  /// **'Jira tickets with the hiro label, plus tasks you create for side projects.'**
+  /// **'Jira tickets with the agnts label, plus tasks you create for side projects.'**
   String get ticketsListSub;
 
   /// No description provided for @ticketsNoMatch.
@@ -7464,7 +7920,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketsEmptyNeeds.
   ///
   /// In en, this message translates to:
-  /// **'Nothing is waiting on you. Tickets show up here when hiro has questions or changes to review.'**
+  /// **'Nothing is waiting on you. Tickets show up here when agnts has questions or changes to review.'**
   String get ticketsEmptyNeeds;
 
   /// No description provided for @ticketsEmptyOther.
@@ -7524,7 +7980,7 @@ abstract class AppLocalizations {
   /// No description provided for @usageLede.
   ///
   /// In en, this message translates to:
-  /// **'hiro runs on your Claude subscription. These limits are shared with your own Claude and Claude Code use.'**
+  /// **'agnts runs on your Claude subscription. These limits are shared with your own Claude and Claude Code use.'**
   String get usageLede;
 
   /// No description provided for @usageCard.
@@ -7668,7 +8124,7 @@ abstract class AppLocalizations {
   /// No description provided for @usageLimitSub.
   ///
   /// In en, this message translates to:
-  /// **'How hiro behaves near the limit'**
+  /// **'How agnts behaves near the limit'**
   String get usageLimitSub;
 
   /// No description provided for @usageAbove.
@@ -7728,7 +8184,7 @@ abstract class AppLocalizations {
   /// No description provided for @usageHelp.
   ///
   /// In en, this message translates to:
-  /// **'Numbers come from the rate limit events Claude Code emits during each run. When hiro is idle, a tiny refresh run keeps them current.'**
+  /// **'Numbers come from the rate limit events Claude Code emits during each run. When agnts is idle, a tiny refresh run keeps them current.'**
   String get usageHelp;
 }
 

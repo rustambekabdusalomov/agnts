@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
 // ErrInvalid wraps input errors the caller should show to the user.
@@ -25,12 +25,12 @@ type Incoming struct {
 	Title       string
 	Description string
 	Priority    string
-	// Kind comes from a kind label; empty means hiro picks it.
+	// Kind comes from a kind label; empty means agnts picks it.
 	Kind domain.TicketKind
 }
 
 // Ingest records a ticket from the tracker. New tickets are queued for
-// analysis; known tickets get their text refreshed while hiro has not
+// analysis; known tickets get their text refreshed while agnts has not
 // started coding them. It reports whether the ticket was created.
 func (o *Orchestrator) Ingest(ctx context.Context, in Incoming, origin domain.Origin) (bool, error) {
 	if in.Key == "" || in.Title == "" {
@@ -189,7 +189,7 @@ func hasQuestion(qs []domain.Question, id int64) bool {
 // MaxAssignees caps how many people a pull request can be assigned to.
 const MaxAssignees = 10
 
-// Approve lets hiro push the reviewed branch and open the pull request,
+// Approve lets agnts push the reviewed branch and open the pull request,
 // assigned to the given git host usernames (none keeps it unassigned). For
 // a report it finishes the ticket, posting the report to the tracker issue
 // when postReport is set.
@@ -389,13 +389,16 @@ func (o *Orchestrator) SetRepo(ctx context.Context, key string, repoID int64, or
 
 // TaskInput creates or edits a side-project task.
 type TaskInput struct {
-	RepoID       int64  // 0: no repository (report kinds, or hiro picks)
-	Kind         string // a domain.TicketKind, or "" / "auto" for hiro to pick
+	RepoID       int64  // 0: no repository (report kinds, or agnts picks)
+	Kind         string // a domain.TicketKind, or "" / "auto" for agnts to pick
 	Title        string
 	Description  string
 	Priority     string
 	AfterApprove string // pr or main
 	Start        string // ask, code or queue
+	// FollowUps turns follow-up suggestions on or off for the task; nil
+	// follows the setting. CreateTask only.
+	FollowUps *bool
 }
 
 // CreateTask adds a side-project task. Its key comes from the
@@ -443,7 +446,7 @@ func (o *Orchestrator) CreateTask(ctx context.Context, in TaskInput, origin doma
 		Title: strings.TrimSpace(in.Title), Description: strings.TrimSpace(in.Description), Priority: in.Priority,
 		State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: in.AfterApprove,
 		Held: in.Start == "queue", AskFirst: in.Start == "ask" || (in.Start == "queue" && st.AskFirst),
-		Kind: kind, KindAuto: auto,
+		Kind: kind, KindAuto: auto, SuggestFollowUps: in.FollowUps,
 	}, prefix, origin)
 }
 
@@ -473,7 +476,7 @@ func (o *Orchestrator) createTask(ctx context.Context, t domain.Ticket, prefix s
 // NoRepoTaskPrefix is the key prefix of tasks without a repository.
 const NoRepoTaskPrefix = "TASK"
 
-// parseKind reads a kind from input: "" or "auto" lets hiro pick (it
+// parseKind reads a kind from input: "" or "auto" lets agnts pick (it
 // starts as code until the analysis says otherwise).
 func parseKind(s string) (domain.TicketKind, bool, error) {
 	if s == "" || s == "auto" {
@@ -487,7 +490,7 @@ func parseKind(s string) (domain.TicketKind, bool, error) {
 }
 
 // SetKind changes what a ticket produces. It is allowed before work starts,
-// while hiro waits for answers, and on a stopped ticket that pushed
+// while agnts waits for answers, and on a stopped ticket that pushed
 // nothing. The chosen kind is final: the analysis no longer changes it.
 func (o *Orchestrator) SetKind(ctx context.Context, key, kind string, origin domain.Origin) (domain.Ticket, error) {
 	k, auto, err := parseKind(kind)
@@ -657,6 +660,12 @@ type TicketView struct {
 	Review    *domain.Review // newest code review; stale when its revision is older
 	History   []HistoryItem
 	Settings  domain.Settings
+	Spend     domain.TokenUsage   // all Claude runs; zero when none was recorded
+	Stages    []domain.StageUsage // Spend by model stage and model
+	// FollowUps are the suggested follow-up tickets and those made from them.
+	FollowUps FollowUps
+	// FollowUpsOn reports whether this ticket's runs suggest follow-ups.
+	FollowUpsOn bool
 }
 
 // TicketRow is a ticket for lists, with when it entered its state.
@@ -664,6 +673,9 @@ type TicketRow struct {
 	Ticket   domain.Ticket
 	Info     StateInfo
 	RepoName string
+	Spend    domain.TokenUsage // zero when no Claude run was recorded
+	// OpenSuggestions counts follow-ups waiting for someone to decide.
+	OpenSuggestions int
 }
 
 // Rows decorates tickets for lists.
@@ -676,10 +688,18 @@ func (o *Orchestrator) Rows(ctx context.Context, ts []domain.Ticket) ([]TicketRo
 	if err != nil {
 		return nil, err
 	}
+	spend, err := o.store.SpendByKeys(ctx, keys)
+	if err != nil {
+		return nil, err
+	}
+	open, err := o.store.OpenSuggestionCounts(ctx, keys)
+	if err != nil {
+		return nil, err
+	}
 	names := map[int64]string{}
 	out := make([]TicketRow, len(ts))
 	for i, t := range ts {
-		out[i] = TicketRow{Ticket: t, Info: info[t.Key]}
+		out[i] = TicketRow{Ticket: t, Info: info[t.Key], Spend: spend[t.Key], OpenSuggestions: open[t.Key]}
 		if t.RepoID != nil {
 			if n, ok := names[*t.RepoID]; ok {
 				out[i].RepoName = n
@@ -703,7 +723,10 @@ func (o *Orchestrator) View(ctx context.Context, key string) (TicketView, error)
 	if err != nil {
 		return v, err
 	}
-	v.Info, v.RepoName = rows[0].Info, rows[0].RepoName
+	v.Info, v.RepoName, v.Spend = rows[0].Info, rows[0].RepoName, rows[0].Spend
+	if v.Stages, err = o.store.TicketUsage(ctx, t.ID); err != nil {
+		return v, err
+	}
 	if v.Settings, err = o.settings.Get(ctx); err != nil {
 		return v, err
 	}
@@ -735,6 +758,10 @@ func (o *Orchestrator) View(ctx context.Context, key string) (TicketView, error)
 	if v.Review, err = o.latestReview(ctx, t.ID); err != nil {
 		return v, err
 	}
+	if v.FollowUps, err = o.followUps(ctx, t); err != nil {
+		return v, err
+	}
+	v.FollowUpsOn = v.Settings.FollowUpsOn(t)
 	return v, nil
 }
 
@@ -753,7 +780,7 @@ func (o *Orchestrator) Events(ctx context.Context, f EventFilter) ([]domain.Even
 func (o *Orchestrator) MarkMerged(ctx context.Context, prURL, branch string, origin domain.Origin) (bool, error) {
 	t, err := o.store.TicketByPR(ctx, prURL, branch)
 	if errors.Is(err, domain.ErrNotFound) {
-		return false, nil // not one of hiro's
+		return false, nil // not one of agnts's
 	}
 	if err != nil {
 		return false, err

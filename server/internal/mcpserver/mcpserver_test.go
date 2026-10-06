@@ -12,20 +12,20 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"hiro/internal/admin"
-	"hiro/internal/domain"
-	"hiro/internal/mcpserver"
-	"hiro/internal/orchestrator"
-	"hiro/internal/store/postgres"
-	"hiro/internal/usage"
-	"hiro/internal/vcs/github"
+	"agnts/internal/admin"
+	"agnts/internal/domain"
+	"agnts/internal/mcpserver"
+	"agnts/internal/orchestrator"
+	"agnts/internal/store/postgres"
+	"agnts/internal/usage"
+	"agnts/internal/vcs/github"
 )
 
 func setup(t *testing.T) (*mcp.ClientSession, *postgres.Agent) {
 	t.Helper()
-	url := os.Getenv("HIRO_TEST_DATABASE_URL")
+	url := os.Getenv("AGNTS_TEST_DATABASE_URL")
 	if url == "" {
-		t.Skip("HIRO_TEST_DATABASE_URL not set")
+		t.Skip("AGNTS_TEST_DATABASE_URL not set")
 	}
 	ctx := context.Background()
 	pool, err := postgres.Open(ctx, url)
@@ -59,7 +59,7 @@ func setup(t *testing.T) (*mcp.ClientSession, *postgres.Agent) {
 	}
 	for _, st := range []domain.TicketState{domain.StateAnalyzing, domain.StateCoding, domain.StateTesting, domain.StateWaitingForReview} {
 		if _, err := store.Transition(ctx, "PAY-1", st, domain.Event{TicketKey: "PAY-1", Type: domain.EventStateChanged}, func(x *domain.Ticket) {
-			x.Branch = "hiro/PAY-1"
+			x.Branch = "agnts/PAY-1"
 		}); err != nil {
 			t.Fatal(err)
 		}
@@ -120,7 +120,7 @@ func TestToolsAndAnnotations(t *testing.T) {
 			t.Errorf("%s should be marked destructive", n)
 		}
 	}
-	for _, n := range []string{"answer_questions", "start_run", "request_changes", "retry_run", "create_task", "set_ticket_kind", "implement_ticket", "confirm_action"} {
+	for _, n := range []string{"answer_questions", "start_run", "request_changes", "retry_run", "create_task", "set_ticket_kind", "implement_ticket", "accept_follow_ups", "dismiss_follow_up", "confirm_action"} {
 		if byName[n] == nil {
 			t.Errorf("missing tool %s", n)
 		}
@@ -146,7 +146,7 @@ func TestTwoStepApprove(t *testing.T) {
 		t.Fatalf("approve_ticket: %v", out)
 	}
 	id, _ := out["action_id"].(string)
-	if id == "" || !strings.Contains(out["summary"].(string), "hiro/PAY-1") {
+	if id == "" || !strings.Contains(out["summary"].(string), "agnts/PAY-1") {
 		t.Fatalf("pending: %v", out)
 	}
 	if tk, _ := store.TicketByKey(ctx, "PAY-1"); tk.State != domain.StateWaitingForReview {
@@ -302,5 +302,67 @@ func TestImplementTicket(t *testing.T) {
 	got, _ := call(t, cs, "get_ticket", map[string]any{"key": "PAY-3"})
 	if got["implemented_by"] != key {
 		t.Fatalf("get_ticket: %v", got)
+	}
+}
+
+func TestFollowUpTools(t *testing.T) {
+	cs, store := setup(t)
+	ctx := context.Background()
+	tk, err := store.TicketByKey(ctx, "PAY-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ss := []domain.Suggestion{
+		{Source: domain.SuggestFromAnalyze, Type: "prerequisite", Title: "Add refund_cents", Serves: "needed first", Kind: domain.KindCode, Priority: "high"},
+		{Source: domain.SuggestFromAnalyze, Type: "split", Title: "Admin screen", Serves: "part of it", Kind: domain.KindCode, Priority: "low"},
+		{Source: domain.SuggestFromWork, Type: "unfinished", Title: "Test negatives", Serves: "untested", Kind: domain.KindTest, Priority: "medium"},
+	}
+	if err := store.ReplaceSuggestions(ctx, tk.ID, domain.SuggestFromAnalyze, ss[:2], nil); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.ReplaceSuggestions(ctx, tk.ID, domain.SuggestFromWork, ss[2:], nil); err != nil {
+		t.Fatal(err)
+	}
+	got, _ := call(t, cs, "get_ticket", map[string]any{"key": "PAY-1"})
+	fus, _ := got["follow_ups"].([]any)
+	if len(fus) != 3 {
+		t.Fatalf("follow_ups: %v", got["follow_ups"])
+	}
+	ids := make([]float64, 3)
+	for i, f := range fus {
+		ids[i] = f.(map[string]any)["id"].(float64)
+	}
+	if fus[2].(map[string]any)["ready"] != false || fus[0].(map[string]any)["ready"] != true {
+		t.Fatalf("readiness: %v", fus)
+	}
+
+	if out, isErr := call(t, cs, "accept_follow_ups", map[string]any{"key": "PAY-1", "items": []any{map[string]any{"id": ids[2]}}}); !isErr {
+		t.Fatalf("work follow-up accepted before done: %v", out)
+	}
+	out, isErr := call(t, cs, "accept_follow_ups", map[string]any{"key": "PAY-1", "items": []any{map[string]any{"id": ids[0], "kind": "test"}}})
+	if isErr || !strings.Contains(out["summary"].(string), `"Add refund_cents" (test) as a local task`) {
+		t.Fatalf("accept_follow_ups: %v", out)
+	}
+	if out, isErr = call(t, cs, "confirm_action", map[string]any{"action_id": out["action_id"]}); isErr {
+		t.Fatalf("confirm: %v", out)
+	}
+	created, _ := out["created"].([]any)
+	if len(created) != 1 {
+		t.Fatalf("created: %v", out)
+	}
+	child, err := store.TicketByKey(ctx, created[0].(map[string]any)["key"].(string))
+	if err != nil || child.FollowUpOf != "PAY-1" || !child.Held || child.Kind != domain.KindTest {
+		t.Fatalf("child: %+v %v", child, err)
+	}
+
+	out, isErr = call(t, cs, "dismiss_follow_up", map[string]any{"key": "PAY-1", "id": ids[1]})
+	if isErr {
+		t.Fatalf("dismiss: %v", out)
+	}
+	if out, isErr = call(t, cs, "confirm_action", map[string]any{"action_id": out["action_id"]}); isErr {
+		t.Fatalf("confirm dismiss: %v", out)
+	}
+	if out, isErr = call(t, cs, "dismiss_follow_up", map[string]any{"key": "PAY-1", "id": ids[1]}); !isErr {
+		t.Fatalf("dismissed twice: %v", out)
 	}
 }

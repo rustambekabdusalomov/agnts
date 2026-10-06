@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
 )
 
 // CI statuses, as the demo shows them.
@@ -96,8 +96,8 @@ type RemoteRepo struct {
 // MaxRemoteRepos caps how many repositories an import listing fetches.
 const MaxRemoteRepos = 500
 
-// LocalBranch is a branch in hiro's own clone on the server: one per ticket
-// checkout. hiro commits there first and pushes only after approval.
+// LocalBranch is a branch in agnts's own clone on the server: one per ticket
+// checkout. agnts commits there first and pushes only after approval.
 type LocalBranch struct {
 	Name    string
 	SHA     string

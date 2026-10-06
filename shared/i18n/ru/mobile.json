@@ -1,8 +1,8 @@
 {
   "mobile": {
     "server": "Адрес сервера",
-    "serverHint": "https://hiro.example.com",
-    "serverInvalid": "Введите https-адрес вашего сервера hiro.",
+    "serverHint": "https://agnts.example.com",
+    "serverInvalid": "Введите https-адрес вашего сервера agnts.",
     "home": "Главная",
     "activity": "Активность",
     "more": "Ещё",

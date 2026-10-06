@@ -1,6 +1,6 @@
 # Qoidalar
 
-Qoidalar hiroga jamoangiz qanday ishlashini aytadi: qanday test yozish, nomlash, loglash, kod tuzilishi va nimaga tegmaslik kerakligi. hiro ularga har bir tiket va vazifada amal qiladi.
+Qoidalar agntsga jamoangiz qanday ishlashini aytadi: qanday test yozish, nomlash, loglash, kod tuzilishi va nimaga tegmaslik kerakligi. agnts ularga har bir tiket va vazifada amal qiladi.
 
 ## Global va repozitoriy qoidalari
 

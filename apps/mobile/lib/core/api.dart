@@ -1,11 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hiro_api/hiro_api.dart';
+import 'package:agnts_api/agnts_api.dart';
 
 import 'session.dart';
 
 /// The generated API client for the signed-in server, or null when signed out.
-final apiProvider = Provider<HiroApi?>((ref) {
+final apiProvider = Provider<AgntsApi?>((ref) {
   final s = ref.watch(sessionProvider).value;
   if (s == null) return null;
   final dio = Dio(BaseOptions(
@@ -28,11 +28,11 @@ final apiProvider = Provider<HiroApi?>((ref) {
       h.next(e);
     },
   ));
-  return HiroApi(dio: dio, interceptors: []);
+  return AgntsApi(dio: dio, interceptors: []);
 });
 
 /// The API client, for providers that only run while signed in.
-HiroApi requireApi(Ref ref) {
+AgntsApi requireApi(Ref ref) {
   final api = ref.watch(apiProvider);
   if (api == null) throw StateError('not signed in');
   return api;

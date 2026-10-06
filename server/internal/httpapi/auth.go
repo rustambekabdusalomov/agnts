@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"time"
 
-	"hiro/internal/auth"
-	"hiro/internal/domain"
-	"hiro/internal/httpapi/gen"
+	"agnts/internal/auth"
+	"agnts/internal/domain"
+	"agnts/internal/httpapi/gen"
 )
 
 var codeRe = regexp.MustCompile(`^[0-9]{6}$`)
@@ -82,7 +82,7 @@ func (s *Server) GetMe(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) sessionCookie(value string, expires time.Time) *http.Cookie {
-	//nolint:gosec // G124: Secure comes from HIRO_COOKIE_SECURE, false only for local http dev
+	//nolint:gosec // G124: Secure comes from AGNTS_COOKIE_SECURE, false only for local http dev
 	c := &http.Cookie{
 		Name:     SessionCookie,
 		Value:    value,

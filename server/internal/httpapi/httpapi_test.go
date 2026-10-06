@@ -17,9 +17,9 @@ import (
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
 
-	"hiro/internal/auth"
-	"hiro/internal/auth/authtest"
-	"hiro/internal/secret"
+	"agnts/internal/auth"
+	"agnts/internal/auth/authtest"
+	"agnts/internal/secret"
 )
 
 type pinger struct{ err error }
@@ -52,7 +52,7 @@ func newHarness(t *testing.T, db Pinger) *harness {
 	if _, err := svc.CreateUser(context.Background(), e, password, h.code(t, 0)); err != nil {
 		t.Fatal(err)
 	}
-	pub, _ := url.Parse("https://hiro.example.com")
+	pub, _ := url.Parse("https://agnts.example.com")
 	h.tickets = &fakeTickets{}
 	h.h, err = NewHandler(Options{
 		Auth:         svc,
@@ -239,7 +239,7 @@ func TestCrossOriginWritesRejected(t *testing.T) {
 	if rec := h.do("POST", "/api/auth/login", body, map[string]string{"Sec-Fetch-Site": "cross-site"}); rec.Code != http.StatusForbidden {
 		t.Fatalf("cross-site fetch: %d", rec.Code)
 	}
-	if rec := h.do("POST", "/api/auth/login", body, map[string]string{"Origin": "https://hiro.example.com"}); rec.Code != http.StatusOK {
+	if rec := h.do("POST", "/api/auth/login", body, map[string]string{"Origin": "https://agnts.example.com"}); rec.Code != http.StatusOK {
 		t.Fatalf("same origin: %d %s", rec.Code, rec.Body)
 	}
 }

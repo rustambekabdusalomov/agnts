@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
 // Limits of the learn stage: it runs after the work is shipped, so it gets
@@ -79,7 +79,7 @@ func (o *Orchestrator) Learn(ctx context.Context, key string, origin domain.Orig
 		return t, err
 	}
 	if t.State != domain.StateDone {
-		return t, invalid("hiro learns from tickets once they are pushed")
+		return t, invalid("agnts learns from tickets once they are pushed")
 	}
 	if t.RepoID == nil || t.Branch == "" {
 		return t, invalid("this ticket has no pushed branch to learn from")

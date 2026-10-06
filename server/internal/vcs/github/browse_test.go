@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"hiro/internal/domain"
-	"hiro/internal/vcs"
+	"agnts/internal/domain"
+	"agnts/internal/vcs"
 )
 
 func TestBrowse(t *testing.T) {
@@ -19,7 +19,7 @@ func TestBrowse(t *testing.T) {
 		p := r.URL.Path
 		switch {
 		case p == "/repos/acme/api/branches":
-			_, _ = io.WriteString(w, `[{"name":"main","commit":{"sha":"m1"}},{"name":"hiro/PAY-1","commit":{"sha":"h1"}}]`)
+			_, _ = io.WriteString(w, `[{"name":"main","commit":{"sha":"m1"}},{"name":"agnts/PAY-1","commit":{"sha":"h1"}}]`)
 		case strings.HasPrefix(p, "/repos/acme/api/commits/") && strings.HasSuffix(p, "/check-runs"):
 			if strings.Contains(p, "h1") {
 				_, _ = io.WriteString(w, `{"total_count":2,"check_runs":[{"status":"completed","conclusion":"success"},{"status":"completed","conclusion":"failure"}]}`)
@@ -28,10 +28,10 @@ func TestBrowse(t *testing.T) {
 			_, _ = io.WriteString(w, `{"total_count":1,"check_runs":[{"status":"completed","conclusion":"success"}]}`)
 		case strings.HasPrefix(p, "/repos/acme/api/commits/"):
 			_, _ = io.WriteString(w, `{"sha":"x","commit":{"message":"PAY-1: fix\n\nbody","author":{"name":"Rustam","date":"2026-10-01T10:00:00Z"}}}`)
-		case p == "/repos/acme/api/compare/main...hiro/PAY-1":
+		case p == "/repos/acme/api/compare/main...agnts/PAY-1":
 			_, _ = io.WriteString(w, `{"ahead_by":2,"behind_by":1}`)
 		case p == "/repos/acme/api/actions/runs":
-			_, _ = io.WriteString(w, `{"workflow_runs":[{"id":9,"name":"CI","display_title":"PAY-1: fix","head_branch":"hiro/PAY-1","head_sha":"h1","event":"pull_request","status":"completed","conclusion":"failure","created_at":"2026-10-01T10:00:00Z","updated_at":"2026-10-01T10:03:00Z"}]}`)
+			_, _ = io.WriteString(w, `{"workflow_runs":[{"id":9,"name":"CI","display_title":"PAY-1: fix","head_branch":"agnts/PAY-1","head_sha":"h1","event":"pull_request","status":"completed","conclusion":"failure","created_at":"2026-10-01T10:00:00Z","updated_at":"2026-10-01T10:03:00Z"}]}`)
 		case p == "/repos/acme/api/actions/runs/9/jobs":
 			_, _ = io.WriteString(w, `{"jobs":[{"id":1,"name":"test","status":"completed","conclusion":"failure","started_at":"2026-10-01T10:00:00Z","completed_at":"2026-10-01T10:02:00Z"}]}`)
 		case r.Method == "POST" && p == "/repos/acme/api/actions/workflows/deploy.yml/dispatches":

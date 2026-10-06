@@ -1,4 +1,4 @@
-// Package mcpserver exposes hiro to Claude chat as an MCP server. Reads run
+// Package mcpserver exposes agnts to Claude chat as an MCP server. Reads run
 // directly; every write is two-step: the tool creates a pending action and
 // returns what it would do, and nothing happens until confirm_action.
 // Deploys, disconnecting integrations and settings are not exposed.
@@ -16,11 +16,11 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"hiro/internal/admin"
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
-	"hiro/internal/store/postgres"
-	"hiro/internal/usage"
+	"agnts/internal/admin"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
+	"agnts/internal/store/postgres"
+	"agnts/internal/usage"
 )
 
 // ConfirmTTL is how long a pending write waits for confirm_action.
@@ -40,10 +40,10 @@ type Deps struct {
 
 type tools struct{ d Deps }
 
-// NewServer builds the MCP server with hiro's tools.
+// NewServer builds the MCP server with agnts's tools.
 func NewServer(d Deps, version string) *mcp.Server {
-	s := mcp.NewServer(&mcp.Implementation{Name: "hiro", Title: "hiro", Version: version}, &mcp.ServerOptions{
-		Instructions: "hiro is the user's agent for tickets: it codes changes and tests, and writes plans, analyses and bug investigations as reports. " +
+	s := mcp.NewServer(&mcp.Implementation{Name: "agnts", Title: "agnts", Version: version}, &mcp.ServerOptions{
+		Instructions: "agnts is the user's agent for tickets: it codes changes and tests, and writes plans, analyses and bug investigations as reports. " +
 			"Use get_inbox first to see what needs the user. " +
 			"Write tools never act directly: they return an action_id and a summary. Show the summary to the user, " +
 			"and call confirm_action only after the user explicitly agrees. Never confirm on your own.",
@@ -56,23 +56,25 @@ func NewServer(d Deps, version string) *mcp.Server {
 
 	mcp.AddTool(s, &mcp.Tool{Name: "get_inbox", Description: "Tickets waiting on the user (questions to answer, changes to review, stopped runs), oldest first, plus what is running.", Annotations: ro}, t.getInbox)
 	mcp.AddTool(s, &mcp.Tool{Name: "list_tickets", Description: "List tickets. filter: needs, running, queue, done or all.", Annotations: ro}, t.listTickets)
-	mcp.AddTool(s, &mcp.Tool{Name: "get_ticket", Description: "One ticket: its kind, description, hiro's analysis and plan, questions with ids, the latest result (summary, checks and changed files for a change; the Markdown report for plan, analysis and bug tickets), hiro's code review of that result (advice; the user decides) and history.", Annotations: ro}, t.getTicket)
+	mcp.AddTool(s, &mcp.Tool{Name: "get_ticket", Description: "One ticket: its kind, description, agnts's analysis and plan, questions with ids, the latest result (summary, checks and changed files for a change; the Markdown report for plan, analysis and bug tickets), agnts's code review of that result (advice; the user decides), suggested follow-up tickets with ids, and history.", Annotations: ro}, t.getTicket)
 	mcp.AddTool(s, &mcp.Tool{Name: "get_run_log", Description: "The newest log lines of a ticket's runs (tool calls, checks, state changes).", Annotations: ro}, t.getRunLog)
 	mcp.AddTool(s, &mcp.Tool{Name: "get_usage", Description: "Claude plan usage (session and weekly) and whether new runs are paused.", Annotations: ro}, t.getUsage)
-	mcp.AddTool(s, &mcp.Tool{Name: "get_analytics", Description: "Statistics for the last N days (7, 30 or 90): tickets picked up, pushed, first-try approvals, turns, waiting time, stops.", Annotations: ro}, t.getAnalytics)
-	mcp.AddTool(s, &mcp.Tool{Name: "list_repositories", Description: "Repositories hiro works on, with open ticket counts.", Annotations: ro}, t.listRepos)
+	mcp.AddTool(s, &mcp.Tool{Name: "get_analytics", Description: "Statistics for the last N days (7, 30 or 90): tickets picked up, pushed, first-try approvals, turns, waiting time, stops, token spend.", Annotations: ro}, t.getAnalytics)
+	mcp.AddTool(s, &mcp.Tool{Name: "list_repositories", Description: "Repositories agnts works on, with open ticket counts.", Annotations: ro}, t.listRepos)
 	mcp.AddTool(s, &mcp.Tool{Name: "get_repository", Description: "One repository by name.", Annotations: ro}, t.getRepo)
-	mcp.AddTool(s, &mcp.Tool{Name: "list_lessons", Description: "Lessons hiro wrote about techniques its pushed changes introduced to a repository for the first time (patterns, architecture, algorithms, libraries), newest first.", Annotations: ro}, t.listLessons)
+	mcp.AddTool(s, &mcp.Tool{Name: "list_lessons", Description: "Lessons agnts wrote about techniques its pushed changes introduced to a repository for the first time (patterns, architecture, algorithms, libraries), newest first.", Annotations: ro}, t.listLessons)
 	mcp.AddTool(s, &mcp.Tool{Name: "get_lesson", Description: "One lesson: explanation, why the change needed it, code references, quiz (with answers: ask the user first, then reveal) and further reading.", Annotations: ro}, t.getLesson)
 
 	mcp.AddTool(s, &mcp.Tool{Name: "answer_questions", Description: "Prepare answers to a ticket's questions (all must be answered). Returns an action_id to confirm.", Annotations: write}, t.answerQuestions)
 	mcp.AddTool(s, &mcp.Tool{Name: "start_run", Description: "Prepare starting a ticket that is held in the queue. Returns an action_id to confirm.", Annotations: write}, t.startRun)
 	mcp.AddTool(s, &mcp.Tool{Name: "request_changes", Description: "Prepare sending a ticket under review back to coding with feedback. Returns an action_id to confirm.", Annotations: write}, t.requestChanges)
 	mcp.AddTool(s, &mcp.Tool{Name: "retry_run", Description: "Prepare retrying a stopped or paused ticket. Returns an action_id to confirm.", Annotations: write}, t.retryRun)
-	mcp.AddTool(s, &mcp.Tool{Name: "create_task", Description: "Prepare a new task. kind says what hiro produces: code or test (a change, needs a repository), plan, analysis or bug (a Markdown report, repository optional), or auto (hiro picks while reading it). Returns an action_id to confirm.", Annotations: write}, t.createTask)
+	mcp.AddTool(s, &mcp.Tool{Name: "create_task", Description: "Prepare a new task. kind says what agnts produces: code or test (a change, needs a repository), plan, analysis or bug (a Markdown report, repository optional), or auto (agnts picks while reading it). Returns an action_id to confirm.", Annotations: write}, t.createTask)
 	mcp.AddTool(s, &mcp.Tool{Name: "implement_ticket", Description: "Prepare the code task that carries out a done plan or bug investigation: a new task linked to the report, with the report as its brief. repository is needed only when the report has none. Returns an action_id to confirm.", Annotations: write}, t.implementTicket)
-	mcp.AddTool(s, &mcp.Tool{Name: "set_ticket_kind", Description: "Prepare changing what a ticket produces (code, test, plan, analysis, bug, or auto to let hiro pick). Only before work starts, while waiting for answers, or on a stopped ticket. Returns an action_id to confirm.", Annotations: write}, t.setKind)
-	mcp.AddTool(s, &mcp.Tool{Name: "approve_ticket", Description: "Prepare approving reviewed work. For a change hiro pushes and opens the pull request; for a report the ticket is done, and post_report also posts it to the Jira issue (only if the user asks). Returns an action_id; confirm only if the user explicitly approves.", Annotations: destructive}, t.approveTicket)
+	mcp.AddTool(s, &mcp.Tool{Name: "accept_follow_ups", Description: "Prepare creating tickets from a ticket's suggested follow-ups (ids from get_ticket), each as a local task or a new Jira issue. They are created queued: nothing runs until started. Returns an action_id to confirm.", Annotations: write}, t.acceptFollowUps)
+	mcp.AddTool(s, &mcp.Tool{Name: "dismiss_follow_up", Description: "Prepare declining a suggested follow-up; agnts will not suggest it again. Returns an action_id to confirm.", Annotations: write}, t.dismissFollowUp)
+	mcp.AddTool(s, &mcp.Tool{Name: "set_ticket_kind", Description: "Prepare changing what a ticket produces (code, test, plan, analysis, bug, or auto to let agnts pick). Only before work starts, while waiting for answers, or on a stopped ticket. Returns an action_id to confirm.", Annotations: write}, t.setKind)
+	mcp.AddTool(s, &mcp.Tool{Name: "approve_ticket", Description: "Prepare approving reviewed work. For a change agnts pushes and opens the pull request; for a report the ticket is done, and post_report also posts it to the Jira issue (only if the user asks). Returns an action_id; confirm only if the user explicitly approves.", Annotations: destructive}, t.approveTicket)
 	mcp.AddTool(s, &mcp.Tool{Name: "reject_ticket", Description: "Prepare rejecting a ticket (stops all work on it). Returns an action_id; confirm only if the user explicitly agrees.", Annotations: destructive}, t.rejectTicket)
 	mcp.AddTool(s, &mcp.Tool{Name: "confirm_action", Description: "Execute a prepared action after the user explicitly agreed to its summary. Actions expire after 10 minutes and run once.", Annotations: write}, t.confirmAction)
 	return s
@@ -229,11 +231,26 @@ type TicketOut struct {
 	Report       string        `json:"report,omitempty"`
 	ParentKey    string        `json:"implements,omitempty"`
 	ChildKey     string        `json:"implemented_by,omitempty"`
+	FollowUpOf   string        `json:"follow_up_of,omitempty"`
+	FollowUps    []FollowUpOut `json:"follow_ups,omitempty"`
 	CodeReview   *ReviewOut    `json:"code_review,omitempty"`
 	History      []string      `json:"history,omitempty"`
 }
 
-// ReviewOut is hiro's code review of the result under review: advice for
+// FollowUpOut is a suggested follow-up ticket.
+type FollowUpOut struct {
+	ID       int64  `json:"id"`
+	Type     string `json:"type" jsonschema:"prerequisite, split, unfinished or gap"`
+	Title    string `json:"title"`
+	Serves   string `json:"serves" jsonschema:"how it helps finish this ticket"`
+	Kind     string `json:"kind"`
+	Priority string `json:"priority"`
+	Status   string `json:"status" jsonschema:"open, accepted or dismissed"`
+	Ready    bool   `json:"ready" jsonschema:"a ticket can be created from it now"`
+	Ticket   string `json:"ticket,omitempty" jsonschema:"the ticket created from it"`
+}
+
+// ReviewOut is agnts's code review of the result under review: advice for
 // the user, who still decides.
 type ReviewOut struct {
 	State    string   `json:"state" jsonschema:"pending, running, done or failed"`
@@ -281,7 +298,11 @@ func (t *tools) getTicket(ctx context.Context, _ *mcp.CallToolRequest, in KeyInp
 		}
 		out.Report = r.Report
 	}
-	out.ParentKey, out.ChildKey = v.Ticket.ParentKey, v.ChildKey
+	out.ParentKey, out.ChildKey, out.FollowUpOf = v.Ticket.ParentKey, v.ChildKey, v.Ticket.FollowUpOf
+	for _, x := range v.FollowUps.Suggestions {
+		out.FollowUps = append(out.FollowUps, FollowUpOut{ID: x.ID, Type: x.Type, Title: x.Title, Serves: x.Serves, Kind: string(x.Kind),
+			Priority: x.Priority, Status: x.Status, Ready: x.Ready(v.Ticket.State), Ticket: x.ChildKey})
+	}
 	if v.Ticket.State == domain.StateWaitingForReview && v.Ticket.ReviewState != domain.ReviewNone {
 		rv := &ReviewOut{State: v.Ticket.ReviewState}
 		if r := v.Review; r != nil && r.Revision == v.Ticket.Revision {
@@ -663,6 +684,108 @@ func (t *tools) implementTicket(ctx context.Context, _ *mcp.CallToolRequest, in 
 		map[string]any{"repo_id": repoID, "start": start})
 }
 
+// FollowUpChoice is one suggestion to create.
+type FollowUpChoice struct {
+	ID     int64  `json:"id"`
+	Target string `json:"target,omitempty" jsonschema:"local (an agnts task, default) or jira (a new Jira issue); ask the user"`
+	Title  string `json:"title,omitempty" jsonschema:"a new title, if the user wants one"`
+	Kind   string `json:"kind,omitempty" jsonschema:"code, test, plan, analysis or bug, if the user wants another kind"`
+}
+
+// AcceptFollowUpsInput creates tickets from suggestions.
+type AcceptFollowUpsInput struct {
+	Key   string           `json:"key" jsonschema:"the ticket that suggested them"`
+	Items []FollowUpChoice `json:"items"`
+}
+
+func (t *tools) acceptFollowUps(ctx context.Context, _ *mcp.CallToolRequest, in AcceptFollowUpsInput) (*mcp.CallToolResult, Pending, error) {
+	tk, err := t.ticket(ctx, in.Key)
+	if err != nil {
+		return nil, Pending{}, err
+	}
+	if len(in.Items) == 0 {
+		return nil, Pending{}, errors.New("pick at least one follow-up")
+	}
+	f, err := t.d.Orch.ListFollowUps(ctx, tk.Key)
+	if err != nil {
+		return nil, Pending{}, err
+	}
+	var lines []string
+	items := make([]any, 0, len(in.Items))
+	for _, c := range in.Items {
+		var x *domain.Suggestion
+		for i := range f.Suggestions {
+			if f.Suggestions[i].ID == c.ID {
+				x = &f.Suggestions[i]
+			}
+		}
+		if x == nil {
+			return nil, Pending{}, fmt.Errorf("%s has no follow-up %d", tk.Key, c.ID)
+		}
+		if !x.Ready(tk.State) {
+			return nil, Pending{}, fmt.Errorf("follow-up %d (%s) cannot be created now: it is %s, or it waits until %s is done", c.ID, x.Title, x.Status, tk.Key)
+		}
+		if c.Target == "" {
+			c.Target = orchestrator.TargetLocal
+		}
+		if c.Target != orchestrator.TargetLocal && c.Target != orchestrator.TargetJira {
+			return nil, Pending{}, errors.New("target must be local or jira")
+		}
+		if c.Kind != "" && !domain.TicketKind(c.Kind).Valid() {
+			return nil, Pending{}, fmt.Errorf("kind must be code, test, plan, analysis or bug")
+		}
+		title, kind := x.Title, string(x.Kind)
+		if c.Title != "" {
+			title = c.Title
+		}
+		if c.Kind != "" {
+			kind = c.Kind
+		}
+		where := "a local task"
+		if c.Target == orchestrator.TargetJira {
+			where = "a new Jira issue"
+		}
+		lines = append(lines, fmt.Sprintf("%q (%s) as %s", title, kind, where))
+		items = append(items, map[string]any{"id": c.ID, "target": c.Target, "title": c.Title, "kind": c.Kind})
+	}
+	return t.prepare(ctx, "accept_follow_ups", tk.Key, fmt.Sprintf("Create %d follow-up %s of %s, queued until started: %s.",
+		len(lines), plural(len(lines), "ticket", "tickets"), tk.Key, strings.Join(lines, "; ")), map[string]any{"items": items})
+}
+
+// DismissInput declines a suggestion.
+type DismissInput struct {
+	Key string `json:"key"`
+	ID  int64  `json:"id" jsonschema:"the follow-up's id from get_ticket"`
+}
+
+func (t *tools) dismissFollowUp(ctx context.Context, _ *mcp.CallToolRequest, in DismissInput) (*mcp.CallToolResult, Pending, error) {
+	tk, err := t.ticket(ctx, in.Key)
+	if err != nil {
+		return nil, Pending{}, err
+	}
+	f, err := t.d.Orch.ListFollowUps(ctx, tk.Key)
+	if err != nil {
+		return nil, Pending{}, err
+	}
+	for _, x := range f.Suggestions {
+		if x.ID == in.ID {
+			if x.Status != domain.SuggestionOpen {
+				return nil, Pending{}, fmt.Errorf("follow-up %d is already %s", in.ID, x.Status)
+			}
+			return t.prepare(ctx, "dismiss_follow_up", tk.Key, fmt.Sprintf("Dismiss the follow-up %q suggested by %s.", x.Title, tk.Key),
+				map[string]any{"id": in.ID})
+		}
+	}
+	return nil, Pending{}, fmt.Errorf("%s has no follow-up %d", tk.Key, in.ID)
+}
+
+func plural(n int, one, many string) string {
+	if n == 1 {
+		return one
+	}
+	return many
+}
+
 // KindInput changes a ticket's kind.
 type KindInput struct {
 	Key  string `json:"key"`
@@ -679,7 +802,7 @@ func (t *tools) setKind(ctx context.Context, _ *mcp.CallToolRequest, in KindInpu
 	}
 	what := "make " + tk.Key + " a " + in.Kind + " ticket"
 	if in.Kind == "auto" {
-		what = "let hiro pick the kind of " + tk.Key + " while reading it"
+		what = "let agnts pick the kind of " + tk.Key + " while reading it"
 	}
 	return t.prepare(ctx, "set_ticket_kind", tk.Key, fmt.Sprintf("Change %s (%s, now %s): %s.", tk.Key, tk.Title, tk.Kind, what),
 		map[string]any{"kind": in.Kind})
@@ -703,11 +826,11 @@ func (t *tools) approveTicket(ctx context.Context, _ *mcp.CallToolRequest, in Ap
 		if in.PostReport && tk.Source != domain.SourceJira {
 			return nil, Pending{}, fmt.Errorf("%s has no Jira issue to post the report to", tk.Key)
 		}
-		what := "close it and keep the report in hiro"
+		what := "close it and keep the report in agnts"
 		if in.PostReport {
-			what = "close it, keep the report in hiro and post it as a comment on the Jira issue"
+			what = "close it, keep the report in agnts and post it as a comment on the Jira issue"
 		}
-		return t.prepare(ctx, "approve_ticket", tk.Key, fmt.Sprintf("Approve the %s report on %s (%s): hiro will %s.", tk.Kind, tk.Key, tk.Title, what),
+		return t.prepare(ctx, "approve_ticket", tk.Key, fmt.Sprintf("Approve the %s report on %s (%s): agnts will %s.", tk.Kind, tk.Key, tk.Title, what),
 			map[string]any{"post_report": in.PostReport})
 	}
 	if in.PostReport {
@@ -717,7 +840,7 @@ func (t *tools) approveTicket(ctx context.Context, _ *mcp.CallToolRequest, in Ap
 	if tk.Source == domain.SourceLocal && tk.AfterApprove == "main" {
 		what = "push the changes straight to the default branch"
 	}
-	return t.prepare(ctx, "approve_ticket", tk.Key, fmt.Sprintf("Approve %s (%s): hiro will %s.", tk.Key, tk.Title, what), nil)
+	return t.prepare(ctx, "approve_ticket", tk.Key, fmt.Sprintf("Approve %s (%s): agnts will %s.", tk.Key, tk.Title, what), nil)
 }
 
 // RejectInput rejects a ticket.
@@ -742,8 +865,10 @@ type ConfirmInput struct {
 
 // Done is confirm_action's output.
 type Done struct {
-	Done   string       `json:"done"`
-	Ticket *TicketBrief `json:"ticket,omitempty"`
+	Done    string        `json:"done"`
+	Ticket  *TicketBrief  `json:"ticket,omitempty"`
+	Created []TicketBrief `json:"created,omitempty"` // accept_follow_ups
+	Errors  []string      `json:"errors,omitempty"`  // follow-ups that could not be created
 }
 
 func (t *tools) confirmAction(ctx context.Context, _ *mcp.CallToolRequest, in ConfirmInput) (*mcp.CallToolResult, Done, error) {
@@ -785,6 +910,14 @@ func (t *tools) confirmAction(ctx context.Context, _ *mcp.CallToolRequest, in Co
 	case "reject_ticket":
 		reason, _ := a.Args["reason"].(string)
 		tk, err = o.Reject(ctx, a.TicketKey, reason, domain.OriginMCP)
+	case "accept_follow_ups":
+		return t.confirmFollowUps(ctx, a.TicketKey, a.Summary, a.Args)
+	case "dismiss_follow_up":
+		id, _ := a.Args["id"].(float64)
+		if _, err := o.DismissSuggestion(ctx, a.TicketKey, int64(id), domain.OriginMCP); err != nil {
+			return nil, Done{}, err
+		}
+		return nil, Done{Done: a.Summary}, nil
 	case "create_task":
 		id, _ := a.Args["repo_id"].(float64)
 		str := func(k string) string { s, _ := a.Args[k].(string); return s }
@@ -805,6 +938,36 @@ func (t *tools) confirmAction(ctx context.Context, _ *mcp.CallToolRequest, in Co
 	if err == nil && len(rows) == 1 {
 		b := brief(rows[0])
 		out.Ticket = &b
+	}
+	return nil, out, nil
+}
+
+func (t *tools) confirmFollowUps(ctx context.Context, key, summary string, args map[string]any) (*mcp.CallToolResult, Done, error) {
+	var in []orchestrator.AcceptInput
+	list, _ := args["items"].([]any)
+	for _, x := range list {
+		m, _ := x.(map[string]any)
+		id, _ := m["id"].(float64)
+		str := func(k string) string { s, _ := m[k].(string); return s }
+		in = append(in, orchestrator.AcceptInput{ID: int64(id), Target: str("target"), Title: str("title"), Kind: str("kind")})
+	}
+	res, err := t.d.Orch.AcceptSuggestions(ctx, key, in, domain.OriginMCP)
+	if err != nil {
+		return nil, Done{}, err
+	}
+	out := Done{Done: summary}
+	var made []domain.Ticket
+	for _, r := range res {
+		if r.Err != nil {
+			out.Errors = append(out.Errors, fmt.Sprintf("follow-up %d: %v", r.ID, r.Err))
+			continue
+		}
+		made = append(made, *r.Ticket)
+	}
+	if rows, err := t.d.Orch.Rows(ctx, made); err == nil {
+		for _, row := range rows {
+			out.Created = append(out.Created, brief(row))
+		}
 	}
 	return nil, out, nil
 }

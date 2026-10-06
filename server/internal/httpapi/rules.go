@@ -5,9 +5,9 @@ import (
 	"errors"
 	"net/http"
 
-	"hiro/internal/domain"
-	"hiro/internal/httpapi/gen"
-	"hiro/internal/orchestrator"
+	"agnts/internal/domain"
+	"agnts/internal/httpapi/gen"
+	"agnts/internal/orchestrator"
 )
 
 // Rules is what the Rules page reads and changes.

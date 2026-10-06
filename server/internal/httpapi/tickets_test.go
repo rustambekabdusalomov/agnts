@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
 )
 
 type fakeTickets struct {
@@ -19,6 +19,47 @@ type fakeTickets struct {
 	lastImplement orchestrator.ImplementInput
 	lastOrigin    domain.Origin
 	lastAnswer    []domain.Answer
+	lastAccept    []orchestrator.AcceptInput
+	lastFollowUps *bool
+}
+
+func (f *fakeTickets) ListFollowUps(context.Context, string) (orchestrator.FollowUps, error) {
+	return orchestrator.FollowUps{}, nil
+}
+
+func (f *fakeTickets) SetFollowUps(_ context.Context, key string, on *bool, _ domain.Origin) (domain.Ticket, error) {
+	f.lastFollowUps = on
+	t, err := f.ticket(key, domain.StateNew)
+	t.SuggestFollowUps = on
+	return t, err
+}
+
+func (f *fakeTickets) AcceptSuggestions(_ context.Context, key string, in []orchestrator.AcceptInput, _ domain.Origin) ([]orchestrator.AcceptResult, error) {
+	f.lastAccept = in
+	out := []orchestrator.AcceptResult{}
+	for _, a := range in {
+		if a.ID == 2 {
+			out = append(out, orchestrator.AcceptResult{ID: 2, Err: fmt.Errorf("%w: create it once %s is done", orchestrator.ErrInvalid, key)})
+			continue
+		}
+		t := domain.Ticket{Key: "VIS-5", Title: "Add a column", State: domain.StateNew, Source: domain.SourceLocal, Held: true, FollowUpOf: key, Kind: domain.KindCode}
+		out = append(out, orchestrator.AcceptResult{ID: a.ID, Ticket: &t})
+	}
+	return out, nil
+}
+
+func (f *fakeTickets) DismissSuggestion(_ context.Context, _ string, id int64, _ domain.Origin) (domain.Suggestion, error) {
+	if id == 7 {
+		return domain.Suggestion{}, domain.ErrSuggestionDecided
+	}
+	return domain.Suggestion{ID: id, Source: "work", Type: "gap", Title: "x", Serves: "y", Kind: domain.KindCode, Priority: "low", Status: domain.SuggestionDismissed}, nil
+}
+
+func (f *fakeTickets) SuggestFromFinding(_ context.Context, _ string, index int, _ domain.Origin) (domain.Suggestion, error) {
+	if index > 0 {
+		return domain.Suggestion{}, fmt.Errorf("%w: the review has no finding %d", orchestrator.ErrInvalid, index)
+	}
+	return domain.Suggestion{ID: 11, Source: "manual", Type: "unfinished", Title: "untested", Serves: "review", Kind: domain.KindCode, Priority: "high", Status: domain.SuggestionOpen}, nil
 }
 
 func (f *fakeTickets) ticket(key string, s domain.TicketState) (domain.Ticket, error) {
@@ -52,6 +93,17 @@ func (f *fakeTickets) View(_ context.Context, key string) (orchestrator.TicketVi
 		},
 		Review: &domain.Review{Revision: 0, Model: "opus", ModelReason: "a large change", Verdict: domain.VerdictHasConcerns, Summary: "ok",
 			Findings: []domain.Finding{{Severity: "major", Category: "tests", File: "a.go", Line: 3, Title: "untested"}}},
+		Spend: domain.TokenUsage{Input: 30, Output: 7, CacheRead: 500, CacheWrite: 60, CostUSD: 0.25},
+		Stages: []domain.StageUsage{
+			{ModelStage: domain.ModelCoding, Model: "opus", Calls: 1, Turns: 4, Usage: domain.TokenUsage{Input: 20, Output: 5, CacheRead: 500, CostUSD: 0.25}},
+			{ModelStage: domain.ModelRetry, Model: "opus", Calls: 2, Turns: 3, Partial: true, Usage: domain.TokenUsage{Input: 10, Output: 2, CacheWrite: 60}},
+		},
+		FollowUps: orchestrator.FollowUps{
+			Suggestions: []domain.Suggestion{{ID: 1, Source: "analyze", Type: "prerequisite", Title: "Add a column", Serves: "needed first",
+				Kind: domain.KindCode, Priority: "high", Status: domain.SuggestionOpen}},
+			Children: []domain.Ticket{{Key: "VIS-5", Title: "Earlier one", State: domain.StateNew, Source: domain.SourceLocal, Held: true}},
+		},
+		FollowUpsOn: true,
 	}, err
 }
 
@@ -157,6 +209,9 @@ func (f *fakeTickets) Rows(_ context.Context, ts []domain.Ticket) ([]orchestrato
 	out := make([]orchestrator.TicketRow, len(ts))
 	for i, t := range ts {
 		out[i] = orchestrator.TicketRow{Ticket: t, RepoName: "api"}
+		if t.Key == "PAY-1" {
+			out[i].Spend = domain.TokenUsage{Input: 1, Output: 2, CostUSD: 0.5}
+		}
 	}
 	return out, nil
 }
@@ -180,6 +235,9 @@ func TestTicketEndpoints(t *testing.T) {
 		{"GET", "/api/tickets?state=done", "", 200, `[]`},
 		{"GET", "/api/tickets?state=bogus", "", 400, ``},
 		{"GET", "/api/tickets/PAY-1", "", 200, `"checks":[{"command":"go test","durationMs":1200,"exitCode":0,"name":"test"}]`},
+		{"GET", "/api/tickets", "", 200, `"spend":{"cacheRead":0,"cacheWrite":0,"costUsd":0.5,"input":1,"output":2,"total":3}`},
+		{"GET", "/api/tickets/PAY-1", "", 200, `"spend":{"cacheRead":500,"cacheWrite":60,"costUsd":0.25,"input":30,"output":7,"total":597}`},
+		{"GET", "/api/tickets/PAY-1", "", 200, `"spendByStage":[{"calls":1,"model":"opus","partial":false,"spend":{"cacheRead":500,"cacheWrite":0,"costUsd":0.25,"input":20,"output":5,"total":525},"stage":"coding","turns":4},{"calls":2,"model":"opus","partial":true,"spend":{"cacheRead":0,"cacheWrite":60,"costUsd":0,"input":10,"output":2,"total":72},"stage":"retry","turns":3}]`},
 		{"GET", "/api/tickets/NOPE-1", "", 404, `not_found`},
 		{"GET", "/api/tickets/PAY-1/events?after=4", "", 200, `"message":"Read: a.go"`},
 		{"PUT", "/api/tickets/PAY-1/answers", `{"answers":[{"questionId":9,"answer":"half up","note":"n"}]}`, 200, `"state":"coding"`},
@@ -202,12 +260,32 @@ func TestTicketEndpoints(t *testing.T) {
 		{"POST", "/api/tickets/PAY-1/request-changes", `{"feedback":"more tests"}`, 200, `"state":"coding"`},
 		{"POST", "/api/tickets/PAY-1/reject", "", 200, `"state":"rejected"`},
 		{"POST", "/api/tickets/PAY-1/retry", "", 200, `"state":"new"`},
+		{"GET", "/api/tickets/PAY-1", "", 200, `"followUps":{"children":[{"held":true,"key":"VIS-5"`},
+		{"GET", "/api/tickets/PAY-1", "", 200, `"openSuggestions":1`},
+		{"GET", "/api/tickets/PAY-1/follow-ups", "", 200, `"suggestions":[{"createdAt"`},
+		{"PUT", "/api/tickets/PAY-1/follow-ups", `{"mode":"on"}`, 200, `"suggestFollowUps":"on"`},
+		{"PUT", "/api/tickets/PAY-1/follow-ups", `{"mode":"maybe"}`, 400, `bad_request`},
+		{"POST", "/api/tickets/PAY-1/follow-ups/accept", `{"items":[]}`, 400, `bad_request`},
+		{"POST", "/api/tickets/PAY-1/follow-ups/accept", `{"items":[{"id":1,"target":"jira","title":"Add a column","kind":"test","priority":"low","repoId":3},{"id":2}]}`, 200,
+			`"results":[{"id":1,"ticket":{`},
+		{"POST", "/api/tickets/PAY-1/follow-ups/accept", `{"items":[{"id":2}]}`, 200, `"error":"invalid input: create it once PAY-1 is done"`},
+		{"POST", "/api/tickets/PAY-1/follow-ups/4/dismiss", "", 200, `"status":"dismissed"`},
+		{"POST", "/api/tickets/PAY-1/follow-ups/7/dismiss", "", 409, `already decided`},
+		{"POST", "/api/tickets/PAY-1/review/findings/0/follow-up", "", 201, `"source":"manual"`},
+		{"POST", "/api/tickets/PAY-1/review/findings/3/follow-up", "", 400, `no finding 3`},
+		{"POST", "/api/tasks", `{"title":"x","priority":"low","afterApprove":"pr","start":"queue","kind":"analysis","followUps":"off"}`, 201, `"key":"VIS-1"`},
 	}
 	for _, c := range cases {
 		rec := h.do(c.method, c.path, c.body, cookie)
 		if rec.Code != c.want || !strings.Contains(rec.Body.String(), c.contains) {
 			t.Errorf("%s %s: %d %s (want %d containing %q)", c.method, c.path, rec.Code, rec.Body, c.want, c.contains)
 		}
+	}
+	if a := h.tickets.lastAccept; len(a) != 1 || a[0].ID != 2 {
+		t.Errorf("accept input: %+v", a)
+	}
+	if h.tickets.lastFollowUps == nil || !*h.tickets.lastFollowUps || h.tickets.lastTask.FollowUps == nil || *h.tickets.lastTask.FollowUps {
+		t.Errorf("follow-up modes not passed: %v %+v", h.tickets.lastFollowUps, h.tickets.lastTask.FollowUps)
 	}
 	if h.tickets.lastImplement.RepoID != 3 || h.tickets.lastImplement.Start != "queue" {
 		t.Errorf("implement input not passed: %+v", h.tickets.lastImplement)

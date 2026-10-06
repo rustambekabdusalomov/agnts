@@ -14,14 +14,14 @@ import (
 	"strconv"
 	"strings"
 
-	"hiro/internal/domain"
-	"hiro/internal/notify"
-	"hiro/internal/orchestrator"
-	"hiro/internal/store/postgres"
-	"hiro/internal/tracker/jira"
-	"hiro/internal/vcs"
-	"hiro/internal/vcs/github"
-	"hiro/internal/vcs/gitlab"
+	"agnts/internal/domain"
+	"agnts/internal/notify"
+	"agnts/internal/orchestrator"
+	"agnts/internal/store/postgres"
+	"agnts/internal/tracker/jira"
+	"agnts/internal/vcs"
+	"agnts/internal/vcs/github"
+	"agnts/internal/vcs/gitlab"
 )
 
 // ErrInvalid wraps input errors to show to the user.
@@ -31,7 +31,7 @@ func invalid(format string, a ...any) error {
 	return fmt.Errorf("%w: %s", ErrInvalid, fmt.Sprintf(format, a...))
 }
 
-// Providers hiro knows how to connect, in display order.
+// Providers agnts knows how to connect, in display order.
 var Providers = []string{"jira", "github", "claude", "telegram", "gitlab"}
 
 // settingKeys lists the non-secret settings each provider accepts.
@@ -215,7 +215,7 @@ func (s *Integrations) Connect(ctx context.Context, provider, token string, sett
 		}
 		stored = jira.SecretsToken(token, secret)
 		if settings["label"] == "" {
-			settings["label"] = "hiro"
+			settings["label"] = "agnts"
 		}
 		if !fresh {
 			secret = "" // shown only when created
@@ -375,7 +375,7 @@ type RemoteLister interface {
 	Repos(ctx context.Context) ([]vcs.RemoteRepo, error)
 }
 
-// LocalLister lists the branches in hiro's own clones of a repository.
+// LocalLister lists the branches in agnts's own clones of a repository.
 type LocalLister interface {
 	LocalBranches(repo domain.Repository) ([]vcs.LocalBranch, error)
 }
@@ -417,7 +417,7 @@ func (r *Repos) List(ctx context.Context) ([]RepoView, error) {
 	return out, nil
 }
 
-// RemoteView is a repository offered for import, and whether hiro has it.
+// RemoteView is a repository offered for import, and whether agnts has it.
 type RemoteView struct {
 	vcs.RemoteRepo
 	Added bool
@@ -476,7 +476,7 @@ func Validate(x *domain.Repository, gitlabHost string) error {
 		return invalid("name is required")
 	}
 	if u, err := url.Parse(x.CloneURL); err != nil || u.Scheme != "https" {
-		return invalid("clone URL must be https (hiro authenticates with a token, not SSH keys)")
+		return invalid("clone URL must be https (agnts authenticates with a token, not SSH keys)")
 	}
 	u, _ := url.Parse(x.CloneURL)
 	switch {
@@ -495,7 +495,7 @@ func Validate(x *domain.Repository, gitlabHost string) error {
 		x.DefaultBranch = "main"
 	}
 	if x.BranchPrefix == "" {
-		x.BranchPrefix = "hiro/"
+		x.BranchPrefix = "agnts/"
 	}
 	x.TaskPrefix = strings.ToUpper(strings.TrimSpace(x.TaskPrefix))
 	for _, c := range x.TaskPrefix {

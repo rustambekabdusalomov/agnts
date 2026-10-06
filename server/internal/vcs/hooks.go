@@ -12,14 +12,14 @@ import (
 	"net/http"
 	"strings"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
 // DeriveSecret derives a webhook secret from the server key, so no extra
-// secret needs storing; it changes only if HIRO_ENC_KEY changes.
+// secret needs storing; it changes only if AGNTS_ENC_KEY changes.
 func DeriveSecret(encKey []byte, provider string) string {
 	m := hmac.New(sha256.New, encKey)
-	m.Write([]byte("hiro-webhook:" + provider))
+	m.Write([]byte("agnts-webhook:" + provider))
 	return hex.EncodeToString(m.Sum(nil))[:40]
 }
 

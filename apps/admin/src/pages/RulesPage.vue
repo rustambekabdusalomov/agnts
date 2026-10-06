@@ -61,7 +61,7 @@ const presetRepo = computed(() => (typeof scope.value === 'number' ? scope.value
 </script>
 
 <template>
-  <PageHeader :title="t('rules.title')" :lede="t('rules.lede')" doc="rules">
+  <PageHeader :title="t('rules.title')" doc="rules">
     <div class="actions" style="margin: 0">
       <button class="btn btn-p" type="button" @click="openRule(null)"><HiIcon name="plus" />{{ t('rules.add') }}</button>
     </div>

@@ -74,7 +74,7 @@ class _Shell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final needs = ref.watch(dashboardProvider).value?.counts.needs ?? 0;
     final tabs = [
       ('dashboard', l.mobileHome, needs),
@@ -116,7 +116,7 @@ class _Tab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final col = selected ? c.primary : c.ink3;
     return Semantics(
       selected: selected,

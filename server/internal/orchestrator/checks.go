@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
 // CheckStep is one check command's outcome, stored with the result.

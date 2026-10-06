@@ -19,18 +19,18 @@ ARG VERSION=dev
 ARG COMMIT=unknown
 RUN CGO_ENABLED=0 go build -trimpath \
       -ldflags "-s -w -X main.version=${VERSION} -X main.commit=${COMMIT}" \
-      -o /out/hiro ./cmd/hiro \
+      -o /out/agnts ./cmd/agnts \
  && mkdir -p /out/data
 
 # Runtime: no shell, no package manager, non-root.
 FROM gcr.io/distroless/static-debian12:nonroot
-COPY --from=server /out/hiro /usr/local/bin/hiro
+COPY --from=server /out/agnts /usr/local/bin/agnts
 COPY --from=admin /src/apps/admin/dist /srv/web
-COPY --from=server --chown=nonroot:nonroot /out/data /var/lib/hiro
-ENV HIRO_WEB_DIR=/srv/web \
-    HIRO_ADDR=:8080
+COPY --from=server --chown=nonroot:nonroot /out/data /var/lib/agnts
+ENV AGNTS_WEB_DIR=/srv/web \
+    AGNTS_ADDR=:8080
 EXPOSE 8080
 USER nonroot
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s CMD ["/usr/local/bin/hiro", "healthcheck"]
-ENTRYPOINT ["/usr/local/bin/hiro"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s CMD ["/usr/local/bin/agnts", "healthcheck"]
+ENTRYPOINT ["/usr/local/bin/agnts"]
 CMD ["serve"]

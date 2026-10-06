@@ -1,6 +1,6 @@
 # Oʻrganish
 
-Kodni hiro yozadi, shuning uchun oʻzgarish loyihaga avval boʻlmagan narsani olib kirganini sezmay qolish oson. Har bir yuborishdan keyin hiro oʻzgarishni oʻqiydi va bu yerda nima yangi ekanini tushuntiradi.
+Kodni agnts yozadi, shuning uchun oʻzgarish loyihaga avval boʻlmagan narsani olib kirganini sezmay qolish oson. Har bir yuborishdan keyin agnts oʻzgarishni oʻqiydi va bu yerda nima yangi ekanini tushuntiradi.
 
 ## Nima dars boʻladi
 
@@ -8,7 +8,7 @@ Oʻzgarish tayanadigan va repozitoriyda avval ishlatilmagan pattern, arxitektura
 
 ## Bilim bazasi
 
-Har bir repozitoriyning oʻz tushunchalar roʻyxati bor. Yozishdan oldin hiro kodni va shu roʻyxatni tekshiradi, shuning uchun bir gʻoya repozitoriyda bir marta tushuntiriladi.
+Har bir repozitoriyning oʻz tushunchalar roʻyxati bor. Yozishdan oldin agnts kodni va shu roʻyxatni tekshiradi, shuning uchun bir gʻoya repozitoriyda bir marta tushuntiriladi.
 
 ## Test va natija
 

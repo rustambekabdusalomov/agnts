@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"hiro/internal/domain"
-	"hiro/internal/store/postgres"
+	"agnts/internal/domain"
+	"agnts/internal/store/postgres"
 )
 
 type memStore struct{ snaps []postgres.UsageSnapshot }

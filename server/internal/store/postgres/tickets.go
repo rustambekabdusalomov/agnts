@@ -11,8 +11,8 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
 )
 
 // Agent implements orchestrator.Store.
@@ -24,7 +24,8 @@ var _ orchestrator.Store = (*Agent)(nil)
 func NewAgent(db *pgxpool.Pool) *Agent { return &Agent{db: db} }
 
 const ticketCols = `id, key, source, repo_id, title, description, priority, state, resume_state,
-	revision, turns, models, after_approve, branch, head_sha, pr_number, pr_url, feedback, held, ask_first, merged_at, assignees, learn_state, review_state, kind, kind_auto, post_report, COALESCE(parent_key, ''), created_at, updated_at`
+	revision, turns, models, after_approve, branch, head_sha, pr_number, pr_url, feedback, held, ask_first, merged_at, assignees, learn_state, review_state, kind, kind_auto, post_report, COALESCE(parent_key, ''),
+	COALESCE(follow_up_of, ''), suggest_follow_ups, created_at, updated_at`
 
 func scanTicket(row pgx.Row) (domain.Ticket, error) {
 	var t domain.Ticket
@@ -32,7 +33,8 @@ func scanTicket(row pgx.Row) (domain.Ticket, error) {
 	var models []byte
 	err := row.Scan(&t.ID, &t.Key, &source, &t.RepoID, &t.Title, &t.Description, &t.Priority, &state, &resume,
 		&t.Revision, &t.Turns, &models, &t.AfterApprove, &t.Branch, &t.HeadSHA, &t.PRNumber, &t.PRURL, &t.Feedback,
-		&t.Held, &t.AskFirst, &t.MergedAt, &t.Assignees, &t.LearnState, &t.ReviewState, &kind, &t.KindAuto, &t.PostReport, &t.ParentKey, &t.CreatedAt, &t.UpdatedAt)
+		&t.Held, &t.AskFirst, &t.MergedAt, &t.Assignees, &t.LearnState, &t.ReviewState, &kind, &t.KindAuto, &t.PostReport, &t.ParentKey,
+		&t.FollowUpOf, &t.SuggestFollowUps, &t.CreatedAt, &t.UpdatedAt)
 	if err != nil {
 		return t, notFound(err)
 	}
@@ -83,20 +85,26 @@ func (s *Agent) CreateTicket(ctx context.Context, t domain.Ticket, ev domain.Eve
 	err := pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
 		models, _ := json.Marshal(nonNilMap(t.Models))
 		var err error
-		out, err = scanTicket(tx.QueryRow(ctx, `INSERT INTO tickets
-			(key, source, repo_id, title, description, priority, state, resume_state, models, after_approve, held, ask_first, kind, kind_auto, parent_key)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NULLIF($15, '')) RETURNING `+ticketCols,
-			t.Key, string(t.Source), t.RepoID, t.Title, t.Description, t.Priority, string(t.State),
-			string(t.ResumeState), models, t.AfterApprove, t.Held, t.AskFirst, string(kindOr(t.Kind)), t.KindAuto, t.ParentKey))
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
-			return domain.ErrConflict
-		}
-		if err != nil {
+		if out, err = insertTicket(ctx, tx, t, models); err != nil {
 			return err
 		}
 		return insertEvent(ctx, tx, ev)
 	})
+	return out, err
+}
+
+func insertTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket, models []byte) (domain.Ticket, error) {
+	out, err := scanTicket(tx.QueryRow(ctx, `INSERT INTO tickets
+		(key, source, repo_id, title, description, priority, state, resume_state, models, after_approve, held, ask_first, kind, kind_auto,
+		 parent_key, follow_up_of, suggest_follow_ups)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NULLIF($15, ''), NULLIF($16, ''), $17) RETURNING `+ticketCols,
+		t.Key, string(t.Source), t.RepoID, t.Title, t.Description, t.Priority, string(t.State),
+		string(t.ResumeState), models, t.AfterApprove, t.Held, t.AskFirst, string(kindOr(t.Kind)), t.KindAuto, t.ParentKey,
+		t.FollowUpOf, t.SuggestFollowUps))
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+		return out, domain.ErrConflict
+	}
 	return out, err
 }
 
@@ -156,11 +164,11 @@ func saveTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket) (domain.Ticket,
 		repo_id = $2, title = $3, description = $4, priority = $5, state = $6, resume_state = $7,
 		revision = $8, turns = $9, models = $10, after_approve = $11, branch = $12, head_sha = $13,
 		pr_number = $14, pr_url = $15, feedback = $16, held = $17, ask_first = $18, merged_at = $19, assignees = $20, learn_state = $21,
-		kind = $22, kind_auto = $23, post_report = $24, review_state = $25, updated_at = now()
+		kind = $22, kind_auto = $23, post_report = $24, review_state = $25, suggest_follow_ups = $26, updated_at = now()
 		WHERE id = $1 RETURNING `+ticketCols,
 		t.ID, t.RepoID, t.Title, t.Description, t.Priority, string(t.State), string(t.ResumeState),
 		t.Revision, t.Turns, models, t.AfterApprove, t.Branch, t.HeadSHA, t.PRNumber, t.PRURL, t.Feedback, t.Held, t.AskFirst, t.MergedAt, nonNilSlice(t.Assignees), t.LearnState,
-		string(kindOr(t.Kind)), t.KindAuto, t.PostReport, t.ReviewState))
+		string(kindOr(t.Kind)), t.KindAuto, t.PostReport, t.ReviewState, t.SuggestFollowUps))
 }
 
 func kindOr(k domain.TicketKind) domain.TicketKind {
@@ -300,7 +308,7 @@ func (s *Agent) RecoverInterrupted(ctx context.Context) (int, error) {
 				return err
 			}
 			if err := insertEvent(ctx, tx, domain.Event{TicketKey: key, RunID: &p.run, Type: domain.EventError, Level: domain.LevelWarn,
-				Message: "hiro restarted during this run; it will start again"}); err != nil {
+				Message: "agnts restarted during this run; it will start again"}); err != nil {
 				return err
 			}
 		}
@@ -512,7 +520,7 @@ func (s *Agent) ListRepositories(ctx context.Context) ([]domain.Repository, erro
 // SaveRepository inserts or updates a repository by name.
 func (s *Agent) SaveRepository(ctx context.Context, r domain.Repository) (domain.Repository, error) {
 	if r.BranchPrefix == "" {
-		r.BranchPrefix = "hiro/"
+		r.BranchPrefix = "agnts/"
 	}
 	if r.DefaultBranch == "" {
 		r.DefaultBranch = "main"

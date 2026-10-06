@@ -12,7 +12,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analyticsTitle => 'Analytics';
 
   @override
-  String get analyticsLede => 'How well hiro works for you over time: throughput, quality, where time goes, and what it costs your plan.';
+  String get analyticsLede => 'How well agnts works for you over time: throughput, quality, where time goes, and what it costs your plan.';
 
   @override
   String get analyticsPeriod => 'Period';
@@ -35,7 +35,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analyticsEmptyTitle => 'No data for this period yet';
 
   @override
-  String get analyticsEmpty => 'Charts fill in as hiro picks up tickets and runs. Label a Jira issue or create a task to get started.';
+  String get analyticsEmpty => 'Charts fill in as agnts picks up tickets and runs. Label a Jira issue or create a task to get started.';
 
   @override
   String get analyticsKpiPushed => 'Tickets pushed';
@@ -58,10 +58,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analyticsKpiFirstTryNote => 'No changes requested';
 
   @override
-  String get analyticsKpiHiro => 'hiro time per ticket';
+  String get analyticsKpiAgnts => 'agnts time per ticket';
 
   @override
-  String get analyticsKpiHiroNote => 'Analyze, coding and tests';
+  String get analyticsKpiAgntsNote => 'Analyze, coding and tests';
 
   @override
   String get analyticsKpiWait => 'Waiting on you';
@@ -114,10 +114,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analyticsSpeed => 'Speed';
 
   @override
-  String get analyticsSpeedSub => 'Average minutes per ticket: hiro working versus waiting on you';
+  String get analyticsSpeedSub => 'Average minutes per ticket: agnts working versus waiting on you';
 
   @override
-  String get analyticsHiroWorking => 'hiro working';
+  String get analyticsAgntsWorking => 'agnts working';
 
   @override
   String get analyticsWaitingOnYou => 'Waiting on you';
@@ -132,7 +132,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analyticsTurns => 'Turns per ticket';
 
   @override
-  String get analyticsTurnsSub => 'Fewer turns means hiro finds its way faster and uses less of your plan';
+  String get analyticsTurnsSub => 'Fewer turns means agnts finds its way faster and uses less of your plan';
 
   @override
   String get analyticsAvgTurns => 'Average turns';
@@ -212,10 +212,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analyticsNoUsage => 'No usage readings in this period.';
 
   @override
+  String get analyticsSpend => 'Token spend';
+
+  @override
+  String get analyticsSpendSub => 'Tokens Claude used per day, input and output';
+
+  @override
+  String get analyticsSpendTokens => 'Tokens in and out';
+
+  @override
+  String get analyticsSpendCost => 'At API prices';
+
+  @override
+  String get analyticsSpendStages => 'Spend by stage';
+
+  @override
+  String get analyticsSpendStagesSub => 'Where the tokens went, costliest first';
+
+  @override
+  String get analyticsNoSpend => 'No Claude runs recorded in this period.';
+
+  @override
   String get analyticsRepos => 'By repository';
 
   @override
-  String get analyticsReposSub => 'Where hiro works best, and where it struggles';
+  String get analyticsReposSub => 'Where agnts works best, and where it struggles';
 
   @override
   String get analyticsColRepo => 'Repository';
@@ -230,7 +251,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analyticsColSuccess => 'Success rate';
 
   @override
-  String get analyticsColHiro => 'hiro time';
+  String get analyticsColAgnts => 'agnts time';
 
   @override
   String get analyticsColClaudeMd => 'CLAUDE.md';
@@ -258,7 +279,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String analyticsHoursSub(String hour) {
-    return 'When hiro works, summed over the period. Busiest hour: $hour:00';
+    return 'When agnts works, summed over the period. Busiest hour: $hour:00';
   }
 
   @override
@@ -285,7 +306,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String analyticsInsightStopsTests(String n) {
-    return 'Most stopped runs ($n) end on failing tests. Clearer acceptance criteria in tickets help hiro know when it\'s done.';
+    return 'Most stopped runs ($n) end on failing tests. Clearer acceptance criteria in tickets help agnts know when it\'s done.';
   }
 
   @override
@@ -295,7 +316,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String analyticsInsightNight(String pct) {
-    return '$pct% of hiro\'s work happens between 22:00 and 07:00, while you\'re offline.';
+    return '$pct% of agnts\'s work happens between 22:00 and 07:00, while you\'re offline.';
   }
 
   @override
@@ -309,7 +330,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get appName => 'hiro';
+  String get appName => 'agnts';
 
   @override
   String get appTagline => 'Your no sleep agent';
@@ -400,7 +421,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String dashboardLede(String date) {
-    return '$date. Here\'s what hiro is doing and what\'s waiting on you.';
+    return '$date. Here\'s what agnts is doing and what\'s waiting on you.';
   }
 
   @override
@@ -437,13 +458,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardWaitingTitle => 'Waiting on you';
 
   @override
-  String get dashboardWaitingSub => 'Oldest first. Every minute here is a minute hiro can\'t work.';
+  String get dashboardWaitingSub => 'Oldest first. Every minute here is a minute agnts can\'t work.';
 
   @override
   String get dashboardOpenInbox => 'Open inbox';
 
   @override
-  String get dashboardNothingWaiting => 'Nothing is waiting on you. hiro will show tickets here when it needs answers or a review.';
+  String get dashboardNothingWaiting => 'Nothing is waiting on you. agnts will show tickets here when it needs answers or a review.';
 
   @override
   String get dashboardColTicket => 'Ticket';
@@ -528,13 +549,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardTodayTitle => 'Today by hour';
 
   @override
-  String get dashboardTodaySub => 'Events recorded today. hiro keeps working while you sleep.';
+  String get dashboardTodaySub => 'Events recorded today. agnts keeps working while you sleep.';
 
   @override
   String get dashboardTodayAria => 'Events today by hour';
 
   @override
-  String get dashboardLegendHiro => 'hiro working';
+  String get dashboardLegendAgnts => 'agnts working';
 
   @override
   String get dashboardLegendYou => 'Your actions';
@@ -606,6 +627,165 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardNoActivity => 'No activity yet.';
 
   @override
+  String get followUpsTitle => 'Follow-up tickets';
+
+  @override
+  String get followUpsSub =>
+      'What finishing this ticket still needs, as agnts sees it. Pick the ones you want: they are created queued, so nothing runs until you start them.';
+
+  @override
+  String get followUpsMode => 'Follow-up suggestions';
+
+  @override
+  String get followUpsModeInherit => 'As in Settings';
+
+  @override
+  String get followUpsModeOn => 'On';
+
+  @override
+  String get followUpsModeOff => 'Off';
+
+  @override
+  String get followUpsModeHint => 'When on, agnts\'s runs suggest tickets this one still needs. It makes every prompt a little longer.';
+
+  @override
+  String get followUpsOffEmpty =>
+      'Follow-up suggestions are off for this ticket. Turn them on to have the next run suggest what finishing it still needs.';
+
+  @override
+  String get followUpsOnEmpty => 'Nothing suggested yet. Most tickets need no follow-up.';
+
+  @override
+  String get followUpsType_prerequisite => 'Prerequisite';
+
+  @override
+  String get followUpsType_split => 'Split off';
+
+  @override
+  String get followUpsType_unfinished => 'Left undone';
+
+  @override
+  String get followUpsType_gap => 'Gap';
+
+  @override
+  String get followUpsSource_analyze => 'from the analysis';
+
+  @override
+  String get followUpsSource_work => 'from the work';
+
+  @override
+  String get followUpsSource_review => 'from the code review';
+
+  @override
+  String get followUpsSource_manual => 'from a review finding';
+
+  @override
+  String followUpsPick(String title) {
+    return 'Create “$title”';
+  }
+
+  @override
+  String get followUpsEditTitle => 'Ticket title';
+
+  @override
+  String get followUpsServes => 'Why';
+
+  @override
+  String get followUpsDetails => 'Details';
+
+  @override
+  String get followUpsWaitsForDone => 'It builds on this ticket\'s work: you can create it once this ticket is done.';
+
+  @override
+  String get followUpsTarget => 'Create as';
+
+  @override
+  String get followUpsTargetLocal => 'Local task';
+
+  @override
+  String get followUpsTargetJira => 'Jira issue';
+
+  @override
+  String get followUpsJiraOff => 'Connect Jira to file issues there';
+
+  @override
+  String followUpsCreate(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Create $count tickets',
+      one: 'Create $count ticket',
+      zero: 'Create tickets',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get followUpsQueuedHint => 'Created tickets wait in the queue until you start them.';
+
+  @override
+  String get followUpsDismiss => 'Dismiss';
+
+  @override
+  String followUpsDismissedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dismissed suggestions',
+      one: '$count dismissed suggestion',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get followUpsChildren => 'Created from this ticket';
+
+  @override
+  String get followUpsFollowUpOf => 'Follow-up of';
+
+  @override
+  String followUpsCreatedNotice(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count tickets created', one: '$count ticket created');
+    return '$_temp0, queued until you start them.';
+  }
+
+  @override
+  String followUpsFailedItem(String title, String error) {
+    return '$title: $error';
+  }
+
+  @override
+  String get followUpsFromFinding => 'Make follow-up';
+
+  @override
+  String get followUpsFromFindingDone => 'Suggested as a follow-up';
+
+  @override
+  String get followUpsFromFindingHint => 'For work outside this change: suggest it as a follow-up ticket instead of sending it back';
+
+  @override
+  String followUpsOpenBadge(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count follow-ups', one: '$count follow-up');
+    return '$_temp0';
+  }
+
+  @override
+  String get followUpsSettingLabel => 'Suggest follow-up tickets';
+
+  @override
+  String get followUpsSettingHelp =>
+      'Analysis, work and review runs suggest tickets that finishing a ticket still needs: prerequisites, parts to split off, work left undone, gaps a report found. You pick which to create. Off by default because it makes every prompt a little longer; a ticket can turn it on for itself.';
+
+  @override
+  String get followUpsNotifyLabel => 'Follow-up tickets suggested';
+
+  @override
+  String get followUpsJiraIssueType => 'Issue type for follow-ups';
+
+  @override
+  String get followUpsJiraIssueTypeHelp => 'The type of the Jira issues agnts files when you create a follow-up in Jira. Default: Task.';
+
+  @override
   String get formSave => 'Save changes';
 
   @override
@@ -660,11 +840,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get implementSubPlan =>
-      'Have hiro carry out this plan: a code task linked to this one, with the plan as its brief. You review the diff as usual.';
+      'Have agnts carry out this plan: a code task linked to this one, with the plan as its brief. You review the diff as usual.';
 
   @override
   String get implementSubBug =>
-      'Have hiro make the proposed fix: a code task linked to this one, with the investigation as its brief. You review the diff as usual.';
+      'Have agnts make the proposed fix: a code task linked to this one, with the investigation as its brief. You review the diff as usual.';
 
   @override
   String get implementImplement => 'Implement this plan';
@@ -689,7 +869,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get integrationsLede =>
-      'The services hiro works with. Tokens are stored encrypted on your server and only used for the actions listed on each page.';
+      'The services agnts works with. Tokens are stored encrypted on your server and only used for the actions listed on each page.';
 
   @override
   String get integrationsName_jira => 'Jira';
@@ -701,7 +881,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get integrationsName_claude => 'Claude';
 
   @override
-  String get integrationsDesc_jira => 'Pick up tickets with the hiro label and keep their status up to date.';
+  String get integrationsDesc_jira => 'Pick up tickets with the agnts label and keep their status up to date.';
 
   @override
   String get integrationsDesc_github => 'Clone code, push branches and open pull requests.';
@@ -729,7 +909,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String integrationsDisconnectConfirm(String name) {
-    return 'Disconnect $name? hiro forgets the token and stops using it.';
+    return 'Disconnect $name? agnts forgets the token and stops using it.';
   }
 
   @override
@@ -782,18 +962,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get integrationsTokenStep1_jira =>
-      'Sign in to the Atlassian account hiro should act as, and open Account settings → Security → API tokens (or use the button below).';
+      'Sign in to the Atlassian account agnts should act as, and open Account settings → Security → API tokens (or use the button below).';
 
   @override
   String get integrationsTokenStep2_jira =>
-      'Click Create API token (not the one with scopes), name it (for example hiro) and pick an expiration date.';
+      'Click Create API token (not the one with scopes), name it (for example agnts) and pick an expiration date.';
 
   @override
   String get integrationsTokenStep3_jira => 'Copy the token and paste it below. Atlassian shows it only once.';
 
   @override
   String get integrationsTokenStep4_jira =>
-      'For Site, enter your Jira address (https://your-team.atlassian.net), and for Account email the email of that same account. It needs access to the Jira projects hiro works on.';
+      'For Site, enter your Jira address (https://your-team.atlassian.net), and for Account email the email of that same account. It needs access to the Jira projects agnts works on.';
 
   @override
   String get integrationsConnectSub_github => 'Create a fine-grained personal access token with the permissions below, then paste it here.';
@@ -813,7 +993,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get integrationsTokenStep2_github =>
-      'Name it (for example hiro), pick an expiration, set Resource owner to the account or organization that owns your repositories, and under Repository access choose the repositories hiro may work on.';
+      'Name it (for example agnts), pick an expiration, set Resource owner to the account or organization that owns your repositories, and under Repository access choose the repositories agnts may work on.';
 
   @override
   String get integrationsTokenStep3_github =>
@@ -861,7 +1041,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get integrationsAccessToken => 'Access token';
 
   @override
-  String get integrationsTokenHelp => 'Stored encrypted on your server. hiro never shows it again.';
+  String get integrationsTokenHelp => 'Stored encrypted on your server. agnts never shows it again.';
 
   @override
   String get integrationsScopes => 'Required permissions';
@@ -933,25 +1113,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get integrationsPickup => 'Pickup rules';
 
   @override
-  String get integrationsPickupSub => 'Which tickets hiro takes';
+  String get integrationsPickupSub => 'Which tickets agnts takes';
 
   @override
   String get integrationsLabel => 'Label';
 
   @override
-  String get integrationsLabelHelp => 'Add this label to a ticket to hand it to hiro';
+  String get integrationsLabelHelp => 'Add this label to a ticket to hand it to agnts';
 
   @override
-  String get integrationsQuery => 'The query hiro runs';
+  String get integrationsQuery => 'The query agnts runs';
 
   @override
   String get integrationsStatuses => 'Status updates';
 
   @override
-  String get integrationsStatusesSub => 'How hiro moves tickets on your board. Leave empty to keep the status.';
+  String get integrationsStatusesSub => 'How agnts moves tickets on your board. Leave empty to keep the status.';
 
   @override
-  String get integrationsMapStarted => 'When hiro starts';
+  String get integrationsMapStarted => 'When agnts starts';
 
   @override
   String get integrationsMapReview => 'When changes are pushed';
@@ -966,10 +1146,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get integrationsComments => 'Comments';
 
   @override
-  String get integrationsCommentsSub => 'What hiro writes on the ticket';
+  String get integrationsCommentsSub => 'What agnts writes on the ticket';
 
   @override
-  String get integrationsCQuestions => 'hiro\'s questions';
+  String get integrationsCQuestions => 'agnts\'s questions';
 
   @override
   String get integrationsCQuestionsHelp => 'So teammates can see what was unclear';
@@ -999,7 +1179,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get integrationsSyncHelp =>
-      'Jira sends new tickets to the webhook right away; hiro also checks every hour in case a delivery was missed.';
+      'Jira sends new tickets to the webhook right away; agnts also checks every hour in case a delivery was missed.';
 
   @override
   String get integrationsWebhook => 'Webhook';
@@ -1011,7 +1191,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get integrationsSecretsHelp =>
-      'hiro only reads tickets that match the query, and only writes the status changes and comments you turn on here.';
+      'agnts only reads tickets that match the query, and only writes the status changes and comments you turn on here.';
 
   @override
   String get integrationsGithubHelp =>
@@ -1029,7 +1209,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get integrationsConnectSub_telegram =>
-      'Create a bot with @BotFather, paste its token, and add your chat id. hiro registers the webhook for you.';
+      'Create a bot with @BotFather, paste its token, and add your chat id. agnts registers the webhook for you.';
 
   @override
   String get integrationsTokenOpen_telegram => 'Open @BotFather';
@@ -1063,7 +1243,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String integrationsTelegramHttps(String url) {
-    return 'Telegram only sends updates to a public HTTPS address, and this hiro runs on $url, so connecting will fail here. Connect Telegram on a deployment with HTTPS, where HIRO_PUBLIC_URL is an https:// address.';
+    return 'Telegram only sends updates to a public HTTPS address, and this agnts runs on $url, so connecting will fail here. Connect Telegram on a deployment with HTTPS, where AGNTS_PUBLIC_URL is an https:// address.';
   }
 
   @override
@@ -1084,7 +1264,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get integrationsTokenStep2_gitlab =>
-      'Name it (for example hiro) and set an expiration date. Use an account that can push to your projects.';
+      'Name it (for example agnts) and set an expiration date. Use an account that can push to your projects.';
 
   @override
   String get integrationsTokenStep3_gitlab => 'Select the scopes api, read_repository and write_repository.';
@@ -1131,7 +1311,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get integrationsGitWebhookWhy =>
-      'When a pull or merge request is merged, hiro marks the ticket merged and moves the Jira issue to the merged status set on the Jira page. Pipeline events keep the repository page current.';
+      'When a pull or merge request is merged, agnts marks the ticket merged and moves the Jira issue to the merged status set on the Jira page. Pipeline events keep the repository page current.';
 
   @override
   String get kindTitle => 'Kind';
@@ -1140,7 +1320,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get kindAuto => 'Auto';
 
   @override
-  String get kindAutoHint => 'hiro picks the kind while reading the ticket';
+  String get kindAutoHint => 'agnts picks the kind while reading the ticket';
 
   @override
   String get kindCode => 'Code';
@@ -1173,7 +1353,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get kindBugHint => 'Find the root cause of a bug and propose a fix. Changes no code.';
 
   @override
-  String get kindPickerHint => 'What hiro produces. Choosing a kind makes it final; Auto lets hiro decide while reading the ticket.';
+  String get kindPickerHint => 'What agnts produces. Choosing a kind makes it final; Auto lets agnts decide while reading the ticket.';
 
   @override
   String kindSwitchTo(String kind) {
@@ -1185,7 +1365,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get learnLede =>
-      'When a change hiro ships does something this codebase never did before, hiro explains it here: what it is, why the change needed it, where to look, and a short quiz.';
+      'When a change agnts ships does something this codebase never did before, agnts explains it here: what it is, why the change needed it, where to look, and a short quiz.';
 
   @override
   String learnViewNew(String n) {
@@ -1210,7 +1390,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get learnRepoLabel => 'Repository';
 
   @override
-  String get learnNone => 'No lessons yet. When hiro pushes a change that does something new for its repository, the lesson appears here.';
+  String get learnNone => 'No lessons yet. When agnts pushes a change that does something new for its repository, the lesson appears here.';
 
   @override
   String get learnNoneNew => 'You\'re up to date: every lesson is marked learned.';
@@ -1336,16 +1516,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get learnTicketSub => 'Techniques this change brought to the repository for the first time.';
 
   @override
-  String get learnTicketPending => 'hiro is reading this change for anything the repository never did before.';
+  String get learnTicketPending => 'agnts is reading this change for anything the repository never did before.';
 
   @override
   String get learnTicketNone => 'Nothing new: this change only used techniques the repository already had.';
 
   @override
-  String get learnTicketFailed => 'hiro could not finish reading this change. The log shows why.';
+  String get learnTicketFailed => 'agnts could not finish reading this change. The log shows why.';
 
   @override
-  String get learnTicketIdle => 'hiro has not looked at this change for lessons yet.';
+  String get learnTicketIdle => 'agnts has not looked at this change for lessons yet.';
 
   @override
   String get learnLearnNow => 'Find what\'s new';
@@ -1354,13 +1534,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get learnLearnAgain => 'Look again';
 
   @override
-  String get learnQueued => 'Queued: hiro will look at this change for something new.';
+  String get learnQueued => 'Queued: agnts will look at this change for something new.';
 
   @override
   String get learnQueueTitle => 'Learning queue';
 
   @override
-  String get learnQueueSub => 'Pushed tickets hiro reads for new techniques, one at a time when no ticket needs a worker.';
+  String get learnQueueSub => 'Pushed tickets agnts reads for new techniques, one at a time when no ticket needs a worker.';
 
   @override
   String get learnStatus_running => 'Learning now';
@@ -1403,7 +1583,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get learnQueueLede =>
-      'Pushed tickets hiro reads for techniques the codebase never used before. Queue any done ticket, or retry one that failed.';
+      'Pushed tickets agnts reads for techniques the codebase never used before. Queue any done ticket, or retry one that failed.';
 
   @override
   String get learnQueueEmpty => 'Nothing to learn from right now: every pushed ticket has been read.';
@@ -1412,7 +1592,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logsTitle => 'Logs';
 
   @override
-  String get logsLede => 'Every step hiro takes, recorded as it happens. Use it to see where time goes and why runs stop.';
+  String get logsLede => 'Every step agnts takes, recorded as it happens. Use it to see where time goes and why runs stop.';
 
   @override
   String get logsLive => 'Live';
@@ -1465,7 +1645,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logsNoData => 'No data';
 
   @override
-  String get logsLegendHiro => 'hiro working';
+  String get logsLegendAgnts => 'agnts working';
 
   @override
   String get logsLegendYou => 'Waiting on you';
@@ -1610,7 +1790,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mcpTitle => 'Claude chat (MCP)';
 
   @override
-  String get mcpSub => 'Manage hiro from Claude on the web, desktop and phone';
+  String get mcpSub => 'Manage agnts from Claude on the web, desktop and phone';
 
   @override
   String get mcpUrl => 'Connector URL';
@@ -1653,11 +1833,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mcpRevoked => 'All Claude connections removed';
 
   @override
-  String get mcpConsentTitle => 'Connect Claude to hiro';
+  String get mcpConsentTitle => 'Connect Claude to agnts';
 
   @override
   String mcpConsentAsk(String client, String user) {
-    return '$client wants to use hiro as $user.';
+    return '$client wants to use agnts as $user.';
   }
 
   @override
@@ -1679,7 +1859,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mdetailApprove => 'Approve';
 
   @override
-  String get mdetailWorking => 'hiro is working. You\'ll get a notification when it needs you.';
+  String get mdetailWorking => 'agnts is working. You\'ll get a notification when it needs you.';
 
   @override
   String get mdetailCopyPr => 'Copy pull request link';
@@ -1701,13 +1881,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get mhomeActAnswers => 'Answer hiro\'s questions';
+  String get mhomeActAnswers => 'Answer agnts\'s questions';
 
   @override
   String get mhomeActReview => 'Review the changes';
 
   @override
-  String get mhomeActStopped => 'Stopped. Tell hiro what to try';
+  String get mhomeActStopped => 'Stopped. Tell agnts what to try';
 
   @override
   String get mhomeActResume => 'Resume when you\'re ready';
@@ -1741,16 +1921,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mmorePipelineRuns => 'Pipeline runs';
 
   @override
-  String get mmoreLoginLede => 'Sign in to your hiro server to answer questions, review changes and follow runs.';
+  String get mmoreLoginLede => 'Sign in to your agnts server to answer questions, review changes and follow runs.';
 
   @override
   String get mobileServer => 'Server address';
 
   @override
-  String get mobileServerHint => 'https://hiro.example.com';
+  String get mobileServerHint => 'https://agnts.example.com';
 
   @override
-  String get mobileServerInvalid => 'Enter the https address of your hiro server.';
+  String get mobileServerInvalid => 'Enter the https address of your agnts server.';
 
   @override
   String get mobileHome => 'Home';
@@ -2025,13 +2205,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get mtasksActAnswers => 'Answer hiro\'s questions';
+  String get mtasksActAnswers => 'Answer agnts\'s questions';
 
   @override
   String get mtasksActReview => 'Review the changes';
 
   @override
-  String get mtasksActFailed => 'Stopped. Tell hiro what to try';
+  String get mtasksActFailed => 'Stopped. Tell agnts what to try';
 
   @override
   String get mtasksActResume => 'Resume when you\'re ready';
@@ -2164,16 +2344,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navLedeNeeds => 'Tickets waiting on your answers or your review, plus runs that stopped.';
 
   @override
-  String get navLedeRunning => 'Tickets hiro is working on right now.';
+  String get navLedeRunning => 'Tickets agnts is working on right now.';
 
   @override
-  String get navLedeQueue => 'Tickets with the hiro label that haven\'t been analyzed yet.';
+  String get navLedeQueue => 'Tickets with the agnts label that haven\'t been analyzed yet.';
 
   @override
   String get navLedeDone => 'Pushed or rejected tickets.';
 
   @override
-  String get navLedeAll => 'Every ticket hiro has picked up from Jira.';
+  String get navLedeAll => 'Every ticket agnts has picked up from Jira.';
 
   @override
   String get navKnowledge => 'Knowledge';
@@ -2223,12 +2403,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String repoBranchesSub(String branch) {
-    return 'hiro works on its own branch for every ticket and never commits to $branch.';
+    return 'agnts works on its own branch for every ticket and never commits to $branch.';
   }
 
   @override
   String repoArchivedBanner(String time) {
-    return 'Archived $time. hiro takes no new tickets or tasks for this repository until you restore it.';
+    return 'Archived $time. agnts takes no new tickets or tasks for this repository until you restore it.';
   }
 
   @override
@@ -2247,7 +2427,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String repoLocalSub(String branch) {
-    return 'Branches in hiro\'s own clones on your server. hiro commits here first and pushes only after you approve; it never commits to $branch.';
+    return 'Branches in agnts\'s own clones on your server. agnts commits here first and pushes only after you approve; it never commits to $branch.';
   }
 
   @override
@@ -2269,7 +2449,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repoPush_differs => 'Origin changed';
 
   @override
-  String get repoPush_local_help => 'Only on the server. hiro pushes it when you approve the review.';
+  String get repoPush_local_help => 'Only on the server. agnts pushes it when you approve the review.';
 
   @override
   String get repoPush_pushed_help => 'Origin has the same commit.';
@@ -2278,10 +2458,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repoPush_unpushed_help => 'Origin has the branch, but not the newest commits.';
 
   @override
-  String get repoPush_differs_help => 'Someone pushed commits to this branch that hiro\'s copy does not have.';
+  String get repoPush_differs_help => 'Someone pushed commits to this branch that agnts\'s copy does not have.';
 
   @override
-  String get repoLocalNone => 'No local branches yet. hiro creates one when it starts work on a ticket.';
+  String get repoLocalNone => 'No local branches yet. agnts creates one when it starts work on a ticket.';
 
   @override
   String get repoCommitsSub => 'Recent commits on the default branch, newest first.';
@@ -2366,7 +2546,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String repoKpiBranchesNote(String n) {
-    return '$n by hiro';
+    return '$n by agnts';
   }
 
   @override
@@ -2374,7 +2554,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String repoKpiCommitsNote(String n) {
-    return '$n written by hiro';
+    return '$n written by agnts';
   }
 
   @override
@@ -2413,7 +2593,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get repoDeployHelp =>
-      'hiro waits for checks before a ticket reaches your review. Deploying is always your decision, and it is never available from Claude chat.';
+      'agnts waits for checks before a ticket reaches your review. Deploying is always your decision, and it is never available from Claude chat.';
 
   @override
   String repoDeployBranch(String branch) {
@@ -2453,7 +2633,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reposLede =>
-      'Code hiro can work in. Each run clones the repository into a fresh container on your server, then runs these checks before anything reaches your review.';
+      'Code agnts can work in. Each run clones the repository into a fresh container on your server, then runs these checks before anything reaches your review.';
 
   @override
   String get reposAdd => 'Add repository';
@@ -2493,7 +2673,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String reposArchiveConfirm(String name) {
-    return 'Archive $name? It moves to the archive and keeps its tickets and history, but hiro stops picking up new Jira tickets and tasks for it. Work already started still finishes. You can restore it any time.';
+    return 'Archive $name? It moves to the archive and keeps its tickets and history, but agnts stops picking up new Jira tickets and tasks for it. Work already started still finishes. You can restore it any time.';
   }
 
   @override
@@ -2543,7 +2723,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String reposMissingHelp(num count) {
     String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count repositories have', one: '$count repository has');
-    return '$_temp0 no CLAUDE.md. hiro still works, but spends more turns finding its way around. Add one with the project\'s structure, conventions and test commands.';
+    return '$_temp0 no CLAUDE.md. agnts still works, but spends more turns finding its way around. Add one with the project\'s structure, conventions and test commands.';
   }
 
   @override
@@ -2585,7 +2765,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reposNoMatch => 'No repositories match your search.';
 
   @override
-  String get reposNone => 'No repositories yet. Add the first one to let hiro work on it.';
+  String get reposNone => 'No repositories yet. Add the first one to let agnts work on it.';
 
   @override
   String get reposDrawerSub => 'Takes side-project tasks, and Jira tickets once it has a Jira project key';
@@ -2597,13 +2777,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reposCloneUrl => 'Clone URL';
 
   @override
-  String get reposCloneHelp => 'An https URL on github.com or your connected GitLab. hiro uses that host\'s token to clone and push.';
+  String get reposCloneHelp => 'An https URL on github.com or your connected GitLab. agnts uses that host\'s token to clone and push.';
 
   @override
   String get reposJiraProject => 'Jira project key';
 
   @override
-  String get reposJiraHelp => 'Optional. Tickets from this Jira project with the hiro label run here.';
+  String get reposJiraHelp => 'Optional. Tickets from this Jira project with the agnts label run here.';
 
   @override
   String get reposTaskPrefix => 'Task key prefix';
@@ -2641,7 +2821,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reposClaudeFound => 'Found in the repository root';
 
   @override
-  String get reposClaudeMissing => 'Missing. hiro still works, but a CLAUDE.md saves turns.';
+  String get reposClaudeMissing => 'Missing. agnts still works, but a CLAUDE.md saves turns.';
 
   @override
   String get reposClaudeUnknown => 'Checked after saving';
@@ -2660,25 +2840,25 @@ class AppLocalizationsEn extends AppLocalizations {
       'GitHub Actions workflow file with workflow_dispatch, e.g. deploy.yml. Deploy on the repository page runs it.';
 
   @override
-  String get reviewTitle => 'hiro\'s code review';
+  String get reviewTitle => 'agnts\'s code review';
 
   @override
-  String get reviewReportTitle => 'hiro\'s review of the report';
+  String get reviewReportTitle => 'agnts\'s review of the report';
 
   @override
   String get reviewSub => 'A second opinion while you review. It never blocks approval: you decide.';
 
   @override
-  String get reviewPending => 'Queued: hiro reviews this as soon as a worker is free. You can review it yourself meanwhile.';
+  String get reviewPending => 'Queued: agnts reviews this as soon as a worker is free. You can review it yourself meanwhile.';
 
   @override
-  String get reviewRunning => 'hiro is reviewing this now…';
+  String get reviewRunning => 'agnts is reviewing this now…';
 
   @override
   String get reviewFailed => 'The review failed. Review it yourself, or run it again.';
 
   @override
-  String get reviewNone => 'Not reviewed by hiro.';
+  String get reviewNone => 'Not reviewed by agnts.';
 
   @override
   String reviewStale(String n) {
@@ -2686,7 +2866,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get reviewRun => 'Review with hiro';
+  String get reviewRun => 'Review with agnts';
 
   @override
   String get reviewRunAgain => 'Review again';
@@ -2746,7 +2926,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get reviewNoFindings => 'hiro found no problems.';
+  String get reviewNoFindings => 'agnts found no problems.';
 
   @override
   String get reviewStrengths => 'Done well';
@@ -2776,7 +2956,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rulesLede =>
-      'Instructions hiro follows on every ticket: global rules for all repositories and rules for one repository. Claude reviews each rule and asks about anything unclear before it applies.';
+      'Instructions agnts follows on every ticket: global rules for all repositories and rules for one repository. Claude reviews each rule and asks about anything unclear before it applies.';
 
   @override
   String get rulesAdd => 'Add rule';
@@ -2846,7 +3026,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get rulesNone => 'No rules yet. Add one to tell hiro how your team works: testing, naming, logging, what never to touch.';
+  String get rulesNone => 'No rules yet. Add one to tell agnts how your team works: testing, naming, logging, what never to touch.';
 
   @override
   String get rulesNoMatch => 'No rules match.';
@@ -2957,7 +3137,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rulesReviewAgain => 'Review again';
 
   @override
-  String get rulesInterpretation => 'How hiro reads it';
+  String get rulesInterpretation => 'How agnts reads it';
 
   @override
   String get rulesClarified => 'What tickets get';
@@ -3003,7 +3183,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsTitle => 'Settings';
 
   @override
-  String get settingsLede => 'How hiro connects to your tools and how it behaves during runs.';
+  String get settingsLede => 'How agnts connects to your tools and how it behaves during runs.';
 
   @override
   String get settingsAppearance => 'Appearance';
@@ -3126,7 +3306,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsDeny => 'Blocked commands';
 
   @override
-  String get settingsDenyHelp => 'Always refused, even if a ticket asks for them. Pushing is done by hiro, never by Claude Code.';
+  String get settingsDenyHelp => 'Always refused, even if a ticket asks for them. Pushing is done by agnts, never by Claude Code.';
 
   @override
   String get settingsCommits => 'Commits and pull requests';
@@ -3147,10 +3327,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAuthorEmailHelp => 'Must match your GitHub account to show as yours';
 
   @override
-  String get settingsCoAuthor => 'Add a Co-authored-by: hiro line';
+  String get settingsCoAuthor => 'Add a Co-authored-by: agnts line';
 
   @override
-  String get settingsCoAuthorHelp => 'Teammates can see which commits hiro wrote';
+  String get settingsCoAuthorHelp => 'Teammates can see which commits agnts wrote';
 
   @override
   String get settingsPrTitle => 'Pull request title';
@@ -3183,14 +3363,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAutoLearnHelp =>
-      'After a push, hiro looks for techniques the repository never used before and writes lessons under Learn. Uses plan usage only when no ticket is waiting.';
+      'After a push, agnts looks for techniques the repository never used before and writes lessons under Learn. Uses plan usage only when no ticket is waiting.';
 
   @override
   String get settingsAutoReview => 'Review every result';
 
   @override
   String get settingsAutoReviewHelp =>
-      'While a change or report waits for you, hiro reviews it and shows its findings next to it. It never blocks approval.';
+      'While a change or report waits for you, agnts reviews it and shows its findings next to it. It never blocks approval.';
 
   @override
   String get settingsPauseAbove => 'Don\'t start new runs above';
@@ -3214,7 +3394,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsPush => 'Push notifications';
 
   @override
-  String get settingsPushHelp => 'To the hiro app on your phone';
+  String get settingsPushHelp => 'To the agnts app on your phone';
 
   @override
   String get settingsTelegram => 'Telegram messages';
@@ -3235,10 +3415,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsDone => 'When changes are pushed';
 
   @override
-  String get settingsLessons => 'When hiro finds something new to learn';
+  String get settingsLessons => 'When agnts finds something new to learn';
 
   @override
-  String get settingsReviewDone => 'When hiro\'s code review finishes';
+  String get settingsReviewDone => 'When agnts\'s code review finishes';
 
   @override
   String get settingsOnThisPage => 'On this page';
@@ -3248,6 +3428,97 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsSaved => 'Settings saved';
+
+  @override
+  String get spendTitle => 'Token spend';
+
+  @override
+  String spendSub(String tokens, String cost) {
+    return '$tokens tokens in and out · about $cost at API prices';
+  }
+
+  @override
+  String get spendEmpty => 'Nothing recorded yet. Spend appears after agnts\'s first Claude run on this ticket.';
+
+  @override
+  String get spendInput => 'Input';
+
+  @override
+  String get spendOutput => 'Output';
+
+  @override
+  String spendCache(String read, String write) {
+    return 'Cache: $read read, $write written';
+  }
+
+  @override
+  String spendCalls(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n runs', one: '$n run');
+    return '$_temp0';
+  }
+
+  @override
+  String get spendPartial => 'A run was cut off, so its cost is unknown';
+
+  @override
+  String get spendCostNote =>
+      'Cost is Claude Code\'s estimate of the same work at API prices. On a Claude plan you are not charged it; it shows the relative weight of each stage.';
+
+  @override
+  String spendTokens(String n) {
+    return '$n tokens';
+  }
+
+  @override
+  String get spendColTokens => 'Tokens';
+
+  @override
+  String get spendStageAnalyze => 'Analysis';
+
+  @override
+  String get spendStageCoding => 'Coding';
+
+  @override
+  String get spendStageWriting => 'Writing';
+
+  @override
+  String get spendStageRetry => 'Fixes and changes';
+
+  @override
+  String get spendStageReview => 'Code review';
+
+  @override
+  String get spendStageLearn => 'Lessons';
+
+  @override
+  String get spendStageHelper => 'Helper';
+
+  @override
+  String get spendTopTitle => 'Tickets by spend';
+
+  @override
+  String spendTopSub(String tokens, String cost) {
+    return '$tokens tokens in and out · about $cost at API prices';
+  }
+
+  @override
+  String get spendTopSubEmpty => 'Which tickets used the most of your plan';
+
+  @override
+  String get spendTopEmpty => 'No Claude runs recorded in this period.';
+
+  @override
+  String get spendTopNote =>
+      'Ranked by Claude Code\'s cost estimate, which weighs cache traffic properly. Share is of the period\'s estimated cost. Only spend inside the period counts.';
+
+  @override
+  String get spendColStage => 'Costliest stage';
+
+  @override
+  String get spendColCost => 'Est. cost';
+
+  @override
+  String get spendColShare => 'Share';
 
   @override
   String get stateNew => 'In queue';
@@ -3296,7 +3567,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tasksLede =>
-      'Work for your side projects. Tasks stay in hiro and never touch Jira. Everything else works the same: questions, coding, your review.';
+      'Work for your side projects. Tasks stay in agnts and never touch Jira. Everything else works the same: questions, coding, your review.';
 
   @override
   String get tasksNew => 'New task';
@@ -3346,7 +3617,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tasksHelp =>
-      'For repositories only you work on, you can let hiro push straight to main after you approve. It still never pushes without your review.';
+      'For repositories only you work on, you can let agnts push straight to main after you approve. It still never pushes without your review.';
 
   @override
   String get tasksDrawerSub => 'For your side projects. Not synced to Jira.';
@@ -3364,7 +3635,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tasksFieldDesc => 'What should be done';
 
   @override
-  String get tasksDescPh => 'Describe the result you want. The clearer this is, the fewer questions hiro asks.';
+  String get tasksDescPh => 'Describe the result you want. The clearer this is, the fewer questions agnts asks.';
 
   @override
   String get tasksPriority => 'Priority';
@@ -3394,7 +3665,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tasksStartAsk => 'Ask questions first';
 
   @override
-  String get tasksStartAskHint => 'hiro reads the code and asks before coding. Best for anything unclear.';
+  String get tasksStartAskHint => 'agnts reads the code and asks before coding. Best for anything unclear.';
 
   @override
   String get tasksStartCode => 'Start coding right away';
@@ -3444,7 +3715,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketPlan => 'Plan';
 
   @override
-  String get ticketAnalysis => 'What hiro found';
+  String get ticketAnalysis => 'What agnts found';
 
   @override
   String get ticketQuestions => 'Questions';
@@ -3568,7 +3839,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ticketQueuedSub =>
-      'hiro reads the ticket and the related code, then comes back with a plan and questions. Nothing is changed in this step.';
+      'agnts reads the ticket and the related code, then comes back with a plan and questions. Nothing is changed in this step.';
 
   @override
   String get ticketHeldSub => 'This task is kept in the queue until you start it.';
@@ -3695,7 +3966,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketReviewSubMain => 'Nothing has left the server yet. Approving pushes straight to the default branch.';
 
   @override
-  String get ticketWhatHiroDid => 'What hiro did';
+  String get ticketWhatAgntsDid => 'What agnts did';
 
   @override
   String get ticketDiff => 'Diff';
@@ -3707,7 +3978,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketAssignTitle => 'Assign the pull request';
 
   @override
-  String get ticketAssignSub => 'Optional. Pick who it is assigned to on the git host when hiro opens it.';
+  String get ticketAssignSub => 'Optional. Pick who it is assigned to on the git host when agnts opens it.';
 
   @override
   String ticketAssignError(String error) {
@@ -3759,10 +4030,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketRejectedTitle => 'Rejected';
 
   @override
-  String get ticketRejectedSub => 'hiro stopped working on this ticket. The branch was not pushed.';
+  String get ticketRejectedSub => 'agnts stopped working on this ticket. The branch was not pushed.';
 
   @override
-  String get ticketFailedTitle => 'hiro stopped';
+  String get ticketFailedTitle => 'agnts stopped';
 
   @override
   String get ticketFailedUnknown => 'The run stopped. Check the run log for details.';
@@ -3802,7 +4073,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketStageRetry => 'Retries and requested changes';
 
   @override
-  String get ticketStageReview => 'Code review by hiro';
+  String get ticketStageReview => 'Code review by agnts';
 
   @override
   String ticketModelAuto(String model) {
@@ -3849,7 +4120,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketSrcJira => 'Jira';
 
   @override
-  String get ticketSrcTask => 'hiro task';
+  String get ticketSrcTask => 'agnts task';
 
   @override
   String get ticketAfterMain => 'Push to main';
@@ -3925,7 +4196,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketRepoTitle => 'Repository';
 
   @override
-  String get ticketRepoHint => 'Where hiro analyzes and codes this ticket.';
+  String get ticketRepoHint => 'Where agnts analyzes and codes this ticket.';
 
   @override
   String get ticketRepoNone => 'Choose a repository…';
@@ -3951,13 +4222,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ticketQueuedSubReport =>
-      'hiro reads the ticket (and the code, if there is a repository) and comes back with a plan and questions. Nothing is changed.';
+      'agnts reads the ticket (and the code, if there is a repository) and comes back with a plan and questions. Nothing is changed.';
 
   @override
   String get ticketAnalyzingTitleNoRepo => 'Reading the ticket';
 
   @override
-  String get ticketAnalyzingSubNoRepo => 'No repository: hiro works from the ticket text.';
+  String get ticketAnalyzingSubNoRepo => 'No repository: agnts works from the ticket text.';
 
   @override
   String get ticketStartWriting => 'Start writing';
@@ -4046,7 +4317,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String ticketsEmptyHint(String label) {
-    return 'Label a Jira issue “$label” and hiro picks it up.';
+    return 'Label a Jira issue “$label” and agnts picks it up.';
   }
 
   @override
@@ -4099,13 +4370,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketsBoardEmpty => 'Nothing here';
 
   @override
-  String get ticketsListSub => 'Jira tickets with the hiro label, plus tasks you create for side projects.';
+  String get ticketsListSub => 'Jira tickets with the agnts label, plus tasks you create for side projects.';
 
   @override
   String get ticketsNoMatch => 'No tickets match your search.';
 
   @override
-  String get ticketsEmptyNeeds => 'Nothing is waiting on you. Tickets show up here when hiro has questions or changes to review.';
+  String get ticketsEmptyNeeds => 'Nothing is waiting on you. Tickets show up here when agnts has questions or changes to review.';
 
   @override
   String get ticketsEmptyOther => 'No tickets here yet.';
@@ -4135,7 +4406,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usageTitle => 'Plan usage';
 
   @override
-  String get usageLede => 'hiro runs on your Claude subscription. These limits are shared with your own Claude and Claude Code use.';
+  String get usageLede => 'agnts runs on your Claude subscription. These limits are shared with your own Claude and Claude Code use.';
 
   @override
   String get usageCard => 'Plan usage';
@@ -4215,7 +4486,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usageLimitTitle => 'When a limit is reached';
 
   @override
-  String get usageLimitSub => 'How hiro behaves near the limit';
+  String get usageLimitSub => 'How agnts behaves near the limit';
 
   @override
   String usageAbove(String pct) {
@@ -4248,5 +4519,5 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get usageHelp =>
-      'Numbers come from the rate limit events Claude Code emits during each run. When hiro is idle, a tiny refresh run keeps them current.';
+      'Numbers come from the rate limit events Claude Code emits during each run. When agnts is idle, a tiny refresh run keeps them current.';
 }

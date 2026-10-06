@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hiro_api/hiro_api.dart';
+import 'package:agnts_api/agnts_api.dart';
 
 import '../l10n/app_localizations.dart';
 import '../theme.dart';
@@ -10,7 +10,7 @@ import 'ui.dart';
 String stateLabel(AppLocalizations l, TicketState s, [TicketKind? kind]) => stateLabelOf(l, s, kind);
 
 /// A state's text colour (its tone's ink), as in the demo.
-Color stateColor(BuildContext context, TicketState s) => stateTone(s).ink(Hiro.of(context));
+Color stateColor(BuildContext context, TicketState s) => stateTone(s).ink(Agnts.of(context));
 
 /// A state as a dotted pill (.badge).
 class StateBadge extends StatelessWidget {
@@ -72,7 +72,7 @@ class UsageBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Hiro.of(context);
+    final c = Agnts.of(context);
     final u = utilization;
     final tone = u == null ? Tone.gray : u >= 1 ? Tone.bad : u >= 0.8 ? Tone.warn : Tone.info;
     final pctColor = tone == Tone.bad ? c.badInk : tone == Tone.warn ? c.warnInk : c.ink;
@@ -82,7 +82,7 @@ class UsageBar extends StatelessWidget {
         Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
           Expanded(child: Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: c.ink2))),
           Text(u == null ? '—' : '${(u * 100).round().clamp(0, 100)}%',
-              style: TextStyle(fontFamily: HiroFonts.display, fontSize: 22, fontWeight: FontWeight.w700, color: pctColor)),
+              style: TextStyle(fontFamily: AgntsFonts.display, fontSize: 22, fontWeight: FontWeight.w700, color: pctColor)),
         ]),
         Padding(padding: const EdgeInsets.only(top: 8, bottom: 6), child: Bar(value: u ?? 0, tone: tone)),
         if (note != null || noteRight != null)

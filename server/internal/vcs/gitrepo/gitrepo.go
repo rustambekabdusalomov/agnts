@@ -24,15 +24,15 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	githttp "github.com/go-git/go-git/v5/plumbing/transport/http"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
-	"hiro/internal/vcs"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
+	"agnts/internal/vcs"
 )
 
 // TokenSource returns the token for a git host ("github", "gitlab").
 type TokenSource func(ctx context.Context, provider string) (string, error)
 
-// Author signs hiro's commits ("commit as you").
+// Author signs agnts's commits ("commit as you").
 type Author struct {
 	Name  string
 	Email string
@@ -136,7 +136,7 @@ func (g *Repos) Prepare(ctx context.Context, repo domain.Repository, branch stri
 	local := plumbing.NewBranchReferenceName(branch)
 	if _, err := r.Reference(local, true); err != nil {
 		// No local branch yet: start from the remote branch if it exists
-		// (hiro pushed it before), else from the default branch.
+		// (agnts pushed it before), else from the default branch.
 		from, err := r.Reference(plumbing.NewRemoteReferenceName("origin", branch), true)
 		if err != nil {
 			if from, err = r.Reference(plumbing.NewRemoteReferenceName("origin", repo.DefaultBranch), true); err != nil {
@@ -257,7 +257,7 @@ func (g *Repos) Commit(ctx context.Context, repo domain.Repository, branch strin
 	return sha.String(), files, err
 }
 
-// Push sends branch to origin. Only fast-forwards: hiro never rewrites history.
+// Push sends branch to origin. Only fast-forwards: agnts never rewrites history.
 func (g *Repos) Push(ctx context.Context, repo domain.Repository, branch string) error {
 	dir := g.checkoutDir(repo, branch)
 	defer g.lock(dir)()
@@ -278,7 +278,7 @@ func (g *Repos) Push(ctx context.Context, repo domain.Repository, branch string)
 }
 
 // PushTo fast-forwards target on origin to branch's head. It fails if
-// target moved on since the branch was cut: hiro never force-pushes.
+// target moved on since the branch was cut: agnts never force-pushes.
 func (g *Repos) PushTo(ctx context.Context, repo domain.Repository, branch, target string) error {
 	dir := g.checkoutDir(repo, branch)
 	defer g.lock(dir)()
@@ -296,7 +296,7 @@ func (g *Repos) PushTo(ctx context.Context, repo domain.Repository, branch, targ
 		return nil
 	}
 	if err != nil && strings.Contains(err.Error(), "non-fast-forward") {
-		return fmt.Errorf("%s moved on since hiro started; switch the task to a pull request or retry to rebuild from %s: %w", target, target, err)
+		return fmt.Errorf("%s moved on since agnts started; switch the task to a pull request or retry to rebuild from %s: %w", target, target, err)
 	}
 	return err
 }

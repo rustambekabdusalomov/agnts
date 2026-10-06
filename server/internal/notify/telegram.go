@@ -67,7 +67,7 @@ func (b *Bot) GetMe(ctx context.Context) (string, error) {
 	return "@" + me.Username, err
 }
 
-// SetWebhook points Telegram at hiro, with a secret header.
+// SetWebhook points Telegram at agnts, with a secret header.
 func (b *Bot) SetWebhook(ctx context.Context, url, secret string) error {
 	return b.call(ctx, "setWebhook", map[string]any{
 		"url": url, "secret_token": secret, "allowed_updates": []string{"message", "callback_query"}, "drop_pending_updates": true,
@@ -109,7 +109,7 @@ func (b *Bot) AnswerCallback(ctx context.Context, id, text string) error {
 	return b.call(ctx, "answerCallbackQuery", map[string]any{"callback_query_id": id, "text": text}, nil)
 }
 
-// Update is the part of a Telegram update hiro reads.
+// Update is the part of a Telegram update agnts reads.
 type Update struct {
 	UpdateID int64    `json:"update_id"`
 	Message  *Message `json:"message"`

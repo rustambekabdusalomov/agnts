@@ -9,17 +9,17 @@ import (
 	"testing"
 	"time"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
 // These tests need a disposable database:
 //
-//	HIRO_TEST_DATABASE_URL=postgres://hiro:hiro@localhost:5442/hiro_test?sslmode=disable go test ./...
+//	AGNTS_TEST_DATABASE_URL=postgres://hiro:hiro@localhost:5442/hiro_test?sslmode=disable go test ./...
 func testDB(t *testing.T) (*Users, *Sessions) {
 	t.Helper()
-	url := os.Getenv("HIRO_TEST_DATABASE_URL")
+	url := os.Getenv("AGNTS_TEST_DATABASE_URL")
 	if url == "" {
-		t.Skip("HIRO_TEST_DATABASE_URL not set")
+		t.Skip("AGNTS_TEST_DATABASE_URL not set")
 	}
 	ctx := context.Background()
 	pool, err := Open(ctx, url)
@@ -190,6 +190,12 @@ func TestAnalytics(t *testing.T) {
 	if _, err := s.db.Exec(ctx, `INSERT INTO usage_snapshots (five_hour, created_at) VALUES (0.3, $1), (0.7, $2)`, at(10), at(70)); err != nil {
 		t.Fatal(err)
 	}
+	// Two coding calls on opus, one analysis call on sonnet.
+	if _, err := s.db.Exec(ctx, `INSERT INTO claude_calls (run_id, ticket_id, model_stage, model, input_tokens, output_tokens, cache_read_tokens, cost_usd, created_at)
+		SELECT id, ticket_id, CASE stage WHEN 'code' THEN 'coding' ELSE stage END, model, 1000, 200, 5000, CASE model WHEN 'opus' THEN 1.5 ELSE 0.25 END, $1
+		FROM runs, generate_series(1, CASE stage WHEN 'code' THEN 2 ELSE 1 END)`, at(40)); err != nil {
+		t.Fatal(err)
+	}
 
 	a, err := s.Analytics(ctx, 7, time.UTC)
 	if err != nil {
@@ -220,8 +226,131 @@ func TestAnalytics(t *testing.T) {
 	if peak < 0.69 {
 		t.Fatalf("peak usage %v", peak)
 	}
-	// hiro working (analyze 10 + coding 30 + pushing 1 = 41 min for PAY-1, 10 for PAY-2) averages ~25.5.
-	if c.HiroMin < 25 || c.HiroMin > 26 || c.WaitMin < 17 || c.WaitMin > 18 {
-		t.Fatalf("time: hiro %.1f wait %.1f", c.HiroMin, c.WaitMin)
+	// agnts working (analyze 10 + coding 30 + pushing 1 = 41 min for PAY-1, 10 for PAY-2) averages ~25.5.
+	if c.AgntsMin < 25 || c.AgntsMin > 26 || c.WaitMin < 17 || c.WaitMin > 18 {
+		t.Fatalf("time: agnts %.1f wait %.1f", c.AgntsMin, c.WaitMin)
+	}
+	if c.Spend.Input != 3000 || c.Spend.Output != 600 || c.Spend.CacheRead != 15000 || c.Spend.CostUSD < 3.24 || c.Spend.CostUSD > 3.26 {
+		t.Fatalf("period spend: %+v", c.Spend)
+	}
+	if a.Prev.Spend.Input != 0 {
+		t.Fatalf("previous spend: %+v", a.Prev.Spend)
+	}
+	var dayIn int64
+	for _, d := range a.Days {
+		dayIn += d.Spend.Input
+	}
+	if dayIn != 3000 {
+		t.Fatalf("daily spend input %d", dayIn)
+	}
+	if len(a.Spend) != 2 || a.Spend[0].ModelStage != "coding" || a.Spend[0].Calls != 2 || a.Spend[1].Model != "sonnet" {
+		t.Fatalf("spend by stage: %+v", a.Spend)
+	}
+}
+
+func TestClaudeCalls(t *testing.T) {
+	users, _ := testDB(t)
+	ctx := context.Background()
+	s := NewAgent(users.db)
+	if _, err := s.db.Exec(ctx, `INSERT INTO tickets (key, source, title, state, revision, turns, updated_at)
+		VALUES ('PAY-1', 'jira', 't', 'coding', 0, 0, now())`); err != nil {
+		t.Fatal(err)
+	}
+	var runID, ticketID int64
+	if err := s.db.QueryRow(ctx, `INSERT INTO runs (ticket_id, stage, model) SELECT id, 'code', 'opus' FROM tickets WHERE key = 'PAY-1'
+		RETURNING id, ticket_id`).Scan(&runID, &ticketID); err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range []domain.ClaudeCall{
+		{ModelStage: domain.ModelCoding, Model: "opus", Turns: 4, Usage: domain.TokenUsage{Input: 10, Output: 5, CacheRead: 100, CacheWrite: 20, CostUSD: 0.5}},
+		{ModelStage: domain.ModelRetry, Model: "opus", Turns: 2, Usage: domain.TokenUsage{Input: 1, Output: 1, CostUSD: 0.25}},
+		{ModelStage: domain.ModelRetry, Model: "sonnet", Turns: 1, Usage: domain.TokenUsage{Input: 2}, Partial: true},
+		{ModelStage: domain.ModelRetry, Model: "opus", Turns: 3, Usage: domain.TokenUsage{Input: 3, Output: 3, CostUSD: 0.125}},
+	} {
+		c.RunID = runID
+		if err := s.RecordClaudeCall(ctx, c); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := s.RecordClaudeCall(ctx, domain.ClaudeCall{RunID: runID + 100, ModelStage: domain.ModelCoding}); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("unknown run: %v", err)
+	}
+
+	got, err := s.TicketUsage(ctx, ticketID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []domain.StageUsage{
+		{ModelStage: domain.ModelCoding, Model: "opus", Calls: 1, Turns: 4, Usage: domain.TokenUsage{Input: 10, Output: 5, CacheRead: 100, CacheWrite: 20, CostUSD: 0.5}},
+		{ModelStage: domain.ModelRetry, Model: "opus", Calls: 2, Turns: 5, Usage: domain.TokenUsage{Input: 4, Output: 4, CostUSD: 0.375}},
+		{ModelStage: domain.ModelRetry, Model: "sonnet", Calls: 1, Turns: 1, Partial: true, Usage: domain.TokenUsage{Input: 2}},
+	}
+	if len(got) != len(want) {
+		t.Fatalf("usage %+v, want %+v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("row %d: %+v, want %+v", i, got[i], want[i])
+		}
+	}
+	if got, err := s.TicketUsage(ctx, ticketID+100); err != nil || len(got) != 0 {
+		t.Fatalf("no calls: %+v %v", got, err)
+	}
+}
+
+func TestTopTicketSpend(t *testing.T) {
+	users, _ := testDB(t)
+	ctx := context.Background()
+	s := NewAgent(users.db)
+	repo, err := s.SaveRepository(ctx, domain.Repository{Name: "api", Kind: "jira", Provider: "github", CloneURL: "https://github.com/a/api.git", DefaultBranch: "main"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	runs := map[string]int64{}
+	for _, k := range []string{"PAY-1", "PAY-2", "PAY-3", "PAY-4"} {
+		var run int64
+		if err := s.db.QueryRow(ctx, `WITH tk AS (INSERT INTO tickets (key, source, repo_id, title, kind, state, revision, turns, updated_at)
+				VALUES ($1, 'jira', $2, 'title '||$1, 'code', 'done', 0, 0, now()) RETURNING id)
+			INSERT INTO runs (ticket_id, stage, model) SELECT id, 'code', 'opus' FROM tk RETURNING id`, k, repo.ID).Scan(&run); err != nil {
+			t.Fatal(err)
+		}
+		runs[k] = run
+	}
+	call := func(key, stage string, in, out int64, cost float64, ago time.Duration) {
+		t.Helper()
+		if _, err := s.db.Exec(ctx, `INSERT INTO claude_calls (run_id, ticket_id, model_stage, model, input_tokens, output_tokens, cache_read_tokens, cost_usd, created_at)
+			SELECT id, ticket_id, $2, 'opus', $3, $4, 10, $5, now() - $6::interval FROM runs WHERE id = $1`,
+			runs[key], stage, in, out, cost, ago.String()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	call("PAY-1", "analyze", 100, 10, 0.25, time.Hour)
+	call("PAY-1", "coding", 200, 20, 1.5, time.Hour)
+	call("PAY-1", "retry", 50, 5, 0.5, time.Hour)
+	call("PAY-2", "coding", 500, 50, 0.75, time.Hour)
+	call("PAY-3", "retry", 900, 90, 0, time.Hour) // cut off: no cost, ranks by tokens
+	call("PAY-4", "coding", 9000, 900, 9, 48*time.Hour)
+
+	total, got, err := s.TopTicketSpend(ctx, time.Now().Add(-24*time.Hour), 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := (domain.TokenUsage{Input: 1750, Output: 175, CacheRead: 50, CostUSD: 3}); total != want {
+		t.Fatalf("total %+v, want %+v", total, want)
+	}
+	if len(got) != 3 {
+		t.Fatalf("tickets %+v", got)
+	}
+	if got[0].Key != "PAY-1" || got[0].Calls != 3 || got[0].TopStage != "coding" || got[0].Usage.CostUSD != 2.25 ||
+		got[0].Usage.Input != 350 || got[0].RepoName != "api" || got[0].Title != "title PAY-1" || got[0].State != domain.StateDone {
+		t.Fatalf("first: %+v", got[0])
+	}
+	if got[1].Key != "PAY-2" || got[2].Key != "PAY-3" || got[2].TopStage != "retry" {
+		t.Fatalf("order: %s %s %+v", got[1].Key, got[2].Key, got[2])
+	}
+
+	_, got, err = s.TopTicketSpend(ctx, time.Now().Add(-72*time.Hour), 1)
+	if err != nil || len(got) != 1 || got[0].Key != "PAY-4" {
+		t.Fatalf("wider period, limit 1: %+v %v", got, err)
 	}
 }

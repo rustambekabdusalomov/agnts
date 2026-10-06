@@ -1,6 +1,6 @@
 # Sozlamalar
 
-hiro vositalaringizga qanday ulanadi va ish paytida qanday ishlaydi. Oʻzgarishlar «Oʻzgarishlarni saqlash»dan keyin qoʻllanadi.
+agnts vositalaringizga qanday ulanadi va ish paytida qanday ishlaydi. Oʻzgarishlar «Oʻzgarishlarni saqlash»dan keyin qoʻllanadi.
 
 ## Koʻrinish
 
@@ -8,7 +8,7 @@ Mavzu va til. Shu brauzerda saqlanadi va darhol qoʻllanadi.
 
 ## Jira va GitHub
 
-Tiketlar qayerdan keladi, hiro qaysi belgini oladi va commitlar kimning nomidan qilinadi.
+Tiketlar qayerdan keladi, agnts qaysi belgini oladi va commitlar kimning nomidan qilinadi.
 
 ## Claude Code
 

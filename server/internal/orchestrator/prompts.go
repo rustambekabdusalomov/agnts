@@ -7,21 +7,21 @@ import (
 	"strings"
 	"text/template"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
-// Files Claude Code writes for hiro to read back. stream-json output has no
+// Files Claude Code writes for agnts to read back. stream-json output has no
 // structured result, so the contract is a file outside the repository.
 const (
-	AnalysisPath = "/hiro/out/analysis.json"
-	SummaryPath  = "/hiro/out/summary.json"
-	LessonsPath  = "/hiro/out/lessons.json"
-	RulePath     = "/hiro/out/rule.json"
-	ReportPath   = "/hiro/out/report.md"
-	ReviewPath   = "/hiro/out/review.json"
-	// ChangePath is where hiro puts the reviewed diff for the learn and
+	AnalysisPath = "/agnts/out/analysis.json"
+	SummaryPath  = "/agnts/out/summary.json"
+	LessonsPath  = "/agnts/out/lessons.json"
+	RulePath     = "/agnts/out/rule.json"
+	ReportPath   = "/agnts/out/report.md"
+	ReviewPath   = "/agnts/out/review.json"
+	// ChangePath is where agnts puts the reviewed diff for the learn and
 	// review runs.
-	ChangePath = "/hiro/out/change.diff"
+	ChangePath = "/agnts/out/change.diff"
 )
 
 // Analysis is what the analyze stage must write to AnalysisPath.
@@ -37,12 +37,16 @@ type Analysis struct {
 		Text    string   `json:"text"`
 		Options []string `json:"options"`
 	} `json:"questions"`
+	// FollowUps are prerequisites and parts to split off, when asked for.
+	FollowUps []domain.FollowUp `json:"followUps,omitempty"`
 }
 
 // Summary is what a coding run should write to SummaryPath.
 type Summary struct {
 	Summary string   `json:"summary"`
 	Notes   []string `json:"notes"`
+	// FollowUps are what the ticket still needs after this run, when asked for.
+	FollowUps []domain.FollowUp `json:"followUps,omitempty"`
 }
 
 // kindWork describes each kind's work to Claude.
@@ -80,22 +84,22 @@ The team wrote these rules for every ticket. Follow them. A repository rule is m
 
 {{define "rules"}}## Rules
 
-- Work only inside /workspace. Do not commit, push, or change git remotes; hiro does that after human review.
+- Work only inside /workspace. Do not commit, push, or change git remotes; agnts does that after human review.
 - Do not read or print secrets (.env files, credentials).
 - Keep changes focused on the ticket. Follow the repository's existing style and CLAUDE.md.
 {{end}}
 
-{{define "analyze"}}You are hiro, a careful software engineer. Analyse the ticket below {{if .NoRepo}}before working on it. It has no repository: /workspace is empty, so work from the ticket text{{else}}in the repository at /workspace{{end}}. Do not change any files in /workspace.
+{{define "analyze"}}You are agnts, a careful software engineer. Analyse the ticket below {{if .NoRepo}}before working on it. It has no repository: /workspace is empty, so work from the ticket text{{else}}in the repository at /workspace{{end}}. Do not change any files in /workspace.
 
 {{template "ticket" .}}
 {{template "rules" .}}
 ## Kind of work
 
-hiro works these kinds of tickets:
+agnts works these kinds of tickets:
 {{range kinds}}
 - {{.}}: {{work .}}{{end}}
 
-{{if .T.KindAuto}}Nobody chose a kind for this ticket. Pick the one it asks for; when it asks for a change to the code and nothing else fits, pick code.{{else}}The ticket was filed as {{.T.Kind}} ({{work .T.Kind}}). Keep that kind unless the ticket clearly asks for a different one; then name that kind, and hiro will tell the author.{{end}}{{if .NoRepo}} The code and test kinds need a repository; pick them only when the ticket really asks for a change to code.{{end}}
+{{if .T.KindAuto}}Nobody chose a kind for this ticket. Pick the one it asks for; when it asks for a change to the code and nothing else fits, pick code.{{else}}The ticket was filed as {{.T.Kind}} ({{work .T.Kind}}). Keep that kind unless the ticket clearly asks for a different one; then name that kind, and agnts will tell the author.{{end}}{{if .NoRepo}} The code and test kinds need a repository; pick them only when the ticket really asks for a change to code.{{end}}
 
 ## What to produce
 
@@ -115,7 +119,7 @@ Rate the complexity "complex" when the work spans several modules or layers, cha
 {{if .NoQuestions}}Do not ask questions: use an empty "questions" list and make reasonable assumptions, noting them in the plan.{{else}}Ask questions only when the answer changes what you would build or conclude and you cannot find it{{if not .NoRepo}} in the code{{end}}. Give two to four concrete options for each. Use an empty list when there is nothing to ask.{{end}}{{if .Rules}} Plan the work so it follows the team rules; if the ticket asks for something a rule forbids, {{if .NoQuestions}}follow the rule and say so in the plan{{else}}ask which one wins{{end}}.{{end}}
 {{end}}
 
-{{define "code"}}You are hiro, a careful software engineer. Implement the ticket below in the repository at /workspace.{{if eq .T.Kind "test"}} This ticket is about tests: add or fix automated tests that follow the project's existing test style, and change other code only when the ticket asks for it or a test cannot be written without it (say so in the notes).{{end}}
+{{define "code"}}You are agnts, a careful software engineer. Implement the ticket below in the repository at /workspace.{{if eq .T.Kind "test"}} This ticket is about tests: add or fix automated tests that follow the project's existing test style, and change other code only when the ticket asks for it or a test cannot be written without it (say so in the notes).{{end}}
 
 {{template "ticket" .}}
 {{if .Plan}}## Plan from the analysis
@@ -139,7 +143,7 @@ When you are done, write {{.SummaryPath}} as {"summary": "what you changed and w
 Make these changes in /workspace, run the checks again, and update {{.SummaryPath}}.
 {{end}}
 
-{{define "learn"}}You are hiro's teacher. hiro, an AI coding agent, just finished ticket {{.T.Key}} in the repository at /workspace, and the change was approved and pushed. The developers who own this repository did not write it, so they may not know the techniques it uses. Find what this change introduces that the repository had never done before, and teach it to them. Do not change any files in /workspace.
+{{define "learn"}}You are agnts's teacher. agnts, an AI coding agent, just finished ticket {{.T.Key}} in the repository at /workspace, and the change was approved and pushed. The developers who own this repository did not write it, so they may not know the techniques it uses. Find what this change introduces that the repository had never done before, and teach it to them. Do not change any files in /workspace.
 
 ## The change
 
@@ -155,7 +159,7 @@ The full diff is in {{.ChangePath}}. /workspace is checked out at the result. Ch
 
 {{if .Topics}}These concepts already have lessons. Never teach them again, even under a different name:
 {{range .Topics}}
-- {{.Slug}}: {{.Title}}{{end}}{{else}}Nothing yet: this is the first change hiro learns from.{{end}}
+- {{.Slug}}: {{.Title}}{{end}}{{else}}Nothing yet: this is the first change agnts learns from.{{end}}
 
 ## What counts as new
 
@@ -188,7 +192,7 @@ Write {{.LessonsPath}} with exactly this shape (an empty "lessons" list when not
 Give two or three quiz questions per lesson. Only link pages you are sure exist (official documentation first); leave "reading" empty rather than guess. Write plain text, not Markdown headings.
 {{end}}
 
-{{define "rule"}}You are hiro, an AI agent that implements tickets in code. The team wrote the rule below for you to follow on every ticket {{if .RuleRepo}}in the repository {{.RuleRepo}}{{else}}in every repository{{end}}. Before you rely on it, make sure it is clear: two engineers reading it should make the same change. Do not change any files in /workspace.
+{{define "rule"}}You are agnts, an AI agent that implements tickets in code. The team wrote the rule below for you to follow on every ticket {{if .RuleRepo}}in the repository {{.RuleRepo}}{{else}}in every repository{{end}}. Before you rely on it, make sure it is clear: two engineers reading it should make the same change. Do not change any files in /workspace.
 
 ## The rule
 
@@ -231,7 +235,7 @@ Write {{.RulePath}} with exactly this shape:
 {{if .NoQuestions}}Do not ask any more questions: use an empty "questions" list, resolve what is still open with the most reasonable reading, and state that reading in "clarified".{{else}}Ask at most five questions, each with two to four concrete options. Use an empty list when the rule is clear.{{end}}
 {{end}}
 
-{{define "report"}}You are hiro, a careful software engineer. Your task: {{work .T.Kind}}, for the ticket below. {{if .NoRepo}}The ticket has no repository: /workspace is empty.{{else}}The repository is at /workspace.{{end}} Do not change any files in /workspace: the result is a report, not a change.
+{{define "report"}}You are agnts, a careful software engineer. Your task: {{work .T.Kind}}, for the ticket below. {{if .NoRepo}}The ticket has no repository: /workspace is empty.{{else}}The repository is at /workspace.{{end}} Do not change any files in /workspace: the result is a report, not a change.
 
 {{template "ticket" .}}
 {{if .Plan}}## Plan from the analysis
@@ -245,7 +249,7 @@ Write {{.RulePath}} with exactly this shape:
 {{end}}{{end}}
 ## Rules
 
-- Do not change, commit or push anything in /workspace. Write only under /hiro/out; use /tmp for scratch files.
+- Do not change, commit or push anything in /workspace. Write only under /agnts/out; use /tmp for scratch files.
 - Do not read or print secrets (.env files, credentials).
 - Base every claim on what you checked.{{if not .NoRepo}} Cite code as path:line.{{end}} Say plainly what you could not verify.
 
@@ -269,7 +273,7 @@ Then write {{.SummaryPath}} as {"summary": "two or three sentences: the outcome"
 Your last report is in {{.ReportPath}}. Rewrite it there in full with these changes, and update {{.SummaryPath}}. Do not change files in /workspace.
 {{end}}
 
-{{define "review"}}You are hiro's code reviewer. hiro, an AI agent, {{if .T.Kind.Report}}wrote a report for the ticket below ({{work .T.Kind}}){{else}}made a change for the ticket below{{end}}, and a developer is about to review it before {{if .T.Kind.Report}}accepting it{{else}}it is pushed{{end}}. Review it for them: find what they would want to know before deciding. Your review is advice shown next to the work; the developer decides. Do not change any files in /workspace.
+{{define "review"}}You are agnts's code reviewer. agnts, an AI agent, {{if .T.Kind.Report}}wrote a report for the ticket below ({{work .T.Kind}}){{else}}made a change for the ticket below{{end}}, and a developer is about to review it before {{if .T.Kind.Report}}accepting it{{else}}it is pushed{{end}}. Review it for them: find what they would want to know before deciding. Your review is advice shown next to the work; the developer decides. Do not change any files in /workspace.
 
 {{template "ticket" .}}
 {{if .Plan}}## Plan from the analysis
@@ -283,7 +287,7 @@ Your last report is in {{.ReportPath}}. Rewrite it there in full with these chan
 {{end}}{{end}}
 ## The work under review
 {{if .WorkSummary}}
-hiro's summary: {{.WorkSummary}}
+agnts's summary: {{.WorkSummary}}
 {{end}}{{range .Notes}}- note: {{.}}
 {{end}}{{if .T.Kind.Report}}
 The report is in {{.ReportPath}}. {{if .NoRepo}}The ticket has no repository: /workspace is empty, so judge the report on its own.{{else}}/workspace is the repository the report is about, at its default branch: check the report's claims against the code.{{end}}
@@ -292,7 +296,7 @@ The full diff is in {{.ChangePath}}. /workspace is checked out at the change. Ch
 {{range .Files}}
 - {{.Path}} (+{{.Add}} −{{.Del}}){{end}}
 {{if .CheckSteps}}
-Checks hiro ran after the change:
+Checks agnts ran after the change:
 {{range .CheckSteps}}
 - {{.Name}}: ` + "`{{.Command}}`" + ` {{if eq .ExitCode 0}}passed{{else}}failed (exit {{.ExitCode}}){{end}}{{end}}
 {{else}}
@@ -326,14 +330,43 @@ Write {{.ReviewPath}} with exactly this shape:
        "line": 42,
        "title": "the problem in one line",
        "detail": "why it is a problem: the case that goes wrong",
-       "suggestion": "what to change; written so it can be sent back to hiro as review feedback"
+       "suggestion": "what to change; written so it can be sent back to agnts as review feedback"
      }],
      "strengths": ["at most three things done well, only if notable"]}
 
 Order findings most severe first. Use an empty "findings" list when there is nothing to report.
 {{end}}
 
-{{define "fix"}}hiro ran the project's checks after your changes and they failed:
+{{define "followups"}}## Follow-up tickets
+
+agnts can suggest follow-up tickets; a person reads them and creates the ones they want. A follow-up exists only to get {{if .Chain}}the original goal of {{(index .Chain 0).Key}} ("{{(index .Chain 0).Title}}"){{else}}ticket {{.T.Key}}{{end}} fully done. Do not invent new work: no general refactoring, no unrelated improvements, no features nobody asked for.
+{{if .Chain}}
+{{.T.Key}} is itself a follow-up. The chain, root first:
+{{range .Chain}}
+- {{.Key}}: {{.Title}}{{end}}
+- {{.T.Key}}: {{.T.Title}} (this ticket)
+
+Stay on the root's goal.
+{{end}}
+Suggest a follow-up only when it is one of these:
+{{range .FollowUpTypes}}
+- {{.}}{{end}}
+
+{{if .Known}}Never suggest what one of these already covers (open tickets, and follow-ups already suggested or declined):
+{{range .Known}}
+- {{.Key}}{{if .Key}}: {{end}}{{.Title}}{{end}}
+
+{{end}}Most tickets need no follow-up; an empty list is the usual answer. Suggest at most {{.MaxFollowUps}}, the most important first. Add this list to the JSON you write to {{.FollowUpFile}}:
+
+    "followUps": [{"type": "one of {{range $i, $t := .FollowUpTypeNames}}{{if $i}}, {{end}}{{$t}}{{end}}",
+                   "title": "imperative, like a ticket title",
+                   "description": "what to do and where{{if not .NoRepo}}, with path:line references{{end}}; enough to start without asking",
+                   "serves": "one sentence: how it helps finish {{if .Chain}}{{(index .Chain 0).Key}}{{else}}{{.T.Key}}{{end}}",
+                   "kind": "code, test, plan, analysis or bug",
+                   "priority": "low, medium or high"}]
+{{end}}
+
+{{define "fix"}}agnts ran the project's checks after your changes and they failed:
 
 {{indent .Output}}
 
@@ -368,6 +401,14 @@ type promptData struct {
 	WorkSummary  string      // what the work run said it did (review)
 	Notes        []string    // its notes for the reviewer
 	CheckSteps   []CheckStep // its checks
+
+	// Follow-up suggestions (the "followups" block).
+	Chain             []TicketRef // ancestors of a follow-up ticket, root first
+	Known             []TicketRef // what not to suggest again
+	FollowUpTypes     []string    // the kinds of follow-up this stage may suggest, explained
+	FollowUpTypeNames []string
+	FollowUpFile      string
+	MaxFollowUps      int
 }
 
 func render(name string, d promptData) (string, error) {

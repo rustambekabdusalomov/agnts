@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hiro_mobile/features/tickets/diff_highlight.dart';
-import 'package:hiro_mobile/features/tickets/diff_lines.dart';
+import 'package:agnts_mobile/features/tickets/diff_highlight.dart';
+import 'package:agnts_mobile/features/tickets/diff_lines.dart';
 
 List<List<CodeSpan>?>? hl(String diff, String path) => highlightDiff((lines: numberDiff(diff), path: path));
 

@@ -19,9 +19,9 @@ import (
 	"testing"
 	"time"
 
-	"hiro/internal/domain"
-	"hiro/internal/orchestrator"
-	"hiro/internal/store/postgres"
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
+	"agnts/internal/store/postgres"
 )
 
 // ---- fakes ----
@@ -195,7 +195,7 @@ func (f *fakeTelegram) server(t *testing.T) *httptest.Server {
 		body["_id"] = id
 		f.calls = append(f.calls, body)
 		f.mu.Unlock()
-		_, _ = io.WriteString(w, `{"ok":true,"result":{"message_id":`+strconv.FormatInt(id, 10)+`,"username":"hiro_bot"}}`)
+		_, _ = io.WriteString(w, `{"ok":true,"result":{"message_id":`+strconv.FormatInt(id, 10)+`,"username":"agnts_bot"}}`)
 	}))
 }
 
@@ -333,7 +333,7 @@ func TestApproveNeedsConfirmation(t *testing.T) {
 	}
 }
 
-func TestApproveReportStaysInHiro(t *testing.T) {
+func TestApproveReportStaysInAgnts(t *testing.T) {
 	n, st, acts, tg := setup(t)
 	acts.view.Ticket.State = domain.StateWaitingForReview
 	acts.view.Ticket.Kind = domain.KindPlan
@@ -526,5 +526,27 @@ func TestReviewNotification(t *testing.T) {
 	n.handle(context.Background(), ev)
 	if len(tg.sent("sendMessage")) != 1 {
 		t.Fatal("sent for a stale review or with review notifications off")
+	}
+}
+
+func TestFollowUpsNotification(t *testing.T) {
+	ev := func(count float64, titles ...any) domain.Event {
+		return domain.Event{ID: 1, TicketKey: "PAY-1", Type: domain.EventFollowUps,
+			Data: map[string]any{"count": count, "source": "analyze", "titles": titles}}
+	}
+	n, _, _, tg := setup(t)
+	n.handle(context.Background(), ev(2, "Add refund_cents", "Admin screen"))
+	msgs := tg.sent("sendMessage")
+	if len(msgs) != 1 {
+		t.Fatalf("messages: %v", msgs)
+	}
+	if text := msgs[0]["text"].(string); !strings.Contains(text, "PAY-1") || !strings.Contains(text, "• Admin screen") {
+		t.Fatalf("follow-ups message: %q", text)
+	}
+	n.handle(context.Background(), ev(0))
+	n.settings = fakeSettings{s: func() domain.Settings { s := domain.DefaultSettings(); s.Notify.FollowUps = false; return s }()}
+	n.handle(context.Background(), ev(1, "Admin screen"))
+	if len(tg.sent("sendMessage")) != 1 {
+		t.Fatal("sent for no follow-ups or with follow-up notifications off")
 	}
 }

@@ -15,7 +15,7 @@ const ui = useUi()
 const settings = useQuery({ queryKey: ['settings'], queryFn: () => unwrap(api.GET('/settings')) })
 const LABEL: Record<Stage, string> = { analyze: 'stageAnalyze', coding: 'stageCoding', retry: 'stageRetry', review: 'stageReview' }
 
-// The review model may be auto in Settings: hiro picks by complexity.
+// The review model may be auto in Settings: agnts picks by complexity.
 function defaultLabel(s: Stage): string {
   const m = settings.data.value?.models[s]
   if (!m) return t('ticket.modelDefault', { model: '…' })

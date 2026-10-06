@@ -7,7 +7,7 @@ import { KINDS, type Ticket, type TicketKindChoice } from '../../api/types'
 import { useUi } from '../../stores/ui'
 
 // What the ticket produces. Choosing a kind makes it final; Auto hands the
-// choice back to hiro's analysis. The server refuses code and test without
+// choice back to agnts's analysis. The server refuses code and test without
 // a repository, and says so.
 const props = defineProps<{ ticket: Ticket }>()
 const { t } = useI18n()

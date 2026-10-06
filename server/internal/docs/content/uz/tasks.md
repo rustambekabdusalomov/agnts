@@ -8,7 +8,7 @@ Repozitoriyni tanlang, kerakli natijani yozing, muhimlikni belgilang va qanday b
 
 ## Tasdiqlaganingizdan keyin
 
-Har bir vazifa uchun hiro pull request ochishini yoki toʻgʻridan-toʻgʻri main'ga yuborishini tanlang. Tekshiruvingizsiz hech narsa yubormaydi.
+Har bir vazifa uchun agnts pull request ochishini yoki toʻgʻridan-toʻgʻri main'ga yuborishini tanlang. Tekshiruvingizsiz hech narsa yubormaydi.
 
 ## Repozitoriylar
 

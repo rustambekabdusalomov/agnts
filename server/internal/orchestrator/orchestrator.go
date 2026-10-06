@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	"hiro/internal/domain"
+	"agnts/internal/domain"
 )
 
 // Config holds limits that are not user settings.
@@ -27,7 +27,7 @@ type Config struct {
 // DefaultConfig returns the built-in limits.
 func DefaultConfig() Config {
 	return Config{
-		Image:        "hiro-runner:latest",
+		Image:        "agnts-runner:latest",
 		CheckTimeout: 15 * time.Minute,
 		FixAttempts:  2,
 		PollEvery:    5 * time.Second,
@@ -460,6 +460,7 @@ func (o *Orchestrator) claude(ctx context.Context, s domain.Settings, ws Workspa
 	if res.SessionID != "" {
 		run.SessionID = res.SessionID
 	}
+	o.recordSpend(ctx, run, modelStage, model, res)
 	if err != nil {
 		return res, err
 	}
@@ -476,7 +477,7 @@ func (o *Orchestrator) claude(ctx context.Context, s domain.Settings, ws Workspa
 		}); err != nil {
 			return res, err
 		}
-		o.trackerComment(ctx, *t, CommentStatus, "hiro paused at the Claude plan limit and resumes after it resets.")
+		o.trackerComment(ctx, *t, CommentStatus, "agnts paused at the Claude plan limit and resumes after it resets.")
 		return res, &stopError{"rate limited"}
 	}
 	if res.IsError {
@@ -489,6 +490,25 @@ func (o *Orchestrator) claude(ctx context.Context, s domain.Settings, ws Workspa
 	return res, nil
 }
 
+// recordSpend stores the tokens an invocation used, failed and rate-limited
+// ones included: they were spent all the same. An invocation that never
+// reached Claude (no turns, no tokens) is not recorded.
+func (o *Orchestrator) recordSpend(ctx context.Context, run *domain.Run, modelStage, model string, res ClaudeResult) {
+	if res.Usage.IsZero() && res.Turns == 0 {
+		return
+	}
+	if res.Model != "" {
+		model = res.Model
+	}
+	// The run may have been stopped; the spend is recorded regardless.
+	if err := o.store.RecordClaudeCall(context.WithoutCancel(ctx), domain.ClaudeCall{
+		RunID: run.ID, ModelStage: modelStage, Model: model, Usage: res.Usage,
+		Turns: res.Turns, Duration: res.Duration, Partial: res.Partial,
+	}); err != nil {
+		o.log.Error("record claude spend", "run_id", run.ID, "err", err)
+	}
+}
+
 var errNoRepo = errors.New("no repository is linked to this ticket; add one on the Repositories page and retry")
 
 func (o *Orchestrator) repoFor(ctx context.Context, t domain.Ticket) (domain.Repository, error) {
@@ -499,7 +519,7 @@ func (o *Orchestrator) repoFor(ctx context.Context, t domain.Ticket) (domain.Rep
 }
 
 // optionalRepo returns the ticket's repository, or nil when it has none
-// and its kind can work without one (or hiro has yet to pick the kind).
+// and its kind can work without one (or agnts has yet to pick the kind).
 func (o *Orchestrator) optionalRepo(ctx context.Context, t domain.Ticket) (*domain.Repository, error) {
 	if t.RepoID == nil {
 		if t.Kind.Spec().NeedsRepo && !t.KindAuto {
@@ -517,7 +537,7 @@ func (o *Orchestrator) optionalRepo(ctx context.Context, t domain.Ticket) (*doma
 func branchFor(repo domain.Repository, key string) string {
 	prefix := repo.BranchPrefix
 	if prefix == "" {
-		prefix = "hiro/"
+		prefix = "agnts/"
 	}
 	return prefix + key
 }
@@ -600,6 +620,9 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 	if err != nil {
 		return err
 	}
+	if prompt, err = o.withFollowUps(ctx, s, t, d, domain.SuggestFromAnalyze, AnalysisPath, prompt); err != nil {
+		return err
+	}
 	if _, err := o.claude(ctx, s, ws, &t, run, domain.ModelAnalyze, prompt, ""); err != nil {
 		return err
 	}
@@ -617,8 +640,9 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 	if t, err = o.settleKind(ctx, t, run, a); err != nil {
 		return err
 	}
+	o.saveFollowUps(ctx, s, t, run, domain.SuggestFromAnalyze, a.FollowUps)
 	if t.Kind.Spec().NeedsRepo && repo == nil {
-		return fmt.Errorf("hiro read this ticket as %s work, which needs a repository: link one and retry, or change the kind", t.Kind)
+		return fmt.Errorf("agnts read this ticket as %s work, which needs a repository: link one and retry, or change the kind", t.Kind)
 	}
 	if t.Kind.Report() {
 		branch = "" // nothing is committed for a report
@@ -650,7 +674,7 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 	return o.transition(ctx, &t, run, domain.StateCoding, "no questions, starting to "+work, setBranch)
 }
 
-// settleKind applies the kind the analysis read from the ticket. While hiro
+// settleKind applies the kind the analysis read from the ticket. While agnts
 // picks the kind it takes that reading; a kind someone chose stays, and a
 // disagreement is only a warning on the ticket.
 func (o *Orchestrator) settleKind(ctx context.Context, t domain.Ticket, run *domain.Run, a Analysis) (domain.Ticket, error) {
@@ -667,7 +691,7 @@ func (o *Orchestrator) settleKind(ctx context.Context, t domain.Ticket, run *dom
 			Level: domain.LevelWarn, Message: msg + ". Kept " + string(t.Kind) + ", as it was chosen.", Data: data})
 		return t, nil
 	}
-	msg := fmt.Sprintf("hiro picked %s", a.Kind)
+	msg := fmt.Sprintf("agnts picked %s", a.Kind)
 	if a.KindReason != "" {
 		msg += ": " + a.KindReason
 	}
@@ -722,6 +746,9 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 			extra, _ := render("feedback", d)
 			prompt += "\n" + extra
 		}
+	}
+	if err == nil {
+		prompt, err = o.withFollowUps(ctx, s, t, promptData{Repo: repo}, domain.SuggestFromWork, SummaryPath, prompt)
 	}
 	if err != nil {
 		return err
@@ -791,6 +818,7 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 	}); err != nil {
 		return err
 	}
+	o.saveFollowUps(ctx, s, t, run, domain.SuggestFromWork, summaryFollowUps(summary))
 	return o.transition(ctx, &t, run, domain.StateWaitingForReview, fmt.Sprintf("%d files changed, ready for review", len(files)), func(x *domain.Ticket) {
 		x.Branch, x.HeadSHA = branch, sha
 		x.Turns += run.Turns
@@ -854,6 +882,9 @@ func (o *Orchestrator) report(ctx context.Context, s domain.Settings, t domain.T
 			prompt += "\n" + extra
 		}
 	}
+	if err == nil {
+		prompt, err = o.withFollowUps(ctx, s, t, d, "report", SummaryPath, prompt)
+	}
 	if err != nil {
 		return err
 	}
@@ -882,6 +913,7 @@ func (o *Orchestrator) report(ctx context.Context, s domain.Settings, t domain.T
 	if err := o.store.SaveResult(ctx, domain.Result{RunID: run.ID, Summary: summary, Report: string(md)}); err != nil {
 		return err
 	}
+	o.saveFollowUps(ctx, s, t, run, domain.SuggestFromWork, summaryFollowUps(summary))
 	return o.transition(ctx, &t, run, domain.StateWaitingForReview, "report ready for review", func(x *domain.Ticket) {
 		x.Turns += run.Turns
 		x.ReviewState = reviewState(s)
@@ -891,7 +923,7 @@ func (o *Orchestrator) report(ctx context.Context, s domain.Settings, t domain.T
 // maxReportComment keeps a posted report under Jira's comment limit.
 const maxReportComment = 30000
 
-// deliver finishes an approved report: it stays in hiro, and goes to the
+// deliver finishes an approved report: it stays in agnts, and goes to the
 // tracker issue when the reviewer asked for that.
 func (o *Orchestrator) deliver(ctx context.Context, t domain.Ticket, run *domain.Run) error {
 	r, err := o.store.LatestResult(ctx, t.ID, domain.StageCode)
@@ -909,7 +941,7 @@ func (o *Orchestrator) deliver(ctx context.Context, t domain.Ticket, run *domain
 		} else {
 			text := r.Report
 			if len(text) > maxReportComment {
-				text = truncate(text, maxReportComment) + "\n\n(The full report is in hiro.)"
+				text = truncate(text, maxReportComment) + "\n\n(The full report is in agnts.)"
 			}
 			posted, err := o.tracker.Comment(ctx, t.Key, CommentReport, text)
 			if err != nil {
@@ -967,7 +999,7 @@ func (o *Orchestrator) push(ctx context.Context, s domain.Settings, t domain.Tic
 			Message: url, Data: map[string]any{"number": number, "url": url}})
 		o.assign(ctx, repo, t, run, number)
 	}
-	o.trackerComment(ctx, t, CommentPR, "hiro opened a pull request: "+url)
+	o.trackerComment(ctx, t, CommentPR, "agnts opened a pull request: "+url)
 	if r, err := o.store.LatestResult(ctx, t.ID, domain.StageCode); err == nil {
 		var sum Summary
 		if json.Unmarshal(r.Summary, &sum) == nil && sum.Summary != "" {
@@ -1026,7 +1058,7 @@ func (o *Orchestrator) trackerMove(ctx context.Context, t domain.Ticket, s Track
 
 func analysisComment(a Analysis, withQuestions bool) string {
 	var b strings.Builder
-	b.WriteString("hiro analysed this ticket.\n\n")
+	b.WriteString("agnts analysed this ticket.\n\n")
 	b.WriteString(a.Summary)
 	if len(a.Plan) > 0 {
 		b.WriteString("\n\nPlan:\n")
@@ -1035,7 +1067,7 @@ func analysisComment(a Analysis, withQuestions bool) string {
 		}
 	}
 	if withQuestions {
-		b.WriteString("\nQuestions (answer them in hiro):\n")
+		b.WriteString("\nQuestions (answer them in agnts):\n")
 		for i, q := range a.Questions {
 			fmt.Fprintf(&b, "%d. %s", i+1, q.Text)
 			if len(q.Options) > 0 {
@@ -1053,7 +1085,7 @@ func commitMessage(t domain.Ticket, g domain.GitSettings) string {
 		msg += fmt.Sprintf(" (revision %d)", t.Revision)
 	}
 	if g.CoAuthor {
-		msg += "\n\nCo-authored-by: hiro <hiro@users.noreply.github.com>"
+		msg += "\n\nCo-authored-by: agnts <agnts@users.noreply.github.com>"
 	}
 	return msg
 }
@@ -1070,7 +1102,7 @@ func prBody(ctx context.Context, store Store, t domain.Ticket) string {
 			b.WriteString("\n\n")
 		}
 	}
-	fmt.Fprintf(&b, "Ticket: %s\n\nWritten by hiro with Claude Code and reviewed before push.", t.Key)
+	fmt.Fprintf(&b, "Ticket: %s\n\nWritten by agnts with Claude Code and reviewed before push.", t.Key)
 	return b.String()
 }
 

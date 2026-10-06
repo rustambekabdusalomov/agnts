@@ -8,7 +8,7 @@ describe('api client', () => {
       url = r.url
       return new Response('[]', { headers: { 'Content-Type': 'application/json' } })
     }
-    await api.GET('/tickets', { baseUrl: 'http://hiro.test/api', fetch, params: { query: { state: ['analyzing', 'coding'] } } })
+    await api.GET('/tickets', { baseUrl: 'http://agnts.test/api', fetch, params: { query: { state: ['analyzing', 'coding'] } } })
     expect(new URL(url).searchParams.getAll('state')).toEqual(['analyzing,coding'])
   })
 })

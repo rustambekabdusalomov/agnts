@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"hiro/internal/httpapi/gen"
-	"hiro/internal/store/postgres"
+	"agnts/internal/httpapi/gen"
+	"agnts/internal/store/postgres"
 )
 
 // Devices stores push registrations.

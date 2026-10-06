@@ -1,8 +1,8 @@
 {
   "implement": {
     "title": "Next step",
-    "subPlan": "Have hiro carry out this plan: a code task linked to this one, with the plan as its brief. You review the diff as usual.",
-    "subBug": "Have hiro make the proposed fix: a code task linked to this one, with the investigation as its brief. You review the diff as usual.",
+    "subPlan": "Have agnts carry out this plan: a code task linked to this one, with the plan as its brief. You review the diff as usual.",
+    "subBug": "Have agnts make the proposed fix: a code task linked to this one, with the investigation as its brief. You review the diff as usual.",
     "implement": "Implement this plan",
     "fix": "Fix this bug",
     "pickRepo": "Repository to implement it in",
