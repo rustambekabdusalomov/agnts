@@ -156,14 +156,31 @@ This ticket waited for these tickets, and their changes are now merged into the 
 The plan above was written before they landed. Check it against the current code, use what they added, and do not redo their work.
 
 {{end}}{{template "rules" .}}- Run the project's build, lint and tests yourself before finishing{{if .Checks}}: {{.Checks}}{{end}}.
-
+{{if .VisualCheck}}{{template "visualcheck" .}}{{end}}
 When you are done, write {{.SummaryPath}} as {"summary": "what you changed and why", "notes": ["anything the reviewer should check"]}.
+{{end}}
+
+{{define "visualcheck"}}
+## Looking at your change
+
+This repository's app can run here. If your change alters what users see, check it in a browser before you finish:
+
+1. ` + "`agnts-preview start`" + ` starts the app on http://localhost:{{.Repo.Preview.Port}} (log: /tmp/preview.log); it waits until the app answers.
+2. ` + "`agnts-shot http://localhost:{{.Repo.Preview.Port}}/<route> --viewport desktop --out /tmp/shots/<name>.png`" + ` (and ` + "`--viewport phone`" + `) takes a screenshot; read the PNG to see it.
+3. Fix what looks broken: overlapping or cut-off elements, layout that breaks at phone width, missing styles, console errors.
+4. ` + "`agnts-preview stop`" + ` stops the app.
+
+Spend at most about 10 turns on this, and skip it when the change has no visible effect.{{if .Repo.Preview.Login}} How to sign in: {{.Repo.Preview.Login}}{{end}} The variables in {{.PreviewEnvPath}} are secrets: never print or copy their values.
 {{end}}
 
 {{define "feedback"}}The reviewer asked for changes to your work on {{.T.Key}}:
 
 {{indent .Feedback}}
-
+{{if .FeedbackShots}}
+The reviewer pointed at these screenshots of the running app; read them to see what they mean:
+{{range .FeedbackShots}}
+- {{.}}{{end}}
+{{end}}
 Make these changes in /workspace, run the checks again, and update {{.SummaryPath}}.
 {{end}}
 
@@ -373,6 +390,56 @@ Write {{.ReviewPath}} with exactly this shape:
 Order findings most severe first. Use an empty "findings" list when there is nothing to report.
 {{end}}
 
+{{define "preview"}}You are agnts's preview tester. agnts, an AI agent, made a change for the ticket below, and a developer is about to review it before it is pushed. Show them what the change looks like: open the pages it affects in a browser, take screenshots, and point out visual problems. Your screenshots are shown next to the diff; the developer decides. Do not change any files in /workspace.
+
+{{template "ticket" .}}
+## The change
+{{if .WorkSummary}}
+agnts's summary: {{.WorkSummary}}
+{{end}}{{range .Notes}}- note: {{.}}
+{{end}}
+The full diff is in {{.ChangePath}}. /workspace is checked out at the change. Changed files:
+{{range .Files}}
+- {{.Path}} (+{{.Add}} −{{.Del}}){{end}}
+
+## The running app
+
+agnts started the app with ` + "`{{.Repo.Preview.Command}}`" + `; it answers on http://localhost:{{.Repo.Preview.Port}}. Its log is in /tmp/preview.log.{{if .Repo.Preview.Login}}
+
+How to sign in: {{.Repo.Preview.Login}}{{end}}
+
+The variables in {{.PreviewEnvPath}} are secrets: never print, copy or write their values; name them if you must.
+
+Take screenshots with:
+
+    agnts-shot <url> --viewport desktop|phone --out /agnts/out/shots/<id>.png [--full-page] [--wait <css selector>] [--click <css selector>]... [--fill '<css selector>=<text>']... [--wait-ms <ms>]
+
+It opens the URL in a fresh page (cookies are kept between calls, so sign in once with --fill and --click), runs the fills and clicks in order, waits for the page to settle, saves the PNG and prints JSON with the page title, console errors and failed requests. Only localhost URLs work. Read each PNG to see it.
+
+## What to capture
+
+1. Read the diff and pick the routes and states that show this change: the pages it alters, and states such as an open dialog, a selected tab, a filled form, an empty list or an error. At most 8 routes and states.{{if .Repo.Preview.Routes}} Always include these routes as well:{{range .Repo.Preview.Routes}} {{.}}{{end}}.{{end}}
+2. Capture each one at desktop and at phone width as "after" shots.{{if .T.PreviewCompare}}
+3. Then run ` + "`agnts-preview base`" + `: it checks out the commit on the default branch this change started from and restarts the app (it may take a few minutes). Capture the same routes and states again as "before" shots, with the same ids ending in -before instead of -after. A route that does not exist there gets no before shot. If the base app does not start, say so in the summary and keep the after shots.{{end}}
+
+Shot ids are lowercase letters, digits and hyphens, made of the page, the state, the viewport and the side, such as tickets-list-empty-phone-after. Give every shot a short human name ("Tickets list, empty") and the route you opened.
+
+Then look at every after shot and report real visual problems: elements that overlap or are cut off, text that overflows, layout that breaks at phone width, missing styles or images, blank or error pages, and console errors the change causes. Do not report taste. Finding nothing is a fine result.
+
+When a page cannot be reached (a login you cannot get past, a crash), capture what you see, say why in the summary, and use status "partial". Use "failed" only when no page works at all.
+
+## What to produce
+
+Write {{.PreviewPath}} with exactly this shape:
+
+    {"status": "ok, partial or failed",
+     "summary": "two or three sentences for the developer: what you captured and what stands out",
+     "shots": [{"id": "tickets-list-phone-after", "file": "shots/tickets-list-phone-after.png", "name": "Tickets list", "route": "/tickets", "viewport": "desktop or phone", "side": "after or before", "note": "the state shown, if any", "consoleErrors": 0}],
+     "issues": [{"severity": "high, medium or low", "description": "the problem and where on the page", "shotId": "the shot that shows it"}]}
+
+List the shots in the order a reviewer should look at them, desktop before phone and after before before. Use an empty "issues" list when there is nothing to report.
+{{end}}
+
 {{define "relations"}}## Other open tickets in this repository
 
 agnts works several tickets at a time, each on its own branch from {{.Repo.DefaultBranch}}, and merges them one by one. Decide how this ticket relates to each ticket below:
@@ -455,7 +522,11 @@ type promptData struct {
 	ReportPath      string
 	NoRepo          bool // the ticket has no repository: /workspace is empty
 	ReviewPath      string
-	Language        string // translate: the target language's English name
+	PreviewPath     string
+	PreviewEnvPath  string
+	VisualCheck     bool     // the coding prompt explains how to look at the app
+	FeedbackShots   []string // screenshots the reviewer's feedback points at
+	Language        string   // translate: the target language's English name
 	SourcePath      string
 	TranslationPath string
 	WorkSummary     string      // what the work run said it did (review)
@@ -478,6 +549,7 @@ type promptData struct {
 func render(name string, d promptData) (string, error) {
 	d.AnalysisPath, d.SummaryPath, d.LessonsPath, d.ChangePath, d.RulePath = AnalysisPath, SummaryPath, LessonsPath, ChangePath, RulePath
 	d.ReportPath, d.ReviewPath = ReportPath, ReviewPath
+	d.PreviewPath, d.PreviewEnvPath = PreviewPath, PreviewEnvPath
 	d.SourcePath, d.TranslationPath = SourcePath, TranslationPath
 	var b bytes.Buffer
 	if err := prompts.ExecuteTemplate(&b, name, d); err != nil {

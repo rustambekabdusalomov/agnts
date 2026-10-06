@@ -136,6 +136,7 @@ Class | Method | HTTP request | Description
 [*TicketsApi*](doc/TicketsApi.md) | [**dismissFollowUp**](doc/TicketsApi.md#dismissfollowup) | **POST** /tickets/{key}/follow-ups/{id}/dismiss | Decline a suggestion; later runs will not suggest it again
 [*TicketsApi*](doc/TicketsApi.md) | [**dismissRelation**](doc/TicketsApi.md#dismissrelation) | **POST** /tickets/{key}/relations/{id}/dismiss | Dismiss a relation (run anyway); agnts does not propose it again
 [*TicketsApi*](doc/TicketsApi.md) | [**followUpFromFinding**](doc/TicketsApi.md#followupfromfinding) | **POST** /tickets/{key}/review/findings/{index}/follow-up | Turn a code review finding into a follow-up suggestion
+[*TicketsApi*](doc/TicketsApi.md) | [**getPreviewShot**](doc/TicketsApi.md#getpreviewshot) | **GET** /tickets/{key}/preview/{runId}/shots/{shotId} | One preview screenshot, as PNG
 [*TicketsApi*](doc/TicketsApi.md) | [**getTicket**](doc/TicketsApi.md#getticket) | **GET** /tickets/{key} | A ticket with its questions, analysis and latest result
 [*TicketsApi*](doc/TicketsApi.md) | [**implementTicket**](doc/TicketsApi.md#implementticket) | **POST** /tickets/{key}/implement | Make the code task that carries out a done plan or bug investigation
 [*TicketsApi*](doc/TicketsApi.md) | [**listFollowUps**](doc/TicketsApi.md#listfollowups) | **GET** /tickets/{key}/follow-ups | Suggested follow-up tickets and the tickets made from them
@@ -143,6 +144,7 @@ Class | Method | HTTP request | Description
 [*TicketsApi*](doc/TicketsApi.md) | [**listTicketEvents**](doc/TicketsApi.md#listticketevents) | **GET** /tickets/{key}/events | The ticket&#39;s log, oldest first; poll with &#x60;after&#x60; for live updates
 [*TicketsApi*](doc/TicketsApi.md) | [**listTickets**](doc/TicketsApi.md#listtickets) | **GET** /tickets | Tickets, most recently active first
 [*TicketsApi*](doc/TicketsApi.md) | [**markTicketMerged**](doc/TicketsApi.md#markticketmerged) | **POST** /tickets/{key}/merged | Record that a done ticket&#39;s pull request was merged
+[*TicketsApi*](doc/TicketsApi.md) | [**previewTicket**](doc/TicketsApi.md#previewticket) | **POST** /tickets/{key}/preview | Queue a preview (screenshots of the running app) of a ticket waiting for review, again if one already ran
 [*TicketsApi*](doc/TicketsApi.md) | [**rejectTicket**](doc/TicketsApi.md#rejectticket) | **POST** /tickets/{key}/reject | Stop work on the ticket for good
 [*TicketsApi*](doc/TicketsApi.md) | [**requestChanges**](doc/TicketsApi.md#requestchanges) | **POST** /tickets/{key}/request-changes | Send the ticket back to coding with feedback
 [*TicketsApi*](doc/TicketsApi.md) | [**retryTicket**](doc/TicketsApi.md#retryticket) | **POST** /tickets/{key}/retry | Resume a failed or rate-limited ticket where it stopped
@@ -226,6 +228,9 @@ Class | Method | HTTP request | Description
  - [NotifySettings](doc/NotifySettings.md)
  - [PeriodStats](doc/PeriodStats.md)
  - [Pipeline](doc/Pipeline.md)
+ - [PreviewInput](doc/PreviewInput.md)
+ - [PreviewIssue](doc/PreviewIssue.md)
+ - [PreviewShot](doc/PreviewShot.md)
  - [Question](doc/Question.md)
  - [QuizQuestion](doc/QuizQuestion.md)
  - [RejectTicketRequest](doc/RejectTicketRequest.md)
@@ -237,6 +242,8 @@ Class | Method | HTTP request | Description
  - [RemoteRepository](doc/RemoteRepository.md)
  - [RepoActivity](doc/RepoActivity.md)
  - [RepoMember](doc/RepoMember.md)
+ - [RepoPreview](doc/RepoPreview.md)
+ - [RepoPreviewInput](doc/RepoPreviewInput.md)
  - [Repository](doc/Repository.md)
  - [RepositoryInput](doc/RepositoryInput.md)
  - [RequestChangesRequest](doc/RequestChangesRequest.md)
@@ -250,6 +257,7 @@ Class | Method | HTTP request | Description
  - [RuleQuestion](doc/RuleQuestion.md)
  - [RuleStatus](doc/RuleStatus.md)
  - [Settings](doc/Settings.md)
+ - [ShotRef](doc/ShotRef.md)
  - [Stage](doc/Stage.md)
  - [StageModels](doc/StageModels.md)
  - [StageSpend](doc/StageSpend.md)
@@ -262,6 +270,7 @@ Class | Method | HTTP request | Description
  - [TicketKind](doc/TicketKind.md)
  - [TicketKindChoice](doc/TicketKindChoice.md)
  - [TicketKindInput](doc/TicketKindInput.md)
+ - [TicketPreview](doc/TicketPreview.md)
  - [TicketRepo](doc/TicketRepo.md)
  - [TicketSpendList](doc/TicketSpendList.md)
  - [TicketSpendRow](doc/TicketSpendRow.md)

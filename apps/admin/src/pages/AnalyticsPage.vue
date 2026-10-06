@@ -136,6 +136,7 @@ const STAGE_KEY: Record<StageSpend['stage'], string> = {
   coding: 'spend.stageCoding',
   retry: 'spend.stageRetry',
   review: 'spend.stageReview',
+  preview: 'spend.stagePreview',
   learn: 'spend.stageLearn',
   helper: 'spend.stageHelper',
 }

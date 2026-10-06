@@ -15,6 +15,7 @@ import 'diff_highlight.dart';
 import 'diff_lines.dart';
 import 'follow_ups.dart';
 import 'kinds.dart';
+import 'preview_shots.dart';
 import 'relations.dart';
 import 'spend.dart';
 import '../../l10n/app_localizations.dart';
@@ -38,6 +39,8 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
   final Map<int, String?> _picked = {};
   final Map<int, TextEditingController> _notes = {};
   final _feedback = TextEditingController();
+  // Preview screenshots the feedback points at.
+  final _feedbackShots = ValueNotifier<List<FeedbackShot>>(const []);
   bool _busy = false;
   bool _descOpen = false;
   // Reports reach the Jira issue only when the reviewer ticks this.
@@ -49,6 +52,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
       c.dispose();
     }
     _feedback.dispose();
+    _feedbackShots.dispose();
     super.dispose();
   }
 
@@ -75,15 +79,18 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
 
   TicketsApi get _tickets => ref.read(apiProvider)!.getTicketsApi();
 
-  Future<void> _run(Future<void> Function() action) async {
+  /// Runs [action], then refreshes the ticket; false when it failed.
+  Future<bool> _run(Future<void> Function() action) async {
     final l = AppLocalizations.of(context);
     setState(() => _busy = true);
     try {
       await action();
       ref.invalidate(ticketProvider(widget.ticketKey));
       ref.invalidate(dashboardProvider);
+      return true;
     } catch (e) {
       if (mounted) showSnack(context, errorMessage(e, l.ticketConflict));
+      return false;
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -100,6 +107,21 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           if (mounted) showSnack(context, AppLocalizations.of(context).followUpsFromFindingDone);
         }),
       );
+
+  /// agnts's preview card (screenshots of the running app), for tickets
+  /// whose repository can be previewed or that already have a preview.
+  Widget _preview(TicketDetail d) {
+    final t = d.ticket;
+    final state = t.previewState ?? TicketPreviewStateEnum.none;
+    if (d.preview == null && t.canPreview != true && state == TicketPreviewStateEnum.none) return const SizedBox.shrink();
+    return PreviewCard(
+      detail: d,
+      feedback: _feedback,
+      shots: _feedbackShots,
+      busy: _busy,
+      onRun: (compare) => _run(() => _tickets.previewTicket(key: t.key, previewInput: PreviewInput(compare: compare))),
+    );
+  }
 
   Future<bool> _confirm(String text) async {
     final l = AppLocalizations.of(context);
@@ -419,7 +441,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
             ? l.ticketReviewSubJira(t.branch)
             : l.ticketReviewSubPr(t.branch);
     final r = d.result;
-    if (r == null) return [_Sub(sub), _codeReview(d)];
+    if (r == null) return [_Sub(sub), _codeReview(d), _preview(d)];
     final passed = r.checks.where((x) => x.exitCode == 0).length;
     final allOk = passed == r.checks.length;
     final time = _reviewTime(d);
@@ -434,6 +456,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         Fact(l.ticketFactTurns, '${t.turns}'),
       ]),
       _codeReview(d),
+      _preview(d),
       ..._resultBody(context, r),
     ];
   }
@@ -871,14 +894,19 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
             style: const TextStyle(fontSize: 16, height: 1.4),
             decoration: InputDecoration(hintText: l.ticketFeedbackPlaceholder),
           ),
+          FeedbackShotChips(shots: _feedbackShots),
           const SizedBox(height: 12),
           FilledButton(onPressed: () => Navigator.pop(c, _feedback.text.trim()), child: Text(l.ticketSend)),
         ]),
       ),
     );
     if (text == null || text.isEmpty) return;
-    await _run(() => _tickets.requestChanges(key: key, requestChangesRequest: RequestChangesRequest(feedback: text)));
+    final shots = [for (final s in _feedbackShots.value) s.ref];
+    final ok = await _run(() => _tickets.requestChanges(
+        key: key, requestChangesRequest: RequestChangesRequest(feedback: text, shots: shots.isEmpty ? null : shots)));
+    if (!ok) return;
     _feedback.clear();
+    _feedbackShots.value = const [];
   }
 }
 

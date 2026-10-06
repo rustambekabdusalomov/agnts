@@ -267,7 +267,14 @@ func egressProxy(ctx context.Context) error {
 	if v := strings.TrimSpace(os.Getenv("AGNTS_EGRESS_ALLOW")); v != "" {
 		allow = strings.Split(v, ",")
 	}
-	srv := &http.Server{Addr: addr, Handler: egress.New(allow, log), ReadHeaderTimeout: 10 * time.Second}
+	proxy := egress.New(allow, log)
+	// Hosts added in Settings (a staging API for previews) come from agnts's
+	// internal listener, which Caddy does not route and run containers
+	// cannot reach.
+	if u := strings.TrimSpace(os.Getenv("AGNTS_EGRESS_EXTRA_URL")); u != "" {
+		go proxy.Follow(ctx, u, 30*time.Second)
+	}
+	srv := &http.Server{Addr: addr, Handler: proxy, ReadHeaderTimeout: 10 * time.Second}
 	go func() {
 		<-ctx.Done()
 		_ = srv.Close()

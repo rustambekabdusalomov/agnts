@@ -238,7 +238,7 @@ func (o *Orchestrator) Approve(ctx context.Context, key string, assignees []stri
 	}, func(x *domain.Ticket) {
 		x.Assignees = clean
 		x.PostReport = postReport && x.Kind.Report()
-		reviewing = dropReview(x)
+		reviewing = dropSideRuns(x)
 	})
 	if err == nil {
 		if reviewing {
@@ -249,11 +249,25 @@ func (o *Orchestrator) Approve(ctx context.Context, key string, assignees []stri
 	return t, err
 }
 
+// dropSideRuns forgets the code review and preview of a ticket leaving
+// review; it reports whether one of them may be running.
+func dropSideRuns(x *domain.Ticket) bool {
+	r := dropReview(x)
+	p := dropPreview(x)
+	return r || p
+}
+
 // RequestChanges sends the ticket back to coding with reviewer feedback.
-func (o *Orchestrator) RequestChanges(ctx context.Context, key, feedback string, origin domain.Origin) (domain.Ticket, error) {
+// shots are preview screenshots the feedback points at; the coding run
+// gets them next to it.
+func (o *Orchestrator) RequestChanges(ctx context.Context, key, feedback string, shots []domain.ShotRef, origin domain.Origin) (domain.Ticket, error) {
 	feedback = strings.TrimSpace(feedback)
 	if feedback == "" {
 		return domain.Ticket{}, invalid("feedback is required")
+	}
+	shots, err := o.checkShotRefs(key, shots)
+	if err != nil {
+		return domain.Ticket{}, err
 	}
 	reviewing := false
 	t, err := o.store.Transition(ctx, key, domain.StateCoding, domain.Event{
@@ -261,7 +275,8 @@ func (o *Orchestrator) RequestChanges(ctx context.Context, key, feedback string,
 	}, func(x *domain.Ticket) {
 		x.Revision++
 		x.Feedback = feedback
-		reviewing = dropReview(x)
+		x.FeedbackShots = shots
+		reviewing = dropSideRuns(x)
 	})
 	if err == nil {
 		if reviewing {
@@ -280,7 +295,7 @@ func (o *Orchestrator) Reject(ctx context.Context, key, reason string, origin do
 	}
 	t, err := o.store.Transition(ctx, key, domain.StateRejected, domain.Event{
 		TicketKey: key, Type: domain.EventStateChanged, Origin: origin, Message: msg,
-	}, func(x *domain.Ticket) { dropReview(x) })
+	}, func(x *domain.Ticket) { dropSideRuns(x) })
 	if err != nil {
 		return t, err
 	}
@@ -344,7 +359,7 @@ func (o *Orchestrator) Start(ctx context.Context, key string, origin domain.Orig
 func (o *Orchestrator) SetModels(ctx context.Context, key string, models map[string]string, origin domain.Origin) (domain.Ticket, error) {
 	clean := map[string]string{}
 	for stage, m := range models {
-		if stage != domain.ModelAnalyze && stage != domain.ModelCoding && stage != domain.ModelRetry && stage != domain.ModelReview {
+		if stage != domain.ModelAnalyze && stage != domain.ModelCoding && stage != domain.ModelRetry && stage != domain.ModelReview && stage != domain.ModelPreview {
 			return domain.Ticket{}, invalid("unknown stage %q", stage)
 		}
 		if m == "" || m == "default" {
@@ -667,12 +682,16 @@ type TicketView struct {
 	Questions []domain.Question
 	Analysis  *Analysis
 	Result    *domain.Result
-	ChildKey  string         // the code task that implements this report, if any
-	Review    *domain.Review // newest code review; stale when its revision is older
-	History   []HistoryItem
-	Settings  domain.Settings
-	Spend     domain.TokenUsage   // all Claude runs; zero when none was recorded
-	Stages    []domain.StageUsage // Spend by model stage and model
+	ChildKey  string          // the code task that implements this report, if any
+	Review    *domain.Review  // newest code review; stale when its revision is older
+	Preview   *domain.Preview // newest preview; stale when its revision is older
+	// CanPreview reports whether the ticket's repository has a preview
+	// command (and the server can store screenshots).
+	CanPreview bool
+	History    []HistoryItem
+	Settings   domain.Settings
+	Spend      domain.TokenUsage   // all Claude runs; zero when none was recorded
+	Stages     []domain.StageUsage // Spend by model stage and model
 	// FollowUps are the suggested follow-up tickets and those made from them.
 	FollowUps FollowUps
 	// FollowUpsOn reports whether this ticket's runs suggest follow-ups.
@@ -776,6 +795,14 @@ func (o *Orchestrator) View(ctx context.Context, key string) (TicketView, error)
 	}
 	if v.Review, err = o.latestReview(ctx, t.ID); err != nil {
 		return v, err
+	}
+	if v.Preview, err = o.latestPreview(ctx, t.ID); err != nil {
+		return v, err
+	}
+	if o.shots != nil && t.RepoID != nil && !t.Kind.Report() {
+		if repo, err := o.store.RepositoryByID(ctx, *t.RepoID); err == nil {
+			v.CanPreview = repo.Preview.Enabled()
+		}
 	}
 	if v.FollowUps, err = o.followUps(ctx, t); err != nil {
 		return v, err

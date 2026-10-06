@@ -16,6 +16,7 @@
     "stageWriting": "Writing",
     "stageRetry": "Fixes and changes",
     "stageReview": "Code review",
+    "stagePreview": "Preview",
     "stageLearn": "Lessons",
     "stageHelper": "Helper",
     "topTitle": "Tickets by spend",

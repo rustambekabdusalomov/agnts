@@ -69,5 +69,10 @@ void main() {
       // TODO
     });
 
+    // RepoPreviewInput preview
+    test('to test the property `preview`', () async {
+      // TODO
+    });
+
   });
 }

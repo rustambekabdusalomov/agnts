@@ -20,6 +20,7 @@ Name | Type | Description | Notes
 **instructions** | **String** |  | [optional] 
 **jiraProject** | **String** |  | [optional] 
 **deployWorkflow** | **String** | GitHub workflow file run by Deploy, e.g. deploy.yml | [optional] 
+**preview** | [**RepoPreviewInput**](RepoPreviewInput.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

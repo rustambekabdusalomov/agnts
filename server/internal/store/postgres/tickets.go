@@ -25,18 +25,21 @@ func NewAgent(db *pgxpool.Pool) *Agent { return &Agent{db: db} }
 
 const ticketCols = `id, key, source, repo_id, title, description, priority, state, resume_state,
 	revision, turns, models, after_approve, branch, head_sha, pr_number, pr_url, feedback, held, ask_first, merged_at, assignees, learn_state, review_state, kind, kind_auto, post_report, COALESCE(parent_key, ''),
-	COALESCE(follow_up_of, ''), suggest_follow_ups, created_at, updated_at`
+	COALESCE(follow_up_of, ''), suggest_follow_ups, preview_state, preview_compare, feedback_shots, created_at, updated_at`
 
 func scanTicket(row pgx.Row) (domain.Ticket, error) {
 	var t domain.Ticket
 	var source, state, resume, kind string
-	var models []byte
+	var models, shots []byte
 	err := row.Scan(&t.ID, &t.Key, &source, &t.RepoID, &t.Title, &t.Description, &t.Priority, &state, &resume,
 		&t.Revision, &t.Turns, &models, &t.AfterApprove, &t.Branch, &t.HeadSHA, &t.PRNumber, &t.PRURL, &t.Feedback,
 		&t.Held, &t.AskFirst, &t.MergedAt, &t.Assignees, &t.LearnState, &t.ReviewState, &kind, &t.KindAuto, &t.PostReport, &t.ParentKey,
-		&t.FollowUpOf, &t.SuggestFollowUps, &t.CreatedAt, &t.UpdatedAt)
+		&t.FollowUpOf, &t.SuggestFollowUps, &t.PreviewState, &t.PreviewCompare, &shots, &t.CreatedAt, &t.UpdatedAt)
 	if err != nil {
 		return t, notFound(err)
+	}
+	if len(shots) > 0 {
+		_ = json.Unmarshal(shots, &t.FeedbackShots)
 	}
 	t.Source, t.State, t.ResumeState = domain.TicketSource(source), domain.TicketState(state), domain.TicketState(resume)
 	t.Kind = domain.TicketKind(kind)
@@ -160,15 +163,21 @@ func (s *Agent) Transition(ctx context.Context, key string, to domain.TicketStat
 
 func saveTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket) (domain.Ticket, error) {
 	models, _ := json.Marshal(nonNilMap(t.Models))
+	shots, _ := json.Marshal(t.FeedbackShots)
+	if t.FeedbackShots == nil {
+		shots = []byte("[]")
+	}
 	return scanTicket(tx.QueryRow(ctx, `UPDATE tickets SET
 		repo_id = $2, title = $3, description = $4, priority = $5, state = $6, resume_state = $7,
 		revision = $8, turns = $9, models = $10, after_approve = $11, branch = $12, head_sha = $13,
 		pr_number = $14, pr_url = $15, feedback = $16, held = $17, ask_first = $18, merged_at = $19, assignees = $20, learn_state = $21,
-		kind = $22, kind_auto = $23, post_report = $24, review_state = $25, suggest_follow_ups = $26, updated_at = now()
+		kind = $22, kind_auto = $23, post_report = $24, review_state = $25, suggest_follow_ups = $26,
+		preview_state = $27, preview_compare = $28, feedback_shots = $29, updated_at = now()
 		WHERE id = $1 RETURNING `+ticketCols,
 		t.ID, t.RepoID, t.Title, t.Description, t.Priority, string(t.State), string(t.ResumeState),
 		t.Revision, t.Turns, models, t.AfterApprove, t.Branch, t.HeadSHA, t.PRNumber, t.PRURL, t.Feedback, t.Held, t.AskFirst, t.MergedAt, nonNilSlice(t.Assignees), t.LearnState,
-		string(kindOr(t.Kind)), t.KindAuto, t.PostReport, t.ReviewState, t.SuggestFollowUps))
+		string(kindOr(t.Kind)), t.KindAuto, t.PostReport, t.ReviewState, t.SuggestFollowUps,
+		t.PreviewState, t.PreviewCompare, shots))
 }
 
 func kindOr(k domain.TicketKind) domain.TicketKind {
@@ -200,7 +209,8 @@ func scanRun(row pgx.Row) (domain.Run, error) {
 // oldest. A ticket whose dependencies are not merged, or whose conflicting
 // ticket is changing the same code, does not start coding (see waitsSQL).
 // Code reviews come next (the reviewer may be reading the change already),
-// and learn runs only take the worker when nothing else is waiting.
+// then previews, and learn runs only take the worker when nothing else is
+// waiting.
 func (s *Agent) ClaimNext(ctx context.Context) (domain.Ticket, domain.Run, bool, error) {
 	var t domain.Ticket
 	var r domain.Run
@@ -219,6 +229,15 @@ func (s *Agent) ClaimNext(ctx context.Context) (domain.Ticket, domain.Run, bool,
 				ORDER BY updated_at
 				LIMIT 1 FOR UPDATE SKIP LOCKED`))
 		}
+		preview := false
+		if errors.Is(err, domain.ErrNotFound) {
+			t, err = scanTicket(tx.QueryRow(ctx, `SELECT `+ticketCols+` FROM tickets t
+				WHERE state = 'waiting_for_review' AND preview_state = 'pending'
+				  AND NOT EXISTS (SELECT 1 FROM runs r WHERE r.ticket_id = t.id AND r.finished_at IS NULL)
+				ORDER BY updated_at
+				LIMIT 1 FOR UPDATE SKIP LOCKED`))
+			preview = err == nil
+		}
 		if errors.Is(err, domain.ErrNotFound) {
 			t, err = scanTicket(tx.QueryRow(ctx, `SELECT `+ticketCols+` FROM tickets t
 				WHERE state = 'done' AND learn_state = 'pending'
@@ -233,12 +252,20 @@ func (s *Agent) ClaimNext(ctx context.Context) (domain.Ticket, domain.Run, bool,
 			domain.StateNew: domain.StageAnalyze, domain.StateCoding: domain.StageCode, domain.StatePushing: domain.StagePush,
 			domain.StateDone: domain.StageLearn, domain.StateWaitingForReview: domain.StageReview,
 		}[t.State]
+		if preview {
+			stage = domain.StagePreview
+		}
 		if r, err = scanRun(tx.QueryRow(ctx, `INSERT INTO runs (ticket_id, stage, model) VALUES ($1, $2, '') RETURNING `+runCols,
 			t.ID, string(stage))); err != nil {
 			return err
 		}
 		if stage == domain.StageReview {
 			t.ReviewState = domain.ReviewRunning
+			t, err = saveTicket(ctx, tx, t)
+			return err
+		}
+		if stage == domain.StagePreview {
+			t.PreviewState = domain.PreviewRunning
 			t, err = saveTicket(ctx, tx, t)
 			return err
 		}
@@ -272,7 +299,7 @@ func (s *Agent) FinishRun(ctx context.Context, r domain.Run) error {
 // (analysis and coding), or "". Learn and review sessions are not resumed.
 func (s *Agent) LastSessionID(ctx context.Context, ticketID int64) (string, error) {
 	var id string
-	err := s.db.QueryRow(ctx, `SELECT session_id FROM runs WHERE ticket_id = $1 AND session_id <> '' AND stage NOT IN ('learn', 'review')
+	err := s.db.QueryRow(ctx, `SELECT session_id FROM runs WHERE ticket_id = $1 AND session_id <> '' AND stage NOT IN ('learn', 'review', 'preview')
 		ORDER BY started_at DESC LIMIT 1`, ticketID).Scan(&id)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return "", nil
@@ -306,6 +333,7 @@ func (s *Agent) RecoverInterrupted(ctx context.Context) (int, error) {
 			var key, from string
 			err := tx.QueryRow(ctx, `UPDATE tickets t SET state = CASE state WHEN 'analyzing' THEN 'new' WHEN 'testing' THEN 'coding' ELSE state END,
 				review_state = CASE review_state WHEN 'running' THEN 'pending' ELSE review_state END,
+				preview_state = CASE preview_state WHEN 'running' THEN 'pending' ELSE preview_state END,
 				updated_at = now() FROM (SELECT state AS old FROM tickets WHERE id = $1) o
 				WHERE t.id = $1 RETURNING t.key, o.old`, p.ticket).Scan(&key, &from)
 			if err != nil {
@@ -474,12 +502,14 @@ func (s *Agent) Events(ctx context.Context, f orchestrator.EventFilter) ([]domai
 	return out, rows.Err()
 }
 
-const repoCols = `id, name, kind, provider, clone_url, default_branch, stack, build_cmd, lint_cmd, test_cmd, branch_prefix, claude_md, jira_project, task_prefix, claude_md_status, deploy_workflow, archived_at`
+const repoCols = `id, name, kind, provider, clone_url, default_branch, stack, build_cmd, lint_cmd, test_cmd, branch_prefix, claude_md, jira_project, task_prefix, claude_md_status, deploy_workflow, archived_at,
+	preview_cmd, preview_port, preview_ready_path, preview_routes, preview_ui_paths, preview_login, preview_env IS NOT NULL, preview_env_names`
 
 func scanRepo(row pgx.Row) (domain.Repository, error) {
 	var r domain.Repository
 	err := row.Scan(&r.ID, &r.Name, &r.Kind, &r.Provider, &r.CloneURL, &r.DefaultBranch, &r.Stack,
-		&r.BuildCmd, &r.LintCmd, &r.TestCmd, &r.BranchPrefix, &r.ClaudeMD, &r.JiraProject, &r.TaskPrefix, &r.ClaudeMDState, &r.DeployWorkflow, &r.ArchivedAt)
+		&r.BuildCmd, &r.LintCmd, &r.TestCmd, &r.BranchPrefix, &r.ClaudeMD, &r.JiraProject, &r.TaskPrefix, &r.ClaudeMDState, &r.DeployWorkflow, &r.ArchivedAt,
+		&r.Preview.Command, &r.Preview.Port, &r.Preview.ReadyPath, &r.Preview.Routes, &r.Preview.UIPaths, &r.Preview.Login, &r.Preview.EnvSet, &r.Preview.EnvNames)
 	return r, notFound(err)
 }
 
@@ -521,7 +551,8 @@ func (s *Agent) ListRepositories(ctx context.Context) ([]domain.Repository, erro
 	return out, rows.Err()
 }
 
-// SaveRepository inserts or updates a repository by name.
+// SaveRepository inserts or updates a repository by name. Updating keeps
+// its preview settings: they are only changed by id (UpdateRepository).
 func (s *Agent) SaveRepository(ctx context.Context, r domain.Repository) (domain.Repository, error) {
 	if r.BranchPrefix == "" {
 		r.BranchPrefix = "agnts/"
@@ -530,14 +561,16 @@ func (s *Agent) SaveRepository(ctx context.Context, r domain.Repository) (domain
 		r.DefaultBranch = "main"
 	}
 	out, err := scanRepo(s.db.QueryRow(ctx, `INSERT INTO repositories
-		(name, kind, provider, clone_url, default_branch, stack, build_cmd, lint_cmd, test_cmd, branch_prefix, claude_md, jira_project, task_prefix, deploy_workflow)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+		(name, kind, provider, clone_url, default_branch, stack, build_cmd, lint_cmd, test_cmd, branch_prefix, claude_md, jira_project, task_prefix, deploy_workflow,
+		 preview_cmd, preview_port, preview_ready_path, preview_routes, preview_ui_paths, preview_login)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
 		ON CONFLICT (name) DO UPDATE SET kind = $2, provider = $3, clone_url = $4, default_branch = $5, stack = $6,
 			build_cmd = $7, lint_cmd = $8, test_cmd = $9, branch_prefix = $10, claude_md = $11, jira_project = $12,
 			task_prefix = $13, deploy_workflow = $14, updated_at = now()
 		RETURNING `+repoCols,
 		r.Name, r.Kind, r.Provider, r.CloneURL, r.DefaultBranch, r.Stack, r.BuildCmd, r.LintCmd, r.TestCmd,
-		r.BranchPrefix, r.ClaudeMD, r.JiraProject, r.TaskPrefix, r.DeployWorkflow))
+		r.BranchPrefix, r.ClaudeMD, r.JiraProject, r.TaskPrefix, r.DeployWorkflow,
+		r.Preview.Command, r.Preview.Port, readyPath(r.Preview.ReadyPath), nonNilSlice(r.Preview.Routes), nonNilSlice(r.Preview.UIPaths), r.Preview.Login))
 	return out, uniqueConflict(err)
 }
 
@@ -545,10 +578,20 @@ func (s *Agent) SaveRepository(ctx context.Context, r domain.Repository) (domain
 func (s *Agent) UpdateRepository(ctx context.Context, r domain.Repository) (domain.Repository, error) {
 	out, err := scanRepo(s.db.QueryRow(ctx, `UPDATE repositories SET name = $2, kind = $3, provider = $4, clone_url = $5,
 		default_branch = $6, build_cmd = $7, lint_cmd = $8, test_cmd = $9, branch_prefix = $10, claude_md = $11,
-		jira_project = $12, task_prefix = $13, deploy_workflow = $14, updated_at = now() WHERE id = $1 RETURNING `+repoCols,
+		jira_project = $12, task_prefix = $13, deploy_workflow = $14, preview_cmd = $15, preview_port = $16,
+		preview_ready_path = $17, preview_routes = $18, preview_ui_paths = $19, preview_login = $20,
+		updated_at = now() WHERE id = $1 RETURNING `+repoCols,
 		r.ID, r.Name, r.Kind, r.Provider, r.CloneURL, r.DefaultBranch, r.BuildCmd, r.LintCmd, r.TestCmd,
-		r.BranchPrefix, r.ClaudeMD, r.JiraProject, r.TaskPrefix, r.DeployWorkflow))
+		r.BranchPrefix, r.ClaudeMD, r.JiraProject, r.TaskPrefix, r.DeployWorkflow,
+		r.Preview.Command, r.Preview.Port, readyPath(r.Preview.ReadyPath), nonNilSlice(r.Preview.Routes), nonNilSlice(r.Preview.UIPaths), r.Preview.Login))
 	return out, uniqueConflict(err)
+}
+
+func readyPath(p string) string {
+	if p == "" {
+		return "/"
+	}
+	return p
 }
 
 // SetClaudeMDState records whether the repository has a CLAUDE.md.

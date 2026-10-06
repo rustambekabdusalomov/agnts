@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -22,6 +23,8 @@ type fakeTickets struct {
 	lastAccept    []orchestrator.AcceptInput
 	lastFollowUps *bool
 	lastRelation  string
+	lastCompare   *bool
+	lastShots     []domain.ShotRef
 }
 
 func (f *fakeTickets) ListRelations(_ context.Context, key string) (orchestrator.Relations, error) {
@@ -130,7 +133,11 @@ func (f *fakeTickets) View(_ context.Context, key string) (orchestrator.TicketVi
 		},
 		Review: &domain.Review{Revision: 0, Model: "opus", ModelReason: "a large change", Verdict: domain.VerdictHasConcerns, Summary: "ok",
 			Findings: []domain.Finding{{Severity: "major", Category: "tests", File: "a.go", Line: 3, Title: "untested"}}},
-		Spend: domain.TokenUsage{Input: 30, Output: 7, CacheRead: 500, CacheWrite: 60, CostUSD: 0.25},
+		Preview: &domain.Preview{RunID: 42, Revision: 0, Model: "sonnet", Status: domain.PreviewOK, Summary: "two pages",
+			Shots:  []domain.Shot{{ID: "home-phone-after", Name: "Home", Route: "/", Viewport: "phone", Side: "after", Width: 390, Height: 844}},
+			Issues: []domain.PreviewIssue{{Severity: "medium", Description: "button overlaps", ShotID: "home-phone-after"}}},
+		CanPreview: true,
+		Spend:      domain.TokenUsage{Input: 30, Output: 7, CacheRead: 500, CacheWrite: 60, CostUSD: 0.25},
 		Stages: []domain.StageUsage{
 			{ModelStage: domain.ModelCoding, Model: "opus", Calls: 1, Turns: 4, Usage: domain.TokenUsage{Input: 20, Output: 5, CacheRead: 500, CostUSD: 0.25}},
 			{ModelStage: domain.ModelRetry, Model: "opus", Calls: 2, Turns: 3, Partial: true, Usage: domain.TokenUsage{Input: 10, Output: 2, CacheWrite: 60}},
@@ -162,7 +169,8 @@ func (f *fakeTickets) Approve(_ context.Context, key string, _ []string, post bo
 	return f.ticket(key, domain.StatePushing)
 }
 
-func (f *fakeTickets) RequestChanges(_ context.Context, key, fb string, o domain.Origin) (domain.Ticket, error) {
+func (f *fakeTickets) RequestChanges(_ context.Context, key, fb string, shots []domain.ShotRef, o domain.Origin) (domain.Ticket, error) {
+	f.lastShots = shots
 	f.lastOrigin = o
 	if strings.TrimSpace(fb) == "" {
 		return domain.Ticket{}, fmt.Errorf("%w: feedback is required", orchestrator.ErrInvalid)
@@ -205,6 +213,21 @@ func (f *fakeTickets) Review(_ context.Context, key string, o domain.Origin) (do
 	t, err := f.ticket(key, domain.StateWaitingForReview)
 	t.ReviewState = domain.ReviewPending
 	return t, err
+}
+
+func (f *fakeTickets) Preview(_ context.Context, key string, compare *bool, o domain.Origin) (domain.Ticket, error) {
+	f.lastOrigin, f.lastCompare = o, compare
+	t, err := f.ticket(key, domain.StateWaitingForReview)
+	t.PreviewState = domain.PreviewPending
+	t.PreviewCompare = compare != nil && *compare
+	return t, err
+}
+
+func (f *fakeTickets) OpenShot(_ context.Context, key string, runID int64, shotID string) (io.ReadCloser, error) {
+	if key != "PAY-1" || runID != 42 || shotID != "home-phone-after" {
+		return nil, domain.ErrNotFound
+	}
+	return io.NopCloser(strings.NewReader("\x89PNG fake")), nil
 }
 
 func (f *fakeTickets) Learn(_ context.Context, key string, o domain.Origin) (domain.Ticket, error) {
@@ -298,6 +321,15 @@ func TestTicketEndpoints(t *testing.T) {
 		{"GET", "/api/tickets/PAY-1", "", 200, `"findings":[{"category":"tests","file":"a.go","line":3,"severity":"major","title":"untested"}]`},
 		{"GET", "/api/tickets/PAY-1", "", 200, `"reviewState":"none"`},
 		{"POST", "/api/tickets/PAY-1/review", "", 200, `"reviewState":"pending"`},
+		{"GET", "/api/tickets/PAY-1", "", 200, `"canPreview":true`},
+		{"GET", "/api/tickets/PAY-1", "", 200, `"shots":[{"height":844,"id":"home-phone-after","name":"Home","route":"/","side":"after","url":"/tickets/PAY-1/preview/42/shots/home-phone-after","viewport":"phone","width":390}]`},
+		{"GET", "/api/tickets/PAY-1", "", 200, `"issues":[{"description":"button overlaps","severity":"medium","shotId":"home-phone-after"}]`},
+		{"POST", "/api/tickets/PAY-1/preview", "", 200, `"previewState":"pending"`},
+		{"POST", "/api/tickets/PAY-1/preview", `{"compare":true}`, 200, `"previewCompare":true`},
+		{"GET", "/api/tickets/PAY-1/preview/42/shots/home-phone-after", "", 200, `PNG`},
+		{"GET", "/api/tickets/PAY-1/preview/41/shots/home-phone-after", "", 404, `not_found`},
+		{"GET", "/api/tickets/PAY-1/preview/42/shots/..%2Fsecret", "", 404, `not_found`},
+		{"POST", "/api/tickets/PAY-1/request-changes", `{"feedback":"fix it","shots":[{"runId":42,"shotId":"home-phone-after"}]}`, 200, `"state":"coding"`},
 		{"POST", "/api/tickets/PAY-1/translate", `{"lang":"ru"}`, 200, `"items":[{"source":"Fix login","text":"Исправить вход"}],"lang":"ru"`},
 		{"POST", "/api/tickets/PAY-1/translate", `{"lang":"xx"}`, 400, `unknown language`},
 		{"POST", "/api/tickets/PAY-1/translate", `{"lang":"de"}`, 429, `plan_limit`},

@@ -54,6 +54,7 @@ String _stageLabel(AppLocalizations l, StageSpendStageEnum s, bool report) => sw
       StageSpendStageEnum.review => l.spendStageReview,
       StageSpendStageEnum.learn => l.spendStageLearn,
       StageSpendStageEnum.helper => l.spendStageHelper,
+      StageSpendStageEnum.preview => l.spendStagePreview,
     };
 
 /// A ticket's token spend: totals, then a row per stage with its model.

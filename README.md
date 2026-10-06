@@ -89,6 +89,21 @@ With the review model on Auto (Settings), Opus reviews tickets the analysis
 rated complex or large changes, and Sonnet the rest. Turn it off in
 Settings, or run it again from the ticket.
 
+**Preview.** For front-end work a diff is not enough, so agnts can show the
+change running. Give a repository a preview command and port (Repositories →
+Preview): when a change touches its UI files, a preview run starts the app
+in a container, Claude opens the pages the diff affects, and the ticket's
+Preview tab shows screenshots at desktop and phone width with console errors
+and visual problems it noticed. Tick Compare with the default branch on a
+ticket for before/after shots. Add to feedback attaches a screenshot to
+Request changes, and the coding run gets the image. Like the code review it
+is advice, never a gate, and runs again for each revision. With Let coding
+runs look at the app on (Settings → Previews), Claude also checks the pages
+it changed before it finishes. A staging API the app calls goes under
+Settings → Previews → Allowed hosts; the preview environment (KEY=value) is
+stored encrypted. Screenshots are kept on disk under the data dir and
+deleted 30 days after a ticket is done.
+
 **Learn.** After each push, a short learn run reads the change in a
 container and checks the repository and its lesson list for anything the
 codebase never did before (a pattern, algorithm, library, architecture

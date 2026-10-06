@@ -13,6 +13,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -134,6 +135,14 @@ type fakeActions struct {
 	feedback []string
 	retried  []string
 	posted   bool
+	opened   []string // screenshots read
+}
+
+func (f *fakeActions) OpenShot(_ context.Context, _ string, _ int64, id string) (io.ReadCloser, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.opened = append(f.opened, id)
+	return io.NopCloser(strings.NewReader("png")), nil
 }
 
 func (f *fakeActions) View(context.Context, string) (orchestrator.TicketView, error) {
@@ -156,7 +165,7 @@ func (f *fakeActions) Approve(_ context.Context, k string, _ []string, post bool
 	f.approved = append(f.approved, k)
 	return domain.Ticket{}, nil
 }
-func (f *fakeActions) RequestChanges(_ context.Context, k, fb string, _ domain.Origin) (domain.Ticket, error) {
+func (f *fakeActions) RequestChanges(_ context.Context, k, fb string, _ []domain.ShotRef, _ domain.Origin) (domain.Ticket, error) {
 	f.feedback = append(f.feedback, k+":"+fb)
 	return domain.Ticket{}, nil
 }
@@ -182,8 +191,18 @@ type fakeTelegram struct {
 
 func (f *fakeTelegram) server(t *testing.T) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var body map[string]any
-		_ = json.NewDecoder(r.Body).Decode(&body)
+		body := map[string]any{}
+		if strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/") {
+			if err := r.ParseMultipartForm(32 << 20); err != nil {
+				t.Errorf("multipart: %v", err)
+			}
+			for k, v := range r.MultipartForm.Value {
+				body[k] = v[0]
+			}
+			body["_files"] = len(r.MultipartForm.File)
+		} else {
+			_ = json.NewDecoder(r.Body).Decode(&body)
+		}
 		method := r.URL.Path[strings.LastIndex(r.URL.Path, "/")+1:]
 		if !strings.HasPrefix(r.URL.Path, "/botBOT/") {
 			t.Errorf("bad token path %s", r.URL.Path)
@@ -526,6 +545,41 @@ func TestReviewNotification(t *testing.T) {
 	n.handle(context.Background(), ev)
 	if len(tg.sent("sendMessage")) != 1 {
 		t.Fatal("sent for a stale review or with review notifications off")
+	}
+}
+
+func TestPreviewNotification(t *testing.T) {
+	n, _, acts, tg := setup(t)
+	acts.view.Ticket.State, acts.view.Ticket.Revision = domain.StateWaitingForReview, 1
+	acts.view.Preview = &domain.Preview{RunID: 9, Revision: 1, Status: domain.PreviewOK, Summary: "Tabs wrap on phones.",
+		Shots: []domain.Shot{
+			{ID: "a-desktop-after", Viewport: "desktop", Side: "after"},
+			{ID: "a-phone-after", Viewport: "phone", Side: "after"},
+			{ID: "a-phone-before", Viewport: "phone", Side: "before"},
+			{ID: "b-phone-after", Viewport: "phone", Side: "after"},
+		},
+		Issues: []domain.PreviewIssue{{Severity: "medium", Description: "Tabs wrap"}}}
+	ev := domain.Event{ID: 1, TicketKey: "PAY-1", Type: domain.EventPreview}
+	n.handle(context.Background(), ev)
+	msgs := tg.sent("sendMessage")
+	if len(msgs) != 1 || !strings.Contains(msgs[0]["text"].(string), "• [medium] Tabs wrap") {
+		t.Fatalf("messages: %v", msgs)
+	}
+	albums := tg.sent("sendMediaGroup")
+	if len(albums) != 1 || albums[0]["_files"] != 2 || !strings.Contains(albums[0]["media"].(string), "attach://p1") {
+		t.Fatalf("album: %v", albums)
+	}
+	if !slices.Equal(acts.opened, []string{"a-phone-after", "b-phone-after"}) {
+		t.Fatalf("opened %v", acts.opened)
+	}
+
+	// Without photos: the message only. A stale preview stays quiet.
+	n.settings = fakeSettings{s: func() domain.Settings { s := domain.DefaultSettings(); s.Notify.PreviewPhotos = false; return s }()}
+	n.handle(context.Background(), ev)
+	acts.view.Ticket.Revision = 2
+	n.handle(context.Background(), ev)
+	if len(tg.sent("sendMessage")) != 2 || len(tg.sent("sendMediaGroup")) != 1 {
+		t.Fatalf("sent %d messages, %d albums", len(tg.sent("sendMessage")), len(tg.sent("sendMediaGroup")))
 	}
 }
 

@@ -34,6 +34,10 @@ class NotifySettings {
 
      this.review,
 
+     this.preview,
+
+     this.previewPhotos,
+
      this.followUps,
   });
 
@@ -123,6 +127,32 @@ class NotifySettings {
 
 
 
+      /// Preview screenshots are ready
+  @JsonKey(
+    
+    name: r'preview',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? preview;
+
+
+
+      /// Send phone screenshots to Telegram with the message
+  @JsonKey(
+    
+    name: r'previewPhotos',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? previewPhotos;
+
+
+
       /// Follow-up tickets were suggested
   @JsonKey(
     
@@ -147,6 +177,8 @@ class NotifySettings {
       other.done == done &&
       other.lessons == lessons &&
       other.review == review &&
+      other.preview == preview &&
+      other.previewPhotos == previewPhotos &&
       other.followUps == followUps;
 
     @override
@@ -158,6 +190,8 @@ class NotifySettings {
         done.hashCode +
         lessons.hashCode +
         review.hashCode +
+        preview.hashCode +
+        previewPhotos.hashCode +
         followUps.hashCode;
 
   factory NotifySettings.fromJson(Map<String, dynamic> json) => _$NotifySettingsFromJson(json);

@@ -362,6 +362,7 @@ func JiraCheck(ctx context.Context, token string, settings map[string]string) (s
 // Repos manages repositories.
 type Repos struct {
 	store      *postgres.Agent
+	envs       PreviewEnvSetter
 	gh         *github.Host
 	browser    vcs.Browser
 	gitlabHost func(ctx context.Context) string // host of the connected GitLab, or ""
@@ -369,6 +370,14 @@ type Repos struct {
 	local      LocalLister
 	log        *slog.Logger
 }
+
+// PreviewEnvSetter stores a repository's sealed preview environment.
+type PreviewEnvSetter interface {
+	SetPreviewEnv(ctx context.Context, repoID int64, env string) error
+}
+
+// SetPreviewEnvs lets Save store preview environments.
+func (r *Repos) SetPreviewEnvs(envs PreviewEnvSetter) { r.envs = envs }
 
 // RemoteLister lists the repositories a git host's token can reach.
 type RemoteLister interface {
@@ -515,7 +524,49 @@ func Validate(x *domain.Repository, gitlabHost string) error {
 		return invalid("the task prefix must differ from the Jira project key: both would number tickets %s-1, %s-2, …", x.JiraProject, x.JiraProject)
 	}
 	x.Kind = RepoKind(x.JiraProject)
-	return nil
+	return validatePreview(&x.Preview)
+}
+
+// validatePreview cleans a repository's preview settings. An empty command
+// turns previews off and needs nothing else.
+func validatePreview(p *domain.PreviewConfig) error {
+	p.Command, p.Login = strings.TrimSpace(p.Command), strings.TrimSpace(p.Login)
+	p.ReadyPath = strings.TrimSpace(p.ReadyPath)
+	if p.ReadyPath == "" {
+		p.ReadyPath = "/"
+	}
+	if !strings.HasPrefix(p.ReadyPath, "/") {
+		return invalid("the preview ready path must start with /")
+	}
+	if p.Command != "" && (p.Port < 1 || p.Port > 65535) {
+		return invalid("the preview needs the port the app listens on (1-65535)")
+	}
+	if p.Port < 0 || p.Port > 65535 {
+		return invalid("the preview port must be between 1 and 65535")
+	}
+	clean := func(in []string, what string, check func(string) bool) ([]string, error) {
+		out := []string{}
+		for _, v := range in {
+			if v = strings.TrimSpace(v); v == "" || slices.Contains(out, v) {
+				continue
+			}
+			if !check(v) {
+				return nil, invalid("%q is not a valid %s", v, what)
+			}
+			out = append(out, v)
+		}
+		return out, nil
+	}
+	var err error
+	if p.Routes, err = clean(p.Routes, "preview route (it must start with /)", func(v string) bool {
+		return strings.HasPrefix(v, "/") && !strings.ContainsAny(v, " \t\n")
+	}); err != nil {
+		return err
+	}
+	p.UIPaths, err = clean(p.UIPaths, "UI path (a glob relative to the repository root, such as src/**/*.vue)", func(v string) bool {
+		return !strings.HasPrefix(v, "/") && !strings.Contains(v, "..")
+	})
+	return err
 }
 
 // RepoKind is "jira" for a repository linked to a Jira project and "side"
@@ -529,10 +580,27 @@ func RepoKind(jiraProject string) string {
 }
 
 // Save creates (id 0) or updates a repository, then checks for CLAUDE.md
-// in the background.
-func (r *Repos) Save(ctx context.Context, x domain.Repository) (RepoView, error) {
+// in the background. keepPreview keeps an existing repository's preview
+// settings (the client did not send them); env, when not nil, replaces the
+// preview environment ("" clears it).
+func (r *Repos) Save(ctx context.Context, x domain.Repository, keepPreview bool, env *string) (RepoView, error) {
+	if keepPreview && x.ID != 0 {
+		cur, err := r.store.RepositoryByID(ctx, x.ID)
+		if err != nil {
+			return RepoView{}, err
+		}
+		x.Preview = cur.Preview
+	}
 	if err := Validate(&x, r.gitlabHost(ctx)); err != nil {
 		return RepoView{}, err
+	}
+	if env != nil {
+		if r.envs == nil {
+			return RepoView{}, invalid("preview environments are not available on this server")
+		}
+		if _, err := domain.ParseEnv(*env); err != nil {
+			return RepoView{}, invalid("preview environment: %v", err)
+		}
 	}
 	var saved domain.Repository
 	var err error
@@ -543,6 +611,11 @@ func (r *Repos) Save(ctx context.Context, x domain.Repository) (RepoView, error)
 	}
 	if err != nil {
 		return RepoView{}, err
+	}
+	if env != nil {
+		if err := r.envs.SetPreviewEnv(ctx, saved.ID, *env); err != nil {
+			return RepoView{}, err
+		}
 	}
 	go r.CheckClaudeMD(context.WithoutCancel(ctx), saved)
 	return r.Get(ctx, saved.ID)

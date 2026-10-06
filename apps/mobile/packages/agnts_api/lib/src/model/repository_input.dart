@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:agnts_api/src/model/repo_preview_input.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -43,6 +44,8 @@ class RepositoryInput {
      this.jiraProject,
 
      this.deployWorkflow,
+
+     this.preview,
   });
 
   @JsonKey(
@@ -192,6 +195,18 @@ class RepositoryInput {
 
 
 
+  @JsonKey(
+    
+    name: r'preview',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final RepoPreviewInput? preview;
+
+
+
 
 
     @override
@@ -207,7 +222,8 @@ class RepositoryInput {
       other.taskPrefix == taskPrefix &&
       other.instructions == instructions &&
       other.jiraProject == jiraProject &&
-      other.deployWorkflow == deployWorkflow;
+      other.deployWorkflow == deployWorkflow &&
+      other.preview == preview;
 
     @override
     int get hashCode =>
@@ -222,7 +238,8 @@ class RepositoryInput {
         taskPrefix.hashCode +
         instructions.hashCode +
         jiraProject.hashCode +
-        deployWorkflow.hashCode;
+        deployWorkflow.hashCode +
+        preview.hashCode;
 
   factory RepositoryInput.fromJson(Map<String, dynamic> json) => _$RepositoryInputFromJson(json);
 

@@ -71,6 +71,13 @@ void main() {
       // TODO
     });
 
+    // One preview screenshot, as PNG
+    //
+    //Future<Uint8List> getPreviewShot(String key, int runId, String shotId) async
+    test('test getPreviewShot', () async {
+      // TODO
+    });
+
     // A ticket with its questions, analysis and latest result
     //
     //Future<TicketDetail> getTicket(String key) async
@@ -121,6 +128,13 @@ void main() {
     //
     //Future<Ticket> markTicketMerged(String key) async
     test('test markTicketMerged', () async {
+      // TODO
+    });
+
+    // Queue a preview (screenshots of the running app) of a ticket waiting for review, again if one already ran
+    //
+    //Future<Ticket> previewTicket(String key, { PreviewInput previewInput }) async
+    test('test previewTicket', () async {
       // TODO
     });
 

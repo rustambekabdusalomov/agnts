@@ -41,6 +41,8 @@ abstract class _$RepositoryCWProxy {
 
   Repository archivedAt(DateTime? archivedAt);
 
+  Repository preview(RepoPreview? preview);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Repository(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -65,6 +67,7 @@ abstract class _$RepositoryCWProxy {
     int openTickets,
     String? deployWorkflow,
     DateTime? archivedAt,
+    RepoPreview? preview,
   });
 }
 
@@ -132,6 +135,9 @@ class _$RepositoryCWProxyImpl implements _$RepositoryCWProxy {
   Repository archivedAt(DateTime? archivedAt) => this(archivedAt: archivedAt);
 
   @override
+  Repository preview(RepoPreview? preview) => this(preview: preview);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Repository(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -156,6 +162,7 @@ class _$RepositoryCWProxyImpl implements _$RepositoryCWProxy {
     Object? openTickets = const $CopyWithPlaceholder(),
     Object? deployWorkflow = const $CopyWithPlaceholder(),
     Object? archivedAt = const $CopyWithPlaceholder(),
+    Object? preview = const $CopyWithPlaceholder(),
   }) {
     return Repository(
       id: id == const $CopyWithPlaceholder()
@@ -226,6 +233,10 @@ class _$RepositoryCWProxyImpl implements _$RepositoryCWProxy {
           ? _value.archivedAt
           // ignore: cast_nullable_to_non_nullable
           : archivedAt as DateTime?,
+      preview: preview == const $CopyWithPlaceholder()
+          ? _value.preview
+          // ignore: cast_nullable_to_non_nullable
+          : preview as RepoPreview?,
     );
   }
 }
@@ -240,61 +251,69 @@ extension $RepositoryCopyWith on Repository {
 // JsonSerializableGenerator
 // **************************************************************************
 
-Repository _$RepositoryFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('Repository', json, ($checkedConvert) {
-      $checkKeys(
-        json,
-        requiredKeys: const [
-          'id',
-          'name',
-          'kind',
-          'provider',
-          'cloneUrl',
-          'defaultBranch',
-          'buildCmd',
-          'lintCmd',
-          'testCmd',
-          'branchPrefix',
-          'taskPrefix',
-          'instructions',
-          'jiraProject',
-          'claudeMd',
-          'openTickets',
-        ],
-      );
-      final val = Repository(
-        id: $checkedConvert('id', (v) => (v as num).toInt()),
-        name: $checkedConvert('name', (v) => v as String),
-        kind: $checkedConvert(
-          'kind',
-          (v) => $enumDecode(_$RepositoryKindEnumEnumMap, v),
-        ),
-        provider: $checkedConvert(
-          'provider',
-          (v) => $enumDecode(_$RepositoryProviderEnumEnumMap, v),
-        ),
-        cloneUrl: $checkedConvert('cloneUrl', (v) => v as String),
-        defaultBranch: $checkedConvert('defaultBranch', (v) => v as String),
-        buildCmd: $checkedConvert('buildCmd', (v) => v as String),
-        lintCmd: $checkedConvert('lintCmd', (v) => v as String),
-        testCmd: $checkedConvert('testCmd', (v) => v as String),
-        branchPrefix: $checkedConvert('branchPrefix', (v) => v as String),
-        taskPrefix: $checkedConvert('taskPrefix', (v) => v as String),
-        instructions: $checkedConvert('instructions', (v) => v as String),
-        jiraProject: $checkedConvert('jiraProject', (v) => v as String),
-        claudeMd: $checkedConvert(
-          'claudeMd',
-          (v) => $enumDecode(_$RepositoryClaudeMdEnumEnumMap, v),
-        ),
-        openTickets: $checkedConvert('openTickets', (v) => (v as num).toInt()),
-        deployWorkflow: $checkedConvert('deployWorkflow', (v) => v as String?),
-        archivedAt: $checkedConvert(
-          'archivedAt',
-          (v) => v == null ? null : DateTime.parse(v as String),
-        ),
-      );
-      return val;
-    });
+Repository _$RepositoryFromJson(Map<String, dynamic> json) => $checkedCreate(
+  'Repository',
+  json,
+  ($checkedConvert) {
+    $checkKeys(
+      json,
+      requiredKeys: const [
+        'id',
+        'name',
+        'kind',
+        'provider',
+        'cloneUrl',
+        'defaultBranch',
+        'buildCmd',
+        'lintCmd',
+        'testCmd',
+        'branchPrefix',
+        'taskPrefix',
+        'instructions',
+        'jiraProject',
+        'claudeMd',
+        'openTickets',
+      ],
+    );
+    final val = Repository(
+      id: $checkedConvert('id', (v) => (v as num).toInt()),
+      name: $checkedConvert('name', (v) => v as String),
+      kind: $checkedConvert(
+        'kind',
+        (v) => $enumDecode(_$RepositoryKindEnumEnumMap, v),
+      ),
+      provider: $checkedConvert(
+        'provider',
+        (v) => $enumDecode(_$RepositoryProviderEnumEnumMap, v),
+      ),
+      cloneUrl: $checkedConvert('cloneUrl', (v) => v as String),
+      defaultBranch: $checkedConvert('defaultBranch', (v) => v as String),
+      buildCmd: $checkedConvert('buildCmd', (v) => v as String),
+      lintCmd: $checkedConvert('lintCmd', (v) => v as String),
+      testCmd: $checkedConvert('testCmd', (v) => v as String),
+      branchPrefix: $checkedConvert('branchPrefix', (v) => v as String),
+      taskPrefix: $checkedConvert('taskPrefix', (v) => v as String),
+      instructions: $checkedConvert('instructions', (v) => v as String),
+      jiraProject: $checkedConvert('jiraProject', (v) => v as String),
+      claudeMd: $checkedConvert(
+        'claudeMd',
+        (v) => $enumDecode(_$RepositoryClaudeMdEnumEnumMap, v),
+      ),
+      openTickets: $checkedConvert('openTickets', (v) => (v as num).toInt()),
+      deployWorkflow: $checkedConvert('deployWorkflow', (v) => v as String?),
+      archivedAt: $checkedConvert(
+        'archivedAt',
+        (v) => v == null ? null : DateTime.parse(v as String),
+      ),
+      preview: $checkedConvert(
+        'preview',
+        (v) =>
+            v == null ? null : RepoPreview.fromJson(v as Map<String, dynamic>),
+      ),
+    );
+    return val;
+  },
+);
 
 Map<String, dynamic> _$RepositoryToJson(Repository instance) =>
     <String, dynamic>{
@@ -315,6 +334,7 @@ Map<String, dynamic> _$RepositoryToJson(Repository instance) =>
       'openTickets': instance.openTickets,
       'deployWorkflow': ?instance.deployWorkflow,
       'archivedAt': ?instance.archivedAt?.toIso8601String(),
+      'preview': ?instance.preview?.toJson(),
     };
 
 const _$RepositoryKindEnumEnumMap = {

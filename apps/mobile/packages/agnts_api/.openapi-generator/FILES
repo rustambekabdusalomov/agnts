@@ -78,6 +78,9 @@ doc/ModelOverrides.md
 doc/NotifySettings.md
 doc/PeriodStats.md
 doc/Pipeline.md
+doc/PreviewInput.md
+doc/PreviewIssue.md
+doc/PreviewShot.md
 doc/Question.md
 doc/QuizQuestion.md
 doc/RejectTicketRequest.md
@@ -89,6 +92,8 @@ doc/Relations.md
 doc/RemoteRepository.md
 doc/RepoActivity.md
 doc/RepoMember.md
+doc/RepoPreview.md
+doc/RepoPreviewInput.md
 doc/ReposApi.md
 doc/Repository.md
 doc/RepositoryInput.md
@@ -105,6 +110,7 @@ doc/RuleStatus.md
 doc/RulesApi.md
 doc/Settings.md
 doc/SettingsApi.md
+doc/ShotRef.md
 doc/Stage.md
 doc/StageModels.md
 doc/StageSpend.md
@@ -118,6 +124,7 @@ doc/TicketDetail.md
 doc/TicketKind.md
 doc/TicketKindChoice.md
 doc/TicketKindInput.md
+doc/TicketPreview.md
 doc/TicketRepo.md
 doc/TicketSpendList.md
 doc/TicketSpendRow.md
@@ -224,6 +231,9 @@ lib/src/model/model_overrides.dart
 lib/src/model/notify_settings.dart
 lib/src/model/period_stats.dart
 lib/src/model/pipeline.dart
+lib/src/model/preview_input.dart
+lib/src/model/preview_issue.dart
+lib/src/model/preview_shot.dart
 lib/src/model/question.dart
 lib/src/model/quiz_question.dart
 lib/src/model/reject_ticket_request.dart
@@ -235,6 +245,8 @@ lib/src/model/relations.dart
 lib/src/model/remote_repository.dart
 lib/src/model/repo_activity.dart
 lib/src/model/repo_member.dart
+lib/src/model/repo_preview.dart
+lib/src/model/repo_preview_input.dart
 lib/src/model/repository.dart
 lib/src/model/repository_input.dart
 lib/src/model/request_changes_request.dart
@@ -248,6 +260,7 @@ lib/src/model/rule_input.dart
 lib/src/model/rule_question.dart
 lib/src/model/rule_status.dart
 lib/src/model/settings.dart
+lib/src/model/shot_ref.dart
 lib/src/model/stage.dart
 lib/src/model/stage_models.dart
 lib/src/model/stage_spend.dart
@@ -260,6 +273,7 @@ lib/src/model/ticket_detail.dart
 lib/src/model/ticket_kind.dart
 lib/src/model/ticket_kind_choice.dart
 lib/src/model/ticket_kind_input.dart
+lib/src/model/ticket_preview.dart
 lib/src/model/ticket_repo.dart
 lib/src/model/ticket_spend_list.dart
 lib/src/model/ticket_spend_row.dart
@@ -351,6 +365,9 @@ test/model_test.dart
 test/notify_settings_test.dart
 test/period_stats_test.dart
 test/pipeline_test.dart
+test/preview_input_test.dart
+test/preview_issue_test.dart
+test/preview_shot_test.dart
 test/question_test.dart
 test/quiz_question_test.dart
 test/reject_ticket_request_test.dart
@@ -362,6 +379,8 @@ test/relations_test.dart
 test/remote_repository_test.dart
 test/repo_activity_test.dart
 test/repo_member_test.dart
+test/repo_preview_input_test.dart
+test/repo_preview_test.dart
 test/repos_api_test.dart
 test/repository_input_test.dart
 test/repository_test.dart
@@ -378,6 +397,7 @@ test/rule_test.dart
 test/rules_api_test.dart
 test/settings_api_test.dart
 test/settings_test.dart
+test/shot_ref_test.dart
 test/stage_models_test.dart
 test/stage_spend_test.dart
 test/stage_test.dart
@@ -390,6 +410,7 @@ test/ticket_detail_test.dart
 test/ticket_kind_choice_test.dart
 test/ticket_kind_input_test.dart
 test/ticket_kind_test.dart
+test/ticket_preview_test.dart
 test/ticket_repo_test.dart
 test/ticket_spend_list_test.dart
 test/ticket_spend_row_test.dart

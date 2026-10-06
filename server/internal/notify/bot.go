@@ -214,7 +214,7 @@ func (n *Notifier) handleText(ctx context.Context, b *Bot, cfg TelegramConfig, m
 			n.answer(ctx, b, cfg, msg.ReplyTo, m.TicketKey, *m.Ref, text)
 		}
 	case "feedback":
-		if _, err := n.actions.RequestChanges(ctx, m.TicketKey, text, domain.OriginTelegram); err != nil {
+		if _, err := n.actions.RequestChanges(ctx, m.TicketKey, text, nil, domain.OriginTelegram); err != nil {
 			n.say(ctx, b, cfg, m.TicketKey+": "+friendly(err))
 			return
 		}

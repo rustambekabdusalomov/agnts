@@ -153,7 +153,9 @@ helper(r'helper'),
 @JsonValue(r'learn')
 learn(r'learn'),
 @JsonValue(r'review')
-review(r'review');
+review(r'review'),
+@JsonValue(r'preview')
+preview(r'preview');
 
 const StageSpendStageEnum(this.value);
 

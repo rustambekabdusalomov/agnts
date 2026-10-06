@@ -16,6 +16,7 @@ Name | Type | Description | Notes
 **followUps** | [**FollowUps**](FollowUps.md) |  | [optional] 
 **relations** | [**Relations**](Relations.md) |  | [optional] 
 **review** | [**CodeReview**](CodeReview.md) |  | [optional] 
+**preview** | [**TicketPreview**](TicketPreview.md) |  | [optional] 
 **history** | [**List&lt;HistoryItem&gt;**](HistoryItem.md) |  | [optional] 
 **maxTurns** | **int** |  | [optional] 
 **effectiveModels** | [**StageModels**](StageModels.md) |  | [optional] 

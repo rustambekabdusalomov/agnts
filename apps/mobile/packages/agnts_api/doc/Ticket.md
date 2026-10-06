@@ -40,6 +40,9 @@ Name | Type | Description | Notes
 **mergedAt** | [**DateTime**](DateTime.md) |  | [optional] 
 **learnState** | **String** | The learn run after push; pending also while it runs | [optional] 
 **reviewState** | **String** | The code review agnts runs beside the human review | [optional] 
+**previewState** | **String** | The screenshots agnts takes beside the human review | [optional] 
+**previewCompare** | **bool** | Previews of this ticket also capture the default branch (before shots) | [optional] 
+**canPreview** | **bool** | The ticket's repository has a preview command | [optional] 
 **spend** | [**TokenSpend**](TokenSpend.md) |  | [optional] 
 **createdAt** | [**DateTime**](DateTime.md) |  | 
 **updatedAt** | [**DateTime**](DateTime.md) |  | 

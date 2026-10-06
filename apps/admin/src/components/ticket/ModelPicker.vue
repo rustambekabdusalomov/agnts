@@ -6,14 +6,14 @@ import { MODEL_NAME, MODELS, type Model, type Ticket } from '../../api/types'
 import { useUi } from '../../stores/ui'
 
 // Per-ticket model overrides; "Default" follows Settings.
-type Stage = 'analyze' | 'coding' | 'retry' | 'review'
+type Stage = 'analyze' | 'coding' | 'retry' | 'review' | 'preview'
 const props = defineProps<{ ticket: Ticket; stages: Stage[] }>()
 const { t } = useI18n()
 const qc = useQueryClient()
 const ui = useUi()
 
 const settings = useQuery({ queryKey: ['settings'], queryFn: () => unwrap(api.GET('/settings')) })
-const LABEL: Record<Stage, string> = { analyze: 'stageAnalyze', coding: 'stageCoding', retry: 'stageRetry', review: 'stageReview' }
+const LABEL: Record<Stage, string> = { analyze: 'stageAnalyze', coding: 'stageCoding', retry: 'stageRetry', review: 'stageReview', preview: 'stagePreview' }
 
 // The review model may be auto in Settings: agnts picks by complexity.
 function defaultLabel(s: Stage): string {

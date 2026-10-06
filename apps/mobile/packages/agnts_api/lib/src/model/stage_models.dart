@@ -33,6 +33,8 @@ class StageModels {
      this.learn,
 
      this.review,
+
+     this.preview,
   });
 
   @JsonKey(
@@ -107,6 +109,18 @@ class StageModels {
 
 
 
+  @JsonKey(
+    
+    name: r'preview',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final Model? preview;
+
+
+
 
 
     @override
@@ -116,7 +130,8 @@ class StageModels {
       other.retry == retry &&
       other.helper == helper &&
       other.learn == learn &&
-      other.review == review;
+      other.review == review &&
+      other.preview == preview;
 
     @override
     int get hashCode =>
@@ -125,7 +140,8 @@ class StageModels {
         retry.hashCode +
         helper.hashCode +
         learn.hashCode +
-        review.hashCode;
+        review.hashCode +
+        preview.hashCode;
 
   factory StageModels.fromJson(Map<String, dynamic> json) => _$StageModelsFromJson(json);
 

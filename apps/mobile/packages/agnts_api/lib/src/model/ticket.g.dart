@@ -71,6 +71,12 @@ abstract class _$TicketCWProxy {
 
   Ticket reviewState(TicketReviewStateEnum? reviewState);
 
+  Ticket previewState(TicketPreviewStateEnum? previewState);
+
+  Ticket previewCompare(bool? previewCompare);
+
+  Ticket canPreview(bool? canPreview);
+
   Ticket spend(TokenSpend? spend);
 
   Ticket createdAt(DateTime createdAt);
@@ -116,6 +122,9 @@ abstract class _$TicketCWProxy {
     DateTime? mergedAt,
     TicketLearnStateEnum? learnState,
     TicketReviewStateEnum? reviewState,
+    TicketPreviewStateEnum? previewState,
+    bool? previewCompare,
+    bool? canPreview,
     TokenSpend? spend,
     DateTime createdAt,
     DateTime updatedAt,
@@ -231,6 +240,17 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
       this(reviewState: reviewState);
 
   @override
+  Ticket previewState(TicketPreviewStateEnum? previewState) =>
+      this(previewState: previewState);
+
+  @override
+  Ticket previewCompare(bool? previewCompare) =>
+      this(previewCompare: previewCompare);
+
+  @override
+  Ticket canPreview(bool? canPreview) => this(canPreview: canPreview);
+
+  @override
   Ticket spend(TokenSpend? spend) => this(spend: spend);
 
   @override
@@ -279,6 +299,9 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
     Object? mergedAt = const $CopyWithPlaceholder(),
     Object? learnState = const $CopyWithPlaceholder(),
     Object? reviewState = const $CopyWithPlaceholder(),
+    Object? previewState = const $CopyWithPlaceholder(),
+    Object? previewCompare = const $CopyWithPlaceholder(),
+    Object? canPreview = const $CopyWithPlaceholder(),
     Object? spend = const $CopyWithPlaceholder(),
     Object? createdAt = const $CopyWithPlaceholder(),
     Object? updatedAt = const $CopyWithPlaceholder(),
@@ -412,6 +435,18 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
           ? _value.reviewState
           // ignore: cast_nullable_to_non_nullable
           : reviewState as TicketReviewStateEnum?,
+      previewState: previewState == const $CopyWithPlaceholder()
+          ? _value.previewState
+          // ignore: cast_nullable_to_non_nullable
+          : previewState as TicketPreviewStateEnum?,
+      previewCompare: previewCompare == const $CopyWithPlaceholder()
+          ? _value.previewCompare
+          // ignore: cast_nullable_to_non_nullable
+          : previewCompare as bool?,
+      canPreview: canPreview == const $CopyWithPlaceholder()
+          ? _value.canPreview
+          // ignore: cast_nullable_to_non_nullable
+          : canPreview as bool?,
       spend: spend == const $CopyWithPlaceholder()
           ? _value.spend
           // ignore: cast_nullable_to_non_nullable
@@ -535,6 +570,12 @@ Ticket _$TicketFromJson(
       'reviewState',
       (v) => $enumDecodeNullable(_$TicketReviewStateEnumEnumMap, v),
     ),
+    previewState: $checkedConvert(
+      'previewState',
+      (v) => $enumDecodeNullable(_$TicketPreviewStateEnumEnumMap, v),
+    ),
+    previewCompare: $checkedConvert('previewCompare', (v) => v as bool?),
+    canPreview: $checkedConvert('canPreview', (v) => v as bool?),
     spend: $checkedConvert(
       'spend',
       (v) => v == null ? null : TokenSpend.fromJson(v as Map<String, dynamic>),
@@ -578,6 +619,9 @@ Map<String, dynamic> _$TicketToJson(Ticket instance) => <String, dynamic>{
   'mergedAt': ?instance.mergedAt?.toIso8601String(),
   'learnState': ?_$TicketLearnStateEnumEnumMap[instance.learnState],
   'reviewState': ?_$TicketReviewStateEnumEnumMap[instance.reviewState],
+  'previewState': ?_$TicketPreviewStateEnumEnumMap[instance.previewState],
+  'previewCompare': ?instance.previewCompare,
+  'canPreview': ?instance.canPreview,
   'spend': ?instance.spend?.toJson(),
   'createdAt': instance.createdAt.toIso8601String(),
   'updatedAt': instance.updatedAt.toIso8601String(),
@@ -634,4 +678,12 @@ const _$TicketReviewStateEnumEnumMap = {
   TicketReviewStateEnum.running: 'running',
   TicketReviewStateEnum.done: 'done',
   TicketReviewStateEnum.failed: 'failed',
+};
+
+const _$TicketPreviewStateEnumEnumMap = {
+  TicketPreviewStateEnum.none: 'none',
+  TicketPreviewStateEnum.pending: 'pending',
+  TicketPreviewStateEnum.running: 'running',
+  TicketPreviewStateEnum.done: 'done',
+  TicketPreviewStateEnum.failed: 'failed',
 };

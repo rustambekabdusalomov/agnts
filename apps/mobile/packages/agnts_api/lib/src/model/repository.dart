@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:agnts_api/src/model/repo_preview.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -53,6 +54,8 @@ class Repository {
      this.deployWorkflow,
 
      this.archivedAt,
+
+     this.preview,
   });
 
   @JsonKey(
@@ -262,6 +265,18 @@ class Repository {
 
 
 
+  @JsonKey(
+    
+    name: r'preview',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final RepoPreview? preview;
+
+
+
 
 
     @override
@@ -282,7 +297,8 @@ class Repository {
       other.claudeMd == claudeMd &&
       other.openTickets == openTickets &&
       other.deployWorkflow == deployWorkflow &&
-      other.archivedAt == archivedAt;
+      other.archivedAt == archivedAt &&
+      other.preview == preview;
 
     @override
     int get hashCode =>
@@ -302,7 +318,8 @@ class Repository {
         claudeMd.hashCode +
         openTickets.hashCode +
         deployWorkflow.hashCode +
-        archivedAt.hashCode;
+        archivedAt.hashCode +
+        preview.hashCode;
 
   factory Repository.fromJson(Map<String, dynamic> json) => _$RepositoryFromJson(json);
 

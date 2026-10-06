@@ -66,6 +66,11 @@ type Deps struct {
 	Rules    Rules   // nil disables rules
 	// Translations stores translated ticket texts; nil disables translation.
 	Translations Translations
+	// Shots stores preview screenshots; nil disables previews.
+	Shots Shots
+	// PreviewEnvs gives the apps under preview their environment; nil
+	// gives them none.
+	PreviewEnvs PreviewEnvs
 }
 
 // Orchestrator runs tickets through their stages.
@@ -82,6 +87,8 @@ type Orchestrator struct {
 	lessons  Lessons
 	rules    Rules
 	trans    Translations
+	shots    Shots
+	envs     PreviewEnvs
 	log      *slog.Logger
 
 	wake chan struct{}
@@ -98,7 +105,8 @@ type Orchestrator struct {
 func New(cfg Config, d Deps, log *slog.Logger) *Orchestrator {
 	return &Orchestrator{
 		cfg: cfg, store: d.Store, runner: d.Runner, git: d.Git, host: d.Host, tracker: d.Tracker, homes: d.Homes,
-		settings: d.Settings, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, trans: d.Translations, log: log,
+		settings: d.Settings, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, trans: d.Translations,
+		shots: d.Shots, envs: d.PreviewEnvs, log: log,
 		wake:    make(chan struct{}, 1),
 		cancels: map[string]context.CancelFunc{},
 	}
@@ -139,7 +147,7 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 	defer wg.Wait()
 	tick := time.NewTicker(o.cfg.PollEvery)
 	defer tick.Stop()
-	lastResume := time.Time{}
+	lastResume, lastPrune := time.Time{}, time.Time{}
 
 	for {
 		s, err := o.settings.Get(ctx)
@@ -149,6 +157,10 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 		if time.Since(lastResume) > time.Minute {
 			lastResume = time.Now()
 			o.AutoResume(ctx, s)
+		}
+		if time.Since(lastPrune) > time.Hour {
+			lastPrune = time.Now()
+			o.pruneShots(ctx)
 		}
 		for err == nil && o.mayStart(ctx, s) {
 			job, ok, cerr := o.claim(ctx)
@@ -274,6 +286,8 @@ func (o *Orchestrator) work(parent context.Context, t domain.Ticket, run domain.
 			err = o.learn(ctx, s, t, &run)
 		case domain.StageReview:
 			err = o.review(ctx, s, t, &run)
+		case domain.StagePreview:
+			err = o.preview(ctx, s, t, &run)
 		default:
 			err = fmt.Errorf("unknown stage %q", run.Stage)
 		}
@@ -320,6 +334,9 @@ func (o *Orchestrator) work(parent context.Context, t domain.Ticket, run domain.
 		// The ticket stays in review; only the code review is missing.
 		log.Warn("review run failed", "err", err)
 		o.reviewFailed(bg, t, run, err)
+	case run.Stage == domain.StagePreview:
+		log.Warn("preview run failed", "err", err)
+		o.previewFailed(bg, t, run, err)
 	default:
 		log.Error("stage failed", "err", err)
 		o.fail(bg, t.Key, run, err)
@@ -461,7 +478,7 @@ func (o *Orchestrator) claude(ctx context.Context, s domain.Settings, ws Workspa
 		MaxTurns: turns,
 		Resume:   resume,
 		Timeout:  time.Duration(s.TimeoutMin) * time.Minute,
-		Settings: permissionSettings(s, t.Kind.Report() || run.Stage == domain.StageReview),
+		Settings: permissionSettings(s, t.Kind.Report() || run.Stage == domain.StageReview || run.Stage == domain.StagePreview),
 	}, o.streamTo(ctx, *t, run))
 	run.Turns += res.Turns
 	if res.SessionID != "" {
@@ -737,14 +754,25 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 	if err != nil {
 		return err
 	}
+	visual := s.VisualCheck && o.shots != nil && repo.Preview.Enabled()
+	if visual {
+		if err := o.writePreviewFiles(ctx, ws, repo); err != nil {
+			return err
+		}
+	}
 	var prompt string
 	modelStage := domain.ModelCoding
 	feedback := t.Feedback
+	shots := o.copyFeedbackShots(ctx, ws, t)
 	if feedback != "" && session != "" {
 		modelStage = domain.ModelRetry
-		prompt, err = render("feedback", promptData{T: t, Feedback: feedback})
+		prompt, err = render("feedback", promptData{T: t, Repo: repo, Feedback: feedback, FeedbackShots: shots})
+		if err == nil && visual {
+			extra, _ := render("visualcheck", promptData{Repo: repo})
+			prompt += extra
+		}
 	} else {
-		d := promptData{T: t, Repo: repo, Checks: checksLine(repo)}
+		d := promptData{T: t, Repo: repo, Checks: checksLine(repo), VisualCheck: visual}
 		if d.Rules, err = o.teamRules(ctx, t.RepoID); err != nil {
 			return err
 		}
@@ -761,7 +789,7 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		}
 		prompt, err = render("code", d)
 		if err == nil && feedback != "" {
-			d.Feedback = feedback
+			d.Feedback, d.FeedbackShots = feedback, shots
 			extra, _ := render("feedback", d)
 			prompt += "\n" + extra
 		}
@@ -778,9 +806,13 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		return err
 	}
 	if feedback != "" {
-		if _, err := o.store.UpdateTicket(ctx, t.Key, nil, func(x *domain.Ticket) { x.Feedback = "" }); err != nil {
+		if _, err := o.store.UpdateTicket(ctx, t.Key, nil, func(x *domain.Ticket) { x.Feedback, x.FeedbackShots = "", nil }); err != nil {
 			return err
 		}
+	}
+	if visual {
+		// An app Claude left running would hold its port during the tests.
+		_, _ = ws.Exec(ctx, "agnts-preview stop", 30*time.Second)
 	}
 
 	if err := o.transition(ctx, &t, run, domain.StateTesting, "running checks", nil); err != nil {
@@ -846,6 +878,7 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		x.Branch, x.HeadSHA = branch, sha
 		x.Turns += run.Turns
 		x.ReviewState = reviewState(s)
+		x.PreviewState = o.previewState(s, repo, files)
 	})
 }
 

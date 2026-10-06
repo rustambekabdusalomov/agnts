@@ -31,8 +31,19 @@ const form = reactive({
   testCmd: '',
   instructions: '',
   deployWorkflow: '',
+  // Previews: how agnts starts the app to take screenshots.
+  pvCommand: '',
+  pvPort: '' as string | number,
+  pvReady: '/',
+  pvRoutes: '',
+  pvUiPaths: '',
+  pvLogin: '',
 })
 const error = ref('')
+// The environment is write-only: it is shown by names, and replaced or
+// cleared only when asked.
+const envEdit = ref<'keep' | 'replace' | 'clear'>('keep')
+const envText = ref('')
 
 watch(
   open,
@@ -52,7 +63,15 @@ watch(
       testCmd: r?.testCmd ?? '',
       instructions: r?.instructions ?? '',
       deployWorkflow: r?.deployWorkflow ?? '',
+      pvCommand: r?.preview?.command ?? '',
+      pvPort: r?.preview?.port || '',
+      pvReady: r?.preview?.readyPath || '/',
+      pvRoutes: (r?.preview?.routes ?? []).join('\n'),
+      pvUiPaths: (r?.preview?.uiPaths ?? []).join('\n'),
+      pvLogin: r?.preview?.login ?? '',
     })
+    envEdit.value = r?.preview?.envSet ? 'keep' : 'replace'
+    envText.value = ''
   },
   { immediate: true },
 )
@@ -70,6 +89,15 @@ const save = useMutation({
       jiraProject: form.jiraProject.trim(),
       taskPrefix: form.taskPrefix.trim(),
       deployWorkflow: isGitHub.value ? form.deployWorkflow.trim() : '',
+      preview: {
+        command: form.pvCommand.trim(),
+        port: Number(form.pvPort) || 0,
+        readyPath: form.pvReady.trim() || '/',
+        routes: lines(form.pvRoutes),
+        uiPaths: lines(form.pvUiPaths),
+        login: form.pvLogin.trim(),
+        env: envEdit.value === 'clear' ? '' : envEdit.value === 'replace' && (envText.value.trim() || props.repo?.preview?.envSet) ? envText.value : undefined,
+      },
     }
     return props.repo
       ? unwrap(api.PUT('/repos/{id}', { params: { path: { id: props.repo.id } }, body }))
@@ -90,6 +118,15 @@ const claudeText = computed(() => {
   const s = props.repo?.claudeMd ?? 'unknown'
   return s === 'found' ? t('repos.claudeFound') : s === 'missing' ? t('repos.claudeMissing') : t('repos.claudeUnknown')
 })
+const lines = (v: string) => v.split('\n').map((x) => x.trim()).filter(Boolean)
+const envNames = computed(() => props.repo?.preview?.envNames ?? [])
+// Globs for the usual front-end layouts; a change touching one gets a preview.
+const UI_PRESETS: Record<string, string[]> = {
+  'Vue / Vite': ['src/**/*.{vue,ts,js,css,scss}'],
+  React: ['src/**/*.{tsx,jsx,ts,css,scss}'],
+  'Next.js': ['app/**/*.{tsx,jsx,ts,css}', 'pages/**/*.{tsx,jsx}', 'components/**/*.{tsx,jsx,css}'],
+  Angular: ['src/**/*.{ts,html,scss,css}'],
+}
 const isGitHub = computed(() => /^https:\/\/github\.com\//i.test(form.cloneUrl.trim()))
 const prefix = computed(() => (form.taskPrefix || 'VIS').toUpperCase())
 </script>
@@ -148,6 +185,63 @@ const prefix = computed(() => (form.taskPrefix || 'VIS').toUpperCase())
         <textarea id="r-instr" v-model="form.instructions" maxlength="20000" />
         <span class="fhelp">{{ t('repos.instructionsHelp') }}</span>
       </div>
+      <fieldset class="field rp-preview">
+        <legend class="flbl">{{ t('preview.repoTitle') }}</legend>
+        <span class="fhelp">{{ t('preview.repoHelp') }}</span>
+        <div class="field">
+          <label for="r-pv-cmd">{{ t('preview.repoCommand') }}</label>
+          <input id="r-pv-cmd" v-model="form.pvCommand" type="text" maxlength="1000" placeholder="npm ci && npm run dev -- --host 127.0.0.1 --port 5173" style="font-family: var(--mono); font-size: 14px">
+          <span class="fhelp">{{ t('preview.repoCommandHelp') }}</span>
+        </div>
+        <template v-if="form.pvCommand.trim()">
+          <div class="rp-row">
+            <div class="field">
+              <label for="r-pv-port">{{ t('preview.repoPort') }}</label>
+              <input id="r-pv-port" v-model="form.pvPort" type="number" min="1" max="65535" required placeholder="5173" style="font-family: var(--mono); font-size: 14px">
+            </div>
+            <div class="field">
+              <label for="r-pv-ready">{{ t('preview.repoReady') }}</label>
+              <input id="r-pv-ready" v-model="form.pvReady" type="text" maxlength="300" placeholder="/" style="font-family: var(--mono); font-size: 14px">
+            </div>
+          </div>
+          <div class="field">
+            <label for="r-pv-ui">{{ t('preview.repoUiPaths') }}</label>
+            <textarea id="r-pv-ui" v-model="form.pvUiPaths" rows="3" placeholder="src/**/*.vue" style="font-family: var(--mono); font-size: 13.5px" />
+            <span class="fhelp">{{ t('preview.repoUiPathsHelp') }}</span>
+            <span class="rp-presets">
+              <button v-for="(globs, name) in UI_PRESETS" :key="name" type="button" class="btn btn-s" @click="form.pvUiPaths = globs.join('\n')">{{ name }}</button>
+            </span>
+          </div>
+          <div class="field">
+            <label for="r-pv-routes">{{ t('preview.repoRoutes') }}</label>
+            <textarea id="r-pv-routes" v-model="form.pvRoutes" rows="2" placeholder="/" style="font-family: var(--mono); font-size: 13.5px" />
+            <span class="fhelp">{{ t('preview.repoRoutesHelp') }}</span>
+          </div>
+          <div class="field">
+            <label for="r-pv-login">{{ t('preview.repoLogin') }}</label>
+            <textarea id="r-pv-login" v-model="form.pvLogin" rows="2" maxlength="2000" :placeholder="t('preview.repoLoginPh')" />
+            <span class="fhelp">{{ t('preview.repoLoginHelp') }}</span>
+          </div>
+          <div class="field">
+            <label for="r-pv-env">{{ t('preview.repoEnv') }}</label>
+            <template v-if="repo?.preview?.envSet && envEdit === 'keep'">
+              <span class="hint">{{ t('preview.repoEnvSet', { names: envNames.join(', ') }) }}</span>
+              <span class="rp-presets">
+                <button type="button" class="btn btn-s" @click="envEdit = 'replace'">{{ t('preview.repoEnvReplace') }}</button>
+                <button type="button" class="btn btn-s btn-d" @click="envEdit = 'clear'">{{ t('preview.repoEnvClear') }}</button>
+              </span>
+            </template>
+            <template v-else-if="envEdit === 'clear'">
+              <span class="hint">{{ t('preview.repoEnvCleared') }}</span>
+              <span class="rp-presets"><button type="button" class="btn btn-s" @click="envEdit = 'keep'">{{ t('form.cancel') }}</button></span>
+            </template>
+            <template v-else>
+              <textarea id="r-pv-env" v-model="envText" rows="3" maxlength="16384" autocomplete="off" spellcheck="false" placeholder="VITE_API_URL=https://staging.example.com" style="font-family: var(--mono); font-size: 13.5px" />
+              <span class="fhelp">{{ t('preview.repoEnvHelp') }}</span>
+            </template>
+          </div>
+        </template>
+      </fieldset>
       <div v-if="repo" class="field">
         <span class="flbl">CLAUDE.md</span>
         <span :class="repo.claudeMd === 'found' ? 'repo-ok' : repo.claudeMd === 'missing' ? 'repo-miss' : 'hint'">{{ claudeText }}</span>
@@ -162,3 +256,10 @@ const prefix = computed(() => (form.taskPrefix || 'VIS').toUpperCase())
     </template>
   </FormDrawer>
 </template>
+
+<style scoped>
+.rp-preview { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin: 0; display: grid; gap: 12px; }
+.rp-preview legend { padding: 0 6px; }
+.rp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.rp-presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+</style>

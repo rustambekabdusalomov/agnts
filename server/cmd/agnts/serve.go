@@ -6,11 +6,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"agnts/internal/admin"
@@ -59,6 +61,15 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 			log.Info("metrics listening", "addr", cfg.MetricsAddr)
 			if err := ms.ListenAndServe(); err != nil {
 				log.Error("metrics", "err", err)
+			}
+		}()
+	}
+	if cfg.InternalAddr != "" {
+		go func() {
+			is := &http.Server{Addr: cfg.InternalAddr, Handler: internalHandler(a.settings), ReadHeaderTimeout: 5 * time.Second}
+			log.Info("internal listener", "addr", cfg.InternalAddr)
+			if err := is.ListenAndServe(); err != nil {
+				log.Error("internal listener", "err", err)
 			}
 		}()
 	}
@@ -240,10 +251,12 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.vcs = vcs.NewMulti(map[string]vcs.Provider{"github": gh, "gitlab": gl})
 	ocfg := orchestrator.DefaultConfig()
 	ocfg.Image = cfg.RunnerImage
+	previewEnvs := postgres.NewPreviewEnvs(pool, box)
 	a.orch = orchestrator.New(ocfg, orchestrator.Deps{
 		Store: a.store, Runner: run, Git: repos, Host: a.vcs, Tracker: a.jira, Homes: homes,
 		Settings: a.settings, Usage: a.usage, Lessons: a.lessons, Rules: postgres.NewRules(pool),
 		Translations: postgres.NewTranslations(pool),
+		Shots:        gitrepo.NewShots(filepath.Join(cfg.DataDir, "previews")), PreviewEnvs: previewEnvs,
 	}, log.With("component", "orchestrator"))
 
 	a.repos = admin.NewRepos(a.store, gh, a.vcs, func(ctx context.Context) string {
@@ -259,6 +272,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	}, log.With("component", "repos"))
 	a.repos.SetRemotes(map[string]admin.RemoteLister{"github": gh, "gitlab": gl})
 	a.repos.SetLocal(repos)
+	a.repos.SetPreviewEnvs(previewEnvs)
 	a.dashboard = admin.NewDashboard(a.store, a.orch, a.repos, a.usage, a.settings, cfg.TimeZone)
 	a.adminInteg = admin.NewIntegrations(a.integrations, a.store, map[string]admin.Checker{
 		"jira":     admin.JiraCheck,
@@ -384,4 +398,23 @@ func jiraSync(ctx context.Context, cfg config.Config, pool postgresPool, log *sl
 	}
 	fmt.Printf("%d labelled open issues, %d new\n", found, created)
 	return nil
+}
+
+// internalHandler serves what other containers of the stack need from
+// agnts and must not be public: the egress proxy reads the hosts allowed in
+// Settings from /egress/allow. Caddy only routes the main listener.
+func internalHandler(settings interface {
+	Get(ctx context.Context) (domain.Settings, error)
+}) http.Handler {
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /egress/allow", func(w http.ResponseWriter, r *http.Request) {
+		s, err := settings.Get(r.Context())
+		if err != nil {
+			http.Error(w, "settings unavailable", http.StatusServiceUnavailable)
+			return
+		}
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		_, _ = io.WriteString(w, strings.Join(s.EgressAllow, "\n"))
+	})
+	return mux
 }

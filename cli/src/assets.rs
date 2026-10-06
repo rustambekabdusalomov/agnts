@@ -47,4 +47,20 @@ pub const FILES: &[Asset] = &[
         content: include_str!("../../deploy/runner/managed-settings.json"),
         mode: 0o644,
     },
+    // Preview tools copied into the image (COPY preview/...).
+    Asset {
+        path: "runner/preview/package.json",
+        content: include_str!("../../deploy/runner/preview/package.json"),
+        mode: 0o644,
+    },
+    Asset {
+        path: "runner/preview/agnts-shot.mjs",
+        content: include_str!("../../deploy/runner/preview/agnts-shot.mjs"),
+        mode: 0o755,
+    },
+    Asset {
+        path: "runner/preview/agnts-preview",
+        content: include_str!("../../deploy/runner/preview/agnts-preview"),
+        mode: 0o755,
+    },
 ];

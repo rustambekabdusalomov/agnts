@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+# agnts-preview: start and stop the repository's app for screenshots.
+#
+#   agnts-preview start   start the app and wait until it answers
+#   agnts-preview stop    stop it
+#   agnts-preview status  say whether it answers
+#   agnts-preview logs    print the end of its log
+#   agnts-preview base    check out the default branch where this change
+#                         started, and restart the app there
+#
+# agnts writes the command, port and ready path to /agnts/out/preview-config.json
+# and the app's environment (KEY=value lines) to /agnts/out/preview.env.
+set -uo pipefail
+
+CONFIG=${AGNTS_PREVIEW_CONFIG:-/agnts/out/preview-config.json}
+ENVFILE=${AGNTS_PREVIEW_ENV:-/agnts/out/preview.env}
+LOG=/tmp/preview.log
+PIDFILE=/tmp/preview.pid
+WAIT=${AGNTS_PREVIEW_WAIT:-420} # seconds: install, build and start
+
+die() { echo "agnts-preview: $*" >&2; exit 1; }
+
+[ -f "$CONFIG" ] || die "no preview is configured for this repository ($CONFIG is missing)"
+COMMAND=$(jq -r '.command // ""' "$CONFIG")
+PORT=$(jq -r '.port // 0' "$CONFIG")
+READY=$(jq -r '.readyPath // "/"' "$CONFIG")
+DEFAULT=$(jq -r '.defaultBranch // "main"' "$CONFIG")
+[ -n "$COMMAND" ] && [ "$PORT" -gt 0 ] || die "the preview command or port is not set"
+URL="http://localhost:${PORT}${READY}"
+
+# load_env exports KEY=value lines without evaluating them.
+load_env() {
+  [ -f "$ENVFILE" ] || return 0
+  local line key val
+  while IFS= read -r line || [ -n "$line" ]; do
+    line="${line#"${line%%[![:space:]]*}"}"
+    case "$line" in ''|'#'*) continue ;; esac
+    line="${line#export }"
+    key="${line%%=*}"; val="${line#*=}"
+    key="${key//[[:space:]]/}"
+    [[ "$key" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || continue
+    export "$key=$val"
+  done < "$ENVFILE"
+}
+
+running() { [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; }
+
+answers() {
+  local code
+  code=$(curl --noproxy '*' -s -o /dev/null -m 5 -w '%{http_code}' "$URL" 2>/dev/null) || return 1
+  [ "$code" != "000" ] && [ "$code" -lt 500 ]
+}
+
+stop() {
+  if running; then
+    local pid; pid=$(cat "$PIDFILE")
+    kill -TERM -- "-$pid" 2>/dev/null || kill -TERM "$pid" 2>/dev/null
+    for _ in $(seq 1 20); do running || break; sleep 0.5; done
+    kill -KILL -- "-$pid" 2>/dev/null || true
+  fi
+  rm -f "$PIDFILE"
+}
+
+start() {
+  stop
+  : > "$LOG"
+  echo "agnts-preview: starting \`$COMMAND\` (log: $LOG)"
+  (
+    load_env
+    cd /workspace || exit 1
+    # Its own session, so stop can end the whole process group.
+    setsid bash -c "$COMMAND" >> "$LOG" 2>&1 < /dev/null &
+    echo $! > "$PIDFILE"
+  )
+  local waited=0
+  while [ "$waited" -lt "$WAIT" ]; do
+    if answers; then
+      echo "agnts-preview: the app answers on http://localhost:${PORT}"
+      return 0
+    fi
+    if ! running; then
+      echo "agnts-preview: the app exited before it answered. The end of its log:" >&2
+      tail -n 60 "$LOG" >&2
+      return 1
+    fi
+    sleep 2; waited=$((waited + 2))
+  done
+  echo "agnts-preview: no answer from $URL after ${WAIT}s. The end of its log:" >&2
+  tail -n 60 "$LOG" >&2
+  return 1
+}
+
+base() {
+  cd /workspace || die "no /workspace"
+  local b
+  b=$(git merge-base HEAD "origin/$DEFAULT" 2>/dev/null) || b=$(git rev-parse "origin/$DEFAULT" 2>/dev/null) ||
+    die "the default branch $DEFAULT is not in this checkout"
+  stop
+  git -c advice.detachedHead=false checkout --quiet --force --detach "$b" || die "cannot check out $b"
+  echo "agnts-preview: checked out $DEFAULT at ${b:0:12}"
+  start
+}
+
+case "${1:-}" in
+  start) start ;;
+  stop) stop; echo "agnts-preview: stopped" ;;
+  status) if answers; then echo "answers on http://localhost:${PORT}"; else echo "not answering"; exit 1; fi ;;
+  logs) tail -n "${2:-80}" "$LOG" ;;
+  base) base ;;
+  *) echo "usage: agnts-preview start|stop|status|logs [lines]|base" >&2; exit 2 ;;
+esac

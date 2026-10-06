@@ -179,6 +179,24 @@ void main() {
       // TODO
     });
 
+    // The screenshots agnts takes beside the human review
+    // String previewState
+    test('to test the property `previewState`', () async {
+      // TODO
+    });
+
+    // Previews of this ticket also capture the default branch (before shots)
+    // bool previewCompare
+    test('to test the property `previewCompare`', () async {
+      // TODO
+    });
+
+    // The ticket's repository has a preview command
+    // bool canPreview
+    test('to test the property `canPreview`', () async {
+      // TODO
+    });
+
     // TokenSpend spend
     test('to test the property `spend`', () async {
       // TODO

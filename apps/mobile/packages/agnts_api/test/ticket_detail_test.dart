@@ -48,6 +48,11 @@ void main() {
       // TODO
     });
 
+    // TicketPreview preview
+    test('to test the property `preview`', () async {
+      // TODO
+    });
+
     // List<HistoryItem> history
     test('to test the property `history`', () async {
       // TODO

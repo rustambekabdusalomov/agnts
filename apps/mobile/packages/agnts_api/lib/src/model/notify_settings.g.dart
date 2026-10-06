@@ -21,6 +21,10 @@ abstract class _$NotifySettingsCWProxy {
 
   NotifySettings review(bool? review);
 
+  NotifySettings preview(bool? preview);
+
+  NotifySettings previewPhotos(bool? previewPhotos);
+
   NotifySettings followUps(bool? followUps);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `NotifySettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -37,6 +41,8 @@ abstract class _$NotifySettingsCWProxy {
     bool done,
     bool? lessons,
     bool? review,
+    bool? preview,
+    bool? previewPhotos,
     bool? followUps,
   });
 }
@@ -69,6 +75,13 @@ class _$NotifySettingsCWProxyImpl implements _$NotifySettingsCWProxy {
   NotifySettings review(bool? review) => this(review: review);
 
   @override
+  NotifySettings preview(bool? preview) => this(preview: preview);
+
+  @override
+  NotifySettings previewPhotos(bool? previewPhotos) =>
+      this(previewPhotos: previewPhotos);
+
+  @override
   NotifySettings followUps(bool? followUps) => this(followUps: followUps);
 
   @override
@@ -86,6 +99,8 @@ class _$NotifySettingsCWProxyImpl implements _$NotifySettingsCWProxy {
     Object? done = const $CopyWithPlaceholder(),
     Object? lessons = const $CopyWithPlaceholder(),
     Object? review = const $CopyWithPlaceholder(),
+    Object? preview = const $CopyWithPlaceholder(),
+    Object? previewPhotos = const $CopyWithPlaceholder(),
     Object? followUps = const $CopyWithPlaceholder(),
   }) {
     return NotifySettings(
@@ -117,6 +132,14 @@ class _$NotifySettingsCWProxyImpl implements _$NotifySettingsCWProxy {
           ? _value.review
           // ignore: cast_nullable_to_non_nullable
           : review as bool?,
+      preview: preview == const $CopyWithPlaceholder()
+          ? _value.preview
+          // ignore: cast_nullable_to_non_nullable
+          : preview as bool?,
+      previewPhotos: previewPhotos == const $CopyWithPlaceholder()
+          ? _value.previewPhotos
+          // ignore: cast_nullable_to_non_nullable
+          : previewPhotos as bool?,
       followUps: followUps == const $CopyWithPlaceholder()
           ? _value.followUps
           // ignore: cast_nullable_to_non_nullable
@@ -149,6 +172,8 @@ NotifySettings _$NotifySettingsFromJson(Map<String, dynamic> json) =>
         done: $checkedConvert('done', (v) => v as bool),
         lessons: $checkedConvert('lessons', (v) => v as bool?),
         review: $checkedConvert('review', (v) => v as bool?),
+        preview: $checkedConvert('preview', (v) => v as bool?),
+        previewPhotos: $checkedConvert('previewPhotos', (v) => v as bool?),
         followUps: $checkedConvert('followUps', (v) => v as bool?),
       );
       return val;
@@ -163,5 +188,7 @@ Map<String, dynamic> _$NotifySettingsToJson(NotifySettings instance) =>
       'done': instance.done,
       'lessons': ?instance.lessons,
       'review': ?instance.review,
+      'preview': ?instance.preview,
+      'previewPhotos': ?instance.previewPhotos,
       'followUps': ?instance.followUps,
     };

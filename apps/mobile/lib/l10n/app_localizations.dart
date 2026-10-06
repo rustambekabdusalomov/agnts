@@ -4041,6 +4041,222 @@ abstract class AppLocalizations {
   /// **'{n} min'**
   String mobileMinutes(String n);
 
+  /// No description provided for @mpreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts\'s preview'**
+  String get mpreviewTitle;
+
+  /// No description provided for @mpreviewSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshots of the app with this change. Advice beside your review: it never blocks approval.'**
+  String get mpreviewSub;
+
+  /// No description provided for @mpreviewPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued: agnts starts the app and takes screenshots as soon as a worker is free.'**
+  String get mpreviewPending;
+
+  /// No description provided for @mpreviewRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts is starting the app and taking screenshots…'**
+  String get mpreviewRunning;
+
+  /// No description provided for @mpreviewFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The preview failed. Check the app yourself, or run it again.'**
+  String get mpreviewFailed;
+
+  /// No description provided for @mpreviewAppFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The app did not start, so there are no screenshots. The end of its log:'**
+  String get mpreviewAppFailed;
+
+  /// No description provided for @mpreviewStale.
+  ///
+  /// In en, this message translates to:
+  /// **'These screenshots are of revision {n}; the work changed since.'**
+  String mpreviewStale(String n);
+
+  /// No description provided for @mpreviewRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Take screenshots'**
+  String get mpreviewRun;
+
+  /// No description provided for @mpreviewRunAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Run again'**
+  String get mpreviewRunAgain;
+
+  /// No description provided for @mpreviewCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare with the default branch'**
+  String get mpreviewCompare;
+
+  /// No description provided for @mpreviewCompareHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Also takes the same screenshots without this change.'**
+  String get mpreviewCompareHelp;
+
+  /// No description provided for @mpreviewStatus_ok.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get mpreviewStatus_ok;
+
+  /// No description provided for @mpreviewStatus_partial.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial'**
+  String get mpreviewStatus_partial;
+
+  /// No description provided for @mpreviewStatus_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Did not start'**
+  String get mpreviewStatus_failed;
+
+  /// No description provided for @mpreviewModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked by {model}'**
+  String mpreviewModel(String model);
+
+  /// No description provided for @mpreviewIssues.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0 {No issues} one {{count} issue} other {{count} issues}}'**
+  String mpreviewIssues(num count);
+
+  /// No description provided for @mpreviewNoIssues.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts saw no visual problems.'**
+  String get mpreviewNoIssues;
+
+  /// No description provided for @mpreviewSev_high.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get mpreviewSev_high;
+
+  /// No description provided for @mpreviewSev_medium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get mpreviewSev_medium;
+
+  /// No description provided for @mpreviewSev_low.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get mpreviewSev_low;
+
+  /// No description provided for @mpreviewShowShot.
+  ///
+  /// In en, this message translates to:
+  /// **'Show screenshot'**
+  String get mpreviewShowShot;
+
+  /// No description provided for @mpreviewDesktop.
+  ///
+  /// In en, this message translates to:
+  /// **'Desktop'**
+  String get mpreviewDesktop;
+
+  /// No description provided for @mpreviewPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get mpreviewPhone;
+
+  /// No description provided for @mpreviewBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'Before'**
+  String get mpreviewBefore;
+
+  /// No description provided for @mpreviewAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'After'**
+  String get mpreviewAfter;
+
+  /// No description provided for @mpreviewNoShots.
+  ///
+  /// In en, this message translates to:
+  /// **'No screenshots at this width.'**
+  String get mpreviewNoShots;
+
+  /// No description provided for @mpreviewConsoleErrors.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} console error} other {{count} console errors}}'**
+  String mpreviewConsoleErrors(num count);
+
+  /// No description provided for @mpreviewLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the screenshot.'**
+  String get mpreviewLoadFailed;
+
+  /// No description provided for @mpreviewAddToFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to feedback'**
+  String get mpreviewAddToFeedback;
+
+  /// No description provided for @mpreviewAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'In feedback'**
+  String get mpreviewAdded;
+
+  /// No description provided for @mpreviewAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshots sent with the feedback'**
+  String get mpreviewAttached;
+
+  /// No description provided for @mpreviewAttachLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {max} screenshots can go with the feedback.'**
+  String mpreviewAttachLimit(String max);
+
+  /// No description provided for @mpreviewRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get mpreviewRemove;
+
+  /// No description provided for @mpreviewSettingsModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get mpreviewSettingsModel;
+
+  /// No description provided for @mpreviewSettingsModelHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Looks at screenshots of the running app'**
+  String get mpreviewSettingsModelHelp;
+
+  /// No description provided for @mpreviewNotify.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview screenshots are ready'**
+  String get mpreviewNotify;
+
   /// No description provided for @mtasksActAnswers.
   ///
   /// In en, this message translates to:
@@ -4358,6 +4574,420 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rules'**
   String get navRules;
+
+  /// No description provided for @previewTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get previewTab;
+
+  /// No description provided for @previewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshots of the app'**
+  String get previewTitle;
+
+  /// No description provided for @previewSub.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts started the app with this change and took screenshots. Advice only: it never blocks approval.'**
+  String get previewSub;
+
+  /// No description provided for @previewPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued: agnts takes screenshots as soon as a worker is free.'**
+  String get previewPending;
+
+  /// No description provided for @previewRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts is starting the app and taking screenshots…'**
+  String get previewRunning;
+
+  /// No description provided for @previewFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The preview run failed. Check the run log, or run it again.'**
+  String get previewFailed;
+
+  /// No description provided for @previewStale.
+  ///
+  /// In en, this message translates to:
+  /// **'These screenshots are of revision {n}; the change moved on since.'**
+  String previewStale(String n);
+
+  /// No description provided for @previewNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No screenshots yet.'**
+  String get previewNone;
+
+  /// No description provided for @previewStatus_ok.
+  ///
+  /// In en, this message translates to:
+  /// **'Captured'**
+  String get previewStatus_ok;
+
+  /// No description provided for @previewStatus_partial.
+  ///
+  /// In en, this message translates to:
+  /// **'Partly captured'**
+  String get previewStatus_partial;
+
+  /// No description provided for @previewStatus_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'App did not start'**
+  String get previewStatus_failed;
+
+  /// No description provided for @previewModel.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =0 {No screenshots} one {{n} screenshot} other {{n} screenshots}} by {model}'**
+  String previewModel(num n, String model);
+
+  /// No description provided for @previewWithBase.
+  ///
+  /// In en, this message translates to:
+  /// **'with the default branch for comparison'**
+  String get previewWithBase;
+
+  /// No description provided for @previewSev_high.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get previewSev_high;
+
+  /// No description provided for @previewSev_medium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get previewSev_medium;
+
+  /// No description provided for @previewSev_low.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get previewSev_low;
+
+  /// No description provided for @previewNoIssues.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts saw no visual problems.'**
+  String get previewNoIssues;
+
+  /// No description provided for @previewViewport.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen size'**
+  String get previewViewport;
+
+  /// No description provided for @previewVp_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get previewVp_all;
+
+  /// No description provided for @previewVp_desktop.
+  ///
+  /// In en, this message translates to:
+  /// **'Desktop'**
+  String get previewVp_desktop;
+
+  /// No description provided for @previewVp_phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get previewVp_phone;
+
+  /// No description provided for @previewMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get previewMode;
+
+  /// No description provided for @previewMode_after.
+  ///
+  /// In en, this message translates to:
+  /// **'After'**
+  String get previewMode_after;
+
+  /// No description provided for @previewMode_before.
+  ///
+  /// In en, this message translates to:
+  /// **'Before'**
+  String get previewMode_before;
+
+  /// No description provided for @previewMode_side.
+  ///
+  /// In en, this message translates to:
+  /// **'Side by side'**
+  String get previewMode_side;
+
+  /// No description provided for @previewMode_slider.
+  ///
+  /// In en, this message translates to:
+  /// **'Slider'**
+  String get previewMode_slider;
+
+  /// No description provided for @previewSlider.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to compare before and after'**
+  String get previewSlider;
+
+  /// No description provided for @previewConsoleErrors.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} console error} other {{count} console errors}}'**
+  String previewConsoleErrors(num count);
+
+  /// No description provided for @previewNoBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'No before screenshot: this page is new or could not open on the default branch.'**
+  String get previewNoBefore;
+
+  /// No description provided for @previewAddToFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to feedback'**
+  String get previewAddToFeedback;
+
+  /// No description provided for @previewAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'In feedback'**
+  String get previewAdded;
+
+  /// No description provided for @previewCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare with the default branch'**
+  String get previewCompare;
+
+  /// No description provided for @previewRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Take screenshots'**
+  String get previewRun;
+
+  /// No description provided for @previewRunAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Take screenshots again'**
+  String get previewRunAgain;
+
+  /// No description provided for @previewTooMany.
+  ///
+  /// In en, this message translates to:
+  /// **'Feedback can carry {n} screenshots at most.'**
+  String previewTooMany(String n);
+
+  /// No description provided for @previewAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshots sent with the feedback'**
+  String get previewAttached;
+
+  /// No description provided for @previewDetach.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}'**
+  String previewDetach(String name);
+
+  /// No description provided for @previewRepoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get previewRepoTitle;
+
+  /// No description provided for @previewRepoHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'How agnts starts the app to take screenshots of UI changes before you review them. Leave the command empty to turn previews off.'**
+  String get previewRepoHelp;
+
+  /// No description provided for @previewRepoCommand.
+  ///
+  /// In en, this message translates to:
+  /// **'Start command'**
+  String get previewRepoCommand;
+
+  /// No description provided for @previewRepoCommandHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Runs in /workspace inside the run container: install, build and start the dev server. It must listen on the port below.'**
+  String get previewRepoCommandHelp;
+
+  /// No description provided for @previewRepoPort.
+  ///
+  /// In en, this message translates to:
+  /// **'Port'**
+  String get previewRepoPort;
+
+  /// No description provided for @previewRepoReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready path'**
+  String get previewRepoReady;
+
+  /// No description provided for @previewRepoUiPaths.
+  ///
+  /// In en, this message translates to:
+  /// **'UI files'**
+  String get previewRepoUiPaths;
+
+  /// No description provided for @previewRepoUiPathsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'One glob per line, relative to the repository root. A change touching one gets screenshots. Empty: every change.'**
+  String get previewRepoUiPathsHelp;
+
+  /// No description provided for @previewRepoRoutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Always capture'**
+  String get previewRepoRoutes;
+
+  /// No description provided for @previewRepoRoutesHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Routes captured on every preview, one per line, besides the ones agnts picks from the diff.'**
+  String get previewRepoRoutesHelp;
+
+  /// No description provided for @previewRepoLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing in'**
+  String get previewRepoLogin;
+
+  /// No description provided for @previewRepoLoginPh.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in as demo@acme.test; the password is in PREVIEW_PASSWORD.'**
+  String get previewRepoLoginPh;
+
+  /// No description provided for @previewRepoLoginHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell agnts how to get past a login, if the app has one. Refer to secrets by variable name.'**
+  String get previewRepoLoginHelp;
+
+  /// No description provided for @previewRepoEnv.
+  ///
+  /// In en, this message translates to:
+  /// **'Environment'**
+  String get previewRepoEnv;
+
+  /// No description provided for @previewRepoEnvSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Set: {names}. The values are never shown.'**
+  String previewRepoEnvSet(String names);
+
+  /// No description provided for @previewRepoEnvReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get previewRepoEnvReplace;
+
+  /// No description provided for @previewRepoEnvClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get previewRepoEnvClear;
+
+  /// No description provided for @previewRepoEnvCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'The environment will be cleared when you save.'**
+  String get previewRepoEnvCleared;
+
+  /// No description provided for @previewRepoEnvHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'KEY=value lines given to the app, such as a staging API URL. Stored encrypted and never shown again. Use staging-only credentials: the app and agnts can read them. Add any host the app calls to Settings → Previews → Allowed hosts.'**
+  String get previewRepoEnvHelp;
+
+  /// No description provided for @previewSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Previews'**
+  String get previewSettingsTitle;
+
+  /// No description provided for @previewSettingsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshots of UI changes, for repositories with a preview command.'**
+  String get previewSettingsSub;
+
+  /// No description provided for @previewAutoPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Take screenshots of every UI change'**
+  String get previewAutoPreview;
+
+  /// No description provided for @previewAutoPreviewHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'While a change waits for you, agnts starts the app, opens the pages it touches and shows screenshots next to the diff. It never blocks approval.'**
+  String get previewAutoPreviewHelp;
+
+  /// No description provided for @previewVisualCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Let coding runs look at the app'**
+  String get previewVisualCheck;
+
+  /// No description provided for @previewVisualCheckHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude may start the app and look at the pages it changed before it finishes, and fix what looks broken. Costs a few more turns.'**
+  String get previewVisualCheckHelp;
+
+  /// No description provided for @previewModel_.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview model'**
+  String get previewModel_;
+
+  /// No description provided for @previewModelHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Picks the pages and judges the screenshots.'**
+  String get previewModelHelp;
+
+  /// No description provided for @previewEgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed hosts'**
+  String get previewEgress;
+
+  /// No description provided for @previewEgressHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Hosts run containers may reach besides the built-in list (Claude, git hosts, package registries), such as a staging API your app calls in a preview. .example.com allows its subdomains.'**
+  String get previewEgressHelp;
+
+  /// No description provided for @previewNotify.
+  ///
+  /// In en, this message translates to:
+  /// **'When preview screenshots are ready'**
+  String get previewNotify;
+
+  /// No description provided for @previewNotifyPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Send phone screenshots to Telegram'**
+  String get previewNotifyPhotos;
+
+  /// No description provided for @previewNotifyPhotosHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to four screenshots go with the Telegram message.'**
+  String get previewNotifyPhotosHelp;
 
   /// No description provided for @relationsTab.
   ///
@@ -6639,6 +7269,12 @@ abstract class AppLocalizations {
   /// **'Code review'**
   String get spendStageReview;
 
+  /// No description provided for @spendStagePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get spendStagePreview;
+
   /// No description provided for @spendStageLearn.
   ///
   /// In en, this message translates to:
@@ -7670,6 +8306,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Code review by agnts'**
   String get ticketStageReview;
+
+  /// No description provided for @ticketStagePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshots (preview)'**
+  String get ticketStagePreview;
 
   /// No description provided for @ticketModelAuto.
   ///

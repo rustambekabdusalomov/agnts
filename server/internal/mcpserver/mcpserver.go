@@ -56,7 +56,7 @@ func NewServer(d Deps, version string) *mcp.Server {
 
 	mcp.AddTool(s, &mcp.Tool{Name: "get_inbox", Description: "Tickets waiting on the user (questions to answer, changes to review, stopped runs), oldest first, plus what is running.", Annotations: ro}, t.getInbox)
 	mcp.AddTool(s, &mcp.Tool{Name: "list_tickets", Description: "List tickets. filter: needs, running, queue, done or all.", Annotations: ro}, t.listTickets)
-	mcp.AddTool(s, &mcp.Tool{Name: "get_ticket", Description: "One ticket: its kind, description, agnts's analysis and plan, questions with ids, the latest result (summary, checks and changed files for a change; the Markdown report for plan, analysis and bug tickets), agnts's code review of that result (advice; the user decides), suggested follow-up tickets with ids, and history.", Annotations: ro}, t.getTicket)
+	mcp.AddTool(s, &mcp.Tool{Name: "get_ticket", Description: "One ticket: its kind, description, agnts's analysis and plan, questions with ids, the latest result (summary, checks and changed files for a change; the Markdown report for plan, analysis and bug tickets), agnts's code review of that result and its preview (screenshots of the app, with visual issues; advice, the user decides), suggested follow-up tickets with ids, and history.", Annotations: ro}, t.getTicket)
 	mcp.AddTool(s, &mcp.Tool{Name: "get_run_log", Description: "The newest log lines of a ticket's runs (tool calls, checks, state changes).", Annotations: ro}, t.getRunLog)
 	mcp.AddTool(s, &mcp.Tool{Name: "get_usage", Description: "Claude plan usage (session and weekly) and whether new runs are paused.", Annotations: ro}, t.getUsage)
 	mcp.AddTool(s, &mcp.Tool{Name: "get_analytics", Description: "Statistics for the last N days (7, 30 or 90): tickets picked up, pushed, first-try approvals, turns, waiting time, stops, token spend.", Annotations: ro}, t.getAnalytics)
@@ -234,6 +234,7 @@ type TicketOut struct {
 	FollowUpOf   string        `json:"follow_up_of,omitempty"`
 	FollowUps    []FollowUpOut `json:"follow_ups,omitempty"`
 	CodeReview   *ReviewOut    `json:"code_review,omitempty"`
+	Preview      *PreviewOut   `json:"preview,omitempty"`
 	History      []string      `json:"history,omitempty"`
 }
 
@@ -258,6 +259,16 @@ type ReviewOut struct {
 	Summary  string   `json:"summary,omitempty"`
 	Findings []string `json:"findings,omitempty"`
 	Model    string   `json:"model,omitempty"`
+}
+
+// PreviewOut is what the preview saw of the app at the change under
+// review: advice, like the code review. The screenshots are in agnts.
+type PreviewOut struct {
+	State       string   `json:"state" jsonschema:"pending, running, done or failed"`
+	Status      string   `json:"status,omitempty" jsonschema:"ok, partial, or failed when the app did not start"`
+	Summary     string   `json:"summary,omitempty"`
+	Screenshots int      `json:"screenshots,omitempty"`
+	Issues      []string `json:"issues,omitempty"`
 }
 
 func (t *tools) getTicket(ctx context.Context, _ *mcp.CallToolRequest, in KeyInput) (*mcp.CallToolResult, TicketOut, error) {
@@ -323,6 +334,20 @@ func (t *tools) getTicket(ctx context.Context, _ *mcp.CallToolRequest, in KeyInp
 			}
 		}
 		out.CodeReview = rv
+	}
+	if v.Ticket.State == domain.StateWaitingForReview && v.Ticket.PreviewState != domain.PreviewNone {
+		pv := &PreviewOut{State: v.Ticket.PreviewState}
+		if p := v.Preview; p != nil && p.Revision == v.Ticket.Revision {
+			pv.Status, pv.Summary, pv.Screenshots = p.Status, p.Summary, len(p.Shots)
+			for _, is := range p.Issues {
+				line := fmt.Sprintf("[%s] %s", is.Severity, is.Description)
+				if sh, ok := p.Shot(is.ShotID); ok {
+					line += fmt.Sprintf(" (%s, %s at %s)", sh.Name, sh.Viewport, sh.Route)
+				}
+				pv.Issues = append(pv.Issues, line)
+			}
+		}
+		out.Preview = pv
 	}
 	for i, h := range v.History {
 		if i < len(v.History)-10 {
@@ -894,7 +919,7 @@ func (t *tools) confirmAction(ctx context.Context, _ *mcp.CallToolRequest, in Co
 		tk, err = o.Start(ctx, a.TicketKey, domain.OriginMCP)
 	case "request_changes":
 		fb, _ := a.Args["feedback"].(string)
-		tk, err = o.RequestChanges(ctx, a.TicketKey, fb, domain.OriginMCP)
+		tk, err = o.RequestChanges(ctx, a.TicketKey, fb, nil, domain.OriginMCP)
 	case "retry_run":
 		tk, err = o.Retry(ctx, a.TicketKey, domain.OriginMCP)
 	case "approve_ticket":

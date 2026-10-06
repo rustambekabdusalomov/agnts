@@ -192,7 +192,7 @@ func TestWorkFollowUpsWaitForDone(t *testing.T) {
 
 	// Changes requested: the rerun replaces open work suggestions; the
 	// dismissed one stays and the prompt says not to suggest it again.
-	if _, err := h.o.RequestChanges(h.ctx, "PAY-1", "Also log refunds.", domain.OriginWeb); err != nil {
+	if _, err := h.o.RequestChanges(h.ctx, "PAY-1", "Also log refunds.", nil, domain.OriginWeb); err != nil {
 		t.Fatal(err)
 	}
 	h.runner.scripts = []script{{result: ok("s2"), edit: "v2", files: map[string]string{orchestrator.SummaryPath: summaryWith(followUp("prerequisite", "Enable refund logs in prod"))}}}

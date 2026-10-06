@@ -205,6 +205,22 @@ const reviewModels = computed(() => [{ value: 'auto' as ReviewModel, label: t('s
         </CfgRow>
       </section>
 
+      <section v-if="draft.autoPreview !== undefined" id="s-preview" class="card">
+        <div class="ch"><div><h2>{{ t('preview.settingsTitle') }}</h2><p class="sub">{{ t('preview.settingsSub') }}</p></div></div>
+        <CfgRow :label="t('preview.autoPreview')" :help="t('preview.autoPreviewHelp')">
+          <SwitchToggle v-model="draft.autoPreview" :label="t('preview.autoPreview')" />
+        </CfgRow>
+        <CfgRow v-if="draft.visualCheck !== undefined" :label="t('preview.visualCheck')" :help="t('preview.visualCheckHelp')">
+          <SwitchToggle v-model="draft.visualCheck" :label="t('preview.visualCheck')" />
+        </CfgRow>
+        <CfgRow v-if="draft.models.preview !== undefined" :label="t('preview.model_')" :help="t('preview.modelHelp')">
+          <SegButtons v-model="draft.models.preview" :options="models" :label="t('preview.model_')" />
+        </CfgRow>
+        <CfgRow v-if="draft.egressAllow !== undefined" :label="t('preview.egress')" :help="t('preview.egressHelp')">
+          <CommandChips v-model="draft.egressAllow" :label="t('preview.egress')" placeholder="staging.example.com" />
+        </CfgRow>
+      </section>
+
       <section v-if="draft.notify" id="s-notify" class="card">
         <div class="ch"><div><h2>{{ t('settings.notify') }}</h2><p class="sub">{{ t('settings.notifySub') }}</p></div></div>
         <CfgRow :label="t('settings.push')" :help="t('settings.pushHelp')">
@@ -228,6 +244,12 @@ const reviewModels = computed(() => [{ value: 'auto' as ReviewModel, label: t('s
         <CfgRow v-if="draft.notify.review !== undefined" :label="t('settings.reviewDone')">
           <SwitchToggle v-model="draft.notify.review" :label="t('settings.reviewDone')" />
         </CfgRow>
+        <CfgRow v-if="draft.notify.preview !== undefined" :label="t('preview.notify')">
+          <SwitchToggle v-model="draft.notify.preview" :label="t('preview.notify')" />
+        </CfgRow>
+        <CfgRow v-if="draft.notify.previewPhotos !== undefined" :label="t('preview.notifyPhotos')" :help="t('preview.notifyPhotosHelp')">
+          <SwitchToggle v-model="draft.notify.previewPhotos" :label="t('preview.notifyPhotos')" />
+        </CfgRow>
         <CfgRow v-if="draft.notify.followUps !== undefined" :label="t('followUps.notifyLabel')">
           <SwitchToggle v-model="draft.notify.followUps" :label="t('followUps.notifyLabel')" />
         </CfgRow>
@@ -245,6 +267,7 @@ const reviewModels = computed(() => [{ value: 'auto' as ReviewModel, label: t('s
           <a href="#s-claude">{{ t('settings.claude') }}</a>
           <a href="#s-git">{{ t('settings.commits') }}</a>
           <a href="#s-runs">{{ t('settings.runs') }}</a>
+          <a href="#s-preview">{{ t('preview.settingsTitle') }}</a>
           <a href="#s-notify">{{ t('settings.notify') }}</a>
           <a href="#s-mcp">{{ t('mcp.title') }}</a>
         </nav>

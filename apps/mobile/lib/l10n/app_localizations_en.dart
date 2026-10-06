@@ -2205,6 +2205,126 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get mpreviewTitle => 'agnts\'s preview';
+
+  @override
+  String get mpreviewSub => 'Screenshots of the app with this change. Advice beside your review: it never blocks approval.';
+
+  @override
+  String get mpreviewPending => 'Queued: agnts starts the app and takes screenshots as soon as a worker is free.';
+
+  @override
+  String get mpreviewRunning => 'agnts is starting the app and taking screenshots…';
+
+  @override
+  String get mpreviewFailed => 'The preview failed. Check the app yourself, or run it again.';
+
+  @override
+  String get mpreviewAppFailed => 'The app did not start, so there are no screenshots. The end of its log:';
+
+  @override
+  String mpreviewStale(String n) {
+    return 'These screenshots are of revision $n; the work changed since.';
+  }
+
+  @override
+  String get mpreviewRun => 'Take screenshots';
+
+  @override
+  String get mpreviewRunAgain => 'Run again';
+
+  @override
+  String get mpreviewCompare => 'Compare with the default branch';
+
+  @override
+  String get mpreviewCompareHelp => 'Also takes the same screenshots without this change.';
+
+  @override
+  String get mpreviewStatus_ok => 'Ready';
+
+  @override
+  String get mpreviewStatus_partial => 'Partial';
+
+  @override
+  String get mpreviewStatus_failed => 'Did not start';
+
+  @override
+  String mpreviewModel(String model) {
+    return 'Checked by $model';
+  }
+
+  @override
+  String mpreviewIssues(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count issues', one: '$count issue', zero: 'No issues');
+    return '$_temp0';
+  }
+
+  @override
+  String get mpreviewNoIssues => 'agnts saw no visual problems.';
+
+  @override
+  String get mpreviewSev_high => 'High';
+
+  @override
+  String get mpreviewSev_medium => 'Medium';
+
+  @override
+  String get mpreviewSev_low => 'Low';
+
+  @override
+  String get mpreviewShowShot => 'Show screenshot';
+
+  @override
+  String get mpreviewDesktop => 'Desktop';
+
+  @override
+  String get mpreviewPhone => 'Phone';
+
+  @override
+  String get mpreviewBefore => 'Before';
+
+  @override
+  String get mpreviewAfter => 'After';
+
+  @override
+  String get mpreviewNoShots => 'No screenshots at this width.';
+
+  @override
+  String mpreviewConsoleErrors(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count console errors', one: '$count console error');
+    return '$_temp0';
+  }
+
+  @override
+  String get mpreviewLoadFailed => 'Could not load the screenshot.';
+
+  @override
+  String get mpreviewAddToFeedback => 'Add to feedback';
+
+  @override
+  String get mpreviewAdded => 'In feedback';
+
+  @override
+  String get mpreviewAttached => 'Screenshots sent with the feedback';
+
+  @override
+  String mpreviewAttachLimit(String max) {
+    return 'Up to $max screenshots can go with the feedback.';
+  }
+
+  @override
+  String get mpreviewRemove => 'Remove';
+
+  @override
+  String get mpreviewSettingsModel => 'Preview';
+
+  @override
+  String get mpreviewSettingsModelHelp => 'Looks at screenshots of the running app';
+
+  @override
+  String get mpreviewNotify => 'Preview screenshots are ready';
+
+  @override
   String get mtasksActAnswers => 'Answer agnts\'s questions';
 
   @override
@@ -2366,6 +2486,234 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navRules => 'Rules';
+
+  @override
+  String get previewTab => 'Preview';
+
+  @override
+  String get previewTitle => 'Screenshots of the app';
+
+  @override
+  String get previewSub => 'agnts started the app with this change and took screenshots. Advice only: it never blocks approval.';
+
+  @override
+  String get previewPending => 'Queued: agnts takes screenshots as soon as a worker is free.';
+
+  @override
+  String get previewRunning => 'agnts is starting the app and taking screenshots…';
+
+  @override
+  String get previewFailed => 'The preview run failed. Check the run log, or run it again.';
+
+  @override
+  String previewStale(String n) {
+    return 'These screenshots are of revision $n; the change moved on since.';
+  }
+
+  @override
+  String get previewNone => 'No screenshots yet.';
+
+  @override
+  String get previewStatus_ok => 'Captured';
+
+  @override
+  String get previewStatus_partial => 'Partly captured';
+
+  @override
+  String get previewStatus_failed => 'App did not start';
+
+  @override
+  String previewModel(num n, String model) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n screenshots', one: '$n screenshot', zero: 'No screenshots');
+    return '$_temp0 by $model';
+  }
+
+  @override
+  String get previewWithBase => 'with the default branch for comparison';
+
+  @override
+  String get previewSev_high => 'High';
+
+  @override
+  String get previewSev_medium => 'Medium';
+
+  @override
+  String get previewSev_low => 'Low';
+
+  @override
+  String get previewNoIssues => 'agnts saw no visual problems.';
+
+  @override
+  String get previewViewport => 'Screen size';
+
+  @override
+  String get previewVp_all => 'All';
+
+  @override
+  String get previewVp_desktop => 'Desktop';
+
+  @override
+  String get previewVp_phone => 'Phone';
+
+  @override
+  String get previewMode => 'Show';
+
+  @override
+  String get previewMode_after => 'After';
+
+  @override
+  String get previewMode_before => 'Before';
+
+  @override
+  String get previewMode_side => 'Side by side';
+
+  @override
+  String get previewMode_slider => 'Slider';
+
+  @override
+  String get previewSlider => 'Drag to compare before and after';
+
+  @override
+  String previewConsoleErrors(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count console errors', one: '$count console error');
+    return '$_temp0';
+  }
+
+  @override
+  String get previewNoBefore => 'No before screenshot: this page is new or could not open on the default branch.';
+
+  @override
+  String get previewAddToFeedback => 'Add to feedback';
+
+  @override
+  String get previewAdded => 'In feedback';
+
+  @override
+  String get previewCompare => 'Compare with the default branch';
+
+  @override
+  String get previewRun => 'Take screenshots';
+
+  @override
+  String get previewRunAgain => 'Take screenshots again';
+
+  @override
+  String previewTooMany(String n) {
+    return 'Feedback can carry $n screenshots at most.';
+  }
+
+  @override
+  String get previewAttached => 'Screenshots sent with the feedback';
+
+  @override
+  String previewDetach(String name) {
+    return 'Remove $name';
+  }
+
+  @override
+  String get previewRepoTitle => 'Preview';
+
+  @override
+  String get previewRepoHelp =>
+      'How agnts starts the app to take screenshots of UI changes before you review them. Leave the command empty to turn previews off.';
+
+  @override
+  String get previewRepoCommand => 'Start command';
+
+  @override
+  String get previewRepoCommandHelp =>
+      'Runs in /workspace inside the run container: install, build and start the dev server. It must listen on the port below.';
+
+  @override
+  String get previewRepoPort => 'Port';
+
+  @override
+  String get previewRepoReady => 'Ready path';
+
+  @override
+  String get previewRepoUiPaths => 'UI files';
+
+  @override
+  String get previewRepoUiPathsHelp =>
+      'One glob per line, relative to the repository root. A change touching one gets screenshots. Empty: every change.';
+
+  @override
+  String get previewRepoRoutes => 'Always capture';
+
+  @override
+  String get previewRepoRoutesHelp => 'Routes captured on every preview, one per line, besides the ones agnts picks from the diff.';
+
+  @override
+  String get previewRepoLogin => 'Signing in';
+
+  @override
+  String get previewRepoLoginPh => 'Sign in as demo@acme.test; the password is in PREVIEW_PASSWORD.';
+
+  @override
+  String get previewRepoLoginHelp => 'Tell agnts how to get past a login, if the app has one. Refer to secrets by variable name.';
+
+  @override
+  String get previewRepoEnv => 'Environment';
+
+  @override
+  String previewRepoEnvSet(String names) {
+    return 'Set: $names. The values are never shown.';
+  }
+
+  @override
+  String get previewRepoEnvReplace => 'Replace';
+
+  @override
+  String get previewRepoEnvClear => 'Clear';
+
+  @override
+  String get previewRepoEnvCleared => 'The environment will be cleared when you save.';
+
+  @override
+  String get previewRepoEnvHelp =>
+      'KEY=value lines given to the app, such as a staging API URL. Stored encrypted and never shown again. Use staging-only credentials: the app and agnts can read them. Add any host the app calls to Settings → Previews → Allowed hosts.';
+
+  @override
+  String get previewSettingsTitle => 'Previews';
+
+  @override
+  String get previewSettingsSub => 'Screenshots of UI changes, for repositories with a preview command.';
+
+  @override
+  String get previewAutoPreview => 'Take screenshots of every UI change';
+
+  @override
+  String get previewAutoPreviewHelp =>
+      'While a change waits for you, agnts starts the app, opens the pages it touches and shows screenshots next to the diff. It never blocks approval.';
+
+  @override
+  String get previewVisualCheck => 'Let coding runs look at the app';
+
+  @override
+  String get previewVisualCheckHelp =>
+      'Claude may start the app and look at the pages it changed before it finishes, and fix what looks broken. Costs a few more turns.';
+
+  @override
+  String get previewModel_ => 'Preview model';
+
+  @override
+  String get previewModelHelp => 'Picks the pages and judges the screenshots.';
+
+  @override
+  String get previewEgress => 'Allowed hosts';
+
+  @override
+  String get previewEgressHelp =>
+      'Hosts run containers may reach besides the built-in list (Claude, git hosts, package registries), such as a staging API your app calls in a preview. .example.com allows its subdomains.';
+
+  @override
+  String get previewNotify => 'When preview screenshots are ready';
+
+  @override
+  String get previewNotifyPhotos => 'Send phone screenshots to Telegram';
+
+  @override
+  String get previewNotifyPhotosHelp => 'Up to four screenshots go with the Telegram message.';
 
   @override
   String get relationsTab => 'Order';
@@ -3644,6 +3992,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spendStageReview => 'Code review';
 
   @override
+  String get spendStagePreview => 'Preview';
+
+  @override
   String get spendStageLearn => 'Lessons';
 
   @override
@@ -4230,6 +4581,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ticketStageReview => 'Code review by agnts';
+
+  @override
+  String get ticketStagePreview => 'Screenshots (preview)';
 
   @override
   String ticketModelAuto(String model) {

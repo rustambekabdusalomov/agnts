@@ -13,6 +13,7 @@ import 'package:agnts_api/src/model/relations.dart';
 import 'package:agnts_api/src/model/history_item.dart';
 import 'package:agnts_api/src/model/code_review.dart';
 import 'package:agnts_api/src/model/analysis.dart';
+import 'package:agnts_api/src/model/ticket_preview.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -45,6 +46,8 @@ class TicketDetail {
      this.relations,
 
      this.review,
+
+     this.preview,
 
      this.history,
 
@@ -154,6 +157,18 @@ class TicketDetail {
 
   @JsonKey(
     
+    name: r'preview',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final TicketPreview? preview;
+
+
+
+  @JsonKey(
+    
     name: r'history',
     required: false,
     includeIfNull: false,
@@ -213,6 +228,7 @@ class TicketDetail {
       other.followUps == followUps &&
       other.relations == relations &&
       other.review == review &&
+      other.preview == preview &&
       other.history == history &&
       other.maxTurns == maxTurns &&
       other.effectiveModels == effectiveModels &&
@@ -228,6 +244,7 @@ class TicketDetail {
         followUps.hashCode +
         relations.hashCode +
         review.hashCode +
+        preview.hashCode +
         history.hashCode +
         maxTurns.hashCode +
         effectiveModels.hashCode +

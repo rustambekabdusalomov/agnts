@@ -405,6 +405,23 @@ const (
 	TrackerMerged   TrackerStatus = "merged"
 )
 
+// Shots stores preview screenshots by ticket and run.
+type Shots interface {
+	Save(ticketKey string, runID int64, id string, png []byte) error
+	Open(ticketKey string, runID int64, id string) (io.ReadCloser, error)
+	// Prune deletes a ticket's screenshots except those of the runs in
+	// keep; an empty keep deletes them all.
+	Prune(ticketKey string, keep []int64) error
+	// Tickets lists the ticket keys that have screenshots.
+	Tickets() ([]string, error)
+}
+
+// PreviewEnvs returns a repository's preview environment (KEY=value
+// lines), "" when none is set.
+type PreviewEnvs interface {
+	PreviewEnv(ctx context.Context, repoID int64) (string, error)
+}
+
 // Homes stores each ticket's Claude Code config dir between runs.
 type Homes interface {
 	Load(ticketKey string) ([]byte, error) // nil, nil when there is none

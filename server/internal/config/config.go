@@ -48,6 +48,9 @@ type Config struct {
 	RunProxy         string         // AGNTS_RUN_PROXY, egress proxy for run containers (e.g. http://egress:3128)
 	EgressAllow      []string       // AGNTS_EGRESS_ALLOW, hosts run containers may reach
 	MetricsAddr      string         // AGNTS_METRICS_ADDR, Prometheus listener (keep it private); empty disables
+	// InternalAddr serves the egress proxy the hosts allowed in Settings
+	// (AGNTS_INTERNAL_ADDR). Keep it private; empty disables.
+	InternalAddr string
 }
 
 // Load reads the configuration from the environment.
@@ -87,6 +90,7 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 	c.TelegramAPI = get("AGNTS_TELEGRAM_API", "https://api.telegram.org")
 	c.RunProxy = get("AGNTS_RUN_PROXY", "")
 	c.MetricsAddr = get("AGNTS_METRICS_ADDR", "")
+	c.InternalAddr = get("AGNTS_INTERNAL_ADDR", ":8081")
 	for _, h := range strings.Split(get("AGNTS_EGRESS_ALLOW", ""), ",") {
 		if h = strings.TrimSpace(h); h != "" {
 			c.EgressAllow = append(c.EgressAllow, h)

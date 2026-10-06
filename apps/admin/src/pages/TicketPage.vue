@@ -4,7 +4,7 @@ import { computed, nextTick, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../api/client'
-import { isReport, KIND_EDITABLE, MODEL_NAME, needsRepo, stateKey, TERMINAL, type TicketKind } from '../api/types'
+import { isReport, KIND_EDITABLE, MODEL_NAME, needsRepo, stateKey, TERMINAL, type ShotRef, type TicketKind } from '../api/types'
 import UsageCard from '../components/dashboard/UsageCard.vue'
 import DiffView from '../components/DiffView.vue'
 import TicketLessons from '../components/learn/TicketLessons.vue'
@@ -16,6 +16,7 @@ import ImplementReport from '../components/ticket/ImplementReport.vue'
 import FollowUps from '../components/ticket/FollowUps.vue'
 import TicketRelations from '../components/ticket/TicketRelations.vue'
 import CodeReview from '../components/ticket/CodeReview.vue'
+import PreviewShots from '../components/ticket/PreviewShots.vue'
 import ModelPicker from '../components/ticket/ModelPicker.vue'
 import ReportView from '../components/ticket/ReportView.vue'
 import RepoPicker from '../components/ticket/RepoPicker.vue'
@@ -79,6 +80,9 @@ const left = computed(() => (d.value?.questions ?? []).filter((q) => !answers[q.
 const answered = computed(() => (d.value?.questions ?? []).filter((q) => q.answer))
 
 const feedback = ref('')
+// Preview screenshots the feedback points at; the coding run gets them.
+const feedbackShots = ref<ShotRef[]>([])
+const MAX_FEEDBACK_SHOTS = 6
 const notice = ref('')
 
 // Assignees for the pull request agnts opens on approval (not for tasks that
@@ -142,7 +146,12 @@ const act = useMutation({
           }),
         )
       case 'request-changes':
-        return unwrap(api.POST('/tickets/{key}/request-changes', { ...path, body: { feedback: feedback.value.trim() } }))
+        return unwrap(
+          api.POST('/tickets/{key}/request-changes', {
+            ...path,
+            body: { feedback: feedback.value.trim(), shots: feedbackShots.value.length ? feedbackShots.value : undefined },
+          }),
+        )
       case 'reject':
         return unwrap(api.POST('/tickets/{key}/reject', { ...path, body: {} }))
       case 'retry':
@@ -157,7 +166,10 @@ const act = useMutation({
   },
   onSuccess: (_, a) => {
     notice.value = ''
-    if (a === 'request-changes') feedback.value = ''
+    if (a === 'request-changes') {
+      feedback.value = ''
+      feedbackShots.value = []
+    }
   },
   onError: (e) => {
     notice.value = e instanceof HttpError && e.status === 409 ? t('ticket.conflict') : e instanceof HttpError ? e.message : t('common.error')
@@ -198,6 +210,20 @@ async function deleteTask() {
 function addFeedback(line: string) {
   feedback.value = feedback.value.trim() ? `${feedback.value.trimEnd()}\n${line}` : line
 }
+// A screenshot goes to the feedback as a line to finish, and travels with it.
+function addShot(line: string, ref: ShotRef) {
+  if (feedbackShots.value.length >= MAX_FEEDBACK_SHOTS) {
+    ui.notify(t('preview.tooMany', { n: MAX_FEEDBACK_SHOTS }))
+    return
+  }
+  addFeedback(line)
+  feedbackShots.value = [...feedbackShots.value, ref]
+  nextTick(() => document.getElementById('feedback')?.focus())
+}
+function dropShot(i: number) {
+  feedbackShots.value = feedbackShots.value.filter((_, j) => j !== i)
+}
+const shotName = (r: ShotRef) => d.value?.preview?.shots.find((s) => s.id === r.shotId)?.name ?? r.shotId
 // Opens a changed file's diff and scrolls to it.
 async function showFile(path: string) {
   tab.value = 'changes'
@@ -222,7 +248,7 @@ const checksOk = computed(() => (result.value?.checks ?? []).every((c) => c.exit
 // Everything that is not the current decision sits behind tabs under the
 // state card, so the page is one screen of "what now" plus one open panel
 // instead of every section stacked. The first available tab opens by default.
-type Tab = 'decide' | 'report' | 'review' | 'changes' | 'followUps' | 'order' | 'answers' | 'lessons' | 'log'
+type Tab = 'decide' | 'report' | 'review' | 'preview' | 'changes' | 'followUps' | 'order' | 'answers' | 'lessons' | 'log'
 const tabs = computed(() => {
   const k = tk.value
   if (!k) return []
@@ -230,6 +256,10 @@ const tabs = computed(() => {
   if (reviewingReport.value) out.push({ id: 'decide', label: t('ticket.reviewReportTitle') })
   if (report.value && (k.state === 'waiting_for_review' || (k.state === 'done' && result.value?.report))) out.push({ id: 'report', label: t('ticket.report') })
   if (k.state === 'waiting_for_review') out.push({ id: 'review', label: t('ticket.tabReview'), n: d.value?.review?.revision === k.revision ? d.value.review.findings.length || undefined : undefined })
+  if (k.state === 'waiting_for_review' && !report.value && (k.canPreview || d.value?.preview)) {
+    const pv = d.value?.preview
+    out.push({ id: 'preview', label: t('preview.tab'), n: pv?.revision === k.revision ? pv.issues.length || undefined : undefined })
+  }
   if (!report.value && result.value?.files.length) out.push({ id: 'changes', label: t('ticket.changes'), n: totals.value.n })
   if (d.value?.followUps) out.push({ id: 'followUps', label: t('ticket.tabFollowUps') })
   const rels = d.value?.relations
@@ -257,6 +287,7 @@ const descLong = computed(() => {
 watch(key, () => {
   tab.value = null
   descOpen.value = false
+  feedbackShots.value = []
 })
 const branch = computed(() => tk.value?.branch || `agnts/${key.value}`)
 const reviewSub = computed(() => {
@@ -427,7 +458,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
                 <ul><li v-for="(n, i) in result.notes" :key="i">{{ tr(n) }}</li></ul>
               </template>
             </div>
-            <ModelPicker :ticket="tk" :stages="['retry', 'review']" />
+            <ModelPicker :ticket="tk" :stages="tk.canPreview ? ['retry', 'review', 'preview'] : ['retry', 'review']" />
             <div v-if="opensPr" class="sec">
               <h3>{{ t('ticket.assignTitle') }}</h3>
               <p class="hint" style="margin: 0 0 10px">{{ t('ticket.assignSub') }}</p>
@@ -453,6 +484,13 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             <div class="sec">
               <h3><label for="feedback">{{ t('ticket.feedback') }}</label></h3>
               <textarea id="feedback" v-model="feedback" :placeholder="t('ticket.feedbackHint')" />
+              <div v-if="feedbackShots.length" class="tk-shots" :aria-label="t('preview.attached')">
+                <span class="hint">{{ t('preview.attached') }}:</span>
+                <span v-for="(r, i) in feedbackShots" :key="`${r.runId}-${r.shotId}`" class="badge b-info tk-shot">
+                  {{ shotName(r) }}
+                  <button type="button" :aria-label="t('preview.detach', { name: shotName(r) })" @click="dropShot(i)">×</button>
+                </span>
+              </div>
             </div>
             <div class="actions">
               <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="approve">{{ t('ticket.approve') }}</button>
@@ -577,6 +615,10 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             <CodeReview :ticket="tk" :review="d.review" :feedback="feedback" :report="report" @add="addFeedback" @show="showFile" />
           </section>
 
+          <section v-else-if="activeTab === 'preview'" class="card tk-panel">
+            <PreviewShots :ticket="tk" :preview="d.preview" :attached="feedbackShots" @add="addShot" />
+          </section>
+
           <section v-else-if="activeTab === 'changes' && result" class="card tk-panel">
             <div class="ch">
               <div>
@@ -675,4 +717,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
 .tk-wait { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
 .tk-wait li { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .tk-wait-title { min-width: 0; overflow-wrap: anywhere; }
+.tk-shots { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; }
+.tk-shot { display: inline-flex; align-items: center; gap: 6px; }
+.tk-shot button { border: 0; background: none; padding: 0 2px; font: inherit; font-weight: 700; color: inherit; cursor: pointer; }
 </style>

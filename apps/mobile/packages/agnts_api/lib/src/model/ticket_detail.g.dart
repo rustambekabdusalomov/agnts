@@ -23,6 +23,8 @@ abstract class _$TicketDetailCWProxy {
 
   TicketDetail review(CodeReview? review);
 
+  TicketDetail preview(TicketPreview? preview);
+
   TicketDetail history(List<HistoryItem>? history);
 
   TicketDetail maxTurns(int? maxTurns);
@@ -46,6 +48,7 @@ abstract class _$TicketDetailCWProxy {
     FollowUps? followUps,
     Relations? relations,
     CodeReview? review,
+    TicketPreview? preview,
     List<HistoryItem>? history,
     int? maxTurns,
     StageModels? effectiveModels,
@@ -85,6 +88,9 @@ class _$TicketDetailCWProxyImpl implements _$TicketDetailCWProxy {
   TicketDetail review(CodeReview? review) => this(review: review);
 
   @override
+  TicketDetail preview(TicketPreview? preview) => this(preview: preview);
+
+  @override
   TicketDetail history(List<HistoryItem>? history) => this(history: history);
 
   @override
@@ -114,6 +120,7 @@ class _$TicketDetailCWProxyImpl implements _$TicketDetailCWProxy {
     Object? followUps = const $CopyWithPlaceholder(),
     Object? relations = const $CopyWithPlaceholder(),
     Object? review = const $CopyWithPlaceholder(),
+    Object? preview = const $CopyWithPlaceholder(),
     Object? history = const $CopyWithPlaceholder(),
     Object? maxTurns = const $CopyWithPlaceholder(),
     Object? effectiveModels = const $CopyWithPlaceholder(),
@@ -152,6 +159,10 @@ class _$TicketDetailCWProxyImpl implements _$TicketDetailCWProxy {
           ? _value.review
           // ignore: cast_nullable_to_non_nullable
           : review as CodeReview?,
+      preview: preview == const $CopyWithPlaceholder()
+          ? _value.preview
+          // ignore: cast_nullable_to_non_nullable
+          : preview as TicketPreview?,
       history: history == const $CopyWithPlaceholder()
           ? _value.history
           // ignore: cast_nullable_to_non_nullable
@@ -182,67 +193,67 @@ extension $TicketDetailCopyWith on TicketDetail {
 // JsonSerializableGenerator
 // **************************************************************************
 
-TicketDetail _$TicketDetailFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('TicketDetail', json, ($checkedConvert) {
-      $checkKeys(json, requiredKeys: const ['ticket', 'questions']);
-      final val = TicketDetail(
-        ticket: $checkedConvert(
-          'ticket',
-          (v) => Ticket.fromJson(v as Map<String, dynamic>),
-        ),
-        questions: $checkedConvert(
-          'questions',
-          (v) => (v as List<dynamic>)
-              .map((e) => Question.fromJson(e as Map<String, dynamic>))
-              .toList(),
-        ),
-        analysis: $checkedConvert(
-          'analysis',
-          (v) =>
-              v == null ? null : Analysis.fromJson(v as Map<String, dynamic>),
-        ),
-        result: $checkedConvert(
-          'result',
-          (v) => v == null ? null : Result.fromJson(v as Map<String, dynamic>),
-        ),
-        childKey: $checkedConvert('childKey', (v) => v as String?),
-        followUps: $checkedConvert(
-          'followUps',
-          (v) =>
-              v == null ? null : FollowUps.fromJson(v as Map<String, dynamic>),
-        ),
-        relations: $checkedConvert(
-          'relations',
-          (v) =>
-              v == null ? null : Relations.fromJson(v as Map<String, dynamic>),
-        ),
-        review: $checkedConvert(
-          'review',
-          (v) =>
-              v == null ? null : CodeReview.fromJson(v as Map<String, dynamic>),
-        ),
-        history: $checkedConvert(
-          'history',
-          (v) => (v as List<dynamic>?)
-              ?.map((e) => HistoryItem.fromJson(e as Map<String, dynamic>))
-              .toList(),
-        ),
-        maxTurns: $checkedConvert('maxTurns', (v) => (v as num?)?.toInt()),
-        effectiveModels: $checkedConvert(
-          'effectiveModels',
-          (v) => v == null
-              ? null
-              : StageModels.fromJson(v as Map<String, dynamic>),
-        ),
-        spendByStage: $checkedConvert(
-          'spendByStage',
-          (v) => (v as List<dynamic>?)
-              ?.map((e) => StageSpend.fromJson(e as Map<String, dynamic>))
-              .toList(),
-        ),
-      );
-      return val;
-    });
+TicketDetail _$TicketDetailFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate('TicketDetail', json, ($checkedConvert) {
+  $checkKeys(json, requiredKeys: const ['ticket', 'questions']);
+  final val = TicketDetail(
+    ticket: $checkedConvert(
+      'ticket',
+      (v) => Ticket.fromJson(v as Map<String, dynamic>),
+    ),
+    questions: $checkedConvert(
+      'questions',
+      (v) => (v as List<dynamic>)
+          .map((e) => Question.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    ),
+    analysis: $checkedConvert(
+      'analysis',
+      (v) => v == null ? null : Analysis.fromJson(v as Map<String, dynamic>),
+    ),
+    result: $checkedConvert(
+      'result',
+      (v) => v == null ? null : Result.fromJson(v as Map<String, dynamic>),
+    ),
+    childKey: $checkedConvert('childKey', (v) => v as String?),
+    followUps: $checkedConvert(
+      'followUps',
+      (v) => v == null ? null : FollowUps.fromJson(v as Map<String, dynamic>),
+    ),
+    relations: $checkedConvert(
+      'relations',
+      (v) => v == null ? null : Relations.fromJson(v as Map<String, dynamic>),
+    ),
+    review: $checkedConvert(
+      'review',
+      (v) => v == null ? null : CodeReview.fromJson(v as Map<String, dynamic>),
+    ),
+    preview: $checkedConvert(
+      'preview',
+      (v) =>
+          v == null ? null : TicketPreview.fromJson(v as Map<String, dynamic>),
+    ),
+    history: $checkedConvert(
+      'history',
+      (v) => (v as List<dynamic>?)
+          ?.map((e) => HistoryItem.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    ),
+    maxTurns: $checkedConvert('maxTurns', (v) => (v as num?)?.toInt()),
+    effectiveModels: $checkedConvert(
+      'effectiveModels',
+      (v) => v == null ? null : StageModels.fromJson(v as Map<String, dynamic>),
+    ),
+    spendByStage: $checkedConvert(
+      'spendByStage',
+      (v) => (v as List<dynamic>?)
+          ?.map((e) => StageSpend.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    ),
+  );
+  return val;
+});
 
 Map<String, dynamic> _$TicketDetailToJson(TicketDetail instance) =>
     <String, dynamic>{
@@ -254,6 +265,7 @@ Map<String, dynamic> _$TicketDetailToJson(TicketDetail instance) =>
       'followUps': ?instance.followUps?.toJson(),
       'relations': ?instance.relations?.toJson(),
       'review': ?instance.review?.toJson(),
+      'preview': ?instance.preview?.toJson(),
       'history': ?instance.history?.map((e) => e.toJson()).toList(),
       'maxTurns': ?instance.maxTurns,
       'effectiveModels': ?instance.effectiveModels?.toJson(),

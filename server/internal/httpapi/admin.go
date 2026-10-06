@@ -70,6 +70,9 @@ func (s *Server) SetTicketModels(w http.ResponseWriter, r *http.Request, key gen
 	if req.Retry != nil {
 		m[domain.ModelRetry] = string(*req.Retry)
 	}
+	if req.Preview != nil {
+		m[domain.ModelPreview] = string(*req.Preview)
+	}
 	if req.Review != nil {
 		m[domain.ModelReview] = string(*req.Review)
 	}
@@ -406,16 +409,20 @@ func toSettings(v domain.Settings) gen.Settings {
 	learn, autoLearn, lessons := gen.Model(v.Models.Learn), v.AutoLearn, v.Notify.Lessons
 	review, autoReview, reviewNote := gen.ReviewModel(v.Models.Review), v.AutoReview, v.Notify.Review
 	followUps, followUpsNote := v.SuggestFollowUps, v.Notify.FollowUps
+	preview, autoPreview, visualCheck := gen.Model(v.Models.Preview), v.AutoPreview, v.VisualCheck
+	previewNote, previewPhotos, egress := v.Notify.Preview, v.Notify.PreviewPhotos, append([]string{}, v.EgressAllow...)
 	return gen.Settings{
 		Models: gen.StageModels{Analyze: gen.Model(v.Models.Analyze), Coding: gen.Model(v.Models.Coding),
-			Retry: gen.Model(v.Models.Retry), Helper: gen.Model(v.Models.Helper), Learn: &learn, Review: &review},
+			Retry: gen.Model(v.Models.Retry), Helper: gen.Model(v.Models.Helper), Learn: &learn, Review: &review, Preview: &preview},
+		AutoPreview: &autoPreview, VisualCheck: &visualCheck, EgressAllow: &egress,
 		MaxTurns: v.MaxTurns, TimeoutMin: v.TimeoutMin, Allow: v.Allow, Deny: v.Deny,
 		AskFirst: v.AskFirst, AutoResume: v.AutoResume, PauseAbove: v.PauseAbove, Parallel: v.Parallel, AutoLearn: &autoLearn,
 		AutoReview: &autoReview, SuggestFollowUps: &followUps,
 		Git: gen.GitSettings{AuthorName: v.Git.AuthorName, AuthorEmail: v.Git.AuthorEmail, CoAuthor: v.Git.CoAuthor,
 			PrTitle: v.Git.PRTitle, Draft: v.Git.Draft},
 		Notify: &gen.NotifySettings{Push: v.Notify.Push, Telegram: v.Notify.Telegram, NeedsYou: v.Notify.NeedsYou,
-			Stopped: v.Notify.Stopped, Done: v.Notify.Done, Lessons: &lessons, Review: &reviewNote, FollowUps: &followUpsNote},
+			Stopped: v.Notify.Stopped, Done: v.Notify.Done, Lessons: &lessons, Review: &reviewNote, FollowUps: &followUpsNote,
+			Preview: &previewNote, PreviewPhotos: &previewPhotos},
 	}
 }
 
@@ -449,7 +456,9 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	v := domain.Settings{
 		Models: domain.StageModels{Analyze: string(req.Models.Analyze), Coding: string(req.Models.Coding),
-			Retry: string(req.Models.Retry), Helper: string(req.Models.Helper), Learn: cur.Models.Learn, Review: cur.Models.Review},
+			Retry: string(req.Models.Retry), Helper: string(req.Models.Helper), Learn: cur.Models.Learn, Review: cur.Models.Review,
+			Preview: cur.Models.Preview},
+		AutoPreview: cur.AutoPreview, VisualCheck: cur.VisualCheck, EgressAllow: cur.EgressAllow,
 		MaxTurns: req.MaxTurns, TimeoutMin: req.TimeoutMin, Allow: req.Allow, Deny: req.Deny,
 		AskFirst: req.AskFirst, AutoResume: req.AutoResume, PauseAbove: req.PauseAbove, Parallel: req.Parallel, AutoLearn: cur.AutoLearn,
 		AutoReview: cur.AutoReview, SuggestFollowUps: cur.SuggestFollowUps,
@@ -460,7 +469,13 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 	if req.Notify != nil {
 		v.Notify = domain.NotifySettings{Push: req.Notify.Push, Telegram: req.Notify.Telegram, NeedsYou: req.Notify.NeedsYou,
 			Stopped: req.Notify.Stopped, Done: req.Notify.Done, Lessons: cur.Notify.Lessons, Review: cur.Notify.Review,
-			FollowUps: cur.Notify.FollowUps}
+			FollowUps: cur.Notify.FollowUps, Preview: cur.Notify.Preview, PreviewPhotos: cur.Notify.PreviewPhotos}
+		if req.Notify.Preview != nil {
+			v.Notify.Preview = *req.Notify.Preview
+		}
+		if req.Notify.PreviewPhotos != nil {
+			v.Notify.PreviewPhotos = *req.Notify.PreviewPhotos
+		}
 		if req.Notify.Lessons != nil {
 			v.Notify.Lessons = *req.Notify.Lessons
 		}
@@ -486,6 +501,18 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 	if req.SuggestFollowUps != nil {
 		v.SuggestFollowUps = *req.SuggestFollowUps
 	}
+	if req.Models.Preview != nil {
+		v.Models.Preview = string(*req.Models.Preview)
+	}
+	if req.AutoPreview != nil {
+		v.AutoPreview = *req.AutoPreview
+	}
+	if req.VisualCheck != nil {
+		v.VisualCheck = *req.VisualCheck
+	}
+	if req.EgressAllow != nil {
+		v.EgressAllow = *req.EgressAllow
+	}
 	saved, err := s.opt.Admin.Settings.Put(r.Context(), v, origin(r))
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
@@ -506,7 +533,22 @@ func toRepo(x admin.RepoView) gen.Repository {
 		CloneUrl: x.CloneURL, DefaultBranch: x.DefaultBranch, BuildCmd: x.BuildCmd, LintCmd: x.LintCmd, TestCmd: x.TestCmd,
 		BranchPrefix: x.BranchPrefix, TaskPrefix: orchestrator.TaskPrefix(x.Repository), Instructions: x.ClaudeMD,
 		JiraProject: x.JiraProject, ClaudeMd: gen.RepositoryClaudeMd(st), OpenTickets: x.Open, DeployWorkflow: &x.DeployWorkflow,
-		ArchivedAt: x.ArchivedAt}
+		ArchivedAt: x.ArchivedAt, Preview: toRepoPreview(x.Preview)}
+}
+
+func toRepoPreview(p domain.PreviewConfig) *gen.RepoPreview {
+	nn := func(v []string) []string {
+		if v == nil {
+			return []string{}
+		}
+		return v
+	}
+	rp := p.ReadyPath
+	if rp == "" {
+		rp = "/"
+	}
+	return &gen.RepoPreview{Command: p.Command, Port: p.Port, ReadyPath: rp, Routes: nn(p.Routes), UiPaths: nn(p.UIPaths),
+		Login: p.Login, EnvSet: p.EnvSet, EnvNames: nn(p.EnvNames)}
 }
 
 // ArchiveRepo implements gen.ServerInterface.
@@ -572,7 +614,27 @@ func repoFromInput(in gen.RepositoryInput) domain.Repository {
 	x.DefaultBranch, x.BuildCmd, x.LintCmd, x.TestCmd = str(in.DefaultBranch), str(in.BuildCmd), str(in.LintCmd), str(in.TestCmd)
 	x.BranchPrefix, x.TaskPrefix, x.ClaudeMD, x.JiraProject = str(in.BranchPrefix), str(in.TaskPrefix), str(in.Instructions), str(in.JiraProject)
 	x.DeployWorkflow = str(in.DeployWorkflow)
+	if p := in.Preview; p != nil {
+		x.Preview = domain.PreviewConfig{Command: str(p.Command), ReadyPath: str(p.ReadyPath), Login: str(p.Login)}
+		if p.Port != nil {
+			x.Preview.Port = *p.Port
+		}
+		if p.Routes != nil {
+			x.Preview.Routes = *p.Routes
+		}
+		if p.UiPaths != nil {
+			x.Preview.UIPaths = *p.UiPaths
+		}
+	}
 	return x
+}
+
+// previewEnv is the environment a repository input replaces, or nil.
+func previewEnv(in gen.RepositoryInput) *string {
+	if in.Preview == nil {
+		return nil
+	}
+	return in.Preview.Env
 }
 
 // CreateRepo implements gen.ServerInterface.
@@ -585,7 +647,7 @@ func (s *Server) CreateRepo(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
 		return
 	}
-	x, err := s.opt.Admin.Repos.Save(r.Context(), repoFromInput(in))
+	x, err := s.opt.Admin.Repos.Save(r.Context(), repoFromInput(in), false, previewEnv(in))
 	if err != nil {
 		s.writeAdminError(w, r, err, "a repository with that name or Jira project already exists")
 		return
@@ -605,7 +667,7 @@ func (s *Server) UpdateRepo(w http.ResponseWriter, r *http.Request, id int64) {
 	}
 	x := repoFromInput(in)
 	x.ID = id
-	saved, err := s.opt.Admin.Repos.Save(r.Context(), x)
+	saved, err := s.opt.Admin.Repos.Save(r.Context(), x, in.Preview == nil, previewEnv(in))
 	if err != nil {
 		s.writeAdminError(w, r, err, "a repository with that name or Jira project already exists")
 		return

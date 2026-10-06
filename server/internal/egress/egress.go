@@ -6,12 +6,14 @@ package egress
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log/slog"
 	"net"
 	"net/http"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -28,6 +30,9 @@ var DefaultAllow = []string{
 // URLs for plain http) restricted to an allowlist.
 type Proxy struct {
 	allow []string // "host" for an exact match, ".domain" for subdomains
+	// extra is the list added in Settings (a staging API for previews),
+	// refreshed by Follow.
+	extra atomic.Pointer[[]string]
 	ports map[string]bool
 	log   *slog.Logger
 	dial  func(ctx context.Context, network, addr string) (net.Conn, error)
@@ -36,6 +41,11 @@ type Proxy struct {
 // New returns a proxy for the allowlist. Entries starting with "*." or "."
 // match subdomains.
 func New(allow []string, log *slog.Logger) *Proxy {
+	d := &net.Dialer{Timeout: 15 * time.Second}
+	return &Proxy{allow: cleanList(allow), ports: map[string]bool{"443": true, "80": true}, log: log, dial: d.DialContext}
+}
+
+func cleanList(allow []string) []string {
 	clean := make([]string, 0, len(allow))
 	for _, a := range allow {
 		a = strings.ToLower(strings.TrimSpace(a))
@@ -44,8 +54,64 @@ func New(allow []string, log *slog.Logger) *Proxy {
 			clean = append(clean, a)
 		}
 	}
-	d := &net.Dialer{Timeout: 15 * time.Second}
-	return &Proxy{allow: clean, ports: map[string]bool{"443": true, "80": true}, log: log, dial: d.DialContext}
+	return clean
+}
+
+// SetExtra replaces the hosts allowed besides the static list.
+func (p *Proxy) SetExtra(allow []string) {
+	l := cleanList(allow)
+	p.extra.Store(&l)
+}
+
+// Follow polls url every interval for the extra allowlist (one host per
+// line) until ctx ends. A failed poll keeps the last list.
+func (p *Proxy) Follow(ctx context.Context, url string, every time.Duration) {
+	c := &http.Client{Timeout: 10 * time.Second}
+	var last string
+	for {
+		if list, err := fetchList(ctx, c, url); err != nil {
+			if ctx.Err() == nil {
+				p.log.Warn("egress: fetch the extra allowlist", "url", url, "err", err)
+			}
+		} else {
+			if joined := strings.Join(list, ","); joined != last {
+				last = joined
+				p.log.Info("egress: extra allowlist", "allow", joined)
+			}
+			p.SetExtra(list)
+		}
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(every):
+		}
+	}
+}
+
+func fetchList(ctx context.Context, c *http.Client, url string) ([]string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = resp.Body.Close() }()
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("status %d", resp.StatusCode)
+	}
+	b, err := io.ReadAll(io.LimitReader(resp.Body, 64<<10))
+	if err != nil {
+		return nil, err
+	}
+	var out []string
+	for _, l := range strings.Split(string(b), "\n") {
+		if l = strings.TrimSpace(l); l != "" && !strings.HasPrefix(l, "#") {
+			out = append(out, l)
+		}
+	}
+	return out, nil
 }
 
 // Allowed reports whether host may be reached.
@@ -54,7 +120,11 @@ func (p *Proxy) Allowed(host string) bool {
 	if net.ParseIP(host) != nil {
 		return false // names only: an IP bypasses the allowlist
 	}
-	for _, a := range p.allow {
+	list := p.allow
+	if extra := p.extra.Load(); extra != nil {
+		list = append(append([]string{}, p.allow...), (*extra)...)
+	}
+	for _, a := range list {
 		if strings.HasPrefix(a, ".") {
 			if strings.HasSuffix(host, a) {
 				return true

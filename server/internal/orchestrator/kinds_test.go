@@ -82,7 +82,7 @@ func TestReportTaskWithoutRepository(t *testing.T) {
 		t.Fatalf("view: %+v %v", v.Result, err)
 	}
 
-	if _, err := h.o.RequestChanges(h.ctx, key, "Say how long a token lives.", domain.OriginWeb); err != nil {
+	if _, err := h.o.RequestChanges(h.ctx, key, "Say how long a token lives.", nil, domain.OriginWeb); err != nil {
 		t.Fatal(err)
 	}
 	h.step()

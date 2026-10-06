@@ -15,6 +15,8 @@ Name | Type | Description | Notes
 **done** | **bool** |  | 
 **lessons** | **bool** | New lessons were found | [optional] 
 **review** | **bool** | A code review finished | [optional] 
+**preview** | **bool** | Preview screenshots are ready | [optional] 
+**previewPhotos** | **bool** | Send phone screenshots to Telegram with the message | [optional] 
 **followUps** | **bool** | Follow-up tickets were suggested | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

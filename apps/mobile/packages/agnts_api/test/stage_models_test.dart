@@ -37,5 +37,10 @@ void main() {
       // TODO
     });
 
+    // Model preview
+    test('to test the property `preview`', () async {
+      // TODO
+    });
+
   });
 }

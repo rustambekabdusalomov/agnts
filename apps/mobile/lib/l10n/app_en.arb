@@ -1241,6 +1241,77 @@
       }
     }
   },
+  "mpreviewTitle": "agnts's preview",
+  "mpreviewSub": "Screenshots of the app with this change. Advice beside your review: it never blocks approval.",
+  "mpreviewPending": "Queued: agnts starts the app and takes screenshots as soon as a worker is free.",
+  "mpreviewRunning": "agnts is starting the app and taking screenshots…",
+  "mpreviewFailed": "The preview failed. Check the app yourself, or run it again.",
+  "mpreviewAppFailed": "The app did not start, so there are no screenshots. The end of its log:",
+  "mpreviewStale": "These screenshots are of revision {n}; the work changed since.",
+  "@mpreviewStale": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "mpreviewRun": "Take screenshots",
+  "mpreviewRunAgain": "Run again",
+  "mpreviewCompare": "Compare with the default branch",
+  "mpreviewCompareHelp": "Also takes the same screenshots without this change.",
+  "mpreviewStatus_ok": "Ready",
+  "mpreviewStatus_partial": "Partial",
+  "mpreviewStatus_failed": "Did not start",
+  "mpreviewModel": "Checked by {model}",
+  "@mpreviewModel": {
+    "placeholders": {
+      "model": {
+        "type": "String"
+      }
+    }
+  },
+  "mpreviewIssues": "{count, plural, =0 {No issues} one {{count} issue} other {{count} issues}}",
+  "@mpreviewIssues": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "mpreviewNoIssues": "agnts saw no visual problems.",
+  "mpreviewSev_high": "High",
+  "mpreviewSev_medium": "Medium",
+  "mpreviewSev_low": "Low",
+  "mpreviewShowShot": "Show screenshot",
+  "mpreviewDesktop": "Desktop",
+  "mpreviewPhone": "Phone",
+  "mpreviewBefore": "Before",
+  "mpreviewAfter": "After",
+  "mpreviewNoShots": "No screenshots at this width.",
+  "mpreviewConsoleErrors": "{count, plural, one {{count} console error} other {{count} console errors}}",
+  "@mpreviewConsoleErrors": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "mpreviewLoadFailed": "Could not load the screenshot.",
+  "mpreviewAddToFeedback": "Add to feedback",
+  "mpreviewAdded": "In feedback",
+  "mpreviewAttached": "Screenshots sent with the feedback",
+  "mpreviewAttachLimit": "Up to {max} screenshots can go with the feedback.",
+  "@mpreviewAttachLimit": {
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "mpreviewRemove": "Remove",
+  "mpreviewSettingsModel": "Preview",
+  "mpreviewSettingsModelHelp": "Looks at screenshots of the running app",
+  "mpreviewNotify": "Preview screenshots are ready",
   "mtasksActAnswers": "Answer agnts's questions",
   "mtasksActReview": "Review the changes",
   "mtasksActFailed": "Stopped. Tell agnts what to try",
@@ -1311,6 +1382,120 @@
   "navLearn": "Learn",
   "navLearnQueue": "Learning queue",
   "navRules": "Rules",
+  "previewTab": "Preview",
+  "previewTitle": "Screenshots of the app",
+  "previewSub": "agnts started the app with this change and took screenshots. Advice only: it never blocks approval.",
+  "previewPending": "Queued: agnts takes screenshots as soon as a worker is free.",
+  "previewRunning": "agnts is starting the app and taking screenshots…",
+  "previewFailed": "The preview run failed. Check the run log, or run it again.",
+  "previewStale": "These screenshots are of revision {n}; the change moved on since.",
+  "@previewStale": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "previewNone": "No screenshots yet.",
+  "previewStatus_ok": "Captured",
+  "previewStatus_partial": "Partly captured",
+  "previewStatus_failed": "App did not start",
+  "previewModel": "{n, plural, =0 {No screenshots} one {{n} screenshot} other {{n} screenshots}} by {model}",
+  "@previewModel": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      },
+      "model": {
+        "type": "String"
+      }
+    }
+  },
+  "previewWithBase": "with the default branch for comparison",
+  "previewSev_high": "High",
+  "previewSev_medium": "Medium",
+  "previewSev_low": "Low",
+  "previewNoIssues": "agnts saw no visual problems.",
+  "previewViewport": "Screen size",
+  "previewVp_all": "All",
+  "previewVp_desktop": "Desktop",
+  "previewVp_phone": "Phone",
+  "previewMode": "Show",
+  "previewMode_after": "After",
+  "previewMode_before": "Before",
+  "previewMode_side": "Side by side",
+  "previewMode_slider": "Slider",
+  "previewSlider": "Drag to compare before and after",
+  "previewConsoleErrors": "{count, plural, one {{count} console error} other {{count} console errors}}",
+  "@previewConsoleErrors": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "previewNoBefore": "No before screenshot: this page is new or could not open on the default branch.",
+  "previewAddToFeedback": "Add to feedback",
+  "previewAdded": "In feedback",
+  "previewCompare": "Compare with the default branch",
+  "previewRun": "Take screenshots",
+  "previewRunAgain": "Take screenshots again",
+  "previewTooMany": "Feedback can carry {n} screenshots at most.",
+  "@previewTooMany": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "previewAttached": "Screenshots sent with the feedback",
+  "previewDetach": "Remove {name}",
+  "@previewDetach": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "previewRepoTitle": "Preview",
+  "previewRepoHelp": "How agnts starts the app to take screenshots of UI changes before you review them. Leave the command empty to turn previews off.",
+  "previewRepoCommand": "Start command",
+  "previewRepoCommandHelp": "Runs in /workspace inside the run container: install, build and start the dev server. It must listen on the port below.",
+  "previewRepoPort": "Port",
+  "previewRepoReady": "Ready path",
+  "previewRepoUiPaths": "UI files",
+  "previewRepoUiPathsHelp": "One glob per line, relative to the repository root. A change touching one gets screenshots. Empty: every change.",
+  "previewRepoRoutes": "Always capture",
+  "previewRepoRoutesHelp": "Routes captured on every preview, one per line, besides the ones agnts picks from the diff.",
+  "previewRepoLogin": "Signing in",
+  "previewRepoLoginPh": "Sign in as demo@acme.test; the password is in PREVIEW_PASSWORD.",
+  "previewRepoLoginHelp": "Tell agnts how to get past a login, if the app has one. Refer to secrets by variable name.",
+  "previewRepoEnv": "Environment",
+  "previewRepoEnvSet": "Set: {names}. The values are never shown.",
+  "@previewRepoEnvSet": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "previewRepoEnvReplace": "Replace",
+  "previewRepoEnvClear": "Clear",
+  "previewRepoEnvCleared": "The environment will be cleared when you save.",
+  "previewRepoEnvHelp": "KEY=value lines given to the app, such as a staging API URL. Stored encrypted and never shown again. Use staging-only credentials: the app and agnts can read them. Add any host the app calls to Settings → Previews → Allowed hosts.",
+  "previewSettingsTitle": "Previews",
+  "previewSettingsSub": "Screenshots of UI changes, for repositories with a preview command.",
+  "previewAutoPreview": "Take screenshots of every UI change",
+  "previewAutoPreviewHelp": "While a change waits for you, agnts starts the app, opens the pages it touches and shows screenshots next to the diff. It never blocks approval.",
+  "previewVisualCheck": "Let coding runs look at the app",
+  "previewVisualCheckHelp": "Claude may start the app and look at the pages it changed before it finishes, and fix what looks broken. Costs a few more turns.",
+  "previewModel_": "Preview model",
+  "previewModelHelp": "Picks the pages and judges the screenshots.",
+  "previewEgress": "Allowed hosts",
+  "previewEgressHelp": "Hosts run containers may reach besides the built-in list (Claude, git hosts, package registries), such as a staging API your app calls in a preview. .example.com allows its subdomains.",
+  "previewNotify": "When preview screenshots are ready",
+  "previewNotifyPhotos": "Send phone screenshots to Telegram",
+  "previewNotifyPhotosHelp": "Up to four screenshots go with the Telegram message.",
   "relationsTab": "Order",
   "relationsTitle": "Order and conflicts",
   "relationsSub": "agnts codes several tickets at once and merges them one by one. A ticket waits for the tickets it depends on to be merged, and two tickets that change the same code never code side by side.",
@@ -2062,6 +2247,7 @@
   "spendStageWriting": "Writing",
   "spendStageRetry": "Fixes and changes",
   "spendStageReview": "Code review",
+  "spendStagePreview": "Preview",
   "spendStageLearn": "Lessons",
   "spendStageHelper": "Helper",
   "spendTopTitle": "Tickets by spend",
@@ -2469,6 +2655,7 @@
   "ticketStageCoding": "Coding",
   "ticketStageRetry": "Retries and requested changes",
   "ticketStageReview": "Code review by agnts",
+  "ticketStagePreview": "Screenshots (preview)",
   "ticketModelAuto": "Auto ({model})",
   "@ticketModelAuto": {
     "placeholders": {

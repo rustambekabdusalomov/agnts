@@ -1,0 +1,9 @@
+{
+  "name": "agnts-shot",
+  "private": true,
+  "type": "module",
+  "description": "Screenshots for agnts previews; installed into the runner image",
+  "dependencies": {
+    "playwright": "1.55.0"
+  }
+}

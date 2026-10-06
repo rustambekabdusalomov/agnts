@@ -80,5 +80,6 @@ func (s *Settings) Put(ctx context.Context, v domain.Settings, origin domain.Ori
 func clone(v domain.Settings) domain.Settings {
 	v.Allow = append([]string{}, v.Allow...)
 	v.Deny = append([]string{}, v.Deny...)
+	v.EgressAllow = append([]string{}, v.EgressAllow...)
 	return v
 }

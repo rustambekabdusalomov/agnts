@@ -283,6 +283,7 @@ type harness struct {
 	tracker  *fakeTracker
 	settings *fakeSettings
 	usage    *fakeUsage
+	shots    *memShots
 }
 
 func newHarness(t *testing.T) *harness {
@@ -312,7 +313,8 @@ func newHarness(t *testing.T) *harness {
 		t.Fatal(err)
 	}
 	h := &harness{t: t, ctx: ctx, store: store,
-		runner: &fakeRunner{execs: map[string][]orchestrator.ExecResult{}}, git: &fakeGit{}, host: &fakeHost{}, tracker: &fakeTracker{}}
+		runner: &fakeRunner{execs: map[string][]orchestrator.ExecResult{}}, git: &fakeGit{}, host: &fakeHost{}, tracker: &fakeTracker{},
+		shots: &memShots{m: map[string][]byte{}}}
 	cfg := orchestrator.DefaultConfig()
 	cfg.FixAttempts = 1
 	h.settings = &fakeSettings{s: domain.DefaultSettings()}
@@ -322,6 +324,7 @@ func newHarness(t *testing.T) *harness {
 	h.o = orchestrator.New(cfg, orchestrator.Deps{
 		Store: store, Runner: h.runner, Git: h.git, Host: h.host, Tracker: h.tracker, Homes: &memHomes{},
 		Settings: h.settings, Usage: h.usage, Translations: postgres.NewTranslations(pool),
+		Shots: h.shots, PreviewEnvs: fakeEnvs{},
 	}, log)
 	return h
 }
@@ -593,10 +596,10 @@ func TestRequestChangesResumesSession(t *testing.T) {
 	h.step()
 	h.expect("PAY-5", domain.StateWaitingForReview)
 
-	if _, err := h.o.RequestChanges(h.ctx, "PAY-5", "  ", domain.OriginWeb); !errors.Is(err, orchestrator.ErrInvalid) {
+	if _, err := h.o.RequestChanges(h.ctx, "PAY-5", "  ", nil, domain.OriginWeb); !errors.Is(err, orchestrator.ErrInvalid) {
 		t.Fatalf("empty feedback: %v", err)
 	}
-	tk, err := h.o.RequestChanges(h.ctx, "PAY-5", "Also handle negative amounts.", domain.OriginMobile)
+	tk, err := h.o.RequestChanges(h.ctx, "PAY-5", "Also handle negative amounts.", nil, domain.OriginMobile)
 	if err != nil || tk.Revision != 1 || tk.State != domain.StateCoding {
 		t.Fatalf("request changes: %+v %v", tk, err)
 	}

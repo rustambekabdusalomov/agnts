@@ -19,6 +19,8 @@ abstract class _$StageModelsCWProxy {
 
   StageModels review(ReviewModel? review);
 
+  StageModels preview(Model? preview);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `StageModels(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -32,6 +34,7 @@ abstract class _$StageModelsCWProxy {
     Model helper,
     Model? learn,
     ReviewModel? review,
+    Model? preview,
   });
 }
 
@@ -60,6 +63,9 @@ class _$StageModelsCWProxyImpl implements _$StageModelsCWProxy {
   StageModels review(ReviewModel? review) => this(review: review);
 
   @override
+  StageModels preview(Model? preview) => this(preview: preview);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `StageModels(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -73,6 +79,7 @@ class _$StageModelsCWProxyImpl implements _$StageModelsCWProxy {
     Object? helper = const $CopyWithPlaceholder(),
     Object? learn = const $CopyWithPlaceholder(),
     Object? review = const $CopyWithPlaceholder(),
+    Object? preview = const $CopyWithPlaceholder(),
   }) {
     return StageModels(
       analyze: analyze == const $CopyWithPlaceholder()
@@ -99,6 +106,10 @@ class _$StageModelsCWProxyImpl implements _$StageModelsCWProxy {
           ? _value.review
           // ignore: cast_nullable_to_non_nullable
           : review as ReviewModel?,
+      preview: preview == const $CopyWithPlaceholder()
+          ? _value.preview
+          // ignore: cast_nullable_to_non_nullable
+          : preview as Model?,
     );
   }
 }
@@ -133,6 +144,10 @@ StageModels _$StageModelsFromJson(
       'review',
       (v) => $enumDecodeNullable(_$ReviewModelEnumMap, v),
     ),
+    preview: $checkedConvert(
+      'preview',
+      (v) => $enumDecodeNullable(_$ModelEnumMap, v),
+    ),
   );
   return val;
 });
@@ -145,6 +160,7 @@ Map<String, dynamic> _$StageModelsToJson(StageModels instance) =>
       'helper': _$ModelEnumMap[instance.helper]!,
       'learn': ?_$ModelEnumMap[instance.learn],
       'review': ?_$ReviewModelEnumMap[instance.review],
+      'preview': ?_$ModelEnumMap[instance.preview],
     };
 
 const _$ModelEnumMap = {

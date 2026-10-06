@@ -2194,6 +2194,127 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
+  String get mpreviewTitle => 'agnts oldindan koʻrishi';
+
+  @override
+  String get mpreviewSub =>
+      'Ushbu oʻzgarish bilan ilovaning skrinshotlari. Sizning tekshiruvingiz yonidagi maslahat: u hech qachon tasdiqlashni toʻsmaydi.';
+
+  @override
+  String get mpreviewPending => 'Navbatda: ishchi boʻshashi bilan agnts ilovani ishga tushirib, skrinshotlar oladi.';
+
+  @override
+  String get mpreviewRunning => 'agnts ilovani ishga tushirib, skrinshotlar olmoqda…';
+
+  @override
+  String get mpreviewFailed => 'Oldindan koʻrish bajarilmadi. Ilovani oʻzingiz tekshiring yoki qayta ishga tushiring.';
+
+  @override
+  String get mpreviewAppFailed => 'Ilova ishga tushmadi, shuning uchun skrinshotlar yoʻq. Uning logining oxiri:';
+
+  @override
+  String mpreviewStale(String n) {
+    return 'Bu $n-tahrir skrinshotlari; shundan beri ish oʻzgargan.';
+  }
+
+  @override
+  String get mpreviewRun => 'Skrinshotlar olish';
+
+  @override
+  String get mpreviewRunAgain => 'Qayta ishga tushirish';
+
+  @override
+  String get mpreviewCompare => 'Asosiy tarmoq bilan solishtirish';
+
+  @override
+  String get mpreviewCompareHelp => 'Xuddi shu skrinshotlarni ushbu oʻzgarishsiz ham oladi.';
+
+  @override
+  String get mpreviewStatus_ok => 'Tayyor';
+
+  @override
+  String get mpreviewStatus_partial => 'Qisman';
+
+  @override
+  String get mpreviewStatus_failed => 'Ishga tushmadi';
+
+  @override
+  String mpreviewModel(String model) {
+    return '$model tekshirdi';
+  }
+
+  @override
+  String mpreviewIssues(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count ta muammo', zero: 'Muammo yoʻq');
+    return '$_temp0';
+  }
+
+  @override
+  String get mpreviewNoIssues => 'agnts vizual muammo koʻrmadi.';
+
+  @override
+  String get mpreviewSev_high => 'Yuqori';
+
+  @override
+  String get mpreviewSev_medium => 'Oʻrta';
+
+  @override
+  String get mpreviewSev_low => 'Past';
+
+  @override
+  String get mpreviewShowShot => 'Skrinshotni koʻrsatish';
+
+  @override
+  String get mpreviewDesktop => 'Kompyuter';
+
+  @override
+  String get mpreviewPhone => 'Telefon';
+
+  @override
+  String get mpreviewBefore => 'Oldin';
+
+  @override
+  String get mpreviewAfter => 'Keyin';
+
+  @override
+  String get mpreviewNoShots => 'Bu kenglik uchun skrinshotlar yoʻq.';
+
+  @override
+  String mpreviewConsoleErrors(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'Konsolda $count ta xato');
+    return '$_temp0';
+  }
+
+  @override
+  String get mpreviewLoadFailed => 'Skrinshotni yuklab boʻlmadi.';
+
+  @override
+  String get mpreviewAddToFeedback => 'Fikrga qoʻshish';
+
+  @override
+  String get mpreviewAdded => 'Fikrda';
+
+  @override
+  String get mpreviewAttached => 'Fikr bilan yuboriladigan skrinshotlar';
+
+  @override
+  String mpreviewAttachLimit(String max) {
+    return 'Fikr bilan koʻpi bilan $max ta skrinshot yuborish mumkin.';
+  }
+
+  @override
+  String get mpreviewRemove => 'Olib tashlash';
+
+  @override
+  String get mpreviewSettingsModel => 'Oldindan koʻrish';
+
+  @override
+  String get mpreviewSettingsModelHelp => 'Ishlayotgan ilova skrinshotlarini koʻrib chiqadi';
+
+  @override
+  String get mpreviewNotify => 'Oldindan koʻrish skrinshotlari tayyor';
+
+  @override
   String get mtasksActAnswers => 'agnts savollariga javob bering';
 
   @override
@@ -2355,6 +2476,236 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get navRules => 'Qoidalar';
+
+  @override
+  String get previewTab => 'Oldindan koʻrish';
+
+  @override
+  String get previewTitle => 'Ilova skrinshotlari';
+
+  @override
+  String get previewSub =>
+      'agnts ilovani shu oʻzgarish bilan ishga tushirib, skrinshotlar oldi. Bu maslahat: tasdiqlashni hech qachon toʻsmaydi.';
+
+  @override
+  String get previewPending => 'Navbatda: ishchi boʻshashi bilan agnts skrinshotlar oladi.';
+
+  @override
+  String get previewRunning => 'agnts ilovani ishga tushirib, skrinshotlar olmoqda…';
+
+  @override
+  String get previewFailed => 'Oldindan koʻrish bajarilmadi. Ishga tushirish jurnalini koʻring yoki qayta ishga tushiring.';
+
+  @override
+  String previewStale(String n) {
+    return 'Bu $n-tahrir skrinshotlari; shundan beri oʻzgarish yangilangan.';
+  }
+
+  @override
+  String get previewNone => 'Hali skrinshot yoʻq.';
+
+  @override
+  String get previewStatus_ok => 'Olindi';
+
+  @override
+  String get previewStatus_partial => 'Qisman olindi';
+
+  @override
+  String get previewStatus_failed => 'Ilova ishga tushmadi';
+
+  @override
+  String previewModel(num n, String model) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ta skrinshot', zero: 'Skrinshot yoʻq');
+    return '$_temp0, $model oldi';
+  }
+
+  @override
+  String get previewWithBase => 'solishtirish uchun asosiy tarmoq bilan';
+
+  @override
+  String get previewSev_high => 'Yuqori';
+
+  @override
+  String get previewSev_medium => 'Oʻrta';
+
+  @override
+  String get previewSev_low => 'Past';
+
+  @override
+  String get previewNoIssues => 'agnts vizual muammo koʻrmadi.';
+
+  @override
+  String get previewViewport => 'Ekran oʻlchami';
+
+  @override
+  String get previewVp_all => 'Hammasi';
+
+  @override
+  String get previewVp_desktop => 'Kompyuter';
+
+  @override
+  String get previewVp_phone => 'Telefon';
+
+  @override
+  String get previewMode => 'Koʻrsatish';
+
+  @override
+  String get previewMode_after => 'Keyin';
+
+  @override
+  String get previewMode_before => 'Oldin';
+
+  @override
+  String get previewMode_side => 'Yonma-yon';
+
+  @override
+  String get previewMode_slider => 'Surgich';
+
+  @override
+  String get previewSlider => 'Oldin va keyinni solishtirish uchun suring';
+
+  @override
+  String previewConsoleErrors(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'Konsolda $count ta xato');
+    return '$_temp0';
+  }
+
+  @override
+  String get previewNoBefore => '“Oldin” skrinshoti yoʻq: sahifa yangi yoki asosiy tarmoqda ochilmadi.';
+
+  @override
+  String get previewAddToFeedback => 'Fikrga qoʻshish';
+
+  @override
+  String get previewAdded => 'Fikrda';
+
+  @override
+  String get previewCompare => 'Asosiy tarmoq bilan solishtirish';
+
+  @override
+  String get previewRun => 'Skrinshot olish';
+
+  @override
+  String get previewRunAgain => 'Qayta skrinshot olish';
+
+  @override
+  String previewTooMany(String n) {
+    return 'Fikrga koʻpi bilan $n ta skrinshot biriktirish mumkin.';
+  }
+
+  @override
+  String get previewAttached => 'Fikr bilan yuboriladigan skrinshotlar';
+
+  @override
+  String previewDetach(String name) {
+    return '$name ni olib tashlash';
+  }
+
+  @override
+  String get previewRepoTitle => 'Oldindan koʻrish';
+
+  @override
+  String get previewRepoHelp =>
+      'Siz koʻrib chiqishdan oldin interfeys oʻzgarishlarining skrinshotlarini olish uchun agnts ilovani qanday ishga tushiradi. Oldindan koʻrishni oʻchirish uchun buyruqni boʻsh qoldiring.';
+
+  @override
+  String get previewRepoCommand => 'Ishga tushirish buyrugʻi';
+
+  @override
+  String get previewRepoCommandHelp =>
+      'Ishga tushirish konteynerida /workspace ichida bajariladi: oʻrnatish, yigʻish va dev-serverni ishga tushirish. U quyidagi portni tinglashi kerak.';
+
+  @override
+  String get previewRepoPort => 'Port';
+
+  @override
+  String get previewRepoReady => 'Tayyorlik yoʻli';
+
+  @override
+  String get previewRepoUiPaths => 'Interfeys fayllari';
+
+  @override
+  String get previewRepoUiPathsHelp =>
+      'Har qatorda bitta glob, repozitoriy ildiziga nisbatan. Shunday faylga tegadigan oʻzgarish skrinshot oladi. Boʻsh: har qanday oʻzgarish.';
+
+  @override
+  String get previewRepoRoutes => 'Har doim olish';
+
+  @override
+  String get previewRepoRoutesHelp => 'agnts diffdan tanlaganlardan tashqari har safar olinadigan yoʻllar, har qatorda bittadan.';
+
+  @override
+  String get previewRepoLogin => 'Kirish';
+
+  @override
+  String get previewRepoLoginPh => 'demo@acme.test sifatida kiring; parol PREVIEW_PASSWORD da.';
+
+  @override
+  String get previewRepoLoginHelp =>
+      'Ilovada kirish boʻlsa, agnts undan qanday oʻtishini yozing. Maxfiy qiymatlarni oʻzgaruvchi nomi bilan ayting.';
+
+  @override
+  String get previewRepoEnv => 'Muhit oʻzgaruvchilari';
+
+  @override
+  String previewRepoEnvSet(String names) {
+    return 'Berilgan: $names. Qiymatlar hech qachon koʻrsatilmaydi.';
+  }
+
+  @override
+  String get previewRepoEnvReplace => 'Almashtirish';
+
+  @override
+  String get previewRepoEnvClear => 'Tozalash';
+
+  @override
+  String get previewRepoEnvCleared => 'Saqlaganingizda muhit oʻzgaruvchilari oʻchiriladi.';
+
+  @override
+  String get previewRepoEnvHelp =>
+      'Ilovaga beriladigan KEY=value qatorlari, masalan staging API manzili. Shifrlangan holda saqlanadi va qayta koʻrsatilmaydi. Faqat test hisob maʼlumotlaridan foydalaning: ularni ilova ham, agnts ham oʻqiy oladi. Ilova murojaat qiladigan hostlarni Sozlamalar → Oldindan koʻrish → Ruxsat etilgan hostlarga qoʻshing.';
+
+  @override
+  String get previewSettingsTitle => 'Oldindan koʻrish';
+
+  @override
+  String get previewSettingsSub => 'Oldindan koʻrish buyrugʻi bor repozitoriylar uchun interfeys oʻzgarishlari skrinshotlari.';
+
+  @override
+  String get previewAutoPreview => 'Har bir interfeys oʻzgarishini suratga olish';
+
+  @override
+  String get previewAutoPreviewHelp =>
+      'Oʻzgarish sizni kutayotganda agnts ilovani ishga tushiradi, u tegadigan sahifalarni ochadi va skrinshotlarni diff yonida koʻrsatadi. Tasdiqlashni hech qachon toʻsmaydi.';
+
+  @override
+  String get previewVisualCheck => 'Kod yozish jarayoniga ilovani koʻrishga ruxsat berish';
+
+  @override
+  String get previewVisualCheckHelp =>
+      'Claude tugatishdan oldin ilovani ishga tushirib, oʻzgartirgan sahifalarini koʻrishi va buzilgan joylarni tuzatishi mumkin. Bir necha qoʻshimcha qadamga tushadi.';
+
+  @override
+  String get previewModel_ => 'Oldindan koʻrish modeli';
+
+  @override
+  String get previewModelHelp => 'Sahifalarni tanlaydi va skrinshotlarni baholaydi.';
+
+  @override
+  String get previewEgress => 'Ruxsat etilgan hostlar';
+
+  @override
+  String get previewEgressHelp =>
+      'Ichki roʻyxatdan (Claude, git xostinglar, paket reyestrlari) tashqari ishga tushirish konteynerlari murojaat qila oladigan hostlar, masalan oldindan koʻrishda ilova murojaat qiladigan staging API. .example.com uning subdomenlariga ruxsat beradi.';
+
+  @override
+  String get previewNotify => 'Oldindan koʻrish skrinshotlari tayyor boʻlganda';
+
+  @override
+  String get previewNotifyPhotos => 'Telefon skrinshotlarini Telegramga yuborish';
+
+  @override
+  String get previewNotifyPhotosHelp => 'Telegram xabariga toʻrttagacha skrinshot qoʻshiladi.';
 
   @override
   String get relationsTab => 'Tartib';
@@ -3622,6 +3973,9 @@ class AppLocalizationsUz extends AppLocalizations {
   String get spendStageReview => 'Kod tekshiruvi';
 
   @override
+  String get spendStagePreview => 'Oldindan koʻrish';
+
+  @override
   String get spendStageLearn => 'Saboqlar';
 
   @override
@@ -4202,6 +4556,9 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get ticketStageReview => 'agnts kod sharhi';
+
+  @override
+  String get ticketStagePreview => 'Skrinshotlar (oldindan koʻrish)';
 
   @override
   String ticketModelAuto(String model) {

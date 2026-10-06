@@ -22,6 +22,10 @@ agnts nima qilganini oʻqing, testlar va oʻzgarishlarni tekshiring. «Tasdiqlas
 
 Ish sizni kutayotganda agnts ham uni koʻrib chiqadi: diffni xatolar, xavfsizlik, yetishmayotgan testlar va jamoa qoidalari boʻyicha; hisobotni aniqlik va boʻshliqlar boʻyicha. Topilmalar diff ustida, eng jiddiylari birinchi koʻrsatiladi. Bu ikkinchi fikr, toʻsiq emas: xohlagan paytda tasdiqlang. «Fikrga qoʻshish» taklifni fikringizga koʻchiradi. Avto rejimida murakkab tiketlarni Opus, qolganlarini Sonnet koʻrib chiqadi.
 
+## Ilova skrinshotlari
+
+Oldindan koʻrish buyrugʻi bor repozitoriyda agnts ilovani oʻzgarish bilan ishga tushiradi va u tegadigan sahifalarni ochadi: Oldindan koʻrish yorligʻida kompyuter va telefon oʻlchamidagi skrinshotlar, konsol xatolari va sezilgan vizual muammolar koʻrinadi. Oldin va keyinni yonma-yon koʻrish uchun «Asosiy tarmoq bilan solishtirish»ni yoqing; agnts bu tanlovni tiket uchun eslab qoladi. «Fikrga qoʻshish» fikringizni skrinshotga bogʻlaydi va keyingi kod yozish jarayoni rasmni oladi. Ilova ishga tushmasa, yorliq uning jurnali oxirini koʻrsatadi. Kod sharhi kabi bu maslahat va tasdiqlashni toʻsmaydi.
+
 ## Keyingi tiketlar
 
 Sozlamalarda yoki bitta tiketda «Keyingi tiketlarni taklif qilish»ni yoqing, agnts tiketni tugatish uchun yana nima kerakligini koʻrsatadi: oldindan kerak ishlar va ajratiladigan qismlar (tahlildan), bajarilmagan ishlar (ishdan) hamda reja, tahlil yoki koʻrik topgan boʻshliqlar. Tiket maqsadidan tashqari hech narsa taklif qilmaydi; davom tiketida maqsad zanjirdagi birinchi tiket maqsadidir. Keraklilarini belgilang va mahalliy vazifa yoki Jira vazifasi sifatida yarating. Ular navbatda yaratiladi va siz ishga tushirmaguningizcha ishlamaydi. «Keyingi tiketga» koʻrik izohini taklifga aylantiradi. Ishdan kelgan takliflar tiket tugaguncha kutadi.

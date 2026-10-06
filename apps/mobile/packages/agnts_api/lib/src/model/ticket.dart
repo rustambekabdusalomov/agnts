@@ -90,6 +90,12 @@ class Ticket {
 
      this.reviewState,
 
+     this.previewState,
+
+     this.previewCompare,
+
+     this.canPreview,
+
      this.spend,
 
     required  this.createdAt,
@@ -493,6 +499,45 @@ class Ticket {
 
 
 
+      /// The screenshots agnts takes beside the human review
+  @JsonKey(
+    
+    name: r'previewState',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final TicketPreviewStateEnum? previewState;
+
+
+
+      /// Previews of this ticket also capture the default branch (before shots)
+  @JsonKey(
+    
+    name: r'previewCompare',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? previewCompare;
+
+
+
+      /// The ticket's repository has a preview command
+  @JsonKey(
+    
+    name: r'canPreview',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? canPreview;
+
+
+
   @JsonKey(
     
     name: r'spend',
@@ -565,6 +610,9 @@ class Ticket {
       other.mergedAt == mergedAt &&
       other.learnState == learnState &&
       other.reviewState == reviewState &&
+      other.previewState == previewState &&
+      other.previewCompare == previewCompare &&
+      other.canPreview == canPreview &&
       other.spend == spend &&
       other.createdAt == createdAt &&
       other.updatedAt == updatedAt;
@@ -603,6 +651,9 @@ class Ticket {
         mergedAt.hashCode +
         learnState.hashCode +
         reviewState.hashCode +
+        previewState.hashCode +
+        previewCompare.hashCode +
+        canPreview.hashCode +
         spend.hashCode +
         createdAt.hashCode +
         updatedAt.hashCode;
@@ -682,6 +733,28 @@ done(r'done'),
 failed(r'failed');
 
 const TicketReviewStateEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
+}
+
+
+/// The screenshots agnts takes beside the human review
+enum TicketPreviewStateEnum {
+@JsonValue(r'none')
+none(r'none'),
+@JsonValue(r'pending')
+pending(r'pending'),
+@JsonValue(r'running')
+running(r'running'),
+@JsonValue(r'done')
+done(r'done'),
+@JsonValue(r'failed')
+failed(r'failed');
+
+const TicketPreviewStateEnum(this.value);
 
 final String value;
 

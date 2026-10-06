@@ -160,4 +160,5 @@ const _$StageSpendStageEnumEnumMap = {
   StageSpendStageEnum.helper: 'helper',
   StageSpendStageEnum.learn: 'learn',
   StageSpendStageEnum.review: 'review',
+  StageSpendStageEnum.preview: 'preview',
 };

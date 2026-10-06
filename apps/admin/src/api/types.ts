@@ -35,6 +35,11 @@ export type Relations = S['Relations']
 export type RelationType = S['RelationType']
 export type Blocker = S['Blocker']
 export type Footprint = S['Footprint']
+export type TicketPreview = S['TicketPreview']
+export type PreviewShot = S['PreviewShot']
+export type PreviewIssue = S['PreviewIssue']
+export type ShotRef = S['ShotRef']
+export type RepoPreview = S['RepoPreview']
 
 /** Tone per state, as in the demo: drives badge colours (b-<tone>). */
 export const STATE_TONE: Record<TicketState, 'gray' | 'info' | 'warn' | 'ok' | 'bad'> = {
@@ -83,6 +88,40 @@ export const SEVERITY_TONE: Record<Finding['severity'], 'bad' | 'warn' | 'info' 
 export function findingFeedback(f: Finding): string {
   const loc = f.file ? `${f.file}${f.line ? `:${f.line}` : ''}: ` : ''
   return `- ${loc}${f.title}${f.suggestion ? `. ${f.suggestion}` : ''}`
+}
+
+/** Badge tone per preview status and issue severity. */
+export const PREVIEW_STATUS_TONE: Record<TicketPreview['status'], 'ok' | 'warn' | 'bad'> = { ok: 'ok', partial: 'warn', failed: 'bad' }
+export const ISSUE_TONE: Record<PreviewIssue['severity'], 'bad' | 'warn' | 'info'> = { high: 'bad', medium: 'warn', low: 'info' }
+
+/** A screenshot as the start of a feedback line: the reviewer finishes it. */
+export function shotFeedback(s: PreviewShot): string {
+  return `- On screenshot "${s.name}" (${s.viewport}, ${s.route}): `
+}
+
+/** Pairs a preview's shots: an after shot and its before shot share an id but for the -after/-before suffix. */
+export interface ShotPair {
+  base: string
+  name: string
+  route: string
+  note?: string
+  viewport: PreviewShot['viewport']
+  after?: PreviewShot
+  before?: PreviewShot
+}
+export function pairShots(shots: PreviewShot[]): ShotPair[] {
+  const out = new Map<string, ShotPair>()
+  for (const s of shots) {
+    const base = s.id.replace(/-(after|before)$/, '')
+    const p = out.get(base) ?? { base, name: s.name, route: s.route, note: s.note, viewport: s.viewport }
+    if (s.side === 'before') p.before = s
+    else {
+      p.after = s
+      Object.assign(p, { name: s.name, route: s.route, note: s.note })
+    }
+    out.set(base, p)
+  }
+  return [...out.values()]
 }
 
 /** Ticket kinds in the order the server lists them. */

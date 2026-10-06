@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"strconv"
 	"time"
@@ -34,6 +35,11 @@ func (b *Bot) call(ctx context.Context, method string, in, out any) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	return b.do(req, method, out)
+}
+
+// do sends a prepared Bot API request and decodes its result into out.
+func (b *Bot) do(req *http.Request, method string, out any) error {
 	resp, err := b.hc.Do(req)
 	if err != nil {
 		// The URL contains the token; never let it reach a log.
@@ -95,6 +101,53 @@ func (b *Bot) Send(ctx context.Context, chatID int64, text string, rows [][]Butt
 	}
 	err := b.call(ctx, "sendMessage", in, &msg)
 	return msg.MessageID, err
+}
+
+// SendPhotos sends PNG images to a chat, the caption on the first: one
+// photo, or an album of up to ten.
+func (b *Bot) SendPhotos(ctx context.Context, chatID int64, caption string, photos [][]byte) error {
+	if len(photos) == 0 {
+		return nil
+	}
+	if len(photos) > 10 {
+		photos = photos[:10]
+	}
+	var body bytes.Buffer
+	mw := multipart.NewWriter(&body)
+	_ = mw.WriteField("chat_id", strconv.FormatInt(chatID, 10))
+	method := "sendPhoto"
+	if len(photos) == 1 {
+		_ = mw.WriteField("caption", caption)
+		fw, err := mw.CreateFormFile("photo", "shot.png")
+		if err != nil {
+			return err
+		}
+		_, _ = fw.Write(photos[0])
+	} else {
+		method = "sendMediaGroup"
+		media := make([]map[string]string, len(photos))
+		for i, p := range photos {
+			name := fmt.Sprintf("p%d", i)
+			media[i] = map[string]string{"type": "photo", "media": "attach://" + name}
+			fw, err := mw.CreateFormFile(name, name+".png")
+			if err != nil {
+				return err
+			}
+			_, _ = fw.Write(p)
+		}
+		media[0]["caption"] = caption
+		js, _ := json.Marshal(media)
+		_ = mw.WriteField("media", string(js))
+	}
+	if err := mw.Close(); err != nil {
+		return err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, b.api+"/bot"+b.token+"/"+method, &body)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	return b.do(req, method, nil)
 }
 
 // ClearButtons removes a message's inline keyboard.

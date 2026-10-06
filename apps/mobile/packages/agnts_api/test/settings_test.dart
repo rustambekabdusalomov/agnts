@@ -54,6 +54,24 @@ void main() {
       // TODO
     });
 
+    // Take screenshots of every UI change in repositories with a preview command
+    // bool autoPreview
+    test('to test the property `autoPreview`', () async {
+      // TODO
+    });
+
+    // Coding runs may start the app and look at the pages they changed
+    // bool visualCheck
+    test('to test the property `visualCheck`', () async {
+      // TODO
+    });
+
+    // Hosts run containers may reach besides the built-in list, such as a staging API; .example.com matches subdomains
+    // List<String> egressAllow
+    test('to test the property `egressAllow`', () async {
+      // TODO
+    });
+
     // Runs suggest follow-up tickets (off by default; a ticket can override it)
     // bool suggestFollowUps
     test('to test the property `suggestFollowUps`', () async {

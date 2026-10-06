@@ -41,6 +41,12 @@ class Settings {
 
      this.autoReview,
 
+     this.autoPreview,
+
+     this.visualCheck,
+
+     this.egressAllow,
+
      this.suggestFollowUps,
 
     required  this.pauseAbove,
@@ -166,6 +172,45 @@ class Settings {
 
 
 
+      /// Take screenshots of every UI change in repositories with a preview command
+  @JsonKey(
+    
+    name: r'autoPreview',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? autoPreview;
+
+
+
+      /// Coding runs may start the app and look at the pages they changed
+  @JsonKey(
+    
+    name: r'visualCheck',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? visualCheck;
+
+
+
+      /// Hosts run containers may reach besides the built-in list, such as a staging API; .example.com matches subdomains
+  @JsonKey(
+    
+    name: r'egressAllow',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<String>? egressAllow;
+
+
+
       /// Runs suggest follow-up tickets (off by default; a ticket can override it)
   @JsonKey(
     
@@ -244,6 +289,9 @@ class Settings {
       other.autoResume == autoResume &&
       other.autoLearn == autoLearn &&
       other.autoReview == autoReview &&
+      other.autoPreview == autoPreview &&
+      other.visualCheck == visualCheck &&
+      other.egressAllow == egressAllow &&
       other.suggestFollowUps == suggestFollowUps &&
       other.pauseAbove == pauseAbove &&
       other.parallel == parallel &&
@@ -261,6 +309,9 @@ class Settings {
         autoResume.hashCode +
         autoLearn.hashCode +
         autoReview.hashCode +
+        autoPreview.hashCode +
+        visualCheck.hashCode +
+        egressAllow.hashCode +
         suggestFollowUps.hashCode +
         pauseAbove.hashCode +
         parallel.hashCode +

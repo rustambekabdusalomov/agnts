@@ -2280,6 +2280,141 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get mpreviewTitle => 'Превью agnts';
+
+  @override
+  String get mpreviewSub => 'Скриншоты приложения с этим изменением. Совет рядом с вашей проверкой: он никогда не блокирует одобрение.';
+
+  @override
+  String get mpreviewPending => 'В очереди: agnts запустит приложение и сделает скриншоты, как только освободится исполнитель.';
+
+  @override
+  String get mpreviewRunning => 'agnts запускает приложение и делает скриншоты…';
+
+  @override
+  String get mpreviewFailed => 'Превью не удалось. Проверьте приложение сами или запустите снова.';
+
+  @override
+  String get mpreviewAppFailed => 'Приложение не запустилось, поэтому скриншотов нет. Конец его лога:';
+
+  @override
+  String mpreviewStale(String n) {
+    return 'Это скриншоты ревизии $n; с тех пор работа изменилась.';
+  }
+
+  @override
+  String get mpreviewRun => 'Сделать скриншоты';
+
+  @override
+  String get mpreviewRunAgain => 'Запустить снова';
+
+  @override
+  String get mpreviewCompare => 'Сравнить с основной веткой';
+
+  @override
+  String get mpreviewCompareHelp => 'Также делает те же скриншоты без этого изменения.';
+
+  @override
+  String get mpreviewStatus_ok => 'Готово';
+
+  @override
+  String get mpreviewStatus_partial => 'Частично';
+
+  @override
+  String get mpreviewStatus_failed => 'Не запустилось';
+
+  @override
+  String mpreviewModel(String model) {
+    return 'Проверил $model';
+  }
+
+  @override
+  String mpreviewIssues(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count проблемы',
+      many: '$count проблем',
+      few: '$count проблемы',
+      one: '$count проблема',
+      zero: 'Проблем нет',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mpreviewNoIssues => 'agnts не заметил визуальных проблем.';
+
+  @override
+  String get mpreviewSev_high => 'Высокая';
+
+  @override
+  String get mpreviewSev_medium => 'Средняя';
+
+  @override
+  String get mpreviewSev_low => 'Низкая';
+
+  @override
+  String get mpreviewShowShot => 'Показать скриншот';
+
+  @override
+  String get mpreviewDesktop => 'Компьютер';
+
+  @override
+  String get mpreviewPhone => 'Телефон';
+
+  @override
+  String get mpreviewBefore => 'До';
+
+  @override
+  String get mpreviewAfter => 'После';
+
+  @override
+  String get mpreviewNoShots => 'Для этой ширины скриншотов нет.';
+
+  @override
+  String mpreviewConsoleErrors(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ошибки в консоли',
+      many: '$count ошибок в консоли',
+      few: '$count ошибки в консоли',
+      one: '$count ошибка в консоли',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mpreviewLoadFailed => 'Не удалось загрузить скриншот.';
+
+  @override
+  String get mpreviewAddToFeedback => 'Добавить в отзыв';
+
+  @override
+  String get mpreviewAdded => 'В отзыве';
+
+  @override
+  String get mpreviewAttached => 'Скриншоты, которые уйдут с отзывом';
+
+  @override
+  String mpreviewAttachLimit(String max) {
+    return 'С отзывом можно отправить не больше $max скриншотов.';
+  }
+
+  @override
+  String get mpreviewRemove => 'Убрать';
+
+  @override
+  String get mpreviewSettingsModel => 'Превью';
+
+  @override
+  String get mpreviewSettingsModelHelp => 'Смотрит скриншоты запущенного приложения';
+
+  @override
+  String get mpreviewNotify => 'Скриншоты превью готовы';
+
+  @override
   String get mtasksActAnswers => 'Ответьте на вопросы agnts';
 
   @override
@@ -2441,6 +2576,249 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get navRules => 'Правила';
+
+  @override
+  String get previewTab => 'Превью';
+
+  @override
+  String get previewTitle => 'Скриншоты приложения';
+
+  @override
+  String get previewSub => 'agnts запустил приложение с этим изменением и сделал скриншоты. Это совет: одобрение он никогда не блокирует.';
+
+  @override
+  String get previewPending => 'В очереди: agnts сделает скриншоты, как только освободится исполнитель.';
+
+  @override
+  String get previewRunning => 'agnts запускает приложение и делает скриншоты…';
+
+  @override
+  String get previewFailed => 'Превью не удалось. Посмотрите журнал запуска или запустите снова.';
+
+  @override
+  String previewStale(String n) {
+    return 'Это скриншоты ревизии $n; с тех пор изменение ушло вперёд.';
+  }
+
+  @override
+  String get previewNone => 'Скриншотов пока нет.';
+
+  @override
+  String get previewStatus_ok => 'Снято';
+
+  @override
+  String get previewStatus_partial => 'Снято частично';
+
+  @override
+  String get previewStatus_failed => 'Приложение не запустилось';
+
+  @override
+  String previewModel(num n, String model) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n скриншота',
+      many: '$n скриншотов',
+      few: '$n скриншота',
+      one: '$n скриншот',
+      zero: 'Скриншотов нет',
+    );
+    return '$_temp0 от $model';
+  }
+
+  @override
+  String get previewWithBase => 'со снимками основной ветки для сравнения';
+
+  @override
+  String get previewSev_high => 'Высокая';
+
+  @override
+  String get previewSev_medium => 'Средняя';
+
+  @override
+  String get previewSev_low => 'Низкая';
+
+  @override
+  String get previewNoIssues => 'agnts не увидел визуальных проблем.';
+
+  @override
+  String get previewViewport => 'Размер экрана';
+
+  @override
+  String get previewVp_all => 'Все';
+
+  @override
+  String get previewVp_desktop => 'Компьютер';
+
+  @override
+  String get previewVp_phone => 'Телефон';
+
+  @override
+  String get previewMode => 'Показать';
+
+  @override
+  String get previewMode_after => 'После';
+
+  @override
+  String get previewMode_before => 'До';
+
+  @override
+  String get previewMode_side => 'Рядом';
+
+  @override
+  String get previewMode_slider => 'Ползунок';
+
+  @override
+  String get previewSlider => 'Потяните, чтобы сравнить до и после';
+
+  @override
+  String previewConsoleErrors(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ошибки в консоли',
+      many: '$count ошибок в консоли',
+      few: '$count ошибки в консоли',
+      one: '$count ошибка в консоли',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get previewNoBefore => 'Скриншота «до» нет: страница новая или не открылась на основной ветке.';
+
+  @override
+  String get previewAddToFeedback => 'Добавить в отзыв';
+
+  @override
+  String get previewAdded => 'В отзыве';
+
+  @override
+  String get previewCompare => 'Сравнить с основной веткой';
+
+  @override
+  String get previewRun => 'Сделать скриншоты';
+
+  @override
+  String get previewRunAgain => 'Сделать скриншоты снова';
+
+  @override
+  String previewTooMany(String n) {
+    return 'К отзыву можно приложить не больше $n скриншотов.';
+  }
+
+  @override
+  String get previewAttached => 'Скриншоты к отзыву';
+
+  @override
+  String previewDetach(String name) {
+    return 'Убрать $name';
+  }
+
+  @override
+  String get previewRepoTitle => 'Превью';
+
+  @override
+  String get previewRepoHelp =>
+      'Как agnts запускает приложение, чтобы снять скриншоты изменений интерфейса до вашей проверки. Оставьте команду пустой, чтобы выключить превью.';
+
+  @override
+  String get previewRepoCommand => 'Команда запуска';
+
+  @override
+  String get previewRepoCommandHelp =>
+      'Выполняется в /workspace в контейнере запуска: установка, сборка и запуск dev-сервера. Он должен слушать порт ниже.';
+
+  @override
+  String get previewRepoPort => 'Порт';
+
+  @override
+  String get previewRepoReady => 'Путь проверки готовности';
+
+  @override
+  String get previewRepoUiPaths => 'Файлы интерфейса';
+
+  @override
+  String get previewRepoUiPathsHelp =>
+      'По одному glob-шаблону на строку, от корня репозитория. Изменение, затронувшее такой файл, получает скриншоты. Пусто: любое изменение.';
+
+  @override
+  String get previewRepoRoutes => 'Снимать всегда';
+
+  @override
+  String get previewRepoRoutesHelp => 'Маршруты для каждого превью, по одному на строку, помимо тех, что agnts выберет по диффу.';
+
+  @override
+  String get previewRepoLogin => 'Вход';
+
+  @override
+  String get previewRepoLoginPh => 'Войти как demo@acme.test; пароль в PREVIEW_PASSWORD.';
+
+  @override
+  String get previewRepoLoginHelp => 'Подскажите agnts, как пройти вход, если он есть. Секреты называйте по имени переменной.';
+
+  @override
+  String get previewRepoEnv => 'Переменные окружения';
+
+  @override
+  String previewRepoEnvSet(String names) {
+    return 'Заданы: $names. Значения никогда не показываются.';
+  }
+
+  @override
+  String get previewRepoEnvReplace => 'Заменить';
+
+  @override
+  String get previewRepoEnvClear => 'Очистить';
+
+  @override
+  String get previewRepoEnvCleared => 'Переменные окружения будут удалены при сохранении.';
+
+  @override
+  String get previewRepoEnvHelp =>
+      'Строки KEY=value для приложения, например адрес staging API. Хранятся зашифрованными и больше не показываются. Используйте только тестовые учётные данные: их видят приложение и agnts. Добавьте хосты, к которым обращается приложение, в Настройки → Превью → Разрешённые хосты.';
+
+  @override
+  String get previewSettingsTitle => 'Превью';
+
+  @override
+  String get previewSettingsSub => 'Скриншоты изменений интерфейса для репозиториев с командой превью.';
+
+  @override
+  String get previewAutoPreview => 'Снимать каждое изменение интерфейса';
+
+  @override
+  String get previewAutoPreviewHelp =>
+      'Пока изменение ждёт вас, agnts запускает приложение, открывает затронутые страницы и показывает скриншоты рядом с диффом. Одобрение это никогда не блокирует.';
+
+  @override
+  String get previewVisualCheck => 'Давать запускам кода смотреть на приложение';
+
+  @override
+  String get previewVisualCheckHelp =>
+      'Claude может запустить приложение, посмотреть на изменённые страницы перед завершением и исправить то, что выглядит сломанным. Это стоит нескольких ходов.';
+
+  @override
+  String get previewModel_ => 'Модель превью';
+
+  @override
+  String get previewModelHelp => 'Выбирает страницы и оценивает скриншоты.';
+
+  @override
+  String get previewEgress => 'Разрешённые хосты';
+
+  @override
+  String get previewEgressHelp =>
+      'Хосты, доступные контейнерам запуска помимо встроенного списка (Claude, git-хостинги, реестры пакетов), например staging API, к которому приложение обращается в превью. .example.com разрешает поддомены.';
+
+  @override
+  String get previewNotify => 'Когда скриншоты превью готовы';
+
+  @override
+  String get previewNotifyPhotos => 'Отправлять скриншоты телефона в Telegram';
+
+  @override
+  String get previewNotifyPhotosHelp => 'К сообщению в Telegram прикладывается до четырёх скриншотов.';
 
   @override
   String get relationsTab => 'Порядок';
@@ -3791,6 +4169,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get spendStageReview => 'Код-ревью';
 
   @override
+  String get spendStagePreview => 'Превью';
+
+  @override
   String get spendStageLearn => 'Уроки';
 
   @override
@@ -4405,6 +4786,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get ticketStageReview => 'Код-ревью agnts';
+
+  @override
+  String get ticketStagePreview => 'Скриншоты (превью)';
 
   @override
   String ticketModelAuto(String model) {

@@ -1,6 +1,6 @@
 # agnts Visual Preview — Plan
 
-Oct 7, 2026 · draft
+Oct 7, 2026 · implemented (phases 1a, 1b, 1c)
 
 ## Overview
 
@@ -110,7 +110,6 @@ New fields on `domain.Repository`, edited in a **Preview** section of the reposi
 | `PreviewUIPaths` | `src/**/*.vue`, `src/**/*.css` | When a change counts as a UI change |
 | `PreviewLogin` | "Sign in as demo@acme.test, password in `PREVIEW_PASSWORD`" | Free text for Claude |
 | `PreviewEnv` | `VITE_API_URL=https://staging.acme.com` | Encrypted with `AGNTS_ENC_KEY`, write-only in the API |
-| `PreviewCompare` | `true` | Before shots from the merge-base; doubles the run time |
 
 **Data.** A page with no backend renders empty, and that is the biggest risk to the feature's usefulness. Each repository chooses one of: point the env at a staging API, use the app's own mock mode (`VITE_USE_MOCKS=1`), or start a backend in the preview command (`docker compose` is not available in the container, so this only works for single-process stacks). The admin form says this plainly, and the repository page warns when previews keep coming back `partial`.
 
@@ -145,8 +144,11 @@ ALTER TABLE repositories
   ADD COLUMN preview_ui_paths   text[]  NOT NULL DEFAULT '{}',
   ADD COLUMN preview_login      text    NOT NULL DEFAULT '',
   ADD COLUMN preview_env        bytea,              -- sealed with AGNTS_ENC_KEY
-  ADD COLUMN preview_compare    boolean NOT NULL DEFAULT true;
-ALTER TABLE tickets ADD COLUMN preview_state text NOT NULL DEFAULT '';
+  ADD COLUMN preview_env_names  text[]  NOT NULL DEFAULT '{}';
+ALTER TABLE tickets
+  ADD COLUMN preview_state   text    NOT NULL DEFAULT '',
+  ADD COLUMN preview_compare boolean NOT NULL DEFAULT false,   -- per ticket
+  ADD COLUMN feedback_shots  jsonb   NOT NULL DEFAULT '[]';    -- screenshots the feedback points at
 ```
 
 There are no CHECK constraints on `runs.stage` or `claude_calls.model_stage`, so the new values need no constraint changes.
@@ -266,11 +268,19 @@ Elsewhere:
 - **Disk.** About 150–400 KB per PNG, so roughly 5 MB per ticket at two kept revisions.
 - **Image.** About +400 MB for Chromium.
 
-## Open questions
+## Decisions
 
-1. Should comparison (before shots) default on? It is the most useful view, but it doubles the run time.
-2. Should agnts provide a seeded login for apps behind authentication, or is free-text login instructions plus env good enough for v1?
-3. Does **Try preview** on the repository page (a ticketless run) belong in 1a, or can the first ticket serve as the test?
+1. **Before/after comparison is chosen per ticket**, off by default: the reviewer ticks *Compare with the default branch* on the ticket's Preview tab (`Ticket.PreviewCompare`, `POST /tickets/{key}/preview {"compare": true}`), and later previews of that ticket keep it. The repository-level `PreviewCompare` from the draft is gone.
+2. **Free-text login instructions plus the preview environment** are enough for v1; no seeded login.
+3. **No "Try preview" on the repository page** in v1; the first ticket is the test.
+
+## Where the build differs from the draft
+
+- agnts itself runs `agnts-preview start` before Claude, so an app that does not start costs no Claude turns and is saved as a preview with status `failed` and the log tail.
+- `agnts-shot` launches Chromium per call and keeps cookies in `/tmp/agnts-shot/state.json` instead of a long-lived daemon; simpler, about a second per shot.
+- The egress proxy runs in its own container, so it reads Settings → Previews → Allowed hosts from agnts's internal listener (`AGNTS_INTERNAL_ADDR`, default `:8081`, `GET /egress/allow`) every 30 seconds. Caddy only routes `:8080`, and run containers are on the internal network, so neither the internet nor a run can reach it.
+- `SaveRepository` (the CLI's `repo add`, an upsert by name) leaves preview settings alone; only the admin's update by id changes them.
+- Shot ids are validated twice: by `domain.ShotIDPattern` in the manifest and again by the on-disk store, so no client path reaches the filesystem.
 
 ## Phase 2 (later): live preview
 

@@ -31,6 +31,8 @@ abstract class _$RepositoryInputCWProxy {
 
   RepositoryInput deployWorkflow(String? deployWorkflow);
 
+  RepositoryInput preview(RepoPreviewInput? preview);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `RepositoryInput(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -50,6 +52,7 @@ abstract class _$RepositoryInputCWProxy {
     String? instructions,
     String? jiraProject,
     String? deployWorkflow,
+    RepoPreviewInput? preview,
   });
 }
 
@@ -102,6 +105,9 @@ class _$RepositoryInputCWProxyImpl implements _$RepositoryInputCWProxy {
       this(deployWorkflow: deployWorkflow);
 
   @override
+  RepositoryInput preview(RepoPreviewInput? preview) => this(preview: preview);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `RepositoryInput(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -121,6 +127,7 @@ class _$RepositoryInputCWProxyImpl implements _$RepositoryInputCWProxy {
     Object? instructions = const $CopyWithPlaceholder(),
     Object? jiraProject = const $CopyWithPlaceholder(),
     Object? deployWorkflow = const $CopyWithPlaceholder(),
+    Object? preview = const $CopyWithPlaceholder(),
   }) {
     return RepositoryInput(
       name: name == const $CopyWithPlaceholder()
@@ -171,6 +178,10 @@ class _$RepositoryInputCWProxyImpl implements _$RepositoryInputCWProxy {
           ? _value.deployWorkflow
           // ignore: cast_nullable_to_non_nullable
           : deployWorkflow as String?,
+      preview: preview == const $CopyWithPlaceholder()
+          ? _value.preview
+          // ignore: cast_nullable_to_non_nullable
+          : preview as RepoPreviewInput?,
     );
   }
 }
@@ -204,6 +215,12 @@ RepositoryInput _$RepositoryInputFromJson(Map<String, dynamic> json) =>
         instructions: $checkedConvert('instructions', (v) => v as String?),
         jiraProject: $checkedConvert('jiraProject', (v) => v as String?),
         deployWorkflow: $checkedConvert('deployWorkflow', (v) => v as String?),
+        preview: $checkedConvert(
+          'preview',
+          (v) => v == null
+              ? null
+              : RepoPreviewInput.fromJson(v as Map<String, dynamic>),
+        ),
       );
       return val;
     });
@@ -222,6 +239,7 @@ Map<String, dynamic> _$RepositoryInputToJson(RepositoryInput instance) =>
       'instructions': ?instance.instructions,
       'jiraProject': ?instance.jiraProject,
       'deployWorkflow': ?instance.deployWorkflow,
+      'preview': ?instance.preview?.toJson(),
     };
 
 const _$RepositoryInputKindEnumEnumMap = {

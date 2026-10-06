@@ -58,6 +58,9 @@ import 'package:agnts_api/src/model/model_overrides.dart';
 import 'package:agnts_api/src/model/notify_settings.dart';
 import 'package:agnts_api/src/model/period_stats.dart';
 import 'package:agnts_api/src/model/pipeline.dart';
+import 'package:agnts_api/src/model/preview_input.dart';
+import 'package:agnts_api/src/model/preview_issue.dart';
+import 'package:agnts_api/src/model/preview_shot.dart';
 import 'package:agnts_api/src/model/question.dart';
 import 'package:agnts_api/src/model/quiz_question.dart';
 import 'package:agnts_api/src/model/reject_ticket_request.dart';
@@ -68,6 +71,8 @@ import 'package:agnts_api/src/model/relations.dart';
 import 'package:agnts_api/src/model/remote_repository.dart';
 import 'package:agnts_api/src/model/repo_activity.dart';
 import 'package:agnts_api/src/model/repo_member.dart';
+import 'package:agnts_api/src/model/repo_preview.dart';
+import 'package:agnts_api/src/model/repo_preview_input.dart';
 import 'package:agnts_api/src/model/repository.dart';
 import 'package:agnts_api/src/model/repository_input.dart';
 import 'package:agnts_api/src/model/request_changes_request.dart';
@@ -79,6 +84,7 @@ import 'package:agnts_api/src/model/rule_answers_answers_inner.dart';
 import 'package:agnts_api/src/model/rule_input.dart';
 import 'package:agnts_api/src/model/rule_question.dart';
 import 'package:agnts_api/src/model/settings.dart';
+import 'package:agnts_api/src/model/shot_ref.dart';
 import 'package:agnts_api/src/model/stage.dart';
 import 'package:agnts_api/src/model/stage_models.dart';
 import 'package:agnts_api/src/model/stage_spend.dart';
@@ -89,6 +95,7 @@ import 'package:agnts_api/src/model/task_update.dart';
 import 'package:agnts_api/src/model/ticket.dart';
 import 'package:agnts_api/src/model/ticket_detail.dart';
 import 'package:agnts_api/src/model/ticket_kind_input.dart';
+import 'package:agnts_api/src/model/ticket_preview.dart';
 import 'package:agnts_api/src/model/ticket_repo.dart';
 import 'package:agnts_api/src/model/ticket_spend_list.dart';
 import 'package:agnts_api/src/model/ticket_spend_row.dart';
@@ -256,6 +263,12 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return PeriodStats.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Pipeline':
           return Pipeline.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PreviewInput':
+          return PreviewInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PreviewIssue':
+          return PreviewIssue.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PreviewShot':
+          return PreviewShot.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Question':
           return Question.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'QuizQuestion':
@@ -279,6 +292,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return RepoActivity.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RepoMember':
           return RepoMember.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RepoPreview':
+          return RepoPreview.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RepoPreviewInput':
+          return RepoPreviewInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Repository':
           return Repository.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RepositoryInput':
@@ -307,6 +324,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           
         case 'Settings':
           return Settings.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ShotRef':
+          return ShotRef.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Stage':
           return Stage.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'StageModels':
@@ -333,6 +352,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           
         case 'TicketKindInput':
           return TicketKindInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'TicketPreview':
+          return TicketPreview.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TicketRepo':
           return TicketRepo.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TicketSpendList':

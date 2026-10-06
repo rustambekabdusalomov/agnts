@@ -28,6 +28,8 @@ class ModelOverrides {
      this.retry,
 
      this.review,
+
+     this.preview,
   });
 
   @JsonKey(
@@ -78,6 +80,18 @@ class ModelOverrides {
 
 
 
+  @JsonKey(
+    
+    name: r'preview',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final Model? preview;
+
+
+
 
 
     @override
@@ -85,14 +99,16 @@ class ModelOverrides {
       other.analyze == analyze &&
       other.coding == coding &&
       other.retry == retry &&
-      other.review == review;
+      other.review == review &&
+      other.preview == preview;
 
     @override
     int get hashCode =>
         analyze.hashCode +
         coding.hashCode +
         retry.hashCode +
-        review.hashCode;
+        review.hashCode +
+        preview.hashCode;
 
   factory ModelOverrides.fromJson(Map<String, dynamic> json) => _$ModelOverridesFromJson(json);
 

@@ -15,6 +15,8 @@ abstract class _$ModelOverridesCWProxy {
 
   ModelOverrides review(Model? review);
 
+  ModelOverrides preview(Model? preview);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ModelOverrides(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -26,6 +28,7 @@ abstract class _$ModelOverridesCWProxy {
     Model? coding,
     Model? retry,
     Model? review,
+    Model? preview,
   });
 }
 
@@ -48,6 +51,9 @@ class _$ModelOverridesCWProxyImpl implements _$ModelOverridesCWProxy {
   ModelOverrides review(Model? review) => this(review: review);
 
   @override
+  ModelOverrides preview(Model? preview) => this(preview: preview);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ModelOverrides(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -59,6 +65,7 @@ class _$ModelOverridesCWProxyImpl implements _$ModelOverridesCWProxy {
     Object? coding = const $CopyWithPlaceholder(),
     Object? retry = const $CopyWithPlaceholder(),
     Object? review = const $CopyWithPlaceholder(),
+    Object? preview = const $CopyWithPlaceholder(),
   }) {
     return ModelOverrides(
       analyze: analyze == const $CopyWithPlaceholder()
@@ -77,6 +84,10 @@ class _$ModelOverridesCWProxyImpl implements _$ModelOverridesCWProxy {
           ? _value.review
           // ignore: cast_nullable_to_non_nullable
           : review as Model?,
+      preview: preview == const $CopyWithPlaceholder()
+          ? _value.preview
+          // ignore: cast_nullable_to_non_nullable
+          : preview as Model?,
     );
   }
 }
@@ -110,6 +121,10 @@ ModelOverrides _$ModelOverridesFromJson(Map<String, dynamic> json) =>
           'review',
           (v) => $enumDecodeNullable(_$ModelEnumMap, v),
         ),
+        preview: $checkedConvert(
+          'preview',
+          (v) => $enumDecodeNullable(_$ModelEnumMap, v),
+        ),
       );
       return val;
     });
@@ -120,6 +135,7 @@ Map<String, dynamic> _$ModelOverridesToJson(ModelOverrides instance) =>
       'coding': ?_$ModelEnumMap[instance.coding],
       'retry': ?_$ModelEnumMap[instance.retry],
       'review': ?_$ModelEnumMap[instance.review],
+      'preview': ?_$ModelEnumMap[instance.preview],
     };
 
 const _$ModelEnumMap = {

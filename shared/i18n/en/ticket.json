@@ -103,6 +103,7 @@
     "stageCoding": "Coding",
     "stageRetry": "Retries and requested changes",
     "stageReview": "Code review by agnts",
+    "stagePreview": "Screenshots (preview)",
     "modelAuto": "Auto ({model})",
     "sideTicket": "Ticket",
     "sideTask": "Task",

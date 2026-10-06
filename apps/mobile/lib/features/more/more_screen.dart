@@ -279,6 +279,7 @@ class _ModelsSection extends ConsumerWidget {
       ('retry', l.settingsStageRetry, l.settingsStageRetryHelp, s.models.retry),
       ('helper', l.settingsStageHelper, l.settingsStageHelperHelp, s.models.helper),
       ('learn', l.settingsStageLearn, l.settingsStageLearnHelp, s.models.learn ?? Model.sonnet),
+      if (s.models.preview != null) ('preview', l.mpreviewSettingsModel, l.mpreviewSettingsModelHelp, s.models.preview!),
     ];
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       SectionHeader(l.mobileDefaultModels),
@@ -382,6 +383,7 @@ class _PushSection extends ConsumerWidget {
             sw(l.mobilePushDone, n.done, 'done'),
             if (n.lessons != null) sw(l.settingsLessons, n.lessons!, 'lessons'),
             if (n.review != null) sw(l.settingsReviewDone, n.review!, 'review'),
+            if (n.preview != null) sw(l.mpreviewNotify, n.preview!, 'preview'),
             if (n.followUps != null) sw(l.followUpsNotifyLabel, n.followUps!, 'followUps'),
             if (s.suggestFollowUps != null)
               ListRow(

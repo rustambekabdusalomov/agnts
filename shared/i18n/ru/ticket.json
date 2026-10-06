@@ -103,6 +103,7 @@
     "stageCoding": "Разработка",
     "stageRetry": "Повторы и запрошенные изменения",
     "stageReview": "Код-ревью agnts",
+    "stagePreview": "Скриншоты (превью)",
     "modelAuto": "Авто ({model})",
     "sideTicket": "Тикет",
     "sideTask": "Задача",

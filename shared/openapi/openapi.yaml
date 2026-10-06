@@ -205,6 +205,11 @@ paths:
               required: [feedback]
               properties:
                 feedback: { type: string, minLength: 1, maxLength: 20000 }
+                shots:
+                  type: array
+                  maxItems: 6
+                  description: Preview screenshots the feedback points at; the coding run gets them
+                  items: { $ref: '#/components/schemas/ShotRef' }
       responses:
         '200': { $ref: '#/components/responses/TicketOK' }
         '400': { $ref: '#/components/responses/BadRequest' }
@@ -281,6 +286,48 @@ paths:
       responses:
         '200': { $ref: '#/components/responses/TicketOK' }
         '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/preview:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: previewTicket
+      summary: Queue a preview (screenshots of the running app) of a ticket waiting for review, again if one already ran
+      tags: [tickets]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PreviewInput' }
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/preview/{runId}/shots/{shotId}:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+      - name: runId
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+      - name: shotId
+        in: path
+        required: true
+        schema: { type: string, pattern: '^[a-z0-9][a-z0-9-]{0,63}$' }
+    get:
+      operationId: getPreviewShot
+      summary: One preview screenshot, as PNG
+      tags: [tickets]
+      responses:
+        '200':
+          description: The screenshot; it never changes, so it may be cached
+          content:
+            image/png:
+              schema: { type: string, format: binary }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
@@ -1965,6 +2012,12 @@ components:
           type: string
           enum: [none, pending, running, done, failed]
           description: The code review agnts runs beside the human review
+        previewState:
+          type: string
+          enum: [none, pending, running, done, failed]
+          description: The screenshots agnts takes beside the human review
+        previewCompare: { type: boolean, description: Previews of this ticket also capture the default branch (before shots) }
+        canPreview: { type: boolean, description: The ticket's repository has a preview command }
         spend: { $ref: '#/components/schemas/TokenSpend' }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
@@ -2008,7 +2061,7 @@ components:
         calls: { type: integer, description: Claude invocations in the period }
         topStage:
           type: string
-          enum: [analyze, coding, retry, helper, learn, review]
+          enum: [analyze, coding, retry, helper, learn, review, preview]
           description: The stage that cost the most
         spend: { $ref: '#/components/schemas/TokenSpend' }
 
@@ -2019,7 +2072,7 @@ components:
       properties:
         stage:
           type: string
-          enum: [analyze, coding, retry, helper, learn, review]
+          enum: [analyze, coding, retry, helper, learn, review, preview]
           description: 'retry is fix attempts after failed checks and requested changes'
         model: { type: string }
         calls: { type: integer, description: Claude invocations }
@@ -2090,6 +2143,63 @@ components:
           items: { type: string }
         createdAt: { type: string, format: date-time }
 
+    ShotRef:
+      type: object
+      required: [runId, shotId]
+      properties:
+        runId: { type: integer, format: int64 }
+        shotId: { type: string, pattern: '^[a-z0-9][a-z0-9-]{0,63}$' }
+
+    PreviewInput:
+      type: object
+      properties:
+        compare: { type: boolean, description: Also capture the default branch; kept for later previews of the ticket }
+
+    PreviewShot:
+      type: object
+      required: [id, name, route, viewport, side, url]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        route: { type: string }
+        viewport: { type: string, enum: [desktop, phone] }
+        side: { type: string, enum: [after, before] }
+        note: { type: string }
+        width: { type: integer }
+        height: { type: integer }
+        consoleErrors: { type: integer }
+        url: { type: string, description: 'Where to load the PNG, relative to the API base' }
+
+    PreviewIssue:
+      type: object
+      required: [severity, description]
+      properties:
+        severity: { type: string, enum: [high, medium, low] }
+        description: { type: string }
+        shotId: { type: string }
+
+    TicketPreview:
+      type: object
+      required: [runId, revision, model, compare, status, summary, shots, issues, createdAt]
+      description: >-
+        Screenshots of the running app at the latest result, advice beside
+        the human review. It shows an older revision when revision is below
+        the ticket's.
+      properties:
+        runId: { type: integer, format: int64 }
+        revision: { type: integer }
+        model: { $ref: '#/components/schemas/Model' }
+        compare: { type: boolean, description: Before shots were taken too }
+        status: { type: string, enum: [ok, partial, failed], description: 'failed: the app did not start' }
+        summary: { type: string }
+        shots:
+          type: array
+          items: { $ref: '#/components/schemas/PreviewShot' }
+        issues:
+          type: array
+          items: { $ref: '#/components/schemas/PreviewIssue' }
+        createdAt: { type: string, format: date-time }
+
     CheckStep:
       type: object
       required: [name, command, exitCode, durationMs]
@@ -2141,6 +2251,7 @@ components:
         followUps: { $ref: '#/components/schemas/FollowUps' }
         relations: { $ref: '#/components/schemas/Relations' }
         review: { $ref: '#/components/schemas/CodeReview' }
+        preview: { $ref: '#/components/schemas/TicketPreview' }
         history:
           type: array
           items: { $ref: '#/components/schemas/HistoryItem' }
@@ -2203,6 +2314,7 @@ components:
         helper: { $ref: '#/components/schemas/Model' }
         learn: { $ref: '#/components/schemas/Model' }
         review: { $ref: '#/components/schemas/ReviewModel' }
+        preview: { $ref: '#/components/schemas/Model' }
 
     TicketRepo:
       type: object
@@ -2217,6 +2329,7 @@ components:
         coding: { $ref: '#/components/schemas/Model' }
         retry: { $ref: '#/components/schemas/Model' }
         review: { $ref: '#/components/schemas/Model' }
+        preview: { $ref: '#/components/schemas/Model' }
 
     HistoryItem:
       type: object
@@ -2330,6 +2443,13 @@ components:
         autoResume: { type: boolean }
         autoLearn: { type: boolean, description: Learn from every pushed ticket }
         autoReview: { type: boolean, description: Review every result while it waits for review }
+        autoPreview: { type: boolean, description: Take screenshots of every UI change in repositories with a preview command }
+        visualCheck: { type: boolean, description: Coding runs may start the app and look at the pages they changed }
+        egressAllow:
+          type: array
+          maxItems: 50
+          description: 'Hosts run containers may reach besides the built-in list, such as a staging API; .example.com matches subdomains'
+          items: { type: string, maxLength: 253 }
         suggestFollowUps: { type: boolean, description: 'Runs suggest follow-up tickets (off by default; a ticket can override it)' }
         pauseAbove: { type: integer, minimum: 50, maximum: 100 }
         parallel: { type: integer, minimum: 1, maximum: 3 }
@@ -2347,6 +2467,8 @@ components:
         done: { type: boolean }
         lessons: { type: boolean, description: New lessons were found }
         review: { type: boolean, description: A code review finished }
+        preview: { type: boolean, description: Preview screenshots are ready }
+        previewPhotos: { type: boolean, description: Send phone screenshots to Telegram with the message }
         followUps: { type: boolean, description: Follow-up tickets were suggested }
 
     Repository:
@@ -2373,6 +2495,7 @@ components:
         openTickets: { type: integer }
         deployWorkflow: { type: string }
         archivedAt: { type: string, format: date-time, description: Set while the repository is archived }
+        preview: { $ref: '#/components/schemas/RepoPreview' }
 
     RepositoryInput:
       type: object
@@ -2394,6 +2517,48 @@ components:
         instructions: { type: string, maxLength: 20000 }
         jiraProject: { type: string, maxLength: 20 }
         deployWorkflow: { type: string, maxLength: 200, description: 'GitHub workflow file run by Deploy, e.g. deploy.yml' }
+        preview: { $ref: '#/components/schemas/RepoPreviewInput' }
+
+    RepoPreview:
+      type: object
+      required: [command, port, readyPath, routes, uiPaths, login, envSet, envNames]
+      description: How agnts starts the app to take screenshots; an empty command turns previews off
+      properties:
+        command: { type: string }
+        port: { type: integer }
+        readyPath: { type: string }
+        routes:
+          type: array
+          items: { type: string }
+        uiPaths:
+          type: array
+          items: { type: string }
+        login: { type: string }
+        envSet: { type: boolean }
+        envNames:
+          type: array
+          description: The names of the variables in the environment; the values are never returned
+          items: { type: string }
+
+    RepoPreviewInput:
+      type: object
+      properties:
+        command: { type: string, maxLength: 1000 }
+        port: { type: integer, minimum: 0, maximum: 65535 }
+        readyPath: { type: string, maxLength: 300 }
+        routes:
+          type: array
+          maxItems: 20
+          items: { type: string, maxLength: 300 }
+        uiPaths:
+          type: array
+          maxItems: 30
+          items: { type: string, maxLength: 300 }
+        login: { type: string, maxLength: 2000 }
+        env:
+          type: string
+          maxLength: 16384
+          description: 'KEY=value lines; replaces the stored environment, "" clears it, absent keeps it'
 
     RepoMember:
       type: object

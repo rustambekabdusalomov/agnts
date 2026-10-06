@@ -216,4 +216,5 @@ const _$TicketSpendRowTopStageEnumEnumMap = {
   TicketSpendRowTopStageEnum.helper: 'helper',
   TicketSpendRowTopStageEnum.learn: 'learn',
   TicketSpendRowTopStageEnum.review: 'review',
+  TicketSpendRowTopStageEnum.preview: 'preview',
 };

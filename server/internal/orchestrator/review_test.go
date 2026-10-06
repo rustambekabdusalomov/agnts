@@ -109,7 +109,7 @@ func TestReviewBesideHumanReview(t *testing.T) {
 
 	// Changes requested from the review: coding resumes the coding
 	// session, not the review's, and the next revision is reviewed again.
-	if _, err := h.o.RequestChanges(h.ctx, "PAY-1", rv.Findings[0].Suggestion, domain.OriginWeb); err != nil {
+	if _, err := h.o.RequestChanges(h.ctx, "PAY-1", rv.Findings[0].Suggestion, nil, domain.OriginWeb); err != nil {
 		t.Fatal(err)
 	}
 	h.runner.scripts = []script{{result: ok("s2"), edit: "v2"}}

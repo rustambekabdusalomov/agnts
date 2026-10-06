@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
 
 	"agnts/internal/domain"
@@ -18,7 +20,7 @@ type Tickets interface {
 	Events(ctx context.Context, f orchestrator.EventFilter) ([]domain.Event, error)
 	Answer(ctx context.Context, key string, answers []domain.Answer, origin domain.Origin) (domain.Ticket, error)
 	Approve(ctx context.Context, key string, assignees []string, postReport bool, origin domain.Origin) (domain.Ticket, error)
-	RequestChanges(ctx context.Context, key, feedback string, origin domain.Origin) (domain.Ticket, error)
+	RequestChanges(ctx context.Context, key, feedback string, shots []domain.ShotRef, origin domain.Origin) (domain.Ticket, error)
 	Reject(ctx context.Context, key, reason string, origin domain.Origin) (domain.Ticket, error)
 	Retry(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	Start(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
@@ -33,6 +35,8 @@ type Tickets interface {
 	Rows(ctx context.Context, ts []domain.Ticket) ([]orchestrator.TicketRow, error)
 	Learn(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	Review(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
+	Preview(ctx context.Context, key string, compare *bool, origin domain.Origin) (domain.Ticket, error)
+	OpenShot(ctx context.Context, key string, runID int64, shotID string) (io.ReadCloser, error)
 	Translate(ctx context.Context, key, lang string) ([]orchestrator.TranslatedText, error)
 	FollowUpTickets
 	RelationTickets
@@ -122,6 +126,10 @@ func (s *Server) GetTicket(w http.ResponseWriter, r *http.Request, key gen.Ticke
 	}
 	rm := gen.ReviewModel(v.Settings.ModelFor(v.Ticket, domain.ModelReview))
 	em.Review = &rm
+	pm := gen.Model(v.Settings.ModelFor(v.Ticket, domain.ModelPreview))
+	em.Preview = &pm
+	canPreview := v.CanPreview
+	d.Ticket.CanPreview = &canPreview
 	d.EffectiveModels = &em
 	for i, q := range v.Questions {
 		opts := q.Options
@@ -152,6 +160,9 @@ func (s *Server) GetTicket(w http.ResponseWriter, r *http.Request, key gen.Ticke
 	}
 	if v.Review != nil {
 		d.Review = toReview(*v.Review)
+	}
+	if v.Preview != nil {
+		d.Preview = toPreview(v.Ticket.Key, *v.Preview)
 	}
 	fu := toFollowUps(v.FollowUps, v.FollowUpsOn, v.Ticket.State)
 	d.FollowUps = &fu
@@ -238,7 +249,13 @@ func (s *Server) RequestChanges(w http.ResponseWriter, r *http.Request, key gen.
 		return
 	}
 	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
-		return s.opt.Tickets.RequestChanges(ctx, key, req.Feedback, origin(r))
+		var shots []domain.ShotRef
+		if req.Shots != nil {
+			for _, x := range *req.Shots {
+				shots = append(shots, domain.ShotRef{RunID: x.RunId, ShotID: x.ShotId})
+			}
+		}
+		return s.opt.Tickets.RequestChanges(ctx, key, req.Feedback, shots, origin(r))
 	})
 }
 
@@ -377,6 +394,12 @@ func toTicket(t domain.Ticket) gen.Ticket {
 		rs = gen.TicketReviewStateNone
 	}
 	out.ReviewState = &rs
+	ps := gen.TicketPreviewState(t.PreviewState)
+	if ps == "" {
+		ps = gen.TicketPreviewStateNone
+	}
+	compare := t.PreviewCompare
+	out.PreviewState, out.PreviewCompare = &ps, &compare
 	if len(t.Assignees) > 0 {
 		as := t.Assignees
 		out.Assignees = &as
@@ -402,6 +425,10 @@ func toTicket(t domain.Ticket) gen.Ticket {
 			mv := gen.Model(v)
 			m.Review = &mv
 		}
+		if v, ok := t.Models[domain.ModelPreview]; ok {
+			mv := gen.Model(v)
+			m.Preview = &mv
+		}
 		out.Models = &m
 	}
 	return out
@@ -410,6 +437,72 @@ func toTicket(t domain.Ticket) gen.Ticket {
 // ReviewTicket implements gen.ServerInterface.
 func (s *Server) ReviewTicket(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
 	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) { return s.opt.Tickets.Review(ctx, key, origin(r)) })
+}
+
+// PreviewTicket implements gen.ServerInterface.
+func (s *Server) PreviewTicket(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	var req gen.PreviewInput
+	if r.ContentLength != 0 {
+		if err := decodeJSON(r, &req); err != nil {
+			writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+			return
+		}
+	}
+	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
+		return s.opt.Tickets.Preview(ctx, key, req.Compare, origin(r))
+	})
+}
+
+// GetPreviewShot implements gen.ServerInterface. A run's screenshots never
+// change, so the browser may keep them.
+func (s *Server) GetPreviewShot(w http.ResponseWriter, r *http.Request, key gen.TicketKey, runID int64, shotID string) {
+	rc, err := s.opt.Tickets.OpenShot(r.Context(), key, runID, shotID)
+	if err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			writeError(w, http.StatusNotFound, "not_found", "no such screenshot")
+			return
+		}
+		s.writeInternal(w, r, err)
+		return
+	}
+	defer func() { _ = rc.Close() }()
+	w.Header().Set("Content-Type", "image/png")
+	w.Header().Set("Cache-Control", "private, max-age=31536000, immutable")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	if _, err := io.Copy(w, rc); err != nil {
+		s.opt.Log.Debug("send screenshot", "err", err)
+	}
+}
+
+func toPreview(key string, p domain.Preview) *gen.TicketPreview {
+	out := &gen.TicketPreview{
+		RunId: p.RunID, Revision: p.Revision, Model: gen.Model(p.Model), Compare: p.Compare,
+		Status: gen.TicketPreviewStatus(p.Status), Summary: p.Summary, CreatedAt: p.CreatedAt,
+		Shots: make([]gen.PreviewShot, len(p.Shots)), Issues: make([]gen.PreviewIssue, len(p.Issues)),
+	}
+	opt := func(s string) *string {
+		if s == "" {
+			return nil
+		}
+		return &s
+	}
+	optInt := func(n int) *int {
+		if n == 0 {
+			return nil
+		}
+		return &n
+	}
+	for i, sh := range p.Shots {
+		out.Shots[i] = gen.PreviewShot{
+			Id: sh.ID, Name: sh.Name, Route: sh.Route, Viewport: gen.PreviewShotViewport(sh.Viewport), Side: gen.PreviewShotSide(sh.Side),
+			Note: opt(sh.Note), Width: optInt(sh.Width), Height: optInt(sh.Height), ConsoleErrors: optInt(sh.ConsoleErrors),
+			Url: fmt.Sprintf("/tickets/%s/preview/%d/shots/%s", key, p.RunID, sh.ID),
+		}
+	}
+	for i, is := range p.Issues {
+		out.Issues[i] = gen.PreviewIssue{Severity: gen.PreviewIssueSeverity(is.Severity), Description: is.Description, ShotId: opt(is.ShotID)}
+	}
+	return out
 }
 
 // TranslateTicket implements gen.ServerInterface.

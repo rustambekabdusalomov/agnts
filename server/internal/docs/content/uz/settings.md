@@ -18,6 +18,10 @@ Har bir bosqichda qaysi model ishlaydi, qadamlar limiti va vaqt chegarasi, Claud
 
 Savollar, limitdan keyin davom etish, yangi ish boshlash chegarasi va bir vaqtdagi ishlar soni uchun standart qiymatlar.
 
+## Oldindan koʻrish
+
+Oldindan koʻrish buyrugʻi bor repozitoriylarda har bir interfeys oʻzgarishining skrinshotlari, sahifalarni tanlab baholaydigan model, kod yozish jarayonlari ilovani oʻzi koʻrishi mumkinmi, va ishga tushirish konteynerlari murojaat qila oladigan qoʻshimcha hostlar (masalan ilovangizning staging API si).
+
 ## Bildirishnomalar
 
 Biror narsa sizni kutganda, ish toʻxtaganda yoki oʻzgarishlar yuborilganda Telegram xabarlari.

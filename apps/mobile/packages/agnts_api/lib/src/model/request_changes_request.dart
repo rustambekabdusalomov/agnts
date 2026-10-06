@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:agnts_api/src/model/shot_ref.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -21,6 +22,8 @@ class RequestChangesRequest {
   RequestChangesRequest({
 
     required  this.feedback,
+
+     this.shots,
   });
 
   @JsonKey(
@@ -35,15 +38,30 @@ class RequestChangesRequest {
 
 
 
+      /// Preview screenshots the feedback points at; the coding run gets them
+  @JsonKey(
+    
+    name: r'shots',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<ShotRef>? shots;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is RequestChangesRequest &&
-      other.feedback == feedback;
+      other.feedback == feedback &&
+      other.shots == shots;
 
     @override
     int get hashCode =>
-        feedback.hashCode;
+        feedback.hashCode +
+        shots.hashCode;
 
   factory RequestChangesRequest.fromJson(Map<String, dynamic> json) => _$RequestChangesRequestFromJson(json);
 

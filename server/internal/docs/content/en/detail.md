@@ -22,6 +22,10 @@ Read what agnts did and check the tests and diff. Approve and push commits as yo
 
 While the work waits for you, agnts reviews it too: a diff for bugs, security, missing tests and your team rules; a report for accuracy and gaps. Findings appear above the diff, most severe first. It is a second opinion, never a gate: approve whenever you like. Add to feedback copies a finding's suggestion into your feedback, ready for Request changes. In Auto, Opus reviews complex tickets and Sonnet the rest.
 
+## Screenshots of the app
+
+In a repository with a preview command, agnts starts the app with the change and opens the pages it touches: the Preview tab shows screenshots at desktop and phone width, console errors, and visual problems it noticed. Turn on Compare with the default branch to see before and after side by side; agnts keeps that choice for the ticket. Add to feedback points your feedback at a screenshot, and the next coding run gets the image. If the app did not start, the tab shows the end of its log. Like the code review, it is advice and never blocks approval.
+
 ## Follow-up tickets
 
 Turn on Suggest follow-up tickets in Settings, or on one ticket, and agnts lists what finishing the ticket still needs: prerequisites and parts to split off (from the analysis), work it left undone (from the work), and gaps a plan, analysis or review found. It suggests nothing outside the ticket's goal; on a follow-up, the goal is that of the first ticket in the chain. Tick the ones you want and create them as local tasks or Jira issues. They are created queued, so nothing runs until you start them. Make follow-up turns a review finding into a suggestion. Suggestions from the work wait until the ticket is done.

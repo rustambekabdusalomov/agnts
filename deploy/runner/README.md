@@ -22,3 +22,26 @@ Network egress is not yet restricted to the git host, package registries and
 the Claude API; that allowlist is part of the phase 5 hardening pass.
 
 To add a toolchain (Python, Rust, ...), extend the Dockerfile and rebuild.
+
+## Previews
+
+The image also carries Chromium (through Playwright, pinned in
+`preview/package.json`) and two commands that preview runs use:
+
+- `agnts-preview start|stop|status|logs|base` starts the repository's app
+  from `/agnts/out/preview-config.json`, with the environment in
+  `/agnts/out/preview.env` (KEY=value lines, never evaluated), and waits until
+  it answers. `base` checks out the default branch where the change started
+  and restarts the app, for before shots.
+- `agnts-shot <url> --viewport desktop|phone --out <file.png>` takes one
+  screenshot (optionally after `--fill` and `--click` steps) and prints the
+  page's console errors and failed requests. It only opens localhost URLs;
+  the app's own calls go through the egress proxy like everything else.
+
+Smoke test after a rebuild:
+
+    docker run --rm --read-only --cap-drop ALL --tmpfs /tmp:rw,exec,size=1g \
+      -v /workspace -v /home/agent -v /agnts/out agnts-runner:latest bash -c '
+        cd /workspace && echo "require(\"http\").createServer((q,s)=>s.end(\"hi\")).listen(4173)" > s.js &&
+        echo "{\"command\":\"node s.js\",\"port\":4173}" > /agnts/out/preview-config.json &&
+        agnts-preview start && agnts-shot http://localhost:4173/ --viewport phone --out /tmp/x.png'

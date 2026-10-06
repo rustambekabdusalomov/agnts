@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"slices"
+	"strings"
 	"time"
 )
 
@@ -43,7 +44,14 @@ type Ticket struct {
 	AskFirst     bool       // analysis may ask questions before coding
 	LearnState   string     // learn run after push: LearnNone, LearnPending, LearnDone, LearnFailed
 	ReviewState  string     // code review while waiting for review: ReviewNone, ReviewPending, ...
-	Kind         TicketKind
+	PreviewState string     // screenshots while waiting for review: PreviewNone, PreviewPending, ...
+	// PreviewCompare has previews of this ticket capture the default
+	// branch too (before shots). The reviewer decides per ticket.
+	PreviewCompare bool
+	// FeedbackShots are the screenshots the reviewer pointed at in
+	// Feedback; the next coding run gets them next to the feedback.
+	FeedbackShots []ShotRef
+	Kind          TicketKind
 	// KindAuto is true while agnts picks the kind: the analysis may change
 	// it. A kind someone chose (label, form, hand edit) is never changed.
 	KindAuto bool
@@ -137,11 +145,14 @@ const (
 	// StageReview runs while a ticket waits for review and writes a code
 	// review for the human reviewer; it never changes the ticket's state.
 	StageReview Stage = "review"
+	// StagePreview runs while a ticket waits for review, starts the app and
+	// takes screenshots for the reviewer; it never changes the ticket's state.
+	StagePreview Stage = "preview"
 )
 
 // Side reports whether runs of stage s work beside the ticket (learn,
 // review) instead of moving it through its states.
-func (s Stage) Side() bool { return s == StageLearn || s == StageReview }
+func (s Stage) Side() bool { return s == StageLearn || s == StageReview || s == StagePreview }
 
 // Run is one container session (or the push step) for a ticket.
 type Run struct {
@@ -298,6 +309,7 @@ const (
 	EventRule           = "rule_changed"
 	EventKind           = "kind_changed"
 	EventReview         = "review_done"
+	EventPreview        = "preview_done"
 	EventFollowUps      = "follow_ups_suggested"
 	// EventRelations: ordering constraints were found, added or decided.
 	EventRelations = "relations_changed"
@@ -328,4 +340,24 @@ type Repository struct {
 	DeployWorkflow string     // GitHub workflow file triggered by Deploy
 	ClaudeMDState  string     // CLAUDE.md in the repository: found, missing, unknown
 	ArchivedAt     *time.Time // archived: kept for history, takes no new work
+	Preview        PreviewConfig
 }
+
+// PreviewConfig is how agnts starts a repository's app to take
+// screenshots. An empty Command turns previews off for the repository.
+type PreviewConfig struct {
+	Command   string   // e.g. "npm ci && npm run dev -- --port 4173"
+	Port      int      // where the app listens on localhost
+	ReadyPath string   // polled until it answers; "/" by default
+	Routes    []string // always captured, besides what Claude picks
+	UIPaths   []string // globs: a change touching one gets a preview
+	Login     string   // free text for Claude: how to get past a login
+	// Env is KEY=value lines given to the app. It is sealed at rest and
+	// never returned by the API; EnvSet and EnvNames describe it.
+	Env      string
+	EnvSet   bool
+	EnvNames []string
+}
+
+// Enabled reports whether the repository can be previewed.
+func (c PreviewConfig) Enabled() bool { return strings.TrimSpace(c.Command) != "" && c.Port > 0 }

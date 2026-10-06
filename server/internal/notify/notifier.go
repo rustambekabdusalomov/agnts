@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"strings"
 	"time"
@@ -20,9 +21,10 @@ type Actions interface {
 	View(ctx context.Context, key string) (orchestrator.TicketView, error)
 	AnswerOne(ctx context.Context, key string, a domain.Answer, origin domain.Origin) (bool, error)
 	Approve(ctx context.Context, key string, assignees []string, postReport bool, origin domain.Origin) (domain.Ticket, error)
-	RequestChanges(ctx context.Context, key, feedback string, origin domain.Origin) (domain.Ticket, error)
+	RequestChanges(ctx context.Context, key, feedback string, shots []domain.ShotRef, origin domain.Origin) (domain.Ticket, error)
 	Reject(ctx context.Context, key, reason string, origin domain.Origin) (domain.Ticket, error)
 	Retry(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
+	OpenShot(ctx context.Context, key string, runID int64, shotID string) (io.ReadCloser, error)
 }
 
 // Store is what the notifier persists.
@@ -140,6 +142,10 @@ func (n *Notifier) handle(ctx context.Context, e domain.Event) {
 	}
 	if e.Type == domain.EventReview {
 		n.review(ctx, e)
+		return
+	}
+	if e.Type == domain.EventPreview {
+		n.preview(ctx, e)
 		return
 	}
 	if e.Type == domain.EventFollowUps {
@@ -319,6 +325,91 @@ func (n *Notifier) review(ctx context.Context, e domain.Event) {
 	if _, err := b.Send(ctx, cfg.ChatID, truncate(text, 3500), nil, false); err != nil {
 		n.log.Warn("telegram notify", "ticket", e.TicketKey, "err", err)
 	}
+}
+
+// maxPreviewPhotos is how many screenshots go to Telegram with a preview.
+const maxPreviewPhotos = 4
+
+// preview announces screenshots of the change under review, with the
+// phone-width ones attached in Telegram when asked for.
+func (n *Notifier) preview(ctx context.Context, e domain.Event) {
+	s, err := n.settings.Get(ctx)
+	if err != nil || !s.Notify.Preview || e.TicketKey == "" {
+		return
+	}
+	v, err := n.actions.View(ctx, e.TicketKey)
+	p := v.Preview
+	if err != nil || v.Ticket.State != domain.StateWaitingForReview || p == nil || p.Revision != v.Ticket.Revision {
+		return // approved or sent back since
+	}
+	k := v.Ticket.Key
+	title := fmt.Sprintf("%s: %d %s", k, len(p.Shots), plural(len(p.Shots), "screenshot", "screenshots"))
+	body := "No visual problems seen."
+	switch {
+	case p.Status == domain.PreviewBroken:
+		title, body = k+": the app did not start", "The change may have broken it; the log is on the ticket."
+	case len(p.Issues) > 0:
+		body = fmt.Sprintf("%d %s, the worst %s.", len(p.Issues), plural(len(p.Issues), "issue", "issues"), p.Issues[0].Severity)
+	}
+	if s.Notify.Push && n.fcm != nil {
+		n.push(ctx, Push{Title: title, Body: body, Ticket: k})
+	}
+	if !s.Notify.Telegram {
+		return
+	}
+	b, cfg, ok := n.bot(ctx)
+	if !ok {
+		return
+	}
+	text := fmt.Sprintf("Screenshots of %s are ready.\n\n%s", k, p.Summary)
+	if p.Status == domain.PreviewBroken {
+		text = fmt.Sprintf("agnts could not start the app for %s.\n\n%s", k, truncate(p.Summary, 1500))
+	}
+	for i, is := range p.Issues {
+		if i == 5 {
+			text += fmt.Sprintf("\n… and %d more", len(p.Issues)-5)
+			break
+		}
+		text += fmt.Sprintf("\n• [%s] %s", is.Severity, is.Description)
+	}
+	text += "\n\nAll screenshots are on the ticket in agnts."
+	if _, err := b.Send(ctx, cfg.ChatID, truncate(text, 3500), nil, false); err != nil {
+		n.log.Warn("telegram notify", "ticket", k, "err", err)
+		return
+	}
+	if !s.Notify.PreviewPhotos {
+		return
+	}
+	var photos [][]byte
+	for _, want := range []string{"phone", "desktop"} {
+		for _, sh := range p.Shots {
+			if len(photos) == maxPreviewPhotos || len(photos) > 0 && want == "desktop" {
+				break // phone shots first; desktop ones only when there are none
+			}
+			if sh.Viewport != want || sh.Side != "after" {
+				continue
+			}
+			rc, err := n.actions.OpenShot(ctx, k, p.RunID, sh.ID)
+			if err != nil {
+				continue
+			}
+			img, err := io.ReadAll(io.LimitReader(rc, 10<<20))
+			_ = rc.Close()
+			if err == nil {
+				photos = append(photos, img)
+			}
+		}
+	}
+	if err := b.SendPhotos(ctx, cfg.ChatID, truncate(k+" · "+p.Summary, 1000), photos); err != nil {
+		n.log.Warn("telegram photos", "ticket", k, "err", err)
+	}
+}
+
+func plural(n int, one, many string) string {
+	if n == 1 {
+		return one
+	}
+	return many
 }
 
 func pushText(v orchestrator.TicketView, e domain.Event) (string, string) {

@@ -44,6 +44,18 @@ void main() {
       // TODO
     });
 
+    // Preview screenshots are ready
+    // bool preview
+    test('to test the property `preview`', () async {
+      // TODO
+    });
+
+    // Send phone screenshots to Telegram with the message
+    // bool previewPhotos
+    test('to test the property `previewPhotos`', () async {
+      // TODO
+    });
+
     // Follow-up tickets were suggested
     // bool followUps
     test('to test the property `followUps`', () async {

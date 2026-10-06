@@ -18,6 +18,10 @@ Which model runs each stage, the turn limit and timeout, and which commands Clau
 
 Defaults for questions, resuming after limits, when to stop starting new runs, and how many run at once.
 
+## Previews
+
+Screenshots of every UI change in repositories with a preview command, the model that picks the pages and judges them, whether coding runs may look at the app themselves, and the extra hosts run containers may reach (a staging API your app calls).
+
 ## Notifications
 
 Telegram messages when something needs you, a run stops, or changes are pushed.

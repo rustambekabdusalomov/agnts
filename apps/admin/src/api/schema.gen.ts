@@ -282,6 +282,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tickets/{key}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Queue a preview (screenshots of the running app) of a ticket waiting for review, again if one already ran */
+        post: operations["previewTicket"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/preview/{runId}/shots/{shotId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+                runId: number;
+                shotId: string;
+            };
+            cookie?: never;
+        };
+        /** One preview screenshot, as PNG */
+        get: operations["getPreviewShot"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tickets/{key}/translate": {
         parameters: {
             query?: never;
@@ -1700,6 +1740,15 @@ export interface components {
              * @enum {string}
              */
             reviewState?: "none" | "pending" | "running" | "done" | "failed";
+            /**
+             * @description The screenshots agnts takes beside the human review
+             * @enum {string}
+             */
+            previewState?: "none" | "pending" | "running" | "done" | "failed";
+            /** @description Previews of this ticket also capture the default branch (before shots) */
+            previewCompare?: boolean;
+            /** @description The ticket's repository has a preview command */
+            canPreview?: boolean;
             spend?: components["schemas"]["TokenSpend"];
             /** Format: date-time */
             createdAt: string;
@@ -1743,7 +1792,7 @@ export interface components {
              * @description The stage that cost the most
              * @enum {string}
              */
-            topStage: "analyze" | "coding" | "retry" | "helper" | "learn" | "review";
+            topStage: "analyze" | "coding" | "retry" | "helper" | "learn" | "review" | "preview";
             spend: components["schemas"]["TokenSpend"];
         };
         /** @description Spend for one stage and model; on a ticket, in the order the stage first ran */
@@ -1752,7 +1801,7 @@ export interface components {
              * @description retry is fix attempts after failed checks and requested changes
              * @enum {string}
              */
-            stage: "analyze" | "coding" | "retry" | "helper" | "learn" | "review";
+            stage: "analyze" | "coding" | "retry" | "helper" | "learn" | "review" | "preview";
             model: string;
             /** @description Claude invocations */
             calls: number;
@@ -1807,6 +1856,55 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
+        ShotRef: {
+            /** Format: int64 */
+            runId: number;
+            shotId: string;
+        };
+        PreviewInput: {
+            /** @description Also capture the default branch; kept for later previews of the ticket */
+            compare?: boolean;
+        };
+        PreviewShot: {
+            id: string;
+            name: string;
+            route: string;
+            /** @enum {string} */
+            viewport: "desktop" | "phone";
+            /** @enum {string} */
+            side: "after" | "before";
+            note?: string;
+            width?: number;
+            height?: number;
+            consoleErrors?: number;
+            /** @description Where to load the PNG, relative to the API base */
+            url: string;
+        };
+        PreviewIssue: {
+            /** @enum {string} */
+            severity: "high" | "medium" | "low";
+            description: string;
+            shotId?: string;
+        };
+        /** @description Screenshots of the running app at the latest result, advice beside the human review. It shows an older revision when revision is below the ticket's. */
+        TicketPreview: {
+            /** Format: int64 */
+            runId: number;
+            revision: number;
+            model: components["schemas"]["Model"];
+            /** @description Before shots were taken too */
+            compare: boolean;
+            /**
+             * @description failed: the app did not start
+             * @enum {string}
+             */
+            status: "ok" | "partial" | "failed";
+            summary: string;
+            shots: components["schemas"]["PreviewShot"][];
+            issues: components["schemas"]["PreviewIssue"][];
+            /** Format: date-time */
+            createdAt: string;
+        };
         CheckStep: {
             name: string;
             command: string;
@@ -1842,6 +1940,7 @@ export interface components {
             followUps?: components["schemas"]["FollowUps"];
             relations?: components["schemas"]["Relations"];
             review?: components["schemas"]["CodeReview"];
+            preview?: components["schemas"]["TicketPreview"];
             history?: components["schemas"]["HistoryItem"][];
             maxTurns?: number;
             effectiveModels?: components["schemas"]["StageModels"];
@@ -1891,6 +1990,7 @@ export interface components {
             helper: components["schemas"]["Model"];
             learn?: components["schemas"]["Model"];
             review?: components["schemas"]["ReviewModel"];
+            preview?: components["schemas"]["Model"];
         };
         TicketRepo: {
             /** Format: int64 */
@@ -1901,6 +2001,7 @@ export interface components {
             coding?: components["schemas"]["Model"];
             retry?: components["schemas"]["Model"];
             review?: components["schemas"]["Model"];
+            preview?: components["schemas"]["Model"];
         };
         HistoryItem: {
             /** Format: date-time */
@@ -2001,6 +2102,12 @@ export interface components {
             autoLearn?: boolean;
             /** @description Review every result while it waits for review */
             autoReview?: boolean;
+            /** @description Take screenshots of every UI change in repositories with a preview command */
+            autoPreview?: boolean;
+            /** @description Coding runs may start the app and look at the pages they changed */
+            visualCheck?: boolean;
+            /** @description Hosts run containers may reach besides the built-in list, such as a staging API; .example.com matches subdomains */
+            egressAllow?: string[];
             /** @description Runs suggest follow-up tickets (off by default; a ticket can override it) */
             suggestFollowUps?: boolean;
             pauseAbove: number;
@@ -2018,6 +2125,10 @@ export interface components {
             lessons?: boolean;
             /** @description A code review finished */
             review?: boolean;
+            /** @description Preview screenshots are ready */
+            preview?: boolean;
+            /** @description Send phone screenshots to Telegram with the message */
+            previewPhotos?: boolean;
             /** @description Follow-up tickets were suggested */
             followUps?: boolean;
         };
@@ -2051,6 +2162,7 @@ export interface components {
              * @description Set while the repository is archived
              */
             archivedAt?: string;
+            preview?: components["schemas"]["RepoPreview"];
         };
         RepositoryInput: {
             name: string;
@@ -2071,6 +2183,29 @@ export interface components {
             jiraProject?: string;
             /** @description GitHub workflow file run by Deploy, e.g. deploy.yml */
             deployWorkflow?: string;
+            preview?: components["schemas"]["RepoPreviewInput"];
+        };
+        /** @description How agnts starts the app to take screenshots; an empty command turns previews off */
+        RepoPreview: {
+            command: string;
+            port: number;
+            readyPath: string;
+            routes: string[];
+            uiPaths: string[];
+            login: string;
+            envSet: boolean;
+            /** @description The names of the variables in the environment; the values are never returned */
+            envNames: string[];
+        };
+        RepoPreviewInput: {
+            command?: string;
+            port?: number;
+            readyPath?: string;
+            routes?: string[];
+            uiPaths?: string[];
+            login?: string;
+            /** @description KEY=value lines; replaces the stored environment, "" clears it, absent keeps it */
+            env?: string;
         };
         RepoMember: {
             username: string;
@@ -2791,6 +2926,8 @@ export interface operations {
             content: {
                 "application/json": {
                     feedback: string;
+                    /** @description Preview screenshots the feedback points at; the coding run gets them */
+                    shots?: components["schemas"]["ShotRef"][];
                 };
             };
         };
@@ -2889,6 +3026,53 @@ export interface operations {
         responses: {
             200: components["responses"]["TicketOK"];
             400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    previewTicket: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PreviewInput"];
+            };
+        };
+        responses: {
+            200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getPreviewShot: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+                runId: number;
+                shotId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The screenshot; it never changes, so it may be cached */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": string;
+                };
+            };
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
         };
