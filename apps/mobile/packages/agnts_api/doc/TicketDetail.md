@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **result** | [**Result**](Result.md) |  | [optional] 
 **childKey** | **String** | The code task that implements this report, if any | [optional] 
 **followUps** | [**FollowUps**](FollowUps.md) |  | [optional] 
+**relations** | [**Relations**](Relations.md) |  | [optional] 
 **review** | [**CodeReview**](CodeReview.md) |  | [optional] 
 **history** | [**List&lt;HistoryItem&gt;**](HistoryItem.md) |  | [optional] 
 **maxTurns** | **int** |  | [optional] 

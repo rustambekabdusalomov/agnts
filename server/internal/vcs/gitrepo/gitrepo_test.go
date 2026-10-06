@@ -266,3 +266,94 @@ func TestLocalBranches(t *testing.T) {
 		t.Errorf("PAY-2 = %+v", two)
 	}
 }
+
+// mergeToMain commits files on a fresh branch and fast-forwards main to it,
+// as merging a pull request would.
+func mergeToMain(t *testing.T, g *Repos, repo domain.Repository, branch string, files map[string]string) {
+	t.Helper()
+	ctx := context.Background()
+	if err := g.Prepare(ctx, repo, branch); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := g.Commit(ctx, repo, branch, tarOf(t, files), branch); err != nil {
+		t.Fatal(err)
+	}
+	if err := g.PushTo(ctx, repo, branch, "main"); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestUnstartedBranchFollowsDefault(t *testing.T) {
+	ctx := context.Background()
+	bare := upstream(t)
+	g := newRepos(t)
+	repo := domain.Repository{Name: "demo", CloneURL: bare, DefaultBranch: "main", Provider: "github"}
+
+	// PAY-2 is analysed (its branch is cut), then waits for PAY-1.
+	if err := g.Prepare(ctx, repo, "agnts/PAY-2"); err != nil {
+		t.Fatal(err)
+	}
+	mergeToMain(t, g, repo, "agnts/PAY-1", map[string]string{
+		"README.md": "# demo\n", "main.go": "package main\n\nfunc main() { tasks() }\n", "old.txt": "remove me\n", "tasks.go": "package main\n\nfunc tasks() {}\n",
+	})
+
+	// When PAY-2 starts coding, its branch has nothing of its own: it moves
+	// onto main, which now has PAY-1's change.
+	if err := g.Prepare(ctx, repo, "agnts/PAY-2"); err != nil {
+		t.Fatal(err)
+	}
+	b, err := os.ReadFile(filepath.Join(g.checkoutDir(repo, "agnts/PAY-2"), "tasks.go"))
+	if err != nil || !strings.Contains(string(b), "func tasks") {
+		t.Fatalf("unstarted branch did not follow main: %q %v", b, err)
+	}
+
+	// A branch with commits of its own is never moved.
+	if _, _, err := g.Commit(ctx, repo, "agnts/PAY-2", tarOf(t, map[string]string{
+		"README.md": "# demo\n", "main.go": "package main\n\nfunc main() { tasks(); list() }\n", "old.txt": "remove me\n",
+		"tasks.go": "package main\n\nfunc tasks() {}\n", "list.go": "package main\n\nfunc list() {}\n",
+	}), "PAY-2"); err != nil {
+		t.Fatal(err)
+	}
+	r, _ := git.PlainOpen(g.checkoutDir(repo, "agnts/PAY-2"))
+	before, _ := r.Reference(plumbing.NewBranchReferenceName("agnts/PAY-2"), true)
+	mergeToMain(t, g, repo, "agnts/PAY-3", map[string]string{
+		"README.md": "# demo, now with docs\n", "main.go": "package main\n\nfunc main() { tasks(); audit() }\n", "old.txt": "remove me\n",
+		"tasks.go": "package main\n\nfunc tasks() {}\n",
+	})
+	if err := g.Prepare(ctx, repo, "agnts/PAY-2"); err != nil {
+		t.Fatal(err)
+	}
+	after, _ := r.Reference(plumbing.NewBranchReferenceName("agnts/PAY-2"), true)
+	if before.Hash() != after.Hash() {
+		t.Fatal("a branch with its own commit was moved")
+	}
+
+	// Drift is what landed on main since PAY-2's branch point: PAY-3's
+	// edit of the same line of main.go, and the README.
+	drift, err := g.Drift(ctx, repo, "agnts/PAY-2")
+	if err != nil {
+		t.Fatal(err)
+	}
+	paths := map[string]bool{}
+	for _, f := range drift {
+		paths[f.Path] = true
+	}
+	if len(drift) != 2 || !paths["main.go"] || !paths["README.md"] {
+		t.Fatalf("drift: %+v", drift)
+	}
+	r2, _ := git.PlainOpen(g.checkoutDir(repo, "agnts/PAY-2"))
+	head, _ := r2.Reference(plumbing.NewBranchReferenceName("agnts/PAY-2"), true)
+	mine, err := branchDiff(r2, "main", head.Hash())
+	if err != nil {
+		t.Fatal(err)
+	}
+	var hit []string
+	for _, c := range domain.DiffConflicts(mine, drift) {
+		if c.Lines {
+			hit = append(hit, c.Path)
+		}
+	}
+	if len(hit) != 1 || hit[0] != "main.go" {
+		t.Fatalf("line conflicts with drift: %v (mine %+v)", hit, mine)
+	}
+}

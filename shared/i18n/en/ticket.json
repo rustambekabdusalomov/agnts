@@ -167,6 +167,17 @@
     "doneReport": "The report is kept here.",
     "doneReportPosted": "The report is kept here and was posted to {key} in Jira.",
     "stopWriting": "Writing",
-    "stopDone": "Done"
+    "stopDone": "Done",
+    "tabsLabel": "Ticket details",
+    "tabReview": "Code review",
+    "tabFollowUps": "Follow-ups",
+    "tabAnswers": "Answers",
+    "tabLessons": "Lessons",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "translate": "Translate",
+    "translateOriginal": "Original language",
+    "translating": "Translating… the first time takes up to a minute; after that it is saved.",
+    "translateFailed": "Could not translate: {error}"
   }
 }

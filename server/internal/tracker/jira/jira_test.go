@@ -253,3 +253,29 @@ func TestCreateLabelAndLinkIssue(t *testing.T) {
 		t.Fatalf("calls: %s", got)
 	}
 }
+
+func TestIssueDependencies(t *testing.T) {
+	const body = `{"key": "PAY-5", "fields": {"summary": "Show tasks", "labels": ["agnts"], "project": {"key": "PAY"},
+		"issuelinks": [
+			{"type": {"name": "Blocks", "inward": "is blocked by", "outward": "blocks"}, "inwardIssue": {"key": "PAY-1"}},
+			{"type": {"name": "Blocks", "inward": "is blocked by", "outward": "blocks"}, "outwardIssue": {"key": "PAY-9"}},
+			{"type": {"name": "Dependency", "inward": "is depended on by", "outward": "depends on"}, "outwardIssue": {"key": "API-3"}},
+			{"type": {"name": "Relates", "inward": "relates to", "outward": "relates to"}, "outwardIssue": {"key": "PAY-7"}},
+			{"type": {"name": "Blocks", "inward": "is blocked by", "outward": "blocks"}, "inwardIssue": {"key": "PAY-1"}}
+		]}}`
+	var is issue
+	if err := json.Unmarshal([]byte(body), &is); err != nil {
+		t.Fatal(err)
+	}
+	in := is.incoming("agnts")
+	if !in.LinksKnown || strings.Join(in.DependsOn, ",") != "PAY-1,API-3" || strings.Join(in.Dependents, ",") != "PAY-9" {
+		t.Fatalf("links: %+v", in)
+	}
+
+	// No issuelinks field: links unknown, so nothing is removed.
+	var bare issue
+	_ = json.Unmarshal([]byte(`{"key": "PAY-6", "fields": {"summary": "x"}}`), &bare)
+	if in := bare.incoming("agnts"); in.LinksKnown || in.DependsOn != nil {
+		t.Fatalf("links without the field: %+v", in)
+	}
+}

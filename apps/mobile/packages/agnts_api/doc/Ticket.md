@@ -32,6 +32,7 @@ Name | Type | Description | Notes
 **followUpOf** | **String** | The ticket that suggested this one as a follow-up | [optional] 
 **suggestFollowUps** | [**FollowUpsMode**](FollowUpsMode.md) |  | [optional] 
 **openSuggestions** | **int** | Follow-up suggestions waiting for a decision | [optional] 
+**blockedBy** | [**List&lt;Blocker&gt;**](Blocker.md) | The tickets holding this one's coding back right now (it is in coding with no commit yet). Absent when nothing does. | [optional] 
 **repoName** | **String** |  | [optional] 
 **models** | [**ModelOverrides**](ModelOverrides.md) |  | [optional] 
 **since** | [**DateTime**](DateTime.md) | When the ticket entered its current state | [optional] 

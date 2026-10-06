@@ -2357,6 +2357,163 @@ class AppLocalizationsUz extends AppLocalizations {
   String get navRules => 'Qoidalar';
 
   @override
+  String get relationsTab => 'Tartib';
+
+  @override
+  String get relationsTitle => 'Tartib va toʻqnashuvlar';
+
+  @override
+  String get relationsSub =>
+      'agnts bir vaqtda bir nechta tiket ustida kod yozadi va ularni birma-bir birlashtiradi. Tiket oʻzi bogʻliq tiketlar birlashtirilishini kutadi, bir xil kodni oʻzgartiradigan ikki tiket esa hech qachon bir vaqtda yozilmaydi.';
+
+  @override
+  String get relationsWaitingTitle => 'Boshqa tiketlarni kutmoqda';
+
+  @override
+  String get relationsWaitingSub => 'Ular birlashtirilishi yoki rad etilishi bilan kod yozish oʻzi boshlanadi.';
+
+  @override
+  String get relationsWaitingBadge => 'Kutmoqda';
+
+  @override
+  String get relationsWaitsFor => 'Kutadi';
+
+  @override
+  String get relationsWaitedBy => 'Ushlab turadi';
+
+  @override
+  String get relationsConflicts => 'Bir vaqtda emas';
+
+  @override
+  String get relationsProposedTitle => 'agnts taklifi';
+
+  @override
+  String get relationsProposedSub =>
+      'agnts bularga ishonchi komil emas. Qabul qilinganlari navbatni boshqaradi; rad etilganlari boshqa taklif qilinmaydi.';
+
+  @override
+  String get relationsActiveTitle => 'Amalda';
+
+  @override
+  String get relationsEmpty => 'Bogʻliqlik yoʻq. Joy boʻshashi bilan tiket ishga tushadi.';
+
+  @override
+  String get relationsAccept => 'Qabul qilish';
+
+  @override
+  String get relationsDismiss => 'Rad etish';
+
+  @override
+  String get relationsRemove => 'Baribir ishga tushirish';
+
+  @override
+  String relationsRemoveConfirm(String key, String other) {
+    return '$key va $other endi bir-birini kutmaydi. Davom etasizmi?';
+  }
+
+  @override
+  String relationsConfidence(String pct) {
+    return '$pct% ishonch';
+  }
+
+  @override
+  String get relationsLanded => 'birlashtirilgan';
+
+  @override
+  String get relationsSource_jira => 'Jira bogʻlanishi';
+
+  @override
+  String get relationsSource_user => 'Siz qoʻshgansiz';
+
+  @override
+  String get relationsSource_agnts => 'agnts';
+
+  @override
+  String get relationsSource_rule => 'Taxminiy kesishma';
+
+  @override
+  String get relationsSource_git => 'Difflarda topilgan';
+
+  @override
+  String relationsBasis_files(String files) {
+    return 'Ikkalasi ham $files ni oʻzgartiradi';
+  }
+
+  @override
+  String get relationsBasis_migrations => 'Ikkalasi ham maʼlumotlar bazasi migratsiyasini qoʻshadi';
+
+  @override
+  String get relationsBasis_lockfile => 'Ikkalasi ham bogʻliqliklar lock-fayllarini oʻzgartiradi';
+
+  @override
+  String get relationsBasis_codegen => 'Ikkalasi ham API spetsifikatsiyasi yoki generatsiya qilingan kodni oʻzgartiradi';
+
+  @override
+  String get relationsBasis_i18n => 'Ikkalasi ham tarjima fayllarini oʻzgartiradi';
+
+  @override
+  String relationsBasis_diff(String files) {
+    return 'Tayyor oʻzgarishlar $files da bir xil qatorlarga tegadi';
+  }
+
+  @override
+  String get relationsConfirmed => 'Difflar tasdiqladi';
+
+  @override
+  String relationsDismissedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count ta rad etilgan');
+    return '$_temp0';
+  }
+
+  @override
+  String get relationsAddTitle => 'Bogʻliqlik qoʻshish';
+
+  @override
+  String get relationsAddType => 'Bogʻliqlik';
+
+  @override
+  String get relationsAddOther => 'Tiket kaliti';
+
+  @override
+  String get relationsAddOtherPh => 'PAY-12';
+
+  @override
+  String get relationsAdd => 'Qoʻshish';
+
+  @override
+  String get relationsAddHint =>
+      'Kutadi: boshqasi birlashtirilgach, bu tiket kod yozishni boshlaydi. Bir vaqtda emas: ikkinchi boshlagani birinchisi birlashtirilguncha kutadi.';
+
+  @override
+  String get relationsAdded => 'Bogʻliqlik qoʻshildi';
+
+  @override
+  String get relationsFootprintTitle => 'Taxminiy iz';
+
+  @override
+  String get relationsFootprintSub =>
+      'Tahlilga koʻra bu tiket nimani oʻzgartiradi. agnts toʻqnashadigan tiketlarni ajratish uchun izlarni solishtiradi.';
+
+  @override
+  String get relationsFootprintFiles => 'Fayllar';
+
+  @override
+  String get relationsFootprintProvides => 'Qoʻshadi';
+
+  @override
+  String get relationsFootprintConsumes => 'Kerak';
+
+  @override
+  String get relationsFootprintMigrations => 'Maʼlumotlar bazasi migratsiyasini qoʻshadi';
+
+  @override
+  String get relationsMarkMerged => 'Birlashtirilgan deb belgilash';
+
+  @override
+  String get relationsMarkMergedHint =>
+      'Birlashtirish webhooki yoʻqmi? Uni kutayotgan tiketlar boshlashi uchun pull requestni birlashtirilgan deb belgilang.';
+
+  @override
   String get repoBack => 'Repozitoriylarga qaytish';
 
   @override
@@ -4264,6 +4421,41 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get ticketStopDone => 'Tayyor';
+
+  @override
+  String get ticketTabsLabel => 'Tiket tafsilotlari';
+
+  @override
+  String get ticketTabReview => 'Kod sharhi';
+
+  @override
+  String get ticketTabFollowUps => 'Keyingi tiketlar';
+
+  @override
+  String get ticketTabAnswers => 'Javoblar';
+
+  @override
+  String get ticketTabLessons => 'Darslar';
+
+  @override
+  String get ticketShowMore => 'Yana koʻrsatish';
+
+  @override
+  String get ticketShowLess => 'Yigʻish';
+
+  @override
+  String get ticketTranslate => 'Tarjima qilish';
+
+  @override
+  String get ticketTranslateOriginal => 'Asl til';
+
+  @override
+  String get ticketTranslating => 'Tarjima qilinmoqda… birinchi marta bir daqiqagacha vaqt oladi, keyin saqlanadi.';
+
+  @override
+  String ticketTranslateFailed(String error) {
+    return 'Tarjima qilib boʻlmadi: $error';
+  }
 
   @override
   String get ticketsTitle => 'Tiketlar';

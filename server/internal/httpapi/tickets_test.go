@@ -21,6 +21,43 @@ type fakeTickets struct {
 	lastAnswer    []domain.Answer
 	lastAccept    []orchestrator.AcceptInput
 	lastFollowUps *bool
+	lastRelation  string
+}
+
+func (f *fakeTickets) ListRelations(_ context.Context, key string) (orchestrator.Relations, error) {
+	if _, err := f.ticket(key, domain.StateCoding); err != nil {
+		return orchestrator.Relations{}, err
+	}
+	return orchestrator.Relations{
+		All: []orchestrator.RelationRow{{
+			Relation:   domain.Relation{ID: 3, TicketKey: key, OtherKey: "PAY-0", Type: domain.RelDependsOn, Source: domain.RelFromAgnts, Status: domain.RelProposed, Confidence: 0.4, Reason: "uses its endpoint"},
+			OtherTitle: "Add the endpoint", OtherState: domain.StateWaitingForReview,
+		}},
+		Blockers: []domain.Blocker{{Key: "PAY-0", Title: "Add the endpoint", State: domain.StateWaitingForReview, Type: domain.RelDependsOn}},
+	}, nil
+}
+
+func (f *fakeTickets) AddRelation(_ context.Context, key, other string, typ domain.RelationType, o domain.Origin) (domain.Relation, error) {
+	f.lastOrigin, f.lastRelation = o, other+" "+string(typ)
+	if other == key {
+		return domain.Relation{}, fmt.Errorf("%w: a ticket cannot wait for itself", orchestrator.ErrInvalid)
+	}
+	return domain.Relation{ID: 3, TicketKey: key, OtherKey: other, Type: typ, Source: domain.RelFromUser, Status: domain.RelActive}, nil
+}
+
+func (f *fakeTickets) DecideRelation(_ context.Context, key string, id int64, accept bool, _ domain.Origin) (domain.Relation, error) {
+	if id != 3 {
+		return domain.Relation{}, domain.ErrNotFound
+	}
+	st := domain.RelDismissed
+	if accept {
+		st = domain.RelActive
+	}
+	return domain.Relation{ID: 3, TicketKey: key, OtherKey: "PAY-0", Type: domain.RelDependsOn, Status: st}, nil
+}
+
+func (f *fakeTickets) MarkMergedByHand(_ context.Context, key string, _ domain.Origin) (domain.Ticket, error) {
+	return f.ticket(key, domain.StateDone)
 }
 
 func (f *fakeTickets) ListFollowUps(context.Context, string) (orchestrator.FollowUps, error) {
@@ -84,7 +121,7 @@ func (f *fakeTickets) View(_ context.Context, key string) (orchestrator.TicketVi
 		Ticket:    t,
 		Settings:  domain.DefaultSettings(),
 		Questions: []domain.Question{{ID: 9, Position: 1, Text: "Rounding?", Options: []string{"a"}, Answer: &ans}},
-		Analysis:  &orchestrator.Analysis{Summary: "s", Plan: []string{"p"}},
+		Analysis:  &orchestrator.Analysis{Summary: "s", Plan: []string{"p"}, Footprint: &domain.Footprint{Files: []string{"./a.go"}, Migrations: true}},
 		Result: &domain.Result{
 			Summary: json.RawMessage(`{"summary":"did it","notes":["n"]}`),
 			Tests:   json.RawMessage(`[{"name":"test","command":"go test","exit_code":0,"duration_ms":1200}]`),
@@ -104,6 +141,7 @@ func (f *fakeTickets) View(_ context.Context, key string) (orchestrator.TicketVi
 			Children: []domain.Ticket{{Key: "VIS-5", Title: "Earlier one", State: domain.StateNew, Source: domain.SourceLocal, Held: true}},
 		},
 		FollowUpsOn: true,
+		Relations:   orchestrator.Relations{Blockers: []domain.Blocker{{Key: "PAY-0", Title: "Add the endpoint", State: domain.StateDone, Type: domain.RelDependsOn}}},
 	}, err
 }
 
@@ -150,6 +188,16 @@ func (f *fakeTickets) Start(_ context.Context, key string, o domain.Origin) (dom
 func (f *fakeTickets) Stop(_ context.Context, key string, o domain.Origin) (domain.Ticket, error) {
 	f.lastOrigin = o
 	return f.ticket(key, domain.StateFailed)
+}
+
+func (f *fakeTickets) Translate(_ context.Context, key, lang string) ([]orchestrator.TranslatedText, error) {
+	if _, err := f.ticket(key, domain.StateDone); err != nil {
+		return nil, err
+	}
+	if lang == "ru" {
+		return []orchestrator.TranslatedText{{Source: "Fix login", Text: "Исправить вход"}}, nil
+	}
+	return nil, orchestrator.ErrPlanLimit
 }
 
 func (f *fakeTickets) Review(_ context.Context, key string, o domain.Origin) (domain.Ticket, error) {
@@ -250,6 +298,10 @@ func TestTicketEndpoints(t *testing.T) {
 		{"GET", "/api/tickets/PAY-1", "", 200, `"findings":[{"category":"tests","file":"a.go","line":3,"severity":"major","title":"untested"}]`},
 		{"GET", "/api/tickets/PAY-1", "", 200, `"reviewState":"none"`},
 		{"POST", "/api/tickets/PAY-1/review", "", 200, `"reviewState":"pending"`},
+		{"POST", "/api/tickets/PAY-1/translate", `{"lang":"ru"}`, 200, `"items":[{"source":"Fix login","text":"Исправить вход"}],"lang":"ru"`},
+		{"POST", "/api/tickets/PAY-1/translate", `{"lang":"xx"}`, 400, `unknown language`},
+		{"POST", "/api/tickets/PAY-1/translate", `{"lang":"de"}`, 429, `plan_limit`},
+		{"POST", "/api/tickets/NOPE-1/translate", `{"lang":"ru"}`, 404, `not_found`},
 		{"PUT", "/api/tickets/PAY-1/kind", `{"kind":"plan"}`, 200, `"kind":"plan","kindAuto":false`},
 		{"PUT", "/api/tickets/PAY-1/kind", `{"kind":"deploy"}`, 400, `bad_request`},
 		{"POST", "/api/tickets/PAY-1/implement", ``, 201, `"parentKey":"PAY-1"`},
@@ -274,12 +326,27 @@ func TestTicketEndpoints(t *testing.T) {
 		{"POST", "/api/tickets/PAY-1/review/findings/0/follow-up", "", 201, `"source":"manual"`},
 		{"POST", "/api/tickets/PAY-1/review/findings/3/follow-up", "", 400, `no finding 3`},
 		{"POST", "/api/tasks", `{"title":"x","priority":"low","afterApprove":"pr","start":"queue","kind":"analysis","followUps":"off"}`, 201, `"key":"VIS-1"`},
+		{"GET", "/api/tickets/PAY-1/relations", "", 200, `"direction":"waits_for"`},
+		{"GET", "/api/tickets/PAY-1/relations", "", 200, `"other":{"key":"PAY-0","landed":false,"state":"waiting_for_review","title":"Add the endpoint"}`},
+		{"GET", "/api/tickets/PAY-1", "", 200, `"blockedBy":[{"key":"PAY-0"`},
+		{"GET", "/api/tickets/PAY-1", "", 200, `"relations":{"blockedBy":[`},
+		{"GET", "/api/tickets/PAY-1", "", 200, `"footprint":{"files":["a.go"],"migrations":true}`},
+		{"GET", "/api/tickets/NOPE-1/relations", "", 404, `not_found`},
+		{"POST", "/api/tickets/PAY-1/relations", `{"otherKey":" pay-0 ","type":"depends_on"}`, 201, `"status":"proposed"`},
+		{"POST", "/api/tickets/PAY-1/relations", `{"otherKey":"PAY-1","type":"depends_on"}`, 400, `cannot wait for itself`},
+		{"POST", "/api/tickets/PAY-1/relations", `{"otherKey":"PAY-0","type":"before"}`, 400, `bad_request`},
+		{"POST", "/api/tickets/PAY-1/relations/3/accept", "", 200, `"id":3`},
+		{"POST", "/api/tickets/PAY-1/relations/9/dismiss", "", 404, `not_found`},
+		{"POST", "/api/tickets/PAY-1/merged", "", 200, `"state":"done"`},
 	}
 	for _, c := range cases {
 		rec := h.do(c.method, c.path, c.body, cookie)
 		if rec.Code != c.want || !strings.Contains(rec.Body.String(), c.contains) {
 			t.Errorf("%s %s: %d %s (want %d containing %q)", c.method, c.path, rec.Code, rec.Body, c.want, c.contains)
 		}
+	}
+	if h.tickets.lastRelation != "PAY-1 depends_on" {
+		t.Errorf("relation input: %q", h.tickets.lastRelation)
 	}
 	if a := h.tickets.lastAccept; len(a) != 1 || a[0].ID != 2 {
 		t.Errorf("accept input: %+v", a)

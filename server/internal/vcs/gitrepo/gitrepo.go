@@ -54,7 +54,10 @@ type Repos struct {
 	locks map[string]*sync.Mutex
 }
 
-var _ orchestrator.Git = (*Repos)(nil)
+var (
+	_ orchestrator.Git          = (*Repos)(nil)
+	_ orchestrator.DriftChecker = (*Repos)(nil)
+)
 
 // New keeps clones under dir.
 func New(dir string, token TokenSource, author func(ctx context.Context) (Author, error)) *Repos {
@@ -134,7 +137,11 @@ func (g *Repos) Prepare(ctx context.Context, repo domain.Repository, branch stri
 	}
 
 	local := plumbing.NewBranchReferenceName(branch)
-	if _, err := r.Reference(local, true); err != nil {
+	if cur, err := r.Reference(local, true); err == nil {
+		if err := fastForward(r, repo, branch, cur); err != nil {
+			return err
+		}
+	} else {
 		// No local branch yet: start from the remote branch if it exists
 		// (agnts pushed it before), else from the default branch.
 		from, err := r.Reference(plumbing.NewRemoteReferenceName("origin", branch), true)
@@ -301,6 +308,79 @@ func (g *Repos) PushTo(ctx context.Context, repo domain.Repository, branch, targ
 	return err
 }
 
+// fastForward moves a local branch that has nothing of its own onto what
+// it should start from: its remote branch when agnts pushed it before,
+// else the default branch. A ticket's branch is cut when it is analysed;
+// one that waited for other tickets to merge then codes on top of them
+// instead of on the default branch as it was. Only fast-forwards: a branch
+// with commits of its own is never moved.
+func fastForward(r *git.Repository, repo domain.Repository, branch string, cur *plumbing.Reference) error {
+	target, err := r.Reference(plumbing.NewRemoteReferenceName("origin", branch), true)
+	if err != nil {
+		if target, err = r.Reference(plumbing.NewRemoteReferenceName("origin", repo.DefaultBranch), true); err != nil {
+			return nil // nothing to compare with; Checkout reports real problems
+		}
+	}
+	if target.Hash() == cur.Hash() {
+		return nil
+	}
+	curC, err := r.CommitObject(cur.Hash())
+	if err != nil {
+		return err
+	}
+	targetC, err := r.CommitObject(target.Hash())
+	if err != nil {
+		return err
+	}
+	behind, err := curC.IsAncestor(targetC)
+	if err != nil || !behind {
+		return err
+	}
+	return r.Storer.SetReference(plumbing.NewHashReference(cur.Name(), target.Hash()))
+}
+
+// Drift fetches and returns what landed on the default branch since its
+// merge base with branch: the changes a pull request from branch has to
+// merge with.
+func (g *Repos) Drift(ctx context.Context, repo domain.Repository, branch string) ([]domain.FileChange, error) {
+	dir := g.checkoutDir(repo, branch)
+	defer g.lock(dir)()
+	r, err := git.PlainOpen(dir)
+	if err != nil {
+		return nil, err
+	}
+	auth, err := g.auth(ctx, repo)
+	if err != nil {
+		return nil, err
+	}
+	err = r.FetchContext(ctx, &git.FetchOptions{Auth: auth, Force: true,
+		RefSpecs: []config.RefSpec{config.RefSpec(fmt.Sprintf("+refs/heads/%s:refs/remotes/origin/%s", repo.DefaultBranch, repo.DefaultBranch))}})
+	if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
+		return nil, fmt.Errorf("fetch: %w", err)
+	}
+	head, err := r.Reference(plumbing.NewBranchReferenceName(branch), true)
+	if err != nil {
+		return nil, err
+	}
+	headC, err := r.CommitObject(head.Hash())
+	if err != nil {
+		return nil, err
+	}
+	defRef, err := r.Reference(plumbing.NewRemoteReferenceName("origin", repo.DefaultBranch), true)
+	if err != nil {
+		return nil, err
+	}
+	defC, err := r.CommitObject(defRef.Hash())
+	if err != nil {
+		return nil, err
+	}
+	bases, err := defC.MergeBase(headC)
+	if err != nil || len(bases) == 0 {
+		return nil, err
+	}
+	return treeDiff(bases[0], defC)
+}
+
 // branchDiff is what a reviewer sees: changes from the merge base with the
 // default branch to head.
 func branchDiff(r *git.Repository, defaultBranch string, head plumbing.Hash) ([]domain.FileChange, error) {
@@ -319,6 +399,11 @@ func branchDiff(r *git.Repository, defaultBranch string, head plumbing.Hash) ([]
 	if bases, err := baseC.MergeBase(headC); err == nil && len(bases) > 0 {
 		baseC = bases[0]
 	}
+	return treeDiff(baseC, headC)
+}
+
+// treeDiff returns the per-file changes from base to head.
+func treeDiff(baseC, headC *object.Commit) ([]domain.FileChange, error) {
 	baseT, err := baseC.Tree()
 	if err != nil {
 		return nil, err

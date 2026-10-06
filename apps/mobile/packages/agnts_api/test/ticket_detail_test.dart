@@ -38,6 +38,11 @@ void main() {
       // TODO
     });
 
+    // Relations relations
+    test('to test the property `relations`', () async {
+      // TODO
+    });
+
     // CodeReview review
     test('to test the property `review`', () async {
       // TODO

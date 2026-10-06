@@ -17,6 +17,7 @@ doc/AnswersRequest.md
 doc/AnswersRequestAnswersInner.md
 doc/ApproveTicketRequest.md
 doc/AuthApi.md
+doc/Blocker.md
 doc/Branch.md
 doc/CI.md
 doc/CheckStep.md
@@ -46,6 +47,7 @@ doc/FollowUpTicket.md
 doc/FollowUps.md
 doc/FollowUpsMode.md
 doc/FollowUpsSetting.md
+doc/Footprint.md
 doc/GetConsent200Response.md
 doc/GitSettings.md
 doc/HistoryItem.md
@@ -79,6 +81,11 @@ doc/Pipeline.md
 doc/Question.md
 doc/QuizQuestion.md
 doc/RejectTicketRequest.md
+doc/RelatedTicket.md
+doc/Relation.md
+doc/RelationInput.md
+doc/RelationType.md
+doc/Relations.md
 doc/RemoteRepository.md
 doc/RepoActivity.md
 doc/RepoMember.md
@@ -117,6 +124,10 @@ doc/TicketSpendRow.md
 doc/TicketState.md
 doc/TicketsApi.md
 doc/TokenSpend.md
+doc/TranslateInput.md
+doc/Translation.md
+doc/TranslationItemsInner.md
+doc/TranslationLanguage.md
 doc/UnregisterDeviceRequest.md
 doc/UpdateIntegrationRequest.md
 doc/Usage.md
@@ -160,6 +171,7 @@ lib/src/model/analytics_repos_inner.dart
 lib/src/model/answers_request.dart
 lib/src/model/answers_request_answers_inner.dart
 lib/src/model/approve_ticket_request.dart
+lib/src/model/blocker.dart
 lib/src/model/branch.dart
 lib/src/model/check_step.dart
 lib/src/model/ci.dart
@@ -186,6 +198,7 @@ lib/src/model/follow_up_ticket.dart
 lib/src/model/follow_ups.dart
 lib/src/model/follow_ups_mode.dart
 lib/src/model/follow_ups_setting.dart
+lib/src/model/footprint.dart
 lib/src/model/get_consent200_response.dart
 lib/src/model/git_settings.dart
 lib/src/model/history_item.dart
@@ -214,6 +227,11 @@ lib/src/model/pipeline.dart
 lib/src/model/question.dart
 lib/src/model/quiz_question.dart
 lib/src/model/reject_ticket_request.dart
+lib/src/model/related_ticket.dart
+lib/src/model/relation.dart
+lib/src/model/relation_input.dart
+lib/src/model/relation_type.dart
+lib/src/model/relations.dart
 lib/src/model/remote_repository.dart
 lib/src/model/repo_activity.dart
 lib/src/model/repo_member.dart
@@ -247,6 +265,10 @@ lib/src/model/ticket_spend_list.dart
 lib/src/model/ticket_spend_row.dart
 lib/src/model/ticket_state.dart
 lib/src/model/token_spend.dart
+lib/src/model/translate_input.dart
+lib/src/model/translation.dart
+lib/src/model/translation_items_inner.dart
+lib/src/model/translation_language.dart
 lib/src/model/unregister_device_request.dart
 lib/src/model/update_integration_request.dart
 lib/src/model/usage.dart
@@ -268,6 +290,7 @@ test/answers_request_answers_inner_test.dart
 test/answers_request_test.dart
 test/approve_ticket_request_test.dart
 test/auth_api_test.dart
+test/blocker_test.dart
 test/branch_test.dart
 test/check_step_test.dart
 test/ci_test.dart
@@ -297,6 +320,7 @@ test/follow_up_ticket_test.dart
 test/follow_ups_mode_test.dart
 test/follow_ups_setting_test.dart
 test/follow_ups_test.dart
+test/footprint_test.dart
 test/get_consent200_response_test.dart
 test/git_settings_test.dart
 test/history_item_test.dart
@@ -330,6 +354,11 @@ test/pipeline_test.dart
 test/question_test.dart
 test/quiz_question_test.dart
 test/reject_ticket_request_test.dart
+test/related_ticket_test.dart
+test/relation_input_test.dart
+test/relation_test.dart
+test/relation_type_test.dart
+test/relations_test.dart
 test/remote_repository_test.dart
 test/repo_activity_test.dart
 test/repo_member_test.dart
@@ -368,6 +397,10 @@ test/ticket_state_test.dart
 test/ticket_test.dart
 test/tickets_api_test.dart
 test/token_spend_test.dart
+test/translate_input_test.dart
+test/translation_items_inner_test.dart
+test/translation_language_test.dart
+test/translation_test.dart
 test/unregister_device_request_test.dart
 test/update_integration_request_test.dart
 test/usage_api_test.dart

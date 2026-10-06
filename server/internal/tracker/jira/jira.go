@@ -11,6 +11,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -295,7 +296,7 @@ func (c *Client) Search(ctx context.Context) ([]orchestrator.Incoming, error) {
 	for page := 0; page < 20; page++ {
 		req := map[string]any{
 			"jql": jql, "maxResults": 50,
-			"fields": []string{"summary", "description", "priority", "project", "labels"},
+			"fields": []string{"summary", "description", "priority", "project", "labels", "issuelinks"},
 		}
 		if token != "" {
 			req["nextPageToken"] = token
@@ -331,7 +332,62 @@ type issue struct {
 		Project struct {
 			Key string `json:"key"`
 		} `json:"project"`
+		// IssueLinks is nil when the payload left the field out.
+		IssueLinks *[]issueLink `json:"issuelinks"`
 	} `json:"fields"`
+}
+
+// issueLink is one link on an issue. Jira fills inwardIssue or
+// outwardIssue: the link reads "this issue <inward> inwardIssue" or "this
+// issue <outward> outwardIssue".
+type issueLink struct {
+	Type struct {
+		Name    string `json:"name"`
+		Inward  string `json:"inward"`
+		Outward string `json:"outward"`
+	} `json:"type"`
+	InwardIssue  *struct{ Key string } `json:"inwardIssue"`
+	OutwardIssue *struct{ Key string } `json:"outwardIssue"`
+}
+
+// waitPhrases read as "this issue waits for the linked one"; heldPhrases
+// as "the linked one waits for this issue". Jira's standard Blocks type
+// and the usual custom dependency types use these.
+var (
+	waitPhrases = []string{"is blocked by", "blocked by", "depends on", "is dependent on", "requires", "needs"}
+	heldPhrases = []string{"blocks", "is depended on by", "is required by", "is needed by", "is a prerequisite of", "is a prerequisite for"}
+)
+
+// dependencies reads the issue's blocking links: the issues it waits for,
+// and the issues that wait for it. Other links (relates, duplicates) do
+// not order work.
+func (is issue) dependencies() (dependsOn, dependents []string) {
+	if is.Fields.IssueLinks == nil {
+		return nil, nil
+	}
+	classify := func(phrase string) (waits, held bool) {
+		p := strings.ToLower(strings.TrimSpace(phrase))
+		return slices.Contains(waitPhrases, p), slices.Contains(heldPhrases, p)
+	}
+	for _, l := range *is.Fields.IssueLinks {
+		var other, phrase string
+		switch {
+		case l.InwardIssue != nil:
+			other, phrase = l.InwardIssue.Key, l.Type.Inward
+		case l.OutwardIssue != nil:
+			other, phrase = l.OutwardIssue.Key, l.Type.Outward
+		default:
+			continue
+		}
+		waits, held := classify(phrase)
+		switch {
+		case waits && !slices.Contains(dependsOn, other):
+			dependsOn = append(dependsOn, other)
+		case held && !slices.Contains(dependents, other):
+			dependents = append(dependents, other)
+		}
+	}
+	return dependsOn, dependents
 }
 
 func (is issue) incoming(label string) orchestrator.Incoming {
@@ -346,6 +402,10 @@ func (is issue) incoming(label string) orchestrator.Incoming {
 	}
 	if is.Fields.Priority != nil {
 		in.Priority = is.Fields.Priority.Name
+	}
+	if is.Fields.IssueLinks != nil {
+		in.LinksKnown = true
+		in.DependsOn, in.Dependents = is.dependencies()
 	}
 	return in
 }

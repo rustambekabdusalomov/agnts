@@ -284,6 +284,34 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /tickets/{key}/translate:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: translateTicket
+      summary: Translate a ticket's texts (its own and what agnts wrote) into a language
+      description: >-
+        Translations are stored per text, so a text is sent to Claude only
+        once per language; asking again, or for a later revision that keeps
+        most texts, answers from the store. Texts not yet translated are
+        translated in this request, which can take a minute.
+      tags: [tickets]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TranslateInput' }
+      responses:
+        '200':
+          description: Each text of the ticket with its translation
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Translation' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
   /tickets/{key}/stop:
     parameters:
       - $ref: '#/components/parameters/TicketKey'
@@ -462,6 +490,97 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/FollowUpSuggestion' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/relations:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    get:
+      operationId: listRelations
+      summary: The ticket's ordering constraints and what holds it back now
+      tags: [tickets]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Relations' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      operationId: addRelation
+      summary: Make this ticket wait for another, or keep the two from running side by side
+      description: >-
+        depends_on: this ticket does not start coding until the other is
+        merged (or rejected). conflicts: whichever of the two starts coding
+        second waits until the first is merged. A dependency that would make
+        two tickets wait for each other is refused (400). Adding a relation
+        agnts proposed or someone dismissed makes it active.
+      tags: [tickets]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RelationInput' }
+      responses:
+        '201':
+          description: The relation
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Relation' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/relations/{id}/accept:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+      - $ref: '#/components/parameters/RelationID'
+    post:
+      operationId: acceptRelation
+      summary: Accept a relation agnts proposed; the queue follows it from now on
+      tags: [tickets]
+      responses:
+        '200':
+          description: The relation
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Relation' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/relations/{id}/dismiss:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+      - $ref: '#/components/parameters/RelationID'
+    post:
+      operationId: dismissRelation
+      summary: Dismiss a relation (run anyway); agnts does not propose it again
+      tags: [tickets]
+      responses:
+        '200':
+          description: The relation
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Relation' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/merged:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: markTicketMerged
+      summary: Record that a done ticket's pull request was merged
+      description: >-
+        For setups without a git host webhook. Tickets waiting for this one
+        may start coding.
+      tags: [tickets]
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -1484,6 +1603,11 @@ components:
       in: path
       required: true
       schema: { type: integer, format: int64 }
+    RelationID:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
     TicketKey:
       name: key
       in: path
@@ -1561,6 +1685,101 @@ components:
           type: string
           enum: [code, queue]
           description: 'code = start now without questions (default), queue = keep until started'
+
+    Footprint:
+      type: object
+      description: What the analysis predicts the work will change; the queue compares footprints
+      required: [files]
+      properties:
+        files:
+          type: array
+          items: { type: string }
+        modules:
+          type: array
+          items: { type: string }
+        provides:
+          type: array
+          description: What the change adds that other work could use
+          items: { type: string }
+        consumes:
+          type: array
+          description: What the change needs that may not exist yet
+          items: { type: string }
+        migrations: { type: boolean }
+
+    Blocker:
+      type: object
+      required: [key, title, state, type]
+      properties:
+        key: { type: string }
+        title: { type: string }
+        state: { $ref: '#/components/schemas/TicketState' }
+        type: { $ref: '#/components/schemas/RelationType' }
+
+    RelationType:
+      type: string
+      enum: [depends_on, conflicts]
+      description: 'depends_on: one waits for the other to merge; conflicts: both change the same code, so they do not run side by side'
+
+    RelationInput:
+      type: object
+      required: [otherKey, type]
+      properties:
+        otherKey: { type: string, minLength: 1, maxLength: 100 }
+        type: { $ref: '#/components/schemas/RelationType' }
+
+    Relation:
+      type: object
+      required: [id, type, direction, source, status, confidence, reason, basis, files, other, createdAt]
+      properties:
+        id: { type: integer, format: int64 }
+        type: { $ref: '#/components/schemas/RelationType' }
+        direction:
+          type: string
+          enum: [waits_for, waited_by, conflicts]
+          description: 'From the ticket asked about: it waits for other, other waits for it, or they conflict'
+        source:
+          type: string
+          enum: [jira, user, agnts, rule, git]
+          description: 'Who found it: a Jira link, a person, the analysis, overlapping footprints, or the finished diffs (when nobody predicted it)'
+        status:
+          type: string
+          enum: [active, proposed, dismissed]
+          description: Only active relations hold the queue; proposed ones wait for a person
+        confidence: { type: number, format: double }
+        reason: { type: string }
+        basis:
+          type: string
+          description: 'For rule and git relations: files, migrations, lockfile, codegen, i18n or diff'
+        files:
+          type: array
+          description: Files both tickets change, when known
+          items: { type: string }
+        other: { $ref: '#/components/schemas/RelatedTicket' }
+        confirmedAt: { type: string, format: date-time, description: When the finished changes proved the conflict real }
+        decidedAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    RelatedTicket:
+      type: object
+      required: [key, title, state, landed]
+      properties:
+        key: { type: string }
+        title: { type: string }
+        state: { $ref: '#/components/schemas/TicketState' }
+        landed: { type: boolean, description: 'Its change is merged (or it was rejected): it holds nothing back' }
+
+    Relations:
+      type: object
+      required: [items, blockedBy]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Relation' }
+        blockedBy:
+          type: array
+          description: What holds the ticket's coding back right now
+          items: { $ref: '#/components/schemas/Blocker' }
 
     FollowUpsMode:
       type: string
@@ -1664,6 +1883,32 @@ components:
           type: array
           items: { $ref: '#/components/schemas/AcceptFollowUpResult' }
 
+    TranslationLanguage:
+      type: string
+      description: A language agnts can translate into
+      enum: [en, ru, uz, kk, tr, de, es, fr, zh, ja, ko, ar]
+
+    TranslateInput:
+      type: object
+      required: [lang]
+      properties:
+        lang: { $ref: '#/components/schemas/TranslationLanguage' }
+
+    Translation:
+      type: object
+      required: [lang, items]
+      properties:
+        lang: { $ref: '#/components/schemas/TranslationLanguage' }
+        items:
+          type: array
+          description: Each text as the ticket page shows it, and its translation
+          items:
+            type: object
+            required: [source, text]
+            properties:
+              source: { type: string }
+              text: { type: string }
+
     TicketKindInput:
       type: object
       required: [kind]
@@ -1701,6 +1946,12 @@ components:
         followUpOf: { type: string, description: 'The ticket that suggested this one as a follow-up' }
         suggestFollowUps: { $ref: '#/components/schemas/FollowUpsMode' }
         openSuggestions: { type: integer, description: 'Follow-up suggestions waiting for a decision' }
+        blockedBy:
+          type: array
+          description: >-
+            The tickets holding this one's coding back right now (it is in
+            coding with no commit yet). Absent when nothing does.
+          items: { $ref: '#/components/schemas/Blocker' }
         repoName: { type: string }
         models: { $ref: '#/components/schemas/ModelOverrides' }
         since: { type: string, format: date-time, description: When the ticket entered its current state }
@@ -1803,6 +2054,7 @@ components:
           type: string
           enum: [simple, complex]
           description: The analysis's rating; picks the review model on auto
+        footprint: { $ref: '#/components/schemas/Footprint' }
 
     Finding:
       type: object
@@ -1887,6 +2139,7 @@ components:
         result: { $ref: '#/components/schemas/Result' }
         childKey: { type: string, description: 'The code task that implements this report, if any' }
         followUps: { $ref: '#/components/schemas/FollowUps' }
+        relations: { $ref: '#/components/schemas/Relations' }
         review: { $ref: '#/components/schemas/CodeReview' }
         history:
           type: array

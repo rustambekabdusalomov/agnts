@@ -4,6 +4,7 @@
 
 // ignore_for_file: unused_element
 import 'package:agnts_api/src/model/follow_ups_mode.dart';
+import 'package:agnts_api/src/model/blocker.dart';
 import 'package:agnts_api/src/model/token_spend.dart';
 import 'package:agnts_api/src/model/ticket_kind.dart';
 import 'package:agnts_api/src/model/ticket_state.dart';
@@ -72,6 +73,8 @@ class Ticket {
      this.suggestFollowUps,
 
      this.openSuggestions,
+
+     this.blockedBy,
 
      this.repoName,
 
@@ -389,6 +392,19 @@ class Ticket {
 
 
 
+      /// The tickets holding this one's coding back right now (it is in coding with no commit yet). Absent when nothing does.
+  @JsonKey(
+    
+    name: r'blockedBy',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<Blocker>? blockedBy;
+
+
+
   @JsonKey(
     
     name: r'repoName',
@@ -541,6 +557,7 @@ class Ticket {
       other.followUpOf == followUpOf &&
       other.suggestFollowUps == suggestFollowUps &&
       other.openSuggestions == openSuggestions &&
+      other.blockedBy == blockedBy &&
       other.repoName == repoName &&
       other.models == models &&
       other.since == since &&
@@ -578,6 +595,7 @@ class Ticket {
         followUpOf.hashCode +
         suggestFollowUps.hashCode +
         openSuggestions.hashCode +
+        blockedBy.hashCode +
         repoName.hashCode +
         models.hashCode +
         since.hashCode +

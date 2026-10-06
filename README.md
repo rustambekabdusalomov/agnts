@@ -107,6 +107,30 @@ when something is unclear. A rule applies only once it is clear, or once you
 choose to use it as written; every analysis and coding prompt then gets it
 under "Team rules", and the ticket's log lists the rules it followed.
 
+**Queue order.** agnts codes several tickets at once (Settings → Runs at the
+same time) and works out which ones must wait. A ticket does not start coding
+until every ticket it depends on is merged (or rejected), and two tickets
+that change the same code never code side by side: whichever starts second
+waits until the first is merged. Analysis never waits. Relations come from:
+
+- Jira "blocks" / "is blocked by" links (and similar dependency link types);
+- the ticket's Order tab, where you can add "Waits for" or "Not alongside";
+- the analysis, which predicts each ticket's footprint (files, what it adds
+  and needs) and compares it with the other open tickets. The same files, or
+  a shared hot spot (database migrations, lockfiles, an API spec and its
+  generated code, translation files), make a conflict. Relations Claude reads
+  from the tickets apply when it is confident and are only proposed when it
+  is not: accept or dismiss them on the ticket's Order tab.
+
+The queue then takes the highest priority first, then the ticket that frees
+the most waiting work. A dependent's first coding run starts from the default
+branch with its dependencies merged in. Finished changes are checked against
+the other unmerged ones and against what landed since the branch was cut;
+same-line overlaps are flagged on both tickets and in the pull request. Without
+a merge webhook, mark a pull request merged from the ticket page.
+`agnts eval relations` scores the predictions (footprint precision and
+recall, predicted vs real collisions), and `/metrics` exports the same.
+
 Secrets are stored encrypted with `AGNTS_ENC_KEY`. Run containers get the
 Claude token and a copy of the repository, never the GitHub token.
 

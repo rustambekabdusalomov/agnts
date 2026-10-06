@@ -33,7 +33,9 @@ type Tickets interface {
 	Rows(ctx context.Context, ts []domain.Ticket) ([]orchestrator.TicketRow, error)
 	Learn(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	Review(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
+	Translate(ctx context.Context, key, lang string) ([]orchestrator.TranslatedText, error)
 	FollowUpTickets
+	RelationTickets
 	Wake()
 }
 
@@ -102,7 +104,7 @@ func (s *Server) GetTicket(w http.ResponseWriter, r *http.Request, key gen.Ticke
 	}
 	d := gen.TicketDetail{
 		Ticket: toTicketRow(orchestrator.TicketRow{Ticket: v.Ticket, Info: v.Info, RepoName: v.RepoName, Spend: v.Spend,
-			OpenSuggestions: openSuggestions(v.FollowUps.Suggestions)}),
+			OpenSuggestions: openSuggestions(v.FollowUps.Suggestions), Blockers: v.Relations.Blockers}),
 		Questions: make([]gen.Question, len(v.Questions)),
 		History:   &[]gen.HistoryItem{},
 		MaxTurns:  &v.Settings.MaxTurns,
@@ -137,7 +139,10 @@ func (s *Server) GetTicket(w http.ResponseWriter, r *http.Request, key gen.Ticke
 		if c := gen.AnalysisComplexity(v.Analysis.Complexity); c.Valid() {
 			d.Analysis.Complexity = &c
 		}
+		d.Analysis.Footprint = toFootprint(v.Analysis.Footprint)
 	}
+	rels := toRelations(v.Ticket.Key, v.Relations)
+	d.Relations = &rels
 	if v.Result != nil {
 		d.Result = toResult(*v.Result)
 	}
@@ -302,6 +307,10 @@ func toTicketRow(r orchestrator.TicketRow) gen.Ticket {
 		n := r.OpenSuggestions
 		out.OpenSuggestions = &n
 	}
+	if len(r.Blockers) > 0 {
+		bs := toBlockers(r.Blockers)
+		out.BlockedBy = &bs
+	}
 	return out
 }
 
@@ -401,6 +410,36 @@ func toTicket(t domain.Ticket) gen.Ticket {
 // ReviewTicket implements gen.ServerInterface.
 func (s *Server) ReviewTicket(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
 	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) { return s.opt.Tickets.Review(ctx, key, origin(r)) })
+}
+
+// TranslateTicket implements gen.ServerInterface.
+func (s *Server) TranslateTicket(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	var req gen.TranslateInput
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	if !req.Lang.Valid() {
+		writeError(w, http.StatusBadRequest, "bad_request", "unknown language "+string(req.Lang))
+		return
+	}
+	items, err := s.opt.Tickets.Translate(r.Context(), key, string(req.Lang))
+	if errors.Is(err, orchestrator.ErrPlanLimit) {
+		writeError(w, http.StatusTooManyRequests, "plan_limit", err.Error())
+		return
+	}
+	if err != nil {
+		s.writeUseCaseError(w, r, err)
+		return
+	}
+	out := gen.Translation{Lang: req.Lang, Items: make([]struct {
+		Source string `json:"source"`
+		Text   string `json:"text"`
+	}, len(items))}
+	for i, x := range items {
+		out.Items[i].Source, out.Items[i].Text = x.Source, x.Text
+	}
+	writeJSON(w, http.StatusOK, out)
 }
 
 func toReview(rv domain.Review) *gen.CodeReview {

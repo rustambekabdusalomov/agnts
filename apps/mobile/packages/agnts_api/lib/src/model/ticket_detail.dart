@@ -9,6 +9,7 @@ import 'package:agnts_api/src/model/follow_ups.dart';
 import 'package:agnts_api/src/model/question.dart';
 import 'package:agnts_api/src/model/stage_models.dart';
 import 'package:agnts_api/src/model/stage_spend.dart';
+import 'package:agnts_api/src/model/relations.dart';
 import 'package:agnts_api/src/model/history_item.dart';
 import 'package:agnts_api/src/model/code_review.dart';
 import 'package:agnts_api/src/model/analysis.dart';
@@ -40,6 +41,8 @@ class TicketDetail {
      this.childKey,
 
      this.followUps,
+
+     this.relations,
 
      this.review,
 
@@ -127,6 +130,18 @@ class TicketDetail {
 
   @JsonKey(
     
+    name: r'relations',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final Relations? relations;
+
+
+
+  @JsonKey(
+    
     name: r'review',
     required: false,
     includeIfNull: false,
@@ -196,6 +211,7 @@ class TicketDetail {
       other.result == result &&
       other.childKey == childKey &&
       other.followUps == followUps &&
+      other.relations == relations &&
       other.review == review &&
       other.history == history &&
       other.maxTurns == maxTurns &&
@@ -210,6 +226,7 @@ class TicketDetail {
         result.hashCode +
         childKey.hashCode +
         followUps.hashCode +
+        relations.hashCode +
         review.hashCode +
         history.hashCode +
         maxTurns.hashCode +

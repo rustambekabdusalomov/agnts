@@ -30,6 +30,11 @@ export type StageSpend = S['StageSpend']
 export type FollowUps = S['FollowUps']
 export type FollowUpSuggestion = S['FollowUpSuggestion']
 export type FollowUpsMode = S['FollowUpsMode']
+export type Relation = S['Relation']
+export type Relations = S['Relations']
+export type RelationType = S['RelationType']
+export type Blocker = S['Blocker']
+export type Footprint = S['Footprint']
 
 /** Tone per state, as in the demo: drives badge colours (b-<tone>). */
 export const STATE_TONE: Record<TicketState, 'gray' | 'info' | 'warn' | 'ok' | 'bad'> = {

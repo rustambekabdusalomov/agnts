@@ -299,6 +299,14 @@ const (
 	EventKind           = "kind_changed"
 	EventReview         = "review_done"
 	EventFollowUps      = "follow_ups_suggested"
+	// EventRelations: ordering constraints were found, added or decided.
+	EventRelations = "relations_changed"
+	// EventCollision: a finished change touches the same lines as another
+	// unmerged one, or as what landed on the default branch since. Its data
+	// says whether the relation was predicted before (for the eval).
+	EventCollision = "collision_found"
+	// EventFootprint: the predicted footprint checked against the real diff.
+	EventFootprint = "footprint_checked"
 )
 
 // Repository is a codebase agnts works on.

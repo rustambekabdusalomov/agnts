@@ -129,15 +129,20 @@ Class | Method | HTTP request | Description
 [*TasksApi*](doc/TasksApi.md) | [**deleteTask**](doc/TasksApi.md#deletetask) | **DELETE** /tasks/{key} | Delete a task that has not started
 [*TasksApi*](doc/TasksApi.md) | [**updateTask**](doc/TasksApi.md#updatetask) | **PATCH** /tasks/{key} | Edit a task that has not started
 [*TicketsApi*](doc/TicketsApi.md) | [**acceptFollowUps**](doc/TicketsApi.md#acceptfollowups) | **POST** /tickets/{key}/follow-ups/accept | Create tickets from chosen suggestions
+[*TicketsApi*](doc/TicketsApi.md) | [**acceptRelation**](doc/TicketsApi.md#acceptrelation) | **POST** /tickets/{key}/relations/{id}/accept | Accept a relation agnts proposed; the queue follows it from now on
+[*TicketsApi*](doc/TicketsApi.md) | [**addRelation**](doc/TicketsApi.md#addrelation) | **POST** /tickets/{key}/relations | Make this ticket wait for another, or keep the two from running side by side
 [*TicketsApi*](doc/TicketsApi.md) | [**answerQuestions**](doc/TicketsApi.md#answerquestions) | **PUT** /tickets/{key}/answers | Answer the ticket&#39;s questions; when all are answered, coding starts
 [*TicketsApi*](doc/TicketsApi.md) | [**approveTicket**](doc/TicketsApi.md#approveticket) | **POST** /tickets/{key}/approve | Approve the reviewed work
 [*TicketsApi*](doc/TicketsApi.md) | [**dismissFollowUp**](doc/TicketsApi.md#dismissfollowup) | **POST** /tickets/{key}/follow-ups/{id}/dismiss | Decline a suggestion; later runs will not suggest it again
+[*TicketsApi*](doc/TicketsApi.md) | [**dismissRelation**](doc/TicketsApi.md#dismissrelation) | **POST** /tickets/{key}/relations/{id}/dismiss | Dismiss a relation (run anyway); agnts does not propose it again
 [*TicketsApi*](doc/TicketsApi.md) | [**followUpFromFinding**](doc/TicketsApi.md#followupfromfinding) | **POST** /tickets/{key}/review/findings/{index}/follow-up | Turn a code review finding into a follow-up suggestion
 [*TicketsApi*](doc/TicketsApi.md) | [**getTicket**](doc/TicketsApi.md#getticket) | **GET** /tickets/{key} | A ticket with its questions, analysis and latest result
 [*TicketsApi*](doc/TicketsApi.md) | [**implementTicket**](doc/TicketsApi.md#implementticket) | **POST** /tickets/{key}/implement | Make the code task that carries out a done plan or bug investigation
 [*TicketsApi*](doc/TicketsApi.md) | [**listFollowUps**](doc/TicketsApi.md#listfollowups) | **GET** /tickets/{key}/follow-ups | Suggested follow-up tickets and the tickets made from them
+[*TicketsApi*](doc/TicketsApi.md) | [**listRelations**](doc/TicketsApi.md#listrelations) | **GET** /tickets/{key}/relations | The ticket&#39;s ordering constraints and what holds it back now
 [*TicketsApi*](doc/TicketsApi.md) | [**listTicketEvents**](doc/TicketsApi.md#listticketevents) | **GET** /tickets/{key}/events | The ticket&#39;s log, oldest first; poll with &#x60;after&#x60; for live updates
 [*TicketsApi*](doc/TicketsApi.md) | [**listTickets**](doc/TicketsApi.md#listtickets) | **GET** /tickets | Tickets, most recently active first
+[*TicketsApi*](doc/TicketsApi.md) | [**markTicketMerged**](doc/TicketsApi.md#markticketmerged) | **POST** /tickets/{key}/merged | Record that a done ticket&#39;s pull request was merged
 [*TicketsApi*](doc/TicketsApi.md) | [**rejectTicket**](doc/TicketsApi.md#rejectticket) | **POST** /tickets/{key}/reject | Stop work on the ticket for good
 [*TicketsApi*](doc/TicketsApi.md) | [**requestChanges**](doc/TicketsApi.md#requestchanges) | **POST** /tickets/{key}/request-changes | Send the ticket back to coding with feedback
 [*TicketsApi*](doc/TicketsApi.md) | [**retryTicket**](doc/TicketsApi.md#retryticket) | **POST** /tickets/{key}/retry | Resume a failed or rate-limited ticket where it stopped
@@ -148,6 +153,7 @@ Class | Method | HTTP request | Description
 [*TicketsApi*](doc/TicketsApi.md) | [**setTicketRepo**](doc/TicketsApi.md#setticketrepo) | **PUT** /tickets/{key}/repo | Link the ticket to a repository
 [*TicketsApi*](doc/TicketsApi.md) | [**startTicket**](doc/TicketsApi.md#startticket) | **POST** /tickets/{key}/analyze | Start a held ticket now (it is queued for the next free slot)
 [*TicketsApi*](doc/TicketsApi.md) | [**stopTicket**](doc/TicketsApi.md#stopticket) | **POST** /tickets/{key}/stop | Stop the running stage; the ticket moves to failed and can be retried
+[*TicketsApi*](doc/TicketsApi.md) | [**translateTicket**](doc/TicketsApi.md#translateticket) | **POST** /tickets/{key}/translate | Translate a ticket&#39;s texts (its own and what agnts wrote) into a language
 [*UsageApi*](doc/UsageApi.md) | [**getTicketSpend**](doc/UsageApi.md#getticketspend) | **GET** /usage/tickets | Tickets that used the most of the plan in a period, by Claude Code&#39;s cost estimate
 [*UsageApi*](doc/UsageApi.md) | [**getUsage**](doc/UsageApi.md#getusage) | **GET** /usage | Plan usage from Claude Code&#39;s rate limit events
 [*UsageApi*](doc/UsageApi.md) | [**refreshUsage**](doc/UsageApi.md#refreshusage) | **POST** /usage/refresh | Start a tiny Claude run to read fresh limits; a usage_updated event follows
@@ -167,6 +173,7 @@ Class | Method | HTTP request | Description
  - [AnswersRequest](doc/AnswersRequest.md)
  - [AnswersRequestAnswersInner](doc/AnswersRequestAnswersInner.md)
  - [ApproveTicketRequest](doc/ApproveTicketRequest.md)
+ - [Blocker](doc/Blocker.md)
  - [Branch](doc/Branch.md)
  - [CI](doc/CI.md)
  - [CheckStep](doc/CheckStep.md)
@@ -193,6 +200,7 @@ Class | Method | HTTP request | Description
  - [FollowUps](doc/FollowUps.md)
  - [FollowUpsMode](doc/FollowUpsMode.md)
  - [FollowUpsSetting](doc/FollowUpsSetting.md)
+ - [Footprint](doc/Footprint.md)
  - [GetConsent200Response](doc/GetConsent200Response.md)
  - [GitSettings](doc/GitSettings.md)
  - [HistoryItem](doc/HistoryItem.md)
@@ -221,6 +229,11 @@ Class | Method | HTTP request | Description
  - [Question](doc/Question.md)
  - [QuizQuestion](doc/QuizQuestion.md)
  - [RejectTicketRequest](doc/RejectTicketRequest.md)
+ - [RelatedTicket](doc/RelatedTicket.md)
+ - [Relation](doc/Relation.md)
+ - [RelationInput](doc/RelationInput.md)
+ - [RelationType](doc/RelationType.md)
+ - [Relations](doc/Relations.md)
  - [RemoteRepository](doc/RemoteRepository.md)
  - [RepoActivity](doc/RepoActivity.md)
  - [RepoMember](doc/RepoMember.md)
@@ -254,6 +267,10 @@ Class | Method | HTTP request | Description
  - [TicketSpendRow](doc/TicketSpendRow.md)
  - [TicketState](doc/TicketState.md)
  - [TokenSpend](doc/TokenSpend.md)
+ - [TranslateInput](doc/TranslateInput.md)
+ - [Translation](doc/Translation.md)
+ - [TranslationItemsInner](doc/TranslationItemsInner.md)
+ - [TranslationLanguage](doc/TranslationLanguage.md)
  - [UnregisterDeviceRequest](doc/UnregisterDeviceRequest.md)
  - [UpdateIntegrationRequest](doc/UpdateIntegrationRequest.md)
  - [Usage](doc/Usage.md)

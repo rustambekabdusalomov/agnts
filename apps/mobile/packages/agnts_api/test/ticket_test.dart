@@ -134,6 +134,12 @@ void main() {
       // TODO
     });
 
+    // The tickets holding this one's coding back right now (it is in coding with no commit yet). Absent when nothing does.
+    // List<Blocker> blockedBy
+    test('to test the property `blockedBy`', () async {
+      // TODO
+    });
+
     // String repoName
     test('to test the property `repoName`', () async {
       // TODO

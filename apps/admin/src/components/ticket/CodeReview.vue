@@ -6,6 +6,7 @@ import { api, HttpError, unwrap } from '../../api/client'
 import { findingFeedback, MODEL_NAME, SEVERITY_TONE, VERDICT_TONE, type CodeReview, type Finding, type Ticket } from '../../api/types'
 import { useUi } from '../../stores/ui'
 import HiIcon from '../ui/HiIcon.vue'
+import { useTr } from '../../composables/useTranslation'
 
 // agnts's code review beside the human one: advice only, never a gate.
 // Findings can be copied into the feedback box, so sending them back to
@@ -13,6 +14,7 @@ import HiIcon from '../ui/HiIcon.vue'
 const props = defineProps<{ ticket: Ticket; review?: CodeReview; feedback: string; report?: boolean }>()
 const emit = defineEmits<{ add: [line: string]; show: [path: string] }>()
 const { t } = useI18n()
+const tr = useTr()
 const qc = useQueryClient()
 const ui = useUi()
 
@@ -63,7 +65,7 @@ function addAll() {
     <p v-if="stale && !busy" class="hint">{{ t('review.stale', { n: stale.revision }) }}</p>
 
     <template v-if="current && !busy">
-      <div class="summary"><p>{{ current.summary }}</p></div>
+      <div class="summary"><p>{{ tr(current.summary) }}</p></div>
       <p class="hint cr-model">{{ t('review.model', { model: MODEL_NAME[current.model], reason: current.modelReason }) }}</p>
 
       <p v-if="!current.findings.length" class="cr-none"><HiIcon name="check" />{{ t('review.noFindings') }}</p>
@@ -77,9 +79,9 @@ function addAll() {
             </button>
             <code v-else-if="f.file" class="cr-loc">{{ f.file }}<template v-if="f.line">:{{ f.line }}</template></code>
           </div>
-          <p class="cr-title">{{ f.title }}</p>
-          <p v-if="f.detail" class="cr-detail">{{ f.detail }}</p>
-          <p v-if="f.suggestion" class="cr-sug"><b>{{ t('review.suggestion') }}:</b> {{ f.suggestion }}</p>
+          <p class="cr-title">{{ tr(f.title) }}</p>
+          <p v-if="f.detail" class="cr-detail">{{ tr(f.detail) }}</p>
+          <p v-if="f.suggestion" class="cr-sug"><b>{{ t('review.suggestion') }}:</b> {{ tr(f.suggestion) }}</p>
           <button
             v-if="f.suggestion"
             type="button"
@@ -103,7 +105,7 @@ function addAll() {
 
       <template v-if="current.strengths.length">
         <h3>{{ t('review.strengths') }}</h3>
-        <ul><li v-for="(s, i) in current.strengths" :key="i">{{ s }}</li></ul>
+        <ul><li v-for="(s, i) in current.strengths" :key="i">{{ tr(s) }}</li></ul>
       </template>
     </template>
 

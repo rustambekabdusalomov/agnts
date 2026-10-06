@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:agnts_api/src/model/footprint.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -25,6 +26,8 @@ class Analysis {
     required  this.plan,
 
      this.complexity,
+
+     this.footprint,
   });
 
   @JsonKey(
@@ -64,19 +67,33 @@ class Analysis {
 
 
 
+  @JsonKey(
+    
+    name: r'footprint',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final Footprint? footprint;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is Analysis &&
       other.summary == summary &&
       other.plan == plan &&
-      other.complexity == complexity;
+      other.complexity == complexity &&
+      other.footprint == footprint;
 
     @override
     int get hashCode =>
         summary.hashCode +
         plan.hashCode +
-        complexity.hashCode;
+        complexity.hashCode +
+        footprint.hashCode;
 
   factory Analysis.fromJson(Map<String, dynamic> json) => _$AnalysisFromJson(json);
 

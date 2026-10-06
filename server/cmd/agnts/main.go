@@ -48,6 +48,7 @@ Usage:
   agnts integration set <jira|github|claude>
                                 connect a service (secrets are read from the terminal)
   agnts jira sync                pick up labelled Jira issues now
+  agnts eval relations           score the queue's predictions (footprints, conflicts) against the real diffs
   agnts mcp token                create a new static MCP bearer token
   agnts keygen                   print a new AGNTS_ENC_KEY
   agnts version [--json]         print the version
@@ -135,6 +136,11 @@ func run(ctx context.Context, args []string) error {
 			return errors.New("usage: agnts jira sync")
 		}
 		return jiraSync(ctx, cfg, pool, log)
+	case "eval":
+		if len(args) != 2 || args[1] != "relations" {
+			return errors.New("usage: agnts eval relations")
+		}
+		return evalRelations(ctx, pool, os.Stdout)
 	case "user":
 		if len(args) != 3 || args[1] != "create" {
 			return errors.New("usage: agnts user create <username>")

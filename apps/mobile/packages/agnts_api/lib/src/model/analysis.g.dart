@@ -13,6 +13,8 @@ abstract class _$AnalysisCWProxy {
 
   Analysis complexity(AnalysisComplexityEnum? complexity);
 
+  Analysis footprint(Footprint? footprint);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Analysis(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -23,6 +25,7 @@ abstract class _$AnalysisCWProxy {
     String summary,
     List<String> plan,
     AnalysisComplexityEnum? complexity,
+    Footprint? footprint,
   });
 }
 
@@ -43,6 +46,9 @@ class _$AnalysisCWProxyImpl implements _$AnalysisCWProxy {
       this(complexity: complexity);
 
   @override
+  Analysis footprint(Footprint? footprint) => this(footprint: footprint);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Analysis(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -53,6 +59,7 @@ class _$AnalysisCWProxyImpl implements _$AnalysisCWProxy {
     Object? summary = const $CopyWithPlaceholder(),
     Object? plan = const $CopyWithPlaceholder(),
     Object? complexity = const $CopyWithPlaceholder(),
+    Object? footprint = const $CopyWithPlaceholder(),
   }) {
     return Analysis(
       summary: summary == const $CopyWithPlaceholder()
@@ -67,6 +74,10 @@ class _$AnalysisCWProxyImpl implements _$AnalysisCWProxy {
           ? _value.complexity
           // ignore: cast_nullable_to_non_nullable
           : complexity as AnalysisComplexityEnum?,
+      footprint: footprint == const $CopyWithPlaceholder()
+          ? _value.footprint
+          // ignore: cast_nullable_to_non_nullable
+          : footprint as Footprint?,
     );
   }
 }
@@ -94,6 +105,11 @@ Analysis _$AnalysisFromJson(Map<String, dynamic> json) =>
           'complexity',
           (v) => $enumDecodeNullable(_$AnalysisComplexityEnumEnumMap, v),
         ),
+        footprint: $checkedConvert(
+          'footprint',
+          (v) =>
+              v == null ? null : Footprint.fromJson(v as Map<String, dynamic>),
+        ),
       );
       return val;
     });
@@ -102,6 +118,7 @@ Map<String, dynamic> _$AnalysisToJson(Analysis instance) => <String, dynamic>{
   'summary': instance.summary,
   'plan': instance.plan,
   'complexity': ?_$AnalysisComplexityEnumEnumMap[instance.complexity],
+  'footprint': ?instance.footprint?.toJson(),
 };
 
 const _$AnalysisComplexityEnumEnumMap = {

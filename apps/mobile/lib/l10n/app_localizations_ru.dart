@@ -2443,6 +2443,168 @@ class AppLocalizationsRu extends AppLocalizations {
   String get navRules => 'Правила';
 
   @override
+  String get relationsTab => 'Порядок';
+
+  @override
+  String get relationsTitle => 'Порядок и конфликты';
+
+  @override
+  String get relationsSub =>
+      'agnts пишет код для нескольких тикетов сразу и сливает их по одному. Тикет ждёт, пока тикеты, от которых он зависит, будут слиты, а два тикета, меняющие один и тот же код, никогда не пишутся одновременно.';
+
+  @override
+  String get relationsWaitingTitle => 'Ждёт другие тикеты';
+
+  @override
+  String get relationsWaitingSub => 'Работа над кодом начнётся сама, как только они будут слиты или отклонены.';
+
+  @override
+  String get relationsWaitingBadge => 'Ждёт';
+
+  @override
+  String get relationsWaitsFor => 'Ждёт';
+
+  @override
+  String get relationsWaitedBy => 'Задерживает';
+
+  @override
+  String get relationsConflicts => 'Не одновременно';
+
+  @override
+  String get relationsProposedTitle => 'Предложено agnts';
+
+  @override
+  String get relationsProposedSub => 'agnts в них не уверен. Принятые управляют очередью; отклонённые больше не предлагаются.';
+
+  @override
+  String get relationsActiveTitle => 'Действуют';
+
+  @override
+  String get relationsEmpty => 'Связей нет. Тикет запустится, как только освободится слот.';
+
+  @override
+  String get relationsAccept => 'Принять';
+
+  @override
+  String get relationsDismiss => 'Отклонить';
+
+  @override
+  String get relationsRemove => 'Запустить всё равно';
+
+  @override
+  String relationsRemoveConfirm(String key, String other) {
+    return '$key и $other больше не будут ждать друг друга. Продолжить?';
+  }
+
+  @override
+  String relationsConfidence(String pct) {
+    return 'уверенность $pct%';
+  }
+
+  @override
+  String get relationsLanded => 'слит';
+
+  @override
+  String get relationsSource_jira => 'Связь в Jira';
+
+  @override
+  String get relationsSource_user => 'Добавлено вами';
+
+  @override
+  String get relationsSource_agnts => 'agnts';
+
+  @override
+  String get relationsSource_rule => 'Предсказанное пересечение';
+
+  @override
+  String get relationsSource_git => 'Найдено в диффах';
+
+  @override
+  String relationsBasis_files(String files) {
+    return 'Оба меняют $files';
+  }
+
+  @override
+  String get relationsBasis_migrations => 'Оба добавляют миграцию базы данных';
+
+  @override
+  String get relationsBasis_lockfile => 'Оба меняют lock-файлы зависимостей';
+
+  @override
+  String get relationsBasis_codegen => 'Оба меняют спецификацию API или сгенерированный код';
+
+  @override
+  String get relationsBasis_i18n => 'Оба меняют файлы переводов';
+
+  @override
+  String relationsBasis_diff(String files) {
+    return 'Готовые изменения затрагивают одни и те же строки в $files';
+  }
+
+  @override
+  String get relationsConfirmed => 'Подтверждено диффами';
+
+  @override
+  String relationsDismissedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count отклонено',
+      many: '$count отклонено',
+      few: '$count отклонены',
+      one: '$count отклонена',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get relationsAddTitle => 'Добавить связь';
+
+  @override
+  String get relationsAddType => 'Связь';
+
+  @override
+  String get relationsAddOther => 'Ключ тикета';
+
+  @override
+  String get relationsAddOtherPh => 'PAY-12';
+
+  @override
+  String get relationsAdd => 'Добавить';
+
+  @override
+  String get relationsAddHint =>
+      'Ждёт: этот тикет начнёт работу над кодом, когда другой будет слит. Не одновременно: тот, что начнёт вторым, ждёт, пока первый не будет слит.';
+
+  @override
+  String get relationsAdded => 'Связь добавлена';
+
+  @override
+  String get relationsFootprintTitle => 'Предсказанный след';
+
+  @override
+  String get relationsFootprintSub =>
+      'Что, по оценке анализа, изменит этот тикет. agnts сравнивает следы, чтобы разводить пересекающиеся тикеты.';
+
+  @override
+  String get relationsFootprintFiles => 'Файлы';
+
+  @override
+  String get relationsFootprintProvides => 'Добавляет';
+
+  @override
+  String get relationsFootprintConsumes => 'Нужно';
+
+  @override
+  String get relationsFootprintMigrations => 'Добавляет миграцию базы данных';
+
+  @override
+  String get relationsMarkMerged => 'Отметить слитым';
+
+  @override
+  String get relationsMarkMergedHint => 'Нет вебхука о слиянии? Отметьте pull request слитым, чтобы ожидающие его тикеты могли начать.';
+
+  @override
   String get repoBack => 'Назад к репозиториям';
 
   @override
@@ -4479,6 +4641,41 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get ticketStopDone => 'Готово';
+
+  @override
+  String get ticketTabsLabel => 'Детали тикета';
+
+  @override
+  String get ticketTabReview => 'Код-ревью';
+
+  @override
+  String get ticketTabFollowUps => 'Последующие';
+
+  @override
+  String get ticketTabAnswers => 'Ответы';
+
+  @override
+  String get ticketTabLessons => 'Уроки';
+
+  @override
+  String get ticketShowMore => 'Показать ещё';
+
+  @override
+  String get ticketShowLess => 'Свернуть';
+
+  @override
+  String get ticketTranslate => 'Перевести';
+
+  @override
+  String get ticketTranslateOriginal => 'Язык оригинала';
+
+  @override
+  String get ticketTranslating => 'Перевод… в первый раз это занимает до минуты, потом он сохраняется.';
+
+  @override
+  String ticketTranslateFailed(String error) {
+    return 'Не удалось перевести: $error';
+  }
 
   @override
   String get ticketsTitle => 'Тикеты';

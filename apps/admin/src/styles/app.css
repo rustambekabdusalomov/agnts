@@ -211,16 +211,6 @@ a.mem-name:hover { color: var(--primary-ink); }
 .cfg-side .card { overflow-wrap: anywhere; }
 .tl li > span:last-child { min-width: 0; overflow-wrap: anywhere; }
 
-/* Ticket page: the sidebar scrolls on its own, so its lower cards are
-   reachable without scrolling to the end of a long main column. Only in the
-   two-column layout; stacked, the page scrolls as a whole. */
-@media (min-width: 1101px) {
-  .tk-side {
-    max-height: calc(100vh - 88px - 16px);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
-    padding-bottom: 2px;
-  }
-  .tk-side > * { flex-shrink: 0; } /* scroll, don't squash the cards */
-}
+/* Ticket page: the sidebar is taller than the screen, so it scrolls with the
+   page (one scroll) instead of sticking with a scrollbar of its own. */
+.tk-side { position: static; }

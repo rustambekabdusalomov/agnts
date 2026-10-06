@@ -10,6 +10,7 @@ import 'package:agnts_api/src/model/analytics_repos_inner.dart';
 import 'package:agnts_api/src/model/answers_request.dart';
 import 'package:agnts_api/src/model/answers_request_answers_inner.dart';
 import 'package:agnts_api/src/model/approve_ticket_request.dart';
+import 'package:agnts_api/src/model/blocker.dart';
 import 'package:agnts_api/src/model/branch.dart';
 import 'package:agnts_api/src/model/check_step.dart';
 import 'package:agnts_api/src/model/code_review.dart';
@@ -34,6 +35,7 @@ import 'package:agnts_api/src/model/follow_up_suggestion.dart';
 import 'package:agnts_api/src/model/follow_up_ticket.dart';
 import 'package:agnts_api/src/model/follow_ups.dart';
 import 'package:agnts_api/src/model/follow_ups_setting.dart';
+import 'package:agnts_api/src/model/footprint.dart';
 import 'package:agnts_api/src/model/get_consent200_response.dart';
 import 'package:agnts_api/src/model/git_settings.dart';
 import 'package:agnts_api/src/model/history_item.dart';
@@ -59,6 +61,10 @@ import 'package:agnts_api/src/model/pipeline.dart';
 import 'package:agnts_api/src/model/question.dart';
 import 'package:agnts_api/src/model/quiz_question.dart';
 import 'package:agnts_api/src/model/reject_ticket_request.dart';
+import 'package:agnts_api/src/model/related_ticket.dart';
+import 'package:agnts_api/src/model/relation.dart';
+import 'package:agnts_api/src/model/relation_input.dart';
+import 'package:agnts_api/src/model/relations.dart';
 import 'package:agnts_api/src/model/remote_repository.dart';
 import 'package:agnts_api/src/model/repo_activity.dart';
 import 'package:agnts_api/src/model/repo_member.dart';
@@ -87,6 +93,9 @@ import 'package:agnts_api/src/model/ticket_repo.dart';
 import 'package:agnts_api/src/model/ticket_spend_list.dart';
 import 'package:agnts_api/src/model/ticket_spend_row.dart';
 import 'package:agnts_api/src/model/token_spend.dart';
+import 'package:agnts_api/src/model/translate_input.dart';
+import 'package:agnts_api/src/model/translation.dart';
+import 'package:agnts_api/src/model/translation_items_inner.dart';
 import 'package:agnts_api/src/model/unregister_device_request.dart';
 import 'package:agnts_api/src/model/update_integration_request.dart';
 import 'package:agnts_api/src/model/usage.dart';
@@ -136,6 +145,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return AnswersRequestAnswersInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApproveTicketRequest':
           return ApproveTicketRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'Blocker':
+          return Blocker.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Branch':
           return Branch.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'CI':
@@ -190,6 +201,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           
         case 'FollowUpsSetting':
           return FollowUpsSetting.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'Footprint':
+          return Footprint.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'GetConsent200Response':
           return GetConsent200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'GitSettings':
@@ -249,6 +262,17 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return QuizQuestion.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RejectTicketRequest':
           return RejectTicketRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RelatedTicket':
+          return RelatedTicket.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'Relation':
+          return Relation.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RelationInput':
+          return RelationInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RelationType':
+          
+          
+        case 'Relations':
+          return Relations.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RemoteRepository':
           return RemoteRepository.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RepoActivity':
@@ -320,6 +344,15 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           
         case 'TokenSpend':
           return TokenSpend.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'TranslateInput':
+          return TranslateInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'Translation':
+          return Translation.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'TranslationItemsInner':
+          return TranslationItemsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'TranslationLanguage':
+          
+          
         case 'UnregisterDeviceRequest':
           return UnregisterDeviceRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'UpdateIntegrationRequest':

@@ -19,6 +19,8 @@ abstract class _$TicketDetailCWProxy {
 
   TicketDetail followUps(FollowUps? followUps);
 
+  TicketDetail relations(Relations? relations);
+
   TicketDetail review(CodeReview? review);
 
   TicketDetail history(List<HistoryItem>? history);
@@ -42,6 +44,7 @@ abstract class _$TicketDetailCWProxy {
     Result? result,
     String? childKey,
     FollowUps? followUps,
+    Relations? relations,
     CodeReview? review,
     List<HistoryItem>? history,
     int? maxTurns,
@@ -76,6 +79,9 @@ class _$TicketDetailCWProxyImpl implements _$TicketDetailCWProxy {
   TicketDetail followUps(FollowUps? followUps) => this(followUps: followUps);
 
   @override
+  TicketDetail relations(Relations? relations) => this(relations: relations);
+
+  @override
   TicketDetail review(CodeReview? review) => this(review: review);
 
   @override
@@ -106,6 +112,7 @@ class _$TicketDetailCWProxyImpl implements _$TicketDetailCWProxy {
     Object? result = const $CopyWithPlaceholder(),
     Object? childKey = const $CopyWithPlaceholder(),
     Object? followUps = const $CopyWithPlaceholder(),
+    Object? relations = const $CopyWithPlaceholder(),
     Object? review = const $CopyWithPlaceholder(),
     Object? history = const $CopyWithPlaceholder(),
     Object? maxTurns = const $CopyWithPlaceholder(),
@@ -137,6 +144,10 @@ class _$TicketDetailCWProxyImpl implements _$TicketDetailCWProxy {
           ? _value.followUps
           // ignore: cast_nullable_to_non_nullable
           : followUps as FollowUps?,
+      relations: relations == const $CopyWithPlaceholder()
+          ? _value.relations
+          // ignore: cast_nullable_to_non_nullable
+          : relations as Relations?,
       review: review == const $CopyWithPlaceholder()
           ? _value.review
           // ignore: cast_nullable_to_non_nullable
@@ -200,6 +211,11 @@ TicketDetail _$TicketDetailFromJson(Map<String, dynamic> json) =>
           (v) =>
               v == null ? null : FollowUps.fromJson(v as Map<String, dynamic>),
         ),
+        relations: $checkedConvert(
+          'relations',
+          (v) =>
+              v == null ? null : Relations.fromJson(v as Map<String, dynamic>),
+        ),
         review: $checkedConvert(
           'review',
           (v) =>
@@ -236,6 +252,7 @@ Map<String, dynamic> _$TicketDetailToJson(TicketDetail instance) =>
       'result': ?instance.result?.toJson(),
       'childKey': ?instance.childKey,
       'followUps': ?instance.followUps?.toJson(),
+      'relations': ?instance.relations?.toJson(),
       'review': ?instance.review?.toJson(),
       'history': ?instance.history?.map((e) => e.toJson()).toList(),
       'maxTurns': ?instance.maxTurns,

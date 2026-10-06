@@ -55,6 +55,8 @@ abstract class _$TicketCWProxy {
 
   Ticket openSuggestions(int? openSuggestions);
 
+  Ticket blockedBy(List<Blocker>? blockedBy);
+
   Ticket repoName(String? repoName);
 
   Ticket models(ModelOverrides? models);
@@ -106,6 +108,7 @@ abstract class _$TicketCWProxy {
     String? followUpOf,
     FollowUpsMode? suggestFollowUps,
     int? openSuggestions,
+    List<Blocker>? blockedBy,
     String? repoName,
     ModelOverrides? models,
     DateTime? since,
@@ -202,6 +205,9 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
       this(openSuggestions: openSuggestions);
 
   @override
+  Ticket blockedBy(List<Blocker>? blockedBy) => this(blockedBy: blockedBy);
+
+  @override
   Ticket repoName(String? repoName) => this(repoName: repoName);
 
   @override
@@ -265,6 +271,7 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
     Object? followUpOf = const $CopyWithPlaceholder(),
     Object? suggestFollowUps = const $CopyWithPlaceholder(),
     Object? openSuggestions = const $CopyWithPlaceholder(),
+    Object? blockedBy = const $CopyWithPlaceholder(),
     Object? repoName = const $CopyWithPlaceholder(),
     Object? models = const $CopyWithPlaceholder(),
     Object? since = const $CopyWithPlaceholder(),
@@ -373,6 +380,10 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
           ? _value.openSuggestions
           // ignore: cast_nullable_to_non_nullable
           : openSuggestions as int?,
+      blockedBy: blockedBy == const $CopyWithPlaceholder()
+          ? _value.blockedBy
+          // ignore: cast_nullable_to_non_nullable
+          : blockedBy as List<Blocker>?,
       repoName: repoName == const $CopyWithPlaceholder()
           ? _value.repoName
           // ignore: cast_nullable_to_non_nullable
@@ -495,6 +506,12 @@ Ticket _$TicketFromJson(
       'openSuggestions',
       (v) => (v as num?)?.toInt(),
     ),
+    blockedBy: $checkedConvert(
+      'blockedBy',
+      (v) => (v as List<dynamic>?)
+          ?.map((e) => Blocker.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    ),
     repoName: $checkedConvert('repoName', (v) => v as String?),
     models: $checkedConvert(
       'models',
@@ -553,6 +570,7 @@ Map<String, dynamic> _$TicketToJson(Ticket instance) => <String, dynamic>{
   'followUpOf': ?instance.followUpOf,
   'suggestFollowUps': ?_$FollowUpsModeEnumMap[instance.suggestFollowUps],
   'openSuggestions': ?instance.openSuggestions,
+  'blockedBy': ?instance.blockedBy?.map((e) => e.toJson()).toList(),
   'repoName': ?instance.repoName,
   'models': ?instance.models?.toJson(),
   'since': ?instance.since?.toIso8601String(),

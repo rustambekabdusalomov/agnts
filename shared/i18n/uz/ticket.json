@@ -167,6 +167,17 @@
     "doneReport": "Hisobot shu yerda saqlanadi.",
     "doneReportPosted": "Hisobot shu yerda saqlanadi va Jira'dagi {key} ga yuborildi.",
     "stopWriting": "Hisobot",
-    "stopDone": "Tayyor"
+    "stopDone": "Tayyor",
+    "tabsLabel": "Tiket tafsilotlari",
+    "tabReview": "Kod sharhi",
+    "tabFollowUps": "Keyingi tiketlar",
+    "tabAnswers": "Javoblar",
+    "tabLessons": "Darslar",
+    "showMore": "Yana koʻrsatish",
+    "showLess": "Yigʻish",
+    "translate": "Tarjima qilish",
+    "translateOriginal": "Asl til",
+    "translating": "Tarjima qilinmoqda… birinchi marta bir daqiqagacha vaqt oladi, keyin saqlanadi.",
+    "translateFailed": "Tarjima qilib boʻlmadi: {error}"
   }
 }

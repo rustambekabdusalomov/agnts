@@ -8,12 +8,14 @@ import { useUi } from '../../stores/ui'
 import StateBadge from '../StateBadge.vue'
 import InputSelect from '../form/InputSelect.vue'
 import { useIntegrations } from '../integrations/useIntegrations'
+import { useTr } from '../../composables/useTranslation'
 
 // Follow-up tickets agnts suggests for finishing this one. The person
 // picks; every ticket made here starts queued, so nothing spends tokens
 // until someone starts it.
 const props = defineProps<{ ticket: Ticket; followUps?: FollowUps }>()
 const { t } = useI18n()
+const tr = useTr()
 const qc = useQueryClient()
 const ui = useUi()
 
@@ -130,12 +132,12 @@ const dismiss = useMutation({
               <span class="fu-src">· {{ t(`tasks.${s.priority}`) }}</span>
             </div>
             <input v-if="edits[s.id].picked" v-model="edits[s.id].title" class="cfg-in fu-title-in" :aria-label="t('followUps.editTitle')" maxlength="300">
-            <p v-else class="fu-title">{{ s.title }}</p>
-            <p class="fu-serves"><b>{{ t('followUps.serves') }}:</b> {{ s.serves }}</p>
+            <p v-else class="fu-title">{{ tr(s.title) }}</p>
+            <p class="fu-serves"><b>{{ t('followUps.serves') }}:</b> {{ tr(s.serves) }}</p>
             <button v-if="s.description" type="button" class="fu-more" :aria-expanded="edits[s.id].open" @click="edits[s.id].open = !edits[s.id].open">
               {{ t('followUps.details') }}
             </button>
-            <p v-if="s.description && edits[s.id].open" class="fu-desc">{{ s.description }}</p>
+            <p v-if="s.description && edits[s.id].open" class="fu-desc">{{ tr(s.description) }}</p>
             <p v-if="!s.ready" class="hint fu-hint">{{ t('followUps.waitsForDone') }}</p>
             <div v-if="edits[s.id].picked" class="fu-opts">
               <InputSelect v-model="edits[s.id].kind" :options="kindOptions" :label="t('kind.title')" />

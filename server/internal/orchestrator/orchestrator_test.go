@@ -301,7 +301,7 @@ func newHarness(t *testing.T) *harness {
 	if err := postgres.Migrate(ctx, pool, "up", log); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := pool.Exec(ctx, `TRUNCATE tickets, runs, results, questions, events, repositories, webhook_deliveries RESTART IDENTITY CASCADE`); err != nil {
+	if _, err := pool.Exec(ctx, `TRUNCATE tickets, runs, results, questions, events, repositories, webhook_deliveries, translations RESTART IDENTITY CASCADE`); err != nil {
 		t.Fatal(err)
 	}
 	store := postgres.NewAgent(pool)
@@ -321,7 +321,7 @@ func newHarness(t *testing.T) *harness {
 	h.usage = &fakeUsage{}
 	h.o = orchestrator.New(cfg, orchestrator.Deps{
 		Store: store, Runner: h.runner, Git: h.git, Host: h.host, Tracker: h.tracker, Homes: &memHomes{},
-		Settings: h.settings, Usage: h.usage,
+		Settings: h.settings, Usage: h.usage, Translations: postgres.NewTranslations(pool),
 	}, log)
 	return h
 }

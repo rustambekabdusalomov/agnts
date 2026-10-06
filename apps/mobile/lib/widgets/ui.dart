@@ -338,6 +338,7 @@ class TicketCard extends StatelessWidget {
             SourceChip(isTask ? l.ticketsSourceTask : l.ticketsSourceJira, task: isTask),
             if (ticket.kind != TicketKind.code) KindChip(ticket),
             if ((ticket.openSuggestions ?? 0) > 0) ToneBadge(AppLocalizations.of(context).followUpsOpenBadge(ticket.openSuggestions!), Tone.info, small: true),
+            if (ticket.blockedBy?.isNotEmpty ?? false) ToneBadge(AppLocalizations.of(context).relationsWaitingBadge, Tone.warn, small: true),
             if (ticket.repoName != null) Text(ticket.repoName!),
             ...meta,
           ]),

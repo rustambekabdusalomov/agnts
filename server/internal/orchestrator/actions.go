@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"slices"
 	"strings"
-	"time"
 
 	"agnts/internal/domain"
 )
@@ -27,6 +26,13 @@ type Incoming struct {
 	Priority    string
 	// Kind comes from a kind label; empty means agnts picks it.
 	Kind domain.TicketKind
+	// LinksKnown is true when the tracker reported the issue's links, so
+	// DependsOn and Dependents are complete (an empty list removes links).
+	LinksKnown bool
+	// DependsOn are the issues this one is blocked by; Dependents are the
+	// issues it blocks.
+	DependsOn  []string
+	Dependents []string
 }
 
 // Ingest records a ticket from the tracker. New tickets are queued for
@@ -65,6 +71,7 @@ func (o *Orchestrator) Ingest(ctx context.Context, in Incoming, origin domain.Or
 			TicketKey: in.Key, Type: domain.EventTicketCreated, Origin: origin, Message: in.Title,
 		})
 		if err == nil {
+			o.syncJiraRelations(ctx, in, origin)
 			o.Wake()
 			return true, nil
 		}
@@ -90,6 +97,9 @@ func (o *Orchestrator) Ingest(ctx context.Context, in Incoming, origin domain.Or
 	})
 	if archived && errors.Is(err, domain.ErrNotFound) {
 		return false, nil
+	}
+	if err == nil {
+		o.syncJiraRelations(ctx, in, origin)
 	}
 	return false, err
 }
@@ -276,6 +286,7 @@ func (o *Orchestrator) Reject(ctx context.Context, key, reason string, origin do
 	}
 	o.cancelRun(key)
 	o.trackerMove(context.WithoutCancel(ctx), t, TrackerRejected)
+	o.Wake() // tickets waiting for it may start
 	return t, nil
 }
 
@@ -666,6 +677,8 @@ type TicketView struct {
 	FollowUps FollowUps
 	// FollowUpsOn reports whether this ticket's runs suggest follow-ups.
 	FollowUpsOn bool
+	// Relations are its ordering constraints and what holds it back now.
+	Relations Relations
 }
 
 // TicketRow is a ticket for lists, with when it entered its state.
@@ -676,6 +689,8 @@ type TicketRow struct {
 	Spend    domain.TokenUsage // zero when no Claude run was recorded
 	// OpenSuggestions counts follow-ups waiting for someone to decide.
 	OpenSuggestions int
+	// Blockers hold its first coding run back right now.
+	Blockers []domain.Blocker
 }
 
 // Rows decorates tickets for lists.
@@ -696,10 +711,14 @@ func (o *Orchestrator) Rows(ctx context.Context, ts []domain.Ticket) ([]TicketRo
 	if err != nil {
 		return nil, err
 	}
+	blockers, err := o.store.Blockers(ctx, keys)
+	if err != nil {
+		return nil, err
+	}
 	names := map[int64]string{}
 	out := make([]TicketRow, len(ts))
 	for i, t := range ts {
-		out[i] = TicketRow{Ticket: t, Info: info[t.Key], Spend: spend[t.Key], OpenSuggestions: open[t.Key]}
+		out[i] = TicketRow{Ticket: t, Info: info[t.Key], Spend: spend[t.Key], OpenSuggestions: open[t.Key], Blockers: blockers[t.Key]}
 		if t.RepoID != nil {
 			if n, ok := names[*t.RepoID]; ok {
 				out[i].RepoName = n
@@ -762,6 +781,9 @@ func (o *Orchestrator) View(ctx context.Context, key string) (TicketView, error)
 		return v, err
 	}
 	v.FollowUpsOn = v.Settings.FollowUpsOn(t)
+	if v.Relations, err = o.relations(ctx, t.Key); err != nil {
+		return v, err
+	}
 	return v, nil
 }
 
@@ -788,13 +810,11 @@ func (o *Orchestrator) MarkMerged(ctx context.Context, prURL, branch string, ori
 	if t.MergedAt != nil {
 		return false, nil
 	}
-	now := time.Now()
-	if _, err := o.store.UpdateTicket(ctx, t.Key, &domain.Event{
-		TicketKey: t.Key, Type: domain.EventMerged, Origin: origin, Message: "pull request merged", Data: map[string]any{"url": prURL},
-	}, func(x *domain.Ticket) { x.MergedAt = &now }); err != nil {
+	if prURL != "" {
+		t.PRURL = prURL
+	}
+	if _, err := o.markMerged(ctx, t, origin, "pull request merged"); err != nil {
 		return false, err
 	}
-	o.trackerComment(ctx, t, CommentStatus, "The pull request was merged.")
-	o.trackerMove(ctx, t, TrackerMerged)
 	return true, nil
 }

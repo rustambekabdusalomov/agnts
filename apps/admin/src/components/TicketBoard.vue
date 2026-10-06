@@ -48,6 +48,7 @@ const tone = (c: BoardColumn) => STATE_TONE[c.states[0]]
             </template>
             <KindBadge v-if="tk.kind !== 'code'" :ticket="tk" />
             <span v-if="tk.openSuggestions" class="badge b-info">{{ t('followUps.openBadge', { count: tk.openSuggestions }) }}</span>
+            <span v-if="tk.blockedBy?.length" class="badge b-warn" :title="tk.blockedBy.map((b) => b.key).join(', ')">{{ t('relations.waitingBadge') }}</span>
             <span v-if="tk.repoName">{{ tk.repoName }}</span>
             <span v-if="tk.spend">{{ t('spend.tokens', { n: fmtTokens(ioTokens(tk.spend), locale) }) }}</span>
             <span>{{ ago(tk.updatedAt, locale) }}</span>

@@ -39,6 +39,13 @@ type Analysis struct {
 	} `json:"questions"`
 	// FollowUps are prerequisites and parts to split off, when asked for.
 	FollowUps []domain.FollowUp `json:"followUps,omitempty"`
+	// Footprint is what the work is expected to change (tickets with a
+	// repository). The queue compares footprints to keep colliding tickets
+	// apart, and checks it against the real diff.
+	Footprint *domain.Footprint `json:"footprint,omitempty"`
+	// Relations say how this ticket depends on or collides with the other
+	// open tickets the prompt listed.
+	Relations []RelationClaim `json:"relations,omitempty"`
 }
 
 // Summary is what a coding run should write to SummaryPath.
@@ -70,7 +77,13 @@ var prompts = template.Must(template.New("").Funcs(template.FuncMap{
 ## Extra instructions for this repository
 
 {{.Repo.ClaudeMD}}
-{{end}}{{template "team" .}}{{end}}
+{{end}}{{template "team" .}}
+{{template "lang"}}{{end}}
+
+{{define "lang"}}## Language
+
+Write everything a person reads (summaries, plans, questions and their options, notes, reports, review findings, follow-ups) in the language the ticket is written in. If the ticket mixes languages, use the one its description is mostly written in. Keep code, identifiers, file paths, commands and URLs as they are, and keep JSON keys and the fixed values listed for them (kinds, severities, verdicts and the like) exactly as given, in English. Code comments and commit text follow the repository's conventions.
+{{end}}
 
 {{define "team"}}{{if .Rules}}
 ## Team rules
@@ -109,12 +122,15 @@ agnts works these kinds of tickets:
      "kindReason": "one sentence: why this kind",
      "complexity": "simple or complex",
      "summary": "one paragraph: what the ticket needs{{if not .NoRepo}} and where in the code{{end}}",
-     "plan": ["step 1", "step 2"],
+     "plan": ["step 1", "step 2"],{{if not .NoRepo}}
+     "footprint": {"files": ["path/relative/to/the/repository/root.go"], "modules": ["package or feature"], "provides": ["what this adds that other work could use"], "consumes": ["what this needs that may not exist yet"], "migrations": false},{{end}}
      "questions": [{"text": "a question only the ticket author can answer", "options": ["option A", "option B"]}]}
 
 For a report kind (plan, analysis, bug) the plan lists how you will do the work and what the report will cover.
 
-Rate the complexity "complex" when the work spans several modules or layers, changes data or schemas, touches concurrency, security, money or public APIs, or needs careful design; otherwise "simple".
+{{if not .NoRepo}}The footprint is what the work will change. "files" lists the exact paths you expect to edit or add, as found in the code (not directories or patterns); "provides" names what the change adds that other work could build on (an endpoint, a table, a function, a config key); "consumes" names what it needs that does not exist yet; "migrations" is true when it adds or changes a database migration. agnts runs several tickets at a time and uses the footprint to keep tickets that change the same code apart, so be precise. For a report kind, which changes nothing, use empty lists.
+
+{{end}}Rate the complexity "complex" when the work spans several modules or layers, changes data or schemas, touches concurrency, security, money or public APIs, or needs careful design; otherwise "simple".
 
 {{if .NoQuestions}}Do not ask questions: use an empty "questions" list and make reasonable assumptions, noting them in the plan.{{else}}Ask questions only when the answer changes what you would build or conclude and you cannot find it{{if not .NoRepo}} in the code{{end}}. Give two to four concrete options for each. Use an empty list when there is nothing to ask.{{end}}{{if .Rules}} Plan the work so it follows the team rules; if the ticket asks for something a rule forbids, {{if .NoQuestions}}follow the rule and say so in the plan{{else}}ask which one wins{{end}}.{{end}}
 {{end}}
@@ -131,7 +147,15 @@ Rate the complexity "complex" when the work spans several modules or layers, cha
 {{range .Answers}}- Q: {{.Text}}
   A: {{.Answer}}{{if .Note}} ({{.Note}}){{end}}
 {{end}}{{end}}
-{{template "rules" .}}- Run the project's build, lint and tests yourself before finishing{{if .Checks}}: {{.Checks}}{{end}}.
+{{if .Landed}}## Merged since the analysis
+
+This ticket waited for these tickets, and their changes are now merged into the default branch, so /workspace includes them:
+{{range .Landed}}
+- {{.Key}}: {{.Title}}{{end}}
+
+The plan above was written before they landed. Check it against the current code, use what they added, and do not redo their work.
+
+{{end}}{{template "rules" .}}- Run the project's build, lint and tests yourself before finishing{{if .Checks}}: {{.Checks}}{{end}}.
 
 When you are done, write {{.SummaryPath}} as {"summary": "what you changed and why", "notes": ["anything the reviewer should check"]}.
 {{end}}
@@ -189,7 +213,7 @@ Write {{.LessonsPath}} with exactly this shape (an empty "lessons" list when not
       "reading": [{"title": "official docs or a well-known reference", "url": "https://..."}]
     }]}
 
-Give two or three quiz questions per lesson. Only link pages you are sure exist (official documentation first); leave "reading" empty rather than guess. Write plain text, not Markdown headings.
+Give two or three quiz questions per lesson. Only link pages you are sure exist (official documentation first); leave "reading" empty rather than guess. Write plain text, not Markdown headings. Write the lessons in the language ticket {{.T.Key}} is written in; keep slugs, categories, levels, code and names of technologies as they are.
 {{end}}
 
 {{define "rule"}}You are agnts, an AI agent that implements tickets in code. The team wrote the rule below for you to follow on every ticket {{if .RuleRepo}}in the repository {{.RuleRepo}}{{else}}in every repository{{end}}. Before you rely on it, make sure it is clear: two engineers reading it should make the same change. Do not change any files in /workspace.
@@ -232,7 +256,19 @@ Write {{.RulePath}} with exactly this shape:
      "clarified": "the rule rewritten as precise instructions to yourself, keeping the author's intent and everything the answers settled; plain text",
      "questions": [{"text": "a question only the author can answer", "options": ["option A", "option B"]}]}
 
-{{if .NoQuestions}}Do not ask any more questions: use an empty "questions" list, resolve what is still open with the most reasonable reading, and state that reading in "clarified".{{else}}Ask at most five questions, each with two to four concrete options. Use an empty list when the rule is clear.{{end}}
+{{if .NoQuestions}}Do not ask any more questions: use an empty "questions" list, resolve what is still open with the most reasonable reading, and state that reading in "clarified".{{else}}Ask at most five questions, each with two to four concrete options. Use an empty list when the rule is clear.{{end}} Write the interpretation, the clarified rule and the questions in the language the rule is written in.
+{{end}}
+
+{{define "translate"}}You are agnts's translator. {{.SourcePath}} holds texts from a software ticket's page as JSON: {"texts": [{"id": 0, "text": "..."}]}. Translate every text into {{.Language}}. /workspace is empty; do not create files there.
+
+- Keep the meaning, tone and formatting: Markdown, line breaks, lists and tables stay as they are.
+- Do not translate code, code blocks, inline code, identifiers, file paths, commands, URLs, ticket keys or branch names.
+- Keep technical terms in the form {{.Language}}-speaking developers usually use.
+- Copy a text already written in {{.Language}} unchanged.
+
+Write {{.TranslationPath}} with exactly this shape, one item for every id in the input:
+
+    {"texts": [{"id": 0, "text": "the translation"}]}
 {{end}}
 
 {{define "report"}}You are agnts, a careful software engineer. Your task: {{work .T.Kind}}, for the ticket below. {{if .NoRepo}}The ticket has no repository: /workspace is empty.{{else}}The repository is at /workspace.{{end}} Do not change any files in /workspace: the result is a report, not a change.
@@ -337,6 +373,27 @@ Write {{.ReviewPath}} with exactly this shape:
 Order findings most severe first. Use an empty "findings" list when there is nothing to report.
 {{end}}
 
+{{define "relations"}}## Other open tickets in this repository
+
+agnts works several tickets at a time, each on its own branch from {{.Repo.DefaultBranch}}, and merges them one by one. Decide how this ticket relates to each ticket below:
+{{range .Related}}
+- {{.Key}} ({{.State}}): {{.Title}}{{if .Summary}}
+  Plan: {{.Summary}}{{end}}{{if .Files}}
+  Changes: {{range $i, $f := .Files}}{{if $i}}, {{end}}{{$f}}{{end}}{{if .MoreFiles}} and {{.MoreFiles}} more{{end}}{{end}}{{if .Provides}}
+  Adds: {{range $i, $x := .Provides}}{{if $i}}; {{end}}{{$x}}{{end}}{{end}}{{if .Consumes}}
+  Needs: {{range $i, $x := .Consumes}}{{if $i}}; {{end}}{{$x}}{{end}}{{end}}{{end}}
+
+Add a "relations" list to the JSON, one item per ticket that matters, and an empty list when none does:
+
+    "relations": [{"key": "the other ticket's key", "type": "depends_on, blocks or conflicts", "confidence": 0.8, "reason": "one sentence a reviewer can check"}]
+
+- depends_on: this ticket needs the other one's change to exist first: it uses what the other adds, or builds on top of it.
+- blocks: the other ticket needs this ticket's change first.
+- conflicts: neither needs the other, but both change the same code (the same functions, lines, schema or generated files), so working on them side by side ends in a merge conflict.
+- Leave out tickets that only work in the same area. Check the code and the plans; do not judge from titles alone.
+- confidence: 0.9 when the tickets or the code say so plainly, 0.6 when it is likely, lower when it is a guess. agnts follows confident relations at once and asks a person about the others. Write the reason in the ticket's language.
+{{end}}
+
 {{define "followups"}}## Follow-up tickets
 
 agnts can suggest follow-up tickets; a person reads them and creates the ones they want. A follow-up exists only to get {{if .Chain}}the original goal of {{(index .Chain 0).Key}} ("{{(index .Chain 0).Title}}"){{else}}ticket {{.T.Key}}{{end}} fully done. Do not invent new work: no general refactoring, no unrelated improvements, no features nobody asked for.
@@ -375,32 +432,35 @@ Fix the cause (not the checks themselves), then update {{.SummaryPath}}.
 `))
 
 type promptData struct {
-	T            domain.Ticket
-	Repo         domain.Repository
-	Plan         []string
-	Answers      []domain.Question
-	Checks       string
-	Feedback     string
-	Output       string
-	AnalysisPath string
-	SummaryPath  string
-	NoQuestions  bool
-	Files        []domain.FileChange
-	Topics       []domain.LessonTopic
-	MaxLessons   int
-	LessonsPath  string
-	ChangePath   string
-	Rules        []domain.Rule // team rules in effect
-	Rule         domain.Rule   // the rule under review
-	RuleRepo     string        // its repository; empty for a global rule
-	Answered     []domain.RuleQuestion
-	RulePath     string
-	ReportPath   string
-	NoRepo       bool // the ticket has no repository: /workspace is empty
-	ReviewPath   string
-	WorkSummary  string      // what the work run said it did (review)
-	Notes        []string    // its notes for the reviewer
-	CheckSteps   []CheckStep // its checks
+	T               domain.Ticket
+	Repo            domain.Repository
+	Plan            []string
+	Answers         []domain.Question
+	Checks          string
+	Feedback        string
+	Output          string
+	AnalysisPath    string
+	SummaryPath     string
+	NoQuestions     bool
+	Files           []domain.FileChange
+	Topics          []domain.LessonTopic
+	MaxLessons      int
+	LessonsPath     string
+	ChangePath      string
+	Rules           []domain.Rule // team rules in effect
+	Rule            domain.Rule   // the rule under review
+	RuleRepo        string        // its repository; empty for a global rule
+	Answered        []domain.RuleQuestion
+	RulePath        string
+	ReportPath      string
+	NoRepo          bool // the ticket has no repository: /workspace is empty
+	ReviewPath      string
+	Language        string // translate: the target language's English name
+	SourcePath      string
+	TranslationPath string
+	WorkSummary     string      // what the work run said it did (review)
+	Notes           []string    // its notes for the reviewer
+	CheckSteps      []CheckStep // its checks
 
 	// Follow-up suggestions (the "followups" block).
 	Chain             []TicketRef // ancestors of a follow-up ticket, root first
@@ -409,11 +469,16 @@ type promptData struct {
 	FollowUpTypeNames []string
 	FollowUpFile      string
 	MaxFollowUps      int
+
+	// Relations to other tickets (the "relations" block).
+	Related []RelatedTicket // other open tickets the analysis compares with
+	Landed  []TicketRef     // tickets this one waited for, merged since its analysis
 }
 
 func render(name string, d promptData) (string, error) {
 	d.AnalysisPath, d.SummaryPath, d.LessonsPath, d.ChangePath, d.RulePath = AnalysisPath, SummaryPath, LessonsPath, ChangePath, RulePath
 	d.ReportPath, d.ReviewPath = ReportPath, ReviewPath
+	d.SourcePath, d.TranslationPath = SourcePath, TranslationPath
 	var b bytes.Buffer
 	if err := prompts.ExecuteTemplate(&b, name, d); err != nil {
 		return "", fmt.Errorf("prompt %s: %w", name, err)

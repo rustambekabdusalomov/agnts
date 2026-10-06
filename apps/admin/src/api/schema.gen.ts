@@ -282,6 +282,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tickets/{key}/translate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Translate a ticket's texts (its own and what agnts wrote) into a language
+         * @description Translations are stored per text, so a text is sent to Claude only once per language; asking again, or for a later revision that keeps most texts, answers from the store. Texts not yet translated are translated in this request, which can take a minute.
+         */
+        post: operations["translateTicket"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tickets/{key}/stop": {
         parameters: {
             query?: never;
@@ -447,6 +469,91 @@ export interface paths {
          * @description No Claude run is involved.
          */
         post: operations["followUpFromFinding"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/relations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        /** The ticket's ordering constraints and what holds it back now */
+        get: operations["listRelations"];
+        put?: never;
+        /**
+         * Make this ticket wait for another, or keep the two from running side by side
+         * @description depends_on: this ticket does not start coding until the other is merged (or rejected). conflicts: whichever of the two starts coding second waits until the first is merged. A dependency that would make two tickets wait for each other is refused (400). Adding a relation agnts proposed or someone dismissed makes it active.
+         */
+        post: operations["addRelation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/relations/{id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+                id: components["parameters"]["RelationID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept a relation agnts proposed; the queue follows it from now on */
+        post: operations["acceptRelation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/relations/{id}/dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+                id: components["parameters"]["RelationID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Dismiss a relation (run anyway); agnts does not propose it again */
+        post: operations["dismissRelation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/merged": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record that a done ticket's pull request was merged
+         * @description For setups without a git host webhook. Tickets waiting for this one may start coding.
+         */
+        post: operations["markTicketMerged"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1352,6 +1459,80 @@ export interface components {
              */
             start?: "code" | "queue";
         };
+        /** @description What the analysis predicts the work will change; the queue compares footprints */
+        Footprint: {
+            files: string[];
+            modules?: string[];
+            /** @description What the change adds that other work could use */
+            provides?: string[];
+            /** @description What the change needs that may not exist yet */
+            consumes?: string[];
+            migrations?: boolean;
+        };
+        Blocker: {
+            key: string;
+            title: string;
+            state: components["schemas"]["TicketState"];
+            type: components["schemas"]["RelationType"];
+        };
+        /**
+         * @description depends_on: one waits for the other to merge; conflicts: both change the same code, so they do not run side by side
+         * @enum {string}
+         */
+        RelationType: "depends_on" | "conflicts";
+        RelationInput: {
+            otherKey: string;
+            type: components["schemas"]["RelationType"];
+        };
+        Relation: {
+            /** Format: int64 */
+            id: number;
+            type: components["schemas"]["RelationType"];
+            /**
+             * @description From the ticket asked about: it waits for other, other waits for it, or they conflict
+             * @enum {string}
+             */
+            direction: "waits_for" | "waited_by" | "conflicts";
+            /**
+             * @description Who found it: a Jira link, a person, the analysis, overlapping footprints, or the finished diffs (when nobody predicted it)
+             * @enum {string}
+             */
+            source: "jira" | "user" | "agnts" | "rule" | "git";
+            /**
+             * @description Only active relations hold the queue; proposed ones wait for a person
+             * @enum {string}
+             */
+            status: "active" | "proposed" | "dismissed";
+            /** Format: double */
+            confidence: number;
+            reason: string;
+            /** @description For rule and git relations: files, migrations, lockfile, codegen, i18n or diff */
+            basis: string;
+            /** @description Files both tickets change, when known */
+            files: string[];
+            other: components["schemas"]["RelatedTicket"];
+            /**
+             * Format: date-time
+             * @description When the finished changes proved the conflict real
+             */
+            confirmedAt?: string;
+            /** Format: date-time */
+            decidedAt?: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        RelatedTicket: {
+            key: string;
+            title: string;
+            state: components["schemas"]["TicketState"];
+            /** @description Its change is merged (or it was rejected): it holds nothing back */
+            landed: boolean;
+        };
+        Relations: {
+            items: components["schemas"]["Relation"][];
+            /** @description What holds the ticket's coding back right now */
+            blockedBy: components["schemas"]["Blocker"][];
+        };
         /**
          * @description Follow-up suggestions for one ticket: inherit follows Settings
          * @enum {string}
@@ -1442,6 +1623,22 @@ export interface components {
         AcceptFollowUpsResult: {
             results: components["schemas"]["AcceptFollowUpResult"][];
         };
+        /**
+         * @description A language agnts can translate into
+         * @enum {string}
+         */
+        TranslationLanguage: "en" | "ru" | "uz" | "kk" | "tr" | "de" | "es" | "fr" | "zh" | "ja" | "ko" | "ar";
+        TranslateInput: {
+            lang: components["schemas"]["TranslationLanguage"];
+        };
+        Translation: {
+            lang: components["schemas"]["TranslationLanguage"];
+            /** @description Each text as the ticket page shows it, and its translation */
+            items: {
+                source: string;
+                text: string;
+            }[];
+        };
         TicketKindInput: {
             kind: components["schemas"]["TicketKindChoice"];
         };
@@ -1480,6 +1677,8 @@ export interface components {
             suggestFollowUps?: components["schemas"]["FollowUpsMode"];
             /** @description Follow-up suggestions waiting for a decision */
             openSuggestions?: number;
+            /** @description The tickets holding this one's coding back right now (it is in coding with no commit yet). Absent when nothing does. */
+            blockedBy?: components["schemas"]["Blocker"][];
             repoName?: string;
             models?: components["schemas"]["ModelOverrides"];
             /**
@@ -1579,6 +1778,7 @@ export interface components {
              * @enum {string}
              */
             complexity?: "simple" | "complex";
+            footprint?: components["schemas"]["Footprint"];
         };
         Finding: {
             /** @enum {string} */
@@ -1640,6 +1840,7 @@ export interface components {
             /** @description The code task that implements this report, if any */
             childKey?: string;
             followUps?: components["schemas"]["FollowUps"];
+            relations?: components["schemas"]["Relations"];
             review?: components["schemas"]["CodeReview"];
             history?: components["schemas"]["HistoryItem"][];
             maxTurns?: number;
@@ -2358,6 +2559,7 @@ export interface components {
         Provider: "jira" | "github" | "claude" | "telegram" | "gitlab";
         RuleID: number;
         LessonID: number;
+        RelationID: number;
         TicketKey: string;
     };
     requestBodies: never;
@@ -2691,6 +2893,36 @@ export interface operations {
             404: components["responses"]["NotFound"];
         };
     };
+    translateTicket: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TranslateInput"];
+            };
+        };
+        responses: {
+            /** @description Each text of the ticket with its translation */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Translation"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
     stopTicket: {
         parameters: {
             query?: never;
@@ -2895,6 +3127,127 @@ export interface operations {
                     "application/json": components["schemas"]["FollowUpSuggestion"];
                 };
             };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    listRelations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Relations"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    addRelation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RelationInput"];
+            };
+        };
+        responses: {
+            /** @description The relation */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Relation"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    acceptRelation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+                id: components["parameters"]["RelationID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The relation */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Relation"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    dismissRelation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+                id: components["parameters"]["RelationID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The relation */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Relation"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    markTicketMerged: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["TicketOK"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];

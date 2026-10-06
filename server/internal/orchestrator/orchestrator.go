@@ -13,6 +13,8 @@ import (
 	"sync"
 	"time"
 
+	"golang.org/x/sync/singleflight"
+
 	"agnts/internal/domain"
 )
 
@@ -62,6 +64,8 @@ type Deps struct {
 	Usage    UsageGate
 	Lessons  Lessons // nil disables the learn stage
 	Rules    Rules   // nil disables rules
+	// Translations stores translated ticket texts; nil disables translation.
+	Translations Translations
 }
 
 // Orchestrator runs tickets through their stages.
@@ -77,6 +81,7 @@ type Orchestrator struct {
 	usage    UsageGate
 	lessons  Lessons
 	rules    Rules
+	trans    Translations
 	log      *slog.Logger
 
 	wake chan struct{}
@@ -85,13 +90,15 @@ type Orchestrator struct {
 	cancels map[string]context.CancelFunc // ticket key -> cancel of its active run
 	active  int
 	paused  bool
+
+	translating singleflight.Group // ticket key and language -> its translation run
 }
 
 // New returns an orchestrator.
 func New(cfg Config, d Deps, log *slog.Logger) *Orchestrator {
 	return &Orchestrator{
 		cfg: cfg, store: d.Store, runner: d.Runner, git: d.Git, host: d.Host, tracker: d.Tracker, homes: d.Homes,
-		settings: d.Settings, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, log: log,
+		settings: d.Settings, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, trans: d.Translations, log: log,
 		wake:    make(chan struct{}, 1),
 		cancels: map[string]context.CancelFunc{},
 	}
@@ -623,6 +630,13 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 	if prompt, err = o.withFollowUps(ctx, s, t, d, domain.SuggestFromAnalyze, AnalysisPath, prompt); err != nil {
 		return err
 	}
+	candidates, err := o.relationCandidates(ctx, t)
+	if err != nil {
+		return err
+	}
+	if prompt, err = withRelations(d, candidates, prompt); err != nil {
+		return err
+	}
 	if _, err := o.claude(ctx, s, ws, &t, run, domain.ModelAnalyze, prompt, ""); err != nil {
 		return err
 	}
@@ -641,6 +655,8 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 		return err
 	}
 	o.saveFollowUps(ctx, s, t, run, domain.SuggestFromAnalyze, a.FollowUps)
+	// Before the ticket can be claimed for coding, so the queue sees them.
+	o.applyRelations(ctx, t, run, a, candidates)
 	if t.Kind.Spec().NeedsRepo && repo == nil {
 		return fmt.Errorf("agnts read this ticket as %s work, which needs a repository: link one and retry, or change the kind", t.Kind)
 	}
@@ -740,6 +756,9 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		if d.Answers, err = o.store.Questions(ctx, t.ID); err != nil {
 			return err
 		}
+		if t.HeadSHA == "" {
+			d.Landed = o.landedDependencies(ctx, t)
+		}
 		prompt, err = render("code", d)
 		if err == nil && feedback != "" {
 			d.Feedback = feedback
@@ -819,6 +838,10 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		return err
 	}
 	o.saveFollowUps(ctx, s, t, run, domain.SuggestFromWork, summaryFollowUps(summary))
+	if t.HeadSHA == "" {
+		o.checkFootprint(ctx, t, run, files) // the first change only: later ones follow feedback, not the plan
+	}
+	o.checkCollisions(ctx, t, run, repo, files)
 	return o.transition(ctx, &t, run, domain.StateWaitingForReview, fmt.Sprintf("%d files changed, ready for review", len(files)), func(x *domain.Ticket) {
 		x.Branch, x.HeadSHA = branch, sha
 		x.Turns += run.Turns
@@ -981,6 +1004,7 @@ func (o *Orchestrator) push(ctx context.Context, s domain.Settings, t domain.Tic
 		})
 	}
 
+	drift := o.checkDrift(ctx, t, run, repo)
 	if err := o.git.Push(ctx, repo, t.Branch); err != nil {
 		return fmt.Errorf("push %s: %w", t.Branch, err)
 	}
@@ -992,7 +1016,11 @@ func (o *Orchestrator) push(ctx context.Context, s domain.Settings, t domain.Tic
 		number = *t.PRNumber
 	} else {
 		title := strings.NewReplacer("{key}", t.Key, "{title}", t.Title).Replace(s.Git.PRTitle)
-		if number, url, err = o.host.OpenPR(ctx, repo, PR{Branch: t.Branch, Title: title, Body: prBody(ctx, o.store, t), Draft: s.Git.Draft}); err != nil {
+		body := prBody(ctx, o.store, t)
+		if len(drift) > 0 {
+			body += fmt.Sprintf("\n\n> **Needs a rebase:** %s changed the same lines since this branch was cut: %s.", repo.DefaultBranch, strings.Join(drift, ", "))
+		}
+		if number, url, err = o.host.OpenPR(ctx, repo, PR{Branch: t.Branch, Title: title, Body: body, Draft: s.Git.Draft}); err != nil {
 			return fmt.Errorf("open pull request: %w", err)
 		}
 		o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: "push", Type: domain.EventPROpened,

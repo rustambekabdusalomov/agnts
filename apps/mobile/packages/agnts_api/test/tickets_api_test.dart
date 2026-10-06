@@ -16,6 +16,22 @@ void main() {
       // TODO
     });
 
+    // Accept a relation agnts proposed; the queue follows it from now on
+    //
+    //Future<Relation> acceptRelation(String key, int id) async
+    test('test acceptRelation', () async {
+      // TODO
+    });
+
+    // Make this ticket wait for another, or keep the two from running side by side
+    //
+    // depends_on: this ticket does not start coding until the other is merged (or rejected). conflicts: whichever of the two starts coding second waits until the first is merged. A dependency that would make two tickets wait for each other is refused (400). Adding a relation agnts proposed or someone dismissed makes it active.
+    //
+    //Future<Relation> addRelation(String key, RelationInput relationInput) async
+    test('test addRelation', () async {
+      // TODO
+    });
+
     // Answer the ticket's questions; when all are answered, coding starts
     //
     //Future<Ticket> answerQuestions(String key, AnswersRequest answersRequest) async
@@ -36,6 +52,13 @@ void main() {
     //
     //Future<FollowUpSuggestion> dismissFollowUp(String key, int id) async
     test('test dismissFollowUp', () async {
+      // TODO
+    });
+
+    // Dismiss a relation (run anyway); agnts does not propose it again
+    //
+    //Future<Relation> dismissRelation(String key, int id) async
+    test('test dismissRelation', () async {
       // TODO
     });
 
@@ -71,6 +94,13 @@ void main() {
       // TODO
     });
 
+    // The ticket's ordering constraints and what holds it back now
+    //
+    //Future<Relations> listRelations(String key) async
+    test('test listRelations', () async {
+      // TODO
+    });
+
     // The ticket's log, oldest first; poll with `after` for live updates
     //
     //Future<List<Event>> listTicketEvents(String key, { int after, int limit }) async
@@ -82,6 +112,15 @@ void main() {
     //
     //Future<List<Ticket>> listTickets({ List<TicketState> state }) async
     test('test listTickets', () async {
+      // TODO
+    });
+
+    // Record that a done ticket's pull request was merged
+    //
+    // For setups without a git host webhook. Tickets waiting for this one may start coding.
+    //
+    //Future<Ticket> markTicketMerged(String key) async
+    test('test markTicketMerged', () async {
       // TODO
     });
 
@@ -158,6 +197,15 @@ void main() {
     //
     //Future<Ticket> stopTicket(String key) async
     test('test stopTicket', () async {
+      // TODO
+    });
+
+    // Translate a ticket's texts (its own and what agnts wrote) into a language
+    //
+    // Translations are stored per text, so a text is sent to Claude only once per language; asking again, or for a later revision that keeps most texts, answers from the store. Texts not yet translated are translated in this request, which can take a minute.
+    //
+    //Future<Translation> translateTicket(String key, TranslateInput translateInput) async
+    test('test translateTicket', () async {
       // TODO
     });
 

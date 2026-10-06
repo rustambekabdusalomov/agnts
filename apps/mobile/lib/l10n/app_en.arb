@@ -1311,6 +1311,91 @@
   "navLearn": "Learn",
   "navLearnQueue": "Learning queue",
   "navRules": "Rules",
+  "relationsTab": "Order",
+  "relationsTitle": "Order and conflicts",
+  "relationsSub": "agnts codes several tickets at once and merges them one by one. A ticket waits for the tickets it depends on to be merged, and two tickets that change the same code never code side by side.",
+  "relationsWaitingTitle": "Waiting for other tickets",
+  "relationsWaitingSub": "Coding starts by itself once these are merged or rejected.",
+  "relationsWaitingBadge": "Waiting",
+  "relationsWaitsFor": "Waits for",
+  "relationsWaitedBy": "Holds back",
+  "relationsConflicts": "Not alongside",
+  "relationsProposedTitle": "Suggested by agnts",
+  "relationsProposedSub": "agnts is not sure about these. Accepted ones hold the queue; dismissed ones are never suggested again.",
+  "relationsActiveTitle": "In effect",
+  "relationsEmpty": "No relations. This ticket runs as soon as a slot is free.",
+  "relationsAccept": "Accept",
+  "relationsDismiss": "Dismiss",
+  "relationsRemove": "Run anyway",
+  "relationsRemoveConfirm": "{key} and {other} will no longer wait for each other. Continue?",
+  "@relationsRemoveConfirm": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      },
+      "other": {
+        "type": "String"
+      }
+    }
+  },
+  "relationsConfidence": "{pct}% sure",
+  "@relationsConfidence": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "relationsLanded": "merged",
+  "relationsSource_jira": "Jira link",
+  "relationsSource_user": "Added by you",
+  "relationsSource_agnts": "agnts",
+  "relationsSource_rule": "Predicted overlap",
+  "relationsSource_git": "Found in the diffs",
+  "relationsBasis_files": "Both change {files}",
+  "@relationsBasis_files": {
+    "placeholders": {
+      "files": {
+        "type": "String"
+      }
+    }
+  },
+  "relationsBasis_migrations": "Both add a database migration",
+  "relationsBasis_lockfile": "Both change dependency lockfiles",
+  "relationsBasis_codegen": "Both change the API spec or generated code",
+  "relationsBasis_i18n": "Both change translation files",
+  "relationsBasis_diff": "The finished changes touch the same lines in {files}",
+  "@relationsBasis_diff": {
+    "placeholders": {
+      "files": {
+        "type": "String"
+      }
+    }
+  },
+  "relationsConfirmed": "Confirmed by the diffs",
+  "relationsDismissedCount": "{count, plural, one {{count} dismissed} other {{count} dismissed}}",
+  "@relationsDismissedCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "relationsAddTitle": "Add a relation",
+  "relationsAddType": "Relation",
+  "relationsAddOther": "Ticket key",
+  "relationsAddOtherPh": "PAY-12",
+  "relationsAdd": "Add",
+  "relationsAddHint": "Waits for: this ticket starts coding once the other is merged. Not alongside: whichever starts second waits until the first is merged.",
+  "relationsAdded": "Relation added",
+  "relationsFootprintTitle": "Predicted footprint",
+  "relationsFootprintSub": "What the analysis expects this ticket to change. agnts compares footprints to keep colliding tickets apart.",
+  "relationsFootprintFiles": "Files",
+  "relationsFootprintProvides": "Adds",
+  "relationsFootprintConsumes": "Needs",
+  "relationsFootprintMigrations": "Adds a database migration",
+  "relationsMarkMerged": "Mark merged",
+  "relationsMarkMergedHint": "No merge webhook? Mark the pull request merged so tickets waiting for it can start.",
   "repoBack": "Back to repositories",
   "repoNotFound": "No such repository.",
   "repoEdit": "Edit settings",
@@ -2529,6 +2614,24 @@
   },
   "ticketStopWriting": "Writing",
   "ticketStopDone": "Done",
+  "ticketTabsLabel": "Ticket details",
+  "ticketTabReview": "Code review",
+  "ticketTabFollowUps": "Follow-ups",
+  "ticketTabAnswers": "Answers",
+  "ticketTabLessons": "Lessons",
+  "ticketShowMore": "Show more",
+  "ticketShowLess": "Show less",
+  "ticketTranslate": "Translate",
+  "ticketTranslateOriginal": "Original language",
+  "ticketTranslating": "Translating… the first time takes up to a minute; after that it is saved.",
+  "ticketTranslateFailed": "Could not translate: {error}",
+  "@ticketTranslateFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "ticketsTitle": "Tickets",
   "ticketsNeedsYou": "Needs you",
   "ticketsRunning": "Running",

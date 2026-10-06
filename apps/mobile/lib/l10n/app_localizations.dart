@@ -4359,6 +4359,288 @@ abstract class AppLocalizations {
   /// **'Rules'**
   String get navRules;
 
+  /// No description provided for @relationsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Order'**
+  String get relationsTab;
+
+  /// No description provided for @relationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order and conflicts'**
+  String get relationsTitle;
+
+  /// No description provided for @relationsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts codes several tickets at once and merges them one by one. A ticket waits for the tickets it depends on to be merged, and two tickets that change the same code never code side by side.'**
+  String get relationsSub;
+
+  /// No description provided for @relationsWaitingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for other tickets'**
+  String get relationsWaitingTitle;
+
+  /// No description provided for @relationsWaitingSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Coding starts by itself once these are merged or rejected.'**
+  String get relationsWaitingSub;
+
+  /// No description provided for @relationsWaitingBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get relationsWaitingBadge;
+
+  /// No description provided for @relationsWaitsFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Waits for'**
+  String get relationsWaitsFor;
+
+  /// No description provided for @relationsWaitedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Holds back'**
+  String get relationsWaitedBy;
+
+  /// No description provided for @relationsConflicts.
+  ///
+  /// In en, this message translates to:
+  /// **'Not alongside'**
+  String get relationsConflicts;
+
+  /// No description provided for @relationsProposedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested by agnts'**
+  String get relationsProposedTitle;
+
+  /// No description provided for @relationsProposedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts is not sure about these. Accepted ones hold the queue; dismissed ones are never suggested again.'**
+  String get relationsProposedSub;
+
+  /// No description provided for @relationsActiveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'In effect'**
+  String get relationsActiveTitle;
+
+  /// No description provided for @relationsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No relations. This ticket runs as soon as a slot is free.'**
+  String get relationsEmpty;
+
+  /// No description provided for @relationsAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get relationsAccept;
+
+  /// No description provided for @relationsDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get relationsDismiss;
+
+  /// No description provided for @relationsRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Run anyway'**
+  String get relationsRemove;
+
+  /// No description provided for @relationsRemoveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'{key} and {other} will no longer wait for each other. Continue?'**
+  String relationsRemoveConfirm(String key, String other);
+
+  /// No description provided for @relationsConfidence.
+  ///
+  /// In en, this message translates to:
+  /// **'{pct}% sure'**
+  String relationsConfidence(String pct);
+
+  /// No description provided for @relationsLanded.
+  ///
+  /// In en, this message translates to:
+  /// **'merged'**
+  String get relationsLanded;
+
+  /// No description provided for @relationsSource_jira.
+  ///
+  /// In en, this message translates to:
+  /// **'Jira link'**
+  String get relationsSource_jira;
+
+  /// No description provided for @relationsSource_user.
+  ///
+  /// In en, this message translates to:
+  /// **'Added by you'**
+  String get relationsSource_user;
+
+  /// No description provided for @relationsSource_agnts.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts'**
+  String get relationsSource_agnts;
+
+  /// No description provided for @relationsSource_rule.
+  ///
+  /// In en, this message translates to:
+  /// **'Predicted overlap'**
+  String get relationsSource_rule;
+
+  /// No description provided for @relationsSource_git.
+  ///
+  /// In en, this message translates to:
+  /// **'Found in the diffs'**
+  String get relationsSource_git;
+
+  /// No description provided for @relationsBasis_files.
+  ///
+  /// In en, this message translates to:
+  /// **'Both change {files}'**
+  String relationsBasis_files(String files);
+
+  /// No description provided for @relationsBasis_migrations.
+  ///
+  /// In en, this message translates to:
+  /// **'Both add a database migration'**
+  String get relationsBasis_migrations;
+
+  /// No description provided for @relationsBasis_lockfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Both change dependency lockfiles'**
+  String get relationsBasis_lockfile;
+
+  /// No description provided for @relationsBasis_codegen.
+  ///
+  /// In en, this message translates to:
+  /// **'Both change the API spec or generated code'**
+  String get relationsBasis_codegen;
+
+  /// No description provided for @relationsBasis_i18n.
+  ///
+  /// In en, this message translates to:
+  /// **'Both change translation files'**
+  String get relationsBasis_i18n;
+
+  /// No description provided for @relationsBasis_diff.
+  ///
+  /// In en, this message translates to:
+  /// **'The finished changes touch the same lines in {files}'**
+  String relationsBasis_diff(String files);
+
+  /// No description provided for @relationsConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed by the diffs'**
+  String get relationsConfirmed;
+
+  /// No description provided for @relationsDismissedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} dismissed} other {{count} dismissed}}'**
+  String relationsDismissedCount(num count);
+
+  /// No description provided for @relationsAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a relation'**
+  String get relationsAddTitle;
+
+  /// No description provided for @relationsAddType.
+  ///
+  /// In en, this message translates to:
+  /// **'Relation'**
+  String get relationsAddType;
+
+  /// No description provided for @relationsAddOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket key'**
+  String get relationsAddOther;
+
+  /// No description provided for @relationsAddOtherPh.
+  ///
+  /// In en, this message translates to:
+  /// **'PAY-12'**
+  String get relationsAddOtherPh;
+
+  /// No description provided for @relationsAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get relationsAdd;
+
+  /// No description provided for @relationsAddHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Waits for: this ticket starts coding once the other is merged. Not alongside: whichever starts second waits until the first is merged.'**
+  String get relationsAddHint;
+
+  /// No description provided for @relationsAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Relation added'**
+  String get relationsAdded;
+
+  /// No description provided for @relationsFootprintTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Predicted footprint'**
+  String get relationsFootprintTitle;
+
+  /// No description provided for @relationsFootprintSub.
+  ///
+  /// In en, this message translates to:
+  /// **'What the analysis expects this ticket to change. agnts compares footprints to keep colliding tickets apart.'**
+  String get relationsFootprintSub;
+
+  /// No description provided for @relationsFootprintFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Files'**
+  String get relationsFootprintFiles;
+
+  /// No description provided for @relationsFootprintProvides.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds'**
+  String get relationsFootprintProvides;
+
+  /// No description provided for @relationsFootprintConsumes.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs'**
+  String get relationsFootprintConsumes;
+
+  /// No description provided for @relationsFootprintMigrations.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds a database migration'**
+  String get relationsFootprintMigrations;
+
+  /// No description provided for @relationsMarkMerged.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark merged'**
+  String get relationsMarkMerged;
+
+  /// No description provided for @relationsMarkMergedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No merge webhook? Mark the pull request merged so tickets waiting for it can start.'**
+  String get relationsMarkMergedHint;
+
   /// No description provided for @repoBack.
   ///
   /// In en, this message translates to:
@@ -7778,6 +8060,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Done'**
   String get ticketStopDone;
+
+  /// No description provided for @ticketTabsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket details'**
+  String get ticketTabsLabel;
+
+  /// No description provided for @ticketTabReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Code review'**
+  String get ticketTabReview;
+
+  /// No description provided for @ticketTabFollowUps.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow-ups'**
+  String get ticketTabFollowUps;
+
+  /// No description provided for @ticketTabAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'Answers'**
+  String get ticketTabAnswers;
+
+  /// No description provided for @ticketTabLessons.
+  ///
+  /// In en, this message translates to:
+  /// **'Lessons'**
+  String get ticketTabLessons;
+
+  /// No description provided for @ticketShowMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Show more'**
+  String get ticketShowMore;
+
+  /// No description provided for @ticketShowLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get ticketShowLess;
+
+  /// No description provided for @ticketTranslate.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate'**
+  String get ticketTranslate;
+
+  /// No description provided for @ticketTranslateOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Original language'**
+  String get ticketTranslateOriginal;
+
+  /// No description provided for @ticketTranslating.
+  ///
+  /// In en, this message translates to:
+  /// **'Translating… the first time takes up to a minute; after that it is saved.'**
+  String get ticketTranslating;
+
+  /// No description provided for @ticketTranslateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not translate: {error}'**
+  String ticketTranslateFailed(String error);
 
   /// No description provided for @ticketsTitle.
   ///

@@ -23,5 +23,10 @@ void main() {
       // TODO
     });
 
+    // Footprint footprint
+    test('to test the property `footprint`', () async {
+      // TODO
+    });
+
   });
 }

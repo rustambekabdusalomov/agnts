@@ -195,9 +195,12 @@ func scanRun(row pgx.Row) (domain.Run, error) {
 	return r, notFound(err)
 }
 
-// ClaimNext starts a run for the oldest ticket waiting for a worker. Code
-// reviews come next (the reviewer may be reading the change already), and
-// learn runs only take the worker when nothing else is waiting.
+// ClaimNext starts a run for the next ticket waiting for a worker: the
+// highest priority first, then the one more tickets wait for, then the
+// oldest. A ticket whose dependencies are not merged, or whose conflicting
+// ticket is changing the same code, does not start coding (see waitsSQL).
+// Code reviews come next (the reviewer may be reading the change already),
+// and learn runs only take the worker when nothing else is waiting.
 func (s *Agent) ClaimNext(ctx context.Context) (domain.Ticket, domain.Run, bool, error) {
 	var t domain.Ticket
 	var r domain.Run
@@ -206,8 +209,9 @@ func (s *Agent) ClaimNext(ctx context.Context) (domain.Ticket, domain.Run, bool,
 		t, err = scanTicket(tx.QueryRow(ctx, `SELECT `+ticketCols+` FROM tickets t
 			WHERE state IN ('new', 'coding', 'pushing') AND NOT held
 			  AND NOT EXISTS (SELECT 1 FROM runs r WHERE r.ticket_id = t.id AND r.finished_at IS NULL)
-			ORDER BY updated_at
-			LIMIT 1 FOR UPDATE SKIP LOCKED`))
+			  AND NOT `+waitsSQL+`
+			ORDER BY `+priorityRankSQL+` DESC, `+unblocksSQL+` DESC, updated_at
+			LIMIT 1 FOR UPDATE OF t SKIP LOCKED`))
 		if errors.Is(err, domain.ErrNotFound) {
 			t, err = scanTicket(tx.QueryRow(ctx, `SELECT `+ticketCols+` FROM tickets t
 				WHERE state = 'waiting_for_review' AND review_state = 'pending'

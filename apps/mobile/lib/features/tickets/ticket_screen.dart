@@ -15,6 +15,7 @@ import 'diff_highlight.dart';
 import 'diff_lines.dart';
 import 'follow_ups.dart';
 import 'kinds.dart';
+import 'relations.dart';
 import 'spend.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme.dart';
@@ -244,6 +245,13 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           for (final q in d.questions) _questionCard(context, q),
           KindPicker(t),
         ]);
+      case TicketState.coding when t.blockedBy?.isNotEmpty ?? false:
+        children.addAll([
+          _H2(l.relationsWaitingTitle),
+          _Sub(l.relationsWaitingSub),
+          const SizedBox(height: 8),
+          WaitingBlock(t.blockedBy!.toList()),
+        ]);
       case TicketState.coding:
       case TicketState.testing:
         children.addAll([
@@ -286,6 +294,18 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
             padding: const EdgeInsets.only(top: 10),
             child: Text(l.ticketMergedAt(_when(context, t.mergedAt!)), style: TextStyle(fontSize: 14, color: c.ink3)),
           ));
+        } else if (t.prUrl.isNotEmpty) {
+          children.addAll([
+            const SizedBox(height: 10),
+            OutlinedButton(
+              onPressed: _busy ? null : () => _run(() => _tickets.markTicketMerged(key: t.key)),
+              child: Text(l.relationsMarkMerged),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(l.relationsMarkMergedHint, style: TextStyle(fontSize: 13, color: c.ink3)),
+            ),
+          ]);
         }
         children.add(TicketLessons(t));
       case TicketState.rejected:
@@ -604,6 +624,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           hint: _changed(l, d.result!),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: _resultBody(context, d.result!)),
         ),
+      if (RelationsFold.shows(d)) RelationsFold(d),
       if (d.followUps != null) FollowUpsFold(d),
       SpendFold(spend: t.spend, stages: d.spendByStage ?? const [], report: isReportKind(t.kind)),
       Fold(

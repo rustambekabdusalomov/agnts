@@ -2368,6 +2368,162 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navRules => 'Rules';
 
   @override
+  String get relationsTab => 'Order';
+
+  @override
+  String get relationsTitle => 'Order and conflicts';
+
+  @override
+  String get relationsSub =>
+      'agnts codes several tickets at once and merges them one by one. A ticket waits for the tickets it depends on to be merged, and two tickets that change the same code never code side by side.';
+
+  @override
+  String get relationsWaitingTitle => 'Waiting for other tickets';
+
+  @override
+  String get relationsWaitingSub => 'Coding starts by itself once these are merged or rejected.';
+
+  @override
+  String get relationsWaitingBadge => 'Waiting';
+
+  @override
+  String get relationsWaitsFor => 'Waits for';
+
+  @override
+  String get relationsWaitedBy => 'Holds back';
+
+  @override
+  String get relationsConflicts => 'Not alongside';
+
+  @override
+  String get relationsProposedTitle => 'Suggested by agnts';
+
+  @override
+  String get relationsProposedSub =>
+      'agnts is not sure about these. Accepted ones hold the queue; dismissed ones are never suggested again.';
+
+  @override
+  String get relationsActiveTitle => 'In effect';
+
+  @override
+  String get relationsEmpty => 'No relations. This ticket runs as soon as a slot is free.';
+
+  @override
+  String get relationsAccept => 'Accept';
+
+  @override
+  String get relationsDismiss => 'Dismiss';
+
+  @override
+  String get relationsRemove => 'Run anyway';
+
+  @override
+  String relationsRemoveConfirm(String key, String other) {
+    return '$key and $other will no longer wait for each other. Continue?';
+  }
+
+  @override
+  String relationsConfidence(String pct) {
+    return '$pct% sure';
+  }
+
+  @override
+  String get relationsLanded => 'merged';
+
+  @override
+  String get relationsSource_jira => 'Jira link';
+
+  @override
+  String get relationsSource_user => 'Added by you';
+
+  @override
+  String get relationsSource_agnts => 'agnts';
+
+  @override
+  String get relationsSource_rule => 'Predicted overlap';
+
+  @override
+  String get relationsSource_git => 'Found in the diffs';
+
+  @override
+  String relationsBasis_files(String files) {
+    return 'Both change $files';
+  }
+
+  @override
+  String get relationsBasis_migrations => 'Both add a database migration';
+
+  @override
+  String get relationsBasis_lockfile => 'Both change dependency lockfiles';
+
+  @override
+  String get relationsBasis_codegen => 'Both change the API spec or generated code';
+
+  @override
+  String get relationsBasis_i18n => 'Both change translation files';
+
+  @override
+  String relationsBasis_diff(String files) {
+    return 'The finished changes touch the same lines in $files';
+  }
+
+  @override
+  String get relationsConfirmed => 'Confirmed by the diffs';
+
+  @override
+  String relationsDismissedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count dismissed', one: '$count dismissed');
+    return '$_temp0';
+  }
+
+  @override
+  String get relationsAddTitle => 'Add a relation';
+
+  @override
+  String get relationsAddType => 'Relation';
+
+  @override
+  String get relationsAddOther => 'Ticket key';
+
+  @override
+  String get relationsAddOtherPh => 'PAY-12';
+
+  @override
+  String get relationsAdd => 'Add';
+
+  @override
+  String get relationsAddHint =>
+      'Waits for: this ticket starts coding once the other is merged. Not alongside: whichever starts second waits until the first is merged.';
+
+  @override
+  String get relationsAdded => 'Relation added';
+
+  @override
+  String get relationsFootprintTitle => 'Predicted footprint';
+
+  @override
+  String get relationsFootprintSub =>
+      'What the analysis expects this ticket to change. agnts compares footprints to keep colliding tickets apart.';
+
+  @override
+  String get relationsFootprintFiles => 'Files';
+
+  @override
+  String get relationsFootprintProvides => 'Adds';
+
+  @override
+  String get relationsFootprintConsumes => 'Needs';
+
+  @override
+  String get relationsFootprintMigrations => 'Adds a database migration';
+
+  @override
+  String get relationsMarkMerged => 'Mark merged';
+
+  @override
+  String get relationsMarkMergedHint => 'No merge webhook? Mark the pull request merged so tickets waiting for it can start.';
+
+  @override
   String get repoBack => 'Back to repositories';
 
   @override
@@ -4296,6 +4452,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ticketStopDone => 'Done';
+
+  @override
+  String get ticketTabsLabel => 'Ticket details';
+
+  @override
+  String get ticketTabReview => 'Code review';
+
+  @override
+  String get ticketTabFollowUps => 'Follow-ups';
+
+  @override
+  String get ticketTabAnswers => 'Answers';
+
+  @override
+  String get ticketTabLessons => 'Lessons';
+
+  @override
+  String get ticketShowMore => 'Show more';
+
+  @override
+  String get ticketShowLess => 'Show less';
+
+  @override
+  String get ticketTranslate => 'Translate';
+
+  @override
+  String get ticketTranslateOriginal => 'Original language';
+
+  @override
+  String get ticketTranslating => 'Translating… the first time takes up to a minute; after that it is saved.';
+
+  @override
+  String ticketTranslateFailed(String error) {
+    return 'Could not translate: $error';
+  }
 
   @override
   String get ticketsTitle => 'Tickets';

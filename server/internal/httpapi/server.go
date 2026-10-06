@@ -13,6 +13,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -160,7 +161,9 @@ func decode(r *http.Request, v any, optional bool) error {
 		if errors.As(err, &tooBig) {
 			return errors.New("request body too large")
 		}
-		return errors.New("invalid JSON body")
+		// Say what is wrong (an unknown field, a wrong type, broken syntax):
+		// a bare "invalid JSON body" leaves API clients guessing.
+		return fmt.Errorf("invalid JSON body: %s", strings.TrimPrefix(err.Error(), "json: "))
 	}
 	return nil
 }

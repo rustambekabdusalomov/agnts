@@ -88,12 +88,74 @@ type Store interface {
 	// OpenTicketRefs returns the newest unfinished tickets in repoID (nil:
 	// tasks without a repository).
 	OpenTicketRefs(ctx context.Context, repoID *int64, limit int) ([]TicketRef, error)
+
+	RelationStore
 }
 
 // TicketRef names a ticket.
 type TicketRef struct {
 	Key   string
 	Title string
+}
+
+// RelationStore keeps the ordering constraints between tickets. The queue
+// (ClaimNext) reads the active ones directly.
+type RelationStore interface {
+	// RelationsOf returns every relation involving key, any status, with
+	// the other ticket's title and state, oldest first.
+	RelationsOf(ctx context.Context, key string) ([]RelationRow, error)
+	// RelationByID returns one relation, or ErrNotFound.
+	RelationByID(ctx context.Context, id int64) (domain.Relation, error)
+	// DependencyGraph returns the active depends_on edges: key -> the keys
+	// it waits for. Cycle checks use it.
+	DependencyGraph(ctx context.Context) (map[string][]string, error)
+	// ReplaceFound swaps the agnts and rule relations foundBy's analysis
+	// found before (dismissed ones stay) for rs, merging each into a
+	// relation the pair may already have, and appends ev when not nil. It
+	// returns the relations as stored.
+	ReplaceFound(ctx context.Context, foundBy string, rs []domain.Relation, ev *domain.Event) ([]domain.Relation, error)
+	// SyncJiraRelations makes the jira relations involving key exactly rs
+	// (only between tickets agnts has); it reports what it added.
+	SyncJiraRelations(ctx context.Context, key string, rs []domain.Relation) ([]domain.Relation, error)
+	// UpsertRelation stores r, or merges it into the pair's relation: the
+	// stronger status and source win, and only a person revives a
+	// dismissed one. ev is appended when not nil.
+	UpsertRelation(ctx context.Context, r domain.Relation, ev *domain.Event) (domain.Relation, error)
+	// DecideRelation sets a relation's status (active or dismissed) and
+	// appends ev. ErrNotFound when it does not involve key.
+	DecideRelation(ctx context.Context, key string, id int64, status domain.RelationStatus, ev domain.Event) (domain.Relation, error)
+	// Blockers returns, per key, the tickets holding its first coding run
+	// back right now. Keys that are not held back are absent.
+	Blockers(ctx context.Context, keys []string) (map[string][]domain.Blocker, error)
+	// RelationCandidates returns the tickets in repoID that work on except
+	// could depend on or collide with: open ones, and done ones whose
+	// change is not merged yet. Each comes with its newest analysis.
+	RelationCandidates(ctx context.Context, repoID int64, except string, limit int) ([]Candidate, error)
+	// InFlightResults returns the newest code result of each ticket in
+	// repoID, other than except, whose change is committed but not merged.
+	InFlightResults(ctx context.Context, repoID int64, except string) ([]InFlight, error)
+}
+
+// RelationRow is a relation with the ticket on its other side.
+type RelationRow struct {
+	domain.Relation
+	OtherTitle string
+	OtherState domain.TicketState
+	// OtherReleases reports whether the other ticket no longer holds work
+	// back (merged, or rejected).
+	OtherReleases bool
+}
+
+// Candidate is a ticket a new analysis compares itself with.
+type Candidate struct {
+	Ticket   domain.Ticket
+	Analysis []byte // the newest analysis.json, or nil
+}
+
+// InFlight is a committed change not merged yet.
+type InFlight struct {
+	Ticket domain.Ticket
+	Files  []domain.FileChange
 }
 
 // Lessons is the knowledge base the learn stage reads and adds to.
@@ -105,6 +167,15 @@ type Lessons interface {
 	// marks the ticket's learn state done, and appends the event ev builds
 	// from the lessons stored. It returns those stored.
 	SaveLessons(ctx context.Context, ticketKey string, ls []domain.Lesson, ev func(saved []domain.Lesson) domain.Event) ([]domain.Lesson, error)
+}
+
+// Translations stores translated texts, keyed by domain.TextHash of the
+// source text and the language.
+type Translations interface {
+	// Translated returns the translations into lang of the texts with these
+	// hashes, by hash; texts never translated are absent.
+	Translated(ctx context.Context, lang string, hashes []string) (map[string]string, error)
+	SaveTranslations(ctx context.Context, lang string, byHash map[string]string) error
 }
 
 // Rules are the instructions the user wrote for every ticket, and the queue

@@ -167,6 +167,17 @@
     "doneReport": "Отчёт хранится здесь.",
     "doneReportPosted": "Отчёт хранится здесь и опубликован в {key} в Jira.",
     "stopWriting": "Отчёт",
-    "stopDone": "Готово"
+    "stopDone": "Готово",
+    "tabsLabel": "Детали тикета",
+    "tabReview": "Код-ревью",
+    "tabFollowUps": "Последующие",
+    "tabAnswers": "Ответы",
+    "tabLessons": "Уроки",
+    "showMore": "Показать ещё",
+    "showLess": "Свернуть",
+    "translate": "Перевести",
+    "translateOriginal": "Язык оригинала",
+    "translating": "Перевод… в первый раз это занимает до минуты, потом он сохраняется.",
+    "translateFailed": "Не удалось перевести: {error}"
   }
 }
