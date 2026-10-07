@@ -46,6 +46,7 @@
     "footprintConsumes": "Нужно",
     "footprintMigrations": "Добавляет миграцию базы данных",
     "markMerged": "Отметить слитым",
-    "markMergedHint": "Нет вебхука о слиянии? Отметьте pull request слитым, чтобы ожидающие его тикеты могли начать."
+    "markMergedHint": "Нет вебхука о слиянии? Отметьте pull request слитым, чтобы ожидающие его тикеты могли начать.",
+    "source_plane": "Связь в Plane"
   }
 }

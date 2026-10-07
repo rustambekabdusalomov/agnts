@@ -10,6 +10,7 @@ import 'package:agnts_api/src/model/question.dart';
 import 'package:agnts_api/src/model/stage_models.dart';
 import 'package:agnts_api/src/model/stage_spend.dart';
 import 'package:agnts_api/src/model/relations.dart';
+import 'package:agnts_api/src/model/attachment.dart';
 import 'package:agnts_api/src/model/history_item.dart';
 import 'package:agnts_api/src/model/code_review.dart';
 import 'package:agnts_api/src/model/analysis.dart';
@@ -34,6 +35,8 @@ class TicketDetail {
     required  this.ticket,
 
     required  this.questions,
+
+    required  this.attachments,
 
      this.analysis,
 
@@ -79,6 +82,19 @@ class TicketDetail {
 
 
   final List<Question> questions;
+
+
+
+      /// Files attached to the task, its answers and retry notes, oldest first
+  @JsonKey(
+    
+    name: r'attachments',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final List<Attachment> attachments;
 
 
 
@@ -222,6 +238,7 @@ class TicketDetail {
     bool operator ==(Object other) => identical(this, other) || other is TicketDetail &&
       other.ticket == ticket &&
       other.questions == questions &&
+      other.attachments == attachments &&
       other.analysis == analysis &&
       other.result == result &&
       other.childKey == childKey &&
@@ -238,6 +255,7 @@ class TicketDetail {
     int get hashCode =>
         ticket.hashCode +
         questions.hashCode +
+        attachments.hashCode +
         analysis.hashCode +
         result.hashCode +
         childKey.hashCode +

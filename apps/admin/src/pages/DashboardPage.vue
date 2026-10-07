@@ -13,13 +13,14 @@ import EventTypeBadge from '../components/logs/EventTypeBadge.vue'
 import PageHeader from '../components/PageHeader.vue'
 import StateBadge from '../components/StateBadge.vue'
 import { fmtDur, fmtTime, level, pct, since } from '../composables/format'
+import { livePoll } from '../composables/useLive'
 import { useSession } from '../stores/session'
 
 const { t, locale } = useI18n()
 const router = useRouter()
 const session = useSession()
 
-const dash = useQuery({ queryKey: ['dashboard'], queryFn: () => unwrap(api.GET('/dashboard')), refetchInterval: 60_000 })
+const dash = useQuery({ queryKey: ['dashboard'], queryFn: () => unwrap(api.GET('/dashboard')), refetchInterval: () => livePoll(60_000) })
 const d = computed(() => dash.data.value)
 
 const greeting = computed(() => {

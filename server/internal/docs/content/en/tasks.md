@@ -4,7 +4,7 @@ Tasks are for repositories outside Jira, like your side projects. They go throug
 
 ## New task
 
-Pick a repository, describe the result you want, set the priority and choose how to start: ask questions first, start coding right away, or keep it in the queue.
+Pick a repository, describe the result you want (attach screenshots, mockups or files if they help), set the priority and choose how to start: ask questions first, start coding right away, or keep it in the queue.
 
 ## After you approve
 

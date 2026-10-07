@@ -37,6 +37,8 @@ class Integration {
      this.webhookUrl,
 
      this.webhookSecret,
+
+     this.webhookSecretSet,
   });
 
   @JsonKey(
@@ -149,6 +151,19 @@ class Integration {
 
 
 
+      /// Plane: a webhook secret is stored (deliveries are accepted)
+  @JsonKey(
+    
+    name: r'webhookSecretSet',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? webhookSecretSet;
+
+
+
 
 
     @override
@@ -161,7 +176,8 @@ class Integration {
       other.lastError == lastError &&
       other.settings == settings &&
       other.webhookUrl == webhookUrl &&
-      other.webhookSecret == webhookSecret;
+      other.webhookSecret == webhookSecret &&
+      other.webhookSecretSet == webhookSecretSet;
 
     @override
     int get hashCode =>
@@ -173,7 +189,8 @@ class Integration {
         lastError.hashCode +
         settings.hashCode +
         webhookUrl.hashCode +
-        webhookSecret.hashCode;
+        webhookSecret.hashCode +
+        webhookSecretSet.hashCode;
 
   factory Integration.fromJson(Map<String, dynamic> json) => _$IntegrationFromJson(json);
 

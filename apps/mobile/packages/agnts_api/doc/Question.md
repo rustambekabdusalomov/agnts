@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **position** | **int** |  | 
 **text** | **String** |  | 
 **options** | **List&lt;String&gt;** |  | 
+**multiple** | **bool** | Several options may be chosen; the answer then lists the chosen ones, one per line | 
 **answer** | **String** |  | [optional] 
 **note** | **String** |  | 
 

@@ -4,6 +4,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { api, HttpError, unwrap } from '../../api/client'
 import { ago } from '../../composables/format'
+import { livePoll } from '../../composables/useLive'
 import { useUi } from '../../stores/ui'
 
 // Done tickets and where their learn run stands: running, queued (in run
@@ -15,7 +16,7 @@ const queue = useQuery({
   queryKey: ['lessons', 'queue'],
   queryFn: () => unwrap(api.GET('/lessons/queue')),
   // Poll while something is queued: a run starting writes no event of its own.
-  refetchInterval: (q) => (q.state.data?.some((x) => x.status === 'running' || x.status === 'pending') ? 5_000 : 60_000),
+  refetchInterval: (q) => (q.state.data?.some((x) => x.status === 'running' || x.status === 'pending') ? 5_000 : livePoll(60_000)),
 })
 const items = computed(() => queue.data.value ?? [])
 const idle = computed(() => items.value.filter((x) => x.status === 'none'))

@@ -30,6 +30,8 @@ class TaskUpdate {
      this.afterApprove,
 
      this.kind,
+
+     this.attachments,
   });
 
   @JsonKey(
@@ -92,6 +94,19 @@ class TaskUpdate {
 
 
 
+      /// The files the description should have: the task's files to keep and new uploads. Left out keeps them; files not listed are deleted.
+  @JsonKey(
+    
+    name: r'attachments',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<int>? attachments;
+
+
+
 
 
     @override
@@ -100,7 +115,8 @@ class TaskUpdate {
       other.description == description &&
       other.priority == priority &&
       other.afterApprove == afterApprove &&
-      other.kind == kind;
+      other.kind == kind &&
+      other.attachments == attachments;
 
     @override
     int get hashCode =>
@@ -108,7 +124,8 @@ class TaskUpdate {
         description.hashCode +
         priority.hashCode +
         afterApprove.hashCode +
-        kind.hashCode;
+        kind.hashCode +
+        attachments.hashCode;
 
   factory TaskUpdate.fromJson(Map<String, dynamic> json) => _$TaskUpdateFromJson(json);
 

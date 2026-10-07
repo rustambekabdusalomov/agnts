@@ -54,6 +54,7 @@ TicketDetail _detail(List<Relation> items) => TicketDetail(
         updatedAt: DateTime(2026),
       ),
       questions: const [],
+      attachments: const [],
       analysis: Analysis(summary: 's', plan: const [], footprint: Footprint(files: const ['server/tasks.go'], migrations: true)),
       relations: Relations(items: items, blockedBy: const []),
     );

@@ -20,6 +20,7 @@ import 'relations.dart';
 import 'spend.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme.dart';
+import '../../widgets/attachments.dart';
 import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
 
@@ -35,15 +36,23 @@ class TicketScreen extends ConsumerStatefulWidget {
 }
 
 class _TicketScreenState extends ConsumerState<TicketScreen> {
-  // Per question: the picked option pill, and the details / own answer text.
+  // Per question: the picked option pill (the picked set for a multiple-
+  // choice question), the details / own answer text, and attached files.
   final Map<int, String?> _picked = {};
+  final Map<int, Set<String>> _chosen = {};
   final Map<int, TextEditingController> _notes = {};
+  final Map<int, AttachmentsController> _answerFiles = {};
+  // A failed run's retry note and its files.
+  final _retryNote = TextEditingController();
+  late final _retryFiles = AttachmentsController()..addListener(_filesChanged);
   final _feedback = TextEditingController();
   // Preview screenshots the feedback points at.
   final _feedbackShots = ValueNotifier<List<FeedbackShot>>(const []);
+  // Files that go with the feedback.
+  final _feedbackFiles = AttachmentsController();
   bool _busy = false;
   bool _descOpen = false;
-  // Reports reach the Jira issue only when the reviewer ticks this.
+  // Reports reach the tracker issue only when the reviewer ticks this.
   bool _postReport = false;
 
   @override
@@ -51,13 +60,32 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     for (final c in _notes.values) {
       c.dispose();
     }
+    for (final c in _answerFiles.values) {
+      c.dispose();
+    }
+    _retryNote.dispose();
+    _retryFiles.dispose();
     _feedback.dispose();
     _feedbackShots.dispose();
+    _feedbackFiles.dispose();
     super.dispose();
   }
 
+  /// The submit buttons follow the uploads.
+  void _filesChanged() {
+    if (mounted) setState(() {});
+  }
+
+  AttachmentsController _filesFor(Question q) => _answerFiles.putIfAbsent(q.id, () => AttachmentsController()..addListener(_filesChanged));
+
   TextEditingController _noteFor(Question q) => _notes.putIfAbsent(q.id, () {
         final a = q.answer;
+        if (q.multiple) {
+          // One option per line; lines that are not options are the own text.
+          final lines = (a ?? '').split('\n').where((x) => x.trim().isNotEmpty).toList();
+          _chosen[q.id] = {for (final x in lines) if (q.options.contains(x)) x};
+          return TextEditingController(text: lines.where((x) => !q.options.contains(x)).join('\n'));
+        }
         if (a != null && q.options.contains(a)) {
           _picked[q.id] = a;
           return TextEditingController(text: q.note);
@@ -65,16 +93,46 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         return TextEditingController(text: a ?? '');
       });
 
-  /// The answer sent for [q]: the picked option, else the typed text.
+  /// The answer sent for [q]: the picked option, else the typed text. For a
+  /// multiple-choice question: the picked options in their order, then the
+  /// typed text, one per line.
   String _answerOf(Question q) {
     final note = _noteFor(q).text.trim();
+    if (q.multiple) {
+      final chosen = _chosen[q.id] ?? const {};
+      return [for (final o in q.options) if (chosen.contains(o)) o, if (note.isNotEmpty) note].join('\n');
+    }
     return _picked[q.id] ?? note;
   }
 
   /// The details sent with a picked option (null when the text is the answer).
   String? _noteOf(Question q) {
+    if (q.multiple) return null;
     final note = _noteFor(q).text.trim();
     return _picked[q.id] != null && note.isNotEmpty ? note : null;
+  }
+
+  void _toggle(Question q, String o) => setState(() {
+        if (q.multiple) {
+          final chosen = _chosen.putIfAbsent(q.id, () => {});
+          if (!chosen.remove(o)) chosen.add(o);
+        } else {
+          _picked[q.id] = _picked[q.id] == o ? null : o;
+        }
+      });
+
+  /// Retries a stopped run, with the note and files when it can take them.
+  Future<void> _retry(Ticket t) async {
+    final note = _retryNote.text.trim();
+    final ids = _retryFiles.ids;
+    final extra = _takesRetryNote(t) && (note.isNotEmpty || ids.isNotEmpty);
+    final ok = await _run(() => _tickets.retryTicket(
+          key: t.key,
+          retryTicketRequest: extra ? RetryTicketRequest(note: note.isEmpty ? null : note, attachments: ids.isEmpty ? null : ids) : null,
+        ));
+    if (!ok) return;
+    _retryNote.clear();
+    _retryFiles.clear();
   }
 
   TicketsApi get _tickets => ref.read(apiProvider)!.getTicketsApi();
@@ -161,7 +219,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.only(bottom: 24),
           children: [
-            _header(context, d.ticket),
+            _header(context, d),
             _Track(ticket: d.ticket, history: d.history ?? const []),
             _stage(context, d),
             _folds(context, d),
@@ -174,9 +232,10 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
 
   // ---- Header (.d-head) ----
 
-  Widget _header(BuildContext context, Ticket t) {
+  Widget _header(BuildContext context, TicketDetail d) {
     final l = AppLocalizations.of(context);
     final c = Agnts.of(context);
+    final t = d.ticket;
     final isTask = t.source_ == TicketSource_Enum.local;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
@@ -185,7 +244,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           style: TextStyle(fontSize: 13, color: c.ink3),
           child: Wrap(spacing: 8, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
             StateBadge(t.state, kind: t.kind),
-            SourceChip(isTask ? l.ticketsSourceTask : l.ticketsSourceJira, task: isTask),
+            SourceChip(sourceLabel(l, t.source_), task: isTask),
             KindChip(t),
             if (t.repoName != null && t.repoName!.isNotEmpty) Text(t.repoName!),
             if (t.priority.isNotEmpty) Text(t.priority),
@@ -206,6 +265,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
             ),
           ),
         ],
+        AttachmentList(d.attachments.where((a) => a.purpose == AttachmentPurposeEnum.ticket).toList()),
         if (t.branch.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 8),
@@ -338,6 +398,25 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           const SizedBox(height: 8),
           HelpBox(t.stopReason ?? l.ticketFailedUnknown, tone: Tone.bad),
           if (kindEditable(t)) KindPicker(t),
+          // A run that stopped while pushing resumes there: nothing to tell it.
+          if (_takesRetryNote(t)) ...[
+            _H3(l.ticketRetryNote),
+            TextField(
+              controller: _retryNote,
+              enabled: !_busy,
+              minLines: 2,
+              maxLines: 6,
+              inputFormatters: [LengthLimitingTextInputFormatter(4000)],
+              textCapitalization: TextCapitalization.sentences,
+              style: const TextStyle(fontSize: 16, height: 1.4),
+              decoration: InputDecoration(
+                hintText: l.ticketRetryNoteHint,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+              ),
+            ),
+            const SizedBox(height: 10),
+            AttachmentPicker(controller: _retryFiles, enabled: !_busy),
+          ],
         ]);
       case TicketState.rateLimited:
         final u = ref.watch(usageProvider).value?.fiveHour.utilization;
@@ -384,9 +463,10 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     final c = Agnts.of(context);
     final t = d.ticket;
     final r = d.result;
-    final jira = t.source_ == TicketSource_Enum.jira;
+    final plane = t.source_ == TicketSource_Enum.plane;
+    final tracked = plane || t.source_ == TicketSource_Enum.jira;
     return [
-      _Sub(jira ? l.ticketReviewReportSubJira : l.ticketReviewReportSub),
+      _Sub(tracked ? (plane ? l.ticketReviewReportSubPlane : l.ticketReviewReportSubJira) : l.ticketReviewReportSub),
       if (r != null && r.summary.isNotEmpty) ...[const SizedBox(height: 8), Text(r.summary, style: const TextStyle(fontSize: 15, height: 1.45))],
       if (r != null && r.notes.isNotEmpty) ...[
         _H3(l.ticketNotes),
@@ -402,13 +482,13 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
       _codeReview(d),
       _H3(l.ticketReport),
       if (r?.report != null) ReportMarkdown(r!.report!) else Text(l.ticketReportMissing, style: TextStyle(color: c.ink3)),
-      if (jira)
+      if (tracked)
         Padding(
           padding: const EdgeInsets.only(top: 12),
           child: CheckboxListTile(
             value: _postReport,
             onChanged: _busy ? null : (v) => setState(() => _postReport = v ?? false),
-            title: Text(l.ticketPostReport(t.key), style: const TextStyle(fontSize: 15)),
+            title: Text(plane ? l.ticketPostReportPlane(t.key) : l.ticketPostReport(t.key), style: const TextStyle(fontSize: 15)),
             controlAffinity: ListTileControlAffinity.leading,
             contentPadding: EdgeInsets.zero,
           ),
@@ -439,7 +519,9 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         ? l.ticketReviewSubMain
         : t.source_ == TicketSource_Enum.jira
             ? l.ticketReviewSubJira(t.branch)
-            : l.ticketReviewSubPr(t.branch);
+            : t.source_ == TicketSource_Enum.plane
+                ? l.ticketReviewSubPlane(t.branch)
+                : l.ticketReviewSubPr(t.branch);
     final r = d.result;
     if (r == null) return [_Sub(sub), _codeReview(d), _preview(d)];
     final passed = r.checks.where((x) => x.exitCode == 0).length;
@@ -536,14 +618,19 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
       decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line), borderRadius: BorderRadius.circular(16)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(q.text, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, height: 1.4, color: c.ink)),
+        if (q.multiple && q.options.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(l.ticketPickAny, style: TextStyle(fontSize: 13, color: c.ink3)),
+          ),
         const SizedBox(height: 10),
         if (q.options.isNotEmpty) ...[
           Wrap(spacing: 8, runSpacing: 8, children: [
             for (final o in q.options)
               _OptionPill(
                 label: o,
-                selected: _picked[q.id] == o,
-                onTap: enabled ? () => setState(() => _picked[q.id] = _picked[q.id] == o ? null : o) : null,
+                selected: q.multiple ? (_chosen[q.id]?.contains(o) ?? false) : _picked[q.id] == o,
+                onTap: enabled ? () => _toggle(q, o) : null,
               ),
           ]),
           const SizedBox(height: 10),
@@ -555,11 +642,17 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           maxLines: 6,
           style: const TextStyle(fontSize: 16, height: 1.4),
           decoration: InputDecoration(
-            hintText: q.options.isEmpty ? l.ticketYourAnswer : l.ticketAddDetails,
+            hintText: q.options.isEmpty
+                ? l.ticketYourAnswer
+                : q.multiple
+                    ? l.ticketOtherAnswer
+                    : l.ticketAddDetails,
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
           ),
           onChanged: (_) => setState(() {}),
         ),
+        const SizedBox(height: 10),
+        AttachmentPicker(controller: _filesFor(q), enabled: enabled),
       ]),
     );
   }
@@ -619,6 +712,8 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     final t = d.ticket;
     final early = t.state == TicketState.new_ || t.state == TicketState.analyzing || t.state == TicketState.waitingForAnswers;
     final answered = d.questions.where((q) => (q.answer ?? '').isNotEmpty).toList();
+    final retryFiles = d.attachments.where((a) => a.purpose == AttachmentPurposeEnum.retry).toList();
+    final feedbackFiles = d.attachments.where((a) => a.purpose == AttachmentPurposeEnum.feedback).toList();
     final history = (d.history ?? const <HistoryItem>[]).toList()..sort((a, b) => b.at.compareTo(a.at));
     final events = ref.watch(ticketEventsProvider(widget.ticketKey));
     final folds = <Widget>[
@@ -630,12 +725,31 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
             for (final q in answered)
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
-                child: Text.rich(TextSpan(style: const TextStyle(fontSize: 15, height: 1.4), children: [
-                  TextSpan(text: '${q.text}\n', style: TextStyle(color: c.ink3)),
-                  TextSpan(text: q.answer, style: const TextStyle(fontWeight: FontWeight.w700)),
-                  if (q.note.isNotEmpty) TextSpan(text: '. ${q.note}'),
-                ])),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text.rich(TextSpan(style: const TextStyle(fontSize: 15, height: 1.4), children: [
+                    TextSpan(text: '${q.text}\n', style: TextStyle(color: c.ink3)),
+                    TextSpan(
+                      // A multiple-choice answer is one choice per line.
+                      text: q.multiple ? q.answer!.split('\n').where((x) => x.trim().isNotEmpty).join(', ') : q.answer,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    if (q.note.isNotEmpty) TextSpan(text: '. ${q.note}'),
+                  ])),
+                  AttachmentList([
+                    for (final a in d.attachments)
+                      if (a.purpose == AttachmentPurposeEnum.answer && a.questionId == q.id) a,
+                  ]),
+                ]),
               ),
+          ]),
+        ),
+      if (retryFiles.isNotEmpty || feedbackFiles.isNotEmpty)
+        Fold(
+          title: l.filesTitle,
+          hint: '${retryFiles.length + feedbackFiles.length}',
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            AttachmentList(feedbackFiles, label: l.filesFromFeedback),
+            AttachmentList(retryFiles, label: l.filesFromRetry),
           ]),
         ),
       if (d.analysis != null && t.state != TicketState.waitingForAnswers) _analysisFold(context, d.analysis!),
@@ -751,26 +865,45 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     switch (t.state) {
       case TicketState.waitingForAnswers:
         final left = d.questions.where((q) => _answerOf(q).isEmpty).length;
+        final uploading = d.questions.any((q) => _filesFor(q).uploading);
         buttons = [
-          hint(left > 0 ? l.ticketQuestionsLeft(left) : l.ticketAllAnswered),
+          hint(uploading
+              ? l.filesWait
+              : left > 0
+                  ? l.ticketQuestionsLeft(left)
+                  : l.ticketAllAnswered),
           FilledButton(
-            onPressed: _busy || left > 0
+            onPressed: _busy || left > 0 || uploading
                 ? null
-                : () => _run(() => _tickets.answerQuestions(
-                      key: key,
-                      answersRequest: AnswersRequest(answers: [
-                        for (final q in d.questions) AnswersRequestAnswersInner(questionId: q.id, answer: _answerOf(q), note: _noteOf(q)),
-                      ]),
-                    )),
+                : () async {
+                    final ok = await _run(() => _tickets.answerQuestions(
+                          key: key,
+                          answersRequest: AnswersRequest(answers: [
+                            for (final q in d.questions)
+                              AnswersRequestAnswersInner(
+                                questionId: q.id,
+                                answer: _answerOf(q),
+                                note: _noteOf(q),
+                                attachments: _filesFor(q).ids.isEmpty ? null : _filesFor(q).ids,
+                              ),
+                          ]),
+                        ));
+                    if (ok) {
+                      for (final f in _answerFiles.values) {
+                        f.clear();
+                      }
+                    }
+                  },
             child: Text(isReportKind(t.kind) ? l.ticketStartWriting : l.ticketStartCoding),
           ),
         ];
       case TicketState.waitingForReview:
         final report = isReportKind(t.kind);
         final toMain = t.afterApprove == TicketAfterApproveEnum.main && t.source_ == TicketSource_Enum.local;
-        final post = report && _postReport && t.source_ == TicketSource_Enum.jira;
+        final plane = t.source_ == TicketSource_Enum.plane;
+        final post = report && _postReport && (plane || t.source_ == TicketSource_Enum.jira);
         final confirm = report
-            ? (post ? l.ticketApproveReportPostConfirm(key) : l.ticketApproveReportConfirm)
+            ? (post ? (plane ? l.ticketApproveReportPostConfirmPlane(key) : l.ticketApproveReportPostConfirm(key)) : l.ticketApproveReportConfirm)
             : (toMain ? l.ticketApproveMainConfirm : l.ticketApproveConfirm(t.branch));
         buttons = [
           Tooltip(
@@ -818,9 +951,12 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
             ),
           ),
           Expanded(
-            child: FilledButton(
-              onPressed: _busy ? null : () => _run(() => _tickets.retryTicket(key: key)),
-              child: Text(failed ? l.mobileRetry : l.ticketResume, maxLines: 1, overflow: TextOverflow.ellipsis),
+            child: Tooltip(
+              message: _retryFiles.uploading ? l.filesWait : '',
+              child: FilledButton(
+                onPressed: _busy || (_takesRetryNote(t) && _retryFiles.uploading) ? null : () => _retry(t),
+                child: Text(failed ? l.mobileRetry : l.ticketResume, maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
             ),
           ),
         ];
@@ -896,19 +1032,41 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           ),
           FeedbackShotChips(shots: _feedbackShots),
           const SizedBox(height: 12),
-          FilledButton(onPressed: () => Navigator.pop(c, _feedback.text.trim()), child: Text(l.ticketSend)),
+          AttachmentPicker(controller: _feedbackFiles),
+          const SizedBox(height: 12),
+          ListenableBuilder(
+            listenable: _feedbackFiles,
+            builder: (c, _) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              if (_feedbackFiles.uploading)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(l.filesWait, style: TextStyle(fontSize: 13, color: Agnts.of(c).ink3)),
+                ),
+              FilledButton(
+                onPressed: _feedbackFiles.uploading ? null : () => Navigator.pop(c, _feedback.text.trim()),
+                child: Text(l.ticketSend),
+              ),
+            ]),
+          ),
         ]),
       ),
     );
     if (text == null || text.isEmpty) return;
     final shots = [for (final s in _feedbackShots.value) s.ref];
+    final ids = _feedbackFiles.ids;
     final ok = await _run(() => _tickets.requestChanges(
-        key: key, requestChangesRequest: RequestChangesRequest(feedback: text, shots: shots.isEmpty ? null : shots)));
+        key: key,
+        requestChangesRequest: RequestChangesRequest(feedback: text, shots: shots.isEmpty ? null : shots, attachments: ids.isEmpty ? null : ids)));
     if (!ok) return;
     _feedback.clear();
     _feedbackShots.value = const [];
+    _feedbackFiles.clear();
   }
 }
+
+/// Whether a retry may carry a note and files: a failed run that does not
+/// resume at pushing (the server refuses them there, as the admin panel).
+bool _takesRetryNote(Ticket t) => t.state == TicketState.failed && t.resumeState != TicketState.pushing;
 
 String _modelName(Model m) => m.value.isEmpty ? m.value : '${m.value[0].toUpperCase()}${m.value.substring(1)}';
 

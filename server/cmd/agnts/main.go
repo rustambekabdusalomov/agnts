@@ -45,9 +45,10 @@ Usage:
   agnts user create <username>   create the admin user (password + TOTP)
   agnts repo add [flags]         add or update a repository (see agnts repo add -h)
   agnts repo list                list repositories
-  agnts integration set <jira|github|claude>
+  agnts integration set <jira|plane|github|claude>
                                 connect a service (secrets are read from the terminal)
   agnts jira sync                pick up labelled Jira issues now
+  agnts plane sync               pick up labelled Plane work items now
   agnts eval relations           score the queue's predictions (footprints, conflicts) against the real diffs
   agnts mcp token                create a new static MCP bearer token
   agnts keygen                   print a new AGNTS_ENC_KEY
@@ -118,7 +119,7 @@ func run(ctx context.Context, args []string) error {
 		}
 		return postgres.Migrate(ctx, pool, postgres.MigrateCommand(cmd), log)
 	case "repo":
-		return repoCmd(ctx, pool, args[1:], os.Stdout)
+		return repoCmd(ctx, cfg, pool, args[1:], os.Stdout)
 	case "integration":
 		return integrationCmd(ctx, cfg, pool, args[1:], os.Stdin, os.Stdout)
 	case "mcp":
@@ -136,6 +137,11 @@ func run(ctx context.Context, args []string) error {
 			return errors.New("usage: agnts jira sync")
 		}
 		return jiraSync(ctx, cfg, pool, log)
+	case "plane":
+		if len(args) != 2 || args[1] != "sync" {
+			return errors.New("usage: agnts plane sync")
+		}
+		return planeSync(ctx, cfg, pool, log)
 	case "eval":
 		if len(args) != 2 || args[1] != "relations" {
 			return errors.New("usage: agnts eval relations")

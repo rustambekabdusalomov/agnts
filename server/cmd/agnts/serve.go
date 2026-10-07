@@ -28,7 +28,9 @@ import (
 	"agnts/internal/runner"
 	"agnts/internal/secret"
 	"agnts/internal/store/postgres"
+	"agnts/internal/toolchain"
 	"agnts/internal/tracker/jira"
+	"agnts/internal/tracker/plane"
 	"agnts/internal/usage"
 	"agnts/internal/vcs"
 	"agnts/internal/vcs/github"
@@ -122,6 +124,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		Commit:       commit,
 		Webhooks: map[string]http.Handler{
 			"jira":     jira.WebhookHandler(a.jiraConfig, a.orch, a.store, log.With("component", "jira")),
+			"plane":    plane.WebhookHandler(a.planeConfig, a.plane, a.orch, a.store, log.With("component", "plane")),
 			"telegram": a.notifier.WebhookHandler(),
 			"github":   vcs.GitHubWebhook(vcs.DeriveSecret(cfg.EncKey, "github"), a.orch, a.store, a.vcs.ForgetAll, log.With("component", "github")),
 			"gitlab":   vcs.GitLabWebhook(vcs.DeriveSecret(cfg.EncKey, "gitlab"), a.orch, a.store, a.vcs.ForgetAll, log.With("component", "gitlab")),
@@ -153,11 +156,15 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 			}
 		}()
 		go jira.Reconcile(ctx, a.jira, a.orch, cfg.JiraSyncEach, log.With("component", "jira"))
+		go plane.Reconcile(ctx, a.plane, a.planeProjects, a.orch, cfg.PlaneSyncEach, log.With("component", "plane"))
 		go pruneDeliveries(ctx, a.store, log)
 		if cfg.UsageRefresh > 0 {
 			go a.refresher.IdleLoop(ctx, cfg.UsageRefresh, a.orch.Active)
 		}
 		go a.checkRepos(ctx)
+		if cfg.CacheMaxBytes > 0 {
+			go sweepCaches(ctx, a.runner, cfg.CacheMaxBytes, log.With("component", "runner"))
+		}
 	} else {
 		close(workerDone)
 		log.Warn("agent loop disabled (AGNTS_AGENT_ENABLED=false): tickets are stored but not worked on")
@@ -196,7 +203,9 @@ type agent struct {
 	refresher    *usage.Refresher
 	orch         *orchestrator.Orchestrator
 	jira         *jira.Client
+	plane        *plane.Client
 	docker       *runner.Docker
+	runner       *runner.Runner
 	repos        *admin.Repos
 	dashboard    *admin.Dashboard
 	adminInteg   *admin.Integrations
@@ -218,6 +227,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	}
 	a.settings = postgres.NewSettings(pool, defaultSettings(cfg))
 	a.jira = jira.New(a.jiraConfig)
+	a.plane = plane.New(a.planeConfig)
 	a.usage = usage.New(postgres.NewUsage(pool), a.store, log.With("component", "usage"))
 
 	tokenFor := func(provider string) func(ctx context.Context) (string, error) {
@@ -226,7 +236,10 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	rcfg := runner.DefaultConfig()
 	rcfg.Network = cfg.RunNetwork
 	rcfg.Proxy = cfg.RunProxy
+	rcfg.ToolchainVolume = cfg.ToolchainVolume
+	rcfg.MemoryMB, rcfg.MaxMemoryMB = int64(cfg.RunMemoryMB), int64(cfg.RunMemoryMaxMB)
 	run := runner.New(a.docker, rcfg, tokenFor("claude"))
+	a.runner = run
 	a.refresher = usage.NewRefresher(a.usage, run, cfg.RunnerImage, log.With("component", "usage"))
 
 	repos := gitrepo.New(filepath.Join(cfg.DataDir, "repos"),
@@ -253,10 +266,12 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	ocfg.Image = cfg.RunnerImage
 	previewEnvs := postgres.NewPreviewEnvs(pool, box)
 	a.orch = orchestrator.New(ocfg, orchestrator.Deps{
-		Store: a.store, Runner: run, Git: repos, Host: a.vcs, Tracker: a.jira, Homes: homes,
+		Store: a.store, Runner: run, Git: repos, Host: a.vcs, Homes: homes,
+		Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: a.jira, domain.SourcePlane: a.plane},
 		Settings: a.settings, Usage: a.usage, Lessons: a.lessons, Rules: postgres.NewRules(pool),
 		Translations: postgres.NewTranslations(pool),
 		Shots:        gitrepo.NewShots(filepath.Join(cfg.DataDir, "previews")), PreviewEnvs: previewEnvs,
+		BuildEnvs: previewEnvs,
 	}, log.With("component", "orchestrator"))
 
 	a.repos = admin.NewRepos(a.store, gh, a.vcs, func(ctx context.Context) string {
@@ -273,9 +288,16 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.repos.SetRemotes(map[string]admin.RemoteLister{"github": gh, "gitlab": gl})
 	a.repos.SetLocal(repos)
 	a.repos.SetPreviewEnvs(previewEnvs)
+	a.repos.SetBuildEnvs(previewEnvs)
+	a.repos.SetImageCheck(run.ImageOK)
+	if cfg.AgentEnabled {
+		a.repos.SetDetector(repoDetector{repos})
+		a.repos.SetDeepDetector(a.orch)
+	}
 	a.dashboard = admin.NewDashboard(a.store, a.orch, a.repos, a.usage, a.settings, cfg.TimeZone)
 	a.adminInteg = admin.NewIntegrations(a.integrations, a.store, map[string]admin.Checker{
 		"jira":     admin.JiraCheck,
+		"plane":    admin.PlaneCheck,
 		"github":   admin.GitHubCheck(gh),
 		"claude":   admin.ClaudeTokenCheck,
 		"telegram": admin.TelegramCheck(cfg.TelegramAPI),
@@ -285,6 +307,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		"github": vcs.DeriveSecret(cfg.EncKey, "github"), "gitlab": vcs.DeriveSecret(cfg.EncKey, "gitlab"),
 	})
 	a.adminInteg.SetTelegramAPI(cfg.TelegramAPI)
+	a.adminInteg.SetPlane(a.plane, a.planeProjects)
 
 	var fcm *notify.FCM
 	if cfg.FCMCredentials != "" {
@@ -323,6 +346,34 @@ func (a *agent) jiraConfig(ctx context.Context) (jira.Config, bool, error) {
 		return jira.Config{}, false, err
 	}
 	return jira.FromIntegration(in.Token, in.Settings, in.Connected)
+}
+
+// planeConfig loads the Plane connection; the secrets live in the encrypted token.
+func (a *agent) planeConfig(ctx context.Context) (plane.Config, bool, error) {
+	in, err := a.integrations.Get(ctx, "plane")
+	if errors.Is(err, domain.ErrNotFound) {
+		return plane.Config{}, false, nil
+	}
+	if err != nil {
+		return plane.Config{}, false, err
+	}
+	return plane.FromIntegration(in.Token, in.Settings, in.Connected)
+}
+
+// planeProjects lists the Plane projects linked to repositories that take
+// new work, for the reconcile and the state list.
+func (a *agent) planeProjects(ctx context.Context) ([]string, error) {
+	repos, err := a.store.ListRepositories(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var out []string
+	for _, r := range repos {
+		if r.PlaneProject != "" && r.ArchivedAt == nil {
+			out = append(out, r.PlaneProject)
+		}
+	}
+	return out, nil
 }
 
 // gitlabConfig loads the GitLab connection.
@@ -400,6 +451,19 @@ func jiraSync(ctx context.Context, cfg config.Config, pool postgresPool, log *sl
 	return nil
 }
 
+func planeSync(ctx context.Context, cfg config.Config, pool postgresPool, log *slog.Logger) error {
+	a, err := newAgent(cfg, pool, log)
+	if err != nil {
+		return err
+	}
+	found, created, err := a.adminInteg.SyncPlane(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%d labelled open work items, %d new\n", found, created)
+	return nil
+}
+
 // internalHandler serves what other containers of the stack need from
 // agnts and must not be public: the egress proxy reads the hosts allowed in
 // Settings from /egress/allow. Caddy only routes the main listener.
@@ -417,4 +481,38 @@ func internalHandler(settings interface {
 		_, _ = io.WriteString(w, strings.Join(s.EgressAllow, "\n"))
 	})
 	return mux
+}
+
+// repoDetector reads a repository's default branch for toolchain detection.
+type repoDetector struct{ git *gitrepo.Repos }
+
+func (d repoDetector) Detect(ctx context.Context, repo domain.Repository) (toolchain.Detection, error) {
+	if err := d.git.Prepare(ctx, repo, repo.DefaultBranch); err != nil {
+		return toolchain.Detection{}, err
+	}
+	tree, err := d.git.Tree(ctx, repo, repo.DefaultBranch)
+	if err != nil {
+		return toolchain.Detection{}, err
+	}
+	return toolchain.Detect(tree), nil
+}
+
+// sweepCaches empties repository package caches that grew over max, every
+// six hours (measuring volume sizes is slow on a busy host).
+func sweepCaches(ctx context.Context, r *runner.Runner, limit int64, log *slog.Logger) {
+	t := time.NewTicker(6 * time.Hour)
+	defer t.Stop()
+	for {
+		removed, err := r.SweepCaches(ctx, limit)
+		if err != nil {
+			log.Warn("sweep package caches", "err", err)
+		} else if len(removed) > 0 {
+			log.Info("package caches over the limit emptied", "volumes", removed)
+		}
+		select {
+		case <-ctx.Done():
+			return
+		case <-t.C:
+		}
+	}
 }

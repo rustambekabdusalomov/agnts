@@ -9,15 +9,15 @@ import CopyField from '../form/CopyField.vue'
 import HiIcon from '../ui/HiIcon.vue'
 import type { Provider } from './providers'
 
-// Connect a provider: the token (and Jira's site and email) is checked by
-// the server before it is saved.
+// Connect a provider: the token (and Jira's site and email, or Plane's
+// address and workspace) is checked by the server before it is saved.
 const props = defineProps<{ provider: Provider }>()
 const emit = defineEmits<{ connected: [webhookUrl: string | undefined, webhookSecret: string | undefined] }>()
 const { t } = useI18n()
 const qc = useQueryClient()
 const ui = useUi()
 
-const form = reactive({ site: '', email: '', token: '', chatId: '', url: 'https://gitlab.com' })
+const form = reactive({ site: '', email: '', token: '', chatId: '', url: 'https://gitlab.com', planeUrl: 'https://api.plane.so', workspace: '' })
 const error = ref('')
 
 // "How to get the token" guide: a page to open, or a command to run.
@@ -31,12 +31,20 @@ const guide = computed<{ link?: string; command?: string; chatIdLink?: string } 
   }
   if (props.provider === 'claude') return { command: 'claude setup-token' }
   if (props.provider === 'jira') return { link: 'https://id.atlassian.com/manage-profile/security/api-tokens' }
+  if (props.provider === 'plane') return { link: 'https://developers.plane.so/api-reference/introduction' }
   if (props.provider === 'telegram') {
     const tok = form.token.trim()
     return { link: 'https://t.me/BotFather', chatIdLink: /^\d+:[\w-]{20,}$/.test(tok) ? `https://api.telegram.org/bot${tok}/getUpdates` : undefined }
   }
   return null
 })
+
+const tokenLabel = computed(() =>
+  props.provider === 'jira' ? t('integrations.apiToken') : props.provider === 'plane' ? t('integrations.apiKey') : t('integrations.accessToken'),
+)
+const tokenHelp = computed(() =>
+  props.provider === 'jira' ? t('integrations.apiTokenHelp') : props.provider === 'plane' ? t('integrations.apiKeyHelp') : t('integrations.tokenHelp'),
+)
 
 const connect = useMutation({
   mutationFn: () => {
@@ -47,7 +55,9 @@ const connect = useMutation({
           ? { chat_id: form.chatId.trim() }
           : props.provider === 'gitlab'
             ? { url: form.url.trim().replace(/\/+$/, '') }
-            : {}
+            : props.provider === 'plane'
+              ? { base_url: form.planeUrl.trim().replace(/\/+$/, ''), workspace: form.workspace.trim().toLowerCase() }
+              : {}
     return unwrap(
       api.POST('/integrations/{provider}/connect', {
         params: { path: { provider: props.provider } },
@@ -70,6 +80,7 @@ const connect = useMutation({
 const perms = [
   { name: 'Contents', help: 'permContents', need: 'required' },
   { name: 'Pull requests', help: 'permPulls', need: 'required' },
+  { name: 'Workflows', help: 'permWorkflows', need: 'recommended' },
   { name: 'Metadata', help: 'permMetadata', need: 'required' },
   { name: 'Actions', help: 'permActions', need: 'recommended' },
   { name: 'Deployments', help: 'permDeployments', need: 'recommended' },
@@ -116,12 +127,20 @@ const glScopes = [
           <input v-model="form.email" class="cfg-in" type="email" required autocomplete="email" :aria-label="t('integrations.email')">
         </CfgRow>
       </template>
+      <template v-if="provider === 'plane'">
+        <CfgRow :label="t('integrations.planeBaseUrl')" :help="t('integrations.planeBaseUrlHelp')">
+          <input v-model="form.planeUrl" class="cfg-in mono" type="url" required pattern="https?://.*" :aria-label="t('integrations.planeBaseUrl')">
+        </CfgRow>
+        <CfgRow :label="t('integrations.planeWorkspace')" :help="t('integrations.planeWorkspaceHelp')">
+          <input v-model="form.workspace" class="cfg-in mono" required pattern="[A-Za-z0-9_\-]+" placeholder="acme" autocapitalize="off" :aria-label="t('integrations.planeWorkspace')">
+        </CfgRow>
+      </template>
       <CfgRow v-if="provider === 'gitlab'" :label="t('integrations.gitlabUrl')" :help="t('integrations.gitlabUrlHelp')">
         <input v-model="form.url" class="cfg-in mono" type="url" required pattern="https://.*" :aria-label="t('integrations.gitlabUrl')">
       </CfgRow>
       <CfgRow
-        :label="provider === 'jira' ? t('integrations.apiToken') : t('integrations.accessToken')"
-        :help="provider === 'jira' ? t('integrations.apiTokenHelp') : t('integrations.tokenHelp')"
+        :label="tokenLabel"
+        :help="tokenHelp"
       >
         <input
           v-model="form.token"
@@ -130,8 +149,8 @@ const glScopes = [
           required
           minlength="8"
           autocomplete="off"
-          :placeholder="provider === 'github' ? 'github_pat_…' : provider === 'gitlab' ? 'glpat-…' : provider === 'claude' ? 'sk-ant-…' : provider === 'telegram' ? '123456:ABC…' : ''"
-          :aria-label="provider === 'jira' ? t('integrations.apiToken') : t('integrations.accessToken')"
+          :placeholder="provider === 'plane' ? 'plane_api_…' : provider === 'github' ? 'github_pat_…' : provider === 'gitlab' ? 'glpat-…' : provider === 'claude' ? 'sk-ant-…' : provider === 'telegram' ? '123456:ABC…' : ''"
+          :aria-label="tokenLabel"
         >
       </CfgRow>
       <CfgRow v-if="provider === 'telegram'" :label="t('integrations.chatId')" :help="t('integrations.chatIdHelp')">

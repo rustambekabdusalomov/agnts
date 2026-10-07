@@ -32,5 +32,11 @@ void main() {
       // TODO
     });
 
+    // The files the description should have: the task's files to keep and new uploads. Left out keeps them; files not listed are deleted.
+    // List<int> attachments
+    test('to test the property `attachments`', () async {
+      // TODO
+    });
+
   });
 }

@@ -210,6 +210,11 @@ paths:
                   maxItems: 6
                   description: Preview screenshots the feedback points at; the coding run gets them
                   items: { $ref: '#/components/schemas/ShotRef' }
+                attachments:
+                  type: array
+                  maxItems: 10
+                  description: Uploads that go with the feedback (mockups, logs, screenshots); the coding run reads them
+                  items: { type: integer, format: int64 }
       responses:
         '200': { $ref: '#/components/responses/TicketOK' }
         '400': { $ref: '#/components/responses/BadRequest' }
@@ -244,10 +249,27 @@ paths:
       operationId: retryTicket
       summary: Resume a failed or rate-limited ticket where it stopped
       tags: [tickets]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note:
+                  type: string
+                  maxLength: 4000
+                  description: How to get past the failure. The next coding run gets it with the error, like requested changes. Not allowed when the ticket resumes at pushing, since no Claude run follows.
+                attachments:
+                  type: array
+                  maxItems: 10
+                  description: Uploads that help get past the failure; the next coding run reads them. Same rule as note.
+                  items: { type: integer, format: int64 }
       responses:
         '200': { $ref: '#/components/responses/TicketOK' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
+        '400': { $ref: '#/components/responses/BadRequest' }
         '409': { $ref: '#/components/responses/Conflict' }
 
   /tickets/{key}/analyze:
@@ -476,8 +498,8 @@ paths:
       operationId: acceptFollowUps
       summary: Create tickets from chosen suggestions
       description: >-
-        Each chosen suggestion becomes a queued (held) ticket, as a local task
-        or a new Jira issue. Nothing runs until it is started. Items are
+        Each chosen suggestion becomes a queued (held) ticket, as a local task,
+        a new Jira issue or a new Plane work item. Nothing runs until it is started. Items are
         handled one by one; each result says what happened to its suggestion.
         What the analysis suggested can be created at once; what the work or
         its review found waits until this ticket is done.
@@ -651,6 +673,71 @@ paths:
       responses:
         '200': { $ref: '#/components/responses/TicketOK' }
         '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /attachments:
+    post:
+      operationId: uploadAttachment
+      summary: Upload a file to attach to a task, an answer or a retry note
+      description: >-
+        The upload stays pending until the request that uses it (createTask,
+        updateTask, answerQuestions, retryTicket, requestChanges) lists its id; pending uploads
+        nobody used are deleted after a day. Pictures (PNG, JPEG, GIF, WebP)
+        are shown in place; other files download. Claude reads every attached
+        file, pictures and PDFs included.
+      tags: [attachments]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: At most 10 MB
+      responses:
+        '201':
+          description: Uploaded
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Attachment' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '413':
+          description: The file is larger than 10 MB
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /attachments/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    get:
+      operationId: getAttachment
+      summary: An attached file's bytes
+      tags: [attachments]
+      responses:
+        '200':
+          description: The file; it never changes, so it may be cached
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      operationId: deleteAttachment
+      summary: Delete an upload that nothing uses yet
+      tags: [attachments]
+      responses:
+        '204': { description: Deleted }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
         '409': { $ref: '#/components/responses/Conflict' }
@@ -893,6 +980,31 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '409': { $ref: '#/components/responses/Conflict' }
 
+  /repos/detect:
+    post:
+      operationId: detectRepo
+      summary: Work out a repository's toolchains and check commands
+      description: |
+        Reads the default branch (of a saved repository by id, or of any
+        clone URL) and returns what it needs, without saving. With deep,
+        Claude also reads the README and CI files when the file scan finds
+        nothing; that takes a minute and uses the Claude plan.
+      tags: [repos]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RepoDetectInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RepoDetection' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /repos/{id}:
     parameters:
       - $ref: '#/components/parameters/RepoID'
@@ -984,6 +1096,10 @@ paths:
               required: [token]
               properties:
                 token: { type: string, minLength: 8, maxLength: 4096 }
+                webhookSecret:
+                  type: string
+                  maxLength: 200
+                  description: 'Plane: the secret Plane shows when you create the webhook. Empty keeps the stored one.'
                 settings:
                   type: object
                   additionalProperties: { type: string }
@@ -1061,6 +1177,64 @@ paths:
                 properties:
                   found: { type: integer }
                   created: { type: integer }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /integrations/plane/sync:
+    post:
+      operationId: syncPlane
+      summary: Pick up labelled Plane work items now
+      tags: [integrations]
+      responses:
+        '200':
+          description: Sync result
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [found, created]
+                properties:
+                  found: { type: integer }
+                  created: { type: integer }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /integrations/plane/webhook-secret:
+    put:
+      operationId: setPlaneWebhookSecret
+      summary: Store the secret Plane generated for the agnts webhook
+      tags: [integrations]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [secret]
+              properties:
+                secret: { type: string, minLength: 8, maxLength: 200 }
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Integration' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /integrations/plane/states:
+    get:
+      operationId: listPlaneStates
+      summary: States of the Plane projects linked to repositories, for the status mapping
+      tags: [integrations]
+      responses:
+        '200':
+          description: States, by name, with the projects that have them
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/PlaneState' }
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
 
@@ -1639,7 +1813,7 @@ components:
       name: provider
       in: path
       required: true
-      schema: { type: string, enum: [jira, github, claude, telegram, gitlab] }
+      schema: { type: string, enum: [jira, plane, github, claude, telegram, gitlab] }
     RuleID:
       name: id
       in: path
@@ -1787,8 +1961,8 @@ components:
           description: 'From the ticket asked about: it waits for other, other waits for it, or they conflict'
         source:
           type: string
-          enum: [jira, user, agnts, rule, git]
-          description: 'Who found it: a Jira link, a person, the analysis, overlapping footprints, or the finished diffs (when nobody predicted it)'
+          enum: [jira, plane, user, agnts, rule, git]
+          description: 'Who found it: a Jira link, a Plane relation, a person, the analysis, overlapping footprints, or the finished diffs (when nobody predicted it)'
         status:
           type: string
           enum: [active, proposed, dismissed]
@@ -1872,7 +2046,7 @@ components:
         title: { type: string }
         state: { $ref: '#/components/schemas/TicketState' }
         kind: { $ref: '#/components/schemas/TicketKind' }
-        source: { type: string, enum: [jira, local] }
+        source: { type: string, enum: [jira, plane, local] }
         held: { type: boolean }
 
     FollowUps:
@@ -1896,8 +2070,8 @@ components:
         id: { type: integer, format: int64 }
         target:
           type: string
-          enum: [local, jira]
-          description: 'local = an agnts task (default), jira = a new issue in the Jira project'
+          enum: [local, jira, plane]
+          description: 'local = an agnts task (default), jira = a new issue in the Jira project, plane = a new work item in the Plane project'
         title: { type: string, maxLength: 300 }
         description: { type: string, maxLength: 20000 }
         kind: { $ref: '#/components/schemas/TicketKind' }
@@ -1967,7 +2141,7 @@ components:
       required: [key, source, title, description, priority, state, revision, turns, branch, prUrl, kind, kindAuto, createdAt, updatedAt]
       properties:
         key: { type: string }
-        source: { type: string, enum: [jira, local] }
+        source: { type: string, enum: [jira, plane, local] }
         repoId: { type: integer, format: int64 }
         title: { type: string }
         description: { type: string }
@@ -2084,7 +2258,7 @@ components:
 
     Question:
       type: object
-      required: [id, position, text, options, note]
+      required: [id, position, text, options, multiple, note]
       properties:
         id: { type: integer, format: int64 }
         position: { type: integer }
@@ -2092,8 +2266,28 @@ components:
         options:
           type: array
           items: { type: string }
+        multiple:
+          type: boolean
+          description: Several options may be chosen; the answer then lists the chosen ones, one per line
         answer: { type: string }
         note: { type: string }
+
+    Attachment:
+      type: object
+      required: [id, name, contentType, size, purpose, url, createdAt]
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        contentType: { type: string }
+        size: { type: integer, format: int64, description: Bytes }
+        purpose:
+          type: string
+          enum: [pending, ticket, answer, retry, feedback]
+          description: 'pending = uploaded, not attached yet; ticket = the task description; answer = an answer (see questionId); retry = a retry note; feedback = requested changes'
+        questionId: { type: integer, format: int64 }
+        image: { type: boolean, description: 'A picture clients can show in place' }
+        url: { type: string, description: 'Where to load the file, relative to the API base' }
+        createdAt: { type: string, format: date-time }
 
     Analysis:
       type: object
@@ -2239,12 +2433,16 @@ components:
 
     TicketDetail:
       type: object
-      required: [ticket, questions]
+      required: [ticket, questions, attachments]
       properties:
         ticket: { $ref: '#/components/schemas/Ticket' }
         questions:
           type: array
           items: { $ref: '#/components/schemas/Question' }
+        attachments:
+          type: array
+          description: Files attached to the task, its answers and retry notes, oldest first
+          items: { $ref: '#/components/schemas/Attachment' }
         analysis: { $ref: '#/components/schemas/Analysis' }
         result: { $ref: '#/components/schemas/Result' }
         childKey: { type: string, description: 'The code task that implements this report, if any' }
@@ -2292,8 +2490,13 @@ components:
             required: [questionId, answer]
             properties:
               questionId: { type: integer, format: int64 }
-              answer: { type: string, minLength: 1, maxLength: 5000 }
+              answer: { type: string, minLength: 1, maxLength: 5000, description: 'For a multiple-choice question, the chosen options, one per line' }
               note: { type: string, maxLength: 5000 }
+              attachments:
+                type: array
+                maxItems: 10
+                description: Uploads to attach to this answer
+                items: { type: integer, format: int64 }
 
     Model:
       type: string
@@ -2355,6 +2558,11 @@ components:
           enum: [ask, code, queue]
           description: ask = analyse and ask first, code = no questions, queue = keep until started
         followUps: { $ref: '#/components/schemas/FollowUpsMode' }
+        attachments:
+          type: array
+          maxItems: 10
+          description: Uploads to attach to the description
+          items: { type: integer, format: int64 }
 
     TaskUpdate:
       type: object
@@ -2364,6 +2572,11 @@ components:
         priority: { type: string, enum: [low, medium, high] }
         afterApprove: { type: string, enum: [pr, main] }
         kind: { $ref: '#/components/schemas/TicketKindChoice' }
+        attachments:
+          type: array
+          maxItems: 10
+          description: 'The files the description should have: the task''s files to keep and new uploads. Left out keeps them; files not listed are deleted.'
+          items: { type: integer, format: int64 }
 
     EventPage:
       type: object
@@ -2479,8 +2692,8 @@ components:
         name: { type: string }
         kind:
           type: string
-          enum: [jira, side]
-          description: jira when the repository has a Jira project key, else side. Every repository takes side-project tasks.
+          enum: [jira, plane, side]
+          description: jira when the repository has a Jira project key, plane when it has only a Plane project, else side. Every repository takes side-project tasks.
         provider: { type: string, enum: [github, gitlab] }
         cloneUrl: { type: string }
         defaultBranch: { type: string }
@@ -2491,11 +2704,30 @@ components:
         taskPrefix: { type: string }
         instructions: { type: string, description: Extra instructions added to every prompt }
         jiraProject: { type: string }
+        planeProject: { type: string, description: 'Plane project identifier (WEB in WEB-123); empty when not linked' }
         claudeMd: { type: string, enum: [found, missing, unknown] }
         openTickets: { type: integer }
         deployWorkflow: { type: string }
         archivedAt: { type: string, format: date-time, description: Set while the repository is archived }
         preview: { $ref: '#/components/schemas/RepoPreview' }
+        stack: { type: string, description: 'Toolchain names, comma-separated (go,node)' }
+        toolchains:
+          type: array
+          description: Installed into every run container
+          items: { $ref: '#/components/schemas/Toolchain' }
+        toolchainsOverride: { type: boolean, description: Set by a person; detection leaves them alone }
+        toolchainsDetectedAt: { type: string, format: date-time }
+        toolchainNotes:
+          type: array
+          description: What detection could not handle
+          items: { type: string }
+        runnerImage: { type: string, description: 'Custom runner image (built FROM agnts-runner); empty uses the default' }
+        memoryMb: { type: integer, description: 'Run container memory; 0 uses the server default' }
+        buildEnvSet: { type: boolean }
+        buildEnvNames:
+          type: array
+          description: Names of the build environment variables; the values are never returned
+          items: { type: string }
 
     RepositoryInput:
       type: object
@@ -2504,9 +2736,9 @@ components:
         name: { type: string, minLength: 1, maxLength: 100 }
         kind:
           type: string
-          enum: [jira, side]
+          enum: [jira, plane, side]
           deprecated: true
-          description: Ignored; derived from jiraProject.
+          description: Ignored; derived from jiraProject and planeProject.
         cloneUrl: { type: string, minLength: 1, maxLength: 500 }
         defaultBranch: { type: string, maxLength: 100 }
         buildCmd: { type: string, maxLength: 500 }
@@ -2516,8 +2748,55 @@ components:
         taskPrefix: { type: string, maxLength: 8 }
         instructions: { type: string, maxLength: 20000 }
         jiraProject: { type: string, maxLength: 20 }
+        planeProject: { type: string, maxLength: 12 }
         deployWorkflow: { type: string, maxLength: 200, description: 'GitHub workflow file run by Deploy, e.g. deploy.yml' }
         preview: { $ref: '#/components/schemas/RepoPreviewInput' }
+        toolchains:
+          type: array
+          maxItems: 12
+          description: Absent keeps the stored list
+          items: { $ref: '#/components/schemas/Toolchain' }
+        toolchainsOverride: { type: boolean, description: 'true: these toolchains were set by hand; detection keeps them' }
+        runnerImage: { type: string, maxLength: 255 }
+        memoryMb: { type: integer, minimum: 0, maximum: 65536 }
+        buildEnv:
+          type: string
+          maxLength: 16384
+          description: 'KEY=value lines given to every run (registry tokens); replaces the stored one, "" clears it, absent keeps it'
+
+    Toolchain:
+      type: object
+      required: [tool, version]
+      description: A language runtime or build tool, installed with mise as tool@version
+      properties:
+        tool: { type: string, maxLength: 40, description: 'mise tool name: go, node, python, rust, java, dotnet, ruby, ...' }
+        version: { type: string, maxLength: 64, description: 'Exact, a prefix (20, 3.12), latest, lts or system' }
+        source: { type: string, description: 'Where it was found: go.mod, .nvmrc, default, manual' }
+        dir: { type: string, description: Subdirectory it was found in }
+
+    RepoDetectInput:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: A saved repository; the other fields are then optional }
+        cloneUrl: { type: string, maxLength: 500 }
+        defaultBranch: { type: string, maxLength: 100 }
+        deep: { type: boolean, description: Ask Claude when the file scan finds no commands }
+
+    RepoDetection:
+      type: object
+      required: [toolchains, buildCmd, lintCmd, testCmd, notes, stack, source]
+      properties:
+        toolchains:
+          type: array
+          items: { $ref: '#/components/schemas/Toolchain' }
+        buildCmd: { type: string }
+        lintCmd: { type: string }
+        testCmd: { type: string }
+        notes:
+          type: array
+          items: { type: string }
+        stack: { type: string }
+        source: { type: string, enum: [files, claude], description: Whether Claude filled in what the file scan could not }
 
     RepoPreview:
       type: object
@@ -2597,6 +2876,18 @@ components:
           additionalProperties: { type: string }
         webhookUrl: { type: string }
         webhookSecret: { type: string, description: 'GitHub and GitLab: secret to enter in the webhook settings' }
+        webhookSecretSet: { type: boolean, description: 'Plane: a webhook secret is stored (deliveries are accepted)' }
+
+    PlaneState:
+      type: object
+      required: [name, group, projects]
+      properties:
+        name: { type: string }
+        group: { type: string, enum: [backlog, unstarted, started, completed, cancelled, triage] }
+        projects:
+          type: array
+          description: Identifiers of the linked projects that have this state
+          items: { type: string }
 
     ConnectResult:
       type: object

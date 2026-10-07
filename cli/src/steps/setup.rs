@@ -6,7 +6,7 @@ use super::{Cx, Step};
 use crate::cloud::CABINET_KEYS;
 use crate::dns::valid_domain;
 use crate::profile::{self, Mode};
-use crate::{ops, preflight, secrets, ui};
+use crate::{capacity, ops, secrets, ui};
 
 pub struct Ask;
 
@@ -133,7 +133,7 @@ impl Step for Preflight {
         "preflight"
     }
     fn title(&self) -> &'static str {
-        "Check the server"
+        "Check the server and its capacity"
     }
     fn read_only(&self) -> bool {
         true
@@ -146,26 +146,20 @@ impl Step for Preflight {
     }
 
     fn apply(&self, cx: &mut Cx) -> Result<()> {
+        // Measured before anything is asked or changed: a server that is too
+        // small stops here with what it lacks.
         let installed = ops::install_id(cx.target, false)?.is_some();
-        let (info, findings) = preflight::run(cx.target, installed)?;
-        let mut failed = false;
-        for f in &findings {
-            if f.ok {
-                ui::ok(&format!("{}: {}", f.name, f.detail));
-            } else {
-                failed = true;
-                ui::fail(&format!("{}: {}", f.name, f.detail));
-                if let Some(fix) = &f.fix {
-                    ui::info(&format!("  → {fix}"));
-                }
-            }
-        }
-        if failed && cx.opts.ignore_preflight {
+        let (info, assessment, fits) = capacity::check(cx.target, installed, !cx.opts.dry_run)?;
+        if !fits && cx.opts.ignore_preflight {
             ui::warn("continuing anyway (--ignore-preflight)");
-        } else if failed {
-            bail!("the server is not ready for agnts; fix the items above and run the same command again");
+        } else if !fits {
+            bail!(
+                "nothing was installed: {} does not meet the requirements above",
+                cx.target.label()
+            );
         }
         cx.host = Some(info);
+        cx.parallel = Some(assessment.parallel);
         Ok(())
     }
 }

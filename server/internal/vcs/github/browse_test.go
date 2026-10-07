@@ -68,3 +68,62 @@ func TestBrowse(t *testing.T) {
 		t.Fatalf("missing environments should be empty: %v %v", envs, err)
 	}
 }
+
+// Branches come from one GraphQL request when GitHub answers it; partial
+// data (a rollup the token may not read) still counts.
+func TestBranchesGraphQL(t *testing.T) {
+	var rest int
+	var vars map[string]any
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" || r.URL.Path != "/graphql" {
+			rest++
+			w.WriteHeader(404)
+			return
+		}
+		var req struct {
+			Variables map[string]any `json:"variables"`
+		}
+		_ = json.NewDecoder(r.Body).Decode(&req)
+		vars = req.Variables
+		_, _ = io.WriteString(w, `{"data":{"repository":{
+			"base":{"name":"main","target":{"oid":"m1","messageHeadline":"init","author":{"name":"U","date":"2026-10-01T09:00:00Z"},"statusCheckRollup":{"state":"SUCCESS"}}},
+			"refs":{"nodes":[
+				{"name":"agnts/PAY-1","target":{"oid":"h1","messageHeadline":"PAY-1: fix","author":{"name":"Rustam","date":"2026-10-01T10:00:00Z"},"statusCheckRollup":{"state":"FAILURE"}},"compare":{"aheadBy":1,"behindBy":2}},
+				{"name":"main","target":{"oid":"m1"},"compare":{"aheadBy":0,"behindBy":0}},
+				{"name":"wip","target":{"oid":"w1","messageHeadline":"wip","author":{"name":"U","date":null},"statusCheckRollup":null},"compare":null}
+			]}}},
+			"errors":[{"message":"Resource not accessible by personal access token"}]}`)
+	}))
+	defer srv.Close()
+	h := New(srv.URL, func(context.Context) (string, error) { return "tok", nil })
+	repo := domain.Repository{CloneURL: "https://github.com/acme/api.git", DefaultBranch: "main"}
+	bs, err := h.Branches(context.Background(), repo)
+	if err != nil || len(bs) != 3 || rest != 0 {
+		t.Fatalf("branches: %+v %v (rest calls %d)", bs, err, rest)
+	}
+	if vars["owner"] != "acme" || vars["name"] != "api" || vars["base"] != "main" || vars["qualified"] != "refs/heads/main" {
+		t.Fatalf("variables: %v", vars)
+	}
+	m, pay, wip := bs[0], bs[1], bs[2]
+	if !m.Default || m.CI != vcs.CIOK || m.Message != "init" {
+		t.Errorf("main = %+v", m)
+	}
+	if pay.Ahead != 2 || pay.Behind != 1 || pay.CI != vcs.CIFail || pay.Message != "PAY-1: fix" || pay.Author != "Rustam" || pay.Date.Hour() != 10 {
+		t.Errorf("PAY-1 = %+v", pay)
+	}
+	if wip.CI != vcs.CINone || !wip.Date.IsZero() {
+		t.Errorf("wip = %+v", wip)
+	}
+}
+
+func TestGraphQLURL(t *testing.T) {
+	for api, want := range map[string]string{
+		"https://api.github.com":       "https://api.github.com/graphql",
+		"https://ghe.acme.com/api/v3":  "https://ghe.acme.com/api/graphql",
+		"https://ghe.acme.com/api/v3/": "https://ghe.acme.com/api/graphql",
+	} {
+		if got := New(api, nil).graphqlURL(); got != want {
+			t.Errorf("%s: %s", api, got)
+		}
+	}
+}

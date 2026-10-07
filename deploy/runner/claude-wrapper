@@ -1,0 +1,8 @@
+#!/bin/sh
+# Claude Code on its own Node (/opt/claude/node), whatever Node the
+# repository puts first on PATH. Native builds of Claude Code run as is.
+t=$(readlink -f /opt/claude/bin/claude)
+case "$(head -c 2 "$t")" in
+  '#!') exec /opt/claude/node/bin/node "$t" "$@" ;;
+  *) exec "$t" "$@" ;;
+esac

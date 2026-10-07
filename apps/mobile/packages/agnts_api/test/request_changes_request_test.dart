@@ -18,5 +18,11 @@ void main() {
       // TODO
     });
 
+    // Uploads that go with the feedback (mockups, logs, screenshots); the coding run reads them
+    // List<int> attachments
+    test('to test the property `attachments`', () async {
+      // TODO
+    });
+
   });
 }

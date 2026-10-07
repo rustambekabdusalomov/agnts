@@ -278,6 +278,7 @@ const _$RelationDirectionEnumEnumMap = {
 
 const _$RelationSource_EnumEnumMap = {
   RelationSource_Enum.jira: 'jira',
+  RelationSource_Enum.plane: 'plane',
   RelationSource_Enum.user: 'user',
   RelationSource_Enum.agnts: 'agnts',
   RelationSource_Enum.rule: 'rule',

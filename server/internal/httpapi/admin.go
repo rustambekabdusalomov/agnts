@@ -157,6 +157,7 @@ func (s *Server) CreateTask(w http.ResponseWriter, r *http.Request) {
 		}
 		in.FollowUps = on
 	}
+	in.Attachments = req.Attachments
 	t, err := s.opt.Tickets.CreateTask(r.Context(), in, origin(r))
 	if err != nil {
 		s.writeUseCaseError(w, r, err)
@@ -188,6 +189,7 @@ func (s *Server) UpdateTask(w http.ResponseWriter, r *http.Request, key gen.Tick
 	if req.Kind != nil {
 		in.Kind = string(*req.Kind)
 	}
+	in.Attachments = req.Attachments
 	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
 		return s.opt.Tickets.UpdateTask(ctx, key, in, origin(r))
 	})
@@ -532,8 +534,85 @@ func toRepo(x admin.RepoView) gen.Repository {
 	return gen.Repository{Id: x.ID, Name: x.Name, Kind: gen.RepositoryKind(x.Kind), Provider: gen.RepositoryProvider(x.Provider),
 		CloneUrl: x.CloneURL, DefaultBranch: x.DefaultBranch, BuildCmd: x.BuildCmd, LintCmd: x.LintCmd, TestCmd: x.TestCmd,
 		BranchPrefix: x.BranchPrefix, TaskPrefix: orchestrator.TaskPrefix(x.Repository), Instructions: x.ClaudeMD,
-		JiraProject: x.JiraProject, ClaudeMd: gen.RepositoryClaudeMd(st), OpenTickets: x.Open, DeployWorkflow: &x.DeployWorkflow,
-		ArchivedAt: x.ArchivedAt, Preview: toRepoPreview(x.Preview)}
+		JiraProject: x.JiraProject, PlaneProject: &x.PlaneProject, ClaudeMd: gen.RepositoryClaudeMd(st), OpenTickets: x.Open, DeployWorkflow: &x.DeployWorkflow,
+		ArchivedAt: x.ArchivedAt, Preview: toRepoPreview(x.Preview),
+		Stack: &x.Stack, Toolchains: ptr(toToolchains(x.Toolchains)), ToolchainsOverride: &x.ToolchainsOverride,
+		ToolchainsDetectedAt: x.ToolchainsDetectedAt, ToolchainNotes: ptr(nonNil(x.ToolchainNotes)),
+		RunnerImage: &x.RunnerImage, MemoryMb: &x.MemoryMB, BuildEnvSet: &x.BuildEnvSet, BuildEnvNames: ptr(nonNil(x.BuildEnvNames))}
+}
+
+func ptr[T any](v T) *T { return &v }
+
+func nonNil(v []string) []string {
+	if v == nil {
+		return []string{}
+	}
+	return v
+}
+
+func toToolchains(ts []domain.Toolchain) []gen.Toolchain {
+	out := make([]gen.Toolchain, len(ts))
+	for i, t := range ts {
+		out[i] = gen.Toolchain{Tool: t.Tool, Version: t.Version}
+		if t.Source != "" {
+			out[i].Source = ptr(t.Source)
+		}
+		if t.Dir != "" {
+			out[i].Dir = ptr(t.Dir)
+		}
+	}
+	return out
+}
+
+func fromToolchains(ts []gen.Toolchain) []domain.Toolchain {
+	out := make([]domain.Toolchain, len(ts))
+	for i, t := range ts {
+		out[i] = domain.Toolchain{Tool: t.Tool, Version: t.Version}
+		if t.Source != nil {
+			out[i].Source = *t.Source
+		}
+		if t.Dir != nil {
+			out[i].Dir = *t.Dir
+		}
+	}
+	return out
+}
+
+// DetectRepo implements gen.ServerInterface.
+func (s *Server) DetectRepo(w http.ResponseWriter, r *http.Request) {
+	if !s.adminReady(w) {
+		return
+	}
+	var in gen.RepoDetectInput
+	if err := decodeJSON(r, &in); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	x := domain.Repository{}
+	if in.Id != nil {
+		x.ID = *in.Id
+	}
+	if in.CloneUrl != nil {
+		x.CloneURL = *in.CloneUrl
+	}
+	if in.DefaultBranch != nil {
+		x.DefaultBranch = *in.DefaultBranch
+	}
+	if x.ID == 0 && x.CloneURL == "" {
+		writeError(w, http.StatusBadRequest, "bad_request", "give a repository id or a clone URL")
+		return
+	}
+	det, byClaude, err := s.opt.Admin.Repos.Detect(r.Context(), x, in.Deep != nil && *in.Deep)
+	if err != nil {
+		s.writeAdminError(w, r, err, "")
+		return
+	}
+	src := gen.RepoDetectionSourceFiles
+	if byClaude {
+		src = gen.RepoDetectionSourceClaude
+	}
+	writeJSON(w, http.StatusOK, gen.RepoDetection{Toolchains: toToolchains(det.Toolchains), BuildCmd: det.Build, LintCmd: det.Lint,
+		TestCmd: det.Test, Notes: nonNil(det.Notes), Stack: det.Stack(), Source: src})
 }
 
 func toRepoPreview(p domain.PreviewConfig) *gen.RepoPreview {
@@ -614,6 +693,17 @@ func repoFromInput(in gen.RepositoryInput) domain.Repository {
 	x.DefaultBranch, x.BuildCmd, x.LintCmd, x.TestCmd = str(in.DefaultBranch), str(in.BuildCmd), str(in.LintCmd), str(in.TestCmd)
 	x.BranchPrefix, x.TaskPrefix, x.ClaudeMD, x.JiraProject = str(in.BranchPrefix), str(in.TaskPrefix), str(in.Instructions), str(in.JiraProject)
 	x.DeployWorkflow = str(in.DeployWorkflow)
+	x.PlaneProject = str(in.PlaneProject)
+	if in.Toolchains != nil {
+		x.Toolchains = fromToolchains(*in.Toolchains)
+	}
+	if in.ToolchainsOverride != nil {
+		x.ToolchainsOverride = *in.ToolchainsOverride
+	}
+	x.RunnerImage = str(in.RunnerImage)
+	if in.MemoryMb != nil {
+		x.MemoryMB = *in.MemoryMb
+	}
 	if p := in.Preview; p != nil {
 		x.Preview = domain.PreviewConfig{Command: str(p.Command), ReadyPath: str(p.ReadyPath), Login: str(p.Login)}
 		if p.Port != nil {
@@ -647,9 +737,9 @@ func (s *Server) CreateRepo(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
 		return
 	}
-	x, err := s.opt.Admin.Repos.Save(r.Context(), repoFromInput(in), false, previewEnv(in))
+	x, err := s.opt.Admin.Repos.SaveRun(r.Context(), repoFromInput(in), admin.SaveOptions{PreviewEnv: previewEnv(in), BuildEnv: in.BuildEnv})
 	if err != nil {
-		s.writeAdminError(w, r, err, "a repository with that name or Jira project already exists")
+		s.writeAdminError(w, r, err, "a repository with that name, Jira project or Plane project already exists")
 		return
 	}
 	writeJSON(w, http.StatusCreated, toRepo(x))
@@ -667,9 +757,14 @@ func (s *Server) UpdateRepo(w http.ResponseWriter, r *http.Request, id int64) {
 	}
 	x := repoFromInput(in)
 	x.ID = id
-	saved, err := s.opt.Admin.Repos.Save(r.Context(), x, in.Preview == nil, previewEnv(in))
+	// A client that sends no toolchains (an older one) keeps the stored
+	// run settings.
+	saved, err := s.opt.Admin.Repos.SaveRun(r.Context(), x, admin.SaveOptions{
+		KeepPreview: in.Preview == nil, PreviewEnv: previewEnv(in), KeepRun: in.Toolchains == nil, BuildEnv: in.BuildEnv,
+		KeepPlane: in.PlaneProject == nil,
+	})
 	if err != nil {
-		s.writeAdminError(w, r, err, "a repository with that name or Jira project already exists")
+		s.writeAdminError(w, r, err, "a repository with that name, Jira project or Plane project already exists")
 		return
 	}
 	writeJSON(w, http.StatusOK, toRepo(saved))
@@ -709,6 +804,9 @@ func toIntegration(v admin.View) gen.Integration {
 	if v.WebhookURL != "" {
 		out.WebhookUrl = &v.WebhookURL
 	}
+	if v.Provider == "plane" {
+		out.WebhookSecretSet = &v.WebhookSecretSet
+	}
 	if v.WebhookSecret != "" {
 		out.WebhookSecret = &v.WebhookSecret
 	}
@@ -746,7 +844,11 @@ func (s *Server) ConnectIntegration(w http.ResponseWriter, r *http.Request, prov
 	if req.Settings != nil {
 		settings = *req.Settings
 	}
-	v, secret, err := s.opt.Admin.Integrations.Connect(r.Context(), string(provider), req.Token, settings, origin(r))
+	hook := ""
+	if req.WebhookSecret != nil {
+		hook = *req.WebhookSecret
+	}
+	v, secret, err := s.opt.Admin.Integrations.Connect(r.Context(), string(provider), req.Token, settings, hook, origin(r))
 	if err != nil {
 		s.writeAdminError(w, r, err, "")
 		return
@@ -841,6 +943,54 @@ func (s *Server) SyncJira(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]int{"found": found, "created": created})
+}
+
+// SyncPlane implements gen.ServerInterface.
+func (s *Server) SyncPlane(w http.ResponseWriter, r *http.Request) {
+	if !s.adminReady(w) {
+		return
+	}
+	found, created, err := s.opt.Admin.Integrations.SyncPlane(r.Context())
+	if err != nil {
+		s.writeAdminError(w, r, err, "")
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]int{"found": found, "created": created})
+}
+
+// SetPlaneWebhookSecret implements gen.ServerInterface.
+func (s *Server) SetPlaneWebhookSecret(w http.ResponseWriter, r *http.Request) {
+	if !s.adminReady(w) {
+		return
+	}
+	var req gen.SetPlaneWebhookSecretJSONRequestBody
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	v, err := s.opt.Admin.Integrations.SetPlaneWebhookSecret(r.Context(), req.Secret, origin(r))
+	if err != nil {
+		s.writeAdminError(w, r, err, "")
+		return
+	}
+	writeJSON(w, http.StatusOK, toIntegration(v))
+}
+
+// ListPlaneStates implements gen.ServerInterface.
+func (s *Server) ListPlaneStates(w http.ResponseWriter, r *http.Request) {
+	if !s.adminReady(w) {
+		return
+	}
+	sts, err := s.opt.Admin.Integrations.PlaneStates(r.Context())
+	if err != nil {
+		s.writeAdminError(w, r, err, "")
+		return
+	}
+	out := make([]gen.PlaneState, len(sts))
+	for i, x := range sts {
+		out[i] = gen.PlaneState{Name: x.Name, Group: gen.PlaneStateGroup(x.Group), Projects: x.Projects}
+	}
+	writeJSON(w, http.StatusOK, out)
 }
 
 // ---- docs ----

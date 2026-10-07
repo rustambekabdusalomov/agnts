@@ -152,6 +152,50 @@ func TestManualRelationsAndMergedByHand(t *testing.T) {
 	h.expect("PAY-2", domain.StateWaitingForReview)
 }
 
+// A merge whose webhook never arrived is found by asking the git host, and
+// releases the ticket waiting for it.
+func TestCheckMergesFindsMergedPR(t *testing.T) {
+	h := newHarness(t)
+	h.ingest("PAY-1")
+	h.ingest("PAY-2")
+	if _, err := h.o.AddRelation(h.ctx, "PAY-2", "PAY-1", domain.RelDependsOn, domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
+	h.runner.scripts = []script{
+		analyzed("s1", analysis(0)), coded("s1"), analyzed("s2", analysis(0)), coded("s2"),
+	}
+	h.step()
+	h.step()
+	h.step()
+	h.idle()
+	h.o.CheckMerges(h.ctx) // nothing pushed yet: nothing to ask about
+	if len(h.host.asked) != 0 {
+		t.Fatalf("asked before a pull request existed: %v", h.host.asked)
+	}
+	h.approve("PAY-1")
+	h.step()
+	h.idle()
+
+	h.o.CheckMerges(h.ctx) // still open
+	if tk := h.state("PAY-1"); tk.MergedAt != nil || len(h.host.asked) != 1 || h.host.asked[0] != 7 {
+		t.Fatalf("open pull request: merged %v, asked %v", tk.MergedAt, h.host.asked)
+	}
+	h.expect("PAY-2", domain.StateCoding)
+
+	h.host.merged = map[int]bool{7: true}
+	h.o.CheckMerges(h.ctx)
+	if tk := h.state("PAY-1"); tk.MergedAt == nil {
+		t.Fatal("merge not recorded")
+	}
+	h.step()
+	h.expect("PAY-2", domain.StateWaitingForReview)
+
+	h.o.CheckMerges(h.ctx) // a recorded merge is not asked about again
+	if len(h.host.asked) != 2 {
+		t.Fatalf("asked again: %v", h.host.asked)
+	}
+}
+
 // Phase 2: predicted footprints that share a hot spot (both add a
 // migration) make an active conflict: the second ticket waits until the
 // first is merged, or rejected.

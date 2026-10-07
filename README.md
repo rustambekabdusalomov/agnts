@@ -55,14 +55,24 @@ the CLI as `agnts server -- ...`:
 agnts server -- integration set claude    # token from `claude setup-token` (your Claude plan)
 agnts server -- integration set github    # fine-grained PAT: Contents + Pull requests, read/write
 agnts server -- integration set jira      # site, email, API token, label; prints the webhook to create
-agnts server -- repo add --name api --url https://github.com/acme/api.git --jira PAY \
-  --build "go build ./..." --lint "go vet ./..." --test "go test ./..."
+agnts server -- integration set plane     # API address, workspace, API key; prints the webhook to create in Plane
+agnts server -- repo add --name api --url https://github.com/acme/api.git --jira PAY
+                                          # clones it, detects toolchains (go@1.24, node@20, python@3.12, ...)
+                                          # and the build/lint/test commands; override with --toolchain/--build/...
+agnts server -- repo detect api           # detect again, e.g. after adding a language
 agnts server -- jira sync                 # pick up already-labelled issues now
+agnts server -- plane sync                # same for Plane work items (repos linked with --plane WEB)
 agnts server -- mcp token                 # static MCP token for Claude Code / Claude Desktop
 ```
 
 - **Jira:** Integrations → Jira shows the webhook URL and secret to paste into
   Jira (Settings → System → WebHooks).
+- **Plane:** Plane Cloud or self-hosted. Integrations → Plane takes the API
+  address, workspace slug and a personal access token, and shows the webhook
+  URL to add in Plane (Workspace settings → Webhooks, work item events). Plane
+  generates the secret: paste it back on the same page. Link a repository to
+  a Plane project by its identifier (WEB in WEB-123) and label work items
+  `agnts`. Statuses left empty move to the first state of the matching group.
 - **GitHub / GitLab webhooks:** the integration page shows a URL and secret.
   Merged pull requests then mark the ticket merged and move the Jira issue.
 - **Telegram:** create a bot with @BotFather, send `/start` to it to learn
@@ -72,6 +82,16 @@ agnts server -- mcp token                 # static MCP token for Claude Code / C
 - **Claude chat:** Settings → Claude chat shows the connector URL. In Claude,
   add a custom connector with it; Claude sends you to agnts to approve. Every
   change requested in chat is prepared first and runs only after you confirm.
+
+**Languages.** Runs work in any language mise can install from prebuilt
+binaries: Go, Node, Bun, Deno, Python, Rust, Java/Kotlin/Scala, .NET, Ruby,
+Elixir/Erlang, Gleam, Dart, Zig, Swift, Crystal, Nim, Julia, Haskell (stack)
+and more, plus PHP from the runner image. Each repository's toolchains are
+detected from its files (or set under Repositories → Toolchains), installed
+once per version into the shared `agnts-toolchains` volume and mounted
+read-only into runs; each repository keeps a package cache between runs. See
+[deploy/runner/README.md](deploy/runner/README.md) and
+[Languages plan.md](Languages%20plan.md).
 
 Then label a Jira issue `agnts`. The flow: agnts reads the code and either asks
 questions (answer them on the ticket page) or starts coding; it runs your
@@ -151,9 +171,13 @@ Claude token and a copy of the repository, never the GitHub token.
 
 ## Deploy
 
-You need a Linux server (Ubuntu 22.04/24.04 or Debian 12, amd64, 2 GB RAM,
-20 GB free disk), a domain, and an access key from your cabinet at
+You need a Linux server (Ubuntu 22.04/24.04 or Debian 12, amd64) with at
+least 2 vCPU, 4 GB RAM and 25 GB free disk (recommended: 4 vCPU, 8 GB RAM,
+80 GB SSD), a domain, and an access key from your cabinet at
 https://agnts.uz/cabinet/keys. One key is good for one install.
+`agnts capacity root@203.0.113.10` checks a server without installing
+anything; `agnts install` runs the same check first and stops, changing
+nothing, when the server is too small.
 
 ```sh
 curl -fsSL https://agnts.uz/install.sh | sh            # Windows: irm https://agnts.uz/install.ps1 | iex
@@ -173,6 +197,7 @@ Afterwards:
 
 ```sh
 agnts status            # containers, version, certificate, disk, last backup
+agnts capacity          # CPU, memory, disk and disk speed against what agnts needs
 agnts doctor            # every check, with fixes
 agnts upgrade           # backup, new version, roll back if it does not come up
 agnts backup --pull     # copy backups to your laptop
@@ -197,9 +222,12 @@ variable `DEPLOY_ENABLED=true` and the secrets listed in
 which publishes the images to `registry.agnts.uz` and the CLI to agnts.uz.
 
 Run containers sit on the internal `agnts-runs` network; the `egress`
-service is their only way out and allows the Claude API, GitHub, GitLab.com
-and the Go, npm and PyPI registries. Add hosts (a self-hosted GitLab, a
-private registry) with `AGNTS_EGRESS_ALLOW`.
+service is their only way out and allows the Claude API, GitHub, GitLab.com,
+the toolchain downloads (nodejs.org, go.dev, static.rust-lang.org, Adoptium,
+dot.net, ...) and the package registries of the supported languages (npm,
+PyPI, crates.io, Maven Central, NuGet, RubyGems, Packagist, Hex, pub.dev, ...).
+Add hosts (a self-hosted GitLab, a private registry) under Settings → Previews → Allowed hosts;
+`AGNTS_EGRESS_ALLOW` replaces the built-in list.
 
 Prometheus metrics are served on `AGNTS_METRICS_ADDR` (for example `:9090`),
 which Caddy does not expose.

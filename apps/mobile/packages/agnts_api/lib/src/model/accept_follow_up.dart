@@ -48,7 +48,7 @@ class AcceptFollowUp {
 
 
 
-      /// local = an agnts task (default), jira = a new issue in the Jira project
+      /// local = an agnts task (default), jira = a new issue in the Jira project, plane = a new work item in the Plane project
   @JsonKey(
     
     name: r'target',
@@ -155,12 +155,14 @@ class AcceptFollowUp {
 
 }
 
-/// local = an agnts task (default), jira = a new issue in the Jira project
+/// local = an agnts task (default), jira = a new issue in the Jira project, plane = a new work item in the Plane project
 enum AcceptFollowUpTargetEnum {
 @JsonValue(r'local')
 local(r'local'),
 @JsonValue(r'jira')
-jira(r'jira');
+jira(r'jira'),
+@JsonValue(r'plane')
+plane(r'plane');
 
 const AcceptFollowUpTargetEnum(this.value);
 

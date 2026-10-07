@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router'
 import { api, unwrap } from '../../api/client'
 import type { StageSpend } from '../../api/types'
 import { fmtTokens, fmtUsd, ioTokens } from '../../composables/format'
+import { livePoll } from '../../composables/useLive'
 import StateBadge from '../StateBadge.vue'
 
 // The tickets that used most of the plan in a period, by Claude Code's cost
@@ -19,7 +20,7 @@ const days = ref<Days>(30)
 const q = useQuery({
   queryKey: computed(() => ['ticket-spend', days.value]),
   queryFn: () => unwrap(api.GET('/usage/tickets', { params: { query: { days: days.value, limit: 10 } } })),
-  refetchInterval: 60_000,
+  refetchInterval: () => livePoll(60_000),
 })
 const v = computed(() => q.data.value)
 

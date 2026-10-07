@@ -12,7 +12,7 @@ void main() {
       // TODO
     });
 
-    // Ignored; derived from jiraProject.
+    // Ignored; derived from jiraProject and planeProject.
     // String kind
     test('to test the property `kind`', () async {
       // TODO
@@ -63,6 +63,11 @@ void main() {
       // TODO
     });
 
+    // String planeProject
+    test('to test the property `planeProject`', () async {
+      // TODO
+    });
+
     // GitHub workflow file run by Deploy, e.g. deploy.yml
     // String deployWorkflow
     test('to test the property `deployWorkflow`', () async {
@@ -71,6 +76,34 @@ void main() {
 
     // RepoPreviewInput preview
     test('to test the property `preview`', () async {
+      // TODO
+    });
+
+    // Absent keeps the stored list
+    // List<Toolchain> toolchains
+    test('to test the property `toolchains`', () async {
+      // TODO
+    });
+
+    // true: these toolchains were set by hand; detection keeps them
+    // bool toolchainsOverride
+    test('to test the property `toolchainsOverride`', () async {
+      // TODO
+    });
+
+    // String runnerImage
+    test('to test the property `runnerImage`', () async {
+      // TODO
+    });
+
+    // int memoryMb
+    test('to test the property `memoryMb`', () async {
+      // TODO
+    });
+
+    // KEY=value lines given to every run (registry tokens); replaces the stored one, \"\" clears it, absent keeps it
+    // String buildEnv
+    test('to test the property `buildEnv`', () async {
       // TODO
     });
 

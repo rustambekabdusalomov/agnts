@@ -29,9 +29,21 @@ abstract class _$RepositoryInputCWProxy {
 
   RepositoryInput jiraProject(String? jiraProject);
 
+  RepositoryInput planeProject(String? planeProject);
+
   RepositoryInput deployWorkflow(String? deployWorkflow);
 
   RepositoryInput preview(RepoPreviewInput? preview);
+
+  RepositoryInput toolchains(List<Toolchain>? toolchains);
+
+  RepositoryInput toolchainsOverride(bool? toolchainsOverride);
+
+  RepositoryInput runnerImage(String? runnerImage);
+
+  RepositoryInput memoryMb(int? memoryMb);
+
+  RepositoryInput buildEnv(String? buildEnv);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `RepositoryInput(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -51,8 +63,14 @@ abstract class _$RepositoryInputCWProxy {
     String? taskPrefix,
     String? instructions,
     String? jiraProject,
+    String? planeProject,
     String? deployWorkflow,
     RepoPreviewInput? preview,
+    List<Toolchain>? toolchains,
+    bool? toolchainsOverride,
+    String? runnerImage,
+    int? memoryMb,
+    String? buildEnv,
   });
 }
 
@@ -101,11 +119,33 @@ class _$RepositoryInputCWProxyImpl implements _$RepositoryInputCWProxy {
       this(jiraProject: jiraProject);
 
   @override
+  RepositoryInput planeProject(String? planeProject) =>
+      this(planeProject: planeProject);
+
+  @override
   RepositoryInput deployWorkflow(String? deployWorkflow) =>
       this(deployWorkflow: deployWorkflow);
 
   @override
   RepositoryInput preview(RepoPreviewInput? preview) => this(preview: preview);
+
+  @override
+  RepositoryInput toolchains(List<Toolchain>? toolchains) =>
+      this(toolchains: toolchains);
+
+  @override
+  RepositoryInput toolchainsOverride(bool? toolchainsOverride) =>
+      this(toolchainsOverride: toolchainsOverride);
+
+  @override
+  RepositoryInput runnerImage(String? runnerImage) =>
+      this(runnerImage: runnerImage);
+
+  @override
+  RepositoryInput memoryMb(int? memoryMb) => this(memoryMb: memoryMb);
+
+  @override
+  RepositoryInput buildEnv(String? buildEnv) => this(buildEnv: buildEnv);
 
   @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `RepositoryInput(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -126,8 +166,14 @@ class _$RepositoryInputCWProxyImpl implements _$RepositoryInputCWProxy {
     Object? taskPrefix = const $CopyWithPlaceholder(),
     Object? instructions = const $CopyWithPlaceholder(),
     Object? jiraProject = const $CopyWithPlaceholder(),
+    Object? planeProject = const $CopyWithPlaceholder(),
     Object? deployWorkflow = const $CopyWithPlaceholder(),
     Object? preview = const $CopyWithPlaceholder(),
+    Object? toolchains = const $CopyWithPlaceholder(),
+    Object? toolchainsOverride = const $CopyWithPlaceholder(),
+    Object? runnerImage = const $CopyWithPlaceholder(),
+    Object? memoryMb = const $CopyWithPlaceholder(),
+    Object? buildEnv = const $CopyWithPlaceholder(),
   }) {
     return RepositoryInput(
       name: name == const $CopyWithPlaceholder()
@@ -174,6 +220,10 @@ class _$RepositoryInputCWProxyImpl implements _$RepositoryInputCWProxy {
           ? _value.jiraProject
           // ignore: cast_nullable_to_non_nullable
           : jiraProject as String?,
+      planeProject: planeProject == const $CopyWithPlaceholder()
+          ? _value.planeProject
+          // ignore: cast_nullable_to_non_nullable
+          : planeProject as String?,
       deployWorkflow: deployWorkflow == const $CopyWithPlaceholder()
           ? _value.deployWorkflow
           // ignore: cast_nullable_to_non_nullable
@@ -182,6 +232,26 @@ class _$RepositoryInputCWProxyImpl implements _$RepositoryInputCWProxy {
           ? _value.preview
           // ignore: cast_nullable_to_non_nullable
           : preview as RepoPreviewInput?,
+      toolchains: toolchains == const $CopyWithPlaceholder()
+          ? _value.toolchains
+          // ignore: cast_nullable_to_non_nullable
+          : toolchains as List<Toolchain>?,
+      toolchainsOverride: toolchainsOverride == const $CopyWithPlaceholder()
+          ? _value.toolchainsOverride
+          // ignore: cast_nullable_to_non_nullable
+          : toolchainsOverride as bool?,
+      runnerImage: runnerImage == const $CopyWithPlaceholder()
+          ? _value.runnerImage
+          // ignore: cast_nullable_to_non_nullable
+          : runnerImage as String?,
+      memoryMb: memoryMb == const $CopyWithPlaceholder()
+          ? _value.memoryMb
+          // ignore: cast_nullable_to_non_nullable
+          : memoryMb as int?,
+      buildEnv: buildEnv == const $CopyWithPlaceholder()
+          ? _value.buildEnv
+          // ignore: cast_nullable_to_non_nullable
+          : buildEnv as String?,
     );
   }
 }
@@ -214,6 +284,7 @@ RepositoryInput _$RepositoryInputFromJson(Map<String, dynamic> json) =>
         taskPrefix: $checkedConvert('taskPrefix', (v) => v as String?),
         instructions: $checkedConvert('instructions', (v) => v as String?),
         jiraProject: $checkedConvert('jiraProject', (v) => v as String?),
+        planeProject: $checkedConvert('planeProject', (v) => v as String?),
         deployWorkflow: $checkedConvert('deployWorkflow', (v) => v as String?),
         preview: $checkedConvert(
           'preview',
@@ -221,6 +292,19 @@ RepositoryInput _$RepositoryInputFromJson(Map<String, dynamic> json) =>
               ? null
               : RepoPreviewInput.fromJson(v as Map<String, dynamic>),
         ),
+        toolchains: $checkedConvert(
+          'toolchains',
+          (v) => (v as List<dynamic>?)
+              ?.map((e) => Toolchain.fromJson(e as Map<String, dynamic>))
+              .toList(),
+        ),
+        toolchainsOverride: $checkedConvert(
+          'toolchainsOverride',
+          (v) => v as bool?,
+        ),
+        runnerImage: $checkedConvert('runnerImage', (v) => v as String?),
+        memoryMb: $checkedConvert('memoryMb', (v) => (v as num?)?.toInt()),
+        buildEnv: $checkedConvert('buildEnv', (v) => v as String?),
       );
       return val;
     });
@@ -238,11 +322,18 @@ Map<String, dynamic> _$RepositoryInputToJson(RepositoryInput instance) =>
       'taskPrefix': ?instance.taskPrefix,
       'instructions': ?instance.instructions,
       'jiraProject': ?instance.jiraProject,
+      'planeProject': ?instance.planeProject,
       'deployWorkflow': ?instance.deployWorkflow,
       'preview': ?instance.preview?.toJson(),
+      'toolchains': ?instance.toolchains?.map((e) => e.toJson()).toList(),
+      'toolchainsOverride': ?instance.toolchainsOverride,
+      'runnerImage': ?instance.runnerImage,
+      'memoryMb': ?instance.memoryMb,
+      'buildEnv': ?instance.buildEnv,
     };
 
 const _$RepositoryInputKindEnumEnumMap = {
   RepositoryInputKindEnum.jira: 'jira',
+  RepositoryInputKindEnum.plane: 'plane',
   RepositoryInputKindEnum.side: 'side',
 };

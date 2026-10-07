@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useI18n } from 'vue-i18n'
 import { api, HttpError, unwrap } from '../../api/client'
 import type { Rule, RuleStatus } from '../../api/types'
+import { livePoll } from '../../composables/useLive'
 import { useUi } from '../../stores/ui'
 
 /** Tone per review status, for badges (b-<tone>). */
@@ -21,7 +22,7 @@ export function useRules() {
   return useQuery({
     queryKey: ['rules'],
     queryFn: () => unwrap(api.GET('/rules')),
-    refetchInterval: (q) => ((q.state.data ?? []).some((r) => r.status === 'pending' || r.status === 'analyzing') ? 5_000 : 60_000),
+    refetchInterval: (q) => ((q.state.data ?? []).some((r) => r.status === 'pending' || r.status === 'analyzing') ? 5_000 : livePoll(60_000)),
   })
 }
 

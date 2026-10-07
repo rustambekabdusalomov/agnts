@@ -4,6 +4,7 @@
 
 // ignore_for_file: unused_element
 import 'package:agnts_api/src/model/repo_preview_input.dart';
+import 'package:agnts_api/src/model/toolchain.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -43,9 +44,21 @@ class RepositoryInput {
 
      this.jiraProject,
 
+     this.planeProject,
+
      this.deployWorkflow,
 
      this.preview,
+
+     this.toolchains,
+
+     this.toolchainsOverride,
+
+     this.runnerImage,
+
+     this.memoryMb,
+
+     this.buildEnv,
   });
 
   @JsonKey(
@@ -60,7 +73,7 @@ class RepositoryInput {
 
 
 
-      /// Ignored; derived from jiraProject.
+      /// Ignored; derived from jiraProject and planeProject.
   @Deprecated('kind has been deprecated')
   @JsonKey(
     
@@ -182,6 +195,18 @@ class RepositoryInput {
 
 
 
+  @JsonKey(
+    
+    name: r'planeProject',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? planeProject;
+
+
+
       /// GitHub workflow file run by Deploy, e.g. deploy.yml
   @JsonKey(
     
@@ -207,6 +232,71 @@ class RepositoryInput {
 
 
 
+      /// Absent keeps the stored list
+  @JsonKey(
+    
+    name: r'toolchains',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<Toolchain>? toolchains;
+
+
+
+      /// true: these toolchains were set by hand; detection keeps them
+  @JsonKey(
+    
+    name: r'toolchainsOverride',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? toolchainsOverride;
+
+
+
+  @JsonKey(
+    
+    name: r'runnerImage',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? runnerImage;
+
+
+
+          // minimum: 0
+          // maximum: 65536
+  @JsonKey(
+    
+    name: r'memoryMb',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? memoryMb;
+
+
+
+      /// KEY=value lines given to every run (registry tokens); replaces the stored one, \"\" clears it, absent keeps it
+  @JsonKey(
+    
+    name: r'buildEnv',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? buildEnv;
+
+
+
 
 
     @override
@@ -222,8 +312,14 @@ class RepositoryInput {
       other.taskPrefix == taskPrefix &&
       other.instructions == instructions &&
       other.jiraProject == jiraProject &&
+      other.planeProject == planeProject &&
       other.deployWorkflow == deployWorkflow &&
-      other.preview == preview;
+      other.preview == preview &&
+      other.toolchains == toolchains &&
+      other.toolchainsOverride == toolchainsOverride &&
+      other.runnerImage == runnerImage &&
+      other.memoryMb == memoryMb &&
+      other.buildEnv == buildEnv;
 
     @override
     int get hashCode =>
@@ -238,8 +334,14 @@ class RepositoryInput {
         taskPrefix.hashCode +
         instructions.hashCode +
         jiraProject.hashCode +
+        planeProject.hashCode +
         deployWorkflow.hashCode +
-        preview.hashCode;
+        preview.hashCode +
+        toolchains.hashCode +
+        toolchainsOverride.hashCode +
+        runnerImage.hashCode +
+        memoryMb.hashCode +
+        buildEnv.hashCode;
 
   factory RepositoryInput.fromJson(Map<String, dynamic> json) => _$RepositoryInputFromJson(json);
 
@@ -252,10 +354,12 @@ class RepositoryInput {
 
 }
 
-/// Ignored; derived from jiraProject.
+/// Ignored; derived from jiraProject and planeProject.
 enum RepositoryInputKindEnum {
 @JsonValue(r'jira')
 jira(r'jira'),
+@JsonValue(r'plane')
+plane(r'plane'),
 @JsonValue(r'side')
 side(r'side');
 

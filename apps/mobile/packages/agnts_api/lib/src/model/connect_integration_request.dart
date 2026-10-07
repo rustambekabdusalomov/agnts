@@ -22,6 +22,8 @@ class ConnectIntegrationRequest {
 
     required  this.token,
 
+     this.webhookSecret,
+
      this.settings,
   });
 
@@ -34,6 +36,19 @@ class ConnectIntegrationRequest {
 
 
   final String token;
+
+
+
+      /// Plane: the secret Plane shows when you create the webhook. Empty keeps the stored one.
+  @JsonKey(
+    
+    name: r'webhookSecret',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? webhookSecret;
 
 
 
@@ -54,11 +69,13 @@ class ConnectIntegrationRequest {
     @override
     bool operator ==(Object other) => identical(this, other) || other is ConnectIntegrationRequest &&
       other.token == token &&
+      other.webhookSecret == webhookSecret &&
       other.settings == settings;
 
     @override
     int get hashCode =>
         token.hashCode +
+        webhookSecret.hashCode +
         settings.hashCode;
 
   factory ConnectIntegrationRequest.fromJson(Map<String, dynamic> json) => _$ConnectIntegrationRequestFromJson(json);

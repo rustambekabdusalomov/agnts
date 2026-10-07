@@ -79,6 +79,7 @@ function setTab(v: Tab) {
       </template>
       <div class="actions" style="margin: 0">
         <span v-if="repo.data.value.kind === 'jira'" class="src">{{ t('repos.jira', { project: repo.data.value.jiraProject || '—' }) }}</span>
+        <span v-if="repo.data.value.planeProject" class="src">{{ t('repos.plane', { project: repo.data.value.planeProject }) }}</span>
         <span v-else class="src local">{{ t('repos.side') }}</span>
         <button v-if="!repo.data.value.archivedAt" type="button" class="btn" @click="editOpen = true">{{ t('repo.edit') }}</button>
         <button type="button" class="btn" :disabled="archive.pending.value" @click="archive.toggle(repo.data.value)">

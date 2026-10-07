@@ -12,7 +12,7 @@ void main() {
       // TODO
     });
 
-    // local = an agnts task (default), jira = a new issue in the Jira project
+    // local = an agnts task (default), jira = a new issue in the Jira project, plane = a new work item in the Plane project
     // String target
     test('to test the property `target`', () async {
       // TODO

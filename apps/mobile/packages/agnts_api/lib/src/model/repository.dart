@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:agnts_api/src/model/toolchain.dart';
 import 'package:agnts_api/src/model/repo_preview.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -47,6 +48,8 @@ class Repository {
 
     required  this.jiraProject,
 
+     this.planeProject,
+
     required  this.claudeMd,
 
     required  this.openTickets,
@@ -56,6 +59,24 @@ class Repository {
      this.archivedAt,
 
      this.preview,
+
+     this.stack,
+
+     this.toolchains,
+
+     this.toolchainsOverride,
+
+     this.toolchainsDetectedAt,
+
+     this.toolchainNotes,
+
+     this.runnerImage,
+
+     this.memoryMb,
+
+     this.buildEnvSet,
+
+     this.buildEnvNames,
   });
 
   @JsonKey(
@@ -82,7 +103,7 @@ class Repository {
 
 
 
-      /// jira when the repository has a Jira project key, else side. Every repository takes side-project tasks.
+      /// jira when the repository has a Jira project key, plane when it has only a Plane project, else side. Every repository takes side-project tasks.
   @JsonKey(
     
     name: r'kind',
@@ -216,6 +237,19 @@ class Repository {
 
 
 
+      /// Plane project identifier (WEB in WEB-123); empty when not linked
+  @JsonKey(
+    
+    name: r'planeProject',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? planeProject;
+
+
+
   @JsonKey(
     
     name: r'claudeMd',
@@ -277,6 +311,121 @@ class Repository {
 
 
 
+      /// Toolchain names, comma-separated (go,node)
+  @JsonKey(
+    
+    name: r'stack',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? stack;
+
+
+
+      /// Installed into every run container
+  @JsonKey(
+    
+    name: r'toolchains',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<Toolchain>? toolchains;
+
+
+
+      /// Set by a person; detection leaves them alone
+  @JsonKey(
+    
+    name: r'toolchainsOverride',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? toolchainsOverride;
+
+
+
+  @JsonKey(
+    
+    name: r'toolchainsDetectedAt',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final DateTime? toolchainsDetectedAt;
+
+
+
+      /// What detection could not handle
+  @JsonKey(
+    
+    name: r'toolchainNotes',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<String>? toolchainNotes;
+
+
+
+      /// Custom runner image (built FROM agnts-runner); empty uses the default
+  @JsonKey(
+    
+    name: r'runnerImage',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? runnerImage;
+
+
+
+      /// Run container memory; 0 uses the server default
+  @JsonKey(
+    
+    name: r'memoryMb',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? memoryMb;
+
+
+
+  @JsonKey(
+    
+    name: r'buildEnvSet',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? buildEnvSet;
+
+
+
+      /// Names of the build environment variables; the values are never returned
+  @JsonKey(
+    
+    name: r'buildEnvNames',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<String>? buildEnvNames;
+
+
+
 
 
     @override
@@ -294,11 +443,21 @@ class Repository {
       other.taskPrefix == taskPrefix &&
       other.instructions == instructions &&
       other.jiraProject == jiraProject &&
+      other.planeProject == planeProject &&
       other.claudeMd == claudeMd &&
       other.openTickets == openTickets &&
       other.deployWorkflow == deployWorkflow &&
       other.archivedAt == archivedAt &&
-      other.preview == preview;
+      other.preview == preview &&
+      other.stack == stack &&
+      other.toolchains == toolchains &&
+      other.toolchainsOverride == toolchainsOverride &&
+      other.toolchainsDetectedAt == toolchainsDetectedAt &&
+      other.toolchainNotes == toolchainNotes &&
+      other.runnerImage == runnerImage &&
+      other.memoryMb == memoryMb &&
+      other.buildEnvSet == buildEnvSet &&
+      other.buildEnvNames == buildEnvNames;
 
     @override
     int get hashCode =>
@@ -315,11 +474,21 @@ class Repository {
         taskPrefix.hashCode +
         instructions.hashCode +
         jiraProject.hashCode +
+        planeProject.hashCode +
         claudeMd.hashCode +
         openTickets.hashCode +
         deployWorkflow.hashCode +
         archivedAt.hashCode +
-        preview.hashCode;
+        preview.hashCode +
+        stack.hashCode +
+        toolchains.hashCode +
+        toolchainsOverride.hashCode +
+        toolchainsDetectedAt.hashCode +
+        toolchainNotes.hashCode +
+        runnerImage.hashCode +
+        memoryMb.hashCode +
+        buildEnvSet.hashCode +
+        buildEnvNames.hashCode;
 
   factory Repository.fromJson(Map<String, dynamic> json) => _$RepositoryFromJson(json);
 
@@ -332,10 +501,12 @@ class Repository {
 
 }
 
-/// jira when the repository has a Jira project key, else side. Every repository takes side-project tasks.
+/// jira when the repository has a Jira project key, plane when it has only a Plane project, else side. Every repository takes side-project tasks.
 enum RepositoryKindEnum {
 @JsonValue(r'jira')
 jira(r'jira'),
+@JsonValue(r'plane')
+plane(r'plane'),
 @JsonValue(r'side')
 side(r'side');
 

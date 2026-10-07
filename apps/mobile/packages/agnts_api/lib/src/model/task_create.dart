@@ -37,6 +37,8 @@ class TaskCreate {
     required  this.start,
 
      this.followUps,
+
+     this.attachments,
   });
 
       /// Omit for a task without a repository (report kinds or auto)
@@ -137,6 +139,19 @@ class TaskCreate {
 
 
 
+      /// Uploads to attach to the description
+  @JsonKey(
+    
+    name: r'attachments',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<int>? attachments;
+
+
+
 
 
     @override
@@ -148,7 +163,8 @@ class TaskCreate {
       other.priority == priority &&
       other.afterApprove == afterApprove &&
       other.start == start &&
-      other.followUps == followUps;
+      other.followUps == followUps &&
+      other.attachments == attachments;
 
     @override
     int get hashCode =>
@@ -159,7 +175,8 @@ class TaskCreate {
         priority.hashCode +
         afterApprove.hashCode +
         start.hashCode +
-        followUps.hashCode;
+        followUps.hashCode +
+        attachments.hashCode;
 
   factory TaskCreate.fromJson(Map<String, dynamic> json) => _$TaskCreateFromJson(json);
 

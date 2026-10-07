@@ -86,7 +86,7 @@ class Relation {
 
 
 
-      /// Who found it: a Jira link, a person, the analysis, overlapping footprints, or the finished diffs (when nobody predicted it)
+      /// Who found it: a Jira link, a Plane relation, a person, the analysis, overlapping footprints, or the finished diffs (when nobody predicted it)
   @JsonKey(
     
     name: r'source',
@@ -274,10 +274,12 @@ String toString() => value;
 }
 
 
-/// Who found it: a Jira link, a person, the analysis, overlapping footprints, or the finished diffs (when nobody predicted it)
+/// Who found it: a Jira link, a Plane relation, a person, the analysis, overlapping footprints, or the finished diffs (when nobody predicted it)
 enum RelationSource_Enum {
 @JsonValue(r'jira')
 jira(r'jira'),
+@JsonValue(r'plane')
+plane(r'plane'),
 @JsonValue(r'user')
 user(r'user'),
 @JsonValue(r'agnts')

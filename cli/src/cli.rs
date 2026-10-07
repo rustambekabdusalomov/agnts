@@ -34,6 +34,8 @@ pub struct Cli {
 pub enum Command {
     /// Install agnts on a server (remote: user@host, local: --local).
     Install(InstallArgs),
+    /// Check whether a server has the capacity for agnts, without installing.
+    Capacity(CapacityArgs),
     /// Containers, version, certificate, disk and backups.
     Status,
     /// Upgrade to this CLI's version (or --version).
@@ -149,6 +151,18 @@ pub struct InstallArgs {
     /// Treat failed server checks as warnings (testing only).
     #[arg(long, hide = true)]
     pub ignore_preflight: bool,
+}
+
+#[derive(Args, Clone, Default)]
+pub struct CapacityArgs {
+    /// The server, as user@host (default: the current profile).
+    pub host: Option<String>,
+    /// Check this server (on the server itself).
+    #[arg(long, conflicts_with = "host")]
+    pub local: bool,
+    /// SSH port, when not 22 and not set in ~/.ssh/config.
+    #[arg(long, short = 'p')]
+    pub ssh_port: Option<u16>,
 }
 
 #[derive(Subcommand)]
@@ -297,6 +311,7 @@ fn run(cli: Cli) -> Result<i32> {
     let profile = cli.profile.as_deref();
     match cli.command {
         Command::Install(args) => cmd::install::run(args, cli.profile).map(|_| 0),
+        Command::Capacity(a) => cmd::status::capacity(a, profile),
         Command::Status => cmd::status::run(&Session::open(profile)?),
         Command::Upgrade { to, no_backup } => {
             cmd::upgrade::run(&Session::open(profile)?, to, no_backup).map(|_| 0)

@@ -33,6 +33,8 @@ abstract class _$RepositoryCWProxy {
 
   Repository jiraProject(String jiraProject);
 
+  Repository planeProject(String? planeProject);
+
   Repository claudeMd(RepositoryClaudeMdEnum claudeMd);
 
   Repository openTickets(int openTickets);
@@ -42,6 +44,24 @@ abstract class _$RepositoryCWProxy {
   Repository archivedAt(DateTime? archivedAt);
 
   Repository preview(RepoPreview? preview);
+
+  Repository stack(String? stack);
+
+  Repository toolchains(List<Toolchain>? toolchains);
+
+  Repository toolchainsOverride(bool? toolchainsOverride);
+
+  Repository toolchainsDetectedAt(DateTime? toolchainsDetectedAt);
+
+  Repository toolchainNotes(List<String>? toolchainNotes);
+
+  Repository runnerImage(String? runnerImage);
+
+  Repository memoryMb(int? memoryMb);
+
+  Repository buildEnvSet(bool? buildEnvSet);
+
+  Repository buildEnvNames(List<String>? buildEnvNames);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Repository(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -63,11 +83,21 @@ abstract class _$RepositoryCWProxy {
     String taskPrefix,
     String instructions,
     String jiraProject,
+    String? planeProject,
     RepositoryClaudeMdEnum claudeMd,
     int openTickets,
     String? deployWorkflow,
     DateTime? archivedAt,
     RepoPreview? preview,
+    String? stack,
+    List<Toolchain>? toolchains,
+    bool? toolchainsOverride,
+    DateTime? toolchainsDetectedAt,
+    List<String>? toolchainNotes,
+    String? runnerImage,
+    int? memoryMb,
+    bool? buildEnvSet,
+    List<String>? buildEnvNames,
   });
 }
 
@@ -121,6 +151,10 @@ class _$RepositoryCWProxyImpl implements _$RepositoryCWProxy {
   Repository jiraProject(String jiraProject) => this(jiraProject: jiraProject);
 
   @override
+  Repository planeProject(String? planeProject) =>
+      this(planeProject: planeProject);
+
+  @override
   Repository claudeMd(RepositoryClaudeMdEnum claudeMd) =>
       this(claudeMd: claudeMd);
 
@@ -136,6 +170,38 @@ class _$RepositoryCWProxyImpl implements _$RepositoryCWProxy {
 
   @override
   Repository preview(RepoPreview? preview) => this(preview: preview);
+
+  @override
+  Repository stack(String? stack) => this(stack: stack);
+
+  @override
+  Repository toolchains(List<Toolchain>? toolchains) =>
+      this(toolchains: toolchains);
+
+  @override
+  Repository toolchainsOverride(bool? toolchainsOverride) =>
+      this(toolchainsOverride: toolchainsOverride);
+
+  @override
+  Repository toolchainsDetectedAt(DateTime? toolchainsDetectedAt) =>
+      this(toolchainsDetectedAt: toolchainsDetectedAt);
+
+  @override
+  Repository toolchainNotes(List<String>? toolchainNotes) =>
+      this(toolchainNotes: toolchainNotes);
+
+  @override
+  Repository runnerImage(String? runnerImage) => this(runnerImage: runnerImage);
+
+  @override
+  Repository memoryMb(int? memoryMb) => this(memoryMb: memoryMb);
+
+  @override
+  Repository buildEnvSet(bool? buildEnvSet) => this(buildEnvSet: buildEnvSet);
+
+  @override
+  Repository buildEnvNames(List<String>? buildEnvNames) =>
+      this(buildEnvNames: buildEnvNames);
 
   @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Repository(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -158,11 +224,21 @@ class _$RepositoryCWProxyImpl implements _$RepositoryCWProxy {
     Object? taskPrefix = const $CopyWithPlaceholder(),
     Object? instructions = const $CopyWithPlaceholder(),
     Object? jiraProject = const $CopyWithPlaceholder(),
+    Object? planeProject = const $CopyWithPlaceholder(),
     Object? claudeMd = const $CopyWithPlaceholder(),
     Object? openTickets = const $CopyWithPlaceholder(),
     Object? deployWorkflow = const $CopyWithPlaceholder(),
     Object? archivedAt = const $CopyWithPlaceholder(),
     Object? preview = const $CopyWithPlaceholder(),
+    Object? stack = const $CopyWithPlaceholder(),
+    Object? toolchains = const $CopyWithPlaceholder(),
+    Object? toolchainsOverride = const $CopyWithPlaceholder(),
+    Object? toolchainsDetectedAt = const $CopyWithPlaceholder(),
+    Object? toolchainNotes = const $CopyWithPlaceholder(),
+    Object? runnerImage = const $CopyWithPlaceholder(),
+    Object? memoryMb = const $CopyWithPlaceholder(),
+    Object? buildEnvSet = const $CopyWithPlaceholder(),
+    Object? buildEnvNames = const $CopyWithPlaceholder(),
   }) {
     return Repository(
       id: id == const $CopyWithPlaceholder()
@@ -217,6 +293,10 @@ class _$RepositoryCWProxyImpl implements _$RepositoryCWProxy {
           ? _value.jiraProject
           // ignore: cast_nullable_to_non_nullable
           : jiraProject as String,
+      planeProject: planeProject == const $CopyWithPlaceholder()
+          ? _value.planeProject
+          // ignore: cast_nullable_to_non_nullable
+          : planeProject as String?,
       claudeMd: claudeMd == const $CopyWithPlaceholder()
           ? _value.claudeMd
           // ignore: cast_nullable_to_non_nullable
@@ -237,6 +317,42 @@ class _$RepositoryCWProxyImpl implements _$RepositoryCWProxy {
           ? _value.preview
           // ignore: cast_nullable_to_non_nullable
           : preview as RepoPreview?,
+      stack: stack == const $CopyWithPlaceholder()
+          ? _value.stack
+          // ignore: cast_nullable_to_non_nullable
+          : stack as String?,
+      toolchains: toolchains == const $CopyWithPlaceholder()
+          ? _value.toolchains
+          // ignore: cast_nullable_to_non_nullable
+          : toolchains as List<Toolchain>?,
+      toolchainsOverride: toolchainsOverride == const $CopyWithPlaceholder()
+          ? _value.toolchainsOverride
+          // ignore: cast_nullable_to_non_nullable
+          : toolchainsOverride as bool?,
+      toolchainsDetectedAt: toolchainsDetectedAt == const $CopyWithPlaceholder()
+          ? _value.toolchainsDetectedAt
+          // ignore: cast_nullable_to_non_nullable
+          : toolchainsDetectedAt as DateTime?,
+      toolchainNotes: toolchainNotes == const $CopyWithPlaceholder()
+          ? _value.toolchainNotes
+          // ignore: cast_nullable_to_non_nullable
+          : toolchainNotes as List<String>?,
+      runnerImage: runnerImage == const $CopyWithPlaceholder()
+          ? _value.runnerImage
+          // ignore: cast_nullable_to_non_nullable
+          : runnerImage as String?,
+      memoryMb: memoryMb == const $CopyWithPlaceholder()
+          ? _value.memoryMb
+          // ignore: cast_nullable_to_non_nullable
+          : memoryMb as int?,
+      buildEnvSet: buildEnvSet == const $CopyWithPlaceholder()
+          ? _value.buildEnvSet
+          // ignore: cast_nullable_to_non_nullable
+          : buildEnvSet as bool?,
+      buildEnvNames: buildEnvNames == const $CopyWithPlaceholder()
+          ? _value.buildEnvNames
+          // ignore: cast_nullable_to_non_nullable
+          : buildEnvNames as List<String>?,
     );
   }
 }
@@ -295,6 +411,7 @@ Repository _$RepositoryFromJson(Map<String, dynamic> json) => $checkedCreate(
       taskPrefix: $checkedConvert('taskPrefix', (v) => v as String),
       instructions: $checkedConvert('instructions', (v) => v as String),
       jiraProject: $checkedConvert('jiraProject', (v) => v as String),
+      planeProject: $checkedConvert('planeProject', (v) => v as String?),
       claudeMd: $checkedConvert(
         'claudeMd',
         (v) => $enumDecode(_$RepositoryClaudeMdEnumEnumMap, v),
@@ -309,6 +426,32 @@ Repository _$RepositoryFromJson(Map<String, dynamic> json) => $checkedCreate(
         'preview',
         (v) =>
             v == null ? null : RepoPreview.fromJson(v as Map<String, dynamic>),
+      ),
+      stack: $checkedConvert('stack', (v) => v as String?),
+      toolchains: $checkedConvert(
+        'toolchains',
+        (v) => (v as List<dynamic>?)
+            ?.map((e) => Toolchain.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      ),
+      toolchainsOverride: $checkedConvert(
+        'toolchainsOverride',
+        (v) => v as bool?,
+      ),
+      toolchainsDetectedAt: $checkedConvert(
+        'toolchainsDetectedAt',
+        (v) => v == null ? null : DateTime.parse(v as String),
+      ),
+      toolchainNotes: $checkedConvert(
+        'toolchainNotes',
+        (v) => (v as List<dynamic>?)?.map((e) => e as String).toList(),
+      ),
+      runnerImage: $checkedConvert('runnerImage', (v) => v as String?),
+      memoryMb: $checkedConvert('memoryMb', (v) => (v as num?)?.toInt()),
+      buildEnvSet: $checkedConvert('buildEnvSet', (v) => v as bool?),
+      buildEnvNames: $checkedConvert(
+        'buildEnvNames',
+        (v) => (v as List<dynamic>?)?.map((e) => e as String).toList(),
       ),
     );
     return val;
@@ -330,15 +473,26 @@ Map<String, dynamic> _$RepositoryToJson(Repository instance) =>
       'taskPrefix': instance.taskPrefix,
       'instructions': instance.instructions,
       'jiraProject': instance.jiraProject,
+      'planeProject': ?instance.planeProject,
       'claudeMd': _$RepositoryClaudeMdEnumEnumMap[instance.claudeMd]!,
       'openTickets': instance.openTickets,
       'deployWorkflow': ?instance.deployWorkflow,
       'archivedAt': ?instance.archivedAt?.toIso8601String(),
       'preview': ?instance.preview?.toJson(),
+      'stack': ?instance.stack,
+      'toolchains': ?instance.toolchains?.map((e) => e.toJson()).toList(),
+      'toolchainsOverride': ?instance.toolchainsOverride,
+      'toolchainsDetectedAt': ?instance.toolchainsDetectedAt?.toIso8601String(),
+      'toolchainNotes': ?instance.toolchainNotes,
+      'runnerImage': ?instance.runnerImage,
+      'memoryMb': ?instance.memoryMb,
+      'buildEnvSet': ?instance.buildEnvSet,
+      'buildEnvNames': ?instance.buildEnvNames,
     };
 
 const _$RepositoryKindEnumEnumMap = {
   RepositoryKindEnum.jira: 'jira',
+  RepositoryKindEnum.plane: 'plane',
   RepositoryKindEnum.side: 'side',
 };
 

@@ -67,7 +67,9 @@ services:
     command: ["egress-proxy"]
     environment:
       # Comma-separated; empty uses the built-in list (Anthropic, GitHub,
-      # GitLab.com, Go, npm and PyPI registries). Add your own GitLab host here.
+      # GitLab.com, the toolchain downloads mise uses and the package
+      # registries of the supported languages: see internal/egress). A value
+      # here replaces that list; to add a host, use Settings -> Previews -> Allowed hosts.
       AGNTS_EGRESS_ALLOW: ${AGNTS_EGRESS_ALLOW:-}
       # Hosts added under Settings -> Network (a staging API for previews),
       # re-read every 30 seconds.

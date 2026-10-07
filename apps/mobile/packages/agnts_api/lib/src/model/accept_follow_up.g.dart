@@ -165,6 +165,7 @@ Map<String, dynamic> _$AcceptFollowUpToJson(AcceptFollowUp instance) =>
 const _$AcceptFollowUpTargetEnumEnumMap = {
   AcceptFollowUpTargetEnum.local: 'local',
   AcceptFollowUpTargetEnum.jira: 'jira',
+  AcceptFollowUpTargetEnum.plane: 'plane',
 };
 
 const _$TicketKindEnumMap = {

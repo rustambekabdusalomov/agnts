@@ -3,13 +3,16 @@ import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { api, HttpError, unwrap } from '../../api/client'
-import type { Repository, RepositoryInput } from '../../api/types'
+import type { RepoDetection, Repository, RepositoryInput, Toolchain } from '../../api/types'
 import { useUi } from '../../stores/ui'
 import FormDrawer from '../form/FormDrawer.vue'
+import NumberStepper from '../form/NumberStepper.vue'
+import ToolchainsField from './ToolchainsField.vue'
 
 // Add or edit a repository. `repo` null means a new one, prefilled from
 // `preset` (a repository picked for import). Every repository takes
-// side-project tasks; a Jira project key makes it take Jira tickets too.
+// side-project tasks; a Jira project key or a Plane project makes it take
+// tracker tickets too.
 const props = defineProps<{
   repo: Repository | null
   preset?: Pick<Repository, 'name' | 'cloneUrl' | 'defaultBranch'> | null
@@ -24,6 +27,7 @@ const form = reactive({
   name: '',
   cloneUrl: '',
   jiraProject: '',
+  planeProject: '',
   taskPrefix: '',
   defaultBranch: 'main',
   buildCmd: '',
@@ -38,8 +42,17 @@ const form = reactive({
   pvRoutes: '',
   pvUiPaths: '',
   pvLogin: '',
+  // Runs: toolchains (detected unless set by hand), image, memory.
+  toolchains: [] as Toolchain[],
+  toolchainsOverride: false,
+  runnerImage: '',
+  memoryMb: 0, // 0 uses the server default
 })
 const error = ref('')
+const filled = ref(false)
+// The build environment is write-only too.
+const buildEnvEdit = ref<'keep' | 'replace' | 'clear'>('keep')
+const buildEnvText = ref('')
 // The environment is write-only: it is shown by names, and replaced or
 // cleared only when asked.
 const envEdit = ref<'keep' | 'replace' | 'clear'>('keep')
@@ -56,6 +69,7 @@ watch(
       name: r?.name ?? p?.name ?? '',
       cloneUrl: r?.cloneUrl ?? p?.cloneUrl ?? '',
       jiraProject: r?.jiraProject ?? '',
+      planeProject: r?.planeProject ?? '',
       taskPrefix: r?.taskPrefix ?? '',
       defaultBranch: r?.defaultBranch ?? (p?.defaultBranch || 'main'),
       buildCmd: r?.buildCmd ?? '',
@@ -69,12 +83,34 @@ watch(
       pvRoutes: (r?.preview?.routes ?? []).join('\n'),
       pvUiPaths: (r?.preview?.uiPaths ?? []).join('\n'),
       pvLogin: r?.preview?.login ?? '',
+      toolchains: [...(r?.toolchains ?? [])],
+      toolchainsOverride: r?.toolchainsOverride ?? false,
+      runnerImage: r?.runnerImage ?? '',
+      memoryMb: r?.memoryMb || 0,
     })
     envEdit.value = r?.preview?.envSet ? 'keep' : 'replace'
     envText.value = ''
+    buildEnvEdit.value = r?.buildEnvSet ? 'keep' : 'replace'
+    buildEnvText.value = ''
+    filled.value = false
   },
   { immediate: true },
 )
+
+// Detection fills the check commands that are still empty; it never
+// overwrites what someone typed.
+function onDetected(det: RepoDetection) {
+  let any = false
+  for (const [k, v] of [['buildCmd', det.buildCmd], ['lintCmd', det.lintCmd], ['testCmd', det.testCmd]] as const) {
+    if (v && !form[k].trim()) {
+      form[k] = v
+      any = true
+    }
+  }
+  filled.value = any
+}
+const advancedOpen = computed(() => !!(props.repo?.runnerImage || props.repo?.memoryMb || props.repo?.buildEnvSet))
+const buildEnvNames = computed(() => props.repo?.buildEnvNames ?? [])
 
 const save = useMutation({
   mutationFn: () => {
@@ -87,6 +123,7 @@ const save = useMutation({
       testCmd: form.testCmd.trim(),
       instructions: form.instructions,
       jiraProject: form.jiraProject.trim(),
+      planeProject: form.planeProject.trim().toUpperCase(),
       taskPrefix: form.taskPrefix.trim(),
       deployWorkflow: isGitHub.value ? form.deployWorkflow.trim() : '',
       preview: {
@@ -98,6 +135,11 @@ const save = useMutation({
         login: form.pvLogin.trim(),
         env: envEdit.value === 'clear' ? '' : envEdit.value === 'replace' && (envText.value.trim() || props.repo?.preview?.envSet) ? envText.value : undefined,
       },
+      toolchains: form.toolchains,
+      toolchainsOverride: form.toolchainsOverride,
+      runnerImage: form.runnerImage.trim(),
+      memoryMb: form.memoryMb,
+      buildEnv: buildEnvEdit.value === 'clear' ? '' : buildEnvEdit.value === 'replace' && (buildEnvText.value.trim() || props.repo?.buildEnvSet) ? buildEnvText.value : undefined,
     }
     return props.repo
       ? unwrap(api.PUT('/repos/{id}', { params: { path: { id: props.repo.id } }, body }))
@@ -114,6 +156,8 @@ const save = useMutation({
   },
 })
 
+// 0 is the server default; anything else in GB (the stepper moves by 1 GB).
+const memoryText = (mb: number) => (mb ? `${+(mb / 1024).toFixed(1)} GB` : t('repos.memoryDefault'))
 const claudeText = computed(() => {
   const s = props.repo?.claudeMd ?? 'unknown'
   return s === 'found' ? t('repos.claudeFound') : s === 'missing' ? t('repos.claudeMissing') : t('repos.claudeUnknown')
@@ -153,6 +197,11 @@ const prefix = computed(() => (form.taskPrefix || 'VIS').toUpperCase())
         <span class="fhelp">{{ t('repos.jiraHelp') }}</span>
       </div>
       <div class="field">
+        <label for="r-plane">{{ t('repos.planeProject') }}</label>
+        <input id="r-plane" v-model="form.planeProject" type="text" maxlength="12" placeholder="WEB" style="font-family: var(--mono); font-size: 14px">
+        <span class="fhelp">{{ t('repos.planeHelp') }}</span>
+      </div>
+      <div class="field">
         <label for="r-prefix">{{ t('repos.taskPrefix') }}</label>
         <input id="r-prefix" v-model="form.taskPrefix" type="text" maxlength="8" placeholder="VIS" style="font-family: var(--mono); font-size: 14px">
         <span class="fhelp">{{ t('repos.taskPrefixHelp', { prefix }) }}</span>
@@ -162,18 +211,29 @@ const prefix = computed(() => (form.taskPrefix || 'VIS').toUpperCase())
         <input id="r-branch" v-model="form.defaultBranch" type="text" style="font-family: var(--mono); font-size: 14px">
         <span class="fhelp">{{ t('repos.branchHelp') }}</span>
       </div>
+      <ToolchainsField
+        v-model="form.toolchains"
+        v-model:override="form.toolchainsOverride"
+        :repo-id="repo?.id"
+        :clone-url="form.cloneUrl"
+        :default-branch="form.defaultBranch"
+        :notes="repo?.toolchainNotes"
+        :auto-detect="open && !repo && !!preset?.cloneUrl"
+        @detected="onDetected"
+      />
       <div class="field">
         <label for="r-build">{{ t('repos.build') }}</label>
-        <input id="r-build" v-model="form.buildCmd" type="text" placeholder="go build ./..." style="font-family: var(--mono); font-size: 14px">
+        <input id="r-build" v-model="form.buildCmd" type="text" :placeholder="t('repos.cmdAuto')" style="font-family: var(--mono); font-size: 14px">
       </div>
       <div class="field">
         <label for="r-lint">{{ t('repos.lint') }}</label>
-        <input id="r-lint" v-model="form.lintCmd" type="text" placeholder="go vet ./..." style="font-family: var(--mono); font-size: 14px">
+        <input id="r-lint" v-model="form.lintCmd" type="text" :placeholder="t('repos.cmdAuto')" style="font-family: var(--mono); font-size: 14px">
       </div>
       <div class="field">
         <label for="r-test">{{ t('repos.test') }}</label>
-        <input id="r-test" v-model="form.testCmd" type="text" placeholder="go test ./..." style="font-family: var(--mono); font-size: 14px">
+        <input id="r-test" v-model="form.testCmd" type="text" :placeholder="t('repos.cmdAuto')" style="font-family: var(--mono); font-size: 14px">
         <span class="fhelp">{{ t('repos.testHelp') }}</span>
+        <span v-if="filled" class="hint" role="status">{{ t('repos.detectFilled') }}</span>
       </div>
       <div v-if="isGitHub" class="field">
         <label for="r-deploy">{{ t('repos.deployWorkflow') }}</label>
@@ -242,6 +302,39 @@ const prefix = computed(() => (form.taskPrefix || 'VIS').toUpperCase())
           </div>
         </template>
       </fieldset>
+      <details class="rp-preview rp-adv" :open="advancedOpen">
+        <summary class="flbl">{{ t('repos.advanced') }}</summary>
+        <div class="rp-adv-body">
+          <div class="field">
+            <label for="r-image">{{ t('repos.runnerImage') }}</label>
+            <input id="r-image" v-model="form.runnerImage" type="text" maxlength="255" placeholder="agnts-runner-android:latest" spellcheck="false" style="font-family: var(--mono); font-size: 14px">
+            <span class="fhelp">{{ t('repos.runnerImageHelp') }}</span>
+          </div>
+          <div class="field">
+            <span class="flbl">{{ t('repos.memory') }}</span>
+            <NumberStepper v-model="form.memoryMb" :min="0" :max="16384" :step="1024" :label="t('repos.memory')" :format="memoryText" />
+            <span class="fhelp">{{ t('repos.memoryHelp') }}</span>
+          </div>
+          <div class="field">
+            <label for="r-benv">{{ t('repos.buildEnv') }}</label>
+            <template v-if="repo?.buildEnvSet && buildEnvEdit === 'keep'">
+              <span class="hint">{{ t('repos.buildEnvSet', { names: buildEnvNames.join(', ') }) }}</span>
+              <span class="rp-presets">
+                <button type="button" class="btn btn-s" @click="buildEnvEdit = 'replace'">{{ t('repos.buildEnvReplace') }}</button>
+                <button type="button" class="btn btn-s btn-d" @click="buildEnvEdit = 'clear'">{{ t('repos.buildEnvClear') }}</button>
+              </span>
+            </template>
+            <template v-else-if="buildEnvEdit === 'clear'">
+              <span class="hint">{{ t('repos.buildEnvCleared') }}</span>
+              <span class="rp-presets"><button type="button" class="btn btn-s" @click="buildEnvEdit = 'keep'">{{ t('form.cancel') }}</button></span>
+            </template>
+            <template v-else>
+              <textarea id="r-benv" v-model="buildEnvText" rows="3" maxlength="16384" autocomplete="off" spellcheck="false" placeholder="NPM_TOKEN=..." style="font-family: var(--mono); font-size: 13.5px" />
+              <span class="fhelp">{{ t('repos.buildEnvHelp') }}</span>
+            </template>
+          </div>
+        </div>
+      </details>
       <div v-if="repo" class="field">
         <span class="flbl">CLAUDE.md</span>
         <span :class="repo.claudeMd === 'found' ? 'repo-ok' : repo.claudeMd === 'missing' ? 'repo-miss' : 'hint'">{{ claudeText }}</span>
@@ -262,4 +355,11 @@ const prefix = computed(() => (form.taskPrefix || 'VIS').toUpperCase())
 .rp-preview legend { padding: 0 6px; }
 .rp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .rp-presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.rp-adv { display: block; }
+.rp-adv summary { cursor: pointer; }
+/* A <details> wraps its content in a UA slot that breaks the global
+   box-sizing inheritance, so fields at 100% width would overflow by their
+   padding: restore border-box here for everything inside. */
+.rp-adv-body { box-sizing: border-box; display: grid; gap: 12px; margin-top: 12px; min-width: 0; }
+.rp-adv-body .step { align-self: flex-start; }
 </style>

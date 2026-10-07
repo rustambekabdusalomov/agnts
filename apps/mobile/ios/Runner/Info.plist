@@ -33,6 +33,10 @@
 	</dict>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>agnts connects to your agnts server on this network.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>agnts uses the camera to attach a photo to a task or an answer.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>agnts attaches the pictures you pick to a task or an answer.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

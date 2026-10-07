@@ -69,6 +69,7 @@ class _RelationsFoldState extends ConsumerState<RelationsFold> {
 
   String _source(AppLocalizations l, Relation r) => switch (r.source_) {
         RelationSource_Enum.jira => l.relationsSource_jira,
+        RelationSource_Enum.plane => l.relationsSource_plane,
         RelationSource_Enum.user => l.relationsSource_user,
         RelationSource_Enum.agnts => l.relationsSource_agnts,
         RelationSource_Enum.rule => l.relationsSource_rule,

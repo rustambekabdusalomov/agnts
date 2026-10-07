@@ -88,7 +88,7 @@ func NewHandler(opt Options) (http.Handler, error) {
 	}
 
 	r.Route("/api", func(api chi.Router) {
-		api.Use(middleware.RequestSize(maxBodyBytes))
+		api.Use(bodyLimit)
 		api.Use(s.checkOrigin)
 		api.Use(middleware.NoCache)
 		gen.HandlerWithOptions(s, gen.ChiServerOptions{
@@ -107,6 +107,19 @@ func NewHandler(opt Options) (http.Handler, error) {
 		r.NotFound(spaHandler(opt.WebDir).ServeHTTP)
 	}
 	return r, nil
+}
+
+// bodyLimit caps request bodies: uploads may carry one file, everything
+// else is small JSON.
+func bodyLimit(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		limit := int64(maxBodyBytes)
+		if r.Method == http.MethodPost && r.URL.Path == "/api/attachments" {
+			limit = maxUploadBytes
+		}
+		r.Body = http.MaxBytesReader(w, r.Body, limit)
+		next.ServeHTTP(w, r)
+	})
 }
 
 func (s *Server) healthz(w http.ResponseWriter, r *http.Request) {

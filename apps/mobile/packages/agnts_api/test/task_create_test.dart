@@ -49,5 +49,11 @@ void main() {
       // TODO
     });
 
+    // Uploads to attach to the description
+    // List<int> attachments
+    test('to test the property `attachments`', () async {
+      // TODO
+    });
+
   });
 }

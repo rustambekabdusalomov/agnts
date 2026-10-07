@@ -165,7 +165,7 @@ func (f *fakeActions) Approve(_ context.Context, k string, _ []string, post bool
 	f.approved = append(f.approved, k)
 	return domain.Ticket{}, nil
 }
-func (f *fakeActions) RequestChanges(_ context.Context, k, fb string, _ []domain.ShotRef, _ domain.Origin) (domain.Ticket, error) {
+func (f *fakeActions) RequestChanges(_ context.Context, k, fb string, _ []domain.ShotRef, _ []int64, _ domain.Origin) (domain.Ticket, error) {
 	f.feedback = append(f.feedback, k+":"+fb)
 	return domain.Ticket{}, nil
 }

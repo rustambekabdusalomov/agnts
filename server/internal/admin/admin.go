@@ -18,7 +18,9 @@ import (
 	"agnts/internal/notify"
 	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres"
+	"agnts/internal/toolchain"
 	"agnts/internal/tracker/jira"
+	"agnts/internal/tracker/plane"
 	"agnts/internal/vcs"
 	"agnts/internal/vcs/github"
 	"agnts/internal/vcs/gitlab"
@@ -32,11 +34,12 @@ func invalid(format string, a ...any) error {
 }
 
 // Providers agnts knows how to connect, in display order.
-var Providers = []string{"jira", "github", "claude", "telegram", "gitlab"}
+var Providers = []string{"jira", "plane", "github", "claude", "telegram", "gitlab"}
 
 // settingKeys lists the non-secret settings each provider accepts.
 var settingKeys = map[string][]string{
 	"jira":     jira.SettingKeys,
+	"plane":    plane.SettingKeys,
 	"github":   {},
 	"claude":   {},
 	"telegram": {"chat_id"},
@@ -59,12 +62,20 @@ type Integrations struct {
 	}
 	checkers  map[string]Checker
 	jira      *jira.Client
+	plane     *plane.Client
+	planeOf   plane.Projects // Plane projects linked to repositories
 	ingest    Ingester
 	publicURL string
 	log       *slog.Logger
 
 	telegramAPI    string            // Bot API base; tests point it at a fake
 	webhookSecrets map[string]string // provider -> derived webhook secret
+}
+
+// SetPlane gives the service the Plane client and the linked projects,
+// for Sync Plane and the state list.
+func (s *Integrations) SetPlane(c *plane.Client, projects plane.Projects) {
+	s.plane, s.planeOf = c, projects
 }
 
 // SetWebhookSecrets sets the GitHub and GitLab webhook secrets shown on their pages.
@@ -98,7 +109,9 @@ type View struct {
 	Settings      map[string]string
 	WebhookURL    string
 	WebhookSecret string // GitHub and GitLab: derived, shown on the page
-	in            postgres.Integration
+	// WebhookSecretSet is true when a Plane webhook secret is stored.
+	WebhookSecretSet bool
+	in               postgres.Integration
 }
 
 func (s *Integrations) view(in postgres.Integration) View {
@@ -118,6 +131,12 @@ func (s *Integrations) view(in postgres.Integration) View {
 			tok = c.APIToken
 		}
 		v.WebhookURL = s.publicURL + "/webhooks/jira"
+	}
+	if in.Provider == "plane" {
+		if c, _, err := plane.FromIntegration(in.Token, in.Settings, in.Connected); err == nil {
+			tok, v.WebhookSecretSet = c.APIKey, c.WebhookSecret != ""
+		}
+		v.WebhookURL = s.publicURL + "/webhooks/plane"
 	}
 	if in.Provider == "telegram" {
 		v.WebhookURL = s.publicURL + "/webhooks/telegram"
@@ -171,8 +190,10 @@ func cleanSettings(provider string, in map[string]string) (map[string]string, er
 }
 
 // Connect checks a token with the provider, then stores it. For Jira it
-// also creates the webhook secret, returned once.
-func (s *Integrations) Connect(ctx context.Context, provider, token string, settings map[string]string, origin domain.Origin) (View, string, error) {
+// also creates the webhook secret, returned once. For Plane, webhookSecret
+// is the secret Plane generated ("" keeps the stored one); other providers
+// ignore it.
+func (s *Integrations) Connect(ctx context.Context, provider, token string, settings map[string]string, webhookSecret string, origin domain.Origin) (View, string, error) {
 	settings, err := cleanSettings(provider, settings)
 	if err != nil {
 		return View{}, "", err
@@ -221,6 +242,18 @@ func (s *Integrations) Connect(ctx context.Context, provider, token string, sett
 			secret = "" // shown only when created
 		}
 	}
+	if provider == "plane" {
+		hook := strings.TrimSpace(webhookSecret)
+		if prev, err := s.store.Get(ctx, "plane"); err == nil && hook == "" {
+			if c, _, err := plane.FromIntegration(prev.Token, prev.Settings, true); err == nil {
+				hook = c.WebhookSecret
+			}
+		}
+		stored = plane.SecretsToken(token, hook)
+		if settings["label"] == "" {
+			settings["label"] = "agnts"
+		}
+	}
 	if err := s.store.Put(ctx, postgres.Integration{Provider: provider, Token: stored, Settings: settings, Account: account}); err != nil {
 		return View{}, "", err
 	}
@@ -247,6 +280,12 @@ func (s *Integrations) Test(ctx context.Context, provider string) (View, error) 
 			return View{}, err
 		}
 		token = c.APIToken
+	case "plane":
+		c, _, err := plane.FromIntegration(in.Token, in.Settings, true)
+		if err != nil {
+			return View{}, err
+		}
+		token = c.APIKey
 	case "telegram":
 		c, err := notify.ParseTelegram(in.Token, in.Settings)
 		if err != nil {
@@ -293,6 +332,11 @@ func (s *Integrations) Update(ctx context.Context, provider string, settings map
 			return View{}, invalid("site must be an https URL")
 		}
 	}
+	if provider == "plane" {
+		if err := validPlaneSettings(settings); err != nil {
+			return View{}, err
+		}
+	}
 	if err := s.store.UpdateSettings(ctx, provider, settings); err != nil {
 		return View{}, err
 	}
@@ -320,6 +364,115 @@ func (s *Integrations) SyncJira(ctx context.Context) (found, created int, err er
 		}
 	}
 	return len(issues), created, nil
+}
+
+// SyncPlane picks up labelled open work items in the linked Plane projects now.
+func (s *Integrations) SyncPlane(ctx context.Context) (found, created int, err error) {
+	if s.plane == nil {
+		return 0, 0, invalid("plane is not available on this server")
+	}
+	found, created, err = plane.Sync(ctx, s.plane, s.planeOf, s.ingest, domain.OriginWeb)
+	if errors.Is(err, plane.ErrNotConnected) {
+		return 0, 0, invalid("plane is not connected")
+	}
+	return found, created, err
+}
+
+// SetPlaneWebhookSecret stores the secret Plane showed when the webhook
+// was created; deliveries are accepted from then on.
+func (s *Integrations) SetPlaneWebhookSecret(ctx context.Context, secret string, origin domain.Origin) (View, error) {
+	secret = strings.TrimSpace(secret)
+	if len(secret) < 8 {
+		return View{}, invalid("paste the whole secret Plane showed for the webhook")
+	}
+	in, err := s.store.Get(ctx, "plane")
+	if errors.Is(err, domain.ErrNotFound) || (err == nil && !in.Connected) {
+		return View{}, invalid("connect Plane first")
+	}
+	if err != nil {
+		return View{}, err
+	}
+	c, _, err := plane.FromIntegration(in.Token, in.Settings, true)
+	if err != nil {
+		return View{}, err
+	}
+	if err := s.store.Put(ctx, postgres.Integration{Provider: "plane", Token: plane.SecretsToken(c.APIKey, secret), Settings: in.Settings, Account: in.Account}); err != nil {
+		return View{}, err
+	}
+	s.changed(ctx, "plane", origin, "webhook secret saved")
+	in, err = s.store.Get(ctx, "plane")
+	return s.view(in), err
+}
+
+// PlaneState is a state name in the linked Plane projects.
+type PlaneState struct {
+	Name     string
+	Group    string
+	Projects []string
+}
+
+// PlaneStates lists the states of the Plane projects linked to
+// repositories, merged by name, for the status mapping.
+func (s *Integrations) PlaneStates(ctx context.Context) ([]PlaneState, error) {
+	if s.plane == nil {
+		return nil, invalid("plane is not available on this server")
+	}
+	projects, err := s.planeOf(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := []PlaneState{}
+	for _, p := range projects {
+		sts, err := s.plane.ProjectStates(ctx, p)
+		if errors.Is(err, plane.ErrNotConnected) {
+			return nil, invalid("plane is not connected")
+		}
+		if err != nil {
+			return nil, invalid("plane project %s: %v", p, err)
+		}
+		for _, st := range sts {
+			i := slices.IndexFunc(out, func(x PlaneState) bool { return strings.EqualFold(x.Name, st.Name) })
+			if i < 0 {
+				out = append(out, PlaneState{Name: st.Name, Group: st.Group})
+				i = len(out) - 1
+			}
+			if !slices.Contains(out[i].Projects, p) {
+				out[i].Projects = append(out[i].Projects, p)
+			}
+		}
+	}
+	return out, nil
+}
+
+// validPlaneSettings checks the base URL and workspace slug.
+func validPlaneSettings(settings map[string]string) error {
+	if b := settings["base_url"]; b != "" {
+		u, err := url.Parse(b)
+		if err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host == "" {
+			return invalid("base URL must be an http(s) URL, such as https://api.plane.so or your Plane's address")
+		}
+	}
+	for _, c := range settings["workspace"] {
+		if (c < 'a' || c > 'z') && (c < '0' || c > '9') && c != '-' && c != '_' {
+			return invalid("the workspace slug is the part after the host in Plane's URL, such as acme in app.plane.so/acme")
+		}
+	}
+	return nil
+}
+
+// PlaneCheck verifies a Plane API key against the workspace in settings.
+func PlaneCheck(ctx context.Context, token string, settings map[string]string) (string, error) {
+	if err := validPlaneSettings(settings); err != nil {
+		return "", err
+	}
+	if strings.TrimSpace(settings["workspace"]) == "" {
+		return "", errors.New("the workspace slug is required")
+	}
+	c := plane.New(func(context.Context) (plane.Config, bool, error) {
+		cfg, _, err := plane.FromIntegration(plane.SecretsToken(token, ""), settings, true)
+		return cfg, true, err
+	})
+	return c.Me(ctx)
 }
 
 func (s *Integrations) changed(ctx context.Context, provider string, origin domain.Origin, msg string) {
@@ -363,6 +516,10 @@ func JiraCheck(ctx context.Context, token string, settings map[string]string) (s
 type Repos struct {
 	store      *postgres.Agent
 	envs       PreviewEnvSetter
+	builds     BuildEnvSetter
+	detector   Detector
+	deep       DeepDetector
+	images     func(ctx context.Context, image string) error
 	gh         *github.Host
 	browser    vcs.Browser
 	gitlabHost func(ctx context.Context) string // host of the connected GitLab, or ""
@@ -378,6 +535,116 @@ type PreviewEnvSetter interface {
 
 // SetPreviewEnvs lets Save store preview environments.
 func (r *Repos) SetPreviewEnvs(envs PreviewEnvSetter) { r.envs = envs }
+
+// BuildEnvSetter stores a repository's sealed build environment.
+type BuildEnvSetter interface {
+	SetBuildEnv(ctx context.Context, repoID int64, env string) error
+}
+
+// SetBuildEnvs lets Save store build environments.
+func (r *Repos) SetBuildEnvs(b BuildEnvSetter) { r.builds = b }
+
+// Detector reads a repository's default branch and works out its
+// toolchains and check commands.
+type Detector interface {
+	Detect(ctx context.Context, repo domain.Repository) (toolchain.Detection, error)
+}
+
+// SetDetector enables toolchain detection.
+func (r *Repos) SetDetector(d Detector) { r.detector = d }
+
+// DeepDetector asks Claude to fill what the file scan could not find.
+type DeepDetector interface {
+	DetectDeep(ctx context.Context, repo domain.Repository, base toolchain.Detection) (toolchain.Detection, error)
+}
+
+// SetDeepDetector enables Claude-assisted detection.
+func (r *Repos) SetDeepDetector(d DeepDetector) { r.deep = d }
+
+// SetImageCheck sets how a custom runner image is checked on save.
+func (r *Repos) SetImageCheck(f func(ctx context.Context, image string) error) { r.images = f }
+
+// Detect clones (or fetches) a repository, saved or not, and returns what
+// it needs without storing anything. With deep, Claude fills the gaps
+// when the file scan found no commands or no toolchains; byClaude
+// reports that it did.
+func (r *Repos) Detect(ctx context.Context, x domain.Repository, deep bool) (det toolchain.Detection, byClaude bool, err error) {
+	det, err = r.detectFiles(ctx, &x)
+	if err != nil || !deep || r.deep == nil {
+		return det, false, err
+	}
+	if len(det.Toolchains) > 0 && det.Build != "" && det.Test != "" {
+		return det, false, nil // nothing for Claude to add
+	}
+	more, err := r.deep.DetectDeep(ctx, x, det)
+	if errors.Is(err, orchestrator.ErrPlanLimit) {
+		return det, false, invalid("the Claude plan limit is reached; try again later")
+	}
+	if err != nil {
+		return det, false, invalid("Claude could not read the repository: %v", err)
+	}
+	return more, true, nil
+}
+
+func (r *Repos) detectFiles(ctx context.Context, x *domain.Repository) (toolchain.Detection, error) {
+	if r.detector == nil {
+		return toolchain.Detection{}, invalid("toolchain detection needs the agent loop (AGNTS_AGENT_ENABLED)")
+	}
+	if x.ID != 0 {
+		cur, err := r.store.RepositoryByID(ctx, x.ID)
+		if err != nil {
+			return toolchain.Detection{}, err
+		}
+		if x.CloneURL != "" {
+			cur.CloneURL = x.CloneURL
+		}
+		if x.DefaultBranch != "" {
+			cur.DefaultBranch = x.DefaultBranch
+		}
+		*x = cur
+	}
+	if x.Name == "" {
+		x.Name = "_detect-" + repoKeySlug(x.CloneURL)
+	}
+	if err := Validate(x, r.gitlabHost(ctx)); err != nil {
+		return toolchain.Detection{}, err
+	}
+	det, err := r.detector.Detect(ctx, *x)
+	if err != nil {
+		return toolchain.Detection{}, invalid("could not read the repository: %v", err)
+	}
+	return det, nil
+}
+
+func repoKeySlug(cloneURL string) string {
+	k := repoKey(cloneURL)
+	if i := strings.Index(k, "://"); i >= 0 {
+		k = k[i+3:]
+	}
+	return strings.Map(func(c rune) rune {
+		if c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || c == '-' {
+			return c
+		}
+		return '-'
+	}, k)
+}
+
+// detectAndStore runs detection for a newly saved repository so its
+// toolchains (and, when none were given, check commands) are filled in
+// before the first ticket.
+func (r *Repos) detectAndStore(ctx context.Context, x domain.Repository) {
+	if r.detector == nil {
+		return
+	}
+	det, err := r.detector.Detect(ctx, x)
+	if err != nil {
+		r.log.Info("detect toolchains", "repo", x.Name, "err", err)
+		return
+	}
+	if _, err := r.store.SetDetectedToolchains(ctx, x.ID, det.Toolchains, det.Notes, det.Build, det.Lint, det.Test); err != nil {
+		r.log.Warn("store detected toolchains", "repo", x.Name, "err", err)
+	}
+}
 
 // RemoteLister lists the repositories a git host's token can reach.
 type RemoteLister interface {
@@ -523,8 +790,43 @@ func Validate(x *domain.Repository, gitlabHost string) error {
 	if x.JiraProject != "" && orchestrator.TaskPrefix(*x) == x.JiraProject {
 		return invalid("the task prefix must differ from the Jira project key: both would number tickets %s-1, %s-2, …", x.JiraProject, x.JiraProject)
 	}
-	x.Kind = RepoKind(x.JiraProject)
+	x.PlaneProject = strings.ToUpper(strings.TrimSpace(x.PlaneProject))
+	for _, c := range x.PlaneProject {
+		if (c < 'A' || c > 'Z') && (c < '0' || c > '9') {
+			return invalid("plane project identifier may only contain letters and digits")
+		}
+	}
+	if len(x.PlaneProject) > 12 {
+		return invalid("plane project identifiers are at most 12 characters")
+	}
+	if x.PlaneProject != "" && orchestrator.TaskPrefix(*x) == x.PlaneProject {
+		return invalid("the task prefix must differ from the Plane project identifier: both would number tickets %s-1, %s-2, …", x.PlaneProject, x.PlaneProject)
+	}
+	if x.PlaneProject != "" && x.PlaneProject == x.JiraProject {
+		return invalid("the Jira project key and the Plane project identifier must differ: both would number tickets %s-1, %s-2, …", x.PlaneProject, x.PlaneProject)
+	}
+	x.Kind = RepoKind(x.JiraProject, x.PlaneProject)
+	if err := validateRun(x); err != nil {
+		return err
+	}
 	return validatePreview(&x.Preview)
+}
+
+// validateRun checks a repository's toolchains, runner image and memory.
+func validateRun(x *domain.Repository) error {
+	tcs, err := domain.ValidateToolchains(x.Toolchains)
+	if err != nil {
+		return invalid("toolchains: %v", err)
+	}
+	x.Toolchains = tcs
+	x.RunnerImage = strings.TrimSpace(x.RunnerImage)
+	if x.RunnerImage != "" && !domain.ValidImage(x.RunnerImage) {
+		return invalid("%q is not a Docker image name", x.RunnerImage)
+	}
+	if x.MemoryMB != 0 && (x.MemoryMB < 512 || x.MemoryMB > 65536) {
+		return invalid("memory must be between 512 and 65536 MB (0 uses the server default)")
+	}
+	return nil
 }
 
 // validatePreview cleans a repository's preview settings. An empty command
@@ -569,14 +871,45 @@ func validatePreview(p *domain.PreviewConfig) error {
 	return err
 }
 
-// RepoKind is "jira" for a repository linked to a Jira project and "side"
-// otherwise. Every repository takes side-project tasks; the kind only says
-// whether Jira tickets arrive too.
-func RepoKind(jiraProject string) string {
-	if jiraProject != "" {
+// RepoKind is "jira" for a repository linked to a Jira project, "plane"
+// for one linked only to a Plane project, and "side" otherwise. Every
+// repository takes side-project tasks; the kind only says whether tracker
+// tickets arrive too.
+func RepoKind(jiraProject, planeProject string) string {
+	switch {
+	case jiraProject != "":
 		return "jira"
+	case planeProject != "":
+		return "plane"
 	}
 	return "side"
+}
+
+// checkKeySpace refuses a repository whose Plane project would number
+// tickets like another repository's Jira project or task prefix, or the
+// other way round. Jira projects among themselves are kept apart by a
+// unique index, as are Plane projects.
+func (r *Repos) checkKeySpace(ctx context.Context, x domain.Repository) error {
+	others, err := r.store.ListRepositories(ctx)
+	if err != nil {
+		return err
+	}
+	for _, o := range others {
+		if o.ID == x.ID || (x.ID == 0 && o.Name == x.Name) {
+			continue
+		}
+		clash := ""
+		switch {
+		case x.PlaneProject != "" && (x.PlaneProject == o.JiraProject || x.PlaneProject == orchestrator.TaskPrefix(o)):
+			clash = x.PlaneProject
+		case o.PlaneProject != "" && (o.PlaneProject == x.JiraProject || o.PlaneProject == orchestrator.TaskPrefix(x)):
+			clash = o.PlaneProject
+		}
+		if clash != "" {
+			return invalid("%s already numbers tickets %s-1, %s-2, …: pick another Plane project, Jira project or task prefix", o.Name, clash, clash)
+		}
+	}
+	return nil
 }
 
 // Save creates (id 0) or updates a repository, then checks for CLAUDE.md
@@ -584,15 +917,61 @@ func RepoKind(jiraProject string) string {
 // settings (the client did not send them); env, when not nil, replaces the
 // preview environment ("" clears it).
 func (r *Repos) Save(ctx context.Context, x domain.Repository, keepPreview bool, env *string) (RepoView, error) {
-	if keepPreview && x.ID != 0 {
+	return r.SaveRun(ctx, x, SaveOptions{KeepPreview: keepPreview, PreviewEnv: env, KeepRun: true})
+}
+
+// SaveOptions says which parts of a repository the client left out (and
+// so are kept) and which secrets it replaces.
+type SaveOptions struct {
+	KeepPreview bool    // keep the stored preview settings
+	PreviewEnv  *string // replaces the preview environment; nil keeps it
+	// KeepRun keeps the stored toolchains, runner image and memory (a
+	// client that does not know about them).
+	KeepRun  bool
+	BuildEnv *string // replaces the build environment; nil keeps it
+	// KeepPlane keeps the stored Plane project (a client that does not
+	// know about Plane).
+	KeepPlane bool
+}
+
+// SaveRun is Save with control over the run settings.
+func (r *Repos) SaveRun(ctx context.Context, x domain.Repository, o SaveOptions) (RepoView, error) {
+	keepPreview, env := o.KeepPreview, o.PreviewEnv
+	if x.ID != 0 && (keepPreview || o.KeepRun || o.KeepPlane) {
 		cur, err := r.store.RepositoryByID(ctx, x.ID)
 		if err != nil {
 			return RepoView{}, err
 		}
-		x.Preview = cur.Preview
+		if keepPreview {
+			x.Preview = cur.Preview
+		}
+		if o.KeepRun {
+			x.Toolchains, x.ToolchainsOverride, x.RunnerImage, x.MemoryMB = cur.Toolchains, cur.ToolchainsOverride, cur.RunnerImage, cur.MemoryMB
+		}
+		if o.KeepPlane {
+			x.PlaneProject = cur.PlaneProject
+		}
 	}
 	if err := Validate(&x, r.gitlabHost(ctx)); err != nil {
 		return RepoView{}, err
+	}
+	if err := r.checkKeySpace(ctx, x); err != nil {
+		return RepoView{}, err
+	}
+	if x.RunnerImage != "" && r.images != nil {
+		if err := r.images(ctx, x.RunnerImage); errors.Is(err, domain.ErrNotFound) {
+			return RepoView{}, invalid("image %s is not on this server: build it there first (see deploy/runner/README.md)", x.RunnerImage)
+		} else if err != nil {
+			return RepoView{}, invalid("runner image: %v", err)
+		}
+	}
+	if o.BuildEnv != nil {
+		if r.builds == nil {
+			return RepoView{}, invalid("build environments are not available on this server")
+		}
+		if _, err := domain.ParseEnv(*o.BuildEnv); err != nil {
+			return RepoView{}, invalid("build environment: %v", err)
+		}
 	}
 	if env != nil {
 		if r.envs == nil {
@@ -617,7 +996,15 @@ func (r *Repos) Save(ctx context.Context, x domain.Repository, keepPreview bool,
 			return RepoView{}, err
 		}
 	}
+	if o.BuildEnv != nil {
+		if err := r.builds.SetBuildEnv(ctx, saved.ID, *o.BuildEnv); err != nil {
+			return RepoView{}, err
+		}
+	}
 	go r.CheckClaudeMD(context.WithoutCancel(ctx), saved)
+	if x.ID == 0 && len(saved.Toolchains) == 0 && !saved.ToolchainsOverride {
+		go r.detectAndStore(context.WithoutCancel(ctx), saved)
+	}
 	return r.Get(ctx, saved.ID)
 }
 

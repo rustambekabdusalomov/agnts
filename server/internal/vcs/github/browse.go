@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -69,8 +70,17 @@ func (h *Host) checkStatus(ctx context.Context, base, sha string) string {
 	return st
 }
 
-// Branches lists up to 30 branches with their tip, ahead/behind and checks.
+// Branches lists up to 30 branches with their tip, ahead/behind and checks:
+// one GraphQL request, or ~3 REST calls per branch where GraphQL fails.
 func (h *Host) Branches(ctx context.Context, repo domain.Repository) ([]vcs.Branch, error) {
+	out, err := h.branchesGraphQL(ctx, repo)
+	if err == nil || errors.Is(err, vcs.ErrNotConnected) || ctx.Err() != nil {
+		return out, err
+	}
+	return h.branchesREST(ctx, repo)
+}
+
+func (h *Host) branchesREST(ctx context.Context, repo domain.Repository) ([]vcs.Branch, error) {
 	base, err := h.base(repo)
 	if err != nil {
 		return nil, err

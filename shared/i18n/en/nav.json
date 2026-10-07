@@ -41,10 +41,12 @@
     "ledeRunning": "Tickets agnts is working on right now.",
     "ledeQueue": "Tickets with the agnts label that haven't been analyzed yet.",
     "ledeDone": "Pushed or rejected tickets.",
-    "ledeAll": "Every ticket agnts has picked up from Jira.",
+    "ledeAll": "Every ticket agnts has picked up from Jira and Plane.",
     "knowledge": "Knowledge",
     "learn": "Learn",
     "learnQueue": "Learning queue",
-    "rules": "Rules"
+    "rules": "Rules",
+    "syncPlane": "Sync Plane",
+    "syncedPlane": "Plane synced: {found} open, {created} new"
   }
 }

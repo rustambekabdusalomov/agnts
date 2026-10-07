@@ -173,7 +173,11 @@ class MoreScreen extends ConsumerWidget {
                           for (final r in list)
                             ListRow(
                               title: r.name,
-                              subtitle: '${r.defaultBranch} · ${r.testCmd.isEmpty ? '—' : r.testCmd}',
+                              subtitle: [
+                                r.defaultBranch,
+                                if ((r.toolchains ?? const []).isNotEmpty) r.toolchains!.map((t) => '${t.tool} ${t.version}').join(', '),
+                                r.testCmd.isEmpty ? '—' : r.testCmd,
+                              ].join(' · '),
                               value: '${r.openTickets}',
                               onTap: () => context.push(Uri(path: '/repos/${r.id}', queryParameters: {'name': r.name}).toString()),
                             ),
@@ -451,6 +455,7 @@ class _RoundButton extends StatelessWidget {
 
 String _providerName(AppLocalizations l, String p) => switch (p) {
       'jira' => l.integrationsName_jira,
+      'plane' => l.integrationsName_plane,
       'github' => l.integrationsName_github,
       'gitlab' => l.integrationsName_gitlab,
       'claude' => l.integrationsName_claude,
@@ -476,6 +481,7 @@ class _ProviderTile extends StatelessWidget {
       'github' => (const Color(0xFF24292F), _gitIcon),
       'gitlab' => (const Color(0xFFC2410C), _gitIcon),
       'jira' => (const Color(0xFF1D4ED8), _trackerIcon),
+      'plane' => (const Color(0xFF3F76FF), _trackerIcon),
       'telegram' => (const Color(0xFF229ED9), _sendIcon),
       'claude' => (const Color(0xFFC15F3C), _sparkIcon),
       _ => (const Color(0xFF6B6F7A), _plugIcon),

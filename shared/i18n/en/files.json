@@ -1,0 +1,20 @@
+{
+  "files": {
+    "title": "Attachments",
+    "attach": "Attach files",
+    "addPhoto": "Photo",
+    "camera": "Camera",
+    "addFile": "File",
+    "hint": "Pictures, PDFs, logs or text, up to 10 MB each. Claude reads them all.",
+    "uploading": "Uploading {name}…",
+    "remove": "Remove {name}",
+    "open": "Open {name}",
+    "tooLarge": "{name} is larger than 10 MB",
+    "tooMany": "Attach at most {n} files",
+    "failed": "Could not upload {name}",
+    "wait": "Wait for the uploads to finish",
+    "fromTask": "With the task",
+    "fromRetry": "With a retry",
+    "fromFeedback": "With requested changes"
+  }
+}

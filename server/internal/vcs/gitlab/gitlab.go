@@ -156,6 +156,21 @@ func (h *Host) OpenPR(ctx context.Context, repo domain.Repository, pr orchestrat
 	return open[0].IID, open[0].WebURL, nil
 }
 
+// PRMerged reports whether merge request number (its IID) was merged.
+func (h *Host) PRMerged(ctx context.Context, repo domain.Repository, number int) (bool, error) {
+	p, err := h.project(ctx, repo)
+	if err != nil {
+		return false, err
+	}
+	var m struct {
+		State string `json:"state"`
+	}
+	if _, err := h.call(ctx, http.MethodGet, p+"/merge_requests/"+strconv.Itoa(number), nil, &m); err != nil {
+		return false, err
+	}
+	return m.State == "merged", nil
+}
+
 func ciStatus(s string) string {
 	switch s {
 	case "success":

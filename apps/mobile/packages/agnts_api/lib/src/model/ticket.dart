@@ -672,6 +672,8 @@ class Ticket {
 enum TicketSource_Enum {
 @JsonValue(r'jira')
 jira(r'jira'),
+@JsonValue(r'plane')
+plane(r'plane'),
 @JsonValue(r'local')
 local(r'local');
 

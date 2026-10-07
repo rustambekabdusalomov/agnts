@@ -13,6 +13,7 @@ Name | Type | Description | Notes
 **priority** | **String** |  | [optional] 
 **afterApprove** | **String** |  | [optional] 
 **kind** | [**TicketKindChoice**](TicketKindChoice.md) |  | [optional] 
+**attachments** | **List&lt;int&gt;** | The files the description should have: the task's files to keep and new uploads. Left out keeps them; files not listed are deleted. | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

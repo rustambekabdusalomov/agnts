@@ -1,21 +1,19 @@
-// Package gitrepo keeps server-side clones with go-git: one checkout per
-// ticket branch. It is the only place push credentials are used.
+// Package gitrepo keeps server-side clones with go-git: one bare mirror per
+// repository, every ticket branch a ref in it. A new branch costs no clone:
+// workspaces get their files and .git built from the mirror (workspace.go).
+// It is the only place push credentials are used.
 package gitrepo
 
 import (
-	"archive/tar"
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"io/fs"
 	"os"
-	"path"
 	"path/filepath"
 	"slices"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
@@ -44,6 +42,14 @@ const AgentUID = 1000
 // maxDiffPerFile caps the stored diff of one file.
 const maxDiffPerFile = 200 << 10
 
+// mirrorName is the mirror's directory inside the repository's. Git refuses
+// branch names starting with a dot, so no old per-branch checkout has it.
+const mirrorName = ".mirror"
+
+// originRefs keeps every branch on the git host under refs/remotes/origin,
+// apart from agnts's own branches in refs/heads.
+const originRefs = config.RefSpec("+refs/heads/*:refs/remotes/origin/*")
+
 // Repos implements orchestrator.Git.
 type Repos struct {
 	dir    string
@@ -51,41 +57,64 @@ type Repos struct {
 	author func(ctx context.Context) (Author, error)
 
 	mu    sync.Mutex
-	locks map[string]*sync.Mutex
+	locks map[string]*sync.RWMutex
+	trees treeCache
 }
 
 var (
 	_ orchestrator.Git          = (*Repos)(nil)
 	_ orchestrator.DriftChecker = (*Repos)(nil)
+	_ orchestrator.TreeReader   = (*Repos)(nil)
 )
 
 // New keeps clones under dir.
 func New(dir string, token TokenSource, author func(ctx context.Context) (Author, error)) *Repos {
-	return &Repos{dir: dir, token: token, author: author, locks: map[string]*sync.Mutex{}}
+	return &Repos{dir: dir, token: token, author: author, locks: map[string]*sync.RWMutex{}}
 }
 
-func (g *Repos) checkoutDir(repo domain.Repository, branch string) string {
-	clean := func(s string) string {
-		return strings.Map(func(r rune) rune {
-			if r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || r == '-' || r == '_' || r == '.' {
-				return r
-			}
-			return '_'
-		}, s)
-	}
-	return filepath.Join(g.dir, clean(repo.Name), clean(branch))
+func clean(s string) string {
+	return strings.Map(func(r rune) rune {
+		if r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || r == '-' || r == '_' || r == '.' {
+			return r
+		}
+		return '_'
+	}, s)
 }
 
-func (g *Repos) lock(dir string) func() {
+// repoDir holds the repository's mirror; before the mirror it held one
+// checkout per branch, which open imports.
+func (g *Repos) repoDir(repo domain.Repository) string {
+	return filepath.Join(g.dir, clean(repo.Name))
+}
+
+func (g *Repos) mirrorDir(repo domain.Repository) string {
+	return filepath.Join(g.repoDir(repo), mirrorName)
+}
+
+// rw returns the repository's lock: fetches, commits and pushes write the
+// mirror, archives and listings only read it.
+func (g *Repos) rw(repo domain.Repository) *sync.RWMutex {
+	dir := g.repoDir(repo)
 	g.mu.Lock()
+	defer g.mu.Unlock()
 	l, ok := g.locks[dir]
 	if !ok {
-		l = &sync.Mutex{}
+		l = &sync.RWMutex{}
 		g.locks[dir] = l
 	}
-	g.mu.Unlock()
+	return l
+}
+
+func (g *Repos) lock(repo domain.Repository) func() {
+	l := g.rw(repo)
 	l.Lock()
 	return l.Unlock
+}
+
+func (g *Repos) rlock(repo domain.Repository) func() {
+	l := g.rw(repo)
+	l.RLock()
+	return l.RUnlock
 }
 
 func (g *Repos) auth(ctx context.Context, repo domain.Repository) (transport.AuthMethod, error) {
@@ -103,193 +132,125 @@ func (g *Repos) auth(ctx context.Context, repo domain.Repository) (transport.Aut
 	return &githttp.BasicAuth{Username: user, Password: tok}, nil
 }
 
-// Prepare clones (or fetches) and checks out branch: the existing local or
-// remote branch, or a new one from the default branch.
+// open returns the repository's mirror, making an empty one when there is
+// none (no network: Prepare fetches) and importing old checkouts. Call it
+// with the write lock held.
+func (g *Repos) open(repo domain.Repository) (*git.Repository, error) {
+	dir := g.mirrorDir(repo)
+	r, err := git.PlainOpen(dir)
+	if errors.Is(err, git.ErrRepositoryNotExists) {
+		if err := os.MkdirAll(dir, 0o750); err != nil {
+			return nil, err
+		}
+		if r, err = git.PlainInit(dir, true); err != nil {
+			_ = os.RemoveAll(dir)
+			return nil, err
+		}
+	} else if err != nil {
+		return nil, err
+	}
+	if _, err := r.Remote("origin"); errors.Is(err, git.ErrRemoteNotFound) {
+		if _, err := r.CreateRemote(&config.RemoteConfig{Name: "origin", URLs: []string{repo.CloneURL}, Fetch: []config.RefSpec{originRefs}}); err != nil {
+			return nil, err
+		}
+	}
+	if err := importCheckouts(r, g.repoDir(repo)); err != nil {
+		return nil, fmt.Errorf("import old checkouts: %w", err)
+	}
+	return r, nil
+}
+
+// importCheckouts moves the checkouts agnts kept before the mirror, one
+// directory per branch, into it: the branch, with any commits not pushed
+// yet, becomes a ref of the mirror, and the directory goes.
+func importCheckouts(r *git.Repository, root string) error {
+	entries, err := os.ReadDir(root)
+	if err != nil {
+		return err
+	}
+	for _, e := range entries {
+		if !e.IsDir() || e.Name() == mirrorName {
+			continue
+		}
+		dir := filepath.Join(root, e.Name())
+		old, err := git.PlainOpen(dir)
+		if err != nil {
+			continue // not a checkout: left alone
+		}
+		head, err := old.Head()
+		if err != nil || !head.Name().IsBranch() {
+			continue
+		}
+		spec := config.RefSpec(fmt.Sprintf("+%s:%s", head.Name(), head.Name()))
+		from := git.NewRemote(r.Storer, &config.RemoteConfig{Name: "import", URLs: []string{dir}})
+		if err := from.Fetch(&git.FetchOptions{RemoteName: "import", RefSpecs: []config.RefSpec{spec}, Tags: git.NoTags}); err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
+			return fmt.Errorf("%s: %w", e.Name(), err)
+		}
+		if err := os.RemoveAll(dir); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// fetch brings refs from origin into the mirror: only what it lacks moves.
+func fetch(ctx context.Context, r *git.Repository, repo domain.Repository, auth transport.AuthMethod, prune bool, refs ...config.RefSpec) error {
+	err := r.FetchContext(ctx, &git.FetchOptions{RemoteName: "origin", RemoteURL: repo.CloneURL, Auth: auth, Force: true, Prune: prune, RefSpecs: refs})
+	if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
+		return fmt.Errorf("fetch %s: %w", repo.CloneURL, err)
+	}
+	return nil
+}
+
+// Prepare fetches and points branch at what it should start from: the
+// existing local or remote branch, or a new one from the default branch.
 func (g *Repos) Prepare(ctx context.Context, repo domain.Repository, branch string) error {
-	dir := g.checkoutDir(repo, branch)
-	defer g.lock(dir)()
+	defer g.lock(repo)()
 	auth, err := g.auth(ctx, repo)
 	if err != nil {
 		return err
 	}
-
-	r, err := git.PlainOpen(dir)
-	if errors.Is(err, git.ErrRepositoryNotExists) {
-		if err := os.MkdirAll(filepath.Dir(dir), 0o750); err != nil {
-			return err
-		}
-		r, err = git.PlainCloneContext(ctx, dir, false, &git.CloneOptions{
-			URL: repo.CloneURL, Auth: auth, ReferenceName: plumbing.NewBranchReferenceName(repo.DefaultBranch),
-			SingleBranch: false, NoCheckout: true,
-		})
-		if err != nil {
-			_ = os.RemoveAll(dir)
-			return fmt.Errorf("clone %s: %w", repo.CloneURL, err)
-		}
-	} else if err != nil {
+	r, err := g.open(repo)
+	if err != nil {
 		return err
-	} else {
-		err = r.FetchContext(ctx, &git.FetchOptions{Auth: auth, Force: true,
-			RefSpecs: []config.RefSpec{"+refs/heads/*:refs/remotes/origin/*"}})
-		if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
-			return fmt.Errorf("fetch: %w", err)
-		}
+	}
+	if err := fetch(ctx, r, repo, auth, true, originRefs); err != nil {
+		return err
 	}
 
 	local := plumbing.NewBranchReferenceName(branch)
 	if cur, err := r.Reference(local, true); err == nil {
-		if err := fastForward(r, repo, branch, cur); err != nil {
-			return err
-		}
-	} else {
-		// No local branch yet: start from the remote branch if it exists
-		// (agnts pushed it before), else from the default branch.
-		from, err := r.Reference(plumbing.NewRemoteReferenceName("origin", branch), true)
-		if err != nil {
-			if from, err = r.Reference(plumbing.NewRemoteReferenceName("origin", repo.DefaultBranch), true); err != nil {
-				return fmt.Errorf("default branch %q not found on remote: %w", repo.DefaultBranch, err)
-			}
-		}
-		if err := r.Storer.SetReference(plumbing.NewHashReference(local, from.Hash())); err != nil {
-			return err
-		}
+		return fastForward(r, repo, branch, cur)
 	}
-	wt, err := r.Worktree()
+	// No local branch yet: start from the remote branch if it exists
+	// (agnts pushed it before), else from the default branch.
+	from, err := r.Reference(plumbing.NewRemoteReferenceName("origin", branch), true)
 	if err != nil {
-		return err
-	}
-	return wt.Checkout(&git.CheckoutOptions{Branch: local, Force: true})
-}
-
-// Archive returns a tar of the checkout, .git included, owned by the agent user.
-func (g *Repos) Archive(_ context.Context, repo domain.Repository, branch string) (io.ReadCloser, error) {
-	dir := g.checkoutDir(repo, branch)
-	pr, pw := io.Pipe()
-	go func() {
-		unlock := g.lock(dir)
-		defer unlock()
-		tw := tar.NewWriter(pw)
-		err := filepath.WalkDir(dir, func(p string, d fs.DirEntry, err error) error {
-			if err != nil {
-				return err
-			}
-			rel, err := filepath.Rel(dir, p)
-			if err != nil || rel == "." {
-				return err
-			}
-			info, err := d.Info()
-			if err != nil {
-				return err
-			}
-			link := ""
-			if info.Mode()&fs.ModeSymlink != 0 {
-				if link, err = os.Readlink(p); err != nil {
-					return err
-				}
-			}
-			h, err := tar.FileInfoHeader(info, link)
-			if err != nil {
-				return err
-			}
-			h.Name = filepath.ToSlash(rel)
-			if d.IsDir() {
-				h.Name += "/"
-			}
-			h.Uid, h.Gid, h.Uname, h.Gname = AgentUID, AgentUID, "agent", "agent"
-			if err := tw.WriteHeader(h); err != nil {
-				return err
-			}
-			if info.Mode().IsRegular() {
-				f, err := os.Open(p) //nolint:gosec // G304: walking our own checkout
-				if err != nil {
-					return err
-				}
-				_, err = io.Copy(tw, f)
-				_ = f.Close()
-				return err
-			}
-			return nil
-		})
-		if err == nil {
-			err = tw.Close()
-		}
-		_ = pw.CloseWithError(err)
-	}()
-	return pr, nil
-}
-
-// Commit replaces the working tree with tree's files, commits any change,
-// and returns the head plus the branch's diff against the default branch.
-func (g *Repos) Commit(ctx context.Context, repo domain.Repository, branch string, tree io.Reader, message string) (string, []domain.FileChange, error) {
-	dir := g.checkoutDir(repo, branch)
-	defer g.lock(dir)()
-
-	r, err := git.PlainOpen(dir)
-	if err != nil {
-		return "", nil, err
-	}
-	wt, err := r.Worktree()
-	if err != nil {
-		return "", nil, err
-	}
-	if err := wipeWorktree(dir); err != nil {
-		return "", nil, err
-	}
-	if err := extract(tree, dir); err != nil {
-		return "", nil, err
-	}
-	if err := wt.AddWithOptions(&git.AddOptions{All: true}); err != nil {
-		return "", nil, fmt.Errorf("stage: %w", err)
-	}
-	st, err := wt.Status()
-	if err != nil {
-		return "", nil, err
-	}
-	head, err := r.Head()
-	if err != nil {
-		return "", nil, err
-	}
-	sha := head.Hash()
-	if !st.IsClean() {
-		a, err := g.author(ctx)
-		if err != nil {
-			return "", nil, err
-		}
-		sig := &object.Signature{Name: a.Name, Email: a.Email, When: time.Now()}
-		if sha, err = wt.Commit(message, &git.CommitOptions{Author: sig, Committer: sig}); err != nil {
-			return "", nil, fmt.Errorf("commit: %w", err)
+		if from, err = r.Reference(plumbing.NewRemoteReferenceName("origin", repo.DefaultBranch), true); err != nil {
+			return fmt.Errorf("default branch %q not found on remote: %w", repo.DefaultBranch, err)
 		}
 	}
-	files, err := branchDiff(r, repo.DefaultBranch, sha)
-	return sha.String(), files, err
+	return r.Storer.SetReference(plumbing.NewHashReference(local, from.Hash()))
 }
 
 // Push sends branch to origin. Only fast-forwards: agnts never rewrites history.
 func (g *Repos) Push(ctx context.Context, repo domain.Repository, branch string) error {
-	dir := g.checkoutDir(repo, branch)
-	defer g.lock(dir)()
-	r, err := git.PlainOpen(dir)
-	if err != nil {
-		return err
-	}
-	auth, err := g.auth(ctx, repo)
-	if err != nil {
-		return err
-	}
-	ref := config.RefSpec(fmt.Sprintf("refs/heads/%s:refs/heads/%s", branch, branch))
-	err = r.PushContext(ctx, &git.PushOptions{RemoteName: "origin", RefSpecs: []config.RefSpec{ref}, Auth: auth})
-	if errors.Is(err, git.NoErrAlreadyUpToDate) {
-		return nil
-	}
-	return err
+	return g.push(ctx, repo, branch, branch)
 }
 
 // PushTo fast-forwards target on origin to branch's head. It fails if
 // target moved on since the branch was cut: agnts never force-pushes.
 func (g *Repos) PushTo(ctx context.Context, repo domain.Repository, branch, target string) error {
-	dir := g.checkoutDir(repo, branch)
-	defer g.lock(dir)()
-	r, err := git.PlainOpen(dir)
+	err := g.push(ctx, repo, branch, target)
+	if err != nil && strings.Contains(err.Error(), "non-fast-forward") {
+		return fmt.Errorf("%s moved on since agnts started; switch the task to a pull request or retry to rebuild from %s: %w", target, target, err)
+	}
+	return err
+}
+
+func (g *Repos) push(ctx context.Context, repo domain.Repository, branch, target string) error {
+	defer g.lock(repo)()
+	r, err := git.PlainOpen(g.mirrorDir(repo))
 	if err != nil {
 		return err
 	}
@@ -298,12 +259,9 @@ func (g *Repos) PushTo(ctx context.Context, repo domain.Repository, branch, targ
 		return err
 	}
 	ref := config.RefSpec(fmt.Sprintf("refs/heads/%s:refs/heads/%s", branch, target))
-	err = r.PushContext(ctx, &git.PushOptions{RemoteName: "origin", RefSpecs: []config.RefSpec{ref}, Auth: auth})
+	err = r.PushContext(ctx, &git.PushOptions{RemoteName: "origin", RemoteURL: repo.CloneURL, RefSpecs: []config.RefSpec{ref}, Auth: auth})
 	if errors.Is(err, git.NoErrAlreadyUpToDate) {
 		return nil
-	}
-	if err != nil && strings.Contains(err.Error(), "non-fast-forward") {
-		return fmt.Errorf("%s moved on since agnts started; switch the task to a pull request or retry to rebuild from %s: %w", target, target, err)
 	}
 	return err
 }
@@ -318,7 +276,7 @@ func fastForward(r *git.Repository, repo domain.Repository, branch string, cur *
 	target, err := r.Reference(plumbing.NewRemoteReferenceName("origin", branch), true)
 	if err != nil {
 		if target, err = r.Reference(plumbing.NewRemoteReferenceName("origin", repo.DefaultBranch), true); err != nil {
-			return nil // nothing to compare with; Checkout reports real problems
+			return nil // nothing to compare with
 		}
 	}
 	if target.Hash() == cur.Hash() {
@@ -343,9 +301,8 @@ func fastForward(r *git.Repository, repo domain.Repository, branch string, cur *
 // merge base with branch: the changes a pull request from branch has to
 // merge with.
 func (g *Repos) Drift(ctx context.Context, repo domain.Repository, branch string) ([]domain.FileChange, error) {
-	dir := g.checkoutDir(repo, branch)
-	defer g.lock(dir)()
-	r, err := git.PlainOpen(dir)
+	defer g.lock(repo)()
+	r, err := git.PlainOpen(g.mirrorDir(repo))
 	if err != nil {
 		return nil, err
 	}
@@ -353,10 +310,9 @@ func (g *Repos) Drift(ctx context.Context, repo domain.Repository, branch string
 	if err != nil {
 		return nil, err
 	}
-	err = r.FetchContext(ctx, &git.FetchOptions{Auth: auth, Force: true,
-		RefSpecs: []config.RefSpec{config.RefSpec(fmt.Sprintf("+refs/heads/%s:refs/remotes/origin/%s", repo.DefaultBranch, repo.DefaultBranch))}})
-	if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
-		return nil, fmt.Errorf("fetch: %w", err)
+	def := config.RefSpec(fmt.Sprintf("+refs/heads/%s:refs/remotes/origin/%s", repo.DefaultBranch, repo.DefaultBranch))
+	if err := fetch(ctx, r, repo, auth, false, def); err != nil {
+		return nil, err
 	}
 	head, err := r.Reference(plumbing.NewBranchReferenceName(branch), true)
 	if err != nil {
@@ -439,125 +395,43 @@ func treeDiff(baseC, headC *object.Commit) ([]domain.FileChange, error) {
 	return out, nil
 }
 
-// wipeWorktree deletes everything except .git, so files Claude deleted
-// disappear when the exported tree is extracted.
-func wipeWorktree(dir string) error {
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return err
-	}
-	for _, e := range entries {
-		if e.Name() == ".git" {
-			continue
-		}
-		if err := os.RemoveAll(filepath.Join(dir, e.Name())); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// extract unpacks a tar into dir, refusing entries that would escape it or
-// touch .git (the container's git metadata is never trusted).
-func extract(r io.Reader, dir string) error {
-	tr := tar.NewReader(r)
-	for {
-		h, err := tr.Next()
-		if errors.Is(err, io.EOF) {
-			return nil
-		}
-		if err != nil {
-			return fmt.Errorf("read workspace tar: %w", err)
-		}
-		name := path.Clean(strings.TrimPrefix(h.Name, "./"))
-		if name == "." || name == ".git" || strings.HasPrefix(name, ".git/") {
-			continue
-		}
-		if path.IsAbs(name) || name == ".." || strings.HasPrefix(name, "../") {
-			return fmt.Errorf("workspace tar entry escapes the repository: %q", h.Name)
-		}
-		target := filepath.Join(dir, filepath.FromSlash(name))
-		switch h.Typeflag {
-		case tar.TypeDir:
-			if err := os.MkdirAll(target, 0o750); err != nil {
-				return err
-			}
-		case tar.TypeReg:
-			if err := os.MkdirAll(filepath.Dir(target), 0o750); err != nil {
-				return err
-			}
-			mode := os.FileMode(0o644)
-			if h.Mode&0o111 != 0 {
-				mode = 0o755
-			}
-			f, err := os.OpenFile(target, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, mode) //nolint:gosec // G304: target checked above
-			if err != nil {
-				return err
-			}
-			_, err = io.Copy(f, io.LimitReader(tr, 512<<20)) //nolint:gosec // G110: bounded per file
-			if cerr := f.Close(); err == nil {
-				err = cerr
-			}
-			if err != nil {
-				return err
-			}
-		case tar.TypeSymlink:
-			// This is the traversal guard for links (TestExtractRejectsEscapes).
-			if path.IsAbs(h.Linkname) || strings.HasPrefix(path.Clean(path.Join(path.Dir(name), h.Linkname)), "../") { //nolint:gosec // G305: guard, not a sink
-				return fmt.Errorf("symlink %q points outside the repository", h.Name)
-			}
-			if err := os.MkdirAll(filepath.Dir(target), 0o750); err != nil {
-				return err
-			}
-			_ = os.Remove(target)
-			if err := os.Symlink(h.Linkname, target); err != nil {
-				return err
-			}
-		}
-	}
-}
-
 // maxCount caps commit counting so a long-lived branch cannot stall a page.
 const maxCount = 1000
 
-// LocalBranches lists the branch checked out in each of the repository's
-// checkouts, newest commit first. Broken or half-made checkouts are skipped.
+// LocalBranches lists agnts's branches in the repository's mirror, newest
+// commit first.
 func (g *Repos) LocalBranches(repo domain.Repository) ([]vcs.LocalBranch, error) {
-	root := filepath.Dir(g.checkoutDir(repo, "x"))
-	entries, err := os.ReadDir(root)
-	if errors.Is(err, fs.ErrNotExist) {
+	if _, err := os.Stat(g.repoDir(repo)); errors.Is(err, fs.ErrNotExist) {
 		return nil, nil
 	}
+	defer g.lock(repo)() // open may import old checkouts
+	r, err := g.open(repo)
+	if err != nil {
+		return nil, err
+	}
+	refs, err := r.References()
 	if err != nil {
 		return nil, err
 	}
 	var out []vcs.LocalBranch
-	for _, e := range entries {
-		if !e.IsDir() {
-			continue
+	err = refs.ForEach(func(ref *plumbing.Reference) error {
+		if ref.Name().IsBranch() && ref.Type() == plumbing.HashReference {
+			if b, ok := localBranch(r, ref, repo.DefaultBranch); ok {
+				out = append(out, b)
+			}
 		}
-		if b, ok := localBranch(filepath.Join(root, e.Name()), repo.DefaultBranch); ok {
-			out = append(out, b)
-		}
-	}
+		return nil
+	})
 	slices.SortFunc(out, func(a, b vcs.LocalBranch) int { return b.Date.Compare(a.Date) })
-	return out, nil
+	return out, err
 }
 
-func localBranch(dir, defaultBranch string) (vcs.LocalBranch, bool) {
-	r, err := git.PlainOpen(dir)
+func localBranch(r *git.Repository, ref *plumbing.Reference, defaultBranch string) (vcs.LocalBranch, bool) {
+	c, err := r.CommitObject(ref.Hash())
 	if err != nil {
 		return vcs.LocalBranch{}, false
 	}
-	head, err := r.Head()
-	if err != nil || !head.Name().IsBranch() {
-		return vcs.LocalBranch{}, false
-	}
-	c, err := r.CommitObject(head.Hash())
-	if err != nil {
-		return vcs.LocalBranch{}, false
-	}
-	name := head.Name().Short()
+	name := ref.Name().Short()
 	b := vcs.LocalBranch{Name: name, SHA: c.Hash.String(), Message: firstLine(c.Message), Author: c.Author.Name, Date: c.Committer.When, Unpushed: -1}
 	if def, err := r.Reference(plumbing.NewRemoteReferenceName("origin", defaultBranch), true); err == nil {
 		b.Ahead, b.Behind = aheadBehind(r, c, def.Hash())

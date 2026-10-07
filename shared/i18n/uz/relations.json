@@ -46,6 +46,7 @@
     "footprintConsumes": "Kerak",
     "footprintMigrations": "Maʼlumotlar bazasi migratsiyasini qoʻshadi",
     "markMerged": "Birlashtirilgan deb belgilash",
-    "markMergedHint": "Birlashtirish webhooki yoʻqmi? Uni kutayotgan tiketlar boshlashi uchun pull requestni birlashtirilgan deb belgilang."
+    "markMergedHint": "Birlashtirish webhooki yoʻqmi? Uni kutayotgan tiketlar boshlashi uchun pull requestni birlashtirilgan deb belgilang.",
+    "source_plane": "Plane bogʻlanishi"
   }
 }

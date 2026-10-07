@@ -24,6 +24,8 @@ class RequestChangesRequest {
     required  this.feedback,
 
      this.shots,
+
+     this.attachments,
   });
 
   @JsonKey(
@@ -51,17 +53,32 @@ class RequestChangesRequest {
 
 
 
+      /// Uploads that go with the feedback (mockups, logs, screenshots); the coding run reads them
+  @JsonKey(
+    
+    name: r'attachments',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<int>? attachments;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is RequestChangesRequest &&
       other.feedback == feedback &&
-      other.shots == shots;
+      other.shots == shots &&
+      other.attachments == attachments;
 
     @override
     int get hashCode =>
         feedback.hashCode +
-        shots.hashCode;
+        shots.hashCode +
+        attachments.hashCode;
 
   factory RequestChangesRequest.fromJson(Map<String, dynamic> json) => _$RequestChangesRequestFromJson(json);
 

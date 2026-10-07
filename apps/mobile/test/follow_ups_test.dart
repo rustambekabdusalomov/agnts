@@ -59,6 +59,7 @@ TicketDetail _detail(FollowUps f) => TicketDetail(
         suggestFollowUps: FollowUpsMode.on_,
       ),
       questions: const [],
+      attachments: const [],
       followUps: f,
     );
 

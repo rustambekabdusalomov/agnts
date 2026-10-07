@@ -9,7 +9,7 @@ import ChartLegend from '../components/charts/ChartLegend.vue'
 import EventTypeBadge from '../components/logs/EventTypeBadge.vue'
 import PageHeader from '../components/PageHeader.vue'
 import { fmtDur, fmtTime } from '../composables/format'
-import { useLive } from '../composables/useLive'
+import { livePoll, useLive } from '../composables/useLive'
 
 type Tab = 'all' | 'state' | 'tool' | 'command' | 'user' | 'limit' | 'problems'
 
@@ -37,7 +37,7 @@ watch(keyFilter, (v) => {
 })
 const open = reactive<Record<number, boolean>>({})
 
-const summary = useQuery({ queryKey: ['events-summary'], queryFn: () => unwrap(api.GET('/events/summary')), refetchInterval: 60_000 })
+const summary = useQuery({ queryKey: ['events-summary'], queryFn: () => unwrap(api.GET('/events/summary')), refetchInterval: 60_000 }) // counts every event: polled, not refetched per event
 
 const events = useInfiniteQuery({
   queryKey: computed(() => ['events', view.type, view.key, view.errors]),
@@ -73,7 +73,7 @@ useLive(() => {
 const runningTickets = useQuery({
   queryKey: ['tickets', 'running'],
   queryFn: () => unwrap(api.GET('/tickets', { params: { query: { state: RUNNING } } })),
-  refetchInterval: 30_000,
+  refetchInterval: () => livePoll(30_000),
 })
 const running = computed(() => (runningTickets.data.value ?? []).length > 0)
 

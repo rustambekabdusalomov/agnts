@@ -35,6 +35,10 @@ const _icons = <String, String>{
   'check': '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
   'search': '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
   'more': '<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>',
+  'attach': '<path d="M20.5 11.5l-8.4 8.4a5 5 0 0 1-7.1-7.1l8.4-8.4a3.3 3.3 0 0 1 4.7 4.7l-8.4 8.4a1.7 1.7 0 0 1-2.4-2.4l7.7-7.7"/>',
+  'image': '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/>',
+  'camera': '<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/>',
+  'file': '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>',
 };
 
 /// One of the demo's stroked icons, in [color] (defaults to the text colour).
@@ -117,9 +121,16 @@ class ToneBadge extends StatelessWidget {
   }
 }
 
-/// The small square source chip: "Jira" (gray) or "Task" (purple) (.src).
+/// The small square source chip: "Jira" or "Plane" (gray), or "Task" (purple) (.src).
 /// Kinds whose work is a Markdown report instead of a change.
 bool isReportKind(TicketKind k) => k == TicketKind.plan || k == TicketKind.analysis || k == TicketKind.bug;
+
+/// Where a ticket came from, for its source chip: Jira, Plane or Task.
+String sourceLabel(AppLocalizations l, TicketSource_Enum s) => switch (s) {
+      TicketSource_Enum.local => l.ticketsSourceTask,
+      TicketSource_Enum.plane => l.ticketsSourcePlane,
+      _ => l.ticketsSourceJira,
+    };
 
 /// A kind's name from the shared dictionaries.
 String kindLabel(AppLocalizations l, TicketKind k) => switch (k) {
@@ -335,7 +346,7 @@ class TicketCard extends StatelessWidget {
         DefaultTextStyle.merge(
           style: TextStyle(fontSize: 13, color: c.ink3),
           child: Wrap(spacing: 8, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
-            SourceChip(isTask ? l.ticketsSourceTask : l.ticketsSourceJira, task: isTask),
+            SourceChip(sourceLabel(l, ticket.source_), task: isTask),
             if (ticket.kind != TicketKind.code) KindChip(ticket),
             if ((ticket.openSuggestions ?? 0) > 0) ToneBadge(AppLocalizations.of(context).followUpsOpenBadge(ticket.openSuggestions!), Tone.info, small: true),
             if (ticket.blockedBy?.isNotEmpty ?? false) ToneBadge(AppLocalizations.of(context).relationsWaitingBadge, Tone.warn, small: true),

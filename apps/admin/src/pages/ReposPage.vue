@@ -80,6 +80,7 @@ function onPick(r: RemoteRepository) {
             <th>{{ t('repos.colRepo') }}</th>
             <th>{{ t('repos.colSource') }}</th>
             <th>{{ t('repos.colBranch') }}</th>
+            <th>{{ t('repos.colStack') }}</th>
             <th>{{ t('repos.colTest') }}</th>
             <th>{{ t('repos.colClaude') }}</th>
             <th>{{ t('repos.colOpen') }}</th>
@@ -95,10 +96,17 @@ function onPick(r: RemoteRepository) {
             <td>
               <span class="srcs">
                 <span v-if="r.jiraProject" class="src">{{ t('repos.jira', { project: r.jiraProject }) }}</span>
+                <span v-if="r.planeProject" class="src">{{ t('repos.plane', { project: r.planeProject }) }}</span>
                 <span class="src local">{{ t('repos.side') }}</span>
               </span>
             </td>
             <td class="tkey">{{ r.defaultBranch }}</td>
+            <td>
+              <span v-if="r.toolchains?.length" class="srcs">
+                <span v-for="tc in r.toolchains" :key="tc.tool" class="src" :title="tc.source">{{ tc.tool }} {{ tc.version }}</span>
+              </span>
+              <span v-else class="tkey">—</span>
+            </td>
             <td class="tkey">{{ r.testCmd || '—' }}</td>
             <td>
               <span v-if="r.claudeMd === 'found'" class="repo-ok">{{ t('repos.found') }}</span>
@@ -115,7 +123,7 @@ function onPick(r: RemoteRepository) {
             </td>
           </tr>
           <tr v-if="!rows.length">
-            <td colspan="7" class="empty">{{ ui.search.trim() ? t('repos.noMatch') : view === 'archived' ? t('repos.noArchived') : t('repos.none') }}</td>
+            <td colspan="8" class="empty">{{ ui.search.trim() ? t('repos.noMatch') : view === 'archived' ? t('repos.noArchived') : t('repos.none') }}</td>
           </tr>
         </tbody>
       </table>

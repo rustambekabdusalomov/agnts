@@ -12,6 +12,7 @@ import TicketBoard, { type BoardColumn } from '../components/TicketBoard.vue'
 import SegButtons from '../components/form/SegButtons.vue'
 import { useListView } from '../composables/useListView'
 import { ago, fmtTokens, ioTokens, level, pct } from '../composables/format'
+import { livePoll } from '../composables/useLive'
 import { useUi } from '../stores/ui'
 
 const { t, locale } = useI18n()
@@ -25,7 +26,7 @@ const tickets = useQuery({
   queryKey: computed(() => ['tickets', filter.value.id]),
   queryFn: () =>
     unwrap(api.GET('/tickets', { params: { query: filter.value.states.length ? { state: filter.value.states } : {} } })),
-  refetchInterval: 30_000,
+  refetchInterval: () => livePoll(30_000),
 })
 
 // Stats only on "Needs you", from the dashboard aggregate.
@@ -107,7 +108,7 @@ const columns = computed<BoardColumn[]>(() =>
             <td><div class="tkey">{{ tk.key }} <KindBadge v-if="tk.kind !== 'code'" :ticket="tk" /> <span v-if="tk.openSuggestions" class="badge b-info">{{ t('followUps.openBadge', { count: tk.openSuggestions }) }}</span> <span v-if="tk.blockedBy?.length" class="badge b-warn" :title="tk.blockedBy.map((b) => b.key).join(', ')">{{ t('relations.waitingBadge') }}</span></div><div class="ttitle">{{ tk.title }}</div></td>
             <td>
               <span v-if="tk.source === 'local'" class="src local">{{ t('tickets.sourceTask') }}</span>
-              <span v-else class="src">{{ t('tickets.sourceJira') }}</span>
+              <span v-else class="src">{{ tk.source === 'plane' ? t('tickets.sourcePlane') : t('tickets.sourceJira') }}</span>
             </td>
             <td class="muted">{{ tk.repoName ?? '—' }}</td>
             <td>

@@ -5,7 +5,7 @@ use serde::Deserialize;
 
 use crate::cli::Session;
 use crate::target::Cmd;
-use crate::{compose, dns, ops, preflight, tls, ui};
+use crate::{capacity, compose, dns, ops, preflight, tls, ui};
 
 #[derive(Deserialize)]
 struct VersionJson {
@@ -31,6 +31,31 @@ fn server_version(s: &Session) -> String {
 fn disk_free(s: &Session) -> Option<u64> {
     let out = s.t().run(&Cmd::new(["df", "-Pk", "/"])).ok()?;
     preflight::parse_df_avail_kb(&out.text())
+}
+
+/// Sizes of the volumes runs use: the shared toolchains and each
+/// repository's package cache, as (name, size) from `docker system df -v`.
+fn run_volumes(s: &Session) -> Vec<(String, String)> {
+    let out = s.t().run(&Cmd::new([
+        "docker",
+        "system",
+        "df",
+        "-v",
+        "--format",
+        "{{range .Volumes}}{{.Name}}\t{{.Size}}\n{{end}}",
+    ]));
+    match out {
+        Ok(o) if o.success() => parse_run_volumes(&o.text()),
+        _ => Vec::new(),
+    }
+}
+
+fn parse_run_volumes(text: &str) -> Vec<(String, String)> {
+    text.lines()
+        .filter_map(|l| l.split_once('\t'))
+        .filter(|(n, _)| *n == "agnts-toolchains" || n.starts_with("agnts-cache-"))
+        .map(|(n, sz)| (n.to_string(), sz.trim().to_string()))
+        .collect()
 }
 
 fn gb(kb: u64) -> String {
@@ -73,6 +98,18 @@ pub fn run(s: &Session) -> Result<i32> {
     if let Some(kb) = disk_free(s) {
         ui::info(&format!("  Free disk:   {}", gb(kb)));
     }
+    let vols = run_volumes(s);
+    if let Some((_, size)) = vols.iter().find(|(n, _)| n == "agnts-toolchains") {
+        ui::info(&format!("  Toolchains:  {size} (installed on first use, shared by runs)"));
+    }
+    let caches: Vec<_> = vols.iter().filter(|(n, _)| n.starts_with("agnts-cache-")).collect();
+    if !caches.is_empty() {
+        let list: Vec<String> = caches
+            .iter()
+            .map(|(n, sz)| format!("{} {sz}", n.trim_start_matches("agnts-cache-")))
+            .collect();
+        ui::info(&format!("  Pkg caches:  {}", list.join(", ")));
+    }
     match ops::list_backups(s.t())?.last() {
         Some(b) => ui::info(&format!("  Last backup: {b}")),
         None => ui::info("  Last backup: none yet (nightly at 03:00, or run `agnts backup`)"),
@@ -95,10 +132,19 @@ pub fn doctor(s: &Session) -> Result<i32> {
     };
 
     ui::header(&format!("Checking {}", s.t().label()));
-    let (_, findings) = preflight::run(s.t(), true)?;
-    for f in &findings {
-        report(f.ok, f.name, &f.detail, f.fix.as_deref());
-    }
+    // OS, ports and capacity (no disk write test on a live server).
+    let (_, _, fits) = capacity::check(s.t(), true, false)?;
+    report(
+        fits,
+        "Server",
+        if fits {
+            "fits agnts"
+        } else {
+            "does not fit agnts"
+        },
+        None,
+    );
+    ui::info("");
 
     let docker = s
         .t()
@@ -182,5 +228,47 @@ pub fn doctor(s: &Session) -> Result<i32> {
     } else {
         ui::header(&format!("{failed} problem(s) found."));
         Ok(1)
+    }
+}
+
+/// `agnts capacity`: measure a server before (or after) installing.
+pub fn capacity(a: crate::cli::CapacityArgs, profile: Option<&str>) -> Result<i32> {
+    use crate::target::{LocalTarget, SshTarget, Target};
+    let session;
+    let target: Box<dyn Target>;
+    let t: &dyn Target = if let Some(host) = &a.host {
+        let ssh = SshTarget::new(host, a.ssh_port);
+        ssh.connect()?;
+        target = Box::new(ssh);
+        target.as_ref()
+    } else if a.local {
+        target = Box::new(LocalTarget::new()?);
+        target.as_ref()
+    } else {
+        session = Session::open(profile)?;
+        session.t()
+    };
+    let installed = ops::install_id(t, false)?.is_some();
+    ui::header(&format!("Checking {}", t.label()));
+    let (_, _, fits) = capacity::check(t, installed, true)?;
+    Ok(if fits { 0 } else { 1 })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn run_volumes_are_picked() {
+        let got = parse_run_volumes(
+            "agnts_pg\t120MB\nagnts-toolchains\t1.4GB\nagnts-cache-repo-3\t310MB\nother\t1kB\n",
+        );
+        assert_eq!(
+            got,
+            vec![
+                ("agnts-toolchains".to_string(), "1.4GB".to_string()),
+                ("agnts-cache-repo-3".to_string(), "310MB".to_string())
+            ]
+        );
     }
 }

@@ -9,7 +9,7 @@ import 'package:agnts_api/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **id** | **int** |  | 
-**target** | **String** | local = an agnts task (default), jira = a new issue in the Jira project | [optional] 
+**target** | **String** | local = an agnts task (default), jira = a new issue in the Jira project, plane = a new work item in the Plane project | [optional] 
 **title** | **String** |  | [optional] 
 **description** | **String** |  | [optional] 
 **kind** | [**TicketKind**](TicketKind.md) |  | [optional] 

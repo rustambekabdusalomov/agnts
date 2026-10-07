@@ -27,6 +27,12 @@ void main() {
       // TODO
     });
 
+    // Several options may be chosen; the answer then lists the chosen ones, one per line
+    // bool multiple
+    test('to test the property `multiple`', () async {
+      // TODO
+    });
+
     // String answer
     test('to test the property `answer`', () async {
       // TODO

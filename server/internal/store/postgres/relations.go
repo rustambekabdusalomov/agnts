@@ -136,8 +136,9 @@ func (s *Agent) ReplaceFound(ctx context.Context, foundBy string, rs []domain.Re
 	return out, err
 }
 
-// SyncJiraRelations makes the jira relations involving key exactly rs.
-func (s *Agent) SyncJiraRelations(ctx context.Context, key string, rs []domain.Relation) ([]domain.Relation, error) {
+// SyncTrackerRelations makes the relations of source (jira, plane)
+// involving key exactly rs.
+func (s *Agent) SyncTrackerRelations(ctx context.Context, source domain.RelationSource, key string, rs []domain.Relation) ([]domain.Relation, error) {
 	var added []domain.Relation
 	err := pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
 		keep := make([]int64, 0, len(rs))
@@ -158,8 +159,8 @@ func (s *Agent) SyncJiraRelations(ctx context.Context, key string, rs []domain.R
 				added = append(added, got)
 			}
 		}
-		_, err := tx.Exec(ctx, `DELETE FROM ticket_relations WHERE source = 'jira' AND (ticket_key = $1 OR other_key = $1) AND NOT (id = ANY($2))`,
-			key, keep)
+		_, err := tx.Exec(ctx, `DELETE FROM ticket_relations WHERE source = $3 AND (ticket_key = $1 OR other_key = $1) AND NOT (id = ANY($2))`,
+			key, keep, string(source))
 		return err
 	})
 	return added, err
@@ -184,7 +185,7 @@ func (s *Agent) UpsertRelation(ctx context.Context, r domain.Relation, ev *domai
 // authority ranks the sources that predict: what a person or Jira says
 // outranks what agnts read from the tickets or their footprints.
 var authority = map[domain.RelationSource]int{
-	domain.RelFromAgnts: 1, domain.RelFromRule: 2, domain.RelFromJira: 3, domain.RelFromUser: 4,
+	domain.RelFromAgnts: 1, domain.RelFromRule: 2, domain.RelFromJira: 3, domain.RelFromPlane: 3, domain.RelFromUser: 4,
 }
 
 // upsertRelation inserts r, or merges it into the existing relation of the

@@ -47,14 +47,16 @@ func (d *Docker) do(ctx context.Context, method, path string, query url.Values, 
 	if len(query) > 0 {
 		u += "?" + query.Encode()
 	}
-	req, err := http.NewRequestWithContext(ctx, method, u, body)
+	// The host is always the local Docker socket; path parts that come from
+	// people (a custom image name) are checked by domain.ValidImage first.
+	req, err := http.NewRequestWithContext(ctx, method, u, body) //nolint:gosec // G704: see above
 	if err != nil {
 		return nil, err
 	}
 	if contentType != "" {
 		req.Header.Set("Content-Type", contentType)
 	}
-	resp, err := d.hc.Do(req)
+	resp, err := d.hc.Do(req) //nolint:gosec // G704: the Docker socket, see above
 	if err != nil {
 		return nil, fmt.Errorf("docker %s %s: %w", method, path, err)
 	}
@@ -130,8 +132,16 @@ type ContainerConfig struct {
 	CPUs       float64
 	PIDs       int64
 	Volumes    []string // container paths backed by anonymous volumes
+	Mounts     []Mount  // named volumes
 	Tmpfs      map[string]string
 	Env        []string
+}
+
+// Mount is a named volume mounted into a container.
+type Mount struct {
+	Volume   string
+	Target   string
+	ReadOnly bool
 }
 
 // Create creates (but does not start) a hardened container and returns its id.
@@ -139,6 +149,9 @@ func (d *Docker) Create(ctx context.Context, c ContainerConfig) (string, error) 
 	mounts := make([]map[string]any, 0, len(c.Volumes))
 	for _, p := range c.Volumes {
 		mounts = append(mounts, map[string]any{"Type": "volume", "Target": p})
+	}
+	for _, m := range c.Mounts {
+		mounts = append(mounts, map[string]any{"Type": "volume", "Source": m.Volume, "Target": m.Target, "ReadOnly": m.ReadOnly})
 	}
 	body := map[string]any{
 		"Image":      c.Image,
@@ -276,4 +289,74 @@ func demux(r io.Reader, stdout, stderr io.Writer) error {
 			return err
 		}
 	}
+}
+
+// EnsureVolume creates a named volume with labels if it does not exist.
+func (d *Docker) EnsureVolume(ctx context.Context, name string, labels map[string]string) error {
+	err := d.json(ctx, http.MethodGet, "/volumes/"+url.PathEscape(name), nil, nil, nil)
+	var ae *apiError
+	if errors.As(err, &ae) && ae.Status == http.StatusNotFound {
+		return d.json(ctx, http.MethodPost, "/volumes/create", nil, map[string]any{"Name": name, "Labels": labels}, nil)
+	}
+	return err
+}
+
+// VolumeUsage is a volume's size as the daemon last measured it.
+type VolumeUsage struct {
+	Name     string
+	Labels   map[string]string
+	Size     int64 // bytes; -1 when unknown
+	RefCount int64 // containers using it; -1 when unknown
+}
+
+// Volumes lists volumes with their sizes (GET /system/df; slow on large
+// hosts, so callers run it rarely).
+func (d *Docker) Volumes(ctx context.Context) ([]VolumeUsage, error) {
+	var out struct {
+		Volumes []struct {
+			Name      string            `json:"Name"`
+			Labels    map[string]string `json:"Labels"`
+			UsageData *struct {
+				Size     int64 `json:"Size"`
+				RefCount int64 `json:"RefCount"`
+			} `json:"UsageData"`
+		} `json:"Volumes"`
+	}
+	if err := d.json(ctx, http.MethodGet, "/system/df", url.Values{"type": {"volume"}}, nil, &out); err != nil {
+		return nil, err
+	}
+	list := make([]VolumeUsage, 0, len(out.Volumes))
+	for _, v := range out.Volumes {
+		u := VolumeUsage{Name: v.Name, Labels: v.Labels, Size: -1, RefCount: -1}
+		if v.UsageData != nil {
+			u.Size, u.RefCount = v.UsageData.Size, v.UsageData.RefCount
+		}
+		list = append(list, u)
+	}
+	return list, nil
+}
+
+// RemoveVolume deletes a named volume; one still in use is an error.
+func (d *Docker) RemoveVolume(ctx context.Context, name string) error {
+	err := d.json(ctx, http.MethodDelete, "/volumes/"+url.PathEscape(name), nil, nil, nil)
+	var ae *apiError
+	if errors.As(err, &ae) && ae.Status == http.StatusNotFound {
+		return nil
+	}
+	return err
+}
+
+// ImageLabels returns the labels of a local image, or domain.ErrNotFound.
+func (d *Docker) ImageLabels(ctx context.Context, image string) (map[string]string, error) {
+	var out struct {
+		Config struct {
+			Labels map[string]string `json:"Labels"`
+		} `json:"Config"`
+	}
+	err := d.json(ctx, http.MethodGet, "/images/"+image+"/json", nil, nil, &out)
+	var ae *apiError
+	if errors.As(err, &ae) && ae.Status == http.StatusNotFound {
+		return nil, domain.ErrNotFound
+	}
+	return out.Config.Labels, err
 }

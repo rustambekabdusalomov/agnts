@@ -46,6 +46,7 @@
     "footprintConsumes": "Needs",
     "footprintMigrations": "Adds a database migration",
     "markMerged": "Mark merged",
-    "markMergedHint": "No merge webhook? Mark the pull request merged so tickets waiting for it can start."
+    "markMergedHint": "No merge webhook? Mark the pull request merged so tickets waiting for it can start.",
+    "source_plane": "Plane relation"
   }
 }

@@ -21,7 +21,7 @@ type Actions interface {
 	View(ctx context.Context, key string) (orchestrator.TicketView, error)
 	AnswerOne(ctx context.Context, key string, a domain.Answer, origin domain.Origin) (bool, error)
 	Approve(ctx context.Context, key string, assignees []string, postReport bool, origin domain.Origin) (domain.Ticket, error)
-	RequestChanges(ctx context.Context, key, feedback string, shots []domain.ShotRef, origin domain.Origin) (domain.Ticket, error)
+	RequestChanges(ctx context.Context, key, feedback string, shots []domain.ShotRef, files []int64, origin domain.Origin) (domain.Ticket, error)
 	Reject(ctx context.Context, key, reason string, origin domain.Origin) (domain.Ticket, error)
 	Retry(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	OpenShot(ctx context.Context, key string, runID int64, shotID string) (io.ReadCloser, error)
@@ -485,7 +485,11 @@ func (n *Notifier) sendTelegram(ctx context.Context, v orchestrator.TicketView, 
 			for i, o := range q.Options {
 				rows = append(rows, []Button{{Text: truncate(o, 60), Data: fmt.Sprintf("ans:%d:%d", q.ID, i)}})
 			}
-			id, err := b.Send(ctx, cfg.ChatID, fmt.Sprintf("%d. %s", q.Position, q.Text), rows, len(rows) == 0)
+			text := fmt.Sprintf("%d. %s", q.Position, q.Text)
+			if q.Multiple {
+				text += "\n\nSeveral options can apply: tap one, or reply with all that do."
+			}
+			id, err := b.Send(ctx, cfg.ChatID, text, rows, len(rows) == 0)
 			if err != nil {
 				return err
 			}
@@ -499,7 +503,7 @@ func (n *Notifier) sendTelegram(ctx context.Context, v orchestrator.TicketView, 
 		text := fmt.Sprintf("%s is ready for review: %s", t.Key, t.Title)
 		approve := "Approve and push"
 		if t.Kind.Report() {
-			// A report keeps to agnts from here; posting it to Jira is a choice made in the app.
+			// A report keeps to agnts from here; posting it to the tracker is a choice made in the app.
 			approve = "Approve"
 			text = fmt.Sprintf("The %s report on %s is ready for review: %s", t.Kind, t.Key, t.Title)
 			if r := v.Result; r != nil {
@@ -507,7 +511,11 @@ func (n *Notifier) sendTelegram(ctx context.Context, v orchestrator.TicketView, 
 					text += "\n\n" + truncate(sum, 900)
 				}
 			}
-			text += "\n\nRead the report in agnts before approving. Approving here keeps it in agnts; to post it to Jira, approve in the app."
+			text += "\n\nRead the report in agnts before approving. Approving here keeps it in agnts"
+			if t.Source.Tracked() {
+				text += "; to post it to " + t.Source.Name() + ", approve in the app"
+			}
+			text += "."
 		} else if r := v.Result; r != nil {
 			add, del := 0, 0
 			for _, f := range r.Files {

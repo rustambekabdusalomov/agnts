@@ -21,7 +21,7 @@
     "viewTable": "Table",
     "viewBoard": "Board",
     "boardEmpty": "Nothing here",
-    "listSub": "Jira tickets with the agnts label, plus tasks you create for side projects.",
+    "listSub": "Jira and Plane tickets with the agnts label, plus tasks you create for side projects.",
     "noMatch": "No tickets match your search.",
     "emptyNeeds": "Nothing is waiting on you. Tickets show up here when agnts has questions or changes to review.",
     "emptyOther": "No tickets here yet.",
@@ -31,6 +31,7 @@
     "statRunningNote": "In containers right now",
     "statPushed": "Pushed this week",
     "statPushedNote": "Pull requests opened",
-    "statSession": "Plan session"
+    "statSession": "Plan session",
+    "sourcePlane": "Plane"
   }
 }

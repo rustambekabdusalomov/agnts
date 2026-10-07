@@ -250,3 +250,21 @@ func ParseEnv(env string) ([]string, error) {
 	}
 	return names, nil
 }
+
+// EnvLines turns KEY=value lines (as checked by ParseEnv) into the
+// KEY=value list a process environment takes. Values are kept verbatim:
+// nothing is evaluated or unquoted.
+func EnvLines(env string) []string {
+	var out []string
+	for _, line := range strings.Split(env, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		k, v, ok := strings.Cut(strings.TrimPrefix(line, "export "), "=")
+		if k = strings.TrimSpace(k); ok && envKey.MatchString(k) {
+			out = append(out, k+"="+v)
+		}
+	}
+	return out
+}

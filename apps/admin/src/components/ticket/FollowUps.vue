@@ -21,6 +21,7 @@ const ui = useUi()
 
 const integrations = useIntegrations()
 const jira = computed(() => !!integrations.data.value?.find((i) => i.provider === 'jira' && i.connected))
+const plane = computed(() => !!integrations.data.value?.find((i) => i.provider === 'plane' && i.connected))
 
 const all = computed(() => props.followUps?.suggestions ?? [])
 const open = computed(() => all.value.filter((s) => s.status === 'open'))
@@ -28,7 +29,7 @@ const decided = computed(() => all.value.filter((s) => s.status !== 'open'))
 const children = computed(() => props.followUps?.children ?? [])
 
 // Per suggestion: picked or not, and the person's edits.
-type Edit = { picked: boolean; title: string; kind: TicketKind; target: 'local' | 'jira'; open: boolean }
+type Edit = { picked: boolean; title: string; kind: TicketKind; target: 'local' | 'jira' | 'plane'; open: boolean }
 const edits = reactive<Record<number, Edit>>({})
 watch(
   open,
@@ -43,6 +44,7 @@ const kindOptions = computed(() => KINDS.map((k) => ({ value: k, label: t(`kind.
 const targetOptions = computed(() => [
   { value: 'local' as const, label: t('followUps.targetLocal') },
   { value: 'jira' as const, label: t('followUps.targetJira'), disabled: !jira.value, hint: jira.value ? undefined : t('followUps.jiraOff') },
+  { value: 'plane' as const, label: t('followUps.targetPlane'), disabled: !plane.value, hint: plane.value ? undefined : t('followUps.planeOff') },
 ])
 const modeOptions = computed(() => [
   { value: 'inherit' as const, label: t('followUps.modeInherit') },

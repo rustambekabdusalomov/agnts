@@ -174,5 +174,6 @@ const _$TicketKindEnumMap = {
 
 const _$FollowUpTicketSource_EnumEnumMap = {
   FollowUpTicketSource_Enum.jira: 'jira',
+  FollowUpTicketSource_Enum.plane: 'plane',
   FollowUpTicketSource_Enum.local: 'local',
 };

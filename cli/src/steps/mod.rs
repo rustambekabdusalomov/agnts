@@ -76,6 +76,8 @@ pub struct Cx<'a> {
     pub install_id: Option<String>,
     pub host: Option<HostInfo>,
     pub ip: Option<(Ipv4Addr, Option<Ipv6Addr>)>,
+    /// Runs that fit at once, from the capacity check.
+    pub parallel: Option<u32>,
     pub profile_name: String,
 }
 
@@ -125,8 +127,8 @@ pub trait Step {
 
 pub fn all() -> Vec<Box<dyn Step>> {
     vec![
-        Box::new(setup::Ask),
         Box::new(setup::Preflight),
+        Box::new(setup::Ask),
         Box::new(setup::ClaimKey),
         Box::new(server::Docker),
         Box::new(server::Firewall),
@@ -135,6 +137,7 @@ pub fn all() -> Vec<Box<dyn Step>> {
         Box::new(stack::Files),
         Box::new(stack::Secrets),
         Box::new(stack::Images),
+        Box::new(stack::Toolchains),
         Box::new(stack::Start),
         Box::new(stack::Https),
         Box::new(stack::AdminUser),
@@ -165,6 +168,7 @@ pub fn install(
         install_id: None,
         host: None,
         ip: None,
+        parallel: None,
         profile_name: String::new(),
     };
     let steps = all();
@@ -233,10 +237,14 @@ mod tests {
             "/etc/os-release",
             "ID=ubuntu\nVERSION_ID=\"24.04\"\nVERSION_CODENAME=noble\n",
         )
-        .put("/proc/meminfo", "MemTotal: 4000000 kB\n");
+        .put(
+            "/proc/meminfo",
+            "MemTotal: 8000000 kB\nMemAvailable: 7800000 kB\nSwapTotal: 0 kB\n",
+        );
         t.on("uname -m", 0, "x86_64\n")
             .on("df -Pk", 0, "h\n/dev/sda 1 1 99999999 1% /\n")
             .on("ss -H", 0, "")
+            .on("nproc", 0, "4\n")
             .on("docker compose version", 0, "2.29.1\n")
             .on("systemctl is-active docker", 0, "active\n")
             .on("getent group docker", 0, "docker:x:998:\n")
@@ -278,11 +286,36 @@ mod tests {
             install_id: None,
             host: None,
             ip: None,
+            parallel: None,
             profile_name: String::new(),
         };
         let steps = all();
         // Start onwards needs real containers and a real domain.
         run_steps(&mut cx, &steps, 0, steps.len(), Some("start"))
+    }
+
+    #[test]
+    fn too_small_server_stops_before_any_change() {
+        let stub = stub::Stub::start("127.0.0.1:0", &["agk_secret"]);
+        let cloud = Cloud::with_base(&stub.url).unwrap();
+        let t = server();
+        t.put(
+            "/proc/meminfo",
+            "MemTotal: 2000000 kB\nMemAvailable: 1900000 kB\n",
+        );
+        let err = run(&t, &cloud, &opts()).unwrap_err();
+        assert!(err.to_string().contains("nothing was installed"), "{err}");
+        assert!(
+            stub.state.lock().unwrap().log.is_empty(),
+            "the key was not claimed"
+        );
+        assert!(
+            t.files
+                .borrow()
+                .keys()
+                .all(|p| !p.starts_with("/opt/agnts")),
+            "nothing written"
+        );
     }
 
     #[test]
@@ -307,6 +340,8 @@ mod tests {
         let env = t.file("/opt/agnts/.env").unwrap();
         assert!(env.contains("AGNTS_DOMAIN=agnts.acme.com"));
         assert!(env.contains("AGNTS_IMAGE=registry.agnts.uz/agnts:1.0.0"));
+        // 8 GB and 4 CPUs: (8 - 1) / 4 = 1 run at a time by memory.
+        assert!(env.contains("AGNTS_PARALLEL=1"));
         assert_eq!(t.mode("/opt/agnts/.env"), Some(0o600));
         assert!(t.file("/opt/agnts/docker-compose.yml").is_some());
 

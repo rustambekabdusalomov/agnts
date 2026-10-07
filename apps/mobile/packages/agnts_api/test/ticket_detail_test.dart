@@ -17,6 +17,12 @@ void main() {
       // TODO
     });
 
+    // Files attached to the task, its answers and retry notes, oldest first
+    // List<Attachment> attachments
+    test('to test the property `attachments`', () async {
+      // TODO
+    });
+
     // Analysis analysis
     test('to test the property `analysis`', () async {
       // TODO

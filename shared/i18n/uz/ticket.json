@@ -92,6 +92,8 @@
     "rejectedSub": "agnts bu tiket ustida ishlashni toʻxtatdi. Branch yuborilmadi.",
     "failedTitle": "agnts toʻxtadi",
     "failedUnknown": "Ish toʻxtadi. Tafsilotlar ish logida.",
+    "retryNote": "Qayta urinish uchun izoh",
+    "retryNoteHint": "Ixtiyoriy. Xatoni qanday chetlab oʻtishni agnts ga yozing; keyingi ish uni xato bilan birga oladi.",
     "takeItMyself": "Oʻzim qilaman",
     "rateTitle": "Pauza: tarif limiti",
     "resume": "Ishni davom ettirish",
@@ -163,7 +165,7 @@
     "approveReportConfirm": "Hisobotni tasdiqlab, tiketni yopasizmi?",
     "approveReportPostConfirm": "Hisobotni tasdiqlab, tiketni yopib, hisobotni Jira'dagi {key} ga yuborasizmi?",
     "deliveringTitle": "Yakunlamoqda",
-    "deliveringSub": "Tasdiqlangan hisobotni saqlayapti va soʻragan boʻlsangiz, Jira'ga yuboryapti.",
+    "deliveringSub": "Tasdiqlangan hisobotni saqlayapti va soʻragan boʻlsangiz, vazifa trekeriga yuboryapti.",
     "doneReportTitle": "Hisobot tasdiqlandi",
     "doneReport": "Hisobot shu yerda saqlanadi.",
     "doneReportPosted": "Hisobot shu yerda saqlanadi va Jira'dagi {key} ga yuborildi.",
@@ -179,6 +181,14 @@
     "translate": "Tarjima qilish",
     "translateOriginal": "Asl til",
     "translating": "Tarjima qilinmoqda… birinchi marta bir daqiqagacha vaqt oladi, keyin saqlanadi.",
-    "translateFailed": "Tarjima qilib boʻlmadi: {error}"
+    "translateFailed": "Tarjima qilib boʻlmadi: {error}",
+    "srcPlane": "Plane",
+    "reviewSubPlane": "Serverdan hali hech narsa chiqmadi. Tasdiqlash {branch} ni yuboradi, pull request ochadi va Plane vazifasini yangilaydi.",
+    "reviewReportSubPlane": "Tasdiqlash hisobotni shu yerda saqlaydi va tiketni yopadi. U Plane'ga faqat quyidagi belgini qoʻysangiz yuboriladi.",
+    "postReportPlane": "Hisobotni Plane'dagi {key} ga izoh sifatida ham joylash",
+    "approveReportPostConfirmPlane": "Hisobot tasdiqlansin, tiket yopilsin va hisobot Plane'dagi {key} ga joylansinmi?",
+    "doneReportPostedPlane": "Hisobot shu yerda saqlandi va Plane'dagi {key} ga joylandi.",
+    "pickAny": "Mos keladiganlarning barchasini tanlang",
+    "otherAnswer": "Boshqa narsa (ixtiyoriy)"
   }
 }

@@ -40,3 +40,45 @@ func TestValidateDerivesKind(t *testing.T) {
 		})
 	}
 }
+
+func TestValidateRunSettings(t *testing.T) {
+	cases := []struct {
+		name    string
+		mut     func(*domain.Repository)
+		wantErr string
+	}{
+		{name: "defaults"},
+		{name: "toolchains deduplicated", mut: func(x *domain.Repository) {
+			x.Toolchains = []domain.Toolchain{{Tool: "Node", Version: "20"}, {Tool: "node", Version: "22"}, {Tool: "go"}}
+		}},
+		{name: "plugin backend", mut: func(x *domain.Repository) { x.Toolchains = []domain.Toolchain{{Tool: "asdf:php", Version: "8"}} }, wantErr: "toolchain name"},
+		{name: "shell in version", mut: func(x *domain.Repository) { x.Toolchains = []domain.Toolchain{{Tool: "node", Version: "20;id"}} }, wantErr: "valid version"},
+		{name: "image", mut: func(x *domain.Repository) { x.RunnerImage = " registry.example.com/agnts-runner-android:1 " }},
+		{name: "bad image", mut: func(x *domain.Repository) { x.RunnerImage = "--privileged" }, wantErr: "Docker image"},
+		{name: "memory too low", mut: func(x *domain.Repository) { x.MemoryMB = 100 }, wantErr: "memory"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			x := domain.Repository{Name: "api", CloneURL: "https://github.com/me/api.git"}
+			if c.mut != nil {
+				c.mut(&x)
+			}
+			err := Validate(&x, "")
+			if c.wantErr != "" {
+				if err == nil || !strings.Contains(err.Error(), c.wantErr) {
+					t.Fatalf("err = %v, want %q", err, c.wantErr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			if c.name == "toolchains deduplicated" && (domain.StackOf(x.Toolchains) != "node,go" || x.Toolchains[0].Version != "20" || x.Toolchains[1].Version != "latest") {
+				t.Fatalf("toolchains %+v", x.Toolchains)
+			}
+			if c.name == "image" && x.RunnerImage != "registry.example.com/agnts-runner-android:1" {
+				t.Fatalf("image %q", x.RunnerImage)
+			}
+		})
+	}
+}

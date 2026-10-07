@@ -171,7 +171,7 @@ class TicketTile extends StatelessWidget {
       title: Text(t.title, maxLines: 2, overflow: TextOverflow.ellipsis),
       subtitle: Text([
         t.key,
-        t.source_ == TicketSource_Enum.local ? l.ticketsSourceTask : l.ticketsSourceJira,
+        sourceLabel(l, t.source_),
         if (t.repoName != null) t.repoName!,
       ].join(' · ')),
       trailing: StateBadge(t.state, kind: t.kind),

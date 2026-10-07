@@ -19,6 +19,8 @@ func invalid(format string, a ...any) error {
 
 // Incoming is a ticket as reported by a tracker.
 type Incoming struct {
+	// Source is the tracker it came from; empty means Jira.
+	Source      domain.TicketSource
 	Key         string
 	Project     string
 	Title       string
@@ -42,12 +44,18 @@ func (o *Orchestrator) Ingest(ctx context.Context, in Incoming, origin domain.Or
 	if in.Key == "" || in.Title == "" {
 		return false, invalid("ticket key and title are required")
 	}
+	if in.Source == "" {
+		in.Source = domain.SourceJira
+	}
+	if !in.Source.Tracked() {
+		return false, invalid("%s is not a tracker", in.Source)
+	}
 	st, err := o.settings.Get(ctx)
 	if err != nil {
 		return false, err
 	}
 	t := domain.Ticket{
-		Key: in.Key, Source: domain.SourceJira, Title: in.Title, Description: in.Description,
+		Key: in.Key, Source: in.Source, Title: in.Title, Description: in.Description,
 		Priority: strings.ToLower(in.Priority), State: domain.StateNew, ResumeState: domain.StateNew,
 		AfterApprove: "pr", AskFirst: st.AskFirst, Kind: in.Kind, KindAuto: in.Kind == "",
 	}
@@ -58,7 +66,7 @@ func (o *Orchestrator) Ingest(ctx context.Context, in Incoming, origin domain.Or
 		t.Priority = "medium"
 	}
 	archived := false
-	if repo, err := o.store.RepositoryByJiraProject(ctx, in.Project); err == nil {
+	if repo, err := o.store.RepositoryByTrackerProject(ctx, in.Source, in.Project); err == nil {
 		t.RepoID = &repo.ID
 		archived = repo.ArchivedAt != nil
 	} else if !errors.Is(err, domain.ErrNotFound) {
@@ -71,7 +79,7 @@ func (o *Orchestrator) Ingest(ctx context.Context, in Incoming, origin domain.Or
 			TicketKey: in.Key, Type: domain.EventTicketCreated, Origin: origin, Message: in.Title,
 		})
 		if err == nil {
-			o.syncJiraRelations(ctx, in, origin)
+			o.syncTrackerRelations(ctx, in, origin)
 			o.Wake()
 			return true, nil
 		}
@@ -83,7 +91,7 @@ func (o *Orchestrator) Ingest(ctx context.Context, in Incoming, origin domain.Or
 	// Known ticket: refresh text only before coding starts, so the
 	// description Claude worked from matches what the reviewer sees.
 	_, err = o.store.UpdateTicket(ctx, in.Key, &domain.Event{
-		TicketKey: in.Key, Type: domain.EventTicketUpdated, Origin: origin, Message: "ticket text updated in Jira",
+		TicketKey: in.Key, Type: domain.EventTicketUpdated, Origin: origin, Message: "ticket text updated in " + in.Source.Name(),
 	}, func(x *domain.Ticket) {
 		if x.State == domain.StateNew || x.State == domain.StateWaitingForAnswers {
 			x.Title, x.Description = in.Title, in.Description
@@ -99,7 +107,7 @@ func (o *Orchestrator) Ingest(ctx context.Context, in Incoming, origin domain.Or
 		return false, nil
 	}
 	if err == nil {
-		o.syncJiraRelations(ctx, in, origin)
+		o.syncTrackerRelations(ctx, in, origin)
 	}
 	return false, err
 }
@@ -119,11 +127,14 @@ func (o *Orchestrator) Answer(ctx context.Context, key string, answers []domain.
 		return t, err
 	}
 	byID := map[int64]domain.Answer{}
-	for _, a := range answers {
+	for i, a := range answers {
 		if strings.TrimSpace(a.Answer) == "" {
 			return t, invalid("answer for question %d is empty", a.QuestionID)
 		}
-		byID[a.QuestionID] = a
+		if answers[i].Attachments, err = o.checkUploads(ctx, a.Attachments); err != nil {
+			return t, err
+		}
+		byID[a.QuestionID] = answers[i]
 	}
 	for _, q := range qs {
 		if _, ok := byID[q.ID]; !ok && q.Answer == nil {
@@ -258,9 +269,9 @@ func dropSideRuns(x *domain.Ticket) bool {
 }
 
 // RequestChanges sends the ticket back to coding with reviewer feedback.
-// shots are preview screenshots the feedback points at; the coding run
-// gets them next to it.
-func (o *Orchestrator) RequestChanges(ctx context.Context, key, feedback string, shots []domain.ShotRef, origin domain.Origin) (domain.Ticket, error) {
+// shots are preview screenshots the feedback points at, files uploads
+// that go with it; the coding run gets both next to it.
+func (o *Orchestrator) RequestChanges(ctx context.Context, key, feedback string, shots []domain.ShotRef, files []int64, origin domain.Origin) (domain.Ticket, error) {
 	feedback = strings.TrimSpace(feedback)
 	if feedback == "" {
 		return domain.Ticket{}, invalid("feedback is required")
@@ -269,13 +280,30 @@ func (o *Orchestrator) RequestChanges(ctx context.Context, key, feedback string,
 	if err != nil {
 		return domain.Ticket{}, err
 	}
+	if files, err = o.checkUploads(ctx, files); err != nil {
+		return domain.Ticket{}, err
+	}
+	cur, err := o.store.TicketByKey(ctx, key)
+	if err != nil {
+		return cur, err
+	}
+	if !domain.CanTransition(cur.State, domain.StateCoding) {
+		return cur, &domain.TransitionError{Key: key, From: cur.State, To: domain.StateCoding}
+	}
+	ev := domain.Event{TicketKey: key, Type: domain.EventFeedback, Origin: origin, Message: feedback}
+	if len(files) > 0 {
+		ev.Data = map[string]any{"attachments": files}
+	}
+	// Link first: once the ticket moves, a run may pick it up.
+	if err := o.store.LinkAttachments(ctx, files, cur.ID, nil, domain.AttachFeedback); err != nil {
+		return cur, err
+	}
 	reviewing := false
-	t, err := o.store.Transition(ctx, key, domain.StateCoding, domain.Event{
-		TicketKey: key, Type: domain.EventFeedback, Origin: origin, Message: feedback,
-	}, func(x *domain.Ticket) {
+	t, err := o.store.Transition(ctx, key, domain.StateCoding, ev, func(x *domain.Ticket) {
 		x.Revision++
 		x.Feedback = feedback
 		x.FeedbackShots = shots
+		x.FeedbackFiles = files
 		reviewing = dropSideRuns(x)
 	})
 	if err == nil {
@@ -425,6 +453,9 @@ type TaskInput struct {
 	// FollowUps turns follow-up suggestions on or off for the task; nil
 	// follows the setting. CreateTask only.
 	FollowUps *bool
+	// Attachments are the files attached to the description: uploads to
+	// link, and on edit the task's files to keep. nil keeps them as they are.
+	Attachments *[]int64
 }
 
 // CreateTask adds a side-project task. Its key comes from the
@@ -463,6 +494,12 @@ func (o *Orchestrator) CreateTask(ctx context.Context, in TaskInput, origin doma
 	} else if !auto && kind.Spec().NeedsRepo {
 		return domain.Ticket{}, invalid("a %s task needs a repository", kind)
 	}
+	var files []int64
+	if in.Attachments != nil {
+		if files, err = o.checkUploads(ctx, *in.Attachments); err != nil {
+			return domain.Ticket{}, err
+		}
+	}
 	st, err := o.settings.Get(ctx)
 	if err != nil {
 		return domain.Ticket{}, err
@@ -473,12 +510,13 @@ func (o *Orchestrator) CreateTask(ctx context.Context, in TaskInput, origin doma
 		State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: in.AfterApprove,
 		Held: in.Start == "queue", AskFirst: in.Start == "ask" || (in.Start == "queue" && st.AskFirst),
 		Kind: kind, KindAuto: auto, SuggestFollowUps: in.FollowUps,
-	}, prefix, origin)
+	}, prefix, files, origin)
 }
 
 // createTask stores a local task under the next free key with prefix
-// (numbered per repository, or among tasks without one) and wakes the loop.
-func (o *Orchestrator) createTask(ctx context.Context, t domain.Ticket, prefix string, origin domain.Origin) (domain.Ticket, error) {
+// (numbered per repository, or among tasks without one), attaches files
+// (checked uploads) and wakes the loop.
+func (o *Orchestrator) createTask(ctx context.Context, t domain.Ticket, prefix string, files []int64, origin domain.Origin) (domain.Ticket, error) {
 	// A key can be taken by a ticket from elsewhere with the same prefix;
 	// skip to the next number.
 	for range 5 {
@@ -491,8 +529,14 @@ func (o *Orchestrator) createTask(ctx context.Context, t domain.Ticket, prefix s
 		if errors.Is(err, domain.ErrConflict) {
 			continue
 		}
-		if err == nil && !out.Held {
-			o.Wake()
+		if err == nil {
+			// Before the wake, so the analysis sees the files.
+			if lerr := o.store.LinkAttachments(ctx, files, out.ID, nil, domain.AttachTicket); lerr != nil {
+				o.log.Warn("attach files", "ticket", out.Key, "err", lerr)
+			}
+			if !out.Held {
+				o.Wake()
+			}
 		}
 		return out, err
 	}
@@ -574,6 +618,11 @@ func TaskPrefix(r domain.Repository) string {
 
 // UpdateTask edits a task that has not started yet.
 func (o *Orchestrator) UpdateTask(ctx context.Context, key string, in TaskInput, origin domain.Origin) (domain.Ticket, error) {
+	if in.Attachments != nil {
+		if len(*in.Attachments) > domain.MaxAttachments {
+			return domain.Ticket{}, invalid("attach at most %d files", domain.MaxAttachments)
+		}
+	}
 	var bad error
 	t, err := o.store.UpdateTicket(ctx, key, &domain.Event{
 		TicketKey: key, Type: domain.EventTaskChanged, Origin: origin, Message: "task edited",
@@ -609,6 +658,9 @@ func (o *Orchestrator) UpdateTask(ctx context.Context, key string, in TaskInput,
 	})
 	if bad != nil {
 		return t, bad
+	}
+	if err == nil && in.Attachments != nil {
+		err = o.setTaskFiles(ctx, t, *in.Attachments)
 	}
 	return t, err
 }
@@ -654,6 +706,19 @@ func (o *Orchestrator) AutoResume(ctx context.Context, s domain.Settings) {
 
 // Retry resumes a failed or rate-limited ticket where it stopped.
 func (o *Orchestrator) Retry(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error) {
+	return o.RetryWithNote(ctx, key, "", nil, origin)
+}
+
+// RetryWithNote is Retry with a note on how to get past the failure, and
+// files (uploads) that help. The next coding run gets them and the error
+// the way it gets requested changes, so the ticket must resume at a stage
+// that runs Claude.
+func (o *Orchestrator) RetryWithNote(ctx context.Context, key, note string, files []int64, origin domain.Origin) (domain.Ticket, error) {
+	note = strings.TrimSpace(note)
+	files, err := o.checkUploads(ctx, files)
+	if err != nil {
+		return domain.Ticket{}, err
+	}
 	t, err := o.store.TicketByKey(ctx, key)
 	if err != nil {
 		return t, err
@@ -665,13 +730,56 @@ func (o *Orchestrator) Retry(ctx context.Context, key string, origin domain.Orig
 	if !to.Valid() {
 		to = domain.StateNew
 	}
-	t, err = o.store.Transition(ctx, key, to, domain.Event{
-		TicketKey: key, Type: domain.EventStateChanged, Origin: origin, Message: "retry",
-	}, nil)
+	if (note != "" || len(files) > 0) && to == domain.StatePushing {
+		return t, invalid("this ticket resumes at pushing, which does not run Claude; retry without a note or files")
+	}
+	feedback := ""
+	if note != "" || len(files) > 0 {
+		info, err := o.store.StateSince(ctx, []string{key})
+		if err != nil {
+			return t, err
+		}
+		if note == "" {
+			note = "See the attached files."
+		}
+		feedback = retryFeedback(info[key].Reason, note)
+	}
+	msg := "retry"
+	if note != "" {
+		msg += ": " + note
+	}
+	ev := domain.Event{TicketKey: key, Type: domain.EventStateChanged, Origin: origin, Message: msg}
+	if len(files) > 0 {
+		ev.Data = map[string]any{"attachments": files}
+	}
+	// Link first: once the ticket moves, a run may pick it up.
+	if err := o.store.LinkAttachments(ctx, files, t.ID, nil, domain.AttachRetry); err != nil {
+		return t, err
+	}
+	t, err = o.store.Transition(ctx, key, to, ev, func(x *domain.Ticket) {
+		if feedback == "" {
+			return
+		}
+		if x.Feedback != "" {
+			x.Feedback += "\n\n" + feedback
+		} else {
+			x.Feedback = feedback
+		}
+		x.FeedbackFiles = append(x.FeedbackFiles, files...)
+	})
 	if err == nil {
 		o.Wake()
 	}
 	return t, err
+}
+
+// retryFeedback is what the next coding run reads for a retry note: the
+// error the last run stopped with, then the note.
+func retryFeedback(reason, note string) string {
+	if reason = strings.TrimSpace(reason); reason == "" {
+		return note
+	}
+	return "The last run stopped with this error:\n\n" + truncate(reason, 4000) + "\n\nHow to get past it:\n\n" + note
 }
 
 // TicketView is everything the ticket page shows.
@@ -698,6 +806,8 @@ type TicketView struct {
 	FollowUpsOn bool
 	// Relations are its ordering constraints and what holds it back now.
 	Relations Relations
+	// Attachments are the files attached to the task, answers and retries.
+	Attachments []domain.Attachment
 }
 
 // TicketRow is a ticket for lists, with when it entered its state.
@@ -772,6 +882,9 @@ func (o *Orchestrator) View(ctx context.Context, key string) (TicketView, error)
 		return v, err
 	}
 	if v.Questions, err = o.store.Questions(ctx, t.ID); err != nil {
+		return v, err
+	}
+	if v.Attachments, err = o.store.TicketAttachments(ctx, t.ID); err != nil {
 		return v, err
 	}
 	if r, err := o.store.LatestResult(ctx, t.ID, domain.StageAnalyze); err == nil {

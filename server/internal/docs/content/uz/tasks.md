@@ -4,7 +4,7 @@ Vazifalar Jira'dan tashqaridagi repozitoriylar, masalan shaxsiy loyihalaringiz u
 
 ## Yangi vazifa
 
-Repozitoriyni tanlang, kerakli natijani yozing, muhimlikni belgilang va qanday boshlashni tanlang: avval savollar, darhol kod yozish yoki navbatda qoldirish.
+Repozitoriyni tanlang, kerakli natijani yozing (kerak boʻlsa skrinshot, maket yoki fayl biriktiring), muhimlikni belgilang va qanday boshlashni tanlang: avval savollar, darhol kod yozish yoki navbatda qoldirish.
 
 ## Tasdiqlaganingizdan keyin
 

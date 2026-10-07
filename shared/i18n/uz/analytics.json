@@ -96,6 +96,7 @@
     "insightStopsLimit": "Ishlarni ({n}) eng koʻp tarif limiti toʻxtatadi. Kamroq parallel ish yoki xulosalar uchun Haiku limitni tejaydi.",
     "insightNight": "agnts ishining {pct}% siz oflayn boʻlgan 22:00 dan 07:00 gacha boʻlgan vaqtga toʻgʻri keladi.",
     "minutes": "{n} daq",
-    "hoursMinutes": "{h} soat {m} daq"
+    "hoursMinutes": "{h} soat {m} daq",
+    "srcPlane": "Plane"
   }
 }

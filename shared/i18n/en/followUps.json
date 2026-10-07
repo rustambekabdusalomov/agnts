@@ -42,6 +42,8 @@
     "settingHelp": "Analysis, work and review runs suggest tickets that finishing a ticket still needs: prerequisites, parts to split off, work left undone, gaps a report found. You pick which to create. Off by default because it makes every prompt a little longer; a ticket can turn it on for itself.",
     "notifyLabel": "Follow-up tickets suggested",
     "jiraIssueType": "Issue type for follow-ups",
-    "jiraIssueTypeHelp": "The type of the Jira issues agnts files when you create a follow-up in Jira. Default: Task."
+    "jiraIssueTypeHelp": "The type of the Jira issues agnts files when you create a follow-up in Jira. Default: Task.",
+    "targetPlane": "Plane work item",
+    "planeOff": "Connect Plane and link the repository to a Plane project to file work items there"
   }
 }

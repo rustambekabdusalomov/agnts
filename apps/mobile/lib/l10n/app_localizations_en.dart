@@ -330,6 +330,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get analyticsSrcPlane => 'Plane';
+
+  @override
   String get appName => 'agnts';
 
   @override
@@ -627,6 +630,66 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardNoActivity => 'No activity yet.';
 
   @override
+  String get filesTitle => 'Attachments';
+
+  @override
+  String get filesAttach => 'Attach files';
+
+  @override
+  String get filesAddPhoto => 'Photo';
+
+  @override
+  String get filesCamera => 'Camera';
+
+  @override
+  String get filesAddFile => 'File';
+
+  @override
+  String get filesHint => 'Pictures, PDFs, logs or text, up to 10 MB each. Claude reads them all.';
+
+  @override
+  String filesUploading(String name) {
+    return 'Uploading $name…';
+  }
+
+  @override
+  String filesRemove(String name) {
+    return 'Remove $name';
+  }
+
+  @override
+  String filesOpen(String name) {
+    return 'Open $name';
+  }
+
+  @override
+  String filesTooLarge(String name) {
+    return '$name is larger than 10 MB';
+  }
+
+  @override
+  String filesTooMany(String n) {
+    return 'Attach at most $n files';
+  }
+
+  @override
+  String filesFailed(String name) {
+    return 'Could not upload $name';
+  }
+
+  @override
+  String get filesWait => 'Wait for the uploads to finish';
+
+  @override
+  String get filesFromTask => 'With the task';
+
+  @override
+  String get filesFromRetry => 'With a retry';
+
+  @override
+  String get filesFromFeedback => 'With requested changes';
+
+  @override
   String get followUpsTitle => 'Follow-up tickets';
 
   @override
@@ -784,6 +847,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get followUpsJiraIssueTypeHelp => 'The type of the Jira issues agnts files when you create a follow-up in Jira. Default: Task.';
+
+  @override
+  String get followUpsTargetPlane => 'Plane work item';
+
+  @override
+  String get followUpsPlaneOff => 'Connect Plane and link the repository to a Plane project to file work items there';
 
   @override
   String get formSave => 'Save changes';
@@ -997,7 +1066,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get integrationsTokenStep3_github =>
-      'Under Repository permissions set Contents and Pull requests to Read and write. For the Pipelines tab also set Actions to Read (Read and write to use Deploy) and Deployments to Read. Metadata (read) is added automatically.';
+      'Under Repository permissions set Contents and Pull requests to Read and write, and Workflows to Read and write if agnts may change CI files in .github/workflows. For the Pipelines tab also set Actions to Read (Read and write to use Deploy) and Deployments to Read. Metadata (read) is added automatically.';
 
   @override
   String get integrationsTokenStep4_github =>
@@ -1051,6 +1120,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get integrationsPermPulls => 'Read and write. Open pull requests.';
+
+  @override
+  String get integrationsPermWorkflows =>
+      'Read and write. Push changes to .github/workflows (CI files); without it such pushes are refused.';
 
   @override
   String get integrationsPermMetadata => 'Read. List repositories and branches.';
@@ -1311,7 +1384,124 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get integrationsGitWebhookWhy =>
-      'When a pull or merge request is merged, agnts marks the ticket merged and moves the Jira issue to the merged status set on the Jira page. Pipeline events keep the repository page current.';
+      'When a pull or merge request is merged, agnts marks the ticket merged and moves the Jira issue or Plane work item to the merged status set on its tracker\'s page. Pipeline events keep the repository page current.';
+
+  @override
+  String get integrationsName_plane => 'Plane';
+
+  @override
+  String get integrationsDesc_plane =>
+      'Pick up work items with the agnts label from Plane Cloud or your own Plane, and keep their state up to date.';
+
+  @override
+  String get integrationsConnectSub_plane => 'Use a personal access token from Plane. Works with Plane Cloud and self-hosted Plane.';
+
+  @override
+  String get integrationsTokenOpen_plane => 'Open Plane API docs';
+
+  @override
+  String get integrationsTokenStep1_plane =>
+      'In Plane, sign in as the person agnts should act as (comments appear under this name) and open Profile settings → Personal access tokens.';
+
+  @override
+  String get integrationsTokenStep2_plane =>
+      'Click Add personal access token, name it (for example agnts), pick an expiry, then copy the token. Plane shows it only once.';
+
+  @override
+  String get integrationsTokenStep3_plane =>
+      'For API address, keep https://api.plane.so for Plane Cloud, or enter your own Plane\'s address if it is self-hosted.';
+
+  @override
+  String get integrationsTokenStep4_plane => 'For Workspace, enter the slug from Plane\'s address: acme in app.plane.so/acme/projects.';
+
+  @override
+  String get integrationsPlaneBaseUrl => 'API address';
+
+  @override
+  String get integrationsPlaneBaseUrlHelp => 'https://api.plane.so for Plane Cloud, or your Plane\'s address';
+
+  @override
+  String get integrationsPlaneWorkspace => 'Workspace';
+
+  @override
+  String get integrationsPlaneWorkspaceHelp => 'The slug in Plane\'s address, such as acme';
+
+  @override
+  String get integrationsApiKey => 'API key';
+
+  @override
+  String get integrationsApiKeyHelp => 'Profile settings → Personal access tokens';
+
+  @override
+  String get integrationsPlaneWebhookTitle => 'Set up the Plane webhook';
+
+  @override
+  String get integrationsPlaneWebhookSteps =>
+      'In Plane, open Workspace settings → Webhooks → Add webhook, enter the URL below and tick the work item (issue) events. Plane then shows a secret once: paste it here.';
+
+  @override
+  String get integrationsPlaneEventsValue => 'Work items (issues)';
+
+  @override
+  String get integrationsPlaneSecret => 'Secret from Plane';
+
+  @override
+  String get integrationsPlaneSecretHelp => 'Plane shows it once when you create the webhook';
+
+  @override
+  String get integrationsPlaneSecretSave => 'Save secret';
+
+  @override
+  String get integrationsPlaneSecretReplace => 'Replace secret';
+
+  @override
+  String get integrationsPlaneSecretSaved => 'Webhook secret saved: Plane deliveries are accepted now';
+
+  @override
+  String get integrationsPlaneSecretSet => 'Secret saved. Deliveries are accepted.';
+
+  @override
+  String get integrationsPlaneSecretMissing =>
+      'No secret yet: agnts refuses deliveries until you paste the secret Plane showed, and only the hourly sync picks up work items.';
+
+  @override
+  String integrationsPlaneQueryText(String labels) {
+    return 'Open work items in the Plane projects linked to repositories that carry one of these labels: $labels';
+  }
+
+  @override
+  String get integrationsPlaneNoProjects =>
+      'No repository is linked to a Plane project yet. Add the project identifier (WEB in WEB-123) on the repository.';
+
+  @override
+  String get integrationsPlaneStatusesSub =>
+      'How agnts moves work items. Leave a status on Default to use the first state of the matching group; In review moves only to a state you pick.';
+
+  @override
+  String integrationsPlaneStateDefault(String group) {
+    return 'Default: first $group state';
+  }
+
+  @override
+  String get integrationsPlaneStateNone => 'Keep state';
+
+  @override
+  String integrationsPlaneStatesError(String error) {
+    return 'Could not read the states from Plane: $error';
+  }
+
+  @override
+  String get integrationsPlaneSyncHelp =>
+      'Plane sends changes to the webhook right away; agnts also checks every hour in case a delivery was missed.';
+
+  @override
+  String get integrationsPlaneHelp =>
+      'agnts reads only work items with its labels in linked projects, and writes only the state changes and comments you turn on here. Plane allows 60 API requests a minute per key; agnts stays under 50.';
+
+  @override
+  String integrationsPlaneSynced(String found, String created) {
+    return '$found open work items, $created new';
+  }
 
   @override
   String get kindTitle => 'Kind';
@@ -2473,7 +2663,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navLedeDone => 'Pushed or rejected tickets.';
 
   @override
-  String get navLedeAll => 'Every ticket agnts has picked up from Jira.';
+  String get navLedeAll => 'Every ticket agnts has picked up from Jira and Plane.';
 
   @override
   String get navKnowledge => 'Knowledge';
@@ -2486,6 +2676,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navRules => 'Rules';
+
+  @override
+  String get navSyncPlane => 'Sync Plane';
+
+  @override
+  String navSyncedPlane(String found, String created) {
+    return 'Plane synced: $found open, $created new';
+  }
 
   @override
   String get previewTab => 'Preview';
@@ -2870,6 +3068,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get relationsMarkMergedHint => 'No merge webhook? Mark the pull request merged so tickets waiting for it can start.';
+
+  @override
+  String get relationsSource_plane => 'Plane relation';
 
   @override
   String get repoBack => 'Back to repositories';
@@ -3272,7 +3473,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reposNone => 'No repositories yet. Add the first one to let agnts work on it.';
 
   @override
-  String get reposDrawerSub => 'Takes side-project tasks, and Jira tickets once it has a Jira project key';
+  String get reposDrawerSub => 'Takes side-project tasks, plus Jira tickets or Plane work items once it is linked to a project';
 
   @override
   String get reposName => 'Name';
@@ -3294,7 +3495,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String reposTaskPrefixHelp(String prefix) {
-    return 'Side-project tasks are numbered like $prefix-1, $prefix-2. Must differ from the Jira project key.';
+    return 'Side-project tasks are numbered like $prefix-1, $prefix-2. Must differ from the Jira project key and the Plane project.';
   }
 
   @override
@@ -3342,6 +3543,137 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reposDeployWorkflowHelp =>
       'GitHub Actions workflow file with workflow_dispatch, e.g. deploy.yml. Deploy on the repository page runs it.';
+
+  @override
+  String get reposColStack => 'Toolchains';
+
+  @override
+  String get reposToolchains => 'Toolchains';
+
+  @override
+  String get reposToolchainsHelp =>
+      'Language runtimes and build tools installed into every run, once per version, and kept for later runs.';
+
+  @override
+  String get reposToolchainsAuto =>
+      'Detected from the repository (go.mod, .nvmrc, .python-version, mise.toml, …) and kept up to date as those files change.';
+
+  @override
+  String get reposToolchainsManual => 'Set by hand: detection leaves them as they are.';
+
+  @override
+  String get reposToolchainsBackToAuto => 'Detect automatically';
+
+  @override
+  String reposToolchainFrom(String source) {
+    return 'from $source';
+  }
+
+  @override
+  String reposToolchainRemove(String tool) {
+    return 'Remove $tool';
+  }
+
+  @override
+  String get reposToolchainAdd => 'Add';
+
+  @override
+  String get reposToolchainPh => 'tool@version, e.g. python@3.12';
+
+  @override
+  String get reposToolchainBad => 'Write it as tool@version, e.g. node@20 or rust@stable.';
+
+  @override
+  String get reposToolchainsNone => 'None yet: they are detected after you save, or press Detect.';
+
+  @override
+  String get reposDetect => 'Detect';
+
+  @override
+  String get reposDetectDeep => 'Ask Claude';
+
+  @override
+  String get reposDetectDeepHelp =>
+      'Claude reads the README and CI files when the scan finds no commands. Takes about a minute and uses your Claude plan.';
+
+  @override
+  String get reposDetecting => 'Reading the repository…';
+
+  @override
+  String reposDetectDone(String list) {
+    return 'Found $list.';
+  }
+
+  @override
+  String get reposDetectNothing => 'No known build files found. Add the toolchains and commands by hand, or ask Claude.';
+
+  @override
+  String get reposDetectFilled => 'Empty check commands were filled in; review them before saving.';
+
+  @override
+  String get reposDetectByClaude => 'Claude filled in what the scan could not find.';
+
+  @override
+  String get reposDetectNeedsUrl => 'Enter the clone URL first.';
+
+  @override
+  String get reposCmdAuto => 'detected after saving';
+
+  @override
+  String get reposNotes => 'Notes from detection';
+
+  @override
+  String get reposAdvanced => 'Advanced';
+
+  @override
+  String get reposRunnerImage => 'Runner image';
+
+  @override
+  String get reposRunnerImageHelp =>
+      'Optional. An image built on the server FROM agnts-runner, for system libraries or SDKs toolchains cannot provide (Android, Flutter). Empty uses the default.';
+
+  @override
+  String get reposMemory => 'Memory';
+
+  @override
+  String get reposMemoryHelp =>
+      'Optional, for heavy builds (JVM, Rust, .NET). Server default unless set; the server caps it (AGNTS_RUN_MEMORY_MAX_MB, 8 GB by default).';
+
+  @override
+  String get reposMemoryDefault => 'Server default';
+
+  @override
+  String get reposBuildEnv => 'Build environment';
+
+  @override
+  String get reposBuildEnvHelp =>
+      'KEY=value lines given to every run, such as tokens for private package registries (NPM_TOKEN, PIP_INDEX_URL). Stored encrypted and never shown again. Claude can read them while it works, so use read-only tokens.';
+
+  @override
+  String reposBuildEnvSet(String names) {
+    return 'Set: $names';
+  }
+
+  @override
+  String get reposBuildEnvReplace => 'Replace';
+
+  @override
+  String get reposBuildEnvClear => 'Clear';
+
+  @override
+  String get reposBuildEnvCleared => 'Cleared when you save.';
+
+  @override
+  String reposPlane(String project) {
+    return 'Plane $project';
+  }
+
+  @override
+  String get reposPlaneProject => 'Plane project';
+
+  @override
+  String get reposPlaneHelp =>
+      'Optional. The project identifier (WEB in WEB-123). Work items from this Plane project with the agnts label run here.';
 
   @override
   String get reviewTitle => 'agnts\'s code review';
@@ -4546,6 +4878,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketFailedUnknown => 'The run stopped. Check the run log for details.';
 
   @override
+  String get ticketRetryNote => 'Note for the retry';
+
+  @override
+  String get ticketRetryNoteHint => 'Optional. Tell agnts how to get past the error; the next coding run gets it with the error.';
+
+  @override
   String get ticketTakeItMyself => 'Take it myself';
 
   @override
@@ -4788,7 +5126,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketDeliveringTitle => 'Finishing up';
 
   @override
-  String get ticketDeliveringSub => 'Saving the approved report and posting it to Jira if you asked.';
+  String get ticketDeliveringSub => 'Saving the approved report and posting it to the issue tracker if you asked.';
 
   @override
   String get ticketDoneReportTitle => 'Report approved';
@@ -4841,6 +5179,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String ticketTranslateFailed(String error) {
     return 'Could not translate: $error';
   }
+
+  @override
+  String get ticketSrcPlane => 'Plane';
+
+  @override
+  String ticketReviewSubPlane(String branch) {
+    return 'Nothing has left the server yet. Approving pushes $branch, opens a pull request and updates the Plane work item.';
+  }
+
+  @override
+  String get ticketReviewReportSubPlane =>
+      'Approving keeps the report here and closes the ticket. It goes to Plane only if you tick the box below.';
+
+  @override
+  String ticketPostReportPlane(String key) {
+    return 'Also post the report as a comment on $key in Plane';
+  }
+
+  @override
+  String ticketApproveReportPostConfirmPlane(String key) {
+    return 'Approve the report, close this ticket and post the report to $key in Plane?';
+  }
+
+  @override
+  String ticketDoneReportPostedPlane(String key) {
+    return 'The report is kept here and was posted to $key in Plane.';
+  }
+
+  @override
+  String get ticketPickAny => 'Pick all that apply';
+
+  @override
+  String get ticketOtherAnswer => 'Something else (optional)';
 
   @override
   String get ticketsTitle => 'Tickets';
@@ -4915,7 +5286,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketsBoardEmpty => 'Nothing here';
 
   @override
-  String get ticketsListSub => 'Jira tickets with the agnts label, plus tasks you create for side projects.';
+  String get ticketsListSub => 'Jira and Plane tickets with the agnts label, plus tasks you create for side projects.';
 
   @override
   String get ticketsNoMatch => 'No tickets match your search.';
@@ -4946,6 +5317,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ticketsStatSession => 'Plan session';
+
+  @override
+  String get ticketsSourcePlane => 'Plane';
 
   @override
   String get usageTitle => 'Plan usage';

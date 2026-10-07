@@ -26,6 +26,15 @@ void main() {
       // TODO
     });
 
+    // Work out a repository's toolchains and check commands
+    //
+    // Reads the default branch (of a saved repository by id, or of any clone URL) and returns what it needs, without saving. With deep, Claude also reads the README and CI files when the file scan finds nothing; that takes a minute and uses the Claude plan. 
+    //
+    //Future<RepoDetection> detectRepo(RepoDetectInput repoDetectInput) async
+    test('test detectRepo', () async {
+      // TODO
+    });
+
     //Future<Repository> getRepo(int id) async
     test('test getRepo', () async {
       // TODO

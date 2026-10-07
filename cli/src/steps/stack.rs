@@ -60,8 +60,14 @@ fn is_placeholder(key: &str, value: &str, template: &EnvFile) -> bool {
 
 /// Build the `.env`: keep every existing value, add missing keys from the
 /// template, fill placeholders, and point the images at this version.
-pub fn build_env(existing: Option<EnvFile>, cfg: &InstallConfig, docker_gid: &str) -> EnvFile {
+pub fn build_env(
+    existing: Option<EnvFile>,
+    cfg: &InstallConfig,
+    docker_gid: &str,
+    parallel: Option<u32>,
+) -> EnvFile {
     let template = EnvFile::parse(assets::ENV_EXAMPLE);
+    let fresh = existing.is_none();
     let mut env = existing.unwrap_or_else(|| template.clone());
     env.merge_missing(&template);
     let (image, runner) = compose::images(&cfg.version);
@@ -83,6 +89,10 @@ pub fn build_env(existing: Option<EnvFile>, cfg: &InstallConfig, docker_gid: &st
     }
     env.set("AGNTS_IMAGE", &image);
     env.set("AGNTS_RUNNER_IMAGE", &runner);
+    // Size parallel work to the server, but never override a chosen value.
+    if let (true, Some(p)) = (fresh, parallel) {
+        env.set("AGNTS_PARALLEL", &p.to_string());
+    }
     env
 }
 
@@ -174,7 +184,7 @@ impl Step for Secrets {
     fn apply(&self, cx: &mut Cx) -> Result<()> {
         let existing = compose::read_env(cx.target)?;
         let adopted = existing.is_some();
-        let env = build_env(existing, &cx.cfg, &docker_gid(cx.target)?);
+        let env = build_env(existing, &cx.cfg, &docker_gid(cx.target)?, cx.parallel);
         compose::write_env(cx.target, &env)?;
         ui::ok(if adopted {
             "updated .env (existing values kept)"
@@ -215,6 +225,80 @@ impl Step for Images {
         ops::registry_login(cx.target, &cx.cloud.policy, cx.install_id(), cx.key())?;
         ops::pull(cx.target, &cx.cloud.policy)?;
         ui::ok(&format!("images for agnts {} pulled", cx.cfg.version));
+        Ok(())
+    }
+}
+
+/// The shared volume runs install language toolchains into (with mise),
+/// read-only in every run. Installing Go and Node LTS now makes the first
+/// ticket on a Go or JavaScript repository start at once; other toolchains
+/// are installed on first use. A failure here is only a warning.
+pub const TOOLCHAIN_VOLUME: &str = "agnts-toolchains";
+
+pub struct Toolchains;
+
+impl Step for Toolchains {
+    fn id(&self) -> &'static str {
+        "toolchains"
+    }
+    fn title(&self) -> &'static str {
+        "Toolchains"
+    }
+    fn check(&self, cx: &mut Cx) -> Result<bool> {
+        let (_, runner) = compose::images(&cx.cfg.version);
+        Ok(cx
+            .target
+            .run(&Cmd::new([
+                "docker",
+                "run",
+                "--rm",
+                "-v",
+                &format!("{TOOLCHAIN_VOLUME}:/opt/toolchains:ro"),
+                "--entrypoint",
+                "sh",
+                &runner,
+                "-c",
+                "ls /opt/toolchains/installs/go/*/bin/go /opt/toolchains/installs/node/*/bin/node",
+            ]))?
+            .success())
+    }
+    fn plan(&self, _: &Cx) -> Vec<String> {
+        vec![format!(
+            "create the {TOOLCHAIN_VOLUME} volume and install Go and Node LTS into it (others install on first use)"
+        )]
+    }
+    fn apply(&self, cx: &mut Cx) -> Result<()> {
+        let (_, runner) = compose::images(&cx.cfg.version);
+        cx.target
+            .run(&Cmd::new([
+                "docker",
+                "volume",
+                "create",
+                "--label",
+                "agnts=toolchains",
+                TOOLCHAIN_VOLUME,
+            ]))?
+            .check("docker volume create")?;
+        let pb = ui::spinner("installing Go and Node LTS (a minute or two)");
+        let out = cx.target.run(&Cmd::new([
+            "docker",
+            "run",
+            "--rm",
+            "-v",
+            &format!("{TOOLCHAIN_VOLUME}:/opt/toolchains"),
+            &runner,
+            "mise",
+            "install",
+            "--yes",
+            "go@latest",
+            "node@lts",
+        ]))?;
+        pb.finish_and_clear();
+        if out.success() {
+            ui::ok("Go and Node LTS installed for runs");
+        } else {
+            ui::warn("could not install Go and Node now; the first run of a repository installs what it needs");
+        }
         Ok(())
     }
 }
@@ -383,10 +467,11 @@ mod tests {
 
     #[test]
     fn fresh_env_is_filled() {
-        let env = build_env(None, &cfg(), "998");
+        let env = build_env(None, &cfg(), "998", Some(3));
         assert_eq!(env.get("AGNTS_DOMAIN"), Some("agnts.acme.com"));
         assert_eq!(env.get("AGNTS_PUBLIC_URL"), Some("https://agnts.acme.com"));
         assert_eq!(env.get("DOCKER_GID"), Some("998"));
+        assert_eq!(env.get("AGNTS_PARALLEL"), Some("3"));
         assert_eq!(
             env.get("AGNTS_IMAGE"),
             Some("registry.agnts.uz/agnts:1.2.3")
@@ -401,12 +486,14 @@ mod tests {
         let old = EnvFile::parse(
             "AGNTS_DOMAIN=old.acme.com\nAGNTS_ENC_KEY=keepme\nPOSTGRES_PASSWORD=pw\n",
         );
-        let env = build_env(Some(old), &cfg(), "999");
+        let env = build_env(Some(old), &cfg(), "999", Some(3));
         assert_eq!(env.get("AGNTS_DOMAIN"), Some("old.acme.com"));
         assert_eq!(env.get("AGNTS_ENC_KEY"), Some("keepme"));
         assert_eq!(env.get("POSTGRES_PASSWORD"), Some("pw"));
         // Missing keys come from the template.
         assert!(env.get("AGNTS_LOG_LEVEL").is_some());
+        // An existing install keeps its own AGNTS_PARALLEL.
+        assert_eq!(env.get("AGNTS_PARALLEL"), Some("1"));
         assert_eq!(
             env.get("AGNTS_RUNNER_IMAGE"),
             Some("registry.agnts.uz/agnts-runner:1.2.3")

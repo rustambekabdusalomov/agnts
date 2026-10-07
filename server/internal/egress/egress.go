@@ -19,11 +19,31 @@ import (
 
 // DefaultAllow is used when AGNTS_EGRESS_ALLOW is not set.
 var DefaultAllow = []string{
+	// Claude Code, and git hosts (GitHub release assets carry most
+	// prebuilt toolchains: Python, Temurin, aqua and ubi tools).
 	"api.anthropic.com", "statsig.anthropic.com", "sentry.io", ".sentry.io",
 	"github.com", ".github.com", ".githubusercontent.com", "gitlab.com",
-	"proxy.golang.org", "sum.golang.org", "storage.googleapis.com",
-	"registry.npmjs.org", "registry.yarnpkg.com",
-	"pypi.org", "files.pythonhosted.org",
+	// mise: its version indexes (mise-versions, mise-java) and the sigstore
+	// trust root it checks attestations against
+	".jdx.dev", "tuf-repo-cdn.sigstore.dev",
+	// Go
+	"proxy.golang.org", "sum.golang.org", "storage.googleapis.com", "go.dev", "dl.google.com",
+	// JavaScript: Node, npm, Yarn, Bun, Deno, JSR
+	"nodejs.org", "registry.npmjs.org", "registry.yarnpkg.com", "repo.yarnpkg.com", "jsr.io", "dl.deno.land",
+	// Python
+	"pypi.org", "files.pythonhosted.org", "downloads.python.org",
+	// Rust (rustup's installer, then its channels)
+	"sh.rustup.rs", "static.rust-lang.org", "crates.io", "index.crates.io", "static.crates.io",
+	// JVM: Temurin, Maven Central, Gradle, sbt
+	"api.adoptium.net", "repo.maven.apache.org", "repo1.maven.org", "plugins.gradle.org", "services.gradle.org",
+	"downloads.gradle.org", "dlcdn.apache.org", "archive.apache.org", "repo.scala-sbt.org", "repo.typesafe.com",
+	// .NET (dot.net serves the install script)
+	"dot.net", "ci.dot.net", "builds.dotnet.microsoft.com", "dotnetcli.azureedge.net", "dotnetcli.blob.core.windows.net", "api.nuget.org",
+	// Ruby, PHP
+	"rubygems.org", "index.rubygems.org", "repo.packagist.org", "packagist.org",
+	// Elixir and Erlang, Dart, Swift, Zig, Haskell, Julia
+	"repo.hex.pm", "builds.hex.pm", "hex.pm", "pub.dev", "download.swift.org", "ziglang.org",
+	"hackage.haskell.org", "downloads.haskell.org", "julialang-s3.julialang.org", "pkg.julialang.org",
 }
 
 // Proxy implements an HTTP forward proxy (CONNECT for https, absolute

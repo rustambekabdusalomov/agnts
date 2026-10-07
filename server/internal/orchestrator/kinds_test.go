@@ -82,7 +82,7 @@ func TestReportTaskWithoutRepository(t *testing.T) {
 		t.Fatalf("view: %+v %v", v.Result, err)
 	}
 
-	if _, err := h.o.RequestChanges(h.ctx, key, "Say how long a token lives.", nil, domain.OriginWeb); err != nil {
+	if _, err := h.o.RequestChanges(h.ctx, key, "Say how long a token lives.", nil, nil, domain.OriginWeb); err != nil {
 		t.Fatal(err)
 	}
 	h.step()
@@ -312,7 +312,7 @@ func TestImplementNeedsAPlanWithARepository(t *testing.T) {
 	if _, err := h.o.Implement(h.ctx, bug.Key, orchestrator.ImplementInput{}, domain.OriginWeb); err == nil || !strings.Contains(err.Error(), "pick the one") {
 		t.Fatalf("no repository: %v", err)
 	}
-	repo, err := h.store.RepositoryByJiraProject(h.ctx, "PAY")
+	repo, err := h.store.RepositoryByTrackerProject(h.ctx, domain.SourceJira, "PAY")
 	if err != nil {
 		t.Fatal(err)
 	}

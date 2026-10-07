@@ -12,6 +12,12 @@ void main() {
       // TODO
     });
 
+    // Plane: the secret Plane shows when you create the webhook. Empty keeps the stored one.
+    // String webhookSecret
+    test('to test the property `webhookSecret`', () async {
+      // TODO
+    });
+
     // Map<String, String> settings
     test('to test the property `settings`', () async {
       // TODO

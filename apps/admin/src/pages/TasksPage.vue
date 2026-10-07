@@ -17,6 +17,7 @@ import SegButtons from '../components/form/SegButtons.vue'
 import { useListView } from '../composables/useListView'
 import HiIcon from '../components/ui/HiIcon.vue'
 import { ago, fmtTokens, ioTokens } from '../composables/format'
+import { livePoll } from '../composables/useLive'
 import { useUi } from '../stores/ui'
 
 const { t, locale } = useI18n()
@@ -27,7 +28,7 @@ const repos = useRepos()
 const tickets = useQuery({
   queryKey: ['tickets', 'tasks'],
   queryFn: () => unwrap(api.GET('/tickets')),
-  refetchInterval: 30_000,
+  refetchInterval: () => livePoll(30_000),
 })
 const tasks = computed(() => (tickets.data.value ?? []).filter((x) => x.source === 'local'))
 const taskRepos = computed(() => (repos.data.value ?? []).filter((r) => !r.archivedAt))

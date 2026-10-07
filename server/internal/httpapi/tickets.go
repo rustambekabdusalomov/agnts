@@ -20,9 +20,9 @@ type Tickets interface {
 	Events(ctx context.Context, f orchestrator.EventFilter) ([]domain.Event, error)
 	Answer(ctx context.Context, key string, answers []domain.Answer, origin domain.Origin) (domain.Ticket, error)
 	Approve(ctx context.Context, key string, assignees []string, postReport bool, origin domain.Origin) (domain.Ticket, error)
-	RequestChanges(ctx context.Context, key, feedback string, shots []domain.ShotRef, origin domain.Origin) (domain.Ticket, error)
+	RequestChanges(ctx context.Context, key, feedback string, shots []domain.ShotRef, files []int64, origin domain.Origin) (domain.Ticket, error)
 	Reject(ctx context.Context, key, reason string, origin domain.Origin) (domain.Ticket, error)
-	Retry(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
+	RetryWithNote(ctx context.Context, key, note string, files []int64, origin domain.Origin) (domain.Ticket, error)
 	Start(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	Stop(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	SetModels(ctx context.Context, key string, models map[string]string, origin domain.Origin) (domain.Ticket, error)
@@ -40,6 +40,7 @@ type Tickets interface {
 	Translate(ctx context.Context, key, lang string) ([]orchestrator.TranslatedText, error)
 	FollowUpTickets
 	RelationTickets
+	Attachments
 	Wake()
 }
 
@@ -109,9 +110,10 @@ func (s *Server) GetTicket(w http.ResponseWriter, r *http.Request, key gen.Ticke
 	d := gen.TicketDetail{
 		Ticket: toTicketRow(orchestrator.TicketRow{Ticket: v.Ticket, Info: v.Info, RepoName: v.RepoName, Spend: v.Spend,
 			OpenSuggestions: openSuggestions(v.FollowUps.Suggestions), Blockers: v.Relations.Blockers}),
-		Questions: make([]gen.Question, len(v.Questions)),
-		History:   &[]gen.HistoryItem{},
-		MaxTurns:  &v.Settings.MaxTurns,
+		Questions:   make([]gen.Question, len(v.Questions)),
+		Attachments: make([]gen.Attachment, len(v.Attachments)),
+		History:     &[]gen.HistoryItem{},
+		MaxTurns:    &v.Settings.MaxTurns,
 	}
 	stages := toStageSpend(v.Stages)
 	d.SpendByStage = &stages
@@ -136,7 +138,10 @@ func (s *Server) GetTicket(w http.ResponseWriter, r *http.Request, key gen.Ticke
 		if opts == nil {
 			opts = []string{}
 		}
-		d.Questions[i] = gen.Question{Id: q.ID, Position: q.Position, Text: q.Text, Options: opts, Answer: q.Answer, Note: q.Note}
+		d.Questions[i] = gen.Question{Id: q.ID, Position: q.Position, Text: q.Text, Options: opts, Multiple: q.Multiple, Answer: q.Answer, Note: q.Note}
+	}
+	for i, a := range v.Attachments {
+		d.Attachments[i] = toAttachment(a)
 	}
 	if v.Analysis != nil {
 		plan := v.Analysis.Plan
@@ -214,7 +219,7 @@ func (s *Server) AnswerQuestions(w http.ResponseWriter, r *http.Request, key gen
 	}
 	as := make([]domain.Answer, len(req.Answers))
 	for i, a := range req.Answers {
-		as[i] = domain.Answer{QuestionID: a.QuestionId, Answer: a.Answer}
+		as[i] = domain.Answer{QuestionID: a.QuestionId, Answer: a.Answer, Attachments: ids(a.Attachments)}
 		if a.Note != nil {
 			as[i].Note = *a.Note
 		}
@@ -255,7 +260,7 @@ func (s *Server) RequestChanges(w http.ResponseWriter, r *http.Request, key gen.
 				shots = append(shots, domain.ShotRef{RunID: x.RunId, ShotID: x.ShotId})
 			}
 		}
-		return s.opt.Tickets.RequestChanges(ctx, key, req.Feedback, shots, origin(r))
+		return s.opt.Tickets.RequestChanges(ctx, key, req.Feedback, shots, ids(req.Attachments), origin(r))
 	})
 }
 
@@ -279,8 +284,19 @@ func (s *Server) RejectTicket(w http.ResponseWriter, r *http.Request, key gen.Ti
 
 // RetryTicket implements gen.ServerInterface.
 func (s *Server) RetryTicket(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	var req gen.RetryTicketJSONRequestBody
+	if r.ContentLength != 0 {
+		if err := decodeJSON(r, &req); err != nil {
+			writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+			return
+		}
+	}
+	note := ""
+	if req.Note != nil {
+		note = *req.Note
+	}
 	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
-		return s.opt.Tickets.Retry(ctx, key, origin(r))
+		return s.opt.Tickets.RetryWithNote(ctx, key, note, ids(req.Attachments), origin(r))
 	})
 }
 

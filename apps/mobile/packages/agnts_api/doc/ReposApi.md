@@ -12,6 +12,7 @@ Method | HTTP request | Description
 [**archiveRepo**](ReposApi.md#archiverepo) | **POST** /repos/{id}/archive | Archive the repository; it keeps its history but takes no new tickets or tasks
 [**createRepo**](ReposApi.md#createrepo) | **POST** /repos | 
 [**deployRepo**](ReposApi.md#deployrepo) | **POST** /repos/{id}/deploy | Start a deployment (GitLab manual job, or the GitHub deploy workflow). Never available from MCP.
+[**detectRepo**](ReposApi.md#detectrepo) | **POST** /repos/detect | Work out a repository&#39;s toolchains and check commands
 [**getRepo**](ReposApi.md#getrepo) | **GET** /repos/{id} | 
 [**listRepoBranches**](ReposApi.md#listrepobranches) | **GET** /repos/{id}/branches | Branches with their tip, ahead/behind the default branch and checks
 [**listRepoCommits**](ReposApi.md#listrepocommits) | **GET** /repos/{id}/commits | Commits on the default branch, newest first, 50 per page; a shorter page is the last
@@ -148,6 +149,53 @@ Name | Type | Description  | Notes
 ### Return type
 
 void (empty response body)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **detectRepo**
+> RepoDetection detectRepo(repoDetectInput)
+
+Work out a repository's toolchains and check commands
+
+Reads the default branch (of a saved repository by id, or of any clone URL) and returns what it needs, without saving. With deep, Claude also reads the README and CI files when the file scan finds nothing; that takes a minute and uses the Claude plan. 
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getReposApi();
+final RepoDetectInput repoDetectInput = ; // RepoDetectInput | 
+
+try {
+    final response = api.detectRepo(repoDetectInput);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling ReposApi->detectRepo: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **repoDetectInput** | [**RepoDetectInput**](RepoDetectInput.md)|  | 
+
+### Return type
+
+[**RepoDetection**](RepoDetection.md)
 
 ### Authorization
 

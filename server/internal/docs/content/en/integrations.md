@@ -1,6 +1,6 @@
 # Integrations
 
-The services agnts works with: Jira for tickets, and GitHub or GitLab for code. Each has its own page with connection status and options.
+The services agnts works with: Jira or Plane for tickets, and GitHub or GitLab for code. Each has its own page with connection status and options.
 
 ## Connecting
 
@@ -21,6 +21,10 @@ Who commits appear from, a Co-authored-by line, title format, draft mode, labels
 ## Jira rules
 
 Which projects are watched, the label, issue types and statuses agnts picks up, shown as the exact query it runs.
+
+## Plane
+
+Plane Cloud or your own Plane. Enter the API address (https://api.plane.so, or your Plane's address), the workspace slug from Plane's URL and a personal access token. In Plane, add a webhook (Workspace settings → Webhooks) with the URL shown here and the work item events, then paste the secret Plane shows. Link a repository to a Plane project by its identifier (WEB in WEB-123) and label work items agnts, or agnts-<kind>. Statuses you leave empty move to the first state of the matching group (started, completed, cancelled); "in review" moves only to a state you name. A sync every hour catches webhooks Plane did not deliver.
 
 ## Status updates and comments
 

@@ -675,6 +675,12 @@ abstract class AppLocalizations {
   /// **'{h} h {m} min'**
   String analyticsHoursMinutes(String h, String m);
 
+  /// No description provided for @analyticsSrcPlane.
+  ///
+  /// In en, this message translates to:
+  /// **'Plane'**
+  String get analyticsSrcPlane;
+
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:
@@ -1215,6 +1221,102 @@ abstract class AppLocalizations {
   /// **'No activity yet.'**
   String get dashboardNoActivity;
 
+  /// No description provided for @filesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachments'**
+  String get filesTitle;
+
+  /// No description provided for @filesAttach.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach files'**
+  String get filesAttach;
+
+  /// No description provided for @filesAddPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get filesAddPhoto;
+
+  /// No description provided for @filesCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get filesCamera;
+
+  /// No description provided for @filesAddFile.
+  ///
+  /// In en, this message translates to:
+  /// **'File'**
+  String get filesAddFile;
+
+  /// No description provided for @filesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pictures, PDFs, logs or text, up to 10 MB each. Claude reads them all.'**
+  String get filesHint;
+
+  /// No description provided for @filesUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading {name}…'**
+  String filesUploading(String name);
+
+  /// No description provided for @filesRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}'**
+  String filesRemove(String name);
+
+  /// No description provided for @filesOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {name}'**
+  String filesOpen(String name);
+
+  /// No description provided for @filesTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is larger than 10 MB'**
+  String filesTooLarge(String name);
+
+  /// No description provided for @filesTooMany.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach at most {n} files'**
+  String filesTooMany(String n);
+
+  /// No description provided for @filesFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not upload {name}'**
+  String filesFailed(String name);
+
+  /// No description provided for @filesWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait for the uploads to finish'**
+  String get filesWait;
+
+  /// No description provided for @filesFromTask.
+  ///
+  /// In en, this message translates to:
+  /// **'With the task'**
+  String get filesFromTask;
+
+  /// No description provided for @filesFromRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'With a retry'**
+  String get filesFromRetry;
+
+  /// No description provided for @filesFromFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'With requested changes'**
+  String get filesFromFeedback;
+
   /// No description provided for @followUpsTitle.
   ///
   /// In en, this message translates to:
@@ -1472,6 +1574,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The type of the Jira issues agnts files when you create a follow-up in Jira. Default: Task.'**
   String get followUpsJiraIssueTypeHelp;
+
+  /// No description provided for @followUpsTargetPlane.
+  ///
+  /// In en, this message translates to:
+  /// **'Plane work item'**
+  String get followUpsTargetPlane;
+
+  /// No description provided for @followUpsPlaneOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect Plane and link the repository to a Plane project to file work items there'**
+  String get followUpsPlaneOff;
 
   /// No description provided for @formSave.
   ///
@@ -1860,7 +1974,7 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsTokenStep3_github.
   ///
   /// In en, this message translates to:
-  /// **'Under Repository permissions set Contents and Pull requests to Read and write. For the Pipelines tab also set Actions to Read (Read and write to use Deploy) and Deployments to Read. Metadata (read) is added automatically.'**
+  /// **'Under Repository permissions set Contents and Pull requests to Read and write, and Workflows to Read and write if agnts may change CI files in .github/workflows. For the Pipelines tab also set Actions to Read (Read and write to use Deploy) and Deployments to Read. Metadata (read) is added automatically.'**
   String get integrationsTokenStep3_github;
 
   /// No description provided for @integrationsTokenStep4_github.
@@ -1958,6 +2072,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Read and write. Open pull requests.'**
   String get integrationsPermPulls;
+
+  /// No description provided for @integrationsPermWorkflows.
+  ///
+  /// In en, this message translates to:
+  /// **'Read and write. Push changes to .github/workflows (CI files); without it such pushes are refused.'**
+  String get integrationsPermWorkflows;
 
   /// No description provided for @integrationsPermMetadata.
   ///
@@ -2424,8 +2544,206 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsGitWebhookWhy.
   ///
   /// In en, this message translates to:
-  /// **'When a pull or merge request is merged, agnts marks the ticket merged and moves the Jira issue to the merged status set on the Jira page. Pipeline events keep the repository page current.'**
+  /// **'When a pull or merge request is merged, agnts marks the ticket merged and moves the Jira issue or Plane work item to the merged status set on its tracker\'s page. Pipeline events keep the repository page current.'**
   String get integrationsGitWebhookWhy;
+
+  /// No description provided for @integrationsName_plane.
+  ///
+  /// In en, this message translates to:
+  /// **'Plane'**
+  String get integrationsName_plane;
+
+  /// No description provided for @integrationsDesc_plane.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick up work items with the agnts label from Plane Cloud or your own Plane, and keep their state up to date.'**
+  String get integrationsDesc_plane;
+
+  /// No description provided for @integrationsConnectSub_plane.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a personal access token from Plane. Works with Plane Cloud and self-hosted Plane.'**
+  String get integrationsConnectSub_plane;
+
+  /// No description provided for @integrationsTokenOpen_plane.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Plane API docs'**
+  String get integrationsTokenOpen_plane;
+
+  /// No description provided for @integrationsTokenStep1_plane.
+  ///
+  /// In en, this message translates to:
+  /// **'In Plane, sign in as the person agnts should act as (comments appear under this name) and open Profile settings → Personal access tokens.'**
+  String get integrationsTokenStep1_plane;
+
+  /// No description provided for @integrationsTokenStep2_plane.
+  ///
+  /// In en, this message translates to:
+  /// **'Click Add personal access token, name it (for example agnts), pick an expiry, then copy the token. Plane shows it only once.'**
+  String get integrationsTokenStep2_plane;
+
+  /// No description provided for @integrationsTokenStep3_plane.
+  ///
+  /// In en, this message translates to:
+  /// **'For API address, keep https://api.plane.so for Plane Cloud, or enter your own Plane\'s address if it is self-hosted.'**
+  String get integrationsTokenStep3_plane;
+
+  /// No description provided for @integrationsTokenStep4_plane.
+  ///
+  /// In en, this message translates to:
+  /// **'For Workspace, enter the slug from Plane\'s address: acme in app.plane.so/acme/projects.'**
+  String get integrationsTokenStep4_plane;
+
+  /// No description provided for @integrationsPlaneBaseUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'API address'**
+  String get integrationsPlaneBaseUrl;
+
+  /// No description provided for @integrationsPlaneBaseUrlHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'https://api.plane.so for Plane Cloud, or your Plane\'s address'**
+  String get integrationsPlaneBaseUrlHelp;
+
+  /// No description provided for @integrationsPlaneWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace'**
+  String get integrationsPlaneWorkspace;
+
+  /// No description provided for @integrationsPlaneWorkspaceHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The slug in Plane\'s address, such as acme'**
+  String get integrationsPlaneWorkspaceHelp;
+
+  /// No description provided for @integrationsApiKey.
+  ///
+  /// In en, this message translates to:
+  /// **'API key'**
+  String get integrationsApiKey;
+
+  /// No description provided for @integrationsApiKeyHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile settings → Personal access tokens'**
+  String get integrationsApiKeyHelp;
+
+  /// No description provided for @integrationsPlaneWebhookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up the Plane webhook'**
+  String get integrationsPlaneWebhookTitle;
+
+  /// No description provided for @integrationsPlaneWebhookSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'In Plane, open Workspace settings → Webhooks → Add webhook, enter the URL below and tick the work item (issue) events. Plane then shows a secret once: paste it here.'**
+  String get integrationsPlaneWebhookSteps;
+
+  /// No description provided for @integrationsPlaneEventsValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Work items (issues)'**
+  String get integrationsPlaneEventsValue;
+
+  /// No description provided for @integrationsPlaneSecret.
+  ///
+  /// In en, this message translates to:
+  /// **'Secret from Plane'**
+  String get integrationsPlaneSecret;
+
+  /// No description provided for @integrationsPlaneSecretHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Plane shows it once when you create the webhook'**
+  String get integrationsPlaneSecretHelp;
+
+  /// No description provided for @integrationsPlaneSecretSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save secret'**
+  String get integrationsPlaneSecretSave;
+
+  /// No description provided for @integrationsPlaneSecretReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace secret'**
+  String get integrationsPlaneSecretReplace;
+
+  /// No description provided for @integrationsPlaneSecretSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Webhook secret saved: Plane deliveries are accepted now'**
+  String get integrationsPlaneSecretSaved;
+
+  /// No description provided for @integrationsPlaneSecretSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Secret saved. Deliveries are accepted.'**
+  String get integrationsPlaneSecretSet;
+
+  /// No description provided for @integrationsPlaneSecretMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'No secret yet: agnts refuses deliveries until you paste the secret Plane showed, and only the hourly sync picks up work items.'**
+  String get integrationsPlaneSecretMissing;
+
+  /// No description provided for @integrationsPlaneQueryText.
+  ///
+  /// In en, this message translates to:
+  /// **'Open work items in the Plane projects linked to repositories that carry one of these labels: {labels}'**
+  String integrationsPlaneQueryText(String labels);
+
+  /// No description provided for @integrationsPlaneNoProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'No repository is linked to a Plane project yet. Add the project identifier (WEB in WEB-123) on the repository.'**
+  String get integrationsPlaneNoProjects;
+
+  /// No description provided for @integrationsPlaneStatusesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'How agnts moves work items. Leave a status on Default to use the first state of the matching group; In review moves only to a state you pick.'**
+  String get integrationsPlaneStatusesSub;
+
+  /// No description provided for @integrationsPlaneStateDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default: first {group} state'**
+  String integrationsPlaneStateDefault(String group);
+
+  /// No description provided for @integrationsPlaneStateNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep state'**
+  String get integrationsPlaneStateNone;
+
+  /// No description provided for @integrationsPlaneStatesError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read the states from Plane: {error}'**
+  String integrationsPlaneStatesError(String error);
+
+  /// No description provided for @integrationsPlaneSyncHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Plane sends changes to the webhook right away; agnts also checks every hour in case a delivery was missed.'**
+  String get integrationsPlaneSyncHelp;
+
+  /// No description provided for @integrationsPlaneHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts reads only work items with its labels in linked projects, and writes only the state changes and comments you turn on here. Plane allows 60 API requests a minute per key; agnts stays under 50.'**
+  String get integrationsPlaneHelp;
+
+  /// No description provided for @integrationsPlaneSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'{found} open work items, {created} new'**
+  String integrationsPlaneSynced(String found, String created);
 
   /// No description provided for @kindTitle.
   ///
@@ -4548,7 +4866,7 @@ abstract class AppLocalizations {
   /// No description provided for @navLedeAll.
   ///
   /// In en, this message translates to:
-  /// **'Every ticket agnts has picked up from Jira.'**
+  /// **'Every ticket agnts has picked up from Jira and Plane.'**
   String get navLedeAll;
 
   /// No description provided for @navKnowledge.
@@ -4574,6 +4892,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rules'**
   String get navRules;
+
+  /// No description provided for @navSyncPlane.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync Plane'**
+  String get navSyncPlane;
+
+  /// No description provided for @navSyncedPlane.
+  ///
+  /// In en, this message translates to:
+  /// **'Plane synced: {found} open, {created} new'**
+  String navSyncedPlane(String found, String created);
 
   /// No description provided for @previewTab.
   ///
@@ -5270,6 +5600,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No merge webhook? Mark the pull request merged so tickets waiting for it can start.'**
   String get relationsMarkMergedHint;
+
+  /// No description provided for @relationsSource_plane.
+  ///
+  /// In en, this message translates to:
+  /// **'Plane relation'**
+  String get relationsSource_plane;
 
   /// No description provided for @repoBack.
   ///
@@ -5970,7 +6306,7 @@ abstract class AppLocalizations {
   /// No description provided for @reposDrawerSub.
   ///
   /// In en, this message translates to:
-  /// **'Takes side-project tasks, and Jira tickets once it has a Jira project key'**
+  /// **'Takes side-project tasks, plus Jira tickets or Plane work items once it is linked to a project'**
   String get reposDrawerSub;
 
   /// No description provided for @reposName.
@@ -6012,7 +6348,7 @@ abstract class AppLocalizations {
   /// No description provided for @reposTaskPrefixHelp.
   ///
   /// In en, this message translates to:
-  /// **'Side-project tasks are numbered like {prefix}-1, {prefix}-2. Must differ from the Jira project key.'**
+  /// **'Side-project tasks are numbered like {prefix}-1, {prefix}-2. Must differ from the Jira project key and the Plane project.'**
   String reposTaskPrefixHelp(String prefix);
 
   /// No description provided for @reposBranch.
@@ -6104,6 +6440,234 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'GitHub Actions workflow file with workflow_dispatch, e.g. deploy.yml. Deploy on the repository page runs it.'**
   String get reposDeployWorkflowHelp;
+
+  /// No description provided for @reposColStack.
+  ///
+  /// In en, this message translates to:
+  /// **'Toolchains'**
+  String get reposColStack;
+
+  /// No description provided for @reposToolchains.
+  ///
+  /// In en, this message translates to:
+  /// **'Toolchains'**
+  String get reposToolchains;
+
+  /// No description provided for @reposToolchainsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Language runtimes and build tools installed into every run, once per version, and kept for later runs.'**
+  String get reposToolchainsHelp;
+
+  /// No description provided for @reposToolchainsAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Detected from the repository (go.mod, .nvmrc, .python-version, mise.toml, …) and kept up to date as those files change.'**
+  String get reposToolchainsAuto;
+
+  /// No description provided for @reposToolchainsManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Set by hand: detection leaves them as they are.'**
+  String get reposToolchainsManual;
+
+  /// No description provided for @reposToolchainsBackToAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Detect automatically'**
+  String get reposToolchainsBackToAuto;
+
+  /// No description provided for @reposToolchainFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'from {source}'**
+  String reposToolchainFrom(String source);
+
+  /// No description provided for @reposToolchainRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {tool}'**
+  String reposToolchainRemove(String tool);
+
+  /// No description provided for @reposToolchainAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get reposToolchainAdd;
+
+  /// No description provided for @reposToolchainPh.
+  ///
+  /// In en, this message translates to:
+  /// **'tool@version, e.g. python@3.12'**
+  String get reposToolchainPh;
+
+  /// No description provided for @reposToolchainBad.
+  ///
+  /// In en, this message translates to:
+  /// **'Write it as tool@version, e.g. node@20 or rust@stable.'**
+  String get reposToolchainBad;
+
+  /// No description provided for @reposToolchainsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None yet: they are detected after you save, or press Detect.'**
+  String get reposToolchainsNone;
+
+  /// No description provided for @reposDetect.
+  ///
+  /// In en, this message translates to:
+  /// **'Detect'**
+  String get reposDetect;
+
+  /// No description provided for @reposDetectDeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Claude'**
+  String get reposDetectDeep;
+
+  /// No description provided for @reposDetectDeepHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude reads the README and CI files when the scan finds no commands. Takes about a minute and uses your Claude plan.'**
+  String get reposDetectDeepHelp;
+
+  /// No description provided for @reposDetecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the repository…'**
+  String get reposDetecting;
+
+  /// No description provided for @reposDetectDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Found {list}.'**
+  String reposDetectDone(String list);
+
+  /// No description provided for @reposDetectNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'No known build files found. Add the toolchains and commands by hand, or ask Claude.'**
+  String get reposDetectNothing;
+
+  /// No description provided for @reposDetectFilled.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty check commands were filled in; review them before saving.'**
+  String get reposDetectFilled;
+
+  /// No description provided for @reposDetectByClaude.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude filled in what the scan could not find.'**
+  String get reposDetectByClaude;
+
+  /// No description provided for @reposDetectNeedsUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the clone URL first.'**
+  String get reposDetectNeedsUrl;
+
+  /// No description provided for @reposCmdAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'detected after saving'**
+  String get reposCmdAuto;
+
+  /// No description provided for @reposNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes from detection'**
+  String get reposNotes;
+
+  /// No description provided for @reposAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced'**
+  String get reposAdvanced;
+
+  /// No description provided for @reposRunnerImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Runner image'**
+  String get reposRunnerImage;
+
+  /// No description provided for @reposRunnerImageHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional. An image built on the server FROM agnts-runner, for system libraries or SDKs toolchains cannot provide (Android, Flutter). Empty uses the default.'**
+  String get reposRunnerImageHelp;
+
+  /// No description provided for @reposMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory'**
+  String get reposMemory;
+
+  /// No description provided for @reposMemoryHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional, for heavy builds (JVM, Rust, .NET). Server default unless set; the server caps it (AGNTS_RUN_MEMORY_MAX_MB, 8 GB by default).'**
+  String get reposMemoryHelp;
+
+  /// No description provided for @reposMemoryDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Server default'**
+  String get reposMemoryDefault;
+
+  /// No description provided for @reposBuildEnv.
+  ///
+  /// In en, this message translates to:
+  /// **'Build environment'**
+  String get reposBuildEnv;
+
+  /// No description provided for @reposBuildEnvHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'KEY=value lines given to every run, such as tokens for private package registries (NPM_TOKEN, PIP_INDEX_URL). Stored encrypted and never shown again. Claude can read them while it works, so use read-only tokens.'**
+  String get reposBuildEnvHelp;
+
+  /// No description provided for @reposBuildEnvSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Set: {names}'**
+  String reposBuildEnvSet(String names);
+
+  /// No description provided for @reposBuildEnvReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get reposBuildEnvReplace;
+
+  /// No description provided for @reposBuildEnvClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get reposBuildEnvClear;
+
+  /// No description provided for @reposBuildEnvCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared when you save.'**
+  String get reposBuildEnvCleared;
+
+  /// No description provided for @reposPlane.
+  ///
+  /// In en, this message translates to:
+  /// **'Plane {project}'**
+  String reposPlane(String project);
+
+  /// No description provided for @reposPlaneProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Plane project'**
+  String get reposPlaneProject;
+
+  /// No description provided for @reposPlaneHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional. The project identifier (WEB in WEB-123). Work items from this Plane project with the agnts label run here.'**
+  String get reposPlaneHelp;
 
   /// No description provided for @reviewTitle.
   ///
@@ -8241,6 +8805,18 @@ abstract class AppLocalizations {
   /// **'The run stopped. Check the run log for details.'**
   String get ticketFailedUnknown;
 
+  /// No description provided for @ticketRetryNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note for the retry'**
+  String get ticketRetryNote;
+
+  /// No description provided for @ticketRetryNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional. Tell agnts how to get past the error; the next coding run gets it with the error.'**
+  String get ticketRetryNoteHint;
+
   /// No description provided for @ticketTakeItMyself.
   ///
   /// In en, this message translates to:
@@ -8670,7 +9246,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketDeliveringSub.
   ///
   /// In en, this message translates to:
-  /// **'Saving the approved report and posting it to Jira if you asked.'**
+  /// **'Saving the approved report and posting it to the issue tracker if you asked.'**
   String get ticketDeliveringSub;
 
   /// No description provided for @ticketDoneReportTitle.
@@ -8768,6 +9344,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not translate: {error}'**
   String ticketTranslateFailed(String error);
+
+  /// No description provided for @ticketSrcPlane.
+  ///
+  /// In en, this message translates to:
+  /// **'Plane'**
+  String get ticketSrcPlane;
+
+  /// No description provided for @ticketReviewSubPlane.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing has left the server yet. Approving pushes {branch}, opens a pull request and updates the Plane work item.'**
+  String ticketReviewSubPlane(String branch);
+
+  /// No description provided for @ticketReviewReportSubPlane.
+  ///
+  /// In en, this message translates to:
+  /// **'Approving keeps the report here and closes the ticket. It goes to Plane only if you tick the box below.'**
+  String get ticketReviewReportSubPlane;
+
+  /// No description provided for @ticketPostReportPlane.
+  ///
+  /// In en, this message translates to:
+  /// **'Also post the report as a comment on {key} in Plane'**
+  String ticketPostReportPlane(String key);
+
+  /// No description provided for @ticketApproveReportPostConfirmPlane.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve the report, close this ticket and post the report to {key} in Plane?'**
+  String ticketApproveReportPostConfirmPlane(String key);
+
+  /// No description provided for @ticketDoneReportPostedPlane.
+  ///
+  /// In en, this message translates to:
+  /// **'The report is kept here and was posted to {key} in Plane.'**
+  String ticketDoneReportPostedPlane(String key);
+
+  /// No description provided for @ticketPickAny.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick all that apply'**
+  String get ticketPickAny;
+
+  /// No description provided for @ticketOtherAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Something else (optional)'**
+  String get ticketOtherAnswer;
 
   /// No description provided for @ticketsTitle.
   ///
@@ -8898,7 +9522,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketsListSub.
   ///
   /// In en, this message translates to:
-  /// **'Jira tickets with the agnts label, plus tasks you create for side projects.'**
+  /// **'Jira and Plane tickets with the agnts label, plus tasks you create for side projects.'**
   String get ticketsListSub;
 
   /// No description provided for @ticketsNoMatch.
@@ -8960,6 +9584,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Plan session'**
   String get ticketsStatSession;
+
+  /// No description provided for @ticketsSourcePlane.
+  ///
+  /// In en, this message translates to:
+  /// **'Plane'**
+  String get ticketsSourcePlane;
 
   /// No description provided for @usageTitle.
   ///

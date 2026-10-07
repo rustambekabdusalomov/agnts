@@ -92,6 +92,8 @@
     "rejectedSub": "agnts stopped working on this ticket. The branch was not pushed.",
     "failedTitle": "agnts stopped",
     "failedUnknown": "The run stopped. Check the run log for details.",
+    "retryNote": "Note for the retry",
+    "retryNoteHint": "Optional. Tell agnts how to get past the error; the next coding run gets it with the error.",
     "takeItMyself": "Take it myself",
     "rateTitle": "Paused at plan limit",
     "resume": "Resume run",
@@ -163,7 +165,7 @@
     "approveReportConfirm": "Approve the report and close this ticket?",
     "approveReportPostConfirm": "Approve the report, close this ticket and post the report to {key} in Jira?",
     "deliveringTitle": "Finishing up",
-    "deliveringSub": "Saving the approved report and posting it to Jira if you asked.",
+    "deliveringSub": "Saving the approved report and posting it to the issue tracker if you asked.",
     "doneReportTitle": "Report approved",
     "doneReport": "The report is kept here.",
     "doneReportPosted": "The report is kept here and was posted to {key} in Jira.",
@@ -179,6 +181,14 @@
     "translate": "Translate",
     "translateOriginal": "Original language",
     "translating": "Translating… the first time takes up to a minute; after that it is saved.",
-    "translateFailed": "Could not translate: {error}"
+    "translateFailed": "Could not translate: {error}",
+    "srcPlane": "Plane",
+    "reviewSubPlane": "Nothing has left the server yet. Approving pushes {branch}, opens a pull request and updates the Plane work item.",
+    "reviewReportSubPlane": "Approving keeps the report here and closes the ticket. It goes to Plane only if you tick the box below.",
+    "postReportPlane": "Also post the report as a comment on {key} in Plane",
+    "approveReportPostConfirmPlane": "Approve the report, close this ticket and post the report to {key} in Plane?",
+    "doneReportPostedPlane": "The report is kept here and was posted to {key} in Plane.",
+    "pickAny": "Pick all that apply",
+    "otherAnswer": "Something else (optional)"
   }
 }

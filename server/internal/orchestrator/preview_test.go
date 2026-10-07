@@ -192,11 +192,11 @@ func TestPreviewBesideHumanReview(t *testing.T) {
 	}
 
 	// Feedback pointing at a screenshot: the coding run gets it.
-	if _, err := h.o.RequestChanges(h.ctx, "PAY-1", "Fix the tabs", []domain.ShotRef{{RunID: p.RunID, ShotID: "nope"}}, domain.OriginWeb); !errors.Is(err, orchestrator.ErrInvalid) {
+	if _, err := h.o.RequestChanges(h.ctx, "PAY-1", "Fix the tabs", []domain.ShotRef{{RunID: p.RunID, ShotID: "nope"}}, nil, domain.OriginWeb); !errors.Is(err, orchestrator.ErrInvalid) {
 		t.Fatalf("unknown screenshot accepted: %v", err)
 	}
 	ref := domain.ShotRef{RunID: p.RunID, ShotID: "tickets-phone-after"}
-	if _, err := h.o.RequestChanges(h.ctx, "PAY-1", "Fix the tabs", []domain.ShotRef{ref, ref}, domain.OriginWeb); err != nil {
+	if _, err := h.o.RequestChanges(h.ctx, "PAY-1", "Fix the tabs", []domain.ShotRef{ref, ref}, nil, domain.OriginWeb); err != nil {
 		t.Fatal(err)
 	}
 	if tk := h.state("PAY-1"); len(tk.FeedbackShots) != 1 || tk.Revision != 1 {

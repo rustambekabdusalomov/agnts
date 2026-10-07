@@ -72,6 +72,9 @@ All URIs are relative to */api*
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 [*AnalyticsApi*](doc/AnalyticsApi.md) | [**getAnalytics**](doc/AnalyticsApi.md#getanalytics) | **GET** /analytics | Throughput, quality, time and plan statistics for a period
+[*AttachmentsApi*](doc/AttachmentsApi.md) | [**deleteAttachment**](doc/AttachmentsApi.md#deleteattachment) | **DELETE** /attachments/{id} | Delete an upload that nothing uses yet
+[*AttachmentsApi*](doc/AttachmentsApi.md) | [**getAttachment**](doc/AttachmentsApi.md#getattachment) | **GET** /attachments/{id} | An attached file&#39;s bytes
+[*AttachmentsApi*](doc/AttachmentsApi.md) | [**uploadAttachment**](doc/AttachmentsApi.md#uploadattachment) | **POST** /attachments | Upload a file to attach to a task, an answer or a retry note
 [*AuthApi*](doc/AuthApi.md) | [**getMe**](doc/AuthApi.md#getme) | **GET** /auth/me | The signed-in user
 [*AuthApi*](doc/AuthApi.md) | [**login**](doc/AuthApi.md#login) | **POST** /auth/login | Sign in with password and TOTP code
 [*AuthApi*](doc/AuthApi.md) | [**logout**](doc/AuthApi.md#logout) | **POST** /auth/logout | End the current session
@@ -82,8 +85,11 @@ Class | Method | HTTP request | Description
 [*IntegrationsApi*](doc/IntegrationsApi.md) | [**connectIntegration**](doc/IntegrationsApi.md#connectintegration) | **POST** /integrations/{provider}/connect | Save a token (and settings), check it against the provider, and connect
 [*IntegrationsApi*](doc/IntegrationsApi.md) | [**disconnectIntegration**](doc/IntegrationsApi.md#disconnectintegration) | **POST** /integrations/{provider}/disconnect | Forget the token
 [*IntegrationsApi*](doc/IntegrationsApi.md) | [**listIntegrations**](doc/IntegrationsApi.md#listintegrations) | **GET** /integrations | 
+[*IntegrationsApi*](doc/IntegrationsApi.md) | [**listPlaneStates**](doc/IntegrationsApi.md#listplanestates) | **GET** /integrations/plane/states | States of the Plane projects linked to repositories, for the status mapping
 [*IntegrationsApi*](doc/IntegrationsApi.md) | [**listRemoteRepos**](doc/IntegrationsApi.md#listremoterepos) | **GET** /integrations/{provider}/repos | Repositories the connected GitHub or GitLab token can reach, for import
+[*IntegrationsApi*](doc/IntegrationsApi.md) | [**setPlaneWebhookSecret**](doc/IntegrationsApi.md#setplanewebhooksecret) | **PUT** /integrations/plane/webhook-secret | Store the secret Plane generated for the agnts webhook
 [*IntegrationsApi*](doc/IntegrationsApi.md) | [**syncJira**](doc/IntegrationsApi.md#syncjira) | **POST** /integrations/jira/sync | Pick up labelled Jira issues now
+[*IntegrationsApi*](doc/IntegrationsApi.md) | [**syncPlane**](doc/IntegrationsApi.md#syncplane) | **POST** /integrations/plane/sync | Pick up labelled Plane work items now
 [*IntegrationsApi*](doc/IntegrationsApi.md) | [**testIntegration**](doc/IntegrationsApi.md#testintegration) | **POST** /integrations/{provider}/test | 
 [*IntegrationsApi*](doc/IntegrationsApi.md) | [**updateIntegration**](doc/IntegrationsApi.md#updateintegration) | **PUT** /integrations/{provider} | Change an integration&#39;s settings (never its token)
 [*LearnApi*](doc/LearnApi.md) | [**getLearnQueue**](doc/LearnApi.md#getlearnqueue) | **GET** /lessons/queue | Done tickets whose learn run is running, queued, failed or never happened
@@ -105,6 +111,7 @@ Class | Method | HTTP request | Description
 [*ReposApi*](doc/ReposApi.md) | [**archiveRepo**](doc/ReposApi.md#archiverepo) | **POST** /repos/{id}/archive | Archive the repository; it keeps its history but takes no new tickets or tasks
 [*ReposApi*](doc/ReposApi.md) | [**createRepo**](doc/ReposApi.md#createrepo) | **POST** /repos | 
 [*ReposApi*](doc/ReposApi.md) | [**deployRepo**](doc/ReposApi.md#deployrepo) | **POST** /repos/{id}/deploy | Start a deployment (GitLab manual job, or the GitHub deploy workflow). Never available from MCP.
+[*ReposApi*](doc/ReposApi.md) | [**detectRepo**](doc/ReposApi.md#detectrepo) | **POST** /repos/detect | Work out a repository&#39;s toolchains and check commands
 [*ReposApi*](doc/ReposApi.md) | [**getRepo**](doc/ReposApi.md#getrepo) | **GET** /repos/{id} | 
 [*ReposApi*](doc/ReposApi.md) | [**listRepoBranches**](doc/ReposApi.md#listrepobranches) | **GET** /repos/{id}/branches | Branches with their tip, ahead/behind the default branch and checks
 [*ReposApi*](doc/ReposApi.md) | [**listRepoCommits**](doc/ReposApi.md#listrepocommits) | **GET** /repos/{id}/commits | Commits on the default branch, newest first, 50 per page; a shorter page is the last
@@ -175,6 +182,7 @@ Class | Method | HTTP request | Description
  - [AnswersRequest](doc/AnswersRequest.md)
  - [AnswersRequestAnswersInner](doc/AnswersRequestAnswersInner.md)
  - [ApproveTicketRequest](doc/ApproveTicketRequest.md)
+ - [Attachment](doc/Attachment.md)
  - [Blocker](doc/Blocker.md)
  - [Branch](doc/Branch.md)
  - [CI](doc/CI.md)
@@ -228,6 +236,7 @@ Class | Method | HTTP request | Description
  - [NotifySettings](doc/NotifySettings.md)
  - [PeriodStats](doc/PeriodStats.md)
  - [Pipeline](doc/Pipeline.md)
+ - [PlaneState](doc/PlaneState.md)
  - [PreviewInput](doc/PreviewInput.md)
  - [PreviewIssue](doc/PreviewIssue.md)
  - [PreviewShot](doc/PreviewShot.md)
@@ -241,6 +250,8 @@ Class | Method | HTTP request | Description
  - [Relations](doc/Relations.md)
  - [RemoteRepository](doc/RemoteRepository.md)
  - [RepoActivity](doc/RepoActivity.md)
+ - [RepoDetectInput](doc/RepoDetectInput.md)
+ - [RepoDetection](doc/RepoDetection.md)
  - [RepoMember](doc/RepoMember.md)
  - [RepoPreview](doc/RepoPreview.md)
  - [RepoPreviewInput](doc/RepoPreviewInput.md)
@@ -248,6 +259,7 @@ Class | Method | HTTP request | Description
  - [RepositoryInput](doc/RepositoryInput.md)
  - [RequestChangesRequest](doc/RequestChangesRequest.md)
  - [Result](doc/Result.md)
+ - [RetryTicketRequest](doc/RetryTicketRequest.md)
  - [ReviewModel](doc/ReviewModel.md)
  - [RotateMcpToken200Response](doc/RotateMcpToken200Response.md)
  - [Rule](doc/Rule.md)
@@ -256,6 +268,7 @@ Class | Method | HTTP request | Description
  - [RuleInput](doc/RuleInput.md)
  - [RuleQuestion](doc/RuleQuestion.md)
  - [RuleStatus](doc/RuleStatus.md)
+ - [SetPlaneWebhookSecretRequest](doc/SetPlaneWebhookSecretRequest.md)
  - [Settings](doc/Settings.md)
  - [ShotRef](doc/ShotRef.md)
  - [Stage](doc/Stage.md)
@@ -276,6 +289,7 @@ Class | Method | HTTP request | Description
  - [TicketSpendRow](doc/TicketSpendRow.md)
  - [TicketState](doc/TicketState.md)
  - [TokenSpend](doc/TokenSpend.md)
+ - [Toolchain](doc/Toolchain.md)
  - [TranslateInput](doc/TranslateInput.md)
  - [Translation](doc/Translation.md)
  - [TranslationItemsInner](doc/TranslationItemsInner.md)

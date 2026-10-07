@@ -190,6 +190,7 @@
       }
     }
   },
+  "analyticsSrcPlane": "Plane",
   "appName": "agnts",
   "appTagline": "Your no sleep agent",
   "authTitle": "Sign in",
@@ -380,6 +381,64 @@
   "dashboardRecentTitle": "Recent activity",
   "dashboardLogs": "Logs",
   "dashboardNoActivity": "No activity yet.",
+  "filesTitle": "Attachments",
+  "filesAttach": "Attach files",
+  "filesAddPhoto": "Photo",
+  "filesCamera": "Camera",
+  "filesAddFile": "File",
+  "filesHint": "Pictures, PDFs, logs or text, up to 10 MB each. Claude reads them all.",
+  "filesUploading": "Uploading {name}…",
+  "@filesUploading": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "filesRemove": "Remove {name}",
+  "@filesRemove": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "filesOpen": "Open {name}",
+  "@filesOpen": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "filesTooLarge": "{name} is larger than 10 MB",
+  "@filesTooLarge": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "filesTooMany": "Attach at most {n} files",
+  "@filesTooMany": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "filesFailed": "Could not upload {name}",
+  "@filesFailed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "filesWait": "Wait for the uploads to finish",
+  "filesFromTask": "With the task",
+  "filesFromRetry": "With a retry",
+  "filesFromFeedback": "With requested changes",
   "followUpsTitle": "Follow-up tickets",
   "followUpsSub": "What finishing this ticket still needs, as agnts sees it. Pick the ones you want: they are created queued, so nothing runs until you start them.",
   "followUpsMode": "Follow-up suggestions",
@@ -468,6 +527,8 @@
   "followUpsNotifyLabel": "Follow-up tickets suggested",
   "followUpsJiraIssueType": "Issue type for follow-ups",
   "followUpsJiraIssueTypeHelp": "The type of the Jira issues agnts files when you create a follow-up in Jira. Default: Task.",
+  "followUpsTargetPlane": "Plane work item",
+  "followUpsPlaneOff": "Connect Plane and link the repository to a Plane project to file work items there",
   "formSave": "Save changes",
   "formSaving": "Saving…",
   "formDiscard": "Discard",
@@ -570,7 +631,7 @@
   "integrationsTokenOpen_github": "Open GitHub token page",
   "integrationsTokenStep1_github": "On GitHub, open Settings → Developer settings → Personal access tokens → Fine-grained tokens and click Generate new token (or use the button below).",
   "integrationsTokenStep2_github": "Name it (for example agnts), pick an expiration, set Resource owner to the account or organization that owns your repositories, and under Repository access choose the repositories agnts may work on.",
-  "integrationsTokenStep3_github": "Under Repository permissions set Contents and Pull requests to Read and write. For the Pipelines tab also set Actions to Read (Read and write to use Deploy) and Deployments to Read. Metadata (read) is added automatically.",
+  "integrationsTokenStep3_github": "Under Repository permissions set Contents and Pull requests to Read and write, and Workflows to Read and write if agnts may change CI files in .github/workflows. For the Pipelines tab also set Actions to Read (Read and write to use Deploy) and Deployments to Read. Metadata (read) is added automatically.",
   "integrationsTokenStep4_github": "Click Generate token, copy it (it starts with github_pat_) and paste it below. GitHub shows it only once. For an organization, an owner may need to approve the token first.",
   "integrationsConnectSub_claude": "Run `claude setup-token` on a machine where you are signed in to your Claude plan, then paste the token.",
   "integrationsTokenStep1_claude": "You need a Claude Pro or Max plan. On any computer, install Claude Code: npm install -g @anthropic-ai/claude-code",
@@ -587,6 +648,7 @@
   "integrationsScopes": "Required permissions",
   "integrationsPermContents": "Read and write. Clone code and push branches.",
   "integrationsPermPulls": "Read and write. Open pull requests.",
+  "integrationsPermWorkflows": "Read and write. Push changes to .github/workflows (CI files); without it such pushes are refused.",
   "integrationsPermMetadata": "Read. List repositories and branches.",
   "integrationsPermActions": "Read for the Pipelines tab and environments; Read and write to use Deploy.",
   "integrationsPermDeployments": "Read. Shows what is deployed to each environment.",
@@ -712,7 +774,71 @@
   "integrationsGitWebhookSteps_gitlab": "In the project go to Settings → Webhooks. Paste the URL, put the secret below in Secret token.",
   "integrationsGitEvents_github": "Pull requests, Workflow runs",
   "integrationsGitEvents_gitlab": "Merge request events, Pipeline events",
-  "integrationsGitWebhookWhy": "When a pull or merge request is merged, agnts marks the ticket merged and moves the Jira issue to the merged status set on the Jira page. Pipeline events keep the repository page current.",
+  "integrationsGitWebhookWhy": "When a pull or merge request is merged, agnts marks the ticket merged and moves the Jira issue or Plane work item to the merged status set on its tracker's page. Pipeline events keep the repository page current.",
+  "integrationsName_plane": "Plane",
+  "integrationsDesc_plane": "Pick up work items with the agnts label from Plane Cloud or your own Plane, and keep their state up to date.",
+  "integrationsConnectSub_plane": "Use a personal access token from Plane. Works with Plane Cloud and self-hosted Plane.",
+  "integrationsTokenOpen_plane": "Open Plane API docs",
+  "integrationsTokenStep1_plane": "In Plane, sign in as the person agnts should act as (comments appear under this name) and open Profile settings → Personal access tokens.",
+  "integrationsTokenStep2_plane": "Click Add personal access token, name it (for example agnts), pick an expiry, then copy the token. Plane shows it only once.",
+  "integrationsTokenStep3_plane": "For API address, keep https://api.plane.so for Plane Cloud, or enter your own Plane's address if it is self-hosted.",
+  "integrationsTokenStep4_plane": "For Workspace, enter the slug from Plane's address: acme in app.plane.so/acme/projects.",
+  "integrationsPlaneBaseUrl": "API address",
+  "integrationsPlaneBaseUrlHelp": "https://api.plane.so for Plane Cloud, or your Plane's address",
+  "integrationsPlaneWorkspace": "Workspace",
+  "integrationsPlaneWorkspaceHelp": "The slug in Plane's address, such as acme",
+  "integrationsApiKey": "API key",
+  "integrationsApiKeyHelp": "Profile settings → Personal access tokens",
+  "integrationsPlaneWebhookTitle": "Set up the Plane webhook",
+  "integrationsPlaneWebhookSteps": "In Plane, open Workspace settings → Webhooks → Add webhook, enter the URL below and tick the work item (issue) events. Plane then shows a secret once: paste it here.",
+  "integrationsPlaneEventsValue": "Work items (issues)",
+  "integrationsPlaneSecret": "Secret from Plane",
+  "integrationsPlaneSecretHelp": "Plane shows it once when you create the webhook",
+  "integrationsPlaneSecretSave": "Save secret",
+  "integrationsPlaneSecretReplace": "Replace secret",
+  "integrationsPlaneSecretSaved": "Webhook secret saved: Plane deliveries are accepted now",
+  "integrationsPlaneSecretSet": "Secret saved. Deliveries are accepted.",
+  "integrationsPlaneSecretMissing": "No secret yet: agnts refuses deliveries until you paste the secret Plane showed, and only the hourly sync picks up work items.",
+  "integrationsPlaneQueryText": "Open work items in the Plane projects linked to repositories that carry one of these labels: {labels}",
+  "@integrationsPlaneQueryText": {
+    "placeholders": {
+      "labels": {
+        "type": "String"
+      }
+    }
+  },
+  "integrationsPlaneNoProjects": "No repository is linked to a Plane project yet. Add the project identifier (WEB in WEB-123) on the repository.",
+  "integrationsPlaneStatusesSub": "How agnts moves work items. Leave a status on Default to use the first state of the matching group; In review moves only to a state you pick.",
+  "integrationsPlaneStateDefault": "Default: first {group} state",
+  "@integrationsPlaneStateDefault": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "integrationsPlaneStateNone": "Keep state",
+  "integrationsPlaneStatesError": "Could not read the states from Plane: {error}",
+  "@integrationsPlaneStatesError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "integrationsPlaneSyncHelp": "Plane sends changes to the webhook right away; agnts also checks every hour in case a delivery was missed.",
+  "integrationsPlaneHelp": "agnts reads only work items with its labels in linked projects, and writes only the state changes and comments you turn on here. Plane allows 60 API requests a minute per key; agnts stays under 50.",
+  "integrationsPlaneSynced": "{found} open work items, {created} new",
+  "@integrationsPlaneSynced": {
+    "placeholders": {
+      "found": {
+        "type": "String"
+      },
+      "created": {
+        "type": "String"
+      }
+    }
+  },
   "kindTitle": "Kind",
   "kindAuto": "Auto",
   "kindAutoHint": "agnts picks the kind while reading the ticket",
@@ -1377,11 +1503,23 @@
   "navLedeRunning": "Tickets agnts is working on right now.",
   "navLedeQueue": "Tickets with the agnts label that haven't been analyzed yet.",
   "navLedeDone": "Pushed or rejected tickets.",
-  "navLedeAll": "Every ticket agnts has picked up from Jira.",
+  "navLedeAll": "Every ticket agnts has picked up from Jira and Plane.",
   "navKnowledge": "Knowledge",
   "navLearn": "Learn",
   "navLearnQueue": "Learning queue",
   "navRules": "Rules",
+  "navSyncPlane": "Sync Plane",
+  "navSyncedPlane": "Plane synced: {found} open, {created} new",
+  "@navSyncedPlane": {
+    "placeholders": {
+      "found": {
+        "type": "String"
+      },
+      "created": {
+        "type": "String"
+      }
+    }
+  },
   "previewTab": "Preview",
   "previewTitle": "Screenshots of the app",
   "previewSub": "agnts started the app with this change and took screenshots. Advice only: it never blocks approval.",
@@ -1581,6 +1719,7 @@
   "relationsFootprintMigrations": "Adds a database migration",
   "relationsMarkMerged": "Mark merged",
   "relationsMarkMergedHint": "No merge webhook? Mark the pull request merged so tickets waiting for it can start.",
+  "relationsSource_plane": "Plane relation",
   "repoBack": "Back to repositories",
   "repoNotFound": "No such repository.",
   "repoEdit": "Edit settings",
@@ -1857,14 +1996,14 @@
   "reposUnknown": "Not checked",
   "reposNoMatch": "No repositories match your search.",
   "reposNone": "No repositories yet. Add the first one to let agnts work on it.",
-  "reposDrawerSub": "Takes side-project tasks, and Jira tickets once it has a Jira project key",
+  "reposDrawerSub": "Takes side-project tasks, plus Jira tickets or Plane work items once it is linked to a project",
   "reposName": "Name",
   "reposCloneUrl": "Clone URL",
   "reposCloneHelp": "An https URL on github.com or your connected GitLab. agnts uses that host's token to clone and push.",
   "reposJiraProject": "Jira project key",
   "reposJiraHelp": "Optional. Tickets from this Jira project with the agnts label run here.",
   "reposTaskPrefix": "Task key prefix",
-  "reposTaskPrefixHelp": "Side-project tasks are numbered like {prefix}-1, {prefix}-2. Must differ from the Jira project key.",
+  "reposTaskPrefixHelp": "Side-project tasks are numbered like {prefix}-1, {prefix}-2. Must differ from the Jira project key and the Plane project.",
   "@reposTaskPrefixHelp": {
     "placeholders": {
       "prefix": {
@@ -1887,6 +2026,79 @@
   "reposEdit": "Edit",
   "reposDeployWorkflow": "Deploy workflow",
   "reposDeployWorkflowHelp": "GitHub Actions workflow file with workflow_dispatch, e.g. deploy.yml. Deploy on the repository page runs it.",
+  "reposColStack": "Toolchains",
+  "reposToolchains": "Toolchains",
+  "reposToolchainsHelp": "Language runtimes and build tools installed into every run, once per version, and kept for later runs.",
+  "reposToolchainsAuto": "Detected from the repository (go.mod, .nvmrc, .python-version, mise.toml, …) and kept up to date as those files change.",
+  "reposToolchainsManual": "Set by hand: detection leaves them as they are.",
+  "reposToolchainsBackToAuto": "Detect automatically",
+  "reposToolchainFrom": "from {source}",
+  "@reposToolchainFrom": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "reposToolchainRemove": "Remove {tool}",
+  "@reposToolchainRemove": {
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "reposToolchainAdd": "Add",
+  "reposToolchainPh": "tool@version, e.g. python@3.12",
+  "reposToolchainBad": "Write it as tool@version, e.g. node@20 or rust@stable.",
+  "reposToolchainsNone": "None yet: they are detected after you save, or press Detect.",
+  "reposDetect": "Detect",
+  "reposDetectDeep": "Ask Claude",
+  "reposDetectDeepHelp": "Claude reads the README and CI files when the scan finds no commands. Takes about a minute and uses your Claude plan.",
+  "reposDetecting": "Reading the repository…",
+  "reposDetectDone": "Found {list}.",
+  "@reposDetectDone": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "reposDetectNothing": "No known build files found. Add the toolchains and commands by hand, or ask Claude.",
+  "reposDetectFilled": "Empty check commands were filled in; review them before saving.",
+  "reposDetectByClaude": "Claude filled in what the scan could not find.",
+  "reposDetectNeedsUrl": "Enter the clone URL first.",
+  "reposCmdAuto": "detected after saving",
+  "reposNotes": "Notes from detection",
+  "reposAdvanced": "Advanced",
+  "reposRunnerImage": "Runner image",
+  "reposRunnerImageHelp": "Optional. An image built on the server FROM agnts-runner, for system libraries or SDKs toolchains cannot provide (Android, Flutter). Empty uses the default.",
+  "reposMemory": "Memory",
+  "reposMemoryHelp": "Optional, for heavy builds (JVM, Rust, .NET). Server default unless set; the server caps it (AGNTS_RUN_MEMORY_MAX_MB, 8 GB by default).",
+  "reposMemoryDefault": "Server default",
+  "reposBuildEnv": "Build environment",
+  "reposBuildEnvHelp": "KEY=value lines given to every run, such as tokens for private package registries (NPM_TOKEN, PIP_INDEX_URL). Stored encrypted and never shown again. Claude can read them while it works, so use read-only tokens.",
+  "reposBuildEnvSet": "Set: {names}",
+  "@reposBuildEnvSet": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "reposBuildEnvReplace": "Replace",
+  "reposBuildEnvClear": "Clear",
+  "reposBuildEnvCleared": "Cleared when you save.",
+  "reposPlane": "Plane {project}",
+  "@reposPlane": {
+    "placeholders": {
+      "project": {
+        "type": "String"
+      }
+    }
+  },
+  "reposPlaneProject": "Plane project",
+  "reposPlaneHelp": "Optional. The project identifier (WEB in WEB-123). Work items from this Plane project with the agnts label run here.",
   "reviewTitle": "agnts's code review",
   "reviewReportTitle": "agnts's review of the report",
   "reviewSub": "A second opinion while you review. It never blocks approval: you decide.",
@@ -2630,6 +2842,8 @@
   "ticketRejectedSub": "agnts stopped working on this ticket. The branch was not pushed.",
   "ticketFailedTitle": "agnts stopped",
   "ticketFailedUnknown": "The run stopped. Check the run log for details.",
+  "ticketRetryNote": "Note for the retry",
+  "ticketRetryNoteHint": "Optional. Tell agnts how to get past the error; the next coding run gets it with the error.",
   "ticketTakeItMyself": "Take it myself",
   "ticketRateTitle": "Paused at plan limit",
   "ticketResume": "Resume run",
@@ -2788,7 +3002,7 @@
     }
   },
   "ticketDeliveringTitle": "Finishing up",
-  "ticketDeliveringSub": "Saving the approved report and posting it to Jira if you asked.",
+  "ticketDeliveringSub": "Saving the approved report and posting it to the issue tracker if you asked.",
   "ticketDoneReportTitle": "Report approved",
   "ticketDoneReport": "The report is kept here.",
   "ticketDoneReportPosted": "The report is kept here and was posted to {key} in Jira.",
@@ -2819,6 +3033,42 @@
       }
     }
   },
+  "ticketSrcPlane": "Plane",
+  "ticketReviewSubPlane": "Nothing has left the server yet. Approving pushes {branch}, opens a pull request and updates the Plane work item.",
+  "@ticketReviewSubPlane": {
+    "placeholders": {
+      "branch": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketReviewReportSubPlane": "Approving keeps the report here and closes the ticket. It goes to Plane only if you tick the box below.",
+  "ticketPostReportPlane": "Also post the report as a comment on {key} in Plane",
+  "@ticketPostReportPlane": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketApproveReportPostConfirmPlane": "Approve the report, close this ticket and post the report to {key} in Plane?",
+  "@ticketApproveReportPostConfirmPlane": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketDoneReportPostedPlane": "The report is kept here and was posted to {key} in Plane.",
+  "@ticketDoneReportPostedPlane": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketPickAny": "Pick all that apply",
+  "ticketOtherAnswer": "Something else (optional)",
   "ticketsTitle": "Tickets",
   "ticketsNeedsYou": "Needs you",
   "ticketsRunning": "Running",
@@ -2868,7 +3118,7 @@
   "ticketsViewTable": "Table",
   "ticketsViewBoard": "Board",
   "ticketsBoardEmpty": "Nothing here",
-  "ticketsListSub": "Jira tickets with the agnts label, plus tasks you create for side projects.",
+  "ticketsListSub": "Jira and Plane tickets with the agnts label, plus tasks you create for side projects.",
   "ticketsNoMatch": "No tickets match your search.",
   "ticketsEmptyNeeds": "Nothing is waiting on you. Tickets show up here when agnts has questions or changes to review.",
   "ticketsEmptyOther": "No tickets here yet.",
@@ -2879,6 +3129,7 @@
   "ticketsStatPushed": "Pushed this week",
   "ticketsStatPushedNote": "Pull requests opened",
   "ticketsStatSession": "Plan session",
+  "ticketsSourcePlane": "Plane",
   "usageTitle": "Plan usage",
   "usageLede": "agnts runs on your Claude subscription. These limits are shared with your own Claude and Claude Code use.",
   "usageCard": "Plan usage",

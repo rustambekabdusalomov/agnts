@@ -25,21 +25,24 @@ func NewAgent(db *pgxpool.Pool) *Agent { return &Agent{db: db} }
 
 const ticketCols = `id, key, source, repo_id, title, description, priority, state, resume_state,
 	revision, turns, models, after_approve, branch, head_sha, pr_number, pr_url, feedback, held, ask_first, merged_at, assignees, learn_state, review_state, kind, kind_auto, post_report, COALESCE(parent_key, ''),
-	COALESCE(follow_up_of, ''), suggest_follow_ups, preview_state, preview_compare, feedback_shots, created_at, updated_at`
+	COALESCE(follow_up_of, ''), suggest_follow_ups, preview_state, preview_compare, feedback_shots, feedback_files, created_at, updated_at`
 
 func scanTicket(row pgx.Row) (domain.Ticket, error) {
 	var t domain.Ticket
 	var source, state, resume, kind string
-	var models, shots []byte
+	var models, shots, files []byte
 	err := row.Scan(&t.ID, &t.Key, &source, &t.RepoID, &t.Title, &t.Description, &t.Priority, &state, &resume,
 		&t.Revision, &t.Turns, &models, &t.AfterApprove, &t.Branch, &t.HeadSHA, &t.PRNumber, &t.PRURL, &t.Feedback,
 		&t.Held, &t.AskFirst, &t.MergedAt, &t.Assignees, &t.LearnState, &t.ReviewState, &kind, &t.KindAuto, &t.PostReport, &t.ParentKey,
-		&t.FollowUpOf, &t.SuggestFollowUps, &t.PreviewState, &t.PreviewCompare, &shots, &t.CreatedAt, &t.UpdatedAt)
+		&t.FollowUpOf, &t.SuggestFollowUps, &t.PreviewState, &t.PreviewCompare, &shots, &files, &t.CreatedAt, &t.UpdatedAt)
 	if err != nil {
 		return t, notFound(err)
 	}
 	if len(shots) > 0 {
 		_ = json.Unmarshal(shots, &t.FeedbackShots)
+	}
+	if len(files) > 0 {
+		_ = json.Unmarshal(files, &t.FeedbackFiles)
 	}
 	t.Source, t.State, t.ResumeState = domain.TicketSource(source), domain.TicketState(state), domain.TicketState(resume)
 	t.Kind = domain.TicketKind(kind)
@@ -167,17 +170,21 @@ func saveTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket) (domain.Ticket,
 	if t.FeedbackShots == nil {
 		shots = []byte("[]")
 	}
+	files, _ := json.Marshal(t.FeedbackFiles)
+	if t.FeedbackFiles == nil {
+		files = []byte("[]")
+	}
 	return scanTicket(tx.QueryRow(ctx, `UPDATE tickets SET
 		repo_id = $2, title = $3, description = $4, priority = $5, state = $6, resume_state = $7,
 		revision = $8, turns = $9, models = $10, after_approve = $11, branch = $12, head_sha = $13,
 		pr_number = $14, pr_url = $15, feedback = $16, held = $17, ask_first = $18, merged_at = $19, assignees = $20, learn_state = $21,
 		kind = $22, kind_auto = $23, post_report = $24, review_state = $25, suggest_follow_ups = $26,
-		preview_state = $27, preview_compare = $28, feedback_shots = $29, updated_at = now()
+		preview_state = $27, preview_compare = $28, feedback_shots = $29, feedback_files = $30, updated_at = now()
 		WHERE id = $1 RETURNING `+ticketCols,
 		t.ID, t.RepoID, t.Title, t.Description, t.Priority, string(t.State), string(t.ResumeState),
 		t.Revision, t.Turns, models, t.AfterApprove, t.Branch, t.HeadSHA, t.PRNumber, t.PRURL, t.Feedback, t.Held, t.AskFirst, t.MergedAt, nonNilSlice(t.Assignees), t.LearnState,
 		string(kindOr(t.Kind)), t.KindAuto, t.PostReport, t.ReviewState, t.SuggestFollowUps,
-		t.PreviewState, t.PreviewCompare, shots))
+		t.PreviewState, t.PreviewCompare, shots, files))
 }
 
 func kindOr(k domain.TicketKind) domain.TicketKind {
@@ -357,8 +364,8 @@ func (s *Agent) ReplaceQuestions(ctx context.Context, ticketID int64, qs []domai
 		}
 		for _, q := range qs {
 			opts, _ := json.Marshal(nonNilSlice(q.Options))
-			if _, err := tx.Exec(ctx, `INSERT INTO questions (ticket_id, position, text, options) VALUES ($1, $2, $3, $4)`,
-				ticketID, q.Position, q.Text, opts); err != nil {
+			if _, err := tx.Exec(ctx, `INSERT INTO questions (ticket_id, position, text, options, multiple) VALUES ($1, $2, $3, $4, $5)`,
+				ticketID, q.Position, q.Text, opts, q.Multiple); err != nil {
 				return err
 			}
 		}
@@ -375,7 +382,7 @@ func nonNilSlice(s []string) []string {
 
 // Questions returns a ticket's questions in order.
 func (s *Agent) Questions(ctx context.Context, ticketID int64) ([]domain.Question, error) {
-	rows, err := s.db.Query(ctx, `SELECT id, ticket_id, position, text, options, answer, note
+	rows, err := s.db.Query(ctx, `SELECT id, ticket_id, position, text, options, multiple, answer, note
 		FROM questions WHERE ticket_id = $1 ORDER BY position`, ticketID)
 	if err != nil {
 		return nil, err
@@ -385,7 +392,7 @@ func (s *Agent) Questions(ctx context.Context, ticketID int64) ([]domain.Questio
 	for rows.Next() {
 		var q domain.Question
 		var opts []byte
-		if err := rows.Scan(&q.ID, &q.TicketID, &q.Position, &q.Text, &opts, &q.Answer, &q.Note); err != nil {
+		if err := rows.Scan(&q.ID, &q.TicketID, &q.Position, &q.Text, &opts, &q.Multiple, &q.Answer, &q.Note); err != nil {
 			return nil, err
 		}
 		_ = json.Unmarshal(opts, &q.Options)
@@ -394,7 +401,9 @@ func (s *Agent) Questions(ctx context.Context, ticketID int64) ([]domain.Questio
 	return out, rows.Err()
 }
 
-// SaveAnswers stores answers to a ticket's questions.
+// SaveAnswers stores answers to a ticket's questions and links the
+// uploads each answer attaches, or fails with ErrConflict when one of them
+// is no longer pending.
 func (s *Agent) SaveAnswers(ctx context.Context, ticketID int64, as []domain.Answer) error {
 	return pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
 		for _, a := range as {
@@ -405,6 +414,10 @@ func (s *Agent) SaveAnswers(ctx context.Context, ticketID int64, as []domain.Ans
 			}
 			if tag.RowsAffected() != 1 {
 				return fmt.Errorf("question %d: %w", a.QuestionID, domain.ErrNotFound)
+			}
+			qid := a.QuestionID
+			if err := linkAttachments(ctx, tx, a.Attachments, ticketID, &qid, domain.AttachAnswer); err != nil {
+				return err
 			}
 		}
 		return nil
@@ -503,13 +516,21 @@ func (s *Agent) Events(ctx context.Context, f orchestrator.EventFilter) ([]domai
 }
 
 const repoCols = `id, name, kind, provider, clone_url, default_branch, stack, build_cmd, lint_cmd, test_cmd, branch_prefix, claude_md, jira_project, task_prefix, claude_md_status, deploy_workflow, archived_at,
-	preview_cmd, preview_port, preview_ready_path, preview_routes, preview_ui_paths, preview_login, preview_env IS NOT NULL, preview_env_names`
+	preview_cmd, preview_port, preview_ready_path, preview_routes, preview_ui_paths, preview_login, preview_env IS NOT NULL, preview_env_names,
+	toolchains, toolchains_override, toolchains_detected_at, toolchain_notes, runner_image, memory_mb, build_env IS NOT NULL, build_env_names,
+	plane_project`
 
 func scanRepo(row pgx.Row) (domain.Repository, error) {
 	var r domain.Repository
+	var tcs []byte
 	err := row.Scan(&r.ID, &r.Name, &r.Kind, &r.Provider, &r.CloneURL, &r.DefaultBranch, &r.Stack,
 		&r.BuildCmd, &r.LintCmd, &r.TestCmd, &r.BranchPrefix, &r.ClaudeMD, &r.JiraProject, &r.TaskPrefix, &r.ClaudeMDState, &r.DeployWorkflow, &r.ArchivedAt,
-		&r.Preview.Command, &r.Preview.Port, &r.Preview.ReadyPath, &r.Preview.Routes, &r.Preview.UIPaths, &r.Preview.Login, &r.Preview.EnvSet, &r.Preview.EnvNames)
+		&r.Preview.Command, &r.Preview.Port, &r.Preview.ReadyPath, &r.Preview.Routes, &r.Preview.UIPaths, &r.Preview.Login, &r.Preview.EnvSet, &r.Preview.EnvNames,
+		&tcs, &r.ToolchainsOverride, &r.ToolchainsDetectedAt, &r.ToolchainNotes, &r.RunnerImage, &r.MemoryMB, &r.BuildEnvSet, &r.BuildEnvNames,
+		&r.PlaneProject)
+	if err == nil {
+		_ = json.Unmarshal(tcs, &r.Toolchains)
+	}
 	return r, notFound(err)
 }
 
@@ -525,12 +546,20 @@ func (s *Agent) SetRepositoryArchived(ctx context.Context, id int64, archived bo
 		WHERE id = $1 RETURNING `+repoCols, id, archived))
 }
 
-// RepositoryByJiraProject returns the repository linked to a Jira project key.
-func (s *Agent) RepositoryByJiraProject(ctx context.Context, project string) (domain.Repository, error) {
-	if project == "" {
+// RepositoryByTrackerProject returns the repository linked to a project
+// of the tracker source: a Jira project key or a Plane project identifier.
+func (s *Agent) RepositoryByTrackerProject(ctx context.Context, source domain.TicketSource, project string) (domain.Repository, error) {
+	col := ""
+	switch source {
+	case domain.SourceJira:
+		col = "jira_project"
+	case domain.SourcePlane:
+		col = "plane_project"
+	}
+	if project == "" || col == "" {
 		return domain.Repository{}, domain.ErrNotFound
 	}
-	return scanRepo(s.db.QueryRow(ctx, `SELECT `+repoCols+` FROM repositories WHERE jira_project = $1`, project))
+	return scanRepo(s.db.QueryRow(ctx, `SELECT `+repoCols+` FROM repositories WHERE `+col+` = $1`, project))
 }
 
 // ListRepositories returns all repositories.
@@ -562,15 +591,20 @@ func (s *Agent) SaveRepository(ctx context.Context, r domain.Repository) (domain
 	}
 	out, err := scanRepo(s.db.QueryRow(ctx, `INSERT INTO repositories
 		(name, kind, provider, clone_url, default_branch, stack, build_cmd, lint_cmd, test_cmd, branch_prefix, claude_md, jira_project, task_prefix, deploy_workflow,
-		 preview_cmd, preview_port, preview_ready_path, preview_routes, preview_ui_paths, preview_login)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+		 preview_cmd, preview_port, preview_ready_path, preview_routes, preview_ui_paths, preview_login,
+		 toolchains, toolchains_override, runner_image, memory_mb, plane_project)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)
 		ON CONFLICT (name) DO UPDATE SET kind = $2, provider = $3, clone_url = $4, default_branch = $5, stack = $6,
 			build_cmd = $7, lint_cmd = $8, test_cmd = $9, branch_prefix = $10, claude_md = $11, jira_project = $12,
-			task_prefix = $13, deploy_workflow = $14, updated_at = now()
+			task_prefix = $13, deploy_workflow = $14,
+			toolchains = CASE WHEN $22 OR $21::jsonb <> '[]'::jsonb THEN $21 ELSE repositories.toolchains END,
+			toolchains_override = $22 OR (repositories.toolchains_override AND $21::jsonb = '[]'::jsonb),
+			runner_image = $23, memory_mb = $24, plane_project = $25, updated_at = now()
 		RETURNING `+repoCols,
-		r.Name, r.Kind, r.Provider, r.CloneURL, r.DefaultBranch, r.Stack, r.BuildCmd, r.LintCmd, r.TestCmd,
+		r.Name, r.Kind, r.Provider, r.CloneURL, r.DefaultBranch, stackOf(r), r.BuildCmd, r.LintCmd, r.TestCmd,
 		r.BranchPrefix, r.ClaudeMD, r.JiraProject, r.TaskPrefix, r.DeployWorkflow,
-		r.Preview.Command, r.Preview.Port, readyPath(r.Preview.ReadyPath), nonNilSlice(r.Preview.Routes), nonNilSlice(r.Preview.UIPaths), r.Preview.Login))
+		r.Preview.Command, r.Preview.Port, readyPath(r.Preview.ReadyPath), nonNilSlice(r.Preview.Routes), nonNilSlice(r.Preview.UIPaths), r.Preview.Login,
+		toolchainsJSON(r.Toolchains), r.ToolchainsOverride, r.RunnerImage, r.MemoryMB, r.PlaneProject))
 	return out, uniqueConflict(err)
 }
 
@@ -580,11 +614,45 @@ func (s *Agent) UpdateRepository(ctx context.Context, r domain.Repository) (doma
 		default_branch = $6, build_cmd = $7, lint_cmd = $8, test_cmd = $9, branch_prefix = $10, claude_md = $11,
 		jira_project = $12, task_prefix = $13, deploy_workflow = $14, preview_cmd = $15, preview_port = $16,
 		preview_ready_path = $17, preview_routes = $18, preview_ui_paths = $19, preview_login = $20,
-		updated_at = now() WHERE id = $1 RETURNING `+repoCols,
+		toolchains = $21, toolchains_override = $22, runner_image = $23, memory_mb = $24, stack = $25,
+		plane_project = $26, updated_at = now() WHERE id = $1 RETURNING `+repoCols,
 		r.ID, r.Name, r.Kind, r.Provider, r.CloneURL, r.DefaultBranch, r.BuildCmd, r.LintCmd, r.TestCmd,
 		r.BranchPrefix, r.ClaudeMD, r.JiraProject, r.TaskPrefix, r.DeployWorkflow,
-		r.Preview.Command, r.Preview.Port, readyPath(r.Preview.ReadyPath), nonNilSlice(r.Preview.Routes), nonNilSlice(r.Preview.UIPaths), r.Preview.Login))
+		r.Preview.Command, r.Preview.Port, readyPath(r.Preview.ReadyPath), nonNilSlice(r.Preview.Routes), nonNilSlice(r.Preview.UIPaths), r.Preview.Login,
+		toolchainsJSON(r.Toolchains), r.ToolchainsOverride, r.RunnerImage, r.MemoryMB, stackOf(r), r.PlaneProject))
 	return out, uniqueConflict(err)
+}
+
+// SetDetectedToolchains stores what detection found for a repository
+// whose toolchains nobody set by hand (an override is left alone), and
+// fills its check commands when all three are empty. It returns the
+// repository as stored.
+func (s *Agent) SetDetectedToolchains(ctx context.Context, id int64, tcs []domain.Toolchain, notes []string, build, lint, test string) (domain.Repository, error) {
+	return scanRepo(s.db.QueryRow(ctx, `UPDATE repositories SET
+		toolchains = CASE WHEN toolchains_override THEN toolchains ELSE $2 END,
+		stack = CASE WHEN toolchains_override THEN stack ELSE $3 END,
+		toolchain_notes = $4, toolchains_detected_at = now(),
+		build_cmd = CASE WHEN build_cmd = '' AND lint_cmd = '' AND test_cmd = '' THEN $5 ELSE build_cmd END,
+		lint_cmd  = CASE WHEN build_cmd = '' AND lint_cmd = '' AND test_cmd = '' THEN $6 ELSE lint_cmd END,
+		test_cmd  = CASE WHEN build_cmd = '' AND lint_cmd = '' AND test_cmd = '' THEN $7 ELSE test_cmd END
+		WHERE id = $1 RETURNING `+repoCols,
+		id, toolchainsJSON(tcs), domain.StackOf(tcs), nonNilSlice(notes), build, lint, test))
+}
+
+func toolchainsJSON(tcs []domain.Toolchain) []byte {
+	if tcs == nil {
+		tcs = []domain.Toolchain{}
+	}
+	b, _ := json.Marshal(tcs)
+	return b
+}
+
+// stackOf is the stack column: the toolchain names, else what was stored.
+func stackOf(r domain.Repository) string {
+	if len(r.Toolchains) > 0 {
+		return domain.StackOf(r.Toolchains)
+	}
+	return r.Stack
 }
 
 func readyPath(p string) string {
@@ -679,4 +747,25 @@ func (s *Agent) ChildOf(ctx context.Context, parentKey string) (domain.Ticket, e
 func (s *Agent) TicketByPR(ctx context.Context, url, branch string) (domain.Ticket, error) {
 	return scanTicket(s.db.QueryRow(ctx, `SELECT `+ticketCols+` FROM tickets
 		WHERE ($1 <> '' AND pr_url = $1) OR ($2 <> '' AND branch = $2) ORDER BY updated_at DESC LIMIT 1`, url, branch))
+}
+
+// UnmergedPRs returns done tickets with a pull request not known to be
+// merged, least recently updated first.
+func (s *Agent) UnmergedPRs(ctx context.Context, limit int) ([]domain.Ticket, error) {
+	rows, err := s.db.Query(ctx, `SELECT `+ticketCols+` FROM tickets
+		WHERE state = 'done' AND pr_number IS NOT NULL AND merged_at IS NULL AND repo_id IS NOT NULL
+		ORDER BY updated_at LIMIT $1`, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []domain.Ticket
+	for rows.Next() {
+		t, err := scanTicket(rows)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, t)
+	}
+	return out, rows.Err()
 }

@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 
 	"agnts/internal/domain"
@@ -205,5 +206,68 @@ func TestPipelinesPaging(t *testing.T) {
 	defer mu.Unlock()
 	if asked != "2/20" || jobs != 20 || len(ps[19].Stages) != 1 {
 		t.Fatalf("asked %q, %d job lookups, last stages %v", asked, jobs, ps[19].Stages)
+	}
+}
+
+func TestPRMerged(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/repos/acme/api/pulls/7":
+			_, _ = w.Write([]byte(`{"number":7,"state":"closed","merged":true}`))
+		case "/repos/acme/api/pulls/8":
+			_, _ = w.Write([]byte(`{"number":8,"state":"closed","merged":false}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+	h := New(srv.URL, func(context.Context) (string, error) { return "tok", nil })
+	repo := domain.Repository{CloneURL: "https://github.com/acme/api.git", DefaultBranch: "main"}
+	ctx := context.Background()
+	if ok, err := h.PRMerged(ctx, repo, 7); err != nil || !ok {
+		t.Fatalf("merged: %v %v", ok, err)
+	}
+	if ok, err := h.PRMerged(ctx, repo, 8); err != nil || ok {
+		t.Fatalf("closed unmerged: %v %v", ok, err)
+	}
+	if _, err := h.PRMerged(ctx, repo, 9); err == nil {
+		t.Fatal("missing pull request: no error")
+	}
+}
+
+// Repeated GETs ask whether the resource changed; a 304 serves the
+// remembered body. Writes and other tokens never use it.
+func TestConditionalGet(t *testing.T) {
+	var conditional, full atomic.Int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet && r.Header.Get("If-None-Match") == `"v1"` {
+			conditional.Add(1)
+			w.WriteHeader(http.StatusNotModified)
+			return
+		}
+		full.Add(1)
+		w.Header().Set("ETag", `"v1"`)
+		_, _ = io.WriteString(w, `{"login":"`+strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")+`"}`)
+	}))
+	defer srv.Close()
+	h := New(srv.URL, func(context.Context) (string, error) { return "tok", nil })
+	for range 3 {
+		if login, err := h.User(context.Background()); err != nil || login != "tok" {
+			t.Fatalf("user: %q %v", login, err)
+		}
+	}
+	if full.Load() != 1 || conditional.Load() != 2 {
+		t.Fatalf("full %d, conditional %d", full.Load(), conditional.Load())
+	}
+	other := h.WithToken("tok2")
+	if login, err := other.User(context.Background()); err != nil || login != "tok2" {
+		t.Fatalf("other token: %q %v", login, err)
+	}
+	h2 := &Host{api: h.api, hc: h.hc, etags: h.etags, token: func(context.Context) (string, error) { return "tok3", nil }}
+	if login, _ := h2.User(context.Background()); login != "tok3" {
+		t.Fatalf("another token got a remembered body: %q", login)
+	}
+	if _, err := h.call(context.Background(), http.MethodPost, "/user", nil, nil); err != nil || full.Load() != 4 {
+		t.Fatalf("POST was conditional: full %d, %v", full.Load(), err)
 	}
 }

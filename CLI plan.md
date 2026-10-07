@@ -76,8 +76,8 @@ Each step is a `Step` with `check()` and `apply()`. `check()` reads server state
 | # | Step | What it does | Check |
 | --- | --- | --- | --- |
 | 1 | Connect | Remote: SSH connects; host key fingerprint shown on first connect (trust on first use); non-root users need passwordless sudo. Local: running as root or with sudo. Runs first so a resumed install can load its saved answers. | — |
-| 2 | Ask | Domain (required), access key, ACME email, git author name/email, admin username. Every answer also has a flag (`--key`, `--domain`, …) or env var (`AGNTS_KEY`) for non-interactive use; a resumed install reuses saved answers. | — |
-| 3 | Preflight | Supported OS and arch; ≥2 GB RAM, ≥20 GB disk; ports 80/443 free. Fails with a clear fix for each. | — |
+| 2 | Server and capacity | Before anything is asked or changed: supported OS and arch, ports 80/443 free, then capacity (see [Capacity](#capacity)). A server that is too small stops here with what it lacks and what size to pick; nothing is installed. | — |
+| 3 | Ask | Domain (required), access key, ACME email, git author name/email, admin username. Every answer also has a flag (`--key`, `--domain`, …) or env var (`AGNTS_KEY`) for non-interactive use; a resumed install reuses saved answers. | — |
 | 4 | Claim key | Read or create this server's install id (`/opt/agnts/install-id`, a random UUID), then `POST /api/installs/claim` with the key, install id and domain. agnts.uz binds the key to this install. See [Access keys](#access-keys). | Key bound to this install id |
 | 5 | Docker | Docker Engine + Compose plugin from Docker's apt repo, service enabled, `DOCKER_GID` read. | `docker compose version` |
 | 6 | Firewall | `ufw allow 22,80,443/tcp` and `443/udp`; enable. Skipped with `--no-firewall`. | `ufw status` |
@@ -90,6 +90,20 @@ Each step is a `Step` with `check()` and `apply()`. `check()` reads server state
 | 13 | HTTPS | Poll `https://<domain>/healthz` until Caddy has a certificate (timeout with a DNS/port hint). | 200 |
 | 14 | Admin user | `docker compose exec agnts agnts user create <name>` with a TTY, so the existing password + TOTP prompts work unchanged. With no terminal it is skipped with the command to run later. | User exists |
 | 15 | Done | Save the profile; report version and status to agnts.uz (the install shows in the cabinet); print the URL and the next three things to connect (Claude, GitHub, Jira). | — |
+
+### Capacity
+
+Measured on the server: CPU cores, total and available memory, swap, free disk on the filesystem that holds `/var/lib/docker`, and disk write speed (256 MB written with `dd` and deleted; skipped in `--dry-run` and `doctor`). The requirements come from the stack: about 1 GB for Caddy, agnts, PostgreSQL and egress, and each run container capped at 4 GB RAM and 2 CPUs.
+
+| | Not enough (install stops) | Tight (installs, with a warning) | Good |
+| --- | --- | --- | --- |
+| CPU | < 2 cores | — | 2+ |
+| Memory | < 4 GB plan (3.6 GB reported) | < 5 GB (suggests swap when there is none) | 5 GB+ |
+| Free disk | < 25 GB (< 5 GB once installed) | < 40 GB (< 10 GB once installed) | 40 GB+ |
+| Disk speed | — | < 50 MB/s | 50+ MB/s |
+| Memory in use | — | > 1 GB used by other programs (before install) | — |
+
+Parallel runs that fit = min((RAM − 1 GB) / 4 GB, CPUs / 2, (free disk − 20 GB) / 5 GB), from 1 to 8. A fresh install writes it as `AGNTS_PARALLEL`; an existing `.env` keeps its own value. `agnts capacity [user@host | --local]` runs the same check without installing, and `agnts doctor` includes it.
 
 ### When agnts.uz or the registry is down
 
@@ -128,6 +142,7 @@ Users create keys in the agnts.uz cabinet (`agnts.uz/cabinet/keys`). **One key i
 | Command | What |
 | --- | --- |
 | `agnts install [user@host \| --local]` | The flow above. `--domain` (required), `--key`, `--email`, `--move`, `--yes`, `--dry-run`, `--version`, `--no-firewall`. |
+| `agnts capacity [user@host \| --local]` | Measure a server against what agnts needs, without installing. Exit 1 when it is too small. |
 | `agnts status` | Containers, versions, health, cert expiry, disk use, last backup. |
 | `agnts upgrade [--version X]` | Write the new embedded files, pull images, `up -d`, wait for health. Takes a backup first; rolls back the image tag if health fails. |
 | `agnts logs [service] [-f]` | `docker compose logs` streamed back. |
@@ -240,7 +255,7 @@ About 5.5 weeks at roughly 20 hours a week, plus the agnts.uz cabinet, token ser
 
 ## Status (Oct 6, 2026)
 
-Built: the whole CLI in `cli/` (Phases 0–2 and the CLI side of Phase 3). Checks: 34 unit and integration tests, clippy and rustfmt clean, a CI job on Linux, macOS and Windows.
+Built: the whole CLI in `cli/` (Phases 0–2 and the CLI side of Phase 3). Checks: 42 unit and integration tests, clippy and rustfmt clean, a CI job on Linux, macOS and Windows.
 
 Tried for real against an Ubuntu 24.04 container over SSH (non-root user with sudo), with the stub agnts.uz and a local registry:
 - trust-on-first-use host keys

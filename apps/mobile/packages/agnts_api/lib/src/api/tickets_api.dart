@@ -27,6 +27,7 @@ import 'package:agnts_api/src/model/relation.dart';
 import 'package:agnts_api/src/model/relation_input.dart';
 import 'package:agnts_api/src/model/relations.dart';
 import 'package:agnts_api/src/model/request_changes_request.dart';
+import 'package:agnts_api/src/model/retry_ticket_request.dart';
 import 'package:agnts_api/src/model/ticket.dart';
 import 'package:agnts_api/src/model/ticket_detail.dart';
 import 'package:agnts_api/src/model/ticket_kind_input.dart';
@@ -42,7 +43,7 @@ class TicketsApi {
   const TicketsApi(this._dio);
 
   /// Create tickets from chosen suggestions
-  /// Each chosen suggestion becomes a queued (held) ticket, as a local task or a new Jira issue. Nothing runs until it is started. Items are handled one by one; each result says what happened to its suggestion. What the analysis suggested can be created at once; what the work or its review found waits until this ticket is done.
+  /// Each chosen suggestion becomes a queued (held) ticket, as a local task, a new Jira issue or a new Plane work item. Nothing runs until it is started. Items are handled one by one; each result says what happened to its suggestion. What the analysis suggested can be created at once; what the work or its review found waits until this ticket is done.
   ///
   /// Parameters:
   /// * [key] 
@@ -1819,6 +1820,7 @@ _responseData = rawData == null ? null : deserialize<Ticket, Ticket>(rawData, 'T
   ///
   /// Parameters:
   /// * [key] 
+  /// * [retryTicketRequest] 
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -1830,6 +1832,7 @@ _responseData = rawData == null ? null : deserialize<Ticket, Ticket>(rawData, 'T
   /// Throws [DioException] if API call or serialization fails
   Future<Response<Ticket>> retryTicket({ 
     required String key,
+    RetryTicketRequest? retryTicketRequest,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -1858,11 +1861,30 @@ _responseData = rawData == null ? null : deserialize<Ticket, Ticket>(rawData, 'T
         ],
         ...?extra,
       },
+      contentType: 'application/json',
       validateStatus: validateStatus,
     );
 
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(retryTicketRequest);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
     final _response = await _dio.request<Object>(
       _path,
+      data: _bodyData,
       options: _options,
       cancelToken: cancelToken,
       onSendProgress: onSendProgress,

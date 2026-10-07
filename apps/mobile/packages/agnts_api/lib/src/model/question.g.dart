@@ -15,6 +15,8 @@ abstract class _$QuestionCWProxy {
 
   Question options(List<String> options);
 
+  Question multiple(bool multiple);
+
   Question answer(String? answer);
 
   Question note(String note);
@@ -30,6 +32,7 @@ abstract class _$QuestionCWProxy {
     int position,
     String text,
     List<String> options,
+    bool multiple,
     String? answer,
     String note,
   });
@@ -54,6 +57,9 @@ class _$QuestionCWProxyImpl implements _$QuestionCWProxy {
   Question options(List<String> options) => this(options: options);
 
   @override
+  Question multiple(bool multiple) => this(multiple: multiple);
+
+  @override
   Question answer(String? answer) => this(answer: answer);
 
   @override
@@ -71,6 +77,7 @@ class _$QuestionCWProxyImpl implements _$QuestionCWProxy {
     Object? position = const $CopyWithPlaceholder(),
     Object? text = const $CopyWithPlaceholder(),
     Object? options = const $CopyWithPlaceholder(),
+    Object? multiple = const $CopyWithPlaceholder(),
     Object? answer = const $CopyWithPlaceholder(),
     Object? note = const $CopyWithPlaceholder(),
   }) {
@@ -91,6 +98,10 @@ class _$QuestionCWProxyImpl implements _$QuestionCWProxy {
           ? _value.options
           // ignore: cast_nullable_to_non_nullable
           : options as List<String>,
+      multiple: multiple == const $CopyWithPlaceholder()
+          ? _value.multiple
+          // ignore: cast_nullable_to_non_nullable
+          : multiple as bool,
       answer: answer == const $CopyWithPlaceholder()
           ? _value.answer
           // ignore: cast_nullable_to_non_nullable
@@ -117,7 +128,14 @@ Question _$QuestionFromJson(Map<String, dynamic> json) =>
     $checkedCreate('Question', json, ($checkedConvert) {
       $checkKeys(
         json,
-        requiredKeys: const ['id', 'position', 'text', 'options', 'note'],
+        requiredKeys: const [
+          'id',
+          'position',
+          'text',
+          'options',
+          'multiple',
+          'note',
+        ],
       );
       final val = Question(
         id: $checkedConvert('id', (v) => (v as num).toInt()),
@@ -127,6 +145,7 @@ Question _$QuestionFromJson(Map<String, dynamic> json) =>
           'options',
           (v) => (v as List<dynamic>).map((e) => e as String).toList(),
         ),
+        multiple: $checkedConvert('multiple', (v) => v as bool),
         answer: $checkedConvert('answer', (v) => v as String?),
         note: $checkedConvert('note', (v) => v as String),
       );
@@ -138,6 +157,7 @@ Map<String, dynamic> _$QuestionToJson(Question instance) => <String, dynamic>{
   'position': instance.position,
   'text': instance.text,
   'options': instance.options,
+  'multiple': instance.multiple,
   'answer': ?instance.answer,
   'note': instance.note,
 };

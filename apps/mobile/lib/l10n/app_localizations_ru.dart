@@ -336,6 +336,9 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get analyticsSrcPlane => 'Plane';
+
+  @override
   String get appName => 'agnts';
 
   @override
@@ -640,6 +643,66 @@ class AppLocalizationsRu extends AppLocalizations {
   String get dashboardNoActivity => 'Пока ничего не произошло.';
 
   @override
+  String get filesTitle => 'Вложения';
+
+  @override
+  String get filesAttach => 'Прикрепить файлы';
+
+  @override
+  String get filesAddPhoto => 'Фото';
+
+  @override
+  String get filesCamera => 'Камера';
+
+  @override
+  String get filesAddFile => 'Файл';
+
+  @override
+  String get filesHint => 'Картинки, PDF, логи или текст, до 10 МБ каждый. Claude прочитает их все.';
+
+  @override
+  String filesUploading(String name) {
+    return 'Загрузка $name…';
+  }
+
+  @override
+  String filesRemove(String name) {
+    return 'Убрать $name';
+  }
+
+  @override
+  String filesOpen(String name) {
+    return 'Открыть $name';
+  }
+
+  @override
+  String filesTooLarge(String name) {
+    return '$name больше 10 МБ';
+  }
+
+  @override
+  String filesTooMany(String n) {
+    return 'Не больше $n файлов';
+  }
+
+  @override
+  String filesFailed(String name) {
+    return 'Не удалось загрузить $name';
+  }
+
+  @override
+  String get filesWait => 'Дождитесь окончания загрузки';
+
+  @override
+  String get filesFromTask => 'К задаче';
+
+  @override
+  String get filesFromRetry => 'К повтору';
+
+  @override
+  String get filesFromFeedback => 'К запрошенным изменениям';
+
+  @override
   String get followUpsTitle => 'Последующие тикеты';
 
   @override
@@ -817,6 +880,12 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get followUpsJiraIssueTypeHelp =>
       'Тип задач Jira, которые agnts создаёт, когда вы создаёте продолжение в Jira. По умолчанию: Task.';
+
+  @override
+  String get followUpsTargetPlane => 'Задача в Plane';
+
+  @override
+  String get followUpsPlaneOff => 'Подключите Plane и привяжите репозиторий к проекту Plane, чтобы создавать там задачи';
 
   @override
   String get formSave => 'Сохранить изменения';
@@ -1030,7 +1099,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get integrationsTokenStep3_github =>
-      'В Repository permissions установите для Contents и Pull requests значение Read and write. Для вкладки «Пайплайны» также установите Actions — Read (Read and write для кнопки «Развернуть») и Deployments — Read. Metadata (чтение) добавляется автоматически.';
+      'В Repository permissions установите для Contents и Pull requests значение Read and write, а для Workflows — Read and write, если agnts может менять файлы CI в .github/workflows. Для вкладки «Пайплайны» также установите Actions — Read (Read and write для кнопки «Развернуть») и Deployments — Read. Metadata (чтение) добавляется автоматически.';
 
   @override
   String get integrationsTokenStep4_github =>
@@ -1084,6 +1153,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get integrationsPermPulls => 'Чтение и запись. Открывать пул-реквесты.';
+
+  @override
+  String get integrationsPermWorkflows =>
+      'Чтение и запись. Отправлять изменения в .github/workflows (файлы CI); без него такие пуши отклоняются.';
 
   @override
   String get integrationsPermMetadata => 'Чтение. Список репозиториев и веток.';
@@ -1344,7 +1417,125 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get integrationsGitWebhookWhy =>
-      'Когда пул- или merge request смёржен, agnts отмечает тикет и переводит задачу Jira в статус, выбранный на странице Jira. События пайплайнов обновляют страницу репозитория.';
+      'Когда пул- или merge request смёржен, agnts отмечает тикет и переводит задачу Jira или Plane в статус, выбранный на странице трекера. События пайплайнов обновляют страницу репозитория.';
+
+  @override
+  String get integrationsName_plane => 'Plane';
+
+  @override
+  String get integrationsDesc_plane => 'Берёт задачи с меткой agnts из Plane Cloud или вашего собственного Plane и обновляет их состояние.';
+
+  @override
+  String get integrationsConnectSub_plane =>
+      'Используйте персональный токен доступа Plane. Работает с Plane Cloud и с Plane на своём сервере.';
+
+  @override
+  String get integrationsTokenOpen_plane => 'Открыть документацию API Plane';
+
+  @override
+  String get integrationsTokenStep1_plane =>
+      'Войдите в Plane под пользователем, от имени которого будет действовать agnts (комментарии появятся под этим именем), и откройте Profile settings → Personal access tokens.';
+
+  @override
+  String get integrationsTokenStep2_plane =>
+      'Нажмите Add personal access token, задайте имя (например, agnts) и срок действия, затем скопируйте токен. Plane покажет его только один раз.';
+
+  @override
+  String get integrationsTokenStep3_plane =>
+      'В поле «Адрес API» оставьте https://api.plane.so для Plane Cloud или укажите адрес вашего Plane, если он на своём сервере.';
+
+  @override
+  String get integrationsTokenStep4_plane =>
+      'В поле «Рабочее пространство» укажите slug из адреса Plane: acme в app.plane.so/acme/projects.';
+
+  @override
+  String get integrationsPlaneBaseUrl => 'Адрес API';
+
+  @override
+  String get integrationsPlaneBaseUrlHelp => 'https://api.plane.so для Plane Cloud или адрес вашего Plane';
+
+  @override
+  String get integrationsPlaneWorkspace => 'Рабочее пространство';
+
+  @override
+  String get integrationsPlaneWorkspaceHelp => 'Slug из адреса Plane, например acme';
+
+  @override
+  String get integrationsApiKey => 'Ключ API';
+
+  @override
+  String get integrationsApiKeyHelp => 'Profile settings → Personal access tokens';
+
+  @override
+  String get integrationsPlaneWebhookTitle => 'Настройте вебхук Plane';
+
+  @override
+  String get integrationsPlaneWebhookSteps =>
+      'В Plane откройте Workspace settings → Webhooks → Add webhook, укажите адрес ниже и отметьте события задач (issues). Plane один раз покажет секрет — вставьте его сюда.';
+
+  @override
+  String get integrationsPlaneEventsValue => 'Задачи (issues)';
+
+  @override
+  String get integrationsPlaneSecret => 'Секрет из Plane';
+
+  @override
+  String get integrationsPlaneSecretHelp => 'Plane показывает его один раз при создании вебхука';
+
+  @override
+  String get integrationsPlaneSecretSave => 'Сохранить секрет';
+
+  @override
+  String get integrationsPlaneSecretReplace => 'Заменить секрет';
+
+  @override
+  String get integrationsPlaneSecretSaved => 'Секрет вебхука сохранён: доставки из Plane теперь принимаются';
+
+  @override
+  String get integrationsPlaneSecretSet => 'Секрет сохранён. Доставки принимаются.';
+
+  @override
+  String get integrationsPlaneSecretMissing =>
+      'Секрета пока нет: agnts отклоняет доставки, пока вы не вставите секрет из Plane, и задачи подхватывает только ежечасная синхронизация.';
+
+  @override
+  String integrationsPlaneQueryText(String labels) {
+    return 'Открытые задачи в проектах Plane, привязанных к репозиториям, с одной из меток: $labels';
+  }
+
+  @override
+  String get integrationsPlaneNoProjects =>
+      'Ни один репозиторий ещё не привязан к проекту Plane. Укажите идентификатор проекта (WEB в WEB-123) в настройках репозитория.';
+
+  @override
+  String get integrationsPlaneStatusesSub =>
+      'Как agnts переводит задачи. «По умолчанию» — первое состояние подходящей группы; «на ревью» — только в выбранное вами состояние.';
+
+  @override
+  String integrationsPlaneStateDefault(String group) {
+    return 'По умолчанию: первое состояние $group';
+  }
+
+  @override
+  String get integrationsPlaneStateNone => 'Не менять';
+
+  @override
+  String integrationsPlaneStatesError(String error) {
+    return 'Не удалось получить состояния из Plane: $error';
+  }
+
+  @override
+  String get integrationsPlaneSyncHelp =>
+      'Plane сразу отправляет изменения на вебхук; agnts также проверяет раз в час на случай пропущенной доставки.';
+
+  @override
+  String get integrationsPlaneHelp =>
+      'agnts читает только задачи со своими метками в привязанных проектах и пишет только те смены состояний и комментарии, которые вы включили здесь. Plane разрешает 60 запросов API в минуту на ключ; agnts держится в пределах 50.';
+
+  @override
+  String integrationsPlaneSynced(String found, String created) {
+    return '$found открытых задач, $created новых';
+  }
 
   @override
   String get kindTitle => 'Тип';
@@ -2563,7 +2754,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get navLedeDone => 'Отправленные или отклонённые тикеты.';
 
   @override
-  String get navLedeAll => 'Все тикеты, которые agnts взял из Jira.';
+  String get navLedeAll => 'Все тикеты, которые agnts взял из Jira и Plane.';
 
   @override
   String get navKnowledge => 'Знания';
@@ -2576,6 +2767,14 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get navRules => 'Правила';
+
+  @override
+  String get navSyncPlane => 'Синхронизировать Plane';
+
+  @override
+  String navSyncedPlane(String found, String created) {
+    return 'Plane синхронизирован: открыто $found, новых $created';
+  }
 
   @override
   String get previewTab => 'Превью';
@@ -2981,6 +3180,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get relationsMarkMergedHint => 'Нет вебхука о слиянии? Отметьте pull request слитым, чтобы ожидающие его тикеты могли начать.';
+
+  @override
+  String get relationsSource_plane => 'Связь в Plane';
 
   @override
   String get repoBack => 'Назад к репозиториям';
@@ -3411,7 +3613,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get reposNone => 'Репозиториев пока нет. Добавьте первый, чтобы agnts мог в нём работать.';
 
   @override
-  String get reposDrawerSub => 'Принимает задачи своего проекта, а с ключом проекта Jira — и тикеты Jira';
+  String get reposDrawerSub => 'Принимает задачи своего проекта, а после привязки к проекту — и тикеты Jira или задачи Plane';
 
   @override
   String get reposName => 'Название';
@@ -3434,7 +3636,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String reposTaskPrefixHelp(String prefix) {
-    return 'Задачи своего проекта нумеруются как $prefix-1, $prefix-2. Должен отличаться от ключа проекта Jira.';
+    return 'Задачи своего проекта нумеруются как $prefix-1, $prefix-2. Должен отличаться от ключа проекта Jira и проекта Plane.';
   }
 
   @override
@@ -3482,6 +3684,137 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get reposDeployWorkflowHelp =>
       'Файл workflow GitHub Actions с workflow_dispatch, например deploy.yml. Кнопка «Деплой» на странице репозитория запускает его.';
+
+  @override
+  String get reposColStack => 'Тулчейны';
+
+  @override
+  String get reposToolchains => 'Тулчейны';
+
+  @override
+  String get reposToolchainsHelp =>
+      'Языки и инструменты сборки, которые ставятся в каждый запуск — один раз на версию — и сохраняются для следующих запусков.';
+
+  @override
+  String get reposToolchainsAuto =>
+      'Определены по репозиторию (go.mod, .nvmrc, .python-version, mise.toml, …) и обновляются, когда эти файлы меняются.';
+
+  @override
+  String get reposToolchainsManual => 'Заданы вручную: автоопределение их не меняет.';
+
+  @override
+  String get reposToolchainsBackToAuto => 'Определять автоматически';
+
+  @override
+  String reposToolchainFrom(String source) {
+    return 'из $source';
+  }
+
+  @override
+  String reposToolchainRemove(String tool) {
+    return 'Убрать $tool';
+  }
+
+  @override
+  String get reposToolchainAdd => 'Добавить';
+
+  @override
+  String get reposToolchainPh => 'инструмент@версия, например python@3.12';
+
+  @override
+  String get reposToolchainBad => 'Укажите как инструмент@версия, например node@20 или rust@stable.';
+
+  @override
+  String get reposToolchainsNone => 'Пока нет: они определятся после сохранения, или нажмите «Определить».';
+
+  @override
+  String get reposDetect => 'Определить';
+
+  @override
+  String get reposDetectDeep => 'Спросить Claude';
+
+  @override
+  String get reposDetectDeepHelp =>
+      'Claude прочитает README и файлы CI, если сканирование не нашло команд. Занимает около минуты и расходует ваш план Claude.';
+
+  @override
+  String get reposDetecting => 'Читаю репозиторий…';
+
+  @override
+  String reposDetectDone(String list) {
+    return 'Найдено: $list.';
+  }
+
+  @override
+  String get reposDetectNothing => 'Известных файлов сборки не найдено. Добавьте тулчейны и команды вручную или спросите Claude.';
+
+  @override
+  String get reposDetectFilled => 'Пустые команды проверок заполнены — проверьте их перед сохранением.';
+
+  @override
+  String get reposDetectByClaude => 'Claude дополнил то, что не нашло сканирование.';
+
+  @override
+  String get reposDetectNeedsUrl => 'Сначала укажите URL для клонирования.';
+
+  @override
+  String get reposCmdAuto => 'определится после сохранения';
+
+  @override
+  String get reposNotes => 'Замечания автоопределения';
+
+  @override
+  String get reposAdvanced => 'Дополнительно';
+
+  @override
+  String get reposRunnerImage => 'Образ запуска';
+
+  @override
+  String get reposRunnerImageHelp =>
+      'Необязательно. Образ, собранный на сервере FROM agnts-runner, — для системных библиотек или SDK, которые тулчейны не дают (Android, Flutter). Пусто — образ по умолчанию.';
+
+  @override
+  String get reposMemory => 'Память';
+
+  @override
+  String get reposMemoryHelp =>
+      'Необязательно, для тяжёлых сборок (JVM, Rust, .NET). По умолчанию — значение сервера; сервер ограничивает максимум (AGNTS_RUN_MEMORY_MAX_MB, по умолчанию 8 ГБ).';
+
+  @override
+  String get reposMemoryDefault => 'По умолчанию';
+
+  @override
+  String get reposBuildEnv => 'Окружение сборки';
+
+  @override
+  String get reposBuildEnvHelp =>
+      'Строки KEY=value для каждого запуска, например токены приватных реестров пакетов (NPM_TOKEN, PIP_INDEX_URL). Хранятся зашифрованными и больше не показываются. Claude может прочитать их во время работы, поэтому используйте токены только для чтения.';
+
+  @override
+  String reposBuildEnvSet(String names) {
+    return 'Задано: $names';
+  }
+
+  @override
+  String get reposBuildEnvReplace => 'Заменить';
+
+  @override
+  String get reposBuildEnvClear => 'Очистить';
+
+  @override
+  String get reposBuildEnvCleared => 'Очистится при сохранении.';
+
+  @override
+  String reposPlane(String project) {
+    return 'Plane $project';
+  }
+
+  @override
+  String get reposPlaneProject => 'Проект Plane';
+
+  @override
+  String get reposPlaneHelp =>
+      'Необязательно. Идентификатор проекта (WEB в WEB-123). Задачи этого проекта Plane с меткой agnts выполняются здесь.';
 
   @override
   String get reviewTitle => 'Код-ревью agnts';
@@ -4751,6 +5084,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ticketFailedUnknown => 'Запуск остановлен. Подробности в логе запуска.';
 
   @override
+  String get ticketRetryNote => 'Заметка к повтору';
+
+  @override
+  String get ticketRetryNoteHint =>
+      'Необязательно. Подскажите agnts, как обойти ошибку; следующий запуск получит заметку вместе с ошибкой.';
+
+  @override
   String get ticketTakeItMyself => 'Сделаю сам';
 
   @override
@@ -5007,7 +5347,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ticketDeliveringTitle => 'Завершает';
 
   @override
-  String get ticketDeliveringSub => 'Сохраняет одобренный отчёт и публикует его в Jira, если вы просили.';
+  String get ticketDeliveringSub => 'Сохраняет одобренный отчёт и публикует его в трекер задач, если вы просили.';
 
   @override
   String get ticketDoneReportTitle => 'Отчёт одобрен';
@@ -5060,6 +5400,39 @@ class AppLocalizationsRu extends AppLocalizations {
   String ticketTranslateFailed(String error) {
     return 'Не удалось перевести: $error';
   }
+
+  @override
+  String get ticketSrcPlane => 'Plane';
+
+  @override
+  String ticketReviewSubPlane(String branch) {
+    return 'С сервера пока ничего не ушло. Одобрение отправит $branch, откроет pull request и обновит задачу в Plane.';
+  }
+
+  @override
+  String get ticketReviewReportSubPlane =>
+      'Одобрение сохранит отчёт здесь и закроет тикет. В Plane он попадёт, только если отметить пункт ниже.';
+
+  @override
+  String ticketPostReportPlane(String key) {
+    return 'Также опубликовать отчёт комментарием к $key в Plane';
+  }
+
+  @override
+  String ticketApproveReportPostConfirmPlane(String key) {
+    return 'Одобрить отчёт, закрыть тикет и опубликовать отчёт в $key в Plane?';
+  }
+
+  @override
+  String ticketDoneReportPostedPlane(String key) {
+    return 'Отчёт сохранён здесь и опубликован в $key в Plane.';
+  }
+
+  @override
+  String get ticketPickAny => 'Выберите все подходящие';
+
+  @override
+  String get ticketOtherAnswer => 'Что-то другое (необязательно)';
 
   @override
   String get ticketsTitle => 'Тикеты';
@@ -5134,7 +5507,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ticketsBoardEmpty => 'Пусто';
 
   @override
-  String get ticketsListSub => 'Тикеты Jira с меткой agnts, а также задачи, которые вы создаёте для своих проектов.';
+  String get ticketsListSub => 'Тикеты Jira и Plane с меткой agnts, а также задачи, которые вы создаёте для своих проектов.';
 
   @override
   String get ticketsNoMatch => 'Нет тикетов по вашему запросу.';
@@ -5165,6 +5538,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get ticketsStatSession => 'Сессия тарифа';
+
+  @override
+  String get ticketsSourcePlane => 'Plane';
 
   @override
   String get usageTitle => 'Лимиты тарифа';

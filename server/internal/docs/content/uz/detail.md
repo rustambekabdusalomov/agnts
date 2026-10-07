@@ -4,7 +4,7 @@ Bitta tiketning olinishidan yuborilishigacha boʻlgan yoʻli. Yuqoridagi shkala 
 
 ## Savollar
 
-agnts avval kodni oʻqiydi va faqat oʻzi hal qila olmaydigan narsalarni soʻraydi. Variantni tanlang yoki oʻz javobingizni yozing, soʻng «Kod yozishni boshlash»ni bosing.
+agnts avval kodni oʻqiydi va faqat oʻzi hal qila olmaydigan narsalarni soʻraydi. Variantni tanlang yoki oʻz javobingizni yozing, soʻng «Kod yozishni boshlash»ni bosing. Baʼzi savollarda bir nechta variantni tanlash mumkin. Har qanday javobga skrinshot yoki fayl biriktirish mumkin.
 
 ## Shu tiket uchun modellar
 
@@ -16,7 +16,7 @@ agnts ishlayotganda har bir qadam, model, sarflangan qadamlar va sessiya sarfi k
 
 ## Tekshiruv
 
-agnts nima qilganini oʻqing, testlar va oʻzgarishlarni tekshiring. «Tasdiqlash va yuborish» sizning nomingizdan commit qiladi. «Oʻzgartirish soʻrash» fikringizni oʻsha sessiyaga yuboradi. «Rad etish» branchni oʻchiradi.
+agnts nima qilganini oʻqing, testlar va oʻzgarishlarni tekshiring. «Tasdiqlash va yuborish» sizning nomingizdan commit qiladi. «Oʻzgartirish soʻrash» fikringizni va biriktirilgan fayllarni oʻsha sessiyaga yuboradi. «Rad etish» branchni oʻchiradi.
 
 ## agnts kod sharhi
 
@@ -32,7 +32,7 @@ Sozlamalarda yoki bitta tiketda «Keyingi tiketlarni taklif qilish»ni yoqing, a
 
 ## agnts toʻxtaganda
 
-Testlar qayta-qayta yiqilsa yoki limit tugasa, agnts taxmin qilmay toʻxtaydi. Koʻrsatma qoʻshib qayta urining yoki tiketni oʻzingiz oling.
+Testlar qayta-qayta yiqilsa yoki limit tugasa, agnts taxmin qilmay toʻxtaydi. Koʻrsatma (va log yoki skrinshot kabi fayllar) qoʻshib qayta urining yoki tiketni oʻzingiz oling.
 
 ## Tarix va ishga tushirish logi
 

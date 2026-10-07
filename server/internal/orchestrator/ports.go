@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"agnts/internal/domain"
+	"agnts/internal/toolchain"
 )
 
 // Store is the persistence the orchestrator needs. Every state change goes
@@ -49,7 +50,21 @@ type Store interface {
 
 	ReplaceQuestions(ctx context.Context, ticketID int64, qs []domain.Question) error
 	Questions(ctx context.Context, ticketID int64) ([]domain.Question, error)
+	// SaveAnswers also links each answer's attachments, failing with
+	// ErrConflict when one is not pending.
 	SaveAnswers(ctx context.Context, ticketID int64, as []domain.Answer) error
+
+	// SaveAttachment stores an upload as pending.
+	SaveAttachment(ctx context.Context, a domain.Attachment, data []byte) (domain.Attachment, error)
+	// Attachments returns attachments by id; unknown ids are left out.
+	Attachments(ctx context.Context, ids []int64) ([]domain.Attachment, error)
+	TicketAttachments(ctx context.Context, ticketID int64) ([]domain.Attachment, error)
+	AttachmentData(ctx context.Context, id int64) (domain.Attachment, []byte, error)
+	// LinkAttachments links pending uploads to a ticket, failing with
+	// ErrConflict when one is not pending.
+	LinkAttachments(ctx context.Context, ids []int64, ticketID int64, questionID *int64, purpose domain.AttachmentPurpose) error
+	DeleteAttachments(ctx context.Context, ids []int64) error
+	PrunePendingAttachments(ctx context.Context, before time.Time) (int64, error)
 
 	SaveResult(ctx context.Context, r domain.Result) error
 	// LatestResult returns the newest result of a stage, or ErrNotFound.
@@ -59,7 +74,13 @@ type Store interface {
 	Events(ctx context.Context, f EventFilter) ([]domain.Event, error)
 
 	RepositoryByID(ctx context.Context, id int64) (domain.Repository, error)
-	RepositoryByJiraProject(ctx context.Context, project string) (domain.Repository, error)
+	// SetDetectedToolchains stores detected toolchains (unless a person set
+	// them), the detection notes and, for a repository without any check
+	// commands, the suggested ones; it returns the stored repository.
+	SetDetectedToolchains(ctx context.Context, id int64, tcs []domain.Toolchain, notes []string, build, lint, test string) (domain.Repository, error)
+	// RepositoryByTrackerProject returns the repository linked to project
+	// in the tracker source (a Jira project key, a Plane project identifier).
+	RepositoryByTrackerProject(ctx context.Context, source domain.TicketSource, project string) (domain.Repository, error)
 	// NextTaskNumber reserves a task number in repoID, or among tasks
 	// without a repository when it is nil.
 	NextTaskNumber(ctx context.Context, repoID *int64) (int, error)
@@ -69,6 +90,9 @@ type Store interface {
 	StateSince(ctx context.Context, keys []string) (map[string]StateInfo, error)
 	History(ctx context.Context, key string) ([]HistoryItem, error)
 	TicketByPR(ctx context.Context, url, branch string) (domain.Ticket, error)
+	// UnmergedPRs returns done tickets with a pull request not known to be
+	// merged, least recently updated first.
+	UnmergedPRs(ctx context.Context, limit int) ([]domain.Ticket, error)
 	// ChildOf returns the ticket that implements parentKey, or ErrNotFound.
 	ChildOf(ctx context.Context, parentKey string) (domain.Ticket, error)
 
@@ -114,9 +138,9 @@ type RelationStore interface {
 	// relation the pair may already have, and appends ev when not nil. It
 	// returns the relations as stored.
 	ReplaceFound(ctx context.Context, foundBy string, rs []domain.Relation, ev *domain.Event) ([]domain.Relation, error)
-	// SyncJiraRelations makes the jira relations involving key exactly rs
-	// (only between tickets agnts has); it reports what it added.
-	SyncJiraRelations(ctx context.Context, key string, rs []domain.Relation) ([]domain.Relation, error)
+	// SyncTrackerRelations makes the relations of source involving key
+	// exactly rs (only between tickets agnts has); it reports what it added.
+	SyncTrackerRelations(ctx context.Context, source domain.RelationSource, key string, rs []domain.Relation) ([]domain.Relation, error)
 	// UpsertRelation stores r, or merges it into the pair's relation: the
 	// stronger status and source win, and only a person revives a
 	// dismissed one. ev is appended when not nil.
@@ -239,6 +263,29 @@ type WorkspaceSpec struct {
 	// ClaudeHome is a tar of Claude Code's config dir from an earlier run of
 	// this ticket (session transcripts for --resume), or nil.
 	ClaudeHome []byte
+	// Toolchains are installed (once, into the shared volume) and put on
+	// PATH; none for runs without a repository.
+	Toolchains []domain.Toolchain
+	// CacheKey names the package cache volume kept between runs ("" for
+	// none); one per repository so runs cannot poison each other's caches.
+	CacheKey string
+	// MemoryMB overrides the container memory (0: the runner default).
+	MemoryMB int
+	// Env is extra KEY=value environment (a repository's build env).
+	Env []string
+	// Progress, if set, receives one line per provisioning step.
+	Progress func(msg string)
+}
+
+// ToolchainError is returned by Runner.Open when a toolchain could not be
+// installed. The run fails with its message, not as a crash.
+type ToolchainError struct {
+	Spec   string
+	Output string
+}
+
+func (e *ToolchainError) Error() string {
+	return "install toolchain " + e.Spec + " failed: " + e.Output
 }
 
 // Workspace is a running container with the repository and Claude Code.
@@ -320,15 +367,17 @@ type ExecResult struct {
 // Git manages the server-side clones. Push credentials stay here and never
 // enter a workspace.
 type Git interface {
-	// Prepare makes sure a clone of repo exists with branch checked out:
-	// the existing branch if there is one, otherwise new from the default.
+	// Prepare fetches repo and makes sure branch exists: the existing branch
+	// if there is one, otherwise new from the default.
 	Prepare(ctx context.Context, repo domain.Repository, branch string) error
-	// Archive returns a tar of the checkout (including .git).
+	// Archive returns a tar of branch as a checkout (including .git).
 	Archive(ctx context.Context, repo domain.Repository, branch string) (io.ReadCloser, error)
-	// Commit replaces the checkout's files with the tar's and commits all
+	// Commit replaces branch's files with the tar's and commits all
 	// changes. It returns the new head and the branch's full diff against
 	// the default branch (what a reviewer sees), empty when they are equal.
-	Commit(ctx context.Context, repo domain.Repository, branch string, tree io.Reader, message string) (sha string, files []domain.FileChange, err error)
+	// Symlinks in the tar that point outside the repository are left out and
+	// listed in dropped.
+	Commit(ctx context.Context, repo domain.Repository, branch string, tree io.Reader, message string) (sha string, files []domain.FileChange, dropped []string, err error)
 	Push(ctx context.Context, repo domain.Repository, branch string) error
 	// PushTo fast-forwards target (the default branch) to branch's head.
 	PushTo(ctx context.Context, repo domain.Repository, branch, target string) error
@@ -346,6 +395,12 @@ type PR struct {
 // cannot do it simply do not implement it.
 type Assigner interface {
 	Assign(ctx context.Context, repo domain.Repository, number int, usernames []string) error
+}
+
+// MergeChecker asks the git host whether a pull request was merged, for
+// when the merge webhook never arrives (no webhook, or agnts on localhost).
+type MergeChecker interface {
+	PRMerged(ctx context.Context, repo domain.Repository, number int) (bool, error)
 }
 
 // Host opens pull requests on GitHub (GitLab in phase 5).
@@ -414,6 +469,17 @@ type Shots interface {
 	Prune(ticketKey string, keep []int64) error
 	// Tickets lists the ticket keys that have screenshots.
 	Tickets() ([]string, error)
+}
+
+// BuildEnvs returns a repository's build environment (KEY=value lines,
+// registry tokens and the like), "" when none is set.
+type BuildEnvs interface {
+	BuildEnv(ctx context.Context, repoID int64) (string, error)
+}
+
+// TreeReader is a Git that can list a checkout for toolchain detection.
+type TreeReader interface {
+	Tree(ctx context.Context, repo domain.Repository, branch string) (toolchain.Tree, error)
 }
 
 // PreviewEnvs returns a repository's preview environment (KEY=value

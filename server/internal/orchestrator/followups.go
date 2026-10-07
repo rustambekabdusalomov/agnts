@@ -203,13 +203,28 @@ func (o *Orchestrator) followUps(ctx context.Context, t domain.Ticket) (FollowUp
 const (
 	TargetLocal = "local" // an agnts task
 	TargetJira  = "jira"  // a new Jira issue
+	TargetPlane = "plane" // a new Plane work item
 )
+
+// targetSource is the tracker a follow-up target files into, or "" for a
+// local task.
+func targetSource(target string) (domain.TicketSource, bool) {
+	switch target {
+	case TargetLocal:
+		return "", true
+	case TargetJira:
+		return domain.SourceJira, true
+	case TargetPlane:
+		return domain.SourcePlane, true
+	}
+	return "", false
+}
 
 // AcceptInput is one suggestion to turn into a ticket, with the person's
 // edits; empty fields keep what was suggested.
 type AcceptInput struct {
 	ID          int64
-	Target      string // TargetLocal (default) or TargetJira
+	Target      string // TargetLocal (default), TargetJira or TargetPlane
 	Title       string
 	Description string
 	Kind        string
@@ -271,8 +286,9 @@ func (o *Orchestrator) accept(ctx context.Context, st domain.Settings, p domain.
 	if a.Target == "" {
 		a.Target = TargetLocal
 	}
-	if a.Target != TargetLocal && a.Target != TargetJira {
-		return domain.Ticket{}, invalid("target must be local or jira")
+	src, ok := targetSource(a.Target)
+	if !ok {
+		return domain.Ticket{}, invalid("target must be local, jira or plane")
 	}
 	kind := x.Kind
 	if a.Kind != "" {
@@ -327,8 +343,8 @@ func (o *Orchestrator) accept(ctx context.Context, st domain.Settings, p domain.
 	}
 	ev := domain.Event{TicketKey: p.Key, Type: domain.EventTicketUpdated, Origin: origin, Data: map[string]any{"suggestion": x.ID}}
 
-	if a.Target == TargetJira {
-		return o.acceptToJira(ctx, p, repo, t, x, ev)
+	if src != "" {
+		return o.acceptToTracker(ctx, src, p, repo, t, x, ev)
 	}
 	prefix := NoRepoTaskPrefix
 	if repo != nil {
@@ -350,47 +366,52 @@ func (o *Orchestrator) accept(ctx context.Context, st domain.Settings, p domain.
 	return domain.Ticket{}, fmt.Errorf("no free task key with prefix %s", prefix)
 }
 
-// acceptToJira files the follow-up as a Jira issue, then keeps it as a
-// queued ticket under the issue's key. The issue gets agnts's labels only
-// after the ticket exists: a webhook for a labelled issue would otherwise
-// race in and start it.
-func (o *Orchestrator) acceptToJira(ctx context.Context, p domain.Ticket, repo *domain.Repository, t domain.Ticket, x domain.Suggestion, ev domain.Event) (domain.Ticket, error) {
-	ic, ok := o.tracker.(IssueCreator)
-	if o.tracker == nil || !ok {
-		return domain.Ticket{}, invalid("Jira is not connected: create it as a local task, or connect Jira on the Integrations page")
+// acceptToTracker files the follow-up as an issue in the tracker src, then
+// keeps it as a queued ticket under the issue's key. The issue gets agnts's
+// labels only after the ticket exists: a webhook for a labelled issue
+// would otherwise race in and start it.
+func (o *Orchestrator) acceptToTracker(ctx context.Context, src domain.TicketSource, p domain.Ticket, repo *domain.Repository, t domain.Ticket, x domain.Suggestion, ev domain.Event) (domain.Ticket, error) {
+	name := src.Name()
+	ic, ok := o.trackers[src].(IssueCreator)
+	if !ok {
+		return domain.Ticket{}, invalid("%s is not connected: create it as a local task, or connect %s on the Integrations page", name, name)
 	}
 	project := ""
-	if p.Source == domain.SourceJira {
+	if p.Source == src {
 		if i := strings.LastIndex(p.Key, "-"); i > 0 {
 			project = p.Key[:i]
 		}
 	}
-	if repo != nil && repo.JiraProject != "" && (project == "" || (p.RepoID != nil && *p.RepoID != repo.ID)) {
-		project = repo.JiraProject
+	repoProject := ""
+	if repo != nil {
+		repoProject = repo.TrackerProject(src)
+	}
+	if repoProject != "" && (project == "" || (p.RepoID != nil && *p.RepoID != repo.ID)) {
+		project = repoProject
 	}
 	if project == "" {
-		return domain.Ticket{}, invalid("no Jira project for this follow-up: link the repository to a Jira project, or create it as a local task")
+		return domain.Ticket{}, invalid("no %s project for this follow-up: link the repository to a %s project, or create it as a local task", name, name)
 	}
 	key, err := ic.CreateIssue(ctx, NewIssue{Project: project, Title: t.Title, Description: t.Description, Priority: t.Priority})
 	if err != nil {
-		return domain.Ticket{}, fmt.Errorf("create the Jira issue: %w", err)
+		return domain.Ticket{}, fmt.Errorf("create the %s issue: %w", name, err)
 	}
-	t.Key, t.Source = key, domain.SourceJira
-	ev.Message, ev.Data["child"] = "follow-up "+key+" filed in Jira: "+t.Title, key
+	t.Key, t.Source = key, src
+	ev.Message, ev.Data["child"] = "follow-up "+key+" filed in "+name+": "+t.Title, key
 	out, err := o.store.CreateFollowUp(ctx, p.ID, x.ID, t, ev)
 	if err != nil {
 		o.event(ctx, domain.Event{TicketKey: p.Key, Type: domain.EventError, Level: domain.LevelWarn,
-			Message: fmt.Sprintf("Jira issue %s was created but agnts could not keep it: %v", key, err)})
+			Message: fmt.Sprintf("%s issue %s was created but agnts could not keep it: %v", name, key, err)})
 		return out, err
 	}
 	if err := ic.LabelIssue(ctx, key, t.Kind); err != nil {
 		o.event(ctx, domain.Event{TicketKey: key, Type: domain.EventTrackerComment, Level: domain.LevelWarn,
-			Message: "could not label the Jira issue for agnts: " + err.Error()})
+			Message: "could not label the " + name + " issue for agnts: " + err.Error()})
 	}
-	if p.Source == domain.SourceJira {
+	if p.Source == src {
 		if err := ic.LinkIssues(ctx, key, p.Key); err != nil {
 			o.event(ctx, domain.Event{TicketKey: key, Type: domain.EventTrackerComment, Level: domain.LevelWarn,
-				Message: "could not link the Jira issue to " + p.Key + ": " + err.Error()})
+				Message: "could not link the " + name + " issue to " + p.Key + ": " + err.Error()})
 		}
 	}
 	return out, nil

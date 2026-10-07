@@ -17,6 +17,7 @@ Name | Type | Description | Notes
 **settings** | **Map&lt;String, String&gt;** |  | 
 **webhookUrl** | **String** |  | [optional] 
 **webhookSecret** | **String** | GitHub and GitLab: secret to enter in the webhook settings | [optional] 
+**webhookSecretSet** | **bool** | Plane: a webhook secret is stored (deliveries are accepted) | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

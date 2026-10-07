@@ -27,7 +27,7 @@ func newLearnHarness(t *testing.T) (*harness, *postgres.Lessons) {
 	cfg := orchestrator.DefaultConfig()
 	cfg.FixAttempts = 1
 	h.o = orchestrator.New(cfg, orchestrator.Deps{
-		Store: h.store, Runner: h.runner, Git: h.git, Host: h.host, Tracker: h.tracker, Homes: &memHomes{},
+		Store: h.store, Runner: h.runner, Git: h.git, Host: h.host, Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: h.tracker}, Homes: &memHomes{},
 		Settings: h.settings, Usage: h.usage, Lessons: lessons,
 	}, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	return h, lessons

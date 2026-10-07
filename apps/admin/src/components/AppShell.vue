@@ -5,19 +5,21 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../api/client'
 import { FILTERS, NEEDS, RUNNING } from '../api/types'
-import { useLive } from '../composables/useLive'
+import { livePoll, useLive } from '../composables/useLive'
 import { useTabBadge } from '../composables/tabBadge'
 import { LOCALES, type Locale } from '../i18n'
 import { usePrefs } from '../stores/prefs'
 import { useSession } from '../stores/session'
 import { useUi } from '../stores/ui'
 import UsagePill from './UsagePill.vue'
+import { TRACKERS, type Tracker } from './integrations/providers'
+import { useIntegrations } from './integrations/useIntegrations'
 import { useRules } from './rules/useRules'
 import ConfirmDialog from './ui/ConfirmDialog.vue'
 import HiIcon from './ui/HiIcon.vue'
 
 // The demo's layout: sidebar navigation with counts and the plan pill,
-// top bar with search, language, theme and Jira sync.
+// top bar with search, language, theme and tracker sync.
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
@@ -29,7 +31,7 @@ const { connected } = useLive()
 const nav = useQuery({
   queryKey: ['nav'],
   queryFn: () => unwrap(api.GET('/tickets', { params: { query: { state: [...NEEDS, ...RUNNING, 'new'] } } })),
-  refetchInterval: 30_000,
+  refetchInterval: () => livePoll(30_000),
 })
 // Counts match what each list shows: Jira tickets and side-project tasks.
 const count = (states: string[]) => (nav.data.value ?? []).filter((x) => states.includes(x.state)).length
@@ -38,14 +40,15 @@ const openTasks = computed(() => (nav.data.value ?? []).filter((x) => x.source =
 const lessons = useQuery({
   queryKey: ['lessons', 'counts'],
   queryFn: () => unwrap(api.GET('/lessons', { params: { query: { limit: 1 } } })),
-  refetchInterval: 120_000,
+  refetchInterval: () => livePoll(120_000),
 })
 const unlearned = computed(() => lessons.data.value?.unlearned ?? 0)
 // Learn runs running or waiting (same query as the queue page).
 const learnQueue = useQuery({
   queryKey: ['lessons', 'queue'],
   queryFn: () => unwrap(api.GET('/lessons/queue')),
-  refetchInterval: 30_000,
+  // A run starting writes no event: keep polling while one is queued.
+  refetchInterval: (q) => (q.state.data?.some((x) => x.status === 'running' || x.status === 'pending') ? 30_000 : livePoll(30_000)),
 })
 const learning = computed(() => (learnQueue.data.value ?? []).filter((x) => x.status === 'running' || x.status === 'pending').length)
 // Rules whose review is waiting on your answers.
@@ -73,9 +76,12 @@ function toggleTheme() {
   prefs.theme = dark.value ? 'light' : 'dark'
 }
 
+// One sync button per connected tracker.
+const integrations = useIntegrations()
+const trackers = computed(() => TRACKERS.filter((p) => integrations.data.value?.some((i) => i.provider === p && i.connected)))
 const sync = useMutation({
-  mutationFn: () => unwrap(api.POST('/integrations/jira/sync')),
-  onSuccess: (r) => ui.notify(t('nav.synced', { found: r.found, created: r.created })),
+  mutationFn: async (p: Tracker) => ({ p, r: await unwrap(p === 'plane' ? api.POST('/integrations/plane/sync') : api.POST('/integrations/jira/sync')) }),
+  onSuccess: ({ p, r }) => ui.notify(t(p === 'plane' ? 'nav.syncedPlane' : 'nav.synced', { found: r.found, created: r.created })),
   onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
 })
 
@@ -202,7 +208,9 @@ async function signOut() {
             <svg v-if="dark" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" /></svg>
             <svg v-else viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-linecap: round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
           </button>
-          <button class="btn btn-s" :disabled="sync.isPending.value" @click="sync.mutate()">{{ t('nav.syncJira') }}</button>
+          <button v-for="p in trackers" :key="p" class="btn btn-s" :disabled="sync.isPending.value" @click="sync.mutate(p)">
+            {{ t(p === 'plane' ? 'nav.syncPlane' : 'nav.syncJira') }}
+          </button>
         </div>
       </header>
       <main class="content" aria-live="polite">

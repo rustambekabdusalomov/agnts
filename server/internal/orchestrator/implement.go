@@ -86,7 +86,7 @@ func (o *Orchestrator) Implement(ctx context.Context, key string, in ImplementIn
 		Source: domain.SourceLocal, RepoID: &repo.ID, Title: truncate(title, 300), Description: desc, Priority: priority,
 		State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: "pr", Held: in.Start == "queue",
 		Kind: domain.KindCode, ParentKey: p.Key,
-	}, TaskPrefix(repo), origin)
+	}, TaskPrefix(repo), nil, origin)
 	if err != nil {
 		return t, err
 	}

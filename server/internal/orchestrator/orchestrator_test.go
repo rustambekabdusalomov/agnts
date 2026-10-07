@@ -130,18 +130,18 @@ func (g *fakeGit) Archive(context.Context, domain.Repository, string) (io.ReadCl
 	return io.NopCloser(bytes.NewReader(nil)), nil
 }
 
-func (g *fakeGit) Commit(_ context.Context, _ domain.Repository, _ string, tree io.Reader, _ string) (string, []domain.FileChange, error) {
+func (g *fakeGit) Commit(_ context.Context, _ domain.Repository, _ string, tree io.Reader, _ string) (string, []domain.FileChange, []string, error) {
 	b, _ := io.ReadAll(tree)
 	if len(b) == 0 {
-		return "base", nil, nil
+		return "base", nil, nil, nil
 	}
 	g.mu.Lock()
 	defer g.mu.Unlock()
 	g.commits++
 	if g.files != nil {
-		return "sha" + string(rune('0'+g.commits)), g.files, nil
+		return "sha" + string(rune('0'+g.commits)), g.files, nil, nil
 	}
-	return "sha" + string(rune('0'+g.commits)), []domain.FileChange{{Path: "main.go", Add: 3, Del: 1, Diff: "+fix"}}, nil
+	return "sha" + string(rune('0'+g.commits)), []domain.FileChange{{Path: "main.go", Add: 3, Del: 1, Diff: "+fix"}}, nil, nil
 }
 
 func (g *fakeGit) PushTo(_ context.Context, _ domain.Repository, branch, target string) error {
@@ -162,6 +162,13 @@ type fakeHost struct {
 	opened   int
 	last     orchestrator.PR
 	assigned map[int][]string
+	merged   map[int]bool // pull requests PRMerged reports merged
+	asked    []int        // pull requests PRMerged was asked about
+}
+
+func (h *fakeHost) PRMerged(_ context.Context, _ domain.Repository, number int) (bool, error) {
+	h.asked = append(h.asked, number)
+	return h.merged[number], nil
 }
 
 func (h *fakeHost) Assign(_ context.Context, _ domain.Repository, number int, usernames []string) error {
@@ -281,6 +288,7 @@ type harness struct {
 	git      *fakeGit
 	host     *fakeHost
 	tracker  *fakeTracker
+	plane    *fakeTracker
 	settings *fakeSettings
 	usage    *fakeUsage
 	shots    *memShots
@@ -313,7 +321,7 @@ func newHarness(t *testing.T) *harness {
 		t.Fatal(err)
 	}
 	h := &harness{t: t, ctx: ctx, store: store,
-		runner: &fakeRunner{execs: map[string][]orchestrator.ExecResult{}}, git: &fakeGit{}, host: &fakeHost{}, tracker: &fakeTracker{},
+		runner: &fakeRunner{execs: map[string][]orchestrator.ExecResult{}}, git: &fakeGit{}, host: &fakeHost{}, tracker: &fakeTracker{}, plane: &fakeTracker{},
 		shots: &memShots{m: map[string][]byte{}}}
 	cfg := orchestrator.DefaultConfig()
 	cfg.FixAttempts = 1
@@ -322,8 +330,8 @@ func newHarness(t *testing.T) *harness {
 	h.settings.s.AutoReview = false // review_test.go turns it on
 	h.usage = &fakeUsage{}
 	h.o = orchestrator.New(cfg, orchestrator.Deps{
-		Store: store, Runner: h.runner, Git: h.git, Host: h.host, Tracker: h.tracker, Homes: &memHomes{},
-		Settings: h.settings, Usage: h.usage, Translations: postgres.NewTranslations(pool),
+		Store: store, Runner: h.runner, Git: h.git, Host: h.host, Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: h.tracker, domain.SourcePlane: h.plane},
+		Homes: &memHomes{}, Settings: h.settings, Usage: h.usage, Translations: postgres.NewTranslations(pool),
 		Shots: h.shots, PreviewEnvs: fakeEnvs{},
 	}, log)
 	return h
@@ -546,6 +554,32 @@ func TestPartialSpendIsRecorded(t *testing.T) {
 	}
 }
 
+// A check command that is not installed is a setup problem, not a code
+// one: the run stops at once, saying which toolchain to add, instead of
+// spending the fix attempts on it.
+func TestMissingToolchainStopsWithoutFixAttempts(t *testing.T) {
+	h := newHarness(t)
+	h.ingest("PAY-7")
+	h.runner.scripts = []script{
+		{result: ok("s7"), files: map[string]string{orchestrator.AnalysisPath: analysis(0)}},
+		{result: ok("s7"), edit: "v1"},
+		{result: ok("s7"), edit: "v2"},
+	}
+	h.runner.execs["go test ./..."] = []orchestrator.ExecResult{{ExitCode: 127, Output: "bash: line 1: go: command not found\n"}}
+	h.step()
+	h.step()
+	h.expect("PAY-7", domain.StateFailed)
+	if n := len(h.runner.prompts); n != 2 {
+		t.Fatalf("%d Claude calls, want 2 (analyze, code): no fix attempt", n)
+	}
+	evs, _ := h.store.Events(h.ctx, orchestrator.EventFilter{TicketKey: "PAY-7"})
+	if !slices.ContainsFunc(evs, func(e domain.Event) bool {
+		return strings.Contains(e.Message, "`go` is not installed in the run container")
+	}) {
+		t.Fatal("no event names the missing command")
+	}
+}
+
 func TestChecksKeepFailingThenRetry(t *testing.T) {
 	h := newHarness(t)
 	h.ingest("PAY-3")
@@ -567,6 +601,39 @@ func TestChecksKeepFailingThenRetry(t *testing.T) {
 		t.Fatal(err)
 	}
 	h.expect("PAY-3", domain.StateCoding)
+}
+
+func TestRetryWithNote(t *testing.T) {
+	h := newHarness(t)
+	h.ingest("PAY-6")
+	h.runner.scripts = []script{
+		{result: ok("s6"), files: map[string]string{orchestrator.AnalysisPath: analysis(0)}},
+		{result: ok("s6"), edit: "v1"},
+		{result: ok("s6"), edit: "v2"},
+		{result: ok("s6"), edit: "v3"},
+	}
+	h.runner.execs["go test ./..."] = []orchestrator.ExecResult{{ExitCode: 1, Output: "boom"}, {ExitCode: 1, Output: "boom"}}
+	h.step()
+	h.step()
+	h.expect("PAY-6", domain.StateFailed)
+	h.idle()
+
+	tk, err := h.o.RetryWithNote(h.ctx, "PAY-6", "  Skip the flaky integration test.  ", nil, domain.OriginWeb)
+	if err != nil || tk.State != domain.StateCoding {
+		t.Fatalf("retry: %+v %v", tk, err)
+	}
+	if !strings.Contains(tk.Feedback, "boom") || !strings.HasSuffix(tk.Feedback, "Skip the flaky integration test.") {
+		t.Fatalf("feedback %q", tk.Feedback)
+	}
+	h.step()
+	tk = h.expect("PAY-6", domain.StateWaitingForReview)
+	last := h.runner.prompts[len(h.runner.prompts)-1]
+	if !strings.Contains(last, "flaky integration test") || h.runner.resumes[len(h.runner.resumes)-1] != "s6" {
+		t.Fatalf("retry run: prompt=%q resume=%q", last, h.runner.resumes[len(h.runner.resumes)-1])
+	}
+	if tk.Feedback != "" {
+		t.Fatal("note not cleared after the run")
+	}
 }
 
 func TestRateLimitedAnalysis(t *testing.T) {
@@ -596,10 +663,10 @@ func TestRequestChangesResumesSession(t *testing.T) {
 	h.step()
 	h.expect("PAY-5", domain.StateWaitingForReview)
 
-	if _, err := h.o.RequestChanges(h.ctx, "PAY-5", "  ", nil, domain.OriginWeb); !errors.Is(err, orchestrator.ErrInvalid) {
+	if _, err := h.o.RequestChanges(h.ctx, "PAY-5", "  ", nil, nil, domain.OriginWeb); !errors.Is(err, orchestrator.ErrInvalid) {
 		t.Fatalf("empty feedback: %v", err)
 	}
-	tk, err := h.o.RequestChanges(h.ctx, "PAY-5", "Also handle negative amounts.", nil, domain.OriginMobile)
+	tk, err := h.o.RequestChanges(h.ctx, "PAY-5", "Also handle negative amounts.", nil, nil, domain.OriginMobile)
 	if err != nil || tk.Revision != 1 || tk.State != domain.StateCoding {
 		t.Fatalf("request changes: %+v %v", tk, err)
 	}
@@ -856,7 +923,7 @@ func TestRunLoopRespectsUsagePauseAndParallel(t *testing.T) {
 func TestArchivedRepositoryTakesNoNewWork(t *testing.T) {
 	h := newHarness(t)
 	h.ingest("PAY-31") // known before archiving
-	pay, err := h.store.RepositoryByJiraProject(h.ctx, "PAY")
+	pay, err := h.store.RepositoryByTrackerProject(h.ctx, domain.SourceJira, "PAY")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -947,5 +1014,50 @@ func TestSetRepo(t *testing.T) {
 	}
 	if _, err := h.o.SetRepo(h.ctx, "PAY-30", side, domain.OriginWeb); !errors.As(err, &te) {
 		t.Fatalf("ticket with a PR: %v", err)
+	}
+}
+
+// A Plane work item goes to the repository linked to its Plane project,
+// its "blocked by" relations become plane relations, and only the Plane
+// tracker hears about it.
+func TestPlaneTicketsUseThePlaneTracker(t *testing.T) {
+	h := newHarness(t)
+	web, err := h.store.SaveRepository(h.ctx, domain.Repository{
+		Name: "web", Kind: "plane", Provider: "github", CloneURL: "https://github.com/acme/web.git",
+		DefaultBranch: "main", PlaneProject: "WEB",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, in := range []orchestrator.Incoming{
+		{Source: domain.SourcePlane, Key: "WEB-2", Project: "WEB", Title: "Add the API", LinksKnown: true},
+		{Source: domain.SourcePlane, Key: "WEB-1", Project: "WEB", Title: "Use the API", LinksKnown: true, DependsOn: []string{"WEB-2"}},
+	} {
+		if created, err := h.o.Ingest(h.ctx, in, domain.OriginWebhook); err != nil || !created {
+			t.Fatalf("ingest %s: %v %v", in.Key, created, err)
+		}
+	}
+	tk := h.state("WEB-1")
+	if tk.Source != domain.SourcePlane || tk.RepoID == nil || *tk.RepoID != web.ID {
+		t.Fatalf("plane ticket: %+v", tk)
+	}
+	if rs := h.relations("WEB-1").All; len(rs) != 1 || rs[0].Source != domain.RelFromPlane || rs[0].OtherKey != "WEB-2" {
+		t.Fatalf("plane relation: %+v", rs)
+	}
+	// The link is gone in Plane: the relation goes too.
+	if _, err := h.o.Ingest(h.ctx, orchestrator.Incoming{Source: domain.SourcePlane, Key: "WEB-1", Project: "WEB", Title: "Use the API", LinksKnown: true}, domain.OriginWebhook); err != nil {
+		t.Fatal(err)
+	}
+	if rs := h.relations("WEB-1").All; len(rs) != 0 {
+		t.Fatalf("relation kept after the link went: %+v", rs)
+	}
+	if _, err := h.o.Reject(h.ctx, "WEB-1", "not now", domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
+	if len(h.plane.moves) != 1 || h.plane.moves[0] != orchestrator.TrackerRejected {
+		t.Fatalf("plane moves: %v", h.plane.moves)
+	}
+	if len(h.tracker.moves) != 0 || len(h.tracker.comments) != 0 {
+		t.Fatalf("a Plane ticket talked to Jira: %v %v", h.tracker.moves, h.tracker.comments)
 	}
 }

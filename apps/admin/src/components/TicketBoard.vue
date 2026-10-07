@@ -44,7 +44,7 @@ const tone = (c: BoardColumn) => STATE_TONE[c.states[0]]
           <div class="bcard-meta">
             <template v-if="showSource">
               <span v-if="tk.source === 'local'" class="src local">{{ t('tickets.sourceTask') }}</span>
-              <span v-else class="src">{{ t('tickets.sourceJira') }}</span>
+              <span v-else class="src">{{ tk.source === 'plane' ? t('tickets.sourcePlane') : t('tickets.sourceJira') }}</span>
             </template>
             <KindBadge v-if="tk.kind !== 'code'" :ticket="tk" />
             <span v-if="tk.openSuggestions" class="badge b-info">{{ t('followUps.openBadge', { count: tk.openSuggestions }) }}</span>

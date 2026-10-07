@@ -24,15 +24,19 @@ type Config struct {
 	CheckTimeout time.Duration // one check command
 	FixAttempts  int           // check failures sent back to Claude before giving up
 	PollEvery    time.Duration
+	// MergeCheckEvery is how often the git host is asked about pull
+	// requests not known to be merged; 0 turns it off.
+	MergeCheckEvery time.Duration
 }
 
 // DefaultConfig returns the built-in limits.
 func DefaultConfig() Config {
 	return Config{
-		Image:        "agnts-runner:latest",
-		CheckTimeout: 15 * time.Minute,
-		FixAttempts:  2,
-		PollEvery:    5 * time.Second,
+		Image:           "agnts-runner:latest",
+		CheckTimeout:    15 * time.Minute,
+		FixAttempts:     2,
+		PollEvery:       5 * time.Second,
+		MergeCheckEvery: 2 * time.Minute,
 	}
 }
 
@@ -54,11 +58,13 @@ type UsageGate interface {
 
 // Deps are the orchestrator's collaborators.
 type Deps struct {
-	Store    Store
-	Runner   Runner
-	Git      Git
-	Host     Host
-	Tracker  Tracker // nil when no tracker is configured
+	Store  Store
+	Runner Runner
+	Git    Git
+	Host   Host
+	// Trackers post back to each tracker, by the source of its tickets.
+	// A source without one gets no comments or status moves.
+	Trackers map[domain.TicketSource]Tracker
 	Homes    Homes
 	Settings SettingsSource
 	Usage    UsageGate
@@ -71,6 +77,9 @@ type Deps struct {
 	// PreviewEnvs gives the apps under preview their environment; nil
 	// gives them none.
 	PreviewEnvs PreviewEnvs
+	// BuildEnvs gives run containers their repository's build environment;
+	// nil leaves it out.
+	BuildEnvs BuildEnvs
 }
 
 // Orchestrator runs tickets through their stages.
@@ -80,7 +89,7 @@ type Orchestrator struct {
 	runner   Runner
 	git      Git
 	host     Host
-	tracker  Tracker
+	trackers map[domain.TicketSource]Tracker
 	homes    Homes
 	settings SettingsSource
 	usage    UsageGate
@@ -89,6 +98,7 @@ type Orchestrator struct {
 	trans    Translations
 	shots    Shots
 	envs     PreviewEnvs
+	builds   BuildEnvs
 	log      *slog.Logger
 
 	wake chan struct{}
@@ -104,9 +114,9 @@ type Orchestrator struct {
 // New returns an orchestrator.
 func New(cfg Config, d Deps, log *slog.Logger) *Orchestrator {
 	return &Orchestrator{
-		cfg: cfg, store: d.Store, runner: d.Runner, git: d.Git, host: d.Host, tracker: d.Tracker, homes: d.Homes,
+		cfg: cfg, store: d.Store, runner: d.Runner, git: d.Git, host: d.Host, trackers: d.Trackers, homes: d.Homes,
 		settings: d.Settings, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, trans: d.Translations,
-		shots: d.Shots, envs: d.PreviewEnvs, log: log,
+		shots: d.Shots, envs: d.PreviewEnvs, builds: d.BuildEnvs, log: log,
 		wake:    make(chan struct{}, 1),
 		cancels: map[string]context.CancelFunc{},
 	}
@@ -147,7 +157,7 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 	defer wg.Wait()
 	tick := time.NewTicker(o.cfg.PollEvery)
 	defer tick.Stop()
-	lastResume, lastPrune := time.Time{}, time.Time{}
+	lastResume, lastPrune, lastMerges := time.Time{}, time.Time{}, time.Time{}
 
 	for {
 		s, err := o.settings.Get(ctx)
@@ -158,9 +168,14 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 			lastResume = time.Now()
 			o.AutoResume(ctx, s)
 		}
+		if o.cfg.MergeCheckEvery > 0 && time.Since(lastMerges) > o.cfg.MergeCheckEvery {
+			lastMerges = time.Now()
+			o.CheckMerges(ctx)
+		}
 		if time.Since(lastPrune) > time.Hour {
 			lastPrune = time.Now()
 			o.pruneShots(ctx)
+			o.prunePendingUploads(ctx)
 		}
 		for err == nil && o.mayStart(ctx, s) {
 			job, ok, cerr := o.claim(ctx)
@@ -574,6 +589,7 @@ func (o *Orchestrator) openWorkspace(ctx context.Context, t domain.Ticket, repo 
 		if err := o.git.Prepare(ctx, *repo, branch); err != nil {
 			return nil, fmt.Errorf("prepare repository: %w", err)
 		}
+		o.refreshToolchains(ctx, repo, branch, t.Key, &run.ID)
 		rc, err := o.git.Archive(ctx, *repo, branch)
 		if err != nil {
 			return nil, fmt.Errorf("archive repository: %w", err)
@@ -589,7 +605,17 @@ func (o *Orchestrator) openWorkspace(ctx context.Context, t domain.Ticket, repo 
 	if err != nil {
 		return nil, fmt.Errorf("load claude home: %w", err)
 	}
-	ws, err := o.runner.Open(ctx, WorkspaceSpec{TicketKey: t.Key, Image: o.cfg.Image, Repo: tree, ClaudeHome: home})
+	spec := WorkspaceSpec{TicketKey: t.Key, Image: o.cfg.Image, Repo: tree, ClaudeHome: home}
+	if repo != nil {
+		if err := o.repoSpec(ctx, &spec, *repo, t.Key, run); err != nil {
+			return nil, err
+		}
+	}
+	ws, err := o.runner.Open(ctx, spec)
+	var te *ToolchainError
+	if errors.As(err, &te) {
+		return nil, err
+	}
 	if err != nil {
 		return nil, fmt.Errorf("start container: %w", err)
 	}
@@ -640,6 +666,7 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 	if len(d.Rules) > 0 {
 		o.event(ctx, rulesEvent(t.Key, run, d.Rules))
 	}
+	d.Attached = o.copyAttachments(ctx, ws, t)
 	prompt, err := render("analyze", d)
 	if err != nil {
 		return err
@@ -687,7 +714,7 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 			if strings.TrimSpace(q.Text) == "" {
 				continue
 			}
-			qs = append(qs, domain.Question{TicketID: t.ID, Position: i + 1, Text: q.Text, Options: q.Options})
+			qs = append(qs, domain.Question{TicketID: t.ID, Position: i + 1, Text: q.Text, Options: q.Options, Multiple: q.Multiple && len(q.Options) > 1})
 		}
 	}
 	if err := o.store.ReplaceQuestions(ctx, t.ID, qs); err != nil {
@@ -764,15 +791,16 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 	modelStage := domain.ModelCoding
 	feedback := t.Feedback
 	shots := o.copyFeedbackShots(ctx, ws, t)
+	attached := o.copyAttachments(ctx, ws, t)
 	if feedback != "" && session != "" {
 		modelStage = domain.ModelRetry
-		prompt, err = render("feedback", promptData{T: t, Repo: repo, Feedback: feedback, FeedbackShots: shots})
+		prompt, err = render("feedback", promptData{T: t, Repo: repo, Feedback: feedback, FeedbackShots: shots, Attached: attached})
 		if err == nil && visual {
 			extra, _ := render("visualcheck", promptData{Repo: repo})
 			prompt += extra
 		}
 	} else {
-		d := promptData{T: t, Repo: repo, Checks: checksLine(repo), VisualCheck: visual}
+		d := promptData{T: t, Repo: repo, Checks: checksLine(repo), VisualCheck: visual, Attached: attached}
 		if d.Rules, err = o.teamRules(ctx, t.RepoID); err != nil {
 			return err
 		}
@@ -806,7 +834,7 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		return err
 	}
 	if feedback != "" {
-		if _, err := o.store.UpdateTicket(ctx, t.Key, nil, func(x *domain.Ticket) { x.Feedback, x.FeedbackShots = "", nil }); err != nil {
+		if _, err := o.store.UpdateTicket(ctx, t.Key, nil, func(x *domain.Ticket) { x.Feedback, x.FeedbackShots, x.FeedbackFiles = "", nil, nil }); err != nil {
 			return err
 		}
 	}
@@ -823,6 +851,11 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		checks = o.runChecks(ctx, ws, t, repo, run)
 		if checks.OK || ctx.Err() != nil {
 			break
+		}
+		if checks.Unfixable != "" {
+			// Not a code problem: retrying with Claude would only burn turns.
+			run.ExitReason = checks.Reason
+			return fmt.Errorf("%s\n%s", checks.Unfixable, truncate(checks.FailOutput, 2000))
 		}
 		if attempt >= o.cfg.FixAttempts {
 			run.ExitReason = "checks_failed"
@@ -855,9 +888,13 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		return fmt.Errorf("export workspace: %w", err)
 	}
 	defer func() { _ = tree.Close() }()
-	sha, files, err := o.git.Commit(ctx, repo, branch, tree, commitMessage(t, s.Git))
+	sha, files, dropped, err := o.git.Commit(ctx, repo, branch, tree, commitMessage(t, s.Git))
 	if err != nil {
 		return fmt.Errorf("commit: %w", err)
+	}
+	if len(dropped) > 0 {
+		o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventError, Level: domain.LevelWarn,
+			Message: "left out symlinks that point outside the repository (ignore them in .gitignore): " + strings.Join(dropped, ", ")})
 	}
 	if len(files) == 0 {
 		run.ExitReason = "no_changes"
@@ -908,6 +945,7 @@ func (o *Orchestrator) report(ctx context.Context, s domain.Settings, t domain.T
 	feedback := t.Feedback
 	modelStage := domain.ModelCoding
 	var prompt string
+	d.Attached = o.copyAttachments(ctx, ws, t)
 	if feedback != "" {
 		modelStage = domain.ModelRetry
 		// The container is new: put the report under review back for Claude.
@@ -918,7 +956,7 @@ func (o *Orchestrator) report(ctx context.Context, s domain.Settings, t domain.T
 		}
 	}
 	if feedback != "" && session != "" {
-		prompt, err = render("report-feedback", promptData{T: t, Feedback: feedback})
+		prompt, err = render("report-feedback", promptData{T: t, Feedback: feedback, Attached: d.Attached})
 	} else {
 		if d.Rules, err = o.teamRules(ctx, t.RepoID); err != nil {
 			return err
@@ -950,7 +988,7 @@ func (o *Orchestrator) report(ctx context.Context, s domain.Settings, t domain.T
 		return err
 	}
 	if feedback != "" {
-		if _, err := o.store.UpdateTicket(ctx, t.Key, nil, func(x *domain.Ticket) { x.Feedback = "" }); err != nil {
+		if _, err := o.store.UpdateTicket(ctx, t.Key, nil, func(x *domain.Ticket) { x.Feedback, x.FeedbackFiles = "", nil }); err != nil {
 			return err
 		}
 	}
@@ -991,7 +1029,8 @@ func (o *Orchestrator) deliver(ctx context.Context, t domain.Ticket, run *domain
 	}
 	msg := "report approved"
 	if t.PostReport {
-		if t.Source != domain.SourceJira || o.tracker == nil {
+		tr := o.trackerFor(t)
+		if tr == nil {
 			o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: "push", Type: domain.EventTrackerComment, Level: domain.LevelWarn,
 				Message: "the report was not posted: this ticket has no tracker issue"})
 		} else {
@@ -999,7 +1038,7 @@ func (o *Orchestrator) deliver(ctx context.Context, t domain.Ticket, run *domain
 			if len(text) > maxReportComment {
 				text = truncate(text, maxReportComment) + "\n\n(The full report is in agnts.)"
 			}
-			posted, err := o.tracker.Comment(ctx, t.Key, CommentReport, text)
+			posted, err := tr.Comment(ctx, t.Key, CommentReport, text)
 			if err != nil {
 				return fmt.Errorf("post the report to %s: %w", t.Key, err)
 			}
@@ -1093,12 +1132,22 @@ func (o *Orchestrator) assign(ctx context.Context, repo domain.Repository, t dom
 		Message: "assigned to " + who, Data: map[string]any{"assignees": t.Assignees}})
 }
 
+// trackerFor returns the tracker t came from, or nil for local tickets
+// and trackers that are not wired.
+func (o *Orchestrator) trackerFor(t domain.Ticket) Tracker {
+	if !t.Source.Tracked() {
+		return nil
+	}
+	return o.trackers[t.Source]
+}
+
 // The tracker only hears about tickets that came from it.
 func (o *Orchestrator) trackerComment(ctx context.Context, t domain.Ticket, kind CommentKind, text string) {
-	if o.tracker == nil || t.Source != domain.SourceJira {
+	tr := o.trackerFor(t)
+	if tr == nil {
 		return
 	}
-	posted, err := o.tracker.Comment(ctx, t.Key, kind, text)
+	posted, err := tr.Comment(ctx, t.Key, kind, text)
 	if err != nil {
 		o.event(ctx, domain.Event{TicketKey: t.Key, Type: domain.EventTrackerComment, Level: domain.LevelWarn, Message: "could not comment on the issue: " + err.Error()})
 		return
@@ -1109,10 +1158,11 @@ func (o *Orchestrator) trackerComment(ctx context.Context, t domain.Ticket, kind
 }
 
 func (o *Orchestrator) trackerMove(ctx context.Context, t domain.Ticket, s TrackerStatus) {
-	if o.tracker == nil || t.Source != domain.SourceJira {
+	tr := o.trackerFor(t)
+	if tr == nil {
 		return
 	}
-	if err := o.tracker.MoveTo(ctx, t.Key, s); err != nil {
+	if err := tr.MoveTo(ctx, t.Key, s); err != nil {
 		o.event(ctx, domain.Event{TicketKey: t.Key, Type: domain.EventTrackerComment, Level: domain.LevelWarn, Message: fmt.Sprintf("could not move issue to %s: %v", s, err)})
 	}
 }
@@ -1133,6 +1183,9 @@ func analysisComment(a Analysis, withQuestions bool) string {
 			fmt.Fprintf(&b, "%d. %s", i+1, q.Text)
 			if len(q.Options) > 0 {
 				fmt.Fprintf(&b, " [%s]", strings.Join(q.Options, " / "))
+				if q.Multiple {
+					b.WriteString(" (pick any)")
+				}
 			}
 			b.WriteString("\n")
 		}

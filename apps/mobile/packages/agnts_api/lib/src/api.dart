@@ -8,6 +8,7 @@ import 'package:agnts_api/src/auth/basic_auth.dart';
 import 'package:agnts_api/src/auth/bearer_auth.dart';
 import 'package:agnts_api/src/auth/oauth.dart';
 import 'package:agnts_api/src/api/analytics_api.dart';
+import 'package:agnts_api/src/api/attachments_api.dart';
 import 'package:agnts_api/src/api/auth_api.dart';
 import 'package:agnts_api/src/api/dashboard_api.dart';
 import 'package:agnts_api/src/api/devices_api.dart';
@@ -119,6 +120,12 @@ class AgntsApi {
   /// by doing that all interceptors will not be executed
   AnalyticsApi getAnalyticsApi() {
     return AnalyticsApi(dio);
+  }
+
+  /// Get AttachmentsApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  AttachmentsApi getAttachmentsApi() {
+    return AttachmentsApi(dio);
   }
 
   /// Get AuthApi instance, base route and serializer can be overridden by a given but be careful,

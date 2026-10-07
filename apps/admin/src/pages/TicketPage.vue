@@ -4,7 +4,7 @@ import { computed, nextTick, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../api/client'
-import { isReport, KIND_EDITABLE, MODEL_NAME, needsRepo, stateKey, TERMINAL, type ShotRef, type TicketKind } from '../api/types'
+import { isReport, KIND_EDITABLE, MODEL_NAME, needsRepo, stateKey, TERMINAL, type Question, type ShotRef, type TicketKind } from '../api/types'
 import UsageCard from '../components/dashboard/UsageCard.vue'
 import DiffView from '../components/DiffView.vue'
 import TicketLessons from '../components/learn/TicketLessons.vue'
@@ -25,8 +25,11 @@ import { useRepoMembers } from '../components/repo/useRepoMembers'
 import RunLog from '../components/ticket/RunLog.vue'
 import SpendCard from '../components/ticket/SpendCard.vue'
 import HiIcon from '../components/ui/HiIcon.vue'
+import FileAttach from '../components/files/FileAttach.vue'
+import FileList from '../components/files/FileList.vue'
 import { useEventLog } from '../composables/useEventLog'
 import { ago, pct } from '../composables/format'
+import { livePoll } from '../composables/useLive'
 import { useUsage } from '../composables/useUsage'
 import { provideTranslation, TRANSLATION_LANGS, type TranslationLang } from '../composables/useTranslation'
 import InputSelect from '../components/form/InputSelect.vue'
@@ -43,11 +46,13 @@ const key = computed(() => String(route.params.key))
 const detail = useQuery({
   queryKey: computed(() => ['ticket', key.value]),
   queryFn: () => unwrap(api.GET('/tickets/{key}', { params: { path: { key: key.value } } })),
-  refetchInterval: (q) => (q.state.data && TERMINAL.includes(q.state.data.ticket.state) ? false : 15_000),
+  refetchInterval: (q) => (q.state.data && TERMINAL.includes(q.state.data.ticket.state) ? false : livePoll(15_000)),
 })
 const d = computed(() => detail.data.value)
 const tk = computed(() => d.value?.ticket)
 const isTask = computed(() => tk.value?.source === 'local')
+// Plane tickets use their own wording where the page names the tracker.
+const isPlane = computed(() => tk.value?.source === 'plane')
 // A report kind (plan, analysis, bug): no branch, checks, diff or pull request.
 const report = computed(() => !!tk.value && isReport(tk.value))
 const kindEditable = computed(() => !!tk.value && KIND_EDITABLE.includes(tk.value.state) && !tk.value.prUrl && tk.value.resumeState !== 'pushing')
@@ -67,28 +72,65 @@ const translateError = computed(() => {
 })
 const usage = useUsage()
 
-// Answers: option or free text, plus an optional note per question.
-const answers = reactive<Record<number, { answer: string; note: string }>>({})
+// Answers: option or free text, plus an optional note and files per
+// question. A multiple-choice question takes several options, and the text
+// is one more choice; the answer lists them one per line.
+type Draft = { answer: string; note: string; picked: string[]; files: number[]; uploading: boolean }
+const answers = reactive<Record<number, Draft>>({})
 watch(
   () => d.value?.questions,
   (qs) => {
-    for (const q of qs ?? []) answers[q.id] ??= { answer: q.answer ?? '', note: q.note }
+    for (const q of qs ?? []) {
+      if (answers[q.id]) continue
+      const lines = q.multiple ? (q.answer ?? '').split('\n').filter(Boolean) : []
+      answers[q.id] = {
+        answer: q.multiple ? lines.filter((l) => !q.options.includes(l)).join(' ') : (q.answer ?? ''),
+        note: q.note,
+        picked: lines.filter((l) => q.options.includes(l)),
+        files: [],
+        uploading: false,
+      }
+    }
   },
   { immediate: true },
 )
-const left = computed(() => (d.value?.questions ?? []).filter((q) => !answers[q.id]?.answer.trim()).length)
+function answerOf(q: Question): string {
+  const a = answers[q.id]
+  if (!a) return ''
+  if (!q.multiple) return a.answer.trim()
+  return [...q.options.filter((o) => a.picked.includes(o)), a.answer.trim()].filter(Boolean).join('\n')
+}
+function togglePick(q: Question, o: string) {
+  const a = answers[q.id]
+  a.picked = a.picked.includes(o) ? a.picked.filter((x) => x !== o) : [...a.picked, o]
+}
+const left = computed(() => (d.value?.questions ?? []).filter((q) => !answerOf(q)).length)
+const answersUploading = computed(() => Object.values(answers).some((a) => a.uploading))
 const answered = computed(() => (d.value?.questions ?? []).filter((q) => q.answer))
+// The chosen options of a multiple-choice answer, each translated.
+const answerText = (q: Question) => (q.answer ?? '').split('\n').map((l) => tr.value(l)).join(', ')
+const files = computed(() => d.value?.attachments ?? [])
+const filesOf = (purpose: string, questionId?: number) =>
+  files.value.filter((a) => a.purpose === purpose && (questionId === undefined || a.questionId === questionId))
 
 const feedback = ref('')
 // Preview screenshots the feedback points at; the coding run gets them.
 const feedbackShots = ref<ShotRef[]>([])
+// Files that go with the feedback (mockups, logs); the coding run reads them.
+const feedbackFiles = ref<number[]>([])
+const feedbackUploading = ref(false)
+const feedbackAttach = ref<InstanceType<typeof FileAttach> | null>(null)
+// How to get past a failure; the retried coding run gets it with the error.
+const retryNote = ref('')
+const retryFiles = ref<number[]>([])
+const retryUploading = ref(false)
 const MAX_FEEDBACK_SHOTS = 6
 const notice = ref('')
 
 // Assignees for the pull request agnts opens on approval (not for tasks that
 // push straight to the default branch). Members load only while reviewing.
 const opensPr = computed(() => !report.value && !(isTask.value && tk.value?.afterApprove === 'main'))
-// Reports reach the Jira issue only when the reviewer ticks this.
+// Reports reach the tracker issue only when the reviewer ticks this.
 const postReport = ref(false)
 const reviewing = computed(() => tk.value?.state === 'waiting_for_review' && opensPr.value)
 // Mirrors the server's rule: no pull request and no pending push.
@@ -130,10 +172,11 @@ const act = useMutation({
           api.PUT('/tickets/{key}/answers', {
             ...path,
             body: {
-              answers: Object.entries(answers).map(([id, v]) => ({
-                questionId: Number(id),
-                answer: v.answer.trim(),
-                note: v.note.trim() || undefined,
+              answers: (d.value?.questions ?? []).map((q) => ({
+                questionId: q.id,
+                answer: answerOf(q),
+                note: answers[q.id].note.trim() || undefined,
+                attachments: answers[q.id].files.length ? answers[q.id].files : undefined,
               })),
             },
           }),
@@ -149,13 +192,25 @@ const act = useMutation({
         return unwrap(
           api.POST('/tickets/{key}/request-changes', {
             ...path,
-            body: { feedback: feedback.value.trim(), shots: feedbackShots.value.length ? feedbackShots.value : undefined },
+            body: {
+              feedback: feedback.value.trim(),
+              shots: feedbackShots.value.length ? feedbackShots.value : undefined,
+              attachments: feedbackFiles.value.length ? feedbackFiles.value : undefined,
+            },
           }),
         )
       case 'reject':
         return unwrap(api.POST('/tickets/{key}/reject', { ...path, body: {} }))
       case 'retry':
-        return unwrap(api.POST('/tickets/{key}/retry', path))
+        return unwrap(
+          api.POST('/tickets/{key}/retry', {
+            ...path,
+            body: {
+              note: retryNote.value.trim() || undefined,
+              attachments: retryFiles.value.length ? retryFiles.value : undefined,
+            },
+          }),
+        )
       case 'start':
         return unwrap(api.POST('/tickets/{key}/analyze', path))
       case 'stop':
@@ -169,6 +224,11 @@ const act = useMutation({
     if (a === 'request-changes') {
       feedback.value = ''
       feedbackShots.value = []
+      feedbackFiles.value = []
+    }
+    if (a === 'retry') {
+      retryNote.value = ''
+      retryFiles.value = []
     }
   },
   onError: (e) => {
@@ -192,7 +252,10 @@ function approve() {
   const t0 = tk.value
   if (!t0) return
   if (report.value) {
-    confirmThen(postReport.value ? t('ticket.approveReportPostConfirm', { key: t0.key }) : t('ticket.approveReportConfirm'), 'approve')
+    confirmThen(
+      postReport.value ? t(isPlane.value ? 'ticket.approveReportPostConfirmPlane' : 'ticket.approveReportPostConfirm', { key: t0.key }) : t('ticket.approveReportConfirm'),
+      'approve',
+    )
     return
   }
   let msg = opensPr.value ? t('ticket.approveConfirm', { branch: t0.branch }) : t('ticket.approveMainConfirm')
@@ -292,7 +355,8 @@ watch(key, () => {
 const branch = computed(() => tk.value?.branch || `agnts/${key.value}`)
 const reviewSub = computed(() => {
   if (isTask.value && tk.value?.afterApprove === 'main') return t('ticket.reviewSubMain')
-  return isTask.value ? t('ticket.reviewSubPr', { branch: branch.value }) : t('ticket.reviewSubJira', { branch: branch.value })
+  if (isTask.value) return t('ticket.reviewSubPr', { branch: branch.value })
+  return t(isPlane.value ? 'ticket.reviewSubPlane' : 'ticket.reviewSubJira', { branch: branch.value })
 })
 const titleWithRev = (title: string) =>
   tk.value && tk.value.revision > 0 ? t('ticket.revisionSuffix', { title, n: tk.value.revision }) : title
@@ -320,6 +384,9 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
         <button v-if="descLong" type="button" class="tk-more" :aria-expanded="descOpen" @click="descOpen = !descOpen">
           {{ descOpen ? t('ticket.showLess') : t('ticket.showMore') }}
         </button>
+        <FileList :files="filesOf('ticket')" />
+        <FileList :files="filesOf('retry')" :label="t('files.fromRetry')" />
+        <FileList :files="filesOf('feedback')" :label="t('files.fromFeedback')" />
       </div>
       <div class="actions tk-head-act" style="margin: 0">
         <div class="tk-lang">
@@ -389,17 +456,27 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
               <h3>{{ t('ticket.questions') }}</h3>
               <div v-for="(q, i) in d.questions" :key="q.id" class="q">
                 <p>{{ tr(q.text) }}</p>
-                <div v-if="q.options.length" class="tabs" role="group">
-                  <button v-for="o in q.options" :key="o" type="button" class="tab" :aria-pressed="answers[q.id].answer === o" @click="answers[q.id].answer = o">{{ tr(o) }}</button>
-                </div>
-                <input v-model="answers[q.id].answer" class="cfg-in" :placeholder="t('ticket.yourAnswer')" :aria-label="t('ticket.answerFor', { n: i + 1 })">
+                <template v-if="q.multiple">
+                  <span class="hint">{{ t('ticket.pickAny') }}</span>
+                  <div class="tabs" role="group">
+                    <button v-for="o in q.options" :key="o" type="button" class="tab" :aria-pressed="answers[q.id].picked.includes(o)" @click="togglePick(q, o)">{{ tr(o) }}</button>
+                  </div>
+                  <input v-model="answers[q.id].answer" class="cfg-in" :placeholder="t('ticket.otherAnswer')" :aria-label="t('ticket.answerFor', { n: i + 1 })">
+                </template>
+                <template v-else>
+                  <div v-if="q.options.length" class="tabs" role="group">
+                    <button v-for="o in q.options" :key="o" type="button" class="tab" :aria-pressed="answers[q.id].answer === o" @click="answers[q.id].answer = o">{{ tr(o) }}</button>
+                  </div>
+                  <input v-model="answers[q.id].answer" class="cfg-in" :placeholder="t('ticket.yourAnswer')" :aria-label="t('ticket.answerFor', { n: i + 1 })">
+                </template>
                 <textarea v-model="answers[q.id].note" :placeholder="t('ticket.addDetails')" :aria-label="t('ticket.detailsFor', { n: i + 1 })" />
+                <FileAttach v-model="answers[q.id].files" v-model:busy="answers[q.id].uploading" />
               </div>
               <KindPicker :ticket="tk" />
               <ModelPicker :ticket="tk" :stages="['coding', 'retry']" />
               <div class="actions">
-                <button class="btn btn-p" type="submit" :disabled="left > 0 || act.isPending.value">{{ report ? t('ticket.startWriting') : t('ticket.startCoding') }}</button>
-                <span class="hint">{{ left ? t('ticket.questionsLeft', { n: left }) : t('ticket.allAnswered') }}</span>
+                <button class="btn btn-p" type="submit" :disabled="left > 0 || answersUploading || act.isPending.value">{{ report ? t('ticket.startWriting') : t('ticket.startCoding') }}</button>
+                <span class="hint">{{ left ? t('ticket.questionsLeft', { n: left }) : answersUploading ? t('files.wait') : t('ticket.allAnswered') }}</span>
               </div>
             </form>
           </template>
@@ -483,7 +560,8 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             </div>
             <div class="sec">
               <h3><label for="feedback">{{ t('ticket.feedback') }}</label></h3>
-              <textarea id="feedback" v-model="feedback" :placeholder="t('ticket.feedbackHint')" />
+              <textarea id="feedback" v-model="feedback" :placeholder="t('ticket.feedbackHint')" @paste="feedbackAttach?.pasted($event)" />
+              <FileAttach ref="feedbackAttach" v-model="feedbackFiles" v-model:busy="feedbackUploading" />
               <div v-if="feedbackShots.length" class="tk-shots" :aria-label="t('preview.attached')">
                 <span class="hint">{{ t('preview.attached') }}:</span>
                 <span v-for="(r, i) in feedbackShots" :key="`${r.runId}-${r.shotId}`" class="badge b-info tk-shot">
@@ -494,7 +572,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             </div>
             <div class="actions">
               <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="approve">{{ t('ticket.approve') }}</button>
-              <button class="btn" type="button" :disabled="!feedback.trim() || act.isPending.value" @click="act.mutate('request-changes')">{{ t('ticket.requestChanges') }}</button>
+              <button class="btn" type="button" :disabled="!feedback.trim() || feedbackUploading || act.isPending.value" @click="act.mutate('request-changes')">{{ t('ticket.requestChanges') }}</button>
               <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.reject') }}</button>
             </div>
           </template>
@@ -512,7 +590,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             <div class="sec">
               <div class="help ok">
                 <HiIcon name="check" />
-                <p>{{ tk.postReport ? t('ticket.doneReportPosted', { key: tk.key }) : t('ticket.doneReport') }}</p>
+                <p>{{ tk.postReport ? t(isPlane ? 'ticket.doneReportPostedPlane' : 'ticket.doneReportPosted', { key: tk.key }) : t('ticket.doneReport') }}</p>
               </div>
             </div>
             <ImplementReport v-if="tk.kind === 'plan' || tk.kind === 'bug'" :ticket="tk" :child-key="d.childKey" />
@@ -552,8 +630,13 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             <KindPicker v-if="kindEditable" :ticket="tk" />
             <RepoPicker v-if="canChangeRepo" :ticket="tk" />
             <ModelPicker :ticket="tk" :stages="['retry']" />
+            <div v-if="tk.resumeState !== 'pushing'" class="sec">
+              <h3><label for="retry-note">{{ t('ticket.retryNote') }}</label></h3>
+              <textarea id="retry-note" v-model="retryNote" maxlength="4000" :placeholder="t('ticket.retryNoteHint')" />
+              <FileAttach v-model="retryFiles" v-model:busy="retryUploading" />
+            </div>
             <div class="actions">
-              <button class="btn btn-p" type="button" :disabled="act.isPending.value || (needsRepo(tk) && !tk.repoId)" @click="act.mutate('retry')">{{ t('ticket.retry') }}</button>
+              <button class="btn btn-p" type="button" :disabled="act.isPending.value || retryUploading || (needsRepo(tk) && !tk.repoId)" @click="act.mutate('retry')">{{ t('ticket.retry') }}</button>
               <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.takeItMyself') }}</button>
             </div>
           </template>
@@ -582,7 +665,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
           <!-- waiting_for_review: a report -->
           <section v-if="activeTab === 'decide'" class="card tk-panel">
             <h2>{{ titleWithRev(t('ticket.reviewReportTitle')) }}</h2>
-            <p class="sub">{{ isTask ? t('ticket.reviewReportSub') : t('ticket.reviewReportSubJira') }}</p>
+            <p class="sub">{{ isTask ? t('ticket.reviewReportSub') : isPlane ? t('ticket.reviewReportSubPlane') : t('ticket.reviewReportSubJira') }}</p>
             <div v-if="result?.summary" class="sec">
               <div class="summary"><p>{{ tr(result.summary) }}</p></div>
               <template v-if="result.notes.length">
@@ -592,15 +675,16 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             </div>
             <ModelPicker :ticket="tk" :stages="['retry', 'review']" />
             <div v-if="!isTask" class="sec">
-              <label class="check-row"><input v-model="postReport" type="checkbox">{{ t('ticket.postReport', { key: tk.key }) }}</label>
+              <label class="check-row"><input v-model="postReport" type="checkbox">{{ t(isPlane ? 'ticket.postReportPlane' : 'ticket.postReport', { key: tk.key }) }}</label>
             </div>
             <div class="sec">
               <h3><label for="feedback">{{ t('ticket.feedback') }}</label></h3>
-              <textarea id="feedback" v-model="feedback" :placeholder="t('ticket.feedbackReportHint')" />
+              <textarea id="feedback" v-model="feedback" :placeholder="t('ticket.feedbackReportHint')" @paste="feedbackAttach?.pasted($event)" />
+              <FileAttach ref="feedbackAttach" v-model="feedbackFiles" v-model:busy="feedbackUploading" />
             </div>
             <div class="actions">
               <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="approve">{{ t('ticket.approveReport') }}</button>
-              <button class="btn" type="button" :disabled="!feedback.trim() || act.isPending.value" @click="act.mutate('request-changes')">{{ t('ticket.requestChanges') }}</button>
+              <button class="btn" type="button" :disabled="!feedback.trim() || feedbackUploading || act.isPending.value" @click="act.mutate('request-changes')">{{ t('ticket.requestChanges') }}</button>
               <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.reject') }}</button>
             </div>
           </section>
@@ -650,7 +734,10 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             <div class="ch"><div><h2>{{ t('ticket.answersTitle') }}</h2><p class="sub">{{ t('ticket.answersSub') }}</p></div></div>
             <div v-for="q in answered" :key="q.id" class="ans">
               <span class="qq">{{ tr(q.text) }}</span>
-              <span><b>{{ tr(q.answer ?? '') }}</b><template v-if="q.note">. {{ q.note }}</template></span>
+              <span>
+                <b>{{ q.multiple ? answerText(q) : tr(q.answer ?? '') }}</b><template v-if="q.note">. {{ q.note }}</template>
+                <FileList :files="filesOf('answer', q.id)" />
+              </span>
             </div>
           </section>
 
@@ -672,7 +759,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
               <dd><template v-for="(k2, i) in waitsFor" :key="k2"><template v-if="i">, </template><RouterLink :to="`/tickets/${k2}`">{{ k2 }}</RouterLink></template></dd>
             </template>
             <dt>{{ t('kind.title') }}</dt><dd><KindBadge :ticket="tk" /></dd>
-            <dt>{{ t('ticket.kvSource') }}</dt><dd>{{ isTask ? t('ticket.srcTask') : t('ticket.srcJira') }}</dd>
+            <dt>{{ t('ticket.kvSource') }}</dt><dd>{{ isTask ? t('ticket.srcTask') : isPlane ? t('ticket.srcPlane') : t('ticket.srcJira') }}</dd>
             <dt>{{ t('ticket.kvRepo') }}</dt><dd>{{ tk.repoName ?? '—' }}</dd>
             <template v-if="isTask && !report"><dt>{{ t('ticket.kvAfter') }}</dt><dd>{{ tk.afterApprove === 'main' ? t('ticket.afterMain') : t('ticket.afterPr') }}</dd></template>
             <dt>{{ t('ticket.kvPriority') }}</dt><dd>{{ tk.priority }}</dd>

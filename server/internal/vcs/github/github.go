@@ -27,13 +27,14 @@ type Host struct {
 	api   string
 	token TokenSource
 	hc    *http.Client
+	etags *etags
 }
 
 var _ orchestrator.Host = (*Host)(nil)
 
 // New returns a GitHub host. api is https://api.github.com unless testing.
 func New(api string, token TokenSource) *Host {
-	return &Host{api: strings.TrimRight(api, "/"), token: token, hc: &http.Client{Timeout: 30 * time.Second}}
+	return &Host{api: strings.TrimRight(api, "/"), token: token, hc: &http.Client{Timeout: 30 * time.Second}, etags: newEtags()}
 }
 
 // OwnerRepo extracts owner and name from an https or ssh GitHub URL.
@@ -66,26 +67,56 @@ func (h *Host) call(ctx context.Context, method, path string, in, out any) (int,
 		b, _ := json.Marshal(in)
 		body = bytes.NewReader(b)
 	}
-	req, err := http.NewRequestWithContext(ctx, method, h.api+path, body)
+	target := h.api + path
+	if strings.Contains(path, "://") {
+		target = path // GraphQL lives outside the REST address on Enterprise Server
+	}
+	req, err := http.NewRequestWithContext(ctx, method, target, body)
 	if err != nil {
 		return 0, err
 	}
 	req.Header.Set("Authorization", "Bearer "+tok)
 	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
+	key, cached := "", []byte(nil)
+	if method == http.MethodGet {
+		key = etagKey(tok, path)
+		if etag, body, ok := h.etags.get(key); ok {
+			req.Header.Set("If-None-Match", etag)
+			cached = body
+		}
+	}
 	resp, err := h.hc.Do(req)
 	if err != nil {
 		return 0, err
 	}
 	defer func() { _ = resp.Body.Close() }()
+	if resp.StatusCode == http.StatusNotModified && cached != nil {
+		return http.StatusOK, decode(cached, out)
+	}
 	if resp.StatusCode >= 300 {
 		b, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
 		return resp.StatusCode, fmt.Errorf("github %s %s: %s: %s", method, path, resp.Status, strings.TrimSpace(string(b)))
 	}
-	if out != nil {
-		return resp.StatusCode, json.NewDecoder(resp.Body).Decode(out)
+	if key == "" {
+		if out != nil {
+			return resp.StatusCode, json.NewDecoder(resp.Body).Decode(out)
+		}
+		return resp.StatusCode, nil
 	}
-	return resp.StatusCode, nil
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return resp.StatusCode, err
+	}
+	h.etags.put(key, resp.Header.Get("ETag"), b)
+	return resp.StatusCode, decode(b, out)
+}
+
+func decode(b []byte, out any) error {
+	if out == nil {
+		return nil
+	}
+	return json.Unmarshal(b, out)
 }
 
 type pull struct {
@@ -118,6 +149,21 @@ func (h *Host) OpenPR(ctx context.Context, repo domain.Repository, pr orchestrat
 		return 0, "", err // the original 422 explains more than an empty list
 	}
 	return open[0].Number, open[0].HTMLURL, nil
+}
+
+// PRMerged reports whether pull request number was merged.
+func (h *Host) PRMerged(ctx context.Context, repo domain.Repository, number int) (bool, error) {
+	owner, name, err := OwnerRepo(repo.CloneURL)
+	if err != nil {
+		return false, err
+	}
+	var p struct {
+		Merged bool `json:"merged"`
+	}
+	if _, err := h.call(ctx, http.MethodGet, "/repos/"+url.PathEscape(owner)+"/"+url.PathEscape(name)+"/pulls/"+strconv.Itoa(number), nil, &p); err != nil {
+		return false, err
+	}
+	return p.Merged, nil
 }
 
 // User returns the login the token belongs to (a connection check).

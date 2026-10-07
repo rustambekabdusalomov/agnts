@@ -26,6 +26,13 @@ void main() {
       // TODO
     });
 
+    // States of the Plane projects linked to repositories, for the status mapping
+    //
+    //Future<List<PlaneState>> listPlaneStates() async
+    test('test listPlaneStates', () async {
+      // TODO
+    });
+
     // Repositories the connected GitHub or GitLab token can reach, for import
     //
     //Future<List<RemoteRepository>> listRemoteRepos(String provider) async
@@ -33,10 +40,24 @@ void main() {
       // TODO
     });
 
+    // Store the secret Plane generated for the agnts webhook
+    //
+    //Future<Integration> setPlaneWebhookSecret(SetPlaneWebhookSecretRequest setPlaneWebhookSecretRequest) async
+    test('test setPlaneWebhookSecret', () async {
+      // TODO
+    });
+
     // Pick up labelled Jira issues now
     //
     //Future<SyncJira200Response> syncJira() async
     test('test syncJira', () async {
+      // TODO
+    });
+
+    // Pick up labelled Plane work items now
+    //
+    //Future<SyncJira200Response> syncPlane() async
+    test('test syncPlane', () async {
       // TODO
     });
 

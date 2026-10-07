@@ -8,6 +8,7 @@ import '../../core/api.dart';
 import '../../core/data.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme.dart';
+import '../../widgets/attachments.dart';
 import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
 import '../tickets/kinds.dart';
@@ -231,6 +232,7 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
   late int _repo = widget.initialRepo;
   final _title = TextEditingController();
   final _desc = TextEditingController();
+  late final _files = AttachmentsController()..addListener(_filesChanged);
   var _priority = TaskCreatePriorityEnum.medium;
   var _after = TaskCreateAfterApproveEnum.pr;
   var _start = TaskCreateStartEnum.ask;
@@ -252,7 +254,13 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
   void dispose() {
     _title.dispose();
     _desc.dispose();
+    _files.dispose();
     super.dispose();
+  }
+
+  /// The create button waits for the uploads.
+  void _filesChanged() {
+    if (mounted) setState(() {});
   }
 
   Future<void> _create() async {
@@ -280,6 +288,7 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
               afterApprove: _after,
               start: _start,
               followUps: _followUps,
+              attachments: _files.ids.isEmpty ? null : _files.ids,
             ),
           );
       if (mounted) Navigator.pop(context, res.data?.key);
@@ -351,6 +360,7 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
                   decoration: InputDecoration(hintText: l.tasksDescPh),
                 ),
               ),
+              _Field(label: l.filesTitle, child: AttachmentPicker(controller: _files, enabled: !_busy)),
               _Field(
                 label: l.mobileTaskPriority,
                 child: Segmented<TaskCreatePriorityEnum>(
@@ -416,17 +426,24 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
         Container(
           decoration: BoxDecoration(border: Border(top: BorderSide(color: c.line))),
           padding: EdgeInsets.fromLTRB(20, 10, 20, 12 + (keyboard > 0 ? 0 : MediaQuery.paddingOf(context).bottom)),
-          child: Row(children: [
-            Expanded(child: OutlinedButton(onPressed: _busy ? null : () => Navigator.pop(context), child: Text(l.mobileCancel))),
-            const SizedBox(width: 10),
-            Expanded(
-              child: FilledButton(
-                onPressed: _busy ? null : _create,
-                child: _busy
-                    ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: c.onPrimary))
-                    : Text(_start == TaskCreateStartEnum.queue ? l.tasksCreate : l.tasksCreateStart, maxLines: 1, overflow: TextOverflow.ellipsis),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            if (_files.uploading)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(l.filesWait, style: TextStyle(fontSize: 13, color: c.ink3)),
               ),
-            ),
+            Row(children: [
+              Expanded(child: OutlinedButton(onPressed: _busy ? null : () => Navigator.pop(context), child: Text(l.mobileCancel))),
+              const SizedBox(width: 10),
+              Expanded(
+                child: FilledButton(
+                  onPressed: _busy || _files.uploading ? null : _create,
+                  child: _busy
+                      ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: c.onPrimary))
+                      : Text(_start == TaskCreateStartEnum.queue ? l.tasksCreate : l.tasksCreateStart, maxLines: 1, overflow: TextOverflow.ellipsis),
+                ),
+              ),
+            ]),
           ]),
         ),
       ]),

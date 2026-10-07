@@ -9,8 +9,9 @@ import 'package:agnts_api/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **questionId** | **int** |  | 
-**answer** | **String** |  | 
+**answer** | **String** | For a multiple-choice question, the chosen options, one per line | 
 **note** | **String** |  | [optional] 
+**attachments** | **List&lt;int&gt;** | Uploads to attach to this answer | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

@@ -10,6 +10,7 @@ import 'package:agnts_api/src/model/analytics_repos_inner.dart';
 import 'package:agnts_api/src/model/answers_request.dart';
 import 'package:agnts_api/src/model/answers_request_answers_inner.dart';
 import 'package:agnts_api/src/model/approve_ticket_request.dart';
+import 'package:agnts_api/src/model/attachment.dart';
 import 'package:agnts_api/src/model/blocker.dart';
 import 'package:agnts_api/src/model/branch.dart';
 import 'package:agnts_api/src/model/check_step.dart';
@@ -58,6 +59,7 @@ import 'package:agnts_api/src/model/model_overrides.dart';
 import 'package:agnts_api/src/model/notify_settings.dart';
 import 'package:agnts_api/src/model/period_stats.dart';
 import 'package:agnts_api/src/model/pipeline.dart';
+import 'package:agnts_api/src/model/plane_state.dart';
 import 'package:agnts_api/src/model/preview_input.dart';
 import 'package:agnts_api/src/model/preview_issue.dart';
 import 'package:agnts_api/src/model/preview_shot.dart';
@@ -70,6 +72,8 @@ import 'package:agnts_api/src/model/relation_input.dart';
 import 'package:agnts_api/src/model/relations.dart';
 import 'package:agnts_api/src/model/remote_repository.dart';
 import 'package:agnts_api/src/model/repo_activity.dart';
+import 'package:agnts_api/src/model/repo_detect_input.dart';
+import 'package:agnts_api/src/model/repo_detection.dart';
 import 'package:agnts_api/src/model/repo_member.dart';
 import 'package:agnts_api/src/model/repo_preview.dart';
 import 'package:agnts_api/src/model/repo_preview_input.dart';
@@ -77,12 +81,14 @@ import 'package:agnts_api/src/model/repository.dart';
 import 'package:agnts_api/src/model/repository_input.dart';
 import 'package:agnts_api/src/model/request_changes_request.dart';
 import 'package:agnts_api/src/model/result.dart';
+import 'package:agnts_api/src/model/retry_ticket_request.dart';
 import 'package:agnts_api/src/model/rotate_mcp_token200_response.dart';
 import 'package:agnts_api/src/model/rule.dart';
 import 'package:agnts_api/src/model/rule_answers.dart';
 import 'package:agnts_api/src/model/rule_answers_answers_inner.dart';
 import 'package:agnts_api/src/model/rule_input.dart';
 import 'package:agnts_api/src/model/rule_question.dart';
+import 'package:agnts_api/src/model/set_plane_webhook_secret_request.dart';
 import 'package:agnts_api/src/model/settings.dart';
 import 'package:agnts_api/src/model/shot_ref.dart';
 import 'package:agnts_api/src/model/stage.dart';
@@ -100,6 +106,7 @@ import 'package:agnts_api/src/model/ticket_repo.dart';
 import 'package:agnts_api/src/model/ticket_spend_list.dart';
 import 'package:agnts_api/src/model/ticket_spend_row.dart';
 import 'package:agnts_api/src/model/token_spend.dart';
+import 'package:agnts_api/src/model/toolchain.dart';
 import 'package:agnts_api/src/model/translate_input.dart';
 import 'package:agnts_api/src/model/translation.dart';
 import 'package:agnts_api/src/model/translation_items_inner.dart';
@@ -152,6 +159,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return AnswersRequestAnswersInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApproveTicketRequest':
           return ApproveTicketRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'Attachment':
+          return Attachment.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Blocker':
           return Blocker.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Branch':
@@ -263,6 +272,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return PeriodStats.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Pipeline':
           return Pipeline.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PlaneState':
+          return PlaneState.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PreviewInput':
           return PreviewInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PreviewIssue':
@@ -290,6 +301,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return RemoteRepository.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RepoActivity':
           return RepoActivity.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RepoDetectInput':
+          return RepoDetectInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RepoDetection':
+          return RepoDetection.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RepoMember':
           return RepoMember.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RepoPreview':
@@ -304,6 +319,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return RequestChangesRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Result':
           return Result.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RetryTicketRequest':
+          return RetryTicketRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ReviewModel':
           
           
@@ -322,6 +339,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
         case 'RuleStatus':
           
           
+        case 'SetPlaneWebhookSecretRequest':
+          return SetPlaneWebhookSecretRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Settings':
           return Settings.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ShotRef':
@@ -365,6 +384,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           
         case 'TokenSpend':
           return TokenSpend.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'Toolchain':
+          return Toolchain.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TranslateInput':
           return TranslateInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Translation':

@@ -28,6 +28,8 @@ class Question {
 
     required  this.options,
 
+    required  this.multiple,
+
      this.answer,
 
     required  this.note,
@@ -81,6 +83,19 @@ class Question {
 
 
 
+      /// Several options may be chosen; the answer then lists the chosen ones, one per line
+  @JsonKey(
+    
+    name: r'multiple',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool multiple;
+
+
+
   @JsonKey(
     
     name: r'answer',
@@ -113,6 +128,7 @@ class Question {
       other.position == position &&
       other.text == text &&
       other.options == options &&
+      other.multiple == multiple &&
       other.answer == answer &&
       other.note == note;
 
@@ -122,6 +138,7 @@ class Question {
         position.hashCode +
         text.hashCode +
         options.hashCode +
+        multiple.hashCode +
         answer.hashCode +
         note.hashCode;
 

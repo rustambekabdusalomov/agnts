@@ -17,7 +17,7 @@ void main() {
       // TODO
     });
 
-    // jira when the repository has a Jira project key, else side. Every repository takes side-project tasks.
+    // jira when the repository has a Jira project key, plane when it has only a Plane project, else side. Every repository takes side-project tasks.
     // String kind
     test('to test the property `kind`', () async {
       // TODO
@@ -74,6 +74,12 @@ void main() {
       // TODO
     });
 
+    // Plane project identifier (WEB in WEB-123); empty when not linked
+    // String planeProject
+    test('to test the property `planeProject`', () async {
+      // TODO
+    });
+
     // String claudeMd
     test('to test the property `claudeMd`', () async {
       // TODO
@@ -97,6 +103,58 @@ void main() {
 
     // RepoPreview preview
     test('to test the property `preview`', () async {
+      // TODO
+    });
+
+    // Toolchain names, comma-separated (go,node)
+    // String stack
+    test('to test the property `stack`', () async {
+      // TODO
+    });
+
+    // Installed into every run container
+    // List<Toolchain> toolchains
+    test('to test the property `toolchains`', () async {
+      // TODO
+    });
+
+    // Set by a person; detection leaves them alone
+    // bool toolchainsOverride
+    test('to test the property `toolchainsOverride`', () async {
+      // TODO
+    });
+
+    // DateTime toolchainsDetectedAt
+    test('to test the property `toolchainsDetectedAt`', () async {
+      // TODO
+    });
+
+    // What detection could not handle
+    // List<String> toolchainNotes
+    test('to test the property `toolchainNotes`', () async {
+      // TODO
+    });
+
+    // Custom runner image (built FROM agnts-runner); empty uses the default
+    // String runnerImage
+    test('to test the property `runnerImage`', () async {
+      // TODO
+    });
+
+    // Run container memory; 0 uses the server default
+    // int memoryMb
+    test('to test the property `memoryMb`', () async {
+      // TODO
+    });
+
+    // bool buildEnvSet
+    test('to test the property `buildEnvSet`', () async {
+      // TODO
+    });
+
+    // Names of the build environment variables; the values are never returned
+    // List<String> buildEnvNames
+    test('to test the property `buildEnvNames`', () async {
       // TODO
     });
 

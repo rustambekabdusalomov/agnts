@@ -326,6 +326,9 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
+  String get analyticsSrcPlane => 'Plane';
+
+  @override
   String get appName => 'agnts';
 
   @override
@@ -623,6 +626,66 @@ class AppLocalizationsUz extends AppLocalizations {
   String get dashboardNoActivity => 'Hozircha faollik yoʻq.';
 
   @override
+  String get filesTitle => 'Ilovalar';
+
+  @override
+  String get filesAttach => 'Fayl biriktirish';
+
+  @override
+  String get filesAddPhoto => 'Rasm';
+
+  @override
+  String get filesCamera => 'Kamera';
+
+  @override
+  String get filesAddFile => 'Fayl';
+
+  @override
+  String get filesHint => 'Rasmlar, PDF, loglar yoki matn, har biri 10 MB gacha. Claude ularning barchasini oʻqiydi.';
+
+  @override
+  String filesUploading(String name) {
+    return '$name yuklanmoqda…';
+  }
+
+  @override
+  String filesRemove(String name) {
+    return '$name ni olib tashlash';
+  }
+
+  @override
+  String filesOpen(String name) {
+    return '$name ni ochish';
+  }
+
+  @override
+  String filesTooLarge(String name) {
+    return '$name 10 MB dan katta';
+  }
+
+  @override
+  String filesTooMany(String n) {
+    return 'Koʻpi bilan $n ta fayl biriktiring';
+  }
+
+  @override
+  String filesFailed(String name) {
+    return '$name yuklanmadi';
+  }
+
+  @override
+  String get filesWait => 'Yuklash tugashini kuting';
+
+  @override
+  String get filesFromTask => 'Vazifaga';
+
+  @override
+  String get filesFromRetry => 'Qayta urinishga';
+
+  @override
+  String get filesFromFeedback => 'Soʻralgan oʻzgarishlarga';
+
+  @override
   String get followUpsTitle => 'Keyingi tiketlar';
 
   @override
@@ -770,6 +833,12 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get followUpsJiraIssueTypeHelp => 'Davomni Jira\'da yaratganingizda agnts ochadigan Jira vazifalari turi. Sukut boʻyicha: Task.';
+
+  @override
+  String get followUpsTargetPlane => 'Plane vazifasi';
+
+  @override
+  String get followUpsPlaneOff => 'U yerda vazifa yaratish uchun Plane\'ni ulang va repozitoriyni Plane loyihasiga bogʻlang';
 
   @override
   String get formSave => 'Oʻzgarishlarni saqlash';
@@ -984,7 +1053,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get integrationsTokenStep3_github =>
-      'Repository permissionsʼda Contents va Pull requests uchun Read and write ni tanlang. Pipelines boʻlimi uchun Actions — Read (Deploy uchun Read and write) va Deployments — Read ni ham tanlang. Metadata (oʻqish) avtomatik qoʻshiladi.';
+      'Repository permissionsʼda Contents va Pull requests uchun Read and write ni tanlang; agnts .github/workflows dagi CI fayllarini oʻzgartirishi mumkin boʻlsa, Workflows uchun ham Read and write ni tanlang. Pipelines boʻlimi uchun Actions — Read (Deploy uchun Read and write) va Deployments — Read ni ham tanlang. Metadata (oʻqish) avtomatik qoʻshiladi.';
 
   @override
   String get integrationsTokenStep4_github =>
@@ -1038,6 +1107,10 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get integrationsPermPulls => 'Oʻqish va yozish. Pull requestlar ochish.';
+
+  @override
+  String get integrationsPermWorkflows =>
+      'Oʻqish va yozish. .github/workflows (CI fayllari) dagi oʻzgarishlarni yuborish; busiz bunday push rad etiladi.';
 
   @override
   String get integrationsPermMetadata => 'Oʻqish. Repozitoriylar va branchlar roʻyxati.';
@@ -1299,7 +1372,126 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get integrationsGitWebhookWhy =>
-      'Pull yoki merge request birlashtirilganda agnts tiketni belgilaydi va Jira vazifasini Jira sahifasida tanlangan holatga oʻtkazadi. Pipeline hodisalari repozitoriy sahifasini yangilab turadi.';
+      'Pull yoki merge request birlashtirilganda agnts tiketni belgilaydi va Jira yoki Plane vazifasini treker sahifasida tanlangan holatga oʻtkazadi. Pipeline hodisalari repozitoriy sahifasini yangilab turadi.';
+
+  @override
+  String get integrationsName_plane => 'Plane';
+
+  @override
+  String get integrationsDesc_plane =>
+      'Plane Cloud yoki oʻzingizning Plane\'dan agnts belgili vazifalarni oladi va ularning holatini yangilab boradi.';
+
+  @override
+  String get integrationsConnectSub_plane =>
+      'Plane\'dagi shaxsiy kirish tokenidan foydalaning. Plane Cloud va oʻz serveringizdagi Plane bilan ishlaydi.';
+
+  @override
+  String get integrationsTokenOpen_plane => 'Plane API hujjatlarini ochish';
+
+  @override
+  String get integrationsTokenStep1_plane =>
+      'Plane\'ga agnts nomidan ishlaydigan foydalanuvchi sifatida kiring (izohlar shu nom bilan chiqadi) va Profile settings → Personal access tokens\'ni oching.';
+
+  @override
+  String get integrationsTokenStep2_plane =>
+      'Add personal access token\'ni bosing, nom bering (masalan, agnts), muddatni tanlang va tokenni nusxalang. Plane uni faqat bir marta koʻrsatadi.';
+
+  @override
+  String get integrationsTokenStep3_plane =>
+      '«API manzili» maydonida Plane Cloud uchun https://api.plane.so ni qoldiring yoki Plane oʻz serveringizda boʻlsa, uning manzilini kiriting.';
+
+  @override
+  String get integrationsTokenStep4_plane =>
+      '«Ish maydoni» maydoniga Plane manzilidagi slugni kiriting: app.plane.so/acme/projects dagi acme.';
+
+  @override
+  String get integrationsPlaneBaseUrl => 'API manzili';
+
+  @override
+  String get integrationsPlaneBaseUrlHelp => 'Plane Cloud uchun https://api.plane.so yoki Plane manzilingiz';
+
+  @override
+  String get integrationsPlaneWorkspace => 'Ish maydoni';
+
+  @override
+  String get integrationsPlaneWorkspaceHelp => 'Plane manzilidagi slug, masalan acme';
+
+  @override
+  String get integrationsApiKey => 'API kaliti';
+
+  @override
+  String get integrationsApiKeyHelp => 'Profile settings → Personal access tokens';
+
+  @override
+  String get integrationsPlaneWebhookTitle => 'Plane webhookini sozlang';
+
+  @override
+  String get integrationsPlaneWebhookSteps =>
+      'Plane\'da Workspace settings → Webhooks → Add webhook\'ni oching, quyidagi manzilni kiriting va vazifa (issue) hodisalarini belgilang. Plane sirni bir marta koʻrsatadi — uni shu yerga joylang.';
+
+  @override
+  String get integrationsPlaneEventsValue => 'Vazifalar (issues)';
+
+  @override
+  String get integrationsPlaneSecret => 'Plane\'dagi sir';
+
+  @override
+  String get integrationsPlaneSecretHelp => 'Plane uni webhook yaratilganda bir marta koʻrsatadi';
+
+  @override
+  String get integrationsPlaneSecretSave => 'Sirni saqlash';
+
+  @override
+  String get integrationsPlaneSecretReplace => 'Sirni almashtirish';
+
+  @override
+  String get integrationsPlaneSecretSaved => 'Webhook siri saqlandi: endi Plane yetkazmalari qabul qilinadi';
+
+  @override
+  String get integrationsPlaneSecretSet => 'Sir saqlangan. Yetkazmalar qabul qilinadi.';
+
+  @override
+  String get integrationsPlaneSecretMissing =>
+      'Sir hali yoʻq: Plane koʻrsatgan sirni joylamaguningizcha agnts yetkazmalarni rad etadi va vazifalarni faqat har soatlik sinxronlash oladi.';
+
+  @override
+  String integrationsPlaneQueryText(String labels) {
+    return 'Repozitoriylarga bogʻlangan Plane loyihalaridagi quyidagi belgilardan biri bor ochiq vazifalar: $labels';
+  }
+
+  @override
+  String get integrationsPlaneNoProjects =>
+      'Hali hech bir repozitoriy Plane loyihasiga bogʻlanmagan. Repozitoriy sozlamalarida loyiha identifikatorini (WEB-123 dagi WEB) kiriting.';
+
+  @override
+  String get integrationsPlaneStatusesSub =>
+      'agnts vazifalarni qanday siljitadi. «Standart» — mos guruhning birinchi holati; «koʻrib chiqishda» — faqat siz tanlagan holatga.';
+
+  @override
+  String integrationsPlaneStateDefault(String group) {
+    return 'Standart: birinchi $group holati';
+  }
+
+  @override
+  String get integrationsPlaneStateNone => 'Holatni saqlash';
+
+  @override
+  String integrationsPlaneStatesError(String error) {
+    return 'Plane\'dan holatlarni olib boʻlmadi: $error';
+  }
+
+  @override
+  String get integrationsPlaneSyncHelp =>
+      'Plane oʻzgarishlarni darhol webhookka yuboradi; agnts ham yetkazma oʻtkazib yuborilgan boʻlsa deb har soatda tekshiradi.';
+
+  @override
+  String get integrationsPlaneHelp =>
+      'agnts bogʻlangan loyihalardagi faqat oʻz belgilari bor vazifalarni oʻqiydi va faqat shu yerda yoqilgan holat oʻzgarishlari va izohlarni yozadi. Plane har bir kalit uchun daqiqasiga 60 ta API soʻroviga ruxsat beradi; agnts 50 tadan oshmaydi.';
+
+  @override
+  String integrationsPlaneSynced(String found, String created) {
+    return '$found ta ochiq vazifa, $created ta yangi';
+  }
 
   @override
   String get kindTitle => 'Turi';
@@ -2463,7 +2655,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get navLedeDone => 'Yuborilgan yoki rad etilgan tiketlar.';
 
   @override
-  String get navLedeAll => 'agnts Jira\'dan olgan barcha tiketlar.';
+  String get navLedeAll => 'agnts Jira va Plane\'dan olgan barcha tiketlar.';
 
   @override
   String get navKnowledge => 'Bilim';
@@ -2476,6 +2668,14 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get navRules => 'Qoidalar';
+
+  @override
+  String get navSyncPlane => 'Plane\'ni sinxronlash';
+
+  @override
+  String navSyncedPlane(String found, String created) {
+    return 'Plane sinxronlandi: $found ochiq, $created yangi';
+  }
 
   @override
   String get previewTab => 'Oldindan koʻrish';
@@ -2863,6 +3063,9 @@ class AppLocalizationsUz extends AppLocalizations {
   @override
   String get relationsMarkMergedHint =>
       'Birlashtirish webhooki yoʻqmi? Uni kutayotgan tiketlar boshlashi uchun pull requestni birlashtirilgan deb belgilang.';
+
+  @override
+  String get relationsSource_plane => 'Plane bogʻlanishi';
 
   @override
   String get repoBack => 'Repozitoriylarga qaytish';
@@ -3262,7 +3465,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get reposNone => 'Hali repozitoriylar yoʻq. agnts ishlashi uchun birinchisini qoʻshing.';
 
   @override
-  String get reposDrawerSub => 'Shaxsiy loyiha vazifalarini, Jira loyiha kaliti boʻlsa Jira tiketlarini ham qabul qiladi';
+  String get reposDrawerSub => 'Shaxsiy loyiha vazifalarini, loyihaga bogʻlangach Jira tiketlari yoki Plane vazifalarini ham qabul qiladi';
 
   @override
   String get reposName => 'Nomi';
@@ -3284,7 +3487,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String reposTaskPrefixHelp(String prefix) {
-    return 'Shaxsiy loyiha vazifalari $prefix-1, $prefix-2 kabi raqamlanadi. Jira loyiha kalitidan farq qilishi kerak.';
+    return 'Shaxsiy loyiha vazifalari $prefix-1, $prefix-2 kabi raqamlanadi. Jira loyiha kalitidan va Plane loyihasidan farq qilishi kerak.';
   }
 
   @override
@@ -3332,6 +3535,137 @@ class AppLocalizationsUz extends AppLocalizations {
   @override
   String get reposDeployWorkflowHelp =>
       'workflow_dispatch li GitHub Actions workflow fayli, masalan deploy.yml. Repozitoriy sahifasidagi Deploy tugmasi uni ishga tushiradi.';
+
+  @override
+  String get reposColStack => 'Toolchainlar';
+
+  @override
+  String get reposToolchains => 'Toolchainlar';
+
+  @override
+  String get reposToolchainsHelp =>
+      'Har bir ishga tushirishga o‘rnatiladigan til muhitlari va yig‘ish vositalari: har bir versiya bir marta o‘rnatiladi va keyingi ishga tushirishlar uchun saqlanadi.';
+
+  @override
+  String get reposToolchainsAuto =>
+      'Repozitoriydan aniqlangan (go.mod, .nvmrc, .python-version, mise.toml, …) va bu fayllar o‘zgarganda yangilanadi.';
+
+  @override
+  String get reposToolchainsManual => 'Qo‘lda belgilangan: avtomatik aniqlash ularni o‘zgartirmaydi.';
+
+  @override
+  String get reposToolchainsBackToAuto => 'Avtomatik aniqlash';
+
+  @override
+  String reposToolchainFrom(String source) {
+    return '$source dan';
+  }
+
+  @override
+  String reposToolchainRemove(String tool) {
+    return '$tool ni olib tashlash';
+  }
+
+  @override
+  String get reposToolchainAdd => 'Qo‘shish';
+
+  @override
+  String get reposToolchainPh => 'vosita@versiya, masalan python@3.12';
+
+  @override
+  String get reposToolchainBad => 'vosita@versiya ko‘rinishida yozing, masalan node@20 yoki rust@stable.';
+
+  @override
+  String get reposToolchainsNone => 'Hozircha yo‘q: saqlagandan keyin aniqlanadi yoki «Aniqlash» tugmasini bosing.';
+
+  @override
+  String get reposDetect => 'Aniqlash';
+
+  @override
+  String get reposDetectDeep => 'Claude’dan so‘rash';
+
+  @override
+  String get reposDetectDeepHelp =>
+      'Skanerlash buyruqlarni topmasa, Claude README va CI fayllarini o‘qiydi. Taxminan bir daqiqa oladi va Claude tarifingizdan foydalanadi.';
+
+  @override
+  String get reposDetecting => 'Repozitoriy o‘qilmoqda…';
+
+  @override
+  String reposDetectDone(String list) {
+    return 'Topildi: $list.';
+  }
+
+  @override
+  String get reposDetectNothing => 'Ma’lum yig‘ish fayllari topilmadi. Toolchain va buyruqlarni qo‘lda qo‘shing yoki Claude’dan so‘rang.';
+
+  @override
+  String get reposDetectFilled => 'Bo‘sh tekshiruv buyruqlari to‘ldirildi — saqlashdan oldin ko‘rib chiqing.';
+
+  @override
+  String get reposDetectByClaude => 'Claude skanerlash topa olmagan narsalarni to‘ldirdi.';
+
+  @override
+  String get reposDetectNeedsUrl => 'Avval klonlash URL manzilini kiriting.';
+
+  @override
+  String get reposCmdAuto => 'saqlangandan keyin aniqlanadi';
+
+  @override
+  String get reposNotes => 'Aniqlash izohlari';
+
+  @override
+  String get reposAdvanced => 'Qo‘shimcha';
+
+  @override
+  String get reposRunnerImage => 'Ishga tushirish obrazi';
+
+  @override
+  String get reposRunnerImageHelp =>
+      'Ixtiyoriy. Serverda FROM agnts-runner asosida yig‘ilgan obraz — toolchainlar bera olmaydigan tizim kutubxonalari yoki SDK uchun (Android, Flutter). Bo‘sh bo‘lsa — standart obraz.';
+
+  @override
+  String get reposMemory => 'Xotira';
+
+  @override
+  String get reposMemoryHelp =>
+      'Ixtiyoriy, og‘ir yig‘ishlar uchun (JVM, Rust, .NET). Belgilanmasa — server qiymati; server maksimumni cheklaydi (AGNTS_RUN_MEMORY_MAX_MB, standart 8 GB).';
+
+  @override
+  String get reposMemoryDefault => 'Server qiymati';
+
+  @override
+  String get reposBuildEnv => 'Yig‘ish muhiti';
+
+  @override
+  String get reposBuildEnvHelp =>
+      'Har bir ishga tushirish uchun KEY=value qatorlari, masalan, xususiy paket reyestrlari tokenlari (NPM_TOKEN, PIP_INDEX_URL). Shifrlangan holda saqlanadi va boshqa ko‘rsatilmaydi. Claude ishlayotganda ularni o‘qishi mumkin, shuning uchun faqat o‘qish uchun tokenlardan foydalaning.';
+
+  @override
+  String reposBuildEnvSet(String names) {
+    return 'Belgilangan: $names';
+  }
+
+  @override
+  String get reposBuildEnvReplace => 'Almashtirish';
+
+  @override
+  String get reposBuildEnvClear => 'Tozalash';
+
+  @override
+  String get reposBuildEnvCleared => 'Saqlaganda tozalanadi.';
+
+  @override
+  String reposPlane(String project) {
+    return 'Plane $project';
+  }
+
+  @override
+  String get reposPlaneProject => 'Plane loyihasi';
+
+  @override
+  String get reposPlaneHelp =>
+      'Ixtiyoriy. Loyiha identifikatori (WEB-123 dagi WEB). Shu Plane loyihasidagi agnts belgili vazifalar shu yerda bajariladi.';
 
   @override
   String get reviewTitle => 'agnts kod sharhi';
@@ -4521,6 +4855,12 @@ class AppLocalizationsUz extends AppLocalizations {
   String get ticketFailedUnknown => 'Ish toʻxtadi. Tafsilotlar ish logida.';
 
   @override
+  String get ticketRetryNote => 'Qayta urinish uchun izoh';
+
+  @override
+  String get ticketRetryNoteHint => 'Ixtiyoriy. Xatoni qanday chetlab oʻtishni agnts ga yozing; keyingi ish uni xato bilan birga oladi.';
+
+  @override
   String get ticketTakeItMyself => 'Oʻzim qilaman';
 
   @override
@@ -4760,7 +5100,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get ticketDeliveringTitle => 'Yakunlamoqda';
 
   @override
-  String get ticketDeliveringSub => 'Tasdiqlangan hisobotni saqlayapti va soʻragan boʻlsangiz, Jira\'ga yuboryapti.';
+  String get ticketDeliveringSub => 'Tasdiqlangan hisobotni saqlayapti va soʻragan boʻlsangiz, vazifa trekeriga yuboryapti.';
 
   @override
   String get ticketDoneReportTitle => 'Hisobot tasdiqlandi';
@@ -4813,6 +5153,39 @@ class AppLocalizationsUz extends AppLocalizations {
   String ticketTranslateFailed(String error) {
     return 'Tarjima qilib boʻlmadi: $error';
   }
+
+  @override
+  String get ticketSrcPlane => 'Plane';
+
+  @override
+  String ticketReviewSubPlane(String branch) {
+    return 'Serverdan hali hech narsa chiqmadi. Tasdiqlash $branch ni yuboradi, pull request ochadi va Plane vazifasini yangilaydi.';
+  }
+
+  @override
+  String get ticketReviewReportSubPlane =>
+      'Tasdiqlash hisobotni shu yerda saqlaydi va tiketni yopadi. U Plane\'ga faqat quyidagi belgini qoʻysangiz yuboriladi.';
+
+  @override
+  String ticketPostReportPlane(String key) {
+    return 'Hisobotni Plane\'dagi $key ga izoh sifatida ham joylash';
+  }
+
+  @override
+  String ticketApproveReportPostConfirmPlane(String key) {
+    return 'Hisobot tasdiqlansin, tiket yopilsin va hisobot Plane\'dagi $key ga joylansinmi?';
+  }
+
+  @override
+  String ticketDoneReportPostedPlane(String key) {
+    return 'Hisobot shu yerda saqlandi va Plane\'dagi $key ga joylandi.';
+  }
+
+  @override
+  String get ticketPickAny => 'Mos keladiganlarning barchasini tanlang';
+
+  @override
+  String get ticketOtherAnswer => 'Boshqa narsa (ixtiyoriy)';
 
   @override
   String get ticketsTitle => 'Tiketlar';
@@ -4886,7 +5259,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get ticketsBoardEmpty => 'Boʻsh';
 
   @override
-  String get ticketsListSub => 'agnts belgili Jira tiketlari hamda shaxsiy loyihalaringiz uchun yaratgan vazifalaringiz.';
+  String get ticketsListSub => 'agnts belgili Jira va Plane tiketlari hamda shaxsiy loyihalaringiz uchun yaratgan vazifalaringiz.';
 
   @override
   String get ticketsNoMatch => 'Qidiruvingiz boʻyicha tiket topilmadi.';
@@ -4918,6 +5291,9 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get ticketsStatSession => 'Tarif sessiyasi';
+
+  @override
+  String get ticketsSourcePlane => 'Plane';
 
   @override
   String get usageTitle => 'Tarif limitlari';

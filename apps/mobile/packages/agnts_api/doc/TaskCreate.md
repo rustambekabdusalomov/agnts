@@ -16,6 +16,7 @@ Name | Type | Description | Notes
 **afterApprove** | **String** |  | 
 **start** | **String** | ask = analyse and ask first, code = no questions, queue = keep until started | 
 **followUps** | [**FollowUpsMode**](FollowUpsMode.md) |  | [optional] 
+**attachments** | **List&lt;int&gt;** | Uploads to attach to the description | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

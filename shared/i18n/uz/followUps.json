@@ -42,6 +42,8 @@
     "settingHelp": "Tahlil, ish va koʻrik jarayonlari tiketni tugatish uchun yana kerak boʻlgan tiketlarni taklif qiladi: oldindan kerak ishlar, ajratiladigan qismlar, bajarilmagan ishlar, hisobot topgan boʻshliqlar. Qaysilarini yaratishni siz hal qilasiz. Har bir prompt biroz uzayishi sababli sukut boʻyicha oʻchirilgan; tiket buni oʻzi uchun yoqishi mumkin.",
     "notifyLabel": "Keyingi tiketlar taklif qilindi",
     "jiraIssueType": "Davomlar uchun vazifa turi",
-    "jiraIssueTypeHelp": "Davomni Jira'da yaratganingizda agnts ochadigan Jira vazifalari turi. Sukut boʻyicha: Task."
+    "jiraIssueTypeHelp": "Davomni Jira'da yaratganingizda agnts ochadigan Jira vazifalari turi. Sukut boʻyicha: Task.",
+    "targetPlane": "Plane vazifasi",
+    "planeOff": "U yerda vazifa yaratish uchun Plane'ni ulang va repozitoriyni Plane loyihasiga bogʻlang"
   }
 }

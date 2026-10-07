@@ -192,7 +192,7 @@ func TestWorkFollowUpsWaitForDone(t *testing.T) {
 
 	// Changes requested: the rerun replaces open work suggestions; the
 	// dismissed one stays and the prompt says not to suggest it again.
-	if _, err := h.o.RequestChanges(h.ctx, "PAY-1", "Also log refunds.", nil, domain.OriginWeb); err != nil {
+	if _, err := h.o.RequestChanges(h.ctx, "PAY-1", "Also log refunds.", nil, nil, domain.OriginWeb); err != nil {
 		t.Fatal(err)
 	}
 	h.runner.scripts = []script{{result: ok("s2"), edit: "v2", files: map[string]string{orchestrator.SummaryPath: summaryWith(followUp("prerequisite", "Enable refund logs in prod"))}}}
@@ -313,4 +313,45 @@ func slicesContainsFunc[T any](s []T, f func(T) bool) bool {
 		}
 	}
 	return false
+}
+
+// A follow-up of a Jira ticket can go to Plane: the project comes from the
+// repository's Plane project, and the issues are not linked across trackers.
+func TestFollowUpToPlane(t *testing.T) {
+	h := newHarness(t)
+	h.settings.s.SuggestFollowUps = true
+	h.ingest("PAY-1")
+	h.runner.scripts = []script{{result: ok("s"), files: map[string]string{orchestrator.AnalysisPath: analysisWith(
+		followUp("prerequisite", "Add refund_cents column"))}}}
+	h.step()
+	ss := suggestions(t, h, "PAY-1")
+
+	accept := func() orchestrator.AcceptResult {
+		res, err := h.o.AcceptSuggestions(h.ctx, "PAY-1", []orchestrator.AcceptInput{{ID: ss[0].ID, Target: orchestrator.TargetPlane}}, domain.OriginWeb)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return res[0]
+	}
+	if r := accept(); r.Err == nil || !strings.Contains(r.Err.Error(), "no Plane project") {
+		t.Fatalf("accept without a Plane project: %+v", r)
+	}
+	repo, err := h.store.RepositoryByTrackerProject(h.ctx, domain.SourceJira, "PAY")
+	if err != nil {
+		t.Fatal(err)
+	}
+	repo.PlaneProject = "API"
+	if _, err := h.store.UpdateRepository(h.ctx, repo); err != nil {
+		t.Fatal(err)
+	}
+	r := accept()
+	if r.Err != nil || r.Ticket.Key != "API-100" || r.Ticket.Source != domain.SourcePlane || !r.Ticket.Held {
+		t.Fatalf("plane follow-up: %+v", r)
+	}
+	if want := "create API-100|label API-100 code"; strings.Join(h.plane.calls, "|") != want {
+		t.Fatalf("plane calls: %v", h.plane.calls)
+	}
+	if len(h.tracker.calls) != 0 {
+		t.Fatalf("jira calls: %v", h.tracker.calls)
+	}
 }

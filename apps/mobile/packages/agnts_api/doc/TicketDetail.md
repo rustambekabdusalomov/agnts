@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **ticket** | [**Ticket**](Ticket.md) |  | 
 **questions** | [**List&lt;Question&gt;**](Question.md) |  | 
+**attachments** | [**List&lt;Attachment&gt;**](Attachment.md) | Files attached to the task, its answers and retry notes, oldest first | 
 **analysis** | [**Analysis**](Analysis.md) |  | [optional] 
 **result** | [**Result**](Result.md) |  | [optional] 
 **childKey** | **String** | The code task that implements this report, if any | [optional] 

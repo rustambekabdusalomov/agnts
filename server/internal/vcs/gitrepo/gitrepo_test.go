@@ -6,6 +6,7 @@ import (
 	"context"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -14,7 +15,9 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/filemode"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/storage/memory"
 
 	"agnts/internal/domain"
 )
@@ -118,7 +121,7 @@ func TestPrepareArchiveCommitPush(t *testing.T) {
 		"refund.go":   "package main\n",
 		".git/config": "[remote \"origin\"]\nurl = https://evil.example/x.git\n",
 	})
-	sha, files, err := g.Commit(ctx, repo, "agnts/PAY-1", tree, "PAY-1: fix")
+	sha, files, _, err := g.Commit(ctx, repo, "agnts/PAY-1", tree, "PAY-1: fix")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -134,14 +137,14 @@ func TestPrepareArchiveCommitPush(t *testing.T) {
 	}
 
 	// Same tree again: no new commit, same diff against main.
-	sha2, files2, err := g.Commit(ctx, repo, "agnts/PAY-1", tarOf(t, map[string]string{
+	sha2, files2, _, err := g.Commit(ctx, repo, "agnts/PAY-1", tarOf(t, map[string]string{
 		"README.md": "# demo\n", "main.go": "package main\n\nfunc main() { println(\"hi\") }\n", "refund.go": "package main\n",
 	}), "PAY-1: again")
 	if err != nil || sha2 != sha || len(files2) != 3 {
 		t.Fatalf("unchanged commit: %s vs %s, %d files, %v", sha2, sha, len(files2), err)
 	}
 
-	r, _ := git.PlainOpen(g.checkoutDir(repo, "agnts/PAY-1"))
+	r, _ := git.PlainOpen(g.mirrorDir(repo))
 	c, _ := r.CommitObject(plumbing.NewHash(sha))
 	if c.Author.Email != "rustam@example.com" || c.Message != "PAY-1: fix" {
 		t.Fatalf("commit: %+v", c)
@@ -165,39 +168,230 @@ func TestPrepareArchiveCommitPush(t *testing.T) {
 	if err := g2.Prepare(ctx, repo, "agnts/PAY-1"); err != nil {
 		t.Fatal(err)
 	}
-	b, _ := os.ReadFile(filepath.Join(g2.checkoutDir(repo, "agnts/PAY-1"), "refund.go"))
-	if string(b) != "package main\n" {
+	if archived(t, g2, repo, "agnts/PAY-1")["refund.go"] != "package main\n" {
 		t.Fatal("second checkout did not start from the pushed branch")
 	}
 }
 
-func TestExtractRejectsEscapes(t *testing.T) {
+func TestBuildTreeRejectsEscapes(t *testing.T) {
+	build := func(hs ...*tar.Header) (*memory.Storage, plumbing.Hash, []string, error) {
+		var buf bytes.Buffer
+		tw := tar.NewWriter(&buf)
+		for _, h := range hs {
+			_ = tw.WriteHeader(h)
+			if h.Size > 0 {
+				_, _ = tw.Write(bytes.Repeat([]byte("x"), int(h.Size)))
+			}
+		}
+		_ = tw.Close()
+		s := memory.NewStorage()
+		h, dropped, err := buildTree(s, &buf, nil)
+		return s, h, dropped, err
+	}
 	for name, entry := range map[string]*tar.Header{
 		"dotdot":   {Name: "../evil", Typeflag: tar.TypeReg, Mode: 0o644},
 		"absolute": {Name: "/etc/evil", Typeflag: tar.TypeReg, Mode: 0o644},
-		"symlink":  {Name: "link", Typeflag: tar.TypeSymlink, Linkname: "../../etc/passwd"},
-		"abs link": {Name: "link", Typeflag: tar.TypeSymlink, Linkname: "/etc/passwd"},
 	} {
-		var buf bytes.Buffer
-		tw := tar.NewWriter(&buf)
-		_ = tw.WriteHeader(entry)
-		_ = tw.Close()
-		if err := extract(&buf, t.TempDir()); err == nil {
+		if _, _, _, err := build(entry); err == nil {
 			t.Errorf("%s: accepted", name)
 		}
 	}
-	dir := t.TempDir()
-	var buf bytes.Buffer
-	tw := tar.NewWriter(&buf)
-	_ = tw.WriteHeader(&tar.Header{Name: "pkg/ok.go", Typeflag: tar.TypeReg, Mode: 0o755, Size: 2})
-	_, _ = tw.Write([]byte("ok"))
-	_ = tw.WriteHeader(&tar.Header{Name: "pkg/link", Typeflag: tar.TypeSymlink, Linkname: "ok.go"})
-	_ = tw.Close()
-	if err := extract(&buf, dir); err != nil {
+	// Links out of the repository are left out, not followed or fatal.
+	for name, entry := range map[string]*tar.Header{
+		"symlink":  {Name: "link", Typeflag: tar.TypeSymlink, Linkname: "../../etc/passwd"},
+		"abs link": {Name: "link", Typeflag: tar.TypeSymlink, Linkname: "/etc/passwd"},
+		"parent":   {Name: "website/dist", Typeflag: tar.TypeSymlink, Linkname: "../.."},
+	} {
+		s, h, dropped, err := build(entry)
+		if err != nil || len(dropped) != 1 || dropped[0] != entry.Name {
+			t.Errorf("%s: dropped %v, err %v", name, dropped, err)
+		}
+		if tr, _ := object.GetTree(s, h); tr == nil || len(tr.Entries) != 0 {
+			t.Errorf("%s: link stored", name)
+		}
+	}
+	s, h, dropped, err := build(
+		&tar.Header{Name: "pkg/ok.go", Typeflag: tar.TypeReg, Mode: 0o755, Size: 2},
+		&tar.Header{Name: "pkg/link", Typeflag: tar.TypeSymlink, Linkname: "ok.go"},
+		&tar.Header{Name: ".git/config", Typeflag: tar.TypeReg, Mode: 0o644, Size: 1},
+	)
+	if err != nil || dropped != nil {
+		t.Fatal(dropped, err)
+	}
+	tr, _ := object.GetTree(s, h)
+	if len(tr.Entries) != 1 || tr.Entries[0].Name != "pkg" {
+		t.Fatalf("root entries: %+v", tr.Entries)
+	}
+	if e, err := tr.FindEntry("pkg/ok.go"); err != nil || e.Mode != filemode.Executable {
+		t.Fatalf("executable bit lost: %+v %v", e, err)
+	}
+	if e, err := tr.FindEntry("pkg/link"); err != nil || e.Mode != filemode.Symlink {
+		t.Fatalf("link: %+v %v", e, err)
+	}
+}
+
+// archived returns the regular files of branch's archive.
+func archived(t *testing.T, g *Repos, repo domain.Repository, branch string) map[string]string {
+	t.Helper()
+	rc, err := g.Archive(context.Background(), repo, branch)
+	if err != nil {
 		t.Fatal(err)
 	}
-	if fi, err := os.Stat(filepath.Join(dir, "pkg", "ok.go")); err != nil || fi.Mode().Perm()&0o100 == 0 {
-		t.Fatalf("executable bit lost: %v %v", fi, err)
+	defer func() { _ = rc.Close() }()
+	out := map[string]string{}
+	tr := tar.NewReader(rc)
+	for {
+		h, err := tr.Next()
+		if err == io.EOF {
+			return out
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+		if h.Typeflag == tar.TypeReg && !strings.HasPrefix(h.Name, ".git/") {
+			b, _ := io.ReadAll(tr)
+			out[h.Name] = string(b)
+		}
+	}
+}
+
+// unpack extracts branch's archive into a new directory.
+func unpack(t *testing.T, g *Repos, repo domain.Repository, branch string) string {
+	t.Helper()
+	dir := t.TempDir()
+	rc, err := g.Archive(context.Background(), repo, branch)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = rc.Close() }()
+	tr := tar.NewReader(rc)
+	for {
+		h, err := tr.Next()
+		if err == io.EOF {
+			return dir
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+		p := filepath.Join(dir, filepath.FromSlash(h.Name))
+		switch h.Typeflag {
+		case tar.TypeDir:
+			_ = os.MkdirAll(p, 0o750)
+		case tar.TypeSymlink:
+			_ = os.Symlink(h.Linkname, p)
+		case tar.TypeReg:
+			b, _ := io.ReadAll(tr)
+			if err := os.WriteFile(p, b, os.FileMode(h.Mode)); err != nil { //nolint:gosec // test archive
+				t.Fatal(err)
+			}
+		}
+	}
+}
+
+// Every branch lives in the one mirror: a second ticket fetches, it never
+// clones again.
+func TestBranchesShareTheMirror(t *testing.T) {
+	ctx := context.Background()
+	bare := upstream(t)
+	g := newRepos(t)
+	repo := domain.Repository{Name: "demo", CloneURL: bare, DefaultBranch: "main", Provider: "github"}
+	for _, b := range []string{"agnts/PAY-1", "agnts/PAY-2", "main"} {
+		if err := g.Prepare(ctx, repo, b); err != nil {
+			t.Fatal(err)
+		}
+	}
+	entries, _ := os.ReadDir(g.repoDir(repo))
+	if len(entries) != 1 || entries[0].Name() != mirrorName {
+		t.Fatalf("repository directory: %v", entries)
+	}
+	if got := archived(t, g, repo, "agnts/PAY-2")["README.md"]; got != "# demo\n" {
+		t.Fatalf("PAY-2 README: %q", got)
+	}
+}
+
+// The archive's .git is a working repository for the git CLI in the
+// workspace: clean status, history, and only its own branch.
+func TestArchiveIsAGitCheckout(t *testing.T) {
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git not installed")
+	}
+	ctx := context.Background()
+	bare := upstream(t)
+	g := newRepos(t)
+	repo := domain.Repository{Name: "demo", CloneURL: bare, DefaultBranch: "main", Provider: "github"}
+	for _, b := range []string{"agnts/PAY-1", "agnts/PAY-2"} {
+		if err := g.Prepare(ctx, repo, b); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, _, _, err := g.Commit(ctx, repo, "agnts/PAY-1", tarOf(t, map[string]string{"README.md": "# one\n", "run.sh": "#!/bin/sh\n"}), "PAY-1: one"); err != nil {
+		t.Fatal(err)
+	}
+	dir := unpack(t, g, repo, "agnts/PAY-1")
+	run := func(args ...string) string {
+		t.Helper()
+		cmd := exec.Command("git", append([]string{"-C", dir}, args...)...) //nolint:gosec // test
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatalf("git %v: %v\n%s", args, err, out)
+		}
+		return strings.TrimSpace(string(out))
+	}
+	if st := run("status", "--porcelain"); st != "" {
+		t.Fatalf("status not clean:\n%s", st)
+	}
+	if log := run("log", "--format=%s"); log != "PAY-1: one\ninit" {
+		t.Fatalf("log: %q", log)
+	}
+	if br := run("branch", "--list", "--format=%(refname:short)"); br != "agnts/PAY-1" {
+		t.Fatalf("branches: %q", br)
+	}
+	if d := run("diff", "--stat", "origin/main"); !strings.Contains(d, "README.md") {
+		t.Fatalf("diff against origin/main: %q", d)
+	}
+	run("fsck", "--no-dangling")
+}
+
+// Checkouts from before the mirror are imported, commits not pushed yet
+// included, and removed.
+func TestImportsOldCheckouts(t *testing.T) {
+	ctx := context.Background()
+	bare := upstream(t)
+	g := newRepos(t)
+	repo := domain.Repository{Name: "demo", CloneURL: bare, DefaultBranch: "main", Provider: "github"}
+
+	old := filepath.Join(g.repoDir(repo), "agnts_PAY-9")
+	r, err := git.PlainClone(old, false, &git.CloneOptions{URL: bare, ReferenceName: plumbing.NewBranchReferenceName("main")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	local := plumbing.NewBranchReferenceName("agnts/PAY-9")
+	head, _ := r.Head()
+	_ = r.Storer.SetReference(plumbing.NewHashReference(local, head.Hash()))
+	wt, _ := r.Worktree()
+	if err := wt.Checkout(&git.CheckoutOptions{Branch: local}); err != nil {
+		t.Fatal(err)
+	}
+	_ = os.WriteFile(filepath.Join(old, "wip.go"), []byte("package main\n"), 0o600)
+	_, _ = wt.Add("wip.go")
+	sig := &object.Signature{Name: "a", Email: "a@x", When: time.Now()}
+	unpushed, err := wt.Commit("PAY-9: wip", &git.CommitOptions{Author: sig})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := g.LocalBranches(repo)
+	if err != nil || len(got) != 1 || got[0].Name != "agnts/PAY-9" || got[0].SHA != unpushed.String() {
+		t.Fatalf("imported branches: %+v %v", got, err)
+	}
+	if _, err := os.Stat(old); !os.IsNotExist(err) {
+		t.Fatalf("old checkout kept: %v", err)
+	}
+	if err := g.Prepare(ctx, repo, "agnts/PAY-9"); err != nil {
+		t.Fatal(err)
+	}
+	if archived(t, g, repo, "agnts/PAY-9")["wip.go"] != "package main\n" {
+		t.Fatal("unpushed commit lost")
 	}
 }
 
@@ -233,14 +427,14 @@ func TestLocalBranches(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if _, _, err := g.Commit(ctx, repo, "agnts/PAY-1", tarOf(t, map[string]string{"README.md": "# one\n"}), "PAY-1: one"); err != nil {
+	if _, _, _, err := g.Commit(ctx, repo, "agnts/PAY-1", tarOf(t, map[string]string{"README.md": "# one\n"}), "PAY-1: one"); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, err := g.Commit(ctx, repo, "agnts/PAY-1", tarOf(t, map[string]string{"README.md": "# two\n"}), "PAY-1: two"); err != nil {
+	if _, _, _, err := g.Commit(ctx, repo, "agnts/PAY-1", tarOf(t, map[string]string{"README.md": "# two\n"}), "PAY-1: two"); err != nil {
 		t.Fatal(err)
 	}
 	// PAY-2: one commit, pushed.
-	if _, _, err := g.Commit(ctx, repo, "agnts/PAY-2", tarOf(t, map[string]string{"README.md": "# pay2\n"}), "PAY-2: change"); err != nil {
+	if _, _, _, err := g.Commit(ctx, repo, "agnts/PAY-2", tarOf(t, map[string]string{"README.md": "# pay2\n"}), "PAY-2: change"); err != nil {
 		t.Fatal(err)
 	}
 	if err := g.Push(ctx, repo, "agnts/PAY-2"); err != nil {
@@ -275,7 +469,7 @@ func mergeToMain(t *testing.T, g *Repos, repo domain.Repository, branch string, 
 	if err := g.Prepare(ctx, repo, branch); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, err := g.Commit(ctx, repo, branch, tarOf(t, files), branch); err != nil {
+	if _, _, _, err := g.Commit(ctx, repo, branch, tarOf(t, files), branch); err != nil {
 		t.Fatal(err)
 	}
 	if err := g.PushTo(ctx, repo, branch, "main"); err != nil {
@@ -302,19 +496,18 @@ func TestUnstartedBranchFollowsDefault(t *testing.T) {
 	if err := g.Prepare(ctx, repo, "agnts/PAY-2"); err != nil {
 		t.Fatal(err)
 	}
-	b, err := os.ReadFile(filepath.Join(g.checkoutDir(repo, "agnts/PAY-2"), "tasks.go"))
-	if err != nil || !strings.Contains(string(b), "func tasks") {
-		t.Fatalf("unstarted branch did not follow main: %q %v", b, err)
+	if b := archived(t, g, repo, "agnts/PAY-2")["tasks.go"]; !strings.Contains(b, "func tasks") {
+		t.Fatalf("unstarted branch did not follow main: %q", b)
 	}
 
 	// A branch with commits of its own is never moved.
-	if _, _, err := g.Commit(ctx, repo, "agnts/PAY-2", tarOf(t, map[string]string{
+	if _, _, _, err := g.Commit(ctx, repo, "agnts/PAY-2", tarOf(t, map[string]string{
 		"README.md": "# demo\n", "main.go": "package main\n\nfunc main() { tasks(); list() }\n", "old.txt": "remove me\n",
 		"tasks.go": "package main\n\nfunc tasks() {}\n", "list.go": "package main\n\nfunc list() {}\n",
 	}), "PAY-2"); err != nil {
 		t.Fatal(err)
 	}
-	r, _ := git.PlainOpen(g.checkoutDir(repo, "agnts/PAY-2"))
+	r, _ := git.PlainOpen(g.mirrorDir(repo))
 	before, _ := r.Reference(plumbing.NewBranchReferenceName("agnts/PAY-2"), true)
 	mergeToMain(t, g, repo, "agnts/PAY-3", map[string]string{
 		"README.md": "# demo, now with docs\n", "main.go": "package main\n\nfunc main() { tasks(); audit() }\n", "old.txt": "remove me\n",
@@ -341,7 +534,7 @@ func TestUnstartedBranchFollowsDefault(t *testing.T) {
 	if len(drift) != 2 || !paths["main.go"] || !paths["README.md"] {
 		t.Fatalf("drift: %+v", drift)
 	}
-	r2, _ := git.PlainOpen(g.checkoutDir(repo, "agnts/PAY-2"))
+	r2, _ := git.PlainOpen(g.mirrorDir(repo))
 	head, _ := r2.Reference(plumbing.NewBranchReferenceName("agnts/PAY-2"), true)
 	mine, err := branchDiff(r2, "main", head.Hash())
 	if err != nil {
@@ -356,4 +549,41 @@ func TestUnstartedBranchFollowsDefault(t *testing.T) {
 	if len(hit) != 1 || hit[0] != "main.go" {
 		t.Fatalf("line conflicts with drift: %v (mine %+v)", hit, mine)
 	}
+}
+
+// Tree listings are kept by git tree hash: a branch cut from main reuses
+// main's, an edit makes a new one, and callers cannot change the cached one.
+func TestTreeCache(t *testing.T) {
+	ctx := context.Background()
+	bare := upstream(t)
+	g := newRepos(t)
+	repo := domain.Repository{Name: "demo", CloneURL: bare, DefaultBranch: "main", Provider: "github"}
+	for _, b := range []string{"main", "agnts/PAY-1"} {
+		if err := g.Prepare(ctx, repo, b); err != nil {
+			t.Fatal(err)
+		}
+	}
+	first, err := g.Tree(ctx, repo, "main")
+	if err != nil || !hasKey(first, "main.go") {
+		t.Fatalf("tree: %v %v", first, err)
+	}
+	first["main.go"] = []byte("changed by a caller")
+	delete(first, "README.md")
+	again, err := g.Tree(ctx, repo, "agnts/PAY-1") // same tree as main
+	if err != nil || len(g.trees.order) != 1 || !hasKey(again, "README.md") || string(again["main.go"]) == "changed by a caller" {
+		t.Fatalf("cached listing: %d entries, %v %v", len(g.trees.order), again, err)
+	}
+
+	if _, _, _, err := g.Commit(ctx, repo, "agnts/PAY-1", tarOf(t, map[string]string{"README.md": "# demo\n", "go.mod": "module demo\n\ngo 1.24\n"}), "PAY-1"); err != nil {
+		t.Fatal(err)
+	}
+	edited, err := g.Tree(ctx, repo, "agnts/PAY-1")
+	if err != nil || len(g.trees.order) != 2 || string(edited["go.mod"]) != "module demo\n\ngo 1.24\n" || hasKey(edited, "main.go") {
+		t.Fatalf("after an edit: %d entries, %v %v", len(g.trees.order), edited, err)
+	}
+}
+
+func hasKey(t map[string][]byte, k string) bool {
+	_, ok := t[k]
+	return ok
 }

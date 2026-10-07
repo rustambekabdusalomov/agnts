@@ -410,7 +410,7 @@ function exportCsv() {
                 <td class="ttitle"><RouterLink :to="`/repos/${r.repoId}`">{{ r.name }}</RouterLink></td>
                 <td>
                   <span v-if="r.kind === 'side'" class="src local">{{ t('analytics.srcTask') }}</span>
-                  <span v-else class="src">{{ t('analytics.srcJira') }}</span>
+                  <span v-else class="src">{{ r.kind === 'plane' ? t('analytics.srcPlane') : t('analytics.srcJira') }}</span>
                 </td>
                 <td>{{ r.tickets }}</td>
                 <td>

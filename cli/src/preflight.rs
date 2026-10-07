@@ -1,13 +1,11 @@
-//! Checks that the server can run agnts. Shared by `install` and `doctor`.
+//! Checks that the server's OS, architecture and ports suit agnts. Shared by
+//! `install`, `capacity` and `doctor`; sizing is in `capacity`.
 
 use std::collections::HashMap;
 
 use anyhow::Result;
 
 use crate::target::{Cmd, Target};
-
-pub const MIN_MEM_KB: u64 = 1_900_000; // 2 GB, minus what the kernel reserves
-pub const MIN_DISK_KB: u64 = 20 * 1024 * 1024;
 
 #[derive(Clone, Debug, Default)]
 pub struct HostInfo {
@@ -58,13 +56,6 @@ pub fn supported_os(id: &str, version: &str) -> bool {
         (id, version),
         ("ubuntu", "22.04") | ("ubuntu", "24.04") | ("debian", "12")
     )
-}
-
-pub fn parse_meminfo_kb(text: &str) -> Option<u64> {
-    text.lines()
-        .find_map(|l| l.strip_prefix("MemTotal:"))
-        .and_then(|v| v.split_whitespace().next())
-        .and_then(|v| v.parse().ok())
 }
 
 /// Available KB from `df -Pk <path>`.
@@ -131,30 +122,6 @@ pub fn run(t: &dyn Target, installed: bool) -> Result<(HostInfo, Vec<Finding>)> 
         )),
     }
 
-    let mem = parse_meminfo_kb(&t.read_text("/proc/meminfo")?.unwrap_or_default()).unwrap_or(0);
-    let gb = |kb: u64| format!("{:.1} GB", kb as f64 / 1024.0 / 1024.0);
-    if mem >= MIN_MEM_KB {
-        f.push(Finding::pass("Memory", gb(mem)));
-    } else {
-        f.push(Finding::fail(
-            "Memory",
-            gb(mem),
-            "agnts needs at least 2 GB of RAM; pick a bigger server",
-        ));
-    }
-
-    let df = t.run(&Cmd::new(["df", "-Pk", "/"]))?;
-    let disk = parse_df_avail_kb(&df.text()).unwrap_or(0);
-    if disk >= MIN_DISK_KB {
-        f.push(Finding::pass("Free disk", gb(disk)));
-    } else {
-        f.push(Finding::fail(
-            "Free disk",
-            gb(disk),
-            "agnts needs at least 20 GB free on /; free some space or resize the disk",
-        ));
-    }
-
     let ss = t.run(&Cmd::new(["ss", "-H", "-ltnp"]))?;
     if ss.success() {
         let busy: Vec<(u16, String)> = parse_listeners(&ss.text())
@@ -191,10 +158,6 @@ mod tests {
         let os = parse_os_release("ID=ubuntu\nVERSION_ID=\"24.04\"\n");
         assert!(supported_os(&os["ID"], &os["VERSION_ID"]));
         assert!(!supported_os("centos", "9"));
-        assert_eq!(
-            parse_meminfo_kb("MemTotal:        4028248 kB\n"),
-            Some(4028248)
-        );
         let df = "Filesystem 1024-blocks Used Available Capacity Mounted on\n/dev/sda1 80000000 1000 50000000 2% /\n";
         assert_eq!(parse_df_avail_kb(df), Some(50000000));
         let ss = r#"LISTEN 0 4096 0.0.0.0:80 0.0.0.0:* users:(("docker-proxy",pid=10,fd=4))
@@ -207,19 +170,16 @@ LISTEN 0 128 0.0.0.0:22 0.0.0.0:* users:(("sshd",pid=1,fd=3))"#;
     }
 
     #[test]
-    fn flags_a_small_server() {
+    fn flags_an_unsupported_os() {
         let t = FakeTarget::new();
         t.put(
             "/etc/os-release",
-            "ID=ubuntu\nVERSION_ID=\"24.04\"\nPRETTY_NAME=\"Ubuntu 24.04\"\n",
-        )
-        .put("/proc/meminfo", "MemTotal: 1000000 kB\n");
-        t.on("uname", 0, "x86_64\n")
-            .on("df -Pk", 0, "h\n/dev/sda 1 1 99999999 1% /\n")
-            .on("ss -H", 0, "");
+            "ID=centos\nVERSION_ID=\"9\"\nPRETTY_NAME=\"CentOS Stream 9\"\n",
+        );
+        t.on("uname", 0, "aarch64\n").on("ss -H", 0, "");
         let (info, f) = run(&t, false).unwrap();
-        assert_eq!(info.os_id, "ubuntu");
+        assert_eq!(info.os_id, "centos");
         let failed: Vec<&str> = f.iter().filter(|x| !x.ok).map(|x| x.name).collect();
-        assert_eq!(failed, vec!["Memory"]);
+        assert_eq!(failed, vec!["Operating system", "Architecture"]);
     }
 }

@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"path"
 	"strconv"
 	"strings"
@@ -36,11 +37,15 @@ type Config struct {
 	MemoryMB int64
 	CPUs     float64
 	PIDs     int64
+	// MaxMemoryMB caps a repository's memory override.
+	MaxMemoryMB int64
+	// ToolchainVolume is the shared volume mise installs toolchains into.
+	ToolchainVolume string
 }
 
 // DefaultConfig returns limits for a small VPS.
 func DefaultConfig() Config {
-	return Config{Network: "agnts-runs", MemoryMB: 4096, CPUs: 2, PIDs: 1024}
+	return Config{Network: "agnts-runs", MemoryMB: 4096, CPUs: 2, PIDs: 1024, MaxMemoryMB: 8192, ToolchainVolume: "agnts-toolchains"}
 }
 
 // TokenSource returns the Claude OAuth token at the moment a run starts,
@@ -55,6 +60,7 @@ type Runner struct {
 
 	netOnce sync.Once
 	netErr  error
+	prov    provisioner
 }
 
 var _ orchestrator.Runner = (*Runner)(nil)
@@ -71,6 +77,29 @@ func (r *Runner) Open(ctx context.Context, spec orchestrator.WorkspaceSpec) (orc
 	if r.netErr != nil {
 		return nil, fmt.Errorf("run network: %w", r.netErr)
 	}
+	specs := specsOf(spec.Toolchains)
+	var prov provisioned
+	if len(specs) > 0 {
+		var err error
+		if prov, err = r.provision(ctx, spec.Image, specs, spec.Progress); err != nil {
+			return nil, err
+		}
+	}
+	var mounts []Mount
+	if len(spec.Toolchains) > 0 {
+		mounts = append(mounts, Mount{Volume: r.cfg.ToolchainVolume, Target: toolchainDir, ReadOnly: true})
+	}
+	if spec.CacheKey != "" {
+		vol := "agnts-cache-" + sanitize(spec.CacheKey)
+		if err := r.docker.EnsureVolume(ctx, vol, map[string]string{"agnts": "cache", "agnts.cache": spec.CacheKey}); err != nil {
+			return nil, fmt.Errorf("cache volume: %w", err)
+		}
+		mounts = append(mounts, Mount{Volume: vol, Target: cacheDir})
+	}
+	memory := r.cfg.MemoryMB
+	if spec.MemoryMB > 0 {
+		memory = min(int64(spec.MemoryMB), max(r.cfg.MaxMemoryMB, r.cfg.MemoryMB))
+	}
 	suffix := make([]byte, 3)
 	_, _ = rand.Read(suffix)
 	id, err := r.docker.Create(ctx, ContainerConfig{
@@ -81,12 +110,13 @@ func (r *Runner) Open(ctx context.Context, spec orchestrator.WorkspaceSpec) (orc
 		Cmd:        []string{"sleep", "infinity"},
 		Labels:     map[string]string{"agnts.ticket": spec.TicketKey},
 		Network:    r.cfg.Network,
-		MemoryMB:   r.cfg.MemoryMB,
+		MemoryMB:   memory,
 		CPUs:       r.cfg.CPUs,
 		PIDs:       r.cfg.PIDs,
 		Volumes:    []string{workDir, homeDir, outDir},
+		Mounts:     mounts,
 		Tmpfs:      map[string]string{"/tmp": "rw,exec,nosuid,size=2g"},
-		Env:        proxyEnv(r.cfg.Proxy),
+		Env:        runEnv(r.cfg.Proxy, spec.Toolchains, prov, spec.Env),
 	})
 	if err != nil {
 		return nil, err
@@ -107,6 +137,15 @@ func (r *Runner) Open(ctx context.Context, spec orchestrator.WorkspaceSpec) (orc
 	if err := r.docker.Start(ctx, id); err != nil {
 		return fail(err)
 	}
+	if len(spec.Toolchains) > 0 {
+		res, err := ws.Exec(ctx, setupScript, 5*time.Minute)
+		if out := strings.TrimSpace(res.Output); spec.Progress != nil && (err != nil || out != "") {
+			if err != nil {
+				out = err.Error()
+			}
+			spec.Progress("environment setup: " + tail(out, 1000))
+		}
+	}
 	return ws, nil
 }
 
@@ -120,7 +159,19 @@ func proxyEnv(proxy string) []string {
 	for _, k := range []string{"HTTPS_PROXY", "HTTP_PROXY", "https_proxy", "http_proxy"} {
 		env = append(env, k+"="+proxy)
 	}
-	return append(env, "NO_PROXY=localhost,127.0.0.1", "no_proxy=localhost,127.0.0.1")
+	env = append(env, "NO_PROXY=localhost,127.0.0.1", "no_proxy=localhost,127.0.0.1")
+	// The JVM ignores the variables above: Maven, Gradle and sbt need
+	// system properties, which JAVA_TOOL_OPTIONS gives every JVM.
+	if u, err := url.Parse(proxy); err == nil && u.Hostname() != "" {
+		port := u.Port()
+		if port == "" {
+			port = "80"
+		}
+		h := u.Hostname()
+		env = append(env, "JAVA_TOOL_OPTIONS=-Dhttp.proxyHost="+h+" -Dhttp.proxyPort="+port+
+			" -Dhttps.proxyHost="+h+" -Dhttps.proxyPort="+port+" -Dhttp.nonProxyHosts=localhost|127.0.0.1")
+	}
+	return env
 }
 
 type workspace struct {

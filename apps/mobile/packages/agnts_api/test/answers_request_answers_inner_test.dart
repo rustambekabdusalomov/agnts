@@ -12,6 +12,7 @@ void main() {
       // TODO
     });
 
+    // For a multiple-choice question, the chosen options, one per line
     // String answer
     test('to test the property `answer`', () async {
       // TODO
@@ -19,6 +20,12 @@ void main() {
 
     // String note
     test('to test the property `note`', () async {
+      // TODO
+    });
+
+    // Uploads to attach to this answer
+    // List<int> attachments
+    test('to test the property `attachments`', () async {
       // TODO
     });
 

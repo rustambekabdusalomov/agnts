@@ -1,11 +1,14 @@
 package httpapi
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -14,17 +17,46 @@ import (
 )
 
 type fakeTickets struct {
-	lastPost      bool
-	lastKind      string
-	lastTask      orchestrator.TaskInput
-	lastImplement orchestrator.ImplementInput
-	lastOrigin    domain.Origin
-	lastAnswer    []domain.Answer
-	lastAccept    []orchestrator.AcceptInput
-	lastFollowUps *bool
-	lastRelation  string
-	lastCompare   *bool
-	lastShots     []domain.ShotRef
+	lastPost          bool
+	lastKind          string
+	lastTask          orchestrator.TaskInput
+	lastImplement     orchestrator.ImplementInput
+	lastOrigin        domain.Origin
+	lastAnswer        []domain.Answer
+	lastAccept        []orchestrator.AcceptInput
+	lastFollowUps     *bool
+	lastRelation      string
+	lastCompare       *bool
+	lastShots         []domain.ShotRef
+	lastNote          string
+	lastFiles         []int64
+	lastFeedbackFiles []int64
+	lastUpload        string
+}
+
+func (f *fakeTickets) Upload(_ context.Context, name string, data []byte) (domain.Attachment, error) {
+	f.lastUpload = name + ":" + string(data)
+	return domain.Attachment{ID: 9, Name: name, ContentType: "image/png", Size: int64(len(data)), Purpose: domain.AttachPending}, nil
+}
+
+func (f *fakeTickets) OpenAttachment(_ context.Context, id int64) (domain.Attachment, []byte, error) {
+	switch id {
+	case 9:
+		return domain.Attachment{ID: 9, Name: "shot.png", ContentType: "image/png"}, []byte("PNGDATA"), nil
+	case 10:
+		return domain.Attachment{ID: 10, Name: "page.html", ContentType: "text/html"}, []byte("<script>"), nil
+	}
+	return domain.Attachment{}, nil, domain.ErrNotFound
+}
+
+func (f *fakeTickets) DeleteUpload(_ context.Context, id int64) error {
+	switch id {
+	case 9:
+		return nil
+	case 10:
+		return fmt.Errorf("page.html is attached to a ticket: %w", domain.ErrConflict)
+	}
+	return domain.ErrNotFound
 }
 
 func (f *fakeTickets) ListRelations(_ context.Context, key string) (orchestrator.Relations, error) {
@@ -120,11 +152,13 @@ func (f *fakeTickets) List(_ context.Context, fl orchestrator.TicketFilter) ([]d
 func (f *fakeTickets) View(_ context.Context, key string) (orchestrator.TicketView, error) {
 	t, err := f.ticket(key, domain.StateWaitingForReview)
 	ans := "half up"
+	qid := int64(9)
 	return orchestrator.TicketView{
-		Ticket:    t,
-		Settings:  domain.DefaultSettings(),
-		Questions: []domain.Question{{ID: 9, Position: 1, Text: "Rounding?", Options: []string{"a"}, Answer: &ans}},
-		Analysis:  &orchestrator.Analysis{Summary: "s", Plan: []string{"p"}, Footprint: &domain.Footprint{Files: []string{"./a.go"}, Migrations: true}},
+		Ticket:      t,
+		Settings:    domain.DefaultSettings(),
+		Questions:   []domain.Question{{ID: 9, Position: 1, Text: "Rounding?", Options: []string{"a", "b"}, Multiple: true, Answer: &ans}},
+		Attachments: []domain.Attachment{{ID: 4, TicketID: &t.ID, QuestionID: &qid, Purpose: domain.AttachAnswer, Name: "a.png", ContentType: "image/png", Size: 3}},
+		Analysis:    &orchestrator.Analysis{Summary: "s", Plan: []string{"p"}, Footprint: &domain.Footprint{Files: []string{"./a.go"}, Migrations: true}},
 		Result: &domain.Result{
 			Summary: json.RawMessage(`{"summary":"did it","notes":["n"]}`),
 			Tests:   json.RawMessage(`[{"name":"test","command":"go test","exit_code":0,"duration_ms":1200}]`),
@@ -169,8 +203,8 @@ func (f *fakeTickets) Approve(_ context.Context, key string, _ []string, post bo
 	return f.ticket(key, domain.StatePushing)
 }
 
-func (f *fakeTickets) RequestChanges(_ context.Context, key, fb string, shots []domain.ShotRef, o domain.Origin) (domain.Ticket, error) {
-	f.lastShots = shots
+func (f *fakeTickets) RequestChanges(_ context.Context, key, fb string, shots []domain.ShotRef, files []int64, o domain.Origin) (domain.Ticket, error) {
+	f.lastShots, f.lastFeedbackFiles = shots, files
 	f.lastOrigin = o
 	if strings.TrimSpace(fb) == "" {
 		return domain.Ticket{}, fmt.Errorf("%w: feedback is required", orchestrator.ErrInvalid)
@@ -183,8 +217,8 @@ func (f *fakeTickets) Reject(_ context.Context, key, _ string, o domain.Origin) 
 	return f.ticket(key, domain.StateRejected)
 }
 
-func (f *fakeTickets) Retry(_ context.Context, key string, o domain.Origin) (domain.Ticket, error) {
-	f.lastOrigin = o
+func (f *fakeTickets) RetryWithNote(_ context.Context, key, note string, files []int64, o domain.Origin) (domain.Ticket, error) {
+	f.lastOrigin, f.lastNote, f.lastFiles = o, note, files
 	return f.ticket(key, domain.StateNew)
 }
 
@@ -311,7 +345,7 @@ func TestTicketEndpoints(t *testing.T) {
 		{"GET", "/api/tickets/PAY-1", "", 200, `"spendByStage":[{"calls":1,"model":"opus","partial":false,"spend":{"cacheRead":500,"cacheWrite":0,"costUsd":0.25,"input":20,"output":5,"total":525},"stage":"coding","turns":4},{"calls":2,"model":"opus","partial":true,"spend":{"cacheRead":0,"cacheWrite":60,"costUsd":0,"input":10,"output":2,"total":72},"stage":"retry","turns":3}]`},
 		{"GET", "/api/tickets/NOPE-1", "", 404, `not_found`},
 		{"GET", "/api/tickets/PAY-1/events?after=4", "", 200, `"message":"Read: a.go"`},
-		{"PUT", "/api/tickets/PAY-1/answers", `{"answers":[{"questionId":9,"answer":"half up","note":"n"}]}`, 200, `"state":"coding"`},
+		{"PUT", "/api/tickets/PAY-1/answers", `{"answers":[{"questionId":9,"answer":"half up","note":"n","attachments":[4]}]}`, 200, `"state":"coding"`},
 		{"POST", "/api/tickets/PAY-1/approve", "", 200, `"state":"pushing"`},
 		{"POST", "/api/tickets/PAY-1/approve", `{"assignees":["alice"]}`, 200, `"state":"pushing"`},
 		{"POST", "/api/tickets/PAY-1/approve", `{"assignees":"alice"}`, 400, `bad_request`},
@@ -329,7 +363,7 @@ func TestTicketEndpoints(t *testing.T) {
 		{"GET", "/api/tickets/PAY-1/preview/42/shots/home-phone-after", "", 200, `PNG`},
 		{"GET", "/api/tickets/PAY-1/preview/41/shots/home-phone-after", "", 404, `not_found`},
 		{"GET", "/api/tickets/PAY-1/preview/42/shots/..%2Fsecret", "", 404, `not_found`},
-		{"POST", "/api/tickets/PAY-1/request-changes", `{"feedback":"fix it","shots":[{"runId":42,"shotId":"home-phone-after"}]}`, 200, `"state":"coding"`},
+		{"POST", "/api/tickets/PAY-1/request-changes", `{"feedback":"fix it","shots":[{"runId":42,"shotId":"home-phone-after"}],"attachments":[5]}`, 200, `"state":"coding"`},
 		{"POST", "/api/tickets/PAY-1/translate", `{"lang":"ru"}`, 200, `"items":[{"source":"Fix login","text":"Исправить вход"}],"lang":"ru"`},
 		{"POST", "/api/tickets/PAY-1/translate", `{"lang":"xx"}`, 400, `unknown language`},
 		{"POST", "/api/tickets/PAY-1/translate", `{"lang":"de"}`, 429, `plan_limit`},
@@ -341,9 +375,19 @@ func TestTicketEndpoints(t *testing.T) {
 		{"POST", "/api/tickets/PAY-1/implement", `{"repoId":3,"start":"queue"}`, 201, `"key":"VIS-9"`},
 		{"POST", "/api/tasks", `{"title":"Plan auth","priority":"low","afterApprove":"pr","start":"ask","kind":"analysis"}`, 201, `"key":"VIS-1"`},
 		{"POST", "/api/tickets/PAY-1/request-changes", `{"feedback":"  "}`, 400, `feedback is required`},
-		{"POST", "/api/tickets/PAY-1/request-changes", `{"feedback":"more tests"}`, 200, `"state":"coding"`},
+		{"POST", "/api/tickets/PAY-1/request-changes", `{"feedback":"more tests","attachments":[5,6]}`, 200, `"state":"coding"`},
 		{"POST", "/api/tickets/PAY-1/reject", "", 200, `"state":"rejected"`},
 		{"POST", "/api/tickets/PAY-1/retry", "", 200, `"state":"new"`},
+		{"POST", "/api/tickets/PAY-1/retry", `{"note":"skip the symlink","attachments":[9,9]}`, 200, `"state":"new"`},
+		{"GET", "/api/tickets/PAY-1", "", 200, `"multiple":true`},
+		{"GET", "/api/tickets/PAY-1", "", 200, `"attachments":[{"contentType":"image/png","createdAt":"0001-01-01T00:00:00Z","id":4,"image":true,"name":"a.png","purpose":"answer","questionId":9,"size":3,"url":"/attachments/4"}]`},
+		{"GET", "/api/attachments/9", "", 200, `PNGDATA`},
+		{"GET", "/api/attachments/11", "", 404, `no such file`},
+		{"DELETE", "/api/attachments/9", "", 204, ``},
+		{"DELETE", "/api/attachments/10", "", 409, `attached to a ticket`},
+		{"DELETE", "/api/attachments/11", "", 404, `no such file`},
+		{"POST", "/api/attachments", `{"file":"x"}`, 400, `multipart/form-data`},
+		{"POST", "/api/tickets/PAY-1/retry", `{"reason":"x"}`, 400, `unknown field`},
 		{"GET", "/api/tickets/PAY-1", "", 200, `"followUps":{"children":[{"held":true,"key":"VIS-5"`},
 		{"GET", "/api/tickets/PAY-1", "", 200, `"openSuggestions":1`},
 		{"GET", "/api/tickets/PAY-1/follow-ups", "", 200, `"suggestions":[{"createdAt"`},
@@ -392,7 +436,13 @@ func TestTicketEndpoints(t *testing.T) {
 	if !h.tickets.lastPost || h.tickets.lastKind != "plan" || h.tickets.lastTask.Kind != "analysis" || h.tickets.lastTask.RepoID != 0 {
 		t.Errorf("kind fields not passed: post=%v kind=%q task=%+v", h.tickets.lastPost, h.tickets.lastKind, h.tickets.lastTask)
 	}
-	if h.tickets.lastOrigin != domain.OriginWeb || len(h.tickets.lastAnswer) != 1 || h.tickets.lastAnswer[0].Note != "n" {
+	if f := h.tickets.lastFeedbackFiles; len(f) != 2 || f[0] != 5 || f[1] != 6 {
+		t.Errorf("feedback files not passed: %v", f)
+	}
+	if len(h.tickets.lastFiles) != 2 || h.tickets.lastFiles[0] != 9 {
+		t.Errorf("retry files not passed: %v", h.tickets.lastFiles)
+	}
+	if h.tickets.lastOrigin != domain.OriginWeb || len(h.tickets.lastAnswer) != 1 || h.tickets.lastAnswer[0].Note != "n" || len(h.tickets.lastAnswer[0].Attachments) != 1 {
 		t.Errorf("web origin/answers not passed: %v %+v", h.tickets.lastOrigin, h.tickets.lastAnswer)
 	}
 
@@ -406,5 +456,40 @@ func TestTicketEndpoints(t *testing.T) {
 	}
 	if h.tickets.lastOrigin != domain.OriginMobile {
 		t.Errorf("mobile origin: %v", h.tickets.lastOrigin)
+	}
+}
+
+func TestUploadAttachment(t *testing.T) {
+	h := newHarness(t, pinger{})
+	rec := h.do("POST", "/api/auth/login", loginBody("rustam", password, h.code(t, 1), "web"), nil)
+	cookie := rec.Result().Cookies()[0].String()
+	upload := func(size int) *httptest.ResponseRecorder {
+		var body bytes.Buffer
+		mw := multipart.NewWriter(&body)
+		fw, _ := mw.CreateFormFile("file", "screen shot.png")
+		_, _ = fw.Write(bytes.Repeat([]byte("x"), size))
+		_ = mw.Close()
+		req := httptest.NewRequest("POST", "/api/attachments", &body)
+		req.Header.Set("Content-Type", mw.FormDataContentType())
+		req.Header.Set("Cookie", cookie)
+		rec := httptest.NewRecorder()
+		h.h.ServeHTTP(rec, req)
+		return rec
+	}
+	if rec := upload(3); rec.Code != http.StatusCreated || !strings.Contains(rec.Body.String(), `"purpose":"pending"`) || h.tickets.lastUpload != "screen shot.png:xxx" {
+		t.Fatalf("upload: %d %s (%q)", rec.Code, rec.Body, h.tickets.lastUpload)
+	}
+	if rec := upload(domain.MaxAttachmentBytes + 1); rec.Code != http.StatusRequestEntityTooLarge {
+		t.Fatalf("large upload: %d %s", rec.Code, rec.Body)
+	}
+	// A picture shows in place; anything else downloads, even HTML.
+	rec = h.do("GET", "/api/attachments/9", "", map[string]string{"Cookie": cookie})
+	if rec.Header().Get("Content-Type") != "image/png" || !strings.HasPrefix(rec.Header().Get("Content-Disposition"), "inline") {
+		t.Fatalf("picture headers: %v", rec.Header())
+	}
+	rec = h.do("GET", "/api/attachments/10", "", map[string]string{"Cookie": cookie})
+	if rec.Header().Get("Content-Type") != "application/octet-stream" || !strings.HasPrefix(rec.Header().Get("Content-Disposition"), "attachment") ||
+		rec.Header().Get("X-Content-Type-Options") != "nosniff" {
+		t.Fatalf("html headers: %v", rec.Header())
 	}
 }

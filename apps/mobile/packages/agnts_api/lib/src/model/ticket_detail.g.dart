@@ -11,6 +11,8 @@ abstract class _$TicketDetailCWProxy {
 
   TicketDetail questions(List<Question> questions);
 
+  TicketDetail attachments(List<Attachment> attachments);
+
   TicketDetail analysis(Analysis? analysis);
 
   TicketDetail result(Result? result);
@@ -42,6 +44,7 @@ abstract class _$TicketDetailCWProxy {
   TicketDetail call({
     Ticket ticket,
     List<Question> questions,
+    List<Attachment> attachments,
     Analysis? analysis,
     Result? result,
     String? childKey,
@@ -68,6 +71,10 @@ class _$TicketDetailCWProxyImpl implements _$TicketDetailCWProxy {
   @override
   TicketDetail questions(List<Question> questions) =>
       this(questions: questions);
+
+  @override
+  TicketDetail attachments(List<Attachment> attachments) =>
+      this(attachments: attachments);
 
   @override
   TicketDetail analysis(Analysis? analysis) => this(analysis: analysis);
@@ -114,6 +121,7 @@ class _$TicketDetailCWProxyImpl implements _$TicketDetailCWProxy {
   TicketDetail call({
     Object? ticket = const $CopyWithPlaceholder(),
     Object? questions = const $CopyWithPlaceholder(),
+    Object? attachments = const $CopyWithPlaceholder(),
     Object? analysis = const $CopyWithPlaceholder(),
     Object? result = const $CopyWithPlaceholder(),
     Object? childKey = const $CopyWithPlaceholder(),
@@ -135,6 +143,10 @@ class _$TicketDetailCWProxyImpl implements _$TicketDetailCWProxy {
           ? _value.questions
           // ignore: cast_nullable_to_non_nullable
           : questions as List<Question>,
+      attachments: attachments == const $CopyWithPlaceholder()
+          ? _value.attachments
+          // ignore: cast_nullable_to_non_nullable
+          : attachments as List<Attachment>,
       analysis: analysis == const $CopyWithPlaceholder()
           ? _value.analysis
           // ignore: cast_nullable_to_non_nullable
@@ -196,7 +208,7 @@ extension $TicketDetailCopyWith on TicketDetail {
 TicketDetail _$TicketDetailFromJson(
   Map<String, dynamic> json,
 ) => $checkedCreate('TicketDetail', json, ($checkedConvert) {
-  $checkKeys(json, requiredKeys: const ['ticket', 'questions']);
+  $checkKeys(json, requiredKeys: const ['ticket', 'questions', 'attachments']);
   final val = TicketDetail(
     ticket: $checkedConvert(
       'ticket',
@@ -206,6 +218,12 @@ TicketDetail _$TicketDetailFromJson(
       'questions',
       (v) => (v as List<dynamic>)
           .map((e) => Question.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    ),
+    attachments: $checkedConvert(
+      'attachments',
+      (v) => (v as List<dynamic>)
+          .map((e) => Attachment.fromJson(e as Map<String, dynamic>))
           .toList(),
     ),
     analysis: $checkedConvert(
@@ -259,6 +277,7 @@ Map<String, dynamic> _$TicketDetailToJson(TicketDetail instance) =>
     <String, dynamic>{
       'ticket': instance.ticket.toJson(),
       'questions': instance.questions.map((e) => e.toJson()).toList(),
+      'attachments': instance.attachments.map((e) => e.toJson()).toList(),
       'analysis': ?instance.analysis?.toJson(),
       'result': ?instance.result?.toJson(),
       'childKey': ?instance.childKey,

@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **feedback** | **String** |  | 
 **shots** | [**List&lt;ShotRef&gt;**](ShotRef.md) | Preview screenshots the feedback points at; the coding run gets them | [optional] 
+**attachments** | **List&lt;int&gt;** | Uploads that go with the feedback (mockups, logs, screenshots); the coding run reads them | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

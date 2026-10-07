@@ -31,6 +31,7 @@ type RelationSource string
 // Relation sources.
 const (
 	RelFromJira  RelationSource = "jira"  // a "blocks" link on the issue
+	RelFromPlane RelationSource = "plane" // a "blocked by" relation on the work item
 	RelFromUser  RelationSource = "user"  // someone added it
 	RelFromAgnts RelationSource = "agnts" // the analysis read it from the tickets
 	RelFromRule  RelationSource = "rule"  // predicted footprints overlap (same files, shared hot spot)

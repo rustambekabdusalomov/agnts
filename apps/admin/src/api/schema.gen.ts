@@ -462,7 +462,7 @@ export interface paths {
         put?: never;
         /**
          * Create tickets from chosen suggestions
-         * @description Each chosen suggestion becomes a queued (held) ticket, as a local task or a new Jira issue. Nothing runs until it is started. Items are handled one by one; each result says what happened to its suggestion. What the analysis suggested can be created at once; what the work or its review found waits until this ticket is done.
+         * @description Each chosen suggestion becomes a queued (held) ticket, as a local task, a new Jira issue or a new Plane work item. Nothing runs until it is started. Items are handled one by one; each result says what happened to its suggestion. What the analysis suggested can be created at once; what the work or its review found waits until this ticket is done.
          */
         post: operations["acceptFollowUps"];
         delete?: never;
@@ -617,6 +617,46 @@ export interface paths {
         put: operations["setTicketKind"];
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/attachments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Upload a file to attach to a task, an answer or a retry note
+         * @description The upload stays pending until the request that uses it (createTask, updateTask, answerQuestions, retryTicket, requestChanges) lists its id; pending uploads nobody used are deleted after a day. Pictures (PNG, JPEG, GIF, WebP) are shown in place; other files download. Claude reads every attached file, pictures and PDFs included.
+         */
+        post: operations["uploadAttachment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/attachments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        /** An attached file's bytes */
+        get: operations["getAttachment"];
+        put?: never;
+        post?: never;
+        /** Delete an upload that nothing uses yet */
+        delete: operations["deleteAttachment"];
         options?: never;
         head?: never;
         patch?: never;
@@ -827,6 +867,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/repos/detect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Work out a repository's toolchains and check commands
+         * @description Reads the default branch (of a saved repository by id, or of any
+         *     clone URL) and returns what it needs, without saving. With deep,
+         *     Claude also reads the README and CI files when the file scan finds
+         *     nothing; that takes a minute and uses the Claude plan.
+         */
+        post: operations["detectRepo"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/repos/{id}": {
         parameters: {
             query?: never;
@@ -966,6 +1029,57 @@ export interface paths {
         put?: never;
         /** Pick up labelled Jira issues now */
         post: operations["syncJira"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/integrations/plane/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pick up labelled Plane work items now */
+        post: operations["syncPlane"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/integrations/plane/webhook-secret": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Store the secret Plane generated for the agnts webhook */
+        put: operations["setPlaneWebhookSecret"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/integrations/plane/states": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** States of the Plane projects linked to repositories, for the status mapping */
+        get: operations["listPlaneStates"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1534,10 +1648,10 @@ export interface components {
              */
             direction: "waits_for" | "waited_by" | "conflicts";
             /**
-             * @description Who found it: a Jira link, a person, the analysis, overlapping footprints, or the finished diffs (when nobody predicted it)
+             * @description Who found it: a Jira link, a Plane relation, a person, the analysis, overlapping footprints, or the finished diffs (when nobody predicted it)
              * @enum {string}
              */
-            source: "jira" | "user" | "agnts" | "rule" | "git";
+            source: "jira" | "plane" | "user" | "agnts" | "rule" | "git";
             /**
              * @description Only active relations hold the queue; proposed ones wait for a person
              * @enum {string}
@@ -1620,7 +1734,7 @@ export interface components {
             state: components["schemas"]["TicketState"];
             kind: components["schemas"]["TicketKind"];
             /** @enum {string} */
-            source: "jira" | "local";
+            source: "jira" | "plane" | "local";
             held?: boolean;
         };
         FollowUps: {
@@ -1635,10 +1749,10 @@ export interface components {
             /** Format: int64 */
             id: number;
             /**
-             * @description local = an agnts task (default), jira = a new issue in the Jira project
+             * @description local = an agnts task (default), jira = a new issue in the Jira project, plane = a new work item in the Plane project
              * @enum {string}
              */
-            target?: "local" | "jira";
+            target?: "local" | "jira" | "plane";
             title?: string;
             description?: string;
             kind?: components["schemas"]["TicketKind"];
@@ -1685,7 +1799,7 @@ export interface components {
         Ticket: {
             key: string;
             /** @enum {string} */
-            source: "jira" | "local";
+            source: "jira" | "plane" | "local";
             /** Format: int64 */
             repoId?: number;
             title: string;
@@ -1816,8 +1930,34 @@ export interface components {
             position: number;
             text: string;
             options: string[];
+            /** @description Several options may be chosen; the answer then lists the chosen ones, one per line */
+            multiple: boolean;
             answer?: string;
             note: string;
+        };
+        Attachment: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            contentType: string;
+            /**
+             * Format: int64
+             * @description Bytes
+             */
+            size: number;
+            /**
+             * @description pending = uploaded, not attached yet; ticket = the task description; answer = an answer (see questionId); retry = a retry note; feedback = requested changes
+             * @enum {string}
+             */
+            purpose: "pending" | "ticket" | "answer" | "retry" | "feedback";
+            /** Format: int64 */
+            questionId?: number;
+            /** @description A picture clients can show in place */
+            image?: boolean;
+            /** @description Where to load the file, relative to the API base */
+            url: string;
+            /** Format: date-time */
+            createdAt: string;
         };
         Analysis: {
             summary: string;
@@ -1933,6 +2073,8 @@ export interface components {
         TicketDetail: {
             ticket: components["schemas"]["Ticket"];
             questions: components["schemas"]["Question"][];
+            /** @description Files attached to the task, its answers and retry notes, oldest first */
+            attachments: components["schemas"]["Attachment"][];
             analysis?: components["schemas"]["Analysis"];
             result?: components["schemas"]["Result"];
             /** @description The code task that implements this report, if any */
@@ -1972,8 +2114,11 @@ export interface components {
             answers: {
                 /** Format: int64 */
                 questionId: number;
+                /** @description For a multiple-choice question, the chosen options, one per line */
                 answer: string;
                 note?: string;
+                /** @description Uploads to attach to this answer */
+                attachments?: number[];
             }[];
         };
         /** @enum {string} */
@@ -2029,6 +2174,8 @@ export interface components {
              */
             start: "ask" | "code" | "queue";
             followUps?: components["schemas"]["FollowUpsMode"];
+            /** @description Uploads to attach to the description */
+            attachments?: number[];
         };
         TaskUpdate: {
             title?: string;
@@ -2038,6 +2185,8 @@ export interface components {
             /** @enum {string} */
             afterApprove?: "pr" | "main";
             kind?: components["schemas"]["TicketKindChoice"];
+            /** @description The files the description should have: the task's files to keep and new uploads. Left out keeps them; files not listed are deleted. */
+            attachments?: number[];
         };
         EventPage: {
             events: components["schemas"]["Event"][];
@@ -2137,10 +2286,10 @@ export interface components {
             id: number;
             name: string;
             /**
-             * @description jira when the repository has a Jira project key, else side. Every repository takes side-project tasks.
+             * @description jira when the repository has a Jira project key, plane when it has only a Plane project, else side. Every repository takes side-project tasks.
              * @enum {string}
              */
-            kind: "jira" | "side";
+            kind: "jira" | "plane" | "side";
             /** @enum {string} */
             provider: "github" | "gitlab";
             cloneUrl: string;
@@ -2153,6 +2302,8 @@ export interface components {
             /** @description Extra instructions added to every prompt */
             instructions: string;
             jiraProject: string;
+            /** @description Plane project identifier (WEB in WEB-123); empty when not linked */
+            planeProject?: string;
             /** @enum {string} */
             claudeMd: "found" | "missing" | "unknown";
             openTickets: number;
@@ -2163,15 +2314,32 @@ export interface components {
              */
             archivedAt?: string;
             preview?: components["schemas"]["RepoPreview"];
+            /** @description Toolchain names, comma-separated (go,node) */
+            stack?: string;
+            /** @description Installed into every run container */
+            toolchains?: components["schemas"]["Toolchain"][];
+            /** @description Set by a person; detection leaves them alone */
+            toolchainsOverride?: boolean;
+            /** Format: date-time */
+            toolchainsDetectedAt?: string;
+            /** @description What detection could not handle */
+            toolchainNotes?: string[];
+            /** @description Custom runner image (built FROM agnts-runner); empty uses the default */
+            runnerImage?: string;
+            /** @description Run container memory; 0 uses the server default */
+            memoryMb?: number;
+            buildEnvSet?: boolean;
+            /** @description Names of the build environment variables; the values are never returned */
+            buildEnvNames?: string[];
         };
         RepositoryInput: {
             name: string;
             /**
              * @deprecated
-             * @description Ignored; derived from jiraProject.
+             * @description Ignored; derived from jiraProject and planeProject.
              * @enum {string}
              */
-            kind?: "jira" | "side";
+            kind?: "jira" | "plane" | "side";
             cloneUrl: string;
             defaultBranch?: string;
             buildCmd?: string;
@@ -2181,9 +2349,53 @@ export interface components {
             taskPrefix?: string;
             instructions?: string;
             jiraProject?: string;
+            planeProject?: string;
             /** @description GitHub workflow file run by Deploy, e.g. deploy.yml */
             deployWorkflow?: string;
             preview?: components["schemas"]["RepoPreviewInput"];
+            /** @description Absent keeps the stored list */
+            toolchains?: components["schemas"]["Toolchain"][];
+            /** @description true: these toolchains were set by hand; detection keeps them */
+            toolchainsOverride?: boolean;
+            runnerImage?: string;
+            memoryMb?: number;
+            /** @description KEY=value lines given to every run (registry tokens); replaces the stored one, "" clears it, absent keeps it */
+            buildEnv?: string;
+        };
+        /** @description A language runtime or build tool, installed with mise as tool@version */
+        Toolchain: {
+            /** @description mise tool name: go, node, python, rust, java, dotnet, ruby, ... */
+            tool: string;
+            /** @description Exact, a prefix (20, 3.12), latest, lts or system */
+            version: string;
+            /** @description Where it was found: go.mod, .nvmrc, default, manual */
+            source?: string;
+            /** @description Subdirectory it was found in */
+            dir?: string;
+        };
+        RepoDetectInput: {
+            /**
+             * Format: int64
+             * @description A saved repository; the other fields are then optional
+             */
+            id?: number;
+            cloneUrl?: string;
+            defaultBranch?: string;
+            /** @description Ask Claude when the file scan finds no commands */
+            deep?: boolean;
+        };
+        RepoDetection: {
+            toolchains: components["schemas"]["Toolchain"][];
+            buildCmd: string;
+            lintCmd: string;
+            testCmd: string;
+            notes: string[];
+            stack: string;
+            /**
+             * @description Whether Claude filled in what the file scan could not
+             * @enum {string}
+             */
+            source: "files" | "claude";
         };
         /** @description How agnts starts the app to take screenshots; an empty command turns previews off */
         RepoPreview: {
@@ -2243,6 +2455,15 @@ export interface components {
             webhookUrl?: string;
             /** @description GitHub and GitLab: secret to enter in the webhook settings */
             webhookSecret?: string;
+            /** @description Plane: a webhook secret is stored (deliveries are accepted) */
+            webhookSecretSet?: boolean;
+        };
+        PlaneState: {
+            name: string;
+            /** @enum {string} */
+            group: "backlog" | "unstarted" | "started" | "completed" | "cancelled" | "triage";
+            /** @description Identifiers of the linked projects that have this state */
+            projects: string[];
         };
         ConnectResult: {
             integration: components["schemas"]["Integration"];
@@ -2691,7 +2912,7 @@ export interface components {
     };
     parameters: {
         RepoID: number;
-        Provider: "jira" | "github" | "claude" | "telegram" | "gitlab";
+        Provider: "jira" | "plane" | "github" | "claude" | "telegram" | "gitlab";
         RuleID: number;
         LessonID: number;
         RelationID: number;
@@ -2928,6 +3149,8 @@ export interface operations {
                     feedback: string;
                     /** @description Preview screenshots the feedback points at; the coding run gets them */
                     shots?: components["schemas"]["ShotRef"][];
+                    /** @description Uploads that go with the feedback (mockups, logs, screenshots); the coding run reads them */
+                    attachments?: number[];
                 };
             };
         };
@@ -2971,9 +3194,19 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @description How to get past the failure. The next coding run gets it with the error, like requested changes. Not allowed when the ticket resumes at pushing, since no Claude run follows. */
+                    note?: string;
+                    /** @description Uploads that help get past the failure; the next coding run reads them. Same rule as note. */
+                    attachments?: number[];
+                };
+            };
+        };
         responses: {
             200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
@@ -3459,6 +3692,94 @@ export interface operations {
             409: components["responses"]["Conflict"];
         };
     };
+    uploadAttachment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description At most 10 MB
+                     */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Uploaded */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Attachment"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description The file is larger than 10 MB */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getAttachment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The file; it never changes, so it may be cached */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": string;
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    deleteAttachment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
     createTask: {
         parameters: {
             query?: never;
@@ -3800,6 +4121,33 @@ export interface operations {
             409: components["responses"]["Conflict"];
         };
     };
+    detectRepo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RepoDetectInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RepoDetection"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
     getRepo: {
         parameters: {
             query?: never;
@@ -3921,6 +4269,8 @@ export interface operations {
             content: {
                 "application/json": {
                     token: string;
+                    /** @description Plane: the secret Plane shows when you create the webhook. Empty keeps the stored one. */
+                    webhookSecret?: string;
                     settings?: {
                         [key: string]: string;
                     };
@@ -4032,6 +4382,81 @@ export interface operations {
                         found: number;
                         created: number;
                     };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    syncPlane: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sync result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        found: number;
+                        created: number;
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    setPlaneWebhookSecret: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    secret: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Saved */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Integration"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    listPlaneStates: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description States, by name, with the projects that have them */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlaneState"][];
                 };
             };
             400: components["responses"]["BadRequest"];

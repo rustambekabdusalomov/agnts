@@ -4,7 +4,7 @@ Follow one ticket from pickup to push. The track at the top shows where it is. D
 
 ## Questions
 
-agnts reads the code first and asks only what it can't decide itself. Pick an option or write your own answer, then press Start coding.
+agnts reads the code first and asks only what it can't decide itself. Pick an option or write your own answer, then press Start coding. Some questions let you pick several options. You can attach screenshots or files to any answer.
 
 ## Models for this ticket
 
@@ -16,7 +16,7 @@ While agnts works you see each step, the model, turns used and session usage. St
 
 ## Review
 
-Read what agnts did and check the tests and diff. Approve and push commits as you. Request changes sends your feedback into the same session. Reject discards the branch.
+Read what agnts did and check the tests and diff. Approve and push commits as you. Request changes sends your feedback, with any files you attach, into the same session. Reject discards the branch.
 
 ## agnts's code review
 
@@ -32,7 +32,7 @@ Turn on Suggest follow-up tickets in Settings, or on one ticket, and agnts lists
 
 ## When agnts stops
 
-After repeated failed tests or a plan limit, agnts stops instead of guessing. Add instructions and retry, or take the ticket yourself.
+After repeated failed tests or a plan limit, agnts stops instead of guessing. Add instructions (and files, such as a log or a screenshot) and retry, or take the ticket yourself.
 
 ## History and run log
 

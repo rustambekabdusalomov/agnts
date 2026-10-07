@@ -9,7 +9,7 @@ void main() {
   group(TicketsApi, () {
     // Create tickets from chosen suggestions
     //
-    // Each chosen suggestion becomes a queued (held) ticket, as a local task or a new Jira issue. Nothing runs until it is started. Items are handled one by one; each result says what happened to its suggestion. What the analysis suggested can be created at once; what the work or its review found waits until this ticket is done.
+    // Each chosen suggestion becomes a queued (held) ticket, as a local task, a new Jira issue or a new Plane work item. Nothing runs until it is started. Items are handled one by one; each result says what happened to its suggestion. What the analysis suggested can be created at once; what the work or its review found waits until this ticket is done.
     //
     //Future<AcceptFollowUpsResult> acceptFollowUps(String key, AcceptFollowUps acceptFollowUps) async
     test('test acceptFollowUps', () async {
@@ -154,7 +154,7 @@ void main() {
 
     // Resume a failed or rate-limited ticket where it stopped
     //
-    //Future<Ticket> retryTicket(String key) async
+    //Future<Ticket> retryTicket(String key, { RetryTicketRequest retryTicketRequest }) async
     test('test retryTicket', () async {
       // TODO
     });

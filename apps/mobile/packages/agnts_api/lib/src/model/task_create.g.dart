@@ -23,6 +23,8 @@ abstract class _$TaskCreateCWProxy {
 
   TaskCreate followUps(FollowUpsMode? followUps);
 
+  TaskCreate attachments(List<int>? attachments);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TaskCreate(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -38,6 +40,7 @@ abstract class _$TaskCreateCWProxy {
     TaskCreateAfterApproveEnum afterApprove,
     TaskCreateStartEnum start,
     FollowUpsMode? followUps,
+    List<int>? attachments,
   });
 }
 
@@ -74,6 +77,10 @@ class _$TaskCreateCWProxyImpl implements _$TaskCreateCWProxy {
   TaskCreate followUps(FollowUpsMode? followUps) => this(followUps: followUps);
 
   @override
+  TaskCreate attachments(List<int>? attachments) =>
+      this(attachments: attachments);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TaskCreate(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -89,6 +96,7 @@ class _$TaskCreateCWProxyImpl implements _$TaskCreateCWProxy {
     Object? afterApprove = const $CopyWithPlaceholder(),
     Object? start = const $CopyWithPlaceholder(),
     Object? followUps = const $CopyWithPlaceholder(),
+    Object? attachments = const $CopyWithPlaceholder(),
   }) {
     return TaskCreate(
       repoId: repoId == const $CopyWithPlaceholder()
@@ -123,6 +131,10 @@ class _$TaskCreateCWProxyImpl implements _$TaskCreateCWProxy {
           ? _value.followUps
           // ignore: cast_nullable_to_non_nullable
           : followUps as FollowUpsMode?,
+      attachments: attachments == const $CopyWithPlaceholder()
+          ? _value.attachments
+          // ignore: cast_nullable_to_non_nullable
+          : attachments as List<int>?,
     );
   }
 }
@@ -167,6 +179,10 @@ TaskCreate _$TaskCreateFromJson(Map<String, dynamic> json) =>
           'followUps',
           (v) => $enumDecodeNullable(_$FollowUpsModeEnumMap, v),
         ),
+        attachments: $checkedConvert(
+          'attachments',
+          (v) => (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList(),
+        ),
       );
       return val;
     });
@@ -182,6 +198,7 @@ Map<String, dynamic> _$TaskCreateToJson(
   'afterApprove': _$TaskCreateAfterApproveEnumEnumMap[instance.afterApprove]!,
   'start': _$TaskCreateStartEnumEnumMap[instance.start]!,
   'followUps': ?_$FollowUpsModeEnumMap[instance.followUps],
+  'attachments': ?instance.attachments,
 };
 
 const _$TicketKindChoiceEnumMap = {

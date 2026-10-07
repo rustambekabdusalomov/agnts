@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../../api/client'
 import { KINDS, REPORT_KINDS, type FollowUpsMode, type Repository, type TicketKindChoice } from '../../api/types'
 import { useUi } from '../../stores/ui'
+import FileAttach from '../files/FileAttach.vue'
 import FormDrawer from '../form/FormDrawer.vue'
 import SegButtons from '../form/SegButtons.vue'
 import HiIcon from '../ui/HiIcon.vue'
@@ -34,6 +35,10 @@ const form = reactive({
   start: 'ask' as Start,
   followUps: 'inherit' as FollowUpsMode,
 })
+// Uploaded files for the description, and whether some are still uploading.
+const files = ref<number[]>([])
+const uploading = ref(false)
+const attach = ref<InstanceType<typeof FileAttach> | null>(null)
 const kinds = computed(() => (['auto', ...KINDS] as TicketKindChoice[]).map((k) => ({ value: k, label: t(`kind.${k}`), hint: t(`kind.${k}Hint`) })))
 const reportKind = computed(() => REPORT_KINDS.some((k) => k === form.kind))
 const changeKind = computed(() => form.kind === 'code' || form.kind === 'test')
@@ -82,6 +87,7 @@ const create = useMutation({
           afterApprove: form.after,
           start: form.start,
           followUps: form.followUps,
+          attachments: files.value.length ? files.value : undefined,
         },
       }),
     ),
@@ -91,6 +97,7 @@ const create = useMutation({
     open.value = false
     form.title = ''
     form.description = ''
+    files.value = []
     await router.push(`/tickets/${tk.key}`)
   },
   onError: (e) => {
@@ -105,6 +112,10 @@ function submit() {
   }
   if (!form.title.trim()) {
     error.value = t('tasks.titleRequired')
+    return
+  }
+  if (uploading.value) {
+    error.value = t('files.wait')
     return
   }
   create.mutate()
@@ -166,7 +177,8 @@ function submit() {
       </div>
       <div class="field">
         <label for="t-desc">{{ t('tasks.fieldDesc') }}</label>
-        <textarea id="t-desc" v-model="form.description" maxlength="20000" :placeholder="t('tasks.descPh')" />
+        <textarea id="t-desc" v-model="form.description" maxlength="20000" :placeholder="t('tasks.descPh')" @paste="attach?.pasted($event)" />
+        <FileAttach ref="attach" v-model="files" v-model:busy="uploading" />
       </div>
       <div class="field">
         <span class="flbl">{{ t('tasks.priority') }}</span>
@@ -201,7 +213,7 @@ function submit() {
     </form>
     <template #footer>
       <button type="button" class="btn" @click="open = false">{{ t('form.cancel') }}</button>
-      <button type="submit" form="task-form" class="btn btn-p" :disabled="create.isPending.value">
+      <button type="submit" form="task-form" class="btn btn-p" :disabled="create.isPending.value || uploading">
         {{ form.start === 'queue' ? t('tasks.create') : t('tasks.createStart') }}
       </button>
     </template>

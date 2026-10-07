@@ -629,6 +629,7 @@ Map<String, dynamic> _$TicketToJson(Ticket instance) => <String, dynamic>{
 
 const _$TicketSource_EnumEnumMap = {
   TicketSource_Enum.jira: 'jira',
+  TicketSource_Enum.plane: 'plane',
   TicketSource_Enum.local: 'local',
 };
 

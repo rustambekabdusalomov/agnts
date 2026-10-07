@@ -21,7 +21,7 @@
     "viewTable": "Jadval",
     "viewBoard": "Doska",
     "boardEmpty": "Boʻsh",
-    "listSub": "agnts belgili Jira tiketlari hamda shaxsiy loyihalaringiz uchun yaratgan vazifalaringiz.",
+    "listSub": "agnts belgili Jira va Plane tiketlari hamda shaxsiy loyihalaringiz uchun yaratgan vazifalaringiz.",
     "noMatch": "Qidiruvingiz boʻyicha tiket topilmadi.",
     "emptyNeeds": "Hozir sizni hech narsa kutmayapti. agnts savol bersa yoki oʻzgarishlarni tekshirishingiz kerak boʻlsa, tiketlar shu yerda chiqadi.",
     "emptyOther": "Bu yerda hozircha tiket yoʻq.",
@@ -31,6 +31,7 @@
     "statRunningNote": "Hozir konteynerlarda",
     "statPushed": "Shu hafta yuborilgan",
     "statPushedNote": "Ochilgan pull requestlar",
-    "statSession": "Tarif sessiyasi"
+    "statSession": "Tarif sessiyasi",
+    "sourcePlane": "Plane"
   }
 }

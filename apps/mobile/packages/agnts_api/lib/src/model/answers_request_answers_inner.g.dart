@@ -13,6 +13,8 @@ abstract class _$AnswersRequestAnswersInnerCWProxy {
 
   AnswersRequestAnswersInner note(String? note);
 
+  AnswersRequestAnswersInner attachments(List<int>? attachments);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `AnswersRequestAnswersInner(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -23,6 +25,7 @@ abstract class _$AnswersRequestAnswersInnerCWProxy {
     int questionId,
     String answer,
     String? note,
+    List<int>? attachments,
   });
 }
 
@@ -44,6 +47,10 @@ class _$AnswersRequestAnswersInnerCWProxyImpl
   AnswersRequestAnswersInner note(String? note) => this(note: note);
 
   @override
+  AnswersRequestAnswersInner attachments(List<int>? attachments) =>
+      this(attachments: attachments);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `AnswersRequestAnswersInner(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -54,6 +61,7 @@ class _$AnswersRequestAnswersInnerCWProxyImpl
     Object? questionId = const $CopyWithPlaceholder(),
     Object? answer = const $CopyWithPlaceholder(),
     Object? note = const $CopyWithPlaceholder(),
+    Object? attachments = const $CopyWithPlaceholder(),
   }) {
     return AnswersRequestAnswersInner(
       questionId: questionId == const $CopyWithPlaceholder()
@@ -68,6 +76,10 @@ class _$AnswersRequestAnswersInnerCWProxyImpl
           ? _value.note
           // ignore: cast_nullable_to_non_nullable
           : note as String?,
+      attachments: attachments == const $CopyWithPlaceholder()
+          ? _value.attachments
+          // ignore: cast_nullable_to_non_nullable
+          : attachments as List<int>?,
     );
   }
 }
@@ -91,6 +103,10 @@ AnswersRequestAnswersInner _$AnswersRequestAnswersInnerFromJson(
     questionId: $checkedConvert('questionId', (v) => (v as num).toInt()),
     answer: $checkedConvert('answer', (v) => v as String),
     note: $checkedConvert('note', (v) => v as String?),
+    attachments: $checkedConvert(
+      'attachments',
+      (v) => (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList(),
+    ),
   );
   return val;
 });
@@ -101,4 +117,5 @@ Map<String, dynamic> _$AnswersRequestAnswersInnerToJson(
   'questionId': instance.questionId,
   'answer': instance.answer,
   'note': ?instance.note,
+  'attachments': ?instance.attachments,
 };

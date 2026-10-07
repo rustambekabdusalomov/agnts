@@ -16,6 +16,8 @@ doc/AnalyticsReposInner.md
 doc/AnswersRequest.md
 doc/AnswersRequestAnswersInner.md
 doc/ApproveTicketRequest.md
+doc/Attachment.md
+doc/AttachmentsApi.md
 doc/AuthApi.md
 doc/Blocker.md
 doc/Branch.md
@@ -78,6 +80,7 @@ doc/ModelOverrides.md
 doc/NotifySettings.md
 doc/PeriodStats.md
 doc/Pipeline.md
+doc/PlaneState.md
 doc/PreviewInput.md
 doc/PreviewIssue.md
 doc/PreviewShot.md
@@ -91,6 +94,8 @@ doc/RelationType.md
 doc/Relations.md
 doc/RemoteRepository.md
 doc/RepoActivity.md
+doc/RepoDetectInput.md
+doc/RepoDetection.md
 doc/RepoMember.md
 doc/RepoPreview.md
 doc/RepoPreviewInput.md
@@ -99,6 +104,7 @@ doc/Repository.md
 doc/RepositoryInput.md
 doc/RequestChangesRequest.md
 doc/Result.md
+doc/RetryTicketRequest.md
 doc/ReviewModel.md
 doc/RotateMcpToken200Response.md
 doc/Rule.md
@@ -108,6 +114,7 @@ doc/RuleInput.md
 doc/RuleQuestion.md
 doc/RuleStatus.md
 doc/RulesApi.md
+doc/SetPlaneWebhookSecretRequest.md
 doc/Settings.md
 doc/SettingsApi.md
 doc/ShotRef.md
@@ -131,6 +138,7 @@ doc/TicketSpendRow.md
 doc/TicketState.md
 doc/TicketsApi.md
 doc/TokenSpend.md
+doc/Toolchain.md
 doc/TranslateInput.md
 doc/Translation.md
 doc/TranslationItemsInner.md
@@ -145,6 +153,7 @@ doc/WeekStats.md
 lib/agnts_api.dart
 lib/src/api.dart
 lib/src/api/analytics_api.dart
+lib/src/api/attachments_api.dart
 lib/src/api/auth_api.dart
 lib/src/api/dashboard_api.dart
 lib/src/api/devices_api.dart
@@ -178,6 +187,7 @@ lib/src/model/analytics_repos_inner.dart
 lib/src/model/answers_request.dart
 lib/src/model/answers_request_answers_inner.dart
 lib/src/model/approve_ticket_request.dart
+lib/src/model/attachment.dart
 lib/src/model/blocker.dart
 lib/src/model/branch.dart
 lib/src/model/check_step.dart
@@ -231,6 +241,7 @@ lib/src/model/model_overrides.dart
 lib/src/model/notify_settings.dart
 lib/src/model/period_stats.dart
 lib/src/model/pipeline.dart
+lib/src/model/plane_state.dart
 lib/src/model/preview_input.dart
 lib/src/model/preview_issue.dart
 lib/src/model/preview_shot.dart
@@ -244,6 +255,8 @@ lib/src/model/relation_type.dart
 lib/src/model/relations.dart
 lib/src/model/remote_repository.dart
 lib/src/model/repo_activity.dart
+lib/src/model/repo_detect_input.dart
+lib/src/model/repo_detection.dart
 lib/src/model/repo_member.dart
 lib/src/model/repo_preview.dart
 lib/src/model/repo_preview_input.dart
@@ -251,6 +264,7 @@ lib/src/model/repository.dart
 lib/src/model/repository_input.dart
 lib/src/model/request_changes_request.dart
 lib/src/model/result.dart
+lib/src/model/retry_ticket_request.dart
 lib/src/model/review_model.dart
 lib/src/model/rotate_mcp_token200_response.dart
 lib/src/model/rule.dart
@@ -259,6 +273,7 @@ lib/src/model/rule_answers_answers_inner.dart
 lib/src/model/rule_input.dart
 lib/src/model/rule_question.dart
 lib/src/model/rule_status.dart
+lib/src/model/set_plane_webhook_secret_request.dart
 lib/src/model/settings.dart
 lib/src/model/shot_ref.dart
 lib/src/model/stage.dart
@@ -279,6 +294,7 @@ lib/src/model/ticket_spend_list.dart
 lib/src/model/ticket_spend_row.dart
 lib/src/model/ticket_state.dart
 lib/src/model/token_spend.dart
+lib/src/model/toolchain.dart
 lib/src/model/translate_input.dart
 lib/src/model/translation.dart
 lib/src/model/translation_items_inner.dart
@@ -303,6 +319,8 @@ test/analytics_test.dart
 test/answers_request_answers_inner_test.dart
 test/answers_request_test.dart
 test/approve_ticket_request_test.dart
+test/attachment_test.dart
+test/attachments_api_test.dart
 test/auth_api_test.dart
 test/blocker_test.dart
 test/branch_test.dart
@@ -365,6 +383,7 @@ test/model_test.dart
 test/notify_settings_test.dart
 test/period_stats_test.dart
 test/pipeline_test.dart
+test/plane_state_test.dart
 test/preview_input_test.dart
 test/preview_issue_test.dart
 test/preview_shot_test.dart
@@ -378,6 +397,8 @@ test/relation_type_test.dart
 test/relations_test.dart
 test/remote_repository_test.dart
 test/repo_activity_test.dart
+test/repo_detect_input_test.dart
+test/repo_detection_test.dart
 test/repo_member_test.dart
 test/repo_preview_input_test.dart
 test/repo_preview_test.dart
@@ -386,6 +407,7 @@ test/repository_input_test.dart
 test/repository_test.dart
 test/request_changes_request_test.dart
 test/result_test.dart
+test/retry_ticket_request_test.dart
 test/review_model_test.dart
 test/rotate_mcp_token200_response_test.dart
 test/rule_answers_answers_inner_test.dart
@@ -395,6 +417,7 @@ test/rule_question_test.dart
 test/rule_status_test.dart
 test/rule_test.dart
 test/rules_api_test.dart
+test/set_plane_webhook_secret_request_test.dart
 test/settings_api_test.dart
 test/settings_test.dart
 test/shot_ref_test.dart
@@ -418,6 +441,7 @@ test/ticket_state_test.dart
 test/ticket_test.dart
 test/tickets_api_test.dart
 test/token_spend_test.dart
+test/toolchain_test.dart
 test/translate_input_test.dart
 test/translation_items_inner_test.dart
 test/translation_language_test.dart

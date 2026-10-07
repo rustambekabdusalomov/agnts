@@ -41,10 +41,12 @@
     "ledeRunning": "Тикеты, над которыми agnts работает прямо сейчас.",
     "ledeQueue": "Тикеты с меткой agnts, которые ещё не проанализированы.",
     "ledeDone": "Отправленные или отклонённые тикеты.",
-    "ledeAll": "Все тикеты, которые agnts взял из Jira.",
+    "ledeAll": "Все тикеты, которые agnts взял из Jira и Plane.",
     "knowledge": "Знания",
     "learn": "Обучение",
     "learnQueue": "Очередь обучения",
-    "rules": "Правила"
+    "rules": "Правила",
+    "syncPlane": "Синхронизировать Plane",
+    "syncedPlane": "Plane синхронизирован: открыто {found}, новых {created}"
   }
 }

@@ -4,7 +4,7 @@ The code agnts can work in. Every run clones the repository into a fresh contain
 
 ## Sources
 
-Jira repositories take tickets from a Jira project. Side-project repositories take tasks you create in agnts.
+Jira repositories take tickets from a Jira project, Plane repositories take work items from a Plane project. Side-project repositories take tasks you create in agnts.
 
 ## Checks
 
@@ -21,3 +21,11 @@ Select a repository to change its clone URL, default branch or commands.
 ## Preview
 
 Give a start command and port, and agnts can take screenshots of UI changes before you review them. The command runs inside the run container (install, build, start); agnts waits for the port to answer. UI files decide which changes get screenshots. The environment holds KEY=value lines such as a staging API URL; it is stored encrypted, shown only by name, and visible to the app and to agnts, so use staging credentials only. Add the hosts the app calls under Settings → Previews → Allowed hosts.
+
+## Toolchains
+
+The language runtimes and build tools every run installs, such as go@1.24, node@20 or python@3.12. agnts detects them from the repository's files (mise.toml, .tool-versions, go.mod, .nvmrc, pyproject.toml, Cargo.toml, pom.xml, global.json, Gemfile and others) and keeps them in step as those files change. Detect reads the default branch again; Ask Claude also reads the README and CI files when the scan finds no commands. Edit the list by hand and detection leaves it alone. Each version is installed once and shared by every run; each repository keeps its own package cache between runs.
+
+## Advanced
+
+Runner image replaces the default image for this repository, for system libraries or SDKs toolchains cannot provide (Android, Flutter); build it on the server FROM agnts-runner. Memory raises the run container's memory for heavy builds. The build environment holds KEY=value lines such as private registry tokens; it is stored encrypted, shown only by name, and visible to Claude while it works, so use read-only tokens.

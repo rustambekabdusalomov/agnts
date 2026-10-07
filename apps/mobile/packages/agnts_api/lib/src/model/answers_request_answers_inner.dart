@@ -25,6 +25,8 @@ class AnswersRequestAnswersInner {
     required  this.answer,
 
      this.note,
+
+     this.attachments,
   });
 
   @JsonKey(
@@ -39,6 +41,7 @@ class AnswersRequestAnswersInner {
 
 
 
+      /// For a multiple-choice question, the chosen options, one per line
   @JsonKey(
     
     name: r'answer',
@@ -63,19 +66,34 @@ class AnswersRequestAnswersInner {
 
 
 
+      /// Uploads to attach to this answer
+  @JsonKey(
+    
+    name: r'attachments',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<int>? attachments;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is AnswersRequestAnswersInner &&
       other.questionId == questionId &&
       other.answer == answer &&
-      other.note == note;
+      other.note == note &&
+      other.attachments == attachments;
 
     @override
     int get hashCode =>
         questionId.hashCode +
         answer.hashCode +
-        note.hashCode;
+        note.hashCode +
+        attachments.hashCode;
 
   factory AnswersRequestAnswersInner.fromJson(Map<String, dynamic> json) => _$AnswersRequestAnswersInnerFromJson(json);
 

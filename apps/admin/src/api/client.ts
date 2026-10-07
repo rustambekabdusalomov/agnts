@@ -1,5 +1,6 @@
 import createClient, { type Middleware } from 'openapi-fetch'
 import type { components, paths } from './schema.gen'
+import type { Attachment } from './types'
 
 export type User = components['schemas']['User']
 export type ApiError = components['schemas']['Error']
@@ -51,4 +52,24 @@ export async function unwrap<T>(
     throw new HttpError(response.status, error as Partial<ApiError>, Number.isFinite(ra) && ra > 0 ? ra : undefined)
   }
   return data as T
+}
+
+/** Largest file the server takes, and how many one task, answer or retry carries. */
+export const MAX_ATTACHMENT_BYTES = 10 << 20
+export const MAX_ATTACHMENTS = 10
+
+/**
+ * Uploads one file for a later createTask / answers / retry request. A
+ * multipart body is simpler with fetch than through openapi-fetch.
+ */
+export async function uploadAttachment(file: File): Promise<Attachment> {
+  const body = new FormData()
+  body.append('file', file, file.name)
+  const response = await fetch('/api/attachments', { method: 'POST', body, credentials: 'same-origin' })
+  const data = await response.json().catch(() => undefined)
+  if (!response.ok) {
+    if (response.status === 401) onUnauthorized()
+    throw new HttpError(response.status, data as Partial<ApiError> | undefined)
+  }
+  return data as Attachment
 }

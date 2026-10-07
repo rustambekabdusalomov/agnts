@@ -41,6 +41,11 @@ function stale(e: TicketEvent): string[] {
       break
   }
   if (e.type === 'state_changed') keys.push('events-summary', 'repos')
+  // Spend is saved when a run finishes, just after its claude_result; the
+  // state change that follows a stage comes after the save.
+  if (e.type === 'claude_result' || e.type === 'state_changed' || e.type === 'usage_updated') keys.push('ticket-spend')
+  // Webhook news from the git host; the server dropped its cached reads.
+  if (e.type === 'pipeline' || e.type === 'deploy') keys.push('repo')
   if (e.step === 'learn') keys.push('lessons')
   return keys
 }
@@ -56,11 +61,29 @@ function flush() {
   timer = undefined
 }
 
+// Refetch everything shown when the stream drops (polls take over at their
+// own pace from the next fetch) and when it is back (events missed while
+// down are covered, and polls slow down again).
+function resync() {
+  void qc?.invalidateQueries()
+}
+
+let opened = false
+
 function connect() {
   if (source) return
   source = new EventSource('/api/events/stream', { withCredentials: true })
-  source.onopen = () => (connected.value = true)
-  source.onerror = () => (connected.value = false) // EventSource reconnects with Last-Event-ID
+  source.onopen = () => {
+    if (opened) resync() // not on the first open: the page just loaded
+    opened = true
+    connected.value = true
+  }
+  source.onerror = () => {
+    // EventSource reconnects with Last-Event-ID, firing this on each try.
+    if (!connected.value) return
+    connected.value = false
+    resync()
+  }
   source.onmessage = (m) => {
     let e: TicketEvent
     try {
@@ -74,6 +97,20 @@ function connect() {
   }
 }
 
+/** How often a query events keep fresh polls while the stream is up: only
+ * to catch what no event announces. */
+export const SAFETY_POLL = 300_000
+
+/**
+ * A poll interval for a query that live events keep fresh: ms while the
+ * stream is down, the slow safety poll while it is up. Pass it as a
+ * function, `refetchInterval: () => livePoll(30_000)`, so every fetch
+ * reads the stream's state.
+ */
+export function livePoll(ms: number): number {
+  return connected.value ? Math.max(ms, SAFETY_POLL) : ms
+}
+
 /** Starts the live stream (once) and wires it to the query cache. */
 export function startLive(client: QueryClient) {
   qc = client
@@ -83,6 +120,7 @@ export function startLive(client: QueryClient) {
 export function stopLive() {
   source?.close()
   source = null
+  opened = false
   connected.value = false
 }
 

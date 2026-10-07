@@ -9,6 +9,8 @@ import (
 	"sync"
 	"time"
 
+	"golang.org/x/sync/singleflight"
+
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 )
@@ -144,6 +146,7 @@ type Browser interface {
 type Provider interface {
 	orchestrator.Host
 	orchestrator.Assigner
+	orchestrator.MergeChecker
 	Browser
 }
 
@@ -153,6 +156,8 @@ type Multi struct {
 
 	mu    sync.Mutex
 	cache map[string]cached
+	gen   int64 // bumped by Forget: reads started before it are not kept
+	group singleflight.Group
 }
 
 type cached struct {
@@ -182,27 +187,39 @@ func (m *Multi) pick(repo domain.Repository) (Provider, error) {
 }
 
 // remember caches read results briefly: the repository page polls, and
-// provider APIs are rate-limited.
-func remember[T any](m *Multi, key string, ttl time.Duration, f func() (T, error)) (T, error) {
+// provider APIs are rate-limited. Concurrent misses share one read, which
+// goes on when the caller that started it leaves, so the next one finds it.
+func remember[T any](ctx context.Context, m *Multi, key string, ttl time.Duration, f func(ctx context.Context) (T, error)) (T, error) {
 	m.mu.Lock()
 	if c, ok := m.cache[key]; ok && time.Since(c.at) < ttl {
 		m.mu.Unlock()
 		return c.val.(T), nil
 	}
+	gen := m.gen
 	m.mu.Unlock()
-	v, err := f()
-	if err == nil {
-		m.mu.Lock()
-		m.cache[key] = cached{at: time.Now(), val: v}
-		m.mu.Unlock()
+	v, err, _ := m.group.Do(key+"@"+itoa(gen), func() (any, error) {
+		v, err := f(context.WithoutCancel(ctx))
+		if err == nil {
+			m.mu.Lock()
+			if m.gen == gen {
+				m.cache[key] = cached{at: time.Now(), val: v}
+			}
+			m.mu.Unlock()
+		}
+		return v, err
+	})
+	if err != nil {
+		var zero T
+		return zero, err
 	}
-	return v, err
+	return v.(T), nil
 }
 
 // ForgetAll drops every cached read (after a pipeline webhook).
 func (m *Multi) ForgetAll() {
 	m.mu.Lock()
 	m.cache = map[string]cached{}
+	m.gen++
 	m.mu.Unlock()
 }
 
@@ -210,6 +227,7 @@ func (m *Multi) ForgetAll() {
 func (m *Multi) Forget(repoID int64) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	m.gen++
 	prefix := cacheKey(repoID, "")
 	for k := range m.cache {
 		if len(k) >= len(prefix) && k[:len(prefix)] == prefix {
@@ -239,7 +257,7 @@ func (m *Multi) Branches(ctx context.Context, repo domain.Repository) ([]Branch,
 	if err != nil {
 		return nil, err
 	}
-	return remember(m, cacheKey(repo.ID, "branches"), time.Minute, func() ([]Branch, error) { return p.Branches(ctx, repo) })
+	return remember(ctx, m, cacheKey(repo.ID, "branches"), time.Minute, func(ctx context.Context) ([]Branch, error) { return p.Branches(ctx, repo) })
 }
 
 // Commits implements Browser.
@@ -249,7 +267,7 @@ func (m *Multi) Commits(ctx context.Context, repo domain.Repository, page, perPa
 		return nil, err
 	}
 	key := cacheKey(repo.ID, "commits:"+itoa(int64(page))+":"+itoa(int64(perPage)))
-	return remember(m, key, time.Minute, func() ([]Commit, error) { return p.Commits(ctx, repo, page, perPage) })
+	return remember(ctx, m, key, time.Minute, func(ctx context.Context) ([]Commit, error) { return p.Commits(ctx, repo, page, perPage) })
 }
 
 // Pipelines implements Browser.
@@ -259,7 +277,16 @@ func (m *Multi) Pipelines(ctx context.Context, repo domain.Repository, page, per
 		return nil, err
 	}
 	key := cacheKey(repo.ID, "pipelines:"+itoa(int64(page))+":"+itoa(int64(perPage)))
-	return remember(m, key, 20*time.Second, func() ([]Pipeline, error) { return p.Pipelines(ctx, repo, page, perPage) })
+	return remember(ctx, m, key, 20*time.Second, func(ctx context.Context) ([]Pipeline, error) { return p.Pipelines(ctx, repo, page, perPage) })
+}
+
+// PRMerged implements orchestrator.MergeChecker.
+func (m *Multi) PRMerged(ctx context.Context, repo domain.Repository, number int) (bool, error) {
+	p, err := m.pick(repo)
+	if err != nil {
+		return false, err
+	}
+	return p.PRMerged(ctx, repo, number)
 }
 
 // Assign implements orchestrator.Assigner.
@@ -277,7 +304,7 @@ func (m *Multi) Members(ctx context.Context, repo domain.Repository) ([]Member, 
 	if err != nil {
 		return nil, err
 	}
-	return remember(m, cacheKey(repo.ID, "members"), 5*time.Minute, func() ([]Member, error) { return p.Members(ctx, repo) })
+	return remember(ctx, m, cacheKey(repo.ID, "members"), 5*time.Minute, func(ctx context.Context) ([]Member, error) { return p.Members(ctx, repo) })
 }
 
 // Environments implements Browser.
@@ -286,7 +313,7 @@ func (m *Multi) Environments(ctx context.Context, repo domain.Repository) ([]Env
 	if err != nil {
 		return nil, err
 	}
-	return remember(m, cacheKey(repo.ID, "envs"), time.Minute, func() ([]Environment, error) { return p.Environments(ctx, repo) })
+	return remember(ctx, m, cacheKey(repo.ID, "envs"), time.Minute, func(ctx context.Context) ([]Environment, error) { return p.Environments(ctx, repo) })
 }
 
 // Deploy implements Browser.

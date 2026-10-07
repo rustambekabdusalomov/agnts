@@ -39,6 +39,7 @@ type Config struct {
 	GitEmail         string         // AGNTS_GIT_AUTHOR_EMAIL
 	GitHubAPI        string         // AGNTS_GITHUB_API
 	JiraSyncEach     time.Duration  // AGNTS_JIRA_SYNC_EVERY, reconcile interval
+	PlaneSyncEach    time.Duration  // AGNTS_PLANE_SYNC_EVERY, reconcile interval
 	DocsDir          string         // AGNTS_DOCS_DIR, overrides for page docs (<dir>/<lang>/<page>.md)
 	TimeZone         *time.Location // AGNTS_TZ, for "today" on the dashboard
 	UsageRefresh     time.Duration  // AGNTS_USAGE_REFRESH_EVERY, idle usage refresh (0 disables)
@@ -51,6 +52,12 @@ type Config struct {
 	// InternalAddr serves the egress proxy the hosts allowed in Settings
 	// (AGNTS_INTERNAL_ADDR). Keep it private; empty disables.
 	InternalAddr string
+
+	// Toolchains (any-language runs).
+	ToolchainVolume string // AGNTS_TOOLCHAIN_VOLUME, shared volume mise installs into
+	RunMemoryMB     int    // AGNTS_RUN_MEMORY_MB, default memory of a run container
+	RunMemoryMaxMB  int    // AGNTS_RUN_MEMORY_MAX_MB, highest per-repository memory override
+	CacheMaxBytes   int64  // AGNTS_CACHE_MAX_GB, a repository's package cache is emptied above it (0 disables)
 }
 
 // Load reads the configuration from the environment.
@@ -146,8 +153,23 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 	if c.Parallel, err = strconv.Atoi(get("AGNTS_PARALLEL", "1")); err != nil || c.Parallel < 1 || c.Parallel > 8 {
 		errs = append(errs, errors.New("AGNTS_PARALLEL must be a number from 1 to 8"))
 	}
+	c.ToolchainVolume = get("AGNTS_TOOLCHAIN_VOLUME", "agnts-toolchains")
+	if c.RunMemoryMB, err = strconv.Atoi(get("AGNTS_RUN_MEMORY_MB", "4096")); err != nil || c.RunMemoryMB < 512 {
+		errs = append(errs, errors.New("AGNTS_RUN_MEMORY_MB must be a number of megabytes, at least 512"))
+	}
+	if c.RunMemoryMaxMB, err = strconv.Atoi(get("AGNTS_RUN_MEMORY_MAX_MB", "8192")); err != nil || c.RunMemoryMaxMB < 512 {
+		errs = append(errs, errors.New("AGNTS_RUN_MEMORY_MAX_MB must be a number of megabytes, at least 512"))
+	}
+	if gb, err := strconv.ParseFloat(get("AGNTS_CACHE_MAX_GB", "5"), 64); err != nil || gb < 0 {
+		errs = append(errs, errors.New("AGNTS_CACHE_MAX_GB must be a number of gigabytes (0 disables the limit)"))
+	} else {
+		c.CacheMaxBytes = int64(gb * (1 << 30))
+	}
 	if c.JiraSyncEach, err = time.ParseDuration(get("AGNTS_JIRA_SYNC_EVERY", "1h")); err != nil || c.JiraSyncEach < time.Minute {
 		errs = append(errs, errors.New("AGNTS_JIRA_SYNC_EVERY must be a duration of at least 1m"))
+	}
+	if c.PlaneSyncEach, err = time.ParseDuration(get("AGNTS_PLANE_SYNC_EVERY", "1h")); err != nil || c.PlaneSyncEach < 5*time.Minute {
+		errs = append(errs, errors.New("AGNTS_PLANE_SYNC_EVERY must be a duration of at least 5m (Plane allows 60 API requests a minute)"))
 	}
 
 	switch c.LogLevel {

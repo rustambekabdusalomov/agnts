@@ -19,7 +19,7 @@ const ui = useUi()
 const repos = useQuery({ queryKey: ['repos'], queryFn: () => unwrap(api.GET('/repos')) })
 const options = computed(() => (repos.data.value ?? []).filter((r) => !r.archivedAt || r.id === props.ticket.repoId))
 const items = computed(() =>
-  options.value.map((r) => ({ value: r.id as number | undefined, label: r.name, hint: r.jiraProject || undefined })),
+  options.value.map((r) => ({ value: r.id as number | undefined, label: r.name, hint: [r.jiraProject, r.planeProject].filter(Boolean).join(' · ') || undefined })),
 )
 const restarts = computed(() => !!props.ticket.repoId && props.ticket.state !== 'new' && props.ticket.resumeState !== 'new')
 

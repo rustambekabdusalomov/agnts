@@ -234,11 +234,11 @@ func relationsMessage(key string, rs []domain.Relation) string {
 	return fmt.Sprintf("found %d %s: %s", len(rs), plural(len(rs), "relation", "relations"), strings.Join(parts, "; "))
 }
 
-// syncJiraRelations mirrors the issue's "blocks" links. Links to issues
+// syncTrackerRelations mirrors the issue's blocking links. Links to issues
 // agnts does not have are skipped; when that issue arrives, its own links
 // add the relation. A link that would close a cycle is skipped with a
 // warning.
-func (o *Orchestrator) syncJiraRelations(ctx context.Context, in Incoming, origin domain.Origin) {
+func (o *Orchestrator) syncTrackerRelations(ctx context.Context, in Incoming, origin domain.Origin) {
 	if !in.LinksKnown {
 		return
 	}
@@ -258,11 +258,11 @@ func (o *Orchestrator) syncJiraRelations(ctx context.Context, in Incoming, origi
 		}
 		if domain.Reachable(graph, on, waits) {
 			o.event(ctx, domain.Event{TicketKey: in.Key, Type: domain.EventRelations, Level: domain.LevelWarn, Origin: origin,
-				Message: fmt.Sprintf("Jira says %s is blocked by %s, but %s already waits for %s: agnts ignores this link", waits, on, on, waits)})
+				Message: fmt.Sprintf("%s says %s is blocked by %s, but %s already waits for %s: agnts ignores this link", in.Source.Name(), waits, on, on, waits)})
 			return
 		}
 		graph[waits] = append(graph[waits], on)
-		rs = append(rs, domain.Relation{Type: domain.RelDependsOn, TicketKey: waits, OtherKey: on, Source: domain.RelFromJira,
+		rs = append(rs, domain.Relation{Type: domain.RelDependsOn, TicketKey: waits, OtherKey: on, Source: in.Source.RelationSource(),
 			Status: domain.RelActive, Confidence: 1})
 	}
 	for _, k := range in.DependsOn {
@@ -271,14 +271,14 @@ func (o *Orchestrator) syncJiraRelations(ctx context.Context, in Incoming, origi
 	for _, k := range in.Dependents {
 		add(k, in.Key)
 	}
-	added, err := o.store.SyncJiraRelations(ctx, in.Key, rs)
+	added, err := o.store.SyncTrackerRelations(ctx, in.Source.RelationSource(), in.Key, rs)
 	if err != nil {
-		o.log.Error("sync jira links", "ticket", in.Key, "err", err)
+		o.log.Error("sync tracker links", "source", in.Source, "ticket", in.Key, "err", err)
 		return
 	}
 	if len(added) > 0 {
 		o.event(ctx, domain.Event{TicketKey: in.Key, Type: domain.EventRelations, Origin: origin,
-			Message: "from Jira links: " + relationsMessage(in.Key, added), Data: map[string]any{"count": len(added)}})
+			Message: "from " + in.Source.Name() + " links: " + relationsMessage(in.Key, added), Data: map[string]any{"count": len(added)}})
 	}
 	o.Wake() // a removed link may free a ticket
 }
@@ -410,6 +410,46 @@ func (o *Orchestrator) MarkMergedByHand(ctx context.Context, key string, origin 
 		return t, nil
 	}
 	return o.markMerged(ctx, t, origin, "marked merged by hand")
+}
+
+// CheckMerges asks the git host about done tickets whose pull request is
+// not known to be merged, and records the merges it finds. It covers a
+// webhook that never arrived; with a working webhook it finds nothing.
+func (o *Orchestrator) CheckMerges(ctx context.Context) {
+	mc, ok := o.host.(MergeChecker)
+	if !ok || ctx.Err() != nil {
+		return
+	}
+	ts, err := o.store.UnmergedPRs(ctx, 50)
+	if err != nil {
+		o.log.Warn("check merges", "err", err)
+		return
+	}
+	repos := map[int64]domain.Repository{}
+	for _, t := range ts {
+		if ctx.Err() != nil {
+			return
+		}
+		repo, seen := repos[*t.RepoID]
+		if !seen {
+			if repo, err = o.store.RepositoryByID(ctx, *t.RepoID); err != nil {
+				o.log.Warn("check merges", "ticket", t.Key, "err", err)
+				continue
+			}
+			repos[*t.RepoID] = repo
+		}
+		merged, err := mc.PRMerged(ctx, repo, *t.PRNumber)
+		if err != nil {
+			o.log.Debug("check merges", "ticket", t.Key, "err", err)
+			continue
+		}
+		if !merged {
+			continue
+		}
+		if _, err := o.markMerged(ctx, t, domain.OriginSystem, "pull request merged (found by checking the git host)"); err != nil {
+			o.log.Warn("check merges", "ticket", t.Key, "err", err)
+		}
+	}
 }
 
 func (o *Orchestrator) markMerged(ctx context.Context, t domain.Ticket, origin domain.Origin, msg string) (domain.Ticket, error) {

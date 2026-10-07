@@ -9,6 +9,8 @@ import CfgRow from '../components/form/CfgRow.vue'
 import CopyField from '../components/form/CopyField.vue'
 import ConnectForm from '../components/integrations/ConnectForm.vue'
 import JiraSettings from '../components/integrations/JiraSettings.vue'
+import PlaneSettings from '../components/integrations/PlaneSettings.vue'
+import PlaneWebhook from '../components/integrations/PlaneWebhook.vue'
 import ProviderTile from '../components/integrations/ProviderTile.vue'
 import { isProvider, type Provider } from '../components/integrations/providers'
 import { useIntegrations } from '../components/integrations/useIntegrations'
@@ -57,11 +59,12 @@ const disconnect = useMutation({
   },
   onError: onErr,
 })
+const tracker = computed(() => provider.value === 'jira' || provider.value === 'plane')
 const sync = useMutation({
-  mutationFn: () => unwrap(api.POST('/integrations/jira/sync')),
+  mutationFn: () => unwrap(provider.value === 'plane' ? api.POST('/integrations/plane/sync') : api.POST('/integrations/jira/sync')),
   onSuccess: (r) => {
     for (const k of ['tickets', 'nav', 'dashboard']) void qc.invalidateQueries({ queryKey: [k] })
-    ui.notify(t('integrations.synced', { found: r.found, created: r.created }))
+    ui.notify(t(provider.value === 'plane' ? 'integrations.planeSynced' : 'integrations.synced', { found: r.found, created: r.created }))
   },
   onError: onErr,
 })
@@ -79,7 +82,9 @@ async function confirmDisconnect() {
 const sideHelp = computed(() =>
   provider.value === 'jira'
     ? t('integrations.secretsHelp')
-    : provider.value === 'github'
+    : provider.value === 'plane'
+      ? t('integrations.planeHelp')
+      : provider.value === 'github'
       ? t('integrations.githubHelp')
       : provider.value === 'gitlab'
         ? t('integrations.gitlabHelp')
@@ -108,7 +113,7 @@ const sideHelp = computed(() =>
         </p>
       </template>
       <div v-if="integ?.connected" class="actions" style="margin: 0">
-        <button v-if="provider === 'jira'" type="button" class="btn" :disabled="sync.isPending.value" @click="sync.mutate()">
+        <button v-if="tracker" type="button" class="btn" :disabled="sync.isPending.value" @click="sync.mutate()">
           {{ t('integrations.syncNow') }}
         </button>
         <button type="button" class="btn" :disabled="test.isPending.value" @click="test.mutate()">{{ t('integrations.test') }}</button>
@@ -140,6 +145,10 @@ const sideHelp = computed(() =>
             </div>
             <CfgRow v-if="integ.settings.site" :label="t('integrations.site')"><span class="conn">{{ integ.settings.site }}</span></CfgRow>
             <CfgRow v-if="integ.settings.url" :label="t('integrations.gitlabUrl')"><span class="conn">{{ integ.settings.url }}</span></CfgRow>
+            <template v-if="provider === 'plane'">
+              <CfgRow :label="t('integrations.planeBaseUrl')"><span class="conn">{{ integ.settings.base_url || 'https://api.plane.so' }}</span></CfgRow>
+              <CfgRow v-if="integ.settings.workspace" :label="t('integrations.planeWorkspace')"><span class="conn">{{ integ.settings.workspace }}</span></CfgRow>
+            </template>
             <CfgRow v-if="integ.account" :label="t('integrations.account')"><span class="conn">{{ integ.account }}</span></CfgRow>
             <CfgRow v-if="integ.tokenHint" :label="t('integrations.token')" :help="t('integrations.tokenHelp')">
               <span class="conn">•••• {{ integ.tokenHint }}</span>
@@ -150,6 +159,10 @@ const sideHelp = computed(() =>
             <p v-if="integ.lastError" class="ferr">{{ t('integrations.lastError') }}: {{ integ.lastError }}</p>
           </section>
           <JiraSettings v-if="provider === 'jira'" :integration="integ" />
+          <template v-if="provider === 'plane'">
+            <PlaneWebhook :integration="integ" />
+            <PlaneSettings :integration="integ" />
+          </template>
           <section v-if="(provider === 'github' || provider === 'gitlab') && integ.webhookSecret" class="card">
             <div class="ch"><div><h2>{{ t('integrations.webhook') }}</h2><p class="sub">{{ t(`integrations.gitWebhookSteps_${provider}`) }}</p></div></div>
             <CopyField v-if="integ.webhookUrl" :label="t('integrations.webhookUrl')" :value="integ.webhookUrl" />
@@ -168,6 +181,10 @@ const sideHelp = computed(() =>
           <div class="ch"><div><h2>{{ t('integrations.webhook') }}</h2></div></div>
           <CopyField v-if="integ.webhookUrl" :label="t('integrations.webhookUrl')" :value="integ.webhookUrl" />
           <p class="hint" style="margin: 8px 0 0">{{ t('integrations.syncHelp') }}</p>
+        </section>
+        <section v-if="provider === 'plane' && integ?.connected" class="card">
+          <div class="ch"><div><h2>{{ t('integrations.sync') }}</h2></div></div>
+          <p class="hint" style="margin: 0">{{ t('integrations.planeSyncHelp') }}</p>
         </section>
         <div class="help"><HiIcon name="info" /><p>{{ sideHelp }}</p></div>
       </aside>

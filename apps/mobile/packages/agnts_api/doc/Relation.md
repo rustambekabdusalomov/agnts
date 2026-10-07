@@ -11,7 +11,7 @@ Name | Type | Description | Notes
 **id** | **int** |  | 
 **type** | [**RelationType**](RelationType.md) |  | 
 **direction** | **String** | From the ticket asked about: it waits for other, other waits for it, or they conflict | 
-**source_** | **String** | Who found it: a Jira link, a person, the analysis, overlapping footprints, or the finished diffs (when nobody predicted it) | 
+**source_** | **String** | Who found it: a Jira link, a Plane relation, a person, the analysis, overlapping footprints, or the finished diffs (when nobody predicted it) | 
 **status** | **String** | Only active relations hold the queue; proposed ones wait for a person | 
 **confidence** | **double** |  | 
 **reason** | **String** |  | 

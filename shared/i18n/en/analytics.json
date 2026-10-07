@@ -96,6 +96,7 @@
     "insightStopsLimit": "Plan limits stop more runs ({n}) than anything else. Fewer parallel runs or Haiku for summaries save usage.",
     "insightNight": "{pct}% of agnts's work happens between 22:00 and 07:00, while you're offline.",
     "minutes": "{n} min",
-    "hoursMinutes": "{h} h {m} min"
+    "hoursMinutes": "{h} h {m} min",
+    "srcPlane": "Plane"
   }
 }

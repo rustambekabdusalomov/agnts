@@ -14,8 +14,35 @@ type TicketSource string
 // Ticket sources.
 const (
 	SourceJira  TicketSource = "jira"
+	SourcePlane TicketSource = "plane"
 	SourceLocal TicketSource = "local"
 )
+
+// TrackerSources are the sources that have an issue in a tracker.
+var TrackerSources = []TicketSource{SourceJira, SourcePlane}
+
+// Tracked reports whether tickets from s have a tracker issue.
+func (s TicketSource) Tracked() bool { return slices.Contains(TrackerSources, s) }
+
+// Name is the tracker's display name ("Jira", "Plane").
+func (s TicketSource) Name() string {
+	switch s {
+	case SourceJira:
+		return "Jira"
+	case SourcePlane:
+		return "Plane"
+	}
+	return string(s)
+}
+
+// RelationSource is the source of the relations this tracker's links
+// make.
+func (s TicketSource) RelationSource() RelationSource {
+	if s == SourcePlane {
+		return RelFromPlane
+	}
+	return RelFromJira
+}
 
 // Ticket is one unit of work agnts takes from intake to merge.
 type Ticket struct {
@@ -51,6 +78,9 @@ type Ticket struct {
 	// FeedbackShots are the screenshots the reviewer pointed at in
 	// Feedback; the next coding run gets them next to the feedback.
 	FeedbackShots []ShotRef
+	// FeedbackFiles are attachments a retry note or review feedback
+	// brought; the next coding run gets them next to the text.
+	FeedbackFiles []int64
 	Kind          TicketKind
 	// KindAuto is true while agnts picks the kind: the analysis may change
 	// it. A kind someone chose (label, form, hand edit) is never changed.
@@ -120,6 +150,9 @@ type Question struct {
 	Position int
 	Text     string
 	Options  []string
+	// Multiple allows choosing several options; the answer then lists
+	// them, one per line (see JoinChoices).
+	Multiple bool
 	Answer   *string
 	Note     string
 }
@@ -129,6 +162,8 @@ type Answer struct {
 	QuestionID int64
 	Answer     string
 	Note       string
+	// Attachments are pending uploads to link to the answer.
+	Attachments []int64
 }
 
 // Stage is the kind of work a run does.
@@ -319,6 +354,9 @@ const (
 	EventCollision = "collision_found"
 	// EventFootprint: the predicted footprint checked against the real diff.
 	EventFootprint = "footprint_checked"
+	// EventToolchain: toolchains were detected for a repository, or
+	// installed into the shared toolchain volume before a run.
+	EventToolchain = "toolchain"
 )
 
 // Repository is a codebase agnts works on.
@@ -336,11 +374,41 @@ type Repository struct {
 	BranchPrefix   string
 	ClaudeMD       string // extra instructions added to every prompt
 	JiraProject    string
+	PlaneProject   string     // Plane project identifier whose work items go here
 	TaskPrefix     string     // side-project task keys: PREFIX-1, PREFIX-2
 	DeployWorkflow string     // GitHub workflow file triggered by Deploy
 	ClaudeMDState  string     // CLAUDE.md in the repository: found, missing, unknown
 	ArchivedAt     *time.Time // archived: kept for history, takes no new work
 	Preview        PreviewConfig
+	// Toolchains are installed into the run container (detected from the
+	// repository unless ToolchainsOverride says a person set them).
+	Toolchains           []Toolchain
+	ToolchainsOverride   bool
+	ToolchainsDetectedAt *time.Time
+	ToolchainNotes       []string // what detection could not handle
+	// RunnerImage replaces the server's runner image for this repository
+	// (an image built FROM agnts-runner); "" uses the default.
+	RunnerImage string
+	// MemoryMB raises or lowers the run container's memory; 0 uses the
+	// server default. Capped by the server limit.
+	MemoryMB int
+	// BuildEnv is KEY=value lines (registry tokens and the like) given to
+	// every run container. Sealed at rest, never returned; BuildEnvNames
+	// describes it.
+	BuildEnvSet   bool
+	BuildEnvNames []string
+}
+
+// TrackerProject is the project in tracker src whose issues come to r,
+// or "" when r is not linked to one.
+func (r Repository) TrackerProject(src TicketSource) string {
+	switch src {
+	case SourceJira:
+		return r.JiraProject
+	case SourcePlane:
+		return r.PlaneProject
+	}
+	return ""
 }
 
 // PreviewConfig is how agnts starts a repository's app to take

@@ -41,10 +41,12 @@
     "ledeRunning": "agnts hozir ishlayotgan tiketlar.",
     "ledeQueue": "agnts belgisi bor, hali tahlil qilinmagan tiketlar.",
     "ledeDone": "Yuborilgan yoki rad etilgan tiketlar.",
-    "ledeAll": "agnts Jira'dan olgan barcha tiketlar.",
+    "ledeAll": "agnts Jira va Plane'dan olgan barcha tiketlar.",
     "knowledge": "Bilim",
     "learn": "Oʻrganish",
     "learnQueue": "Oʻrganish navbati",
-    "rules": "Qoidalar"
+    "rules": "Qoidalar",
+    "syncPlane": "Plane'ni sinxronlash",
+    "syncedPlane": "Plane sinxronlandi: {found} ochiq, {created} yangi"
   }
 }

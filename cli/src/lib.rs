@@ -2,6 +2,7 @@
 //! server itself) and manages it afterwards. See `CLI plan.md`.
 
 pub mod assets;
+pub mod capacity;
 pub mod cli;
 pub mod cloud;
 pub mod cmd;

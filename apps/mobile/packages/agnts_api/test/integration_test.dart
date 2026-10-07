@@ -54,5 +54,11 @@ void main() {
       // TODO
     });
 
+    // Plane: a webhook secret is stored (deliveries are accepted)
+    // bool webhookSecretSet
+    test('to test the property `webhookSecretSet`', () async {
+      // TODO
+    });
+
   });
 }

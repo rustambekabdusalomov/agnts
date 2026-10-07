@@ -25,6 +25,8 @@ abstract class _$IntegrationCWProxy {
 
   Integration webhookSecret(String? webhookSecret);
 
+  Integration webhookSecretSet(bool? webhookSecretSet);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Integration(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -41,6 +43,7 @@ abstract class _$IntegrationCWProxy {
     Map<String, String> settings,
     String? webhookUrl,
     String? webhookSecret,
+    bool? webhookSecretSet,
   });
 }
 
@@ -80,6 +83,10 @@ class _$IntegrationCWProxyImpl implements _$IntegrationCWProxy {
       this(webhookSecret: webhookSecret);
 
   @override
+  Integration webhookSecretSet(bool? webhookSecretSet) =>
+      this(webhookSecretSet: webhookSecretSet);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Integration(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -96,6 +103,7 @@ class _$IntegrationCWProxyImpl implements _$IntegrationCWProxy {
     Object? settings = const $CopyWithPlaceholder(),
     Object? webhookUrl = const $CopyWithPlaceholder(),
     Object? webhookSecret = const $CopyWithPlaceholder(),
+    Object? webhookSecretSet = const $CopyWithPlaceholder(),
   }) {
     return Integration(
       provider: provider == const $CopyWithPlaceholder()
@@ -134,6 +142,10 @@ class _$IntegrationCWProxyImpl implements _$IntegrationCWProxy {
           ? _value.webhookSecret
           // ignore: cast_nullable_to_non_nullable
           : webhookSecret as String?,
+      webhookSecretSet: webhookSecretSet == const $CopyWithPlaceholder()
+          ? _value.webhookSecretSet
+          // ignore: cast_nullable_to_non_nullable
+          : webhookSecretSet as bool?,
     );
   }
 }
@@ -169,6 +181,7 @@ Integration _$IntegrationFromJson(Map<String, dynamic> json) => $checkedCreate(
       ),
       webhookUrl: $checkedConvert('webhookUrl', (v) => v as String?),
       webhookSecret: $checkedConvert('webhookSecret', (v) => v as String?),
+      webhookSecretSet: $checkedConvert('webhookSecretSet', (v) => v as bool?),
     );
     return val;
   },
@@ -185,4 +198,5 @@ Map<String, dynamic> _$IntegrationToJson(Integration instance) =>
       'settings': instance.settings,
       'webhookUrl': ?instance.webhookUrl,
       'webhookSecret': ?instance.webhookSecret,
+      'webhookSecretSet': ?instance.webhookSecretSet,
     };

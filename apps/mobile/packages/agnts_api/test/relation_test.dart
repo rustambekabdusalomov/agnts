@@ -23,7 +23,7 @@ void main() {
       // TODO
     });
 
-    // Who found it: a Jira link, a person, the analysis, overlapping footprints, or the finished diffs (when nobody predicted it)
+    // Who found it: a Jira link, a Plane relation, a person, the analysis, overlapping footprints, or the finished diffs (when nobody predicted it)
     // String source_
     test('to test the property `source_`', () async {
       // TODO

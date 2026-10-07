@@ -112,7 +112,11 @@ func (n *Notifier) handleCallback(ctx context.Context, b *Bot, cfg TelegramConfi
 	case "apr", "rej":
 		tool, what := "approve", "Approve and push "+arg+"? agnts pushes the branch and opens the pull request."
 		if v, err := n.actions.View(ctx, arg); err == nil && v.Ticket.Kind.Report() {
-			what = "Approve the report on " + arg + "? It stays in agnts and is not posted to Jira."
+			what = "Approve the report on " + arg + "? It stays in agnts"
+			if v.Ticket.Source.Tracked() {
+				what += " and is not posted to " + v.Ticket.Source.Name()
+			}
+			what += "."
 		}
 		if verb == "rej" {
 			tool, what = "reject", "Reject "+arg+"? This stops all work on it."
@@ -214,7 +218,7 @@ func (n *Notifier) handleText(ctx context.Context, b *Bot, cfg TelegramConfig, m
 			n.answer(ctx, b, cfg, msg.ReplyTo, m.TicketKey, *m.Ref, text)
 		}
 	case "feedback":
-		if _, err := n.actions.RequestChanges(ctx, m.TicketKey, text, nil, domain.OriginTelegram); err != nil {
+		if _, err := n.actions.RequestChanges(ctx, m.TicketKey, text, nil, nil, domain.OriginTelegram); err != nil {
 			n.say(ctx, b, cfg, m.TicketKey+": "+friendly(err))
 			return
 		}

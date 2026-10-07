@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 	"text/template"
 
 	"agnts/internal/domain"
+	"agnts/internal/toolchain"
 )
 
 // Files Claude Code writes for agnts to read back. stream-json output has no
@@ -36,6 +38,9 @@ type Analysis struct {
 	Questions  []struct {
 		Text    string   `json:"text"`
 		Options []string `json:"options"`
+		// Multiple: the options do not exclude each other; the author
+		// may pick several.
+		Multiple bool `json:"multiple"`
 	} `json:"questions"`
 	// FollowUps are prerequisites and parts to split off, when asked for.
 	FollowUps []domain.FollowUp `json:"followUps,omitempty"`
@@ -67,18 +72,44 @@ var kindWork = map[domain.TicketKind]string{
 
 var prompts = template.Must(template.New("").Funcs(template.FuncMap{
 	"indent": func(s string) string { return "    " + strings.ReplaceAll(s, "\n", "\n    ") },
-	"work":   func(k domain.TicketKind) string { return kindWork[k] },
-	"kinds":  func() []domain.TicketKind { return domain.Kinds },
+	// answer is a question's answer on one line: the chosen options of a
+	// multiple-choice question are joined.
+	"answer": func(q domain.Question) string {
+		if q.Answer == nil {
+			return ""
+		}
+		return strings.ReplaceAll(strings.TrimSpace(*q.Answer), "\n", "; ")
+	},
+	"work":  func(k domain.TicketKind) string { return kindWork[k] },
+	"kinds": func() []domain.TicketKind { return domain.Kinds },
 }).Parse(`
 {{define "ticket"}}## Ticket {{.T.Key}}: {{.T.Title}}
 
 {{if .T.Description}}{{.T.Description}}{{else}}(no description){{end}}
-{{if .Repo.ClaudeMD}}
+{{with .TicketFiles}}
+The author attached these files to the ticket. Read each one (images and PDFs too) before you start:
+{{range .}}
+- {{.Path}} ({{.Name}}, {{.ContentType}}){{end}}
+{{end}}{{if .Repo.ClaudeMD}}
 ## Extra instructions for this repository
 
 {{.Repo.ClaudeMD}}
 {{end}}{{template "team" .}}
 {{template "lang"}}{{end}}
+
+{{define "answers"}}{{if .Answers}}
+## Answers from the ticket author
+
+{{range .Answers}}- Q: {{.Text}}
+  A: {{answer .}}{{if .Note}} ({{.Note}}){{end}}
+{{with $.AnswerFiles .ID}}  Attached to this answer (read them): {{range $i, $f := .}}{{if $i}}, {{end}}{{$f.Path}}{{end}}
+{{end}}{{end}}{{end}}{{end}}
+
+{{define "feedbackfiles"}}{{with .FeedbackFiles}}
+The author attached these files to help; read each one (images and PDFs too):
+{{range .}}
+- {{.Path}} ({{.Name}}){{end}}
+{{end}}{{end}}
 
 {{define "lang"}}## Language
 
@@ -100,6 +131,28 @@ The team wrote these rules for every ticket. Follow them. A repository rule is m
 - Work only inside /workspace. Do not commit, push, or change git remotes; agnts does that after human review.
 - Do not read or print secrets (.env files, credentials).
 - Keep changes focused on the ticket. Follow the repository's existing style and CLAUDE.md.
+{{end}}
+
+{{define "environment"}}{{if .Repo.Toolchains}}## Environment
+
+Installed and on PATH: {{range $i, $t := .Repo.Toolchains}}{{if $i}}, {{end}}{{$t.Tool}} {{$t.Version}}{{if $t.Dir}} (for {{$t.Dir}}/){{end}}{{end}}. Their install directories are read-only: do not install other language versions, and do not use sudo or apt-get. Install the project's dependencies the usual way (npm ci, pip install, bundle install, cargo build, ...); package caches are kept between runs.{{range .Repo.Toolchains}}{{if eq .Tool "python"}} A Python virtualenv is active ($VIRTUAL_ENV, outside /workspace): install Python packages into it, and never create a virtualenv inside /workspace.{{end}}{{end}} If the work needs a tool that is not installed, say so in the notes instead of working around it.
+
+{{end}}{{end}}
+
+{{define "detect"}}You are agnts's build engineer. agnts runs AI coding agents on the repository at /workspace, in a Linux container, and needs to know which language toolchains to install and which commands build, lint and test the project. A file scan found:
+{{if .Detected.Toolchains}}- toolchains: {{range $i, $t := .Detected.Toolchains}}{{if $i}}, {{end}}{{$t.Spec}}{{end}}{{else}}- no toolchains{{end}}
+- build: {{if .Detected.Build}}{{.Detected.Build}}{{else}}(none){{end}}
+- lint: {{if .Detected.Lint}}{{.Detected.Lint}}{{else}}(none){{end}}
+- test: {{if .Detected.Test}}{{.Detected.Test}}{{else}}(none){{end}}
+
+Fill the gaps. Read the README, CONTRIBUTING, the CI configuration (.github/workflows, .gitlab-ci.yml, .circleci, Jenkinsfile), Makefiles, Dockerfiles and build files: the CI file usually shows exactly how the project is built and tested. Do not run anything and do not change any files in /workspace.
+
+Write {{.DetectPath}} as JSON:
+{"toolchains": [{"tool": "python", "version": "3.12"}], "build": "...", "lint": "...", "test": "...", "notes": ["..."]}
+
+- tool: a mise tool name (go, node, python, rust, java, dotnet, ruby, elixir, erlang, dart, zig, swift, deno, bun, uv, maven, gradle, cmake, ...). version: the one the project pins, or a prefix such as "20", or "latest". Leave out tools the scan already found, and anything the base image has (git, make, gcc, PHP, Composer).
+- build, lint, test: one shell line each, run from the repository root, that install dependencies and then build, lint or test. Use "" when the project has none. Prefer what CI runs, without CI-only steps (caching, uploads, deploys, docker build). Each must finish on its own: no watch modes, servers or prompts.
+- notes: anything a person must set up by hand (services such as a database the tests need, secrets, an SDK that cannot be installed this way). Keep each note to one sentence.
 {{end}}
 
 {{define "analyze"}}You are agnts, a careful software engineer. Analyse the ticket below {{if .NoRepo}}before working on it. It has no repository: /workspace is empty, so work from the ticket text{{else}}in the repository at /workspace{{end}}. Do not change any files in /workspace.
@@ -124,7 +177,7 @@ agnts works these kinds of tickets:
      "summary": "one paragraph: what the ticket needs{{if not .NoRepo}} and where in the code{{end}}",
      "plan": ["step 1", "step 2"],{{if not .NoRepo}}
      "footprint": {"files": ["path/relative/to/the/repository/root.go"], "modules": ["package or feature"], "provides": ["what this adds that other work could use"], "consumes": ["what this needs that may not exist yet"], "migrations": false},{{end}}
-     "questions": [{"text": "a question only the ticket author can answer", "options": ["option A", "option B"]}]}
+     "questions": [{"text": "a question only the ticket author can answer", "options": ["option A", "option B"], "multiple": false}]}
 
 For a report kind (plan, analysis, bug) the plan lists how you will do the work and what the report will cover.
 
@@ -132,7 +185,7 @@ For a report kind (plan, analysis, bug) the plan lists how you will do the work 
 
 {{end}}Rate the complexity "complex" when the work spans several modules or layers, changes data or schemas, touches concurrency, security, money or public APIs, or needs careful design; otherwise "simple".
 
-{{if .NoQuestions}}Do not ask questions: use an empty "questions" list and make reasonable assumptions, noting them in the plan.{{else}}Ask questions only when the answer changes what you would build or conclude and you cannot find it{{if not .NoRepo}} in the code{{end}}. Give two to four concrete options for each. Use an empty list when there is nothing to ask.{{end}}{{if .Rules}} Plan the work so it follows the team rules; if the ticket asks for something a rule forbids, {{if .NoQuestions}}follow the rule and say so in the plan{{else}}ask which one wins{{end}}.{{end}}
+{{if .NoQuestions}}Do not ask questions: use an empty "questions" list and make reasonable assumptions, noting them in the plan.{{else}}Ask questions only when the answer changes what you would build or conclude and you cannot find it{{if not .NoRepo}} in the code{{end}}. Give two to four concrete options for each. Set "multiple" to true when the options do not exclude each other and the author may pick several (which platforms to support, which fields to show); keep it false when only one can be right. Use an empty list when there is nothing to ask.{{end}}{{if .Rules}} Plan the work so it follows the team rules; if the ticket asks for something a rule forbids, {{if .NoQuestions}}follow the rule and say so in the plan{{else}}ask which one wins{{end}}.{{end}}
 {{end}}
 
 {{define "code"}}You are agnts, a careful software engineer. Implement the ticket below in the repository at /workspace.{{if eq .T.Kind "test"}} This ticket is about tests: add or fix automated tests that follow the project's existing test style, and change other code only when the ticket asks for it or a test cannot be written without it (say so in the notes).{{end}}
@@ -141,12 +194,7 @@ For a report kind (plan, analysis, bug) the plan lists how you will do the work 
 {{if .Plan}}## Plan from the analysis
 
 {{range .Plan}}- {{.}}
-{{end}}{{end}}{{if .Answers}}
-## Answers from the ticket author
-
-{{range .Answers}}- Q: {{.Text}}
-  A: {{.Answer}}{{if .Note}} ({{.Note}}){{end}}
-{{end}}{{end}}
+{{end}}{{end}}{{template "answers" .}}
 {{if .Landed}}## Merged since the analysis
 
 This ticket waited for these tickets, and their changes are now merged into the default branch, so /workspace includes them:
@@ -155,7 +203,7 @@ This ticket waited for these tickets, and their changes are now merged into the 
 
 The plan above was written before they landed. Check it against the current code, use what they added, and do not redo their work.
 
-{{end}}{{template "rules" .}}- Run the project's build, lint and tests yourself before finishing{{if .Checks}}: {{.Checks}}{{end}}.
+{{end}}{{template "environment" .}}{{template "rules" .}}- Run the project's build, lint and tests yourself before finishing{{if .Checks}}: {{.Checks}}{{end}}.
 {{if .VisualCheck}}{{template "visualcheck" .}}{{end}}
 When you are done, write {{.SummaryPath}} as {"summary": "what you changed and why", "notes": ["anything the reviewer should check"]}.
 {{end}}
@@ -176,7 +224,7 @@ Spend at most about 10 turns on this, and skip it when the change has no visible
 {{define "feedback"}}The reviewer asked for changes to your work on {{.T.Key}}:
 
 {{indent .Feedback}}
-{{if .FeedbackShots}}
+{{template "feedbackfiles" .}}{{if .FeedbackShots}}
 The reviewer pointed at these screenshots of the running app; read them to see what they mean:
 {{range .FeedbackShots}}
 - {{.}}{{end}}
@@ -291,15 +339,10 @@ Write {{.TranslationPath}} with exactly this shape, one item for every id in the
 {{define "report"}}You are agnts, a careful software engineer. Your task: {{work .T.Kind}}, for the ticket below. {{if .NoRepo}}The ticket has no repository: /workspace is empty.{{else}}The repository is at /workspace.{{end}} Do not change any files in /workspace: the result is a report, not a change.
 
 {{template "ticket" .}}
-{{if .Plan}}## Plan from the analysis
+{{template "environment" .}}{{if .Plan}}## Plan from the analysis
 
 {{range .Plan}}- {{.}}
-{{end}}{{end}}{{if .Answers}}
-## Answers from the ticket author
-
-{{range .Answers}}- Q: {{.Text}}
-  A: {{.Answer}}{{if .Note}} ({{.Note}}){{end}}
-{{end}}{{end}}
+{{end}}{{end}}{{template "answers" .}}
 ## Rules
 
 - Do not change, commit or push anything in /workspace. Write only under /agnts/out; use /tmp for scratch files.
@@ -322,7 +365,7 @@ Then write {{.SummaryPath}} as {"summary": "two or three sentences: the outcome"
 {{define "report-feedback"}}The reviewer asked for changes to your report on {{.T.Key}}:
 
 {{indent .Feedback}}
-
+{{template "feedbackfiles" .}}
 Your last report is in {{.ReportPath}}. Rewrite it there in full with these changes, and update {{.SummaryPath}}. Do not change files in /workspace.
 {{end}}
 
@@ -332,12 +375,7 @@ Your last report is in {{.ReportPath}}. Rewrite it there in full with these chan
 {{if .Plan}}## Plan from the analysis
 
 {{range .Plan}}- {{.}}
-{{end}}{{end}}{{if .Answers}}
-## Answers from the ticket author
-
-{{range .Answers}}- Q: {{.Text}}
-  A: {{.Answer}}{{if .Note}} ({{.Note}}){{end}}
-{{end}}{{end}}
+{{end}}{{end}}{{template "answers" .}}
 ## The work under review
 {{if .WorkSummary}}
 agnts's summary: {{.WorkSummary}}
@@ -524,14 +562,17 @@ type promptData struct {
 	ReviewPath      string
 	PreviewPath     string
 	PreviewEnvPath  string
-	VisualCheck     bool     // the coding prompt explains how to look at the app
-	FeedbackShots   []string // screenshots the reviewer's feedback points at
-	Language        string   // translate: the target language's English name
+	VisualCheck     bool           // the coding prompt explains how to look at the app
+	FeedbackShots   []string       // screenshots the reviewer's feedback points at
+	Attached        []AttachedFile // files people attached, copied into the run
+	Language        string         // translate: the target language's English name
 	SourcePath      string
 	TranslationPath string
-	WorkSummary     string      // what the work run said it did (review)
-	Notes           []string    // its notes for the reviewer
-	CheckSteps      []CheckStep // its checks
+	DetectPath      string
+	Detected        toolchain.Detection // detect: what the file scan found
+	WorkSummary     string              // what the work run said it did (review)
+	Notes           []string            // its notes for the reviewer
+	CheckSteps      []CheckStep         // its checks
 
 	// Follow-up suggestions (the "followups" block).
 	Chain             []TicketRef // ancestors of a follow-up ticket, root first
@@ -546,11 +587,37 @@ type promptData struct {
 	Landed  []TicketRef     // tickets this one waited for, merged since its analysis
 }
 
+// TicketFiles are the files attached to the ticket's description.
+func (d promptData) TicketFiles() []AttachedFile {
+	return d.attached(func(f AttachedFile) bool { return f.Purpose == domain.AttachTicket })
+}
+
+// AnswerFiles are the files attached to the answer to question qid.
+func (d promptData) AnswerFiles(qid int64) []AttachedFile {
+	return d.attached(func(f AttachedFile) bool { return f.QuestionID != nil && *f.QuestionID == qid })
+}
+
+// FeedbackFiles are the files a retry note brought, not yet seen by a run.
+func (d promptData) FeedbackFiles() []AttachedFile {
+	return d.attached(func(f AttachedFile) bool { return slices.Contains(d.T.FeedbackFiles, f.ID) })
+}
+
+func (d promptData) attached(keep func(AttachedFile) bool) []AttachedFile {
+	var out []AttachedFile
+	for _, f := range d.Attached {
+		if keep(f) {
+			out = append(out, f)
+		}
+	}
+	return out
+}
+
 func render(name string, d promptData) (string, error) {
 	d.AnalysisPath, d.SummaryPath, d.LessonsPath, d.ChangePath, d.RulePath = AnalysisPath, SummaryPath, LessonsPath, ChangePath, RulePath
 	d.ReportPath, d.ReviewPath = ReportPath, ReviewPath
 	d.PreviewPath, d.PreviewEnvPath = PreviewPath, PreviewEnvPath
 	d.SourcePath, d.TranslationPath = SourcePath, TranslationPath
+	d.DetectPath = DetectPath
 	var b bytes.Buffer
 	if err := prompts.ExecuteTemplate(&b, name, d); err != nil {
 		return "", fmt.Errorf("prompt %s: %w", name, err)

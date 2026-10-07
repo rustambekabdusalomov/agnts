@@ -1,0 +1,20 @@
+{
+  "files": {
+    "title": "Ilovalar",
+    "attach": "Fayl biriktirish",
+    "addPhoto": "Rasm",
+    "camera": "Kamera",
+    "addFile": "Fayl",
+    "hint": "Rasmlar, PDF, loglar yoki matn, har biri 10 MB gacha. Claude ularning barchasini oʻqiydi.",
+    "uploading": "{name} yuklanmoqda…",
+    "remove": "{name} ni olib tashlash",
+    "open": "{name} ni ochish",
+    "tooLarge": "{name} 10 MB dan katta",
+    "tooMany": "Koʻpi bilan {n} ta fayl biriktiring",
+    "failed": "{name} yuklanmadi",
+    "wait": "Yuklash tugashini kuting",
+    "fromTask": "Vazifaga",
+    "fromRetry": "Qayta urinishga",
+    "fromFeedback": "Soʻralgan oʻzgarishlarga"
+  }
+}

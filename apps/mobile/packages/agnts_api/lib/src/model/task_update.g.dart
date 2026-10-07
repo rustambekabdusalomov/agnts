@@ -17,6 +17,8 @@ abstract class _$TaskUpdateCWProxy {
 
   TaskUpdate kind(TicketKindChoice? kind);
 
+  TaskUpdate attachments(List<int>? attachments);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TaskUpdate(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -29,6 +31,7 @@ abstract class _$TaskUpdateCWProxy {
     TaskUpdatePriorityEnum? priority,
     TaskUpdateAfterApproveEnum? afterApprove,
     TicketKindChoice? kind,
+    List<int>? attachments,
   });
 }
 
@@ -56,6 +59,10 @@ class _$TaskUpdateCWProxyImpl implements _$TaskUpdateCWProxy {
   TaskUpdate kind(TicketKindChoice? kind) => this(kind: kind);
 
   @override
+  TaskUpdate attachments(List<int>? attachments) =>
+      this(attachments: attachments);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TaskUpdate(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -68,6 +75,7 @@ class _$TaskUpdateCWProxyImpl implements _$TaskUpdateCWProxy {
     Object? priority = const $CopyWithPlaceholder(),
     Object? afterApprove = const $CopyWithPlaceholder(),
     Object? kind = const $CopyWithPlaceholder(),
+    Object? attachments = const $CopyWithPlaceholder(),
   }) {
     return TaskUpdate(
       title: title == const $CopyWithPlaceholder()
@@ -90,6 +98,10 @@ class _$TaskUpdateCWProxyImpl implements _$TaskUpdateCWProxy {
           ? _value.kind
           // ignore: cast_nullable_to_non_nullable
           : kind as TicketKindChoice?,
+      attachments: attachments == const $CopyWithPlaceholder()
+          ? _value.attachments
+          // ignore: cast_nullable_to_non_nullable
+          : attachments as List<int>?,
     );
   }
 }
@@ -121,6 +133,10 @@ TaskUpdate _$TaskUpdateFromJson(Map<String, dynamic> json) =>
           'kind',
           (v) => $enumDecodeNullable(_$TicketKindChoiceEnumMap, v),
         ),
+        attachments: $checkedConvert(
+          'attachments',
+          (v) => (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList(),
+        ),
       );
       return val;
     });
@@ -133,6 +149,7 @@ Map<String, dynamic> _$TaskUpdateToJson(
   'priority': ?_$TaskUpdatePriorityEnumEnumMap[instance.priority],
   'afterApprove': ?_$TaskUpdateAfterApproveEnumEnumMap[instance.afterApprove],
   'kind': ?_$TicketKindChoiceEnumMap[instance.kind],
+  'attachments': ?instance.attachments,
 };
 
 const _$TaskUpdatePriorityEnumEnumMap = {
