@@ -8,6 +8,7 @@
       <a class="p-link" href="#faq"><span>{{ t('nav.faq') }}</span></a>
       <a class="p-link" href="https://t.me/agnts_uz" target="_blank" rel="noopener"><span>{{ t('social.channel') }}</span></a>
       <a class="p-link" href="https://t.me/agnts_community" target="_blank" rel="noopener"><span>{{ t('social.community') }}</span></a>
+      <a class="p-link" href="https://www.instagram.com/agnts.uz/" target="_blank" rel="noopener"><span>Instagram</span></a>
     </nav>
     <span>{{ t('footer.made') }}</span>
   </footer>

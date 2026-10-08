@@ -10,6 +10,7 @@
         <a class="p-link p-contact8" href="mailto:abdusalomovrustambek@gmail.com"><span>{{ t('contact.email') }}</span></a>
         <a class="p-link p-contact8" href="https://t.me/agnts_uz" target="_blank" rel="noopener"><span>{{ t('social.channel') }}</span></a>
         <a class="p-link p-contact8" href="https://t.me/agnts_community" target="_blank" rel="noopener"><span>{{ t('social.community') }}</span></a>
+        <a class="p-link p-contact8" href="https://www.instagram.com/agnts.uz/" target="_blank" rel="noopener"><span>Instagram</span></a>
       </div>
     </div>
   </section>
