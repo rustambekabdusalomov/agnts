@@ -8,9 +8,9 @@ import 'package:agnts_api/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**username** | **String** |  | 
+**username** | **String** | Username or email | 
 **password** | **String** |  | 
-**code** | **String** | Six-digit code from the authenticator app | 
+**code** | **String** | Six-digit code from the authenticator app, when two-factor sign-in is on | [optional] 
 **client** | **String** |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

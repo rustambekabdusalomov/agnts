@@ -120,7 +120,7 @@ func testRunner(t *testing.T, ctx context.Context) (*Runner, *Docker) {
 	if err := d.EnsureNetwork(ctx, cfg.Network, cfg.Proxy != ""); err != nil {
 		t.Fatal(err)
 	}
-	return New(d, cfg, func(context.Context) (string, error) { return "", nil }), d
+	return New(d, cfg, func(context.Context) (Credential, error) { return Credential{}, nil }), d
 }
 
 // Provisions real toolchains with the runner image when

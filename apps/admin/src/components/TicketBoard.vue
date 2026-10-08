@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { STATE_TONE, TERMINAL, type Ticket, type TicketState } from '../api/types'
 import { ago, fmtTokens, ioTokens } from '../composables/format'
 import StateBadge from './StateBadge.vue'
+import WaitBadge from './WaitBadge.vue'
 import KindBadge from './ticket/KindBadge.vue'
 
 // The "Board" view of tickets and tasks: one column per group of states,
@@ -40,7 +41,7 @@ const tone = (c: BoardColumn) => STATE_TONE[c.states[0]]
             <span v-if="tk.revision > 0 && !TERMINAL.includes(tk.state)" class="hint">{{ t('tickets.rev', { n: tk.revision }) }}</span>
           </div>
           <div class="bcard-title">{{ tk.title }}</div>
-          <div v-if="c.states.length > 1"><StateBadge :state="tk.state" :kind="tk.kind" /></div>
+          <div v-if="c.states.length > 1 || tk.waitReason"><StateBadge v-if="c.states.length > 1" :state="tk.state" :kind="tk.kind" /> <WaitBadge :ticket="tk" /></div>
           <div class="bcard-meta">
             <template v-if="showSource">
               <span v-if="tk.source === 'local'" class="src local">{{ t('tickets.sourceTask') }}</span>

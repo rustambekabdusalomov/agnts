@@ -8,6 +8,7 @@ import 'package:agnts_api/src/model/period_stats.dart';
 import 'package:agnts_api/src/model/analytics_models_inner.dart';
 import 'package:agnts_api/src/model/stage_spend.dart';
 import 'package:agnts_api/src/model/analytics_repos_inner.dart';
+import 'package:agnts_api/src/model/quality_stat.dart';
 import 'package:agnts_api/src/model/analytics_insights_inner.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -27,6 +28,8 @@ class Analytics {
   Analytics({
 
     required  this.days,
+
+    required  this.quality,
 
     required  this.current,
 
@@ -58,6 +61,19 @@ class Analytics {
 
 
   final int days;
+
+
+
+      /// How the tickets whose first coding run started in the period went, by prompt version, oldest first
+  @JsonKey(
+    
+    name: r'quality',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final List<QualityStat> quality;
 
 
 
@@ -190,6 +206,7 @@ class Analytics {
     @override
     bool operator ==(Object other) => identical(this, other) || other is Analytics &&
       other.days == days &&
+      other.quality == quality &&
       other.current == current &&
       other.previous == previous &&
       other.perDay == perDay &&
@@ -204,6 +221,7 @@ class Analytics {
     @override
     int get hashCode =>
         days.hashCode +
+        quality.hashCode +
         current.hashCode +
         previous.hashCode +
         perDay.hashCode +

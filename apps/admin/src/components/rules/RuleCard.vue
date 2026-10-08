@@ -48,6 +48,12 @@ async function accept() {
   }
 }
 
+async function dismiss() {
+  if (await askConfirm({ title: t('rules.dismiss'), message: t('rules.dismissBody', { title: props.rule.title }), confirmLabel: t('rules.dismiss') })) {
+    act.mutate({ kind: 'dismiss', id: props.rule.id })
+  }
+}
+
 async function remove() {
   if (await askConfirm({ title: t('rules.delete'), message: t('rules.deleteBody', { title: props.rule.title }), confirmLabel: t('rules.delete'), danger: true })) {
     act.mutate({ kind: 'delete', id: props.rule.id })
@@ -64,20 +70,37 @@ async function remove() {
           <span v-if="rule.repoName" class="src local">{{ rule.repoName }}</span>
           <span v-else class="src">{{ t('rules.global') }}</span>
           <span class="badge" :class="`b-${RULE_TONE[rule.status]}`">{{ t(`rules.status_${rule.status}`) }}</span>
+          <span v-if="rule.kind === 'context'" class="badge b-gray">{{ t('rules.kindContext') }}</span>
           <span v-if="!rule.enabled" class="badge b-gray">{{ t('rules.off') }}</span>
         </div>
       </div>
       <div class="rule-tools">
         <SwitchToggle v-model="enabled" :label="t('rules.enabledFor', { title: rule.title })" />
         <button type="button" class="btn btn-s" @click="emit('edit', rule)">{{ t('rules.edit') }}</button>
-        <button type="button" class="btn btn-s" :disabled="act.isPending.value" @click="remove">{{ t('rules.delete') }}</button>
+        <button v-if="rule.status !== 'suggested'" type="button" class="btn btn-s" :disabled="act.isPending.value" @click="remove">{{ t('rules.delete') }}</button>
       </div>
     </div>
 
     <p class="rule-body">{{ rule.body }}</p>
 
+    <!-- Suggested by agnts from feedback -->
+    <template v-if="rule.status === 'suggested'">
+      <div class="help">
+        <p>
+          {{ t('rules.suggestedFrom') }}
+          <RouterLink v-if="rule.sourceTicket" :to="{ name: 'ticket', params: { key: rule.sourceTicket } }">{{ rule.sourceTicket }}</RouterLink><template v-if="rule.reason">: {{ rule.reason }}</template>
+        </p>
+      </div>
+      <div class="actions">
+        <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="act.mutate({ kind: 'review', id: rule.id })">{{ t('rules.adopt') }}</button>
+        <button class="btn" type="button" :disabled="act.isPending.value" @click="act.mutate({ kind: 'accept', id: rule.id })">{{ t('rules.adoptAsWritten') }}</button>
+        <button class="btn" type="button" :disabled="act.isPending.value" @click="dismiss">{{ t('rules.dismiss') }}</button>
+      </div>
+      <p class="hint">{{ t('rules.suggestedHint') }}</p>
+    </template>
+
     <!-- Review queued or running -->
-    <div v-if="reviewing" class="help"><p>{{ rule.status === 'analyzing' ? t('rules.analyzing') : t('rules.pending') }}</p></div>
+    <div v-else-if="reviewing" class="help"><p>{{ rule.status === 'analyzing' ? t('rules.analyzing') : t('rules.pending') }}</p></div>
 
     <!-- Questions from the review -->
     <form v-else-if="rule.status === 'questions'" class="sec" @submit.prevent="submitAnswers">

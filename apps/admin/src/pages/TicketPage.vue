@@ -7,6 +7,7 @@ import { api, HttpError, unwrap } from '../api/client'
 import { isReport, KIND_EDITABLE, MODEL_NAME, needsRepo, stateKey, TERMINAL, type Question, type ShotRef, type TicketKind } from '../api/types'
 import UsageCard from '../components/dashboard/UsageCard.vue'
 import DiffView from '../components/DiffView.vue'
+import CheckBox from '../components/form/CheckBox.vue'
 import TicketLessons from '../components/learn/TicketLessons.vue'
 import StateBadge from '../components/StateBadge.vue'
 import LiveLog from '../components/ticket/LiveLog.vue'
@@ -16,6 +17,9 @@ import ImplementReport from '../components/ticket/ImplementReport.vue'
 import FollowUps from '../components/ticket/FollowUps.vue'
 import TicketRelations from '../components/ticket/TicketRelations.vue'
 import CodeReview from '../components/ticket/CodeReview.vue'
+import DesignRecord from '../components/ticket/DesignRecord.vue'
+import RedFlags from '../components/ticket/RedFlags.vue'
+import ReplayButton from '../components/ticket/ReplayButton.vue'
 import PreviewShots from '../components/ticket/PreviewShots.vue'
 import ModelPicker from '../components/ticket/ModelPicker.vue'
 import ReportView from '../components/ticket/ReportView.vue'
@@ -35,12 +39,17 @@ import { provideTranslation, TRANSLATION_LANGS, type TranslationLang } from '../
 import InputSelect from '../components/form/InputSelect.vue'
 import { useUi } from '../stores/ui'
 import { askConfirm } from '../composables/useConfirm'
+import WaitBanner from '../components/ticket/WaitBanner.vue'
+import { useSession } from '../stores/session'
+import { useWorkspace } from '../stores/workspace'
 
 const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const qc = useQueryClient()
 const ui = useUi()
+const session = useSession()
+const workspace = useWorkspace()
 const key = computed(() => String(route.params.key))
 
 const detail = useQuery({
@@ -50,6 +59,15 @@ const detail = useQuery({
 })
 const d = computed(() => detail.data.value)
 const tk = computed(() => d.value?.ticket)
+// Making the ticket yours: per-member Claude mode then runs it on your account.
+const takeOver = useMutation({
+  mutationFn: () => unwrap(api.PUT('/tickets/{key}/member', { params: { path: { key: key.value } }, body: { userId: 0 } })),
+  onSuccess: () => {
+    ui.notify(t('queue.takenOver'))
+    void qc.invalidateQueries({ queryKey: ['ticket', key.value] })
+  },
+  onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
+})
 const isTask = computed(() => tk.value?.source === 'local')
 // Plane tickets use their own wording where the page names the tracker.
 const isPlane = computed(() => tk.value?.source === 'plane')
@@ -239,7 +257,7 @@ const act = useMutation({
 
 const del = useMutation({
   mutationFn: () => unwrap(api.DELETE('/tasks/{key}', { params: { path: { key: key.value } } })),
-  onSuccess: () => router.push('/tasks'),
+  onSuccess: () => router.push({ name: 'tasks' }),
   onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
 })
 
@@ -368,7 +386,12 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
 </script>
 
 <template>
-  <RouterLink class="back-btn" :to="backTo"><HiIcon name="back" />{{ isTask ? t('nav.tasks') : t('ticket.back') }}</RouterLink>
+  <div class="tk-top">
+    <RouterLink class="back-btn" :to="backTo"><HiIcon name="back" />{{ isTask ? t('nav.tasks') : t('ticket.back') }}</RouterLink>
+    <div v-if="d && tk" class="tk-lang">
+      <InputSelect v-model="translation.lang.value" :options="langOptions" :label="t('ticket.translate')" :placeholder="t('ticket.translate')" />
+    </div>
+  </div>
 
   <p v-if="detail.isPending.value" class="hint">{{ t('common.loading') }}</p>
   <p v-else-if="detail.error.value instanceof HttpError && detail.error.value.status === 404" class="ferr">
@@ -388,11 +411,8 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
         <FileList :files="filesOf('retry')" :label="t('files.fromRetry')" />
         <FileList :files="filesOf('feedback')" :label="t('files.fromFeedback')" />
       </div>
-      <div class="actions tk-head-act" style="margin: 0">
-        <div class="tk-lang">
-          <InputSelect v-model="translation.lang.value" :options="langOptions" :label="t('ticket.translate')" :placeholder="t('ticket.translate')" />
-        </div>
-        <button v-if="isTask && tk.state === 'new'" class="btn btn-d" type="button" :disabled="del.isPending.value" @click="deleteTask">{{ t('ticket.delete') }}</button>
+      <div v-if="isTask && tk.state === 'new' && workspace.canEdit" class="actions tk-head-act" style="margin: 0">
+        <button class="btn btn-d" type="button" :disabled="del.isPending.value" @click="deleteTask">{{ t('ticket.delete') }}</button>
       </div>
     </div>
     <p v-if="translation.lang.value && translation.query.isFetching.value" class="hint tk-tr-note" role="status">
@@ -401,12 +421,20 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
     <p v-else-if="translateError" class="ferr" role="alert">{{ translateError }}</p>
 
     <p v-if="notice" class="ferr" role="alert">{{ notice }}</p>
+    <WaitBanner :ticket="tk" />
+    <div v-if="tk.replayOf" class="help" style="margin-bottom: 14px">
+      <HiIcon name="info" />
+      <p>
+        {{ t('replay.banner') }}
+        <RouterLink :to="{ name: 'ticket', params: { key: tk.replayOf } }">{{ tk.replayOf }}</RouterLink>
+      </p>
+    </div>
     <div v-if="kindWarning" class="help warn" style="margin-bottom: 14px">
       <HiIcon name="info" />
       <p>
         {{ kindWarning.message }}
         <button
-          v-if="kindEditable"
+          v-if="kindEditable && workspace.canEdit"
           type="button"
           class="btn"
           style="margin-left: 8px; min-height: 32px"
@@ -423,236 +451,241 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
         <section class="card"><ProgressTrack :ticket="tk" :spend="d.spendByStage" /></section>
 
         <section v-if="!reviewingReport" class="card">
-          <!-- new -->
-          <template v-if="tk.state === 'new'">
-            <h2>{{ t('ticket.queuedTitle') }}</h2>
-            <p class="sub">{{ tk.held ? t('ticket.heldSub') : report ? t('ticket.queuedSubReport') : t('ticket.queuedSub') }}</p>
-            <KindPicker :ticket="tk" />
-            <RepoPicker :ticket="tk" />
-            <ModelPicker :ticket="tk" :stages="['analyze', 'coding']" />
-            <div v-if="tk.held" class="actions">
-              <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="act.mutate('start')">{{ t('ticket.start') }}</button>
-              <span class="hint">{{ t('ticket.startHint') }}</span>
-            </div>
-          </template>
-
-          <!-- analyzing -->
-          <template v-else-if="tk.state === 'analyzing'">
-            <h2>{{ tk.repoId ? t('ticket.analyzingTitle') : t('ticket.analyzingTitleNoRepo') }}</h2>
-            <p class="sub">{{ tk.repoId ? t('ticket.analyzingSub', { repo: tk.repoName ?? '' }) : t('ticket.analyzingSubNoRepo') }}</p>
-            <div class="sec"><LiveLog :events="events" /></div>
-            <div class="actions"><button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="confirmThen(t('ticket.stopConfirm', { key }), 'stop')">{{ t('ticket.stopRun') }}</button></div>
-          </template>
-
-          <!-- waiting_for_answers -->
-          <template v-else-if="tk.state === 'waiting_for_answers'">
-            <h2>{{ t('ticket.questionsTitle', { n: d.questions.length }) }}</h2>
-            <p class="sub">{{ t('ticket.questionsSub') }}</p>
-            <div v-if="d.analysis?.plan.length" class="sec">
-              <h3>{{ t('ticket.plan') }}</h3>
-              <ol class="plan"><li v-for="(p, i) in d.analysis.plan" :key="i">{{ tr(p) }}</li></ol>
-            </div>
-            <form class="sec" @submit.prevent="act.mutate('answers')">
-              <h3>{{ t('ticket.questions') }}</h3>
-              <div v-for="(q, i) in d.questions" :key="q.id" class="q">
-                <p>{{ tr(q.text) }}</p>
-                <template v-if="q.multiple">
-                  <span class="hint">{{ t('ticket.pickAny') }}</span>
-                  <div class="tabs" role="group">
-                    <button v-for="o in q.options" :key="o" type="button" class="tab" :aria-pressed="answers[q.id].picked.includes(o)" @click="togglePick(q, o)">{{ tr(o) }}</button>
-                  </div>
-                  <input v-model="answers[q.id].answer" class="cfg-in" :placeholder="t('ticket.otherAnswer')" :aria-label="t('ticket.answerFor', { n: i + 1 })">
-                </template>
-                <template v-else>
-                  <div v-if="q.options.length" class="tabs" role="group">
-                    <button v-for="o in q.options" :key="o" type="button" class="tab" :aria-pressed="answers[q.id].answer === o" @click="answers[q.id].answer = o">{{ tr(o) }}</button>
-                  </div>
-                  <input v-model="answers[q.id].answer" class="cfg-in" :placeholder="t('ticket.yourAnswer')" :aria-label="t('ticket.answerFor', { n: i + 1 })">
-                </template>
-                <textarea v-model="answers[q.id].note" :placeholder="t('ticket.addDetails')" :aria-label="t('ticket.detailsFor', { n: i + 1 })" />
-                <FileAttach v-model="answers[q.id].files" v-model:busy="answers[q.id].uploading" />
-              </div>
+          <fieldset class="ro-fs" :disabled="!workspace.canEdit">
+            <!-- new -->
+            <template v-if="tk.state === 'new'">
+              <h2>{{ t('ticket.queuedTitle') }}</h2>
+              <p class="sub">{{ tk.held ? t('ticket.heldSub') : report ? t('ticket.queuedSubReport') : t('ticket.queuedSub') }}</p>
               <KindPicker :ticket="tk" />
-              <ModelPicker :ticket="tk" :stages="['coding', 'retry']" />
-              <div class="actions">
-                <button class="btn btn-p" type="submit" :disabled="left > 0 || answersUploading || act.isPending.value">{{ report ? t('ticket.startWriting') : t('ticket.startCoding') }}</button>
-                <span class="hint">{{ left ? t('ticket.questionsLeft', { n: left }) : answersUploading ? t('files.wait') : t('ticket.allAnswered') }}</span>
+              <RepoPicker :ticket="tk" />
+              <ModelPicker :ticket="tk" :stages="['analyze', 'coding']" />
+              <div v-if="tk.held" class="actions">
+                <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="act.mutate('start')">{{ t('ticket.start') }}</button>
+                <span class="hint">{{ t('ticket.startHint') }}</span>
               </div>
-            </form>
-          </template>
+            </template>
 
-          <!-- coding, held back by other tickets -->
-          <template v-else-if="tk.state === 'coding' && tk.blockedBy?.length">
-            <h2>{{ t('relations.waitingTitle') }}</h2>
-            <p class="sub">{{ t('relations.waitingSub') }}</p>
-            <ul class="tk-wait">
-              <li v-for="b in tk.blockedBy" :key="b.key">
-                <span class="badge" :class="b.type === 'conflicts' ? 'b-warn' : 'b-info'">{{ b.type === 'conflicts' ? t('relations.conflicts') : t('relations.waitsFor') }}</span>
-                <RouterLink :to="`/tickets/${b.key}`">{{ b.key }}</RouterLink>
-                <span class="tk-wait-title">{{ b.title }}</span>
-                <StateBadge :state="b.state" />
-              </li>
-            </ul>
-            <div class="actions"><button class="btn" type="button" @click="tab = 'order'">{{ t('relations.title') }}</button></div>
-          </template>
+            <!-- analyzing -->
+            <template v-else-if="tk.state === 'analyzing'">
+              <h2>{{ tk.repoId ? t('ticket.analyzingTitle') : t('ticket.analyzingTitleNoRepo') }}</h2>
+              <p class="sub">{{ tk.repoId ? t('ticket.analyzingSub', { repo: tk.repoName ?? '' }) : t('ticket.analyzingSubNoRepo') }}</p>
+              <div class="sec"><LiveLog :events="events" /></div>
+              <div class="actions"><button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="confirmThen(t('ticket.stopConfirm', { key }), 'stop')">{{ t('ticket.stopRun') }}</button></div>
+            </template>
 
-          <!-- coding / testing -->
-          <template v-else-if="tk.state === 'coding' || tk.state === 'testing'">
-            <h2>{{ titleWithRev(report ? t('ticket.writingTitle') : tk.state === 'coding' ? t('ticket.codingTitle') : t('ticket.testingTitle')) }}</h2>
-            <p class="sub">{{ report ? t('ticket.writingSub') : t('ticket.codingSub', { branch }) }}</p>
-            <div class="sec">
-              <dl class="facts">
-                <div><dt>{{ t('ticket.factModel') }}</dt><dd>{{ d.effectiveModels ? MODEL_NAME[tk.revision > 0 ? d.effectiveModels.retry : d.effectiveModels.coding] : '—' }}</dd></div>
-                <div><dt>{{ t('ticket.factTurns') }}</dt><dd>{{ tk.turns }}</dd></div>
-                <div><dt>{{ t('ticket.factTurnLimit') }}</dt><dd>{{ d.maxTurns ?? '—' }}</dd></div>
-                <div><dt>{{ t('ticket.factSession') }}</dt><dd>{{ sessionPct }}%</dd></div>
-              </dl>
-            </div>
-            <div class="sec"><h3>{{ t('ticket.log') }}</h3><LiveLog :events="events" /></div>
-            <div class="actions"><button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="confirmThen(t('ticket.stopConfirm', { key }), 'stop')">{{ t('ticket.stopRun') }}</button></div>
-          </template>
-
-          <!-- waiting_for_review -->
-          <template v-else-if="tk.state === 'waiting_for_review'">
-            <h2>{{ titleWithRev(t('ticket.reviewTitle')) }}</h2>
-            <p class="sub">{{ reviewSub }}</p>
-            <div v-if="result" class="sec">
-              <dl class="facts">
-                <div>
-                  <dt>{{ t('ticket.factTests') }}</dt>
-                  <dd :class="checksOk ? 'ok' : 'bad'">{{ result.checks.length ? t('ticket.checksPassed', { n: result.checks.filter((c) => c.exitCode === 0).length }) : t('ticket.noChecks') }}</dd>
+            <!-- waiting_for_answers -->
+            <template v-else-if="tk.state === 'waiting_for_answers'">
+              <h2>{{ t('ticket.questionsTitle', { n: d.questions.length }) }}</h2>
+              <p class="sub">{{ t('ticket.questionsSub') }}</p>
+              <div v-if="d.analysis?.plan.length" class="sec">
+                <h3>{{ t('ticket.plan') }}</h3>
+                <ol class="plan"><li v-for="(p, i) in d.analysis.plan" :key="i">{{ tr(p) }}</li></ol>
+              </div>
+              <DesignRecord :analysis="d.analysis" />
+              <form class="sec" @submit.prevent="act.mutate('answers')">
+                <h3>{{ t('ticket.questions') }}</h3>
+                <div v-for="(q, i) in d.questions" :key="q.id" class="q">
+                  <p>{{ tr(q.text) }}</p>
+                  <template v-if="q.multiple">
+                    <span class="hint">{{ t('ticket.pickAny') }}</span>
+                    <div class="tabs" role="group">
+                      <button v-for="o in q.options" :key="o" type="button" class="tab" :aria-pressed="answers[q.id].picked.includes(o)" @click="togglePick(q, o)">{{ tr(o) }}</button>
+                    </div>
+                    <input v-model="answers[q.id].answer" class="cfg-in" :placeholder="t('ticket.otherAnswer')" :aria-label="t('ticket.answerFor', { n: i + 1 })">
+                  </template>
+                  <template v-else>
+                    <div v-if="q.options.length" class="tabs" role="group">
+                      <button v-for="o in q.options" :key="o" type="button" class="tab" :aria-pressed="answers[q.id].answer === o" @click="answers[q.id].answer = o">{{ tr(o) }}</button>
+                    </div>
+                    <input v-model="answers[q.id].answer" class="cfg-in" :placeholder="t('ticket.yourAnswer')" :aria-label="t('ticket.answerFor', { n: i + 1 })">
+                  </template>
+                  <textarea v-model="answers[q.id].note" :placeholder="t('ticket.addDetails')" :aria-label="t('ticket.detailsFor', { n: i + 1 })" />
+                  <FileAttach v-model="answers[q.id].files" v-model:busy="answers[q.id].uploading" />
                 </div>
-                <div><dt>{{ t('ticket.factChanged') }}</dt><dd>{{ t('ticket.changedValue', { n: totals.n, add: totals.add, del: totals.del }) }}</dd></div>
-                <div><dt>{{ t('ticket.factTurns') }}</dt><dd>{{ tk.turns }}</dd></div>
-                <div><dt>{{ t('ticket.kvBranch') }}</dt><dd>{{ branch }}</dd></div>
-              </dl>
-            </div>
-            <div v-if="result?.summary" class="sec">
-              <h3>{{ t('ticket.whatAgntsDid') }}</h3>
-              <div class="summary"><p>{{ tr(result.summary) }}</p></div>
-              <template v-if="result.notes.length">
-                <h3>{{ t('ticket.notes') }}</h3>
-                <ul><li v-for="(n, i) in result.notes" :key="i">{{ tr(n) }}</li></ul>
-              </template>
-            </div>
-            <ModelPicker :ticket="tk" :stages="tk.canPreview ? ['retry', 'review', 'preview'] : ['retry', 'review']" />
-            <div v-if="opensPr" class="sec">
-              <h3>{{ t('ticket.assignTitle') }}</h3>
-              <p class="hint" style="margin: 0 0 10px">{{ t('ticket.assignSub') }}</p>
-              <p v-if="members.isPending.value" class="hint">{{ t('common.loading') }}</p>
-              <p v-else-if="members.isError.value" class="hint">{{ t('ticket.assignError', { error: (members.error.value as Error)?.message || t('common.error') }) }}</p>
-              <p v-else-if="!members.data.value?.length" class="hint">{{ t('ticket.assignNone') }}</p>
-              <div v-else class="assignees" role="group" :aria-label="t('ticket.assignTitle')">
-                <button
-                  v-for="m in members.data.value"
-                  :key="m.username"
-                  type="button"
-                  class="assignee"
-                  :aria-pressed="assignees.includes(m.username)"
-                  :title="m.role"
-                  @click="toggleAssignee(m.username)"
-                >
-                  <img v-if="m.avatarUrl" class="mem-av" :src="m.avatarUrl" alt="" loading="lazy">
-                  <span v-else class="mem-av mem-av-x" aria-hidden="true">{{ m.username.slice(0, 1).toUpperCase() }}</span>
-                  {{ m.name || m.username }}
-                </button>
+                <KindPicker :ticket="tk" />
+                <ModelPicker :ticket="tk" :stages="['coding', 'retry']" />
+                <div class="actions">
+                  <button class="btn btn-p" type="submit" :disabled="left > 0 || answersUploading || act.isPending.value">{{ report ? t('ticket.startWriting') : t('ticket.startCoding') }}</button>
+                  <span class="hint">{{ left ? t('ticket.questionsLeft', { n: left }) : answersUploading ? t('files.wait') : t('ticket.allAnswered') }}</span>
+                </div>
+              </form>
+            </template>
+
+            <!-- coding, held back by other tickets -->
+            <template v-else-if="tk.state === 'coding' && tk.blockedBy?.length">
+              <h2>{{ t('relations.waitingTitle') }}</h2>
+              <p class="sub">{{ t('relations.waitingSub') }}</p>
+              <ul class="tk-wait">
+                <li v-for="b in tk.blockedBy" :key="b.key">
+                  <span class="badge" :class="b.type === 'conflicts' ? 'b-warn' : 'b-info'">{{ b.type === 'conflicts' ? t('relations.conflicts') : t('relations.waitsFor') }}</span>
+                  <RouterLink :to="{ name: 'ticket', params: { key: b.key } }">{{ b.key }}</RouterLink>
+                  <span class="tk-wait-title">{{ b.title }}</span>
+                  <StateBadge :state="b.state" />
+                </li>
+              </ul>
+              <div class="actions"><button class="btn" type="button" @click="tab = 'order'">{{ t('relations.title') }}</button></div>
+            </template>
+
+            <!-- coding / testing -->
+            <template v-else-if="tk.state === 'coding' || tk.state === 'testing'">
+              <h2>{{ titleWithRev(report ? t('ticket.writingTitle') : tk.state === 'coding' ? t('ticket.codingTitle') : t('ticket.testingTitle')) }}</h2>
+              <p class="sub">{{ report ? t('ticket.writingSub') : t('ticket.codingSub', { branch }) }}</p>
+              <div class="sec">
+                <dl class="facts">
+                  <div><dt>{{ t('ticket.factModel') }}</dt><dd>{{ d.effectiveModels ? MODEL_NAME[tk.revision > 0 ? d.effectiveModels.retry : d.effectiveModels.coding] : '—' }}</dd></div>
+                  <div><dt>{{ t('ticket.factTurns') }}</dt><dd>{{ tk.turns }}</dd></div>
+                  <div><dt>{{ t('ticket.factTurnLimit') }}</dt><dd>{{ d.maxTurns ?? '—' }}</dd></div>
+                  <div><dt>{{ t('ticket.factSession') }}</dt><dd>{{ sessionPct }}%</dd></div>
+                </dl>
               </div>
-            </div>
-            <div class="sec">
-              <h3><label for="feedback">{{ t('ticket.feedback') }}</label></h3>
-              <textarea id="feedback" v-model="feedback" :placeholder="t('ticket.feedbackHint')" @paste="feedbackAttach?.pasted($event)" />
-              <FileAttach ref="feedbackAttach" v-model="feedbackFiles" v-model:busy="feedbackUploading" />
-              <div v-if="feedbackShots.length" class="tk-shots" :aria-label="t('preview.attached')">
-                <span class="hint">{{ t('preview.attached') }}:</span>
-                <span v-for="(r, i) in feedbackShots" :key="`${r.runId}-${r.shotId}`" class="badge b-info tk-shot">
-                  {{ shotName(r) }}
-                  <button type="button" :aria-label="t('preview.detach', { name: shotName(r) })" @click="dropShot(i)">×</button>
-                </span>
+              <div class="sec"><h3>{{ t('ticket.log') }}</h3><LiveLog :events="events" /></div>
+              <div class="actions"><button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="confirmThen(t('ticket.stopConfirm', { key }), 'stop')">{{ t('ticket.stopRun') }}</button></div>
+            </template>
+
+            <!-- waiting_for_review -->
+            <template v-else-if="tk.state === 'waiting_for_review'">
+              <h2>{{ titleWithRev(t('ticket.reviewTitle')) }}</h2>
+              <p class="sub">{{ reviewSub }}</p>
+              <div v-if="result" class="sec">
+                <dl class="facts">
+                  <div>
+                    <dt>{{ t('ticket.factTests') }}</dt>
+                    <dd :class="checksOk ? 'ok' : 'bad'">{{ result.checks.length ? t('ticket.checksPassed', { n: result.checks.filter((c) => c.exitCode === 0).length }) : t('ticket.noChecks') }}</dd>
+                  </div>
+                  <div><dt>{{ t('ticket.factChanged') }}</dt><dd>{{ t('ticket.changedValue', { n: totals.n, add: totals.add, del: totals.del }) }}</dd></div>
+                  <div><dt>{{ t('ticket.factTurns') }}</dt><dd>{{ tk.turns }}</dd></div>
+                  <div><dt>{{ t('ticket.kvBranch') }}</dt><dd>{{ branch }}</dd></div>
+                </dl>
               </div>
-            </div>
-            <div class="actions">
-              <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="approve">{{ t('ticket.approve') }}</button>
-              <button class="btn" type="button" :disabled="!feedback.trim() || feedbackUploading || act.isPending.value" @click="act.mutate('request-changes')">{{ t('ticket.requestChanges') }}</button>
-              <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.reject') }}</button>
-            </div>
-          </template>
-
-          <!-- pushing -->
-          <template v-else-if="tk.state === 'pushing'">
-            <h2>{{ report ? t('ticket.deliveringTitle') : t('ticket.pushingTitle') }}</h2>
-            <p class="sub">{{ report ? t('ticket.deliveringSub') : t('ticket.pushingSub') }}</p>
-            <div class="sec"><LiveLog :events="events" /></div>
-          </template>
-
-          <!-- done -->
-          <template v-else-if="tk.state === 'done' && report">
-            <h2>{{ t('ticket.doneReportTitle') }}</h2>
-            <div class="sec">
-              <div class="help ok">
-                <HiIcon name="check" />
-                <p>{{ tk.postReport ? t(isPlane ? 'ticket.doneReportPostedPlane' : 'ticket.doneReportPosted', { key: tk.key }) : t('ticket.doneReport') }}</p>
+              <div v-if="result?.summary" class="sec">
+                <h3>{{ t('ticket.whatAgntsDid') }}</h3>
+                <div class="summary"><p>{{ tr(result.summary) }}</p></div>
+                <template v-if="result.notes.length">
+                  <h3>{{ t('ticket.notes') }}</h3>
+                  <ul><li v-for="(n, i) in result.notes" :key="i">{{ tr(n) }}</li></ul>
+                </template>
               </div>
-            </div>
-            <ImplementReport v-if="tk.kind === 'plan' || tk.kind === 'bug'" :ticket="tk" :child-key="d.childKey" />
-          </template>
-
-          <template v-else-if="tk.state === 'done'">
-            <h2>{{ t('ticket.doneTitle') }}</h2>
-            <div class="sec">
-              <div class="help ok">
-                <HiIcon name="check" />
-                <p v-if="isTask && tk.afterApprove === 'main' && !tk.prUrl">{{ t('ticket.doneMain', { repo: tk.repoName ?? '' }) }}</p>
-                <p v-else>{{ t('ticket.donePr', { number: tk.prNumber ?? '', branch }) }}</p>
+              <DesignRecord :analysis="d.analysis" :deviations="result?.deviations" />
+              <ModelPicker :ticket="tk" :stages="tk.canPreview ? ['retry', 'review', 'preview'] : ['retry', 'review']" />
+              <div v-if="opensPr" class="sec">
+                <h3>{{ t('ticket.assignTitle') }}</h3>
+                <p class="hint" style="margin: 0 0 10px">{{ t('ticket.assignSub') }}</p>
+                <p v-if="members.isPending.value" class="hint">{{ t('common.loading') }}</p>
+                <p v-else-if="members.isError.value" class="hint">{{ t('ticket.assignError', { error: (members.error.value as Error)?.message || t('common.error') }) }}</p>
+                <p v-else-if="!members.data.value?.length" class="hint">{{ t('ticket.assignNone') }}</p>
+                <div v-else class="assignees" role="group" :aria-label="t('ticket.assignTitle')">
+                  <button
+                    v-for="m in members.data.value"
+                    :key="m.username"
+                    type="button"
+                    class="assignee"
+                    :aria-pressed="assignees.includes(m.username)"
+                    :title="m.role"
+                    @click="toggleAssignee(m.username)"
+                  >
+                    <img v-if="m.avatarUrl" class="mem-av" :src="m.avatarUrl" alt="" loading="lazy">
+                    <span v-else class="mem-av mem-av-x" aria-hidden="true">{{ m.username.slice(0, 1).toUpperCase() }}</span>
+                    {{ m.name || m.username }}
+                  </button>
+                </div>
               </div>
-              <p v-if="tk.mergedAt" class="hint" style="margin: 8px 0 0">{{ t('ticket.mergedAt', { time: ago(tk.mergedAt, locale) }) }}</p>
-            </div>
-            <div v-if="tk.prUrl" class="actions">
-              <a class="btn" :href="tk.prUrl" target="_blank" rel="noopener">{{ t('ticket.openPr', { number: tk.prNumber ?? '' }) }}</a>
-              <template v-if="!tk.mergedAt">
-                <button class="btn" type="button" :disabled="act.isPending.value" @click="act.mutate('merged')">{{ t('relations.markMerged') }}</button>
-                <span class="hint">{{ t('relations.markMergedHint') }}</span>
-              </template>
-            </div>
-          </template>
+              <div class="sec">
+                <h3><label for="feedback">{{ t('ticket.feedback') }}</label></h3>
+                <textarea id="feedback" v-model="feedback" :placeholder="t('ticket.feedbackHint')" @paste="feedbackAttach?.pasted($event)" />
+                <FileAttach ref="feedbackAttach" v-model="feedbackFiles" v-model:busy="feedbackUploading" />
+                <div v-if="feedbackShots.length" class="tk-shots" :aria-label="t('preview.attached')">
+                  <span class="hint">{{ t('preview.attached') }}:</span>
+                  <span v-for="(r, i) in feedbackShots" :key="`${r.runId}-${r.shotId}`" class="badge b-info tk-shot">
+                    {{ shotName(r) }}
+                    <button type="button" :aria-label="t('preview.detach', { name: shotName(r) })" @click="dropShot(i)">×</button>
+                  </span>
+                </div>
+              </div>
+              <div class="actions">
+                <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="approve">{{ t('ticket.approve') }}</button>
+                <button class="btn" type="button" :disabled="!feedback.trim() || feedbackUploading || act.isPending.value" @click="act.mutate('request-changes')">{{ t('ticket.requestChanges') }}</button>
+                <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.reject') }}</button>
+              </div>
+            </template>
 
-          <!-- rejected -->
-          <template v-else-if="tk.state === 'rejected'">
-            <h2>{{ t('ticket.rejectedTitle') }}</h2>
-            <p class="sub">{{ t('ticket.rejectedSub') }}</p>
-          </template>
+            <!-- pushing -->
+            <template v-else-if="tk.state === 'pushing'">
+              <h2>{{ report ? t('ticket.deliveringTitle') : t('ticket.pushingTitle') }}</h2>
+              <p class="sub">{{ report ? t('ticket.deliveringSub') : t('ticket.pushingSub') }}</p>
+              <div class="sec"><LiveLog :events="events" /></div>
+            </template>
 
-          <!-- failed -->
-          <template v-else-if="tk.state === 'failed'">
-            <h2>{{ t('ticket.failedTitle') }}</h2>
-            <div class="sec">
-              <div class="help bad"><HiIcon name="info" /><p style="white-space: pre-wrap">{{ tk.stopReason || t('ticket.failedUnknown') }}</p></div>
-            </div>
-            <KindPicker v-if="kindEditable" :ticket="tk" />
-            <RepoPicker v-if="canChangeRepo" :ticket="tk" />
-            <ModelPicker :ticket="tk" :stages="['retry']" />
-            <div v-if="tk.resumeState !== 'pushing'" class="sec">
-              <h3><label for="retry-note">{{ t('ticket.retryNote') }}</label></h3>
-              <textarea id="retry-note" v-model="retryNote" maxlength="4000" :placeholder="t('ticket.retryNoteHint')" />
-              <FileAttach v-model="retryFiles" v-model:busy="retryUploading" />
-            </div>
-            <div class="actions">
-              <button class="btn btn-p" type="button" :disabled="act.isPending.value || retryUploading || (needsRepo(tk) && !tk.repoId)" @click="act.mutate('retry')">{{ t('ticket.retry') }}</button>
-              <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.takeItMyself') }}</button>
-            </div>
-          </template>
+            <!-- done -->
+            <template v-else-if="tk.state === 'done' && report">
+              <h2>{{ t('ticket.doneReportTitle') }}</h2>
+              <div class="sec">
+                <div class="help ok">
+                  <HiIcon name="check" />
+                  <p>{{ tk.postReport ? t(isPlane ? 'ticket.doneReportPostedPlane' : 'ticket.doneReportPosted', { key: tk.key }) : t('ticket.doneReport') }}</p>
+                </div>
+              </div>
+              <ImplementReport v-if="tk.kind === 'plan' || tk.kind === 'bug'" :ticket="tk" :child-key="d.childKey" />
+            </template>
 
-          <!-- rate_limited -->
-          <template v-else-if="tk.state === 'rate_limited'">
-            <h2>{{ t('ticket.rateTitle') }}</h2>
-            <div class="sec">
-              <div class="help warn"><HiIcon name="info" /><p>{{ tk.stopReason || t('ticket.rateTitle') }}</p></div>
-            </div>
-            <RepoPicker v-if="canChangeRepo" :ticket="tk" />
-            <div class="actions">
-              <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="act.mutate('retry')">{{ t('ticket.resume') }}</button>
-              <span class="hint">{{ t('ticket.rateHint', { pct: sessionPct }) }}</span>
-            </div>
-          </template>
+            <template v-else-if="tk.state === 'done'">
+              <h2>{{ t('ticket.doneTitle') }}</h2>
+              <div class="sec">
+                <div class="help ok">
+                  <HiIcon name="check" />
+                  <p v-if="isTask && tk.afterApprove === 'main' && !tk.prUrl">{{ t('ticket.doneMain', { repo: tk.repoName ?? '' }) }}</p>
+                  <p v-else>{{ t('ticket.donePr', { number: tk.prNumber ?? '', branch }) }}</p>
+                </div>
+                <p v-if="tk.mergedAt" class="hint" style="margin: 8px 0 0">{{ t('ticket.mergedAt', { time: ago(tk.mergedAt, locale) }) }}</p>
+              </div>
+              <div v-if="tk.prUrl" class="actions">
+                <a class="btn" :href="tk.prUrl" target="_blank" rel="noopener">{{ t('ticket.openPr', { number: tk.prNumber ?? '' }) }}</a>
+                <template v-if="!tk.mergedAt">
+                  <button class="btn" type="button" :disabled="act.isPending.value" @click="act.mutate('merged')">{{ t('relations.markMerged') }}</button>
+                  <span class="hint">{{ t('relations.markMergedHint') }}</span>
+                </template>
+              </div>
+              <ReplayButton v-if="!tk.replayOf && tk.repoId" :ticket="tk" />
+            </template>
+
+            <!-- rejected -->
+            <template v-else-if="tk.state === 'rejected'">
+              <h2>{{ t('ticket.rejectedTitle') }}</h2>
+              <p class="sub">{{ t('ticket.rejectedSub') }}</p>
+            </template>
+
+            <!-- failed -->
+            <template v-else-if="tk.state === 'failed'">
+              <h2>{{ t('ticket.failedTitle') }}</h2>
+              <div class="sec">
+                <div class="help bad"><HiIcon name="info" /><p style="white-space: pre-wrap">{{ tk.stopReason || t('ticket.failedUnknown') }}</p></div>
+              </div>
+              <KindPicker v-if="kindEditable" :ticket="tk" />
+              <RepoPicker v-if="canChangeRepo" :ticket="tk" />
+              <ModelPicker :ticket="tk" :stages="['retry']" />
+              <div v-if="tk.resumeState !== 'pushing'" class="sec">
+                <h3><label for="retry-note">{{ t('ticket.retryNote') }}</label></h3>
+                <textarea id="retry-note" v-model="retryNote" maxlength="4000" :placeholder="t('ticket.retryNoteHint')" />
+                <FileAttach v-model="retryFiles" v-model:busy="retryUploading" />
+              </div>
+              <div class="actions">
+                <button class="btn btn-p" type="button" :disabled="act.isPending.value || retryUploading || (needsRepo(tk) && !tk.repoId)" @click="act.mutate('retry')">{{ t('ticket.retry') }}</button>
+                <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.takeItMyself') }}</button>
+              </div>
+            </template>
+
+            <!-- rate_limited -->
+            <template v-else-if="tk.state === 'rate_limited'">
+              <h2>{{ t('ticket.rateTitle') }}</h2>
+              <div class="sec">
+                <div class="help warn"><HiIcon name="info" /><p>{{ tk.stopReason || t('ticket.rateTitle') }}</p></div>
+              </div>
+              <RepoPicker v-if="canChangeRepo" :ticket="tk" />
+              <div class="actions">
+                <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="act.mutate('retry')">{{ t('ticket.resume') }}</button>
+                <span class="hint">{{ t('ticket.rateHint', { pct: sessionPct }) }}</span>
+              </div>
+            </template>
+          </fieldset>
         </section>
 
         <template v-if="tabs.length">
@@ -664,29 +697,31 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
 
           <!-- waiting_for_review: a report -->
           <section v-if="activeTab === 'decide'" class="card tk-panel">
-            <h2>{{ titleWithRev(t('ticket.reviewReportTitle')) }}</h2>
-            <p class="sub">{{ isTask ? t('ticket.reviewReportSub') : isPlane ? t('ticket.reviewReportSubPlane') : t('ticket.reviewReportSubJira') }}</p>
-            <div v-if="result?.summary" class="sec">
-              <div class="summary"><p>{{ tr(result.summary) }}</p></div>
-              <template v-if="result.notes.length">
-                <h3>{{ t('ticket.notes') }}</h3>
-                <ul><li v-for="(n, i) in result.notes" :key="i">{{ tr(n) }}</li></ul>
-              </template>
-            </div>
-            <ModelPicker :ticket="tk" :stages="['retry', 'review']" />
-            <div v-if="!isTask" class="sec">
-              <label class="check-row"><input v-model="postReport" type="checkbox">{{ t(isPlane ? 'ticket.postReportPlane' : 'ticket.postReport', { key: tk.key }) }}</label>
-            </div>
-            <div class="sec">
-              <h3><label for="feedback">{{ t('ticket.feedback') }}</label></h3>
-              <textarea id="feedback" v-model="feedback" :placeholder="t('ticket.feedbackReportHint')" @paste="feedbackAttach?.pasted($event)" />
-              <FileAttach ref="feedbackAttach" v-model="feedbackFiles" v-model:busy="feedbackUploading" />
-            </div>
-            <div class="actions">
-              <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="approve">{{ t('ticket.approveReport') }}</button>
-              <button class="btn" type="button" :disabled="!feedback.trim() || feedbackUploading || act.isPending.value" @click="act.mutate('request-changes')">{{ t('ticket.requestChanges') }}</button>
-              <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.reject') }}</button>
-            </div>
+            <fieldset class="ro-fs" :disabled="!workspace.canEdit">
+              <h2>{{ titleWithRev(t('ticket.reviewReportTitle')) }}</h2>
+              <p class="sub">{{ isTask ? t('ticket.reviewReportSub') : isPlane ? t('ticket.reviewReportSubPlane') : t('ticket.reviewReportSubJira') }}</p>
+              <div v-if="result?.summary" class="sec">
+                <div class="summary"><p>{{ tr(result.summary) }}</p></div>
+                <template v-if="result.notes.length">
+                  <h3>{{ t('ticket.notes') }}</h3>
+                  <ul><li v-for="(n, i) in result.notes" :key="i">{{ tr(n) }}</li></ul>
+                </template>
+              </div>
+              <ModelPicker :ticket="tk" :stages="['retry', 'review']" />
+              <div v-if="!isTask" class="sec">
+                <CheckBox v-model="postReport">{{ t(isPlane ? 'ticket.postReportPlane' : 'ticket.postReport', { key: tk.key }) }}</CheckBox>
+              </div>
+              <div class="sec">
+                <h3><label for="feedback">{{ t('ticket.feedback') }}</label></h3>
+                <textarea id="feedback" v-model="feedback" :placeholder="t('ticket.feedbackReportHint')" @paste="feedbackAttach?.pasted($event)" />
+                <FileAttach ref="feedbackAttach" v-model="feedbackFiles" v-model:busy="feedbackUploading" />
+              </div>
+              <div class="actions">
+                <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="approve">{{ t('ticket.approveReport') }}</button>
+                <button class="btn" type="button" :disabled="!feedback.trim() || feedbackUploading || act.isPending.value" @click="act.mutate('request-changes')">{{ t('ticket.requestChanges') }}</button>
+                <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.reject') }}</button>
+              </div>
+            </fieldset>
           </section>
 
           <section v-else-if="activeTab === 'report'" class="card tk-panel">
@@ -696,11 +731,16 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
           </section>
 
           <section v-else-if="activeTab === 'review'" class="card tk-panel">
-            <CodeReview :ticket="tk" :review="d.review" :feedback="feedback" :report="report" @add="addFeedback" @show="showFile" />
+            <fieldset class="ro-fs" :disabled="!workspace.canEdit">
+              <CodeReview :ticket="tk" :review="d.review" :feedback="feedback" :report="report" @add="addFeedback" @show="showFile" />
+              <RedFlags v-if="result?.redFlags?.length" :flags="result.redFlags" @show="showFile" />
+            </fieldset>
           </section>
 
           <section v-else-if="activeTab === 'preview'" class="card tk-panel">
-            <PreviewShots :ticket="tk" :preview="d.preview" :attached="feedbackShots" @add="addShot" />
+            <fieldset class="ro-fs" :disabled="!workspace.canEdit">
+              <PreviewShots :ticket="tk" :preview="d.preview" :attached="feedbackShots" @add="addShot" />
+            </fieldset>
           </section>
 
           <section v-else-if="activeTab === 'changes' && result" class="card tk-panel">
@@ -726,9 +766,13 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             </div>
           </section>
 
-          <FollowUps v-else-if="activeTab === 'followUps'" :ticket="tk" :follow-ups="d.followUps" />
+          <fieldset v-else-if="activeTab === 'followUps'" class="ro-fs" :disabled="!workspace.canEdit">
+            <FollowUps :ticket="tk" :follow-ups="d.followUps" />
+          </fieldset>
 
-          <TicketRelations v-else-if="activeTab === 'order'" :ticket="tk" :relations="d.relations" :footprint="d.analysis?.footprint" />
+          <fieldset v-else-if="activeTab === 'order'" class="ro-fs" :disabled="!workspace.canEdit">
+            <TicketRelations :ticket="tk" :relations="d.relations" :footprint="d.analysis?.footprint" />
+          </fieldset>
 
           <section v-else-if="activeTab === 'answers'" class="card">
             <div class="ch"><div><h2>{{ t('ticket.answersTitle') }}</h2><p class="sub">{{ t('ticket.answersSub') }}</p></div></div>
@@ -741,7 +785,9 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             </div>
           </section>
 
-          <TicketLessons v-else-if="activeTab === 'lessons'" :ticket="tk" />
+          <fieldset v-else-if="activeTab === 'lessons'" class="ro-fs" :disabled="!workspace.canEdit">
+            <TicketLessons :ticket="tk" />
+          </fieldset>
 
           <RunLog v-else-if="activeTab === 'log'" :events="events" :ticket-key="key" />
         </template>
@@ -752,15 +798,26 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
           <div class="ch"><h2>{{ isTask ? t('ticket.sideTask') : t('ticket.sideTicket') }}</h2><span><StateBadge :state="tk.state" :kind="tk.kind" /> <span v-if="tk.mergedAt" class="badge b-ok">{{ t('ticket.merged') }}</span></span></div>
           <dl class="kv">
             <dt>{{ t('ticket.kvKey') }}</dt><dd>{{ tk.key }}</dd>
-            <template v-if="tk.parentKey"><dt>{{ t('implement.implements') }}</dt><dd><RouterLink :to="`/tickets/${tk.parentKey}`">{{ tk.parentKey }}</RouterLink></dd></template>
-            <template v-if="tk.followUpOf"><dt>{{ t('followUps.followUpOf') }}</dt><dd><RouterLink :to="`/tickets/${tk.followUpOf}`">{{ tk.followUpOf }}</RouterLink></dd></template>
+            <template v-if="tk.parentKey"><dt>{{ t('implement.implements') }}</dt><dd><RouterLink :to="{ name: 'ticket', params: { key: tk.parentKey } }">{{ tk.parentKey }}</RouterLink></dd></template>
+            <template v-if="tk.followUpOf"><dt>{{ t('followUps.followUpOf') }}</dt><dd><RouterLink :to="{ name: 'ticket', params: { key: tk.followUpOf } }">{{ tk.followUpOf }}</RouterLink></dd></template>
             <template v-if="waitsFor.length">
               <dt>{{ t('relations.waitsFor') }}</dt>
-              <dd><template v-for="(k2, i) in waitsFor" :key="k2"><template v-if="i">, </template><RouterLink :to="`/tickets/${k2}`">{{ k2 }}</RouterLink></template></dd>
+              <dd><template v-for="(k2, i) in waitsFor" :key="k2"><template v-if="i">, </template><RouterLink :to="{ name: 'ticket', params: { key: k2 } }">{{ k2 }}</RouterLink></template></dd>
             </template>
             <dt>{{ t('kind.title') }}</dt><dd><KindBadge :ticket="tk" /></dd>
             <dt>{{ t('ticket.kvSource') }}</dt><dd>{{ isTask ? t('ticket.srcTask') : isPlane ? t('ticket.srcPlane') : t('ticket.srcJira') }}</dd>
             <dt>{{ t('ticket.kvRepo') }}</dt><dd>{{ tk.repoName ?? '—' }}</dd>
+            <dt>{{ t('queue.member') }}</dt>
+            <dd>
+              {{ tk.member ?? '—' }}
+              <button
+                v-if="workspace.canEdit && tk.memberId !== session.user?.id && !['done', 'rejected'].includes(tk.state)" type="button" class="link-btn" style="margin-left: 6px"
+                :disabled="takeOver.isPending.value" @click="takeOver.mutate()"
+              >
+                {{ t('queue.takeOver') }}
+              </button>
+            </dd>
+            <template v-if="tk.createdBy"><dt /><dd class="hint">{{ t('queue.createdBy', { name: tk.createdBy }) }}</dd></template>
             <template v-if="isTask && !report"><dt>{{ t('ticket.kvAfter') }}</dt><dd>{{ tk.afterApprove === 'main' ? t('ticket.afterMain') : t('ticket.afterPr') }}</dd></template>
             <dt>{{ t('ticket.kvPriority') }}</dt><dd>{{ tk.priority }}</dd>
             <template v-if="!report"><dt>{{ t('ticket.kvBranch') }}</dt><dd>{{ branch }}</dd></template>
@@ -780,7 +837,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             <li v-for="(h, i) in [...d.history].reverse()" :key="i">
               <time>{{ histTime(h.at) }}</time>
               <span class="dot" :class="histDot(h.origin, h.state)" />
-              <span>{{ t(stateKey(h.state, tk.kind)) }}<template v-if="h.message">: {{ h.message }}</template></span>
+              <span>{{ t(stateKey(h.state, tk.kind)) }}<template v-if="h.message">: {{ h.message }}</template><span v-if="h.user" class="hint"> · {{ t('queue.by', { name: h.user }) }}</span></span>
             </li>
           </ol>
           <p v-else class="hint">{{ t('ticket.historyEmpty') }}</p>
@@ -796,6 +853,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
 .tk-desc.folded { display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .tk-more { margin-top: 4px; padding: 0; border: 0; background: none; font: inherit; font-size: 14px; font-weight: 700; color: var(--primary-ink); cursor: pointer; }
 .tk-head-act { align-self: flex-start; }
+.tk-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
 .tk-lang { width: 200px; }
 .tk-tr-note { display: flex; align-items: center; gap: 8px; margin: 10px 0 0; }
 .tk-tabs { margin: 4px 0 -4px; }

@@ -17,7 +17,29 @@ const (
 	RuleQuestions RuleStatus = "questions" // waiting for the author's answers
 	RuleReady     RuleStatus = "ready"     // clear; applied to tickets while enabled
 	RuleFailed    RuleStatus = "failed"    // the review did not finish
+	// RuleSuggested: agnts proposed it from what people told it; tickets
+	// never get it until someone adopts it (a review, or as written).
+	RuleSuggested RuleStatus = "suggested"
+	// RuleDismissed: a suggestion someone declined, kept so it is not
+	// suggested again; never shown in the list.
+	RuleDismissed RuleStatus = "dismissed"
 )
+
+// RuleKind tells instructions from business knowledge.
+type RuleKind string
+
+// Rule kinds.
+const (
+	// KindInstruction is something agnts must do: it reaches prompts as a
+	// team rule.
+	KindInstruction RuleKind = "rule"
+	// KindContext is business knowledge (a glossary, invariants, roles):
+	// runs get every context note in /agnts/context/business.md.
+	KindContext RuleKind = "context"
+)
+
+// Valid reports whether k is a known kind.
+func (k RuleKind) Valid() bool { return k == KindInstruction || k == KindContext }
 
 // Limits of a rule's text and review.
 const (
@@ -29,25 +51,31 @@ const (
 // Rule is an instruction the user wrote for agnts to follow on every ticket:
 // in every repository when RepoID is nil, else in that repository only.
 type Rule struct {
-	ID       int64
-	RepoID   *int64
-	RepoName string // filled on reads
-	Title    string
-	Body     string
-	Enabled  bool
-	Status   RuleStatus
+	ID          int64
+	WorkspaceID int64
+	RepoID      *int64
+	RepoName    string // filled on reads
+	Title       string
+	Body        string
+	Enabled     bool
+	Status      RuleStatus
 	// Interpretation is Claude's account of what the rule makes agnts do.
 	Interpretation string
 	// Clarified is the rule rewritten with what the answers settled; tickets
 	// get it instead of Body when set.
-	Clarified  string
-	Questions  []RuleQuestion // every question asked, answered or not
-	Rounds     int            // question rounds so far
-	Revision   int            // bumped by edits and answers
-	Error      string         // why the last review failed
-	AnalyzedAt *time.Time
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
+	Clarified string
+	Questions []RuleQuestion // every question asked, answered or not
+	Rounds    int            // question rounds so far
+	Revision  int            // bumped by edits and answers
+	Error     string         // why the last review failed
+	Kind      RuleKind
+	// SourceTicket and Reason say where a suggested rule came from: the
+	// ticket whose feedback taught it, and which feedback.
+	SourceTicket string
+	Reason       string
+	AnalyzedAt   *time.Time
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 // RuleQuestion is one question from a rule's review, with its answer once

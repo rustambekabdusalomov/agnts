@@ -41,6 +41,17 @@ type Config struct {
 	MaxMemoryMB int64
 	// ToolchainVolume is the shared volume mise installs toolchains into.
 	ToolchainVolume string
+	// Runtime is the OCI runtime for run containers (runsc: gVisor); ""
+	// is Docker's default.
+	Runtime string
+	// NetworkPerRun gives every run a network of its own, so runs cannot
+	// reach each other; the egress proxy container (ProxyContainer) joins
+	// each one.
+	NetworkPerRun  bool
+	ProxyContainer string
+	// StampDir keeps a file per package cache, touched on every use, so
+	// caches nobody used for a while can be emptied.
+	StampDir string
 }
 
 // DefaultConfig returns limits for a small VPS.
@@ -48,9 +59,18 @@ func DefaultConfig() Config {
 	return Config{Network: "agnts-runs", MemoryMB: 4096, CPUs: 2, PIDs: 1024, MaxMemoryMB: 8192, ToolchainVolume: "agnts-toolchains"}
 }
 
-// TokenSource returns the Claude OAuth token at the moment a run starts,
-// so a rotated token is picked up without a restart.
-type TokenSource func(ctx context.Context) (string, error)
+// Credential is how Claude Code reaches Claude: Env is the variable it
+// reads the token from (CLAUDE_CODE_OAUTH_TOKEN for a subscription,
+// ANTHROPIC_API_KEY for an API key).
+type Credential struct {
+	Env   string
+	Token string
+}
+
+// TokenSource returns the credential of the account a run uses (from its
+// context) at the moment it calls Claude, so a rotated token is picked up
+// without a restart.
+type TokenSource func(ctx context.Context) (Credential, error)
 
 // Runner implements orchestrator.Runner with Docker.
 type Runner struct {
@@ -95,6 +115,7 @@ func (r *Runner) Open(ctx context.Context, spec orchestrator.WorkspaceSpec) (orc
 			return nil, fmt.Errorf("cache volume: %w", err)
 		}
 		mounts = append(mounts, Mount{Volume: vol, Target: cacheDir})
+		r.stampCache(vol)
 	}
 	memory := r.cfg.MemoryMB
 	if spec.MemoryMB > 0 {
@@ -102,15 +123,24 @@ func (r *Runner) Open(ctx context.Context, spec orchestrator.WorkspaceSpec) (orc
 	}
 	suffix := make([]byte, 3)
 	_, _ = rand.Read(suffix)
+	network, ownNet := r.cfg.Network, ""
+	if r.cfg.NetworkPerRun {
+		ownNet = "agnts-run-" + hex.EncodeToString(suffix)
+		if err := r.runNetwork(ctx, ownNet); err != nil {
+			return nil, fmt.Errorf("run network: %w", err)
+		}
+		network = ownNet
+	}
 	id, err := r.docker.Create(ctx, ContainerConfig{
-		Name:       "agnts-" + sanitize(spec.TicketKey) + "-" + hex.EncodeToString(suffix),
+		Name:       "agnts-" + strconv.FormatInt(domain.WorkspaceOf(ctx), 10) + "-" + sanitize(spec.TicketKey) + "-" + hex.EncodeToString(suffix),
 		Image:      spec.Image,
 		User:       agentUser,
 		WorkingDir: workDir,
 		Cmd:        []string{"sleep", "infinity"},
-		Labels:     map[string]string{"agnts.ticket": spec.TicketKey},
-		Network:    r.cfg.Network,
+		Labels:     map[string]string{"agnts.ticket": spec.TicketKey, "agnts.workspace": strconv.FormatInt(domain.WorkspaceOf(ctx), 10)},
+		Network:    network,
 		MemoryMB:   memory,
+		Runtime:    r.cfg.Runtime,
 		CPUs:       r.cfg.CPUs,
 		PIDs:       r.cfg.PIDs,
 		Volumes:    []string{workDir, homeDir, outDir},
@@ -119,11 +149,14 @@ func (r *Runner) Open(ctx context.Context, spec orchestrator.WorkspaceSpec) (orc
 		Env:        runEnv(r.cfg.Proxy, spec.Toolchains, prov, spec.Env),
 	})
 	if err != nil {
+		if ownNet != "" {
+			_ = r.docker.RemoveNetwork(context.WithoutCancel(ctx), ownNet, r.cfg.ProxyContainer)
+		}
 		return nil, err
 	}
-	ws := &workspace{docker: r.docker, id: id, token: r.token}
+	ws := &workspace{docker: r.docker, id: id, token: r.token, memoryMB: memory, network: ownNet, proxy: r.cfg.ProxyContainer}
 	fail := func(err error) (orchestrator.Workspace, error) {
-		_ = r.docker.Remove(context.WithoutCancel(ctx), id)
+		_ = ws.Close(context.WithoutCancel(ctx))
 		return nil, err
 	}
 	if err := r.docker.PutArchive(ctx, id, workDir, spec.Repo); err != nil {
@@ -175,9 +208,46 @@ func proxyEnv(proxy string) []string {
 }
 
 type workspace struct {
-	docker *Docker
-	id     string
-	token  TokenSource
+	docker   *Docker
+	id       string
+	token    TokenSource
+	memoryMB int64
+	// network is the run's own network ("" on the shared one), removed
+	// with the container; proxy is the egress proxy that joined it.
+	network, proxy string
+}
+
+// runNetwork creates a run's own network: internal (no route out) when
+// the egress proxy is the way out, which then joins it under the name in
+// the proxy URL.
+func (r *Runner) runNetwork(ctx context.Context, name string) error {
+	internal := r.cfg.Proxy != ""
+	if err := r.docker.CreateNetwork(ctx, name, internal, map[string]string{"agnts": "run"}); err != nil {
+		return err
+	}
+	if !internal || r.cfg.ProxyContainer == "" {
+		return nil
+	}
+	alias := ""
+	if u, err := url.Parse(r.cfg.Proxy); err == nil {
+		alias = u.Hostname()
+	}
+	if err := r.docker.ConnectNetwork(ctx, name, r.cfg.ProxyContainer, []string{alias}); err != nil {
+		_ = r.docker.RemoveNetwork(context.WithoutCancel(ctx), name, "")
+		return fmt.Errorf("connect the egress proxy: %w", err)
+	}
+	return nil
+}
+
+// errOOM explains a run the kernel killed at its memory limit.
+func (w *workspace) errOOM(ctx context.Context, code int) error {
+	if code != 137 {
+		return nil
+	}
+	if oom, err := w.docker.OOMKilled(context.WithoutCancel(ctx), w.id); err != nil || !oom {
+		return nil
+	}
+	return &orchestrator.OOMError{LimitMB: w.memoryMB}
 }
 
 func (w *workspace) ID() string { return w.id }
@@ -193,12 +263,15 @@ func timeoutCmd(d time.Duration, argv ...string) []string {
 }
 
 func (w *workspace) Claude(ctx context.Context, req orchestrator.ClaudeRequest, onEvent func(orchestrator.ClaudeEvent)) (orchestrator.ClaudeResult, error) {
-	token, err := w.token(ctx)
+	cred, err := w.token(ctx)
 	if err != nil {
 		return orchestrator.ClaudeResult{}, fmt.Errorf("claude token: %w", err)
 	}
-	if token == "" {
-		return orchestrator.ClaudeResult{}, errors.New("claude is not connected; run `agnts integration set claude`")
+	if cred.Token == "" {
+		return orchestrator.ClaudeResult{}, errors.New("claude is not connected: connect an account in Workspace settings → Claude")
+	}
+	if cred.Env == "" {
+		cred.Env = "CLAUDE_CODE_OAUTH_TOKEN"
 	}
 	argv := []string{"claude", "-p", req.Prompt,
 		"--output-format", "stream-json", "--verbose",
@@ -229,7 +302,7 @@ func (w *workspace) Claude(ctx context.Context, req orchestrator.ClaudeRequest, 
 			User:       agentUser,
 			WorkingDir: workDir,
 			Env: []string{
-				"CLAUDE_CODE_OAUTH_TOKEN=" + token,
+				cred.Env + "=" + cred.Token,
 				"CLAUDE_CONFIG_DIR=" + claudeHome,
 				"DISABLE_AUTOUPDATER=1",
 			},
@@ -244,6 +317,9 @@ func (w *workspace) Claude(ctx context.Context, req orchestrator.ClaudeRequest, 
 	out := <-done
 	if res.Duration == 0 {
 		res.Duration = time.Since(start)
+	}
+	if oom := w.errOOM(ctx, out.code); oom != nil {
+		return res, oom
 	}
 	switch {
 	case out.err != nil:
@@ -264,6 +340,9 @@ func (w *workspace) Exec(ctx context.Context, cmd string, timeout time.Duration)
 		User:       agentUser,
 		WorkingDir: workDir,
 	}, &buf, &buf)
+	if oom := w.errOOM(ctx, code); oom != nil && err == nil {
+		err = oom
+	}
 	return orchestrator.ExecResult{
 		ExitCode: code, Output: buf.String(), Duration: time.Since(start), TimedOut: code == 124,
 	}, err
@@ -341,7 +420,11 @@ func (w *workspace) ExportClaudeHome(ctx context.Context) ([]byte, error) {
 }
 
 func (w *workspace) Close(ctx context.Context) error {
-	return w.docker.Remove(ctx, w.id)
+	err := w.docker.Remove(ctx, w.id)
+	if w.network != "" {
+		err = errors.Join(err, w.docker.RemoveNetwork(ctx, w.network, w.proxy))
+	}
+	return err
 }
 
 // tailBuffer keeps the last 256 KiB written to it.

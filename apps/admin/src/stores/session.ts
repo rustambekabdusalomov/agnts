@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { api, unwrap, type User } from '../api/client'
+import { api, HttpError, unwrap, type User } from '../api/client'
 
 /** The signed-in user. The session itself lives in an HttpOnly cookie. */
 export const useSession = defineStore('session', () => {
@@ -18,10 +18,20 @@ export const useSession = defineStore('session', () => {
     return user.value
   }
 
-  async function login(username: string, password: string, code: string) {
-    const res = await unwrap(api.POST('/auth/login', { body: { username, password, code, client: 'web' } }))
-    user.value = res.user
-    checked.value = true
+  /**
+   * Signs in. A code is needed only for accounts with two-factor sign-in;
+   * without one the server answers code_required (returned as true).
+   */
+  async function login(username: string, password: string, code: string): Promise<boolean> {
+    try {
+      const res = await unwrap(api.POST('/auth/login', { body: { username, password, ...(code ? { code } : {}), client: 'web' } }))
+      user.value = res.user
+      checked.value = true
+      return false
+    } catch (e) {
+      if (e instanceof HttpError && e.code === 'code_required') return true
+      throw e
+    }
   }
 
   async function logout() {
@@ -32,5 +42,13 @@ export const useSession = defineStore('session', () => {
     }
   }
 
-  return { user, checked, load, login, logout }
+  /** The workspace to open: the last one, else the first. */
+  function homeWorkspace(): string {
+    const u = user.value
+    if (!u) return ''
+    if (u.lastWorkspace && u.workspaces?.some((w) => w.slug === u.lastWorkspace)) return u.lastWorkspace
+    return u.workspaces?.[0]?.slug ?? ''
+  }
+
+  return { user, checked, load, login, logout, homeWorkspace }
 })

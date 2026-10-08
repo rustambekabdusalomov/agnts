@@ -4,6 +4,8 @@
 
 // ignore_for_file: unused_element
 import 'package:agnts_api/src/model/footprint.dart';
+import 'package:agnts_api/src/model/approach.dart';
+import 'package:agnts_api/src/model/ship_notes.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -28,6 +30,12 @@ class Analysis {
      this.complexity,
 
      this.footprint,
+
+     this.approaches,
+
+     this.outOfScope,
+
+     this.ship,
   });
 
   @JsonKey(
@@ -79,6 +87,44 @@ class Analysis {
 
 
 
+      /// Ways to do the work that the analysis weighed; exactly one is chosen
+  @JsonKey(
+    
+    name: r'approaches',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<Approach>? approaches;
+
+
+
+      /// What the work will deliberately not do
+  @JsonKey(
+    
+    name: r'outOfScope',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<String>? outOfScope;
+
+
+
+  @JsonKey(
+    
+    name: r'ship',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final ShipNotes? ship;
+
+
+
 
 
     @override
@@ -86,14 +132,20 @@ class Analysis {
       other.summary == summary &&
       other.plan == plan &&
       other.complexity == complexity &&
-      other.footprint == footprint;
+      other.footprint == footprint &&
+      other.approaches == approaches &&
+      other.outOfScope == outOfScope &&
+      other.ship == ship;
 
     @override
     int get hashCode =>
         summary.hashCode +
         plan.hashCode +
         complexity.hashCode +
-        footprint.hashCode;
+        footprint.hashCode +
+        approaches.hashCode +
+        outOfScope.hashCode +
+        ship.hashCode;
 
   factory Analysis.fromJson(Map<String, dynamic> json) => _$AnalysisFromJson(json);
 

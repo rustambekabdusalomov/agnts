@@ -115,31 +115,10 @@ func validSignature(secret, header string, body []byte) bool {
 }
 
 // Reconcile ingests every open labelled issue now and then every interval,
-// catching webhook deliveries Jira dropped. Ingest is idempotent.
-func Reconcile(ctx context.Context, c *Client, ing Ingester, every time.Duration, log *slog.Logger) {
-	run := func() {
-		issues, err := c.Search(ctx)
-		if err != nil {
-			if !errors.Is(err, ErrNotConnected) && ctx.Err() == nil {
-				log.Warn("jira reconcile", "err", err)
-			}
-			return
-		}
-		n := 0
-		for _, in := range issues {
-			created, err := ing.Ingest(ctx, in, domain.OriginSystem)
-			if err != nil {
-				log.Warn("jira reconcile: ingest", "issue", in.Key, "err", err)
-				continue
-			}
-			if created {
-				n++
-			}
-		}
-		if n > 0 {
-			log.Info("jira reconcile picked up missed issues", "count", n)
-		}
-	}
+// catching webhook deliveries Jira dropped, in every workspace: each calls
+// fn once per workspace with a context acting in it. Ingest is idempotent.
+func Reconcile(ctx context.Context, c *Client, ing Ingester, every time.Duration, each func(context.Context, func(context.Context)), log *slog.Logger) {
+	run := func() { each(ctx, func(ctx context.Context) { reconcileOnce(ctx, c, ing, log) }) }
 	run()
 	t := time.NewTicker(every)
 	defer t.Stop()
@@ -150,5 +129,29 @@ func Reconcile(ctx context.Context, c *Client, ing Ingester, every time.Duration
 		case <-t.C:
 			run()
 		}
+	}
+}
+
+func reconcileOnce(ctx context.Context, c *Client, ing Ingester, log *slog.Logger) {
+	issues, err := c.Search(ctx)
+	if err != nil {
+		if !errors.Is(err, ErrNotConnected) && ctx.Err() == nil {
+			log.Warn("jira reconcile", "workspace", domain.WorkspaceOf(ctx), "err", err)
+		}
+		return
+	}
+	n := 0
+	for _, in := range issues {
+		created, err := ing.Ingest(ctx, in, domain.OriginSystem)
+		if err != nil {
+			log.Warn("jira reconcile: ingest", "issue", in.Key, "err", err)
+			continue
+		}
+		if created {
+			n++
+		}
+	}
+	if n > 0 {
+		log.Info("jira reconcile picked up missed issues", "workspace", domain.WorkspaceOf(ctx), "count", n)
 	}
 }

@@ -7,6 +7,7 @@ import type { Rule, RuleInput } from '../../api/types'
 import { useUi } from '../../stores/ui'
 import FormDrawer from '../form/FormDrawer.vue'
 import InputSelect from '../form/InputSelect.vue'
+import SegButtons from '../form/SegButtons.vue'
 import SwitchToggle from '../form/SwitchToggle.vue'
 import { useRepos } from '../repos/useRepos'
 
@@ -19,7 +20,11 @@ const qc = useQueryClient()
 const ui = useUi()
 const repos = useRepos()
 
-const form = reactive({ title: '', body: '', repoId: undefined as number | undefined, enabled: true })
+const form = reactive({ title: '', body: '', repoId: undefined as number | undefined, enabled: true, kind: 'rule' as 'rule' | 'context' })
+const kinds = computed(() => [
+  { value: 'rule' as const, label: t('rules.kindRule') },
+  { value: 'context' as const, label: t('rules.kindContext') },
+])
 const error = ref('')
 
 watch(
@@ -33,6 +38,7 @@ watch(
       body: r?.body ?? '',
       repoId: r ? r.repoId : props.repoId,
       enabled: r?.enabled ?? true,
+      kind: r?.kind ?? 'rule',
     })
   },
   { immediate: true },
@@ -48,12 +54,12 @@ const scopes = computed(() => [
 // Editing what the rule says (or where) sends it back to review.
 const rereview = computed(() => {
   const r = props.rule
-  return !!r && (r.title !== form.title.trim() || r.body !== form.body.trim() || (r.repoId ?? undefined) !== form.repoId)
+  return !!r && (r.title !== form.title.trim() || r.body !== form.body.trim() || (r.repoId ?? undefined) !== form.repoId || r.kind !== form.kind)
 })
 
 const save = useMutation({
   mutationFn: () => {
-    const body: RuleInput = { title: form.title.trim(), body: form.body.trim(), repoId: form.repoId, enabled: form.enabled }
+    const body: RuleInput = { title: form.title.trim(), body: form.body.trim(), repoId: form.repoId, enabled: form.enabled, kind: form.kind }
     return props.rule
       ? unwrap(api.PUT('/rules/{id}', { params: { path: { id: props.rule.id } }, body }))
       : unwrap(api.POST('/rules', { body }))
@@ -75,6 +81,11 @@ const save = useMutation({
       <div class="field">
         <label for="rule-title">{{ t('rules.ruleTitle') }}</label>
         <input id="rule-title" v-model="form.title" type="text" required maxlength="200" :placeholder="t('rules.titlePlaceholder')">
+      </div>
+      <div class="field">
+        <span class="flbl">{{ t('rules.kind') }}</span>
+        <SegButtons v-model="form.kind" :options="kinds" :label="t('rules.kind')" />
+        <span class="fhelp">{{ form.kind === 'context' ? t('rules.kindContextHelp') : t('rules.kindRuleHelp') }}</span>
       </div>
       <div class="field">
         <span class="flbl">{{ t('rules.scope') }}</span>

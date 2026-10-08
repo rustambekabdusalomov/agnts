@@ -30,7 +30,7 @@ const test = useMutation({
   <PageHeader :title="t('integrations.title')" doc="integrations" />
   <p v-if="list.isPending.value" class="hint">{{ t('common.loading') }}</p>
   <div v-else class="integ-grid">
-    <section v-for="p in PROVIDERS" :key="p" class="card integ-card">
+    <section v-for="p in PROVIDERS.filter((x) => x !== 'claude')" :key="p" class="card integ-card">
       <div class="ic-h">
         <ProviderTile :provider="p" />
         <div>
@@ -48,12 +48,22 @@ const test = useMutation({
         <p v-if="find(p)?.lastError" class="ferr" style="margin: 8px 0 0">{{ find(p)?.lastError }}</p>
       </template>
       <div class="actions">
-        <RouterLink class="btn" :class="{ 'btn-p': !find(p)?.connected }" :to="`/integrations/${p}`">
+        <RouterLink class="btn" :class="{ 'btn-p': !find(p)?.connected }" :to="{ name: 'integration', params: { provider: p } }">
           {{ find(p)?.connected ? t('integrations.manage') : t('integrations.connect') }}
         </RouterLink>
         <button v-if="find(p)?.connected" type="button" class="btn" :disabled="test.isPending.value" @click="test.mutate(p)">
           {{ t('integrations.test') }}
         </button>
+      </div>
+    </section>
+    <section class="card integ-card">
+      <div class="ic-h">
+        <ProviderTile provider="claude" />
+        <div><h2>{{ t('integrations.name_claude') }}</h2></div>
+      </div>
+      <p class="sub" style="margin: 10px 0 8px">{{ t('settings.claudeMoved') }}</p>
+      <div class="actions">
+        <RouterLink class="btn" :to="{ name: 'workspace', query: { tab: 'claude' } }">{{ t('settings.claudeOpen') }}</RouterLink>
       </div>
     </section>
   </div>

@@ -56,7 +56,7 @@ const time = (iso?: string) => (iso ? new Date(iso).toLocaleTimeString(locale.va
             <div class="cm-m">{{ c.message }}</div>
             <div class="cm-meta">
               <span class="au">{{ c.author }}</span>
-              <RouterLink v-if="c.ticketKey" :to="`/tickets/${c.ticketKey}`" class="badge b-info">{{ c.ticketKey }}</RouterLink>
+              <RouterLink v-if="c.ticketKey" :to="{ name: 'ticket', params: { key: c.ticketKey } }" class="badge b-info">{{ c.ticketKey }}</RouterLink>
               <span v-if="c.add || c.del" class="n"><span style="color: var(--ok-ink)">+{{ c.add }}</span> <span style="color: var(--bad-ink)">−{{ c.del }}</span></span>
             </div>
           </div>

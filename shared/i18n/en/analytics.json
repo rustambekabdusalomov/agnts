@@ -97,6 +97,25 @@
     "insightNight": "{pct}% of agnts's work happens between 22:00 and 07:00, while you're offline.",
     "minutes": "{n} min",
     "hoursMinutes": "{h} h {m} min",
-    "srcPlane": "Plane"
+    "srcPlane": "Plane",
+    "quality": "Agent quality",
+    "qualitySub": "Tickets grouped by the prompt version of their first coding run. Compare versions to see whether a change to the agent helped.",
+    "noQuality": "No coding runs in this period.",
+    "colVersion": "Prompt version",
+    "versionUnknown": "before tracking",
+    "colFirstPass": "First pass",
+    "colFirstPassHint": "Done tickets approved without a person asking for changes",
+    "colRounds": "Change rounds",
+    "colRoundsHint": "Average change requests by a person per ticket that reached review",
+    "colFixes": "Check fixes",
+    "colFixesHint": "Average times failing checks were sent back to Claude",
+    "colSerious": "Serious findings",
+    "colSeriousHint": "Share of reviewed tickets where agnts's review found a blocker or major problem",
+    "colFootprint": "Plan accuracy",
+    "colFootprintHint": "Share of changed files the analysis predicted",
+    "colRedFlags": "Red flags",
+    "colRedFlagsHint": "Skipped tests, removed assertions, silenced linters and the like found in the diffs",
+    "colSelfFixes": "Self-fixes",
+    "colSelfFixesHint": "Times agnts's own review sent findings back to the coder before a person looked"
   }
 }

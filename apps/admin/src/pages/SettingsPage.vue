@@ -107,9 +107,9 @@ const reviewModels = computed(() => [{ value: 'auto' as ReviewModel, label: t('s
       <section id="s-integ" class="card">
         <div class="ch">
           <div><h2>{{ t('settings.integrations') }}</h2><p class="sub">{{ t('settings.integrationsSub') }}</p></div>
-          <RouterLink class="btn btn-s" to="/integrations">{{ t('settings.manageAll') }}</RouterLink>
+          <RouterLink class="btn btn-s" :to="{ name: 'integrations' }">{{ t('settings.manageAll') }}</RouterLink>
         </div>
-        <div v-for="p in PROVIDERS" :key="p" class="cfg-row">
+        <div v-for="p in PROVIDERS.filter((x) => x !== 'claude')" :key="p" class="cfg-row">
           <div style="display: flex; gap: 12px; align-items: center">
             <ProviderTile :provider="p" :size="32" />
             <div class="cfg-lbl">{{ t(`integrations.name_${p}`) }}</div>
@@ -118,7 +118,7 @@ const reviewModels = computed(() => [{ value: 'auto' as ReviewModel, label: t('s
             <span class="badge" :class="integ(p)?.connected ? 'b-ok' : 'b-gray'">
               {{ integ(p)?.connected ? t('settings.connected') : t('settings.notConnected') }}
             </span>
-            <RouterLink class="btn btn-s" :to="`/integrations/${p}`">
+            <RouterLink class="btn btn-s" :to="{ name: 'integration', params: { provider: p } }">
               {{ integ(p)?.connected ? t('settings.manage') : t('settings.connect') }}
             </RouterLink>
           </span>
@@ -126,7 +126,10 @@ const reviewModels = computed(() => [{ value: 'auto' as ReviewModel, label: t('s
       </section>
 
       <section id="s-claude" class="card">
-        <div class="ch"><div><h2>{{ t('settings.claude') }}</h2><p class="sub">{{ t('settings.claudeSub') }}</p></div></div>
+        <div class="ch">
+          <div><h2>{{ t('settings.claude') }}</h2><p class="sub">{{ t('settings.claudeSub') }}</p></div>
+          <RouterLink class="btn btn-s" :to="{ name: 'workspace', query: { tab: 'claude' } }" :title="t('settings.claudeMoved')">{{ t('settings.claudeOpen') }}</RouterLink>
+        </div>
         <div class="cfg-row" style="display: block">
           <div class="cfg-lbl">{{ t('settings.models') }}</div>
           <div class="cfg-help">{{ t('settings.modelsHelp') }}</div>
@@ -194,14 +197,23 @@ const reviewModels = computed(() => [{ value: 'auto' as ReviewModel, label: t('s
         <CfgRow v-if="draft.autoReview !== undefined" :label="t('settings.autoReview')" :help="t('settings.autoReviewHelp')">
           <SwitchToggle v-model="draft.autoReview" :label="t('settings.autoReview')" />
         </CfgRow>
+        <CfgRow v-if="draft.selfReview !== undefined" :label="t('settings.selfReview')" :help="t('settings.selfReviewHelp')">
+          <SwitchToggle v-model="draft.selfReview" :label="t('settings.selfReview')" />
+        </CfgRow>
+        <CfgRow v-if="draft.reflect !== undefined" :label="t('settings.reflect')" :help="t('settings.reflectHelp')">
+          <SwitchToggle v-model="draft.reflect" :label="t('settings.reflect')" />
+        </CfgRow>
+        <CfgRow v-if="draft.autoBrief !== undefined" :label="t('settings.autoBrief')" :help="t('settings.autoBriefHelp')">
+          <SwitchToggle v-model="draft.autoBrief" :label="t('settings.autoBrief')" />
+        </CfgRow>
         <CfgRow v-if="draft.suggestFollowUps !== undefined" :label="t('followUps.settingLabel')" :help="t('followUps.settingHelp')">
           <SwitchToggle v-model="draft.suggestFollowUps" :label="t('followUps.settingLabel')" />
         </CfgRow>
         <CfgRow :label="t('settings.pauseAbove')" :help="t('settings.pauseAboveHelp')">
           <NumberStepper v-model="draft.pauseAbove" :min="50" :max="100" :step="5" :label="t('settings.pauseAbove')" :format="percent" />
         </CfgRow>
-        <CfgRow :label="t('settings.parallel')" :help="t('settings.parallelHelp')">
-          <NumberStepper v-model="draft.parallel" :min="1" :max="3" :step="1" :label="t('settings.parallel')" />
+        <CfgRow :label="t('settings.parallel')" :help="t('settings.parallelSlotsHelp')">
+          <RouterLink class="btn btn-s" :to="{ name: 'workspace', query: { tab: 'billing' } }">{{ t('settings.parallelSlots', { n: draft.parallel }) }}</RouterLink>
         </CfgRow>
       </section>
 

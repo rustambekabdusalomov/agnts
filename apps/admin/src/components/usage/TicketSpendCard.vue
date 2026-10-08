@@ -35,7 +35,7 @@ const STAGE_KEY: Record<StageSpend['stage'], string> = {
 }
 const share = (cost: number) => (v.value && v.value.total.costUsd > 0 ? Math.round((100 * cost) / v.value.total.costUsd) : 0)
 const tok = (n: number) => fmtTokens(n, locale.value)
-const open = (key: string) => router.push(`/tickets/${key}`)
+const open = (key: string) => router.push({ name: 'ticket', params: { key: key } })
 </script>
 
 <template>

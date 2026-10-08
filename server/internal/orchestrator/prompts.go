@@ -12,6 +12,12 @@ import (
 	"agnts/internal/toolchain"
 )
 
+// PromptVersion names the current prompts. Every run records it, so the
+// Analytics page can compare the quality of the work before and after a
+// change: bump it whenever a change to the prompts or to the context runs
+// get could change what Claude does.
+const PromptVersion = "2026-10-08.1"
+
 // Files Claude Code writes for agnts to read back. stream-json output has no
 // structured result, so the contract is a file outside the repository.
 const (
@@ -51,6 +57,70 @@ type Analysis struct {
 	// Relations say how this ticket depends on or collides with the other
 	// open tickets the prompt listed.
 	Relations []RelationClaim `json:"relations,omitempty"`
+	// Approaches are the ways the work could be done, weighed against the
+	// code base; one is chosen (code and test kinds).
+	Approaches []Approach `json:"approaches,omitempty"`
+	// OutOfScope is what the work will deliberately not do.
+	OutOfScope []string `json:"outOfScope,omitempty"`
+	// Ship says how the change reaches production, when it touches data,
+	// schemas, public APIs or configuration.
+	Ship *ShipNotes `json:"ship,omitempty"`
+}
+
+// Approach is one way to do a ticket's work.
+type Approach struct {
+	Title  string   `json:"title"`
+	Sketch string   `json:"sketch"`
+	Pros   []string `json:"pros,omitempty"`
+	Cons   []string `json:"cons,omitempty"`
+	// Fit is how it fits the brief's architecture and the team rules, or
+	// what it bends.
+	Fit    string `json:"fit,omitempty"`
+	Chosen bool   `json:"chosen"`
+	// Why: for the chosen one, why it beats the others; otherwise, why not.
+	Why string `json:"why,omitempty"`
+}
+
+// ShipNotes are how a change ships; empty fields do not apply.
+type ShipNotes struct {
+	Migrations    string `json:"migrations,omitempty"`
+	Compatibility string `json:"compatibility,omitempty"`
+	Rollout       string `json:"rollout,omitempty"`
+	Rollback      string `json:"rollback,omitempty"`
+}
+
+// ShipPlan returns the ship notes, or nil when none applies.
+func (a Analysis) ShipPlan() *ShipNotes {
+	if n := a.Ship; n != nil && strings.TrimSpace(n.Migrations+n.Compatibility+n.Rollout+n.Rollback) != "" {
+		return n
+	}
+	return nil
+}
+
+// Chosen returns the approach the analysis picked: the one marked chosen,
+// else the first; nil when there are none.
+func (a Analysis) Chosen() *Approach {
+	for i := range a.Approaches {
+		if a.Approaches[i].Chosen {
+			return &a.Approaches[i]
+		}
+	}
+	if len(a.Approaches) > 0 {
+		return &a.Approaches[0]
+	}
+	return nil
+}
+
+// Alternatives returns the approaches not chosen.
+func (a Analysis) Alternatives() []Approach {
+	c := a.Chosen()
+	var out []Approach
+	for i := range a.Approaches {
+		if &a.Approaches[i] != c {
+			out = append(out, a.Approaches[i])
+		}
+	}
+	return out
 }
 
 // Summary is what a coding run should write to SummaryPath.
@@ -59,6 +129,9 @@ type Summary struct {
 	Notes   []string `json:"notes"`
 	// FollowUps are what the ticket still needs after this run, when asked for.
 	FollowUps []domain.FollowUp `json:"followUps,omitempty"`
+	// Deviations are where the work departed from the chosen approach or
+	// the plan, and why.
+	Deviations []string `json:"deviations,omitempty"`
 }
 
 // kindWork describes each kind's work to Claude.
@@ -94,8 +167,18 @@ The author attached these files to the ticket. Read each one (images and PDFs to
 ## Extra instructions for this repository
 
 {{.Repo.ClaudeMD}}
-{{end}}{{template "team" .}}
+{{end}}{{template "context" .}}{{template "team" .}}
 {{template "lang"}}{{end}}
+
+{{define "context"}}{{with .Context}}
+## Team knowledge
+
+Read these files before you start. People on the team approved them; they say how this code base works:
+{{range .}}
+- {{.Path}}: {{.What}}{{end}}
+
+Follow them: put code where they say it belongs, copy the files they point to, keep to the dependency rules and conventions. When the ticket needs something they do not cover, or the code contradicts them, trust the code and say so in your notes.
+{{end}}{{end}}
 
 {{define "answers"}}{{if .Answers}}
 ## Answers from the ticket author
@@ -155,6 +238,94 @@ Write {{.DetectPath}} as JSON:
 - notes: anything a person must set up by hand (services such as a database the tests need, secrets, an SDK that cannot be installed this way). Keep each note to one sentence.
 {{end}}
 
+{{define "survey"}}You are agnts's architect. agnts runs AI coding agents on tickets in the repository {{.Repo.Name}}, checked out at /workspace on its default branch, {{.Repo.DefaultBranch}}. Before an agent touches a ticket it reads a brief of the repository, so that it builds what a senior engineer on this team would: in the right place, the way the code base already does it. Write that brief. Do not change any files in /workspace.
+{{if .Brief.Ready}}
+## The current brief
+
+/agnts/context/brief.md is the brief the team approved{{if .Brief.BodySHA}}, written at commit {{.Brief.BodySHA}}{{end}}. People may have edited it: keep what they wrote unless the code now contradicts it. Update it rather than starting over:{{if .Brief.BodySHA}} run ` + "`git log --stat {{.Brief.BodySHA}}..HEAD`" + ` to see what changed since, and{{end}} check every statement against the code as it is now. Remove what no longer holds; add what is new.
+{{end}}{{if .Rules}}
+## Team rules
+
+The team wrote these rules; they stay separate from the brief, so do not repeat them, but do not contradict them either:
+{{range .Rules}}
+- {{.Title}}{{end}}
+{{end}}
+## How to survey
+
+Read the README, CONTRIBUTING, CLAUDE.md or AGENTS.md, the build and CI files, then the code itself: the entry points, the package or module layout, the imports between them, a few typical features end to end, and the tests. Use git log to see how the team usually makes changes. Every statement in the brief must be something you checked in the code; cite paths. When the code is inconsistent, say which way is the current one (usually the newer code).
+
+## What to write
+
+Write {{.BriefOutPath}} in Markdown, at most about 2000 words, with exactly these sections:
+
+# {{.Repo.Name}}
+
+## Purpose
+What the product does and for whom, the main domain concepts and their names in the code. Three to six sentences.
+
+## Architecture
+The layers or modules and what each owns; which may depend on which (and which must not); where business rules live, where I/O lives; how requests or jobs flow through the code. Name the directories.
+
+## Module map
+A list: path → what it is responsible for. The important directories only.
+
+## Recipes
+For each common kind of change (for example: a new API endpoint, a new database table or migration, a new page or screen, a new background job, a new setting, a new integration), the steps and files to touch, in order, including generated code and how to regenerate it. Only kinds this repository has.
+
+## Files to copy
+For each recipe, the one existing file that is the best example to copy, with why.
+
+## Conventions
+Error handling, naming, logging, configuration, dependency injection, transactions, translations, comments, commit style: what the code consistently does.
+
+## Testing
+Where tests live, their style (table tests, fixtures, mocks or real services), how to run one test, what needs a database or other services.
+
+## Pitfalls
+What a newcomer would get wrong: generated files not to edit by hand, invariants the code relies on, surprising coupling, slow or flaky parts, things that look unused but are not.
+
+Write facts, not advice anyone could give ("write clean code"). Write in English; keep identifiers, paths and commands as they are.
+{{end}}
+
+{{define "design"}}## Design
+
+For code and test work, think like a senior engineer on this team before you plan. In "approaches", give two or three genuinely different ways to do it when the work is complex, and one when it is simple; mark exactly one "chosen" and make the plan carry it out. Weigh them on how the code base already does similar things{{if .Context}} (the brief's recipes and files to copy){{end}}, how much code each touches and how easy it is to undo, what breaks if it is wrong, compatibility with existing callers, data and clients, and the risk of running it in production. Prefer the plain option that matches the existing code; add a new abstraction, layer or dependency only when the existing ones cannot do the job, and say why. Do not pad the list with approaches nobody would pick.
+
+"outOfScope" names what you will deliberately leave alone: refactors, clean-ups and features next to the ticket that it does not ask for. Keep it short, and empty when nothing tempting is nearby.
+
+Fill "ship" only when the change touches persisted data, a schema or migration, a public or cross-service API, configuration or environment variables: how the migration runs and whether the old code still works with the new schema (migrations), what happens to existing callers, clients and data (compatibility), what to deploy first (rollout), and how to undo it (rollback). Use "" for what does not apply, and leave "ship" out when nothing does.
+
+For a report kind (plan, analysis, bug), leave "approaches", "outOfScope" and "ship" out.{{if not .NoQuestions}} When the work is complex and you give two or more approaches a reasonable person could prefer, add a question asking which one to take, with their titles as the options, the chosen one first.{{end}}
+
+{{end}}
+
+{{define "approach"}}{{with .Design}}{{with .Chosen}}## Approach
+
+Take this approach, chosen in the analysis{{if $.Answers}} (unless the author's answers below pick another: then follow theirs){{end}}:
+
+**{{.Title}}**: {{.Sketch}}{{if .Why}}
+Why: {{.Why}}{{end}}
+{{end}}{{with .Alternatives}}
+Rejected:
+{{range .}}
+- {{.Title}}{{if .Why}}: {{.Why}}{{end}}{{end}}
+{{end}}{{with .OutOfScope}}
+## Out of scope
+
+Do not do these, even where they look easy; mention them in the notes if they matter:
+{{range .}}
+- {{.}}{{end}}
+{{end}}{{with .ShipPlan}}
+## Shipping
+
+The change must ship safely:{{with .Migrations}}
+- Migrations: {{.}}{{end}}{{with .Compatibility}}
+- Compatibility: {{.}}{{end}}{{with .Rollout}}
+- Rollout: {{.}}{{end}}{{with .Rollback}}
+- Rollback: {{.}}{{end}}
+{{end}}
+{{end}}{{end}}
+
 {{define "analyze"}}You are agnts, a careful software engineer. Analyse the ticket below {{if .NoRepo}}before working on it. It has no repository: /workspace is empty, so work from the ticket text{{else}}in the repository at /workspace{{end}}. Do not change any files in /workspace.
 
 {{template "ticket" .}}
@@ -176,6 +347,9 @@ agnts works these kinds of tickets:
      "complexity": "simple or complex",
      "summary": "one paragraph: what the ticket needs{{if not .NoRepo}} and where in the code{{end}}",
      "plan": ["step 1", "step 2"],{{if not .NoRepo}}
+     "approaches": [{"title": "a short name", "sketch": "what changes where, in two or three sentences", "pros": ["..."], "cons": ["..."], "fit": "how it fits the brief and the team rules, or what it bends", "chosen": true, "why": "why this one beats the others; for the others, why not"}],
+     "outOfScope": ["what this ticket will deliberately not do"],
+     "ship": {"migrations": "", "compatibility": "", "rollout": "", "rollback": ""},
      "footprint": {"files": ["path/relative/to/the/repository/root.go"], "modules": ["package or feature"], "provides": ["what this adds that other work could use"], "consumes": ["what this needs that may not exist yet"], "migrations": false},{{end}}
      "questions": [{"text": "a question only the ticket author can answer", "options": ["option A", "option B"], "multiple": false}]}
 
@@ -183,7 +357,7 @@ For a report kind (plan, analysis, bug) the plan lists how you will do the work 
 
 {{if not .NoRepo}}The footprint is what the work will change. "files" lists the exact paths you expect to edit or add, as found in the code (not directories or patterns); "provides" names what the change adds that other work could build on (an endpoint, a table, a function, a config key); "consumes" names what it needs that does not exist yet; "migrations" is true when it adds or changes a database migration. agnts runs several tickets at a time and uses the footprint to keep tickets that change the same code apart, so be precise. For a report kind, which changes nothing, use empty lists.
 
-{{end}}Rate the complexity "complex" when the work spans several modules or layers, changes data or schemas, touches concurrency, security, money or public APIs, or needs careful design; otherwise "simple".
+{{template "design" .}}{{end}}Rate the complexity "complex" when the work spans several modules or layers, changes data or schemas, touches concurrency, security, money or public APIs, or needs careful design; otherwise "simple".
 
 {{if .NoQuestions}}Do not ask questions: use an empty "questions" list and make reasonable assumptions, noting them in the plan.{{else}}Ask questions only when the answer changes what you would build or conclude and you cannot find it{{if not .NoRepo}} in the code{{end}}. Give two to four concrete options for each. Set "multiple" to true when the options do not exclude each other and the author may pick several (which platforms to support, which fields to show); keep it false when only one can be right. Use an empty list when there is nothing to ask.{{end}}{{if .Rules}} Plan the work so it follows the team rules; if the ticket asks for something a rule forbids, {{if .NoQuestions}}follow the rule and say so in the plan{{else}}ask which one wins{{end}}.{{end}}
 {{end}}
@@ -194,7 +368,7 @@ For a report kind (plan, analysis, bug) the plan lists how you will do the work 
 {{if .Plan}}## Plan from the analysis
 
 {{range .Plan}}- {{.}}
-{{end}}{{end}}{{template "answers" .}}
+{{end}}{{end}}{{template "approach" .}}{{template "answers" .}}
 {{if .Landed}}## Merged since the analysis
 
 This ticket waited for these tickets, and their changes are now merged into the default branch, so /workspace includes them:
@@ -205,7 +379,7 @@ The plan above was written before they landed. Check it against the current code
 
 {{end}}{{template "environment" .}}{{template "rules" .}}- Run the project's build, lint and tests yourself before finishing{{if .Checks}}: {{.Checks}}{{end}}.
 {{if .VisualCheck}}{{template "visualcheck" .}}{{end}}
-When you are done, write {{.SummaryPath}} as {"summary": "what you changed and why", "notes": ["anything the reviewer should check"]}.
+When you are done, write {{.SummaryPath}} as {"summary": "what you changed and why", "notes": ["anything the reviewer should check"], "deviations": ["where you departed from the approach or the plan, and why"]}. Leave "deviations" empty when you followed them.
 {{end}}
 
 {{define "visualcheck"}}
@@ -281,9 +455,9 @@ Write {{.LessonsPath}} with exactly this shape (an empty "lessons" list when not
 Give two or three quiz questions per lesson. Only link pages you are sure exist (official documentation first); leave "reading" empty rather than guess. Write plain text, not Markdown headings. Write the lessons in the language ticket {{.T.Key}} is written in; keep slugs, categories, levels, code and names of technologies as they are.
 {{end}}
 
-{{define "rule"}}You are agnts, an AI agent that implements tickets in code. The team wrote the rule below for you to follow on every ticket {{if .RuleRepo}}in the repository {{.RuleRepo}}{{else}}in every repository{{end}}. Before you rely on it, make sure it is clear: two engineers reading it should make the same change. Do not change any files in /workspace.
+{{define "rule"}}You are agnts, an AI agent that implements tickets in code. {{if eq .Rule.Kind "context"}}The team wrote the business context note below: knowledge about the product and its domain (terms, invariants, roles, rules of the business) that you read before every ticket {{if .RuleRepo}}in the repository {{.RuleRepo}}{{else}}in every repository{{end}}. Before you rely on it, make sure it is clear: two engineers reading it should understand the same thing, and every term and invariant should be precise enough to check code against{{else}}The team wrote the rule below for you to follow on every ticket {{if .RuleRepo}}in the repository {{.RuleRepo}}{{else}}in every repository{{end}}. Before you rely on it, make sure it is clear: two engineers reading it should make the same change{{end}}. Do not change any files in /workspace.
 
-## The rule
+## The {{if eq .Rule.Kind "context"}}note{{else}}rule{{end}}
 
 Title: {{.Rule.Title}}
 
@@ -317,7 +491,7 @@ Do not ask about what the rule or the code already settles, about style you can 
 
 Write {{.RulePath}} with exactly this shape:
 
-    {"interpretation": "one paragraph: what you will do differently on every ticket because of this rule, in concrete terms",
+    {"interpretation": "one paragraph: {{if eq .Rule.Kind "context"}}what you understand from this note, and how it will shape the work on tickets{{else}}what you will do differently on every ticket because of this rule{{end}}, in concrete terms",
      "clarified": "the rule rewritten as precise instructions to yourself, keeping the author's intent and everything the answers settled; plain text",
      "questions": [{"text": "a question only the author can answer", "options": ["option A", "option B"]}]}
 
@@ -375,11 +549,18 @@ Your last report is in {{.ReportPath}}. Rewrite it there in full with these chan
 {{if .Plan}}## Plan from the analysis
 
 {{range .Plan}}- {{.}}
+{{end}}{{end}}{{with .Design}}{{with .Chosen}}
+## Decisions from the analysis
+
+Chosen approach: **{{.Title}}**: {{.Sketch}}
+{{end}}{{with .OutOfScope}}Out of scope: {{range $i, $x := .}}{{if $i}}; {{end}}{{$x}}{{end}}
+{{end}}{{with .ShipPlan}}How it must ship:{{with .Migrations}} migrations: {{.}};{{end}}{{with .Compatibility}} compatibility: {{.}};{{end}}{{with .Rollout}} rollout: {{.}};{{end}}{{with .Rollback}} rollback: {{.}}{{end}}
 {{end}}{{end}}{{template "answers" .}}
 ## The work under review
 {{if .WorkSummary}}
 agnts's summary: {{.WorkSummary}}
 {{end}}{{range .Notes}}- note: {{.}}
+{{end}}{{range .Deviations}}- departed from the plan: {{.}}
 {{end}}{{if .T.Kind.Report}}
 The report is in {{.ReportPath}}. {{if .NoRepo}}The ticket has no repository: /workspace is empty, so judge the report on its own.{{else}}/workspace is the repository the report is about, at its default branch: check the report's claims against the code.{{end}}
 {{else}}
@@ -392,6 +573,12 @@ Checks agnts ran after the change:
 - {{.Name}}: ` + "`{{.Command}}`" + ` {{if eq .ExitCode 0}}passed{{else}}failed (exit {{.ExitCode}}){{end}}{{end}}
 {{else}}
 No build, lint or test commands are configured for this repository.
+{{end}}{{with .Unexpected}}
+Changed, but not among the files the analysis expected to change: {{range $i, $f := .}}{{if $i}}, {{end}}{{$f}}{{end}}.
+{{end}}{{with .RedFlags}}
+agnts's scan flagged these lines. It only matches patterns: check each one and report the real problems.
+{{range .}}
+- {{.Path}}{{if .Line}}:{{.Line}}{{end}} [{{.Kind}}] {{.Text}}{{end}}
 {{end}}{{end}}
 ## What to look for
 
@@ -404,6 +591,9 @@ No build, lint or test commands are configured for this repository.
 - Tests: behaviour the change adds or alters with no test.
 - Performance problems that matter at this code's scale.
 - Maintainability: duplication of existing helpers, code that does not match the repository's style.
+- Architecture: code in the wrong layer or module, dependencies that point the wrong way, a new pattern or abstraction where the code base{{if .Context}} (see the brief){{end}} already has one (category "architecture").
+- Scope: changes the ticket and the chosen approach do not need, work listed as out of scope, departures from the plan the summary does not explain, and a missing migration, compatibility or rollback step when the change touches data, schemas, APIs or configuration (category "scope").
+- Checks made to pass the wrong way: tests skipped, weakened or deleted, assertions removed, linters silenced, errors swallowed. Each is a blocker unless the summary gives a good reason (category "tests").
 {{end}}{{if .Rules}}- Team rules: anything that breaks one of the rules above (category "rules").
 {{end}}
 Report only real problems, each with a concrete case of what goes wrong; you may run the code or its tests to confirm, but leave /workspace as you found it. Skip praise-free filler, style nits a linter would catch, and guesses you could not check. Finding nothing is a fine result.
@@ -416,7 +606,7 @@ Write {{.ReviewPath}} with exactly this shape:
      "summary": "two to four sentences: your overall read, for the developer",
      "findings": [{
        "severity": "blocker (must fix before {{if .T.Kind.Report}}accepting{{else}}pushing{{end}}), major, minor or nit",
-       "category": "one of {{if .T.Kind.Report}}accuracy, completeness, {{end}}correctness, security, performance, tests, rules, maintainability, other",
+       "category": "one of {{if .T.Kind.Report}}accuracy, completeness, {{end}}correctness, security, performance, tests, rules, {{if not .T.Kind.Report}}architecture, scope, {{end}}maintainability, other",
        "file": "{{if .T.Kind.Report}}the code file a finding is about, relative to /workspace, or empty{{else}}path/relative/to/workspace{{end}}",
        "line": 42,
        "title": "the problem in one line",
@@ -528,6 +718,64 @@ Suggest a follow-up only when it is one of these:
                    "priority": "low, medium or high"}]
 {{end}}
 
+{{define "reflect"}}You are agnts's coach. agnts, an AI agent, worked on ticket {{.T.Key}}{{if not .NoRepo}} in the repository {{.Repo.Name}}{{end}}, and a person {{if eq .Source "rejected"}}rejected the work{{else}}reviewing it asked for changes{{end}}. Find out whether what they said teaches agnts something it should do on every future ticket, not just this one. Do not change any files in /workspace.
+
+## What they said
+
+{{indent .Feedback}}
+
+## The ticket
+
+{{.T.Key}}: {{.T.Title}}
+{{if .T.Description}}
+{{indent .T.Description}}
+{{end}}{{if .Files}}
+The change they reviewed is in {{.ChangePath}}. Changed files:
+{{range .Files}}
+- {{.Path}} (+{{.Add}} −{{.Del}}){{end}}
+{{else if .HasReport}}
+The report they reviewed is in {{.ReportPath}}.
+{{end}}{{if not .NoRepo}}
+/workspace is the repository at its default branch, {{.Repo.DefaultBranch}}: look at how the code base does things before you generalise.
+{{end}}{{template "context" .}}
+## Rules that already exist
+
+{{if .Rules}}Never suggest anything one of these already covers, even in other words. Suggestions the team declined are marked; do not suggest them again.
+{{range .Rules}}
+- [{{if .RepoID}}{{.RepoName}}{{else}}global{{end}}{{if eq .Status "dismissed"}}, declined{{else if eq .Status "suggested"}}, suggested{{end}}] {{.Title}}: {{.Text}}{{end}}{{else}}None yet.{{end}}
+
+## What counts
+
+A suggestion must be a convention of this code base or team that the feedback reveals and agnts did not follow: where code belongs, a library or helper to use or avoid, how tests are written, naming, error handling, a business rule, how changes ship. Leave out:
+
+- feedback about this ticket only: a bug, a missed requirement, a typo, a wrong value;
+- taste with no rule behind it;
+- anything an existing rule covers.
+
+Most feedback teaches no general rule: an empty list is the usual answer. Suggest at most {{.MaxSuggest}}.
+
+## What to produce
+
+Write {{.ReflectPath}} with exactly this shape:
+
+    {"suggestions": [{"title": "a short name for the rule", "body": "the rule as an instruction to agnts, precise enough that two engineers would make the same change: name the files, packages, libraries or commands it is about", "scope": "repository or global", "why": "one sentence: which part of the feedback shows it"}]}
+
+Use "repository" unless the rule clearly holds for every repository. Write the title, body and why in the language the feedback is written in.
+{{end}}
+
+{{define "checkpoint"}}Checkpoint: you have used about a third of your turns. Before you go on, check that you are still building what was planned.
+
+Files changed so far:{{range .Changed}}
+- {{.}}{{else}} none yet.{{end}}
+{{with .Outside}}
+These are not among the files the analysis expected to change: {{range $i, $f := .}}{{if $i}}, {{end}}{{$f}}{{end}}. Make sure each one is needed.
+{{end}}{{with .Design}}{{with .Chosen}}
+The chosen approach: **{{.Title}}**: {{.Sketch}}
+{{end}}{{with .OutOfScope}}Out of scope: {{range $i, $x := .}}{{if $i}}; {{end}}{{$x}}{{end}}
+{{end}}{{end}}
+If you are drifting (a workaround instead of a fix, a new abstraction or dependency nobody asked for, changes the ticket does not need, tests skipped or weakened so they pass), stop: undo what does not belong (git checkout -- <file>, or delete files you added) and get back to the plan. If the plan itself turned out to be wrong, change course and say why under "deviations" in {{.SummaryPath}}. Then finish the work as instructed.
+{{end}}
+
 {{define "fix"}}agnts ran the project's checks after your changes and they failed:
 
 {{indent .Output}}
@@ -570,9 +818,22 @@ type promptData struct {
 	TranslationPath string
 	DetectPath      string
 	Detected        toolchain.Detection // detect: what the file scan found
-	WorkSummary     string              // what the work run said it did (review)
-	Notes           []string            // its notes for the reviewer
-	CheckSteps      []CheckStep         // its checks
+	Context         []ContextFile       // team knowledge copied into /agnts/context
+	Design          *Analysis           // the analysis, for its approach, scope and ship notes
+	Brief           domain.RepoBrief    // survey: the brief so far
+	BriefOutPath    string
+	WorkSummary     string           // what the work run said it did (review)
+	Notes           []string         // its notes for the reviewer
+	Deviations      []string         // where it departed from the approach or plan
+	RedFlags        []domain.RedFlag // what the scan of the change flagged (review)
+	Unexpected      []string         // changed files the analysis did not predict (review)
+	Source          string           // reflect: changes or rejected
+	HasReport       bool             // reflect: the work was a report, in ReportPath
+	MaxSuggest      int
+	ReflectPath     string
+	Changed         []string    // checkpoint: files changed so far
+	Outside         []string    // checkpoint: of those, the ones the analysis did not predict
+	CheckSteps      []CheckStep // its checks
 
 	// Follow-up suggestions (the "followups" block).
 	Chain             []TicketRef // ancestors of a follow-up ticket, root first
@@ -617,7 +878,7 @@ func render(name string, d promptData) (string, error) {
 	d.ReportPath, d.ReviewPath = ReportPath, ReviewPath
 	d.PreviewPath, d.PreviewEnvPath = PreviewPath, PreviewEnvPath
 	d.SourcePath, d.TranslationPath = SourcePath, TranslationPath
-	d.DetectPath = DetectPath
+	d.DetectPath, d.BriefOutPath, d.ReflectPath, d.MaxSuggest = DetectPath, BriefOutPath, ReflectPath, reflectMaxSuggest
 	var b bytes.Buffer
 	if err := prompts.ExecuteTemplate(&b, name, d); err != nil {
 		return "", fmt.Errorf("prompt %s: %w", name, err)
@@ -643,5 +904,6 @@ func parseAnalysis(b []byte) (Analysis, error) {
 	if strings.TrimSpace(a.Summary) == "" {
 		return a, fmt.Errorf("analysis.json has no summary")
 	}
+	a.normalizeDesign()
 	return a, nil
 }

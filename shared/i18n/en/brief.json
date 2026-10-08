@@ -1,0 +1,30 @@
+{
+  "brief": {
+    "title": "Repository brief",
+    "sub": "How this code base works: architecture, recipes for common changes, files to copy, conventions and pitfalls. Every run of this repository's tickets reads it, so agnts builds things the way your team does.",
+    "survey": "Survey",
+    "update": "Update",
+    "edit": "Edit",
+    "write": "Write it yourself",
+    "save": "Save brief",
+    "cancel": "Cancel",
+    "editHint": "Markdown. What you save is what runs read from now on; leave it empty to give runs no brief.",
+    "none": "No brief yet. Survey the repository to have Claude write a draft, or write one yourself.",
+    "surveying": "Claude is surveying the repository. The draft appears here for your approval.",
+    "failed": "The last survey failed: {error}",
+    "approved": "Approved {time}",
+    "atCommit": "at {sha}",
+    "merges": "{n} of {of} merges before the next update",
+    "draftTitle": "Draft from the survey",
+    "draftSub": "Written {time}. Runs read it only after you approve it.",
+    "approve": "Approve",
+    "discard": "Discard draft",
+    "discardBody": "The draft is deleted; the approved brief stays as it is.",
+    "status_pending": "Survey queued",
+    "status_surveying": "Surveying…",
+    "done_survey": "Survey queued",
+    "done_approve": "Brief approved: new runs read it",
+    "done_discard": "Draft discarded",
+    "done_save": "Brief saved"
+  }
+}

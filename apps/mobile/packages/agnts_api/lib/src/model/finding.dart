@@ -184,6 +184,10 @@ performance(r'performance'),
 tests(r'tests'),
 @JsonValue(r'rules')
 rules(r'rules'),
+@JsonValue(r'architecture')
+architecture(r'architecture'),
+@JsonValue(r'scope')
+scope(r'scope'),
 @JsonValue(r'maintainability')
 maintainability(r'maintainability'),
 @JsonValue(r'accuracy')

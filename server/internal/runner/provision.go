@@ -4,7 +4,11 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"fmt"
+	"net/http"
+	"os"
+	"path/filepath"
 	"regexp"
 	"slices"
 	"strings"
@@ -383,4 +387,66 @@ func (r *Runner) SweepCaches(ctx context.Context, maxBytes int64) ([]string, err
 		removed = append(removed, v.Name)
 	}
 	return removed, nil
+}
+
+// stampCache records that a package cache volume was used now.
+func (r *Runner) stampCache(vol string) {
+	if r.cfg.StampDir == "" {
+		return
+	}
+	if err := os.MkdirAll(r.cfg.StampDir, 0o750); err != nil {
+		return
+	}
+	p := filepath.Join(r.cfg.StampDir, vol)
+	now := time.Now()
+	if err := os.Chtimes(p, now, now); err != nil {
+		_ = os.WriteFile(p, nil, 0o600)
+	}
+}
+
+// SweepIdleCaches empties package caches no run used for idle (a cache
+// never stamped counts from the first sweep that sees it).
+func (r *Runner) SweepIdleCaches(ctx context.Context, idle time.Duration) ([]string, error) {
+	if r.cfg.StampDir == "" || idle <= 0 {
+		return nil, nil
+	}
+	vols, err := r.docker.Volumes(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var removed []string
+	for _, v := range vols {
+		if v.Labels["agnts"] != "cache" || v.RefCount > 0 {
+			continue
+		}
+		st, err := os.Stat(filepath.Join(r.cfg.StampDir, v.Name))
+		if err != nil {
+			r.stampCache(v.Name)
+			continue
+		}
+		if time.Since(st.ModTime()) < idle {
+			continue
+		}
+		if err := r.docker.RemoveVolume(ctx, v.Name); err != nil {
+			continue // in use by now
+		}
+		_ = os.Remove(filepath.Join(r.cfg.StampDir, v.Name))
+		removed = append(removed, v.Name)
+	}
+	return removed, nil
+}
+
+// RemoveCache deletes a package cache (its repository was archived or its
+// workspace deleted); a missing one is not an error.
+func (r *Runner) RemoveCache(ctx context.Context, key string) error {
+	vol := "agnts-cache-" + sanitize(key)
+	err := r.docker.RemoveVolume(ctx, vol)
+	var ae *apiError
+	if errors.As(err, &ae) && ae.Status == http.StatusNotFound {
+		err = nil
+	}
+	if err == nil && r.cfg.StampDir != "" {
+		_ = os.Remove(filepath.Join(r.cfg.StampDir, vol))
+	}
+	return err
 }

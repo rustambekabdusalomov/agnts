@@ -7,6 +7,7 @@ void main() {
   // TODO add properties to the entity
 
   group(LoginRequest, () {
+    // Username or email
     // String username
     test('to test the property `username`', () async {
       // TODO
@@ -17,7 +18,7 @@ void main() {
       // TODO
     });
 
-    // Six-digit code from the authenticator app
+    // Six-digit code from the authenticator app, when two-factor sign-in is on
     // String code
     test('to test the property `code`', () async {
       // TODO

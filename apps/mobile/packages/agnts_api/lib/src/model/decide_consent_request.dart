@@ -33,6 +33,8 @@ class DecideConsentRequest {
      this.resource,
 
     required  this.approve,
+
+     this.workspace,
   });
 
   @JsonKey(
@@ -119,6 +121,19 @@ class DecideConsentRequest {
 
 
 
+      /// The slug of the workspace Claude may act in (required to approve)
+  @JsonKey(
+    
+    name: r'workspace',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? workspace;
+
+
+
 
 
     @override
@@ -129,7 +144,8 @@ class DecideConsentRequest {
       other.codeChallengeMethod == codeChallengeMethod &&
       other.state == state &&
       other.resource == resource &&
-      other.approve == approve;
+      other.approve == approve &&
+      other.workspace == workspace;
 
     @override
     int get hashCode =>
@@ -139,7 +155,8 @@ class DecideConsentRequest {
         codeChallengeMethod.hashCode +
         state.hashCode +
         resource.hashCode +
-        approve.hashCode;
+        approve.hashCode +
+        workspace.hashCode;
 
   factory DecideConsentRequest.fromJson(Map<String, dynamic> json) => _$DecideConsentRequestFromJson(json);
 

@@ -19,6 +19,7 @@ import (
 
 	"agnts/internal/auth"
 	"agnts/internal/auth/authtest"
+	"agnts/internal/domain"
 	"agnts/internal/secret"
 )
 
@@ -27,10 +28,30 @@ type pinger struct{ err error }
 func (p pinger) Ping(context.Context) error { return p.err }
 
 type harness struct {
-	h       http.Handler
-	seed    string
-	tickets *fakeTickets
+	h          http.Handler
+	seed       string
+	tickets    *fakeTickets
+	workspaces *fakeWorkspaces
+	// hookWS and hookID are what the test webhook last saw.
+	hookWS int64
+	hookID string
 }
+
+// fakeUsers is the UserStore over the auth test store.
+type fakeUsers struct{ *authtest.Users }
+
+func (f fakeUsers) List(ctx context.Context) ([]domain.User, error) {
+	var out []domain.User
+	for id := int64(1); ; id++ {
+		u, err := f.ByID(ctx, id)
+		if err != nil {
+			return out, nil
+		}
+		out = append(out, u)
+	}
+}
+
+func (f fakeUsers) SetAdmin(context.Context, int64, bool) error { return nil }
 
 const password = "a long enough password"
 
@@ -40,7 +61,8 @@ func newHarness(t *testing.T, db Pinger) *harness {
 	if err != nil {
 		t.Fatal(err)
 	}
-	svc, err := auth.New(&authtest.Users{}, &authtest.Sessions{}, box, time.Hour)
+	users := &authtest.Users{}
+	svc, err := auth.New(users, &authtest.Sessions{}, box, time.Hour)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,9 +76,16 @@ func newHarness(t *testing.T, db Pinger) *harness {
 	}
 	pub, _ := url.Parse("https://agnts.example.com")
 	h.tickets = &fakeTickets{}
+	h.workspaces = newFakeWorkspaces()
 	h.h, err = NewHandler(Options{
 		Auth:         svc,
 		Tickets:      h.tickets,
+		Workspaces:   h.workspaces,
+		Users:        fakeUsers{users},
+		Webhooks: map[string]http.Handler{"test": http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			h.hookWS, h.hookID = domain.WorkspaceOf(r.Context()), domain.HookOf(r.Context())
+			w.WriteHeader(http.StatusOK)
+		})},
 		DB:           db,
 		Log:          slog.New(slog.NewTextHandler(io.Discard, nil)),
 		PublicURL:    pub,
@@ -106,11 +135,18 @@ func loginBody(username, pw, code, client string) string {
 }
 
 func TestPublicRoutesComeFromSpec(t *testing.T) {
-	got, err := publicRoutes()
+	ops, err := operations()
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := map[string]bool{"POST /api/auth/login": true, "GET /api/meta": true}
+	got := map[string]bool{}
+	for k, op := range ops {
+		if op.public {
+			got[k] = true
+		}
+	}
+	want := map[string]bool{"POST /api/auth/login": true, "GET /api/meta": true, "GET /api/auth/signup": true, "POST /api/auth/signup": true,
+		"POST /api/auth/verify": true, "POST /api/auth/password/forgot": true, "POST /api/auth/password/reset": true, "GET /api/invites/{token}": true}
 	if len(got) != len(want) {
 		t.Fatalf("public routes = %v, want %v", got, want)
 	}
@@ -118,6 +154,18 @@ func TestPublicRoutesComeFromSpec(t *testing.T) {
 		if !got[k] {
 			t.Errorf("%s should be public", k)
 		}
+	}
+	// Every public operation is about accounts, never a workspace's data.
+	for k := range got {
+		if ops[k].scope != "user" && k != "GET /api/meta" {
+			t.Errorf("%s is public but scoped %q", k, ops[k].scope)
+		}
+	}
+	if op := ops["PUT /api/settings"]; op.scope != "workspace" || op.role != "owner" {
+		t.Errorf("settings: %+v", op)
+	}
+	if op := ops["GET /api/platform/overview"]; op.scope != "admin" {
+		t.Errorf("platform overview: %+v", op)
 	}
 }
 

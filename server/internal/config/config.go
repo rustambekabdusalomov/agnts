@@ -58,6 +58,57 @@ type Config struct {
 	RunMemoryMB     int    // AGNTS_RUN_MEMORY_MB, default memory of a run container
 	RunMemoryMaxMB  int    // AGNTS_RUN_MEMORY_MAX_MB, highest per-repository memory override
 	CacheMaxBytes   int64  // AGNTS_CACHE_MAX_GB, a repository's package cache is emptied above it (0 disables)
+	// CacheIdleDays empties a repository's package cache nobody used for
+	// that many days (AGNTS_CACHE_IDLE_DAYS, 0 disables).
+	CacheIdleDays int
+
+	// Workspaces and people.
+	// Signup is who may register (AGNTS_SIGNUP): "open" for anyone,
+	// "invite" for people with an invite link (the first account on a
+	// fresh install can always register).
+	Signup string
+	// SMTPURL sends email (AGNTS_SMTP_URL, smtp://user:pass@host:587);
+	// empty logs the messages instead.
+	SMTPURL  string
+	MailFrom string // AGNTS_MAIL_FROM
+	// TrialDays is how long a new workspace's trial lasts (AGNTS_TRIAL_DAYS, 0: none).
+	TrialDays int
+	// Cloud turns on the hosted product's rules (AGNTS_CLOUD): billing,
+	// API keys only for Claude (no subscription tokens), plan limits.
+	Cloud bool
+
+	// Capacity (the server queue).
+	// RunMemoryBudgetMB is the memory all run containers together may
+	// reserve (AGNTS_RUN_MEMORY_BUDGET_MB; 0: the host's memory less 2.5 GB).
+	RunMemoryBudgetMB int64
+	// MinFreeDiskMB holds runs back while the data disk has less free
+	// (AGNTS_MIN_FREE_DISK_GB).
+	MinFreeDiskMB int64
+	// RunRuntime is the container runtime for runs (AGNTS_RUN_RUNTIME,
+	// e.g. runsc for gVisor; empty: Docker's default).
+	RunRuntime string
+	// RunNetworkPerRun gives every run its own network
+	// (AGNTS_RUN_NETWORK_PER_RUN), so runs cannot reach each other; the
+	// egress proxy container (AGNTS_EGRESS_CONTAINER) joins each one.
+	RunNetworkPerRun bool
+	EgressContainer  string
+
+	// Billing and credits.
+	// AnthropicAPIKey is agnts's own key, used for runs paid with credits
+	// (AGNTS_ANTHROPIC_API_KEY); empty disables credits.
+	AnthropicAPIKey string
+	// CreditMarkup multiplies API cost into credits (AGNTS_CREDIT_MARKUP).
+	CreditMarkup float64
+	// RunCreditCap is the most credits one run may spend (AGNTS_RUN_CREDIT_CAP).
+	RunCreditCap int64
+	// Prices in so'm (AGNTS_PRICE_*): a workspace a month, an extra slot,
+	// a member above the included ones, one credit.
+	PriceWorkspaceUZS, PriceSlotUZS, PriceMemberUZS, PriceCreditUZS int64
+	IncludedMembers, MaxSlots                                       int
+	// Payme and Click merchants (AGNTS_PAYME_*, AGNTS_CLICK_*); empty
+	// disables that provider.
+	PaymeMerchantID, PaymeKey                       string
+	ClickServiceID, ClickMerchantID, ClickSecretKey string
 }
 
 // Load reads the configuration from the environment.
@@ -165,6 +216,74 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 	} else {
 		c.CacheMaxBytes = int64(gb * (1 << 30))
 	}
+	if c.CacheIdleDays, err = strconv.Atoi(get("AGNTS_CACHE_IDLE_DAYS", "14")); err != nil || c.CacheIdleDays < 0 {
+		errs = append(errs, errors.New("AGNTS_CACHE_IDLE_DAYS must be a number of days (0 disables)"))
+	}
+
+	c.Signup = strings.ToLower(get("AGNTS_SIGNUP", "invite"))
+	if c.Signup != "open" && c.Signup != "invite" {
+		errs = append(errs, errors.New("AGNTS_SIGNUP must be open or invite"))
+	}
+	c.SMTPURL = get("AGNTS_SMTP_URL", "")
+	if c.SMTPURL != "" {
+		if u, err := url.Parse(c.SMTPURL); err != nil || (u.Scheme != "smtp" && u.Scheme != "smtps") || u.Host == "" {
+			errs = append(errs, errors.New("AGNTS_SMTP_URL must look like smtp://user:password@host:587 (or smtps:// for port 465)"))
+		}
+	}
+	c.MailFrom = get("AGNTS_MAIL_FROM", "agnts <noreply@"+hostOf(get("AGNTS_PUBLIC_URL", "http://localhost"))+">")
+	if c.TrialDays, err = strconv.Atoi(get("AGNTS_TRIAL_DAYS", "14")); err != nil || c.TrialDays < 0 {
+		errs = append(errs, errors.New("AGNTS_TRIAL_DAYS must be a number of days"))
+	}
+	if c.Cloud, err = strconv.ParseBool(get("AGNTS_CLOUD", "false")); err != nil {
+		errs = append(errs, errors.New("AGNTS_CLOUD must be true or false"))
+	}
+	if c.RunMemoryBudgetMB, err = strconv.ParseInt(get("AGNTS_RUN_MEMORY_BUDGET_MB", "0"), 10, 64); err != nil || c.RunMemoryBudgetMB < 0 {
+		errs = append(errs, errors.New("AGNTS_RUN_MEMORY_BUDGET_MB must be a number of megabytes (0: the host's memory less 2.5 GB)"))
+	}
+	if gb, err := strconv.ParseFloat(get("AGNTS_MIN_FREE_DISK_GB", "10"), 64); err != nil || gb < 0 {
+		errs = append(errs, errors.New("AGNTS_MIN_FREE_DISK_GB must be a number of gigabytes"))
+	} else {
+		c.MinFreeDiskMB = int64(gb * 1024)
+	}
+	c.RunRuntime = get("AGNTS_RUN_RUNTIME", "")
+	if c.RunNetworkPerRun, err = strconv.ParseBool(get("AGNTS_RUN_NETWORK_PER_RUN", "false")); err != nil {
+		errs = append(errs, errors.New("AGNTS_RUN_NETWORK_PER_RUN must be true or false"))
+	}
+	c.EgressContainer = get("AGNTS_EGRESS_CONTAINER", "")
+	if c.RunNetworkPerRun && c.RunProxy != "" && c.EgressContainer == "" {
+		errs = append(errs, errors.New("AGNTS_RUN_NETWORK_PER_RUN with AGNTS_RUN_PROXY needs AGNTS_EGRESS_CONTAINER (the egress proxy's container name)"))
+	}
+	c.AnthropicAPIKey = get("AGNTS_ANTHROPIC_API_KEY", "")
+	if c.CreditMarkup, err = strconv.ParseFloat(get("AGNTS_CREDIT_MARKUP", "1.4"), 64); err != nil || c.CreditMarkup < 1 {
+		errs = append(errs, errors.New("AGNTS_CREDIT_MARKUP must be a number of at least 1"))
+	}
+	if c.RunCreditCap, err = strconv.ParseInt(get("AGNTS_RUN_CREDIT_CAP", "2500"), 10, 64); err != nil || c.RunCreditCap < 1 {
+		errs = append(errs, errors.New("AGNTS_RUN_CREDIT_CAP must be a positive number of credits"))
+	}
+	prices := []struct {
+		key string
+		def string
+		dst *int64
+	}{
+		{"AGNTS_PRICE_WORKSPACE_UZS", "300000", &c.PriceWorkspaceUZS},
+		{"AGNTS_PRICE_SLOT_UZS", "190000", &c.PriceSlotUZS},
+		{"AGNTS_PRICE_MEMBER_UZS", "60000", &c.PriceMemberUZS},
+		{"AGNTS_PRICE_CREDIT_UZS", "175", &c.PriceCreditUZS},
+	}
+	for _, p := range prices {
+		if *p.dst, err = strconv.ParseInt(get(p.key, p.def), 10, 64); err != nil || *p.dst < 0 {
+			errs = append(errs, fmt.Errorf("%s must be a number of so'm", p.key))
+		}
+	}
+	if c.IncludedMembers, err = strconv.Atoi(get("AGNTS_INCLUDED_MEMBERS", "5")); err != nil || c.IncludedMembers < 1 {
+		errs = append(errs, errors.New("AGNTS_INCLUDED_MEMBERS must be a positive number"))
+	}
+	if c.MaxSlots, err = strconv.Atoi(get("AGNTS_MAX_SLOTS", "5")); err != nil || c.MaxSlots < 1 || c.MaxSlots > 50 {
+		errs = append(errs, errors.New("AGNTS_MAX_SLOTS must be a number from 1 to 50"))
+	}
+	c.PaymeMerchantID, c.PaymeKey = get("AGNTS_PAYME_MERCHANT_ID", ""), get("AGNTS_PAYME_KEY", "")
+	c.ClickServiceID, c.ClickMerchantID, c.ClickSecretKey = get("AGNTS_CLICK_SERVICE_ID", ""), get("AGNTS_CLICK_MERCHANT_ID", ""), get("AGNTS_CLICK_SECRET_KEY", "")
+
 	if c.JiraSyncEach, err = time.ParseDuration(get("AGNTS_JIRA_SYNC_EVERY", "1h")); err != nil || c.JiraSyncEach < time.Minute {
 		errs = append(errs, errors.New("AGNTS_JIRA_SYNC_EVERY must be a duration of at least 1m"))
 	}
@@ -184,6 +303,14 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 	}
 
 	return c, errors.Join(errs...)
+}
+
+// hostOf returns the host of a URL, or "localhost".
+func hostOf(raw string) string {
+	if u, err := url.Parse(raw); err == nil && u.Hostname() != "" {
+		return u.Hostname()
+	}
+	return "localhost"
 }
 
 // loadZone loads a named time zone, or the machine's own when name is empty

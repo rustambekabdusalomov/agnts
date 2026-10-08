@@ -12,6 +12,7 @@ export const RULE_TONE: Record<RuleStatus, 'gray' | 'info' | 'warn' | 'ok' | 'ba
   questions: 'warn',
   ready: 'ok',
   failed: 'bad',
+  suggested: 'info',
 }
 
 /**
@@ -28,7 +29,7 @@ export function useRules() {
 
 type Action =
   | { kind: 'answers'; id: number; answers: { index: number; answer: string; note?: string }[] }
-  | { kind: 'accept' | 'review' | 'delete'; id: number }
+  | { kind: 'accept' | 'review' | 'delete' | 'dismiss'; id: number }
   | { kind: 'enabled'; rule: Rule; enabled: boolean }
 
 /** Answers, accept as written, review again, delete, and on/off. */
@@ -43,7 +44,7 @@ export function useRuleAction() {
         return unwrap(
           api.PUT('/rules/{id}', {
             params: { path: { id: r.id } },
-            body: { title: r.title, body: r.body, repoId: r.repoId, enabled: a.enabled },
+            body: { title: r.title, body: r.body, repoId: r.repoId, enabled: a.enabled, kind: r.kind },
           }),
         )
       }
@@ -56,6 +57,7 @@ export function useRuleAction() {
         case 'review':
           return unwrap(api.POST('/rules/{id}/review', path))
         case 'delete':
+        case 'dismiss':
           await unwrap(api.DELETE('/rules/{id}', path))
           return null
       }
@@ -67,6 +69,7 @@ export function useRuleAction() {
         accept: t('rules.accepted'),
         review: t('rules.queued'),
         delete: t('rules.deleted'),
+        dismiss: t('rules.dismissed'),
         enabled: a.kind === 'enabled' && a.enabled ? t('rules.turnedOn') : t('rules.turnedOff'),
       }
       ui.notify(msg[a.kind])

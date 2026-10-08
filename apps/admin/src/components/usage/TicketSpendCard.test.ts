@@ -20,7 +20,14 @@ vi.mock('../../api/client', () => ({ api: { GET: get }, unwrap: async (p: Promis
 
 async function setup(json: unknown) {
   get.mockResolvedValue(json)
-  const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/:p(.*)*', component: { template: '<div />' } }] })
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      { path: '/w/:ws/tickets/:key', name: 'ticket', component: { template: '<div />' } },
+      { path: '/w/:ws/:p(.*)*', component: { template: '<div />' } },
+    ],
+  })
+  await router.push('/w/acme/usage')
   const w = mount(TicketSpendCard, {
     global: { plugins: [i18n, router, [VueQueryPlugin, { queryClient: new QueryClient({ defaultOptions: { queries: { retry: false } } }) }]] },
   })
@@ -45,7 +52,7 @@ describe('TicketSpendCard', () => {
     expect(rows[1].find('.share .hint').text()).toBe('25%')
     await rows[1].trigger('click')
     await flushPromises()
-    expect(router.currentRoute.value.path).toBe('/tickets/PAY-2')
+    expect(router.currentRoute.value.path).toBe('/w/acme/tickets/PAY-2')
 
     await w.findAll('.seg-b')[0].trigger('click')
     await flushPromises()

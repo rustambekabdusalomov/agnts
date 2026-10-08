@@ -39,7 +39,7 @@ const scopeOptions = computed(() => [
 ])
 
 // Rules that need you first, then failed reviews, then the rest in order.
-const rank = (r: Rule) => (r.status === 'questions' ? 0 : r.status === 'failed' ? 1 : 2)
+const rank = (r: Rule) => (r.status === 'questions' ? 0 : r.status === 'suggested' ? 1 : r.status === 'failed' ? 2 : 3)
 const rows = computed(() => {
   const q = ui.search.trim().toLowerCase()
   return all.value
@@ -50,6 +50,7 @@ const rows = computed(() => {
     .map(({ r }) => r)
 })
 const waiting = computed(() => all.value.filter((r) => r.status === 'questions').length)
+const suggested = computed(() => all.value.filter((r) => r.status === 'suggested').length)
 
 const drawerOpen = ref(false)
 const editing = ref<Rule | null>(null)
@@ -68,6 +69,7 @@ const presetRepo = computed(() => (typeof scope.value === 'number' ? scope.value
   </PageHeader>
 
   <div v-if="waiting" class="help warn"><HiIcon name="info" /><p>{{ t('rules.waitingHelp', { n: waiting }) }}</p></div>
+  <div v-if="suggested" class="help"><HiIcon name="info" /><p>{{ t('rules.suggestedHelp', { n: suggested }) }}</p></div>
 
   <div v-if="all.length" class="rules-bar">
     <InputSelect v-model="scope" :options="scopeOptions" :label="t('rules.scopeLabel')" style="width: 280px; max-width: 100%" />

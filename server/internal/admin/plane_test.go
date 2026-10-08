@@ -2,19 +2,18 @@ package admin
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"io"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 
 	"agnts/internal/domain"
 	"agnts/internal/secret"
 	"agnts/internal/store/postgres"
+	"agnts/internal/store/postgres/pgtest"
 	"agnts/internal/tracker/plane"
 )
 
@@ -53,20 +52,9 @@ func TestValidatePlaneProject(t *testing.T) {
 // Connecting Plane checks the key against the workspace; the webhook
 // secret Plane generated is stored later and survives a reconnect.
 func TestPlaneConnectAndWebhookSecret(t *testing.T) {
-	url := os.Getenv("AGNTS_TEST_DATABASE_URL")
-	if url == "" {
-		t.Skip("AGNTS_TEST_DATABASE_URL not set")
-	}
-	ctx := context.Background()
-	pool, err := postgres.Open(ctx, url)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(pool.Close)
+	pool := pgtest.Open(t)
+	ctx, _ := pgtest.Workspace(t, pool, "admin-plane")
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
-	if err := postgres.Migrate(ctx, pool, "up", log); err != nil {
-		t.Fatal(err)
-	}
 	if _, err := pool.Exec(ctx, `DELETE FROM integrations WHERE provider = 'plane'`); err != nil {
 		t.Fatal(err)
 	}

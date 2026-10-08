@@ -221,7 +221,7 @@ func (o *Orchestrator) preview(ctx context.Context, s domain.Settings, t domain.
 			o.log.Warn("drop screenshot", "ticket", t.Key, "file", sh.File, "bytes", len(b), "png", ok)
 			continue
 		}
-		if err := o.shots.Save(t.Key, run.ID, sh.ID, b); err != nil {
+		if err := o.shots.Save(t.WorkspaceID, t.Key, run.ID, sh.ID, b); err != nil {
 			return fmt.Errorf("save screenshot %s: %w", sh.ID, err)
 		}
 		sh.File, sh.Width, sh.Height = "", w, h
@@ -274,7 +274,7 @@ func (o *Orchestrator) savePreview(ctx context.Context, t domain.Ticket, run *do
 	if prev != nil {
 		keep = append(keep, prev.RunID)
 	}
-	if err := o.shots.Prune(t.Key, keep); err != nil {
+	if err := o.shots.Prune(t.WorkspaceID, t.Key, keep); err != nil {
 		o.log.Warn("prune screenshots", "ticket", t.Key, "err", err)
 	}
 	ev := previewEvent(t.Key, run, p)
@@ -388,21 +388,21 @@ func (o *Orchestrator) pruneShots(ctx context.Context) {
 	if o.shots == nil {
 		return
 	}
-	keys, err := o.shots.Tickets()
+	refs, err := o.shots.Tickets()
 	if err != nil {
 		o.log.Warn("list screenshots", "err", err)
 		return
 	}
 	cutoff := time.Now().AddDate(0, 0, -previewKeepDays)
-	for _, k := range keys {
-		t, err := o.store.TicketByKey(ctx, k)
+	for _, r := range refs {
+		t, err := o.store.TicketByKey(domain.WithWorkspace(ctx, r.WorkspaceID), r.Key)
 		gone := errors.Is(err, domain.ErrNotFound)
 		if err != nil && !gone {
 			continue
 		}
 		if gone || (t.State.Terminal() && t.UpdatedAt.Before(cutoff)) {
-			if err := o.shots.Prune(k, nil); err != nil {
-				o.log.Warn("prune screenshots", "ticket", k, "err", err)
+			if err := o.shots.Prune(r.WorkspaceID, r.Key, nil); err != nil {
+				o.log.Warn("prune screenshots", "workspace", r.WorkspaceID, "ticket", r.Key, "err", err)
 			}
 		}
 	}
@@ -410,7 +410,7 @@ func (o *Orchestrator) pruneShots(ctx context.Context) {
 
 // checkShotRefs keeps the screenshot references feedback may carry: ones
 // stored for this ticket, each once, at most domain.MaxFeedbackShots.
-func (o *Orchestrator) checkShotRefs(key string, refs []domain.ShotRef) ([]domain.ShotRef, error) {
+func (o *Orchestrator) checkShotRefs(ws int64, key string, refs []domain.ShotRef) ([]domain.ShotRef, error) {
 	if len(refs) == 0 {
 		return nil, nil
 	}
@@ -425,7 +425,7 @@ func (o *Orchestrator) checkShotRefs(key string, refs []domain.ShotRef) ([]domai
 		if len(out) >= domain.MaxFeedbackShots {
 			return nil, invalid("feedback can point at %d screenshots at most", domain.MaxFeedbackShots)
 		}
-		rc, err := o.shots.Open(key, r.RunID, r.ShotID)
+		rc, err := o.shots.Open(ws, key, r.RunID, r.ShotID)
 		if err != nil {
 			return nil, invalid("screenshot %s of run %d is not one of %s's", r.ShotID, r.RunID, key)
 		}
@@ -449,7 +449,7 @@ func (o *Orchestrator) copyFeedbackShots(ctx context.Context, ws Workspace, t do
 	}
 	var out []string
 	for _, r := range t.FeedbackShots {
-		rc, err := o.shots.Open(t.Key, r.RunID, r.ShotID)
+		rc, err := o.shots.Open(t.WorkspaceID, t.Key, r.RunID, r.ShotID)
 		if err != nil {
 			continue
 		}
@@ -473,8 +473,9 @@ func (o *Orchestrator) OpenShot(ctx context.Context, key string, runID int64, sh
 	if o.shots == nil {
 		return nil, domain.ErrNotFound
 	}
-	if _, err := o.store.TicketByKey(ctx, key); err != nil {
+	t, err := o.store.TicketByKey(ctx, key)
+	if err != nil {
 		return nil, err
 	}
-	return o.shots.Open(key, runID, shotID)
+	return o.shots.Open(t.WorkspaceID, key, runID, shotID)
 }

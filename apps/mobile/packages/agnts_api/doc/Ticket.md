@@ -17,6 +17,7 @@ Name | Type | Description | Notes
 **state** | [**TicketState**](TicketState.md) |  | 
 **resumeState** | [**TicketState**](TicketState.md) |  | [optional] 
 **revision** | **int** |  | 
+**replayOf** | **String** | For a replay: the done ticket it re-runs. Replays are never pushed. | [optional] 
 **turns** | **int** |  | 
 **branch** | **String** |  | 
 **prNumber** | **int** |  | [optional] 
@@ -44,6 +45,12 @@ Name | Type | Description | Notes
 **previewCompare** | **bool** | Previews of this ticket also capture the default branch (before shots) | [optional] 
 **canPreview** | **bool** | The ticket's repository has a preview command | [optional] 
 **spend** | [**TokenSpend**](TokenSpend.md) |  | [optional] 
+**waitReason** | [**WaitReason**](WaitReason.md) |  | [optional] 
+**waitMessage** | **String** | Why it waits, in a sentence | [optional] 
+**queuedAt** | [**DateTime**](DateTime.md) | When it started waiting for a worker | [optional] 
+**memberId** | **int** | Whose ticket it is (per-member Claude mode runs on their account) | [optional] 
+**member** | **String** | The member's username | [optional] 
+**createdBy** | **String** | Who created it; absent for webhooks and agnts | [optional] 
 **createdAt** | [**DateTime**](DateTime.md) |  | 
 **updatedAt** | [**DateTime**](DateTime.md) |  | 
 

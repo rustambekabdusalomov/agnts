@@ -27,7 +27,7 @@ const list = useIntegrations()
 
 const provider = computed<Provider | null>(() => {
   const p = String(route.params.provider)
-  return isProvider(p) ? p : null
+  return isProvider(p) && p !== 'claude' ? p : null
 })
 const integ = computed(() => list.data.value?.find((i) => i.provider === provider.value))
 const name = computed(() => (provider.value ? t(`integrations.name_${provider.value}`) : ''))
@@ -95,7 +95,7 @@ const sideHelp = computed(() =>
 </script>
 
 <template>
-  <RouterLink class="back-btn" to="/integrations"><HiIcon name="back" />{{ t('integrations.back') }}</RouterLink>
+  <RouterLink class="back-btn" :to="{ name: 'integrations' }"><HiIcon name="back" />{{ t('integrations.back') }}</RouterLink>
   <p v-if="!provider" class="empty">{{ t('common.error') }}</p>
   <p v-else-if="list.isPending.value" class="hint">{{ t('common.loading') }}</p>
   <template v-else>

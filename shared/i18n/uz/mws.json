@@ -1,0 +1,8 @@
+{
+  "mws": {
+    "none": "Siz hali hech qaysi ish maydoniga a'zo emassiz. Veb-admin panelda yangisini yarating yoki taklifni qabul qiling, so'ng yangilash uchun pastga torting.",
+    "switched": "{name} ochildi",
+    "members": "{n, plural, one {# a'zo} other {# a'zo}}",
+    "suspended": "To'xtatilgan"
+  }
+}

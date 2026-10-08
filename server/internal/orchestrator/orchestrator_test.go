@@ -7,7 +7,6 @@ import (
 	"errors"
 	"io"
 	"log/slog"
-	"os"
 	"slices"
 	"strings"
 	"sync"
@@ -17,6 +16,7 @@ import (
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres"
+	"agnts/internal/store/postgres/pgtest"
 )
 
 // ---- fakes ----
@@ -39,6 +39,7 @@ type fakeRunner struct {
 	closed   int
 	lastHome []byte
 	onClaude func(orchestrator.ClaudeRequest)
+	written  map[string]string // every file agnts put into a workspace, last write wins
 }
 
 func (f *fakeRunner) Open(_ context.Context, spec orchestrator.WorkspaceSpec) (orchestrator.Workspace, error) {
@@ -102,6 +103,12 @@ func (w *fakeWS) ReadFile(_ context.Context, p string) ([]byte, error) {
 
 func (w *fakeWS) WriteFile(_ context.Context, p string, data []byte) error {
 	w.files[p] = string(data)
+	w.r.mu.Lock()
+	if w.r.written == nil {
+		w.r.written = map[string]string{}
+	}
+	w.r.written[p] = string(data)
+	w.r.mu.Unlock()
 	return nil
 }
 
@@ -123,9 +130,23 @@ type fakeGit struct {
 	commits int
 	pushed  []string
 	files   []domain.FileChange // what Commit reports, when set
+	// preparedAt records PrepareAt calls as branch@base.
+	preparedAt []string
 }
 
 func (g *fakeGit) Prepare(context.Context, domain.Repository, string) error { return nil }
+
+// BaseOf and PrepareAt make fakeGit a Replayer.
+func (g *fakeGit) BaseOf(_ context.Context, _ domain.Repository, sha string) (string, error) {
+	return "base-of-" + sha, nil
+}
+
+func (g *fakeGit) PrepareAt(_ context.Context, _ domain.Repository, branch, base string) error {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	g.preparedAt = append(g.preparedAt, branch+"@"+base)
+	return nil
+}
 func (g *fakeGit) Archive(context.Context, domain.Repository, string) (io.ReadCloser, error) {
 	return io.NopCloser(bytes.NewReader(nil)), nil
 }
@@ -269,13 +290,13 @@ func (t *fakeTracker) MoveTo(_ context.Context, _ string, s orchestrator.Tracker
 
 type memHomes struct{ m sync.Map }
 
-func (h *memHomes) Load(k string) ([]byte, error) {
+func (h *memHomes) Load(_ int64, k string) ([]byte, error) {
 	if v, ok := h.m.Load(k); ok {
 		return v.([]byte), nil
 	}
 	return nil, nil
 }
-func (h *memHomes) Save(k string, b []byte) error { h.m.Store(k, b); return nil }
+func (h *memHomes) Save(_ int64, k string, b []byte) error { h.m.Store(k, b); return nil }
 
 // ---- harness ----
 
@@ -296,23 +317,10 @@ type harness struct {
 
 func newHarness(t *testing.T) *harness {
 	t.Helper()
-	url := os.Getenv("AGNTS_TEST_DATABASE_URL")
-	if url == "" {
-		t.Skip("AGNTS_TEST_DATABASE_URL not set")
-	}
-	ctx := context.Background()
-	pool, err := postgres.Open(ctx, url)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(pool.Close)
+	pool := pgtest.Open(t)
+	pgtest.Reset(t, pool)
+	ctx, _ := pgtest.Workspace(t, pool, "orch")
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
-	if err := postgres.Migrate(ctx, pool, "up", log); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := pool.Exec(ctx, `TRUNCATE tickets, runs, results, questions, events, repositories, webhook_deliveries, translations RESTART IDENTITY CASCADE`); err != nil {
-		t.Fatal(err)
-	}
 	store := postgres.NewAgent(pool)
 	if _, err := store.SaveRepository(ctx, domain.Repository{
 		Name: "api", Kind: "jira", Provider: "github", CloneURL: "https://github.com/acme/api.git",

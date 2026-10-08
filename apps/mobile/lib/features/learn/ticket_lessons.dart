@@ -56,7 +56,7 @@ class _TicketLessonsState extends ConsumerState<TicketLessons> {
         for (final x in items) LessonTile(x, compact: true)
       else
         Text(text, style: TextStyle(fontSize: 14, height: 1.45, color: state == TicketLearnStateEnum.failed ? c.badInk : c.ink3)),
-      if (state != TicketLearnStateEnum.pending)
+      if (state != TicketLearnStateEnum.pending && ref.watch(canEditProvider))
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton(

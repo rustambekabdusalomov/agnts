@@ -28,6 +28,17 @@ type RuleInput struct {
 	Body    string
 	RepoID  *int64 // nil: every repository
 	Enabled bool
+	Kind    domain.RuleKind // "" is an instruction
+}
+
+func (in RuleInput) kind() (domain.RuleKind, error) {
+	if in.Kind == "" {
+		return domain.KindInstruction, nil
+	}
+	if !in.Kind.Valid() {
+		return "", invalid("kind must be rule or context")
+	}
+	return in.Kind, nil
 }
 
 // RuleAnswer answers the rule question at Index (into Rule.Questions).
@@ -100,14 +111,18 @@ func (o *Orchestrator) CreateRule(ctx context.Context, in RuleInput, origin doma
 	if err := o.rulesReady(); err != nil {
 		return domain.Rule{}, err
 	}
-	r := domain.Rule{Title: in.Title, Body: in.Body, RepoID: in.RepoID, Enabled: in.Enabled, Status: domain.RulePending}
+	kind, err := in.kind()
+	if err != nil {
+		return domain.Rule{}, err
+	}
+	r := domain.Rule{Title: in.Title, Body: in.Body, RepoID: in.RepoID, Enabled: in.Enabled, Status: domain.RulePending, Kind: kind}
 	if err := r.Validate(); err != nil {
 		return r, invalid("%s", err)
 	}
 	if err := o.checkRuleRepo(ctx, r.RepoID); err != nil {
 		return r, err
 	}
-	r, err := o.rules.CreateRule(ctx, r, func(x domain.Rule) domain.Event {
+	r, err = o.rules.CreateRule(ctx, r, func(x domain.Rule) domain.Event {
 		return *ruleEvent(x, origin, "", fmt.Sprintf("rule %q added; Claude is reviewing it", x.Title))
 	})
 	if err == nil {
@@ -122,6 +137,10 @@ func (o *Orchestrator) UpdateRule(ctx context.Context, id int64, in RuleInput, o
 	if err := o.rulesReady(); err != nil {
 		return domain.Rule{}, err
 	}
+	kind, err := in.kind()
+	if err != nil {
+		return domain.Rule{}, err
+	}
 	next := domain.Rule{Title: in.Title, Body: in.Body}
 	if err := next.Validate(); err != nil {
 		return next, invalid("%s", err)
@@ -131,11 +150,14 @@ func (o *Orchestrator) UpdateRule(ctx context.Context, id int64, in RuleInput, o
 	}
 	var msg string
 	r, err := o.rules.UpdateRule(ctx, id, func(x *domain.Rule) error {
-		changed := x.Title != next.Title || x.Body != next.Body || !sameRepo(x.RepoID, in.RepoID)
+		changed := x.Title != next.Title || x.Body != next.Body || !sameRepo(x.RepoID, in.RepoID) || x.Kind != kind
 		switch {
 		case changed:
 			msg = fmt.Sprintf("rule %q edited; Claude is reviewing it again", next.Title)
-			x.Title, x.Body, x.RepoID = next.Title, next.Body, in.RepoID
+			if x.Status == domain.RuleSuggested {
+				msg = fmt.Sprintf("suggested rule %q adopted with changes; Claude is reviewing it", next.Title)
+			}
+			x.Title, x.Body, x.RepoID, x.Kind = next.Title, next.Body, in.RepoID, kind
 			// The old answers and clarification were about the old text.
 			x.Questions, x.Rounds, x.Interpretation, x.Clarified = nil, 0, "", ""
 			x.Requeue()
@@ -203,8 +225,8 @@ func (o *Orchestrator) AcceptRule(ctx context.Context, id int64, origin domain.O
 		return domain.Rule{}, err
 	}
 	return o.rules.UpdateRule(ctx, id, func(x *domain.Rule) error {
-		if x.Status != domain.RuleQuestions && x.Status != domain.RuleFailed {
-			return invalid("only a rule with open questions or a failed review can be accepted as written")
+		if x.Status != domain.RuleQuestions && x.Status != domain.RuleFailed && x.Status != domain.RuleSuggested {
+			return invalid("only a suggested rule, or one with open questions or a failed review, can be accepted as written")
 		}
 		x.Questions = x.Answered()
 		x.Status, x.Error, x.Clarified, x.Interpretation = domain.RuleReady, "", "", ""
@@ -214,19 +236,36 @@ func (o *Orchestrator) AcceptRule(ctx context.Context, id int64, origin domain.O
 	})
 }
 
+// dismissRule declines a suggested rule. It is kept, hidden, so agnts does
+// not suggest it again.
+func (o *Orchestrator) dismissRule(ctx context.Context, id int64, origin domain.Origin) error {
+	_, err := o.rules.UpdateRule(ctx, id, func(x *domain.Rule) error {
+		x.Status, x.Enabled = domain.RuleDismissed, false
+		return nil
+	}, func(x domain.Rule) *domain.Event {
+		return ruleEvent(x, origin, "", fmt.Sprintf("suggested rule %q dismissed", x.Title))
+	})
+	return err
+}
+
 // ReviewRule queues a rule for another review, keeping its answers.
 func (o *Orchestrator) ReviewRule(ctx context.Context, id int64, origin domain.Origin) (domain.Rule, error) {
 	if err := o.rulesReady(); err != nil {
 		return domain.Rule{}, err
 	}
+	adopted := false
 	r, err := o.rules.UpdateRule(ctx, id, func(x *domain.Rule) error {
 		if x.Status == domain.RulePending || x.Status == domain.RuleAnalyzing {
 			return invalid("this rule is already being reviewed")
 		}
+		adopted = x.Status == domain.RuleSuggested
 		x.Questions = x.Answered()
 		x.Requeue()
 		return nil
 	}, func(x domain.Rule) *domain.Event {
+		if adopted {
+			return ruleEvent(x, origin, "", fmt.Sprintf("suggested rule %q adopted; Claude is reviewing it", x.Title))
+		}
 		return ruleEvent(x, origin, "", fmt.Sprintf("rule %q queued for another review", x.Title))
 	})
 	if err == nil {
@@ -244,6 +283,9 @@ func (o *Orchestrator) DeleteRule(ctx context.Context, id int64, origin domain.O
 	if err != nil {
 		return err
 	}
+	if r.Status == domain.RuleSuggested {
+		return o.dismissRule(ctx, id, origin)
+	}
 	return o.rules.DeleteRule(ctx, id, *ruleEvent(r, origin, "", fmt.Sprintf("rule %q deleted", r.Title)))
 }
 
@@ -256,7 +298,32 @@ func (o *Orchestrator) teamRules(ctx context.Context, repoID *int64) ([]domain.R
 	if err != nil {
 		return nil, fmt.Errorf("load team rules: %w", err)
 	}
-	return rules, nil
+	out := rules[:0:0]
+	for _, r := range rules {
+		if r.Kind != domain.KindContext {
+			out = append(out, r)
+		}
+	}
+	return out, nil
+}
+
+// businessNotes returns the business context notes runs in repoID read
+// (nil: global ones only).
+func (o *Orchestrator) businessNotes(ctx context.Context, repoID *int64) ([]domain.Rule, error) {
+	if o.rules == nil {
+		return nil, nil
+	}
+	rules, err := o.rules.ActiveRules(ctx, repoID)
+	if err != nil {
+		return nil, fmt.Errorf("load business context: %w", err)
+	}
+	var out []domain.Rule
+	for _, r := range rules {
+		if r.Kind == domain.KindContext {
+			out = append(out, r)
+		}
+	}
+	return out, nil
 }
 
 // rulesEvent records which rules a ticket was given.

@@ -11,6 +11,7 @@ import LineChart from '../components/charts/LineChart.vue'
 import StackedBars from '../components/charts/StackedBars.vue'
 import DeltaTag from '../components/dashboard/DeltaTag.vue'
 import PageHeader from '../components/PageHeader.vue'
+import ReplayEval from '../components/eval/ReplayEval.vue'
 import HiIcon from '../components/ui/HiIcon.vue'
 import { modelLabel, type StageSpend } from '../api/types'
 import { fmtTokens, fmtUsd, ioTokens } from '../composables/format'
@@ -305,7 +306,7 @@ function exportCsv() {
       <section class="card span2">
         <div class="ch">
           <div><h2>{{ t('analytics.models') }}</h2><p class="sub">{{ t('analytics.modelsSub') }}</p></div>
-          <RouterLink class="btn btn-s" to="/settings">{{ t('analytics.changeModels') }}</RouterLink>
+          <RouterLink class="btn btn-s" :to="{ name: 'settings' }">{{ t('analytics.changeModels') }}</RouterLink>
         </div>
         <p v-if="!a.models.length" class="hint">{{ t('analytics.noRuns') }}</p>
         <div v-else class="tw">
@@ -407,7 +408,7 @@ function exportCsv() {
             </thead>
             <tbody>
               <tr v-for="r in a.repos" :key="r.repoId">
-                <td class="ttitle"><RouterLink :to="`/repos/${r.repoId}`">{{ r.name }}</RouterLink></td>
+                <td class="ttitle"><RouterLink :to="{ name: 'repo', params: { id: r.repoId } }">{{ r.name }}</RouterLink></td>
                 <td>
                   <span v-if="r.kind === 'side'" class="src local">{{ t('analytics.srcTask') }}</span>
                   <span v-else class="src">{{ r.kind === 'plane' ? t('analytics.srcPlane') : t('analytics.srcJira') }}</span>
@@ -425,6 +426,48 @@ function exportCsv() {
           </table>
         </div>
       </section>
+
+      <section class="card span3">
+        <div class="ch"><div><h2>{{ t('analytics.quality') }}</h2><p class="sub">{{ t('analytics.qualitySub') }}</p></div></div>
+        <p v-if="!a.quality.length" class="hint">{{ t('analytics.noQuality') }}</p>
+        <div v-else class="tw">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>{{ t('analytics.colVersion') }}</th>
+                <th>{{ t('analytics.colTickets') }}</th>
+                <th :title="t('analytics.colFirstPassHint')">{{ t('analytics.colFirstPass') }}</th>
+                <th :title="t('analytics.colRoundsHint')">{{ t('analytics.colRounds') }}</th>
+                <th :title="t('analytics.colFixesHint')">{{ t('analytics.colFixes') }}</th>
+                <th :title="t('analytics.colSeriousHint')">{{ t('analytics.colSerious') }}</th>
+                <th :title="t('analytics.colFootprintHint')">{{ t('analytics.colFootprint') }}</th>
+                <th :title="t('analytics.colRedFlagsHint')">{{ t('analytics.colRedFlags') }}</th>
+                <th :title="t('analytics.colSelfFixesHint')">{{ t('analytics.colSelfFixes') }}</th>
+                <th>{{ t('analytics.rejected') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="v in a.quality" :key="v.promptVersion">
+                <td class="ttitle mono" style="white-space: nowrap">{{ v.promptVersion || t('analytics.versionUnknown') }}</td>
+                <td>{{ v.tickets }}</td>
+                <td>
+                  <span v-if="v.done" :class="pctOf(v.firstTry, v.done) >= 70 ? 'repo-ok' : 'repo-miss'">{{ pctOf(v.firstTry, v.done) }}%</span>
+                  <span v-else class="hint">—</span>
+                </td>
+                <td>{{ v.reachedReview ? v.changeRounds.toFixed(1) : '—' }}</td>
+                <td>{{ v.fixAttempts.toFixed(1) }}</td>
+                <td>{{ v.reachedReview ? `${pctOf(v.serious, v.reachedReview)}%` : '—' }}</td>
+                <td>{{ v.footprintHit == null ? '—' : `${Math.round(v.footprintHit * 100)}%` }}</td>
+                <td>{{ v.redFlags }}</td>
+                <td>{{ v.selfFixes }}</td>
+                <td>{{ v.rejected }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <ReplayEval />
 
       <section class="card span2">
         <div class="ch"><div><h2>{{ t('analytics.hours') }}</h2><p class="sub">{{ t('analytics.hoursSub', { hour: busiest }) }}</p></div></div>

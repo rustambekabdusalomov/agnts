@@ -93,6 +93,564 @@ abstract class AppLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[Locale('en'), Locale('ru'), Locale('uz')];
 
+  /// No description provided for @accountSignupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your account'**
+  String get accountSignupTitle;
+
+  /// No description provided for @accountSignupLede.
+  ///
+  /// In en, this message translates to:
+  /// **'You get a workspace of your own to start in.'**
+  String get accountSignupLede;
+
+  /// No description provided for @accountSignupInviteLede.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an account to join {workspace}.'**
+  String accountSignupInviteLede(String workspace);
+
+  /// No description provided for @accountSignupClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-up is by invitation on this server. Ask a workspace owner for an invite link.'**
+  String get accountSignupClosed;
+
+  /// No description provided for @accountFirstUser.
+  ///
+  /// In en, this message translates to:
+  /// **'This is the first account: it becomes the platform\'s Admin.'**
+  String get accountFirstUser;
+
+  /// No description provided for @accountEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get accountEmail;
+
+  /// No description provided for @accountDisplayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Your name'**
+  String get accountDisplayName;
+
+  /// No description provided for @accountUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get accountUsername;
+
+  /// No description provided for @accountUsernameHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional; made from your email when empty.'**
+  String get accountUsernameHelp;
+
+  /// No description provided for @accountPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get accountPassword;
+
+  /// No description provided for @accountPasswordHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 12 characters.'**
+  String get accountPasswordHelp;
+
+  /// No description provided for @accountPasswordAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat password'**
+  String get accountPasswordAgain;
+
+  /// No description provided for @accountPasswordsDiffer.
+  ///
+  /// In en, this message translates to:
+  /// **'The passwords differ.'**
+  String get accountPasswordsDiffer;
+
+  /// No description provided for @accountWorkspaceName.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace name'**
+  String get accountWorkspaceName;
+
+  /// No description provided for @accountWorkspaceNameHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Your first workspace, e.g. your project\'s name. You can rename it.'**
+  String get accountWorkspaceNameHelp;
+
+  /// No description provided for @accountCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get accountCreate;
+
+  /// No description provided for @accountCreating.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating…'**
+  String get accountCreating;
+
+  /// No description provided for @accountHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account?'**
+  String get accountHaveAccount;
+
+  /// No description provided for @accountSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get accountSignIn;
+
+  /// No description provided for @accountNoAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'No account yet?'**
+  String get accountNoAccount;
+
+  /// No description provided for @accountSignUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Create one'**
+  String get accountSignUp;
+
+  /// No description provided for @accountForgot.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get accountForgot;
+
+  /// No description provided for @accountForgotTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset your password'**
+  String get accountForgotTitle;
+
+  /// No description provided for @accountForgotLede.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll email you a link to choose a new one.'**
+  String get accountForgotLede;
+
+  /// No description provided for @accountForgotSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send link'**
+  String get accountForgotSend;
+
+  /// No description provided for @accountForgotSent.
+  ///
+  /// In en, this message translates to:
+  /// **'If an account uses that address, a link is on its way. It works for an hour.'**
+  String get accountForgotSent;
+
+  /// No description provided for @accountResetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a new password'**
+  String get accountResetTitle;
+
+  /// No description provided for @accountResetSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save password'**
+  String get accountResetSave;
+
+  /// No description provided for @accountResetDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed. Every session was signed out.'**
+  String get accountResetDone;
+
+  /// No description provided for @accountVerifyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your email'**
+  String get accountVerifyTitle;
+
+  /// No description provided for @accountVerifying.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirming…'**
+  String get accountVerifying;
+
+  /// No description provided for @accountVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Your email is confirmed.'**
+  String get accountVerified;
+
+  /// No description provided for @accountVerifyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'This link is invalid or expired.'**
+  String get accountVerifyFailed;
+
+  /// No description provided for @accountContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get accountContinue;
+
+  /// No description provided for @accountInviteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join {workspace}'**
+  String accountInviteTitle(String workspace);
+
+  /// No description provided for @accountInviteBy.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} invited you.'**
+  String accountInviteBy(String name);
+
+  /// No description provided for @accountInviteFor.
+  ///
+  /// In en, this message translates to:
+  /// **'The invite is for {email}.'**
+  String accountInviteFor(String email);
+
+  /// No description provided for @accountInviteJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Join workspace'**
+  String get accountInviteJoin;
+
+  /// No description provided for @accountInviteJoining.
+  ///
+  /// In en, this message translates to:
+  /// **'Joining…'**
+  String get accountInviteJoining;
+
+  /// No description provided for @accountInviteInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This invite link is invalid or expired. Ask for a new one.'**
+  String get accountInviteInvalid;
+
+  /// No description provided for @accountInviteSignInFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in or create an account to join.'**
+  String get accountInviteSignInFirst;
+
+  /// No description provided for @accountWorkspacesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your workspaces'**
+  String get accountWorkspacesTitle;
+
+  /// No description provided for @accountWorkspacesLede.
+  ///
+  /// In en, this message translates to:
+  /// **'A workspace is one project: its repositories, tickets, members and settings.'**
+  String get accountWorkspacesLede;
+
+  /// No description provided for @accountNoWorkspaces.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not in any workspace yet. Create one, or open an invite link someone sent you.'**
+  String get accountNoWorkspaces;
+
+  /// No description provided for @accountOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get accountOpen;
+
+  /// No description provided for @accountCreateWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a workspace'**
+  String get accountCreateWorkspace;
+
+  /// No description provided for @accountCreateWorkspaceSub.
+  ///
+  /// In en, this message translates to:
+  /// **'You become its owner.'**
+  String get accountCreateWorkspaceSub;
+
+  /// No description provided for @accountWorkspaceSlug.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get accountWorkspaceSlug;
+
+  /// No description provided for @accountWorkspaceSlugHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Used in links; made from the name when empty.'**
+  String get accountWorkspaceSlugHelp;
+
+  /// No description provided for @accountCreateWs.
+  ///
+  /// In en, this message translates to:
+  /// **'Create workspace'**
+  String get accountCreateWs;
+
+  /// No description provided for @accountProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get accountProfileTitle;
+
+  /// No description provided for @accountProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile'**
+  String get accountProfile;
+
+  /// No description provided for @accountProfileSub.
+  ///
+  /// In en, this message translates to:
+  /// **'How you appear to the members of your workspaces.'**
+  String get accountProfileSub;
+
+  /// No description provided for @accountSaveProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get accountSaveProfile;
+
+  /// No description provided for @accountProfileSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile saved'**
+  String get accountProfileSaved;
+
+  /// No description provided for @accountEmailUnverified.
+  ///
+  /// In en, this message translates to:
+  /// **'Not confirmed yet'**
+  String get accountEmailUnverified;
+
+  /// No description provided for @accountEmailVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get accountEmailVerified;
+
+  /// No description provided for @accountResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send the link again'**
+  String get accountResend;
+
+  /// No description provided for @accountResent.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmation link sent'**
+  String get accountResent;
+
+  /// No description provided for @accountPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get accountPasswordTitle;
+
+  /// No description provided for @accountPasswordSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Changing it signs out your other sessions.'**
+  String get accountPasswordSub;
+
+  /// No description provided for @accountCurrentPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password'**
+  String get accountCurrentPassword;
+
+  /// No description provided for @accountNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get accountNewPassword;
+
+  /// No description provided for @accountChangePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get accountChangePassword;
+
+  /// No description provided for @accountPasswordChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed'**
+  String get accountPasswordChanged;
+
+  /// No description provided for @accountTotpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Two-factor sign-in'**
+  String get accountTotpTitle;
+
+  /// No description provided for @accountTotpSub.
+  ///
+  /// In en, this message translates to:
+  /// **'A code from an authenticator app at every sign-in.'**
+  String get accountTotpSub;
+
+  /// No description provided for @accountTotpOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get accountTotpOn;
+
+  /// No description provided for @accountTotpOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get accountTotpOff;
+
+  /// No description provided for @accountTotpSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on'**
+  String get accountTotpSetup;
+
+  /// No description provided for @accountTotpScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Add this account to your authenticator app with the secret (or open the link on your phone), then enter the code it shows.'**
+  String get accountTotpScan;
+
+  /// No description provided for @accountTotpSecret.
+  ///
+  /// In en, this message translates to:
+  /// **'Secret'**
+  String get accountTotpSecret;
+
+  /// No description provided for @accountTotpLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup link'**
+  String get accountTotpLink;
+
+  /// No description provided for @accountTotpCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get accountTotpCode;
+
+  /// No description provided for @accountTotpConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get accountTotpConfirm;
+
+  /// No description provided for @accountTotpEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Two-factor sign-in is on'**
+  String get accountTotpEnabled;
+
+  /// No description provided for @accountTotpDisable.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off'**
+  String get accountTotpDisable;
+
+  /// No description provided for @accountTotpDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Two-factor sign-in is off'**
+  String get accountTotpDisabled;
+
+  /// No description provided for @accountMyClaude.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Claude account'**
+  String get accountMyClaude;
+
+  /// No description provided for @accountMyClaudeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Runs of your tickets use it in workspaces set to per-member mode.'**
+  String get accountMyClaudeSub;
+
+  /// No description provided for @accountClaudeSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude account connected'**
+  String get accountClaudeSaved;
+
+  /// No description provided for @accountClaudeRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude account disconnected'**
+  String get accountClaudeRemoved;
+
+  /// No description provided for @accountAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Admin'**
+  String get accountAdmin;
+
+  /// No description provided for @accountAdminConsole.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the operator console'**
+  String get accountAdminConsole;
+
+  /// No description provided for @accountReturnTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get accountReturnTitle;
+
+  /// No description provided for @accountReturnLede.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks. Credits show in Billing as soon as the payment provider confirms the payment (usually within a minute).'**
+  String get accountReturnLede;
+
+  /// No description provided for @accountReturnBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Billing'**
+  String get accountReturnBack;
+
+  /// No description provided for @accountLastOpened.
+  ///
+  /// In en, this message translates to:
+  /// **'Last opened'**
+  String get accountLastOpened;
+
+  /// No description provided for @accountMemberCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} member} other {{n} members}}'**
+  String accountMemberCount(num n);
+
+  /// No description provided for @accountSlotCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} parallel run} other {{n} parallel runs}}'**
+  String accountSlotCount(num n);
+
+  /// No description provided for @accountSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get accountSuspended;
+
+  /// No description provided for @accountNoWorkspacesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No workspaces yet'**
+  String get accountNoWorkspacesTitle;
+
+  /// No description provided for @accountCreateFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first workspace'**
+  String get accountCreateFirst;
+
   /// No description provided for @analyticsTitle.
   ///
   /// In en, this message translates to:
@@ -681,6 +1239,120 @@ abstract class AppLocalizations {
   /// **'Plane'**
   String get analyticsSrcPlane;
 
+  /// No description provided for @analyticsQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent quality'**
+  String get analyticsQuality;
+
+  /// No description provided for @analyticsQualitySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets grouped by the prompt version of their first coding run. Compare versions to see whether a change to the agent helped.'**
+  String get analyticsQualitySub;
+
+  /// No description provided for @analyticsNoQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'No coding runs in this period.'**
+  String get analyticsNoQuality;
+
+  /// No description provided for @analyticsColVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt version'**
+  String get analyticsColVersion;
+
+  /// No description provided for @analyticsVersionUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'before tracking'**
+  String get analyticsVersionUnknown;
+
+  /// No description provided for @analyticsColFirstPass.
+  ///
+  /// In en, this message translates to:
+  /// **'First pass'**
+  String get analyticsColFirstPass;
+
+  /// No description provided for @analyticsColFirstPassHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Done tickets approved without a person asking for changes'**
+  String get analyticsColFirstPassHint;
+
+  /// No description provided for @analyticsColRounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Change rounds'**
+  String get analyticsColRounds;
+
+  /// No description provided for @analyticsColRoundsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Average change requests by a person per ticket that reached review'**
+  String get analyticsColRoundsHint;
+
+  /// No description provided for @analyticsColFixes.
+  ///
+  /// In en, this message translates to:
+  /// **'Check fixes'**
+  String get analyticsColFixes;
+
+  /// No description provided for @analyticsColFixesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Average times failing checks were sent back to Claude'**
+  String get analyticsColFixesHint;
+
+  /// No description provided for @analyticsColSerious.
+  ///
+  /// In en, this message translates to:
+  /// **'Serious findings'**
+  String get analyticsColSerious;
+
+  /// No description provided for @analyticsColSeriousHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Share of reviewed tickets where agnts\'s review found a blocker or major problem'**
+  String get analyticsColSeriousHint;
+
+  /// No description provided for @analyticsColFootprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan accuracy'**
+  String get analyticsColFootprint;
+
+  /// No description provided for @analyticsColFootprintHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Share of changed files the analysis predicted'**
+  String get analyticsColFootprintHint;
+
+  /// No description provided for @analyticsColRedFlags.
+  ///
+  /// In en, this message translates to:
+  /// **'Red flags'**
+  String get analyticsColRedFlags;
+
+  /// No description provided for @analyticsColRedFlagsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped tests, removed assertions, silenced linters and the like found in the diffs'**
+  String get analyticsColRedFlagsHint;
+
+  /// No description provided for @analyticsColSelfFixes.
+  ///
+  /// In en, this message translates to:
+  /// **'Self-fixes'**
+  String get analyticsColSelfFixes;
+
+  /// No description provided for @analyticsColSelfFixesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Times agnts\'s own review sent findings back to the coder before a person looked'**
+  String get analyticsColSelfFixesHint;
+
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:
@@ -702,13 +1374,13 @@ abstract class AppLocalizations {
   /// No description provided for @authLede.
   ///
   /// In en, this message translates to:
-  /// **'Use your account and the code from your authenticator app.'**
+  /// **'Use your email or username and your password.'**
   String get authLede;
 
   /// No description provided for @authUsername.
   ///
   /// In en, this message translates to:
-  /// **'Username'**
+  /// **'Email or username'**
   String get authUsername;
 
   /// No description provided for @authPassword.
@@ -782,6 +1454,342 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Too many attempts. Try again in {seconds, plural, one {{seconds} second} other {{seconds} seconds}}.'**
   String authRateLimited(num seconds);
+
+  /// No description provided for @authCodeLede.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the code from your authenticator app.'**
+  String get authCodeLede;
+
+  /// No description provided for @authBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Use another account'**
+  String get authBack;
+
+  /// No description provided for @billingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing'**
+  String get billingTitle;
+
+  /// No description provided for @billingSelfHosted.
+  ///
+  /// In en, this message translates to:
+  /// **'This server is self-hosted: there is nothing to pay. The Admin sets slots and member limits.'**
+  String get billingSelfHosted;
+
+  /// No description provided for @billingPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get billingPlan;
+
+  /// No description provided for @billingPlanSub.
+  ///
+  /// In en, this message translates to:
+  /// **'The base plan includes 1 parallel run and {members} members.'**
+  String billingPlanSub(String members);
+
+  /// No description provided for @billingMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} so\'m a month'**
+  String billingMonthly(String amount);
+
+  /// No description provided for @billingPaidUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid until {date}'**
+  String billingPaidUntil(String date);
+
+  /// No description provided for @billingTrialUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Free trial until {date}'**
+  String billingTrialUntil(String date);
+
+  /// No description provided for @billingSlots.
+  ///
+  /// In en, this message translates to:
+  /// **'Parallel runs'**
+  String get billingSlots;
+
+  /// No description provided for @billingSlotsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Each extra run at once costs {price} so\'m a month. Adding one now charges the rest of this month from credits.'**
+  String billingSlotsHelp(String price);
+
+  /// No description provided for @billingSlotsSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get billingSlotsSave;
+
+  /// No description provided for @billingSlotsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Parallel runs set to {n}'**
+  String billingSlotsSaved(String n);
+
+  /// No description provided for @billingMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get billingMembers;
+
+  /// No description provided for @billingMembersHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'{included} included; each one more costs {price} so\'m a month.'**
+  String billingMembersHelp(String included, String price);
+
+  /// No description provided for @billingCredits.
+  ///
+  /// In en, this message translates to:
+  /// **'Credits'**
+  String get billingCredits;
+
+  /// No description provided for @billingCreditsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Runs on agnts\'s API key (the fallback) spend credits: 1 credit is \$0.01 of Anthropic API cost. The month\'s plan is paid from them too.'**
+  String get billingCreditsSub;
+
+  /// No description provided for @billingBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get billingBalance;
+
+  /// No description provided for @billingCreditPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'1 credit = {price} so\'m'**
+  String billingCreditPrice(String price);
+
+  /// No description provided for @billingBuy.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy credits'**
+  String get billingBuy;
+
+  /// No description provided for @billingAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount (so\'m)'**
+  String get billingAmount;
+
+  /// No description provided for @billingYouGet.
+  ///
+  /// In en, this message translates to:
+  /// **'≈ {n} credits'**
+  String billingYouGet(String n);
+
+  /// No description provided for @billingPayWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay with {provider}'**
+  String billingPayWith(String provider);
+
+  /// No description provided for @billingPaymentsOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments are not set up on this server yet; ask the Admin to grant credits.'**
+  String get billingPaymentsOff;
+
+  /// No description provided for @billingHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get billingHistory;
+
+  /// No description provided for @billingNoHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing yet.'**
+  String get billingNoHistory;
+
+  /// No description provided for @billingReason_purchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Bought'**
+  String get billingReason_purchase;
+
+  /// No description provided for @billingReason_run.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent'**
+  String get billingReason_run;
+
+  /// No description provided for @billingReason_refund.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunded'**
+  String get billingReason_refund;
+
+  /// No description provided for @billingReason_grant.
+  ///
+  /// In en, this message translates to:
+  /// **'Granted'**
+  String get billingReason_grant;
+
+  /// No description provided for @briefTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Repository brief'**
+  String get briefTitle;
+
+  /// No description provided for @briefSub.
+  ///
+  /// In en, this message translates to:
+  /// **'How this code base works: architecture, recipes for common changes, files to copy, conventions and pitfalls. Every run of this repository\'s tickets reads it, so agnts builds things the way your team does.'**
+  String get briefSub;
+
+  /// No description provided for @briefSurvey.
+  ///
+  /// In en, this message translates to:
+  /// **'Survey'**
+  String get briefSurvey;
+
+  /// No description provided for @briefUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get briefUpdate;
+
+  /// No description provided for @briefEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get briefEdit;
+
+  /// No description provided for @briefWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Write it yourself'**
+  String get briefWrite;
+
+  /// No description provided for @briefSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save brief'**
+  String get briefSave;
+
+  /// No description provided for @briefCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get briefCancel;
+
+  /// No description provided for @briefEditHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Markdown. What you save is what runs read from now on; leave it empty to give runs no brief.'**
+  String get briefEditHint;
+
+  /// No description provided for @briefNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No brief yet. Survey the repository to have Claude write a draft, or write one yourself.'**
+  String get briefNone;
+
+  /// No description provided for @briefSurveying.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude is surveying the repository. The draft appears here for your approval.'**
+  String get briefSurveying;
+
+  /// No description provided for @briefFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The last survey failed: {error}'**
+  String briefFailed(String error);
+
+  /// No description provided for @briefApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved {time}'**
+  String briefApproved(String time);
+
+  /// No description provided for @briefAtCommit.
+  ///
+  /// In en, this message translates to:
+  /// **'at {sha}'**
+  String briefAtCommit(String sha);
+
+  /// No description provided for @briefMerges.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} of {of} merges before the next update'**
+  String briefMerges(String n, String of);
+
+  /// No description provided for @briefDraftTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft from the survey'**
+  String get briefDraftTitle;
+
+  /// No description provided for @briefDraftSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Written {time}. Runs read it only after you approve it.'**
+  String briefDraftSub(String time);
+
+  /// No description provided for @briefApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get briefApprove;
+
+  /// No description provided for @briefDiscard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard draft'**
+  String get briefDiscard;
+
+  /// No description provided for @briefDiscardBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The draft is deleted; the approved brief stays as it is.'**
+  String get briefDiscardBody;
+
+  /// No description provided for @briefStatus_pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Survey queued'**
+  String get briefStatus_pending;
+
+  /// No description provided for @briefStatus_surveying.
+  ///
+  /// In en, this message translates to:
+  /// **'Surveying…'**
+  String get briefStatus_surveying;
+
+  /// No description provided for @briefDone_survey.
+  ///
+  /// In en, this message translates to:
+  /// **'Survey queued'**
+  String get briefDone_survey;
+
+  /// No description provided for @briefDone_approve.
+  ///
+  /// In en, this message translates to:
+  /// **'Brief approved: new runs read it'**
+  String get briefDone_approve;
+
+  /// No description provided for @briefDone_discard.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft discarded'**
+  String get briefDone_discard;
+
+  /// No description provided for @briefDone_save.
+  ///
+  /// In en, this message translates to:
+  /// **'Brief saved'**
+  String get briefDone_save;
 
   /// No description provided for @commonLoading.
   ///
@@ -1220,6 +2228,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No activity yet.'**
   String get dashboardNoActivity;
+
+  /// No description provided for @designApproach.
+  ///
+  /// In en, this message translates to:
+  /// **'Approach'**
+  String get designApproach;
+
+  /// No description provided for @designFit.
+  ///
+  /// In en, this message translates to:
+  /// **'Fit with the code base'**
+  String get designFit;
+
+  /// No description provided for @designAlternatives.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} alternative considered} other {{n} alternatives considered}}'**
+  String designAlternatives(num n);
+
+  /// No description provided for @designWhyNot.
+  ///
+  /// In en, this message translates to:
+  /// **'Why not'**
+  String get designWhyNot;
+
+  /// No description provided for @designOutOfScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of scope'**
+  String get designOutOfScope;
+
+  /// No description provided for @designShipping.
+  ///
+  /// In en, this message translates to:
+  /// **'Shipping'**
+  String get designShipping;
+
+  /// No description provided for @designShip_migrations.
+  ///
+  /// In en, this message translates to:
+  /// **'Migrations'**
+  String get designShip_migrations;
+
+  /// No description provided for @designShip_compatibility.
+  ///
+  /// In en, this message translates to:
+  /// **'Compatibility'**
+  String get designShip_compatibility;
+
+  /// No description provided for @designShip_rollout.
+  ///
+  /// In en, this message translates to:
+  /// **'Rollout'**
+  String get designShip_rollout;
+
+  /// No description provided for @designShip_rollback.
+  ///
+  /// In en, this message translates to:
+  /// **'Rollback'**
+  String get designShip_rollback;
+
+  /// No description provided for @designDeviations.
+  ///
+  /// In en, this message translates to:
+  /// **'Departed from the plan'**
+  String get designDeviations;
 
   /// No description provided for @filesTitle.
   ///
@@ -3705,6 +4779,18 @@ abstract class AppLocalizations {
   /// **'Deny'**
   String get mcpDeny;
 
+  /// No description provided for @mcpPickWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace'**
+  String get mcpPickWorkspace;
+
+  /// No description provided for @mcpPickWorkspaceHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude acts in this workspace, as you.'**
+  String get mcpPickWorkspaceHelp;
+
   /// No description provided for @mdetailApprove.
   ///
   /// In en, this message translates to:
@@ -4617,6 +5703,30 @@ abstract class AppLocalizations {
   /// **'Yesterday'**
   String get mtasksYesterday;
 
+  /// No description provided for @mwsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re not in a workspace yet. Create one or accept an invite in the web admin, then pull to refresh.'**
+  String get mwsNone;
+
+  /// No description provided for @mwsSwitched.
+  ///
+  /// In en, this message translates to:
+  /// **'Switched to {name}'**
+  String mwsSwitched(String name);
+
+  /// No description provided for @mwsMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} member} other {{n} members}}'**
+  String mwsMembers(num n);
+
+  /// No description provided for @mwsSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get mwsSuspended;
+
   /// No description provided for @navOverview.
   ///
   /// In en, this message translates to:
@@ -4904,6 +6014,300 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Plane synced: {found} open, {created} new'**
   String navSyncedPlane(String found, String created);
+
+  /// No description provided for @navWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace'**
+  String get navWorkspace;
+
+  /// No description provided for @navProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get navProfile;
+
+  /// No description provided for @navPlatform.
+  ///
+  /// In en, this message translates to:
+  /// **'Operator console'**
+  String get navPlatform;
+
+  /// No description provided for @navPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get navPeople;
+
+  /// No description provided for @navAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get navAccount;
+
+  /// No description provided for @platformTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Operator console'**
+  String get platformTitle;
+
+  /// No description provided for @platformLede.
+  ///
+  /// In en, this message translates to:
+  /// **'Every workspace, run and user on this server. Workspaces show metadata only: their tickets are their members\'.'**
+  String get platformLede;
+
+  /// No description provided for @platformCapacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Server'**
+  String get platformCapacity;
+
+  /// No description provided for @platformReserved.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory reserved'**
+  String get platformReserved;
+
+  /// No description provided for @platformBudgetNone.
+  ///
+  /// In en, this message translates to:
+  /// **'not limited'**
+  String get platformBudgetNone;
+
+  /// No description provided for @platformRuns.
+  ///
+  /// In en, this message translates to:
+  /// **'Runs'**
+  String get platformRuns;
+
+  /// No description provided for @platformDisk.
+  ///
+  /// In en, this message translates to:
+  /// **'Disk free'**
+  String get platformDisk;
+
+  /// No description provided for @platformFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Full: runs are waiting for the server'**
+  String get platformFull;
+
+  /// No description provided for @platformRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Running now'**
+  String get platformRunning;
+
+  /// No description provided for @platformNoRuns.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is running.'**
+  String get platformNoRuns;
+
+  /// No description provided for @platformQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Server queue'**
+  String get platformQueue;
+
+  /// No description provided for @platformNoQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'No run is waiting for the server.'**
+  String get platformNoQueue;
+
+  /// No description provided for @platformWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace'**
+  String get platformWorkspace;
+
+  /// No description provided for @platformTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket'**
+  String get platformTicket;
+
+  /// No description provided for @platformStage.
+  ///
+  /// In en, this message translates to:
+  /// **'Stage'**
+  String get platformStage;
+
+  /// No description provided for @platformStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Started'**
+  String get platformStarted;
+
+  /// No description provided for @platformWorkspaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspaces'**
+  String get platformWorkspaces;
+
+  /// No description provided for @platformOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get platformOwner;
+
+  /// No description provided for @platformPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get platformPlan;
+
+  /// No description provided for @platformSlots.
+  ///
+  /// In en, this message translates to:
+  /// **'Slots'**
+  String get platformSlots;
+
+  /// No description provided for @platformMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get platformMembers;
+
+  /// No description provided for @platformMemberLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Member limit'**
+  String get platformMemberLimit;
+
+  /// No description provided for @platformCredits.
+  ///
+  /// In en, this message translates to:
+  /// **'Credits'**
+  String get platformCredits;
+
+  /// No description provided for @platformState.
+  ///
+  /// In en, this message translates to:
+  /// **'State'**
+  String get platformState;
+
+  /// No description provided for @platformActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get platformActive;
+
+  /// No description provided for @platformSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get platformSuspended;
+
+  /// No description provided for @platformDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted'**
+  String get platformDeleted;
+
+  /// No description provided for @platformEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get platformEdit;
+
+  /// No description provided for @platformSuspend.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspend'**
+  String get platformSuspend;
+
+  /// No description provided for @platformResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get platformResume;
+
+  /// No description provided for @platformGrant.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant credits'**
+  String get platformGrant;
+
+  /// No description provided for @platformGrantAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Credits (negative takes back)'**
+  String get platformGrantAmount;
+
+  /// No description provided for @platformGrantNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get platformGrantNote;
+
+  /// No description provided for @platformGrantDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} credits granted to {name}'**
+  String platformGrantDone(String n, String name);
+
+  /// No description provided for @platformSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get platformSaved;
+
+  /// No description provided for @platformUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Users'**
+  String get platformUsers;
+
+  /// No description provided for @platformUser.
+  ///
+  /// In en, this message translates to:
+  /// **'User'**
+  String get platformUser;
+
+  /// No description provided for @platformEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get platformEmail;
+
+  /// No description provided for @platformAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get platformAdmin;
+
+  /// No description provided for @platformMakeAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Make Admin'**
+  String get platformMakeAdmin;
+
+  /// No description provided for @platformRemoveAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Admin'**
+  String get platformRemoveAdmin;
+
+  /// No description provided for @platformJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined'**
+  String get platformJoined;
+
+  /// No description provided for @platformNoLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'no limit'**
+  String get platformNoLimit;
+
+  /// No description provided for @platformForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Only an Admin can open the operator console.'**
+  String get platformForbidden;
 
   /// No description provided for @previewTab.
   ///
@@ -5319,6 +6723,198 @@ abstract class AppLocalizations {
   /// **'Up to four screenshots go with the Telegram message.'**
   String get previewNotifyPhotosHelp;
 
+  /// No description provided for @queueHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Running {running}/{slots}'**
+  String queueHeader(String running, String slots);
+
+  /// No description provided for @queueQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} queued} other {{n} queued}}'**
+  String queueQueued(num n);
+
+  /// No description provided for @queueWaitingServer.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} waiting for the server'**
+  String queueWaitingServer(String n);
+
+  /// No description provided for @queueBadge_blocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting · related'**
+  String get queueBadge_blocked;
+
+  /// No description provided for @queueBadge_slots.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued · slots'**
+  String get queueBadge_slots;
+
+  /// No description provided for @queueBadge_server.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued · server'**
+  String get queueBadge_server;
+
+  /// No description provided for @queueBadge_claude.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused · Claude'**
+  String get queueBadge_claude;
+
+  /// No description provided for @queueTitle_blocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for related tickets'**
+  String get queueTitle_blocked;
+
+  /// No description provided for @queueTitle_slots.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for a free slot'**
+  String get queueTitle_slots;
+
+  /// No description provided for @queueTitle_server.
+  ///
+  /// In en, this message translates to:
+  /// **'In the server queue'**
+  String get queueTitle_server;
+
+  /// No description provided for @queueTitle_claude.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for Claude'**
+  String get queueTitle_claude;
+
+  /// No description provided for @queuePosition.
+  ///
+  /// In en, this message translates to:
+  /// **'#{position} in the server queue'**
+  String queuePosition(String position);
+
+  /// No description provided for @queueOthers.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =0 {} one {{n} ticket of another workspace ahead.} other {{n} tickets of other workspaces ahead.}}'**
+  String queueOthers(num n);
+
+  /// No description provided for @queueEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts in about {minutes, plural, one {{minutes} minute} other {{minutes} minutes}}.'**
+  String queueEstimate(num minutes);
+
+  /// No description provided for @queueServerFull.
+  ///
+  /// In en, this message translates to:
+  /// **'The server is at capacity ({runs} runs, {reserved} of {budget} reserved).'**
+  String queueServerFull(String runs, String reserved, String budget);
+
+  /// No description provided for @queueSlotsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{running} of {slots} runs in use. It starts when one ends.'**
+  String queueSlotsHint(String running, String slots);
+
+  /// No description provided for @queueAddSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a slot'**
+  String get queueAddSlot;
+
+  /// No description provided for @queueClaudeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect an account or turn on credits in Workspace settings → Claude.'**
+  String get queueClaudeHint;
+
+  /// No description provided for @queueMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get queueMember;
+
+  /// No description provided for @queueTakeOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Take over'**
+  String get queueTakeOver;
+
+  /// No description provided for @queueTakenOver.
+  ///
+  /// In en, this message translates to:
+  /// **'The ticket is yours: it runs on your Claude account in per-member mode.'**
+  String get queueTakenOver;
+
+  /// No description provided for @queueCreatedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Created by {name}'**
+  String queueCreatedBy(String name);
+
+  /// No description provided for @queueBy.
+  ///
+  /// In en, this message translates to:
+  /// **'by {name}'**
+  String queueBy(String name);
+
+  /// No description provided for @redFlagsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} red flag} other {{n} red flags}}'**
+  String redFlagsTitle(num n);
+
+  /// No description provided for @redFlagsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts\'s scan of the change matched these lines. They often mean the checks were made to pass the wrong way; agnts\'s review checks each one.'**
+  String get redFlagsSub;
+
+  /// No description provided for @redFlagsKind_skipped_test.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped or focused test'**
+  String get redFlagsKind_skipped_test;
+
+  /// No description provided for @redFlagsKind_removed_assertion.
+  ///
+  /// In en, this message translates to:
+  /// **'Assertions removed'**
+  String get redFlagsKind_removed_assertion;
+
+  /// No description provided for @redFlagsKind_deleted_test.
+  ///
+  /// In en, this message translates to:
+  /// **'Test file deleted'**
+  String get redFlagsKind_deleted_test;
+
+  /// No description provided for @redFlagsKind_silenced_lint.
+  ///
+  /// In en, this message translates to:
+  /// **'Linter silenced'**
+  String get redFlagsKind_silenced_lint;
+
+  /// No description provided for @redFlagsKind_swallowed_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error swallowed'**
+  String get redFlagsKind_swallowed_error;
+
+  /// No description provided for @redFlagsKind_todo.
+  ///
+  /// In en, this message translates to:
+  /// **'TODO left'**
+  String get redFlagsKind_todo;
+
+  /// No description provided for @redFlagsKind_new_dependency.
+  ///
+  /// In en, this message translates to:
+  /// **'New dependency'**
+  String get redFlagsKind_new_dependency;
+
   /// No description provided for @relationsTab.
   ///
   /// In en, this message translates to:
@@ -5606,6 +7202,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Plane relation'**
   String get relationsSource_plane;
+
+  /// No description provided for @replayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay with today\'s agnts'**
+  String get replayTitle;
+
+  /// No description provided for @replaySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-run this ticket from the commit it started from, with the current prompts, brief and rules, and compare the result with what you approved. The replay is never pushed.'**
+  String get replaySub;
+
+  /// No description provided for @replayStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay'**
+  String get replayStart;
+
+  /// No description provided for @replayConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts creates a new task that re-does {key} from where it started. It uses your Claude plan like any ticket.'**
+  String replayConfirm(String key);
+
+  /// No description provided for @replayCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay {key} queued'**
+  String replayCreated(String key);
+
+  /// No description provided for @replayBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a replay to evaluate agnts: it is never pushed. Compare it with'**
+  String get replayBanner;
+
+  /// No description provided for @replayEvalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay evaluation'**
+  String get replayEvalTitle;
+
+  /// No description provided for @replayEvalSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Done tickets re-run with a newer agnts, compared with the change you approved. Start one with Replay on a done ticket, or `agnts eval replay KEY`.'**
+  String get replayEvalSub;
+
+  /// No description provided for @replayNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No replays yet.'**
+  String get replayNone;
+
+  /// No description provided for @replayRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent replays'**
+  String get replayRecent;
+
+  /// No description provided for @replayColReplays.
+  ///
+  /// In en, this message translates to:
+  /// **'Replays'**
+  String get replayColReplays;
+
+  /// No description provided for @replayColChecks.
+  ///
+  /// In en, this message translates to:
+  /// **'Checks'**
+  String get replayColChecks;
+
+  /// No description provided for @replayColLooksGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Review OK'**
+  String get replayColLooksGood;
+
+  /// No description provided for @replayColOverlap.
+  ///
+  /// In en, this message translates to:
+  /// **'Same files'**
+  String get replayColOverlap;
+
+  /// No description provided for @replayColOverlapHint.
+  ///
+  /// In en, this message translates to:
+  /// **'How much the replay\'s changed files match the approved change\'s (Jaccard index)'**
+  String get replayColOverlapHint;
+
+  /// No description provided for @replayColRecall.
+  ///
+  /// In en, this message translates to:
+  /// **'Coverage'**
+  String get replayColRecall;
+
+  /// No description provided for @replayColRecallHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Share of the approved change\'s files the replay changed too'**
+  String get replayColRecallHint;
+
+  /// No description provided for @replayColTurns.
+  ///
+  /// In en, this message translates to:
+  /// **'Turns (original)'**
+  String get replayColTurns;
+
+  /// No description provided for @replayColCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost (original)'**
+  String get replayColCost;
+
+  /// No description provided for @replayColReplay.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay'**
+  String get replayColReplay;
+
+  /// No description provided for @replayColOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Of'**
+  String get replayColOf;
+
+  /// No description provided for @replayColState.
+  ///
+  /// In en, this message translates to:
+  /// **'State'**
+  String get replayColState;
+
+  /// No description provided for @replayColReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get replayColReview;
+
+  /// No description provided for @replayPass.
+  ///
+  /// In en, this message translates to:
+  /// **'pass'**
+  String get replayPass;
+
+  /// No description provided for @replayFail.
+  ///
+  /// In en, this message translates to:
+  /// **'fail'**
+  String get replayFail;
+
+  /// No description provided for @replayVerdict_looks_good.
+  ///
+  /// In en, this message translates to:
+  /// **'looks good'**
+  String get replayVerdict_looks_good;
+
+  /// No description provided for @replayVerdict_has_concerns.
+  ///
+  /// In en, this message translates to:
+  /// **'has concerns'**
+  String get replayVerdict_has_concerns;
+
+  /// No description provided for @replayVerdict_needs_changes.
+  ///
+  /// In en, this message translates to:
+  /// **'needs changes'**
+  String get replayVerdict_needs_changes;
 
   /// No description provided for @repoBack.
   ///
@@ -6062,6 +7826,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open on the git host'**
   String get repoOpenRun;
+
+  /// No description provided for @repoBrief.
+  ///
+  /// In en, this message translates to:
+  /// **'Brief'**
+  String get repoBrief;
 
   /// No description provided for @reposTitle.
   ///
@@ -6879,6 +8649,18 @@ abstract class AppLocalizations {
   /// **'Reviewed by {model}: {reason}'**
   String reviewModel(String model, String reason);
 
+  /// No description provided for @reviewCat_architecture.
+  ///
+  /// In en, this message translates to:
+  /// **'Architecture'**
+  String get reviewCat_architecture;
+
+  /// No description provided for @reviewCat_scope.
+  ///
+  /// In en, this message translates to:
+  /// **'Scope'**
+  String get reviewCat_scope;
+
   /// No description provided for @rulesTitle.
   ///
   /// In en, this message translates to:
@@ -7250,6 +9032,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rule turned off'**
   String get rulesTurnedOff;
+
+  /// No description provided for @rulesStatus_suggested.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested'**
+  String get rulesStatus_suggested;
+
+  /// No description provided for @rulesSuggestedFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts suggests this rule from your feedback on'**
+  String get rulesSuggestedFrom;
+
+  /// No description provided for @rulesSuggestedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets don\'t follow it until you adopt it. Edit it to adopt it with your changes.'**
+  String get rulesSuggestedHint;
+
+  /// No description provided for @rulesSuggestedHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {agnts suggests {n} rule learned from your feedback.} other {agnts suggests {n} rules learned from your feedback.}}'**
+  String rulesSuggestedHelp(num n);
+
+  /// No description provided for @rulesAdopt.
+  ///
+  /// In en, this message translates to:
+  /// **'Adopt'**
+  String get rulesAdopt;
+
+  /// No description provided for @rulesAdoptAsWritten.
+  ///
+  /// In en, this message translates to:
+  /// **'Adopt as written'**
+  String get rulesAdoptAsWritten;
+
+  /// No description provided for @rulesDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get rulesDismiss;
+
+  /// No description provided for @rulesDismissBody.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts drops “{title}” and won\'t suggest it again.'**
+  String rulesDismissBody(String title);
+
+  /// No description provided for @rulesDismissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestion dismissed'**
+  String get rulesDismissed;
+
+  /// No description provided for @rulesKind.
+  ///
+  /// In en, this message translates to:
+  /// **'Kind'**
+  String get rulesKind;
+
+  /// No description provided for @rulesKindRule.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule'**
+  String get rulesKindRule;
+
+  /// No description provided for @rulesKindContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Business context'**
+  String get rulesKindContext;
+
+  /// No description provided for @rulesKindRuleHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'An instruction agnts follows on every ticket.'**
+  String get rulesKindRuleHelp;
+
+  /// No description provided for @rulesKindContextHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Knowledge about your product: what its terms mean, invariants the code must keep, who uses what. Every run reads it before it starts.'**
+  String get rulesKindContextHelp;
 
   /// No description provided for @settingsTitle.
   ///
@@ -7736,6 +9602,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings saved'**
   String get settingsSaved;
+
+  /// No description provided for @settingsParallelSlots.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} run} other {{n} runs}} at once'**
+  String settingsParallelSlots(num n);
+
+  /// No description provided for @settingsParallelSlotsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The workspace\'s slots. Change them in Workspace → Billing.'**
+  String get settingsParallelSlotsHelp;
+
+  /// No description provided for @settingsClaudeMoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude is connected per workspace now.'**
+  String get settingsClaudeMoved;
+
+  /// No description provided for @settingsClaudeOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace → Claude'**
+  String get settingsClaudeOpen;
+
+  /// No description provided for @settingsSelfReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix review findings first'**
+  String get settingsSelfReview;
+
+  /// No description provided for @settingsSelfReviewHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'When agnts\'s own code review finds a blocker or major problem, agnts sends it back to the coder once before you review. Needs the code review above.'**
+  String get settingsSelfReviewHelp;
+
+  /// No description provided for @settingsAutoBrief.
+  ///
+  /// In en, this message translates to:
+  /// **'Survey repositories'**
+  String get settingsAutoBrief;
+
+  /// No description provided for @settingsAutoBriefHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a repository brief (architecture, recipes, conventions) when a repository\'s first ticket is analysed, and update it after every 10 merges. A brief reaches the agent only after you approve it.'**
+  String get settingsAutoBriefHelp;
+
+  /// No description provided for @settingsReflect.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn from your feedback'**
+  String get settingsReflect;
+
+  /// No description provided for @settingsReflectHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'When you ask for changes or reject work with a reason, agnts looks for a convention behind it and suggests a rule on the Rules page. Nothing applies until you adopt it.'**
+  String get settingsReflectHelp;
 
   /// No description provided for @spendTitle.
   ///
@@ -9806,6 +11732,606 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Numbers come from the rate limit events Claude Code emits during each run. When agnts is idle, a tiny refresh run keeps them current.'**
   String get usageHelp;
+
+  /// No description provided for @wsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace'**
+  String get wsTitle;
+
+  /// No description provided for @wsSwitcher.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch workspace'**
+  String get wsSwitcher;
+
+  /// No description provided for @wsAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All workspaces'**
+  String get wsAll;
+
+  /// No description provided for @wsNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New workspace'**
+  String get wsNew;
+
+  /// No description provided for @wsRole_owner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get wsRole_owner;
+
+  /// No description provided for @wsRole_user.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get wsRole_user;
+
+  /// No description provided for @wsTabGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get wsTabGeneral;
+
+  /// No description provided for @wsTabMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get wsTabMembers;
+
+  /// No description provided for @wsTabClaude.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude'**
+  String get wsTabClaude;
+
+  /// No description provided for @wsTabBilling.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing'**
+  String get wsTabBilling;
+
+  /// No description provided for @wsGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace'**
+  String get wsGeneral;
+
+  /// No description provided for @wsGeneralSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Its name and the address in links.'**
+  String get wsGeneralSub;
+
+  /// No description provided for @wsName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get wsName;
+
+  /// No description provided for @wsSlug.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get wsSlug;
+
+  /// No description provided for @wsSlugHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Links to this workspace: /w/{slug}. Old links stop working when it changes.'**
+  String wsSlugHelp(String slug);
+
+  /// No description provided for @wsSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get wsSave;
+
+  /// No description provided for @wsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace saved'**
+  String get wsSaved;
+
+  /// No description provided for @wsReadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the owner can change this.'**
+  String get wsReadOnly;
+
+  /// No description provided for @wsPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get wsPlan;
+
+  /// No description provided for @wsSlots.
+  ///
+  /// In en, this message translates to:
+  /// **'Parallel runs'**
+  String get wsSlots;
+
+  /// No description provided for @wsSlotsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'How many runs this workspace may have at once. Change it in Billing.'**
+  String get wsSlotsHelp;
+
+  /// No description provided for @wsTrialEnds.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial until {date}'**
+  String wsTrialEnds(String date);
+
+  /// No description provided for @wsSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'This workspace is suspended: nothing new starts until it is resumed.'**
+  String get wsSuspended;
+
+  /// No description provided for @wsDanger.
+  ///
+  /// In en, this message translates to:
+  /// **'Danger zone'**
+  String get wsDanger;
+
+  /// No description provided for @wsDangerSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting stops every run and removes the workspace, its repositories\' copies, tickets and history. It is kept 7 days for undo, then purged.'**
+  String get wsDangerSub;
+
+  /// No description provided for @wsDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete workspace'**
+  String get wsDelete;
+
+  /// No description provided for @wsDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name}?'**
+  String wsDeleteTitle(String name);
+
+  /// No description provided for @wsDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the address ({slug}) to confirm. Everyone loses access.'**
+  String wsDeleteBody(String slug);
+
+  /// No description provided for @wsDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace deleted'**
+  String get wsDeleted;
+
+  /// No description provided for @wsMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get wsMembers;
+
+  /// No description provided for @wsMembersSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone in the workspace sees its tickets and can create, answer, review and retry them. The owner also manages settings, integrations, Claude, members and billing.'**
+  String get wsMembersSub;
+
+  /// No description provided for @wsYou.
+  ///
+  /// In en, this message translates to:
+  /// **'you'**
+  String get wsYou;
+
+  /// No description provided for @wsRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get wsRemove;
+
+  /// No description provided for @wsRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}?'**
+  String wsRemoveTitle(String name);
+
+  /// No description provided for @wsRemoveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'They lose access to this workspace. Their tickets stay.'**
+  String get wsRemoveBody;
+
+  /// No description provided for @wsRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} removed'**
+  String wsRemoved(String name);
+
+  /// No description provided for @wsMakeOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Make owner'**
+  String get wsMakeOwner;
+
+  /// No description provided for @wsTransferTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Make {name} the owner?'**
+  String wsTransferTitle(String name);
+
+  /// No description provided for @wsTransferBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You stay a member but can no longer change settings, members or billing.'**
+  String get wsTransferBody;
+
+  /// No description provided for @wsTransferred.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is the owner now'**
+  String wsTransferred(String name);
+
+  /// No description provided for @wsLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave workspace'**
+  String get wsLeave;
+
+  /// No description provided for @wsLeaveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave {name}?'**
+  String wsLeaveTitle(String name);
+
+  /// No description provided for @wsLeaveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You lose access until someone invites you again.'**
+  String get wsLeaveBody;
+
+  /// No description provided for @wsOwnerCannotLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'The owner cannot leave: make someone else the owner first.'**
+  String get wsOwnerCannotLeave;
+
+  /// No description provided for @wsClaudeBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude connected'**
+  String get wsClaudeBadge;
+
+  /// No description provided for @wsNoClaudeBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'No Claude'**
+  String get wsNoClaudeBadge;
+
+  /// No description provided for @wsInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite people'**
+  String get wsInvite;
+
+  /// No description provided for @wsInviteSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a link by email, or make a link to share yourself. Links work for 7 days and once.'**
+  String get wsInviteSub;
+
+  /// No description provided for @wsInviteEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email (optional)'**
+  String get wsInviteEmail;
+
+  /// No description provided for @wsInviteSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Create invite'**
+  String get wsInviteSend;
+
+  /// No description provided for @wsInviteLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite link (shown once)'**
+  String get wsInviteLink;
+
+  /// No description provided for @wsInviteEmailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent to {email}'**
+  String wsInviteEmailed(String email);
+
+  /// No description provided for @wsInviteCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get wsInviteCopy;
+
+  /// No description provided for @wsInvites.
+  ///
+  /// In en, this message translates to:
+  /// **'Open invites'**
+  String get wsInvites;
+
+  /// No description provided for @wsInviteAnyone.
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone with the link'**
+  String get wsInviteAnyone;
+
+  /// No description provided for @wsInviteExpires.
+  ///
+  /// In en, this message translates to:
+  /// **'expires {date}'**
+  String wsInviteExpires(String date);
+
+  /// No description provided for @wsRevoke.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke'**
+  String get wsRevoke;
+
+  /// No description provided for @wsRevoked.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite revoked'**
+  String get wsRevoked;
+
+  /// No description provided for @wsMemberLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} of {limit} members'**
+  String wsMemberLimit(String n, String limit);
+
+  /// No description provided for @wsMemberLimitNone.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} member} other {{n} members}}'**
+  String wsMemberLimitNone(num n);
+
+  /// No description provided for @wsClaude.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude'**
+  String get wsClaude;
+
+  /// No description provided for @wsClaudeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Which Claude account this workspace\'s runs use.'**
+  String get wsClaudeSub;
+
+  /// No description provided for @wsMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Mode'**
+  String get wsMode;
+
+  /// No description provided for @wsModeShared.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared'**
+  String get wsModeShared;
+
+  /// No description provided for @wsModeSharedHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Every run uses the workspace\'s account, set here by the owner.'**
+  String get wsModeSharedHelp;
+
+  /// No description provided for @wsModeMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Per member'**
+  String get wsModeMember;
+
+  /// No description provided for @wsModeMemberHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Each run uses the account of the ticket\'s member. Members connect theirs in their profile.'**
+  String get wsModeMemberHelp;
+
+  /// No description provided for @wsConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace account'**
+  String get wsConnection;
+
+  /// No description provided for @wsConnectionSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Used by every run in shared mode.'**
+  String get wsConnectionSub;
+
+  /// No description provided for @wsKind.
+  ///
+  /// In en, this message translates to:
+  /// **'Kind'**
+  String get wsKind;
+
+  /// No description provided for @wsKindSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude subscription'**
+  String get wsKindSubscription;
+
+  /// No description provided for @wsKindApiKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Anthropic API key'**
+  String get wsKindApiKey;
+
+  /// No description provided for @wsKindSubscriptionHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Run `claude setup-token` where you are signed in to your Claude plan, and paste the token.'**
+  String get wsKindSubscriptionHelp;
+
+  /// No description provided for @wsKindApiKeyHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a key in the Anthropic Console (sk-ant-api…). Usage is billed by Anthropic to its owner.'**
+  String get wsKindApiKeyHelp;
+
+  /// No description provided for @wsSubscriptionsOff.
+  ///
+  /// In en, this message translates to:
+  /// **'This server takes Anthropic API keys only.'**
+  String get wsSubscriptionsOff;
+
+  /// No description provided for @wsToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Token'**
+  String get wsToken;
+
+  /// No description provided for @wsConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get wsConnect;
+
+  /// No description provided for @wsReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get wsReplace;
+
+  /// No description provided for @wsDisconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get wsDisconnect;
+
+  /// No description provided for @wsConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get wsConnected;
+
+  /// No description provided for @wsNotConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not connected'**
+  String get wsNotConnected;
+
+  /// No description provided for @wsPausedUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'At its limit until {time}'**
+  String wsPausedUntil(String time);
+
+  /// No description provided for @wsConnectedAs.
+  ///
+  /// In en, this message translates to:
+  /// **'{account} · …{hint}'**
+  String wsConnectedAs(String account, String hint);
+
+  /// No description provided for @wsFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue on credits'**
+  String get wsFallback;
+
+  /// No description provided for @wsFallbackHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'When the chosen account is at its limit or missing, runs continue on agnts\'s API key and spend the workspace\'s credits instead of pausing.'**
+  String get wsFallbackHelp;
+
+  /// No description provided for @wsFallbackOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Credits are not available on this server.'**
+  String get wsFallbackOff;
+
+  /// No description provided for @wsCredits.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} credit} other {{n} credits}}'**
+  String wsCredits(num n);
+
+  /// No description provided for @wsDefaultMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets without a person'**
+  String get wsDefaultMember;
+
+  /// No description provided for @wsDefaultMemberHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets from Jira, Plane, follow-ups and incidents run on this member\'s account in per-member mode.'**
+  String get wsDefaultMemberHelp;
+
+  /// No description provided for @wsDefaultOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'The owner'**
+  String get wsDefaultOwner;
+
+  /// No description provided for @wsMemberAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Members\' accounts'**
+  String get wsMemberAccounts;
+
+  /// No description provided for @wsMemberAccountsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Who has connected their own Claude account (Profile → Claude).'**
+  String get wsMemberAccountsSub;
+
+  /// No description provided for @wsYourAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect yours in your profile'**
+  String get wsYourAccount;
+
+  /// No description provided for @wsClaudeSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude settings saved'**
+  String get wsClaudeSaved;
+
+  /// No description provided for @wsRole_viewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewer'**
+  String get wsRole_viewer;
+
+  /// No description provided for @wsViewerBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'You are a viewer here: you can see everything, but you cannot change anything.'**
+  String get wsViewerBanner;
+
+  /// No description provided for @wsInviteAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Joins as'**
+  String get wsInviteAs;
+
+  /// No description provided for @wsInviteAsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Members work on tickets; viewers only look.'**
+  String get wsInviteAsHelp;
+
+  /// No description provided for @wsRoleChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is now {role}'**
+  String wsRoleChanged(String name, String role);
+
+  /// No description provided for @wsRoleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Role of {name}'**
+  String wsRoleLabel(String name);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

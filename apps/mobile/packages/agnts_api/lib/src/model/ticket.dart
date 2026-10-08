@@ -6,6 +6,7 @@
 import 'package:agnts_api/src/model/follow_ups_mode.dart';
 import 'package:agnts_api/src/model/blocker.dart';
 import 'package:agnts_api/src/model/token_spend.dart';
+import 'package:agnts_api/src/model/wait_reason.dart';
 import 'package:agnts_api/src/model/ticket_kind.dart';
 import 'package:agnts_api/src/model/ticket_state.dart';
 import 'package:agnts_api/src/model/model_overrides.dart';
@@ -43,6 +44,8 @@ class Ticket {
      this.resumeState,
 
     required  this.revision,
+
+     this.replayOf,
 
     required  this.turns,
 
@@ -97,6 +100,18 @@ class Ticket {
      this.canPreview,
 
      this.spend,
+
+     this.waitReason,
+
+     this.waitMessage,
+
+     this.queuedAt,
+
+     this.memberId,
+
+     this.member,
+
+     this.createdBy,
 
     required  this.createdAt,
 
@@ -208,6 +223,19 @@ class Ticket {
 
 
   final int revision;
+
+
+
+      /// For a replay: the done ticket it re-runs. Replays are never pushed.
+  @JsonKey(
+    
+    name: r'replayOf',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? replayOf;
 
 
 
@@ -552,6 +580,83 @@ class Ticket {
 
   @JsonKey(
     
+    name: r'waitReason',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final WaitReason? waitReason;
+
+
+
+      /// Why it waits, in a sentence
+  @JsonKey(
+    
+    name: r'waitMessage',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? waitMessage;
+
+
+
+      /// When it started waiting for a worker
+  @JsonKey(
+    
+    name: r'queuedAt',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final DateTime? queuedAt;
+
+
+
+      /// Whose ticket it is (per-member Claude mode runs on their account)
+  @JsonKey(
+    
+    name: r'memberId',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? memberId;
+
+
+
+      /// The member's username
+  @JsonKey(
+    
+    name: r'member',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? member;
+
+
+
+      /// Who created it; absent for webhooks and agnts
+  @JsonKey(
+    
+    name: r'createdBy',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? createdBy;
+
+
+
+  @JsonKey(
+    
     name: r'createdAt',
     required: true,
     includeIfNull: false,
@@ -587,6 +692,7 @@ class Ticket {
       other.state == state &&
       other.resumeState == resumeState &&
       other.revision == revision &&
+      other.replayOf == replayOf &&
       other.turns == turns &&
       other.branch == branch &&
       other.prNumber == prNumber &&
@@ -614,6 +720,12 @@ class Ticket {
       other.previewCompare == previewCompare &&
       other.canPreview == canPreview &&
       other.spend == spend &&
+      other.waitReason == waitReason &&
+      other.waitMessage == waitMessage &&
+      other.queuedAt == queuedAt &&
+      other.memberId == memberId &&
+      other.member == member &&
+      other.createdBy == createdBy &&
       other.createdAt == createdAt &&
       other.updatedAt == updatedAt;
 
@@ -628,6 +740,7 @@ class Ticket {
         state.hashCode +
         resumeState.hashCode +
         revision.hashCode +
+        replayOf.hashCode +
         turns.hashCode +
         branch.hashCode +
         prNumber.hashCode +
@@ -655,6 +768,12 @@ class Ticket {
         previewCompare.hashCode +
         canPreview.hashCode +
         spend.hashCode +
+        waitReason.hashCode +
+        waitMessage.hashCode +
+        queuedAt.hashCode +
+        memberId.hashCode +
+        member.hashCode +
+        createdBy.hashCode +
         createdAt.hashCode +
         updatedAt.hashCode;
 

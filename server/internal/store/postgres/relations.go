@@ -26,12 +26,15 @@ const inFlightSQL = `(b.head_sha <> '' OR b.state IN ('testing', 'waiting_for_re
 // it back: an active dependency that has not landed, or an active conflict
 // whose other side is changing the code right now. Columns: key, title,
 // state, relation type.
-const blockersSQL = `SELECT b.key, b.title, b.state, r.type FROM ticket_relations r JOIN tickets b ON b.key = r.other_key
-		WHERE r.ticket_key = t.key AND r.type = 'depends_on' AND r.status = 'active' AND NOT ` + releasesSQL + `
+// Keys are unique per workspace: every join by key also matches the
+// workspace, since the queue reads all workspaces at once.
+const blockersSQL = `SELECT b.key, b.title, b.state, r.type FROM ticket_relations r
+		JOIN tickets b ON b.workspace_id = r.workspace_id AND b.key = r.other_key
+		WHERE r.workspace_id = t.workspace_id AND r.ticket_key = t.key AND r.type = 'depends_on' AND r.status = 'active' AND NOT ` + releasesSQL + `
 	UNION ALL
 	SELECT b.key, b.title, b.state, r.type FROM ticket_relations r
-		JOIN tickets b ON b.key = CASE WHEN r.ticket_key = t.key THEN r.other_key ELSE r.ticket_key END
-		WHERE (r.ticket_key = t.key OR r.other_key = t.key) AND r.type = 'conflicts' AND r.status = 'active'
+		JOIN tickets b ON b.workspace_id = r.workspace_id AND b.key = CASE WHEN r.ticket_key = t.key THEN r.other_key ELSE r.ticket_key END
+		WHERE r.workspace_id = t.workspace_id AND (r.ticket_key = t.key OR r.other_key = t.key) AND r.type = 'conflicts' AND r.status = 'active'
 		  AND ` + inFlightSQL + ` AND NOT ` + releasesSQL
 
 // waitsSQL is true when ticket t may not start coding. Only the first
@@ -49,8 +52,8 @@ const priorityRankSQL = `(CASE lower(t.priority) WHEN 'highest' THEN 5 WHEN 'blo
 
 // unblocksSQL counts the open tickets that wait for ticket t: among equal
 // priorities, the one that frees the most work goes first.
-const unblocksSQL = `(SELECT count(*) FROM ticket_relations r JOIN tickets d ON d.key = r.ticket_key
-	WHERE r.other_key = t.key AND r.type = 'depends_on' AND r.status = 'active' AND d.state NOT IN ('done', 'rejected'))`
+const unblocksSQL = `(SELECT count(*) FROM ticket_relations r JOIN tickets d ON d.workspace_id = r.workspace_id AND d.key = r.ticket_key
+	WHERE r.workspace_id = t.workspace_id AND r.other_key = t.key AND r.type = 'depends_on' AND r.status = 'active' AND d.state NOT IN ('done', 'rejected'))`
 
 const relationCols = `id, ticket_key, other_key, type, source, status, confidence, reason, basis, files, COALESCE(found_by, ''), confirmed_at, decided_at, created_at`
 
@@ -325,7 +328,7 @@ func (s *Agent) RelationCandidates(ctx context.Context, repoID int64, except str
 	rows, err := s.db.Query(ctx, `SELECT `+ticketCols+`, a.summary FROM tickets t
 		LEFT JOIN LATERAL (SELECT res.summary FROM results res JOIN runs ON runs.id = res.run_id
 			WHERE runs.ticket_id = t.id AND runs.stage = 'analyze' ORDER BY res.created_at DESC LIMIT 1) a ON true
-		WHERE t.repo_id = $1 AND t.key <> $2 AND (t.state NOT IN ('done', 'rejected')
+		WHERE t.repo_id = $1 AND t.key <> $2 AND t.replay_of = '' AND (t.state NOT IN ('done', 'rejected')
 			OR (t.state = 'done' AND t.merged_at IS NULL AND t.kind IN ('code', 'test') AND NOT (t.after_approve = 'main' AND t.source = 'local')))
 		ORDER BY t.updated_at DESC LIMIT $3`, repoID, except, limit)
 	if err != nil {
@@ -351,7 +354,7 @@ func (s *Agent) InFlightResults(ctx context.Context, repoID int64, except string
 	rows, err := s.db.Query(ctx, `SELECT `+ticketCols+`, c.files FROM tickets t
 		JOIN LATERAL (SELECT res.files FROM results res JOIN runs ON runs.id = res.run_id
 			WHERE runs.ticket_id = t.id AND runs.stage = 'code' ORDER BY res.created_at DESC LIMIT 1) c ON true
-		WHERE t.repo_id = $1 AND t.key <> $2 AND t.head_sha <> '' AND t.kind IN ('code', 'test')
+		WHERE t.repo_id = $1 AND t.key <> $2 AND t.replay_of = '' AND t.head_sha <> '' AND t.kind IN ('code', 'test')
 		  AND t.state NOT IN ('rejected') AND t.merged_at IS NULL AND NOT (t.state = 'done' AND t.after_approve = 'main' AND t.source = 'local')
 		ORDER BY t.updated_at DESC LIMIT 50`, repoID, except)
 	if err != nil {

@@ -6,6 +6,8 @@ import (
 	"errors"
 	"time"
 
+	"strconv"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"agnts/internal/domain"
@@ -34,21 +36,37 @@ func NewIntegrations(db *pgxpool.Pool, box *secret.Box) *Integrations {
 	return &Integrations{db: db, box: box}
 }
 
-func integrationAAD(provider string) []byte { return []byte("integration:" + provider) }
+// integrationAAD binds a sealed token to its workspace and provider, so
+// a token copied to another workspace's row does not open.
+func integrationAAD(ws int64, provider string) []byte {
+	return []byte("integration:" + strconv.FormatInt(ws, 10) + ":" + provider)
+}
 
-// Get returns a provider's integration, or domain.ErrNotFound.
+// legacyAAD is how tokens were sealed before workspaces; they open until
+// the integration is saved again.
+func legacyAAD(provider string) []byte { return []byte("integration:" + provider) }
+
+// Get returns a provider's integration in the workspace ctx acts in, or
+// domain.ErrNotFound.
 func (s *Integrations) Get(ctx context.Context, provider string) (Integration, error) {
 	in := Integration{Provider: provider}
+	ws, err := domain.MustWorkspace(ctx)
+	if err != nil {
+		return in, err
+	}
 	var enc, settings []byte
-	err := s.db.QueryRow(ctx, `SELECT connected, token_enc, settings, checked_at, account, last_error FROM integrations WHERE provider = $1`, provider).
+	err = s.db.QueryRow(ctx, `SELECT connected, token_enc, settings, checked_at, account, last_error FROM integrations
+		WHERE workspace_id = $1 AND provider = $2`, ws, provider).
 		Scan(&in.Connected, &enc, &settings, &in.CheckedAt, &in.Account, &in.LastError)
 	if err != nil {
 		return in, notFound(err)
 	}
 	if len(enc) > 0 {
-		pt, err := s.box.Open(enc, integrationAAD(provider))
+		pt, err := s.box.Open(enc, integrationAAD(ws, provider))
 		if err != nil {
-			return in, err
+			if pt, err = s.box.Open(enc, legacyAAD(provider)); err != nil {
+				return in, err
+			}
 		}
 		in.Token = string(pt)
 	}
@@ -61,18 +79,27 @@ func (s *Integrations) Get(ctx context.Context, provider string) (Integration, e
 
 // Put saves a provider's token and settings and marks it connected.
 func (s *Integrations) Put(ctx context.Context, in Integration) error {
+	ws, err := domain.MustWorkspace(ctx)
+	if err != nil {
+		return err
+	}
+	if in.Token == "" {
+		// Keep the stored token, sealed for this workspace.
+		if cur, err := s.Get(ctx, in.Provider); err == nil {
+			in.Token = cur.Token
+		}
+	}
 	var enc []byte
 	if in.Token != "" {
-		var err error
-		if enc, err = s.box.Seal([]byte(in.Token), integrationAAD(in.Provider)); err != nil {
+		if enc, err = s.box.Seal([]byte(in.Token), integrationAAD(ws, in.Provider)); err != nil {
 			return err
 		}
 	}
 	settings, _ := json.Marshal(in.Settings)
-	_, err := s.db.Exec(ctx, `INSERT INTO integrations (provider, connected, token_enc, settings, checked_at, account, last_error)
-		VALUES ($1, true, $2, $3, now(), $4, '')
-		ON CONFLICT (provider) DO UPDATE SET connected = true, token_enc = COALESCE($2, integrations.token_enc),
-			settings = $3, checked_at = now(), account = $4, last_error = '', updated_at = now()`, in.Provider, enc, settings, in.Account)
+	_, err = s.db.Exec(ctx, `INSERT INTO integrations (workspace_id, provider, connected, token_enc, settings, checked_at, account, last_error)
+		VALUES ($1, $2, true, $3, $4, now(), $5, '')
+		ON CONFLICT (workspace_id, provider) DO UPDATE SET connected = true, token_enc = COALESCE($3, integrations.token_enc),
+			settings = $4, checked_at = now(), account = $5, last_error = '', updated_at = now()`, ws, in.Provider, enc, settings, in.Account)
 	return err
 }
 

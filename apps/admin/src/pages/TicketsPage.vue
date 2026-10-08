@@ -1,24 +1,30 @@
 <script setup lang="ts">
-import { useQuery } from '@tanstack/vue-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { api, unwrap } from '../api/client'
+import { api, HttpError, unwrap } from '../api/client'
 import { FILTERS, TERMINAL, BOARD_GROUPS } from '../api/types'
 import PageHeader from '../components/PageHeader.vue'
 import StateBadge from '../components/StateBadge.vue'
+import WaitBadge from '../components/WaitBadge.vue'
 import KindBadge from '../components/ticket/KindBadge.vue'
 import TicketBoard, { type BoardColumn } from '../components/TicketBoard.vue'
 import SegButtons from '../components/form/SegButtons.vue'
+import { TRACKERS, type Tracker } from '../components/integrations/providers'
+import { useIntegrations } from '../components/integrations/useIntegrations'
 import { useListView } from '../composables/useListView'
 import { ago, fmtTokens, ioTokens, level, pct } from '../composables/format'
 import { livePoll } from '../composables/useLive'
 import { useUi } from '../stores/ui'
+import { useWorkspace } from '../stores/workspace'
 
 const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const ui = useUi()
+const workspace = useWorkspace()
+const qc = useQueryClient()
 
 const filter = computed(() => FILTERS.find((f) => f.id === route.query.f) ?? FILTERS[0])
 
@@ -40,8 +46,24 @@ const rows = computed(() => {
   const q = ui.search.trim().toLowerCase()
   return (tickets.data.value ?? []).filter((x) => !q || `${x.key} ${x.title}`.toLowerCase().includes(q))
 })
+// All tickets: a sync button per connected tracker (Jira, Plane), for
+// those who may change the workspace.
+const integrations = useIntegrations()
+const trackers = computed(() =>
+  filter.value.id === 'all' && workspace.canEdit
+    ? TRACKERS.filter((p) => integrations.data.value?.some((i) => i.provider === p && i.connected))
+    : [],
+)
+const sync = useMutation({
+  mutationFn: async (p: Tracker) => ({ p, r: await unwrap(p === 'plane' ? api.POST('/integrations/plane/sync') : api.POST('/integrations/jira/sync')) }),
+  onSuccess: ({ p, r }) => {
+    ui.notify(t(p === 'plane' ? 'nav.syncedPlane' : 'nav.synced', { found: r.found, created: r.created }))
+    void qc.invalidateQueries({ queryKey: ['tickets'] })
+  },
+  onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
+})
 const session5 = computed(() => dash.data.value?.usage.fiveHour.utilization)
-const open = (key: string) => router.push(`/tickets/${key}`)
+const open = (key: string) => router.push({ name: 'ticket', params: { key: key } })
 const { view, options: viewOptions } = useListView('tickets')
 // Board: All tickets gets a column per group; a single group (Running,
 // Needs you...) gets a column per state, which says more.
@@ -53,7 +75,13 @@ const columns = computed<BoardColumn[]>(() =>
 </script>
 
 <template>
-  <PageHeader :title="t(`nav.${filter.id}`)" doc="list" />
+  <PageHeader :title="t(`nav.${filter.id}`)" doc="list">
+    <div v-if="trackers.length" class="row-actions">
+      <button v-for="p in trackers" :key="p" class="btn btn-s" :disabled="sync.isPending.value" @click="sync.mutate(p)">
+        <span v-if="sync.isPending.value && sync.variables.value === p" class="spin" aria-hidden="true" />{{ t(p === 'plane' ? 'nav.syncPlane' : 'nav.syncJira') }}
+      </button>
+    </div>
+  </PageHeader>
 
   <div v-if="filter.id === 'needs' && dash.data.value" class="g4">
     <div class="card stat">
@@ -112,7 +140,7 @@ const columns = computed<BoardColumn[]>(() =>
             </td>
             <td class="muted">{{ tk.repoName ?? '—' }}</td>
             <td>
-              <StateBadge :state="tk.state" :kind="tk.kind" />
+              <StateBadge :state="tk.state" :kind="tk.kind" /> <WaitBadge :ticket="tk" />
               <span v-if="tk.revision > 0 && !TERMINAL.includes(tk.state)" class="hint"> {{ t('tickets.rev', { n: tk.revision }) }}</span>
             </td>
             <td class="muted num" :title="tk.spend ? t('spend.tokens', { n: ioTokens(tk.spend).toLocaleString(locale) }) : undefined">

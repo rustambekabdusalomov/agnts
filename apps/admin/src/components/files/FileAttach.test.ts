@@ -49,11 +49,25 @@ describe('FileAttach', () => {
     expect(w.emitted('update:modelValue')).toBeUndefined()
   })
 
+  it('previews pictures before they are sent', async () => {
+    URL.createObjectURL = vi.fn(() => 'blob:shot')
+    URL.revokeObjectURL = vi.fn()
+    const w = setup()
+    await pick(w, [new File(['p'], 'shot.png', { type: 'image/png' }), new File(['a'], 'notes.txt')])
+    expect(w.find('.fa-pic img').attributes('src')).toBe('blob:shot')
+    expect(w.findAll('.fa-pic')).toHaveLength(1)
+    expect(w.findAll('.fa-item')).toHaveLength(1)
+    // A picture the browser cannot draw falls back to a row.
+    await w.find('.fa-pic img').trigger('error')
+    expect(w.findAll('.fa-pic')).toHaveLength(0)
+    expect(w.findAll('.fa-item')).toHaveLength(2)
+  })
+
   it('deletes an upload when it is removed', async () => {
     const w = setup()
     await pick(w, [new File(['a'], 'c.txt')])
     await w.find('.fa-x').trigger('click')
-    expect(del).toHaveBeenCalledWith('/attachments/{id}', { params: { path: { id: 3 } } })
+    expect(del).toHaveBeenCalledWith('/attachments/{id}', { params: { path: { id: 5 } } })
     const ids = w.emitted('update:modelValue')
     expect(ids?.[ids.length - 1]).toEqual([[]])
   })

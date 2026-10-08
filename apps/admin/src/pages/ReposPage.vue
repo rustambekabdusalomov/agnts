@@ -88,7 +88,7 @@ function onPick(r: RemoteRepository) {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="r in rows" :key="r.id" tabindex="0" @click="router.push(`/repos/${r.id}`)" @keydown.enter="router.push(`/repos/${r.id}`)">
+          <tr v-for="r in rows" :key="r.id" tabindex="0" @click="router.push({ name: 'repo', params: { id: r.id } })" @keydown.enter="router.push({ name: 'repo', params: { id: r.id } })">
             <td>
               <div class="ttitle">{{ r.name }}</div>
               <div class="tkey">{{ r.cloneUrl }}</div>

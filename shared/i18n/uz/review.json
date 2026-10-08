@@ -34,6 +34,8 @@
     "added": "Fikrda",
     "addAll": "Hammasini fikrga qoʻshish",
     "showInDiff": "Diffda koʻrsatish",
-    "model": "{model} koʻrib chiqdi: {reason}"
+    "model": "{model} koʻrib chiqdi: {reason}",
+    "cat_architecture": "Arxitektura",
+    "cat_scope": "Vazifa doirasi"
   }
 }

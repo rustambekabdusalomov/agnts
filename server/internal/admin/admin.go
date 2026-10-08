@@ -34,7 +34,7 @@ func invalid(format string, a ...any) error {
 }
 
 // Providers agnts knows how to connect, in display order.
-var Providers = []string{"jira", "plane", "github", "claude", "telegram", "gitlab"}
+var Providers = []string{"jira", "plane", "github", "telegram", "gitlab"}
 
 // settingKeys lists the non-secret settings each provider accepts.
 var settingKeys = map[string][]string{
@@ -68,8 +68,18 @@ type Integrations struct {
 	publicURL string
 	log       *slog.Logger
 
-	telegramAPI    string            // Bot API base; tests point it at a fake
-	webhookSecrets map[string]string // provider -> derived webhook secret
+	telegramAPI string     // Bot API base; tests point it at a fake
+	hooks       HookSource // the workspace's webhook URLs and secrets
+}
+
+// HookSource gives the webhook URLs and secrets of the workspace a context
+// acts in: each workspace has its own.
+type HookSource interface {
+	// HookID is the id in the workspace's webhook URLs.
+	HookID(ctx context.Context) (string, error)
+	// Secret is the derived webhook secret for GitHub or GitLab; "" for
+	// providers that bring their own.
+	Secret(ctx context.Context, provider string) string
 }
 
 // SetPlane gives the service the Plane client and the linked projects,
@@ -78,8 +88,20 @@ func (s *Integrations) SetPlane(c *plane.Client, projects plane.Projects) {
 	s.plane, s.planeOf = c, projects
 }
 
-// SetWebhookSecrets sets the GitHub and GitLab webhook secrets shown on their pages.
-func (s *Integrations) SetWebhookSecrets(m map[string]string) { s.webhookSecrets = m }
+// SetHooks sets where webhook URLs and the GitHub and GitLab secrets
+// shown on their pages come from.
+func (s *Integrations) SetHooks(h HookSource) { s.hooks = h }
+
+// hookURL is the workspace's webhook URL for provider.
+func (s *Integrations) hookURL(ctx context.Context, provider string) string {
+	u := s.publicURL + "/webhooks/" + provider
+	if s.hooks != nil {
+		if id, err := s.hooks.HookID(ctx); err == nil && id != "" {
+			u += "/" + id
+		}
+	}
+	return u
+}
 
 // NewIntegrations returns the integrations service.
 func NewIntegrations(store *postgres.Integrations, events interface {
@@ -114,7 +136,7 @@ type View struct {
 	in               postgres.Integration
 }
 
-func (s *Integrations) view(in postgres.Integration) View {
+func (s *Integrations) view(ctx context.Context, in postgres.Integration) View {
 	v := View{Provider: in.Provider, Connected: in.Connected, Account: in.Account, LastError: in.LastError, Settings: in.Settings, in: in}
 	if in.CheckedAt != nil {
 		t := in.CheckedAt.UTC().Format("2006-01-02T15:04:05Z07:00")
@@ -130,19 +152,21 @@ func (s *Integrations) view(in postgres.Integration) View {
 		if c, _, err := jira.FromIntegration(in.Token, in.Settings, in.Connected); err == nil {
 			tok = c.APIToken
 		}
-		v.WebhookURL = s.publicURL + "/webhooks/jira"
+		v.WebhookURL = s.hookURL(ctx, "jira")
 	}
 	if in.Provider == "plane" {
 		if c, _, err := plane.FromIntegration(in.Token, in.Settings, in.Connected); err == nil {
 			tok, v.WebhookSecretSet = c.APIKey, c.WebhookSecret != ""
 		}
-		v.WebhookURL = s.publicURL + "/webhooks/plane"
+		v.WebhookURL = s.hookURL(ctx, "plane")
 	}
 	if in.Provider == "telegram" {
-		v.WebhookURL = s.publicURL + "/webhooks/telegram"
+		v.WebhookURL = s.hookURL(ctx, "telegram")
 	}
-	if sec, ok := s.webhookSecrets[in.Provider]; ok && in.Connected {
-		v.WebhookURL, v.WebhookSecret = s.publicURL+"/webhooks/"+in.Provider, sec
+	if (in.Provider == "github" || in.Provider == "gitlab") && in.Connected && s.hooks != nil {
+		if sec := s.hooks.Secret(ctx, in.Provider); sec != "" {
+			v.WebhookURL, v.WebhookSecret = s.hookURL(ctx, in.Provider), sec
+		}
 	}
 	if len(tok) >= 4 && in.Connected {
 		v.TokenHint = tok[len(tok)-4:]
@@ -169,7 +193,7 @@ func (s *Integrations) List(ctx context.Context) ([]View, error) {
 		if !ok {
 			in = postgres.Integration{Provider: p, Settings: map[string]string{}}
 		}
-		out = append(out, s.view(in))
+		out = append(out, s.view(ctx, in))
 	}
 	return out, nil
 }
@@ -198,6 +222,9 @@ func (s *Integrations) Connect(ctx context.Context, provider, token string, sett
 	if err != nil {
 		return View{}, "", err
 	}
+	if provider == "claude" {
+		return View{}, "", invalid("Claude is connected per workspace now: Workspace settings → Claude")
+	}
 	check, ok := s.checkers[provider]
 	if !ok {
 		return View{}, "", invalid("%s cannot be connected in this version", provider)
@@ -216,7 +243,7 @@ func (s *Integrations) Connect(ctx context.Context, provider, token string, sett
 		b := make([]byte, 24)
 		_, _ = rand.Read(b)
 		hook := hex.EncodeToString(b)
-		if err := notify.NewBot(s.telegramAPI, token).SetWebhook(ctx, s.publicURL+"/webhooks/telegram", hook); err != nil {
+		if err := notify.NewBot(s.telegramAPI, token).SetWebhook(ctx, s.hookURL(ctx, "telegram"), hook); err != nil {
 			return View{}, "", invalid("could not register the Telegram webhook: %v", err)
 		}
 		stored = notify.TelegramToken(token, hook)
@@ -259,7 +286,7 @@ func (s *Integrations) Connect(ctx context.Context, provider, token string, sett
 	}
 	s.changed(ctx, provider, origin, "connected as "+account)
 	in, err := s.store.Get(ctx, provider)
-	return s.view(in), secret, err
+	return s.view(ctx, in), secret, err
 }
 
 // Test checks the stored token again.
@@ -270,7 +297,7 @@ func (s *Integrations) Test(ctx context.Context, provider string) (View, error) 
 	}
 	check, ok := s.checkers[provider]
 	if !ok || !in.Connected {
-		return s.view(in), invalid("%s is not connected", provider)
+		return s.view(ctx, in), invalid("%s is not connected", provider)
 	}
 	token := in.Token
 	switch provider {
@@ -302,7 +329,7 @@ func (s *Integrations) Test(ctx context.Context, provider string) (View, error) 
 		return View{}, err
 	}
 	in, err = s.store.Get(ctx, provider)
-	return s.view(in), err
+	return s.view(ctx, in), err
 }
 
 // Disconnect forgets a provider's token.
@@ -316,9 +343,9 @@ func (s *Integrations) Disconnect(ctx context.Context, provider string, origin d
 	s.changed(ctx, provider, origin, "disconnected")
 	in, err := s.store.Get(ctx, provider)
 	if errors.Is(err, domain.ErrNotFound) {
-		return s.view(postgres.Integration{Provider: provider}), nil
+		return s.view(ctx, postgres.Integration{Provider: provider}), nil
 	}
-	return s.view(in), err
+	return s.view(ctx, in), err
 }
 
 // Update replaces non-secret settings.
@@ -342,7 +369,7 @@ func (s *Integrations) Update(ctx context.Context, provider string, settings map
 	}
 	s.changed(ctx, provider, origin, "settings changed")
 	in, err := s.store.Get(ctx, provider)
-	return s.view(in), err
+	return s.view(ctx, in), err
 }
 
 // SyncJira picks up labelled open issues now.
@@ -401,7 +428,7 @@ func (s *Integrations) SetPlaneWebhookSecret(ctx context.Context, secret string,
 	}
 	s.changed(ctx, "plane", origin, "webhook secret saved")
 	in, err = s.store.Get(ctx, "plane")
-	return s.view(in), err
+	return s.view(ctx, in), err
 }
 
 // PlaneState is a state name in the linked Plane projects.
@@ -526,7 +553,13 @@ type Repos struct {
 	remotes    map[string]RemoteLister
 	local      LocalLister
 	log        *slog.Logger
+	// onArchive frees what an archived repository held on the server
+	// (its package cache); nil does nothing.
+	onArchive func(ctx context.Context, repo domain.Repository)
 }
+
+// OnArchive sets what frees an archived repository's server resources.
+func (r *Repos) OnArchive(f func(ctx context.Context, repo domain.Repository)) { r.onArchive = f }
 
 // PreviewEnvSetter stores a repository's sealed preview environment.
 type PreviewEnvSetter interface {
@@ -1018,6 +1051,9 @@ func (r *Repos) SetArchived(ctx context.Context, id int64, archived bool, origin
 	msg := x.Name + " restored from the archive"
 	if archived {
 		msg = x.Name + " archived"
+		if r.onArchive != nil {
+			r.onArchive(context.WithoutCancel(ctx), x)
+		}
 	}
 	if err := r.store.AppendEvent(ctx, domain.Event{Type: domain.EventRepoArchived, Origin: origin, Message: msg,
 		Data: map[string]any{"repo": x.Name, "archived": archived}}); err != nil {

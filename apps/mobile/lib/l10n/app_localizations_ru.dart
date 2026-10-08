@@ -9,6 +9,316 @@ class AppLocalizationsRu extends AppLocalizations {
   AppLocalizationsRu([String locale = 'ru']) : super(locale);
 
   @override
+  String get accountSignupTitle => 'Создайте аккаунт';
+
+  @override
+  String get accountSignupLede => 'Для начала у вас будет своё рабочее пространство.';
+
+  @override
+  String accountSignupInviteLede(String workspace) {
+    return 'Создайте аккаунт, чтобы присоединиться к $workspace.';
+  }
+
+  @override
+  String get accountSignupClosed => 'Регистрация на этом сервере — по приглашениям. Попросите ссылку у владельца рабочего пространства.';
+
+  @override
+  String get accountFirstUser => 'Это первый аккаунт: он станет администратором платформы.';
+
+  @override
+  String get accountEmail => 'Почта';
+
+  @override
+  String get accountDisplayName => 'Ваше имя';
+
+  @override
+  String get accountUsername => 'Имя пользователя';
+
+  @override
+  String get accountUsernameHelp => 'Необязательно; если пусто, берётся из почты.';
+
+  @override
+  String get accountPassword => 'Пароль';
+
+  @override
+  String get accountPasswordHelp => 'Не меньше 12 символов.';
+
+  @override
+  String get accountPasswordAgain => 'Повторите пароль';
+
+  @override
+  String get accountPasswordsDiffer => 'Пароли не совпадают.';
+
+  @override
+  String get accountWorkspaceName => 'Название пространства';
+
+  @override
+  String get accountWorkspaceNameHelp => 'Ваше первое пространство, например название проекта. Его можно переименовать.';
+
+  @override
+  String get accountCreate => 'Создать аккаунт';
+
+  @override
+  String get accountCreating => 'Создание…';
+
+  @override
+  String get accountHaveAccount => 'Уже есть аккаунт?';
+
+  @override
+  String get accountSignIn => 'Войти';
+
+  @override
+  String get accountNoAccount => 'Ещё нет аккаунта?';
+
+  @override
+  String get accountSignUp => 'Создать';
+
+  @override
+  String get accountForgot => 'Забыли пароль?';
+
+  @override
+  String get accountForgotTitle => 'Сброс пароля';
+
+  @override
+  String get accountForgotLede => 'Мы отправим ссылку, чтобы задать новый пароль.';
+
+  @override
+  String get accountForgotSend => 'Отправить ссылку';
+
+  @override
+  String get accountForgotSent => 'Если эта почта принадлежит аккаунту, ссылка уже в пути. Она действует час.';
+
+  @override
+  String get accountResetTitle => 'Новый пароль';
+
+  @override
+  String get accountResetSave => 'Сохранить пароль';
+
+  @override
+  String get accountResetDone => 'Пароль изменён. Все сеансы завершены.';
+
+  @override
+  String get accountVerifyTitle => 'Подтверждение почты';
+
+  @override
+  String get accountVerifying => 'Подтверждаем…';
+
+  @override
+  String get accountVerified => 'Почта подтверждена.';
+
+  @override
+  String get accountVerifyFailed => 'Ссылка недействительна или устарела.';
+
+  @override
+  String get accountContinue => 'Продолжить';
+
+  @override
+  String accountInviteTitle(String workspace) {
+    return 'Присоединиться к $workspace';
+  }
+
+  @override
+  String accountInviteBy(String name) {
+    return 'Вас пригласил(а) $name.';
+  }
+
+  @override
+  String accountInviteFor(String email) {
+    return 'Приглашение для $email.';
+  }
+
+  @override
+  String get accountInviteJoin => 'Присоединиться';
+
+  @override
+  String get accountInviteJoining => 'Присоединяемся…';
+
+  @override
+  String get accountInviteInvalid => 'Ссылка-приглашение недействительна или устарела. Попросите новую.';
+
+  @override
+  String get accountInviteSignInFirst => 'Войдите или создайте аккаунт, чтобы присоединиться.';
+
+  @override
+  String get accountWorkspacesTitle => 'Ваши рабочие пространства';
+
+  @override
+  String get accountWorkspacesLede => 'Рабочее пространство — это один проект: его репозитории, тикеты, участники и настройки.';
+
+  @override
+  String get accountNoWorkspaces =>
+      'Вы пока не состоите ни в одном пространстве. Создайте своё или откройте присланную вам ссылку-приглашение.';
+
+  @override
+  String get accountOpen => 'Открыть';
+
+  @override
+  String get accountCreateWorkspace => 'Создать рабочее пространство';
+
+  @override
+  String get accountCreateWorkspaceSub => 'Вы станете его владельцем.';
+
+  @override
+  String get accountWorkspaceSlug => 'Адрес';
+
+  @override
+  String get accountWorkspaceSlugHelp => 'Используется в ссылках; если пусто, берётся из названия.';
+
+  @override
+  String get accountCreateWs => 'Создать пространство';
+
+  @override
+  String get accountProfileTitle => 'Профиль';
+
+  @override
+  String get accountProfile => 'Ваш профиль';
+
+  @override
+  String get accountProfileSub => 'Как вас видят участники ваших пространств.';
+
+  @override
+  String get accountSaveProfile => 'Сохранить';
+
+  @override
+  String get accountProfileSaved => 'Профиль сохранён';
+
+  @override
+  String get accountEmailUnverified => 'Ещё не подтверждена';
+
+  @override
+  String get accountEmailVerified => 'Подтверждена';
+
+  @override
+  String get accountResend => 'Отправить ссылку снова';
+
+  @override
+  String get accountResent => 'Ссылка для подтверждения отправлена';
+
+  @override
+  String get accountPasswordTitle => 'Пароль';
+
+  @override
+  String get accountPasswordSub => 'После смены остальные сеансы завершатся.';
+
+  @override
+  String get accountCurrentPassword => 'Текущий пароль';
+
+  @override
+  String get accountNewPassword => 'Новый пароль';
+
+  @override
+  String get accountChangePassword => 'Сменить пароль';
+
+  @override
+  String get accountPasswordChanged => 'Пароль изменён';
+
+  @override
+  String get accountTotpTitle => 'Двухфакторный вход';
+
+  @override
+  String get accountTotpSub => 'Код из приложения-аутентификатора при каждом входе.';
+
+  @override
+  String get accountTotpOn => 'Включён';
+
+  @override
+  String get accountTotpOff => 'Выключен';
+
+  @override
+  String get accountTotpSetup => 'Включить';
+
+  @override
+  String get accountTotpScan =>
+      'Добавьте аккаунт в приложение-аутентификатор по секрету (или откройте ссылку на телефоне), затем введите код из приложения.';
+
+  @override
+  String get accountTotpSecret => 'Секрет';
+
+  @override
+  String get accountTotpLink => 'Ссылка для настройки';
+
+  @override
+  String get accountTotpCode => 'Код';
+
+  @override
+  String get accountTotpConfirm => 'Подтвердить';
+
+  @override
+  String get accountTotpEnabled => 'Двухфакторный вход включён';
+
+  @override
+  String get accountTotpDisable => 'Выключить';
+
+  @override
+  String get accountTotpDisabled => 'Двухфакторный вход выключен';
+
+  @override
+  String get accountMyClaude => 'Ваш аккаунт Claude';
+
+  @override
+  String get accountMyClaudeSub => 'Запуски ваших тикетов используют его в пространствах с режимом «у каждого свой».';
+
+  @override
+  String get accountClaudeSaved => 'Аккаунт Claude подключён';
+
+  @override
+  String get accountClaudeRemoved => 'Аккаунт Claude отключён';
+
+  @override
+  String get accountAdmin => 'Администратор платформы';
+
+  @override
+  String get accountAdminConsole => 'Открыть консоль оператора';
+
+  @override
+  String get accountReturnTitle => 'Оплата';
+
+  @override
+  String get accountReturnLede =>
+      'Спасибо. Кредиты появятся в разделе «Оплата», как только платёжная система подтвердит платёж (обычно в течение минуты).';
+
+  @override
+  String get accountReturnBack => 'Вернуться к оплате';
+
+  @override
+  String get accountLastOpened => 'Открывали последним';
+
+  @override
+  String accountMemberCount(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n участника',
+      many: '$n участников',
+      few: '$n участника',
+      one: '$n участник',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String accountSlotCount(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n параллельного запуска',
+      many: '$n параллельных запусков',
+      few: '$n параллельных запуска',
+      one: '$n параллельный запуск',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get accountSuspended => 'Приостановлено';
+
+  @override
+  String get accountNoWorkspacesTitle => 'Пока нет рабочих пространств';
+
+  @override
+  String get accountCreateFirst => 'Создайте первое рабочее пространство';
+
+  @override
   String get analyticsTitle => 'Аналитика';
 
   @override
@@ -339,6 +649,64 @@ class AppLocalizationsRu extends AppLocalizations {
   String get analyticsSrcPlane => 'Plane';
 
   @override
+  String get analyticsQuality => 'Качество агента';
+
+  @override
+  String get analyticsQualitySub =>
+      'Тикеты сгруппированы по версии промптов их первого запуска кодирования. Сравнивайте версии, чтобы понять, помогло ли изменение агента.';
+
+  @override
+  String get analyticsNoQuality => 'За этот период не было запусков кодирования.';
+
+  @override
+  String get analyticsColVersion => 'Версия промптов';
+
+  @override
+  String get analyticsVersionUnknown => 'до учёта';
+
+  @override
+  String get analyticsColFirstPass => 'С первого раза';
+
+  @override
+  String get analyticsColFirstPassHint => 'Завершённые тикеты, принятые без запроса изменений от человека';
+
+  @override
+  String get analyticsColRounds => 'Раундов правок';
+
+  @override
+  String get analyticsColRoundsHint => 'Среднее число запросов изменений от человека на тикет, дошедший до ревью';
+
+  @override
+  String get analyticsColFixes => 'Исправлений проверок';
+
+  @override
+  String get analyticsColFixesHint => 'Сколько раз в среднем упавшие проверки возвращались Claude';
+
+  @override
+  String get analyticsColSerious => 'Серьёзные замечания';
+
+  @override
+  String get analyticsColSeriousHint => 'Доля тикетов, где ревью agnts нашло блокирующую или серьёзную проблему';
+
+  @override
+  String get analyticsColFootprint => 'Точность плана';
+
+  @override
+  String get analyticsColFootprintHint => 'Доля изменённых файлов, которые анализ предсказал';
+
+  @override
+  String get analyticsColRedFlags => 'Тревожные признаки';
+
+  @override
+  String get analyticsColRedFlagsHint => 'Пропущенные тесты, удалённые проверки, заглушённые линтеры и подобное в диффах';
+
+  @override
+  String get analyticsColSelfFixes => 'Самоисправления';
+
+  @override
+  String get analyticsColSelfFixesHint => 'Сколько раз ревью agnts возвращало замечания кодеру до просмотра человеком';
+
+  @override
   String get appName => 'agnts';
 
   @override
@@ -348,10 +716,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get authTitle => 'Вход';
 
   @override
-  String get authLede => 'Войдите с вашей учётной записью и кодом из приложения-аутентификатора.';
+  String get authLede => 'Войдите по почте или имени пользователя и паролю.';
 
   @override
-  String get authUsername => 'Имя пользователя';
+  String get authUsername => 'Почта или имя пользователя';
 
   @override
   String get authPassword => 'Пароль';
@@ -398,6 +766,207 @@ class AppLocalizationsRu extends AppLocalizations {
     );
     return 'Слишком много попыток. Повторите через $_temp0.';
   }
+
+  @override
+  String get authCodeLede => 'Введите код из приложения-аутентификатора.';
+
+  @override
+  String get authBack => 'Другой аккаунт';
+
+  @override
+  String get billingTitle => 'Оплата';
+
+  @override
+  String get billingSelfHosted => 'Этот сервер развёрнут самостоятельно: платить не нужно. Слоты и лимит участников задаёт администратор.';
+
+  @override
+  String get billingPlan => 'Тариф';
+
+  @override
+  String billingPlanSub(String members) {
+    return 'Базовый тариф включает 1 параллельный запуск и $members участников.';
+  }
+
+  @override
+  String billingMonthly(String amount) {
+    return '$amount сум в месяц';
+  }
+
+  @override
+  String billingPaidUntil(String date) {
+    return 'Оплачено до $date';
+  }
+
+  @override
+  String billingTrialUntil(String date) {
+    return 'Бесплатный период до $date';
+  }
+
+  @override
+  String get billingSlots => 'Параллельные запуски';
+
+  @override
+  String billingSlotsHelp(String price) {
+    return 'Каждый дополнительный одновременный запуск стоит $price сум в месяц. При добавлении остаток месяца списывается из кредитов.';
+  }
+
+  @override
+  String get billingSlotsSave => 'Изменить';
+
+  @override
+  String billingSlotsSaved(String n) {
+    return 'Параллельных запусков: $n';
+  }
+
+  @override
+  String get billingMembers => 'Участники';
+
+  @override
+  String billingMembersHelp(String included, String price) {
+    return 'Включено: $included; каждый следующий стоит $price сум в месяц.';
+  }
+
+  @override
+  String get billingCredits => 'Кредиты';
+
+  @override
+  String get billingCreditsSub =>
+      'Запуски на API-ключе agnts (резервный вариант) тратят кредиты: 1 кредит — это \$0,01 стоимости API Anthropic. Ежемесячный тариф тоже оплачивается из них.';
+
+  @override
+  String get billingBalance => 'Баланс';
+
+  @override
+  String billingCreditPrice(String price) {
+    return '1 кредит = $price сум';
+  }
+
+  @override
+  String get billingBuy => 'Купить кредиты';
+
+  @override
+  String get billingAmount => 'Сумма (сум)';
+
+  @override
+  String billingYouGet(String n) {
+    return '≈ $n кредитов';
+  }
+
+  @override
+  String billingPayWith(String provider) {
+    return 'Оплатить через $provider';
+  }
+
+  @override
+  String get billingPaymentsOff => 'Оплата на этом сервере ещё не настроена; попросите администратора начислить кредиты.';
+
+  @override
+  String get billingHistory => 'История';
+
+  @override
+  String get billingNoHistory => 'Пока ничего.';
+
+  @override
+  String get billingReason_purchase => 'Покупка';
+
+  @override
+  String get billingReason_run => 'Списание';
+
+  @override
+  String get billingReason_refund => 'Возврат';
+
+  @override
+  String get billingReason_grant => 'Начисление';
+
+  @override
+  String get briefTitle => 'Описание репозитория';
+
+  @override
+  String get briefSub =>
+      'Как устроен этот код: архитектура, рецепты типичных изменений, файлы-образцы, соглашения и подводные камни. Каждый запуск по тикетам этого репозитория читает его, чтобы agnts делал всё так, как принято в вашей команде.';
+
+  @override
+  String get briefSurvey => 'Изучить';
+
+  @override
+  String get briefUpdate => 'Обновить';
+
+  @override
+  String get briefEdit => 'Изменить';
+
+  @override
+  String get briefWrite => 'Написать самому';
+
+  @override
+  String get briefSave => 'Сохранить описание';
+
+  @override
+  String get briefCancel => 'Отмена';
+
+  @override
+  String get briefEditHint =>
+      'Markdown. Сохранённый текст сразу начнут читать запуски; оставьте пустым, чтобы запуски не получали описание.';
+
+  @override
+  String get briefNone => 'Описания пока нет. Запустите изучение, чтобы Claude написал черновик, или напишите его сами.';
+
+  @override
+  String get briefSurveying => 'Claude изучает репозиторий. Черновик появится здесь для вашего одобрения.';
+
+  @override
+  String briefFailed(String error) {
+    return 'Последнее изучение не удалось: $error';
+  }
+
+  @override
+  String briefApproved(String time) {
+    return 'Одобрено $time';
+  }
+
+  @override
+  String briefAtCommit(String sha) {
+    return 'на коммите $sha';
+  }
+
+  @override
+  String briefMerges(String n, String of) {
+    return '$n из $of слияний до следующего обновления';
+  }
+
+  @override
+  String get briefDraftTitle => 'Черновик после изучения';
+
+  @override
+  String briefDraftSub(String time) {
+    return 'Написан $time. Запуски получат его только после вашего одобрения.';
+  }
+
+  @override
+  String get briefApprove => 'Одобрить';
+
+  @override
+  String get briefDiscard => 'Удалить черновик';
+
+  @override
+  String get briefDiscardBody => 'Черновик будет удалён; одобренное описание останется как есть.';
+
+  @override
+  String get briefStatus_pending => 'Изучение в очереди';
+
+  @override
+  String get briefStatus_surveying => 'Изучение…';
+
+  @override
+  String get briefDone_survey => 'Изучение поставлено в очередь';
+
+  @override
+  String get briefDone_approve => 'Описание одобрено: новые запуски его читают';
+
+  @override
+  String get briefDone_discard => 'Черновик удалён';
+
+  @override
+  String get briefDone_save => 'Описание сохранено';
 
   @override
   String get commonLoading => 'Загрузка…';
@@ -641,6 +1210,49 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get dashboardNoActivity => 'Пока ничего не произошло.';
+
+  @override
+  String get designApproach => 'Подход';
+
+  @override
+  String get designFit => 'Соответствие коду';
+
+  @override
+  String designAlternatives(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Рассмотрено $n альтернативы',
+      many: 'Рассмотрено $n альтернатив',
+      few: 'Рассмотрены $n альтернативы',
+      one: 'Рассмотрена $n альтернатива',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get designWhyNot => 'Почему нет';
+
+  @override
+  String get designOutOfScope => 'Вне рамок задачи';
+
+  @override
+  String get designShipping => 'Выкатка';
+
+  @override
+  String get designShip_migrations => 'Миграции';
+
+  @override
+  String get designShip_compatibility => 'Совместимость';
+
+  @override
+  String get designShip_rollout => 'Порядок выкатки';
+
+  @override
+  String get designShip_rollback => 'Откат';
+
+  @override
+  String get designDeviations => 'Отступления от плана';
 
   @override
   String get filesTitle => 'Вложения';
@@ -2122,6 +2734,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mcpDeny => 'Отклонить';
 
   @override
+  String get mcpPickWorkspace => 'Рабочее пространство';
+
+  @override
+  String get mcpPickWorkspaceHelp => 'Claude действует в этом пространстве от вашего имени.';
+
+  @override
   String get mdetailApprove => 'Одобрить';
 
   @override
@@ -2627,6 +3245,31 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mtasksYesterday => 'Вчера';
 
   @override
+  String get mwsNone =>
+      'Вы пока не состоите ни в одном рабочем пространстве. Создайте его или примите приглашение в веб-админке, затем потяните вниз, чтобы обновить.';
+
+  @override
+  String mwsSwitched(String name) {
+    return 'Открыто: $name';
+  }
+
+  @override
+  String mwsMembers(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n участника',
+      many: '$n участников',
+      few: '$n участника',
+      one: '$n участник',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mwsSuspended => 'Приостановлено';
+
+  @override
   String get navOverview => 'Обзор';
 
   @override
@@ -2775,6 +3418,156 @@ class AppLocalizationsRu extends AppLocalizations {
   String navSyncedPlane(String found, String created) {
     return 'Plane синхронизирован: открыто $found, новых $created';
   }
+
+  @override
+  String get navWorkspace => 'Пространство';
+
+  @override
+  String get navProfile => 'Профиль';
+
+  @override
+  String get navPlatform => 'Консоль оператора';
+
+  @override
+  String get navPeople => 'Люди';
+
+  @override
+  String get navAccount => 'Аккаунт';
+
+  @override
+  String get platformTitle => 'Консоль оператора';
+
+  @override
+  String get platformLede =>
+      'Все рабочие пространства, запуски и пользователи сервера. О пространствах видны только метаданные: их тикеты принадлежат участникам.';
+
+  @override
+  String get platformCapacity => 'Сервер';
+
+  @override
+  String get platformReserved => 'Зарезервировано памяти';
+
+  @override
+  String get platformBudgetNone => 'без ограничения';
+
+  @override
+  String get platformRuns => 'Запуски';
+
+  @override
+  String get platformDisk => 'Свободно на диске';
+
+  @override
+  String get platformFull => 'Заполнен: запуски ждут сервер';
+
+  @override
+  String get platformRunning => 'Выполняются сейчас';
+
+  @override
+  String get platformNoRuns => 'Ничего не выполняется.';
+
+  @override
+  String get platformQueue => 'Очередь сервера';
+
+  @override
+  String get platformNoQueue => 'Ни один запуск не ждёт сервер.';
+
+  @override
+  String get platformWorkspace => 'Пространство';
+
+  @override
+  String get platformTicket => 'Тикет';
+
+  @override
+  String get platformStage => 'Этап';
+
+  @override
+  String get platformStarted => 'Начат';
+
+  @override
+  String get platformWorkspaces => 'Рабочие пространства';
+
+  @override
+  String get platformOwner => 'Владелец';
+
+  @override
+  String get platformPlan => 'Тариф';
+
+  @override
+  String get platformSlots => 'Слоты';
+
+  @override
+  String get platformMembers => 'Участники';
+
+  @override
+  String get platformMemberLimit => 'Лимит участников';
+
+  @override
+  String get platformCredits => 'Кредиты';
+
+  @override
+  String get platformState => 'Состояние';
+
+  @override
+  String get platformActive => 'Активно';
+
+  @override
+  String get platformSuspended => 'Приостановлено';
+
+  @override
+  String get platformDeleted => 'Удалено';
+
+  @override
+  String get platformEdit => 'Изменить';
+
+  @override
+  String get platformSuspend => 'Приостановить';
+
+  @override
+  String get platformResume => 'Возобновить';
+
+  @override
+  String get platformGrant => 'Начислить кредиты';
+
+  @override
+  String get platformGrantAmount => 'Кредиты (отрицательное число — списание)';
+
+  @override
+  String get platformGrantNote => 'Комментарий';
+
+  @override
+  String platformGrantDone(String n, String name) {
+    return '$name: начислено $n кредитов';
+  }
+
+  @override
+  String get platformSaved => 'Сохранено';
+
+  @override
+  String get platformUsers => 'Пользователи';
+
+  @override
+  String get platformUser => 'Пользователь';
+
+  @override
+  String get platformEmail => 'Почта';
+
+  @override
+  String get platformAdmin => 'Админ';
+
+  @override
+  String get platformMakeAdmin => 'Сделать админом';
+
+  @override
+  String get platformRemoveAdmin => 'Снять роль админа';
+
+  @override
+  String get platformJoined => 'Зарегистрирован';
+
+  @override
+  String get platformNoLimit => 'без лимита';
+
+  @override
+  String get platformForbidden => 'Консоль оператора доступна только администраторам.';
 
   @override
   String get previewTab => 'Превью';
@@ -3020,6 +3813,150 @@ class AppLocalizationsRu extends AppLocalizations {
   String get previewNotifyPhotosHelp => 'К сообщению в Telegram прикладывается до четырёх скриншотов.';
 
   @override
+  String queueHeader(String running, String slots) {
+    return 'Выполняется $running/$slots';
+  }
+
+  @override
+  String queueQueued(num n) {
+    return '$n в очереди';
+  }
+
+  @override
+  String queueWaitingServer(String n) {
+    return '$n ждут сервер';
+  }
+
+  @override
+  String get queueBadge_blocked => 'Ждёт · связи';
+
+  @override
+  String get queueBadge_slots => 'В очереди · слоты';
+
+  @override
+  String get queueBadge_server => 'В очереди · сервер';
+
+  @override
+  String get queueBadge_claude => 'Пауза · Claude';
+
+  @override
+  String get queueTitle_blocked => 'Ждёт связанные тикеты';
+
+  @override
+  String get queueTitle_slots => 'Ждёт свободный слот';
+
+  @override
+  String get queueTitle_server => 'В очереди сервера';
+
+  @override
+  String get queueTitle_claude => 'Ждёт Claude';
+
+  @override
+  String queuePosition(String position) {
+    return '#$position в очереди сервера';
+  }
+
+  @override
+  String queueOthers(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Впереди $n тикета других пространств.',
+      many: 'Впереди $n тикетов других пространств.',
+      few: 'Впереди $n тикета других пространств.',
+      one: 'Впереди $n тикет другого пространства.',
+      zero: '',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String queueEstimate(num minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: '$minutes минуты',
+      many: '$minutes минут',
+      few: '$minutes минуты',
+      one: '$minutes минуту',
+    );
+    return 'Начнётся примерно через $_temp0.';
+  }
+
+  @override
+  String queueServerFull(String runs, String reserved, String budget) {
+    return 'Сервер загружен ($runs запусков, занято $reserved из $budget).';
+  }
+
+  @override
+  String queueSlotsHint(String running, String slots) {
+    return 'Занято $running из $slots слотов. Тикет начнётся, когда один освободится.';
+  }
+
+  @override
+  String get queueAddSlot => 'Добавить слот';
+
+  @override
+  String get queueClaudeHint => 'Подключите аккаунт или включите кредиты в настройках пространства → Claude.';
+
+  @override
+  String get queueMember => 'Участник';
+
+  @override
+  String get queueTakeOver => 'Взять себе';
+
+  @override
+  String get queueTakenOver => 'Тикет ваш: в режиме «у каждого свой» он выполняется на вашем аккаунте Claude.';
+
+  @override
+  String queueCreatedBy(String name) {
+    return 'Создал(а) $name';
+  }
+
+  @override
+  String queueBy(String name) {
+    return '$name';
+  }
+
+  @override
+  String redFlagsTitle(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n тревожного признака',
+      many: '$n тревожных признаков',
+      few: '$n тревожных признака',
+      one: '$n тревожный признак',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get redFlagsSub =>
+      'Сканирование изменения agnts нашло эти строки. Часто они означают, что проверки прошли «не тем путём»; ревью agnts проверяет каждую.';
+
+  @override
+  String get redFlagsKind_skipped_test => 'Пропущенный или выделенный тест';
+
+  @override
+  String get redFlagsKind_removed_assertion => 'Удалены проверки';
+
+  @override
+  String get redFlagsKind_deleted_test => 'Удалён файл тестов';
+
+  @override
+  String get redFlagsKind_silenced_lint => 'Линтер заглушён';
+
+  @override
+  String get redFlagsKind_swallowed_error => 'Ошибка проглочена';
+
+  @override
+  String get redFlagsKind_todo => 'Оставлен TODO';
+
+  @override
+  String get redFlagsKind_new_dependency => 'Новая зависимость';
+
+  @override
   String get relationsTab => 'Порядок';
 
   @override
@@ -3183,6 +4120,96 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get relationsSource_plane => 'Связь в Plane';
+
+  @override
+  String get replayTitle => 'Повторить с текущим agnts';
+
+  @override
+  String get replaySub =>
+      'Повторить этот тикет с коммита, с которого он начинался, с текущими промптами, описанием и правилами, и сравнить результат с тем, что вы одобрили. Повтор никогда не отправляется.';
+
+  @override
+  String get replayStart => 'Повторить';
+
+  @override
+  String replayConfirm(String key) {
+    return 'agnts создаст новую задачу, которая заново выполнит $key с того места, где он начинался. Она расходует ваш план Claude, как любой тикет.';
+  }
+
+  @override
+  String replayCreated(String key) {
+    return 'Повтор $key в очереди';
+  }
+
+  @override
+  String get replayBanner => 'Это повтор для оценки agnts: он никогда не отправляется. Сравните его с';
+
+  @override
+  String get replayEvalTitle => 'Оценка повторов';
+
+  @override
+  String get replayEvalSub =>
+      'Завершённые тикеты, повторённые новой версией agnts, в сравнении с одобренным вами изменением. Запустите повтор кнопкой «Повторить» на завершённом тикете или `agnts eval replay KEY`.';
+
+  @override
+  String get replayNone => 'Повторов пока нет.';
+
+  @override
+  String get replayRecent => 'Последние повторы';
+
+  @override
+  String get replayColReplays => 'Повторы';
+
+  @override
+  String get replayColChecks => 'Проверки';
+
+  @override
+  String get replayColLooksGood => 'Ревью OK';
+
+  @override
+  String get replayColOverlap => 'Те же файлы';
+
+  @override
+  String get replayColOverlapHint => 'Насколько изменённые файлы повтора совпадают с одобренным изменением (индекс Жаккара)';
+
+  @override
+  String get replayColRecall => 'Покрытие';
+
+  @override
+  String get replayColRecallHint => 'Доля файлов одобренного изменения, которые повтор тоже изменил';
+
+  @override
+  String get replayColTurns => 'Ходы (оригинал)';
+
+  @override
+  String get replayColCost => 'Стоимость (оригинал)';
+
+  @override
+  String get replayColReplay => 'Повтор';
+
+  @override
+  String get replayColOf => 'Чего';
+
+  @override
+  String get replayColState => 'Состояние';
+
+  @override
+  String get replayColReview => 'Ревью';
+
+  @override
+  String get replayPass => 'прошли';
+
+  @override
+  String get replayFail => 'упали';
+
+  @override
+  String get replayVerdict_looks_good => 'всё хорошо';
+
+  @override
+  String get replayVerdict_has_concerns => 'есть сомнения';
+
+  @override
+  String get replayVerdict_needs_changes => 'нужны правки';
 
   @override
   String get repoBack => 'Назад к репозиториям';
@@ -3465,6 +4492,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get repoOpenRun => 'Открыть на git-хостинге';
+
+  @override
+  String get repoBrief => 'Описание';
 
   @override
   String get reposTitle => 'Репозитории';
@@ -3937,6 +4967,12 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get reviewCat_architecture => 'Архитектура';
+
+  @override
+  String get reviewCat_scope => 'Рамки задачи';
+
+  @override
   String get rulesTitle => 'Правила';
 
   @override
@@ -4184,6 +5220,61 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get rulesTurnedOff => 'Правило выключено';
+
+  @override
+  String get rulesStatus_suggested => 'Предложено';
+
+  @override
+  String get rulesSuggestedFrom => 'agnts предлагает это правило по вашим замечаниям к';
+
+  @override
+  String get rulesSuggestedHint => 'Тикеты не следуют правилу, пока вы его не примете. Измените его, чтобы принять со своими правками.';
+
+  @override
+  String rulesSuggestedHelp(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'agnts предлагает $n правила по вашим замечаниям.',
+      many: 'agnts предлагает $n правил по вашим замечаниям.',
+      few: 'agnts предлагает $n правила по вашим замечаниям.',
+      one: 'agnts предлагает $n правило по вашим замечаниям.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rulesAdopt => 'Принять';
+
+  @override
+  String get rulesAdoptAsWritten => 'Принять как есть';
+
+  @override
+  String get rulesDismiss => 'Отклонить';
+
+  @override
+  String rulesDismissBody(String title) {
+    return 'agnts уберёт «$title» и больше не предложит его.';
+  }
+
+  @override
+  String get rulesDismissed => 'Предложение отклонено';
+
+  @override
+  String get rulesKind => 'Тип';
+
+  @override
+  String get rulesKindRule => 'Правило';
+
+  @override
+  String get rulesKindContext => 'Бизнес-контекст';
+
+  @override
+  String get rulesKindRuleHelp => 'Инструкция, которой agnts следует в каждом тикете.';
+
+  @override
+  String get rulesKindContextHelp =>
+      'Знания о продукте: что значат термины, какие инварианты должен соблюдать код, кто чем пользуется. Каждый запуск читает это перед началом.';
 
   @override
   String get settingsTitle => 'Настройки';
@@ -4435,6 +5526,49 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsSaved => 'Настройки сохранены';
+
+  @override
+  String settingsParallelSlots(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n запуска',
+      many: '$n запусков',
+      few: '$n запуска',
+      one: '$n запуск',
+    );
+    return '$_temp0 одновременно';
+  }
+
+  @override
+  String get settingsParallelSlotsHelp => 'Слоты пространства. Меняются в разделе «Пространство → Оплата».';
+
+  @override
+  String get settingsClaudeMoved => 'Claude теперь подключается для каждого пространства отдельно.';
+
+  @override
+  String get settingsClaudeOpen => 'Пространство → Claude';
+
+  @override
+  String get settingsSelfReview => 'Сначала исправлять замечания ревью';
+
+  @override
+  String get settingsSelfReviewHelp =>
+      'Если собственное ревью agnts находит блокирующую или серьёзную проблему, agnts один раз возвращает её кодеру до вашего ревью. Нужно включённое ревью кода выше.';
+
+  @override
+  String get settingsAutoBrief => 'Изучать репозитории';
+
+  @override
+  String get settingsAutoBriefHelp =>
+      'Составлять описание репозитория (архитектура, рецепты, соглашения) при анализе первого тикета и обновлять его после каждых 10 слияний. Агент получает описание только после вашего одобрения.';
+
+  @override
+  String get settingsReflect => 'Учиться на ваших замечаниях';
+
+  @override
+  String get settingsReflectHelp =>
+      'Когда вы просите изменения или отклоняете работу с причиной, agnts ищет за этим общее правило и предлагает его на странице «Правила». Ничего не применяется, пока вы его не примете.';
 
   @override
   String get spendTitle => 'Расход токенов';
@@ -5661,4 +6795,361 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get usageHelp =>
       'Данные берутся из событий лимитов, которые Claude Code отправляет во время каждого запуска. Когда agnts простаивает, небольшой запуск обновляет их.';
+
+  @override
+  String get wsTitle => 'Рабочее пространство';
+
+  @override
+  String get wsSwitcher => 'Сменить рабочее пространство';
+
+  @override
+  String get wsAll => 'Все пространства';
+
+  @override
+  String get wsNew => 'Новое пространство';
+
+  @override
+  String get wsRole_owner => 'Владелец';
+
+  @override
+  String get wsRole_user => 'Участник';
+
+  @override
+  String get wsTabGeneral => 'Общее';
+
+  @override
+  String get wsTabMembers => 'Участники';
+
+  @override
+  String get wsTabClaude => 'Claude';
+
+  @override
+  String get wsTabBilling => 'Оплата';
+
+  @override
+  String get wsGeneral => 'Рабочее пространство';
+
+  @override
+  String get wsGeneralSub => 'Название и адрес в ссылках.';
+
+  @override
+  String get wsName => 'Название';
+
+  @override
+  String get wsSlug => 'Адрес';
+
+  @override
+  String wsSlugHelp(String slug) {
+    return 'Ссылки на это пространство: /w/$slug. При смене старые ссылки перестают работать.';
+  }
+
+  @override
+  String get wsSave => 'Сохранить';
+
+  @override
+  String get wsSaved => 'Пространство сохранено';
+
+  @override
+  String get wsReadOnly => 'Изменить это может только владелец.';
+
+  @override
+  String get wsPlan => 'Тариф';
+
+  @override
+  String get wsSlots => 'Параллельные запуски';
+
+  @override
+  String get wsSlotsHelp => 'Сколько запусков это пространство может выполнять одновременно. Меняется в разделе «Оплата».';
+
+  @override
+  String wsTrialEnds(String date) {
+    return 'Пробный период до $date';
+  }
+
+  @override
+  String get wsSuspended => 'Пространство приостановлено: новые запуски не начнутся, пока его не возобновят.';
+
+  @override
+  String get wsDanger => 'Опасная зона';
+
+  @override
+  String get wsDangerSub =>
+      'Удаление останавливает все запуски и удаляет пространство, копии его репозиториев, тикеты и историю. 7 дней его можно восстановить, затем оно стирается.';
+
+  @override
+  String get wsDelete => 'Удалить пространство';
+
+  @override
+  String wsDeleteTitle(String name) {
+    return 'Удалить $name?';
+  }
+
+  @override
+  String wsDeleteBody(String slug) {
+    return 'Введите адрес ($slug) для подтверждения. Все потеряют доступ.';
+  }
+
+  @override
+  String get wsDeleted => 'Пространство удалено';
+
+  @override
+  String get wsMembers => 'Участники';
+
+  @override
+  String get wsMembersSub =>
+      'Все участники видят тикеты пространства, могут создавать их, отвечать, проверять и перезапускать. Владелец также управляет настройками, интеграциями, Claude, участниками и оплатой.';
+
+  @override
+  String get wsYou => 'вы';
+
+  @override
+  String get wsRemove => 'Удалить';
+
+  @override
+  String wsRemoveTitle(String name) {
+    return 'Удалить $name?';
+  }
+
+  @override
+  String get wsRemoveBody => 'Участник потеряет доступ к пространству. Его тикеты останутся.';
+
+  @override
+  String wsRemoved(String name) {
+    return '$name удалён';
+  }
+
+  @override
+  String get wsMakeOwner => 'Сделать владельцем';
+
+  @override
+  String wsTransferTitle(String name) {
+    return 'Сделать $name владельцем?';
+  }
+
+  @override
+  String get wsTransferBody => 'Вы останетесь участником, но больше не сможете менять настройки, участников и оплату.';
+
+  @override
+  String wsTransferred(String name) {
+    return 'Теперь владелец — $name';
+  }
+
+  @override
+  String get wsLeave => 'Покинуть пространство';
+
+  @override
+  String wsLeaveTitle(String name) {
+    return 'Покинуть $name?';
+  }
+
+  @override
+  String get wsLeaveBody => 'Вы потеряете доступ, пока вас снова не пригласят.';
+
+  @override
+  String get wsOwnerCannotLeave => 'Владелец не может уйти: сначала передайте права другому участнику.';
+
+  @override
+  String get wsClaudeBadge => 'Claude подключён';
+
+  @override
+  String get wsNoClaudeBadge => 'Без Claude';
+
+  @override
+  String get wsInvite => 'Пригласить людей';
+
+  @override
+  String get wsInviteSub => 'Отправьте ссылку по почте или создайте ссылку, чтобы поделиться самому. Ссылка действует 7 дней и один раз.';
+
+  @override
+  String get wsInviteEmail => 'Почта (необязательно)';
+
+  @override
+  String get wsInviteSend => 'Создать приглашение';
+
+  @override
+  String get wsInviteLink => 'Ссылка-приглашение (показывается один раз)';
+
+  @override
+  String wsInviteEmailed(String email) {
+    return 'Отправлено на $email';
+  }
+
+  @override
+  String get wsInviteCopy => 'Копировать';
+
+  @override
+  String get wsInvites => 'Открытые приглашения';
+
+  @override
+  String get wsInviteAnyone => 'Любой со ссылкой';
+
+  @override
+  String wsInviteExpires(String date) {
+    return 'до $date';
+  }
+
+  @override
+  String get wsRevoke => 'Отозвать';
+
+  @override
+  String get wsRevoked => 'Приглашение отозвано';
+
+  @override
+  String wsMemberLimit(String n, String limit) {
+    return '$n из $limit участников';
+  }
+
+  @override
+  String wsMemberLimitNone(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n участника',
+      many: '$n участников',
+      few: '$n участника',
+      one: '$n участник',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get wsClaude => 'Claude';
+
+  @override
+  String get wsClaudeSub => 'Какой аккаунт Claude используют запуски этого пространства.';
+
+  @override
+  String get wsMode => 'Режим';
+
+  @override
+  String get wsModeShared => 'Общий';
+
+  @override
+  String get wsModeSharedHelp => 'Все запуски используют аккаунт пространства, который подключает владелец.';
+
+  @override
+  String get wsModeMember => 'У каждого свой';
+
+  @override
+  String get wsModeMemberHelp =>
+      'Каждый запуск использует аккаунт участника, которому принадлежит тикет. Участники подключают свой аккаунт в профиле.';
+
+  @override
+  String get wsConnection => 'Аккаунт пространства';
+
+  @override
+  String get wsConnectionSub => 'Используется всеми запусками в общем режиме.';
+
+  @override
+  String get wsKind => 'Тип';
+
+  @override
+  String get wsKindSubscription => 'Подписка Claude';
+
+  @override
+  String get wsKindApiKey => 'API-ключ Anthropic';
+
+  @override
+  String get wsKindSubscriptionHelp => 'Выполните `claude setup-token` там, где вы вошли в свой тариф Claude, и вставьте токен.';
+
+  @override
+  String get wsKindApiKeyHelp => 'Создайте ключ в Anthropic Console (sk-ant-api…). Расход оплачивает владелец ключа.';
+
+  @override
+  String get wsSubscriptionsOff => 'Этот сервер принимает только API-ключи Anthropic.';
+
+  @override
+  String get wsToken => 'Токен';
+
+  @override
+  String get wsConnect => 'Подключить';
+
+  @override
+  String get wsReplace => 'Заменить';
+
+  @override
+  String get wsDisconnect => 'Отключить';
+
+  @override
+  String get wsConnected => 'Подключён';
+
+  @override
+  String get wsNotConnected => 'Не подключён';
+
+  @override
+  String wsPausedUntil(String time) {
+    return 'Лимит исчерпан до $time';
+  }
+
+  @override
+  String wsConnectedAs(String account, String hint) {
+    return '$account · …$hint';
+  }
+
+  @override
+  String get wsFallback => 'Продолжать на кредитах';
+
+  @override
+  String get wsFallbackHelp =>
+      'Когда выбранный аккаунт упёрся в лимит или не подключён, запуски продолжаются на API-ключе agnts и тратят кредиты пространства вместо паузы.';
+
+  @override
+  String get wsFallbackOff => 'Кредиты на этом сервере недоступны.';
+
+  @override
+  String wsCredits(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n кредита',
+      many: '$n кредитов',
+      few: '$n кредита',
+      one: '$n кредит',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get wsDefaultMember => 'Тикеты без автора';
+
+  @override
+  String get wsDefaultMemberHelp =>
+      'Тикеты из Jira, Plane, последующие задачи и инциденты в режиме «у каждого свой» выполняются на аккаунте этого участника.';
+
+  @override
+  String get wsDefaultOwner => 'Владелец';
+
+  @override
+  String get wsMemberAccounts => 'Аккаунты участников';
+
+  @override
+  String get wsMemberAccountsSub => 'Кто подключил свой аккаунт Claude (Профиль → Claude).';
+
+  @override
+  String get wsYourAccount => 'Подключить свой в профиле';
+
+  @override
+  String get wsClaudeSaved => 'Настройки Claude сохранены';
+
+  @override
+  String get wsRole_viewer => 'Наблюдатель';
+
+  @override
+  String get wsViewerBanner => 'Вы здесь наблюдатель: видите всё, но ничего не можете изменить.';
+
+  @override
+  String get wsInviteAs => 'Роль';
+
+  @override
+  String get wsInviteAsHelp => 'Участники работают с тикетами; наблюдатели только смотрят.';
+
+  @override
+  String wsRoleChanged(String name, String role) {
+    return '$name теперь: $role';
+  }
+
+  @override
+  String wsRoleLabel(String name) {
+    return 'Роль: $name';
+  }
 }

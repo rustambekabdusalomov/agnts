@@ -33,7 +33,7 @@ type Store interface {
 	MaxEventID(ctx context.Context) (int64, error)
 	Cursor(ctx context.Context, name string) (int64, error)
 	SetCursor(ctx context.Context, name string, id int64) error
-	Devices(ctx context.Context) ([]postgres.Device, error)
+	Devices(ctx context.Context, ws int64) ([]postgres.Device, error)
 	DeleteDevice(ctx context.Context, token string) error
 	SaveTelegramMessage(ctx context.Context, m postgres.TelegramMessage) error
 	TelegramMessage(ctx context.Context, chatID, messageID int64) (postgres.TelegramMessage, error)
@@ -77,6 +77,7 @@ const cursorName = "notifier"
 // Run follows the event log from a saved cursor, so a restart neither
 // loses nor repeats notifications.
 func (n *Notifier) Run(ctx context.Context) {
+	ctx = domain.System(ctx)
 	cur, err := n.store.Cursor(ctx, cursorName)
 	if err != nil {
 		n.log.Error("notifier: read cursor", "err", err)
@@ -136,6 +137,12 @@ func kindFor(to domain.TicketState) string {
 }
 
 func (n *Notifier) handle(ctx context.Context, e domain.Event) {
+	if e.WorkspaceID == 0 {
+		return // server-wide events reach nobody's phone
+	}
+	// Everything below acts in the event's workspace: its settings, its
+	// Telegram connection, its members' phones.
+	ctx = domain.WithWorkspace(ctx, e.WorkspaceID)
 	if e.Type == domain.EventLessons {
 		n.lessons(ctx, e)
 		return
@@ -155,6 +162,9 @@ func (n *Notifier) handle(ctx context.Context, e domain.Event) {
 	to, _ := e.Data["to"].(string)
 	if e.TicketKey == "" || to == "" {
 		return
+	}
+	if quiet, _ := e.Data["quiet"].(bool); quiet {
+		return // announced later, once agnts's own review lets it through
 	}
 	kind := kindFor(domain.TicketState(to))
 	if kind == "" {
@@ -432,7 +442,8 @@ func pushText(v orchestrator.TicketView, e domain.Event) (string, string) {
 }
 
 func (n *Notifier) push(ctx context.Context, p Push) {
-	devs, err := n.store.Devices(ctx)
+	p.Workspace = domain.WorkspaceOf(ctx)
+	devs, err := n.store.Devices(ctx, domain.WorkspaceOf(ctx))
 	if err != nil {
 		n.log.Warn("push: devices", "err", err)
 		return

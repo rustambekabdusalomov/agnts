@@ -327,6 +327,9 @@ func (s *Server) GetDashboard(w http.ResponseWriter, r *http.Request) {
 		Week: toWeek(d.Week), LastWeek: toWeek(d.LastWeek), Repos: make([]gen.RepoActivity, len(d.Repos)),
 		Recent: make([]gen.Event, len(d.Recent)), Usage: toUsage(d.Usage), Parallel: d.Parallel,
 	}
+	if m, ok := memberFrom(r.Context()); ok && m.w.Slots > 0 {
+		out.Parallel = m.w.Slots
+	}
 	for i, row := range d.Waiting {
 		out.Waiting[i] = toTicketRow(row)
 	}
@@ -413,10 +416,11 @@ func toSettings(v domain.Settings) gen.Settings {
 	followUps, followUpsNote := v.SuggestFollowUps, v.Notify.FollowUps
 	preview, autoPreview, visualCheck := gen.Model(v.Models.Preview), v.AutoPreview, v.VisualCheck
 	previewNote, previewPhotos, egress := v.Notify.Preview, v.Notify.PreviewPhotos, append([]string{}, v.EgressAllow...)
+	autoBrief, selfReview, reflect := v.AutoBrief, v.SelfReview, v.Reflect
 	return gen.Settings{
 		Models: gen.StageModels{Analyze: gen.Model(v.Models.Analyze), Coding: gen.Model(v.Models.Coding),
 			Retry: gen.Model(v.Models.Retry), Helper: gen.Model(v.Models.Helper), Learn: &learn, Review: &review, Preview: &preview},
-		AutoPreview: &autoPreview, VisualCheck: &visualCheck, EgressAllow: &egress,
+		AutoPreview: &autoPreview, VisualCheck: &visualCheck, EgressAllow: &egress, AutoBrief: &autoBrief, SelfReview: &selfReview, Reflect: &reflect,
 		MaxTurns: v.MaxTurns, TimeoutMin: v.TimeoutMin, Allow: v.Allow, Deny: v.Deny,
 		AskFirst: v.AskFirst, AutoResume: v.AutoResume, PauseAbove: v.PauseAbove, Parallel: v.Parallel, AutoLearn: &autoLearn,
 		AutoReview: &autoReview, SuggestFollowUps: &followUps,
@@ -438,7 +442,17 @@ func (s *Server) GetSettings(w http.ResponseWriter, r *http.Request) {
 		s.writeInternal(w, r, err)
 		return
 	}
-	writeJSON(w, http.StatusOK, toSettings(v))
+	writeJSON(w, http.StatusOK, s.settingsView(r.Context(), v))
+}
+
+// settingsView shows settings with the workspace's slots as its parallel
+// runs: slots come with the plan (Billing), not from Settings.
+func (s *Server) settingsView(ctx context.Context, v domain.Settings) gen.Settings {
+	out := toSettings(v)
+	if m, ok := memberFrom(ctx); ok && m.w.Slots > 0 {
+		out.Parallel = m.w.Slots
+	}
+	return out
 }
 
 // PutSettings implements gen.ServerInterface.
@@ -461,8 +475,9 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 			Retry: string(req.Models.Retry), Helper: string(req.Models.Helper), Learn: cur.Models.Learn, Review: cur.Models.Review,
 			Preview: cur.Models.Preview},
 		AutoPreview: cur.AutoPreview, VisualCheck: cur.VisualCheck, EgressAllow: cur.EgressAllow,
+		AutoBrief: cur.AutoBrief, SelfReview: cur.SelfReview, Reflect: cur.Reflect,
 		MaxTurns: req.MaxTurns, TimeoutMin: req.TimeoutMin, Allow: req.Allow, Deny: req.Deny,
-		AskFirst: req.AskFirst, AutoResume: req.AutoResume, PauseAbove: req.PauseAbove, Parallel: req.Parallel, AutoLearn: cur.AutoLearn,
+		AskFirst: req.AskFirst, AutoResume: req.AutoResume, PauseAbove: req.PauseAbove, Parallel: cur.Parallel, AutoLearn: cur.AutoLearn,
 		AutoReview: cur.AutoReview, SuggestFollowUps: cur.SuggestFollowUps,
 		Git: domain.GitSettings{AuthorName: req.Git.AuthorName, AuthorEmail: req.Git.AuthorEmail, CoAuthor: req.Git.CoAuthor,
 			PRTitle: req.Git.PrTitle, Draft: req.Git.Draft},
@@ -512,6 +527,15 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 	if req.VisualCheck != nil {
 		v.VisualCheck = *req.VisualCheck
 	}
+	if req.AutoBrief != nil {
+		v.AutoBrief = *req.AutoBrief
+	}
+	if req.SelfReview != nil {
+		v.SelfReview = *req.SelfReview
+	}
+	if req.Reflect != nil {
+		v.Reflect = *req.Reflect
+	}
 	if req.EgressAllow != nil {
 		v.EgressAllow = *req.EgressAllow
 	}
@@ -521,7 +545,7 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.opt.Tickets.Wake()
-	writeJSON(w, http.StatusOK, toSettings(saved))
+	writeJSON(w, http.StatusOK, s.settingsView(r.Context(), saved))
 }
 
 // ---- repositories ----

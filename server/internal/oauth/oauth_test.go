@@ -11,37 +11,23 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"os"
 	"strings"
 	"testing"
 
-	"agnts/internal/store/postgres"
+	"agnts/internal/domain"
+	"agnts/internal/store/postgres/pgtest"
 )
 
-func setup(t *testing.T) (*Server, int64) {
+func setup(t *testing.T) (*Server, int64, context.Context, int64) {
 	t.Helper()
-	dsn := os.Getenv("AGNTS_TEST_DATABASE_URL")
-	if dsn == "" {
-		t.Skip("AGNTS_TEST_DATABASE_URL not set")
-	}
-	ctx := context.Background()
-	pool, err := postgres.Open(ctx, dsn)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(pool.Close)
+	pool := pgtest.Open(t)
+	pgtest.Exec(t, pool, `TRUNCATE oauth_clients, oauth_codes, oauth_tokens CASCADE`)
+	pgtest.Exec(t, pool, `DELETE FROM settings WHERE key LIKE 'mcp_static_token%'`)
+	ctx, ws := pgtest.Workspace(t, pool, "oauth")
+	uid := pgtest.User(t, pool, "oauth-user")
+	pgtest.Exec(t, pool, `INSERT INTO memberships (workspace_id, user_id, role) VALUES ($1, $2, 'user') ON CONFLICT DO NOTHING`, ws, uid)
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
-	if err := postgres.Migrate(ctx, pool, "up", log); err != nil {
-		t.Fatal(err)
-	}
-	_, _ = pool.Exec(ctx, `TRUNCATE oauth_clients, oauth_codes, oauth_tokens CASCADE`)
-	_, _ = pool.Exec(ctx, `DELETE FROM settings WHERE key = 'mcp_static_token'`)
-	var uid int64
-	if err := pool.QueryRow(ctx, `INSERT INTO users (username, password_hash, totp_secret_enc) VALUES ('oauth-user', 'h', '\x01')
-		ON CONFLICT (username) DO UPDATE SET username = EXCLUDED.username RETURNING id`).Scan(&uid); err != nil {
-		t.Fatal(err)
-	}
-	return New(pool, "https://agnts.example.com", []string{"claude.ai", "claude.com"}, log), uid
+	return New(pool, "https://agnts.example.com", []string{"claude.ai", "claude.com"}, log), uid, ctx, ws
 }
 
 func form(h http.HandlerFunc, v url.Values) (int, map[string]any) {
@@ -55,8 +41,12 @@ func form(h http.HandlerFunc, v url.Values) (int, map[string]any) {
 }
 
 func TestFullFlow(t *testing.T) {
-	s, uid := setup(t)
-	ctx := context.Background()
+	s, uid, wctx, ws := setup(t)
+	ctx := domain.System(context.Background())
+	verify := func(tok string) bool {
+		p, ok := s.Verify(ctx, tok)
+		return ok && p.UserID == uid && p.WorkspaceID == ws
+	}
 
 	// Registration: only allowed redirect hosts.
 	reg := func(uri string) (int, map[string]any) {
@@ -96,12 +86,12 @@ func TestFullFlow(t *testing.T) {
 	}
 
 	// Denied: redirect carries access_denied and no code.
-	denied, err := s.Approve(ctx, uid, ar, false)
+	denied, err := s.Approve(ctx, uid, ws, ar, false)
 	if err != nil || !strings.Contains(denied, "error=access_denied") || strings.Contains(denied, "code=") {
 		t.Fatalf("deny: %s %v", denied, err)
 	}
 
-	target, err := s.Approve(ctx, uid, ar, true)
+	target, err := s.Approve(ctx, uid, ws, ar, true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -123,7 +113,7 @@ func TestFullFlow(t *testing.T) {
 		t.Fatalf("a used code was accepted: %d", c)
 	}
 
-	target, _ = s.Approve(ctx, uid, ar, true)
+	target, _ = s.Approve(ctx, uid, ws, ar, true)
 	u, _ = url.Parse(target)
 	code = u.Query().Get("code")
 	c, tok := exchange(verifier)
@@ -131,7 +121,7 @@ func TestFullFlow(t *testing.T) {
 		t.Fatalf("token: %d %v", c, tok)
 	}
 	access, refresh := tok["access_token"].(string), tok["refresh_token"].(string)
-	if !s.Verify(ctx, access) || s.Verify(ctx, refresh) || s.Verify(ctx, "nope") {
+	if !verify(access) || verify(refresh) || verify("nope") {
 		t.Fatal("verify")
 	}
 
@@ -148,19 +138,22 @@ func TestFullFlow(t *testing.T) {
 	if c, _ := exchange(verifier); c != http.StatusBadRequest {
 		t.Fatal("code replay accepted")
 	}
-	if s.Verify(ctx, tok2["access_token"].(string)) {
+	if verify(tok2["access_token"].(string)) {
 		t.Fatal("tokens survived a code replay")
 	}
 
-	static, err := s.RotateStatic(ctx)
-	if err != nil || !s.Verify(ctx, static) {
+	static, err := s.RotateStatic(wctx, uid)
+	if err != nil || !verify(static) {
 		t.Fatalf("static: %v", err)
 	}
-	newer, _ := s.RotateStatic(ctx)
-	if s.Verify(ctx, static) || !s.Verify(ctx, newer) {
+	newer, _ := s.RotateStatic(wctx, uid)
+	if verify(static) || !verify(newer) {
 		t.Fatal("rotation did not replace the static token")
 	}
-	if err := s.RevokeAll(ctx); err != nil || s.Verify(ctx, newer) {
+	if on, _, err := s.Status(wctx, uid, ws); err != nil || !on {
+		t.Fatalf("status: %v %v", on, err)
+	}
+	if err := s.RevokeAll(wctx, uid, ws); err != nil || verify(newer) {
 		t.Fatal("revoke all")
 	}
 }

@@ -31,7 +31,7 @@ const learn = useMutation({
     <div class="ch"><div><h2>{{ t('learn.ticketTitle') }}</h2><p class="sub">{{ t('learn.ticketSub') }}</p></div></div>
     <ul v-if="items.length" class="lesson-list">
       <li v-for="l in items" :key="l.id">
-        <RouterLink class="lesson-row" :to="`/learn/${l.id}`">
+        <RouterLink class="lesson-row" :to="{ name: 'lesson', params: { id: l.id } }">
           <div class="lesson-row-top">
             <span class="ttitle">{{ l.title }}</span>
             <span class="src">{{ t(`learn.category_${l.category}`) }}</span>

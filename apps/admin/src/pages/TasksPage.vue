@@ -7,6 +7,7 @@ import { api, unwrap } from '../api/client'
 import { BOARD_GROUPS, type RemoteRepository, type Repository } from '../api/types'
 import PageHeader from '../components/PageHeader.vue'
 import StateBadge from '../components/StateBadge.vue'
+import WaitBadge from '../components/WaitBadge.vue'
 import KindBadge from '../components/ticket/KindBadge.vue'
 import ImportDrawer from '../components/repos/ImportDrawer.vue'
 import RepoDrawer from '../components/repos/RepoDrawer.vue'
@@ -19,10 +20,12 @@ import HiIcon from '../components/ui/HiIcon.vue'
 import { ago, fmtTokens, ioTokens } from '../composables/format'
 import { livePoll } from '../composables/useLive'
 import { useUi } from '../stores/ui'
+import { useWorkspace } from '../stores/workspace'
 
 const { t, locale } = useI18n()
 const router = useRouter()
 const ui = useUi()
+const workspace = useWorkspace()
 const repos = useRepos()
 
 const tickets = useQuery({
@@ -87,7 +90,7 @@ function repoSaved(r: Repository) {
   <PageHeader :title="t('tasks.title')" doc="tasks">
     <div class="actions" style="margin: 0">
       <SegButtons v-model="view" :options="viewOptions" :label="t('tickets.viewLabel')" />
-      <button class="btn btn-p" type="button" @click="newTask"><HiIcon name="plus" />{{ t('tasks.new') }}</button>
+      <button v-if="workspace.canEdit" class="btn btn-p" type="button" @click="newTask"><HiIcon name="plus" />{{ t('tasks.new') }}</button>
     </div>
   </PageHeader>
 
@@ -114,7 +117,7 @@ function repoSaved(r: Repository) {
         <h2>{{ t('tasks.count', { n: rows.length }) }}</h2>
       </div>
       <p v-if="tickets.isPending.value" class="hint">{{ t('common.loading') }}</p>
-      <TicketBoard v-else-if="rows.length && view === 'board'" :items="rows" :columns="columns" @open="(k) => router.push(`/tickets/${k}`)" />
+      <TicketBoard v-else-if="rows.length && view === 'board'" :items="rows" :columns="columns" @open="(k) => router.push({ name: 'ticket', params: { key: k } })" />
       <div v-else-if="rows.length" class="tw">
         <table class="tbl">
           <thead>
@@ -131,15 +134,15 @@ function repoSaved(r: Repository) {
               v-for="x in rows"
               :key="x.key"
               tabindex="0"
-              @click="router.push(`/tickets/${x.key}`)"
-              @keydown.enter="router.push(`/tickets/${x.key}`)"
+              @click="router.push({ name: 'ticket', params: { key: x.key } })"
+              @keydown.enter="router.push({ name: 'ticket', params: { key: x.key } })"
             >
               <td>
                 <div class="tkey">{{ x.key }} <KindBadge v-if="x.kind !== 'code'" :ticket="x" /></div>
                 <div class="ttitle">{{ x.title }}</div>
               </td>
               <td class="muted">{{ x.repoName ?? '—' }}</td>
-              <td><StateBadge :state="x.state" :kind="x.kind" /></td>
+              <td><StateBadge :state="x.state" :kind="x.kind" /> <WaitBadge :ticket="x" /></td>
               <td class="muted num" :title="x.spend ? t('spend.tokens', { n: ioTokens(x.spend).toLocaleString(locale) }) : undefined">
                 {{ x.spend ? fmtTokens(ioTokens(x.spend), locale) : '—' }}
               </td>
@@ -150,7 +153,7 @@ function repoSaved(r: Repository) {
       </div>
       <div v-else class="empty">
         <p style="margin: 0 0 12px">{{ ui.search ? t('tasks.noMatch') : t('tasks.empty') }}</p>
-        <button v-if="!ui.search" type="button" class="btn btn-p" @click="newTask"><HiIcon name="plus" />{{ t('tasks.new') }}</button>
+        <button v-if="!ui.search && workspace.canEdit" type="button" class="btn btn-p" @click="newTask"><HiIcon name="plus" />{{ t('tasks.new') }}</button>
       </div>
     </section>
   </div>

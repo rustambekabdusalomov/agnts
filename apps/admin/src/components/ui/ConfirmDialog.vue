@@ -45,6 +45,7 @@ function onBackdrop(e: MouseEvent) {
       </span>
       <h2 :id="`${id}-title`">{{ title }}</h2>
       <p v-if="message" :id="`${id}-msg`">{{ message }}</p>
+      <slot />
       <div class="cdlg-f">
         <button class="btn" type="button" :disabled="busy" autofocus @click="open = false">{{ t('form.cancel') }}</button>
         <button class="btn" :class="danger ? 'btn-danger' : 'btn-p'" type="button" :disabled="busy" @click="emit('confirm')">

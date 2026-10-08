@@ -1,5 +1,140 @@
 {
   "@@locale": "en",
+  "accountSignupTitle": "Create your account",
+  "accountSignupLede": "You get a workspace of your own to start in.",
+  "accountSignupInviteLede": "Create an account to join {workspace}.",
+  "@accountSignupInviteLede": {
+    "placeholders": {
+      "workspace": {
+        "type": "String"
+      }
+    }
+  },
+  "accountSignupClosed": "Sign-up is by invitation on this server. Ask a workspace owner for an invite link.",
+  "accountFirstUser": "This is the first account: it becomes the platform's Admin.",
+  "accountEmail": "Email",
+  "accountDisplayName": "Your name",
+  "accountUsername": "Username",
+  "accountUsernameHelp": "Optional; made from your email when empty.",
+  "accountPassword": "Password",
+  "accountPasswordHelp": "At least 12 characters.",
+  "accountPasswordAgain": "Repeat password",
+  "accountPasswordsDiffer": "The passwords differ.",
+  "accountWorkspaceName": "Workspace name",
+  "accountWorkspaceNameHelp": "Your first workspace, e.g. your project's name. You can rename it.",
+  "accountCreate": "Create account",
+  "accountCreating": "Creating…",
+  "accountHaveAccount": "Already have an account?",
+  "accountSignIn": "Sign in",
+  "accountNoAccount": "No account yet?",
+  "accountSignUp": "Create one",
+  "accountForgot": "Forgot password?",
+  "accountForgotTitle": "Reset your password",
+  "accountForgotLede": "We'll email you a link to choose a new one.",
+  "accountForgotSend": "Send link",
+  "accountForgotSent": "If an account uses that address, a link is on its way. It works for an hour.",
+  "accountResetTitle": "Choose a new password",
+  "accountResetSave": "Save password",
+  "accountResetDone": "Password changed. Every session was signed out.",
+  "accountVerifyTitle": "Confirm your email",
+  "accountVerifying": "Confirming…",
+  "accountVerified": "Your email is confirmed.",
+  "accountVerifyFailed": "This link is invalid or expired.",
+  "accountContinue": "Continue",
+  "accountInviteTitle": "Join {workspace}",
+  "@accountInviteTitle": {
+    "placeholders": {
+      "workspace": {
+        "type": "String"
+      }
+    }
+  },
+  "accountInviteBy": "{name} invited you.",
+  "@accountInviteBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "accountInviteFor": "The invite is for {email}.",
+  "@accountInviteFor": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "accountInviteJoin": "Join workspace",
+  "accountInviteJoining": "Joining…",
+  "accountInviteInvalid": "This invite link is invalid or expired. Ask for a new one.",
+  "accountInviteSignInFirst": "Sign in or create an account to join.",
+  "accountWorkspacesTitle": "Your workspaces",
+  "accountWorkspacesLede": "A workspace is one project: its repositories, tickets, members and settings.",
+  "accountNoWorkspaces": "You are not in any workspace yet. Create one, or open an invite link someone sent you.",
+  "accountOpen": "Open",
+  "accountCreateWorkspace": "Create a workspace",
+  "accountCreateWorkspaceSub": "You become its owner.",
+  "accountWorkspaceSlug": "Address",
+  "accountWorkspaceSlugHelp": "Used in links; made from the name when empty.",
+  "accountCreateWs": "Create workspace",
+  "accountProfileTitle": "Profile",
+  "accountProfile": "Your profile",
+  "accountProfileSub": "How you appear to the members of your workspaces.",
+  "accountSaveProfile": "Save",
+  "accountProfileSaved": "Profile saved",
+  "accountEmailUnverified": "Not confirmed yet",
+  "accountEmailVerified": "Confirmed",
+  "accountResend": "Send the link again",
+  "accountResent": "Confirmation link sent",
+  "accountPasswordTitle": "Password",
+  "accountPasswordSub": "Changing it signs out your other sessions.",
+  "accountCurrentPassword": "Current password",
+  "accountNewPassword": "New password",
+  "accountChangePassword": "Change password",
+  "accountPasswordChanged": "Password changed",
+  "accountTotpTitle": "Two-factor sign-in",
+  "accountTotpSub": "A code from an authenticator app at every sign-in.",
+  "accountTotpOn": "On",
+  "accountTotpOff": "Off",
+  "accountTotpSetup": "Turn on",
+  "accountTotpScan": "Add this account to your authenticator app with the secret (or open the link on your phone), then enter the code it shows.",
+  "accountTotpSecret": "Secret",
+  "accountTotpLink": "Setup link",
+  "accountTotpCode": "Code",
+  "accountTotpConfirm": "Confirm",
+  "accountTotpEnabled": "Two-factor sign-in is on",
+  "accountTotpDisable": "Turn off",
+  "accountTotpDisabled": "Two-factor sign-in is off",
+  "accountMyClaude": "Your Claude account",
+  "accountMyClaudeSub": "Runs of your tickets use it in workspaces set to per-member mode.",
+  "accountClaudeSaved": "Claude account connected",
+  "accountClaudeRemoved": "Claude account disconnected",
+  "accountAdmin": "Platform Admin",
+  "accountAdminConsole": "Open the operator console",
+  "accountReturnTitle": "Payment",
+  "accountReturnLede": "Thanks. Credits show in Billing as soon as the payment provider confirms the payment (usually within a minute).",
+  "accountReturnBack": "Back to Billing",
+  "accountLastOpened": "Last opened",
+  "accountMemberCount": "{n, plural, one {{n} member} other {{n} members}}",
+  "@accountMemberCount": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "accountSlotCount": "{n, plural, one {{n} parallel run} other {{n} parallel runs}}",
+  "@accountSlotCount": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "accountSuspended": "Suspended",
+  "accountNoWorkspacesTitle": "No workspaces yet",
+  "accountCreateFirst": "Create your first workspace",
   "analyticsTitle": "Analytics",
   "analyticsLede": "How well agnts works for you over time: throughput, quality, where time goes, and what it costs your plan.",
   "analyticsPeriod": "Period",
@@ -191,11 +326,30 @@
     }
   },
   "analyticsSrcPlane": "Plane",
+  "analyticsQuality": "Agent quality",
+  "analyticsQualitySub": "Tickets grouped by the prompt version of their first coding run. Compare versions to see whether a change to the agent helped.",
+  "analyticsNoQuality": "No coding runs in this period.",
+  "analyticsColVersion": "Prompt version",
+  "analyticsVersionUnknown": "before tracking",
+  "analyticsColFirstPass": "First pass",
+  "analyticsColFirstPassHint": "Done tickets approved without a person asking for changes",
+  "analyticsColRounds": "Change rounds",
+  "analyticsColRoundsHint": "Average change requests by a person per ticket that reached review",
+  "analyticsColFixes": "Check fixes",
+  "analyticsColFixesHint": "Average times failing checks were sent back to Claude",
+  "analyticsColSerious": "Serious findings",
+  "analyticsColSeriousHint": "Share of reviewed tickets where agnts's review found a blocker or major problem",
+  "analyticsColFootprint": "Plan accuracy",
+  "analyticsColFootprintHint": "Share of changed files the analysis predicted",
+  "analyticsColRedFlags": "Red flags",
+  "analyticsColRedFlagsHint": "Skipped tests, removed assertions, silenced linters and the like found in the diffs",
+  "analyticsColSelfFixes": "Self-fixes",
+  "analyticsColSelfFixesHint": "Times agnts's own review sent findings back to the coder before a person looked",
   "appName": "agnts",
   "appTagline": "Your no sleep agent",
   "authTitle": "Sign in",
-  "authLede": "Use your account and the code from your authenticator app.",
-  "authUsername": "Username",
+  "authLede": "Use your email or username and your password.",
+  "authUsername": "Email or username",
   "authPassword": "Password",
   "authShowPassword": "Show password",
   "authHidePassword": "Hide password",
@@ -215,6 +369,173 @@
       }
     }
   },
+  "authCodeLede": "Enter the code from your authenticator app.",
+  "authBack": "Use another account",
+  "billingTitle": "Billing",
+  "billingSelfHosted": "This server is self-hosted: there is nothing to pay. The Admin sets slots and member limits.",
+  "billingPlan": "Plan",
+  "billingPlanSub": "The base plan includes 1 parallel run and {members} members.",
+  "@billingPlanSub": {
+    "placeholders": {
+      "members": {
+        "type": "String"
+      }
+    }
+  },
+  "billingMonthly": "{amount} so'm a month",
+  "@billingMonthly": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "billingPaidUntil": "Paid until {date}",
+  "@billingPaidUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "billingTrialUntil": "Free trial until {date}",
+  "@billingTrialUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "billingSlots": "Parallel runs",
+  "billingSlotsHelp": "Each extra run at once costs {price} so'm a month. Adding one now charges the rest of this month from credits.",
+  "@billingSlotsHelp": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "billingSlotsSave": "Change",
+  "billingSlotsSaved": "Parallel runs set to {n}",
+  "@billingSlotsSaved": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "billingMembers": "Members",
+  "billingMembersHelp": "{included} included; each one more costs {price} so'm a month.",
+  "@billingMembersHelp": {
+    "placeholders": {
+      "included": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "billingCredits": "Credits",
+  "billingCreditsSub": "Runs on agnts's API key (the fallback) spend credits: 1 credit is $0.01 of Anthropic API cost. The month's plan is paid from them too.",
+  "billingBalance": "Balance",
+  "billingCreditPrice": "1 credit = {price} so'm",
+  "@billingCreditPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "billingBuy": "Buy credits",
+  "billingAmount": "Amount (so'm)",
+  "billingYouGet": "≈ {n} credits",
+  "@billingYouGet": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "billingPayWith": "Pay with {provider}",
+  "@billingPayWith": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "billingPaymentsOff": "Payments are not set up on this server yet; ask the Admin to grant credits.",
+  "billingHistory": "History",
+  "billingNoHistory": "Nothing yet.",
+  "billingReason_purchase": "Bought",
+  "billingReason_run": "Spent",
+  "billingReason_refund": "Refunded",
+  "billingReason_grant": "Granted",
+  "briefTitle": "Repository brief",
+  "briefSub": "How this code base works: architecture, recipes for common changes, files to copy, conventions and pitfalls. Every run of this repository's tickets reads it, so agnts builds things the way your team does.",
+  "briefSurvey": "Survey",
+  "briefUpdate": "Update",
+  "briefEdit": "Edit",
+  "briefWrite": "Write it yourself",
+  "briefSave": "Save brief",
+  "briefCancel": "Cancel",
+  "briefEditHint": "Markdown. What you save is what runs read from now on; leave it empty to give runs no brief.",
+  "briefNone": "No brief yet. Survey the repository to have Claude write a draft, or write one yourself.",
+  "briefSurveying": "Claude is surveying the repository. The draft appears here for your approval.",
+  "briefFailed": "The last survey failed: {error}",
+  "@briefFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "briefApproved": "Approved {time}",
+  "@briefApproved": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "briefAtCommit": "at {sha}",
+  "@briefAtCommit": {
+    "placeholders": {
+      "sha": {
+        "type": "String"
+      }
+    }
+  },
+  "briefMerges": "{n} of {of} merges before the next update",
+  "@briefMerges": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "of": {
+        "type": "String"
+      }
+    }
+  },
+  "briefDraftTitle": "Draft from the survey",
+  "briefDraftSub": "Written {time}. Runs read it only after you approve it.",
+  "@briefDraftSub": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "briefApprove": "Approve",
+  "briefDiscard": "Discard draft",
+  "briefDiscardBody": "The draft is deleted; the approved brief stays as it is.",
+  "briefStatus_pending": "Survey queued",
+  "briefStatus_surveying": "Surveying…",
+  "briefDone_survey": "Survey queued",
+  "briefDone_approve": "Brief approved: new runs read it",
+  "briefDone_discard": "Draft discarded",
+  "briefDone_save": "Brief saved",
   "commonLoading": "Loading…",
   "commonError": "Something went wrong. Try again.",
   "commonSignedInAs": "Signed in as {username}",
@@ -381,6 +702,24 @@
   "dashboardRecentTitle": "Recent activity",
   "dashboardLogs": "Logs",
   "dashboardNoActivity": "No activity yet.",
+  "designApproach": "Approach",
+  "designFit": "Fit with the code base",
+  "designAlternatives": "{n, plural, one {{n} alternative considered} other {{n} alternatives considered}}",
+  "@designAlternatives": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "designWhyNot": "Why not",
+  "designOutOfScope": "Out of scope",
+  "designShipping": "Shipping",
+  "designShip_migrations": "Migrations",
+  "designShip_compatibility": "Compatibility",
+  "designShip_rollout": "Rollout",
+  "designShip_rollback": "Rollback",
+  "designDeviations": "Departed from the plan",
   "filesTitle": "Attachments",
   "filesAttach": "Attach files",
   "filesAddPhoto": "Photo",
@@ -1172,6 +1511,8 @@
   },
   "mcpAllow": "Allow",
   "mcpDeny": "Deny",
+  "mcpPickWorkspace": "Workspace",
+  "mcpPickWorkspaceHelp": "Claude acts in this workspace, as you.",
   "mdetailApprove": "Approve",
   "mdetailWorking": "agnts is working. You'll get a notification when it needs you.",
   "mdetailCopyPr": "Copy pull request link",
@@ -1445,6 +1786,24 @@
   "mtasksActAnalyze": "Tap to analyze",
   "mtasksActHeld": "Kept in queue. Tap to start",
   "mtasksYesterday": "Yesterday",
+  "mwsNone": "You're not in a workspace yet. Create one or accept an invite in the web admin, then pull to refresh.",
+  "mwsSwitched": "Switched to {name}",
+  "@mwsSwitched": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mwsMembers": "{n, plural, one {{n} member} other {{n} members}}",
+  "@mwsMembers": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "mwsSuspended": "Suspended",
   "navOverview": "Overview",
   "navDashboard": "Dashboard",
   "navAnalytics": "Analytics",
@@ -1520,6 +1879,65 @@
       }
     }
   },
+  "navWorkspace": "Workspace",
+  "navProfile": "Profile",
+  "navPlatform": "Operator console",
+  "navPeople": "People",
+  "navAccount": "Account",
+  "platformTitle": "Operator console",
+  "platformLede": "Every workspace, run and user on this server. Workspaces show metadata only: their tickets are their members'.",
+  "platformCapacity": "Server",
+  "platformReserved": "Memory reserved",
+  "platformBudgetNone": "not limited",
+  "platformRuns": "Runs",
+  "platformDisk": "Disk free",
+  "platformFull": "Full: runs are waiting for the server",
+  "platformRunning": "Running now",
+  "platformNoRuns": "Nothing is running.",
+  "platformQueue": "Server queue",
+  "platformNoQueue": "No run is waiting for the server.",
+  "platformWorkspace": "Workspace",
+  "platformTicket": "Ticket",
+  "platformStage": "Stage",
+  "platformStarted": "Started",
+  "platformWorkspaces": "Workspaces",
+  "platformOwner": "Owner",
+  "platformPlan": "Plan",
+  "platformSlots": "Slots",
+  "platformMembers": "Members",
+  "platformMemberLimit": "Member limit",
+  "platformCredits": "Credits",
+  "platformState": "State",
+  "platformActive": "Active",
+  "platformSuspended": "Suspended",
+  "platformDeleted": "Deleted",
+  "platformEdit": "Edit",
+  "platformSuspend": "Suspend",
+  "platformResume": "Resume",
+  "platformGrant": "Grant credits",
+  "platformGrantAmount": "Credits (negative takes back)",
+  "platformGrantNote": "Note",
+  "platformGrantDone": "{n} credits granted to {name}",
+  "@platformGrantDone": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "platformSaved": "Saved",
+  "platformUsers": "Users",
+  "platformUser": "User",
+  "platformEmail": "Email",
+  "platformAdmin": "Admin",
+  "platformMakeAdmin": "Make Admin",
+  "platformRemoveAdmin": "Remove Admin",
+  "platformJoined": "Joined",
+  "platformNoLimit": "no limit",
+  "platformForbidden": "Only an Admin can open the operator console.",
   "previewTab": "Preview",
   "previewTitle": "Screenshots of the app",
   "previewSub": "agnts started the app with this change and took screenshots. Advice only: it never blocks approval.",
@@ -1634,6 +2052,127 @@
   "previewNotify": "When preview screenshots are ready",
   "previewNotifyPhotos": "Send phone screenshots to Telegram",
   "previewNotifyPhotosHelp": "Up to four screenshots go with the Telegram message.",
+  "queueHeader": "Running {running}/{slots}",
+  "@queueHeader": {
+    "placeholders": {
+      "running": {
+        "type": "String"
+      },
+      "slots": {
+        "type": "String"
+      }
+    }
+  },
+  "queueQueued": "{n, plural, one {{n} queued} other {{n} queued}}",
+  "@queueQueued": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "queueWaitingServer": "{n} waiting for the server",
+  "@queueWaitingServer": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "queueBadge_blocked": "Waiting · related",
+  "queueBadge_slots": "Queued · slots",
+  "queueBadge_server": "Queued · server",
+  "queueBadge_claude": "Paused · Claude",
+  "queueTitle_blocked": "Waiting for related tickets",
+  "queueTitle_slots": "Waiting for a free slot",
+  "queueTitle_server": "In the server queue",
+  "queueTitle_claude": "Waiting for Claude",
+  "queuePosition": "#{position} in the server queue",
+  "@queuePosition": {
+    "placeholders": {
+      "position": {
+        "type": "String"
+      }
+    }
+  },
+  "queueOthers": "{n, plural, =0 {} one {{n} ticket of another workspace ahead.} other {{n} tickets of other workspaces ahead.}}",
+  "@queueOthers": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "queueEstimate": "Starts in about {minutes, plural, one {{minutes} minute} other {{minutes} minutes}}.",
+  "@queueEstimate": {
+    "placeholders": {
+      "minutes": {
+        "type": "num"
+      }
+    }
+  },
+  "queueServerFull": "The server is at capacity ({runs} runs, {reserved} of {budget} reserved).",
+  "@queueServerFull": {
+    "placeholders": {
+      "runs": {
+        "type": "String"
+      },
+      "reserved": {
+        "type": "String"
+      },
+      "budget": {
+        "type": "String"
+      }
+    }
+  },
+  "queueSlotsHint": "{running} of {slots} runs in use. It starts when one ends.",
+  "@queueSlotsHint": {
+    "placeholders": {
+      "running": {
+        "type": "String"
+      },
+      "slots": {
+        "type": "String"
+      }
+    }
+  },
+  "queueAddSlot": "Add a slot",
+  "queueClaudeHint": "Connect an account or turn on credits in Workspace settings → Claude.",
+  "queueMember": "Member",
+  "queueTakeOver": "Take over",
+  "queueTakenOver": "The ticket is yours: it runs on your Claude account in per-member mode.",
+  "queueCreatedBy": "Created by {name}",
+  "@queueCreatedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "queueBy": "by {name}",
+  "@queueBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "redFlagsTitle": "{n, plural, one {{n} red flag} other {{n} red flags}}",
+  "@redFlagsTitle": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "redFlagsSub": "agnts's scan of the change matched these lines. They often mean the checks were made to pass the wrong way; agnts's review checks each one.",
+  "redFlagsKind_skipped_test": "Skipped or focused test",
+  "redFlagsKind_removed_assertion": "Assertions removed",
+  "redFlagsKind_deleted_test": "Test file deleted",
+  "redFlagsKind_silenced_lint": "Linter silenced",
+  "redFlagsKind_swallowed_error": "Error swallowed",
+  "redFlagsKind_todo": "TODO left",
+  "redFlagsKind_new_dependency": "New dependency",
   "relationsTab": "Order",
   "relationsTitle": "Order and conflicts",
   "relationsSub": "agnts codes several tickets at once and merges them one by one. A ticket waits for the tickets it depends on to be merged, and two tickets that change the same code never code side by side.",
@@ -1720,6 +2259,48 @@
   "relationsMarkMerged": "Mark merged",
   "relationsMarkMergedHint": "No merge webhook? Mark the pull request merged so tickets waiting for it can start.",
   "relationsSource_plane": "Plane relation",
+  "replayTitle": "Replay with today's agnts",
+  "replaySub": "Re-run this ticket from the commit it started from, with the current prompts, brief and rules, and compare the result with what you approved. The replay is never pushed.",
+  "replayStart": "Replay",
+  "replayConfirm": "agnts creates a new task that re-does {key} from where it started. It uses your Claude plan like any ticket.",
+  "@replayConfirm": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "replayCreated": "Replay {key} queued",
+  "@replayCreated": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "replayBanner": "This is a replay to evaluate agnts: it is never pushed. Compare it with",
+  "replayEvalTitle": "Replay evaluation",
+  "replayEvalSub": "Done tickets re-run with a newer agnts, compared with the change you approved. Start one with Replay on a done ticket, or `agnts eval replay KEY`.",
+  "replayNone": "No replays yet.",
+  "replayRecent": "Recent replays",
+  "replayColReplays": "Replays",
+  "replayColChecks": "Checks",
+  "replayColLooksGood": "Review OK",
+  "replayColOverlap": "Same files",
+  "replayColOverlapHint": "How much the replay's changed files match the approved change's (Jaccard index)",
+  "replayColRecall": "Coverage",
+  "replayColRecallHint": "Share of the approved change's files the replay changed too",
+  "replayColTurns": "Turns (original)",
+  "replayColCost": "Cost (original)",
+  "replayColReplay": "Replay",
+  "replayColOf": "Of",
+  "replayColState": "State",
+  "replayColReview": "Review",
+  "replayPass": "pass",
+  "replayFail": "fail",
+  "replayVerdict_looks_good": "looks good",
+  "replayVerdict_has_concerns": "has concerns",
+  "replayVerdict_needs_changes": "needs changes",
   "repoBack": "Back to repositories",
   "repoNotFound": "No such repository.",
   "repoEdit": "Edit settings",
@@ -1900,6 +2481,7 @@
   "repoStatus": "Status",
   "repoDuration": "Duration",
   "repoOpenRun": "Open on the git host",
+  "repoBrief": "Brief",
   "reposTitle": "Repositories",
   "reposLede": "Code agnts can work in. Each run clones the repository into a fresh container on your server, then runs these checks before anything reaches your review.",
   "reposAdd": "Add repository",
@@ -2158,6 +2740,8 @@
       }
     }
   },
+  "reviewCat_architecture": "Architecture",
+  "reviewCat_scope": "Scope",
   "rulesTitle": "Rules",
   "rulesLede": "Instructions agnts follows on every ticket: global rules for all repositories and rules for one repository. Claude reviews each rule and asks about anything unclear before it applies.",
   "rulesAdd": "Add rule",
@@ -2311,6 +2895,34 @@
   "rulesDeleted": "Rule deleted",
   "rulesTurnedOn": "Rule turned on",
   "rulesTurnedOff": "Rule turned off",
+  "rulesStatus_suggested": "Suggested",
+  "rulesSuggestedFrom": "agnts suggests this rule from your feedback on",
+  "rulesSuggestedHint": "Tickets don't follow it until you adopt it. Edit it to adopt it with your changes.",
+  "rulesSuggestedHelp": "{n, plural, one {agnts suggests {n} rule learned from your feedback.} other {agnts suggests {n} rules learned from your feedback.}}",
+  "@rulesSuggestedHelp": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "rulesAdopt": "Adopt",
+  "rulesAdoptAsWritten": "Adopt as written",
+  "rulesDismiss": "Dismiss",
+  "rulesDismissBody": "agnts drops “{title}” and won't suggest it again.",
+  "@rulesDismissBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "rulesDismissed": "Suggestion dismissed",
+  "rulesKind": "Kind",
+  "rulesKindRule": "Rule",
+  "rulesKindContext": "Business context",
+  "rulesKindRuleHelp": "An instruction agnts follows on every ticket.",
+  "rulesKindContextHelp": "Knowledge about your product: what its terms mean, invariants the code must keep, who uses what. Every run reads it before it starts.",
   "settingsTitle": "Settings",
   "settingsLede": "How agnts connects to your tools and how it behaves during runs.",
   "settingsAppearance": "Appearance",
@@ -2409,6 +3021,23 @@
   "settingsOnThisPage": "On this page",
   "settingsSecretsHelp": "Tokens for Jira, GitHub and Claude are stored encrypted on your server. This page never shows them.",
   "settingsSaved": "Settings saved",
+  "settingsParallelSlots": "{n, plural, one {{n} run} other {{n} runs}} at once",
+  "@settingsParallelSlots": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "settingsParallelSlotsHelp": "The workspace's slots. Change them in Workspace → Billing.",
+  "settingsClaudeMoved": "Claude is connected per workspace now.",
+  "settingsClaudeOpen": "Workspace → Claude",
+  "settingsSelfReview": "Fix review findings first",
+  "settingsSelfReviewHelp": "When agnts's own code review finds a blocker or major problem, agnts sends it back to the coder once before you review. Needs the code review above.",
+  "settingsAutoBrief": "Survey repositories",
+  "settingsAutoBriefHelp": "Write a repository brief (architecture, recipes, conventions) when a repository's first ticket is analysed, and update it after every 10 merges. A brief reaches the agent only after you approve it.",
+  "settingsReflect": "Learn from your feedback",
+  "settingsReflectHelp": "When you ask for changes or reject work with a reason, agnts looks for a convention behind it and suggests a rule on the Rules page. Nothing applies until you adopt it.",
   "spendTitle": "Token spend",
   "spendSub": "{tokens} tokens in and out · about {cost} at API prices",
   "@spendSub": {
@@ -3200,5 +3829,240 @@
   "usageResumeManual": "Wait for you to resume",
   "usageIdle": "Idle refresh",
   "usageIdleDo": "Every 30 min",
-  "usageHelp": "Numbers come from the rate limit events Claude Code emits during each run. When agnts is idle, a tiny refresh run keeps them current."
+  "usageHelp": "Numbers come from the rate limit events Claude Code emits during each run. When agnts is idle, a tiny refresh run keeps them current.",
+  "wsTitle": "Workspace",
+  "wsSwitcher": "Switch workspace",
+  "wsAll": "All workspaces",
+  "wsNew": "New workspace",
+  "wsRole_owner": "Owner",
+  "wsRole_user": "Member",
+  "wsTabGeneral": "General",
+  "wsTabMembers": "Members",
+  "wsTabClaude": "Claude",
+  "wsTabBilling": "Billing",
+  "wsGeneral": "Workspace",
+  "wsGeneralSub": "Its name and the address in links.",
+  "wsName": "Name",
+  "wsSlug": "Address",
+  "wsSlugHelp": "Links to this workspace: /w/{slug}. Old links stop working when it changes.",
+  "@wsSlugHelp": {
+    "placeholders": {
+      "slug": {
+        "type": "String"
+      }
+    }
+  },
+  "wsSave": "Save",
+  "wsSaved": "Workspace saved",
+  "wsReadOnly": "Only the owner can change this.",
+  "wsPlan": "Plan",
+  "wsSlots": "Parallel runs",
+  "wsSlotsHelp": "How many runs this workspace may have at once. Change it in Billing.",
+  "wsTrialEnds": "Trial until {date}",
+  "@wsTrialEnds": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "wsSuspended": "This workspace is suspended: nothing new starts until it is resumed.",
+  "wsDanger": "Danger zone",
+  "wsDangerSub": "Deleting stops every run and removes the workspace, its repositories' copies, tickets and history. It is kept 7 days for undo, then purged.",
+  "wsDelete": "Delete workspace",
+  "wsDeleteTitle": "Delete {name}?",
+  "@wsDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "wsDeleteBody": "Type the address ({slug}) to confirm. Everyone loses access.",
+  "@wsDeleteBody": {
+    "placeholders": {
+      "slug": {
+        "type": "String"
+      }
+    }
+  },
+  "wsDeleted": "Workspace deleted",
+  "wsMembers": "Members",
+  "wsMembersSub": "Everyone in the workspace sees its tickets and can create, answer, review and retry them. The owner also manages settings, integrations, Claude, members and billing.",
+  "wsYou": "you",
+  "wsRemove": "Remove",
+  "wsRemoveTitle": "Remove {name}?",
+  "@wsRemoveTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "wsRemoveBody": "They lose access to this workspace. Their tickets stay.",
+  "wsRemoved": "{name} removed",
+  "@wsRemoved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "wsMakeOwner": "Make owner",
+  "wsTransferTitle": "Make {name} the owner?",
+  "@wsTransferTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "wsTransferBody": "You stay a member but can no longer change settings, members or billing.",
+  "wsTransferred": "{name} is the owner now",
+  "@wsTransferred": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "wsLeave": "Leave workspace",
+  "wsLeaveTitle": "Leave {name}?",
+  "@wsLeaveTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "wsLeaveBody": "You lose access until someone invites you again.",
+  "wsOwnerCannotLeave": "The owner cannot leave: make someone else the owner first.",
+  "wsClaudeBadge": "Claude connected",
+  "wsNoClaudeBadge": "No Claude",
+  "wsInvite": "Invite people",
+  "wsInviteSub": "Send a link by email, or make a link to share yourself. Links work for 7 days and once.",
+  "wsInviteEmail": "Email (optional)",
+  "wsInviteSend": "Create invite",
+  "wsInviteLink": "Invite link (shown once)",
+  "wsInviteEmailed": "Sent to {email}",
+  "@wsInviteEmailed": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "wsInviteCopy": "Copy",
+  "wsInvites": "Open invites",
+  "wsInviteAnyone": "Anyone with the link",
+  "wsInviteExpires": "expires {date}",
+  "@wsInviteExpires": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "wsRevoke": "Revoke",
+  "wsRevoked": "Invite revoked",
+  "wsMemberLimit": "{n} of {limit} members",
+  "@wsMemberLimit": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "wsMemberLimitNone": "{n, plural, one {{n} member} other {{n} members}}",
+  "@wsMemberLimitNone": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "wsClaude": "Claude",
+  "wsClaudeSub": "Which Claude account this workspace's runs use.",
+  "wsMode": "Mode",
+  "wsModeShared": "Shared",
+  "wsModeSharedHelp": "Every run uses the workspace's account, set here by the owner.",
+  "wsModeMember": "Per member",
+  "wsModeMemberHelp": "Each run uses the account of the ticket's member. Members connect theirs in their profile.",
+  "wsConnection": "Workspace account",
+  "wsConnectionSub": "Used by every run in shared mode.",
+  "wsKind": "Kind",
+  "wsKindSubscription": "Claude subscription",
+  "wsKindApiKey": "Anthropic API key",
+  "wsKindSubscriptionHelp": "Run `claude setup-token` where you are signed in to your Claude plan, and paste the token.",
+  "wsKindApiKeyHelp": "Create a key in the Anthropic Console (sk-ant-api…). Usage is billed by Anthropic to its owner.",
+  "wsSubscriptionsOff": "This server takes Anthropic API keys only.",
+  "wsToken": "Token",
+  "wsConnect": "Connect",
+  "wsReplace": "Replace",
+  "wsDisconnect": "Disconnect",
+  "wsConnected": "Connected",
+  "wsNotConnected": "Not connected",
+  "wsPausedUntil": "At its limit until {time}",
+  "@wsPausedUntil": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "wsConnectedAs": "{account} · …{hint}",
+  "@wsConnectedAs": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "hint": {
+        "type": "String"
+      }
+    }
+  },
+  "wsFallback": "Continue on credits",
+  "wsFallbackHelp": "When the chosen account is at its limit or missing, runs continue on agnts's API key and spend the workspace's credits instead of pausing.",
+  "wsFallbackOff": "Credits are not available on this server.",
+  "wsCredits": "{n, plural, one {{n} credit} other {{n} credits}}",
+  "@wsCredits": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "wsDefaultMember": "Tickets without a person",
+  "wsDefaultMemberHelp": "Tickets from Jira, Plane, follow-ups and incidents run on this member's account in per-member mode.",
+  "wsDefaultOwner": "The owner",
+  "wsMemberAccounts": "Members' accounts",
+  "wsMemberAccountsSub": "Who has connected their own Claude account (Profile → Claude).",
+  "wsYourAccount": "Connect yours in your profile",
+  "wsClaudeSaved": "Claude settings saved",
+  "wsRole_viewer": "Viewer",
+  "wsViewerBanner": "You are a viewer here: you can see everything, but you cannot change anything.",
+  "wsInviteAs": "Joins as",
+  "wsInviteAsHelp": "Members work on tickets; viewers only look.",
+  "wsRoleChanged": "{name} is now {role}",
+  "@wsRoleChanged": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "wsRoleLabel": "Role of {name}",
+  "@wsRoleLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

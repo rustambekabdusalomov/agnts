@@ -9,6 +9,301 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get accountSignupTitle => 'Create your account';
+
+  @override
+  String get accountSignupLede => 'You get a workspace of your own to start in.';
+
+  @override
+  String accountSignupInviteLede(String workspace) {
+    return 'Create an account to join $workspace.';
+  }
+
+  @override
+  String get accountSignupClosed => 'Sign-up is by invitation on this server. Ask a workspace owner for an invite link.';
+
+  @override
+  String get accountFirstUser => 'This is the first account: it becomes the platform\'s Admin.';
+
+  @override
+  String get accountEmail => 'Email';
+
+  @override
+  String get accountDisplayName => 'Your name';
+
+  @override
+  String get accountUsername => 'Username';
+
+  @override
+  String get accountUsernameHelp => 'Optional; made from your email when empty.';
+
+  @override
+  String get accountPassword => 'Password';
+
+  @override
+  String get accountPasswordHelp => 'At least 12 characters.';
+
+  @override
+  String get accountPasswordAgain => 'Repeat password';
+
+  @override
+  String get accountPasswordsDiffer => 'The passwords differ.';
+
+  @override
+  String get accountWorkspaceName => 'Workspace name';
+
+  @override
+  String get accountWorkspaceNameHelp => 'Your first workspace, e.g. your project\'s name. You can rename it.';
+
+  @override
+  String get accountCreate => 'Create account';
+
+  @override
+  String get accountCreating => 'Creating…';
+
+  @override
+  String get accountHaveAccount => 'Already have an account?';
+
+  @override
+  String get accountSignIn => 'Sign in';
+
+  @override
+  String get accountNoAccount => 'No account yet?';
+
+  @override
+  String get accountSignUp => 'Create one';
+
+  @override
+  String get accountForgot => 'Forgot password?';
+
+  @override
+  String get accountForgotTitle => 'Reset your password';
+
+  @override
+  String get accountForgotLede => 'We\'ll email you a link to choose a new one.';
+
+  @override
+  String get accountForgotSend => 'Send link';
+
+  @override
+  String get accountForgotSent => 'If an account uses that address, a link is on its way. It works for an hour.';
+
+  @override
+  String get accountResetTitle => 'Choose a new password';
+
+  @override
+  String get accountResetSave => 'Save password';
+
+  @override
+  String get accountResetDone => 'Password changed. Every session was signed out.';
+
+  @override
+  String get accountVerifyTitle => 'Confirm your email';
+
+  @override
+  String get accountVerifying => 'Confirming…';
+
+  @override
+  String get accountVerified => 'Your email is confirmed.';
+
+  @override
+  String get accountVerifyFailed => 'This link is invalid or expired.';
+
+  @override
+  String get accountContinue => 'Continue';
+
+  @override
+  String accountInviteTitle(String workspace) {
+    return 'Join $workspace';
+  }
+
+  @override
+  String accountInviteBy(String name) {
+    return '$name invited you.';
+  }
+
+  @override
+  String accountInviteFor(String email) {
+    return 'The invite is for $email.';
+  }
+
+  @override
+  String get accountInviteJoin => 'Join workspace';
+
+  @override
+  String get accountInviteJoining => 'Joining…';
+
+  @override
+  String get accountInviteInvalid => 'This invite link is invalid or expired. Ask for a new one.';
+
+  @override
+  String get accountInviteSignInFirst => 'Sign in or create an account to join.';
+
+  @override
+  String get accountWorkspacesTitle => 'Your workspaces';
+
+  @override
+  String get accountWorkspacesLede => 'A workspace is one project: its repositories, tickets, members and settings.';
+
+  @override
+  String get accountNoWorkspaces => 'You are not in any workspace yet. Create one, or open an invite link someone sent you.';
+
+  @override
+  String get accountOpen => 'Open';
+
+  @override
+  String get accountCreateWorkspace => 'Create a workspace';
+
+  @override
+  String get accountCreateWorkspaceSub => 'You become its owner.';
+
+  @override
+  String get accountWorkspaceSlug => 'Address';
+
+  @override
+  String get accountWorkspaceSlugHelp => 'Used in links; made from the name when empty.';
+
+  @override
+  String get accountCreateWs => 'Create workspace';
+
+  @override
+  String get accountProfileTitle => 'Profile';
+
+  @override
+  String get accountProfile => 'Your profile';
+
+  @override
+  String get accountProfileSub => 'How you appear to the members of your workspaces.';
+
+  @override
+  String get accountSaveProfile => 'Save';
+
+  @override
+  String get accountProfileSaved => 'Profile saved';
+
+  @override
+  String get accountEmailUnverified => 'Not confirmed yet';
+
+  @override
+  String get accountEmailVerified => 'Confirmed';
+
+  @override
+  String get accountResend => 'Send the link again';
+
+  @override
+  String get accountResent => 'Confirmation link sent';
+
+  @override
+  String get accountPasswordTitle => 'Password';
+
+  @override
+  String get accountPasswordSub => 'Changing it signs out your other sessions.';
+
+  @override
+  String get accountCurrentPassword => 'Current password';
+
+  @override
+  String get accountNewPassword => 'New password';
+
+  @override
+  String get accountChangePassword => 'Change password';
+
+  @override
+  String get accountPasswordChanged => 'Password changed';
+
+  @override
+  String get accountTotpTitle => 'Two-factor sign-in';
+
+  @override
+  String get accountTotpSub => 'A code from an authenticator app at every sign-in.';
+
+  @override
+  String get accountTotpOn => 'On';
+
+  @override
+  String get accountTotpOff => 'Off';
+
+  @override
+  String get accountTotpSetup => 'Turn on';
+
+  @override
+  String get accountTotpScan =>
+      'Add this account to your authenticator app with the secret (or open the link on your phone), then enter the code it shows.';
+
+  @override
+  String get accountTotpSecret => 'Secret';
+
+  @override
+  String get accountTotpLink => 'Setup link';
+
+  @override
+  String get accountTotpCode => 'Code';
+
+  @override
+  String get accountTotpConfirm => 'Confirm';
+
+  @override
+  String get accountTotpEnabled => 'Two-factor sign-in is on';
+
+  @override
+  String get accountTotpDisable => 'Turn off';
+
+  @override
+  String get accountTotpDisabled => 'Two-factor sign-in is off';
+
+  @override
+  String get accountMyClaude => 'Your Claude account';
+
+  @override
+  String get accountMyClaudeSub => 'Runs of your tickets use it in workspaces set to per-member mode.';
+
+  @override
+  String get accountClaudeSaved => 'Claude account connected';
+
+  @override
+  String get accountClaudeRemoved => 'Claude account disconnected';
+
+  @override
+  String get accountAdmin => 'Platform Admin';
+
+  @override
+  String get accountAdminConsole => 'Open the operator console';
+
+  @override
+  String get accountReturnTitle => 'Payment';
+
+  @override
+  String get accountReturnLede =>
+      'Thanks. Credits show in Billing as soon as the payment provider confirms the payment (usually within a minute).';
+
+  @override
+  String get accountReturnBack => 'Back to Billing';
+
+  @override
+  String get accountLastOpened => 'Last opened';
+
+  @override
+  String accountMemberCount(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n members', one: '$n member');
+    return '$_temp0';
+  }
+
+  @override
+  String accountSlotCount(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n parallel runs', one: '$n parallel run');
+    return '$_temp0';
+  }
+
+  @override
+  String get accountSuspended => 'Suspended';
+
+  @override
+  String get accountNoWorkspacesTitle => 'No workspaces yet';
+
+  @override
+  String get accountCreateFirst => 'Create your first workspace';
+
+  @override
   String get analyticsTitle => 'Analytics';
 
   @override
@@ -333,6 +628,64 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analyticsSrcPlane => 'Plane';
 
   @override
+  String get analyticsQuality => 'Agent quality';
+
+  @override
+  String get analyticsQualitySub =>
+      'Tickets grouped by the prompt version of their first coding run. Compare versions to see whether a change to the agent helped.';
+
+  @override
+  String get analyticsNoQuality => 'No coding runs in this period.';
+
+  @override
+  String get analyticsColVersion => 'Prompt version';
+
+  @override
+  String get analyticsVersionUnknown => 'before tracking';
+
+  @override
+  String get analyticsColFirstPass => 'First pass';
+
+  @override
+  String get analyticsColFirstPassHint => 'Done tickets approved without a person asking for changes';
+
+  @override
+  String get analyticsColRounds => 'Change rounds';
+
+  @override
+  String get analyticsColRoundsHint => 'Average change requests by a person per ticket that reached review';
+
+  @override
+  String get analyticsColFixes => 'Check fixes';
+
+  @override
+  String get analyticsColFixesHint => 'Average times failing checks were sent back to Claude';
+
+  @override
+  String get analyticsColSerious => 'Serious findings';
+
+  @override
+  String get analyticsColSeriousHint => 'Share of reviewed tickets where agnts\'s review found a blocker or major problem';
+
+  @override
+  String get analyticsColFootprint => 'Plan accuracy';
+
+  @override
+  String get analyticsColFootprintHint => 'Share of changed files the analysis predicted';
+
+  @override
+  String get analyticsColRedFlags => 'Red flags';
+
+  @override
+  String get analyticsColRedFlagsHint => 'Skipped tests, removed assertions, silenced linters and the like found in the diffs';
+
+  @override
+  String get analyticsColSelfFixes => 'Self-fixes';
+
+  @override
+  String get analyticsColSelfFixesHint => 'Times agnts\'s own review sent findings back to the coder before a person looked';
+
+  @override
   String get appName => 'agnts';
 
   @override
@@ -342,10 +695,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authTitle => 'Sign in';
 
   @override
-  String get authLede => 'Use your account and the code from your authenticator app.';
+  String get authLede => 'Use your email or username and your password.';
 
   @override
-  String get authUsername => 'Username';
+  String get authUsername => 'Email or username';
 
   @override
   String get authPassword => 'Password';
@@ -385,6 +738,206 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(seconds, locale: localeName, other: '$seconds seconds', one: '$seconds second');
     return 'Too many attempts. Try again in $_temp0.';
   }
+
+  @override
+  String get authCodeLede => 'Enter the code from your authenticator app.';
+
+  @override
+  String get authBack => 'Use another account';
+
+  @override
+  String get billingTitle => 'Billing';
+
+  @override
+  String get billingSelfHosted => 'This server is self-hosted: there is nothing to pay. The Admin sets slots and member limits.';
+
+  @override
+  String get billingPlan => 'Plan';
+
+  @override
+  String billingPlanSub(String members) {
+    return 'The base plan includes 1 parallel run and $members members.';
+  }
+
+  @override
+  String billingMonthly(String amount) {
+    return '$amount so\'m a month';
+  }
+
+  @override
+  String billingPaidUntil(String date) {
+    return 'Paid until $date';
+  }
+
+  @override
+  String billingTrialUntil(String date) {
+    return 'Free trial until $date';
+  }
+
+  @override
+  String get billingSlots => 'Parallel runs';
+
+  @override
+  String billingSlotsHelp(String price) {
+    return 'Each extra run at once costs $price so\'m a month. Adding one now charges the rest of this month from credits.';
+  }
+
+  @override
+  String get billingSlotsSave => 'Change';
+
+  @override
+  String billingSlotsSaved(String n) {
+    return 'Parallel runs set to $n';
+  }
+
+  @override
+  String get billingMembers => 'Members';
+
+  @override
+  String billingMembersHelp(String included, String price) {
+    return '$included included; each one more costs $price so\'m a month.';
+  }
+
+  @override
+  String get billingCredits => 'Credits';
+
+  @override
+  String get billingCreditsSub =>
+      'Runs on agnts\'s API key (the fallback) spend credits: 1 credit is \$0.01 of Anthropic API cost. The month\'s plan is paid from them too.';
+
+  @override
+  String get billingBalance => 'Balance';
+
+  @override
+  String billingCreditPrice(String price) {
+    return '1 credit = $price so\'m';
+  }
+
+  @override
+  String get billingBuy => 'Buy credits';
+
+  @override
+  String get billingAmount => 'Amount (so\'m)';
+
+  @override
+  String billingYouGet(String n) {
+    return '≈ $n credits';
+  }
+
+  @override
+  String billingPayWith(String provider) {
+    return 'Pay with $provider';
+  }
+
+  @override
+  String get billingPaymentsOff => 'Payments are not set up on this server yet; ask the Admin to grant credits.';
+
+  @override
+  String get billingHistory => 'History';
+
+  @override
+  String get billingNoHistory => 'Nothing yet.';
+
+  @override
+  String get billingReason_purchase => 'Bought';
+
+  @override
+  String get billingReason_run => 'Spent';
+
+  @override
+  String get billingReason_refund => 'Refunded';
+
+  @override
+  String get billingReason_grant => 'Granted';
+
+  @override
+  String get briefTitle => 'Repository brief';
+
+  @override
+  String get briefSub =>
+      'How this code base works: architecture, recipes for common changes, files to copy, conventions and pitfalls. Every run of this repository\'s tickets reads it, so agnts builds things the way your team does.';
+
+  @override
+  String get briefSurvey => 'Survey';
+
+  @override
+  String get briefUpdate => 'Update';
+
+  @override
+  String get briefEdit => 'Edit';
+
+  @override
+  String get briefWrite => 'Write it yourself';
+
+  @override
+  String get briefSave => 'Save brief';
+
+  @override
+  String get briefCancel => 'Cancel';
+
+  @override
+  String get briefEditHint => 'Markdown. What you save is what runs read from now on; leave it empty to give runs no brief.';
+
+  @override
+  String get briefNone => 'No brief yet. Survey the repository to have Claude write a draft, or write one yourself.';
+
+  @override
+  String get briefSurveying => 'Claude is surveying the repository. The draft appears here for your approval.';
+
+  @override
+  String briefFailed(String error) {
+    return 'The last survey failed: $error';
+  }
+
+  @override
+  String briefApproved(String time) {
+    return 'Approved $time';
+  }
+
+  @override
+  String briefAtCommit(String sha) {
+    return 'at $sha';
+  }
+
+  @override
+  String briefMerges(String n, String of) {
+    return '$n of $of merges before the next update';
+  }
+
+  @override
+  String get briefDraftTitle => 'Draft from the survey';
+
+  @override
+  String briefDraftSub(String time) {
+    return 'Written $time. Runs read it only after you approve it.';
+  }
+
+  @override
+  String get briefApprove => 'Approve';
+
+  @override
+  String get briefDiscard => 'Discard draft';
+
+  @override
+  String get briefDiscardBody => 'The draft is deleted; the approved brief stays as it is.';
+
+  @override
+  String get briefStatus_pending => 'Survey queued';
+
+  @override
+  String get briefStatus_surveying => 'Surveying…';
+
+  @override
+  String get briefDone_survey => 'Survey queued';
+
+  @override
+  String get briefDone_approve => 'Brief approved: new runs read it';
+
+  @override
+  String get briefDone_discard => 'Draft discarded';
+
+  @override
+  String get briefDone_save => 'Brief saved';
 
   @override
   String get commonLoading => 'Loading…';
@@ -628,6 +1181,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dashboardNoActivity => 'No activity yet.';
+
+  @override
+  String get designApproach => 'Approach';
+
+  @override
+  String get designFit => 'Fit with the code base';
+
+  @override
+  String designAlternatives(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n alternatives considered', one: '$n alternative considered');
+    return '$_temp0';
+  }
+
+  @override
+  String get designWhyNot => 'Why not';
+
+  @override
+  String get designOutOfScope => 'Out of scope';
+
+  @override
+  String get designShipping => 'Shipping';
+
+  @override
+  String get designShip_migrations => 'Migrations';
+
+  @override
+  String get designShip_compatibility => 'Compatibility';
+
+  @override
+  String get designShip_rollout => 'Rollout';
+
+  @override
+  String get designShip_rollback => 'Rollback';
+
+  @override
+  String get designDeviations => 'Departed from the plan';
 
   @override
   String get filesTitle => 'Attachments';
@@ -2046,6 +2635,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mcpDeny => 'Deny';
 
   @override
+  String get mcpPickWorkspace => 'Workspace';
+
+  @override
+  String get mcpPickWorkspaceHelp => 'Claude acts in this workspace, as you.';
+
+  @override
   String get mdetailApprove => 'Approve';
 
   @override
@@ -2536,6 +3131,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mtasksYesterday => 'Yesterday';
 
   @override
+  String get mwsNone => 'You\'re not in a workspace yet. Create one or accept an invite in the web admin, then pull to refresh.';
+
+  @override
+  String mwsSwitched(String name) {
+    return 'Switched to $name';
+  }
+
+  @override
+  String mwsMembers(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n members', one: '$n member');
+    return '$_temp0';
+  }
+
+  @override
+  String get mwsSuspended => 'Suspended';
+
+  @override
   String get navOverview => 'Overview';
 
   @override
@@ -2684,6 +3296,156 @@ class AppLocalizationsEn extends AppLocalizations {
   String navSyncedPlane(String found, String created) {
     return 'Plane synced: $found open, $created new';
   }
+
+  @override
+  String get navWorkspace => 'Workspace';
+
+  @override
+  String get navProfile => 'Profile';
+
+  @override
+  String get navPlatform => 'Operator console';
+
+  @override
+  String get navPeople => 'People';
+
+  @override
+  String get navAccount => 'Account';
+
+  @override
+  String get platformTitle => 'Operator console';
+
+  @override
+  String get platformLede =>
+      'Every workspace, run and user on this server. Workspaces show metadata only: their tickets are their members\'.';
+
+  @override
+  String get platformCapacity => 'Server';
+
+  @override
+  String get platformReserved => 'Memory reserved';
+
+  @override
+  String get platformBudgetNone => 'not limited';
+
+  @override
+  String get platformRuns => 'Runs';
+
+  @override
+  String get platformDisk => 'Disk free';
+
+  @override
+  String get platformFull => 'Full: runs are waiting for the server';
+
+  @override
+  String get platformRunning => 'Running now';
+
+  @override
+  String get platformNoRuns => 'Nothing is running.';
+
+  @override
+  String get platformQueue => 'Server queue';
+
+  @override
+  String get platformNoQueue => 'No run is waiting for the server.';
+
+  @override
+  String get platformWorkspace => 'Workspace';
+
+  @override
+  String get platformTicket => 'Ticket';
+
+  @override
+  String get platformStage => 'Stage';
+
+  @override
+  String get platformStarted => 'Started';
+
+  @override
+  String get platformWorkspaces => 'Workspaces';
+
+  @override
+  String get platformOwner => 'Owner';
+
+  @override
+  String get platformPlan => 'Plan';
+
+  @override
+  String get platformSlots => 'Slots';
+
+  @override
+  String get platformMembers => 'Members';
+
+  @override
+  String get platformMemberLimit => 'Member limit';
+
+  @override
+  String get platformCredits => 'Credits';
+
+  @override
+  String get platformState => 'State';
+
+  @override
+  String get platformActive => 'Active';
+
+  @override
+  String get platformSuspended => 'Suspended';
+
+  @override
+  String get platformDeleted => 'Deleted';
+
+  @override
+  String get platformEdit => 'Edit';
+
+  @override
+  String get platformSuspend => 'Suspend';
+
+  @override
+  String get platformResume => 'Resume';
+
+  @override
+  String get platformGrant => 'Grant credits';
+
+  @override
+  String get platformGrantAmount => 'Credits (negative takes back)';
+
+  @override
+  String get platformGrantNote => 'Note';
+
+  @override
+  String platformGrantDone(String n, String name) {
+    return '$n credits granted to $name';
+  }
+
+  @override
+  String get platformSaved => 'Saved';
+
+  @override
+  String get platformUsers => 'Users';
+
+  @override
+  String get platformUser => 'User';
+
+  @override
+  String get platformEmail => 'Email';
+
+  @override
+  String get platformAdmin => 'Admin';
+
+  @override
+  String get platformMakeAdmin => 'Make Admin';
+
+  @override
+  String get platformRemoveAdmin => 'Remove Admin';
+
+  @override
+  String get platformJoined => 'Joined';
+
+  @override
+  String get platformNoLimit => 'no limit';
+
+  @override
+  String get platformForbidden => 'Only an Admin can open the operator console.';
 
   @override
   String get previewTab => 'Preview';
@@ -2914,6 +3676,135 @@ class AppLocalizationsEn extends AppLocalizations {
   String get previewNotifyPhotosHelp => 'Up to four screenshots go with the Telegram message.';
 
   @override
+  String queueHeader(String running, String slots) {
+    return 'Running $running/$slots';
+  }
+
+  @override
+  String queueQueued(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n queued', one: '$n queued');
+    return '$_temp0';
+  }
+
+  @override
+  String queueWaitingServer(String n) {
+    return '$n waiting for the server';
+  }
+
+  @override
+  String get queueBadge_blocked => 'Waiting · related';
+
+  @override
+  String get queueBadge_slots => 'Queued · slots';
+
+  @override
+  String get queueBadge_server => 'Queued · server';
+
+  @override
+  String get queueBadge_claude => 'Paused · Claude';
+
+  @override
+  String get queueTitle_blocked => 'Waiting for related tickets';
+
+  @override
+  String get queueTitle_slots => 'Waiting for a free slot';
+
+  @override
+  String get queueTitle_server => 'In the server queue';
+
+  @override
+  String get queueTitle_claude => 'Waiting for Claude';
+
+  @override
+  String queuePosition(String position) {
+    return '#$position in the server queue';
+  }
+
+  @override
+  String queueOthers(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n tickets of other workspaces ahead.',
+      one: '$n ticket of another workspace ahead.',
+      zero: '',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String queueEstimate(num minutes) {
+    String _temp0 = intl.Intl.pluralLogic(minutes, locale: localeName, other: '$minutes minutes', one: '$minutes minute');
+    return 'Starts in about $_temp0.';
+  }
+
+  @override
+  String queueServerFull(String runs, String reserved, String budget) {
+    return 'The server is at capacity ($runs runs, $reserved of $budget reserved).';
+  }
+
+  @override
+  String queueSlotsHint(String running, String slots) {
+    return '$running of $slots runs in use. It starts when one ends.';
+  }
+
+  @override
+  String get queueAddSlot => 'Add a slot';
+
+  @override
+  String get queueClaudeHint => 'Connect an account or turn on credits in Workspace settings → Claude.';
+
+  @override
+  String get queueMember => 'Member';
+
+  @override
+  String get queueTakeOver => 'Take over';
+
+  @override
+  String get queueTakenOver => 'The ticket is yours: it runs on your Claude account in per-member mode.';
+
+  @override
+  String queueCreatedBy(String name) {
+    return 'Created by $name';
+  }
+
+  @override
+  String queueBy(String name) {
+    return 'by $name';
+  }
+
+  @override
+  String redFlagsTitle(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n red flags', one: '$n red flag');
+    return '$_temp0';
+  }
+
+  @override
+  String get redFlagsSub =>
+      'agnts\'s scan of the change matched these lines. They often mean the checks were made to pass the wrong way; agnts\'s review checks each one.';
+
+  @override
+  String get redFlagsKind_skipped_test => 'Skipped or focused test';
+
+  @override
+  String get redFlagsKind_removed_assertion => 'Assertions removed';
+
+  @override
+  String get redFlagsKind_deleted_test => 'Test file deleted';
+
+  @override
+  String get redFlagsKind_silenced_lint => 'Linter silenced';
+
+  @override
+  String get redFlagsKind_swallowed_error => 'Error swallowed';
+
+  @override
+  String get redFlagsKind_todo => 'TODO left';
+
+  @override
+  String get redFlagsKind_new_dependency => 'New dependency';
+
+  @override
   String get relationsTab => 'Order';
 
   @override
@@ -3071,6 +3962,96 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get relationsSource_plane => 'Plane relation';
+
+  @override
+  String get replayTitle => 'Replay with today\'s agnts';
+
+  @override
+  String get replaySub =>
+      'Re-run this ticket from the commit it started from, with the current prompts, brief and rules, and compare the result with what you approved. The replay is never pushed.';
+
+  @override
+  String get replayStart => 'Replay';
+
+  @override
+  String replayConfirm(String key) {
+    return 'agnts creates a new task that re-does $key from where it started. It uses your Claude plan like any ticket.';
+  }
+
+  @override
+  String replayCreated(String key) {
+    return 'Replay $key queued';
+  }
+
+  @override
+  String get replayBanner => 'This is a replay to evaluate agnts: it is never pushed. Compare it with';
+
+  @override
+  String get replayEvalTitle => 'Replay evaluation';
+
+  @override
+  String get replayEvalSub =>
+      'Done tickets re-run with a newer agnts, compared with the change you approved. Start one with Replay on a done ticket, or `agnts eval replay KEY`.';
+
+  @override
+  String get replayNone => 'No replays yet.';
+
+  @override
+  String get replayRecent => 'Recent replays';
+
+  @override
+  String get replayColReplays => 'Replays';
+
+  @override
+  String get replayColChecks => 'Checks';
+
+  @override
+  String get replayColLooksGood => 'Review OK';
+
+  @override
+  String get replayColOverlap => 'Same files';
+
+  @override
+  String get replayColOverlapHint => 'How much the replay\'s changed files match the approved change\'s (Jaccard index)';
+
+  @override
+  String get replayColRecall => 'Coverage';
+
+  @override
+  String get replayColRecallHint => 'Share of the approved change\'s files the replay changed too';
+
+  @override
+  String get replayColTurns => 'Turns (original)';
+
+  @override
+  String get replayColCost => 'Cost (original)';
+
+  @override
+  String get replayColReplay => 'Replay';
+
+  @override
+  String get replayColOf => 'Of';
+
+  @override
+  String get replayColState => 'State';
+
+  @override
+  String get replayColReview => 'Review';
+
+  @override
+  String get replayPass => 'pass';
+
+  @override
+  String get replayFail => 'fail';
+
+  @override
+  String get replayVerdict_looks_good => 'looks good';
+
+  @override
+  String get replayVerdict_has_concerns => 'has concerns';
+
+  @override
+  String get replayVerdict_needs_changes => 'needs changes';
 
   @override
   String get repoBack => 'Back to repositories';
@@ -3332,6 +4313,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get repoOpenRun => 'Open on the git host';
+
+  @override
+  String get repoBrief => 'Brief';
 
   @override
   String get reposTitle => 'Repositories';
@@ -3788,6 +4772,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get reviewCat_architecture => 'Architecture';
+
+  @override
+  String get reviewCat_scope => 'Scope';
+
+  @override
   String get rulesTitle => 'Rules';
 
   @override
@@ -4014,6 +5004,59 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rulesTurnedOff => 'Rule turned off';
+
+  @override
+  String get rulesStatus_suggested => 'Suggested';
+
+  @override
+  String get rulesSuggestedFrom => 'agnts suggests this rule from your feedback on';
+
+  @override
+  String get rulesSuggestedHint => 'Tickets don\'t follow it until you adopt it. Edit it to adopt it with your changes.';
+
+  @override
+  String rulesSuggestedHelp(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'agnts suggests $n rules learned from your feedback.',
+      one: 'agnts suggests $n rule learned from your feedback.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rulesAdopt => 'Adopt';
+
+  @override
+  String get rulesAdoptAsWritten => 'Adopt as written';
+
+  @override
+  String get rulesDismiss => 'Dismiss';
+
+  @override
+  String rulesDismissBody(String title) {
+    return 'agnts drops “$title” and won\'t suggest it again.';
+  }
+
+  @override
+  String get rulesDismissed => 'Suggestion dismissed';
+
+  @override
+  String get rulesKind => 'Kind';
+
+  @override
+  String get rulesKindRule => 'Rule';
+
+  @override
+  String get rulesKindContext => 'Business context';
+
+  @override
+  String get rulesKindRuleHelp => 'An instruction agnts follows on every ticket.';
+
+  @override
+  String get rulesKindContextHelp =>
+      'Knowledge about your product: what its terms mean, invariants the code must keep, who uses what. Every run reads it before it starts.';
 
   @override
   String get settingsTitle => 'Settings';
@@ -4264,6 +5307,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsSaved => 'Settings saved';
+
+  @override
+  String settingsParallelSlots(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n runs', one: '$n run');
+    return '$_temp0 at once';
+  }
+
+  @override
+  String get settingsParallelSlotsHelp => 'The workspace\'s slots. Change them in Workspace → Billing.';
+
+  @override
+  String get settingsClaudeMoved => 'Claude is connected per workspace now.';
+
+  @override
+  String get settingsClaudeOpen => 'Workspace → Claude';
+
+  @override
+  String get settingsSelfReview => 'Fix review findings first';
+
+  @override
+  String get settingsSelfReviewHelp =>
+      'When agnts\'s own code review finds a blocker or major problem, agnts sends it back to the coder once before you review. Needs the code review above.';
+
+  @override
+  String get settingsAutoBrief => 'Survey repositories';
+
+  @override
+  String get settingsAutoBriefHelp =>
+      'Write a repository brief (architecture, recipes, conventions) when a repository\'s first ticket is analysed, and update it after every 10 merges. A brief reaches the agent only after you approve it.';
+
+  @override
+  String get settingsReflect => 'Learn from your feedback';
+
+  @override
+  String get settingsReflectHelp =>
+      'When you ask for changes or reject work with a reason, agnts looks for a convention behind it and suggests a rule on the Rules page. Nothing applies until you adopt it.';
 
   @override
   String get spendTitle => 'Token spend';
@@ -5439,4 +6518,345 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get usageHelp =>
       'Numbers come from the rate limit events Claude Code emits during each run. When agnts is idle, a tiny refresh run keeps them current.';
+
+  @override
+  String get wsTitle => 'Workspace';
+
+  @override
+  String get wsSwitcher => 'Switch workspace';
+
+  @override
+  String get wsAll => 'All workspaces';
+
+  @override
+  String get wsNew => 'New workspace';
+
+  @override
+  String get wsRole_owner => 'Owner';
+
+  @override
+  String get wsRole_user => 'Member';
+
+  @override
+  String get wsTabGeneral => 'General';
+
+  @override
+  String get wsTabMembers => 'Members';
+
+  @override
+  String get wsTabClaude => 'Claude';
+
+  @override
+  String get wsTabBilling => 'Billing';
+
+  @override
+  String get wsGeneral => 'Workspace';
+
+  @override
+  String get wsGeneralSub => 'Its name and the address in links.';
+
+  @override
+  String get wsName => 'Name';
+
+  @override
+  String get wsSlug => 'Address';
+
+  @override
+  String wsSlugHelp(String slug) {
+    return 'Links to this workspace: /w/$slug. Old links stop working when it changes.';
+  }
+
+  @override
+  String get wsSave => 'Save';
+
+  @override
+  String get wsSaved => 'Workspace saved';
+
+  @override
+  String get wsReadOnly => 'Only the owner can change this.';
+
+  @override
+  String get wsPlan => 'Plan';
+
+  @override
+  String get wsSlots => 'Parallel runs';
+
+  @override
+  String get wsSlotsHelp => 'How many runs this workspace may have at once. Change it in Billing.';
+
+  @override
+  String wsTrialEnds(String date) {
+    return 'Trial until $date';
+  }
+
+  @override
+  String get wsSuspended => 'This workspace is suspended: nothing new starts until it is resumed.';
+
+  @override
+  String get wsDanger => 'Danger zone';
+
+  @override
+  String get wsDangerSub =>
+      'Deleting stops every run and removes the workspace, its repositories\' copies, tickets and history. It is kept 7 days for undo, then purged.';
+
+  @override
+  String get wsDelete => 'Delete workspace';
+
+  @override
+  String wsDeleteTitle(String name) {
+    return 'Delete $name?';
+  }
+
+  @override
+  String wsDeleteBody(String slug) {
+    return 'Type the address ($slug) to confirm. Everyone loses access.';
+  }
+
+  @override
+  String get wsDeleted => 'Workspace deleted';
+
+  @override
+  String get wsMembers => 'Members';
+
+  @override
+  String get wsMembersSub =>
+      'Everyone in the workspace sees its tickets and can create, answer, review and retry them. The owner also manages settings, integrations, Claude, members and billing.';
+
+  @override
+  String get wsYou => 'you';
+
+  @override
+  String get wsRemove => 'Remove';
+
+  @override
+  String wsRemoveTitle(String name) {
+    return 'Remove $name?';
+  }
+
+  @override
+  String get wsRemoveBody => 'They lose access to this workspace. Their tickets stay.';
+
+  @override
+  String wsRemoved(String name) {
+    return '$name removed';
+  }
+
+  @override
+  String get wsMakeOwner => 'Make owner';
+
+  @override
+  String wsTransferTitle(String name) {
+    return 'Make $name the owner?';
+  }
+
+  @override
+  String get wsTransferBody => 'You stay a member but can no longer change settings, members or billing.';
+
+  @override
+  String wsTransferred(String name) {
+    return '$name is the owner now';
+  }
+
+  @override
+  String get wsLeave => 'Leave workspace';
+
+  @override
+  String wsLeaveTitle(String name) {
+    return 'Leave $name?';
+  }
+
+  @override
+  String get wsLeaveBody => 'You lose access until someone invites you again.';
+
+  @override
+  String get wsOwnerCannotLeave => 'The owner cannot leave: make someone else the owner first.';
+
+  @override
+  String get wsClaudeBadge => 'Claude connected';
+
+  @override
+  String get wsNoClaudeBadge => 'No Claude';
+
+  @override
+  String get wsInvite => 'Invite people';
+
+  @override
+  String get wsInviteSub => 'Send a link by email, or make a link to share yourself. Links work for 7 days and once.';
+
+  @override
+  String get wsInviteEmail => 'Email (optional)';
+
+  @override
+  String get wsInviteSend => 'Create invite';
+
+  @override
+  String get wsInviteLink => 'Invite link (shown once)';
+
+  @override
+  String wsInviteEmailed(String email) {
+    return 'Sent to $email';
+  }
+
+  @override
+  String get wsInviteCopy => 'Copy';
+
+  @override
+  String get wsInvites => 'Open invites';
+
+  @override
+  String get wsInviteAnyone => 'Anyone with the link';
+
+  @override
+  String wsInviteExpires(String date) {
+    return 'expires $date';
+  }
+
+  @override
+  String get wsRevoke => 'Revoke';
+
+  @override
+  String get wsRevoked => 'Invite revoked';
+
+  @override
+  String wsMemberLimit(String n, String limit) {
+    return '$n of $limit members';
+  }
+
+  @override
+  String wsMemberLimitNone(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n members', one: '$n member');
+    return '$_temp0';
+  }
+
+  @override
+  String get wsClaude => 'Claude';
+
+  @override
+  String get wsClaudeSub => 'Which Claude account this workspace\'s runs use.';
+
+  @override
+  String get wsMode => 'Mode';
+
+  @override
+  String get wsModeShared => 'Shared';
+
+  @override
+  String get wsModeSharedHelp => 'Every run uses the workspace\'s account, set here by the owner.';
+
+  @override
+  String get wsModeMember => 'Per member';
+
+  @override
+  String get wsModeMemberHelp => 'Each run uses the account of the ticket\'s member. Members connect theirs in their profile.';
+
+  @override
+  String get wsConnection => 'Workspace account';
+
+  @override
+  String get wsConnectionSub => 'Used by every run in shared mode.';
+
+  @override
+  String get wsKind => 'Kind';
+
+  @override
+  String get wsKindSubscription => 'Claude subscription';
+
+  @override
+  String get wsKindApiKey => 'Anthropic API key';
+
+  @override
+  String get wsKindSubscriptionHelp => 'Run `claude setup-token` where you are signed in to your Claude plan, and paste the token.';
+
+  @override
+  String get wsKindApiKeyHelp => 'Create a key in the Anthropic Console (sk-ant-api…). Usage is billed by Anthropic to its owner.';
+
+  @override
+  String get wsSubscriptionsOff => 'This server takes Anthropic API keys only.';
+
+  @override
+  String get wsToken => 'Token';
+
+  @override
+  String get wsConnect => 'Connect';
+
+  @override
+  String get wsReplace => 'Replace';
+
+  @override
+  String get wsDisconnect => 'Disconnect';
+
+  @override
+  String get wsConnected => 'Connected';
+
+  @override
+  String get wsNotConnected => 'Not connected';
+
+  @override
+  String wsPausedUntil(String time) {
+    return 'At its limit until $time';
+  }
+
+  @override
+  String wsConnectedAs(String account, String hint) {
+    return '$account · …$hint';
+  }
+
+  @override
+  String get wsFallback => 'Continue on credits';
+
+  @override
+  String get wsFallbackHelp =>
+      'When the chosen account is at its limit or missing, runs continue on agnts\'s API key and spend the workspace\'s credits instead of pausing.';
+
+  @override
+  String get wsFallbackOff => 'Credits are not available on this server.';
+
+  @override
+  String wsCredits(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n credits', one: '$n credit');
+    return '$_temp0';
+  }
+
+  @override
+  String get wsDefaultMember => 'Tickets without a person';
+
+  @override
+  String get wsDefaultMemberHelp => 'Tickets from Jira, Plane, follow-ups and incidents run on this member\'s account in per-member mode.';
+
+  @override
+  String get wsDefaultOwner => 'The owner';
+
+  @override
+  String get wsMemberAccounts => 'Members\' accounts';
+
+  @override
+  String get wsMemberAccountsSub => 'Who has connected their own Claude account (Profile → Claude).';
+
+  @override
+  String get wsYourAccount => 'Connect yours in your profile';
+
+  @override
+  String get wsClaudeSaved => 'Claude settings saved';
+
+  @override
+  String get wsRole_viewer => 'Viewer';
+
+  @override
+  String get wsViewerBanner => 'You are a viewer here: you can see everything, but you cannot change anything.';
+
+  @override
+  String get wsInviteAs => 'Joins as';
+
+  @override
+  String get wsInviteAsHelp => 'Members work on tickets; viewers only look.';
+
+  @override
+  String wsRoleChanged(String name, String role) {
+    return '$name is now $role';
+  }
+
+  @override
+  String wsRoleLabel(String name) {
+    return 'Role of $name';
+  }
 }

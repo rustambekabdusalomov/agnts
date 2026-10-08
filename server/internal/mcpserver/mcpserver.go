@@ -11,9 +11,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/modelcontextprotocol/go-sdk/auth"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
 	"agnts/internal/admin"
@@ -36,9 +38,68 @@ type Deps struct {
 	Repos     *admin.Repos
 	Lessons   *postgres.Lessons                                // nil disables the lesson tools
 	Analytics func(ctx context.Context, days int) (any, error) // phase 5; nil returns weekly stats
+	// Role is the caller's role in a workspace: viewers get only the
+	// read-only tools. Nil lets every caller write.
+	Role RoleFunc
 }
 
+// RoleFunc returns userID's role in workspace ws.
+type RoleFunc func(ctx context.Context, ws, userID int64) (domain.WorkspaceRole, error)
+
 type tools struct{ d Deps }
+
+// TokenInfo describes a token of userID for workspace ws. The MCP library
+// carries it to every tool call of the request, and refuses a session to
+// anyone but the user (in the workspace) who opened it.
+func TokenInfo(userID, ws int64, expires time.Time) *auth.TokenInfo {
+	return &auth.TokenInfo{
+		UserID:     strconv.FormatInt(userID, 10) + "@" + strconv.FormatInt(ws, 10),
+		Expiration: expires,
+		Extra:      map[string]any{"user": userID, "workspace": ws},
+	}
+}
+
+// Scope returns ctx acting in the token's workspace as its person. A call
+// without a token acts nowhere: every workspace read then finds nothing.
+func Scope(ctx context.Context, extra *mcp.RequestExtra) (context.Context, error) {
+	if extra == nil || extra.TokenInfo == nil {
+		// In-process sessions (tests, a local transport) act in the
+		// workspace their connection was opened in; HTTP always has a token.
+		if domain.WorkspaceOf(ctx) > 0 {
+			return ctx, nil
+		}
+		return ctx, errors.New("not signed in")
+	}
+	uid, _ := extra.TokenInfo.Extra["user"].(int64)
+	ws, _ := extra.TokenInfo.Extra["workspace"].(int64)
+	if uid == 0 || ws == 0 {
+		return ctx, errors.New("this token is not for a workspace")
+	}
+	ctx = domain.WithWorkspace(ctx, ws)
+	return domain.WithActor(ctx, domain.Actor{UserID: uid}), nil
+}
+
+// addTool registers a tool whose handler runs scoped to the caller. A tool
+// that is not read-only refuses a viewer.
+func addTool[In, Out any](s *mcp.Server, role RoleFunc, tool *mcp.Tool, h mcp.ToolHandlerFor[In, Out]) {
+	write := tool.Annotations == nil || !tool.Annotations.ReadOnlyHint
+	mcp.AddTool(s, tool, func(ctx context.Context, req *mcp.CallToolRequest, in In) (*mcp.CallToolResult, Out, error) {
+		var zero Out
+		ctx, err := Scope(ctx, req.Extra)
+		if err != nil {
+			return nil, zero, err
+		}
+		if write && role != nil {
+			if a, ok := domain.ActorOf(ctx); ok {
+				r, err := role(ctx, domain.WorkspaceOf(ctx), a.UserID)
+				if err != nil || !r.CanEdit() {
+					return nil, zero, errors.New("viewers can see this workspace but not change it")
+				}
+			}
+		}
+		return h(ctx, req, in)
+	})
+}
 
 // NewServer builds the MCP server with agnts's tools.
 func NewServer(d Deps, version string) *mcp.Server {
@@ -54,29 +115,29 @@ func NewServer(d Deps, version string) *mcp.Server {
 	write := &mcp.ToolAnnotations{DestructiveHint: &no}
 	destructive := &mcp.ToolAnnotations{DestructiveHint: &yes}
 
-	mcp.AddTool(s, &mcp.Tool{Name: "get_inbox", Description: "Tickets waiting on the user (questions to answer, changes to review, stopped runs), oldest first, plus what is running.", Annotations: ro}, t.getInbox)
-	mcp.AddTool(s, &mcp.Tool{Name: "list_tickets", Description: "List tickets. filter: needs, running, queue, done or all.", Annotations: ro}, t.listTickets)
-	mcp.AddTool(s, &mcp.Tool{Name: "get_ticket", Description: "One ticket: its kind, description, agnts's analysis and plan, questions with ids, the latest result (summary, checks and changed files for a change; the Markdown report for plan, analysis and bug tickets), agnts's code review of that result and its preview (screenshots of the app, with visual issues; advice, the user decides), suggested follow-up tickets with ids, and history.", Annotations: ro}, t.getTicket)
-	mcp.AddTool(s, &mcp.Tool{Name: "get_run_log", Description: "The newest log lines of a ticket's runs (tool calls, checks, state changes).", Annotations: ro}, t.getRunLog)
-	mcp.AddTool(s, &mcp.Tool{Name: "get_usage", Description: "Claude plan usage (session and weekly) and whether new runs are paused.", Annotations: ro}, t.getUsage)
-	mcp.AddTool(s, &mcp.Tool{Name: "get_analytics", Description: "Statistics for the last N days (7, 30 or 90): tickets picked up, pushed, first-try approvals, turns, waiting time, stops, token spend.", Annotations: ro}, t.getAnalytics)
-	mcp.AddTool(s, &mcp.Tool{Name: "list_repositories", Description: "Repositories agnts works on, with open ticket counts.", Annotations: ro}, t.listRepos)
-	mcp.AddTool(s, &mcp.Tool{Name: "get_repository", Description: "One repository by name.", Annotations: ro}, t.getRepo)
-	mcp.AddTool(s, &mcp.Tool{Name: "list_lessons", Description: "Lessons agnts wrote about techniques its pushed changes introduced to a repository for the first time (patterns, architecture, algorithms, libraries), newest first.", Annotations: ro}, t.listLessons)
-	mcp.AddTool(s, &mcp.Tool{Name: "get_lesson", Description: "One lesson: explanation, why the change needed it, code references, quiz (with answers: ask the user first, then reveal) and further reading.", Annotations: ro}, t.getLesson)
+	addTool(s, d.Role, &mcp.Tool{Name: "get_inbox", Description: "Tickets waiting on the user (questions to answer, changes to review, stopped runs), oldest first, plus what is running.", Annotations: ro}, t.getInbox)
+	addTool(s, d.Role, &mcp.Tool{Name: "list_tickets", Description: "List tickets. filter: needs, running, queue, done or all.", Annotations: ro}, t.listTickets)
+	addTool(s, d.Role, &mcp.Tool{Name: "get_ticket", Description: "One ticket: its kind, description, agnts's analysis and plan, questions with ids, the latest result (summary, checks and changed files for a change; the Markdown report for plan, analysis and bug tickets), agnts's code review of that result and its preview (screenshots of the app, with visual issues; advice, the user decides), suggested follow-up tickets with ids, and history.", Annotations: ro}, t.getTicket)
+	addTool(s, d.Role, &mcp.Tool{Name: "get_run_log", Description: "The newest log lines of a ticket's runs (tool calls, checks, state changes).", Annotations: ro}, t.getRunLog)
+	addTool(s, d.Role, &mcp.Tool{Name: "get_usage", Description: "Claude plan usage (session and weekly) and whether new runs are paused.", Annotations: ro}, t.getUsage)
+	addTool(s, d.Role, &mcp.Tool{Name: "get_analytics", Description: "Statistics for the last N days (7, 30 or 90): tickets picked up, pushed, first-try approvals, turns, waiting time, stops, token spend.", Annotations: ro}, t.getAnalytics)
+	addTool(s, d.Role, &mcp.Tool{Name: "list_repositories", Description: "Repositories agnts works on, with open ticket counts.", Annotations: ro}, t.listRepos)
+	addTool(s, d.Role, &mcp.Tool{Name: "get_repository", Description: "One repository by name.", Annotations: ro}, t.getRepo)
+	addTool(s, d.Role, &mcp.Tool{Name: "list_lessons", Description: "Lessons agnts wrote about techniques its pushed changes introduced to a repository for the first time (patterns, architecture, algorithms, libraries), newest first.", Annotations: ro}, t.listLessons)
+	addTool(s, d.Role, &mcp.Tool{Name: "get_lesson", Description: "One lesson: explanation, why the change needed it, code references, quiz (with answers: ask the user first, then reveal) and further reading.", Annotations: ro}, t.getLesson)
 
-	mcp.AddTool(s, &mcp.Tool{Name: "answer_questions", Description: "Prepare answers to a ticket's questions (all must be answered). For a question marked multiple, the answer lists the chosen options, one per line. Returns an action_id to confirm.", Annotations: write}, t.answerQuestions)
-	mcp.AddTool(s, &mcp.Tool{Name: "start_run", Description: "Prepare starting a ticket that is held in the queue. Returns an action_id to confirm.", Annotations: write}, t.startRun)
-	mcp.AddTool(s, &mcp.Tool{Name: "request_changes", Description: "Prepare sending a ticket under review back to coding with feedback. Returns an action_id to confirm.", Annotations: write}, t.requestChanges)
-	mcp.AddTool(s, &mcp.Tool{Name: "retry_run", Description: "Prepare retrying a stopped or paused ticket. Returns an action_id to confirm.", Annotations: write}, t.retryRun)
-	mcp.AddTool(s, &mcp.Tool{Name: "create_task", Description: "Prepare a new task. kind says what agnts produces: code or test (a change, needs a repository), plan, analysis or bug (a Markdown report, repository optional), or auto (agnts picks while reading it). Returns an action_id to confirm.", Annotations: write}, t.createTask)
-	mcp.AddTool(s, &mcp.Tool{Name: "implement_ticket", Description: "Prepare the code task that carries out a done plan or bug investigation: a new task linked to the report, with the report as its brief. repository is needed only when the report has none. Returns an action_id to confirm.", Annotations: write}, t.implementTicket)
-	mcp.AddTool(s, &mcp.Tool{Name: "accept_follow_ups", Description: "Prepare creating tickets from a ticket's suggested follow-ups (ids from get_ticket), each as a local task or a new Jira issue or Plane work item. They are created queued: nothing runs until started. Returns an action_id to confirm.", Annotations: write}, t.acceptFollowUps)
-	mcp.AddTool(s, &mcp.Tool{Name: "dismiss_follow_up", Description: "Prepare declining a suggested follow-up; agnts will not suggest it again. Returns an action_id to confirm.", Annotations: write}, t.dismissFollowUp)
-	mcp.AddTool(s, &mcp.Tool{Name: "set_ticket_kind", Description: "Prepare changing what a ticket produces (code, test, plan, analysis, bug, or auto to let agnts pick). Only before work starts, while waiting for answers, or on a stopped ticket. Returns an action_id to confirm.", Annotations: write}, t.setKind)
-	mcp.AddTool(s, &mcp.Tool{Name: "approve_ticket", Description: "Prepare approving reviewed work. For a change agnts pushes and opens the pull request; for a report the ticket is done, and post_report also posts it to the Jira or Plane issue (only if the user asks). Returns an action_id; confirm only if the user explicitly approves.", Annotations: destructive}, t.approveTicket)
-	mcp.AddTool(s, &mcp.Tool{Name: "reject_ticket", Description: "Prepare rejecting a ticket (stops all work on it). Returns an action_id; confirm only if the user explicitly agrees.", Annotations: destructive}, t.rejectTicket)
-	mcp.AddTool(s, &mcp.Tool{Name: "confirm_action", Description: "Execute a prepared action after the user explicitly agreed to its summary. Actions expire after 10 minutes and run once.", Annotations: write}, t.confirmAction)
+	addTool(s, d.Role, &mcp.Tool{Name: "answer_questions", Description: "Prepare answers to a ticket's questions (all must be answered). For a question marked multiple, the answer lists the chosen options, one per line. Returns an action_id to confirm.", Annotations: write}, t.answerQuestions)
+	addTool(s, d.Role, &mcp.Tool{Name: "start_run", Description: "Prepare starting a ticket that is held in the queue. Returns an action_id to confirm.", Annotations: write}, t.startRun)
+	addTool(s, d.Role, &mcp.Tool{Name: "request_changes", Description: "Prepare sending a ticket under review back to coding with feedback. Returns an action_id to confirm.", Annotations: write}, t.requestChanges)
+	addTool(s, d.Role, &mcp.Tool{Name: "retry_run", Description: "Prepare retrying a stopped or paused ticket. Returns an action_id to confirm.", Annotations: write}, t.retryRun)
+	addTool(s, d.Role, &mcp.Tool{Name: "create_task", Description: "Prepare a new task. kind says what agnts produces: code or test (a change, needs a repository), plan, analysis or bug (a Markdown report, repository optional), or auto (agnts picks while reading it). Returns an action_id to confirm.", Annotations: write}, t.createTask)
+	addTool(s, d.Role, &mcp.Tool{Name: "implement_ticket", Description: "Prepare the code task that carries out a done plan or bug investigation: a new task linked to the report, with the report as its brief. repository is needed only when the report has none. Returns an action_id to confirm.", Annotations: write}, t.implementTicket)
+	addTool(s, d.Role, &mcp.Tool{Name: "accept_follow_ups", Description: "Prepare creating tickets from a ticket's suggested follow-ups (ids from get_ticket), each as a local task or a new Jira issue or Plane work item. They are created queued: nothing runs until started. Returns an action_id to confirm.", Annotations: write}, t.acceptFollowUps)
+	addTool(s, d.Role, &mcp.Tool{Name: "dismiss_follow_up", Description: "Prepare declining a suggested follow-up; agnts will not suggest it again. Returns an action_id to confirm.", Annotations: write}, t.dismissFollowUp)
+	addTool(s, d.Role, &mcp.Tool{Name: "set_ticket_kind", Description: "Prepare changing what a ticket produces (code, test, plan, analysis, bug, or auto to let agnts pick). Only before work starts, while waiting for answers, or on a stopped ticket. Returns an action_id to confirm.", Annotations: write}, t.setKind)
+	addTool(s, d.Role, &mcp.Tool{Name: "approve_ticket", Description: "Prepare approving reviewed work. For a change agnts pushes and opens the pull request; for a report the ticket is done, and post_report also posts it to the Jira or Plane issue (only if the user asks). Returns an action_id; confirm only if the user explicitly approves.", Annotations: destructive}, t.approveTicket)
+	addTool(s, d.Role, &mcp.Tool{Name: "reject_ticket", Description: "Prepare rejecting a ticket (stops all work on it). Returns an action_id; confirm only if the user explicitly agrees.", Annotations: destructive}, t.rejectTicket)
+	addTool(s, d.Role, &mcp.Tool{Name: "confirm_action", Description: "Execute a prepared action after the user explicitly agreed to its summary. Actions expire after 10 minutes and run once.", Annotations: write}, t.confirmAction)
 	return s
 }
 

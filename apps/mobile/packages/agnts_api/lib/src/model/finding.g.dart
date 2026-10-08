@@ -168,6 +168,8 @@ const _$FindingCategoryEnumEnumMap = {
   FindingCategoryEnum.performance: 'performance',
   FindingCategoryEnum.tests: 'tests',
   FindingCategoryEnum.rules: 'rules',
+  FindingCategoryEnum.architecture: 'architecture',
+  FindingCategoryEnum.scope: 'scope',
   FindingCategoryEnum.maintainability: 'maintainability',
   FindingCategoryEnum.accuracy: 'accuracy',
   FindingCategoryEnum.completeness: 'completeness',

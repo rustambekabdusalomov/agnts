@@ -57,6 +57,12 @@ void main() {
       // TODO
     });
 
+    // The person behind the event; absent for agnts
+    // String user
+    test('to test the property `user`', () async {
+      // TODO
+    });
+
     // DateTime createdAt
     test('to test the property `createdAt`', () async {
       // TODO

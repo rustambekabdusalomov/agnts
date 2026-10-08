@@ -61,6 +61,20 @@
     "queued": "Queued for review",
     "deleted": "Rule deleted",
     "turnedOn": "Rule turned on",
-    "turnedOff": "Rule turned off"
+    "turnedOff": "Rule turned off",
+    "status_suggested": "Suggested",
+    "suggestedFrom": "agnts suggests this rule from your feedback on",
+    "suggestedHint": "Tickets don't follow it until you adopt it. Edit it to adopt it with your changes.",
+    "suggestedHelp": "{n, plural, one {agnts suggests # rule learned from your feedback.} other {agnts suggests # rules learned from your feedback.}}",
+    "adopt": "Adopt",
+    "adoptAsWritten": "Adopt as written",
+    "dismiss": "Dismiss",
+    "dismissBody": "agnts drops “{title}” and won't suggest it again.",
+    "dismissed": "Suggestion dismissed",
+    "kind": "Kind",
+    "kindRule": "Rule",
+    "kindContext": "Business context",
+    "kindRuleHelp": "An instruction agnts follows on every ticket.",
+    "kindContextHelp": "Knowledge about your product: what its terms mean, invariants the code must keep, who uses what. Every run reads it before it starts."
   }
 }

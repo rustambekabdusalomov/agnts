@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { useMutation, useQuery } from '@tanstack/vue-query'
+import { useQuery } from '@tanstack/vue-query'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { api, HttpError, unwrap } from '../api/client'
+import { api, unwrap } from '../api/client'
 import { FILTERS, NEEDS, RUNNING } from '../api/types'
 import { livePoll, useLive } from '../composables/useLive'
 import { useTabBadge } from '../composables/tabBadge'
@@ -11,9 +11,9 @@ import { LOCALES, type Locale } from '../i18n'
 import { usePrefs } from '../stores/prefs'
 import { useSession } from '../stores/session'
 import { useUi } from '../stores/ui'
+import { useWorkspace } from '../stores/workspace'
+import BrandLogo from './BrandLogo.vue'
 import UsagePill from './UsagePill.vue'
-import { TRACKERS, type Tracker } from './integrations/providers'
-import { useIntegrations } from './integrations/useIntegrations'
 import { useRules } from './rules/useRules'
 import ConfirmDialog from './ui/ConfirmDialog.vue'
 import HiIcon from './ui/HiIcon.vue'
@@ -26,7 +26,30 @@ const router = useRouter()
 const session = useSession()
 const prefs = usePrefs()
 const ui = useUi()
+const workspace = useWorkspace()
 const { connected } = useLive()
+
+// The workspace switcher: every workspace the person is in.
+const wsOpen = ref(false)
+const myWorkspaces = computed(() => session.user?.workspaces ?? [])
+async function switchTo(slug: string) {
+  wsOpen.value = false
+  if (slug !== workspace.slug) await router.push(`/w/${slug}/dashboard`)
+}
+const wsInitials = (name: string) => name.slice(0, 2)
+
+// Running n/slots and how many wait, and why: the workspace's slots or
+// the server.
+const queue = useQuery({
+  queryKey: ['queue'],
+  queryFn: () => unwrap(api.GET('/workspace/queue')),
+  refetchInterval: () => livePoll(15_000),
+})
+const queued = computed(() => {
+  const w = queue.data.value?.waiting
+  return w ? (w.slots ?? 0) + (w.server ?? 0) + (w.claude ?? 0) + (w.blocked ?? 0) : 0
+})
+const serverWaiting = computed(() => queue.data.value?.waiting.server ?? 0)
 
 const nav = useQuery({
   queryKey: ['nav'],
@@ -76,15 +99,6 @@ function toggleTheme() {
   prefs.theme = dark.value ? 'light' : 'dark'
 }
 
-// One sync button per connected tracker.
-const integrations = useIntegrations()
-const trackers = computed(() => TRACKERS.filter((p) => integrations.data.value?.some((i) => i.provider === p && i.connected)))
-const sync = useMutation({
-  mutationFn: async (p: Tracker) => ({ p, r: await unwrap(p === 'plane' ? api.POST('/integrations/plane/sync') : api.POST('/integrations/jira/sync')) }),
-  onSuccess: ({ p, r }) => ui.notify(t(p === 'plane' ? 'nav.syncedPlane' : 'nav.synced', { found: r.found, created: r.created })),
-  onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
-})
-
 // Labels are hidden in the thin sidebar, so items carry them for the hover
 // tooltip and as their accessible name.
 function tip(text: string) {
@@ -122,8 +136,8 @@ async function signOut() {
   <div class="shell" :class="{ thin: prefs.thin }">
     <aside class="side" @mouseover="showTip" @focusin="showTip" @mouseleave="tipBox = null" @focusout="tipBox = null" @scroll.capture="tipBox = null" @click="tipBox = null">
       <div class="brandbox">
-        <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="1" width="28" height="28" rx="7" fill="var(--mark)" /><path d="M19.75 10.25V19.75M19.75 15a4.75 4.75 0 1 1-9.5 0a4.75 4.75 0 1 1 9.5 0" stroke="var(--mark-ink)" stroke-width="2.4" fill="none" stroke-linecap="round" /></svg>
-        <div class="brand-txt"><div class="brand-name">{{ t('app.name') }}</div><div class="brand-sub">{{ t('app.tagline') }}</div></div>
+        <BrandLogo class="brand-mark" mark :size="30" />
+        <div class="brand-txt"><BrandLogo :size="24" /></div>
         <button
           class="thin-btn"
           :aria-label="prefs.thin ? t('nav.expandSidebar') : t('nav.collapseSidebar')"
@@ -137,8 +151,8 @@ async function signOut() {
       </div>
       <nav class="navscroll" :aria-label="t('nav.main')">
         <div class="grp">{{ t('nav.overview') }}</div>
-        <RouterLink class="nav-a" active-class="on" to="/dashboard" v-bind="tip(t('nav.dashboard'))"><HiIcon name="dashboard" /><span class="lbl">{{ t('nav.dashboard') }}</span></RouterLink>
-        <RouterLink class="nav-a" active-class="on" to="/analytics" v-bind="tip(t('nav.analytics'))"><HiIcon name="analytics" /><span class="lbl">{{ t('nav.analytics') }}</span></RouterLink>
+        <RouterLink class="nav-a" active-class="on" :to="{ name: 'dashboard' }" v-bind="tip(t('nav.dashboard'))"><HiIcon name="dashboard" /><span class="lbl">{{ t('nav.dashboard') }}</span></RouterLink>
+        <RouterLink class="nav-a" active-class="on" :to="{ name: 'analytics' }" v-bind="tip(t('nav.analytics'))"><HiIcon name="analytics" /><span class="lbl">{{ t('nav.analytics') }}</span></RouterLink>
         <div class="grp">{{ t('nav.tickets') }}</div>
         <RouterLink
           v-for="f in FILTERS"
@@ -153,26 +167,30 @@ async function signOut() {
           <span v-else-if="(f.id === 'running' || f.id === 'queue') && count(f.states)" class="cnt dim">{{ count(f.states) }}</span>
         </RouterLink>
         <div class="grp">{{ t('nav.sideProjects') }}</div>
-        <RouterLink class="nav-a" active-class="on" to="/tasks" v-bind="tip(t('nav.tasks'))">
+        <RouterLink class="nav-a" active-class="on" :to="{ name: 'tasks' }" v-bind="tip(t('nav.tasks'))">
           <HiIcon name="tasks" /><span class="lbl">{{ t('nav.tasks') }}</span><span v-if="openTasks" class="cnt dim">{{ openTasks }}</span>
         </RouterLink>
         <div class="grp">{{ t('nav.knowledge') }}</div>
-        <RouterLink class="nav-a" active-class="on" to="/learn" v-bind="tip(t('nav.learn'))">
+        <RouterLink class="nav-a" active-class="on" :to="{ name: 'learn' }" v-bind="tip(t('nav.learn'))">
           <HiIcon name="learn" /><span class="lbl">{{ t('nav.learn') }}</span><span v-if="unlearned" class="cnt">{{ unlearned }}</span>
         </RouterLink>
-        <RouterLink class="nav-a" active-class="on" to="/learn-queue" v-bind="tip(t('nav.learnQueue'))">
+        <RouterLink class="nav-a" active-class="on" :to="{ name: 'learnQueue' }" v-bind="tip(t('nav.learnQueue'))">
           <HiIcon name="learnQueue" /><span class="lbl">{{ t('nav.learnQueue') }}</span><span v-if="learning" class="cnt dim">{{ learning }}</span>
         </RouterLink>
         <div class="grp">{{ t('nav.monitor') }}</div>
-        <RouterLink class="nav-a" active-class="on" to="/logs" v-bind="tip(t('nav.logs'))"><HiIcon name="logs" /><span class="lbl">{{ t('nav.logs') }}</span></RouterLink>
-        <RouterLink class="nav-a" active-class="on" to="/usage" v-bind="tip(t('nav.usage'))"><HiIcon name="usage" /><span class="lbl">{{ t('nav.usage') }}</span></RouterLink>
+        <RouterLink class="nav-a" active-class="on" :to="{ name: 'logs' }" v-bind="tip(t('nav.logs'))"><HiIcon name="logs" /><span class="lbl">{{ t('nav.logs') }}</span></RouterLink>
+        <RouterLink class="nav-a" active-class="on" :to="{ name: 'usage' }" v-bind="tip(t('nav.usage'))"><HiIcon name="usage" /><span class="lbl">{{ t('nav.usage') }}</span></RouterLink>
         <div class="grp">{{ t('nav.setup') }}</div>
-        <RouterLink class="nav-a" active-class="on" to="/integrations" v-bind="tip(t('nav.integrations'))"><HiIcon name="plug" /><span class="lbl">{{ t('nav.integrations') }}</span></RouterLink>
-        <RouterLink class="nav-a" active-class="on" to="/repos" v-bind="tip(t('nav.repos'))"><HiIcon name="repos" /><span class="lbl">{{ t('nav.repos') }}</span></RouterLink>
-        <RouterLink class="nav-a" active-class="on" to="/rules" v-bind="tip(t('nav.rules'))">
+        <RouterLink class="nav-a" active-class="on" :to="{ name: 'integrations' }" v-bind="tip(t('nav.integrations'))"><HiIcon name="plug" /><span class="lbl">{{ t('nav.integrations') }}</span></RouterLink>
+        <RouterLink class="nav-a" active-class="on" :to="{ name: 'repos' }" v-bind="tip(t('nav.repos'))"><HiIcon name="repos" /><span class="lbl">{{ t('nav.repos') }}</span></RouterLink>
+        <RouterLink class="nav-a" active-class="on" :to="{ name: 'rules' }" v-bind="tip(t('nav.rules'))">
           <HiIcon name="rules" /><span class="lbl">{{ t('nav.rules') }}</span><span v-if="ruleQuestions" class="cnt">{{ ruleQuestions }}</span>
         </RouterLink>
-        <RouterLink class="nav-a" active-class="on" to="/settings" v-bind="tip(t('nav.settings'))"><HiIcon name="settings" /><span class="lbl">{{ t('nav.settings') }}</span></RouterLink>
+        <RouterLink class="nav-a" active-class="on" :to="{ name: 'settings' }" v-bind="tip(t('nav.settings'))"><HiIcon name="settings" /><span class="lbl">{{ t('nav.settings') }}</span></RouterLink>
+        <div class="grp">{{ t('nav.people') }}</div>
+        <RouterLink class="nav-a" active-class="on" :to="{ name: 'workspace' }" v-bind="tip(t('nav.workspace'))"><HiIcon name="repos" /><span class="lbl">{{ t('nav.workspace') }}</span></RouterLink>
+        <RouterLink class="nav-a" active-class="on" :to="{ name: 'profile' }" v-bind="tip(t('nav.profile'))"><HiIcon name="settings" /><span class="lbl">{{ t('nav.profile') }}</span></RouterLink>
+        <RouterLink v-if="session.user?.isAdmin" class="nav-a" active-class="on" :to="{ name: 'platform' }" v-bind="tip(t('nav.platform'))"><HiIcon name="analytics" /><span class="lbl">{{ t('nav.platform') }}</span></RouterLink>
       </nav>
       <div class="me">
         <button class="nav-a me-btn" v-bind="tip(`${t('common.signedInAs', { username: session.user?.username })} · ${t('auth.signOut')}`)" @click="confirmOut = true">
@@ -187,6 +205,23 @@ async function signOut() {
     </aside>
     <div class="main">
       <header class="top">
+        <div class="ws-menu">
+          <button class="ws-btn" aria-haspopup="menu" :aria-expanded="wsOpen" :aria-label="t('ws.switcher')" @click="wsOpen = !wsOpen">
+            <span class="ws-av">{{ wsInitials(workspace.name) }}</span>
+            <span class="nm">{{ workspace.name }}</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5" /></svg>
+          </button>
+          <div v-if="wsOpen" class="ws-dd" role="menu">
+            <button v-for="w in myWorkspaces" :key="w.id" class="ws-opt" role="menuitem" :aria-current="w.slug === workspace.slug" @click="switchTo(w.slug)">
+              <span class="ws-av">{{ wsInitials(w.name) }}</span>{{ w.name }}<small>{{ t(`ws.role_${w.role}`) }}</small>
+            </button>
+            <div class="ws-sep" />
+            <RouterLink class="ws-opt" role="menuitem" :to="{ name: 'workspaces' }" @click="wsOpen = false">{{ t('ws.new') }} · {{ t('ws.all') }}</RouterLink>
+          </div>
+        </div>
+        <RouterLink v-if="queue.data.value" class="queue-pill" :class="{ warn: serverWaiting > 0 }" :to="{ name: 'tickets', query: { f: 'queue' } }">
+          {{ t('queue.header', { running: queue.data.value.running, slots: queue.data.value.slots }) }}<template v-if="queued"> · {{ t('queue.queued', { n: queued }) }}</template><template v-if="serverWaiting"> ({{ t('queue.waitingServer', { n: serverWaiting }) }})</template>
+        </RouterLink>
         <label class="search">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
           <input v-model="ui.search" type="search" :placeholder="t('nav.search')" :aria-label="t('nav.search')">
@@ -208,12 +243,10 @@ async function signOut() {
             <svg v-if="dark" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" /></svg>
             <svg v-else viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-linecap: round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
           </button>
-          <button v-for="p in trackers" :key="p" class="btn btn-s" :disabled="sync.isPending.value" @click="sync.mutate(p)">
-            {{ t(p === 'plane' ? 'nav.syncPlane' : 'nav.syncJira') }}
-          </button>
         </div>
       </header>
       <main class="content" aria-live="polite">
+        <p v-if="workspace.detail && !workspace.canEdit" class="ro-banner" role="note"><HiIcon name="info" />{{ t('ws.viewerBanner') }}</p>
         <slot />
       </main>
     </div>

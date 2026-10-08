@@ -4,6 +4,7 @@
 
 // ignore_for_file: unused_element
 import 'package:agnts_api/src/model/check_step.dart';
+import 'package:agnts_api/src/model/red_flag.dart';
 import 'package:agnts_api/src/model/file_change.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -31,6 +32,10 @@ class Result {
     required  this.files,
 
      this.report,
+
+     this.deviations,
+
+     this.redFlags,
 
     required  this.createdAt,
   });
@@ -96,6 +101,32 @@ class Result {
 
 
 
+      /// Where the work departed from the chosen approach or the plan, and why
+  @JsonKey(
+    
+    name: r'deviations',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<String>? deviations;
+
+
+
+      /// Lines agnts's scan of the change flagged for the reviewer: skipped tests, removed assertions, silenced linters and the like
+  @JsonKey(
+    
+    name: r'redFlags',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<RedFlag>? redFlags;
+
+
+
   @JsonKey(
     
     name: r'createdAt',
@@ -117,6 +148,8 @@ class Result {
       other.checks == checks &&
       other.files == files &&
       other.report == report &&
+      other.deviations == deviations &&
+      other.redFlags == redFlags &&
       other.createdAt == createdAt;
 
     @override
@@ -126,6 +159,8 @@ class Result {
         checks.hashCode +
         files.hashCode +
         report.hashCode +
+        deviations.hashCode +
+        redFlags.hashCode +
         createdAt.hashCode;
 
   factory Result.fromJson(Map<String, dynamic> json) => _$ResultFromJson(json);

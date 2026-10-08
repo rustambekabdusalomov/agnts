@@ -70,6 +70,10 @@ type Deps struct {
 	Usage    UsageGate
 	Lessons  Lessons // nil disables the learn stage
 	Rules    Rules   // nil disables rules
+	// Briefs stores repository briefs; nil disables surveys and briefs.
+	Briefs Briefs
+	// Reflections keeps feedback for reflect runs; nil disables them.
+	Reflections Reflections
 	// Translations stores translated ticket texts; nil disables translation.
 	Translations Translations
 	// Shots stores preview screenshots; nil disables previews.
@@ -80,47 +84,77 @@ type Deps struct {
 	// BuildEnvs gives run containers their repository's build environment;
 	// nil leaves it out.
 	BuildEnvs BuildEnvs
+	// Queue lets the scheduler read and claim across workspaces; nil uses
+	// Store when it implements Queue.
+	Queue Queue
+	// Workspaces gives each workspace's slots and Claude choices; nil
+	// treats every workspace as one with Settings.Parallel slots.
+	Workspaces Workspaces
+	// Accounts picks each run's Claude account; nil uses Usage alone (one
+	// connection for everything).
+	Accounts ClaudeAccounts
+	// Capacity holds runs to the server's memory budget; nil admits runs
+	// by slots alone.
+	Capacity Capacity
+	// Credits charges runs on agnts's API key; nil never stops them.
+	Credits Credits
 }
 
 // Orchestrator runs tickets through their stages.
 type Orchestrator struct {
-	cfg      Config
-	store    Store
-	runner   Runner
-	git      Git
-	host     Host
-	trackers map[domain.TicketSource]Tracker
-	homes    Homes
-	settings SettingsSource
-	usage    UsageGate
-	lessons  Lessons
-	rules    Rules
-	trans    Translations
-	shots    Shots
-	envs     PreviewEnvs
-	builds   BuildEnvs
-	log      *slog.Logger
+	cfg         Config
+	store       Store
+	runner      Runner
+	git         Git
+	host        Host
+	trackers    map[domain.TicketSource]Tracker
+	homes       Homes
+	settings    SettingsSource
+	usage       UsageGate
+	lessons     Lessons
+	rules       Rules
+	briefs      Briefs
+	reflections Reflections
+	trans       Translations
+	shots       Shots
+	envs        PreviewEnvs
+	builds      BuildEnvs
+	log         *slog.Logger
+
+	queue      Queue
+	workspaces Workspaces
+	accounts   ClaudeAccounts
+	capacity   Capacity
+	credits    Credits
+	sched      *schedState
 
 	wake chan struct{}
 
 	mu      sync.Mutex
-	cancels map[string]context.CancelFunc // ticket key -> cancel of its active run
+	cancels map[string]context.CancelFunc // runKey(workspace, ticket) -> cancel of its active run
 	active  int
-	paused  bool
 
 	translating singleflight.Group // ticket key and language -> its translation run
 }
 
 // New returns an orchestrator.
 func New(cfg Config, d Deps, log *slog.Logger) *Orchestrator {
+	q := d.Queue
+	if q == nil {
+		q, _ = d.Store.(Queue)
+	}
 	return &Orchestrator{
 		cfg: cfg, store: d.Store, runner: d.Runner, git: d.Git, host: d.Host, trackers: d.Trackers, homes: d.Homes,
-		settings: d.Settings, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, trans: d.Translations,
+		settings: d.Settings, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, briefs: d.Briefs, reflections: d.Reflections, trans: d.Translations,
 		shots: d.Shots, envs: d.PreviewEnvs, builds: d.BuildEnvs, log: log,
+		queue: q, workspaces: d.Workspaces, accounts: d.Accounts, capacity: d.Capacity, credits: d.Credits, sched: newSchedState(),
 		wake:    make(chan struct{}, 1),
 		cancels: map[string]context.CancelFunc{},
 	}
 }
+
+// runKey names a ticket's active run: keys are unique per workspace.
+func runKey(ws int64, key string) string { return fmt.Sprintf("%d/%s", ws, key) }
 
 // Wake asks the loop to look for work now instead of at the next poll.
 func (o *Orchestrator) Wake() {
@@ -138,19 +172,40 @@ func (o *Orchestrator) Active() int {
 }
 
 // Run is the worker loop. It returns when ctx is cancelled, after the
-// active stages have stopped. Interrupted runs are recovered on the next start.
+// active stages have stopped. Interrupted runs are recovered on the next
+// start. It serves every workspace: each tick the scheduler starts what
+// the workspaces' slots, their Claude accounts and the server's memory
+// allow, fairly between workspaces.
 func (o *Orchestrator) Run(ctx context.Context) error {
-	if n, err := o.store.RecoverInterrupted(ctx); err != nil {
+	sys := domain.System(ctx)
+	if n, err := o.store.RecoverInterrupted(sys); err != nil {
 		return fmt.Errorf("recover interrupted runs: %w", err)
 	} else if n > 0 {
 		o.log.Warn("recovered interrupted runs", "count", n)
 	}
 	if o.rules != nil {
-		if n, err := o.rules.RecoverRules(ctx); err != nil {
+		if n, err := o.rules.RecoverRules(sys); err != nil {
 			return fmt.Errorf("recover interrupted rule reviews: %w", err)
 		} else if n > 0 {
 			o.log.Warn("requeued interrupted rule reviews", "count", n)
 		}
+	}
+	if o.briefs != nil {
+		if n, err := o.briefs.RecoverBriefs(sys); err != nil {
+			return fmt.Errorf("recover interrupted surveys: %w", err)
+		} else if n > 0 {
+			o.log.Warn("requeued interrupted surveys", "count", n)
+		}
+	}
+	if o.reflections != nil {
+		if n, err := o.reflections.RecoverReflections(sys); err != nil {
+			return fmt.Errorf("recover interrupted reflect runs: %w", err)
+		} else if n > 0 {
+			o.log.Warn("requeued interrupted reflect runs", "count", n)
+		}
+	}
+	if o.queue == nil {
+		return errors.New("the store cannot serve the queue")
 	}
 
 	var wg sync.WaitGroup
@@ -160,45 +215,40 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 	lastResume, lastPrune, lastMerges := time.Time{}, time.Time{}, time.Time{}
 
 	for {
-		s, err := o.settings.Get(ctx)
-		if err != nil && ctx.Err() == nil {
-			o.log.Error("load settings", "err", err)
-		}
 		if time.Since(lastResume) > time.Minute {
 			lastResume = time.Now()
-			o.AutoResume(ctx, s)
+			o.forEachWorkspace(sys, func(wctx context.Context) {
+				if s, err := o.settings.Get(wctx); err == nil {
+					o.AutoResume(wctx, s)
+				}
+			})
 		}
 		if o.cfg.MergeCheckEvery > 0 && time.Since(lastMerges) > o.cfg.MergeCheckEvery {
 			lastMerges = time.Now()
-			o.CheckMerges(ctx)
+			o.CheckMerges(sys)
 		}
 		if time.Since(lastPrune) > time.Hour {
 			lastPrune = time.Now()
-			o.pruneShots(ctx)
-			o.prunePendingUploads(ctx)
+			o.pruneShots(sys)
+			o.prunePendingUploads(sys)
 		}
-		for err == nil && o.mayStart(ctx, s) {
-			job, ok, cerr := o.claim(ctx)
-			if cerr != nil || !ok {
-				if cerr != nil && ctx.Err() == nil {
-					o.log.Error("claim", "err", cerr)
-				}
-				break
-			}
-			o.mu.Lock()
-			o.active++
-			o.mu.Unlock()
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				defer func() {
-					o.mu.Lock()
-					o.active--
-					o.mu.Unlock()
-					o.Wake()
+		if ctx.Err() == nil {
+			o.tick(ctx, func(j scheduled) {
+				o.mu.Lock()
+				o.active++
+				o.mu.Unlock()
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					defer func() {
+						o.mu.Lock()
+						o.active--
+						o.mu.Unlock()
+						o.Wake()
+					}()
+					o.runScheduled(ctx, j)
 				}()
-				job(ctx)
-			}()
+			})
 		}
 		select {
 		case <-ctx.Done():
@@ -209,34 +259,30 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 	}
 }
 
-// mayStart applies the parallel limit and the plan-usage pause.
-func (o *Orchestrator) mayStart(ctx context.Context, s domain.Settings) bool {
-	if ctx.Err() != nil {
-		return false
+// forEachWorkspace calls fn with a context acting in each active
+// workspace. Without a workspace source it does nothing.
+func (o *Orchestrator) forEachWorkspace(ctx context.Context, fn func(wctx context.Context)) {
+	if o.workspaces == nil {
+		return
 	}
-	o.mu.Lock()
-	full := o.active >= max(1, s.Parallel)
-	o.mu.Unlock()
-	if full {
-		return false
-	}
-	paused, until := o.usage.Paused(ctx, s)
-	o.mu.Lock()
-	changed := paused != o.paused
-	o.paused = paused
-	o.mu.Unlock()
-	if changed {
-		if paused {
-			o.log.Warn("plan usage limit: not starting new runs", "until", until)
-		} else {
-			o.log.Info("plan usage below the limit: starting runs again")
+	ids, err := o.workspaces.Active(ctx)
+	if err != nil {
+		if ctx.Err() == nil {
+			o.log.Warn("list workspaces", "err", err)
 		}
+		return
 	}
-	return !paused
+	for _, id := range ids {
+		if ctx.Err() != nil {
+			return
+		}
+		fn(domain.WithWorkspace(ctx, id))
+	}
 }
 
 // RunOnce claims and works one stage synchronously, without the usage
-// pause or parallel limit. It reports false when there was nothing to do.
+// pause or slot limits, in the workspace ctx acts in. It reports false
+// when there was nothing to do.
 func (o *Orchestrator) RunOnce(ctx context.Context) (bool, error) {
 	job, ok, err := o.claim(ctx)
 	if err != nil || !ok {
@@ -248,6 +294,7 @@ func (o *Orchestrator) RunOnce(ctx context.Context) (bool, error) {
 
 // claim takes the next piece of work. Rule reviews go first: they are short
 // and the user is waiting on them, and every later ticket follows the result.
+// Repository surveys go last: nobody waits on them.
 func (o *Orchestrator) claim(ctx context.Context) (func(context.Context), bool, error) {
 	if o.rules != nil {
 		r, ok, err := o.rules.ClaimRule(ctx)
@@ -259,27 +306,49 @@ func (o *Orchestrator) claim(ctx context.Context) (func(context.Context), bool, 
 		}
 	}
 	t, run, ok, err := o.store.ClaimNext(ctx)
-	if err != nil || !ok {
+	if err != nil {
 		return nil, false, err
 	}
-	return func(ctx context.Context) { o.work(ctx, t, run) }, true, nil
+	if ok {
+		return func(ctx context.Context) { o.work(domain.WithWorkspace(ctx, t.WorkspaceID), t, run) }, true, nil
+	}
+	if o.briefs != nil {
+		b, ok, err := o.briefs.ClaimBrief(ctx)
+		if err != nil {
+			return nil, false, err
+		}
+		if ok {
+			return func(ctx context.Context) { o.surveyBrief(ctx, b) }, true, nil
+		}
+	}
+	if o.reflections != nil {
+		r, ok, err := o.reflections.ClaimReflection(ctx)
+		if err != nil || !ok {
+			return nil, false, err
+		}
+		return func(ctx context.Context) { o.reflect(ctx, r) }, true, nil
+	}
+	return nil, false, nil
 }
 
 // work runs one claimed stage and records how it ended.
 func (o *Orchestrator) work(parent context.Context, t domain.Ticket, run domain.Run) {
+	parent = domain.WithWorkspace(parent, t.WorkspaceID)
 	ctx, cancel := context.WithCancel(parent)
+	rk := runKey(t.WorkspaceID, t.Key)
 	o.mu.Lock()
-	o.cancels[t.Key] = cancel
+	o.cancels[rk] = cancel
 	o.mu.Unlock()
 	defer func() {
 		o.mu.Lock()
-		delete(o.cancels, t.Key)
+		delete(o.cancels, rk)
 		o.mu.Unlock()
 		cancel()
 	}()
 
-	log := o.log.With("ticket", t.Key, "stage", run.Stage, "run_id", run.ID)
+	log := o.log.With("workspace", t.WorkspaceID, "ticket", t.Key, "stage", run.Stage, "run_id", run.ID)
 	log.Info("stage started")
+	run.PromptVersion = PromptVersion
 	s, err := o.settings.Get(ctx)
 	if err == nil {
 		switch run.Stage {
@@ -479,6 +548,13 @@ func bashRule(c string) string {
 // claude runs one invocation with the model for modelStage, and turns rate
 // limits and errors into states.
 func (o *Orchestrator) claude(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, modelStage, prompt, resume string) (ClaudeResult, error) {
+	return o.claudeTurns(ctx, s, ws, t, run, modelStage, prompt, resume, 0)
+}
+
+// claudeTurns is claude with a turn budget: above zero, the invocation may
+// take at most that many turns, and reaching them is not an error (the
+// result says error_max_turns, and the session can be resumed).
+func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, modelStage, prompt, resume string, budget int) (ClaudeResult, error) {
 	model := s.ModelFor(*t, modelStage)
 	if run.Model == "" {
 		run.Model = model
@@ -486,6 +562,9 @@ func (o *Orchestrator) claude(ctx context.Context, s domain.Settings, ws Workspa
 	turns := s.MaxTurns
 	if modelStage == domain.ModelAnalyze {
 		turns = min(turns, 60)
+	}
+	if budget > 0 {
+		turns = min(turns, budget)
 	}
 	res, err := ws.Claude(ctx, ClaudeRequest{
 		Prompt:   prompt,
@@ -500,6 +579,12 @@ func (o *Orchestrator) claude(ctx context.Context, s domain.Settings, ws Workspa
 		run.SessionID = res.SessionID
 	}
 	o.recordSpend(ctx, run, modelStage, model, res)
+	if a, ok := domain.ClaudeOf(ctx); ok && a.Credits && o.credits != nil {
+		if within, why := o.credits.Within(ctx, t.WorkspaceID, run.ID); !within {
+			run.ExitReason = "credits"
+			return res, fmt.Errorf("%s; buy credits in Billing and retry", why)
+		}
+	}
 	if err != nil {
 		return res, err
 	}
@@ -518,6 +603,9 @@ func (o *Orchestrator) claude(ctx context.Context, s domain.Settings, ws Workspa
 		}
 		o.trackerComment(ctx, *t, CommentStatus, "agnts paused at the Claude plan limit and resumes after it resets.")
 		return res, &stopError{"rate limited"}
+	}
+	if res.IsError && res.Subtype == "error_max_turns" && budget > 0 {
+		return res, nil // the caller planned to stop here
 	}
 	if res.IsError {
 		run.ExitReason = "claude_" + res.Subtype
@@ -586,7 +674,11 @@ func branchFor(repo domain.Repository, key string) string {
 func (o *Orchestrator) openWorkspace(ctx context.Context, t domain.Ticket, repo *domain.Repository, branch string, run *domain.Run) (Workspace, error) {
 	var tree io.Reader
 	if repo != nil {
-		if err := o.git.Prepare(ctx, *repo, branch); err != nil {
+		prepare := func() error { return o.git.Prepare(ctx, *repo, branch) }
+		if rp, ok := o.git.(Replayer); ok && t.BaseSHA != "" && branch != repo.DefaultBranch {
+			prepare = func() error { return rp.PrepareAt(ctx, *repo, branch, t.BaseSHA) }
+		}
+		if err := prepare(); err != nil {
 			return nil, fmt.Errorf("prepare repository: %w", err)
 		}
 		o.refreshToolchains(ctx, repo, branch, t.Key, &run.ID)
@@ -601,7 +693,7 @@ func (o *Orchestrator) openWorkspace(ctx context.Context, t domain.Ticket, repo 
 		_ = tar.NewWriter(&empty).Close()
 		tree = &empty
 	}
-	home, err := o.homes.Load(t.Key)
+	home, err := o.homes.Load(t.WorkspaceID, t.Key)
 	if err != nil {
 		return nil, fmt.Errorf("load claude home: %w", err)
 	}
@@ -626,7 +718,7 @@ func (o *Orchestrator) openWorkspace(ctx context.Context, t domain.Ticket, repo 
 func (o *Orchestrator) closeWorkspace(ctx context.Context, t domain.Ticket, ws Workspace) {
 	bg := context.WithoutCancel(ctx)
 	if home, err := ws.ExportClaudeHome(bg); err == nil {
-		if err := o.homes.Save(t.Key, home); err != nil {
+		if err := o.homes.Save(t.WorkspaceID, t.Key, home); err != nil {
 			o.log.Warn("save claude home", "ticket", t.Key, "err", err)
 		}
 	} else {
@@ -653,12 +745,16 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 		}
 	}
 	o.trackerMove(ctx, t, TrackerStarted)
+	if repo != nil {
+		o.autoSurvey(ctx, s, repo.ID)
+	}
 
 	ws, err := o.openWorkspace(ctx, t, repo, branch, run)
 	if err != nil {
 		return err
 	}
 	defer o.closeWorkspace(ctx, t, ws)
+	d.Context = o.contextFiles(ctx, ws, t, repo)
 
 	if d.Rules, err = o.teamRules(ctx, t.RepoID); err != nil {
 		return err
@@ -708,13 +804,19 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 		branch = "" // nothing is committed for a report
 	}
 
-	qs := make([]domain.Question, 0, len(a.Questions))
+	qs := make([]domain.Question, 0, len(a.Questions)+1)
 	if t.AskFirst {
-		for i, q := range a.Questions {
+		for _, q := range a.Questions {
 			if strings.TrimSpace(q.Text) == "" {
 				continue
 			}
-			qs = append(qs, domain.Question{TicketID: t.ID, Position: i + 1, Text: q.Text, Options: q.Options, Multiple: q.Multiple && len(q.Options) > 1})
+			qs = append(qs, domain.Question{TicketID: t.ID, Text: q.Text, Options: q.Options, Multiple: q.Multiple && len(q.Options) > 1})
+		}
+		if q, ok := approachQuestion(t, a, qs); ok {
+			qs = append([]domain.Question{q}, qs...)
+		}
+		for i := range qs {
+			qs[i].Position = i + 1
 		}
 	}
 	if err := o.store.ReplaceQuestions(ctx, t.ID, qs); err != nil {
@@ -776,6 +878,7 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		return err
 	}
 	defer o.closeWorkspace(ctx, t, ws)
+	knowledge := o.contextFiles(ctx, ws, t, &repo)
 
 	session, err := o.store.LastSessionID(ctx, t.ID)
 	if err != nil {
@@ -788,6 +891,7 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		}
 	}
 	var prompt string
+	var design *Analysis
 	modelStage := domain.ModelCoding
 	feedback := t.Feedback
 	shots := o.copyFeedbackShots(ctx, ws, t)
@@ -800,13 +904,13 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 			prompt += extra
 		}
 	} else {
-		d := promptData{T: t, Repo: repo, Checks: checksLine(repo), VisualCheck: visual, Attached: attached}
+		d := promptData{T: t, Repo: repo, Checks: checksLine(repo), VisualCheck: visual, Attached: attached, Context: knowledge}
 		if d.Rules, err = o.teamRules(ctx, t.RepoID); err != nil {
 			return err
 		}
 		if r, rerr := o.store.LatestResult(ctx, t.ID, domain.StageAnalyze); rerr == nil {
 			if a, aerr := parseAnalysis(r.Summary); aerr == nil {
-				d.Plan = a.Plan
+				d.Plan, d.Design, design = a.Plan, &a, &a
 			}
 		}
 		if d.Answers, err = o.store.Questions(ctx, t.ID); err != nil {
@@ -829,7 +933,7 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		return err
 	}
 
-	res, err := o.claude(ctx, s, ws, &t, run, modelStage, prompt, session)
+	res, err := o.codeWithCheckpoint(ctx, s, ws, &t, run, modelStage, prompt, session, design)
 	if err != nil {
 		return err
 	}
@@ -849,6 +953,7 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 	var checks checkReport
 	for attempt := 0; ; attempt++ {
 		checks = o.runChecks(ctx, ws, t, repo, run)
+		run.FixAttempts = attempt
 		if checks.OK || ctx.Err() != nil {
 			break
 		}
@@ -901,22 +1006,51 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		return errors.New("claude finished without changing any files")
 	}
 	testsJSON, _ := json.Marshal(checks.Steps)
+	flags := domain.ScanRedFlags(files)
 	if err := o.store.SaveResult(ctx, domain.Result{
-		RunID: run.ID, Summary: summary, Tests: testsJSON, Lint: checks.LintOutput, Files: files,
+		RunID: run.ID, Summary: summary, Tests: testsJSON, Lint: checks.LintOutput, Files: files, RedFlags: flags,
 	}); err != nil {
 		return err
+	}
+	if len(flags) > 0 {
+		o.event(ctx, redFlagsEvent(t.Key, run, flags))
 	}
 	o.saveFollowUps(ctx, s, t, run, domain.SuggestFromWork, summaryFollowUps(summary))
 	if t.HeadSHA == "" {
 		o.checkFootprint(ctx, t, run, files) // the first change only: later ones follow feedback, not the plan
 	}
 	o.checkCollisions(ctx, t, run, repo, files)
-	return o.transition(ctx, &t, run, domain.StateWaitingForReview, fmt.Sprintf("%d files changed, ready for review", len(files)), func(x *domain.Ticket) {
+	// agnts's own review may still send it back: no one is told yet.
+	quiet := selfReviewDue(s, t)
+	msg := fmt.Sprintf("%d files changed, ready for review", len(files))
+	if quiet {
+		msg = fmt.Sprintf("%d files changed; agnts reviews the change before you do", len(files))
+	}
+	nt, err := o.store.Transition(ctx, t.Key, domain.StateWaitingForReview, domain.Event{
+		TicketKey: t.Key, RunID: &run.ID, Type: domain.EventStateChanged, Message: msg, Step: string(run.Stage),
+		Data: map[string]any{"quiet": quiet},
+	}, func(x *domain.Ticket) {
 		x.Branch, x.HeadSHA = branch, sha
 		x.Turns += run.Turns
 		x.ReviewState = reviewState(s)
 		x.PreviewState = o.previewState(s, repo, files)
+		x.QuietReview = quiet
 	})
+	if err == nil {
+		t = nt
+	}
+	return err
+}
+
+// redFlagsEvent is the log line for what the scan of a change flagged.
+func redFlagsEvent(key string, run *domain.Run, flags []domain.RedFlag) domain.Event {
+	kinds := map[string]int{}
+	for _, f := range flags {
+		kinds[f.Kind]++
+	}
+	return domain.Event{TicketKey: key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventRedFlags, Level: domain.LevelWarn,
+		Message: fmt.Sprintf("%d %s in the change for the reviewer to check", len(flags), plural(len(flags), "red flag", "red flags")),
+		Data:    map[string]any{"count": len(flags), "kinds": kinds}}
 }
 
 // report has Claude write the ticket's report (or rewrite it with the
@@ -937,6 +1071,7 @@ func (o *Orchestrator) report(ctx context.Context, s domain.Settings, t domain.T
 		return err
 	}
 	defer o.closeWorkspace(ctx, t, ws)
+	d.Context = o.contextFiles(ctx, ws, t, repo)
 
 	session, err := o.store.LastSessionID(ctx, t.ID)
 	if err != nil {
@@ -1069,11 +1204,15 @@ func (o *Orchestrator) push(ctx context.Context, s domain.Settings, t domain.Tic
 		}
 		o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: "push", Type: domain.EventPushed,
 			Message: "pushed to " + repo.DefaultBranch, Data: map[string]any{"branch": repo.DefaultBranch, "sha": t.HeadSHA}})
-		return o.transition(ctx, &t, run, domain.StateDone, "pushed to "+repo.DefaultBranch, func(x *domain.Ticket) {
+		if err := o.transition(ctx, &t, run, domain.StateDone, "pushed to "+repo.DefaultBranch, func(x *domain.Ticket) {
 			if o.learnQueued(s, *x) {
 				x.LearnState = domain.LearnPending
 			}
-		})
+		}); err != nil {
+			return err
+		}
+		o.countMerge(ctx, t) // on the default branch now, as good as merged
+		return nil
 	}
 
 	drift := o.checkDrift(ctx, t, run, repo)
@@ -1171,6 +1310,9 @@ func analysisComment(a Analysis, withQuestions bool) string {
 	var b strings.Builder
 	b.WriteString("agnts analysed this ticket.\n\n")
 	b.WriteString(a.Summary)
+	if c := a.Chosen(); c != nil {
+		fmt.Fprintf(&b, "\n\nApproach: %s. %s", c.Title, c.Sketch)
+	}
 	if len(a.Plan) > 0 {
 		b.WriteString("\n\nPlan:\n")
 		for i, p := range a.Plan {

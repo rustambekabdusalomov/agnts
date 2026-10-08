@@ -9,6 +9,9 @@ import 'package:agnts_api/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **id** | **int** |  | 
+**kind** | [**RuleKind**](RuleKind.md) |  | 
+**sourceTicket** | **String** | For a rule agnts suggested: the ticket whose feedback taught it | [optional] 
+**reason** | **String** | For a rule agnts suggested: which feedback shows it | [optional] 
 **repoId** | **int** | Absent for a global rule | [optional] 
 **repoName** | **String** |  | [optional] 
 **title** | **String** |  | 

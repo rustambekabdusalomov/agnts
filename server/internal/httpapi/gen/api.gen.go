@@ -171,21 +171,57 @@ func (e CI) Valid() bool {
 	}
 }
 
+// Defines values for ClaudeConnectionInputKind.
+const (
+	ClaudeConnectionInputKindApiKey       ClaudeConnectionInputKind = "api_key"
+	ClaudeConnectionInputKindSubscription ClaudeConnectionInputKind = "subscription"
+)
+
+// Valid indicates whether the value is a known member of the ClaudeConnectionInputKind enum.
+func (e ClaudeConnectionInputKind) Valid() bool {
+	switch e {
+	case ClaudeConnectionInputKindApiKey:
+		return true
+	case ClaudeConnectionInputKindSubscription:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ClaudeConnectionStateKind.
+const (
+	ClaudeConnectionStateKindApiKey       ClaudeConnectionStateKind = "api_key"
+	ClaudeConnectionStateKindSubscription ClaudeConnectionStateKind = "subscription"
+)
+
+// Valid indicates whether the value is a known member of the ClaudeConnectionStateKind enum.
+func (e ClaudeConnectionStateKind) Valid() bool {
+	switch e {
+	case ClaudeConnectionStateKindApiKey:
+		return true
+	case ClaudeConnectionStateKindSubscription:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for CodeReviewVerdict.
 const (
-	HasConcerns  CodeReviewVerdict = "has_concerns"
-	LooksGood    CodeReviewVerdict = "looks_good"
-	NeedsChanges CodeReviewVerdict = "needs_changes"
+	CodeReviewVerdictHasConcerns  CodeReviewVerdict = "has_concerns"
+	CodeReviewVerdictLooksGood    CodeReviewVerdict = "looks_good"
+	CodeReviewVerdictNeedsChanges CodeReviewVerdict = "needs_changes"
 )
 
 // Valid indicates whether the value is a known member of the CodeReviewVerdict enum.
 func (e CodeReviewVerdict) Valid() bool {
 	switch e {
-	case HasConcerns:
+	case CodeReviewVerdictHasConcerns:
 		return true
-	case LooksGood:
+	case CodeReviewVerdictLooksGood:
 		return true
-	case NeedsChanges:
+	case CodeReviewVerdictNeedsChanges:
 		return true
 	default:
 		return false
@@ -267,12 +303,14 @@ func (e EventOrigin) Valid() bool {
 // Defines values for FindingCategory.
 const (
 	FindingCategoryAccuracy        FindingCategory = "accuracy"
+	FindingCategoryArchitecture    FindingCategory = "architecture"
 	FindingCategoryCompleteness    FindingCategory = "completeness"
 	FindingCategoryCorrectness     FindingCategory = "correctness"
 	FindingCategoryMaintainability FindingCategory = "maintainability"
 	FindingCategoryOther           FindingCategory = "other"
 	FindingCategoryPerformance     FindingCategory = "performance"
 	FindingCategoryRules           FindingCategory = "rules"
+	FindingCategoryScope           FindingCategory = "scope"
 	FindingCategorySecurity        FindingCategory = "security"
 	FindingCategoryTests           FindingCategory = "tests"
 )
@@ -281,6 +319,8 @@ const (
 func (e FindingCategory) Valid() bool {
 	switch e {
 	case FindingCategoryAccuracy:
+		return true
+	case FindingCategoryArchitecture:
 		return true
 	case FindingCategoryCompleteness:
 		return true
@@ -293,6 +333,8 @@ func (e FindingCategory) Valid() bool {
 	case FindingCategoryPerformance:
 		return true
 	case FindingCategoryRules:
+		return true
+	case FindingCategoryScope:
 		return true
 	case FindingCategorySecurity:
 		return true
@@ -495,6 +537,30 @@ func (e LearnQueueItemStatus) Valid() bool {
 	case LearnQueueItemStatusPending:
 		return true
 	case LearnQueueItemStatusRunning:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for LedgerEntryReason.
+const (
+	LedgerEntryReasonGrant    LedgerEntryReason = "grant"
+	LedgerEntryReasonPurchase LedgerEntryReason = "purchase"
+	LedgerEntryReasonRefund   LedgerEntryReason = "refund"
+	LedgerEntryReasonRun      LedgerEntryReason = "run"
+)
+
+// Valid indicates whether the value is a known member of the LedgerEntryReason enum.
+func (e LedgerEntryReason) Valid() bool {
+	switch e {
+	case LedgerEntryReasonGrant:
+		return true
+	case LedgerEntryReasonPurchase:
+		return true
+	case LedgerEntryReasonRefund:
+		return true
+	case LedgerEntryReasonRun:
 		return true
 	default:
 		return false
@@ -714,6 +780,57 @@ func (e PreviewShotViewport) Valid() bool {
 	}
 }
 
+// Defines values for RedFlagKind.
+const (
+	DeletedTest      RedFlagKind = "deleted_test"
+	NewDependency    RedFlagKind = "new_dependency"
+	RemovedAssertion RedFlagKind = "removed_assertion"
+	SilencedLint     RedFlagKind = "silenced_lint"
+	SkippedTest      RedFlagKind = "skipped_test"
+	SwallowedError   RedFlagKind = "swallowed_error"
+	Todo             RedFlagKind = "todo"
+)
+
+// Valid indicates whether the value is a known member of the RedFlagKind enum.
+func (e RedFlagKind) Valid() bool {
+	switch e {
+	case DeletedTest:
+		return true
+	case NewDependency:
+		return true
+	case RemovedAssertion:
+		return true
+	case SilencedLint:
+		return true
+	case SkippedTest:
+		return true
+	case SwallowedError:
+		return true
+	case Todo:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for RegisterRequestClient.
+const (
+	RegisterRequestClientMobile RegisterRequestClient = "mobile"
+	RegisterRequestClientWeb    RegisterRequestClient = "web"
+)
+
+// Valid indicates whether the value is a known member of the RegisterRequestClient enum.
+func (e RegisterRequestClient) Valid() bool {
+	switch e {
+	case RegisterRequestClientMobile:
+		return true
+	case RegisterRequestClientWeb:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for RelationDirection.
 const (
 	RelationDirectionConflicts RelationDirection = "conflicts"
@@ -798,6 +915,51 @@ func (e RelationType) Valid() bool {
 	case RelationTypeConflicts:
 		return true
 	case RelationTypeDependsOn:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ReplayResultVerdict.
+const (
+	ReplayResultVerdictHasConcerns  ReplayResultVerdict = "has_concerns"
+	ReplayResultVerdictLooksGood    ReplayResultVerdict = "looks_good"
+	ReplayResultVerdictNeedsChanges ReplayResultVerdict = "needs_changes"
+)
+
+// Valid indicates whether the value is a known member of the ReplayResultVerdict enum.
+func (e ReplayResultVerdict) Valid() bool {
+	switch e {
+	case ReplayResultVerdictHasConcerns:
+		return true
+	case ReplayResultVerdictLooksGood:
+		return true
+	case ReplayResultVerdictNeedsChanges:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for RepoBriefStatus.
+const (
+	RepoBriefStatusFailed    RepoBriefStatus = "failed"
+	RepoBriefStatusIdle      RepoBriefStatus = "idle"
+	RepoBriefStatusPending   RepoBriefStatus = "pending"
+	RepoBriefStatusSurveying RepoBriefStatus = "surveying"
+)
+
+// Valid indicates whether the value is a known member of the RepoBriefStatus enum.
+func (e RepoBriefStatus) Valid() bool {
+	switch e {
+	case RepoBriefStatusFailed:
+		return true
+	case RepoBriefStatusIdle:
+		return true
+	case RepoBriefStatusPending:
+		return true
+	case RepoBriefStatusSurveying:
 		return true
 	default:
 		return false
@@ -927,6 +1089,24 @@ func (e ReviewModel) Valid() bool {
 	}
 }
 
+// Defines values for RuleKind.
+const (
+	RuleKindContext RuleKind = "context"
+	RuleKindRule    RuleKind = "rule"
+)
+
+// Valid indicates whether the value is a known member of the RuleKind enum.
+func (e RuleKind) Valid() bool {
+	switch e {
+	case RuleKindContext:
+		return true
+	case RuleKindRule:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for RuleStatus.
 const (
 	RuleStatusAnalyzing RuleStatus = "analyzing"
@@ -934,6 +1114,7 @@ const (
 	RuleStatusPending   RuleStatus = "pending"
 	RuleStatusQuestions RuleStatus = "questions"
 	RuleStatusReady     RuleStatus = "ready"
+	RuleStatusSuggested RuleStatus = "suggested"
 )
 
 // Valid indicates whether the value is a known member of the RuleStatus enum.
@@ -948,6 +1129,8 @@ func (e RuleStatus) Valid() bool {
 	case RuleStatusQuestions:
 		return true
 	case RuleStatusReady:
+		return true
+	case RuleStatusSuggested:
 		return true
 	default:
 		return false
@@ -1431,6 +1614,87 @@ func (e UsageStatus) Valid() bool {
 	}
 }
 
+// Defines values for WaitReason.
+const (
+	WaitReasonBlocked WaitReason = "blocked"
+	WaitReasonClaude  WaitReason = "claude"
+	WaitReasonServer  WaitReason = "server"
+	WaitReasonSlots   WaitReason = "slots"
+)
+
+// Valid indicates whether the value is a known member of the WaitReason enum.
+func (e WaitReason) Valid() bool {
+	switch e {
+	case WaitReasonBlocked:
+		return true
+	case WaitReasonClaude:
+		return true
+	case WaitReasonServer:
+		return true
+	case WaitReasonSlots:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for WorkspaceClaudeMode.
+const (
+	WorkspaceClaudeModeMember WorkspaceClaudeMode = "member"
+	WorkspaceClaudeModeShared WorkspaceClaudeMode = "shared"
+)
+
+// Valid indicates whether the value is a known member of the WorkspaceClaudeMode enum.
+func (e WorkspaceClaudeMode) Valid() bool {
+	switch e {
+	case WorkspaceClaudeModeMember:
+		return true
+	case WorkspaceClaudeModeShared:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for WorkspaceDetailClaudeMode.
+const (
+	WorkspaceDetailClaudeModeMember WorkspaceDetailClaudeMode = "member"
+	WorkspaceDetailClaudeModeShared WorkspaceDetailClaudeMode = "shared"
+)
+
+// Valid indicates whether the value is a known member of the WorkspaceDetailClaudeMode enum.
+func (e WorkspaceDetailClaudeMode) Valid() bool {
+	switch e {
+	case WorkspaceDetailClaudeModeMember:
+		return true
+	case WorkspaceDetailClaudeModeShared:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for WorkspaceRole.
+const (
+	WorkspaceRoleOwner  WorkspaceRole = "owner"
+	WorkspaceRoleUser   WorkspaceRole = "user"
+	WorkspaceRoleViewer WorkspaceRole = "viewer"
+)
+
+// Valid indicates whether the value is a known member of the WorkspaceRole enum.
+func (e WorkspaceRole) Valid() bool {
+	switch e {
+	case WorkspaceRoleOwner:
+		return true
+	case WorkspaceRoleUser:
+		return true
+	case WorkspaceRoleViewer:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for Provider.
 const (
 	ProviderClaude   Provider = "claude"
@@ -1596,6 +1860,78 @@ func (e GetTicketSpendParamsDays) Valid() bool {
 	}
 }
 
+// Defines values for CheckoutCreditsJSONBodyProvider.
+const (
+	Click CheckoutCreditsJSONBodyProvider = "click"
+	Payme CheckoutCreditsJSONBodyProvider = "payme"
+)
+
+// Valid indicates whether the value is a known member of the CheckoutCreditsJSONBodyProvider enum.
+func (e CheckoutCreditsJSONBodyProvider) Valid() bool {
+	switch e {
+	case Click:
+		return true
+	case Payme:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for UpdateWorkspaceClaudeJSONBodyMode.
+const (
+	UpdateWorkspaceClaudeJSONBodyModeMember UpdateWorkspaceClaudeJSONBodyMode = "member"
+	UpdateWorkspaceClaudeJSONBodyModeShared UpdateWorkspaceClaudeJSONBodyMode = "shared"
+)
+
+// Valid indicates whether the value is a known member of the UpdateWorkspaceClaudeJSONBodyMode enum.
+func (e UpdateWorkspaceClaudeJSONBodyMode) Valid() bool {
+	switch e {
+	case UpdateWorkspaceClaudeJSONBodyModeMember:
+		return true
+	case UpdateWorkspaceClaudeJSONBodyModeShared:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CreateInviteJSONBodyRole.
+const (
+	CreateInviteJSONBodyRoleUser   CreateInviteJSONBodyRole = "user"
+	CreateInviteJSONBodyRoleViewer CreateInviteJSONBodyRole = "viewer"
+)
+
+// Valid indicates whether the value is a known member of the CreateInviteJSONBodyRole enum.
+func (e CreateInviteJSONBodyRole) Valid() bool {
+	switch e {
+	case CreateInviteJSONBodyRoleUser:
+		return true
+	case CreateInviteJSONBodyRoleViewer:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for SetMemberRoleJSONBodyRole.
+const (
+	SetMemberRoleJSONBodyRoleUser   SetMemberRoleJSONBodyRole = "user"
+	SetMemberRoleJSONBodyRoleViewer SetMemberRoleJSONBodyRole = "viewer"
+)
+
+// Valid indicates whether the value is a known member of the SetMemberRoleJSONBodyRole enum.
+func (e SetMemberRoleJSONBodyRole) Valid() bool {
+	switch e {
+	case SetMemberRoleJSONBodyRoleUser:
+		return true
+	case SetMemberRoleJSONBodyRoleViewer:
+		return true
+	default:
+		return false
+	}
+}
+
 // AcceptFollowUp A suggestion to create, with optional edits
 type AcceptFollowUp struct {
 	Description *string `json:"description,omitempty"`
@@ -1639,13 +1975,22 @@ type AcceptFollowUpsResult struct {
 
 // Analysis defines model for Analysis.
 type Analysis struct {
+	// Approaches Ways to do the work that the analysis weighed; exactly one is chosen
+	Approaches *[]Approach `json:"approaches,omitempty"`
+
 	// Complexity The analysis's rating; picks the review model on auto
 	Complexity *AnalysisComplexity `json:"complexity,omitempty"`
 
 	// Footprint What the analysis predicts the work will change; the queue compares footprints
 	Footprint *Footprint `json:"footprint,omitempty"`
-	Plan      []string   `json:"plan"`
-	Summary   string     `json:"summary"`
+
+	// OutOfScope What the work will deliberately not do
+	OutOfScope *[]string `json:"outOfScope,omitempty"`
+	Plan       []string  `json:"plan"`
+
+	// Ship How the change ships; absent fields do not apply
+	Ship    *ShipNotes `json:"ship,omitempty"`
+	Summary string     `json:"summary"`
 }
 
 // AnalysisComplexity The analysis's rating; picks the review model on auto
@@ -1670,7 +2015,10 @@ type Analytics struct {
 	} `json:"models"`
 	PerDay   []DayStat   `json:"perDay"`
 	Previous PeriodStats `json:"previous"`
-	Repos    []struct {
+
+	// Quality How the tickets whose first coding run started in the period went, by prompt version, oldest first
+	Quality []QualityStat `json:"quality"`
+	Repos   []struct {
 		AgntsMin float32 `json:"agntsMin"`
 		AvgTurns float32 `json:"avgTurns"`
 		ClaudeMd string  `json:"claudeMd"`
@@ -1708,6 +2056,21 @@ type AnswersRequest struct {
 	} `json:"answers"`
 }
 
+// Approach defines model for Approach.
+type Approach struct {
+	Chosen bool     `json:"chosen"`
+	Cons   []string `json:"cons"`
+
+	// Fit How it fits the repository brief and the team rules, or what it bends
+	Fit    *string  `json:"fit,omitempty"`
+	Pros   []string `json:"pros"`
+	Sketch string   `json:"sketch"`
+	Title  string   `json:"title"`
+
+	// Why For the chosen approach, why it beats the others; for the others, why not
+	Why *string `json:"why,omitempty"`
+}
+
 // Attachment defines model for Attachment.
 type Attachment struct {
 	ContentType string    `json:"contentType"`
@@ -1731,6 +2094,34 @@ type Attachment struct {
 
 // AttachmentPurpose pending = uploaded, not attached yet; ticket = the task description; answer = an answer (see questionId); retry = a retry note; feedback = requested changes
 type AttachmentPurpose string
+
+// Billing defines model for Billing.
+type Billing struct {
+	CreditsBalance int64         `json:"creditsBalance"`
+	Ledger         []LedgerEntry `json:"ledger"`
+	MaxSlots       int           `json:"maxSlots"`
+	MemberLimit    int           `json:"memberLimit"`
+	Members        int           `json:"members"`
+
+	// MonthlyUzs What the plan, extra slots and extra members cost a month
+	MonthlyUzs      *int64 `json:"monthlyUzs,omitempty"`
+	PaymentsEnabled bool   `json:"paymentsEnabled"`
+	Plan            string `json:"plan"`
+	Prices          struct {
+		// CreditUzs Price of one credit ($0.01 of API cost at the markup)
+		CreditUzs       int64   `json:"creditUzs"`
+		IncludedMembers int     `json:"includedMembers"`
+		Markup          float32 `json:"markup"`
+		MemberUzs       int64   `json:"memberUzs"`
+		SlotUzs         int64   `json:"slotUzs"`
+		WorkspaceUzs    int64   `json:"workspaceUzs"`
+	} `json:"prices"`
+
+	// SelfHosted No billing: slots and members are set by the Admin
+	SelfHosted  *bool      `json:"selfHosted,omitempty"`
+	Slots       int        `json:"slots"`
+	TrialEndsAt *time.Time `json:"trialEndsAt,omitempty"`
+}
 
 // Blocker defines model for Blocker.
 type Blocker struct {
@@ -1759,6 +2150,16 @@ type Branch struct {
 // CI defines model for CI.
 type CI string
 
+// Capacity defines model for Capacity.
+type Capacity struct {
+	// BudgetMb Memory the server lends to runs; 0 when it is not limited
+	BudgetMb   int64  `json:"budgetMb"`
+	DiskFreeMb *int64 `json:"diskFreeMb,omitempty"`
+	Full       bool   `json:"full"`
+	ReservedMb int64  `json:"reservedMb"`
+	Runs       int    `json:"runs"`
+}
+
 // CheckStep defines model for CheckStep.
 type CheckStep struct {
 	Command    string  `json:"command"`
@@ -1768,6 +2169,35 @@ type CheckStep struct {
 	Output     *string `json:"output,omitempty"`
 	TimedOut   *bool   `json:"timedOut,omitempty"`
 }
+
+// ClaudeConnectionInput defines model for ClaudeConnectionInput.
+type ClaudeConnectionInput struct {
+	// Kind subscription: a token from `claude setup-token`; api_key: an Anthropic API key
+	Kind  ClaudeConnectionInputKind `json:"kind"`
+	Token string                    `json:"token"`
+}
+
+// ClaudeConnectionInputKind subscription: a token from `claude setup-token`; api_key: an Anthropic API key
+type ClaudeConnectionInputKind string
+
+// ClaudeConnectionState defines model for ClaudeConnectionState.
+type ClaudeConnectionState struct {
+	Account   *string                    `json:"account,omitempty"`
+	CheckedAt *time.Time                 `json:"checkedAt,omitempty"`
+	Connected bool                       `json:"connected"`
+	Kind      *ClaudeConnectionStateKind `json:"kind,omitempty"`
+	LastError *string                    `json:"lastError,omitempty"`
+
+	// PausedUntil At its usage limit until then
+	PausedUntil *time.Time `json:"pausedUntil,omitempty"`
+
+	// TokenHint The token's last four characters
+	TokenHint *string `json:"tokenHint,omitempty"`
+	Usage     *Usage  `json:"usage,omitempty"`
+}
+
+// ClaudeConnectionStateKind defines model for ClaudeConnectionState.Kind.
+type ClaudeConnectionStateKind string
 
 // CodeReview agnts's review of the latest result, advice beside the human review. It reviewed an older revision when revision is below the ticket's.
 type CodeReview struct {
@@ -1888,6 +2318,9 @@ type Event struct {
 	Step       string                 `json:"step"`
 	TicketKey  string                 `json:"ticketKey"`
 	Type       string                 `json:"type"`
+
+	// User The person behind the event; absent for agnts
+	User *string `json:"user,omitempty"`
 }
 
 // EventLevel defines model for Event.Level.
@@ -2049,6 +2482,9 @@ type HistoryItem struct {
 	Message string      `json:"message"`
 	Origin  string      `json:"origin"`
 	State   TicketState `json:"state"`
+
+	// User The person behind it; absent for agnts
+	User *string `json:"user,omitempty"`
 }
 
 // HourBucket defines model for HourBucket.
@@ -2091,6 +2527,28 @@ type Integration struct {
 	WebhookUrl       *string `json:"webhookUrl,omitempty"`
 }
 
+// Invite defines model for Invite.
+type Invite struct {
+	CreatedAt time.Time `json:"createdAt"`
+	Email     string    `json:"email"`
+	ExpiresAt time.Time `json:"expiresAt"`
+	Id        int64     `json:"id"`
+	InvitedBy *string   `json:"invitedBy,omitempty"`
+
+	// Role owner runs the workspace; user works in it; viewer sees everything and changes nothing
+	Role WorkspaceRole `json:"role"`
+}
+
+// InvitePreview defines model for InvitePreview.
+type InvitePreview struct {
+	Email     *string   `json:"email,omitempty"`
+	ExpiresAt time.Time `json:"expiresAt"`
+	InvitedBy *string   `json:"invitedBy,omitempty"`
+
+	// Workspace The workspace's name
+	Workspace string `json:"workspace"`
+}
+
 // LearnQueueItem defines model for LearnQueueItem.
 type LearnQueueItem struct {
 	Key string `json:"key"`
@@ -2107,6 +2565,20 @@ type LearnQueueItem struct {
 
 // LearnQueueItemStatus none: the ticket was never learned from
 type LearnQueueItemStatus string
+
+// LedgerEntry defines model for LedgerEntry.
+type LedgerEntry struct {
+	// Amount Credits; negative for spend
+	Amount    int64             `json:"amount"`
+	CreatedAt time.Time         `json:"createdAt"`
+	Id        int64             `json:"id"`
+	Note      *string           `json:"note,omitempty"`
+	Reason    LedgerEntryReason `json:"reason"`
+	TicketKey *string           `json:"ticketKey,omitempty"`
+}
+
+// LedgerEntryReason defines model for LedgerEntry.Reason.
+type LedgerEntryReason string
 
 // Lesson defines model for Lesson.
 type Lesson struct {
@@ -2227,9 +2699,11 @@ type LocalBranchStatus string
 type LoginRequest struct {
 	Client LoginRequestClient `json:"client"`
 
-	// Code Six-digit code from the authenticator app
-	Code     string `json:"code"`
-	Password string `json:"password"`
+	// Code Six-digit code from the authenticator app, when two-factor sign-in is on
+	Code     *string `json:"code,omitempty"`
+	Password string  `json:"password"`
+
+	// Username Username or email
 	Username string `json:"username"`
 }
 
@@ -2253,6 +2727,22 @@ type McpStatus struct {
 
 	// Url The connector URL to add in Claude
 	Url string `json:"url"`
+}
+
+// Member defines model for Member.
+type Member struct {
+	// ClaudeConnected Has a personal Claude connection (per-member mode)
+	ClaudeConnected bool    `json:"claudeConnected"`
+	DisplayName     *string `json:"displayName,omitempty"`
+
+	// Email Shown to the owner only
+	Email    *string   `json:"email,omitempty"`
+	JoinedAt time.Time `json:"joinedAt"`
+
+	// Role owner runs the workspace; user works in it; viewer sees everything and changes nothing
+	Role     WorkspaceRole `json:"role"`
+	UserId   int64         `json:"userId"`
+	Username string        `json:"username"`
 }
 
 // Meta defines model for Meta.
@@ -2342,6 +2832,42 @@ type PlaneState struct {
 // PlaneStateGroup defines model for PlaneState.Group.
 type PlaneStateGroup string
 
+// PlatformOverview defines model for PlatformOverview.
+type PlatformOverview struct {
+	Capacity Capacity `json:"capacity"`
+	Runs     []struct {
+		Stage       string    `json:"stage"`
+		StartedAt   time.Time `json:"startedAt"`
+		TicketKey   string    `json:"ticketKey"`
+		Workspace   *string   `json:"workspace,omitempty"`
+		WorkspaceId int64     `json:"workspaceId"`
+	} `json:"runs"`
+	ServerQueue []struct {
+		TicketKey   string  `json:"ticketKey"`
+		Workspace   *string `json:"workspace,omitempty"`
+		WorkspaceId int64   `json:"workspaceId"`
+	} `json:"serverQueue"`
+	Users      int `json:"users"`
+	Workspaces int `json:"workspaces"`
+}
+
+// PlatformWorkspace defines model for PlatformWorkspace.
+type PlatformWorkspace struct {
+	CreatedAt      time.Time  `json:"createdAt"`
+	CreditsBalance int64      `json:"creditsBalance"`
+	DeletedAt      *time.Time `json:"deletedAt,omitempty"`
+	Id             int64      `json:"id"`
+	MemberLimit    int        `json:"memberLimit"`
+	Members        int        `json:"members"`
+	Name           string     `json:"name"`
+	Owner          *string    `json:"owner,omitempty"`
+	Plan           string     `json:"plan"`
+	Running        int        `json:"running"`
+	Slots          int        `json:"slots"`
+	Slug           string     `json:"slug"`
+	Suspended      *bool      `json:"suspended,omitempty"`
+}
+
 // PreviewInput defines model for PreviewInput.
 type PreviewInput struct {
 	// Compare Also capture the default branch; kept for later previews of the ticket
@@ -2380,6 +2906,39 @@ type PreviewShotSide string
 // PreviewShotViewport defines model for PreviewShot.Viewport.
 type PreviewShotViewport string
 
+// QualityStat defines model for QualityStat.
+type QualityStat struct {
+	// ChangeRounds Average change requests by a person, over the tickets that reached review
+	ChangeRounds float32 `json:"changeRounds"`
+	Done         int     `json:"done"`
+
+	// FirstTry Done without a person asking for changes
+	FirstTry int `json:"firstTry"`
+
+	// FixAttempts Average failing checks sent back to Claude
+	FixAttempts float32 `json:"fixAttempts"`
+
+	// FootprintHit Average share of the changed files the analysis predicted; absent when none was measured
+	FootprintHit *float32 `json:"footprintHit,omitempty"`
+
+	// PromptVersion Empty for runs from before versions were recorded
+	PromptVersion string `json:"promptVersion"`
+	ReachedReview int    `json:"reachedReview"`
+
+	// RedFlags Red flags found in the diffs
+	RedFlags int `json:"redFlags"`
+	Rejected int `json:"rejected"`
+
+	// SelfFixes Findings of agnts's own review sent back to the coder
+	SelfFixes int `json:"selfFixes"`
+
+	// Serious Reviewed with a blocker or major finding at least once
+	Serious int `json:"serious"`
+
+	// Tickets First coding run in the period
+	Tickets int `json:"tickets"`
+}
+
 // Question defines model for Question.
 type Question struct {
 	Answer *string `json:"answer,omitempty"`
@@ -2393,6 +2952,35 @@ type Question struct {
 	Text     string   `json:"text"`
 }
 
+// QueueStatus defines model for QueueStatus.
+type QueueStatus struct {
+	Capacity Capacity `json:"capacity"`
+	Running  int      `json:"running"`
+
+	// ServerQueue The workspace's tickets waiting for the server
+	ServerQueue []struct {
+		// EstimateSec About how long until it may start
+		EstimateSec *int   `json:"estimateSec,omitempty"`
+		Key         string `json:"key"`
+
+		// Others Tickets of other workspaces ahead
+		Others int `json:"others"`
+
+		// Position 1-based place in the whole server queue
+		Position int `json:"position"`
+	} `json:"serverQueue"`
+	ServerQueueLength int `json:"serverQueueLength"`
+	Slots             int `json:"slots"`
+
+	// Waiting The workspace's waiting tickets by reason
+	Waiting struct {
+		Blocked *int `json:"blocked,omitempty"`
+		Claude  *int `json:"claude,omitempty"`
+		Server  *int `json:"server,omitempty"`
+		Slots   *int `json:"slots,omitempty"`
+	} `json:"waiting"`
+}
+
 // QuizQuestion defines model for QuizQuestion.
 type QuizQuestion struct {
 	// Answer Index of the correct option
@@ -2401,6 +2989,39 @@ type QuizQuestion struct {
 	Options     []string `json:"options"`
 	Question    string   `json:"question"`
 }
+
+// RedFlag defines model for RedFlag.
+type RedFlag struct {
+	Kind RedFlagKind `json:"kind"`
+
+	// Line Line in the new file; absent for the whole file
+	Line *int   `json:"line,omitempty"`
+	Path string `json:"path"`
+	Text string `json:"text"`
+}
+
+// RedFlagKind defines model for RedFlag.Kind.
+type RedFlagKind string
+
+// RegisterRequest defines model for RegisterRequest.
+type RegisterRequest struct {
+	Client      RegisterRequestClient `json:"client"`
+	DisplayName *string               `json:"displayName,omitempty"`
+	Email       string                `json:"email"`
+
+	// Invite An invite token to join with
+	Invite   *string `json:"invite,omitempty"`
+	Password string  `json:"password"`
+
+	// Username Derived from the email when empty
+	Username *string `json:"username,omitempty"`
+
+	// WorkspaceName Name of the first workspace; not created when joining by invite
+	WorkspaceName *string `json:"workspaceName,omitempty"`
+}
+
+// RegisterRequestClient defines model for RegisterRequest.Client.
+type RegisterRequestClient string
 
 // RelatedTicket defines model for RelatedTicket.
 type RelatedTicket struct {
@@ -2483,11 +3104,106 @@ type RemoteRepository struct {
 	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
 }
 
+// ReplayReport defines model for ReplayReport.
+type ReplayReport struct {
+	// Replays The newest replays first
+	Replays []ReplayResult `json:"replays"`
+
+	// Versions Replays with a change, summed by the prompt version they ran with
+	Versions []ReplayVersion `json:"versions"`
+}
+
+// ReplayResult defines model for ReplayResult.
+type ReplayResult struct {
+	ChecksPassed    bool                 `json:"checksPassed"`
+	CostUsd         float32              `json:"costUsd"`
+	CreatedAt       time.Time            `json:"createdAt"`
+	Files           []string             `json:"files"`
+	HasChange       bool                 `json:"hasChange"`
+	Key             string               `json:"key"`
+	Original        string               `json:"original"`
+	OriginalCostUsd float32              `json:"originalCostUsd"`
+	OriginalFiles   []string             `json:"originalFiles"`
+	OriginalTurns   int                  `json:"originalTurns"`
+	Overlap         float32              `json:"overlap"`
+	PromptVersion   string               `json:"promptVersion"`
+	Recall          float32              `json:"recall"`
+	State           TicketState          `json:"state"`
+	Title           string               `json:"title"`
+	Turns           int                  `json:"turns"`
+	Verdict         *ReplayResultVerdict `json:"verdict,omitempty"`
+}
+
+// ReplayResultVerdict defines model for ReplayResult.Verdict.
+type ReplayResultVerdict string
+
+// ReplayVersion defines model for ReplayVersion.
+type ReplayVersion struct {
+	AvgCostUsd float32 `json:"avgCostUsd"`
+
+	// AvgOverlap Average Jaccard index of the changed files, replay against original
+	AvgOverlap float32 `json:"avgOverlap"`
+
+	// AvgRecall Average share of the original's files the replay changed too
+	AvgRecall    float32 `json:"avgRecall"`
+	AvgTurns     float32 `json:"avgTurns"`
+	ChecksPassed int     `json:"checksPassed"`
+
+	// LooksGood Reviews that found nothing to block
+	LooksGood       int     `json:"looksGood"`
+	OriginalCostUsd float32 `json:"originalCostUsd"`
+
+	// OriginalTurns Average turns of the originals, for comparison
+	OriginalTurns float32 `json:"originalTurns"`
+	PromptVersion string  `json:"promptVersion"`
+	Replays       int     `json:"replays"`
+
+	// Reviewed Replays agnts's code review read
+	Reviewed int `json:"reviewed"`
+}
+
 // RepoActivity defines model for RepoActivity.
 type RepoActivity struct {
 	Latest *Ticket    `json:"latest,omitempty"`
 	Open   int        `json:"open"`
 	Repo   Repository `json:"repo"`
+}
+
+// RepoBrief What agnts knows about how a repository works. A survey writes the draft; once a person approves it, the body reaches every run of the repository's tickets as /agnts/context/brief.md.
+type RepoBrief struct {
+	ApprovedAt *time.Time `json:"approvedAt,omitempty"`
+
+	// Body The approved brief, Markdown; empty when there is none
+	Body string `json:"body"`
+
+	// BodySha The commit the approved brief describes
+	BodySha string `json:"bodySha"`
+
+	// Draft The latest survey, waiting for approval; empty when there is none
+	Draft    string `json:"draft"`
+	DraftSha string `json:"draftSha"`
+
+	// Error Why the last survey failed
+	Error string `json:"error"`
+
+	// MergesSince Tickets merged since the brief was approved
+	MergesSince int `json:"mergesSince"`
+
+	// RefreshAfter Merges after which agnts surveys again, when Settings allow
+	RefreshAfter int             `json:"refreshAfter"`
+	RepoId       int64           `json:"repoId"`
+	RepoName     string          `json:"repoName"`
+	Status       RepoBriefStatus `json:"status"`
+	SurveyedAt   *time.Time      `json:"surveyedAt,omitempty"`
+	UpdatedAt    time.Time       `json:"updatedAt"`
+}
+
+// RepoBriefStatus defines model for RepoBrief.Status.
+type RepoBriefStatus string
+
+// RepoBriefInput defines model for RepoBriefInput.
+type RepoBriefInput struct {
+	Body string `json:"body"`
 }
 
 // RepoDetectInput defines model for RepoDetectInput.
@@ -2663,10 +3379,16 @@ type RepositoryInputKind string
 
 // Result defines model for Result.
 type Result struct {
-	Checks    []CheckStep  `json:"checks"`
-	CreatedAt time.Time    `json:"createdAt"`
-	Files     []FileChange `json:"files"`
-	Notes     []string     `json:"notes"`
+	Checks    []CheckStep `json:"checks"`
+	CreatedAt time.Time   `json:"createdAt"`
+
+	// Deviations Where the work departed from the chosen approach or the plan, and why
+	Deviations *[]string    `json:"deviations,omitempty"`
+	Files      []FileChange `json:"files"`
+	Notes      []string     `json:"notes"`
+
+	// RedFlags Lines agnts's scan of the change flagged for the reviewer: skipped tests, removed assertions, silenced linters and the like
+	RedFlags *[]RedFlag `json:"redFlags,omitempty"`
 
 	// Report The Markdown report, for report kinds
 	Report  *string `json:"report,omitempty"`
@@ -2693,8 +3415,14 @@ type Rule struct {
 	Id    int64  `json:"id"`
 
 	// Interpretation What Claude will do because of the rule
-	Interpretation string         `json:"interpretation"`
-	Questions      []RuleQuestion `json:"questions"`
+	Interpretation string `json:"interpretation"`
+
+	// Kind rule: an instruction tickets follow. context: business knowledge (a glossary, invariants, roles) that runs read as /agnts/context/business.md.
+	Kind      RuleKind       `json:"kind"`
+	Questions []RuleQuestion `json:"questions"`
+
+	// Reason For a rule agnts suggested: which feedback shows it
+	Reason *string `json:"reason,omitempty"`
 
 	// RepoId Absent for a global rule
 	RepoId   *int64  `json:"repoId,omitempty"`
@@ -2703,7 +3431,10 @@ type Rule struct {
 	// Rounds Question rounds so far
 	Rounds int `json:"rounds"`
 
-	// Status Where Claude's review stands. Tickets follow a rule only when it is ready and enabled.
+	// SourceTicket For a rule agnts suggested: the ticket whose feedback taught it
+	SourceTicket *string `json:"sourceTicket,omitempty"`
+
+	// Status Where Claude's review stands. Tickets follow a rule only when it is ready and enabled. A suggested rule is one agnts proposed from feedback: adopt it with a review or as written, or delete it to dismiss it (it is then not suggested again).
 	Status RuleStatus `json:"status"`
 
 	// Text What tickets are given
@@ -2726,10 +3457,16 @@ type RuleInput struct {
 	Body    string `json:"body"`
 	Enabled *bool  `json:"enabled,omitempty"`
 
+	// Kind rule: an instruction tickets follow. context: business knowledge (a glossary, invariants, roles) that runs read as /agnts/context/business.md.
+	Kind *RuleKind `json:"kind,omitempty"`
+
 	// RepoId Leave out for a rule every repository follows
 	RepoId *int64 `json:"repoId,omitempty"`
 	Title  string `json:"title"`
 }
+
+// RuleKind rule: an instruction tickets follow. context: business knowledge (a glossary, invariants, roles) that runs read as /agnts/context/business.md.
+type RuleKind string
 
 // RuleQuestion defines model for RuleQuestion.
 type RuleQuestion struct {
@@ -2746,13 +3483,16 @@ type RuleQuestion struct {
 	Text  string `json:"text"`
 }
 
-// RuleStatus Where Claude's review stands. Tickets follow a rule only when it is ready and enabled.
+// RuleStatus Where Claude's review stands. Tickets follow a rule only when it is ready and enabled. A suggested rule is one agnts proposed from feedback: adopt it with a review or as written, or delete it to dismiss it (it is then not suggested again).
 type RuleStatus string
 
 // Settings defines model for Settings.
 type Settings struct {
 	Allow    []string `json:"allow"`
 	AskFirst bool     `json:"askFirst"`
+
+	// AutoBrief Survey a repository without a brief when its first ticket is analysed, and refresh the brief after merges
+	AutoBrief *bool `json:"autoBrief,omitempty"`
 
 	// AutoLearn Learn from every pushed ticket
 	AutoLearn *bool `json:"autoLearn,omitempty"`
@@ -2774,6 +3514,12 @@ type Settings struct {
 	Parallel    int             `json:"parallel"`
 	PauseAbove  int             `json:"pauseAbove"`
 
+	// Reflect Learn from change requests and rejections: suggest rules, which apply once someone adopts them
+	Reflect *bool `json:"reflect,omitempty"`
+
+	// SelfReview Send blocker and major findings of agnts's code review back to the coder once per revision, before a person reviews
+	SelfReview *bool `json:"selfReview,omitempty"`
+
 	// SuggestFollowUps Runs suggest follow-up tickets (off by default; a ticket can override it)
 	SuggestFollowUps *bool `json:"suggestFollowUps,omitempty"`
 	TimeoutMin       int   `json:"timeoutMin"`
@@ -2782,10 +3528,30 @@ type Settings struct {
 	VisualCheck *bool `json:"visualCheck,omitempty"`
 }
 
+// ShipNotes How the change ships; absent fields do not apply
+type ShipNotes struct {
+	Compatibility *string `json:"compatibility,omitempty"`
+	Migrations    *string `json:"migrations,omitempty"`
+	Rollback      *string `json:"rollback,omitempty"`
+	Rollout       *string `json:"rollout,omitempty"`
+}
+
 // ShotRef defines model for ShotRef.
 type ShotRef struct {
 	RunId  int64  `json:"runId"`
 	ShotId string `json:"shotId"`
+}
+
+// SignupInfo defines model for SignupInfo.
+type SignupInfo struct {
+	// EmailEnabled The server can send email (verification, invites, resets)
+	EmailEnabled bool `json:"emailEnabled"`
+
+	// FirstUser No account exists yet; the first one becomes Admin
+	FirstUser bool `json:"firstUser"`
+
+	// Open Anyone can register; otherwise only with an invite link
+	Open bool `json:"open"`
 }
 
 // Stage defines model for Stage.
@@ -2902,9 +3668,12 @@ type Ticket struct {
 	Branch    string     `json:"branch"`
 
 	// CanPreview The ticket's repository has a preview command
-	CanPreview  *bool     `json:"canPreview,omitempty"`
-	CreatedAt   time.Time `json:"createdAt"`
-	Description string    `json:"description"`
+	CanPreview *bool     `json:"canPreview,omitempty"`
+	CreatedAt  time.Time `json:"createdAt"`
+
+	// CreatedBy Who created it; absent for webhooks and agnts
+	CreatedBy   *string `json:"createdBy,omitempty"`
+	Description string  `json:"description"`
 
 	// FollowUpOf The ticket that suggested this one as a follow-up
 	FollowUpOf *string `json:"followUpOf,omitempty"`
@@ -2921,8 +3690,14 @@ type Ticket struct {
 
 	// LearnState The learn run after push; pending also while it runs
 	LearnState *TicketLearnState `json:"learnState,omitempty"`
-	MergedAt   *time.Time        `json:"mergedAt,omitempty"`
-	Models     *ModelOverrides   `json:"models,omitempty"`
+
+	// Member The member's username
+	Member *string `json:"member,omitempty"`
+
+	// MemberId Whose ticket it is (per-member Claude mode runs on their account)
+	MemberId *int64          `json:"memberId,omitempty"`
+	MergedAt *time.Time      `json:"mergedAt,omitempty"`
+	Models   *ModelOverrides `json:"models,omitempty"`
 
 	// OpenSuggestions Follow-up suggestions waiting for a decision
 	OpenSuggestions *int `json:"openSuggestions,omitempty"`
@@ -2941,9 +3716,15 @@ type Ticket struct {
 	// PreviewState The screenshots agnts takes beside the human review
 	PreviewState *TicketPreviewState `json:"previewState,omitempty"`
 	Priority     string              `json:"priority"`
-	RepoId       *int64              `json:"repoId,omitempty"`
-	RepoName     *string             `json:"repoName,omitempty"`
-	ResumeState  *TicketState        `json:"resumeState,omitempty"`
+
+	// QueuedAt When it started waiting for a worker
+	QueuedAt *time.Time `json:"queuedAt,omitempty"`
+
+	// ReplayOf For a replay: the done ticket it re-runs. Replays are never pushed.
+	ReplayOf    *string      `json:"replayOf,omitempty"`
+	RepoId      *int64       `json:"repoId,omitempty"`
+	RepoName    *string      `json:"repoName,omitempty"`
+	ResumeState *TicketState `json:"resumeState,omitempty"`
 
 	// ReviewState The code review agnts runs beside the human review
 	ReviewState *TicketReviewState `json:"reviewState,omitempty"`
@@ -2965,6 +3746,12 @@ type Ticket struct {
 	Title            string         `json:"title"`
 	Turns            int            `json:"turns"`
 	UpdatedAt        time.Time      `json:"updatedAt"`
+
+	// WaitMessage Why it waits, in a sentence
+	WaitMessage *string `json:"waitMessage,omitempty"`
+
+	// WaitReason Why a ticket waits for a worker: blocked (related tickets or held, for the team), slots (the workspace's runs are in use), server (no memory left on the server, for the platform), claude (the Claude account is at its limit or missing).
+	WaitReason *WaitReason `json:"waitReason,omitempty"`
 }
 
 // TicketAfterApprove defines model for Ticket.AfterApprove.
@@ -3082,6 +3869,11 @@ type TicketSpendRowTopStage string
 // TicketState defines model for TicketState.
 type TicketState string
 
+// TokenRequest defines model for TokenRequest.
+type TokenRequest struct {
+	Token string `json:"token"`
+}
+
 // TokenSpend Tokens Claude used (on a ticket: all its runs; absent until one is recorded). costUsd is what Claude Code reports the same work would cost on the API; on a Claude plan it is an estimate, not a charge.
 type TokenSpend struct {
 	CacheRead  int64   `json:"cacheRead"`
@@ -3157,9 +3949,28 @@ type UsageWindow struct {
 
 // User defines model for User.
 type User struct {
-	Id       int64  `json:"id"`
-	Username string `json:"username"`
+	CreatedAt     *time.Time `json:"createdAt,omitempty"`
+	DisplayName   *string    `json:"displayName,omitempty"`
+	Email         *string    `json:"email,omitempty"`
+	EmailVerified *bool      `json:"emailVerified,omitempty"`
+
+	// HasTotp Signs in with a second factor
+	HasTotp *bool `json:"hasTotp,omitempty"`
+	Id      int64 `json:"id"`
+
+	// IsAdmin The platform operator (system role Admin)
+	IsAdmin *bool `json:"isAdmin,omitempty"`
+
+	// LastWorkspace The slug of the workspace opened last
+	LastWorkspace *string `json:"lastWorkspace,omitempty"`
+	Username      string  `json:"username"`
+
+	// Workspaces The workspaces the user is a member of (on /auth/me only)
+	Workspaces *[]WorkspaceSummary `json:"workspaces,omitempty"`
 }
+
+// WaitReason Why a ticket waits for a worker: blocked (related tickets or held, for the team), slots (the workspace's runs are in use), server (no memory left on the server, for the platform), claude (the Claude account is at its limit or missing).
+type WaitReason string
 
 // WeekStats defines model for WeekStats.
 type WeekStats struct {
@@ -3169,6 +3980,74 @@ type WeekStats struct {
 	Picked      int `json:"picked"`
 	Pushed      int `json:"pushed"`
 	Stopped     int `json:"stopped"`
+}
+
+// WorkspaceClaude defines model for WorkspaceClaude.
+type WorkspaceClaude struct {
+	Connection      ClaudeConnectionState `json:"connection"`
+	CreditsBalance  int64                 `json:"creditsBalance"`
+	DefaultMemberId *int64                `json:"defaultMemberId,omitempty"`
+	Fallback        bool                  `json:"fallback"`
+
+	// Members Who has a personal connection (per-member mode)
+	Members []struct {
+		Connected   bool       `json:"connected"`
+		PausedUntil *time.Time `json:"pausedUntil,omitempty"`
+		UserId      int64      `json:"userId"`
+		Username    string     `json:"username"`
+	} `json:"members"`
+	Mode WorkspaceClaudeMode `json:"mode"`
+
+	// SubscriptionsAllowed This server accepts Claude subscription tokens (self-hosted); otherwise API keys only
+	SubscriptionsAllowed bool `json:"subscriptionsAllowed"`
+}
+
+// WorkspaceClaudeMode defines model for WorkspaceClaude.Mode.
+type WorkspaceClaudeMode string
+
+// WorkspaceDetail defines model for WorkspaceDetail.
+type WorkspaceDetail struct {
+	ClaudeFallback  bool                      `json:"claudeFallback"`
+	ClaudeMode      WorkspaceDetailClaudeMode `json:"claudeMode"`
+	CreatedAt       time.Time                 `json:"createdAt"`
+	CreditsBalance  int64                     `json:"creditsBalance"`
+	DefaultMemberId *int64                    `json:"defaultMemberId,omitempty"`
+	DeletedAt       *time.Time                `json:"deletedAt,omitempty"`
+	Id              int64                     `json:"id"`
+
+	// MemberLimit 0 means no limit
+	MemberLimit int    `json:"memberLimit"`
+	Members     int    `json:"members"`
+	Name        string `json:"name"`
+	OwnerId     int64  `json:"ownerId"`
+	Plan        string `json:"plan"`
+
+	// Role owner runs the workspace; user works in it; viewer sees everything and changes nothing
+	Role        WorkspaceRole `json:"role"`
+	Slots       int           `json:"slots"`
+	Slug        string        `json:"slug"`
+	Suspended   *bool         `json:"suspended,omitempty"`
+	TrialEndsAt *time.Time    `json:"trialEndsAt,omitempty"`
+}
+
+// WorkspaceDetailClaudeMode defines model for WorkspaceDetail.ClaudeMode.
+type WorkspaceDetailClaudeMode string
+
+// WorkspaceRole owner runs the workspace; user works in it; viewer sees everything and changes nothing
+type WorkspaceRole string
+
+// WorkspaceSummary defines model for WorkspaceSummary.
+type WorkspaceSummary struct {
+	Id      int64  `json:"id"`
+	Members int    `json:"members"`
+	Name    string `json:"name"`
+	Plan    string `json:"plan"`
+
+	// Role owner runs the workspace; user works in it; viewer sees everything and changes nothing
+	Role      WorkspaceRole `json:"role"`
+	Slots     int           `json:"slots"`
+	Slug      string        `json:"slug"`
+	Suspended *bool         `json:"suspended,omitempty"`
 }
 
 // LessonID defines model for LessonID.
@@ -3198,8 +4077,17 @@ type BadRequest = Error
 // Conflict defines model for Conflict.
 type Conflict = Error
 
+// Forbidden defines model for Forbidden.
+type Forbidden = Error
+
 // NotFound defines model for NotFound.
 type NotFound = Error
+
+// NotImplemented defines model for NotImplemented.
+type NotImplemented = Error
+
+// PaymentRequired defines model for PaymentRequired.
+type PaymentRequired = Error
 
 // TicketOK defines model for TicketOK.
 type TicketOK = Ticket
@@ -3209,6 +4097,30 @@ type TooManyRequests = Error
 
 // Unauthorized defines model for Unauthorized.
 type Unauthorized = Error
+
+// ChangePasswordJSONBody defines parameters for ChangePassword.
+type ChangePasswordJSONBody struct {
+	Current  string `json:"current"`
+	Password string `json:"password"`
+}
+
+// UpdateProfileJSONBody defines parameters for UpdateProfile.
+type UpdateProfileJSONBody struct {
+	DisplayName *string `json:"displayName,omitempty"`
+	Email       *string `json:"email,omitempty"`
+}
+
+// ConfirmTotpJSONBody defines parameters for ConfirmTotp.
+type ConfirmTotpJSONBody struct {
+	Code   string `json:"code"`
+	Secret string `json:"secret"`
+}
+
+// DisableTotpJSONBody defines parameters for DisableTotp.
+type DisableTotpJSONBody struct {
+	Code     *string `json:"code,omitempty"`
+	Password string  `json:"password"`
+}
 
 // GetAnalyticsParams defines parameters for GetAnalytics.
 type GetAnalyticsParams struct {
@@ -3222,6 +4134,17 @@ type GetAnalyticsParamsDays int
 type UploadAttachmentMultipartBody struct {
 	// File At most 10 MB
 	File openapi_types.File `json:"file"`
+}
+
+// ForgotPasswordJSONBody defines parameters for ForgotPassword.
+type ForgotPasswordJSONBody struct {
+	Email string `json:"email"`
+}
+
+// ResetPasswordJSONBody defines parameters for ResetPassword.
+type ResetPasswordJSONBody struct {
+	Password string `json:"password"`
+	Token    string `json:"token"`
 }
 
 // UnregisterDeviceJSONBody defines parameters for UnregisterDevice.
@@ -3314,6 +4237,28 @@ type DecideConsentJSONBody struct {
 	RedirectUri         string  `json:"redirectUri"`
 	Resource            *string `json:"resource,omitempty"`
 	State               *string `json:"state,omitempty"`
+
+	// Workspace The slug of the workspace Claude may act in (required to approve)
+	Workspace *string `json:"workspace,omitempty"`
+}
+
+// UpdatePlatformUserJSONBody defines parameters for UpdatePlatformUser.
+type UpdatePlatformUserJSONBody struct {
+	IsAdmin bool `json:"isAdmin"`
+}
+
+// UpdatePlatformWorkspaceJSONBody defines parameters for UpdatePlatformWorkspace.
+type UpdatePlatformWorkspaceJSONBody struct {
+	MemberLimit *int    `json:"memberLimit,omitempty"`
+	Plan        *string `json:"plan,omitempty"`
+	Slots       *int    `json:"slots,omitempty"`
+	Suspended   *bool   `json:"suspended,omitempty"`
+}
+
+// GrantCreditsJSONBody defines parameters for GrantCredits.
+type GrantCreditsJSONBody struct {
+	Amount int64   `json:"amount"`
+	Note   *string `json:"note,omitempty"`
 }
 
 // ListRepoCommitsParams defines parameters for ListRepoCommits.
@@ -3357,6 +4302,12 @@ type ListTicketEventsParams struct {
 	Limit *int   `form:"limit,omitempty" json:"limit,omitempty"`
 }
 
+// SetTicketMemberJSONBody defines parameters for SetTicketMember.
+type SetTicketMemberJSONBody struct {
+	// UserId A member of the workspace; 0 for yourself
+	UserId int64 `json:"userId"`
+}
+
 // RejectTicketJSONBody defines parameters for RejectTicket.
 type RejectTicketJSONBody struct {
 	Reason *string `json:"reason,omitempty"`
@@ -3390,11 +4341,111 @@ type GetTicketSpendParams struct {
 // GetTicketSpendParamsDays defines parameters for GetTicketSpend.
 type GetTicketSpendParamsDays int
 
+// DeleteWorkspaceJSONBody defines parameters for DeleteWorkspace.
+type DeleteWorkspaceJSONBody struct {
+	// Confirm The workspace's address, typed to confirm
+	Confirm string `json:"confirm"`
+}
+
+// UpdateWorkspaceJSONBody defines parameters for UpdateWorkspace.
+type UpdateWorkspaceJSONBody struct {
+	Name *string `json:"name,omitempty"`
+	Slug *string `json:"slug,omitempty"`
+}
+
+// CheckoutCreditsJSONBody defines parameters for CheckoutCredits.
+type CheckoutCreditsJSONBody struct {
+	// AmountUzs Amount to pay in so'm
+	AmountUzs int64                           `json:"amountUzs"`
+	Provider  CheckoutCreditsJSONBodyProvider `json:"provider"`
+}
+
+// CheckoutCreditsJSONBodyProvider defines parameters for CheckoutCredits.
+type CheckoutCreditsJSONBodyProvider string
+
+// SetSlotsJSONBody defines parameters for SetSlots.
+type SetSlotsJSONBody struct {
+	Slots int `json:"slots"`
+}
+
+// UpdateWorkspaceClaudeJSONBody defines parameters for UpdateWorkspaceClaude.
+type UpdateWorkspaceClaudeJSONBody struct {
+	// DefaultMemberId Whose account tickets without a person use in per-member mode; 0 for the owner
+	DefaultMemberId *int64 `json:"defaultMemberId,omitempty"`
+
+	// Fallback Continue on workspace credits when the account is at its limit or missing
+	Fallback *bool                              `json:"fallback,omitempty"`
+	Mode     *UpdateWorkspaceClaudeJSONBodyMode `json:"mode,omitempty"`
+}
+
+// UpdateWorkspaceClaudeJSONBodyMode defines parameters for UpdateWorkspaceClaude.
+type UpdateWorkspaceClaudeJSONBodyMode string
+
+// CreateInviteJSONBody defines parameters for CreateInvite.
+type CreateInviteJSONBody struct {
+	// Email Sends the link by email; empty makes a link to share yourself
+	Email *string `json:"email,omitempty"`
+
+	// Role The role the invite joins as (user when omitted)
+	Role *CreateInviteJSONBodyRole `json:"role,omitempty"`
+}
+
+// CreateInviteJSONBodyRole defines parameters for CreateInvite.
+type CreateInviteJSONBodyRole string
+
+// SetMemberRoleJSONBody defines parameters for SetMemberRole.
+type SetMemberRoleJSONBody struct {
+	Role SetMemberRoleJSONBodyRole `json:"role"`
+}
+
+// SetMemberRoleJSONBodyRole defines parameters for SetMemberRole.
+type SetMemberRoleJSONBodyRole string
+
+// TransferWorkspaceJSONBody defines parameters for TransferWorkspace.
+type TransferWorkspaceJSONBody struct {
+	UserId int64 `json:"userId"`
+}
+
+// CreateWorkspaceJSONBody defines parameters for CreateWorkspace.
+type CreateWorkspaceJSONBody struct {
+	Name string `json:"name"`
+
+	// Slug The address in links; derived from the name when empty
+	Slug *string `json:"slug,omitempty"`
+}
+
+// SetMyClaudeJSONRequestBody defines body for SetMyClaude for application/json ContentType.
+type SetMyClaudeJSONRequestBody = ClaudeConnectionInput
+
+// ChangePasswordJSONRequestBody defines body for ChangePassword for application/json ContentType.
+type ChangePasswordJSONRequestBody ChangePasswordJSONBody
+
+// UpdateProfileJSONRequestBody defines body for UpdateProfile for application/json ContentType.
+type UpdateProfileJSONRequestBody UpdateProfileJSONBody
+
+// ConfirmTotpJSONRequestBody defines body for ConfirmTotp for application/json ContentType.
+type ConfirmTotpJSONRequestBody ConfirmTotpJSONBody
+
+// DisableTotpJSONRequestBody defines body for DisableTotp for application/json ContentType.
+type DisableTotpJSONRequestBody DisableTotpJSONBody
+
 // UploadAttachmentMultipartRequestBody defines body for UploadAttachment for multipart/form-data ContentType.
 type UploadAttachmentMultipartRequestBody UploadAttachmentMultipartBody
 
 // LoginJSONRequestBody defines body for Login for application/json ContentType.
 type LoginJSONRequestBody = LoginRequest
+
+// ForgotPasswordJSONRequestBody defines body for ForgotPassword for application/json ContentType.
+type ForgotPasswordJSONRequestBody ForgotPasswordJSONBody
+
+// ResetPasswordJSONRequestBody defines body for ResetPassword for application/json ContentType.
+type ResetPasswordJSONRequestBody ResetPasswordJSONBody
+
+// RegisterJSONRequestBody defines body for Register for application/json ContentType.
+type RegisterJSONRequestBody = RegisterRequest
+
+// VerifyEmailJSONRequestBody defines body for VerifyEmail for application/json ContentType.
+type VerifyEmailJSONRequestBody = TokenRequest
 
 // RegisterDeviceJSONRequestBody defines body for RegisterDevice for application/json ContentType.
 type RegisterDeviceJSONRequestBody = DeviceRegistration
@@ -3414,6 +4465,15 @@ type ConnectIntegrationJSONRequestBody ConnectIntegrationJSONBody
 // DecideConsentJSONRequestBody defines body for DecideConsent for application/json ContentType.
 type DecideConsentJSONRequestBody DecideConsentJSONBody
 
+// UpdatePlatformUserJSONRequestBody defines body for UpdatePlatformUser for application/json ContentType.
+type UpdatePlatformUserJSONRequestBody UpdatePlatformUserJSONBody
+
+// UpdatePlatformWorkspaceJSONRequestBody defines body for UpdatePlatformWorkspace for application/json ContentType.
+type UpdatePlatformWorkspaceJSONRequestBody UpdatePlatformWorkspaceJSONBody
+
+// GrantCreditsJSONRequestBody defines body for GrantCredits for application/json ContentType.
+type GrantCreditsJSONRequestBody GrantCreditsJSONBody
+
 // CreateRepoJSONRequestBody defines body for CreateRepo for application/json ContentType.
 type CreateRepoJSONRequestBody = RepositoryInput
 
@@ -3422,6 +4482,9 @@ type DetectRepoJSONRequestBody = RepoDetectInput
 
 // UpdateRepoJSONRequestBody defines body for UpdateRepo for application/json ContentType.
 type UpdateRepoJSONRequestBody = RepositoryInput
+
+// SaveRepoBriefJSONRequestBody defines body for SaveRepoBrief for application/json ContentType.
+type SaveRepoBriefJSONRequestBody = RepoBriefInput
 
 // DeployRepoJSONRequestBody defines body for DeployRepo for application/json ContentType.
 type DeployRepoJSONRequestBody DeployRepoJSONBody
@@ -3462,6 +4525,9 @@ type ImplementTicketJSONRequestBody = ImplementInput
 // SetTicketKindJSONRequestBody defines body for SetTicketKind for application/json ContentType.
 type SetTicketKindJSONRequestBody = TicketKindInput
 
+// SetTicketMemberJSONRequestBody defines body for SetTicketMember for application/json ContentType.
+type SetTicketMemberJSONRequestBody SetTicketMemberJSONBody
+
 // SetTicketModelsJSONRequestBody defines body for SetTicketModels for application/json ContentType.
 type SetTicketModelsJSONRequestBody = ModelOverrides
 
@@ -3486,8 +4552,65 @@ type RetryTicketJSONRequestBody RetryTicketJSONBody
 // TranslateTicketJSONRequestBody defines body for TranslateTicket for application/json ContentType.
 type TranslateTicketJSONRequestBody = TranslateInput
 
+// DeleteWorkspaceJSONRequestBody defines body for DeleteWorkspace for application/json ContentType.
+type DeleteWorkspaceJSONRequestBody DeleteWorkspaceJSONBody
+
+// UpdateWorkspaceJSONRequestBody defines body for UpdateWorkspace for application/json ContentType.
+type UpdateWorkspaceJSONRequestBody UpdateWorkspaceJSONBody
+
+// CheckoutCreditsJSONRequestBody defines body for CheckoutCredits for application/json ContentType.
+type CheckoutCreditsJSONRequestBody CheckoutCreditsJSONBody
+
+// SetSlotsJSONRequestBody defines body for SetSlots for application/json ContentType.
+type SetSlotsJSONRequestBody SetSlotsJSONBody
+
+// UpdateWorkspaceClaudeJSONRequestBody defines body for UpdateWorkspaceClaude for application/json ContentType.
+type UpdateWorkspaceClaudeJSONRequestBody UpdateWorkspaceClaudeJSONBody
+
+// SetWorkspaceClaudeConnectionJSONRequestBody defines body for SetWorkspaceClaudeConnection for application/json ContentType.
+type SetWorkspaceClaudeConnectionJSONRequestBody = ClaudeConnectionInput
+
+// CreateInviteJSONRequestBody defines body for CreateInvite for application/json ContentType.
+type CreateInviteJSONRequestBody CreateInviteJSONBody
+
+// SetMemberRoleJSONRequestBody defines body for SetMemberRole for application/json ContentType.
+type SetMemberRoleJSONRequestBody SetMemberRoleJSONBody
+
+// TransferWorkspaceJSONRequestBody defines body for TransferWorkspace for application/json ContentType.
+type TransferWorkspaceJSONRequestBody TransferWorkspaceJSONBody
+
+// CreateWorkspaceJSONRequestBody defines body for CreateWorkspace for application/json ContentType.
+type CreateWorkspaceJSONRequestBody CreateWorkspaceJSONBody
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// DeleteMyClaude Disconnect your Claude account
+	// (DELETE /account/claude)
+	DeleteMyClaude(w http.ResponseWriter, r *http.Request)
+	// GetMyClaude Your personal Claude connection (used by workspaces in per-member mode)
+	// (GET /account/claude)
+	GetMyClaude(w http.ResponseWriter, r *http.Request)
+	// SetMyClaude Connect your Claude account
+	// (PUT /account/claude)
+	SetMyClaude(w http.ResponseWriter, r *http.Request)
+	// ChangePassword Change the password
+	// (PUT /account/password)
+	ChangePassword(w http.ResponseWriter, r *http.Request)
+	// UpdateProfile Change the display name or email
+	// (PUT /account/profile)
+	UpdateProfile(w http.ResponseWriter, r *http.Request)
+	// ConfirmTotp Turn two-factor sign-in on with a code from the new secret
+	// (POST /account/totp/confirm)
+	ConfirmTotp(w http.ResponseWriter, r *http.Request)
+	// DisableTotp Turn two-factor sign-in off
+	// (POST /account/totp/disable)
+	DisableTotp(w http.ResponseWriter, r *http.Request)
+	// BeginTotp Start turning on two-factor sign-in (a new secret, not saved yet)
+	// (POST /account/totp/setup)
+	BeginTotp(w http.ResponseWriter, r *http.Request)
+	// ResendVerification Send the email verification link again
+	// (POST /account/verify)
+	ResendVerification(w http.ResponseWriter, r *http.Request)
 	// GetAnalytics Throughput, quality, time and plan statistics for a period
 	// (GET /analytics)
 	GetAnalytics(w http.ResponseWriter, r *http.Request, params GetAnalyticsParams)
@@ -3509,6 +4632,21 @@ type ServerInterface interface {
 	// GetMe The signed-in user
 	// (GET /auth/me)
 	GetMe(w http.ResponseWriter, r *http.Request)
+	// ForgotPassword Email a password reset link (always answers 204)
+	// (POST /auth/password/forgot)
+	ForgotPassword(w http.ResponseWriter, r *http.Request)
+	// ResetPassword Set a new password with a reset link's token
+	// (POST /auth/password/reset)
+	ResetPassword(w http.ResponseWriter, r *http.Request)
+	// GetSignupInfo Whether people can register, and whether this install has no user yet
+	// (GET /auth/signup)
+	GetSignupInfo(w http.ResponseWriter, r *http.Request)
+	// Register Create an account (and its first workspace, unless joining by invite)
+	// (POST /auth/signup)
+	Register(w http.ResponseWriter, r *http.Request)
+	// VerifyEmail Confirm an email address with the link's token
+	// (POST /auth/verify)
+	VerifyEmail(w http.ResponseWriter, r *http.Request)
 	// GetDashboard Everything the dashboard shows, in one call
 	// (GET /dashboard)
 	GetDashboard(w http.ResponseWriter, r *http.Request)
@@ -3521,6 +4659,9 @@ type ServerInterface interface {
 	// GetPageDoc The "How this page works" text, as Markdown
 	// (GET /docs/{page})
 	GetPageDoc(w http.ResponseWriter, r *http.Request, page string, params GetPageDocParams)
+	// GetReplayReport How the newest replays compare with the tickets they re-ran, by prompt version
+	// (GET /eval/replays)
+	GetReplayReport(w http.ResponseWriter, r *http.Request)
 	// ListEvents The global log, newest first, with filters and a cursor
 	// (GET /events)
 	ListEvents(w http.ResponseWriter, r *http.Request, params ListEventsParams)
@@ -3563,6 +4704,12 @@ type ServerInterface interface {
 
 	// (POST /integrations/{provider}/test)
 	TestIntegration(w http.ResponseWriter, r *http.Request, provider Provider)
+	// GetInvite What an invite link is for
+	// (GET /invites/{token})
+	GetInvite(w http.ResponseWriter, r *http.Request, token string)
+	// AcceptInvite Join the workspace an invite is for
+	// (POST /invites/{token}/accept)
+	AcceptInvite(w http.ResponseWriter, r *http.Request, token string)
 	// ListLessons Lessons agnts learned from pushed tickets, newest first
 	// (GET /lessons)
 	ListLessons(w http.ResponseWriter, r *http.Request, params ListLessonsParams)
@@ -3596,6 +4743,24 @@ type ServerInterface interface {
 	// DecideConsent Approve or deny a Claude connection; returns where to send the browser
 	// (POST /oauth/consent)
 	DecideConsent(w http.ResponseWriter, r *http.Request)
+	// GetPlatformOverview Servers, runs and the queue across every workspace (Admin)
+	// (GET /platform/overview)
+	GetPlatformOverview(w http.ResponseWriter, r *http.Request)
+	// ListPlatformUsers Every user (Admin)
+	// (GET /platform/users)
+	ListPlatformUsers(w http.ResponseWriter, r *http.Request)
+	// UpdatePlatformUser Grant or remove the Admin role (Admin)
+	// (PUT /platform/users/{id})
+	UpdatePlatformUser(w http.ResponseWriter, r *http.Request, id int64)
+	// ListPlatformWorkspaces Every workspace, metadata only (Admin)
+	// (GET /platform/workspaces)
+	ListPlatformWorkspaces(w http.ResponseWriter, r *http.Request)
+	// UpdatePlatformWorkspace Change a workspace's plan, slots, member limit, or suspend it (Admin)
+	// (PUT /platform/workspaces/{id})
+	UpdatePlatformWorkspace(w http.ResponseWriter, r *http.Request, id int64)
+	// GrantCredits Grant (or take back, when negative) credits (Admin)
+	// (POST /platform/workspaces/{id}/credits)
+	GrantCredits(w http.ResponseWriter, r *http.Request, id int64)
 
 	// (GET /repos)
 	ListRepos(w http.ResponseWriter, r *http.Request)
@@ -3617,6 +4782,21 @@ type ServerInterface interface {
 	// ListRepoBranches Branches with their tip, ahead/behind the default branch and checks
 	// (GET /repos/{id}/branches)
 	ListRepoBranches(w http.ResponseWriter, r *http.Request, id RepoID)
+	// GetRepoBrief What agnts knows about how the repository works; empty and idle before the first survey
+	// (GET /repos/{id}/brief)
+	GetRepoBrief(w http.ResponseWriter, r *http.Request, id RepoID)
+	// SaveRepoBrief Replace the approved brief with your text; empty text removes it
+	// (PUT /repos/{id}/brief)
+	SaveRepoBrief(w http.ResponseWriter, r *http.Request, id RepoID)
+	// ApproveRepoBrief Make the draft the brief that runs read
+	// (POST /repos/{id}/brief/approve)
+	ApproveRepoBrief(w http.ResponseWriter, r *http.Request, id RepoID)
+	// DiscardRepoBriefDraft Drop the draft a survey wrote
+	// (POST /repos/{id}/brief/discard)
+	DiscardRepoBriefDraft(w http.ResponseWriter, r *http.Request, id RepoID)
+	// SurveyRepoBrief Have Claude survey the repository and write a draft brief (an update when it has one)
+	// (POST /repos/{id}/brief/survey)
+	SurveyRepoBrief(w http.ResponseWriter, r *http.Request, id RepoID)
 	// ListRepoCommits Commits on the default branch, newest first, 50 per page; a shorter page is the last
 	// (GET /repos/{id}/commits)
 	ListRepoCommits(w http.ResponseWriter, r *http.Request, id RepoID, params ListRepoCommitsParams)
@@ -3716,6 +4896,9 @@ type ServerInterface interface {
 	// LearnFromTicket Queue a learn run for a pushed ticket (again, if it already ran)
 	// (POST /tickets/{key}/learn)
 	LearnFromTicket(w http.ResponseWriter, r *http.Request, key TicketKey)
+	// SetTicketMember Make a member the ticket's member (per-member Claude mode runs it on their account)
+	// (PUT /tickets/{key}/member)
+	SetTicketMember(w http.ResponseWriter, r *http.Request, key TicketKey)
 	// MarkTicketMerged Record that a done ticket's pull request was merged
 	// (POST /tickets/{key}/merged)
 	MarkTicketMerged(w http.ResponseWriter, r *http.Request, key TicketKey)
@@ -3743,6 +4926,9 @@ type ServerInterface interface {
 	// DismissRelation Dismiss a relation (run anyway); agnts does not propose it again
 	// (POST /tickets/{key}/relations/{id}/dismiss)
 	DismissRelation(w http.ResponseWriter, r *http.Request, key TicketKey, id RelationID)
+	// ReplayTicket Re-run a done code or test ticket with today's agnts, from the commit it started from, to compare the two (Analytics → Replay evaluation). The replay is a new local task that is never pushed.
+	// (POST /tickets/{key}/replay)
+	ReplayTicket(w http.ResponseWriter, r *http.Request, key TicketKey)
 	// SetTicketRepo Link the ticket to a repository
 	// (PUT /tickets/{key}/repo)
 	SetTicketRepo(w http.ResponseWriter, r *http.Request, key TicketKey)
@@ -3773,11 +4959,128 @@ type ServerInterface interface {
 	// GetTicketSpend Tickets that used the most of the plan in a period, by Claude Code's cost estimate
 	// (GET /usage/tickets)
 	GetTicketSpend(w http.ResponseWriter, r *http.Request, params GetTicketSpendParams)
+	// DeleteWorkspace Delete the workspace (kept 7 days for undo, then purged)
+	// (DELETE /workspace)
+	DeleteWorkspace(w http.ResponseWriter, r *http.Request)
+	// GetWorkspace The current workspace and your role in it
+	// (GET /workspace)
+	GetWorkspace(w http.ResponseWriter, r *http.Request)
+	// UpdateWorkspace Rename the workspace or change its address
+	// (PUT /workspace)
+	UpdateWorkspace(w http.ResponseWriter, r *http.Request)
+	// GetBilling The workspace's plan, slots, members and credits
+	// (GET /workspace/billing)
+	GetBilling(w http.ResponseWriter, r *http.Request)
+	// CheckoutCredits Start buying credits; returns the payment page to open
+	// (POST /workspace/billing/checkout)
+	CheckoutCredits(w http.ResponseWriter, r *http.Request)
+	// SetSlots Change how many runs the workspace may have at once
+	// (PUT /workspace/billing/slots)
+	SetSlots(w http.ResponseWriter, r *http.Request)
+	// GetWorkspaceClaude Which Claude account the workspace's runs use
+	// (GET /workspace/claude)
+	GetWorkspaceClaude(w http.ResponseWriter, r *http.Request)
+	// UpdateWorkspaceClaude Choose the Claude mode, the fallback and the default member
+	// (PUT /workspace/claude)
+	UpdateWorkspaceClaude(w http.ResponseWriter, r *http.Request)
+	// DeleteWorkspaceClaudeConnection Disconnect the workspace's shared Claude account
+	// (DELETE /workspace/claude/connection)
+	DeleteWorkspaceClaudeConnection(w http.ResponseWriter, r *http.Request)
+	// SetWorkspaceClaudeConnection Connect the workspace's shared Claude account
+	// (PUT /workspace/claude/connection)
+	SetWorkspaceClaudeConnection(w http.ResponseWriter, r *http.Request)
+	// ListInvites Open invites
+	// (GET /workspace/invites)
+	ListInvites(w http.ResponseWriter, r *http.Request)
+	// CreateInvite Invite someone by email or by a link (valid 7 days)
+	// (POST /workspace/invites)
+	CreateInvite(w http.ResponseWriter, r *http.Request)
+	// RevokeInvite Revoke an open invite
+	// (DELETE /workspace/invites/{id})
+	RevokeInvite(w http.ResponseWriter, r *http.Request, id int64)
+	// LeaveWorkspace Leave the workspace
+	// (POST /workspace/leave)
+	LeaveWorkspace(w http.ResponseWriter, r *http.Request)
+	// ListMembers The workspace's members
+	// (GET /workspace/members)
+	ListMembers(w http.ResponseWriter, r *http.Request)
+	// RemoveMember Remove a member
+	// (DELETE /workspace/members/{userId})
+	RemoveMember(w http.ResponseWriter, r *http.Request, userId int64)
+	// SetMemberRole Make a member (not the owner) a user or a viewer
+	// (PUT /workspace/members/{userId}/role)
+	SetMemberRole(w http.ResponseWriter, r *http.Request, userId int64)
+	// GetQueue Where the workspace's tickets stand in the queue
+	// (GET /workspace/queue)
+	GetQueue(w http.ResponseWriter, r *http.Request)
+	// TransferWorkspace Make another member the owner
+	// (POST /workspace/transfer)
+	TransferWorkspace(w http.ResponseWriter, r *http.Request)
+	// ListWorkspaces The workspaces you are a member of
+	// (GET /workspaces)
+	ListWorkspaces(w http.ResponseWriter, r *http.Request)
+	// CreateWorkspace Create a workspace you own
+	// (POST /workspaces)
+	CreateWorkspace(w http.ResponseWriter, r *http.Request)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
 
 type Unimplemented struct{}
+
+// DeleteMyClaude Disconnect your Claude account
+// (DELETE /account/claude)
+func (_ Unimplemented) DeleteMyClaude(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetMyClaude Your personal Claude connection (used by workspaces in per-member mode)
+// (GET /account/claude)
+func (_ Unimplemented) GetMyClaude(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// SetMyClaude Connect your Claude account
+// (PUT /account/claude)
+func (_ Unimplemented) SetMyClaude(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// ChangePassword Change the password
+// (PUT /account/password)
+func (_ Unimplemented) ChangePassword(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// UpdateProfile Change the display name or email
+// (PUT /account/profile)
+func (_ Unimplemented) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// ConfirmTotp Turn two-factor sign-in on with a code from the new secret
+// (POST /account/totp/confirm)
+func (_ Unimplemented) ConfirmTotp(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// DisableTotp Turn two-factor sign-in off
+// (POST /account/totp/disable)
+func (_ Unimplemented) DisableTotp(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// BeginTotp Start turning on two-factor sign-in (a new secret, not saved yet)
+// (POST /account/totp/setup)
+func (_ Unimplemented) BeginTotp(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// ResendVerification Send the email verification link again
+// (POST /account/verify)
+func (_ Unimplemented) ResendVerification(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
 
 // GetAnalytics Throughput, quality, time and plan statistics for a period
 // (GET /analytics)
@@ -3821,6 +5124,36 @@ func (_ Unimplemented) GetMe(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// ForgotPassword Email a password reset link (always answers 204)
+// (POST /auth/password/forgot)
+func (_ Unimplemented) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// ResetPassword Set a new password with a reset link's token
+// (POST /auth/password/reset)
+func (_ Unimplemented) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetSignupInfo Whether people can register, and whether this install has no user yet
+// (GET /auth/signup)
+func (_ Unimplemented) GetSignupInfo(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Register Create an account (and its first workspace, unless joining by invite)
+// (POST /auth/signup)
+func (_ Unimplemented) Register(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// VerifyEmail Confirm an email address with the link's token
+// (POST /auth/verify)
+func (_ Unimplemented) VerifyEmail(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // GetDashboard Everything the dashboard shows, in one call
 // (GET /dashboard)
 func (_ Unimplemented) GetDashboard(w http.ResponseWriter, r *http.Request) {
@@ -3842,6 +5175,12 @@ func (_ Unimplemented) UnregisterDevice(w http.ResponseWriter, r *http.Request) 
 // GetPageDoc The "How this page works" text, as Markdown
 // (GET /docs/{page})
 func (_ Unimplemented) GetPageDoc(w http.ResponseWriter, r *http.Request, page string, params GetPageDocParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetReplayReport How the newest replays compare with the tickets they re-ran, by prompt version
+// (GET /eval/replays)
+func (_ Unimplemented) GetReplayReport(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -3927,6 +5266,18 @@ func (_ Unimplemented) TestIntegration(w http.ResponseWriter, r *http.Request, p
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// GetInvite What an invite link is for
+// (GET /invites/{token})
+func (_ Unimplemented) GetInvite(w http.ResponseWriter, r *http.Request, token string) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// AcceptInvite Join the workspace an invite is for
+// (POST /invites/{token}/accept)
+func (_ Unimplemented) AcceptInvite(w http.ResponseWriter, r *http.Request, token string) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // ListLessons Lessons agnts learned from pushed tickets, newest first
 // (GET /lessons)
 func (_ Unimplemented) ListLessons(w http.ResponseWriter, r *http.Request, params ListLessonsParams) {
@@ -3993,6 +5344,42 @@ func (_ Unimplemented) DecideConsent(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// GetPlatformOverview Servers, runs and the queue across every workspace (Admin)
+// (GET /platform/overview)
+func (_ Unimplemented) GetPlatformOverview(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// ListPlatformUsers Every user (Admin)
+// (GET /platform/users)
+func (_ Unimplemented) ListPlatformUsers(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// UpdatePlatformUser Grant or remove the Admin role (Admin)
+// (PUT /platform/users/{id})
+func (_ Unimplemented) UpdatePlatformUser(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// ListPlatformWorkspaces Every workspace, metadata only (Admin)
+// (GET /platform/workspaces)
+func (_ Unimplemented) ListPlatformWorkspaces(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// UpdatePlatformWorkspace Change a workspace's plan, slots, member limit, or suspend it (Admin)
+// (PUT /platform/workspaces/{id})
+func (_ Unimplemented) UpdatePlatformWorkspace(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GrantCredits Grant (or take back, when negative) credits (Admin)
+// (POST /platform/workspaces/{id}/credits)
+func (_ Unimplemented) GrantCredits(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // (GET /repos)
 func (_ Unimplemented) ListRepos(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
@@ -4028,6 +5415,36 @@ func (_ Unimplemented) ArchiveRepo(w http.ResponseWriter, r *http.Request, id Re
 // ListRepoBranches Branches with their tip, ahead/behind the default branch and checks
 // (GET /repos/{id}/branches)
 func (_ Unimplemented) ListRepoBranches(w http.ResponseWriter, r *http.Request, id RepoID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetRepoBrief What agnts knows about how the repository works; empty and idle before the first survey
+// (GET /repos/{id}/brief)
+func (_ Unimplemented) GetRepoBrief(w http.ResponseWriter, r *http.Request, id RepoID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// SaveRepoBrief Replace the approved brief with your text; empty text removes it
+// (PUT /repos/{id}/brief)
+func (_ Unimplemented) SaveRepoBrief(w http.ResponseWriter, r *http.Request, id RepoID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// ApproveRepoBrief Make the draft the brief that runs read
+// (POST /repos/{id}/brief/approve)
+func (_ Unimplemented) ApproveRepoBrief(w http.ResponseWriter, r *http.Request, id RepoID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// DiscardRepoBriefDraft Drop the draft a survey wrote
+// (POST /repos/{id}/brief/discard)
+func (_ Unimplemented) DiscardRepoBriefDraft(w http.ResponseWriter, r *http.Request, id RepoID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// SurveyRepoBrief Have Claude survey the repository and write a draft brief (an update when it has one)
+// (POST /repos/{id}/brief/survey)
+func (_ Unimplemented) SurveyRepoBrief(w http.ResponseWriter, r *http.Request, id RepoID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -4225,6 +5642,12 @@ func (_ Unimplemented) LearnFromTicket(w http.ResponseWriter, r *http.Request, k
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// SetTicketMember Make a member the ticket's member (per-member Claude mode runs it on their account)
+// (PUT /tickets/{key}/member)
+func (_ Unimplemented) SetTicketMember(w http.ResponseWriter, r *http.Request, key TicketKey) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // MarkTicketMerged Record that a done ticket's pull request was merged
 // (POST /tickets/{key}/merged)
 func (_ Unimplemented) MarkTicketMerged(w http.ResponseWriter, r *http.Request, key TicketKey) {
@@ -4276,6 +5699,12 @@ func (_ Unimplemented) AcceptRelation(w http.ResponseWriter, r *http.Request, ke
 // DismissRelation Dismiss a relation (run anyway); agnts does not propose it again
 // (POST /tickets/{key}/relations/{id}/dismiss)
 func (_ Unimplemented) DismissRelation(w http.ResponseWriter, r *http.Request, key TicketKey, id RelationID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// ReplayTicket Re-run a done code or test ticket with today's agnts, from the commit it started from, to compare the two (Analytics → Replay evaluation). The replay is a new local task that is never pushed.
+// (POST /tickets/{key}/replay)
+func (_ Unimplemented) ReplayTicket(w http.ResponseWriter, r *http.Request, key TicketKey) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -4339,6 +5768,132 @@ func (_ Unimplemented) GetTicketSpend(w http.ResponseWriter, r *http.Request, pa
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// DeleteWorkspace Delete the workspace (kept 7 days for undo, then purged)
+// (DELETE /workspace)
+func (_ Unimplemented) DeleteWorkspace(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetWorkspace The current workspace and your role in it
+// (GET /workspace)
+func (_ Unimplemented) GetWorkspace(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// UpdateWorkspace Rename the workspace or change its address
+// (PUT /workspace)
+func (_ Unimplemented) UpdateWorkspace(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetBilling The workspace's plan, slots, members and credits
+// (GET /workspace/billing)
+func (_ Unimplemented) GetBilling(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// CheckoutCredits Start buying credits; returns the payment page to open
+// (POST /workspace/billing/checkout)
+func (_ Unimplemented) CheckoutCredits(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// SetSlots Change how many runs the workspace may have at once
+// (PUT /workspace/billing/slots)
+func (_ Unimplemented) SetSlots(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetWorkspaceClaude Which Claude account the workspace's runs use
+// (GET /workspace/claude)
+func (_ Unimplemented) GetWorkspaceClaude(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// UpdateWorkspaceClaude Choose the Claude mode, the fallback and the default member
+// (PUT /workspace/claude)
+func (_ Unimplemented) UpdateWorkspaceClaude(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// DeleteWorkspaceClaudeConnection Disconnect the workspace's shared Claude account
+// (DELETE /workspace/claude/connection)
+func (_ Unimplemented) DeleteWorkspaceClaudeConnection(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// SetWorkspaceClaudeConnection Connect the workspace's shared Claude account
+// (PUT /workspace/claude/connection)
+func (_ Unimplemented) SetWorkspaceClaudeConnection(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// ListInvites Open invites
+// (GET /workspace/invites)
+func (_ Unimplemented) ListInvites(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// CreateInvite Invite someone by email or by a link (valid 7 days)
+// (POST /workspace/invites)
+func (_ Unimplemented) CreateInvite(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// RevokeInvite Revoke an open invite
+// (DELETE /workspace/invites/{id})
+func (_ Unimplemented) RevokeInvite(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// LeaveWorkspace Leave the workspace
+// (POST /workspace/leave)
+func (_ Unimplemented) LeaveWorkspace(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// ListMembers The workspace's members
+// (GET /workspace/members)
+func (_ Unimplemented) ListMembers(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// RemoveMember Remove a member
+// (DELETE /workspace/members/{userId})
+func (_ Unimplemented) RemoveMember(w http.ResponseWriter, r *http.Request, userId int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// SetMemberRole Make a member (not the owner) a user or a viewer
+// (PUT /workspace/members/{userId}/role)
+func (_ Unimplemented) SetMemberRole(w http.ResponseWriter, r *http.Request, userId int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetQueue Where the workspace's tickets stand in the queue
+// (GET /workspace/queue)
+func (_ Unimplemented) GetQueue(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// TransferWorkspace Make another member the owner
+// (POST /workspace/transfer)
+func (_ Unimplemented) TransferWorkspace(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// ListWorkspaces The workspaces you are a member of
+// (GET /workspaces)
+func (_ Unimplemented) ListWorkspaces(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// CreateWorkspace Create a workspace you own
+// (POST /workspaces)
+func (_ Unimplemented) CreateWorkspace(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // ServerInterfaceWrapper converts contexts to parameters.
 type ServerInterfaceWrapper struct {
 	Handler            ServerInterface
@@ -4347,6 +5902,132 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.Handler) http.Handler
+
+// DeleteMyClaude operation middleware
+func (siw *ServerInterfaceWrapper) DeleteMyClaude(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteMyClaude(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetMyClaude operation middleware
+func (siw *ServerInterfaceWrapper) GetMyClaude(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetMyClaude(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// SetMyClaude operation middleware
+func (siw *ServerInterfaceWrapper) SetMyClaude(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SetMyClaude(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ChangePassword operation middleware
+func (siw *ServerInterfaceWrapper) ChangePassword(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ChangePassword(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateProfile operation middleware
+func (siw *ServerInterfaceWrapper) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateProfile(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ConfirmTotp operation middleware
+func (siw *ServerInterfaceWrapper) ConfirmTotp(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ConfirmTotp(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DisableTotp operation middleware
+func (siw *ServerInterfaceWrapper) DisableTotp(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DisableTotp(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// BeginTotp operation middleware
+func (siw *ServerInterfaceWrapper) BeginTotp(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.BeginTotp(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ResendVerification operation middleware
+func (siw *ServerInterfaceWrapper) ResendVerification(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ResendVerification(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
 
 // GetAnalytics operation middleware
 func (siw *ServerInterfaceWrapper) GetAnalytics(w http.ResponseWriter, r *http.Request) {
@@ -4489,6 +6170,76 @@ func (siw *ServerInterfaceWrapper) GetMe(w http.ResponseWriter, r *http.Request)
 	handler.ServeHTTP(w, r)
 }
 
+// ForgotPassword operation middleware
+func (siw *ServerInterfaceWrapper) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ForgotPassword(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ResetPassword operation middleware
+func (siw *ServerInterfaceWrapper) ResetPassword(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ResetPassword(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetSignupInfo operation middleware
+func (siw *ServerInterfaceWrapper) GetSignupInfo(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetSignupInfo(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// Register operation middleware
+func (siw *ServerInterfaceWrapper) Register(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.Register(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// VerifyEmail operation middleware
+func (siw *ServerInterfaceWrapper) VerifyEmail(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.VerifyEmail(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // GetDashboard operation middleware
 func (siw *ServerInterfaceWrapper) GetDashboard(w http.ResponseWriter, r *http.Request) {
 
@@ -4564,6 +6315,20 @@ func (siw *ServerInterfaceWrapper) GetPageDoc(w http.ResponseWriter, r *http.Req
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetPageDoc(w, r, page, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetReplayReport operation middleware
+func (siw *ServerInterfaceWrapper) GetReplayReport(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetReplayReport(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -4919,6 +6684,58 @@ func (siw *ServerInterfaceWrapper) TestIntegration(w http.ResponseWriter, r *htt
 	handler.ServeHTTP(w, r)
 }
 
+// GetInvite operation middleware
+func (siw *ServerInterfaceWrapper) GetInvite(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "token" -------------
+	var token string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "token", chi.URLParam(r, "token"), &token, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "token", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetInvite(w, r, token)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// AcceptInvite operation middleware
+func (siw *ServerInterfaceWrapper) AcceptInvite(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "token" -------------
+	var token string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "token", chi.URLParam(r, "token"), &token, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "token", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AcceptInvite(w, r, token)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // ListLessons operation middleware
 func (siw *ServerInterfaceWrapper) ListLessons(w http.ResponseWriter, r *http.Request) {
 
@@ -5251,6 +7068,126 @@ func (siw *ServerInterfaceWrapper) DecideConsent(w http.ResponseWriter, r *http.
 	handler.ServeHTTP(w, r)
 }
 
+// GetPlatformOverview operation middleware
+func (siw *ServerInterfaceWrapper) GetPlatformOverview(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetPlatformOverview(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListPlatformUsers operation middleware
+func (siw *ServerInterfaceWrapper) ListPlatformUsers(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListPlatformUsers(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdatePlatformUser operation middleware
+func (siw *ServerInterfaceWrapper) UpdatePlatformUser(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdatePlatformUser(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListPlatformWorkspaces operation middleware
+func (siw *ServerInterfaceWrapper) ListPlatformWorkspaces(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListPlatformWorkspaces(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdatePlatformWorkspace operation middleware
+func (siw *ServerInterfaceWrapper) UpdatePlatformWorkspace(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdatePlatformWorkspace(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GrantCredits operation middleware
+func (siw *ServerInterfaceWrapper) GrantCredits(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GrantCredits(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // ListRepos operation middleware
 func (siw *ServerInterfaceWrapper) ListRepos(w http.ResponseWriter, r *http.Request) {
 
@@ -5388,6 +7325,136 @@ func (siw *ServerInterfaceWrapper) ListRepoBranches(w http.ResponseWriter, r *ht
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.ListRepoBranches(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetRepoBrief operation middleware
+func (siw *ServerInterfaceWrapper) GetRepoBrief(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id RepoID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRepoBrief(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// SaveRepoBrief operation middleware
+func (siw *ServerInterfaceWrapper) SaveRepoBrief(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id RepoID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SaveRepoBrief(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ApproveRepoBrief operation middleware
+func (siw *ServerInterfaceWrapper) ApproveRepoBrief(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id RepoID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ApproveRepoBrief(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DiscardRepoBriefDraft operation middleware
+func (siw *ServerInterfaceWrapper) DiscardRepoBriefDraft(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id RepoID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DiscardRepoBriefDraft(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// SurveyRepoBrief operation middleware
+func (siw *ServerInterfaceWrapper) SurveyRepoBrief(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id RepoID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SurveyRepoBrief(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -6272,6 +8339,32 @@ func (siw *ServerInterfaceWrapper) LearnFromTicket(w http.ResponseWriter, r *htt
 	handler.ServeHTTP(w, r)
 }
 
+// SetTicketMember operation middleware
+func (siw *ServerInterfaceWrapper) SetTicketMember(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "key" -------------
+	var key TicketKey
+
+	err = runtime.BindStyledParameterWithOptions("simple", "key", chi.URLParam(r, "key"), &key, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "key", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SetTicketMember(w, r, key)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // MarkTicketMerged operation middleware
 func (siw *ServerInterfaceWrapper) MarkTicketMerged(w http.ResponseWriter, r *http.Request) {
 
@@ -6533,6 +8626,32 @@ func (siw *ServerInterfaceWrapper) DismissRelation(w http.ResponseWriter, r *htt
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DismissRelation(w, r, key, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ReplayTicket operation middleware
+func (siw *ServerInterfaceWrapper) ReplayTicket(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "key" -------------
+	var key TicketKey
+
+	err = runtime.BindStyledParameterWithOptions("simple", "key", chi.URLParam(r, "key"), &key, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "key", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ReplayTicket(w, r, key)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -6807,6 +8926,336 @@ func (siw *ServerInterfaceWrapper) GetTicketSpend(w http.ResponseWriter, r *http
 	handler.ServeHTTP(w, r)
 }
 
+// DeleteWorkspace operation middleware
+func (siw *ServerInterfaceWrapper) DeleteWorkspace(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteWorkspace(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetWorkspace operation middleware
+func (siw *ServerInterfaceWrapper) GetWorkspace(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetWorkspace(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateWorkspace operation middleware
+func (siw *ServerInterfaceWrapper) UpdateWorkspace(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateWorkspace(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetBilling operation middleware
+func (siw *ServerInterfaceWrapper) GetBilling(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetBilling(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CheckoutCredits operation middleware
+func (siw *ServerInterfaceWrapper) CheckoutCredits(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CheckoutCredits(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// SetSlots operation middleware
+func (siw *ServerInterfaceWrapper) SetSlots(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SetSlots(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetWorkspaceClaude operation middleware
+func (siw *ServerInterfaceWrapper) GetWorkspaceClaude(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetWorkspaceClaude(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateWorkspaceClaude operation middleware
+func (siw *ServerInterfaceWrapper) UpdateWorkspaceClaude(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateWorkspaceClaude(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteWorkspaceClaudeConnection operation middleware
+func (siw *ServerInterfaceWrapper) DeleteWorkspaceClaudeConnection(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteWorkspaceClaudeConnection(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// SetWorkspaceClaudeConnection operation middleware
+func (siw *ServerInterfaceWrapper) SetWorkspaceClaudeConnection(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SetWorkspaceClaudeConnection(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListInvites operation middleware
+func (siw *ServerInterfaceWrapper) ListInvites(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListInvites(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateInvite operation middleware
+func (siw *ServerInterfaceWrapper) CreateInvite(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateInvite(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RevokeInvite operation middleware
+func (siw *ServerInterfaceWrapper) RevokeInvite(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RevokeInvite(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// LeaveWorkspace operation middleware
+func (siw *ServerInterfaceWrapper) LeaveWorkspace(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.LeaveWorkspace(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListMembers operation middleware
+func (siw *ServerInterfaceWrapper) ListMembers(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListMembers(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RemoveMember operation middleware
+func (siw *ServerInterfaceWrapper) RemoveMember(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "userId" -------------
+	var userId int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", chi.URLParam(r, "userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "userId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RemoveMember(w, r, userId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// SetMemberRole operation middleware
+func (siw *ServerInterfaceWrapper) SetMemberRole(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "userId" -------------
+	var userId int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", chi.URLParam(r, "userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "userId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SetMemberRole(w, r, userId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetQueue operation middleware
+func (siw *ServerInterfaceWrapper) GetQueue(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetQueue(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// TransferWorkspace operation middleware
+func (siw *ServerInterfaceWrapper) TransferWorkspace(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.TransferWorkspace(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListWorkspaces operation middleware
+func (siw *ServerInterfaceWrapper) ListWorkspaces(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListWorkspaces(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateWorkspace operation middleware
+func (siw *ServerInterfaceWrapper) CreateWorkspace(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateWorkspace(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 type UnescapedCookieParamError struct {
 	ParamName string
 	Err       error
@@ -6963,6 +9412,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Post(options.BaseURL+"/tickets/{key}/learn", wrapper.LearnFromTicket)
 	})
 	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/tickets/{key}/replay", wrapper.ReplayTicket)
+	})
+	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/tickets/{key}/review", wrapper.ReviewTicket)
 	})
 	r.Group(func(r chi.Router) {
@@ -7018,6 +9470,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Put(options.BaseURL+"/tickets/{key}/kind", wrapper.SetTicketKind)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/tickets/{key}/member", wrapper.SetTicketMember)
 	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/attachments", wrapper.UploadAttachment)
@@ -7179,10 +9634,28 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Get(options.BaseURL+"/analytics", wrapper.GetAnalytics)
 	})
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/eval/replays", wrapper.GetReplayReport)
+	})
+	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/repos/{id}/archive", wrapper.ArchiveRepo)
 	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/repos/{id}/unarchive", wrapper.UnarchiveRepo)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/repos/{id}/brief", wrapper.GetRepoBrief)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/repos/{id}/brief", wrapper.SaveRepoBrief)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/repos/{id}/brief/survey", wrapper.SurveyRepoBrief)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/repos/{id}/brief/approve", wrapper.ApproveRepoBrief)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/repos/{id}/brief/discard", wrapper.DiscardRepoBriefDraft)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/repos/{id}/local-branches", wrapper.ListRepoLocalBranches)
@@ -7205,6 +9678,135 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/repos/{id}/deploy", wrapper.DeployRepo)
 	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/auth/signup", wrapper.GetSignupInfo)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/auth/signup", wrapper.Register)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/auth/verify", wrapper.VerifyEmail)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/auth/password/forgot", wrapper.ForgotPassword)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/auth/password/reset", wrapper.ResetPassword)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/account/profile", wrapper.UpdateProfile)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/account/password", wrapper.ChangePassword)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/account/verify", wrapper.ResendVerification)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/account/totp/setup", wrapper.BeginTotp)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/account/totp/confirm", wrapper.ConfirmTotp)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/account/totp/disable", wrapper.DisableTotp)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/account/claude", wrapper.DeleteMyClaude)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/account/claude", wrapper.GetMyClaude)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/account/claude", wrapper.SetMyClaude)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/workspaces", wrapper.ListWorkspaces)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/workspaces", wrapper.CreateWorkspace)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/invites/{token}", wrapper.GetInvite)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/invites/{token}/accept", wrapper.AcceptInvite)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/workspace", wrapper.DeleteWorkspace)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/workspace", wrapper.GetWorkspace)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/workspace", wrapper.UpdateWorkspace)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/workspace/members", wrapper.ListMembers)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/workspace/members/{userId}", wrapper.RemoveMember)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/workspace/members/{userId}/role", wrapper.SetMemberRole)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/workspace/transfer", wrapper.TransferWorkspace)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/workspace/leave", wrapper.LeaveWorkspace)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/workspace/invites", wrapper.ListInvites)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/workspace/invites", wrapper.CreateInvite)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/workspace/invites/{id}", wrapper.RevokeInvite)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/workspace/queue", wrapper.GetQueue)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/workspace/claude", wrapper.GetWorkspaceClaude)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/workspace/claude", wrapper.UpdateWorkspaceClaude)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/workspace/claude/connection", wrapper.DeleteWorkspaceClaudeConnection)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/workspace/claude/connection", wrapper.SetWorkspaceClaudeConnection)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/workspace/billing", wrapper.GetBilling)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/workspace/billing/slots", wrapper.SetSlots)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/workspace/billing/checkout", wrapper.CheckoutCredits)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/platform/overview", wrapper.GetPlatformOverview)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/platform/workspaces", wrapper.ListPlatformWorkspaces)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/platform/workspaces/{id}", wrapper.UpdatePlatformWorkspace)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/platform/workspaces/{id}/credits", wrapper.GrantCredits)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/platform/users", wrapper.ListPlatformUsers)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/platform/users/{id}", wrapper.UpdatePlatformUser)
+	})
 
 	return r
 }
@@ -7214,319 +9816,442 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // const string: with thousands of chunks the chained `+` fold is several
 // times slower for the Go compiler than parsing a slice literal.
 var swaggerSpec = []string{
-	"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",
-	"/v8AAAD//w==",
+	"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",
+	"AAD//w==",
 }
 
 // decodeSpec returns the embedded OpenAPI spec as raw JSON bytes,

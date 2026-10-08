@@ -69,7 +69,7 @@ func (o *Orchestrator) Translate(ctx context.Context, key, lang string) ([]Trans
 		// One run per ticket and language at a time: a second request waits
 		// for the first. The run outlives a client that gives up, so its
 		// work is stored all the same.
-		_, err, _ := o.translating.Do(key+"\x00"+lang, func() (any, error) {
+		_, err, _ := o.translating.Do(runKey(domain.WorkspaceOf(ctx), key)+"\x00"+lang, func() (any, error) {
 			return nil, o.translateMissing(context.WithoutCancel(ctx), key, lang, missing)
 		})
 		if err != nil {
@@ -121,9 +121,18 @@ func ticketTexts(v TicketView) []string {
 		}
 	}
 	add(v.Ticket.Title, v.Ticket.Description)
-	if v.Analysis != nil {
-		add(v.Analysis.Summary)
-		add(v.Analysis.Plan...)
+	if a := v.Analysis; a != nil {
+		add(a.Summary)
+		add(a.Plan...)
+		for _, x := range a.Approaches {
+			add(x.Title, x.Sketch, x.Fit, x.Why)
+			add(x.Pros...)
+			add(x.Cons...)
+		}
+		add(a.OutOfScope...)
+		if n := a.ShipPlan(); n != nil {
+			add(n.Migrations, n.Compatibility, n.Rollout, n.Rollback)
+		}
 	}
 	for _, q := range v.Questions {
 		add(q.Text)
@@ -134,6 +143,7 @@ func ticketTexts(v TicketView) []string {
 		_ = json.Unmarshal(v.Result.Summary, &sum)
 		add(sum.Summary, v.Result.Report)
 		add(sum.Notes...)
+		add(sum.Deviations...)
 	}
 	if v.Review != nil {
 		add(v.Review.Summary)

@@ -25,16 +25,18 @@ func NewAgent(db *pgxpool.Pool) *Agent { return &Agent{db: db} }
 
 const ticketCols = `id, key, source, repo_id, title, description, priority, state, resume_state,
 	revision, turns, models, after_approve, branch, head_sha, pr_number, pr_url, feedback, held, ask_first, merged_at, assignees, learn_state, review_state, kind, kind_auto, post_report, COALESCE(parent_key, ''),
-	COALESCE(follow_up_of, ''), suggest_follow_ups, preview_state, preview_compare, feedback_shots, feedback_files, created_at, updated_at`
+	COALESCE(follow_up_of, ''), suggest_follow_ups, preview_state, preview_compare, feedback_shots, feedback_files, created_at, updated_at,
+	workspace_id, member_id, created_by, wait_reason, queued_at, wait_message, self_fixes, quiet_review, replay_of, base_sha`
 
 func scanTicket(row pgx.Row) (domain.Ticket, error) {
 	var t domain.Ticket
-	var source, state, resume, kind string
+	var source, state, resume, kind, wait string
 	var models, shots, files []byte
 	err := row.Scan(&t.ID, &t.Key, &source, &t.RepoID, &t.Title, &t.Description, &t.Priority, &state, &resume,
 		&t.Revision, &t.Turns, &models, &t.AfterApprove, &t.Branch, &t.HeadSHA, &t.PRNumber, &t.PRURL, &t.Feedback,
 		&t.Held, &t.AskFirst, &t.MergedAt, &t.Assignees, &t.LearnState, &t.ReviewState, &kind, &t.KindAuto, &t.PostReport, &t.ParentKey,
-		&t.FollowUpOf, &t.SuggestFollowUps, &t.PreviewState, &t.PreviewCompare, &shots, &files, &t.CreatedAt, &t.UpdatedAt)
+		&t.FollowUpOf, &t.SuggestFollowUps, &t.PreviewState, &t.PreviewCompare, &shots, &files, &t.CreatedAt, &t.UpdatedAt,
+		&t.WorkspaceID, &t.MemberID, &t.CreatedBy, &wait, &t.QueuedAt, &t.WaitMessage, &t.SelfFixes, &t.QuietReview, &t.ReplayOf, &t.BaseSHA)
 	if err != nil {
 		return t, notFound(err)
 	}
@@ -46,6 +48,7 @@ func scanTicket(row pgx.Row) (domain.Ticket, error) {
 	}
 	t.Source, t.State, t.ResumeState = domain.TicketSource(source), domain.TicketState(state), domain.TicketState(resume)
 	t.Kind = domain.TicketKind(kind)
+	t.WaitReason = domain.WaitReason(wait)
 	if len(models) > 0 {
 		_ = json.Unmarshal(models, &t.Models)
 	}
@@ -100,13 +103,21 @@ func (s *Agent) CreateTicket(ctx context.Context, t domain.Ticket, ev domain.Eve
 }
 
 func insertTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket, models []byte) (domain.Ticket, error) {
+	if a, ok := domain.ActorOf(ctx); ok {
+		if t.CreatedBy == nil {
+			t.CreatedBy = &a.UserID
+		}
+		if t.MemberID == nil {
+			t.MemberID = &a.UserID
+		}
+	}
 	out, err := scanTicket(tx.QueryRow(ctx, `INSERT INTO tickets
 		(key, source, repo_id, title, description, priority, state, resume_state, models, after_approve, held, ask_first, kind, kind_auto,
-		 parent_key, follow_up_of, suggest_follow_ups)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NULLIF($15, ''), NULLIF($16, ''), $17) RETURNING `+ticketCols,
+		 parent_key, follow_up_of, suggest_follow_ups, member_id, created_by, replay_of, base_sha)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NULLIF($15, ''), NULLIF($16, ''), $17, $18, $19, $20, $21) RETURNING `+ticketCols,
 		t.Key, string(t.Source), t.RepoID, t.Title, t.Description, t.Priority, string(t.State),
 		string(t.ResumeState), models, t.AfterApprove, t.Held, t.AskFirst, string(kindOr(t.Kind)), t.KindAuto, t.ParentKey,
-		t.FollowUpOf, t.SuggestFollowUps))
+		t.FollowUpOf, t.SuggestFollowUps, t.MemberID, t.CreatedBy, t.ReplayOf, t.BaseSHA))
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 		return out, domain.ErrConflict
@@ -179,12 +190,17 @@ func saveTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket) (domain.Ticket,
 		revision = $8, turns = $9, models = $10, after_approve = $11, branch = $12, head_sha = $13,
 		pr_number = $14, pr_url = $15, feedback = $16, held = $17, ask_first = $18, merged_at = $19, assignees = $20, learn_state = $21,
 		kind = $22, kind_auto = $23, post_report = $24, review_state = $25, suggest_follow_ups = $26,
-		preview_state = $27, preview_compare = $28, feedback_shots = $29, feedback_files = $30, updated_at = now()
+		preview_state = $27, preview_compare = $28, feedback_shots = $29, feedback_files = $30, member_id = $31,
+		self_fixes = $32, quiet_review = $33,
+		wait_reason = CASE WHEN $6 IN ('new', 'coding', 'pushing') THEN wait_reason ELSE '' END,
+		wait_message = CASE WHEN $6 IN ('new', 'coding', 'pushing') THEN wait_message ELSE '' END,
+		queued_at = CASE WHEN $6 IN ('new', 'coding', 'pushing') THEN queued_at END,
+		updated_at = now()
 		WHERE id = $1 RETURNING `+ticketCols,
 		t.ID, t.RepoID, t.Title, t.Description, t.Priority, string(t.State), string(t.ResumeState),
 		t.Revision, t.Turns, models, t.AfterApprove, t.Branch, t.HeadSHA, t.PRNumber, t.PRURL, t.Feedback, t.Held, t.AskFirst, t.MergedAt, nonNilSlice(t.Assignees), t.LearnState,
 		string(kindOr(t.Kind)), t.KindAuto, t.PostReport, t.ReviewState, t.SuggestFollowUps,
-		t.PreviewState, t.PreviewCompare, shots, files))
+		t.PreviewState, t.PreviewCompare, shots, files, t.MemberID, t.SelfFixes, t.QuietReview))
 }
 
 func kindOr(k domain.TicketKind) domain.TicketKind {
@@ -255,39 +271,8 @@ func (s *Agent) ClaimNext(ctx context.Context) (domain.Ticket, domain.Run, bool,
 		if err != nil {
 			return err
 		}
-		stage := map[domain.TicketState]domain.Stage{
-			domain.StateNew: domain.StageAnalyze, domain.StateCoding: domain.StageCode, domain.StatePushing: domain.StagePush,
-			domain.StateDone: domain.StageLearn, domain.StateWaitingForReview: domain.StageReview,
-		}[t.State]
-		if preview {
-			stage = domain.StagePreview
-		}
-		if r, err = scanRun(tx.QueryRow(ctx, `INSERT INTO runs (ticket_id, stage, model) VALUES ($1, $2, '') RETURNING `+runCols,
-			t.ID, string(stage))); err != nil {
-			return err
-		}
-		if stage == domain.StageReview {
-			t.ReviewState = domain.ReviewRunning
-			t, err = saveTicket(ctx, tx, t)
-			return err
-		}
-		if stage == domain.StagePreview {
-			t.PreviewState = domain.PreviewRunning
-			t, err = saveTicket(ctx, tx, t)
-			return err
-		}
-		if t.State == domain.StateNew {
-			from := t.State
-			t.State = domain.StateAnalyzing
-			if t, err = saveTicket(ctx, tx, t); err != nil {
-				return err
-			}
-			return insertEvent(ctx, tx, domain.Event{
-				TicketKey: t.Key, RunID: &r.ID, Type: domain.EventStateChanged, Step: string(stage),
-				Message: "picked up for analysis", Data: map[string]any{"from": string(from), "to": string(t.State)},
-			})
-		}
-		return nil
+		t, r, err = startRun(ctx, tx, t, preview)
+		return err
 	})
 	if errors.Is(err, domain.ErrNotFound) {
 		return t, r, false, nil
@@ -295,10 +280,139 @@ func (s *Agent) ClaimNext(ctx context.Context) (domain.Ticket, domain.Run, bool,
 	return t, r, err == nil, err
 }
 
+// startRun starts the run a claimed (locked) ticket needs: its main stage,
+// or the review, preview or learn side run.
+func startRun(ctx context.Context, tx pgx.Tx, t domain.Ticket, preview bool) (domain.Ticket, domain.Run, error) {
+	var r domain.Run
+	stage := map[domain.TicketState]domain.Stage{
+		domain.StateNew: domain.StageAnalyze, domain.StateCoding: domain.StageCode, domain.StatePushing: domain.StagePush,
+		domain.StateDone: domain.StageLearn, domain.StateWaitingForReview: domain.StageReview,
+	}[t.State]
+	if preview {
+		stage = domain.StagePreview
+	}
+	var err error
+	if r, err = scanRun(tx.QueryRow(ctx, `INSERT INTO runs (ticket_id, stage, model) VALUES ($1, $2, '') RETURNING `+runCols,
+		t.ID, string(stage))); err != nil {
+		return t, r, err
+	}
+	// It no longer waits for a worker.
+	if _, err := tx.Exec(ctx, `UPDATE tickets SET wait_reason = '', wait_message = '', queued_at = NULL WHERE id = $1`, t.ID); err != nil {
+		return t, r, err
+	}
+	t.WaitReason, t.WaitMessage, t.QueuedAt = domain.WaitNone, "", nil
+	switch {
+	case stage == domain.StageReview:
+		t.ReviewState = domain.ReviewRunning
+		t, err = saveTicket(ctx, tx, t)
+	case stage == domain.StagePreview:
+		t.PreviewState = domain.PreviewRunning
+		t, err = saveTicket(ctx, tx, t)
+	case t.State == domain.StateNew:
+		from := t.State
+		t.State = domain.StateAnalyzing
+		if t, err = saveTicket(ctx, tx, t); err != nil {
+			return t, r, err
+		}
+		err = insertEvent(ctx, tx, domain.Event{
+			WorkspaceID: t.WorkspaceID, TicketKey: t.Key, RunID: &r.ID, Type: domain.EventStateChanged, Step: string(stage),
+			Message: "picked up for analysis", Data: map[string]any{"from": string(from), "to": string(t.State)},
+		})
+	}
+	return t, r, err
+}
+
+// queueClassSQL says which run a ticket waits for: main (its next
+// stage), review, preview or learn; NULL when none.
+const queueClassSQL = `(CASE
+	WHEN t.state IN ('new', 'coding', 'pushing') THEN 'main'
+	WHEN t.state = 'waiting_for_review' AND t.review_state = 'pending' THEN 'review'
+	WHEN t.state = 'waiting_for_review' AND t.preview_state = 'pending' THEN 'preview'
+	WHEN t.state = 'done' AND t.learn_state = 'pending' THEN 'learn' END)`
+
+// QueueItems returns every ticket that waits for a run, in every workspace
+// the context sees, with what the scheduler needs to pick and explain.
+func (s *Agent) QueueItems(ctx context.Context) ([]orchestrator.QueueItem, error) {
+	rows, err := s.db.Query(ctx, `SELECT t.id, t.workspace_id, t.key, t.state, `+queueClassSQL+`, t.held, `+waitsSQL+`,
+			`+priorityRankSQL+`, `+unblocksSQL+`, t.updated_at, t.queued_at, t.wait_reason, t.member_id, t.repo_id,
+			COALESCE(r.memory_mb, 0), t.kind, t.wait_message
+		FROM tickets t LEFT JOIN repositories r ON r.id = t.repo_id
+		WHERE `+queueClassSQL+` IS NOT NULL
+		  AND NOT EXISTS (SELECT 1 FROM runs x WHERE x.ticket_id = t.id AND x.finished_at IS NULL)`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []orchestrator.QueueItem
+	for rows.Next() {
+		var q orchestrator.QueueItem
+		var state, class, wait, kind string
+		if err := rows.Scan(&q.TicketID, &q.WorkspaceID, &q.Key, &state, &class, &q.Held, &q.Blocked, &q.Priority, &q.Unblocks,
+			&q.UpdatedAt, &q.QueuedAt, &wait, &q.MemberID, &q.RepoID, &q.MemoryMB, &kind, &q.WaitMessage); err != nil {
+			return nil, err
+		}
+		q.State, q.Class, q.WaitReason, q.Kind = domain.TicketState(state), orchestrator.QueueClass(class), domain.WaitReason(wait), domain.TicketKind(kind)
+		out = append(out, q)
+	}
+	return out, rows.Err()
+}
+
+// ClaimTicket starts the run of class one ticket waits for, when it still
+// waits for it and nothing else claimed it; ok is false otherwise.
+func (s *Agent) ClaimTicket(ctx context.Context, ticketID int64, class orchestrator.QueueClass) (domain.Ticket, domain.Run, bool, error) {
+	var t domain.Ticket
+	var r domain.Run
+	err := pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
+		var err error
+		t, err = scanTicket(tx.QueryRow(ctx, `SELECT `+ticketCols+` FROM tickets t
+			WHERE t.id = $1 AND `+queueClassSQL+` = $2
+			  AND ($2 <> 'main' OR (NOT t.held AND NOT `+waitsSQL+`))
+			  AND NOT EXISTS (SELECT 1 FROM runs x WHERE x.ticket_id = t.id AND x.finished_at IS NULL)
+			FOR UPDATE OF t SKIP LOCKED`, ticketID, string(class)))
+		if err != nil {
+			return err
+		}
+		t, r, err = startRun(ctx, tx, t, class == orchestrator.ClassPreview)
+		return err
+	})
+	if errors.Is(err, domain.ErrNotFound) {
+		return t, r, false, nil
+	}
+	return t, r, err == nil, err
+}
+
+// SetWaitReasons records why tickets wait (only the ones that changed are
+// passed), with an event on each so the reason shows in the history.
+func (s *Agent) SetWaitReasons(ctx context.Context, changes []orchestrator.WaitChange) error {
+	if len(changes) == 0 {
+		return nil
+	}
+	return pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
+		for _, c := range changes {
+			tag, err := tx.Exec(ctx, `UPDATE tickets SET wait_reason = $2, wait_message = $3,
+				queued_at = CASE WHEN $2 = '' THEN NULL ELSE COALESCE(queued_at, now()) END
+				WHERE id = $1 AND state IN ('new', 'coding', 'pushing') AND (wait_reason <> $2 OR wait_message <> $3)`,
+				c.TicketID, string(c.Reason), c.Message)
+			if err != nil {
+				return err
+			}
+			if tag.RowsAffected() == 0 || c.Message == "" || !c.Announce {
+				continue
+			}
+			if err := insertEvent(ctx, tx, domain.Event{WorkspaceID: c.WorkspaceID, TicketKey: c.Key, Type: domain.EventQueued,
+				Message: c.Message, Data: map[string]any{"reason": string(c.Reason)}}); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
 // FinishRun records how a run ended.
 func (s *Agent) FinishRun(ctx context.Context, r domain.Run) error {
-	_, err := s.db.Exec(ctx, `UPDATE runs SET session_id = $2, container_id = $3, finished_at = $4, turns = $5, exit_reason = $6, model = $7 WHERE id = $1`,
-		r.ID, r.SessionID, r.ContainerID, r.FinishedAt, r.Turns, r.ExitReason, r.Model)
+	_, err := s.db.Exec(ctx, `UPDATE runs SET session_id = $2, container_id = $3, finished_at = $4, turns = $5, exit_reason = $6, model = $7,
+		prompt_version = $8, fix_attempts = $9 WHERE id = $1`,
+		r.ID, r.SessionID, r.ContainerID, r.FinishedAt, r.Turns, r.ExitReason, r.Model, r.PromptVersion, r.FixAttempts)
 	return err
 }
 
@@ -430,9 +544,13 @@ func (s *Agent) SaveResult(ctx context.Context, r domain.Result) error {
 	if r.Files == nil {
 		files = []byte("[]")
 	}
-	_, err := s.db.Exec(ctx, `INSERT INTO results (run_id, summary, tests, lint, files, report) VALUES ($1, $2, $3, $4, $5, $6)
-		ON CONFLICT (run_id) DO UPDATE SET summary = $2, tests = $3, lint = $4, files = $5, report = $6`,
-		r.RunID, jsonOr(r.Summary, "{}"), jsonOr(r.Tests, "{}"), r.Lint, files, r.Report)
+	flags, _ := json.Marshal(r.RedFlags)
+	if r.RedFlags == nil {
+		flags = []byte("[]")
+	}
+	_, err := s.db.Exec(ctx, `INSERT INTO results (run_id, summary, tests, lint, files, report, red_flags) VALUES ($1, $2, $3, $4, $5, $6, $7)
+		ON CONFLICT (run_id) DO UPDATE SET summary = $2, tests = $3, lint = $4, files = $5, report = $6, red_flags = $7`,
+		r.RunID, jsonOr(r.Summary, "{}"), jsonOr(r.Tests, "{}"), r.Lint, files, r.Report, flags)
 	return err
 }
 
@@ -446,15 +564,16 @@ func jsonOr(b json.RawMessage, def string) []byte {
 // LatestResult returns the newest result of a stage for a ticket.
 func (s *Agent) LatestResult(ctx context.Context, ticketID int64, stage domain.Stage) (domain.Result, error) {
 	var r domain.Result
-	var files []byte
-	err := s.db.QueryRow(ctx, `SELECT res.id, res.run_id, res.summary, res.tests, res.lint, res.files, res.report, res.created_at
+	var files, flags []byte
+	err := s.db.QueryRow(ctx, `SELECT res.id, res.run_id, res.summary, res.tests, res.lint, res.files, res.report, res.red_flags, res.created_at
 		FROM results res JOIN runs ON runs.id = res.run_id
 		WHERE runs.ticket_id = $1 AND runs.stage = $2 ORDER BY res.created_at DESC LIMIT 1`, ticketID, string(stage)).
-		Scan(&r.ID, &r.RunID, &r.Summary, &r.Tests, &r.Lint, &files, &r.Report, &r.CreatedAt)
+		Scan(&r.ID, &r.RunID, &r.Summary, &r.Tests, &r.Lint, &files, &r.Report, &flags, &r.CreatedAt)
 	if err != nil {
 		return r, notFound(err)
 	}
 	_ = json.Unmarshal(files, &r.Files)
+	_ = json.Unmarshal(flags, &r.RedFlags)
 	return r, nil
 }
 
@@ -482,9 +601,19 @@ func insertEvent(ctx context.Context, db execer, ev domain.Event) error {
 	if ev.TicketKey != "" {
 		key = &ev.TicketKey
 	}
-	_, err = db.Exec(ctx, `INSERT INTO events (ticket_key, run_id, step, type, level, origin, message, data, duration_ms)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-		key, ev.RunID, ev.Step, ev.Type, string(ev.Level), string(ev.Origin), ev.Message, data, ev.DurationMS)
+	var user *int64
+	if ev.UserID > 0 {
+		user = &ev.UserID
+	} else if a, ok := domain.ActorOf(ctx); ok {
+		user = &a.UserID
+	}
+	var ws *int64
+	if ev.WorkspaceID > 0 {
+		ws = &ev.WorkspaceID
+	}
+	_, err = db.Exec(ctx, `INSERT INTO events (ticket_key, run_id, step, type, level, origin, message, data, duration_ms, user_id, workspace_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, COALESCE($11, agnts_ws()))`,
+		key, ev.RunID, ev.Step, ev.Type, string(ev.Level), string(ev.Origin), ev.Message, data, ev.DurationMS, user, ws)
 	return err
 }
 
@@ -494,31 +623,18 @@ func (s *Agent) Events(ctx context.Context, f orchestrator.EventFilter) ([]domai
 	if limit <= 0 || limit > 1000 {
 		limit = 500
 	}
-	rows, err := s.db.Query(ctx, `SELECT id, COALESCE(ticket_key, ''), run_id, step, type, level, origin, message, data, duration_ms, created_at
-		FROM events WHERE ($1 = '' OR ticket_key = $1) AND id > $2 ORDER BY id LIMIT $3`, f.TicketKey, f.AfterID, limit)
+	rows, err := s.db.Query(ctx, `SELECT `+eventCols+` FROM `+eventFrom+`
+		WHERE ($1 = '' OR e.ticket_key = $1) AND e.id > $2 ORDER BY e.id LIMIT $3`, f.TicketKey, f.AfterID, limit)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var out []domain.Event
-	for rows.Next() {
-		var e domain.Event
-		var level, origin string
-		var data []byte
-		if err := rows.Scan(&e.ID, &e.TicketKey, &e.RunID, &e.Step, &e.Type, &level, &origin, &e.Message, &data, &e.DurationMS, &e.CreatedAt); err != nil {
-			return nil, err
-		}
-		e.Level, e.Origin = domain.Level(level), domain.Origin(origin)
-		_ = json.Unmarshal(data, &e.Data)
-		out = append(out, e)
-	}
-	return out, rows.Err()
+	return scanEvents(rows)
 }
 
 const repoCols = `id, name, kind, provider, clone_url, default_branch, stack, build_cmd, lint_cmd, test_cmd, branch_prefix, claude_md, jira_project, task_prefix, claude_md_status, deploy_workflow, archived_at,
 	preview_cmd, preview_port, preview_ready_path, preview_routes, preview_ui_paths, preview_login, preview_env IS NOT NULL, preview_env_names,
 	toolchains, toolchains_override, toolchains_detected_at, toolchain_notes, runner_image, memory_mb, build_env IS NOT NULL, build_env_names,
-	plane_project`
+	plane_project, workspace_id`
 
 func scanRepo(row pgx.Row) (domain.Repository, error) {
 	var r domain.Repository
@@ -527,7 +643,7 @@ func scanRepo(row pgx.Row) (domain.Repository, error) {
 		&r.BuildCmd, &r.LintCmd, &r.TestCmd, &r.BranchPrefix, &r.ClaudeMD, &r.JiraProject, &r.TaskPrefix, &r.ClaudeMDState, &r.DeployWorkflow, &r.ArchivedAt,
 		&r.Preview.Command, &r.Preview.Port, &r.Preview.ReadyPath, &r.Preview.Routes, &r.Preview.UIPaths, &r.Preview.Login, &r.Preview.EnvSet, &r.Preview.EnvNames,
 		&tcs, &r.ToolchainsOverride, &r.ToolchainsDetectedAt, &r.ToolchainNotes, &r.RunnerImage, &r.MemoryMB, &r.BuildEnvSet, &r.BuildEnvNames,
-		&r.PlaneProject)
+		&r.PlaneProject, &r.WorkspaceID)
 	if err == nil {
 		_ = json.Unmarshal(tcs, &r.Toolchains)
 	}
@@ -594,7 +710,7 @@ func (s *Agent) SaveRepository(ctx context.Context, r domain.Repository) (domain
 		 preview_cmd, preview_port, preview_ready_path, preview_routes, preview_ui_paths, preview_login,
 		 toolchains, toolchains_override, runner_image, memory_mb, plane_project)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)
-		ON CONFLICT (name) DO UPDATE SET kind = $2, provider = $3, clone_url = $4, default_branch = $5, stack = $6,
+		ON CONFLICT (workspace_id, name) DO UPDATE SET kind = $2, provider = $3, clone_url = $4, default_branch = $5, stack = $6,
 			build_cmd = $7, lint_cmd = $8, test_cmd = $9, branch_prefix = $10, claude_md = $11, jira_project = $12,
 			task_prefix = $13, deploy_workflow = $14,
 			toolchains = CASE WHEN $22 OR $21::jsonb <> '[]'::jsonb THEN $21 ELSE repositories.toolchains END,
@@ -673,8 +789,12 @@ func (s *Agent) SetClaudeMDState(ctx context.Context, id int64, state string) er
 func (s *Agent) NextTaskNumber(ctx context.Context, repoID *int64) (int, error) {
 	var n int
 	if repoID == nil {
-		err := s.db.QueryRow(ctx, `SELECT nextval('task_seq')`).Scan(&n)
-		return n, err
+		ws, err := domain.MustWorkspace(ctx)
+		if err != nil {
+			return 0, err
+		}
+		err = s.db.QueryRow(ctx, `UPDATE workspaces SET task_seq = task_seq + 1 WHERE id = $1 RETURNING task_seq`, ws).Scan(&n)
+		return n, notFound(err)
 	}
 	err := s.db.QueryRow(ctx, `UPDATE repositories SET task_seq = task_seq + 1 WHERE id = $1 RETURNING task_seq`, *repoID).Scan(&n)
 	return n, notFound(err)
@@ -768,4 +888,10 @@ func (s *Agent) UnmergedPRs(ctx context.Context, limit int) ([]domain.Ticket, er
 		out = append(out, t)
 	}
 	return out, rows.Err()
+}
+
+// SetRunAccount records which Claude account a run used.
+func (s *Agent) SetRunAccount(ctx context.Context, runID int64, connection *int64, credits bool) error {
+	_, err := s.db.Exec(ctx, `UPDATE runs SET claude_connection_id = $2, on_credits = $3 WHERE id = $1`, runID, connection, credits)
+	return err
 }

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app_router.dart';
 import 'core/api.dart';
+import 'core/data.dart';
 import 'core/live.dart';
 import 'core/prefs.dart';
 import 'core/push.dart';
@@ -16,7 +17,7 @@ const appVersion = '0.1.0';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final container = ProviderContainer();
-  await Push.init((route) => container.read(routerProvider).push(route));
+  await Push.init((route, ws) => openFromPush(container, route, ws));
   runApp(UncontrolledProviderScope(container: container, child: const AgntsApp()));
 }
 
@@ -33,15 +34,28 @@ class _AgntsAppState extends ConsumerState<AgntsApp> {
     super.initState();
     // While signed in: follow the live stream and register for push. Set up
     // once here: Riverpod 3 cannot fire a listener immediately from build.
-    ref.listenManual(apiProvider, (_, api) {
+    ref.listenManual(apiProvider, (prev, api) {
       final live = ref.read(liveProvider);
       if (api == null) {
         live.stop();
         return;
       }
-      live.start();
-      Push.register(api, appVersion);
+      if (prev == null) {
+        live.start();
+        Push.register(api, appVersion);
+      } else {
+        // Another workspace (or a new token): its own event stream.
+        live.restart();
+      }
     }, fireImmediately: true);
+    // A workspace the person no longer belongs to: fall back to the server's choice.
+    ref.listenManual(meProvider, (_, me) {
+      final slug = ref.read(sessionProvider).value?.workspace;
+      final ws = me.value?.workspaces;
+      if (slug != null && ws != null && !ws.any((w) => w.slug == slug)) {
+        ref.read(sessionProvider.notifier).setWorkspace(null);
+      }
+    });
   }
 
   @override
@@ -64,6 +78,23 @@ class _AgntsAppState extends ConsumerState<AgntsApp> {
       routerConfig: ref.watch(routerProvider),
     );
   }
+}
+
+/// Opens a notification's screen, first switching to the workspace its
+/// ticket is in.
+Future<void> openFromPush(ProviderContainer container, String route, int ws) async {
+  if (ws > 0 && container.read(sessionProvider).value != null) {
+    try {
+      final me = await container.read(meProvider.future);
+      final w = me.workspaces?.where((w) => w.id == ws).firstOrNull;
+      if (w != null && w.slug != container.read(currentWorkspaceProvider)?.slug) {
+        await container.read(sessionProvider.notifier).setWorkspace(w.slug);
+      }
+    } catch (_) {
+      // Offline or signed out: open the link anyway.
+    }
+  }
+  container.read(routerProvider).push(route);
 }
 
 /// Signs out on the server and locally, and stops push to this phone.

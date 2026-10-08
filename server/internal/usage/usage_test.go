@@ -19,11 +19,14 @@ func (m *memStore) Insert(_ context.Context, s postgres.UsageSnapshot) error {
 	return nil
 }
 
-func (m *memStore) Latest(context.Context) (postgres.UsageSnapshot, bool, error) {
-	if len(m.snaps) == 0 {
-		return postgres.UsageSnapshot{}, false, nil
+func (m *memStore) Latest(_ context.Context, conn *int64) (postgres.UsageSnapshot, bool, error) {
+	for i := len(m.snaps) - 1; i >= 0; i-- {
+		s := m.snaps[i]
+		if (s.ConnectionID == nil) == (conn == nil) && (conn == nil || *s.ConnectionID == *conn) {
+			return s, true, nil
+		}
 	}
-	return m.snaps[len(m.snaps)-1], true, nil
+	return postgres.UsageSnapshot{}, false, nil
 }
 
 type memEvents struct{ n int }

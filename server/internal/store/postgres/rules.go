@@ -21,20 +21,22 @@ var _ orchestrator.Rules = (*Rules)(nil)
 func NewRules(db *pgxpool.Pool) *Rules { return &Rules{db: db} }
 
 const ruleCols = `x.id, x.repo_id, coalesce(r.name, ''), x.title, x.body, x.enabled, x.status, x.interpretation,
-	x.clarified, x.questions, x.rounds, x.revision, x.error, x.analyzed_at, x.created_at, x.updated_at`
+	x.clarified, x.questions, x.rounds, x.revision, x.error, x.analyzed_at, x.created_at, x.updated_at, x.workspace_id,
+	x.kind, x.source_ticket, x.reason`
 
 const ruleFrom = ` FROM rules x LEFT JOIN repositories r ON r.id = x.repo_id`
 
 func scanRule(row pgx.Row) (domain.Rule, error) {
 	var x domain.Rule
-	var status string
+	var status, kind string
 	var qs []byte
 	err := row.Scan(&x.ID, &x.RepoID, &x.RepoName, &x.Title, &x.Body, &x.Enabled, &status, &x.Interpretation,
-		&x.Clarified, &qs, &x.Rounds, &x.Revision, &x.Error, &x.AnalyzedAt, &x.CreatedAt, &x.UpdatedAt)
+		&x.Clarified, &qs, &x.Rounds, &x.Revision, &x.Error, &x.AnalyzedAt, &x.CreatedAt, &x.UpdatedAt, &x.WorkspaceID,
+		&kind, &x.SourceTicket, &x.Reason)
 	if err != nil {
 		return x, notFound(err)
 	}
-	x.Status = domain.RuleStatus(status)
+	x.Status, x.Kind = domain.RuleStatus(status), domain.RuleKind(kind)
 	_ = json.Unmarshal(qs, &x.Questions)
 	return x, nil
 }
@@ -56,9 +58,17 @@ func (s *Rules) query(ctx context.Context, sql string, args ...any) ([]domain.Ru
 	return out, rows.Err()
 }
 
-// ListRules returns every rule: global ones first, then by repository.
+// ListRules returns every rule but dismissed suggestions: global ones
+// first, then by repository.
 func (s *Rules) ListRules(ctx context.Context) ([]domain.Rule, error) {
-	return s.query(ctx, `SELECT `+ruleCols+ruleFrom+` ORDER BY x.repo_id NULLS FIRST, r.name, x.id`)
+	return s.query(ctx, `SELECT `+ruleCols+ruleFrom+` WHERE x.status <> 'dismissed' ORDER BY x.repo_id NULLS FIRST, r.name, x.id`)
+}
+
+// KnownRules returns every rule of the workspace that tickets in repoID
+// could get (nil: global ones only), in any status, dismissed suggestions
+// included: what a reflect run must not suggest again.
+func (s *Rules) KnownRules(ctx context.Context, repoID *int64) ([]domain.Rule, error) {
+	return s.query(ctx, `SELECT `+ruleCols+ruleFrom+` WHERE x.repo_id IS NULL OR x.repo_id = $1 ORDER BY x.repo_id NULLS FIRST, x.id`, repoID)
 }
 
 // ActiveRules returns the rules tickets in repoID follow: enabled, reviewed,
@@ -79,8 +89,13 @@ func (s *Rules) CreateRule(ctx context.Context, x domain.Rule, ev func(domain.Ru
 	var out domain.Rule
 	err := pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
 		var id int64
-		if err := tx.QueryRow(ctx, `INSERT INTO rules (repo_id, title, body, enabled, status) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-			x.RepoID, x.Title, x.Body, x.Enabled, string(x.Status)).Scan(&id); err != nil {
+		kind := x.Kind
+		if !kind.Valid() {
+			kind = domain.KindInstruction
+		}
+		if err := tx.QueryRow(ctx, `INSERT INTO rules (repo_id, title, body, enabled, status, kind, source_ticket, reason)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+			x.RepoID, x.Title, x.Body, x.Enabled, string(x.Status), string(kind), x.SourceTicket, x.Reason).Scan(&id); err != nil {
 			return err
 		}
 		var err error
@@ -108,9 +123,9 @@ func (s *Rules) UpdateRule(ctx context.Context, id int64, mut func(*domain.Rule)
 		qs, _ := json.Marshal(nonNil(x.Questions))
 		if _, err := tx.Exec(ctx, `UPDATE rules SET repo_id = $2, title = $3, body = $4, enabled = $5, status = $6,
 			interpretation = $7, clarified = $8, questions = $9, rounds = $10, revision = $11, error = $12,
-			analyzed_at = $13, updated_at = now() WHERE id = $1`,
+			analyzed_at = $13, kind = $14, updated_at = now() WHERE id = $1`,
 			x.ID, x.RepoID, x.Title, x.Body, x.Enabled, string(x.Status), x.Interpretation, x.Clarified, qs,
-			x.Rounds, x.Revision, x.Error, x.AnalyzedAt); err != nil {
+			x.Rounds, x.Revision, x.Error, x.AnalyzedAt, string(x.Kind)); err != nil {
 			return err
 		}
 		if out, err = scanRule(tx.QueryRow(ctx, `SELECT `+ruleCols+ruleFrom+` WHERE x.id = $1`, id)); err != nil {
@@ -156,6 +171,16 @@ func (s *Rules) ClaimRule(ctx context.Context) (domain.Rule, bool, error) {
 	}
 	x, err := s.Rule(ctx, id)
 	return x, err == nil, err
+}
+
+// PendingRuleWorkspaces returns the workspaces with rules waiting for a
+// review (a system context sees them all).
+func (s *Rules) PendingRuleWorkspaces(ctx context.Context) ([]int64, error) {
+	rows, err := s.db.Query(ctx, `SELECT DISTINCT workspace_id FROM rules WHERE status = 'pending' ORDER BY 1`)
+	if err != nil {
+		return nil, err
+	}
+	return pgx.CollectRows(rows, pgx.RowTo[int64])
 }
 
 // RecoverRules requeues reviews a crash left running.

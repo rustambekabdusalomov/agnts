@@ -2,12 +2,13 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { api, HttpError, unwrap } from '../../api/client'
+import { api, HttpError, unwrap, apiPath } from '../../api/client'
 import {
   ISSUE_TONE, MODEL_NAME, pairShots, PREVIEW_STATUS_TONE, shotFeedback,
   type PreviewShot, type ShotPair, type ShotRef, type Ticket, type TicketPreview,
 } from '../../api/types'
 import { useUi } from '../../stores/ui'
+import CheckBox from '../form/CheckBox.vue'
 import HiIcon from '../ui/HiIcon.vue'
 import { useTr } from '../../composables/useTranslation'
 
@@ -46,7 +47,7 @@ watch(hasBefore, (v) => {
   if (!v) mode.value = 'after'
 })
 
-const src = (s: PreviewShot) => `/api${s.url}`
+const src = (s: PreviewShot) => apiPath(s.url)
 const refOf = (s: PreviewShot): ShotRef => ({ runId: current.value?.runId ?? 0, shotId: s.id })
 const attached = (s: PreviewShot) => props.attached.some((r) => r.runId === current.value?.runId && r.shotId === s.id)
 // The shot a pair shows in the current mode; side by side and the slider
@@ -164,7 +165,7 @@ watch(zoomed, async (s) => {
     </template>
 
     <div v-if="!busy" class="cr-actions pv-run">
-      <label class="check-row"><input v-model="compare" type="checkbox">{{ t('preview.compare') }}</label>
+      <CheckBox v-model="compare">{{ t('preview.compare') }}</CheckBox>
       <button type="button" class="btn btn-s" :disabled="run.isPending.value" @click="run.mutate()">
         {{ preview || state === 'failed' ? t('preview.runAgain') : t('preview.run') }}
       </button>

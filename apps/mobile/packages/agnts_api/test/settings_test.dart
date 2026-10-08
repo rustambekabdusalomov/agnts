@@ -66,6 +66,24 @@ void main() {
       // TODO
     });
 
+    // Survey a repository without a brief when its first ticket is analysed, and refresh the brief after merges
+    // bool autoBrief
+    test('to test the property `autoBrief`', () async {
+      // TODO
+    });
+
+    // Send blocker and major findings of agnts's code review back to the coder once per revision, before a person reviews
+    // bool selfReview
+    test('to test the property `selfReview`', () async {
+      // TODO
+    });
+
+    // Learn from change requests and rejections: suggest rules, which apply once someone adopts them
+    // bool reflect
+    test('to test the property `reflect`', () async {
+      // TODO
+    });
+
     // Hosts run containers may reach besides the built-in list, such as a staging API; .example.com matches subdomains
     // List<String> egressAllow
     test('to test the property `egressAllow`', () async {

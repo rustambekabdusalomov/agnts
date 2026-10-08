@@ -13,14 +13,26 @@ var (
 	ErrConflict     = errors.New("conflict")
 )
 
-// User is a person who can sign in. v1 has exactly one.
+// User is a person who can sign in. Users own workspaces and are members
+// of others.
 type User struct {
 	ID            int64
 	Username      string
+	Email         string
+	DisplayName   string
 	PasswordHash  string
-	TOTPSecretEnc []byte
-	CreatedAt     time.Time
+	TOTPSecretEnc []byte // nil until two-factor sign-in is turned on
+	// EmailVerifiedAt is when the address was confirmed by a link.
+	EmailVerifiedAt *time.Time
+	// IsAdmin marks the platform operator (system role Admin); everyone
+	// else is a User.
+	IsAdmin         bool
+	LastWorkspaceID *int64
+	CreatedAt       time.Time
 }
+
+// HasTOTP reports whether the user signs in with a second factor.
+func (u User) HasTOTP() bool { return len(u.TOTPSecretEnc) > 0 }
 
 // Client identifies which app a session belongs to.
 type Client string

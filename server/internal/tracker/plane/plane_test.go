@@ -232,7 +232,7 @@ func newSetup(t *testing.T) *setup {
 		"base_url": srv.URL + "/", "workspace": "acme", "status_in_review": "In Review",
 	}, true)
 	s.c = New(func(context.Context) (Config, bool, error) { return s.cfg, true, nil })
-	s.c.limit = rate.NewLimiter(rate.Inf, 1)
+	s.c.limits[scopeOf(s.cfg)] = rate.NewLimiter(rate.Inf, 1)
 	s.c.sleep = func(context.Context, time.Duration) error { return nil }
 	return s
 }

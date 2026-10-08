@@ -25,6 +25,8 @@ abstract class _$TicketCWProxy {
 
   Ticket revision(int revision);
 
+  Ticket replayOf(String? replayOf);
+
   Ticket turns(int turns);
 
   Ticket branch(String branch);
@@ -79,6 +81,18 @@ abstract class _$TicketCWProxy {
 
   Ticket spend(TokenSpend? spend);
 
+  Ticket waitReason(WaitReason? waitReason);
+
+  Ticket waitMessage(String? waitMessage);
+
+  Ticket queuedAt(DateTime? queuedAt);
+
+  Ticket memberId(int? memberId);
+
+  Ticket member(String? member);
+
+  Ticket createdBy(String? createdBy);
+
   Ticket createdAt(DateTime createdAt);
 
   Ticket updatedAt(DateTime updatedAt);
@@ -99,6 +113,7 @@ abstract class _$TicketCWProxy {
     TicketState state,
     TicketState? resumeState,
     int revision,
+    String? replayOf,
     int turns,
     String branch,
     int? prNumber,
@@ -126,6 +141,12 @@ abstract class _$TicketCWProxy {
     bool? previewCompare,
     bool? canPreview,
     TokenSpend? spend,
+    WaitReason? waitReason,
+    String? waitMessage,
+    DateTime? queuedAt,
+    int? memberId,
+    String? member,
+    String? createdBy,
     DateTime createdAt,
     DateTime updatedAt,
   });
@@ -164,6 +185,9 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
 
   @override
   Ticket revision(int revision) => this(revision: revision);
+
+  @override
+  Ticket replayOf(String? replayOf) => this(replayOf: replayOf);
 
   @override
   Ticket turns(int turns) => this(turns: turns);
@@ -254,6 +278,24 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
   Ticket spend(TokenSpend? spend) => this(spend: spend);
 
   @override
+  Ticket waitReason(WaitReason? waitReason) => this(waitReason: waitReason);
+
+  @override
+  Ticket waitMessage(String? waitMessage) => this(waitMessage: waitMessage);
+
+  @override
+  Ticket queuedAt(DateTime? queuedAt) => this(queuedAt: queuedAt);
+
+  @override
+  Ticket memberId(int? memberId) => this(memberId: memberId);
+
+  @override
+  Ticket member(String? member) => this(member: member);
+
+  @override
+  Ticket createdBy(String? createdBy) => this(createdBy: createdBy);
+
+  @override
   Ticket createdAt(DateTime createdAt) => this(createdAt: createdAt);
 
   @override
@@ -276,6 +318,7 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
     Object? state = const $CopyWithPlaceholder(),
     Object? resumeState = const $CopyWithPlaceholder(),
     Object? revision = const $CopyWithPlaceholder(),
+    Object? replayOf = const $CopyWithPlaceholder(),
     Object? turns = const $CopyWithPlaceholder(),
     Object? branch = const $CopyWithPlaceholder(),
     Object? prNumber = const $CopyWithPlaceholder(),
@@ -303,6 +346,12 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
     Object? previewCompare = const $CopyWithPlaceholder(),
     Object? canPreview = const $CopyWithPlaceholder(),
     Object? spend = const $CopyWithPlaceholder(),
+    Object? waitReason = const $CopyWithPlaceholder(),
+    Object? waitMessage = const $CopyWithPlaceholder(),
+    Object? queuedAt = const $CopyWithPlaceholder(),
+    Object? memberId = const $CopyWithPlaceholder(),
+    Object? member = const $CopyWithPlaceholder(),
+    Object? createdBy = const $CopyWithPlaceholder(),
     Object? createdAt = const $CopyWithPlaceholder(),
     Object? updatedAt = const $CopyWithPlaceholder(),
   }) {
@@ -343,6 +392,10 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
           ? _value.revision
           // ignore: cast_nullable_to_non_nullable
           : revision as int,
+      replayOf: replayOf == const $CopyWithPlaceholder()
+          ? _value.replayOf
+          // ignore: cast_nullable_to_non_nullable
+          : replayOf as String?,
       turns: turns == const $CopyWithPlaceholder()
           ? _value.turns
           // ignore: cast_nullable_to_non_nullable
@@ -451,6 +504,30 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
           ? _value.spend
           // ignore: cast_nullable_to_non_nullable
           : spend as TokenSpend?,
+      waitReason: waitReason == const $CopyWithPlaceholder()
+          ? _value.waitReason
+          // ignore: cast_nullable_to_non_nullable
+          : waitReason as WaitReason?,
+      waitMessage: waitMessage == const $CopyWithPlaceholder()
+          ? _value.waitMessage
+          // ignore: cast_nullable_to_non_nullable
+          : waitMessage as String?,
+      queuedAt: queuedAt == const $CopyWithPlaceholder()
+          ? _value.queuedAt
+          // ignore: cast_nullable_to_non_nullable
+          : queuedAt as DateTime?,
+      memberId: memberId == const $CopyWithPlaceholder()
+          ? _value.memberId
+          // ignore: cast_nullable_to_non_nullable
+          : memberId as int?,
+      member: member == const $CopyWithPlaceholder()
+          ? _value.member
+          // ignore: cast_nullable_to_non_nullable
+          : member as String?,
+      createdBy: createdBy == const $CopyWithPlaceholder()
+          ? _value.createdBy
+          // ignore: cast_nullable_to_non_nullable
+          : createdBy as String?,
       createdAt: createdAt == const $CopyWithPlaceholder()
           ? _value.createdAt
           // ignore: cast_nullable_to_non_nullable
@@ -514,6 +591,7 @@ Ticket _$TicketFromJson(
       (v) => $enumDecodeNullable(_$TicketStateEnumMap, v),
     ),
     revision: $checkedConvert('revision', (v) => (v as num).toInt()),
+    replayOf: $checkedConvert('replayOf', (v) => v as String?),
     turns: $checkedConvert('turns', (v) => (v as num).toInt()),
     branch: $checkedConvert('branch', (v) => v as String),
     prNumber: $checkedConvert('prNumber', (v) => (v as num?)?.toInt()),
@@ -580,6 +658,18 @@ Ticket _$TicketFromJson(
       'spend',
       (v) => v == null ? null : TokenSpend.fromJson(v as Map<String, dynamic>),
     ),
+    waitReason: $checkedConvert(
+      'waitReason',
+      (v) => $enumDecodeNullable(_$WaitReasonEnumMap, v),
+    ),
+    waitMessage: $checkedConvert('waitMessage', (v) => v as String?),
+    queuedAt: $checkedConvert(
+      'queuedAt',
+      (v) => v == null ? null : DateTime.parse(v as String),
+    ),
+    memberId: $checkedConvert('memberId', (v) => (v as num?)?.toInt()),
+    member: $checkedConvert('member', (v) => v as String?),
+    createdBy: $checkedConvert('createdBy', (v) => v as String?),
     createdAt: $checkedConvert('createdAt', (v) => DateTime.parse(v as String)),
     updatedAt: $checkedConvert('updatedAt', (v) => DateTime.parse(v as String)),
   );
@@ -596,6 +686,7 @@ Map<String, dynamic> _$TicketToJson(Ticket instance) => <String, dynamic>{
   'state': _$TicketStateEnumMap[instance.state]!,
   'resumeState': ?_$TicketStateEnumMap[instance.resumeState],
   'revision': instance.revision,
+  'replayOf': ?instance.replayOf,
   'turns': instance.turns,
   'branch': instance.branch,
   'prNumber': ?instance.prNumber,
@@ -623,6 +714,12 @@ Map<String, dynamic> _$TicketToJson(Ticket instance) => <String, dynamic>{
   'previewCompare': ?instance.previewCompare,
   'canPreview': ?instance.canPreview,
   'spend': ?instance.spend?.toJson(),
+  'waitReason': ?_$WaitReasonEnumMap[instance.waitReason],
+  'waitMessage': ?instance.waitMessage,
+  'queuedAt': ?instance.queuedAt?.toIso8601String(),
+  'memberId': ?instance.memberId,
+  'member': ?instance.member,
+  'createdBy': ?instance.createdBy,
   'createdAt': instance.createdAt.toIso8601String(),
   'updatedAt': instance.updatedAt.toIso8601String(),
 };
@@ -687,4 +784,11 @@ const _$TicketPreviewStateEnumEnumMap = {
   TicketPreviewStateEnum.running: 'running',
   TicketPreviewStateEnum.done: 'done',
   TicketPreviewStateEnum.failed: 'failed',
+};
+
+const _$WaitReasonEnumMap = {
+  WaitReason.blocked: 'blocked',
+  WaitReason.slots: 'slots',
+  WaitReason.server: 'server',
+  WaitReason.claude: 'claude',
 };

@@ -12,6 +12,12 @@ void main() {
       // TODO
     });
 
+    // How the tickets whose first coding run started in the period went, by prompt version, oldest first
+    // List<QualityStat> quality
+    test('to test the property `quality`', () async {
+      // TODO
+    });
+
     // PeriodStats current
     test('to test the property `current`', () async {
       // TODO

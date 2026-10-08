@@ -61,6 +61,20 @@
     "queued": "Tekshiruv navbatiga qoʻyildi",
     "deleted": "Qoida oʻchirildi",
     "turnedOn": "Qoida yoqildi",
-    "turnedOff": "Qoida oʻchirildi"
+    "turnedOff": "Qoida oʻchirildi",
+    "status_suggested": "Taklif qilingan",
+    "suggestedFrom": "agnts bu qoidani quyidagi tiketga bergan fikringizdan taklif qilmoqda:",
+    "suggestedHint": "Siz qabul qilmaguningizcha tiketlar unga amal qilmaydi. O‘zgartirishlaringiz bilan qabul qilish uchun uni tahrirlang.",
+    "suggestedHelp": "agnts fikr-mulohazalaringizdan o‘rganib, {n} ta qoida taklif qilmoqda.",
+    "adopt": "Qabul qilish",
+    "adoptAsWritten": "Yozilganicha qabul qilish",
+    "dismiss": "Rad etish",
+    "dismissBody": "agnts «{title}»ni olib tashlaydi va uni boshqa taklif qilmaydi.",
+    "dismissed": "Taklif rad etildi",
+    "kind": "Turi",
+    "kindRule": "Qoida",
+    "kindContext": "Biznes konteksti",
+    "kindRuleHelp": "agnts har bir tiketda amal qiladigan ko‘rsatma.",
+    "kindContextHelp": "Mahsulotingiz haqida bilim: atamalar nimani anglatadi, kod saqlashi kerak bo‘lgan invariantlar, kim nimadan foydalanadi. Har bir ishga tushirish boshlashdan oldin uni o‘qiydi."
   }
 }

@@ -1,0 +1,32 @@
+{
+  "replay": {
+    "title": "Bugungi agnts bilan qayta bajarish",
+    "sub": "Bu tiketni u boshlangan kommitdan, joriy promptlar, tavsif va qoidalar bilan qayta bajaring va natijani siz tasdiqlagan ish bilan solishtiring. Takror hech qachon push qilinmaydi.",
+    "start": "Qayta bajarish",
+    "confirm": "agnts {key}ni boshlangan joyidan qayta bajaradigan yangi vazifa yaratadi. U har qanday tiket kabi Claude rejangizdan foydalanadi.",
+    "created": "{key} takrori navbatga qo‘yildi",
+    "banner": "Bu agnts’ni baholash uchun takror: u hech qachon push qilinmaydi. Uni quyidagi bilan solishtiring:",
+    "evalTitle": "Takrorlarni baholash",
+    "evalSub": "Yangi agnts bilan qayta bajarilgan yakunlangan tiketlar, siz tasdiqlagan o‘zgarish bilan solishtirilgan. Yakunlangan tiketdagi «Qayta bajarish» tugmasi yoki `agnts eval replay KEY` bilan boshlang.",
+    "none": "Hali takrorlar yo‘q.",
+    "recent": "So‘nggi takrorlar",
+    "colReplays": "Takrorlar",
+    "colChecks": "Tekshiruvlar",
+    "colLooksGood": "Ko‘rib chiqish OK",
+    "colOverlap": "Bir xil fayllar",
+    "colOverlapHint": "Takrorda o‘zgargan fayllar tasdiqlangan o‘zgarish fayllariga qanchalik mos (Jakkar indeksi)",
+    "colRecall": "Qamrov",
+    "colRecallHint": "Tasdiqlangan o‘zgarish fayllaridan takror ham o‘zgartirganlari ulushi",
+    "colTurns": "Qadamlar (asl)",
+    "colCost": "Narx (asl)",
+    "colReplay": "Takror",
+    "colOf": "Asli",
+    "colState": "Holat",
+    "colReview": "Ko‘rib chiqish",
+    "pass": "o‘tdi",
+    "fail": "o‘tmadi",
+    "verdict_looks_good": "yaxshi",
+    "verdict_has_concerns": "shubhalar bor",
+    "verdict_needs_changes": "o‘zgartirish kerak"
+  }
+}

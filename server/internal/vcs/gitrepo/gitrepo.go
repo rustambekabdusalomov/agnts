@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -81,10 +82,60 @@ func clean(s string) string {
 	}, s)
 }
 
-// repoDir holds the repository's mirror; before the mirror it held one
-// checkout per branch, which open imports.
+// repoDir holds the repository's mirror, as <dir>/<workspace>/<repo id>,
+// so two workspaces' repositories never share a folder. A repository not
+// saved yet (detection) gets new-<name> in its workspace. Before the mirror
+// it held one checkout per branch, which open imports.
 func (g *Repos) repoDir(repo domain.Repository) string {
+	name := "new-" + clean(repo.Name)
+	if repo.ID > 0 {
+		name = strconv.FormatInt(repo.ID, 10)
+	}
+	return filepath.Join(g.dir, strconv.FormatInt(repo.WorkspaceID, 10), name)
+}
+
+// legacyDir is where the repository lived before workspaces.
+func (g *Repos) legacyDir(repo domain.Repository) string {
 	return filepath.Join(g.dir, clean(repo.Name))
+}
+
+// AdoptLegacy moves the folders of repositories kept before workspaces
+// (<dir>/<name>) to their place in the workspace the install migrated
+// into. Only that workspace's repositories may take them: a folder named
+// like another workspace's repository is not theirs.
+func (g *Repos) AdoptLegacy(repos []domain.Repository) error {
+	var errs []error
+	for _, r := range repos {
+		old, dir := g.legacyDir(r), g.repoDir(r)
+		if _, err := os.Stat(filepath.Join(old, mirrorName)); err != nil {
+			if _, err := os.Stat(old); err != nil {
+				continue
+			}
+		}
+		if _, err := os.Stat(dir); err == nil {
+			continue
+		}
+		if err := os.MkdirAll(filepath.Dir(dir), 0o750); err != nil {
+			return err
+		}
+		errs = append(errs, os.Rename(old, dir))
+	}
+	return errors.Join(errs...)
+}
+
+// Remove deletes a repository's mirror (the repository was deleted).
+func (g *Repos) Remove(repo domain.Repository) error {
+	unlock := g.lock(repo)
+	defer unlock()
+	return os.RemoveAll(g.repoDir(repo))
+}
+
+// RemoveWorkspace deletes every mirror of a workspace (it was deleted).
+func (g *Repos) RemoveWorkspace(ws int64) error {
+	if ws <= 0 {
+		return nil
+	}
+	return os.RemoveAll(filepath.Join(g.dir, strconv.FormatInt(ws, 10)))
 }
 
 func (g *Repos) mirrorDir(repo domain.Repository) string {
@@ -231,6 +282,28 @@ func (g *Repos) Prepare(ctx context.Context, repo domain.Repository, branch stri
 		}
 	}
 	return r.Storer.SetReference(plumbing.NewHashReference(local, from.Hash()))
+}
+
+// DeleteBranch removes agnts's local branch of a ticket that is merged or
+// rejected; the git host keeps its copy. The default branch is never
+// removed.
+func (g *Repos) DeleteBranch(_ context.Context, repo domain.Repository, branch string) error {
+	if branch == "" || branch == repo.DefaultBranch {
+		return nil
+	}
+	defer g.lock(repo)()
+	r, err := git.PlainOpen(g.mirrorDir(repo))
+	if errors.Is(err, git.ErrRepositoryNotExists) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	err = r.Storer.RemoveReference(plumbing.NewBranchReferenceName(branch))
+	if errors.Is(err, plumbing.ErrReferenceNotFound) {
+		return nil
+	}
+	return err
 }
 
 // Push sends branch to origin. Only fast-forwards: agnts never rewrites history.
@@ -483,4 +556,68 @@ func countUntil(r *git.Repository, from plumbing.Hash, stop map[plumbing.Hash]bo
 func firstLine(s string) string {
 	line, _, _ := strings.Cut(strings.TrimSpace(s), "\n")
 	return line
+}
+
+// BaseOf returns the commit a change at sha started from: its merge base
+// with the default branch.
+func (g *Repos) BaseOf(ctx context.Context, repo domain.Repository, sha string) (string, error) {
+	defer g.lock(repo)()
+	r, err := g.open(repo)
+	if err != nil {
+		return "", err
+	}
+	head, err := r.CommitObject(plumbing.NewHash(sha))
+	if err != nil {
+		return "", fmt.Errorf("commit %s is gone from agnts's clone: %w", shortSHA(sha), err)
+	}
+	defRef, err := r.Reference(plumbing.NewRemoteReferenceName("origin", repo.DefaultBranch), true)
+	if err != nil {
+		return "", err
+	}
+	defC, err := r.CommitObject(defRef.Hash())
+	if err != nil {
+		return "", err
+	}
+	bases, err := defC.MergeBase(head)
+	if err != nil {
+		return "", err
+	}
+	if len(bases) == 0 {
+		return "", fmt.Errorf("commit %s shares no history with %s", shortSHA(sha), repo.DefaultBranch)
+	}
+	return bases[0].Hash.String(), nil
+}
+
+// PrepareAt fetches repo and makes sure branch exists: the existing branch
+// as it is (never fast-forwarded), else new at commit base. Replays use
+// it, so their work starts where the original's did.
+func (g *Repos) PrepareAt(ctx context.Context, repo domain.Repository, branch, base string) error {
+	defer g.lock(repo)()
+	auth, err := g.auth(ctx, repo)
+	if err != nil {
+		return err
+	}
+	r, err := g.open(repo)
+	if err != nil {
+		return err
+	}
+	if err := fetch(ctx, r, repo, auth, true, originRefs); err != nil {
+		return err
+	}
+	local := plumbing.NewBranchReferenceName(branch)
+	if _, err := r.Reference(local, true); err == nil {
+		return nil
+	}
+	h := plumbing.NewHash(base)
+	if _, err := r.CommitObject(h); err != nil {
+		return fmt.Errorf("base commit %s not found: %w", shortSHA(base), err)
+	}
+	return r.Storer.SetReference(plumbing.NewHashReference(local, h))
+}
+
+func shortSHA(s string) string {
+	if len(s) > 7 {
+		return s[:7]
+	}
+	return s
 }

@@ -1,0 +1,15 @@
+{
+  "design": {
+    "approach": "Approach",
+    "fit": "Fit with the code base",
+    "alternatives": "{n, plural, one {# alternative considered} other {# alternatives considered}}",
+    "whyNot": "Why not",
+    "outOfScope": "Out of scope",
+    "shipping": "Shipping",
+    "ship_migrations": "Migrations",
+    "ship_compatibility": "Compatibility",
+    "ship_rollout": "Rollout",
+    "ship_rollback": "Rollback",
+    "deviations": "Departed from the plan"
+  }
+}

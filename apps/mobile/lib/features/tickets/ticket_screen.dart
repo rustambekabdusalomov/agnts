@@ -23,6 +23,7 @@ import '../../theme.dart';
 import '../../widgets/attachments.dart';
 import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
+import '../../widgets/workspace.dart';
 
 /// One ticket (scrDetail in mobile.html): header, the six-stop progress
 /// track, a block for the current state, folds for answers and history, and
@@ -220,13 +221,15 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           padding: const EdgeInsets.only(bottom: 24),
           children: [
             _header(context, d),
+            if (d.ticket.waitReason != null) Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 0), child: WaitBanner(d.ticket)),
             _Track(ticket: d.ticket, history: d.history ?? const []),
-            _stage(context, d),
+            // A viewer reads the stage (questions, the result to review) but cannot act on it.
+            IgnorePointer(ignoring: !ref.watch(canEditProvider), child: _stage(context, d)),
             _folds(context, d),
           ],
         ),
       ),
-      bottomNavigationBar: detail.value == null ? null : _actionBar(context, detail.value!),
+      bottomNavigationBar: detail.value == null || !ref.watch(canEditProvider) ? null : _actionBar(context, detail.value!),
     );
   }
 

@@ -10,6 +10,8 @@ package plane
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -98,18 +100,54 @@ type Client struct {
 	hc  *http.Client
 	// sleep waits out a rate limit; tests replace it.
 	sleep func(ctx context.Context, d time.Duration) error
-	// limit keeps every caller together under Plane's 60 requests a
-	// minute per key, with room for the person using the same key.
-	limit *rate.Limiter
+	// limits keep every caller of one API key together under Plane's 60
+	// requests a minute per key, with room for the person using it.
+	limits map[string]*rate.Limiter
 
-	mu    sync.Mutex
-	scope string            // base URL and workspace the caches belong to
+	mu sync.Mutex
+	// caches hold what was read, per Plane connection (base URL, Plane
+	// workspace and key): agnts workspaces never see each other's.
+	caches map[string]*scopeCache
+}
+
+// scopeCache is what one Plane connection has read. Guarded by Client.mu.
+type scopeCache struct {
 	refs  map[string]ref    // WEB-123 -> ids; ids never change
 	projs map[string]string // project id -> identifier, and identifier -> project id ("#WEB")
 	// states and labels are per project and change rarely; they are
 	// reloaded after stateTTL.
 	states map[string]cached[[]State]
 	labels map[string]cached[[]label]
+}
+
+func scopeOf(cfg Config) string {
+	sum := sha256.Sum256([]byte(cfg.APIKey))
+	return cfg.BaseURL + "|" + cfg.Workspace + "|" + hex.EncodeToString(sum[:8])
+}
+
+// cache returns cfg's cache; call it with c.mu held.
+func (c *Client) cache(cfg Config) *scopeCache {
+	k := scopeOf(cfg)
+	sc, ok := c.caches[k]
+	if !ok {
+		sc = &scopeCache{refs: map[string]ref{}, projs: map[string]string{},
+			states: map[string]cached[[]State]{}, labels: map[string]cached[[]label]{}}
+		c.caches[k] = sc
+	}
+	return sc
+}
+
+// limiter returns the rate limiter of cfg's API key.
+func (c *Client) limiter(cfg Config) *rate.Limiter {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	k := scopeOf(cfg)
+	l, ok := c.limits[k]
+	if !ok {
+		l = rate.NewLimiter(rate.Every(1200*time.Millisecond), 10)
+		c.limits[k] = l
+	}
+	return l
 }
 
 type ref struct{ project, id string }
@@ -129,7 +167,7 @@ var (
 // New returns a Plane client.
 func New(cfg ConfigSource) *Client {
 	return &Client{cfg: cfg, hc: &http.Client{Timeout: 30 * time.Second}, sleep: sleepCtx,
-		limit: rate.NewLimiter(rate.Every(1200*time.Millisecond), 10)}
+		limits: map[string]*rate.Limiter{}, caches: map[string]*scopeCache{}}
 }
 
 // ErrNotConnected is returned when Plane has not been configured.
@@ -149,7 +187,7 @@ func sleepCtx(ctx context.Context, d time.Duration) error {
 	}
 }
 
-// config loads the config and drops the caches when it points somewhere new.
+// config loads the config of the agnts workspace ctx acts in.
 func (c *Client) config(ctx context.Context) (Config, error) {
 	cfg, ok, err := c.cfg(ctx)
 	if err != nil {
@@ -158,13 +196,6 @@ func (c *Client) config(ctx context.Context) (Config, error) {
 	if !ok {
 		return Config{}, ErrNotConnected
 	}
-	c.mu.Lock()
-	if scope := cfg.BaseURL + "|" + cfg.Workspace; scope != c.scope {
-		c.scope = scope
-		c.refs, c.projs = map[string]ref{}, map[string]string{}
-		c.states, c.labels = map[string]cached[[]State]{}, map[string]cached[[]label]{}
-	}
-	c.mu.Unlock()
 	return cfg, nil
 }
 
@@ -182,7 +213,7 @@ func (c *Client) call(ctx context.Context, cfg Config, method, path string, in, 
 		}
 	}
 	for attempt := 0; ; attempt++ {
-		if err := c.limit.Wait(ctx); err != nil {
+		if err := c.limiter(cfg).Wait(ctx); err != nil {
 			return err
 		}
 		req, err := http.NewRequestWithContext(ctx, method, cfg.BaseURL+"/api/v1"+path, bytes.NewReader(body))
@@ -331,7 +362,7 @@ func (c *Client) Projects(ctx context.Context) ([]Project, error) {
 	}
 	c.mu.Lock()
 	for _, p := range out {
-		c.projs[p.ID], c.projs["#"+strings.ToUpper(p.Identifier)] = p.Identifier, p.ID
+		c.cache(cfg).projs[p.ID], c.cache(cfg).projs["#"+strings.ToUpper(p.Identifier)] = p.Identifier, p.ID
 	}
 	c.mu.Unlock()
 	return out, nil
@@ -339,9 +370,13 @@ func (c *Client) Projects(ctx context.Context) ([]Project, error) {
 
 // projectID returns the id of the project with this identifier.
 func (c *Client) projectID(ctx context.Context, identifier string) (string, error) {
+	cfg, err := c.config(ctx)
+	if err != nil {
+		return "", err
+	}
 	identifier = strings.ToUpper(identifier)
 	c.mu.Lock()
-	id, ok := c.projs["#"+identifier]
+	id, ok := c.cache(cfg).projs["#"+identifier]
 	c.mu.Unlock()
 	if ok {
 		return id, nil
@@ -350,7 +385,7 @@ func (c *Client) projectID(ctx context.Context, identifier string) (string, erro
 		return "", err
 	}
 	c.mu.Lock()
-	id, ok = c.projs["#"+identifier]
+	id, ok = c.cache(cfg).projs["#"+identifier]
 	c.mu.Unlock()
 	if !ok {
 		return "", fmt.Errorf("no Plane project %s in this workspace (or the API key cannot see it)", identifier)
@@ -360,8 +395,12 @@ func (c *Client) projectID(ctx context.Context, identifier string) (string, erro
 
 // projectIdentifier returns the identifier (WEB) of the project with this id.
 func (c *Client) projectIdentifier(ctx context.Context, id string) (string, error) {
+	cfg, err := c.config(ctx)
+	if err != nil {
+		return "", err
+	}
 	c.mu.Lock()
-	ident, ok := c.projs[id]
+	ident, ok := c.cache(cfg).projs[id]
 	c.mu.Unlock()
 	if ok {
 		return ident, nil
@@ -370,7 +409,7 @@ func (c *Client) projectIdentifier(ctx context.Context, id string) (string, erro
 		return "", err
 	}
 	c.mu.Lock()
-	ident, ok = c.projs[id]
+	ident, ok = c.cache(cfg).projs[id]
 	c.mu.Unlock()
 	if !ok {
 		return "", fmt.Errorf("plane project %s is not visible to the API key", id)
@@ -381,7 +420,7 @@ func (c *Client) projectIdentifier(ctx context.Context, id string) (string, erro
 // resolve returns the project and work item ids of key (WEB-123).
 func (c *Client) resolve(ctx context.Context, cfg Config, key string) (ref, error) {
 	c.mu.Lock()
-	r, ok := c.refs[key]
+	r, ok := c.cache(cfg).refs[key]
 	c.mu.Unlock()
 	if ok {
 		return r, nil
@@ -397,13 +436,13 @@ func (c *Client) resolve(ctx context.Context, cfg Config, key string) (ref, erro
 		return ref{}, fmt.Errorf("plane returned no ids for %s", key)
 	}
 	r = ref{project: wi.Project, id: wi.ID}
-	c.remember(key, r)
+	c.remember(cfg, key, r)
 	return r, nil
 }
 
-func (c *Client) remember(key string, r ref) {
+func (c *Client) remember(cfg Config, key string, r ref) {
 	c.mu.Lock()
-	c.refs[key] = r
+	c.cache(cfg).refs[key] = r
 	c.mu.Unlock()
 }
 
@@ -425,7 +464,7 @@ func (c *Client) States(ctx context.Context, projectID string) ([]State, error) 
 
 func (c *Client) loadStates(ctx context.Context, cfg Config, projectID string) ([]State, error) {
 	c.mu.Lock()
-	s, ok := c.states[projectID]
+	s, ok := c.cache(cfg).states[projectID]
 	c.mu.Unlock()
 	if ok && time.Since(s.at) < stateTTL {
 		return s.v, nil
@@ -443,7 +482,7 @@ func (c *Client) loadStates(ctx context.Context, cfg Config, projectID string) (
 		return nil, err
 	}
 	c.mu.Lock()
-	c.states[projectID] = cached[[]State]{at: time.Now(), v: out}
+	c.cache(cfg).states[projectID] = cached[[]State]{at: time.Now(), v: out}
 	c.mu.Unlock()
 	return out, nil
 }
@@ -465,7 +504,7 @@ type label struct {
 // loadLabels returns a project's labels; fresh forces a reload.
 func (c *Client) loadLabels(ctx context.Context, cfg Config, projectID string, fresh bool) ([]label, error) {
 	c.mu.Lock()
-	l, ok := c.labels[projectID]
+	l, ok := c.cache(cfg).labels[projectID]
 	c.mu.Unlock()
 	if ok && !fresh && time.Since(l.at) < stateTTL {
 		return l.v, nil
@@ -483,7 +522,7 @@ func (c *Client) loadLabels(ctx context.Context, cfg Config, projectID string, f
 		return nil, err
 	}
 	c.mu.Lock()
-	c.labels[projectID] = cached[[]label]{at: time.Now(), v: out}
+	c.cache(cfg).labels[projectID] = cached[[]label]{at: time.Now(), v: out}
 	c.mu.Unlock()
 	return out, nil
 }

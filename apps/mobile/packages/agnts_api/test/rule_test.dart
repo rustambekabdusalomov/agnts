@@ -12,6 +12,23 @@ void main() {
       // TODO
     });
 
+    // RuleKind kind
+    test('to test the property `kind`', () async {
+      // TODO
+    });
+
+    // For a rule agnts suggested: the ticket whose feedback taught it
+    // String sourceTicket
+    test('to test the property `sourceTicket`', () async {
+      // TODO
+    });
+
+    // For a rule agnts suggested: which feedback shows it
+    // String reason
+    test('to test the property `reason`', () async {
+      // TODO
+    });
+
     // Absent for a global rule
     // int repoId
     test('to test the property `repoId`', () async {

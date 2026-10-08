@@ -17,6 +17,10 @@ abstract class _$ResultCWProxy {
 
   Result report(String? report);
 
+  Result deviations(List<String>? deviations);
+
+  Result redFlags(List<RedFlag>? redFlags);
+
   Result createdAt(DateTime createdAt);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Result(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -31,6 +35,8 @@ abstract class _$ResultCWProxy {
     List<CheckStep> checks,
     List<FileChange> files,
     String? report,
+    List<String>? deviations,
+    List<RedFlag>? redFlags,
     DateTime createdAt,
   });
 }
@@ -57,6 +63,12 @@ class _$ResultCWProxyImpl implements _$ResultCWProxy {
   Result report(String? report) => this(report: report);
 
   @override
+  Result deviations(List<String>? deviations) => this(deviations: deviations);
+
+  @override
+  Result redFlags(List<RedFlag>? redFlags) => this(redFlags: redFlags);
+
+  @override
   Result createdAt(DateTime createdAt) => this(createdAt: createdAt);
 
   @override
@@ -72,6 +84,8 @@ class _$ResultCWProxyImpl implements _$ResultCWProxy {
     Object? checks = const $CopyWithPlaceholder(),
     Object? files = const $CopyWithPlaceholder(),
     Object? report = const $CopyWithPlaceholder(),
+    Object? deviations = const $CopyWithPlaceholder(),
+    Object? redFlags = const $CopyWithPlaceholder(),
     Object? createdAt = const $CopyWithPlaceholder(),
   }) {
     return Result(
@@ -95,6 +109,14 @@ class _$ResultCWProxyImpl implements _$ResultCWProxy {
           ? _value.report
           // ignore: cast_nullable_to_non_nullable
           : report as String?,
+      deviations: deviations == const $CopyWithPlaceholder()
+          ? _value.deviations
+          // ignore: cast_nullable_to_non_nullable
+          : deviations as List<String>?,
+      redFlags: redFlags == const $CopyWithPlaceholder()
+          ? _value.redFlags
+          // ignore: cast_nullable_to_non_nullable
+          : redFlags as List<RedFlag>?,
       createdAt: createdAt == const $CopyWithPlaceholder()
           ? _value.createdAt
           // ignore: cast_nullable_to_non_nullable
@@ -139,6 +161,16 @@ Result _$ResultFromJson(
           .toList(),
     ),
     report: $checkedConvert('report', (v) => v as String?),
+    deviations: $checkedConvert(
+      'deviations',
+      (v) => (v as List<dynamic>?)?.map((e) => e as String).toList(),
+    ),
+    redFlags: $checkedConvert(
+      'redFlags',
+      (v) => (v as List<dynamic>?)
+          ?.map((e) => RedFlag.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    ),
     createdAt: $checkedConvert('createdAt', (v) => DateTime.parse(v as String)),
   );
   return val;
@@ -150,5 +182,7 @@ Map<String, dynamic> _$ResultToJson(Result instance) => <String, dynamic>{
   'checks': instance.checks.map((e) => e.toJson()).toList(),
   'files': instance.files.map((e) => e.toJson()).toList(),
   'report': ?instance.report,
+  'deviations': ?instance.deviations,
+  'redFlags': ?instance.redFlags?.map((e) => e.toJson()).toList(),
   'createdAt': instance.createdAt.toIso8601String(),
 };

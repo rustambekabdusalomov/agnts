@@ -23,7 +23,7 @@ func newRulesHarness(t *testing.T) *harness {
 		t.Fatal(err)
 	}
 	t.Cleanup(pool.Close)
-	if _, err := pool.Exec(h.ctx, `TRUNCATE rules RESTART IDENTITY`); err != nil {
+	if _, err := pool.Exec(domain.System(h.ctx), `TRUNCATE rules RESTART IDENTITY`); err != nil {
 		t.Fatal(err)
 	}
 	cfg := orchestrator.DefaultConfig()

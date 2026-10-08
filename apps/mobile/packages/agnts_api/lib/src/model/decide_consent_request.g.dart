@@ -21,6 +21,8 @@ abstract class _$DecideConsentRequestCWProxy {
 
   DecideConsentRequest approve(bool approve);
 
+  DecideConsentRequest workspace(String? workspace);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `DecideConsentRequest(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -35,6 +37,7 @@ abstract class _$DecideConsentRequestCWProxy {
     String? state,
     String? resource,
     bool approve,
+    String? workspace,
   });
 }
 
@@ -70,6 +73,10 @@ class _$DecideConsentRequestCWProxyImpl
   DecideConsentRequest approve(bool approve) => this(approve: approve);
 
   @override
+  DecideConsentRequest workspace(String? workspace) =>
+      this(workspace: workspace);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `DecideConsentRequest(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -84,6 +91,7 @@ class _$DecideConsentRequestCWProxyImpl
     Object? state = const $CopyWithPlaceholder(),
     Object? resource = const $CopyWithPlaceholder(),
     Object? approve = const $CopyWithPlaceholder(),
+    Object? workspace = const $CopyWithPlaceholder(),
   }) {
     return DecideConsentRequest(
       clientId: clientId == const $CopyWithPlaceholder()
@@ -114,6 +122,10 @@ class _$DecideConsentRequestCWProxyImpl
           ? _value.approve
           // ignore: cast_nullable_to_non_nullable
           : approve as bool,
+      workspace: workspace == const $CopyWithPlaceholder()
+          ? _value.workspace
+          // ignore: cast_nullable_to_non_nullable
+          : workspace as String?,
     );
   }
 }
@@ -153,6 +165,7 @@ DecideConsentRequest _$DecideConsentRequestFromJson(
     state: $checkedConvert('state', (v) => v as String?),
     resource: $checkedConvert('resource', (v) => v as String?),
     approve: $checkedConvert('approve', (v) => v as bool),
+    workspace: $checkedConvert('workspace', (v) => v as String?),
   );
   return val;
 });
@@ -167,4 +180,5 @@ Map<String, dynamic> _$DecideConsentRequestToJson(
   'state': ?instance.state,
   'resource': ?instance.resource,
   'approve': instance.approve,
+  'workspace': ?instance.workspace,
 };

@@ -8,6 +8,7 @@ import LessonText from '../components/learn/LessonText.vue'
 import { useLesson, useSetLearned } from '../components/learn/useLessons'
 import HiIcon from '../components/ui/HiIcon.vue'
 import { ago } from '../composables/format'
+import { useWorkspace } from '../stores/workspace'
 
 // One lesson: what it is, why the change needed it, where to look, a quiz
 // and further reading.
@@ -17,13 +18,14 @@ const id = computed(() => Number(route.params.id))
 const lesson = useLesson(id)
 const l = computed(() => lesson.data.value)
 const setLearned = useSetLearned()
+const workspace = useWorkspace()
 // A reference's folder and file name, shown in different weights.
 const dirOf = (p: string) => p.slice(0, p.lastIndexOf('/') + 1)
 const fileOf = (p: string) => p.slice(p.lastIndexOf('/') + 1)
 </script>
 
 <template>
-  <RouterLink class="back-btn" to="/learn"><HiIcon name="back" />{{ t('learn.back') }}</RouterLink>
+  <RouterLink class="back-btn" :to="{ name: 'learn' }"><HiIcon name="back" />{{ t('learn.back') }}</RouterLink>
   <p v-if="lesson.isPending.value" class="hint">{{ t('common.loading') }}</p>
   <p v-else-if="lesson.isError.value || !l" class="empty">{{ t('learn.notFound') }}</p>
   <template v-else>
@@ -32,13 +34,13 @@ const fileOf = (p: string) => p.slice(p.lastIndexOf('/') + 1)
         <div class="lesson-meta" style="margin-top: 10px">
           <span class="src">{{ t(`learn.category_${l.category}`) }}</span>
           <span class="src local">{{ t(`learn.level_${l.level}`) }}</span>
-          <RouterLink class="tkey" :to="`/repos/${l.repoId}`">{{ l.repoName }}</RouterLink>
-          <RouterLink class="tkey" :to="`/tickets/${l.ticketKey}`">{{ t('learn.fromTicket', { key: l.ticketKey }) }}</RouterLink>
+          <RouterLink class="tkey" :to="{ name: 'repo', params: { id: l.repoId } }">{{ l.repoName }}</RouterLink>
+          <RouterLink class="tkey" :to="{ name: 'ticket', params: { key: l.ticketKey } }">{{ t('learn.fromTicket', { key: l.ticketKey }) }}</RouterLink>
           <span class="tkey">{{ t('learn.readTime', { n: l.readMinutes }) }}</span>
           <span class="tkey">{{ ago(l.createdAt, locale) }}</span>
         </div>
       </template>
-      <div class="actions" style="margin: 0">
+      <div v-if="workspace.canEdit" class="actions" style="margin: 0">
         <button
           type="button"
           class="btn"

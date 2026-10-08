@@ -15,6 +15,7 @@ class LiveStream {
   CancelToken? _cancel;
   int _lastId = 0;
   bool _running = false;
+  int _gen = 0; // bumped on stop, so an old loop ends instead of running on
   final _events = StreamController<Map<String, dynamic>>.broadcast();
 
   Stream<Map<String, dynamic>> get events => _events.stream;
@@ -22,17 +23,27 @@ class LiveStream {
   void start() {
     if (_running) return;
     _running = true;
-    unawaited(_loop());
+    unawaited(_loop(_gen));
   }
 
   void stop() {
     _running = false;
+    _gen++;
     _cancel?.cancel();
   }
 
-  Future<void> _loop() async {
+  /// Follows another workspace's stream from its start: the old event ids
+  /// mean nothing there.
+  void restart() {
+    stop();
+    _lastId = 0;
+    start();
+  }
+
+  Future<void> _loop(int gen) async {
+    bool live() => _running && gen == _gen;
     var backoff = const Duration(seconds: 2);
-    while (_running) {
+    while (live()) {
       final api = ref.read(apiProvider);
       if (api == null) return;
       _cancel = CancelToken();
@@ -49,6 +60,7 @@ class LiveStream {
         backoff = const Duration(seconds: 2);
         var data = StringBuffer();
         await for (final line in res.data!.stream.cast<List<int>>().transform(utf8.decoder).transform(const LineSplitter())) {
+          if (!live()) break;
           if (line.startsWith('id: ')) {
             _lastId = int.tryParse(line.substring(4)) ?? _lastId;
           } else if (line.startsWith('data: ')) {
@@ -61,7 +73,7 @@ class LiveStream {
       } catch (_) {
         // Dropped, timed out or cancelled: retry below.
       }
-      if (!_running) return;
+      if (!live()) return;
       await Future<void>.delayed(backoff);
       backoff = Duration(seconds: (backoff.inSeconds * 2).clamp(2, 30));
     }
@@ -77,6 +89,7 @@ class LiveStream {
     _events.add(e);
     final key = e['ticketKey'] as String? ?? '';
     ref.invalidate(dashboardProvider);
+    ref.invalidate(queueProvider);
     if (key.isNotEmpty) {
       ref.invalidate(ticketProvider(key));
       ref.invalidate(ticketEventsProvider(key));
@@ -90,6 +103,8 @@ class LiveStream {
         ref.invalidate(settingsProvider);
       case 'integration_changed':
         ref.invalidate(integrationsProvider);
+      case 'workspace':
+        ref.invalidate(meProvider);
       case 'lessons_found':
         ref.invalidate(lessonsProvider);
         ref.invalidate(ticketLessonsProvider);

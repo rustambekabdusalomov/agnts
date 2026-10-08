@@ -36,7 +36,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     final sideRepos = _taskRepos(repos.value ?? const []);
     return Scaffold(
       backgroundColor: c.bg,
-      floatingActionButton: HFab(onTap: _newTask, tooltip: l.mobileNewTask),
+      floatingActionButton: ref.watch(canEditProvider) ? HFab(onTap: _newTask, tooltip: l.mobileNewTask) : null,
       body: SafeArea(
         bottom: false,
         child: AsyncBody<List<Ticket>>(
@@ -86,7 +86,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   EmptyState(
                     title: l.mobileNoTasks,
                     text: l.tasksDrawerSub,
-                    action: FilledButton(onPressed: _newTask, child: Text(l.mobileNewTask)),
+                    action: ref.watch(canEditProvider) ? FilledButton(onPressed: _newTask, child: Text(l.mobileNewTask)) : null,
                   )
                 else if (rows.isEmpty)
                   EmptyState(title: l.tasksEmpty)

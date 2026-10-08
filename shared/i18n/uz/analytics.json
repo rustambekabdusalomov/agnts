@@ -97,6 +97,25 @@
     "insightNight": "agnts ishining {pct}% siz oflayn boʻlgan 22:00 dan 07:00 gacha boʻlgan vaqtga toʻgʻri keladi.",
     "minutes": "{n} daq",
     "hoursMinutes": "{h} soat {m} daq",
-    "srcPlane": "Plane"
+    "srcPlane": "Plane",
+    "quality": "Agent sifati",
+    "qualitySub": "Tiketlar birinchi kodlash ishga tushirilishidagi prompt versiyasi bo‘yicha guruhlangan. Agentdagi o‘zgarish foyda berganini bilish uchun versiyalarni solishtiring.",
+    "noQuality": "Bu davrda kodlash ishga tushirilmagan.",
+    "colVersion": "Prompt versiyasi",
+    "versionUnknown": "hisobdan oldin",
+    "colFirstPass": "Birinchi urinishda",
+    "colFirstPassHint": "Inson o‘zgartirish so‘ramasdan tasdiqlangan yakunlangan tiketlar",
+    "colRounds": "Tuzatish bosqichlari",
+    "colRoundsHint": "Ko‘rib chiqishga yetgan har bir tiket uchun insondan o‘rtacha o‘zgartirish so‘rovlari",
+    "colFixes": "Tekshiruv tuzatishlari",
+    "colFixesHint": "Muvaffaqiyatsiz tekshiruvlar Claude’ga o‘rtacha necha marta qaytarilgan",
+    "colSerious": "Jiddiy kamchiliklar",
+    "colSeriousHint": "agnts ko‘rib chiqishi to‘suvchi yoki jiddiy muammo topgan tiketlar ulushi",
+    "colFootprint": "Reja aniqligi",
+    "colFootprintHint": "Tahlil oldindan aytgan o‘zgargan fayllar ulushi",
+    "colRedFlags": "Xavfli belgilar",
+    "colRedFlagsHint": "Difflarda topilgan o‘tkazib yuborilgan testlar, olib tashlangan tekshiruvlar, o‘chirilgan linterlar va shu kabilar",
+    "colSelfFixes": "O‘z-o‘zini tuzatish",
+    "colSelfFixesHint": "agnts o‘z ko‘rib chiqishi kamchiliklarni inson ko‘rishidan oldin dasturchiga necha marta qaytargan"
   }
 }

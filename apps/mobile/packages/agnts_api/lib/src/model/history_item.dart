@@ -28,6 +28,8 @@ class HistoryItem {
     required  this.message,
 
     required  this.origin,
+
+     this.user,
   });
 
   @JsonKey(
@@ -78,6 +80,19 @@ class HistoryItem {
 
 
 
+      /// The person behind it; absent for agnts
+  @JsonKey(
+    
+    name: r'user',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? user;
+
+
+
 
 
     @override
@@ -85,14 +100,16 @@ class HistoryItem {
       other.at == at &&
       other.state == state &&
       other.message == message &&
-      other.origin == origin;
+      other.origin == origin &&
+      other.user == user;
 
     @override
     int get hashCode =>
         at.hashCode +
         state.hashCode +
         message.hashCode +
-        origin.hashCode;
+        origin.hashCode +
+        user.hashCode;
 
   factory HistoryItem.fromJson(Map<String, dynamic> json) => _$HistoryItemFromJson(json);
 

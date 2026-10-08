@@ -67,7 +67,7 @@ func (m *memStore) SetCursor(_ context.Context, _ string, id int64) error {
 	m.cursor = id
 	return nil
 }
-func (m *memStore) Devices(context.Context) ([]postgres.Device, error) { return m.devices, nil }
+func (m *memStore) Devices(context.Context, int64) ([]postgres.Device, error) { return m.devices, nil }
 func (m *memStore) DeleteDevice(_ context.Context, token string) error {
 	var keep []postgres.Device
 	for _, d := range m.devices {
@@ -282,7 +282,7 @@ func reply(to int64, text string, from int64) map[string]any {
 func TestQuestionsFlow(t *testing.T) {
 	n, st, acts, tg := setup(t)
 	ctx := context.Background()
-	st.events = []domain.Event{{ID: 1, TicketKey: "PAY-1", Type: "state_changed", Data: map[string]any{"to": "waiting_for_answers"}}}
+	st.events = []domain.Event{{WorkspaceID: 1, ID: 1, TicketKey: "PAY-1", Type: "state_changed", Data: map[string]any{"to": "waiting_for_answers"}}}
 	st.cursor = 0
 	n.handle(ctx, st.events[0])
 
@@ -412,8 +412,8 @@ func TestNotifierCursorAndToggles(t *testing.T) {
 	acts.view.Ticket.State = domain.StateDone
 	acts.view.Ticket.PRURL = "https://github.com/a/b/pull/1"
 	st.events = []domain.Event{
-		{ID: 1, TicketKey: "PAY-1", Type: "state_changed", Data: map[string]any{"to": "coding"}},
-		{ID: 2, TicketKey: "PAY-1", Type: "state_changed", Data: map[string]any{"to": "done"}},
+		{WorkspaceID: 1, ID: 1, TicketKey: "PAY-1", Type: "state_changed", Data: map[string]any{"to": "coding"}},
+		{WorkspaceID: 1, ID: 2, TicketKey: "PAY-1", Type: "state_changed", Data: map[string]any{"to": "done"}},
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	st.cursor = 0
@@ -435,7 +435,7 @@ func TestNotifierCursorAndToggles(t *testing.T) {
 	n2, st2, acts2, tg2 := setup(t)
 	acts2.view.Ticket.State = domain.StateDone
 	n2.settings = fakeSettings{s: func() domain.Settings { s := domain.DefaultSettings(); s.Notify.Done = false; return s }()}
-	n2.handle(context.Background(), domain.Event{ID: 1, TicketKey: "PAY-1", Data: map[string]any{"to": "done"}})
+	n2.handle(context.Background(), domain.Event{WorkspaceID: 1, ID: 1, TicketKey: "PAY-1", Data: map[string]any{"to": "done"}})
 	if len(tg2.sent("sendMessage")) != 0 {
 		t.Fatal("sent although turned off")
 	}
@@ -487,19 +487,33 @@ func TestFCM(t *testing.T) {
 	n.fcm = f
 	acts.view.Ticket.State = domain.StateWaitingForReview
 	st.devices = []postgres.Device{{ID: 1, FCMToken: "good"}, {ID: 2, FCMToken: "dead"}}
-	n.handle(context.Background(), domain.Event{ID: 1, TicketKey: "PAY-1", Data: map[string]any{"to": "waiting_for_review"}})
+	n.handle(context.Background(), domain.Event{WorkspaceID: 1, ID: 1, TicketKey: "PAY-1", Data: map[string]any{"to": "waiting_for_review"}})
 	if sends != 2 || tokenCalls != 1 {
 		t.Fatalf("sends %d token calls %d", sends, tokenCalls)
 	}
 	if len(st.devices) != 1 || st.devices[0].FCMToken != "good" {
 		t.Fatalf("dead token not removed: %+v", st.devices)
 	}
+
+	// A ticket that reaches review quietly is announced only when agnts's
+	// own review lets it through.
+	sends = 0
+	n.handle(context.Background(), domain.Event{WorkspaceID: 1, ID: 2, TicketKey: "PAY-1", Type: domain.EventStateChanged,
+		Data: map[string]any{"to": "waiting_for_review", "quiet": true}})
+	if sends != 0 {
+		t.Fatalf("a quiet arrival was announced: %d sends", sends)
+	}
+	n.handle(context.Background(), domain.Event{WorkspaceID: 1, ID: 3, TicketKey: "PAY-1", Type: domain.EventReadyForReview,
+		Data: map[string]any{"to": "waiting_for_review"}})
+	if sends != 1 {
+		t.Fatalf("ready for review not announced: %d sends", sends)
+	}
 }
 
 func TestLessonsNotification(t *testing.T) {
 	// Data as it comes back from the events table: JSON numbers are float64.
 	ev := func(count float64, titles ...any) domain.Event {
-		return domain.Event{ID: 1, TicketKey: "PAY-1", Type: domain.EventLessons,
+		return domain.Event{WorkspaceID: 1, ID: 1, TicketKey: "PAY-1", Type: domain.EventLessons,
 			Data: map[string]any{"count": count, "ids": []any{float64(5), float64(6)}, "titles": titles}}
 	}
 	n, _, _, tg := setup(t)
@@ -525,7 +539,7 @@ func TestReviewNotification(t *testing.T) {
 	acts.view.Ticket.State, acts.view.Ticket.Revision = domain.StateWaitingForReview, 1
 	acts.view.Review = &domain.Review{Revision: 1, Verdict: domain.VerdictNeedsChanges, Summary: "One caller still truncates.",
 		Findings: []domain.Finding{{Severity: "blocker", Title: "Caller still truncates"}, {Severity: "minor", Title: "No test"}}}
-	ev := domain.Event{ID: 1, TicketKey: "PAY-1", Type: domain.EventReview}
+	ev := domain.Event{WorkspaceID: 1, ID: 1, TicketKey: "PAY-1", Type: domain.EventReview}
 	n.handle(context.Background(), ev)
 	msgs := tg.sent("sendMessage")
 	if len(msgs) != 1 {
@@ -559,7 +573,7 @@ func TestPreviewNotification(t *testing.T) {
 			{ID: "b-phone-after", Viewport: "phone", Side: "after"},
 		},
 		Issues: []domain.PreviewIssue{{Severity: "medium", Description: "Tabs wrap"}}}
-	ev := domain.Event{ID: 1, TicketKey: "PAY-1", Type: domain.EventPreview}
+	ev := domain.Event{WorkspaceID: 1, ID: 1, TicketKey: "PAY-1", Type: domain.EventPreview}
 	n.handle(context.Background(), ev)
 	msgs := tg.sent("sendMessage")
 	if len(msgs) != 1 || !strings.Contains(msgs[0]["text"].(string), "• [medium] Tabs wrap") {
@@ -585,7 +599,7 @@ func TestPreviewNotification(t *testing.T) {
 
 func TestFollowUpsNotification(t *testing.T) {
 	ev := func(count float64, titles ...any) domain.Event {
-		return domain.Event{ID: 1, TicketKey: "PAY-1", Type: domain.EventFollowUps,
+		return domain.Event{WorkspaceID: 1, ID: 1, TicketKey: "PAY-1", Type: domain.EventFollowUps,
 			Data: map[string]any{"count": count, "source": "analyze", "titles": titles}}
 	}
 	n, _, _, tg := setup(t)

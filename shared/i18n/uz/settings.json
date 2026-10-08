@@ -80,6 +80,16 @@
     "reviewDone": "agnts kod sharhi tugaganda",
     "onThisPage": "Ushbu sahifada",
     "secretsHelp": "Jira, GitHub va Claude tokenlari serveringizda shifrlangan holda saqlanadi. Bu sahifa ularni hech qachon koʻrsatmaydi.",
-    "saved": "Sozlamalar saqlandi"
+    "saved": "Sozlamalar saqlandi",
+    "parallelSlots": "Bir vaqtda {n} ta ish",
+    "parallelSlotsHelp": "Ish maydoni slotlari. «Ish maydoni → To‘lov» bo‘limida o‘zgartiriladi.",
+    "claudeMoved": "Claude endi har bir ish maydoni uchun alohida ulanadi.",
+    "claudeOpen": "Ish maydoni → Claude",
+    "selfReview": "Avval ko‘rib chiqish kamchiliklarini tuzatish",
+    "selfReviewHelp": "agnts o‘z ko‘rib chiqishida to‘suvchi yoki jiddiy muammo topsa, siz ko‘rib chiqishingizdan oldin uni bir marta dasturchiga qaytaradi. Yuqoridagi kod ko‘rib chiqishi yoqilgan bo‘lishi kerak.",
+    "autoBrief": "Repozitoriylarni o‘rganish",
+    "autoBriefHelp": "Repozitoriyning birinchi tiketi tahlil qilinganda repozitoriy tavsifini (arxitektura, retseptlar, kelishuvlar) yozish va har 10 ta birlashtirishdan keyin yangilash. Tavsif agentga faqat siz tasdiqlaganingizdan keyin yetadi.",
+    "reflect": "Fikr-mulohazalaringizdan o‘rganish",
+    "reflectHelp": "O‘zgartirish so‘raganingizda yoki ishni sabab bilan rad etganingizda, agnts uning ortidagi umumiy qoidani qidiradi va «Qoidalar» sahifasida taklif qiladi. Siz qabul qilmaguningizcha hech narsa qo‘llanmaydi."
   }
 }

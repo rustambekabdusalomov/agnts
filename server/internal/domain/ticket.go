@@ -46,7 +46,10 @@ func (s TicketSource) RelationSource() RelationSource {
 
 // Ticket is one unit of work agnts takes from intake to merge.
 type Ticket struct {
-	ID          int64
+	ID int64
+	// WorkspaceID is the workspace the ticket belongs to; keys are unique
+	// within it.
+	WorkspaceID int64
 	Key         string
 	Source      TicketSource
 	RepoID      *int64
@@ -94,9 +97,43 @@ type Ticket struct {
 	// SuggestFollowUps turns follow-up suggestions on or off for this
 	// ticket; nil follows Settings.
 	SuggestFollowUps *bool
-	CreatedAt        time.Time
-	UpdatedAt        time.Time
+	// MemberID is whose ticket it is: per-member Claude mode runs it on
+	// that person's account. nil: the workspace's default member.
+	MemberID *int64
+	// CreatedBy is the person who created it, nil for webhooks and agnts.
+	CreatedBy *int64
+	// WaitReason says why a ticket that needs a worker is not running:
+	// WaitBlocked, WaitSlots, WaitServer or WaitClaude ("" when it runs or
+	// does not wait for one). QueuedAt is when it started waiting.
+	WaitReason  WaitReason
+	WaitMessage string // the reason in a sentence
+	// SelfFixes counts the rounds agnts's own review sent findings back to
+	// the coder since a person last asked for changes.
+	SelfFixes int
+	// QuietReview: the ticket reached review without being announced, as
+	// agnts's own review may still send it back; announced when it ends.
+	QuietReview bool
+	// ReplayOf is the done ticket a replay re-runs ("" for other tickets);
+	// BaseSHA is the commit the replay's branch is cut from. Replays are
+	// for evaluation: never pushed, and never shown to other tickets.
+	ReplayOf  string
+	BaseSHA   string
+	QueuedAt  *time.Time
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
+
+// WaitReason is why a ticket waits for a worker.
+type WaitReason string
+
+// Wait reasons, by who can fix them.
+const (
+	WaitNone    WaitReason = ""
+	WaitBlocked WaitReason = "blocked" // relations or a hold: the team
+	WaitSlots   WaitReason = "slots"   // the workspace's slots are in use: the workspace
+	WaitServer  WaitReason = "server"  // the server has no memory left: the platform
+	WaitClaude  WaitReason = "claude"  // the Claude account is at its limit: the workspace
+)
 
 // transitions lists every allowed state change. Anything else is a bug.
 var transitions = map[TicketState][]TicketState{
@@ -201,6 +238,10 @@ type Run struct {
 	FinishedAt  *time.Time
 	Turns       int
 	ExitReason  string
+	// PromptVersion is the version of agnts's prompts the run used.
+	PromptVersion string
+	// FixAttempts counts failing checks sent back to Claude (coding runs).
+	FixAttempts int
 }
 
 // TokenUsage is what one or more Claude invocations used. CostUSD is what
@@ -267,13 +308,15 @@ type FileChange struct {
 
 // Result is what a coding run produced, shown on the review page.
 type Result struct {
-	ID        int64
-	RunID     int64
-	Summary   json.RawMessage
-	Tests     json.RawMessage
-	Lint      string
-	Files     []FileChange
-	Report    string // Markdown, for report kinds
+	ID      int64
+	RunID   int64
+	Summary json.RawMessage
+	Tests   json.RawMessage
+	Lint    string
+	Files   []FileChange
+	Report  string // Markdown, for report kinds
+	// RedFlags are what agnts's scan of the change flagged.
+	RedFlags  []RedFlag
 	CreatedAt time.Time
 }
 
@@ -303,7 +346,14 @@ const (
 
 // Event is one row of the append-only log.
 type Event struct {
-	ID         int64
+	ID int64
+	// WorkspaceID is the workspace the event belongs to, 0 for server-wide
+	// events. Set by the store from the context.
+	WorkspaceID int64
+	// UserID and Username name the person behind the event (from the
+	// context's actor); 0 and "" for agnts itself.
+	UserID     int64
+	Username   string
 	TicketKey  string
 	RunID      *int64
 	Step       string
@@ -346,6 +396,12 @@ const (
 	EventReview         = "review_done"
 	EventPreview        = "preview_done"
 	EventFollowUps      = "follow_ups_suggested"
+	// EventQueued: why a ticket waits for a worker changed (wait_reason).
+	EventQueued = "queued"
+	// EventWorkspace: members, invites or workspace settings changed.
+	EventWorkspace = "workspace_changed"
+	// EventCredits: credits were bought, granted, spent or refunded.
+	EventCredits = "credits_changed"
 	// EventRelations: ordering constraints were found, added or decided.
 	EventRelations = "relations_changed"
 	// EventCollision: a finished change touches the same lines as another
@@ -354,6 +410,15 @@ const (
 	EventCollision = "collision_found"
 	// EventFootprint: the predicted footprint checked against the real diff.
 	EventFootprint = "footprint_checked"
+	// EventBrief: a repository brief was queued, surveyed, approved or edited.
+	EventBrief = "brief_changed"
+	// EventReadyForReview announces a ticket that reached review quietly,
+	// once agnts's own review let it through (data "to" is its state).
+	EventReadyForReview = "review_ready"
+	// EventRedFlags: agnts's scan of a change flagged lines for the reviewer.
+	EventRedFlags = "red_flags"
+	// EventCheckpoint: the drift checkpoint partway through a coding run.
+	EventCheckpoint = "checkpoint"
 	// EventToolchain: toolchains were detected for a repository, or
 	// installed into the shared toolchain volume before a run.
 	EventToolchain = "toolchain"
@@ -362,6 +427,7 @@ const (
 // Repository is a codebase agnts works on.
 type Repository struct {
 	ID             int64
+	WorkspaceID    int64
 	Name           string
 	Kind           string // "jira" or "side"
 	Provider       string // "github" or "gitlab"

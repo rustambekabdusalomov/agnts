@@ -58,7 +58,7 @@ const series = computed(() => [
 const hourLabels = computed(() => hours.value.map((h) => String(h.hour).padStart(2, '0')))
 
 const session5 = computed(() => d.value?.usage.fiveHour.utilization)
-const open = (key: string) => router.push(`/tickets/${key}`)
+const open = (key: string) => router.push({ name: 'ticket', params: { key: key } })
 const fmtMin = (m: number) => (m < 60 ? `${Math.max(0, m)}m` : `${Math.floor(m / 60)}h ${m % 60}m`)
 </script>
 
@@ -66,7 +66,7 @@ const fmtMin = (m: number) => (m < 60 ? `${Math.max(0, m)}m` : `${Math.floor(m /
   <PageHeader :title="greeting" doc="dashboard">
     <div class="actions" style="margin: 0">
       <span v-if="d?.counts.running" class="live">{{ t('nav.live') }}</span>
-      <RouterLink class="btn" to="/analytics">{{ t('dashboard.openAnalytics') }}</RouterLink>
+      <RouterLink class="btn" :to="{ name: 'analytics' }">{{ t('dashboard.openAnalytics') }}</RouterLink>
     </div>
   </PageHeader>
 
@@ -84,12 +84,12 @@ const fmtMin = (m: number) => (m < 60 ? `${Math.max(0, m)}m` : `${Math.floor(m /
         <div class="val">{{ d.counts.running }}</div>
         <div class="note">{{ t('dashboard.runningNote', { n: d.parallel }) }}</div>
       </RouterLink>
-      <RouterLink class="card stat kpi-btn" to="/analytics">
+      <RouterLink class="card stat kpi-btn" :to="{ name: 'analytics' }">
         <div class="lbl">{{ t('dashboard.pushedWeek') }}</div>
         <div class="val">{{ d.week.pushed }} <DeltaTag :cur="d.week.pushed" :prev="d.lastWeek.pushed" good-when-up /></div>
         <div class="note">{{ t('dashboard.pushedNote', { n: d.lastWeek.pushed }) }}</div>
       </RouterLink>
-      <RouterLink class="card stat kpi-btn" to="/usage">
+      <RouterLink class="card stat kpi-btn" :to="{ name: 'usage' }">
         <div class="lbl">{{ t('dashboard.planSession') }}</div>
         <div class="val" :style="{ color: level(session5) === 'warn' ? 'var(--warn-ink)' : level(session5) === 'bad' ? 'var(--bad-ink)' : 'inherit' }">
           {{ session5 == null ? '—' : pct(session5) + '%' }}
@@ -126,7 +126,7 @@ const fmtMin = (m: number) => (m < 60 ? `${Math.max(0, m)}m` : `${Math.floor(m /
       <section class="card span2">
         <div class="ch"><div><h2>{{ t('dashboard.liveTitle') }}</h2><p class="sub">{{ t('dashboard.liveSub') }}</p></div></div>
         <template v-if="d.live.length">
-          <RouterLink v-for="r in d.live" :key="r.ticket.key" class="run-row" :to="`/tickets/${r.ticket.key}`">
+          <RouterLink v-for="r in d.live" :key="r.ticket.key" class="run-row" :to="{ name: 'ticket', params: { key: r.ticket.key } }">
             <div class="rr-top"><span class="tkey">{{ r.ticket.key }}</span><span class="ttitle">{{ r.ticket.title }}</span><StateBadge :state="r.ticket.state" /></div>
             <div class="rr-meta">
               <span>{{ r.model }}</span>
@@ -170,7 +170,7 @@ const fmtMin = (m: number) => (m < 60 ? `${Math.max(0, m)}m` : `${Math.floor(m /
       <section class="card span2">
         <div class="ch">
           <div><h2>{{ t('dashboard.reposTitle') }}</h2><p class="sub">{{ t('dashboard.reposSub') }}</p></div>
-          <RouterLink class="btn btn-s" to="/repos">{{ t('dashboard.allRepos') }}</RouterLink>
+          <RouterLink class="btn btn-s" :to="{ name: 'repos' }">{{ t('dashboard.allRepos') }}</RouterLink>
         </div>
         <div v-if="d.repos.length" class="tw">
           <table class="tbl">
@@ -193,7 +193,7 @@ const fmtMin = (m: number) => (m < 60 ? `${Math.max(0, m)}m` : `${Math.floor(m /
       </section>
 
       <section class="card">
-        <div class="ch"><div><h2>{{ t('dashboard.recentTitle') }}</h2></div><RouterLink class="btn btn-s" to="/logs">{{ t('dashboard.logs') }}</RouterLink></div>
+        <div class="ch"><div><h2>{{ t('dashboard.recentTitle') }}</h2></div><RouterLink class="btn btn-s" :to="{ name: 'logs' }">{{ t('dashboard.logs') }}</RouterLink></div>
         <ul v-if="d.recent.length" class="recent">
           <li v-for="e in d.recent" :key="e.id" @click="e.ticketKey && open(e.ticketKey)">
             <time>{{ fmtTime(e.createdAt, locale).slice(0, 5) }}</time>

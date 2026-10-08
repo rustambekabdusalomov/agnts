@@ -28,5 +28,22 @@ void main() {
       // TODO
     });
 
+    // Ways to do the work that the analysis weighed; exactly one is chosen
+    // List<Approach> approaches
+    test('to test the property `approaches`', () async {
+      // TODO
+    });
+
+    // What the work will deliberately not do
+    // List<String> outOfScope
+    test('to test the property `outOfScope`', () async {
+      // TODO
+    });
+
+    // ShipNotes ship
+    test('to test the property `ship`', () async {
+      // TODO
+    });
+
   });
 }

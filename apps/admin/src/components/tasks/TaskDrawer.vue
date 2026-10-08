@@ -98,7 +98,7 @@ const create = useMutation({
     form.title = ''
     form.description = ''
     files.value = []
-    await router.push(`/tickets/${tk.key}`)
+    await router.push({ name: 'ticket', params: { key: tk.key } })
   },
   onError: (e) => {
     error.value = e instanceof HttpError ? e.message : t('common.error')

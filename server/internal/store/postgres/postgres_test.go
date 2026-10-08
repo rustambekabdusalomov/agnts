@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"os"
@@ -21,15 +22,19 @@ func testDB(t *testing.T) (*Users, *Sessions) {
 	if url == "" {
 		t.Skip("AGNTS_TEST_DATABASE_URL not set")
 	}
-	ctx := context.Background()
+	ctx := domain.System(context.Background())
 	pool, err := Open(ctx, url)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(pool.Close)
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
-	// Down then up proves both directions of every migration work.
+	// Down then up proves both directions of every migration work. Going
+	// back past workspaces needs at most one workspace.
 	if err := Migrate(ctx, pool, "up", log); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := pool.Exec(ctx, `TRUNCATE workspaces CASCADE`); err != nil {
 		t.Fatal(err)
 	}
 	for {
@@ -47,7 +52,29 @@ func testDB(t *testing.T) (*Users, *Sessions) {
 	if err := Migrate(ctx, pool, "up", log); err != nil {
 		t.Fatal(err)
 	}
+	if _, err := DetectTenantRole(ctx, pool); err != nil {
+		t.Fatal(err)
+	}
 	return NewUsers(pool), NewSessions(pool)
+}
+
+var wsSeq int
+
+// testWS returns a context acting in a fresh workspace of the test
+// database, and the workspace's id.
+func testWS(t *testing.T, users *Users) (context.Context, int64) {
+	t.Helper()
+	sys := domain.System(context.Background())
+	wsSeq++
+	owner, err := users.Create(sys, domain.User{Username: fmt.Sprintf("owner-%d-%s", wsSeq, t.Name()), PasswordHash: "h"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	w, err := NewWorkspaces(users.db).Create(sys, NewWorkspace{Name: t.Name(), OwnerID: owner.ID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return domain.WithWorkspace(context.Background(), w.ID), w.ID
 }
 
 func TestUsersAndSessions(t *testing.T) {
@@ -87,9 +114,10 @@ func TestUsersAndSessions(t *testing.T) {
 
 func TestPendingDevicesTelegram(t *testing.T) {
 	users, _ := testDB(t)
-	ctx := context.Background()
+	ctx, ws := testWS(t, users)
+	_ = ws
 	s := NewAgent(users.db)
-	_, _ = s.db.Exec(ctx, `TRUNCATE pending_actions, devices, telegram_messages`)
+	_, _ = s.db.Exec(domain.System(ctx), `TRUNCATE pending_actions, devices, telegram_messages`)
 
 	exp := time.Now().Add(10 * time.Minute)
 	if err := s.CreatePending(ctx, PendingAction{ID: "a1", Origin: domain.OriginMCP, Tool: "approve", TicketKey: "PAY-1",
@@ -121,7 +149,13 @@ func TestPendingDevicesTelegram(t *testing.T) {
 	if err := s.RegisterDevice(ctx, Device{UserID: u.ID, Platform: "ios", FCMToken: "tok", AppVersion: "2"}); err != nil {
 		t.Fatal(err)
 	}
-	ds, _ := s.Devices(ctx)
+	if ds, _ := s.Devices(ctx, ws); len(ds) != 0 {
+		t.Fatalf("a non-member's device: %+v", ds)
+	}
+	if err := NewWorkspaces(users.db).AddMember(domain.System(ctx), ws, u.ID, domain.RoleUser); err != nil {
+		t.Fatal(err)
+	}
+	ds, _ := s.Devices(ctx, ws)
 	if len(ds) != 1 || ds[0].AppVersion != "2" {
 		t.Fatalf("devices: %+v", ds)
 	}
@@ -145,9 +179,10 @@ func TestPendingDevicesTelegram(t *testing.T) {
 
 func TestAnalytics(t *testing.T) {
 	users, _ := testDB(t)
-	ctx := context.Background()
+	ctx, ws := testWS(t, users)
+	_ = ws
 	s := NewAgent(users.db)
-	_, _ = s.db.Exec(ctx, `TRUNCATE tickets, runs, events, repositories, usage_snapshots RESTART IDENTITY CASCADE`)
+	_, _ = s.db.Exec(domain.System(ctx), `TRUNCATE tickets, runs, events, repositories, usage_snapshots RESTART IDENTITY CASCADE`)
 
 	repo, err := s.SaveRepository(ctx, domain.Repository{Name: "api", Kind: "jira", Provider: "github", CloneURL: "https://github.com/a/api.git", DefaultBranch: "main"})
 	if err != nil {
@@ -186,6 +221,21 @@ func TestAnalytics(t *testing.T) {
 		((SELECT id FROM tickets WHERE key='PAY-1'), 'code', 'opus', $1, $2, 12, 'ok'),
 		((SELECT id FROM tickets WHERE key='PAY-2'), 'analyze', 'sonnet', $1, $2, 3, 'checks_failed')`, at(30), at(60)); err != nil {
 		t.Fatal(err)
+	}
+	// PAY-1's coding used prompts v1 and needed one fix; agnts's review found
+	// a major problem and sent it back; the analysis predicted half the files.
+	if _, err := s.db.Exec(ctx, `UPDATE runs SET prompt_version = 'v1', fix_attempts = 1 WHERE stage = 'code'`); err != nil {
+		t.Fatal(err)
+	}
+	for _, q := range []string{
+		`INSERT INTO events (ticket_key, type, origin, data, created_at) VALUES ('PAY-1', 'review_done', 'system', '{"counts":{"major":1,"minor":2}}', $1)`,
+		`INSERT INTO events (ticket_key, type, origin, data, created_at) VALUES ('PAY-1', 'feedback', 'system', '{}', $1)`,
+		`INSERT INTO events (ticket_key, type, origin, data, created_at) VALUES ('PAY-1', 'footprint_checked', 'system', '{"recall":0.5}', $1)`,
+		`INSERT INTO events (ticket_key, type, origin, data, created_at) VALUES ('PAY-1', 'red_flags', 'system', '{"count":2}', $1)`,
+	} {
+		if _, err := s.db.Exec(ctx, q, at(61)); err != nil {
+			t.Fatal(err)
+		}
 	}
 	if _, err := s.db.Exec(ctx, `INSERT INTO usage_snapshots (five_hour, created_at) VALUES (0.3, $1), (0.7, $2)`, at(10), at(70)); err != nil {
 		t.Fatal(err)
@@ -246,11 +296,19 @@ func TestAnalytics(t *testing.T) {
 	if len(a.Spend) != 2 || a.Spend[0].ModelStage != "coding" || a.Spend[0].Calls != 2 || a.Spend[1].Model != "sonnet" {
 		t.Fatalf("spend by stage: %+v", a.Spend)
 	}
+	// Only PAY-1 had a coding run: done first time (agnts's own feedback
+	// does not count against it).
+	want := QualityStats{PromptVersion: "v1", Tickets: 1, ReachedReview: 1, Done: 1, FirstTry: 1, FixAttempts: 1,
+		Serious: 1, FootprintHit: 0.5, RedFlags: 2, SelfFixes: 1}
+	if len(a.Quality) != 1 || a.Quality[0] != want {
+		t.Fatalf("quality: %+v", a.Quality)
+	}
 }
 
 func TestClaudeCalls(t *testing.T) {
 	users, _ := testDB(t)
-	ctx := context.Background()
+	ctx, ws := testWS(t, users)
+	_ = ws
 	s := NewAgent(users.db)
 	if _, err := s.db.Exec(ctx, `INSERT INTO tickets (key, source, title, state, revision, turns, updated_at)
 		VALUES ('PAY-1', 'jira', 't', 'coding', 0, 0, now())`); err != nil {
@@ -300,7 +358,8 @@ func TestClaudeCalls(t *testing.T) {
 
 func TestTopTicketSpend(t *testing.T) {
 	users, _ := testDB(t)
-	ctx := context.Background()
+	ctx, ws := testWS(t, users)
+	_ = ws
 	s := NewAgent(users.db)
 	repo, err := s.SaveRepository(ctx, domain.Repository{Name: "api", Kind: "jira", Provider: "github", CloneURL: "https://github.com/a/api.git", DefaultBranch: "main"})
 	if err != nil {

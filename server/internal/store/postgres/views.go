@@ -19,7 +19,8 @@ func (s *Agent) StateSince(ctx context.Context, keys []string) (map[string]orche
 		return out, nil
 	}
 	rows, err := s.db.Query(ctx, `SELECT DISTINCT ON (t.key) t.key, e.created_at, e.message
-		FROM tickets t JOIN events e ON e.ticket_key = t.key AND e.type = 'state_changed' AND e.data->>'to' = t.state
+		FROM tickets t JOIN events e ON e.ticket_key = t.key AND e.workspace_id = t.workspace_id
+			AND e.type = 'state_changed' AND e.data->>'to' = t.state
 		WHERE t.key = ANY($1) ORDER BY t.key, e.id DESC`, keys)
 	if err != nil {
 		return nil, err
@@ -38,8 +39,8 @@ func (s *Agent) StateSince(ctx context.Context, keys []string) (map[string]orche
 
 // History returns a ticket's state changes, oldest first.
 func (s *Agent) History(ctx context.Context, key string) ([]orchestrator.HistoryItem, error) {
-	rows, err := s.db.Query(ctx, `SELECT created_at, data->>'to', message, origin FROM events
-		WHERE ticket_key = $1 AND type IN ('state_changed', 'answered', 'feedback') AND data ? 'to' ORDER BY id`, key)
+	rows, err := s.db.Query(ctx, `SELECT e.created_at, e.data->>'to', e.message, e.origin, COALESCE(u.username, '') FROM `+eventFrom+`
+		WHERE e.ticket_key = $1 AND e.type IN ('state_changed', 'answered', 'feedback') AND e.data ? 'to' ORDER BY e.id`, key)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +49,7 @@ func (s *Agent) History(ctx context.Context, key string) ([]orchestrator.History
 	for rows.Next() {
 		var h orchestrator.HistoryItem
 		var st, origin string
-		if err := rows.Scan(&h.At, &st, &h.Message, &origin); err != nil {
+		if err := rows.Scan(&h.At, &st, &h.Message, &origin, &h.User); err != nil {
 			return nil, err
 		}
 		h.State, h.Origin = domain.TicketState(st), domain.Origin(origin)
@@ -68,12 +69,12 @@ type LogFilter struct {
 
 // typeCondition maps the Logs page tabs to event rows.
 var typeCondition = map[string]string{
-	"state":    `type = 'state_changed'`,
-	"tool":     `type IN ('claude_tool', 'claude_text')`,
-	"command":  `type IN ('check', 'pushed', 'pr_opened', 'tracker_comment')`,
-	"user":     `origin IN ('web', 'mobile', 'mcp', 'telegram')`,
-	"limit":    `type IN ('rate_limit', 'usage_updated')`,
-	"problems": `level IN ('warn', 'error')`,
+	"state":    `e.type = 'state_changed'`,
+	"tool":     `e.type IN ('claude_tool', 'claude_text')`,
+	"command":  `e.type IN ('check', 'pushed', 'pr_opened', 'tracker_comment')`,
+	"user":     `e.origin IN ('web', 'mobile', 'mcp', 'telegram')`,
+	"limit":    `e.type IN ('rate_limit', 'usage_updated')`,
+	"problems": `e.level IN ('warn', 'error')`,
 }
 
 // ListEvents returns events newest first.
@@ -86,12 +87,11 @@ func (s *Agent) ListEvents(ctx context.Context, f LogFilter) ([]domain.Event, er
 	if c, ok := typeCondition[f.Type]; ok {
 		cond = c
 	}
-	q := `SELECT id, COALESCE(ticket_key, ''), run_id, step, type, level, origin, message, data, duration_ms, created_at
-		FROM events WHERE ` + cond + `
-		  AND ($1 = '' OR ticket_key ILIKE $1 || '%')
-		  AND (NOT $2 OR level = 'error')
-		  AND ($3 = 0 OR id < $3)
-		ORDER BY id DESC LIMIT $4`
+	q := `SELECT ` + eventCols + ` FROM ` + eventFrom + ` WHERE ` + cond + `
+		  AND ($1 = '' OR e.ticket_key ILIKE $1 || '%')
+		  AND (NOT $2 OR e.level = 'error')
+		  AND ($3 = 0 OR e.id < $3)
+		ORDER BY e.id DESC LIMIT $4`
 	rows, err := s.db.Query(ctx, q, f.Key, f.Errors, f.Before, limit)
 	if err != nil {
 		return nil, err
@@ -99,18 +99,35 @@ func (s *Agent) ListEvents(ctx context.Context, f LogFilter) ([]domain.Event, er
 	return scanEvents(rows)
 }
 
+// eventCols and eventFrom select events with the name of the person
+// behind each.
+const (
+	eventCols = `e.id, COALESCE(e.ticket_key, ''), e.run_id, e.step, e.type, e.level, e.origin, e.message, e.data, e.duration_ms, e.created_at,
+	COALESCE(e.workspace_id, 0), COALESCE(e.user_id, 0), COALESCE(u.username, '')`
+	eventFrom = `events e LEFT JOIN users u ON u.id = e.user_id`
+)
+
+func scanEvent(row pgx.Row) (domain.Event, error) {
+	var e domain.Event
+	var level, origin string
+	var data []byte
+	if err := row.Scan(&e.ID, &e.TicketKey, &e.RunID, &e.Step, &e.Type, &level, &origin, &e.Message, &data, &e.DurationMS, &e.CreatedAt,
+		&e.WorkspaceID, &e.UserID, &e.Username); err != nil {
+		return e, notFound(err)
+	}
+	e.Level, e.Origin = domain.Level(level), domain.Origin(origin)
+	_ = json.Unmarshal(data, &e.Data)
+	return e, nil
+}
+
 func scanEvents(rows pgx.Rows) ([]domain.Event, error) {
 	defer rows.Close()
 	var out []domain.Event
 	for rows.Next() {
-		var e domain.Event
-		var level, origin string
-		var data []byte
-		if err := rows.Scan(&e.ID, &e.TicketKey, &e.RunID, &e.Step, &e.Type, &level, &origin, &e.Message, &data, &e.DurationMS, &e.CreatedAt); err != nil {
+		e, err := scanEvent(rows)
+		if err != nil {
 			return nil, err
 		}
-		e.Level, e.Origin = domain.Level(level), domain.Origin(origin)
-		_ = json.Unmarshal(data, &e.Data)
 		out = append(out, e)
 	}
 	return out, rows.Err()
@@ -118,21 +135,16 @@ func scanEvents(rows pgx.Rows) ([]domain.Event, error) {
 
 // ExportEvents streams the last 90 days of events to fn, oldest first.
 func (s *Agent) ExportEvents(ctx context.Context, fn func(domain.Event) error) error {
-	rows, err := s.db.Query(ctx, `SELECT id, COALESCE(ticket_key, ''), run_id, step, type, level, origin, message, data, duration_ms, created_at
-		FROM events WHERE created_at > now() - interval '90 days' ORDER BY id`)
+	rows, err := s.db.Query(ctx, `SELECT `+eventCols+` FROM `+eventFrom+` WHERE e.created_at > now() - interval '90 days' ORDER BY e.id`)
 	if err != nil {
 		return err
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var e domain.Event
-		var level, origin string
-		var data []byte
-		if err := rows.Scan(&e.ID, &e.TicketKey, &e.RunID, &e.Step, &e.Type, &level, &origin, &e.Message, &data, &e.DurationMS, &e.CreatedAt); err != nil {
+		e, err := scanEvent(rows)
+		if err != nil {
 			return err
 		}
-		e.Level, e.Origin = domain.Level(level), domain.Origin(origin)
-		_ = json.Unmarshal(data, &e.Data)
 		if err := fn(e); err != nil {
 			return err
 		}
@@ -272,8 +284,8 @@ func (s *Agent) Week(ctx context.Context, from time.Time) (WeekStats, error) {
 
 // RecentEvents returns the newest n events that matter to a person.
 func (s *Agent) RecentEvents(ctx context.Context, n int) ([]domain.Event, error) {
-	rows, err := s.db.Query(ctx, `SELECT id, COALESCE(ticket_key, ''), run_id, step, type, level, origin, message, data, duration_ms, created_at
-		FROM events WHERE type NOT IN ('claude_text', 'claude_tool', 'rate_limit') ORDER BY id DESC LIMIT $1`, n)
+	rows, err := s.db.Query(ctx, `SELECT `+eventCols+` FROM `+eventFrom+`
+		WHERE e.type NOT IN ('claude_text', 'claude_tool', 'rate_limit') ORDER BY e.id DESC LIMIT $1`, n)
 	if err != nil {
 		return nil, err
 	}

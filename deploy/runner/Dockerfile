@@ -56,7 +56,7 @@ COPY preview/package.json /opt/agnts-shot/package.json
 RUN cd /opt/agnts-shot \
  && export PATH=/opt/claude/node/bin:$PATH \
  && npm install --omit=dev --no-audit --no-fund \
- && npx playwright install --with-deps chromium \
+ && npx playwright install --with-deps --only-shell chromium \
  && npm cache clean --force \
  && rm -rf /var/lib/apt/lists/* /root/.npm
 COPY preview/agnts-shot.mjs /opt/agnts-shot/agnts-shot.mjs

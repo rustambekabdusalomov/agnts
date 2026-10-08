@@ -5,6 +5,7 @@
 // ignore_for_file: unused_element
 import 'package:agnts_api/src/model/rule_question.dart';
 import 'package:agnts_api/src/model/rule_status.dart';
+import 'package:agnts_api/src/model/rule_kind.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -23,6 +24,12 @@ class Rule {
   Rule({
 
     required  this.id,
+
+    required  this.kind,
+
+     this.sourceTicket,
+
+     this.reason,
 
      this.repoId,
 
@@ -64,6 +71,44 @@ class Rule {
 
 
   final int id;
+
+
+
+  @JsonKey(
+    
+    name: r'kind',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final RuleKind kind;
+
+
+
+      /// For a rule agnts suggested: the ticket whose feedback taught it
+  @JsonKey(
+    
+    name: r'sourceTicket',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? sourceTicket;
+
+
+
+      /// For a rule agnts suggested: which feedback shows it
+  @JsonKey(
+    
+    name: r'reason',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? reason;
 
 
 
@@ -259,6 +304,9 @@ class Rule {
     @override
     bool operator ==(Object other) => identical(this, other) || other is Rule &&
       other.id == id &&
+      other.kind == kind &&
+      other.sourceTicket == sourceTicket &&
+      other.reason == reason &&
       other.repoId == repoId &&
       other.repoName == repoName &&
       other.title == title &&
@@ -278,6 +326,9 @@ class Rule {
     @override
     int get hashCode =>
         id.hashCode +
+        kind.hashCode +
+        sourceTicket.hashCode +
+        reason.hashCode +
         repoId.hashCode +
         repoName.hashCode +
         title.hashCode +

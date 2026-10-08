@@ -145,6 +145,13 @@ void main() {
       // TODO
     });
 
+    // Re-run a done code or test ticket with today's agnts, from the commit it started from, to compare the two (Analytics → Replay evaluation). The replay is a new local task that is never pushed.
+    //
+    //Future<Ticket> replayTicket(String key) async
+    test('test replayTicket', () async {
+      // TODO
+    });
+
     // Send the ticket back to coding with feedback
     //
     //Future<Ticket> requestChanges(String key, RequestChangesRequest requestChangesRequest) async
@@ -181,6 +188,13 @@ void main() {
     //
     //Future<Ticket> setTicketKind(String key, TicketKindInput ticketKindInput) async
     test('test setTicketKind', () async {
+      // TODO
+    });
+
+    // Make a member the ticket's member (per-member Claude mode runs it on their account)
+    //
+    //Future<Ticket> setTicketMember(String key, SetTicketMemberRequest setTicketMemberRequest) async
+    test('test setTicketMember', () async {
       // TODO
     });
 

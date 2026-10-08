@@ -4,8 +4,9 @@ import { badgeSvg, badgeTitle } from './tabBadge'
 describe('tab badge', () => {
   it('is the plain mark when idle', () => {
     const svg = badgeSvg(0, false)
-    expect(svg).not.toContain('<circle')
-    expect(svg).toContain('prefers-color-scheme: dark')
+    expect(svg).toContain('#FF5A1F')
+    expect(svg).not.toContain('#E5484D')
+    expect(svg).not.toContain('#3E63DD')
   })
 
   it('shows a red count when tickets need you, capped at 9+', () => {

@@ -47,3 +47,10 @@ func (s *Sessions) DeleteExpired(ctx context.Context, now time.Time) (int64, err
 	tag, err := s.db.Exec(ctx, `DELETE FROM sessions WHERE expires_at <= $1`, now)
 	return tag.RowsAffected(), err
 }
+
+// DeleteForUser ends every session of a user except keep (a token hash;
+// nil ends them all).
+func (s *Sessions) DeleteForUser(ctx context.Context, userID int64, keep []byte) error {
+	_, err := s.db.Exec(ctx, `DELETE FROM sessions WHERE user_id = $1 AND ($2::bytea IS NULL OR token_hash <> $2)`, userID, keep)
+	return err
+}

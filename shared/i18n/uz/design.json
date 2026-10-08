@@ -1,0 +1,15 @@
+{
+  "design": {
+    "approach": "Yondashuv",
+    "fit": "Kod bazasiga mosligi",
+    "alternatives": "{n} ta muqobil ko‘rib chiqildi",
+    "whyNot": "Nega emas",
+    "outOfScope": "Vazifa doirasidan tashqari",
+    "shipping": "Chiqarish",
+    "ship_migrations": "Migratsiyalar",
+    "ship_compatibility": "Moslik",
+    "ship_rollout": "Chiqarish tartibi",
+    "ship_rollback": "Orqaga qaytarish",
+    "deviations": "Rejadan chetlanishlar"
+  }
+}

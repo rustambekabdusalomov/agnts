@@ -26,7 +26,7 @@ function useResetText() {
 
 <template>
   <RouterLink
-    to="/usage"
+    :to="{ name: 'usage' }"
     class="side-usage"
     :aria-label="`${t('nav.session')} ${pct(five?.utilization)}%`"
     :data-tip="prefs.thin ? `${t('nav.session')} ${pct(five?.utilization)}% · ${resetText(five?.resetsAt)} · ${t('nav.week')} ${pct(week?.utilization)}%` : undefined"

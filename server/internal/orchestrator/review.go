@@ -140,7 +140,7 @@ func (o *Orchestrator) review(ctx context.Context, s domain.Settings, t domain.T
 	var a *Analysis
 	if r, err := o.store.LatestResult(ctx, t.ID, domain.StageAnalyze); err == nil {
 		if x, err := parseAnalysis(r.Summary); err == nil {
-			a, d.Plan = &x, x.Plan
+			a, d.Plan, d.Design = &x, x.Plan, &x
 		}
 	}
 	if d.Answers, err = o.store.Questions(ctx, t.ID); err != nil {
@@ -151,11 +151,15 @@ func (o *Orchestrator) review(ctx context.Context, s domain.Settings, t domain.T
 	}
 	var sum Summary
 	_ = json.Unmarshal(res.Summary, &sum)
-	d.WorkSummary, d.Notes = sum.Summary, sum.Notes
+	d.WorkSummary, d.Notes, d.Deviations = sum.Summary, sum.Notes, sum.Deviations
 	_ = json.Unmarshal(res.Tests, &d.CheckSteps)
 	d.Files = res.Files
 	if len(d.Files) > reviewMaxFiles {
 		d.Files = d.Files[:reviewMaxFiles]
+	}
+	d.RedFlags = res.RedFlags
+	if a != nil && a.Footprint != nil {
+		d.Unexpected = unexpectedFiles(a.Footprint.Clean().Files, res.Files)
 	}
 
 	branch := ""
@@ -170,6 +174,7 @@ func (o *Orchestrator) review(ctx context.Context, s domain.Settings, t domain.T
 		return err
 	}
 	defer o.closeWorkspace(ctx, t, ws)
+	d.Context = o.contextFiles(ctx, ws, t, repo)
 	if report {
 		err = ws.WriteFile(ctx, ReportPath, []byte(res.Report))
 	} else {
@@ -196,8 +201,11 @@ func (o *Orchestrator) review(ctx context.Context, s domain.Settings, t domain.T
 	if _, err := o.claude(ctx, rs, ws, &t, run, domain.ModelReview, prompt, ""); err != nil {
 		var stop *stopError
 		if errors.As(err, &stop) {
-			// Rate limited: claimed again once usage allows.
-			o.setReviewState(context.WithoutCancel(ctx), t, domain.ReviewPending)
+			// Rate limited: claimed again once usage allows, but nobody
+			// waits for it to start reviewing the change themselves.
+			bg := context.WithoutCancel(ctx)
+			o.setReviewState(bg, t, domain.ReviewPending)
+			o.announceQuiet(bg, t.Key, run, "agnts's code review waits for the Claude limit")
 		}
 		return err
 	}
@@ -217,12 +225,18 @@ func (o *Orchestrator) review(ctx context.Context, s domain.Settings, t domain.T
 		return err
 	}
 	ev := reviewEvent(t.Key, run, rv)
-	_, err = o.store.UpdateTicket(ctx, t.Key, &ev, func(x *domain.Ticket) {
+	if _, err = o.store.UpdateTicket(ctx, t.Key, &ev, func(x *domain.Ticket) {
 		if x.ReviewState == domain.ReviewRunning && x.Revision == t.Revision {
 			x.ReviewState = domain.ReviewDone
 		}
-	})
-	return err
+	}); err != nil {
+		return err
+	}
+	if report {
+		o.announceQuiet(ctx, t.Key, run, "agnts's review: "+strings.ReplaceAll(rv.Verdict, "_", " "))
+		return nil
+	}
+	return o.afterReview(ctx, s, t, run, rv)
 }
 
 // reviewEvent is the log line for a finished review; the notifier
@@ -259,6 +273,7 @@ func (o *Orchestrator) setReviewState(ctx context.Context, t domain.Ticket, stat
 
 // reviewFailed records a failed review run. The ticket stays in review.
 func (o *Orchestrator) reviewFailed(ctx context.Context, t domain.Ticket, run domain.Run, cause error) {
+	defer o.announceQuiet(ctx, t.Key, &run, "agnts's code review failed")
 	if _, err := o.store.UpdateTicket(ctx, t.Key, &domain.Event{
 		TicketKey: t.Key, RunID: &run.ID, Type: domain.EventError, Level: domain.LevelWarn, Step: string(domain.StageReview),
 		Message: "the code review failed: " + cause.Error(),
@@ -286,4 +301,19 @@ func (o *Orchestrator) latestReview(ctx context.Context, ticketID int64) (*domai
 	}
 	rv.CreatedAt = r.CreatedAt
 	return &rv, nil
+}
+
+// unexpectedFiles lists changed files the analysis did not predict, at
+// most 20. Without a prediction there is nothing to compare.
+func unexpectedFiles(predicted []string, changed []domain.FileChange) []string {
+	if len(predicted) == 0 {
+		return nil
+	}
+	var out []string
+	for _, f := range changed {
+		if !slices.Contains(predicted, f.Path) && len(out) < 20 {
+			out = append(out, f.Path)
+		}
+	}
+	return out
 }

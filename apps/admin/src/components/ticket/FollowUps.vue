@@ -6,6 +6,7 @@ import { api, HttpError, unwrap } from '../../api/client'
 import { KINDS, type FollowUpSuggestion, type FollowUps, type FollowUpsMode, type Ticket, type TicketKind } from '../../api/types'
 import { useUi } from '../../stores/ui'
 import StateBadge from '../StateBadge.vue'
+import CheckBox from '../form/CheckBox.vue'
 import InputSelect from '../form/InputSelect.vue'
 import { useIntegrations } from '../integrations/useIntegrations'
 import { useTr } from '../../composables/useTranslation'
@@ -121,12 +122,7 @@ const dismiss = useMutation({
     <ul v-if="open.length" class="fu-list">
       <li v-for="s in open" :key="s.id" class="fu-item" :class="{ 'fu-wait': !s.ready }">
         <div class="fu-row">
-          <input
-            v-model="edits[s.id].picked"
-            type="checkbox"
-            :disabled="!s.ready"
-            :aria-label="t('followUps.pick', { title: s.title })"
-          >
+          <CheckBox v-model="edits[s.id].picked" class="fu-check" :disabled="!s.ready" :label="t('followUps.pick', { title: s.title })" />
           <div class="fu-main">
             <div class="fu-tags">
               <span class="badge" :class="`b-${s.type === 'prerequisite' ? 'warn' : s.type === 'gap' ? 'bad' : 'info'}`">{{ t(`followUps.type_${s.type}`) }}</span>
@@ -165,7 +161,7 @@ const dismiss = useMutation({
       <h3 class="fu-h3">{{ t('followUps.children') }}</h3>
       <ul class="fu-kids">
         <li v-for="c in children" :key="c.key">
-          <RouterLink :to="`/tickets/${c.key}`">{{ c.key }}</RouterLink>
+          <RouterLink :to="{ name: 'ticket', params: { key: c.key } }">{{ c.key }}</RouterLink>
           <span class="fu-kid-title">{{ c.title }}</span>
           <StateBadge :state="c.state" :kind="c.kind" />
         </li>
@@ -188,7 +184,7 @@ const dismiss = useMutation({
 .fu-item { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
 .fu-wait { opacity: 0.75; }
 .fu-row { display: flex; gap: 12px; align-items: flex-start; }
-.fu-row > input[type='checkbox'] { margin-top: 4px; width: 18px; height: 18px; flex: none; }
+.fu-check { margin-top: 4px; flex: none; }
 .fu-main { flex: 1; min-width: 0; }
 .fu-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .fu-src { font-size: 12.5px; color: var(--ink-3); font-weight: 600; }

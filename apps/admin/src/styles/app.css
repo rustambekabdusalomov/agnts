@@ -1,8 +1,16 @@
 /* Sign-in page. Everything else uses the demo's classes in demo.css. */
 .login-wrap { min-height: 100vh; display: grid; place-content: center; gap: 18px; padding: 32px 16px; background: radial-gradient(ellipse 70% 50% at 50% 0%, var(--primary-soft), transparent 70%), var(--bg); }
 .login { width: min(400px, calc(100vw - 32px)); display: flex; flex-direction: column; gap: 16px; padding: 30px 28px 28px; border-radius: 18px; box-shadow: 0 24px 48px -28px var(--shadow); }
-.login-brand { display: flex; align-items: center; gap: 12px; padding-bottom: 18px; border-bottom: 1px solid var(--line-2); }
-.login-brand .brand-name { font-size: 22px; }
+.login-brand { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding-bottom: 18px; border-bottom: 1px solid var(--line-2); }
+/* The sidebar: the wordmark when open, the square mark when thin. */
+.brand-logo { display: block; flex: none; }
+/* The open sidebar's brand row is exactly as tall as the page header, so
+   their bottom borders meet in one line. */
+:root { --top-h: 69px; }
+.top { min-height: var(--top-h); }
+.shell:not(.thin) .brandbox { flex: none; height: var(--top-h); padding: 0 24px; }
+.brandbox .brand-mark { display: none; }
+.thin .brandbox .brand-mark { display: block; }
 .login-head h1 { font-family: var(--display); font-size: 24px; line-height: 1.15; margin: 4px 0 0; }
 .login-head p { margin: 6px 0 0; color: var(--ink-3); font-size: 14px; line-height: 1.45; }
 .login .field { gap: 7px; }
@@ -155,8 +163,7 @@ a.mem-name:hover { color: var(--primary-ink); }
 .quiz-text { margin: 0 0 8px; font-weight: 600; }
 .quiz-opts { display: grid; gap: 6px; }
 .quiz-opt { text-align: left; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; }
-.quiz-opt:hover:not(:disabled) { background: var(--hover); }
-.quiz-opt:disabled { cursor: default; }
+.quiz-opt:not(.dis):hover { background: var(--hover); }
 .quiz-opt.right { border-color: var(--ok); background: var(--ok-soft); color: var(--ok-ink); }
 .quiz-opt.wrong { border-color: var(--bad); background: var(--bad-soft); color: var(--bad-ink); }
 .quiz-opt.dim { opacity: .6; }
@@ -202,7 +209,6 @@ a.mem-name:hover { color: var(--primary-ink); }
 .report table { border-collapse: collapse; margin: 0 0 .8em; display: block; overflow-x: auto; }
 .report th, .report td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; }
 .report a { color: var(--primary-ink); }
-.check-row { display: flex; align-items: center; gap: 8px; font-size: 14.5px; cursor: pointer; }
 
 /* Sidebars are a fixed-width column: long unbroken text (branch names, URLs,
    file paths, error output) must wrap inside them instead of widening the
@@ -214,3 +220,106 @@ a.mem-name:hover { color: var(--primary-ink); }
 /* Ticket page: the sidebar is taller than the screen, so it scrolls with the
    page (one scroll) instead of sticking with a scrollbar of its own. */
 .tk-side { position: static; }
+
+/* Sign-up, invites, links from emails and the workspace chooser. */
+.login-links { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13.5px; color: var(--ink-3); }
+.login-links a { color: var(--primary-ink); font-weight: 600; }
+.link-btn { border: 0; padding: 0; background: none; color: var(--primary-ink); font: inherit; font-weight: 600; cursor: pointer; }
+.login-ok { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--ok-soft); color: var(--ok-ink); font-size: 13.5px; font-weight: 600; line-height: 1.4; }
+.login-note { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--primary-soft); color: var(--primary-ink); font-size: 13.5px; line-height: 1.4; }
+.login .fhelp { font-size: 12.5px; color: var(--ink-3); }
+.ws-list { display: flex; flex-direction: column; gap: 8px; }
+.ws-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.ws-item b { display: block; font-size: 14.5px; }
+.ws-item small { color: var(--ink-3); }
+.ws-av { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px; background: var(--primary-soft); color: var(--primary-ink); font-weight: 700; font-size: 13px; text-transform: uppercase; }
+.ws-main { display: flex; align-items: center; gap: 12px; min-width: 0; }
+
+/* Workspace switcher in the top bar. */
+.ws-menu { position: relative; }
+.ws-btn { display: flex; align-items: center; gap: 8px; max-width: 260px; height: 36px; padding: 0 10px 0 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; }
+.ws-btn .ws-av { width: 24px; height: 24px; font-size: 11px; border-radius: 6px; }
+.ws-btn span.nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ws-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; flex: none; }
+.ws-dd { position: absolute; z-index: 30; top: calc(100% + 6px); left: 0; min-width: 260px; padding: 6px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: 0 20px 40px -20px var(--shadow); }
+.ws-opt { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px; border: 0; border-radius: 8px; background: none; color: var(--ink); font: inherit; font-size: 13.5px; text-align: left; cursor: pointer; }
+.ws-opt:hover, .ws-opt[aria-current="true"] { background: var(--hover); }
+.ws-opt small { margin-left: auto; color: var(--ink-3); font-size: 12px; }
+.ws-opt .ws-av { width: 26px; height: 26px; font-size: 11px; border-radius: 7px; }
+.ws-sep { height: 1px; margin: 6px 4px; background: var(--line-2); }
+.queue-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; background: var(--hover); color: var(--ink-2); font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.queue-pill.warn { background: var(--warn-soft); color: var(--warn-ink); }
+
+/* Why a ticket waits, on its page. */
+.wait-banner { display: flex; gap: 12px; align-items: flex-start; margin: 0 0 16px; padding: 12px 14px; border-radius: 12px; background: var(--warn-soft); color: var(--warn-ink); }
+.wait-banner.server { background: var(--primary-soft); color: var(--primary-ink); }
+.wait-banner svg { flex: none; width: 20px; height: 20px; margin-top: 1px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.wait-banner b { display: block; margin-bottom: 2px; }
+.wait-banner p { margin: 0; font-size: 13.5px; line-height: 1.45; }
+
+/* Tabs of a settings page. */
+.page-tabs { display: flex; gap: 4px; margin: 0 0 18px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.page-tab { padding: 10px 14px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--ink-3); font: inherit; font-weight: 600; font-size: 14px; cursor: pointer; white-space: nowrap; }
+.page-tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--primary); }
+.stack { display: flex; flex-direction: column; gap: 16px; max-width: 860px; }
+.row-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; font-size: 14px; }
+.kv dt { color: var(--ink-3); }
+.kv dd { margin: 0; }
+.mono-box { display: block; padding: 10px 12px; border-radius: 10px; background: var(--field); border: 1px solid var(--line); font-family: var(--mono); font-size: 13px; word-break: break-all; }
+.stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.stat-card { padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.stat-card .v { font-family: var(--display); font-size: 22px; font-weight: 700; }
+.stat-card .l { color: var(--ink-3); font-size: 12.5px; }
+.tbl-wrap { overflow-x: auto; }
+
+/* The workspaces page: a top bar that keeps language, theme and sign-out in
+   view, then the workspace cards beside the create panel. */
+.acct { min-height: 100vh; background: radial-gradient(ellipse 70% 40% at 50% 0%, var(--primary-soft), transparent 70%), var(--bg); }
+.acct-top { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; padding: 12px 32px; border-bottom: 1px solid var(--line-2); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px); }
+.acct-top .acct-prefs { margin-left: auto; }
+.acct-prefs .seg-b { min-height: 30px; padding: 0 10px; font-size: 13px; }
+.acct-user { display: flex; align-items: center; gap: 8px; padding-left: 14px; border-left: 1px solid var(--line-2); }
+.acct-user .ws-av { width: 30px; height: 30px; border-radius: 50%; font-size: 12px; }
+.acct-nm { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 600; }
+.acct-main { max-width: 1160px; margin: 0 auto; padding: 36px 32px 48px; }
+.acct-head h1 { margin: 0; font-family: var(--display); font-size: 28px; line-height: 1.15; }
+.acct-head p { margin: 6px 0 0; max-width: 620px; color: var(--ink-3); font-size: 15px; line-height: 1.45; }
+.acct-cols { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; align-items: start; margin-top: 24px; }
+.ws-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+.ws-card { display: flex; flex-direction: column; gap: 12px; padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--ink); text-decoration: none; transition: border-color .15s, box-shadow .15s, transform .15s; }
+.ws-card:hover { border-color: var(--primary); box-shadow: 0 14px 28px -22px var(--shadow); transform: translateY(-1px); }
+.ws-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.ws-card-top { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.ws-av-lg { width: 42px; height: 42px; border-radius: 11px; font-size: 15px; }
+.ws-card-nm { min-width: 0; }
+.ws-card-nm b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 16px; }
+.ws-card-nm small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-3); font-size: 12.5px; }
+.ws-card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.ws-card-meta { color: var(--ink-3); font-size: 13.5px; }
+.ws-card-go { margin-top: auto; color: var(--primary-ink); font-size: 13.5px; font-weight: 700; }
+.ws-empty h2, .ws-create h2 { margin: 0; font-size: 17px; }
+.ws-empty p { margin: 6px 0 0; color: var(--ink-3); font-size: 14px; line-height: 1.45; }
+.ws-create { position: sticky; top: 84px; display: flex; flex-direction: column; gap: 14px; }
+.ws-create .sub { margin: 4px 0 0; }
+.ws-create .cfg-in { width: 100%; max-width: none; }
+.ws-create .fhelp { font-size: 12.5px; color: var(--ink-3); }
+@media (max-width: 900px) {
+  .acct-cols { grid-template-columns: minmax(0, 1fr); }
+  .ws-create { position: static; }
+}
+@media (max-width: 600px) {
+  .acct-top { position: static; padding: 10px 16px; }
+  .acct-user { order: 2; margin-left: auto; }
+  .acct-top .acct-prefs { order: 3; width: 100%; margin-left: 0; justify-content: flex-start; }
+  .acct-main { padding: 24px 16px 40px; }
+  .acct-head h1 { font-size: 24px; }
+  .acct-user { padding-left: 0; border-left: 0; }
+  .acct-nm { display: none; }
+}
+
+/* Viewers: action areas render disabled, and a note says why. */
+.ro-fs { min-width: 0; margin: 0; padding: 0; border: 0; }
+.ro-fs:disabled .btn, .ro-fs:disabled .tab, .ro-fs:disabled input, .ro-fs:disabled select, .ro-fs:disabled textarea { cursor: not-allowed; }
+.ro-banner { display: flex; align-items: center; gap: 10px; margin: 0 0 16px; padding: 10px 14px; border-radius: 12px; background: var(--warn-soft); color: var(--warn-ink); font-size: 14px; font-weight: 600; }
+.ro-banner svg { flex: none; width: 18px; height: 18px; }

@@ -14,6 +14,7 @@ import '../../main.dart' show appVersion, signOut;
 import '../../theme.dart';
 import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
+import '../../widgets/workspace.dart';
 
 /// Profile, usage, appearance, default models, push settings, integrations and repositories.
 class MoreScreen extends ConsumerWidget {
@@ -27,6 +28,8 @@ class MoreScreen extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
     final prefs = ref.watch(prefsProvider);
     final session = ref.watch(sessionProvider).value;
+    final workspace = ref.watch(currentWorkspaceProvider);
+    final workspaces = ref.watch(meProvider).value?.workspaces?.length ?? 0;
     final lang = prefs.locale?.languageCode;
 
     Widget group(List<Widget> rows) => Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: ListGroup(children: rows));
@@ -42,6 +45,7 @@ class MoreScreen extends ConsumerWidget {
             ref.invalidate(integrationsProvider);
             ref.invalidate(reposProvider);
             ref.invalidate(lessonsProvider);
+            ref.invalidate(meProvider);
           },
           child: ListView(padding: const EdgeInsets.only(bottom: 24), children: [
             PageHeader(title: l.mobileMore, actions: [
@@ -70,6 +74,18 @@ class MoreScreen extends ConsumerWidget {
                   ]),
                 ),
               ])),
+              const SizedBox(height: 10),
+            ],
+            // The workspace everything here belongs to; tap to switch.
+            if (workspace != null) ...[
+              group([
+                ListRow(
+                  title: l.wsTitle,
+                  subtitle: roleLabel(l, workspace.role),
+                  value: workspace.name,
+                  onTap: workspaces > 1 ? () => showWorkspaceSheet(context, ref) : null,
+                ),
+              ]),
               const SizedBox(height: 10),
             ],
             // Plan usage (.u-row, .bar, .u-foot)

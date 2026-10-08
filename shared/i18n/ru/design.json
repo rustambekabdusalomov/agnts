@@ -1,0 +1,15 @@
+{
+  "design": {
+    "approach": "Подход",
+    "fit": "Соответствие коду",
+    "alternatives": "{n, plural, one {Рассмотрена # альтернатива} few {Рассмотрены # альтернативы} many {Рассмотрено # альтернатив} other {Рассмотрено # альтернативы}}",
+    "whyNot": "Почему нет",
+    "outOfScope": "Вне рамок задачи",
+    "shipping": "Выкатка",
+    "ship_migrations": "Миграции",
+    "ship_compatibility": "Совместимость",
+    "ship_rollout": "Порядок выкатки",
+    "ship_rollback": "Откат",
+    "deviations": "Отступления от плана"
+  }
+}

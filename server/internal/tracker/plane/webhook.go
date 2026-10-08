@@ -185,15 +185,18 @@ func Sync(ctx context.Context, c *Client, projects Projects, ing Ingester, origi
 
 // Reconcile syncs now and then every interval, catching webhook
 // deliveries Plane dropped. Ingest is idempotent.
-func Reconcile(ctx context.Context, c *Client, projects Projects, ing Ingester, every time.Duration, log *slog.Logger) {
+// each calls fn once per workspace, with a context acting in it.
+func Reconcile(ctx context.Context, c *Client, projects Projects, ing Ingester, every time.Duration, each func(context.Context, func(context.Context)), log *slog.Logger) {
 	run := func() {
-		_, n, err := Sync(ctx, c, projects, ing, domain.OriginSystem)
-		if err != nil && !errors.Is(err, ErrNotConnected) && ctx.Err() == nil {
-			log.Warn("plane reconcile", "err", err)
-		}
-		if n > 0 {
-			log.Info("plane reconcile picked up missed work items", "count", n)
-		}
+		each(ctx, func(ctx context.Context) {
+			_, n, err := Sync(ctx, c, projects, ing, domain.OriginSystem)
+			if err != nil && !errors.Is(err, ErrNotConnected) && ctx.Err() == nil {
+				log.Warn("plane reconcile", "workspace", domain.WorkspaceOf(ctx), "err", err)
+			}
+			if n > 0 {
+				log.Info("plane reconcile picked up missed work items", "workspace", domain.WorkspaceOf(ctx), "count", n)
+			}
+		})
 	}
 	run()
 	t := time.NewTicker(every)

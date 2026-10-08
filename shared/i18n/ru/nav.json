@@ -47,6 +47,11 @@
     "learnQueue": "Очередь обучения",
     "rules": "Правила",
     "syncPlane": "Синхронизировать Plane",
-    "syncedPlane": "Plane синхронизирован: открыто {found}, новых {created}"
+    "syncedPlane": "Plane синхронизирован: открыто {found}, новых {created}",
+    "workspace": "Пространство",
+    "profile": "Профиль",
+    "platform": "Консоль оператора",
+    "people": "Люди",
+    "account": "Аккаунт"
   }
 }

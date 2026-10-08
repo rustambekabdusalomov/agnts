@@ -27,6 +27,8 @@ abstract class _$EventCWProxy {
 
   Event durationMs(int? durationMs);
 
+  Event user(String? user);
+
   Event createdAt(DateTime createdAt);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Event(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -46,6 +48,7 @@ abstract class _$EventCWProxy {
     String message,
     Map<String, Object> data,
     int? durationMs,
+    String? user,
     DateTime createdAt,
   });
 }
@@ -87,6 +90,9 @@ class _$EventCWProxyImpl implements _$EventCWProxy {
   Event durationMs(int? durationMs) => this(durationMs: durationMs);
 
   @override
+  Event user(String? user) => this(user: user);
+
+  @override
   Event createdAt(DateTime createdAt) => this(createdAt: createdAt);
 
   @override
@@ -107,6 +113,7 @@ class _$EventCWProxyImpl implements _$EventCWProxy {
     Object? message = const $CopyWithPlaceholder(),
     Object? data = const $CopyWithPlaceholder(),
     Object? durationMs = const $CopyWithPlaceholder(),
+    Object? user = const $CopyWithPlaceholder(),
     Object? createdAt = const $CopyWithPlaceholder(),
   }) {
     return Event(
@@ -150,6 +157,10 @@ class _$EventCWProxyImpl implements _$EventCWProxy {
           ? _value.durationMs
           // ignore: cast_nullable_to_non_nullable
           : durationMs as int?,
+      user: user == const $CopyWithPlaceholder()
+          ? _value.user
+          // ignore: cast_nullable_to_non_nullable
+          : user as String?,
       createdAt: createdAt == const $CopyWithPlaceholder()
           ? _value.createdAt
           // ignore: cast_nullable_to_non_nullable
@@ -206,6 +217,7 @@ Event _$EventFromJson(
           (v as Map<String, dynamic>).map((k, e) => MapEntry(k, e as Object)),
     ),
     durationMs: $checkedConvert('durationMs', (v) => (v as num?)?.toInt()),
+    user: $checkedConvert('user', (v) => v as String?),
     createdAt: $checkedConvert('createdAt', (v) => DateTime.parse(v as String)),
   );
   return val;
@@ -222,6 +234,7 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
   'message': instance.message,
   'data': instance.data,
   'durationMs': ?instance.durationMs,
+  'user': ?instance.user,
   'createdAt': instance.createdAt.toIso8601String(),
 };
 

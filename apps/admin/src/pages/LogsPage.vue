@@ -3,7 +3,7 @@ import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
-import { api, unwrap } from '../api/client'
+import { api, unwrap, apiPath } from '../api/client'
 import { RUNNING, type TicketState } from '../api/types'
 import ChartLegend from '../components/charts/ChartLegend.vue'
 import EventTypeBadge from '../components/logs/EventTypeBadge.vue'
@@ -112,8 +112,8 @@ const pretty = (data: Record<string, unknown>) => (Object.keys(data).length ? JS
   <PageHeader :title="t('logs.title')" doc="logs">
     <div class="actions" style="margin: 0">
       <span v-if="running" class="live">{{ t('logs.live') }}</span>
-      <a class="btn" href="/api/events/export?format=json" download>{{ t('logs.exportJson') }}</a>
-      <a class="btn" href="/api/events/export?format=csv" download>{{ t('logs.exportCsv') }}</a>
+      <a class="btn" :href="apiPath('/events/export') + '?format=json'" download>{{ t('logs.exportJson') }}</a>
+      <a class="btn" :href="apiPath('/events/export') + '?format=csv'" download>{{ t('logs.exportCsv') }}</a>
     </div>
   </PageHeader>
 
@@ -192,7 +192,7 @@ const pretty = (data: Record<string, unknown>) => (Object.keys(data).length ? JS
             <tr class="ev" :class="`lv-${e.level}`" tabindex="0" :aria-expanded="!!open[e.id]" @click="toggle(e.id)" @keydown.enter="toggle(e.id)">
               <td class="ts">{{ fmtTime(e.createdAt, locale) }}</td>
               <td>
-                <RouterLink v-if="e.ticketKey" class="tkey" :to="`/tickets/${e.ticketKey}`" @click.stop>{{ e.ticketKey }}</RouterLink>
+                <RouterLink v-if="e.ticketKey" class="tkey" :to="{ name: 'ticket', params: { key: e.ticketKey } }" @click.stop>{{ e.ticketKey }}</RouterLink>
               </td>
               <td class="muted">{{ e.step }}</td>
               <td><EventTypeBadge :event="e" /></td>

@@ -29,6 +29,12 @@ abstract class _$SettingsCWProxy {
 
   Settings visualCheck(bool? visualCheck);
 
+  Settings autoBrief(bool? autoBrief);
+
+  Settings selfReview(bool? selfReview);
+
+  Settings reflect(bool? reflect);
+
   Settings egressAllow(List<String>? egressAllow);
 
   Settings suggestFollowUps(bool? suggestFollowUps);
@@ -59,6 +65,9 @@ abstract class _$SettingsCWProxy {
     bool? autoReview,
     bool? autoPreview,
     bool? visualCheck,
+    bool? autoBrief,
+    bool? selfReview,
+    bool? reflect,
     List<String>? egressAllow,
     bool? suggestFollowUps,
     int pauseAbove,
@@ -108,6 +117,15 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
   Settings visualCheck(bool? visualCheck) => this(visualCheck: visualCheck);
 
   @override
+  Settings autoBrief(bool? autoBrief) => this(autoBrief: autoBrief);
+
+  @override
+  Settings selfReview(bool? selfReview) => this(selfReview: selfReview);
+
+  @override
+  Settings reflect(bool? reflect) => this(reflect: reflect);
+
+  @override
   Settings egressAllow(List<String>? egressAllow) =>
       this(egressAllow: egressAllow);
 
@@ -146,6 +164,9 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
     Object? autoReview = const $CopyWithPlaceholder(),
     Object? autoPreview = const $CopyWithPlaceholder(),
     Object? visualCheck = const $CopyWithPlaceholder(),
+    Object? autoBrief = const $CopyWithPlaceholder(),
+    Object? selfReview = const $CopyWithPlaceholder(),
+    Object? reflect = const $CopyWithPlaceholder(),
     Object? egressAllow = const $CopyWithPlaceholder(),
     Object? suggestFollowUps = const $CopyWithPlaceholder(),
     Object? pauseAbove = const $CopyWithPlaceholder(),
@@ -198,6 +219,18 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
           ? _value.visualCheck
           // ignore: cast_nullable_to_non_nullable
           : visualCheck as bool?,
+      autoBrief: autoBrief == const $CopyWithPlaceholder()
+          ? _value.autoBrief
+          // ignore: cast_nullable_to_non_nullable
+          : autoBrief as bool?,
+      selfReview: selfReview == const $CopyWithPlaceholder()
+          ? _value.selfReview
+          // ignore: cast_nullable_to_non_nullable
+          : selfReview as bool?,
+      reflect: reflect == const $CopyWithPlaceholder()
+          ? _value.reflect
+          // ignore: cast_nullable_to_non_nullable
+          : reflect as bool?,
       egressAllow: egressAllow == const $CopyWithPlaceholder()
           ? _value.egressAllow
           // ignore: cast_nullable_to_non_nullable
@@ -275,6 +308,9 @@ Settings _$SettingsFromJson(
     autoReview: $checkedConvert('autoReview', (v) => v as bool?),
     autoPreview: $checkedConvert('autoPreview', (v) => v as bool?),
     visualCheck: $checkedConvert('visualCheck', (v) => v as bool?),
+    autoBrief: $checkedConvert('autoBrief', (v) => v as bool?),
+    selfReview: $checkedConvert('selfReview', (v) => v as bool?),
+    reflect: $checkedConvert('reflect', (v) => v as bool?),
     egressAllow: $checkedConvert(
       'egressAllow',
       (v) => (v as List<dynamic>?)?.map((e) => e as String).toList(),
@@ -307,6 +343,9 @@ Map<String, dynamic> _$SettingsToJson(Settings instance) => <String, dynamic>{
   'autoReview': ?instance.autoReview,
   'autoPreview': ?instance.autoPreview,
   'visualCheck': ?instance.visualCheck,
+  'autoBrief': ?instance.autoBrief,
+  'selfReview': ?instance.selfReview,
+  'reflect': ?instance.reflect,
   'egressAllow': ?instance.egressAllow,
   'suggestFollowUps': ?instance.suggestFollowUps,
   'pauseAbove': instance.pauseAbove,

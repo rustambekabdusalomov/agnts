@@ -23,6 +23,7 @@ import (
 
 	"agnts/internal/auth"
 	"agnts/internal/config"
+	"agnts/internal/domain"
 	"agnts/internal/egress"
 	"agnts/internal/logging"
 	"agnts/internal/oauth"
@@ -42,7 +43,16 @@ Usage:
   agnts serve                    run the server
   agnts migrate [up|down|status|version]
                                 manage the database schema (default: up)
-  agnts user create <username>   create the admin user (password + TOTP)
+  agnts user create <username>   create a user (password + TOTP); the first one is Admin
+  agnts workspace list|create|slots|members|suspend|resume
+                                manage workspaces (see agnts workspace)
+  agnts admin grant|revoke <username>
+                                grant or remove the Admin role
+  agnts credits grant <slug> <amount> [note]
+                                add (or take back) a workspace's credits
+
+Workspace commands act in --workspace <slug> (or AGNTS_WORKSPACE), else the
+install's default workspace:
   agnts repo add [flags]         add or update a repository (see agnts repo add -h)
   agnts repo list                list repositories
   agnts integration set <jira|plane|github|claude>
@@ -50,7 +60,9 @@ Usage:
   agnts jira sync                pick up labelled Jira issues now
   agnts plane sync               pick up labelled Plane work items now
   agnts eval relations           score the queue's predictions (footprints, conflicts) against the real diffs
-  agnts mcp token                create a new static MCP bearer token
+  agnts eval replay KEY...       re-run done tickets with today's prompts, from the commit each started from
+  agnts eval report              compare the replays with the tickets they re-ran, by prompt version
+  agnts mcp token                create a new static MCP bearer token (the owner's)
   agnts keygen                   print a new AGNTS_ENC_KEY
   agnts version [--json]         print the version
   agnts healthcheck              exit 0 if the local server is healthy (for Docker)
@@ -110,6 +122,20 @@ func run(ctx context.Context, args []string) error {
 	defer pool.Close()
 
 	switch args[0] {
+	case "repo", "integration", "mcp", "jira", "plane", "eval":
+		wctx, w, rest, err := cliWorkspace(ctx, pool, args)
+		if err != nil {
+			return err
+		}
+		return workspaceCommand(wctx, cfg, log, pool, w, rest)
+	case "workspace":
+		return workspaceCmd(ctx, pool, args[1:], os.Stdout)
+	case "admin":
+		return adminCmd(ctx, pool, args[1:], os.Stdout)
+	case "credits":
+		return creditsCmd(ctx, pool, args[1:], os.Stdout)
+	}
+	switch args[0] {
 	case "serve":
 		return serve(ctx, cfg, log, pool)
 	case "migrate":
@@ -118,6 +144,23 @@ func run(ctx context.Context, args []string) error {
 			cmd = args[1]
 		}
 		return postgres.Migrate(ctx, pool, postgres.MigrateCommand(cmd), log)
+	case "user":
+		if len(args) != 3 || args[1] != "create" {
+			return errors.New("usage: agnts user create <username>")
+		}
+		svc, err := newAuth(cfg, pool)
+		if err != nil {
+			return err
+		}
+		return createUser(ctx, svc, postgres.NewWorkspaces(pool), args[2], os.Stdin, os.Stdout)
+	default:
+		return fmt.Errorf("unknown command %q\n\n%s", args[0], usageText)
+	}
+}
+
+// workspaceCommand runs a command that acts in workspace w (ctx acts in it).
+func workspaceCommand(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgresPool, w domain.Workspace, args []string) error {
+	switch args[0] {
 	case "repo":
 		return repoCmd(ctx, cfg, pool, args[1:], os.Stdout)
 	case "integration":
@@ -126,11 +169,14 @@ func run(ctx context.Context, args []string) error {
 		if len(args) != 2 || args[1] != "token" {
 			return errors.New("usage: agnts mcp token")
 		}
-		tok, err := oauth.New(pool, cfg.PublicURL.String(), cfg.MCPRedirectHosts, log).RotateStatic(ctx)
+		if w.OwnerID == 0 {
+			return errors.New("the workspace has no owner yet")
+		}
+		tok, err := oauth.New(pool, cfg.PublicURL.String(), cfg.MCPRedirectHosts, log).RotateStatic(ctx, w.OwnerID)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("New MCP token (shown once; the previous one stops working):\n\n  %s\n\nUse it as `Authorization: Bearer <token>` for %s/mcp\n", tok, strings.TrimRight(cfg.PublicURL.String(), "/"))
+		fmt.Printf("New MCP token for %s, acting as its owner (shown once; the previous one stops working):\n\n  %s\n\nUse it as `Authorization: Bearer <token>` for %s/mcp\n", w.Slug, tok, strings.TrimRight(cfg.PublicURL.String(), "/"))
 		return nil
 	case "jira":
 		if len(args) != 2 || args[1] != "sync" {
@@ -143,22 +189,17 @@ func run(ctx context.Context, args []string) error {
 		}
 		return planeSync(ctx, cfg, pool, log)
 	case "eval":
-		if len(args) != 2 || args[1] != "relations" {
-			return errors.New("usage: agnts eval relations")
+		switch {
+		case len(args) == 2 && args[1] == "relations":
+			return evalRelations(ctx, pool, os.Stdout)
+		case len(args) >= 3 && args[1] == "replay":
+			return evalReplay(ctx, cfg, pool, log, args[2:], os.Stdout)
+		case len(args) == 2 && args[1] == "report":
+			return evalReport(ctx, cfg, pool, log, os.Stdout)
 		}
-		return evalRelations(ctx, pool, os.Stdout)
-	case "user":
-		if len(args) != 3 || args[1] != "create" {
-			return errors.New("usage: agnts user create <username>")
-		}
-		svc, err := newAuth(cfg, pool)
-		if err != nil {
-			return err
-		}
-		return createUser(ctx, svc, args[2], os.Stdin, os.Stdout)
-	default:
-		return fmt.Errorf("unknown command %q\n\n%s", args[0], usageText)
+		return errors.New("usage: agnts eval relations | eval replay KEY... | eval report")
 	}
+	return fmt.Errorf("unknown command %q", args[0])
 }
 
 type postgresPool = *pgxpool.Pool
@@ -216,7 +257,7 @@ func purgeSessions(ctx context.Context, svc *auth.Service, log *slog.Logger) {
 	}
 }
 
-func createUser(ctx context.Context, svc *auth.Service, username string, in *os.File, out io.Writer) error {
+func createUser(ctx context.Context, svc *auth.Service, ws *postgres.Workspaces, username string, in *os.File, out io.Writer) error {
 	reader := bufio.NewReader(in)
 	readSecret := func(prompt string) (string, error) {
 		_, _ = fmt.Fprint(out, prompt)
@@ -258,6 +299,23 @@ func createUser(ctx context.Context, svc *auth.Service, username string, in *os.
 		return err
 	}
 	_, _ = fmt.Fprintf(out, "Created user %q (id %d). You can sign in now.\n", u.Username, u.ID)
+	// The first user takes over an install migrated without one; everyone
+	// gets a workspace of their own to start in.
+	if u.IsAdmin {
+		if err := ws.ClaimOwnerless(ctx, u.ID); err != nil {
+			return err
+		}
+	}
+	if mine, err := ws.Of(ctx, u.ID); err == nil && len(mine) == 0 {
+		w, err := ws.Create(ctx, postgres.NewWorkspace{Name: u.Username + "'s workspace", OwnerID: u.ID, Plan: "self-hosted", Slots: 1})
+		if err != nil {
+			return err
+		}
+		_, _ = fmt.Fprintf(out, "Created the workspace %q (address %s).\n", w.Name, w.Slug)
+	}
+	if u.IsAdmin {
+		_, _ = fmt.Fprintln(out, "This is the first user, so it is the platform's Admin.")
+	}
 	return nil
 }
 

@@ -1,0 +1,27 @@
+{
+  "queue": {
+    "header": "Bajarilmoqda {running}/{slots}",
+    "queued": "{n} ta navbatda",
+    "waitingServer": "{n} tasi serverni kutmoqda",
+    "badge_blocked": "Kutmoqda · bog‘liq",
+    "badge_slots": "Navbatda · slotlar",
+    "badge_server": "Navbatda · server",
+    "badge_claude": "Pauza · Claude",
+    "title_blocked": "Bog‘liq tiketlarni kutmoqda",
+    "title_slots": "Bo‘sh slotni kutmoqda",
+    "title_server": "Server navbatida",
+    "title_claude": "Claude’ni kutmoqda",
+    "position": "Server navbatida #{position}",
+    "others": "{n, plural, =0 {} other {Oldinda boshqa ish maydonlarining # ta tiketi bor.}}",
+    "estimate": "Taxminan {minutes} daqiqadan keyin boshlanadi.",
+    "serverFull": "Server band ({runs} ta ish, {budget} dan {reserved} band).",
+    "slotsHint": "{slots} ta slotdan {running} tasi band. Bittasi bo‘shashi bilan boshlanadi.",
+    "addSlot": "Slot qo‘shish",
+    "claudeHint": "Ish maydoni sozlamalari → Claude bo‘limida hisob ulang yoki kreditlarni yoqing.",
+    "member": "A’zo",
+    "takeOver": "O‘zimga olish",
+    "takenOver": "Tiket sizniki: «har kimniki o‘zi» rejimida u sizning Claude hisobingizda bajariladi.",
+    "createdBy": "Yaratgan: {name}",
+    "by": "{name}"
+  }
+}

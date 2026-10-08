@@ -19,6 +19,8 @@ final apiProvider = Provider<AgntsApi?>((ref) {
   dio.interceptors.add(InterceptorsWrapper(
     onRequest: (o, h) {
       o.headers['Authorization'] = 'Bearer ${s.token}';
+      // Workspace routes act in this workspace; account routes ignore it.
+      if (s.workspace != null) o.headers['X-Workspace'] = s.workspace;
       h.next(o);
     },
     onError: (e, h) {

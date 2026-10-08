@@ -61,7 +61,7 @@ function pick(r: RemoteRepository) {
     <p v-if="integrations.isPending.value" class="hint">{{ t('common.loading') }}</p>
     <div v-else-if="!connected.length" class="help">
       <HiIcon name="info" />
-      <p>{{ t('repos.importNone') }} <RouterLink to="/integrations">{{ t('repos.importConnect') }}</RouterLink></p>
+      <p>{{ t('repos.importNone') }} <RouterLink :to="{ name: 'integrations' }">{{ t('repos.importConnect') }}</RouterLink></p>
     </div>
     <template v-else>
       <SegButtons v-if="options.length > 1" v-model="provider" :options="options" :label="t('repos.importFrom')" />

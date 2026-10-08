@@ -2,6 +2,7 @@ package orchestrator
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -88,7 +89,11 @@ func (o *Orchestrator) runChecks(ctx context.Context, ws Workspace, t domain.Tic
 		if !ok {
 			rep.OK = false
 			rep.FailOutput = fmt.Sprintf("$ %s\n%s", c.cmd, step.Output)
-			if err == nil && !res.TimedOut {
+			var oom *OOMError
+			switch {
+			case errors.As(err, &oom):
+				rep.Unfixable, rep.Reason = "the "+c.name+" "+oom.Error(), "out_of_memory"
+			case err == nil && !res.TimedOut:
 				rep.Unfixable, rep.Reason = unfixable(repo, res.ExitCode, res.Output)
 			}
 			return rep

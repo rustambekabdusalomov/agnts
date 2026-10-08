@@ -7,9 +7,11 @@ import 'package:agnts_api/src/auth/api_key_auth.dart';
 import 'package:agnts_api/src/auth/basic_auth.dart';
 import 'package:agnts_api/src/auth/bearer_auth.dart';
 import 'package:agnts_api/src/auth/oauth.dart';
+import 'package:agnts_api/src/api/account_api.dart';
 import 'package:agnts_api/src/api/analytics_api.dart';
 import 'package:agnts_api/src/api/attachments_api.dart';
 import 'package:agnts_api/src/api/auth_api.dart';
+import 'package:agnts_api/src/api/billing_api.dart';
 import 'package:agnts_api/src/api/dashboard_api.dart';
 import 'package:agnts_api/src/api/devices_api.dart';
 import 'package:agnts_api/src/api/docs_api.dart';
@@ -18,12 +20,15 @@ import 'package:agnts_api/src/api/learn_api.dart';
 import 'package:agnts_api/src/api/logs_api.dart';
 import 'package:agnts_api/src/api/mcp_api.dart';
 import 'package:agnts_api/src/api/meta_api.dart';
+import 'package:agnts_api/src/api/platform_api.dart';
 import 'package:agnts_api/src/api/repos_api.dart';
 import 'package:agnts_api/src/api/rules_api.dart';
 import 'package:agnts_api/src/api/settings_api.dart';
 import 'package:agnts_api/src/api/tasks_api.dart';
 import 'package:agnts_api/src/api/tickets_api.dart';
 import 'package:agnts_api/src/api/usage_api.dart';
+import 'package:agnts_api/src/api/workspace_api.dart';
+import 'package:agnts_api/src/api/workspaces_api.dart';
 
 class AgntsApi {
   static const String basePath = r'/api';
@@ -116,6 +121,12 @@ class AgntsApi {
     }
   }
 
+  /// Get AccountApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  AccountApi getAccountApi() {
+    return AccountApi(dio);
+  }
+
   /// Get AnalyticsApi instance, base route and serializer can be overridden by a given but be careful,
   /// by doing that all interceptors will not be executed
   AnalyticsApi getAnalyticsApi() {
@@ -132,6 +143,12 @@ class AgntsApi {
   /// by doing that all interceptors will not be executed
   AuthApi getAuthApi() {
     return AuthApi(dio);
+  }
+
+  /// Get BillingApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  BillingApi getBillingApi() {
+    return BillingApi(dio);
   }
 
   /// Get DashboardApi instance, base route and serializer can be overridden by a given but be careful,
@@ -182,6 +199,12 @@ class AgntsApi {
     return MetaApi(dio);
   }
 
+  /// Get PlatformApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  PlatformApi getPlatformApi() {
+    return PlatformApi(dio);
+  }
+
   /// Get ReposApi instance, base route and serializer can be overridden by a given but be careful,
   /// by doing that all interceptors will not be executed
   ReposApi getReposApi() {
@@ -216,5 +239,17 @@ class AgntsApi {
   /// by doing that all interceptors will not be executed
   UsageApi getUsageApi() {
     return UsageApi(dio);
+  }
+
+  /// Get WorkspaceApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  WorkspaceApi getWorkspaceApi() {
+    return WorkspaceApi(dio);
+  }
+
+  /// Get WorkspacesApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  WorkspacesApi getWorkspacesApi() {
+    return WorkspacesApi(dio);
   }
 }

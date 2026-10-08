@@ -32,6 +32,43 @@ const authRedirect: Middleware = {
   },
 }
 
+// The workspace the panel acts in. Workspace operations go to
+// /api/w/<slug>/...; the person's own (account, workspaces, the Admin's
+// console) stay at /api/....
+let workspace = ''
+
+/** Sets the workspace API calls act in (the route's :ws). */
+export function setWorkspace(slug: string) {
+  workspace = slug
+}
+
+/** The workspace API calls act in now. */
+export function currentWorkspace(): string {
+  return workspace
+}
+
+/** Operations that are the person's, not a workspace's (see x-scope in the spec). */
+const USER_PATHS = ['/auth/', '/meta', '/account/', '/workspaces', '/invites/', '/platform/', '/devices', '/docs/', '/oauth/']
+
+export function isUserPath(path: string): boolean {
+  return USER_PATHS.some((p) => path === p.replace(/\/$/, '') || path.startsWith(p))
+}
+
+/** The URL of an API path, in the current workspace when it is a workspace's. */
+export function apiPath(path: string): string {
+  return !isUserPath(path) && workspace ? `/api/w/${encodeURIComponent(workspace)}${path}` : `/api${path}`
+}
+
+const workspaceRoute: Middleware = {
+  onRequest({ request, schemaPath }) {
+    if (!workspace || isUserPath(schemaPath)) return undefined
+    const url = new URL(request.url)
+    if (!url.pathname.startsWith('/api/') || url.pathname.startsWith('/api/w/')) return undefined
+    url.pathname = `/api/w/${encodeURIComponent(workspace)}${url.pathname.slice(4)}`
+    return new Request(url, request)
+  },
+}
+
 // Same-origin: the session travels in the HttpOnly cookie. Array query
 // parameters are comma-separated (?state=a,b), as the spec declares them
 // (style: form, explode: false); openapi-fetch repeats them by default.
@@ -41,6 +78,7 @@ export const api = createClient<paths>({
   querySerializer: { array: { style: 'form', explode: false } },
 })
 api.use(authRedirect)
+api.use(workspaceRoute)
 
 /** Unwraps an openapi-fetch result, throwing HttpError on failure. */
 export async function unwrap<T>(
@@ -65,7 +103,7 @@ export const MAX_ATTACHMENTS = 10
 export async function uploadAttachment(file: File): Promise<Attachment> {
   const body = new FormData()
   body.append('file', file, file.name)
-  const response = await fetch('/api/attachments', { method: 'POST', body, credentials: 'same-origin' })
+  const response = await fetch(apiPath('/attachments'), { method: 'POST', body, credentials: 'same-origin' })
   const data = await response.json().catch(() => undefined)
   if (!response.ok) {
     if (response.status === 401) onUnauthorized()

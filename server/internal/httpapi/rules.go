@@ -58,9 +58,12 @@ func ruleInput(r *http.Request) (orchestrator.RuleInput, error) {
 	if err := decodeJSON(r, &req); err != nil {
 		return orchestrator.RuleInput{}, err
 	}
-	in := orchestrator.RuleInput{Title: req.Title, Body: req.Body, RepoID: req.RepoId, Enabled: true}
+	in := orchestrator.RuleInput{Title: req.Title, Body: req.Body, RepoID: req.RepoId, Enabled: true, Kind: domain.KindInstruction}
 	if req.Enabled != nil {
 		in.Enabled = *req.Enabled
+	}
+	if req.Kind != nil {
+		in.Kind = domain.RuleKind(*req.Kind)
 	}
 	return in, nil
 }
@@ -158,13 +161,22 @@ func (s *Server) ReviewRule(w http.ResponseWriter, r *http.Request, id gen.RuleI
 
 func toRule(x domain.Rule) gen.Rule {
 	out := gen.Rule{
-		Id: x.ID, RepoId: x.RepoID, Title: x.Title, Body: x.Body, Enabled: x.Enabled, Status: gen.RuleStatus(x.Status),
+		Id: x.ID, RepoId: x.RepoID, Title: x.Title, Body: x.Body, Enabled: x.Enabled, Status: gen.RuleStatus(x.Status), Kind: gen.RuleKind(x.Kind),
 		Interpretation: x.Interpretation, Clarified: x.Clarified, Text: x.Text(), Rounds: x.Rounds, Error: x.Error,
 		AnalyzedAt: x.AnalyzedAt, CreatedAt: x.CreatedAt, UpdatedAt: x.UpdatedAt,
 		Questions: make([]gen.RuleQuestion, len(x.Questions)),
 	}
 	if x.RepoName != "" {
 		out.RepoName = &x.RepoName
+	}
+	if out.Kind == "" {
+		out.Kind = gen.RuleKind(domain.KindInstruction)
+	}
+	if x.SourceTicket != "" {
+		out.SourceTicket = &x.SourceTicket
+	}
+	if x.Reason != "" {
+		out.Reason = &x.Reason
 	}
 	for i, q := range x.Questions {
 		out.Questions[i] = gen.RuleQuestion{Index: i, Text: q.Text, Options: q.Options, Round: q.Round}

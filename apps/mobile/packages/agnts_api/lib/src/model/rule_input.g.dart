@@ -15,13 +15,21 @@ abstract class _$RuleInputCWProxy {
 
   RuleInput enabled(bool? enabled);
 
+  RuleInput kind(RuleKind? kind);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `RuleInput(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
   /// ```dart
   /// RuleInput(...).copyWith(id: 12, name: "My name")
   /// ````
-  RuleInput call({String title, String body, int? repoId, bool? enabled});
+  RuleInput call({
+    String title,
+    String body,
+    int? repoId,
+    bool? enabled,
+    RuleKind? kind,
+  });
 }
 
 /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfRuleInput.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfRuleInput.copyWith.fieldName(...)`
@@ -43,6 +51,9 @@ class _$RuleInputCWProxyImpl implements _$RuleInputCWProxy {
   RuleInput enabled(bool? enabled) => this(enabled: enabled);
 
   @override
+  RuleInput kind(RuleKind? kind) => this(kind: kind);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `RuleInput(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -54,6 +65,7 @@ class _$RuleInputCWProxyImpl implements _$RuleInputCWProxy {
     Object? body = const $CopyWithPlaceholder(),
     Object? repoId = const $CopyWithPlaceholder(),
     Object? enabled = const $CopyWithPlaceholder(),
+    Object? kind = const $CopyWithPlaceholder(),
   }) {
     return RuleInput(
       title: title == const $CopyWithPlaceholder()
@@ -72,6 +84,10 @@ class _$RuleInputCWProxyImpl implements _$RuleInputCWProxy {
           ? _value.enabled
           // ignore: cast_nullable_to_non_nullable
           : enabled as bool?,
+      kind: kind == const $CopyWithPlaceholder()
+          ? _value.kind
+          // ignore: cast_nullable_to_non_nullable
+          : kind as RuleKind?,
     );
   }
 }
@@ -94,6 +110,10 @@ RuleInput _$RuleInputFromJson(Map<String, dynamic> json) =>
         body: $checkedConvert('body', (v) => v as String),
         repoId: $checkedConvert('repoId', (v) => (v as num?)?.toInt()),
         enabled: $checkedConvert('enabled', (v) => v as bool? ?? true),
+        kind: $checkedConvert(
+          'kind',
+          (v) => $enumDecodeNullable(_$RuleKindEnumMap, v),
+        ),
       );
       return val;
     });
@@ -103,4 +123,7 @@ Map<String, dynamic> _$RuleInputToJson(RuleInput instance) => <String, dynamic>{
   'body': instance.body,
   'repoId': ?instance.repoId,
   'enabled': ?instance.enabled,
+  'kind': ?_$RuleKindEnumMap[instance.kind],
 };
+
+const _$RuleKindEnumMap = {RuleKind.rule: 'rule', RuleKind.context: 'context'};

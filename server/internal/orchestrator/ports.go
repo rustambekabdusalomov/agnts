@@ -6,6 +6,7 @@ package orchestrator
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"time"
 
@@ -112,6 +113,8 @@ type Store interface {
 	// OpenTicketRefs returns the newest unfinished tickets in repoID (nil:
 	// tasks without a repository).
 	OpenTicketRefs(ctx context.Context, repoID *int64, limit int) ([]TicketRef, error)
+	// Usernames returns the usernames of people by id.
+	Usernames(ctx context.Context, ids []int64) (map[int64]string, error)
 
 	RelationStore
 }
@@ -210,6 +213,9 @@ type Rules interface {
 	// ActiveRules returns the enabled, reviewed rules for tickets in repoID
 	// (global ones first); nil gives the global rules only.
 	ActiveRules(ctx context.Context, repoID *int64) ([]domain.Rule, error)
+	// KnownRules returns every rule tickets in repoID could get (nil: global
+	// ones only), in any status, dismissed suggestions included.
+	KnownRules(ctx context.Context, repoID *int64) ([]domain.Rule, error)
 	CreateRule(ctx context.Context, r domain.Rule, ev func(domain.Rule) domain.Event) (domain.Rule, error)
 	// UpdateRule applies mut to the locked rule and appends the event ev
 	// returns (nil for none) in the same transaction.
@@ -220,6 +226,43 @@ type Rules interface {
 	ClaimRule(ctx context.Context) (r domain.Rule, ok bool, err error)
 	// RecoverRules requeues reviews a crash left running.
 	RecoverRules(ctx context.Context) (int, error)
+	// PendingRuleWorkspaces returns the workspaces with rules waiting for
+	// a review.
+	PendingRuleWorkspaces(ctx context.Context) ([]int64, error)
+}
+
+// Reflections stores feedback waiting for agnts to learn from, and the
+// queue of reflect runs.
+type Reflections interface {
+	QueueReflection(ctx context.Context, r domain.Reflection) error
+	// ClaimReflection moves the oldest pending reflection to running; ok
+	// is false when none is waiting.
+	ClaimReflection(ctx context.Context) (r domain.Reflection, ok bool, err error)
+	// FinishReflection records the outcome: done, failed, or pending again.
+	FinishReflection(ctx context.Context, id int64, status string, suggested int, errMsg string) error
+	// Reflections returns a ticket's reflections, oldest first.
+	Reflections(ctx context.Context, key string) ([]domain.Reflection, error)
+	PendingReflectionWorkspaces(ctx context.Context) ([]int64, error)
+	RecoverReflections(ctx context.Context) (int, error)
+}
+
+// PrecedentStore finds done tickets like the one at hand. A Store may
+// implement it; runs then get them as /agnts/context/precedents.md.
+type PrecedentStore interface {
+	// Precedents returns at most limit done tickets of repoID other than
+	// the except keys (and never replays), the ones whose change touched
+	// files first, then those whose text shares words with text.
+	Precedents(ctx context.Context, repoID int64, except []string, files []string, text string, limit int) ([]Precedent, error)
+}
+
+// Precedent is an approved change like the one at hand.
+type Precedent struct {
+	Key      string
+	Title    string
+	Summary  string   // what agnts said it changed
+	Files    []string // what it changed
+	Overlap  int      // of those, files the work at hand expects to change
+	Feedback []string // what people asked to change, at most 3
 }
 
 // StateInfo is when a ticket entered its state, and why it stopped.
@@ -234,6 +277,7 @@ type HistoryItem struct {
 	State   domain.TicketState
 	Message string
 	Origin  domain.Origin
+	User    string // the person behind it, "" for agnts
 }
 
 // TicketFilter narrows ListTickets.
@@ -286,6 +330,21 @@ type ToolchainError struct {
 
 func (e *ToolchainError) Error() string {
 	return "install toolchain " + e.Spec + " failed: " + e.Output
+}
+
+// OOMError is returned by a workspace whose process the kernel killed for
+// using more memory than the container's limit.
+type OOMError struct{ LimitMB int64 }
+
+func (e *OOMError) Error() string {
+	return fmt.Sprintf("ran out of memory at %s: raise the repository's memory (Repository → Advanced) and retry", gbOf(e.LimitMB))
+}
+
+func gbOf(mb int64) string {
+	if mb%1024 == 0 {
+		return fmt.Sprintf("%d GB", mb/1024)
+	}
+	return fmt.Sprintf("%.1f GB", float64(mb)/1024)
 }
 
 // Workspace is a running container with the repository and Claude Code.
@@ -383,6 +442,12 @@ type Git interface {
 	PushTo(ctx context.Context, repo domain.Repository, branch, target string) error
 }
 
+// BranchCleaner removes a ticket's local branch once it is merged or
+// rejected. A Git may implement it.
+type BranchCleaner interface {
+	DeleteBranch(ctx context.Context, repo domain.Repository, branch string) error
+}
+
 // PR is a pull request to open.
 type PR struct {
 	Branch string
@@ -462,13 +527,13 @@ const (
 
 // Shots stores preview screenshots by ticket and run.
 type Shots interface {
-	Save(ticketKey string, runID int64, id string, png []byte) error
-	Open(ticketKey string, runID int64, id string) (io.ReadCloser, error)
+	Save(ws int64, ticketKey string, runID int64, id string, png []byte) error
+	Open(ws int64, ticketKey string, runID int64, id string) (io.ReadCloser, error)
 	// Prune deletes a ticket's screenshots except those of the runs in
 	// keep; an empty keep deletes them all.
-	Prune(ticketKey string, keep []int64) error
-	// Tickets lists the ticket keys that have screenshots.
-	Tickets() ([]string, error)
+	Prune(ws int64, ticketKey string, keep []int64) error
+	// Tickets lists the tickets that have screenshots.
+	Tickets() ([]domain.TicketRef, error)
 }
 
 // BuildEnvs returns a repository's build environment (KEY=value lines,
@@ -490,6 +555,6 @@ type PreviewEnvs interface {
 
 // Homes stores each ticket's Claude Code config dir between runs.
 type Homes interface {
-	Load(ticketKey string) ([]byte, error) // nil, nil when there is none
-	Save(ticketKey string, tar []byte) error
+	Load(ws int64, ticketKey string) ([]byte, error) // nil, nil when there is none
+	Save(ws int64, ticketKey string, tar []byte) error
 }

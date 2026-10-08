@@ -2,7 +2,9 @@
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { HttpError } from '../api/client'
+import { useQuery } from '@tanstack/vue-query'
+import { api, HttpError, unwrap } from '../api/client'
+import BrandLogo from '../components/BrandLogo.vue'
 import PrefsControls from '../components/PrefsControls.vue'
 import { useSession } from '../stores/session'
 
@@ -22,13 +24,20 @@ watch(code, (v) => {
 const showPw = ref(false)
 const busy = ref(false)
 const error = ref('')
+// Asked for only when the account signs in with two factors.
+const needCode = ref(false)
+
+const signup = useQuery({ queryKey: ['signup-info'], queryFn: () => unwrap(api.GET('/auth/signup')), retry: false })
 
 async function submit() {
   if (busy.value) return
   busy.value = true
   error.value = ''
   try {
-    await session.login(username.value.trim(), password.value, code.value)
+    if (await session.login(username.value.trim(), password.value, code.value)) {
+      needCode.value = true
+      return
+    }
     const next = typeof route.query.next === 'string' && route.query.next.startsWith('/') ? route.query.next : '/'
     await router.replace(next)
   } catch (e) {
@@ -40,46 +49,54 @@ async function submit() {
     busy.value = false
   }
 }
+
+function otherAccount() {
+  needCode.value = false
+  code.value = ''
+  password.value = ''
+}
 </script>
 
 <template>
   <main class="login-wrap">
     <form class="card login" novalidate @submit.prevent="submit">
       <div class="login-brand">
-        <svg width="40" height="40" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="1" width="28" height="28" rx="7" fill="var(--mark)" /><path d="M19.75 10.25V19.75M19.75 15a4.75 4.75 0 1 1-9.5 0a4.75 4.75 0 1 1 9.5 0" stroke="var(--mark-ink)" stroke-width="2.4" fill="none" stroke-linecap="round" /></svg>
-        <div><div class="brand-name">{{ t('app.name') }}</div><div class="brand-sub">{{ t('app.tagline') }}</div></div>
+        <BrandLogo :size="34" />
+        <div class="brand-sub">{{ t('app.tagline') }}</div>
       </div>
       <div class="login-head">
         <h1>{{ t('auth.title') }}</h1>
-        <p>{{ t('auth.lede') }}</p>
+        <p>{{ needCode ? t('auth.codeLede') : t('auth.lede') }}</p>
       </div>
 
-      <div class="field">
-        <label class="flbl" for="login-user">{{ t('auth.username') }}</label>
-        <span class="in-wrap">
-          <svg class="in-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 20c1.5-3.5 4.4-5 8-5s6.5 1.5 8 5" /></svg>
-          <input id="login-user" v-model="username" class="cfg-in" name="username" autocomplete="username" autocapitalize="off" spellcheck="false" required autofocus>
-        </span>
-      </div>
-      <div class="field">
-        <label class="flbl" for="login-pw">{{ t('auth.password') }}</label>
-        <span class="in-wrap">
-          <svg class="in-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5" /><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" /></svg>
-          <input id="login-pw" v-model="password" class="cfg-in" name="password" :type="showPw ? 'text' : 'password'" autocomplete="current-password" required>
-          <button
-            type="button"
-            class="in-act"
-            :aria-label="showPw ? t('auth.hidePassword') : t('auth.showPassword')"
-            :title="showPw ? t('auth.hidePassword') : t('auth.showPassword')"
-            :aria-pressed="showPw"
-            @click="showPw = !showPw"
-          >
-            <svg v-if="showPw" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 6.1A9.8 9.8 0 0 1 12 6c5 0 8.5 4.5 9.5 6-.5.8-1.5 2.1-2.9 3.3M6.6 7.6C4.6 8.9 3.2 10.8 2.5 12c1 1.5 4.5 6 9.5 6 1.6 0 3-.4 4.2-1.1M9.9 9.9a3 3 0 0 0 4.2 4.2" /></svg>
-            <svg v-else viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12c1-1.5 4.5-6 9.5-6s8.5 4.5 9.5 6c-1 1.5-4.5 6-9.5 6s-8.5-4.5-9.5-6z" /><circle cx="12" cy="12" r="3" /></svg>
-          </button>
-        </span>
-      </div>
-      <div class="field">
+      <template v-if="!needCode">
+        <div class="field">
+          <label class="flbl" for="login-user">{{ t('auth.username') }}</label>
+          <span class="in-wrap">
+            <svg class="in-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 20c1.5-3.5 4.4-5 8-5s6.5 1.5 8 5" /></svg>
+            <input id="login-user" v-model="username" class="cfg-in" name="username" autocomplete="username" autocapitalize="off" spellcheck="false" required autofocus>
+          </span>
+        </div>
+        <div class="field">
+          <label class="flbl" for="login-pw">{{ t('auth.password') }}</label>
+          <span class="in-wrap">
+            <svg class="in-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5" /><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" /></svg>
+            <input id="login-pw" v-model="password" class="cfg-in" name="password" :type="showPw ? 'text' : 'password'" autocomplete="current-password" required>
+            <button
+              type="button"
+              class="in-act"
+              :aria-label="showPw ? t('auth.hidePassword') : t('auth.showPassword')"
+              :title="showPw ? t('auth.hidePassword') : t('auth.showPassword')"
+              :aria-pressed="showPw"
+              @click="showPw = !showPw"
+            >
+              <svg v-if="showPw" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 6.1A9.8 9.8 0 0 1 12 6c5 0 8.5 4.5 9.5 6-.5.8-1.5 2.1-2.9 3.3M6.6 7.6C4.6 8.9 3.2 10.8 2.5 12c1 1.5 4.5 6 9.5 6 1.6 0 3-.4 4.2-1.1M9.9 9.9a3 3 0 0 0 4.2 4.2" /></svg>
+              <svg v-else viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12c1-1.5 4.5-6 9.5-6s8.5 4.5 9.5 6c-1 1.5-4.5 6-9.5 6s-8.5-4.5-9.5-6z" /><circle cx="12" cy="12" r="3" /></svg>
+            </button>
+          </span>
+        </div>
+      </template>
+      <div v-else class="field">
         <label class="flbl" for="login-code">{{ t('auth.code') }}</label>
         <span class="in-wrap">
           <svg class="in-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7.5 3v5.5c0 4.4-3.1 8.2-7.5 9.5-4.4-1.3-7.5-5.1-7.5-9.5V6z" /><path d="M9 12l2 2 4-4" /></svg>
@@ -94,6 +111,7 @@ async function submit() {
             maxlength="6"
             placeholder="••••••"
             required
+            autofocus
             aria-describedby="code-hint"
           >
         </span>
@@ -105,11 +123,20 @@ async function submit() {
         {{ error }}
       </p>
 
-      <button class="btn btn-p login-submit" type="submit" :disabled="busy || !username || !password || code.length !== 6">
+      <button class="btn btn-p login-submit" type="submit" :disabled="busy || !username || !password || (needCode && code.length !== 6)">
         <span v-if="busy" class="spin" aria-hidden="true" />
         {{ busy ? t('auth.submitting') : t('auth.submit') }}
         <svg v-if="!busy" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
       </button>
+      <div class="login-links">
+        <button v-if="needCode" type="button" class="link-btn" @click="otherAccount">{{ t('auth.back') }}</button>
+        <template v-else>
+          <RouterLink :to="{ name: 'forgot' }">{{ t('account.forgot') }}</RouterLink>
+          <span v-if="signup.data.value?.open">
+            {{ t('account.noAccount') }} <RouterLink :to="{ name: 'signup' }">{{ t('account.signUp') }}</RouterLink>
+          </span>
+        </template>
+      </div>
     </form>
     <PrefsControls />
   </main>

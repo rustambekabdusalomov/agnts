@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/session.dart';
 import '../../l10n/app_localizations.dart';
@@ -20,6 +21,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _pass = TextEditingController();
   final _code = TextEditingController();
   bool _busy = false;
+  bool _needCode = false; // the account signs in with a second factor
+  bool _asking = false; // the message asks for the code rather than reports an error
   String? _error;
 
   @override
@@ -35,7 +38,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final server = _server.text.trim();
     final uri = Uri.tryParse(server);
     if (uri == null || uri.host.isEmpty || !(uri.scheme == 'https' || (allowLocalHttp && uri.scheme == 'http' && isLocalHost(uri.host)))) {
-      setState(() => _error = l.mobileServerInvalid);
+      setState(() {
+        _error = l.mobileServerInvalid;
+        _asking = false;
+      });
       return;
     }
     setState(() {
@@ -45,12 +51,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       await ref.read(sessionProvider.notifier).signIn(server, _user.text, _pass.text, _code.text);
     } on SignInError catch (e) {
+      // The first code_required just asks for the code; after one was typed it was wrong.
+      final ask = e.kind == 'codeRequired' && !_needCode;
       _code.clear();
       setState(() => _error = switch (e.kind) {
-            'credentials' => l.authWrongCredentials,
+            _ when ask => l.authCodeLede,
+            'credentials' || 'codeRequired' => l.authWrongCredentials,
             'rateLimited' => l.authRateLimited(60),
             _ => l.commonError,
           });
+      setState(() {
+        _asking = ask;
+        if (ask) _needCode = true;
+      });
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -70,22 +83,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               constraints: const BoxConstraints(maxWidth: 420),
               child: AutofillGroup(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                  Row(children: [
-                    // agnts's mark, as in the admin sidebar: light on a dark theme.
-                    Image.asset(
-                      theme.brightness == Brightness.dark ? 'assets/brand/logo_dark.png' : 'assets/brand/logo.png',
-                      width: 44,
-                      height: 44,
-                      semanticLabel: l.appName,
+                  // agnts's wordmark, as in the admin sidebar: light letters on a dark theme.
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: SvgPicture.asset(
+                      theme.brightness == Brightness.dark ? 'assets/brand/wordmark_dark.svg' : 'assets/brand/wordmark.svg',
+                      height: 34,
+                      semanticsLabel: l.appName,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text(l.appName, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
-                        Text(l.appTagline, style: TextStyle(fontSize: 13.5, color: c.ink3)),
-                      ]),
-                    ),
-                  ]),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(l.appTagline, style: TextStyle(fontSize: 13.5, color: c.ink3)),
                   const SizedBox(height: 24),
                   Text(l.authTitle, style: theme.textTheme.displaySmall),
                   const SizedBox(height: 8),
@@ -114,28 +122,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         obscureText: true,
                         autofillHints: const [AutofillHints.password],
                         decoration: InputDecoration(labelText: l.authPassword),
+                        onSubmitted: _needCode ? null : (_) => _submit(),
                       ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: _code,
-                        keyboardType: TextInputType.number,
-                        autofillHints: const [AutofillHints.oneTimeCode],
-                        maxLength: 6,
-                        style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 17, letterSpacing: 4),
-                        decoration: InputDecoration(
-                          labelText: l.authCode,
-                          helperText: l.authCodeHint,
-                          helperStyle: TextStyle(fontSize: 12.5, color: c.ink3),
-                          counterText: '',
+                      if (_needCode) ...[
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _code,
+                          autofocus: true,
+                          keyboardType: TextInputType.number,
+                          autofillHints: const [AutofillHints.oneTimeCode],
+                          maxLength: 6,
+                          style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 17, letterSpacing: 4),
+                          decoration: InputDecoration(
+                            labelText: l.authCode,
+                            helperText: l.authCodeHint,
+                            helperStyle: TextStyle(fontSize: 12.5, color: c.ink3),
+                            counterText: '',
+                          ),
+                          onSubmitted: (_) => _submit(),
                         ),
-                        onSubmitted: (_) => _submit(),
-                      ),
+                      ],
                     ]),
                   ),
                   if (_error != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 12),
-                      child: HelpBox(_error!, tone: Tone.bad),
+                      child: HelpBox(_error!, tone: _asking ? Tone.info : Tone.bad),
                     ),
                   const SizedBox(height: 18),
                   FilledButton(

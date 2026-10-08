@@ -60,14 +60,13 @@ flutter:
         - asset: assets/fonts/AtkinsonHyperlegibleMono-Bold.ttf
           weight: 700
 
-# App icon: agnts's mark, light by day and dark by night. After `flutter create`
-# (see README), run `dart run flutter_launcher_icons` to write every size.
-# The tool has no Android night option: the night background colour and
-# foreground live in res/values-night and res/drawable-night-*, kept by hand.
+# App icon: agnts's mark on its dark square, the same by day and by night.
+# The sources are in shared/brand. After `flutter create` (see README), run
+# `dart run flutter_launcher_icons` to write every size.
 flutter_launcher_icons:
   image_path: assets/icon/icon.png
   android: true
-  adaptive_icon_background: "#ECEBE6"
+  adaptive_icon_background: "#0E0E10"
   adaptive_icon_foreground: assets/icon/icon_foreground.png
   adaptive_icon_monochrome: assets/icon/icon_monochrome.png
   ios: true

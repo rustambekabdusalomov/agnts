@@ -12,6 +12,9 @@ import (
 
 // UsageSnapshot is one reading of the plan limits.
 type UsageSnapshot struct {
+	// ConnectionID is the Claude account the reading is for (nil: agnts's
+	// own key, or an install without connections).
+	ConnectionID   *int64
 	FiveHour       *float64
 	FiveHourResets *time.Time
 	SevenDay       *float64
@@ -33,18 +36,20 @@ func (u *Usage) Insert(ctx context.Context, s UsageSnapshot) error {
 	if s.Raw == nil {
 		raw = []byte("{}")
 	}
-	_, err := u.db.Exec(ctx, `INSERT INTO usage_snapshots (five_hour, resets_at, seven_day, seven_day_resets_at, status, raw)
-		VALUES ($1, $2, $3, $4, $5, $6)`, s.FiveHour, s.FiveHourResets, s.SevenDay, s.SevenDayResets, s.Status, raw)
+	_, err := u.db.Exec(ctx, `INSERT INTO usage_snapshots (five_hour, resets_at, seven_day, seven_day_resets_at, status, raw, connection_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)`, s.FiveHour, s.FiveHourResets, s.SevenDay, s.SevenDayResets, s.Status, raw, s.ConnectionID)
 	return err
 }
 
-// Latest returns the newest snapshot, or ok=false when there is none.
-func (u *Usage) Latest(ctx context.Context) (UsageSnapshot, bool, error) {
-	var s UsageSnapshot
+// Latest returns the newest snapshot of a Claude account (nil: agnts's own
+// key), or ok=false when there is none.
+func (u *Usage) Latest(ctx context.Context, conn *int64) (UsageSnapshot, bool, error) {
+	s := UsageSnapshot{ConnectionID: conn}
 	var raw []byte
 	var five, seven *float32
 	err := u.db.QueryRow(ctx, `SELECT five_hour, resets_at, seven_day, seven_day_resets_at, status, raw, created_at
-		FROM usage_snapshots ORDER BY id DESC LIMIT 1`).Scan(&five, &s.FiveHourResets, &seven, &s.SevenDayResets, &s.Status, &raw, &s.CreatedAt)
+		FROM usage_snapshots WHERE connection_id IS NOT DISTINCT FROM $1 ORDER BY id DESC LIMIT 1`, conn).
+		Scan(&five, &s.FiveHourResets, &seven, &s.SevenDayResets, &s.Status, &raw, &s.CreatedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return s, false, nil
 	}

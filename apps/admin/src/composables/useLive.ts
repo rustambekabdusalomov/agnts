@@ -1,5 +1,6 @@
 import { useQueryClient, type QueryClient } from '@tanstack/vue-query'
 import { onScopeDispose, ref } from 'vue'
+import { apiPath } from '../api/client'
 import type { TicketEvent } from '../api/types'
 
 type Listener = (e: TicketEvent) => void
@@ -35,12 +36,21 @@ function stale(e: TicketEvent): string[] {
     case 'rule_changed':
       keys.push('rules')
       break
+    case 'queued':
+      keys.push('queue', 'tickets')
+      break
+    case 'workspace_changed':
+      keys.push('members', 'invites', 'workspace-claude', 'queue')
+      break
+    case 'credits_changed':
+      keys.push('billing', 'workspace-claude')
+      break
     case 'task_changed':
     case 'ticket_created':
       keys.push('tickets', 'repos')
       break
   }
-  if (e.type === 'state_changed') keys.push('events-summary', 'repos')
+  if (e.type === 'state_changed') keys.push('events-summary', 'repos', 'queue')
   // Spend is saved when a run finishes, just after its claude_result; the
   // state change that follows a stage comes after the save.
   if (e.type === 'claude_result' || e.type === 'state_changed' || e.type === 'usage_updated') keys.push('ticket-spend')
@@ -72,7 +82,7 @@ let opened = false
 
 function connect() {
   if (source) return
-  source = new EventSource('/api/events/stream', { withCredentials: true })
+  source = new EventSource(apiPath('/events/stream'), { withCredentials: true })
   source.onopen = () => {
     if (opened) resync() // not on the first open: the page just loaded
     opened = true
@@ -122,6 +132,13 @@ export function stopLive() {
   source = null
   opened = false
   connected.value = false
+}
+
+/** Reopens the stream (another workspace): its events are another's. */
+export function restartLive() {
+  if (!qc) return
+  stopLive()
+  connect()
 }
 
 /** Subscribes to live events for the lifetime of the calling component. */

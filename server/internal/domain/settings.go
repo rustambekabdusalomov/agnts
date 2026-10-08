@@ -98,6 +98,15 @@ type Settings struct {
 	// VisualCheck lets coding runs start the app and look at the pages they
 	// changed, in repositories with a preview command.
 	VisualCheck bool `json:"visualCheck"`
+	// AutoBrief surveys a repository that has no brief when its first
+	// ticket is analysed, and again after every BriefRefreshMerges merges.
+	AutoBrief bool `json:"autoBrief"`
+	// SelfReview sends the blocker and major findings of agnts's own code
+	// review back to the coder once per revision, before a person reviews.
+	SelfReview bool `json:"selfReview"`
+	// Reflect has agnts learn from change requests and rejections: it may
+	// suggest rules, which apply only once someone adopts them.
+	Reflect bool `json:"reflect"`
 	// EgressAllow are hosts run containers may reach besides the built-in
 	// list (a staging API for previews); ".domain" matches subdomains.
 	EgressAllow []string `json:"egressAllow"`
@@ -124,6 +133,9 @@ func DefaultSettings() Settings {
 		AutoReview:  true,
 		AutoPreview: true,
 		VisualCheck: true,
+		AutoBrief:   true,
+		SelfReview:  true,
+		Reflect:     true,
 		EgressAllow: []string{},
 		PauseAbove:  90,
 		Parallel:    1,

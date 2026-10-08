@@ -47,6 +47,11 @@
     "learnQueue": "Oʻrganish navbati",
     "rules": "Qoidalar",
     "syncPlane": "Plane'ni sinxronlash",
-    "syncedPlane": "Plane sinxronlandi: {found} ochiq, {created} yangi"
+    "syncedPlane": "Plane sinxronlandi: {found} ochiq, {created} yangi",
+    "workspace": "Ish maydoni",
+    "profile": "Profil",
+    "platform": "Operator konsoli",
+    "people": "Odamlar",
+    "account": "Hisob"
   }
 }

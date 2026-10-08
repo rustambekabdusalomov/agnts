@@ -51,6 +51,23 @@ type RepoStats struct {
 	AgntsMin float64
 }
 
+// QualityStats is how well the tickets whose first coding run used one
+// prompt version went: the numbers each change to the agent is judged by.
+type QualityStats struct {
+	PromptVersion string // "" for runs from before versions were recorded
+	Tickets       int    // first coding run in the period
+	ReachedReview int    // got to a person's review at least once
+	Done          int
+	FirstTry      int // done without a person asking for changes
+	Rejected      int
+	ChangeRounds  float64 // average change requests by a person, over those that reached review
+	FixAttempts   float64 // average failing checks sent back to Claude
+	Serious       int     // reviewed with a blocker or major finding at least once
+	FootprintHit  float64 // average share of changed files the analysis predicted (-1: none measured)
+	RedFlags      int     // red flags found in their diffs
+	SelfFixes     int     // findings sent back to the coder by agnts's own review
+}
+
 // Analytics is everything the Analytics page shows for one period.
 type Analytics struct {
 	Days    []DayStats
@@ -62,6 +79,7 @@ type Analytics struct {
 	Repos   []RepoStats
 	Hours   [24]int
 	Spend   []domain.StageUsage // by stage and model, costliest first
+	Quality []QualityStats      // by prompt version, oldest first
 }
 
 // stateSpans is a CTE of how long each ticket stayed in each state.
@@ -302,6 +320,10 @@ func (s *Agent) Analytics(ctx context.Context, days int, tz *time.Location) (Ana
 	}
 	rows.Close()
 
+	if a.Quality, err = s.quality(ctx, start, end); err != nil {
+		return a, err
+	}
+
 	// Activity by hour of day, agnts's own events only.
 	rows, err = s.db.Query(ctx, `SELECT extract(hour FROM created_at AT TIME ZONE $3)::int, count(*) FROM events
 		WHERE created_at >= $1 AND created_at < $2 AND origin = 'system' GROUP BY 1`, start, end, tzName)
@@ -362,4 +384,55 @@ func (s *Agent) period(ctx context.Context, from, to time.Time) (Period, error) 
 		FROM claude_calls WHERE created_at >= $1 AND created_at < $2`, from, to).
 		Scan(&p.Spend.Input, &p.Spend.Output, &p.Spend.CacheRead, &p.Spend.CacheWrite, &p.Spend.CostUSD)
 	return p, err
+}
+
+// quality groups the tickets whose first coding run started in [from, to)
+// by that run's prompt version.
+func (s *Agent) quality(ctx context.Context, from, to time.Time) ([]QualityStats, error) {
+	rows, err := s.db.Query(ctx, `WITH first_code AS (
+			SELECT DISTINCT ON (ticket_id) ticket_id, prompt_version, started_at
+			FROM runs WHERE stage = 'code' ORDER BY ticket_id, started_at, id),
+		cohort AS (
+			SELECT f.ticket_id, f.prompt_version, f.started_at, t.key, t.state
+			FROM first_code f JOIN tickets t ON t.id = f.ticket_id
+			WHERE f.started_at >= $1 AND f.started_at < $2 AND t.replay_of = ''),
+		per AS (
+			SELECT c.prompt_version, c.started_at, c.state,
+				EXISTS (SELECT 1 FROM events e WHERE e.ticket_key = c.key AND e.type = 'state_changed'
+					AND e.data->>'to' = 'waiting_for_review') AS reached,
+				(SELECT count(*) FROM events e WHERE e.ticket_key = c.key AND e.type = 'feedback' AND e.origin <> 'system') AS rounds,
+				(SELECT count(*) FROM events e WHERE e.ticket_key = c.key AND e.type = 'feedback' AND e.origin = 'system') AS self_fixes,
+				(SELECT COALESCE(sum(r.fix_attempts), 0) FROM runs r WHERE r.ticket_id = c.ticket_id AND r.stage = 'code') AS fixes,
+				EXISTS (SELECT 1 FROM events e WHERE e.ticket_key = c.key AND e.type = 'review_done'
+					AND (COALESCE((e.data->'counts'->>'blocker')::int, 0) + COALESCE((e.data->'counts'->>'major')::int, 0)) > 0) AS serious,
+				(SELECT (e.data->>'recall')::float8 FROM events e WHERE e.ticket_key = c.key AND e.type = 'footprint_checked'
+					ORDER BY e.id LIMIT 1) AS recall,
+				(SELECT COALESCE(sum((e.data->>'count')::int), 0) FROM events e WHERE e.ticket_key = c.key AND e.type = 'red_flags') AS flags
+			FROM cohort c)
+		SELECT prompt_version, count(*),
+			count(*) FILTER (WHERE reached),
+			count(*) FILTER (WHERE state = 'done'),
+			count(*) FILTER (WHERE state = 'done' AND rounds = 0),
+			count(*) FILTER (WHERE state = 'rejected'),
+			COALESCE(avg(rounds) FILTER (WHERE reached), 0)::float8,
+			COALESCE(avg(fixes), 0)::float8,
+			count(*) FILTER (WHERE serious),
+			COALESCE(avg(recall), -1)::float8,
+			COALESCE(sum(flags), 0)::int,
+			COALESCE(sum(self_fixes), 0)::int
+		FROM per GROUP BY prompt_version ORDER BY min(started_at)`, from, to)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := []QualityStats{}
+	for rows.Next() {
+		var q QualityStats
+		if err := rows.Scan(&q.PromptVersion, &q.Tickets, &q.ReachedReview, &q.Done, &q.FirstTry, &q.Rejected,
+			&q.ChangeRounds, &q.FixAttempts, &q.Serious, &q.FootprintHit, &q.RedFlags, &q.SelfFixes); err != nil {
+			return nil, err
+		}
+		out = append(out, q)
+	}
+	return out, rows.Err()
 }

@@ -18,6 +18,17 @@ func toPeriod(p postgres.Period) gen.PeriodStats {
 		AnswerMin: float32(p.AnswerMin), Turns: float32(p.Turns), Spend: toTokenSpend(p.Spend)}
 }
 
+func toQualityStat(q postgres.QualityStats) gen.QualityStat {
+	out := gen.QualityStat{PromptVersion: q.PromptVersion, Tickets: q.Tickets, ReachedReview: q.ReachedReview, Done: q.Done,
+		FirstTry: q.FirstTry, Rejected: q.Rejected, ChangeRounds: float32(q.ChangeRounds), FixAttempts: float32(q.FixAttempts),
+		Serious: q.Serious, RedFlags: q.RedFlags, SelfFixes: q.SelfFixes}
+	if q.FootprintHit >= 0 {
+		v := float32(q.FootprintHit)
+		out.FootprintHit = &v
+	}
+	return out
+}
+
 // GetAnalytics implements gen.ServerInterface.
 func (s *Server) GetAnalytics(w http.ResponseWriter, r *http.Request, p gen.GetAnalyticsParams) {
 	if !s.adminReady(w) {
@@ -85,6 +96,10 @@ func (s *Server) GetAnalytics(w http.ResponseWriter, r *http.Request, p gen.GetA
 	}, len(a.Insights))
 	for i, in := range a.Insights {
 		out.Insights[i].Kind, out.Insights[i].Values = gen.AnalyticsInsightsKind(in.Kind), in.Values
+	}
+	out.Quality = make([]gen.QualityStat, len(a.Quality))
+	for i, q := range a.Quality {
+		out.Quality[i] = toQualityStat(q)
 	}
 	writeJSON(w, http.StatusOK, out)
 }

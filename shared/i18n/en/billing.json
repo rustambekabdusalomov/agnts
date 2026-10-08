@@ -1,0 +1,32 @@
+{
+  "billing": {
+    "title": "Billing",
+    "selfHosted": "This server is self-hosted: there is nothing to pay. The Admin sets slots and member limits.",
+    "plan": "Plan",
+    "planSub": "The base plan includes 1 parallel run and {members} members.",
+    "monthly": "{amount} so'm a month",
+    "paidUntil": "Paid until {date}",
+    "trialUntil": "Free trial until {date}",
+    "slots": "Parallel runs",
+    "slotsHelp": "Each extra run at once costs {price} so'm a month. Adding one now charges the rest of this month from credits.",
+    "slotsSave": "Change",
+    "slotsSaved": "Parallel runs set to {n}",
+    "members": "Members",
+    "membersHelp": "{included} included; each one more costs {price} so'm a month.",
+    "credits": "Credits",
+    "creditsSub": "Runs on agnts's API key (the fallback) spend credits: 1 credit is $0.01 of Anthropic API cost. The month's plan is paid from them too.",
+    "balance": "Balance",
+    "creditPrice": "1 credit = {price} so'm",
+    "buy": "Buy credits",
+    "amount": "Amount (so'm)",
+    "youGet": "≈ {n} credits",
+    "payWith": "Pay with {provider}",
+    "paymentsOff": "Payments are not set up on this server yet; ask the Admin to grant credits.",
+    "history": "History",
+    "noHistory": "Nothing yet.",
+    "reason_purchase": "Bought",
+    "reason_run": "Spent",
+    "reason_refund": "Refunded",
+    "reason_grant": "Granted"
+  }
+}

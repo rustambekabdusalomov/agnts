@@ -233,6 +233,9 @@ func (o *Orchestrator) Approve(ctx context.Context, key string, assignees []stri
 	if err != nil {
 		return cur, err
 	}
+	if cur.ReplayOf != "" {
+		return cur, invalid("%s replays %s to evaluate agnts: it is never pushed. Reject it when you are done", cur.Key, cur.ReplayOf)
+	}
 	msg := "approved"
 	switch {
 	case cur.Kind.Report():
@@ -253,7 +256,7 @@ func (o *Orchestrator) Approve(ctx context.Context, key string, assignees []stri
 	})
 	if err == nil {
 		if reviewing {
-			o.cancelRun(key) // the push waits for the run to end
+			o.cancelRun(ctx, key) // the push waits for the run to end
 		}
 		o.Wake()
 	}
@@ -276,7 +279,7 @@ func (o *Orchestrator) RequestChanges(ctx context.Context, key, feedback string,
 	if feedback == "" {
 		return domain.Ticket{}, invalid("feedback is required")
 	}
-	shots, err := o.checkShotRefs(key, shots)
+	shots, err := o.checkShotRefs(domain.WorkspaceOf(ctx), key, shots)
 	if err != nil {
 		return domain.Ticket{}, err
 	}
@@ -304,12 +307,14 @@ func (o *Orchestrator) RequestChanges(ctx context.Context, key, feedback string,
 		x.Feedback = feedback
 		x.FeedbackShots = shots
 		x.FeedbackFiles = files
+		x.SelfFixes, x.QuietReview = 0, false // agnts's review gets a round on the new change
 		reviewing = dropSideRuns(x)
 	})
 	if err == nil {
 		if reviewing {
-			o.cancelRun(key) // coding waits for the run to end
+			o.cancelRun(ctx, key) // coding waits for the run to end
 		}
+		o.queueReflection(ctx, t, domain.ReflectChanges, feedback, origin)
 		o.Wake()
 	}
 	return t, err
@@ -327,15 +332,19 @@ func (o *Orchestrator) Reject(ctx context.Context, key, reason string, origin do
 	if err != nil {
 		return t, err
 	}
-	o.cancelRun(key)
+	o.cancelRun(ctx, key)
 	o.trackerMove(context.WithoutCancel(ctx), t, TrackerRejected)
+	o.queueReflection(context.WithoutCancel(ctx), t, domain.ReflectRejected, reason, origin)
+	if t.PRNumber == nil {
+		o.dropBranch(ctx, t) // never pushed: nothing else needs it
+	}
 	o.Wake() // tickets waiting for it may start
 	return t, nil
 }
 
-func (o *Orchestrator) cancelRun(key string) bool {
+func (o *Orchestrator) cancelRun(ctx context.Context, key string) bool {
 	o.mu.Lock()
-	cancel := o.cancels[key]
+	cancel := o.cancels[runKey(domain.WorkspaceOf(ctx), key)]
 	o.mu.Unlock()
 	if cancel != nil {
 		cancel()
@@ -361,7 +370,7 @@ func (o *Orchestrator) Stop(ctx context.Context, key string, origin domain.Origi
 	if err != nil {
 		return t, err
 	}
-	o.cancelRun(key)
+	o.cancelRun(ctx, key)
 	return t, nil
 }
 
@@ -671,16 +680,16 @@ func (o *Orchestrator) DeleteTask(ctx context.Context, key string, origin domain
 	if err != nil {
 		return err
 	}
-	if t.Source != domain.SourceLocal || t.State != domain.StateNew || (!t.Held && o.cancelRunning(key)) {
+	if t.Source != domain.SourceLocal || t.State != domain.StateNew || (!t.Held && o.cancelRunning(ctx, key)) {
 		return &domain.TransitionError{Key: key, From: t.State, To: domain.StateRejected}
 	}
 	return o.store.DeleteTicket(ctx, key, domain.Event{TicketKey: key, Type: domain.EventTaskChanged, Origin: origin, Message: "task deleted"})
 }
 
-func (o *Orchestrator) cancelRunning(key string) bool {
+func (o *Orchestrator) cancelRunning(ctx context.Context, key string) bool {
 	o.mu.Lock()
 	defer o.mu.Unlock()
-	_, ok := o.cancels[key]
+	_, ok := o.cancels[runKey(domain.WorkspaceOf(ctx), key)]
 	return ok
 }
 
@@ -787,6 +796,8 @@ type TicketView struct {
 	Ticket    domain.Ticket
 	Info      StateInfo
 	RepoName  string
+	// Member and CreatedBy are usernames ("" for none).
+	Member, CreatedBy string
 	Questions []domain.Question
 	Analysis  *Analysis
 	Result    *domain.Result
@@ -820,6 +831,9 @@ type TicketRow struct {
 	OpenSuggestions int
 	// Blockers hold its first coding run back right now.
 	Blockers []domain.Blocker
+	// Member and CreatedBy are the usernames of the ticket's member and
+	// creator ("" for none).
+	Member, CreatedBy string
 }
 
 // Rows decorates tickets for lists.
@@ -844,10 +858,29 @@ func (o *Orchestrator) Rows(ctx context.Context, ts []domain.Ticket) ([]TicketRo
 	if err != nil {
 		return nil, err
 	}
+	var people []int64
+	for _, t := range ts {
+		if t.MemberID != nil {
+			people = append(people, *t.MemberID)
+		}
+		if t.CreatedBy != nil {
+			people = append(people, *t.CreatedBy)
+		}
+	}
+	who, err := o.store.Usernames(ctx, people)
+	if err != nil {
+		return nil, err
+	}
 	names := map[int64]string{}
 	out := make([]TicketRow, len(ts))
 	for i, t := range ts {
 		out[i] = TicketRow{Ticket: t, Info: info[t.Key], Spend: spend[t.Key], OpenSuggestions: open[t.Key], Blockers: blockers[t.Key]}
+		if t.MemberID != nil {
+			out[i].Member = who[*t.MemberID]
+		}
+		if t.CreatedBy != nil {
+			out[i].CreatedBy = who[*t.CreatedBy]
+		}
 		if t.RepoID != nil {
 			if n, ok := names[*t.RepoID]; ok {
 				out[i].RepoName = n
@@ -872,6 +905,7 @@ func (o *Orchestrator) View(ctx context.Context, key string) (TicketView, error)
 		return v, err
 	}
 	v.Info, v.RepoName, v.Spend = rows[0].Info, rows[0].RepoName, rows[0].Spend
+	v.Member, v.CreatedBy = rows[0].Member, rows[0].CreatedBy
 	if v.Stages, err = o.store.TicketUsage(ctx, t.ID); err != nil {
 		return v, err
 	}
@@ -957,4 +991,15 @@ func (o *Orchestrator) MarkMerged(ctx context.Context, prURL, branch string, ori
 		return false, err
 	}
 	return true, nil
+}
+
+// SetMember makes userID the ticket's member: in per-member Claude mode its
+// runs use that person's account. The caller checks userID is a member.
+func (o *Orchestrator) SetMember(ctx context.Context, key string, userID int64, name string, origin domain.Origin) (domain.Ticket, error) {
+	msg := "assigned to " + name
+	if a, ok := domain.ActorOf(ctx); ok && a.UserID == userID {
+		msg = name + " took the ticket over"
+	}
+	return o.store.UpdateTicket(ctx, key, &domain.Event{TicketKey: key, Type: domain.EventTicketUpdated, Origin: origin, Message: msg,
+		Data: map[string]any{"member": userID}}, func(t *domain.Ticket) { t.MemberID = &userID })
 }

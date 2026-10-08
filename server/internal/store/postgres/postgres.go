@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"strconv"
+	"sync/atomic"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -16,17 +18,76 @@ import (
 	"agnts/migrations"
 )
 
-// Open connects to PostgreSQL and checks the connection.
+// Open connects to PostgreSQL and checks the connection. Every connection
+// taken from the pool is scoped to the workspace of the context that takes
+// it (see scopeConn), which the row-level security policies enforce.
 func Open(ctx context.Context, url string) (*pgxpool.Pool, error) {
-	pool, err := pgxpool.New(ctx, url)
+	cfg, err := pgxpool.ParseConfig(url)
+	if err != nil {
+		return nil, fmt.Errorf("postgres: config: %w", err)
+	}
+	cfg.PrepareConn = scopeConn
+	pool, err := pgxpool.NewWithConfig(ctx, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("postgres: connect: %w", err)
 	}
-	if err := pool.Ping(ctx); err != nil {
+	if err := pool.Ping(domain.System(ctx)); err != nil {
 		pool.Close()
 		return nil, fmt.Errorf("postgres: ping: %w", err)
 	}
 	return pool, nil
+}
+
+// tenantRole is set once the agnts_tenant role is known to exist; scoped
+// connections then switch to it so the policies hold even for a superuser
+// login role.
+var tenantRole atomic.Bool
+
+// DetectTenantRole checks for the agnts_tenant role (created by the
+// workspaces migration) and reports whether scoped connections use it.
+func DetectTenantRole(ctx context.Context, pool *pgxpool.Pool) (bool, error) {
+	var ok bool
+	err := pool.QueryRow(domain.System(ctx), `SELECT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'agnts_tenant')
+		AND pg_has_role(current_user, 'agnts_tenant', 'MEMBER')`).Scan(&ok)
+	if err != nil {
+		return false, err
+	}
+	tenantRole.Store(ok)
+	return ok, nil
+}
+
+const scopeData = "agnts.scope"
+
+// scopeConn sets app.workspace_id (and the role) for the context taking the
+// connection: a workspace id, "all" for system work, or "" (no workspace's
+// rows) otherwise. The setting is only sent when it changes.
+func scopeConn(ctx context.Context, conn *pgx.Conn) (bool, error) {
+	sc := domain.ScopeOf(ctx)
+	ws, role := "", "none"
+	switch {
+	case sc.WorkspaceID > 0:
+		ws = strconv.FormatInt(sc.WorkspaceID, 10)
+		if tenantRole.Load() {
+			role = "agnts_tenant"
+		}
+	case sc.All:
+		ws = "all"
+	default:
+		if tenantRole.Load() {
+			role = "agnts_tenant"
+		}
+	}
+	want := ws + "/" + role
+	data := conn.PgConn().CustomData()
+	if cur, ok := data[scopeData].(string); ok && cur == want {
+		return true, nil
+	}
+	if _, err := conn.Exec(ctx, `SELECT set_config('app.workspace_id', $1, false), set_config('role', $2, false)`, ws, role); err != nil {
+		delete(data, scopeData)
+		return false, err
+	}
+	data[scopeData] = want
+	return true, nil
 }
 
 // MigrateCommand is a goose command: up, down, status, or version.
@@ -34,6 +95,7 @@ type MigrateCommand string
 
 // Migrate runs a migration command against the database.
 func Migrate(ctx context.Context, pool *pgxpool.Pool, cmd MigrateCommand, log *slog.Logger) error {
+	ctx = domain.System(ctx)
 	db := stdlib.OpenDBFromPool(pool)
 	defer func() { _ = db.Close() }()
 

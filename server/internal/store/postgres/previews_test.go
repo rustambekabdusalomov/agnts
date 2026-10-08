@@ -1,7 +1,6 @@
 package postgres
 
 import (
-	"context"
 	"slices"
 	"testing"
 
@@ -11,9 +10,8 @@ import (
 
 func TestPreviewClaimRecoverAndEnv(t *testing.T) {
 	users, _ := testDB(t)
-	ctx := context.Background()
+	ctx, _ := testWS(t, users)
 	s := NewAgent(users.db)
-	_, _ = s.db.Exec(ctx, `TRUNCATE tickets, runs, events, repositories RESTART IDENTITY CASCADE`)
 
 	repo, err := s.SaveRepository(ctx, domain.Repository{Name: "web", Kind: "side", Provider: "github", CloneURL: "https://github.com/a/web.git", DefaultBranch: "main",
 		Preview: domain.PreviewConfig{Command: "npm run dev", Port: 5173, Routes: []string{"/"}, UIPaths: []string{"src/**"}}})

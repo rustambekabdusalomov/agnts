@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **body** | **String** |  | 
 **repoId** | **int** | Leave out for a rule every repository follows | [optional] 
 **enabled** | **bool** |  | [optional] [default to true]
+**kind** | [**RuleKind**](RuleKind.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

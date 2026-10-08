@@ -9,6 +9,12 @@ part of 'rule.dart';
 abstract class _$RuleCWProxy {
   Rule id(int id);
 
+  Rule kind(RuleKind kind);
+
+  Rule sourceTicket(String? sourceTicket);
+
+  Rule reason(String? reason);
+
   Rule repoId(int? repoId);
 
   Rule repoName(String? repoName);
@@ -47,6 +53,9 @@ abstract class _$RuleCWProxy {
   /// ````
   Rule call({
     int id,
+    RuleKind kind,
+    String? sourceTicket,
+    String? reason,
     int? repoId,
     String? repoName,
     String title,
@@ -73,6 +82,15 @@ class _$RuleCWProxyImpl implements _$RuleCWProxy {
 
   @override
   Rule id(int id) => this(id: id);
+
+  @override
+  Rule kind(RuleKind kind) => this(kind: kind);
+
+  @override
+  Rule sourceTicket(String? sourceTicket) => this(sourceTicket: sourceTicket);
+
+  @override
+  Rule reason(String? reason) => this(reason: reason);
 
   @override
   Rule repoId(int? repoId) => this(repoId: repoId);
@@ -129,6 +147,9 @@ class _$RuleCWProxyImpl implements _$RuleCWProxy {
   /// ````
   Rule call({
     Object? id = const $CopyWithPlaceholder(),
+    Object? kind = const $CopyWithPlaceholder(),
+    Object? sourceTicket = const $CopyWithPlaceholder(),
+    Object? reason = const $CopyWithPlaceholder(),
     Object? repoId = const $CopyWithPlaceholder(),
     Object? repoName = const $CopyWithPlaceholder(),
     Object? title = const $CopyWithPlaceholder(),
@@ -150,6 +171,18 @@ class _$RuleCWProxyImpl implements _$RuleCWProxy {
           ? _value.id
           // ignore: cast_nullable_to_non_nullable
           : id as int,
+      kind: kind == const $CopyWithPlaceholder()
+          ? _value.kind
+          // ignore: cast_nullable_to_non_nullable
+          : kind as RuleKind,
+      sourceTicket: sourceTicket == const $CopyWithPlaceholder()
+          ? _value.sourceTicket
+          // ignore: cast_nullable_to_non_nullable
+          : sourceTicket as String?,
+      reason: reason == const $CopyWithPlaceholder()
+          ? _value.reason
+          // ignore: cast_nullable_to_non_nullable
+          : reason as String?,
       repoId: repoId == const $CopyWithPlaceholder()
           ? _value.repoId
           // ignore: cast_nullable_to_non_nullable
@@ -231,6 +264,7 @@ Rule _$RuleFromJson(Map<String, dynamic> json) => $checkedCreate('Rule', json, (
     json,
     requiredKeys: const [
       'id',
+      'kind',
       'title',
       'body',
       'enabled',
@@ -247,6 +281,9 @@ Rule _$RuleFromJson(Map<String, dynamic> json) => $checkedCreate('Rule', json, (
   );
   final val = Rule(
     id: $checkedConvert('id', (v) => (v as num).toInt()),
+    kind: $checkedConvert('kind', (v) => $enumDecode(_$RuleKindEnumMap, v)),
+    sourceTicket: $checkedConvert('sourceTicket', (v) => v as String?),
+    reason: $checkedConvert('reason', (v) => v as String?),
     repoId: $checkedConvert('repoId', (v) => (v as num?)?.toInt()),
     repoName: $checkedConvert('repoName', (v) => v as String?),
     title: $checkedConvert('title', (v) => v as String),
@@ -279,6 +316,9 @@ Rule _$RuleFromJson(Map<String, dynamic> json) => $checkedCreate('Rule', json, (
 
 Map<String, dynamic> _$RuleToJson(Rule instance) => <String, dynamic>{
   'id': instance.id,
+  'kind': _$RuleKindEnumMap[instance.kind]!,
+  'sourceTicket': ?instance.sourceTicket,
+  'reason': ?instance.reason,
   'repoId': ?instance.repoId,
   'repoName': ?instance.repoName,
   'title': instance.title,
@@ -296,10 +336,13 @@ Map<String, dynamic> _$RuleToJson(Rule instance) => <String, dynamic>{
   'updatedAt': instance.updatedAt.toIso8601String(),
 };
 
+const _$RuleKindEnumMap = {RuleKind.rule: 'rule', RuleKind.context: 'context'};
+
 const _$RuleStatusEnumMap = {
   RuleStatus.pending: 'pending',
   RuleStatus.analyzing: 'analyzing',
   RuleStatus.questions: 'questions',
   RuleStatus.ready: 'ready',
   RuleStatus.failed: 'failed',
+  RuleStatus.suggested: 'suggested',
 };

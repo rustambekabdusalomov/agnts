@@ -119,6 +119,60 @@ func (d *Docker) EnsureNetwork(ctx context.Context, name string, internal bool) 
 	return err
 }
 
+// Info is the Docker host's memory (total, in MB).
+func (d *Docker) Info(ctx context.Context) (memTotalMB int64, err error) {
+	var out struct {
+		MemTotal int64 `json:"MemTotal"`
+	}
+	if err := d.json(ctx, http.MethodGet, "/info", nil, nil, &out); err != nil {
+		return 0, err
+	}
+	return out.MemTotal / (1 << 20), nil
+}
+
+// OOMKilled reports whether the kernel killed a process of the container
+// for using more memory than its limit.
+func (d *Docker) OOMKilled(ctx context.Context, id string) (bool, error) {
+	var out struct {
+		State struct {
+			OOMKilled bool `json:"OOMKilled"`
+		} `json:"State"`
+	}
+	if err := d.json(ctx, http.MethodGet, "/containers/"+id+"/json", nil, nil, &out); err != nil {
+		return false, err
+	}
+	return out.State.OOMKilled, nil
+}
+
+// CreateNetwork creates a bridge network of its own for one run.
+func (d *Docker) CreateNetwork(ctx context.Context, name string, internal bool, labels map[string]string) error {
+	return d.json(ctx, http.MethodPost, "/networks/create", nil, map[string]any{
+		"Name": name, "Driver": "bridge", "CheckDuplicate": true, "Internal": internal, "Labels": labels,
+	}, nil)
+}
+
+// ConnectNetwork attaches a container to a network under aliases.
+func (d *Docker) ConnectNetwork(ctx context.Context, network, container string, aliases []string) error {
+	return d.json(ctx, http.MethodPost, "/networks/"+url.PathEscape(network)+"/connect", nil, map[string]any{
+		"Container": container, "EndpointConfig": map[string]any{"Aliases": aliases},
+	}, nil)
+}
+
+// RemoveNetwork disconnects a container from a network (when given) and
+// removes the network; one already gone is not an error.
+func (d *Docker) RemoveNetwork(ctx context.Context, network, container string) error {
+	if container != "" {
+		_ = d.json(ctx, http.MethodPost, "/networks/"+url.PathEscape(network)+"/disconnect", nil,
+			map[string]any{"Container": container, "Force": true}, nil)
+	}
+	err := d.json(ctx, http.MethodDelete, "/networks/"+url.PathEscape(network), nil, nil, nil)
+	var ae *apiError
+	if errors.As(err, &ae) && ae.Status == http.StatusNotFound {
+		return nil
+	}
+	return err
+}
+
 // ContainerConfig is the subset of the create request agnts uses.
 type ContainerConfig struct {
 	Name       string
@@ -135,6 +189,8 @@ type ContainerConfig struct {
 	Mounts     []Mount  // named volumes
 	Tmpfs      map[string]string
 	Env        []string
+	// Runtime is the OCI runtime (runsc for gVisor); "" is Docker's default.
+	Runtime string
 }
 
 // Mount is a named volume mounted into a container.
@@ -172,6 +228,9 @@ func (d *Docker) Create(ctx context.Context, c ContainerConfig) (string, error) 
 			"Tmpfs":          c.Tmpfs,
 			"Init":           true,
 		},
+	}
+	if c.Runtime != "" {
+		body["HostConfig"].(map[string]any)["Runtime"] = c.Runtime
 	}
 	var out struct {
 		ID string `json:"Id"`

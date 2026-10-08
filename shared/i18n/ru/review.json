@@ -34,6 +34,8 @@
     "added": "В отзыве",
     "addAll": "Добавить всё в отзыв",
     "showInDiff": "Показать в диффе",
-    "model": "Проверил {model}: {reason}"
+    "model": "Проверил {model}: {reason}",
+    "cat_architecture": "Архитектура",
+    "cat_scope": "Рамки задачи"
   }
 }

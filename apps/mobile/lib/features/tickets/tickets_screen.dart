@@ -9,6 +9,7 @@ import '../../l10n/app_localizations.dart';
 import '../../theme.dart';
 import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
+import '../../widgets/workspace.dart';
 import 'spend.dart';
 
 /// The Tickets tab (scrTickets): big title, search, filter chips with counts
@@ -137,7 +138,9 @@ Widget ticketCardFor(BuildContext context, Ticket t, {LiveRun? live, bool showTu
   final needs = filterStates['needs']!.contains(t.state);
   final action = ticketAction(l, t);
   final running = _isRunning(t.state);
+  final wait = t.waitReason == null ? null : waitBadge(l, t.waitReason!);
   final meta = <Widget>[
+    if (wait != null) ToneBadge(wait.$1, wait.$2, small: true),
     if (needs && since != null)
       Text(l.mhomeWaiting(shortDuration(DateTime.now().difference(since))))
     else

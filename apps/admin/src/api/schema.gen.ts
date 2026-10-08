@@ -263,6 +263,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tickets/{key}/replay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Re-run a done code or test ticket with today's agnts, from the commit it started from, to compare the two (Analytics → Replay evaluation). The replay is a new local task that is never pushed. */
+        post: operations["replayTicket"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tickets/{key}/review": {
         parameters: {
             query?: never;
@@ -615,6 +634,25 @@ export interface paths {
          * @description Allowed on a new ticket, while agnts waits for answers, and on a failed or rate-limited one that has not pushed. auto lets the analysis pick the kind again; any other kind is final.
          */
         put: operations["setTicketKind"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/member": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Make a member the ticket's member (per-member Claude mode runs it on their account) */
+        put: operations["setTicketMember"];
         post?: never;
         delete?: never;
         options?: never;
@@ -1390,6 +1428,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/eval/replays": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** How the newest replays compare with the tickets they re-ran, by prompt version */
+        get: operations["getReplayReport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/repos/{id}/archive": {
         parameters: {
             query?: never;
@@ -1422,6 +1477,83 @@ export interface paths {
         put?: never;
         /** Restore an archived repository */
         post: operations["unarchiveRepo"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repos/{id}/brief": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        /** What agnts knows about how the repository works; empty and idle before the first survey */
+        get: operations["getRepoBrief"];
+        /** Replace the approved brief with your text; empty text removes it */
+        put: operations["saveRepoBrief"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repos/{id}/brief/survey": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Have Claude survey the repository and write a draft brief (an update when it has one) */
+        post: operations["surveyRepoBrief"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repos/{id}/brief/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Make the draft the brief that runs read */
+        post: operations["approveRepoBrief"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repos/{id}/brief/discard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Drop the draft a survey wrote */
+        post: operations["discardRepoBriefDraft"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1561,15 +1693,895 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/signup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Whether people can register, and whether this install has no user yet */
+        get: operations["getSignupInfo"];
+        put?: never;
+        /** Create an account (and its first workspace, unless joining by invite) */
+        post: operations["register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm an email address with the link's token */
+        post: operations["verifyEmail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/password/forgot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Email a password reset link (always answers 204) */
+        post: operations["forgotPassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/password/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set a new password with a reset link's token */
+        post: operations["resetPassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Change the display name or email */
+        put: operations["updateProfile"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Change the password */
+        put: operations["changePassword"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send the email verification link again */
+        post: operations["resendVerification"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account/totp/setup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start turning on two-factor sign-in (a new secret, not saved yet) */
+        post: operations["beginTotp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account/totp/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Turn two-factor sign-in on with a code from the new secret */
+        post: operations["confirmTotp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account/totp/disable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Turn two-factor sign-in off */
+        post: operations["disableTotp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account/claude": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your personal Claude connection (used by workspaces in per-member mode) */
+        get: operations["getMyClaude"];
+        /** Connect your Claude account */
+        put: operations["setMyClaude"];
+        post?: never;
+        /** Disconnect your Claude account */
+        delete: operations["deleteMyClaude"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workspaces": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The workspaces you are a member of */
+        get: operations["listWorkspaces"];
+        put?: never;
+        /** Create a workspace you own */
+        post: operations["createWorkspace"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/invites/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        /** What an invite link is for */
+        get: operations["getInvite"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/invites/{token}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Join the workspace an invite is for */
+        post: operations["acceptInvite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workspace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The current workspace and your role in it */
+        get: operations["getWorkspace"];
+        /** Rename the workspace or change its address */
+        put: operations["updateWorkspace"];
+        post?: never;
+        /** Delete the workspace (kept 7 days for undo, then purged) */
+        delete: operations["deleteWorkspace"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workspace/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The workspace's members */
+        get: operations["listMembers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workspace/members/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a member */
+        delete: operations["removeMember"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workspace/members/{userId}/role": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Make a member (not the owner) a user or a viewer */
+        put: operations["setMemberRole"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workspace/transfer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Make another member the owner */
+        post: operations["transferWorkspace"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workspace/leave": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Leave the workspace */
+        post: operations["leaveWorkspace"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workspace/invites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Open invites */
+        get: operations["listInvites"];
+        put?: never;
+        /** Invite someone by email or by a link (valid 7 days) */
+        post: operations["createInvite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workspace/invites/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Revoke an open invite */
+        delete: operations["revokeInvite"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workspace/queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Where the workspace's tickets stand in the queue */
+        get: operations["getQueue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workspace/claude": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Which Claude account the workspace's runs use */
+        get: operations["getWorkspaceClaude"];
+        /** Choose the Claude mode, the fallback and the default member */
+        put: operations["updateWorkspaceClaude"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workspace/claude/connection": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Connect the workspace's shared Claude account */
+        put: operations["setWorkspaceClaudeConnection"];
+        post?: never;
+        /** Disconnect the workspace's shared Claude account */
+        delete: operations["deleteWorkspaceClaudeConnection"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workspace/billing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The workspace's plan, slots, members and credits */
+        get: operations["getBilling"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workspace/billing/slots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Change how many runs the workspace may have at once */
+        put: operations["setSlots"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workspace/billing/checkout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start buying credits; returns the payment page to open */
+        post: operations["checkoutCredits"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Servers, runs and the queue across every workspace (Admin) */
+        get: operations["getPlatformOverview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/workspaces": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every workspace, metadata only (Admin) */
+        get: operations["listPlatformWorkspaces"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/workspaces/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Change a workspace's plan, slots, member limit, or suspend it (Admin) */
+        put: operations["updatePlatformWorkspace"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/workspaces/{id}/credits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Grant (or take back, when negative) credits (Admin) */
+        post: operations["grantCredits"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every user (Admin) */
+        get: operations["listPlatformUsers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Grant or remove the Admin role (Admin) */
+        put: operations["updatePlatformUser"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        SignupInfo: {
+            /** @description Anyone can register; otherwise only with an invite link */
+            open: boolean;
+            /** @description No account exists yet; the first one becomes Admin */
+            firstUser: boolean;
+            /** @description The server can send email (verification, invites, resets) */
+            emailEnabled: boolean;
+        };
+        RegisterRequest: {
+            email: string;
+            /** @description Derived from the email when empty */
+            username?: string;
+            displayName?: string;
+            password: string;
+            /** @description Name of the first workspace; not created when joining by invite */
+            workspaceName?: string;
+            /** @description An invite token to join with */
+            invite?: string;
+            /** @enum {string} */
+            client: "web" | "mobile";
+        };
+        TokenRequest: {
+            token: string;
+        };
+        /**
+         * @description owner runs the workspace; user works in it; viewer sees everything and changes nothing
+         * @enum {string}
+         */
+        WorkspaceRole: "owner" | "user" | "viewer";
+        WorkspaceSummary: {
+            /** Format: int64 */
+            id: number;
+            slug: string;
+            name: string;
+            role: components["schemas"]["WorkspaceRole"];
+            members: number;
+            plan: string;
+            slots: number;
+            suspended?: boolean;
+        };
+        WorkspaceDetail: {
+            /** Format: int64 */
+            id: number;
+            slug: string;
+            name: string;
+            role: components["schemas"]["WorkspaceRole"];
+            /** Format: int64 */
+            ownerId: number;
+            plan: string;
+            slots: number;
+            /** @description 0 means no limit */
+            memberLimit: number;
+            members: number;
+            /** @enum {string} */
+            claudeMode: "shared" | "member";
+            claudeFallback: boolean;
+            /** Format: int64 */
+            defaultMemberId?: number;
+            /** Format: int64 */
+            creditsBalance: number;
+            /** Format: date-time */
+            trialEndsAt?: string;
+            suspended?: boolean;
+            /** Format: date-time */
+            deletedAt?: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        Member: {
+            /** Format: int64 */
+            userId: number;
+            username: string;
+            displayName?: string;
+            /** @description Shown to the owner only */
+            email?: string;
+            role: components["schemas"]["WorkspaceRole"];
+            /** Format: date-time */
+            joinedAt: string;
+            /** @description Has a personal Claude connection (per-member mode) */
+            claudeConnected: boolean;
+        };
+        Invite: {
+            /** Format: int64 */
+            id: number;
+            email: string;
+            role: components["schemas"]["WorkspaceRole"];
+            invitedBy?: string;
+            /** Format: date-time */
+            expiresAt: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        InvitePreview: {
+            /** @description The workspace's name */
+            workspace: string;
+            invitedBy?: string;
+            email?: string;
+            /** Format: date-time */
+            expiresAt: string;
+        };
+        Capacity: {
+            /**
+             * Format: int64
+             * @description Memory the server lends to runs; 0 when it is not limited
+             */
+            budgetMb: number;
+            /** Format: int64 */
+            reservedMb: number;
+            runs: number;
+            /** Format: int64 */
+            diskFreeMb?: number;
+            full: boolean;
+        };
+        /**
+         * @description Why a ticket waits for a worker: blocked (related tickets or held, for the team), slots (the workspace's runs are in use), server (no memory left on the server, for the platform), claude (the Claude account is at its limit or missing).
+         * @enum {string}
+         */
+        WaitReason: "blocked" | "slots" | "server" | "claude";
+        QueueStatus: {
+            running: number;
+            slots: number;
+            /** @description The workspace's waiting tickets by reason */
+            waiting: {
+                blocked?: number;
+                slots?: number;
+                server?: number;
+                claude?: number;
+            };
+            /** @description The workspace's tickets waiting for the server */
+            serverQueue: {
+                key: string;
+                /** @description 1-based place in the whole server queue */
+                position: number;
+                /** @description Tickets of other workspaces ahead */
+                others: number;
+                /** @description About how long until it may start */
+                estimateSec?: number;
+            }[];
+            serverQueueLength: number;
+            capacity: components["schemas"]["Capacity"];
+        };
+        ClaudeConnectionInput: {
+            /**
+             * @description subscription: a token from `claude setup-token`; api_key: an Anthropic API key
+             * @enum {string}
+             */
+            kind: "subscription" | "api_key";
+            token: string;
+        };
+        ClaudeConnectionState: {
+            connected: boolean;
+            /** @enum {string} */
+            kind?: "subscription" | "api_key";
+            /** @description The token's last four characters */
+            tokenHint?: string;
+            account?: string;
+            lastError?: string;
+            /**
+             * Format: date-time
+             * @description At its usage limit until then
+             */
+            pausedUntil?: string;
+            usage?: components["schemas"]["Usage"];
+            /** Format: date-time */
+            checkedAt?: string;
+        };
+        WorkspaceClaude: {
+            /** @enum {string} */
+            mode: "shared" | "member";
+            fallback: boolean;
+            /** Format: int64 */
+            defaultMemberId?: number;
+            connection: components["schemas"]["ClaudeConnectionState"];
+            /** @description Who has a personal connection (per-member mode) */
+            members: {
+                /** Format: int64 */
+                userId: number;
+                username: string;
+                connected: boolean;
+                /** Format: date-time */
+                pausedUntil?: string;
+            }[];
+            /** Format: int64 */
+            creditsBalance: number;
+            /** @description This server accepts Claude subscription tokens (self-hosted); otherwise API keys only */
+            subscriptionsAllowed: boolean;
+        };
+        LedgerEntry: {
+            /** Format: int64 */
+            id: number;
+            /**
+             * Format: int64
+             * @description Credits; negative for spend
+             */
+            amount: number;
+            /** @enum {string} */
+            reason: "purchase" | "run" | "refund" | "grant";
+            ticketKey?: string;
+            note?: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        Billing: {
+            plan: string;
+            slots: number;
+            maxSlots: number;
+            memberLimit: number;
+            members: number;
+            /** Format: int64 */
+            creditsBalance: number;
+            /** Format: date-time */
+            trialEndsAt?: string;
+            /**
+             * Format: int64
+             * @description What the plan, extra slots and extra members cost a month
+             */
+            monthlyUzs?: number;
+            ledger: components["schemas"]["LedgerEntry"][];
+            prices: {
+                /** Format: int64 */
+                workspaceUzs: number;
+                /** Format: int64 */
+                slotUzs: number;
+                /** Format: int64 */
+                memberUzs: number;
+                /**
+                 * Format: int64
+                 * @description Price of one credit ($0.01 of API cost at the markup)
+                 */
+                creditUzs: number;
+                includedMembers: number;
+                markup: number;
+            };
+            paymentsEnabled: boolean;
+            /** @description No billing: slots and members are set by the Admin */
+            selfHosted?: boolean;
+        };
+        PlatformWorkspace: {
+            /** Format: int64 */
+            id: number;
+            slug: string;
+            name: string;
+            owner?: string;
+            plan: string;
+            slots: number;
+            memberLimit: number;
+            members: number;
+            /** Format: int64 */
+            creditsBalance: number;
+            running: number;
+            suspended?: boolean;
+            /** Format: date-time */
+            deletedAt?: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        PlatformOverview: {
+            capacity: components["schemas"]["Capacity"];
+            runs: {
+                /** Format: int64 */
+                workspaceId: number;
+                workspace?: string;
+                ticketKey: string;
+                stage: string;
+                /** Format: date-time */
+                startedAt: string;
+            }[];
+            serverQueue: {
+                /** Format: int64 */
+                workspaceId: number;
+                workspace?: string;
+                ticketKey: string;
+            }[];
+            workspaces: number;
+            users: number;
+        };
         LoginRequest: {
+            /** @description Username or email */
             username: string;
             password: string;
-            /** @description Six-digit code from the authenticator app */
-            code: string;
+            /** @description Six-digit code from the authenticator app, when two-factor sign-in is on */
+            code?: string;
             /** @enum {string} */
             client: "web" | "mobile";
         };
@@ -1584,6 +2596,19 @@ export interface components {
             /** Format: int64 */
             id: number;
             username: string;
+            displayName?: string;
+            email?: string;
+            emailVerified?: boolean;
+            /** @description The platform operator (system role Admin) */
+            isAdmin?: boolean;
+            /** @description Signs in with a second factor */
+            hasTotp?: boolean;
+            /** @description The slug of the workspace opened last */
+            lastWorkspace?: string;
+            /** @description The workspaces the user is a member of (on /auth/me only) */
+            workspaces?: components["schemas"]["WorkspaceSummary"][];
+            /** Format: date-time */
+            createdAt?: string;
         };
         Meta: {
             version: string;
@@ -1808,6 +2833,8 @@ export interface components {
             state: components["schemas"]["TicketState"];
             resumeState?: components["schemas"]["TicketState"];
             revision: number;
+            /** @description For a replay: the done ticket it re-runs. Replays are never pushed. */
+            replayOf?: string;
             turns: number;
             branch: string;
             prNumber?: number;
@@ -1864,6 +2891,23 @@ export interface components {
             /** @description The ticket's repository has a preview command */
             canPreview?: boolean;
             spend?: components["schemas"]["TokenSpend"];
+            waitReason?: components["schemas"]["WaitReason"];
+            /** @description Why it waits, in a sentence */
+            waitMessage?: string;
+            /**
+             * Format: date-time
+             * @description When it started waiting for a worker
+             */
+            queuedAt?: string;
+            /**
+             * Format: int64
+             * @description Whose ticket it is (per-member Claude mode runs on their account)
+             */
+            memberId?: number;
+            /** @description The member's username */
+            member?: string;
+            /** @description Who created it; absent for webhooks and agnts */
+            createdBy?: string;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -1968,12 +3012,35 @@ export interface components {
              */
             complexity?: "simple" | "complex";
             footprint?: components["schemas"]["Footprint"];
+            /** @description Ways to do the work that the analysis weighed; exactly one is chosen */
+            approaches?: components["schemas"]["Approach"][];
+            /** @description What the work will deliberately not do */
+            outOfScope?: string[];
+            ship?: components["schemas"]["ShipNotes"];
+        };
+        Approach: {
+            title: string;
+            sketch: string;
+            pros: string[];
+            cons: string[];
+            /** @description How it fits the repository brief and the team rules, or what it bends */
+            fit?: string;
+            chosen: boolean;
+            /** @description For the chosen approach, why it beats the others; for the others, why not */
+            why?: string;
+        };
+        /** @description How the change ships; absent fields do not apply */
+        ShipNotes: {
+            migrations?: string;
+            compatibility?: string;
+            rollout?: string;
+            rollback?: string;
         };
         Finding: {
             /** @enum {string} */
             severity: "blocker" | "major" | "minor" | "nit";
             /** @enum {string} */
-            category: "correctness" | "security" | "performance" | "tests" | "rules" | "maintainability" | "accuracy" | "completeness" | "other";
+            category: "correctness" | "security" | "performance" | "tests" | "rules" | "architecture" | "scope" | "maintainability" | "accuracy" | "completeness" | "other";
             /** @description Path relative to the repository */
             file?: string;
             line?: number;
@@ -2067,8 +3134,20 @@ export interface components {
             files: components["schemas"]["FileChange"][];
             /** @description The Markdown report, for report kinds */
             report?: string;
+            /** @description Where the work departed from the chosen approach or the plan, and why */
+            deviations?: string[];
+            /** @description Lines agnts's scan of the change flagged for the reviewer: skipped tests, removed assertions, silenced linters and the like */
+            redFlags?: components["schemas"]["RedFlag"][];
             /** Format: date-time */
             createdAt: string;
+        };
+        RedFlag: {
+            /** @enum {string} */
+            kind: "skipped_test" | "removed_assertion" | "deleted_test" | "silenced_lint" | "swallowed_error" | "todo" | "new_dependency";
+            path: string;
+            /** @description Line in the new file; absent for the whole file */
+            line?: number;
+            text: string;
         };
         TicketDetail: {
             ticket: components["schemas"]["Ticket"];
@@ -2107,6 +3186,8 @@ export interface components {
             };
             /** Format: int64 */
             durationMs?: number;
+            /** @description The person behind the event; absent for agnts */
+            user?: string;
             /** Format: date-time */
             createdAt: string;
         };
@@ -2154,6 +3235,8 @@ export interface components {
             state: components["schemas"]["TicketState"];
             message: string;
             origin: string;
+            /** @description The person behind it; absent for agnts */
+            user?: string;
         };
         TaskCreate: {
             /**
@@ -2255,6 +3338,12 @@ export interface components {
             autoPreview?: boolean;
             /** @description Coding runs may start the app and look at the pages they changed */
             visualCheck?: boolean;
+            /** @description Survey a repository without a brief when its first ticket is analysed, and refresh the brief after merges */
+            autoBrief?: boolean;
+            /** @description Send blocker and major findings of agnts's code review back to the coder once per revision, before a person reviews */
+            selfReview?: boolean;
+            /** @description Learn from change requests and rejections: suggest rules, which apply once someone adopts them */
+            reflect?: boolean;
             /** @description Hosts run containers may reach besides the built-in list, such as a staging API; .example.com matches subdomains */
             egressAllow?: string[];
             /** @description Runs suggest follow-up tickets (off by default; a ticket can override it) */
@@ -2641,6 +3730,8 @@ export interface components {
         };
         Analytics: {
             days: number;
+            /** @description How the tickets whose first coding run started in the period went, by prompt version, oldest first */
+            quality: components["schemas"]["QualityStat"][];
             current: components["schemas"]["PeriodStats"];
             previous: components["schemas"]["PeriodStats"];
             perDay: components["schemas"]["DayStat"][];
@@ -2681,6 +3772,104 @@ export interface components {
                     [key: string]: string;
                 };
             }[];
+        };
+        /** @description What agnts knows about how a repository works. A survey writes the draft; once a person approves it, the body reaches every run of the repository's tickets as /agnts/context/brief.md. */
+        RepoBrief: {
+            /** Format: int64 */
+            repoId: number;
+            repoName: string;
+            /** @description The approved brief, Markdown; empty when there is none */
+            body: string;
+            /** @description The commit the approved brief describes */
+            bodySha: string;
+            /** @description The latest survey, waiting for approval; empty when there is none */
+            draft: string;
+            draftSha: string;
+            /** @enum {string} */
+            status: "idle" | "pending" | "surveying" | "failed";
+            /** @description Tickets merged since the brief was approved */
+            mergesSince: number;
+            /** @description Merges after which agnts surveys again, when Settings allow */
+            refreshAfter: number;
+            /** @description Why the last survey failed */
+            error: string;
+            /** Format: date-time */
+            surveyedAt?: string;
+            /** Format: date-time */
+            approvedAt?: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        RepoBriefInput: {
+            body: string;
+        };
+        ReplayReport: {
+            /** @description Replays with a change, summed by the prompt version they ran with */
+            versions: components["schemas"]["ReplayVersion"][];
+            /** @description The newest replays first */
+            replays: components["schemas"]["ReplayResult"][];
+        };
+        ReplayVersion: {
+            promptVersion: string;
+            replays: number;
+            checksPassed: number;
+            /** @description Replays agnts's code review read */
+            reviewed: number;
+            /** @description Reviews that found nothing to block */
+            looksGood: number;
+            /** @description Average Jaccard index of the changed files, replay against original */
+            avgOverlap: number;
+            /** @description Average share of the original's files the replay changed too */
+            avgRecall: number;
+            avgTurns: number;
+            avgCostUsd: number;
+            /** @description Average turns of the originals, for comparison */
+            originalTurns: number;
+            originalCostUsd: number;
+        };
+        ReplayResult: {
+            key: string;
+            original: string;
+            title: string;
+            state: components["schemas"]["TicketState"];
+            promptVersion: string;
+            hasChange: boolean;
+            checksPassed: boolean;
+            files: string[];
+            originalFiles: string[];
+            overlap: number;
+            recall: number;
+            /** @enum {string} */
+            verdict?: "looks_good" | "has_concerns" | "needs_changes";
+            turns: number;
+            originalTurns: number;
+            costUsd: number;
+            originalCostUsd: number;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        QualityStat: {
+            /** @description Empty for runs from before versions were recorded */
+            promptVersion: string;
+            /** @description First coding run in the period */
+            tickets: number;
+            reachedReview: number;
+            done: number;
+            /** @description Done without a person asking for changes */
+            firstTry: number;
+            rejected: number;
+            /** @description Average change requests by a person, over the tickets that reached review */
+            changeRounds: number;
+            /** @description Average failing checks sent back to Claude */
+            fixAttempts: number;
+            /** @description Reviewed with a blocker or major finding at least once */
+            serious: number;
+            /** @description Average share of the changed files the analysis predicted; absent when none was measured */
+            footprintHit?: number;
+            /** @description Red flags found in the diffs */
+            redFlags: number;
+            /** @description Findings of agnts's own review sent back to the coder */
+            selfFixes: number;
         };
         /** @enum {string} */
         LessonCategory: "pattern" | "architecture" | "algorithm" | "library" | "language" | "testing" | "security" | "performance" | "tooling" | "other";
@@ -2773,10 +3962,16 @@ export interface components {
             createdAt: string;
         };
         /**
-         * @description Where Claude's review stands. Tickets follow a rule only when it is ready and enabled.
+         * @description Where Claude's review stands. Tickets follow a rule only when it is ready and enabled. A suggested rule is one agnts proposed from feedback: adopt it with a review or as written, or delete it to dismiss it (it is then not suggested again).
          * @enum {string}
          */
-        RuleStatus: "pending" | "analyzing" | "questions" | "ready" | "failed";
+        RuleStatus: "pending" | "analyzing" | "questions" | "ready" | "failed" | "suggested";
+        /**
+         * @description rule: an instruction tickets follow. context: business knowledge (a glossary, invariants, roles) that runs read as /agnts/context/business.md.
+         * @default rule
+         * @enum {string}
+         */
+        RuleKind: "rule" | "context";
         RuleQuestion: {
             /** @description Position in the rule's questions; answers refer to it */
             index: number;
@@ -2791,6 +3986,11 @@ export interface components {
         Rule: {
             /** Format: int64 */
             id: number;
+            kind: components["schemas"]["RuleKind"];
+            /** @description For a rule agnts suggested: the ticket whose feedback taught it */
+            sourceTicket?: string;
+            /** @description For a rule agnts suggested: which feedback shows it */
+            reason?: string;
             /**
              * Format: int64
              * @description Absent for a global rule
@@ -2830,6 +4030,7 @@ export interface components {
             repoId?: number;
             /** @default true */
             enabled: boolean;
+            kind?: components["schemas"]["RuleKind"];
         };
         RuleAnswers: {
             answers: {
@@ -2865,6 +4066,33 @@ export interface components {
         };
         /** @description No such ticket */
         NotFound: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Error"];
+            };
+        };
+        /** @description Your role does not allow this */
+        Forbidden: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Error"];
+            };
+        };
+        /** @description The plan does not include this; upgrade or buy credits */
+        PaymentRequired: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Error"];
+            };
+        };
+        /** @description Not available on this server */
+        NotImplemented: {
             headers: {
                 [name: string]: unknown;
             };
@@ -3241,6 +4469,31 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    replayTicket: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The replay ticket */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Ticket"];
+                };
+            };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
@@ -3690,6 +4943,32 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
+        };
+    };
+    setTicketMember: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * Format: int64
+                     * @description A member of the workspace; 0 for yourself
+                     */
+                    userId: number;
+                };
+            };
+        };
+        responses: {
+            200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
         };
     };
     uploadAttachment: {
@@ -4586,6 +5865,8 @@ export interface operations {
                     state?: string;
                     resource?: string;
                     approve: boolean;
+                    /** @description The slug of the workspace Claude may act in (required to approve) */
+                    workspace?: string;
                 };
             };
         };
@@ -5015,6 +6296,27 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
         };
     };
+    getReplayReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReplayReport"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
     archiveRepo: {
         parameters: {
             query?: never;
@@ -5059,6 +6361,134 @@ export interface operations {
                     "application/json": components["schemas"]["Repository"];
                 };
             };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getRepoBrief: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RepoBrief"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    saveRepoBrief: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RepoBriefInput"];
+            };
+        };
+        responses: {
+            /** @description Saved; new runs read it */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RepoBrief"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    surveyRepoBrief: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Queued, or already queued or running */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RepoBrief"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    approveRepoBrief: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Approved */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RepoBrief"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    discardRepoBriefDraft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Discarded */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RepoBrief"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
         };
@@ -5249,6 +6679,1071 @@ export interface operations {
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getSignupInfo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SignupInfo"];
+                };
+            };
+        };
+    };
+    register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterRequest"];
+            };
+        };
+        responses: {
+            /** @description Registered and signed in */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
+    verifyEmail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TokenRequest"];
+            };
+        };
+        responses: {
+            /** @description Verified */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+        };
+    };
+    forgotPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    email: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Sent if the address is known */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
+    resetPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    token: string;
+                    password: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Password changed; every session ended */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+        };
+    };
+    updateProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    displayName?: string;
+                    email?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The user after the change */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    changePassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    current: string;
+                    password: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Changed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+        };
+    };
+    resendVerification: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sent */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
+    beginTotp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The secret to add to an authenticator app */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        secret: string;
+                        url: string;
+                    };
+                };
+            };
+        };
+    };
+    confirmTotp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    secret: string;
+                    code: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Turned on */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+        };
+    };
+    disableTotp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    password: string;
+                    code?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Turned off */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+        };
+    };
+    getMyClaude: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaudeConnectionState"];
+                };
+            };
+        };
+    };
+    setMyClaude: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaudeConnectionInput"];
+            };
+        };
+        responses: {
+            /** @description Connected */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaudeConnectionState"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+        };
+    };
+    deleteMyClaude: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Disconnected */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    listWorkspaces: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceSummary"][];
+                };
+            };
+        };
+    };
+    createWorkspace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name: string;
+                    /** @description The address in links; derived from the name when empty */
+                    slug?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceSummary"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    getInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitePreview"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    acceptInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Joined */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceSummary"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    getWorkspace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceDetail"];
+                };
+            };
+        };
+    };
+    updateWorkspace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name?: string;
+                    slug?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The workspace after the change */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceDetail"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    deleteWorkspace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The workspace's address, typed to confirm */
+                    confirm: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+        };
+    };
+    listMembers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Member"][];
+                };
+            };
+        };
+    };
+    removeMember: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    setMemberRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    role: "user" | "viewer";
+                };
+            };
+        };
+        responses: {
+            /** @description Changed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    transferWorkspace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: int64 */
+                    userId: number;
+                };
+            };
+        };
+        responses: {
+            /** @description Transferred */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    leaveWorkspace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Left */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            409: components["responses"]["Conflict"];
+        };
+    };
+    listInvites: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Invite"][];
+                };
+            };
+        };
+    };
+    createInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Sends the link by email; empty makes a link to share yourself */
+                    email?: string;
+                    /**
+                     * @description The role the invite joins as (user when omitted)
+                     * @enum {string}
+                     */
+                    role?: "user" | "viewer";
+                };
+            };
+        };
+        responses: {
+            /** @description Created; the link is shown once */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        invite: components["schemas"]["Invite"];
+                        url: string;
+                        emailed?: boolean;
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    revokeInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Revoked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getQueue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QueueStatus"];
+                };
+            };
+        };
+    };
+    getWorkspaceClaude: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceClaude"];
+                };
+            };
+        };
+    };
+    updateWorkspaceClaude: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    mode?: "shared" | "member";
+                    /** @description Continue on workspace credits when the account is at its limit or missing */
+                    fallback?: boolean;
+                    /**
+                     * Format: int64
+                     * @description Whose account tickets without a person use in per-member mode; 0 for the owner
+                     */
+                    defaultMemberId?: number;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceClaude"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+        };
+    };
+    setWorkspaceClaudeConnection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaudeConnectionInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceClaude"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+        };
+    };
+    deleteWorkspaceClaudeConnection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Disconnected */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getBilling: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Billing"];
+                };
+            };
+        };
+    };
+    setSlots: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    slots: number;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Billing"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            402: components["responses"]["PaymentRequired"];
+        };
+    };
+    checkoutCredits: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * Format: int64
+                     * @description Amount to pay in so'm
+                     */
+                    amountUzs: number;
+                    /** @enum {string} */
+                    provider: "payme" | "click";
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        url: string;
+                        /** Format: int64 */
+                        paymentId: number;
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    getPlatformOverview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlatformOverview"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    listPlatformWorkspaces: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlatformWorkspace"][];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    updatePlatformWorkspace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    plan?: string;
+                    slots?: number;
+                    memberLimit?: number;
+                    suspended?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlatformWorkspace"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    grantCredits: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: int64 */
+                    amount: number;
+                    note?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlatformWorkspace"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    listPlatformUsers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"][];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    updatePlatformUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    isAdmin: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };

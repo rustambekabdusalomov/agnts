@@ -15,6 +15,12 @@ abstract class _$AnalysisCWProxy {
 
   Analysis footprint(Footprint? footprint);
 
+  Analysis approaches(List<Approach>? approaches);
+
+  Analysis outOfScope(List<String>? outOfScope);
+
+  Analysis ship(ShipNotes? ship);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Analysis(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -26,6 +32,9 @@ abstract class _$AnalysisCWProxy {
     List<String> plan,
     AnalysisComplexityEnum? complexity,
     Footprint? footprint,
+    List<Approach>? approaches,
+    List<String>? outOfScope,
+    ShipNotes? ship,
   });
 }
 
@@ -49,6 +58,16 @@ class _$AnalysisCWProxyImpl implements _$AnalysisCWProxy {
   Analysis footprint(Footprint? footprint) => this(footprint: footprint);
 
   @override
+  Analysis approaches(List<Approach>? approaches) =>
+      this(approaches: approaches);
+
+  @override
+  Analysis outOfScope(List<String>? outOfScope) => this(outOfScope: outOfScope);
+
+  @override
+  Analysis ship(ShipNotes? ship) => this(ship: ship);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Analysis(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -60,6 +79,9 @@ class _$AnalysisCWProxyImpl implements _$AnalysisCWProxy {
     Object? plan = const $CopyWithPlaceholder(),
     Object? complexity = const $CopyWithPlaceholder(),
     Object? footprint = const $CopyWithPlaceholder(),
+    Object? approaches = const $CopyWithPlaceholder(),
+    Object? outOfScope = const $CopyWithPlaceholder(),
+    Object? ship = const $CopyWithPlaceholder(),
   }) {
     return Analysis(
       summary: summary == const $CopyWithPlaceholder()
@@ -78,6 +100,18 @@ class _$AnalysisCWProxyImpl implements _$AnalysisCWProxy {
           ? _value.footprint
           // ignore: cast_nullable_to_non_nullable
           : footprint as Footprint?,
+      approaches: approaches == const $CopyWithPlaceholder()
+          ? _value.approaches
+          // ignore: cast_nullable_to_non_nullable
+          : approaches as List<Approach>?,
+      outOfScope: outOfScope == const $CopyWithPlaceholder()
+          ? _value.outOfScope
+          // ignore: cast_nullable_to_non_nullable
+          : outOfScope as List<String>?,
+      ship: ship == const $CopyWithPlaceholder()
+          ? _value.ship
+          // ignore: cast_nullable_to_non_nullable
+          : ship as ShipNotes?,
     );
   }
 }
@@ -110,6 +144,21 @@ Analysis _$AnalysisFromJson(Map<String, dynamic> json) =>
           (v) =>
               v == null ? null : Footprint.fromJson(v as Map<String, dynamic>),
         ),
+        approaches: $checkedConvert(
+          'approaches',
+          (v) => (v as List<dynamic>?)
+              ?.map((e) => Approach.fromJson(e as Map<String, dynamic>))
+              .toList(),
+        ),
+        outOfScope: $checkedConvert(
+          'outOfScope',
+          (v) => (v as List<dynamic>?)?.map((e) => e as String).toList(),
+        ),
+        ship: $checkedConvert(
+          'ship',
+          (v) =>
+              v == null ? null : ShipNotes.fromJson(v as Map<String, dynamic>),
+        ),
       );
       return val;
     });
@@ -119,6 +168,9 @@ Map<String, dynamic> _$AnalysisToJson(Analysis instance) => <String, dynamic>{
   'plan': instance.plan,
   'complexity': ?_$AnalysisComplexityEnumEnumMap[instance.complexity],
   'footprint': ?instance.footprint?.toJson(),
+  'approaches': ?instance.approaches?.map((e) => e.toJson()).toList(),
+  'outOfScope': ?instance.outOfScope,
+  'ship': ?instance.ship?.toJson(),
 };
 
 const _$AnalysisComplexityEnumEnumMap = {

@@ -23,6 +23,19 @@ func DeriveSecret(encKey []byte, provider string) string {
 	return hex.EncodeToString(m.Sum(nil))[:40]
 }
 
+// HookSecret is a workspace's webhook secret for provider: derived from
+// the server key and the workspace's hook id, so each workspace has its
+// own. The URLs from before workspaces (hook id "") keep the old secret.
+func HookSecret(encKey []byte, provider, hookID string) string {
+	if hookID == "" {
+		return DeriveSecret(encKey, provider)
+	}
+	return DeriveSecret(encKey, provider+":"+hookID)
+}
+
+// SecretSource returns the webhook secret for a delivery's context.
+type SecretSource func(ctx context.Context) string
+
 // HookSink receives what the webhooks report.
 type HookSink interface {
 	MarkMerged(ctx context.Context, prURL, branch string, origin domain.Origin) (bool, error)
@@ -50,7 +63,7 @@ func readBody(w http.ResponseWriter, r *http.Request) ([]byte, bool) {
 // GitHubWebhook handles pull_request (merged) and workflow_run events.
 // Configure it in the repository (or organisation) settings with content
 // type application/json and the secret from the Integrations page.
-func GitHubWebhook(secret string, sink HookSink, store HookStore, onPipeline func(), log *slog.Logger) http.Handler {
+func GitHubWebhook(secretOf SecretSource, sink HookSink, store HookStore, onPipeline func(), log *slog.Logger) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, ok := readBody(w, r)
 		if !ok {
@@ -58,7 +71,7 @@ func GitHubWebhook(secret string, sink HookSink, store HookStore, onPipeline fun
 		}
 		sig, _ := strings.CutPrefix(r.Header.Get("X-Hub-Signature-256"), "sha256=")
 		got, _ := hex.DecodeString(sig)
-		m := hmac.New(sha256.New, []byte(secret))
+		m := hmac.New(sha256.New, []byte(secretOf(r.Context())))
 		m.Write(body)
 		if !hmac.Equal(got, m.Sum(nil)) {
 			log.Warn("github webhook: bad signature", "ip", r.RemoteAddr)
@@ -109,13 +122,13 @@ func GitHubWebhook(secret string, sink HookSink, store HookStore, onPipeline fun
 // GitLabWebhook handles merge request (merged) and pipeline events.
 // Configure it in the project's Webhooks settings with the secret token
 // from the Integrations page.
-func GitLabWebhook(secret string, sink HookSink, store HookStore, onPipeline func(), log *slog.Logger) http.Handler {
+func GitLabWebhook(secretOf SecretSource, sink HookSink, store HookStore, onPipeline func(), log *slog.Logger) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, ok := readBody(w, r)
 		if !ok {
 			return
 		}
-		if subtle.ConstantTimeCompare([]byte(r.Header.Get("X-Gitlab-Token")), []byte(secret)) != 1 {
+		if subtle.ConstantTimeCompare([]byte(r.Header.Get("X-Gitlab-Token")), []byte(secretOf(r.Context()))) != 1 {
 			log.Warn("gitlab webhook: bad token", "ip", r.RemoteAddr)
 			w.WriteHeader(http.StatusUnauthorized)
 			return

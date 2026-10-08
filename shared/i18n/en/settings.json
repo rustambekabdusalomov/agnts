@@ -80,6 +80,16 @@
     "reviewDone": "When agnts's code review finishes",
     "onThisPage": "On this page",
     "secretsHelp": "Tokens for Jira, GitHub and Claude are stored encrypted on your server. This page never shows them.",
-    "saved": "Settings saved"
+    "saved": "Settings saved",
+    "parallelSlots": "{n, plural, one {# run} other {# runs}} at once",
+    "parallelSlotsHelp": "The workspace's slots. Change them in Workspace → Billing.",
+    "claudeMoved": "Claude is connected per workspace now.",
+    "claudeOpen": "Workspace → Claude",
+    "selfReview": "Fix review findings first",
+    "selfReviewHelp": "When agnts's own code review finds a blocker or major problem, agnts sends it back to the coder once before you review. Needs the code review above.",
+    "autoBrief": "Survey repositories",
+    "autoBriefHelp": "Write a repository brief (architecture, recipes, conventions) when a repository's first ticket is analysed, and update it after every 10 merges. A brief reaches the agent only after you approve it.",
+    "reflect": "Learn from your feedback",
+    "reflectHelp": "When you ask for changes or reject work with a reason, agnts looks for a convention behind it and suggests a rule on the Rules page. Nothing applies until you adopt it."
   }
 }

@@ -1,0 +1,32 @@
+{
+  "replay": {
+    "title": "Replay with today's agnts",
+    "sub": "Re-run this ticket from the commit it started from, with the current prompts, brief and rules, and compare the result with what you approved. The replay is never pushed.",
+    "start": "Replay",
+    "confirm": "agnts creates a new task that re-does {key} from where it started. It uses your Claude plan like any ticket.",
+    "created": "Replay {key} queued",
+    "banner": "This is a replay to evaluate agnts: it is never pushed. Compare it with",
+    "evalTitle": "Replay evaluation",
+    "evalSub": "Done tickets re-run with a newer agnts, compared with the change you approved. Start one with Replay on a done ticket, or `agnts eval replay KEY`.",
+    "none": "No replays yet.",
+    "recent": "Recent replays",
+    "colReplays": "Replays",
+    "colChecks": "Checks",
+    "colLooksGood": "Review OK",
+    "colOverlap": "Same files",
+    "colOverlapHint": "How much the replay's changed files match the approved change's (Jaccard index)",
+    "colRecall": "Coverage",
+    "colRecallHint": "Share of the approved change's files the replay changed too",
+    "colTurns": "Turns (original)",
+    "colCost": "Cost (original)",
+    "colReplay": "Replay",
+    "colOf": "Of",
+    "colState": "State",
+    "colReview": "Review",
+    "pass": "pass",
+    "fail": "fail",
+    "verdict_looks_good": "looks good",
+    "verdict_has_concerns": "has concerns",
+    "verdict_needs_changes": "needs changes"
+  }
+}

@@ -6,12 +6,14 @@ import { api, HttpError, unwrap } from '../../api/client'
 import { ago } from '../../composables/format'
 import { livePoll } from '../../composables/useLive'
 import { useUi } from '../../stores/ui'
+import { useWorkspace } from '../../stores/workspace'
 
 // Done tickets and where their learn run stands: running, queued (in run
 // order), failed or never learned, with buttons to queue them.
 const { t, locale } = useI18n()
 const qc = useQueryClient()
 const ui = useUi()
+const workspace = useWorkspace()
 const queue = useQuery({
   queryKey: ['lessons', 'queue'],
   queryFn: () => unwrap(api.GET('/lessons/queue')),
@@ -38,7 +40,7 @@ const learn = useMutation({
   <section class="card">
     <div class="ch">
       <div><h2>{{ t('learn.queueTitle') }}</h2><p class="sub">{{ t('learn.queueSub') }}</p></div>
-      <button v-if="idle.length > 1" type="button" class="btn btn-s" :disabled="learn.isPending.value" @click="learn.mutate(idle.map((x) => x.key))">
+      <button v-if="idle.length > 1 && workspace.canEdit" type="button" class="btn btn-s" :disabled="learn.isPending.value" @click="learn.mutate(idle.map((x) => x.key))">
         {{ t('learn.queueAll', { n: idle.length }) }}
       </button>
     </div>
@@ -50,7 +52,7 @@ const learn = useMutation({
         <tbody>
           <tr v-for="x in items" :key="x.key">
             <td>
-              <RouterLink class="ttitle" :to="`/tickets/${x.key}`">{{ x.title }}</RouterLink>
+              <RouterLink class="ttitle" :to="{ name: 'ticket', params: { key: x.key } }">{{ x.title }}</RouterLink>
               <div class="tkey">{{ x.key }} · {{ x.repoName }}</div>
             </td>
             <td>
@@ -60,7 +62,7 @@ const learn = useMutation({
             <td class="tkey">{{ ago(x.updatedAt, locale) }}</td>
             <td style="text-align: right">
               <button
-                v-if="x.status === 'none' || x.status === 'failed'"
+                v-if="workspace.canEdit && (x.status === 'none' || x.status === 'failed')"
                 type="button"
                 class="btn btn-s"
                 :disabled="learn.isPending.value"

@@ -75,7 +75,7 @@ const options = computed(() => [
               <td>
                 <span class="br">{{ b.name }}</span>
                 <div v-if="b.ticketKey" style="margin-top: 4px">
-                  <RouterLink :to="`/tickets/${b.ticketKey}`" class="badge b-info">{{ b.ticketKey }}</RouterLink>
+                  <RouterLink :to="{ name: 'ticket', params: { key: b.ticketKey } }" class="badge b-info">{{ b.ticketKey }}</RouterLink>
                 </div>
               </td>
               <td style="max-width: 340px">{{ b.message || '—' }} <span class="hint" style="font-family: var(--mono)">{{ b.sha.slice(0, 7) }}</span></td>
@@ -117,7 +117,7 @@ const options = computed(() => [
               <span class="br">{{ b.name }}</span>
               <span v-if="b.default" class="badge b-info" style="margin-left: 6px">{{ t('repo.default') }}</span>
               <div v-if="b.ticketKey" style="margin-top: 4px">
-                <RouterLink :to="`/tickets/${b.ticketKey}`" class="badge b-info">{{ b.ticketKey }}</RouterLink>
+                <RouterLink :to="{ name: 'ticket', params: { key: b.ticketKey } }" class="badge b-info">{{ b.ticketKey }}</RouterLink>
               </div>
             </td>
             <td style="max-width: 340px">{{ b.message || '—' }}</td>

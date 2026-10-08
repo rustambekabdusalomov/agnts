@@ -34,10 +34,13 @@ type Tickets interface {
 	DeleteTask(ctx context.Context, key string, origin domain.Origin) error
 	Rows(ctx context.Context, ts []domain.Ticket) ([]orchestrator.TicketRow, error)
 	Learn(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
+	Replay(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
+	ReplayReport(ctx context.Context) (orchestrator.ReplayReport, error)
 	Review(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	Preview(ctx context.Context, key string, compare *bool, origin domain.Origin) (domain.Ticket, error)
 	OpenShot(ctx context.Context, key string, runID int64, shotID string) (io.ReadCloser, error)
 	Translate(ctx context.Context, key, lang string) ([]orchestrator.TranslatedText, error)
+	SetMember(ctx context.Context, key string, userID int64, name string, origin domain.Origin) (domain.Ticket, error)
 	FollowUpTickets
 	RelationTickets
 	Attachments
@@ -109,7 +112,7 @@ func (s *Server) GetTicket(w http.ResponseWriter, r *http.Request, key gen.Ticke
 	}
 	d := gen.TicketDetail{
 		Ticket: toTicketRow(orchestrator.TicketRow{Ticket: v.Ticket, Info: v.Info, RepoName: v.RepoName, Spend: v.Spend,
-			OpenSuggestions: openSuggestions(v.FollowUps.Suggestions), Blockers: v.Relations.Blockers}),
+			OpenSuggestions: openSuggestions(v.FollowUps.Suggestions), Blockers: v.Relations.Blockers, Member: v.Member, CreatedBy: v.CreatedBy}),
 		Questions:   make([]gen.Question, len(v.Questions)),
 		Attachments: make([]gen.Attachment, len(v.Attachments)),
 		History:     &[]gen.HistoryItem{},
@@ -118,7 +121,12 @@ func (s *Server) GetTicket(w http.ResponseWriter, r *http.Request, key gen.Ticke
 	stages := toStageSpend(v.Stages)
 	d.SpendByStage = &stages
 	for _, h := range v.History {
-		*d.History = append(*d.History, gen.HistoryItem{At: h.At, State: gen.TicketState(h.State), Message: h.Message, Origin: string(h.Origin)})
+		item := gen.HistoryItem{At: h.At, State: gen.TicketState(h.State), Message: h.Message, Origin: string(h.Origin)}
+		if h.User != "" {
+			user := h.User
+			item.User = &user
+		}
+		*d.History = append(*d.History, item)
 	}
 	em := gen.StageModels{
 		Analyze: gen.Model(v.Settings.ModelFor(v.Ticket, domain.ModelAnalyze)),
@@ -153,6 +161,7 @@ func (s *Server) GetTicket(w http.ResponseWriter, r *http.Request, key gen.Ticke
 			d.Analysis.Complexity = &c
 		}
 		d.Analysis.Footprint = toFootprint(v.Analysis.Footprint)
+		toDesign(d.Analysis, *v.Analysis)
 	}
 	rels := toRelations(v.Ticket.Key, v.Relations)
 	d.Relations = &rels
@@ -203,11 +212,16 @@ func toEvent(e domain.Event) gen.Event {
 			data[k] = v
 		}
 	}
-	return gen.Event{
+	out := gen.Event{
 		Id: e.ID, TicketKey: e.TicketKey, RunId: e.RunID, Step: e.Step, Type: e.Type,
 		Level: gen.EventLevel(e.Level), Origin: gen.EventOrigin(e.Origin), Message: e.Message,
 		Data: data, DurationMs: e.DurationMS, CreatedAt: e.CreatedAt,
 	}
+	if e.Username != "" {
+		user := e.Username
+		out.User = &user
+	}
+	return out
 }
 
 // AnswerQuestions implements gen.ServerInterface.
@@ -344,6 +358,14 @@ func toTicketRow(r orchestrator.TicketRow) gen.Ticket {
 		bs := toBlockers(r.Blockers)
 		out.BlockedBy = &bs
 	}
+	if r.Member != "" {
+		m := r.Member
+		out.Member = &m
+	}
+	if r.CreatedBy != "" {
+		c := r.CreatedBy
+		out.CreatedBy = &c
+	}
 	return out
 }
 
@@ -376,7 +398,15 @@ func toTicket(t domain.Ticket) gen.Ticket {
 		Key: t.Key, Source: gen.TicketSource(t.Source), RepoId: t.RepoID, Title: t.Title, Description: t.Description,
 		Priority: t.Priority, State: gen.TicketState(t.State), Revision: t.Revision, Turns: t.Turns,
 		Branch: t.Branch, PrNumber: t.PRNumber, PrUrl: t.PRURL, CreatedAt: t.CreatedAt, UpdatedAt: t.UpdatedAt,
-		Kind: gen.TicketKind(t.Kind), KindAuto: t.KindAuto,
+		Kind: gen.TicketKind(t.Kind), KindAuto: t.KindAuto, MemberId: t.MemberID, QueuedAt: t.QueuedAt,
+	}
+	if t.WaitReason != domain.WaitNone {
+		wr := gen.WaitReason(t.WaitReason)
+		out.WaitReason = &wr
+		if t.WaitMessage != "" {
+			msg := t.WaitMessage
+			out.WaitMessage = &msg
+		}
 	}
 	if out.Kind == "" {
 		out.Kind = gen.TicketKindCode
@@ -392,6 +422,10 @@ func toTicket(t domain.Ticket) gen.Ticket {
 	if t.FollowUpOf != "" {
 		of := t.FollowUpOf
 		out.FollowUpOf = &of
+	}
+	if t.ReplayOf != "" {
+		of := t.ReplayOf
+		out.ReplayOf = &of
 	}
 	mode := toFollowUpsMode(t.SuggestFollowUps)
 	out.SuggestFollowUps = &mode
@@ -588,6 +622,20 @@ func toResult(r domain.Result) *gen.Result {
 	if out.Notes == nil {
 		out.Notes = []string{}
 	}
+	if len(sum.Deviations) > 0 {
+		out.Deviations = &sum.Deviations
+	}
+	if len(r.RedFlags) > 0 {
+		flags := make([]gen.RedFlag, len(r.RedFlags))
+		for i, f := range r.RedFlags {
+			flags[i] = gen.RedFlag{Kind: gen.RedFlagKind(f.Kind), Path: f.Path, Text: f.Text}
+			if f.Line > 0 {
+				line := f.Line
+				flags[i].Line = &line
+			}
+		}
+		out.RedFlags = &flags
+	}
 	for i, c := range steps {
 		c := c
 		out.Checks[i] = gen.CheckStep{Name: c.Name, Command: c.Command, ExitCode: c.ExitCode, DurationMs: c.DurationMS}
@@ -606,4 +654,83 @@ func toResult(r domain.Result) *gen.Result {
 		out.Report = &report
 	}
 	return out
+}
+
+// SetTicketMember implements gen.ServerInterface.
+func (s *Server) SetTicketMember(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	var req gen.SetTicketMemberJSONBody
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	u, _ := userFrom(r.Context())
+	m, _ := memberFrom(r.Context())
+	uid, name := req.UserId, u.Username
+	if uid == 0 {
+		uid = u.ID
+	}
+	if uid != u.ID {
+		if s.opt.Workspaces == nil {
+			writeError(w, http.StatusBadRequest, "bad_request", "not a member of this workspace")
+			return
+		}
+		role, err := s.opt.Workspaces.Role(r.Context(), m.w.ID, uid)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, "bad_request", "not a member of this workspace")
+			return
+		}
+		if !role.CanEdit() {
+			writeError(w, http.StatusConflict, "conflict", "a viewer cannot own a ticket")
+			return
+		}
+		if s.opt.Users != nil {
+			if x, err := s.opt.Users.ByID(r.Context(), uid); err == nil {
+				name = x.Username
+			}
+		}
+	}
+	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
+		return s.opt.Tickets.SetMember(ctx, key, uid, name, origin(r))
+	})
+}
+
+// toDesign adds the analysis's approaches, scope and ship notes.
+func toDesign(out *gen.Analysis, a orchestrator.Analysis) {
+	if len(a.Approaches) > 0 {
+		aps := make([]gen.Approach, len(a.Approaches))
+		for i, x := range a.Approaches {
+			aps[i] = gen.Approach{Title: x.Title, Sketch: x.Sketch, Pros: nonNilStrings(x.Pros), Cons: nonNilStrings(x.Cons), Chosen: x.Chosen}
+			if x.Fit != "" {
+				aps[i].Fit = &x.Fit
+			}
+			if x.Why != "" {
+				aps[i].Why = &x.Why
+			}
+		}
+		out.Approaches = &aps
+	}
+	if len(a.OutOfScope) > 0 {
+		scope := a.OutOfScope
+		out.OutOfScope = &scope
+	}
+	if n := a.ShipPlan(); n != nil {
+		sn := gen.ShipNotes{}
+		for _, f := range []struct {
+			v   string
+			dst **string
+		}{{n.Migrations, &sn.Migrations}, {n.Compatibility, &sn.Compatibility}, {n.Rollout, &sn.Rollout}, {n.Rollback, &sn.Rollback}} {
+			if f.v != "" {
+				v := f.v
+				*f.dst = &v
+			}
+		}
+		out.Ship = &sn
+	}
+}
+
+func nonNilStrings(s []string) []string {
+	if s == nil {
+		return []string{}
+	}
+	return s
 }

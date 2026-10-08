@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useMutation, useQuery } from '@tanstack/vue-query'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { api, HttpError, unwrap } from '../api/client'
+import BrandLogo from '../components/BrandLogo.vue'
 import { useSession } from '../stores/session'
 
 // Claude's connector sign-in lands here (via /oauth/authorize). The user is
@@ -42,8 +43,12 @@ const info = useQuery({
   retry: false,
 })
 
+// Claude acts in one workspace, as this person; the last one opened first.
+const workspaces = computed(() => session.user?.workspaces ?? [])
+const workspace = ref(session.homeWorkspace())
+
 const decide = useMutation({
-  mutationFn: (approve: boolean) => unwrap(api.POST('/oauth/consent', { body: { ...q.value, approve } })),
+  mutationFn: (approve: boolean) => unwrap(api.POST('/oauth/consent', { body: { ...q.value, approve, ...(approve ? { workspace: workspace.value } : {}) } })),
   onSuccess: (r) => window.location.assign(r.redirect),
 })
 const error = computed(() => {
@@ -55,9 +60,9 @@ const error = computed(() => {
 <template>
   <main class="login-wrap">
     <section class="card login" aria-labelledby="consent-title">
-      <div class="brand">
-        <span class="brand-name">{{ t('app.name') }}</span>
-        <span class="brand-sub">{{ t('app.tagline') }}</span>
+      <div class="login-brand">
+        <BrandLogo :size="34" />
+        <div class="brand-sub">{{ t('app.tagline') }}</div>
       </div>
       <h1 id="consent-title">{{ t('mcp.consentTitle') }}</h1>
       <p v-if="info.isPending.value" class="hint">{{ t('common.loading') }}</p>
@@ -67,9 +72,16 @@ const error = computed(() => {
         <div class="help">
           <p>{{ t('mcp.consentWhat') }}</p>
         </div>
+        <label class="field">
+          <span class="flbl">{{ t('mcp.pickWorkspace') }}</span>
+          <select v-model="workspace" class="cfg-in">
+            <option v-for="w in workspaces" :key="w.id" :value="w.slug">{{ w.name }}</option>
+          </select>
+          <span class="fhelp">{{ t('mcp.pickWorkspaceHelp') }}</span>
+        </label>
         <p class="hint">{{ t('mcp.consentRedirect', { host: info.data.value.redirectHost }) }}</p>
         <div class="actions">
-          <button class="btn btn-p" type="button" :disabled="decide.isPending.value" @click="decide.mutate(true)">{{ t('mcp.allow') }}</button>
+          <button class="btn btn-p" type="button" :disabled="decide.isPending.value || !workspace" @click="decide.mutate(true)">{{ t('mcp.allow') }}</button>
           <button class="btn" type="button" :disabled="decide.isPending.value" @click="decide.mutate(false)">{{ t('mcp.deny') }}</button>
         </div>
       </template>

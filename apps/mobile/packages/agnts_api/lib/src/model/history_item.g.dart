@@ -15,6 +15,8 @@ abstract class _$HistoryItemCWProxy {
 
   HistoryItem origin(String origin);
 
+  HistoryItem user(String? user);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `HistoryItem(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -26,6 +28,7 @@ abstract class _$HistoryItemCWProxy {
     TicketState state,
     String message,
     String origin,
+    String? user,
   });
 }
 
@@ -48,6 +51,9 @@ class _$HistoryItemCWProxyImpl implements _$HistoryItemCWProxy {
   HistoryItem origin(String origin) => this(origin: origin);
 
   @override
+  HistoryItem user(String? user) => this(user: user);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `HistoryItem(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -59,6 +65,7 @@ class _$HistoryItemCWProxyImpl implements _$HistoryItemCWProxy {
     Object? state = const $CopyWithPlaceholder(),
     Object? message = const $CopyWithPlaceholder(),
     Object? origin = const $CopyWithPlaceholder(),
+    Object? user = const $CopyWithPlaceholder(),
   }) {
     return HistoryItem(
       at: at == const $CopyWithPlaceholder()
@@ -77,6 +84,10 @@ class _$HistoryItemCWProxyImpl implements _$HistoryItemCWProxy {
           ? _value.origin
           // ignore: cast_nullable_to_non_nullable
           : origin as String,
+      user: user == const $CopyWithPlaceholder()
+          ? _value.user
+          // ignore: cast_nullable_to_non_nullable
+          : user as String?,
     );
   }
 }
@@ -104,6 +115,7 @@ HistoryItem _$HistoryItemFromJson(Map<String, dynamic> json) => $checkedCreate(
       ),
       message: $checkedConvert('message', (v) => v as String),
       origin: $checkedConvert('origin', (v) => v as String),
+      user: $checkedConvert('user', (v) => v as String?),
     );
     return val;
   },
@@ -115,6 +127,7 @@ Map<String, dynamic> _$HistoryItemToJson(HistoryItem instance) =>
       'state': _$TicketStateEnumMap[instance.state]!,
       'message': instance.message,
       'origin': instance.origin,
+      'user': ?instance.user,
     };
 
 const _$TicketStateEnumMap = {

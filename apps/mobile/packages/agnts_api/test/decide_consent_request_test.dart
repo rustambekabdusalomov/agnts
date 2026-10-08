@@ -42,5 +42,11 @@ void main() {
       // TODO
     });
 
+    // The slug of the workspace Claude may act in (required to approve)
+    // String workspace
+    test('to test the property `workspace`', () async {
+      // TODO
+    });
+
   });
 }

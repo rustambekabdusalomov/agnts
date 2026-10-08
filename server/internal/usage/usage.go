@@ -20,10 +20,27 @@ import (
 	"agnts/internal/store/postgres"
 )
 
-// Store persists snapshots.
+// Store persists snapshots, per Claude account.
 type Store interface {
 	Insert(ctx context.Context, s postgres.UsageSnapshot) error
-	Latest(ctx context.Context) (postgres.UsageSnapshot, bool, error)
+	Latest(ctx context.Context, conn *int64) (postgres.UsageSnapshot, bool, error)
+}
+
+// connOf is the Claude account ctx runs on: a connection, or nil for
+// agnts's own key and for installs that never picked one.
+func connOf(ctx context.Context) *int64 {
+	if a, ok := domain.ClaudeOf(ctx); ok && a.ConnectionID > 0 {
+		id := a.ConnectionID
+		return &id
+	}
+	return nil
+}
+
+// onCredits reports whether ctx runs on agnts's key, paid with credits:
+// plan limits do not apply to it.
+func onCredits(ctx context.Context) bool {
+	a, ok := domain.ClaudeOf(ctx)
+	return ok && a.Credits
 }
 
 // Events appends to the event log (so SSE clients refresh).
@@ -37,10 +54,35 @@ type Tracker struct {
 	events Events
 	log    *slog.Logger
 	now    func() time.Time
+	// paused learns when an account reaches or leaves its limit, so the
+	// account's row can show it.
+	paused func(ctx context.Context, conn int64, until *time.Time)
+	// resolve finds the account a context without one reads.
+	resolve func(ctx context.Context) (domain.ClaudeAccount, bool)
 
 	mu         sync.Mutex
 	refreshing bool
 }
+
+// SetResolver sets how a reading is found for a context without a Claude
+// account (pages and the refresh button): the account the workspace's
+// person would run on.
+func (t *Tracker) SetResolver(f func(ctx context.Context) (domain.ClaudeAccount, bool)) { t.resolve = f }
+
+// account returns ctx with its Claude account, resolving one when needed.
+func (t *Tracker) account(ctx context.Context) context.Context {
+	if _, ok := domain.ClaudeOf(ctx); ok || t.resolve == nil {
+		return ctx
+	}
+	if a, ok := t.resolve(ctx); ok {
+		return domain.WithClaude(ctx, a)
+	}
+	return ctx
+}
+
+// OnPaused sets what learns that an account reached (until set) or left
+// (nil) its limit.
+func (t *Tracker) OnPaused(f func(ctx context.Context, conn int64, until *time.Time)) { t.paused = f }
 
 var _ orchestrator.UsageGate = (*Tracker)(nil)
 
@@ -66,7 +108,11 @@ type View struct {
 // Current returns the latest reading with windows that have reset rolled
 // over to zero, and whether new runs are paused.
 func (t *Tracker) Current(ctx context.Context, s domain.Settings) (View, error) {
-	snap, ok, err := t.store.Latest(ctx)
+	ctx = t.account(ctx)
+	if onCredits(ctx) {
+		return View{Status: "allowed", PauseAbove: s.PauseAbove}, nil
+	}
+	snap, ok, err := t.store.Latest(ctx, connOf(ctx))
 	if err != nil {
 		return View{}, err
 	}
@@ -148,11 +194,12 @@ func (t *Tracker) Record(ctx context.Context, data map[string]any) {
 	if r.empty() {
 		return
 	}
-	prev, ok, err := t.store.Latest(ctx)
+	conn := connOf(ctx)
+	prev, ok, err := t.store.Latest(ctx, conn)
 	if err != nil {
 		t.log.Warn("usage: read", "err", err)
 	}
-	snap := postgres.UsageSnapshot{Status: r.Status, Raw: data}
+	snap := postgres.UsageSnapshot{ConnectionID: conn, Status: r.Status, Raw: data}
 	if ok {
 		snap.FiveHour, snap.FiveHourResets = roll(prev.FiveHour, prev.FiveHourResets, t.now())
 		snap.SevenDay, snap.SevenDayResets = roll(prev.SevenDay, prev.SevenDayResets, t.now())
@@ -175,6 +222,15 @@ func (t *Tracker) Record(ctx context.Context, data map[string]any) {
 	if err := t.store.Insert(ctx, snap); err != nil {
 		t.log.Warn("usage: save", "err", err)
 		return
+	}
+	if conn != nil && t.paused != nil {
+		if v, err := t.Current(ctx, domain.Settings{PauseAbove: 100}); err == nil {
+			if v.Paused {
+				t.paused(ctx, *conn, v.PausedUntil)
+			} else {
+				t.paused(ctx, *conn, nil)
+			}
+		}
 	}
 	t.announce(ctx, snap)
 }
@@ -341,8 +397,10 @@ func NewRefresher(t *Tracker, r orchestrator.Runner, image string, log *slog.Log
 // ErrBusy is returned when a refresh is already running.
 var ErrBusy = errors.New("a usage refresh is already running")
 
-// Refresh starts a refresh in the background.
+// Refresh starts a refresh in the background, on the account ctx resolves
+// to.
 func (r *Refresher) Refresh(ctx context.Context) error {
+	ctx = r.tracker.account(ctx)
 	r.tracker.mu.Lock()
 	if r.tracker.refreshing {
 		r.tracker.mu.Unlock()
@@ -395,8 +453,10 @@ func (r *Refresher) run(ctx context.Context) error {
 	return nil
 }
 
-// IdleLoop refreshes every interval while no stage is running.
-func (r *Refresher) IdleLoop(ctx context.Context, every time.Duration, active func() int) {
+// IdleLoop refreshes, every interval while no stage is running, the
+// accounts accounts lists (the ones paused at their limit: a fresh reading
+// lets their runs resume as soon as the limit resets).
+func (r *Refresher) IdleLoop(ctx context.Context, every time.Duration, active func() int, accounts func(ctx context.Context) []domain.ClaudeAccount) {
 	t := time.NewTicker(every)
 	defer t.Stop()
 	for {
@@ -404,10 +464,18 @@ func (r *Refresher) IdleLoop(ctx context.Context, every time.Duration, active fu
 		case <-ctx.Done():
 			return
 		case <-t.C:
-			if active() == 0 {
-				if err := r.Refresh(ctx); err != nil && !errors.Is(err, ErrBusy) {
-					r.log.Warn("idle usage refresh", "err", err)
+			if active() != 0 {
+				continue
+			}
+			for _, a := range accounts(ctx) {
+				if ctx.Err() != nil {
+					return
 				}
+				actx, cancel := context.WithTimeout(domain.WithClaude(ctx, a), 3*time.Minute)
+				if err := r.run(actx); err != nil {
+					r.log.Warn("idle usage refresh", "account", a.ConnectionID, "err", err)
+				}
+				cancel()
 			}
 		}
 	}

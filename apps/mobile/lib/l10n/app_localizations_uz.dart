@@ -9,6 +9,302 @@ class AppLocalizationsUz extends AppLocalizations {
   AppLocalizationsUz([String locale = 'uz']) : super(locale);
 
   @override
+  String get accountSignupTitle => 'Hisob yarating';
+
+  @override
+  String get accountSignupLede => 'Boshlash uchun sizda o‘z ish maydoningiz bo‘ladi.';
+
+  @override
+  String accountSignupInviteLede(String workspace) {
+    return '$workspace ga qo‘shilish uchun hisob yarating.';
+  }
+
+  @override
+  String get accountSignupClosed => 'Bu serverda ro‘yxatdan o‘tish faqat taklif orqali. Ish maydoni egasidan taklif havolasini so‘rang.';
+
+  @override
+  String get accountFirstUser => 'Bu birinchi hisob: u platforma administratori bo‘ladi.';
+
+  @override
+  String get accountEmail => 'Pochta';
+
+  @override
+  String get accountDisplayName => 'Ismingiz';
+
+  @override
+  String get accountUsername => 'Foydalanuvchi nomi';
+
+  @override
+  String get accountUsernameHelp => 'Ixtiyoriy; bo‘sh bo‘lsa, pochtadan olinadi.';
+
+  @override
+  String get accountPassword => 'Parol';
+
+  @override
+  String get accountPasswordHelp => 'Kamida 12 ta belgi.';
+
+  @override
+  String get accountPasswordAgain => 'Parolni takrorlang';
+
+  @override
+  String get accountPasswordsDiffer => 'Parollar mos emas.';
+
+  @override
+  String get accountWorkspaceName => 'Ish maydoni nomi';
+
+  @override
+  String get accountWorkspaceNameHelp => 'Birinchi ish maydoningiz, masalan loyihangiz nomi. Keyin nomini o‘zgartirish mumkin.';
+
+  @override
+  String get accountCreate => 'Hisob yaratish';
+
+  @override
+  String get accountCreating => 'Yaratilmoqda…';
+
+  @override
+  String get accountHaveAccount => 'Hisobingiz bormi?';
+
+  @override
+  String get accountSignIn => 'Kirish';
+
+  @override
+  String get accountNoAccount => 'Hali hisobingiz yo‘qmi?';
+
+  @override
+  String get accountSignUp => 'Yaratish';
+
+  @override
+  String get accountForgot => 'Parolni unutdingizmi?';
+
+  @override
+  String get accountForgotTitle => 'Parolni tiklash';
+
+  @override
+  String get accountForgotLede => 'Yangi parol tanlash uchun havola yuboramiz.';
+
+  @override
+  String get accountForgotSend => 'Havola yuborish';
+
+  @override
+  String get accountForgotSent => 'Agar bu pochta hisobga tegishli bo‘lsa, havola yo‘lda. U bir soat amal qiladi.';
+
+  @override
+  String get accountResetTitle => 'Yangi parol tanlang';
+
+  @override
+  String get accountResetSave => 'Parolni saqlash';
+
+  @override
+  String get accountResetDone => 'Parol o‘zgartirildi. Barcha seanslar yopildi.';
+
+  @override
+  String get accountVerifyTitle => 'Pochtani tasdiqlash';
+
+  @override
+  String get accountVerifying => 'Tasdiqlanmoqda…';
+
+  @override
+  String get accountVerified => 'Pochtangiz tasdiqlandi.';
+
+  @override
+  String get accountVerifyFailed => 'Havola noto‘g‘ri yoki muddati o‘tgan.';
+
+  @override
+  String get accountContinue => 'Davom etish';
+
+  @override
+  String accountInviteTitle(String workspace) {
+    return '$workspace ga qo‘shilish';
+  }
+
+  @override
+  String accountInviteBy(String name) {
+    return 'Sizni $name taklif qildi.';
+  }
+
+  @override
+  String accountInviteFor(String email) {
+    return 'Taklif $email uchun.';
+  }
+
+  @override
+  String get accountInviteJoin => 'Qo‘shilish';
+
+  @override
+  String get accountInviteJoining => 'Qo‘shilmoqda…';
+
+  @override
+  String get accountInviteInvalid => 'Taklif havolasi noto‘g‘ri yoki muddati o‘tgan. Yangisini so‘rang.';
+
+  @override
+  String get accountInviteSignInFirst => 'Qo‘shilish uchun kiring yoki hisob yarating.';
+
+  @override
+  String get accountWorkspacesTitle => 'Ish maydonlaringiz';
+
+  @override
+  String get accountWorkspacesLede => 'Ish maydoni — bitta loyiha: uning repozitoriylari, tiketlari, a’zolari va sozlamalari.';
+
+  @override
+  String get accountNoWorkspaces =>
+      'Siz hali hech bir ish maydonida emassiz. O‘zingiznikini yarating yoki sizga yuborilgan taklif havolasini oching.';
+
+  @override
+  String get accountOpen => 'Ochish';
+
+  @override
+  String get accountCreateWorkspace => 'Ish maydoni yaratish';
+
+  @override
+  String get accountCreateWorkspaceSub => 'Siz uning egasi bo‘lasiz.';
+
+  @override
+  String get accountWorkspaceSlug => 'Manzil';
+
+  @override
+  String get accountWorkspaceSlugHelp => 'Havolalarda ishlatiladi; bo‘sh bo‘lsa, nomdan olinadi.';
+
+  @override
+  String get accountCreateWs => 'Ish maydoni yaratish';
+
+  @override
+  String get accountProfileTitle => 'Profil';
+
+  @override
+  String get accountProfile => 'Profilingiz';
+
+  @override
+  String get accountProfileSub => 'Ish maydonlaringiz a’zolari sizni qanday ko‘radi.';
+
+  @override
+  String get accountSaveProfile => 'Saqlash';
+
+  @override
+  String get accountProfileSaved => 'Profil saqlandi';
+
+  @override
+  String get accountEmailUnverified => 'Hali tasdiqlanmagan';
+
+  @override
+  String get accountEmailVerified => 'Tasdiqlangan';
+
+  @override
+  String get accountResend => 'Havolani qayta yuborish';
+
+  @override
+  String get accountResent => 'Tasdiqlash havolasi yuborildi';
+
+  @override
+  String get accountPasswordTitle => 'Parol';
+
+  @override
+  String get accountPasswordSub => 'O‘zgartirilsa, boshqa seanslaringiz yopiladi.';
+
+  @override
+  String get accountCurrentPassword => 'Joriy parol';
+
+  @override
+  String get accountNewPassword => 'Yangi parol';
+
+  @override
+  String get accountChangePassword => 'Parolni o‘zgartirish';
+
+  @override
+  String get accountPasswordChanged => 'Parol o‘zgartirildi';
+
+  @override
+  String get accountTotpTitle => 'Ikki bosqichli kirish';
+
+  @override
+  String get accountTotpSub => 'Har kirishda autentifikator ilovasidan kod.';
+
+  @override
+  String get accountTotpOn => 'Yoqilgan';
+
+  @override
+  String get accountTotpOff => 'O‘chirilgan';
+
+  @override
+  String get accountTotpSetup => 'Yoqish';
+
+  @override
+  String get accountTotpScan =>
+      'Hisobni autentifikator ilovasiga sir kaliti orqali qo‘shing (yoki havolani telefonda oching), so‘ng ilova ko‘rsatgan kodni kiriting.';
+
+  @override
+  String get accountTotpSecret => 'Sir kaliti';
+
+  @override
+  String get accountTotpLink => 'Sozlash havolasi';
+
+  @override
+  String get accountTotpCode => 'Kod';
+
+  @override
+  String get accountTotpConfirm => 'Tasdiqlash';
+
+  @override
+  String get accountTotpEnabled => 'Ikki bosqichli kirish yoqildi';
+
+  @override
+  String get accountTotpDisable => 'O‘chirish';
+
+  @override
+  String get accountTotpDisabled => 'Ikki bosqichli kirish o‘chirildi';
+
+  @override
+  String get accountMyClaude => 'Claude hisobingiz';
+
+  @override
+  String get accountMyClaudeSub => '«Har kimniki o‘zi» rejimidagi ish maydonlarida tiketlaringiz ishlari shundan foydalanadi.';
+
+  @override
+  String get accountClaudeSaved => 'Claude hisobi ulandi';
+
+  @override
+  String get accountClaudeRemoved => 'Claude hisobi uzildi';
+
+  @override
+  String get accountAdmin => 'Platforma administratori';
+
+  @override
+  String get accountAdminConsole => 'Operator konsolini ochish';
+
+  @override
+  String get accountReturnTitle => 'To‘lov';
+
+  @override
+  String get accountReturnLede =>
+      'Rahmat. To‘lov tizimi to‘lovni tasdiqlashi bilan kreditlar «To‘lov» bo‘limida ko‘rinadi (odatda bir daqiqa ichida).';
+
+  @override
+  String get accountReturnBack => 'To‘lovga qaytish';
+
+  @override
+  String get accountLastOpened => 'Oxirgi ochilgan';
+
+  @override
+  String accountMemberCount(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n a\'zo', one: '$n a\'zo');
+    return '$_temp0';
+  }
+
+  @override
+  String accountSlotCount(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n parallel ishga tushirish', one: '$n parallel ishga tushirish');
+    return '$_temp0';
+  }
+
+  @override
+  String get accountSuspended => 'To\'xtatilgan';
+
+  @override
+  String get accountNoWorkspacesTitle => 'Hali ish maydonlari yo\'q';
+
+  @override
+  String get accountCreateFirst => 'Birinchi ish maydoningizni yarating';
+
+  @override
   String get analyticsTitle => 'Analitika';
 
   @override
@@ -329,6 +625,66 @@ class AppLocalizationsUz extends AppLocalizations {
   String get analyticsSrcPlane => 'Plane';
 
   @override
+  String get analyticsQuality => 'Agent sifati';
+
+  @override
+  String get analyticsQualitySub =>
+      'Tiketlar birinchi kodlash ishga tushirilishidagi prompt versiyasi bo‘yicha guruhlangan. Agentdagi o‘zgarish foyda berganini bilish uchun versiyalarni solishtiring.';
+
+  @override
+  String get analyticsNoQuality => 'Bu davrda kodlash ishga tushirilmagan.';
+
+  @override
+  String get analyticsColVersion => 'Prompt versiyasi';
+
+  @override
+  String get analyticsVersionUnknown => 'hisobdan oldin';
+
+  @override
+  String get analyticsColFirstPass => 'Birinchi urinishda';
+
+  @override
+  String get analyticsColFirstPassHint => 'Inson o‘zgartirish so‘ramasdan tasdiqlangan yakunlangan tiketlar';
+
+  @override
+  String get analyticsColRounds => 'Tuzatish bosqichlari';
+
+  @override
+  String get analyticsColRoundsHint => 'Ko‘rib chiqishga yetgan har bir tiket uchun insondan o‘rtacha o‘zgartirish so‘rovlari';
+
+  @override
+  String get analyticsColFixes => 'Tekshiruv tuzatishlari';
+
+  @override
+  String get analyticsColFixesHint => 'Muvaffaqiyatsiz tekshiruvlar Claude’ga o‘rtacha necha marta qaytarilgan';
+
+  @override
+  String get analyticsColSerious => 'Jiddiy kamchiliklar';
+
+  @override
+  String get analyticsColSeriousHint => 'agnts ko‘rib chiqishi to‘suvchi yoki jiddiy muammo topgan tiketlar ulushi';
+
+  @override
+  String get analyticsColFootprint => 'Reja aniqligi';
+
+  @override
+  String get analyticsColFootprintHint => 'Tahlil oldindan aytgan o‘zgargan fayllar ulushi';
+
+  @override
+  String get analyticsColRedFlags => 'Xavfli belgilar';
+
+  @override
+  String get analyticsColRedFlagsHint =>
+      'Difflarda topilgan o‘tkazib yuborilgan testlar, olib tashlangan tekshiruvlar, o‘chirilgan linterlar va shu kabilar';
+
+  @override
+  String get analyticsColSelfFixes => 'O‘z-o‘zini tuzatish';
+
+  @override
+  String get analyticsColSelfFixesHint =>
+      'agnts o‘z ko‘rib chiqishi kamchiliklarni inson ko‘rishidan oldin dasturchiga necha marta qaytargan';
+
+  @override
   String get appName => 'agnts';
 
   @override
@@ -338,10 +694,10 @@ class AppLocalizationsUz extends AppLocalizations {
   String get authTitle => 'Kirish';
 
   @override
-  String get authLede => 'Hisobingiz va autentifikator ilovasidagi kod bilan kiring.';
+  String get authLede => 'Pochta yoki foydalanuvchi nomi va parol bilan kiring.';
 
   @override
-  String get authUsername => 'Foydalanuvchi nomi';
+  String get authUsername => 'Pochta yoki foydalanuvchi nomi';
 
   @override
   String get authPassword => 'Parol';
@@ -380,6 +736,207 @@ class AppLocalizationsUz extends AppLocalizations {
   String authRateLimited(num seconds) {
     return 'Urinishlar juda ko‘p. $seconds soniyadan keyin qayta urining.';
   }
+
+  @override
+  String get authCodeLede => 'Autentifikator ilovasidagi kodni kiriting.';
+
+  @override
+  String get authBack => 'Boshqa hisob';
+
+  @override
+  String get billingTitle => 'To‘lov';
+
+  @override
+  String get billingSelfHosted =>
+      'Bu server mustaqil o‘rnatilgan: to‘lash shart emas. Slotlar va a’zolar limitini administrator belgilaydi.';
+
+  @override
+  String get billingPlan => 'Tarif';
+
+  @override
+  String billingPlanSub(String members) {
+    return 'Asosiy tarifga 1 ta parallel ish va $members ta a’zo kiradi.';
+  }
+
+  @override
+  String billingMonthly(String amount) {
+    return 'Oyiga $amount so‘m';
+  }
+
+  @override
+  String billingPaidUntil(String date) {
+    return '$date gacha to‘langan';
+  }
+
+  @override
+  String billingTrialUntil(String date) {
+    return '$date gacha bepul sinov';
+  }
+
+  @override
+  String get billingSlots => 'Parallel ishlar';
+
+  @override
+  String billingSlotsHelp(String price) {
+    return 'Har bir qo‘shimcha bir vaqtdagi ish oyiga $price so‘m turadi. Qo‘shilganda oyning qolgan qismi kreditlardan yechiladi.';
+  }
+
+  @override
+  String get billingSlotsSave => 'O‘zgartirish';
+
+  @override
+  String billingSlotsSaved(String n) {
+    return 'Parallel ishlar: $n';
+  }
+
+  @override
+  String get billingMembers => 'A’zolar';
+
+  @override
+  String billingMembersHelp(String included, String price) {
+    return '$included tasi kiradi; har bir qo‘shimchasi oyiga $price so‘m.';
+  }
+
+  @override
+  String get billingCredits => 'Kreditlar';
+
+  @override
+  String get billingCreditsSub =>
+      'agnts API kalitidagi ishlar (zaxira variant) kredit sarflaydi: 1 kredit — Anthropic API narxining \$0.01 qismi. Oylik tarif ham shulardan to‘lanadi.';
+
+  @override
+  String get billingBalance => 'Balans';
+
+  @override
+  String billingCreditPrice(String price) {
+    return '1 kredit = $price so‘m';
+  }
+
+  @override
+  String get billingBuy => 'Kredit sotib olish';
+
+  @override
+  String get billingAmount => 'Summa (so‘m)';
+
+  @override
+  String billingYouGet(String n) {
+    return '≈ $n kredit';
+  }
+
+  @override
+  String billingPayWith(String provider) {
+    return '$provider orqali to‘lash';
+  }
+
+  @override
+  String get billingPaymentsOff => 'Bu serverda to‘lov hali sozlanmagan; administratordan kredit berishni so‘rang.';
+
+  @override
+  String get billingHistory => 'Tarix';
+
+  @override
+  String get billingNoHistory => 'Hozircha hech narsa yo‘q.';
+
+  @override
+  String get billingReason_purchase => 'Sotib olindi';
+
+  @override
+  String get billingReason_run => 'Sarflandi';
+
+  @override
+  String get billingReason_refund => 'Qaytarildi';
+
+  @override
+  String get billingReason_grant => 'Berildi';
+
+  @override
+  String get briefTitle => 'Repozitoriy tavsifi';
+
+  @override
+  String get briefSub =>
+      'Bu kod bazasi qanday ishlaydi: arxitektura, odatiy o‘zgarishlar uchun retseptlar, namuna fayllar, kelishuvlar va tuzoqlar. Bu repozitoriy tiketlarining har bir ishga tushirilishi uni o‘qiydi, shunda agnts jamoangiz qanday qilsa, shunday quradi.';
+
+  @override
+  String get briefSurvey => 'O‘rganish';
+
+  @override
+  String get briefUpdate => 'Yangilash';
+
+  @override
+  String get briefEdit => 'Tahrirlash';
+
+  @override
+  String get briefWrite => 'O‘zingiz yozish';
+
+  @override
+  String get briefSave => 'Tavsifni saqlash';
+
+  @override
+  String get briefCancel => 'Bekor qilish';
+
+  @override
+  String get briefEditHint => 'Markdown. Saqlaganingizni bundan keyin ishga tushirishlar o‘qiydi; tavsif bermaslik uchun bo‘sh qoldiring.';
+
+  @override
+  String get briefNone => 'Hali tavsif yo‘q. Claude qoralama yozishi uchun repozitoriyni o‘rganing yoki o‘zingiz yozing.';
+
+  @override
+  String get briefSurveying => 'Claude repozitoriyni o‘rganmoqda. Qoralama tasdiqlashingiz uchun shu yerda paydo bo‘ladi.';
+
+  @override
+  String briefFailed(String error) {
+    return 'Oxirgi o‘rganish muvaffaqiyatsiz tugadi: $error';
+  }
+
+  @override
+  String briefApproved(String time) {
+    return 'Tasdiqlangan: $time';
+  }
+
+  @override
+  String briefAtCommit(String sha) {
+    return '$sha kommitida';
+  }
+
+  @override
+  String briefMerges(String n, String of) {
+    return 'keyingi yangilanishgacha $of ta birlashtirishdan $n tasi';
+  }
+
+  @override
+  String get briefDraftTitle => 'O‘rganishdan keyingi qoralama';
+
+  @override
+  String briefDraftSub(String time) {
+    return '$time yozilgan. Ishga tushirishlar uni faqat siz tasdiqlaganingizdan keyin o‘qiydi.';
+  }
+
+  @override
+  String get briefApprove => 'Tasdiqlash';
+
+  @override
+  String get briefDiscard => 'Qoralamani o‘chirish';
+
+  @override
+  String get briefDiscardBody => 'Qoralama o‘chiriladi; tasdiqlangan tavsif o‘zgarmaydi.';
+
+  @override
+  String get briefStatus_pending => 'O‘rganish navbatda';
+
+  @override
+  String get briefStatus_surveying => 'O‘rganilmoqda…';
+
+  @override
+  String get briefDone_survey => 'O‘rganish navbatga qo‘yildi';
+
+  @override
+  String get briefDone_approve => 'Tavsif tasdiqlandi: yangi ishga tushirishlar uni o‘qiydi';
+
+  @override
+  String get briefDone_discard => 'Qoralama o‘chirildi';
+
+  @override
+  String get briefDone_save => 'Tavsif saqlandi';
 
   @override
   String get commonLoading => 'Yuklanmoqda…';
@@ -624,6 +1181,41 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get dashboardNoActivity => 'Hozircha faollik yoʻq.';
+
+  @override
+  String get designApproach => 'Yondashuv';
+
+  @override
+  String get designFit => 'Kod bazasiga mosligi';
+
+  @override
+  String designAlternatives(num n) {
+    return '$n ta muqobil ko‘rib chiqildi';
+  }
+
+  @override
+  String get designWhyNot => 'Nega emas';
+
+  @override
+  String get designOutOfScope => 'Vazifa doirasidan tashqari';
+
+  @override
+  String get designShipping => 'Chiqarish';
+
+  @override
+  String get designShip_migrations => 'Migratsiyalar';
+
+  @override
+  String get designShip_compatibility => 'Moslik';
+
+  @override
+  String get designShip_rollout => 'Chiqarish tartibi';
+
+  @override
+  String get designShip_rollback => 'Orqaga qaytarish';
+
+  @override
+  String get designDeviations => 'Rejadan chetlanishlar';
 
   @override
   String get filesTitle => 'Ilovalar';
@@ -2036,6 +2628,12 @@ class AppLocalizationsUz extends AppLocalizations {
   String get mcpDeny => 'Rad etish';
 
   @override
+  String get mcpPickWorkspace => 'Ish maydoni';
+
+  @override
+  String get mcpPickWorkspaceHelp => 'Claude shu ish maydonida sizning nomingizdan ishlaydi.';
+
+  @override
   String get mdetailApprove => 'Tasdiqlash';
 
   @override
@@ -2528,6 +3126,24 @@ class AppLocalizationsUz extends AppLocalizations {
   String get mtasksYesterday => 'Kecha';
 
   @override
+  String get mwsNone =>
+      'Siz hali hech qaysi ish maydoniga a\'zo emassiz. Veb-admin panelda yangisini yarating yoki taklifni qabul qiling, so\'ng yangilash uchun pastga torting.';
+
+  @override
+  String mwsSwitched(String name) {
+    return '$name ochildi';
+  }
+
+  @override
+  String mwsMembers(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n a\'zo', one: '$n a\'zo');
+    return '$_temp0';
+  }
+
+  @override
+  String get mwsSuspended => 'To\'xtatilgan';
+
+  @override
   String get navOverview => 'Umumiy';
 
   @override
@@ -2676,6 +3292,156 @@ class AppLocalizationsUz extends AppLocalizations {
   String navSyncedPlane(String found, String created) {
     return 'Plane sinxronlandi: $found ochiq, $created yangi';
   }
+
+  @override
+  String get navWorkspace => 'Ish maydoni';
+
+  @override
+  String get navProfile => 'Profil';
+
+  @override
+  String get navPlatform => 'Operator konsoli';
+
+  @override
+  String get navPeople => 'Odamlar';
+
+  @override
+  String get navAccount => 'Hisob';
+
+  @override
+  String get platformTitle => 'Operator konsoli';
+
+  @override
+  String get platformLede =>
+      'Serverdagi barcha ish maydonlari, ishlar va foydalanuvchilar. Ish maydonlarining faqat metama’lumotlari ko‘rinadi: tiketlari a’zolarigagina tegishli.';
+
+  @override
+  String get platformCapacity => 'Server';
+
+  @override
+  String get platformReserved => 'Band qilingan xotira';
+
+  @override
+  String get platformBudgetNone => 'cheklanmagan';
+
+  @override
+  String get platformRuns => 'Ishlar';
+
+  @override
+  String get platformDisk => 'Diskda bo‘sh joy';
+
+  @override
+  String get platformFull => 'To‘lgan: ishlar serverni kutmoqda';
+
+  @override
+  String get platformRunning => 'Hozir bajarilmoqda';
+
+  @override
+  String get platformNoRuns => 'Hech narsa bajarilmayapti.';
+
+  @override
+  String get platformQueue => 'Server navbati';
+
+  @override
+  String get platformNoQueue => 'Serverni kutayotgan ish yo‘q.';
+
+  @override
+  String get platformWorkspace => 'Ish maydoni';
+
+  @override
+  String get platformTicket => 'Tiket';
+
+  @override
+  String get platformStage => 'Bosqich';
+
+  @override
+  String get platformStarted => 'Boshlangan';
+
+  @override
+  String get platformWorkspaces => 'Ish maydonlari';
+
+  @override
+  String get platformOwner => 'Egasi';
+
+  @override
+  String get platformPlan => 'Tarif';
+
+  @override
+  String get platformSlots => 'Slotlar';
+
+  @override
+  String get platformMembers => 'A’zolar';
+
+  @override
+  String get platformMemberLimit => 'A’zolar limiti';
+
+  @override
+  String get platformCredits => 'Kreditlar';
+
+  @override
+  String get platformState => 'Holat';
+
+  @override
+  String get platformActive => 'Faol';
+
+  @override
+  String get platformSuspended => 'To‘xtatilgan';
+
+  @override
+  String get platformDeleted => 'O‘chirilgan';
+
+  @override
+  String get platformEdit => 'Tahrirlash';
+
+  @override
+  String get platformSuspend => 'To‘xtatish';
+
+  @override
+  String get platformResume => 'Qayta yoqish';
+
+  @override
+  String get platformGrant => 'Kredit berish';
+
+  @override
+  String get platformGrantAmount => 'Kreditlar (manfiy son — qaytarib olish)';
+
+  @override
+  String get platformGrantNote => 'Izoh';
+
+  @override
+  String platformGrantDone(String n, String name) {
+    return '$name ga $n kredit berildi';
+  }
+
+  @override
+  String get platformSaved => 'Saqlandi';
+
+  @override
+  String get platformUsers => 'Foydalanuvchilar';
+
+  @override
+  String get platformUser => 'Foydalanuvchi';
+
+  @override
+  String get platformEmail => 'Pochta';
+
+  @override
+  String get platformAdmin => 'Admin';
+
+  @override
+  String get platformMakeAdmin => 'Admin qilish';
+
+  @override
+  String get platformRemoveAdmin => 'Admin rolini olib tashlash';
+
+  @override
+  String get platformJoined => 'Ro‘yxatdan o‘tgan';
+
+  @override
+  String get platformNoLimit => 'cheklovsiz';
+
+  @override
+  String get platformForbidden => 'Operator konsoli faqat administratorlar uchun.';
 
   @override
   String get previewTab => 'Oldindan koʻrish';
@@ -2908,6 +3674,126 @@ class AppLocalizationsUz extends AppLocalizations {
   String get previewNotifyPhotosHelp => 'Telegram xabariga toʻrttagacha skrinshot qoʻshiladi.';
 
   @override
+  String queueHeader(String running, String slots) {
+    return 'Bajarilmoqda $running/$slots';
+  }
+
+  @override
+  String queueQueued(num n) {
+    return '$n ta navbatda';
+  }
+
+  @override
+  String queueWaitingServer(String n) {
+    return '$n tasi serverni kutmoqda';
+  }
+
+  @override
+  String get queueBadge_blocked => 'Kutmoqda · bog‘liq';
+
+  @override
+  String get queueBadge_slots => 'Navbatda · slotlar';
+
+  @override
+  String get queueBadge_server => 'Navbatda · server';
+
+  @override
+  String get queueBadge_claude => 'Pauza · Claude';
+
+  @override
+  String get queueTitle_blocked => 'Bog‘liq tiketlarni kutmoqda';
+
+  @override
+  String get queueTitle_slots => 'Bo‘sh slotni kutmoqda';
+
+  @override
+  String get queueTitle_server => 'Server navbatida';
+
+  @override
+  String get queueTitle_claude => 'Claude’ni kutmoqda';
+
+  @override
+  String queuePosition(String position) {
+    return 'Server navbatida #$position';
+  }
+
+  @override
+  String queueOthers(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'Oldinda boshqa ish maydonlarining $n ta tiketi bor.', zero: '');
+    return '$_temp0';
+  }
+
+  @override
+  String queueEstimate(num minutes) {
+    return 'Taxminan $minutes daqiqadan keyin boshlanadi.';
+  }
+
+  @override
+  String queueServerFull(String runs, String reserved, String budget) {
+    return 'Server band ($runs ta ish, $budget dan $reserved band).';
+  }
+
+  @override
+  String queueSlotsHint(String running, String slots) {
+    return '$slots ta slotdan $running tasi band. Bittasi bo‘shashi bilan boshlanadi.';
+  }
+
+  @override
+  String get queueAddSlot => 'Slot qo‘shish';
+
+  @override
+  String get queueClaudeHint => 'Ish maydoni sozlamalari → Claude bo‘limida hisob ulang yoki kreditlarni yoqing.';
+
+  @override
+  String get queueMember => 'A’zo';
+
+  @override
+  String get queueTakeOver => 'O‘zimga olish';
+
+  @override
+  String get queueTakenOver => 'Tiket sizniki: «har kimniki o‘zi» rejimida u sizning Claude hisobingizda bajariladi.';
+
+  @override
+  String queueCreatedBy(String name) {
+    return 'Yaratgan: $name';
+  }
+
+  @override
+  String queueBy(String name) {
+    return '$name';
+  }
+
+  @override
+  String redFlagsTitle(num n) {
+    return '$n ta xavfli belgi';
+  }
+
+  @override
+  String get redFlagsSub =>
+      'agnts o‘zgarishni tekshirib, ushbu qatorlarni topdi. Ular ko‘pincha tekshiruvlar noto‘g‘ri yo‘l bilan o‘tkazilganini bildiradi; agnts ko‘rib chiqishi har birini tekshiradi.';
+
+  @override
+  String get redFlagsKind_skipped_test => 'O‘tkazib yuborilgan yoki ajratilgan test';
+
+  @override
+  String get redFlagsKind_removed_assertion => 'Tekshiruvlar olib tashlangan';
+
+  @override
+  String get redFlagsKind_deleted_test => 'Test fayli o‘chirilgan';
+
+  @override
+  String get redFlagsKind_silenced_lint => 'Linter o‘chirilgan';
+
+  @override
+  String get redFlagsKind_swallowed_error => 'Xato yutib yuborilgan';
+
+  @override
+  String get redFlagsKind_todo => 'TODO qoldirilgan';
+
+  @override
+  String get redFlagsKind_new_dependency => 'Yangi bog‘liqlik';
+
+  @override
   String get relationsTab => 'Tartib';
 
   @override
@@ -3066,6 +3952,96 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get relationsSource_plane => 'Plane bogʻlanishi';
+
+  @override
+  String get replayTitle => 'Bugungi agnts bilan qayta bajarish';
+
+  @override
+  String get replaySub =>
+      'Bu tiketni u boshlangan kommitdan, joriy promptlar, tavsif va qoidalar bilan qayta bajaring va natijani siz tasdiqlagan ish bilan solishtiring. Takror hech qachon push qilinmaydi.';
+
+  @override
+  String get replayStart => 'Qayta bajarish';
+
+  @override
+  String replayConfirm(String key) {
+    return 'agnts ${key}ni boshlangan joyidan qayta bajaradigan yangi vazifa yaratadi. U har qanday tiket kabi Claude rejangizdan foydalanadi.';
+  }
+
+  @override
+  String replayCreated(String key) {
+    return '$key takrori navbatga qo‘yildi';
+  }
+
+  @override
+  String get replayBanner => 'Bu agnts’ni baholash uchun takror: u hech qachon push qilinmaydi. Uni quyidagi bilan solishtiring:';
+
+  @override
+  String get replayEvalTitle => 'Takrorlarni baholash';
+
+  @override
+  String get replayEvalSub =>
+      'Yangi agnts bilan qayta bajarilgan yakunlangan tiketlar, siz tasdiqlagan o‘zgarish bilan solishtirilgan. Yakunlangan tiketdagi «Qayta bajarish» tugmasi yoki `agnts eval replay KEY` bilan boshlang.';
+
+  @override
+  String get replayNone => 'Hali takrorlar yo‘q.';
+
+  @override
+  String get replayRecent => 'So‘nggi takrorlar';
+
+  @override
+  String get replayColReplays => 'Takrorlar';
+
+  @override
+  String get replayColChecks => 'Tekshiruvlar';
+
+  @override
+  String get replayColLooksGood => 'Ko‘rib chiqish OK';
+
+  @override
+  String get replayColOverlap => 'Bir xil fayllar';
+
+  @override
+  String get replayColOverlapHint => 'Takrorda o‘zgargan fayllar tasdiqlangan o‘zgarish fayllariga qanchalik mos (Jakkar indeksi)';
+
+  @override
+  String get replayColRecall => 'Qamrov';
+
+  @override
+  String get replayColRecallHint => 'Tasdiqlangan o‘zgarish fayllaridan takror ham o‘zgartirganlari ulushi';
+
+  @override
+  String get replayColTurns => 'Qadamlar (asl)';
+
+  @override
+  String get replayColCost => 'Narx (asl)';
+
+  @override
+  String get replayColReplay => 'Takror';
+
+  @override
+  String get replayColOf => 'Asli';
+
+  @override
+  String get replayColState => 'Holat';
+
+  @override
+  String get replayColReview => 'Ko‘rib chiqish';
+
+  @override
+  String get replayPass => 'o‘tdi';
+
+  @override
+  String get replayFail => 'o‘tmadi';
+
+  @override
+  String get replayVerdict_looks_good => 'yaxshi';
+
+  @override
+  String get replayVerdict_has_concerns => 'shubhalar bor';
+
+  @override
+  String get replayVerdict_needs_changes => 'o‘zgartirish kerak';
 
   @override
   String get repoBack => 'Repozitoriylarga qaytish';
@@ -3325,6 +4301,9 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get repoOpenRun => 'Git xostingida ochish';
+
+  @override
+  String get repoBrief => 'Tavsif';
 
   @override
   String get reposTitle => 'Repozitoriylar';
@@ -3780,6 +4759,12 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
+  String get reviewCat_architecture => 'Arxitektura';
+
+  @override
+  String get reviewCat_scope => 'Vazifa doirasi';
+
+  @override
   String get rulesTitle => 'Qoidalar';
 
   @override
@@ -3995,6 +4980,54 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get rulesTurnedOff => 'Qoida oʻchirildi';
+
+  @override
+  String get rulesStatus_suggested => 'Taklif qilingan';
+
+  @override
+  String get rulesSuggestedFrom => 'agnts bu qoidani quyidagi tiketga bergan fikringizdan taklif qilmoqda:';
+
+  @override
+  String get rulesSuggestedHint =>
+      'Siz qabul qilmaguningizcha tiketlar unga amal qilmaydi. O‘zgartirishlaringiz bilan qabul qilish uchun uni tahrirlang.';
+
+  @override
+  String rulesSuggestedHelp(num n) {
+    return 'agnts fikr-mulohazalaringizdan o‘rganib, $n ta qoida taklif qilmoqda.';
+  }
+
+  @override
+  String get rulesAdopt => 'Qabul qilish';
+
+  @override
+  String get rulesAdoptAsWritten => 'Yozilganicha qabul qilish';
+
+  @override
+  String get rulesDismiss => 'Rad etish';
+
+  @override
+  String rulesDismissBody(String title) {
+    return 'agnts «$title»ni olib tashlaydi va uni boshqa taklif qilmaydi.';
+  }
+
+  @override
+  String get rulesDismissed => 'Taklif rad etildi';
+
+  @override
+  String get rulesKind => 'Turi';
+
+  @override
+  String get rulesKindRule => 'Qoida';
+
+  @override
+  String get rulesKindContext => 'Biznes konteksti';
+
+  @override
+  String get rulesKindRuleHelp => 'agnts har bir tiketda amal qiladigan ko‘rsatma.';
+
+  @override
+  String get rulesKindContextHelp =>
+      'Mahsulotingiz haqida bilim: atamalar nimani anglatadi, kod saqlashi kerak bo‘lgan invariantlar, kim nimadan foydalanadi. Har bir ishga tushirish boshlashdan oldin uni o‘qiydi.';
 
   @override
   String get settingsTitle => 'Sozlamalar';
@@ -4246,6 +5279,41 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get settingsSaved => 'Sozlamalar saqlandi';
+
+  @override
+  String settingsParallelSlots(num n) {
+    return 'Bir vaqtda $n ta ish';
+  }
+
+  @override
+  String get settingsParallelSlotsHelp => 'Ish maydoni slotlari. «Ish maydoni → To‘lov» bo‘limida o‘zgartiriladi.';
+
+  @override
+  String get settingsClaudeMoved => 'Claude endi har bir ish maydoni uchun alohida ulanadi.';
+
+  @override
+  String get settingsClaudeOpen => 'Ish maydoni → Claude';
+
+  @override
+  String get settingsSelfReview => 'Avval ko‘rib chiqish kamchiliklarini tuzatish';
+
+  @override
+  String get settingsSelfReviewHelp =>
+      'agnts o‘z ko‘rib chiqishida to‘suvchi yoki jiddiy muammo topsa, siz ko‘rib chiqishingizdan oldin uni bir marta dasturchiga qaytaradi. Yuqoridagi kod ko‘rib chiqishi yoqilgan bo‘lishi kerak.';
+
+  @override
+  String get settingsAutoBrief => 'Repozitoriylarni o‘rganish';
+
+  @override
+  String get settingsAutoBriefHelp =>
+      'Repozitoriyning birinchi tiketi tahlil qilinganda repozitoriy tavsifini (arxitektura, retseptlar, kelishuvlar) yozish va har 10 ta birlashtirishdan keyin yangilash. Tavsif agentga faqat siz tasdiqlaganingizdan keyin yetadi.';
+
+  @override
+  String get settingsReflect => 'Fikr-mulohazalaringizdan o‘rganish';
+
+  @override
+  String get settingsReflectHelp =>
+      'O‘zgartirish so‘raganingizda yoki ishni sabab bilan rad etganingizda, agnts uning ortidagi umumiy qoidani qidiradi va «Qoidalar» sahifasida taklif qiladi. Siz qabul qilmaguningizcha hech narsa qo‘llanmaydi.';
 
   @override
   String get spendTitle => 'Token sarfi';
@@ -5415,4 +6483,345 @@ class AppLocalizationsUz extends AppLocalizations {
   @override
   String get usageHelp =>
       'Raqamlar Claude Code har bir ish davomida yuboradigan limit hodisalaridan olinadi. agnts boʻsh turganda kichik yangilash ishi ularni dolzarb saqlaydi.';
+
+  @override
+  String get wsTitle => 'Ish maydoni';
+
+  @override
+  String get wsSwitcher => 'Ish maydonini almashtirish';
+
+  @override
+  String get wsAll => 'Barcha ish maydonlari';
+
+  @override
+  String get wsNew => 'Yangi ish maydoni';
+
+  @override
+  String get wsRole_owner => 'Egasi';
+
+  @override
+  String get wsRole_user => 'A’zo';
+
+  @override
+  String get wsTabGeneral => 'Umumiy';
+
+  @override
+  String get wsTabMembers => 'A’zolar';
+
+  @override
+  String get wsTabClaude => 'Claude';
+
+  @override
+  String get wsTabBilling => 'To‘lov';
+
+  @override
+  String get wsGeneral => 'Ish maydoni';
+
+  @override
+  String get wsGeneralSub => 'Nomi va havolalardagi manzili.';
+
+  @override
+  String get wsName => 'Nomi';
+
+  @override
+  String get wsSlug => 'Manzil';
+
+  @override
+  String wsSlugHelp(String slug) {
+    return 'Bu ish maydoniga havolalar: /w/$slug. O‘zgartirilsa, eski havolalar ishlamay qoladi.';
+  }
+
+  @override
+  String get wsSave => 'Saqlash';
+
+  @override
+  String get wsSaved => 'Ish maydoni saqlandi';
+
+  @override
+  String get wsReadOnly => 'Buni faqat egasi o‘zgartira oladi.';
+
+  @override
+  String get wsPlan => 'Tarif';
+
+  @override
+  String get wsSlots => 'Parallel ishlar';
+
+  @override
+  String get wsSlotsHelp => 'Bu ish maydoni bir vaqtda nechta ishni bajara oladi. «To‘lov» bo‘limida o‘zgartiriladi.';
+
+  @override
+  String wsTrialEnds(String date) {
+    return 'Sinov muddati $date gacha';
+  }
+
+  @override
+  String get wsSuspended => 'Ish maydoni to‘xtatilgan: qayta yoqilmaguncha yangi ishlar boshlanmaydi.';
+
+  @override
+  String get wsDanger => 'Xavfli zona';
+
+  @override
+  String get wsDangerSub =>
+      'O‘chirish barcha ishlarni to‘xtatadi va ish maydonini, repozitoriylari nusxalarini, tiketlarni va tarixni o‘chiradi. 7 kun davomida tiklash mumkin, keyin butunlay o‘chiriladi.';
+
+  @override
+  String get wsDelete => 'Ish maydonini o‘chirish';
+
+  @override
+  String wsDeleteTitle(String name) {
+    return '$name o‘chirilsinmi?';
+  }
+
+  @override
+  String wsDeleteBody(String slug) {
+    return 'Tasdiqlash uchun manzilni ($slug) kiriting. Hamma kirish huquqini yo‘qotadi.';
+  }
+
+  @override
+  String get wsDeleted => 'Ish maydoni o‘chirildi';
+
+  @override
+  String get wsMembers => 'A’zolar';
+
+  @override
+  String get wsMembersSub =>
+      'Ish maydonidagi har bir a’zo uning tiketlarini ko‘radi, ularni yaratadi, javob beradi, tekshiradi va qayta ishga tushiradi. Egasi bundan tashqari sozlamalar, integratsiyalar, Claude, a’zolar va to‘lovni boshqaradi.';
+
+  @override
+  String get wsYou => 'siz';
+
+  @override
+  String get wsRemove => 'Chiqarish';
+
+  @override
+  String wsRemoveTitle(String name) {
+    return '$name chiqarilsinmi?';
+  }
+
+  @override
+  String get wsRemoveBody => 'U bu ish maydoniga kira olmaydi. Uning tiketlari qoladi.';
+
+  @override
+  String wsRemoved(String name) {
+    return '$name chiqarildi';
+  }
+
+  @override
+  String get wsMakeOwner => 'Egasi qilish';
+
+  @override
+  String wsTransferTitle(String name) {
+    return '$name egasi qilinsinmi?';
+  }
+
+  @override
+  String get wsTransferBody => 'Siz a’zo bo‘lib qolasiz, lekin sozlamalar, a’zolar va to‘lovni o‘zgartira olmaysiz.';
+
+  @override
+  String wsTransferred(String name) {
+    return 'Endi egasi — $name';
+  }
+
+  @override
+  String get wsLeave => 'Ish maydonidan chiqish';
+
+  @override
+  String wsLeaveTitle(String name) {
+    return '$name dan chiqasizmi?';
+  }
+
+  @override
+  String get wsLeaveBody => 'Sizni qayta taklif qilishmaguncha kira olmaysiz.';
+
+  @override
+  String get wsOwnerCannotLeave => 'Egasi chiqib keta olmaydi: avval boshqa a’zoni ega qiling.';
+
+  @override
+  String get wsClaudeBadge => 'Claude ulangan';
+
+  @override
+  String get wsNoClaudeBadge => 'Claude yo‘q';
+
+  @override
+  String get wsInvite => 'Odamlarni taklif qilish';
+
+  @override
+  String get wsInviteSub =>
+      'Havolani pochta orqali yuboring yoki o‘zingiz ulashish uchun havola yarating. Havola 7 kun va bir marta amal qiladi.';
+
+  @override
+  String get wsInviteEmail => 'Pochta (ixtiyoriy)';
+
+  @override
+  String get wsInviteSend => 'Taklif yaratish';
+
+  @override
+  String get wsInviteLink => 'Taklif havolasi (bir marta ko‘rsatiladi)';
+
+  @override
+  String wsInviteEmailed(String email) {
+    return '$email manziliga yuborildi';
+  }
+
+  @override
+  String get wsInviteCopy => 'Nusxa olish';
+
+  @override
+  String get wsInvites => 'Ochiq takliflar';
+
+  @override
+  String get wsInviteAnyone => 'Havolasi bor har kim';
+
+  @override
+  String wsInviteExpires(String date) {
+    return '$date gacha';
+  }
+
+  @override
+  String get wsRevoke => 'Bekor qilish';
+
+  @override
+  String get wsRevoked => 'Taklif bekor qilindi';
+
+  @override
+  String wsMemberLimit(String n, String limit) {
+    return '$limit tadan $n ta a’zo';
+  }
+
+  @override
+  String wsMemberLimitNone(num n) {
+    return '$n ta a’zo';
+  }
+
+  @override
+  String get wsClaude => 'Claude';
+
+  @override
+  String get wsClaudeSub => 'Bu ish maydonidagi ishlar qaysi Claude hisobidan foydalanadi.';
+
+  @override
+  String get wsMode => 'Rejim';
+
+  @override
+  String get wsModeShared => 'Umumiy';
+
+  @override
+  String get wsModeSharedHelp => 'Barcha ishlar egasi ulagan ish maydoni hisobidan foydalanadi.';
+
+  @override
+  String get wsModeMember => 'Har kimniki o‘zi';
+
+  @override
+  String get wsModeMemberHelp => 'Har bir ish tiket egasi bo‘lgan a’zoning hisobidan foydalanadi. A’zolar o‘z hisobini profilda ulaydi.';
+
+  @override
+  String get wsConnection => 'Ish maydoni hisobi';
+
+  @override
+  String get wsConnectionSub => 'Umumiy rejimda barcha ishlar shundan foydalanadi.';
+
+  @override
+  String get wsKind => 'Turi';
+
+  @override
+  String get wsKindSubscription => 'Claude obunasi';
+
+  @override
+  String get wsKindApiKey => 'Anthropic API kaliti';
+
+  @override
+  String get wsKindSubscriptionHelp => 'Claude tarifingizga kirgan joyda `claude setup-token` buyrug‘ini bajaring va tokenni joylang.';
+
+  @override
+  String get wsKindApiKeyHelp => 'Anthropic Console’da kalit yarating (sk-ant-api…). Sarfni kalit egasi to‘laydi.';
+
+  @override
+  String get wsSubscriptionsOff => 'Bu server faqat Anthropic API kalitlarini qabul qiladi.';
+
+  @override
+  String get wsToken => 'Token';
+
+  @override
+  String get wsConnect => 'Ulash';
+
+  @override
+  String get wsReplace => 'Almashtirish';
+
+  @override
+  String get wsDisconnect => 'Uzish';
+
+  @override
+  String get wsConnected => 'Ulangan';
+
+  @override
+  String get wsNotConnected => 'Ulanmagan';
+
+  @override
+  String wsPausedUntil(String time) {
+    return '$time gacha limitga yetgan';
+  }
+
+  @override
+  String wsConnectedAs(String account, String hint) {
+    return '$account · …$hint';
+  }
+
+  @override
+  String get wsFallback => 'Kreditlar hisobidan davom etish';
+
+  @override
+  String get wsFallbackHelp =>
+      'Tanlangan hisob limitga yetganda yoki ulanmaganda ishlar to‘xtab qolmaydi: agnts API kaliti bilan davom etadi va ish maydoni kreditlarini sarflaydi.';
+
+  @override
+  String get wsFallbackOff => 'Bu serverda kreditlar mavjud emas.';
+
+  @override
+  String wsCredits(num n) {
+    return '$n kredit';
+  }
+
+  @override
+  String get wsDefaultMember => 'Muallifsiz tiketlar';
+
+  @override
+  String get wsDefaultMemberHelp =>
+      'Jira, Plane’dan kelgan tiketlar, keyingi vazifalar va hodisalar «har kimniki o‘zi» rejimida shu a’zoning hisobidan bajariladi.';
+
+  @override
+  String get wsDefaultOwner => 'Egasi';
+
+  @override
+  String get wsMemberAccounts => 'A’zolar hisoblari';
+
+  @override
+  String get wsMemberAccountsSub => 'Kim o‘z Claude hisobini ulagan (Profil → Claude).';
+
+  @override
+  String get wsYourAccount => 'O‘zingiznikini profilda ulang';
+
+  @override
+  String get wsClaudeSaved => 'Claude sozlamalari saqlandi';
+
+  @override
+  String get wsRole_viewer => 'Kuzatuvchi';
+
+  @override
+  String get wsViewerBanner => 'Siz bu yerda kuzatuvchisiz: hammasini ko\'rasiz, lekin hech narsani o\'zgartira olmaysiz.';
+
+  @override
+  String get wsInviteAs => 'Rol';
+
+  @override
+  String get wsInviteAsHelp => 'A\'zolar tiketlar ustida ishlaydi; kuzatuvchilar faqat ko\'radi.';
+
+  @override
+  String wsRoleChanged(String name, String role) {
+    return '$name endi: $role';
+  }
+
+  @override
+  String wsRoleLabel(String name) {
+    return '$name roli';
+  }
 }

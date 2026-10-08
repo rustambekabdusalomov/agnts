@@ -6,27 +6,30 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
+	"strings"
 )
 
 var safeKey = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_-]*$`)
 
 // Homes keeps each ticket's Claude Code config dir (a tar) on disk so a later
-// run can --resume the session. Implements orchestrator.Homes.
+// run can --resume the session, as <dir>/<workspace>/<key>.tar. Implements
+// orchestrator.Homes.
 type Homes struct{ dir string }
 
 // NewHomes stores tars under dir.
 func NewHomes(dir string) *Homes { return &Homes{dir: dir} }
 
-func (h *Homes) path(key string) (string, error) {
-	if !safeKey.MatchString(key) {
+func (h *Homes) path(ws int64, key string) (string, error) {
+	if !safeKey.MatchString(key) || ws <= 0 {
 		return "", fmt.Errorf("unsafe ticket key %q", key)
 	}
-	return filepath.Join(h.dir, key+".tar"), nil
+	return filepath.Join(h.dir, strconv.FormatInt(ws, 10), key+".tar"), nil
 }
 
 // Load returns the saved tar, or nil when there is none.
-func (h *Homes) Load(key string) ([]byte, error) {
-	p, err := h.path(key)
+func (h *Homes) Load(ws int64, key string) ([]byte, error) {
+	p, err := h.path(ws, key)
 	if err != nil {
 		return nil, err
 	}
@@ -38,15 +41,15 @@ func (h *Homes) Load(key string) ([]byte, error) {
 }
 
 // Save replaces the saved tar atomically.
-func (h *Homes) Save(key string, tar []byte) error {
+func (h *Homes) Save(ws int64, key string, tar []byte) error {
 	if len(tar) == 0 {
 		return nil
 	}
-	p, err := h.path(key)
+	p, err := h.path(ws, key)
 	if err != nil {
 		return err
 	}
-	if err := os.MkdirAll(h.dir, 0o700); err != nil {
+	if err := os.MkdirAll(filepath.Dir(p), 0o700); err != nil {
 		return err
 	}
 	tmp := p + ".tmp"
@@ -54,4 +57,40 @@ func (h *Homes) Save(key string, tar []byte) error {
 		return err
 	}
 	return os.Rename(tmp, p)
+}
+
+// Delete removes the saved tars of a workspace (it was deleted).
+func (h *Homes) Delete(ws int64) error {
+	if ws <= 0 {
+		return nil
+	}
+	return os.RemoveAll(filepath.Join(h.dir, strconv.FormatInt(ws, 10)))
+}
+
+// AdoptLegacy moves tars saved before workspaces (<dir>/<key>.tar) into
+// workspace ws, the one the install migrated into.
+func (h *Homes) AdoptLegacy(ws int64) error {
+	entries, err := os.ReadDir(h.dir)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	var errs []error
+	for _, e := range entries {
+		key, ok := strings.CutSuffix(e.Name(), ".tar")
+		if e.IsDir() || !ok || !safeKey.MatchString(key) {
+			continue
+		}
+		p, err := h.path(ws, key)
+		if err != nil {
+			continue
+		}
+		if err := os.MkdirAll(filepath.Dir(p), 0o700); err != nil {
+			return err
+		}
+		errs = append(errs, os.Rename(filepath.Join(h.dir, e.Name()), p))
+	}
+	return errors.Join(errs...)
 }

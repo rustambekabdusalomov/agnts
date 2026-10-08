@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { api, HttpError, MAX_ATTACHMENT_BYTES, MAX_ATTACHMENTS, uploadAttachment } from '../../api/client'
 import HiIcon from '../ui/HiIcon.vue'
@@ -19,6 +19,10 @@ const input = ref<HTMLInputElement | null>(null)
 const dragging = ref(false)
 
 const uploading = computed(() => items.value.some((i) => !i.id && !i.error))
+// Pictures show as previews; other files (and pictures the browser cannot
+// draw, such as HEIC) as rows.
+const pictures = computed(() => items.value.filter((i) => i.preview))
+const others = computed(() => items.value.filter((i) => !i.preview))
 watch(uploading, (v) => (busy.value = v), { immediate: true })
 watch(ids, (v) => {
   if (v.length === 0 && items.value.some((i) => i.id)) clear()
@@ -54,6 +58,19 @@ function add(files: Iterable<File>) {
         it.error = e instanceof HttpError && e.status === 413 ? t('files.tooLarge', { name: it.name }) : t('files.failed', { name: it.name })
       })
   }
+}
+
+function unviewable(it: Item) {
+  if (it.preview) URL.revokeObjectURL(it.preview)
+  it.preview = undefined
+}
+
+const zoomed = ref<Item | null>(null)
+const dlg = ref<HTMLDialogElement | null>(null)
+async function zoom(it: Item) {
+  zoomed.value = it
+  await nextTick()
+  if (dlg.value && !dlg.value.open) dlg.value.showModal()
 }
 
 function remove(it: Item) {
@@ -107,10 +124,23 @@ const kb = (n: number) => (n >= 1 << 20 ? `${(n / (1 << 20)).toFixed(1)} MB` : `
       <span class="hint">{{ t('files.hint') }}</span>
       <input ref="input" type="file" multiple hidden @change="picked">
     </div>
-    <ul v-if="items.length" class="fa-list">
-      <li v-for="it in items" :key="it.key" class="fa-item" :class="{ bad: it.error }">
-        <img v-if="it.preview" :src="it.preview" alt="">
-        <HiIcon v-else name="file" />
+    <ul v-if="pictures.length" class="fa-pics">
+      <li v-for="it in pictures" :key="it.key" class="fa-pic" :class="{ bad: it.error, busy: !it.id && !it.error }">
+        <button type="button" class="fa-thumb" :aria-label="t('files.open', { name: it.name })" :title="it.name" @click="zoom(it)">
+          <img :src="it.preview" :alt="it.name" @error="unviewable(it)">
+          <span v-if="!it.id && !it.error" class="fa-over" role="status" :aria-label="t('files.uploading', { name: it.name })"><span class="spin" aria-hidden="true" /></span>
+        </button>
+        <button type="button" class="fa-x fa-x-pic" :aria-label="t('files.remove', { name: it.name })" @click="remove(it)"><HiIcon name="close" /></button>
+        <span class="fa-cap">
+          <span class="fa-cap-name">{{ it.name }}</span>
+          <span v-if="it.error" class="fa-err" role="alert">{{ it.error }}</span>
+          <span v-else class="fa-meta">{{ kb(it.size) }}</span>
+        </span>
+      </li>
+    </ul>
+    <ul v-if="others.length" class="fa-list">
+      <li v-for="it in others" :key="it.key" class="fa-item" :class="{ bad: it.error }">
+        <HiIcon name="file" />
         <span class="fa-name">
           <b>{{ it.name }}</b>
           <span v-if="it.error" class="fa-err" role="alert">{{ it.error }}</span>
@@ -120,6 +150,9 @@ const kb = (n: number) => (n >= 1 << 20 ? `${(n / (1 << 20)).toFixed(1)} MB` : `
         <button type="button" class="fa-x" :aria-label="t('files.remove', { name: it.name })" @click="remove(it)"><HiIcon name="close" /></button>
       </li>
     </ul>
+    <dialog ref="dlg" class="fa-zoom" :aria-label="zoomed?.name" @close="zoomed = null" @click="dlg?.close()">
+      <img v-if="zoomed?.preview" :src="zoomed.preview" :alt="zoomed.name">
+    </dialog>
   </div>
 </template>
 
@@ -132,7 +165,20 @@ const kb = (n: number) => (n >= 1 << 20 ? `${(n / (1 << 20)).toFixed(1)} MB` : `
 .fa-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .fa-item { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 10px; padding: 6px 6px 6px 10px; min-width: 0; }
 .fa-item.bad { border-color: var(--bad-ink); }
-.fa-item img { width: 36px; height: 36px; object-fit: cover; border-radius: 6px; flex: none; }
+.fa-pics { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 10px; }
+.fa-pic { position: relative; display: grid; gap: 4px; min-width: 0; }
+.fa-thumb { position: relative; display: block; padding: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--hover); cursor: zoom-in; aspect-ratio: 4 / 3; }
+.fa-pic.bad .fa-thumb { border-color: var(--bad-ink); }
+.fa-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.fa-pic.busy img, .fa-pic.bad img { opacity: 0.5; }
+.fa-over { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--ink); }
+.fa-x-pic { position: absolute; top: 4px; right: 4px; background: var(--surface); box-shadow: 0 1px 3px rgb(0 0 0 / 0.25); }
+.fa-x-pic:hover { background: var(--surface); }
+.fa-cap { display: grid; min-width: 0; font-size: 12.5px; }
+.fa-cap-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.fa-zoom { padding: 0; border: 0; border-radius: 10px; max-width: min(96vw, 1600px); max-height: 94vh; background: transparent; cursor: zoom-out; }
+.fa-zoom::backdrop { background: rgb(0 0 0 / 0.7); }
+.fa-zoom img { display: block; max-width: 100%; max-height: 94vh; height: auto; }
 .fa-name { display: grid; min-width: 0; flex: 1; font-size: 13.5px; }
 .fa-name b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fa-meta { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-3); }

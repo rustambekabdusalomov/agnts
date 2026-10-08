@@ -20,6 +20,7 @@ paths:
       operationId: login
       summary: Sign in with password and TOTP code
       tags: [auth]
+      x-scope: user
       security: []
       requestBody:
         required: true
@@ -44,6 +45,7 @@ paths:
       operationId: logout
       summary: End the current session
       tags: [auth]
+      x-scope: user
       responses:
         '204': { description: Signed out }
 
@@ -52,6 +54,7 @@ paths:
       operationId: getMe
       summary: The signed-in user
       tags: [auth]
+      x-scope: user
       responses:
         '200':
           description: OK
@@ -65,6 +68,7 @@ paths:
       operationId: getMeta
       summary: Server version and build information
       tags: [meta]
+      x-scope: user
       security: []
       responses:
         '200':
@@ -298,6 +302,26 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /tickets/{key}/replay:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: replayTicket
+      summary: >-
+        Re-run a done code or test ticket with today's agnts, from the commit it
+        started from, to compare the two (Analytics → Replay evaluation). The
+        replay is a new local task that is never pushed.
+      tags: [tickets]
+      responses:
+        '200':
+          description: The replay ticket
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Ticket' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /tickets/{key}/review:
     parameters:
       - $ref: '#/components/parameters/TicketKey'
@@ -358,6 +382,7 @@ paths:
       - $ref: '#/components/parameters/TicketKey'
     post:
       operationId: translateTicket
+      x-viewer: true
       summary: Translate a ticket's texts (its own and what agnts wrote) into a language
       description: >-
         Translations are stored per text, so a text is sent to Claude only
@@ -677,6 +702,27 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '409': { $ref: '#/components/responses/Conflict' }
 
+  /tickets/{key}/member:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    put:
+      operationId: setTicketMember
+      summary: Make a member the ticket's member (per-member Claude mode runs it on their account)
+      tags: [tickets]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId]
+              properties:
+                userId: { type: integer, format: int64, description: A member of the workspace; 0 for yourself }
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /attachments:
     post:
       operationId: uploadAttachment
@@ -890,6 +936,7 @@ paths:
   /usage/refresh:
     post:
       operationId: refreshUsage
+      x-viewer: true
       summary: Start a tiny Claude run to read fresh limits; a usage_updated event follows
       tags: [usage]
       responses:
@@ -934,6 +981,7 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
     put:
       operationId: putSettings
+      x-role: owner
       tags: [settings]
       requestBody:
         required: true
@@ -964,6 +1012,7 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
     post:
       operationId: createRepo
+      x-role: owner
       tags: [repos]
       requestBody:
         required: true
@@ -983,6 +1032,7 @@ paths:
   /repos/detect:
     post:
       operationId: detectRepo
+      x-role: owner
       summary: Work out a repository's toolchains and check commands
       description: |
         Reads the default branch (of a saved repository by id, or of any
@@ -1021,6 +1071,7 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
     put:
       operationId: updateRepo
+      x-role: owner
       tags: [repos]
       requestBody:
         required: true
@@ -1057,6 +1108,7 @@ paths:
       - $ref: '#/components/parameters/Provider'
     put:
       operationId: updateIntegration
+      x-role: owner
       summary: Change an integration's settings (never its token)
       tags: [integrations]
       requestBody:
@@ -1085,6 +1137,7 @@ paths:
       - $ref: '#/components/parameters/Provider'
     post:
       operationId: connectIntegration
+      x-role: owner
       summary: Save a token (and settings), check it against the provider, and connect
       tags: [integrations]
       requestBody:
@@ -1117,6 +1170,7 @@ paths:
       - $ref: '#/components/parameters/Provider'
     post:
       operationId: testIntegration
+      x-role: owner
       tags: [integrations]
       responses:
         '200':
@@ -1132,6 +1186,7 @@ paths:
       - $ref: '#/components/parameters/Provider'
     post:
       operationId: disconnectIntegration
+      x-role: owner
       summary: Forget the token
       tags: [integrations]
       responses:
@@ -1147,6 +1202,7 @@ paths:
       - $ref: '#/components/parameters/Provider'
     get:
       operationId: listRemoteRepos
+      x-role: owner
       summary: Repositories the connected GitHub or GitLab token can reach, for import
       tags: [integrations]
       responses:
@@ -1202,6 +1258,7 @@ paths:
   /integrations/plane/webhook-secret:
     put:
       operationId: setPlaneWebhookSecret
+      x-role: owner
       summary: Store the secret Plane generated for the agnts webhook
       tags: [integrations]
       requestBody:
@@ -1243,6 +1300,7 @@ paths:
       operationId: getPageDoc
       summary: The "How this page works" text, as Markdown
       tags: [docs]
+      x-scope: user
       parameters:
         - name: page
           in: path
@@ -1265,6 +1323,7 @@ paths:
       operationId: registerDevice
       summary: Register this phone for push notifications (call again when the token changes)
       tags: [devices]
+      x-scope: user
       requestBody:
         required: true
         content:
@@ -1280,6 +1339,7 @@ paths:
       operationId: unregisterDevice
       summary: Stop push notifications to this phone (on sign-out)
       tags: [devices]
+      x-scope: user
       requestBody:
         required: true
         content:
@@ -1296,6 +1356,7 @@ paths:
   /oauth/consent:
     get:
       operationId: getConsent
+      x-scope: user
       summary: Details of a pending Claude connection request, for the consent page
       tags: [mcp]
       parameters:
@@ -1319,6 +1380,7 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
     post:
       operationId: decideConsent
+      x-scope: user
       summary: Approve or deny a Claude connection; returns where to send the browser
       tags: [mcp]
       requestBody:
@@ -1336,6 +1398,7 @@ paths:
                 state: { type: string }
                 resource: { type: string }
                 approve: { type: boolean }
+                workspace: { type: string, description: 'The slug of the workspace Claude may act in (required to approve)' }
       responses:
         '200':
           description: Redirect target
@@ -1365,6 +1428,7 @@ paths:
   /mcp-settings/token:
     post:
       operationId: rotateMcpToken
+      x-viewer: true
       summary: Create a new static MCP bearer token (shown once; the old one stops working)
       tags: [mcp]
       responses:
@@ -1382,6 +1446,7 @@ paths:
   /mcp-settings/revoke:
     post:
       operationId: revokeMcp
+      x-viewer: true
       summary: Disconnect every Claude connection and delete the static token
       tags: [mcp]
       responses:
@@ -1495,6 +1560,7 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
     post:
       operationId: createRule
+      x-role: owner
       summary: Add a rule; Claude reviews it before tickets follow it
       tags: [rules]
       requestBody:
@@ -1527,6 +1593,7 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
     put:
       operationId: updateRule
+      x-role: owner
       summary: Edit a rule. Changing its text or repository starts a new review; turning it on or off does not.
       tags: [rules]
       requestBody:
@@ -1545,6 +1612,7 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
     delete:
       operationId: deleteRule
+      x-role: owner
       tags: [rules]
       responses:
         '204': { description: Deleted }
@@ -1556,6 +1624,7 @@ paths:
       - $ref: '#/components/parameters/RuleID'
     put:
       operationId: answerRule
+      x-role: owner
       summary: Answer every open question of a rule; Claude then reviews it again
       tags: [rules]
       requestBody:
@@ -1578,6 +1647,7 @@ paths:
       - $ref: '#/components/parameters/RuleID'
     post:
       operationId: acceptRule
+      x-role: owner
       summary: Apply a rule as written, skipping its open questions or a failed review
       tags: [rules]
       responses:
@@ -1595,6 +1665,7 @@ paths:
       - $ref: '#/components/parameters/RuleID'
     post:
       operationId: reviewRule
+      x-role: owner
       summary: Have Claude review a rule again, keeping its answers
       tags: [rules]
       responses:
@@ -1624,11 +1695,25 @@ paths:
               schema: { $ref: '#/components/schemas/Analytics' }
         '401': { $ref: '#/components/responses/Unauthorized' }
 
+  /eval/replays:
+    get:
+      operationId: getReplayReport
+      summary: How the newest replays compare with the tickets they re-ran, by prompt version
+      tags: [analytics]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReplayReport' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
   /repos/{id}/archive:
     parameters:
       - $ref: '#/components/parameters/RepoID'
     post:
       operationId: archiveRepo
+      x-role: owner
       summary: Archive the repository; it keeps its history but takes no new tickets or tasks
       tags: [repos]
       responses:
@@ -1645,6 +1730,7 @@ paths:
       - $ref: '#/components/parameters/RepoID'
     post:
       operationId: unarchiveRepo
+      x-role: owner
       summary: Restore an archived repository
       tags: [repos]
       responses:
@@ -1653,6 +1739,95 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Repository' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /repos/{id}/brief:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    get:
+      operationId: getRepoBrief
+      summary: What agnts knows about how the repository works; empty and idle before the first survey
+      tags: [repos]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RepoBrief' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      operationId: saveRepoBrief
+      x-role: owner
+      summary: Replace the approved brief with your text; empty text removes it
+      tags: [repos]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RepoBriefInput' }
+      responses:
+        '200':
+          description: Saved; new runs read it
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RepoBrief' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /repos/{id}/brief/survey:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    post:
+      operationId: surveyRepoBrief
+      x-role: owner
+      summary: Have Claude survey the repository and write a draft brief (an update when it has one)
+      tags: [repos]
+      responses:
+        '200':
+          description: Queued, or already queued or running
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RepoBrief' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /repos/{id}/brief/approve:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    post:
+      operationId: approveRepoBrief
+      x-role: owner
+      summary: Make the draft the brief that runs read
+      tags: [repos]
+      responses:
+        '200':
+          description: Approved
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RepoBrief' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /repos/{id}/brief/discard:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    post:
+      operationId: discardRepoBriefDraft
+      x-role: owner
+      summary: Drop the draft a survey wrote
+      tags: [repos]
+      responses:
+        '200':
+          description: Discarded
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RepoBrief' }
+        '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
@@ -1785,6 +1960,7 @@ paths:
       - $ref: '#/components/parameters/RepoID'
     post:
       operationId: deployRepo
+      x-role: owner
       summary: Start a deployment (GitLab manual job, or the GitHub deploy workflow). Never available from MCP.
       tags: [repos]
       requestBody:
@@ -1800,6 +1976,795 @@ paths:
         '202': { description: Started }
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /auth/signup:
+    get:
+      operationId: getSignupInfo
+      summary: Whether people can register, and whether this install has no user yet
+      tags: [auth]
+      security: []
+      x-scope: user
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SignupInfo' }
+    post:
+      operationId: register
+      summary: Create an account (and its first workspace, unless joining by invite)
+      tags: [auth]
+      security: []
+      x-scope: user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
+      responses:
+        '200':
+          description: Registered and signed in
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LoginResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /auth/verify:
+    post:
+      operationId: verifyEmail
+      summary: Confirm an email address with the link's token
+      tags: [auth]
+      security: []
+      x-scope: user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TokenRequest' }
+      responses:
+        '204': { description: Verified }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /auth/password/forgot:
+    post:
+      operationId: forgotPassword
+      summary: Email a password reset link (always answers 204)
+      tags: [auth]
+      security: []
+      x-scope: user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, maxLength: 254 }
+      responses:
+        '204': { description: Sent if the address is known }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /auth/password/reset:
+    post:
+      operationId: resetPassword
+      summary: Set a new password with a reset link's token
+      tags: [auth]
+      security: []
+      x-scope: user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password]
+              properties:
+                token: { type: string, maxLength: 200 }
+                password: { type: string, minLength: 1, maxLength: 256 }
+      responses:
+        '204': { description: Password changed; every session ended }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /account/profile:
+    put:
+      operationId: updateProfile
+      summary: Change the display name or email
+      tags: [account]
+      x-scope: user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                displayName: { type: string, maxLength: 100 }
+                email: { type: string, maxLength: 254 }
+      responses:
+        '200':
+          description: The user after the change
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /account/password:
+    put:
+      operationId: changePassword
+      summary: Change the password
+      tags: [account]
+      x-scope: user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [current, password]
+              properties:
+                current: { type: string, maxLength: 256 }
+                password: { type: string, minLength: 1, maxLength: 256 }
+      responses:
+        '204': { description: Changed }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /account/verify:
+    post:
+      operationId: resendVerification
+      summary: Send the email verification link again
+      tags: [account]
+      x-scope: user
+      responses:
+        '204': { description: Sent }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /account/totp/setup:
+    post:
+      operationId: beginTotp
+      summary: Start turning on two-factor sign-in (a new secret, not saved yet)
+      tags: [account]
+      x-scope: user
+      responses:
+        '200':
+          description: The secret to add to an authenticator app
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [secret, url]
+                properties:
+                  secret: { type: string }
+                  url: { type: string }
+
+  /account/totp/confirm:
+    post:
+      operationId: confirmTotp
+      summary: Turn two-factor sign-in on with a code from the new secret
+      tags: [account]
+      x-scope: user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [secret, code]
+              properties:
+                secret: { type: string, maxLength: 64 }
+                code: { type: string, pattern: '^[0-9]{6}$' }
+      responses:
+        '204': { description: Turned on }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /account/totp/disable:
+    post:
+      operationId: disableTotp
+      summary: Turn two-factor sign-in off
+      tags: [account]
+      x-scope: user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password: { type: string, maxLength: 256 }
+                code: { type: string, pattern: '^[0-9]{6}$' }
+      responses:
+        '204': { description: Turned off }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /account/claude:
+    get:
+      operationId: getMyClaude
+      summary: Your personal Claude connection (used by workspaces in per-member mode)
+      tags: [account]
+      x-scope: user
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ClaudeConnectionState' }
+    put:
+      operationId: setMyClaude
+      summary: Connect your Claude account
+      tags: [account]
+      x-scope: user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ClaudeConnectionInput' }
+      responses:
+        '200':
+          description: Connected
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ClaudeConnectionState' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+    delete:
+      operationId: deleteMyClaude
+      summary: Disconnect your Claude account
+      tags: [account]
+      x-scope: user
+      responses:
+        '204': { description: Disconnected }
+
+  /workspaces:
+    get:
+      operationId: listWorkspaces
+      summary: The workspaces you are a member of
+      tags: [workspaces]
+      x-scope: user
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/WorkspaceSummary' }
+    post:
+      operationId: createWorkspace
+      summary: Create a workspace you own
+      tags: [workspaces]
+      x-scope: user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, minLength: 1, maxLength: 80 }
+                slug: { type: string, maxLength: 40, description: 'The address in links; derived from the name when empty' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WorkspaceSummary' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /invites/{token}:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema: { type: string, maxLength: 200 }
+    get:
+      operationId: getInvite
+      summary: What an invite link is for
+      tags: [workspaces]
+      security: []
+      x-scope: user
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InvitePreview' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /invites/{token}/accept:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema: { type: string, maxLength: 200 }
+    post:
+      operationId: acceptInvite
+      summary: Join the workspace an invite is for
+      tags: [workspaces]
+      x-scope: user
+      responses:
+        '200':
+          description: Joined
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WorkspaceSummary' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /workspace:
+    get:
+      operationId: getWorkspace
+      summary: The current workspace and your role in it
+      tags: [workspace]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WorkspaceDetail' }
+    put:
+      operationId: updateWorkspace
+      summary: Rename the workspace or change its address
+      tags: [workspace]
+      x-role: owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string, minLength: 1, maxLength: 80 }
+                slug: { type: string, maxLength: 40 }
+      responses:
+        '200':
+          description: The workspace after the change
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WorkspaceDetail' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+    delete:
+      operationId: deleteWorkspace
+      summary: Delete the workspace (kept 7 days for undo, then purged)
+      tags: [workspace]
+      x-role: owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [confirm]
+              properties:
+                confirm: { type: string, description: "The workspace's address, typed to confirm" }
+      responses:
+        '204': { description: Deleted }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /workspace/members:
+    get:
+      operationId: listMembers
+      summary: The workspace's members
+      tags: [workspace]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Member' }
+
+  /workspace/members/{userId}:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    delete:
+      operationId: removeMember
+      summary: Remove a member
+      tags: [workspace]
+      x-role: owner
+      responses:
+        '204': { description: Removed }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /workspace/members/{userId}/role:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    put:
+      operationId: setMemberRole
+      summary: Make a member (not the owner) a user or a viewer
+      tags: [workspace]
+      x-role: owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role: { type: string, enum: [user, viewer] }
+      responses:
+        '204': { description: Changed }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /workspace/transfer:
+    post:
+      operationId: transferWorkspace
+      summary: Make another member the owner
+      tags: [workspace]
+      x-role: owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId]
+              properties:
+                userId: { type: integer, format: int64 }
+      responses:
+        '204': { description: Transferred }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /workspace/leave:
+    post:
+      operationId: leaveWorkspace
+      x-viewer: true
+      summary: Leave the workspace
+      tags: [workspace]
+      responses:
+        '204': { description: Left }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /workspace/invites:
+    get:
+      operationId: listInvites
+      summary: Open invites
+      tags: [workspace]
+      x-role: owner
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Invite' }
+    post:
+      operationId: createInvite
+      summary: Invite someone by email or by a link (valid 7 days)
+      tags: [workspace]
+      x-role: owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string, maxLength: 254, description: 'Sends the link by email; empty makes a link to share yourself' }
+                role: { type: string, enum: [user, viewer], description: 'The role the invite joins as (user when omitted)' }
+      responses:
+        '201':
+          description: Created; the link is shown once
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [invite, url]
+                properties:
+                  invite: { $ref: '#/components/schemas/Invite' }
+                  url: { type: string }
+                  emailed: { type: boolean }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /workspace/invites/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    delete:
+      operationId: revokeInvite
+      summary: Revoke an open invite
+      tags: [workspace]
+      x-role: owner
+      responses:
+        '204': { description: Revoked }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /workspace/queue:
+    get:
+      operationId: getQueue
+      summary: Where the workspace's tickets stand in the queue
+      tags: [workspace]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QueueStatus' }
+
+  /workspace/claude:
+    get:
+      operationId: getWorkspaceClaude
+      summary: Which Claude account the workspace's runs use
+      tags: [workspace]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WorkspaceClaude' }
+    put:
+      operationId: updateWorkspaceClaude
+      summary: Choose the Claude mode, the fallback and the default member
+      tags: [workspace]
+      x-role: owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mode: { type: string, enum: [shared, member] }
+                fallback: { type: boolean, description: Continue on workspace credits when the account is at its limit or missing }
+                defaultMemberId: { type: integer, format: int64, description: 'Whose account tickets without a person use in per-member mode; 0 for the owner' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WorkspaceClaude' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /workspace/claude/connection:
+    put:
+      operationId: setWorkspaceClaudeConnection
+      summary: Connect the workspace's shared Claude account
+      tags: [workspace]
+      x-role: owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ClaudeConnectionInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WorkspaceClaude' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+    delete:
+      operationId: deleteWorkspaceClaudeConnection
+      summary: Disconnect the workspace's shared Claude account
+      tags: [workspace]
+      x-role: owner
+      responses:
+        '204': { description: Disconnected }
+
+  /workspace/billing:
+    get:
+      operationId: getBilling
+      summary: The workspace's plan, slots, members and credits
+      tags: [billing]
+      x-role: owner
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Billing' }
+
+  /workspace/billing/slots:
+    put:
+      operationId: setSlots
+      summary: Change how many runs the workspace may have at once
+      tags: [billing]
+      x-role: owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [slots]
+              properties:
+                slots: { type: integer, minimum: 1, maximum: 5 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Billing' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '402': { $ref: '#/components/responses/PaymentRequired' }
+
+  /workspace/billing/checkout:
+    post:
+      operationId: checkoutCredits
+      summary: Start buying credits; returns the payment page to open
+      tags: [billing]
+      x-role: owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amountUzs, provider]
+              properties:
+                amountUzs: { type: integer, format: int64, minimum: 10000, description: Amount to pay in so'm }
+                provider: { type: string, enum: [payme, click] }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [url, paymentId]
+                properties:
+                  url: { type: string }
+                  paymentId: { type: integer, format: int64 }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
+  /platform/overview:
+    get:
+      operationId: getPlatformOverview
+      summary: Servers, runs and the queue across every workspace (Admin)
+      tags: [platform]
+      x-scope: admin
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlatformOverview' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /platform/workspaces:
+    get:
+      operationId: listPlatformWorkspaces
+      summary: Every workspace, metadata only (Admin)
+      tags: [platform]
+      x-scope: admin
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/PlatformWorkspace' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /platform/workspaces/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    put:
+      operationId: updatePlatformWorkspace
+      summary: Change a workspace's plan, slots, member limit, or suspend it (Admin)
+      tags: [platform]
+      x-scope: admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                plan: { type: string, maxLength: 40 }
+                slots: { type: integer, minimum: 1, maximum: 50 }
+                memberLimit: { type: integer, minimum: 0, maximum: 10000 }
+                suspended: { type: boolean }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlatformWorkspace' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /platform/workspaces/{id}/credits:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    post:
+      operationId: grantCredits
+      summary: Grant (or take back, when negative) credits (Admin)
+      tags: [platform]
+      x-scope: admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount: { type: integer, format: int64 }
+                note: { type: string, maxLength: 300 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlatformWorkspace' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /platform/users:
+    get:
+      operationId: listPlatformUsers
+      summary: Every user (Admin)
+      tags: [platform]
+      x-scope: admin
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/User' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /platform/users/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    put:
+      operationId: updatePlatformUser
+      summary: Grant or remove the Admin role (Admin)
+      tags: [platform]
+      x-scope: admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [isAdmin]
+              properties:
+                isAdmin: { type: boolean }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
 
 components:
@@ -1844,15 +2809,287 @@ components:
       scheme: bearer
 
   schemas:
+    SignupInfo:
+      type: object
+      required: [open, firstUser, emailEnabled]
+      properties:
+        open: { type: boolean, description: Anyone can register; otherwise only with an invite link }
+        firstUser: { type: boolean, description: No account exists yet; the first one becomes Admin }
+        emailEnabled: { type: boolean, description: "The server can send email (verification, invites, resets)" }
+
+    RegisterRequest:
+      type: object
+      required: [email, password, client]
+      properties:
+        email: { type: string, minLength: 3, maxLength: 254 }
+        username: { type: string, maxLength: 64, description: 'Derived from the email when empty' }
+        displayName: { type: string, maxLength: 100 }
+        password: { type: string, minLength: 1, maxLength: 256 }
+        workspaceName: { type: string, maxLength: 80, description: 'Name of the first workspace; not created when joining by invite' }
+        invite: { type: string, maxLength: 200, description: An invite token to join with }
+        client: { type: string, enum: [web, mobile] }
+
+    TokenRequest:
+      type: object
+      required: [token]
+      properties:
+        token: { type: string, maxLength: 200 }
+
+    WorkspaceRole:
+      type: string
+      description: 'owner runs the workspace; user works in it; viewer sees everything and changes nothing'
+      enum: [owner, user, viewer]
+
+    WorkspaceSummary:
+      type: object
+      required: [id, slug, name, role, members, plan, slots]
+      properties:
+        id: { type: integer, format: int64 }
+        slug: { type: string }
+        name: { type: string }
+        role: { $ref: '#/components/schemas/WorkspaceRole' }
+        members: { type: integer }
+        plan: { type: string }
+        slots: { type: integer }
+        suspended: { type: boolean }
+
+    WorkspaceDetail:
+      type: object
+      required: [id, slug, name, role, ownerId, plan, slots, memberLimit, members, claudeMode, claudeFallback, creditsBalance, createdAt]
+      properties:
+        id: { type: integer, format: int64 }
+        slug: { type: string }
+        name: { type: string }
+        role: { $ref: '#/components/schemas/WorkspaceRole' }
+        ownerId: { type: integer, format: int64 }
+        plan: { type: string }
+        slots: { type: integer }
+        memberLimit: { type: integer, description: 0 means no limit }
+        members: { type: integer }
+        claudeMode: { type: string, enum: [shared, member] }
+        claudeFallback: { type: boolean }
+        defaultMemberId: { type: integer, format: int64 }
+        creditsBalance: { type: integer, format: int64 }
+        trialEndsAt: { type: string, format: date-time }
+        suspended: { type: boolean }
+        deletedAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    Member:
+      type: object
+      required: [userId, username, role, joinedAt, claudeConnected]
+      properties:
+        userId: { type: integer, format: int64 }
+        username: { type: string }
+        displayName: { type: string }
+        email: { type: string, description: Shown to the owner only }
+        role: { $ref: '#/components/schemas/WorkspaceRole' }
+        joinedAt: { type: string, format: date-time }
+        claudeConnected: { type: boolean, description: Has a personal Claude connection (per-member mode) }
+
+    Invite:
+      type: object
+      required: [id, email, role, expiresAt, createdAt]
+      properties:
+        id: { type: integer, format: int64 }
+        email: { type: string }
+        role: { $ref: '#/components/schemas/WorkspaceRole' }
+        invitedBy: { type: string }
+        expiresAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    InvitePreview:
+      type: object
+      required: [workspace, expiresAt]
+      properties:
+        workspace: { type: string, description: The workspace's name }
+        invitedBy: { type: string }
+        email: { type: string }
+        expiresAt: { type: string, format: date-time }
+
+    Capacity:
+      type: object
+      required: [budgetMb, reservedMb, runs, full]
+      properties:
+        budgetMb: { type: integer, format: int64, description: Memory the server lends to runs; 0 when it is not limited }
+        reservedMb: { type: integer, format: int64 }
+        runs: { type: integer }
+        diskFreeMb: { type: integer, format: int64 }
+        full: { type: boolean }
+
+    WaitReason:
+      type: string
+      enum: [blocked, slots, server, claude]
+      description: >-
+        Why a ticket waits for a worker: blocked (related tickets or held,
+        for the team), slots (the workspace's runs are in use), server (no
+        memory left on the server, for the platform), claude (the Claude
+        account is at its limit or missing).
+
+    QueueStatus:
+      type: object
+      required: [running, slots, waiting, serverQueue, serverQueueLength, capacity]
+      properties:
+        running: { type: integer }
+        slots: { type: integer }
+        waiting:
+          type: object
+          description: The workspace's waiting tickets by reason
+          properties:
+            blocked: { type: integer }
+            slots: { type: integer }
+            server: { type: integer }
+            claude: { type: integer }
+        serverQueue:
+          type: array
+          description: The workspace's tickets waiting for the server
+          items:
+            type: object
+            required: [key, position, others]
+            properties:
+              key: { type: string }
+              position: { type: integer, description: 1-based place in the whole server queue }
+              others: { type: integer, description: Tickets of other workspaces ahead }
+              estimateSec: { type: integer, description: About how long until it may start }
+        serverQueueLength: { type: integer }
+        capacity: { $ref: '#/components/schemas/Capacity' }
+
+    ClaudeConnectionInput:
+      type: object
+      required: [kind, token]
+      properties:
+        kind: { type: string, enum: [subscription, api_key], description: 'subscription: a token from `claude setup-token`; api_key: an Anthropic API key' }
+        token: { type: string, minLength: 10, maxLength: 500 }
+
+    ClaudeConnectionState:
+      type: object
+      required: [connected]
+      properties:
+        connected: { type: boolean }
+        kind: { type: string, enum: [subscription, api_key] }
+        tokenHint: { type: string, description: The token's last four characters }
+        account: { type: string }
+        lastError: { type: string }
+        pausedUntil: { type: string, format: date-time, description: At its usage limit until then }
+        usage: { $ref: '#/components/schemas/Usage' }
+        checkedAt: { type: string, format: date-time }
+
+    WorkspaceClaude:
+      type: object
+      required: [mode, fallback, connection, members, creditsBalance, subscriptionsAllowed]
+      properties:
+        mode: { type: string, enum: [shared, member] }
+        fallback: { type: boolean }
+        defaultMemberId: { type: integer, format: int64 }
+        connection: { $ref: '#/components/schemas/ClaudeConnectionState' }
+        members:
+          type: array
+          description: Who has a personal connection (per-member mode)
+          items:
+            type: object
+            required: [userId, username, connected]
+            properties:
+              userId: { type: integer, format: int64 }
+              username: { type: string }
+              connected: { type: boolean }
+              pausedUntil: { type: string, format: date-time }
+        creditsBalance: { type: integer, format: int64 }
+        subscriptionsAllowed: { type: boolean, description: 'This server accepts Claude subscription tokens (self-hosted); otherwise API keys only' }
+
+    LedgerEntry:
+      type: object
+      required: [id, amount, reason, createdAt]
+      properties:
+        id: { type: integer, format: int64 }
+        amount: { type: integer, format: int64, description: Credits; negative for spend }
+        reason: { type: string, enum: [purchase, run, refund, grant] }
+        ticketKey: { type: string }
+        note: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    Billing:
+      type: object
+      required: [plan, slots, maxSlots, memberLimit, members, creditsBalance, ledger, prices, paymentsEnabled]
+      properties:
+        plan: { type: string }
+        slots: { type: integer }
+        maxSlots: { type: integer }
+        memberLimit: { type: integer }
+        members: { type: integer }
+        creditsBalance: { type: integer, format: int64 }
+        trialEndsAt: { type: string, format: date-time }
+        monthlyUzs: { type: integer, format: int64, description: "What the plan, extra slots and extra members cost a month" }
+        ledger:
+          type: array
+          items: { $ref: '#/components/schemas/LedgerEntry' }
+        prices:
+          type: object
+          required: [workspaceUzs, slotUzs, memberUzs, creditUzs, includedMembers, markup]
+          properties:
+            workspaceUzs: { type: integer, format: int64 }
+            slotUzs: { type: integer, format: int64 }
+            memberUzs: { type: integer, format: int64 }
+            creditUzs: { type: integer, format: int64, description: Price of one credit ($0.01 of API cost at the markup) }
+            includedMembers: { type: integer }
+            markup: { type: number }
+        paymentsEnabled: { type: boolean }
+        selfHosted: { type: boolean, description: 'No billing: slots and members are set by the Admin' }
+
+    PlatformWorkspace:
+      type: object
+      required: [id, slug, name, plan, slots, memberLimit, members, creditsBalance, running, createdAt]
+      properties:
+        id: { type: integer, format: int64 }
+        slug: { type: string }
+        name: { type: string }
+        owner: { type: string }
+        plan: { type: string }
+        slots: { type: integer }
+        memberLimit: { type: integer }
+        members: { type: integer }
+        creditsBalance: { type: integer, format: int64 }
+        running: { type: integer }
+        suspended: { type: boolean }
+        deletedAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    PlatformOverview:
+      type: object
+      required: [capacity, runs, serverQueue, workspaces, users]
+      properties:
+        capacity: { $ref: '#/components/schemas/Capacity' }
+        runs:
+          type: array
+          items:
+            type: object
+            required: [workspaceId, ticketKey, stage, startedAt]
+            properties:
+              workspaceId: { type: integer, format: int64 }
+              workspace: { type: string }
+              ticketKey: { type: string }
+              stage: { type: string }
+              startedAt: { type: string, format: date-time }
+        serverQueue:
+          type: array
+          items:
+            type: object
+            required: [workspaceId, ticketKey]
+            properties:
+              workspaceId: { type: integer, format: int64 }
+              workspace: { type: string }
+              ticketKey: { type: string }
+        workspaces: { type: integer }
+        users: { type: integer }
+
     LoginRequest:
       type: object
-      required: [username, password, code, client]
+      required: [username, password, client]
       properties:
-        username: { type: string, minLength: 1, maxLength: 64 }
+        username: { type: string, minLength: 1, maxLength: 254, description: Username or email }
         password: { type: string, minLength: 1, maxLength: 256 }
         code:
           type: string
-          description: Six-digit code from the authenticator app
+          description: Six-digit code from the authenticator app, when two-factor sign-in is on
           pattern: '^[0-9]{6}$'
         client:
           type: string
@@ -1874,6 +3111,17 @@ components:
       properties:
         id: { type: integer, format: int64 }
         username: { type: string }
+        displayName: { type: string }
+        email: { type: string }
+        emailVerified: { type: boolean }
+        isAdmin: { type: boolean, description: The platform operator (system role Admin) }
+        hasTotp: { type: boolean, description: Signs in with a second factor }
+        lastWorkspace: { type: string, description: The slug of the workspace opened last }
+        workspaces:
+          type: array
+          description: The workspaces the user is a member of (on /auth/me only)
+          items: { $ref: '#/components/schemas/WorkspaceSummary' }
+        createdAt: { type: string, format: date-time }
 
     Meta:
       type: object
@@ -2149,6 +3397,7 @@ components:
         state: { $ref: '#/components/schemas/TicketState' }
         resumeState: { $ref: '#/components/schemas/TicketState' }
         revision: { type: integer }
+        replayOf: { type: string, description: 'For a replay: the done ticket it re-runs. Replays are never pushed.' }
         turns: { type: integer }
         branch: { type: string }
         prNumber: { type: integer }
@@ -2193,6 +3442,12 @@ components:
         previewCompare: { type: boolean, description: Previews of this ticket also capture the default branch (before shots) }
         canPreview: { type: boolean, description: The ticket's repository has a preview command }
         spend: { $ref: '#/components/schemas/TokenSpend' }
+        waitReason: { $ref: '#/components/schemas/WaitReason' }
+        waitMessage: { type: string, description: "Why it waits, in a sentence" }
+        queuedAt: { type: string, format: date-time, description: When it started waiting for a worker }
+        memberId: { type: integer, format: int64, description: 'Whose ticket it is (per-member Claude mode runs on their account)' }
+        member: { type: string, description: The member's username }
+        createdBy: { type: string, description: Who created it; absent for webhooks and agnts }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
 
@@ -2302,6 +3557,40 @@ components:
           enum: [simple, complex]
           description: The analysis's rating; picks the review model on auto
         footprint: { $ref: '#/components/schemas/Footprint' }
+        approaches:
+          type: array
+          description: Ways to do the work that the analysis weighed; exactly one is chosen
+          items: { $ref: '#/components/schemas/Approach' }
+        outOfScope:
+          type: array
+          description: What the work will deliberately not do
+          items: { type: string }
+        ship: { $ref: '#/components/schemas/ShipNotes' }
+
+    Approach:
+      type: object
+      required: [title, sketch, pros, cons, chosen]
+      properties:
+        title: { type: string }
+        sketch: { type: string }
+        pros:
+          type: array
+          items: { type: string }
+        cons:
+          type: array
+          items: { type: string }
+        fit: { type: string, description: 'How it fits the repository brief and the team rules, or what it bends' }
+        chosen: { type: boolean }
+        why: { type: string, description: 'For the chosen approach, why it beats the others; for the others, why not' }
+
+    ShipNotes:
+      type: object
+      description: How the change ships; absent fields do not apply
+      properties:
+        migrations: { type: string }
+        compatibility: { type: string }
+        rollout: { type: string }
+        rollback: { type: string }
 
     Finding:
       type: object
@@ -2310,7 +3599,7 @@ components:
         severity: { type: string, enum: [blocker, major, minor, nit] }
         category:
           type: string
-          enum: [correctness, security, performance, tests, rules, maintainability, accuracy, completeness, other]
+          enum: [correctness, security, performance, tests, rules, architecture, scope, maintainability, accuracy, completeness, other]
         file: { type: string, description: Path relative to the repository }
         line: { type: integer }
         title: { type: string }
@@ -2429,7 +3718,24 @@ components:
           type: array
           items: { $ref: '#/components/schemas/FileChange' }
         report: { type: string, description: 'The Markdown report, for report kinds' }
+        deviations:
+          type: array
+          description: Where the work departed from the chosen approach or the plan, and why
+          items: { type: string }
+        redFlags:
+          type: array
+          description: "Lines agnts's scan of the change flagged for the reviewer: skipped tests, removed assertions, silenced linters and the like"
+          items: { $ref: '#/components/schemas/RedFlag' }
         createdAt: { type: string, format: date-time }
+
+    RedFlag:
+      type: object
+      required: [kind, path, text]
+      properties:
+        kind: { type: string, enum: [skipped_test, removed_assertion, deleted_test, silenced_lint, swallowed_error, todo, new_dependency] }
+        path: { type: string }
+        line: { type: integer, description: Line in the new file; absent for the whole file }
+        text: { type: string }
 
     TicketDetail:
       type: object
@@ -2476,6 +3782,7 @@ components:
           type: object
           additionalProperties: true
         durationMs: { type: integer, format: int64 }
+        user: { type: string, description: The person behind the event; absent for agnts }
         createdAt: { type: string, format: date-time }
 
     AnswersRequest:
@@ -2542,6 +3849,7 @@ components:
         state: { $ref: '#/components/schemas/TicketState' }
         message: { type: string }
         origin: { type: string }
+        user: { type: string, description: The person behind it; absent for agnts }
 
     TaskCreate:
       type: object
@@ -2658,6 +3966,9 @@ components:
         autoReview: { type: boolean, description: Review every result while it waits for review }
         autoPreview: { type: boolean, description: Take screenshots of every UI change in repositories with a preview command }
         visualCheck: { type: boolean, description: Coding runs may start the app and look at the pages they changed }
+        autoBrief: { type: boolean, description: 'Survey a repository without a brief when its first ticket is analysed, and refresh the brief after merges' }
+        selfReview: { type: boolean, description: "Send blocker and major findings of agnts's code review back to the coder once per revision, before a person reviews" }
+        reflect: { type: boolean, description: 'Learn from change requests and rejections: suggest rules, which apply once someone adopts them' }
         egressAllow:
           type: array
           maxItems: 50
@@ -3112,9 +4423,13 @@ components:
 
     Analytics:
       type: object
-      required: [days, current, previous, perDay, steps, stops, models, repos, hours, insights, spendByStage]
+      required: [days, current, previous, perDay, steps, stops, models, repos, hours, insights, spendByStage, quality]
       properties:
         days: { type: integer }
+        quality:
+          type: array
+          description: How the tickets whose first coding run started in the period went, by prompt version, oldest first
+          items: { $ref: '#/components/schemas/QualityStat' }
         current: { $ref: '#/components/schemas/PeriodStats' }
         previous: { $ref: '#/components/schemas/PeriodStats' }
         perDay:
@@ -3171,6 +4486,106 @@ components:
               values:
                 type: object
                 additionalProperties: { type: string }
+
+    RepoBrief:
+      type: object
+      required: [repoId, repoName, body, bodySha, draft, draftSha, status, mergesSince, refreshAfter, error, updatedAt]
+      description: >-
+        What agnts knows about how a repository works. A survey writes the
+        draft; once a person approves it, the body reaches every run of the
+        repository's tickets as /agnts/context/brief.md.
+      properties:
+        repoId: { type: integer, format: int64 }
+        repoName: { type: string }
+        body: { type: string, description: 'The approved brief, Markdown; empty when there is none' }
+        bodySha: { type: string, description: The commit the approved brief describes }
+        draft: { type: string, description: 'The latest survey, waiting for approval; empty when there is none' }
+        draftSha: { type: string }
+        status: { type: string, enum: [idle, pending, surveying, failed] }
+        mergesSince: { type: integer, description: Tickets merged since the brief was approved }
+        refreshAfter: { type: integer, description: 'Merges after which agnts surveys again, when Settings allow' }
+        error: { type: string, description: Why the last survey failed }
+        surveyedAt: { type: string, format: date-time }
+        approvedAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    RepoBriefInput:
+      type: object
+      required: [body]
+      properties:
+        body: { type: string, maxLength: 40000 }
+
+    ReplayReport:
+      type: object
+      required: [versions, replays]
+      properties:
+        versions:
+          type: array
+          description: Replays with a change, summed by the prompt version they ran with
+          items: { $ref: '#/components/schemas/ReplayVersion' }
+        replays:
+          type: array
+          description: The newest replays first
+          items: { $ref: '#/components/schemas/ReplayResult' }
+
+    ReplayVersion:
+      type: object
+      required: [promptVersion, replays, checksPassed, reviewed, looksGood, avgOverlap, avgRecall, avgTurns, avgCostUsd, originalTurns, originalCostUsd]
+      properties:
+        promptVersion: { type: string }
+        replays: { type: integer }
+        checksPassed: { type: integer }
+        reviewed: { type: integer, description: "Replays agnts's code review read" }
+        looksGood: { type: integer, description: Reviews that found nothing to block }
+        avgOverlap: { type: number, description: 'Average Jaccard index of the changed files, replay against original' }
+        avgRecall: { type: number, description: "Average share of the original's files the replay changed too" }
+        avgTurns: { type: number }
+        avgCostUsd: { type: number }
+        originalTurns: { type: number, description: 'Average turns of the originals, for comparison' }
+        originalCostUsd: { type: number }
+
+    ReplayResult:
+      type: object
+      required: [key, original, title, state, promptVersion, hasChange, checksPassed, files, originalFiles, overlap, recall, turns, originalTurns, costUsd, originalCostUsd, createdAt]
+      properties:
+        key: { type: string }
+        original: { type: string }
+        title: { type: string }
+        state: { $ref: '#/components/schemas/TicketState' }
+        promptVersion: { type: string }
+        hasChange: { type: boolean }
+        checksPassed: { type: boolean }
+        files:
+          type: array
+          items: { type: string }
+        originalFiles:
+          type: array
+          items: { type: string }
+        overlap: { type: number }
+        recall: { type: number }
+        verdict: { type: string, enum: [looks_good, has_concerns, needs_changes] }
+        turns: { type: integer }
+        originalTurns: { type: integer }
+        costUsd: { type: number }
+        originalCostUsd: { type: number }
+        createdAt: { type: string, format: date-time }
+
+    QualityStat:
+      type: object
+      required: [promptVersion, tickets, reachedReview, done, firstTry, rejected, changeRounds, fixAttempts, serious, redFlags, selfFixes]
+      properties:
+        promptVersion: { type: string, description: 'Empty for runs from before versions were recorded' }
+        tickets: { type: integer, description: First coding run in the period }
+        reachedReview: { type: integer }
+        done: { type: integer }
+        firstTry: { type: integer, description: Done without a person asking for changes }
+        rejected: { type: integer }
+        changeRounds: { type: number, description: 'Average change requests by a person, over the tickets that reached review' }
+        fixAttempts: { type: number, description: Average failing checks sent back to Claude }
+        serious: { type: integer, description: Reviewed with a blocker or major finding at least once }
+        footprintHit: { type: number, description: 'Average share of the changed files the analysis predicted; absent when none was measured' }
+        redFlags: { type: integer, description: Red flags found in the diffs }
+        selfFixes: { type: integer, description: "Findings of agnts's own review sent back to the coder" }
 
     LessonCategory:
       type: string
@@ -3278,8 +4693,21 @@ components:
 
     RuleStatus:
       type: string
-      enum: [pending, analyzing, questions, ready, failed]
-      description: 'Where Claude''s review stands. Tickets follow a rule only when it is ready and enabled.'
+      enum: [pending, analyzing, questions, ready, failed, suggested]
+      description: >-
+        Where Claude's review stands. Tickets follow a rule only when it is
+        ready and enabled. A suggested rule is one agnts proposed from
+        feedback: adopt it with a review or as written, or delete it to
+        dismiss it (it is then not suggested again).
+
+    RuleKind:
+      type: string
+      enum: [rule, context]
+      default: rule
+      description: >-
+        rule: an instruction tickets follow. context: business knowledge
+        (a glossary, invariants, roles) that runs read as
+        /agnts/context/business.md.
 
     RuleQuestion:
       type: object
@@ -3296,9 +4724,12 @@ components:
 
     Rule:
       type: object
-      required: [id, title, body, enabled, status, interpretation, clarified, text, questions, rounds, error, createdAt, updatedAt]
+      required: [id, title, body, enabled, status, kind, interpretation, clarified, text, questions, rounds, error, createdAt, updatedAt]
       properties:
         id: { type: integer, format: int64 }
+        kind: { $ref: '#/components/schemas/RuleKind' }
+        sourceTicket: { type: string, description: 'For a rule agnts suggested: the ticket whose feedback taught it' }
+        reason: { type: string, description: 'For a rule agnts suggested: which feedback shows it' }
         repoId: { type: integer, format: int64, description: Absent for a global rule }
         repoName: { type: string }
         title: { type: string }
@@ -3325,6 +4756,7 @@ components:
         body: { type: string, maxLength: 10000 }
         repoId: { type: integer, format: int64, description: Leave out for a rule every repository follows }
         enabled: { type: boolean, default: true }
+        kind: { $ref: '#/components/schemas/RuleKind' }
 
     RuleAnswers:
       type: object
@@ -3363,6 +4795,21 @@ components:
           schema: { $ref: '#/components/schemas/Ticket' }
     NotFound:
       description: No such ticket
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: Your role does not allow this
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    PaymentRequired:
+      description: The plan does not include this; upgrade or buy credits
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotImplemented:
+      description: Not available on this server
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }

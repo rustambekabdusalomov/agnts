@@ -2,8 +2,32 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:agnts_api/agnts_api.dart';
 
 import 'api.dart';
+import 'session.dart';
 
 // Server data. The live stream (live.dart) invalidates these as events arrive.
+
+/// The signed-in user with the workspaces they belong to.
+final meProvider = FutureProvider<User>((ref) async {
+  return (await requireApi(ref).getAuthApi().getMe()).data!;
+});
+
+/// The workspace the app acts in: the chosen one, else the server's (the
+/// one opened last). Null while loading, or when the user has none.
+final currentWorkspaceProvider = Provider<WorkspaceSummary?>((ref) {
+  final me = ref.watch(meProvider).value;
+  final ws = me?.workspaces ?? const <WorkspaceSummary>[];
+  if (ws.isEmpty) return null;
+  final slug = ref.watch(sessionProvider.select((s) => s.value?.workspace)) ?? me?.lastWorkspace;
+  return ws.firstWhere((w) => w.slug == slug, orElse: () => ws.first);
+});
+
+/// Whether the person may change the current workspace: viewers only look.
+final canEditProvider = Provider<bool>((ref) => ref.watch(currentWorkspaceProvider)?.role != WorkspaceRole.viewer);
+
+/// The workspace's runs and slots, and where its tickets wait.
+final queueProvider = FutureProvider<QueueStatus>((ref) async {
+  return (await requireApi(ref).getWorkspaceApi().getQueue()).data!;
+});
 
 final dashboardProvider = FutureProvider<Dashboard>((ref) async {
   return (await requireApi(ref).getDashboardApi().getDashboard()).data!;

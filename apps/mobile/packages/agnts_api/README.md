@@ -53,14 +53,13 @@ Please follow the [installation procedure](#installation--usage) and then run th
 import 'package:agnts_api/agnts_api.dart';
 
 
-final api = AgntsApi().getAnalyticsApi();
-final int days = 56; // int | 
+final api = AgntsApi().getAccountApi();
 
 try {
-    final response = await api.getAnalytics(days);
+    final response = await api.beginTotp();
     print(response);
 } on DioException catch (e) {
-    print("Exception when calling AnalyticsApi->getAnalytics: $e\n");
+    print("Exception when calling AccountApi->beginTotp: $e\n");
 }
 
 ```
@@ -71,13 +70,31 @@ All URIs are relative to */api*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+[*AccountApi*](doc/AccountApi.md) | [**beginTotp**](doc/AccountApi.md#begintotp) | **POST** /account/totp/setup | Start turning on two-factor sign-in (a new secret, not saved yet)
+[*AccountApi*](doc/AccountApi.md) | [**changePassword**](doc/AccountApi.md#changepassword) | **PUT** /account/password | Change the password
+[*AccountApi*](doc/AccountApi.md) | [**confirmTotp**](doc/AccountApi.md#confirmtotp) | **POST** /account/totp/confirm | Turn two-factor sign-in on with a code from the new secret
+[*AccountApi*](doc/AccountApi.md) | [**deleteMyClaude**](doc/AccountApi.md#deletemyclaude) | **DELETE** /account/claude | Disconnect your Claude account
+[*AccountApi*](doc/AccountApi.md) | [**disableTotp**](doc/AccountApi.md#disabletotp) | **POST** /account/totp/disable | Turn two-factor sign-in off
+[*AccountApi*](doc/AccountApi.md) | [**getMyClaude**](doc/AccountApi.md#getmyclaude) | **GET** /account/claude | Your personal Claude connection (used by workspaces in per-member mode)
+[*AccountApi*](doc/AccountApi.md) | [**resendVerification**](doc/AccountApi.md#resendverification) | **POST** /account/verify | Send the email verification link again
+[*AccountApi*](doc/AccountApi.md) | [**setMyClaude**](doc/AccountApi.md#setmyclaude) | **PUT** /account/claude | Connect your Claude account
+[*AccountApi*](doc/AccountApi.md) | [**updateProfile**](doc/AccountApi.md#updateprofile) | **PUT** /account/profile | Change the display name or email
 [*AnalyticsApi*](doc/AnalyticsApi.md) | [**getAnalytics**](doc/AnalyticsApi.md#getanalytics) | **GET** /analytics | Throughput, quality, time and plan statistics for a period
+[*AnalyticsApi*](doc/AnalyticsApi.md) | [**getReplayReport**](doc/AnalyticsApi.md#getreplayreport) | **GET** /eval/replays | How the newest replays compare with the tickets they re-ran, by prompt version
 [*AttachmentsApi*](doc/AttachmentsApi.md) | [**deleteAttachment**](doc/AttachmentsApi.md#deleteattachment) | **DELETE** /attachments/{id} | Delete an upload that nothing uses yet
 [*AttachmentsApi*](doc/AttachmentsApi.md) | [**getAttachment**](doc/AttachmentsApi.md#getattachment) | **GET** /attachments/{id} | An attached file&#39;s bytes
 [*AttachmentsApi*](doc/AttachmentsApi.md) | [**uploadAttachment**](doc/AttachmentsApi.md#uploadattachment) | **POST** /attachments | Upload a file to attach to a task, an answer or a retry note
+[*AuthApi*](doc/AuthApi.md) | [**forgotPassword**](doc/AuthApi.md#forgotpassword) | **POST** /auth/password/forgot | Email a password reset link (always answers 204)
 [*AuthApi*](doc/AuthApi.md) | [**getMe**](doc/AuthApi.md#getme) | **GET** /auth/me | The signed-in user
+[*AuthApi*](doc/AuthApi.md) | [**getSignupInfo**](doc/AuthApi.md#getsignupinfo) | **GET** /auth/signup | Whether people can register, and whether this install has no user yet
 [*AuthApi*](doc/AuthApi.md) | [**login**](doc/AuthApi.md#login) | **POST** /auth/login | Sign in with password and TOTP code
 [*AuthApi*](doc/AuthApi.md) | [**logout**](doc/AuthApi.md#logout) | **POST** /auth/logout | End the current session
+[*AuthApi*](doc/AuthApi.md) | [**register**](doc/AuthApi.md#register) | **POST** /auth/signup | Create an account (and its first workspace, unless joining by invite)
+[*AuthApi*](doc/AuthApi.md) | [**resetPassword**](doc/AuthApi.md#resetpassword) | **POST** /auth/password/reset | Set a new password with a reset link&#39;s token
+[*AuthApi*](doc/AuthApi.md) | [**verifyEmail**](doc/AuthApi.md#verifyemail) | **POST** /auth/verify | Confirm an email address with the link&#39;s token
+[*BillingApi*](doc/BillingApi.md) | [**checkoutCredits**](doc/BillingApi.md#checkoutcredits) | **POST** /workspace/billing/checkout | Start buying credits; returns the payment page to open
+[*BillingApi*](doc/BillingApi.md) | [**getBilling**](doc/BillingApi.md#getbilling) | **GET** /workspace/billing | The workspace&#39;s plan, slots, members and credits
+[*BillingApi*](doc/BillingApi.md) | [**setSlots**](doc/BillingApi.md#setslots) | **PUT** /workspace/billing/slots | Change how many runs the workspace may have at once
 [*DashboardApi*](doc/DashboardApi.md) | [**getDashboard**](doc/DashboardApi.md#getdashboard) | **GET** /dashboard | Everything the dashboard shows, in one call
 [*DevicesApi*](doc/DevicesApi.md) | [**registerDevice**](doc/DevicesApi.md#registerdevice) | **POST** /devices | Register this phone for push notifications (call again when the token changes)
 [*DevicesApi*](doc/DevicesApi.md) | [**unregisterDevice**](doc/DevicesApi.md#unregisterdevice) | **POST** /devices/unregister | Stop push notifications to this phone (on sign-out)
@@ -108,11 +125,20 @@ Class | Method | HTTP request | Description
 [*McpApi*](doc/McpApi.md) | [**revokeMcp**](doc/McpApi.md#revokemcp) | **POST** /mcp-settings/revoke | Disconnect every Claude connection and delete the static token
 [*McpApi*](doc/McpApi.md) | [**rotateMcpToken**](doc/McpApi.md#rotatemcptoken) | **POST** /mcp-settings/token | Create a new static MCP bearer token (shown once; the old one stops working)
 [*MetaApi*](doc/MetaApi.md) | [**getMeta**](doc/MetaApi.md#getmeta) | **GET** /meta | Server version and build information
+[*PlatformApi*](doc/PlatformApi.md) | [**getPlatformOverview**](doc/PlatformApi.md#getplatformoverview) | **GET** /platform/overview | Servers, runs and the queue across every workspace (Admin)
+[*PlatformApi*](doc/PlatformApi.md) | [**grantCredits**](doc/PlatformApi.md#grantcredits) | **POST** /platform/workspaces/{id}/credits | Grant (or take back, when negative) credits (Admin)
+[*PlatformApi*](doc/PlatformApi.md) | [**listPlatformUsers**](doc/PlatformApi.md#listplatformusers) | **GET** /platform/users | Every user (Admin)
+[*PlatformApi*](doc/PlatformApi.md) | [**listPlatformWorkspaces**](doc/PlatformApi.md#listplatformworkspaces) | **GET** /platform/workspaces | Every workspace, metadata only (Admin)
+[*PlatformApi*](doc/PlatformApi.md) | [**updatePlatformUser**](doc/PlatformApi.md#updateplatformuser) | **PUT** /platform/users/{id} | Grant or remove the Admin role (Admin)
+[*PlatformApi*](doc/PlatformApi.md) | [**updatePlatformWorkspace**](doc/PlatformApi.md#updateplatformworkspace) | **PUT** /platform/workspaces/{id} | Change a workspace&#39;s plan, slots, member limit, or suspend it (Admin)
+[*ReposApi*](doc/ReposApi.md) | [**approveRepoBrief**](doc/ReposApi.md#approverepobrief) | **POST** /repos/{id}/brief/approve | Make the draft the brief that runs read
 [*ReposApi*](doc/ReposApi.md) | [**archiveRepo**](doc/ReposApi.md#archiverepo) | **POST** /repos/{id}/archive | Archive the repository; it keeps its history but takes no new tickets or tasks
 [*ReposApi*](doc/ReposApi.md) | [**createRepo**](doc/ReposApi.md#createrepo) | **POST** /repos | 
 [*ReposApi*](doc/ReposApi.md) | [**deployRepo**](doc/ReposApi.md#deployrepo) | **POST** /repos/{id}/deploy | Start a deployment (GitLab manual job, or the GitHub deploy workflow). Never available from MCP.
 [*ReposApi*](doc/ReposApi.md) | [**detectRepo**](doc/ReposApi.md#detectrepo) | **POST** /repos/detect | Work out a repository&#39;s toolchains and check commands
+[*ReposApi*](doc/ReposApi.md) | [**discardRepoBriefDraft**](doc/ReposApi.md#discardrepobriefdraft) | **POST** /repos/{id}/brief/discard | Drop the draft a survey wrote
 [*ReposApi*](doc/ReposApi.md) | [**getRepo**](doc/ReposApi.md#getrepo) | **GET** /repos/{id} | 
+[*ReposApi*](doc/ReposApi.md) | [**getRepoBrief**](doc/ReposApi.md#getrepobrief) | **GET** /repos/{id}/brief | What agnts knows about how the repository works; empty and idle before the first survey
 [*ReposApi*](doc/ReposApi.md) | [**listRepoBranches**](doc/ReposApi.md#listrepobranches) | **GET** /repos/{id}/branches | Branches with their tip, ahead/behind the default branch and checks
 [*ReposApi*](doc/ReposApi.md) | [**listRepoCommits**](doc/ReposApi.md#listrepocommits) | **GET** /repos/{id}/commits | Commits on the default branch, newest first, 50 per page; a shorter page is the last
 [*ReposApi*](doc/ReposApi.md) | [**listRepoEnvironments**](doc/ReposApi.md#listrepoenvironments) | **GET** /repos/{id}/environments | Deployment environments and what runs there
@@ -120,6 +146,8 @@ Class | Method | HTTP request | Description
 [*ReposApi*](doc/ReposApi.md) | [**listRepoMembers**](doc/ReposApi.md#listrepomembers) | **GET** /repos/{id}/members | People with access to the repository on its git host
 [*ReposApi*](doc/ReposApi.md) | [**listRepoPipelines**](doc/ReposApi.md#listrepopipelines) | **GET** /repos/{id}/pipelines | CI runs with their stages, newest first, 20 per page; a shorter page is the last
 [*ReposApi*](doc/ReposApi.md) | [**listRepos**](doc/ReposApi.md#listrepos) | **GET** /repos | 
+[*ReposApi*](doc/ReposApi.md) | [**saveRepoBrief**](doc/ReposApi.md#saverepobrief) | **PUT** /repos/{id}/brief | Replace the approved brief with your text; empty text removes it
+[*ReposApi*](doc/ReposApi.md) | [**surveyRepoBrief**](doc/ReposApi.md#surveyrepobrief) | **POST** /repos/{id}/brief/survey | Have Claude survey the repository and write a draft brief (an update when it has one)
 [*ReposApi*](doc/ReposApi.md) | [**unarchiveRepo**](doc/ReposApi.md#unarchiverepo) | **POST** /repos/{id}/unarchive | Restore an archived repository
 [*ReposApi*](doc/ReposApi.md) | [**updateRepo**](doc/ReposApi.md#updaterepo) | **PUT** /repos/{id} | 
 [*RulesApi*](doc/RulesApi.md) | [**acceptRule**](doc/RulesApi.md#acceptrule) | **POST** /rules/{id}/accept | Apply a rule as written, skipping its open questions or a failed review
@@ -153,11 +181,13 @@ Class | Method | HTTP request | Description
 [*TicketsApi*](doc/TicketsApi.md) | [**markTicketMerged**](doc/TicketsApi.md#markticketmerged) | **POST** /tickets/{key}/merged | Record that a done ticket&#39;s pull request was merged
 [*TicketsApi*](doc/TicketsApi.md) | [**previewTicket**](doc/TicketsApi.md#previewticket) | **POST** /tickets/{key}/preview | Queue a preview (screenshots of the running app) of a ticket waiting for review, again if one already ran
 [*TicketsApi*](doc/TicketsApi.md) | [**rejectTicket**](doc/TicketsApi.md#rejectticket) | **POST** /tickets/{key}/reject | Stop work on the ticket for good
+[*TicketsApi*](doc/TicketsApi.md) | [**replayTicket**](doc/TicketsApi.md#replayticket) | **POST** /tickets/{key}/replay | Re-run a done code or test ticket with today&#39;s agnts, from the commit it started from, to compare the two (Analytics → Replay evaluation). The replay is a new local task that is never pushed.
 [*TicketsApi*](doc/TicketsApi.md) | [**requestChanges**](doc/TicketsApi.md#requestchanges) | **POST** /tickets/{key}/request-changes | Send the ticket back to coding with feedback
 [*TicketsApi*](doc/TicketsApi.md) | [**retryTicket**](doc/TicketsApi.md#retryticket) | **POST** /tickets/{key}/retry | Resume a failed or rate-limited ticket where it stopped
 [*TicketsApi*](doc/TicketsApi.md) | [**reviewTicket**](doc/TicketsApi.md#reviewticket) | **POST** /tickets/{key}/review | Queue a code review of a ticket waiting for review (again, if one already ran)
 [*TicketsApi*](doc/TicketsApi.md) | [**setFollowUps**](doc/TicketsApi.md#setfollowups) | **PUT** /tickets/{key}/follow-ups | Turn follow-up suggestions on or off for this ticket
 [*TicketsApi*](doc/TicketsApi.md) | [**setTicketKind**](doc/TicketsApi.md#setticketkind) | **PUT** /tickets/{key}/kind | Change what the ticket produces
+[*TicketsApi*](doc/TicketsApi.md) | [**setTicketMember**](doc/TicketsApi.md#setticketmember) | **PUT** /tickets/{key}/member | Make a member the ticket&#39;s member (per-member Claude mode runs it on their account)
 [*TicketsApi*](doc/TicketsApi.md) | [**setTicketModels**](doc/TicketsApi.md#setticketmodels) | **PUT** /tickets/{key}/models | Override models for this ticket; omit a stage to use the default
 [*TicketsApi*](doc/TicketsApi.md) | [**setTicketRepo**](doc/TicketsApi.md#setticketrepo) | **PUT** /tickets/{key}/repo | Link the ticket to a repository
 [*TicketsApi*](doc/TicketsApi.md) | [**startTicket**](doc/TicketsApi.md#startticket) | **POST** /tickets/{key}/analyze | Start a held ticket now (it is queued for the next free slot)
@@ -166,6 +196,26 @@ Class | Method | HTTP request | Description
 [*UsageApi*](doc/UsageApi.md) | [**getTicketSpend**](doc/UsageApi.md#getticketspend) | **GET** /usage/tickets | Tickets that used the most of the plan in a period, by Claude Code&#39;s cost estimate
 [*UsageApi*](doc/UsageApi.md) | [**getUsage**](doc/UsageApi.md#getusage) | **GET** /usage | Plan usage from Claude Code&#39;s rate limit events
 [*UsageApi*](doc/UsageApi.md) | [**refreshUsage**](doc/UsageApi.md#refreshusage) | **POST** /usage/refresh | Start a tiny Claude run to read fresh limits; a usage_updated event follows
+[*WorkspaceApi*](doc/WorkspaceApi.md) | [**createInvite**](doc/WorkspaceApi.md#createinvite) | **POST** /workspace/invites | Invite someone by email or by a link (valid 7 days)
+[*WorkspaceApi*](doc/WorkspaceApi.md) | [**deleteWorkspace**](doc/WorkspaceApi.md#deleteworkspace) | **DELETE** /workspace | Delete the workspace (kept 7 days for undo, then purged)
+[*WorkspaceApi*](doc/WorkspaceApi.md) | [**deleteWorkspaceClaudeConnection**](doc/WorkspaceApi.md#deleteworkspaceclaudeconnection) | **DELETE** /workspace/claude/connection | Disconnect the workspace&#39;s shared Claude account
+[*WorkspaceApi*](doc/WorkspaceApi.md) | [**getQueue**](doc/WorkspaceApi.md#getqueue) | **GET** /workspace/queue | Where the workspace&#39;s tickets stand in the queue
+[*WorkspaceApi*](doc/WorkspaceApi.md) | [**getWorkspace**](doc/WorkspaceApi.md#getworkspace) | **GET** /workspace | The current workspace and your role in it
+[*WorkspaceApi*](doc/WorkspaceApi.md) | [**getWorkspaceClaude**](doc/WorkspaceApi.md#getworkspaceclaude) | **GET** /workspace/claude | Which Claude account the workspace&#39;s runs use
+[*WorkspaceApi*](doc/WorkspaceApi.md) | [**leaveWorkspace**](doc/WorkspaceApi.md#leaveworkspace) | **POST** /workspace/leave | Leave the workspace
+[*WorkspaceApi*](doc/WorkspaceApi.md) | [**listInvites**](doc/WorkspaceApi.md#listinvites) | **GET** /workspace/invites | Open invites
+[*WorkspaceApi*](doc/WorkspaceApi.md) | [**listMembers**](doc/WorkspaceApi.md#listmembers) | **GET** /workspace/members | The workspace&#39;s members
+[*WorkspaceApi*](doc/WorkspaceApi.md) | [**removeMember**](doc/WorkspaceApi.md#removemember) | **DELETE** /workspace/members/{userId} | Remove a member
+[*WorkspaceApi*](doc/WorkspaceApi.md) | [**revokeInvite**](doc/WorkspaceApi.md#revokeinvite) | **DELETE** /workspace/invites/{id} | Revoke an open invite
+[*WorkspaceApi*](doc/WorkspaceApi.md) | [**setMemberRole**](doc/WorkspaceApi.md#setmemberrole) | **PUT** /workspace/members/{userId}/role | Make a member (not the owner) a user or a viewer
+[*WorkspaceApi*](doc/WorkspaceApi.md) | [**setWorkspaceClaudeConnection**](doc/WorkspaceApi.md#setworkspaceclaudeconnection) | **PUT** /workspace/claude/connection | Connect the workspace&#39;s shared Claude account
+[*WorkspaceApi*](doc/WorkspaceApi.md) | [**transferWorkspace**](doc/WorkspaceApi.md#transferworkspace) | **POST** /workspace/transfer | Make another member the owner
+[*WorkspaceApi*](doc/WorkspaceApi.md) | [**updateWorkspace**](doc/WorkspaceApi.md#updateworkspace) | **PUT** /workspace | Rename the workspace or change its address
+[*WorkspaceApi*](doc/WorkspaceApi.md) | [**updateWorkspaceClaude**](doc/WorkspaceApi.md#updateworkspaceclaude) | **PUT** /workspace/claude | Choose the Claude mode, the fallback and the default member
+[*WorkspacesApi*](doc/WorkspacesApi.md) | [**acceptInvite**](doc/WorkspacesApi.md#acceptinvite) | **POST** /invites/{token}/accept | Join the workspace an invite is for
+[*WorkspacesApi*](doc/WorkspacesApi.md) | [**createWorkspace**](doc/WorkspacesApi.md#createworkspace) | **POST** /workspaces | Create a workspace you own
+[*WorkspacesApi*](doc/WorkspacesApi.md) | [**getInvite**](doc/WorkspacesApi.md#getinvite) | **GET** /invites/{token} | What an invite link is for
+[*WorkspacesApi*](doc/WorkspacesApi.md) | [**listWorkspaces**](doc/WorkspacesApi.md#listworkspaces) | **GET** /workspaces | The workspaces you are a member of
 
 
 ## Documentation For Models
@@ -181,23 +231,39 @@ Class | Method | HTTP request | Description
  - [AnalyticsReposInner](doc/AnalyticsReposInner.md)
  - [AnswersRequest](doc/AnswersRequest.md)
  - [AnswersRequestAnswersInner](doc/AnswersRequestAnswersInner.md)
+ - [Approach](doc/Approach.md)
  - [ApproveTicketRequest](doc/ApproveTicketRequest.md)
  - [Attachment](doc/Attachment.md)
+ - [BeginTotp200Response](doc/BeginTotp200Response.md)
+ - [Billing](doc/Billing.md)
+ - [BillingPrices](doc/BillingPrices.md)
  - [Blocker](doc/Blocker.md)
  - [Branch](doc/Branch.md)
  - [CI](doc/CI.md)
+ - [Capacity](doc/Capacity.md)
+ - [ChangePasswordRequest](doc/ChangePasswordRequest.md)
  - [CheckStep](doc/CheckStep.md)
+ - [CheckoutCredits200Response](doc/CheckoutCredits200Response.md)
+ - [CheckoutCreditsRequest](doc/CheckoutCreditsRequest.md)
+ - [ClaudeConnectionInput](doc/ClaudeConnectionInput.md)
+ - [ClaudeConnectionState](doc/ClaudeConnectionState.md)
  - [CodeReview](doc/CodeReview.md)
  - [Commit](doc/Commit.md)
+ - [ConfirmTotpRequest](doc/ConfirmTotpRequest.md)
  - [ConnectIntegrationRequest](doc/ConnectIntegrationRequest.md)
  - [ConnectResult](doc/ConnectResult.md)
+ - [CreateInvite201Response](doc/CreateInvite201Response.md)
+ - [CreateInviteRequest](doc/CreateInviteRequest.md)
+ - [CreateWorkspaceRequest](doc/CreateWorkspaceRequest.md)
  - [Dashboard](doc/Dashboard.md)
  - [DashboardCounts](doc/DashboardCounts.md)
  - [DayStat](doc/DayStat.md)
  - [DecideConsent200Response](doc/DecideConsent200Response.md)
  - [DecideConsentRequest](doc/DecideConsentRequest.md)
+ - [DeleteWorkspaceRequest](doc/DeleteWorkspaceRequest.md)
  - [DeployRepoRequest](doc/DeployRepoRequest.md)
  - [DeviceRegistration](doc/DeviceRegistration.md)
+ - [DisableTotpRequest](doc/DisableTotpRequest.md)
  - [Environment](doc/Environment.md)
  - [Error](doc/Error.md)
  - [Event](doc/Event.md)
@@ -211,13 +277,18 @@ Class | Method | HTTP request | Description
  - [FollowUpsMode](doc/FollowUpsMode.md)
  - [FollowUpsSetting](doc/FollowUpsSetting.md)
  - [Footprint](doc/Footprint.md)
+ - [ForgotPasswordRequest](doc/ForgotPasswordRequest.md)
  - [GetConsent200Response](doc/GetConsent200Response.md)
  - [GitSettings](doc/GitSettings.md)
+ - [GrantCreditsRequest](doc/GrantCreditsRequest.md)
  - [HistoryItem](doc/HistoryItem.md)
  - [HourBucket](doc/HourBucket.md)
  - [ImplementInput](doc/ImplementInput.md)
  - [Integration](doc/Integration.md)
+ - [Invite](doc/Invite.md)
+ - [InvitePreview](doc/InvitePreview.md)
  - [LearnQueueItem](doc/LearnQueueItem.md)
+ - [LedgerEntry](doc/LedgerEntry.md)
  - [Lesson](doc/Lesson.md)
  - [LessonBrief](doc/LessonBrief.md)
  - [LessonCategory](doc/LessonCategory.md)
@@ -230,6 +301,7 @@ Class | Method | HTTP request | Description
  - [LoginRequest](doc/LoginRequest.md)
  - [LoginResponse](doc/LoginResponse.md)
  - [McpStatus](doc/McpStatus.md)
+ - [Member](doc/Member.md)
  - [Meta](doc/Meta.md)
  - [Model](doc/Model.md)
  - [ModelOverrides](doc/ModelOverrides.md)
@@ -237,11 +309,21 @@ Class | Method | HTTP request | Description
  - [PeriodStats](doc/PeriodStats.md)
  - [Pipeline](doc/Pipeline.md)
  - [PlaneState](doc/PlaneState.md)
+ - [PlatformOverview](doc/PlatformOverview.md)
+ - [PlatformOverviewRunsInner](doc/PlatformOverviewRunsInner.md)
+ - [PlatformOverviewServerQueueInner](doc/PlatformOverviewServerQueueInner.md)
+ - [PlatformWorkspace](doc/PlatformWorkspace.md)
  - [PreviewInput](doc/PreviewInput.md)
  - [PreviewIssue](doc/PreviewIssue.md)
  - [PreviewShot](doc/PreviewShot.md)
+ - [QualityStat](doc/QualityStat.md)
  - [Question](doc/Question.md)
+ - [QueueStatus](doc/QueueStatus.md)
+ - [QueueStatusServerQueueInner](doc/QueueStatusServerQueueInner.md)
+ - [QueueStatusWaiting](doc/QueueStatusWaiting.md)
  - [QuizQuestion](doc/QuizQuestion.md)
+ - [RedFlag](doc/RedFlag.md)
+ - [RegisterRequest](doc/RegisterRequest.md)
  - [RejectTicketRequest](doc/RejectTicketRequest.md)
  - [RelatedTicket](doc/RelatedTicket.md)
  - [Relation](doc/Relation.md)
@@ -249,7 +331,12 @@ Class | Method | HTTP request | Description
  - [RelationType](doc/RelationType.md)
  - [Relations](doc/Relations.md)
  - [RemoteRepository](doc/RemoteRepository.md)
+ - [ReplayReport](doc/ReplayReport.md)
+ - [ReplayResult](doc/ReplayResult.md)
+ - [ReplayVersion](doc/ReplayVersion.md)
  - [RepoActivity](doc/RepoActivity.md)
+ - [RepoBrief](doc/RepoBrief.md)
+ - [RepoBriefInput](doc/RepoBriefInput.md)
  - [RepoDetectInput](doc/RepoDetectInput.md)
  - [RepoDetection](doc/RepoDetection.md)
  - [RepoMember](doc/RepoMember.md)
@@ -258,6 +345,7 @@ Class | Method | HTTP request | Description
  - [Repository](doc/Repository.md)
  - [RepositoryInput](doc/RepositoryInput.md)
  - [RequestChangesRequest](doc/RequestChangesRequest.md)
+ - [ResetPasswordRequest](doc/ResetPasswordRequest.md)
  - [Result](doc/Result.md)
  - [RetryTicketRequest](doc/RetryTicketRequest.md)
  - [ReviewModel](doc/ReviewModel.md)
@@ -266,11 +354,17 @@ Class | Method | HTTP request | Description
  - [RuleAnswers](doc/RuleAnswers.md)
  - [RuleAnswersAnswersInner](doc/RuleAnswersAnswersInner.md)
  - [RuleInput](doc/RuleInput.md)
+ - [RuleKind](doc/RuleKind.md)
  - [RuleQuestion](doc/RuleQuestion.md)
  - [RuleStatus](doc/RuleStatus.md)
+ - [SetMemberRoleRequest](doc/SetMemberRoleRequest.md)
  - [SetPlaneWebhookSecretRequest](doc/SetPlaneWebhookSecretRequest.md)
+ - [SetSlotsRequest](doc/SetSlotsRequest.md)
+ - [SetTicketMemberRequest](doc/SetTicketMemberRequest.md)
  - [Settings](doc/Settings.md)
+ - [ShipNotes](doc/ShipNotes.md)
  - [ShotRef](doc/ShotRef.md)
+ - [SignupInfo](doc/SignupInfo.md)
  - [Stage](doc/Stage.md)
  - [StageModels](doc/StageModels.md)
  - [StageSpend](doc/StageSpend.md)
@@ -288,18 +382,31 @@ Class | Method | HTTP request | Description
  - [TicketSpendList](doc/TicketSpendList.md)
  - [TicketSpendRow](doc/TicketSpendRow.md)
  - [TicketState](doc/TicketState.md)
+ - [TokenRequest](doc/TokenRequest.md)
  - [TokenSpend](doc/TokenSpend.md)
  - [Toolchain](doc/Toolchain.md)
+ - [TransferWorkspaceRequest](doc/TransferWorkspaceRequest.md)
  - [TranslateInput](doc/TranslateInput.md)
  - [Translation](doc/Translation.md)
  - [TranslationItemsInner](doc/TranslationItemsInner.md)
  - [TranslationLanguage](doc/TranslationLanguage.md)
  - [UnregisterDeviceRequest](doc/UnregisterDeviceRequest.md)
  - [UpdateIntegrationRequest](doc/UpdateIntegrationRequest.md)
+ - [UpdatePlatformUserRequest](doc/UpdatePlatformUserRequest.md)
+ - [UpdatePlatformWorkspaceRequest](doc/UpdatePlatformWorkspaceRequest.md)
+ - [UpdateProfileRequest](doc/UpdateProfileRequest.md)
+ - [UpdateWorkspaceClaudeRequest](doc/UpdateWorkspaceClaudeRequest.md)
+ - [UpdateWorkspaceRequest](doc/UpdateWorkspaceRequest.md)
  - [Usage](doc/Usage.md)
  - [UsageWindow](doc/UsageWindow.md)
  - [User](doc/User.md)
+ - [WaitReason](doc/WaitReason.md)
  - [WeekStats](doc/WeekStats.md)
+ - [WorkspaceClaude](doc/WorkspaceClaude.md)
+ - [WorkspaceClaudeMembersInner](doc/WorkspaceClaudeMembersInner.md)
+ - [WorkspaceDetail](doc/WorkspaceDetail.md)
+ - [WorkspaceRole](doc/WorkspaceRole.md)
+ - [WorkspaceSummary](doc/WorkspaceSummary.md)
 
 
 ## Documentation For Authorization

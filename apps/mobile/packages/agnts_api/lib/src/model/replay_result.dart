@@ -1,0 +1,332 @@
+//
+// AUTO-GENERATED FILE, DO NOT MODIFY!
+//
+
+// ignore_for_file: unused_element
+import 'package:agnts_api/src/model/ticket_state.dart';
+import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+part 'replay_result.g.dart';
+
+
+@CopyWith()
+@JsonSerializable(
+  checked: true,
+  createToJson: true,
+  disallowUnrecognizedKeys: false,
+  explicitToJson: true,
+)
+class ReplayResult {
+  /// Returns a new [ReplayResult] instance.
+  ReplayResult({
+
+    required  this.key,
+
+    required  this.original,
+
+    required  this.title,
+
+    required  this.state,
+
+    required  this.promptVersion,
+
+    required  this.hasChange,
+
+    required  this.checksPassed,
+
+    required  this.files,
+
+    required  this.originalFiles,
+
+    required  this.overlap,
+
+    required  this.recall,
+
+     this.verdict,
+
+    required  this.turns,
+
+    required  this.originalTurns,
+
+    required  this.costUsd,
+
+    required  this.originalCostUsd,
+
+    required  this.createdAt,
+  });
+
+  @JsonKey(
+    
+    name: r'key',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final String key;
+
+
+
+  @JsonKey(
+    
+    name: r'original',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final String original;
+
+
+
+  @JsonKey(
+    
+    name: r'title',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final String title;
+
+
+
+  @JsonKey(
+    
+    name: r'state',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final TicketState state;
+
+
+
+  @JsonKey(
+    
+    name: r'promptVersion',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final String promptVersion;
+
+
+
+  @JsonKey(
+    
+    name: r'hasChange',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool hasChange;
+
+
+
+  @JsonKey(
+    
+    name: r'checksPassed',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool checksPassed;
+
+
+
+  @JsonKey(
+    
+    name: r'files',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final List<String> files;
+
+
+
+  @JsonKey(
+    
+    name: r'originalFiles',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final List<String> originalFiles;
+
+
+
+  @JsonKey(
+    
+    name: r'overlap',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final num overlap;
+
+
+
+  @JsonKey(
+    
+    name: r'recall',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final num recall;
+
+
+
+  @JsonKey(
+    
+    name: r'verdict',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final ReplayResultVerdictEnum? verdict;
+
+
+
+  @JsonKey(
+    
+    name: r'turns',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final int turns;
+
+
+
+  @JsonKey(
+    
+    name: r'originalTurns',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final int originalTurns;
+
+
+
+  @JsonKey(
+    
+    name: r'costUsd',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final num costUsd;
+
+
+
+  @JsonKey(
+    
+    name: r'originalCostUsd',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final num originalCostUsd;
+
+
+
+  @JsonKey(
+    
+    name: r'createdAt',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final DateTime createdAt;
+
+
+
+
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is ReplayResult &&
+      other.key == key &&
+      other.original == original &&
+      other.title == title &&
+      other.state == state &&
+      other.promptVersion == promptVersion &&
+      other.hasChange == hasChange &&
+      other.checksPassed == checksPassed &&
+      other.files == files &&
+      other.originalFiles == originalFiles &&
+      other.overlap == overlap &&
+      other.recall == recall &&
+      other.verdict == verdict &&
+      other.turns == turns &&
+      other.originalTurns == originalTurns &&
+      other.costUsd == costUsd &&
+      other.originalCostUsd == originalCostUsd &&
+      other.createdAt == createdAt;
+
+    @override
+    int get hashCode =>
+        key.hashCode +
+        original.hashCode +
+        title.hashCode +
+        state.hashCode +
+        promptVersion.hashCode +
+        hasChange.hashCode +
+        checksPassed.hashCode +
+        files.hashCode +
+        originalFiles.hashCode +
+        overlap.hashCode +
+        recall.hashCode +
+        verdict.hashCode +
+        turns.hashCode +
+        originalTurns.hashCode +
+        costUsd.hashCode +
+        originalCostUsd.hashCode +
+        createdAt.hashCode;
+
+  factory ReplayResult.fromJson(Map<String, dynamic> json) => _$ReplayResultFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ReplayResultToJson(this);
+
+  @override
+  String toString() {
+    return toJson().toString();
+  }
+
+}
+
+enum ReplayResultVerdictEnum {
+@JsonValue(r'looks_good')
+looksGood(r'looks_good'),
+@JsonValue(r'has_concerns')
+hasConcerns(r'has_concerns'),
+@JsonValue(r'needs_changes')
+needsChanges(r'needs_changes');
+
+const ReplayResultVerdictEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
+}
+
+

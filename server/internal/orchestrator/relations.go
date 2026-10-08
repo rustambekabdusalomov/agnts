@@ -44,8 +44,8 @@ type RelatedTicket struct {
 // relationCandidates loads the tickets an analysis of t compares itself
 // with: open tickets in its repository and unmerged done ones.
 func (o *Orchestrator) relationCandidates(ctx context.Context, t domain.Ticket) ([]Candidate, error) {
-	if t.RepoID == nil {
-		return nil, nil
+	if t.RepoID == nil || t.ReplayOf != "" {
+		return nil, nil // a replay is cut from the past: today's tickets are not its neighbours
 	}
 	return o.store.RelationCandidates(ctx, *t.RepoID, t.Key, relationMaxCandidates)
 }
@@ -426,10 +426,13 @@ func (o *Orchestrator) CheckMerges(ctx context.Context) {
 		return
 	}
 	repos := map[int64]domain.Repository{}
+	sys := ctx
 	for _, t := range ts {
 		if ctx.Err() != nil {
 			return
 		}
+		// Each ticket is checked with its workspace's git host token.
+		ctx := domain.WithWorkspace(sys, t.WorkspaceID)
 		repo, seen := repos[*t.RepoID]
 		if !seen {
 			if repo, err = o.store.RepositoryByID(ctx, *t.RepoID); err != nil {
@@ -460,6 +463,8 @@ func (o *Orchestrator) markMerged(ctx context.Context, t domain.Ticket, origin d
 	if err != nil {
 		return out, err
 	}
+	o.dropBranch(ctx, out)
+	o.countMerge(ctx, out)
 	o.trackerComment(ctx, t, CommentStatus, "The pull request was merged.")
 	o.trackerMove(ctx, t, TrackerMerged)
 	o.Wake() // tickets waiting for it may start
@@ -532,6 +537,9 @@ func (o *Orchestrator) checkFootprint(ctx context.Context, t domain.Ticket, run 
 // on both tickets. Whether the relation was predicted is logged for the
 // eval.
 func (o *Orchestrator) checkCollisions(ctx context.Context, t domain.Ticket, run *domain.Run, repo domain.Repository, files []domain.FileChange) {
+	if t.ReplayOf != "" {
+		return // never merged, so it collides with nothing
+	}
 	others, err := o.store.InFlightResults(ctx, repo.ID, t.Key)
 	if err != nil {
 		o.log.Warn("load unmerged changes", "ticket", t.Key, "err", err)
@@ -616,4 +624,20 @@ func (o *Orchestrator) checkDrift(ctx context.Context, t domain.Ticket, run *dom
 			Data:    map[string]any{"files": lines, "drift": true}})
 	}
 	return lines
+}
+
+// dropBranch deletes a finished ticket's local branch (merged or rejected):
+// the git host keeps its copy, and the mirror stops growing with refs.
+func (o *Orchestrator) dropBranch(ctx context.Context, t domain.Ticket) {
+	bc, ok := o.git.(BranchCleaner)
+	if !ok || t.Branch == "" || t.RepoID == nil {
+		return
+	}
+	repo, err := o.store.RepositoryByID(ctx, *t.RepoID)
+	if err != nil {
+		return
+	}
+	if err := bc.DeleteBranch(context.WithoutCancel(ctx), repo, t.Branch); err != nil {
+		o.log.Warn("delete finished branch", "ticket", t.Key, "branch", t.Branch, "err", err)
+	}
 }

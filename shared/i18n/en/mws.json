@@ -1,0 +1,8 @@
+{
+  "mws": {
+    "none": "You're not in a workspace yet. Create one or accept an invite in the web admin, then pull to refresh.",
+    "switched": "Switched to {name}",
+    "members": "{n, plural, one {# member} other {# members}}",
+    "suspended": "Suspended"
+  }
+}

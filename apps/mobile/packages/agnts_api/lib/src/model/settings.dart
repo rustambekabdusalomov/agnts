@@ -45,6 +45,12 @@ class Settings {
 
      this.visualCheck,
 
+     this.autoBrief,
+
+     this.selfReview,
+
+     this.reflect,
+
      this.egressAllow,
 
      this.suggestFollowUps,
@@ -198,6 +204,45 @@ class Settings {
 
 
 
+      /// Survey a repository without a brief when its first ticket is analysed, and refresh the brief after merges
+  @JsonKey(
+    
+    name: r'autoBrief',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? autoBrief;
+
+
+
+      /// Send blocker and major findings of agnts's code review back to the coder once per revision, before a person reviews
+  @JsonKey(
+    
+    name: r'selfReview',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? selfReview;
+
+
+
+      /// Learn from change requests and rejections: suggest rules, which apply once someone adopts them
+  @JsonKey(
+    
+    name: r'reflect',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? reflect;
+
+
+
       /// Hosts run containers may reach besides the built-in list, such as a staging API; .example.com matches subdomains
   @JsonKey(
     
@@ -291,6 +336,9 @@ class Settings {
       other.autoReview == autoReview &&
       other.autoPreview == autoPreview &&
       other.visualCheck == visualCheck &&
+      other.autoBrief == autoBrief &&
+      other.selfReview == selfReview &&
+      other.reflect == reflect &&
       other.egressAllow == egressAllow &&
       other.suggestFollowUps == suggestFollowUps &&
       other.pauseAbove == pauseAbove &&
@@ -311,6 +359,9 @@ class Settings {
         autoReview.hashCode +
         autoPreview.hashCode +
         visualCheck.hashCode +
+        autoBrief.hashCode +
+        selfReview.hashCode +
+        reflect.hashCode +
         egressAllow.hashCode +
         suggestFollowUps.hashCode +
         pauseAbove.hashCode +

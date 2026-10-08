@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, reactive, watch } from 'vue'
+import { computed, reactive, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Lesson } from '../../api/types'
+import RadioButton from '../form/RadioButton.vue'
 
 // The lesson's quiz: one pick per question, then right or wrong with why.
 const props = defineProps<{ quiz: Lesson['quiz'] }>()
@@ -19,30 +20,42 @@ function optClass(qi: number, oi: number) {
   if (oi === props.quiz[qi].answer) return 'right'
   return picked[qi] === oi ? 'wrong' : 'dim'
 }
+
+// A pick is final, so arrow keys only move focus here (natively they would
+// pick as they go); Space or a click picks.
+const group = useId()
+function moveFocus(e: KeyboardEvent) {
+  const step = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key]
+  if (!step) return
+  e.preventDefault()
+  const inputs = [...(e.currentTarget as HTMLElement).querySelectorAll<HTMLInputElement>('input:not(:disabled)')]
+  const i = inputs.indexOf(e.target as HTMLInputElement)
+  inputs[(i + step + inputs.length) % inputs.length]?.focus()
+}
 </script>
 
 <template>
   <ol class="quiz">
     <li v-for="(q, qi) in quiz" :key="qi" class="quiz-q">
       <p class="quiz-text">{{ q.question }}</p>
-      <div class="quiz-opts" role="radiogroup" :aria-label="q.question">
-        <button
+      <div class="quiz-opts" role="radiogroup" :aria-label="q.question" @keydown="moveFocus">
+        <RadioButton
           v-for="(o, oi) in q.options"
           :key="oi"
-          type="button"
+          v-model="picked[qi]"
           class="quiz-opt"
           :class="optClass(qi, oi)"
-          role="radio"
-          :aria-checked="picked[qi] === oi"
+          :name="`${group}-${qi}`"
+          :value="oi"
           :disabled="qi in picked"
-          @click="picked[qi] = oi"
+          :tone="picked[qi] === oi ? (oi === q.answer ? 'ok' : 'bad') : undefined"
         >
           {{ o }}
-        </button>
+        </RadioButton>
       </div>
       <p v-if="qi in picked" class="quiz-why" :class="picked[qi] === q.answer ? 'ok' : 'bad'" aria-live="polite">
         <strong>{{ picked[qi] === q.answer ? t('learn.correct') : t('learn.wrong') }}</strong>
-        <template v-if="q.explanation"> {{ q.explanation }}</template>
+        <template v-if="q.explanation">{{ " " + q.explanation }}</template>
       </p>
     </li>
   </ol>

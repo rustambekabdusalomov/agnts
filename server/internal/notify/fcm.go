@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -124,6 +125,9 @@ type Push struct {
 	Body   string
 	Ticket string // deep link target
 	Route  string // app route to open instead of the ticket, if set
+	// Workspace is the id of the workspace the ticket is in; the app
+	// switches to it before opening the link.
+	Workspace int64
 }
 
 // ErrUnregistered means the device token is no longer valid.
@@ -142,7 +146,7 @@ func (f *FCM) Send(ctx context.Context, token string, p Push) error {
 	msg := map[string]any{"message": map[string]any{
 		"token":        token,
 		"notification": map[string]string{"title": p.Title, "body": p.Body},
-		"data":         map[string]string{"ticket": p.Ticket, "route": route},
+		"data":         map[string]string{"ticket": p.Ticket, "route": route, "workspace": strconv.FormatInt(p.Workspace, 10)},
 		"android":      map[string]any{"priority": "high", "notification": map[string]string{"channel_id": "agnts"}},
 		"apns":         map[string]any{"payload": map[string]any{"aps": map[string]any{"sound": "default"}}},
 	}}

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"io"
 	"log/slog"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -17,29 +16,21 @@ import (
 	"agnts/internal/mcpserver"
 	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres"
+	"agnts/internal/store/postgres/pgtest"
 	"agnts/internal/usage"
 	"agnts/internal/vcs/github"
 )
 
+// testCtx acts in the workspace the test's MCP session acts in.
+var testCtx context.Context
+
 func setup(t *testing.T) (*mcp.ClientSession, *postgres.Agent) {
 	t.Helper()
-	url := os.Getenv("AGNTS_TEST_DATABASE_URL")
-	if url == "" {
-		t.Skip("AGNTS_TEST_DATABASE_URL not set")
-	}
-	ctx := context.Background()
-	pool, err := postgres.Open(ctx, url)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(pool.Close)
+	pool := pgtest.Open(t)
+	pgtest.Reset(t, pool)
+	ctx, _ := pgtest.Workspace(t, pool, "mcp")
+	testCtx = ctx
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
-	if err := postgres.Migrate(ctx, pool, "up", log); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := pool.Exec(ctx, `TRUNCATE tickets, runs, results, questions, events, repositories, pending_actions RESTART IDENTITY CASCADE`); err != nil {
-		t.Fatal(err)
-	}
 	store := postgres.NewAgent(pool)
 	settings := postgres.NewSettings(pool, domain.DefaultSettings())
 	ut := usage.New(postgres.NewUsage(pool), store, log)
@@ -134,7 +125,7 @@ func TestToolsAndAnnotations(t *testing.T) {
 
 func TestTwoStepApprove(t *testing.T) {
 	cs, store := setup(t)
-	ctx := context.Background()
+	ctx := testCtx
 
 	inbox, _ := call(t, cs, "get_inbox", nil)
 	if needs, _ := inbox["needs_you"].([]any); len(needs) != 1 {
@@ -184,7 +175,7 @@ func TestTwoStepApprove(t *testing.T) {
 
 func TestReportKinds(t *testing.T) {
 	cs, store := setup(t)
-	ctx := context.Background()
+	ctx := testCtx
 
 	// A plan ticket under review.
 	if _, err := store.CreateTicket(ctx, domain.Ticket{Key: "PAY-2", Source: domain.SourceJira, Title: "Plan expiry", Kind: domain.KindPlan,
@@ -253,7 +244,7 @@ func TestReportKinds(t *testing.T) {
 
 func TestImplementTicket(t *testing.T) {
 	cs, store := setup(t)
-	ctx := context.Background()
+	ctx := testCtx
 	if _, err := store.CreateTicket(ctx, domain.Ticket{Key: "PAY-3", Source: domain.SourceJira, Title: "Plan expiry", Kind: domain.KindPlan,
 		State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: "pr"}, domain.Event{Type: domain.EventTicketCreated}); err != nil {
 		t.Fatal(err)
@@ -307,7 +298,7 @@ func TestImplementTicket(t *testing.T) {
 
 func TestFollowUpTools(t *testing.T) {
 	cs, store := setup(t)
-	ctx := context.Background()
+	ctx := testCtx
 	tk, err := store.TicketByKey(ctx, "PAY-1")
 	if err != nil {
 		t.Fatal(err)

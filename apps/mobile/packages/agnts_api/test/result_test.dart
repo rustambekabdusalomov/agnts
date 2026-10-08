@@ -33,6 +33,18 @@ void main() {
       // TODO
     });
 
+    // Where the work departed from the chosen approach or the plan, and why
+    // List<String> deviations
+    test('to test the property `deviations`', () async {
+      // TODO
+    });
+
+    // Lines agnts's scan of the change flagged for the reviewer: skipped tests, removed assertions, silenced linters and the like
+    // List<RedFlag> redFlags
+    test('to test the property `redFlags`', () async {
+      // TODO
+    });
+
     // DateTime createdAt
     test('to test the property `createdAt`', () async {
       // TODO

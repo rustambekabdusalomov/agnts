@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:agnts_api/src/model/rule_kind.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -27,6 +28,8 @@ class RuleInput {
      this.repoId,
 
      this.enabled = true,
+
+     this.kind,
   });
 
   @JsonKey(
@@ -78,6 +81,18 @@ class RuleInput {
 
 
 
+  @JsonKey(
+    
+    name: r'kind',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final RuleKind? kind;
+
+
+
 
 
     @override
@@ -85,14 +100,16 @@ class RuleInput {
       other.title == title &&
       other.body == body &&
       other.repoId == repoId &&
-      other.enabled == enabled;
+      other.enabled == enabled &&
+      other.kind == kind;
 
     @override
     int get hashCode =>
         title.hashCode +
         body.hashCode +
         repoId.hashCode +
-        enabled.hashCode;
+        enabled.hashCode +
+        kind.hashCode;
 
   factory RuleInput.fromJson(Map<String, dynamic> json) => _$RuleInputFromJson(json);
 

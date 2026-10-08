@@ -17,6 +17,7 @@ import (
 )
 
 type fakeTickets struct {
+	lastWS            int64 // the workspace the last List acted in
 	lastPost          bool
 	lastKind          string
 	lastTask          orchestrator.TaskInput
@@ -141,7 +142,12 @@ func (f *fakeTickets) ticket(key string, s domain.TicketState) (domain.Ticket, e
 	return domain.Ticket{Key: key, Title: "t", State: s, Source: domain.SourceJira}, nil
 }
 
-func (f *fakeTickets) List(_ context.Context, fl orchestrator.TicketFilter) ([]domain.Ticket, error) {
+func (f *fakeTickets) SetMember(_ context.Context, key string, _ int64, _ string, _ domain.Origin) (domain.Ticket, error) {
+	return f.ticket(key, domain.StateNew)
+}
+
+func (f *fakeTickets) List(ctx context.Context, fl orchestrator.TicketFilter) ([]domain.Ticket, error) {
+	f.lastWS = domain.WorkspaceOf(ctx)
 	t, _ := f.ticket("PAY-1", domain.StateNew)
 	if len(fl.States) == 1 && fl.States[0] == domain.StateDone {
 		return nil, nil
@@ -262,6 +268,15 @@ func (f *fakeTickets) OpenShot(_ context.Context, key string, runID int64, shotI
 		return nil, domain.ErrNotFound
 	}
 	return io.NopCloser(strings.NewReader("\x89PNG fake")), nil
+}
+
+func (f *fakeTickets) Replay(_ context.Context, key string, o domain.Origin) (domain.Ticket, error) {
+	f.lastOrigin = o
+	return domain.Ticket{Key: key + "-R", Source: domain.SourceLocal, ReplayOf: key}, nil
+}
+
+func (f *fakeTickets) ReplayReport(context.Context) (orchestrator.ReplayReport, error) {
+	return orchestrator.ReplayReport{}, nil
 }
 
 func (f *fakeTickets) Learn(_ context.Context, key string, o domain.Origin) (domain.Ticket, error) {
@@ -414,6 +429,8 @@ func TestTicketEndpoints(t *testing.T) {
 		{"POST", "/api/tickets/PAY-1/relations/3/accept", "", 200, `"id":3`},
 		{"POST", "/api/tickets/PAY-1/relations/9/dismiss", "", 404, `not_found`},
 		{"POST", "/api/tickets/PAY-1/merged", "", 200, `"state":"done"`},
+		{"POST", "/api/tickets/PAY-1/replay", "", 200, `"replayOf":"PAY-1"`},
+		{"GET", "/api/eval/replays", "", 200, `{"replays":[],"versions":[]}`},
 	}
 	for _, c := range cases {
 		rec := h.do(c.method, c.path, c.body, cookie)

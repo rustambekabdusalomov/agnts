@@ -1,0 +1,13 @@
+{
+  "redFlags": {
+    "title": "{n} ta xavfli belgi",
+    "sub": "agnts o‘zgarishni tekshirib, ushbu qatorlarni topdi. Ular ko‘pincha tekshiruvlar noto‘g‘ri yo‘l bilan o‘tkazilganini bildiradi; agnts ko‘rib chiqishi har birini tekshiradi.",
+    "kind_skipped_test": "O‘tkazib yuborilgan yoki ajratilgan test",
+    "kind_removed_assertion": "Tekshiruvlar olib tashlangan",
+    "kind_deleted_test": "Test fayli o‘chirilgan",
+    "kind_silenced_lint": "Linter o‘chirilgan",
+    "kind_swallowed_error": "Xato yutib yuborilgan",
+    "kind_todo": "TODO qoldirilgan",
+    "kind_new_dependency": "Yangi bog‘liqlik"
+  }
+}

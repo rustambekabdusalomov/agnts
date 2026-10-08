@@ -63,7 +63,7 @@ const empty = computed(() => {
       <SegButtons v-if="!ticket" v-model="view" :options="views" :label="t('learn.viewLabel')" />
       <span v-else style="display: flex; gap: 8px; align-items: center">
         <span class="src">{{ t('learn.fromTicket', { key: ticket }) }}</span>
-        <RouterLink class="btn btn-s" to="/learn">{{ t('learn.back') }}</RouterLink>
+        <RouterLink class="btn btn-s" :to="{ name: 'learn' }">{{ t('learn.back') }}</RouterLink>
       </span>
       <InputSelect v-if="(repos.data.value?.length ?? 0) > 1" v-model="repo" :options="repoOptions" :label="t('learn.repoLabel')" style="width: 240px" />
     </div>
@@ -73,7 +73,7 @@ const empty = computed(() => {
     <p v-else-if="!rows.length" class="empty">{{ empty }}</p>
     <ul v-else class="lesson-list">
       <li v-for="l in rows" :key="l.id">
-        <RouterLink class="lesson-row" :to="`/learn/${l.id}`">
+        <RouterLink class="lesson-row" :to="{ name: 'lesson', params: { id: l.id } }">
           <div class="lesson-row-top">
             <span class="ttitle">{{ l.title }}</span>
             <span v-if="!l.learnedAt" class="badge b-info">{{ t('learn.newBadge') }}</span>

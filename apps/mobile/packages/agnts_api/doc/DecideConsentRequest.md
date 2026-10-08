@@ -15,6 +15,7 @@ Name | Type | Description | Notes
 **state** | **String** |  | [optional] 
 **resource** | **String** |  | [optional] 
 **approve** | **bool** |  | 
+**workspace** | **String** | The slug of the workspace Claude may act in (required to approve) | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

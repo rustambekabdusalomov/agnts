@@ -19,7 +19,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
+	"agnts/internal/accounts"
 	"agnts/internal/auth"
+	"agnts/internal/domain"
 	"agnts/internal/httpapi/gen"
 )
 
@@ -42,36 +44,62 @@ type Options struct {
 	Devices Devices      // push registrations
 	Lessons Lessons      // Learn pages; nil answers 501
 	Rules   Rules        // Rules page; nil answers 501
+	Briefs  Briefs       // repository briefs; nil answers 501
 	OAuth   OAuth        // MCP connector authorization; nil disables /mcp
 	MCP     http.Handler // the MCP streamable HTTP handler
 	DB      Pinger
-	// Webhooks are mounted at /webhooks/{name}. They authenticate with
+	// Webhooks are mounted at /webhooks/{name}/{hook id} (and the URL
+	// without a hook id, from before workspaces). They authenticate with
 	// provider signatures, not sessions.
-	Webhooks     map[string]http.Handler
+	Webhooks map[string]http.Handler
+	// Payments are the payment providers' callbacks at /webhooks/{name},
+	// for the whole platform (they find their payment by id).
+	Payments     map[string]http.Handler
 	Log          *slog.Logger
 	PublicURL    *url.URL
 	CookieSecure bool
 	WebDir       string // built admin panel; empty disables static serving
 	Version      string
 	Commit       string
+
+	// Workspaces resolves the workspace in a request's path and the
+	// member's role in it.
+	Workspaces WorkspaceStore
+	// Users reads accounts (names in lists, the Admin's user list).
+	Users UserStore
+	// Accounts runs sign-up, invites and members; nil answers 501.
+	Accounts *accounts.Service
+	// Claude manages Claude connections; nil answers 501.
+	Claude ClaudeService
+	// Queue reports the queue and the server's capacity; nil answers 501.
+	Queue QueueReporter
+	// Billing runs plans, slots and credits; nil answers 501.
+	Billing BillingService
+	// EventLog records workspace changes.
+	EventLog interface {
+		AppendEvent(ctx context.Context, ev domain.Event) error
+	}
+	// Cloud is the hosted product (stricter rules for new accounts).
+	Cloud bool
 }
 
 // Server implements gen.ServerInterface.
 type Server struct {
 	opt          Options
 	loginLimiter *ipLimiter
-	public       map[string]bool
+	mailLimiter  *ipLimiter
+	ops          map[string]opInfo
 }
 
 var _ gen.ServerInterface = (*Server)(nil)
 
 // NewHandler returns the root HTTP handler.
 func NewHandler(opt Options) (http.Handler, error) {
-	public, err := publicRoutes()
+	ops, err := operations()
 	if err != nil {
 		return nil, fmt.Errorf("httpapi: load embedded spec: %w", err)
 	}
-	s := &Server{opt: opt, loginLimiter: newIPLimiter(5, time.Minute), public: public}
+	s := &Server{opt: opt, loginLimiter: newIPLimiter(5, time.Minute), mailLimiter: newIPLimiter(5, 10*time.Minute), ops: ops}
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
@@ -84,23 +112,39 @@ func NewHandler(opt Options) (http.Handler, error) {
 		s.mountMCP(r)
 	}
 	for name, h := range opt.Webhooks {
+		// Each workspace has its own URL; the one without a hook id is the
+		// URL from before workspaces and goes to the default workspace.
+		r.With(middleware.RequestSize(maxBodyBytes), s.webhookWorkspace).Handle("/webhooks/"+name+"/{hook}", h)
+		r.With(middleware.RequestSize(maxBodyBytes), s.webhookWorkspace).Handle("/webhooks/"+name, h)
+	}
+
+	for name, h := range opt.Payments {
 		r.With(middleware.RequestSize(maxBodyBytes)).Handle("/webhooks/"+name, h)
 	}
 
+	badRequest := func(w http.ResponseWriter, _ *http.Request, err error) {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+	}
+	notFound := func(w http.ResponseWriter, _ *http.Request) {
+		writeError(w, http.StatusNotFound, "not_found", "no such endpoint")
+	}
 	r.Route("/api", func(api chi.Router) {
 		api.Use(bodyLimit)
 		api.Use(s.checkOrigin)
 		api.Use(middleware.NoCache)
+		// Workspace operations under /api/w/{ws}/...; the same operations
+		// at /api/... act in the X-Workspace header's workspace, or the
+		// last one the person opened (clients from before workspaces).
+		api.Route("/w/{ws}", func(wr chi.Router) {
+			gen.HandlerWithOptions(s, gen.ChiServerOptions{
+				BaseRouter: wr, Middlewares: []gen.MiddlewareFunc{s.authorize}, ErrorHandlerFunc: badRequest,
+			})
+			wr.NotFound(notFound)
+		})
 		gen.HandlerWithOptions(s, gen.ChiServerOptions{
-			BaseRouter:  api,
-			Middlewares: []gen.MiddlewareFunc{s.requireAuth},
-			ErrorHandlerFunc: func(w http.ResponseWriter, _ *http.Request, err error) {
-				writeError(w, http.StatusBadRequest, "bad_request", err.Error())
-			},
+			BaseRouter: api, Middlewares: []gen.MiddlewareFunc{s.authorize}, ErrorHandlerFunc: badRequest,
 		})
-		api.NotFound(func(w http.ResponseWriter, _ *http.Request) {
-			writeError(w, http.StatusNotFound, "not_found", "no such endpoint")
-		})
+		api.NotFound(notFound)
 	})
 
 	if opt.WebDir != "" {
@@ -114,7 +158,7 @@ func NewHandler(opt Options) (http.Handler, error) {
 func bodyLimit(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		limit := int64(maxBodyBytes)
-		if r.Method == http.MethodPost && r.URL.Path == "/api/attachments" {
+		if r.Method == http.MethodPost && strings.HasSuffix(r.URL.Path, "/attachments") {
 			limit = maxUploadBytes
 		}
 		r.Body = http.MaxBytesReader(w, r.Body, limit)

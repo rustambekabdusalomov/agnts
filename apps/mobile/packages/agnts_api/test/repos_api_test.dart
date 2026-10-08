@@ -7,6 +7,13 @@ void main() {
   final instance = AgntsApi().getReposApi();
 
   group(ReposApi, () {
+    // Make the draft the brief that runs read
+    //
+    //Future<RepoBrief> approveRepoBrief(int id) async
+    test('test approveRepoBrief', () async {
+      // TODO
+    });
+
     // Archive the repository; it keeps its history but takes no new tickets or tasks
     //
     //Future<Repository> archiveRepo(int id) async
@@ -35,8 +42,22 @@ void main() {
       // TODO
     });
 
+    // Drop the draft a survey wrote
+    //
+    //Future<RepoBrief> discardRepoBriefDraft(int id) async
+    test('test discardRepoBriefDraft', () async {
+      // TODO
+    });
+
     //Future<Repository> getRepo(int id) async
     test('test getRepo', () async {
+      // TODO
+    });
+
+    // What agnts knows about how the repository works; empty and idle before the first survey
+    //
+    //Future<RepoBrief> getRepoBrief(int id) async
+    test('test getRepoBrief', () async {
       // TODO
     });
 
@@ -84,6 +105,20 @@ void main() {
 
     //Future<List<Repository>> listRepos() async
     test('test listRepos', () async {
+      // TODO
+    });
+
+    // Replace the approved brief with your text; empty text removes it
+    //
+    //Future<RepoBrief> saveRepoBrief(int id, RepoBriefInput repoBriefInput) async
+    test('test saveRepoBrief', () async {
+      // TODO
+    });
+
+    // Have Claude survey the repository and write a draft brief (an update when it has one)
+    //
+    //Future<RepoBrief> surveyRepoBrief(int id) async
+    test('test surveyRepoBrief', () async {
       // TODO
     });
 

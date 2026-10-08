@@ -9,6 +9,8 @@ part of 'analytics.dart';
 abstract class _$AnalyticsCWProxy {
   Analytics days(int days);
 
+  Analytics quality(List<QualityStat> quality);
+
   Analytics current(PeriodStats current);
 
   Analytics previous(PeriodStats previous);
@@ -37,6 +39,7 @@ abstract class _$AnalyticsCWProxy {
   /// ````
   Analytics call({
     int days,
+    List<QualityStat> quality,
     PeriodStats current,
     PeriodStats previous,
     List<DayStat> perDay,
@@ -58,6 +61,9 @@ class _$AnalyticsCWProxyImpl implements _$AnalyticsCWProxy {
 
   @override
   Analytics days(int days) => this(days: days);
+
+  @override
+  Analytics quality(List<QualityStat> quality) => this(quality: quality);
 
   @override
   Analytics current(PeriodStats current) => this(current: current);
@@ -100,6 +106,7 @@ class _$AnalyticsCWProxyImpl implements _$AnalyticsCWProxy {
   /// ````
   Analytics call({
     Object? days = const $CopyWithPlaceholder(),
+    Object? quality = const $CopyWithPlaceholder(),
     Object? current = const $CopyWithPlaceholder(),
     Object? previous = const $CopyWithPlaceholder(),
     Object? perDay = const $CopyWithPlaceholder(),
@@ -116,6 +123,10 @@ class _$AnalyticsCWProxyImpl implements _$AnalyticsCWProxy {
           ? _value.days
           // ignore: cast_nullable_to_non_nullable
           : days as int,
+      quality: quality == const $CopyWithPlaceholder()
+          ? _value.quality
+          // ignore: cast_nullable_to_non_nullable
+          : quality as List<QualityStat>,
       current: current == const $CopyWithPlaceholder()
           ? _value.current
           // ignore: cast_nullable_to_non_nullable
@@ -177,6 +188,7 @@ Analytics _$AnalyticsFromJson(
     json,
     requiredKeys: const [
       'days',
+      'quality',
       'current',
       'previous',
       'perDay',
@@ -191,6 +203,12 @@ Analytics _$AnalyticsFromJson(
   );
   final val = Analytics(
     days: $checkedConvert('days', (v) => (v as num).toInt()),
+    quality: $checkedConvert(
+      'quality',
+      (v) => (v as List<dynamic>)
+          .map((e) => QualityStat.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    ),
     current: $checkedConvert(
       'current',
       (v) => PeriodStats.fromJson(v as Map<String, dynamic>),
@@ -243,6 +261,7 @@ Analytics _$AnalyticsFromJson(
 
 Map<String, dynamic> _$AnalyticsToJson(Analytics instance) => <String, dynamic>{
   'days': instance.days,
+  'quality': instance.quality.map((e) => e.toJson()).toList(),
   'current': instance.current.toJson(),
   'previous': instance.previous.toJson(),
   'perDay': instance.perDay.map((e) => e.toJson()).toList(),

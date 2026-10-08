@@ -75,6 +75,7 @@
     "stage": "Stage",
     "status": "Status",
     "duration": "Duration",
-    "openRun": "Open on the git host"
+    "openRun": "Open on the git host",
+    "brief": "Brief"
   }
 }

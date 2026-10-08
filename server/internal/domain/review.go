@@ -29,7 +29,7 @@ var FindingSeverities = []string{"blocker", "major", "minor", "nit"}
 
 // FindingCategories say what a finding is about.
 var FindingCategories = []string{
-	"correctness", "security", "performance", "tests", "rules", "maintainability", "accuracy", "completeness", "other",
+	"correctness", "security", "performance", "tests", "rules", "architecture", "scope", "maintainability", "accuracy", "completeness", "other",
 }
 
 // MaxFindings caps what one review keeps, most severe first.

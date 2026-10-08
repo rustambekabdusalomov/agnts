@@ -20,6 +20,8 @@
     "consentWhat": "U tiketlar, loglar, limitlar va repozitoriylarni oʻqiy oladi hamda amallarni tayyorlaydi. Har bir amalni chatda tasdiqlamaguningizcha hech narsa oʻzgarmaydi. Deploy, sozlamalar va integratsiyalar unga ochiq emas.",
     "consentRedirect": "Siz {host} ga qaytasiz.",
     "allow": "Ruxsat berish",
-    "deny": "Rad etish"
+    "deny": "Rad etish",
+    "pickWorkspace": "Ish maydoni",
+    "pickWorkspaceHelp": "Claude shu ish maydonida sizning nomingizdan ishlaydi."
   }
 }

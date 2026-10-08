@@ -192,7 +192,7 @@ func (c *Client) resolveItem(ctx context.Context, cfg Config, projectID string, 
 		title: strings.TrimSpace(w.Name), desc: textFromHTML(w.DescriptionHTML), priority: w.Priority, state: w.stateRef(),
 		gone: w.ArchivedAt != nil || w.DeletedAt != nil,
 	}
-	c.remember(it.key, it.ref)
+	c.remember(cfg, it.key, it.ref)
 
 	if it.state.Group == "" && it.state.ID != "" {
 		if sts, err := c.loadStates(ctx, cfg, pid); err == nil {
@@ -266,7 +266,7 @@ type relRef struct {
 // keyOf returns the key (WEB-7) of a work item by ids.
 func (c *Client) keyOf(ctx context.Context, cfg Config, projectID, id string) (string, error) {
 	c.mu.Lock()
-	for k, r := range c.refs {
+	for k, r := range c.cache(cfg).refs {
 		if r.id == id {
 			c.mu.Unlock()
 			return k, nil
@@ -285,7 +285,7 @@ func (c *Client) keyOf(ctx context.Context, cfg Config, projectID, id string) (s
 		return "", err
 	}
 	key := strings.ToUpper(ident) + "-" + strconv.Itoa(w.SequenceID)
-	c.remember(key, ref{project: projectID, id: id})
+	c.remember(cfg, key, ref{project: projectID, id: id})
 	return key, nil
 }
 
@@ -431,7 +431,7 @@ func (c *Client) CreateIssue(ctx context.Context, in orchestrator.NewIssue) (str
 		return "", errors.New("plane created the work item but returned no id")
 	}
 	key := strings.ToUpper(in.Project) + "-" + strconv.Itoa(w.SequenceID)
-	c.remember(key, ref{project: pid, id: w.ID})
+	c.remember(cfg, key, ref{project: pid, id: w.ID})
 	return key, nil
 }
 
@@ -483,7 +483,7 @@ func (c *Client) ensureLabel(ctx context.Context, cfg Config, projectID, name st
 		return label{}, fmt.Errorf("create label %s: %w", name, err)
 	}
 	c.mu.Lock()
-	delete(c.labels, projectID)
+	delete(c.cache(cfg).labels, projectID)
 	c.mu.Unlock()
 	return lb, nil
 }

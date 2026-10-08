@@ -6,6 +6,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { api, unwrap } from '../api/client'
 import PageHeader from '../components/PageHeader.vue'
 import BranchesTab from '../components/repo/BranchesTab.vue'
+import BriefTab from '../components/repo/BriefTab.vue'
 import CommitsTab from '../components/repo/CommitsTab.vue'
 import MembersTab from '../components/repo/MembersTab.vue'
 import PipelinesTab from '../components/repo/PipelinesTab.vue'
@@ -21,7 +22,7 @@ const route = useRoute()
 const router = useRouter()
 const qc = useQueryClient()
 const id = computed(() => Number(route.params.id))
-const TABS = ['branches', 'commits', 'pipelines', 'members'] as const
+const TABS = ['branches', 'commits', 'pipelines', 'members', 'brief'] as const
 type Tab = (typeof TABS)[number]
 const tab = computed<Tab>(() => (TABS.includes(route.query.tab as Tab) ? (route.query.tab as Tab) : 'branches'))
 const editOpen = ref(false)
@@ -40,7 +41,7 @@ const envs = useQuery({ queryKey: computed(() => ['repo', id.value, 'environment
 
 let timer: ReturnType<typeof setTimeout> | undefined
 useLive((e) => {
-  if (e.type !== 'pipeline' && e.type !== 'pr_merged' && e.type !== 'deploy') return
+  if (e.type !== 'pipeline' && e.type !== 'pr_merged' && e.type !== 'deploy' && e.type !== 'brief_changed') return
   clearTimeout(timer)
   timer = setTimeout(() => void qc.invalidateQueries({ queryKey: ['repo', id.value] }), 1500)
 })
@@ -69,7 +70,7 @@ function setTab(v: Tab) {
 </script>
 
 <template>
-  <RouterLink class="back-btn" to="/repos"><HiIcon name="back" />{{ t('repo.back') }}</RouterLink>
+  <RouterLink class="back-btn" :to="{ name: 'repos' }"><HiIcon name="back" />{{ t('repo.back') }}</RouterLink>
   <p v-if="repo.isPending.value" class="hint">{{ t('common.loading') }}</p>
   <p v-else-if="repo.isError.value" class="empty">{{ t('repo.notFound') }}</p>
   <template v-else-if="repo.data.value">
@@ -124,7 +125,8 @@ function setTab(v: Tab) {
     <BranchesTab v-if="tab === 'branches'" :repo-id="id" :default-branch="repo.data.value.defaultBranch" />
     <CommitsTab v-else-if="tab === 'commits'" :repo-id="id" />
     <PipelinesTab v-else-if="tab === 'pipelines'" :repo="repo.data.value" />
-    <MembersTab v-else :repo="repo.data.value" />
+    <MembersTab v-else-if="tab === 'members'" :repo="repo.data.value" />
+    <BriefTab v-else :repo-id="id" />
 
     <RepoDrawer v-model="editOpen" :repo="repo.data.value" @saved="() => qc.invalidateQueries({ queryKey: ['repos', id] })" />
   </template>

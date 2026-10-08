@@ -25,14 +25,14 @@ type memShots struct {
 
 func shotKey(key string, run int64, id string) string { return fmt.Sprintf("%s/%d/%s", key, run, id) }
 
-func (s *memShots) Save(key string, run int64, id string, png []byte) error {
+func (s *memShots) Save(_ int64, key string, run int64, id string, png []byte) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.m[shotKey(key, run, id)] = png
 	return nil
 }
 
-func (s *memShots) Open(key string, run int64, id string) (io.ReadCloser, error) {
+func (s *memShots) Open(_ int64, key string, run int64, id string) (io.ReadCloser, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	b, ok := s.m[shotKey(key, run, id)]
@@ -42,7 +42,7 @@ func (s *memShots) Open(key string, run int64, id string) (io.ReadCloser, error)
 	return io.NopCloser(bytes.NewReader(b)), nil
 }
 
-func (s *memShots) Prune(key string, keep []int64) error {
+func (s *memShots) Prune(_ int64, key string, keep []int64) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	for k := range s.m {
@@ -59,7 +59,7 @@ func (s *memShots) Prune(key string, keep []int64) error {
 	return nil
 }
 
-func (s *memShots) Tickets() ([]string, error) { return nil, nil }
+func (s *memShots) Tickets() ([]domain.TicketRef, error) { return nil, nil }
 
 func (s *memShots) count(key string) int {
 	s.mu.Lock()

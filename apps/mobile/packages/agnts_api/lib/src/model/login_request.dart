@@ -24,11 +24,12 @@ class LoginRequest {
 
     required  this.password,
 
-    required  this.code,
+     this.code,
 
     required  this.client,
   });
 
+      /// Username or email
   @JsonKey(
     
     name: r'username',
@@ -53,16 +54,16 @@ class LoginRequest {
 
 
 
-      /// Six-digit code from the authenticator app
+      /// Six-digit code from the authenticator app, when two-factor sign-in is on
   @JsonKey(
     
     name: r'code',
-    required: true,
+    required: false,
     includeIfNull: false,
   )
 
 
-  final String code;
+  final String? code;
 
 
 

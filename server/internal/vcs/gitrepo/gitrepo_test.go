@@ -396,18 +396,38 @@ func TestImportsOldCheckouts(t *testing.T) {
 }
 
 func TestHomes(t *testing.T) {
-	h := NewHomes(t.TempDir())
-	if b, err := h.Load("PAY-1"); b != nil || err != nil {
-		t.Fatalf("empty load: %v %v", b, err)
-	}
-	if err := h.Save("PAY-1", []byte("tar")); err != nil {
+	dir := t.TempDir()
+	// A home from before workspaces moves into the migrated workspace.
+	if err := os.WriteFile(filepath.Join(dir, "OLD-1.tar"), []byte("old"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	if b, _ := h.Load("PAY-1"); string(b) != "tar" {
+	h := NewHomes(dir)
+	if err := h.AdoptLegacy(1); err != nil {
+		t.Fatal(err)
+	}
+	if b, _ := h.Load(1, "OLD-1"); string(b) != "old" {
+		t.Fatalf("adopted home: %q", b)
+	}
+	if b, err := h.Load(2, "PAY-1"); b != nil || err != nil {
+		t.Fatalf("empty load: %v %v", b, err)
+	}
+	if err := h.Save(2, "PAY-1", []byte("tar")); err != nil {
+		t.Fatal(err)
+	}
+	if b, _ := h.Load(2, "PAY-1"); string(b) != "tar" {
 		t.Fatal("round trip")
 	}
-	if err := h.Save("../escape", []byte("x")); err == nil {
+	if b, _ := h.Load(3, "PAY-1"); b != nil {
+		t.Fatal("another workspace loaded the home")
+	}
+	if err := h.Save(2, "../escape", []byte("x")); err == nil {
 		t.Fatal("unsafe key accepted")
+	}
+	if err := h.Delete(2); err != nil {
+		t.Fatal(err)
+	}
+	if b, _ := h.Load(2, "PAY-1"); b != nil {
+		t.Fatal("deleted workspace's home kept")
 	}
 }
 
@@ -586,4 +606,65 @@ func TestTreeCache(t *testing.T) {
 func hasKey(t map[string][]byte, k string) bool {
 	_, ok := t[k]
 	return ok
+}
+
+func TestWorkspaceLayoutAdoptAndDeleteBranch(t *testing.T) {
+	ctx := context.Background()
+	bare := upstream(t)
+	g := newRepos(t)
+	// Before workspaces the mirror lived at <dir>/<name>.
+	legacy := domain.Repository{Name: "demo", CloneURL: bare, DefaultBranch: "main", Provider: "github"}
+	if err := os.MkdirAll(g.legacyDir(legacy), 0o750); err != nil {
+		t.Fatal(err)
+	}
+	old := domain.Repository{ID: 1, Name: "demo", CloneURL: bare, DefaultBranch: "main", Provider: "github"}
+	if err := g.Prepare(ctx, domain.Repository{ID: 99, WorkspaceID: 9, Name: "demo", CloneURL: bare, DefaultBranch: "main", Provider: "github"}, "main"); err != nil {
+		t.Fatal(err)
+	}
+	// Prepare a mirror under the legacy path by hand: the old layout.
+	if err := os.Rename(g.repoDir(domain.Repository{ID: 99, WorkspaceID: 9}), g.legacyDir(legacy)); err != nil {
+		_ = os.RemoveAll(g.legacyDir(legacy))
+		if err := os.Rename(g.repoDir(domain.Repository{ID: 99, WorkspaceID: 9}), g.legacyDir(legacy)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	moved := old
+	moved.WorkspaceID = 3
+	if err := g.AdoptLegacy([]domain.Repository{moved}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(g.legacyDir(legacy)); !os.IsNotExist(err) {
+		t.Fatalf("legacy folder kept: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(g.repoDir(moved), mirrorName)); err != nil {
+		t.Fatalf("mirror not at its workspace path: %v", err)
+	}
+	// Two workspaces' repositories with the same name live apart.
+	other := domain.Repository{ID: 2, WorkspaceID: 4, Name: "demo", CloneURL: bare, DefaultBranch: "main", Provider: "github"}
+	if g.repoDir(other) == g.repoDir(moved) {
+		t.Fatal("two workspaces share a folder")
+	}
+
+	if err := g.Prepare(ctx, moved, "agnts/PAY-1"); err != nil {
+		t.Fatal(err)
+	}
+	branches, _ := g.LocalBranches(moved)
+	if len(branches) != 2 {
+		t.Fatalf("branches before delete: %+v", branches)
+	}
+	if err := g.DeleteBranch(ctx, moved, "agnts/PAY-1"); err != nil {
+		t.Fatal(err)
+	}
+	if err := g.DeleteBranch(ctx, moved, "main"); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := g.LocalBranches(moved); len(got) != 1 || got[0].Name != "main" {
+		t.Fatalf("branches after delete (the default branch stays): %+v", got)
+	}
+	if err := g.RemoveWorkspace(3); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(g.repoDir(moved)); !os.IsNotExist(err) {
+		t.Fatal("workspace folder kept")
+	}
 }

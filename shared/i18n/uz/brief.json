@@ -1,0 +1,30 @@
+{
+  "brief": {
+    "title": "Repozitoriy tavsifi",
+    "sub": "Bu kod bazasi qanday ishlaydi: arxitektura, odatiy o‘zgarishlar uchun retseptlar, namuna fayllar, kelishuvlar va tuzoqlar. Bu repozitoriy tiketlarining har bir ishga tushirilishi uni o‘qiydi, shunda agnts jamoangiz qanday qilsa, shunday quradi.",
+    "survey": "O‘rganish",
+    "update": "Yangilash",
+    "edit": "Tahrirlash",
+    "write": "O‘zingiz yozish",
+    "save": "Tavsifni saqlash",
+    "cancel": "Bekor qilish",
+    "editHint": "Markdown. Saqlaganingizni bundan keyin ishga tushirishlar o‘qiydi; tavsif bermaslik uchun bo‘sh qoldiring.",
+    "none": "Hali tavsif yo‘q. Claude qoralama yozishi uchun repozitoriyni o‘rganing yoki o‘zingiz yozing.",
+    "surveying": "Claude repozitoriyni o‘rganmoqda. Qoralama tasdiqlashingiz uchun shu yerda paydo bo‘ladi.",
+    "failed": "Oxirgi o‘rganish muvaffaqiyatsiz tugadi: {error}",
+    "approved": "Tasdiqlangan: {time}",
+    "atCommit": "{sha} kommitida",
+    "merges": "keyingi yangilanishgacha {of} ta birlashtirishdan {n} tasi",
+    "draftTitle": "O‘rganishdan keyingi qoralama",
+    "draftSub": "{time} yozilgan. Ishga tushirishlar uni faqat siz tasdiqlaganingizdan keyin o‘qiydi.",
+    "approve": "Tasdiqlash",
+    "discard": "Qoralamani o‘chirish",
+    "discardBody": "Qoralama o‘chiriladi; tasdiqlangan tavsif o‘zgarmaydi.",
+    "status_pending": "O‘rganish navbatda",
+    "status_surveying": "O‘rganilmoqda…",
+    "done_survey": "O‘rganish navbatga qo‘yildi",
+    "done_approve": "Tavsif tasdiqlandi: yangi ishga tushirishlar uni o‘qiydi",
+    "done_discard": "Qoralama o‘chirildi",
+    "done_save": "Tavsif saqlandi"
+  }
+}

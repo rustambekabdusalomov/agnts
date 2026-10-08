@@ -10,6 +10,7 @@ import '../../l10n/app_localizations.dart';
 import '../../theme.dart';
 import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
+import '../../widgets/workspace.dart';
 import '../tickets/tickets_screen.dart';
 
 /// The Home tab (scrHome): greeting and date, four KPI tiles, what waits on
@@ -22,17 +23,31 @@ class HomeScreen extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final user = ref.watch(sessionProvider).value?.username ?? '';
     final dash = ref.watch(dashboardProvider);
+    // Not in any workspace yet: nothing to show until they join or create one.
+    final none = ref.watch(meProvider).value?.workspaces?.isEmpty ?? false;
     return Scaffold(
       body: SafeArea(
         bottom: false,
         child: Column(children: [
-          PageHeader(title: user.isEmpty ? l.mobileHome : _greeting(l, user), sub: _today(context)),
+          PageHeader(title: user.isEmpty ? l.mobileHome : _greeting(l, user), sub: _today(context), actions: const [WorkspaceChip()]),
           Expanded(
-            child: AsyncBody<Dashboard>(
-              value: dash,
-              onRefresh: () => ref.refresh(dashboardProvider.future),
-              builder: (d) => _HomeBody(d),
-            ),
+            child: none
+                ? RefreshIndicator(
+                    onRefresh: () => ref.refresh(meProvider.future),
+                    child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      children: [HelpBox(l.mwsNone)],
+                    ),
+                  )
+                : AsyncBody<Dashboard>(
+                    value: dash,
+                    onRefresh: () {
+                      ref.invalidate(queueProvider);
+                      return ref.refresh(dashboardProvider.future);
+                    },
+                    builder: (d) => _HomeBody(d),
+                  ),
           ),
         ]),
       ),
@@ -57,7 +72,7 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-class _HomeBody extends StatelessWidget {
+class _HomeBody extends ConsumerWidget {
   const _HomeBody(this.d);
   final Dashboard d;
 
@@ -66,10 +81,11 @@ class _HomeBody extends StatelessWidget {
       context.go(Uri(path: '/tickets', queryParameters: {'filter': filter, 'at': '${DateTime.now().millisecondsSinceEpoch}'}).toString());
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final c = Agnts.of(context);
     final n = d.counts;
+    final q = ref.watch(queueProvider).value;
     final session = d.usage.fiveHour.utilization;
     final sessionTone = session == null ? Tone.gray : session >= 1 ? Tone.bad : session >= 0.8 ? Tone.warn : Tone.info;
     final pushed = d.week.pushed, prev = d.lastWeek.pushed;
@@ -110,7 +126,24 @@ class _HomeBody extends StatelessWidget {
           ),
         ]),
       ),
+      if (!ref.watch(canEditProvider)) Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 0), child: HelpBox(l.wsViewerBanner, tone: Tone.warn)),
       if (d.usage.paused) Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 0), child: HelpBox(l.mobilePaused, tone: Tone.bad)),
+      // Tickets held back by the server or by Claude, not by this workspace's own slots.
+      if (q != null && ((q.waiting.server ?? 0) > 0 || (q.waiting.claude ?? 0) > 0))
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: HelpBox(
+            l.queueHeader('${q.running}', '${q.slots}'),
+            tone: (q.waiting.claude ?? 0) > 0 ? Tone.warn : Tone.info,
+            child: Text(
+              [
+                if ((q.waiting.server ?? 0) > 0) l.queueWaitingServer('${q.waiting.server}'),
+                if ((q.waiting.claude ?? 0) > 0) '${l.queueBadge_claude}: ${q.waiting.claude}',
+              ].join(' · '),
+              style: const TextStyle(fontSize: 13.5),
+            ),
+          ),
+        ),
       SectionHeader(l.dashboardWaitingTitle, trailing: Text('${waiting.length}')),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),

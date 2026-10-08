@@ -52,6 +52,12 @@ void main() {
       // TODO
     });
 
+    // For a replay: the done ticket it re-runs. Replays are never pushed.
+    // String replayOf
+    test('to test the property `replayOf`', () async {
+      // TODO
+    });
+
     // int turns
     test('to test the property `turns`', () async {
       // TODO
@@ -199,6 +205,41 @@ void main() {
 
     // TokenSpend spend
     test('to test the property `spend`', () async {
+      // TODO
+    });
+
+    // WaitReason waitReason
+    test('to test the property `waitReason`', () async {
+      // TODO
+    });
+
+    // Why it waits, in a sentence
+    // String waitMessage
+    test('to test the property `waitMessage`', () async {
+      // TODO
+    });
+
+    // When it started waiting for a worker
+    // DateTime queuedAt
+    test('to test the property `queuedAt`', () async {
+      // TODO
+    });
+
+    // Whose ticket it is (per-member Claude mode runs on their account)
+    // int memberId
+    test('to test the property `memberId`', () async {
+      // TODO
+    });
+
+    // The member's username
+    // String member
+    test('to test the property `member`', () async {
+      // TODO
+    });
+
+    // Who created it; absent for webhooks and agnts
+    // String createdBy
+    test('to test the property `createdBy`', () async {
       // TODO
     });
 

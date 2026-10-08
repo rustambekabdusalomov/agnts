@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { apiPath } from '../../api/client'
 import { nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Attachment } from '../../api/types'
@@ -9,7 +10,7 @@ import HiIcon from '../ui/HiIcon.vue'
 defineProps<{ files: Attachment[]; label?: string }>()
 const { t } = useI18n()
 
-const src = (a: Attachment) => `/api${a.url}`
+const src = (a: Attachment) => apiPath(a.url)
 const kb = (n: number) => (n >= 1 << 20 ? `${(n / (1 << 20)).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`)
 
 const zoomed = ref<Attachment | null>(null)

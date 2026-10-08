@@ -9,6 +9,7 @@ import 'package:agnts_api/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **days** | **int** |  | 
+**quality** | [**List&lt;QualityStat&gt;**](QualityStat.md) | How the tickets whose first coding run started in the period went, by prompt version, oldest first | 
 **current** | [**PeriodStats**](PeriodStats.md) |  | 
 **previous** | [**PeriodStats**](PeriodStats.md) |  | 
 **perDay** | [**List&lt;DayStat&gt;**](DayStat.md) |  | 

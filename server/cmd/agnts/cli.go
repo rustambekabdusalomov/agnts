@@ -207,6 +207,13 @@ func integrationCmd(ctx context.Context, cfg config.Config, pool postgresPool, a
 	}
 	store := postgres.NewIntegrations(pool, box)
 	p := &prompter{in: in, r: bufio.NewReader(in), out: out}
+	hookURL := func(provider string) string {
+		u := strings.TrimRight(cfg.PublicURL.String(), "/") + "/webhooks/" + provider
+		if w, err := postgres.NewWorkspaces(pool).ByID(domain.System(ctx), domain.WorkspaceOf(ctx)); err == nil {
+			u += "/" + w.HookID
+		}
+		return u
+	}
 
 	switch args[1] {
 	case "claude":
@@ -218,7 +225,17 @@ func integrationCmd(ctx context.Context, cfg config.Config, pool postgresPool, a
 		if !strings.HasPrefix(tok, "sk-ant-") {
 			return errors.New("that does not look like a Claude OAuth token (expected sk-ant-...)")
 		}
-		return p.done(store.Put(ctx, postgres.Integration{Provider: "claude", Token: tok, Settings: map[string]string{}}), "Claude")
+		ws, err := domain.MustWorkspace(ctx)
+		if err != nil {
+			return err
+		}
+		kind := postgres.ClaudeSubscription
+		if strings.HasPrefix(tok, "sk-ant-api") {
+			kind = postgres.ClaudeAPIKey
+		}
+		_, err = postgres.NewClaudeConnections(pool, box).Put(ctx, ws, 0, kind, tok, map[string]string{
+			postgres.ClaudeSubscription: "Claude subscription", postgres.ClaudeAPIKey: "Anthropic API key"}[kind])
+		return p.done(err, "Claude (the workspace's shared account)")
 
 	case "github":
 		_, _ = fmt.Fprintln(out, "Create a fine-grained token with Contents and Pull requests: read and write, for the repositories agnts works on.")
@@ -270,8 +287,8 @@ func integrationCmd(ctx context.Context, cfg config.Config, pool postgresPool, a
 		if err := p.done(store.Put(ctx, enc), "Jira"); err != nil {
 			return err
 		}
-		_, _ = fmt.Fprintf(out, "\nIn Jira, go to Settings → System → WebHooks → Create:\n  URL:    %s/webhooks/jira\n  Secret: %s\n  Events: Issue created, Issue updated\n  JQL:    labels = %q\n",
-			strings.TrimRight(cfg.PublicURL.String(), "/"), jc.WebhookSecret, jc.Label)
+		_, _ = fmt.Fprintf(out, "\nIn Jira, go to Settings → System → WebHooks → Create:\n  URL:    %s\n  Secret: %s\n  Events: Issue created, Issue updated\n  JQL:    labels = %q\n",
+			hookURL("jira"), jc.WebhookSecret, jc.Label)
 		return nil
 	case "plane":
 		base, err := p.line("Plane API URL [https://api.plane.so] (self-hosted: your Plane's address): ", plane.DefaultBaseURL)
@@ -295,7 +312,7 @@ func integrationCmd(ctx context.Context, cfg config.Config, pool postgresPool, a
 		if err != nil {
 			return fmt.Errorf("plane rejected the key: %w", err)
 		}
-		hook := strings.TrimRight(cfg.PublicURL.String(), "/") + "/webhooks/plane"
+		hook := hookURL("plane")
 		_, _ = fmt.Fprintf(out, "Connected as %s.\n\nIn Plane, go to Workspace settings → Webhooks → Add webhook:\n  URL:    %s\n  Events: Work items (Issues)\nPlane then shows a secret once.\n", account, hook)
 		whSecret, err := p.secret("Webhook secret from Plane (empty: add it later on the Integrations page): ")
 		if err != nil {

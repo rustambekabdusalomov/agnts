@@ -28,6 +28,7 @@ func newReviewHarness(t *testing.T) (*harness, *[]string) {
 	t.Helper()
 	h := newHarness(t)
 	h.settings.s.AutoReview = true
+	h.settings.s.SelfReview = false // selfreview_test.go turns it on
 	var models []string
 	h.runner.onClaude = func(r orchestrator.ClaudeRequest) { models = append(models, r.Model) }
 	return h, &models

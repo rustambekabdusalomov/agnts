@@ -106,7 +106,7 @@ const tone = (r: Relation) => (r.direction === 'conflicts' ? 'warn' : 'info')
       <p>
         <b>{{ t('relations.waitingTitle') }}:</b>
         <template v-for="(b, i) in blockedBy" :key="b.key">
-          <template v-if="i">, </template><RouterLink :to="`/tickets/${b.key}`">{{ b.key }}</RouterLink>
+          <template v-if="i">, </template><RouterLink :to="{ name: 'ticket', params: { key: b.key } }">{{ b.key }}</RouterLink>
         </template>.
         {{ t('relations.waitingSub') }}
       </p>
@@ -120,7 +120,7 @@ const tone = (r: Relation) => (r.direction === 'conflicts' ? 'warn' : 'info')
           <div class="rel-main">
             <div class="rel-tags">
               <span class="badge" :class="`b-${tone(r)}`">{{ dirLabel(r) }}</span>
-              <RouterLink :to="`/tickets/${r.other.key}`" class="tkey">{{ r.other.key }}</RouterLink>
+              <RouterLink :to="{ name: 'ticket', params: { key: r.other.key } }" class="tkey">{{ r.other.key }}</RouterLink>
               <span class="rel-title">{{ r.other.title }}</span>
               <StateBadge :state="r.other.state" />
             </div>
@@ -142,7 +142,7 @@ const tone = (r: Relation) => (r.direction === 'conflicts' ? 'warn' : 'info')
         <div class="rel-main">
           <div class="rel-tags">
             <span class="badge" :class="`b-${tone(r)}`">{{ dirLabel(r) }}</span>
-            <RouterLink :to="`/tickets/${r.other.key}`" class="tkey">{{ r.other.key }}</RouterLink>
+            <RouterLink :to="{ name: 'ticket', params: { key: r.other.key } }" class="tkey">{{ r.other.key }}</RouterLink>
             <span class="rel-title">{{ r.other.title }}</span>
             <StateBadge :state="r.other.state" />
             <span v-if="r.other.landed" class="badge b-ok">{{ t('relations.landed') }}</span>
@@ -163,7 +163,7 @@ const tone = (r: Relation) => (r.direction === 'conflicts' ? 'warn' : 'info')
       <summary>{{ t('relations.dismissedCount', { count: dismissed.length }) }}</summary>
       <ul>
         <li v-for="r in dismissed" :key="r.id">
-          {{ dirLabel(r) }} <RouterLink :to="`/tickets/${r.other.key}`">{{ r.other.key }}</RouterLink>
+          {{ dirLabel(r) }} <RouterLink :to="{ name: 'ticket', params: { key: r.other.key } }">{{ r.other.key }}</RouterLink>
           <template v-if="r.reason">: {{ tr(r.reason) }}</template>
         </li>
       </ul>

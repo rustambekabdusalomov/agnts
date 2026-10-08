@@ -47,6 +47,11 @@
     "learnQueue": "Learning queue",
     "rules": "Rules",
     "syncPlane": "Sync Plane",
-    "syncedPlane": "Plane synced: {found} open, {created} new"
+    "syncedPlane": "Plane synced: {found} open, {created} new",
+    "workspace": "Workspace",
+    "profile": "Profile",
+    "platform": "Operator console",
+    "people": "People",
+    "account": "Account"
   }
 }

@@ -5,16 +5,15 @@ import { onScopeDispose, watchEffect, type Ref } from 'vue'
 // also goes in the title. Browsers don't animate SVG favicons, so the
 // dot is steady.
 
-const MARK = `<style>.m{fill:#16181D}.i{stroke:#F4F3EF}@media (prefers-color-scheme: dark){.m{fill:#ECEBE6}.i{stroke:#16181D}}</style>`
-const GLYPH = `<path class="i" d="M19.75 10.25V19.75M19.75 15a4.75 4.75 0 1 1-9.5 0a4.75 4.75 0 1 1 9.5 0" stroke-width="2.4" fill="none" stroke-linecap="round"/>`
+// The mark as in public/favicon.svg, on a 32-unit box.
+const MARK = `<rect width="32" height="32" rx="7.04" fill="#0E0E10"/><g transform="translate(5.76 6.4) scale(0.2048)"><path d="M50 56 L50 18 M50 56 L18 76 M50 56 L82 76" stroke="#F4F3EF" stroke-width="8" stroke-linecap="round" fill="none"/><circle cx="50" cy="18" r="13" fill="#F4F3EF"/><circle cx="18" cy="76" r="13" fill="#F4F3EF"/><circle cx="82" cy="76" r="13" fill="#F4F3EF"/><circle cx="50" cy="56" r="16" fill="#FF5A1F"/></g>`
 
 /** The favicon SVG for a state; the plain mark when idle. */
 export function badgeSvg(needs: number, busy: boolean): string {
-  const mark = (x: number, y: number, size: number) =>
-    `<g transform="translate(${x} ${y}) scale(${size / 28}) translate(-1 -1)"><rect class="m" x="1" y="1" width="28" height="28" rx="7"/>${GLYPH}</g>`
+  const mark = (x: number, y: number, size: number) => `<g transform="translate(${x} ${y}) scale(${size / 32})">${MARK}</g>`
   const text = needs > 9 ? '9+' : String(needs)
   const d = needs > 0 ? 16 : busy ? 11 : 0 // badge diameter
-  if (!d) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30">${MARK}${mark(1, 1, 28)}</svg>`
+  if (!d) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">${MARK}</svg>`
 
   // A favicon cannot draw outside its box, so the mark shrinks to leave
   // room: the badge is centred on the mark's top-right corner, half of it
@@ -28,7 +27,7 @@ export function badgeSvg(needs: number, busy: boolean): string {
   if (needs > 0) {
     badge += `<text x="${cx}" y="${cy}" dy=".36em" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="${text.length > 1 ? 9.5 : 12.5}" font-weight="800" fill="#fff">${text}</text>`
   }
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30">${MARK}${mark(x, y, size)}${badge}</svg>`
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30">${mark(x, y, size)}${badge}</svg>`
 }
 
 /** The tab title: "(2) agnts" while tickets need you. */

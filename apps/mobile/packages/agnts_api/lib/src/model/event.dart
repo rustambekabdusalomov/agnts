@@ -40,6 +40,8 @@ class Event {
 
      this.durationMs,
 
+     this.user,
+
     required  this.createdAt,
   });
 
@@ -163,6 +165,19 @@ class Event {
 
 
 
+      /// The person behind the event; absent for agnts
+  @JsonKey(
+    
+    name: r'user',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? user;
+
+
+
   @JsonKey(
     
     name: r'createdAt',
@@ -189,6 +204,7 @@ class Event {
       other.message == message &&
       other.data == data &&
       other.durationMs == durationMs &&
+      other.user == user &&
       other.createdAt == createdAt;
 
     @override
@@ -203,6 +219,7 @@ class Event {
         message.hashCode +
         data.hashCode +
         durationMs.hashCode +
+        user.hashCode +
         createdAt.hashCode;
 
   factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);

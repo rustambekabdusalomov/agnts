@@ -9,8 +9,11 @@ const route = useRoute()
 </script>
 
 <template>
-  <!-- One shell for every signed-in page, so the sidebar survives navigation. -->
-  <RouterView v-if="route.meta.bare" />
+  <!-- One shell for every signed-in page, so the sidebar survives navigation.
+       Nothing renders before the first navigation resolves: the start route
+       has no :ws, and the shell's named links would throw without it. -->
+  <template v-if="!route.matched.length" />
+  <RouterView v-else-if="route.meta.bare" />
   <AppShell v-else>
     <RouterView />
   </AppShell>

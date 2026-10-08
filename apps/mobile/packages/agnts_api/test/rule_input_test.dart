@@ -28,5 +28,10 @@ void main() {
       // TODO
     });
 
+    // RuleKind kind
+    test('to test the property `kind`', () async {
+      // TODO
+    });
+
   });
 }

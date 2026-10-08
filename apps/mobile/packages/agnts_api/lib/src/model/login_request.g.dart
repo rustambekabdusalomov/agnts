@@ -11,7 +11,7 @@ abstract class _$LoginRequestCWProxy {
 
   LoginRequest password(String password);
 
-  LoginRequest code(String code);
+  LoginRequest code(String? code);
 
   LoginRequest client(LoginRequestClientEnum client);
 
@@ -24,7 +24,7 @@ abstract class _$LoginRequestCWProxy {
   LoginRequest call({
     String username,
     String password,
-    String code,
+    String? code,
     LoginRequestClientEnum client,
   });
 }
@@ -42,7 +42,7 @@ class _$LoginRequestCWProxyImpl implements _$LoginRequestCWProxy {
   LoginRequest password(String password) => this(password: password);
 
   @override
-  LoginRequest code(String code) => this(code: code);
+  LoginRequest code(String? code) => this(code: code);
 
   @override
   LoginRequest client(LoginRequestClientEnum client) => this(client: client);
@@ -72,7 +72,7 @@ class _$LoginRequestCWProxyImpl implements _$LoginRequestCWProxy {
       code: code == const $CopyWithPlaceholder()
           ? _value.code
           // ignore: cast_nullable_to_non_nullable
-          : code as String,
+          : code as String?,
       client: client == const $CopyWithPlaceholder()
           ? _value.client
           // ignore: cast_nullable_to_non_nullable
@@ -93,14 +93,11 @@ extension $LoginRequestCopyWith on LoginRequest {
 
 LoginRequest _$LoginRequestFromJson(Map<String, dynamic> json) =>
     $checkedCreate('LoginRequest', json, ($checkedConvert) {
-      $checkKeys(
-        json,
-        requiredKeys: const ['username', 'password', 'code', 'client'],
-      );
+      $checkKeys(json, requiredKeys: const ['username', 'password', 'client']);
       final val = LoginRequest(
         username: $checkedConvert('username', (v) => v as String),
         password: $checkedConvert('password', (v) => v as String),
-        code: $checkedConvert('code', (v) => v as String),
+        code: $checkedConvert('code', (v) => v as String?),
         client: $checkedConvert(
           'client',
           (v) => $enumDecode(_$LoginRequestClientEnumEnumMap, v),
@@ -113,7 +110,7 @@ Map<String, dynamic> _$LoginRequestToJson(LoginRequest instance) =>
     <String, dynamic>{
       'username': instance.username,
       'password': instance.password,
-      'code': instance.code,
+      'code': ?instance.code,
       'client': _$LoginRequestClientEnumEnumMap[instance.client]!,
     };
 

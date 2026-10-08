@@ -1,0 +1,13 @@
+{
+  "redFlags": {
+    "title": "{n, plural, one {# red flag} other {# red flags}}",
+    "sub": "agnts's scan of the change matched these lines. They often mean the checks were made to pass the wrong way; agnts's review checks each one.",
+    "kind_skipped_test": "Skipped or focused test",
+    "kind_removed_assertion": "Assertions removed",
+    "kind_deleted_test": "Test file deleted",
+    "kind_silenced_lint": "Linter silenced",
+    "kind_swallowed_error": "Error swallowed",
+    "kind_todo": "TODO left",
+    "kind_new_dependency": "New dependency"
+  }
+}

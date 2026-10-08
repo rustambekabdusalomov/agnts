@@ -20,20 +20,21 @@ type EventSource interface {
 	MaxEventID(ctx context.Context) (int64, error)
 }
 
-// Broker fans new event rows out to SSE subscribers.
+// Broker fans new event rows out to SSE subscribers, each only the
+// events of the workspace it subscribed in.
 type Broker struct {
 	src  EventSource
 	log  *slog.Logger
 	poke chan struct{}
 
 	mu   sync.Mutex
-	subs map[chan domain.Event]struct{}
+	subs map[chan domain.Event]int64 // -> workspace
 	last int64
 }
 
 // NewBroker returns a broker; call Run, and Notify on each database notification.
 func NewBroker(src EventSource, log *slog.Logger) *Broker {
-	return &Broker{src: src, log: log, poke: make(chan struct{}, 1), subs: map[chan domain.Event]struct{}{}}
+	return &Broker{src: src, log: log, poke: make(chan struct{}, 1), subs: map[chan domain.Event]int64{}}
 }
 
 // Notify signals that new events may exist.
@@ -46,6 +47,7 @@ func (b *Broker) Notify() {
 
 // Run delivers events until ctx ends.
 func (b *Broker) Run(ctx context.Context) {
+	ctx = domain.System(ctx)
 	last, err := b.src.MaxEventID(ctx)
 	if err != nil {
 		b.log.Warn("broker: start", "err", err)
@@ -73,7 +75,10 @@ func (b *Broker) Run(ctx context.Context) {
 			b.mu.Lock()
 			for _, e := range evs {
 				b.last = e.ID
-				for ch := range b.subs {
+				for ch, ws := range b.subs {
+					if e.WorkspaceID != ws {
+						continue
+					}
 					select {
 					case ch <- e:
 					default:
@@ -91,10 +96,10 @@ func (b *Broker) Run(ctx context.Context) {
 	}
 }
 
-func (b *Broker) subscribe() (chan domain.Event, int64, func()) {
+func (b *Broker) subscribe(ws int64) (chan domain.Event, int64, func()) {
 	ch := make(chan domain.Event, 256)
 	b.mu.Lock()
-	b.subs[ch] = struct{}{}
+	b.subs[ch] = ws
 	last := b.last
 	b.mu.Unlock()
 	return ch, last, func() {
@@ -114,7 +119,7 @@ func (s *Server) StreamEvents(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotImplemented, "unsupported", "streaming is not available")
 		return
 	}
-	ch, live, cancel := s.opt.Broker.subscribe()
+	ch, live, cancel := s.opt.Broker.subscribe(domain.WorkspaceOf(r.Context()))
 	defer cancel()
 
 	h := w.Header()

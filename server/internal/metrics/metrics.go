@@ -3,6 +3,7 @@
 package metrics
 
 import (
+	"agnts/internal/domain"
 	"context"
 	"fmt"
 	"io"
@@ -17,7 +18,8 @@ import (
 // Handler returns the /metrics handler.
 func Handler(db *pgxpool.Pool, active func() int) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+		// Metrics count every workspace.
+		ctx, cancel := context.WithTimeout(domain.System(r.Context()), 5*time.Second)
 		defer cancel()
 		w.Header().Set("Content-Type", "text/plain; version=0.0.4")
 		if err := write(ctx, w, db, active); err != nil {
