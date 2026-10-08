@@ -7,6 +7,15 @@ void main() {
   final instance = AgntsApi().getAuthApi();
 
   group(AuthApi, () {
+    // Start the two-factor setup an Admin without it does at sign-in
+    //
+    // Two-factor sign-in is mandatory for Admins. When login answers 401 totp_setup_required, this returns a new secret (after checking the password again); signing in with it as totpSecret and a matching code saves it and starts the session.
+    //
+    //Future<BeginLoginTotp200Response> beginLoginTotp(BeginLoginTotpRequest beginLoginTotpRequest) async
+    test('test beginLoginTotp', () async {
+      // TODO
+    });
+
     // Email a password reset link (always answers 204)
     //
     //Future forgotPassword(ForgotPasswordRequest forgotPasswordRequest) async

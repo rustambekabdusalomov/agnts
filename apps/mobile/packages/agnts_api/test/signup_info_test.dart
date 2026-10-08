@@ -25,5 +25,17 @@ void main() {
       // TODO
     });
 
+    // OAuth client id for \"Continue with Google\" (a form post to /auth/google); absent when it is off
+    // String googleClientId
+    test('to test the property `googleClientId`', () async {
+      // TODO
+    });
+
+    // Registering with a password works; when only Admins sign in with one, only for the first account
+    // bool passwordSignup
+    test('to test the property `passwordSignup`', () async {
+      // TODO
+    });
+
   });
 }

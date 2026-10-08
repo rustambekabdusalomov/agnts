@@ -67,7 +67,9 @@ type Tracker struct {
 // SetResolver sets how a reading is found for a context without a Claude
 // account (pages and the refresh button): the account the workspace's
 // person would run on.
-func (t *Tracker) SetResolver(f func(ctx context.Context) (domain.ClaudeAccount, bool)) { t.resolve = f }
+func (t *Tracker) SetResolver(f func(ctx context.Context) (domain.ClaudeAccount, bool)) {
+	t.resolve = f
+}
 
 // account returns ctx with its Claude account, resolving one when needed.
 func (t *Tracker) account(ctx context.Context) context.Context {

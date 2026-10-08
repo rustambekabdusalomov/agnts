@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
+import AdminShell from './components/AdminShell.vue'
 import AppShell from './components/AppShell.vue'
 import ConfirmHost from './components/ui/ConfirmHost.vue'
 import { usePrefs } from './stores/prefs'
@@ -14,6 +15,9 @@ const route = useRoute()
        has no :ws, and the shell's named links would throw without it. -->
   <template v-if="!route.matched.length" />
   <RouterView v-else-if="route.meta.bare" />
+  <AdminShell v-else-if="route.meta.admin">
+    <RouterView />
+  </AdminShell>
   <AppShell v-else>
     <RouterView />
   </AppShell>

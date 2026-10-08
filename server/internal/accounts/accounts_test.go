@@ -210,6 +210,149 @@ func TestOpenSignupMembersAndDelete(t *testing.T) {
 	}
 }
 
+func TestSignInWithGoogle(t *testing.T) {
+	ctx := domain.System(context.Background())
+	g := GoogleInput{Email: "dev@gmail.com", DisplayName: "Dev Person", Client: domain.ClientWeb}
+
+	// Invite-only: the install's first account may still register.
+	s, _, _ := setup(t, false)
+	if r, err := s.SignInWithGoogle(ctx, g); err != nil || !r.User.IsAdmin {
+		t.Fatalf("first account: %+v %v", r.User, err)
+	}
+	if _, err := s.SignInWithGoogle(ctx, GoogleInput{Email: "new@gmail.com", Client: domain.ClientWeb}); !errors.Is(err, domain.ErrForbidden) {
+		t.Fatalf("invite-only sign-up: %v, want ErrForbidden", err)
+	}
+	// An existing account signs in even when sign-up is closed.
+	if r, err := s.SignInWithGoogle(ctx, g); err != nil || r.User.Email != "dev@gmail.com" {
+		t.Fatalf("existing account: %+v %v", r.User, err)
+	}
+
+	// Open: a new person becomes a solo developer, the owner of a personal
+	// workspace, and stays in it on later sign-ins.
+	s, _, _ = setup(t, true)
+	if _, err := s.SignInWithGoogle(ctx, GoogleInput{Email: "admin@x.io", Client: domain.ClientWeb}); err != nil {
+		t.Fatal(err)
+	}
+	r, err := s.SignInWithGoogle(ctx, g)
+	u := r.User
+	if err != nil || r.Token == "" || r.Workspace != "" || u.IsAdmin || u.HasPassword() || u.EmailVerifiedAt == nil {
+		t.Fatalf("solo developer: %+v %v", u, err)
+	}
+	for range 2 {
+		ws, err := s.workspaces.Of(ctx, u.ID)
+		if err != nil || len(ws) != 1 || ws[0].Name != "Dev Person's workspace" || ws[0].Role != domain.RoleOwner {
+			t.Fatalf("workspaces %+v %v", ws, err)
+		}
+		if _, err := s.SignInWithGoogle(ctx, g); err != nil {
+			t.Fatal(err)
+		}
+	}
+	// A verified account can invite friends straight away.
+	res, err := s.Invite(ctx, mustWS(t, s, u.ID), u, "", domain.RoleUser)
+	if err != nil {
+		t.Fatalf("invite: %v", err)
+	}
+	tok := res.URL[strings.LastIndex(res.URL, "/")+1:]
+	// A friend signs up with Google through the link: they join that
+	// workspace (no personal one) and it opens.
+	s.cfg.Open = false
+	f, err := s.SignInWithGoogle(ctx, GoogleInput{Email: "friend@gmail.com", Invite: tok, Client: domain.ClientWeb})
+	invited, _ := s.workspaces.ByID(ctx, res.Invite.WorkspaceID)
+	if err != nil || f.Workspace == "" || f.Workspace != invited.Slug {
+		t.Fatalf("friend: %+v %v", f, err)
+	}
+	fws, _ := s.workspaces.Of(ctx, f.User.ID)
+	if len(fws) != 1 || fws[0].ID != res.Invite.WorkspaceID || fws[0].Role != domain.RoleUser {
+		t.Fatalf("friend's workspaces %+v", fws)
+	}
+	// The link works once.
+	if _, err := s.SignInWithGoogle(ctx, GoogleInput{Email: "late@gmail.com", Invite: tok, Client: domain.ClientWeb}); err == nil {
+		t.Fatal("a used invite let someone in")
+	}
+}
+
+func TestPasswordSignupOnlyForTheFirstAccount(t *testing.T) {
+	ctx := domain.System(context.Background())
+	s, _, _ := setup(t, true)
+	s.auth.PasswordsForAdminsOnly()
+	if info, _ := s.Signup(ctx); !info.PasswordSignup {
+		t.Fatal("a fresh install cannot create its Admin")
+	}
+	if _, _, admin, err := s.Register(ctx, reg("admin@x.io")); err != nil || !admin.IsAdmin {
+		t.Fatalf("first account: %+v %v", admin, err)
+	}
+	if info, _ := s.Signup(ctx); info.PasswordSignup {
+		t.Fatal("password sign-up still open after the Admin")
+	}
+	if _, _, _, err := s.Register(ctx, reg("dev@x.io")); !errors.Is(err, auth.ErrUseGoogle) {
+		t.Fatalf("second password sign-up: %v, want ErrUseGoogle", err)
+	}
+}
+
+func TestAdminsAndUsersAreSeparate(t *testing.T) {
+	ctx := domain.System(context.Background())
+	s, _, _ := setup(t, true)
+	s.auth.PasswordsForAdminsOnly()
+
+	// The first password account is the Admin, with no workspace.
+	_, _, admin, err := s.Register(ctx, reg("admin@x.io"))
+	if err != nil || !admin.IsAdmin {
+		t.Fatalf("admin: %+v %v", admin, err)
+	}
+	if ws, _ := s.workspaces.Of(ctx, admin.ID); len(ws) != 0 {
+		t.Fatalf("the Admin got workspaces: %+v", ws)
+	}
+	var inv *auth.InvalidError
+	if _, err := s.CreateWorkspace(ctx, admin, "Ops", ""); !errors.As(err, &inv) {
+		t.Fatalf("an Admin created a workspace: %v", err)
+	}
+	// An Admin does not sign in with Google.
+	if _, err := s.SignInWithGoogle(ctx, GoogleInput{Email: "admin@x.io", Client: domain.ClientWeb}); !errors.Is(err, auth.ErrAdminUsesPassword) {
+		t.Fatalf("Admin via Google: %v", err)
+	}
+
+	// A Google account is a User, never an Admin, with its own workspace;
+	// an Admin cannot join it, even with an invite.
+	r, err := s.SignInWithGoogle(ctx, GoogleInput{Email: "dev@gmail.com", Client: domain.ClientWeb})
+	if err != nil || r.User.IsAdmin {
+		t.Fatalf("user: %+v %v", r.User, err)
+	}
+	res, err := s.Invite(ctx, mustWS(t, s, r.User.ID), r.User, "", domain.RoleUser)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.AcceptInvite(ctx, admin, res.URL[strings.LastIndex(res.URL, "/")+1:]); !errors.As(err, &inv) {
+		t.Fatalf("an Admin joined a workspace: %v", err)
+	}
+
+	// Admins make and remove Admins: not themselves, not a User.
+	ops, err := s.CreateAdmin(ctx, admin, auth.AdminInput{Username: "ops", Password: "another long password"})
+	if err != nil || !ops.IsAdmin || !ops.HasPassword() {
+		t.Fatalf("new admin: %+v %v", ops, err)
+	}
+	if err := s.DeleteAdmin(ctx, admin, admin.ID); !errors.As(err, &inv) {
+		t.Fatalf("deleted yourself: %v", err)
+	}
+	if err := s.DeleteAdmin(ctx, admin, r.User.ID); !errors.As(err, &inv) {
+		t.Fatalf("deleted a User as an Admin: %v", err)
+	}
+	if err := s.DeleteAdmin(ctx, admin, ops.ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.users.ByID(ctx, ops.ID); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("admin still there: %v", err)
+	}
+}
+
+func mustWS(t *testing.T, s *Service, userID int64) int64 {
+	t.Helper()
+	ws, err := s.workspaces.Of(domain.System(context.Background()), userID)
+	if err != nil || len(ws) == 0 {
+		t.Fatalf("workspaces of %d: %v", userID, err)
+	}
+	return ws[0].ID
+}
+
 func TestForgotPassword(t *testing.T) {
 	ctx := domain.System(context.Background())
 	s, ob, _ := setup(t, true)

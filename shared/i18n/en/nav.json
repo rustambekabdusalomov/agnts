@@ -50,7 +50,7 @@
     "syncedPlane": "Plane synced: {found} open, {created} new",
     "workspace": "Workspace",
     "profile": "Profile",
-    "platform": "Operator console",
+    "platform": "Admin cabinet",
     "people": "People",
     "account": "Account"
   }

@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"sync"
 	"testing"
 
 	"agnts/internal/domain"
+	"agnts/internal/httpapi/gen"
 	"agnts/internal/store/postgres"
 )
 
@@ -63,7 +65,9 @@ func (f *fakeWorkspaces) ByHookID(_ context.Context, hook string) (domain.Worksp
 	return domain.Workspace{}, domain.ErrNotFound
 }
 
-func (f *fakeWorkspaces) Default(ctx context.Context) (domain.Workspace, error) { return f.ByID(ctx, 1) }
+func (f *fakeWorkspaces) Default(ctx context.Context) (domain.Workspace, error) {
+	return f.ByID(ctx, 1)
+}
 
 func (f *fakeWorkspaces) Role(_ context.Context, ws, user int64) (domain.WorkspaceRole, error) {
 	f.mu.Lock()
@@ -125,6 +129,16 @@ func (f *fakeWorkspaces) SetLastWorkspace(_ context.Context, user, ws int64) err
 }
 
 func (f *fakeWorkspaces) RevokeInvite(context.Context, int64, int64) error { return domain.ErrNotFound }
+
+func (f *fakeWorkspaces) Memberships(context.Context) ([]domain.Member, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	var out []domain.Member
+	for k, role := range f.roles {
+		out = append(out, domain.Member{WorkspaceID: k[0], UserID: k[1], Role: role})
+	}
+	return out, nil
+}
 
 func (f *fakeWorkspaces) List(context.Context, bool) ([]domain.WorkspaceMembership, error) {
 	f.mu.Lock()
@@ -281,5 +295,105 @@ func TestViewerReadsOnly(t *testing.T) {
 	// The few marked x-viewer stay open: reading a ticket in their language.
 	if rec := h.do("POST", "/api/w/acme/tickets/PAY-1/translate", `{"lang":"ru"}`, cookie); rec.Code == http.StatusForbidden {
 		t.Fatalf("viewer translate: %d %s", rec.Code, rec.Body)
+	}
+}
+
+func TestPlatformUsers(t *testing.T) {
+	h := newHarness(t, pinger{})
+	cookie := h.signIn(t)
+	rec := h.do("GET", "/api/platform/users", "", cookie)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("list: %d %s", rec.Code, rec.Body)
+	}
+	var got []gen.PlatformUser
+	if err := json.Unmarshal(rec.Body.Bytes(), &got); err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 1 {
+		t.Fatalf("users %+v", got)
+	}
+	u := got[0]
+	if u.User.Username != "rustam" || !u.HasPassword || u.LastSignInAt == nil {
+		t.Fatalf("user %+v", u)
+	}
+	// Only their own workspace, with their role in it.
+	if len(u.Workspaces) != 1 || u.Workspaces[0].Slug != "acme" || u.Workspaces[0].Role != gen.WorkspaceRoleOwner {
+		t.Fatalf("workspaces %+v", u.Workspaces)
+	}
+}
+
+// fakeFeedback is an in-memory FeedbackStore.
+type fakeFeedback struct {
+	mu   sync.Mutex
+	list []postgres.Feedback
+}
+
+func (f *fakeFeedback) Create(_ context.Context, x postgres.Feedback) (postgres.Feedback, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	x.ID, x.Status = int64(len(f.list)+1), "new"
+	if x.WorkspaceID != nil {
+		x.Workspace = "Acme"
+	}
+	f.list = append(f.list, x)
+	return x, nil
+}
+
+func (f *fakeFeedback) List(context.Context) ([]postgres.Feedback, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return append([]postgres.Feedback(nil), f.list...), nil
+}
+
+func (f *fakeFeedback) SetStatus(_ context.Context, id int64, status string) (postgres.Feedback, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	for i := range f.list {
+		if f.list[i].ID == id {
+			f.list[i].Status = status
+			return f.list[i], nil
+		}
+	}
+	return postgres.Feedback{}, domain.ErrNotFound
+}
+
+func TestFeedbackRoutes(t *testing.T) {
+	h := newHarness(t, pinger{})
+	cookie := h.signIn(t)
+	send := func(body string) *httptest.ResponseRecorder { return h.do("POST", "/api/feedback", body, cookie) }
+
+	rec := send(`{"title":"Love it","description":"More languages please","workspace":"acme"}`)
+	var got gen.Feedback
+	if rec.Code != http.StatusCreated || json.Unmarshal(rec.Body.Bytes(), &got) != nil || got.Status != gen.FeedbackStatusNew || got.Workspace == nil || got.Sender != "rustam" {
+		t.Fatalf("send: %d %s", rec.Code, rec.Body)
+	}
+	// Another's workspace is not recorded as context.
+	if rec := send(`{"title":"Hm","description":"x","workspace":"other"}`); rec.Code != http.StatusCreated || strings.Contains(rec.Body.String(), `"workspace"`) {
+		t.Fatalf("someone else's workspace: %d %s", rec.Code, rec.Body)
+	}
+	for _, bad := range []string{`{"title":" ","description":"x"}`, `{"title":"x","description":""}`, `{"title":"` + strings.Repeat("a", 121) + `","description":"x"}`} {
+		if rec := send(bad); rec.Code != http.StatusBadRequest {
+			t.Errorf("%s: %d", bad[:20], rec.Code)
+		}
+	}
+	// Signed out: no.
+	if rec := h.do("POST", "/api/feedback", `{"title":"x","description":"y"}`, nil); rec.Code != http.StatusUnauthorized {
+		t.Fatalf("signed out: %d", rec.Code)
+	}
+
+	// The Admin reads it and marks it done.
+	rec = h.do("GET", "/api/platform/feedback", "", cookie)
+	var list []gen.Feedback
+	if rec.Code != http.StatusOK || json.Unmarshal(rec.Body.Bytes(), &list) != nil || len(list) != 2 {
+		t.Fatalf("list: %d %s", rec.Code, rec.Body)
+	}
+	if rec := h.do("PUT", "/api/platform/feedback/1", `{"status":"done"}`, cookie); rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), `"status":"done"`) {
+		t.Fatalf("done: %d %s", rec.Code, rec.Body)
+	}
+	if rec := h.do("PUT", "/api/platform/feedback/1", `{"status":"maybe"}`, cookie); rec.Code != http.StatusBadRequest {
+		t.Fatalf("bad status: %d", rec.Code)
+	}
+	if rec := h.do("PUT", "/api/platform/feedback/99", `{"status":"done"}`, cookie); rec.Code != http.StatusNotFound {
+		t.Fatalf("unknown: %d", rec.Code)
 	}
 }

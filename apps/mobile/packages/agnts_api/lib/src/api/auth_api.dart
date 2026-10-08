@@ -9,6 +9,8 @@ import 'dart:convert';
 import 'package:agnts_api/src/deserialize.dart';
 import 'package:dio/dio.dart';
 
+import 'package:agnts_api/src/model/begin_login_totp200_response.dart';
+import 'package:agnts_api/src/model/begin_login_totp_request.dart';
 import 'package:agnts_api/src/model/error.dart';
 import 'package:agnts_api/src/model/forgot_password_request.dart';
 import 'package:agnts_api/src/model/login_request.dart';
@@ -24,6 +26,97 @@ class AuthApi {
   final Dio _dio;
 
   const AuthApi(this._dio);
+
+  /// Start the two-factor setup an Admin without it does at sign-in
+  /// Two-factor sign-in is mandatory for Admins. When login answers 401 totp_setup_required, this returns a new secret (after checking the password again); signing in with it as totpSecret and a matching code saves it and starts the session.
+  ///
+  /// Parameters:
+  /// * [beginLoginTotpRequest] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [BeginLoginTotp200Response] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<BeginLoginTotp200Response>> beginLoginTotp({ 
+    required BeginLoginTotpRequest beginLoginTotpRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/auth/login/totp';
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(beginLoginTotpRequest);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    BeginLoginTotp200Response? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<BeginLoginTotp200Response, BeginLoginTotp200Response>(rawData, 'BeginLoginTotp200Response', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<BeginLoginTotp200Response>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
 
   /// Email a password reset link (always answers 204)
   /// 

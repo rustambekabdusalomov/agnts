@@ -793,17 +793,17 @@ func retryFeedback(reason, note string) string {
 
 // TicketView is everything the ticket page shows.
 type TicketView struct {
-	Ticket    domain.Ticket
-	Info      StateInfo
-	RepoName  string
+	Ticket   domain.Ticket
+	Info     StateInfo
+	RepoName string
 	// Member and CreatedBy are usernames ("" for none).
 	Member, CreatedBy string
-	Questions []domain.Question
-	Analysis  *Analysis
-	Result    *domain.Result
-	ChildKey  string          // the code task that implements this report, if any
-	Review    *domain.Review  // newest code review; stale when its revision is older
-	Preview   *domain.Preview // newest preview; stale when its revision is older
+	Questions         []domain.Question
+	Analysis          *Analysis
+	Result            *domain.Result
+	ChildKey          string          // the code task that implements this report, if any
+	Review            *domain.Review  // newest code review; stale when its revision is older
+	Preview           *domain.Preview // newest preview; stale when its revision is older
 	// CanPreview reports whether the ticket's repository has a preview
 	// command (and the server can store screenshots).
 	CanPreview bool

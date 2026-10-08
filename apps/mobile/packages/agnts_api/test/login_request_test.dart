@@ -24,6 +24,12 @@ void main() {
       // TODO
     });
 
+    // An Admin finishing two-factor setup at sign-in (beginLoginTotp's secret); code must match it
+    // String totpSecret
+    test('to test the property `totpSecret`', () async {
+      // TODO
+    });
+
     // String client
     test('to test the property `client`', () async {
       // TODO

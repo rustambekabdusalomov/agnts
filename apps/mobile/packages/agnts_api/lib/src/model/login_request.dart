@@ -26,6 +26,8 @@ class LoginRequest {
 
      this.code,
 
+     this.totpSecret,
+
     required  this.client,
   });
 
@@ -67,6 +69,19 @@ class LoginRequest {
 
 
 
+      /// An Admin finishing two-factor setup at sign-in (beginLoginTotp's secret); code must match it
+  @JsonKey(
+    
+    name: r'totpSecret',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? totpSecret;
+
+
+
   @JsonKey(
     
     name: r'client',
@@ -86,6 +101,7 @@ class LoginRequest {
       other.username == username &&
       other.password == password &&
       other.code == code &&
+      other.totpSecret == totpSecret &&
       other.client == client;
 
     @override
@@ -93,6 +109,7 @@ class LoginRequest {
         username.hashCode +
         password.hashCode +
         code.hashCode +
+        totpSecret.hashCode +
         client.hashCode;
 
   factory LoginRequest.fromJson(Map<String, dynamic> json) => _$LoginRequestFromJson(json);

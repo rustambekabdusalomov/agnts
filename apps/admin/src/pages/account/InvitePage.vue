@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../../api/client'
 import AuthCard from '../../components/AuthCard.vue'
+import GoogleSignIn from '../../components/account/GoogleSignIn.vue'
 import { useSession } from '../../stores/session'
 
 const { t } = useI18n()
@@ -17,6 +18,8 @@ const preview = useQuery({
   queryFn: () => unwrap(api.GET('/invites/{token}', { params: { path: { token } } })),
   retry: false,
 })
+// Google sign-in, when on, both registers and joins (the invite rides along).
+const signup = useQuery({ queryKey: ['signup-info'], queryFn: () => unwrap(api.GET('/auth/signup')), retry: false })
 const busy = ref(false)
 const error = ref('')
 
@@ -47,10 +50,16 @@ async function join() {
         <button class="btn btn-p login-submit" type="submit" :disabled="busy">{{ busy ? t('account.inviteJoining') : t('account.inviteJoin') }}</button>
       </template>
       <template v-else>
-        <p class="hint">{{ t('account.inviteSignInFirst') }}</p>
-        <RouterLink class="btn btn-p login-submit" :to="{ name: 'signup', query: { invite: token, ...(preview.data.value.email ? { email: preview.data.value.email } : {}) } }">
-          {{ t('account.signUp') }}
-        </RouterLink>
+        <template v-if="signup.data.value?.googleClientId">
+          <p class="hint">{{ t('account.inviteGoogle') }}</p>
+          <GoogleSignIn :client-id="signup.data.value.googleClientId" :invite="token" />
+        </template>
+        <template v-else>
+          <p class="hint">{{ t('account.inviteSignInFirst') }}</p>
+          <RouterLink class="btn btn-p login-submit" :to="{ name: 'signup', query: { invite: token, ...(preview.data.value.email ? { email: preview.data.value.email } : {}) } }">
+            {{ t('account.signUp') }}
+          </RouterLink>
+        </template>
         <div class="login-links">
           <span>{{ t('account.haveAccount') }} <RouterLink :to="{ name: 'login', query: { next: `/invite/${token}` } }">{{ t('account.signIn') }}</RouterLink></span>
         </div>

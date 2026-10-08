@@ -66,6 +66,59 @@ type Service struct {
 	// dummyHash is verified when the username is unknown so that
 	// response time does not reveal whether a user exists.
 	dummyHash string
+	// adminPasswords separates the two roles: Admins are operator
+	// accounts that sign in with a password; Users sign in with Google.
+	adminPasswords bool
+}
+
+// PasswordsForAdminsOnly separates Admins from Users: only Admins sign in
+// with a password, everyone else with Google (SignInVerified), and an
+// account is one or the other.
+func (s *Service) PasswordsForAdminsOnly() { s.adminPasswords = true }
+
+// AdminPasswordsOnly reports whether Admins and Users are separate: only
+// Admins sign in with a password, and they have no workspaces.
+func (s *Service) AdminPasswordsOnly() bool { return s.adminPasswords }
+
+// ErrAdminUsesPassword means an Admin tried Google sign-in: Admins sign in
+// with their password.
+var ErrAdminUsesPassword = errors.New("auth: Admins sign in with their password")
+
+// AdminInput is a new Admin account, made by another Admin.
+type AdminInput struct {
+	Username    string
+	Email       string
+	DisplayName string
+	Password    string
+}
+
+// CreateAdmin creates an Admin account that signs in with a password
+// (two-factor sign-in can be turned on later from its profile).
+func (s *Service) CreateAdmin(ctx context.Context, in AdminInput) (domain.User, error) {
+	in.Username, in.Email, in.DisplayName = strings.TrimSpace(in.Username), strings.TrimSpace(in.Email), strings.TrimSpace(in.DisplayName)
+	if !usernameRe.MatchString(in.Username) {
+		return domain.User{}, Invalid("a username has 2 to 32 letters, digits, dots, dashes or underscores")
+	}
+	if in.Email != "" && !ValidEmail(in.Email) {
+		return domain.User{}, Invalid("enter a valid email address")
+	}
+	if len(in.Password) < MinPasswordLength {
+		return domain.User{}, Invalid(fmt.Sprintf("the password must be at least %d characters", MinPasswordLength))
+	}
+	if in.Email != "" {
+		if _, err := s.users.ByEmail(ctx, in.Email); err == nil {
+			return domain.User{}, fmt.Errorf("%w: an account with this email exists", domain.ErrConflict)
+		}
+	}
+	hash, err := secret.HashPassword(in.Password)
+	if err != nil {
+		return domain.User{}, err
+	}
+	u, err := s.users.Create(ctx, domain.User{Username: in.Username, Email: in.Email, DisplayName: in.DisplayName, PasswordHash: hash, IsAdmin: true})
+	if errors.Is(err, domain.ErrConflict) {
+		return domain.User{}, fmt.Errorf("%w: the username %q is taken", domain.ErrConflict, in.Username)
+	}
+	return u, err
 }
 
 // New returns an auth service.
@@ -79,12 +132,15 @@ func New(users Users, sessions Sessions, box *secret.Box, ttl time.Duration) (*S
 
 // LoginInput is what a client sends to sign in.
 type LoginInput struct {
-	Username  string
-	Password  string
-	Code      string
-	Client    domain.Client
-	UserAgent string
-	IP        string
+	Username string
+	Password string
+	Code     string
+	// TOTPSecret finishes an Admin's two-factor setup at sign-in: the
+	// secret from BeginAdminSetup, which Code must match.
+	TOTPSecret string
+	Client     domain.Client
+	UserAgent  string
+	IP         string
 }
 
 // Login checks the password (and the TOTP code, for users who turned
@@ -104,6 +160,10 @@ func (s *Service) Login(ctx context.Context, in LoginInput) (string, domain.Sess
 	if err != nil {
 		return "", none, domain.User{}, err
 	}
+	if !u.HasPassword() {
+		_, _ = secret.VerifyPassword(s.dummyHash, in.Password)
+		return "", none, domain.User{}, domain.ErrUnauthorized
+	}
 	ok, err := secret.VerifyPassword(u.PasswordHash, in.Password)
 	if err != nil {
 		return "", none, domain.User{}, err
@@ -111,12 +171,27 @@ func (s *Service) Login(ctx context.Context, in LoginInput) (string, domain.Sess
 	if !ok {
 		return "", none, domain.User{}, domain.ErrUnauthorized
 	}
-	if u.HasTOTP() {
+	// Checked after the password, so it says nothing to someone who does
+	// not know it.
+	if s.adminPasswords && !u.IsAdmin {
+		return "", none, domain.User{}, ErrUseGoogle
+	}
+	switch {
+	case u.HasTOTP():
 		if in.Code == "" {
 			return "", none, domain.User{}, ErrCodeRequired
 		}
 		if err := s.checkCode(ctx, u, in.Code); err != nil {
 			return "", none, domain.User{}, err
+		}
+	case u.IsAdmin:
+		// Two-factor sign-in is mandatory for Admins: one without it sets
+		// it up now, and gets a session only once a code matches.
+		if in.TOTPSecret == "" || in.Code == "" {
+			return "", none, domain.User{}, ErrTOTPSetupRequired
+		}
+		if err := s.ConfirmTOTP(ctx, u, in.TOTPSecret, in.Code); err != nil {
+			return "", none, domain.User{}, domain.ErrUnauthorized
 		}
 	}
 	token, sess, err := s.startSession(ctx, u, in.Client, in.UserAgent, in.IP)
@@ -126,6 +201,41 @@ func (s *Service) Login(ctx context.Context, in LoginInput) (string, domain.Sess
 // ErrCodeRequired means the password was right but the account needs its
 // two-factor code too.
 var ErrCodeRequired = errors.New("auth: two-factor code required")
+
+// ErrTOTPSetupRequired means an Admin's password was right but the account
+// has no two-factor sign-in yet: it sets it up (BeginAdminSetup) and signs
+// in with the secret and a code.
+var ErrTOTPSetupRequired = errors.New("auth: Admins set up two-factor sign-in first")
+
+// BeginAdminSetup starts the two-factor setup an Admin without it does at
+// sign-in. It checks the password again, so only the account's owner gets a
+// secret; the secret is saved only when a sign-in confirms it with a code.
+func (s *Service) BeginAdminSetup(ctx context.Context, login, password string) (Enrollment, error) {
+	u, err := s.users.ByLogin(ctx, login)
+	if errors.Is(err, domain.ErrNotFound) {
+		_, _ = secret.VerifyPassword(s.dummyHash, password)
+		return Enrollment{}, domain.ErrUnauthorized
+	}
+	if err != nil {
+		return Enrollment{}, err
+	}
+	if !u.HasPassword() {
+		_, _ = secret.VerifyPassword(s.dummyHash, password)
+		return Enrollment{}, domain.ErrUnauthorized
+	}
+	ok, err := secret.VerifyPassword(u.PasswordHash, password)
+	if err != nil {
+		return Enrollment{}, err
+	}
+	if !ok || !u.IsAdmin || u.HasTOTP() {
+		return Enrollment{}, domain.ErrUnauthorized
+	}
+	return s.BeginEnrollment(u.Username)
+}
+
+// ErrUseGoogle means the password was right, but only Admins sign in with
+// one here: this account signs in with Google.
+var ErrUseGoogle = errors.New("auth: sign in with Google")
 
 // checkCode verifies a TOTP code once (a code is never accepted twice).
 func (s *Service) checkCode(ctx context.Context, u domain.User, code string) error {
@@ -332,6 +442,85 @@ func (s *Service) Register(ctx context.Context, in RegisterInput) (string, domai
 	return token, sess, u, err
 }
 
+// Verified is a person whose email a sign-in provider (Google) has
+// verified.
+type Verified struct {
+	Email       string
+	DisplayName string
+	Client      domain.Client
+	UserAgent   string
+	IP          string
+}
+
+// SignInVerified signs in the account with in.Email, creating one without a
+// password when there is none (created is then true; the first account of
+// an install becomes Admin). The provider proved the address, so it is
+// marked verified. An existing account whose address was never verified may
+// have been registered by someone else with this email: its password and
+// sessions are dropped, so only the address's owner keeps access.
+func (s *Service) SignInVerified(ctx context.Context, in Verified) (token string, sess domain.Session, u domain.User, created bool, err error) {
+	in.Email = strings.TrimSpace(in.Email)
+	if !ValidEmail(in.Email) {
+		return "", sess, u, false, Invalid("the account has no usable email address")
+	}
+	if in.Client != domain.ClientWeb && in.Client != domain.ClientMobile {
+		return "", sess, u, false, Invalid("unknown client")
+	}
+	u, err = s.users.ByEmail(ctx, in.Email)
+	switch {
+	case errors.Is(err, domain.ErrNotFound):
+		if u, err = s.createVerified(ctx, in); err != nil {
+			return "", sess, u, false, err
+		}
+		created = true
+	case err != nil:
+		return "", sess, u, false, err
+	case s.adminPasswords && u.IsAdmin:
+		return "", sess, u, false, ErrAdminUsesPassword
+	case u.EmailVerifiedAt == nil:
+		if err := s.users.SetPassword(ctx, u.ID, ""); err != nil {
+			return "", sess, u, false, err
+		}
+		if err := s.sessions.DeleteForUser(ctx, u.ID, nil); err != nil {
+			return "", sess, u, false, err
+		}
+	}
+	if u.EmailVerifiedAt == nil {
+		if err := s.users.MarkEmailVerified(ctx, u.ID, u.Email); err != nil {
+			return "", sess, u, false, err
+		}
+	}
+	if u, err = s.users.ByID(ctx, u.ID); err != nil {
+		return "", sess, u, false, err
+	}
+	token, sess, err = s.startSession(ctx, u, in.Client, in.UserAgent, in.IP)
+	return token, sess, u, created, err
+}
+
+// createVerified creates a password-less account for in.Email.
+func (s *Service) createVerified(ctx context.Context, in Verified) (domain.User, error) {
+	n, err := s.users.Count(ctx)
+	if err != nil {
+		return domain.User{}, err
+	}
+	// Two sign-ins racing for the same derived username: try the next one.
+	for range 3 {
+		name, err := s.freeUsername(ctx, in.Email)
+		if err != nil {
+			return domain.User{}, err
+		}
+		// With separate roles the Admin is made with a password, never here.
+		u, err := s.users.Create(ctx, domain.User{Username: name, Email: in.Email, DisplayName: in.DisplayName, IsAdmin: n == 0 && !s.adminPasswords})
+		if !errors.Is(err, domain.ErrConflict) {
+			return u, err
+		}
+		if _, err := s.users.ByEmail(ctx, in.Email); err == nil {
+			return domain.User{}, fmt.Errorf("%w: an account with this email was just created; sign in again", domain.ErrConflict)
+		}
+	}
+	return domain.User{}, fmt.Errorf("%w: no free username for %s", domain.ErrConflict, in.Email)
+}
+
 // freeUsername derives a username from an email that nobody has yet.
 func (s *Service) freeUsername(ctx context.Context, email string) (string, error) {
 	local, _, _ := strings.Cut(strings.ToLower(email), "@")
@@ -440,15 +629,18 @@ func (s *Service) ResetPassword(ctx context.Context, token, password string) err
 	return s.sessions.DeleteForUser(ctx, id, nil)
 }
 
-// ChangePassword replaces the password after checking the current one, and
-// ends the user's other sessions.
+// ChangePassword replaces the password after checking the current one
+// (an account that signed up with Google sets its first one), and ends the
+// user's other sessions.
 func (s *Service) ChangePassword(ctx context.Context, u domain.User, current, password, keepToken string) error {
-	ok, err := secret.VerifyPassword(u.PasswordHash, current)
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return Invalid("the current password is wrong")
+	if u.HasPassword() {
+		ok, err := secret.VerifyPassword(u.PasswordHash, current)
+		if err != nil {
+			return err
+		}
+		if !ok {
+			return Invalid("the current password is wrong")
+		}
 	}
 	if len(password) < MinPasswordLength {
 		return Invalid(fmt.Sprintf("the new password must be at least %d characters", MinPasswordLength))
@@ -480,12 +672,17 @@ func (s *Service) ConfirmTOTP(ctx context.Context, u domain.User, seed, code str
 // DisableTOTP turns two-factor sign-in off after checking the password and
 // a current code.
 func (s *Service) DisableTOTP(ctx context.Context, u domain.User, password, code string) error {
-	ok, err := secret.VerifyPassword(u.PasswordHash, password)
-	if err != nil {
-		return err
+	if u.IsAdmin {
+		return Invalid("two-factor sign-in is required for Admins")
 	}
-	if !ok {
-		return Invalid("the password is wrong")
+	if u.HasPassword() {
+		ok, err := secret.VerifyPassword(u.PasswordHash, password)
+		if err != nil {
+			return err
+		}
+		if !ok {
+			return Invalid("the password is wrong")
+		}
 	}
 	if u.HasTOTP() {
 		if err := s.checkCode(ctx, u, code); err != nil {

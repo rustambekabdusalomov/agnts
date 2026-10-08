@@ -240,3 +240,20 @@ func TestSlotsAndGrants(t *testing.T) {
 		t.Fatalf("balance %d vs view %d", bal, v.Balance)
 	}
 }
+
+func TestMonthlyUSD(t *testing.T) {
+	s := &Service{cfg: Config{WorkspaceUSD: 10, SlotUSD: 15, MemberUSD: 5, IncludedMembers: 5}}
+	for _, c := range []struct {
+		slots, members int
+		want           float64
+	}{
+		{1, 1, 10},          // the plan alone
+		{3, 5, 40},          // two extra slots
+		{1, 7, 20},          // two members above the five included
+		{2, 6, 10 + 15 + 5}, // both
+	} {
+		if got := s.MonthlyUSD(c.slots, c.members); got != c.want {
+			t.Errorf("%d slots, %d members: $%v, want $%v", c.slots, c.members, got, c.want)
+		}
+	}
+}

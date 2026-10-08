@@ -7,6 +7,20 @@ void main() {
   final instance = AgntsApi().getPlatformApi();
 
   group(PlatformApi, () {
+    // Create an Admin account that signs in with a password (Admin)
+    //
+    //Future<User> createPlatformAdmin(CreatePlatformAdminRequest createPlatformAdminRequest) async
+    test('test createPlatformAdmin', () async {
+      // TODO
+    });
+
+    // Delete an Admin account; not your own (Admin)
+    //
+    //Future deletePlatformAdmin(int id) async
+    test('test deletePlatformAdmin', () async {
+      // TODO
+    });
+
     // Servers, runs and the queue across every workspace (Admin)
     //
     //Future<PlatformOverview> getPlatformOverview() async
@@ -21,9 +35,16 @@ void main() {
       // TODO
     });
 
-    // Every user (Admin)
+    // Every feedback people sent, newest first (Admin)
     //
-    //Future<List<User>> listPlatformUsers() async
+    //Future<List<Feedback>> listPlatformFeedback() async
+    test('test listPlatformFeedback', () async {
+      // TODO
+    });
+
+    // Every user, with their workspaces and last sign-in (Admin)
+    //
+    //Future<List<PlatformUser>> listPlatformUsers() async
     test('test listPlatformUsers', () async {
       // TODO
     });
@@ -35,7 +56,14 @@ void main() {
       // TODO
     });
 
-    // Grant or remove the Admin role (Admin)
+    // Mark a feedback done, or new again (Admin)
+    //
+    //Future<Feedback> updatePlatformFeedback(int id, UpdatePlatformFeedbackRequest updatePlatformFeedbackRequest) async
+    test('test updatePlatformFeedback', () async {
+      // TODO
+    });
+
+    // Grant or remove the Admin role (Admin); refused when Admins and Users are separate accounts
     //
     //Future<User> updatePlatformUser(int id, UpdatePlatformUserRequest updatePlatformUserRequest) async
     test('test updatePlatformUser', () async {

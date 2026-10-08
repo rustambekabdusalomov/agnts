@@ -24,7 +24,7 @@ const (
 	VerdictNeedsChanges = "needs_changes"
 )
 
-// FindingSeverities, most severe first.
+// FindingSeverities are the severities of a review finding, most severe first.
 var FindingSeverities = []string{"blocker", "major", "minor", "nit"}
 
 // FindingCategories say what a finding is about.

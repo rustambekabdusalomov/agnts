@@ -1,0 +1,28 @@
+{
+  "feedback": {
+    "title": "Send feedback",
+    "lede": "Tell the agnts team what works, what doesn’t, or what you’d like next.",
+    "titleLabel": "Title",
+    "titlePlaceholder": "In a few words",
+    "descLabel": "Description",
+    "descPlaceholder": "What happened, what you expected, or your idea",
+    "send": "Send",
+    "sent": "Thanks! Your feedback was sent.",
+    "adminTitle": "Feedback",
+    "adminLede": "What people sent from their accounts, newest first. Mark each one done once it’s handled.",
+    "f_new": "New",
+    "f_done": "Done",
+    "f_all": "All",
+    "s_new": "New",
+    "s_done": "Done",
+    "search": "Search feedback, people or workspaces",
+    "none": "No feedback here.",
+    "noneNew": "No new feedback. Nice!",
+    "from": "from {workspace}",
+    "accountGone": "account deleted",
+    "markDone": "Mark done",
+    "reopen": "Reopen",
+    "markedDone": "Marked done",
+    "reopened": "Marked new again"
+  }
+}

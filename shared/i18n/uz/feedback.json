@@ -1,0 +1,28 @@
+{
+  "feedback": {
+    "title": "Fikr yuborish",
+    "lede": "agnts jamoasiga nima ishlayotgani, nima ishlamayotgani yoki keyin nimani xohlashingizni yozing.",
+    "titleLabel": "Sarlavha",
+    "titlePlaceholder": "Bir necha so'z bilan",
+    "descLabel": "Tavsif",
+    "descPlaceholder": "Nima bo'ldi, nimani kutgan edingiz yoki g'oyangiz",
+    "send": "Yuborish",
+    "sent": "Rahmat! Fikringiz yuborildi.",
+    "adminTitle": "Fikrlar",
+    "adminLede": "Foydalanuvchilar akkauntlaridan yuborgan fikrlar, avval yangilari. Ko'rib chiqilganda bajarildi deb belgilang.",
+    "f_new": "Yangi",
+    "f_done": "Bajarilgan",
+    "f_all": "Hammasi",
+    "s_new": "Yangi",
+    "s_done": "Bajarildi",
+    "search": "Fikrlar, odamlar yoki ish maydonlarini qidirish",
+    "none": "Fikrlar yo'q.",
+    "noneNew": "Yangi fikrlar yo'q. Ajoyib!",
+    "from": "{workspace} dan",
+    "accountGone": "akkaunt o'chirilgan",
+    "markDone": "Bajarildi deb belgilash",
+    "reopen": "Qayta ochish",
+    "markedDone": "Bajarildi deb belgilandi",
+    "reopened": "Yana yangi deb belgilandi"
+  }
+}

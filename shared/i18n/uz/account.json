@@ -92,6 +92,10 @@
     "slotCount": "{n, plural, one {# parallel ishga tushirish} other {# parallel ishga tushirish}}",
     "suspended": "To'xtatilgan",
     "noWorkspacesTitle": "Hali ish maydonlari yo'q",
-    "createFirst": "Birinchi ish maydoningizni yarating"
+    "createFirst": "Birinchi ish maydoningizni yarating",
+    "inviteGoogle": "Qo'shilish uchun Google orqali davom eting. Yangimisiz? Akkauntingiz darhol yaratiladi.",
+    "totpRequiredAdmin": "Administrator akkauntlari uchun ikki bosqichli kirish majburiy, shuning uchun u yoqilgan holda qoladi.",
+    "goHome": "Bosh sahifaga qaytish",
+    "backToDashboard": "{name} ish maydoni bosh sahifasiga qaytish"
   }
 }

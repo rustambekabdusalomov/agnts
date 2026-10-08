@@ -34,6 +34,10 @@ type User struct {
 // HasTOTP reports whether the user signs in with a second factor.
 func (u User) HasTOTP() bool { return len(u.TOTPSecretEnc) > 0 }
 
+// HasPassword reports whether the user can sign in with a password; an
+// account created with Google sign-in has none until they set one.
+func (u User) HasPassword() bool { return u.PasswordHash != "" }
+
 // Client identifies which app a session belongs to.
 type Client string
 

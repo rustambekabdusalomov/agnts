@@ -76,6 +76,16 @@ type Config struct {
 	// Cloud turns on the hosted product's rules (AGNTS_CLOUD): billing,
 	// API keys only for Claude (no subscription tokens), plan limits.
 	Cloud bool
+	// GoogleClientID turns on "Continue with Google" from the website
+	// (AGNTS_GOOGLE_CLIENT_ID, the OAuth web client id); empty disables it.
+	GoogleClientID string
+	// SiteURL is the public website with the Google button
+	// (AGNTS_SITE_URL, e.g. https://agnts.uz); empty: only the admin panel.
+	SiteURL *url.URL
+	// PasswordSignIn is who signs in with a password (AGNTS_PASSWORD_SIGNIN):
+	// "admins" (everyone else uses Google; only the first account
+	// registers with a password) or "all".
+	PasswordSignIn string
 
 	// Capacity (the server queue).
 	// RunMemoryBudgetMB is the memory all run containers together may
@@ -104,6 +114,9 @@ type Config struct {
 	// Prices in so'm (AGNTS_PRICE_*): a workspace a month, an extra slot,
 	// a member above the included ones, one credit.
 	PriceWorkspaceUZS, PriceSlotUZS, PriceMemberUZS, PriceCreditUZS int64
+	// The same prices in US dollars (AGNTS_PRICE_*_USD): what the billing
+	// page shows. So'm stay what Payme and Click charge.
+	PriceWorkspaceUSD, PriceSlotUSD, PriceMemberUSD, PriceCreditUSD float64
 	IncludedMembers, MaxSlots                                       int
 	// Payme and Click merchants (AGNTS_PAYME_*, AGNTS_CLICK_*); empty
 	// disables that provider.
@@ -237,6 +250,18 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 	if c.Cloud, err = strconv.ParseBool(get("AGNTS_CLOUD", "false")); err != nil {
 		errs = append(errs, errors.New("AGNTS_CLOUD must be true or false"))
 	}
+	c.GoogleClientID = get("AGNTS_GOOGLE_CLIENT_ID", "")
+	c.PasswordSignIn = strings.ToLower(get("AGNTS_PASSWORD_SIGNIN", "admins"))
+	if c.PasswordSignIn != "admins" && c.PasswordSignIn != "all" {
+		errs = append(errs, errors.New("AGNTS_PASSWORD_SIGNIN must be admins or all"))
+	}
+	if v := get("AGNTS_SITE_URL", ""); v != "" {
+		if site, err := url.Parse(v); err != nil || site.Scheme == "" || site.Host == "" {
+			errs = append(errs, errors.New("AGNTS_SITE_URL must be an absolute URL, e.g. https://agnts.uz"))
+		} else {
+			c.SiteURL = site
+		}
+	}
 	if c.RunMemoryBudgetMB, err = strconv.ParseInt(get("AGNTS_RUN_MEMORY_BUDGET_MB", "0"), 10, 64); err != nil || c.RunMemoryBudgetMB < 0 {
 		errs = append(errs, errors.New("AGNTS_RUN_MEMORY_BUDGET_MB must be a number of megabytes (0: the host's memory less 2.5 GB)"))
 	}
@@ -273,6 +298,21 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 	for _, p := range prices {
 		if *p.dst, err = strconv.ParseInt(get(p.key, p.def), 10, 64); err != nil || *p.dst < 0 {
 			errs = append(errs, fmt.Errorf("%s must be a number of so'm", p.key))
+		}
+	}
+	usd := []struct {
+		key string
+		def string
+		dst *float64
+	}{
+		{"AGNTS_PRICE_WORKSPACE_USD", "10", &c.PriceWorkspaceUSD},
+		{"AGNTS_PRICE_SLOT_USD", "15", &c.PriceSlotUSD},
+		{"AGNTS_PRICE_MEMBER_USD", "5", &c.PriceMemberUSD},
+		{"AGNTS_PRICE_CREDIT_USD", "0.014", &c.PriceCreditUSD},
+	}
+	for _, p := range usd {
+		if *p.dst, err = strconv.ParseFloat(get(p.key, p.def), 64); err != nil || *p.dst < 0 {
+			errs = append(errs, fmt.Errorf("%s must be a number of US dollars", p.key))
 		}
 	}
 	if c.IncludedMembers, err = strconv.Atoi(get("AGNTS_INCLUDED_MEMBERS", "5")); err != nil || c.IncludedMembers < 1 {

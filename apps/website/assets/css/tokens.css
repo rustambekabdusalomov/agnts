@@ -1,0 +1,12 @@
+/* agnts design tokens, taken from the prototypes (website.html, admin.html). */
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap');
+
+:root {
+  --a: #FF713C;
+  --ink: #0A0A0A;
+  --muted: #6B6B6B;
+  --line: #E8E8E8;
+  --soft: #F5F5F5;
+  --font-sans: 'Geist', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}

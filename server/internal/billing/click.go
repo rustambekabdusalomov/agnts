@@ -22,7 +22,9 @@ type ClickConfig struct {
 	SecretKey  string
 }
 
-func (c ClickConfig) enabled() bool { return c.ServiceID != "" && c.MerchantID != "" && c.SecretKey != "" }
+func (c ClickConfig) enabled() bool {
+	return c.ServiceID != "" && c.MerchantID != "" && c.SecretKey != ""
+}
 
 func (c ClickConfig) checkoutURL(p postgres.Payment, publicURL string) string {
 	q := url.Values{}

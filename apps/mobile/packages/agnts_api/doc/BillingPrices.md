@@ -8,6 +8,10 @@ import 'package:agnts_api/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**workspaceUsd** | **double** | A workspace a month, in US dollars (shown on the billing page) | 
+**slotUsd** | **double** | An extra parallel run a month, in US dollars | 
+**memberUsd** | **double** | A member above the included ones a month, in US dollars | 
+**creditUsd** | **double** | One credit, in US dollars | 
 **workspaceUzs** | **int** |  | 
 **slotUzs** | **int** |  | 
 **memberUzs** | **int** |  | 

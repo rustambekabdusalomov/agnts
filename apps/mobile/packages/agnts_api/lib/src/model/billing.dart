@@ -38,6 +38,8 @@ class Billing {
 
      this.monthlyUzs,
 
+     this.monthlyUsd,
+
     required  this.ledger,
 
     required  this.prices,
@@ -144,6 +146,19 @@ class Billing {
 
 
 
+      /// The same in US dollars, as the billing page shows it
+  @JsonKey(
+    
+    name: r'monthlyUsd',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final double? monthlyUsd;
+
+
+
   @JsonKey(
     
     name: r'ledger',
@@ -205,6 +220,7 @@ class Billing {
       other.creditsBalance == creditsBalance &&
       other.trialEndsAt == trialEndsAt &&
       other.monthlyUzs == monthlyUzs &&
+      other.monthlyUsd == monthlyUsd &&
       other.ledger == ledger &&
       other.prices == prices &&
       other.paymentsEnabled == paymentsEnabled &&
@@ -220,6 +236,7 @@ class Billing {
         creditsBalance.hashCode +
         trialEndsAt.hashCode +
         monthlyUzs.hashCode +
+        monthlyUsd.hashCode +
         ledger.hashCode +
         prices.hashCode +
         paymentsEnabled.hashCode +

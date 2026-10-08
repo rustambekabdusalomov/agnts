@@ -7,6 +7,30 @@ void main() {
   // TODO add properties to the entity
 
   group(BillingPrices, () {
+    // A workspace a month, in US dollars (shown on the billing page)
+    // double workspaceUsd
+    test('to test the property `workspaceUsd`', () async {
+      // TODO
+    });
+
+    // An extra parallel run a month, in US dollars
+    // double slotUsd
+    test('to test the property `slotUsd`', () async {
+      // TODO
+    });
+
+    // A member above the included ones a month, in US dollars
+    // double memberUsd
+    test('to test the property `memberUsd`', () async {
+      // TODO
+    });
+
+    // One credit, in US dollars
+    // double creditUsd
+    test('to test the property `creditUsd`', () async {
+      // TODO
+    });
+
     // int workspaceUzs
     test('to test the property `workspaceUzs`', () async {
       // TODO

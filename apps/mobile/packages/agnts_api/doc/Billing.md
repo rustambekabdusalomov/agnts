@@ -16,6 +16,7 @@ Name | Type | Description | Notes
 **creditsBalance** | **int** |  | 
 **trialEndsAt** | [**DateTime**](DateTime.md) |  | [optional] 
 **monthlyUzs** | **int** | What the plan, extra slots and extra members cost a month | [optional] 
+**monthlyUsd** | **double** | The same in US dollars, as the billing page shows it | [optional] 
 **ledger** | [**List&lt;LedgerEntry&gt;**](LedgerEntry.md) |  | 
 **prices** | [**BillingPrices**](BillingPrices.md) |  | 
 **paymentsEnabled** | **bool** |  | 

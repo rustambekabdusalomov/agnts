@@ -44,6 +44,7 @@ type Users interface {
 	ByID(ctx context.Context, id int64) (domain.User, error)
 	ByEmail(ctx context.Context, email string) (domain.User, error)
 	Count(ctx context.Context) (int, error)
+	Delete(ctx context.Context, id int64) error
 }
 
 // Events records what changed in a workspace.
@@ -97,15 +98,19 @@ const InviteTTL = 7 * 24 * time.Hour
 // DeleteGrace is how long a deleted workspace is kept for undo.
 const DeleteGrace = 7 * 24 * time.Hour
 
-// SignupInfo says who may register here.
+// SignupInfo says who may register here, and how.
 type SignupInfo struct {
 	Open, FirstUser, EmailEnabled bool
+	// PasswordSignup is registering with a password; when only Admins
+	// sign in with one, only the install's first account (the Admin) may.
+	PasswordSignup bool
 }
 
 // Signup returns who may register.
 func (s *Service) Signup(ctx context.Context) (SignupInfo, error) {
 	n, err := s.users.Count(ctx)
-	return SignupInfo{Open: s.cfg.Open || n == 0, FirstUser: n == 0, EmailEnabled: s.mail.Enabled()}, err
+	return SignupInfo{Open: s.cfg.Open || n == 0, FirstUser: n == 0, EmailEnabled: s.mail.Enabled(),
+		PasswordSignup: n == 0 || !s.auth.AdminPasswordsOnly()}, err
 }
 
 // RegisterInput is a sign-up.
@@ -124,6 +129,9 @@ func (s *Service) Register(ctx context.Context, in RegisterInput) (string, domai
 	if err != nil {
 		return "", none, domain.User{}, err
 	}
+	if !info.PasswordSignup {
+		return "", none, domain.User{}, auth.ErrUseGoogle
+	}
 	var inv domain.Invite
 	if in.Invite != "" {
 		if inv, err = s.workspaces.InviteByToken(ctx, secret.HashToken(in.Invite)); err != nil {
@@ -139,23 +147,9 @@ func (s *Service) Register(ctx context.Context, in RegisterInput) (string, domai
 	if err != nil {
 		return "", none, domain.User{}, err
 	}
-	switch {
-	case info.FirstUser:
-		if err := s.workspaces.ClaimOwnerless(ctx, u.ID); err != nil {
-			return "", none, u, err
-		}
-		if ws, err := s.workspaces.Of(ctx, u.ID); err == nil && len(ws) == 0 {
-			_, err = s.CreateWorkspace(ctx, u, firstName(in.WorkspaceName, u), "")
-			if err != nil {
-				return "", none, u, err
-			}
-		}
-	case in.Invite != "":
-		if _, err := s.AcceptInvite(ctx, u, in.Invite); err != nil {
-			return "", none, u, err
-		}
-	default:
-		if _, err := s.CreateWorkspace(ctx, u, firstName(in.WorkspaceName, u), ""); err != nil {
+	// With separate roles the first account is the Admin: no workspace.
+	if !u.IsAdmin || !s.auth.AdminPasswordsOnly() {
+		if err := s.firstWorkspace(ctx, u, info.FirstUser, in.WorkspaceName, in.Invite); err != nil {
 			return "", none, u, err
 		}
 	}
@@ -173,6 +167,148 @@ func (s *Service) Register(ctx context.Context, in RegisterInput) (string, domai
 	return token, sess, u, nil
 }
 
+// firstWorkspace puts a new account in a workspace: the invite's, or a
+// personal one it owns (the first account of an install also takes over
+// the workspace migrated from before workspaces).
+func (s *Service) firstWorkspace(ctx context.Context, u domain.User, firstUser bool, name, invite string) error {
+	switch {
+	case firstUser:
+		if err := s.workspaces.ClaimOwnerless(ctx, u.ID); err != nil {
+			return err
+		}
+		if ws, err := s.workspaces.Of(ctx, u.ID); err == nil && len(ws) == 0 {
+			_, err = s.CreateWorkspace(ctx, u, firstName(name, u), "")
+			return err
+		}
+		return nil
+	case invite != "":
+		_, err := s.AcceptInvite(ctx, u, invite)
+		return err
+	default:
+		_, err := s.CreateWorkspace(ctx, u, firstName(name, u), "")
+		return err
+	}
+}
+
+// GoogleInput is a sign-in with an address Google verified.
+type GoogleInput struct {
+	Email       string
+	DisplayName string
+	// Invite is an invite token to join with ("" for none).
+	Invite    string
+	Client    domain.Client
+	UserAgent string
+	IP        string
+}
+
+// GoogleResult is a Google sign-in's session and the workspace to open
+// ("" for the one they used last).
+type GoogleResult struct {
+	Token     string
+	Session   domain.Session
+	User      domain.User
+	Workspace string
+}
+
+// SignInWithGoogle signs in the account with in.Email, registering it when
+// sign-up is open here, it comes with an invite, or it is the install's
+// first account. A new account starts as a solo developer, the owner of a
+// personal workspace where it can invite people or create more workspaces;
+// with an invite it joins that workspace instead (an existing account joins
+// it too).
+func (s *Service) SignInWithGoogle(ctx context.Context, in GoogleInput) (GoogleResult, error) {
+	info, err := s.Signup(ctx)
+	if err != nil {
+		return GoogleResult{}, err
+	}
+	var invited int64 // the invite's workspace
+	if in.Invite != "" {
+		inv, err := s.workspaces.InviteByToken(ctx, secret.HashToken(in.Invite))
+		if err != nil {
+			return GoogleResult{}, auth.Invalid("this invite link is invalid or expired; ask for a new one")
+		}
+		if inv.Email != "" && !strings.EqualFold(inv.Email, strings.TrimSpace(in.Email)) {
+			return GoogleResult{}, auth.Invalid("this invite is for " + inv.Email + "; sign in with that Google account")
+		}
+		invited = inv.WorkspaceID
+	}
+	if _, err := s.users.ByEmail(ctx, strings.TrimSpace(in.Email)); errors.Is(err, domain.ErrNotFound) && !info.Open && in.Invite == "" {
+		return GoogleResult{}, domain.ErrForbidden
+	} else if err != nil && !errors.Is(err, domain.ErrNotFound) {
+		return GoogleResult{}, err
+	}
+	token, sess, u, created, err := s.auth.SignInVerified(ctx, auth.Verified{Email: in.Email, DisplayName: in.DisplayName,
+		Client: in.Client, UserAgent: in.UserAgent, IP: in.IP})
+	if err != nil {
+		return GoogleResult{}, err
+	}
+	res := GoogleResult{Token: token, Session: sess, User: u}
+	// With separate roles a new Google account never takes over the
+	// install's migrated workspace (that is the Admin's install).
+	first := info.FirstUser && in.Invite == "" && !s.auth.AdminPasswordsOnly()
+	switch {
+	case created:
+		if err := s.firstWorkspace(ctx, u, first, "", in.Invite); err != nil {
+			return GoogleResult{}, err
+		}
+		s.log.Info("registered with Google", "user", u.ID)
+	case in.Invite != "":
+		if _, err := s.AcceptInvite(ctx, u, in.Invite); err != nil {
+			return GoogleResult{}, err
+		}
+	}
+	if invited != 0 {
+		if w, err := s.workspaces.ByID(ctx, invited); err == nil {
+			res.Workspace = w.Slug
+		}
+	}
+	return res, nil
+}
+
+// notAdmin refuses workspaces to an Admin when Admins and Users are
+// separate: an Admin runs the platform, a User works in workspaces.
+func (s *Service) notAdmin(u domain.User) error {
+	if u.IsAdmin && s.auth.AdminPasswordsOnly() {
+		return auth.Invalid("Admins run the platform and have no workspaces: sign in with a Google account to work in one")
+	}
+	return nil
+}
+
+// CreateAdmin makes a new Admin account (by another Admin).
+func (s *Service) CreateAdmin(ctx context.Context, by domain.User, in auth.AdminInput) (domain.User, error) {
+	u, err := s.auth.CreateAdmin(ctx, in)
+	if err != nil {
+		return u, err
+	}
+	s.log.Info("admin created", "admin", u.ID, "by", by.ID)
+	return u, nil
+}
+
+// DeleteAdmin deletes an Admin account: never your own, never the last
+// Admin, and never one that owns a workspace.
+func (s *Service) DeleteAdmin(ctx context.Context, by domain.User, id int64) error {
+	if id == by.ID {
+		return auth.Invalid("you cannot delete your own Admin account; ask another Admin")
+	}
+	u, err := s.users.ByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if !u.IsAdmin {
+		return auth.Invalid("this account is a User, not an Admin")
+	}
+	if ws, err := s.workspaces.Of(ctx, id); err != nil {
+		return err
+	} else if len(ws) > 0 {
+		return auth.Invalid("this Admin is in a workspace; transfer or leave it first")
+	}
+	if err := s.users.Delete(ctx, id); err != nil {
+		return err
+	}
+	s.log.Info("admin deleted", "admin", id, "by", by.ID)
+	return nil
+}
+
 func firstName(name string, u domain.User) string {
 	if name = strings.TrimSpace(name); name != "" {
 		return name
@@ -187,6 +323,9 @@ func firstName(name string, u domain.User) string {
 // CreateWorkspace creates a workspace owned by u, on the plan new
 // workspaces get here.
 func (s *Service) CreateWorkspace(ctx context.Context, u domain.User, name, slug string) (domain.Workspace, error) {
+	if err := s.notAdmin(u); err != nil {
+		return domain.Workspace{}, err
+	}
 	name = strings.TrimSpace(name)
 	if name == "" || len(name) > 80 {
 		return domain.Workspace{}, auth.Invalid("a workspace needs a name of up to 80 characters")
@@ -352,6 +491,9 @@ func (s *Service) PreviewInvite(ctx context.Context, token string) (InvitePrevie
 
 // AcceptInvite makes u a member of the invite's workspace.
 func (s *Service) AcceptInvite(ctx context.Context, u domain.User, token string) (domain.Workspace, error) {
+	if err := s.notAdmin(u); err != nil {
+		return domain.Workspace{}, err
+	}
 	inv, err := s.workspaces.InviteByToken(ctx, secret.HashToken(token))
 	if err != nil {
 		return domain.Workspace{}, domain.ErrNotFound

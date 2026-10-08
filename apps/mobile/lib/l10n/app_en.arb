@@ -135,6 +135,17 @@
   "accountSuspended": "Suspended",
   "accountNoWorkspacesTitle": "No workspaces yet",
   "accountCreateFirst": "Create your first workspace",
+  "accountInviteGoogle": "Continue with Google to join. New here? Your account is created on the spot.",
+  "accountTotpRequiredAdmin": "Two-factor sign-in is required for Admin accounts, so it stays on.",
+  "accountGoHome": "Back to dashboard",
+  "accountBackToDashboard": "Back to the {name} dashboard",
+  "@accountBackToDashboard": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "analyticsTitle": "Analytics",
   "analyticsLede": "How well agnts works for you over time: throughput, quality, where time goes, and what it costs your plan.",
   "analyticsPeriod": "Period",
@@ -371,6 +382,19 @@
   },
   "authCodeLede": "Enter the code from your authenticator app.",
   "authBack": "Use another account",
+  "authOr": "or",
+  "authGoogleRedirecting": "Signing you in…",
+  "authGoogleUnavailable": "Google sign-in could not load. Check your connection or ad blocker.",
+  "authGoogleFailed": "Google sign-in did not go through. Try again.",
+  "authGoogleClosed": "Sign-up is by invitation on this server: ask a workspace owner for an invite link.",
+  "authGoogleRateLimited": "Too many attempts. Wait a minute and try again.",
+  "authGoogleError": "Something went wrong signing you in with Google. Try again in a moment.",
+  "authUseGoogle": "Passwords are for Admins only here. Continue with Google instead.",
+  "authAdminsLede": "Admins sign in with their password. Everyone else continues with Google.",
+  "authGoogleInvite": "This invite link is invalid, already used, expired, or meant for another Google account.",
+  "authGoogleAdmin": "This is an Admin account: Admins sign in with their username and password.",
+  "authSetupLede": "Admins sign in with two factors. Scan this code with an authenticator app (Google Authenticator, 1Password, Authy), then enter the 6-digit code it shows.",
+  "authSignOutBodyGoogle": "You can sign back in any time with Continue with Google.",
   "billingTitle": "Billing",
   "billingSelfHosted": "This server is self-hosted: there is nothing to pay. The Admin sets slots and member limits.",
   "billingPlan": "Plan",
@@ -382,7 +406,7 @@
       }
     }
   },
-  "billingMonthly": "{amount} so'm a month",
+  "billingMonthly": "{amount} a month",
   "@billingMonthly": {
     "placeholders": {
       "amount": {
@@ -407,7 +431,7 @@
     }
   },
   "billingSlots": "Parallel runs",
-  "billingSlotsHelp": "Each extra run at once costs {price} so'm a month. Adding one now charges the rest of this month from credits.",
+  "billingSlotsHelp": "Each extra run at once costs {price} a month. Adding one now charges the rest of this month from credits.",
   "@billingSlotsHelp": {
     "placeholders": {
       "price": {
@@ -425,7 +449,7 @@
     }
   },
   "billingMembers": "Members",
-  "billingMembersHelp": "{included} included; each one more costs {price} so'm a month.",
+  "billingMembersHelp": "{included} included; each one more costs {price} a month.",
   "@billingMembersHelp": {
     "placeholders": {
       "included": {
@@ -439,7 +463,7 @@
   "billingCredits": "Credits",
   "billingCreditsSub": "Runs on agnts's API key (the fallback) spend credits: 1 credit is $0.01 of Anthropic API cost. The month's plan is paid from them too.",
   "billingBalance": "Balance",
-  "billingCreditPrice": "1 credit = {price} so'm",
+  "billingCreditPrice": "1 credit = {price}",
   "@billingCreditPrice": {
     "placeholders": {
       "price": {
@@ -720,6 +744,37 @@
   "designShip_rollout": "Rollout",
   "designShip_rollback": "Rollback",
   "designDeviations": "Departed from the plan",
+  "feedbackTitle": "Send feedback",
+  "feedbackLede": "Tell the agnts team what works, what doesn’t, or what you’d like next.",
+  "feedbackTitleLabel": "Title",
+  "feedbackTitlePlaceholder": "In a few words",
+  "feedbackDescLabel": "Description",
+  "feedbackDescPlaceholder": "What happened, what you expected, or your idea",
+  "feedbackSend": "Send",
+  "feedbackSent": "Thanks! Your feedback was sent.",
+  "feedbackAdminTitle": "Feedback",
+  "feedbackAdminLede": "What people sent from their accounts, newest first. Mark each one done once it’s handled.",
+  "feedbackF_new": "New",
+  "feedbackF_done": "Done",
+  "feedbackF_all": "All",
+  "feedbackS_new": "New",
+  "feedbackS_done": "Done",
+  "feedbackSearch": "Search feedback, people or workspaces",
+  "feedbackNone": "No feedback here.",
+  "feedbackNoneNew": "No new feedback. Nice!",
+  "feedbackFrom": "from {workspace}",
+  "@feedbackFrom": {
+    "placeholders": {
+      "workspace": {
+        "type": "String"
+      }
+    }
+  },
+  "feedbackAccountGone": "account deleted",
+  "feedbackMarkDone": "Mark done",
+  "feedbackReopen": "Reopen",
+  "feedbackMarkedDone": "Marked done",
+  "feedbackReopened": "Marked new again",
   "filesTitle": "Attachments",
   "filesAttach": "Attach files",
   "filesAddPhoto": "Photo",
@@ -1881,10 +1936,10 @@
   },
   "navWorkspace": "Workspace",
   "navProfile": "Profile",
-  "navPlatform": "Operator console",
+  "navPlatform": "Admin cabinet",
   "navPeople": "People",
   "navAccount": "Account",
-  "platformTitle": "Operator console",
+  "platformTitle": "Admin cabinet",
   "platformLede": "Every workspace, run and user on this server. Workspaces show metadata only: their tickets are their members'.",
   "platformCapacity": "Server",
   "platformReserved": "Memory reserved",
@@ -1938,6 +1993,166 @@
   "platformJoined": "Joined",
   "platformNoLimit": "no limit",
   "platformForbidden": "Only an Admin can open the operator console.",
+  "platformCabinetBadge": "Admin cabinet",
+  "platformNavDashboard": "Dashboard",
+  "platformAdmins": "Admins",
+  "platformNavMine": "My work",
+  "platformBackToWorkspace": "Back to my workspace",
+  "platformDashLede": "Everyone on the platform, how fast it grows, and what the server is running.",
+  "platformNewThisWeek": "{n} new this week",
+  "@platformNewThisWeek": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "platformViaGoogle": "{n} via Google",
+  "@platformViaGoogle": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "platformActiveUsers": "Active this week",
+  "platformActiveNote": "Signed in during the last 7 days",
+  "platformTeams": "{n, plural, one {{n} with a team} other {{n} with teams}}",
+  "@platformTeams": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "platformRunsNow": "{n, plural, one {{n} run right now} other {{n} runs right now}}",
+  "@platformRunsNow": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "platformGrowthTitle": "Sign-ups",
+  "platformGrowthSub": "New accounts and workspaces per day, last {n} days",
+  "@platformGrowthSub": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "platformLegendUsers": "Accounts",
+  "platformLegendWorkspaces": "Workspaces",
+  "platformRecentTitle": "Newest accounts",
+  "platformSeeAll": "See all",
+  "platformNoUsers": "No users match.",
+  "platformWsLede": "Every workspace and who is in it. You see metadata only: tickets and code belong to the workspace’s members.",
+  "platformF_all": "All",
+  "platformF_active": "Active",
+  "platformF_suspended": "Suspended",
+  "platformF_deleted": "Deleted",
+  "platformSearchWs": "Search workspaces or owners",
+  "platformNoWorkspaces": "No workspaces match.",
+  "platformCreated": "Created",
+  "platformNoMembers": "No members.",
+  "platformSuspendTitle": "Suspend {name}?",
+  "@platformSuspendTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "platformSuspendBody": "Its runs stop being started and its members see that the workspace is suspended. You can resume it at any time.",
+  "platformUsersLede": "Everyone who signed up with Google: their workspaces, and when they were last here. Admin accounts are on the Admins page.",
+  "platformU_all": "All",
+  "platformU_active": "Active",
+  "platformU_new": "New this week",
+  "platformU_google": "Google",
+  "platformU_admins": "Admins",
+  "platformSearchUsers": "Search by name, email or workspace",
+  "platformSignIn": "Sign-in",
+  "platformLastSeen": "Last sign-in",
+  "platformPassword": "Password",
+  "platformUnverified": "unverified",
+  "platformYou": "You",
+  "platformMakeAdminTitle": "Make {name} an Admin?",
+  "@platformMakeAdminTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "platformMakeAdminBody": "Admins open this cabinet: they see every user and workspace, change plans and credits, suspend workspaces and manage other Admins.",
+  "platformRemoveAdminTitle": "Remove {name} as Admin?",
+  "@platformRemoveAdminTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "platformRemoveAdminBody": "They keep their account and workspaces, but lose the Admin cabinet.",
+  "platformAdminAdded": "Admin {name} created",
+  "@platformAdminAdded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "platformAdminRemoved": "Admin {name} deleted",
+  "@platformAdminRemoved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "platformAdminsLede": "The platform’s operators. Each is its own account, apart from Users: an Admin sees no workspace’s tickets.",
+  "platformAdminsCount": "{n, plural, one {{n} Admin} other {{n} Admins}}",
+  "@platformAdminsCount": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "platformAddAdmin": "Add an Admin",
+  "platformAddAdminSub": "An Admin is a separate account: it signs in with a password, opens this cabinet and has no workspaces. Users can’t be made Admins.",
+  "platformFindUser": "Find a person",
+  "platformNoMatch": "No one matches, or they are an Admin already.",
+  "platformLastSeenAgo": "last sign-in {when}",
+  "@platformLastSeenAgo": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "platformAdminName": "Name",
+  "platformAdminUsername": "Username",
+  "platformAdminPasswordHint": "At least {n} characters. They can turn on two-factor sign-in in their profile.",
+  "@platformAdminPasswordHint": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "platformCreateAdmin": "Create Admin",
+  "platformDeleteAdmin": "Delete",
+  "platformDeleteAdminTitle": "Delete the Admin account {name}?",
+  "@platformDeleteAdminTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "platformDeleteAdminBody": "They can no longer sign in. This cannot be undone.",
   "previewTab": "Preview",
   "previewTitle": "Screenshots of the app",
   "previewSub": "agnts started the app with this change and took screenshots. Advice only: it never blocks approval.",

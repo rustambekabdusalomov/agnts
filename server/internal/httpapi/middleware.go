@@ -101,6 +101,7 @@ type WorkspaceStore interface {
 	List(ctx context.Context, withDeleted bool) ([]domain.WorkspaceMembership, error)
 	SetPlan(ctx context.Context, ws int64, p postgres.PlanUpdate) (domain.Workspace, error)
 	SetSuspended(ctx context.Context, ws int64, suspended bool) (domain.Workspace, error)
+	Memberships(ctx context.Context) ([]domain.Member, error)
 }
 
 // member is the workspace a request acts in and the person's role there.

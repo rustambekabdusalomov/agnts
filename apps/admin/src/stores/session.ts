@@ -19,17 +19,22 @@ export const useSession = defineStore('session', () => {
   }
 
   /**
-   * Signs in. A code is needed only for accounts with two-factor sign-in;
-   * without one the server answers code_required (returned as true).
+   * Signs in. Returns what is still needed: 'code' for an account with
+   * two-factor sign-in (the server answered code_required), 'setup' for an
+   * Admin who must turn it on first (totp_setup_required; sign in again with
+   * the new secret and a code), or null once signed in.
    */
-  async function login(username: string, password: string, code: string): Promise<boolean> {
+  async function login(username: string, password: string, code: string, totpSecret?: string): Promise<'code' | 'setup' | null> {
     try {
-      const res = await unwrap(api.POST('/auth/login', { body: { username, password, ...(code ? { code } : {}), client: 'web' } }))
+      const res = await unwrap(api.POST('/auth/login', {
+        body: { username, password, ...(code ? { code } : {}), ...(totpSecret ? { totpSecret } : {}), client: 'web' },
+      }))
       user.value = res.user
       checked.value = true
-      return false
+      return null
     } catch (e) {
-      if (e instanceof HttpError && e.code === 'code_required') return true
+      if (e instanceof HttpError && e.code === 'code_required') return 'code'
+      if (e instanceof HttpError && e.code === 'totp_setup_required') return 'setup'
       throw e
     }
   }

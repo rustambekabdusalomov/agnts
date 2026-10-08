@@ -84,6 +84,7 @@ Class | Method | HTTP request | Description
 [*AttachmentsApi*](doc/AttachmentsApi.md) | [**deleteAttachment**](doc/AttachmentsApi.md#deleteattachment) | **DELETE** /attachments/{id} | Delete an upload that nothing uses yet
 [*AttachmentsApi*](doc/AttachmentsApi.md) | [**getAttachment**](doc/AttachmentsApi.md#getattachment) | **GET** /attachments/{id} | An attached file&#39;s bytes
 [*AttachmentsApi*](doc/AttachmentsApi.md) | [**uploadAttachment**](doc/AttachmentsApi.md#uploadattachment) | **POST** /attachments | Upload a file to attach to a task, an answer or a retry note
+[*AuthApi*](doc/AuthApi.md) | [**beginLoginTotp**](doc/AuthApi.md#beginlogintotp) | **POST** /auth/login/totp | Start the two-factor setup an Admin without it does at sign-in
 [*AuthApi*](doc/AuthApi.md) | [**forgotPassword**](doc/AuthApi.md#forgotpassword) | **POST** /auth/password/forgot | Email a password reset link (always answers 204)
 [*AuthApi*](doc/AuthApi.md) | [**getMe**](doc/AuthApi.md#getme) | **GET** /auth/me | The signed-in user
 [*AuthApi*](doc/AuthApi.md) | [**getSignupInfo**](doc/AuthApi.md#getsignupinfo) | **GET** /auth/signup | Whether people can register, and whether this install has no user yet
@@ -99,6 +100,7 @@ Class | Method | HTTP request | Description
 [*DevicesApi*](doc/DevicesApi.md) | [**registerDevice**](doc/DevicesApi.md#registerdevice) | **POST** /devices | Register this phone for push notifications (call again when the token changes)
 [*DevicesApi*](doc/DevicesApi.md) | [**unregisterDevice**](doc/DevicesApi.md#unregisterdevice) | **POST** /devices/unregister | Stop push notifications to this phone (on sign-out)
 [*DocsApi*](doc/DocsApi.md) | [**getPageDoc**](doc/DocsApi.md#getpagedoc) | **GET** /docs/{page} | The \&quot;How this page works\&quot; text, as Markdown
+[*FeedbackApi*](doc/FeedbackApi.md) | [**sendFeedback**](doc/FeedbackApi.md#sendfeedback) | **POST** /feedback | Send feedback to the platform&#39;s Admins
 [*IntegrationsApi*](doc/IntegrationsApi.md) | [**connectIntegration**](doc/IntegrationsApi.md#connectintegration) | **POST** /integrations/{provider}/connect | Save a token (and settings), check it against the provider, and connect
 [*IntegrationsApi*](doc/IntegrationsApi.md) | [**disconnectIntegration**](doc/IntegrationsApi.md#disconnectintegration) | **POST** /integrations/{provider}/disconnect | Forget the token
 [*IntegrationsApi*](doc/IntegrationsApi.md) | [**listIntegrations**](doc/IntegrationsApi.md#listintegrations) | **GET** /integrations | 
@@ -125,11 +127,15 @@ Class | Method | HTTP request | Description
 [*McpApi*](doc/McpApi.md) | [**revokeMcp**](doc/McpApi.md#revokemcp) | **POST** /mcp-settings/revoke | Disconnect every Claude connection and delete the static token
 [*McpApi*](doc/McpApi.md) | [**rotateMcpToken**](doc/McpApi.md#rotatemcptoken) | **POST** /mcp-settings/token | Create a new static MCP bearer token (shown once; the old one stops working)
 [*MetaApi*](doc/MetaApi.md) | [**getMeta**](doc/MetaApi.md#getmeta) | **GET** /meta | Server version and build information
+[*PlatformApi*](doc/PlatformApi.md) | [**createPlatformAdmin**](doc/PlatformApi.md#createplatformadmin) | **POST** /platform/admins | Create an Admin account that signs in with a password (Admin)
+[*PlatformApi*](doc/PlatformApi.md) | [**deletePlatformAdmin**](doc/PlatformApi.md#deleteplatformadmin) | **DELETE** /platform/admins/{id} | Delete an Admin account; not your own (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**getPlatformOverview**](doc/PlatformApi.md#getplatformoverview) | **GET** /platform/overview | Servers, runs and the queue across every workspace (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**grantCredits**](doc/PlatformApi.md#grantcredits) | **POST** /platform/workspaces/{id}/credits | Grant (or take back, when negative) credits (Admin)
-[*PlatformApi*](doc/PlatformApi.md) | [**listPlatformUsers**](doc/PlatformApi.md#listplatformusers) | **GET** /platform/users | Every user (Admin)
+[*PlatformApi*](doc/PlatformApi.md) | [**listPlatformFeedback**](doc/PlatformApi.md#listplatformfeedback) | **GET** /platform/feedback | Every feedback people sent, newest first (Admin)
+[*PlatformApi*](doc/PlatformApi.md) | [**listPlatformUsers**](doc/PlatformApi.md#listplatformusers) | **GET** /platform/users | Every user, with their workspaces and last sign-in (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**listPlatformWorkspaces**](doc/PlatformApi.md#listplatformworkspaces) | **GET** /platform/workspaces | Every workspace, metadata only (Admin)
-[*PlatformApi*](doc/PlatformApi.md) | [**updatePlatformUser**](doc/PlatformApi.md#updateplatformuser) | **PUT** /platform/users/{id} | Grant or remove the Admin role (Admin)
+[*PlatformApi*](doc/PlatformApi.md) | [**updatePlatformFeedback**](doc/PlatformApi.md#updateplatformfeedback) | **PUT** /platform/feedback/{id} | Mark a feedback done, or new again (Admin)
+[*PlatformApi*](doc/PlatformApi.md) | [**updatePlatformUser**](doc/PlatformApi.md#updateplatformuser) | **PUT** /platform/users/{id} | Grant or remove the Admin role (Admin); refused when Admins and Users are separate accounts
 [*PlatformApi*](doc/PlatformApi.md) | [**updatePlatformWorkspace**](doc/PlatformApi.md#updateplatformworkspace) | **PUT** /platform/workspaces/{id} | Change a workspace&#39;s plan, slots, member limit, or suspend it (Admin)
 [*ReposApi*](doc/ReposApi.md) | [**approveRepoBrief**](doc/ReposApi.md#approverepobrief) | **POST** /repos/{id}/brief/approve | Make the draft the brief that runs read
 [*ReposApi*](doc/ReposApi.md) | [**archiveRepo**](doc/ReposApi.md#archiverepo) | **POST** /repos/{id}/archive | Archive the repository; it keeps its history but takes no new tickets or tasks
@@ -234,6 +240,8 @@ Class | Method | HTTP request | Description
  - [Approach](doc/Approach.md)
  - [ApproveTicketRequest](doc/ApproveTicketRequest.md)
  - [Attachment](doc/Attachment.md)
+ - [BeginLoginTotp200Response](doc/BeginLoginTotp200Response.md)
+ - [BeginLoginTotpRequest](doc/BeginLoginTotpRequest.md)
  - [BeginTotp200Response](doc/BeginTotp200Response.md)
  - [Billing](doc/Billing.md)
  - [BillingPrices](doc/BillingPrices.md)
@@ -254,6 +262,7 @@ Class | Method | HTTP request | Description
  - [ConnectResult](doc/ConnectResult.md)
  - [CreateInvite201Response](doc/CreateInvite201Response.md)
  - [CreateInviteRequest](doc/CreateInviteRequest.md)
+ - [CreatePlatformAdminRequest](doc/CreatePlatformAdminRequest.md)
  - [CreateWorkspaceRequest](doc/CreateWorkspaceRequest.md)
  - [Dashboard](doc/Dashboard.md)
  - [DashboardCounts](doc/DashboardCounts.md)
@@ -269,6 +278,7 @@ Class | Method | HTTP request | Description
  - [Event](doc/Event.md)
  - [EventPage](doc/EventPage.md)
  - [EventSummary](doc/EventSummary.md)
+ - [Feedback](doc/Feedback.md)
  - [FileChange](doc/FileChange.md)
  - [Finding](doc/Finding.md)
  - [FollowUpSuggestion](doc/FollowUpSuggestion.md)
@@ -312,6 +322,7 @@ Class | Method | HTTP request | Description
  - [PlatformOverview](doc/PlatformOverview.md)
  - [PlatformOverviewRunsInner](doc/PlatformOverviewRunsInner.md)
  - [PlatformOverviewServerQueueInner](doc/PlatformOverviewServerQueueInner.md)
+ - [PlatformUser](doc/PlatformUser.md)
  - [PlatformWorkspace](doc/PlatformWorkspace.md)
  - [PreviewInput](doc/PreviewInput.md)
  - [PreviewIssue](doc/PreviewIssue.md)
@@ -357,6 +368,7 @@ Class | Method | HTTP request | Description
  - [RuleKind](doc/RuleKind.md)
  - [RuleQuestion](doc/RuleQuestion.md)
  - [RuleStatus](doc/RuleStatus.md)
+ - [SendFeedbackRequest](doc/SendFeedbackRequest.md)
  - [SetMemberRoleRequest](doc/SetMemberRoleRequest.md)
  - [SetPlaneWebhookSecretRequest](doc/SetPlaneWebhookSecretRequest.md)
  - [SetSlotsRequest](doc/SetSlotsRequest.md)
@@ -392,6 +404,7 @@ Class | Method | HTTP request | Description
  - [TranslationLanguage](doc/TranslationLanguage.md)
  - [UnregisterDeviceRequest](doc/UnregisterDeviceRequest.md)
  - [UpdateIntegrationRequest](doc/UpdateIntegrationRequest.md)
+ - [UpdatePlatformFeedbackRequest](doc/UpdatePlatformFeedbackRequest.md)
  - [UpdatePlatformUserRequest](doc/UpdatePlatformUserRequest.md)
  - [UpdatePlatformWorkspaceRequest](doc/UpdatePlatformWorkspaceRequest.md)
  - [UpdateProfileRequest](doc/UpdateProfileRequest.md)

@@ -20,6 +20,14 @@ class BillingPrices {
   /// Returns a new [BillingPrices] instance.
   BillingPrices({
 
+    required  this.workspaceUsd,
+
+    required  this.slotUsd,
+
+    required  this.memberUsd,
+
+    required  this.creditUsd,
+
     required  this.workspaceUzs,
 
     required  this.slotUzs,
@@ -32,6 +40,58 @@ class BillingPrices {
 
     required  this.markup,
   });
+
+      /// A workspace a month, in US dollars (shown on the billing page)
+  @JsonKey(
+    
+    name: r'workspaceUsd',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final double workspaceUsd;
+
+
+
+      /// An extra parallel run a month, in US dollars
+  @JsonKey(
+    
+    name: r'slotUsd',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final double slotUsd;
+
+
+
+      /// A member above the included ones a month, in US dollars
+  @JsonKey(
+    
+    name: r'memberUsd',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final double memberUsd;
+
+
+
+      /// One credit, in US dollars
+  @JsonKey(
+    
+    name: r'creditUsd',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final double creditUsd;
+
+
 
   @JsonKey(
     
@@ -110,6 +170,10 @@ class BillingPrices {
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is BillingPrices &&
+      other.workspaceUsd == workspaceUsd &&
+      other.slotUsd == slotUsd &&
+      other.memberUsd == memberUsd &&
+      other.creditUsd == creditUsd &&
       other.workspaceUzs == workspaceUzs &&
       other.slotUzs == slotUzs &&
       other.memberUzs == memberUzs &&
@@ -119,6 +183,10 @@ class BillingPrices {
 
     @override
     int get hashCode =>
+        workspaceUsd.hashCode +
+        slotUsd.hashCode +
+        memberUsd.hashCode +
+        creditUsd.hashCode +
         workspaceUzs.hashCode +
         slotUzs.hashCode +
         memberUzs.hashCode +

@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/auth/login/totp": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start the two-factor setup an Admin without it does at sign-in
+         * @description Two-factor sign-in is mandatory for Admins. When login answers 401 totp_setup_required, this returns a new secret (after checking the password again); signing in with it as totpSecret and a matching code saves it and starts the session.
+         */
+        post: operations["beginLoginTotp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/login": {
         parameters: {
             query?: never;
@@ -1883,6 +1903,59 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send feedback to the platform's Admins */
+        post: operations["sendFeedback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every feedback people sent, newest first (Admin) */
+        get: operations["listPlatformFeedback"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/feedback/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Mark a feedback done, or new again (Admin) */
+        put: operations["updatePlatformFeedback"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/workspaces": {
         parameters: {
             query?: never;
@@ -2267,11 +2340,47 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Every user (Admin) */
+        /** Every user, with their workspaces and last sign-in (Admin) */
         get: operations["listPlatformUsers"];
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/admins": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create an Admin account that signs in with a password (Admin) */
+        post: operations["createPlatformAdmin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/admins/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete an Admin account; not your own (Admin) */
+        delete: operations["deletePlatformAdmin"];
         options?: never;
         head?: never;
         patch?: never;
@@ -2287,7 +2396,7 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** Grant or remove the Admin role (Admin) */
+        /** Grant or remove the Admin role (Admin); refused when Admins and Users are separate accounts */
         put: operations["updatePlatformUser"];
         post?: never;
         delete?: never;
@@ -2307,6 +2416,10 @@ export interface components {
             firstUser: boolean;
             /** @description The server can send email (verification, invites, resets) */
             emailEnabled: boolean;
+            /** @description OAuth client id for "Continue with Google" (a form post to /auth/google); absent when it is off */
+            googleClientId?: string;
+            /** @description Registering with a password works; when only Admins sign in with one, only for the first account */
+            passwordSignup?: boolean;
         };
         RegisterRequest: {
             email: string;
@@ -2329,6 +2442,39 @@ export interface components {
          * @enum {string}
          */
         WorkspaceRole: "owner" | "user" | "viewer";
+        Feedback: {
+            /** Format: int64 */
+            id: number;
+            title: string;
+            description: string;
+            /** @enum {string} */
+            status: "new" | "done";
+            /** @description The sender's name when they sent it */
+            sender: string;
+            email?: string;
+            /**
+             * Format: int64
+             * @description Absent once the account is deleted
+             */
+            userId?: number;
+            /** @description The name of the workspace it was sent from */
+            workspace?: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        /** @description A user as the Admin cabinet lists them */
+        PlatformUser: {
+            user: components["schemas"]["User"];
+            /** @description Can sign in with a password; false for accounts made with Google sign-in */
+            hasPassword: boolean;
+            /**
+             * Format: date-time
+             * @description The newest session still on record
+             */
+            lastSignInAt?: string;
+            /** @description The workspaces they belong to (not deleted), with their role */
+            workspaces: components["schemas"]["WorkspaceSummary"][];
+        };
         WorkspaceSummary: {
             /** Format: int64 */
             id: number;
@@ -2517,8 +2663,33 @@ export interface components {
              * @description What the plan, extra slots and extra members cost a month
              */
             monthlyUzs?: number;
+            /**
+             * Format: double
+             * @description The same in US dollars, as the billing page shows it
+             */
+            monthlyUsd?: number;
             ledger: components["schemas"]["LedgerEntry"][];
             prices: {
+                /**
+                 * Format: double
+                 * @description A workspace a month, in US dollars (shown on the billing page)
+                 */
+                workspaceUsd: number;
+                /**
+                 * Format: double
+                 * @description An extra parallel run a month, in US dollars
+                 */
+                slotUsd: number;
+                /**
+                 * Format: double
+                 * @description A member above the included ones a month, in US dollars
+                 */
+                memberUsd: number;
+                /**
+                 * Format: double
+                 * @description One credit, in US dollars
+                 */
+                creditUsd: number;
                 /** Format: int64 */
                 workspaceUzs: number;
                 /** Format: int64 */
@@ -2582,6 +2753,8 @@ export interface components {
             password: string;
             /** @description Six-digit code from the authenticator app, when two-factor sign-in is on */
             code?: string;
+            /** @description An Admin finishing two-factor setup at sign-in (beginLoginTotp's secret); code must match it */
+            totpSecret?: string;
             /** @enum {string} */
             client: "web" | "mobile";
         };
@@ -4152,6 +4325,40 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    beginLoginTotp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    username: string;
+                    password: string;
+                };
+            };
+        };
+        responses: {
+            /** @description A secret to add to an authenticator app */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Base32, for manual entry */
+                        secret: string;
+                        /** @description otpauth:// URL, for a QR code */
+                        url: string;
+                    };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
     login: {
         parameters: {
             query?: never;
@@ -7017,6 +7224,89 @@ export interface operations {
             };
         };
     };
+    sendFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    title: string;
+                    description: string;
+                    /** @description The slug of the workspace it is sent from (yours), for context */
+                    workspace?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Sent */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Feedback"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
+    listPlatformFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Feedback"][];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    updatePlatformFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    status: "new" | "done";
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Feedback"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
     listWorkspaces: {
         parameters: {
             query?: never;
@@ -7711,10 +8001,65 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["User"][];
+                    "application/json": components["schemas"]["PlatformUser"][];
                 };
             };
             403: components["responses"]["Forbidden"];
+        };
+    };
+    createPlatformAdmin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    username: string;
+                    email?: string;
+                    displayName?: string;
+                    password: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    deletePlatformAdmin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
         };
     };
     updatePlatformUser: {

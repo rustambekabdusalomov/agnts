@@ -23,6 +23,8 @@ abstract class _$BillingCWProxy {
 
   Billing monthlyUzs(int? monthlyUzs);
 
+  Billing monthlyUsd(double? monthlyUsd);
+
   Billing ledger(List<LedgerEntry> ledger);
 
   Billing prices(BillingPrices prices);
@@ -46,6 +48,7 @@ abstract class _$BillingCWProxy {
     int creditsBalance,
     DateTime? trialEndsAt,
     int? monthlyUzs,
+    double? monthlyUsd,
     List<LedgerEntry> ledger,
     BillingPrices prices,
     bool paymentsEnabled,
@@ -85,6 +88,9 @@ class _$BillingCWProxyImpl implements _$BillingCWProxy {
   Billing monthlyUzs(int? monthlyUzs) => this(monthlyUzs: monthlyUzs);
 
   @override
+  Billing monthlyUsd(double? monthlyUsd) => this(monthlyUsd: monthlyUsd);
+
+  @override
   Billing ledger(List<LedgerEntry> ledger) => this(ledger: ledger);
 
   @override
@@ -113,6 +119,7 @@ class _$BillingCWProxyImpl implements _$BillingCWProxy {
     Object? creditsBalance = const $CopyWithPlaceholder(),
     Object? trialEndsAt = const $CopyWithPlaceholder(),
     Object? monthlyUzs = const $CopyWithPlaceholder(),
+    Object? monthlyUsd = const $CopyWithPlaceholder(),
     Object? ledger = const $CopyWithPlaceholder(),
     Object? prices = const $CopyWithPlaceholder(),
     Object? paymentsEnabled = const $CopyWithPlaceholder(),
@@ -151,6 +158,10 @@ class _$BillingCWProxyImpl implements _$BillingCWProxy {
           ? _value.monthlyUzs
           // ignore: cast_nullable_to_non_nullable
           : monthlyUzs as int?,
+      monthlyUsd: monthlyUsd == const $CopyWithPlaceholder()
+          ? _value.monthlyUsd
+          // ignore: cast_nullable_to_non_nullable
+          : monthlyUsd as double?,
       ledger: ledger == const $CopyWithPlaceholder()
           ? _value.ledger
           // ignore: cast_nullable_to_non_nullable
@@ -181,52 +192,56 @@ extension $BillingCopyWith on Billing {
 // JsonSerializableGenerator
 // **************************************************************************
 
-Billing _$BillingFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('Billing', json, ($checkedConvert) {
-      $checkKeys(
-        json,
-        requiredKeys: const [
-          'plan',
-          'slots',
-          'maxSlots',
-          'memberLimit',
-          'members',
-          'creditsBalance',
-          'ledger',
-          'prices',
-          'paymentsEnabled',
-        ],
-      );
-      final val = Billing(
-        plan: $checkedConvert('plan', (v) => v as String),
-        slots: $checkedConvert('slots', (v) => (v as num).toInt()),
-        maxSlots: $checkedConvert('maxSlots', (v) => (v as num).toInt()),
-        memberLimit: $checkedConvert('memberLimit', (v) => (v as num).toInt()),
-        members: $checkedConvert('members', (v) => (v as num).toInt()),
-        creditsBalance: $checkedConvert(
-          'creditsBalance',
-          (v) => (v as num).toInt(),
-        ),
-        trialEndsAt: $checkedConvert(
-          'trialEndsAt',
-          (v) => v == null ? null : DateTime.parse(v as String),
-        ),
-        monthlyUzs: $checkedConvert('monthlyUzs', (v) => (v as num?)?.toInt()),
-        ledger: $checkedConvert(
-          'ledger',
-          (v) => (v as List<dynamic>)
-              .map((e) => LedgerEntry.fromJson(e as Map<String, dynamic>))
-              .toList(),
-        ),
-        prices: $checkedConvert(
-          'prices',
-          (v) => BillingPrices.fromJson(v as Map<String, dynamic>),
-        ),
-        paymentsEnabled: $checkedConvert('paymentsEnabled', (v) => v as bool),
-        selfHosted: $checkedConvert('selfHosted', (v) => v as bool?),
-      );
-      return val;
-    });
+Billing _$BillingFromJson(Map<String, dynamic> json) => $checkedCreate(
+  'Billing',
+  json,
+  ($checkedConvert) {
+    $checkKeys(
+      json,
+      requiredKeys: const [
+        'plan',
+        'slots',
+        'maxSlots',
+        'memberLimit',
+        'members',
+        'creditsBalance',
+        'ledger',
+        'prices',
+        'paymentsEnabled',
+      ],
+    );
+    final val = Billing(
+      plan: $checkedConvert('plan', (v) => v as String),
+      slots: $checkedConvert('slots', (v) => (v as num).toInt()),
+      maxSlots: $checkedConvert('maxSlots', (v) => (v as num).toInt()),
+      memberLimit: $checkedConvert('memberLimit', (v) => (v as num).toInt()),
+      members: $checkedConvert('members', (v) => (v as num).toInt()),
+      creditsBalance: $checkedConvert(
+        'creditsBalance',
+        (v) => (v as num).toInt(),
+      ),
+      trialEndsAt: $checkedConvert(
+        'trialEndsAt',
+        (v) => v == null ? null : DateTime.parse(v as String),
+      ),
+      monthlyUzs: $checkedConvert('monthlyUzs', (v) => (v as num?)?.toInt()),
+      monthlyUsd: $checkedConvert('monthlyUsd', (v) => (v as num?)?.toDouble()),
+      ledger: $checkedConvert(
+        'ledger',
+        (v) => (v as List<dynamic>)
+            .map((e) => LedgerEntry.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      ),
+      prices: $checkedConvert(
+        'prices',
+        (v) => BillingPrices.fromJson(v as Map<String, dynamic>),
+      ),
+      paymentsEnabled: $checkedConvert('paymentsEnabled', (v) => v as bool),
+      selfHosted: $checkedConvert('selfHosted', (v) => v as bool?),
+    );
+    return val;
+  },
+);
 
 Map<String, dynamic> _$BillingToJson(Billing instance) => <String, dynamic>{
   'plan': instance.plan,
@@ -237,6 +252,7 @@ Map<String, dynamic> _$BillingToJson(Billing instance) => <String, dynamic>{
   'creditsBalance': instance.creditsBalance,
   'trialEndsAt': ?instance.trialEndsAt?.toIso8601String(),
   'monthlyUzs': ?instance.monthlyUzs,
+  'monthlyUsd': ?instance.monthlyUsd,
   'ledger': instance.ledger.map((e) => e.toJson()).toList(),
   'prices': instance.prices.toJson(),
   'paymentsEnabled': instance.paymentsEnabled,

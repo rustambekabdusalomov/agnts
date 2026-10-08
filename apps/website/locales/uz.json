@@ -1,0 +1,268 @@
+{
+  "aria": {
+    "footer": "Pastki menyu",
+    "language": "Til",
+    "main": "Asosiy menyu",
+    "top": "Yuqoriga"
+  },
+  "common": {
+    "getStarted": "Boshlash"
+  },
+  "compare": {
+    "always": "Doim",
+    "cloud": "Bulutli AI agentlar",
+    "ide": "IDE'dagi AI yordamchilar",
+    "label": "Taqqoslash",
+    "no": "Yo'q",
+    "partly": "Qisman",
+    "price": "Narx",
+    "priceUs": "$25 / oy · demoda bepul",
+    "r1": "Dasturchi klaviatura oldida bo'lmasa ham ishlaydi",
+    "r2": "Jira vazifalaridan boshlaydi",
+    "r3": "Kod yozishdan oldin aniqlashtiruvchi savollar beradi",
+    "r4": "Hech narsa o'rnatish va qo'llab-quvvatlash shart emas",
+    "r5": "Telefondan tasdiqlash",
+    "r6": "O'zbek va rus tilidagi interfeys",
+    "rarely": "Kamdan-kam",
+    "title": "agnts boshqalardan nimasi bilan farq qiladi.",
+    "varies": "Turlicha",
+    "whenPrompted": "So'ralganda",
+    "yes": "Ha"
+  },
+  "connectors": {
+    "claude": {
+      "role": "Model va chat",
+      "text": "agnts kodni sizning kalitingiz bilan Claude yordamida yozadi. Uni Claude chatidan MCP serveri orqali ham boshqarish mumkin."
+    },
+    "github": {
+      "role": "Kod va pull request",
+      "text": "agnts repozitoriyingizni klonlaydi, o'z branch'ida ishlaydi va tasdiqlaganingizdan keyin pull request'ni sizning nomingizdan ochadi."
+    },
+    "gitlab": {
+      "role": "Kod va merge request",
+      "text": "GitLab uchun ham xuddi shunday: har bir vazifa uchun alohida branch va faqat tasdig'ingizdan keyin merge request."
+    },
+    "jira": {
+      "role": "Vazifalar",
+      "text": "Vazifaga agnts belgisini qo'ying. agnts uni o'qiydi, savollarini o'sha yerda beradi va pull request ochilganda vazifani yangilaydi."
+    },
+    "lead": "Trekeringiz, repozitoriylaringiz va Claude'ni bir marta ulang. Qolganini agnts o'zi bajaradi.",
+    "title": "Siz allaqachon ishlatadigan vositalar bilan ishlaydi."
+  },
+  "contact": {
+    "email": "Savollar bormi? Bizga yozing",
+    "text": "agnts demo versiyada ekan bepul, keyin oyiga $25. Hech narsa o'rnatish shart emas, har bir push esa faqat sizning tasdig'ingiz bilan.",
+    "title1": "",
+    "title2": "Vaqtingizni",
+    "title3": "qaytarib oling."
+  },
+  "faq": {
+    "a2": "Yo'q. Konteyner ichidagi agent push yoki deploy qila olmaydi. agnts faqat siz diff'ni tasdiqlaganingizdan keyin push qiladi, production'ga deploy esa faqat tugmani bosganingizda bo'ladi.",
+    "a3": "agnts avval kodni o'qiydi, so'ng variantli qisqa savollar beradi. Kod faqat siz javob berganingizdan keyin yoziladi, shuning uchun o'ylab topilgan funksiyalar bo'lmaydi.",
+    "a4": "agnts Claude Code'ni sizning tarifingizda ishga tushiradi, shuning uchun model xarajatlarini o'zingiz nazorat qilasiz va bizdan kutilmagan to'lovlar bo'lmaydi. agnts limitlaringizni kuzatadi va ular tugashidan oldin to'xtaydi.",
+    "a5": "Ha. Shaxsiy loyihalar uchun vazifalarni to'g'ridan-to'g'ri agnts'da yaratishingiz mumkin.",
+    "a6": "Yo'q. Juniorlar tezroq ishlash va diff'lardan o'rganish uchun, seniorlar esa oddiy vazifalardan xalos bo'lib, murakkab muammolarga e'tibor qaratish uchun foydalanadi.",
+    "q2": "agnts o'zi push yoki deploy qila oladimi?",
+    "q3": "Vazifa noaniq bo'lsa nima bo'ladi?",
+    "q4": "Nega o'z Claude tarifim kerak?",
+    "q5": "Jira'siz shaxsiy loyihalar uchun ishlaydimi?",
+    "q6": "Bu faqat senior dasturchilar uchunmi?",
+    "title": "Dasturchilar beradigan savollar."
+  },
+  "features": {
+    "f1": {
+      "text": "Noaniq vazifalarga o'ylab topilgan funksiyalar emas, savollar beriladi. Javoblaringiz to'g'ridan-to'g'ri kod promptiga tushadi.",
+      "title": "Taxmin qilmay, so'raydi"
+    },
+    "f2": {
+      "text": "Kutilmagan to'lovlar yo'q. agnts sessiya va haftalik limitlarni kuzatadi va ular tugashidan oldin to'xtaydi.",
+      "title": "Claude tarifingizda ishlaydi"
+    },
+    "f3": {
+      "text": "Kod uchun Sonnet, qiyin qayta urinishlar uchun Opus, xulosalar uchun Haiku. Har bir vazifa uchun o'zgartirish mumkin.",
+      "title": "Har bir qadam uchun o'z modeli"
+    },
+    "f4": {
+      "text": "Telefoningizdan javob bering, tekshiring va deploy qiling yoki agnts'ni MCP server orqali Claude chatdan boshqaring.",
+      "title": "Mobil ilova va Claude chat"
+    },
+    "f5": {
+      "text": "Asbob chaqiruvlari, buyruqlar, harakatlaringiz va limitlar — vaqtlari bilan. Ish nima uchun to'xtaganini soniyalarda ko'rasiz.",
+      "title": "Har bir qadam qayd etiladi"
+    },
+    "f6": {
+      "text": "Admin panel va mobil ilovada kunduzgi va tungi mavzular.",
+      "title": "Ingliz, rus, o'zbek tillari"
+    },
+    "label": "Imkoniyatlar",
+    "title": "Ehtiyotkor hamkasb kabi yaratilgan."
+  },
+  "footer": {
+    "made": "Toshkentda yaratilgan · 2026",
+    "tagline": "Vaqtingizni kod yozishga sarflamang. Muhandislik bilan shug'ullaning."
+  },
+  "hero": {
+    "accent": "Muhandislik",
+    "lead": "agnts kod yozish bilan bog'liq barcha ishlarni o'z zimmasiga oladi. agnts bilan dasturchilar haqiqiy muhandisga aylanadi.",
+    "log1": "2 ta savol berdi, telefondan javob berildi",
+    "log3": "48 ta o'tdi",
+    "log4": "tekshiruvingizni kutmoqda",
+    "ready": "Tekshiruvingizga tayyor",
+    "see": "Qanday ishlashini ko'ring",
+    "ticketTitle": "O'tkazma yaratishda idempotentlik kalitini talab qilish",
+    "title": "Dasturlashning yangi davri. Vaqtingizni kod yozishga sarflamang. {accent} bilan shug'ullaning."
+  },
+  "how": {
+    "lead": "Junior, middle yoki senior: oddiy vazifalarni agnts'ga topshiring, vaqtingizni esa sizni talab qiladigan ishlarga qoldiring.",
+    "s1": {
+      "text": "Kunning istalgan vaqtida Jira'da vazifani belgilang. agnts uni oladi, vazifani va kodingizni o'qib chiqadi.",
+      "title": "agnts belgisini qo'shing"
+    },
+    "s2": {
+      "text": "Noaniq narsalar variantli qisqa savolga aylanadi. Telefoningizdan bir bosishda javob bering.",
+      "title": "Savollariga javob bering"
+    },
+    "s3": {
+      "text": "Yangi konteynerda, alohida branch'da. Siz ko'rishingizdan oldin build, lint va testlar o'tishi shart.",
+      "title": "agnts kod yozadi va sinaydi"
+    },
+    "s4": {
+      "text": "Xulosa va diff'ni o'qing. Tasdiqlang — agnts siz nomingizdan push qiladi, pull request ochadi va Jira'ni yangilaydi.",
+      "title": "Siz tasdiqlaysiz"
+    },
+    "title": "Vazifaga belgi qo'ying. Sinovdan o'tgan pull request oling."
+  },
+  "marquee": {
+    "always": "24/7 ishlaydi"
+  },
+  "meta": {
+    "description": "agnts Jira vazifalaringizni 24/7 sinovdan o'tgan pull request'larga aylantiradi. Hech narsa o'rnatish shart emas. Demo davrida bepul.",
+    "title": "agnts — 24/7 ishlaydigan AI hamkasbingiz"
+  },
+  "nav": {
+    "connectors": "Konnektorlar",
+    "faq": "Savollar",
+    "how": "Qanday ishlaydi",
+    "pricing": "Narxlar",
+    "privacy": "Maxfiylik",
+    "reviews": "Sharhlar",
+    "savings": "Tejash",
+    "signIn": "Kirish"
+  },
+  "pricing": {
+    "a1": "Qo'shimcha parallel ish: +${price} / oy, har bir ish maydoniga {max} tagacha",
+    "a2": "{members} tadan ortiq har bir a'zo: +${price} / oy",
+    "a3": "Kreditlar: Claude agnts kalitida API narxi +{markup}% bilan ishlaydi",
+    "a4": "Faqat oldindan to'lov: balans tugasa, ish xavfsiz to'xtaydi",
+    "addons": "O'sishingizga qarab qo'shing",
+    "addonsTag": "Istalgan vaqtda o'zgartiring",
+    "addonsText": "Demodan keyin tarif ish maydonining oldindan to'langan balansidan oyma-oy to'lanadi. Navbat uzaysa quvvat qo'shing, kerak bo'lmasa olib tashlang.",
+    "b1": "Anthropic API kaliti yoki oldindan to'langan agnts kreditlari",
+    "b2": "Jira va Git repozitoriylaringizga kirish",
+    "demo": "Demo versiya: hozircha bepul",
+    "i1": "agnts agenti, cheksiz vazifalar",
+    "i2": "1 ta parallel ish va {members} tagacha a'zo",
+    "i3": "To'liq ishlar tarixi bilan admin panel",
+    "i4": "Javoblar, tekshiruvlar va deploy uchun mobil ilova",
+    "i5": "agnts'ni Claude chatdan boshqarish uchun MCP server",
+    "i6": "Jira, GitHub va GitLab integratsiyalari",
+    "included": "Tarkibida",
+    "perMonth": "/ oy",
+    "plan": "agnts Workspace",
+    "prepaid": "To'lov demodan keyin",
+    "selfHosted": "O'z serverlaringizda kerakmi? Bizga yozing",
+    "start": "Bepul boshlash",
+    "text": "Yakka dasturchi yoki {members} kishilik jamoa uchun bitta narx. agnts hozir demo versiyada, shuning uchun quyidagilarning barchasi hozircha bepul; pullik tariflar undan keyin boshlanadi.",
+    "title": "Bitta ish maydoni. Bitta narx. Yakka yoki jamoa.",
+    "youBring": "Sizdan"
+  },
+  "privacy": {
+    "lead": "Hech narsa o'rnatish yoki qo'llab-quvvatlash shart emas. Har bir ishga tushirish izolyatsiyalangan va sizsiz hech narsa chiqarilmaydi.",
+    "p1": {
+      "text": "Server ham, Docker ham, yangilanishlar ham kerak emas. Kiring, vositalaringizni ulang va vazifani belgilang.",
+      "title": "O'rnatish shart emas"
+    },
+    "p2": {
+      "text": "Har bir vazifa cheklangan tarmoqli alohida konteynerda bajariladi va tugagach o'chiriladi.",
+      "title": "Har bir ishga yangi konteyner"
+    },
+    "p3": {
+      "text": "Jira, Git va Claude tokenlari shifrlangan holda saqlanadi va boshqa hech qachon ko'rsatilmaydi.",
+      "title": "Shifrlangan tokenlar"
+    },
+    "p4": {
+      "text": "Agent push yoki deploy qila olmaydi. agnts faqat siz tasdiqlaganingizdan keyin push qiladi va faqat tugmani bosganingizda deploy qiladi.",
+      "title": "Sizsiz hech narsa chiqmaydi"
+    },
+    "title": "Kodingiz har bir ishga tushirishda izolyatsiyalangan."
+  },
+  "reviews": {
+    "lead": "agnts'ni ishda qo'llayotgan dasturchilarning fikrlari.",
+    "name": "[Ism Familiya]",
+    "r1": "[1-sharh: dasturchining o'z so'zlari bilan agnts unga nima bergani haqida bir-ikki gap.]",
+    "r2": "[2-sharh: dasturchining o'z so'zlari bilan agnts unga nima bergani haqida bir-ikki gap.]",
+    "r3": "[3-sharh: dasturchining o'z so'zlari bilan agnts unga nima bergani haqida bir-ikki gap.]",
+    "role": "[Lavozim, kompaniya]",
+    "title": "Dasturchilar nima deydi."
+  },
+  "savings": {
+    "about": "taxminan",
+    "hours": "Bir vazifaga sarflaydigan soatingiz",
+    "hoursPerMonth": "soat / oy",
+    "hoursUnit": "soat",
+    "label": "Tejalgan vaqt",
+    "lead": "Slayderlarni haftangizga moslang. Kod yozish va sinashni agnts bajaradi, siz esa tekshirishga bir necha daqiqa sarflaysiz.",
+    "minUnit": "daq",
+    "note": "Yuqoridagi ma'lumotlar asosidagi taxmin: oyda 4,33 hafta va 8 soatlik ish kuni. Haqiqiy tejash vazifalarga bog'liq. Claude API xarajatlari hisobga olinmagan.",
+    "perMonth": "oyiga,",
+    "perYear": "yiliga",
+    "rate": "Soatlik stavkangiz",
+    "rateUnit": "/ soat",
+    "review": "agnts pull request'ini tekshirish daqiqalari",
+    "roi": "agnts'ga sarflangan har $1 qaytaradi",
+    "savedLabel": "Oyiga tejalgan soatlar",
+    "tickets": "agnts haftada bajaradigan vazifalar",
+    "title": "Oyiga $25. U nimani qaytarishini ko'ring.",
+    "valueLabel": "Shu vaqtning qiymati",
+    "with": "agnts bilan (faqat tekshirish)",
+    "without": "agnts'siz",
+    "workdays": "to'liq ish kuni"
+  },
+  "signin": {
+    "title": "agnts’ga kirish",
+    "lede": "Google akkauntingiz bilan bir bosishda. Yangimisiz? Akkauntingiz va ish maydoningiz darhol yaratiladi.",
+    "p1": "O'z ish maydoningizda yakka dasturchi sifatida boshlang",
+    "p2": "Istalgan vaqtda yangi ish maydonlari yarating va jamoangizni taklif qiling",
+    "fine": "Demo kirish: hozircha ro'yxatdan o'tish hamma uchun ochiq.",
+    "close": "Yopish",
+    "redirecting": "Kirilmoqda…",
+    "errors": {
+      "failed": "Google orqali kirish amalga oshmadi. Qayta urinib ko'ring.",
+      "closed": "Hozir ro'yxatdan o'tish faqat taklif orqali. Ish maydoni egasidan taklif havolasini so'rang.",
+      "rate_limited": "Juda ko'p urinish. Bir daqiqa kutib, qayta urinib ko'ring.",
+      "unavailable": "Bizda nimadir xato ketdi. Birozdan so'ng qayta urinib ko'ring.",
+      "not_configured": "Bu saytda kirish hali sozlanmagan.",
+      "google": "Google orqali kirishni yuklab bo'lmadi. Internetni yoki reklama blokerini tekshirib, qayta urinib ko'ring."
+    }
+  },
+  "social": {
+    "channel": "Telegram kanal",
+    "community": "Telegram hamjamiyat"
+  },
+  "start": {
+    "label": "Boshlash",
+    "s1": {
+      "text": "Google orqali kiring. Siz o'z ish maydoningizda yakka dasturchi sifatida boshlaysiz.",
+      "title": "Akkaunt oching"
+    },
+    "s2": {
+      "text": "Jira, GitHub yoki GitLab va Claude tarifingizni ulang.",
+      "title": "Vositalaringizni ulang"
+    },
+    "s3": {
+      "text": "Birinchi vazifangizga agnts belgisini qo'ying. Qolganini agnts o'zi bajaradi.",
+      "title": "Vazifani belgilang"
+    },
+    "title": "Uch qadamda ishga tushiring."
+  }
+}

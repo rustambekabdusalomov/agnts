@@ -22,8 +22,11 @@ type Config struct {
 	// Enabled turns billing on (the hosted product). Off, workspaces are
 	// self-hosted: no fees, slots set by the Admin.
 	Enabled bool
-	// Prices in so'm.
+	// Prices in so'm: what Payme and Click charge, and what credits are
+	// worth.
 	WorkspaceUZS, SlotUZS, MemberUZS, CreditUZS int64
+	// The same prices in US dollars: what the billing page shows.
+	WorkspaceUSD, SlotUSD, MemberUSD, CreditUSD float64
 	IncludedMembers, MaxSlots                   int
 	// Markup is what a credit's price adds to API cost (1.4 = 40%).
 	Markup float64
@@ -102,6 +105,7 @@ func (s *Service) PaymentsEnabled() bool { return s.cfg.Payme.enabled() || s.cfg
 // Prices is the price list.
 type Prices struct {
 	WorkspaceUZS, SlotUZS, MemberUZS, CreditUZS int64
+	WorkspaceUSD, SlotUSD, MemberUSD, CreditUSD float64
 	IncludedMembers                             int
 	Markup                                      float64
 }
@@ -116,6 +120,7 @@ type View struct {
 	TrialEndsAt     *time.Time
 	PaidUntil       *time.Time
 	MonthlyUZS      int64
+	MonthlyUSD      float64
 	Ledger          []postgres.LedgerEntry
 	Prices          Prices
 	PaymentsEnabled bool
@@ -127,6 +132,12 @@ type View struct {
 func (s *Service) Monthly(slots, members int) int64 {
 	extraMembers := max(0, members-s.cfg.IncludedMembers)
 	return s.cfg.WorkspaceUZS + int64(max(0, slots-1))*s.cfg.SlotUZS + int64(extraMembers)*s.cfg.MemberUZS
+}
+
+// MonthlyUSD is Monthly in US dollars, from the dollar price list.
+func (s *Service) MonthlyUSD(slots, members int) float64 {
+	extraMembers := max(0, members-s.cfg.IncludedMembers)
+	return s.cfg.WorkspaceUSD + float64(max(0, slots-1))*s.cfg.SlotUSD + float64(extraMembers)*s.cfg.MemberUSD
 }
 
 // MonthlyCredits is a month's fee in credits.
@@ -168,10 +179,12 @@ func (s *Service) View(ctx context.Context, ws int64) (View, error) {
 	v := View{Plan: w.Plan, Slots: w.Slots, MaxSlots: s.cfg.MaxSlots, MemberLimit: w.MemberLimit, Members: len(members),
 		Balance: w.CreditsBalance, TrialEndsAt: w.TrialEndsAt, PaidUntil: paid, Ledger: ledger,
 		Prices: Prices{WorkspaceUZS: s.cfg.WorkspaceUZS, SlotUZS: s.cfg.SlotUZS, MemberUZS: s.cfg.MemberUZS, CreditUZS: s.cfg.CreditUZS,
+			WorkspaceUSD: s.cfg.WorkspaceUSD, SlotUSD: s.cfg.SlotUSD, MemberUSD: s.cfg.MemberUSD, CreditUSD: s.cfg.CreditUSD,
 			IncludedMembers: s.cfg.IncludedMembers, Markup: s.cfg.Markup},
 		PaymentsEnabled: s.PaymentsEnabled(), SelfHosted: !s.cfg.Enabled}
 	if s.cfg.Enabled {
 		v.MonthlyUZS = s.Monthly(w.Slots, len(members))
+		v.MonthlyUSD = s.MonthlyUSD(w.Slots, len(members))
 	}
 	return v, nil
 }

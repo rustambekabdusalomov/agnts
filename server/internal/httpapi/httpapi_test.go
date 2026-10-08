@@ -17,9 +17,11 @@ import (
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
 
+	"agnts/internal/accounts"
 	"agnts/internal/auth"
 	"agnts/internal/auth/authtest"
 	"agnts/internal/domain"
+	"agnts/internal/google"
 	"agnts/internal/secret"
 )
 
@@ -53,6 +55,10 @@ func (f fakeUsers) List(ctx context.Context) ([]domain.User, error) {
 
 func (f fakeUsers) SetAdmin(context.Context, int64, bool) error { return nil }
 
+func (f fakeUsers) LastSignIns(context.Context) (map[int64]time.Time, error) {
+	return map[int64]time.Time{1: time.Date(2026, 10, 8, 9, 0, 0, 0, time.UTC)}, nil
+}
+
 const password = "a long enough password"
 
 func newHarness(t *testing.T, db Pinger) *harness {
@@ -78,10 +84,11 @@ func newHarness(t *testing.T, db Pinger) *harness {
 	h.tickets = &fakeTickets{}
 	h.workspaces = newFakeWorkspaces()
 	h.h, err = NewHandler(Options{
-		Auth:         svc,
-		Tickets:      h.tickets,
-		Workspaces:   h.workspaces,
-		Users:        fakeUsers{users},
+		Auth:       svc,
+		Tickets:    h.tickets,
+		Workspaces: h.workspaces,
+		Users:      fakeUsers{users},
+		Feedback:   &fakeFeedback{},
 		Webhooks: map[string]http.Handler{"test": http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			h.hookWS, h.hookID = domain.WorkspaceOf(r.Context()), domain.HookOf(r.Context())
 			w.WriteHeader(http.StatusOK)
@@ -146,7 +153,7 @@ func TestPublicRoutesComeFromSpec(t *testing.T) {
 		}
 	}
 	want := map[string]bool{"POST /api/auth/login": true, "GET /api/meta": true, "GET /api/auth/signup": true, "POST /api/auth/signup": true,
-		"POST /api/auth/verify": true, "POST /api/auth/password/forgot": true, "POST /api/auth/password/reset": true, "GET /api/invites/{token}": true}
+		"POST /api/auth/verify": true, "POST /api/auth/password/forgot": true, "POST /api/auth/login/totp": true, "POST /api/auth/password/reset": true, "GET /api/invites/{token}": true}
 	if len(got) != len(want) {
 		t.Fatalf("public routes = %v, want %v", got, want)
 	}
@@ -319,5 +326,113 @@ func TestHealthz(t *testing.T) {
 	}
 	if rec := newHarness(t, pinger{errors.New("down")}).do("GET", "/healthz", "", nil); rec.Code != http.StatusServiceUnavailable {
 		t.Fatalf("db down: %d", rec.Code)
+	}
+}
+
+type fakeVerifier map[string]google.Identity
+
+func (f fakeVerifier) Verify(_ context.Context, credential string) (google.Identity, error) {
+	if id, ok := f[credential]; ok {
+		return id, nil
+	}
+	return google.Identity{}, google.ErrInvalid
+}
+
+type fakeGoogleAccounts struct {
+	closed bool
+	got    accounts.GoogleInput
+}
+
+func (f *fakeGoogleAccounts) SignInWithGoogle(_ context.Context, in accounts.GoogleInput) (accounts.GoogleResult, error) {
+	switch {
+	case f.closed:
+		return accounts.GoogleResult{}, domain.ErrForbidden
+	case in.Invite == "expired":
+		return accounts.GoogleResult{}, auth.Invalid("this invite link is invalid or expired")
+	}
+	f.got = in
+	res := accounts.GoogleResult{Token: "tok", Session: domain.Session{ExpiresAt: time.Now().Add(time.Hour)}, User: domain.User{ID: 7, Email: in.Email}}
+	if in.Invite == "to-acme" {
+		res.Workspace = "acme"
+	}
+	return res, nil
+}
+
+func TestGoogleSignIn(t *testing.T) {
+	h := newHarness(t, pinger{})
+	acc := &fakeGoogleAccounts{}
+	site, _ := url.Parse("https://site.example.com")
+	pub, _ := url.Parse("https://agnts.example.com")
+	handler, err := NewHandler(Options{
+		Auth: nil, Tickets: h.tickets, Workspaces: h.workspaces, DB: pinger{}, PublicURL: pub, CookieSecure: true,
+		Log:    slog.New(slog.NewTextHandler(io.Discard, nil)),
+		Google: &GoogleSignIn{Verifier: fakeVerifier{"good": {Subject: "1", Email: "dev@gmail.com", Name: "Dev"}}, Accounts: acc, SiteURL: site},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ip := "203.0.113.8"
+	post := func(credential, origin string, invite ...string) *httptest.ResponseRecorder {
+		form := url.Values{"credential": {credential}}
+		if len(invite) > 0 {
+			form.Set("invite", invite[0])
+		}
+		req := httptest.NewRequest("POST", "/auth/google", strings.NewReader(form.Encode()))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		if origin != "" {
+			req.Header.Set("Origin", origin)
+		}
+		req.RemoteAddr = ip
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		return rec
+	}
+
+	// Signed in: the session cookie, then the admin panel.
+	rec := post("good", "https://site.example.com")
+	if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != "https://agnts.example.com/" {
+		t.Fatalf("sign-in: %d %q", rec.Code, rec.Header().Get("Location"))
+	}
+	c := rec.Result().Cookies()
+	if len(c) != 1 || c[0].Name != SessionCookie || c[0].Value != "tok" || !c[0].HttpOnly || !c[0].Secure {
+		t.Fatalf("cookie %+v", c)
+	}
+	if acc.got.Email != "dev@gmail.com" || acc.got.DisplayName != "Dev" || acc.got.Client != domain.ClientWeb {
+		t.Fatalf("signed in as %+v", acc.got)
+	}
+
+	// With an invite: straight into the workspace they were invited to.
+	if rec := post("good", "https://agnts.example.com", "to-acme"); rec.Header().Get("Location") != "https://agnts.example.com/w/acme/dashboard" || acc.got.Invite != "to-acme" {
+		t.Fatalf("invite: %q (invite %q)", rec.Header().Get("Location"), acc.got.Invite)
+	}
+	if rec := post("good", "https://agnts.example.com", "expired"); rec.Header().Get("Location") != "https://agnts.example.com/login?signin=invite" {
+		t.Fatalf("bad invite: %q", rec.Header().Get("Location"))
+	}
+
+	// Another site, or no Origin at all, cannot sign a visitor in.
+	for _, o := range []string{"https://evil.example", ""} {
+		if rec := post("good", o); rec.Code != http.StatusForbidden || len(rec.Result().Cookies()) != 0 {
+			t.Fatalf("origin %q: %d", o, rec.Code)
+		}
+	}
+	// A token Google does not vouch for goes back to the website.
+	if rec := post("forged", "https://site.example.com"); rec.Header().Get("Location") != "https://site.example.com/?signin=failed" {
+		t.Fatalf("forged: %d %q", rec.Code, rec.Header().Get("Location"))
+	}
+	ip, acc.closed = "203.0.113.9", true
+	if rec := post("good", "https://site.example.com"); rec.Header().Get("Location") != "https://site.example.com/?signin=closed" {
+		t.Fatalf("closed: %q", rec.Header().Get("Location"))
+	}
+	// Started on the admin panel's sign-in page: back to it.
+	if rec := post("good", "https://agnts.example.com"); rec.Header().Get("Location") != "https://agnts.example.com/login?signin=closed" {
+		t.Fatalf("closed from the admin panel: %q", rec.Header().Get("Location"))
+	}
+	// Five attempts a minute from one address.
+	ip, acc.closed = "203.0.113.50", false
+	for range 5 {
+		post("good", "https://site.example.com")
+	}
+	if rec := post("good", "https://site.example.com"); rec.Header().Get("Location") != "https://site.example.com/?signin=rate_limited" {
+		t.Fatalf("rate limit: %q", rec.Header().Get("Location"))
 	}
 }

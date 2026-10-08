@@ -45,8 +45,8 @@ i18n-check: ## Check that EN/RU/UZ dictionaries have the same keys and placehold
 
 # ---- Checks ----
 
-.PHONY: lint lint-server lint-admin
-lint: lint-server lint-admin ## Lint server and admin
+.PHONY: lint lint-server lint-admin lint-website
+lint: lint-server lint-admin lint-website ## Lint server, admin and website
 
 lint-server:
 	cd server && $(GOLANGCI) run ./...
@@ -54,8 +54,11 @@ lint-server:
 lint-admin:
 	cd apps/admin && npm run lint && npm run typecheck
 
-.PHONY: test test-server test-admin
-test: test-server test-admin ## Run unit tests (set AGNTS_TEST_DATABASE_URL for DB tests)
+lint-website:
+	cd apps/website && npm run lint && npm run typecheck
+
+.PHONY: test test-server test-admin test-website
+test: test-server test-admin test-website ## Run unit tests (set AGNTS_TEST_DATABASE_URL for DB tests)
 
 test-server:
 	cd server && go test -race -p 1 ./...
@@ -63,9 +66,12 @@ test-server:
 test-admin:
 	cd apps/admin && npm test
 
+test-website:
+	cd apps/website && npm test
+
 # ---- Local development ----
 
-.PHONY: dev-db dev-server dev-admin dev-user
+.PHONY: dev-db dev-server dev-admin dev-website dev-user
 dev-db: ## Start the local PostgreSQL (Docker)
 	docker compose -f deploy/docker-compose.dev.yml up -d
 
@@ -75,14 +81,18 @@ dev-server: ## Run the server against the local database
 dev-admin: ## Run the admin panel with hot reload on :5173
 	cd apps/admin && npm run dev
 
+dev-website: ## Run the public website on :3000
+	cd apps/website && npm run dev
+
 dev-user: ## Create the local admin user
 	cd server && set -a && source ../deploy/.env.dev && set +a && go run ./cmd/agnts user create $${USERNAME:-admin}
 
 # ---- Build ----
 
 .PHONY: build image
-build: ## Build the server binary and the admin panel
+build: ## Build the server binary, the admin panel and the website
 	cd apps/admin && npm run build
+	cd apps/website && npm run generate
 	cd server && go build -trimpath -ldflags "-X main.version=$(VERSION) -X main.commit=$(COMMIT)" -o ../bin/agnts ./cmd/agnts
 
 image: ## Build the production Docker image

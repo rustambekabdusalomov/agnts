@@ -319,3 +319,97 @@ func TestMembersInvitesAndCredits(t *testing.T) {
 		t.Fatalf("ledger %+v", ledger)
 	}
 }
+
+func TestMembershipsAndLastSignIns(t *testing.T) {
+	users, sessions := testDB(t)
+	sys := domain.System(context.Background())
+	ws := NewWorkspaces(users.db)
+	solo, _ := users.Create(sys, domain.User{Username: "solo", PasswordHash: "h"})
+	idle, _ := users.Create(sys, domain.User{Username: "idle", PasswordHash: "h"})
+	kept, err := ws.Create(sys, NewWorkspace{Name: "Kept", OwnerID: solo.ID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	gone, err := ws.Create(sys, NewWorkspace{Name: "Gone", OwnerID: solo.ID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ws.SetDeleted(sys, gone.ID, true); err != nil {
+		t.Fatal(err)
+	}
+	ms, err := ws.Memberships(sys)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var mine []domain.Member
+	for _, m := range ms {
+		if m.UserID == solo.ID {
+			mine = append(mine, m)
+		}
+	}
+	// A deleted workspace is left out.
+	if len(mine) != 1 || mine[0].WorkspaceID != kept.ID || mine[0].Role != domain.RoleOwner {
+		t.Fatalf("memberships %+v", mine)
+	}
+
+	now := time.Now().Truncate(time.Second)
+	for i, at := range []time.Time{now.Add(-time.Hour), now} {
+		if err := sessions.Create(sys, domain.Session{TokenHash: []byte{byte(i), 7}, UserID: solo.ID, Client: domain.ClientWeb, CreatedAt: at, ExpiresAt: now.Add(time.Hour)}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	last, err := users.LastSignIns(sys)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !last[solo.ID].Equal(now) {
+		t.Fatalf("last sign-in %v, want %v", last[solo.ID], now)
+	}
+	if _, ok := last[idle.ID]; ok {
+		t.Fatal("a user who never signed in has a last sign-in")
+	}
+}
+
+func TestFeedback(t *testing.T) {
+	users, _ := testDB(t)
+	sys := domain.System(context.Background())
+	fb := NewFeedbacks(users.db)
+	u, _ := users.Create(sys, domain.User{Username: "fan", PasswordHash: "h"})
+	w, err := NewWorkspaces(users.db).Create(sys, NewWorkspace{Name: "Fan club", OwnerID: u.ID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	a, err := fb.Create(sys, Feedback{UserID: &u.ID, Sender: "Fan", Email: "fan@x.io", WorkspaceID: &w.ID, Title: "Love it", Description: "More languages please"})
+	if err != nil || a.Status != "new" || a.Workspace != "Fan club" || a.Title != "Love it" {
+		t.Fatalf("created %+v %v", a, err)
+	}
+	b, err := fb.Create(sys, Feedback{UserID: &u.ID, Sender: "Fan", Title: "Bug", Description: "The button is grey"})
+	if err != nil || b.WorkspaceID != nil || b.Workspace != "" {
+		t.Fatalf("without a workspace %+v %v", b, err)
+	}
+	if _, err := fb.Create(sys, Feedback{Title: "", Description: "x"}); err == nil {
+		t.Fatal("an empty title was stored")
+	}
+	if done, err := fb.SetStatus(sys, a.ID, "done"); err != nil || done.Status != "done" {
+		t.Fatalf("done: %+v %v", done, err)
+	}
+	if _, err := fb.SetStatus(sys, 1<<40, "done"); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("unknown id: %v", err)
+	}
+	list, err := fb.List(sys)
+	if err != nil || len(list) < 2 || list[0].ID != b.ID {
+		t.Fatalf("newest first: %+v %v", list, err)
+	}
+	// The sender's name stays when their account goes.
+	gone, _ := users.Create(sys, domain.User{Username: "gone", PasswordHash: "h"})
+	c, err := fb.Create(sys, Feedback{UserID: &gone.ID, Sender: "Gone Person", Title: "Bye", Description: "Thanks"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := users.Delete(sys, gone.ID); err != nil {
+		t.Fatal(err)
+	}
+	if c, err = fb.byID(sys, c.ID); err != nil || c.UserID != nil || c.Sender != "Gone Person" {
+		t.Fatalf("after the account went: %+v %v", c, err)
+	}
+}

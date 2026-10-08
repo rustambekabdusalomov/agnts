@@ -24,6 +24,7 @@ import (
 	"agnts/internal/config"
 	"agnts/internal/docs"
 	"agnts/internal/domain"
+	"agnts/internal/google"
 	"agnts/internal/httpapi"
 	"agnts/internal/mail"
 	"agnts/internal/mcpserver"
@@ -60,6 +61,12 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 	svc, err := newAuth(cfg, pool)
 	if err != nil {
 		return err
+	}
+	if cfg.PasswordSignIn == "admins" {
+		svc.PasswordsForAdminsOnly()
+		if cfg.GoogleClientID == "" {
+			log.Warn("only Admins sign in with a password (AGNTS_PASSWORD_SIGNIN=admins) and Google sign-in is off (AGNTS_GOOGLE_CLIENT_ID): nobody else can sign in")
+		}
 	}
 	a, err := newAgent(cfg, pool, log)
 	if err != nil {
@@ -159,6 +166,8 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		Billing:      a.billing,
 		EventLog:     a.store,
 		Cloud:        cfg.Cloud,
+		Google:       googleSignIn(cfg, acc),
+		Feedback:     postgres.NewFeedbacks(pool),
 		Payments: map[string]http.Handler{
 			"payme": a.billing.PaymeHandler(),
 			"click": a.billing.ClickHandler(),
@@ -309,6 +318,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.billing = billing.New(billing.Config{
 		Enabled: cfg.Cloud, WorkspaceUZS: cfg.PriceWorkspaceUZS, SlotUZS: cfg.PriceSlotUZS, MemberUZS: cfg.PriceMemberUZS,
 		CreditUZS: cfg.PriceCreditUZS, IncludedMembers: cfg.IncludedMembers, MaxSlots: cfg.MaxSlots, Markup: cfg.CreditMarkup,
+		WorkspaceUSD: cfg.PriceWorkspaceUSD, SlotUSD: cfg.PriceSlotUSD, MemberUSD: cfg.PriceMemberUSD, CreditUSD: cfg.PriceCreditUSD,
 		RunCap: cfg.RunCreditCap, PublicURL: cfg.PublicURL.String(),
 		Payme: billing.PaymeConfig{MerchantID: cfg.PaymeMerchantID, Key: cfg.PaymeKey},
 		Click: billing.ClickConfig{ServiceID: cfg.ClickServiceID, MerchantID: cfg.ClickMerchantID, SecretKey: cfg.ClickSecretKey},
@@ -822,4 +832,12 @@ func orDash(s string) string {
 		return "-"
 	}
 	return s
+}
+
+// googleSignIn is "Continue with Google" when a client id is configured.
+func googleSignIn(cfg config.Config, acc *accounts.Service) *httpapi.GoogleSignIn {
+	if cfg.GoogleClientID == "" {
+		return nil
+	}
+	return &httpapi.GoogleSignIn{Verifier: google.New(cfg.GoogleClientID), Accounts: acc, ClientID: cfg.GoogleClientID, SiteURL: cfg.SiteURL}
 }

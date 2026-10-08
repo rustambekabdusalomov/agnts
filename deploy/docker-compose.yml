@@ -16,9 +16,14 @@ services:
       - "443:443/udp"
     environment:
       AGNTS_DOMAIN: ${AGNTS_DOMAIN:?set AGNTS_DOMAIN in .env}
-      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env}
+      ACME_EMAIL: ${ACME_EMAIL:-}
+      # The hosted product (CADDYFILE=./Caddyfile.cloud) also serves the
+      # website and a separate API domain.
+      AGNTS_SITE_DOMAIN: ${AGNTS_SITE_DOMAIN:-}
+      AGNTS_API_DOMAIN: ${AGNTS_API_DOMAIN:-}
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ${CADDYFILE:-./Caddyfile}:/etc/caddy/Caddyfile:ro
+      - ./website:/srv/website:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
@@ -74,6 +79,9 @@ services:
       # Hosts added under Settings -> Network (a staging API for previews),
       # re-read every 30 seconds.
       AGNTS_EGRESS_EXTRA_URL: http://agnts:8081/egress/allow
+    # The image's own check probes the API port; the proxy has none.
+    healthcheck:
+      disable: true
     networks: [default, runs]
     logging: *logging
 

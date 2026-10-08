@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"agnts/internal/auth"
 	"agnts/internal/billing"
 	"agnts/internal/domain"
 	"agnts/internal/httpapi/gen"
@@ -220,16 +221,51 @@ func (s *Server) GrantCredits(w http.ResponseWriter, r *http.Request, id int64) 
 	writeJSON(w, http.StatusOK, out)
 }
 
-// ListPlatformUsers implements gen.ServerInterface.
+// ListPlatformUsers implements gen.ServerInterface: every user with the
+// workspaces they belong to, how they sign in and when they last did.
 func (s *Server) ListPlatformUsers(w http.ResponseWriter, r *http.Request) {
-	us, err := s.opt.Users.List(r.Context())
+	ctx := domain.System(r.Context())
+	us, err := s.opt.Users.List(ctx)
 	if err != nil {
 		s.writeInternal(w, r, err)
 		return
 	}
-	out := make([]gen.User, 0, len(us))
+	ws, err := s.opt.Workspaces.List(ctx, false)
+	if err != nil {
+		s.writeInternal(w, r, err)
+		return
+	}
+	members, err := s.opt.Workspaces.Memberships(ctx)
+	if err != nil {
+		s.writeInternal(w, r, err)
+		return
+	}
+	last, err := s.opt.Users.LastSignIns(ctx)
+	if err != nil {
+		s.writeInternal(w, r, err)
+		return
+	}
+	byID := make(map[int64]domain.WorkspaceMembership, len(ws))
+	for _, x := range ws {
+		byID[x.ID] = x
+	}
+	of := map[int64][]gen.WorkspaceSummary{}
+	for _, m := range members {
+		if x, ok := byID[m.WorkspaceID]; ok {
+			x.Role = m.Role
+			of[m.UserID] = append(of[m.UserID], toWorkspaceSummary(x))
+		}
+	}
+	out := make([]gen.PlatformUser, 0, len(us))
 	for _, u := range us {
-		out = append(out, toUser(u))
+		p := gen.PlatformUser{User: toUser(u), HasPassword: u.HasPassword(), Workspaces: of[u.ID]}
+		if p.Workspaces == nil {
+			p.Workspaces = []gen.WorkspaceSummary{}
+		}
+		if t, ok := last[u.ID]; ok {
+			p.LastSignInAt = &t
+		}
+		out = append(out, p)
 	}
 	writeJSON(w, http.StatusOK, out)
 }
@@ -240,6 +276,10 @@ func (s *Server) UpdatePlatformUser(w http.ResponseWriter, r *http.Request, id i
 	var req gen.UpdatePlatformUserJSONBody
 	if err := decodeJSON(r, &req); err != nil {
 		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	if s.opt.Auth != nil && s.opt.Auth.AdminPasswordsOnly() {
+		writeError(w, http.StatusBadRequest, "bad_request", "an account is either an Admin or a User: create Admins on the Admins page")
 		return
 	}
 	if id == me.ID && !req.IsAdmin {
@@ -256,6 +296,40 @@ func (s *Server) UpdatePlatformUser(w http.ResponseWriter, r *http.Request, id i
 		return
 	}
 	writeJSON(w, http.StatusOK, toUser(u))
+}
+
+// CreatePlatformAdmin implements gen.ServerInterface.
+func (s *Server) CreatePlatformAdmin(w http.ResponseWriter, r *http.Request) {
+	if s.accountsOff(w) {
+		return
+	}
+	me, _ := userFrom(r.Context())
+	var req gen.CreatePlatformAdminJSONBody
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	u, err := s.opt.Accounts.CreateAdmin(domain.System(r.Context()), me, auth.AdminInput{
+		Username: req.Username, Email: deref(req.Email), DisplayName: deref(req.DisplayName), Password: req.Password,
+	})
+	if err != nil {
+		s.authError(w, r, err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, toUser(u))
+}
+
+// DeletePlatformAdmin implements gen.ServerInterface.
+func (s *Server) DeletePlatformAdmin(w http.ResponseWriter, r *http.Request, id int64) {
+	if s.accountsOff(w) {
+		return
+	}
+	me, _ := userFrom(r.Context())
+	if err := s.opt.Accounts.DeleteAdmin(domain.System(r.Context()), me, id); err != nil {
+		s.authError(w, r, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (s *Server) billingError(w http.ResponseWriter, r *http.Request, err error) {
@@ -279,9 +353,14 @@ func toBilling(v billing.View) gen.Billing {
 		m := v.MonthlyUZS
 		out.MonthlyUzs = &m
 	}
+	if v.MonthlyUSD > 0 {
+		m := v.MonthlyUSD
+		out.MonthlyUsd = &m
+	}
 	self := v.SelfHosted
 	out.SelfHosted = &self
 	out.Prices.WorkspaceUzs, out.Prices.SlotUzs, out.Prices.MemberUzs, out.Prices.CreditUzs = v.Prices.WorkspaceUZS, v.Prices.SlotUZS, v.Prices.MemberUZS, v.Prices.CreditUZS
+	out.Prices.WorkspaceUsd, out.Prices.SlotUsd, out.Prices.MemberUsd, out.Prices.CreditUsd = v.Prices.WorkspaceUSD, v.Prices.SlotUSD, v.Prices.MemberUSD, v.Prices.CreditUSD
 	out.Prices.IncludedMembers, out.Prices.Markup = v.Prices.IncludedMembers, float32(v.Prices.Markup)
 	for _, e := range v.Ledger {
 		g := gen.LedgerEntry{Id: e.ID, Amount: e.Amount, Reason: gen.LedgerEntryReason(e.Reason), CreatedAt: e.CreatedAt}

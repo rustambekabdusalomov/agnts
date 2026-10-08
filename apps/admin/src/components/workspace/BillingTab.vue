@@ -18,6 +18,9 @@ const errText = (e: unknown) => (e instanceof HttpError ? e.message : t('common.
 const billing = useQuery({ queryKey: ['billing'], queryFn: () => unwrap(api.GET('/workspace/billing')) })
 const b = computed(() => billing.data.value)
 const som = (n: number) => n.toLocaleString('ru-RU').replace(/,/g, ' ')
+// Prices are shown in US dollars only (cents, or tenths of a cent for a credit).
+const usd = (n: number) =>
+  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: n < 1 ? 3 : 2 }).format(n)
 const fmt = (s?: string) => (s ? new Date(s).toLocaleDateString() : '')
 
 const slots = ref(1)
@@ -58,16 +61,16 @@ const reasonBadge: Record<string, string> = { purchase: 'b-ok', grant: 'b-info',
         <span class="badge b-info">{{ b.plan }}</span>
       </div>
       <dl class="kv">
-        <template v-if="b.monthlyUzs"><dt>{{ t('billing.plan') }}</dt><dd>{{ t('billing.monthly', { amount: som(b.monthlyUzs) }) }}</dd></template>
+        <template v-if="b.monthlyUsd"><dt>{{ t('billing.plan') }}</dt><dd>{{ t('billing.monthly', { amount: usd(b.monthlyUsd) }) }}</dd></template>
         <template v-if="b.trialEndsAt"><dt /><dd>{{ t('billing.trialUntil', { date: fmt(b.trialEndsAt) }) }}</dd></template>
       </dl>
-      <CfgRow :label="t('billing.slots')" :help="t('billing.slotsHelp', { price: som(b.prices.slotUzs) })">
+      <CfgRow :label="t('billing.slots')" :help="t('billing.slotsHelp', { price: usd(b.prices.slotUsd) })">
         <span class="row-actions">
           <NumberStepper v-model="slots" :min="1" :max="b.maxSlots" :step="1" :label="t('billing.slots')" />
           <button class="btn btn-s" :disabled="slots === b.slots || setSlots.isPending.value || b.selfHosted" @click="setSlots.mutate()">{{ t('billing.slotsSave') }}</button>
         </span>
       </CfgRow>
-      <CfgRow :label="t('billing.members')" :help="t('billing.membersHelp', { included: b.prices.includedMembers, price: som(b.prices.memberUzs) })">
+      <CfgRow :label="t('billing.members')" :help="t('billing.membersHelp', { included: b.prices.includedMembers, price: usd(b.prices.memberUsd) })">
         <span class="mono">{{ b.memberLimit > 0 ? `${b.members} / ${b.memberLimit}` : b.members }}</span>
       </CfgRow>
     </section>
@@ -77,7 +80,7 @@ const reasonBadge: Record<string, string> = { purchase: 'b-ok', grant: 'b-info',
         <div><h2>{{ t('billing.credits') }}</h2><p class="sub">{{ t('billing.creditsSub') }}</p></div>
         <span class="badge" :class="b.creditsBalance > 0 ? 'b-ok' : 'b-gray'">{{ t('ws.credits', { n: b.creditsBalance }) }}</span>
       </div>
-      <p class="hint">{{ t('billing.creditPrice', { price: som(b.prices.creditUzs) }) }}</p>
+      <p class="hint">{{ t('billing.creditPrice', { price: usd(b.prices.creditUsd) }) }}</p>
       <template v-if="b.paymentsEnabled">
         <CfgRow :label="t('billing.amount')" :help="t('billing.youGet', { n: credits })">
           <NumberStepper v-model="amount" :min="10000" :max="50000000" :step="50000" :label="t('billing.amount')" :format="som" />

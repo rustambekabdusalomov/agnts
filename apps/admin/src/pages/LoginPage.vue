@@ -6,6 +6,8 @@ import { useQuery } from '@tanstack/vue-query'
 import { api, HttpError, unwrap } from '../api/client'
 import BrandLogo from '../components/BrandLogo.vue'
 import PrefsControls from '../components/PrefsControls.vue'
+import GoogleSignIn from '../components/account/GoogleSignIn.vue'
+import TotpQr from '../components/account/TotpQr.vue'
 import { useSession } from '../stores/session'
 
 const { t } = useI18n()
@@ -26,15 +28,39 @@ const busy = ref(false)
 const error = ref('')
 // Asked for only when the account signs in with two factors.
 const needCode = ref(false)
+// An Admin without two-factor sign-in sets it up here before signing in.
+const setup = ref<{ secret: string; url: string } | null>(null)
 
 const signup = useQuery({ queryKey: ['signup-info'], queryFn: () => unwrap(api.GET('/auth/signup')), retry: false })
+
+// Back from a Google sign-in that did not work (/auth/google sends ?signin=<reason>): say why, once.
+const SIGNIN_ERRORS: Record<string, string> = {
+  failed: 'auth.googleFailed',
+  closed: 'auth.googleClosed',
+  rate_limited: 'auth.googleRateLimited',
+  unavailable: 'auth.googleError',
+  invite: 'auth.googleInvite',
+  admin: 'auth.googleAdmin',
+}
+if (typeof route.query.signin === 'string') {
+  error.value = t(SIGNIN_ERRORS[route.query.signin] ?? 'auth.googleFailed')
+  const query = { ...route.query }
+  delete query.signin
+  void router.replace({ query })
+}
 
 async function submit() {
   if (busy.value) return
   busy.value = true
   error.value = ''
   try {
-    if (await session.login(username.value.trim(), password.value, code.value)) {
+    const need = await session.login(username.value.trim(), password.value, code.value, setup.value?.secret)
+    if (need === 'code') {
+      needCode.value = true
+      return
+    }
+    if (need === 'setup') {
+      setup.value = await unwrap(api.POST('/auth/login/totp', { body: { username: username.value.trim(), password: password.value } }))
       needCode.value = true
       return
     }
@@ -42,7 +68,8 @@ async function submit() {
     await router.replace(next)
   } catch (e) {
     code.value = ''
-    if (e instanceof HttpError && e.status === 401) error.value = t('auth.wrongCredentials')
+    if (e instanceof HttpError && e.status === 403 && e.code === 'use_google') error.value = t('auth.useGoogle')
+    else if (e instanceof HttpError && e.status === 401) error.value = t('auth.wrongCredentials')
     else if (e instanceof HttpError && e.status === 429) error.value = t('auth.rateLimited', { seconds: e.retryAfter ?? 60 })
     else error.value = t('common.error')
   } finally {
@@ -52,6 +79,7 @@ async function submit() {
 
 function otherAccount() {
   needCode.value = false
+  setup.value = null
   code.value = ''
   password.value = ''
 }
@@ -66,7 +94,7 @@ function otherAccount() {
       </div>
       <div class="login-head">
         <h1>{{ t('auth.title') }}</h1>
-        <p>{{ needCode ? t('auth.codeLede') : t('auth.lede') }}</p>
+        <p>{{ setup ? t('auth.setupLede') : needCode ? t('auth.codeLede') : signup.data.value?.googleClientId && signup.data.value?.passwordSignup === false ? t('auth.adminsLede') : t('auth.lede') }}</p>
       </div>
 
       <template v-if="!needCode">
@@ -96,7 +124,8 @@ function otherAccount() {
           </span>
         </div>
       </template>
-      <div v-else class="field">
+      <TotpQr v-if="setup" :url="setup.url" :secret="setup.secret" />
+      <div v-if="needCode" class="field">
         <label class="flbl" for="login-code">{{ t('auth.code') }}</label>
         <span class="in-wrap">
           <svg class="in-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7.5 3v5.5c0 4.4-3.1 8.2-7.5 9.5-4.4-1.3-7.5-5.1-7.5-9.5V6z" /><path d="M9 12l2 2 4-4" /></svg>
@@ -128,11 +157,12 @@ function otherAccount() {
         {{ busy ? t('auth.submitting') : t('auth.submit') }}
         <svg v-if="!busy" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
       </button>
+      <GoogleSignIn v-if="!needCode && signup.data.value?.googleClientId" :client-id="signup.data.value.googleClientId" />
       <div class="login-links">
         <button v-if="needCode" type="button" class="link-btn" @click="otherAccount">{{ t('auth.back') }}</button>
         <template v-else>
           <RouterLink :to="{ name: 'forgot' }">{{ t('account.forgot') }}</RouterLink>
-          <span v-if="signup.data.value?.open">
+          <span v-if="signup.data.value?.open && signup.data.value?.passwordSignup !== false">
             {{ t('account.noAccount') }} <RouterLink :to="{ name: 'signup' }">{{ t('account.signUp') }}</RouterLink>
           </span>
         </template>

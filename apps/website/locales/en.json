@@ -1,0 +1,268 @@
+{
+  "aria": {
+    "footer": "Footer",
+    "language": "Language",
+    "main": "Main",
+    "top": "Scroll to top"
+  },
+  "common": {
+    "getStarted": "Get started"
+  },
+  "compare": {
+    "always": "Always",
+    "cloud": "Cloud coding agents",
+    "ide": "IDE coding assistants",
+    "label": "Compare",
+    "no": "No",
+    "partly": "Partly",
+    "price": "Price",
+    "priceUs": "$25 / month · free in demo",
+    "r1": "Works without a developer at the keyboard",
+    "r2": "Starts from Jira tickets",
+    "r3": "Asks clarifying questions before coding",
+    "r4": "Nothing to install or keep running",
+    "r5": "Approve from a phone",
+    "r6": "Uzbek and Russian interface",
+    "rarely": "Rarely",
+    "title": "How agnts compares.",
+    "varies": "Varies",
+    "whenPrompted": "When prompted",
+    "yes": "Yes"
+  },
+  "connectors": {
+    "claude": {
+      "role": "Model and chat",
+      "text": "agnts codes with Claude using your own key. You can also manage it from Claude chat through its MCP server."
+    },
+    "github": {
+      "role": "Code and pull requests",
+      "text": "agnts clones your repository, works on its own branch, and opens the pull request as you after you approve."
+    },
+    "gitlab": {
+      "role": "Code and merge requests",
+      "text": "The same flow for GitLab: its own branch for every task, and a merge request only after your approval."
+    },
+    "jira": {
+      "role": "Tickets",
+      "text": "Add the agnts label to a ticket. agnts reads it, asks its questions there, and updates the ticket when the pull request is open."
+    },
+    "lead": "Connect your tracker, your repositories and Claude once. agnts takes the work from there.",
+    "title": "Works with the tools you already use."
+  },
+  "contact": {
+    "email": "Questions? Email us",
+    "text": "Free while agnts is in demo, then $25 a month. Nothing to install, and your approval on every push.",
+    "title1": "Get your",
+    "title2": "time",
+    "title3": "back."
+  },
+  "faq": {
+    "a2": "No. The agent inside the container can't push or deploy. agnts pushes only after you approve the diff, and production deploys happen only when you press the button.",
+    "a3": "agnts reads the code first, then asks short questions with options. Coding starts only after you answer, so you don't get invented features.",
+    "a4": "agnts runs Claude Code on your plan, so you control the model costs and there are no surprise bills from us. agnts tracks your limits and pauses before they run out.",
+    "a5": "Yes. You can create tasks for side projects directly in agnts.",
+    "a6": "No. Juniors use it to move faster and learn from the diffs; seniors use it to clear routine tickets and stay on the hard problems.",
+    "q2": "Can agnts push code or deploy on its own?",
+    "q3": "What happens when a ticket is unclear?",
+    "q4": "Why do I need my own Claude plan?",
+    "q5": "Does it work for side projects without Jira?",
+    "q6": "Is it only for senior developers?",
+    "title": "Questions developers ask."
+  },
+  "features": {
+    "f1": {
+      "text": "Vague tickets get questions, not invented features. Your answers go straight into the coding prompt.",
+      "title": "Asks before it guesses"
+    },
+    "f2": {
+      "text": "No surprise bills. agnts tracks session and weekly limits and pauses before it runs out.",
+      "title": "Runs on your Claude plan"
+    },
+    "f3": {
+      "text": "Sonnet to code, Opus for hard retries, Haiku for summaries. Override per ticket.",
+      "title": "A model for every step"
+    },
+    "f4": {
+      "text": "Answer, review and deploy from your phone, or manage agnts from Claude chat through its MCP server.",
+      "title": "Mobile app and Claude chat"
+    },
+    "f5": {
+      "text": "Tool calls, commands, your actions and limits, with timings. See why a run stopped in seconds.",
+      "title": "Every step on record"
+    },
+    "f6": {
+      "text": "Day and night themes in the admin panel and the mobile app.",
+      "title": "English, Russian, Uzbek"
+    },
+    "label": "Features",
+    "title": "Built like a careful teammate."
+  },
+  "footer": {
+    "made": "Made in Tashkent · 2026",
+    "tagline": "Don't spend time on coding. Start engineering."
+  },
+  "hero": {
+    "accent": "engineering.",
+    "lead": "agnts takes on all the coding work. With agnts, programmers become real engineers.",
+    "log1": "asked 2 questions, answered from phone",
+    "log3": "48 passed",
+    "log4": "waiting for your review",
+    "ready": "Ready for your review",
+    "see": "See how it works",
+    "ticketTitle": "Require idempotency key on transfer creation",
+    "title": "New era of programming. Don't spend time on coding. Start {accent}"
+  },
+  "how": {
+    "lead": "Junior, mid-level or senior: hand agnts the routine tickets and keep your hours for the work that needs you.",
+    "s1": {
+      "text": "Tag a ticket in Jira, any time of day. agnts picks it up and reads the ticket and your codebase.",
+      "title": "Add the agnts label"
+    },
+    "s2": {
+      "text": "Anything unclear becomes a short question with options. Answer in one tap from your phone.",
+      "title": "Answer its questions"
+    },
+    "s3": {
+      "text": "In a fresh container on its own branch. Build, lint and tests must pass before you see it.",
+      "title": "agnts codes and tests"
+    },
+    "s4": {
+      "text": "Read the summary and the diff. Approve and agnts pushes as you, opens the pull request and updates Jira.",
+      "title": "You approve"
+    },
+    "title": "Label a ticket. Get a tested pull request back."
+  },
+  "marquee": {
+    "always": "Works 24/7"
+  },
+  "meta": {
+    "description": "agnts turns your Jira tickets into tested pull requests 24/7. Nothing to install. Free during the demo.",
+    "title": "agnts, your AI teammate that works 24/7"
+  },
+  "nav": {
+    "connectors": "Connectors",
+    "faq": "FAQ",
+    "how": "How it works",
+    "pricing": "Pricing",
+    "privacy": "Privacy",
+    "reviews": "Reviews",
+    "savings": "Savings",
+    "signIn": "Sign in"
+  },
+  "pricing": {
+    "a1": "Extra parallel run: +${price} / month, up to {max} per workspace",
+    "a2": "Extra member above {members}: +${price} / month",
+    "a3": "Credits: Claude runs on agnts's key at API cost +{markup}%",
+    "a4": "Prepaid only: a run stops cleanly when the balance runs out",
+    "addons": "Add as you grow",
+    "addonsTag": "Change any time",
+    "addonsText": "After the demo, the plan is paid a month at a time from your workspace's prepaid balance. Add capacity when the queue gets long, remove it when it doesn't.",
+    "b1": "An Anthropic API key, or prepaid agnts credits",
+    "b2": "Access to your Jira and Git repositories",
+    "demo": "Demo version: free for now",
+    "i1": "The agnts agent, unlimited tickets",
+    "i2": "1 parallel run and up to {members} members",
+    "i3": "Admin panel with full run history",
+    "i4": "Mobile app for answers, reviews and deploys",
+    "i5": "MCP server to manage agnts from Claude chat",
+    "i6": "Jira, GitHub and GitLab integrations",
+    "included": "Included",
+    "perMonth": "/ month",
+    "plan": "agnts Workspace",
+    "prepaid": "Billed after the demo",
+    "selfHosted": "Self-hosted on your servers? Talk to us",
+    "start": "Start for free",
+    "text": "One price for a solo developer or a team of {members}. agnts is in demo, so everything below is free while it lasts; paid plans start after it.",
+    "title": "One workspace. One price. Solo or team.",
+    "youBring": "You bring"
+  },
+  "privacy": {
+    "lead": "There is nothing to install or keep running. Every run is isolated, and nothing ships without you.",
+    "p1": {
+      "text": "No server, no Docker, no updates to manage. Sign in, connect your tools and label a ticket.",
+      "title": "Nothing to install"
+    },
+    "p2": {
+      "text": "Each task runs in an isolated container with limited network, removed when the run ends.",
+      "title": "A fresh box per run"
+    },
+    "p3": {
+      "text": "Jira, Git and Claude tokens are stored encrypted and never shown again.",
+      "title": "Encrypted tokens"
+    },
+    "p4": {
+      "text": "The agent can't push or deploy. agnts pushes only after you approve, and deploys only when you press the button.",
+      "title": "Nothing ships without you"
+    },
+    "title": "Your code, isolated on every run."
+  },
+  "reviews": {
+    "lead": "Reviews from developers already running agnts on real work.",
+    "name": "[Name Surname]",
+    "r1": "[Review 1: one or two sentences in the developer's own words about what agnts did for them.]",
+    "r2": "[Review 2: one or two sentences in the developer's own words about what agnts did for them.]",
+    "r3": "[Review 3: one or two sentences in the developer's own words about what agnts did for them.]",
+    "role": "[Role, company]",
+    "title": "What developers say."
+  },
+  "savings": {
+    "about": "about",
+    "hours": "Hours you would spend per ticket",
+    "hoursPerMonth": "h / month",
+    "hoursUnit": "h",
+    "label": "Time saved",
+    "lead": "Move the sliders to match your week. agnts does the coding and testing; you only spend a few minutes reviewing.",
+    "minUnit": "min",
+    "note": "Estimate from the inputs above, using 4.33 weeks per month and 8-hour workdays. Real savings depend on the tickets. Excludes Claude API usage.",
+    "perMonth": "per month,",
+    "perYear": "per year",
+    "rate": "Your hourly rate",
+    "rateUnit": "/ h",
+    "review": "Minutes to review agnts's pull request",
+    "roi": "Every $1 you spend on agnts returns",
+    "savedLabel": "Hours saved per month",
+    "tickets": "Tickets agnts handles per week",
+    "title": "$25 a month. See what it gives back.",
+    "valueLabel": "Value of that time",
+    "with": "With agnts (review only)",
+    "without": "Without agnts",
+    "workdays": "full workdays"
+  },
+  "signin": {
+    "title": "Sign in to agnts",
+    "lede": "One click with your Google account. New here? Your account and your own workspace are created on the spot.",
+    "p1": "Start as a solo developer in your own workspace",
+    "p2": "Create more workspaces and invite your team any time",
+    "fine": "Demo access: registration is open to everyone for now.",
+    "close": "Close",
+    "redirecting": "Signing you in…",
+    "errors": {
+      "failed": "Google sign-in did not go through. Try again.",
+      "closed": "Registration is by invitation right now. Ask a workspace owner for an invite link.",
+      "rate_limited": "Too many attempts. Wait a minute and try again.",
+      "unavailable": "Something went wrong on our side. Try again in a moment.",
+      "not_configured": "Sign-in is not set up on this site yet.",
+      "google": "Google sign-in could not load. Check your connection or ad blocker and try again."
+    }
+  },
+  "social": {
+    "channel": "Telegram channel",
+    "community": "Telegram community"
+  },
+  "start": {
+    "label": "Get started",
+    "s1": {
+      "text": "Sign in with Google. You start as a solo developer in your own workspace.",
+      "title": "Create an account"
+    },
+    "s2": {
+      "text": "Connect Jira, GitHub or GitLab, and your Claude plan.",
+      "title": "Connect your tools"
+    },
+    "s3": {
+      "text": "Add the agnts label to your first ticket. agnts takes it from there.",
+      "title": "Label a ticket"
+    },
+    "title": "Running in three steps."
+  }
+}

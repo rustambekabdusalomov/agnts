@@ -6,6 +6,7 @@ import { api, HttpError, unwrap } from '../../api/client'
 import PageHeader from '../../components/PageHeader.vue'
 import ClaudeConnect from '../../components/account/ClaudeConnect.vue'
 import CfgRow from '../../components/form/CfgRow.vue'
+import TotpQr from '../../components/account/TotpQr.vue'
 import { useSession } from '../../stores/session'
 import { useUi } from '../../stores/ui'
 
@@ -127,7 +128,7 @@ const subscriptions = useQuery({ queryKey: ['workspace-claude'], queryFn: () => 
       </div>
     </section>
 
-    <section class="card">
+    <section v-if="!session.user?.isAdmin || session.user?.workspaces?.length" class="card">
       <div class="ch"><div><h2>{{ t('account.myClaude') }}</h2><p class="sub">{{ t('account.myClaudeSub') }}</p></div></div>
       <ClaudeConnect
         :state="claude.data.value"
@@ -161,14 +162,14 @@ const subscriptions = useQuery({ queryKey: ['workspace-claude'], queryFn: () => 
         <button v-if="!enroll" class="btn btn-s" :disabled="begin.isPending.value" @click="begin.mutate()">{{ t('account.totpSetup') }}</button>
         <div v-else class="stack" style="gap: 10px">
           <p class="hint">{{ t('account.totpScan') }}</p>
-          <div><div class="cfg-lbl">{{ t('account.totpSecret') }}</div><code class="mono-box">{{ enroll.secret }}</code></div>
-          <div><div class="cfg-lbl">{{ t('account.totpLink') }}</div><a class="mono-box" :href="enroll.url">{{ enroll.url }}</a></div>
+          <TotpQr :url="enroll.url" :secret="enroll.secret" />
           <span class="row-actions" style="justify-content: flex-start">
             <input v-model="code" class="cfg-in code-in" inputmode="numeric" maxlength="6" placeholder="••••••" :aria-label="t('account.totpCode')" style="max-width: 180px">
             <button class="btn btn-p btn-s" :disabled="code.length !== 6 || confirm.isPending.value" @click="confirm.mutate()">{{ t('account.totpConfirm') }}</button>
           </span>
         </div>
       </template>
+      <p v-else-if="user?.isAdmin" class="hint">{{ t('account.totpRequiredAdmin') }}</p>
       <div v-else class="stack" style="gap: 10px">
         <CfgRow :label="t('account.currentPassword')">
           <input v-model="offPassword" class="cfg-in" type="password" autocomplete="current-password" :aria-label="t('account.currentPassword')">

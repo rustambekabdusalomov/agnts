@@ -3,7 +3,6 @@
 package metrics
 
 import (
-	"agnts/internal/domain"
 	"context"
 	"fmt"
 	"io"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"agnts/internal/domain"
 	"agnts/internal/store/postgres"
 )
 

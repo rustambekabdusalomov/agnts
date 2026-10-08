@@ -48,6 +48,12 @@ void main() {
       // TODO
     });
 
+    // The same in US dollars, as the billing page shows it
+    // double monthlyUsd
+    test('to test the property `monthlyUsd`', () async {
+      // TODO
+    });
+
     // List<LedgerEntry> ledger
     test('to test the property `ledger`', () async {
       // TODO

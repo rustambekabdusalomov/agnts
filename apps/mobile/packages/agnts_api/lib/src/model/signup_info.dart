@@ -25,6 +25,10 @@ class SignupInfo {
     required  this.firstUser,
 
     required  this.emailEnabled,
+
+     this.googleClientId,
+
+     this.passwordSignup,
   });
 
       /// Anyone can register; otherwise only with an invite link
@@ -66,19 +70,49 @@ class SignupInfo {
 
 
 
+      /// OAuth client id for \"Continue with Google\" (a form post to /auth/google); absent when it is off
+  @JsonKey(
+    
+    name: r'googleClientId',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? googleClientId;
+
+
+
+      /// Registering with a password works; when only Admins sign in with one, only for the first account
+  @JsonKey(
+    
+    name: r'passwordSignup',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? passwordSignup;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is SignupInfo &&
       other.open == open &&
       other.firstUser == firstUser &&
-      other.emailEnabled == emailEnabled;
+      other.emailEnabled == emailEnabled &&
+      other.googleClientId == googleClientId &&
+      other.passwordSignup == passwordSignup;
 
     @override
     int get hashCode =>
         open.hashCode +
         firstUser.hashCode +
-        emailEnabled.hashCode;
+        emailEnabled.hashCode +
+        googleClientId.hashCode +
+        passwordSignup.hashCode;
 
   factory SignupInfo.fromJson(Map<String, dynamic> json) => _$SignupInfoFromJson(json);
 

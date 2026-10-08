@@ -15,6 +15,42 @@ security:
   - bearerAuth: []
 
 paths:
+  /auth/login/totp:
+    post:
+      operationId: beginLoginTotp
+      summary: Start the two-factor setup an Admin without it does at sign-in
+      description: >-
+        Two-factor sign-in is mandatory for Admins. When login answers 401
+        totp_setup_required, this returns a new secret (after checking the
+        password again); signing in with it as totpSecret and a matching code
+        saves it and starts the session.
+      tags: [auth]
+      x-scope: user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string, minLength: 1, maxLength: 254 }
+                password: { type: string, minLength: 1, maxLength: 256 }
+      responses:
+        '200':
+          description: A secret to add to an authenticator app
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [secret, url]
+                properties:
+                  secret: { type: string, description: 'Base32, for manual entry' }
+                  url: { type: string, description: 'otpauth:// URL, for a QR code' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
   /auth/login:
     post:
       operationId: login
@@ -2220,6 +2256,77 @@ paths:
       responses:
         '204': { description: Disconnected }
 
+  /feedback:
+    post:
+      operationId: sendFeedback
+      summary: Send feedback to the platform's Admins
+      tags: [feedback]
+      x-scope: user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, description]
+              properties:
+                title: { type: string, minLength: 1, maxLength: 120 }
+                description: { type: string, minLength: 1, maxLength: 5000 }
+                workspace: { type: string, maxLength: 40, description: 'The slug of the workspace it is sent from (yours), for context' }
+      responses:
+        '201':
+          description: Sent
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Feedback' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /platform/feedback:
+    get:
+      operationId: listPlatformFeedback
+      summary: Every feedback people sent, newest first (Admin)
+      tags: [platform]
+      x-scope: admin
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Feedback' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /platform/feedback/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    put:
+      operationId: updatePlatformFeedback
+      summary: Mark a feedback done, or new again (Admin)
+      tags: [platform]
+      x-scope: admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [new, done] }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Feedback' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /workspaces:
     get:
       operationId: listWorkspaces
@@ -2725,7 +2832,7 @@ paths:
   /platform/users:
     get:
       operationId: listPlatformUsers
-      summary: Every user (Admin)
+      summary: Every user, with their workspaces and last sign-in (Admin)
       tags: [platform]
       x-scope: admin
       responses:
@@ -2735,8 +2842,53 @@ paths:
             application/json:
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/User' }
+                items: { $ref: '#/components/schemas/PlatformUser' }
         '403': { $ref: '#/components/responses/Forbidden' }
+
+  /platform/admins:
+    post:
+      operationId: createPlatformAdmin
+      summary: Create an Admin account that signs in with a password (Admin)
+      tags: [platform]
+      x-scope: admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string, maxLength: 64 }
+                email: { type: string, maxLength: 254 }
+                displayName: { type: string, maxLength: 100 }
+                password: { type: string, minLength: 1, maxLength: 256 }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /platform/admins/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    delete:
+      operationId: deletePlatformAdmin
+      summary: Delete an Admin account; not your own (Admin)
+      tags: [platform]
+      x-scope: admin
+      responses:
+        '204': { description: Deleted }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
 
   /platform/users/{id}:
     parameters:
@@ -2746,7 +2898,7 @@ paths:
         schema: { type: integer, format: int64 }
     put:
       operationId: updatePlatformUser
-      summary: Grant or remove the Admin role (Admin)
+      summary: Grant or remove the Admin role (Admin); refused when Admins and Users are separate accounts
       tags: [platform]
       x-scope: admin
       requestBody:
@@ -2816,6 +2968,8 @@ components:
         open: { type: boolean, description: Anyone can register; otherwise only with an invite link }
         firstUser: { type: boolean, description: No account exists yet; the first one becomes Admin }
         emailEnabled: { type: boolean, description: "The server can send email (verification, invites, resets)" }
+        googleClientId: { type: string, description: 'OAuth client id for "Continue with Google" (a form post to /auth/google); absent when it is off' }
+        passwordSignup: { type: boolean, description: 'Registering with a password works; when only Admins sign in with one, only for the first account' }
 
     RegisterRequest:
       type: object
@@ -2839,6 +2993,33 @@ components:
       type: string
       description: 'owner runs the workspace; user works in it; viewer sees everything and changes nothing'
       enum: [owner, user, viewer]
+
+    Feedback:
+      type: object
+      required: [id, title, description, status, sender, createdAt]
+      properties:
+        id: { type: integer, format: int64 }
+        title: { type: string }
+        description: { type: string }
+        status: { type: string, enum: [new, done] }
+        sender: { type: string, description: 'The sender''s name when they sent it' }
+        email: { type: string }
+        userId: { type: integer, format: int64, description: 'Absent once the account is deleted' }
+        workspace: { type: string, description: The name of the workspace it was sent from }
+        createdAt: { type: string, format: date-time }
+
+    PlatformUser:
+      type: object
+      description: A user as the Admin cabinet lists them
+      required: [user, hasPassword, workspaces]
+      properties:
+        user: { $ref: '#/components/schemas/User' }
+        hasPassword: { type: boolean, description: Can sign in with a password; false for accounts made with Google sign-in }
+        lastSignInAt: { type: string, format: date-time, description: The newest session still on record }
+        workspaces:
+          type: array
+          description: The workspaces they belong to (not deleted), with their role
+          items: { $ref: '#/components/schemas/WorkspaceSummary' }
 
     WorkspaceSummary:
       type: object
@@ -3019,13 +3200,18 @@ components:
         creditsBalance: { type: integer, format: int64 }
         trialEndsAt: { type: string, format: date-time }
         monthlyUzs: { type: integer, format: int64, description: "What the plan, extra slots and extra members cost a month" }
+        monthlyUsd: { type: number, format: double, description: 'The same in US dollars, as the billing page shows it' }
         ledger:
           type: array
           items: { $ref: '#/components/schemas/LedgerEntry' }
         prices:
           type: object
-          required: [workspaceUzs, slotUzs, memberUzs, creditUzs, includedMembers, markup]
+          required: [workspaceUzs, slotUzs, memberUzs, creditUzs, workspaceUsd, slotUsd, memberUsd, creditUsd, includedMembers, markup]
           properties:
+            workspaceUsd: { type: number, format: double, description: 'A workspace a month, in US dollars (shown on the billing page)' }
+            slotUsd: { type: number, format: double, description: 'An extra parallel run a month, in US dollars' }
+            memberUsd: { type: number, format: double, description: 'A member above the included ones a month, in US dollars' }
+            creditUsd: { type: number, format: double, description: 'One credit, in US dollars' }
             workspaceUzs: { type: integer, format: int64 }
             slotUzs: { type: integer, format: int64 }
             memberUzs: { type: integer, format: int64 }
@@ -3091,6 +3277,10 @@ components:
           type: string
           description: Six-digit code from the authenticator app, when two-factor sign-in is on
           pattern: '^[0-9]{6}$'
+        totpSecret:
+          type: string
+          maxLength: 128
+          description: An Admin finishing two-factor setup at sign-in (beginLoginTotp's secret); code must match it
         client:
           type: string
           enum: [web, mobile]

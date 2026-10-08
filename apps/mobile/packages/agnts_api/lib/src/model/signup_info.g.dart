@@ -13,13 +13,23 @@ abstract class _$SignupInfoCWProxy {
 
   SignupInfo emailEnabled(bool emailEnabled);
 
+  SignupInfo googleClientId(String? googleClientId);
+
+  SignupInfo passwordSignup(bool? passwordSignup);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `SignupInfo(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
   /// ```dart
   /// SignupInfo(...).copyWith(id: 12, name: "My name")
   /// ````
-  SignupInfo call({bool open, bool firstUser, bool emailEnabled});
+  SignupInfo call({
+    bool open,
+    bool firstUser,
+    bool emailEnabled,
+    String? googleClientId,
+    bool? passwordSignup,
+  });
 }
 
 /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfSignupInfo.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfSignupInfo.copyWith.fieldName(...)`
@@ -39,6 +49,14 @@ class _$SignupInfoCWProxyImpl implements _$SignupInfoCWProxy {
       this(emailEnabled: emailEnabled);
 
   @override
+  SignupInfo googleClientId(String? googleClientId) =>
+      this(googleClientId: googleClientId);
+
+  @override
+  SignupInfo passwordSignup(bool? passwordSignup) =>
+      this(passwordSignup: passwordSignup);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `SignupInfo(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -49,6 +67,8 @@ class _$SignupInfoCWProxyImpl implements _$SignupInfoCWProxy {
     Object? open = const $CopyWithPlaceholder(),
     Object? firstUser = const $CopyWithPlaceholder(),
     Object? emailEnabled = const $CopyWithPlaceholder(),
+    Object? googleClientId = const $CopyWithPlaceholder(),
+    Object? passwordSignup = const $CopyWithPlaceholder(),
   }) {
     return SignupInfo(
       open: open == const $CopyWithPlaceholder()
@@ -63,6 +83,14 @@ class _$SignupInfoCWProxyImpl implements _$SignupInfoCWProxy {
           ? _value.emailEnabled
           // ignore: cast_nullable_to_non_nullable
           : emailEnabled as bool,
+      googleClientId: googleClientId == const $CopyWithPlaceholder()
+          ? _value.googleClientId
+          // ignore: cast_nullable_to_non_nullable
+          : googleClientId as String?,
+      passwordSignup: passwordSignup == const $CopyWithPlaceholder()
+          ? _value.passwordSignup
+          // ignore: cast_nullable_to_non_nullable
+          : passwordSignup as bool?,
     );
   }
 }
@@ -86,6 +114,8 @@ SignupInfo _$SignupInfoFromJson(Map<String, dynamic> json) => $checkedCreate(
       open: $checkedConvert('open', (v) => v as bool),
       firstUser: $checkedConvert('firstUser', (v) => v as bool),
       emailEnabled: $checkedConvert('emailEnabled', (v) => v as bool),
+      googleClientId: $checkedConvert('googleClientId', (v) => v as String?),
+      passwordSignup: $checkedConvert('passwordSignup', (v) => v as bool?),
     );
     return val;
   },
@@ -96,4 +126,6 @@ Map<String, dynamic> _$SignupInfoToJson(SignupInfo instance) =>
       'open': instance.open,
       'firstUser': instance.firstUser,
       'emailEnabled': instance.emailEnabled,
+      'googleClientId': ?instance.googleClientId,
+      'passwordSignup': ?instance.passwordSignup,
     };

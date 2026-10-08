@@ -153,6 +153,35 @@ func (s *Users) Create(ctx context.Context, u domain.User) (domain.User, error) 
 	return out, err
 }
 
+// Delete removes a user; their sessions and tokens go with them.
+func (s *Users) Delete(ctx context.Context, id int64) error {
+	tag, err := s.db.Exec(ctx, `DELETE FROM users WHERE id = $1`, id)
+	if err == nil && tag.RowsAffected() == 0 {
+		return domain.ErrNotFound
+	}
+	return err
+}
+
+// LastSignIns returns when each user last signed in: their newest session
+// still on record (expired ones are purged).
+func (s *Users) LastSignIns(ctx context.Context) (map[int64]time.Time, error) {
+	rows, err := s.db.Query(ctx, `SELECT user_id, max(created_at) FROM sessions GROUP BY user_id`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := map[int64]time.Time{}
+	for rows.Next() {
+		var id int64
+		var t time.Time
+		if err := rows.Scan(&id, &t); err != nil {
+			return nil, err
+		}
+		out[id] = t
+	}
+	return out, rows.Err()
+}
+
 // AdvanceTOTPStep records step as used if it is later than the last one.
 func (s *Users) AdvanceTOTPStep(ctx context.Context, userID, step int64) (bool, error) {
 	tag, err := s.db.Exec(ctx,

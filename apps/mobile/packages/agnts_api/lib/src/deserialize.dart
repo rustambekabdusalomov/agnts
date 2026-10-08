@@ -12,6 +12,8 @@ import 'package:agnts_api/src/model/answers_request_answers_inner.dart';
 import 'package:agnts_api/src/model/approach.dart';
 import 'package:agnts_api/src/model/approve_ticket_request.dart';
 import 'package:agnts_api/src/model/attachment.dart';
+import 'package:agnts_api/src/model/begin_login_totp200_response.dart';
+import 'package:agnts_api/src/model/begin_login_totp_request.dart';
 import 'package:agnts_api/src/model/begin_totp200_response.dart';
 import 'package:agnts_api/src/model/billing.dart';
 import 'package:agnts_api/src/model/billing_prices.dart';
@@ -31,6 +33,7 @@ import 'package:agnts_api/src/model/connect_integration_request.dart';
 import 'package:agnts_api/src/model/connect_result.dart';
 import 'package:agnts_api/src/model/create_invite201_response.dart';
 import 'package:agnts_api/src/model/create_invite_request.dart';
+import 'package:agnts_api/src/model/create_platform_admin_request.dart';
 import 'package:agnts_api/src/model/create_workspace_request.dart';
 import 'package:agnts_api/src/model/dashboard.dart';
 import 'package:agnts_api/src/model/dashboard_counts.dart';
@@ -46,6 +49,7 @@ import 'package:agnts_api/src/model/error.dart';
 import 'package:agnts_api/src/model/event.dart';
 import 'package:agnts_api/src/model/event_page.dart';
 import 'package:agnts_api/src/model/event_summary.dart';
+import 'package:agnts_api/src/model/feedback.dart';
 import 'package:agnts_api/src/model/file_change.dart';
 import 'package:agnts_api/src/model/finding.dart';
 import 'package:agnts_api/src/model/follow_up_suggestion.dart';
@@ -85,6 +89,7 @@ import 'package:agnts_api/src/model/plane_state.dart';
 import 'package:agnts_api/src/model/platform_overview.dart';
 import 'package:agnts_api/src/model/platform_overview_runs_inner.dart';
 import 'package:agnts_api/src/model/platform_overview_server_queue_inner.dart';
+import 'package:agnts_api/src/model/platform_user.dart';
 import 'package:agnts_api/src/model/platform_workspace.dart';
 import 'package:agnts_api/src/model/preview_input.dart';
 import 'package:agnts_api/src/model/preview_issue.dart';
@@ -126,6 +131,7 @@ import 'package:agnts_api/src/model/rule_answers.dart';
 import 'package:agnts_api/src/model/rule_answers_answers_inner.dart';
 import 'package:agnts_api/src/model/rule_input.dart';
 import 'package:agnts_api/src/model/rule_question.dart';
+import 'package:agnts_api/src/model/send_feedback_request.dart';
 import 'package:agnts_api/src/model/set_member_role_request.dart';
 import 'package:agnts_api/src/model/set_plane_webhook_secret_request.dart';
 import 'package:agnts_api/src/model/set_slots_request.dart';
@@ -157,6 +163,7 @@ import 'package:agnts_api/src/model/translation.dart';
 import 'package:agnts_api/src/model/translation_items_inner.dart';
 import 'package:agnts_api/src/model/unregister_device_request.dart';
 import 'package:agnts_api/src/model/update_integration_request.dart';
+import 'package:agnts_api/src/model/update_platform_feedback_request.dart';
 import 'package:agnts_api/src/model/update_platform_user_request.dart';
 import 'package:agnts_api/src/model/update_platform_workspace_request.dart';
 import 'package:agnts_api/src/model/update_profile_request.dart';
@@ -217,6 +224,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ApproveTicketRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Attachment':
           return Attachment.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'BeginLoginTotp200Response':
+          return BeginLoginTotp200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'BeginLoginTotpRequest':
+          return BeginLoginTotpRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'BeginTotp200Response':
           return BeginTotp200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Billing':
@@ -258,6 +269,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return CreateInvite201Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'CreateInviteRequest':
           return CreateInviteRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CreatePlatformAdminRequest':
+          return CreatePlatformAdminRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'CreateWorkspaceRequest':
           return CreateWorkspaceRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Dashboard':
@@ -288,6 +301,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return EventPage.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'EventSummary':
           return EventSummary.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'Feedback':
+          return Feedback.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'FileChange':
           return FileChange.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Finding':
@@ -378,6 +393,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return PlatformOverviewRunsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PlatformOverviewServerQueueInner':
           return PlatformOverviewServerQueueInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PlatformUser':
+          return PlatformUser.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PlatformWorkspace':
           return PlatformWorkspace.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PreviewInput':
@@ -472,6 +489,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
         case 'RuleStatus':
           
           
+        case 'SendFeedbackRequest':
+          return SendFeedbackRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetMemberRoleRequest':
           return SetMemberRoleRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetPlaneWebhookSecretRequest':
@@ -546,6 +565,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return UnregisterDeviceRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'UpdateIntegrationRequest':
           return UpdateIntegrationRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'UpdatePlatformFeedbackRequest':
+          return UpdatePlatformFeedbackRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'UpdatePlatformUserRequest':
           return UpdatePlatformUserRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'UpdatePlatformWorkspaceRequest':

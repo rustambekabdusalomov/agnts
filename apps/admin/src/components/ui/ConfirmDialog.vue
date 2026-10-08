@@ -4,7 +4,8 @@ import { useI18n } from 'vue-i18n'
 
 // Centered confirm modal on the native <dialog>: it traps focus, closes on
 // Escape and renders above everything. Clicking the backdrop cancels.
-const props = defineProps<{ title: string; message?: string; confirmLabel: string; danger?: boolean; busy?: boolean }>()
+// disabled keeps the confirm button off (a form inside that is not filled in yet).
+const props = defineProps<{ title: string; message?: string; confirmLabel: string; danger?: boolean; busy?: boolean; disabled?: boolean }>()
 const emit = defineEmits<{ confirm: [] }>()
 const open = defineModel<boolean>({ default: false })
 const { t } = useI18n()
@@ -48,7 +49,7 @@ function onBackdrop(e: MouseEvent) {
       <slot />
       <div class="cdlg-f">
         <button class="btn" type="button" :disabled="busy" autofocus @click="open = false">{{ t('form.cancel') }}</button>
-        <button class="btn" :class="danger ? 'btn-danger' : 'btn-p'" type="button" :disabled="busy" @click="emit('confirm')">
+        <button class="btn" :class="danger ? 'btn-danger' : 'btn-p'" type="button" :disabled="busy || disabled" @click="emit('confirm')">
           <span v-if="busy" class="spin" aria-hidden="true" />{{ confirmLabel }}
         </button>
       </div>

@@ -21,6 +21,8 @@ doc/ApproveTicketRequest.md
 doc/Attachment.md
 doc/AttachmentsApi.md
 doc/AuthApi.md
+doc/BeginLoginTotp200Response.md
+doc/BeginLoginTotpRequest.md
 doc/BeginTotp200Response.md
 doc/Billing.md
 doc/BillingApi.md
@@ -42,6 +44,7 @@ doc/ConnectIntegrationRequest.md
 doc/ConnectResult.md
 doc/CreateInvite201Response.md
 doc/CreateInviteRequest.md
+doc/CreatePlatformAdminRequest.md
 doc/CreateWorkspaceRequest.md
 doc/Dashboard.md
 doc/DashboardApi.md
@@ -60,6 +63,8 @@ doc/Error.md
 doc/Event.md
 doc/EventPage.md
 doc/EventSummary.md
+doc/Feedback.md
+doc/FeedbackApi.md
 doc/FileChange.md
 doc/Finding.md
 doc/FollowUpSuggestion.md
@@ -109,6 +114,7 @@ doc/PlatformApi.md
 doc/PlatformOverview.md
 doc/PlatformOverviewRunsInner.md
 doc/PlatformOverviewServerQueueInner.md
+doc/PlatformUser.md
 doc/PlatformWorkspace.md
 doc/PreviewInput.md
 doc/PreviewIssue.md
@@ -156,6 +162,7 @@ doc/RuleKind.md
 doc/RuleQuestion.md
 doc/RuleStatus.md
 doc/RulesApi.md
+doc/SendFeedbackRequest.md
 doc/SetMemberRoleRequest.md
 doc/SetPlaneWebhookSecretRequest.md
 doc/SetSlotsRequest.md
@@ -194,6 +201,7 @@ doc/TranslationItemsInner.md
 doc/TranslationLanguage.md
 doc/UnregisterDeviceRequest.md
 doc/UpdateIntegrationRequest.md
+doc/UpdatePlatformFeedbackRequest.md
 doc/UpdatePlatformUserRequest.md
 doc/UpdatePlatformWorkspaceRequest.md
 doc/UpdateProfileRequest.md
@@ -222,6 +230,7 @@ lib/src/api/billing_api.dart
 lib/src/api/dashboard_api.dart
 lib/src/api/devices_api.dart
 lib/src/api/docs_api.dart
+lib/src/api/feedback_api.dart
 lib/src/api/integrations_api.dart
 lib/src/api/learn_api.dart
 lib/src/api/logs_api.dart
@@ -256,6 +265,8 @@ lib/src/model/answers_request_answers_inner.dart
 lib/src/model/approach.dart
 lib/src/model/approve_ticket_request.dart
 lib/src/model/attachment.dart
+lib/src/model/begin_login_totp200_response.dart
+lib/src/model/begin_login_totp_request.dart
 lib/src/model/begin_totp200_response.dart
 lib/src/model/billing.dart
 lib/src/model/billing_prices.dart
@@ -276,6 +287,7 @@ lib/src/model/connect_integration_request.dart
 lib/src/model/connect_result.dart
 lib/src/model/create_invite201_response.dart
 lib/src/model/create_invite_request.dart
+lib/src/model/create_platform_admin_request.dart
 lib/src/model/create_workspace_request.dart
 lib/src/model/dashboard.dart
 lib/src/model/dashboard_counts.dart
@@ -291,6 +303,7 @@ lib/src/model/error.dart
 lib/src/model/event.dart
 lib/src/model/event_page.dart
 lib/src/model/event_summary.dart
+lib/src/model/feedback.dart
 lib/src/model/file_change.dart
 lib/src/model/finding.dart
 lib/src/model/follow_up_suggestion.dart
@@ -334,6 +347,7 @@ lib/src/model/plane_state.dart
 lib/src/model/platform_overview.dart
 lib/src/model/platform_overview_runs_inner.dart
 lib/src/model/platform_overview_server_queue_inner.dart
+lib/src/model/platform_user.dart
 lib/src/model/platform_workspace.dart
 lib/src/model/preview_input.dart
 lib/src/model/preview_issue.dart
@@ -379,6 +393,7 @@ lib/src/model/rule_input.dart
 lib/src/model/rule_kind.dart
 lib/src/model/rule_question.dart
 lib/src/model/rule_status.dart
+lib/src/model/send_feedback_request.dart
 lib/src/model/set_member_role_request.dart
 lib/src/model/set_plane_webhook_secret_request.dart
 lib/src/model/set_slots_request.dart
@@ -414,6 +429,7 @@ lib/src/model/translation_items_inner.dart
 lib/src/model/translation_language.dart
 lib/src/model/unregister_device_request.dart
 lib/src/model/update_integration_request.dart
+lib/src/model/update_platform_feedback_request.dart
 lib/src/model/update_platform_user_request.dart
 lib/src/model/update_platform_workspace_request.dart
 lib/src/model/update_profile_request.dart
@@ -448,6 +464,8 @@ test/approve_ticket_request_test.dart
 test/attachment_test.dart
 test/attachments_api_test.dart
 test/auth_api_test.dart
+test/begin_login_totp200_response_test.dart
+test/begin_login_totp_request_test.dart
 test/begin_totp200_response_test.dart
 test/billing_api_test.dart
 test/billing_prices_test.dart
@@ -469,6 +487,7 @@ test/connect_integration_request_test.dart
 test/connect_result_test.dart
 test/create_invite201_response_test.dart
 test/create_invite_request_test.dart
+test/create_platform_admin_request_test.dart
 test/create_workspace_request_test.dart
 test/dashboard_api_test.dart
 test/dashboard_counts_test.dart
@@ -487,6 +506,8 @@ test/error_test.dart
 test/event_page_test.dart
 test/event_summary_test.dart
 test/event_test.dart
+test/feedback_api_test.dart
+test/feedback_test.dart
 test/file_change_test.dart
 test/finding_test.dart
 test/follow_up_suggestion_test.dart
@@ -536,6 +557,7 @@ test/platform_api_test.dart
 test/platform_overview_runs_inner_test.dart
 test/platform_overview_server_queue_inner_test.dart
 test/platform_overview_test.dart
+test/platform_user_test.dart
 test/platform_workspace_test.dart
 test/preview_input_test.dart
 test/preview_issue_test.dart
@@ -583,6 +605,7 @@ test/rule_question_test.dart
 test/rule_status_test.dart
 test/rule_test.dart
 test/rules_api_test.dart
+test/send_feedback_request_test.dart
 test/set_member_role_request_test.dart
 test/set_plane_webhook_secret_request_test.dart
 test/set_slots_request_test.dart
@@ -621,6 +644,7 @@ test/translation_language_test.dart
 test/translation_test.dart
 test/unregister_device_request_test.dart
 test/update_integration_request_test.dart
+test/update_platform_feedback_request_test.dart
 test/update_platform_user_request_test.dart
 test/update_platform_workspace_request_test.dart
 test/update_profile_request_test.dart

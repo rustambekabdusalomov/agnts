@@ -50,7 +50,7 @@
     "syncedPlane": "Plane синхронизирован: открыто {found}, новых {created}",
     "workspace": "Пространство",
     "profile": "Профиль",
-    "platform": "Консоль оператора",
+    "platform": "Кабинет администратора",
     "people": "Люди",
     "account": "Аккаунт"
   }

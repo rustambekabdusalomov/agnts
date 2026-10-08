@@ -13,6 +13,8 @@ abstract class _$LoginRequestCWProxy {
 
   LoginRequest code(String? code);
 
+  LoginRequest totpSecret(String? totpSecret);
+
   LoginRequest client(LoginRequestClientEnum client);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `LoginRequest(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -25,6 +27,7 @@ abstract class _$LoginRequestCWProxy {
     String username,
     String password,
     String? code,
+    String? totpSecret,
     LoginRequestClientEnum client,
   });
 }
@@ -45,6 +48,9 @@ class _$LoginRequestCWProxyImpl implements _$LoginRequestCWProxy {
   LoginRequest code(String? code) => this(code: code);
 
   @override
+  LoginRequest totpSecret(String? totpSecret) => this(totpSecret: totpSecret);
+
+  @override
   LoginRequest client(LoginRequestClientEnum client) => this(client: client);
 
   @override
@@ -58,6 +64,7 @@ class _$LoginRequestCWProxyImpl implements _$LoginRequestCWProxy {
     Object? username = const $CopyWithPlaceholder(),
     Object? password = const $CopyWithPlaceholder(),
     Object? code = const $CopyWithPlaceholder(),
+    Object? totpSecret = const $CopyWithPlaceholder(),
     Object? client = const $CopyWithPlaceholder(),
   }) {
     return LoginRequest(
@@ -73,6 +80,10 @@ class _$LoginRequestCWProxyImpl implements _$LoginRequestCWProxy {
           ? _value.code
           // ignore: cast_nullable_to_non_nullable
           : code as String?,
+      totpSecret: totpSecret == const $CopyWithPlaceholder()
+          ? _value.totpSecret
+          // ignore: cast_nullable_to_non_nullable
+          : totpSecret as String?,
       client: client == const $CopyWithPlaceholder()
           ? _value.client
           // ignore: cast_nullable_to_non_nullable
@@ -98,6 +109,7 @@ LoginRequest _$LoginRequestFromJson(Map<String, dynamic> json) =>
         username: $checkedConvert('username', (v) => v as String),
         password: $checkedConvert('password', (v) => v as String),
         code: $checkedConvert('code', (v) => v as String?),
+        totpSecret: $checkedConvert('totpSecret', (v) => v as String?),
         client: $checkedConvert(
           'client',
           (v) => $enumDecode(_$LoginRequestClientEnumEnumMap, v),
@@ -111,6 +123,7 @@ Map<String, dynamic> _$LoginRequestToJson(LoginRequest instance) =>
       'username': instance.username,
       'password': instance.password,
       'code': ?instance.code,
+      'totpSecret': ?instance.totpSecret,
       'client': _$LoginRequestClientEnumEnumMap[instance.client]!,
     };
 

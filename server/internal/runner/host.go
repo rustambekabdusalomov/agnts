@@ -42,5 +42,5 @@ func DiskFreeMB(dir string) (int64, bool) {
 	if err := syscall.Statfs(dir, &st); err != nil {
 		return 0, false
 	}
-	return int64(uint64(st.Bavail) * uint64(st.Bsize) / (1 << 20)), true //nolint:gosec // G115: sizes fit
+	return int64(st.Bavail * uint64(st.Bsize) / (1 << 20)), true //nolint:gosec // G115: sizes fit
 }

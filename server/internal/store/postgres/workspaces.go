@@ -167,6 +167,28 @@ func (s *Workspaces) Of(ctx context.Context, userID int64) ([]domain.WorkspaceMe
 	return out, rows.Err()
 }
 
+// Memberships returns every membership of a workspace that is not
+// deleted, for the Admin's user list.
+func (s *Workspaces) Memberships(ctx context.Context) ([]domain.Member, error) {
+	rows, err := s.db.Query(ctx, `SELECT m.workspace_id, m.user_id, m.role, m.created_at
+		FROM memberships m JOIN workspaces w ON w.id = m.workspace_id WHERE w.deleted_at IS NULL ORDER BY w.name, w.id`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []domain.Member
+	for rows.Next() {
+		var m domain.Member
+		var role string
+		if err := rows.Scan(&m.WorkspaceID, &m.UserID, &role, &m.CreatedAt); err != nil {
+			return nil, err
+		}
+		m.Role = domain.WorkspaceRole(role)
+		out = append(out, m)
+	}
+	return out, rows.Err()
+}
+
 // Role returns userID's role in workspace ws, or ErrNotFound when they
 // are not a member.
 func (s *Workspaces) Role(ctx context.Context, ws, userID int64) (domain.WorkspaceRole, error) {

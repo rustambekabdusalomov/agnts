@@ -9,6 +9,7 @@ All URIs are relative to */api*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**beginLoginTotp**](AuthApi.md#beginlogintotp) | **POST** /auth/login/totp | Start the two-factor setup an Admin without it does at sign-in
 [**forgotPassword**](AuthApi.md#forgotpassword) | **POST** /auth/password/forgot | Email a password reset link (always answers 204)
 [**getMe**](AuthApi.md#getme) | **GET** /auth/me | The signed-in user
 [**getSignupInfo**](AuthApi.md#getsignupinfo) | **GET** /auth/signup | Whether people can register, and whether this install has no user yet
@@ -18,6 +19,49 @@ Method | HTTP request | Description
 [**resetPassword**](AuthApi.md#resetpassword) | **POST** /auth/password/reset | Set a new password with a reset link&#39;s token
 [**verifyEmail**](AuthApi.md#verifyemail) | **POST** /auth/verify | Confirm an email address with the link&#39;s token
 
+
+# **beginLoginTotp**
+> BeginLoginTotp200Response beginLoginTotp(beginLoginTotpRequest)
+
+Start the two-factor setup an Admin without it does at sign-in
+
+Two-factor sign-in is mandatory for Admins. When login answers 401 totp_setup_required, this returns a new secret (after checking the password again); signing in with it as totpSecret and a matching code saves it and starts the session.
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+
+final api = AgntsApi().getAuthApi();
+final BeginLoginTotpRequest beginLoginTotpRequest = ; // BeginLoginTotpRequest | 
+
+try {
+    final response = api.beginLoginTotp(beginLoginTotpRequest);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling AuthApi->beginLoginTotp: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **beginLoginTotpRequest** | [**BeginLoginTotpRequest**](BeginLoginTotpRequest.md)|  | 
+
+### Return type
+
+[**BeginLoginTotp200Response**](BeginLoginTotp200Response.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **forgotPassword**
 > forgotPassword(forgotPasswordRequest)

@@ -20,6 +20,13 @@ export const router = createRouter({
     { path: '/oauth/consent', name: 'consent', component: () => import('../pages/ConsentPage.vue'), meta: { bare: true, global: true } },
     { path: '/billing/return', name: 'billingReturn', component: () => import('../pages/account/BillingReturnPage.vue'), meta: { bare: true, global: true } },
     { path: '/', name: 'home', component: () => import('../pages/account/WorkspacesPage.vue'), meta: { bare: true, global: true } },
+    // The Admin cabinet: the platform's users, workspaces and Admins (system Admins only).
+    { path: '/admin', name: 'adminDashboard', component: () => import('../pages/admin/AdminDashboardPage.vue'), meta: { admin: true, global: true } },
+    { path: '/admin/workspaces', name: 'adminWorkspaces', component: () => import('../pages/admin/AdminWorkspacesPage.vue'), meta: { admin: true, global: true } },
+    { path: '/admin/users', name: 'adminUsers', component: () => import('../pages/admin/AdminUsersPage.vue'), meta: { admin: true, global: true } },
+    { path: '/admin/admins', name: 'adminAdmins', component: () => import('../pages/admin/AdminAdminsPage.vue'), meta: { admin: true, global: true } },
+    { path: '/admin/feedback', name: 'adminFeedback', component: () => import('../pages/admin/AdminFeedbackPage.vue'), meta: { admin: true, global: true } },
+    { path: '/admin/profile', name: 'adminProfile', component: () => import('../pages/account/ProfilePage.vue'), meta: { admin: true, global: true } },
     {
       path: '/w/:ws',
       children: [
@@ -42,7 +49,7 @@ export const router = createRouter({
         { path: 'settings', name: 'settings', component: () => import('../pages/SettingsPage.vue') },
         { path: 'workspace', name: 'workspace', component: () => import('../pages/workspace/WorkspacePage.vue') },
         { path: 'profile', name: 'profile', component: () => import('../pages/account/ProfilePage.vue') },
-        { path: 'platform', name: 'platform', component: () => import('../pages/platform/PlatformPage.vue') },
+        { path: 'platform', redirect: '/admin' },
         { path: ':rest(.*)*', redirect: (to) => `/w/${String(to.params.ws)}/dashboard` },
       ],
     },
@@ -60,6 +67,9 @@ router.beforeEach(async (to) => {
     return true
   }
   if (!session.user) return { name: 'login', query: to.fullPath === '/' ? {} : { next: to.fullPath } }
+  if (to.meta.admin) return session.user.isAdmin ? true : { path: '/' }
+  // An Admin account runs the platform and has no workspaces: the cabinet is its home.
+  if (session.user.isAdmin && !session.user.workspaces?.length) return { name: 'adminDashboard', replace: true }
 
   const workspace = useWorkspace()
   const ws = typeof to.params.ws === 'string' ? to.params.ws : ''

@@ -2,6 +2,8 @@
 /bin/
 **/dist/
 **/node_modules/
+apps/website/.nuxt/
+apps/website/.output/
 
 # Secrets and local data
 deploy/.env
@@ -19,3 +21,4 @@ apps/mobile/packages/agnts_api/.dart_tool/
 .idea/
 .vscode/
 /.dev-data/
+/.dev-data-*/

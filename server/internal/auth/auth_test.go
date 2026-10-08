@@ -200,6 +200,173 @@ func TestRegisterSignsInWithoutCode(t *testing.T) {
 	}
 }
 
+func TestSignInVerified(t *testing.T) {
+	ctx := context.Background()
+	f := setup(t)
+	g := Verified{Email: "Dev@Gmail.com", DisplayName: "Dev Person", Client: domain.ClientWeb}
+
+	// A new address: an account without a password, already verified.
+	tok, _, u, created, err := f.svc.SignInVerified(ctx, g)
+	if err != nil || !created {
+		t.Fatalf("first sign-in: created=%v %v", created, err)
+	}
+	if u.Username != "dev" || u.DisplayName != "Dev Person" || u.HasPassword() || u.EmailVerifiedAt == nil || u.IsAdmin {
+		t.Fatalf("created %+v", u)
+	}
+	if got, err := f.svc.Authenticate(ctx, tok); err != nil || got.ID != u.ID {
+		t.Fatalf("session: %+v %v", got, err)
+	}
+	// No password signs in to it, even an empty one.
+	for _, pw := range []string{"", "a long enough password"} {
+		if _, _, _, err := f.svc.Login(ctx, LoginInput{Username: "dev", Password: pw, Client: domain.ClientWeb}); !errors.Is(err, domain.ErrUnauthorized) {
+			t.Fatalf("password %q: %v, want ErrUnauthorized", pw, err)
+		}
+	}
+	// It can set a first password without a current one.
+	if err := f.svc.ChangePassword(ctx, u, "", "a brand new password", tok); err != nil {
+		t.Fatalf("first password: %v", err)
+	}
+
+	// The same address again: the same account.
+	_, _, again, created, err := f.svc.SignInVerified(ctx, g)
+	if err != nil || created || again.ID != u.ID {
+		t.Fatalf("second sign-in: %+v created=%v %v", again, created, err)
+	}
+
+	// Someone registered an address they do not own; its owner signs in
+	// with Google and the squatter's password and sessions stop working.
+	sqTok, _, sq, err := f.svc.Register(ctx, RegisterInput{Email: "victim@gmail.com", Password: "squatters password", Client: domain.ClientWeb})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _, owned, created, err := f.svc.SignInVerified(ctx, Verified{Email: "victim@gmail.com", Client: domain.ClientWeb})
+	if err != nil || created || owned.ID != sq.ID || owned.HasPassword() || owned.EmailVerifiedAt == nil {
+		t.Fatalf("taken over: %+v created=%v %v", owned, created, err)
+	}
+	if _, err := f.svc.Authenticate(ctx, sqTok); !errors.Is(err, domain.ErrUnauthorized) {
+		t.Fatalf("squatter's session survived: %v", err)
+	}
+	if _, _, _, err := f.svc.Login(ctx, LoginInput{Username: "victim@gmail.com", Password: "squatters password", Client: domain.ClientWeb}); !errors.Is(err, domain.ErrUnauthorized) {
+		t.Fatalf("squatter's password works: %v", err)
+	}
+
+	var inv *InvalidError
+	if _, _, _, _, err := f.svc.SignInVerified(ctx, Verified{Email: "nope", Client: domain.ClientWeb}); !errors.As(err, &inv) {
+		t.Fatalf("bad email: %v", err)
+	}
+}
+
+func TestPasswordsForAdminsOnly(t *testing.T) {
+	ctx := context.Background()
+	f := setup(t) // rustam, the first account, is an Admin
+	if _, _, _, err := f.svc.Register(ctx, RegisterInput{Email: "dev@x.io", Password: "a long enough password", Client: domain.ClientWeb}); err != nil {
+		t.Fatal(err)
+	}
+	f.svc.PasswordsForAdminsOnly()
+	// Someone else's right password: use Google instead.
+	if _, _, _, err := f.svc.Login(ctx, LoginInput{Username: "dev@x.io", Password: "a long enough password", Client: domain.ClientWeb}); !errors.Is(err, ErrUseGoogle) {
+		t.Fatalf("non-Admin password sign-in: %v, want ErrUseGoogle", err)
+	}
+	// A wrong one says no more than before.
+	if _, _, _, err := f.svc.Login(ctx, LoginInput{Username: "dev@x.io", Password: "wrong password!", Client: domain.ClientWeb}); !errors.Is(err, domain.ErrUnauthorized) {
+		t.Fatalf("wrong password: %v", err)
+	}
+	// The Admin still does (with their code).
+	f.now = f.now.Add(time.Minute)
+	if _, _, _, err := f.svc.Login(ctx, LoginInput{Username: "rustam", Password: "a long enough password", Code: f.code(t, f.now), Client: domain.ClientWeb}); err != nil {
+		t.Fatalf("Admin sign-in: %v", err)
+	}
+}
+
+func TestSeparateRolesInGoogleSignIn(t *testing.T) {
+	ctx := context.Background()
+	box, _ := secret.NewBox(bytes.Repeat([]byte{1}, 32))
+	svc, err := New(&authtest.Users{}, &authtest.Sessions{}, box, time.Hour)
+	if err != nil {
+		t.Fatal(err)
+	}
+	svc.PasswordsForAdminsOnly()
+	// Even the install's first account is a User when it comes from Google.
+	_, _, u, _, err := svc.SignInVerified(ctx, Verified{Email: "first@gmail.com", Client: domain.ClientWeb})
+	if err != nil || u.IsAdmin {
+		t.Fatalf("first Google account: %+v %v", u, err)
+	}
+	a, err := svc.CreateAdmin(ctx, AdminInput{Username: "ops", Email: "ops@x.io", Password: "a long enough password"})
+	if err != nil || !a.IsAdmin {
+		t.Fatalf("admin: %+v %v", a, err)
+	}
+	if _, _, _, _, err := svc.SignInVerified(ctx, Verified{Email: "ops@x.io", Client: domain.ClientWeb}); !errors.Is(err, ErrAdminUsesPassword) {
+		t.Fatalf("Admin via Google: %v", err)
+	}
+	var inv *InvalidError
+	for _, bad := range []AdminInput{{Username: "x", Password: "a long enough password"}, {Username: "ops2", Password: "short"}, {Username: "ops3", Email: "nope", Password: "a long enough password"}} {
+		if _, err := svc.CreateAdmin(ctx, bad); !errors.As(err, &inv) {
+			t.Errorf("%+v: %v", bad, err)
+		}
+	}
+	if _, err := svc.CreateAdmin(ctx, AdminInput{Username: "ops", Password: "a long enough password"}); !errors.Is(err, domain.ErrConflict) {
+		t.Fatalf("taken username: %v", err)
+	}
+}
+
+func TestAdminsMustUseTwoFactor(t *testing.T) {
+	ctx := context.Background()
+	box, _ := secret.NewBox(bytes.Repeat([]byte{1}, 32))
+	svc, err := New(&authtest.Users{}, &authtest.Sessions{}, box, time.Hour)
+	if err != nil {
+		t.Fatal(err)
+	}
+	now := time.Date(2026, 10, 8, 12, 0, 0, 0, time.UTC)
+	svc.now = func() time.Time { return now }
+	const pw = "a long enough password"
+	if _, err := svc.CreateAdmin(ctx, AdminInput{Username: "ops", Password: pw}); err != nil {
+		t.Fatal(err)
+	}
+	login := func(code, sec string) error {
+		_, _, _, err := svc.Login(ctx, LoginInput{Username: "ops", Password: pw, Code: code, TOTPSecret: sec, Client: domain.ClientWeb})
+		return err
+	}
+	// The right password alone: set up two-factor sign-in first.
+	if err := login("", ""); !errors.Is(err, ErrTOTPSetupRequired) {
+		t.Fatalf("no 2FA yet: %v, want ErrTOTPSetupRequired", err)
+	}
+	// The setup checks the password again.
+	if _, err := svc.BeginAdminSetup(ctx, "ops", "wrong password!"); !errors.Is(err, domain.ErrUnauthorized) {
+		t.Fatalf("setup with a wrong password: %v", err)
+	}
+	e, err := svc.BeginAdminSetup(ctx, "ops", pw)
+	if err != nil || e.Secret == "" {
+		t.Fatalf("setup: %+v %v", e, err)
+	}
+	gen := func(at time.Time) string {
+		c, _ := totp.GenerateCodeCustom(e.Secret, at, totp.ValidateOpts{Period: 30, Digits: otp.DigitsSix, Algorithm: otp.AlgorithmSHA1})
+		return c
+	}
+	if err := login("000000", e.Secret); !errors.Is(err, domain.ErrUnauthorized) {
+		t.Fatalf("wrong code: %v", err)
+	}
+	if err := login(gen(now), e.Secret); err != nil {
+		t.Fatalf("setup sign-in: %v", err)
+	}
+	// From now on the code is asked for, and the setup is closed.
+	now = now.Add(time.Minute)
+	if err := login("", ""); !errors.Is(err, ErrCodeRequired) {
+		t.Fatalf("after setup: %v, want ErrCodeRequired", err)
+	}
+	if _, err := svc.BeginAdminSetup(ctx, "ops", pw); !errors.Is(err, domain.ErrUnauthorized) {
+		t.Fatalf("setup again: %v", err)
+	}
+	if err := login(gen(now), ""); err != nil {
+		t.Fatalf("sign-in with the code: %v", err)
+	}
+	// An Admin cannot turn it off.
+	u, _ := svc.users.ByUsername(ctx, "ops")
+	var inv *InvalidError
+	if err := svc.DisableTOTP(ctx, u, pw, gen(now.Add(30*time.Second))); !errors.As(err, &inv) {
+		t.Fatalf("Admin turned 2FA off: %v", err)
+	}
+}
+
 func TestLoginNeedsCodeWhenTOTPIsOn(t *testing.T) {
 	ctx := context.Background()
 	f := setup(t)

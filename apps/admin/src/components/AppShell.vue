@@ -16,6 +16,7 @@ import BrandLogo from './BrandLogo.vue'
 import UsagePill from './UsagePill.vue'
 import { useRules } from './rules/useRules'
 import ConfirmDialog from './ui/ConfirmDialog.vue'
+import FeedbackDialog from './account/FeedbackDialog.vue'
 import HiIcon from './ui/HiIcon.vue'
 
 // The demo's layout: sidebar navigation with counts and the plan pill,
@@ -119,6 +120,7 @@ function showTip(e: Event) {
 
 const initials = computed(() => (session.user?.username ?? '?').slice(0, 2).toUpperCase())
 const confirmOut = ref(false)
+const feedbackOpen = ref(false)
 const signingOut = ref(false)
 async function signOut() {
   signingOut.value = true
@@ -190,7 +192,8 @@ async function signOut() {
         <div class="grp">{{ t('nav.people') }}</div>
         <RouterLink class="nav-a" active-class="on" :to="{ name: 'workspace' }" v-bind="tip(t('nav.workspace'))"><HiIcon name="repos" /><span class="lbl">{{ t('nav.workspace') }}</span></RouterLink>
         <RouterLink class="nav-a" active-class="on" :to="{ name: 'profile' }" v-bind="tip(t('nav.profile'))"><HiIcon name="settings" /><span class="lbl">{{ t('nav.profile') }}</span></RouterLink>
-        <RouterLink v-if="session.user?.isAdmin" class="nav-a" active-class="on" :to="{ name: 'platform' }" v-bind="tip(t('nav.platform'))"><HiIcon name="analytics" /><span class="lbl">{{ t('nav.platform') }}</span></RouterLink>
+        <button type="button" class="nav-a" v-bind="tip(t('feedback.title'))" @click="feedbackOpen = true"><HiIcon name="feedback" /><span class="lbl">{{ t('feedback.title') }}</span></button>
+        <RouterLink v-if="session.user?.isAdmin" class="nav-a" active-class="on" :to="{ name: 'adminDashboard' }" v-bind="tip(t('nav.platform'))"><HiIcon name="shield" /><span class="lbl">{{ t('nav.platform') }}</span></RouterLink>
       </nav>
       <div class="me">
         <button class="nav-a me-btn" v-bind="tip(`${t('common.signedInAs', { username: session.user?.username })} · ${t('auth.signOut')}`)" @click="confirmOut = true">
@@ -252,8 +255,9 @@ async function signOut() {
     </div>
   </div>
   <div v-if="tipBox" class="side-tip" role="tooltip" :style="{ top: tipBox.top + 'px', left: tipBox.left + 'px' }">{{ tipBox.text }}</div>
-  <ConfirmDialog v-model="confirmOut" :title="t('auth.signOutTitle')" :message="t('auth.signOutBody')" :confirm-label="t('auth.signOut')" danger :busy="signingOut" @confirm="signOut">
+  <ConfirmDialog v-model="confirmOut" :title="t('auth.signOutTitle')" :message="session.user?.isAdmin ? t('auth.signOutBody') : t('auth.signOutBodyGoogle')" :confirm-label="t('auth.signOut')" danger :busy="signingOut" @confirm="signOut">
     <template #icon><svg viewBox="0 0 24 24"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10" /></svg></template>
   </ConfirmDialog>
+  <FeedbackDialog v-model="feedbackOpen" :workspace="workspace.slug" />
   <div class="toast" :class="{ show: ui.toast }" role="status">{{ ui.toast }}</div>
 </template>

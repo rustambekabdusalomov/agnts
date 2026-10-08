@@ -10,6 +10,7 @@ approval. See [Implementation plan.md](Implementation%20plan.md).
 | --- | --- |
 | `server/` | Go server: REST API, auth, and later orchestrator, runner, MCP |
 | `apps/admin/` | Admin panel: Vue 3 + Vite, served by the Go binary |
+| `apps/website/` | Public website (agnts.uz): Nuxt 3, fully static build in EN/RU/UZ |
 | `apps/mobile/` | Mobile app: Flutter (iOS and Android) |
 | `shared/openapi/` | OpenAPI spec, the contract for both clients and the server |
 | `shared/i18n/` | EN/RU/UZ dictionaries (ICU MessageFormat) |
@@ -33,6 +34,7 @@ make dev-db          # PostgreSQL on localhost:5442 (Docker)
 make dev-user        # create your user: password + authenticator app
 make dev-server      # API on :8080, migrations applied on start
 make dev-admin       # admin panel on http://localhost:5173
+make dev-website     # public website on http://localhost:3000
 ```
 
 Database tests run when `AGNTS_TEST_DATABASE_URL` is set; the dev database

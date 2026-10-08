@@ -17,6 +17,10 @@ import (
 
 var codeRe = regexp.MustCompile(`^[0-9]{6}$`)
 
+// useGoogle answers a password sign-in or sign-up by someone who is not an
+// Admin, when only Admins use passwords.
+const useGoogle = "sign in with Google: passwords are for Admins only here"
+
 // UserStore reads and changes accounts.
 type UserStore interface {
 	ByID(ctx context.Context, id int64) (domain.User, error)
@@ -24,6 +28,7 @@ type UserStore interface {
 	SetAdmin(ctx context.Context, id int64, admin bool) error
 	SetProfile(ctx context.Context, id int64, displayName, email string) (domain.User, error)
 	Count(ctx context.Context) (int, error)
+	LastSignIns(ctx context.Context) (map[int64]time.Time, error)
 }
 
 // Login implements gen.ServerInterface.
@@ -47,15 +52,24 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token, sess, u, err := s.opt.Auth.Login(r.Context(), auth.LoginInput{
-		Username:  strings.TrimSpace(req.Username),
-		Password:  req.Password,
-		Code:      code,
-		Client:    domain.Client(req.Client),
-		UserAgent: r.UserAgent(),
-		IP:        r.RemoteAddr,
+		Username:   strings.TrimSpace(req.Username),
+		Password:   req.Password,
+		Code:       code,
+		TOTPSecret: deref(req.TotpSecret),
+		Client:     domain.Client(req.Client),
+		UserAgent:  r.UserAgent(),
+		IP:         r.RemoteAddr,
 	})
 	if errors.Is(err, auth.ErrCodeRequired) {
 		writeError(w, http.StatusUnauthorized, "code_required", "enter the 6-digit code from your authenticator app")
+		return
+	}
+	if errors.Is(err, auth.ErrTOTPSetupRequired) {
+		writeError(w, http.StatusUnauthorized, "totp_setup_required", "Admins sign in with two-factor codes: set it up to continue")
+		return
+	}
+	if errors.Is(err, auth.ErrUseGoogle) {
+		writeError(w, http.StatusForbidden, "use_google", useGoogle)
 		return
 	}
 	if errors.Is(err, domain.ErrUnauthorized) {
@@ -69,6 +83,28 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	s.opt.Log.Info("signed in", "user_id", u.ID, "client", sess.Client, "ip", r.RemoteAddr)
 	s.writeSession(w, r, token, sess, u)
+}
+
+// BeginLoginTotp implements gen.ServerInterface.
+func (s *Server) BeginLoginTotp(w http.ResponseWriter, r *http.Request) {
+	if !s.limit(w, r, s.loginLimiter, "too many sign-in attempts, try again later") {
+		return
+	}
+	var req gen.BeginLoginTotpJSONBody
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	e, err := s.opt.Auth.BeginAdminSetup(r.Context(), strings.TrimSpace(req.Username), req.Password)
+	if errors.Is(err, domain.ErrUnauthorized) {
+		writeError(w, http.StatusUnauthorized, "unauthorized", "wrong username or password")
+		return
+	}
+	if err != nil {
+		s.writeInternal(w, r, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"secret": e.Secret, "url": e.URL})
 }
 
 // limit applies an IP rate limiter, answering 429 when it says no.
@@ -182,6 +218,8 @@ func (s *Server) authError(w http.ResponseWriter, r *http.Request, err error) {
 	switch {
 	case errors.As(err, &inv):
 		writeError(w, http.StatusBadRequest, "bad_request", inv.Msg)
+	case errors.Is(err, auth.ErrUseGoogle):
+		writeError(w, http.StatusForbidden, "use_google", useGoogle)
 	case errors.Is(err, domain.ErrForbidden):
 		writeError(w, http.StatusForbidden, "forbidden", "sign-up is by invitation on this server: ask a workspace owner for an invite link")
 	case errors.Is(err, domain.ErrMemberLimit):
@@ -215,7 +253,11 @@ func (s *Server) GetSignupInfo(w http.ResponseWriter, r *http.Request) {
 		s.writeInternal(w, r, err)
 		return
 	}
-	writeJSON(w, http.StatusOK, gen.SignupInfo{Open: info.Open, FirstUser: info.FirstUser, EmailEnabled: info.EmailEnabled})
+	out := gen.SignupInfo{Open: info.Open, FirstUser: info.FirstUser, EmailEnabled: info.EmailEnabled, PasswordSignup: &info.PasswordSignup}
+	if g := s.opt.Google; g != nil && g.ClientID != "" {
+		out.GoogleClientId = &g.ClientID
+	}
+	writeJSON(w, http.StatusOK, out)
 }
 
 // Register implements gen.ServerInterface.

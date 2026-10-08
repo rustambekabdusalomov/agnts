@@ -81,6 +81,11 @@ type Options struct {
 	}
 	// Cloud is the hosted product (stricter rules for new accounts).
 	Cloud bool
+	// Google is sign-in with Google from the website at /auth/google; nil
+	// disables it.
+	Google *GoogleSignIn
+	// Feedback keeps what people send the Admins; nil answers 501.
+	Feedback FeedbackStore
 }
 
 // Server implements gen.ServerInterface.
@@ -88,7 +93,9 @@ type Server struct {
 	opt          Options
 	loginLimiter *ipLimiter
 	mailLimiter  *ipLimiter
-	ops          map[string]opInfo
+	// feedbackLimiter: a few feedbacks per address every 10 minutes.
+	feedbackLimiter *ipLimiter
+	ops             map[string]opInfo
 }
 
 var _ gen.ServerInterface = (*Server)(nil)
@@ -99,7 +106,8 @@ func NewHandler(opt Options) (http.Handler, error) {
 	if err != nil {
 		return nil, fmt.Errorf("httpapi: load embedded spec: %w", err)
 	}
-	s := &Server{opt: opt, loginLimiter: newIPLimiter(5, time.Minute), mailLimiter: newIPLimiter(5, 10*time.Minute), ops: ops}
+	s := &Server{opt: opt, loginLimiter: newIPLimiter(5, time.Minute), mailLimiter: newIPLimiter(5, 10*time.Minute),
+		feedbackLimiter: newIPLimiter(5, 10*time.Minute), ops: ops}
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
@@ -120,6 +128,10 @@ func NewHandler(opt Options) (http.Handler, error) {
 
 	for name, h := range opt.Payments {
 		r.With(middleware.RequestSize(maxBodyBytes)).Handle("/webhooks/"+name, h)
+	}
+	if opt.Google != nil {
+		// A form post from the website, not a JSON API call: outside /api.
+		r.With(middleware.RequestSize(16<<10), middleware.NoCache).Post("/auth/google", s.googleSignIn)
 	}
 
 	badRequest := func(w http.ResponseWriter, _ *http.Request, err error) {

@@ -7,6 +7,14 @@ part of 'billing_prices.dart';
 // **************************************************************************
 
 abstract class _$BillingPricesCWProxy {
+  BillingPrices workspaceUsd(double workspaceUsd);
+
+  BillingPrices slotUsd(double slotUsd);
+
+  BillingPrices memberUsd(double memberUsd);
+
+  BillingPrices creditUsd(double creditUsd);
+
   BillingPrices workspaceUzs(int workspaceUzs);
 
   BillingPrices slotUzs(int slotUzs);
@@ -26,6 +34,10 @@ abstract class _$BillingPricesCWProxy {
   /// BillingPrices(...).copyWith(id: 12, name: "My name")
   /// ````
   BillingPrices call({
+    double workspaceUsd,
+    double slotUsd,
+    double memberUsd,
+    double creditUsd,
     int workspaceUzs,
     int slotUzs,
     int memberUzs,
@@ -40,6 +52,19 @@ class _$BillingPricesCWProxyImpl implements _$BillingPricesCWProxy {
   const _$BillingPricesCWProxyImpl(this._value);
 
   final BillingPrices _value;
+
+  @override
+  BillingPrices workspaceUsd(double workspaceUsd) =>
+      this(workspaceUsd: workspaceUsd);
+
+  @override
+  BillingPrices slotUsd(double slotUsd) => this(slotUsd: slotUsd);
+
+  @override
+  BillingPrices memberUsd(double memberUsd) => this(memberUsd: memberUsd);
+
+  @override
+  BillingPrices creditUsd(double creditUsd) => this(creditUsd: creditUsd);
 
   @override
   BillingPrices workspaceUzs(int workspaceUzs) =>
@@ -69,6 +94,10 @@ class _$BillingPricesCWProxyImpl implements _$BillingPricesCWProxy {
   /// BillingPrices(...).copyWith(id: 12, name: "My name")
   /// ````
   BillingPrices call({
+    Object? workspaceUsd = const $CopyWithPlaceholder(),
+    Object? slotUsd = const $CopyWithPlaceholder(),
+    Object? memberUsd = const $CopyWithPlaceholder(),
+    Object? creditUsd = const $CopyWithPlaceholder(),
     Object? workspaceUzs = const $CopyWithPlaceholder(),
     Object? slotUzs = const $CopyWithPlaceholder(),
     Object? memberUzs = const $CopyWithPlaceholder(),
@@ -77,6 +106,22 @@ class _$BillingPricesCWProxyImpl implements _$BillingPricesCWProxy {
     Object? markup = const $CopyWithPlaceholder(),
   }) {
     return BillingPrices(
+      workspaceUsd: workspaceUsd == const $CopyWithPlaceholder()
+          ? _value.workspaceUsd
+          // ignore: cast_nullable_to_non_nullable
+          : workspaceUsd as double,
+      slotUsd: slotUsd == const $CopyWithPlaceholder()
+          ? _value.slotUsd
+          // ignore: cast_nullable_to_non_nullable
+          : slotUsd as double,
+      memberUsd: memberUsd == const $CopyWithPlaceholder()
+          ? _value.memberUsd
+          // ignore: cast_nullable_to_non_nullable
+          : memberUsd as double,
+      creditUsd: creditUsd == const $CopyWithPlaceholder()
+          ? _value.creditUsd
+          // ignore: cast_nullable_to_non_nullable
+          : creditUsd as double,
       workspaceUzs: workspaceUzs == const $CopyWithPlaceholder()
           ? _value.workspaceUzs
           // ignore: cast_nullable_to_non_nullable
@@ -115,38 +160,48 @@ extension $BillingPricesCopyWith on BillingPrices {
 // JsonSerializableGenerator
 // **************************************************************************
 
-BillingPrices _$BillingPricesFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('BillingPrices', json, ($checkedConvert) {
-      $checkKeys(
-        json,
-        requiredKeys: const [
-          'workspaceUzs',
-          'slotUzs',
-          'memberUzs',
-          'creditUzs',
-          'includedMembers',
-          'markup',
-        ],
-      );
-      final val = BillingPrices(
-        workspaceUzs: $checkedConvert(
-          'workspaceUzs',
-          (v) => (v as num).toInt(),
-        ),
-        slotUzs: $checkedConvert('slotUzs', (v) => (v as num).toInt()),
-        memberUzs: $checkedConvert('memberUzs', (v) => (v as num).toInt()),
-        creditUzs: $checkedConvert('creditUzs', (v) => (v as num).toInt()),
-        includedMembers: $checkedConvert(
-          'includedMembers',
-          (v) => (v as num).toInt(),
-        ),
-        markup: $checkedConvert('markup', (v) => v as num),
-      );
-      return val;
-    });
+BillingPrices _$BillingPricesFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate('BillingPrices', json, ($checkedConvert) {
+  $checkKeys(
+    json,
+    requiredKeys: const [
+      'workspaceUsd',
+      'slotUsd',
+      'memberUsd',
+      'creditUsd',
+      'workspaceUzs',
+      'slotUzs',
+      'memberUzs',
+      'creditUzs',
+      'includedMembers',
+      'markup',
+    ],
+  );
+  final val = BillingPrices(
+    workspaceUsd: $checkedConvert('workspaceUsd', (v) => (v as num).toDouble()),
+    slotUsd: $checkedConvert('slotUsd', (v) => (v as num).toDouble()),
+    memberUsd: $checkedConvert('memberUsd', (v) => (v as num).toDouble()),
+    creditUsd: $checkedConvert('creditUsd', (v) => (v as num).toDouble()),
+    workspaceUzs: $checkedConvert('workspaceUzs', (v) => (v as num).toInt()),
+    slotUzs: $checkedConvert('slotUzs', (v) => (v as num).toInt()),
+    memberUzs: $checkedConvert('memberUzs', (v) => (v as num).toInt()),
+    creditUzs: $checkedConvert('creditUzs', (v) => (v as num).toInt()),
+    includedMembers: $checkedConvert(
+      'includedMembers',
+      (v) => (v as num).toInt(),
+    ),
+    markup: $checkedConvert('markup', (v) => v as num),
+  );
+  return val;
+});
 
 Map<String, dynamic> _$BillingPricesToJson(BillingPrices instance) =>
     <String, dynamic>{
+      'workspaceUsd': instance.workspaceUsd,
+      'slotUsd': instance.slotUsd,
+      'memberUsd': instance.memberUsd,
+      'creditUsd': instance.creditUsd,
       'workspaceUzs': instance.workspaceUzs,
       'slotUzs': instance.slotUzs,
       'memberUzs': instance.memberUzs,

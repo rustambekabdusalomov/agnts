@@ -34,11 +34,11 @@ func (f *fakeAccounts) Pick(_ context.Context, w domain.Workspace, member *int64
 
 // sched is two workspaces sharing one orchestrator.
 type sched struct {
-	t      *testing.T
-	o      *orchestrator.Orchestrator
-	store  *postgres.Agent
-	a, b   context.Context
-	wa, wb int64
+	t        *testing.T
+	o        *orchestrator.Orchestrator
+	store    *postgres.Agent
+	a, b     context.Context
+	wa, wb   int64
 	accounts *fakeAccounts
 	budget   *orchestrator.MemoryBudget
 	runner   *fakeRunner

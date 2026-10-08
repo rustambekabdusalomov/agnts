@@ -33,6 +33,52 @@
 .login-submit { width: 100%; min-height: 46px; margin-top: 4px; font-size: 15px; }
 .login-submit svg { transition: transform .18s; }
 .login-submit:not(:disabled):hover svg { transform: translateX(3px); }
+/* A two-factor secret as a QR code (account/TotpQr.vue). */
+.totp-qr { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.totp-qr-img { width: 152px; height: 152px; padding: 8px; border-radius: 12px; background: #fff; flex: none; }
+.totp-qr-img svg { display: block; width: 100%; height: 100%; }
+.totp-qr-key { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.totp-qr-key .mono-box { word-break: break-all; }
+
+/* Feedback: the form (account/FeedbackDialog.vue) and the Admin's list (pages/admin/AdminFeedbackPage.vue). */
+.cdlg.cdlg-wide { width: min(640px, calc(100vw - 32px)); }
+.fb-form { align-self: stretch; width: 100%; gap: 14px; margin-top: 18px; }
+.fb-form .field { width: 100%; }
+.fb-form .cfg-in { width: 100%; max-width: none; }
+.fb-form .fb-desc { min-height: 220px; padding: 10px 12px; resize: vertical; font: inherit; line-height: 1.5; }
+.fb-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.fb-item { padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.fb-item.done { opacity: .72; }
+.fb-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.fb-head h3 { margin: 0; font-size: 16px; font-weight: 700; }
+.fb-text { margin: 8px 0 12px; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--ink-2); line-height: 1.55; }
+.fb-meta { display: flex; align-items: center; gap: 6px 16px; flex-wrap: wrap; color: var(--ink-3); font-size: 13px; }
+.fb-meta b { color: var(--ink); }
+.fb-act { margin-left: auto; }
+
+/* Admin cabinet (pages/admin, AdminShell). */
+.adm-badge { margin-right: auto; }
+.adm-prefs { display: flex; gap: 8px; }
+.adm-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.adm-list li { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line-2); }
+.adm-list li:last-child { border-bottom: 0; }
+.adm-person { display: flex; align-items: center; gap: 12px; }
+.adm-who { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.adm-who b { font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.adm-who small { color: var(--ink-3); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adm-when { color: var(--ink-3); font-size: 13px; white-space: nowrap; }
+.adm-ws { display: inline-block; margin: 2px 6px 2px 0; padding: 2px 9px; border-radius: 10px; background: var(--hover); border: 1px solid var(--line); font-size: 13px; white-space: nowrap; }
+.adm-ws small { color: var(--ink-3); }
+.adm-sub td { background: var(--row-hover); }
+.adm-members { list-style: none; margin: 0; padding: 4px 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.adm-members li { display: flex; align-items: center; gap: 10px; }
+
+/* "Continue with Google" under the sign-in form (account/GoogleSignIn.vue). */
+.gsi { display: flex; flex-direction: column; gap: 12px; }
+.gsi-or { display: flex; align-items: center; gap: 12px; color: var(--ink-3); font-size: 12.5px; }
+.gsi-or::before, .gsi-or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.gsi-btn { display: flex; justify-content: center; min-height: 44px; color-scheme: normal; }
+.gsi-wait { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; margin: 0; color: var(--ink-2); font-size: 14px; }
 .spin { width: 16px; height: 16px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: spin .7s linear infinite; }
 .prefs { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
 
@@ -278,6 +324,8 @@ a.mem-name:hover { color: var(--primary-ink); }
 .acct { min-height: 100vh; background: radial-gradient(ellipse 70% 40% at 50% 0%, var(--primary-soft), transparent 70%), var(--bg); }
 .acct-top { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; padding: 12px 32px; border-bottom: 1px solid var(--line-2); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px); }
 .acct-top .acct-prefs { margin-left: auto; }
+.acct-logo { display: inline-flex; }
+.acct-home svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .acct-prefs .seg-b { min-height: 30px; padding: 0 10px; font-size: 13px; }
 .acct-user { display: flex; align-items: center; gap: 8px; padding-left: 14px; border-left: 1px solid var(--line-2); }
 .acct-user .ws-av { width: 30px; height: 30px; border-radius: 50%; font-size: 12px; }
