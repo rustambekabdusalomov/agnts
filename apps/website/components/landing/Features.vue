@@ -18,7 +18,7 @@
             <p class="p-features7"><span>{{ t('features.f3.text') }}</span></p>
           </div>
           <div class="p-rev p-features5"><div class="p-rule"></div>
-            <h3 class="p-features6"><span>{{ t('features.f4.title') }}</span></h3>
+            <h3 class="p-features6"><span>{{ t('features.f4.title') }}</span> <span class="p-mono p-soon"><span class="p-dot p-soon1" aria-hidden="true"></span><span>{{ t('common.soon') }}</span></span></h3>
             <p class="p-features7"><span>{{ t('features.f4.text') }}</span></p>
           </div>
           <div class="p-rev p-features8"><div class="p-rule"></div>

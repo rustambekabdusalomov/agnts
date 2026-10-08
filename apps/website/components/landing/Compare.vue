@@ -14,7 +14,7 @@
               <tr><td><span>{{ t('compare.r2') }}</span></td><td><span>{{ t('compare.no') }}</span></td><td><span>{{ t('compare.partly') }}</span></td><td class="p-us"><span>{{ t('compare.yes') }}</span></td></tr>
               <tr><td><span>{{ t('compare.r3') }}</span></td><td><span>{{ t('compare.whenPrompted') }}</span></td><td><span>{{ t('compare.rarely') }}</span></td><td class="p-us"><span>{{ t('compare.always') }}</span></td></tr>
               <tr><td><span>{{ t('compare.r4') }}</span></td><td><span>{{ t('compare.no') }}</span></td><td><span>{{ t('compare.yes') }}</span></td><td class="p-us"><span>{{ t('compare.yes') }}</span></td></tr>
-              <tr><td><span>{{ t('compare.r5') }}</span></td><td><span>{{ t('compare.no') }}</span></td><td><span>{{ t('compare.varies') }}</span></td><td class="p-us"><span>{{ t('compare.yes') }}</span></td></tr>
+              <tr><td><span>{{ t('compare.r5') }}</span></td><td><span>{{ t('compare.no') }}</span></td><td><span>{{ t('compare.varies') }}</span></td><td class="p-us"><span>{{ t('common.soon') }}</span></td></tr>
               <tr><td><span>{{ t('compare.r6') }}</span></td><td><span>{{ t('compare.rarely') }}</span></td><td><span>{{ t('compare.rarely') }}</span></td><td class="p-us"><span>{{ t('compare.yes') }}</span></td></tr>
               <tr><td><span>{{ t('compare.price') }}</span></td><td><span>{{ t('compare.varies') }}</span></td><td><span>{{ t('compare.varies') }}</span></td><td class="p-us"><span>{{ t('compare.priceUs') }}</span></td></tr>
             </tbody>

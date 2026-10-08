@@ -6,7 +6,8 @@
     "top": "Yuqoriga"
   },
   "common": {
-    "getStarted": "Boshlash"
+    "getStarted": "Boshlash",
+    "soon": "Tez orada"
   },
   "compare": {
     "always": "Doim",
@@ -83,7 +84,7 @@
       "title": "Har bir qadam uchun o'z modeli"
     },
     "f4": {
-      "text": "Telefoningizdan javob bering, tekshiring va deploy qiling yoki agnts'ni MCP server orqali Claude chatdan boshqaring.",
+      "text": "agnts'ni MCP server orqali Claude chatdan boshqaring. Telefondan javob berish, tekshirish va deploy qilish uchun mobil ilova tayyorlanmoqda.",
       "title": "Mobil ilova va Claude chat"
     },
     "f5": {
@@ -91,7 +92,7 @@
       "title": "Har bir qadam qayd etiladi"
     },
     "f6": {
-      "text": "Admin panel va mobil ilovada kunduzgi va tungi mavzular.",
+      "text": "Admin panelda kunduzgi va tungi mavzular, mobil ilova chiqqach unda ham.",
       "title": "Ingliz, rus, o'zbek tillari"
     },
     "label": "Imkoniyatlar",

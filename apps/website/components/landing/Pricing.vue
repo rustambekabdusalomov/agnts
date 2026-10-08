@@ -21,7 +21,7 @@
                 <li class="p-li"><span class="p-chk" aria-hidden="true"></span><span>{{ t('pricing.i1') }}</span></li>
                 <li class="p-li"><span class="p-chk" aria-hidden="true"></span><span>{{ t('pricing.i2', { members: p.includedMembers }) }}</span></li>
                 <li class="p-li"><span class="p-chk" aria-hidden="true"></span><span>{{ t('pricing.i3') }}</span></li>
-                <li class="p-li"><span class="p-chk" aria-hidden="true"></span><span>{{ t('pricing.i4') }}</span></li>
+                <li class="p-li"><span class="p-chk" aria-hidden="true"></span><span>{{ t('pricing.i4') }} <span class="p-mono p-soon"><span class="p-dot p-soon1" aria-hidden="true"></span><span>{{ t('common.soon') }}</span></span></span></li>
                 <li class="p-li"><span class="p-chk" aria-hidden="true"></span><span>{{ t('pricing.i5') }}</span></li>
                 <li class="p-li"><span class="p-chk" aria-hidden="true"></span><span>{{ t('pricing.i6') }}</span></li>
               </ul>

@@ -6,7 +6,8 @@
     "top": "Scroll to top"
   },
   "common": {
-    "getStarted": "Get started"
+    "getStarted": "Get started",
+    "soon": "Coming soon"
   },
   "compare": {
     "always": "Always",
@@ -83,7 +84,7 @@
       "title": "A model for every step"
     },
     "f4": {
-      "text": "Answer, review and deploy from your phone, or manage agnts from Claude chat through its MCP server.",
+      "text": "Manage agnts from Claude chat through its MCP server. A mobile app to answer, review and deploy from your phone is on the way.",
       "title": "Mobile app and Claude chat"
     },
     "f5": {
@@ -91,7 +92,7 @@
       "title": "Every step on record"
     },
     "f6": {
-      "text": "Day and night themes in the admin panel and the mobile app.",
+      "text": "Day and night themes in the admin panel, and in the mobile app when it ships.",
       "title": "English, Russian, Uzbek"
     },
     "label": "Features",
