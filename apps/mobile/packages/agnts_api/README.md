@@ -92,6 +92,7 @@ Class | Method | HTTP request | Description
 [*AuthApi*](doc/AuthApi.md) | [**logout**](doc/AuthApi.md#logout) | **POST** /auth/logout | End the current session
 [*AuthApi*](doc/AuthApi.md) | [**register**](doc/AuthApi.md#register) | **POST** /auth/signup | Create an account (and its first workspace, unless joining by invite)
 [*AuthApi*](doc/AuthApi.md) | [**resetPassword**](doc/AuthApi.md#resetpassword) | **POST** /auth/password/reset | Set a new password with a reset link&#39;s token
+[*AuthApi*](doc/AuthApi.md) | [**signInWithGoogle**](doc/AuthApi.md#signinwithgoogle) | **POST** /auth/google | Sign in with a Google ID token (the mobile app)
 [*AuthApi*](doc/AuthApi.md) | [**verifyEmail**](doc/AuthApi.md#verifyemail) | **POST** /auth/verify | Confirm an email address with the link&#39;s token
 [*BillingApi*](doc/BillingApi.md) | [**checkoutCredits**](doc/BillingApi.md#checkoutcredits) | **POST** /workspace/billing/checkout | Start buying credits; returns the payment page to open
 [*BillingApi*](doc/BillingApi.md) | [**getBilling**](doc/BillingApi.md#getbilling) | **GET** /workspace/billing | The workspace&#39;s plan, slots, members and credits
@@ -290,6 +291,7 @@ Class | Method | HTTP request | Description
  - [ForgotPasswordRequest](doc/ForgotPasswordRequest.md)
  - [GetConsent200Response](doc/GetConsent200Response.md)
  - [GitSettings](doc/GitSettings.md)
+ - [GoogleSignInRequest](doc/GoogleSignInRequest.md)
  - [GrantCreditsRequest](doc/GrantCreditsRequest.md)
  - [HistoryItem](doc/HistoryItem.md)
  - [HourBucket](doc/HourBucket.md)

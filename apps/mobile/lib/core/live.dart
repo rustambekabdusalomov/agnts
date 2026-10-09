@@ -21,7 +21,9 @@ class LiveStream {
   Stream<Map<String, dynamic>> get events => _events.stream;
 
   void start() {
-    if (_running) return;
+    // The stream belongs to a workspace; an Admin account with none has no
+    // stream to follow (the server answers 409).
+    if (_running || (ref.read(adminProvider)?.only ?? false)) return;
     _running = true;
     unawaited(_loop(_gen));
   }

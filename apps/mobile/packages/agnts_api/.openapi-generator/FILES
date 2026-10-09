@@ -76,6 +76,7 @@ doc/Footprint.md
 doc/ForgotPasswordRequest.md
 doc/GetConsent200Response.md
 doc/GitSettings.md
+doc/GoogleSignInRequest.md
 doc/GrantCreditsRequest.md
 doc/HistoryItem.md
 doc/HourBucket.md
@@ -315,6 +316,7 @@ lib/src/model/footprint.dart
 lib/src/model/forgot_password_request.dart
 lib/src/model/get_consent200_response.dart
 lib/src/model/git_settings.dart
+lib/src/model/google_sign_in_request.dart
 lib/src/model/grant_credits_request.dart
 lib/src/model/history_item.dart
 lib/src/model/hour_bucket.dart
@@ -519,6 +521,7 @@ test/footprint_test.dart
 test/forgot_password_request_test.dart
 test/get_consent200_response_test.dart
 test/git_settings_test.dart
+test/google_sign_in_request_test.dart
 test/grant_credits_request_test.dart
 test/history_item_test.dart
 test/hour_bucket_test.dart

@@ -19,7 +19,12 @@ FROM debian:trixie-slim
 
 # Pin Claude Code: agnts parses its stream-json output, including the
 # undocumented rate_limit_event, so upgrades are deliberate.
-ARG CLAUDE_CODE_VERSION=2.1.289
+# 2.1.112 is the last release that runs on Node. From 2.1.113 Claude Code is
+# a native binary that needs a CPU with SSE4.2/AVX: on a VM that hides them
+# (CPU type "QEMU Virtual CPU", kvm64) it starts, then spins at 100% CPU with
+# no output. Move back to a native release (2.1.289 was the last one used)
+# once the server's VM exposes its host CPU.
+ARG CLAUDE_CODE_VERSION=2.1.112
 
 # Custom runner images are built FROM this one; agnts checks the label.
 LABEL agnts.runner="1"
@@ -40,8 +45,14 @@ RUN apt-get update \
 COPY --from=mise /usr/local/bin/mise /usr/local/bin/mise
 COPY --from=node /usr/local /opt/claude/node
 
-RUN PATH=/opt/claude/node/bin:$PATH npm install -g --prefix /opt/claude "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
- && PATH=/opt/claude/node/bin:$PATH npm cache clean --force \
+# Claude Code is a native binary in a per-platform optional package. npm
+# skips an optional package it fails to download, which leaves a stub that
+# only fails once a run starts ("claude native binary not installed"), so
+# retry slow downloads and fail the build unless claude actually runs.
+RUN export PATH=/opt/claude/node/bin:$PATH \
+ && npm install -g --prefix /opt/claude --fetch-retries=5 --fetch-timeout=600000 "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
+ && /opt/claude/bin/claude --version \
+ && npm cache clean --force \
  && rm -rf /root/.npm
 # `claude` always runs on /opt/claude/node, by absolute path, so the
 # repository's Node (first on PATH) never changes the Node Claude runs on.

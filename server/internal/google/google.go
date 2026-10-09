@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -28,18 +29,21 @@ type Identity struct {
 	Name    string
 }
 
-// Verifier checks ID tokens issued for one OAuth client.
+// Verifier checks ID tokens issued for the app's OAuth clients.
 type Verifier struct {
 	ClientID string
+	// Also are more clients whose tokens count: the mobile app's.
+	Also []string
 	// Endpoint is TokenInfoURL; tests point it at a fake.
 	Endpoint string
 	HTTP     *http.Client
 	Now      func() time.Time
 }
 
-// New returns a Verifier for the OAuth client clientID.
-func New(clientID string) *Verifier {
-	return &Verifier{ClientID: clientID, Endpoint: TokenInfoURL, HTTP: &http.Client{Timeout: 10 * time.Second}, Now: time.Now}
+// New returns a Verifier for the OAuth client clientID and, optionally, more
+// clients of the same app.
+func New(clientID string, also ...string) *Verifier {
+	return &Verifier{ClientID: clientID, Also: also, Endpoint: TokenInfoURL, HTTP: &http.Client{Timeout: 10 * time.Second}, Now: time.Now}
 }
 
 // claims are the tokeninfo fields agnts reads. Google returns booleans and
@@ -82,7 +86,7 @@ func (v *Verifier) Verify(ctx context.Context, token string) (Identity, error) {
 	}
 	exp, err := strconv.ParseInt(c.Exp, 10, 64)
 	switch {
-	case c.Aud != v.ClientID,
+	case c.Aud != v.ClientID && !slices.Contains(v.Also, c.Aud),
 		c.Iss != "accounts.google.com" && c.Iss != "https://accounts.google.com",
 		c.Sub == "" || c.Email == "" || c.EmailVerified != "true",
 		err != nil || !v.Now().Before(time.Unix(exp, 0)):

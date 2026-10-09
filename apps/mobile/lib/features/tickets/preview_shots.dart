@@ -184,7 +184,10 @@ class _PreviewCardState extends State<PreviewCard> {
       return [
         Padding(
           padding: const EdgeInsets.only(top: 10),
-          child: Text(l.mpreviewAppFailed, style: TextStyle(fontSize: 14, height: 1.4, color: c.badInk)),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Expanded(child: Text(l.mpreviewAppFailed, style: TextStyle(fontSize: 14, height: 1.4, color: c.badInk))),
+            if (p.summary.isNotEmpty) CopyButton(p.summary, color: c.badInk),
+          ]),
         ),
         if (p.summary.isNotEmpty)
           Padding(

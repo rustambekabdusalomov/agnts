@@ -23,7 +23,7 @@ const _storage = FlutterSecureStorage();
 /// Thrown by [SessionNotifier.signIn] with a message to show.
 class SignInError implements Exception {
   SignInError(this.kind);
-  final String kind; // credentials, codeRequired, rateLimited, server
+  final String kind; // credentials, codeRequired, rateLimited, server, or a Google reason (signInWithGoogle)
 }
 
 /// Holds the session; the token lives in the platform's secure storage.
@@ -41,10 +41,9 @@ class SessionNotifier extends AsyncNotifier<Session?> {
   /// Signs in; [code] is asked for only when the account has two-factor
   /// sign-in on (the server answers code_required first).
   Future<void> signIn(String server, String username, String password, String code) async {
-    server = server.trim().replaceAll(RegExp(r'/+$'), '');
-    final api = AgntsApi(dio: Dio(BaseOptions(baseUrl: '$server/api', connectTimeout: const Duration(seconds: 15))), interceptors: []);
+    server = _trim(server);
     try {
-      final res = await api.getAuthApi().login(
+      final res = await _client(server).getAuthApi().login(
             loginRequest: LoginRequest(
               username: username.trim(),
               password: password,
@@ -52,14 +51,7 @@ class SessionNotifier extends AsyncNotifier<Session?> {
               client: LoginRequestClientEnum.mobile,
             ),
           );
-      final token = res.data?.token;
-      if (token == null) throw SignInError('server');
-      await _storage.write(key: 'server', value: server);
-      await _storage.write(key: 'token', value: token);
-      final user = res.data!.user;
-      await _storage.write(key: 'username', value: user.username);
-      await _writeWorkspace(user.lastWorkspace);
-      state = AsyncData(Session(server: server, token: token, username: user.username, workspace: user.lastWorkspace));
+      await _signedIn(server, res.data);
     } on DioException catch (e) {
       final status = e.response?.statusCode;
       final data = e.response?.data;
@@ -72,6 +64,55 @@ class SessionNotifier extends AsyncNotifier<Session?> {
                   ? 'rateLimited'
                   : 'server');
     }
+  }
+
+  /// The server's OAuth web client id for Google sign-in, or null when
+  /// Google sign-in is off there.
+  Future<String?> googleClientId(String server) async {
+    try {
+      final id = (await _client(_trim(server)).getAuthApi().getSignupInfo()).data?.googleClientId;
+      return id == null || id.isEmpty ? null : id;
+    } on DioException {
+      throw SignInError('server');
+    }
+  }
+
+  /// Signs in with the ID token Google Sign-In gave the app. Errors carry
+  /// the server's reason: googleInvalid, signupClosed, admin, invite,
+  /// googleOff, rateLimited or server.
+  Future<void> signInWithGoogle(String server, String idToken) async {
+    server = _trim(server);
+    try {
+      final res = await _client(server).getAuthApi().signInWithGoogle(googleSignInRequest: GoogleSignInRequest(idToken: idToken));
+      await _signedIn(server, res.data);
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      throw SignInError(switch ((e.response?.statusCode, data is Map ? data['code'] : null)) {
+        (_, 'google_invalid') => 'googleInvalid',
+        (_, 'signup_closed') => 'signupClosed',
+        (_, 'admin_password') => 'admin',
+        (_, 'invite') => 'invite',
+        (_, 'google_off') => 'googleOff',
+        (429, _) => 'rateLimited',
+        _ => 'server',
+      });
+    }
+  }
+
+  static String _trim(String server) => server.trim().replaceAll(RegExp(r'/+$'), '');
+
+  static AgntsApi _client(String server) =>
+      AgntsApi(dio: Dio(BaseOptions(baseUrl: '$server/api', connectTimeout: const Duration(seconds: 15))), interceptors: []);
+
+  Future<void> _signedIn(String server, LoginResponse? res) async {
+    final token = res?.token;
+    if (token == null) throw SignInError('server');
+    await _storage.write(key: 'server', value: server);
+    await _storage.write(key: 'token', value: token);
+    final user = res!.user;
+    await _storage.write(key: 'username', value: user.username);
+    await _writeWorkspace(user.lastWorkspace);
+    state = AsyncData(Session(server: server, token: token, username: user.username, workspace: user.lastWorkspace));
   }
 
   /// Switches the workspace the app acts in; every screen reloads for it.

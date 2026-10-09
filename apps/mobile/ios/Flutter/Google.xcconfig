@@ -1,0 +1,8 @@
+// Google sign-in for the user app (google_sign_in). The iOS OAuth client is
+// created in the Google Cloud project of the server's web client
+// (APIs & Services > Credentials > OAuth client ID > iOS, bundle ID
+// dev.agnts.agntsMobile). Its id also goes on the server, in
+// AGNTS_GOOGLE_APP_CLIENT_IDS: the ID tokens the phone gets are issued to it.
+// The reversed id is the URL scheme Google returns to the app through.
+GOOGLE_IOS_CLIENT_ID = 340542876762-g90m3i4289m29mbkvbdgll9ns5m6vlai.apps.googleusercontent.com
+GOOGLE_REVERSED_CLIENT_ID = com.googleusercontent.apps.340542876762-g90m3i4289m29mbkvbdgll9ns5m6vlai

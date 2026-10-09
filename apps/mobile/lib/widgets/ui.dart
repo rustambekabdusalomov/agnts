@@ -39,6 +39,9 @@ const _icons = <String, String>{
   'image': '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/>',
   'camera': '<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/>',
   'file': '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>',
+  'users': '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c1.9.7 3.1 2.4 3.5 5.2"/>',
+  'shield': '<path d="M12 3l7.5 3v5.5c0 4.4-3.1 8.2-7.5 9.5-4.4-1.3-7.5-5.1-7.5-9.5V6z"/><path d="M9 12l2 2 4-4"/>',
+  'feedback': '<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H9l-5 4z"/><path d="M8 9h8M8 12h5"/>',
 };
 
 /// One of the demo's stroked icons, in [color] (defaults to the text colour).
@@ -792,28 +795,56 @@ class _FoldState extends State<Fold> {
 
 /// A tinted note with an info icon (.help, .help.warn/bad/ok).
 class HelpBox extends StatelessWidget {
-  const HelpBox(this.text, {super.key, this.tone = Tone.info, this.child});
+  const HelpBox(this.text, {super.key, this.tone = Tone.info, this.child, this.copyable = false});
   final String text;
   final Tone tone;
   final Widget? child;
+
+  /// An error to paste elsewhere: a copy button, and the text selectable.
+  final bool copyable;
 
   @override
   Widget build(BuildContext context) {
     final c = Agnts.of(context);
     final (bg, fg, border) = tone == Tone.info ? (c.help, c.primaryInk, c.ring) : (tone.soft(c), tone.ink(c), Colors.transparent);
+    final style = TextStyle(fontSize: 14.5, color: fg);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: EdgeInsets.fromLTRB(14, 12, copyable ? 6 : 14, 12),
       decoration: BoxDecoration(color: bg, border: Border.all(color: border), borderRadius: BorderRadius.circular(14)),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Padding(padding: const EdgeInsets.only(top: 2), child: HIcon('info', size: 18, color: fg)),
         const SizedBox(width: 10),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(text, style: TextStyle(fontSize: 14.5, color: fg)),
+            copyable ? SelectableText(text, style: style) : Text(text, style: style),
             if (child != null) Padding(padding: const EdgeInsets.only(top: 8), child: child!),
           ]),
         ),
+        if (copyable) CopyButton(text, color: fg),
       ]),
+    );
+  }
+}
+
+/// A small copy icon: puts [text] on the clipboard and says so.
+class CopyButton extends StatelessWidget {
+  const CopyButton(this.text, {super.key, this.color});
+  final String text;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return IconButton(
+      tooltip: l.formCopy,
+      visualDensity: VisualDensity.compact,
+      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+      icon: Icon(Icons.copy_rounded, size: 18, color: color ?? Agnts.of(context).ink3),
+      onPressed: () async {
+        await Clipboard.setData(ClipboardData(text: text));
+        if (!context.mounted) return;
+        ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(l.formCopied), duration: const Duration(seconds: 2)));
+      },
     );
   }
 }

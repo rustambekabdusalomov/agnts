@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"maps"
 	"net/http"
 	"net/url"
 	"os"
@@ -334,6 +335,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	rcfg.MemoryMB, rcfg.MaxMemoryMB = int64(cfg.RunMemoryMB), int64(cfg.RunMemoryMaxMB)
 	rcfg.Runtime, rcfg.NetworkPerRun, rcfg.ProxyContainer = cfg.RunRuntime, cfg.RunNetworkPerRun, cfg.EgressContainer
 	rcfg.StampDir = filepath.Join(cfg.DataDir, "cache-stamps")
+	maps.Copy(rcfg.Models, cfg.ClaudeModels)
 	run := runner.New(a.docker, rcfg, func(ctx context.Context) (runner.Credential, error) {
 		c, err := a.claude.CredentialFor(ctx)
 		return runner.Credential{Env: c.Env, Token: c.Token}, err
@@ -839,5 +841,5 @@ func googleSignIn(cfg config.Config, acc *accounts.Service) *httpapi.GoogleSignI
 	if cfg.GoogleClientID == "" {
 		return nil
 	}
-	return &httpapi.GoogleSignIn{Verifier: google.New(cfg.GoogleClientID), Accounts: acc, ClientID: cfg.GoogleClientID, SiteURL: cfg.SiteURL}
+	return &httpapi.GoogleSignIn{Verifier: google.New(cfg.GoogleClientID, cfg.GoogleAppClientIDs...), Accounts: acc, ClientID: cfg.GoogleClientID, SiteURL: cfg.SiteURL}
 }

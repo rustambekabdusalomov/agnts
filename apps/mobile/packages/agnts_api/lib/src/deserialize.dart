@@ -60,6 +60,7 @@ import 'package:agnts_api/src/model/footprint.dart';
 import 'package:agnts_api/src/model/forgot_password_request.dart';
 import 'package:agnts_api/src/model/get_consent200_response.dart';
 import 'package:agnts_api/src/model/git_settings.dart';
+import 'package:agnts_api/src/model/google_sign_in_request.dart';
 import 'package:agnts_api/src/model/grant_credits_request.dart';
 import 'package:agnts_api/src/model/history_item.dart';
 import 'package:agnts_api/src/model/hour_bucket.dart';
@@ -326,6 +327,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return GetConsent200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'GitSettings':
           return GitSettings.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'GoogleSignInRequest':
+          return GoogleSignInRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'GrantCreditsRequest':
           return GrantCreditsRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'HistoryItem':

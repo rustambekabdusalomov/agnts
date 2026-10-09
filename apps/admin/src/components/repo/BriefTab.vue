@@ -9,6 +9,7 @@ import { askConfirm } from '../../composables/useConfirm'
 import { livePoll } from '../../composables/useLive'
 import { useUi } from '../../stores/ui'
 import ReportView from '../ticket/ReportView.vue'
+import CopyButton from '../ui/CopyButton.vue'
 
 // What agnts knows about how the repository works. A survey writes a draft;
 // once approved, every run of the repository's tickets reads the brief.
@@ -84,7 +85,7 @@ const short = (sha: string) => sha.slice(0, 7)
         </div>
       </div>
 
-      <div v-if="b.status === 'failed'" class="help bad"><p>{{ t('brief.failed', { error: b.error }) }}</p></div>
+      <div v-if="b.status === 'failed'" class="help bad"><p class="err-text">{{ t('brief.failed', { error: b.error }) }}</p><CopyButton v-if="b.error" :text="b.error" /></div>
 
       <template v-if="editing">
         <textarea v-model="text" class="brief-edit" rows="24" :aria-label="t('brief.title')" spellcheck="false" />

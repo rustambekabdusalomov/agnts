@@ -1763,6 +1763,10 @@
       }
     }
   },
+  "mobileAdminAppOnly": "This is an Admin account. Open it in the agnts admin app.",
+  "mobileGoogleContinue": "Continue with Google",
+  "mobileGoogleOff": "Google sign-in is off on this server.",
+  "mobileGoogleSetup": "Google sign-in is not set up in this build of the app.",
   "mpreviewTitle": "agnts's preview",
   "mpreviewSub": "Screenshots of the app with this change. Advice beside your review: it never blocks approval.",
   "mpreviewPending": "Queued: agnts starts the app and takes screenshots as soon as a worker is free.",
@@ -4213,6 +4217,11 @@
   "wsKindApiKey": "Anthropic API key",
   "wsKindSubscriptionHelp": "Run `claude setup-token` where you are signed in to your Claude plan, and paste the token.",
   "wsKindApiKeyHelp": "Create a key in the Anthropic Console (sk-ant-api…). Usage is billed by Anthropic to its owner.",
+  "wsKeyStep1": "Sign in to the Claude Console (button below) and open Settings → API keys.",
+  "wsKeyStep2": "Click Create Key, name it (for example agnts) and pick the Console workspace it bills to.",
+  "wsKeyStep3": "Copy the key (it starts with sk-ant-api) and paste it below. The Console shows it only once.",
+  "wsKeyStep4": "Runs are billed per token to that Console account: add credits and set a spend limit under Billing.",
+  "wsKeyOpen": "Open the Claude Console",
   "wsSubscriptionsOff": "This server takes Anthropic API keys only.",
   "wsToken": "Token",
   "wsConnect": "Connect",

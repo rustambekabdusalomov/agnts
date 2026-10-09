@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../core/flavor.dart';
+import '../../core/google_auth.dart';
 import '../../core/session.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme.dart';
@@ -16,7 +18,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _server = TextEditingController();
+  final _server = TextEditingController(text: defaultServer);
   final _user = TextEditingController();
   final _pass = TextEditingController();
   final _code = TextEditingController();
@@ -33,17 +35,59 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
-  Future<void> _submit() async {
-    final l = AppLocalizations.of(context);
+  /// The server address, or null after saying it is not a valid one.
+  String? _validServer() {
     final server = _server.text.trim();
     final uri = Uri.tryParse(server);
     if (uri == null || uri.host.isEmpty || !(uri.scheme == 'https' || (allowLocalHttp && uri.scheme == 'http' && isLocalHost(uri.host)))) {
       setState(() {
-        _error = l.mobileServerInvalid;
+        _error = AppLocalizations.of(context).mobileServerInvalid;
         _asking = false;
       });
-      return;
+      return null;
     }
+    return server;
+  }
+
+  /// The user app signs in with Google only: the server's web client id,
+  /// then Google's account picker on the phone, then the server.
+  Future<void> _google() async {
+    final l = AppLocalizations.of(context);
+    final server = _validServer();
+    if (server == null) return;
+    setState(() {
+      _busy = true;
+      _error = null;
+      _asking = false;
+    });
+    final session = ref.read(sessionProvider.notifier);
+    try {
+      final clientId = await session.googleClientId(server);
+      if (clientId == null) throw SignInError('googleOff');
+      final token = await GoogleAuth.idToken(clientId);
+      if (token == null) return; // backed out of Google's picker
+      await session.signInWithGoogle(server, token);
+    } on SignInError catch (e) {
+      if (!mounted) return;
+      setState(() => _error = switch (e.kind) {
+            'googleOff' => l.mobileGoogleOff,
+            'googleSetup' => l.mobileGoogleSetup,
+            'googleInvalid' || 'googleFailed' => l.authGoogleFailed,
+            'signupClosed' => l.authGoogleClosed,
+            'admin' => l.mobileAdminAppOnly,
+            'invite' => l.authGoogleInvite,
+            'rateLimited' => l.authGoogleRateLimited,
+            _ => l.authGoogleError,
+          });
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _submit() async {
+    final l = AppLocalizations.of(context);
+    final server = _validServer();
+    if (server == null) return;
     setState(() {
       _busy = true;
       _error = null;
@@ -74,6 +118,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final l = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final c = Agnts.of(context);
+    // The user app signs in with Google; the admin app with a password.
+    final google = !ref.watch(adminAppProvider);
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -109,38 +155,40 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 15),
                         decoration: InputDecoration(labelText: l.mobileServer, hintText: l.mobileServerHint),
                       ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: _user,
-                        autofillHints: const [AutofillHints.username],
-                        autocorrect: false,
-                        decoration: InputDecoration(labelText: l.authUsername),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: _pass,
-                        obscureText: true,
-                        autofillHints: const [AutofillHints.password],
-                        decoration: InputDecoration(labelText: l.authPassword),
-                        onSubmitted: _needCode ? null : (_) => _submit(),
-                      ),
-                      if (_needCode) ...[
+                      if (!google) ...[
                         const SizedBox(height: 12),
                         TextField(
-                          controller: _code,
-                          autofocus: true,
-                          keyboardType: TextInputType.number,
-                          autofillHints: const [AutofillHints.oneTimeCode],
-                          maxLength: 6,
-                          style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 17, letterSpacing: 4),
-                          decoration: InputDecoration(
-                            labelText: l.authCode,
-                            helperText: l.authCodeHint,
-                            helperStyle: TextStyle(fontSize: 12.5, color: c.ink3),
-                            counterText: '',
-                          ),
-                          onSubmitted: (_) => _submit(),
+                          controller: _user,
+                          autofillHints: const [AutofillHints.username],
+                          autocorrect: false,
+                          decoration: InputDecoration(labelText: l.authUsername),
                         ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _pass,
+                          obscureText: true,
+                          autofillHints: const [AutofillHints.password],
+                          decoration: InputDecoration(labelText: l.authPassword),
+                          onSubmitted: _needCode ? null : (_) => _submit(),
+                        ),
+                        if (_needCode) ...[
+                          const SizedBox(height: 12),
+                          TextField(
+                            controller: _code,
+                            autofocus: true,
+                            keyboardType: TextInputType.number,
+                            autofillHints: const [AutofillHints.oneTimeCode],
+                            maxLength: 6,
+                            style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 17, letterSpacing: 4),
+                            decoration: InputDecoration(
+                              labelText: l.authCode,
+                              helperText: l.authCodeHint,
+                              helperStyle: TextStyle(fontSize: 12.5, color: c.ink3),
+                              counterText: '',
+                            ),
+                            onSubmitted: (_) => _submit(),
+                          ),
+                        ],
                       ],
                     ]),
                   ),
@@ -150,10 +198,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: HelpBox(_error!, tone: _asking ? Tone.info : Tone.bad),
                     ),
                   const SizedBox(height: 18),
-                  FilledButton(
-                    onPressed: _busy ? null : _submit,
-                    child: Text(_busy ? l.authSubmitting : l.authSubmit),
-                  ),
+                  if (google)
+                    _GoogleButton(busy: _busy, onPressed: _google)
+                  else
+                    FilledButton(
+                      onPressed: _busy ? null : _submit,
+                      child: Text(_busy ? l.authSubmitting : l.authSubmit),
+                    ),
                 ]),
               ),
             ),
@@ -163,6 +214,50 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 }
+
+/// "Continue with Google": Google's mark on a white (or dark) pill, as
+/// Google's branding asks.
+class _GoogleButton extends StatelessWidget {
+  const _GoogleButton({required this.busy, required this.onPressed});
+  final bool busy;
+  final VoidCallback onPressed;
+
+  static const _mark = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">'
+      '<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>'
+      '<path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>'
+      '<path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>'
+      '<path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>'
+      '</svg>';
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = Agnts.of(context);
+    return OutlinedButton(
+      onPressed: busy ? null : onPressed,
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size.fromHeight(50),
+        shape: const StadiumBorder(),
+        backgroundColor: c.surface,
+        side: BorderSide(color: c.line4),
+      ),
+      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        if (busy)
+          SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: c.ink3))
+        else
+          SvgPicture.string(_mark, width: 18, height: 18),
+        const SizedBox(width: 10),
+        Flexible(
+          child: Text(busy ? l.authGoogleRedirecting : l.mobileGoogleContinue,
+              overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w700, color: c.ink)),
+        ),
+      ]),
+    );
+  }
+}
+
+/// The server the sign-in screen starts with; another can be typed in.
+const defaultServer = String.fromEnvironment('AGNTS_SERVER', defaultValue: 'https://api.agnts.uz');
 
 /// Plain http is allowed only to a server on the local network (a dev server
 /// on your computer), and only in debug builds or builds made with

@@ -20,6 +20,7 @@ func TestVerify(t *testing.T) {
 	tokens := map[string]map[string]string{
 		"good":       valid,
 		"other-app":  with(valid, "aud", "client-2"),
+		"ios-app":    with(valid, "aud", "client-ios"),
 		"other-iss":  with(valid, "iss", "evil.example.com"),
 		"unverified": with(valid, "email_verified", "false"),
 		"expired":    with(valid, "exp", jsonNum(now.Add(-time.Minute).Unix())),
@@ -33,12 +34,16 @@ func TestVerify(t *testing.T) {
 		_ = json.NewEncoder(w).Encode(c)
 	}))
 	defer srv.Close()
-	v := New("client-1")
+	v := New("client-1", "client-ios")
 	v.Endpoint, v.Now = srv.URL, func() time.Time { return now }
 
 	id, err := v.Verify(context.Background(), "good")
 	if err != nil || id != (Identity{Subject: "1234", Email: "dev@gmail.com", Name: "Dev Person"}) {
 		t.Fatalf("good token: %+v %v", id, err)
+	}
+	// The mobile app's own client counts too.
+	if _, err := v.Verify(context.Background(), "ios-app"); err != nil {
+		t.Fatalf("app client: %v", err)
 	}
 	for _, tok := range []string{"", "forged", "other-app", "other-iss", "unverified", "expired"} {
 		if _, err := v.Verify(context.Background(), tok); !errors.Is(err, ErrInvalid) {

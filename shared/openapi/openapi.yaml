@@ -76,6 +76,39 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '429': { $ref: '#/components/responses/TooManyRequests' }
 
+  /auth/google:
+    post:
+      operationId: signInWithGoogle
+      summary: Sign in with a Google ID token (the mobile app)
+      description: >
+        The phone signs in with Google itself and sends the ID token here. Like
+        "Continue with Google" on the website, a new account starts as a solo
+        developer with a workspace of its own, or joins the workspace of an invite.
+        Always a mobile session: the token comes back in the body.
+      tags: [auth]
+      x-scope: user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/GoogleSignInRequest' }
+      responses:
+        '200':
+          description: Signed in
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LoginResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+        '503':
+          description: Google sign-in is off on this server, or Google could not be reached
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
   /auth/logout:
     post:
       operationId: logout
@@ -3284,6 +3317,13 @@ components:
         client:
           type: string
           enum: [web, mobile]
+
+    GoogleSignInRequest:
+      type: object
+      required: [idToken]
+      properties:
+        idToken: { type: string, minLength: 1, maxLength: 4096, description: The ID token Google Sign-In gave the app }
+        invite: { type: string, maxLength: 256, description: "An invite link's token, to join that workspace" }
 
     LoginResponse:
       type: object

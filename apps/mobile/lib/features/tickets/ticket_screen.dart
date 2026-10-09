@@ -399,7 +399,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         children.addAll([
           _H2(l.ticketFailedTitle),
           const SizedBox(height: 8),
-          HelpBox(t.stopReason ?? l.ticketFailedUnknown, tone: Tone.bad),
+          HelpBox(t.stopReason ?? l.ticketFailedUnknown, tone: Tone.bad, copyable: t.stopReason != null),
           if (kindEditable(t)) KindPicker(t),
           // A run that stopped while pushing resumes there: nothing to tell it.
           if (_takesRetryNote(t)) ...[
@@ -425,12 +425,12 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         final u = ref.watch(usageProvider).value?.fiveHour.utilization;
         children.addAll([
           _H2(l.ticketRateTitle),
-          if (t.stopReason != null) ...[const SizedBox(height: 8), HelpBox(t.stopReason!, tone: Tone.warn)],
+          if (t.stopReason != null) ...[const SizedBox(height: 8), HelpBox(t.stopReason!, tone: Tone.warn, copyable: true)],
           if (u != null) Padding(padding: const EdgeInsets.only(top: 10), child: _Sub(l.ticketRateHint('${(u * 100).round()}'))),
         ]);
     }
     if (t.stopReason != null && t.state != TicketState.failed && t.state != TicketState.rateLimited) {
-      children.addAll([const SizedBox(height: 10), HelpBox(t.stopReason!, tone: Tone.gray)]);
+      children.addAll([const SizedBox(height: 10), HelpBox(t.stopReason!, tone: Tone.gray, copyable: true)]);
     }
     final warning = _kindWarning(t);
     if (warning != null) children.insert(0, Padding(padding: const EdgeInsets.only(bottom: 12), child: warning));

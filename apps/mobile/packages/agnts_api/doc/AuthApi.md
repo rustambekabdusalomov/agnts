@@ -17,6 +17,7 @@ Method | HTTP request | Description
 [**logout**](AuthApi.md#logout) | **POST** /auth/logout | End the current session
 [**register**](AuthApi.md#register) | **POST** /auth/signup | Create an account (and its first workspace, unless joining by invite)
 [**resetPassword**](AuthApi.md#resetpassword) | **POST** /auth/password/reset | Set a new password with a reset link&#39;s token
+[**signInWithGoogle**](AuthApi.md#signinwithgoogle) | **POST** /auth/google | Sign in with a Google ID token (the mobile app)
 [**verifyEmail**](AuthApi.md#verifyemail) | **POST** /auth/verify | Confirm an email address with the link&#39;s token
 
 
@@ -331,6 +332,49 @@ Name | Type | Description  | Notes
 ### Return type
 
 void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **signInWithGoogle**
+> LoginResponse signInWithGoogle(googleSignInRequest)
+
+Sign in with a Google ID token (the mobile app)
+
+The phone signs in with Google itself and sends the ID token here. Like \"Continue with Google\" on the website, a new account starts as a solo developer with a workspace of its own, or joins the workspace of an invite. Always a mobile session: the token comes back in the body. 
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+
+final api = AgntsApi().getAuthApi();
+final GoogleSignInRequest googleSignInRequest = ; // GoogleSignInRequest | 
+
+try {
+    final response = api.signInWithGoogle(googleSignInRequest);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling AuthApi->signInWithGoogle: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **googleSignInRequest** | [**GoogleSignInRequest**](GoogleSignInRequest.md)|  | 
+
+### Return type
+
+[**LoginResponse**](LoginResponse.md)
 
 ### Authorization
 

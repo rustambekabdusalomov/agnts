@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"net/url"
 	"path"
 	"strconv"
@@ -52,11 +53,24 @@ type Config struct {
 	// StampDir keeps a file per package cache, touched on every use, so
 	// caches nobody used for a while can be emptied.
 	StampDir string
+	// Models are the full model ids for agnts's short names (opus, sonnet,
+	// haiku). Claude Code resolves a short name to the newest model it
+	// knows, so a pinned older release would pick older models; a full id
+	// does not depend on the release.
+	Models map[string]string
+}
+
+// DefaultModels are the current Claude models.
+var DefaultModels = map[string]string{
+	"opus":   "claude-opus-5-5",
+	"sonnet": "claude-sonnet-5-5",
+	"haiku":  "claude-haiku-5-5",
 }
 
 // DefaultConfig returns limits for a small VPS.
 func DefaultConfig() Config {
-	return Config{Network: "agnts-runs", MemoryMB: 4096, CPUs: 2, PIDs: 1024, MaxMemoryMB: 8192, ToolchainVolume: "agnts-toolchains"}
+	return Config{Network: "agnts-runs", MemoryMB: 4096, CPUs: 2, PIDs: 1024, MaxMemoryMB: 8192, ToolchainVolume: "agnts-toolchains",
+		Models: maps.Clone(DefaultModels)}
 }
 
 // Credential is how Claude Code reaches Claude: Env is the variable it
@@ -154,7 +168,7 @@ func (r *Runner) Open(ctx context.Context, spec orchestrator.WorkspaceSpec) (orc
 		}
 		return nil, err
 	}
-	ws := &workspace{docker: r.docker, id: id, token: r.token, memoryMB: memory, network: ownNet, proxy: r.cfg.ProxyContainer}
+	ws := &workspace{docker: r.docker, id: id, token: r.token, memoryMB: memory, network: ownNet, proxy: r.cfg.ProxyContainer, models: r.cfg.Models}
 	fail := func(err error) (orchestrator.Workspace, error) {
 		_ = ws.Close(context.WithoutCancel(ctx))
 		return nil, err
@@ -215,6 +229,7 @@ type workspace struct {
 	// network is the run's own network ("" on the shared one), removed
 	// with the container; proxy is the egress proxy that joined it.
 	network, proxy string
+	models         map[string]string
 }
 
 // runNetwork creates a run's own network: internal (no route out) when
@@ -252,6 +267,27 @@ func (w *workspace) errOOM(ctx context.Context, code int) error {
 
 func (w *workspace) ID() string { return w.id }
 
+// modelID is the full id for a short model name; anything else (a full
+// id already, or a name without a mapping) goes to Claude Code as is.
+func modelID(models map[string]string, name string) string {
+	if id := models[name]; id != "" {
+		return id
+	}
+	return name
+}
+
+// modelEnv points Claude Code's own short names at the same models: it
+// uses them for sub-agents and its quick background calls.
+func modelEnv(models map[string]string) []string {
+	var env []string
+	for _, name := range []string{"opus", "sonnet", "haiku"} {
+		if id := models[name]; id != "" {
+			env = append(env, "ANTHROPIC_DEFAULT_"+strings.ToUpper(name)+"_MODEL="+id)
+		}
+	}
+	return env
+}
+
 // timeoutCmd wraps argv in coreutils timeout so the process inside the
 // container is killed too, not just our stream.
 func timeoutCmd(d time.Duration, argv ...string) []string {
@@ -277,7 +313,7 @@ func (w *workspace) Claude(ctx context.Context, req orchestrator.ClaudeRequest, 
 		"--output-format", "stream-json", "--verbose",
 		"--permission-mode", "dontAsk"}
 	if req.Model != "" {
-		argv = append(argv, "--model", req.Model)
+		argv = append(argv, "--model", modelID(w.models, req.Model))
 	}
 	if req.MaxTurns > 0 {
 		argv = append(argv, "--max-turns", strconv.Itoa(req.MaxTurns))
@@ -301,11 +337,11 @@ func (w *workspace) Claude(ctx context.Context, req orchestrator.ClaudeRequest, 
 			Cmd:        timeoutCmd(req.Timeout, argv...),
 			User:       agentUser,
 			WorkingDir: workDir,
-			Env: []string{
+			Env: append([]string{
 				cred.Env + "=" + cred.Token,
 				"CLAUDE_CONFIG_DIR=" + claudeHome,
 				"DISABLE_AUTOUPDATER=1",
-			},
+			}, modelEnv(w.models)...),
 		}, pw, &stderr)
 		_ = pw.CloseWithError(err)
 		done <- execOut{code, err}

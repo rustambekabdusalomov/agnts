@@ -11,6 +11,7 @@ import (
 	"agnts/internal/auth"
 	"agnts/internal/domain"
 	"agnts/internal/google"
+	"agnts/internal/httpapi/gen"
 )
 
 // GoogleSignIn is "Continue with Google" on the website.
@@ -118,4 +119,59 @@ func urlOrigin(u *url.URL) string {
 		return ""
 	}
 	return u.Scheme + "://" + u.Host
+}
+
+// SignInWithGoogle implements gen.ServerInterface: the mobile app's Google
+// sign-in. The phone gets the ID token from Google itself, so there is no
+// form post and no Origin to check; the token's audience (one of this
+// install's OAuth clients) is what ties it to agnts.
+func (s *Server) SignInWithGoogle(w http.ResponseWriter, r *http.Request) {
+	g := s.opt.Google
+	if g == nil {
+		writeError(w, http.StatusServiceUnavailable, "google_off", "Google sign-in is off on this server")
+		return
+	}
+	if !s.limit(w, r, s.loginLimiter, "too many sign-in attempts, try again later") {
+		return
+	}
+	var req gen.GoogleSignInRequest
+	if err := decodeJSON(r, &req); err != nil || req.IdToken == "" {
+		writeError(w, http.StatusBadRequest, "bad_request", "the Google ID token is required")
+		return
+	}
+	id, err := g.Verifier.Verify(r.Context(), req.IdToken)
+	if errors.Is(err, google.ErrInvalid) {
+		s.opt.Log.Warn("google sign-in rejected", "ip", r.RemoteAddr, "client", "mobile")
+		writeError(w, http.StatusUnauthorized, "google_invalid", "Google did not confirm this account; try again")
+		return
+	}
+	if err != nil {
+		s.opt.Log.Error("google sign-in", "err", err)
+		writeError(w, http.StatusServiceUnavailable, "google_unavailable", "Google could not be reached; try again")
+		return
+	}
+	invite := deref(req.Invite)
+	res, err := g.Accounts.SignInWithGoogle(r.Context(), accounts.GoogleInput{
+		Email: id.Email, DisplayName: id.Name, Invite: invite, Client: domain.ClientMobile, UserAgent: r.UserAgent(), IP: r.RemoteAddr,
+	})
+	var inv *auth.InvalidError
+	switch {
+	case errors.Is(err, domain.ErrForbidden):
+		writeError(w, http.StatusForbidden, "signup_closed", "sign-up is by invitation here: ask for an invite link")
+		return
+	case errors.Is(err, auth.ErrAdminUsesPassword):
+		writeError(w, http.StatusForbidden, "admin_password", "this is an Admin account: it signs in with its password in the agnts admin app")
+		return
+	case invite != "" && (errors.Is(err, domain.ErrNotFound) || errors.Is(err, domain.ErrMemberLimit)):
+		writeError(w, http.StatusBadRequest, "invite", "this invite link is invalid or the workspace is full")
+		return
+	case errors.As(err, &inv):
+		writeError(w, http.StatusBadRequest, "invalid", inv.Error())
+		return
+	case err != nil:
+		s.writeInternal(w, r, err)
+		return
+	}
+	s.opt.Log.Info("signed in with Google", "user_id", res.User.ID, "client", "mobile", "ip", r.RemoteAddr)
+	s.writeSession(w, r, res.Token, res.Session, res.User)
 }

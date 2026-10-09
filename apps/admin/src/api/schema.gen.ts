@@ -41,6 +41,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/google": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sign in with a Google ID token (the mobile app)
+         * @description The phone signs in with Google itself and sends the ID token here. Like "Continue with Google" on the website, a new account starts as a solo developer with a workspace of its own, or joins the workspace of an invite. Always a mobile session: the token comes back in the body.
+         */
+        post: operations["signInWithGoogle"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/logout": {
         parameters: {
             query?: never;
@@ -2758,6 +2778,12 @@ export interface components {
             /** @enum {string} */
             client: "web" | "mobile";
         };
+        GoogleSignInRequest: {
+            /** @description The ID token Google Sign-In gave the app */
+            idToken: string;
+            /** @description An invite link's token, to join that workspace */
+            invite?: string;
+        };
         LoginResponse: {
             user: components["schemas"]["User"];
             /** Format: date-time */
@@ -4385,6 +4411,43 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             429: components["responses"]["TooManyRequests"];
+        };
+    };
+    signInWithGoogle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoogleSignInRequest"];
+            };
+        };
+        responses: {
+            /** @description Signed in */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            429: components["responses"]["TooManyRequests"];
+            /** @description Google sign-in is off on this server, or Google could not be reached */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
     logout: {

@@ -26,11 +26,9 @@ class MoreScreen extends ConsumerWidget {
     final c = Agnts.of(context);
     final usage = ref.watch(usageProvider);
     final settings = ref.watch(settingsProvider);
-    final prefs = ref.watch(prefsProvider);
     final session = ref.watch(sessionProvider).value;
     final workspace = ref.watch(currentWorkspaceProvider);
     final workspaces = ref.watch(meProvider).value?.workspaces?.length ?? 0;
-    final lang = prefs.locale?.languageCode;
 
     Widget group(List<Widget> rows) => Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: ListGroup(children: rows));
     Widget card(Widget child) => Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: HCard(child: child));
@@ -64,7 +62,7 @@ class MoreScreen extends ConsumerWidget {
             // Profile (.profile)
             if (session != null) ...[
               card(Row(children: [
-                _Avatar(session.username),
+                Avatar(session.username),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -124,39 +122,7 @@ class MoreScreen extends ConsumerWidget {
                 onTap: () => context.push('/learn-queue'),
               ),
             ]),
-            // Appearance
-            SectionHeader(l.mobileAppearance),
-            group([
-              // Title and switch on one line, or the switch below when the words are long.
-              Container(
-                constraints: const BoxConstraints(minHeight: 52),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                alignment: Alignment.centerLeft,
-                child: Wrap(
-                  alignment: WrapAlignment.spaceBetween,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 12,
-                  runSpacing: 8,
-                  children: [
-                    Text(l.mobileTheme, style: TextStyle(fontSize: 15, color: c.ink)),
-                    Segmented<ThemeMode>(
-                      options: [
-                        (ThemeMode.system, l.mobileThemeSystem),
-                        (ThemeMode.light, l.mobileThemeLight),
-                        (ThemeMode.dark, l.mobileThemeDark),
-                      ],
-                      value: prefs.theme,
-                      onChanged: (m) => ref.read(prefsProvider.notifier).setTheme(m),
-                    ),
-                  ],
-                ),
-              ),
-              ListRow(
-                title: l.mobileLanguage,
-                value: lang == null ? l.mmoreLangPhone : _langName(lang),
-                onTap: () => _pickLanguage(context, ref, lang),
-              ),
-            ]),
+            const AppearanceSection(),
             // Default models and push notifications
             ...settings.when(
               data: (s) => [_ModelsSection(s), _PushSection(s)],
@@ -214,6 +180,56 @@ class MoreScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+/// Theme and language: on this phone only.
+class AppearanceSection extends ConsumerWidget {
+  const AppearanceSection({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final c = Agnts.of(context);
+    final prefs = ref.watch(prefsProvider);
+    final lang = prefs.locale?.languageCode;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      SectionHeader(l.mobileAppearance),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: ListGroup(children: [
+          // Title and switch on one line, or the switch below when the words are long.
+          Container(
+            constraints: const BoxConstraints(minHeight: 52),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+            alignment: Alignment.centerLeft,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 12,
+              runSpacing: 8,
+              children: [
+                Text(l.mobileTheme, style: TextStyle(fontSize: 15, color: c.ink)),
+                Segmented<ThemeMode>(
+                  options: [
+                    (ThemeMode.system, l.mobileThemeSystem),
+                    (ThemeMode.light, l.mobileThemeLight),
+                    (ThemeMode.dark, l.mobileThemeDark),
+                  ],
+                  value: prefs.theme,
+                  onChanged: (m) => ref.read(prefsProvider.notifier).setTheme(m),
+                ),
+              ],
+            ),
+          ),
+          ListRow(
+            title: l.mobileLanguage,
+            value: lang == null ? l.mmoreLangPhone : _langName(lang),
+            onTap: () => _pickLanguage(context, ref, lang),
+          ),
+        ]),
+      ),
+    ]);
   }
 }
 
@@ -421,8 +437,8 @@ class _PushSection extends ConsumerWidget {
 }
 
 /// The round initials avatar (.av).
-class _Avatar extends StatelessWidget {
-  const _Avatar(this.name);
+class Avatar extends StatelessWidget {
+  const Avatar(this.name, {super.key});
   final String name;
 
   @override

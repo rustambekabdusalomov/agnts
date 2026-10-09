@@ -3,7 +3,10 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { components } from '../../api/schema.gen'
 import CfgRow from '../form/CfgRow.vue'
+import CopyField from '../form/CopyField.vue'
 import SegButtons from '../form/SegButtons.vue'
+import HiIcon from '../ui/HiIcon.vue'
+import CopyButton from '../ui/CopyButton.vue'
 
 type State = components['schemas']['ClaudeConnectionState']
 type Kind = 'subscription' | 'api_key'
@@ -22,6 +25,12 @@ const kinds = computed(() => [
   ...(props.subscriptions ? [{ value: 'subscription' as Kind, label: t('ws.kindSubscription') }] : []),
   { value: 'api_key' as Kind, label: t('ws.kindApiKey') },
 ])
+// "How to get the token": a plan token from Claude Code, or a key from the Console.
+const steps = computed(() =>
+  kind.value === 'subscription'
+    ? [1, 2, 3, 4].map((n) => t(`integrations.tokenStep${n}_claude`))
+    : [1, 2, 3, 4].map((n) => t(`ws.keyStep${n}`)),
+)
 const pct = (v?: number) => (v === undefined ? '' : `${Math.round(v * 100)}%`)
 
 function submit() {
@@ -50,11 +59,23 @@ function submit() {
     <p v-if="state?.usage && state.usage.fiveHour.utilization !== undefined" class="hint">
       {{ t('nav.session') }}: {{ pct(state.usage.fiveHour.utilization) }}<template v-if="state.usage.sevenDay.utilization !== undefined"> · {{ t('nav.week') }}: {{ pct(state.usage.sevenDay.utilization) }}</template>
     </p>
-    <p v-if="state?.lastError" class="ferr">{{ state.lastError }}</p>
+    <div v-if="state?.lastError" class="err-row"><p class="ferr err-text">{{ state.lastError }}</p><CopyButton :text="state.lastError" /></div>
     <form v-if="editing && !readonly" class="stack" style="margin-top: 12px; gap: 10px" @submit.prevent="submit">
       <p v-if="!subscriptions" class="hint">{{ t('ws.subscriptionsOff') }}</p>
       <SegButtons v-model="kind" :options="kinds" :label="t('ws.kind')" />
-      <p class="hint">{{ kind === 'subscription' ? t('ws.kindSubscriptionHelp') : t('ws.kindApiKeyHelp') }}</p>
+      <div class="help token-how">
+        <HiIcon name="info" />
+        <div>
+          <b>{{ t('integrations.tokenHow') }}</b>
+          <ol>
+            <li v-for="(step, i) in steps" :key="i">{{ step }}</li>
+          </ol>
+          <CopyField v-if="kind === 'subscription'" :label="t('integrations.tokenCommand')" value="claude setup-token" />
+          <div v-else class="actions" style="margin: 0">
+            <a class="btn" href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">{{ t('ws.keyOpen') }} ↗</a>
+          </div>
+        </div>
+      </div>
       <input v-model="token" class="cfg-in mono" type="password" autocomplete="off" :placeholder="kind === 'subscription' ? 'sk-ant-oat…' : 'sk-ant-api…'" :aria-label="t('ws.token')">
       <p v-if="error" class="ferr">{{ error }}</p>
       <span class="row-actions" style="justify-content: flex-start">

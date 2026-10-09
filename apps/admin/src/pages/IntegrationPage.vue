@@ -18,6 +18,7 @@ import HiIcon from '../components/ui/HiIcon.vue'
 import { ago } from '../composables/format'
 import { useUi } from '../stores/ui'
 import { askConfirm } from '../composables/useConfirm'
+import CopyButton from '../components/ui/CopyButton.vue'
 
 const { t, locale } = useI18n()
 const route = useRoute()
@@ -156,7 +157,7 @@ const sideHelp = computed(() =>
             <CfgRow :label="t('integrations.lastChecked')">
               <span class="conn">{{ integ.checkedAt ? ago(integ.checkedAt, locale) : t('integrations.never') }}</span>
             </CfgRow>
-            <p v-if="integ.lastError" class="ferr">{{ t('integrations.lastError') }}: {{ integ.lastError }}</p>
+            <div v-if="integ.lastError" class="err-row"><p class="ferr err-text">{{ t('integrations.lastError') }}: {{ integ.lastError }}</p><CopyButton :text="integ.lastError" /></div>
           </section>
           <JiraSettings v-if="provider === 'jira'" :integration="integ" />
           <template v-if="provider === 'plane'">

@@ -97,6 +97,7 @@ export 'package:agnts_api/src/model/footprint.dart';
 export 'package:agnts_api/src/model/forgot_password_request.dart';
 export 'package:agnts_api/src/model/get_consent200_response.dart';
 export 'package:agnts_api/src/model/git_settings.dart';
+export 'package:agnts_api/src/model/google_sign_in_request.dart';
 export 'package:agnts_api/src/model/grant_credits_request.dart';
 export 'package:agnts_api/src/model/history_item.dart';
 export 'package:agnts_api/src/model/hour_bucket.dart';

@@ -42,6 +42,7 @@ import { askConfirm } from '../composables/useConfirm'
 import WaitBanner from '../components/ticket/WaitBanner.vue'
 import { useSession } from '../stores/session'
 import { useWorkspace } from '../stores/workspace'
+import CopyButton from '../components/ui/CopyButton.vue'
 
 const { t, locale } = useI18n()
 const route = useRoute()
@@ -657,7 +658,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             <template v-else-if="tk.state === 'failed'">
               <h2>{{ t('ticket.failedTitle') }}</h2>
               <div class="sec">
-                <div class="help bad"><HiIcon name="info" /><p style="white-space: pre-wrap">{{ tk.stopReason || t('ticket.failedUnknown') }}</p></div>
+                <div class="help bad"><HiIcon name="info" /><p class="err-text" style="white-space: pre-wrap">{{ tk.stopReason || t('ticket.failedUnknown') }}</p><CopyButton v-if="tk.stopReason" :text="tk.stopReason" /></div>
               </div>
               <KindPicker v-if="kindEditable" :ticket="tk" />
               <RepoPicker v-if="canChangeRepo" :ticket="tk" />

@@ -88,6 +88,10 @@
     "pushed": "Pushed",
     "firstTry": "First try",
     "waitingAvg": "Waiting on you",
-    "minutes": "{n} min"
+    "minutes": "{n} min",
+    "adminAppOnly": "This is an Admin account. Open it in the agnts admin app.",
+    "googleContinue": "Continue with Google",
+    "googleOff": "Google sign-in is off on this server.",
+    "googleSetup": "Google sign-in is not set up in this build of the app."
   }
 }

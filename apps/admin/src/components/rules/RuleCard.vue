@@ -6,6 +6,7 @@ import { ago } from '../../composables/format'
 import { askConfirm } from '../../composables/useConfirm'
 import SwitchToggle from '../form/SwitchToggle.vue'
 import { RULE_TONE, useRuleAction } from './useRules'
+import CopyButton from '../ui/CopyButton.vue'
 
 // One rule: its text, where Claude's review stands, and what to do next
 // (answer its questions, retry a failed review, edit, turn off, delete).
@@ -123,7 +124,7 @@ async function remove() {
 
     <!-- Review failed -->
     <template v-else-if="rule.status === 'failed'">
-      <div class="help bad"><p>{{ t('rules.failed', { error: rule.error }) }}</p></div>
+      <div class="help bad"><p class="err-text">{{ t('rules.failed', { error: rule.error }) }}</p><CopyButton v-if="rule.error" :text="rule.error" /></div>
       <div class="actions">
         <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="act.mutate({ kind: 'review', id: rule.id })">{{ t('rules.reviewAgain') }}</button>
         <button class="btn" type="button" :disabled="act.isPending.value" @click="accept">{{ t('rules.accept') }}</button>

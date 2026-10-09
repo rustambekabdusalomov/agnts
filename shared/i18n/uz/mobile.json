@@ -88,6 +88,10 @@
     "pushed": "Yuborildi",
     "firstTry": "Birinchi urinishda",
     "waitingAvg": "Sizni kutish",
-    "minutes": "{n} daq"
+    "minutes": "{n} daq",
+    "adminAppOnly": "Bu Admin hisobi. Uni agnts admin ilovasida oching.",
+    "googleContinue": "Google orqali davom etish",
+    "googleOff": "Bu serverda Google orqali kirish oʻchirilgan.",
+    "googleSetup": "Ilovaning bu yigʻmasida Google orqali kirish sozlanmagan."
   }
 }

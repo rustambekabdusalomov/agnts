@@ -65,6 +65,15 @@ void main() {
       // TODO
     });
 
+    // Sign in with a Google ID token (the mobile app)
+    //
+    // The phone signs in with Google itself and sends the ID token here. Like \"Continue with Google\" on the website, a new account starts as a solo developer with a workspace of its own, or joins the workspace of an invite. Always a mobile session: the token comes back in the body. 
+    //
+    //Future<LoginResponse> signInWithGoogle(GoogleSignInRequest googleSignInRequest) async
+    test('test signInWithGoogle', () async {
+      // TODO
+    });
+
     // Confirm an email address with the link's token
     //
     //Future verifyEmail(TokenRequest tokenRequest) async

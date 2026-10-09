@@ -1,10 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:agnts_api/agnts_api.dart' show AgntsApi;
 
 import 'app_router.dart';
 import 'core/api.dart';
 import 'core/data.dart';
+import 'core/flavor.dart';
+import 'core/google_auth.dart';
 import 'core/live.dart';
 import 'core/prefs.dart';
 import 'core/push.dart';
@@ -17,7 +22,8 @@ const appVersion = '0.1.0';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final container = ProviderContainer();
-  await Push.init((route, ws) => openFromPush(container, route, ws));
+  // Push and the event stream follow a workspace's tickets: the user app's.
+  if (!isAdminApp) await Push.init((route, ws) => openFromPush(container, route, ws));
   runApp(UncontrolledProviderScope(container: container, child: const AgntsApp()));
 }
 
@@ -34,6 +40,7 @@ class _AgntsAppState extends ConsumerState<AgntsApp> {
     super.initState();
     // While signed in: follow the live stream and register for push. Set up
     // once here: Riverpod 3 cannot fire a listener immediately from build.
+    if (isAdminApp) return;
     ref.listenManual(apiProvider, (prev, api) {
       final live = ref.read(liveProvider);
       if (api == null) {
@@ -48,6 +55,16 @@ class _AgntsAppState extends ConsumerState<AgntsApp> {
         live.restart();
       }
     }, fireImmediately: true);
+    // An Admin account with no workspaces has no event stream: stop the one
+    // started before the account loaded, and start it if a workspace appears.
+    ref.listenManual(adminProvider, (_, admin) {
+      final live = ref.read(liveProvider);
+      if (admin?.only ?? false) {
+        live.stop();
+      } else if (ref.read(apiProvider) != null) {
+        live.start();
+      }
+    });
     // A workspace the person no longer belongs to: fall back to the server's choice.
     ref.listenManual(meProvider, (_, me) {
       final slug = ref.read(sessionProvider).value?.workspace;
@@ -97,14 +114,22 @@ Future<void> openFromPush(ProviderContainer container, String route, int ws) asy
   container.read(routerProvider).push(route);
 }
 
-/// Signs out on the server and locally, and stops push to this phone.
+/// Signs out on this phone at once, then tells the server (ends the session,
+/// stops push) in the background: an unreachable server must not keep the
+/// person signed in until its calls time out.
 Future<void> signOut(WidgetRef ref) async {
   final api = ref.read(apiProvider);
-  if (api != null) {
-    await Push.unregister(api);
-    try {
-      await api.getAuthApi().logout();
-    } catch (_) {}
-  }
   await ref.read(sessionProvider.notifier).signedOut();
+  unawaited(GoogleAuth.signOut());
+  if (api != null) unawaited(_endServerSession(api));
+}
+
+Future<void> _endServerSession(AgntsApi api) async {
+  const wait = Duration(seconds: 10);
+  try {
+    await Push.unregister(api).timeout(wait);
+  } catch (_) {}
+  try {
+    await api.getAuthApi().logout().timeout(wait);
+  } catch (_) {}
 }

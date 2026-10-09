@@ -8,6 +8,7 @@ import { PROVIDERS, type Provider } from '../components/integrations/providers'
 import { useIntegrations } from '../components/integrations/useIntegrations'
 import { ago } from '../composables/format'
 import { useUi } from '../stores/ui'
+import CopyButton from '../components/ui/CopyButton.vue'
 
 const { t, locale } = useI18n()
 const qc = useQueryClient()
@@ -45,7 +46,7 @@ const test = useMutation({
         <div v-if="find(p)?.account" class="mini-kv"><span>{{ t('integrations.account') }}</span><b>{{ find(p)?.account }}</b></div>
         <div v-if="find(p)?.tokenHint" class="mini-kv"><span>{{ t('integrations.token') }}</span><b>•••• {{ find(p)?.tokenHint }}</b></div>
         <div class="mini-kv"><span>{{ t('integrations.lastChecked') }}</span><b>{{ find(p)?.checkedAt ? ago(find(p)?.checkedAt, locale) : t('integrations.never') }}</b></div>
-        <p v-if="find(p)?.lastError" class="ferr" style="margin: 8px 0 0">{{ find(p)?.lastError }}</p>
+        <div v-if="find(p)?.lastError" class="err-row" style="margin: 8px 0 0"><p class="ferr err-text">{{ find(p)?.lastError }}</p><CopyButton :text="find(p)?.lastError ?? ''" /></div>
       </template>
       <div class="actions">
         <RouterLink class="btn" :class="{ 'btn-p': !find(p)?.connected }" :to="{ name: 'integration', params: { provider: p } }">

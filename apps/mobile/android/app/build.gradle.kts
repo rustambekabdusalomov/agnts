@@ -29,6 +29,25 @@ android {
         versionName = flutter.versionName
     }
 
+    // Two apps from one codebase: `flutter run --flavor user` (the app for
+    // workspace members) and `--flavor admin` (the Admin cabinet). They have
+    // their own ids, so both install side by side.
+    buildFeatures {
+        resValues = true // each flavor's app_name
+    }
+    flavorDimensions += "app"
+    productFlavors {
+        create("user") {
+            dimension = "app"
+            resValue("string", "app_name", "agnts")
+        }
+        create("admin") {
+            dimension = "app"
+            applicationId = "dev.agnts.agnts_admin"
+            resValue("string", "app_name", "agnts admin")
+        }
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.

@@ -11,6 +11,7 @@ import { useUi } from '../../stores/ui'
 import CheckBox from '../form/CheckBox.vue'
 import HiIcon from '../ui/HiIcon.vue'
 import { useTr } from '../../composables/useTranslation'
+import CopyButton from '../ui/CopyButton.vue'
 
 // Screenshots of the running app beside the human review: advice only,
 // never a gate. A screenshot can be pointed at in the feedback, and the
@@ -92,7 +93,7 @@ watch(zoomed, async (s) => {
     <p v-if="!preview && !busy && state !== 'failed'" class="hint">{{ t('preview.none') }}</p>
 
     <template v-if="current && !busy">
-      <div v-if="current.status === 'failed'" class="help bad pv-log"><HiIcon name="info" /><pre>{{ current.summary }}</pre></div>
+      <div v-if="current.status === 'failed'" class="help bad pv-log"><HiIcon name="info" /><pre class="err-text">{{ current.summary }}</pre><CopyButton v-if="current.summary" :text="current.summary" /></div>
       <div v-else class="summary"><p>{{ tr(current.summary) }}</p></div>
       <p class="hint cr-model">
         {{ t('preview.model', { model: MODEL_NAME[current.model], n: current.shots.length }) }}<template v-if="current.compare"> · {{ t('preview.withBase') }}</template>

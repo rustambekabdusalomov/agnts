@@ -651,6 +651,30 @@ abstract class AppLocalizations {
   /// **'Create your first workspace'**
   String get accountCreateFirst;
 
+  /// No description provided for @accountInviteGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google to join. New here? Your account is created on the spot.'**
+  String get accountInviteGoogle;
+
+  /// No description provided for @accountTotpRequiredAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Two-factor sign-in is required for Admin accounts, so it stays on.'**
+  String get accountTotpRequiredAdmin;
+
+  /// No description provided for @accountGoHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to dashboard'**
+  String get accountGoHome;
+
+  /// No description provided for @accountBackToDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the {name} dashboard'**
+  String accountBackToDashboard(String name);
+
   /// No description provided for @analyticsTitle.
   ///
   /// In en, this message translates to:
@@ -1467,6 +1491,84 @@ abstract class AppLocalizations {
   /// **'Use another account'**
   String get authBack;
 
+  /// No description provided for @authOr.
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get authOr;
+
+  /// No description provided for @authGoogleRedirecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing you in…'**
+  String get authGoogleRedirecting;
+
+  /// No description provided for @authGoogleUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in could not load. Check your connection or ad blocker.'**
+  String get authGoogleUnavailable;
+
+  /// No description provided for @authGoogleFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in did not go through. Try again.'**
+  String get authGoogleFailed;
+
+  /// No description provided for @authGoogleClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-up is by invitation on this server: ask a workspace owner for an invite link.'**
+  String get authGoogleClosed;
+
+  /// No description provided for @authGoogleRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Wait a minute and try again.'**
+  String get authGoogleRateLimited;
+
+  /// No description provided for @authGoogleError.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong signing you in with Google. Try again in a moment.'**
+  String get authGoogleError;
+
+  /// No description provided for @authUseGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords are for Admins only here. Continue with Google instead.'**
+  String get authUseGoogle;
+
+  /// No description provided for @authAdminsLede.
+  ///
+  /// In en, this message translates to:
+  /// **'Admins sign in with their password. Everyone else continues with Google.'**
+  String get authAdminsLede;
+
+  /// No description provided for @authGoogleInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'This invite link is invalid, already used, expired, or meant for another Google account.'**
+  String get authGoogleInvite;
+
+  /// No description provided for @authGoogleAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'This is an Admin account: Admins sign in with their username and password.'**
+  String get authGoogleAdmin;
+
+  /// No description provided for @authSetupLede.
+  ///
+  /// In en, this message translates to:
+  /// **'Admins sign in with two factors. Scan this code with an authenticator app (Google Authenticator, 1Password, Authy), then enter the 6-digit code it shows.'**
+  String get authSetupLede;
+
+  /// No description provided for @authSignOutBodyGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'You can sign back in any time with Continue with Google.'**
+  String get authSignOutBodyGoogle;
+
   /// No description provided for @billingTitle.
   ///
   /// In en, this message translates to:
@@ -1494,7 +1596,7 @@ abstract class AppLocalizations {
   /// No description provided for @billingMonthly.
   ///
   /// In en, this message translates to:
-  /// **'{amount} so\'m a month'**
+  /// **'{amount} a month'**
   String billingMonthly(String amount);
 
   /// No description provided for @billingPaidUntil.
@@ -1518,7 +1620,7 @@ abstract class AppLocalizations {
   /// No description provided for @billingSlotsHelp.
   ///
   /// In en, this message translates to:
-  /// **'Each extra run at once costs {price} so\'m a month. Adding one now charges the rest of this month from credits.'**
+  /// **'Each extra run at once costs {price} a month. Adding one now charges the rest of this month from credits.'**
   String billingSlotsHelp(String price);
 
   /// No description provided for @billingSlotsSave.
@@ -1542,7 +1644,7 @@ abstract class AppLocalizations {
   /// No description provided for @billingMembersHelp.
   ///
   /// In en, this message translates to:
-  /// **'{included} included; each one more costs {price} so\'m a month.'**
+  /// **'{included} included; each one more costs {price} a month.'**
   String billingMembersHelp(String included, String price);
 
   /// No description provided for @billingCredits.
@@ -1566,7 +1668,7 @@ abstract class AppLocalizations {
   /// No description provided for @billingCreditPrice.
   ///
   /// In en, this message translates to:
-  /// **'1 credit = {price} so\'m'**
+  /// **'1 credit = {price}'**
   String billingCreditPrice(String price);
 
   /// No description provided for @billingBuy.
@@ -2294,6 +2396,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Departed from the plan'**
   String get designDeviations;
+
+  /// No description provided for @feedbackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send feedback'**
+  String get feedbackTitle;
+
+  /// No description provided for @feedbackLede.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell the agnts team what works, what doesn’t, or what you’d like next.'**
+  String get feedbackLede;
+
+  /// No description provided for @feedbackTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get feedbackTitleLabel;
+
+  /// No description provided for @feedbackTitlePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'In a few words'**
+  String get feedbackTitlePlaceholder;
+
+  /// No description provided for @feedbackDescLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get feedbackDescLabel;
+
+  /// No description provided for @feedbackDescPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'What happened, what you expected, or your idea'**
+  String get feedbackDescPlaceholder;
+
+  /// No description provided for @feedbackSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get feedbackSend;
+
+  /// No description provided for @feedbackSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks! Your feedback was sent.'**
+  String get feedbackSent;
+
+  /// No description provided for @feedbackAdminTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Feedback'**
+  String get feedbackAdminTitle;
+
+  /// No description provided for @feedbackAdminLede.
+  ///
+  /// In en, this message translates to:
+  /// **'What people sent from their accounts, newest first. Mark each one done once it’s handled.'**
+  String get feedbackAdminLede;
+
+  /// No description provided for @feedbackF_new.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get feedbackF_new;
+
+  /// No description provided for @feedbackF_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get feedbackF_done;
+
+  /// No description provided for @feedbackF_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get feedbackF_all;
+
+  /// No description provided for @feedbackS_new.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get feedbackS_new;
+
+  /// No description provided for @feedbackS_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get feedbackS_done;
+
+  /// No description provided for @feedbackSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search feedback, people or workspaces'**
+  String get feedbackSearch;
+
+  /// No description provided for @feedbackNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No feedback here.'**
+  String get feedbackNone;
+
+  /// No description provided for @feedbackNoneNew.
+  ///
+  /// In en, this message translates to:
+  /// **'No new feedback. Nice!'**
+  String get feedbackNoneNew;
+
+  /// No description provided for @feedbackFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'from {workspace}'**
+  String feedbackFrom(String workspace);
+
+  /// No description provided for @feedbackAccountGone.
+  ///
+  /// In en, this message translates to:
+  /// **'account deleted'**
+  String get feedbackAccountGone;
+
+  /// No description provided for @feedbackMarkDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark done'**
+  String get feedbackMarkDone;
+
+  /// No description provided for @feedbackReopen.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopen'**
+  String get feedbackReopen;
+
+  /// No description provided for @feedbackMarkedDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked done'**
+  String get feedbackMarkedDone;
+
+  /// No description provided for @feedbackReopened.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked new again'**
+  String get feedbackReopened;
 
   /// No description provided for @filesTitle.
   ///
@@ -5445,6 +5691,30 @@ abstract class AppLocalizations {
   /// **'{n} min'**
   String mobileMinutes(String n);
 
+  /// No description provided for @mobileAdminAppOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'This is an Admin account. Open it in the agnts admin app.'**
+  String get mobileAdminAppOnly;
+
+  /// No description provided for @mobileGoogleContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google'**
+  String get mobileGoogleContinue;
+
+  /// No description provided for @mobileGoogleOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in is off on this server.'**
+  String get mobileGoogleOff;
+
+  /// No description provided for @mobileGoogleSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in is not set up in this build of the app.'**
+  String get mobileGoogleSetup;
+
   /// No description provided for @mpreviewTitle.
   ///
   /// In en, this message translates to:
@@ -6030,7 +6300,7 @@ abstract class AppLocalizations {
   /// No description provided for @navPlatform.
   ///
   /// In en, this message translates to:
-  /// **'Operator console'**
+  /// **'Admin cabinet'**
   String get navPlatform;
 
   /// No description provided for @navPeople.
@@ -6048,7 +6318,7 @@ abstract class AppLocalizations {
   /// No description provided for @platformTitle.
   ///
   /// In en, this message translates to:
-  /// **'Operator console'**
+  /// **'Admin cabinet'**
   String get platformTitle;
 
   /// No description provided for @platformLede.
@@ -6308,6 +6578,378 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Only an Admin can open the operator console.'**
   String get platformForbidden;
+
+  /// No description provided for @platformCabinetBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin cabinet'**
+  String get platformCabinetBadge;
+
+  /// No description provided for @platformNavDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get platformNavDashboard;
+
+  /// No description provided for @platformAdmins.
+  ///
+  /// In en, this message translates to:
+  /// **'Admins'**
+  String get platformAdmins;
+
+  /// No description provided for @platformNavMine.
+  ///
+  /// In en, this message translates to:
+  /// **'My work'**
+  String get platformNavMine;
+
+  /// No description provided for @platformBackToWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to my workspace'**
+  String get platformBackToWorkspace;
+
+  /// No description provided for @platformDashLede.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone on the platform, how fast it grows, and what the server is running.'**
+  String get platformDashLede;
+
+  /// No description provided for @platformNewThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} new this week'**
+  String platformNewThisWeek(String n);
+
+  /// No description provided for @platformViaGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} via Google'**
+  String platformViaGoogle(String n);
+
+  /// No description provided for @platformActiveUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Active this week'**
+  String get platformActiveUsers;
+
+  /// No description provided for @platformActiveNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in during the last 7 days'**
+  String get platformActiveNote;
+
+  /// No description provided for @platformTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} with a team} other {{n} with teams}}'**
+  String platformTeams(num n);
+
+  /// No description provided for @platformRunsNow.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} run right now} other {{n} runs right now}}'**
+  String platformRunsNow(num n);
+
+  /// No description provided for @platformGrowthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-ups'**
+  String get platformGrowthTitle;
+
+  /// No description provided for @platformGrowthSub.
+  ///
+  /// In en, this message translates to:
+  /// **'New accounts and workspaces per day, last {n} days'**
+  String platformGrowthSub(String n);
+
+  /// No description provided for @platformLegendUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts'**
+  String get platformLegendUsers;
+
+  /// No description provided for @platformLegendWorkspaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspaces'**
+  String get platformLegendWorkspaces;
+
+  /// No description provided for @platformRecentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest accounts'**
+  String get platformRecentTitle;
+
+  /// No description provided for @platformSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get platformSeeAll;
+
+  /// No description provided for @platformNoUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'No users match.'**
+  String get platformNoUsers;
+
+  /// No description provided for @platformWsLede.
+  ///
+  /// In en, this message translates to:
+  /// **'Every workspace and who is in it. You see metadata only: tickets and code belong to the workspace’s members.'**
+  String get platformWsLede;
+
+  /// No description provided for @platformF_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get platformF_all;
+
+  /// No description provided for @platformF_active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get platformF_active;
+
+  /// No description provided for @platformF_suspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get platformF_suspended;
+
+  /// No description provided for @platformF_deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted'**
+  String get platformF_deleted;
+
+  /// No description provided for @platformSearchWs.
+  ///
+  /// In en, this message translates to:
+  /// **'Search workspaces or owners'**
+  String get platformSearchWs;
+
+  /// No description provided for @platformNoWorkspaces.
+  ///
+  /// In en, this message translates to:
+  /// **'No workspaces match.'**
+  String get platformNoWorkspaces;
+
+  /// No description provided for @platformCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get platformCreated;
+
+  /// No description provided for @platformNoMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'No members.'**
+  String get platformNoMembers;
+
+  /// No description provided for @platformSuspendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspend {name}?'**
+  String platformSuspendTitle(String name);
+
+  /// No description provided for @platformSuspendBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Its runs stop being started and its members see that the workspace is suspended. You can resume it at any time.'**
+  String get platformSuspendBody;
+
+  /// No description provided for @platformUsersLede.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone who signed up with Google: their workspaces, and when they were last here. Admin accounts are on the Admins page.'**
+  String get platformUsersLede;
+
+  /// No description provided for @platformU_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get platformU_all;
+
+  /// No description provided for @platformU_active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get platformU_active;
+
+  /// No description provided for @platformU_new.
+  ///
+  /// In en, this message translates to:
+  /// **'New this week'**
+  String get platformU_new;
+
+  /// No description provided for @platformU_google.
+  ///
+  /// In en, this message translates to:
+  /// **'Google'**
+  String get platformU_google;
+
+  /// No description provided for @platformU_admins.
+  ///
+  /// In en, this message translates to:
+  /// **'Admins'**
+  String get platformU_admins;
+
+  /// No description provided for @platformSearchUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name, email or workspace'**
+  String get platformSearchUsers;
+
+  /// No description provided for @platformSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in'**
+  String get platformSignIn;
+
+  /// No description provided for @platformLastSeen.
+  ///
+  /// In en, this message translates to:
+  /// **'Last sign-in'**
+  String get platformLastSeen;
+
+  /// No description provided for @platformPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get platformPassword;
+
+  /// No description provided for @platformUnverified.
+  ///
+  /// In en, this message translates to:
+  /// **'unverified'**
+  String get platformUnverified;
+
+  /// No description provided for @platformYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get platformYou;
+
+  /// No description provided for @platformMakeAdminTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Make {name} an Admin?'**
+  String platformMakeAdminTitle(String name);
+
+  /// No description provided for @platformMakeAdminBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Admins open this cabinet: they see every user and workspace, change plans and credits, suspend workspaces and manage other Admins.'**
+  String get platformMakeAdminBody;
+
+  /// No description provided for @platformRemoveAdminTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name} as Admin?'**
+  String platformRemoveAdminTitle(String name);
+
+  /// No description provided for @platformRemoveAdminBody.
+  ///
+  /// In en, this message translates to:
+  /// **'They keep their account and workspaces, but lose the Admin cabinet.'**
+  String get platformRemoveAdminBody;
+
+  /// No description provided for @platformAdminAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin {name} created'**
+  String platformAdminAdded(String name);
+
+  /// No description provided for @platformAdminRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin {name} deleted'**
+  String platformAdminRemoved(String name);
+
+  /// No description provided for @platformAdminsLede.
+  ///
+  /// In en, this message translates to:
+  /// **'The platform’s operators. Each is its own account, apart from Users: an Admin sees no workspace’s tickets.'**
+  String get platformAdminsLede;
+
+  /// No description provided for @platformAdminsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} Admin} other {{n} Admins}}'**
+  String platformAdminsCount(num n);
+
+  /// No description provided for @platformAddAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an Admin'**
+  String get platformAddAdmin;
+
+  /// No description provided for @platformAddAdminSub.
+  ///
+  /// In en, this message translates to:
+  /// **'An Admin is a separate account: it signs in with a password, opens this cabinet and has no workspaces. Users can’t be made Admins.'**
+  String get platformAddAdminSub;
+
+  /// No description provided for @platformFindUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a person'**
+  String get platformFindUser;
+
+  /// No description provided for @platformNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No one matches, or they are an Admin already.'**
+  String get platformNoMatch;
+
+  /// No description provided for @platformLastSeenAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'last sign-in {when}'**
+  String platformLastSeenAgo(String when);
+
+  /// No description provided for @platformAdminName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get platformAdminName;
+
+  /// No description provided for @platformAdminUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get platformAdminUsername;
+
+  /// No description provided for @platformAdminPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'At least {n} characters. They can turn on two-factor sign-in in their profile.'**
+  String platformAdminPasswordHint(String n);
+
+  /// No description provided for @platformCreateAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Admin'**
+  String get platformCreateAdmin;
+
+  /// No description provided for @platformDeleteAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get platformDeleteAdmin;
+
+  /// No description provided for @platformDeleteAdminTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the Admin account {name}?'**
+  String platformDeleteAdminTitle(String name);
+
+  /// No description provided for @platformDeleteAdminBody.
+  ///
+  /// In en, this message translates to:
+  /// **'They can no longer sign in. This cannot be undone.'**
+  String get platformDeleteAdminBody;
 
   /// No description provided for @previewTab.
   ///
@@ -12176,6 +12818,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create a key in the Anthropic Console (sk-ant-api…). Usage is billed by Anthropic to its owner.'**
   String get wsKindApiKeyHelp;
+
+  /// No description provided for @wsKeyStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to the Claude Console (button below) and open Settings → API keys.'**
+  String get wsKeyStep1;
+
+  /// No description provided for @wsKeyStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Click Create Key, name it (for example agnts) and pick the Console workspace it bills to.'**
+  String get wsKeyStep2;
+
+  /// No description provided for @wsKeyStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy the key (it starts with sk-ant-api) and paste it below. The Console shows it only once.'**
+  String get wsKeyStep3;
+
+  /// No description provided for @wsKeyStep4.
+  ///
+  /// In en, this message translates to:
+  /// **'Runs are billed per token to that Console account: add credits and set a spend limit under Billing.'**
+  String get wsKeyStep4;
+
+  /// No description provided for @wsKeyOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the Claude Console'**
+  String get wsKeyOpen;
 
   /// No description provided for @wsSubscriptionsOff.
   ///

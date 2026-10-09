@@ -153,7 +153,8 @@ func TestPublicRoutesComeFromSpec(t *testing.T) {
 		}
 	}
 	want := map[string]bool{"POST /api/auth/login": true, "GET /api/meta": true, "GET /api/auth/signup": true, "POST /api/auth/signup": true,
-		"POST /api/auth/verify": true, "POST /api/auth/password/forgot": true, "POST /api/auth/login/totp": true, "POST /api/auth/password/reset": true, "GET /api/invites/{token}": true}
+		"POST /api/auth/verify": true, "POST /api/auth/password/forgot": true, "POST /api/auth/login/totp": true, "POST /api/auth/password/reset": true, "GET /api/invites/{token}": true,
+		"POST /api/auth/google": true}
 	if len(got) != len(want) {
 		t.Fatalf("public routes = %v, want %v", got, want)
 	}
@@ -351,7 +352,7 @@ func (f *fakeGoogleAccounts) SignInWithGoogle(_ context.Context, in accounts.Goo
 		return accounts.GoogleResult{}, auth.Invalid("this invite link is invalid or expired")
 	}
 	f.got = in
-	res := accounts.GoogleResult{Token: "tok", Session: domain.Session{ExpiresAt: time.Now().Add(time.Hour)}, User: domain.User{ID: 7, Email: in.Email}}
+	res := accounts.GoogleResult{Token: "tok", Session: domain.Session{ExpiresAt: time.Now().Add(time.Hour), Client: in.Client}, User: domain.User{ID: 7, Email: in.Email}}
 	if in.Invite == "to-acme" {
 		res.Workspace = "acme"
 	}
@@ -434,5 +435,74 @@ func TestGoogleSignIn(t *testing.T) {
 	}
 	if rec := post("good", "https://site.example.com"); rec.Header().Get("Location") != "https://site.example.com/?signin=rate_limited" {
 		t.Fatalf("rate limit: %q", rec.Header().Get("Location"))
+	}
+}
+
+func TestMobileGoogleSignIn(t *testing.T) {
+	h := newHarness(t, pinger{})
+	acc := &fakeGoogleAccounts{}
+	pub, _ := url.Parse("https://agnts.example.com")
+	handler, err := NewHandler(Options{
+		Auth: nil, Tickets: h.tickets, Workspaces: h.workspaces, DB: pinger{}, PublicURL: pub,
+		Log:    slog.New(slog.NewTextHandler(io.Discard, nil)),
+		Google: &GoogleSignIn{Verifier: fakeVerifier{"good": {Subject: "1", Email: "dev@gmail.com", Name: "Dev"}}, Accounts: acc},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ip := "203.0.113.20"
+	post := func(body string) *httptest.ResponseRecorder {
+		req := httptest.NewRequest("POST", "/api/auth/google", strings.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		req.RemoteAddr = ip
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		return rec
+	}
+
+	// Signed in: a mobile session, with the token in the body and no cookie.
+	rec := post(`{"idToken":"good"}`)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("sign-in: %d %s", rec.Code, rec.Body)
+	}
+	var out struct {
+		Token string `json:"token"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &out); err != nil || out.Token != "tok" || len(rec.Result().Cookies()) != 0 {
+		t.Fatalf("response %s, cookies %v", rec.Body, rec.Result().Cookies())
+	}
+	if acc.got.Email != "dev@gmail.com" || acc.got.Client != domain.ClientMobile {
+		t.Fatalf("signed in as %+v", acc.got)
+	}
+	if rec := post(`{"idToken":"good","invite":"to-acme"}`); rec.Code != http.StatusOK || acc.got.Invite != "to-acme" {
+		t.Fatalf("invite: %d (invite %q)", rec.Code, acc.got.Invite)
+	}
+
+	// A token Google does not vouch for, an empty one, and closed sign-up.
+	if rec := post(`{"idToken":"forged"}`); rec.Code != http.StatusUnauthorized {
+		t.Fatalf("forged: %d", rec.Code)
+	}
+	if rec := post(`{}`); rec.Code != http.StatusBadRequest {
+		t.Fatalf("empty: %d", rec.Code)
+	}
+	acc.closed = true
+	if rec := post(`{"idToken":"good"}`); rec.Code != http.StatusForbidden || !strings.Contains(rec.Body.String(), "signup_closed") {
+		t.Fatalf("closed: %d %s", rec.Code, rec.Body)
+	}
+}
+
+func TestMobileGoogleSignInOff(t *testing.T) {
+	h := newHarness(t, pinger{})
+	pub, _ := url.Parse("https://agnts.example.com")
+	handler, err := NewHandler(Options{Tickets: h.tickets, Workspaces: h.workspaces, DB: pinger{}, PublicURL: pub, Log: slog.New(slog.NewTextHandler(io.Discard, nil))})
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := httptest.NewRequest("POST", "/api/auth/google", strings.NewReader(`{"idToken":"x"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+	if rec.Code != http.StatusServiceUnavailable {
+		t.Fatalf("off: %d %s", rec.Code, rec.Body)
 	}
 }

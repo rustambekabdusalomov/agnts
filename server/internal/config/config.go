@@ -49,6 +49,10 @@ type Config struct {
 	RunProxy         string         // AGNTS_RUN_PROXY, egress proxy for run containers (e.g. http://egress:3128)
 	EgressAllow      []string       // AGNTS_EGRESS_ALLOW, hosts run containers may reach
 	MetricsAddr      string         // AGNTS_METRICS_ADDR, Prometheus listener (keep it private); empty disables
+	// ClaudeModels overrides the full model id for a short name
+	// (AGNTS_CLAUDE_MODELS, e.g. "opus=claude-opus-5-5,haiku="); an empty id
+	// passes the short name to Claude Code unchanged.
+	ClaudeModels map[string]string
 	// InternalAddr serves the egress proxy the hosts allowed in Settings
 	// (AGNTS_INTERNAL_ADDR). Keep it private; empty disables.
 	InternalAddr string
@@ -79,6 +83,10 @@ type Config struct {
 	// GoogleClientID turns on "Continue with Google" from the website
 	// (AGNTS_GOOGLE_CLIENT_ID, the OAuth web client id); empty disables it.
 	GoogleClientID string
+	// GoogleAppClientIDs are the mobile app's OAuth client ids
+	// (AGNTS_GOOGLE_APP_CLIENT_IDS, comma-separated): the iOS app's ID tokens
+	// are issued to its own client. Android's are issued to the web client.
+	GoogleAppClientIDs []string
 	// SiteURL is the public website with the Google button
 	// (AGNTS_SITE_URL, e.g. https://agnts.uz); empty: only the admin panel.
 	SiteURL *url.URL
@@ -160,6 +168,17 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 	c.FCMCredentials = get("AGNTS_FCM_CREDENTIALS", "")
 	c.TelegramAPI = get("AGNTS_TELEGRAM_API", "https://api.telegram.org")
 	c.RunProxy = get("AGNTS_RUN_PROXY", "")
+	if v := get("AGNTS_CLAUDE_MODELS", ""); v != "" {
+		c.ClaudeModels = map[string]string{}
+		for _, pair := range strings.Split(v, ",") {
+			name, id, ok := strings.Cut(strings.TrimSpace(pair), "=")
+			if !ok || strings.TrimSpace(name) == "" {
+				errs = append(errs, errors.New("AGNTS_CLAUDE_MODELS must be name=id pairs separated by commas"))
+				break
+			}
+			c.ClaudeModels[strings.TrimSpace(name)] = strings.TrimSpace(id)
+		}
+	}
 	c.MetricsAddr = get("AGNTS_METRICS_ADDR", "")
 	c.InternalAddr = get("AGNTS_INTERNAL_ADDR", ":8081")
 	for _, h := range strings.Split(get("AGNTS_EGRESS_ALLOW", ""), ",") {
@@ -251,6 +270,11 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 		errs = append(errs, errors.New("AGNTS_CLOUD must be true or false"))
 	}
 	c.GoogleClientID = get("AGNTS_GOOGLE_CLIENT_ID", "")
+	for _, id := range strings.Split(get("AGNTS_GOOGLE_APP_CLIENT_IDS", ""), ",") {
+		if id = strings.TrimSpace(id); id != "" {
+			c.GoogleAppClientIDs = append(c.GoogleAppClientIDs, id)
+		}
+	}
 	c.PasswordSignIn = strings.ToLower(get("AGNTS_PASSWORD_SIGNIN", "admins"))
 	if c.PasswordSignIn != "admins" && c.PasswordSignIn != "all" {
 		errs = append(errs, errors.New("AGNTS_PASSWORD_SIGNIN must be admins or all"))

@@ -10,6 +10,7 @@ import EventTypeBadge from '../components/logs/EventTypeBadge.vue'
 import PageHeader from '../components/PageHeader.vue'
 import { fmtDur, fmtTime } from '../composables/format'
 import { livePoll, useLive } from '../composables/useLive'
+import CopyButton from '../components/ui/CopyButton.vue'
 
 type Tab = 'all' | 'state' | 'tool' | 'command' | 'user' | 'limit' | 'problems'
 
@@ -201,8 +202,11 @@ const pretty = (data: Record<string, unknown>) => (Object.keys(data).length ? JS
             </tr>
             <tr v-if="open[e.id]" class="ev-detail">
               <td colspan="6">
-                <pre v-if="pretty(e.data)">{{ pretty(e.data) }}</pre>
-                <p v-else class="hint" style="margin: 0">{{ t('logs.noDetail') }}</p>
+                <div class="err-row">
+                  <pre v-if="pretty(e.data)" class="err-text">{{ pretty(e.data) }}</pre>
+                  <p v-else class="hint err-text" style="margin: 0">{{ t('logs.noDetail') }}</p>
+                  <CopyButton :text="[e.ticketKey, e.step, e.message, pretty(e.data)].filter(Boolean).join('\n')" />
+                </div>
               </td>
             </tr>
           </template>

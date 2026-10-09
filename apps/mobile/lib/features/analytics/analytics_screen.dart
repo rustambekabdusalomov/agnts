@@ -211,9 +211,9 @@ class _Dashboard {
 
     // Throughput
     final throughput = [
-      _Series(l.analyticsPushed, [for (final d in a.perDay) d.pushed], c.primary),
-      _Series(l.analyticsRejected, [for (final d in a.perDay) d.rejected], c.line3),
-      _Series(l.analyticsStopped, [for (final d in a.perDay) d.stopped], c.bad),
+      ChartSeries(l.analyticsPushed, [for (final d in a.perDay) d.pushed], c.primary),
+      ChartSeries(l.analyticsRejected, [for (final d in a.perDay) d.rejected], c.line3),
+      ChartSeries(l.analyticsStopped, [for (final d in a.perDay) d.stopped], c.bad),
     ];
 
     // Outcomes
@@ -277,8 +277,8 @@ class _Dashboard {
       _card(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         sub(l.analyticsThroughputSub),
         const SizedBox(height: 10),
-        _BarChart(series: throughput, labels: labels, maxLabels: maxLabels, height: 190),
-        _Legend([for (final s in throughput) (s.color, s.label)]),
+        BarChart(series: throughput, labels: labels, maxLabels: maxLabels, height: 190),
+        ChartLegend([for (final s in throughput) (s.color, s.label)]),
       ])),
       SectionHeader(l.analyticsOutcomes),
       _card(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -309,21 +309,21 @@ class _Dashboard {
         const SizedBox(height: 10),
         _LineChart(
           series: [
-            _Series(l.analyticsAgntsWorking, [for (final d in a.perDay) d.agntsMin], c.primary, area: true),
-            _Series(l.analyticsWaitingOnYou, [for (final d in a.perDay) d.waitMin], c.warn),
+            ChartSeries(l.analyticsAgntsWorking, [for (final d in a.perDay) d.agntsMin], c.primary, area: true),
+            ChartSeries(l.analyticsWaitingOnYou, [for (final d in a.perDay) d.waitMin], c.warn),
           ],
           labels: labels,
           maxLabels: maxLabels,
           fmt: (v) => _min(l, v),
         ),
-        _Legend([(c.primary, l.analyticsAgntsWorking), (c.warn, l.analyticsWaitingOnYou)]),
+        ChartLegend([(c.primary, l.analyticsAgntsWorking), (c.warn, l.analyticsWaitingOnYou)]),
       ])),
       SectionHeader(l.analyticsSteps),
       _card(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         sub(l.analyticsStepsSub),
         const SizedBox(height: 6),
         _HBars(steps, fmt: (v) => _min(l, v)),
-        _Legend([(c.primary, l.analyticsAgntsWorking), (c.warn, l.analyticsWaitingOnYou)]),
+        ChartLegend([(c.primary, l.analyticsAgntsWorking), (c.warn, l.analyticsWaitingOnYou)]),
       ])),
       SectionHeader(l.analyticsStops, trailing: Text('$stopsTotal')),
       _card(stopsTotal == 0
@@ -357,8 +357,8 @@ class _Dashboard {
           : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               sub(l.analyticsUsageSub),
               const SizedBox(height: 10),
-              _BarChart(
-                series: [_Series(l.analyticsSession, [for (final d in a.perDay) d.peakUsage == null ? 0 : (d.peakUsage! * 100).round()], c.primary)],
+              BarChart(
+                series: [ChartSeries(l.analyticsSession, [for (final d in a.perDay) d.peakUsage == null ? 0 : (d.peakUsage! * 100).round()], c.primary)],
                 labels: labels,
                 maxLabels: maxLabels,
                 height: 170,
@@ -400,8 +400,8 @@ class _Dashboard {
         _card(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           sub(l.analyticsHoursSub(busiest)),
           const SizedBox(height: 10),
-          _BarChart(
-            series: [_Series(l.analyticsEvents, a.hours, _softBlue)],
+          BarChart(
+            series: [ChartSeries(l.analyticsEvents, a.hours, _softBlue)],
             labels: [for (var i = 0; i < a.hours.length; i++) i.toString().padLeft(2, '0')],
             maxLabels: 6,
             height: 170,
@@ -423,8 +423,8 @@ class _Dashboard {
 
 // ---- Chart pieces ----
 
-class _Series {
-  const _Series(this.label, this.values, this.color, {this.area = false});
+class ChartSeries {
+  const ChartSeries(this.label, this.values, this.color, {this.area = false});
   final String label;
   final List<num> values;
   final Color color;
@@ -456,8 +456,8 @@ class _Swatch extends StatelessWidget {
 }
 
 /// Colour keys under a chart (.legend).
-class _Legend extends StatelessWidget {
-  const _Legend(this.items);
+class ChartLegend extends StatelessWidget {
+  const ChartLegend(this.items, {super.key});
   final List<(Color, String)> items;
 
   @override
@@ -647,9 +647,9 @@ int _niceTop(num max) {
 }
 
 /// Stacked vertical bars per label with a y-axis grid (chartBars).
-class _BarChart extends StatelessWidget {
-  const _BarChart({required this.series, required this.labels, required this.maxLabels, required this.height});
-  final List<_Series> series;
+class BarChart extends StatelessWidget {
+  const BarChart({super.key, required this.series, required this.labels, required this.maxLabels, required this.height});
+  final List<ChartSeries> series;
   final List<String> labels;
   final int maxLabels;
   final double height;
@@ -669,7 +669,7 @@ class _BarChart extends StatelessWidget {
 
 class _BarPainter extends CustomPainter {
   _BarPainter(this.series, this.labels, this.maxLabels, this.grid, this.text);
-  final List<_Series> series;
+  final List<ChartSeries> series;
   final List<String> labels;
   final int maxLabels;
   final Color grid;
@@ -708,7 +708,7 @@ class _BarPainter extends CustomPainter {
 /// Lines (one optionally filled) over the same grid (chartLines).
 class _LineChart extends StatelessWidget {
   const _LineChart({required this.series, required this.labels, required this.maxLabels, required this.fmt});
-  final List<_Series> series;
+  final List<ChartSeries> series;
   final List<String> labels;
   final int maxLabels;
   final String Function(num) fmt;
@@ -728,7 +728,7 @@ class _LineChart extends StatelessWidget {
 
 class _LinePainter extends CustomPainter {
   _LinePainter(this.series, this.labels, this.maxLabels, this.fmt, this.grid, this.text);
-  final List<_Series> series;
+  final List<ChartSeries> series;
   final List<String> labels;
   final int maxLabels;
   final String Function(num) fmt;

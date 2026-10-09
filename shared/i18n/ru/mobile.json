@@ -88,6 +88,10 @@
     "pushed": "Отправлено",
     "firstTry": "С первого раза",
     "waitingAvg": "Ожидание вас",
-    "minutes": "{n} мин"
+    "minutes": "{n} мин",
+    "adminAppOnly": "Это аккаунт администратора. Откройте его в приложении agnts admin.",
+    "googleContinue": "Продолжить с Google",
+    "googleOff": "Вход через Google на этом сервере выключен.",
+    "googleSetup": "Вход через Google не настроен в этой сборке приложения."
   }
 }

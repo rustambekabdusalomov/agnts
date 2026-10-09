@@ -304,6 +304,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountCreateFirst => 'Create your first workspace';
 
   @override
+  String get accountInviteGoogle => 'Continue with Google to join. New here? Your account is created on the spot.';
+
+  @override
+  String get accountTotpRequiredAdmin => 'Two-factor sign-in is required for Admin accounts, so it stays on.';
+
+  @override
+  String get accountGoHome => 'Back to dashboard';
+
+  @override
+  String accountBackToDashboard(String name) {
+    return 'Back to the $name dashboard';
+  }
+
+  @override
   String get analyticsTitle => 'Analytics';
 
   @override
@@ -746,6 +760,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authBack => 'Use another account';
 
   @override
+  String get authOr => 'or';
+
+  @override
+  String get authGoogleRedirecting => 'Signing you in…';
+
+  @override
+  String get authGoogleUnavailable => 'Google sign-in could not load. Check your connection or ad blocker.';
+
+  @override
+  String get authGoogleFailed => 'Google sign-in did not go through. Try again.';
+
+  @override
+  String get authGoogleClosed => 'Sign-up is by invitation on this server: ask a workspace owner for an invite link.';
+
+  @override
+  String get authGoogleRateLimited => 'Too many attempts. Wait a minute and try again.';
+
+  @override
+  String get authGoogleError => 'Something went wrong signing you in with Google. Try again in a moment.';
+
+  @override
+  String get authUseGoogle => 'Passwords are for Admins only here. Continue with Google instead.';
+
+  @override
+  String get authAdminsLede => 'Admins sign in with their password. Everyone else continues with Google.';
+
+  @override
+  String get authGoogleInvite => 'This invite link is invalid, already used, expired, or meant for another Google account.';
+
+  @override
+  String get authGoogleAdmin => 'This is an Admin account: Admins sign in with their username and password.';
+
+  @override
+  String get authSetupLede =>
+      'Admins sign in with two factors. Scan this code with an authenticator app (Google Authenticator, 1Password, Authy), then enter the 6-digit code it shows.';
+
+  @override
+  String get authSignOutBodyGoogle => 'You can sign back in any time with Continue with Google.';
+
+  @override
   String get billingTitle => 'Billing';
 
   @override
@@ -761,7 +815,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String billingMonthly(String amount) {
-    return '$amount so\'m a month';
+    return '$amount a month';
   }
 
   @override
@@ -779,7 +833,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String billingSlotsHelp(String price) {
-    return 'Each extra run at once costs $price so\'m a month. Adding one now charges the rest of this month from credits.';
+    return 'Each extra run at once costs $price a month. Adding one now charges the rest of this month from credits.';
   }
 
   @override
@@ -795,7 +849,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String billingMembersHelp(String included, String price) {
-    return '$included included; each one more costs $price so\'m a month.';
+    return '$included included; each one more costs $price a month.';
   }
 
   @override
@@ -810,7 +864,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String billingCreditPrice(String price) {
-    return '1 credit = $price so\'m';
+    return '1 credit = $price';
   }
 
   @override
@@ -1217,6 +1271,80 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get designDeviations => 'Departed from the plan';
+
+  @override
+  String get feedbackTitle => 'Send feedback';
+
+  @override
+  String get feedbackLede => 'Tell the agnts team what works, what doesn’t, or what you’d like next.';
+
+  @override
+  String get feedbackTitleLabel => 'Title';
+
+  @override
+  String get feedbackTitlePlaceholder => 'In a few words';
+
+  @override
+  String get feedbackDescLabel => 'Description';
+
+  @override
+  String get feedbackDescPlaceholder => 'What happened, what you expected, or your idea';
+
+  @override
+  String get feedbackSend => 'Send';
+
+  @override
+  String get feedbackSent => 'Thanks! Your feedback was sent.';
+
+  @override
+  String get feedbackAdminTitle => 'Feedback';
+
+  @override
+  String get feedbackAdminLede => 'What people sent from their accounts, newest first. Mark each one done once it’s handled.';
+
+  @override
+  String get feedbackF_new => 'New';
+
+  @override
+  String get feedbackF_done => 'Done';
+
+  @override
+  String get feedbackF_all => 'All';
+
+  @override
+  String get feedbackS_new => 'New';
+
+  @override
+  String get feedbackS_done => 'Done';
+
+  @override
+  String get feedbackSearch => 'Search feedback, people or workspaces';
+
+  @override
+  String get feedbackNone => 'No feedback here.';
+
+  @override
+  String get feedbackNoneNew => 'No new feedback. Nice!';
+
+  @override
+  String feedbackFrom(String workspace) {
+    return 'from $workspace';
+  }
+
+  @override
+  String get feedbackAccountGone => 'account deleted';
+
+  @override
+  String get feedbackMarkDone => 'Mark done';
+
+  @override
+  String get feedbackReopen => 'Reopen';
+
+  @override
+  String get feedbackMarkedDone => 'Marked done';
+
+  @override
+  String get feedbackReopened => 'Marked new again';
 
   @override
   String get filesTitle => 'Attachments';
@@ -2990,6 +3118,18 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get mobileAdminAppOnly => 'This is an Admin account. Open it in the agnts admin app.';
+
+  @override
+  String get mobileGoogleContinue => 'Continue with Google';
+
+  @override
+  String get mobileGoogleOff => 'Google sign-in is off on this server.';
+
+  @override
+  String get mobileGoogleSetup => 'Google sign-in is not set up in this build of the app.';
+
+  @override
   String get mpreviewTitle => 'agnts\'s preview';
 
   @override
@@ -3304,7 +3444,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navProfile => 'Profile';
 
   @override
-  String get navPlatform => 'Operator console';
+  String get navPlatform => 'Admin cabinet';
 
   @override
   String get navPeople => 'People';
@@ -3313,7 +3453,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navAccount => 'Account';
 
   @override
-  String get platformTitle => 'Operator console';
+  String get platformTitle => 'Admin cabinet';
 
   @override
   String get platformLede =>
@@ -3446,6 +3586,229 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get platformForbidden => 'Only an Admin can open the operator console.';
+
+  @override
+  String get platformCabinetBadge => 'Admin cabinet';
+
+  @override
+  String get platformNavDashboard => 'Dashboard';
+
+  @override
+  String get platformAdmins => 'Admins';
+
+  @override
+  String get platformNavMine => 'My work';
+
+  @override
+  String get platformBackToWorkspace => 'Back to my workspace';
+
+  @override
+  String get platformDashLede => 'Everyone on the platform, how fast it grows, and what the server is running.';
+
+  @override
+  String platformNewThisWeek(String n) {
+    return '$n new this week';
+  }
+
+  @override
+  String platformViaGoogle(String n) {
+    return '$n via Google';
+  }
+
+  @override
+  String get platformActiveUsers => 'Active this week';
+
+  @override
+  String get platformActiveNote => 'Signed in during the last 7 days';
+
+  @override
+  String platformTeams(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n with teams', one: '$n with a team');
+    return '$_temp0';
+  }
+
+  @override
+  String platformRunsNow(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n runs right now', one: '$n run right now');
+    return '$_temp0';
+  }
+
+  @override
+  String get platformGrowthTitle => 'Sign-ups';
+
+  @override
+  String platformGrowthSub(String n) {
+    return 'New accounts and workspaces per day, last $n days';
+  }
+
+  @override
+  String get platformLegendUsers => 'Accounts';
+
+  @override
+  String get platformLegendWorkspaces => 'Workspaces';
+
+  @override
+  String get platformRecentTitle => 'Newest accounts';
+
+  @override
+  String get platformSeeAll => 'See all';
+
+  @override
+  String get platformNoUsers => 'No users match.';
+
+  @override
+  String get platformWsLede =>
+      'Every workspace and who is in it. You see metadata only: tickets and code belong to the workspace’s members.';
+
+  @override
+  String get platformF_all => 'All';
+
+  @override
+  String get platformF_active => 'Active';
+
+  @override
+  String get platformF_suspended => 'Suspended';
+
+  @override
+  String get platformF_deleted => 'Deleted';
+
+  @override
+  String get platformSearchWs => 'Search workspaces or owners';
+
+  @override
+  String get platformNoWorkspaces => 'No workspaces match.';
+
+  @override
+  String get platformCreated => 'Created';
+
+  @override
+  String get platformNoMembers => 'No members.';
+
+  @override
+  String platformSuspendTitle(String name) {
+    return 'Suspend $name?';
+  }
+
+  @override
+  String get platformSuspendBody =>
+      'Its runs stop being started and its members see that the workspace is suspended. You can resume it at any time.';
+
+  @override
+  String get platformUsersLede =>
+      'Everyone who signed up with Google: their workspaces, and when they were last here. Admin accounts are on the Admins page.';
+
+  @override
+  String get platformU_all => 'All';
+
+  @override
+  String get platformU_active => 'Active';
+
+  @override
+  String get platformU_new => 'New this week';
+
+  @override
+  String get platformU_google => 'Google';
+
+  @override
+  String get platformU_admins => 'Admins';
+
+  @override
+  String get platformSearchUsers => 'Search by name, email or workspace';
+
+  @override
+  String get platformSignIn => 'Sign-in';
+
+  @override
+  String get platformLastSeen => 'Last sign-in';
+
+  @override
+  String get platformPassword => 'Password';
+
+  @override
+  String get platformUnverified => 'unverified';
+
+  @override
+  String get platformYou => 'You';
+
+  @override
+  String platformMakeAdminTitle(String name) {
+    return 'Make $name an Admin?';
+  }
+
+  @override
+  String get platformMakeAdminBody =>
+      'Admins open this cabinet: they see every user and workspace, change plans and credits, suspend workspaces and manage other Admins.';
+
+  @override
+  String platformRemoveAdminTitle(String name) {
+    return 'Remove $name as Admin?';
+  }
+
+  @override
+  String get platformRemoveAdminBody => 'They keep their account and workspaces, but lose the Admin cabinet.';
+
+  @override
+  String platformAdminAdded(String name) {
+    return 'Admin $name created';
+  }
+
+  @override
+  String platformAdminRemoved(String name) {
+    return 'Admin $name deleted';
+  }
+
+  @override
+  String get platformAdminsLede =>
+      'The platform’s operators. Each is its own account, apart from Users: an Admin sees no workspace’s tickets.';
+
+  @override
+  String platformAdminsCount(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n Admins', one: '$n Admin');
+    return '$_temp0';
+  }
+
+  @override
+  String get platformAddAdmin => 'Add an Admin';
+
+  @override
+  String get platformAddAdminSub =>
+      'An Admin is a separate account: it signs in with a password, opens this cabinet and has no workspaces. Users can’t be made Admins.';
+
+  @override
+  String get platformFindUser => 'Find a person';
+
+  @override
+  String get platformNoMatch => 'No one matches, or they are an Admin already.';
+
+  @override
+  String platformLastSeenAgo(String when) {
+    return 'last sign-in $when';
+  }
+
+  @override
+  String get platformAdminName => 'Name';
+
+  @override
+  String get platformAdminUsername => 'Username';
+
+  @override
+  String platformAdminPasswordHint(String n) {
+    return 'At least $n characters. They can turn on two-factor sign-in in their profile.';
+  }
+
+  @override
+  String get platformCreateAdmin => 'Create Admin';
+
+  @override
+  String get platformDeleteAdmin => 'Delete';
+
+  @override
+  String platformDeleteAdminTitle(String name) {
+    return 'Delete the Admin account $name?';
+  }
+
+  @override
+  String get platformDeleteAdminBody => 'They can no longer sign in. This cannot be undone.';
 
   @override
   String get previewTab => 'Preview';
@@ -6769,6 +7132,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wsKindApiKeyHelp => 'Create a key in the Anthropic Console (sk-ant-api…). Usage is billed by Anthropic to its owner.';
+
+  @override
+  String get wsKeyStep1 => 'Sign in to the Claude Console (button below) and open Settings → API keys.';
+
+  @override
+  String get wsKeyStep2 => 'Click Create Key, name it (for example agnts) and pick the Console workspace it bills to.';
+
+  @override
+  String get wsKeyStep3 => 'Copy the key (it starts with sk-ant-api) and paste it below. The Console shows it only once.';
+
+  @override
+  String get wsKeyStep4 => 'Runs are billed per token to that Console account: add credits and set a spend limit under Billing.';
+
+  @override
+  String get wsKeyOpen => 'Open the Claude Console';
 
   @override
   String get wsSubscriptionsOff => 'This server takes Anthropic API keys only.';

@@ -66,3 +66,25 @@ func TestTimeZoneIsNeverLocal(t *testing.T) {
 		t.Fatalf("explicit zone: %v %v", c.TimeZone, err)
 	}
 }
+
+func TestClaudeModels(t *testing.T) {
+	base := map[string]string{"AGNTS_DATABASE_URL": "postgres://localhost/hiro", "AGNTS_ENC_KEY": testKey}
+	with := func(v string) map[string]string {
+		m := map[string]string{"AGNTS_CLAUDE_MODELS": v}
+		for k, x := range base {
+			m[k] = x
+		}
+		return m
+	}
+	c, err := load(env(base))
+	if err != nil || c.ClaudeModels != nil {
+		t.Fatalf("default: %v %v", c.ClaudeModels, err)
+	}
+	c, err = load(env(with(" opus = claude-opus-6 , haiku= ")))
+	if err != nil || c.ClaudeModels["opus"] != "claude-opus-6" || c.ClaudeModels["haiku"] != "" || len(c.ClaudeModels) != 2 {
+		t.Fatalf("parsed %v %v", c.ClaudeModels, err)
+	}
+	if _, err := load(env(with("opus"))); err == nil || !strings.Contains(err.Error(), "AGNTS_CLAUDE_MODELS") {
+		t.Fatalf("bad value: %v", err)
+	}
+}

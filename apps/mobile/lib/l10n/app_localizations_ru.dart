@@ -319,6 +319,20 @@ class AppLocalizationsRu extends AppLocalizations {
   String get accountCreateFirst => 'Создайте первое рабочее пространство';
 
   @override
+  String get accountInviteGoogle => 'Войдите через Google, чтобы присоединиться. Впервые здесь? Аккаунт создастся сразу.';
+
+  @override
+  String get accountTotpRequiredAdmin => 'Для аккаунтов администраторов двухфакторный вход обязателен, поэтому он остаётся включённым.';
+
+  @override
+  String get accountGoHome => 'Назад к обзору';
+
+  @override
+  String accountBackToDashboard(String name) {
+    return 'Назад к обзору пространства $name';
+  }
+
+  @override
   String get analyticsTitle => 'Аналитика';
 
   @override
@@ -774,6 +788,48 @@ class AppLocalizationsRu extends AppLocalizations {
   String get authBack => 'Другой аккаунт';
 
   @override
+  String get authOr => 'или';
+
+  @override
+  String get authGoogleRedirecting => 'Выполняем вход…';
+
+  @override
+  String get authGoogleUnavailable => 'Не удалось загрузить вход через Google. Проверьте соединение или блокировщик рекламы.';
+
+  @override
+  String get authGoogleFailed => 'Вход через Google не удался. Попробуйте ещё раз.';
+
+  @override
+  String get authGoogleClosed =>
+      'На этом сервере регистрация только по приглашению: попросите у владельца пространства ссылку-приглашение.';
+
+  @override
+  String get authGoogleRateLimited => 'Слишком много попыток. Подождите минуту и попробуйте снова.';
+
+  @override
+  String get authGoogleError => 'Не удалось войти через Google. Попробуйте чуть позже.';
+
+  @override
+  String get authUseGoogle => 'Пароли здесь только для администраторов. Войдите через Google.';
+
+  @override
+  String get authAdminsLede => 'Администраторы входят по паролю. Все остальные — через Google.';
+
+  @override
+  String get authGoogleInvite =>
+      'Ссылка-приглашение недействительна, уже использована, истекла или предназначена для другого аккаунта Google.';
+
+  @override
+  String get authGoogleAdmin => 'Это аккаунт администратора: администраторы входят по логину и паролю.';
+
+  @override
+  String get authSetupLede =>
+      'Администраторы входят с двухфакторной защитой. Отсканируйте код в приложении-аутентификаторе (Google Authenticator, 1Password, Authy) и введите 6-значный код из него.';
+
+  @override
+  String get authSignOutBodyGoogle => 'Вы сможете снова войти в любой момент через Google.';
+
+  @override
   String get billingTitle => 'Оплата';
 
   @override
@@ -789,7 +845,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String billingMonthly(String amount) {
-    return '$amount сум в месяц';
+    return '$amount в месяц';
   }
 
   @override
@@ -807,7 +863,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String billingSlotsHelp(String price) {
-    return 'Каждый дополнительный одновременный запуск стоит $price сум в месяц. При добавлении остаток месяца списывается из кредитов.';
+    return 'Каждый дополнительный одновременный запуск стоит $price в месяц. При добавлении остаток месяца списывается из кредитов.';
   }
 
   @override
@@ -823,7 +879,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String billingMembersHelp(String included, String price) {
-    return 'Включено: $included; каждый следующий стоит $price сум в месяц.';
+    return 'Включено: $included; каждый следующий стоит $price в месяц.';
   }
 
   @override
@@ -838,7 +894,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String billingCreditPrice(String price) {
-    return '1 кредит = $price сум';
+    return '1 кредит = $price';
   }
 
   @override
@@ -1253,6 +1309,81 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get designDeviations => 'Отступления от плана';
+
+  @override
+  String get feedbackTitle => 'Отправить отзыв';
+
+  @override
+  String get feedbackLede => 'Расскажите команде agnts, что работает, что нет и чего вы ждёте дальше.';
+
+  @override
+  String get feedbackTitleLabel => 'Заголовок';
+
+  @override
+  String get feedbackTitlePlaceholder => 'В нескольких словах';
+
+  @override
+  String get feedbackDescLabel => 'Описание';
+
+  @override
+  String get feedbackDescPlaceholder => 'Что произошло, чего вы ожидали, или ваша идея';
+
+  @override
+  String get feedbackSend => 'Отправить';
+
+  @override
+  String get feedbackSent => 'Спасибо! Ваш отзыв отправлен.';
+
+  @override
+  String get feedbackAdminTitle => 'Отзывы';
+
+  @override
+  String get feedbackAdminLede =>
+      'Что пользователи прислали из своих аккаунтов, сначала новые. Отмечайте отзыв выполненным, когда он обработан.';
+
+  @override
+  String get feedbackF_new => 'Новые';
+
+  @override
+  String get feedbackF_done => 'Выполненные';
+
+  @override
+  String get feedbackF_all => 'Все';
+
+  @override
+  String get feedbackS_new => 'Новый';
+
+  @override
+  String get feedbackS_done => 'Выполнен';
+
+  @override
+  String get feedbackSearch => 'Поиск по отзывам, людям и пространствам';
+
+  @override
+  String get feedbackNone => 'Отзывов нет.';
+
+  @override
+  String get feedbackNoneNew => 'Новых отзывов нет. Отлично!';
+
+  @override
+  String feedbackFrom(String workspace) {
+    return 'из $workspace';
+  }
+
+  @override
+  String get feedbackAccountGone => 'аккаунт удалён';
+
+  @override
+  String get feedbackMarkDone => 'Отметить выполненным';
+
+  @override
+  String get feedbackReopen => 'Открыть снова';
+
+  @override
+  String get feedbackMarkedDone => 'Отмечен выполненным';
+
+  @override
+  String get feedbackReopened => 'Снова отмечен как новый';
 
   @override
   String get filesTitle => 'Вложения';
@@ -3089,6 +3220,18 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get mobileAdminAppOnly => 'Это аккаунт администратора. Откройте его в приложении agnts admin.';
+
+  @override
+  String get mobileGoogleContinue => 'Продолжить с Google';
+
+  @override
+  String get mobileGoogleOff => 'Вход через Google на этом сервере выключен.';
+
+  @override
+  String get mobileGoogleSetup => 'Вход через Google не настроен в этой сборке приложения.';
+
+  @override
   String get mpreviewTitle => 'Превью agnts';
 
   @override
@@ -3426,7 +3569,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get navProfile => 'Профиль';
 
   @override
-  String get navPlatform => 'Консоль оператора';
+  String get navPlatform => 'Кабинет администратора';
 
   @override
   String get navPeople => 'Люди';
@@ -3435,7 +3578,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get navAccount => 'Аккаунт';
 
   @override
-  String get platformTitle => 'Консоль оператора';
+  String get platformTitle => 'Кабинет администратора';
 
   @override
   String get platformLede =>
@@ -3568,6 +3711,250 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get platformForbidden => 'Консоль оператора доступна только администраторам.';
+
+  @override
+  String get platformCabinetBadge => 'Кабинет администратора';
+
+  @override
+  String get platformNavDashboard => 'Обзор';
+
+  @override
+  String get platformAdmins => 'Администраторы';
+
+  @override
+  String get platformNavMine => 'Моя работа';
+
+  @override
+  String get platformBackToWorkspace => 'В моё пространство';
+
+  @override
+  String get platformDashLede => 'Все пользователи платформы, её рост и то, что сейчас выполняет сервер.';
+
+  @override
+  String platformNewThisWeek(String n) {
+    return '$n новых за неделю';
+  }
+
+  @override
+  String platformViaGoogle(String n) {
+    return '$n через Google';
+  }
+
+  @override
+  String get platformActiveUsers => 'Активны за неделю';
+
+  @override
+  String get platformActiveNote => 'Входили за последние 7 дней';
+
+  @override
+  String platformTeams(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n с командой',
+      many: '$n с командой',
+      few: '$n с командой',
+      one: '$n с командой',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String platformRunsNow(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n запуска сейчас',
+      many: '$n запусков сейчас',
+      few: '$n запуска сейчас',
+      one: '$n запуск сейчас',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get platformGrowthTitle => 'Регистрации';
+
+  @override
+  String platformGrowthSub(String n) {
+    return 'Новые аккаунты и пространства по дням за последние $n дней';
+  }
+
+  @override
+  String get platformLegendUsers => 'Аккаунты';
+
+  @override
+  String get platformLegendWorkspaces => 'Пространства';
+
+  @override
+  String get platformRecentTitle => 'Новые аккаунты';
+
+  @override
+  String get platformSeeAll => 'Все';
+
+  @override
+  String get platformNoUsers => 'Пользователи не найдены.';
+
+  @override
+  String get platformWsLede =>
+      'Все рабочие пространства и их участники. Видны только метаданные: задачи и код принадлежат участникам пространства.';
+
+  @override
+  String get platformF_all => 'Все';
+
+  @override
+  String get platformF_active => 'Активные';
+
+  @override
+  String get platformF_suspended => 'Приостановлены';
+
+  @override
+  String get platformF_deleted => 'Удалены';
+
+  @override
+  String get platformSearchWs => 'Поиск по пространствам и владельцам';
+
+  @override
+  String get platformNoWorkspaces => 'Пространства не найдены.';
+
+  @override
+  String get platformCreated => 'Создано';
+
+  @override
+  String get platformNoMembers => 'Нет участников.';
+
+  @override
+  String platformSuspendTitle(String name) {
+    return 'Приостановить $name?';
+  }
+
+  @override
+  String get platformSuspendBody =>
+      'Новые запуски перестанут начинаться, а участники увидят, что пространство приостановлено. Возобновить можно в любой момент.';
+
+  @override
+  String get platformUsersLede =>
+      'Все, кто зарегистрировался через Google: их пространства и когда они заходили. Аккаунты администраторов — на странице «Администраторы».';
+
+  @override
+  String get platformU_all => 'Все';
+
+  @override
+  String get platformU_active => 'Активные';
+
+  @override
+  String get platformU_new => 'Новые за неделю';
+
+  @override
+  String get platformU_google => 'Google';
+
+  @override
+  String get platformU_admins => 'Администраторы';
+
+  @override
+  String get platformSearchUsers => 'Поиск по имени, email или пространству';
+
+  @override
+  String get platformSignIn => 'Вход';
+
+  @override
+  String get platformLastSeen => 'Последний вход';
+
+  @override
+  String get platformPassword => 'Пароль';
+
+  @override
+  String get platformUnverified => 'не подтверждён';
+
+  @override
+  String get platformYou => 'Вы';
+
+  @override
+  String platformMakeAdminTitle(String name) {
+    return 'Сделать $name администратором?';
+  }
+
+  @override
+  String get platformMakeAdminBody =>
+      'Администраторы открывают этот кабинет: видят всех пользователей и пространства, меняют тарифы и кредиты, приостанавливают пространства и управляют другими администраторами.';
+
+  @override
+  String platformRemoveAdminTitle(String name) {
+    return 'Снять с $name роль администратора?';
+  }
+
+  @override
+  String get platformRemoveAdminBody => 'Аккаунт и пространства сохранятся, но доступа к кабинету администратора не будет.';
+
+  @override
+  String platformAdminAdded(String name) {
+    return 'Администратор $name создан';
+  }
+
+  @override
+  String platformAdminRemoved(String name) {
+    return 'Администратор $name удалён';
+  }
+
+  @override
+  String get platformAdminsLede =>
+      'Операторы платформы. Каждый — отдельный аккаунт, не пользователь: администратор не видит задачи пространств.';
+
+  @override
+  String platformAdminsCount(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n администратора',
+      many: '$n администраторов',
+      few: '$n администратора',
+      one: '$n администратор',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get platformAddAdmin => 'Добавить администратора';
+
+  @override
+  String get platformAddAdminSub =>
+      'Администратор — отдельный аккаунт: входит по паролю, открывает этот кабинет и не состоит в пространствах. Пользователя нельзя сделать администратором.';
+
+  @override
+  String get platformFindUser => 'Найти человека';
+
+  @override
+  String get platformNoMatch => 'Никого не найдено, или это уже администратор.';
+
+  @override
+  String platformLastSeenAgo(String when) {
+    return 'последний вход $when';
+  }
+
+  @override
+  String get platformAdminName => 'Имя';
+
+  @override
+  String get platformAdminUsername => 'Логин';
+
+  @override
+  String platformAdminPasswordHint(String n) {
+    return 'Не менее $n символов. Двухфакторный вход можно включить в профиле.';
+  }
+
+  @override
+  String get platformCreateAdmin => 'Создать администратора';
+
+  @override
+  String get platformDeleteAdmin => 'Удалить';
+
+  @override
+  String platformDeleteAdminTitle(String name) {
+    return 'Удалить аккаунт администратора $name?';
+  }
+
+  @override
+  String get platformDeleteAdminBody => 'Он больше не сможет войти. Это действие нельзя отменить.';
 
   @override
   String get previewTab => 'Превью';
@@ -7054,6 +7441,23 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get wsKindApiKeyHelp => 'Создайте ключ в Anthropic Console (sk-ant-api…). Расход оплачивает владелец ключа.';
+
+  @override
+  String get wsKeyStep1 => 'Войдите в Claude Console (кнопка ниже) и откройте Settings → API keys.';
+
+  @override
+  String get wsKeyStep2 =>
+      'Нажмите Create Key, назовите ключ (например, agnts) и выберите рабочую область Console, на которую пойдут расходы.';
+
+  @override
+  String get wsKeyStep3 => 'Скопируйте ключ (он начинается с sk-ant-api) и вставьте ниже. Console показывает его только один раз.';
+
+  @override
+  String get wsKeyStep4 =>
+      'Запуски оплачиваются по токенам с этого аккаунта Console: пополните баланс и задайте лимит расходов в разделе Billing.';
+
+  @override
+  String get wsKeyOpen => 'Открыть Claude Console';
 
   @override
   String get wsSubscriptionsOff => 'Этот сервер принимает только API-ключи Anthropic.';

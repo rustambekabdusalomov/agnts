@@ -5,7 +5,6 @@
       :key="l"
       type="button"
       class="p-lang"
-      :class="{ 'p-cur': locale === l }"
       :aria-pressed="locale === l"
       :lang="l"
       @click="setLocale(l)"

@@ -305,6 +305,21 @@ class AppLocalizationsUz extends AppLocalizations {
   String get accountCreateFirst => 'Birinchi ish maydoningizni yarating';
 
   @override
+  String get accountInviteGoogle => 'Qo\'shilish uchun Google orqali davom eting. Yangimisiz? Akkauntingiz darhol yaratiladi.';
+
+  @override
+  String get accountTotpRequiredAdmin =>
+      'Administrator akkauntlari uchun ikki bosqichli kirish majburiy, shuning uchun u yoqilgan holda qoladi.';
+
+  @override
+  String get accountGoHome => 'Bosh sahifaga qaytish';
+
+  @override
+  String accountBackToDashboard(String name) {
+    return '$name ish maydoni bosh sahifasiga qaytish';
+  }
+
+  @override
   String get analyticsTitle => 'Analitika';
 
   @override
@@ -744,6 +759,46 @@ class AppLocalizationsUz extends AppLocalizations {
   String get authBack => 'Boshqa hisob';
 
   @override
+  String get authOr => 'yoki';
+
+  @override
+  String get authGoogleRedirecting => 'Kirilmoqda…';
+
+  @override
+  String get authGoogleUnavailable => 'Google orqali kirishni yuklab bo\'lmadi. Internetni yoki reklama blokerini tekshiring.';
+
+  @override
+  String get authGoogleFailed => 'Google orqali kirish amalga oshmadi. Qayta urinib ko\'ring.';
+
+  @override
+  String get authGoogleClosed => 'Bu serverda ro\'yxatdan o\'tish faqat taklif orqali: ish maydoni egasidan taklif havolasini so\'rang.';
+
+  @override
+  String get authGoogleRateLimited => 'Juda ko\'p urinish. Bir daqiqa kutib, qayta urinib ko\'ring.';
+
+  @override
+  String get authGoogleError => 'Google orqali kirishda xatolik yuz berdi. Birozdan so\'ng qayta urinib ko\'ring.';
+
+  @override
+  String get authUseGoogle => 'Bu yerda parollar faqat administratorlar uchun. Google orqali kiring.';
+
+  @override
+  String get authAdminsLede => 'Administratorlar parol bilan kiradi. Qolganlar Google orqali davom etadi.';
+
+  @override
+  String get authGoogleInvite => 'Taklif havolasi yaroqsiz, allaqachon ishlatilgan, muddati o\'tgan yoki boshqa Google akkaunti uchun.';
+
+  @override
+  String get authGoogleAdmin => 'Bu administrator akkaunti: administratorlar login va parol bilan kiradi.';
+
+  @override
+  String get authSetupLede =>
+      'Administratorlar ikki bosqichli himoya bilan kiradi. Kodni autentifikator ilovasida (Google Authenticator, 1Password, Authy) skanerlang va u ko\'rsatgan 6 xonali kodni kiriting.';
+
+  @override
+  String get authSignOutBodyGoogle => 'Istalgan vaqtda Google orqali qayta kirishingiz mumkin.';
+
+  @override
   String get billingTitle => 'To‘lov';
 
   @override
@@ -760,7 +815,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String billingMonthly(String amount) {
-    return 'Oyiga $amount so‘m';
+    return 'Oyiga $amount';
   }
 
   @override
@@ -778,7 +833,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String billingSlotsHelp(String price) {
-    return 'Har bir qo‘shimcha bir vaqtdagi ish oyiga $price so‘m turadi. Qo‘shilganda oyning qolgan qismi kreditlardan yechiladi.';
+    return 'Har bir qo‘shimcha bir vaqtdagi ish oyiga $price turadi. Qo‘shilganda oyning qolgan qismi kreditlardan yechiladi.';
   }
 
   @override
@@ -794,7 +849,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String billingMembersHelp(String included, String price) {
-    return '$included tasi kiradi; har bir qo‘shimchasi oyiga $price so‘m.';
+    return '$included tasi kiradi; har bir qo‘shimchasi oyiga $price.';
   }
 
   @override
@@ -809,7 +864,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String billingCreditPrice(String price) {
-    return '1 kredit = $price so‘m';
+    return '1 kredit = $price';
   }
 
   @override
@@ -1216,6 +1271,81 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get designDeviations => 'Rejadan chetlanishlar';
+
+  @override
+  String get feedbackTitle => 'Fikr yuborish';
+
+  @override
+  String get feedbackLede => 'agnts jamoasiga nima ishlayotgani, nima ishlamayotgani yoki keyin nimani xohlashingizni yozing.';
+
+  @override
+  String get feedbackTitleLabel => 'Sarlavha';
+
+  @override
+  String get feedbackTitlePlaceholder => 'Bir necha so\'z bilan';
+
+  @override
+  String get feedbackDescLabel => 'Tavsif';
+
+  @override
+  String get feedbackDescPlaceholder => 'Nima bo\'ldi, nimani kutgan edingiz yoki g\'oyangiz';
+
+  @override
+  String get feedbackSend => 'Yuborish';
+
+  @override
+  String get feedbackSent => 'Rahmat! Fikringiz yuborildi.';
+
+  @override
+  String get feedbackAdminTitle => 'Fikrlar';
+
+  @override
+  String get feedbackAdminLede =>
+      'Foydalanuvchilar akkauntlaridan yuborgan fikrlar, avval yangilari. Ko\'rib chiqilganda bajarildi deb belgilang.';
+
+  @override
+  String get feedbackF_new => 'Yangi';
+
+  @override
+  String get feedbackF_done => 'Bajarilgan';
+
+  @override
+  String get feedbackF_all => 'Hammasi';
+
+  @override
+  String get feedbackS_new => 'Yangi';
+
+  @override
+  String get feedbackS_done => 'Bajarildi';
+
+  @override
+  String get feedbackSearch => 'Fikrlar, odamlar yoki ish maydonlarini qidirish';
+
+  @override
+  String get feedbackNone => 'Fikrlar yo\'q.';
+
+  @override
+  String get feedbackNoneNew => 'Yangi fikrlar yo\'q. Ajoyib!';
+
+  @override
+  String feedbackFrom(String workspace) {
+    return '$workspace dan';
+  }
+
+  @override
+  String get feedbackAccountGone => 'akkaunt o\'chirilgan';
+
+  @override
+  String get feedbackMarkDone => 'Bajarildi deb belgilash';
+
+  @override
+  String get feedbackReopen => 'Qayta ochish';
+
+  @override
+  String get feedbackMarkedDone => 'Bajarildi deb belgilandi';
+
+  @override
+  String get feedbackReopened => 'Yana yangi deb belgilandi';
 
   @override
   String get filesTitle => 'Ilovalar';
@@ -2984,6 +3114,18 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
+  String get mobileAdminAppOnly => 'Bu Admin hisobi. Uni agnts admin ilovasida oching.';
+
+  @override
+  String get mobileGoogleContinue => 'Google orqali davom etish';
+
+  @override
+  String get mobileGoogleOff => 'Bu serverda Google orqali kirish oʻchirilgan.';
+
+  @override
+  String get mobileGoogleSetup => 'Ilovaning bu yigʻmasida Google orqali kirish sozlanmagan.';
+
+  @override
   String get mpreviewTitle => 'agnts oldindan koʻrishi';
 
   @override
@@ -3300,7 +3442,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get navProfile => 'Profil';
 
   @override
-  String get navPlatform => 'Operator konsoli';
+  String get navPlatform => 'Administrator kabineti';
 
   @override
   String get navPeople => 'Odamlar';
@@ -3309,7 +3451,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get navAccount => 'Hisob';
 
   @override
-  String get platformTitle => 'Operator konsoli';
+  String get platformTitle => 'Administrator kabineti';
 
   @override
   String get platformLede =>
@@ -3442,6 +3584,229 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get platformForbidden => 'Operator konsoli faqat administratorlar uchun.';
+
+  @override
+  String get platformCabinetBadge => 'Administrator kabineti';
+
+  @override
+  String get platformNavDashboard => 'Umumiy ko‘rinish';
+
+  @override
+  String get platformAdmins => 'Administratorlar';
+
+  @override
+  String get platformNavMine => 'Mening ishim';
+
+  @override
+  String get platformBackToWorkspace => 'Ish maydonimga qaytish';
+
+  @override
+  String get platformDashLede => 'Platformadagi barcha foydalanuvchilar, o‘sish sur’ati va server hozir nimani bajaryapti.';
+
+  @override
+  String platformNewThisWeek(String n) {
+    return 'shu hafta $n ta yangi';
+  }
+
+  @override
+  String platformViaGoogle(String n) {
+    return '$n ta Google orqali';
+  }
+
+  @override
+  String get platformActiveUsers => 'Shu hafta faol';
+
+  @override
+  String get platformActiveNote => 'So‘nggi 7 kunda kirganlar';
+
+  @override
+  String platformTeams(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n tasi jamoa bilan', one: '$n tasi jamoa bilan');
+    return '$_temp0';
+  }
+
+  @override
+  String platformRunsNow(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'hozir $n ta ishga tushirish', one: 'hozir $n ta ishga tushirish');
+    return '$_temp0';
+  }
+
+  @override
+  String get platformGrowthTitle => 'Ro‘yxatdan o‘tishlar';
+
+  @override
+  String platformGrowthSub(String n) {
+    return 'So‘nggi $n kunda kunlik yangi akkauntlar va ish maydonlari';
+  }
+
+  @override
+  String get platformLegendUsers => 'Akkauntlar';
+
+  @override
+  String get platformLegendWorkspaces => 'Ish maydonlari';
+
+  @override
+  String get platformRecentTitle => 'Eng yangi akkauntlar';
+
+  @override
+  String get platformSeeAll => 'Hammasi';
+
+  @override
+  String get platformNoUsers => 'Foydalanuvchi topilmadi.';
+
+  @override
+  String get platformWsLede =>
+      'Barcha ish maydonlari va ulardagi a’zolar. Faqat metama’lumotlar ko‘rinadi: vazifalar va kod ish maydoni a’zolariga tegishli.';
+
+  @override
+  String get platformF_all => 'Hammasi';
+
+  @override
+  String get platformF_active => 'Faol';
+
+  @override
+  String get platformF_suspended => 'To‘xtatilgan';
+
+  @override
+  String get platformF_deleted => 'O‘chirilgan';
+
+  @override
+  String get platformSearchWs => 'Ish maydoni yoki egasini qidirish';
+
+  @override
+  String get platformNoWorkspaces => 'Ish maydoni topilmadi.';
+
+  @override
+  String get platformCreated => 'Yaratilgan';
+
+  @override
+  String get platformNoMembers => 'A’zolar yo‘q.';
+
+  @override
+  String platformSuspendTitle(String name) {
+    return '$name to‘xtatilsinmi?';
+  }
+
+  @override
+  String get platformSuspendBody =>
+      'Yangi ishga tushirishlar boshlanmaydi va a’zolar ish maydoni to‘xtatilganini ko‘radi. Istalgan vaqtda qayta yoqish mumkin.';
+
+  @override
+  String get platformUsersLede =>
+      'Google orqali ro\'yxatdan o\'tganlarning barchasi: ish maydonlari va oxirgi kirishi. Administrator akkauntlari «Administratorlar» sahifasida.';
+
+  @override
+  String get platformU_all => 'Hammasi';
+
+  @override
+  String get platformU_active => 'Faol';
+
+  @override
+  String get platformU_new => 'Shu hafta yangi';
+
+  @override
+  String get platformU_google => 'Google';
+
+  @override
+  String get platformU_admins => 'Administratorlar';
+
+  @override
+  String get platformSearchUsers => 'Ism, email yoki ish maydoni bo‘yicha qidirish';
+
+  @override
+  String get platformSignIn => 'Kirish';
+
+  @override
+  String get platformLastSeen => 'Oxirgi kirish';
+
+  @override
+  String get platformPassword => 'Parol';
+
+  @override
+  String get platformUnverified => 'tasdiqlanmagan';
+
+  @override
+  String get platformYou => 'Siz';
+
+  @override
+  String platformMakeAdminTitle(String name) {
+    return '$name administrator qilinsinmi?';
+  }
+
+  @override
+  String get platformMakeAdminBody =>
+      'Administratorlar bu kabinetni ochadi: barcha foydalanuvchi va ish maydonlarini ko‘radi, tarif va kreditlarni o‘zgartiradi, ish maydonlarini to‘xtatadi va boshqa administratorlarni boshqaradi.';
+
+  @override
+  String platformRemoveAdminTitle(String name) {
+    return '$name administratorlikdan olinsinmi?';
+  }
+
+  @override
+  String get platformRemoveAdminBody => 'Akkaunt va ish maydonlari qoladi, lekin administrator kabinetiga kira olmaydi.';
+
+  @override
+  String platformAdminAdded(String name) {
+    return 'Administrator $name yaratildi';
+  }
+
+  @override
+  String platformAdminRemoved(String name) {
+    return 'Administrator $name o\'chirildi';
+  }
+
+  @override
+  String get platformAdminsLede =>
+      'Platforma operatorlari. Har biri foydalanuvchilardan alohida akkaunt: administrator ish maydonlarining vazifalarini ko\'rmaydi.';
+
+  @override
+  String platformAdminsCount(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n administrator', one: '$n administrator');
+    return '$_temp0';
+  }
+
+  @override
+  String get platformAddAdmin => 'Administrator qo‘shish';
+
+  @override
+  String get platformAddAdminSub =>
+      'Administrator alohida akkaunt: parol bilan kiradi, shu kabinetni ochadi va ish maydonlarida bo\'lmaydi. Foydalanuvchini administrator qilib bo\'lmaydi.';
+
+  @override
+  String get platformFindUser => 'Odamni topish';
+
+  @override
+  String get platformNoMatch => 'Hech kim topilmadi yoki u allaqachon administrator.';
+
+  @override
+  String platformLastSeenAgo(String when) {
+    return 'oxirgi kirish $when';
+  }
+
+  @override
+  String get platformAdminName => 'Ism';
+
+  @override
+  String get platformAdminUsername => 'Login';
+
+  @override
+  String platformAdminPasswordHint(String n) {
+    return 'Kamida $n ta belgi. Ikki bosqichli kirishni profilda yoqish mumkin.';
+  }
+
+  @override
+  String get platformCreateAdmin => 'Administrator yaratish';
+
+  @override
+  String get platformDeleteAdmin => 'O\'chirish';
+
+  @override
+  String platformDeleteAdminTitle(String name) {
+    return '$name administrator akkaunti o\'chirilsinmi?';
+  }
+
+  @override
+  String get platformDeleteAdminBody => 'U endi kira olmaydi. Buni qaytarib bo\'lmaydi.';
 
   @override
   String get previewTab => 'Oldindan koʻrish';
@@ -6734,6 +7099,23 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get wsKindApiKeyHelp => 'Anthropic Console’da kalit yarating (sk-ant-api…). Sarfni kalit egasi to‘laydi.';
+
+  @override
+  String get wsKeyStep1 => 'Claude Console’ga kiring (pastdagi tugma) va Settings → API keys bo‘limini oching.';
+
+  @override
+  String get wsKeyStep2 =>
+      'Create Key tugmasini bosing, kalitga nom bering (masalan, agnts) va xarajat yoziladigan Console ish maydonini tanlang.';
+
+  @override
+  String get wsKeyStep3 => 'Kalitni nusxalang (u sk-ant-api bilan boshlanadi) va pastga joylang. Console uni faqat bir marta ko‘rsatadi.';
+
+  @override
+  String get wsKeyStep4 =>
+      'Ishga tushirishlar shu Console hisobidan token bo‘yicha to‘lanadi: Billing bo‘limida balansni to‘ldiring va xarajat chegarasini qo‘ying.';
+
+  @override
+  String get wsKeyOpen => 'Claude Console’ni ochish';
 
   @override
   String get wsSubscriptionsOff => 'Bu server faqat Anthropic API kalitlarini qabul qiladi.';

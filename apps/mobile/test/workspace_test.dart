@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:agnts_api/agnts_api.dart';
 
 import 'package:agnts_mobile/core/data.dart';
+import 'package:agnts_mobile/core/flavor.dart';
 import 'package:agnts_mobile/core/session.dart';
 import 'package:agnts_mobile/features/auth/login_screen.dart';
 import 'package:agnts_mobile/l10n/app_localizations.dart';
@@ -131,9 +132,18 @@ void main() {
     expect(find.text('Switched to B'), findsOneWidget);
   });
 
-  testWidgets('login asks for the code only when the account needs one', (tester) async {
-    await tester.pumpWidget(_app(const LoginScreen()));
+  testWidgets('the admin app signs in with a password, and asks for the code only when needed', (tester) async {
+    await tester.pumpWidget(_app(const LoginScreen(), overrides: [adminAppProvider.overrideWithValue(true)]));
     await tester.pumpAndSettle();
     expect(find.byType(TextField), findsNWidgets(3));
+    expect(find.text('Continue with Google'), findsNothing);
+  });
+
+  testWidgets('the user app signs in with Google only', (tester) async {
+    await tester.pumpWidget(_app(const LoginScreen()));
+    await tester.pumpAndSettle();
+    expect(find.byType(TextField), findsOneWidget); // the server address
+    expect(find.text('https://api.agnts.uz'), findsOneWidget);
+    expect(find.text('Continue with Google'), findsOneWidget);
   });
 }

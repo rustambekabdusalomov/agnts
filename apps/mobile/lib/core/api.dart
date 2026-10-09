@@ -24,7 +24,9 @@ final apiProvider = Provider<AgntsApi?>((ref) {
       h.next(o);
     },
     onError: (e, h) {
-      if (e.response?.statusCode == 401) {
+      // Calls finishing after sign-out (see signOut) belong to a client
+      // that is gone; only a live one signs out.
+      if (e.response?.statusCode == 401 && ref.mounted) {
         ref.read(sessionProvider.notifier).signedOut();
       }
       h.next(e);

@@ -11,6 +11,16 @@ final meProvider = FutureProvider<User>((ref) async {
   return (await requireApi(ref).getAuthApi().getMe()).data!;
 });
 
+/// Whether the person is a system Admin (`admin`), and an Admin account
+/// with no workspaces (`only`), whose home is the Admin cabinet. Null until
+/// the account has loaded.
+final adminProvider = Provider<({bool admin, bool only})?>((ref) {
+  final me = ref.watch(meProvider).value;
+  if (me == null) return null;
+  final admin = me.isAdmin ?? false;
+  return (admin: admin, only: admin && (me.workspaces?.isEmpty ?? true));
+});
+
 /// The workspace the app acts in: the chosen one, else the server's (the
 /// one opened last). Null while loading, or when the user has none.
 final currentWorkspaceProvider = Provider<WorkspaceSummary?>((ref) {
