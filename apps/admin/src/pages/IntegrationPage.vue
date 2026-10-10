@@ -65,7 +65,7 @@ const sync = useMutation({
   mutationFn: () => unwrap(provider.value === 'plane' ? api.POST('/integrations/plane/sync') : api.POST('/integrations/jira/sync')),
   onSuccess: (r) => {
     for (const k of ['tickets', 'nav', 'dashboard']) void qc.invalidateQueries({ queryKey: [k] })
-    ui.notify(t(provider.value === 'plane' ? 'integrations.planeSynced' : 'integrations.synced', { found: r.found, created: r.created }))
+    ui.notify(t(provider.value === 'plane' ? 'integrations.planeSynced' : 'integrations.synced', { found: r.found, created: r.created, updated: ('updated' in r ? r.updated : 0) ?? 0, waiting: ('waiting' in r ? r.waiting : 0) ?? 0 }))
   },
   onError: onErr,
 })

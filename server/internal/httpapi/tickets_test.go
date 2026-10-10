@@ -255,6 +255,16 @@ func (f *fakeTickets) Review(_ context.Context, key string, o domain.Origin) (do
 	return t, err
 }
 
+func (f *fakeTickets) RestartWithUpdate(_ context.Context, key string, o domain.Origin) (domain.Ticket, error) {
+	f.lastOrigin = o
+	return f.ticket(key, domain.StateNew)
+}
+
+func (f *fakeTickets) KeepCurrentVersion(_ context.Context, key string, o domain.Origin) (domain.Ticket, error) {
+	f.lastOrigin = o
+	return f.ticket(key, domain.StateCoding)
+}
+
 func (f *fakeTickets) Preview(_ context.Context, key string, compare *bool, o domain.Origin) (domain.Ticket, error) {
 	f.lastOrigin, f.lastCompare = o, compare
 	t, err := f.ticket(key, domain.StateWaitingForReview)

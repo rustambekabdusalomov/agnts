@@ -32,6 +32,7 @@
     "statPushed": "Shu hafta yuborilgan",
     "statPushedNote": "Ochilgan pull requestlar",
     "statSession": "Tarif sessiyasi",
-    "sourcePlane": "Plane"
+    "sourcePlane": "Plane",
+    "sourceGit": "PR"
   }
 }

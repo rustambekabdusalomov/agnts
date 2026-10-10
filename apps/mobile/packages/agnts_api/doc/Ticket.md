@@ -20,6 +20,7 @@ Name | Type | Description | Notes
 **replayOf** | **String** | For a replay: the done ticket it re-runs. Replays are never pushed. | [optional] 
 **turns** | **int** |  | 
 **branch** | **String** |  | 
+**headSha** | **String** | The reviewed commit: the branch head agnts committed, or for a pull request review the head agnts reviewed | [optional] 
 **prNumber** | **int** |  | [optional] 
 **prUrl** | **String** |  | 
 **assignees** | **List&lt;String&gt;** | Git host usernames the pull request is (or will be) assigned to | [optional] 
@@ -39,6 +40,8 @@ Name | Type | Description | Notes
 **since** | [**DateTime**](DateTime.md) | When the ticket entered its current state | [optional] 
 **stopReason** | **String** | Why it failed or paused | [optional] 
 **mergedAt** | [**DateTime**](DateTime.md) |  | [optional] 
+**pull** | [**PullRequest**](PullRequest.md) |  | [optional] 
+**trackerUpdate** | [**TrackerUpdate**](TrackerUpdate.md) |  | [optional] 
 **learnState** | **String** | The learn run after push; pending also while it runs | [optional] 
 **reviewState** | **String** | The code review agnts runs beside the human review | [optional] 
 **previewState** | **String** | The screenshots agnts takes beside the human review | [optional] 

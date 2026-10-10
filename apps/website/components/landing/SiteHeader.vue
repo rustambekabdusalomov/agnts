@@ -8,6 +8,7 @@
       <a class="p-link" href="#connectors"><span>{{ t('nav.connectors') }}</span></a>
       <a class="p-link" href="#savings"><span>{{ t('nav.savings') }}</span></a>
       <a class="p-link" href="#privacy"><span>{{ t('nav.privacy') }}</span></a>
+      <a class="p-link" href="#about"><span>{{ t('nav.about') }}</span></a>
       <a class="p-link" href="#pricing"><span>{{ t('nav.pricing') }}</span></a>
       <a class="p-link" href="#faq"><span>{{ t('nav.faq') }}</span></a>
     </nav>

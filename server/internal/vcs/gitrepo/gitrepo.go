@@ -621,3 +621,46 @@ func shortSHA(s string) string {
 	}
 	return s
 }
+
+var _ orchestrator.PRFetcher = (*Repos)(nil)
+
+// FetchPR fetches a pull request's head from ref (refs/pull/42/head on
+// GitHub, refs/merge-requests/42/head on GitLab: they work for forks too)
+// into the local branch, and base into origin/base. It returns the head
+// and the change from the merge base with base, as a reviewer sees it.
+// The branch is agnts's copy: it is never pushed.
+func (g *Repos) FetchPR(ctx context.Context, repo domain.Repository, ref, branch, base string) (string, []domain.FileChange, error) {
+	if !strings.HasPrefix(ref, "refs/") || strings.ContainsAny(ref, " :*\\") || branch == "" || branch == repo.DefaultBranch {
+		return "", nil, fmt.Errorf("cannot fetch %q into %q", ref, branch)
+	}
+	defer g.lock(repo)()
+	auth, err := g.auth(ctx, repo)
+	if err != nil {
+		return "", nil, err
+	}
+	r, err := g.open(repo)
+	if err != nil {
+		return "", nil, err
+	}
+	refs := []config.RefSpec{
+		config.RefSpec(fmt.Sprintf("+%s:refs/heads/%s", ref, branch)),
+		config.RefSpec(fmt.Sprintf("+refs/heads/%s:refs/remotes/origin/%s", base, base)),
+	}
+	for _, rs := range refs {
+		if err := rs.Validate(); err != nil {
+			return "", nil, err
+		}
+	}
+	if err := fetch(ctx, r, repo, auth, false, refs...); err != nil {
+		return "", nil, err
+	}
+	head, err := r.Reference(plumbing.NewBranchReferenceName(branch), true)
+	if err != nil {
+		return "", nil, err
+	}
+	files, err := branchDiff(r, base, head.Hash())
+	if err != nil {
+		return "", nil, err
+	}
+	return head.Hash().String(), files, nil
+}

@@ -217,19 +217,19 @@ func TestClick(t *testing.T) {
 func TestSlotsAndGrants(t *testing.T) {
 	s, credits, ws, ctx := setup(t)
 	sys := domain.System(ctx)
-	if _, err := s.SetSlots(sys, ws, 9, 0, false); err == nil {
+	if _, err := s.SetSlots(sys, ws, 9, 0); err == nil {
 		t.Fatal("over the max slots")
 	}
 	// Paid this month: a slot more costs the rest of the month now.
 	pgtest.Exec(t, pgtest.Open(t), `UPDATE workspaces SET paid_until = now() + interval '30 days' WHERE id = $1`, ws)
 	var be *Error
-	if _, err := s.SetSlots(sys, ws, 2, 0, false); !errors.As(err, &be) || !be.Payment {
+	if _, err := s.SetSlots(sys, ws, 2, 0); !errors.As(err, &be) || !be.Payment {
 		t.Fatalf("no credits for a slot: %v", err)
 	}
 	if _, err := s.Grant(sys, ws, 5000, "test", 0); err != nil {
 		t.Fatal(err)
 	}
-	v, err := s.SetSlots(sys, ws, 2, 0, false)
+	v, err := s.SetSlots(sys, ws, 2, 0)
 	if err != nil || v.Slots != 2 || v.Balance >= 5000 {
 		t.Fatalf("slots %+v %v", v, err)
 	}
@@ -238,6 +238,20 @@ func TestSlotsAndGrants(t *testing.T) {
 	}
 	if bal, _ := credits.Balance(sys, ws); bal != v.Balance {
 		t.Fatalf("balance %d vs view %d", bal, v.Balance)
+	}
+}
+
+func TestSelfHostedSlotsAreFree(t *testing.T) {
+	_, credits, ws, ctx := setup(t)
+	sys := domain.System(ctx)
+	s := New(Config{MaxSlots: 5}, credits, postgres.NewWorkspaces(pgtest.Open(t)), postgres.NewAgent(pgtest.Open(t)),
+		slog.New(slog.NewTextHandler(io.Discard, nil)))
+	v, err := s.SetSlots(sys, ws, 4, 0)
+	if err != nil || v.Slots != 4 || v.Balance != 0 {
+		t.Fatalf("slots %+v %v", v, err)
+	}
+	if _, err := s.SetSlots(sys, ws, 6, 0); err == nil {
+		t.Fatal("over the max slots")
 	}
 }
 

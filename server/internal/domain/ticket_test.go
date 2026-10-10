@@ -24,6 +24,8 @@ func TestTransitionMatrix(t *testing.T) {
 		{StatePushing, StateDone}, {StatePushing, StateFailed},
 		{StateFailed, StateNew}, {StateFailed, StateCoding}, {StateFailed, StatePushing}, {StateFailed, StateRejected},
 		{StateRateLimited, StateNew}, {StateRateLimited, StateCoding}, {StateRateLimited, StateRejected},
+		// Restart with a newer version of the issue, before anything is pushed.
+		{StateWaitingForAnswers, StateNew}, {StateCoding, StateNew}, {StateTesting, StateNew}, {StateWaitingForReview, StateNew},
 	} {
 		allowed[p] = true
 	}
@@ -84,5 +86,23 @@ func TestKinds(t *testing.T) {
 	}
 	if !TicketKind("").Spec().NeedsRepo {
 		t.Error("an unset kind must be worked as code")
+	}
+}
+
+func TestRepoFromLabels(t *testing.T) {
+	for _, c := range []struct {
+		in   []string
+		want string
+	}{
+		{nil, ""},
+		{[]string{"agnts", "backend"}, ""},
+		{[]string{"agnts", "repo:api"}, "api"},
+		{[]string{"Repo:Web-App", "repo:api"}, "Web-App"},
+		{[]string{"repo:", " repo: api "}, "api"},
+		{[]string{"repository:api"}, ""},
+	} {
+		if got := RepoFromLabels(c.in); got != c.want {
+			t.Errorf("%v: %q, want %q", c.in, got, c.want)
+		}
 	}
 }

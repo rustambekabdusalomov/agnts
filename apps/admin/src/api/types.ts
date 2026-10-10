@@ -47,6 +47,11 @@ export type ShotRef = S['ShotRef']
 export type Attachment = S['Attachment']
 export type Question = S['Question']
 export type RepoPreview = S['RepoPreview']
+export type PullRequest = S['PullRequest']
+export type PullReviewSettings = S['PullReviewSettings']
+export type ReviewSync = S['ReviewSync']
+export type Reviewer = S['Reviewer']
+export type ReviewerNote = S['ReviewerNote']
 
 /** Tone per state, as in the demo: drives badge colours (b-<tone>). */
 export const STATE_TONE: Record<TicketState, 'gray' | 'info' | 'warn' | 'ok' | 'bad'> = {
@@ -133,6 +138,10 @@ export function pairShots(shots: PreviewShot[]): ShotPair[] {
 
 /** Ticket kinds in the order the server lists them. */
 export const KINDS: TicketKind[] = ['code', 'test', 'plan', 'analysis', 'bug']
+/** Pull request reviews: someone else's change, merged on approval. Never picked by hand. */
+export const isPullReview = (t: Pick<Ticket, 'kind'>) => t.kind === 'review'
+/** The git host a pull request lives on, for labels ("GitHub", "GitLab"). */
+export const pullHost = (url?: string) => (url && /gitlab/i.test(new URL(url, 'https://x').hostname) ? 'GitLab' : 'GitHub')
 /** Kinds whose work is a Markdown report instead of a change. */
 export const REPORT_KINDS: TicketKind[] = ['plan', 'analysis', 'bug']
 export const isReport = (t: Pick<Ticket, 'kind'>) => REPORT_KINDS.includes(t.kind)
@@ -143,6 +152,7 @@ export const KIND_EDITABLE: TicketState[] = ['new', 'waiting_for_answers', 'fail
 
 /** i18n key of a ticket's state: reports read "Writing" and "Done" where changes read "Coding" and "Pushed". */
 export function stateKey(state: TicketState, kind?: TicketKind): string {
+  if (kind === 'review' && ['analyzing', 'coding', 'waiting_for_review', 'pushing', 'done', 'rejected'].includes(state)) return `state.review.${state}`
   if (kind && REPORT_KINDS.includes(kind) && ['coding', 'pushing', 'done'].includes(state)) return `state.report.${state}`
   return `state.${state}`
 }

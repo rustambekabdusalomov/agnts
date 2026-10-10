@@ -48,7 +48,7 @@ const any = computed(() => !!chosen.value || scope.value.length > 0 || ship.valu
     </template>
     <template v-if="ship.length">
       <h3>{{ t('design.shipping') }}</h3>
-      <dl class="facts">
+      <dl class="design-ship">
         <div v-for="x in ship" :key="x.k"><dt>{{ t(`design.ship_${x.k}`) }}</dt><dd>{{ tr(x.v) }}</dd></div>
       </dl>
     </template>
@@ -67,4 +67,12 @@ const any = computed(() => !!chosen.value || scope.value.length > 0 || ship.valu
 .design-pc { list-style: none; padding: 0; margin: 4px 0 0; font-size: 13.5px; }
 .design-pc .ok { color: var(--ok); }
 .design-pc .bad { color: var(--bad); }
+.design-ship { margin: 0 0 6px; }
+.design-ship div { display: grid; grid-template-columns: 130px 1fr; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line-2); }
+.design-ship div:first-child { border-top: 0; padding-top: 0; }
+.design-ship dt { font-size: 13px; color: var(--ink-3); padding-top: 1px; }
+.design-ship dd { margin: 0; max-width: 72ch; }
+@media (max-width: 560px) {
+  .design-ship div { grid-template-columns: 1fr; gap: 2px; }
+}
 </style>

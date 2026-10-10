@@ -31,6 +31,8 @@ abstract class _$TicketCWProxy {
 
   Ticket branch(String branch);
 
+  Ticket headSha(String? headSha);
+
   Ticket prNumber(int? prNumber);
 
   Ticket prUrl(String prUrl);
@@ -68,6 +70,10 @@ abstract class _$TicketCWProxy {
   Ticket stopReason(String? stopReason);
 
   Ticket mergedAt(DateTime? mergedAt);
+
+  Ticket pull(PullRequest? pull);
+
+  Ticket trackerUpdate(TrackerUpdate? trackerUpdate);
 
   Ticket learnState(TicketLearnStateEnum? learnState);
 
@@ -116,6 +122,7 @@ abstract class _$TicketCWProxy {
     String? replayOf,
     int turns,
     String branch,
+    String? headSha,
     int? prNumber,
     String prUrl,
     List<String>? assignees,
@@ -135,6 +142,8 @@ abstract class _$TicketCWProxy {
     DateTime? since,
     String? stopReason,
     DateTime? mergedAt,
+    PullRequest? pull,
+    TrackerUpdate? trackerUpdate,
     TicketLearnStateEnum? learnState,
     TicketReviewStateEnum? reviewState,
     TicketPreviewStateEnum? previewState,
@@ -196,6 +205,9 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
   Ticket branch(String branch) => this(branch: branch);
 
   @override
+  Ticket headSha(String? headSha) => this(headSha: headSha);
+
+  @override
   Ticket prNumber(int? prNumber) => this(prNumber: prNumber);
 
   @override
@@ -254,6 +266,13 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
 
   @override
   Ticket mergedAt(DateTime? mergedAt) => this(mergedAt: mergedAt);
+
+  @override
+  Ticket pull(PullRequest? pull) => this(pull: pull);
+
+  @override
+  Ticket trackerUpdate(TrackerUpdate? trackerUpdate) =>
+      this(trackerUpdate: trackerUpdate);
 
   @override
   Ticket learnState(TicketLearnStateEnum? learnState) =>
@@ -321,6 +340,7 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
     Object? replayOf = const $CopyWithPlaceholder(),
     Object? turns = const $CopyWithPlaceholder(),
     Object? branch = const $CopyWithPlaceholder(),
+    Object? headSha = const $CopyWithPlaceholder(),
     Object? prNumber = const $CopyWithPlaceholder(),
     Object? prUrl = const $CopyWithPlaceholder(),
     Object? assignees = const $CopyWithPlaceholder(),
@@ -340,6 +360,8 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
     Object? since = const $CopyWithPlaceholder(),
     Object? stopReason = const $CopyWithPlaceholder(),
     Object? mergedAt = const $CopyWithPlaceholder(),
+    Object? pull = const $CopyWithPlaceholder(),
+    Object? trackerUpdate = const $CopyWithPlaceholder(),
     Object? learnState = const $CopyWithPlaceholder(),
     Object? reviewState = const $CopyWithPlaceholder(),
     Object? previewState = const $CopyWithPlaceholder(),
@@ -404,6 +426,10 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
           ? _value.branch
           // ignore: cast_nullable_to_non_nullable
           : branch as String,
+      headSha: headSha == const $CopyWithPlaceholder()
+          ? _value.headSha
+          // ignore: cast_nullable_to_non_nullable
+          : headSha as String?,
       prNumber: prNumber == const $CopyWithPlaceholder()
           ? _value.prNumber
           // ignore: cast_nullable_to_non_nullable
@@ -480,6 +506,14 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
           ? _value.mergedAt
           // ignore: cast_nullable_to_non_nullable
           : mergedAt as DateTime?,
+      pull: pull == const $CopyWithPlaceholder()
+          ? _value.pull
+          // ignore: cast_nullable_to_non_nullable
+          : pull as PullRequest?,
+      trackerUpdate: trackerUpdate == const $CopyWithPlaceholder()
+          ? _value.trackerUpdate
+          // ignore: cast_nullable_to_non_nullable
+          : trackerUpdate as TrackerUpdate?,
       learnState: learnState == const $CopyWithPlaceholder()
           ? _value.learnState
           // ignore: cast_nullable_to_non_nullable
@@ -594,6 +628,7 @@ Ticket _$TicketFromJson(
     replayOf: $checkedConvert('replayOf', (v) => v as String?),
     turns: $checkedConvert('turns', (v) => (v as num).toInt()),
     branch: $checkedConvert('branch', (v) => v as String),
+    headSha: $checkedConvert('headSha', (v) => v as String?),
     prNumber: $checkedConvert('prNumber', (v) => (v as num?)?.toInt()),
     prUrl: $checkedConvert('prUrl', (v) => v as String),
     assignees: $checkedConvert(
@@ -639,6 +674,15 @@ Ticket _$TicketFromJson(
     mergedAt: $checkedConvert(
       'mergedAt',
       (v) => v == null ? null : DateTime.parse(v as String),
+    ),
+    pull: $checkedConvert(
+      'pull',
+      (v) => v == null ? null : PullRequest.fromJson(v as Map<String, dynamic>),
+    ),
+    trackerUpdate: $checkedConvert(
+      'trackerUpdate',
+      (v) =>
+          v == null ? null : TrackerUpdate.fromJson(v as Map<String, dynamic>),
     ),
     learnState: $checkedConvert(
       'learnState',
@@ -689,6 +733,7 @@ Map<String, dynamic> _$TicketToJson(Ticket instance) => <String, dynamic>{
   'replayOf': ?instance.replayOf,
   'turns': instance.turns,
   'branch': instance.branch,
+  'headSha': ?instance.headSha,
   'prNumber': ?instance.prNumber,
   'prUrl': instance.prUrl,
   'assignees': ?instance.assignees,
@@ -708,6 +753,8 @@ Map<String, dynamic> _$TicketToJson(Ticket instance) => <String, dynamic>{
   'since': ?instance.since?.toIso8601String(),
   'stopReason': ?instance.stopReason,
   'mergedAt': ?instance.mergedAt?.toIso8601String(),
+  'pull': ?instance.pull?.toJson(),
+  'trackerUpdate': ?instance.trackerUpdate?.toJson(),
   'learnState': ?_$TicketLearnStateEnumEnumMap[instance.learnState],
   'reviewState': ?_$TicketReviewStateEnumEnumMap[instance.reviewState],
   'previewState': ?_$TicketPreviewStateEnumEnumMap[instance.previewState],
@@ -728,6 +775,7 @@ const _$TicketSource_EnumEnumMap = {
   TicketSource_Enum.jira: 'jira',
   TicketSource_Enum.plane: 'plane',
   TicketSource_Enum.local: 'local',
+  TicketSource_Enum.git: 'git',
 };
 
 const _$TicketStateEnumMap = {
@@ -755,6 +803,7 @@ const _$TicketKindEnumMap = {
   TicketKind.plan: 'plan',
   TicketKind.analysis: 'analysis',
   TicketKind.bug: 'bug',
+  TicketKind.review: 'review',
 };
 
 const _$FollowUpsModeEnumMap = {

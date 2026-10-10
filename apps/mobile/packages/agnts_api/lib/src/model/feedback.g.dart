@@ -9,6 +9,8 @@ part of 'feedback.dart';
 abstract class _$FeedbackCWProxy {
   Feedback id(int id);
 
+  Feedback kind(FeedbackKindEnum kind);
+
   Feedback title(String title);
 
   Feedback description(String description);
@@ -33,6 +35,7 @@ abstract class _$FeedbackCWProxy {
   /// ````
   Feedback call({
     int id,
+    FeedbackKindEnum kind,
     String title,
     String description,
     FeedbackStatusEnum status,
@@ -52,6 +55,9 @@ class _$FeedbackCWProxyImpl implements _$FeedbackCWProxy {
 
   @override
   Feedback id(int id) => this(id: id);
+
+  @override
+  Feedback kind(FeedbackKindEnum kind) => this(kind: kind);
 
   @override
   Feedback title(String title) => this(title: title);
@@ -86,6 +92,7 @@ class _$FeedbackCWProxyImpl implements _$FeedbackCWProxy {
   /// ````
   Feedback call({
     Object? id = const $CopyWithPlaceholder(),
+    Object? kind = const $CopyWithPlaceholder(),
     Object? title = const $CopyWithPlaceholder(),
     Object? description = const $CopyWithPlaceholder(),
     Object? status = const $CopyWithPlaceholder(),
@@ -100,6 +107,10 @@ class _$FeedbackCWProxyImpl implements _$FeedbackCWProxy {
           ? _value.id
           // ignore: cast_nullable_to_non_nullable
           : id as int,
+      kind: kind == const $CopyWithPlaceholder()
+          ? _value.kind
+          // ignore: cast_nullable_to_non_nullable
+          : kind as FeedbackKindEnum,
       title: title == const $CopyWithPlaceholder()
           ? _value.title
           // ignore: cast_nullable_to_non_nullable
@@ -152,6 +163,7 @@ Feedback _$FeedbackFromJson(Map<String, dynamic> json) =>
         json,
         requiredKeys: const [
           'id',
+          'kind',
           'title',
           'description',
           'status',
@@ -161,6 +173,10 @@ Feedback _$FeedbackFromJson(Map<String, dynamic> json) =>
       );
       final val = Feedback(
         id: $checkedConvert('id', (v) => (v as num).toInt()),
+        kind: $checkedConvert(
+          'kind',
+          (v) => $enumDecode(_$FeedbackKindEnumEnumMap, v),
+        ),
         title: $checkedConvert('title', (v) => v as String),
         description: $checkedConvert('description', (v) => v as String),
         status: $checkedConvert(
@@ -181,6 +197,7 @@ Feedback _$FeedbackFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$FeedbackToJson(Feedback instance) => <String, dynamic>{
   'id': instance.id,
+  'kind': _$FeedbackKindEnumEnumMap[instance.kind]!,
   'title': instance.title,
   'description': instance.description,
   'status': _$FeedbackStatusEnumEnumMap[instance.status]!,
@@ -189,6 +206,11 @@ Map<String, dynamic> _$FeedbackToJson(Feedback instance) => <String, dynamic>{
   'userId': ?instance.userId,
   'workspace': ?instance.workspace,
   'createdAt': instance.createdAt.toIso8601String(),
+};
+
+const _$FeedbackKindEnumEnumMap = {
+  FeedbackKindEnum.feedback: 'feedback',
+  FeedbackKindEnum.connector: 'connector',
 };
 
 const _$FeedbackStatusEnumEnumMap = {

@@ -19,7 +19,11 @@ type FeedbackStore interface {
 }
 
 func toFeedback(f postgres.Feedback) gen.Feedback {
-	out := gen.Feedback{Id: f.ID, Title: f.Title, Description: f.Description, Status: gen.FeedbackStatus(f.Status),
+	kind := gen.FeedbackKindFeedback
+	if f.Kind == postgres.ConnectorKind {
+		kind = gen.FeedbackKindConnector
+	}
+	out := gen.Feedback{Id: f.ID, Kind: kind, Title: f.Title, Description: f.Description, Status: gen.FeedbackStatus(f.Status),
 		Sender: f.Sender, CreatedAt: f.CreatedAt, UserId: f.UserID}
 	if f.Email != "" {
 		e := f.Email

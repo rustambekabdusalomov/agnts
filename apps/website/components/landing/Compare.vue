@@ -1,7 +1,7 @@
 <template>
   <section class="p-compare1" id="compare">
     <div class="p-row">
-      <p class="p-mono p-rev p-compare2"><span class="p-compare3">06</span>  <span>{{ t('compare.label') }}</span></p>
+      <p class="p-mono p-rev p-compare2"><span class="p-compare3">07</span>  <span>{{ t('compare.label') }}</span></p>
       <div>
         <h2 class="p-h2 p-rev p-compare4"><span>{{ t('compare.title') }}</span></h2>
         <div class="p-rev p-compare5">

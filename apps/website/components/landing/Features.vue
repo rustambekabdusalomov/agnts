@@ -1,7 +1,7 @@
 <template>
   <section class="p-features1" id="features">
     <div class="p-row">
-      <p class="p-mono p-rev p-features2"><span class="p-features3">04</span>  <span>{{ t('features.label') }}</span></p>
+      <p class="p-mono p-rev p-features2"><span class="p-features3">05</span>  <span>{{ t('features.label') }}</span></p>
       <div>
         <h2 class="p-h2 p-rev p-features4"><span>{{ t('features.title') }}</span></h2>
         <div class="p-three">

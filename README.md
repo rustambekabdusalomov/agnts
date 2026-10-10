@@ -75,6 +75,23 @@ agnts server -- mcp token                 # static MCP token for Claude Code / C
   generates the secret: paste it back on the same page. Link a repository to
   a Plane project by its identifier (WEB in WEB-123) and label work items
   `agnts`. Statuses left empty move to the first state of the matching group.
+- **Whose issues:** agnts takes a labelled Jira issue only when it is assigned
+  to the account agnts connects with (Integrations → Jira → Only issues
+  assigned to me; on by default). Turn it off to take every labelled issue.
+- **Edited issues:** each sync (and each webhook) refreshes the tickets agnts
+  has. One it has not started takes the new title and description; a priority
+  change is taken at any time. One it started keeps working on the version it
+  started with, and the ticket shows the new version with Restart with the new
+  version (drops the analysis, answers, commits and reviews so far, and starts
+  over) or Keep the current version (not asked again for that version). You
+  are notified on the phone and in Telegram, with the same two buttons. A
+  ticket already pushed cannot restart.
+- **Which repository:** a Jira issue or Plane work item goes to the repository
+  linked to its project. A `repo:<name>` label (the repository's name in
+  agnts, any case, e.g. `repo:web`) overrides that, so one project can feed
+  several repositories. Adding or changing the label moves a ticket that has
+  not started; once work starts it keeps its repository. A name agnts does not
+  know falls back to the project's repository and logs a warning on the ticket.
 - **GitHub / GitLab webhooks:** the integration page shows a URL and secret.
   Merged pull requests then mark the ticket merged and move the Jira issue.
 - **Telegram:** create a bot with @BotFather, send `/start` to it to learn
@@ -110,6 +127,26 @@ cancels a review still running, and each new revision is reviewed again.
 With the review model on Auto (Settings), Opus reviews tickets the analysis
 rated complex or large changes, and Sonnet the rest. Turn it off in
 Settings, or run it again from the ticket.
+
+**Pull request reviews.** agnts also reviews the pull requests other people
+open and assign to you (or ask your review on), on GitHub and GitLab, in the
+repositories you added. Reviews → Sync now, or turn on Review pull requests
+waiting for you to sync every five minutes. Each pull request becomes a
+ticket of kind review (`API-PR42`): agnts fetches its head (forks too, from
+`refs/pull/N/head` or `refs/merge-requests/N/head`) into its own clone, and a
+read-only review run writes findings with the diff on the ticket page. Then
+you decide: **Merge** merges it on the git host at the commit agnts reviewed
+(a newer head sends it back for another review instead), **Review again**
+takes your note, and **Dismiss** leaves the pull request to you on the git
+host. **Post review on GitHub/GitLab** puts agnts's findings on the pull
+request as one comment from your account, once per reviewed commit, and only
+when you click it. agnts never pushes to a pull request. What you write when you ask for
+another review or dismiss one is kept per git host user and folded into a
+reviewer profile on the next review, which every later review reads: what you
+care about, what you call noise, how severe you rate things. Read and edit it
+(or add notes) on the Reviews page. New commits on a reviewed pull request
+are reviewed again, and one merged or closed on the git host ends its
+review. Merging needs the GitHub token's Contents: Read and write permission.
 
 **Preview.** For front-end work a diff is not enough, so agnts can show the
 change running. Give a repository a preview command and port (Repositories →

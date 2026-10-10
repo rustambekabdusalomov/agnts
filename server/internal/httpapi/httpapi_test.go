@@ -81,6 +81,7 @@ func newHarness(t *testing.T, db Pinger) *harness {
 		t.Fatal(err)
 	}
 	pub, _ := url.Parse("https://agnts.example.com")
+	site, _ := url.Parse("https://agnts.example.org")
 	h.tickets = &fakeTickets{}
 	h.workspaces = newFakeWorkspaces()
 	h.h, err = NewHandler(Options{
@@ -89,6 +90,7 @@ func newHarness(t *testing.T, db Pinger) *harness {
 		Workspaces: h.workspaces,
 		Users:      fakeUsers{users},
 		Feedback:   &fakeFeedback{},
+		SiteURL:    site,
 		Webhooks: map[string]http.Handler{"test": http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			h.hookWS, h.hookID = domain.WorkspaceOf(r.Context()), domain.HookOf(r.Context())
 			w.WriteHeader(http.StatusOK)

@@ -20,6 +20,7 @@ Method | HTTP request | Description
 [**getPreviewShot**](TicketsApi.md#getpreviewshot) | **GET** /tickets/{key}/preview/{runId}/shots/{shotId} | One preview screenshot, as PNG
 [**getTicket**](TicketsApi.md#getticket) | **GET** /tickets/{key} | A ticket with its questions, analysis and latest result
 [**implementTicket**](TicketsApi.md#implementticket) | **POST** /tickets/{key}/implement | Make the code task that carries out a done plan or bug investigation
+[**keepCurrentVersion**](TicketsApi.md#keepcurrentversion) | **POST** /tickets/{key}/keep-version | Keep working from the version agnts started with; this newer version of the issue is not asked about again
 [**listFollowUps**](TicketsApi.md#listfollowups) | **GET** /tickets/{key}/follow-ups | Suggested follow-up tickets and the tickets made from them
 [**listRelations**](TicketsApi.md#listrelations) | **GET** /tickets/{key}/relations | The ticket&#39;s ordering constraints and what holds it back now
 [**listTicketEvents**](TicketsApi.md#listticketevents) | **GET** /tickets/{key}/events | The ticket&#39;s log, oldest first; poll with &#x60;after&#x60; for live updates
@@ -29,6 +30,7 @@ Method | HTTP request | Description
 [**rejectTicket**](TicketsApi.md#rejectticket) | **POST** /tickets/{key}/reject | Stop work on the ticket for good
 [**replayTicket**](TicketsApi.md#replayticket) | **POST** /tickets/{key}/replay | Re-run a done code or test ticket with today&#39;s agnts, from the commit it started from, to compare the two (Analytics → Replay evaluation). The replay is a new local task that is never pushed.
 [**requestChanges**](TicketsApi.md#requestchanges) | **POST** /tickets/{key}/request-changes | Send the ticket back to coding with feedback
+[**restartWithUpdate**](TicketsApi.md#restartwithupdate) | **POST** /tickets/{key}/restart-update | Start the ticket over from the newer version of its issue; the work so far is dropped
 [**retryTicket**](TicketsApi.md#retryticket) | **POST** /tickets/{key}/retry | Resume a failed or rate-limited ticket where it stopped
 [**reviewTicket**](TicketsApi.md#reviewticket) | **POST** /tickets/{key}/review | Queue a code review of a ticket waiting for review (again, if one already ran)
 [**setFollowUps**](TicketsApi.md#setfollowups) | **PUT** /tickets/{key}/follow-ups | Turn follow-up suggestions on or off for this ticket
@@ -568,6 +570,51 @@ Name | Type | Description  | Notes
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **keepCurrentVersion**
+> Ticket keepCurrentVersion(key)
+
+Keep working from the version agnts started with; this newer version of the issue is not asked about again
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getTicketsApi();
+final String key = key_example; // String | 
+
+try {
+    final response = api.keepCurrentVersion(key);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling TicketsApi->keepCurrentVersion: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **key** | **String**|  | 
+
+### Return type
+
+[**Ticket**](Ticket.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **listFollowUps**
 > FollowUps listFollowUps(key)
 
@@ -981,6 +1028,51 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **restartWithUpdate**
+> Ticket restartWithUpdate(key)
+
+Start the ticket over from the newer version of its issue; the work so far is dropped
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getTicketsApi();
+final String key = key_example; // String | 
+
+try {
+    final response = api.restartWithUpdate(key);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling TicketsApi->restartWithUpdate: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **key** | **String**|  | 
+
+### Return type
+
+[**Ticket**](Ticket.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

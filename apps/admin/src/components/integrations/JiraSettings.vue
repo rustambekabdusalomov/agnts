@@ -8,6 +8,8 @@ import { useUi } from '../../stores/ui'
 import CfgRow from '../form/CfgRow.vue'
 import SaveBar from '../form/SaveBar.vue'
 import SwitchToggle from '../form/SwitchToggle.vue'
+import TrackerLabels from './TrackerLabels.vue'
+import { trackerLabels } from './trackerLabels'
 
 // Editable Jira settings: pickup label, status mapping and comment kinds.
 const props = defineProps<{ integration: Integration }>()
@@ -42,11 +44,19 @@ const comments = [
 ] as const
 
 const commentOn = (k: string) => draft.value[k] !== 'false'
-function setComment(k: string, on: boolean) {
+function setFlag(k: string, on: boolean) {
   draft.value = { ...draft.value, [k]: on ? 'true' : 'false' }
 }
 const label = computed(() => draft.value.label || 'agnts')
-const jql = computed(() => `labels = "${label.value}" AND statusCategory != Done ORDER BY created ASC`)
+// On unless set to "false": agnts takes only the issues assigned to you.
+const assignedOnly = computed(() => draft.value.assigned_only !== 'false')
+const jql = computed(
+  () =>
+    `labels in (${trackerLabels(label.value).map((l) => `"${l}"`).join(', ')}) AND statusCategory != Done` +
+    (assignedOnly.value ? ' AND assignee = currentUser()' : '') +
+    ' ORDER BY created ASC',
+)
+const notes = computed(() => [t('integrations.labelsRepo'), t('integrations.labelsMany'), t('integrations.labelsLater')])
 
 const save = useMutation({
   mutationFn: () => unwrap(api.PUT('/integrations/{provider}', { params: { path: { provider: 'jira' } }, body: { settings: draft.value } })),
@@ -72,6 +82,9 @@ function discard() {
     <CfgRow :label="t('integrations.label')" :help="t('integrations.labelHelp')">
       <input v-model="draft.label" class="cfg-in mono" placeholder="agnts" :aria-label="t('integrations.label')">
     </CfgRow>
+    <CfgRow :label="t('integrations.assignedOnly')" :help="t('integrations.assignedOnlyHelp', { email: integration.settings.email || 'Jira' })">
+      <SwitchToggle :model-value="assignedOnly" :label="t('integrations.assignedOnly')" @update:model-value="setFlag('assigned_only', $event)" />
+    </CfgRow>
     <div class="sec">
       <h3>{{ t('integrations.query') }}</h3>
       <pre class="jql">{{ jql }}</pre>
@@ -80,6 +93,7 @@ function discard() {
       <input v-model="draft.issue_type" class="cfg-in" placeholder="Task" :aria-label="t('followUps.jiraIssueType')">
     </CfgRow>
   </section>
+  <TrackerLabels :label="label" :sub="t('integrations.labelsSub')" :notes="notes" />
   <section class="card">
     <div class="ch"><div><h2>{{ t('integrations.statuses') }}</h2><p class="sub">{{ t('integrations.statusesSub') }}</p></div></div>
     <CfgRow v-for="s in statuses" :key="s.key" :label="t(`integrations.${s.label}`)">
@@ -89,7 +103,7 @@ function discard() {
   <section class="card">
     <div class="ch"><div><h2>{{ t('integrations.comments') }}</h2><p class="sub">{{ t('integrations.commentsSub') }}</p></div></div>
     <CfgRow v-for="c in comments" :key="c.key" :label="t(`integrations.${c.label}`)" :help="'help' in c ? t(`integrations.${c.help}`) : undefined">
-      <SwitchToggle :model-value="commentOn(c.key)" :label="t(`integrations.${c.label}`)" @update:model-value="setComment(c.key, $event)" />
+      <SwitchToggle :model-value="commentOn(c.key)" :label="t(`integrations.${c.label}`)" @update:model-value="setFlag(c.key, $event)" />
     </CfgRow>
   </section>
   <SaveBar v-if="dirty || error" :busy="save.isPending.value" :error="error" @save="save.mutate()" @discard="discard" />

@@ -822,7 +822,7 @@ func (t *tools) acceptFollowUps(ctx context.Context, _ *mcp.CallToolRequest, in 
 		if c.Target != orchestrator.TargetLocal && c.Target != orchestrator.TargetJira && c.Target != orchestrator.TargetPlane {
 			return nil, Pending{}, errors.New("target must be local, jira or plane")
 		}
-		if c.Kind != "" && !domain.TicketKind(c.Kind).Valid() {
+		if c.Kind != "" && !domain.TicketKind(c.Kind).Selectable() {
 			return nil, Pending{}, fmt.Errorf("kind must be code, test, plan, analysis or bug")
 		}
 		title, kind := x.Title, string(x.Kind)
@@ -891,7 +891,7 @@ func (t *tools) setKind(ctx context.Context, _ *mcp.CallToolRequest, in KindInpu
 	if err != nil {
 		return nil, Pending{}, err
 	}
-	if in.Kind != "auto" && !domain.TicketKind(in.Kind).Valid() {
+	if in.Kind != "auto" && !domain.TicketKind(in.Kind).Selectable() {
 		return nil, Pending{}, fmt.Errorf("kind must be auto, code, test, plan, analysis or bug")
 	}
 	what := "make " + tk.Key + " a " + in.Kind + " ticket"

@@ -39,7 +39,10 @@ type ReflectFile struct {
 // reflect run, when Settings allow it. Failures only log: the person's
 // action has happened already.
 func (o *Orchestrator) queueReflection(ctx context.Context, t domain.Ticket, source, feedback string, origin domain.Origin) {
-	if o.reflections == nil || o.rules == nil || origin == domain.OriginSystem || strings.TrimSpace(feedback) == "" || t.ReplayOf != "" {
+	// A review's feedback is about how to review, not about agnts's code:
+	// it goes to the reviewer's profile instead (noteReviewer).
+	if o.reflections == nil || o.rules == nil || origin == domain.OriginSystem || strings.TrimSpace(feedback) == "" || t.ReplayOf != "" ||
+		t.Kind == domain.KindReview {
 		return
 	}
 	s, err := o.settings.Get(ctx)

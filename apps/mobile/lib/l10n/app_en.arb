@@ -396,7 +396,7 @@
   "authSetupLede": "Admins sign in with two factors. Scan this code with an authenticator app (Google Authenticator, 1Password, Authy), then enter the 6-digit code it shows.",
   "authSignOutBodyGoogle": "You can sign back in any time with Continue with Google.",
   "billingTitle": "Billing",
-  "billingSelfHosted": "This server is self-hosted: there is nothing to pay. The Admin sets slots and member limits.",
+  "billingSelfHosted": "This server is self-hosted: there is nothing to pay. Set parallel runs below; the Admin sets member limits.",
   "billingPlan": "Plan",
   "billingPlanSub": "The base plan includes 1 parallel run and {members} members.",
   "@billingPlanSub": {
@@ -435,6 +435,14 @@
   "@billingSlotsHelp": {
     "placeholders": {
       "price": {
+        "type": "String"
+      }
+    }
+  },
+  "billingSlotsHelpSelfHosted": "How many runs this workspace has at once, free on this server. Up to {max}; the server's AGNTS_MAX_SLOTS sets the limit.",
+  "@billingSlotsHelpSelfHosted": {
+    "placeholders": {
+      "max": {
         "type": "String"
       }
     }
@@ -753,7 +761,7 @@
   "feedbackSend": "Send",
   "feedbackSent": "Thanks! Your feedback was sent.",
   "feedbackAdminTitle": "Feedback",
-  "feedbackAdminLede": "What people sent from their accounts, newest first. Mark each one done once it’s handled.",
+  "feedbackAdminLede": "What people sent from their accounts, and connector requests from the website, newest first. Mark each one done once it’s handled.",
   "feedbackF_new": "New",
   "feedbackF_done": "Done",
   "feedbackF_all": "All",
@@ -775,6 +783,12 @@
   "feedbackReopen": "Reopen",
   "feedbackMarkedDone": "Marked done",
   "feedbackReopened": "Marked new again",
+  "feedbackKind": "Kind",
+  "feedbackK_any": "Everything",
+  "feedbackK_feedback": "Feedback",
+  "feedbackK_connector": "Connector requests",
+  "feedbackConnectorBadge": "Connector request",
+  "feedbackFromSite": "from the website",
   "filesTitle": "Attachments",
   "filesAttach": "Attach files",
   "filesAddPhoto": "Photo",
@@ -955,6 +969,15 @@
   "implementQueue": "Keep the task in the queue instead of starting it",
   "implementDoneBy": "Implemented by",
   "implementImplements": "Implements",
+  "integrationsAssignedOnly": "Only issues assigned to me",
+  "integrationsAssignedOnlyHelp": "agnts takes a labelled issue only when it is assigned to the account it connects to Jira with ({email}). Turn off to take every labelled issue.",
+  "@integrationsAssignedOnlyHelp": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "integrationsTitle": "Integrations",
   "integrationsLede": "The services agnts works with. Tokens are stored encrypted on your server and only used for the actions listed on each page.",
   "integrationsName_jira": "Jira",
@@ -1089,6 +1112,15 @@
   "integrationsLabel": "Label",
   "integrationsLabelHelp": "Add this label to a ticket to hand it to agnts",
   "integrationsQuery": "The query agnts runs",
+  "integrationsLabelsTitle": "How to label tickets",
+  "integrationsLabelsSub": "Add one of these labels to a Jira issue that isn't done. Case doesn't matter.",
+  "integrationsLabelsRepo": "An issue goes to the repository linked to its project (Repositories → Jira project). To send it to another one, add a label repo: followed by the repository's name in agnts, such as repo:web. Without a repository, only plans, analyses and bug investigations can run.",
+  "integrationsLabelsMany": "With several kind labels, the first in this list wins.",
+  "integrationsLabelsLater": "Adding a kind label before work starts changes the ticket's kind. Removing every agnts label stops updates from Jira.",
+  "integrationsPlaneLabelsSub": "Add one of these labels to an open work item. Case doesn't matter.",
+  "integrationsPlaneLabelsCreate": "Plane labels belong to a project: create the ones you use in each linked project first.",
+  "integrationsPlaneLabelsRepo": "Link the project to a repository by its identifier (WEB in WEB-123) under Repositories → Plane project. Sync reads only linked projects, and code and test work needs a repository. To send one work item to another repository, add a label repo: followed by the repository's name in agnts, such as repo:web.",
+  "integrationsPlaneLabelsLater": "Adding a kind label before work starts changes the ticket's kind. Removing every agnts label stops updates from Plane.",
   "integrationsStatuses": "Status updates",
   "integrationsStatusesSub": "How agnts moves tickets on your board. Leave empty to keep the status.",
   "integrationsMapStarted": "When agnts starts",
@@ -1105,13 +1137,19 @@
   "integrationsCStatus": "Pauses at the plan limit",
   "integrationsSync": "Sync",
   "integrationsSyncNow": "Sync now",
-  "integrationsSynced": "{found} open issues, {created} new",
+  "integrationsSynced": "{found} open issues for you, {created} new, {updated} updated, {waiting} changed after agnts started",
   "@integrationsSynced": {
     "placeholders": {
       "found": {
         "type": "String"
       },
       "created": {
+        "type": "String"
+      },
+      "updated": {
+        "type": "String"
+      },
+      "waiting": {
         "type": "String"
       }
     }
@@ -1255,6 +1293,8 @@
       }
     }
   },
+  "kindReview": "PR review",
+  "kindReviewHint": "Review a pull request someone else opened. Comes from GitHub or GitLab.",
   "learnTitle": "Learn",
   "learnLede": "When a change agnts ships does something this codebase never did before, agnts explains it here: what it is, why the change needed it, where to look, and a short quiz.",
   "learnViewNew": "New ({n})",
@@ -1883,13 +1923,19 @@
   "navSettings": "Settings",
   "navSearch": "Search tickets and tasks",
   "navSyncJira": "Sync Jira",
-  "navSynced": "Jira synced: {found} open, {created} new",
+  "navSynced": "Jira synced: {found} open, {created} new, {updated} updated, {waiting} waiting for your choice",
   "@navSynced": {
     "placeholders": {
       "found": {
         "type": "String"
       },
       "created": {
+        "type": "String"
+      },
+      "updated": {
+        "type": "String"
+      },
+      "waiting": {
         "type": "String"
       }
     }
@@ -1943,6 +1989,7 @@
   "navPlatform": "Admin cabinet",
   "navPeople": "People",
   "navAccount": "Account",
+  "navReviews": "PR reviews",
   "platformTitle": "Admin cabinet",
   "platformLede": "Every workspace, run and user on this server. Workspaces show metadata only: their tickets are their members'.",
   "platformCapacity": "Server",
@@ -2961,6 +3008,226 @@
   },
   "reviewCat_architecture": "Architecture",
   "reviewCat_scope": "Scope",
+  "reviewsTitle": "Pull request reviews",
+  "reviewsLede": "agnts reviews the pull requests assigned to you on GitHub and GitLab. Merge from here when the review looks good, or dismiss it and review on the git host yourself.",
+  "reviewsSync": "Sync now",
+  "reviewsSyncing": "Syncing…",
+  "reviewsSynced": "{open} waiting for you in {repos} repositories · {created} new · {rereview} reviewed again · {closed} ended",
+  "@reviewsSynced": {
+    "placeholders": {
+      "open": {
+        "type": "String"
+      },
+      "repos": {
+        "type": "String"
+      },
+      "created": {
+        "type": "String"
+      },
+      "rereview": {
+        "type": "String"
+      },
+      "closed": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewsSyncErrors": "Some could not be read:",
+  "reviewsSettingsTitle": "How agnts picks them up",
+  "reviewsEnabled": "Review automatically",
+  "reviewsEnabledHelp": "Check the git host every 5 minutes and review new pull requests. When off, only Sync now does it.",
+  "reviewsReviewRequested": "Review requests too",
+  "reviewsReviewRequestedHelp": "Also take pull requests whose review is requested from you, not only those assigned to you.",
+  "reviewsSkipDrafts": "Skip drafts",
+  "reviewsSkipDraftsHelp": "Leave draft pull requests alone until they are ready.",
+  "reviewsRereview": "Review new commits",
+  "reviewsRereviewHelp": "Review again when the author pushes while the review waits for you.",
+  "reviewsMergeMethod": "Merge method",
+  "reviewsMergeMethodHelp": "How agnts merges a pull request you accept.",
+  "reviewsMerge_merge": "Merge commit",
+  "reviewsMerge_squash": "Squash",
+  "reviewsMerge_rebase": "Rebase",
+  "reviewsWaiting": "Waiting for you",
+  "reviewsInProgress": "In progress",
+  "reviewsFinished": "Finished",
+  "reviewsEmpty": "Nothing here.",
+  "reviewsEmptyAll": "No pull requests to review yet. Assign one to yourself on GitHub or GitLab, then press Sync now.",
+  "reviewsWhy_assigned": "assigned",
+  "reviewsWhy_review_requested": "review requested",
+  "reviewsBy": "by @{author}",
+  "@reviewsBy": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewsHowTitle": "How you review",
+  "reviewsHowSub": "Notes you leave when you ask for another review or dismiss one are folded into your profile on the next review. Every later review reads it.",
+  "reviewsNoReviewers": "agnts knows nothing about how you review yet. Leave a note when you ask for another review, or add one below.",
+  "reviewsProfile": "Profile",
+  "reviewsProfileHint": "Markdown: what you care about, what is noise, how severe you rate things.",
+  "reviewsFolded": "{n, plural, one {{n} note learned} other {{n} notes learned}}",
+  "@reviewsFolded": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "reviewsPending": "Not learned yet",
+  "reviewsSaveProfile": "Save profile",
+  "reviewsProfileSaved": "Profile saved",
+  "reviewsAddNote": "Add a note",
+  "reviewsNotePlaceholder": "For example: naming nits are noise to me; always check that migrations can be rolled back.",
+  "reviewsNoteAdded": "Note added",
+  "reviewsDeleteNote": "Delete note",
+  "reviewsNoteKind_rereview": "re-review",
+  "reviewsNoteKind_dismissed": "dismissed",
+  "reviewsNoteKind_manual": "written here",
+  "reviewsLogin": "Git host username",
+  "reviewsPr": "Pull request #{number}",
+  "@reviewsPr": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewsReviewed": "Head at {sha}",
+  "@reviewsReviewed": {
+    "placeholders": {
+      "sha": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewsNewCommits": "New commits since agnts reviewed {sha}: it reviews them again",
+  "@reviewsNewCommits": {
+    "placeholders": {
+      "sha": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewsPostBtn": "Post review on {host}",
+  "@reviewsPostBtn": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewsPostConfirm": "Post agnts's review of #{number} on {host} as a comment? It is posted as your {host} account and everyone on the pull request sees it.",
+  "@reviewsPostConfirm": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewsPostedToast": "Review posted on {host}",
+  "@reviewsPostedToast": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewsPosted": "agnts's review of this commit is on {host} · {when}",
+  "@reviewsPosted": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewsQueuedSub": "agnts will fetch it and review it.",
+  "reviewsFetchingTitle": "Fetching the pull request",
+  "reviewsReviewingTitle": "Reviewing the pull request",
+  "reviewsReviewingSub": "agnts is reading the change. Its review appears here.",
+  "reviewsReadyTitle": "agnts's review is ready",
+  "reviewsReadySub": "Merge it from here, review again with a note, or dismiss it and review on {host} yourself.",
+  "@reviewsReadySub": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewsNoteLabel": "Review again with a note",
+  "reviewsNoteHint": "Tell agnts what it got wrong or missed. The note also teaches it how you review.",
+  "reviewsMergeBtn": "Merge pull request",
+  "reviewsMergeConfirm": "agnts merges #{number} on {host} ({method}), at the commit it reviewed.",
+  "@reviewsMergeConfirm": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "host": {
+        "type": "String"
+      },
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewsRereviewBtn": "Review again",
+  "reviewsDismissBtn": "Dismiss, I'll review it on {host}",
+  "@reviewsDismissBtn": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewsDismissReason": "Why (optional)",
+  "reviewsDismissReasonHint": "Optional. It also teaches agnts how you review.",
+  "reviewsDismissConfirm": "agnts stops reviewing #{number}. The pull request stays open on {host}.",
+  "@reviewsDismissConfirm": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewsMergingTitle": "Merging the pull request",
+  "reviewsMergedTitle": "Merged",
+  "reviewsMergedSub": "#{number} is merged.",
+  "@reviewsMergedSub": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewsDismissedTitle": "Review dismissed",
+  "reviewsDismissedSub": "The pull request is yours on {host}.",
+  "@reviewsDismissedSub": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewsOpenOn": "Open on {host}",
+  "@reviewsOpenOn": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewsReviewTitle": "agnts's review of the pull request",
   "rulesTitle": "Rules",
   "rulesLede": "Instructions agnts follows on every ticket: global rules for all repositories and rules for one repository. Claude reviews each rule and asks about anything unclear before it applies.",
   "rulesAdd": "Add rule",
@@ -3342,6 +3609,12 @@
   "stateReportCoding": "Writing",
   "stateReportPushing": "Delivering",
   "stateReportDone": "Done",
+  "stateReviewAnalyzing": "Fetching",
+  "stateReviewCoding": "Reviewing",
+  "stateReviewWaiting_for_review": "Review ready",
+  "stateReviewPushing": "Merging",
+  "stateReviewDone": "Merged",
+  "stateReviewRejected": "Dismissed",
   "tasksTitle": "Tasks",
   "tasksLede": "Work for your side projects. Tasks stay in agnts and never touch Jira. Everything else works the same: questions, coding, your review.",
   "tasksNew": "New task",
@@ -3418,6 +3691,46 @@
   },
   "tasksNoRepo": "No repository",
   "tasksRepoNeeded": "Code and tests need a repository: pick one, or choose another kind.",
+  "ticketUpdateTitle": "Changed in {source} after agnts started",
+  "@ticketUpdateTitle": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketUpdateSub": "agnts keeps working on the version it started with. Restart to drop the work so far and start over from the new version, or keep going with the current one.",
+  "ticketUpdateNow": "New version, {when}",
+  "@ticketUpdateNow": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketUpdateRestart": "Restart with the new version",
+  "ticketUpdateKeep": "Keep the current version",
+  "ticketUpdateRestartConfirm": "Restart {key} with the new version from {source}? The analysis, answers, commits and reviews so far are dropped, and agnts starts over.",
+  "@ticketUpdateRestartConfirm": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketUpdatePushed": "Pushed already: it cannot restart. Reject it and let agnts take the issue again, or keep the current version.",
+  "ticketUpdateRestarted": "{key} restarts with the new version",
+  "@ticketUpdateRestarted": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketUpdateKept": "agnts keeps working on the current version",
   "ticketBack": "All tickets",
   "ticketPlan": "Plan",
   "ticketAnalysis": "What agnts found",
@@ -3917,6 +4230,7 @@
   },
   "ticketPickAny": "Pick all that apply",
   "ticketOtherAnswer": "Something else (optional)",
+  "ticketSrcGit": "Pull request",
   "ticketsTitle": "Tickets",
   "ticketsNeedsYou": "Needs you",
   "ticketsRunning": "Running",
@@ -3978,6 +4292,7 @@
   "ticketsStatPushedNote": "Pull requests opened",
   "ticketsStatSession": "Plan session",
   "ticketsSourcePlane": "Plane",
+  "ticketsSourceGit": "PR",
   "usageTitle": "Plan usage",
   "usageLede": "agnts runs on your Claude subscription. These limits are shared with your own Claude and Claude Code use.",
   "usageCard": "Plan usage",

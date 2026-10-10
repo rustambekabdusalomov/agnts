@@ -64,10 +64,10 @@ const reasonBadge: Record<string, string> = { purchase: 'b-ok', grant: 'b-info',
         <template v-if="b.monthlyUsd"><dt>{{ t('billing.plan') }}</dt><dd>{{ t('billing.monthly', { amount: usd(b.monthlyUsd) }) }}</dd></template>
         <template v-if="b.trialEndsAt"><dt /><dd>{{ t('billing.trialUntil', { date: fmt(b.trialEndsAt) }) }}</dd></template>
       </dl>
-      <CfgRow :label="t('billing.slots')" :help="t('billing.slotsHelp', { price: usd(b.prices.slotUsd) })">
+      <CfgRow :label="t('billing.slots')" :help="b.selfHosted ? t('billing.slotsHelpSelfHosted', { max: b.maxSlots }) : t('billing.slotsHelp', { price: usd(b.prices.slotUsd) })">
         <span class="row-actions">
           <NumberStepper v-model="slots" :min="1" :max="b.maxSlots" :step="1" :label="t('billing.slots')" />
-          <button class="btn btn-s" :disabled="slots === b.slots || setSlots.isPending.value || b.selfHosted" @click="setSlots.mutate()">{{ t('billing.slotsSave') }}</button>
+          <button class="btn btn-s" :disabled="slots === b.slots || setSlots.isPending.value" @click="setSlots.mutate()">{{ t('billing.slotsSave') }}</button>
         </span>
       </CfgRow>
       <CfgRow :label="t('billing.members')" :help="t('billing.membersHelp', { included: b.prices.includedMembers, price: usd(b.prices.memberUsd) })">

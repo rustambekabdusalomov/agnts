@@ -47,7 +47,7 @@ void main() {
       // TODO
     });
 
-    // Pick up labelled Jira issues now
+    // Pick up labelled Jira issues now (only those assigned to you, unless that is off) and refresh the tickets agnts has for them
     //
     //Future<SyncJira200Response> syncJira() async
     test('test syncJira', () async {
@@ -56,7 +56,7 @@ void main() {
 
     // Pick up labelled Plane work items now
     //
-    //Future<SyncJira200Response> syncPlane() async
+    //Future<SyncPlane200Response> syncPlane() async
     test('test syncPlane', () async {
       // TODO
     });

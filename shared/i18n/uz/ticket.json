@@ -1,5 +1,14 @@
 {
   "ticket": {
+    "updateTitle": "agnts boshlagandan keyin {source}da oʻzgardi",
+    "updateSub": "agnts boshlagan versiyasi ustida ishlashda davom etadi. Qilingan ishni tashlab, yangi versiyadan qayta boshlash uchun qayta ishga tushiring yoki joriy versiya bilan davom eting.",
+    "updateNow": "Yangi versiya, {when}",
+    "updateRestart": "Yangi versiya bilan qayta boshlash",
+    "updateKeep": "Joriy versiyani qoldirish",
+    "updateRestartConfirm": "{key} {source}dagi yangi versiya bilan qayta boshlansinmi? Hozirgacha qilingan tahlil, javoblar, commitlar va koʻrib chiqishlar tashlanadi va agnts qaytadan boshlaydi.",
+    "updatePushed": "Allaqachon yuborilgan: qayta boshlab boʻlmaydi. agnts vazifani qayta olishi uchun tiketni rad eting yoki joriy versiyani qoldiring.",
+    "updateRestarted": "{key} yangi versiya bilan qayta boshlanmoqda",
+    "updateKept": "agnts joriy versiya ustida ishlashda davom etadi",
     "back": "Barcha tiketlar",
     "plan": "Reja",
     "analysis": "agnts nimani topdi",
@@ -189,6 +198,7 @@
     "approveReportPostConfirmPlane": "Hisobot tasdiqlansin, tiket yopilsin va hisobot Plane'dagi {key} ga joylansinmi?",
     "doneReportPostedPlane": "Hisobot shu yerda saqlandi va Plane'dagi {key} ga joylandi.",
     "pickAny": "Mos keladiganlarning barchasini tanlang",
-    "otherAnswer": "Boshqa narsa (ixtiyoriy)"
+    "otherAnswer": "Boshqa narsa (ixtiyoriy)",
+    "srcGit": "Pull request"
   }
 }

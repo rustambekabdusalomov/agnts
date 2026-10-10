@@ -833,7 +833,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get billingTitle => 'Оплата';
 
   @override
-  String get billingSelfHosted => 'Этот сервер развёрнут самостоятельно: платить не нужно. Слоты и лимит участников задаёт администратор.';
+  String get billingSelfHosted =>
+      'Этот сервер развёрнут самостоятельно: платить не нужно. Число одновременных запусков задаётся ниже, лимит участников — администратором.';
 
   @override
   String get billingPlan => 'Тариф';
@@ -864,6 +865,11 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String billingSlotsHelp(String price) {
     return 'Каждый дополнительный одновременный запуск стоит $price в месяц. При добавлении остаток месяца списывается из кредитов.';
+  }
+
+  @override
+  String billingSlotsHelpSelfHosted(String max) {
+    return 'Сколько запусков у рабочего пространства одновременно; на этом сервере бесплатно. До $max; предел задаёт AGNTS_MAX_SLOTS на сервере.';
   }
 
   @override
@@ -1339,7 +1345,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get feedbackAdminLede =>
-      'Что пользователи прислали из своих аккаунтов, сначала новые. Отмечайте отзыв выполненным, когда он обработан.';
+      'Что люди отправили из своих аккаунтов и запросы коннекторов с сайта, сначала новые. Отметьте каждый как готовый, когда разберётесь.';
 
   @override
   String get feedbackF_new => 'Новые';
@@ -1384,6 +1390,24 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get feedbackReopened => 'Снова отмечен как новый';
+
+  @override
+  String get feedbackKind => 'Тип';
+
+  @override
+  String get feedbackK_any => 'Всё';
+
+  @override
+  String get feedbackK_feedback => 'Отзывы';
+
+  @override
+  String get feedbackK_connector => 'Запросы коннекторов';
+
+  @override
+  String get feedbackConnectorBadge => 'Запрос коннектора';
+
+  @override
+  String get feedbackFromSite => 'с сайта';
 
   @override
   String get filesTitle => 'Вложения';
@@ -1710,6 +1734,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get implementImplements => 'Выполняет';
 
   @override
+  String get integrationsAssignedOnly => 'Только задачи, назначенные мне';
+
+  @override
+  String integrationsAssignedOnlyHelp(String email) {
+    return 'agnts берёт задачу с меткой, только если она назначена на аккаунт, которым agnts подключён к Jira ($email). Выключите, чтобы брать все задачи с меткой.';
+  }
+
+  @override
   String get integrationsTitle => 'Интеграции';
 
   @override
@@ -1974,6 +2006,37 @@ class AppLocalizationsRu extends AppLocalizations {
   String get integrationsQuery => 'Запрос, который выполняет agnts';
 
   @override
+  String get integrationsLabelsTitle => 'Как размечать тикеты';
+
+  @override
+  String get integrationsLabelsSub => 'Добавьте одну из этих меток незавершённой задаче в Jira. Регистр не важен.';
+
+  @override
+  String get integrationsLabelsRepo =>
+      'Задача попадает в репозиторий, привязанный к её проекту (Репозитории → проект Jira). Чтобы отправить её в другой, добавьте метку repo: с именем репозитория в agnts, например repo:web. Без репозитория запускаются только планы, анализ и поиск причин ошибок.';
+
+  @override
+  String get integrationsLabelsMany => 'Если меток вида несколько, выбирается первая по этому списку.';
+
+  @override
+  String get integrationsLabelsLater =>
+      'Метка вида, добавленная до начала работы, меняет вид тикета. Если убрать все метки agnts, обновления из Jira перестанут приходить.';
+
+  @override
+  String get integrationsPlaneLabelsSub => 'Добавьте одну из этих меток открытой задаче. Регистр не важен.';
+
+  @override
+  String get integrationsPlaneLabelsCreate => 'Метки в Plane принадлежат проекту: сначала создайте нужные в каждом привязанном проекте.';
+
+  @override
+  String get integrationsPlaneLabelsRepo =>
+      'Привяжите проект к репозиторию по идентификатору (WEB в WEB-123): Репозитории → проект Plane. Синхронизация читает только привязанные проекты, а коду и тестам нужен репозиторий. Чтобы отправить одну задачу в другой репозиторий, добавьте метку repo: с именем репозитория в agnts, например repo:web.';
+
+  @override
+  String get integrationsPlaneLabelsLater =>
+      'Метка вида, добавленная до начала работы, меняет вид тикета. Если убрать все метки agnts, обновления из Plane перестанут приходить.';
+
+  @override
   String get integrationsStatuses => 'Обновления статуса';
 
   @override
@@ -2022,8 +2085,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get integrationsSyncNow => 'Синхронизировать';
 
   @override
-  String integrationsSynced(String found, String created) {
-    return 'Открытых задач: $found, новых: $created';
+  String integrationsSynced(String found, String created, String updated, String waiting) {
+    return 'Открытых задач для вас: $found, новых: $created, обновлено: $updated, изменились после начала работы: $waiting';
   }
 
   @override
@@ -2326,6 +2389,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String kindSwitchTo(String kind) {
     return 'Сменить на «$kind»';
   }
+
+  @override
+  String get kindReview => 'Ревью PR';
+
+  @override
+  String get kindReviewHint => 'Проверить пул-реквест, который открыл кто-то другой. Приходит из GitHub или GitLab.';
 
   @override
   String get learnTitle => 'Обучение';
@@ -3473,8 +3542,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get navSyncJira => 'Синхронизировать Jira';
 
   @override
-  String navSynced(String found, String created) {
-    return 'Jira синхронизирована: открыто $found, новых $created';
+  String navSynced(String found, String created, String updated, String waiting) {
+    return 'Jira синхронизирована: открыто $found, новых $created, обновлено $updated, ждут вашего решения $waiting';
   }
 
   @override
@@ -3576,6 +3645,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get navAccount => 'Аккаунт';
+
+  @override
+  String get navReviews => 'Ревью PR';
 
   @override
   String get platformTitle => 'Кабинет администратора';
@@ -5360,6 +5432,274 @@ class AppLocalizationsRu extends AppLocalizations {
   String get reviewCat_scope => 'Рамки задачи';
 
   @override
+  String get reviewsTitle => 'Ревью пул-реквестов';
+
+  @override
+  String get reviewsLede =>
+      'agnts проверяет пул-реквесты, назначенные вам в GitHub и GitLab. Если ревью в порядке, слейте отсюда, или отклоните его и проверьте сами на git-хостинге.';
+
+  @override
+  String get reviewsSync => 'Синхронизировать';
+
+  @override
+  String get reviewsSyncing => 'Синхронизация…';
+
+  @override
+  String reviewsSynced(String open, String repos, String created, String rereview, String closed) {
+    return '$open ждут вас в $repos репозиториях · $created новых · $rereview проверены заново · $closed завершены';
+  }
+
+  @override
+  String get reviewsSyncErrors => 'Не удалось прочитать:';
+
+  @override
+  String get reviewsSettingsTitle => 'Как agnts их берёт';
+
+  @override
+  String get reviewsEnabled => 'Проверять автоматически';
+
+  @override
+  String get reviewsEnabledHelp =>
+      'Каждые 5 минут смотреть git-хостинг и проверять новые пул-реквесты. Когда выключено, только по кнопке «Синхронизировать».';
+
+  @override
+  String get reviewsReviewRequested => 'И запросы на ревью';
+
+  @override
+  String get reviewsReviewRequestedHelp => 'Брать также пул-реквесты, где у вас запрошено ревью, а не только назначенные вам.';
+
+  @override
+  String get reviewsSkipDrafts => 'Пропускать черновики';
+
+  @override
+  String get reviewsSkipDraftsHelp => 'Не трогать черновики, пока они не готовы.';
+
+  @override
+  String get reviewsRereview => 'Проверять новые коммиты';
+
+  @override
+  String get reviewsRereviewHelp => 'Проверять заново, если автор запушил, пока ревью ждёт вас.';
+
+  @override
+  String get reviewsMergeMethod => 'Способ слияния';
+
+  @override
+  String get reviewsMergeMethodHelp => 'Как agnts сливает принятый вами пул-реквест.';
+
+  @override
+  String get reviewsMerge_merge => 'Merge-коммит';
+
+  @override
+  String get reviewsMerge_squash => 'Squash';
+
+  @override
+  String get reviewsMerge_rebase => 'Rebase';
+
+  @override
+  String get reviewsWaiting => 'Ждут вас';
+
+  @override
+  String get reviewsInProgress => 'В работе';
+
+  @override
+  String get reviewsFinished => 'Завершены';
+
+  @override
+  String get reviewsEmpty => 'Здесь пусто.';
+
+  @override
+  String get reviewsEmptyAll => 'Пул-реквестов для ревью пока нет. Назначьте себе один в GitHub или GitLab и нажмите «Синхронизировать».';
+
+  @override
+  String get reviewsWhy_assigned => 'назначен';
+
+  @override
+  String get reviewsWhy_review_requested => 'запрошено ревью';
+
+  @override
+  String reviewsBy(String author) {
+    return 'от @$author';
+  }
+
+  @override
+  String get reviewsHowTitle => 'Как вы проверяете';
+
+  @override
+  String get reviewsHowSub =>
+      'Заметки, которые вы оставляете, прося проверить заново или отклоняя ревью, при следующем ревью вносятся в ваш профиль. Все следующие ревью его читают.';
+
+  @override
+  String get reviewsNoReviewers =>
+      'agnts пока ничего не знает о том, как вы проверяете. Оставьте заметку, когда просите проверить заново, или добавьте её ниже.';
+
+  @override
+  String get reviewsProfile => 'Профиль';
+
+  @override
+  String get reviewsProfileHint => 'Markdown: что для вас важно, что считается шумом, как вы оцениваете серьёзность.';
+
+  @override
+  String reviewsFolded(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n заметки учтены',
+      many: '$n заметок учтено',
+      few: '$n заметки учтены',
+      one: '$n заметка учтена',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewsPending => 'Ещё не учтены';
+
+  @override
+  String get reviewsSaveProfile => 'Сохранить профиль';
+
+  @override
+  String get reviewsProfileSaved => 'Профиль сохранён';
+
+  @override
+  String get reviewsAddNote => 'Добавить заметку';
+
+  @override
+  String get reviewsNotePlaceholder => 'Например: замечания по именованию для меня шум; всегда проверяй, что миграции можно откатить.';
+
+  @override
+  String get reviewsNoteAdded => 'Заметка добавлена';
+
+  @override
+  String get reviewsDeleteNote => 'Удалить заметку';
+
+  @override
+  String get reviewsNoteKind_rereview => 'повторное ревью';
+
+  @override
+  String get reviewsNoteKind_dismissed => 'отклонено';
+
+  @override
+  String get reviewsNoteKind_manual => 'написана здесь';
+
+  @override
+  String get reviewsLogin => 'Имя на git-хостинге';
+
+  @override
+  String reviewsPr(String number) {
+    return 'Пул-реквест #$number';
+  }
+
+  @override
+  String reviewsReviewed(String sha) {
+    return 'Последний коммит $sha';
+  }
+
+  @override
+  String reviewsNewCommits(String sha) {
+    return 'Новые коммиты после ревью agnts ($sha): он проверит их снова';
+  }
+
+  @override
+  String reviewsPostBtn(String host) {
+    return 'Опубликовать ревью в $host';
+  }
+
+  @override
+  String reviewsPostConfirm(String number, String host) {
+    return 'Опубликовать ревью agnts для #$number в $host комментарием? Оно публикуется от вашего аккаунта $host, и его увидят все участники pull request.';
+  }
+
+  @override
+  String reviewsPostedToast(String host) {
+    return 'Ревью опубликовано в $host';
+  }
+
+  @override
+  String reviewsPosted(String host, String when) {
+    return 'Ревью agnts этого коммита опубликовано в $host · $when';
+  }
+
+  @override
+  String get reviewsQueuedSub => 'agnts загрузит и проверит его.';
+
+  @override
+  String get reviewsFetchingTitle => 'Загружаем пул-реквест';
+
+  @override
+  String get reviewsReviewingTitle => 'Проверяем пул-реквест';
+
+  @override
+  String get reviewsReviewingSub => 'agnts читает изменения. Его ревью появится здесь.';
+
+  @override
+  String get reviewsReadyTitle => 'Ревью agnts готово';
+
+  @override
+  String reviewsReadySub(String host) {
+    return 'Слейте отсюда, попросите проверить заново с заметкой или отклоните и проверьте сами на $host.';
+  }
+
+  @override
+  String get reviewsNoteLabel => 'Проверить заново с заметкой';
+
+  @override
+  String get reviewsNoteHint => 'Скажите agnts, в чём он ошибся или что упустил. Заметка также учит его тому, как вы проверяете.';
+
+  @override
+  String get reviewsMergeBtn => 'Слить пул-реквест';
+
+  @override
+  String reviewsMergeConfirm(String number, String host, String method) {
+    return 'agnts сольёт #$number на $host ($method) на проверенном коммите.';
+  }
+
+  @override
+  String get reviewsRereviewBtn => 'Проверить заново';
+
+  @override
+  String reviewsDismissBtn(String host) {
+    return 'Отклонить, проверю сам на $host';
+  }
+
+  @override
+  String get reviewsDismissReason => 'Почему (необязательно)';
+
+  @override
+  String get reviewsDismissReasonHint => 'Необязательно. Это тоже учит agnts тому, как вы проверяете.';
+
+  @override
+  String reviewsDismissConfirm(String number, String host) {
+    return 'agnts перестанет проверять #$number. Пул-реквест останется открытым на $host.';
+  }
+
+  @override
+  String get reviewsMergingTitle => 'Сливаем пул-реквест';
+
+  @override
+  String get reviewsMergedTitle => 'Слит';
+
+  @override
+  String reviewsMergedSub(String number) {
+    return '#$number слит.';
+  }
+
+  @override
+  String get reviewsDismissedTitle => 'Ревью отклонено';
+
+  @override
+  String reviewsDismissedSub(String host) {
+    return 'Пул-реквест ваш на $host.';
+  }
+
+  @override
+  String reviewsOpenOn(String host) {
+    return 'Открыть на $host';
+  }
+
+  @override
+  String get reviewsReviewTitle => 'Ревью пул-реквеста от agnts';
+
+  @override
   String get rulesTitle => 'Правила';
 
   @override
@@ -6101,6 +6441,24 @@ class AppLocalizationsRu extends AppLocalizations {
   String get stateReportDone => 'Готово';
 
   @override
+  String get stateReviewAnalyzing => 'Загрузка';
+
+  @override
+  String get stateReviewCoding => 'Проверка';
+
+  @override
+  String get stateReviewWaiting_for_review => 'Ревью готово';
+
+  @override
+  String get stateReviewPushing => 'Слияние';
+
+  @override
+  String get stateReviewDone => 'Слит';
+
+  @override
+  String get stateReviewRejected => 'Отклонено';
+
+  @override
   String get tasksTitle => 'Задачи';
 
   @override
@@ -6245,6 +6603,43 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get tasksRepoNeeded => 'Для кода и тестов нужен репозиторий: выберите его или другой тип.';
+
+  @override
+  String ticketUpdateTitle(String source) {
+    return 'Изменено в $source после начала работы agnts';
+  }
+
+  @override
+  String get ticketUpdateSub =>
+      'agnts продолжает работать с версией, с которой начал. Перезапустите, чтобы отбросить сделанное и начать заново с новой версии, или продолжайте с текущей.';
+
+  @override
+  String ticketUpdateNow(String when) {
+    return 'Новая версия, $when';
+  }
+
+  @override
+  String get ticketUpdateRestart => 'Перезапустить с новой версией';
+
+  @override
+  String get ticketUpdateKeep => 'Оставить текущую версию';
+
+  @override
+  String ticketUpdateRestartConfirm(String key, String source) {
+    return 'Перезапустить $key с новой версией из $source? Анализ, ответы, коммиты и ревью будут отброшены, и agnts начнёт заново.';
+  }
+
+  @override
+  String get ticketUpdatePushed =>
+      'Уже отправлено: перезапуск невозможен. Отклоните тикет, чтобы agnts взял задачу заново, или оставьте текущую версию.';
+
+  @override
+  String ticketUpdateRestarted(String key) {
+    return '$key перезапускается с новой версией';
+  }
+
+  @override
+  String get ticketUpdateKept => 'agnts продолжает работать с текущей версией';
 
   @override
   String get ticketBack => 'Все тикеты';
@@ -6956,6 +7351,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ticketOtherAnswer => 'Что-то другое (необязательно)';
 
   @override
+  String get ticketSrcGit => 'Пул-реквест';
+
+  @override
   String get ticketsTitle => 'Тикеты';
 
   @override
@@ -7062,6 +7460,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get ticketsSourcePlane => 'Plane';
+
+  @override
+  String get ticketsSourceGit => 'PR';
 
   @override
   String get usageTitle => 'Лимиты тарифа';

@@ -37,6 +37,8 @@ type Tickets interface {
 	Replay(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	ReplayReport(ctx context.Context) (orchestrator.ReplayReport, error)
 	Review(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
+	RestartWithUpdate(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
+	KeepCurrentVersion(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	Preview(ctx context.Context, key string, compare *bool, origin domain.Origin) (domain.Ticket, error)
 	OpenShot(ctx context.Context, key string, runID int64, shotID string) (io.ReadCloser, error)
 	Translate(ctx context.Context, key, lang string) ([]orchestrator.TranslatedText, error)
@@ -434,6 +436,17 @@ func toTicket(t domain.Ticket) gen.Ticket {
 		out.ResumeState = &rs
 	}
 	out.MergedAt = t.MergedAt
+	if t.HeadSHA != "" {
+		sha := t.HeadSHA
+		out.HeadSha = &sha
+	}
+	if t.Pull != nil {
+		pr := toPullRequest(*t.Pull)
+		out.Pull = &pr
+	}
+	if u := t.Update; u != nil && !t.State.Terminal() {
+		out.TrackerUpdate = &gen.TrackerUpdate{Title: u.Title, Description: u.Description, At: u.At}
+	}
 	ls := gen.TicketLearnState(t.LearnState)
 	if ls == "" {
 		ls = gen.TicketLearnStateNone
@@ -487,6 +500,36 @@ func toTicket(t domain.Ticket) gen.Ticket {
 // ReviewTicket implements gen.ServerInterface.
 func (s *Server) ReviewTicket(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
 	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) { return s.opt.Tickets.Review(ctx, key, origin(r)) })
+}
+
+// RestartWithUpdate implements gen.ServerInterface.
+func (s *Server) RestartWithUpdate(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
+		return s.opt.Tickets.RestartWithUpdate(ctx, key, origin(r))
+	})
+}
+
+// KeepCurrentVersion implements gen.ServerInterface.
+func (s *Server) KeepCurrentVersion(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
+		return s.opt.Tickets.KeepCurrentVersion(ctx, key, origin(r))
+	})
+}
+
+// PostPullReview implements gen.ServerInterface.
+func (s *Server) PostPullReview(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	if !s.reviewsReady(w) {
+		return
+	}
+	t, err := s.opt.Reviews.PostPullReview(r.Context(), key, origin(r))
+	switch {
+	case errors.Is(err, orchestrator.ErrHost):
+		writeError(w, http.StatusBadGateway, "git_host", err.Error())
+	case err != nil:
+		s.writeUseCaseError(w, r, err)
+	default:
+		s.writeTicket(w, r, http.StatusOK, t)
+	}
 }
 
 // PreviewTicket implements gen.ServerInterface.

@@ -108,7 +108,7 @@ Class | Method | HTTP request | Description
 [*IntegrationsApi*](doc/IntegrationsApi.md) | [**listPlaneStates**](doc/IntegrationsApi.md#listplanestates) | **GET** /integrations/plane/states | States of the Plane projects linked to repositories, for the status mapping
 [*IntegrationsApi*](doc/IntegrationsApi.md) | [**listRemoteRepos**](doc/IntegrationsApi.md#listremoterepos) | **GET** /integrations/{provider}/repos | Repositories the connected GitHub or GitLab token can reach, for import
 [*IntegrationsApi*](doc/IntegrationsApi.md) | [**setPlaneWebhookSecret**](doc/IntegrationsApi.md#setplanewebhooksecret) | **PUT** /integrations/plane/webhook-secret | Store the secret Plane generated for the agnts webhook
-[*IntegrationsApi*](doc/IntegrationsApi.md) | [**syncJira**](doc/IntegrationsApi.md#syncjira) | **POST** /integrations/jira/sync | Pick up labelled Jira issues now
+[*IntegrationsApi*](doc/IntegrationsApi.md) | [**syncJira**](doc/IntegrationsApi.md#syncjira) | **POST** /integrations/jira/sync | Pick up labelled Jira issues now (only those assigned to you, unless that is off) and refresh the tickets agnts has for them
 [*IntegrationsApi*](doc/IntegrationsApi.md) | [**syncPlane**](doc/IntegrationsApi.md#syncplane) | **POST** /integrations/plane/sync | Pick up labelled Plane work items now
 [*IntegrationsApi*](doc/IntegrationsApi.md) | [**testIntegration**](doc/IntegrationsApi.md#testintegration) | **POST** /integrations/{provider}/test | 
 [*IntegrationsApi*](doc/IntegrationsApi.md) | [**updateIntegration**](doc/IntegrationsApi.md#updateintegration) | **PUT** /integrations/{provider} | Change an integration&#39;s settings (never its token)
@@ -157,6 +157,12 @@ Class | Method | HTTP request | Description
 [*ReposApi*](doc/ReposApi.md) | [**surveyRepoBrief**](doc/ReposApi.md#surveyrepobrief) | **POST** /repos/{id}/brief/survey | Have Claude survey the repository and write a draft brief (an update when it has one)
 [*ReposApi*](doc/ReposApi.md) | [**unarchiveRepo**](doc/ReposApi.md#unarchiverepo) | **POST** /repos/{id}/unarchive | Restore an archived repository
 [*ReposApi*](doc/ReposApi.md) | [**updateRepo**](doc/ReposApi.md#updaterepo) | **PUT** /repos/{id} | 
+[*ReviewsApi*](doc/ReviewsApi.md) | [**addReviewerNote**](doc/ReviewsApi.md#addreviewernote) | **POST** /reviews/notes | Tell agnts something about how you review; the next review for that user reads it
+[*ReviewsApi*](doc/ReviewsApi.md) | [**deleteReviewerNote**](doc/ReviewsApi.md#deletereviewernote) | **DELETE** /reviews/notes/{id} | Forget a note (one already folded into a profile stays there until the profile is edited)
+[*ReviewsApi*](doc/ReviewsApi.md) | [**listReviewers**](doc/ReviewsApi.md#listreviewers) | **GET** /reviews/reviewers | How each person agnts reviews pull requests for reviews, as it learned from their notes
+[*ReviewsApi*](doc/ReviewsApi.md) | [**postPullReview**](doc/ReviewsApi.md#postpullreview) | **POST** /tickets/{key}/post-review | Post agnts&#39;s latest review of a pull request on it as a comment (once per reviewed commit)
+[*ReviewsApi*](doc/ReviewsApi.md) | [**saveReviewerProfile**](doc/ReviewsApi.md#savereviewerprofile) | **PUT** /reviews/reviewers/{login} | Replace a reviewer profile with your text; empty text clears it
+[*ReviewsApi*](doc/ReviewsApi.md) | [**syncReviews**](doc/ReviewsApi.md#syncreviews) | **POST** /reviews/sync | Ask the git host for the pull requests waiting for you and queue reviews of the new ones
 [*RulesApi*](doc/RulesApi.md) | [**acceptRule**](doc/RulesApi.md#acceptrule) | **POST** /rules/{id}/accept | Apply a rule as written, skipping its open questions or a failed review
 [*RulesApi*](doc/RulesApi.md) | [**answerRule**](doc/RulesApi.md#answerrule) | **PUT** /rules/{id}/answers | Answer every open question of a rule; Claude then reviews it again
 [*RulesApi*](doc/RulesApi.md) | [**createRule**](doc/RulesApi.md#createrule) | **POST** /rules | Add a rule; Claude reviews it before tickets follow it
@@ -181,6 +187,7 @@ Class | Method | HTTP request | Description
 [*TicketsApi*](doc/TicketsApi.md) | [**getPreviewShot**](doc/TicketsApi.md#getpreviewshot) | **GET** /tickets/{key}/preview/{runId}/shots/{shotId} | One preview screenshot, as PNG
 [*TicketsApi*](doc/TicketsApi.md) | [**getTicket**](doc/TicketsApi.md#getticket) | **GET** /tickets/{key} | A ticket with its questions, analysis and latest result
 [*TicketsApi*](doc/TicketsApi.md) | [**implementTicket**](doc/TicketsApi.md#implementticket) | **POST** /tickets/{key}/implement | Make the code task that carries out a done plan or bug investigation
+[*TicketsApi*](doc/TicketsApi.md) | [**keepCurrentVersion**](doc/TicketsApi.md#keepcurrentversion) | **POST** /tickets/{key}/keep-version | Keep working from the version agnts started with; this newer version of the issue is not asked about again
 [*TicketsApi*](doc/TicketsApi.md) | [**listFollowUps**](doc/TicketsApi.md#listfollowups) | **GET** /tickets/{key}/follow-ups | Suggested follow-up tickets and the tickets made from them
 [*TicketsApi*](doc/TicketsApi.md) | [**listRelations**](doc/TicketsApi.md#listrelations) | **GET** /tickets/{key}/relations | The ticket&#39;s ordering constraints and what holds it back now
 [*TicketsApi*](doc/TicketsApi.md) | [**listTicketEvents**](doc/TicketsApi.md#listticketevents) | **GET** /tickets/{key}/events | The ticket&#39;s log, oldest first; poll with &#x60;after&#x60; for live updates
@@ -190,6 +197,7 @@ Class | Method | HTTP request | Description
 [*TicketsApi*](doc/TicketsApi.md) | [**rejectTicket**](doc/TicketsApi.md#rejectticket) | **POST** /tickets/{key}/reject | Stop work on the ticket for good
 [*TicketsApi*](doc/TicketsApi.md) | [**replayTicket**](doc/TicketsApi.md#replayticket) | **POST** /tickets/{key}/replay | Re-run a done code or test ticket with today&#39;s agnts, from the commit it started from, to compare the two (Analytics → Replay evaluation). The replay is a new local task that is never pushed.
 [*TicketsApi*](doc/TicketsApi.md) | [**requestChanges**](doc/TicketsApi.md#requestchanges) | **POST** /tickets/{key}/request-changes | Send the ticket back to coding with feedback
+[*TicketsApi*](doc/TicketsApi.md) | [**restartWithUpdate**](doc/TicketsApi.md#restartwithupdate) | **POST** /tickets/{key}/restart-update | Start the ticket over from the newer version of its issue; the work so far is dropped
 [*TicketsApi*](doc/TicketsApi.md) | [**retryTicket**](doc/TicketsApi.md#retryticket) | **POST** /tickets/{key}/retry | Resume a failed or rate-limited ticket where it stopped
 [*TicketsApi*](doc/TicketsApi.md) | [**reviewTicket**](doc/TicketsApi.md#reviewticket) | **POST** /tickets/{key}/review | Queue a code review of a ticket waiting for review (again, if one already ran)
 [*TicketsApi*](doc/TicketsApi.md) | [**setFollowUps**](doc/TicketsApi.md#setfollowups) | **PUT** /tickets/{key}/follow-ups | Turn follow-up suggestions on or off for this ticket
@@ -329,6 +337,8 @@ Class | Method | HTTP request | Description
  - [PreviewInput](doc/PreviewInput.md)
  - [PreviewIssue](doc/PreviewIssue.md)
  - [PreviewShot](doc/PreviewShot.md)
+ - [PullRequest](doc/PullRequest.md)
+ - [PullReviewSettings](doc/PullReviewSettings.md)
  - [QualityStat](doc/QualityStat.md)
  - [Question](doc/Question.md)
  - [QueueStatus](doc/QueueStatus.md)
@@ -362,6 +372,12 @@ Class | Method | HTTP request | Description
  - [Result](doc/Result.md)
  - [RetryTicketRequest](doc/RetryTicketRequest.md)
  - [ReviewModel](doc/ReviewModel.md)
+ - [ReviewSync](doc/ReviewSync.md)
+ - [Reviewer](doc/Reviewer.md)
+ - [ReviewerNote](doc/ReviewerNote.md)
+ - [ReviewerNoteInput](doc/ReviewerNoteInput.md)
+ - [ReviewerProfileInput](doc/ReviewerProfileInput.md)
+ - [Reviewers](doc/Reviewers.md)
  - [RotateMcpToken200Response](doc/RotateMcpToken200Response.md)
  - [Rule](doc/Rule.md)
  - [RuleAnswers](doc/RuleAnswers.md)
@@ -384,6 +400,7 @@ Class | Method | HTTP request | Description
  - [StageSpend](doc/StageSpend.md)
  - [StepDuration](doc/StepDuration.md)
  - [SyncJira200Response](doc/SyncJira200Response.md)
+ - [SyncPlane200Response](doc/SyncPlane200Response.md)
  - [TaskCreate](doc/TaskCreate.md)
  - [TaskUpdate](doc/TaskUpdate.md)
  - [Ticket](doc/Ticket.md)
@@ -399,6 +416,7 @@ Class | Method | HTTP request | Description
  - [TokenRequest](doc/TokenRequest.md)
  - [TokenSpend](doc/TokenSpend.md)
  - [Toolchain](doc/Toolchain.md)
+ - [TrackerUpdate](doc/TrackerUpdate.md)
  - [TransferWorkspaceRequest](doc/TransferWorkspaceRequest.md)
  - [TranslateInput](doc/TranslateInput.md)
  - [Translation](doc/Translation.md)

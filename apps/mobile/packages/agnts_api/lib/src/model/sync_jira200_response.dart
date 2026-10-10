@@ -23,6 +23,10 @@ class SyncJira200Response {
     required  this.found,
 
     required  this.created,
+
+     this.updated,
+
+     this.waiting,
   });
 
   @JsonKey(
@@ -49,17 +53,47 @@ class SyncJira200Response {
 
 
 
+      /// Tickets not started yet that took the issue's new text
+  @JsonKey(
+    
+    name: r'updated',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? updated;
+
+
+
+      /// Started tickets whose issue changed: each asks you to restart with the new version or keep the current one
+  @JsonKey(
+    
+    name: r'waiting',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? waiting;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is SyncJira200Response &&
       other.found == found &&
-      other.created == created;
+      other.created == created &&
+      other.updated == updated &&
+      other.waiting == waiting;
 
     @override
     int get hashCode =>
         found.hashCode +
-        created.hashCode;
+        created.hashCode +
+        updated.hashCode +
+        waiting.hashCode;
 
   factory SyncJira200Response.fromJson(Map<String, dynamic> json) => _$SyncJira200ResponseFromJson(json);
 

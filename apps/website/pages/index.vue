@@ -3,6 +3,7 @@
     <LandingSiteHeader />
     <LandingHero />
     <LandingMarquee />
+    <LandingProblem />
     <LandingHowItWorks />
     <LandingConnectors />
     <LandingSavings />
@@ -10,6 +11,7 @@
     <LandingPrivacy />
     <LandingCompare />
     <!-- Reviews are hidden until there are real quotes; restore with the header link and numbering. -->
+    <LandingAbout />
     <LandingPricing />
     <LandingStart />
     <LandingFaq />
@@ -17,6 +19,7 @@
     <LandingSiteFooter />
     <LandingToTop />
     <LandingSignInDialog />
+    <LandingConnectorRequestDialog />
   </div>
 </template>
 

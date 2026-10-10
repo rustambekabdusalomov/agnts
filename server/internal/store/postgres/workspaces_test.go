@@ -390,6 +390,17 @@ func TestFeedback(t *testing.T) {
 	if _, err := fb.Create(sys, Feedback{Title: "", Description: "x"}); err == nil {
 		t.Fatal("an empty title was stored")
 	}
+	if a.Kind != FeedbackKind {
+		t.Fatalf("kind %q", a.Kind)
+	}
+	// A connector request from the website has no account behind it.
+	cr, err := fb.Create(sys, Feedback{Kind: ConnectorKind, Sender: "Visitor", Email: "v@x.io", Title: "Connector: Linear", Description: "Hosting: cloud"})
+	if err != nil || cr.Kind != ConnectorKind || cr.UserID != nil {
+		t.Fatalf("connector request %+v %v", cr, err)
+	}
+	if _, err := fb.Create(sys, Feedback{Kind: "spam", Title: "x", Description: "y"}); err == nil {
+		t.Fatal("an unknown kind was stored")
+	}
 	if done, err := fb.SetStatus(sys, a.ID, "done"); err != nil || done.Status != "done" {
 		t.Fatalf("done: %+v %v", done, err)
 	}
@@ -397,7 +408,7 @@ func TestFeedback(t *testing.T) {
 		t.Fatalf("unknown id: %v", err)
 	}
 	list, err := fb.List(sys)
-	if err != nil || len(list) < 2 || list[0].ID != b.ID {
+	if err != nil || len(list) < 3 || list[0].ID != cr.ID {
 		t.Fatalf("newest first: %+v %v", list, err)
 	}
 	// The sender's name stays when their account goes.

@@ -24,6 +24,7 @@ Name | Type | Description | Notes
 **reflect** | **bool** | Learn from change requests and rejections: suggest rules, which apply once someone adopts them | [optional] 
 **egressAllow** | **List&lt;String&gt;** | Hosts run containers may reach besides the built-in list, such as a staging API; .example.com matches subdomains | [optional] 
 **suggestFollowUps** | **bool** | Runs suggest follow-up tickets (off by default; a ticket can override it) | [optional] 
+**pullReviews** | [**PullReviewSettings**](PullReviewSettings.md) |  | [optional] 
 **pauseAbove** | **int** |  | 
 **parallel** | **int** |  | 
 **git** | [**GitSettings**](GitSettings.md) |  | 

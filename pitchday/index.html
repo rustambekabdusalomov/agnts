@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-i18n="meta.title">agnts · Pitch Day 3.0</title>
+<meta name="description" data-i18n-content="meta.desc" content="agnts: AI agents that take tickets from Jira to a tested, reviewed pull request. Pitch Day 3.0 demo website.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="site-loader" aria-hidden="true"><img class="site-loader-mark" src="assets/loader.svg" alt="" width="454" height="173"></div>
+
+<header class="hd">
+  <div class="wrap">
+    <a href="./" aria-label="agnts"><img src="assets/wordmark.svg" alt="agnts" width="86" height="25"></a>
+    <nav aria-label="Sections">
+      <a href="#problem" data-i18n="nav.problem">Problem</a>
+      <a href="#team" data-i18n="nav.team">Team</a>
+      <a href="#why" data-i18n="nav.why">Why me</a>
+      <a href="#roadmap" data-i18n="nav.roadmap">Roadmap</a>
+      <a href="#plan" data-i18n="nav.plan">Implementation</a>
+      <a href="#api" data-i18n="nav.api">API</a>
+    </nav>
+    <div class="lang" role="group" aria-label="Language"><button type="button" data-lang="en">EN</button><button type="button" data-lang="ru">RU</button><button type="button" data-lang="uz">UZ</button></div>
+    <a class="btn btn-dark btn-s hd-cta" href="demo/" data-i18n="cta.watch">Watch the demo</a>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <span class="tag"><i></i><span data-i18n="hero.tag">Pitch Day 3.0 · MVP live at agnts.uz</span></span>
+    <h1 data-i18n="hero.title">AI agents that take your tickets to a <u>reviewed pull request</u>.</h1>
+    <p class="lede" data-i18n="hero.lede">agnts picks up a ticket from Jira or Plane, reads your code, asks what is unclear, codes and tests it in an isolated container, and opens the pull request only after you approve. Developers keep their time for architecture, scaling and business logic.</p>
+    <div class="ctas">
+      <a class="btn btn-acc" href="demo/"><span data-i18n="cta.watch">Watch the demo</span> <span aria-hidden="true">&rarr;</span></a>
+      <a class="btn btn-line" href="https://agnts.uz" target="_blank" rel="noopener" data-i18n="cta.open">Open agnts.uz</a>
+    </div>
+    <div class="facts">
+      <div><b data-i18n="facts.f1v">May 2026</b><span data-i18n="facts.f1">Idea</span></div>
+      <div><b data-i18n="facts.f2v">June 2026</b><span data-i18n="facts.f2">First version, used on my own tickets since</span></div>
+      <div><b data-i18n="facts.f3v">20–25 min</b><span data-i18n="facts.f3">a day to keep projects moving while travelling</span></div>
+      <div><b>EN · RU · UZ</b><span data-i18n="facts.f4">Interface languages</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 1. Problem → Solution -->
+<section class="s" id="problem">
+  <div class="wrap row">
+    <p class="lbl"><b>01</b><span data-i18n="problem.label">Problem → Solution</span></p>
+    <div>
+      <h2 data-i18n="problem.title">AI writes the code. Developers still do everything around it.</h2>
+      <p class="sub" data-i18n="problem.sub">Developers already code with AI, but every ticket still has to be read, explained, checked, tested and closed by hand. That routine takes most of the day.</p>
+      <div class="two">
+        <div>
+          <p class="kicker" data-i18n="problem.before">The problem</p>
+          <div class="rule"><h3 data-i18n="problem.p1t">Every ticket becomes a prompt</h3><p class="t" data-i18n="problem.p1">Read the ticket, dig through the code, then explain the task to the AI in enough detail that it gets it right.</p></div>
+          <div class="rule"><h3 data-i18n="problem.p2t">Checking and testing by hand</h3><p class="t" data-i18n="problem.p2">Run the build, the linter and the tests, and fix what broke before anyone else sees it.</p></div>
+          <div class="rule"><h3 data-i18n="problem.p3t">The paperwork</h3><p class="t" data-i18n="problem.p3">Push the branch, open the pull request, move the ticket to done.</p></div>
+          <div class="rule"><h3 data-i18n="problem.p4t">The same mistakes again</h3><p class="t" data-i18n="problem.p4">The AI forgets your corrections, so you explain them again on the next ticket.</p></div>
+        </div>
+        <div class="solution">
+          <p class="kicker acc"><span data-i18n="problem.after">The solution: agnts</span></p>
+          <div class="rule"><h3 data-i18n="problem.s1t">Reads the ticket and your code</h3><p class="t" data-i18n="problem.s1">Takes the ticket from Jira or Plane and asks short questions only where something is unclear.</p></div>
+          <div class="rule"><h3 data-i18n="problem.s2t">Checks pass before you look</h3><p class="t" data-i18n="problem.s2">Codes in an isolated container, runs your build, lint and tests, and fixes failures itself.</p></div>
+          <div class="rule"><h3 data-i18n="problem.s3t">From ticket to pull request</h3><p class="t" data-i18n="problem.s3">After you approve the diff, agnts pushes, opens the pull request and updates the ticket.</p></div>
+          <div class="rule"><h3 data-i18n="problem.s4t">Learns from every mistake</h3><p class="t" data-i18n="problem.s4">Explain what went wrong once. agnts fixes it and keeps the lesson for the next tickets.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. Team -->
+<section class="s" id="team">
+  <div class="wrap row">
+    <p class="lbl"><b>02</b><span data-i18n="nav.team">Team</span></p>
+    <div>
+      <h2 data-i18n="team.title">Built by an engineer who uses it on real work.</h2>
+      <p class="sub" data-i18n="team.sub">I build agnts on my own as a solo founder. A few programmer friends test it on their own work and in the mobile app.</p>
+      <div class="team">
+        <div>
+          <div class="avatar" aria-hidden="true">RA</div>
+          <p class="who" data-i18n="team.name">Rustambek Abdusalomov</p>
+          <p class="role" data-i18n="team.role">Founder · Engineer and team lead</p>
+          <p class="t" data-i18n="team.bio">Over 5 years in software engineering and team leading. Designed and built agnts end to end: server, admin panel, website, mobile app and infrastructure.</p>
+        </div>
+        <div>
+          <div class="block">
+            <h4 data-i18n="team.skills">Skills</h4>
+            <ul class="chips">
+              <li data-i18n="skill.1">Backend architecture (Go)</li><li data-i18n="skill.2">Frontend (Vue, Nuxt)</li><li data-i18n="skill.3">Mobile (Flutter)</li><li>PostgreSQL</li>
+              <li data-i18n="skill.5">Docker and DevOps</li><li data-i18n="skill.6">AI agents (Claude Code, MCP)</li><li data-i18n="skill.7">API design (OpenAPI)</li><li data-i18n="skill.8">Team leading</li>
+            </ul>
+          </div>
+          <div class="block">
+            <h4 data-i18n="team.tech">Technologies used</h4>
+            <table class="stack">
+              <tr><th data-i18n="tech.server">Server</th><td data-i18n="tech.serverv">Go, Clean Architecture, REST API with Server-Sent Events, MCP server</td></tr>
+              <tr><th data-i18n="tech.db">Database</th><td data-i18n="tech.dbv">PostgreSQL with migrations and row-level workspace isolation</td></tr>
+              <tr><th data-i18n="tech.ai">AI agent runtime</th><td data-i18n="tech.aiv">Claude Code (Sonnet, Opus, Haiku) in one Docker container per run</td></tr>
+              <tr><th data-i18n="tech.admin">Admin panel</th><td>Vue 3, Vite, TanStack Query</td></tr>
+              <tr><th data-i18n="tech.site">Website</th><td data-i18n="tech.sitev">Nuxt 3, static build in English, Russian and Uzbek</td></tr>
+              <tr><th data-i18n="tech.mobile">Mobile app</th><td data-i18n="tech.mobilev">Flutter for iOS and Android, push notifications, Telegram bot</td></tr>
+              <tr><th data-i18n="tech.int">Integrations</th><td data-i18n="tech.intv">Jira, Plane, GitHub, GitLab, Telegram</td></tr>
+              <tr><th data-i18n="tech.infra">Infrastructure</th><td data-i18n="tech.infrav">Docker Compose, Caddy (HTTPS), egress allowlist proxy, nightly backups, a Rust CLI installer</td></tr>
+            </table>
+          </div>
+          <div>
+            <h4 data-i18n="team.links">Links</h4>
+            <ul class="links">
+              <li><a href="https://agnts.uz" target="_blank" rel="noopener">agnts.uz</a></li>
+              <li><a href="mailto:abdusalomovrustambek@gmail.com">abdusalomovrustambek@gmail.com</a></li>
+              <li><a href="https://t.me/agnts_uz" target="_blank" rel="noopener" data-i18n="links.channel">Telegram channel</a></li>
+              <li><a href="https://t.me/agnts_community" target="_blank" rel="noopener" data-i18n="links.community">Telegram community</a></li>
+              <li><a href="https://www.instagram.com/agnts.uz/" target="_blank" rel="noopener">Instagram</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="story">
+        <h4 data-i18n="story.label">How agnts started</h4>
+        <p class="story-q" data-i18n="story.title">I wrote tickets over breakfast. By evening, they were ready for review.</p>
+        <ol class="story-steps">
+          <li>
+            <span class="story-n" aria-hidden="true">01</span>
+            <div>
+              <p class="story-when" data-i18n="story.w1">July 2026</p>
+              <h3 data-i18n="story.t1">The trip to Turkey</h3>
+              <p class="t" data-i18n="story.p1">In July 2026 I went to Turkey on a trip. Every morning I spent just 5–10 minutes writing a few tickets, and when I came back to the hotel in the evening, they were waiting for me as tested pull requests. Reviewing them took only 10–15 minutes. So 20–25 minutes a day was enough to keep my project work moving, and I can honestly say it made a big difference to how good the trip was. That week I was truly thankful to myself for building agnts.</p>
+            </div>
+          </li>
+          <li>
+            <span class="story-n" aria-hidden="true">02</span>
+            <div>
+              <p class="story-when" data-i18n="story.w2">May – June 2026</p>
+              <h3 data-i18n="story.t2">How it started</h3>
+              <p class="t" data-i18n="story.p2">I started it in May, after seeing how much of a developer’s day still goes to reading tickets, explaining them to AI, then checking and testing the result. The first version started working on my own tickets at the end of June, and it has been working on them ever since.</p>
+            </div>
+          </li>
+          <li>
+            <span class="story-n" aria-hidden="true">03</span>
+            <div>
+              <p class="story-when" data-i18n="story.w3">After the trip</p>
+              <h3 data-i18n="story.t3">Friends and the startup</h3>
+              <p class="t" data-i18n="story.p3">When I came back, I told my programmer friends about it, and they got interested. They wanted to try it too, so I opened accounts for them, and soon after, every one of them gave me honest, positive feedback. That’s when agnts became a startup: I concluded that other developers should also spend their time on architecture, scaling and business logic rather than on repetitive daily tasks. I saw for myself how much it raises productivity, and how it lets projects be built with better, more polished solutions.</p>
+            </div>
+          </li>
+          <li>
+            <span class="story-n" aria-hidden="true">04</span>
+            <div>
+              <p class="story-when" data-i18n="story.w4">Now</p>
+              <h3 data-i18n="story.t4">The mobile app</h3>
+              <p class="t" data-i18n="story.p4">The mobile app is now in testing. I’m building it so the whole process can be managed from a phone. Once testing is done, I plan to launch it in full so everyone can use it.</p>
+            </div>
+          </li>
+        </ol>
+        <p class="story-sig" data-i18n="story.sig">Rustambek, founder of agnts</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. Why me -->
+<section class="s" id="why">
+  <div class="wrap row">
+    <p class="lbl"><b>03</b><span data-i18n="nav.why">Why me</span></p>
+    <div>
+      <h2 data-i18n="why.title">Why I can solve it.</h2>
+      <p class="sub" data-i18n="why.sub">The problem comes from my own daily work, and the product already runs on real tickets.</p>
+      <div class="two">
+        <div class="rule"><h3 data-i18n="why.w1t">The builder is the user</h3><p class="t" data-i18n="why.w1">I have used agnts on my own tickets since June 2026. On a trip to Turkey I spent 20–25 minutes a day: writing tickets in the morning and reviewing finished pull requests in the evening.</p></div>
+        <div class="rule"><h3 data-i18n="why.w2t">Years inside the ticket workflow</h3><p class="t" data-i18n="why.w2">Over 5 years of engineering and leading teams: I know where a developer's day goes, from vague tickets to review rounds.</p></div>
+        <div class="rule"><h3 data-i18n="why.w3t">Already working, not a mockup</h3><p class="t" data-i18n="why.w3">The product is live at agnts.uz with a free demo. Programmer friends use it on their own work and gave very good feedback.</p></div>
+        <div class="rule"><h3 data-i18n="why.w4t">Built for safety and the local market</h3><p class="t" data-i18n="why.w4">Nothing ships without human approval, every run is isolated, and the interface and support are ready for Uzbekistan, in Uzbek and Russian.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. Roadmap -->
+<section class="s" id="roadmap">
+  <div class="wrap row">
+    <p class="lbl"><b>04</b><span data-i18n="nav.roadmap">Roadmap</span></p>
+    <div>
+      <h2 data-i18n="road.title">Idea → Prototype → MVP → Launched.</h2>
+      <p class="sub" data-i18n="road.sub">agnts is at the MVP stage: live, free to try, and in use by its first developers.</p>
+      <div class="track" aria-hidden="true"><div class="track-fill"></div><span class="here" data-i18n="road.here">agnts is here</span></div>
+      <ol class="road">
+        <li class="done">
+          <span class="dot"></span>
+          <div class="road-h"><h3 data-i18n="road.r1">Idea</h3><span class="st" data-i18n="road.done">Done</span></div>
+          <span class="when" data-i18n="facts.f1v">May 2026</span>
+          <ul><li data-i18n="road.r1a">Automate the path from ticket to pull request with AI agents</li><li data-i18n="road.r1b">Architecture and implementation plan</li></ul>
+        </li>
+        <li class="done">
+          <span class="dot"></span>
+          <div class="road-h"><h3 data-i18n="road.r2">Prototype</h3><span class="st" data-i18n="road.done">Done</span></div>
+          <span class="when" data-i18n="facts.f2v">June 2026</span>
+          <ul><li data-i18n="road.r2a">Jira ticket to a tested pull request</li><li data-i18n="road.r2b">Isolated runs, checks and approval</li><li data-i18n="road.r2c">Used on my own tickets since</li><li data-i18n="road.r2d">On a trip, projects kept moving with 20–25 minutes a day</li></ul>
+        </li>
+        <li class="now">
+          <span class="dot"></span>
+          <div class="road-h"><h3>MVP</h3><span class="st" data-i18n="road.current">Current stage</span></div>
+          <span class="when" data-i18n="road.nowWhen">Now</span>
+          <ul><li data-i18n="road.r3a">Live at agnts.uz, free demo</li><li>Jira, Plane, GitHub, GitLab</li><li data-i18n="road.r3c">AI review, previews, learning</li><li data-i18n="road.r3e">Programmer friends using it on their work</li><li data-i18n="road.r3d">Mobile app in testing with friends</li></ul>
+        </li>
+        <li class="next">
+          <span class="dot"></span>
+          <div class="road-h"><h3 data-i18n="road.r4">Launched</h3><span class="st" data-i18n="road.next">Next</span></div>
+          <span class="when" data-i18n="road.nextWhen">After the demo period</span>
+          <ul><li data-i18n="road.r4a">Paid plans</li><li data-i18n="road.r4b">Mobile app in the app stores</li><li data-i18n="road.r4c">New connectors from user requests</li><li data-i18n="road.r4d">More AI models besides Claude: ChatGPT, Kimi and others</li></ul>
+        </li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- 5. Implementation -->
+<section class="s" id="plan">
+  <div class="wrap row">
+    <p class="lbl"><b>05</b><span data-i18n="nav.plan">Implementation</span></p>
+    <div>
+      <h2 data-i18n="plan.title">How I build and run it.</h2>
+      <p class="sub" data-i18n="plan.sub">Every ticket goes through the same pipeline. AI does the work in an isolated container; a person decides at every point that matters.</p>
+
+      <ol class="flow" data-i18n-aria="plan.flowAria" aria-label="Ticket pipeline">
+        <li><span data-i18n="flow.1">Ticket in Jira or Plane</span></li>
+        <li class="ai"><span data-i18n="flow.2">Analyse code</span></li>
+        <li class="you"><span data-i18n="flow.3">Answer questions</span></li>
+        <li class="ai"><span data-i18n="flow.4">Code in container</span></li>
+        <li class="ai"><span data-i18n="flow.5">Build, lint, tests</span></li>
+        <li class="ai"><span data-i18n="flow.6">AI review and preview</span></li>
+        <li class="you"><span data-i18n="flow.7">Approve</span></li>
+        <li><span data-i18n="flow.8">Pull request</span></li>
+        <li class="ai"><span data-i18n="flow.9">Learn</span></li>
+      </ol>
+      <div class="legend"><span class="l-ai"><i></i><span data-i18n="legend.ai">AI agent</span></span><span class="l-you"><i></i><span data-i18n="legend.you">Developer decides</span></span><span><i></i><span data-i18n="legend.server">agnts server</span></span></div>
+
+      <div class="block">
+        <h4 data-i18n="plan.ai">AI tools and solutions</h4>
+        <div class="models">
+          <div class="model"><b>Sonnet</b><span data-i18n="model.s">Coding</span><p data-i18n="model.sv">Writes the change. Failing build, lint or tests go back to the agent, up to twice.</p></div>
+          <div class="model"><b>Opus</b><span data-i18n="model.o">Hard cases</span><p data-i18n="model.ov">Hard retries and reviews of complex or large changes.</p></div>
+          <div class="model"><b>Haiku</b><span data-i18n="model.h">Helpers</span><p data-i18n="model.hv">Summaries, translations and small helper steps.</p></div>
+        </div>
+        <div class="two" style="margin-top:28px">
+          <div class="rule"><h3 data-i18n="ai.1t">Claude Code as the agent runtime</h3><p class="t" data-i18n="ai.1">Each run gets a fresh Docker container with the repository and its toolchains. It can reach only Claude, the git host and package registries.</p></div>
+          <div class="rule"><h3 data-i18n="ai.2t">Asks before it guesses</h3><p class="t" data-i18n="ai.2">An analysis run reads the ticket and the code first and turns anything unclear into short questions with options.</p></div>
+          <div class="rule"><h3 data-i18n="ai.3t">Self-review and red flags</h3><p class="t" data-i18n="ai.3">A separate review run reads the diff, and a scan flags skipped tests, removed assertions and silenced linters before a person looks.</p></div>
+          <div class="rule"><h3 data-i18n="ai.4t">Learning from feedback</h3><p class="t" data-i18n="ai.4">After a push or a change request, agnts distils lessons and suggests team rules. A person approves them before they reach any prompt.</p></div>
+          <div class="rule"><h3 data-i18n="ai.5t">Visual previews</h3><p class="t" data-i18n="ai.5">For front-end work, a preview run opens the changed pages and takes screenshots at desktop and phone width.</p></div>
+          <div class="rule"><h3 data-i18n="ai.6t">Repository brief and replays</h3><p class="t" data-i18n="ai.6">A brief of each codebase gives the agent context; replaying done tickets measures each new prompt version.</p></div>
+        </div>
+      </div>
+
+      <div class="block">
+        <h4 data-i18n="plan.stages">Stages</h4>
+        <ol class="phases">
+          <li class="done"><div><h3 data-i18n="ph.1t">Core agent loop</h3><p data-i18n="ph.1">Jira adapter, orchestrator state machine, container runner, checks and retries, GitHub pull requests.</p></div></li>
+          <li class="done"><div><h3 data-i18n="ph.2t">Daily-driver admin panel</h3><p data-i18n="ph.2">Live run logs, diff review, approvals, plan-limit tracking, workspaces, three languages.</p></div></li>
+          <li class="done"><div><h3 data-i18n="ph.3t">Integrations and agent intelligence</h3><p data-i18n="ph.3">Plane, GitLab, Telegram, MCP server for Claude chat, AI review, previews, learning from feedback.</p></div></li>
+          <li class="now"><div><h3 data-i18n="ph.4t">MVP with first users (now)</h3><p data-i18n="ph.4">Free demo at agnts.uz, friends using it on their work, mobile app in testing.</p></div></li>
+          <li><div><h3 data-i18n="ph.5t">Launch</h3><p data-i18n="ph.5">Paid plans, mobile app in the app stores, new connectors from user requests, and more AI models besides Claude, such as ChatGPT and Kimi.</p></div></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Optional: API access -->
+<section class="s" id="api">
+  <div class="wrap row">
+    <p class="lbl"><b>06</b><span data-i18n="api.label">API access</span></p>
+    <div>
+      <h2 data-i18n="api.title">Everything in agnts is an API.</h2>
+      <p class="sub" data-i18n="api.sub">The admin panel, the mobile app and Claude chat are all clients of the same API, so teams can script agnts too.</p>
+      <div class="two">
+        <div class="rule"><h3>REST API</h3><p class="t" data-i18n="api.rest">Described by an OpenAPI 3 contract, with bearer tokens and live updates over Server-Sent Events.</p></div>
+        <div class="rule"><h3 data-i18n="api.mcpt">MCP server</h3><p class="t" data-i18n="api.mcp">Connect agnts to Claude chat, Claude Code or Claude Desktop and manage tickets in conversation, with a confirmation step before every change.</p></div>
+      </div>
+      <pre class="code"><span class="c" data-i18n="code.0"># A few operations from the OpenAPI contract</span>
+<span class="k">GET</span>  /tickets                        <span class="c" data-i18n="code.1"># tickets and their state</span>
+<span class="k">GET</span>  /tickets/{key}/events           <span class="c" data-i18n="code.2"># the run's live log</span>
+<span class="k">POST</span> /tickets/{key}/answers          <span class="c" data-i18n="code.3"># answer agnts's questions</span>
+<span class="k">POST</span> /tickets/{key}/approve          <span class="c" data-i18n="code.4"># approve: push and open the pull request</span>
+<span class="k">POST</span> /tickets/{key}/request-changes  <span class="c" data-i18n="code.5"># send it back with feedback</span></pre>
+    </div>
+  </div>
+</section>
+</main>
+
+<section class="band">
+  <div class="wrap">
+    <h2 data-i18n="band.title">See agnts work on a real ticket.</h2>
+    <p data-i18n="band.text">The demo shows a ticket going from Jira to a reviewed pull request, and the working product you can try today.</p>
+    <a class="btn btn-dark" href="demo/"><span data-i18n="band.cta">Go to the demo</span> <span aria-hidden="true">&rarr;</span></a>
+  </div>
+</section>
+
+<footer class="ft">
+  <div class="wrap">
+    <span data-i18n="ft.line">agnts · Pitch Day 3.0 · Rustambek Abdusalomov</span>
+    <span><a href="https://agnts.uz" target="_blank" rel="noopener">agnts.uz</a></span>
+  </div>
+</footer>
+
+<button type="button" class="chat-btn" id="chat-open" aria-expanded="false" aria-controls="chat"><span aria-hidden="true">&#9679;</span> <span data-i18n="chat.open">Ask about agnts</span></button>
+<div class="chat" id="chat" role="dialog" data-i18n-aria="chat.open" aria-label="Ask about agnts"></div>
+<script src="assets/i18n.js"></script>
+<script src="assets/chat.js"></script>
+</body>
+</html>

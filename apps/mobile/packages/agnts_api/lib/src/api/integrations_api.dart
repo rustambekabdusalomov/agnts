@@ -17,6 +17,7 @@ import 'package:agnts_api/src/model/plane_state.dart';
 import 'package:agnts_api/src/model/remote_repository.dart';
 import 'package:agnts_api/src/model/set_plane_webhook_secret_request.dart';
 import 'package:agnts_api/src/model/sync_jira200_response.dart';
+import 'package:agnts_api/src/model/sync_plane200_response.dart';
 import 'package:agnts_api/src/model/update_integration_request.dart';
 
 class IntegrationsApi {
@@ -559,7 +560,7 @@ _responseData = rawData == null ? null : deserialize<Integration, Integration>(r
     );
   }
 
-  /// Pick up labelled Jira issues now
+  /// Pick up labelled Jira issues now (only those assigned to you, unless that is off) and refresh the tickets agnts has for them
   /// 
   ///
   /// Parameters:
@@ -651,9 +652,9 @@ _responseData = rawData == null ? null : deserialize<SyncJira200Response, SyncJi
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future] containing a [Response] with a [SyncJira200Response] as data
+  /// Returns a [Future] containing a [Response] with a [SyncPlane200Response] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<SyncJira200Response>> syncPlane({ 
+  Future<Response<SyncPlane200Response>> syncPlane({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -693,11 +694,11 @@ _responseData = rawData == null ? null : deserialize<SyncJira200Response, SyncJi
       onReceiveProgress: onReceiveProgress,
     );
 
-    SyncJira200Response? _responseData;
+    SyncPlane200Response? _responseData;
 
     try {
 final rawData = _response.data;
-_responseData = rawData == null ? null : deserialize<SyncJira200Response, SyncJira200Response>(rawData, 'SyncJira200Response', growable: true);
+_responseData = rawData == null ? null : deserialize<SyncPlane200Response, SyncPlane200Response>(rawData, 'SyncPlane200Response', growable: true);
 
     } catch (error, stackTrace) {
       throw DioException(
@@ -709,7 +710,7 @@ _responseData = rawData == null ? null : deserialize<SyncJira200Response, SyncJi
       );
     }
 
-    return Response<SyncJira200Response>(
+    return Response<SyncPlane200Response>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,

@@ -4,6 +4,7 @@
 
 // ignore_for_file: unused_element
 import 'package:agnts_api/src/model/notify_settings.dart';
+import 'package:agnts_api/src/model/pull_review_settings.dart';
 import 'package:agnts_api/src/model/stage_models.dart';
 import 'package:agnts_api/src/model/git_settings.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
@@ -54,6 +55,8 @@ class Settings {
      this.egressAllow,
 
      this.suggestFollowUps,
+
+     this.pullReviews,
 
     required  this.pauseAbove,
 
@@ -269,6 +272,18 @@ class Settings {
 
 
 
+  @JsonKey(
+    
+    name: r'pullReviews',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final PullReviewSettings? pullReviews;
+
+
+
           // minimum: 50
           // maximum: 100
   @JsonKey(
@@ -341,6 +356,7 @@ class Settings {
       other.reflect == reflect &&
       other.egressAllow == egressAllow &&
       other.suggestFollowUps == suggestFollowUps &&
+      other.pullReviews == pullReviews &&
       other.pauseAbove == pauseAbove &&
       other.parallel == parallel &&
       other.git == git &&
@@ -364,6 +380,7 @@ class Settings {
         reflect.hashCode +
         egressAllow.hashCode +
         suggestFollowUps.hashCode +
+        pullReviews.hashCode +
         pauseAbove.hashCode +
         parallel.hashCode +
         git.hashCode +

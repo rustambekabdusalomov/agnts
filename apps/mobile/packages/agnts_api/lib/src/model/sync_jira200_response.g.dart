@@ -11,13 +11,22 @@ abstract class _$SyncJira200ResponseCWProxy {
 
   SyncJira200Response created(int created);
 
+  SyncJira200Response updated(int? updated);
+
+  SyncJira200Response waiting(int? waiting);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `SyncJira200Response(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
   /// ```dart
   /// SyncJira200Response(...).copyWith(id: 12, name: "My name")
   /// ````
-  SyncJira200Response call({int found, int created});
+  SyncJira200Response call({
+    int found,
+    int created,
+    int? updated,
+    int? waiting,
+  });
 }
 
 /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfSyncJira200Response.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfSyncJira200Response.copyWith.fieldName(...)`
@@ -33,6 +42,12 @@ class _$SyncJira200ResponseCWProxyImpl implements _$SyncJira200ResponseCWProxy {
   SyncJira200Response created(int created) => this(created: created);
 
   @override
+  SyncJira200Response updated(int? updated) => this(updated: updated);
+
+  @override
+  SyncJira200Response waiting(int? waiting) => this(waiting: waiting);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `SyncJira200Response(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -42,6 +57,8 @@ class _$SyncJira200ResponseCWProxyImpl implements _$SyncJira200ResponseCWProxy {
   SyncJira200Response call({
     Object? found = const $CopyWithPlaceholder(),
     Object? created = const $CopyWithPlaceholder(),
+    Object? updated = const $CopyWithPlaceholder(),
+    Object? waiting = const $CopyWithPlaceholder(),
   }) {
     return SyncJira200Response(
       found: found == const $CopyWithPlaceholder()
@@ -52,6 +69,14 @@ class _$SyncJira200ResponseCWProxyImpl implements _$SyncJira200ResponseCWProxy {
           ? _value.created
           // ignore: cast_nullable_to_non_nullable
           : created as int,
+      updated: updated == const $CopyWithPlaceholder()
+          ? _value.updated
+          // ignore: cast_nullable_to_non_nullable
+          : updated as int?,
+      waiting: waiting == const $CopyWithPlaceholder()
+          ? _value.waiting
+          // ignore: cast_nullable_to_non_nullable
+          : waiting as int?,
     );
   }
 }
@@ -73,10 +98,17 @@ SyncJira200Response _$SyncJira200ResponseFromJson(Map<String, dynamic> json) =>
       final val = SyncJira200Response(
         found: $checkedConvert('found', (v) => (v as num).toInt()),
         created: $checkedConvert('created', (v) => (v as num).toInt()),
+        updated: $checkedConvert('updated', (v) => (v as num?)?.toInt()),
+        waiting: $checkedConvert('waiting', (v) => (v as num?)?.toInt()),
       );
       return val;
     });
 
 Map<String, dynamic> _$SyncJira200ResponseToJson(
   SyncJira200Response instance,
-) => <String, dynamic>{'found': instance.found, 'created': instance.created};
+) => <String, dynamic>{
+  'found': instance.found,
+  'created': instance.created,
+  'updated': ?instance.updated,
+  'waiting': ?instance.waiting,
+};

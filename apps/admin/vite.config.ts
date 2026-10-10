@@ -11,6 +11,8 @@ export default defineConfig({
       '/api': 'http://localhost:8080',
       // "Continue with Google" on the website posts here.
       '/auth': 'http://localhost:8080',
+      // The website's "Request a connector" form posts here.
+      '/site': 'http://localhost:8080',
       '/healthz': 'http://localhost:8080',
     },
   },

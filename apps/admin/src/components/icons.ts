@@ -26,5 +26,6 @@ export const ICON: Record<string, string> = {
   "rules": "<path d=\"M7 3h8l4 4v14H7z\"/><path d=\"M15 3v4h4\"/><path d=\"M10 12h6M10 16h4\"/><path d=\"M4 7v13a1 1 0 0 0 1 1h1\"/>",
   "import": "<path d=\"M12 4v11M7.5 10.5L12 15l4.5-4.5\"/><path d=\"M4 19h16\"/>",
   "attach": "<path d=\"M20.5 11.5l-8.4 8.4a5 5 0 0 1-7.1-7.1l8.4-8.4a3.3 3.3 0 0 1 4.7 4.7l-8.4 8.4a1.7 1.7 0 0 1-2.4-2.4l7.7-7.7\"/>",
+  "pull": "<circle cx=\"6\" cy=\"6\" r=\"2.5\"/><circle cx=\"6\" cy=\"18\" r=\"2.5\"/><circle cx=\"18\" cy=\"18\" r=\"2.5\"/><path d=\"M6 8.5v7M18 15.5V9a3 3 0 0 0-3-3h-4M13 3.5L10.5 6 13 8.5\"/>",
   "file": "<path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"/><path d=\"M14 3v5h5\"/>"
 }

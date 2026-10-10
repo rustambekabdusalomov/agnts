@@ -22,6 +22,8 @@ class Feedback {
 
     required  this.id,
 
+    required  this.kind,
+
     required  this.title,
 
     required  this.description,
@@ -48,6 +50,19 @@ class Feedback {
 
 
   final int id;
+
+
+
+      /// feedback: sent from an account; connector: a connector request from the website
+  @JsonKey(
+    
+    name: r'kind',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final FeedbackKindEnum kind;
 
 
 
@@ -155,6 +170,7 @@ class Feedback {
     @override
     bool operator ==(Object other) => identical(this, other) || other is Feedback &&
       other.id == id &&
+      other.kind == kind &&
       other.title == title &&
       other.description == description &&
       other.status == status &&
@@ -167,6 +183,7 @@ class Feedback {
     @override
     int get hashCode =>
         id.hashCode +
+        kind.hashCode +
         title.hashCode +
         description.hashCode +
         status.hashCode +
@@ -186,6 +203,22 @@ class Feedback {
   }
 
 }
+
+/// feedback: sent from an account; connector: a connector request from the website
+enum FeedbackKindEnum {
+@JsonValue(r'feedback')
+feedback(r'feedback'),
+@JsonValue(r'connector')
+connector(r'connector');
+
+const FeedbackKindEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
+}
+
 
 enum FeedbackStatusEnum {
 @JsonValue(r'new')

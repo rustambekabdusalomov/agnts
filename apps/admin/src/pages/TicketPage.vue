@@ -4,7 +4,7 @@ import { computed, nextTick, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../api/client'
-import { isReport, KIND_EDITABLE, MODEL_NAME, needsRepo, stateKey, TERMINAL, type Question, type ShotRef, type TicketKind } from '../api/types'
+import { isPullReview, isReport, KIND_EDITABLE, MODEL_NAME, needsRepo, pullHost, stateKey, TERMINAL, type Question, type ShotRef, type TicketKindChoice } from '../api/types'
 import UsageCard from '../components/dashboard/UsageCard.vue'
 import DiffView from '../components/DiffView.vue'
 import CheckBox from '../components/form/CheckBox.vue'
@@ -25,6 +25,7 @@ import ModelPicker from '../components/ticket/ModelPicker.vue'
 import ReportView from '../components/ticket/ReportView.vue'
 import RepoPicker from '../components/ticket/RepoPicker.vue'
 import ProgressTrack from '../components/ticket/ProgressTrack.vue'
+import PullCard from '../components/ticket/PullCard.vue'
 import { useRepoMembers } from '../components/repo/useRepoMembers'
 import RunLog from '../components/ticket/RunLog.vue'
 import SpendCard from '../components/ticket/SpendCard.vue'
@@ -74,6 +75,12 @@ const isTask = computed(() => tk.value?.source === 'local')
 const isPlane = computed(() => tk.value?.source === 'plane')
 // A report kind (plan, analysis, bug): no branch, checks, diff or pull request.
 const report = computed(() => !!tk.value && isReport(tk.value))
+// A review of someone else's pull request: approve merges it, reject
+// dismisses agnts's review and leaves the pull request to you.
+const pull = computed(() => !!tk.value && isPullReview(tk.value))
+const host = computed(() => pullHost(tk.value?.pull?.url ?? tk.value?.prUrl))
+// Why a review is dismissed; it teaches agnts how you review.
+const dismissReason = ref('')
 const kindEditable = computed(() => !!tk.value && KIND_EDITABLE.includes(tk.value.state) && !tk.value.prUrl && tk.value.resumeState !== 'pushing')
 const { events } = useEventLog(key)
 
@@ -148,7 +155,7 @@ const notice = ref('')
 
 // Assignees for the pull request agnts opens on approval (not for tasks that
 // push straight to the default branch). Members load only while reviewing.
-const opensPr = computed(() => !report.value && !(isTask.value && tk.value?.afterApprove === 'main'))
+const opensPr = computed(() => !report.value && !pull.value && !(isTask.value && tk.value?.afterApprove === 'main'))
 // Reports reach the tracker issue only when the reviewer ticks this.
 const postReport = ref(false)
 const reviewing = computed(() => tk.value?.state === 'waiting_for_review' && opensPr.value)
@@ -170,10 +177,10 @@ watch(
 const kindWarning = computed(() => {
   const ev = [...events.value].reverse().find((e) => e.type === 'kind_changed')
   if (!ev || ev.level !== 'warn' || !tk.value || ev.data.to === tk.value.kind || ev.data.from !== tk.value.kind) return null
-  return { message: ev.message, to: ev.data.to as TicketKind }
+  return { message: ev.message, to: ev.data.to as TicketKindChoice }
 })
 const switchKind = useMutation({
-  mutationFn: (kind: TicketKind) => unwrap(api.PUT('/tickets/{key}/kind', { params: { path: { key: key.value } }, body: { kind } })),
+  mutationFn: (kind: TicketKindChoice) => unwrap(api.PUT('/tickets/{key}/kind', { params: { path: { key: key.value } }, body: { kind } })),
   onSettled: () => qc.invalidateQueries({ queryKey: ['ticket', key.value] }),
   onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
 })
@@ -219,7 +226,7 @@ const act = useMutation({
           }),
         )
       case 'reject':
-        return unwrap(api.POST('/tickets/{key}/reject', { ...path, body: {} }))
+        return unwrap(api.POST('/tickets/{key}/reject', { ...path, body: pull.value && dismissReason.value.trim() ? { reason: dismissReason.value.trim() } : {} }))
       case 'retry':
         return unwrap(
           api.POST('/tickets/{key}/retry', {
@@ -245,6 +252,7 @@ const act = useMutation({
       feedbackShots.value = []
       feedbackFiles.value = []
     }
+    if (a === 'reject') dismissReason.value = ''
     if (a === 'retry') {
       retryNote.value = ''
       retryFiles.value = []
@@ -262,14 +270,58 @@ const del = useMutation({
   onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
 })
 
+// A newer version of the issue arrived after agnts started: restart with
+// it, or keep working on the current one.
+const trackerName = computed(() => (tk.value?.source === 'plane' ? 'Plane' : 'Jira'))
+const version = useMutation({
+  mutationFn: (what: 'restart' | 'keep') =>
+    unwrap(
+      what === 'restart'
+        ? api.POST('/tickets/{key}/restart-update', { params: { path: { key: key.value } } })
+        : api.POST('/tickets/{key}/keep-version', { params: { path: { key: key.value } } }),
+    ),
+  onSuccess: (_, what) => {
+    ui.notify(what === 'restart' ? t('ticket.updateRestarted', { key: key.value }) : t('ticket.updateKept'))
+    void qc.invalidateQueries({ queryKey: ['ticket', key.value] })
+    void qc.invalidateQueries({ queryKey: ['tickets'] })
+  },
+  onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
+})
+async function confirmRestart() {
+  const label = t('ticket.updateRestart')
+  const message = t('ticket.updateRestartConfirm', { key: key.value, source: trackerName.value })
+  if (await askConfirm({ title: label, message, confirmLabel: label, danger: true })) version.mutate('restart')
+}
+
+// Posting agnts's review on the pull request, once per reviewed commit.
+const posted = computed(() => !!tk.value?.pull?.postedSha && tk.value.pull.postedSha === tk.value.headSha)
+const canPost = computed(() => pull.value && !!d.value?.review?.summary && !!tk.value?.headSha && !posted.value && tk.value?.state !== 'pushing')
+const postReview = useMutation({
+  mutationFn: () => unwrap(api.POST('/tickets/{key}/post-review', { params: { path: { key: key.value } } })),
+  onSuccess: () => {
+    ui.notify(t('reviews.postedToast', { host: host.value }))
+    void qc.invalidateQueries({ queryKey: ['ticket', key.value] })
+  },
+  onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
+})
+async function confirmPost() {
+  const label = t('reviews.postBtn', { host: host.value })
+  if (await askConfirm({ title: label, message: t('reviews.postConfirm', { number: tk.value?.pull?.number ?? '', host: host.value }), confirmLabel: label })) postReview.mutate()
+}
+
 const ACTION_LABEL = { approve: 'ticket.approve', reject: 'ticket.reject', stop: 'ticket.stopRun' } as const
 async function confirmThen(msg: string, a: keyof typeof ACTION_LABEL) {
-  const label = a === 'approve' && report.value ? t('ticket.approveReport') : t(ACTION_LABEL[a])
+  const label = a === 'approve' && pull.value ? t('reviews.mergeBtn') : a === 'reject' && pull.value ? t('reviews.dismissBtn', { host: host.value }) : a === 'approve' && report.value ? t('ticket.approveReport') : t(ACTION_LABEL[a])
   if (await askConfirm({ title: label, message: msg, confirmLabel: label, danger: a !== 'approve' })) act.mutate(a)
 }
 function approve() {
   const t0 = tk.value
   if (!t0) return
+  if (pull.value) {
+    const method = t(`reviews.merge_${settingsMerge.value}`)
+    confirmThen(t('reviews.mergeConfirm', { number: t0.pull?.number ?? t0.prNumber ?? '', host: host.value, method }), 'approve')
+    return
+  }
   if (report.value) {
     confirmThen(
       postReport.value ? t(isPlane.value ? 'ticket.approveReportPostConfirmPlane' : 'ticket.approveReportPostConfirm', { key: t0.key }) : t('ticket.approveReportConfirm'),
@@ -282,8 +334,12 @@ function approve() {
   confirmThen(msg, 'approve')
 }
 function reject() {
-  confirmThen(t('ticket.rejectConfirm', { key: key.value }), 'reject')
+  if (pull.value) confirmThen(t('reviews.dismissConfirm', { number: tk.value?.pull?.number ?? '', host: host.value }), 'reject')
+  else confirmThen(t('ticket.rejectConfirm', { key: key.value }), 'reject')
 }
+// The merge method agnts uses, for the merge confirmation.
+const settingsQuery = useQuery({ queryKey: ['settings'], queryFn: () => unwrap(api.GET('/settings')), enabled: pull })
+const settingsMerge = computed(() => settingsQuery.data.value?.pullReviews?.mergeMethod ?? 'merge')
 async function deleteTask() {
   if (await askConfirm({ title: t('ticket.delete'), message: t('ticket.deleteConfirm', { key: key.value }), confirmLabel: t('ticket.delete'), danger: true })) del.mutate()
 }
@@ -337,20 +393,20 @@ const tabs = computed(() => {
   const out: { id: Tab; label: string; n?: number }[] = []
   if (reviewingReport.value) out.push({ id: 'decide', label: t('ticket.reviewReportTitle') })
   if (report.value && (k.state === 'waiting_for_review' || (k.state === 'done' && result.value?.report))) out.push({ id: 'report', label: t('ticket.report') })
-  if (k.state === 'waiting_for_review') out.push({ id: 'review', label: t('ticket.tabReview'), n: d.value?.review?.revision === k.revision ? d.value.review.findings.length || undefined : undefined })
+  if (k.state === 'waiting_for_review' || (pull.value && d.value?.review)) out.push({ id: 'review', label: t('ticket.tabReview'), n: d.value?.review?.revision === k.revision ? d.value.review.findings.length || undefined : undefined })
   if (k.state === 'waiting_for_review' && !report.value && (k.canPreview || d.value?.preview)) {
     const pv = d.value?.preview
     out.push({ id: 'preview', label: t('preview.tab'), n: pv?.revision === k.revision ? pv.issues.length || undefined : undefined })
   }
   if (!report.value && result.value?.files.length) out.push({ id: 'changes', label: t('ticket.changes'), n: totals.value.n })
-  if (d.value?.followUps) out.push({ id: 'followUps', label: t('ticket.tabFollowUps') })
+  if (d.value?.followUps && !pull.value) out.push({ id: 'followUps', label: t('ticket.tabFollowUps') })
   const rels = d.value?.relations
-  if (k.repoId || rels?.items.length) {
+  if (!pull.value && (k.repoId || rels?.items.length)) {
     const waiting = rels?.items.filter((r) => r.status === 'proposed').length
     out.push({ id: 'order', label: t('relations.tab'), n: waiting || undefined })
   }
   if (answered.value.length && !['new', 'analyzing', 'waiting_for_answers'].includes(k.state)) out.push({ id: 'answers', label: t('ticket.tabAnswers'), n: answered.value.length })
-  if (k.state === 'done') out.push({ id: 'lessons', label: t('ticket.tabLessons') })
+  if (k.state === 'done' && !pull.value) out.push({ id: 'lessons', label: t('ticket.tabLessons') })
   if (events.value.length) out.push({ id: 'log', label: t('ticket.runLog') })
   return out
 })
@@ -430,6 +486,25 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
         <RouterLink :to="{ name: 'ticket', params: { key: tk.replayOf } }">{{ tk.replayOf }}</RouterLink>
       </p>
     </div>
+    <section v-if="tk.trackerUpdate" class="card tk-update">
+      <div class="help warn">
+        <HiIcon name="info" />
+        <div>
+          <p><b>{{ t('ticket.updateTitle', { source: trackerName }) }}</b></p>
+          <p>{{ t('ticket.updateSub') }}</p>
+        </div>
+      </div>
+      <div class="sec">
+        <h3>{{ t('ticket.updateNow', { when: new Date(tk.trackerUpdate.at).toLocaleString() }) }}</h3>
+        <p class="tk-update-title">{{ tk.trackerUpdate.title }}</p>
+        <p class="tk-update-desc">{{ tk.trackerUpdate.description || '—' }}</p>
+      </div>
+      <p v-if="tk.prUrl" class="hint">{{ t('ticket.updatePushed') }}</p>
+      <div v-if="workspace.canEdit" class="actions" style="margin: 0">
+        <button class="btn btn-p" type="button" :disabled="!!tk.prUrl || version.isPending.value" @click="confirmRestart">{{ t('ticket.updateRestart') }}</button>
+        <button class="btn" type="button" :disabled="version.isPending.value" @click="version.mutate('keep')">{{ t('ticket.updateKeep') }}</button>
+      </div>
+    </section>
     <div v-if="kindWarning" class="help warn" style="margin-bottom: 14px">
       <HiIcon name="info" />
       <p>
@@ -453,8 +528,57 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
 
         <section v-if="!reviewingReport" class="card">
           <fieldset class="ro-fs" :disabled="!workspace.canEdit">
+            <PullCard v-if="pull" :ticket="tk" />
+            <div v-if="pull && (canPost || posted)" class="sec pr-post">
+              <p v-if="posted" class="hint">{{ t('reviews.posted', { host, when: tk.pull?.postedAt ? new Date(tk.pull.postedAt).toLocaleString() : '' }) }}</p>
+              <button v-else class="btn btn-s" type="button" :disabled="postReview.isPending.value" @click="confirmPost">{{ t('reviews.postBtn', { host }) }}</button>
+            </div>
+            <!-- a pull request review: queued, fetching, reviewing, ready, merging, merged, dismissed -->
+            <template v-if="pull && ['new', 'analyzing', 'coding'].includes(tk.state)">
+              <h2>{{ titleWithRev(tk.state === 'new' ? t('ticket.queuedTitle') : tk.state === 'analyzing' ? t('reviews.fetchingTitle') : t('reviews.reviewingTitle')) }}</h2>
+              <p class="sub">{{ tk.state === 'new' ? t('reviews.queuedSub') : t('reviews.reviewingSub') }}</p>
+              <div v-if="tk.state !== 'new'" class="sec"><LiveLog :events="events" /></div>
+              <div v-if="tk.state !== 'new'" class="actions"><button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="confirmThen(t('ticket.stopConfirm', { key }), 'stop')">{{ t('ticket.stopRun') }}</button></div>
+            </template>
+            <template v-else-if="pull && tk.state === 'waiting_for_review'">
+              <h2>{{ titleWithRev(t('reviews.readyTitle')) }}</h2>
+              <p class="sub">{{ t('reviews.readySub', { host }) }}</p>
+              <div v-if="d.review?.summary" class="sec"><div class="summary"><p>{{ tr(d.review.summary) }}</p></div></div>
+              <div v-if="result" class="sec">
+                <dl class="facts">
+                  <div><dt>{{ t('ticket.factChanged') }}</dt><dd>{{ t('ticket.changedValue', { n: totals.n, add: totals.add, del: totals.del }) }}</dd></div>
+                  <div><dt>{{ t('ticket.factTurns') }}</dt><dd>{{ tk.turns }}</dd></div>
+                </dl>
+              </div>
+              <div class="sec">
+                <h3><label for="feedback">{{ t('reviews.noteLabel') }}</label></h3>
+                <textarea id="feedback" v-model="feedback" maxlength="4000" :placeholder="t('reviews.noteHint')" @paste="feedbackAttach?.pasted($event)" />
+                <FileAttach ref="feedbackAttach" v-model="feedbackFiles" v-model:busy="feedbackUploading" />
+              </div>
+              <div class="sec">
+                <h3><label for="dismiss-reason">{{ t('reviews.dismissReason') }}</label></h3>
+                <input id="dismiss-reason" v-model="dismissReason" class="cfg-in" maxlength="4000" :placeholder="t('reviews.dismissReasonHint')">
+              </div>
+              <div class="actions">
+                <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="approve">{{ t('reviews.mergeBtn') }}</button>
+                <button class="btn" type="button" :disabled="!feedback.trim() || feedbackUploading || act.isPending.value" @click="act.mutate('request-changes')">{{ t('reviews.rereviewBtn') }}</button>
+                <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('reviews.dismissBtn', { host }) }}</button>
+              </div>
+            </template>
+            <template v-else-if="pull && tk.state === 'pushing'">
+              <h2>{{ t('reviews.mergingTitle') }}</h2>
+              <div class="sec"><LiveLog :events="events" /></div>
+            </template>
+            <template v-else-if="pull && tk.state === 'done'">
+              <h2>{{ t('reviews.mergedTitle') }}</h2>
+              <div class="sec"><div class="help ok"><HiIcon name="check" /><p>{{ t('reviews.mergedSub', { number: tk.pull?.number ?? tk.prNumber ?? '' }) }}</p></div></div>
+            </template>
+            <template v-else-if="pull && tk.state === 'rejected'">
+              <h2>{{ tk.mergedAt ? t('reviews.mergedTitle') : t('reviews.dismissedTitle') }}</h2>
+              <p class="sub">{{ tk.stopReason || t('reviews.dismissedSub', { host }) }}</p>
+            </template>
             <!-- new -->
-            <template v-if="tk.state === 'new'">
+            <template v-else-if="tk.state === 'new'">
               <h2>{{ t('ticket.queuedTitle') }}</h2>
               <p class="sub">{{ tk.held ? t('ticket.heldSub') : report ? t('ticket.queuedSubReport') : t('ticket.queuedSub') }}</p>
               <KindPicker :ticket="tk" />
@@ -660,9 +784,9 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
               <div class="sec">
                 <div class="help bad"><HiIcon name="info" /><p class="err-text" style="white-space: pre-wrap">{{ tk.stopReason || t('ticket.failedUnknown') }}</p><CopyButton v-if="tk.stopReason" :text="tk.stopReason" /></div>
               </div>
-              <KindPicker v-if="kindEditable" :ticket="tk" />
-              <RepoPicker v-if="canChangeRepo" :ticket="tk" />
-              <ModelPicker :ticket="tk" :stages="['retry']" />
+              <KindPicker v-if="kindEditable && !pull" :ticket="tk" />
+              <RepoPicker v-if="canChangeRepo && !pull" :ticket="tk" />
+              <ModelPicker v-if="!pull" :ticket="tk" :stages="['retry']" />
               <div v-if="tk.resumeState !== 'pushing'" class="sec">
                 <h3><label for="retry-note">{{ t('ticket.retryNote') }}</label></h3>
                 <textarea id="retry-note" v-model="retryNote" maxlength="4000" :placeholder="t('ticket.retryNoteHint')" />
@@ -733,7 +857,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
 
           <section v-else-if="activeTab === 'review'" class="card tk-panel">
             <fieldset class="ro-fs" :disabled="!workspace.canEdit">
-              <CodeReview :ticket="tk" :review="d.review" :feedback="feedback" :report="report" @add="addFeedback" @show="showFile" />
+              <CodeReview :ticket="tk" :review="d.review" :feedback="feedback" :report="report" :pull="pull" @add="addFeedback" @show="showFile" />
               <RedFlags v-if="result?.redFlags?.length" :flags="result.redFlags" @show="showFile" />
             </fieldset>
           </section>
@@ -756,7 +880,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
               <h3>{{ t('ticket.checks') }}</h3>
               <dl class="kv">
                 <template v-for="c in result.checks" :key="c.name">
-                  <dt>{{ c.command }}</dt>
+                  <dt class="mono">{{ c.command }}</dt>
                   <dd :class="c.exitCode === 0 ? 'repo-ok' : 'repo-miss'">{{ c.exitCode === 0 ? t('ticket.passed') : t('ticket.failedCheck') }} · {{ (c.durationMs / 1000).toFixed(1) }}s</dd>
                 </template>
               </dl>
@@ -806,7 +930,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
               <dd><template v-for="(k2, i) in waitsFor" :key="k2"><template v-if="i">, </template><RouterLink :to="{ name: 'ticket', params: { key: k2 } }">{{ k2 }}</RouterLink></template></dd>
             </template>
             <dt>{{ t('kind.title') }}</dt><dd><KindBadge :ticket="tk" /></dd>
-            <dt>{{ t('ticket.kvSource') }}</dt><dd>{{ isTask ? t('ticket.srcTask') : isPlane ? t('ticket.srcPlane') : t('ticket.srcJira') }}</dd>
+            <dt>{{ t('ticket.kvSource') }}</dt><dd>{{ isTask ? t('ticket.srcTask') : isPlane ? t('ticket.srcPlane') : pull ? t('ticket.srcGit') : t('ticket.srcJira') }}</dd>
             <dt>{{ t('ticket.kvRepo') }}</dt><dd>{{ tk.repoName ?? '—' }}</dd>
             <dt>{{ t('queue.member') }}</dt>
             <dd>
@@ -821,11 +945,11 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             <template v-if="tk.createdBy"><dt /><dd class="hint">{{ t('queue.createdBy', { name: tk.createdBy }) }}</dd></template>
             <template v-if="isTask && !report"><dt>{{ t('ticket.kvAfter') }}</dt><dd>{{ tk.afterApprove === 'main' ? t('ticket.afterMain') : t('ticket.afterPr') }}</dd></template>
             <dt>{{ t('ticket.kvPriority') }}</dt><dd>{{ tk.priority }}</dd>
-            <template v-if="!report"><dt>{{ t('ticket.kvBranch') }}</dt><dd>{{ branch }}</dd></template>
+            <template v-if="!report && !pull"><dt>{{ t('ticket.kvBranch') }}</dt><dd>{{ branch }}</dd></template>
             <template v-if="tk.assignees?.length"><dt>{{ t('ticket.kvAssignees') }}</dt><dd>{{ tk.assignees.join(', ') }}</dd></template>
             <dt>{{ t('ticket.kvRevision') }}</dt><dd>{{ tk.revision }}</dd>
             <dt>{{ t('ticket.kvTurns') }}</dt><dd>{{ tk.turns }}</dd>
-            <template v-if="d.effectiveModels">
+            <template v-if="d.effectiveModels && !pull">
               <dt>{{ t('ticket.kvCodingModel') }}</dt><dd>{{ MODEL_NAME[d.effectiveModels.coding] }}</dd>
               <dt>{{ t('ticket.kvRetryModel') }}</dt><dd>{{ MODEL_NAME[d.effectiveModels.retry] }}</dd>
             </template>
@@ -850,6 +974,9 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
 </template>
 
 <style scoped>
+.tk-update { margin-bottom: 14px; }
+.tk-update-title { margin: 6px 0 4px; font-weight: 600; }
+.tk-update-desc { margin: 0; white-space: pre-wrap; max-height: 240px; overflow: auto; font-size: 14px; }
 .tk-desc { white-space: pre-wrap; }
 .tk-desc.folded { display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .tk-more { margin-top: 4px; padding: 0; border: 0; background: none; font: inherit; font-size: 14px; font-weight: 700; color: var(--primary-ink); cursor: pointer; }

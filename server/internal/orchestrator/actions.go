@@ -2,6 +2,7 @@ package orchestrator
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"slices"
@@ -28,6 +29,12 @@ type Incoming struct {
 	Priority    string
 	// Kind comes from a kind label; empty means agnts picks it.
 	Kind domain.TicketKind
+	// Repo is the repository a repo: label names; it wins over the one
+	// linked to Project. Empty: the project's.
+	Repo string
+	// NoCreate refreshes a known ticket but never creates one (an issue no
+	// longer assigned to you).
+	NoCreate bool
 	// LinksKnown is true when the tracker reported the issue's links, so
 	// DependsOn and Dependents are complete (an empty list removes links).
 	LinksKnown bool
@@ -37,22 +44,42 @@ type Incoming struct {
 	Dependents []string
 }
 
-// Ingest records a ticket from the tracker. New tickets are queued for
-// analysis; known tickets get their text refreshed while agnts has not
-// started coding them. It reports whether the ticket was created.
+// IngestOutcome is what Ingest did with an issue.
+type IngestOutcome string
+
+// Ingest outcomes.
+const (
+	IngestCreated   IngestOutcome = "created"   // a new ticket
+	IngestUpdated   IngestOutcome = "updated"   // a ticket not started yet took the new text
+	IngestAsked     IngestOutcome = "asked"     // a started ticket's issue changed: it asks you now
+	IngestPending   IngestOutcome = "pending"   // that question still waits for you
+	IngestUnchanged IngestOutcome = "unchanged" // nothing new, or nothing to do
+)
+
+// Ingest records a ticket from the tracker and reports whether it was
+// created; IngestDetail says what else happened.
 func (o *Orchestrator) Ingest(ctx context.Context, in Incoming, origin domain.Origin) (bool, error) {
+	out, err := o.IngestDetail(ctx, in, origin)
+	return out == IngestCreated, err
+}
+
+// IngestDetail records a ticket from the tracker. New tickets are queued
+// for analysis. A known ticket agnts has not started takes the new text;
+// one it started keeps working from the text it started with, and a newer
+// version waits on it for you to restart with it or keep the current one.
+func (o *Orchestrator) IngestDetail(ctx context.Context, in Incoming, origin domain.Origin) (IngestOutcome, error) {
 	if in.Key == "" || in.Title == "" {
-		return false, invalid("ticket key and title are required")
+		return IngestUnchanged, invalid("ticket key and title are required")
 	}
 	if in.Source == "" {
 		in.Source = domain.SourceJira
 	}
 	if !in.Source.Tracked() {
-		return false, invalid("%s is not a tracker", in.Source)
+		return IngestUnchanged, invalid("%s is not a tracker", in.Source)
 	}
 	st, err := o.settings.Get(ctx)
 	if err != nil {
-		return false, err
+		return IngestUnchanged, err
 	}
 	t := domain.Ticket{
 		Key: in.Key, Source: in.Source, Title: in.Title, Description: in.Description,
@@ -65,51 +92,109 @@ func (o *Orchestrator) Ingest(ctx context.Context, in Incoming, origin domain.Or
 	if t.Priority == "" {
 		t.Priority = "medium"
 	}
-	archived := false
-	if repo, err := o.store.RepositoryByTrackerProject(ctx, in.Source, in.Project); err == nil {
-		t.RepoID = &repo.ID
-		archived = repo.ArchivedAt != nil
-	} else if !errors.Is(err, domain.ErrNotFound) {
-		return false, err
+	archived, labelled, warn := false, false, ""
+	if in.Repo != "" {
+		repo, err := o.store.RepositoryByName(ctx, in.Repo)
+		switch {
+		case err == nil:
+			t.RepoID, labelled = &repo.ID, true
+			archived = repo.ArchivedAt != nil
+		case errors.Is(err, domain.ErrNotFound):
+			warn = fmt.Sprintf("the label %s%s names no repository in agnts; using the one linked to %s, if any", domain.RepoLabelPrefix, in.Repo, in.Project)
+		default:
+			return IngestUnchanged, err
+		}
 	}
+	if !labelled {
+		if repo, err := o.store.RepositoryByTrackerProject(ctx, in.Source, in.Project); err == nil {
+			t.RepoID = &repo.ID
+			archived = repo.ArchivedAt != nil
+		} else if !errors.Is(err, domain.ErrNotFound) {
+			return IngestUnchanged, err
+		}
+	}
+	defer func() {
+		if warn != "" {
+			o.event(ctx, domain.Event{TicketKey: in.Key, Type: domain.EventTicketUpdated, Origin: origin, Level: domain.LevelWarn, Message: warn})
+		}
+	}()
 
 	// An archived repository takes no new tickets; known ones still refresh.
-	if !archived {
+	if !archived && !in.NoCreate {
 		_, err = o.store.CreateTicket(ctx, t, domain.Event{
 			TicketKey: in.Key, Type: domain.EventTicketCreated, Origin: origin, Message: in.Title,
 		})
 		if err == nil {
 			o.syncTrackerRelations(ctx, in, origin)
 			o.Wake()
-			return true, nil
+			return IngestCreated, nil
 		}
 		if !errors.Is(err, domain.ErrConflict) {
-			return false, err
+			return IngestUnchanged, err
 		}
 	}
 
-	// Known ticket: refresh text only before coding starts, so the
-	// description Claude worked from matches what the reviewer sees.
-	_, err = o.store.UpdateTicket(ctx, in.Key, &domain.Event{
-		TicketKey: in.Key, Type: domain.EventTicketUpdated, Origin: origin, Message: "ticket text updated in " + in.Source.Name(),
-	}, func(x *domain.Ticket) {
-		if x.State == domain.StateNew || x.State == domain.StateWaitingForAnswers {
-			x.Title, x.Description = in.Title, in.Description
+	// Known ticket: before work starts it takes the new text; after, the
+	// description Claude worked from stays what the reviewer sees, and the
+	// new version waits for a person's choice.
+	fresh := domain.NewTrackerUpdate(in.Title, in.Description)
+	out := IngestUnchanged
+	cur, err := o.store.UpdateTicket(ctx, in.Key, nil, func(x *domain.Ticket) {
+		if !x.State.Terminal() && in.Priority != "" && x.Priority != t.Priority {
+			x.Priority = t.Priority // only orders the queue: taken at any time
 		}
-		if x.State == domain.StateNew && in.Kind != "" {
+		switch {
+		case x.State.Terminal():
+		case x.State == domain.StateNew:
+			if fresh.Differs(*x) {
+				x.Title, x.Description, out = fresh.Title, fresh.Description, IngestUpdated
+			}
+			x.Update = nil
+		case !fresh.Differs(*x):
+			x.Update = nil // changed back to what agnts works from
+		case fresh.Hash == x.Kept:
+		case x.Update != nil && x.Update.Hash == fresh.Hash:
+			out = IngestPending
+		default:
+			x.Update, out = &fresh, IngestAsked
+		}
+		if x.State == domain.StateNew && in.Kind != "" && (x.Kind != in.Kind || x.KindAuto) {
 			x.Kind, x.KindAuto = in.Kind, false // a kind label added before work started
+			if out == IngestUnchanged {
+				out = IngestUpdated
+			}
 		}
-		if x.RepoID == nil {
+		switch {
+		case labelled && x.State == domain.StateNew && x.PRURL == "" && (x.RepoID == nil || *x.RepoID != *t.RepoID):
+			// A repo: label added or changed before work started.
 			x.RepoID = t.RepoID
+			if out == IngestUnchanged {
+				out = IngestUpdated
+			}
+		case x.RepoID == nil && t.RepoID != nil:
+			x.RepoID = t.RepoID
+		default:
+			warn = "" // the ticket keeps its repository; nothing to warn about
 		}
 	})
-	if archived && errors.Is(err, domain.ErrNotFound) {
-		return false, nil
+	if errors.Is(err, domain.ErrNotFound) && (archived || in.NoCreate) {
+		warn = "" // no ticket to warn on
+		return IngestUnchanged, nil
 	}
-	if err == nil {
-		o.syncTrackerRelations(ctx, in, origin)
+	if err != nil {
+		return IngestUnchanged, err
 	}
-	return false, err
+	switch out {
+	case IngestUpdated:
+		o.event(ctx, domain.Event{TicketKey: in.Key, Type: domain.EventTicketUpdated, Origin: origin, Message: "ticket text updated in " + in.Source.Name()})
+	case IngestAsked:
+		o.event(ctx, domain.Event{TicketKey: in.Key, Type: domain.EventTrackerChanged, Origin: origin, Level: domain.LevelWarn,
+			Message: fmt.Sprintf("%s changed in %s after agnts started (%s): restart with the new version, or keep working on the current one",
+				in.Key, in.Source.Name(), cur.State),
+			Data: map[string]any{"title": fresh.Title, "state": string(cur.State)}})
+	}
+	o.syncTrackerRelations(ctx, in, origin)
+	return out, nil
 }
 
 // Answer saves answers to the ticket's questions and, once all are
@@ -238,6 +323,9 @@ func (o *Orchestrator) Approve(ctx context.Context, key string, assignees []stri
 	}
 	msg := "approved"
 	switch {
+	case cur.Kind == domain.KindReview:
+		clean, postReport = nil, false
+		msg = "accepted: merging the pull request"
 	case cur.Kind.Report():
 		clean = nil // there is no pull request to assign
 		if postReport {
@@ -315,6 +403,7 @@ func (o *Orchestrator) RequestChanges(ctx context.Context, key, feedback string,
 			o.cancelRun(ctx, key) // coding waits for the run to end
 		}
 		o.queueReflection(ctx, t, domain.ReflectChanges, feedback, origin)
+		o.noteReviewer(ctx, t, domain.NoteRereview, feedback, origin)
 		o.Wake()
 	}
 	return t, err
@@ -335,11 +424,71 @@ func (o *Orchestrator) Reject(ctx context.Context, key, reason string, origin do
 	o.cancelRun(ctx, key)
 	o.trackerMove(context.WithoutCancel(ctx), t, TrackerRejected)
 	o.queueReflection(context.WithoutCancel(ctx), t, domain.ReflectRejected, reason, origin)
-	if t.PRNumber == nil {
-		o.dropBranch(ctx, t) // never pushed: nothing else needs it
+	o.noteReviewer(ctx, t, domain.NoteDismissed, reason, origin)
+	if t.PRNumber == nil || t.Kind == domain.KindReview {
+		o.dropBranch(ctx, t) // never pushed (a review's branch is a copy): nothing else needs it
 	}
 	o.Wake() // tickets waiting for it may start
 	return t, nil
+}
+
+// RestartWithUpdate starts a ticket over from the newer version of its
+// issue that arrived after agnts started: the work so far (analysis,
+// answers, commits, reviews) is dropped and the ticket is analysed again.
+// Anything pushed already cannot be restarted.
+func (o *Orchestrator) RestartWithUpdate(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error) {
+	cur, err := o.store.TicketByKey(ctx, key)
+	if err != nil {
+		return cur, err
+	}
+	if cur.Update == nil {
+		return cur, invalid("%s has no newer version from the tracker", key)
+	}
+	if cur.PRURL != "" || cur.State == domain.StatePushing || cur.ResumeState == domain.StatePushing {
+		return cur, invalid("%s is pushed already: reject it and let agnts take the issue again, or keep the current version", key)
+	}
+	u := *cur.Update
+	t, err := o.store.Transition(ctx, key, domain.StateNew, domain.Event{
+		TicketKey: key, Type: domain.EventStateChanged, Origin: origin,
+		Message: "restarted with the newer version from " + cur.Source.Name(),
+	}, func(x *domain.Ticket) {
+		x.Title, x.Description = u.Title, u.Description
+		x.Update, x.Kept = nil, ""
+		x.Revision++ // reviews of the old work are stale
+		x.HeadSHA, x.Feedback, x.FeedbackShots, x.FeedbackFiles = "", "", nil, nil
+		x.ResumeState, x.SelfFixes, x.QuietReview = domain.StateNew, 0, false
+		dropSideRuns(x)
+	})
+	if err != nil {
+		return t, err
+	}
+	o.cancelRun(ctx, key)
+	o.dropBranch(ctx, cur) // the old commits: the new analysis cuts a fresh branch
+	if err := o.store.ReplaceQuestions(context.WithoutCancel(ctx), cur.ID, nil); err != nil {
+		o.log.Warn("drop the old questions", "ticket", key, "err", err)
+	}
+	o.Wake()
+	return t, nil
+}
+
+// KeepCurrentVersion keeps working from the text agnts started with and
+// stops asking about this newer version of the issue (a later change asks
+// again).
+func (o *Orchestrator) KeepCurrentVersion(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error) {
+	cur, err := o.store.TicketByKey(ctx, key)
+	if err != nil {
+		return cur, err
+	}
+	if cur.Update == nil {
+		return cur, invalid("%s has no newer version from the tracker", key)
+	}
+	return o.store.UpdateTicket(ctx, key, &domain.Event{
+		TicketKey: key, Type: domain.EventTicketUpdated, Origin: origin, Message: "kept working on the version agnts started with",
+	}, func(x *domain.Ticket) {
+		if x.Update != nil {
+			x.Kept, x.Update = x.Update.Hash, nil
+		}
+	})
 }
 
 func (o *Orchestrator) cancelRun(ctx context.Context, key string) bool {
@@ -434,7 +583,7 @@ func (o *Orchestrator) SetRepo(ctx context.Context, key string, repoID int64, or
 		Data: map[string]any{"repoId": repo.ID},
 	}, func(x *domain.Ticket) {
 		stopped := x.State == domain.StateFailed || x.State == domain.StateRateLimited
-		if (x.State != domain.StateNew && !stopped) || x.PRURL != "" || x.ResumeState == domain.StatePushing {
+		if (x.State != domain.StateNew && !stopped) || x.PRURL != "" || x.ResumeState == domain.StatePushing || x.Kind == domain.KindReview {
 			bad = &domain.TransitionError{Key: key, From: x.State, To: x.State}
 			return
 		}
@@ -562,7 +711,7 @@ func parseKind(s string) (domain.TicketKind, bool, error) {
 		return domain.KindCode, true, nil
 	}
 	k := domain.TicketKind(s)
-	if !k.Valid() {
+	if !k.Selectable() {
 		return "", false, invalid("unknown kind %q", s)
 	}
 	return k, false, nil
@@ -587,7 +736,7 @@ func (o *Orchestrator) SetKind(ctx context.Context, key, kind string, origin dom
 			bad = &domain.TransitionError{Key: key, From: x.State, To: x.State}
 			return
 		}
-		if x.PRURL != "" || x.ResumeState == domain.StatePushing {
+		if x.PRURL != "" || x.ResumeState == domain.StatePushing || x.Kind == domain.KindReview {
 			bad = &domain.TransitionError{Key: key, From: x.State, To: x.State}
 			return
 		}
@@ -942,6 +1091,14 @@ func (o *Orchestrator) View(ctx context.Context, key string) (TicketView, error)
 	}
 	if v.Review, err = o.latestReview(ctx, t.ID); err != nil {
 		return v, err
+	}
+	if t.Kind == domain.KindReview && v.Result != nil {
+		// A pull request review is the work itself: the result holds it.
+		var rv domain.Review
+		if json.Unmarshal(v.Result.Summary, &rv) == nil && rv.Summary != "" {
+			rv.CreatedAt = v.Result.CreatedAt
+			v.Review = &rv
+		}
 	}
 	if v.Preview, err = o.latestPreview(ctx, t.ID); err != nil {
 		return v, err

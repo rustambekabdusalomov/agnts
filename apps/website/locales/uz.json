@@ -1,4 +1,40 @@
 {
+  "about": {
+    "bio": "5 yildan ortiq tajribaga ega Software engineer va Teamlead.",
+    "m1": {
+      "title": "G'oya",
+      "when": "May"
+    },
+    "m2": {
+      "title": "Birinchi versiya",
+      "when": "Iyun"
+    },
+    "m3": {
+      "title": "Turkiya",
+      "when": "Iyul"
+    },
+    "m4": {
+      "title": "Do'stlar",
+      "when": "Keyin"
+    },
+    "m5": {
+      "title": "Startap",
+      "when": "Hozir"
+    },
+    "m6": {
+      "title": "Mobil ilova",
+      "when": "Keyin"
+    },
+    "name": "Rustambek Abdusalomov",
+    "role": "Asoschi",
+    "signature": "Rustambek, agnts asoschisi",
+    "story1": "2026-yil iyul oyida Turkiyaga sayohat qilish uchun borgan edim. Har kuni ertalab bir nechta vazifalarni yozib ketardim, bunga atiga 5-10 daqiqa vaqt sarflar edim, kechqurun mehmonxonaga qaytganimda esa ular testdan o'tgan pull requestlar bo'lib meni kutib turardi. Ularni ko'rib chiqish 10–15 daqiqa vaqt talab qilar edi holos. Bu kunlik 20-25 daqiqalik vaqt ajratgan holda loyihalardagi vazifalarni bajarish imkoniyatini yaratdi. Va bu menga sayohatni ko'ngildagidek bo'lishiga juda katta hissa qo'shdi deb ayta olaman. O'sha hafta agnts'ni yaratganim uchun o'zimga chin dildan rahmat aytdim.",
+    "story2": "Uni may oyida boshladim. Dasturchi kunining qanchasi hali ham vazifalarni o'qish, ularni AI'ga tushuntirish, so'ng natijani tekshirish va test qilishga ketishini ko'rganimdan keyin. Birinchi versiya iyun oyining oxirlarida mening vazifalarim ustida ishlay boshladi va hozirgacha ishlab kelmoqda.",
+    "story3": "Qaytib kelganimda bu haqida dasturchi do'stlarimga aytib berdim va ularda bunga qiziqish paydo bo'ldi. Shundan so'ng ular ham sinab ko'rmoqchi bo'lishdi. Ularga akkauntlarini ochib berdim, orqadan ko'p o'tmay, barchasidan samimiy fikrlar oldim. Shunda agnts startapga aylandi, boshqa dasturchilar ham vaqtini kunlik takrorlanuvchi vazifalarga emas, arxitektura, masshtablashtirish va biznes logika ustida ishlash uchun sarflashi kerak degan hulosaga keldim. Bu ish unumdorligini sezilarli darajada oshirishiga va proyektlarning yanada mukammalroq yechimlar bilan amalga oshirish mumkinligiga guvoh bo'ldim.",
+    "story4": "Hozir mobil ilova sinov bosqichida. Ilovani barcha jarayonlarni telefondan boshqarish imkoniyatini yaratish uchun ishlab chiqyapman. Sinovni tugatgach, ilovani to'liq holatda hamma foydalana olishi uchun ishga tushirishni reja qilganman.",
+    "timeline": "Xronologiya",
+    "title": "Ertalab vazifalarni yozardim. Kechga ular review'ga tayyor edi."
+  },
   "aria": {
     "footer": "Pastki menyu",
     "language": "Til",
@@ -48,6 +84,35 @@
       "text": "Vazifaga agnts belgisini qo'ying. agnts uni o'qiydi, savollarini o'sha yerda beradi va pull request ochilganda vazifani yangilaydi."
     },
     "lead": "Trekeringiz, repozitoriylaringiz va Claude'ni bir marta ulang. Qolganini agnts o'zi bajaradi.",
+    "plane": {
+      "role": "Vazifalar",
+      "text": "Plane Cloud yoki o'z serveringiz. Vazifaga agnts belgisini qo'ying, ish davomida u holatlaringiz bo'ylab o'tib boradi."
+    },
+    "request": {
+      "button": "Konnektor so'rash",
+      "cloud": "Bulut",
+      "email": "Email",
+      "failed": "So'rovni yuborib bo'lmadi. Birozdan keyin qayta urinib ko'ring.",
+      "formLede": "Jamoangiz qaysi vositadan foydalanishini yozing. Har bir so'rovni o'qiymiz va sizga javob yozamiz.",
+      "formTitle": "Konnektor so'rash",
+      "hosting": "Qayerda ishlaydi",
+      "invalid": "Vositani va javob yozishimiz mumkin bo'lgan emailni kiriting.",
+      "link": "Vositaga havola",
+      "name": "Ismingiz",
+      "notSure": "Bilmayman",
+      "selfHosted": "O'z serverimiz",
+      "send": "So'rovni yuborish",
+      "sending": "Yuborilmoqda...",
+      "sentText": "So'rovingizni ko'rib chiqamiz va konnektor haqida emailingizga yozamiz.",
+      "sentTitle": "Rahmat, qabul qildik!",
+      "text": "Linear, YouTrack, Trello, Azure DevOps yoki o'z trekeringiz: jamoangiz nimadan foydalanishini yozing, biz siz uchun konnektor qilib beramiz.",
+      "title": "Boshqa narsadan foydalanasizmi?",
+      "tooMany": "Tarmog'ingizdan juda ko'p so'rov keldi. Bir necha daqiqadan keyin urinib ko'ring.",
+      "tool": "Vosita",
+      "toolPh": "Linear, YouTrack, Trello...",
+      "usage": "Jamoangiz undan qanday foydalanadi",
+      "usagePh": "Vazifalar, kod review, CI — to'g'ri qilishimizga yordam beradigan hamma narsa"
+    },
     "title": "Siz allaqachon ishlatadigan vositalar bilan ishlaydi."
   },
   "contact": {
@@ -141,6 +206,7 @@
     "title": "agnts — 24/7 ishlaydigan AI hamkasbingiz"
   },
   "nav": {
+    "about": "Biz haqimizda",
     "connectors": "Konnektorlar",
     "faq": "Savollar",
     "how": "Qanday ishlaydi",
@@ -196,6 +262,45 @@
       "title": "Sizsiz hech narsa chiqmaydi"
     },
     "title": "Kodingiz har bir ishga tushirishda izolyatsiyalangan."
+  },
+  "problem": {
+    "label": "Nega agnts",
+    "title": "Kodni AI yozadi. Qolgan hammasini hali ham siz qilasiz.",
+    "lead": "Dasturchilar allaqachon AI bilan kod yozmoqda. Lekin vazifani hali ham qo'lda o'qish, tushuntirish, tekshirish, test qilish va yopish kerak.",
+    "before": "Muammo",
+    "after": "agnts bilan",
+    "p1": {
+      "title": "Har bir vazifani promptga aylantirasiz",
+      "text": "Vazifani o'qish, kodni o'rganish va AI to'g'ri bajarishi uchun vazifani batafsil tushuntirish."
+    },
+    "p2": {
+      "title": "U yozgan kodni tekshirasiz va test qilasiz",
+      "text": "Build, linter va testlarni ishga tushirib, buzilgan joylarni boshqalar ko'rishidan oldin tuzatish."
+    },
+    "p3": {
+      "title": "Rutina sizda qoladi",
+      "text": "Branchni push qilish, pull request ochish, vazifani «Bajarildi»ga o'tkazish."
+    },
+    "p4": {
+      "title": "U bir xil xatolarni takrorlaydi",
+      "text": "AI tuzatishlaringizni unutadi va keyingi vazifada hammasini qaytadan tushuntirasiz."
+    },
+    "s1": {
+      "title": "agnts vazifani va kodingizni o'qiydi",
+      "text": "Vazifani Jira yoki Plane'dan oladi va faqat noaniq joylarda qisqa savollar beradi."
+    },
+    "s2": {
+      "title": "Tekshiruvlar siz ko'rishdan oldin o'tadi",
+      "text": "Izolyatsiyalangan konteynerda kod yozadi, build, lint va testlarni ishga tushiradi va xatolarni o'zi tuzatadi."
+    },
+    "s3": {
+      "title": "Vazifadan pull requestgacha",
+      "text": "Diffni tasdiqlaganingizdan so'ng agnts push qiladi, pull request ochadi va vazifani yangilaydi."
+    },
+    "s4": {
+      "title": "Har bir xatodan o'rganadi",
+      "text": "Xatoni bir marta tushuntiring. agnts uni tuzatadi va saboqni keyingi vazifalar uchun eslab qoladi."
+    }
   },
   "reviews": {
     "lead": "agnts'ni ishda qo'llayotgan dasturchilarning fikrlari.",

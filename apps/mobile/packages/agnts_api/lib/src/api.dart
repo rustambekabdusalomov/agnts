@@ -23,6 +23,7 @@ import 'package:agnts_api/src/api/mcp_api.dart';
 import 'package:agnts_api/src/api/meta_api.dart';
 import 'package:agnts_api/src/api/platform_api.dart';
 import 'package:agnts_api/src/api/repos_api.dart';
+import 'package:agnts_api/src/api/reviews_api.dart';
 import 'package:agnts_api/src/api/rules_api.dart';
 import 'package:agnts_api/src/api/settings_api.dart';
 import 'package:agnts_api/src/api/tasks_api.dart';
@@ -216,6 +217,12 @@ class AgntsApi {
   /// by doing that all interceptors will not be executed
   ReposApi getReposApi() {
     return ReposApi(dio);
+  }
+
+  /// Get ReviewsApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  ReviewsApi getReviewsApi() {
+    return ReviewsApi(dio);
   }
 
   /// Get RulesApi instance, base route and serializer can be overridden by a given but be careful,

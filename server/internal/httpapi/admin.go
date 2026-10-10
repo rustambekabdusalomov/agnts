@@ -417,7 +417,10 @@ func toSettings(v domain.Settings) gen.Settings {
 	preview, autoPreview, visualCheck := gen.Model(v.Models.Preview), v.AutoPreview, v.VisualCheck
 	previewNote, previewPhotos, egress := v.Notify.Preview, v.Notify.PreviewPhotos, append([]string{}, v.EgressAllow...)
 	autoBrief, selfReview, reflect := v.AutoBrief, v.SelfReview, v.Reflect
+	pulls := gen.PullReviewSettings{Enabled: v.PullReviews.Enabled, ReviewRequested: v.PullReviews.ReviewRequested,
+		SkipDrafts: v.PullReviews.SkipDrafts, Rereview: v.PullReviews.Rereview, MergeMethod: gen.PullReviewSettingsMergeMethod(v.PullReviews.MergeMethod)}
 	return gen.Settings{
+		PullReviews: &pulls,
 		Models: gen.StageModels{Analyze: gen.Model(v.Models.Analyze), Coding: gen.Model(v.Models.Coding),
 			Retry: gen.Model(v.Models.Retry), Helper: gen.Model(v.Models.Helper), Learn: &learn, Review: &review, Preview: &preview},
 		AutoPreview: &autoPreview, VisualCheck: &visualCheck, EgressAllow: &egress, AutoBrief: &autoBrief, SelfReview: &selfReview, Reflect: &reflect,
@@ -478,7 +481,7 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 		AutoBrief: cur.AutoBrief, SelfReview: cur.SelfReview, Reflect: cur.Reflect,
 		MaxTurns: req.MaxTurns, TimeoutMin: req.TimeoutMin, Allow: req.Allow, Deny: req.Deny,
 		AskFirst: req.AskFirst, AutoResume: req.AutoResume, PauseAbove: req.PauseAbove, Parallel: cur.Parallel, AutoLearn: cur.AutoLearn,
-		AutoReview: cur.AutoReview, SuggestFollowUps: cur.SuggestFollowUps,
+		AutoReview: cur.AutoReview, SuggestFollowUps: cur.SuggestFollowUps, PullReviews: cur.PullReviews,
 		Git: domain.GitSettings{AuthorName: req.Git.AuthorName, AuthorEmail: req.Git.AuthorEmail, CoAuthor: req.Git.CoAuthor,
 			PRTitle: req.Git.PrTitle, Draft: req.Git.Draft},
 		Notify: cur.Notify,
@@ -538,6 +541,10 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.EgressAllow != nil {
 		v.EgressAllow = *req.EgressAllow
+	}
+	if p := req.PullReviews; p != nil {
+		v.PullReviews = domain.PullReviewSettings{Enabled: p.Enabled, ReviewRequested: p.ReviewRequested, SkipDrafts: p.SkipDrafts,
+			Rereview: p.Rereview, MergeMethod: string(p.MergeMethod)}
 	}
 	saved, err := s.opt.Admin.Settings.Put(r.Context(), v, origin(r))
 	if err != nil {
@@ -961,12 +968,12 @@ func (s *Server) SyncJira(w http.ResponseWriter, r *http.Request) {
 	if !s.adminReady(w) {
 		return
 	}
-	found, created, err := s.opt.Admin.Integrations.SyncJira(r.Context())
+	res, err := s.opt.Admin.Integrations.SyncJira(r.Context())
 	if err != nil {
 		s.writeAdminError(w, r, err, "")
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]int{"found": found, "created": created})
+	writeJSON(w, http.StatusOK, map[string]int{"found": res.Found, "created": res.Created, "updated": res.Updated, "waiting": res.Waiting})
 }
 
 // SyncPlane implements gen.ServerInterface.

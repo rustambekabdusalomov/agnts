@@ -82,6 +82,9 @@ type Store interface {
 	// RepositoryByTrackerProject returns the repository linked to project
 	// in the tracker source (a Jira project key, a Plane project identifier).
 	RepositoryByTrackerProject(ctx context.Context, source domain.TicketSource, project string) (domain.Repository, error)
+	// RepositoryByName returns the repository named name (in any case), or
+	// ErrNotFound.
+	RepositoryByName(ctx context.Context, name string) (domain.Repository, error)
 	// NextTaskNumber reserves a task number in repoID, or among tasks
 	// without a repository when it is nil.
 	NextTaskNumber(ctx context.Context, repoID *int64) (int, error)

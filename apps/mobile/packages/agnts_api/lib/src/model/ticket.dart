@@ -5,6 +5,8 @@
 // ignore_for_file: unused_element
 import 'package:agnts_api/src/model/follow_ups_mode.dart';
 import 'package:agnts_api/src/model/blocker.dart';
+import 'package:agnts_api/src/model/pull_request.dart';
+import 'package:agnts_api/src/model/tracker_update.dart';
 import 'package:agnts_api/src/model/token_spend.dart';
 import 'package:agnts_api/src/model/wait_reason.dart';
 import 'package:agnts_api/src/model/ticket_kind.dart';
@@ -51,6 +53,8 @@ class Ticket {
 
     required  this.branch,
 
+     this.headSha,
+
      this.prNumber,
 
     required  this.prUrl,
@@ -88,6 +92,10 @@ class Ticket {
      this.stopReason,
 
      this.mergedAt,
+
+     this.pull,
+
+     this.trackerUpdate,
 
      this.learnState,
 
@@ -260,6 +268,19 @@ class Ticket {
 
 
   final String branch;
+
+
+
+      /// The reviewed commit: the branch head agnts committed, or for a pull request review the head agnts reviewed
+  @JsonKey(
+    
+    name: r'headSha',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? headSha;
 
 
 
@@ -501,6 +522,30 @@ class Ticket {
 
 
 
+  @JsonKey(
+    
+    name: r'pull',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final PullRequest? pull;
+
+
+
+  @JsonKey(
+    
+    name: r'trackerUpdate',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final TrackerUpdate? trackerUpdate;
+
+
+
       /// The learn run after push; pending also while it runs
   @JsonKey(
     
@@ -695,6 +740,7 @@ class Ticket {
       other.replayOf == replayOf &&
       other.turns == turns &&
       other.branch == branch &&
+      other.headSha == headSha &&
       other.prNumber == prNumber &&
       other.prUrl == prUrl &&
       other.assignees == assignees &&
@@ -714,6 +760,8 @@ class Ticket {
       other.since == since &&
       other.stopReason == stopReason &&
       other.mergedAt == mergedAt &&
+      other.pull == pull &&
+      other.trackerUpdate == trackerUpdate &&
       other.learnState == learnState &&
       other.reviewState == reviewState &&
       other.previewState == previewState &&
@@ -743,6 +791,7 @@ class Ticket {
         replayOf.hashCode +
         turns.hashCode +
         branch.hashCode +
+        headSha.hashCode +
         prNumber.hashCode +
         prUrl.hashCode +
         assignees.hashCode +
@@ -762,6 +811,8 @@ class Ticket {
         since.hashCode +
         stopReason.hashCode +
         mergedAt.hashCode +
+        pull.hashCode +
+        trackerUpdate.hashCode +
         learnState.hashCode +
         reviewState.hashCode +
         previewState.hashCode +
@@ -794,7 +845,9 @@ jira(r'jira'),
 @JsonValue(r'plane')
 plane(r'plane'),
 @JsonValue(r'local')
-local(r'local');
+local(r'local'),
+@JsonValue(r'git')
+git(r'git');
 
 const TicketSource_Enum(this.value);
 

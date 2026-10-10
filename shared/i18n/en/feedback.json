@@ -9,7 +9,7 @@
     "send": "Send",
     "sent": "Thanks! Your feedback was sent.",
     "adminTitle": "Feedback",
-    "adminLede": "What people sent from their accounts, newest first. Mark each one done once it’s handled.",
+    "adminLede": "What people sent from their accounts, and connector requests from the website, newest first. Mark each one done once it’s handled.",
     "f_new": "New",
     "f_done": "Done",
     "f_all": "All",
@@ -23,6 +23,12 @@
     "markDone": "Mark done",
     "reopen": "Reopen",
     "markedDone": "Marked done",
-    "reopened": "Marked new again"
+    "reopened": "Marked new again",
+    "kind": "Kind",
+    "k_any": "Everything",
+    "k_feedback": "Feedback",
+    "k_connector": "Connector requests",
+    "connectorBadge": "Connector request",
+    "fromSite": "from the website"
   }
 }

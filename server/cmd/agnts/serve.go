@@ -150,6 +150,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		Lessons:      a.lessons,
 		Rules:        a.orch,
 		Briefs:       a.orch,
+		Reviews:      a.orch,
 		OAuth:        a.oauth,
 		MCP:          mcpHandler,
 		DB:           pool,
@@ -169,12 +170,13 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		Cloud:        cfg.Cloud,
 		Google:       googleSignIn(cfg, acc),
 		Feedback:     postgres.NewFeedbacks(pool),
+		SiteURL:      cfg.SiteURL,
 		Payments: map[string]http.Handler{
 			"payme": a.billing.PaymeHandler(),
 			"click": a.billing.ClickHandler(),
 		},
 		Webhooks: map[string]http.Handler{
-			"jira":     jira.WebhookHandler(a.jiraConfig, a.orch, a.store, log.With("component", "jira")),
+			"jira":     jira.WebhookHandler(a.jiraConfig, a.jira.AccountID, a.orch, a.store, log.With("component", "jira")),
 			"plane":    plane.WebhookHandler(a.planeConfig, a.plane, a.orch, a.store, log.With("component", "plane")),
 			"telegram": a.notifier.WebhookHandler(),
 			"github":   vcs.GitHubWebhook(hookSecret(cfg.EncKey, "github"), a.orch, a.store, a.vcs.ForgetAll, log.With("component", "github")),
@@ -378,6 +380,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: a.jira, domain.SourcePlane: a.plane},
 		Settings: a.settings, Usage: a.usage, Lessons: a.lessons, Rules: postgres.NewRules(pool), Briefs: postgres.NewBriefs(pool),
 		Reflections:  postgres.NewReflections(pool),
+		PullReviews:  a.store,
 		Translations: postgres.NewTranslations(pool),
 		Shots:        a.shots, PreviewEnvs: previewEnvs,
 		BuildEnvs: previewEnvs, Workspaces: a.workspaces,
@@ -694,11 +697,12 @@ func jiraSync(ctx context.Context, cfg config.Config, pool postgresPool, log *sl
 	if err != nil {
 		return err
 	}
-	found, created, err := a.adminInteg.SyncJira(ctx)
+	res, err := a.adminInteg.SyncJira(ctx)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%d labelled open issues, %d new\n", found, created)
+	fmt.Printf("%d labelled open issues, %d new, %d updated, %d changed after work started (restart or keep them in agnts)\n",
+		res.Found, res.Created, res.Updated, res.Waiting)
 	return nil
 }
 

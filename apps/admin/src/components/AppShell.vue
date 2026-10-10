@@ -60,6 +60,8 @@ const nav = useQuery({
 // Counts match what each list shows: Jira tickets and side-project tasks.
 const count = (states: string[]) => (nav.data.value ?? []).filter((x) => states.includes(x.state)).length
 const openTasks = computed(() => (nav.data.value ?? []).filter((x) => x.source === 'local').length)
+// Pull request reviews waiting for your decision.
+const readyReviews = computed(() => (nav.data.value ?? []).filter((x) => x.kind === 'review' && x.state === 'waiting_for_review').length)
 // Lessons not marked learned yet (one row is enough: the list carries the counts).
 const lessons = useQuery({
   queryKey: ['lessons', 'counts'],
@@ -171,6 +173,9 @@ async function signOut() {
         <div class="grp">{{ t('nav.sideProjects') }}</div>
         <RouterLink class="nav-a" active-class="on" :to="{ name: 'tasks' }" v-bind="tip(t('nav.tasks'))">
           <HiIcon name="tasks" /><span class="lbl">{{ t('nav.tasks') }}</span><span v-if="openTasks" class="cnt dim">{{ openTasks }}</span>
+        </RouterLink>
+        <RouterLink class="nav-a" active-class="on" :to="{ name: 'reviews' }" v-bind="tip(t('nav.reviews'))">
+          <HiIcon name="pull" /><span class="lbl">{{ t('nav.reviews') }}</span><span v-if="readyReviews" class="cnt">{{ readyReviews }}</span>
         </RouterLink>
         <div class="grp">{{ t('nav.knowledge') }}</div>
         <RouterLink class="nav-a" active-class="on" :to="{ name: 'learn' }" v-bind="tip(t('nav.learn'))">

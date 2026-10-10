@@ -341,6 +341,63 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tickets/{key}/restart-update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start the ticket over from the newer version of its issue; the work so far is dropped */
+        post: operations["restartWithUpdate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/keep-version": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Keep working from the version agnts started with; this newer version of the issue is not asked about again */
+        post: operations["keepCurrentVersion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/post-review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post agnts's latest review of a pull request on it as a comment (once per reviewed commit) */
+        post: operations["postPullReview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tickets/{key}/preview": {
         parameters: {
             query?: never;
@@ -1105,7 +1162,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Pick up labelled Jira issues now */
+        /** Pick up labelled Jira issues now (only those assigned to you, unless that is off) and refresh the tickets agnts has for them */
         post: operations["syncJira"];
         delete?: never;
         options?: never;
@@ -1352,6 +1409,95 @@ export interface paths {
         post?: never;
         /** Mark a lesson as not learned yet */
         delete: operations["unmarkLessonLearned"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reviews/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ask the git host for the pull requests waiting for you and queue reviews of the new ones */
+        post: operations["syncReviews"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reviews/reviewers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** How each person agnts reviews pull requests for reviews, as it learned from their notes */
+        get: operations["listReviewers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reviews/reviewers/{login}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                login: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Replace a reviewer profile with your text; empty text clears it */
+        put: operations["saveReviewerProfile"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reviews/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Tell agnts something about how you review; the next review for that user reads it */
+        post: operations["addReviewerNote"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reviews/notes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Forget a note (one already folded into a profile stays there until the profile is edited) */
+        delete: operations["deleteReviewerNote"];
         options?: never;
         head?: never;
         patch?: never;
@@ -2465,6 +2611,11 @@ export interface components {
         Feedback: {
             /** Format: int64 */
             id: number;
+            /**
+             * @description feedback: sent from an account; connector: a connector request from the website
+             * @enum {string}
+             */
+            kind: "feedback" | "connector";
             title: string;
             description: string;
             /** @enum {string} */
@@ -2816,10 +2967,10 @@ export interface components {
         /** @enum {string} */
         TicketState: "new" | "analyzing" | "waiting_for_answers" | "coding" | "testing" | "waiting_for_review" | "pushing" | "done" | "rejected" | "failed" | "rate_limited";
         /**
-         * @description What the work produces. code and test make a change (diff, checks, pull request); plan, analysis and bug write a Markdown report.
+         * @description What the work produces. code and test make a change (diff, checks, pull request); plan, analysis and bug write a Markdown report. review reviews a pull request someone else opened (source git): approving it merges the pull request. Nobody picks review: those tickets come from syncing the git host.
          * @enum {string}
          */
-        TicketKind: "code" | "test" | "plan" | "analysis" | "bug";
+        TicketKind: "code" | "test" | "plan" | "analysis" | "bug" | "review";
         /**
          * @description A kind, or auto for agnts to pick one during analysis
          * @enum {string}
@@ -2958,7 +3109,7 @@ export interface components {
             state: components["schemas"]["TicketState"];
             kind: components["schemas"]["TicketKind"];
             /** @enum {string} */
-            source: "jira" | "plane" | "local";
+            source: "jira" | "plane" | "local" | "git";
             held?: boolean;
         };
         FollowUps: {
@@ -3023,7 +3174,7 @@ export interface components {
         Ticket: {
             key: string;
             /** @enum {string} */
-            source: "jira" | "plane" | "local";
+            source: "jira" | "plane" | "local" | "git";
             /** Format: int64 */
             repoId?: number;
             title: string;
@@ -3036,6 +3187,8 @@ export interface components {
             replayOf?: string;
             turns: number;
             branch: string;
+            /** @description The reviewed commit: the branch head agnts committed, or for a pull request review the head agnts reviewed */
+            headSha?: string;
             prNumber?: number;
             prUrl: string;
             /** @description Git host usernames the pull request is (or will be) assigned to */
@@ -3070,6 +3223,8 @@ export interface components {
             stopReason?: string;
             /** Format: date-time */
             mergedAt?: string;
+            pull?: components["schemas"]["PullRequest"];
+            trackerUpdate?: components["schemas"]["TrackerUpdate"];
             /**
              * @description The learn run after push; pending also while it runs
              * @enum {string}
@@ -3547,10 +3702,127 @@ export interface components {
             egressAllow?: string[];
             /** @description Runs suggest follow-up tickets (off by default; a ticket can override it) */
             suggestFollowUps?: boolean;
+            pullReviews?: components["schemas"]["PullReviewSettings"];
             pauseAbove: number;
             parallel: number;
             git: components["schemas"]["GitSettings"];
             notify?: components["schemas"]["NotifySettings"];
+        };
+        /** @description A newer version of the issue from the tracker, which arrived after agnts started on the ticket. agnts keeps working from the version it started with until you restart the ticket with this one or keep the current one. */
+        TrackerUpdate: {
+            title: string;
+            description: string;
+            /**
+             * Format: date-time
+             * @description When agnts saw it
+             */
+            at: string;
+        };
+        /** @description Reviews of the pull requests waiting for you on GitHub or GitLab */
+        PullReviewSettings: {
+            /** @description Sync the pull requests waiting for you every few minutes and review the new ones */
+            enabled: boolean;
+            /** @description Also take pull requests whose review is requested from you, not only those assigned to you */
+            reviewRequested: boolean;
+            /** @description Leave draft pull requests alone until they are ready */
+            skipDrafts: boolean;
+            /** @description Review again when the author pushes new commits while agnts's review waits for you */
+            rereview: boolean;
+            /**
+             * @description How an accepted pull request is merged
+             * @enum {string}
+             */
+            mergeMethod: "merge" | "squash" | "rebase";
+        };
+        /** @description The pull request (GitLab merge request) a review ticket reviews, as of the last sync */
+        PullRequest: {
+            /** @description The pull request number (GitLab: the IID) */
+            number: number;
+            url: string;
+            title: string;
+            /** @description Git host username of the author */
+            author: string;
+            /** @description The branch it comes from */
+            headRef: string;
+            /** @description Its newest commit on the git host */
+            headSha: string;
+            /** @description The branch it goes into */
+            baseRef: string;
+            draft: boolean;
+            /** @enum {string} */
+            state: "open" | "closed" | "merged";
+            /** @description The git host user it waits for; their reviewer profile shapes its reviews */
+            login: string;
+            /** @enum {string} */
+            why: "assigned" | "review_requested";
+            additions?: number;
+            deletions?: number;
+            /** Format: date-time */
+            updatedAt?: string;
+            /** @description The reviewed commit whose review agnts last posted on the pull request */
+            postedSha?: string;
+            /**
+             * Format: date-time
+             * @description When agnts last posted its review on the pull request
+             */
+            postedAt?: string;
+        };
+        /** @description What a sync of the pull requests waiting for you found */
+        ReviewSync: {
+            /** @description Repositories asked */
+            repos: number;
+            /** @description Pull requests waiting for you */
+            open: number;
+            /** @description New reviews queued */
+            created: number;
+            /** @description Reviews queued again for new commits */
+            rereview: number;
+            /** @description Reviews ended because the pull request was merged or closed on the git host */
+            closed: number;
+            /** @description Repositories or pull requests that could not be read */
+            errors: string[];
+        };
+        /** @description Something a person told agnts about one of its pull request reviews. Later reviews for the same git host user read it until it is folded into their profile. */
+        ReviewerNote: {
+            /** Format: int64 */
+            id: number;
+            /** @description The git host user the review was for */
+            login: string;
+            /** @description Who wrote it in agnts */
+            username?: string;
+            repoName?: string;
+            ticketKey?: string;
+            pullTitle?: string;
+            /** @enum {string} */
+            kind: "rereview" | "dismissed" | "manual";
+            note: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        ReviewerNoteInput: {
+            login: string;
+            note: string;
+        };
+        /** @description What agnts learned about how one git host user reviews pull requests */
+        Reviewer: {
+            login: string;
+            /** @description Markdown; empty until a review folds notes in or someone writes it */
+            profile: string;
+            /** @description Notes folded into the profile so far */
+            notesFolded: number;
+            /** Format: date-time */
+            updatedAt?: string;
+            /** @description Notes the next review folds in, newest first */
+            pending: components["schemas"]["ReviewerNote"][];
+        };
+        Reviewers: {
+            reviewers: components["schemas"]["Reviewer"][];
+            /** @description The newest notes of everyone, newest first */
+            notes: components["schemas"]["ReviewerNote"][];
+        };
+        ReviewerProfileInput: {
+            /** @description Markdown; empty clears it */
+            profile: string;
         };
         NotifySettings: {
             push: boolean;
@@ -4786,6 +5058,59 @@ export interface operations {
             404: components["responses"]["NotFound"];
         };
     };
+    restartWithUpdate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    keepCurrentVersion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    postPullReview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            502: components["responses"]["BadGateway"];
+        };
+    };
     previewTicket: {
         parameters: {
             query?: never;
@@ -5930,6 +6255,10 @@ export interface operations {
                     "application/json": {
                         found: number;
                         created: number;
+                        /** @description Tickets not started yet that took the issue's new text */
+                        updated?: number;
+                        /** @description Started tickets whose issue changed: each asks you to restart with the new version or keep the current one */
+                        waiting?: number;
                     };
                 };
             };
@@ -6337,6 +6666,125 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Lesson"];
                 };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    syncReviews: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description What the sync found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewSync"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    listReviewers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Reviewers"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    saveReviewerProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                login: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewerProfileInput"];
+            };
+        };
+        responses: {
+            /** @description The profile */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Reviewer"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    addReviewerNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewerNoteInput"];
+            };
+        };
+        responses: {
+            /** @description Kept */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewerNote"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    deleteReviewerNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
@@ -7887,6 +8335,7 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
+                    /** @description At most AGNTS_MAX_SLOTS (5 by default) */
                     slots: number;
                 };
             };

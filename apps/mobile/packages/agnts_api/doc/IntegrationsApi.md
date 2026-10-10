@@ -15,7 +15,7 @@ Method | HTTP request | Description
 [**listPlaneStates**](IntegrationsApi.md#listplanestates) | **GET** /integrations/plane/states | States of the Plane projects linked to repositories, for the status mapping
 [**listRemoteRepos**](IntegrationsApi.md#listremoterepos) | **GET** /integrations/{provider}/repos | Repositories the connected GitHub or GitLab token can reach, for import
 [**setPlaneWebhookSecret**](IntegrationsApi.md#setplanewebhooksecret) | **PUT** /integrations/plane/webhook-secret | Store the secret Plane generated for the agnts webhook
-[**syncJira**](IntegrationsApi.md#syncjira) | **POST** /integrations/jira/sync | Pick up labelled Jira issues now
+[**syncJira**](IntegrationsApi.md#syncjira) | **POST** /integrations/jira/sync | Pick up labelled Jira issues now (only those assigned to you, unless that is off) and refresh the tickets agnts has for them
 [**syncPlane**](IntegrationsApi.md#syncplane) | **POST** /integrations/plane/sync | Pick up labelled Plane work items now
 [**testIntegration**](IntegrationsApi.md#testintegration) | **POST** /integrations/{provider}/test | 
 [**updateIntegration**](IntegrationsApi.md#updateintegration) | **PUT** /integrations/{provider} | Change an integration&#39;s settings (never its token)
@@ -288,7 +288,7 @@ Name | Type | Description  | Notes
 # **syncJira**
 > SyncJira200Response syncJira()
 
-Pick up labelled Jira issues now
+Pick up labelled Jira issues now (only those assigned to you, unless that is off) and refresh the tickets agnts has for them
 
 ### Example
 ```dart
@@ -327,7 +327,7 @@ This endpoint does not need any parameter.
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **syncPlane**
-> SyncJira200Response syncPlane()
+> SyncPlane200Response syncPlane()
 
 Pick up labelled Plane work items now
 
@@ -354,7 +354,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-[**SyncJira200Response**](SyncJira200Response.md)
+[**SyncPlane200Response**](SyncPlane200Response.md)
 
 ### Authorization
 

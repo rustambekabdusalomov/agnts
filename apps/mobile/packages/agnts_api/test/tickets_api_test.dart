@@ -94,6 +94,13 @@ void main() {
       // TODO
     });
 
+    // Keep working from the version agnts started with; this newer version of the issue is not asked about again
+    //
+    //Future<Ticket> keepCurrentVersion(String key) async
+    test('test keepCurrentVersion', () async {
+      // TODO
+    });
+
     // Suggested follow-up tickets and the tickets made from them
     //
     //Future<FollowUps> listFollowUps(String key) async
@@ -156,6 +163,13 @@ void main() {
     //
     //Future<Ticket> requestChanges(String key, RequestChangesRequest requestChangesRequest) async
     test('test requestChanges', () async {
+      // TODO
+    });
+
+    // Start the ticket over from the newer version of its issue; the work so far is dropped
+    //
+    //Future<Ticket> restartWithUpdate(String key) async
+    test('test restartWithUpdate', () async {
       // TODO
     });
 

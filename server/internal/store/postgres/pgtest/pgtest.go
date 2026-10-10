@@ -79,5 +79,5 @@ func Reset(t *testing.T, pool *pgxpool.Pool) {
 	t.Helper()
 	Exec(t, pool, `TRUNCATE tickets, runs, results, questions, events, repositories, webhook_deliveries, translations,
 		rules, lessons, ticket_relations, ticket_suggestions, claude_calls, attachments, integrations, settings,
-		pending_actions, telegram_messages, credit_ledger, payments, claude_connections, usage_snapshots RESTART IDENTITY CASCADE`)
+		pending_actions, telegram_messages, credit_ledger, payments, claude_connections, usage_snapshots, reviewer_notes, reviewer_profiles RESTART IDENTITY CASCADE`)
 }

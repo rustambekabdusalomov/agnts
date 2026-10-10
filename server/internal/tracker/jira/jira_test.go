@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"io"
 	"log/slog"
 	"net/http"
@@ -39,6 +40,8 @@ func (d fakeDedup) SeenDelivery(_ context.Context, p, id string) (bool, error) {
 	return seen, nil
 }
 
+func noAccount(context.Context) (string, error) { return "", errors.New("not asked") }
+
 func static(c Config) ConfigSource {
 	return func(context.Context) (Config, bool, error) { return c, true, nil }
 }
@@ -56,7 +59,7 @@ const payload = `{"webhookEvent":"jira:issue_created","issue":{"key":"PAY-42","f
 func TestWebhook(t *testing.T) {
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
 	ing := &fakeIngester{}
-	h := WebhookHandler(static(Config{WebhookSecret: "s3cret", Label: "agnts"}), ing, fakeDedup{}, log)
+	h := WebhookHandler(static(Config{WebhookSecret: "s3cret", Label: "agnts"}), noAccount, ing, fakeDedup{}, log)
 
 	post := func(body, sig, id string) int {
 		req := httptest.NewRequest("POST", "/webhooks/jira", strings.NewReader(body))
@@ -105,7 +108,7 @@ func TestWebhook(t *testing.T) {
 		t.Fatalf("unlabelled issue ingested: %d, %d", c, len(ing.got))
 	}
 
-	notConnected := WebhookHandler(func(context.Context) (Config, bool, error) { return Config{}, false, nil }, ing, fakeDedup{}, log)
+	notConnected := WebhookHandler(func(context.Context) (Config, bool, error) { return Config{}, false, nil }, noAccount, ing, fakeDedup{}, log)
 	rec := httptest.NewRecorder()
 	notConnected.ServeHTTP(rec, httptest.NewRequest("POST", "/webhooks/jira", strings.NewReader(payload)))
 	if rec.Code != http.StatusServiceUnavailable {
@@ -277,5 +280,64 @@ func TestIssueDependencies(t *testing.T) {
 	_ = json.Unmarshal([]byte(`{"key": "PAY-6", "fields": {"summary": "x"}}`), &bare)
 	if in := bare.incoming("agnts"); in.LinksKnown || in.DependsOn != nil {
 		t.Fatalf("links without the field: %+v", in)
+	}
+}
+
+func TestIncomingRepoLabel(t *testing.T) {
+	var is issue
+	if err := json.Unmarshal([]byte(`{"key":"PAY-9","fields":{"summary":"x","labels":["agnts-bug","repo:web"],"project":{"key":"PAY"}}}`), &is); err != nil {
+		t.Fatal(err)
+	}
+	in := is.incoming("agnts")
+	if in.Repo != "web" || in.Project != "PAY" || in.Kind != domain.KindBug {
+		t.Fatalf("incoming: %+v", in)
+	}
+}
+
+func TestWebhookAssignedOnly(t *testing.T) {
+	log := slog.New(slog.NewTextHandler(io.Discard, nil))
+	ing := &fakeIngester{}
+	me := func(context.Context) (string, error) { return "acc-me", nil }
+	h := WebhookHandler(static(Config{WebhookSecret: "s", Label: "agnts", AssignedOnly: true}), me, ing, fakeDedup{}, log)
+	post := func(assignee string) orchestrator.Incoming {
+		body := strings.Replace(payload, `"project":{"key":"PAY"}`, `"project":{"key":"PAY"}`+assignee, 1)
+		req := httptest.NewRequest("POST", "/webhooks/jira", strings.NewReader(body))
+		req.Header.Set("X-Hub-Signature", sign("s", []byte(body)))
+		h.ServeHTTP(httptest.NewRecorder(), req)
+		return ing.got[len(ing.got)-1]
+	}
+	if in := post(`,"assignee":{"accountId":"acc-me"}`); in.NoCreate {
+		t.Fatal("an issue assigned to me may not create a ticket")
+	}
+	if in := post(`,"assignee":{"accountId":"acc-bob"}`); !in.NoCreate {
+		t.Fatal("an issue assigned to someone else may create a ticket")
+	}
+	if in := post(``); !in.NoCreate {
+		t.Fatal("an unassigned issue may create a ticket")
+	}
+}
+
+func TestSearchAssignedOnlyAndConfig(t *testing.T) {
+	var jql string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var b map[string]any
+		_ = json.NewDecoder(r.Body).Decode(&b)
+		jql, _ = b["jql"].(string)
+		_, _ = io.WriteString(w, `{"issues":[],"isLast":true}`)
+	}))
+	defer srv.Close()
+	cfg, ok, err := FromIntegration(`{"api_token":"tok"}`, map[string]string{"site": srv.URL, "email": "me@x.com"}, true)
+	if err != nil || !ok || !cfg.AssignedOnly {
+		t.Fatalf("assigned only is not the default: %+v %v", cfg, err)
+	}
+	if _, err := New(static(cfg)).Search(context.Background()); err != nil || !strings.Contains(jql, "AND assignee = currentUser()") {
+		t.Fatalf("jql %q %v", jql, err)
+	}
+	cfg.AssignedOnly = false
+	if _, err := New(static(cfg)).Search(context.Background()); err != nil || strings.Contains(jql, "assignee") {
+		t.Fatalf("jql without the filter %q %v", jql, err)
+	}
+	if cfg, _, _ := FromIntegration("", map[string]string{"assigned_only": "false"}, true); cfg.AssignedOnly {
+		t.Fatal("assigned_only=false ignored")
 	}
 }

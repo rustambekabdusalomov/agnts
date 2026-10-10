@@ -39,6 +39,8 @@ abstract class _$SettingsCWProxy {
 
   Settings suggestFollowUps(bool? suggestFollowUps);
 
+  Settings pullReviews(PullReviewSettings? pullReviews);
+
   Settings pauseAbove(int pauseAbove);
 
   Settings parallel(int parallel);
@@ -70,6 +72,7 @@ abstract class _$SettingsCWProxy {
     bool? reflect,
     List<String>? egressAllow,
     bool? suggestFollowUps,
+    PullReviewSettings? pullReviews,
     int pauseAbove,
     int parallel,
     GitSettings git,
@@ -134,6 +137,10 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
       this(suggestFollowUps: suggestFollowUps);
 
   @override
+  Settings pullReviews(PullReviewSettings? pullReviews) =>
+      this(pullReviews: pullReviews);
+
+  @override
   Settings pauseAbove(int pauseAbove) => this(pauseAbove: pauseAbove);
 
   @override
@@ -169,6 +176,7 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
     Object? reflect = const $CopyWithPlaceholder(),
     Object? egressAllow = const $CopyWithPlaceholder(),
     Object? suggestFollowUps = const $CopyWithPlaceholder(),
+    Object? pullReviews = const $CopyWithPlaceholder(),
     Object? pauseAbove = const $CopyWithPlaceholder(),
     Object? parallel = const $CopyWithPlaceholder(),
     Object? git = const $CopyWithPlaceholder(),
@@ -239,6 +247,10 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
           ? _value.suggestFollowUps
           // ignore: cast_nullable_to_non_nullable
           : suggestFollowUps as bool?,
+      pullReviews: pullReviews == const $CopyWithPlaceholder()
+          ? _value.pullReviews
+          // ignore: cast_nullable_to_non_nullable
+          : pullReviews as PullReviewSettings?,
       pauseAbove: pauseAbove == const $CopyWithPlaceholder()
           ? _value.pauseAbove
           // ignore: cast_nullable_to_non_nullable
@@ -316,6 +328,12 @@ Settings _$SettingsFromJson(
       (v) => (v as List<dynamic>?)?.map((e) => e as String).toList(),
     ),
     suggestFollowUps: $checkedConvert('suggestFollowUps', (v) => v as bool?),
+    pullReviews: $checkedConvert(
+      'pullReviews',
+      (v) => v == null
+          ? null
+          : PullReviewSettings.fromJson(v as Map<String, dynamic>),
+    ),
     pauseAbove: $checkedConvert('pauseAbove', (v) => (v as num).toInt()),
     parallel: $checkedConvert('parallel', (v) => (v as num).toInt()),
     git: $checkedConvert(
@@ -348,6 +366,7 @@ Map<String, dynamic> _$SettingsToJson(Settings instance) => <String, dynamic>{
   'reflect': ?instance.reflect,
   'egressAllow': ?instance.egressAllow,
   'suggestFollowUps': ?instance.suggestFollowUps,
+  'pullReviews': ?instance.pullReviews?.toJson(),
   'pauseAbove': instance.pauseAbove,
   'parallel': instance.parallel,
   'git': instance.git.toJson(),

@@ -95,6 +95,8 @@ import 'package:agnts_api/src/model/platform_workspace.dart';
 import 'package:agnts_api/src/model/preview_input.dart';
 import 'package:agnts_api/src/model/preview_issue.dart';
 import 'package:agnts_api/src/model/preview_shot.dart';
+import 'package:agnts_api/src/model/pull_request.dart';
+import 'package:agnts_api/src/model/pull_review_settings.dart';
 import 'package:agnts_api/src/model/quality_stat.dart';
 import 'package:agnts_api/src/model/question.dart';
 import 'package:agnts_api/src/model/queue_status.dart';
@@ -126,6 +128,12 @@ import 'package:agnts_api/src/model/request_changes_request.dart';
 import 'package:agnts_api/src/model/reset_password_request.dart';
 import 'package:agnts_api/src/model/result.dart';
 import 'package:agnts_api/src/model/retry_ticket_request.dart';
+import 'package:agnts_api/src/model/review_sync.dart';
+import 'package:agnts_api/src/model/reviewer.dart';
+import 'package:agnts_api/src/model/reviewer_note.dart';
+import 'package:agnts_api/src/model/reviewer_note_input.dart';
+import 'package:agnts_api/src/model/reviewer_profile_input.dart';
+import 'package:agnts_api/src/model/reviewers.dart';
 import 'package:agnts_api/src/model/rotate_mcp_token200_response.dart';
 import 'package:agnts_api/src/model/rule.dart';
 import 'package:agnts_api/src/model/rule_answers.dart';
@@ -146,6 +154,7 @@ import 'package:agnts_api/src/model/stage_models.dart';
 import 'package:agnts_api/src/model/stage_spend.dart';
 import 'package:agnts_api/src/model/step_duration.dart';
 import 'package:agnts_api/src/model/sync_jira200_response.dart';
+import 'package:agnts_api/src/model/sync_plane200_response.dart';
 import 'package:agnts_api/src/model/task_create.dart';
 import 'package:agnts_api/src/model/task_update.dart';
 import 'package:agnts_api/src/model/ticket.dart';
@@ -158,6 +167,7 @@ import 'package:agnts_api/src/model/ticket_spend_row.dart';
 import 'package:agnts_api/src/model/token_request.dart';
 import 'package:agnts_api/src/model/token_spend.dart';
 import 'package:agnts_api/src/model/toolchain.dart';
+import 'package:agnts_api/src/model/tracker_update.dart';
 import 'package:agnts_api/src/model/transfer_workspace_request.dart';
 import 'package:agnts_api/src/model/translate_input.dart';
 import 'package:agnts_api/src/model/translation.dart';
@@ -406,6 +416,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return PreviewIssue.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PreviewShot':
           return PreviewShot.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PullRequest':
+          return PullRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PullReviewSettings':
+          return PullReviewSettings.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'QualityStat':
           return QualityStat.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Question':
@@ -474,6 +488,18 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
         case 'ReviewModel':
           
           
+        case 'ReviewSync':
+          return ReviewSync.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'Reviewer':
+          return Reviewer.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ReviewerNote':
+          return ReviewerNote.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ReviewerNoteInput':
+          return ReviewerNoteInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ReviewerProfileInput':
+          return ReviewerProfileInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'Reviewers':
+          return Reviewers.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RotateMcpToken200Response':
           return RotateMcpToken200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Rule':
@@ -520,6 +546,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return StepDuration.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SyncJira200Response':
           return SyncJira200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SyncPlane200Response':
+          return SyncPlane200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TaskCreate':
           return TaskCreate.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TaskUpdate':
@@ -553,6 +581,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return TokenSpend.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Toolchain':
           return Toolchain.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'TrackerUpdate':
+          return TrackerUpdate.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TransferWorkspaceRequest':
           return TransferWorkspaceRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TranslateInput':

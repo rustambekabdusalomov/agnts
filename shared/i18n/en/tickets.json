@@ -32,6 +32,7 @@
     "statPushed": "Pushed this week",
     "statPushedNote": "Pull requests opened",
     "statSession": "Plan session",
-    "sourcePlane": "Plane"
+    "sourcePlane": "Plane",
+    "sourceGit": "PR"
   }
 }

@@ -96,6 +96,11 @@ void main() {
       // TODO
     });
 
+    // PullReviewSettings pullReviews
+    test('to test the property `pullReviews`', () async {
+      // TODO
+    });
+
     // int pauseAbove
     test('to test the property `pauseAbove`', () async {
       // TODO

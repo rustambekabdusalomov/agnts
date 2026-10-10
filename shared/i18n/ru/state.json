@@ -15,6 +15,14 @@
       "coding": "Пишет отчёт",
       "pushing": "Сдаёт",
       "done": "Готово"
+    },
+    "review": {
+      "analyzing": "Загрузка",
+      "coding": "Проверка",
+      "waiting_for_review": "Ревью готово",
+      "pushing": "Слияние",
+      "done": "Слит",
+      "rejected": "Отклонено"
     }
   }
 }

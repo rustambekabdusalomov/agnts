@@ -1,7 +1,7 @@
 {
   "billing": {
     "title": "To‘lov",
-    "selfHosted": "Bu server mustaqil o‘rnatilgan: to‘lash shart emas. Slotlar va a’zolar limitini administrator belgilaydi.",
+    "selfHosted": "Bu server mustaqil o‘rnatilgan: to‘lash shart emas. Bir vaqtdagi ishlar sonini quyida belgilang; a’zolar limitini administrator belgilaydi.",
     "plan": "Tarif",
     "planSub": "Asosiy tarifga 1 ta parallel ish va {members} ta a’zo kiradi.",
     "monthly": "Oyiga {amount}",
@@ -9,6 +9,7 @@
     "trialUntil": "{date} gacha bepul sinov",
     "slots": "Parallel ishlar",
     "slotsHelp": "Har bir qo‘shimcha bir vaqtdagi ish oyiga {price} turadi. Qo‘shilganda oyning qolgan qismi kreditlardan yechiladi.",
+    "slotsHelpSelfHosted": "Bu ish maydonida bir vaqtda nechta ish bajariladi; bu serverda bepul. Ko‘pi bilan {max}; chegarani serverdagi AGNTS_MAX_SLOTS belgilaydi.",
     "slotsSave": "O‘zgartirish",
     "slotsSaved": "Parallel ishlar: {n}",
     "members": "A’zolar",

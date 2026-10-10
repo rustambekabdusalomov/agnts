@@ -16,7 +16,8 @@ const _icons = <String, String>{
   'running': '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
   'queue': '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/>',
   'done': '<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>',
-  'all': '<rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="11" rx="1"/><rect x="17" y="4" width="4" height="7" rx="1"/>',
+  'all':
+      '<rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="11" rx="1"/><rect x="17" y="4" width="4" height="7" rx="1"/>',
   'usage': '<path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-6"/>',
   'repos': '<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3M9 7h6"/>',
   'learnQueue': '<path d="M4 6h10M4 11h7M4 16h5"/><circle cx="17" cy="15" r="4.5"/><path d="M17 13v2.2l1.5 1"/>',
@@ -26,7 +27,8 @@ const _icons = <String, String>{
   'chevron': '<path d="M9 6l6 6-6 6"/>',
   'down': '<path d="M6 9l6 6 6-6"/>',
   'logs': '<path d="M4 6h16M4 10h16M4 14h10M4 18h7"/>',
-  'dashboard': '<rect x="3" y="3" width="8" height="9" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="14" width="8" height="7" rx="2"/>',
+  'dashboard':
+      '<rect x="3" y="3" width="8" height="9" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="14" width="8" height="7" rx="2"/>',
   'analytics': '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
   'plug': '<path d="M9 7V3M15 7V3M7 7h10v4a5 5 0 0 1-10 0z"/><path d="M12 16v5"/>',
   'tasks': '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
@@ -37,9 +39,11 @@ const _icons = <String, String>{
   'more': '<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>',
   'attach': '<path d="M20.5 11.5l-8.4 8.4a5 5 0 0 1-7.1-7.1l8.4-8.4a3.3 3.3 0 0 1 4.7 4.7l-8.4 8.4a1.7 1.7 0 0 1-2.4-2.4l7.7-7.7"/>',
   'image': '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/>',
-  'camera': '<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/>',
+  'camera':
+      '<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/>',
   'file': '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>',
-  'users': '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c1.9.7 3.1 2.4 3.5 5.2"/>',
+  'users':
+      '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c1.9.7 3.1 2.4 3.5 5.2"/>',
   'shield': '<path d="M12 3l7.5 3v5.5c0 4.4-3.1 8.2-7.5 9.5-4.4-1.3-7.5-5.1-7.5-9.5V6z"/><path d="M9 12l2 2 4-4"/>',
   'feedback': '<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H9l-5 4z"/><path d="M8 9h8M8 12h5"/>',
 };
@@ -57,7 +61,8 @@ class HIcon extends StatelessWidget {
     final col = color ?? IconTheme.of(context).color ?? Agnts.of(context).ink;
     final hex = '#${(col.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
     final fill = name == 'more' ? hex : 'none';
-    final svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="$fill" stroke="$hex" '
+    final svg =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="$fill" stroke="$hex" '
         'stroke-width="$stroke" stroke-linecap="round" stroke-linejoin="round" opacity="${col.a}">${_icons[name] ?? ''}</svg>';
     return SvgPicture.string(svg, width: size, height: size);
   }
@@ -69,36 +74,36 @@ enum Tone { info, warn, bad, ok, gray }
 
 extension ToneColors on Tone {
   Color soft(Agnts c) => switch (this) {
-        Tone.info => c.primarySoft,
-        Tone.warn => c.warnSoft,
-        Tone.bad => c.badSoft,
-        Tone.ok => c.okSoft,
-        Tone.gray => c.graySoft,
-      };
+    Tone.info => c.primarySoft,
+    Tone.warn => c.warnSoft,
+    Tone.bad => c.badSoft,
+    Tone.ok => c.okSoft,
+    Tone.gray => c.graySoft,
+  };
   Color ink(Agnts c) => switch (this) {
-        Tone.info => c.primaryInk,
-        Tone.warn => c.warnInk,
-        Tone.bad => c.badInk,
-        Tone.ok => c.okInk,
-        Tone.gray => c.grayInk,
-      };
+    Tone.info => c.primaryInk,
+    Tone.warn => c.warnInk,
+    Tone.bad => c.badInk,
+    Tone.ok => c.okInk,
+    Tone.gray => c.grayInk,
+  };
   Color solid(Agnts c) => switch (this) {
-        Tone.info => c.primary,
-        Tone.warn => c.warn,
-        Tone.bad => c.bad,
-        Tone.ok => c.ok,
-        Tone.gray => c.line3,
-      };
+    Tone.info => c.primary,
+    Tone.warn => c.warn,
+    Tone.bad => c.bad,
+    Tone.ok => c.ok,
+    Tone.gray => c.line3,
+  };
 }
 
 /// A ticket state's tone, as the demo colours it.
 Tone stateTone(TicketState s) => switch (s) {
-      TicketState.waitingForAnswers || TicketState.waitingForReview => Tone.warn,
-      TicketState.failed || TicketState.rateLimited => Tone.bad,
-      TicketState.done => Tone.ok,
-      TicketState.new_ || TicketState.rejected => Tone.gray,
-      _ => Tone.info,
-    };
+  TicketState.waitingForAnswers || TicketState.waitingForReview => Tone.warn,
+  TicketState.failed || TicketState.rateLimited => Tone.bad,
+  TicketState.done => Tone.ok,
+  TicketState.new_ || TicketState.rejected => Tone.gray,
+  _ => Tone.info,
+};
 
 /// A rounded pill with a dot (.badge).
 class ToneBadge extends StatelessWidget {
@@ -115,34 +120,48 @@ class ToneBadge extends StatelessWidget {
       height: small ? 20 : 24,
       padding: EdgeInsets.symmetric(horizontal: small ? 7 : 9),
       decoration: BoxDecoration(color: tone.soft(c), borderRadius: BorderRadius.circular(12)),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Container(width: 7, height: 7, decoration: BoxDecoration(color: ink, shape: BoxShape.circle)),
-        const SizedBox(width: 6),
-        Text(text, style: TextStyle(color: ink, fontSize: small ? 11 : 12, fontWeight: FontWeight.w700, height: 1)),
-      ]),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 7,
+            height: 7,
+            decoration: BoxDecoration(color: ink, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: TextStyle(color: ink, fontSize: small ? 11 : 12, fontWeight: FontWeight.w700, height: 1),
+          ),
+        ],
+      ),
     );
   }
 }
 
 /// The small square source chip: "Jira" or "Plane" (gray), or "Task" (purple) (.src).
 /// Kinds whose work is a Markdown report instead of a change.
-bool isReportKind(TicketKind k) => k == TicketKind.plan || k == TicketKind.analysis || k == TicketKind.bug;
+/// A pull request review is one too: its report is agnts's review, and
+/// approving it merges the pull request.
+bool isReportKind(TicketKind k) => k == TicketKind.plan || k == TicketKind.analysis || k == TicketKind.bug || k == TicketKind.review;
 
 /// Where a ticket came from, for its source chip: Jira, Plane or Task.
 String sourceLabel(AppLocalizations l, TicketSource_Enum s) => switch (s) {
-      TicketSource_Enum.local => l.ticketsSourceTask,
-      TicketSource_Enum.plane => l.ticketsSourcePlane,
-      _ => l.ticketsSourceJira,
-    };
+  TicketSource_Enum.local => l.ticketsSourceTask,
+  TicketSource_Enum.plane => l.ticketsSourcePlane,
+  TicketSource_Enum.git => l.ticketsSourceGit,
+  _ => l.ticketsSourceJira,
+};
 
 /// A kind's name from the shared dictionaries.
 String kindLabel(AppLocalizations l, TicketKind k) => switch (k) {
-      TicketKind.code => l.kindCode,
-      TicketKind.test => l.kindTest,
-      TicketKind.plan => l.kindPlan,
-      TicketKind.analysis => l.kindAnalysis,
-      TicketKind.bug => l.kindBug,
-    };
+  TicketKind.code => l.kindCode,
+  TicketKind.test => l.kindTest,
+  TicketKind.plan => l.kindPlan,
+  TicketKind.analysis => l.kindAnalysis,
+  TicketKind.bug => l.kindBug,
+  TicketKind.review => l.kindReview,
+};
 
 /// What a ticket produces, as a small chip; "· Auto" while agnts picks it.
 class KindChip extends StatelessWidget {
@@ -164,7 +183,10 @@ class KindChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 7),
       alignment: Alignment.center,
       decoration: BoxDecoration(color: tone.soft(c), borderRadius: BorderRadius.circular(6)),
-      child: Text(text, style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: tone.ink(c))),
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: tone.ink(c)),
+      ),
     );
   }
 }
@@ -182,7 +204,10 @@ class SourceChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 7),
       alignment: Alignment.center,
       decoration: BoxDecoration(color: task ? c.taskSoft : c.graySoft, borderRadius: BorderRadius.circular(6)),
-      child: Text(text, style: TextStyle(color: task ? c.taskInk : c.grayInk, fontSize: 11.5, fontWeight: FontWeight.w700, height: 1)),
+      child: Text(
+        text,
+        style: TextStyle(color: task ? c.taskInk : c.grayInk, fontSize: 11.5, fontWeight: FontWeight.w700, height: 1),
+      ),
     );
   }
 }
@@ -203,15 +228,25 @@ class PageHeader extends StatelessWidget {
     final t = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 14),
-      child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(title, style: long ? t.headlineSmall : t.displaySmall?.copyWith(height: 1.05)),
-            if (sub != null) Padding(padding: const EdgeInsets.only(top: 4), child: Text(sub!, style: TextStyle(color: c.ink3, fontSize: 14))),
-          ]),
-        ),
-        for (final a in actions) Padding(padding: const EdgeInsets.only(left: 8, bottom: 2), child: a),
-      ]),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: long ? t.headlineSmall : t.displaySmall?.copyWith(height: 1.05)),
+                if (sub != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(sub!, style: TextStyle(color: c.ink3, fontSize: 14)),
+                  ),
+              ],
+            ),
+          ),
+          for (final a in actions) Padding(padding: const EdgeInsets.only(left: 8, bottom: 2), child: a),
+        ],
+      ),
     );
   }
 }
@@ -229,7 +264,15 @@ class RoundIconButton extends StatelessWidget {
     final b = Material(
       color: c.surface,
       shape: CircleBorder(side: BorderSide(color: c.line)),
-      child: InkWell(customBorder: const CircleBorder(), onTap: onTap, child: SizedBox(width: 40, height: 40, child: Center(child: HIcon(icon, size: 20, color: c.ink2)))),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: SizedBox(
+          width: 40,
+          height: 40,
+          child: Center(child: HIcon(icon, size: 20, color: c.ink2)),
+        ),
+      ),
     );
     return tooltip == null ? b : Tooltip(message: tooltip!, child: b);
   }
@@ -247,10 +290,22 @@ class SectionHeader extends StatelessWidget {
     final c = Agnts.of(context);
     return Padding(
       padding: padding,
-      child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-        Expanded(child: Text(title, style: TextStyle(color: c.ink3, fontSize: 13.5, fontWeight: FontWeight.w700))),
-        if (trailing != null) DefaultTextStyle.merge(style: TextStyle(color: c.ink, fontSize: 13.5, fontWeight: FontWeight.w700), child: trailing!),
-      ]),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(color: c.ink3, fontSize: 13.5, fontWeight: FontWeight.w700),
+            ),
+          ),
+          if (trailing != null)
+            DefaultTextStyle.merge(
+              style: TextStyle(color: c.ink, fontSize: 13.5, fontWeight: FontWeight.w700),
+              child: trailing!,
+            ),
+        ],
+      ),
     );
   }
 }
@@ -267,12 +322,20 @@ class HCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Agnts.of(context);
-    final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius), side: BorderSide(color: c.line));
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(radius),
+      side: BorderSide(color: c.line),
+    );
     return Material(
       color: color ?? c.surface,
       shape: shape,
       clipBehavior: Clip.antiAlias,
-      child: onTap == null ? Padding(padding: padding, child: child) : _Pressable(onTap: onTap!, child: Padding(padding: padding, child: child)),
+      child: onTap == null
+          ? Padding(padding: padding, child: child)
+          : _Pressable(
+              onTap: onTap!,
+              child: Padding(padding: padding, child: child),
+            ),
     );
   }
 }
@@ -334,48 +397,86 @@ class TicketCard extends StatelessWidget {
     final c = Agnts.of(context);
     final l = AppLocalizations.of(context);
     final isTask = ticket.source_ == TicketSource_Enum.local;
-    final actColor = switch (actionTone) { Tone.warn => c.warnInk, Tone.bad => c.badInk, _ => c.primaryInk };
+    final actColor = switch (actionTone) {
+      Tone.warn => c.warnInk,
+      Tone.bad => c.badInk,
+      _ => c.primaryInk,
+    };
     return HCard(
       onTap: onTap,
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          Expanded(child: Text(ticket.key, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3))),
-          ToneBadge(stateLabelOf(l, ticket.state, ticket.kind), stateTone(ticket.state)),
-        ]),
-        const SizedBox(height: 6),
-        Text(ticket.title, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, height: 1.3, color: c.ink)),
-        const SizedBox(height: 8),
-        DefaultTextStyle.merge(
-          style: TextStyle(fontSize: 13, color: c.ink3),
-          child: Wrap(spacing: 8, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
-            SourceChip(sourceLabel(l, ticket.source_), task: isTask),
-            if (ticket.kind != TicketKind.code) KindChip(ticket),
-            if ((ticket.openSuggestions ?? 0) > 0) ToneBadge(AppLocalizations.of(context).followUpsOpenBadge(ticket.openSuggestions!), Tone.info, small: true),
-            if (ticket.blockedBy?.isNotEmpty ?? false) ToneBadge(AppLocalizations.of(context).relationsWaitingBadge, Tone.warn, small: true),
-            if (ticket.repoName != null) Text(ticket.repoName!),
-            ...meta,
-          ]),
-        ),
-        if (live != null && live!.isNotEmpty) ...[
-          const SizedBox(height: 10),
-          Row(children: [
-            const Pulse(),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(live!, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink2)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  ticket.key,
+                  style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3),
+                ),
+              ),
+              ToneBadge(stateLabelOf(l, ticket.state, ticket.kind), stateTone(ticket.state)),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            ticket.title,
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, height: 1.3, color: c.ink),
+          ),
+          const SizedBox(height: 8),
+          DefaultTextStyle.merge(
+            style: TextStyle(fontSize: 13, color: c.ink3),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                SourceChip(sourceLabel(l, ticket.source_), task: isTask),
+                if (ticket.kind != TicketKind.code) KindChip(ticket),
+                if ((ticket.openSuggestions ?? 0) > 0)
+                  ToneBadge(AppLocalizations.of(context).followUpsOpenBadge(ticket.openSuggestions!), Tone.info, small: true),
+                if (ticket.blockedBy?.isNotEmpty ?? false)
+                  ToneBadge(AppLocalizations.of(context).relationsWaitingBadge, Tone.warn, small: true),
+                if (ticket.repoName != null) Text(ticket.repoName!),
+                ...meta,
+              ],
             ),
-          ]),
-        ] else if (action != null) ...[
-          const SizedBox(height: 10),
-          Divider(height: 1, color: c.line2),
-          const SizedBox(height: 10),
-          Row(children: [
-            Expanded(child: Text(action!, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: actColor))),
-            HIcon('chevron', size: 16, color: actColor, stroke: 2.2),
-          ]),
+          ),
+          if (live != null && live!.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                const Pulse(),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    live!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink2),
+                  ),
+                ),
+              ],
+            ),
+          ] else if (action != null) ...[
+            const SizedBox(height: 10),
+            Divider(height: 1, color: c.line2),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    action!,
+                    style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: actColor),
+                  ),
+                ),
+                HIcon('chevron', size: 16, color: actColor, stroke: 2.2),
+              ],
+            ),
+          ],
         ],
-      ]),
+      ),
     );
   }
 }
@@ -383,21 +484,21 @@ class TicketCard extends StatelessWidget {
 /// The state's label from the shared dictionaries. A report reads
 /// "Writing" and "Done" where a change reads "Coding" and "Pushed".
 String stateLabelOf(AppLocalizations l, TicketState s, [TicketKind? kind]) => switch (s) {
-      TicketState.coding when kind != null && isReportKind(kind) => l.stateReportCoding,
-      TicketState.pushing when kind != null && isReportKind(kind) => l.stateReportPushing,
-      TicketState.done when kind != null && isReportKind(kind) => l.stateReportDone,
-      TicketState.new_ => l.stateNew,
-      TicketState.analyzing => l.stateAnalyzing,
-      TicketState.waitingForAnswers => l.stateWaiting_for_answers,
-      TicketState.coding => l.stateCoding,
-      TicketState.testing => l.stateTesting,
-      TicketState.waitingForReview => l.stateWaiting_for_review,
-      TicketState.pushing => l.statePushing,
-      TicketState.done => l.stateDone,
-      TicketState.rejected => l.stateRejected,
-      TicketState.failed => l.stateFailed,
-      TicketState.rateLimited => l.stateRate_limited,
-    };
+  TicketState.coding when kind != null && isReportKind(kind) => l.stateReportCoding,
+  TicketState.pushing when kind != null && isReportKind(kind) => l.stateReportPushing,
+  TicketState.done when kind != null && isReportKind(kind) => l.stateReportDone,
+  TicketState.new_ => l.stateNew,
+  TicketState.analyzing => l.stateAnalyzing,
+  TicketState.waitingForAnswers => l.stateWaiting_for_answers,
+  TicketState.coding => l.stateCoding,
+  TicketState.testing => l.stateTesting,
+  TicketState.waitingForReview => l.stateWaiting_for_review,
+  TicketState.pushing => l.statePushing,
+  TicketState.done => l.stateDone,
+  TicketState.rejected => l.stateRejected,
+  TicketState.failed => l.stateFailed,
+  TicketState.rateLimited => l.stateRate_limited,
+};
 
 /// The pulsing dot of something running (.pulse).
 class Pulse extends StatefulWidget {
@@ -427,7 +528,11 @@ class _PulseState extends State<Pulse> with SingleTickerProviderStateMixin {
         opacity: 1 - 0.4 * _c.value,
         child: Transform.scale(
           scale: 1 - 0.45 * _c.value,
-          child: Container(width: widget.size, height: widget.size, decoration: BoxDecoration(color: col, shape: BoxShape.circle)),
+          child: Container(
+            width: widget.size,
+            height: widget.size,
+            decoration: BoxDecoration(color: col, shape: BoxShape.circle),
+          ),
         ),
       ),
     );
@@ -458,17 +563,30 @@ class FilterChipH extends StatelessWidget {
         child: Container(
           constraints: const BoxConstraints(minHeight: 36),
           padding: const EdgeInsets.symmetric(horizontal: 14),
-          child: Row(mainAxisSize: MainAxisSize.min, children: [
-            if (dot != null) ...[
-              Container(width: 8, height: 8, decoration: BoxDecoration(color: dot, borderRadius: BorderRadius.circular(3))),
-              const SizedBox(width: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (dot != null) ...[
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(color: dot, borderRadius: BorderRadius.circular(3)),
+                ),
+                const SizedBox(width: 6),
+              ],
+              Text(
+                label,
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: fg),
+              ),
+              if (count != null) ...[
+                const SizedBox(width: 4),
+                Text(
+                  '$count',
+                  style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: fg.withValues(alpha: 0.7)),
+                ),
+              ],
             ],
-            Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: fg)),
-            if (count != null) ...[
-              const SizedBox(width: 4),
-              Text('$count', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: fg.withValues(alpha: 0.7))),
-            ],
-          ]),
+          ),
         ),
       ),
     );
@@ -485,7 +603,15 @@ class ChipRow extends StatelessWidget {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.fromLTRB(16, 2, 16, 4),
-      child: Row(children: [for (final (i, w) in children.indexed) Padding(padding: EdgeInsets.only(left: i == 0 ? 0 : 8), child: w)]),
+      child: Row(
+        children: [
+          for (final (i, w) in children.indexed)
+            Padding(
+              padding: EdgeInsets.only(left: i == 0 ? 0 : 8),
+              child: w,
+            ),
+        ],
+      ),
     );
   }
 }
@@ -509,11 +635,20 @@ class SearchBox extends StatelessWidget {
         textInputAction: TextInputAction.search,
         decoration: InputDecoration(
           hintText: hint,
-          prefixIcon: Padding(padding: const EdgeInsets.only(left: 12, right: 8), child: HIcon('search', size: 18, color: c.ink3, stroke: 2)),
+          prefixIcon: Padding(
+            padding: const EdgeInsets.only(left: 12, right: 8),
+            child: HIcon('search', size: 18, color: c.ink3, stroke: 2),
+          ),
           prefixIconConstraints: const BoxConstraints(minWidth: 38, minHeight: 44),
           contentPadding: const EdgeInsets.symmetric(vertical: 11, horizontal: 12),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: c.line4)),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: c.line4)),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: c.line4),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: c.line4),
+          ),
         ),
       ),
     );
@@ -548,7 +683,10 @@ class Segmented<T> extends StatelessWidget {
             borderRadius: BorderRadius.circular(9),
             boxShadow: on ? const [BoxShadow(color: Color(0x2616181D), blurRadius: 3, offset: Offset(0, 1))] : null,
           ),
-          child: Text(o.$2, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: on ? c.ink : c.grayInk)),
+          child: Text(
+            o.$2,
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: on ? c.ink : c.grayInk),
+          ),
         ),
       );
       return full ? Expanded(child: b) : b;
@@ -557,9 +695,12 @@ class Segmented<T> extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(color: c.hover, borderRadius: BorderRadius.circular(11)),
-      child: Row(mainAxisSize: full ? MainAxisSize.max : MainAxisSize.min, children: [
-        for (final (i, o) in options.indexed) ...[if (i > 0) const SizedBox(width: 3), seg(o)],
-      ]),
+      child: Row(
+        mainAxisSize: full ? MainAxisSize.max : MainAxisSize.min,
+        children: [
+          for (final (i, o) in options.indexed) ...[if (i > 0) const SizedBox(width: 3), seg(o)],
+        ],
+      ),
     );
   }
 }
@@ -568,7 +709,18 @@ class Segmented<T> extends StatelessWidget {
 
 /// A tappable KPI tile (.kc): label, big number, note, optional bar or delta.
 class KpiCard extends StatelessWidget {
-  const KpiCard({super.key, required this.label, required this.value, this.note, this.valueColor, this.delta, this.bar, this.barTone = Tone.info, this.onTap, this.mono = false});
+  const KpiCard({
+    super.key,
+    required this.label,
+    required this.value,
+    this.note,
+    this.valueColor,
+    this.delta,
+    this.bar,
+    this.barTone = Tone.info,
+    this.onTap,
+    this.mono = false,
+  });
   final String label;
   final String value;
   final String? note;
@@ -585,19 +737,47 @@ class KpiCard extends StatelessWidget {
     return HCard(
       onTap: onTap,
       padding: const EdgeInsets.all(14),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, color: c.ink3, fontWeight: FontWeight.w700)),
-        const SizedBox(height: 6),
-        Wrap(crossAxisAlignment: WrapCrossAlignment.center, spacing: 6, children: [
-          Text(value,
-              style: mono
-                  ? TextStyle(fontFamily: AgntsFonts.mono, fontSize: 22, fontWeight: FontWeight.w700, color: valueColor ?? c.ink)
-                  : TextStyle(fontFamily: AgntsFonts.display, fontSize: 26, fontWeight: FontWeight.w700, height: 1.1, color: valueColor ?? c.ink)),
-          if (delta != null) delta!,
-        ]),
-        if (bar != null) Padding(padding: const EdgeInsets.only(top: 6, bottom: 2), child: Bar(value: bar!, tone: barTone, height: 6)),
-        if (note != null) Padding(padding: const EdgeInsets.only(top: 4), child: Text(note!, style: TextStyle(fontSize: 12.5, color: c.ink3))),
-      ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 13, color: c.ink3, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 6),
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 6,
+            children: [
+              Text(
+                value,
+                style: mono
+                    ? TextStyle(fontFamily: AgntsFonts.mono, fontSize: 22, fontWeight: FontWeight.w700, color: valueColor ?? c.ink)
+                    : TextStyle(
+                        fontFamily: AgntsFonts.display,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w700,
+                        height: 1.1,
+                        color: valueColor ?? c.ink,
+                      ),
+              ),
+              if (delta != null) delta!,
+            ],
+          ),
+          if (bar != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 6, bottom: 2),
+              child: Bar(value: bar!, tone: barTone, height: 6),
+            ),
+          if (note != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(note!, style: TextStyle(fontSize: 12.5, color: c.ink3)),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -611,11 +791,18 @@ class Delta extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Agnts.of(context);
-    final (bg, fg) = better == null ? (c.graySoft, c.grayInk) : better! ? (c.okSoft, c.okInk) : (c.badSoft, c.badInk);
+    final (bg, fg) = better == null
+        ? (c.graySoft, c.grayInk)
+        : better!
+        ? (c.okSoft, c.okInk)
+        : (c.badSoft, c.badInk);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(9)),
-      child: Text(text, style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: fg)),
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: fg),
+      ),
     );
   }
 }
@@ -634,17 +821,23 @@ class Bar extends StatelessWidget {
       borderRadius: BorderRadius.circular(height / 2),
       child: SizedBox(
         height: height,
-        child: Stack(children: [
-          Positioned.fill(child: ColoredBox(color: c.line2)),
-          // Positioned.fill gives the fill the bar's full height; a plain
-          // child of the Stack would be zero high.
-          Positioned.fill(
-            child: Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: FractionallySizedBox(widthFactor: value.clamp(0, 1).toDouble(), heightFactor: 1, child: ColoredBox(color: tone.solid(c))),
+        child: Stack(
+          children: [
+            Positioned.fill(child: ColoredBox(color: c.line2)),
+            // Positioned.fill gives the fill the bar's full height; a plain
+            // child of the Stack would be zero high.
+            Positioned.fill(
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: FractionallySizedBox(
+                  widthFactor: value.clamp(0, 1).toDouble(),
+                  heightFactor: 1,
+                  child: ColoredBox(color: tone.solid(c)),
+                ),
+              ),
             ),
-          ),
-        ]),
+          ],
+        ),
       ),
     );
   }
@@ -660,13 +853,18 @@ class Grid2 extends StatelessWidget {
   Widget build(BuildContext context) {
     final rows = <Widget>[];
     for (var i = 0; i < children.length; i += 2) {
-      rows.add(IntrinsicHeight(
-        child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Expanded(child: children[i]),
-          SizedBox(width: gap),
-          Expanded(child: i + 1 < children.length ? children[i + 1] : const SizedBox()),
-        ]),
-      ));
+      rows.add(
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: children[i]),
+              SizedBox(width: gap),
+              Expanded(child: i + 1 < children.length ? children[i + 1] : const SizedBox()),
+            ],
+          ),
+        ),
+      );
       if (i + 2 < children.length) rows.add(SizedBox(height: gap));
     }
     return Column(children: rows);
@@ -685,12 +883,23 @@ class Fact extends StatelessWidget {
     final c = Agnts.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line), borderRadius: BorderRadius.circular(14)),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-        Text(label, style: TextStyle(fontSize: 12.5, color: c.ink3)),
-        const SizedBox(height: 2),
-        Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: tone == null ? c.ink : tone!.ink(c))),
-      ]),
+      decoration: BoxDecoration(
+        color: c.surface,
+        border: Border.all(color: c.line),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label, style: TextStyle(fontSize: 12.5, color: c.ink3)),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: tone == null ? c.ink : tone!.ink(c)),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -706,11 +915,17 @@ class ListGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = Agnts.of(context);
     return Container(
-      decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line), borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(
+        color: c.surface,
+        border: Border.all(color: c.line),
+        borderRadius: BorderRadius.circular(16),
+      ),
       clipBehavior: Clip.antiAlias,
-      child: Column(children: [
-        for (final (i, w) in children.indexed) ...[if (i > 0) Divider(height: 1, color: c.line2), w],
-      ]),
+      child: Column(
+        children: [
+          for (final (i, w) in children.indexed) ...[if (i > 0) Divider(height: 1, color: c.line2), w],
+        ],
+      ),
     );
   }
 }
@@ -732,18 +947,38 @@ class ListRow extends StatelessWidget {
     final row = Container(
       constraints: const BoxConstraints(minHeight: 52),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      child: Row(children: [
-        if (leading != null) ...[leading!, const SizedBox(width: 12)],
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(title, style: TextStyle(fontSize: 15, color: titleColor ?? c.ink, fontWeight: titleColor != null ? FontWeight.w700 : null)),
-            if (subtitle != null) Padding(padding: const EdgeInsets.only(top: 1), child: Text(subtitle!, style: TextStyle(fontSize: 13, color: c.ink3))),
-          ]),
-        ),
-        if (value != null) Padding(padding: const EdgeInsets.only(left: 8), child: Text(value!, style: TextStyle(fontSize: 14, color: c.ink3))),
-        if (trailing != null) Padding(padding: const EdgeInsets.only(left: 8), child: trailing!),
-        if (onTap != null && trailing == null) Padding(padding: const EdgeInsets.only(left: 8), child: HIcon('chevron', size: 16, color: c.line3, stroke: 2.4)),
-      ]),
+      child: Row(
+        children: [
+          if (leading != null) ...[leading!, const SizedBox(width: 12)],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(fontSize: 15, color: titleColor ?? c.ink, fontWeight: titleColor != null ? FontWeight.w700 : null),
+                ),
+                if (subtitle != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 1),
+                    child: Text(subtitle!, style: TextStyle(fontSize: 13, color: c.ink3)),
+                  ),
+              ],
+            ),
+          ),
+          if (value != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 8),
+              child: Text(value!, style: TextStyle(fontSize: 14, color: c.ink3)),
+            ),
+          if (trailing != null) Padding(padding: const EdgeInsets.only(left: 8), child: trailing!),
+          if (onTap != null && trailing == null)
+            Padding(
+              padding: const EdgeInsets.only(left: 8),
+              child: HIcon('chevron', size: 16, color: c.line3, stroke: 2.4),
+            ),
+        ],
+      ),
     );
     return onTap == null ? row : InkWell(onTap: onTap, child: row);
   }
@@ -768,27 +1003,44 @@ class _FoldState extends State<Fold> {
   Widget build(BuildContext context) {
     final c = Agnts.of(context);
     return Container(
-      decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line), borderRadius: BorderRadius.circular(14)),
+      decoration: BoxDecoration(
+        color: c.surface,
+        border: Border.all(color: c.line),
+        borderRadius: BorderRadius.circular(14),
+      ),
       clipBehavior: Clip.antiAlias,
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        InkWell(
-          onTap: () => setState(() => _open = !_open),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(children: [
-              Expanded(child: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.w700))),
-              if (widget.hint != null) Text(widget.hint!, style: TextStyle(color: c.ink2)),
-              const SizedBox(width: 8),
-              AnimatedRotation(turns: _open ? 0.5 : 0, duration: const Duration(milliseconds: 150), child: HIcon('down', size: 18, color: c.ink3, stroke: 2.2)),
-            ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          InkWell(
+            onTap: () => setState(() => _open = !_open),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                  ),
+                  if (widget.hint != null) Text(widget.hint!, style: TextStyle(color: c.ink2)),
+                  const SizedBox(width: 8),
+                  AnimatedRotation(
+                    turns: _open ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 150),
+                    child: HIcon('down', size: 18, color: c.ink3, stroke: 2.2),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 180),
-          alignment: Alignment.topCenter,
-          child: _open ? Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 14), child: widget.child) : const SizedBox(width: double.infinity),
-        ),
-      ]),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 180),
+            alignment: Alignment.topCenter,
+            child: _open
+                ? Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 14), child: widget.child)
+                : const SizedBox(width: double.infinity),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -810,18 +1062,31 @@ class HelpBox extends StatelessWidget {
     final style = TextStyle(fontSize: 14.5, color: fg);
     return Container(
       padding: EdgeInsets.fromLTRB(14, 12, copyable ? 6 : 14, 12),
-      decoration: BoxDecoration(color: bg, border: Border.all(color: border), borderRadius: BorderRadius.circular(14)),
-      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Padding(padding: const EdgeInsets.only(top: 2), child: HIcon('info', size: 18, color: fg)),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            copyable ? SelectableText(text, style: style) : Text(text, style: style),
-            if (child != null) Padding(padding: const EdgeInsets.only(top: 8), child: child!),
-          ]),
-        ),
-        if (copyable) CopyButton(text, color: fg),
-      ]),
+      decoration: BoxDecoration(
+        color: bg,
+        border: Border.all(color: border),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: HIcon('info', size: 18, color: fg),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                copyable ? SelectableText(text, style: style) : Text(text, style: style),
+                if (child != null) Padding(padding: const EdgeInsets.only(top: 8), child: child!),
+              ],
+            ),
+          ),
+          if (copyable) CopyButton(text, color: fg),
+        ],
+      ),
     );
   }
 }
@@ -867,14 +1132,30 @@ class LogBox extends StatelessWidget {
       child: SingleChildScrollView(
         reverse: true,
         padding: const EdgeInsets.all(12),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          for (final (i, (t, x)) in lines.indexed)
-            Text.rich(TextSpan(style: style.copyWith(color: c.codeInk), children: [
-              if (t.isNotEmpty) TextSpan(text: '$t  ', style: TextStyle(color: c.codeDim)),
-              TextSpan(text: x),
-              if (live && i == lines.length - 1) const TextSpan(text: '▍', style: TextStyle(color: Color(0xFF8FA4F0))),
-            ])),
-        ]),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final (i, (t, x)) in lines.indexed)
+              Text.rich(
+                TextSpan(
+                  style: style.copyWith(color: c.codeInk),
+                  children: [
+                    if (t.isNotEmpty)
+                      TextSpan(
+                        text: '$t  ',
+                        style: TextStyle(color: c.codeDim),
+                      ),
+                    TextSpan(text: x),
+                    if (live && i == lines.length - 1)
+                      const TextSpan(
+                        text: '▍',
+                        style: TextStyle(color: Color(0xFF8FA4F0)),
+                      ),
+                  ],
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -892,11 +1173,25 @@ class EmptyState extends StatelessWidget {
     final c = Agnts.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 36),
-      child: Column(children: [
-        Text(title, textAlign: TextAlign.center, style: TextStyle(color: c.ink, fontSize: 16, fontWeight: FontWeight.w700)),
-        if (text != null) Padding(padding: const EdgeInsets.only(top: 4), child: Text(text!, textAlign: TextAlign.center, style: TextStyle(color: c.ink3))),
-        if (action != null) Padding(padding: const EdgeInsets.only(top: 14), child: action!),
-      ]),
+      child: Column(
+        children: [
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: c.ink, fontSize: 16, fontWeight: FontWeight.w700),
+          ),
+          if (text != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                text!,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: c.ink3),
+              ),
+            ),
+          if (action != null) Padding(padding: const EdgeInsets.only(top: 14), child: action!),
+        ],
+      ),
     );
   }
 }
@@ -923,22 +1218,37 @@ class DetailBar extends StatelessWidget implements PreferredSizeWidget {
       padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
       child: SizedBox(
         height: 52,
-        child: Stack(alignment: Alignment.center, children: [
-          if (title != null) Text(title!, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 14, color: c.ink2)),
-          Row(children: [
-            const SizedBox(width: 4),
-            TextButton(
-              onPressed: onBack ?? () => Navigator.of(context).maybePop(),
-              style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 6), minimumSize: const Size(40, 40)),
-              child: Row(mainAxisSize: MainAxisSize.min, children: [
-                HIcon('back', size: 22, color: c.primary, stroke: 2.4),
-                Text(backLabel, style: TextStyle(color: c.primary, fontSize: 16, fontWeight: FontWeight.w700)),
-              ]),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            if (title != null)
+              Text(
+                title!,
+                style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 14, color: c.ink2),
+              ),
+            Row(
+              children: [
+                const SizedBox(width: 4),
+                TextButton(
+                  onPressed: onBack ?? () => Navigator.of(context).maybePop(),
+                  style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 6), minimumSize: const Size(40, 40)),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      HIcon('back', size: 22, color: c.primary, stroke: 2.4),
+                      Text(
+                        backLabel,
+                        style: TextStyle(color: c.primary, fontSize: 16, fontWeight: FontWeight.w700),
+                      ),
+                    ],
+                  ),
+                ),
+                const Spacer(),
+                for (final a in actions) Padding(padding: const EdgeInsets.only(right: 10), child: a),
+              ],
             ),
-            const Spacer(),
-            for (final a in actions) Padding(padding: const EdgeInsets.only(right: 10), child: a),
-          ]),
-        ]),
+          ],
+        ),
       ),
     );
   }
@@ -953,9 +1263,16 @@ class ActionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = Agnts.of(context);
     return Container(
-      decoration: BoxDecoration(color: c.surface, border: Border(top: BorderSide(color: c.line))),
+      decoration: BoxDecoration(
+        color: c.surface,
+        border: Border(top: BorderSide(color: c.line)),
+      ),
       padding: EdgeInsets.fromLTRB(16, 10, 16, 10 + MediaQuery.paddingOf(context).bottom),
-      child: Row(children: [for (final (i, w) in children.indexed) ...[if (i > 0) const SizedBox(width: 8), w]]),
+      child: Row(
+        children: [
+          for (final (i, w) in children.indexed) ...[if (i > 0) const SizedBox(width: 8), w],
+        ],
+      ),
     );
   }
 }
@@ -982,7 +1299,11 @@ class HFab extends StatelessWidget {
           child: InkWell(
             borderRadius: BorderRadius.circular(20),
             onTap: onTap,
-            child: SizedBox(width: 58, height: 58, child: Center(child: HIcon('plus', size: 26, color: c.onPrimary, stroke: 2.4))),
+            child: SizedBox(
+              width: 58,
+              height: 58,
+              child: Center(child: HIcon('plus', size: 26, color: c.onPrimary, stroke: 2.4)),
+            ),
           ),
         ),
       ),

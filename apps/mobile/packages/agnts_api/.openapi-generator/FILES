@@ -120,6 +120,8 @@ doc/PlatformWorkspace.md
 doc/PreviewInput.md
 doc/PreviewIssue.md
 doc/PreviewShot.md
+doc/PullRequest.md
+doc/PullReviewSettings.md
 doc/QualityStat.md
 doc/Question.md
 doc/QueueStatus.md
@@ -154,6 +156,13 @@ doc/ResetPasswordRequest.md
 doc/Result.md
 doc/RetryTicketRequest.md
 doc/ReviewModel.md
+doc/ReviewSync.md
+doc/Reviewer.md
+doc/ReviewerNote.md
+doc/ReviewerNoteInput.md
+doc/ReviewerProfileInput.md
+doc/Reviewers.md
+doc/ReviewsApi.md
 doc/RotateMcpToken200Response.md
 doc/Rule.md
 doc/RuleAnswers.md
@@ -178,6 +187,7 @@ doc/StageModels.md
 doc/StageSpend.md
 doc/StepDuration.md
 doc/SyncJira200Response.md
+doc/SyncPlane200Response.md
 doc/TaskCreate.md
 doc/TaskUpdate.md
 doc/TasksApi.md
@@ -195,6 +205,7 @@ doc/TicketsApi.md
 doc/TokenRequest.md
 doc/TokenSpend.md
 doc/Toolchain.md
+doc/TrackerUpdate.md
 doc/TransferWorkspaceRequest.md
 doc/TranslateInput.md
 doc/Translation.md
@@ -239,6 +250,7 @@ lib/src/api/mcp_api.dart
 lib/src/api/meta_api.dart
 lib/src/api/platform_api.dart
 lib/src/api/repos_api.dart
+lib/src/api/reviews_api.dart
 lib/src/api/rules_api.dart
 lib/src/api/settings_api.dart
 lib/src/api/tasks_api.dart
@@ -354,6 +366,8 @@ lib/src/model/platform_workspace.dart
 lib/src/model/preview_input.dart
 lib/src/model/preview_issue.dart
 lib/src/model/preview_shot.dart
+lib/src/model/pull_request.dart
+lib/src/model/pull_review_settings.dart
 lib/src/model/quality_stat.dart
 lib/src/model/question.dart
 lib/src/model/queue_status.dart
@@ -387,6 +401,12 @@ lib/src/model/reset_password_request.dart
 lib/src/model/result.dart
 lib/src/model/retry_ticket_request.dart
 lib/src/model/review_model.dart
+lib/src/model/review_sync.dart
+lib/src/model/reviewer.dart
+lib/src/model/reviewer_note.dart
+lib/src/model/reviewer_note_input.dart
+lib/src/model/reviewer_profile_input.dart
+lib/src/model/reviewers.dart
 lib/src/model/rotate_mcp_token200_response.dart
 lib/src/model/rule.dart
 lib/src/model/rule_answers.dart
@@ -409,6 +429,7 @@ lib/src/model/stage_models.dart
 lib/src/model/stage_spend.dart
 lib/src/model/step_duration.dart
 lib/src/model/sync_jira200_response.dart
+lib/src/model/sync_plane200_response.dart
 lib/src/model/task_create.dart
 lib/src/model/task_update.dart
 lib/src/model/ticket.dart
@@ -424,6 +445,7 @@ lib/src/model/ticket_state.dart
 lib/src/model/token_request.dart
 lib/src/model/token_spend.dart
 lib/src/model/toolchain.dart
+lib/src/model/tracker_update.dart
 lib/src/model/transfer_workspace_request.dart
 lib/src/model/translate_input.dart
 lib/src/model/translation.dart
@@ -565,6 +587,8 @@ test/platform_workspace_test.dart
 test/preview_input_test.dart
 test/preview_issue_test.dart
 test/preview_shot_test.dart
+test/pull_request_test.dart
+test/pull_review_settings_test.dart
 test/quality_stat_test.dart
 test/question_test.dart
 test/queue_status_server_queue_inner_test.dart
@@ -599,6 +623,13 @@ test/reset_password_request_test.dart
 test/result_test.dart
 test/retry_ticket_request_test.dart
 test/review_model_test.dart
+test/review_sync_test.dart
+test/reviewer_note_input_test.dart
+test/reviewer_note_test.dart
+test/reviewer_profile_input_test.dart
+test/reviewer_test.dart
+test/reviewers_test.dart
+test/reviews_api_test.dart
 test/rotate_mcp_token200_response_test.dart
 test/rule_answers_answers_inner_test.dart
 test/rule_answers_test.dart
@@ -623,6 +654,7 @@ test/stage_spend_test.dart
 test/stage_test.dart
 test/step_duration_test.dart
 test/sync_jira200_response_test.dart
+test/sync_plane200_response_test.dart
 test/task_create_test.dart
 test/task_update_test.dart
 test/tasks_api_test.dart
@@ -640,6 +672,7 @@ test/tickets_api_test.dart
 test/token_request_test.dart
 test/token_spend_test.dart
 test/toolchain_test.dart
+test/tracker_update_test.dart
 test/transfer_workspace_request_test.dart
 test/translate_input_test.dart
 test/translation_items_inner_test.dart

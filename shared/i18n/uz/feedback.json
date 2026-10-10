@@ -9,7 +9,7 @@
     "send": "Yuborish",
     "sent": "Rahmat! Fikringiz yuborildi.",
     "adminTitle": "Fikrlar",
-    "adminLede": "Foydalanuvchilar akkauntlaridan yuborgan fikrlar, avval yangilari. Ko'rib chiqilganda bajarildi deb belgilang.",
+    "adminLede": "Odamlar o‘z akkauntlaridan yuborgan fikrlar va saytdan kelgan konnektor so‘rovlari, eng yangilari birinchi. Har birini hal qilgach, bajarildi deb belgilang.",
     "f_new": "Yangi",
     "f_done": "Bajarilgan",
     "f_all": "Hammasi",
@@ -23,6 +23,12 @@
     "markDone": "Bajarildi deb belgilash",
     "reopen": "Qayta ochish",
     "markedDone": "Bajarildi deb belgilandi",
-    "reopened": "Yana yangi deb belgilandi"
+    "reopened": "Yana yangi deb belgilandi",
+    "kind": "Turi",
+    "k_any": "Hammasi",
+    "k_feedback": "Fikrlar",
+    "k_connector": "Konnektor so‘rovlari",
+    "connectorBadge": "Konnektor so‘rovi",
+    "fromSite": "saytdan"
   }
 }

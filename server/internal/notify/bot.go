@@ -5,6 +5,7 @@ import (
 	"crypto/subtle"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -111,7 +112,10 @@ func (n *Notifier) handleCallback(ctx context.Context, b *Bot, cfg TelegramConfi
 		return "This question is no longer open."
 	case "apr", "rej":
 		tool, what := "approve", "Approve and push "+arg+"? agnts pushes the branch and opens the pull request."
-		if v, err := n.actions.View(ctx, arg); err == nil && v.Ticket.Kind.Report() {
+		v, verr := n.actions.View(ctx, arg)
+		if verr == nil && v.Ticket.Kind == domain.KindReview && v.Ticket.Pull != nil {
+			what = fmt.Sprintf("Merge #%d into %s? agnts merges it at the commit it reviewed.", v.Ticket.Pull.Number, v.Ticket.Pull.BaseRef)
+		} else if verr == nil && v.Ticket.Kind.Report() {
 			what = "Approve the report on " + arg + "? It stays in agnts"
 			if v.Ticket.Source.Tracked() {
 				what += " and is not posted to " + v.Ticket.Source.Name()
@@ -120,6 +124,9 @@ func (n *Notifier) handleCallback(ctx context.Context, b *Bot, cfg TelegramConfi
 		}
 		if verb == "rej" {
 			tool, what = "reject", "Reject "+arg+"? This stops all work on it."
+			if verr == nil && v.Ticket.Kind == domain.KindReview {
+				what = "Dismiss agnts's review of " + arg + "? The pull request stays open for you on the git host."
+			}
 		}
 		id := newID()
 		if err := n.store.CreatePending(ctx, postgres.PendingAction{ID: id, Origin: domain.OriginTelegram, Tool: tool, TicketKey: arg,
@@ -133,6 +140,24 @@ func (n *Notifier) handleCallback(ctx context.Context, b *Bot, cfg TelegramConfi
 			_ = n.store.SaveTelegramMessage(ctx, postgres.TelegramMessage{ChatID: cfg.ChatID, MessageID: mid, TicketKey: arg, Kind: "confirm"})
 		}
 		return ""
+	case "rsu", "kpv":
+		_ = b.ClearButtons(ctx, cfg.ChatID, msg.MessageID)
+		var err error
+		if verb == "rsu" {
+			_, err = n.actions.RestartWithUpdate(ctx, arg, domain.OriginTelegram)
+		} else {
+			_, err = n.actions.KeepCurrentVersion(ctx, arg, domain.OriginTelegram)
+		}
+		if err != nil {
+			n.say(ctx, b, cfg, arg+": "+friendly(err))
+			return "Not done"
+		}
+		if verb == "rsu" {
+			n.say(ctx, b, cfg, arg+" restarted with the new version.")
+		} else {
+			n.say(ctx, b, cfg, arg+": agnts keeps working on the current version.")
+		}
+		return "Done"
 	case "ok":
 		_ = b.ClearButtons(ctx, cfg.ChatID, msg.MessageID)
 		a, err := n.store.ConfirmPending(ctx, arg, domain.OriginTelegram)
@@ -153,7 +178,9 @@ func (n *Notifier) handleCallback(ctx context.Context, b *Bot, cfg TelegramConfi
 			n.say(ctx, b, cfg, a.TicketKey+": "+friendly(err))
 			return "Not done"
 		}
-		if a.Tool == "approve" && strings.HasPrefix(a.Summary, "Approve the report") {
+		if a.Tool == "approve" && strings.HasPrefix(a.Summary, "Merge #") {
+			n.say(ctx, b, cfg, a.TicketKey+" accepted. agnts is merging it now.")
+		} else if a.Tool == "approve" && strings.HasPrefix(a.Summary, "Approve the report") {
 			n.say(ctx, b, cfg, a.TicketKey+" approved.")
 		} else if a.Tool == "approve" {
 			n.say(ctx, b, cfg, a.TicketKey+" approved. agnts is pushing it now.")

@@ -14,6 +14,8 @@
     "bug": "Bug investigation",
     "bugHint": "Find the root cause of a bug and propose a fix. Changes no code.",
     "pickerHint": "What agnts produces. Choosing a kind makes it final; Auto lets agnts decide while reading the ticket.",
-    "switchTo": "Switch to {kind}"
+    "switchTo": "Switch to {kind}",
+    "review": "PR review",
+    "reviewHint": "Review a pull request someone else opened. Comes from GitHub or GitLab."
   }
 }

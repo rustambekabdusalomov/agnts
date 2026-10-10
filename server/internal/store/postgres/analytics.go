@@ -352,12 +352,13 @@ func (s *Agent) period(ctx context.Context, from, to time.Time) (Period, error) 
 		count(*) FILTER (WHERE type = 'state_changed' AND data->>'to' = 'done'),
 		count(*) FILTER (WHERE type = 'state_changed' AND data->>'to' = 'rejected'),
 		count(*) FILTER (WHERE type = 'state_changed' AND data->>'to' IN ('failed', 'rate_limited'))
-		FROM events WHERE created_at >= $1 AND created_at < $2`, from, to).Scan(&p.Picked, &p.Pushed, &p.Rejected, &p.Stopped)
+		FROM events WHERE created_at >= $1 AND created_at < $2
+		  AND ticket_key NOT IN (SELECT key FROM tickets WHERE kind = 'review')`, from, to).Scan(&p.Picked, &p.Pushed, &p.Rejected, &p.Stopped)
 	if err != nil {
 		return p, err
 	}
 	err = s.db.QueryRow(ctx, `SELECT count(*) FILTER (WHERE revision = 0), count(*) FILTER (WHERE revision > 0)
-		FROM tickets WHERE state = 'done' AND updated_at >= $1 AND updated_at < $2`, from, to).Scan(&p.FirstTry, &p.AfterChanges)
+		FROM tickets WHERE state = 'done' AND kind <> 'review' AND updated_at >= $1 AND updated_at < $2`, from, to).Scan(&p.FirstTry, &p.AfterChanges)
 	if err != nil {
 		return p, err
 	}
@@ -395,7 +396,7 @@ func (s *Agent) quality(ctx context.Context, from, to time.Time) ([]QualityStats
 		cohort AS (
 			SELECT f.ticket_id, f.prompt_version, f.started_at, t.key, t.state
 			FROM first_code f JOIN tickets t ON t.id = f.ticket_id
-			WHERE f.started_at >= $1 AND f.started_at < $2 AND t.replay_of = ''),
+			WHERE f.started_at >= $1 AND f.started_at < $2 AND t.replay_of = '' AND t.kind <> 'review'),
 		per AS (
 			SELECT c.prompt_version, c.started_at, c.state,
 				EXISTS (SELECT 1 FROM events e WHERE e.ticket_key = c.key AND e.type = 'state_changed'

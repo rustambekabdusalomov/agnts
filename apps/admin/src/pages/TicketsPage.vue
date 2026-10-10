@@ -57,7 +57,7 @@ const trackers = computed(() =>
 const sync = useMutation({
   mutationFn: async (p: Tracker) => ({ p, r: await unwrap(p === 'plane' ? api.POST('/integrations/plane/sync') : api.POST('/integrations/jira/sync')) }),
   onSuccess: ({ p, r }) => {
-    ui.notify(t(p === 'plane' ? 'nav.syncedPlane' : 'nav.synced', { found: r.found, created: r.created }))
+    ui.notify(t(p === 'plane' ? 'nav.syncedPlane' : 'nav.synced', { found: r.found, created: r.created, updated: ('updated' in r ? r.updated : 0) ?? 0, waiting: ('waiting' in r ? r.waiting : 0) ?? 0 }))
     void qc.invalidateQueries({ queryKey: ['tickets'] })
   },
   onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
@@ -136,7 +136,7 @@ const columns = computed<BoardColumn[]>(() =>
             <td><div class="tkey">{{ tk.key }} <KindBadge v-if="tk.kind !== 'code'" :ticket="tk" /> <span v-if="tk.openSuggestions" class="badge b-info">{{ t('followUps.openBadge', { count: tk.openSuggestions }) }}</span> <span v-if="tk.blockedBy?.length" class="badge b-warn" :title="tk.blockedBy.map((b) => b.key).join(', ')">{{ t('relations.waitingBadge') }}</span></div><div class="ttitle">{{ tk.title }}</div></td>
             <td>
               <span v-if="tk.source === 'local'" class="src local">{{ t('tickets.sourceTask') }}</span>
-              <span v-else class="src">{{ tk.source === 'plane' ? t('tickets.sourcePlane') : t('tickets.sourceJira') }}</span>
+              <span v-else class="src">{{ tk.source === 'plane' ? t('tickets.sourcePlane') : tk.source === 'git' ? t('tickets.sourceGit') : t('tickets.sourceJira') }}</span>
             </td>
             <td class="muted">{{ tk.repoName ?? '—' }}</td>
             <td>

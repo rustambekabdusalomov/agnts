@@ -14,6 +14,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"agnts/internal/domain"
@@ -35,6 +36,9 @@ type Config struct {
 	Comments map[string]bool `json:"comments"`
 	// IssueType is the type of the issues agnts files for follow-ups.
 	IssueType string `json:"issue_type"`
+	// AssignedOnly takes only issues assigned to the connected account
+	// (with agnts's label); on unless the setting says "false".
+	AssignedOnly bool `json:"assigned_only"`
 }
 
 // FromIntegration builds the config from the stored integration: secrets
@@ -56,8 +60,9 @@ func FromIntegration(token string, settings map[string]string, connected bool) (
 			"started": settings["status_started"], "in_review": settings["status_in_review"], "rejected": settings["status_rejected"],
 			"merged": settings["status_merged"],
 		},
-		Comments:  map[string]bool{},
-		IssueType: strings.TrimSpace(settings["issue_type"]),
+		Comments:     map[string]bool{},
+		IssueType:    strings.TrimSpace(settings["issue_type"]),
+		AssignedOnly: settings["assigned_only"] != "false",
 	}
 	for _, k := range []string{"questions", "plan", "pr", "summary", "status"} {
 		c.Comments[k] = settings["comment_"+k] != "false"
@@ -79,7 +84,8 @@ func SecretsToken(apiToken, webhookSecret string) string {
 
 // SettingKeys are the settings the Jira integration accepts.
 var SettingKeys = []string{"site", "email", "label", "status_started", "status_in_review", "status_rejected", "status_merged",
-	"comment_questions", "comment_plan", "comment_pr", "comment_summary", "comment_status", "issue_type"}
+	"comment_questions", "comment_plan", "comment_pr", "comment_summary", "comment_status", "issue_type",
+	"assigned_only"}
 
 // Myself checks the credentials and returns the account's display name.
 func (c *Client) Myself(ctx context.Context) (string, error) {
@@ -96,14 +102,42 @@ func (c *Client) Myself(ctx context.Context) (string, error) {
 	return me.EmailAddress, nil
 }
 
+// AccountID returns the connected account's Jira account id, asked once
+// per site and email.
+func (c *Client) AccountID(ctx context.Context) (string, error) {
+	cfg, ok, err := c.cfg(ctx)
+	if err != nil {
+		return "", err
+	}
+	if !ok {
+		return "", ErrNotConnected
+	}
+	key := cfg.Site + "\x00" + cfg.Email
+	if v, ok := c.accounts.Load(key); ok {
+		return v.(string), nil
+	}
+	var me struct {
+		AccountID string `json:"accountId"`
+	}
+	if err := c.call(ctx, http.MethodGet, "/rest/api/3/myself", nil, &me); err != nil {
+		return "", err
+	}
+	if me.AccountID == "" {
+		return "", errors.New("jira did not say which account the token belongs to")
+	}
+	c.accounts.Store(key, me.AccountID)
+	return me.AccountID, nil
+}
+
 // ConfigSource loads the current config, so changes apply without a restart.
 // It returns ok=false when Jira is not connected.
 type ConfigSource func(ctx context.Context) (cfg Config, ok bool, err error)
 
 // Client talks to Jira Cloud REST v3.
 type Client struct {
-	cfg ConfigSource
-	hc  *http.Client
+	cfg      ConfigSource
+	hc       *http.Client
+	accounts sync.Map // site and email -> account id
 }
 
 var (
@@ -290,7 +324,11 @@ func (c *Client) Search(ctx context.Context) ([]orchestrator.Incoming, error) {
 	for _, l := range labels(cfg.Label) {
 		quoted = append(quoted, strconv.Quote(l))
 	}
-	jql := fmt.Sprintf(`labels in (%s) AND statusCategory != Done ORDER BY created ASC`, strings.Join(quoted, ", "))
+	mine := ""
+	if cfg.AssignedOnly {
+		mine = " AND assignee = currentUser()"
+	}
+	jql := fmt.Sprintf(`labels in (%s) AND statusCategory != Done%s ORDER BY created ASC`, strings.Join(quoted, ", "), mine)
 	var out []orchestrator.Incoming
 	token := ""
 	for page := 0; page < 20; page++ {
@@ -332,6 +370,9 @@ type issue struct {
 		Project struct {
 			Key string `json:"key"`
 		} `json:"project"`
+		Assignee *struct {
+			AccountID string `json:"accountId"`
+		} `json:"assignee"`
 		// IssueLinks is nil when the payload left the field out.
 		IssueLinks *[]issueLink `json:"issuelinks"`
 	} `json:"fields"`
@@ -394,6 +435,7 @@ func (is issue) incoming(label string) orchestrator.Incoming {
 	in := orchestrator.Incoming{
 		Key: is.Key, Project: is.Fields.Project.Key, Title: is.Fields.Summary,
 		Description: descriptionText(is.Fields.Description), Kind: is.kind(label),
+		Repo: domain.RepoFromLabels(is.Fields.Labels),
 	}
 	if in.Project == "" {
 		if i := strings.LastIndex(is.Key, "-"); i > 0 {

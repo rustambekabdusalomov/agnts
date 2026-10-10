@@ -52,6 +52,17 @@ type Checker func(ctx context.Context, token string, settings map[string]string)
 // Ingester picks up tickets (the orchestrator).
 type Ingester interface {
 	Ingest(ctx context.Context, in orchestrator.Incoming, origin domain.Origin) (bool, error)
+	IngestDetail(ctx context.Context, in orchestrator.Incoming, origin domain.Origin) (orchestrator.IngestOutcome, error)
+}
+
+// JiraSync is what a Jira sync found.
+type JiraSync struct {
+	Found   int // open issues for agnts (assigned to you, when that is on)
+	Created int // new tickets
+	Updated int // tickets not started yet that took the issue's new text
+	// Waiting counts started tickets whose issue changed: each asks you to
+	// restart with the new version or keep the current one.
+	Waiting int
 }
 
 // Integrations manages provider connections.
@@ -372,25 +383,33 @@ func (s *Integrations) Update(ctx context.Context, provider string, settings map
 	return s.view(ctx, in), err
 }
 
-// SyncJira picks up labelled open issues now.
-func (s *Integrations) SyncJira(ctx context.Context) (found, created int, err error) {
+// SyncJira picks up the open issues for agnts now and refreshes the
+// tickets it has for them.
+func (s *Integrations) SyncJira(ctx context.Context) (JiraSync, error) {
+	var out JiraSync
 	issues, err := s.jira.Search(ctx)
 	if errors.Is(err, jira.ErrNotConnected) {
-		return 0, 0, invalid("jira is not connected")
+		return out, invalid("jira is not connected")
 	}
 	if err != nil {
-		return 0, 0, err
+		return out, err
 	}
+	out.Found = len(issues)
 	for _, in := range issues {
-		ok, err := s.ingest.Ingest(ctx, in, domain.OriginWeb)
+		res, err := s.ingest.IngestDetail(ctx, in, domain.OriginWeb)
 		if err != nil {
-			return len(issues), created, err
+			return out, err
 		}
-		if ok {
-			created++
+		switch res {
+		case orchestrator.IngestCreated:
+			out.Created++
+		case orchestrator.IngestUpdated:
+			out.Updated++
+		case orchestrator.IngestAsked, orchestrator.IngestPending:
+			out.Waiting++
 		}
 	}
-	return len(issues), created, nil
+	return out, nil
 }
 
 // SyncPlane picks up labelled open work items in the linked Plane projects now.

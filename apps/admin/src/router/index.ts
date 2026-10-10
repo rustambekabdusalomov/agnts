@@ -36,6 +36,7 @@ export const router = createRouter({
         { path: 'tickets', name: 'tickets', component: () => import('../pages/TicketsPage.vue') },
         { path: 'tickets/:key', name: 'ticket', component: () => import('../pages/TicketPage.vue') },
         { path: 'tasks', name: 'tasks', component: () => import('../pages/TasksPage.vue') },
+        { path: 'reviews', name: 'reviews', component: () => import('../pages/ReviewsPage.vue') },
         { path: 'logs', name: 'logs', component: () => import('../pages/LogsPage.vue') },
         { path: 'usage', name: 'usage', component: () => import('../pages/UsagePage.vue') },
         { path: 'integrations', name: 'integrations', component: () => import('../pages/IntegrationsPage.vue') },

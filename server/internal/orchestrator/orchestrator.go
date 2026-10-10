@@ -74,6 +74,10 @@ type Deps struct {
 	Briefs Briefs
 	// Reflections keeps feedback for reflect runs; nil disables them.
 	Reflections Reflections
+	// PullReviews keeps the reviews of pull requests waiting for you and
+	// what agnts learned from your notes; nil disables them (the git host
+	// must also implement ReviewHost, and Git PRFetcher).
+	PullReviews PullReviews
 	// Translations stores translated ticket texts; nil disables translation.
 	Translations Translations
 	// Shots stores preview screenshots; nil disables previews.
@@ -115,6 +119,7 @@ type Orchestrator struct {
 	rules       Rules
 	briefs      Briefs
 	reflections Reflections
+	pulls       PullReviews
 	trans       Translations
 	shots       Shots
 	envs        PreviewEnvs
@@ -145,7 +150,7 @@ func New(cfg Config, d Deps, log *slog.Logger) *Orchestrator {
 	}
 	return &Orchestrator{
 		cfg: cfg, store: d.Store, runner: d.Runner, git: d.Git, host: d.Host, trackers: d.Trackers, homes: d.Homes,
-		settings: d.Settings, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, briefs: d.Briefs, reflections: d.Reflections, trans: d.Translations,
+		settings: d.Settings, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, briefs: d.Briefs, reflections: d.Reflections, pulls: d.PullReviews, trans: d.Translations,
 		shots: d.Shots, envs: d.PreviewEnvs, builds: d.BuildEnvs, log: log,
 		queue: q, workspaces: d.Workspaces, accounts: d.Accounts, capacity: d.Capacity, credits: d.Credits, sched: newSchedState(),
 		wake:    make(chan struct{}, 1),
@@ -212,7 +217,7 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 	defer wg.Wait()
 	tick := time.NewTicker(o.cfg.PollEvery)
 	defer tick.Stop()
-	lastResume, lastPrune, lastMerges := time.Time{}, time.Time{}, time.Time{}
+	lastResume, lastPrune, lastMerges, lastPulls := time.Time{}, time.Time{}, time.Time{}, time.Time{}
 
 	for {
 		if time.Since(lastResume) > time.Minute {
@@ -226,6 +231,10 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 		if o.cfg.MergeCheckEvery > 0 && time.Since(lastMerges) > o.cfg.MergeCheckEvery {
 			lastMerges = time.Now()
 			o.CheckMerges(sys)
+		}
+		if time.Since(lastPulls) > ReviewSyncEvery {
+			lastPulls = time.Now()
+			o.autoSyncReviews(sys)
 		}
 		if time.Since(lastPrune) > time.Hour {
 			lastPrune = time.Now()
@@ -350,7 +359,9 @@ func (o *Orchestrator) work(parent context.Context, t domain.Ticket, run domain.
 	log.Info("stage started")
 	run.PromptVersion = PromptVersion
 	s, err := o.settings.Get(ctx)
-	if err == nil {
+	if err == nil && t.Kind == domain.KindReview {
+		err = o.workPull(ctx, s, t, &run)
+	} else if err == nil {
 		switch run.Stage {
 		case domain.StageAnalyze:
 			err = o.analyze(ctx, s, t, &run)
@@ -840,7 +851,7 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 // picks the kind it takes that reading; a kind someone chose stays, and a
 // disagreement is only a warning on the ticket.
 func (o *Orchestrator) settleKind(ctx context.Context, t domain.Ticket, run *domain.Run, a Analysis) (domain.Ticket, error) {
-	if !a.Kind.Valid() || a.Kind == t.Kind {
+	if !a.Kind.Selectable() || a.Kind == t.Kind {
 		return t, nil
 	}
 	data := map[string]any{"from": string(t.Kind), "to": string(a.Kind), "reason": a.KindReason}

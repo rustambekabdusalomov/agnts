@@ -12,6 +12,12 @@ void main() {
       // TODO
     });
 
+    // feedback: sent from an account; connector: a connector request from the website
+    // String kind
+    test('to test the property `kind`', () async {
+      // TODO
+    });
+
     // String title
     test('to test the property `title`', () async {
       // TODO

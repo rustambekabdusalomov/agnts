@@ -23,8 +23,9 @@ class SetSlotsRequest {
     required  this.slots,
   });
 
+      /// At most AGNTS_MAX_SLOTS (5 by default)
           // minimum: 1
-          // maximum: 5
+          // maximum: 50
   @JsonKey(
     
     name: r'slots',

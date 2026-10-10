@@ -1,7 +1,7 @@
 {
   "billing": {
     "title": "Billing",
-    "selfHosted": "This server is self-hosted: there is nothing to pay. The Admin sets slots and member limits.",
+    "selfHosted": "This server is self-hosted: there is nothing to pay. Set parallel runs below; the Admin sets member limits.",
     "plan": "Plan",
     "planSub": "The base plan includes 1 parallel run and {members} members.",
     "monthly": "{amount} a month",
@@ -9,6 +9,7 @@
     "trialUntil": "Free trial until {date}",
     "slots": "Parallel runs",
     "slotsHelp": "Each extra run at once costs {price} a month. Adding one now charges the rest of this month from credits.",
+    "slotsHelpSelfHosted": "How many runs this workspace has at once, free on this server. Up to {max}; the server's AGNTS_MAX_SLOTS sets the limit.",
     "slotsSave": "Change",
     "slotsSaved": "Parallel runs set to {n}",
     "members": "Members",

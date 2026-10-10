@@ -32,6 +32,7 @@
     "statPushed": "Отправлено за неделю",
     "statPushedNote": "Открыто пул-реквестов",
     "statSession": "Сессия тарифа",
-    "sourcePlane": "Plane"
+    "sourcePlane": "Plane",
+    "sourceGit": "PR"
   }
 }

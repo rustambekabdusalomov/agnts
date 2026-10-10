@@ -24,6 +24,7 @@ services:
     volumes:
       - ${CADDYFILE:-./Caddyfile}:/etc/caddy/Caddyfile:ro
       - ./website:/srv/website:ro
+      - ./pitch-day:/srv/pitch-day:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:

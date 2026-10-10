@@ -16,6 +16,8 @@ const (
 	SourceJira  TicketSource = "jira"
 	SourcePlane TicketSource = "plane"
 	SourceLocal TicketSource = "local"
+	// SourceGit is a pull request on the git host waiting for your review.
+	SourceGit TicketSource = "git"
 )
 
 // TrackerSources are the sources that have an issue in a tracker.
@@ -31,6 +33,8 @@ func (s TicketSource) Name() string {
 		return "Jira"
 	case SourcePlane:
 		return "Plane"
+	case SourceGit:
+		return "Git"
 	}
 	return string(s)
 }
@@ -116,8 +120,17 @@ type Ticket struct {
 	// ReplayOf is the done ticket a replay re-runs ("" for other tickets);
 	// BaseSHA is the commit the replay's branch is cut from. Replays are
 	// for evaluation: never pushed, and never shown to other tickets.
-	ReplayOf  string
-	BaseSHA   string
+	ReplayOf string
+	BaseSHA  string
+	// Pull is the pull request a review ticket reviews (kind review), as
+	// of the last sync; nil for other tickets.
+	Pull *PullRequest
+	// Update is a newer version of the issue from the tracker, which
+	// arrived after agnts started on the ticket: it waits for you to
+	// restart with it or keep the current one. Kept is the version you
+	// chose to keep, so it is not asked about again.
+	Update    *TrackerUpdate
+	Kept      string
 	QueuedAt  *time.Time
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -137,13 +150,15 @@ const (
 
 // transitions lists every allowed state change. Anything else is a bug.
 var transitions = map[TicketState][]TicketState{
+	// Back to new from any state before pushing: a restart with a newer
+	// version of the issue.
 	StateNew:               {StateAnalyzing, StateRejected},
 	StateAnalyzing:         {StateWaitingForAnswers, StateCoding, StateFailed, StateRateLimited, StateNew, StateRejected},
-	StateWaitingForAnswers: {StateCoding, StateRejected},
+	StateWaitingForAnswers: {StateCoding, StateRejected, StateNew},
 	// A report skips testing: coding goes straight to review.
-	StateCoding:           {StateTesting, StateWaitingForReview, StateFailed, StateRateLimited, StateRejected},
-	StateTesting:          {StateWaitingForReview, StateCoding, StateFailed, StateRejected},
-	StateWaitingForReview: {StatePushing, StateCoding, StateRejected},
+	StateCoding:           {StateTesting, StateWaitingForReview, StateFailed, StateRateLimited, StateRejected, StateNew},
+	StateTesting:          {StateWaitingForReview, StateCoding, StateFailed, StateRejected, StateNew},
+	StateWaitingForReview: {StatePushing, StateCoding, StateRejected, StateNew},
 	StatePushing:          {StateDone, StateFailed},
 	StateFailed:           {StateNew, StateCoding, StatePushing, StateRejected},
 	StateRateLimited:      {StateNew, StateCoding, StateRejected},
@@ -419,6 +434,13 @@ const (
 	EventRedFlags = "red_flags"
 	// EventCheckpoint: the drift checkpoint partway through a coding run.
 	EventCheckpoint = "checkpoint"
+	// EventReviewer: agnts learned how a person reviews pull requests.
+	EventReviewer = "reviewer_learned"
+	// EventTrackerChanged: the issue changed in the tracker after agnts
+	// started; it waits for you to restart with it or keep going.
+	EventTrackerChanged = "tracker_changed"
+	// EventReviewPosted: agnts posted its review on the pull request.
+	EventReviewPosted = "review_posted"
 	// EventToolchain: toolchains were detected for a repository, or
 	// installed into the shared toolchain volume before a run.
 	EventToolchain = "toolchain"
@@ -495,3 +517,41 @@ type PreviewConfig struct {
 
 // Enabled reports whether the repository can be previewed.
 func (c PreviewConfig) Enabled() bool { return strings.TrimSpace(c.Command) != "" && c.Port > 0 }
+
+// RepoLabelPrefix starts a tracker label that names the repository an issue
+// belongs to (repo:api), overriding the repository linked to its project.
+const RepoLabelPrefix = "repo:"
+
+// RepoFromLabels returns the repository name the first repo: label names,
+// or "" when none does. The prefix is matched in any case.
+func RepoFromLabels(labels []string) string {
+	for _, l := range labels {
+		l = strings.TrimSpace(l)
+		if len(l) > len(RepoLabelPrefix) && strings.EqualFold(l[:len(RepoLabelPrefix)], RepoLabelPrefix) {
+			if name := strings.TrimSpace(l[len(RepoLabelPrefix):]); name != "" {
+				return name
+			}
+		}
+	}
+	return ""
+}
+
+// TrackerUpdate is a version of an issue's text from the tracker: what
+// the work is about. Priority only orders the queue, so it is not part of it.
+type TrackerUpdate struct {
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	Hash        string    `json:"hash"`
+	At          time.Time `json:"at"`
+}
+
+// NewTrackerUpdate is the tracker's version of an issue now.
+func NewTrackerUpdate(title, description string) TrackerUpdate {
+	return TrackerUpdate{Title: title, Description: description, Hash: TextHash(title + "\x00" + description), At: time.Now()}
+}
+
+// Differs reports whether the tracker's version differs from what the
+// ticket was worked from.
+func (u TrackerUpdate) Differs(t Ticket) bool {
+	return u.Title != t.Title || u.Description != t.Description
+}

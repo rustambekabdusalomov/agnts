@@ -45,6 +45,7 @@ type Options struct {
 	Lessons Lessons      // Learn pages; nil answers 501
 	Rules   Rules        // Rules page; nil answers 501
 	Briefs  Briefs       // repository briefs; nil answers 501
+	Reviews Reviews      // pull request reviews; nil answers 501
 	OAuth   OAuth        // MCP connector authorization; nil disables /mcp
 	MCP     http.Handler // the MCP streamable HTTP handler
 	DB      Pinger
@@ -86,6 +87,9 @@ type Options struct {
 	Google *GoogleSignIn
 	// Feedback keeps what people send the Admins; nil answers 501.
 	Feedback FeedbackStore
+	// SiteURL is the public website (AGNTS_SITE_URL); its "Request a
+	// connector" form posts to /site/connector-request. Nil turns that off.
+	SiteURL *url.URL
 }
 
 // Server implements gen.ServerInterface.
@@ -128,6 +132,13 @@ func NewHandler(opt Options) (http.Handler, error) {
 
 	for name, h := range opt.Payments {
 		r.With(middleware.RequestSize(maxBodyBytes)).Handle("/webhooks/"+name, h)
+	}
+	if opt.SiteURL != nil && opt.Feedback != nil {
+		// Called by the website from another origin, without an account:
+		// outside /api, with its own CORS answer.
+		site := r.With(middleware.RequestSize(16<<10), middleware.NoCache)
+		site.Options("/site/connector-request", s.connectorRequestPreflight)
+		site.Post("/site/connector-request", s.connectorRequest)
 	}
 	if opt.Google != nil {
 		// A form post from the website, not a JSON API call: outside /api.

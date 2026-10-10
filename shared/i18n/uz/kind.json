@@ -14,6 +14,8 @@
     "bug": "Xatoni tekshirish",
     "bugHint": "Xatoning asl sababini topib, tuzatishni taklif qilish. Kod oʻzgarmaydi.",
     "pickerHint": "agnts nima qiladi. Tanlangan tur oʻzgarmaydi; «Avto»da agnts tiketni oʻqib, oʻzi hal qiladi.",
-    "switchTo": "«{kind}»ga oʻtkazish"
+    "switchTo": "«{kind}»ga oʻtkazish",
+    "review": "PR koʻrib chiqish",
+    "reviewHint": "Boshqa birov ochgan pull requestni tekshirish. GitHub yoki GitLab’dan keladi."
   }
 }

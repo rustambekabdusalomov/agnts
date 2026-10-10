@@ -15,6 +15,14 @@
       "coding": "Writing",
       "pushing": "Delivering",
       "done": "Done"
+    },
+    "review": {
+      "analyzing": "Fetching",
+      "coding": "Reviewing",
+      "waiting_for_review": "Review ready",
+      "pushing": "Merging",
+      "done": "Merged",
+      "rejected": "Dismissed"
     }
   }
 }

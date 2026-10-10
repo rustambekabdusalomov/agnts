@@ -1,4 +1,40 @@
 {
+  "about": {
+    "bio": "Software engineer and team lead with over 5 years of experience.",
+    "m1": {
+      "title": "The idea",
+      "when": "May"
+    },
+    "m2": {
+      "title": "First version",
+      "when": "June"
+    },
+    "m3": {
+      "title": "Turkey",
+      "when": "July"
+    },
+    "m4": {
+      "title": "Friends",
+      "when": "After"
+    },
+    "m5": {
+      "title": "Startup",
+      "when": "Today"
+    },
+    "m6": {
+      "title": "Mobile app",
+      "when": "Next"
+    },
+    "name": "Rustambek Abdusalomov",
+    "role": "Founder",
+    "signature": "Rustambek, founder of agnts",
+    "story1": "In July 2026 I went to Turkey on a trip. Every morning I spent just 5–10 minutes writing a few tickets, and when I came back to the hotel in the evening, they were waiting for me as tested pull requests. Reviewing them took only 10–15 minutes. So 20–25 minutes a day was enough to keep my project work moving, and I can honestly say it made a big difference to how good the trip was. That week I was truly thankful to myself for building agnts.",
+    "story2": "I started it in May, after seeing how much of a developer’s day still goes to reading tickets, explaining them to AI, then checking and testing the result. The first version started working on my own tickets at the end of June, and it has been working on them ever since.",
+    "story3": "When I came back, I told my programmer friends about it, and they got interested. They wanted to try it too, so I opened accounts for them, and soon after, every one of them gave me honest, positive feedback. That’s when agnts became a startup: I concluded that other developers should also spend their time on architecture, scaling and business logic rather than on repetitive daily tasks. I saw for myself how much it raises productivity, and how it lets projects be built with better, more polished solutions.",
+    "story4": "The mobile app is now in testing. I’m building it so the whole process can be managed from a phone. Once testing is done, I plan to launch it in full so everyone can use it.",
+    "timeline": "Timeline",
+    "title": "I wrote tickets over breakfast. By evening, they were ready for review."
+  },
   "aria": {
     "footer": "Footer",
     "language": "Language",
@@ -48,6 +84,35 @@
       "text": "Add the agnts label to a ticket. agnts reads it, asks its questions there, and updates the ticket when the pull request is open."
     },
     "lead": "Connect your tracker, your repositories and Claude once. agnts takes the work from there.",
+    "plane": {
+      "role": "Tickets",
+      "text": "Plane Cloud or self-hosted. Label a work item for agnts and it moves through your states as the work goes on."
+    },
+    "request": {
+      "button": "Request a connector",
+      "cloud": "Cloud",
+      "email": "Email",
+      "failed": "The request could not be sent. Please try again in a moment.",
+      "formLede": "Tell us which tool your team uses. We read every request and write back to you.",
+      "formTitle": "Request a connector",
+      "hosting": "Where it runs",
+      "invalid": "Name the tool and add an email we can reply to.",
+      "link": "Link to the tool",
+      "name": "Your name",
+      "notSure": "Not sure",
+      "selfHosted": "Self-hosted",
+      "send": "Send request",
+      "sending": "Sending...",
+      "sentText": "We will look at your request and email you about the connector.",
+      "sentTitle": "Thanks, we got it!",
+      "text": "Linear, YouTrack, Trello, Azure DevOps or your own tracker: tell us what your team uses and we will build the connector for you.",
+      "title": "Using something else?",
+      "tooMany": "Too many requests from your network. Please try again in a few minutes.",
+      "tool": "Tool",
+      "toolPh": "Linear, YouTrack, Trello...",
+      "usage": "How your team uses it",
+      "usagePh": "Tickets, code reviews, CI, anything that helps us build it right"
+    },
     "title": "Works with the tools you already use."
   },
   "contact": {
@@ -141,6 +206,7 @@
     "title": "agnts, your AI teammate that works 24/7"
   },
   "nav": {
+    "about": "About",
     "connectors": "Connectors",
     "faq": "FAQ",
     "how": "How it works",
@@ -196,6 +262,45 @@
       "title": "Nothing ships without you"
     },
     "title": "Your code, isolated on every run."
+  },
+  "problem": {
+    "label": "Why agnts",
+    "title": "AI writes the code. You still do everything around it.",
+    "lead": "Developers already code with AI. But the ticket still has to be read, explained, checked, tested and closed by hand.",
+    "before": "The problem",
+    "after": "With agnts",
+    "p1": {
+      "title": "You turn every ticket into a prompt",
+      "text": "Read the ticket, dig through the code, then explain the task to the AI in enough detail that it gets it right."
+    },
+    "p2": {
+      "title": "You check and test what it wrote",
+      "text": "Run the build, the linter and the tests, and fix what broke before anyone else sees it."
+    },
+    "p3": {
+      "title": "You do the paperwork",
+      "text": "Push the branch, open the pull request, move the ticket to done."
+    },
+    "p4": {
+      "title": "It repeats the same mistakes",
+      "text": "The AI forgets your corrections, so you explain them again on the next ticket."
+    },
+    "s1": {
+      "title": "agnts reads the ticket and your code",
+      "text": "It takes the ticket from Jira or Plane and asks short questions only where something is unclear."
+    },
+    "s2": {
+      "title": "Checks pass before you look",
+      "text": "It codes and runs your build, lint and tests in an isolated container, and fixes failures itself."
+    },
+    "s3": {
+      "title": "From ticket to pull request",
+      "text": "After you approve the diff, agnts pushes, opens the pull request and updates the ticket."
+    },
+    "s4": {
+      "title": "It learns from every mistake",
+      "text": "Explain what went wrong once. agnts fixes it and keeps the lesson for the next tickets."
+    }
   },
   "reviews": {
     "lead": "Reviews from developers already running agnts on real work.",

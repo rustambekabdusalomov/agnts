@@ -404,6 +404,47 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /tickets/{key}/restart-update:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: restartWithUpdate
+      summary: Start the ticket over from the newer version of its issue; the work so far is dropped
+      tags: [tickets]
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /tickets/{key}/keep-version:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: keepCurrentVersion
+      summary: Keep working from the version agnts started with; this newer version of the issue is not asked about again
+      tags: [tickets]
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/post-review:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: postPullReview
+      summary: Post agnts's latest review of a pull request on it as a comment (once per reviewed commit)
+      tags: [reviews]
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /tickets/{key}/preview:
     parameters:
       - $ref: '#/components/parameters/TicketKey'
@@ -1289,7 +1330,7 @@ paths:
   /integrations/jira/sync:
     post:
       operationId: syncJira
-      summary: Pick up labelled Jira issues now
+      summary: Pick up labelled Jira issues now (only those assigned to you, unless that is off) and refresh the tickets agnts has for them
       tags: [integrations]
       responses:
         '200':
@@ -1302,6 +1343,8 @@ paths:
                 properties:
                   found: { type: integer }
                   created: { type: integer }
+                  updated: { type: integer, description: Tickets not started yet that took the issue's new text }
+                  waiting: { type: integer, description: 'Started tickets whose issue changed: each asks you to restart with the new version or keep the current one' }
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
 
@@ -1610,6 +1653,91 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Lesson' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /reviews/sync:
+    post:
+      operationId: syncReviews
+      summary: Ask the git host for the pull requests waiting for you and queue reviews of the new ones
+      tags: [reviews]
+      responses:
+        '200':
+          description: What the sync found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReviewSync' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /reviews/reviewers:
+    get:
+      operationId: listReviewers
+      summary: How each person agnts reviews pull requests for reviews, as it learned from their notes
+      tags: [reviews]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Reviewers' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /reviews/reviewers/{login}:
+    parameters:
+      - name: login
+        in: path
+        required: true
+        schema: { type: string, minLength: 1, maxLength: 100 }
+    put:
+      operationId: saveReviewerProfile
+      summary: Replace a reviewer profile with your text; empty text clears it
+      tags: [reviews]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReviewerProfileInput' }
+      responses:
+        '200':
+          description: The profile
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Reviewer' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /reviews/notes:
+    post:
+      operationId: addReviewerNote
+      summary: Tell agnts something about how you review; the next review for that user reads it
+      tags: [reviews]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReviewerNoteInput' }
+      responses:
+        '201':
+          description: Kept
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReviewerNote' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /reviews/notes/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    delete:
+      operationId: deleteReviewerNote
+      summary: Forget a note (one already folded into a profile stays there until the profile is edited)
+      tags: [reviews]
+      responses:
+        '204': { description: Deleted }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
@@ -2732,7 +2860,7 @@ paths:
               type: object
               required: [slots]
               properties:
-                slots: { type: integer, minimum: 1, maximum: 5 }
+                slots: { type: integer, minimum: 1, maximum: 50, description: 'At most AGNTS_MAX_SLOTS (5 by default)' }
       responses:
         '200':
           description: OK
@@ -3029,9 +3157,10 @@ components:
 
     Feedback:
       type: object
-      required: [id, title, description, status, sender, createdAt]
+      required: [id, kind, title, description, status, sender, createdAt]
       properties:
         id: { type: integer, format: int64 }
+        kind: { type: string, enum: [feedback, connector], description: 'feedback: sent from an account; connector: a connector request from the website' }
         title: { type: string }
         description: { type: string }
         status: { type: string, enum: [new, done] }
@@ -3366,10 +3495,13 @@ components:
 
     TicketKind:
       type: string
-      enum: [code, test, plan, analysis, bug]
+      enum: [code, test, plan, analysis, bug, review]
       description: >-
         What the work produces. code and test make a change (diff, checks,
         pull request); plan, analysis and bug write a Markdown report.
+        review reviews a pull request someone else opened (source git):
+        approving it merges the pull request. Nobody picks review: those
+        tickets come from syncing the git host.
 
     TicketKindChoice:
       type: string
@@ -3524,7 +3656,7 @@ components:
         title: { type: string }
         state: { $ref: '#/components/schemas/TicketState' }
         kind: { $ref: '#/components/schemas/TicketKind' }
-        source: { type: string, enum: [jira, plane, local] }
+        source: { type: string, enum: [jira, plane, local, git] }
         held: { type: boolean }
 
     FollowUps:
@@ -3619,7 +3751,7 @@ components:
       required: [key, source, title, description, priority, state, revision, turns, branch, prUrl, kind, kindAuto, createdAt, updatedAt]
       properties:
         key: { type: string }
-        source: { type: string, enum: [jira, plane, local] }
+        source: { type: string, enum: [jira, plane, local, git] }
         repoId: { type: integer, format: int64 }
         title: { type: string }
         description: { type: string }
@@ -3630,6 +3762,7 @@ components:
         replayOf: { type: string, description: 'For a replay: the done ticket it re-runs. Replays are never pushed.' }
         turns: { type: integer }
         branch: { type: string }
+        headSha: { type: string, description: "The reviewed commit: the branch head agnts committed, or for a pull request review the head agnts reviewed" }
         prNumber: { type: integer }
         prUrl: { type: string }
         assignees:
@@ -3657,6 +3790,8 @@ components:
         since: { type: string, format: date-time, description: When the ticket entered its current state }
         stopReason: { type: string, description: Why it failed or paused }
         mergedAt: { type: string, format: date-time }
+        pull: { $ref: '#/components/schemas/PullRequest' }
+        trackerUpdate: { $ref: '#/components/schemas/TrackerUpdate' }
         learnState:
           type: string
           enum: [none, pending, done, failed]
@@ -4205,10 +4340,129 @@ components:
           description: 'Hosts run containers may reach besides the built-in list, such as a staging API; .example.com matches subdomains'
           items: { type: string, maxLength: 253 }
         suggestFollowUps: { type: boolean, description: 'Runs suggest follow-up tickets (off by default; a ticket can override it)' }
+        pullReviews: { $ref: '#/components/schemas/PullReviewSettings' }
         pauseAbove: { type: integer, minimum: 50, maximum: 100 }
         parallel: { type: integer, minimum: 1, maximum: 3 }
         git: { $ref: '#/components/schemas/GitSettings' }
         notify: { $ref: '#/components/schemas/NotifySettings' }
+
+    TrackerUpdate:
+      type: object
+      description: >-
+        A newer version of the issue from the tracker, which arrived after
+        agnts started on the ticket. agnts keeps working from the version it
+        started with until you restart the ticket with this one or keep the
+        current one.
+      required: [title, description, at]
+      properties:
+        title: { type: string }
+        description: { type: string }
+        at: { type: string, format: date-time, description: When agnts saw it }
+
+    PullReviewSettings:
+      type: object
+      description: Reviews of the pull requests waiting for you on GitHub or GitLab
+      required: [enabled, reviewRequested, skipDrafts, rereview, mergeMethod]
+      properties:
+        enabled: { type: boolean, description: 'Sync the pull requests waiting for you every few minutes and review the new ones' }
+        reviewRequested: { type: boolean, description: 'Also take pull requests whose review is requested from you, not only those assigned to you' }
+        skipDrafts: { type: boolean, description: Leave draft pull requests alone until they are ready }
+        rereview: { type: boolean, description: "Review again when the author pushes new commits while agnts's review waits for you" }
+        mergeMethod: { type: string, enum: [merge, squash, rebase], description: How an accepted pull request is merged }
+
+    PullRequest:
+      type: object
+      description: The pull request (GitLab merge request) a review ticket reviews, as of the last sync
+      required: [number, url, title, author, headRef, headSha, baseRef, draft, state, login, why]
+      properties:
+        number: { type: integer, description: 'The pull request number (GitLab: the IID)' }
+        url: { type: string }
+        title: { type: string }
+        author: { type: string, description: Git host username of the author }
+        headRef: { type: string, description: The branch it comes from }
+        headSha: { type: string, description: Its newest commit on the git host }
+        baseRef: { type: string, description: The branch it goes into }
+        draft: { type: boolean }
+        state: { type: string, enum: [open, closed, merged] }
+        login: { type: string, description: The git host user it waits for; their reviewer profile shapes its reviews }
+        why: { type: string, enum: [assigned, review_requested] }
+        additions: { type: integer }
+        deletions: { type: integer }
+        updatedAt: { type: string, format: date-time }
+        postedSha: { type: string, description: "The reviewed commit whose review agnts last posted on the pull request" }
+        postedAt: { type: string, format: date-time, description: When agnts last posted its review on the pull request }
+
+    ReviewSync:
+      type: object
+      description: What a sync of the pull requests waiting for you found
+      required: [repos, open, created, rereview, closed, errors]
+      properties:
+        repos: { type: integer, description: Repositories asked }
+        open: { type: integer, description: Pull requests waiting for you }
+        created: { type: integer, description: New reviews queued }
+        rereview: { type: integer, description: Reviews queued again for new commits }
+        closed: { type: integer, description: Reviews ended because the pull request was merged or closed on the git host }
+        errors:
+          type: array
+          description: Repositories or pull requests that could not be read
+          items: { type: string }
+
+    ReviewerNote:
+      type: object
+      description: >-
+        Something a person told agnts about one of its pull request
+        reviews. Later reviews for the same git host user read it until it
+        is folded into their profile.
+      required: [id, login, kind, note, createdAt]
+      properties:
+        id: { type: integer, format: int64 }
+        login: { type: string, description: The git host user the review was for }
+        username: { type: string, description: Who wrote it in agnts }
+        repoName: { type: string }
+        ticketKey: { type: string }
+        pullTitle: { type: string }
+        kind: { type: string, enum: [rereview, dismissed, manual] }
+        note: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    ReviewerNoteInput:
+      type: object
+      required: [login, note]
+      properties:
+        login: { type: string, minLength: 1, maxLength: 100 }
+        note: { type: string, minLength: 1, maxLength: 4000 }
+
+    Reviewer:
+      type: object
+      description: What agnts learned about how one git host user reviews pull requests
+      required: [login, profile, notesFolded, pending]
+      properties:
+        login: { type: string }
+        profile: { type: string, description: Markdown; empty until a review folds notes in or someone writes it }
+        notesFolded: { type: integer, description: Notes folded into the profile so far }
+        updatedAt: { type: string, format: date-time }
+        pending:
+          type: array
+          description: Notes the next review folds in, newest first
+          items: { $ref: '#/components/schemas/ReviewerNote' }
+
+    Reviewers:
+      type: object
+      required: [reviewers, notes]
+      properties:
+        reviewers:
+          type: array
+          items: { $ref: '#/components/schemas/Reviewer' }
+        notes:
+          type: array
+          description: The newest notes of everyone, newest first
+          items: { $ref: '#/components/schemas/ReviewerNote' }
+
+    ReviewerProfileInput:
+      type: object
+      required: [profile]
+      properties:
+        profile: { type: string, maxLength: 8000, description: Markdown; empty clears it }
 
     NotifySettings:
       type: object

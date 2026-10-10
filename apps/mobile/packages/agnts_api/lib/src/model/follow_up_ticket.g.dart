@@ -170,10 +170,12 @@ const _$TicketKindEnumMap = {
   TicketKind.plan: 'plan',
   TicketKind.analysis: 'analysis',
   TicketKind.bug: 'bug',
+  TicketKind.review: 'review',
 };
 
 const _$FollowUpTicketSource_EnumEnumMap = {
   FollowUpTicketSource_Enum.jira: 'jira',
   FollowUpTicketSource_Enum.plane: 'plane',
   FollowUpTicketSource_Enum.local: 'local',
+  FollowUpTicketSource_Enum.git: 'git',
 };

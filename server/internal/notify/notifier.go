@@ -24,6 +24,8 @@ type Actions interface {
 	RequestChanges(ctx context.Context, key, feedback string, shots []domain.ShotRef, files []int64, origin domain.Origin) (domain.Ticket, error)
 	Reject(ctx context.Context, key, reason string, origin domain.Origin) (domain.Ticket, error)
 	Retry(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
+	RestartWithUpdate(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
+	KeepCurrentVersion(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	OpenShot(ctx context.Context, key string, runID int64, shotID string) (io.ReadCloser, error)
 }
 
@@ -159,6 +161,10 @@ func (n *Notifier) handle(ctx context.Context, e domain.Event) {
 		n.followUps(ctx, e)
 		return
 	}
+	if e.Type == domain.EventTrackerChanged {
+		n.trackerChanged(ctx, e)
+		return
+	}
 	to, _ := e.Data["to"].(string)
 	if e.TicketKey == "" || to == "" {
 		return
@@ -246,6 +252,42 @@ func (n *Notifier) lessons(ctx context.Context, e domain.Event) {
 
 // followUps announces follow-up tickets a run suggested. They wait for
 // someone to pick them on the ticket page.
+// trackerChanged asks whether to restart a started ticket whose issue
+// changed in the tracker, or keep the version agnts works from.
+func (n *Notifier) trackerChanged(ctx context.Context, e domain.Event) {
+	s, err := n.settings.Get(ctx)
+	if err != nil || !s.Notify.NeedsYou || e.TicketKey == "" {
+		return
+	}
+	v, err := n.actions.View(ctx, e.TicketKey)
+	if err != nil || v.Ticket.Update == nil {
+		return // decided already
+	}
+	src := v.Ticket.Source.Name()
+	title := fmt.Sprintf("%s changed in %s", e.TicketKey, src)
+	if s.Notify.Push && n.fcm != nil {
+		n.push(ctx, Push{Title: title, Body: "agnts started on the old version: restart with the new one, or keep going?", Ticket: e.TicketKey})
+	}
+	if !s.Notify.Telegram {
+		return
+	}
+	b, cfg, ok := n.bot(ctx)
+	if !ok {
+		return
+	}
+	text := fmt.Sprintf("%s changed in %s after agnts started on it (%s).\n\nNow: %s\n\n%s\n\nRestart drops the work so far and starts over from the new version; Keep finishes the current one.",
+		e.TicketKey, src, strings.ReplaceAll(string(v.Ticket.State), "_", " "), v.Ticket.Update.Title, truncate(v.Ticket.Update.Description, 900))
+	id, err := b.Send(ctx, cfg.ChatID, text, [][]Button{
+		{{Text: "Restart with the new version", Data: "rsu:" + e.TicketKey}},
+		{{Text: "Keep the current version", Data: "kpv:" + e.TicketKey}},
+	}, false)
+	if err != nil {
+		n.log.Warn("telegram notify", "ticket", e.TicketKey, "err", err)
+		return
+	}
+	_ = n.store.SaveTelegramMessage(ctx, postgres.TelegramMessage{ChatID: cfg.ChatID, MessageID: id, TicketKey: e.TicketKey, Kind: "notice"})
+}
+
 func (n *Notifier) followUps(ctx context.Context, e domain.Event) {
 	count, _ := e.Data["count"].(float64) // numbers come back from JSON as float64
 	if count < 1 || e.TicketKey == "" {
@@ -434,6 +476,9 @@ func pushText(v orchestrator.TicketView, e domain.Event) (string, string) {
 	case domain.StateFailed:
 		return k + " stopped", truncate(e.Message, 180)
 	default:
+		if v.Ticket.Kind == domain.KindReview {
+			return k + " merged", v.Ticket.PRURL
+		}
 		if v.Ticket.Kind.Report() {
 			return k + " is done", v.Ticket.Title
 		}
@@ -512,8 +557,22 @@ func (n *Notifier) sendTelegram(ctx context.Context, v orchestrator.TicketView, 
 		return nil
 	case domain.StateWaitingForReview:
 		text := fmt.Sprintf("%s is ready for review: %s", t.Key, t.Title)
-		approve := "Approve and push"
-		if t.Kind.Report() {
+		approve, change, reject := "Approve and push", "Request changes", "Reject"
+		if t.Kind == domain.KindReview && t.Pull != nil {
+			approve, change, reject = "Merge", "Review again", "Dismiss"
+			text = fmt.Sprintf("agnts reviewed #%d by @%s (%s): %s", t.Pull.Number, t.Pull.Author, t.Key, t.Title)
+			if rv := v.Review; rv != nil {
+				text += "\n\nVerdict: " + strings.ReplaceAll(rv.Verdict, "_", " ") + "\n" + truncate(rv.Summary, 900)
+				for i, f := range rv.Findings {
+					if i == 5 {
+						text += fmt.Sprintf("\n… and %d more", len(rv.Findings)-5)
+						break
+					}
+					text += "\n- [" + f.Severity + "] " + truncate(f.Title, 200)
+				}
+			}
+			text += "\n\n" + t.PRURL + "\n\nMerge merges it at the commit agnts reviewed; Review again takes your note; Dismiss leaves it to you on the git host."
+		} else if t.Kind.Report() {
 			// A report keeps to agnts from here; posting it to the tracker is a choice made in the app.
 			approve = "Approve"
 			text = fmt.Sprintf("The %s report on %s is ready for review: %s", t.Kind, t.Key, t.Title)
@@ -543,7 +602,7 @@ func (n *Notifier) sendTelegram(ctx context.Context, v orchestrator.TicketView, 
 		}
 		id, err := b.Send(ctx, cfg.ChatID, text, [][]Button{
 			{{Text: approve, Data: "apr:" + t.Key}},
-			{{Text: "Request changes", Data: "chg:" + t.Key}, {Text: "Reject", Data: "rej:" + t.Key}},
+			{{Text: change, Data: "chg:" + t.Key}, {Text: reject, Data: "rej:" + t.Key}},
 		}, false)
 		if err != nil {
 			return err
@@ -561,7 +620,9 @@ func (n *Notifier) sendTelegram(ctx context.Context, v orchestrator.TicketView, 
 		return err
 	case domain.StateDone:
 		msg := t.Key + " is pushed."
-		if t.Kind.Report() {
+		if t.Kind == domain.KindReview {
+			msg = fmt.Sprintf("%s: pull request merged\n%s", t.Key, t.PRURL)
+		} else if t.Kind.Report() {
 			msg = t.Key + ": report approved."
 		} else if t.PRURL != "" {
 			msg = fmt.Sprintf("%s: pull request opened\n%s", t.Key, t.PRURL)

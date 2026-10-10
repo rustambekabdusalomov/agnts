@@ -7,6 +7,7 @@ void main() {
   // TODO add properties to the entity
 
   group(SetSlotsRequest, () {
+    // At most AGNTS_MAX_SLOTS (5 by default)
     // int slots
     test('to test the property `slots`', () async {
       // TODO

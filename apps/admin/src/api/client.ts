@@ -60,12 +60,27 @@ export function apiPath(path: string): string {
 }
 
 const workspaceRoute: Middleware = {
-  onRequest({ request, schemaPath }) {
+  async onRequest({ request, schemaPath }) {
     if (!workspace || isUserPath(schemaPath)) return undefined
     const url = new URL(request.url)
     if (!url.pathname.startsWith('/api/') || url.pathname.startsWith('/api/w/')) return undefined
     url.pathname = `/api/w/${encodeURIComponent(workspace)}${url.pathname.slice(4)}`
-    return new Request(url, request)
+    // Not new Request(url, request): that carries the body over as a stream,
+    // and Chrome sends a streamed body only over HTTP/2. Over HTTP/1.1 (the
+    // Vite dev server) every PUT and POST failed with ERR_ALPN_NEGOTIATION_FAILED.
+    const body = request.method === 'GET' || request.method === 'HEAD' ? undefined : await request.blob()
+    return new Request(url, {
+      method: request.method,
+      headers: request.headers,
+      body,
+      credentials: request.credentials,
+      cache: request.cache,
+      redirect: request.redirect,
+      referrer: request.referrer,
+      integrity: request.integrity,
+      keepalive: request.keepalive,
+      signal: request.signal,
+    })
   },
 }
 

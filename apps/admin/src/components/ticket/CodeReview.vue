@@ -11,7 +11,9 @@ import { useTr } from '../../composables/useTranslation'
 // agnts's code review beside the human one: advice only, never a gate.
 // Findings can be copied into the feedback box, so sending them back to
 // agnts is one click away.
-const props = defineProps<{ ticket: Ticket; review?: CodeReview; feedback: string; report?: boolean }>()
+// A pull request review (pull) is the work itself: no second review to run,
+// and no follow-ups, since the change is not agnts's.
+const props = defineProps<{ ticket: Ticket; review?: CodeReview; feedback: string; report?: boolean; pull?: boolean }>()
 const emit = defineEmits<{ add: [line: string]; show: [path: string] }>()
 const { t } = useI18n()
 const tr = useTr()
@@ -54,11 +56,11 @@ function addAll() {
 <template>
   <div class="sec cr">
     <div class="cr-h">
-      <h3>{{ report ? t('review.reportTitle') : t('review.title') }}</h3>
+      <h3>{{ pull ? t('reviews.reviewTitle') : report ? t('review.reportTitle') : t('review.title') }}</h3>
       <span v-if="current && !busy" class="badge" :class="`b-${VERDICT_TONE[current.verdict]}`">{{ t(`review.verdict_${current.verdict}`) }}</span>
       <span v-if="state === 'running'" class="cr-run"><span class="spin" aria-hidden="true" />{{ t('review.running') }}</span>
     </div>
-    <p class="hint" style="margin: -4px 0 10px">{{ t('review.sub') }}</p>
+    <p v-if="!pull" class="hint" style="margin: -4px 0 10px">{{ t('review.sub') }}</p>
 
     <p v-if="state === 'pending'" class="hint">{{ t('review.pending') }}</p>
     <div v-else-if="state === 'failed'" class="help bad"><HiIcon name="info" /><p>{{ t('review.failed') }}</p></div>
@@ -92,6 +94,7 @@ function addAll() {
             <HiIcon v-if="added(f)" name="check" />{{ added(f) ? t('review.added') : t('review.addToFeedback') }}
           </button>
           <button
+            v-if="!pull"
             type="button"
             class="btn btn-s cr-fu"
             :disabled="suggested.has(i) || toFollowUp.isPending.value"
@@ -111,7 +114,7 @@ function addAll() {
 
     <div v-if="!busy" class="cr-actions">
       <button v-if="actionable.length > 1 && !allAdded" type="button" class="btn btn-s" @click="addAll">{{ t('review.addAll') }}</button>
-      <button type="button" class="btn btn-s" :disabled="run.isPending.value" @click="run.mutate()">
+      <button v-if="!pull" type="button" class="btn btn-s" :disabled="run.isPending.value" @click="run.mutate()">
         {{ current || stale || state === 'failed' ? t('review.runAgain') : t('review.run') }}
       </button>
     </div>

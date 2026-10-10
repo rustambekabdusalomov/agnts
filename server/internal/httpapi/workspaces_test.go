@@ -3,6 +3,7 @@ package httpapi
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -395,5 +396,81 @@ func TestFeedbackRoutes(t *testing.T) {
 	}
 	if rec := h.do("PUT", "/api/platform/feedback/99", `{"status":"done"}`, cookie); rec.Code != http.StatusNotFound {
 		t.Fatalf("unknown: %d", rec.Code)
+	}
+}
+
+func TestConnectorRequest(t *testing.T) {
+	h := newHarness(t, pinger{})
+	const site = "https://agnts.example.org"
+	// Each send comes from its own address, under the rate limit.
+	n := 0
+	send := func(origin, body string) *httptest.ResponseRecorder {
+		n++
+		return h.do("POST", "/site/connector-request", body, map[string]string{"Origin": origin, "X-Forwarded-For": fmt.Sprintf("198.51.100.%d", n)})
+	}
+
+	// The browser asks first; only the website's origin is answered.
+	rec := h.do("OPTIONS", "/site/connector-request", "", map[string]string{"Origin": site, "Access-Control-Request-Method": "POST"})
+	if rec.Code != http.StatusNoContent || rec.Header().Get("Access-Control-Allow-Origin") != site || rec.Header().Get("Access-Control-Allow-Headers") != "Content-Type" {
+		t.Fatalf("preflight: %d %v", rec.Code, rec.Header())
+	}
+	if rec := h.do("OPTIONS", "/site/connector-request", "", map[string]string{"Origin": "https://evil.example"}); rec.Code != http.StatusForbidden || rec.Header().Get("Access-Control-Allow-Origin") != "" {
+		t.Fatalf("preflight from elsewhere: %d", rec.Code)
+	}
+
+	ok := `{"tool":"Linear","link":"https://linear.app","hosting":"cloud","usage":"Issues for 3 teams","name":"Dilnoza","email":"dilnoza@example.com"}`
+	if rec := send(site, ok); rec.Code != http.StatusCreated || rec.Header().Get("Access-Control-Allow-Origin") != site {
+		t.Fatalf("send: %d %s", rec.Code, rec.Body)
+	}
+	if rec := send("https://evil.example", ok); rec.Code != http.StatusForbidden {
+		t.Fatalf("from another site: %d", rec.Code)
+	}
+	if rec := send("", ok); rec.Code != http.StatusForbidden {
+		t.Fatalf("without an origin: %d", rec.Code)
+	}
+	for _, bad := range []string{
+		`{"tool":" ","email":"a@example.com"}`,
+		`{"tool":"` + strings.Repeat("a", 81) + `","email":"a@example.com"}`,
+		`{"tool":"Trello","email":"not an email"}`,
+		`{"tool":"Trello","email":"Bob <bob@example.com>"}`,
+		`{"tool":"Trello","email":"a@example.com","hosting":"moon"}`,
+		`not json`,
+	} {
+		if rec := send(site, bad); rec.Code != http.StatusBadRequest {
+			t.Errorf("%s: %d", bad, rec.Code)
+		}
+	}
+
+	// One address may send only a few.
+	limited := 0
+	for range 7 {
+		if h.do("POST", "/site/connector-request", ok, map[string]string{"Origin": site, "X-Forwarded-For": "192.0.2.9"}).Code == http.StatusTooManyRequests {
+			limited++
+		}
+	}
+	if limited == 0 {
+		t.Fatal("no rate limit")
+	}
+
+	// A bot that fills in the hidden field hears "ok", and nothing is kept.
+	if rec := send(site, `{"tool":"Spam","email":"bot@example.com","website":"http://spam"}`); rec.Code != http.StatusCreated {
+		t.Fatalf("honeypot: %d", rec.Code)
+	}
+
+	rec = h.do("GET", "/api/platform/feedback", "", h.signIn(t))
+	var list []gen.Feedback
+	if rec.Code != http.StatusOK || json.Unmarshal(rec.Body.Bytes(), &list) != nil || len(list) != 1+(7-limited) {
+		t.Fatalf("list: %d %s", rec.Code, rec.Body)
+	}
+	for _, f := range list {
+		if f.Title == "Connector: Spam" {
+			t.Fatal("the honeypot was kept")
+		}
+	}
+	got := list[0]
+	if got.Kind != gen.FeedbackKindConnector || got.Title != "Connector: Linear" || got.Sender != "Dilnoza" || got.UserId != nil ||
+		got.Email == nil || *got.Email != "dilnoza@example.com" ||
+		got.Description != "Link: https://linear.app\nHosting: cloud\nHow they use it: Issues for 3 teams" {
+		t.Fatalf("kept: %+v", got)
 	}
 }

@@ -803,7 +803,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get billingTitle => 'Billing';
 
   @override
-  String get billingSelfHosted => 'This server is self-hosted: there is nothing to pay. The Admin sets slots and member limits.';
+  String get billingSelfHosted =>
+      'This server is self-hosted: there is nothing to pay. Set parallel runs below; the Admin sets member limits.';
 
   @override
   String get billingPlan => 'Plan';
@@ -834,6 +835,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String billingSlotsHelp(String price) {
     return 'Each extra run at once costs $price a month. Adding one now charges the rest of this month from credits.';
+  }
+
+  @override
+  String billingSlotsHelpSelfHosted(String max) {
+    return 'How many runs this workspace has at once, free on this server. Up to $max; the server\'s AGNTS_MAX_SLOTS sets the limit.';
   }
 
   @override
@@ -1300,7 +1306,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get feedbackAdminTitle => 'Feedback';
 
   @override
-  String get feedbackAdminLede => 'What people sent from their accounts, newest first. Mark each one done once it’s handled.';
+  String get feedbackAdminLede =>
+      'What people sent from their accounts, and connector requests from the website, newest first. Mark each one done once it’s handled.';
 
   @override
   String get feedbackF_new => 'New';
@@ -1345,6 +1352,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get feedbackReopened => 'Marked new again';
+
+  @override
+  String get feedbackKind => 'Kind';
+
+  @override
+  String get feedbackK_any => 'Everything';
+
+  @override
+  String get feedbackK_feedback => 'Feedback';
+
+  @override
+  String get feedbackK_connector => 'Connector requests';
+
+  @override
+  String get feedbackConnectorBadge => 'Connector request';
+
+  @override
+  String get feedbackFromSite => 'from the website';
 
   @override
   String get filesTitle => 'Attachments';
@@ -1651,6 +1676,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get implementImplements => 'Implements';
 
   @override
+  String get integrationsAssignedOnly => 'Only issues assigned to me';
+
+  @override
+  String integrationsAssignedOnlyHelp(String email) {
+    return 'agnts takes a labelled issue only when it is assigned to the account it connects to Jira with ($email). Turn off to take every labelled issue.';
+  }
+
+  @override
   String get integrationsTitle => 'Integrations';
 
   @override
@@ -1915,6 +1948,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get integrationsQuery => 'The query agnts runs';
 
   @override
+  String get integrationsLabelsTitle => 'How to label tickets';
+
+  @override
+  String get integrationsLabelsSub => 'Add one of these labels to a Jira issue that isn\'t done. Case doesn\'t matter.';
+
+  @override
+  String get integrationsLabelsRepo =>
+      'An issue goes to the repository linked to its project (Repositories → Jira project). To send it to another one, add a label repo: followed by the repository\'s name in agnts, such as repo:web. Without a repository, only plans, analyses and bug investigations can run.';
+
+  @override
+  String get integrationsLabelsMany => 'With several kind labels, the first in this list wins.';
+
+  @override
+  String get integrationsLabelsLater =>
+      'Adding a kind label before work starts changes the ticket\'s kind. Removing every agnts label stops updates from Jira.';
+
+  @override
+  String get integrationsPlaneLabelsSub => 'Add one of these labels to an open work item. Case doesn\'t matter.';
+
+  @override
+  String get integrationsPlaneLabelsCreate => 'Plane labels belong to a project: create the ones you use in each linked project first.';
+
+  @override
+  String get integrationsPlaneLabelsRepo =>
+      'Link the project to a repository by its identifier (WEB in WEB-123) under Repositories → Plane project. Sync reads only linked projects, and code and test work needs a repository. To send one work item to another repository, add a label repo: followed by the repository\'s name in agnts, such as repo:web.';
+
+  @override
+  String get integrationsPlaneLabelsLater =>
+      'Adding a kind label before work starts changes the ticket\'s kind. Removing every agnts label stops updates from Plane.';
+
+  @override
   String get integrationsStatuses => 'Status updates';
 
   @override
@@ -1963,8 +2027,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get integrationsSyncNow => 'Sync now';
 
   @override
-  String integrationsSynced(String found, String created) {
-    return '$found open issues, $created new';
+  String integrationsSynced(String found, String created, String updated, String waiting) {
+    return '$found open issues for you, $created new, $updated updated, $waiting changed after agnts started';
   }
 
   @override
@@ -2266,6 +2330,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String kindSwitchTo(String kind) {
     return 'Switch to $kind';
   }
+
+  @override
+  String get kindReview => 'PR review';
+
+  @override
+  String get kindReviewHint => 'Review a pull request someone else opened. Comes from GitHub or GitLab.';
 
   @override
   String get learnTitle => 'Learn';
@@ -3348,8 +3418,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navSyncJira => 'Sync Jira';
 
   @override
-  String navSynced(String found, String created) {
-    return 'Jira synced: $found open, $created new';
+  String navSynced(String found, String created, String updated, String waiting) {
+    return 'Jira synced: $found open, $created new, $updated updated, $waiting waiting for your choice';
   }
 
   @override
@@ -3451,6 +3521,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navAccount => 'Account';
+
+  @override
+  String get navReviews => 'PR reviews';
 
   @override
   String get platformTitle => 'Admin cabinet';
@@ -5141,6 +5214,266 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reviewCat_scope => 'Scope';
 
   @override
+  String get reviewsTitle => 'Pull request reviews';
+
+  @override
+  String get reviewsLede =>
+      'agnts reviews the pull requests assigned to you on GitHub and GitLab. Merge from here when the review looks good, or dismiss it and review on the git host yourself.';
+
+  @override
+  String get reviewsSync => 'Sync now';
+
+  @override
+  String get reviewsSyncing => 'Syncing…';
+
+  @override
+  String reviewsSynced(String open, String repos, String created, String rereview, String closed) {
+    return '$open waiting for you in $repos repositories · $created new · $rereview reviewed again · $closed ended';
+  }
+
+  @override
+  String get reviewsSyncErrors => 'Some could not be read:';
+
+  @override
+  String get reviewsSettingsTitle => 'How agnts picks them up';
+
+  @override
+  String get reviewsEnabled => 'Review automatically';
+
+  @override
+  String get reviewsEnabledHelp => 'Check the git host every 5 minutes and review new pull requests. When off, only Sync now does it.';
+
+  @override
+  String get reviewsReviewRequested => 'Review requests too';
+
+  @override
+  String get reviewsReviewRequestedHelp => 'Also take pull requests whose review is requested from you, not only those assigned to you.';
+
+  @override
+  String get reviewsSkipDrafts => 'Skip drafts';
+
+  @override
+  String get reviewsSkipDraftsHelp => 'Leave draft pull requests alone until they are ready.';
+
+  @override
+  String get reviewsRereview => 'Review new commits';
+
+  @override
+  String get reviewsRereviewHelp => 'Review again when the author pushes while the review waits for you.';
+
+  @override
+  String get reviewsMergeMethod => 'Merge method';
+
+  @override
+  String get reviewsMergeMethodHelp => 'How agnts merges a pull request you accept.';
+
+  @override
+  String get reviewsMerge_merge => 'Merge commit';
+
+  @override
+  String get reviewsMerge_squash => 'Squash';
+
+  @override
+  String get reviewsMerge_rebase => 'Rebase';
+
+  @override
+  String get reviewsWaiting => 'Waiting for you';
+
+  @override
+  String get reviewsInProgress => 'In progress';
+
+  @override
+  String get reviewsFinished => 'Finished';
+
+  @override
+  String get reviewsEmpty => 'Nothing here.';
+
+  @override
+  String get reviewsEmptyAll => 'No pull requests to review yet. Assign one to yourself on GitHub or GitLab, then press Sync now.';
+
+  @override
+  String get reviewsWhy_assigned => 'assigned';
+
+  @override
+  String get reviewsWhy_review_requested => 'review requested';
+
+  @override
+  String reviewsBy(String author) {
+    return 'by @$author';
+  }
+
+  @override
+  String get reviewsHowTitle => 'How you review';
+
+  @override
+  String get reviewsHowSub =>
+      'Notes you leave when you ask for another review or dismiss one are folded into your profile on the next review. Every later review reads it.';
+
+  @override
+  String get reviewsNoReviewers =>
+      'agnts knows nothing about how you review yet. Leave a note when you ask for another review, or add one below.';
+
+  @override
+  String get reviewsProfile => 'Profile';
+
+  @override
+  String get reviewsProfileHint => 'Markdown: what you care about, what is noise, how severe you rate things.';
+
+  @override
+  String reviewsFolded(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n notes learned', one: '$n note learned');
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewsPending => 'Not learned yet';
+
+  @override
+  String get reviewsSaveProfile => 'Save profile';
+
+  @override
+  String get reviewsProfileSaved => 'Profile saved';
+
+  @override
+  String get reviewsAddNote => 'Add a note';
+
+  @override
+  String get reviewsNotePlaceholder => 'For example: naming nits are noise to me; always check that migrations can be rolled back.';
+
+  @override
+  String get reviewsNoteAdded => 'Note added';
+
+  @override
+  String get reviewsDeleteNote => 'Delete note';
+
+  @override
+  String get reviewsNoteKind_rereview => 're-review';
+
+  @override
+  String get reviewsNoteKind_dismissed => 'dismissed';
+
+  @override
+  String get reviewsNoteKind_manual => 'written here';
+
+  @override
+  String get reviewsLogin => 'Git host username';
+
+  @override
+  String reviewsPr(String number) {
+    return 'Pull request #$number';
+  }
+
+  @override
+  String reviewsReviewed(String sha) {
+    return 'Head at $sha';
+  }
+
+  @override
+  String reviewsNewCommits(String sha) {
+    return 'New commits since agnts reviewed $sha: it reviews them again';
+  }
+
+  @override
+  String reviewsPostBtn(String host) {
+    return 'Post review on $host';
+  }
+
+  @override
+  String reviewsPostConfirm(String number, String host) {
+    return 'Post agnts\'s review of #$number on $host as a comment? It is posted as your $host account and everyone on the pull request sees it.';
+  }
+
+  @override
+  String reviewsPostedToast(String host) {
+    return 'Review posted on $host';
+  }
+
+  @override
+  String reviewsPosted(String host, String when) {
+    return 'agnts\'s review of this commit is on $host · $when';
+  }
+
+  @override
+  String get reviewsQueuedSub => 'agnts will fetch it and review it.';
+
+  @override
+  String get reviewsFetchingTitle => 'Fetching the pull request';
+
+  @override
+  String get reviewsReviewingTitle => 'Reviewing the pull request';
+
+  @override
+  String get reviewsReviewingSub => 'agnts is reading the change. Its review appears here.';
+
+  @override
+  String get reviewsReadyTitle => 'agnts\'s review is ready';
+
+  @override
+  String reviewsReadySub(String host) {
+    return 'Merge it from here, review again with a note, or dismiss it and review on $host yourself.';
+  }
+
+  @override
+  String get reviewsNoteLabel => 'Review again with a note';
+
+  @override
+  String get reviewsNoteHint => 'Tell agnts what it got wrong or missed. The note also teaches it how you review.';
+
+  @override
+  String get reviewsMergeBtn => 'Merge pull request';
+
+  @override
+  String reviewsMergeConfirm(String number, String host, String method) {
+    return 'agnts merges #$number on $host ($method), at the commit it reviewed.';
+  }
+
+  @override
+  String get reviewsRereviewBtn => 'Review again';
+
+  @override
+  String reviewsDismissBtn(String host) {
+    return 'Dismiss, I\'ll review it on $host';
+  }
+
+  @override
+  String get reviewsDismissReason => 'Why (optional)';
+
+  @override
+  String get reviewsDismissReasonHint => 'Optional. It also teaches agnts how you review.';
+
+  @override
+  String reviewsDismissConfirm(String number, String host) {
+    return 'agnts stops reviewing #$number. The pull request stays open on $host.';
+  }
+
+  @override
+  String get reviewsMergingTitle => 'Merging the pull request';
+
+  @override
+  String get reviewsMergedTitle => 'Merged';
+
+  @override
+  String reviewsMergedSub(String number) {
+    return '#$number is merged.';
+  }
+
+  @override
+  String get reviewsDismissedTitle => 'Review dismissed';
+
+  @override
+  String reviewsDismissedSub(String host) {
+    return 'The pull request is yours on $host.';
+  }
+
+  @override
+  String reviewsOpenOn(String host) {
+    return 'Open on $host';
+  }
+
+  @override
+  String get reviewsReviewTitle => 'agnts\'s review of the pull request';
+
+  @override
   String get rulesTitle => 'Rules';
 
   @override
@@ -5844,6 +6177,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stateReportDone => 'Done';
 
   @override
+  String get stateReviewAnalyzing => 'Fetching';
+
+  @override
+  String get stateReviewCoding => 'Reviewing';
+
+  @override
+  String get stateReviewWaiting_for_review => 'Review ready';
+
+  @override
+  String get stateReviewPushing => 'Merging';
+
+  @override
+  String get stateReviewDone => 'Merged';
+
+  @override
+  String get stateReviewRejected => 'Dismissed';
+
+  @override
   String get tasksTitle => 'Tasks';
 
   @override
@@ -5988,6 +6339,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tasksRepoNeeded => 'Code and tests need a repository: pick one, or choose another kind.';
+
+  @override
+  String ticketUpdateTitle(String source) {
+    return 'Changed in $source after agnts started';
+  }
+
+  @override
+  String get ticketUpdateSub =>
+      'agnts keeps working on the version it started with. Restart to drop the work so far and start over from the new version, or keep going with the current one.';
+
+  @override
+  String ticketUpdateNow(String when) {
+    return 'New version, $when';
+  }
+
+  @override
+  String get ticketUpdateRestart => 'Restart with the new version';
+
+  @override
+  String get ticketUpdateKeep => 'Keep the current version';
+
+  @override
+  String ticketUpdateRestartConfirm(String key, String source) {
+    return 'Restart $key with the new version from $source? The analysis, answers, commits and reviews so far are dropped, and agnts starts over.';
+  }
+
+  @override
+  String get ticketUpdatePushed =>
+      'Pushed already: it cannot restart. Reject it and let agnts take the issue again, or keep the current version.';
+
+  @override
+  String ticketUpdateRestarted(String key) {
+    return '$key restarts with the new version';
+  }
+
+  @override
+  String get ticketUpdateKept => 'agnts keeps working on the current version';
 
   @override
   String get ticketBack => 'All tickets';
@@ -6656,6 +7044,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketOtherAnswer => 'Something else (optional)';
 
   @override
+  String get ticketSrcGit => 'Pull request';
+
+  @override
   String get ticketsTitle => 'Tickets';
 
   @override
@@ -6762,6 +7153,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ticketsSourcePlane => 'Plane';
+
+  @override
+  String get ticketsSourceGit => 'PR';
 
   @override
   String get usageTitle => 'Plan usage';

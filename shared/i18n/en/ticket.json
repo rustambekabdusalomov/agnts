@@ -1,5 +1,14 @@
 {
   "ticket": {
+    "updateTitle": "Changed in {source} after agnts started",
+    "updateSub": "agnts keeps working on the version it started with. Restart to drop the work so far and start over from the new version, or keep going with the current one.",
+    "updateNow": "New version, {when}",
+    "updateRestart": "Restart with the new version",
+    "updateKeep": "Keep the current version",
+    "updateRestartConfirm": "Restart {key} with the new version from {source}? The analysis, answers, commits and reviews so far are dropped, and agnts starts over.",
+    "updatePushed": "Pushed already: it cannot restart. Reject it and let agnts take the issue again, or keep the current version.",
+    "updateRestarted": "{key} restarts with the new version",
+    "updateKept": "agnts keeps working on the current version",
     "back": "All tickets",
     "plan": "Plan",
     "analysis": "What agnts found",
@@ -189,6 +198,7 @@
     "approveReportPostConfirmPlane": "Approve the report, close this ticket and post the report to {key} in Plane?",
     "doneReportPostedPlane": "The report is kept here and was posted to {key} in Plane.",
     "pickAny": "Pick all that apply",
-    "otherAnswer": "Something else (optional)"
+    "otherAnswer": "Something else (optional)",
+    "srcGit": "Pull request"
   }
 }

@@ -9,6 +9,8 @@ import CfgRow from '../form/CfgRow.vue'
 import InputSelect, { type SelectOption } from '../form/InputSelect.vue'
 import SaveBar from '../form/SaveBar.vue'
 import SwitchToggle from '../form/SwitchToggle.vue'
+import TrackerLabels from './TrackerLabels.vue'
+import { trackerLabels } from './trackerLabels'
 
 // Editable Plane settings: pickup label, state mapping and comment kinds.
 // States come from the Plane projects linked to repositories; a status left
@@ -70,7 +72,8 @@ function setComment(k: string, on: boolean) {
   draft.value = { ...draft.value, [k]: on ? 'true' : 'false' }
 }
 const label = computed(() => draft.value.label || 'agnts')
-const labels = computed(() => [label.value, ...['code', 'test', 'plan', 'analysis', 'bug'].map((k) => `${label.value}-${k}`)].join(', '))
+const labels = computed(() => trackerLabels(label.value).join(', '))
+const notes = computed(() => [t('integrations.planeLabelsCreate'), t('integrations.planeLabelsRepo'), t('integrations.labelsMany'), t('integrations.planeLabelsLater')])
 const noProjects = computed(() => states.isSuccess.value && (states.data.value ?? []).length === 0)
 
 const save = useMutation({
@@ -104,6 +107,7 @@ function discard() {
       <p v-if="noProjects" class="hint" style="margin: 8px 0 0">{{ t('integrations.planeNoProjects') }}</p>
     </div>
   </section>
+  <TrackerLabels :label="label" :sub="t('integrations.planeLabelsSub')" :notes="notes" />
   <section class="card">
     <div class="ch"><div><h2>{{ t('integrations.statuses') }}</h2><p class="sub">{{ t('integrations.planeStatusesSub') }}</p></div></div>
     <p v-if="statesError" class="ferr">{{ t('integrations.planeStatesError', { error: statesError }) }}</p>

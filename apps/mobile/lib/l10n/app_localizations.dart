@@ -1578,7 +1578,7 @@ abstract class AppLocalizations {
   /// No description provided for @billingSelfHosted.
   ///
   /// In en, this message translates to:
-  /// **'This server is self-hosted: there is nothing to pay. The Admin sets slots and member limits.'**
+  /// **'This server is self-hosted: there is nothing to pay. Set parallel runs below; the Admin sets member limits.'**
   String get billingSelfHosted;
 
   /// No description provided for @billingPlan.
@@ -1622,6 +1622,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Each extra run at once costs {price} a month. Adding one now charges the rest of this month from credits.'**
   String billingSlotsHelp(String price);
+
+  /// No description provided for @billingSlotsHelpSelfHosted.
+  ///
+  /// In en, this message translates to:
+  /// **'How many runs this workspace has at once, free on this server. Up to {max}; the server\'s AGNTS_MAX_SLOTS sets the limit.'**
+  String billingSlotsHelpSelfHosted(String max);
 
   /// No description provided for @billingSlotsSave.
   ///
@@ -2454,7 +2460,7 @@ abstract class AppLocalizations {
   /// No description provided for @feedbackAdminLede.
   ///
   /// In en, this message translates to:
-  /// **'What people sent from their accounts, newest first. Mark each one done once it’s handled.'**
+  /// **'What people sent from their accounts, and connector requests from the website, newest first. Mark each one done once it’s handled.'**
   String get feedbackAdminLede;
 
   /// No description provided for @feedbackF_new.
@@ -2540,6 +2546,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Marked new again'**
   String get feedbackReopened;
+
+  /// No description provided for @feedbackKind.
+  ///
+  /// In en, this message translates to:
+  /// **'Kind'**
+  String get feedbackKind;
+
+  /// No description provided for @feedbackK_any.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything'**
+  String get feedbackK_any;
+
+  /// No description provided for @feedbackK_feedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Feedback'**
+  String get feedbackK_feedback;
+
+  /// No description provided for @feedbackK_connector.
+  ///
+  /// In en, this message translates to:
+  /// **'Connector requests'**
+  String get feedbackK_connector;
+
+  /// No description provided for @feedbackConnectorBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Connector request'**
+  String get feedbackConnectorBadge;
+
+  /// No description provided for @feedbackFromSite.
+  ///
+  /// In en, this message translates to:
+  /// **'from the website'**
+  String get feedbackFromSite;
 
   /// No description provided for @filesTitle.
   ///
@@ -3057,6 +3099,18 @@ abstract class AppLocalizations {
   /// **'Implements'**
   String get implementImplements;
 
+  /// No description provided for @integrationsAssignedOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Only issues assigned to me'**
+  String get integrationsAssignedOnly;
+
+  /// No description provided for @integrationsAssignedOnlyHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts takes a labelled issue only when it is assigned to the account it connects to Jira with ({email}). Turn off to take every labelled issue.'**
+  String integrationsAssignedOnlyHelp(String email);
+
   /// No description provided for @integrationsTitle.
   ///
   /// In en, this message translates to:
@@ -3531,6 +3585,60 @@ abstract class AppLocalizations {
   /// **'The query agnts runs'**
   String get integrationsQuery;
 
+  /// No description provided for @integrationsLabelsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How to label tickets'**
+  String get integrationsLabelsTitle;
+
+  /// No description provided for @integrationsLabelsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Add one of these labels to a Jira issue that isn\'t done. Case doesn\'t matter.'**
+  String get integrationsLabelsSub;
+
+  /// No description provided for @integrationsLabelsRepo.
+  ///
+  /// In en, this message translates to:
+  /// **'An issue goes to the repository linked to its project (Repositories → Jira project). To send it to another one, add a label repo: followed by the repository\'s name in agnts, such as repo:web. Without a repository, only plans, analyses and bug investigations can run.'**
+  String get integrationsLabelsRepo;
+
+  /// No description provided for @integrationsLabelsMany.
+  ///
+  /// In en, this message translates to:
+  /// **'With several kind labels, the first in this list wins.'**
+  String get integrationsLabelsMany;
+
+  /// No description provided for @integrationsLabelsLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding a kind label before work starts changes the ticket\'s kind. Removing every agnts label stops updates from Jira.'**
+  String get integrationsLabelsLater;
+
+  /// No description provided for @integrationsPlaneLabelsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Add one of these labels to an open work item. Case doesn\'t matter.'**
+  String get integrationsPlaneLabelsSub;
+
+  /// No description provided for @integrationsPlaneLabelsCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Plane labels belong to a project: create the ones you use in each linked project first.'**
+  String get integrationsPlaneLabelsCreate;
+
+  /// No description provided for @integrationsPlaneLabelsRepo.
+  ///
+  /// In en, this message translates to:
+  /// **'Link the project to a repository by its identifier (WEB in WEB-123) under Repositories → Plane project. Sync reads only linked projects, and code and test work needs a repository. To send one work item to another repository, add a label repo: followed by the repository\'s name in agnts, such as repo:web.'**
+  String get integrationsPlaneLabelsRepo;
+
+  /// No description provided for @integrationsPlaneLabelsLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding a kind label before work starts changes the ticket\'s kind. Removing every agnts label stops updates from Plane.'**
+  String get integrationsPlaneLabelsLater;
+
   /// No description provided for @integrationsStatuses.
   ///
   /// In en, this message translates to:
@@ -3630,8 +3738,8 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsSynced.
   ///
   /// In en, this message translates to:
-  /// **'{found} open issues, {created} new'**
-  String integrationsSynced(String found, String created);
+  /// **'{found} open issues for you, {created} new, {updated} updated, {waiting} changed after agnts started'**
+  String integrationsSynced(String found, String created, String updated, String waiting);
 
   /// No description provided for @integrationsSyncHelp.
   ///
@@ -4154,6 +4262,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Switch to {kind}'**
   String kindSwitchTo(String kind);
+
+  /// No description provided for @kindReview.
+  ///
+  /// In en, this message translates to:
+  /// **'PR review'**
+  String get kindReview;
+
+  /// No description provided for @kindReviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Review a pull request someone else opened. Comes from GitHub or GitLab.'**
+  String get kindReviewHint;
 
   /// No description provided for @learnTitle.
   ///
@@ -6120,8 +6240,8 @@ abstract class AppLocalizations {
   /// No description provided for @navSynced.
   ///
   /// In en, this message translates to:
-  /// **'Jira synced: {found} open, {created} new'**
-  String navSynced(String found, String created);
+  /// **'Jira synced: {found} open, {created} new, {updated} updated, {waiting} waiting for your choice'**
+  String navSynced(String found, String created, String updated, String waiting);
 
   /// No description provided for @navSession.
   ///
@@ -6314,6 +6434,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Account'**
   String get navAccount;
+
+  /// No description provided for @navReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'PR reviews'**
+  String get navReviews;
 
   /// No description provided for @platformTitle.
   ///
@@ -9303,6 +9429,450 @@ abstract class AppLocalizations {
   /// **'Scope'**
   String get reviewCat_scope;
 
+  /// No description provided for @reviewsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull request reviews'**
+  String get reviewsTitle;
+
+  /// No description provided for @reviewsLede.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts reviews the pull requests assigned to you on GitHub and GitLab. Merge from here when the review looks good, or dismiss it and review on the git host yourself.'**
+  String get reviewsLede;
+
+  /// No description provided for @reviewsSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now'**
+  String get reviewsSync;
+
+  /// No description provided for @reviewsSyncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get reviewsSyncing;
+
+  /// No description provided for @reviewsSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'{open} waiting for you in {repos} repositories · {created} new · {rereview} reviewed again · {closed} ended'**
+  String reviewsSynced(String open, String repos, String created, String rereview, String closed);
+
+  /// No description provided for @reviewsSyncErrors.
+  ///
+  /// In en, this message translates to:
+  /// **'Some could not be read:'**
+  String get reviewsSyncErrors;
+
+  /// No description provided for @reviewsSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How agnts picks them up'**
+  String get reviewsSettingsTitle;
+
+  /// No description provided for @reviewsEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Review automatically'**
+  String get reviewsEnabled;
+
+  /// No description provided for @reviewsEnabledHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the git host every 5 minutes and review new pull requests. When off, only Sync now does it.'**
+  String get reviewsEnabledHelp;
+
+  /// No description provided for @reviewsReviewRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Review requests too'**
+  String get reviewsReviewRequested;
+
+  /// No description provided for @reviewsReviewRequestedHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Also take pull requests whose review is requested from you, not only those assigned to you.'**
+  String get reviewsReviewRequestedHelp;
+
+  /// No description provided for @reviewsSkipDrafts.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip drafts'**
+  String get reviewsSkipDrafts;
+
+  /// No description provided for @reviewsSkipDraftsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave draft pull requests alone until they are ready.'**
+  String get reviewsSkipDraftsHelp;
+
+  /// No description provided for @reviewsRereview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review new commits'**
+  String get reviewsRereview;
+
+  /// No description provided for @reviewsRereviewHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Review again when the author pushes while the review waits for you.'**
+  String get reviewsRereviewHelp;
+
+  /// No description provided for @reviewsMergeMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge method'**
+  String get reviewsMergeMethod;
+
+  /// No description provided for @reviewsMergeMethodHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'How agnts merges a pull request you accept.'**
+  String get reviewsMergeMethodHelp;
+
+  /// No description provided for @reviewsMerge_merge.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge commit'**
+  String get reviewsMerge_merge;
+
+  /// No description provided for @reviewsMerge_squash.
+  ///
+  /// In en, this message translates to:
+  /// **'Squash'**
+  String get reviewsMerge_squash;
+
+  /// No description provided for @reviewsMerge_rebase.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebase'**
+  String get reviewsMerge_rebase;
+
+  /// No description provided for @reviewsWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for you'**
+  String get reviewsWaiting;
+
+  /// No description provided for @reviewsInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get reviewsInProgress;
+
+  /// No description provided for @reviewsFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished'**
+  String get reviewsFinished;
+
+  /// No description provided for @reviewsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here.'**
+  String get reviewsEmpty;
+
+  /// No description provided for @reviewsEmptyAll.
+  ///
+  /// In en, this message translates to:
+  /// **'No pull requests to review yet. Assign one to yourself on GitHub or GitLab, then press Sync now.'**
+  String get reviewsEmptyAll;
+
+  /// No description provided for @reviewsWhy_assigned.
+  ///
+  /// In en, this message translates to:
+  /// **'assigned'**
+  String get reviewsWhy_assigned;
+
+  /// No description provided for @reviewsWhy_review_requested.
+  ///
+  /// In en, this message translates to:
+  /// **'review requested'**
+  String get reviewsWhy_review_requested;
+
+  /// No description provided for @reviewsBy.
+  ///
+  /// In en, this message translates to:
+  /// **'by @{author}'**
+  String reviewsBy(String author);
+
+  /// No description provided for @reviewsHowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How you review'**
+  String get reviewsHowTitle;
+
+  /// No description provided for @reviewsHowSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes you leave when you ask for another review or dismiss one are folded into your profile on the next review. Every later review reads it.'**
+  String get reviewsHowSub;
+
+  /// No description provided for @reviewsNoReviewers.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts knows nothing about how you review yet. Leave a note when you ask for another review, or add one below.'**
+  String get reviewsNoReviewers;
+
+  /// No description provided for @reviewsProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get reviewsProfile;
+
+  /// No description provided for @reviewsProfileHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Markdown: what you care about, what is noise, how severe you rate things.'**
+  String get reviewsProfileHint;
+
+  /// No description provided for @reviewsFolded.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} note learned} other {{n} notes learned}}'**
+  String reviewsFolded(num n);
+
+  /// No description provided for @reviewsPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Not learned yet'**
+  String get reviewsPending;
+
+  /// No description provided for @reviewsSaveProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Save profile'**
+  String get reviewsSaveProfile;
+
+  /// No description provided for @reviewsProfileSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile saved'**
+  String get reviewsProfileSaved;
+
+  /// No description provided for @reviewsAddNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note'**
+  String get reviewsAddNote;
+
+  /// No description provided for @reviewsNotePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'For example: naming nits are noise to me; always check that migrations can be rolled back.'**
+  String get reviewsNotePlaceholder;
+
+  /// No description provided for @reviewsNoteAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Note added'**
+  String get reviewsNoteAdded;
+
+  /// No description provided for @reviewsDeleteNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete note'**
+  String get reviewsDeleteNote;
+
+  /// No description provided for @reviewsNoteKind_rereview.
+  ///
+  /// In en, this message translates to:
+  /// **'re-review'**
+  String get reviewsNoteKind_rereview;
+
+  /// No description provided for @reviewsNoteKind_dismissed.
+  ///
+  /// In en, this message translates to:
+  /// **'dismissed'**
+  String get reviewsNoteKind_dismissed;
+
+  /// No description provided for @reviewsNoteKind_manual.
+  ///
+  /// In en, this message translates to:
+  /// **'written here'**
+  String get reviewsNoteKind_manual;
+
+  /// No description provided for @reviewsLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Git host username'**
+  String get reviewsLogin;
+
+  /// No description provided for @reviewsPr.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull request #{number}'**
+  String reviewsPr(String number);
+
+  /// No description provided for @reviewsReviewed.
+  ///
+  /// In en, this message translates to:
+  /// **'Head at {sha}'**
+  String reviewsReviewed(String sha);
+
+  /// No description provided for @reviewsNewCommits.
+  ///
+  /// In en, this message translates to:
+  /// **'New commits since agnts reviewed {sha}: it reviews them again'**
+  String reviewsNewCommits(String sha);
+
+  /// No description provided for @reviewsPostBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Post review on {host}'**
+  String reviewsPostBtn(String host);
+
+  /// No description provided for @reviewsPostConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Post agnts\'s review of #{number} on {host} as a comment? It is posted as your {host} account and everyone on the pull request sees it.'**
+  String reviewsPostConfirm(String number, String host);
+
+  /// No description provided for @reviewsPostedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Review posted on {host}'**
+  String reviewsPostedToast(String host);
+
+  /// No description provided for @reviewsPosted.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts\'s review of this commit is on {host} · {when}'**
+  String reviewsPosted(String host, String when);
+
+  /// No description provided for @reviewsQueuedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts will fetch it and review it.'**
+  String get reviewsQueuedSub;
+
+  /// No description provided for @reviewsFetchingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching the pull request'**
+  String get reviewsFetchingTitle;
+
+  /// No description provided for @reviewsReviewingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewing the pull request'**
+  String get reviewsReviewingTitle;
+
+  /// No description provided for @reviewsReviewingSub.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts is reading the change. Its review appears here.'**
+  String get reviewsReviewingSub;
+
+  /// No description provided for @reviewsReadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts\'s review is ready'**
+  String get reviewsReadyTitle;
+
+  /// No description provided for @reviewsReadySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge it from here, review again with a note, or dismiss it and review on {host} yourself.'**
+  String reviewsReadySub(String host);
+
+  /// No description provided for @reviewsNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Review again with a note'**
+  String get reviewsNoteLabel;
+
+  /// No description provided for @reviewsNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell agnts what it got wrong or missed. The note also teaches it how you review.'**
+  String get reviewsNoteHint;
+
+  /// No description provided for @reviewsMergeBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge pull request'**
+  String get reviewsMergeBtn;
+
+  /// No description provided for @reviewsMergeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts merges #{number} on {host} ({method}), at the commit it reviewed.'**
+  String reviewsMergeConfirm(String number, String host, String method);
+
+  /// No description provided for @reviewsRereviewBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Review again'**
+  String get reviewsRereviewBtn;
+
+  /// No description provided for @reviewsDismissBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss, I\'ll review it on {host}'**
+  String reviewsDismissBtn(String host);
+
+  /// No description provided for @reviewsDismissReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Why (optional)'**
+  String get reviewsDismissReason;
+
+  /// No description provided for @reviewsDismissReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional. It also teaches agnts how you review.'**
+  String get reviewsDismissReasonHint;
+
+  /// No description provided for @reviewsDismissConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts stops reviewing #{number}. The pull request stays open on {host}.'**
+  String reviewsDismissConfirm(String number, String host);
+
+  /// No description provided for @reviewsMergingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Merging the pull request'**
+  String get reviewsMergingTitle;
+
+  /// No description provided for @reviewsMergedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Merged'**
+  String get reviewsMergedTitle;
+
+  /// No description provided for @reviewsMergedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'#{number} is merged.'**
+  String reviewsMergedSub(String number);
+
+  /// No description provided for @reviewsDismissedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review dismissed'**
+  String get reviewsDismissedTitle;
+
+  /// No description provided for @reviewsDismissedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'The pull request is yours on {host}.'**
+  String reviewsDismissedSub(String host);
+
+  /// No description provided for @reviewsOpenOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Open on {host}'**
+  String reviewsOpenOn(String host);
+
+  /// No description provided for @reviewsReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts\'s review of the pull request'**
+  String get reviewsReviewTitle;
+
   /// No description provided for @rulesTitle.
   ///
   /// In en, this message translates to:
@@ -10551,6 +11121,42 @@ abstract class AppLocalizations {
   /// **'Done'**
   String get stateReportDone;
 
+  /// No description provided for @stateReviewAnalyzing.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching'**
+  String get stateReviewAnalyzing;
+
+  /// No description provided for @stateReviewCoding.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewing'**
+  String get stateReviewCoding;
+
+  /// No description provided for @stateReviewWaiting_for_review.
+  ///
+  /// In en, this message translates to:
+  /// **'Review ready'**
+  String get stateReviewWaiting_for_review;
+
+  /// No description provided for @stateReviewPushing.
+  ///
+  /// In en, this message translates to:
+  /// **'Merging'**
+  String get stateReviewPushing;
+
+  /// No description provided for @stateReviewDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Merged'**
+  String get stateReviewDone;
+
+  /// No description provided for @stateReviewRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissed'**
+  String get stateReviewRejected;
+
   /// No description provided for @tasksTitle.
   ///
   /// In en, this message translates to:
@@ -10820,6 +11426,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Code and tests need a repository: pick one, or choose another kind.'**
   String get tasksRepoNeeded;
+
+  /// No description provided for @ticketUpdateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed in {source} after agnts started'**
+  String ticketUpdateTitle(String source);
+
+  /// No description provided for @ticketUpdateSub.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts keeps working on the version it started with. Restart to drop the work so far and start over from the new version, or keep going with the current one.'**
+  String get ticketUpdateSub;
+
+  /// No description provided for @ticketUpdateNow.
+  ///
+  /// In en, this message translates to:
+  /// **'New version, {when}'**
+  String ticketUpdateNow(String when);
+
+  /// No description provided for @ticketUpdateRestart.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart with the new version'**
+  String get ticketUpdateRestart;
+
+  /// No description provided for @ticketUpdateKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the current version'**
+  String get ticketUpdateKeep;
+
+  /// No description provided for @ticketUpdateRestartConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart {key} with the new version from {source}? The analysis, answers, commits and reviews so far are dropped, and agnts starts over.'**
+  String ticketUpdateRestartConfirm(String key, String source);
+
+  /// No description provided for @ticketUpdatePushed.
+  ///
+  /// In en, this message translates to:
+  /// **'Pushed already: it cannot restart. Reject it and let agnts take the issue again, or keep the current version.'**
+  String get ticketUpdatePushed;
+
+  /// No description provided for @ticketUpdateRestarted.
+  ///
+  /// In en, this message translates to:
+  /// **'{key} restarts with the new version'**
+  String ticketUpdateRestarted(String key);
+
+  /// No description provided for @ticketUpdateKept.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts keeps working on the current version'**
+  String get ticketUpdateKept;
 
   /// No description provided for @ticketBack.
   ///
@@ -11961,6 +12621,12 @@ abstract class AppLocalizations {
   /// **'Something else (optional)'**
   String get ticketOtherAnswer;
 
+  /// No description provided for @ticketSrcGit.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull request'**
+  String get ticketSrcGit;
+
   /// No description provided for @ticketsTitle.
   ///
   /// In en, this message translates to:
@@ -12158,6 +12824,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Plane'**
   String get ticketsSourcePlane;
+
+  /// No description provided for @ticketsSourceGit.
+  ///
+  /// In en, this message translates to:
+  /// **'PR'**
+  String get ticketsSourceGit;
 
   /// No description provided for @usageTitle.
   ///

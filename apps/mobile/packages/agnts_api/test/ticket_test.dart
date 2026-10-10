@@ -68,6 +68,12 @@ void main() {
       // TODO
     });
 
+    // The reviewed commit: the branch head agnts committed, or for a pull request review the head agnts reviewed
+    // String headSha
+    test('to test the property `headSha`', () async {
+      // TODO
+    });
+
     // int prNumber
     test('to test the property `prNumber`', () async {
       // TODO
@@ -170,6 +176,16 @@ void main() {
 
     // DateTime mergedAt
     test('to test the property `mergedAt`', () async {
+      // TODO
+    });
+
+    // PullRequest pull
+    test('to test the property `pull`', () async {
+      // TODO
+    });
+
+    // TrackerUpdate trackerUpdate
+    test('to test the property `trackerUpdate`', () async {
       // TODO
     });
 

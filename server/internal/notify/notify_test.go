@@ -178,6 +178,16 @@ func (f *fakeActions) Retry(_ context.Context, k string, _ domain.Origin) (domai
 	return domain.Ticket{}, nil
 }
 
+func (f *fakeActions) RestartWithUpdate(_ context.Context, k string, _ domain.Origin) (domain.Ticket, error) {
+	f.retried = append(f.retried, "restart "+k)
+	return domain.Ticket{}, nil
+}
+
+func (f *fakeActions) KeepCurrentVersion(_ context.Context, k string, _ domain.Origin) (domain.Ticket, error) {
+	f.retried = append(f.retried, "keep "+k)
+	return domain.Ticket{}, nil
+}
+
 type fakeSettings struct{ s domain.Settings }
 
 func (f fakeSettings) Get(context.Context) (domain.Settings, error) { return f.s, nil }

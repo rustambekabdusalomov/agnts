@@ -198,18 +198,15 @@ type Error struct {
 func (e *Error) Error() string { return e.Msg }
 
 // SetSlots changes a workspace's slots. The owner of a paying workspace
-// pays the rest of this month's difference now, from credits; a
-// self-hosted workspace's slots are the Admin's (admin is true).
-func (s *Service) SetSlots(ctx context.Context, ws int64, slots int, by int64, admin bool) (View, error) {
+// pays the rest of this month's difference now, from credits; on a
+// self-hosted server slots are free, up to MaxSlots.
+func (s *Service) SetSlots(ctx context.Context, ws int64, slots int, by int64) (View, error) {
 	if slots < 1 || slots > s.cfg.MaxSlots {
 		return View{}, &Error{Msg: fmt.Sprintf("slots must be from 1 to %d", s.cfg.MaxSlots)}
 	}
 	w, err := s.ws.ByID(ctx, ws)
 	if err != nil {
 		return View{}, err
-	}
-	if !s.cfg.Enabled && !admin {
-		return View{}, &Error{Msg: "on this server the Admin sets slots"}
 	}
 	if s.cfg.Enabled && slots > w.Slots && !s.inTrial(w) {
 		paid, err := s.ws.PaidUntil(ctx, ws)

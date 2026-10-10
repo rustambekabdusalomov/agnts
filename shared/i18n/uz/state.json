@@ -15,6 +15,14 @@
       "coding": "Hisobot yozmoqda",
       "pushing": "Topshirmoqda",
       "done": "Tayyor"
+    },
+    "review": {
+      "analyzing": "Yuklanmoqda",
+      "coding": "Tekshirilmoqda",
+      "waiting_for_review": "Tekshiruv tayyor",
+      "pushing": "Birlashtirilmoqda",
+      "done": "Birlashtirildi",
+      "rejected": "Rad etildi"
     }
   }
 }

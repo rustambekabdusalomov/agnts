@@ -9,6 +9,7 @@ import 'package:agnts_api/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **id** | **int** |  | 
+**kind** | **String** | feedback: sent from an account; connector: a connector request from the website | 
 **title** | **String** |  | 
 **description** | **String** |  | 
 **status** | **String** |  | 

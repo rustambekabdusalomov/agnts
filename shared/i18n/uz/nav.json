@@ -20,7 +20,7 @@
     "settings": "Sozlamalar",
     "search": "Tiket va vazifalarni qidirish",
     "syncJira": "Jira bilan sinxronlash",
-    "synced": "Jira sinxronlandi: {found} ta ochiq, {created} ta yangi",
+    "synced": "Jira sinxronlandi: {found} ta ochiq, {created} ta yangi, {updated} ta yangilandi, {waiting} tasi qaroringizni kutmoqda",
     "session": "Joriy sessiya",
     "week": "Shu hafta",
     "dayMode": "Kunduzgi rejimga oʻtish",
@@ -52,6 +52,7 @@
     "profile": "Profil",
     "platform": "Administrator kabineti",
     "people": "Odamlar",
-    "account": "Hisob"
+    "account": "Hisob",
+    "reviews": "PR tekshiruvlari"
   }
 }

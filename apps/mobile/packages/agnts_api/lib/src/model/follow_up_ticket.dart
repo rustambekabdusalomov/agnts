@@ -144,7 +144,9 @@ jira(r'jira'),
 @JsonValue(r'plane')
 plane(r'plane'),
 @JsonValue(r'local')
-local(r'local');
+local(r'local'),
+@JsonValue(r'git')
+git(r'git');
 
 const FollowUpTicketSource_Enum(this.value);
 

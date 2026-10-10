@@ -834,6 +834,7 @@ type promptData struct {
 	Changed         []string    // checkpoint: files changed so far
 	Outside         []string    // checkpoint: of those, the ones the analysis did not predict
 	CheckSteps      []CheckStep // its checks
+	Pull            *pullPrompt // pull-review: the pull request and the reviewer
 
 	// Follow-up suggestions (the "followups" block).
 	Chain             []TicketRef // ancestors of a follow-up ticket, root first

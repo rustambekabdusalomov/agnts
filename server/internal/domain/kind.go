@@ -11,9 +11,12 @@ const (
 	KindPlan     TicketKind = "plan"     // write an implementation plan
 	KindAnalysis TicketKind = "analysis" // research a question and report
 	KindBug      TicketKind = "bug"      // find a bug's root cause, change nothing
+	// KindReview reviews a pull request someone else wrote. Its tickets
+	// come from the git host, never from a form or a label.
+	KindReview TicketKind = "review"
 )
 
-// Kinds lists every kind in the order clients show them.
+// Kinds lists every kind people can pick, in the order clients show them.
 var Kinds = []TicketKind{KindCode, KindTest, KindPlan, KindAnalysis, KindBug}
 
 // Output is what a kind's work run produces.
@@ -45,6 +48,9 @@ var kindSpecs = map[TicketKind]KindSpec{
 	KindPlan:     {Output: OutputReport, Implementable: true},
 	KindAnalysis: {Output: OutputReport},
 	KindBug:      {Output: OutputReport, Implementable: true},
+	// A review is a report about someone else's change; approving it
+	// merges the pull request.
+	KindReview: {Output: OutputReport, NeedsRepo: true},
 }
 
 // Valid reports whether k is a known kind.
@@ -52,6 +58,10 @@ func (k TicketKind) Valid() bool {
 	_, ok := kindSpecs[k]
 	return ok
 }
+
+// Selectable reports whether people (a form, a label, the analysis) may
+// give a ticket kind k: every kind but review.
+func (k TicketKind) Selectable() bool { return k.Valid() && k != KindReview }
 
 // Spec returns how agnts works k; unknown kinds are worked as code.
 func (k TicketKind) Spec() KindSpec {

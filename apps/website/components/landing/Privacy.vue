@@ -3,7 +3,7 @@
     <div class="p-privacy2" aria-hidden="true"><span class="p-privacy3"></span></div>
     <div class="p-privacy4">
       <div class="p-row">
-        <p class="p-mono p-rev p-privacy5"><span class="p-privacy6">05</span>  <span>{{ t('nav.privacy') }}</span></p>
+        <p class="p-mono p-rev p-privacy5"><span class="p-privacy6">06</span>  <span>{{ t('nav.privacy') }}</span></p>
         <div>
           <h2 class="p-h2 p-rev p-privacy7"><span>{{ t('privacy.title') }}</span></h2>
           <p class="p-rev p-privacy8"><span>{{ t('privacy.lead') }}</span></p>

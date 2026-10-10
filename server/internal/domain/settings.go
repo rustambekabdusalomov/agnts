@@ -112,11 +112,13 @@ type Settings struct {
 	EgressAllow []string `json:"egressAllow"`
 	// SuggestFollowUps has the runs suggest follow-up tickets. Off by
 	// default: it makes every prompt and answer a little longer.
-	SuggestFollowUps bool           `json:"suggestFollowUps"`
-	PauseAbove       int            `json:"pauseAbove"`
-	Parallel         int            `json:"parallel"`
-	Git              GitSettings    `json:"git"`
-	Notify           NotifySettings `json:"notify"`
+	SuggestFollowUps bool `json:"suggestFollowUps"`
+	// PullReviews: agnts reviews the pull requests waiting for you.
+	PullReviews PullReviewSettings `json:"pullReviews"`
+	PauseAbove  int                `json:"pauseAbove"`
+	Parallel    int                `json:"parallel"`
+	Git         GitSettings        `json:"git"`
+	Notify      NotifySettings     `json:"notify"`
 }
 
 // DefaultSettings returns the settings used before any are saved.
@@ -137,6 +139,7 @@ func DefaultSettings() Settings {
 		SelfReview:  true,
 		Reflect:     true,
 		EgressAllow: []string{},
+		PullReviews: DefaultPullReviewSettings(),
 		PauseAbove:  90,
 		Parallel:    1,
 		Git:         GitSettings{CoAuthor: true, PRTitle: "{key}: {title}"},
@@ -181,6 +184,12 @@ func (s *Settings) Validate() error {
 		if !validHost(h) {
 			errs = append(errs, fmt.Errorf("allowed host %q is not a host name (use example.com or .example.com)", h))
 		}
+	}
+	if s.PullReviews.MergeMethod == "" {
+		s.PullReviews.MergeMethod = "merge"
+	}
+	if !slices.Contains(MergeMethods, s.PullReviews.MergeMethod) {
+		errs = append(errs, fmt.Errorf("merge method must be one of %s", strings.Join(MergeMethods, ", ")))
 	}
 	if s.Git.PRTitle == "" {
 		s.Git.PRTitle = "{key}: {title}"

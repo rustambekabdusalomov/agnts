@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-i18n="demo.metaTitle">agnts · Demo</title>
+<meta name="description" data-i18n-content="demo.metaDesc" content="agnts demo: a ticket from Jira to a tested, reviewed pull request.">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<div class="site-loader" aria-hidden="true"><img class="site-loader-mark" src="../assets/loader.svg" alt="" width="454" height="173"></div>
+
+<header class="hd">
+  <div class="wrap">
+    <a href="../" aria-label="agnts"><img src="../assets/wordmark.svg" alt="agnts" width="86" height="25"></a>
+    <nav aria-label="Sections">
+      <a href="../#problem" data-i18n="nav.problem">Problem</a>
+      <a href="../#team" data-i18n="nav.team">Team</a>
+      <a href="../#roadmap" data-i18n="nav.roadmap">Roadmap</a>
+      <a href="../#plan" data-i18n="nav.plan">Implementation</a>
+    </nav>
+    <div class="lang" role="group" aria-label="Language"><button type="button" data-lang="en">EN</button><button type="button" data-lang="ru">RU</button><button type="button" data-lang="uz">UZ</button></div>
+    <a class="btn btn-dark btn-s hd-cta" href="https://agnts.uz" target="_blank" rel="noopener" data-i18n="cta.open">Open agnts.uz</a>
+  </div>
+</header>
+
+<main>
+<section class="s" style="padding-top:80px">
+  <div class="wrap row">
+    <p class="lbl"><b data-i18n="demo.label">Demo</b><span data-i18n="demo.video">Video</span></p>
+    <div>
+      <h2 data-i18n="demo.title">agnts on a real ticket.</h2>
+      <p class="sub" data-i18n="demo.sub">From a labelled Jira ticket to a tested, reviewed pull request, and the review that takes a few minutes.</p>
+
+      <!--
+        THE DEMO VIDEO. Use one of these and delete the placeholder:
+        YouTube: <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" title="agnts demo" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
+        A file next to this page: <video src="agnts-demo.mp4" controls playsinline preload="metadata"></video>
+      -->
+      <div class="video">
+        <div class="ph"><div><b data-i18n="demo.phTitle">Demo video</b><span data-i18n="demo.ph">The 1–5 minute demo video goes here.</span></div></div>
+      </div>
+
+      <div class="block">
+        <h4 data-i18n="demo.shows">What the video shows</h4>
+        <p class="t" style="margin-bottom:20px" data-i18n="demo.intro">A developer hands agnts a ticket and only steps in to answer and approve. Everything in the video is the working product at agnts.uz.</p>
+        <ol class="chapters">
+          <li><time data-i18n="demo.step1">Step 1</time><div><h3 data-i18n="demo.c1t">Label a ticket</h3><p class="t" data-i18n="demo.c1">A ticket in Jira gets the agnts label. agnts picks it up and reads the ticket and the codebase.</p></div></li>
+          <li><time data-i18n="demo.step2">Step 2</time><div><h3 data-i18n="demo.c2t">Answer its questions</h3><p class="t" data-i18n="demo.c2">Anything unclear becomes a short question with options, answered in one click.</p></div></li>
+          <li><time data-i18n="demo.step3">Step 3</time><div><h3 data-i18n="demo.c3t">agnts codes and tests</h3><p class="t" data-i18n="demo.c3">In a fresh container on its own branch. The live log shows the build, lint and tests passing.</p></div></li>
+          <li><time data-i18n="demo.step4">Step 4</time><div><h3 data-i18n="demo.c4t">Review the result</h3><p class="t" data-i18n="demo.c4">The summary, the diff, the AI review findings and, for front-end work, screenshots of the changed pages.</p></div></li>
+          <li><time data-i18n="demo.step5">Step 5</time><div><h3 data-i18n="demo.c5t">Approve</h3><p class="t" data-i18n="demo.c5">agnts pushes, opens the pull request and moves the ticket. Or request changes, and agnts fixes them and learns from it.</p></div></li>
+          <li><time data-i18n="demo.step6">Step 6</time><div><h3 data-i18n="demo.c6t">Learning</h3><p class="t" data-i18n="demo.c6">After the push, agnts reads the change and turns anything new in it (a pattern, an algorithm, a library) into a lesson with an explanation, code references and a short quiz. The developer grows with every ticket, not just the codebase.</p></div></li>
+        </ol>
+      </div>
+
+      <div class="block">
+        <h4 data-i18n="demo.proto">Working prototype</h4>
+        <div class="proto">
+          <div>
+            <h3>agnts.uz</h3>
+            <p data-i18n="demo.protoText">Live and free during the demo. Sign in with Google, connect Jira or Plane, GitHub or GitLab and Claude, then label a ticket.</p>
+          </div>
+          <a class="btn btn-acc" href="https://agnts.uz" target="_blank" rel="noopener"><span data-i18n="demo.protoCta">Open the prototype</span> <span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="ft">
+  <div class="wrap">
+    <span data-i18n="ft.line">agnts · Pitch Day 3.0 · Rustambek Abdusalomov</span>
+    <span><a href="../" data-i18n="demo.back">Back to the overview</a></span>
+  </div>
+</footer>
+<script src="../assets/i18n.js"></script>
+</body>
+</html>

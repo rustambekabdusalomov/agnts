@@ -309,8 +309,9 @@ a.mem-name:hover { color: var(--primary-ink); }
 .page-tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--primary); }
 .stack { display: flex; flex-direction: column; gap: 16px; max-width: 860px; }
 .row-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
-.kv { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; font-size: 14px; }
+.kv { display: grid; grid-template-columns: fit-content(50%) minmax(0, 1fr); gap: 6px 16px; font-size: 14px; }
 .kv dt { color: var(--ink-3); }
+.kv dt, .kv dd { min-width: 0; overflow-wrap: anywhere; }
 .kv dd { margin: 0; }
 .mono-box { display: block; padding: 10px 12px; border-radius: 10px; background: var(--field); border: 1px solid var(--line); font-family: var(--mono); font-size: 13px; word-break: break-all; }
 .stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
@@ -384,3 +385,4 @@ a.mem-name:hover { color: var(--primary-ink); }
 .q .cfg-in { display: block; width: 100%; max-width: none; }
 .q textarea { display: block; }
 .q .cfg-in + textarea { margin-top: 10px; }
+.q textarea + .fa { margin-top: 10px; }

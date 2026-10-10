@@ -32,7 +32,11 @@ type Deduper interface {
 // In Jira: Settings → System → WebHooks, URL https://<domain>/webhooks/jira,
 // events "Issue created" and "Issue updated", and the same secret as in
 // agnts. Jira signs each delivery with X-Hub-Signature: sha256=<hmac>.
-func WebhookHandler(cfg ConfigSource, ing Ingester, dedup Deduper, log *slog.Logger) http.Handler {
+//
+// With AssignedOnly, an issue assigned to someone else creates no ticket
+// (one agnts has still gets its updates); me returns the connected
+// account's id.
+func WebhookHandler(cfg ConfigSource, me func(context.Context) (string, error), ing Ingester, dedup Deduper, log *slog.Logger) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			w.WriteHeader(http.StatusMethodNotAllowed)
@@ -89,7 +93,15 @@ func WebhookHandler(cfg ConfigSource, ing Ingester, dedup Deduper, log *slog.Log
 			w.WriteHeader(http.StatusNoContent) // not for agnts (or the label was removed)
 			return
 		}
-		created, err := ing.Ingest(ctx, p.Issue.incoming(c.Label), domain.OriginWebhook)
+		in := p.Issue.incoming(c.Label)
+		if c.AssignedOnly {
+			id, err := me(ctx)
+			if err != nil {
+				log.Warn("jira webhook: find the connected account", "err", err) // the reconcile query still finds it
+			}
+			in.NoCreate = err != nil || p.Issue.Fields.Assignee == nil || p.Issue.Fields.Assignee.AccountID != id
+		}
+		created, err := ing.Ingest(ctx, in, domain.OriginWebhook)
 		if err != nil {
 			log.Error("jira webhook: ingest", "issue", p.Issue.Key, "err", err)
 			w.WriteHeader(http.StatusInternalServerError) // Jira retries

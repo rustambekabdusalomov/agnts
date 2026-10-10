@@ -18,7 +18,7 @@ import (
 type BillingService interface {
 	Enabled() bool
 	View(ctx context.Context, ws int64) (billing.View, error)
-	SetSlots(ctx context.Context, ws int64, slots int, by int64, admin bool) (billing.View, error)
+	SetSlots(ctx context.Context, ws int64, slots int, by int64) (billing.View, error)
 	Checkout(ctx context.Context, ws, by, amountUZS int64, provider string) (string, int64, error)
 	Grant(ctx context.Context, ws, amount int64, note string, by int64) (int64, error)
 }
@@ -405,7 +405,7 @@ func (s *Server) SetSlots(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
 		return
 	}
-	v, err := s.opt.Billing.SetSlots(r.Context(), m.w.ID, req.Slots, u.ID, u.IsAdmin)
+	v, err := s.opt.Billing.SetSlots(r.Context(), m.w.ID, req.Slots, u.ID)
 	if err != nil {
 		s.billingError(w, r, err)
 		return

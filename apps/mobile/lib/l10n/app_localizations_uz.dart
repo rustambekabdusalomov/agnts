@@ -803,7 +803,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get billingSelfHosted =>
-      'Bu server mustaqil o‘rnatilgan: to‘lash shart emas. Slotlar va a’zolar limitini administrator belgilaydi.';
+      'Bu server mustaqil o‘rnatilgan: to‘lash shart emas. Bir vaqtdagi ishlar sonini quyida belgilang; a’zolar limitini administrator belgilaydi.';
 
   @override
   String get billingPlan => 'Tarif';
@@ -834,6 +834,11 @@ class AppLocalizationsUz extends AppLocalizations {
   @override
   String billingSlotsHelp(String price) {
     return 'Har bir qo‘shimcha bir vaqtdagi ish oyiga $price turadi. Qo‘shilganda oyning qolgan qismi kreditlardan yechiladi.';
+  }
+
+  @override
+  String billingSlotsHelpSelfHosted(String max) {
+    return 'Bu ish maydonida bir vaqtda nechta ish bajariladi; bu serverda bepul. Ko‘pi bilan $max; chegarani serverdagi AGNTS_MAX_SLOTS belgilaydi.';
   }
 
   @override
@@ -1301,7 +1306,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get feedbackAdminLede =>
-      'Foydalanuvchilar akkauntlaridan yuborgan fikrlar, avval yangilari. Ko\'rib chiqilganda bajarildi deb belgilang.';
+      'Odamlar o‘z akkauntlaridan yuborgan fikrlar va saytdan kelgan konnektor so‘rovlari, eng yangilari birinchi. Har birini hal qilgach, bajarildi deb belgilang.';
 
   @override
   String get feedbackF_new => 'Yangi';
@@ -1346,6 +1351,24 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get feedbackReopened => 'Yana yangi deb belgilandi';
+
+  @override
+  String get feedbackKind => 'Turi';
+
+  @override
+  String get feedbackK_any => 'Hammasi';
+
+  @override
+  String get feedbackK_feedback => 'Fikrlar';
+
+  @override
+  String get feedbackK_connector => 'Konnektor so‘rovlari';
+
+  @override
+  String get feedbackConnectorBadge => 'Konnektor so‘rovi';
+
+  @override
+  String get feedbackFromSite => 'saytdan';
 
   @override
   String get filesTitle => 'Ilovalar';
@@ -1642,6 +1665,14 @@ class AppLocalizationsUz extends AppLocalizations {
   String get implementImplements => 'Bajaradi';
 
   @override
+  String get integrationsAssignedOnly => 'Faqat menga biriktirilgan vazifalar';
+
+  @override
+  String integrationsAssignedOnlyHelp(String email) {
+    return 'agnts belgili vazifani faqat u agnts Jira\'ga ulangan akkauntga ($email) biriktirilgan boʻlsa oladi. Barcha belgili vazifalarni olish uchun oʻchiring.';
+  }
+
+  @override
   String get integrationsTitle => 'Integratsiyalar';
 
   @override
@@ -1907,6 +1938,39 @@ class AppLocalizationsUz extends AppLocalizations {
   String get integrationsQuery => 'agnts bajaradigan soʻrov';
 
   @override
+  String get integrationsLabelsTitle => 'Tiketlarni qanday belgilash';
+
+  @override
+  String get integrationsLabelsSub =>
+      'Jira\'dagi tugallanmagan vazifaga shu belgilardan birini qoʻshing. Harf katta-kichikligi muhim emas.';
+
+  @override
+  String get integrationsLabelsRepo =>
+      'Vazifa oʻz loyihasiga bogʻlangan repozitoriyga tushadi (Repozitoriylar → Jira loyihasi). Boshqasiga yuborish uchun agnts\'dagi repozitoriy nomi bilan repo: belgisini qoʻshing, masalan repo:web. Repozitoriysiz faqat rejalar, tahlillar va xato sabablarini izlash ishlaydi.';
+
+  @override
+  String get integrationsLabelsMany => 'Bir nechta tur belgisi boʻlsa, shu roʻyxatda birinchi kelgani tanlanadi.';
+
+  @override
+  String get integrationsLabelsLater =>
+      'Ish boshlanishidan oldin qoʻshilgan tur belgisi tiket turini oʻzgartiradi. Barcha agnts belgilari olib tashlansa, Jira\'dan yangilanishlar kelmay qoladi.';
+
+  @override
+  String get integrationsPlaneLabelsSub => 'Ochiq vazifaga shu belgilardan birini qoʻshing. Harf katta-kichikligi muhim emas.';
+
+  @override
+  String get integrationsPlaneLabelsCreate =>
+      'Plane belgilari loyihaga tegishli: avval har bir bogʻlangan loyihada kerakli belgilarni yarating.';
+
+  @override
+  String get integrationsPlaneLabelsRepo =>
+      'Loyihani identifikatori orqali (WEB-123 dagi WEB) repozitoriyga bogʻlang: Repozitoriylar → Plane loyihasi. Sinxronlash faqat bogʻlangan loyihalarni oʻqiydi, kod va testlar uchun esa repozitoriy kerak. Bitta vazifani boshqa repozitoriyga yuborish uchun agnts\'dagi repozitoriy nomi bilan repo: belgisini qoʻshing, masalan repo:web.';
+
+  @override
+  String get integrationsPlaneLabelsLater =>
+      'Ish boshlanishidan oldin qoʻshilgan tur belgisi tiket turini oʻzgartiradi. Barcha agnts belgilari olib tashlansa, Plane\'dan yangilanishlar kelmay qoladi.';
+
+  @override
   String get integrationsStatuses => 'Holat yangilanishlari';
 
   @override
@@ -1955,8 +2019,8 @@ class AppLocalizationsUz extends AppLocalizations {
   String get integrationsSyncNow => 'Hozir sinxronlash';
 
   @override
-  String integrationsSynced(String found, String created) {
-    return 'Ochiq vazifalar: $found, yangilari: $created';
+  String integrationsSynced(String found, String created, String updated, String waiting) {
+    return 'Siz uchun ochiq vazifalar: $found, yangilari: $created, yangilangani: $updated, agnts boshlagandan keyin oʻzgargani: $waiting';
   }
 
   @override
@@ -2261,6 +2325,12 @@ class AppLocalizationsUz extends AppLocalizations {
   String kindSwitchTo(String kind) {
     return '«$kind»ga oʻtkazish';
   }
+
+  @override
+  String get kindReview => 'PR koʻrib chiqish';
+
+  @override
+  String get kindReviewHint => 'Boshqa birov ochgan pull requestni tekshirish. GitHub yoki GitLab’dan keladi.';
 
   @override
   String get learnTitle => 'Oʻrganish';
@@ -3346,8 +3416,8 @@ class AppLocalizationsUz extends AppLocalizations {
   String get navSyncJira => 'Jira bilan sinxronlash';
 
   @override
-  String navSynced(String found, String created) {
-    return 'Jira sinxronlandi: $found ta ochiq, $created ta yangi';
+  String navSynced(String found, String created, String updated, String waiting) {
+    return 'Jira sinxronlandi: $found ta ochiq, $created ta yangi, $updated ta yangilandi, $waiting tasi qaroringizni kutmoqda';
   }
 
   @override
@@ -3449,6 +3519,9 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get navAccount => 'Hisob';
+
+  @override
+  String get navReviews => 'PR tekshiruvlari';
 
   @override
   String get platformTitle => 'Administrator kabineti';
@@ -5130,6 +5203,270 @@ class AppLocalizationsUz extends AppLocalizations {
   String get reviewCat_scope => 'Vazifa doirasi';
 
   @override
+  String get reviewsTitle => 'Pull request tekshiruvlari';
+
+  @override
+  String get reviewsLede =>
+      'agnts GitHub va GitLab’da sizga biriktirilgan pull requestlarni tekshiradi. Tekshiruv yaxshi boʻlsa, shu yerdan birlashtiring yoki rad etib, git hostingda oʻzingiz tekshiring.';
+
+  @override
+  String get reviewsSync => 'Sinxronlash';
+
+  @override
+  String get reviewsSyncing => 'Sinxronlanmoqda…';
+
+  @override
+  String reviewsSynced(String open, String repos, String created, String rereview, String closed) {
+    return '$repos ta repozitoriyda $open ta sizni kutmoqda · $created ta yangi · $rereview ta qayta tekshirildi · $closed ta yakunlandi';
+  }
+
+  @override
+  String get reviewsSyncErrors => 'Baʼzilarini oʻqib boʻlmadi:';
+
+  @override
+  String get reviewsSettingsTitle => 'agnts ularni qanday oladi';
+
+  @override
+  String get reviewsEnabled => 'Avtomatik tekshirish';
+
+  @override
+  String get reviewsEnabledHelp =>
+      'Har 5 daqiqada git hostingni tekshirib, yangi pull requestlarni koʻrib chiqish. Oʻchiq boʻlsa, faqat «Sinxronlash» tugmasi bilan.';
+
+  @override
+  String get reviewsReviewRequested => 'Tekshiruv soʻrovlari ham';
+
+  @override
+  String get reviewsReviewRequestedHelp => 'Faqat sizga biriktirilganlarini emas, sizdan tekshiruv soʻralgan pull requestlarni ham olish.';
+
+  @override
+  String get reviewsSkipDrafts => 'Qoralamalarni oʻtkazib yuborish';
+
+  @override
+  String get reviewsSkipDraftsHelp => 'Qoralama pull requestlar tayyor boʻlguncha tegilmaydi.';
+
+  @override
+  String get reviewsRereview => 'Yangi commitlarni tekshirish';
+
+  @override
+  String get reviewsRereviewHelp => 'Tekshiruv sizni kutayotganda muallif push qilsa, qayta tekshirish.';
+
+  @override
+  String get reviewsMergeMethod => 'Birlashtirish usuli';
+
+  @override
+  String get reviewsMergeMethodHelp => 'Siz qabul qilgan pull requestni agnts qanday birlashtiradi.';
+
+  @override
+  String get reviewsMerge_merge => 'Merge commit';
+
+  @override
+  String get reviewsMerge_squash => 'Squash';
+
+  @override
+  String get reviewsMerge_rebase => 'Rebase';
+
+  @override
+  String get reviewsWaiting => 'Sizni kutmoqda';
+
+  @override
+  String get reviewsInProgress => 'Jarayonda';
+
+  @override
+  String get reviewsFinished => 'Yakunlangan';
+
+  @override
+  String get reviewsEmpty => 'Bu yerda hech narsa yoʻq.';
+
+  @override
+  String get reviewsEmptyAll =>
+      'Hozircha tekshiriladigan pull request yoʻq. GitHub yoki GitLab’da birini oʻzingizga biriktiring va «Sinxronlash»ni bosing.';
+
+  @override
+  String get reviewsWhy_assigned => 'biriktirilgan';
+
+  @override
+  String get reviewsWhy_review_requested => 'tekshiruv soʻralgan';
+
+  @override
+  String reviewsBy(String author) {
+    return 'muallif @$author';
+  }
+
+  @override
+  String get reviewsHowTitle => 'Siz qanday tekshirasiz';
+
+  @override
+  String get reviewsHowSub =>
+      'Qayta tekshirishni soʻraganda yoki rad etganda qoldirgan izohlaringiz keyingi tekshiruvda profilingizga qoʻshiladi. Keyingi barcha tekshiruvlar uni oʻqiydi.';
+
+  @override
+  String get reviewsNoReviewers =>
+      'agnts siz qanday tekshirishingiz haqida hali hech narsa bilmaydi. Qayta tekshirishni soʻraganda izoh qoldiring yoki quyida qoʻshing.';
+
+  @override
+  String get reviewsProfile => 'Profil';
+
+  @override
+  String get reviewsProfileHint => 'Markdown: siz uchun nima muhim, nima shovqin, jiddiylikni qanday baholaysiz.';
+
+  @override
+  String reviewsFolded(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ta izoh oʻrganildi');
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewsPending => 'Hali oʻrganilmagan';
+
+  @override
+  String get reviewsSaveProfile => 'Profilni saqlash';
+
+  @override
+  String get reviewsProfileSaved => 'Profil saqlandi';
+
+  @override
+  String get reviewsAddNote => 'Izoh qoʻshish';
+
+  @override
+  String get reviewsNotePlaceholder =>
+      'Masalan: nomlash boʻyicha mayda gaplar men uchun shovqin; migratsiyalarni orqaga qaytarish mumkinligini doim tekshir.';
+
+  @override
+  String get reviewsNoteAdded => 'Izoh qoʻshildi';
+
+  @override
+  String get reviewsDeleteNote => 'Izohni oʻchirish';
+
+  @override
+  String get reviewsNoteKind_rereview => 'qayta tekshiruv';
+
+  @override
+  String get reviewsNoteKind_dismissed => 'rad etilgan';
+
+  @override
+  String get reviewsNoteKind_manual => 'shu yerda yozilgan';
+
+  @override
+  String get reviewsLogin => 'Git hostingdagi foydalanuvchi nomi';
+
+  @override
+  String reviewsPr(String number) {
+    return 'Pull request #$number';
+  }
+
+  @override
+  String reviewsReviewed(String sha) {
+    return 'Oxirgi commit $sha';
+  }
+
+  @override
+  String reviewsNewCommits(String sha) {
+    return 'agnts koʻrib chiqqandan ($sha) keyin yangi commitlar: ularni qayta koʻrib chiqadi';
+  }
+
+  @override
+  String reviewsPostBtn(String host) {
+    return 'Koʻrib chiqishni ${host}ga joylash';
+  }
+
+  @override
+  String reviewsPostConfirm(String number, String host) {
+    return 'agnts #$number boʻyicha koʻrib chiqishini ${host}ga izoh sifatida joylasinmi? U sizning $host akkauntingizdan joylanadi va pull requestdagi hamma uni koʻradi.';
+  }
+
+  @override
+  String reviewsPostedToast(String host) {
+    return 'Koʻrib chiqish ${host}ga joylandi';
+  }
+
+  @override
+  String reviewsPosted(String host, String when) {
+    return 'agnts bu commit boʻyicha koʻrib chiqishi ${host}da · $when';
+  }
+
+  @override
+  String get reviewsQueuedSub => 'agnts uni yuklab oladi va tekshiradi.';
+
+  @override
+  String get reviewsFetchingTitle => 'Pull request yuklanmoqda';
+
+  @override
+  String get reviewsReviewingTitle => 'Pull request tekshirilmoqda';
+
+  @override
+  String get reviewsReviewingSub => 'agnts oʻzgarishlarni oʻqimoqda. Uning tekshiruvi shu yerda chiqadi.';
+
+  @override
+  String get reviewsReadyTitle => 'agnts tekshiruvi tayyor';
+
+  @override
+  String reviewsReadySub(String host) {
+    return 'Shu yerdan birlashtiring, izoh bilan qayta tekshirishni soʻrang yoki rad etib, ${host}da oʻzingiz tekshiring.';
+  }
+
+  @override
+  String get reviewsNoteLabel => 'Izoh bilan qayta tekshirish';
+
+  @override
+  String get reviewsNoteHint =>
+      'agnts nimada xato qilgani yoki nimani oʻtkazib yuborganini yozing. Izoh unga siz qanday tekshirishingizni ham oʻrgatadi.';
+
+  @override
+  String get reviewsMergeBtn => 'Pull requestni birlashtirish';
+
+  @override
+  String reviewsMergeConfirm(String number, String host, String method) {
+    return 'agnts #$number ni ${host}da tekshirilgan commitda birlashtiradi ($method).';
+  }
+
+  @override
+  String get reviewsRereviewBtn => 'Qayta tekshirish';
+
+  @override
+  String reviewsDismissBtn(String host) {
+    return 'Rad etish, ${host}da oʻzim tekshiraman';
+  }
+
+  @override
+  String get reviewsDismissReason => 'Nega (ixtiyoriy)';
+
+  @override
+  String get reviewsDismissReasonHint => 'Ixtiyoriy. Bu ham agnts’ga siz qanday tekshirishingizni oʻrgatadi.';
+
+  @override
+  String reviewsDismissConfirm(String number, String host) {
+    return 'agnts #$number ni tekshirishni toʻxtatadi. Pull request ${host}da ochiq qoladi.';
+  }
+
+  @override
+  String get reviewsMergingTitle => 'Pull request birlashtirilmoqda';
+
+  @override
+  String get reviewsMergedTitle => 'Birlashtirildi';
+
+  @override
+  String reviewsMergedSub(String number) {
+    return '#$number birlashtirildi.';
+  }
+
+  @override
+  String get reviewsDismissedTitle => 'Tekshiruv rad etildi';
+
+  @override
+  String reviewsDismissedSub(String host) {
+    return 'Pull request ${host}da sizniki.';
+  }
+
+  @override
+  String reviewsOpenOn(String host) {
+    return '${host}da ochish';
+  }
+
+  @override
+  String get reviewsReviewTitle => 'agnts’ning pull request tekshiruvi';
+
+  @override
   String get rulesTitle => 'Qoidalar';
 
   @override
@@ -5818,6 +6155,24 @@ class AppLocalizationsUz extends AppLocalizations {
   String get stateReportDone => 'Tayyor';
 
   @override
+  String get stateReviewAnalyzing => 'Yuklanmoqda';
+
+  @override
+  String get stateReviewCoding => 'Tekshirilmoqda';
+
+  @override
+  String get stateReviewWaiting_for_review => 'Tekshiruv tayyor';
+
+  @override
+  String get stateReviewPushing => 'Birlashtirilmoqda';
+
+  @override
+  String get stateReviewDone => 'Birlashtirildi';
+
+  @override
+  String get stateReviewRejected => 'Rad etildi';
+
+  @override
   String get tasksTitle => 'Vazifalar';
 
   @override
@@ -5961,6 +6316,43 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get tasksRepoNeeded => 'Kod va testlar uchun repozitoriy kerak: uni yoki boshqa turni tanlang.';
+
+  @override
+  String ticketUpdateTitle(String source) {
+    return 'agnts boshlagandan keyin ${source}da oʻzgardi';
+  }
+
+  @override
+  String get ticketUpdateSub =>
+      'agnts boshlagan versiyasi ustida ishlashda davom etadi. Qilingan ishni tashlab, yangi versiyadan qayta boshlash uchun qayta ishga tushiring yoki joriy versiya bilan davom eting.';
+
+  @override
+  String ticketUpdateNow(String when) {
+    return 'Yangi versiya, $when';
+  }
+
+  @override
+  String get ticketUpdateRestart => 'Yangi versiya bilan qayta boshlash';
+
+  @override
+  String get ticketUpdateKeep => 'Joriy versiyani qoldirish';
+
+  @override
+  String ticketUpdateRestartConfirm(String key, String source) {
+    return '$key ${source}dagi yangi versiya bilan qayta boshlansinmi? Hozirgacha qilingan tahlil, javoblar, commitlar va koʻrib chiqishlar tashlanadi va agnts qaytadan boshlaydi.';
+  }
+
+  @override
+  String get ticketUpdatePushed =>
+      'Allaqachon yuborilgan: qayta boshlab boʻlmaydi. agnts vazifani qayta olishi uchun tiketni rad eting yoki joriy versiyani qoldiring.';
+
+  @override
+  String ticketUpdateRestarted(String key) {
+    return '$key yangi versiya bilan qayta boshlanmoqda';
+  }
+
+  @override
+  String get ticketUpdateKept => 'agnts joriy versiya ustida ishlashda davom etadi';
 
   @override
   String get ticketBack => 'Barcha tiketlar';
@@ -6621,6 +7013,9 @@ class AppLocalizationsUz extends AppLocalizations {
   String get ticketOtherAnswer => 'Boshqa narsa (ixtiyoriy)';
 
   @override
+  String get ticketSrcGit => 'Pull request';
+
+  @override
   String get ticketsTitle => 'Tiketlar';
 
   @override
@@ -6727,6 +7122,9 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get ticketsSourcePlane => 'Plane';
+
+  @override
+  String get ticketsSourceGit => 'PR';
 
   @override
   String get usageTitle => 'Tarif limitlari';

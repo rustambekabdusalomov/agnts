@@ -147,6 +147,7 @@ type Provider interface {
 	orchestrator.Host
 	orchestrator.Assigner
 	orchestrator.MergeChecker
+	orchestrator.ReviewHost
 	Browser
 }
 
@@ -287,6 +288,44 @@ func (m *Multi) PRMerged(ctx context.Context, repo domain.Repository, number int
 		return false, err
 	}
 	return p.PRMerged(ctx, repo, number)
+}
+
+// ReviewQueue implements orchestrator.ReviewHost. It is not cached: a
+// sync wants the pull requests as they are.
+func (m *Multi) ReviewQueue(ctx context.Context, repo domain.Repository, requested bool) ([]domain.PullRequest, error) {
+	p, err := m.pick(repo)
+	if err != nil {
+		return nil, err
+	}
+	return p.ReviewQueue(ctx, repo, requested)
+}
+
+// PullRequest implements orchestrator.ReviewHost.
+func (m *Multi) PullRequest(ctx context.Context, repo domain.Repository, number int) (domain.PullRequest, error) {
+	p, err := m.pick(repo)
+	if err != nil {
+		return domain.PullRequest{}, err
+	}
+	return p.PullRequest(ctx, repo, number)
+}
+
+// MergePR implements orchestrator.ReviewHost.
+func (m *Multi) MergePR(ctx context.Context, repo domain.Repository, number int, sha, method string) error {
+	p, err := m.pick(repo)
+	if err != nil {
+		return err
+	}
+	defer m.Forget(repo.ID)
+	return p.MergePR(ctx, repo, number, sha, method)
+}
+
+// CommentPR implements orchestrator.ReviewHost.
+func (m *Multi) CommentPR(ctx context.Context, repo domain.Repository, number int, body string) error {
+	p, err := m.pick(repo)
+	if err != nil {
+		return err
+	}
+	return p.CommentPR(ctx, repo, number, body)
 }
 
 // Assign implements orchestrator.Assigner.

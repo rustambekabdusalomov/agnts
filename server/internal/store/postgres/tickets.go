@@ -26,17 +26,18 @@ func NewAgent(db *pgxpool.Pool) *Agent { return &Agent{db: db} }
 const ticketCols = `id, key, source, repo_id, title, description, priority, state, resume_state,
 	revision, turns, models, after_approve, branch, head_sha, pr_number, pr_url, feedback, held, ask_first, merged_at, assignees, learn_state, review_state, kind, kind_auto, post_report, COALESCE(parent_key, ''),
 	COALESCE(follow_up_of, ''), suggest_follow_ups, preview_state, preview_compare, feedback_shots, feedback_files, created_at, updated_at,
-	workspace_id, member_id, created_by, wait_reason, queued_at, wait_message, self_fixes, quiet_review, replay_of, base_sha`
+	workspace_id, member_id, created_by, wait_reason, queued_at, wait_message, self_fixes, quiet_review, replay_of, base_sha, pull_request,
+	tracker_update, tracker_kept`
 
 func scanTicket(row pgx.Row) (domain.Ticket, error) {
 	var t domain.Ticket
 	var source, state, resume, kind, wait string
-	var models, shots, files []byte
+	var models, shots, files, pull, update []byte
 	err := row.Scan(&t.ID, &t.Key, &source, &t.RepoID, &t.Title, &t.Description, &t.Priority, &state, &resume,
 		&t.Revision, &t.Turns, &models, &t.AfterApprove, &t.Branch, &t.HeadSHA, &t.PRNumber, &t.PRURL, &t.Feedback,
 		&t.Held, &t.AskFirst, &t.MergedAt, &t.Assignees, &t.LearnState, &t.ReviewState, &kind, &t.KindAuto, &t.PostReport, &t.ParentKey,
 		&t.FollowUpOf, &t.SuggestFollowUps, &t.PreviewState, &t.PreviewCompare, &shots, &files, &t.CreatedAt, &t.UpdatedAt,
-		&t.WorkspaceID, &t.MemberID, &t.CreatedBy, &wait, &t.QueuedAt, &t.WaitMessage, &t.SelfFixes, &t.QuietReview, &t.ReplayOf, &t.BaseSHA)
+		&t.WorkspaceID, &t.MemberID, &t.CreatedBy, &wait, &t.QueuedAt, &t.WaitMessage, &t.SelfFixes, &t.QuietReview, &t.ReplayOf, &t.BaseSHA, &pull, &update, &t.Kept)
 	if err != nil {
 		return t, notFound(err)
 	}
@@ -45,6 +46,18 @@ func scanTicket(row pgx.Row) (domain.Ticket, error) {
 	}
 	if len(files) > 0 {
 		_ = json.Unmarshal(files, &t.FeedbackFiles)
+	}
+	if len(update) > 0 {
+		var u domain.TrackerUpdate
+		if json.Unmarshal(update, &u) == nil {
+			t.Update = &u
+		}
+	}
+	if len(pull) > 0 {
+		var p domain.PullRequest
+		if json.Unmarshal(pull, &p) == nil {
+			t.Pull = &p
+		}
 	}
 	t.Source, t.State, t.ResumeState = domain.TicketSource(source), domain.TicketState(state), domain.TicketState(resume)
 	t.Kind = domain.TicketKind(kind)
@@ -113,11 +126,12 @@ func insertTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket, models []byte
 	}
 	out, err := scanTicket(tx.QueryRow(ctx, `INSERT INTO tickets
 		(key, source, repo_id, title, description, priority, state, resume_state, models, after_approve, held, ask_first, kind, kind_auto,
-		 parent_key, follow_up_of, suggest_follow_ups, member_id, created_by, replay_of, base_sha)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NULLIF($15, ''), NULLIF($16, ''), $17, $18, $19, $20, $21) RETURNING `+ticketCols,
+		 parent_key, follow_up_of, suggest_follow_ups, member_id, created_by, replay_of, base_sha, branch, pr_number, pr_url, pull_request)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NULLIF($15, ''), NULLIF($16, ''), $17, $18, $19, $20, $21,
+		 $22, $23, $24, $25) RETURNING `+ticketCols,
 		t.Key, string(t.Source), t.RepoID, t.Title, t.Description, t.Priority, string(t.State),
 		string(t.ResumeState), models, t.AfterApprove, t.Held, t.AskFirst, string(kindOr(t.Kind)), t.KindAuto, t.ParentKey,
-		t.FollowUpOf, t.SuggestFollowUps, t.MemberID, t.CreatedBy, t.ReplayOf, t.BaseSHA))
+		t.FollowUpOf, t.SuggestFollowUps, t.MemberID, t.CreatedBy, t.ReplayOf, t.BaseSHA, t.Branch, t.PRNumber, t.PRURL, pullJSON(t.Pull)))
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 		return out, domain.ErrConflict
@@ -191,7 +205,7 @@ func saveTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket) (domain.Ticket,
 		pr_number = $14, pr_url = $15, feedback = $16, held = $17, ask_first = $18, merged_at = $19, assignees = $20, learn_state = $21,
 		kind = $22, kind_auto = $23, post_report = $24, review_state = $25, suggest_follow_ups = $26,
 		preview_state = $27, preview_compare = $28, feedback_shots = $29, feedback_files = $30, member_id = $31,
-		self_fixes = $32, quiet_review = $33,
+		self_fixes = $32, quiet_review = $33, pull_request = $34, tracker_update = $35, tracker_kept = $36,
 		wait_reason = CASE WHEN $6 IN ('new', 'coding', 'pushing') THEN wait_reason ELSE '' END,
 		wait_message = CASE WHEN $6 IN ('new', 'coding', 'pushing') THEN wait_message ELSE '' END,
 		queued_at = CASE WHEN $6 IN ('new', 'coding', 'pushing') THEN queued_at END,
@@ -200,7 +214,26 @@ func saveTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket) (domain.Ticket,
 		t.ID, t.RepoID, t.Title, t.Description, t.Priority, string(t.State), string(t.ResumeState),
 		t.Revision, t.Turns, models, t.AfterApprove, t.Branch, t.HeadSHA, t.PRNumber, t.PRURL, t.Feedback, t.Held, t.AskFirst, t.MergedAt, nonNilSlice(t.Assignees), t.LearnState,
 		string(kindOr(t.Kind)), t.KindAuto, t.PostReport, t.ReviewState, t.SuggestFollowUps,
-		t.PreviewState, t.PreviewCompare, shots, files, t.MemberID, t.SelfFixes, t.QuietReview))
+		t.PreviewState, t.PreviewCompare, shots, files, t.MemberID, t.SelfFixes, t.QuietReview, pullJSON(t.Pull), updateJSON(t.Update), t.Kept))
+}
+
+// updateJSON is a ticket's pending tracker version, nil (SQL NULL) for none.
+func updateJSON(u *domain.TrackerUpdate) []byte {
+	if u == nil {
+		return nil
+	}
+	b, _ := json.Marshal(u)
+	return b
+}
+
+// pullJSON is a ticket's pull request for the pull_request column, nil
+// (SQL NULL) for tickets that review none.
+func pullJSON(p *domain.PullRequest) []byte {
+	if p == nil {
+		return nil
+	}
+	b, _ := json.Marshal(p)
+	return b
 }
 
 func kindOr(k domain.TicketKind) domain.TicketKind {
@@ -676,6 +709,12 @@ func (s *Agent) RepositoryByTrackerProject(ctx context.Context, source domain.Ti
 		return domain.Repository{}, domain.ErrNotFound
 	}
 	return scanRepo(s.db.QueryRow(ctx, `SELECT `+repoCols+` FROM repositories WHERE `+col+` = $1`, project))
+}
+
+// RepositoryByName returns the repository named name, in any case.
+func (s *Agent) RepositoryByName(ctx context.Context, name string) (domain.Repository, error) {
+	return scanRepo(s.db.QueryRow(ctx, `SELECT `+repoCols+` FROM repositories WHERE lower(name) = lower($1)
+		ORDER BY name = $1 DESC, id LIMIT 1`, name))
 }
 
 // ListRepositories returns all repositories.
