@@ -53,6 +53,7 @@
     "platform": "Admin cabinet",
     "people": "People",
     "account": "Account",
-    "reviews": "PR reviews"
+    "reviews": "PR reviews",
+    "ci": "CI"
   }
 }

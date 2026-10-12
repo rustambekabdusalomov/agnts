@@ -232,6 +232,89 @@ _responseData = rawData == null ? null : deserialize<Relation, Relation>(rawData
     );
   }
 
+  /// Confirm that the lines flagged as secrets in the change under review are not real credentials
+  /// A change with lines agnts&#39;s scan flagged as secrets (or a dotenv file) cannot be approved until a person confirms, for that commit, that they are not real credentials.
+  ///
+  /// Parameters:
+  /// * [key] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [Ticket] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<Ticket>> acknowledgeSecrets({ 
+    required String key,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/tickets/{key}/secrets-ack'.replaceAll('{' r'key' '}', key.toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'cookieAuth',
+            'keyName': 'hiro_session',
+            'where': '',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    Ticket? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<Ticket, Ticket>(rawData, 'Ticket', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<Ticket>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
   /// Make this ticket wait for another, or keep the two from running side by side
   /// depends_on: this ticket does not start coding until the other is merged (or rejected). conflicts: whichever of the two starts coding second waits until the first is merged. A dependency that would make two tickets wait for each other is refused (400). Adding a relation agnts proposed or someone dismissed makes it active.
   ///

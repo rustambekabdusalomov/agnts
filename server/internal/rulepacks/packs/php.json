@@ -1,0 +1,7 @@
+{"name": "PHP", "rules": [
+ {"title": "Typed signatures", "body": "New and changed functions and methods declare parameter, return and property types."},
+ {"title": "Bound parameters for SQL", "body": "Queries take values as bound parameters (PDO prepared statements or the query builder); never interpolate values into SQL strings."},
+ {"title": "Validate before use", "body": "Request data is validated (Form Requests or validate()) and only the validated data is used; never pass $request->all() into create or update."},
+ {"title": "Escape output", "body": "Values shown in HTML go through the template engine's escaping; raw output ({!! !!}, echo of request data) only for trusted, sanitised strings."},
+ {"title": "No error suppression", "body": "Do not use the @ operator to suppress errors, and do not leave catch blocks empty."}
+]}

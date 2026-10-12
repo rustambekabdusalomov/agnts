@@ -34,7 +34,7 @@ func invalid(format string, a ...any) error {
 }
 
 // Providers agnts knows how to connect, in display order.
-var Providers = []string{"jira", "plane", "github", "telegram", "gitlab"}
+var Providers = []string{"jira", "plane", "github", "telegram", "gitlab", "openai"}
 
 // settingKeys lists the non-secret settings each provider accepts.
 var settingKeys = map[string][]string{
@@ -44,6 +44,7 @@ var settingKeys = map[string][]string{
 	"claude":   {},
 	"telegram": {"chat_id"},
 	"gitlab":   {"url"},
+	"openai":   {}, // Codex runs
 }
 
 // Checker verifies a token with its provider and returns the account name.
@@ -1111,4 +1112,21 @@ func GitLabCheck(ctx context.Context, token string, settings map[string]string) 
 		return "", errors.New("the GitLab URL must be https")
 	}
 	return gitlab.WithConfig(gitlab.Config{URL: u, Token: token}).User(ctx)
+}
+
+// SetHarness saves the guard and check settings people chose for a
+// repository.
+func (r *Repos) SetHarness(ctx context.Context, id int64, h domain.RepoHarness, origin domain.Origin) (RepoView, error) {
+	if err := h.Validate(); err != nil {
+		return RepoView{}, invalid("%s", err)
+	}
+	x, err := r.store.SetRepoHarness(ctx, id, h)
+	if err != nil {
+		return RepoView{}, err
+	}
+	if err := r.store.AppendEvent(ctx, domain.Event{Type: domain.EventRepoHarness, Origin: origin, Message: x.Name + ": guard and check settings changed",
+		Data: map[string]any{"repo": x.Name, "guardProfile": h.GuardProfile, "coverage": h.Coverage.Enabled, "acceptance": h.Acceptance}}); err != nil {
+		r.log.Warn("repository harness event", "err", err)
+	}
+	return r.Get(ctx, id)
 }

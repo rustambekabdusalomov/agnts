@@ -70,6 +70,10 @@ type contentBlock struct {
 	Text  string          `json:"text"`
 	Name  string          `json:"name"`
 	Input json.RawMessage `json:"input"`
+	ID    string          `json:"id"`
+	// tool_result blocks (in "user" lines): which call, and whether it failed.
+	ToolUseID string `json:"tool_use_id"`
+	IsError   bool   `json:"is_error"`
 }
 
 var rateLimitText = regexp.MustCompile(`(?i)(usage limit|rate limit|limit reached|limit will reset|resets? at)`)
@@ -127,8 +131,20 @@ func ParseStream(r io.Reader, onEvent func(orchestrator.ClaudeEvent)) (orchestra
 				case "tool_use":
 					emit(onEvent, orchestrator.ClaudeEvent{
 						Kind: orchestrator.ClaudeTool, Tool: toolSummary(b.Name, b.Input),
-						Data: map[string]any{"tool": b.Name},
+						Data: map[string]any{"tool": b.Name, "id": b.ID},
 					})
+				}
+			}
+
+		case l.Type == "user":
+			blocks := l.Content
+			if l.Message != nil {
+				blocks = l.Message.Content
+			}
+			for _, b := range blocks {
+				if b.Type == "tool_result" && b.ToolUseID != "" {
+					emit(onEvent, orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeToolResult,
+						Data: map[string]any{"id": b.ToolUseID, "is_error": b.IsError}})
 				}
 			}
 

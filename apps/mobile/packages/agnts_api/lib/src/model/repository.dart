@@ -5,6 +5,7 @@
 // ignore_for_file: unused_element
 import 'package:agnts_api/src/model/toolchain.dart';
 import 'package:agnts_api/src/model/repo_preview.dart';
+import 'package:agnts_api/src/model/repo_harness.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -77,6 +78,8 @@ class Repository {
      this.buildEnvSet,
 
      this.buildEnvNames,
+
+     this.harness,
   });
 
   @JsonKey(
@@ -426,6 +429,18 @@ class Repository {
 
 
 
+  @JsonKey(
+    
+    name: r'harness',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final RepoHarness? harness;
+
+
+
 
 
     @override
@@ -457,7 +472,8 @@ class Repository {
       other.runnerImage == runnerImage &&
       other.memoryMb == memoryMb &&
       other.buildEnvSet == buildEnvSet &&
-      other.buildEnvNames == buildEnvNames;
+      other.buildEnvNames == buildEnvNames &&
+      other.harness == harness;
 
     @override
     int get hashCode =>
@@ -488,7 +504,8 @@ class Repository {
         runnerImage.hashCode +
         memoryMb.hashCode +
         buildEnvSet.hashCode +
-        buildEnvNames.hashCode;
+        buildEnvNames.hashCode +
+        harness.hashCode;
 
   factory Repository.fromJson(Map<String, dynamic> json) => _$RepositoryFromJson(json);
 

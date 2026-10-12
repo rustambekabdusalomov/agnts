@@ -230,6 +230,7 @@ type AcceptInput struct {
 	Kind        string
 	Priority    string
 	RepoID      int64 // 0: the parent's repository
+	Start       bool  // queue it to run now instead of holding it
 }
 
 // AcceptResult is what accepting one suggestion did.
@@ -239,10 +240,12 @@ type AcceptResult struct {
 	Err    error
 }
 
-// AcceptSuggestions creates a ticket from each chosen suggestion. Every
-// ticket is queued (held): nothing runs, and no tokens are spent, until
-// someone starts it. Each suggestion is handled on its own, so one bad
-// choice does not undo the others.
+// AcceptSuggestions creates a ticket from each chosen suggestion. A ticket
+// is held (nothing runs, and no tokens are spent, until someone starts it)
+// unless its input says Start. Each suggestion is handled on its own, so
+// one bad choice does not undo the others. Suggestions that said another
+// must land first become depends_on relations once both are tickets, so
+// the queue codes them in that order.
 func (o *Orchestrator) AcceptSuggestions(ctx context.Context, key string, in []AcceptInput, origin domain.Origin) ([]AcceptResult, error) {
 	if len(in) == 0 {
 		return nil, invalid("pick at least one suggestion")
@@ -273,7 +276,68 @@ func (o *Orchestrator) AcceptSuggestions(ctx context.Context, key string, in []A
 		}
 		out = append(out, r)
 	}
+	made := map[int64]string{}
+	started := false
+	for i, r := range out {
+		if r.Ticket != nil {
+			made[r.ID] = r.Ticket.Key
+			started = started || in[i].Start
+		}
+	}
+	if len(made) > 0 {
+		o.linkFollowUps(ctx, p, ss, made)
+	}
+	if started {
+		o.Wake()
+	}
 	return out, nil
+}
+
+// linkFollowUps turns the After of p's suggestions into depends_on
+// relations between their tickets, for every pair where one side was just
+// made (made: suggestion id -> new ticket key). The parent's run said the
+// order, so the queue follows it at once; someone can still dismiss it on
+// the ticket. A failure is logged and noted on the ticket, never fatal.
+func (o *Orchestrator) linkFollowUps(ctx context.Context, p domain.Ticket, ss []domain.Suggestion, made map[int64]string) {
+	child := map[int64]string{}
+	title := map[int64]string{}
+	for _, x := range ss {
+		title[x.ID] = x.Title
+		if x.ChildKey != "" {
+			child[x.ID] = x.ChildKey
+		}
+	}
+	for id, key := range made {
+		child[id] = key
+	}
+	for _, x := range ss {
+		key := child[x.ID]
+		if key == "" {
+			continue
+		}
+		for _, dep := range x.After {
+			other := child[dep]
+			_, fresh := made[x.ID]
+			_, freshDep := made[dep]
+			if other == "" || other == key || (!fresh && !freshDep) {
+				continue
+			}
+			r := domain.Relation{Type: domain.RelDependsOn, TicketKey: key, OtherKey: other, Source: domain.RelFromAgnts,
+				Status: domain.RelActive, Confidence: 1,
+				Reason: fmt.Sprintf("%s suggested doing \"%s\" first", p.Key, title[dep])}
+			err := o.checkCycle(ctx, r)
+			if err == nil {
+				_, err = o.store.UpsertRelation(ctx, r, &domain.Event{TicketKey: key, Type: domain.EventRelations,
+					Message: key + " waits for " + other + " to be merged, as " + p.Key + " suggested",
+					Data:    map[string]any{"other": other, "type": string(domain.RelDependsOn)}})
+			}
+			if err != nil {
+				o.log.Warn("link follow-ups", "ticket", key, "other", other, "err", err)
+				o.event(ctx, domain.Event{TicketKey: key, Type: domain.EventError, Level: domain.LevelWarn,
+					Message: fmt.Sprintf("could not make %s wait for %s: %v", key, other, err)})
+			}
+		}
+	}
 }
 
 func (o *Orchestrator) accept(ctx context.Context, st domain.Settings, p domain.Ticket, x domain.Suggestion, a AcceptInput, origin domain.Origin) (domain.Ticket, error) {
@@ -335,7 +399,7 @@ func (o *Orchestrator) accept(ctx context.Context, st domain.Settings, p domain.
 
 	t := domain.Ticket{
 		Source: domain.SourceLocal, Title: truncate(title, 300), Description: desc, Priority: priority,
-		State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: "pr", Held: true, AskFirst: st.AskFirst,
+		State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: "pr", Held: !a.Start, AskFirst: st.AskFirst,
 		Kind: kind, FollowUpOf: p.Key,
 	}
 	if repo != nil {
@@ -356,7 +420,7 @@ func (o *Orchestrator) accept(ctx context.Context, st domain.Settings, p domain.
 			return domain.Ticket{}, err
 		}
 		t.Key = fmt.Sprintf("%s-%d", prefix, n)
-		ev.Message, ev.Data["child"] = "follow-up "+t.Key+" created: "+t.Title, t.Key
+		ev.Message, ev.Data["child"] = "follow-up "+t.Key+" "+createdWord(a.Start)+": "+t.Title, t.Key
 		out, err := o.store.CreateFollowUp(ctx, p.ID, x.ID, t, ev)
 		if errors.Is(err, domain.ErrConflict) && !errors.Is(err, domain.ErrSuggestionDecided) {
 			continue // the key is taken by a ticket from elsewhere
@@ -415,6 +479,14 @@ func (o *Orchestrator) acceptToTracker(ctx context.Context, src domain.TicketSou
 		}
 	}
 	return out, nil
+}
+
+// createdWord says how a follow-up was made: held, or queued to run.
+func createdWord(start bool) string {
+	if start {
+		return "created and started"
+	}
+	return "created"
 }
 
 // followUpDescription is the new ticket's description: the work, then why

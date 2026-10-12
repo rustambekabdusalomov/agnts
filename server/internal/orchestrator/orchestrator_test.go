@@ -40,6 +40,8 @@ type fakeRunner struct {
 	lastHome []byte
 	onClaude func(orchestrator.ClaudeRequest)
 	written  map[string]string // every file agnts put into a workspace, last write wins
+	// stream, when set, sends more events during every invocation.
+	stream func(on func(orchestrator.ClaudeEvent))
 }
 
 func (f *fakeRunner) Open(_ context.Context, spec orchestrator.WorkspaceSpec) (orchestrator.Workspace, error) {
@@ -74,6 +76,12 @@ func (w *fakeWS) Claude(_ context.Context, req orchestrator.ClaudeRequest, on fu
 	w.r.scripts = w.r.scripts[1:]
 	on(orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeInit, Data: map[string]any{"session_id": s.result.SessionID}})
 	on(orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeTool, Tool: "Read: main.go"})
+	if w.r.stream != nil {
+		// WriteFile takes the lock: let go of it while the stream runs.
+		w.r.mu.Unlock()
+		w.r.stream(on)
+		w.r.mu.Lock()
+	}
 	for k, v := range s.files {
 		w.files[k] = v
 	}
@@ -183,13 +191,20 @@ type fakeHost struct {
 	opened   int
 	last     orchestrator.PR
 	assigned map[int][]string
-	merged   map[int]bool // pull requests PRMerged reports merged
-	asked    []int        // pull requests PRMerged was asked about
+	merged   map[int]bool // pull requests PRState reports merged
+	closed   map[int]bool // pull requests PRState reports closed without a merge
+	asked    []int        // pull requests PRState was asked about
 }
 
-func (h *fakeHost) PRMerged(_ context.Context, _ domain.Repository, number int) (bool, error) {
+func (h *fakeHost) PRState(_ context.Context, _ domain.Repository, number int) (string, error) {
 	h.asked = append(h.asked, number)
-	return h.merged[number], nil
+	switch {
+	case h.merged[number]:
+		return domain.PullMerged, nil
+	case h.closed[number]:
+		return domain.PullClosed, nil
+	}
+	return domain.PullOpen, nil
 }
 
 func (h *fakeHost) Assign(_ context.Context, _ domain.Repository, number int, usernames []string) error {

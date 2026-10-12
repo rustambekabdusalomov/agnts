@@ -33,6 +33,12 @@ class Finding {
      this.detail,
 
      this.suggestion,
+
+     this.confidence,
+
+     this.pass,
+
+     this.adopted,
   });
 
   @JsonKey(
@@ -121,6 +127,45 @@ class Finding {
 
 
 
+      /// How sure the reviewer was, 0 to 1; absent when it did not say
+  @JsonKey(
+    
+    name: r'confidence',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final num? confidence;
+
+
+
+      /// The specialist pass that found it (security, failures, tests, types), empty for the main review
+  @JsonKey(
+    
+    name: r'pass',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? pass;
+
+
+
+      /// A person put it in their feedback
+  @JsonKey(
+    
+    name: r'adopted',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? adopted;
+
+
+
 
 
     @override
@@ -131,7 +176,10 @@ class Finding {
       other.line == line &&
       other.title == title &&
       other.detail == detail &&
-      other.suggestion == suggestion;
+      other.suggestion == suggestion &&
+      other.confidence == confidence &&
+      other.pass == pass &&
+      other.adopted == adopted;
 
     @override
     int get hashCode =>
@@ -141,7 +189,10 @@ class Finding {
         line.hashCode +
         title.hashCode +
         detail.hashCode +
-        suggestion.hashCode;
+        suggestion.hashCode +
+        confidence.hashCode +
+        pass.hashCode +
+        adopted.hashCode;
 
   factory Finding.fromJson(Map<String, dynamic> json) => _$FindingFromJson(json);
 

@@ -76,6 +76,7 @@ type pullGit struct {
 	*fakeGit
 	host    *reviewHost
 	fetched []string
+	prFiles []domain.FileChange // what FetchPR reports, when set
 }
 
 func (g *pullGit) FetchPR(_ context.Context, _ domain.Repository, ref, branch, base string) (string, []domain.FileChange, error) {
@@ -85,6 +86,9 @@ func (g *pullGit) FetchPR(_ context.Context, _ domain.Repository, ref, branch, b
 		if p.FetchRef == ref {
 			n = k
 		}
+	}
+	if g.prFiles != nil {
+		return g.host.queue[n].HeadSHA, g.prFiles, nil
 	}
 	return g.host.queue[n].HeadSHA, []domain.FileChange{{Path: "cache.go", Add: 40, Del: 2, Diff: "+func Get() {}"}}, nil
 }

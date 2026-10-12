@@ -3,7 +3,9 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:agnts_api/src/model/analysis_acceptance_inner.dart';
 import 'package:agnts_api/src/model/footprint.dart';
+import 'package:agnts_api/src/model/second_opinion.dart';
 import 'package:agnts_api/src/model/approach.dart';
 import 'package:agnts_api/src/model/ship_notes.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
@@ -36,6 +38,12 @@ class Analysis {
      this.outOfScope,
 
      this.ship,
+
+     this.defect,
+
+     this.acceptance,
+
+     this.secondOpinion,
   });
 
   @JsonKey(
@@ -125,6 +133,44 @@ class Analysis {
 
 
 
+      /// The work fixes broken behaviour; with proveFixes on it must prove the fix
+  @JsonKey(
+    
+    name: r'defect',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? defect;
+
+
+
+      /// What the finished work must do, as checks
+  @JsonKey(
+    
+    name: r'acceptance',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<AnalysisAcceptanceInner>? acceptance;
+
+
+
+  @JsonKey(
+    
+    name: r'secondOpinion',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final SecondOpinion? secondOpinion;
+
+
+
 
 
     @override
@@ -135,7 +181,10 @@ class Analysis {
       other.footprint == footprint &&
       other.approaches == approaches &&
       other.outOfScope == outOfScope &&
-      other.ship == ship;
+      other.ship == ship &&
+      other.defect == defect &&
+      other.acceptance == acceptance &&
+      other.secondOpinion == secondOpinion;
 
     @override
     int get hashCode =>
@@ -145,7 +194,10 @@ class Analysis {
         footprint.hashCode +
         approaches.hashCode +
         outOfScope.hashCode +
-        ship.hashCode;
+        ship.hashCode +
+        defect.hashCode +
+        acceptance.hashCode +
+        secondOpinion.hashCode;
 
   factory Analysis.fromJson(Map<String, dynamic> json) => _$AnalysisFromJson(json);
 

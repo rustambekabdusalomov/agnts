@@ -7,19 +7,19 @@ part of 'stage_models.dart';
 // **************************************************************************
 
 abstract class _$StageModelsCWProxy {
-  StageModels analyze(Model analyze);
+  StageModels analyze(String analyze);
 
-  StageModels coding(Model coding);
+  StageModels coding(String coding);
 
-  StageModels retry(Model retry);
+  StageModels retry(String retry);
 
-  StageModels helper(Model helper);
+  StageModels helper(String helper);
 
-  StageModels learn(Model? learn);
+  StageModels learn(String? learn);
 
-  StageModels review(ReviewModel? review);
+  StageModels review(String? review);
 
-  StageModels preview(Model? preview);
+  StageModels preview(String? preview);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `StageModels(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -28,13 +28,13 @@ abstract class _$StageModelsCWProxy {
   /// StageModels(...).copyWith(id: 12, name: "My name")
   /// ````
   StageModels call({
-    Model analyze,
-    Model coding,
-    Model retry,
-    Model helper,
-    Model? learn,
-    ReviewModel? review,
-    Model? preview,
+    String analyze,
+    String coding,
+    String retry,
+    String helper,
+    String? learn,
+    String? review,
+    String? preview,
   });
 }
 
@@ -45,25 +45,25 @@ class _$StageModelsCWProxyImpl implements _$StageModelsCWProxy {
   final StageModels _value;
 
   @override
-  StageModels analyze(Model analyze) => this(analyze: analyze);
+  StageModels analyze(String analyze) => this(analyze: analyze);
 
   @override
-  StageModels coding(Model coding) => this(coding: coding);
+  StageModels coding(String coding) => this(coding: coding);
 
   @override
-  StageModels retry(Model retry) => this(retry: retry);
+  StageModels retry(String retry) => this(retry: retry);
 
   @override
-  StageModels helper(Model helper) => this(helper: helper);
+  StageModels helper(String helper) => this(helper: helper);
 
   @override
-  StageModels learn(Model? learn) => this(learn: learn);
+  StageModels learn(String? learn) => this(learn: learn);
 
   @override
-  StageModels review(ReviewModel? review) => this(review: review);
+  StageModels review(String? review) => this(review: review);
 
   @override
-  StageModels preview(Model? preview) => this(preview: preview);
+  StageModels preview(String? preview) => this(preview: preview);
 
   @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `StageModels(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -85,31 +85,31 @@ class _$StageModelsCWProxyImpl implements _$StageModelsCWProxy {
       analyze: analyze == const $CopyWithPlaceholder()
           ? _value.analyze
           // ignore: cast_nullable_to_non_nullable
-          : analyze as Model,
+          : analyze as String,
       coding: coding == const $CopyWithPlaceholder()
           ? _value.coding
           // ignore: cast_nullable_to_non_nullable
-          : coding as Model,
+          : coding as String,
       retry: retry == const $CopyWithPlaceholder()
           ? _value.retry
           // ignore: cast_nullable_to_non_nullable
-          : retry as Model,
+          : retry as String,
       helper: helper == const $CopyWithPlaceholder()
           ? _value.helper
           // ignore: cast_nullable_to_non_nullable
-          : helper as Model,
+          : helper as String,
       learn: learn == const $CopyWithPlaceholder()
           ? _value.learn
           // ignore: cast_nullable_to_non_nullable
-          : learn as Model?,
+          : learn as String?,
       review: review == const $CopyWithPlaceholder()
           ? _value.review
           // ignore: cast_nullable_to_non_nullable
-          : review as ReviewModel?,
+          : review as String?,
       preview: preview == const $CopyWithPlaceholder()
           ? _value.preview
           // ignore: cast_nullable_to_non_nullable
-          : preview as Model?,
+          : preview as String?,
     );
   }
 }
@@ -124,54 +124,31 @@ extension $StageModelsCopyWith on StageModels {
 // JsonSerializableGenerator
 // **************************************************************************
 
-StageModels _$StageModelsFromJson(
-  Map<String, dynamic> json,
-) => $checkedCreate('StageModels', json, ($checkedConvert) {
-  $checkKeys(
-    json,
-    requiredKeys: const ['analyze', 'coding', 'retry', 'helper'],
-  );
-  final val = StageModels(
-    analyze: $checkedConvert('analyze', (v) => $enumDecode(_$ModelEnumMap, v)),
-    coding: $checkedConvert('coding', (v) => $enumDecode(_$ModelEnumMap, v)),
-    retry: $checkedConvert('retry', (v) => $enumDecode(_$ModelEnumMap, v)),
-    helper: $checkedConvert('helper', (v) => $enumDecode(_$ModelEnumMap, v)),
-    learn: $checkedConvert(
-      'learn',
-      (v) => $enumDecodeNullable(_$ModelEnumMap, v),
-    ),
-    review: $checkedConvert(
-      'review',
-      (v) => $enumDecodeNullable(_$ReviewModelEnumMap, v),
-    ),
-    preview: $checkedConvert(
-      'preview',
-      (v) => $enumDecodeNullable(_$ModelEnumMap, v),
-    ),
-  );
-  return val;
-});
+StageModels _$StageModelsFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('StageModels', json, ($checkedConvert) {
+      $checkKeys(
+        json,
+        requiredKeys: const ['analyze', 'coding', 'retry', 'helper'],
+      );
+      final val = StageModels(
+        analyze: $checkedConvert('analyze', (v) => v as String),
+        coding: $checkedConvert('coding', (v) => v as String),
+        retry: $checkedConvert('retry', (v) => v as String),
+        helper: $checkedConvert('helper', (v) => v as String),
+        learn: $checkedConvert('learn', (v) => v as String?),
+        review: $checkedConvert('review', (v) => v as String?),
+        preview: $checkedConvert('preview', (v) => v as String?),
+      );
+      return val;
+    });
 
 Map<String, dynamic> _$StageModelsToJson(StageModels instance) =>
     <String, dynamic>{
-      'analyze': _$ModelEnumMap[instance.analyze]!,
-      'coding': _$ModelEnumMap[instance.coding]!,
-      'retry': _$ModelEnumMap[instance.retry]!,
-      'helper': _$ModelEnumMap[instance.helper]!,
-      'learn': ?_$ModelEnumMap[instance.learn],
-      'review': ?_$ReviewModelEnumMap[instance.review],
-      'preview': ?_$ModelEnumMap[instance.preview],
+      'analyze': instance.analyze,
+      'coding': instance.coding,
+      'retry': instance.retry,
+      'helper': instance.helper,
+      'learn': ?instance.learn,
+      'review': ?instance.review,
+      'preview': ?instance.preview,
     };
-
-const _$ModelEnumMap = {
-  Model.haiku: 'haiku',
-  Model.sonnet: 'sonnet',
-  Model.opus: 'opus',
-};
-
-const _$ReviewModelEnumMap = {
-  ReviewModel.auto: 'auto',
-  ReviewModel.haiku: 'haiku',
-  ReviewModel.sonnet: 'sonnet',
-  ReviewModel.opus: 'opus',
-};

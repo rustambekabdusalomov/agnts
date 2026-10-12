@@ -106,6 +106,10 @@ class RedFlag {
 }
 
 enum RedFlagKindEnum {
+@JsonValue(r'secret')
+secret(r'secret'),
+@JsonValue(r'env_file')
+envFile(r'env_file'),
 @JsonValue(r'skipped_test')
 skippedTest(r'skipped_test'),
 @JsonValue(r'removed_assertion')
@@ -114,8 +118,14 @@ removedAssertion(r'removed_assertion'),
 deletedTest(r'deleted_test'),
 @JsonValue(r'silenced_lint')
 silencedLint(r'silenced_lint'),
+@JsonValue(r'check_config')
+checkConfig(r'check_config'),
 @JsonValue(r'swallowed_error')
 swallowedError(r'swallowed_error'),
+@JsonValue(r'rule_violation')
+ruleViolation(r'rule_violation'),
+@JsonValue(r'debug_leftover')
+debugLeftover(r'debug_leftover'),
 @JsonValue(r'todo')
 todo(r'todo'),
 @JsonValue(r'new_dependency')

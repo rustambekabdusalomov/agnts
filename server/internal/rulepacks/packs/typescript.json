@@ -1,0 +1,8 @@
+{"name": "TypeScript", "rules": [
+ {"title": "No any, no silencing the type checker", "body": "Do not add any, as any, @ts-ignore or @ts-expect-error to get past a type error; fix the types. Use unknown for values whose type is not known yet and narrow them with checks."},
+ {"title": "Validate external data at the boundary", "body": "Data from HTTP responses, request bodies, query strings, localStorage, environment variables and JSON.parse is validated where it enters the code (with the project's schema library, or explicit checks) and then used through a typed value. Never cast it with as."},
+ {"title": "Every promise is handled", "body": "Await or return every promise. Do not use forEach with an async callback; use for...of or Promise.all. A promise deliberately not awaited is marked with void and a comment saying why."},
+ {"title": "Do not mutate shared objects", "body": "Objects and arrays that came from callers, props, stores or caches are not changed in place; create a new object or array with the change (spread, map, filter, structuredClone)."},
+ {"title": "Strict equality and explicit parsing", "body": "Use === and !==. Convert strings to numbers with Number() or parseInt(x, 10) and check for NaN before use; use ?? (not ||) for defaults when 0 or an empty string are valid values."},
+ {"title": "No raw HTML from data", "body": "Never render strings that came from users or the API as HTML (innerHTML, dangerouslySetInnerHTML, v-html) unless they pass through the project's sanitizer first."}
+]}

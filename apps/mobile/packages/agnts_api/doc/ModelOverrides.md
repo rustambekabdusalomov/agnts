@@ -8,11 +8,11 @@ import 'package:agnts_api/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**analyze** | [**Model**](Model.md) |  | [optional] 
-**coding** | [**Model**](Model.md) |  | [optional] 
-**retry** | [**Model**](Model.md) |  | [optional] 
-**review** | [**Model**](Model.md) |  | [optional] 
-**preview** | [**Model**](Model.md) |  | [optional] 
+**analyze** | **String** | A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI | [optional] 
+**coding** | **String** | A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI | [optional] 
+**retry** | **String** | A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI | [optional] 
+**review** | **String** | A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI | [optional] 
+**preview** | **String** | A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

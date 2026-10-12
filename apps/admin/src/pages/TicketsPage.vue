@@ -10,6 +10,7 @@ import StateBadge from '../components/StateBadge.vue'
 import WaitBadge from '../components/WaitBadge.vue'
 import KindBadge from '../components/ticket/KindBadge.vue'
 import TicketBoard, { type BoardColumn } from '../components/TicketBoard.vue'
+import InputSelect from '../components/form/InputSelect.vue'
 import SegButtons from '../components/form/SegButtons.vue'
 import { TRACKERS, type Tracker } from '../components/integrations/providers'
 import { useIntegrations } from '../components/integrations/useIntegrations'
@@ -42,9 +43,33 @@ const dash = useQuery({
   enabled: computed(() => filter.value.id === 'needs'),
 })
 
+// Repository filter, kept in the URL (?repo=<id>, or none for tickets
+// without one). The choices are the repositories these tickets are in.
+const repo = computed<string>({
+  get: () => (typeof route.query.repo === 'string' ? route.query.repo : ''),
+  set: (v) => void router.replace({ query: { ...route.query, repo: v || undefined } }),
+})
+const repoOptions = computed(() => {
+  const names = new Map<string, string>()
+  let none = false
+  for (const x of tickets.data.value ?? []) {
+    if (x.repoId == null) none = true
+    else names.set(String(x.repoId), x.repoName ?? `#${x.repoId}`)
+  }
+  const opts = [...names].sort((a, b) => a[1].localeCompare(b[1])).map(([value, label]) => ({ value, label }))
+  if (none) opts.push({ value: 'none', label: t('tickets.noRepo') })
+  // A repository chosen in the URL stays listed even with no tickets here.
+  if (repo.value && !opts.some((o) => o.value === repo.value)) opts.push({ value: repo.value, label: `#${repo.value}` })
+  return [{ value: '', label: t('tickets.allRepos') }, ...opts]
+})
 const rows = computed(() => {
   const q = ui.search.trim().toLowerCase()
-  return (tickets.data.value ?? []).filter((x) => !q || `${x.key} ${x.title}`.toLowerCase().includes(q))
+  const r = repo.value
+  return (tickets.data.value ?? []).filter(
+    (x) =>
+      (!q || `${x.key} ${x.title}`.toLowerCase().includes(q)) &&
+      (!r || (r === 'none' ? x.repoId == null : String(x.repoId) === r)),
+  )
 })
 // All tickets: a sync button per connected tracker (Jira, Plane), for
 // those who may change the workspace.
@@ -114,7 +139,10 @@ const columns = computed<BoardColumn[]>(() =>
         <h2>{{ t('tickets.count', { n: rows.length }) }}</h2>
         <p class="sub">{{ t('tickets.listSub') }}</p>
       </div>
-      <SegButtons v-model="view" :options="viewOptions" :label="t('tickets.viewLabel')" />
+      <div class="tk-filters">
+        <InputSelect v-if="repoOptions.length > 2 || repo" v-model="repo" :options="repoOptions" :label="t('tickets.repoLabel')" class="tk-repo" />
+        <SegButtons v-model="view" :options="viewOptions" :label="t('tickets.viewLabel')" />
+      </div>
     </div>
     <p v-if="tickets.isPending.value" class="hint">{{ t('common.loading') }}</p>
     <p v-else-if="tickets.isError.value" class="ferr">{{ t('common.error') }}</p>
@@ -136,7 +164,7 @@ const columns = computed<BoardColumn[]>(() =>
             <td><div class="tkey">{{ tk.key }} <KindBadge v-if="tk.kind !== 'code'" :ticket="tk" /> <span v-if="tk.openSuggestions" class="badge b-info">{{ t('followUps.openBadge', { count: tk.openSuggestions }) }}</span> <span v-if="tk.blockedBy?.length" class="badge b-warn" :title="tk.blockedBy.map((b) => b.key).join(', ')">{{ t('relations.waitingBadge') }}</span></div><div class="ttitle">{{ tk.title }}</div></td>
             <td>
               <span v-if="tk.source === 'local'" class="src local">{{ t('tickets.sourceTask') }}</span>
-              <span v-else class="src">{{ tk.source === 'plane' ? t('tickets.sourcePlane') : tk.source === 'git' ? t('tickets.sourceGit') : t('tickets.sourceJira') }}</span>
+              <span v-else class="src">{{ tk.source === 'plane' ? t('tickets.sourcePlane') : tk.source === 'git' ? t('tickets.sourceGit') : tk.source === 'ci' ? t('tickets.sourceCi') : t('tickets.sourceJira') }}</span>
             </td>
             <td class="muted">{{ tk.repoName ?? '—' }}</td>
             <td>
@@ -152,7 +180,12 @@ const columns = computed<BoardColumn[]>(() =>
       </table>
     </div>
     <p v-else class="empty">
-      {{ ui.search ? t('tickets.noMatch') : filter.id === 'needs' ? t('tickets.emptyNeeds') : t('tickets.emptyOther') }}
+      {{ ui.search || repo ? t('tickets.noMatch') : filter.id === 'needs' ? t('tickets.emptyNeeds') : t('tickets.emptyOther') }}
     </p>
   </section>
 </template>
+
+<style scoped>
+.tk-filters { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.tk-repo { width: 220px; max-width: 100%; }
+</style>

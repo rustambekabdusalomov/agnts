@@ -29,6 +29,8 @@ abstract class _$FollowUpSuggestionCWProxy {
 
   FollowUpSuggestion ready(bool ready);
 
+  FollowUpSuggestion after(List<int>? after);
+
   FollowUpSuggestion childKey(String? childKey);
 
   FollowUpSuggestion decidedAt(DateTime? decidedAt);
@@ -53,6 +55,7 @@ abstract class _$FollowUpSuggestionCWProxy {
     FollowUpSuggestionPriorityEnum priority,
     FollowUpSuggestionStatusEnum status,
     bool ready,
+    List<int>? after,
     String? childKey,
     DateTime? decidedAt,
     DateTime createdAt,
@@ -103,6 +106,9 @@ class _$FollowUpSuggestionCWProxyImpl implements _$FollowUpSuggestionCWProxy {
   FollowUpSuggestion ready(bool ready) => this(ready: ready);
 
   @override
+  FollowUpSuggestion after(List<int>? after) => this(after: after);
+
+  @override
   FollowUpSuggestion childKey(String? childKey) => this(childKey: childKey);
 
   @override
@@ -132,6 +138,7 @@ class _$FollowUpSuggestionCWProxyImpl implements _$FollowUpSuggestionCWProxy {
     Object? priority = const $CopyWithPlaceholder(),
     Object? status = const $CopyWithPlaceholder(),
     Object? ready = const $CopyWithPlaceholder(),
+    Object? after = const $CopyWithPlaceholder(),
     Object? childKey = const $CopyWithPlaceholder(),
     Object? decidedAt = const $CopyWithPlaceholder(),
     Object? createdAt = const $CopyWithPlaceholder(),
@@ -181,6 +188,10 @@ class _$FollowUpSuggestionCWProxyImpl implements _$FollowUpSuggestionCWProxy {
           ? _value.ready
           // ignore: cast_nullable_to_non_nullable
           : ready as bool,
+      after: after == const $CopyWithPlaceholder()
+          ? _value.after
+          // ignore: cast_nullable_to_non_nullable
+          : after as List<int>?,
       childKey: childKey == const $CopyWithPlaceholder()
           ? _value.childKey
           // ignore: cast_nullable_to_non_nullable
@@ -252,6 +263,10 @@ FollowUpSuggestion _$FollowUpSuggestionFromJson(
       (v) => $enumDecode(_$FollowUpSuggestionStatusEnumEnumMap, v),
     ),
     ready: $checkedConvert('ready', (v) => v as bool),
+    after: $checkedConvert(
+      'after',
+      (v) => (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList(),
+    ),
     childKey: $checkedConvert('childKey', (v) => v as String?),
     decidedAt: $checkedConvert(
       'decidedAt',
@@ -275,6 +290,7 @@ Map<String, dynamic> _$FollowUpSuggestionToJson(FollowUpSuggestion instance) =>
       'priority': _$FollowUpSuggestionPriorityEnumEnumMap[instance.priority]!,
       'status': _$FollowUpSuggestionStatusEnumEnumMap[instance.status]!,
       'ready': instance.ready,
+      'after': ?instance.after,
       'childKey': ?instance.childKey,
       'decidedAt': ?instance.decidedAt?.toIso8601String(),
       'createdAt': instance.createdAt.toIso8601String(),

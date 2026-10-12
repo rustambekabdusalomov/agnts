@@ -158,5 +158,10 @@ void main() {
       // TODO
     });
 
+    // RepoHarness harness
+    test('to test the property `harness`', () async {
+      // TODO
+    });
+
   });
 }

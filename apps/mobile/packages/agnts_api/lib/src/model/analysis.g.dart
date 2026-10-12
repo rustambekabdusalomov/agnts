@@ -21,6 +21,12 @@ abstract class _$AnalysisCWProxy {
 
   Analysis ship(ShipNotes? ship);
 
+  Analysis defect(bool? defect);
+
+  Analysis acceptance(List<AnalysisAcceptanceInner>? acceptance);
+
+  Analysis secondOpinion(SecondOpinion? secondOpinion);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Analysis(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -35,6 +41,9 @@ abstract class _$AnalysisCWProxy {
     List<Approach>? approaches,
     List<String>? outOfScope,
     ShipNotes? ship,
+    bool? defect,
+    List<AnalysisAcceptanceInner>? acceptance,
+    SecondOpinion? secondOpinion,
   });
 }
 
@@ -68,6 +77,17 @@ class _$AnalysisCWProxyImpl implements _$AnalysisCWProxy {
   Analysis ship(ShipNotes? ship) => this(ship: ship);
 
   @override
+  Analysis defect(bool? defect) => this(defect: defect);
+
+  @override
+  Analysis acceptance(List<AnalysisAcceptanceInner>? acceptance) =>
+      this(acceptance: acceptance);
+
+  @override
+  Analysis secondOpinion(SecondOpinion? secondOpinion) =>
+      this(secondOpinion: secondOpinion);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Analysis(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -82,6 +102,9 @@ class _$AnalysisCWProxyImpl implements _$AnalysisCWProxy {
     Object? approaches = const $CopyWithPlaceholder(),
     Object? outOfScope = const $CopyWithPlaceholder(),
     Object? ship = const $CopyWithPlaceholder(),
+    Object? defect = const $CopyWithPlaceholder(),
+    Object? acceptance = const $CopyWithPlaceholder(),
+    Object? secondOpinion = const $CopyWithPlaceholder(),
   }) {
     return Analysis(
       summary: summary == const $CopyWithPlaceholder()
@@ -112,6 +135,18 @@ class _$AnalysisCWProxyImpl implements _$AnalysisCWProxy {
           ? _value.ship
           // ignore: cast_nullable_to_non_nullable
           : ship as ShipNotes?,
+      defect: defect == const $CopyWithPlaceholder()
+          ? _value.defect
+          // ignore: cast_nullable_to_non_nullable
+          : defect as bool?,
+      acceptance: acceptance == const $CopyWithPlaceholder()
+          ? _value.acceptance
+          // ignore: cast_nullable_to_non_nullable
+          : acceptance as List<AnalysisAcceptanceInner>?,
+      secondOpinion: secondOpinion == const $CopyWithPlaceholder()
+          ? _value.secondOpinion
+          // ignore: cast_nullable_to_non_nullable
+          : secondOpinion as SecondOpinion?,
     );
   }
 }
@@ -159,6 +194,22 @@ Analysis _$AnalysisFromJson(Map<String, dynamic> json) =>
           (v) =>
               v == null ? null : ShipNotes.fromJson(v as Map<String, dynamic>),
         ),
+        defect: $checkedConvert('defect', (v) => v as bool?),
+        acceptance: $checkedConvert(
+          'acceptance',
+          (v) => (v as List<dynamic>?)
+              ?.map(
+                (e) =>
+                    AnalysisAcceptanceInner.fromJson(e as Map<String, dynamic>),
+              )
+              .toList(),
+        ),
+        secondOpinion: $checkedConvert(
+          'secondOpinion',
+          (v) => v == null
+              ? null
+              : SecondOpinion.fromJson(v as Map<String, dynamic>),
+        ),
       );
       return val;
     });
@@ -171,6 +222,9 @@ Map<String, dynamic> _$AnalysisToJson(Analysis instance) => <String, dynamic>{
   'approaches': ?instance.approaches?.map((e) => e.toJson()).toList(),
   'outOfScope': ?instance.outOfScope,
   'ship': ?instance.ship?.toJson(),
+  'defect': ?instance.defect,
+  'acceptance': ?instance.acceptance?.map((e) => e.toJson()).toList(),
+  'secondOpinion': ?instance.secondOpinion?.toJson(),
 };
 
 const _$AnalysisComplexityEnumEnumMap = {

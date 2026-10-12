@@ -196,6 +196,40 @@ func TestCheckMergesFindsMergedPR(t *testing.T) {
 	}
 }
 
+// A pull request closed without a merge is recorded once and then no longer
+// polled; a webhook reopen clears it so polling resumes.
+func TestCheckMergesRecordsClosedPR(t *testing.T) {
+	h := newHarness(t)
+	h.ingest("PAY-1")
+	h.runner.scripts = []script{analyzed("s1", analysis(0)), coded("s1")}
+	h.step()
+	h.step()
+	h.idle()
+	h.approve("PAY-1")
+	h.step()
+	h.idle()
+
+	h.host.closed = map[int]bool{7: true}
+	h.o.CheckMerges(h.ctx)
+	h.o.CheckMerges(h.ctx) // closed: not asked again
+	if len(h.host.asked) != 1 {
+		t.Fatalf("asked %v", h.host.asked)
+	}
+	tk := h.state("PAY-1")
+	if tk.MergedAt != nil || tk.State != domain.StateDone {
+		t.Fatalf("closed PR changed the ticket: %+v", tk)
+	}
+
+	if ok, err := h.o.MarkPRClosed(h.ctx, tk.PRURL, "", false, domain.OriginWebhook); err != nil || !ok {
+		t.Fatalf("reopen: %v %v", ok, err)
+	}
+	h.host.closed = nil
+	h.o.CheckMerges(h.ctx) // reopened: polled again
+	if len(h.host.asked) != 2 {
+		t.Fatalf("not polled after reopen: %v", h.host.asked)
+	}
+}
+
 // Phase 2: predicted footprints that share a hot spot (both add a
 // migration) make an active conflict: the second ticket waits until the
 // first is merged, or rejected.

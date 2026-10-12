@@ -25,6 +25,7 @@ Method | HTTP request | Description
 [**listRepoPipelines**](ReposApi.md#listrepopipelines) | **GET** /repos/{id}/pipelines | CI runs with their stages, newest first, 20 per page; a shorter page is the last
 [**listRepos**](ReposApi.md#listrepos) | **GET** /repos | 
 [**saveRepoBrief**](ReposApi.md#saverepobrief) | **PUT** /repos/{id}/brief | Replace the approved brief with your text; empty text removes it
+[**saveRepoHarness**](ReposApi.md#saverepoharness) | **PUT** /repos/{id}/harness | Set the repository&#39;s guard profile, per-file checks, coverage and acceptance check
 [**surveyRepoBrief**](ReposApi.md#surveyrepobrief) | **POST** /repos/{id}/brief/survey | Have Claude survey the repository and write a draft brief (an update when it has one)
 [**unarchiveRepo**](ReposApi.md#unarchiverepo) | **POST** /repos/{id}/unarchive | Restore an archived repository
 [**updateRepo**](ReposApi.md#updaterepo) | **PUT** /repos/{id} | 
@@ -743,6 +744,53 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**RepoBrief**](RepoBrief.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **saveRepoHarness**
+> Repository saveRepoHarness(id, repoHarnessInput)
+
+Set the repository's guard profile, per-file checks, coverage and acceptance check
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getReposApi();
+final int id = 789; // int | 
+final RepoHarnessInput repoHarnessInput = ; // RepoHarnessInput | 
+
+try {
+    final response = api.saveRepoHarness(id, repoHarnessInput);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling ReposApi->saveRepoHarness: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **repoHarnessInput** | [**RepoHarnessInput**](RepoHarnessInput.md)|  | 
+
+### Return type
+
+[**Repository**](Repository.md)
 
 ### Authorization
 

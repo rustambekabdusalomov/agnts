@@ -25,6 +25,13 @@ Name | Type | Description | Notes
 **egressAllow** | **List&lt;String&gt;** | Hosts run containers may reach besides the built-in list, such as a staging API; .example.com matches subdomains | [optional] 
 **suggestFollowUps** | **bool** | Runs suggest follow-up tickets (off by default; a ticket can override it) | [optional] 
 **pullReviews** | [**PullReviewSettings**](PullReviewSettings.md) |  | [optional] 
+**ci** | [**CISettings**](CISettings.md) |  | [optional] 
+**guard** | [**GuardSettings**](GuardSettings.md) |  | [optional] 
+**stalls** | **String** | What agnts does when a run looks stuck: nothing, note it on the ticket, or also tell Claude to step back (once per run) | [optional] 
+**proveFixes** | **bool** | Bug fixes need a test that fails before the change and passes after it; agnts checks it | [optional] 
+**deepReview** | **String** | Specialist passes in the code review (security, silent failures, tests, types); auto: large or complex work | [optional] 
+**learnFromRuns** | **bool** | Suggest tips from runs that had trouble (failed checks, a stall) | [optional] 
+**secondOpinion** | **String** | A model that critiques the chosen approach of complex tickets (codex:<model> or a Claude model); empty turns it off | [optional] 
 **pauseAbove** | **int** |  | 
 **parallel** | **int** |  | 
 **git** | [**GitSettings**](GitSettings.md) |  | 

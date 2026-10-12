@@ -199,6 +199,9 @@
     "doneReportPostedPlane": "Hisobot shu yerda saqlandi va Plane'dagi {key} ga joylandi.",
     "pickAny": "Mos keladiganlarning barchasini tanlang",
     "otherAnswer": "Boshqa narsa (ixtiyoriy)",
-    "srcGit": "Pull request"
+    "srcGit": "Pull request",
+    "srcCi": "CI yiqilishi",
+    "kvCi": "CI",
+    "ciFixes": "CI pull requestni {n, plural, one {# marta} other {# marta}} qaytardi"
   }
 }

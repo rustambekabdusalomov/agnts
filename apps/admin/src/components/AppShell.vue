@@ -62,6 +62,13 @@ const count = (states: string[]) => (nav.data.value ?? []).filter((x) => states.
 const openTasks = computed(() => (nav.data.value ?? []).filter((x) => x.source === 'local').length)
 // Pull request reviews waiting for your decision.
 const readyReviews = computed(() => (nav.data.value ?? []).filter((x) => x.kind === 'review' && x.state === 'waiting_for_review').length)
+// CI failures no ticket works on yet: confirmed or back after a fix.
+const ciRed = useQuery({
+  queryKey: ['ci', 'nav'],
+  queryFn: () => unwrap(api.GET('/ci/failures', { params: { query: { status: 'open,regression' } } })),
+  refetchInterval: () => livePoll(120_000),
+})
+const redPipelines = computed(() => (ciRed.data.value ?? []).filter((f) => !f.ticketKey).length)
 // Lessons not marked learned yet (one row is enough: the list carries the counts).
 const lessons = useQuery({
   queryKey: ['lessons', 'counts'],
@@ -176,6 +183,9 @@ async function signOut() {
         </RouterLink>
         <RouterLink class="nav-a" active-class="on" :to="{ name: 'reviews' }" v-bind="tip(t('nav.reviews'))">
           <HiIcon name="pull" /><span class="lbl">{{ t('nav.reviews') }}</span><span v-if="readyReviews" class="cnt">{{ readyReviews }}</span>
+        </RouterLink>
+        <RouterLink class="nav-a" active-class="on" :to="{ name: 'ci' }" v-bind="tip(t('nav.ci'))">
+          <HiIcon name="ci" /><span class="lbl">{{ t('nav.ci') }}</span><span v-if="redPipelines" class="cnt">{{ redPipelines }}</span>
         </RouterLink>
         <div class="grp">{{ t('nav.knowledge') }}</div>
         <RouterLink class="nav-a" active-class="on" :to="{ name: 'learn' }" v-bind="tip(t('nav.learn'))">

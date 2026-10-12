@@ -54,6 +54,10 @@ func toSuggestion(x domain.Suggestion, parent domain.TicketState) gen.FollowUpSu
 		c := x.ChildKey
 		out.ChildKey = &c
 	}
+	if len(x.After) > 0 {
+		after := x.After
+		out.After = &after
+	}
 	return out
 }
 
@@ -121,9 +125,10 @@ func (s *Server) AcceptFollowUps(w http.ResponseWriter, r *http.Request, key gen
 		writeError(w, http.StatusBadRequest, "bad_request", "pick between 1 and 20 suggestions")
 		return
 	}
+	start := req.Start != nil && *req.Start
 	in := make([]orchestrator.AcceptInput, len(req.Items))
 	for i, it := range req.Items {
-		a := orchestrator.AcceptInput{ID: it.Id}
+		a := orchestrator.AcceptInput{ID: it.Id, Start: start}
 		if it.Target != nil {
 			a.Target = string(*it.Target)
 		}

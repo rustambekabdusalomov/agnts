@@ -5,7 +5,7 @@ import type { Rule } from '../../api/types'
 import { ago } from '../../composables/format'
 import { askConfirm } from '../../composables/useConfirm'
 import SwitchToggle from '../form/SwitchToggle.vue'
-import { RULE_TONE, useRuleAction } from './useRules'
+import { RULE_TONE, ruleBadges, useRuleAction } from './useRules'
 import CopyButton from '../ui/CopyButton.vue'
 
 // One rule: its text, where Claude's review stands, and what to do next
@@ -18,6 +18,7 @@ const act = useRuleAction()
 const open = computed(() => props.rule.questions.filter((q) => !q.answer))
 const answered = computed(() => props.rule.questions.filter((q) => q.answer))
 const reviewing = computed(() => props.rule.status === 'pending' || props.rule.status === 'analyzing')
+const badges = computed(() => ruleBadges(props.rule, t))
 
 // Draft answers per question index, kept while the list refreshes.
 const answers = reactive<Record<number, { answer: string; note: string }>>({})
@@ -72,6 +73,7 @@ async function remove() {
           <span v-else class="src">{{ t('rules.global') }}</span>
           <span class="badge" :class="`b-${RULE_TONE[rule.status]}`">{{ t(`rules.status_${rule.status}`) }}</span>
           <span v-if="rule.kind === 'context'" class="badge b-gray">{{ t('rules.kindContext') }}</span>
+          <span v-for="b in badges" :key="b.label" class="badge" :class="`b-${b.tone}`">{{ b.label }}</span>
           <span v-if="!rule.enabled" class="badge b-gray">{{ t('rules.off') }}</span>
         </div>
       </div>

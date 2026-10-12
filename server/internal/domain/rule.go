@@ -2,6 +2,8 @@ package domain
 
 import (
 	"errors"
+	"fmt"
+	"regexp"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -36,10 +38,69 @@ const (
 	// KindContext is business knowledge (a glossary, invariants, roles):
 	// runs get every context note in /agnts/context/business.md.
 	KindContext RuleKind = "context"
+	// KindTip is a practical lesson about running a repository's work
+	// ("the tests need the database: run make dev-db first"), learned from
+	// runs; runs get tips as skills.
+	KindTip RuleKind = "tip"
 )
 
 // Valid reports whether k is a known kind.
-func (k RuleKind) Valid() bool { return k == KindInstruction || k == KindContext }
+func (k RuleKind) Valid() bool { return k == KindInstruction || k == KindContext || k == KindTip }
+
+// Rule deliveries: how a rule reaches a run.
+const (
+	DeliverPrompt = "prompt" // in every prompt
+	DeliverSkill  = "skill"  // a skill Claude loads when its description matches the work
+)
+
+// RuleEnforce makes a rule something agnts-guard checks, not only asks
+// for: On "file" checks edits of files matching Paths (and, with a
+// Pattern, only added lines matching it), "bash" checks commands against
+// Pattern, "diff" checks the finished change (on the server only).
+type RuleEnforce struct {
+	On      string   `json:"on"`
+	Paths   []string `json:"paths,omitempty"`
+	Pattern string   `json:"pattern,omitempty"`
+	Action  string   `json:"action"` // block or warn
+	Message string   `json:"message,omitempty"`
+}
+
+// Validate checks an enforcement and compiles its pattern.
+func (e *RuleEnforce) Validate() error {
+	e.Pattern, e.Message = strings.TrimSpace(e.Pattern), strings.TrimSpace(e.Message)
+	var paths []string
+	for _, p := range e.Paths {
+		if p = strings.TrimSpace(p); p != "" {
+			paths = append(paths, p)
+		}
+	}
+	e.Paths = paths
+	var errs []error
+	switch e.On {
+	case "file", "diff":
+		if len(e.Paths) == 0 && e.Pattern == "" {
+			errs = append(errs, errors.New("a file or diff rule needs paths, a pattern, or both"))
+		}
+	case "bash":
+		if e.Pattern == "" {
+			errs = append(errs, errors.New("a command rule needs a pattern"))
+		}
+	default:
+		errs = append(errs, errors.New("enforce on must be file, bash or diff"))
+	}
+	if e.Action != "block" && e.Action != "warn" {
+		errs = append(errs, errors.New("enforce action must be block or warn"))
+	}
+	if e.Pattern != "" {
+		if _, err := regexp.Compile(e.Pattern); err != nil {
+			errs = append(errs, fmt.Errorf("the pattern is not a valid regular expression: %w", err))
+		}
+	}
+	if len(e.Paths) > 20 || len(e.Pattern) > 500 || len(e.Message) > 1000 {
+		errs = append(errs, errors.New("an enforcement takes at most 20 paths, a 500-character pattern and a 1000-character message"))
+	}
+	return errors.Join(errs...)
+}
 
 // Limits of a rule's text and review.
 const (
@@ -73,9 +134,24 @@ type Rule struct {
 	// ticket whose feedback taught it, and which feedback.
 	SourceTicket string
 	Reason       string
-	AnalyzedAt   *time.Time
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	// Enforce, when set, has agnts-guard check the rule while Claude works.
+	Enforce *RuleEnforce
+	// Delivery is DeliverPrompt or DeliverSkill.
+	Delivery string
+	// SkillDescription says when the rule applies, for a skill.
+	SkillDescription string
+	// Source says where a rule came from: "" (a person), "reflect"
+	// (feedback), "run" (a run's trouble), "pack:go" (a starter pack).
+	Source string
+	// Confidence (0.3 to 0.9) and Evidence (how many times it was seen)
+	// are what a learned suggestion has earned; LastSeen is when it was
+	// last seen again.
+	Confidence float64
+	Evidence   int
+	LastSeen   *time.Time
+	AnalyzedAt *time.Time
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }
 
 // RuleQuestion is one question from a rule's review, with its answer once

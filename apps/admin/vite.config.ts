@@ -14,6 +14,8 @@ export default defineConfig({
       // The website's "Request a connector" form posts here.
       '/site': 'http://localhost:8080',
       '/healthz': 'http://localhost:8080',
+      // agnts-link connectors (private networks) reach the agnts-dev-gateway container.
+      '/link': { target: 'http://localhost:3130', ws: true },
     },
   },
   test: {

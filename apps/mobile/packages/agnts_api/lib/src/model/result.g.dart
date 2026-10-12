@@ -21,6 +21,10 @@ abstract class _$ResultCWProxy {
 
   Result redFlags(List<RedFlag>? redFlags);
 
+  Result proof(Proof? proof);
+
+  Result coverage(Coverage? coverage);
+
   Result createdAt(DateTime createdAt);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Result(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -37,6 +41,8 @@ abstract class _$ResultCWProxy {
     String? report,
     List<String>? deviations,
     List<RedFlag>? redFlags,
+    Proof? proof,
+    Coverage? coverage,
     DateTime createdAt,
   });
 }
@@ -69,6 +75,12 @@ class _$ResultCWProxyImpl implements _$ResultCWProxy {
   Result redFlags(List<RedFlag>? redFlags) => this(redFlags: redFlags);
 
   @override
+  Result proof(Proof? proof) => this(proof: proof);
+
+  @override
+  Result coverage(Coverage? coverage) => this(coverage: coverage);
+
+  @override
   Result createdAt(DateTime createdAt) => this(createdAt: createdAt);
 
   @override
@@ -86,6 +98,8 @@ class _$ResultCWProxyImpl implements _$ResultCWProxy {
     Object? report = const $CopyWithPlaceholder(),
     Object? deviations = const $CopyWithPlaceholder(),
     Object? redFlags = const $CopyWithPlaceholder(),
+    Object? proof = const $CopyWithPlaceholder(),
+    Object? coverage = const $CopyWithPlaceholder(),
     Object? createdAt = const $CopyWithPlaceholder(),
   }) {
     return Result(
@@ -117,6 +131,14 @@ class _$ResultCWProxyImpl implements _$ResultCWProxy {
           ? _value.redFlags
           // ignore: cast_nullable_to_non_nullable
           : redFlags as List<RedFlag>?,
+      proof: proof == const $CopyWithPlaceholder()
+          ? _value.proof
+          // ignore: cast_nullable_to_non_nullable
+          : proof as Proof?,
+      coverage: coverage == const $CopyWithPlaceholder()
+          ? _value.coverage
+          // ignore: cast_nullable_to_non_nullable
+          : coverage as Coverage?,
       createdAt: createdAt == const $CopyWithPlaceholder()
           ? _value.createdAt
           // ignore: cast_nullable_to_non_nullable
@@ -171,6 +193,14 @@ Result _$ResultFromJson(
           ?.map((e) => RedFlag.fromJson(e as Map<String, dynamic>))
           .toList(),
     ),
+    proof: $checkedConvert(
+      'proof',
+      (v) => v == null ? null : Proof.fromJson(v as Map<String, dynamic>),
+    ),
+    coverage: $checkedConvert(
+      'coverage',
+      (v) => v == null ? null : Coverage.fromJson(v as Map<String, dynamic>),
+    ),
     createdAt: $checkedConvert('createdAt', (v) => DateTime.parse(v as String)),
   );
   return val;
@@ -184,5 +214,7 @@ Map<String, dynamic> _$ResultToJson(Result instance) => <String, dynamic>{
   'report': ?instance.report,
   'deviations': ?instance.deviations,
   'redFlags': ?instance.redFlags?.map((e) => e.toJson()).toList(),
+  'proof': ?instance.proof?.toJson(),
+  'coverage': ?instance.coverage?.toJson(),
   'createdAt': instance.createdAt.toIso8601String(),
 };

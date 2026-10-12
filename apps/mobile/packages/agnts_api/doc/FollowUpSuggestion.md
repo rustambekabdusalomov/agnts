@@ -19,6 +19,7 @@ Name | Type | Description | Notes
 **priority** | **String** |  | 
 **status** | **String** |  | 
 **ready** | **bool** | A ticket can be made from it now (open, and the parent is done unless the analysis suggested it) | 
+**after** | **List&lt;int&gt;** | Ids of sibling suggestions that must land first; once both are tickets, this one depends on them | [optional] 
 **childKey** | **String** | The ticket made from it | [optional] 
 **decidedAt** | [**DateTime**](DateTime.md) |  | [optional] 
 **createdAt** | [**DateTime**](DateTime.md) |  | 

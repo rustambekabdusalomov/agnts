@@ -178,6 +178,16 @@
     "planeStatesError": "Could not read the states from Plane: {error}",
     "planeSyncHelp": "Plane sends changes to the webhook right away; agnts also checks every hour in case a delivery was missed.",
     "planeHelp": "agnts reads only work items with its labels in linked projects, and writes only the state changes and comments you turn on here. Plane allows 60 API requests a minute per key; agnts stays under 50.",
-    "planeSynced": "{found} open work items, {created} new"
+    "planeSynced": "{found} open work items, {created} new",
+    "name_openai": "OpenAI",
+    "desc_openai": "An OpenAI API key for runs on Codex CLI, agnts's second coding tool. Pick a codex: model in Settings to use it.",
+    "connectSub_openai": "Paste an OpenAI API key. agnts checks it, keeps it encrypted, and gives it only to runs that use Codex.",
+    "tokenOpen_openai": "Open API keys",
+    "tokenStep1_openai": "Open the OpenAI platform's API keys page (button below) and sign in.",
+    "tokenStep2_openai": "Create a new secret key, ideally in a project with a spending limit.",
+    "tokenStep3_openai": "Copy the key (it starts with sk-) and paste it into API key below.",
+    "tokenStep4_openai": "In Settings → Preview, add api.openai.com to the hosts runs may reach, so Codex runs can call OpenAI.",
+    "openaiKeyHelp": "Stored encrypted on your server. Only runs on Codex receive it.",
+    "openaiHelp": "Codex runs have no agnts-guard hooks: agnts's checks after the run (red flags, build, lint, tests, review) still apply. Runs also need api.openai.com in the allowed hosts."
   }
 }

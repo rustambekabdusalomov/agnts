@@ -18,6 +18,10 @@ Har bir pipeline ishga tushirishi bosqichlari bilan: build, test, linter va joyl
 
 Staging va production'da qaysi commit turibdi. Production'ga joylash sizni kutadi: bosqichdagi «Joylash»ni bosing.
 
+## Cheklovlar
+
+Repozitoriyning oʻz cheklov profili (boʻsh boʻlsa Sozlamalardagidek), namuna maxfiy maʼlumotlar kutiladigan yoʻllar, har bir tahrirlangan faylning tezkor tekshiruvlari (oʻrnatilmagan boʻlsa toolchainlardan chiqariladi), oʻzgargan qatorlarning chegarali **Qamrovi**, preview dan keyin ishlayotgan ilovada task mezonlarining **Qabul tekshiruvi** va agnts repozitoriyning AI agentlar uchun koʻrsatmalarida (CLAUDE.md, AGENTS.md, .claude/) topgan narsalar. agnts hech qachon repozitoriyning oʻz hooklari yoki MCP serverlarini ishga tushirmaydi.
+
 ## Sozlamalar
 
 «Sozlamalarni tahrirlash» klonlash URL, asosiy branch va build, linter, test buyruqlarini oʻzgartiradi.

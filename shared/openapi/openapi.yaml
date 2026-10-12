@@ -230,6 +230,23 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '409': { $ref: '#/components/responses/Conflict' }
 
+  /tickets/{key}/secrets-ack:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: acknowledgeSecrets
+      summary: Confirm that the lines flagged as secrets in the change under review are not real credentials
+      description: >-
+        A change with lines agnts's scan flagged as secrets (or a dotenv
+        file) cannot be approved until a person confirms, for that commit,
+        that they are not real credentials.
+      tags: [tickets]
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /tickets/{key}/approve:
     parameters:
       - $ref: '#/components/parameters/TicketKey'
@@ -1565,6 +1582,183 @@ paths:
         '204': { description: Revoked }
         '401': { $ref: '#/components/responses/Unauthorized' }
 
+  /networks:
+    get:
+      operationId: listPrivateNetworks
+      summary: The workspace's private networks (VPNs and agnts-link connectors)
+      description: |
+        Tunnels into the team's own networks and the routes (hosts, domains,
+        private ranges) that go through each: agnts's calls to a self-hosted
+        GitLab, Jira or Plane, git, and run containers' connections to those
+        hosts. A connection goes through the network whose route matches it
+        most closely. Secrets are never returned.
+      tags: [network]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PrivateNetworkList' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      operationId: createPrivateNetwork
+      x-role: owner
+      summary: Add a private network
+      description: |
+        Its routes may not claim a host, domain or range another of the
+        workspace's networks has (on a common port); a route nested inside
+        another network's is fine. A connector's token is returned once.
+      tags: [network]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PrivateNetworkInput' }
+      responses:
+        '201':
+          description: Added
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PrivateNetworkSaved' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /networks/test:
+    post:
+      operationId: testPrivateNetwork
+      x-role: owner
+      summary: Connect to host:port through the network its routes pick, and check its TLS certificate
+      tags: [network]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [target]
+              properties:
+                target: { type: string, maxLength: 300, description: 'host:port, e.g. gitlab.corp.local:443' }
+                network: { type: integer, format: int64, description: The network expected to carry it; the result says if another one would }
+      responses:
+        '200':
+          description: What the test found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NetworkTest' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /networks/activity:
+    get:
+      operationId: getNetworkActivity
+      summary: Connections made through private networks (the last 100, and the day's counts)
+      tags: [network]
+      parameters:
+        - name: network
+          in: query
+          description: Only this network's connections
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NetworkActivity' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /networks/{networkId}:
+    parameters:
+      - $ref: '#/components/parameters/NetworkID'
+    get:
+      operationId: getPrivateNetwork
+      summary: One private network
+      tags: [network]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PrivateNetwork' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      operationId: updatePrivateNetwork
+      x-role: owner
+      summary: Change a private network
+      description: |
+        Left-out secrets (config, password) keep the stored ones. Switching
+        to a connector makes its token, returned once.
+      tags: [network]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PrivateNetworkInput' }
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PrivateNetworkSaved' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      operationId: deletePrivateNetwork
+      x-role: owner
+      summary: Remove a private network
+      tags: [network]
+      responses:
+        '204': { description: Removed }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /networks/{networkId}/reconnect:
+    parameters:
+      - $ref: '#/components/parameters/NetworkID'
+    post:
+      operationId: reconnectPrivateNetwork
+      x-role: owner
+      summary: Restart the tunnel (a new OpenVPN sidecar, a new WireGuard handshake, agnts-link reconnects)
+      tags: [network]
+      responses:
+        '200':
+          description: The network, reconnecting
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PrivateNetwork' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /networks/{networkId}/token:
+    parameters:
+      - $ref: '#/components/parameters/NetworkID'
+    post:
+      operationId: rotateLinkToken
+      x-role: owner
+      summary: Make a new agnts-link token for a connector network (shown once; the old one stops working)
+      tags: [network]
+      responses:
+        '200':
+          description: The new token
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [token]
+                properties:
+                  token: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /lessons:
     get:
       operationId: listLessons
@@ -1774,6 +1968,25 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
 
+  /rules/try:
+    post:
+      operationId: tryEnforce
+      summary: "Check an enforcement against agnts's last changes before turning it on"
+      tags: [rules]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TryEnforceInput' }
+      responses:
+        '200':
+          description: What the enforcement would have caught
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TryEnforceResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
   /rules/{id}:
     parameters:
       - $ref: '#/components/parameters/RuleID'
@@ -1892,6 +2105,57 @@ paths:
               schema: { $ref: '#/components/schemas/Analytics' }
         '401': { $ref: '#/components/responses/Unauthorized' }
 
+  /analytics/delivery:
+    get:
+      operationId: getAnalyticsDelivery
+      summary: What happened to agnts pull requests, cycle time and questions for a period
+      tags: [analytics]
+      parameters:
+        - name: days
+          in: query
+          schema: { type: integer, enum: [7, 30, 90], default: 30 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AnalyticsDelivery' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /analytics/ci:
+    get:
+      operationId: getAnalyticsCi
+      summary: CI failures, fixes and flaky jobs for a period
+      tags: [analytics]
+      parameters:
+        - name: days
+          in: query
+          schema: { type: integer, enum: [7, 30, 90], default: 30 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AnalyticsCI' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /analytics/learning:
+    get:
+      operationId: getAnalyticsLearning
+      summary: Lessons, rules, follow-ups and reviewer notes for a period
+      tags: [analytics]
+      parameters:
+        - name: days
+          in: query
+          schema: { type: integer, enum: [7, 30, 90], default: 30 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AnalyticsLearning' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
   /eval/replays:
     get:
       operationId: getReplayReport
@@ -1936,6 +2200,75 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Repository' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /repos/{id}/harness:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    put:
+      operationId: saveRepoHarness
+      x-role: owner
+      summary: "Set the repository's guard profile, per-file checks, coverage and acceptance check"
+      tags: [repos]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RepoHarnessInput' }
+      responses:
+        '200':
+          description: The repository after the change
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Repository' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /repos/{id}/starter-rules:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    get:
+      operationId: listStarterPacks
+      summary: "Starter rule packs that fit the repository's toolchains"
+      tags: [rules]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/StarterPack' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      operationId: offerStarterRules
+      x-role: owner
+      summary: "Add a starter pack's rules to the repository as suggestions"
+      description: >-
+        Nothing applies until someone adopts a suggestion (with a review or
+        as written). Rules whose title the repository already has are skipped.
+      tags: [rules]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pack]
+              properties:
+                pack: { type: string, maxLength: 40 }
+      responses:
+        '200':
+          description: The suggestions added
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Rule' }
+        '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
@@ -3080,8 +3413,168 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /ci/failures:
+    get:
+      operationId: listCIFailures
+      summary: CI failure groups, newest occurrence first
+      tags: [ci]
+      parameters:
+        - name: repoId
+          in: query
+          required: false
+          schema: { type: integer, format: int64 }
+        - name: status
+          in: query
+          required: false
+          description: Comma-separated statuses; empty for all
+          schema: { type: string, maxLength: 200 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/CIFailure' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /ci/failures/{failureId}:
+    parameters:
+      - $ref: '#/components/parameters/CIFailureID'
+    get:
+      operationId: getCIFailure
+      summary: One CI failure group with its redacted log excerpt
+      tags: [ci]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CIFailure' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /ci/failures/{failureId}/fix:
+    parameters:
+      - $ref: '#/components/parameters/CIFailureID'
+    post:
+      operationId: fixCIFailure
+      summary: Open a ticket that fixes the failure now (ignores the auto-fix setting and the daily budget)
+      tags: [ci]
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /ci/failures/{failureId}/mute:
+    parameters:
+      - $ref: '#/components/parameters/CIFailureID'
+    post:
+      operationId: muteCIFailure
+      summary: Ignore this failure (no tickets, no notifications)
+      tags: [ci]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CIFailure' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /ci/failures/{failureId}/unmute:
+    parameters:
+      - $ref: '#/components/parameters/CIFailureID'
+    post:
+      operationId: unmuteCIFailure
+      summary: Watch a muted failure again
+      tags: [ci]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CIFailure' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /ci/failures/{failureId}/rerun:
+    parameters:
+      - $ref: '#/components/parameters/CIFailureID'
+    post:
+      operationId: rerunCIFailure
+      summary: Re-run the failed jobs of the newest failing run on the git host
+      tags: [ci]
+      responses:
+        '204': { description: Re-run started }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+
+  /tickets/{key}/ci:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    get:
+      operationId: getTicketCIFailure
+      summary: The CI failure a CI ticket fixes (404 for other tickets)
+      tags: [ci]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CIFailure' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /repos/{id}/ci-watch:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    get:
+      operationId: getRepoCIWatch
+      summary: How agnts watches this repository's CI, and whether the git token can read it
+      tags: [ci]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CIWatch' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      operationId: putRepoCIWatch
+      summary: Change how agnts watches this repository's CI
+      tags: [ci]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CIWatch' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CIWatch' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
 components:
   parameters:
+    NetworkID:
+      name: networkId
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
+    CIFailureID:
+      name: failureId
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
     RepoID:
       name: id
       in: path
@@ -3091,7 +3584,7 @@ components:
       name: provider
       in: path
       required: true
-      schema: { type: string, enum: [jira, plane, github, claude, telegram, gitlab] }
+      schema: { type: string, enum: [jira, plane, github, claude, telegram, gitlab, openai] }
     RuleID:
       name: id
       in: path
@@ -3644,6 +4137,10 @@ components:
         priority: { type: string, enum: [low, medium, high] }
         status: { type: string, enum: [open, accepted, dismissed] }
         ready: { type: boolean, description: 'A ticket can be made from it now (open, and the parent is done unless the analysis suggested it)' }
+        after:
+          type: array
+          items: { type: integer, format: int64 }
+          description: 'Ids of sibling suggestions that must land first; once both are tickets, this one depends on them'
         childKey: { type: string, description: 'The ticket made from it' }
         decidedAt: { type: string, format: date-time }
         createdAt: { type: string, format: date-time }
@@ -3656,7 +4153,7 @@ components:
         title: { type: string }
         state: { $ref: '#/components/schemas/TicketState' }
         kind: { $ref: '#/components/schemas/TicketKind' }
-        source: { type: string, enum: [jira, plane, local, git] }
+        source: { type: string, enum: [jira, plane, local, git, ci] }
         held: { type: boolean }
 
     FollowUps:
@@ -3697,6 +4194,9 @@ components:
           minItems: 1
           maxItems: 20
           items: { $ref: '#/components/schemas/AcceptFollowUp' }
+        start:
+          type: boolean
+          description: 'Queue the new tickets to run now instead of holding them until someone starts each one'
 
     AcceptFollowUpResult:
       type: object
@@ -3751,7 +4251,7 @@ components:
       required: [key, source, title, description, priority, state, revision, turns, branch, prUrl, kind, kindAuto, createdAt, updatedAt]
       properties:
         key: { type: string }
-        source: { type: string, enum: [jira, plane, local, git] }
+        source: { type: string, enum: [jira, plane, local, git, ci] }
         repoId: { type: integer, format: int64 }
         title: { type: string }
         description: { type: string }
@@ -3765,6 +4265,7 @@ components:
         headSha: { type: string, description: "The reviewed commit: the branch head agnts committed, or for a pull request review the head agnts reviewed" }
         prNumber: { type: integer }
         prUrl: { type: string }
+        ciFixes: { type: integer, description: 'Rounds a red CI check sent the pull request back to coding' }
         assignees:
           type: array
           description: Git host usernames the pull request is (or will be) assigned to
@@ -3931,6 +4432,18 @@ components:
           description: What the work will deliberately not do
           items: { type: string }
         ship: { $ref: '#/components/schemas/ShipNotes' }
+        defect: { type: boolean, description: 'The work fixes broken behaviour; with proveFixes on it must prove the fix' }
+        acceptance:
+          type: array
+          description: What the finished work must do, as checks
+          items:
+            type: object
+            required: [id, criterion, check]
+            properties:
+              id: { type: string }
+              criterion: { type: string }
+              check: { type: string, enum: [ui, api, test, manual] }
+        secondOpinion: { $ref: '#/components/schemas/SecondOpinion' }
 
     Approach:
       type: object
@@ -3970,6 +4483,9 @@ components:
         title: { type: string }
         detail: { type: string }
         suggestion: { type: string, description: 'What to change, written to be sent back as feedback' }
+        confidence: { type: number, description: "How sure the reviewer was, 0 to 1; absent when it did not say" }
+        pass: { type: string, description: 'The specialist pass that found it (security, failures, tests, types), empty for the main review' }
+        adopted: { type: boolean, description: "A person put it in their feedback" }
 
     CodeReview:
       type: object
@@ -3989,6 +4505,8 @@ components:
         strengths:
           type: array
           items: { type: string }
+        deep: { type: boolean, description: The review ran the specialist passes }
+        dropped: { type: integer, description: Findings left out for low confidence or as duplicates }
         createdAt: { type: string, format: date-time }
 
     ShotRef:
@@ -4046,6 +4564,7 @@ components:
         issues:
           type: array
           items: { $ref: '#/components/schemas/PreviewIssue' }
+        acceptance: { $ref: '#/components/schemas/Acceptance' }
         createdAt: { type: string, format: date-time }
 
     CheckStep:
@@ -4091,13 +4610,15 @@ components:
           type: array
           description: "Lines agnts's scan of the change flagged for the reviewer: skipped tests, removed assertions, silenced linters and the like"
           items: { $ref: '#/components/schemas/RedFlag' }
+        proof: { $ref: '#/components/schemas/Proof' }
+        coverage: { $ref: '#/components/schemas/Coverage' }
         createdAt: { type: string, format: date-time }
 
     RedFlag:
       type: object
       required: [kind, path, text]
       properties:
-        kind: { type: string, enum: [skipped_test, removed_assertion, deleted_test, silenced_lint, swallowed_error, todo, new_dependency] }
+        kind: { type: string, enum: [secret, env_file, skipped_test, removed_assertion, deleted_test, silenced_lint, check_config, swallowed_error, rule_violation, debug_leftover, todo, new_dependency] }
         path: { type: string }
         line: { type: integer, description: Line in the new file; absent for the whole file }
         text: { type: string }
@@ -4172,11 +4693,12 @@ components:
 
     Model:
       type: string
-      enum: [haiku, sonnet, opus]
+      pattern: '^(haiku|sonnet|opus|codex:[a-z0-9][a-z0-9._-]{0,63})$'
+      description: 'A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI'
 
     ReviewModel:
       type: string
-      enum: [auto, haiku, sonnet, opus]
+      pattern: '^(auto|haiku|sonnet|opus|codex:[a-z0-9][a-z0-9._-]{0,63})$'
       description: 'auto: opus for complex tickets, sonnet otherwise'
 
     StageModels:
@@ -4341,10 +4863,274 @@ components:
           items: { type: string, maxLength: 253 }
         suggestFollowUps: { type: boolean, description: 'Runs suggest follow-up tickets (off by default; a ticket can override it)' }
         pullReviews: { $ref: '#/components/schemas/PullReviewSettings' }
+        ci: { $ref: '#/components/schemas/CISettings' }
+        guard: { $ref: '#/components/schemas/GuardSettings' }
+        stalls:
+          type: string
+          pattern: '^(off|log|act)$'
+          description: 'What agnts does when a run looks stuck: nothing, note it on the ticket, or also tell Claude to step back (once per run)'
+        proveFixes: { type: boolean, description: 'Bug fixes need a test that fails before the change and passes after it; agnts checks it' }
+        deepReview:
+          type: string
+          pattern: '^(off|auto|always)$'
+          description: 'Specialist passes in the code review (security, silent failures, tests, types); auto: large or complex work'
+        learnFromRuns: { type: boolean, description: 'Suggest tips from runs that had trouble (failed checks, a stall)' }
+        secondOpinion:
+          type: string
+          maxLength: 80
+          description: 'A model that critiques the chosen approach of complex tickets (codex:<model> or a Claude model); empty turns it off'
         pauseAbove: { type: integer, minimum: 50, maximum: 100 }
         parallel: { type: integer, minimum: 1, maximum: 3 }
         git: { $ref: '#/components/schemas/GitSettings' }
         notify: { $ref: '#/components/schemas/NotifySettings' }
+
+    GuardSettings:
+      type: object
+      required: [profile, disabled, factCheck]
+      description: How strict agnts-guard, the hooks inside every run, is
+      properties:
+        profile: { $ref: '#/components/schemas/GuardProfile' }
+        disabled:
+          type: array
+          maxItems: 20
+          description: Guard hooks turned off
+          items: { $ref: '#/components/schemas/GuardHook' }
+        factCheck: { type: integer, minimum: 0, maximum: 100, description: 'Percent of strict-profile tickets whose runs must state facts before the first edit of each file (A/B)' }
+
+    GuardProfile:
+      type: string
+      enum: [minimal, standard, strict]
+
+    GuardHook:
+      type: string
+      enum: ['pre:secret', 'pre:redflags', 'pre:rules', 'pre:fact-check', 'pre:destructive', 'post:edit-check', 'stop:gate', 'session:progress']
+
+    EditCheck:
+      type: object
+      required: [name, globs, cmd]
+      properties:
+        name: { type: string, maxLength: 80 }
+        globs:
+          type: array
+          maxItems: 20
+          items: { type: string, maxLength: 200 }
+        cmd: { type: string, maxLength: 2000, description: '{file} is the edited file, {dir} its directory, both relative to the repository' }
+        every: { type: integer, minimum: 0, maximum: 3600, description: 'Seconds between runs; 0 runs it after every edit' }
+
+    CoverageConfig:
+      type: object
+      properties:
+        enabled: { type: boolean }
+        command: { type: string, maxLength: 2000, description: 'Runs the tests with coverage; empty uses the one agnts derives' }
+        report: { type: string, maxLength: 500, description: 'The report the command writes (Go profile or lcov), in the repository or under /agnts/out/' }
+        threshold: { type: integer, minimum: 0, maximum: 100 }
+
+    AgentConfigFinding:
+      type: object
+      required: [path, kind, severity, text]
+      properties:
+        path: { type: string }
+        line: { type: integer }
+        kind: { type: string, enum: [hidden_unicode, agent_instruction, exfiltration, encoded_blob, hooks, mcp_server] }
+        severity: { type: string, enum: [high, medium, info] }
+        text: { type: string }
+
+    AgentConfigScan:
+      type: object
+      required: [scannedAt, findings]
+      description: "What agnts found in the repository's instructions for AI agents (CLAUDE.md, AGENTS.md, .claude/, .mcp.json)"
+      properties:
+        scannedAt: { type: string, format: date-time }
+        findings:
+          type: array
+          items: { $ref: '#/components/schemas/AgentConfigFinding' }
+
+    RepoHarnessInput:
+      type: object
+      properties:
+        guardProfile:
+          type: string
+          enum: ['', minimal, standard, strict]
+          description: Empty follows the workspace
+        secretAllow:
+          type: array
+          maxItems: 50
+          description: 'Path globs where example credentials are expected, besides testdata/, fixtures/ and *.example'
+          items: { type: string, maxLength: 200 }
+        editChecks:
+          type: array
+          maxItems: 20
+          nullable: true
+          description: 'Per-file checks after each edit; null uses the ones agnts derives from the toolchains'
+          items: { $ref: '#/components/schemas/EditCheck' }
+        editChecksOff: { type: boolean }
+        coverage: { $ref: '#/components/schemas/CoverageConfig' }
+        acceptance: { type: boolean, description: "Check the ticket's acceptance criteria in the running app after the preview" }
+
+    RepoHarness:
+      allOf:
+        - $ref: '#/components/schemas/RepoHarnessInput'
+        - type: object
+          properties:
+            derivedEditChecks:
+              type: array
+              description: The per-file checks agnts derives from the toolchains
+              items: { $ref: '#/components/schemas/EditCheck' }
+            derivedCoverage:
+              type: object
+              description: The coverage command agnts derives; empty when it knows none
+              properties:
+                command: { type: string }
+                report: { type: string }
+            agentConfig: { $ref: '#/components/schemas/AgentConfigScan' }
+
+    StarterPack:
+      type: object
+      required: [pack, name, rules, offered]
+      properties:
+        pack: { type: string }
+        name: { type: string }
+        rules: { type: integer }
+        offered: { type: boolean, description: "Its rules are already among the repository's rules or suggestions" }
+
+    RuleEnforce:
+      type: object
+      required: ['on', action]
+      description: 'agnts-guard checks the rule while Claude works: file (edits of matching files, or added lines matching the pattern), bash (commands), diff (the finished change, on the server)'
+      properties:
+        'on': { type: string, enum: [file, bash, diff] }
+        paths:
+          type: array
+          maxItems: 20
+          items: { type: string, maxLength: 200 }
+        pattern: { type: string, maxLength: 500, description: A regular expression (RE2) }
+        action: { type: string, enum: [block, warn] }
+        message: { type: string, maxLength: 1000 }
+
+    TryEnforceInput:
+      type: object
+      required: [enforce]
+      properties:
+        enforce: { $ref: '#/components/schemas/RuleEnforce' }
+        repoId: { type: integer, format: int64, description: Leave out to check every repository }
+
+    TryEnforceResult:
+      type: object
+      required: [checked, tickets, hits]
+      properties:
+        checked: { type: integer, description: Changes looked at }
+        tickets:
+          type: array
+          items: { type: string }
+        hits:
+          type: array
+          items:
+            type: object
+            required: [ticket, path, text]
+            properties:
+              ticket: { type: string }
+              path: { type: string }
+              line: { type: integer }
+              text: { type: string }
+        note: { type: string }
+
+    Proof:
+      type: object
+      required: [status, tests]
+      description: 'Evidence that a bug fix fixes the bug: reproducing tests run before and after the change'
+      properties:
+        status: { type: string, enum: [proven, not_reproduced, still_failing, inconclusive, no_test, error] }
+        base: { type: string, description: The commit the change started from }
+        why: { type: string }
+        tests:
+          type: array
+          items: { $ref: '#/components/schemas/ProofTest' }
+
+    ProofTest:
+      type: object
+      required: [file, name, command, status, before, after]
+      properties:
+        file: { type: string }
+        name: { type: string }
+        command: { type: string }
+        status: { type: string }
+        before: { $ref: '#/components/schemas/ProofRun' }
+        after: { $ref: '#/components/schemas/ProofRun' }
+
+    ProofRun:
+      type: object
+      required: [exit, output, ms]
+      properties:
+        exit: { type: integer }
+        output: { type: string }
+        ms: { type: integer, format: int64 }
+
+    Coverage:
+      type: object
+      required: [covered, total, percent, files]
+      description: "How much of the change's added lines the tests ran"
+      properties:
+        covered: { type: integer }
+        total: { type: integer }
+        percent: { type: number }
+        threshold: { type: integer }
+        error: { type: string }
+        files:
+          type: array
+          items:
+            type: object
+            required: [path, covered, total, uncovered]
+            properties:
+              path: { type: string }
+              covered: { type: integer }
+              total: { type: integer }
+              uncovered:
+                type: array
+                items:
+                  type: object
+                  required: [from, to]
+                  properties:
+                    from: { type: integer }
+                    to: { type: integer }
+
+    Acceptance:
+      type: object
+      required: [status, summary, criteria]
+      description: "The check of the ticket's acceptance criteria in the running app"
+      properties:
+        status: { type: string, enum: [ok, partial, failed] }
+        summary: { type: string }
+        criteria:
+          type: array
+          items:
+            type: object
+            required: [id, criterion, verdict]
+            properties:
+              id: { type: string }
+              criterion: { type: string }
+              verdict: { type: string, enum: [pass, fail, unknown] }
+              evidence: { type: string }
+              steps:
+                type: array
+                items: { type: string }
+              shots:
+                type: array
+                description: Screenshot ids in the preview
+                items: { type: string }
+
+    SecondOpinion:
+      type: object
+      required: [model, agrees, summary]
+      description: "Another model's read of the approach a complex ticket's analysis chose"
+      properties:
+        model: { type: string }
+        agrees: { type: boolean }
+        summary: { type: string }
+        concerns:
+          type: array
+          items: { type: string }
+        alternative: { type: string }
+        error: { type: string }
 
     TrackerUpdate:
       type: object
@@ -4358,6 +5144,92 @@ components:
         title: { type: string }
         description: { type: string }
         at: { type: string, format: date-time, description: When agnts saw it }
+
+    CIStatus:
+      type: string
+      enum: [triage, open, fixing, fixed, resolved, flaky, infra, muted, regression]
+      description: >-
+        triage: new, waiting for a re-run; open: confirmed, no ticket working on it;
+        fixing: a ticket works on it; fixed: the fix is merged, waiting for a green run;
+        resolved: green again; flaky: passed on re-run; infra: the runner or the network,
+        not the code; muted: ignored; regression: failed again after the fix was merged
+
+    CIOccurrence:
+      type: object
+      required: [runId, url, sha, job, at]
+      properties:
+        runId: { type: integer, format: int64 }
+        url: { type: string }
+        sha: { type: string }
+        job: { type: string }
+        at: { type: string, format: date-time }
+        flaky: { type: boolean, description: Passed when re-run }
+
+    CIFailure:
+      type: object
+      description: CI failures of one job with the same fingerprint on one branch
+      required: [id, repoId, repo, branch, workflow, job, title, class, status, count, flakyCount, firstSeenAt, lastSeenAt, firstSha, lastSha, occurrences, ticketKey, prNumber]
+      properties:
+        id: { type: integer, format: int64 }
+        repoId: { type: integer, format: int64 }
+        repo: { type: string }
+        branch: { type: string, description: 'The branch, or pr/<number> for a failure on someone else''s pull request' }
+        workflow: { type: string }
+        job: { type: string }
+        title: { type: string }
+        class: { type: string, description: 'code, test, config, dependency, infra, flaky, report, or empty while unknown' }
+        status: { $ref: '#/components/schemas/CIStatus' }
+        count: { type: integer }
+        flakyCount: { type: integer }
+        firstSeenAt: { type: string, format: date-time }
+        lastSeenAt: { type: string, format: date-time }
+        firstSha: { type: string }
+        lastSha: { type: string }
+        occurrences:
+          type: array
+          items: { $ref: '#/components/schemas/CIOccurrence' }
+        ticketKey: { type: string, description: 'The ticket fixing it, or empty' }
+        ticketState: { $ref: '#/components/schemas/TicketState' }
+        fixedSha: { type: string }
+        fixedAt: { type: string, format: date-time }
+        prNumber: { type: integer, description: 'Someone else''s pull request (diagnosis comment only), 0 otherwise' }
+        sample: { type: string, description: 'Redacted log excerpt (single reads only)' }
+
+    CIWatch:
+      type: object
+      required: [enabled, branches, ignore, prs]
+      properties:
+        enabled: { type: boolean }
+        branches:
+          type: array
+          maxItems: 20
+          description: Globs of extra watched branches; the default branch is always watched
+          items: { type: string, maxLength: 200 }
+        ignore:
+          type: array
+          maxItems: 50
+          description: Globs of workflow or job names never watched
+          items: { type: string, maxLength: 200 }
+        prs:
+          type: string
+          maxLength: 20
+          description: "Failures on other people's pull requests: off (ignore) or comment (post one diagnosis comment)"
+        autoFix: { type: boolean, nullable: true, description: 'Overrides the workspace setting for this repository; null follows it' }
+        problem: { type: string, readOnly: true, description: 'Why agnts cannot read this repository''s CI with the current token, or empty' }
+
+    CISettings:
+      type: object
+      required: [autoFix, maxAutoPerDay, retryFlaky, feedbackRounds, infraPatterns]
+      properties:
+        autoFix: { type: boolean, description: 'Open a ticket for every confirmed failure on a watched branch; off, failures wait for Fix it' }
+        maxAutoPerDay: { type: integer, minimum: 0, maximum: 50, description: Automatic CI tickets a day at most }
+        retryFlaky: { type: boolean, description: Re-run the failed jobs of a new failure once before believing it }
+        feedbackRounds: { type: integer, minimum: 0, maximum: 5, description: "How many times a red check sends one of agnts's pull requests back to coding; 0 turns it off" }
+        infraPatterns:
+          type: array
+          maxItems: 50
+          description: Extra regular expressions that mark a failure as infra (not the code)
+          items: { type: string, maxLength: 300 }
 
     PullReviewSettings:
       type: object
@@ -4478,6 +5350,7 @@ components:
         preview: { type: boolean, description: Preview screenshots are ready }
         previewPhotos: { type: boolean, description: Send phone screenshots to Telegram with the message }
         followUps: { type: boolean, description: Follow-up tickets were suggested }
+        ci: { type: boolean, description: A watched branch went red }
 
     Repository:
       type: object
@@ -4523,6 +5396,7 @@ components:
           type: array
           description: Names of the build environment variables; the values are never returned
           items: { type: string }
+        harness: { $ref: '#/components/schemas/RepoHarness' }
 
     RepositoryInput:
       type: object
@@ -4785,6 +5659,132 @@ components:
         staticToken: { type: boolean }
         connections: { type: integer, description: Claude connections authorised with OAuth }
 
+    NetworkRoute:
+      type: object
+      description: A host (gitlab.corp.local), a domain (.corp.local) or a private range (10.20.0.0/16), with ports (80 and 443 when none).
+      properties:
+        host: { type: string, maxLength: 253 }
+        cidr: { type: string, maxLength: 64 }
+        ports:
+          type: array
+          maxItems: 10
+          items: { type: integer, minimum: 1, maximum: 65535 }
+
+    PrivateNetworkList:
+      type: object
+      required: [available, linkUrl, max, networks]
+      properties:
+        available: { type: boolean, description: The server runs the gateway (private networks can be used) }
+        linkUrl: { type: string, description: Where agnts-link connects }
+        max: { type: integer, description: How many networks a workspace may keep }
+        networks:
+          type: array
+          items: { $ref: '#/components/schemas/PrivateNetwork' }
+
+    PrivateNetwork:
+      type: object
+      required: [id, name, kind, enabled, routes, status, tokenSet, webhooks, pollMinutes, updatedAt]
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        kind: { type: string, enum: [wireguard, openvpn, connector] }
+        enabled: { type: boolean }
+        summary: { type: string, description: 'The config without its keys, e.g. peer vpn.corp.com:51820' }
+        routes:
+          type: array
+          items: { $ref: '#/components/schemas/NetworkRoute' }
+        ca:
+          type: object
+          required: [subjects, notAfter]
+          properties:
+            subjects: { type: array, items: { type: string } }
+            notAfter: { type: string, format: date-time }
+        status:
+          type: string
+          enum: [connecting, up, error, disabled, gateway_down]
+        lastError: { type: string }
+        upAt: { type: string, format: date-time }
+        handshakeAt: { type: string, format: date-time, description: "WireGuard's last handshake, or agnts-link's last heartbeat" }
+        detail: { type: string }
+        tokenSet: { type: boolean, description: An agnts-link token exists }
+        webhooks:
+          type: string
+          enum: [relay, polling]
+          description: relay — agnts-link forwards webhooks; polling — trackers reached through it are read every pollMinutes
+        pollMinutes: { type: integer }
+        updatedAt: { type: string, format: date-time }
+
+    PrivateNetworkInput:
+      type: object
+      required: [name, kind, enabled, routes]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 60, description: 'Unique in the workspace, e.g. the company or office it reaches' }
+        kind: { type: string, enum: [wireguard, openvpn, connector] }
+        enabled: { type: boolean }
+        config: { type: string, maxLength: 65536, description: The WireGuard or OpenVPN config; left out keeps the saved one }
+        username: { type: string, maxLength: 256, description: OpenVPN auth-user-pass }
+        password: { type: string, maxLength: 256, description: OpenVPN auth-user-pass; left out or empty keeps the saved one }
+        routes:
+          type: array
+          maxItems: 50
+          items: { $ref: '#/components/schemas/NetworkRoute' }
+        caPem: { type: string, maxLength: 65536, description: 'Company CA certificates (PEM); "" removes them, left out keeps them' }
+
+    PrivateNetworkSaved:
+      type: object
+      required: [network]
+      properties:
+        network: { $ref: '#/components/schemas/PrivateNetwork' }
+        token: { type: string, description: 'A new agnts-link token, shown once' }
+
+    NetworkTest:
+      type: object
+      required: [ok]
+      properties:
+        ok: { type: boolean, description: The connection was made }
+        via: { type: string }
+        network:
+          type: object
+          description: The network the routes pick for the target
+          required: [id, name]
+          properties:
+            id: { type: integer, format: int64 }
+            name: { type: string }
+        resolved: { type: string, description: The address the name resolved to inside the tunnel }
+        connectMs: { type: integer, format: int64 }
+        error: { type: string }
+        tls:
+          type: object
+          required: [verified]
+          properties:
+            verified: { type: boolean }
+            subject: { type: string }
+            issuer: { type: string }
+            notAfter: { type: string, format: date-time }
+            error: { type: string }
+
+    NetworkActivity:
+      type: object
+      required: [today, refused, dials]
+      properties:
+        today: { type: integer, description: Connections in the last 24 hours }
+        refused: { type: integer, description: 'Of those, refused or failed' }
+        dials:
+          type: array
+          items:
+            type: object
+            required: [at, target, source, ok, bytesIn, bytesOut]
+            properties:
+              at: { type: string, format: date-time }
+              target: { type: string }
+              network: { type: integer, format: int64, description: 'The network that carried it (none: refused before one was picked, or since removed)' }
+              ticket: { type: string }
+              source: { type: string, description: 'run, server, test or webhook' }
+              ok: { type: boolean }
+              error: { type: string }
+              bytesIn: { type: integer, format: int64 }
+              bytesOut: { type: integer, format: int64 }
+
     CI:
       type: string
       enum: [ok, fail, run, pending, manual, skip, canceled, none]
@@ -4875,8 +5875,10 @@ components:
 
     PeriodStats:
       type: object
-      required: [picked, pushed, rejected, stopped, firstTry, afterChanges, agntsMin, waitMin, reviewMin, answerMin, turns, spend]
+      required: [picked, pushed, rejected, stopped, firstTry, afterChanges, agntsMin, waitMin, reviewMin, answerMin, turns, merged, closed, spend]
       properties:
+        merged: { type: integer, description: agnts pull requests merged in the period }
+        closed: { type: integer, description: agnts pull requests closed without a merge in the period }
         picked: { type: integer }
         pushed: { type: integer }
         rejected: { type: integer }
@@ -4941,8 +5943,13 @@ components:
           type: array
           items:
             type: object
-            required: [repoId, name, kind, claudeMd, tickets, done, finished, avgTurns, agntsMin]
+            required: [repoId, name, kind, claudeMd, tickets, done, finished, avgTurns, agntsMin, merged, closed, asked, analyzed, ciFailures]
             properties:
+              merged: { type: integer, description: Pull requests merged in the period }
+              closed: { type: integer, description: Pull requests closed without a merge in the period }
+              asked: { type: integer, description: Questions agnts asked in the period }
+              analyzed: { type: integer, description: Tickets analysed in the period }
+              ciFailures: { type: integer, description: CI failure groups that failed in the period }
               repoId: { type: integer, format: int64 }
               name: { type: string }
               kind: { type: string }
@@ -4966,10 +5973,207 @@ components:
             type: object
             required: [kind, values]
             properties:
-              kind: { type: string, enum: [claudeMd, waiting, stopsTests, stopsLimit, night] }
+              kind: { type: string, enum: [claudeMd, waiting, stopsTests, stopsLimit, night, mergeRate, slowAnswers, followUpsNoise, flakyJob] }
               values:
                 type: object
                 additionalProperties: { type: string }
+
+    Spread:
+      type: object
+      description: 'Typical (median) and slow (90th percentile) minutes; absent when nothing was measured'
+      properties:
+        p50: { type: number }
+        p90: { type: number }
+
+    DeliveryPeriod:
+      type: object
+      required: [opened, merged, closed, mergeMin, pushed, pushedMin, mergedTickets, mergedMin, questions, askedTickets, analyzedTickets, answerMin]
+      properties:
+        opened: { type: integer, description: Pull requests opened in the period }
+        merged: { type: integer, description: 'Of those, merged so far' }
+        closed: { type: integer, description: 'Of those, closed without a merge so far' }
+        mergeMin: { $ref: '#/components/schemas/Spread' }
+        pushed: { type: integer, description: Tickets that first reached done in the period }
+        pushedMin: { $ref: '#/components/schemas/Spread' }
+        mergedTickets: { type: integer, description: Tickets merged in the period }
+        mergedMin: { $ref: '#/components/schemas/Spread' }
+        questions: { type: integer }
+        askedTickets: { type: integer, description: Tickets that asked the questions }
+        analyzedTickets: { type: integer, description: Tickets analysed in the period }
+        answerMin: { $ref: '#/components/schemas/Spread' }
+
+    DeliveryDay:
+      type: object
+      required: [date, merged, closed]
+      properties:
+        date: { type: string, format: date }
+        merged: { type: integer }
+        closed: { type: integer }
+        pushedMin: { type: number, description: Median minutes picked → pushed of the tickets pushed that day }
+        mergedMin: { type: number, description: Median minutes picked → merged of the tickets merged that day }
+
+    SlowTicket:
+      type: object
+      required: [key, title, cycleMin, agntsMin, answersMin, reviewMin, queueMin, merged]
+      properties:
+        key: { type: string }
+        title: { type: string }
+        cycleMin: { type: number, description: Minutes picked → pushed }
+        agntsMin: { type: number }
+        answersMin: { type: number }
+        reviewMin: { type: number }
+        queueMin: { type: number, description: 'The rest: queued, paused or retried' }
+        merged: { type: boolean }
+
+    StalePR:
+      type: object
+      required: [key, title, repo, url, openedAt]
+      properties:
+        key: { type: string }
+        title: { type: string }
+        repo: { type: string }
+        url: { type: string }
+        openedAt: { type: string, format: date-time }
+
+    AnalyticsDelivery:
+      type: object
+      required: [days, current, previous, perDay, slowest, stale, unanswered]
+      properties:
+        days: { type: integer }
+        current: { $ref: '#/components/schemas/DeliveryPeriod' }
+        previous: { $ref: '#/components/schemas/DeliveryPeriod' }
+        perDay:
+          type: array
+          items: { $ref: '#/components/schemas/DeliveryDay' }
+        slowest:
+          type: array
+          description: The slowest tickets pushed in the period, and where their time went
+          items: { $ref: '#/components/schemas/SlowTicket' }
+        stale:
+          type: array
+          description: Pull requests still open after a week, oldest first
+          items: { $ref: '#/components/schemas/StalePR' }
+        unanswered: { type: integer, description: Questions waiting for an answer now }
+
+    CIPeriod:
+      type: object
+      required: [seen, new, fixed, autoFixed, flaky, fixMin, ownFixes]
+      properties:
+        seen: { type: integer, description: Failure groups that failed in the period }
+        new: { type: integer, description: First seen in the period }
+        fixed: { type: integer }
+        autoFixed: { type: integer, description: Fixed by an agnts ticket }
+        flaky: { type: integer }
+        fixMin: { $ref: '#/components/schemas/Spread' }
+        ownFixes: { type: integer, description: "Times red CI sent agnts's own pull request back to coding" }
+
+    CIDay:
+      type: object
+      required: [date, new, fixed]
+      properties:
+        date: { type: string, format: date }
+        new: { type: integer }
+        fixed: { type: integer }
+
+    FlakyJob:
+      type: object
+      required: [id, repo, workflow, job, title, flaky, failures]
+      properties:
+        id: { type: integer, format: int64 }
+        repo: { type: string }
+        workflow: { type: string }
+        job: { type: string }
+        title: { type: string }
+        flaky: { type: integer, description: Times it passed on re-run }
+        failures: { type: integer }
+
+    AnalyticsCI:
+      type: object
+      required: [days, watching, current, previous, byClass, perDay, flakiest, open]
+      properties:
+        days: { type: integer }
+        watching: { type: boolean, description: CI watching is set up for at least one repository }
+        current: { $ref: '#/components/schemas/CIPeriod' }
+        previous: { $ref: '#/components/schemas/CIPeriod' }
+        byClass:
+          type: object
+          additionalProperties: { type: integer }
+          description: 'Failure groups seen in the period by class: code, test, config, dependency, infra, flaky, unknown'
+        perDay:
+          type: array
+          items: { $ref: '#/components/schemas/CIDay' }
+        flakiest:
+          type: array
+          items: { $ref: '#/components/schemas/FlakyJob' }
+        open: { type: integer, description: Failure groups that need attention now }
+
+    LearningPeriod:
+      type: object
+      required: [lessons, lessonsLearned, rulesSuggested, rulesAdopted, rulesManual, reflections, reflectionRules, followUps, accepted, dismissed, reviewerNotes]
+      properties:
+        lessons: { type: integer }
+        lessonsLearned: { type: integer }
+        rulesSuggested: { type: integer, description: Rules suggested from tickets }
+        rulesAdopted: { type: integer, description: 'Of those, in use now' }
+        rulesManual: { type: integer, description: Rules written by a person }
+        reflections: { type: integer }
+        reflectionRules: { type: integer, description: Rules the reflections suggested }
+        followUps: { type: integer }
+        accepted: { type: integer, description: Follow-ups accepted in the period }
+        dismissed: { type: integer, description: Follow-ups dismissed in the period }
+        reviewerNotes: { type: integer }
+
+    LessonCount:
+      type: object
+      required: [category, created, learned]
+      properties:
+        category: { type: string }
+        created: { type: integer }
+        learned: { type: integer }
+
+    FollowUpCount:
+      type: object
+      required: [name, suggested, accepted, dismissed]
+      properties:
+        name: { type: string }
+        suggested: { type: integer }
+        accepted: { type: integer }
+        dismissed: { type: integer }
+
+    ReviewerStat:
+      type: object
+      required: [login, rereview, dismissed, manual, repos]
+      properties:
+        login: { type: string }
+        rereview: { type: integer }
+        dismissed: { type: integer }
+        manual: { type: integer }
+        repos:
+          type: array
+          items: { type: string }
+
+    AnalyticsLearning:
+      type: object
+      required: [days, current, previous, lessons, followUpTypes, followUpSources, reviewers]
+      properties:
+        days: { type: integer }
+        current: { $ref: '#/components/schemas/LearningPeriod' }
+        previous: { $ref: '#/components/schemas/LearningPeriod' }
+        lessons:
+          type: array
+          items: { $ref: '#/components/schemas/LessonCount' }
+        followUpTypes:
+          type: array
+          description: Follow-ups suggested in the period by type (prerequisite, split, unfinished, gap)
+          items: { $ref: '#/components/schemas/FollowUpCount' }
+        followUpSources:
+          type: array
+          description: Follow-ups suggested in the period by source (analyze, work, review, manual)
+          items: { $ref: '#/components/schemas/FollowUpCount' }
+        reviewers:
+          type: array
+          description: Reviewers with the most notes in the period
+          items: { $ref: '#/components/schemas/ReviewerStat' }
 
     RepoBrief:
       type: object
@@ -5070,6 +6274,16 @@ components:
         footprintHit: { type: number, description: 'Average share of the changed files the analysis predicted; absent when none was measured' }
         redFlags: { type: integer, description: Red flags found in the diffs }
         selfFixes: { type: integer, description: "Findings of agnts's own review sent back to the coder" }
+        guardBlocks: { type: integer, description: Actions agnts-guard refused in their coding runs }
+        stopSaves: { type: integer, description: 'Tickets whose stop gate sent failing checks back and whose checks then passed first time' }
+        stalls: { type: integer, description: Times their runs looked stuck }
+        proofDue: { type: integer, description: Tickets with a proof of fix }
+        proven: { type: integer, description: 'Of those, proven' }
+        findings: { type: integer, description: Review findings shown on them }
+        adopted: { type: integer, description: "Of those, put into a person's feedback" }
+        tokens: { type: number, description: 'Average tokens of a done ticket, all stages' }
+        factCheck: { type: integer, description: Tickets in the fact check group (A/B) }
+        factCheckFirst: { type: integer, description: 'Of those, done without a person asking for changes' }
 
     LessonCategory:
       type: string
@@ -5186,12 +6400,14 @@ components:
 
     RuleKind:
       type: string
-      enum: [rule, context]
+      enum: [rule, context, tip]
       default: rule
       description: >-
         rule: an instruction tickets follow. context: business knowledge
         (a glossary, invariants, roles) that runs read as
-        /agnts/context/business.md.
+        /agnts/context/business.md. tip: a practical lesson about working in
+        a repository, learned from runs that had trouble; runs get tips as
+        skills.
 
     RuleQuestion:
       type: object
@@ -5228,6 +6444,14 @@ components:
           items: { $ref: '#/components/schemas/RuleQuestion' }
         rounds: { type: integer, description: Question rounds so far }
         error: { type: string, description: Why the last review failed }
+        enforce: { $ref: '#/components/schemas/RuleEnforce' }
+        delivery: { type: string, enum: [prompt, skill], description: 'prompt: in every prompt; skill: a skill Claude loads when its description matches the work' }
+        skillDescription: { type: string, description: 'When the rule applies, for its skill' }
+        source: { type: string, description: 'Where it came from: empty (a person), reflect, run, promoted or pack:<language>' }
+        confidence: { type: number, description: 'For a learned suggestion: 0.3 to 0.9, earned each time it is seen again' }
+        evidence: { type: integer, description: How many times a learned suggestion was seen }
+        lastSeen: { type: string, format: date-time }
+        watching: { type: boolean, description: 'A learned suggestion with too little evidence to show yet' }
         analyzedAt: { type: string, format: date-time }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
@@ -5241,6 +6465,9 @@ components:
         repoId: { type: integer, format: int64, description: Leave out for a rule every repository follows }
         enabled: { type: boolean, default: true }
         kind: { $ref: '#/components/schemas/RuleKind' }
+        enforce: { $ref: '#/components/schemas/RuleEnforce' }
+        removeEnforce: { type: boolean, description: Remove the enforcement; enforce left out keeps it }
+        delivery: { type: string, enum: [prompt, skill], description: Left out keeps the rule's }
 
     RuleAnswers:
       type: object

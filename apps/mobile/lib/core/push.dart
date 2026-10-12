@@ -15,8 +15,8 @@ class Push {
   static String? _token;
 
   /// Called on app start; [open] handles taps on notifications with the
-  /// app route to show (a ticket, or lessons) and the id of the workspace
-  /// it is in (0 when the server did not say).
+  /// app route to show (a ticket, lessons, or a CI failure) and the id of
+  /// the workspace it is in (0 when the server did not say).
   static Future<void> init(void Function(String route, int workspace) open) async {
     try {
       await Firebase.initializeApp();
@@ -34,7 +34,7 @@ class Push {
     final route = m.data['route'];
     final key = m.data['ticket'];
     final ws = int.tryParse('${m.data['workspace'] ?? ''}') ?? 0;
-    if (route is String && (route.startsWith('/tickets/') || route.startsWith('/learn'))) {
+    if (route is String && (route.startsWith('/tickets/') || route.startsWith('/learn') || route.startsWith('/ci/'))) {
       open(route, ws);
     } else if (key is String && key.isNotEmpty) {
       open('/tickets/$key', ws);

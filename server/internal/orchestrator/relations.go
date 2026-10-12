@@ -413,8 +413,9 @@ func (o *Orchestrator) MarkMergedByHand(ctx context.Context, key string, origin 
 }
 
 // CheckMerges asks the git host about done tickets whose pull request is
-// not known to be merged, and records the merges it finds. It covers a
-// webhook that never arrived; with a working webhook it finds nothing.
+// not known to be merged or closed, and records the merges and closes it
+// finds. It covers a webhook that never arrived; with a working webhook it
+// finds nothing.
 func (o *Orchestrator) CheckMerges(ctx context.Context) {
 	mc, ok := o.host.(MergeChecker)
 	if !ok || ctx.Err() != nil {
@@ -441,15 +442,18 @@ func (o *Orchestrator) CheckMerges(ctx context.Context) {
 			}
 			repos[*t.RepoID] = repo
 		}
-		merged, err := mc.PRMerged(ctx, repo, *t.PRNumber)
+		state, err := mc.PRState(ctx, repo, *t.PRNumber)
 		if err != nil {
 			o.log.Debug("check merges", "ticket", t.Key, "err", err)
 			continue
 		}
-		if !merged {
-			continue
+		switch state {
+		case domain.PullMerged:
+			_, err = o.markMerged(ctx, t, domain.OriginSystem, "pull request merged (found by checking the git host)")
+		case domain.PullClosed:
+			err = o.setPRClosed(ctx, t, true, domain.OriginSystem, "pull request closed without merging (found by checking the git host)")
 		}
-		if _, err := o.markMerged(ctx, t, domain.OriginSystem, "pull request merged (found by checking the git host)"); err != nil {
+		if err != nil {
 			o.log.Warn("check merges", "ticket", t.Key, "err", err)
 		}
 	}
@@ -467,6 +471,9 @@ func (o *Orchestrator) markMerged(ctx context.Context, t domain.Ticket, origin d
 	o.countMerge(ctx, out)
 	o.trackerComment(ctx, t, CommentStatus, "The pull request was merged.")
 	o.trackerMove(ctx, t, TrackerMerged)
+	if o.ciHook != nil {
+		o.ciHook.TicketMerged(ctx, out)
+	}
 	o.Wake() // tickets waiting for it may start
 	return out, nil
 }

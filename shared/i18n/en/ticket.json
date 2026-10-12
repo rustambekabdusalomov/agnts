@@ -199,6 +199,9 @@
     "doneReportPostedPlane": "The report is kept here and was posted to {key} in Plane.",
     "pickAny": "Pick all that apply",
     "otherAnswer": "Something else (optional)",
-    "srcGit": "Pull request"
+    "srcGit": "Pull request",
+    "srcCi": "CI failure",
+    "kvCi": "CI",
+    "ciFixes": "CI sent the pull request back {n, plural, one {# time} other {# times}}"
   }
 }

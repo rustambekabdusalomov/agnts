@@ -103,4 +103,8 @@ const _$AnalyticsInsightsInnerKindEnumEnumMap = {
   AnalyticsInsightsInnerKindEnum.stopsTests: 'stopsTests',
   AnalyticsInsightsInnerKindEnum.stopsLimit: 'stopsLimit',
   AnalyticsInsightsInnerKindEnum.night: 'night',
+  AnalyticsInsightsInnerKindEnum.mergeRate: 'mergeRate',
+  AnalyticsInsightsInnerKindEnum.slowAnswers: 'slowAnswers',
+  AnalyticsInsightsInnerKindEnum.followUpsNoise: 'followUpsNoise',
+  AnalyticsInsightsInnerKindEnum.flakyJob: 'flakyJob',
 };

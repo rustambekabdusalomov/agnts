@@ -266,6 +266,10 @@ class _Dashboard {
         AnalyticsInsightsInnerKindEnum.stopsTests => l.analyticsInsightStopsTests(v['n'] ?? ''),
         AnalyticsInsightsInnerKindEnum.stopsLimit => l.analyticsInsightStopsLimit(v['n'] ?? ''),
         AnalyticsInsightsInnerKindEnum.night => l.analyticsInsightNight(v['pct'] ?? ''),
+        AnalyticsInsightsInnerKindEnum.mergeRate => l.analyticsInsightMergeRate(v['pct'] ?? '', v['closed'] ?? ''),
+        AnalyticsInsightsInnerKindEnum.slowAnswers => l.analyticsInsightSlowAnswers(v['hours'] ?? ''),
+        AnalyticsInsightsInnerKindEnum.followUpsNoise => l.analyticsInsightFollowUpsNoise(v['pct'] ?? ''),
+        AnalyticsInsightsInnerKindEnum.flakyJob => l.analyticsInsightFlakyJob(v['job'] ?? '', v['repo'] ?? '', v['n'] ?? ''),
       };
     }
 

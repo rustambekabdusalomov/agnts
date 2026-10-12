@@ -3,8 +3,6 @@
 //
 
 // ignore_for_file: unused_element
-import 'package:agnts_api/src/model/model.dart';
-import 'package:agnts_api/src/model/review_model.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -37,6 +35,7 @@ class StageModels {
      this.preview,
   });
 
+      /// A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
   @JsonKey(
     
     name: r'analyze',
@@ -45,10 +44,11 @@ class StageModels {
   )
 
 
-  final Model analyze;
+  final String analyze;
 
 
 
+      /// A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
   @JsonKey(
     
     name: r'coding',
@@ -57,10 +57,11 @@ class StageModels {
   )
 
 
-  final Model coding;
+  final String coding;
 
 
 
+      /// A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
   @JsonKey(
     
     name: r'retry',
@@ -69,10 +70,11 @@ class StageModels {
   )
 
 
-  final Model retry;
+  final String retry;
 
 
 
+      /// A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
   @JsonKey(
     
     name: r'helper',
@@ -81,10 +83,11 @@ class StageModels {
   )
 
 
-  final Model helper;
+  final String helper;
 
 
 
+      /// A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
   @JsonKey(
     
     name: r'learn',
@@ -93,10 +96,11 @@ class StageModels {
   )
 
 
-  final Model? learn;
+  final String? learn;
 
 
 
+      /// auto: opus for complex tickets, sonnet otherwise
   @JsonKey(
     
     name: r'review',
@@ -105,10 +109,11 @@ class StageModels {
   )
 
 
-  final ReviewModel? review;
+  final String? review;
 
 
 
+      /// A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
   @JsonKey(
     
     name: r'preview',
@@ -117,7 +122,7 @@ class StageModels {
   )
 
 
-  final Model? preview;
+  final String? preview;
 
 
 

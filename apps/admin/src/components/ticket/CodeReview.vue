@@ -44,6 +44,10 @@ const toFollowUp = useMutation({
   onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
 })
 
+// The specialist pass that found a finding (deep reviews).
+const PASSES = ['security', 'failures', 'tests', 'types']
+const passLabel = (p?: string) => (p && PASSES.includes(p) ? t(`harnessTicket.pass_${p}`) : '')
+
 const added = (f: Finding) => props.feedback.includes(findingFeedback(f))
 const actionable = computed(() => (current.value?.findings ?? []).filter((f) => f.suggestion))
 const allAdded = computed(() => actionable.value.every(added))
@@ -58,6 +62,7 @@ function addAll() {
     <div class="cr-h">
       <h3>{{ pull ? t('reviews.reviewTitle') : report ? t('review.reportTitle') : t('review.title') }}</h3>
       <span v-if="current && !busy" class="badge" :class="`b-${VERDICT_TONE[current.verdict]}`">{{ t(`review.verdict_${current.verdict}`) }}</span>
+      <span v-if="current && !busy && current.deep" class="badge b-info">{{ t('harnessTicket.deep') }}</span>
       <span v-if="state === 'running'" class="cr-run"><span class="spin" aria-hidden="true" />{{ t('review.running') }}</span>
     </div>
     <p v-if="!pull" class="hint" style="margin: -4px 0 10px">{{ t('review.sub') }}</p>
@@ -68,7 +73,8 @@ function addAll() {
 
     <template v-if="current && !busy">
       <div class="summary"><p>{{ tr(current.summary) }}</p></div>
-      <p class="hint cr-model">{{ t('review.model', { model: MODEL_NAME[current.model], reason: current.modelReason }) }}</p>
+      <p class="hint cr-model">{{ t('review.model', { model: MODEL_NAME[current.model] ?? current.model, reason: current.modelReason }) }}</p>
+      <p v-if="current.dropped" class="hint cr-dropped">{{ t('harnessTicket.dropped', { n: current.dropped }) }}</p>
 
       <p v-if="!current.findings.length" class="cr-none"><HiIcon name="check" />{{ t('review.noFindings') }}</p>
       <ul v-else class="cr-list">
@@ -76,6 +82,9 @@ function addAll() {
           <div class="cr-fh">
             <span class="badge" :class="`b-${SEVERITY_TONE[f.severity]}`">{{ t(`review.sev_${f.severity}`) }}</span>
             <span class="cr-cat">{{ t(`review.cat_${f.category}`) }}</span>
+            <span v-if="passLabel(f.pass)" class="badge b-info">{{ passLabel(f.pass) }}</span>
+            <span v-if="f.confidence" class="cr-conf">{{ t('harnessTicket.confidence', { n: Math.round(f.confidence * 100) }) }}</span>
+            <span v-if="f.adopted" class="badge b-ok">{{ t('harnessTicket.adopted') }}</span>
             <button v-if="f.file && !report" type="button" class="cr-loc" :title="t('review.showInDiff')" @click="emit('show', f.file)">
               {{ f.file }}<template v-if="f.line">:{{ f.line }}</template>
             </button>
@@ -132,6 +141,8 @@ function addAll() {
 .cr-f { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
 .cr-fh { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .cr-cat { font-size: 12.5px; font-weight: 600; color: var(--ink-3); }
+.cr-conf { font-size: 12.5px; color: var(--ink-3); }
+.cr-dropped { margin: 4px 0 0; font-size: 13px; }
 .cr-loc { font: 12.5px/1.4 var(--mono); color: var(--primary-ink); background: none; border: 0; padding: 0; cursor: pointer; overflow-wrap: anywhere; text-align: left; }
 code.cr-loc { cursor: default; color: var(--ink-3); }
 button.cr-loc:hover { text-decoration: underline; }

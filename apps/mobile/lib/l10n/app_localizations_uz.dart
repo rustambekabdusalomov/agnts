@@ -700,6 +700,447 @@ class AppLocalizationsUz extends AppLocalizations {
       'agnts o‘z ko‘rib chiqishi kamchiliklarni inson ko‘rishidan oldin dasturchiga necha marta qaytargan';
 
   @override
+  String get analyticsTabOverview => 'Umumiy';
+
+  @override
+  String get analyticsTabDelivery => 'Yetkazish';
+
+  @override
+  String get analyticsTabQuality => 'Sifat';
+
+  @override
+  String get analyticsTabLearning => 'Oʻrganish';
+
+  @override
+  String get analyticsTabCost => 'Xarajat';
+
+  @override
+  String get analyticsTabRepos => 'Repozitoriylar';
+
+  @override
+  String analyticsDaysHours(String d, String h) {
+    return '$d kun $h soat';
+  }
+
+  @override
+  String get analyticsKpiMerged => 'Birlashtirilgan pull requestlar';
+
+  @override
+  String analyticsKpiMergedNote(String n) {
+    return '$n tasi birlashtirilmasdan yopildi';
+  }
+
+  @override
+  String get analyticsKpiCostPerTicket => 'Bitta tiket narxi';
+
+  @override
+  String get analyticsKpiCostPerTicketNote => 'API narxlarida, barcha bosqichlar';
+
+  @override
+  String analyticsInsightMergeRate(String pct, String closed) {
+    return 'agnts pull requestlarining faqat $pct% birlashtirildi; $closed tasi birlashtirilmasdan yopildi. Sababini «Yetkazish» boʻlimida koʻring.';
+  }
+
+  @override
+  String analyticsInsightSlowAnswers(String hours) {
+    return 'Tiketlar agnts savollariga javobingizni taxminan $hours soat kutadi. Tezroq javob berish yetkazishni tezlashtirishning eng oson yoʻli.';
+  }
+
+  @override
+  String analyticsInsightFollowUpsNoise(String pct) {
+    return 'Taklif qilingan qoʻshimcha vazifalarning faqat $pct% qabul qilindi. Aksariyati rad etilmoqda.';
+  }
+
+  @override
+  String analyticsInsightFlakyJob(String job, String repo, String n) {
+    return '$repo dagi $job qayta ishga tushirilganda $n marta oʻtdi: beqarorga oʻxshaydi. Uni tuzatish yoki chetlatish CI vaqtini tejaydi.';
+  }
+
+  @override
+  String get analyticsPrMerged => 'Birlashtirildi';
+
+  @override
+  String get analyticsPrClosed => 'Birlashtirilmasdan yopildi';
+
+  @override
+  String get analyticsPrOpened => 'Ochildi';
+
+  @override
+  String get analyticsPrOpen => 'Hali ochiq';
+
+  @override
+  String get analyticsCyclePushed => 'Olindi → yuborildi';
+
+  @override
+  String get analyticsCycleMerged => 'Olindi → birlashtirildi';
+
+  @override
+  String get analyticsSplitAnswers => 'Javob kutish';
+
+  @override
+  String get analyticsSplitReview => 'Tekshiruv kutish';
+
+  @override
+  String get analyticsSplitQueue => 'Navbatda yoki pauzada';
+
+  @override
+  String get analyticsKpiMergeRate => 'Birlashtirish ulushi';
+
+  @override
+  String analyticsKpiMergeRateNote(String merged, String closed) {
+    return '$merged birlashtirildi, $closed yopildi';
+  }
+
+  @override
+  String get analyticsKpiTimeToMerge => 'Birlashtirishgacha vaqt';
+
+  @override
+  String get analyticsKpiTimeToMergeNote => 'Pull requestdan birlashtirishgacha';
+
+  @override
+  String get analyticsKpiCyclePushed => 'Olindi → yuborildi';
+
+  @override
+  String get analyticsKpiCyclePushedNote => 'agnts qismidagi ish';
+
+  @override
+  String get analyticsKpiCycleMerged => 'Olindi → birlashtirildi';
+
+  @override
+  String get analyticsKpiCycleMergedNote => 'Haqiqiy yetkazish vaqti';
+
+  @override
+  String get analyticsKpiAnswer => 'Javob vaqti';
+
+  @override
+  String get analyticsKpiAnswerNote => 'agnts savollariga javob berguningizcha';
+
+  @override
+  String get analyticsTypicalNote => 'Vaqtlar odatiy qiymat (mediana): tiketlarning yarmi tezroq, yarmi sekinroq boʻlgan.';
+
+  @override
+  String get analyticsPrOutcomes => 'Pull requestlar natijasi';
+
+  @override
+  String get analyticsPrOutcomesSub =>
+      'Davrda ochilgan agnts pull requestlari va ular bilan nima boʻldi; kunlik birlashtirish va yopishlar';
+
+  @override
+  String analyticsMergeSpread(String p50, String p90) {
+    return 'Odatda pull request $p50 da birlashtiriladi; oʻntadan eng sekini $p90 yoki undan koʻproq vaqt oladi.';
+  }
+
+  @override
+  String get analyticsStale => 'Bir haftadan ortiq ochiq';
+
+  @override
+  String get analyticsStaleSub => 'Hali hech kim birlashtirmagan yoki yopmagan pull requestlar';
+
+  @override
+  String get analyticsNoStale => 'Bir haftadan ortiq ochiq turgan pull request yoʻq.';
+
+  @override
+  String analyticsOpenDays(num n) {
+    return '$n kundan beri ochiq';
+  }
+
+  @override
+  String get analyticsOpenPr => 'Pull requestni ochish';
+
+  @override
+  String get analyticsCycle => 'Sikl vaqti';
+
+  @override
+  String get analyticsCycleSub => 'Tiketni olishdan yuborish va birlashtirishgacha boʻlgan odatiy vaqt, kunlar boʻyicha';
+
+  @override
+  String analyticsCycleSpread(String pushed, String pushed90, String merged, String merged90) {
+    return 'Odatda $pushed da yuboriladi (oʻntadan eng sekini $pushed90); $merged da birlashtiriladi ($merged90).';
+  }
+
+  @override
+  String get analyticsQuestions => 'Savollar';
+
+  @override
+  String get analyticsQuestionsSub => 'agnts koddan oldin nima soʻragani va javobni qanchalik tez olgani';
+
+  @override
+  String get analyticsQuestionsAsked => 'Berilgan savollar';
+
+  @override
+  String get analyticsQuestionsShare => 'Savolli tiketlar';
+
+  @override
+  String get analyticsAnswerTypical => 'Odatiy javob vaqti';
+
+  @override
+  String get analyticsAnswerSlow => 'Oʻntadan eng sekini';
+
+  @override
+  String get analyticsUnanswered => 'Hozir javob kutmoqda';
+
+  @override
+  String get analyticsSlowest => 'Eng sekin tiketlar';
+
+  @override
+  String get analyticsSlowestSub => 'Davrda olishdan yuborishgacha eng koʻp vaqt olgan tiketlar va vaqt qayerga ketgani';
+
+  @override
+  String get analyticsNoSlowest => 'Bu davrda hech bir tiket yuborilmadi.';
+
+  @override
+  String get analyticsKpiCiSeen => 'CI xatolari';
+
+  @override
+  String analyticsKpiCiSeenNote(String n) {
+    return 'Davrda $n ta yangi';
+  }
+
+  @override
+  String get analyticsKpiCiAuto => 'agnts tuzatgan';
+
+  @override
+  String analyticsKpiCiAutoNote(String auto, String fixed) {
+    return '$fixed ta tuzatilgandan $auto tasi';
+  }
+
+  @override
+  String get analyticsKpiCiFix => 'Tuzatish vaqti';
+
+  @override
+  String get analyticsKpiCiFixNote => 'Birinchi xatodan birlashtirilgan tuzatishgacha';
+
+  @override
+  String get analyticsKpiCiFlaky => 'Beqaror xatolar';
+
+  @override
+  String get analyticsKpiCiFlakyNote => 'Qayta ishga tushirilganda oʻtdi';
+
+  @override
+  String get analyticsKpiCiOwn => 'Oʻz PRlari tuzatildi';
+
+  @override
+  String get analyticsKpiCiOwnNote => 'agnts PRlaridagi qizil tekshiruvlar tekshiruvdan oldin tuzatildi';
+
+  @override
+  String get analyticsCiUnknown => 'Tasniflanmagan';
+
+  @override
+  String get analyticsCiNew => 'Yangi xatolar';
+
+  @override
+  String get analyticsCiFixed => 'Tuzatildi';
+
+  @override
+  String get analyticsCiTitle => 'CI holati';
+
+  @override
+  String analyticsCiSub(String n) {
+    return 'Kunlik yangi va tuzatilgan CI xatolari. Hozir eʼtibor talab qiladi: $n.';
+  }
+
+  @override
+  String get analyticsCiOffSub =>
+      'CI kuzatuvi sozlanmagan. Uni repozitoriy uchun yoqing — agnts qizil buildlarni tahlil qiladi va kod sabab boʻlganlarini tuzatadi.';
+
+  @override
+  String get analyticsCiSetUp => 'CI kuzatuvini sozlash';
+
+  @override
+  String get analyticsCiOpen => 'CI ni ochish';
+
+  @override
+  String get analyticsCiClasses => 'Xatolar sabablari';
+
+  @override
+  String get analyticsCiClassesSub => 'Tahlil har bir xatoni nima deb topgani';
+
+  @override
+  String get analyticsCiNone => 'Bu davrda CI xatolari boʻlmadi.';
+
+  @override
+  String get analyticsCiFlakiest => 'Eng beqaror vazifalar';
+
+  @override
+  String get analyticsCiFlakiestSub => 'Eng koʻp yiqilib, qayta ishga tushirilganda oʻtgan vazifalar';
+
+  @override
+  String get analyticsCiNoFlaky => 'Bu davrda beqaror vazifalar boʻlmadi.';
+
+  @override
+  String get analyticsColJob => 'Vazifa';
+
+  @override
+  String get analyticsColFailure => 'Xato';
+
+  @override
+  String get analyticsColFlaky => 'Qayta ishga tushirilganda oʻtdi';
+
+  @override
+  String get analyticsColFailures => 'Xatolar';
+
+  @override
+  String get analyticsKpiLessons => 'Darslar';
+
+  @override
+  String analyticsKpiLessonsNote(String n) {
+    return '$n tasi oʻrganildi';
+  }
+
+  @override
+  String get analyticsKpiRulesLearned => 'Oʻrganilgan qoidalar';
+
+  @override
+  String analyticsKpiRulesLearnedNote(String n) {
+    return 'Ishlatilmoqda, tiketlardan taklif qilingan $n tadan';
+  }
+
+  @override
+  String get analyticsKpiRulesManual => 'Yozilgan qoidalar';
+
+  @override
+  String get analyticsKpiRulesManualNote => 'Odamlar qoʻshgan';
+
+  @override
+  String get analyticsKpiReflections => 'Tahlillar';
+
+  @override
+  String analyticsKpiReflectionsNote(String n) {
+    return 'Oʻzgartirilgan yoki rad etilgan tiketlar boʻyicha; $n ta qoida taklif qilindi';
+  }
+
+  @override
+  String get analyticsKpiFollowUps => 'Qabul qilingan qoʻshimchalar';
+
+  @override
+  String analyticsKpiFollowUpsNote(String n) {
+    return 'Davrda $n ta taklif qilindi';
+  }
+
+  @override
+  String get analyticsKpiReviewerNotes => 'Tekshiruvchi izohlari';
+
+  @override
+  String get analyticsKpiReviewerNotesNote => 'Qayta tekshiruvlar, rad etilgan topilmalar va izohlar';
+
+  @override
+  String get analyticsLearningNote =>
+      'agnts fikringizdan qanday oʻrganadi: vaqt oʻtib izohlar kamayib, qabul qilingan qoidalar koʻpaysa — oʻrganish ishlayapti.';
+
+  @override
+  String get analyticsFollowUps => 'Qoʻshimcha vazifalar turlari';
+
+  @override
+  String get analyticsFollowUpsSub => 'agnts davrda taklif qilgan qoʻshimcha tiketlar va qarorlaringiz';
+
+  @override
+  String get analyticsNoFollowUps => 'Bu davrda qoʻshimcha vazifalar taklif qilinmadi.';
+
+  @override
+  String get analyticsColType => 'Tur';
+
+  @override
+  String get analyticsColSuggested => 'Taklif qilindi';
+
+  @override
+  String get analyticsColAccepted => 'Qabul qilindi';
+
+  @override
+  String get analyticsColDismissed => 'Rad etildi';
+
+  @override
+  String get analyticsColOpen => 'Ochiq';
+
+  @override
+  String get analyticsColAcceptRate => 'Qabul ulushi';
+
+  @override
+  String get analyticsFollowUpSources => 'Qoʻshimchalar manbai';
+
+  @override
+  String get analyticsFollowUpSourcesSub => 'Taklif qilingan qoʻshimchalar ularni topgan bosqich boʻyicha';
+
+  @override
+  String get analyticsLessons => 'Mavzular boʻyicha darslar';
+
+  @override
+  String analyticsLessonsSub(String n) {
+    return 'Davrda yozilgan darslar; $n tasi oʻrganildi';
+  }
+
+  @override
+  String get analyticsOpenLearn => 'Oʻrganishni ochish';
+
+  @override
+  String get analyticsNoLessons => 'Bu davrda darslar yoʻq.';
+
+  @override
+  String get analyticsReviewers => 'Tekshiruvchilar';
+
+  @override
+  String get analyticsReviewersSub => 'Kod tekshiruvlarida agntsga eng koʻp fikr bildiradiganlar';
+
+  @override
+  String get analyticsOpenRules => 'Qoidalarni ochish';
+
+  @override
+  String get analyticsNoReviewers => 'Bu davrda tekshiruvchi izohlari yoʻq.';
+
+  @override
+  String get analyticsColReviewer => 'Tekshiruvchi';
+
+  @override
+  String get analyticsColRereview => 'Qayta tekshiruvlar';
+
+  @override
+  String get analyticsColRereviewHint => 'Tekshiruvchi agntsdan qayta koʻrib chiqishni necha marta soʻragani';
+
+  @override
+  String get analyticsColDismissedNotes => 'Rad etildi';
+
+  @override
+  String get analyticsColDismissedNotesHint => 'Tekshiruvchi rad etgan agnts tekshiruvi topilmalari';
+
+  @override
+  String get analyticsColManual => 'Izohlar';
+
+  @override
+  String get analyticsColManualHint => 'Tekshiruvchi qoʻlda yozgan izohlar';
+
+  @override
+  String get analyticsColRepos => 'Repozitoriylar';
+
+  @override
+  String get analyticsKpiCostNote => 'Davrdagi barcha Claude chaqiruvlari';
+
+  @override
+  String analyticsKpiDaysAboveNote(String n) {
+    return 'Sessiya limitining 80% dan oshgan kunlar: $n';
+  }
+
+  @override
+  String get analyticsColCost => 'Xarajat';
+
+  @override
+  String get analyticsColMergeRate => 'Birlashtirish ulushi';
+
+  @override
+  String get analyticsColMergeRateHint => 'Davrda birlashtirilgan yoki yopilganlar ichida birlashtirilgan pull requestlar';
+
+  @override
+  String get analyticsColQuestions => 'Tiketga savollar';
+
+  @override
+  String get analyticsColQuestionsHint =>
+      'Tahlil qilingan bitta tiketga agnts savollari. Savollar koʻp boʻlsa, CLAUDE.md yoki qoidalar yetishmaydi.';
+
+  @override
+  String get analyticsColCi => 'CI xatolari';
+
+  @override
+  String get analyticsColCiHint => 'Davrdagi CI xato guruhlari';
+
+  @override
   String get appName => 'agnts';
 
   @override
@@ -997,6 +1438,420 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get briefDone_save => 'Tavsif saqlandi';
+
+  @override
+  String get ciTitle => 'CI';
+
+  @override
+  String get ciLede =>
+      'Kuzatiladigan branchlardagi yiqilgan pipelinelar, job va xato boʻyicha guruhlangan. agnts yangi yiqilishni bir marta qayta ishga tushiradi, haqiqiylarini esa tuzatadi.';
+
+  @override
+  String get ciBack => 'CI';
+
+  @override
+  String get ciRepo => 'Repozitoriy';
+
+  @override
+  String get ciAllRepos => 'Barcha repozitoriylar';
+
+  @override
+  String get ciFilterLabel => 'Holat';
+
+  @override
+  String get ciFilter_red => 'Qizil';
+
+  @override
+  String get ciFilter_flaky => 'Beqaror';
+
+  @override
+  String get ciFilter_infra => 'Infratuzilma';
+
+  @override
+  String get ciFilter_fixed => 'Tuzatilgan';
+
+  @override
+  String get ciFilter_muted => 'Yashirilgan';
+
+  @override
+  String get ciFilter_all => 'Hammasi';
+
+  @override
+  String get ciStatus_triage => 'Yangi';
+
+  @override
+  String get ciStatus_open => 'Yiqilmoqda';
+
+  @override
+  String get ciStatus_fixing => 'Tuzatilmoqda';
+
+  @override
+  String get ciStatus_fixed => 'Tuzatish qoʻshildi';
+
+  @override
+  String get ciStatus_resolved => 'Yana yashil';
+
+  @override
+  String get ciStatus_flaky => 'Beqaror';
+
+  @override
+  String get ciStatus_infra => 'Infratuzilma';
+
+  @override
+  String get ciStatus_muted => 'Yashirilgan';
+
+  @override
+  String get ciStatus_regression => 'Regressiya';
+
+  @override
+  String get ciStatusHelp_triage => 'Yangi yiqilish, tasdiqlash uchun qayta ishga tushirishni kutmoqda';
+
+  @override
+  String get ciStatusHelp_open => 'Tasdiqlangan, uning ustida hech qanday tiket ishlamayapti';
+
+  @override
+  String get ciStatusHelp_fixing => 'Uning ustida tiket ishlamoqda';
+
+  @override
+  String get ciStatusHelp_fixed => 'Tuzatish qoʻshildi, yashil ishga tushirish kutilmoqda';
+
+  @override
+  String get ciStatusHelp_resolved => 'Branch yana yashil';
+
+  @override
+  String get ciStatusHelp_flaky => 'Qayta ishga tushirilganda oʻtdi';
+
+  @override
+  String get ciStatusHelp_infra => 'Kod emas, runner yoki tarmoq yiqildi';
+
+  @override
+  String get ciStatusHelp_muted => 'Qaytarilmaguncha eʼtiborsiz qoldiriladi';
+
+  @override
+  String get ciStatusHelp_regression => 'Tuzatish qoʻshilgandan keyin yana yiqildi';
+
+  @override
+  String get ciClass_code => 'Kod';
+
+  @override
+  String get ciClass_test => 'Test';
+
+  @override
+  String get ciClass_config => 'Sozlama';
+
+  @override
+  String get ciClass_dependency => 'Bogʻliqlik';
+
+  @override
+  String get ciClass_infra => 'Infratuzilma';
+
+  @override
+  String get ciClass_flaky => 'Beqaror';
+
+  @override
+  String get ciClass_report => 'Hisobot';
+
+  @override
+  String get ciColStatus => 'Holat';
+
+  @override
+  String get ciColFailure => 'Yiqilish';
+
+  @override
+  String get ciColCount => 'Yiqildi';
+
+  @override
+  String get ciColLastSeen => 'Oxirgi marta';
+
+  @override
+  String get ciColTicket => 'Tiket';
+
+  @override
+  String get ciColTime => 'Vaqt';
+
+  @override
+  String get ciColCommit => 'Commit';
+
+  @override
+  String get ciColJob => 'Job';
+
+  @override
+  String ciTimes(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n marta', one: '$n marta');
+    return '$_temp0';
+  }
+
+  @override
+  String get ciFix => 'Tuzatish';
+
+  @override
+  String ciFixStarted(String key) {
+    return '$key tiketi ochildi';
+  }
+
+  @override
+  String get ciMute => 'Yashirish';
+
+  @override
+  String get ciUnmute => 'Qaytarish';
+
+  @override
+  String get ciMuted => 'Yashirildi: endi agnts bu yiqilishga eʼtibor bermaydi';
+
+  @override
+  String get ciUnmuted => 'Qaytarildi';
+
+  @override
+  String get ciRerun => 'Qayta ishga tushirish';
+
+  @override
+  String get ciRerunStarted => 'Qayta ishga tushirildi';
+
+  @override
+  String get ciCommentOnly => 'Faqat izoh';
+
+  @override
+  String get ciEmptyRed => 'Hech narsa qizil emas. Barcha kuzatiladigan branchlar oʻtmoqda.';
+
+  @override
+  String get ciEmptyFilter => 'Bu yerda yiqilishlar yoʻq.';
+
+  @override
+  String get ciHowTitle => 'Kuzatishni qanday boshlash kerak';
+
+  @override
+  String get ciHowWatch =>
+      'Repozitoriyni oching, uning CI yorligʻiga oʻting va kuzatishni yoqing. Asosiy branch har doim kuzatiladi; release/* kabi boshqalarini qoʻshing.';
+
+  @override
+  String get ciHowWebhook =>
+      'Yiqilishlardan bir necha soniyada xabar topish uchun git xostingida workflow_run (GitHub) yoki Pipeline events (GitLab) uchun webhook qoʻshing. Usiz agnts har 5 daqiqada tekshiradi.';
+
+  @override
+  String get ciNotFound => 'Bu CI yiqilishi topilmadi.';
+
+  @override
+  String ciOpenTicket(String key) {
+    return '$key ni ochish';
+  }
+
+  @override
+  String ciPrNote(String n) {
+    return 'Bu yiqilish boshqa birovning #$n pull requestida. agnts u yerda hech qachon tiket ochmaydi va push qilmaydi; izohlar yoqilgan boʻlsa, bitta tashxis izohini qoldiradi.';
+  }
+
+  @override
+  String ciRegressionNote(String sha) {
+    return '$sha tuzatishini oʻz ichiga olgan commitda yana yiqildi. Asl tiketga davomiy taklif beriladi.';
+  }
+
+  @override
+  String get ciLogTitle => 'Log';
+
+  @override
+  String get ciLogSub => 'Oxirgi yiqilgan ishga tushirishning tozalangan parchasi';
+
+  @override
+  String get ciLogAnnotations => 'Annotatsiyalar';
+
+  @override
+  String get ciLogFirstError => 'Birinchi xato';
+
+  @override
+  String get ciLogEnd => 'Log oxiri';
+
+  @override
+  String get ciLogTail => 'Oxirgi qatorlar';
+
+  @override
+  String get ciNoLog => 'Bu yiqilish uchun log saqlanmagan.';
+
+  @override
+  String get ciOccurrences => 'Yiqilgan ishga tushirishlar';
+
+  @override
+  String get ciOccurrencesSub => 'Bu yiqilish uchragan oxirgi 20 ta ishga tushirish';
+
+  @override
+  String get ciNoOccurrences => 'Ishga tushirishlar yozilmagan.';
+
+  @override
+  String get ciPassedOnRerun => 'Qayta ishga tushirilganda oʻtdi';
+
+  @override
+  String get ciOpenRun => 'Ishga tushirishni ochish';
+
+  @override
+  String get ciFacts => 'Tafsilotlar';
+
+  @override
+  String get ciCount => 'Yiqildi';
+
+  @override
+  String get ciFlakyCount => 'Qayta ishga tushirilganda oʻtdi';
+
+  @override
+  String get ciFirstSeen => 'Birinchi marta';
+
+  @override
+  String get ciLastSeen => 'Oxirgi marta';
+
+  @override
+  String get ciFirstSha => 'Birinchi yiqilgan commit';
+
+  @override
+  String get ciLastSha => 'Oxirgi commit';
+
+  @override
+  String get ciFixedSha => 'Tuzatish commiti';
+
+  @override
+  String get ciFixedAt => 'Tuzatish qoʻshildi';
+
+  @override
+  String get ciTicket => 'Tiket';
+
+  @override
+  String get ciBranch => 'Branch';
+
+  @override
+  String get ciWatchTitle => 'CI kuzatuvi';
+
+  @override
+  String get ciWatchSub => 'agnts bu repozitoriy pipelinelarini oʻqiydi va yiqilganini tuzatadi';
+
+  @override
+  String get ciWatchEnabled => 'CI ni kuzatish';
+
+  @override
+  String get ciWatchEnabledHelp => 'Odatda oʻchiq. Kuzatiladigan branchlardagi yiqilishlar guruhlanadi va tuzatiladi.';
+
+  @override
+  String get ciBranches => 'Qoʻshimcha branchlar';
+
+  @override
+  String ciBranchesHelp(String branch) {
+    return 'Shablonlar, har qatorda bittadan. Asosiy branch ($branch) har doim kuzatiladi.';
+  }
+
+  @override
+  String get ciIgnore => 'Eʼtiborsiz workflow va joblar';
+
+  @override
+  String get ciIgnoreHelp =>
+      'Shablonlar, har qatorda bittadan, workflow va job nomlari bilan solishtiriladi. Boʻsh boʻlsa — *deploy*, *release* va *publish*.';
+
+  @override
+  String get ciPrs => 'Boshqalarning pull requestlari';
+
+  @override
+  String get ciPrsHelp =>
+      'agnts hech qachon hamkasbning branchiga push qilmaydi. Izohlar yoqilgan boʻlsa, pull requestda bitta tashxis izohini qoldiradi.';
+
+  @override
+  String get ciPrs_off => 'Eʼtiborsiz';
+
+  @override
+  String get ciPrs_comment => 'Izoh qoldirish';
+
+  @override
+  String get ciAutoFix => 'Avtomatik tuzatish';
+
+  @override
+  String get ciAutoFixRepoHelp => 'Har bir tasdiqlangan yiqilish uchun tiket ochish yoki «Tuzatish» tugmasini kutish';
+
+  @override
+  String get ciAutoFix_inherit => 'Ish maydonidagidek';
+
+  @override
+  String get ciAutoFix_on => 'Yoqiq';
+
+  @override
+  String get ciAutoFix_off => 'Oʻchiq';
+
+  @override
+  String get ciSave => 'Saqlash';
+
+  @override
+  String get ciWatchSaved => 'CI kuzatuvi saqlandi';
+
+  @override
+  String get ciFailuresTitle => 'Yiqilishlar';
+
+  @override
+  String get ciFailuresSub => 'Bu repozitoriyning yiqilgan joblari, avval yangilari';
+
+  @override
+  String get ciFlakyTitle => 'Beqaror testlar';
+
+  @override
+  String get ciFlakySub => 'Qayta ishga tushirilganda oʻtgan yiqilishlar';
+
+  @override
+  String get ciFlakyEmpty => 'Beqaror testlar topilmadi.';
+
+  @override
+  String get ciCardTitle => 'CI yiqilishi';
+
+  @override
+  String get ciFailingRuns => 'Yiqilgan ishga tushirishlar';
+
+  @override
+  String get ciLastRun => 'Oxirgi yiqilgan ishga tushirish';
+
+  @override
+  String get ciStillFailing => 'Hali ham yiqilmoqda';
+
+  @override
+  String get ciWaitingGreen => 'Tuzatish qoʻshildi, yashil ishga tushirish kutilmoqda';
+
+  @override
+  String get ciGreenAgain => 'Yana yashil';
+
+  @override
+  String get ciOpenFailure => 'Yiqilishni ochish';
+
+  @override
+  String get ciSettingsTitle => 'CI';
+
+  @override
+  String get ciSettingsSub => 'Kuzatiladigan pipeline qizarganda agnts nima qiladi. Kuzatish har bir repozitoriy uchun alohida yoqiladi.';
+
+  @override
+  String get ciAutoFixHelp => 'Har bir tasdiqlangan yiqilish uchun tiket ochish. Oʻchiq boʻlsa, yiqilishlar «Tuzatish» tugmasini kutadi.';
+
+  @override
+  String get ciMaxAutoPerDay => 'Kuniga avtomatik tiketlar';
+
+  @override
+  String get ciMaxAutoPerDayHelp =>
+      'Limitdan oshsa, yiqilishlar «Tuzatish» tugmasini kutadi. agnts oʻz pull requestlarini qayta ishlashi hisobga olinmaydi.';
+
+  @override
+  String ciPerDay(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'Kuniga $n', one: 'Kuniga $n', zero: 'Hech biri');
+    return '$_temp0';
+  }
+
+  @override
+  String get ciRetryFlaky => 'Yangi yiqilishlarni bir marta qayta ishga tushirish';
+
+  @override
+  String get ciRetryFlakyHelp =>
+      'agnts yangi yiqilishga ishonishidan oldin uning joblari yana ishga tushiriladi. Oʻtsa, beqaror deb belgilanadi.';
+
+  @override
+  String get ciFeedbackRounds => 'agnts pull requestlarini qayta ishlash';
+
+  @override
+  String get ciFeedbackRoundsHelp => 'Qizil tekshiruv agnts oʻz pull requestini necha marta qayta kodlashga qaytaradi. 0 — oʻchiq.';
+
+  @override
+  String get ciInfraPatterns => 'Infratuzilma shablonlari';
+
+  @override
+  String get ciInfraPatternsHelp =>
+      'Regulyar ifodalar, har qatorda bittadan. Mos kelgan log infratuzilma yiqilishi hisoblanadi: koʻrsatiladi va sanaladi, lekin tiket ochilmaydi. Oʻrnatilganlariga qoʻshiladi.';
 
   @override
   String get commonLoading => 'Yuklanmoqda…';
@@ -1435,7 +2290,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get followUpsSub =>
-      'agnts fikricha, bu tiketni oxiriga yetkazish uchun yana nima kerak. Keraklilarini tanlang: ular navbatda yaratiladi va siz ishga tushirmaguningizcha ishlamaydi.';
+      'agnts fikricha, bu tiketni oxiriga yetkazish uchun yana nima kerak. Keraklilarini tanlang va darhol ishga tushiring yoki har birini o\'zingiz ishga tushirguningizcha ushlab turing.';
 
   @override
   String get followUpsMode => 'Keyingi tiket takliflari';
@@ -1496,6 +2351,9 @@ class AppLocalizationsUz extends AppLocalizations {
   String get followUpsServes => 'Nima uchun';
 
   @override
+  String get followUpsAfter => 'Keyin';
+
+  @override
   String get followUpsDetails => 'Batafsil';
 
   @override
@@ -1520,7 +2378,22 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
-  String get followUpsQueuedHint => 'Yaratilgan tiketlar siz ishga tushirmaguningizcha navbatda turadi.';
+  String followUpsCreateStart(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ta tiketni yaratish va ishga tushirish',
+      zero: 'Yaratish va ishga tushirish',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get followUpsCreateHeld => 'Yaratib, ushlab turish';
+
+  @override
+  String get followUpsQueuedHint =>
+      'Ishga tushirilgan tiketlar darhol navbatga turadi; boshqasini kutadigan tiket u birlashtirilgandan keyin kod yozishni boshlaydi. Ushlab turilganlar siz ishga tushirguningizcha kutadi.';
 
   @override
   String get followUpsDismiss => 'Rad etish';
@@ -1541,6 +2414,12 @@ class AppLocalizationsUz extends AppLocalizations {
   String followUpsCreatedNotice(num count) {
     String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count ta tiket yaratildi');
     return '$_temp0, ishga tushirguningizcha navbatda.';
+  }
+
+  @override
+  String followUpsStartedNotice(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count ta tiket yaratildi');
+    return '$_temp0 va ishga tushirish navbatiga qo\'yildi.';
   }
 
   @override
@@ -1634,6 +2513,775 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get formNoMatch => 'Hech narsa topilmadi';
+
+  @override
+  String get harnessRepoTab => 'Himoya';
+
+  @override
+  String get harnessRepoTitle => 'Himoya';
+
+  @override
+  String get harnessRepoSub => 'agnts-guard bu repozitoriyda Claude ishini qanchalik qatʼiy tekshiradi — ish davomida va undan keyin.';
+
+  @override
+  String get harnessRepoSave => 'Himoyani saqlash';
+
+  @override
+  String get harnessRepoSaved => 'Himoya saqlandi';
+
+  @override
+  String get harnessRepoAgentTitle => 'Agentlar uchun koʻrsatma fayllari';
+
+  @override
+  String get harnessRepoAgentSub =>
+      'agnts CLAUDE.md, AGENTS.md, .claude/ va .mcp.json fayllarida agentni boshqarishga urinadigan matnni qidiradi. Bu repozitoriyning hooklari va MCP serverlarini agnts hech qachon ishga tushirmaydi.';
+
+  @override
+  String harnessRepoAgentScanned(String time) {
+    return '$time tekshirilgan';
+  }
+
+  @override
+  String get harnessRepoAgentNotScanned => 'Hali tekshirilmagan: bu repozitoriydagi keyingi ishga tushirish fayllarni tekshiradi.';
+
+  @override
+  String get harnessRepoAgentNothing => 'Hech narsa topilmadi.';
+
+  @override
+  String harnessRepoAgentWarn(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n qator');
+    return '$_temp0 agentni boshqarishga urinishi mumkin. Ishga tushirishlar bu fayllarni koʻrsatma emas, maʼlumot sifatida oʻqiydi; ularga ishonishdan oldin oʻqib chiqing.';
+  }
+
+  @override
+  String get harnessRepoAgentInfo => 'agnts eʼtiborsiz qoldiradigan sozlamalar';
+
+  @override
+  String get harnessRepoKind_hidden_unicode => 'Yashirin belgilar';
+
+  @override
+  String get harnessRepoKind_agent_instruction => 'Agentga koʻrsatma';
+
+  @override
+  String get harnessRepoKind_exfiltration => 'Maʼlumotni tashqariga yuboradi';
+
+  @override
+  String get harnessRepoKind_encoded_blob => 'Kodlangan matn';
+
+  @override
+  String get harnessRepoKind_hooks => 'Claude Code hooklari';
+
+  @override
+  String get harnessRepoKind_mcp_server => 'MCP serverlar';
+
+  @override
+  String get harnessRepoProfile => 'Himoya profili';
+
+  @override
+  String get harnessRepoProfileHelp => 'Bu repozitoriyda ish davomidagi tekshiruvlar qanchalik qatʼiy.';
+
+  @override
+  String get harnessRepoProfile_ => 'Ish maydonidagidek';
+
+  @override
+  String get harnessRepoProfile_minimal => 'Minimal';
+
+  @override
+  String get harnessRepoProfile_standard => 'Oddiy';
+
+  @override
+  String get harnessRepoProfile_strict => 'Qatʼiy';
+
+  @override
+  String get harnessRepoProfileHelp_ => 'Ish maydoni sozlamasiga amal qiladi.';
+
+  @override
+  String get harnessRepoProfileHelp_minimal =>
+      'Faqat sirlar va majburiy qoidalar bloklanadi; Claude tugatishidan oldin build tekshiriladi.';
+
+  @override
+  String get harnessRepoProfileHelp_standard =>
+      'Oʻtkazib yuborilgan testlar, oʻchirilgan linterlar va tekshiruv sozlamalariga oʻzgartirishlar ham bloklanadi; tugatishdan oldin build va lint oʻtishi kerak.';
+
+  @override
+  String get harnessRepoProfileHelp_strict =>
+      'Yutib yuborilgan xatolar va testlardan olib tashlangan tekshiruvlar ham bloklanadi, tugatishdan oldin testlar ishga tushadi, faylni tahrirlashdan oldin faktlar soʻralishi mumkin.';
+
+  @override
+  String get harnessRepoSecretAllow => 'Namuna kalitlarga ruxsat berilgan joylar';
+
+  @override
+  String get harnessRepoSecretAllowHelp => 'Soxta kalitlar kutiladigan yoʻl shablonlari, testdata/, fixtures/ va *.example dan tashqari.';
+
+  @override
+  String get harnessRepoChecksTitle => 'Har bir faylni tekshirish';
+
+  @override
+  String get harnessRepoChecksSub =>
+      'Claude tahrirlagan har bir faylda agnts-guard ishga tushiradigan tez formatter va linterlar, muammolar darhol tuzatilishi uchun.';
+
+  @override
+  String get harnessRepoChecksOff => 'Fayl tekshiruvlarini oʻchirish';
+
+  @override
+  String get harnessRepoChecksOffHelp => 'Claude har bir tahrirdan keyin tekshirilmaydi; ishga tushirishdan keyingi tekshiruvlar qoladi.';
+
+  @override
+  String get harnessRepoOwnChecks => 'Oʻz tekshiruvlarim';
+
+  @override
+  String get harnessRepoOwnChecksHelp => 'agnts vositalardan chiqaradigan tekshiruvlarni oʻz roʻyxatingiz bilan almashtiring.';
+
+  @override
+  String get harnessRepoDerivedTitle => 'Vositalardan chiqarilgan';
+
+  @override
+  String get harnessRepoDerivedNone => 'agnts bu repozitoriy vositalari uchun fayl tekshiruvlarini bilmaydi.';
+
+  @override
+  String get harnessRepoCheckName => 'Nomi';
+
+  @override
+  String get harnessRepoCheckGlobs => 'Fayllar (shablonlar, vergul bilan)';
+
+  @override
+  String get harnessRepoCheckCmd => 'Buyruq';
+
+  @override
+  String harnessRepoCheckCmdHelp(String file, String dir) {
+    return '\'$file\' — tahrirlangan fayl, \'$dir\' — uning papkasi, ikkalasi ham repozitoriyga nisbatan.';
+  }
+
+  @override
+  String get harnessRepoCheckEvery => 'Eng koʻpi bilan har (soniya)';
+
+  @override
+  String get harnessRepoAddCheck => 'Tekshiruv qoʻshish';
+
+  @override
+  String harnessRepoRemoveCheck(String name) {
+    return '$name ni olib tashlash';
+  }
+
+  @override
+  String get harnessRepoCoverageTitle => 'Oʻzgargan qatorlarning qamrovi';
+
+  @override
+  String get harnessRepoCoverageSub =>
+      'Tekshiruvlar oʻtgach, agnts testlarni qamrov bilan yana bir bor ishga tushiradi va qaysi qoʻshilgan qatorlarni hech bir test bajarmaganini koʻrsatadi.';
+
+  @override
+  String get harnessRepoCoverage => 'Qamrovni oʻlchash';
+
+  @override
+  String get harnessRepoCoverageHelp => 'Tekshiruvlardan keyin qoʻshimcha test ishga tushirish; ishga tushirish undan yiqilmaydi.';
+
+  @override
+  String get harnessRepoThreshold => 'Chegara';
+
+  @override
+  String get harnessRepoThresholdHelp => 'Undan past boʻlsa, kod reviewga qamrov haqida izoh qoʻshiladi. 0 izohni oʻchiradi.';
+
+  @override
+  String get harnessRepoCoverageCmd => 'Qamrov buyrugʻi';
+
+  @override
+  String get harnessRepoCoverageCmdHelp => 'agnts chiqaradigan buyruqdan foydalanish uchun boʻsh qoldiring.';
+
+  @override
+  String get harnessRepoCoverageReport => 'Hisobot fayli';
+
+  @override
+  String get harnessRepoCoverageReportHelp => 'Go cover profile yoki lcov fayli, repozitoriyda yoki /agnts/out/ ichida.';
+
+  @override
+  String get harnessRepoCoverageNoDerived => 'agnts bu vositalar uchun qamrov buyrugʻini bilmaydi: uni kiriting.';
+
+  @override
+  String get harnessRepoAcceptance => 'Ilovada qabulni tekshirish';
+
+  @override
+  String get harnessRepoAcceptanceHelp =>
+      'Previewdan keyin agnts tiketning qabul mezonlarini ishlab turgan ilovada tekshiradi va natijani skrinshotlar bilan koʻrsatadi.';
+
+  @override
+  String get harnessRepoAcceptanceNoPreview => 'Preview buyrugʻi kerak: repozitoriyni tahrirlaganda uni kiriting.';
+
+  @override
+  String get harnessRepoStarterTitle => 'Boshlangʻich qoidalar';
+
+  @override
+  String get harnessRepoStarterSub =>
+      'Bu repozitoriy tillari uchun aniq, tekshiriladigan kelishuvlar. Ular taklif sifatida qoʻshiladi: siz qabul qilmaguningizcha hech narsa qoʻllanmaydi.';
+
+  @override
+  String get harnessRepoStarterNone => 'Bu repozitoriy vositalariga mos boshlangʻich toʻplam yoʻq.';
+
+  @override
+  String harnessRepoStarterRules(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n qoida');
+    return '$_temp0';
+  }
+
+  @override
+  String harnessRepoStarterOffer(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n qoidani');
+    return '$_temp0 taklif qilish';
+  }
+
+  @override
+  String get harnessRepoStarterOffered => 'Allaqachon taklif qilingan';
+
+  @override
+  String harnessRepoStarterAdded(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n qoida taklif qilindi',
+      zero: 'Taklif qilinadigan yangi narsa yoʻq',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get harnessRepoStarterOpenRules => 'Takliflarni ochish';
+
+  @override
+  String get harnessRulesDelivery => 'Ishga tushirishlar uni qanday oladi';
+
+  @override
+  String get harnessRulesDelivery_prompt => 'Har bir promptda';
+
+  @override
+  String get harnessRulesDelivery_skill => 'Koʻnikma';
+
+  @override
+  String get harnessRulesDeliveryHelp_prompt => 'Har bir promptda, doim koʻz oldida.';
+
+  @override
+  String get harnessRulesDeliveryHelp_skill =>
+      'Tavsifi ishga mos kelganda Claude yuklaydigan koʻnikma: qoidalar koʻpayganda promptlar qisqa qoladi. Muhim qoidalarni har bir promptda saqlang.';
+
+  @override
+  String get harnessRulesEnforce => 'Majburiy';
+
+  @override
+  String get harnessRulesEnforceHelp => 'agnts-guard qoidani faqat soʻramaydi, Claude ishlayotganda tekshiradi.';
+
+  @override
+  String get harnessRulesOn => 'Tekshirish';
+
+  @override
+  String get harnessRulesOn_file => 'Fayl tahrirlari';
+
+  @override
+  String get harnessRulesOn_bash => 'Buyruqlar';
+
+  @override
+  String get harnessRulesOn_diff => 'Tayyor oʻzgarish';
+
+  @override
+  String get harnessRulesOnHelp_file => 'Quyidagi fayllar tahrirlari; shablon bilan — faqat unga mos keladigan qoʻshilgan qatorlar.';
+
+  @override
+  String get harnessRulesOnHelp_bash => 'Claude ishga tushiradigan va shablonga mos keladigan shell buyruqlari.';
+
+  @override
+  String get harnessRulesOnHelp_diff => 'Tayyor oʻzgarish, ishga tushirishdan keyin serverda tekshiriladi.';
+
+  @override
+  String get harnessRulesPaths => 'Fayllar (shablonlar)';
+
+  @override
+  String get harnessRulesPathsPlaceholder => 'server/migrations/*.sql';
+
+  @override
+  String get harnessRulesPattern => 'Shablon (RE2 regular expression)';
+
+  @override
+  String get harnessRulesAction => 'Mos kelganda';
+
+  @override
+  String get harnessRulesAction_block => 'Bloklash';
+
+  @override
+  String get harnessRulesAction_warn => 'Ogohlantirish';
+
+  @override
+  String get harnessRulesMessage => 'Claude uchun xabar';
+
+  @override
+  String get harnessRulesMessagePlaceholder => 'Oʻrniga yangi migratsiya qoʻshing.';
+
+  @override
+  String get harnessRulesTry => 'Tarixda sinash';
+
+  @override
+  String get harnessRulesTrying => 'Tekshirilmoqda…';
+
+  @override
+  String harnessRulesTryChecked(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ta oʻzgarish');
+    return 'agnts qilgan $_temp0 tekshirildi.';
+  }
+
+  @override
+  String get harnessRulesTryNone => 'Ularning hech biriga mos kelmagan boʻlardi.';
+
+  @override
+  String harnessRulesTryHits(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ta tiket');
+    return '${_temp0}ga mos kelgan boʻlardi:';
+  }
+
+  @override
+  String get harnessRulesBadgeBlock => 'Majburiy: bloklaydi';
+
+  @override
+  String get harnessRulesBadgeWarn => 'Majburiy: ogohlantiradi';
+
+  @override
+  String get harnessRulesBadgeSkill => 'Koʻnikma';
+
+  @override
+  String get harnessRulesBadgeTip => 'Maslahat';
+
+  @override
+  String get harnessRulesSource_reflect => 'Fikrdan';
+
+  @override
+  String get harnessRulesSource_run => 'Ishga tushirishdan';
+
+  @override
+  String get harnessRulesSource_promoted => 'Bir nechta repozitoriyda koʻrilgan';
+
+  @override
+  String harnessRulesSourceStarter(String name) {
+    return 'Boshlangʻich: $name';
+  }
+
+  @override
+  String harnessRulesConfidence(String n) {
+    return 'Ishonch $n%';
+  }
+
+  @override
+  String harnessRulesSeen(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n marta koʻrilgan');
+    return '$_temp0';
+  }
+
+  @override
+  String harnessRulesWatching(String n) {
+    return 'Kuzatuvda ($n)';
+  }
+
+  @override
+  String get harnessRulesWatchingHelp =>
+      'agnts bir-ikki marta payqagan saboqlar. Yana koʻrganida ular taklifga aylanadi; shungacha hech bir tiketga tushmaydi.';
+
+  @override
+  String get harnessSettingsTitle => 'Cheklovlar';
+
+  @override
+  String get harnessSettingsSub =>
+      'agnts-guard Claude ishini har bir ishga tushirish ichida, jarayonning oʻzida tekshiradi; ishga tushirishdan keyingi agnts tekshiruvlari ham amal qiladi.';
+
+  @override
+  String get harnessSettingsProfile => 'Cheklov profili';
+
+  @override
+  String get harnessSettingsProfile_minimal => 'Minimal';
+
+  @override
+  String get harnessSettingsProfile_standard => 'Standart';
+
+  @override
+  String get harnessSettingsProfile_strict => 'Qatʼiy';
+
+  @override
+  String get harnessSettingsProfileHelp_minimal =>
+      'Maxfiy maʼlumotlar va .env fayllarini bloklaydi, shablonli jamoa qoidalarini qoʻllaydi va Claude tugatishidan oldin build muvaffaqiyatli boʻlishini talab qiladi.';
+
+  @override
+  String get harnessSettingsProfileHelp_standard =>
+      'Minimaldagi hammasi, yana: oʻtkazib yuborilgan va oʻchirilgan testlar, oʻchirilgan linterlar va tekshiruv sozlamalari oʻzgarishini bloklaydi; toʻxtash tekshiruvida lint; har bir tahrirlangan faylni tezkor tekshirish.';
+
+  @override
+  String get harnessSettingsProfileHelp_strict =>
+      'Standartdagi hammasi, yana: toʻxtash tekshiruvida testlar, yutib yuborilgan xatolar va olib tashlangan tekshiruvlarni bloklash, birinchi tahrirlardan oldin faktlarni tekshirish.';
+
+  @override
+  String get harnessSettingsFactCheck => 'Faktlarni tekshirish ulushi';
+
+  @override
+  String get harnessSettingsFactCheckHelp =>
+      'Qatʼiy profildagi tasklar ulushi: ularda ishga tushirish faylni oʻzgartirishdan oldin undan kim foydalanishini va buzuvchi buyruqlarni qanday qaytarishni aytishi kerak. Guruhlarni Analitikada solishtiring.';
+
+  @override
+  String get harnessSettingsStalls => 'Ishga tushirish tiqilib qolsa';
+
+  @override
+  String get harnessSettingsStallsHelp =>
+      'Bir xil buyruq qayta-qayta yiqiladi, koʻp chaqiruvlar davomida tahrir yoʻq yoki bitta fayl qayta-qayta oʻqiladi.';
+
+  @override
+  String get harnessSettingsStalls_off => 'Eʼtiborsiz';
+
+  @override
+  String get harnessSettingsStalls_log => 'Belgilash';
+
+  @override
+  String get harnessSettingsStalls_act => 'Aralashish';
+
+  @override
+  String get harnessSettingsProveFixes => 'Tuzatishlarni isbotlash';
+
+  @override
+  String get harnessSettingsProveFixesHelp =>
+      'Xato tuzatishiga oʻzgarishdan oldin yiqiladigan va keyin oʻtadigan test kerak; agnts uni ikkala holatda ishga tushirib, natijani koʻrsatadi.';
+
+  @override
+  String get harnessSettingsDeepReview => 'Chuqur review';
+
+  @override
+  String get harnessSettingsDeepReviewHelp =>
+      'Kod reviewda maxsus oʻtishlar (xavfsizlik, jim xatolar, testlar, turlar). Avto: faqat katta yoki murakkab ish; koʻproq token sarflaydi.';
+
+  @override
+  String get harnessSettingsDeep_off => 'Oʻchiq';
+
+  @override
+  String get harnessSettingsDeep_auto => 'Avto';
+
+  @override
+  String get harnessSettingsDeep_always => 'Doim';
+
+  @override
+  String get harnessSettingsLearnFromRuns => 'Ishga tushirishlardan oʻrganish';
+
+  @override
+  String get harnessSettingsLearnFromRunsHelp =>
+      'Tekshiruvlari yiqilgan yoki tiqilib qolgan ishga tushirishdan keyin agnts repozitoriy uchun maslahat taklif qilishi mumkin. Maslahatlar yana koʻringuncha kuzatiladi.';
+
+  @override
+  String get harnessSettingsSecondOpinion => 'Ikkinchi fikr';
+
+  @override
+  String get harnessSettingsSecondOpinionHelp =>
+      'Boshqa model murakkab tasklarning tanlangan yondashuvini oʻqib, rozi yoki rozi emasligini aytadi. Boʻsh boʻlsa oʻchiq.';
+
+  @override
+  String get harnessSettingsSecondOpinionHint => 'masalan, opus yoki codex:gpt-5-codex';
+
+  @override
+  String get harnessSettingsAdvanced => 'Qoʻshimcha: cheklov hooklari';
+
+  @override
+  String get harnessSettingsAdvancedHelp => 'Alohida hooklarni oʻchiring; qolganini profil hal qiladi.';
+
+  @override
+  String get harnessSettingsHook_pre_secret => 'maxfiy maʼlumotlar va .env fayllarini rad etish';
+
+  @override
+  String get harnessSettingsHook_pre_redflags =>
+      'testlarni oʻtkazib yuborish, linterlarni oʻchirish, tekshiruvlarni zaiflashtirishni rad etish';
+
+  @override
+  String get harnessSettingsHook_pre_rules => 'shablonli jamoa qoidalarini qoʻllash';
+
+  @override
+  String get harnessSettingsHook_pre_fact_check => 'faylni birinchi tahrirlashdan oldin faktlarni soʻrash';
+
+  @override
+  String get harnessSettingsHook_pre_destructive => 'buzuvchi buyruqlardan oldin qaytarish rejasini soʻrash';
+
+  @override
+  String get harnessSettingsHook_post_edit_check => 'har bir tahrirlangan faylni tekshirish (formatter, linter)';
+
+  @override
+  String get harnessSettingsHook_stop_gate => 'Claude tugatishidan oldin build va lint oʻtishi kerak';
+
+  @override
+  String get harnessSettingsHook_session_progress => 'kontekst siqilgandan keyin rejani qaytarish';
+
+  @override
+  String get harnessSettingsCodex => 'Kodni Codex da yozish';
+
+  @override
+  String get harnessSettingsCodexHelp =>
+      'Codex model nomi kod yozishni Claude oʻrniga Codex CLI da ishga tushiradi; boʻsh boʻlsa Claude. OpenAI integratsiyasi va ruxsat etilgan hostlarda api.openai.com kerak (Sozlamalar → Preview).';
+
+  @override
+  String get harnessSettingsCodexConnect => 'OpenAI integratsiyasi';
+
+  @override
+  String get harnessSettingsQualityTitle => 'Prompt versiyalari boʻyicha cheklovlar';
+
+  @override
+  String get harnessSettingsQualitySub => 'Har bir prompt versiyasidagi tasklar uchun agnts-guard va tekshiruvlar nima qildi.';
+
+  @override
+  String get harnessSettingsColBlocks => 'Bloklangan';
+
+  @override
+  String get harnessSettingsColBlocksHint => 'Kod yozish ishga tushirishlarida agnts-guard rad etgan harakatlar';
+
+  @override
+  String get harnessSettingsColStopSaves => 'Toʻxtash tekshiruvi qutqargan';
+
+  @override
+  String get harnessSettingsColStopSavesHint =>
+      'Toʻxtash tekshiruvi yiqilgan tekshiruvlarni qaytargan, keyin agnts tekshiruvlari birinchi urinishda oʻtgan tasklar';
+
+  @override
+  String get harnessSettingsColStalls => 'Tiqilishlar';
+
+  @override
+  String get harnessSettingsColStallsHint => 'Ishga tushirishlar necha marta tiqilib qolgandek koʻringan';
+
+  @override
+  String get harnessSettingsColProven => 'Isbotlangan tuzatishlar';
+
+  @override
+  String get harnessSettingsColProvenHint => 'Testi oʻzgarishdan oldin yiqilgan va keyin oʻtgan xato tuzatishlari, isboti borlar ichidan';
+
+  @override
+  String get harnessSettingsColAdopted => 'Qabul qilingan izohlar';
+
+  @override
+  String get harnessSettingsColAdoptedHint => 'Odamlar oʻz fikr-mulohazasiga kiritgan review izohlari';
+
+  @override
+  String get harnessSettingsColTokens => 'Tayyor taskka tokenlar';
+
+  @override
+  String get harnessSettingsColTokensHint => 'Tayyor taskning oʻrtacha tokenlari, barcha bosqichlar';
+
+  @override
+  String get harnessSettingsColFactCheck => 'Faktlarni tekshirish, birinchi urinish';
+
+  @override
+  String get harnessSettingsColFactCheckHint =>
+      'Faktlarni tekshirish guruhidagi tasklarning birinchi urinishda qabul qilinish ulushi, barcha tayyor tasklar ulushi yonida';
+
+  @override
+  String harnessSettingsXOfY(String x, String y) {
+    return '$y dan $x';
+  }
+
+  @override
+  String harnessSettingsVsAll(String n) {
+    return 'barchasi $n%';
+  }
+
+  @override
+  String get harnessTicketFlag_secret => 'Ehtimoliy maxfiy kalit';
+
+  @override
+  String get harnessTicketFlag_env_file => '.env fayli qo‘shilgan';
+
+  @override
+  String get harnessTicketFlag_debug_leftover => 'Nosozlik chiqishi qoldirilgan';
+
+  @override
+  String get harnessTicketFlag_check_config => 'Tekshiruv sozlamasi o‘zgargan';
+
+  @override
+  String get harnessTicketFlag_rule_violation => 'Jamoa qoidasi buzilgan';
+
+  @override
+  String get harnessTicketSecretsTitle => 'O‘zgarishda haqiqiy maxfiy ma’lumot bo‘lishi mumkin';
+
+  @override
+  String harnessTicketSecretsBody(num n) {
+    return 'agnts $n ta qatorni ehtimoliy maxfiy kalit yoki .env fayli deb belgiladi. Ularni «Ko‘rib chiqish» bo‘limidagi xavfli belgilarda tekshiring: ular haqiqiy maxfiy ma’lumot emasligini tasdiqlamaguningizcha agnts o‘zgarishni yubormaydi.';
+  }
+
+  @override
+  String get harnessTicketSecretsConfirm => 'Tekshirdim: bular haqiqiy maxfiy ma’lumot emas';
+
+  @override
+  String get harnessTicketSecretsDone => 'Tasdiqlandi: belgilangan qatorlar haqiqiy maxfiy ma’lumot emas.';
+
+  @override
+  String get harnessTicketSecretsNeeded => 'Avval maxfiy deb belgilangan qatorlar haqiqiy maxfiy ma’lumot emasligini tasdiqlang.';
+
+  @override
+  String get harnessTicketProofTitle => 'Tuzatishning isboti';
+
+  @override
+  String get harnessTicketProof_proven => 'Isbotlandi';
+
+  @override
+  String get harnessTicketProof_not_reproduced => 'Takrorlanmadi';
+
+  @override
+  String get harnessTicketProof_still_failing => 'Hali ham xato';
+
+  @override
+  String get harnessTicketProof_inconclusive => 'Noaniq';
+
+  @override
+  String get harnessTicketProof_no_test => 'Test yo‘q';
+
+  @override
+  String get harnessTicketProof_error => 'Tekshirilmadi';
+
+  @override
+  String get harnessTicketProofHelp_proven => 'Xatoni takrorlovchi test o‘zgarishdan oldingi kodda yiqiladi va keyin o‘tadi.';
+
+  @override
+  String get harnessTicketProofHelp_not_reproduced => 'Test o‘zgarishdan oldin ham o‘tadi, demak u xatoni ko‘rsatmaydi.';
+
+  @override
+  String get harnessTicketProofHelp_still_failing => 'Test o‘zgarish bilan ham yiqilmoqda.';
+
+  @override
+  String get harnessTicketProofHelp_inconclusive =>
+      'Testni o‘zgarishdan oldingi kodda ishga tushirib bo‘lmadi; unga tuzatish qo‘shadigan narsa kerak bo‘lishi mumkin.';
+
+  @override
+  String get harnessTicketProofHelp_no_test => 'Xatoni hech bir avtomatik test takrorlamaydi.';
+
+  @override
+  String get harnessTicketProofHelp_error => 'agnts tuzatishni tekshira olmadi.';
+
+  @override
+  String harnessTicketProofBase(String sha) {
+    return '$sha dan boshlangan';
+  }
+
+  @override
+  String harnessTicketProofBefore(String code) {
+    return 'O‘zgarishdan oldin (chiqish kodi $code)';
+  }
+
+  @override
+  String harnessTicketProofAfter(String code) {
+    return 'O‘zgarishdan keyin (chiqish kodi $code)';
+  }
+
+  @override
+  String get harnessTicketCoverageTitle => 'O‘zgargan qatorlarning qamrovi';
+
+  @override
+  String harnessTicketCoveragePct(String pct, String covered, String total) {
+    return 'Testlar o‘zgargan qatorlarning $pct% qismini bajardi ($total tadan $covered ta)';
+  }
+
+  @override
+  String harnessTicketCoverageBelow(String n) {
+    return 'Repozitoriyning $n% chegarasidan past';
+  }
+
+  @override
+  String get harnessTicketCoverageNone => 'O‘zgargan qatorlarning hech biri qamrov hisoboti o‘lchaydigan kod emas.';
+
+  @override
+  String harnessTicketCoverageLines(String ranges) {
+    return 'Bajarilmagan: $ranges qatorlar';
+  }
+
+  @override
+  String harnessTicketCoverageError(String error) {
+    return 'Qamrovni o‘lchab bo‘lmadi: $error';
+  }
+
+  @override
+  String harnessTicketConfidence(String n) {
+    return '$n% ishonch';
+  }
+
+  @override
+  String get harnessTicketPass_security => 'Xavfsizlik tekshiruvi';
+
+  @override
+  String get harnessTicketPass_failures => 'Xatolar tekshiruvi';
+
+  @override
+  String get harnessTicketPass_tests => 'Testlar tekshiruvi';
+
+  @override
+  String get harnessTicketPass_types => 'Turlar tekshiruvi';
+
+  @override
+  String get harnessTicketAdopted => 'Fikringizda';
+
+  @override
+  String get harnessTicketDeep => 'Chuqur ko‘rib chiqish';
+
+  @override
+  String harnessTicketDropped(num n) {
+    return '$n ta topilma ko‘rsatilmadi (past ishonch yoki takror)';
+  }
+
+  @override
+  String get harnessTicketDefect => 'Xatoni tuzatish';
+
+  @override
+  String get harnessTicketAcceptanceTitle => 'Qabul mezonlari';
+
+  @override
+  String get harnessTicketCheck_ui => 'Ilovada';
+
+  @override
+  String get harnessTicketCheck_api => 'API';
+
+  @override
+  String get harnessTicketCheck_test => 'Test';
+
+  @override
+  String get harnessTicketCheck_manual => 'Qo‘lda';
+
+  @override
+  String get harnessTicketSecondTitle => 'Ikkinchi fikr';
+
+  @override
+  String harnessTicketSecondBy(String model) {
+    return '$model dan';
+  }
+
+  @override
+  String get harnessTicketSecondAgrees => 'Rozi';
+
+  @override
+  String get harnessTicketSecondConcerns => 'E’tirozlari bor';
+
+  @override
+  String get harnessTicketSecondAlternative => 'Buning o‘rniga qilardi';
+
+  @override
+  String harnessTicketSecondError(String error) {
+    return 'Ikkinchi fikr yo‘q: $error';
+  }
+
+  @override
+  String get harnessTicketAccTitle => 'Qabul tekshiruvi';
+
+  @override
+  String get harnessTicketAcc_ok => 'Hammasi bajarildi';
+
+  @override
+  String get harnessTicketAcc_partial => 'Qisman tekshirildi';
+
+  @override
+  String get harnessTicketAcc_failed => 'Bajarilmadi';
+
+  @override
+  String get harnessTicketVerdict_pass => 'Bajarildi';
+
+  @override
+  String get harnessTicketVerdict_fail => 'Bajarilmadi';
+
+  @override
+  String get harnessTicketVerdict_unknown => 'Tekshirilmadi';
+
+  @override
+  String get harnessTicketAccSteps => 'Qadamlar';
+
+  @override
+  String get harnessTicketAccShot => 'Skrinshot';
 
   @override
   String get implementTitle => 'Keyingi qadam';
@@ -2280,6 +3928,40 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
+  String get integrationsName_openai => 'OpenAI';
+
+  @override
+  String get integrationsDesc_openai =>
+      'agnts ning ikkinchi kod vositasi Codex CLI dagi ishga tushirishlar uchun OpenAI API kaliti. Undan foydalanish uchun Sozlamalarda codex: modelini tanlang.';
+
+  @override
+  String get integrationsConnectSub_openai =>
+      'OpenAI API kalitini qoʻying. agnts uni tekshiradi, shifrlangan holda saqlaydi va faqat Codex dagi ishga tushirishlarga beradi.';
+
+  @override
+  String get integrationsTokenOpen_openai => 'API kalitlarini ochish';
+
+  @override
+  String get integrationsTokenStep1_openai => 'OpenAI platformasidagi API kalitlari sahifasini oching (pastdagi tugma) va kiring.';
+
+  @override
+  String get integrationsTokenStep2_openai => 'Yangi maxfiy kalit yarating, yaxshisi xarajat chegarasi bor loyihada.';
+
+  @override
+  String get integrationsTokenStep3_openai => 'Kalitni nusxalang (u sk- bilan boshlanadi) va pastdagi «API kaliti» maydoniga qoʻying.';
+
+  @override
+  String get integrationsTokenStep4_openai =>
+      'Codex ishga tushirishlari OpenAI ga murojaat qila olishi uchun Sozlamalar → Preview boʻlimida api.openai.com ni ruxsat etilgan hostlarga qoʻshing.';
+
+  @override
+  String get integrationsOpenaiKeyHelp => 'Serveringizda shifrlangan holda saqlanadi. Uni faqat Codex dagi ishga tushirishlar oladi.';
+
+  @override
+  String get integrationsOpenaiHelp =>
+      'Codex ishga tushirishlarida agnts-guard hooklari yoʻq: ishga tushirishdan keyingi agnts tekshiruvlari (qizil bayroqlar, build, lint, testlar, review) baribir ishlaydi. Ishga tushirishlarga ruxsat etilgan hostlarda api.openai.com ham kerak.';
+
+  @override
   String get kindTitle => 'Turi';
 
   @override
@@ -2757,6 +4439,163 @@ class AppLocalizationsUz extends AppLocalizations {
   String manalyticsCompared(num n) {
     return 'Oʻzgarishlar oldingi $n kun bilan solishtiriladi. Yashil — yaxshiroq.';
   }
+
+  @override
+  String get mciTitle => 'CI nosozliklari';
+
+  @override
+  String get mciLede => 'Qizarib ketgan kuzatiladigan tarmoqlar: har bir xato uchun bitta qator.';
+
+  @override
+  String get mciFilterRed => 'Qizil';
+
+  @override
+  String get mciFilterFlaky => 'Beqaror';
+
+  @override
+  String get mciFilterAll => 'Hammasi';
+
+  @override
+  String get mciEmptyRed => 'Kuzatiladigan tarmoqlarning hech biri qizil emas.';
+
+  @override
+  String get mciEmpty => 'Bu yerda CI nosozliklari yoʻq.';
+
+  @override
+  String get mciStatus_triage => 'Tekshirilmoqda';
+
+  @override
+  String get mciStatus_open => 'Qizil';
+
+  @override
+  String get mciStatus_fixing => 'Tuzatilmoqda';
+
+  @override
+  String get mciStatus_fixed => 'Tuzatildi';
+
+  @override
+  String get mciStatus_resolved => 'Yana yashil';
+
+  @override
+  String get mciStatus_flaky => 'Beqaror';
+
+  @override
+  String get mciStatus_infra => 'Infratuzilma';
+
+  @override
+  String get mciStatus_muted => 'Oʻchirilgan';
+
+  @override
+  String get mciStatus_regression => 'Qaytdi';
+
+  @override
+  String mciLastSeen(String when) {
+    return 'oxirgisi $when';
+  }
+
+  @override
+  String get mciFactFirstCommit => 'Birinchi yiqilgan kommit';
+
+  @override
+  String get mciFactCount => 'Yiqildi';
+
+  @override
+  String mciTimes(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n marta', one: '$n marta');
+    return '$_temp0';
+  }
+
+  @override
+  String get mciFactLastSeen => 'Oxirgi marta';
+
+  @override
+  String get mciFactFlaky => 'Qayta ishga tushirishda oʻtdi';
+
+  @override
+  String get mciJob => 'Vazifa';
+
+  @override
+  String get mciBranch => 'Tarmoq';
+
+  @override
+  String get mciFirstError => 'Birinchi xato';
+
+  @override
+  String get mciLogTail => 'Log oxiri';
+
+  @override
+  String get mciLogNote => 'Vazifa logidan, maxfiy maʼlumotlar olib tashlangan.';
+
+  @override
+  String get mciNoSample => 'Bu nosozlik uchun log parchasi saqlanmagan.';
+
+  @override
+  String get mciRuns => 'Yiqilgan ishga tushirishlar';
+
+  @override
+  String mciRunsCount(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n yiqilgan ishga tushirish', one: '$n yiqilgan ishga tushirish');
+    return '$_temp0';
+  }
+
+  @override
+  String get mciRunFlaky => 'qayta ishga tushirishda oʻtdi';
+
+  @override
+  String get mciTicket => 'Tiket';
+
+  @override
+  String mciForeignPr(String n) {
+    return 'Bu nosozlik boshqa birovning pull requestida (#$n): u yerda agnts faqat izoh qoldiradi.';
+  }
+
+  @override
+  String get mciFix => 'Tuzatish';
+
+  @override
+  String get mciFixConfirm =>
+      'agnts bu nosozlikni tuzatish uchun tiket ochadi. Hech narsa yuborilishidan oldin tuzatishni siz tekshirasiz.';
+
+  @override
+  String get mciMute => 'Oʻchirish';
+
+  @override
+  String get mciUnmute => 'Yoqish';
+
+  @override
+  String get mciMutedDone => 'Oʻchirildi: siz yoqmaguningizcha agnts bu nosozlikka tegmaydi.';
+
+  @override
+  String get mciUnmutedDone => 'Yoqildi.';
+
+  @override
+  String get mciRerun => 'Qayta ishga tushirish';
+
+  @override
+  String get mciRerunDone => 'Qayta ishga tushirish boshlandi.';
+
+  @override
+  String get mciCardTitle => 'CI nosozligi';
+
+  @override
+  String get mciCardOpen => 'CI nosozligini ochish';
+
+  @override
+  String mciCiFixes(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'CI pull requestni $n marta qaytardi',
+      one: 'CI pull requestni $n marta qaytardi',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mciSourceCi => 'CI';
+
+  @override
+  String get mciNotify => 'Kuzatiladigan tarmoq qizarib ketdi';
 
   @override
   String get mcpTitle => 'Claude chat (MCP)';
@@ -3522,6 +5361,309 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get navReviews => 'PR tekshiruvlari';
+
+  @override
+  String get navCi => 'CI';
+
+  @override
+  String get networkTitle => 'Xususiy tarmoqlar';
+
+  @override
+  String get networkSub =>
+      'Tarmoqlaringiz ichidagi GitLab, Jira yoki paketlar reyestriga ulanish. Ulanish marshruti unga eng aniq mos keladigan tarmoq orqali oʻtadi.';
+
+  @override
+  String get networkUnavailable =>
+      'Bu serverda xususiy tarmoqlar sozlanmagan: administrator gateway xizmatini ishga tushiradi va AGNTS_GATEWAY ni belgilaydi.';
+
+  @override
+  String get networkStatus_up => 'Ulangan';
+
+  @override
+  String get networkStatus_connecting => 'Ulanmoqda';
+
+  @override
+  String get networkStatus_error => 'Xato';
+
+  @override
+  String get networkStatus_gateway_down => 'Shlyuz ishlamayapti';
+
+  @override
+  String get networkStatus_disabled => 'Oʻchirilgan';
+
+  @override
+  String get networkHandshake => 'Oxirgi handshake';
+
+  @override
+  String get networkHeartbeat => 'Oxirgi signal';
+
+  @override
+  String get networkWebhooksRelay => 'agnts-link uzatadi';
+
+  @override
+  String networkWebhooksPolling(String n) {
+    return 'Vebhuklar yoʻq: u orqali ulanadigan trekerlar har $n daqiqada oʻqiladi';
+  }
+
+  @override
+  String get networkKind => 'Ulanish';
+
+  @override
+  String get networkKindConnector => 'agnts-link (tavsiya etiladi)';
+
+  @override
+  String get networkKindHelp_connector =>
+      'Tarmogʻingiz ichida ishga tushiriladigan kichik agent. U agnts ga oʻzi ulanadi: VPN maʼlumotlari ham, kiruvchi firewall qoidasi ham kerak emas, vebhuklarni ham uzatadi.';
+
+  @override
+  String get networkKindHelp_wireguard => 'agnts WireGuard peeringizga mijoz sifatida ulanadi. Peer bu serverdan UDP qabul qilishi kerak.';
+
+  @override
+  String get networkKindHelp_openvpn =>
+      'agnts OpenVPN mijoz konfigingizni alohida konteynerda ishga tushiradi. Sertifikatlar konfig ichida boʻlishi kerak; MFA talab qiladigan kirish qoʻllab-quvvatlanmaydi.';
+
+  @override
+  String get networkEnabled => 'Yoqilgan';
+
+  @override
+  String get networkConfigWg => 'WireGuard konfigi';
+
+  @override
+  String get networkConfigOvpn => 'OpenVPN konfigi (.ovpn)';
+
+  @override
+  String networkSavedConfig(String summary) {
+    return 'Saqlangan: $summary. Oʻzgartirmaslik uchun boʻsh qoldiring.';
+  }
+
+  @override
+  String get networkConfigWgHelp =>
+      'wg-quick ga beradigan faylingiz. Xostlarga nom orqali ulanish uchun DNS qatorini qoʻshing. Kalitlar shifrlanadi va qayta koʻrsatilmaydi.';
+
+  @override
+  String get networkConfigOvpnHelp =>
+      'ca, cert va key bloklari ichida joylashgan mijoz konfigi. Skriptlar (up, down, plugin…) qabul qilinmaydi.';
+
+  @override
+  String get networkUsername => 'Foydalanuvchi nomi';
+
+  @override
+  String get networkPassword => 'Parol';
+
+  @override
+  String get networkPasswordKeep => 'Saqlangan: boʻsh qoldiring';
+
+  @override
+  String get networkRoutes => 'Marshrutlar';
+
+  @override
+  String get networkRoutesHelp =>
+      'Shu tarmoq orqali oʻtadigan hostlar (gitlab.corp.local), domenlar (.corp.local) yoki xususiy diapazonlar (10.20.0.0/16) va portlar (boʻsh boʻlsa 80 va 443). Boshqa tarmoqda ularning ichida torroq marshrut boʻlishi mumkin (10.0.0.0/8 ichida 10.30.0.0/16): aniqrogʻi ustun keladi. Ikki tarmoq bir xil marshrutni koʻrsata olmaydi.';
+
+  @override
+  String get networkRouteTarget => 'Xost, domen yoki diapazon';
+
+  @override
+  String get networkRoutePorts => 'Portlar';
+
+  @override
+  String get networkRemoveRoute => 'Marshrutni oʻchirish';
+
+  @override
+  String get networkAddRoute => 'Marshrut qoʻshish';
+
+  @override
+  String get networkBlastRadius =>
+      'agnts vazifalaringiz uchun ishga tushiradigan kod shu roʻyxatdagi barcha xostlarga ulana oladi. Butun diapazonlar oʻrniga aniq xostlarni koʻrsating.';
+
+  @override
+  String get networkCa => 'Kompaniya CA sertifikatlari';
+
+  @override
+  String networkCaSaved(String subjects, String date) {
+    return 'Ishonchli: $subjects ($date gacha).';
+  }
+
+  @override
+  String get networkCaRemove => 'Oʻchirish';
+
+  @override
+  String get networkCaHelp =>
+      'Ichki CA ingizning PEM sertifikatlari. agnts va uning ishga tushirishlari ularga ochiq ildiz sertifikatlari bilan birga ishonadi.';
+
+  @override
+  String networkSaved(String name) {
+    return '$name saqlandi';
+  }
+
+  @override
+  String get networkRemove => 'Oʻchirish';
+
+  @override
+  String get networkRemoved => 'Xususiy tarmoq oʻchirildi';
+
+  @override
+  String networkRemoveConfirm(String name) {
+    return '$name oʻchirilsinmi? agnts uning marshrutlaridagi hostlarga ulanmay qoʻyadi.';
+  }
+
+  @override
+  String get networkLinkTitle => 'agnts-link ni ishga tushiring';
+
+  @override
+  String get networkLinkHelp =>
+      'Buni tarmoq ichidagi yuqoridagi hostlarni koʻra oladigan mashinada ishga tushiring. AGNTS_LINK_ALLOW — sizning chegarangiz: agnts-link boshqa hech narsaga ulanmaydi. Har bir tarmoqning oʻz tokeni bor, shuning uchun bitta mashina bir nechta linkni ishga tushira oladi.';
+
+  @override
+  String get networkToken => 'Token';
+
+  @override
+  String get networkTokenOnce => 'Hozir nusxa oling: u faqat bir marta koʻrsatiladi.';
+
+  @override
+  String get networkLinkHooks =>
+      'Vebhuklar: GitLab va Jira da http://AGNTS-LINK-XOSTI:8080 manzilini Integratsiyalar sahifasidagi /webhooks/… yoʻli bilan koʻrsating.';
+
+  @override
+  String get networkRotate => 'Tokenni almashtirish';
+
+  @override
+  String get networkRotateConfirm =>
+      'Yangi token yaratilsinmi? Ishlab turgan agnts-link yangisi bilan qayta ishga tushirilmaguncha uziladi.';
+
+  @override
+  String get networkTest => 'Ulanishni tekshirish';
+
+  @override
+  String get networkTestRun => 'Tekshirish';
+
+  @override
+  String get networkTesting => 'Tekshirilmoqda…';
+
+  @override
+  String networkTestOk(String name, String via, String ip, String ms) {
+    return '$name ($via) orqali $ip ga $ms ms da ulandi.';
+  }
+
+  @override
+  String networkTlsOk(String subject, String issuer) {
+    return 'Sertifikat joyida: $subject, beruvchi $issuer.';
+  }
+
+  @override
+  String networkTlsBad(String error) {
+    return 'Sertifikatga ishonch yoʻq: $error';
+  }
+
+  @override
+  String get networkActivity => 'Faollik';
+
+  @override
+  String networkActivityCounts(String n, String refused) {
+    return '$n ta ulanish, $refused tasi rad etilgan yoki xato';
+  }
+
+  @override
+  String get networkActivityShow => 'Ulanishlarni koʻrsatish';
+
+  @override
+  String get networkActivityHide => 'Ulanishlarni yashirish';
+
+  @override
+  String get networkRefused => 'rad etildi';
+
+  @override
+  String networkSecondsAgo(String n) {
+    return '$n s oldin';
+  }
+
+  @override
+  String networkMinutesAgo(String n) {
+    return '$n daqiqa oldin';
+  }
+
+  @override
+  String networkHoursAgo(String n) {
+    return '$n soat oldin';
+  }
+
+  @override
+  String get networkReconnect => 'Qayta ulash';
+
+  @override
+  String get networkReconnectHelp =>
+      'Tunnelni qayta ishga tushirish: yangi OpenVPN mijozi, yangi WireGuard handshake yoki agnts-link qayta ulanadi';
+
+  @override
+  String get networkReconnecting => 'Qayta ulanmoqda: tunnel 15 soniya ichida qayta ishga tushadi';
+
+  @override
+  String get networkAdd => 'Tarmoq qoʻshish';
+
+  @override
+  String get networkAddTitle => 'Yangi xususiy tarmoq';
+
+  @override
+  String get networkAddSubmit => 'Tarmoq qoʻshish';
+
+  @override
+  String get networkEditorSub => 'Tarmoqlaringizdan biriga tunnel va u orqali oʻtadigan hostlar';
+
+  @override
+  String get networkEdit => 'Tahrirlash';
+
+  @override
+  String get networkDone => 'Tayyor';
+
+  @override
+  String get networkName => 'Nomi';
+
+  @override
+  String get networkNamePlaceholder => 'Mijoz A, Ofis, Data-markaz';
+
+  @override
+  String get networkNameHelp => 'Ish maydonida yagona: tarmoq olib boradigan kompaniya, ofis yoki data-markaz.';
+
+  @override
+  String get networkEmpty => 'Hozircha xususiy tarmoq yoʻq. Faqat tarmoq ichida mavjud hostlarga ulanish uchun tarmoq qoʻshing.';
+
+  @override
+  String networkLimit(String n) {
+    return 'Ish maydonida koʻpi bilan $n ta xususiy tarmoq boʻladi';
+  }
+
+  @override
+  String networkCaShort(String subjects) {
+    return '$subjects ga ishonadi';
+  }
+
+  @override
+  String get networkTestHelp =>
+      'host:port kiriting. agnts marshrutlar olib boradigan tarmoqni tanlaydi, ulanadi va sertifikatni tekshiradi.';
+
+  @override
+  String get networkTestThrough => 'Orqali';
+
+  @override
+  String get networkTestAuto => 'Marshrutlar tanlagan tarmoq';
+
+  @override
+  String get networkActivityAll => 'Barcha tarmoqlar';
+
+  @override
+  String get networkActivityNetwork => 'Tarmoq';
+
+  @override
+  String get networkActivityTime => 'Vaqt';
+
+  @override
+  String get networkActivityTarget => 'Manzil';
+
+  @override
+  String get networkActivitySource => 'Tiket yoki manba';
+
+  @override
+  String get networkGone => 'oʻchirilgan';
 
   @override
   String get platformTitle => 'Administrator kabineti';
@@ -4744,6 +6886,9 @@ class AppLocalizationsUz extends AppLocalizations {
   String get repoBrief => 'Tavsif';
 
   @override
+  String get repoCi => 'CI';
+
+  @override
   String get reposTitle => 'Repozitoriylar';
 
   @override
@@ -5861,7 +8006,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get settingsDenyHelp => 'Tiket soʻrasa ham doim rad etiladi. Kodni agnts yuboradi, hech qachon Claude Code emas.';
 
   @override
-  String get settingsCommits => 'Commitlar va pull requestlar';
+  String get settingsCommits => 'Commitlar va PR';
 
   @override
   String get settingsCommitsSub => 'Commitlar kimning nomidan va pull requestlar qanday ochiladi';
@@ -5973,9 +8118,6 @@ class AppLocalizationsUz extends AppLocalizations {
   String get settingsReviewDone => 'agnts kod sharhi tugaganda';
 
   @override
-  String get settingsOnThisPage => 'Ushbu sahifada';
-
-  @override
   String get settingsSecretsHelp =>
       'Jira, GitHub va Claude tokenlari serveringizda shifrlangan holda saqlanadi. Bu sahifa ularni hech qachon koʻrsatmaydi.';
 
@@ -6016,6 +8158,9 @@ class AppLocalizationsUz extends AppLocalizations {
   @override
   String get settingsReflectHelp =>
       'O‘zgartirish so‘raganingizda yoki ishni sabab bilan rad etganingizda, agnts uning ortidagi umumiy qoidani qidiradi va «Qoidalar» sahifasida taklif qiladi. Siz qabul qilmaguningizcha hech narsa qo‘llanmaydi.';
+
+  @override
+  String get settingsCiRed => 'Kuzatiladigan branch qizarganda';
 
   @override
   String get spendTitle => 'Token sarfi';
@@ -7016,6 +9161,18 @@ class AppLocalizationsUz extends AppLocalizations {
   String get ticketSrcGit => 'Pull request';
 
   @override
+  String get ticketSrcCi => 'CI yiqilishi';
+
+  @override
+  String get ticketKvCi => 'CI';
+
+  @override
+  String ticketCiFixes(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n marta', one: '$n marta');
+    return 'CI pull requestni $_temp0 qaytardi';
+  }
+
+  @override
   String get ticketsTitle => 'Tiketlar';
 
   @override
@@ -7051,6 +9208,15 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get ticketsColRepo => 'Repozitoriy';
+
+  @override
+  String get ticketsRepoLabel => 'Repozitoriy';
+
+  @override
+  String get ticketsAllRepos => 'Barcha repozitoriylar';
+
+  @override
+  String get ticketsNoRepo => 'Repozitoriysiz';
 
   @override
   String get ticketsColStatus => 'Holat';
@@ -7090,7 +9256,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get ticketsListSub => 'agnts belgili Jira va Plane tiketlari hamda shaxsiy loyihalaringiz uchun yaratgan vazifalaringiz.';
 
   @override
-  String get ticketsNoMatch => 'Qidiruvingiz boʻyicha tiket topilmadi.';
+  String get ticketsNoMatch => 'Filtrlarga mos tiket yo\'q.';
 
   @override
   String get ticketsEmptyNeeds =>
@@ -7125,6 +9291,9 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get ticketsSourceGit => 'PR';
+
+  @override
+  String get ticketsSourceCi => 'CI';
 
   @override
   String get usageTitle => 'Tarif limitlari';

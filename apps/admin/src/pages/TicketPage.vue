@@ -19,6 +19,7 @@ import TicketRelations from '../components/ticket/TicketRelations.vue'
 import CodeReview from '../components/ticket/CodeReview.vue'
 import DesignRecord from '../components/ticket/DesignRecord.vue'
 import RedFlags from '../components/ticket/RedFlags.vue'
+import HarnessChecks from '../components/ticket/HarnessChecks.vue'
 import ReplayButton from '../components/ticket/ReplayButton.vue'
 import PreviewShots from '../components/ticket/PreviewShots.vue'
 import ModelPicker from '../components/ticket/ModelPicker.vue'
@@ -26,6 +27,7 @@ import ReportView from '../components/ticket/ReportView.vue'
 import RepoPicker from '../components/ticket/RepoPicker.vue'
 import ProgressTrack from '../components/ticket/ProgressTrack.vue'
 import PullCard from '../components/ticket/PullCard.vue'
+import CiCard from '../components/ticket/CiCard.vue'
 import { useRepoMembers } from '../components/repo/useRepoMembers'
 import RunLog from '../components/ticket/RunLog.vue'
 import SpendCard from '../components/ticket/SpendCard.vue'
@@ -259,7 +261,9 @@ const act = useMutation({
     }
   },
   onError: (e) => {
-    notice.value = e instanceof HttpError && e.status === 409 ? t('ticket.conflict') : e instanceof HttpError ? e.message : t('common.error')
+    notice.value = e instanceof HttpError && e.status === 409 ? t('ticket.conflict')
+      : e instanceof HttpError && e.status === 400 && /credential/i.test(e.message) ? t('harnessTicket.secretsNeeded')
+        : e instanceof HttpError ? e.message : t('common.error')
   },
   onSettled: () => qc.invalidateQueries({ queryKey: ['ticket', key.value] }),
 })
@@ -373,6 +377,22 @@ async function showFile(path: string) {
 }
 
 const result = computed(() => d.value?.result)
+// Lines flagged as possible credentials: approving needs a person to say
+// they are not real ones, once per revision.
+const secretFlags = computed(() => (result.value?.redFlags ?? []).filter((f) => f.kind === 'secret' || f.kind === 'env_file').length)
+const secretsAcked = ref('')
+const ackKey = computed(() => `${key.value}@${tk.value?.revision ?? 0}`)
+const needsAck = computed(() => secretFlags.value > 0 && !pull.value && !report.value && secretsAcked.value !== ackKey.value)
+const ackSecrets = useMutation({
+  mutationFn: () => unwrap(api.POST('/tickets/{key}/secrets-ack', { params: { path: { key: key.value } } })),
+  onSuccess: () => {
+    secretsAcked.value = ackKey.value
+    notice.value = ''
+    ui.notify(t('harnessTicket.secretsDone'))
+    void qc.invalidateQueries({ queryKey: ['ticket', key.value] })
+  },
+  onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
+})
 // The tickets this one waits for (active dependencies not merged yet).
 const waitsFor = computed(() =>
   (d.value?.relations?.items ?? []).filter((r) => r.status === 'active' && r.direction === 'waits_for' && !r.other.landed).map((r) => r.other.key),
@@ -524,6 +544,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
 
     <div class="cfg-grid">
       <div class="col">
+        <CiCard v-if="tk.source === 'ci'" :ticket-key="tk.key" />
         <section class="card"><ProgressTrack :ticket="tk" :spend="d.spendByStage" /></section>
 
         <section v-if="!reviewingReport" class="card">
@@ -726,6 +747,14 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
                   </span>
                 </div>
               </div>
+              <div v-if="secretFlags" class="help" :class="needsAck ? 'bad' : 'ok'" role="status">
+                <HiIcon name="info" />
+                <div>
+                  <p><b>{{ t('harnessTicket.secretsTitle') }}</b></p>
+                  <p>{{ needsAck ? t('harnessTicket.secretsBody', { n: secretFlags }) : t('harnessTicket.secretsDone') }}</p>
+                  <button v-if="needsAck" class="btn btn-s" type="button" :disabled="ackSecrets.isPending.value" @click="ackSecrets.mutate()">{{ t('harnessTicket.secretsConfirm') }}</button>
+                </div>
+              </div>
               <div class="actions">
                 <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="approve">{{ t('ticket.approve') }}</button>
                 <button class="btn" type="button" :disabled="!feedback.trim() || feedbackUploading || act.isPending.value" @click="act.mutate('request-changes')">{{ t('ticket.requestChanges') }}</button>
@@ -859,6 +888,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             <fieldset class="ro-fs" :disabled="!workspace.canEdit">
               <CodeReview :ticket="tk" :review="d.review" :feedback="feedback" :report="report" :pull="pull" @add="addFeedback" @show="showFile" />
               <RedFlags v-if="result?.redFlags?.length" :flags="result.redFlags" @show="showFile" />
+              <HarnessChecks :result="result" />
             </fieldset>
           </section>
 
@@ -930,7 +960,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
               <dd><template v-for="(k2, i) in waitsFor" :key="k2"><template v-if="i">, </template><RouterLink :to="{ name: 'ticket', params: { key: k2 } }">{{ k2 }}</RouterLink></template></dd>
             </template>
             <dt>{{ t('kind.title') }}</dt><dd><KindBadge :ticket="tk" /></dd>
-            <dt>{{ t('ticket.kvSource') }}</dt><dd>{{ isTask ? t('ticket.srcTask') : isPlane ? t('ticket.srcPlane') : pull ? t('ticket.srcGit') : t('ticket.srcJira') }}</dd>
+            <dt>{{ t('ticket.kvSource') }}</dt><dd>{{ isTask ? t('ticket.srcTask') : isPlane ? t('ticket.srcPlane') : pull ? t('ticket.srcGit') : tk.source === 'ci' ? t('ticket.srcCi') : t('ticket.srcJira') }}</dd>
             <dt>{{ t('ticket.kvRepo') }}</dt><dd>{{ tk.repoName ?? '—' }}</dd>
             <dt>{{ t('queue.member') }}</dt>
             <dd>
@@ -948,6 +978,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             <template v-if="!report && !pull"><dt>{{ t('ticket.kvBranch') }}</dt><dd>{{ branch }}</dd></template>
             <template v-if="tk.assignees?.length"><dt>{{ t('ticket.kvAssignees') }}</dt><dd>{{ tk.assignees.join(', ') }}</dd></template>
             <dt>{{ t('ticket.kvRevision') }}</dt><dd>{{ tk.revision }}</dd>
+            <template v-if="tk.ciFixes"><dt>{{ t('ticket.kvCi') }}</dt><dd><span class="badge b-warn">{{ t('ticket.ciFixes', { n: tk.ciFixes }) }}</span></dd></template>
             <dt>{{ t('ticket.kvTurns') }}</dt><dd>{{ tk.turns }}</dd>
             <template v-if="d.effectiveModels && !pull">
               <dt>{{ t('ticket.kvCodingModel') }}</dt><dd>{{ MODEL_NAME[d.effectiveModels.coding] }}</dd>

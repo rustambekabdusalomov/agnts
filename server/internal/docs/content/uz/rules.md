@@ -19,3 +19,11 @@ Har bir tahlil va kod yozish ishga tushishi tegishli yoqilgan qoidalarni "Team r
 ## Narxi
 
 Tekshiruv — Sozlamalardagi tahlil modeli bilan qisqa Claude ishga tushishi. U kutayotgan tiketlardan oldin bajariladi, chunki keyingi barcha tiketlar uning natijasiga bogʻliq.
+
+## Majburiy qoidalar
+
+Qoidaga shablon bering, shunda agnts-guard uni Claude ishlayotganda qoʻllaydi: mos fayllarni tahrirlashda (xohlasangiz, faqat regulyar ifodaga mos qoʻshilgan qatorlarda), buyruqlarda yoki tayyor oʻzgarishda. *Bloklash* harakatni rad etadi; *Ogohlantirish* Claude ga aytadi. Yoqishdan oldin **Tarixda sinash** shablon agnts ning oxirgi oʻzgarishlarida nimani ushlashini koʻrsatadi. Buzilgan majburiy qoida reviewda qizil bayroq sifatida ham koʻrinadi.
+
+## Skillar, maslahatlar va boshlangʻich qoidalar
+
+**Skill** sifatida yetkaziladigan qoida yoki biznes eslatma har bir promptga kirmaydi; tavsifi ishga mos kelganda Claude uni yuklaydi, shuning uchun qoidalar koʻpaysa ham promptlar qisqa qoladi. Doim amal qilishi kerak boʻlgan qoidalarni promptda qoldiring. **Maslahatlar** — agnts muammoli ishga tushirishlardan olgan amaliy saboqlar; oʻrganilgan takliflar agnts ularni har safar yana koʻrganda ishonch toʻplaydi va shungacha faqat *kuzatiladi*, ikki repozitoriyda koʻrilgani esa barcha repozitoriylar uchun taklif qilinadi. Repozitoriy tillari uchun **boshlangʻich qoidalar** uning sahifasida taklif qilinadi; qabul qilinganlari takliflar sifatida qoʻshiladi.

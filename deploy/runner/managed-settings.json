@@ -8,7 +8,8 @@
       "Grep",
       "Bash",
       "TodoWrite",
-      "Task"
+      "Task",
+      "Skill"
     ],
     "deny": [
       "Bash(git push *)",
@@ -25,5 +26,57 @@
       "WebFetch"
     ],
     "disableBypassPermissionsMode": "disable"
+  },
+  "allowManagedHooksOnly": true,
+  "enableAllProjectMcpServers": false,
+  "allowedMcpServers": [],
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "g=/home/agent/.agnts/bin/agnts-guard; [ -x \"$g\" ] || exit 0; exec \"$g\" pre",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "g=/home/agent/.agnts/bin/agnts-guard; [ -x \"$g\" ] || exit 0; exec \"$g\" post",
+            "timeout": 180
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "g=/home/agent/.agnts/bin/agnts-guard; [ -x \"$g\" ] || exit 0; exec \"$g\" stop",
+            "timeout": 1800
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "compact|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "g=/home/agent/.agnts/bin/agnts-guard; [ -x \"$g\" ] || exit 0; exec \"$g\" session",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
   }
 }

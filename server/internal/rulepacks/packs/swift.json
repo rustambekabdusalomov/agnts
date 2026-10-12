@@ -1,0 +1,6 @@
+{"name": "Swift", "rules": [
+ {"title": "No force unwraps at runtime", "body": "Do not use !, try! or as! on values that can be nil or fail at runtime; use guard let, if let, try with do/catch, or as?."},
+ {"title": "UI work on the main actor", "body": "Code that updates UI state is marked @MainActor or dispatched to the main actor; shared mutable state is protected by an actor or isolated to one."},
+ {"title": "Weak self in long-lived closures", "body": "Closures stored by long-lived objects (timers, subscriptions, completion handlers kept by services) capture self weakly; delegates are weak references."},
+ {"title": "Secrets in the Keychain", "body": "Tokens and credentials are stored in the Keychain, never in UserDefaults, plists or source files."}
+]}

@@ -628,3 +628,40 @@ func TestFollowUpsNotification(t *testing.T) {
 		t.Fatal("sent for no follow-ups or with follow-up notifications off")
 	}
 }
+
+type fakeFixer struct{ fixed []int64 }
+
+func (f *fakeFixer) FixIt(_ context.Context, id int64, _ domain.Origin) (domain.Ticket, error) {
+	f.fixed = append(f.fixed, id)
+	return domain.Ticket{Key: "CI-4"}, nil
+}
+
+func TestCIFailureNotification(t *testing.T) {
+	n, _, _, tg := setup(t)
+	fx := &fakeFixer{}
+	n.SetCIFixer(fx)
+	ev := domain.Event{WorkspaceID: 1, ID: 1, Type: domain.EventCIFailure,
+		Data: map[string]any{"notify": true, "repo": "api", "branch": "main", "title": "TestApplyCoupon: expected 90, got 100", "failureId": float64(7)}}
+	n.handle(context.Background(), ev)
+	msgs := tg.sent("sendMessage")
+	if len(msgs) != 1 || !strings.Contains(msgs[0]["text"].(string), "api: main is red") || !strings.Contains(toJSON(msgs[0]["reply_markup"]), "cif:7") {
+		t.Fatalf("messages: %v", msgs)
+	}
+	// Infra failures and CI notifications turned off stay quiet.
+	ev.Data["notify"] = false
+	n.handle(context.Background(), ev)
+	ev.Data["notify"] = true
+	n.settings = fakeSettings{s: func() domain.Settings { s := domain.DefaultSettings(); s.Notify.CI = false; return s }()}
+	n.handle(context.Background(), ev)
+	if len(tg.sent("sendMessage")) != 1 {
+		t.Fatal("sent for infra or with CI notifications off")
+	}
+}
+
+func toJSON(v any) string {
+	if s, ok := v.(string); ok {
+		return s
+	}
+	b, _ := json.Marshal(v)
+	return string(b)
+}

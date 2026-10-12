@@ -39,6 +39,8 @@ class NotifySettings {
      this.previewPhotos,
 
      this.followUps,
+
+     this.ci,
   });
 
   @JsonKey(
@@ -166,6 +168,19 @@ class NotifySettings {
 
 
 
+      /// A watched branch went red
+  @JsonKey(
+    
+    name: r'ci',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? ci;
+
+
+
 
 
     @override
@@ -179,7 +194,8 @@ class NotifySettings {
       other.review == review &&
       other.preview == preview &&
       other.previewPhotos == previewPhotos &&
-      other.followUps == followUps;
+      other.followUps == followUps &&
+      other.ci == ci;
 
     @override
     int get hashCode =>
@@ -192,7 +208,8 @@ class NotifySettings {
         review.hashCode +
         preview.hashCode +
         previewPhotos.hashCode +
-        followUps.hashCode;
+        followUps.hashCode +
+        ci.hashCode;
 
   factory NotifySettings.fromJson(Map<String, dynamic> json) => _$NotifySettingsFromJson(json);
 

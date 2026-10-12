@@ -24,6 +24,14 @@ Name | Type | Description | Notes
 **questions** | [**List&lt;RuleQuestion&gt;**](RuleQuestion.md) |  | 
 **rounds** | **int** | Question rounds so far | 
 **error** | **String** | Why the last review failed | 
+**enforce** | [**RuleEnforce**](RuleEnforce.md) |  | [optional] 
+**delivery** | **String** | prompt: in every prompt; skill: a skill Claude loads when its description matches the work | [optional] 
+**skillDescription** | **String** | When the rule applies, for its skill | [optional] 
+**source_** | **String** | Where it came from: empty (a person), reflect, run, promoted or pack:<language> | [optional] 
+**confidence** | **num** | For a learned suggestion: 0.3 to 0.9, earned each time it is seen again | [optional] 
+**evidence** | **int** | How many times a learned suggestion was seen | [optional] 
+**lastSeen** | [**DateTime**](DateTime.md) |  | [optional] 
+**watching** | **bool** | A learned suggestion with too little evidence to show yet | [optional] 
 **analyzedAt** | [**DateTime**](DateTime.md) |  | [optional] 
 **createdAt** | [**DateTime**](DateTime.md) |  | 
 **updatedAt** | [**DateTime**](DateTime.md) |  | 

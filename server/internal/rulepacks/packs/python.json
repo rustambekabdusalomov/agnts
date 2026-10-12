@@ -1,0 +1,8 @@
+{"name": "Python", "rules": [
+ {"title": "No bare except, keep the cause", "body": "Never write except: or except Exception: pass. Catch the specific exceptions you can handle; when you raise a new one, chain it with raise NewError(...) from e."},
+ {"title": "Type hints on new functions", "body": "New and changed functions have type hints for parameters and return values, in the style the module already uses. Optional values are checked for None before use."},
+ {"title": "No mutable default arguments", "body": "Never use a list, dict or set literal as a default argument value; use None and create the value inside the function."},
+ {"title": "Parameters, never string-built SQL or shell", "body": "Pass values to SQL as query parameters, never with f-strings, % or + into the query text. Run subprocesses with a list of arguments, never shell=True with values from outside."},
+ {"title": "Context managers for resources", "body": "Files, database connections, locks and HTTP sessions are opened with with statements so they are closed on every path. Outgoing HTTP calls set a timeout."},
+ {"title": "Decimal for money, aware datetimes", "body": "Money and other exact amounts use decimal.Decimal (or integer minor units), never float. Datetimes are timezone-aware (UTC inside the system)."}
+]}

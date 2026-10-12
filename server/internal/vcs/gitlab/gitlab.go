@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"agnts/internal/domain"
+	"agnts/internal/netroute"
 	"agnts/internal/orchestrator"
 	"agnts/internal/vcs"
 )
@@ -40,7 +41,7 @@ var _ vcs.Provider = (*Host)(nil)
 
 // New returns a GitLab host.
 func New(cfg ConfigSource) *Host {
-	return &Host{cfg: cfg, hc: &http.Client{Timeout: 30 * time.Second}}
+	return &Host{cfg: cfg, hc: netroute.Client(30 * time.Second)}
 }
 
 // WithConfig returns a host with a fixed connection (to test one before saving).
@@ -156,19 +157,26 @@ func (h *Host) OpenPR(ctx context.Context, repo domain.Repository, pr orchestrat
 	return open[0].IID, open[0].WebURL, nil
 }
 
-// PRMerged reports whether merge request number (its IID) was merged.
-func (h *Host) PRMerged(ctx context.Context, repo domain.Repository, number int) (bool, error) {
+// PRState reports whether merge request number (its IID) is open, merged
+// or closed without a merge (domain.PullOpen, PullMerged, PullClosed).
+func (h *Host) PRState(ctx context.Context, repo domain.Repository, number int) (string, error) {
 	p, err := h.project(ctx, repo)
 	if err != nil {
-		return false, err
+		return "", err
 	}
 	var m struct {
 		State string `json:"state"`
 	}
 	if _, err := h.call(ctx, http.MethodGet, p+"/merge_requests/"+strconv.Itoa(number), nil, &m); err != nil {
-		return false, err
+		return "", err
 	}
-	return m.State == "merged", nil
+	switch m.State {
+	case "merged":
+		return domain.PullMerged, nil
+	case "closed":
+		return domain.PullClosed, nil
+	}
+	return domain.PullOpen, nil
 }
 
 func ciStatus(s string) string {

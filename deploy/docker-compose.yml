@@ -80,10 +80,40 @@ services:
       # Hosts added under Settings -> Network (a staging API for previews),
       # re-read every 30 seconds.
       AGNTS_EGRESS_EXTRA_URL: http://agnts:8081/egress/allow
+      # Private networks: a run's connection to a host on its workspace's
+      # routes goes through the gateway (empty AGNTS_GATEWAY: off).
+      AGNTS_GATEWAY: ${AGNTS_GATEWAY:-}
+      AGNTS_GATEWAY_SECRET: ${AGNTS_GATEWAY_SECRET:-}
+      AGNTS_EGRESS_ROUTE_URL: http://agnts:8081/egress/route
     # The image's own check probes the API port; the proxy has none.
     healthcheck:
       disable: true
     networks: [default, runs]
+    logging: *logging
+
+  # Private networks (Settings → Private network): every workspace's tunnel
+  # into its own network. WireGuard runs here in user space; OpenVPN runs in
+  # a sidecar per workspace that agnts starts on the agnts-ovpn network;
+  # agnts-link connectors reach /link through Caddy. agnts and the egress
+  # proxy dial through it with AGNTS_GATEWAY_SECRET. Turn on with
+  #   AGNTS_GATEWAY=gateway:3129 and AGNTS_GATEWAY_SECRET=<random> in .env,
+  #   docker compose --profile private-network up -d
+  gateway:
+    image: ${AGNTS_IMAGE:-registry.agnts.uz/agnts:latest}
+    restart: unless-stopped
+    command: ["gateway"]
+    profiles: ["private-network"]
+    environment:
+      # The gateway opens the sealed VPN configs: agnts's own key.
+      AGNTS_ENC_KEY: ${AGNTS_ENC_KEY:-}
+      AGNTS_GATEWAY_SECRET: ${AGNTS_GATEWAY_SECRET:-}
+      AGNTS_LOG_LEVEL: ${AGNTS_LOG_LEVEL:-info}
+    expose:
+      - "3129" # CONNECT, for agnts and the egress proxy
+      - "3130" # agnts-link sessions, routed by Caddy at /link
+    healthcheck:
+      disable: true
+    networks: [default, ovpn]
     logging: *logging
 
   postgres:
@@ -128,10 +158,24 @@ services:
     build: ./runner
     profiles: ["build"]
 
+  # Build-only: the OpenVPN sidecar (OpenVPN plus the agnts binary).
+  #   docker compose --profile build build ovpn
+  ovpn:
+    image: ${AGNTS_OVPN_IMAGE:-agnts-ovpn:latest}
+    build:
+      context: ./ovpn
+      args:
+        AGNTS_IMAGE: ${AGNTS_IMAGE:-registry.agnts.uz/agnts:latest}
+    profiles: ["build"]
+
 networks:
   runs:
     name: agnts-runs
     internal: true
+  # OpenVPN sidecars and the gateway; the sidecars need a way out to the
+  # VPN server, run containers never join it.
+  ovpn:
+    name: agnts-ovpn
 
 # Volume names are pinned to the ones created before the project was renamed
 # from hiro, so existing data, certificates and clones stay attached.

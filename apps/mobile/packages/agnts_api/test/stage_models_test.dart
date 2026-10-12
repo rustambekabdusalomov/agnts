@@ -7,37 +7,44 @@ void main() {
   // TODO add properties to the entity
 
   group(StageModels, () {
-    // Model analyze
+    // A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
+    // String analyze
     test('to test the property `analyze`', () async {
       // TODO
     });
 
-    // Model coding
+    // A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
+    // String coding
     test('to test the property `coding`', () async {
       // TODO
     });
 
-    // Model retry
+    // A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
+    // String retry
     test('to test the property `retry`', () async {
       // TODO
     });
 
-    // Model helper
+    // A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
+    // String helper
     test('to test the property `helper`', () async {
       // TODO
     });
 
-    // Model learn
+    // A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
+    // String learn
     test('to test the property `learn`', () async {
       // TODO
     });
 
-    // ReviewModel review
+    // auto: opus for complex tickets, sonnet otherwise
+    // String review
     test('to test the property `review`', () async {
       // TODO
     });
 
-    // Model preview
+    // A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
+    // String preview
     test('to test the property `preview`', () async {
       // TODO
     });

@@ -12,8 +12,9 @@ import { useIntegrations } from '../integrations/useIntegrations'
 import { useTr } from '../../composables/useTranslation'
 
 // Follow-up tickets agnts suggests for finishing this one. The person
-// picks; every ticket made here starts queued, so nothing spends tokens
-// until someone starts it.
+// picks, then creates them held (nothing spends tokens until someone
+// starts each one) or started. Either way a suggestion that must wait for
+// another one waits for its ticket in the queue.
 const props = defineProps<{ ticket: Ticket; followUps?: FollowUps }>()
 const { t } = useI18n()
 const tr = useTr()
@@ -40,6 +41,9 @@ watch(
   { immediate: true },
 )
 const picked = computed(() => open.value.filter((s) => s.ready && edits[s.id]?.picked))
+// The sibling suggestions one must wait for, by title.
+const afterOf = (s: FollowUpSuggestion) =>
+  (s.after ?? []).map((id) => all.value.find((x) => x.id === id)).filter((x) => !!x).map((x) => x.childKey ?? tr.value(x.title))
 
 const kindOptions = computed(() => KINDS.map((k) => ({ value: k, label: t(`kind.${k}`) })))
 const targetOptions = computed(() => [
@@ -68,11 +72,12 @@ const setMode = useMutation({
 
 const errors = ref<string[]>([])
 const accept = useMutation({
-  mutationFn: () =>
+  mutationFn: (start: boolean) =>
     unwrap(
       api.POST('/tickets/{key}/follow-ups/accept', {
         params: { path: { key: props.ticket.key } },
         body: {
+          start,
           items: picked.value.map((s) => {
             const e = edits[s.id]
             return {
@@ -85,12 +90,12 @@ const accept = useMutation({
         },
       }),
     ),
-  onSuccess: (res) => {
+  onSuccess: (res, start) => {
     const made = res.results.filter((r) => r.ticket).length
     errors.value = res.results
       .filter((r) => r.error)
       .map((r) => t('followUps.failedItem', { title: all.value.find((s) => s.id === r.id)?.title ?? `#${r.id}`, error: r.error ?? '' }))
-    if (made) ui.notify(t('followUps.createdNotice', { count: made }))
+    if (made) ui.notify(t(start ? 'followUps.startedNotice' : 'followUps.createdNotice', { count: made }))
     refresh()
   },
   onError: fail,
@@ -132,6 +137,7 @@ const dismiss = useMutation({
             <input v-if="edits[s.id].picked" v-model="edits[s.id].title" class="cfg-in fu-title-in" :aria-label="t('followUps.editTitle')" maxlength="300">
             <p v-else class="fu-title">{{ tr(s.title) }}</p>
             <p class="fu-serves"><b>{{ t('followUps.serves') }}:</b> {{ tr(s.serves) }}</p>
+            <p v-if="afterOf(s).length" class="fu-serves"><b>{{ t('followUps.after') }}:</b> {{ afterOf(s).join(', ') }}</p>
             <button v-if="s.description" type="button" class="fu-more" :aria-expanded="edits[s.id].open" @click="edits[s.id].open = !edits[s.id].open">
               {{ t('followUps.details') }}
             </button>
@@ -151,8 +157,11 @@ const dismiss = useMutation({
       <li v-for="(e, i) in errors" :key="i">{{ e }}</li>
     </ul>
     <div v-if="open.length" class="actions" style="margin-top: 12px">
-      <button class="btn btn-p" type="button" :disabled="!picked.length || accept.isPending.value" @click="accept.mutate()">
-        {{ t('followUps.create', { count: picked.length }) }}
+      <button class="btn btn-p" type="button" :disabled="!picked.length || accept.isPending.value" @click="accept.mutate(true)">
+        {{ t('followUps.createStart', { count: picked.length }) }}
+      </button>
+      <button class="btn" type="button" :disabled="!picked.length || accept.isPending.value" @click="accept.mutate(false)">
+        {{ t('followUps.createHeld') }}
       </button>
       <span class="hint">{{ t('followUps.queuedHint') }}</span>
     </div>

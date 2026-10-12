@@ -262,6 +262,10 @@ func (o *Orchestrator) contextFiles(ctx context.Context, ws Workspace, t domain.
 			write(PrecedentsPath, precedentsMarkdown(repo.Name, prec), "similar tickets this team approved before, with what changed and what reviewers asked for: do similar work the same way, and avoid what reviewers objected to")
 		}
 	}
+	if n := o.writeSkills(ctx, ws, repoID); n > 0 {
+		out = append(out, ContextFile{Path: SkillsDir, What: fmt.Sprintf("%d more team %s as Claude Code skills (named agnts-…): load each one whose description matches what you are doing, and follow it like the rules above",
+			n, plural(n, "rule or tip", "rules and tips"))})
+	}
 	return out
 }
 

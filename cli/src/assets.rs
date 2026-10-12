@@ -59,6 +59,11 @@ pub const FILES: &[Asset] = &[
         mode: 0o755,
     },
     Asset {
+        path: "runner/preview/agnts-act.mjs",
+        content: include_str!("../../deploy/runner/preview/agnts-act.mjs"),
+        mode: 0o755,
+    },
+    Asset {
         path: "runner/preview/agnts-preview",
         content: include_str!("../../deploy/runner/preview/agnts-preview"),
         mode: 0o755,

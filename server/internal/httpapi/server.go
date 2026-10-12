@@ -23,6 +23,7 @@ import (
 	"agnts/internal/auth"
 	"agnts/internal/domain"
 	"agnts/internal/httpapi/gen"
+	"agnts/internal/network"
 )
 
 // SessionCookie is the name of the web session cookie.
@@ -46,6 +47,7 @@ type Options struct {
 	Rules   Rules        // Rules page; nil answers 501
 	Briefs  Briefs       // repository briefs; nil answers 501
 	Reviews Reviews      // pull request reviews; nil answers 501
+	CI      CI           // CI watching; nil answers 501
 	OAuth   OAuth        // MCP connector authorization; nil disables /mcp
 	MCP     http.Handler // the MCP streamable HTTP handler
 	DB      Pinger
@@ -90,6 +92,9 @@ type Options struct {
 	// SiteURL is the public website (AGNTS_SITE_URL); its "Request a
 	// connector" form posts to /site/connector-request. Nil turns that off.
 	SiteURL *url.URL
+	// Network runs the workspace's private network (VPN, agnts-link);
+	// nil answers 501.
+	Network *network.Service
 }
 
 // Server implements gen.ServerInterface.

@@ -355,3 +355,42 @@ func TestFollowUpToPlane(t *testing.T) {
 		t.Fatalf("jira calls: %v", h.tracker.calls)
 	}
 }
+
+func TestFollowUpsStartInOrder(t *testing.T) {
+	h := newHarness(t)
+	h.settings.s.SuggestFollowUps = true
+	h.ingest("PAY-1")
+	build := followUp("prerequisite", "Commit the missing files")
+	login := followUp("prerequisite", "Close the login bypass")
+	login["after"] = []int{1}
+	logs := followUp("split", "Purge the logs")
+	h.runner.scripts = []script{{result: ok("s"), files: map[string]string{orchestrator.AnalysisPath: analysisWith(build, login, logs)}}}
+	h.step()
+	if p := lastPrompt(h); !strings.Contains(p, `"after": [numbers of the follow-ups in this list`) {
+		t.Fatalf("analysis prompt does not ask for the order:\n%s", p)
+	}
+	ss := suggestions(t, h, "PAY-1")
+	if len(ss) != 3 || len(ss[1].After) != 1 || ss[1].After[0] != ss[0].ID || len(ss[0].After) != 0 || len(ss[2].After) != 0 {
+		t.Fatalf("suggestions: %+v", ss)
+	}
+
+	// Created and started at once; the second waits for the first.
+	res, err := h.o.AcceptSuggestions(h.ctx, "PAY-1", []orchestrator.AcceptInput{
+		{ID: ss[0].ID, Start: true}, {ID: ss[1].ID, Start: true}, {ID: ss[2].ID},
+	}, domain.OriginWeb)
+	if err != nil || res[0].Err != nil || res[1].Err != nil || res[2].Err != nil {
+		t.Fatalf("accept: %+v %v", res, err)
+	}
+	first, second, third := res[0].Ticket, res[1].Ticket, res[2].Ticket
+	if first.Held || second.Held || !third.Held {
+		t.Fatalf("held: %v %v %v", first.Held, second.Held, third.Held)
+	}
+	rs, err := h.store.RelationsOf(h.ctx, second.Key)
+	if err != nil || len(rs) != 1 || rs[0].Type != domain.RelDependsOn || rs[0].TicketKey != second.Key ||
+		rs[0].OtherKey != first.Key || rs[0].Status != domain.RelActive || !strings.Contains(rs[0].Reason, "Commit the missing files") {
+		t.Fatalf("relations of %s: %+v %v", second.Key, rs, err)
+	}
+	if rs, _ := h.store.RelationsOf(h.ctx, third.Key); len(rs) != 0 {
+		t.Fatalf("the third follow-up got relations: %+v", rs)
+	}
+}

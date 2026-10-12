@@ -299,9 +299,33 @@ func TestAnalytics(t *testing.T) {
 	// Only PAY-1 had a coding run: done first time (agnts's own feedback
 	// does not count against it).
 	want := QualityStats{PromptVersion: "v1", Tickets: 1, ReachedReview: 1, Done: 1, FirstTry: 1, FixAttempts: 1,
-		Serious: 1, FootprintHit: 0.5, RedFlags: 2, SelfFixes: 1}
+		Serious: 1, FootprintHit: 0.5, RedFlags: 2, SelfFixes: 1, Tokens: 12400}
 	if len(a.Quality) != 1 || a.Quality[0] != want {
 		t.Fatalf("quality: %+v", a.Quality)
+	}
+
+	// The harness: agnts-guard refused two edits, the stop gate caught a
+	// failure (but the checks still needed a fix, so no save), the run
+	// stalled once, the fix was proven, one of two findings was adopted,
+	// and the ticket was in the fact check group.
+	for _, q := range []string{
+		`UPDATE runs SET harness = '{"guard":{"blocks":{"secret":1,"skipped_test":1},"stopFailures":1},"stalls":[{"reason":"no_edits"}],"factCheck":true}' WHERE stage = 'code'`,
+		`INSERT INTO results (run_id, harness) SELECT id, '{"proof":{"status":"proven"}}' FROM runs WHERE stage = 'code'`,
+		`INSERT INTO runs (ticket_id, stage, model, started_at, finished_at, turns, exit_reason) VALUES ((SELECT id FROM tickets WHERE key='PAY-1'), 'review', 'opus', now(), now(), 3, 'ok')`,
+		`INSERT INTO results (run_id, summary) SELECT id, '{"findings":[{"title":"a","adopted":true},{"title":"b"}]}' FROM runs WHERE stage = 'review'`,
+	} {
+		if _, err := s.db.Exec(ctx, q); err != nil {
+			t.Fatalf("%s: %v", q, err)
+		}
+	}
+	a, err = s.Analytics(ctx, 7, time.UTC)
+	if err != nil {
+		t.Fatal(err)
+	}
+	q := a.Quality[0]
+	if q.GuardBlocks != 2 || q.StopSaves != 0 || q.Stalls != 1 || q.ProofDue != 1 || q.Proven != 1 || q.Findings != 2 || q.Adopted != 1 ||
+		q.FactCheck != 1 || q.FactCheckFirst != 1 {
+		t.Fatalf("harness quality: %+v", q)
 	}
 }
 

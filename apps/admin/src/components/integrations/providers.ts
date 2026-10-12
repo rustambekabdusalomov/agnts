@@ -1,7 +1,7 @@
 // Providers shown in the UI, with their tile colour and icon (from the demo).
-export type Provider = 'jira' | 'plane' | 'github' | 'gitlab' | 'claude' | 'telegram'
+export type Provider = 'jira' | 'plane' | 'github' | 'gitlab' | 'claude' | 'telegram' | 'openai'
 
-export const PROVIDERS: Provider[] = ['jira', 'plane', 'github', 'gitlab', 'claude', 'telegram']
+export const PROVIDERS: Provider[] = ['jira', 'plane', 'github', 'gitlab', 'claude', 'telegram', 'openai']
 
 /** Providers that send tickets. */
 export type Tracker = 'jira' | 'plane'
@@ -14,6 +14,7 @@ export const PROVIDER_TINT: Record<Provider, string> = {
   gitlab: '#C2410C',
   claude: '#C2410C',
   telegram: '#229ED9',
+  openai: '#10A37F',
 }
 
 export const PROVIDER_ICON: Record<Provider, string> = {
@@ -23,6 +24,7 @@ export const PROVIDER_ICON: Record<Provider, string> = {
   gitlab: '<circle cx="6" cy="5" r="2.2"/><circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="7" r="2.2"/><path d="M6 7.2v9.6M18 9.2c0 4-6 3.5-11.2 8"/>',
   claude: '<path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4"/>',
   telegram: '<path d="M21 4L3 11l6 2.5L19 7l-8 8 .5 5 3-3.5 4.5 3.5z"/>',
+  openai: '<path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z"/><circle cx="12" cy="12" r="3"/>',
 }
 
 export function isProvider(s: string): s is Provider {

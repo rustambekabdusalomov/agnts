@@ -1,0 +1,8 @@
+{"name": "Java", "rules": [
+ {"title": "Try-with-resources for everything closeable", "body": "Streams, readers, connections, statements and result sets are opened in try-with-resources so they close on every path."},
+ {"title": "No swallowed exceptions", "body": "Do not catch an exception only to log it and continue, or leave a catch block empty. Rethrow it wrapped with context (new XException(\"what failed\", e)) or handle it fully."},
+ {"title": "Constructor injection only", "body": "New Spring beans get their dependencies through the constructor (final fields), never with @Autowired on fields."},
+ {"title": "No null returns for collections", "body": "Methods that return collections return an empty collection instead of null. Optional is used for return values that may be absent, never for fields or parameters."},
+ {"title": "Prepared statements and bound parameters", "body": "SQL and JPQL take values as bound parameters; queries are never built by concatenating strings with values."},
+ {"title": "Entities are not API responses", "body": "Controllers return DTOs, not JPA entities, so lazy relations and internal fields never leak into responses."}
+]}

@@ -10,7 +10,9 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 
 	"agnts/internal/domain"
 )
@@ -39,6 +41,155 @@ type SecretSource func(ctx context.Context) string
 // HookSink receives what the webhooks report.
 type HookSink interface {
 	MarkMerged(ctx context.Context, prURL, branch string, origin domain.Origin) (bool, error)
+}
+
+// CloseSink records pull requests closed without a merge, or reopened. A
+// HookSink may implement it.
+type CloseSink interface {
+	MarkPRClosed(ctx context.Context, prURL, branch string, closed bool, origin domain.Origin) (bool, error)
+}
+
+// prClosed hands a close or reopen to the sink when it takes them.
+func prClosed(ctx context.Context, sink HookSink, prURL, branch string, closed bool) error {
+	cs, ok := sink.(CloseSink)
+	if !ok {
+		return nil
+	}
+	_, err := cs.MarkPRClosed(ctx, prURL, branch, closed, domain.OriginWebhook)
+	return err
+}
+
+// CISink receives finished CI runs. A HookSink may implement it.
+type CISink interface {
+	CIRunFinished(ctx context.Context, run domain.CIRun) error
+}
+
+// ciRun hands a finished run to the sink when it takes CI runs. Errors are
+// logged, not returned: the host would only redeliver the same run.
+func ciRun(ctx context.Context, sink HookSink, run domain.CIRun, log *slog.Logger) {
+	ci, ok := sink.(CISink)
+	if !ok || run.RunID == 0 {
+		return
+	}
+	if err := ci.CIRunFinished(ctx, run); err != nil {
+		log.Error("ci run", "repo", run.Repo, "run", run.RunID, "err", err)
+	}
+}
+
+// githubRun is the workflow_run webhook's payload, as much as CI needs.
+type githubRun struct {
+	Action string `json:"action"`
+	Run    struct {
+		ID           int64     `json:"id"`
+		Name         string    `json:"name"`
+		Path         string    `json:"path"`
+		DisplayTitle string    `json:"display_title"`
+		HeadBranch   string    `json:"head_branch"`
+		HeadSHA      string    `json:"head_sha"`
+		Event        string    `json:"event"`
+		Status       string    `json:"status"`
+		Conclusion   string    `json:"conclusion"`
+		RunAttempt   int       `json:"run_attempt"`
+		HTMLURL      string    `json:"html_url"`
+		UpdatedAt    time.Time `json:"updated_at"`
+		PullRequests []struct {
+			Number int `json:"number"`
+		} `json:"pull_requests"`
+		HeadCommit struct {
+			Message string `json:"message"`
+			Author  struct {
+				Name string `json:"name"`
+			} `json:"author"`
+		} `json:"head_commit"`
+		HeadRepository struct {
+			FullName string `json:"full_name"`
+		} `json:"head_repository"`
+	} `json:"workflow_run"`
+	Repository struct {
+		FullName string `json:"full_name"`
+	} `json:"repository"`
+}
+
+func (p githubRun) run() (domain.CIRun, bool) {
+	r := p.Run
+	if p.Action != "completed" || r.ID == 0 {
+		return domain.CIRun{}, false
+	}
+	wf := r.Path
+	if wf == "" {
+		wf = r.Name
+	}
+	if i := strings.LastIndex(wf, "/"); i >= 0 {
+		wf = wf[i+1:]
+	}
+	msg, _, _ := strings.Cut(strings.TrimSpace(r.HeadCommit.Message), "\n")
+	if msg == "" {
+		msg = r.DisplayTitle
+	}
+	out := domain.CIRun{Provider: "github", Repo: p.Repository.FullName, RunID: r.ID, Attempt: max(r.RunAttempt, 1), Workflow: wf,
+		Name: r.Name, Branch: r.HeadBranch, SHA: r.HeadSHA, Event: r.Event, Conclusion: r.Conclusion, URL: r.HTMLURL,
+		Author: r.HeadCommit.Author.Name, Message: msg, Finished: r.UpdatedAt,
+		Fork: r.HeadRepository.FullName != "" && !strings.EqualFold(r.HeadRepository.FullName, p.Repository.FullName)}
+	for _, pr := range r.PullRequests {
+		out.PRNumbers = append(out.PRNumbers, pr.Number)
+	}
+	return out, true
+}
+
+// gitlabPipeline is the pipeline webhook's payload, as much as CI needs.
+type gitlabPipeline struct {
+	Attrs struct {
+		ID         int64  `json:"id"`
+		Ref        string `json:"ref"`
+		SHA        string `json:"sha"`
+		Status     string `json:"status"`
+		Source     string `json:"source"`
+		FinishedAt string `json:"finished_at"`
+		URL        string `json:"url"`
+	} `json:"object_attributes"`
+	MR *struct {
+		IID             int    `json:"iid"`
+		SourceProjectID int64  `json:"source_project_id"`
+		TargetProjectID int64  `json:"target_project_id"`
+		SourceBranch    string `json:"source_branch"`
+	} `json:"merge_request"`
+	Project struct {
+		Path   string `json:"path_with_namespace"`
+		WebURL string `json:"web_url"`
+	} `json:"project"`
+	Commit struct {
+		Message string `json:"message"`
+		Author  struct {
+			Name string `json:"name"`
+		} `json:"author"`
+	} `json:"commit"`
+}
+
+func (p gitlabPipeline) run() (domain.CIRun, bool) {
+	a := p.Attrs
+	switch a.Status {
+	case "success", "failed", "canceled", "skipped":
+	default:
+		return domain.CIRun{}, false // still running
+	}
+	url := a.URL
+	if url == "" && p.Project.WebURL != "" {
+		url = p.Project.WebURL + "/-/pipelines/" + strconv.FormatInt(a.ID, 10)
+	}
+	msg, _, _ := strings.Cut(strings.TrimSpace(p.Commit.Message), "\n")
+	out := domain.CIRun{Provider: "gitlab", Repo: p.Project.Path, RunID: a.ID, Attempt: 1, Workflow: "pipeline", Name: "pipeline",
+		Branch: a.Ref, SHA: a.SHA, Event: a.Source, Conclusion: a.Status, URL: url, Author: p.Commit.Author.Name, Message: msg, Finished: time.Now()}
+	if t, err := time.Parse("2006-01-02 15:04:05 MST", a.FinishedAt); err == nil {
+		out.Finished = t
+	}
+	if p.MR != nil && p.MR.IID > 0 {
+		out.PRNumbers = []int{p.MR.IID}
+		out.Fork = p.MR.SourceProjectID != 0 && p.MR.SourceProjectID != p.MR.TargetProjectID
+		if p.MR.SourceBranch != "" {
+			out.Branch = p.MR.SourceBranch // merge request pipelines run on refs/merge-requests/n/head
+		}
+	}
+	return out, true
 }
 
 // HookStore deduplicates deliveries and records pipeline activity.
@@ -95,14 +246,29 @@ func GitHubWebhook(secretOf SecretSource, sink HookSink, store HookStore, onPipe
 					} `json:"head"`
 				} `json:"pull_request"`
 			}
-			if json.Unmarshal(body, &p) == nil && p.Action == "closed" && p.PR.Merged {
-				if _, err := sink.MarkMerged(ctx, p.PR.HTMLURL, p.PR.Head.Ref, domain.OriginWebhook); err != nil {
-					log.Error("github webhook: merged", "err", err)
+			if json.Unmarshal(body, &p) == nil {
+				var err error
+				switch {
+				case p.Action == "closed" && p.PR.Merged:
+					_, err = sink.MarkMerged(ctx, p.PR.HTMLURL, p.PR.Head.Ref, domain.OriginWebhook)
+				case p.Action == "closed" || p.Action == "reopened":
+					err = prClosed(ctx, sink, p.PR.HTMLURL, p.PR.Head.Ref, p.Action == "closed")
+				}
+				if err != nil {
+					log.Error("github webhook: pull request", "action", p.Action, "err", err)
 					w.WriteHeader(http.StatusInternalServerError)
 					return
 				}
 			}
 		case "workflow_run", "check_suite", "push", "deployment_status":
+			if r.Header.Get("X-GitHub-Event") == "workflow_run" {
+				var wr githubRun
+				if json.Unmarshal(body, &wr) == nil {
+					if run, ok := wr.run(); ok {
+						ciRun(ctx, sink, run, log)
+					}
+				}
+			}
 			var p struct {
 				Repository struct {
 					FullName string `json:"full_name"`
@@ -161,14 +327,27 @@ func GitLabWebhook(secretOf SecretSource, sink HookSink, store HookStore, onPipe
 		}
 		switch p.Kind {
 		case "merge_request":
-			if p.Attrs.Action == "merge" {
-				if _, err := sink.MarkMerged(ctx, p.Attrs.URL, p.Attrs.SourceBranch, domain.OriginWebhook); err != nil {
-					log.Error("gitlab webhook: merged", "err", err)
-					w.WriteHeader(http.StatusInternalServerError)
-					return
-				}
+			var err error
+			switch p.Attrs.Action {
+			case "merge":
+				_, err = sink.MarkMerged(ctx, p.Attrs.URL, p.Attrs.SourceBranch, domain.OriginWebhook)
+			case "close", "reopen":
+				err = prClosed(ctx, sink, p.Attrs.URL, p.Attrs.SourceBranch, p.Attrs.Action == "close")
+			}
+			if err != nil {
+				log.Error("gitlab webhook: merge request", "action", p.Attrs.Action, "err", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
 			}
 		case "pipeline", "deployment", "build":
+			if p.Kind == "pipeline" {
+				var pl gitlabPipeline
+				if json.Unmarshal(body, &pl) == nil {
+					if run, ok := pl.run(); ok {
+						ciRun(ctx, sink, run, log)
+					}
+				}
+			}
 			_ = store.AppendEvent(ctx, domain.Event{Type: domain.EventPipeline, Origin: domain.OriginWebhook, Level: domain.LevelDebug,
 				Message: p.Kind + " on " + p.Project.Path, Data: map[string]any{"repo": p.Project.Path}})
 			if onPipeline != nil {

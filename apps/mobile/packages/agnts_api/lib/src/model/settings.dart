@@ -4,6 +4,8 @@
 
 // ignore_for_file: unused_element
 import 'package:agnts_api/src/model/notify_settings.dart';
+import 'package:agnts_api/src/model/ci_settings.dart';
+import 'package:agnts_api/src/model/guard_settings.dart';
 import 'package:agnts_api/src/model/pull_review_settings.dart';
 import 'package:agnts_api/src/model/stage_models.dart';
 import 'package:agnts_api/src/model/git_settings.dart';
@@ -57,6 +59,20 @@ class Settings {
      this.suggestFollowUps,
 
      this.pullReviews,
+
+     this.ci,
+
+     this.guard,
+
+     this.stalls,
+
+     this.proveFixes,
+
+     this.deepReview,
+
+     this.learnFromRuns,
+
+     this.secondOpinion,
 
     required  this.pauseAbove,
 
@@ -284,6 +300,95 @@ class Settings {
 
 
 
+  @JsonKey(
+    
+    name: r'ci',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final CISettings? ci;
+
+
+
+  @JsonKey(
+    
+    name: r'guard',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final GuardSettings? guard;
+
+
+
+      /// What agnts does when a run looks stuck: nothing, note it on the ticket, or also tell Claude to step back (once per run)
+  @JsonKey(
+    
+    name: r'stalls',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? stalls;
+
+
+
+      /// Bug fixes need a test that fails before the change and passes after it; agnts checks it
+  @JsonKey(
+    
+    name: r'proveFixes',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? proveFixes;
+
+
+
+      /// Specialist passes in the code review (security, silent failures, tests, types); auto: large or complex work
+  @JsonKey(
+    
+    name: r'deepReview',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? deepReview;
+
+
+
+      /// Suggest tips from runs that had trouble (failed checks, a stall)
+  @JsonKey(
+    
+    name: r'learnFromRuns',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? learnFromRuns;
+
+
+
+      /// A model that critiques the chosen approach of complex tickets (codex:<model> or a Claude model); empty turns it off
+  @JsonKey(
+    
+    name: r'secondOpinion',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? secondOpinion;
+
+
+
           // minimum: 50
           // maximum: 100
   @JsonKey(
@@ -357,6 +462,13 @@ class Settings {
       other.egressAllow == egressAllow &&
       other.suggestFollowUps == suggestFollowUps &&
       other.pullReviews == pullReviews &&
+      other.ci == ci &&
+      other.guard == guard &&
+      other.stalls == stalls &&
+      other.proveFixes == proveFixes &&
+      other.deepReview == deepReview &&
+      other.learnFromRuns == learnFromRuns &&
+      other.secondOpinion == secondOpinion &&
       other.pauseAbove == pauseAbove &&
       other.parallel == parallel &&
       other.git == git &&
@@ -381,6 +493,13 @@ class Settings {
         egressAllow.hashCode +
         suggestFollowUps.hashCode +
         pullReviews.hashCode +
+        ci.hashCode +
+        guard.hashCode +
+        stalls.hashCode +
+        proveFixes.hashCode +
+        deepReview.hashCode +
+        learnFromRuns.hashCode +
+        secondOpinion.hashCode +
         pauseAbove.hashCode +
         parallel.hashCode +
         git.hashCode +

@@ -6,6 +6,7 @@ import "time"
 const (
 	ReflectChanges  = "changes"  // a person asked for changes
 	ReflectRejected = "rejected" // a person rejected the work, with a reason
+	ReflectRun      = "run"      // a run had trouble (failed checks, a stall): a tip may help next time
 )
 
 // Reflection statuses.

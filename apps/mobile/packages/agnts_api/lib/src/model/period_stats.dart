@@ -21,6 +21,10 @@ class PeriodStats {
   /// Returns a new [PeriodStats] instance.
   PeriodStats({
 
+    required  this.merged,
+
+    required  this.closed,
+
     required  this.picked,
 
     required  this.pushed,
@@ -45,6 +49,32 @@ class PeriodStats {
 
     required  this.spend,
   });
+
+      /// agnts pull requests merged in the period
+  @JsonKey(
+    
+    name: r'merged',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final int merged;
+
+
+
+      /// agnts pull requests closed without a merge in the period
+  @JsonKey(
+    
+    name: r'closed',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final int closed;
+
+
 
   @JsonKey(
     
@@ -194,6 +224,8 @@ class PeriodStats {
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is PeriodStats &&
+      other.merged == merged &&
+      other.closed == closed &&
       other.picked == picked &&
       other.pushed == pushed &&
       other.rejected == rejected &&
@@ -209,6 +241,8 @@ class PeriodStats {
 
     @override
     int get hashCode =>
+        merged.hashCode +
+        closed.hashCode +
         picked.hashCode +
         pushed.hashCode +
         rejected.hashCode +

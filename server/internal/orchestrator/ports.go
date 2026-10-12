@@ -95,8 +95,11 @@ type Store interface {
 	History(ctx context.Context, key string) ([]HistoryItem, error)
 	TicketByPR(ctx context.Context, url, branch string) (domain.Ticket, error)
 	// UnmergedPRs returns done tickets with a pull request not known to be
-	// merged, least recently updated first.
+	// merged or closed, least recently updated first.
 	UnmergedPRs(ctx context.Context, limit int) ([]domain.Ticket, error)
+	// SetPRClosed records a pull request closed without a merge (or clears
+	// it on reopen) and reports whether anything changed.
+	SetPRClosed(ctx context.Context, key string, closed bool) (bool, error)
 	// ChildOf returns the ticket that implements parentKey, or ErrNotFound.
 	ChildOf(ctx context.Context, parentKey string) (domain.Ticket, error)
 
@@ -377,18 +380,30 @@ type ClaudeRequest struct {
 	Resume   string // session id to continue, or empty
 	Timeout  time.Duration
 	Settings string // JSON for --settings (permission rules from Settings)
+	// Env is extra KEY=value environment for Claude Code; its hooks
+	// inherit it (agnts-guard reads its config from there).
+	Env []string
+	// ReadOnly: the run must not change /workspace (Codex runs enforce it
+	// with their sandbox; Claude Code with the permission rules).
+	ReadOnly bool
 }
+
+// CodexPrefix marks a model as one Codex CLI runs ("codex:<model>"); any
+// other model is Claude Code's.
+const CodexPrefix = "codex:"
 
 // ClaudeEventKind classifies stream lines.
 type ClaudeEventKind string
 
 // Claude event kinds.
 const (
-	ClaudeInit      ClaudeEventKind = "init"
-	ClaudeText      ClaudeEventKind = "text"
-	ClaudeTool      ClaudeEventKind = "tool"
-	ClaudeRateLimit ClaudeEventKind = "rate_limit"
-	ClaudeResultEv  ClaudeEventKind = "result"
+	ClaudeInit ClaudeEventKind = "init"
+	ClaudeText ClaudeEventKind = "text"
+	ClaudeTool ClaudeEventKind = "tool"
+	// ClaudeToolResult: a tool call finished (Data: id, is_error).
+	ClaudeToolResult ClaudeEventKind = "tool_result"
+	ClaudeRateLimit  ClaudeEventKind = "rate_limit"
+	ClaudeResultEv   ClaudeEventKind = "result"
 )
 
 // ClaudeEvent is one parsed line of Claude Code's stream-json output.
@@ -465,10 +480,11 @@ type Assigner interface {
 	Assign(ctx context.Context, repo domain.Repository, number int, usernames []string) error
 }
 
-// MergeChecker asks the git host whether a pull request was merged, for
-// when the merge webhook never arrives (no webhook, or agnts on localhost).
+// MergeChecker asks the git host whether a pull request was merged or
+// closed, for when the webhook never arrives (no webhook, or agnts on
+// localhost). The state is domain.PullOpen, PullMerged or PullClosed.
 type MergeChecker interface {
-	PRMerged(ctx context.Context, repo domain.Repository, number int) (bool, error)
+	PRState(ctx context.Context, repo domain.Repository, number int) (string, error)
 }
 
 // Host opens pull requests on GitHub (GitLab in phase 5).

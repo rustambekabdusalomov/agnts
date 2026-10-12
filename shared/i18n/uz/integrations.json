@@ -178,6 +178,16 @@
     "planeSyncHelp": "Plane oʻzgarishlarni darhol webhookka yuboradi; agnts ham yetkazma oʻtkazib yuborilgan boʻlsa deb har soatda tekshiradi.",
     "planeHelp": "agnts bogʻlangan loyihalardagi faqat oʻz belgilari bor vazifalarni oʻqiydi va faqat shu yerda yoqilgan holat oʻzgarishlari va izohlarni yozadi. Plane har bir kalit uchun daqiqasiga 60 ta API soʻroviga ruxsat beradi; agnts 50 tadan oshmaydi.",
     "planeSynced": "{found} ta ochiq vazifa, {created} ta yangi",
-    "planeStatusesSub": "agnts vazifalarni qanday siljitadi. «Standart» — mos guruhning birinchi holati; «koʻrib chiqishda» — faqat siz tanlagan holatga."
+    "planeStatusesSub": "agnts vazifalarni qanday siljitadi. «Standart» — mos guruhning birinchi holati; «koʻrib chiqishda» — faqat siz tanlagan holatga.",
+    "name_openai": "OpenAI",
+    "desc_openai": "agnts ning ikkinchi kod vositasi Codex CLI dagi ishga tushirishlar uchun OpenAI API kaliti. Undan foydalanish uchun Sozlamalarda codex: modelini tanlang.",
+    "connectSub_openai": "OpenAI API kalitini qoʻying. agnts uni tekshiradi, shifrlangan holda saqlaydi va faqat Codex dagi ishga tushirishlarga beradi.",
+    "tokenOpen_openai": "API kalitlarini ochish",
+    "tokenStep1_openai": "OpenAI platformasidagi API kalitlari sahifasini oching (pastdagi tugma) va kiring.",
+    "tokenStep2_openai": "Yangi maxfiy kalit yarating, yaxshisi xarajat chegarasi bor loyihada.",
+    "tokenStep3_openai": "Kalitni nusxalang (u sk- bilan boshlanadi) va pastdagi «API kaliti» maydoniga qoʻying.",
+    "tokenStep4_openai": "Codex ishga tushirishlari OpenAI ga murojaat qila olishi uchun Sozlamalar → Preview boʻlimida api.openai.com ni ruxsat etilgan hostlarga qoʻshing.",
+    "openaiKeyHelp": "Serveringizda shifrlangan holda saqlanadi. Uni faqat Codex dagi ishga tushirishlar oladi.",
+    "openaiHelp": "Codex ishga tushirishlarida agnts-guard hooklari yoʻq: ishga tushirishdan keyingi agnts tekshiruvlari (qizil bayroqlar, build, lint, testlar, review) baribir ishlaydi. Ishga tushirishlarga ruxsat etilgan hostlarda api.openai.com ham kerak."
   }
 }

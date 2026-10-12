@@ -1,8 +1,11 @@
 package egress
 
 import (
+	"bufio"
 	"context"
 	"crypto/tls"
+	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"net"
@@ -86,5 +89,85 @@ func TestExtraAllowList(t *testing.T) {
 	p.SetExtra(nil)
 	if p.Allowed("staging.acme.com") {
 		t.Fatal("extra list not replaced")
+	}
+}
+
+type fakeRouter struct {
+	asked []string
+}
+
+func (f *fakeRouter) Route(_ context.Context, ip, host string, port int) (Private, bool, error) {
+	f.asked = append(f.asked, ip+" "+host)
+	if host == "gitlab.corp.local" || host == "10.20.0.5" {
+		return Private{Workspace: 42, Ticket: "PAY-7"}, true, nil
+	}
+	return Private{}, false, nil
+}
+
+func TestPrivateNetwork(t *testing.T) {
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.WriteString(w, "inside "+r.Host)
+	}))
+	defer upstream.Close()
+	p := New([]string{"github.com"}, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	router := &fakeRouter{}
+	var via []string
+	p.SetPrivate(router, func(ctx context.Context, pr Private, target string) (net.Conn, error) {
+		via = append(via, fmt.Sprintf("%d %s %s", pr.Workspace, pr.Ticket, target))
+		var d net.Dialer
+		return d.DialContext(ctx, "tcp", strings.TrimPrefix(upstream.URL, "http://"))
+	})
+	p.dial = func(context.Context, string, string) (net.Conn, error) {
+		return nil, errors.New("no internet in tests")
+	}
+	proxy := httptest.NewServer(p)
+	defer proxy.Close()
+	pu, _ := url.Parse(proxy.URL)
+	client := &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(pu)}}
+
+	// Plain http through the proxy and CONNECT (an http URL over a tunnel).
+	resp, err := client.Get("http://gitlab.corp.local/api/v4/version")
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, _ := io.ReadAll(resp.Body)
+	_ = resp.Body.Close()
+	if string(b) != "inside gitlab.corp.local" {
+		t.Fatalf("body %q", b)
+	}
+	conn, err := net.Dial("tcp", strings.TrimPrefix(proxy.URL, "http://"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = io.WriteString(conn, "CONNECT 10.20.0.5:443 HTTP/1.1\r\nHost: 10.20.0.5:443\r\n\r\n")
+	cr, err := http.ReadResponse(bufio.NewReader(conn), &http.Request{Method: http.MethodConnect})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = cr.Body.Close()
+	if cr.StatusCode != http.StatusOK {
+		t.Fatalf("CONNECT to a routed address: %v", cr.Status)
+	}
+	_ = conn.Close()
+
+	// Not routed and not allowed: refused. Allowed hosts never ask the router.
+	resp, err = client.Get("http://jira.other.local/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = resp.Body.Close()
+	if resp.StatusCode != http.StatusForbidden {
+		t.Errorf("unrouted host: %d", resp.StatusCode)
+	}
+	if resp, err := client.Get("http://github.com/"); err == nil {
+		_ = resp.Body.Close()
+	}
+	for _, a := range router.asked {
+		if strings.HasSuffix(a, " github.com") {
+			t.Error("the router was asked about an allowlisted host")
+		}
+	}
+	if len(via) != 2 || via[0] != "42 PAY-7 gitlab.corp.local:80" || via[1] != "42 PAY-7 10.20.0.5:443" {
+		t.Errorf("gateway dials %v", via)
 	}
 }

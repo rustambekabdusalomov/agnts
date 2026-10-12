@@ -42,6 +42,9 @@ type FollowUp struct {
 	Serves      string `json:"serves"`
 	Kind        string `json:"kind"`
 	Priority    string `json:"priority"`
+	// After numbers the follow-ups in the same list that must be done
+	// first, 1 for the first.
+	After []int `json:"after"`
 }
 
 // Suggestion is a follow-up ticket agnts suggests from a ticket. Nothing
@@ -59,9 +62,15 @@ type Suggestion struct {
 	Kind        TicketKind
 	Priority    string
 	Status      string
-	ChildKey    string // the ticket made from it, once accepted
-	DecidedAt   *time.Time
-	CreatedAt   time.Time
+	// After lists the sibling suggestions (same parent) that must land
+	// before this one: once both are tickets, this one depends on them.
+	After []int64
+	// AfterIndex is After before the batch is stored: positions in the
+	// list being saved. The store turns them into ids.
+	AfterIndex []int
+	ChildKey   string // the ticket made from it, once accepted
+	DecidedAt  *time.Time
+	CreatedAt  time.Time
 }
 
 // Suggestion builds a suggestion from what Claude wrote, cleaned. It
@@ -90,22 +99,57 @@ func (f FollowUp) Suggestion(source string) (Suggestion, bool) {
 }
 
 // Suggestions cleans a run's follow-ups: out-of-scope ones and repeats of
-// a title are dropped, and at most MaxFollowUps are kept.
+// a title are dropped, and at most MaxFollowUps are kept. Each one's After
+// becomes AfterIndex, pointing at the kept ones; a reference to a dropped
+// follow-up, to itself, or one that would close a cycle is left out.
 func Suggestions(fs []FollowUp, source string) []Suggestion {
 	out := []Suggestion{}
+	from := []int{}       // out[i] came from fs[from[i]]
+	kept := map[int]int{} // 1-based position in fs -> index in out
 	seen := map[string]bool{}
-	for _, f := range fs {
+	for i, f := range fs {
 		s, ok := f.Suggestion(source)
 		key := strings.ToLower(s.Title)
 		if !ok || seen[key] {
 			continue
 		}
 		seen[key] = true
+		kept[i+1] = len(out)
+		from = append(from, i)
 		if out = append(out, s); len(out) == MaxFollowUps {
 			break
 		}
 	}
+	for i := range out {
+		for _, n := range fs[from[i]].After {
+			j, ok := kept[n]
+			if !ok || j == i || slices.Contains(out[i].AfterIndex, j) || reaches(out, j, i) {
+				continue
+			}
+			out[i].AfterIndex = append(out[i].AfterIndex, j)
+		}
+	}
 	return out
+}
+
+// reaches reports whether suggestion from waits for to, directly or
+// through others, by AfterIndex.
+func reaches(ss []Suggestion, from, to int) bool {
+	seen := map[int]bool{}
+	stack := []int{from}
+	for len(stack) > 0 {
+		n := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+		if n == to {
+			return true
+		}
+		if seen[n] {
+			continue
+		}
+		seen[n] = true
+		stack = append(stack, ss[n].AfterIndex...)
+	}
+	return false
 }
 
 // Ready reports whether a ticket can be made from s while its parent is

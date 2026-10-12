@@ -27,7 +27,7 @@ const ticketCols = `id, key, source, repo_id, title, description, priority, stat
 	revision, turns, models, after_approve, branch, head_sha, pr_number, pr_url, feedback, held, ask_first, merged_at, assignees, learn_state, review_state, kind, kind_auto, post_report, COALESCE(parent_key, ''),
 	COALESCE(follow_up_of, ''), suggest_follow_ups, preview_state, preview_compare, feedback_shots, feedback_files, created_at, updated_at,
 	workspace_id, member_id, created_by, wait_reason, queued_at, wait_message, self_fixes, quiet_review, replay_of, base_sha, pull_request,
-	tracker_update, tracker_kept`
+	tracker_update, tracker_kept, ci_fixes`
 
 func scanTicket(row pgx.Row) (domain.Ticket, error) {
 	var t domain.Ticket
@@ -37,7 +37,7 @@ func scanTicket(row pgx.Row) (domain.Ticket, error) {
 		&t.Revision, &t.Turns, &models, &t.AfterApprove, &t.Branch, &t.HeadSHA, &t.PRNumber, &t.PRURL, &t.Feedback,
 		&t.Held, &t.AskFirst, &t.MergedAt, &t.Assignees, &t.LearnState, &t.ReviewState, &kind, &t.KindAuto, &t.PostReport, &t.ParentKey,
 		&t.FollowUpOf, &t.SuggestFollowUps, &t.PreviewState, &t.PreviewCompare, &shots, &files, &t.CreatedAt, &t.UpdatedAt,
-		&t.WorkspaceID, &t.MemberID, &t.CreatedBy, &wait, &t.QueuedAt, &t.WaitMessage, &t.SelfFixes, &t.QuietReview, &t.ReplayOf, &t.BaseSHA, &pull, &update, &t.Kept)
+		&t.WorkspaceID, &t.MemberID, &t.CreatedBy, &wait, &t.QueuedAt, &t.WaitMessage, &t.SelfFixes, &t.QuietReview, &t.ReplayOf, &t.BaseSHA, &pull, &update, &t.Kept, &t.CIFixes)
 	if err != nil {
 		return t, notFound(err)
 	}
@@ -205,7 +205,7 @@ func saveTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket) (domain.Ticket,
 		pr_number = $14, pr_url = $15, feedback = $16, held = $17, ask_first = $18, merged_at = $19, assignees = $20, learn_state = $21,
 		kind = $22, kind_auto = $23, post_report = $24, review_state = $25, suggest_follow_ups = $26,
 		preview_state = $27, preview_compare = $28, feedback_shots = $29, feedback_files = $30, member_id = $31,
-		self_fixes = $32, quiet_review = $33, pull_request = $34, tracker_update = $35, tracker_kept = $36,
+		self_fixes = $32, quiet_review = $33, pull_request = $34, tracker_update = $35, tracker_kept = $36, ci_fixes = $37,
 		wait_reason = CASE WHEN $6 IN ('new', 'coding', 'pushing') THEN wait_reason ELSE '' END,
 		wait_message = CASE WHEN $6 IN ('new', 'coding', 'pushing') THEN wait_message ELSE '' END,
 		queued_at = CASE WHEN $6 IN ('new', 'coding', 'pushing') THEN queued_at END,
@@ -214,7 +214,7 @@ func saveTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket) (domain.Ticket,
 		t.ID, t.RepoID, t.Title, t.Description, t.Priority, string(t.State), string(t.ResumeState),
 		t.Revision, t.Turns, models, t.AfterApprove, t.Branch, t.HeadSHA, t.PRNumber, t.PRURL, t.Feedback, t.Held, t.AskFirst, t.MergedAt, nonNilSlice(t.Assignees), t.LearnState,
 		string(kindOr(t.Kind)), t.KindAuto, t.PostReport, t.ReviewState, t.SuggestFollowUps,
-		t.PreviewState, t.PreviewCompare, shots, files, t.MemberID, t.SelfFixes, t.QuietReview, pullJSON(t.Pull), updateJSON(t.Update), t.Kept))
+		t.PreviewState, t.PreviewCompare, shots, files, t.MemberID, t.SelfFixes, t.QuietReview, pullJSON(t.Pull), updateJSON(t.Update), t.Kept, t.CIFixes))
 }
 
 // updateJSON is a ticket's pending tracker version, nil (SQL NULL) for none.
@@ -443,9 +443,36 @@ func (s *Agent) SetWaitReasons(ctx context.Context, changes []orchestrator.WaitC
 
 // FinishRun records how a run ended.
 func (s *Agent) FinishRun(ctx context.Context, r domain.Run) error {
+	harness, _ := json.Marshal(r.Harness)
 	_, err := s.db.Exec(ctx, `UPDATE runs SET session_id = $2, container_id = $3, finished_at = $4, turns = $5, exit_reason = $6, model = $7,
-		prompt_version = $8, fix_attempts = $9 WHERE id = $1`,
-		r.ID, r.SessionID, r.ContainerID, r.FinishedAt, r.Turns, r.ExitReason, r.Model, r.PromptVersion, r.FixAttempts)
+		prompt_version = $8, fix_attempts = $9, harness = $10 WHERE id = $1`,
+		r.ID, r.SessionID, r.ContainerID, r.FinishedAt, r.Turns, r.ExitReason, r.Model, r.PromptVersion, r.FixAttempts, harness)
+	return err
+}
+
+// SetRepoHarness stores the harness settings people chose for a
+// repository, keeping agnts's scan of its agent files.
+func (s *Agent) SetRepoHarness(ctx context.Context, id int64, h domain.RepoHarness) (domain.Repository, error) {
+	h.AgentConfig = nil
+	raw, err := json.Marshal(h)
+	if err != nil {
+		return domain.Repository{}, err
+	}
+	return scanRepo(s.db.QueryRow(ctx, `UPDATE repositories SET
+		harness = CASE WHEN harness ? 'agentConfig' THEN $2::jsonb || jsonb_build_object('agentConfig', harness->'agentConfig') ELSE $2::jsonb END,
+		updated_at = now() WHERE id = $1 RETURNING `+repoCols, id, raw))
+}
+
+// SetAgentConfigScan stores what agnts found in a repository's agent files.
+func (s *Agent) SetAgentConfigScan(ctx context.Context, id int64, scan domain.AgentConfigScan) error {
+	if scan.Findings == nil {
+		scan.Findings = []domain.AgentConfigFinding{}
+	}
+	raw, err := json.Marshal(scan)
+	if err != nil {
+		return err
+	}
+	_, err = s.db.Exec(ctx, `UPDATE repositories SET harness = jsonb_set(harness, '{agentConfig}', $2::jsonb) WHERE id = $1`, id, raw)
 	return err
 }
 
@@ -581,9 +608,10 @@ func (s *Agent) SaveResult(ctx context.Context, r domain.Result) error {
 	if r.RedFlags == nil {
 		flags = []byte("[]")
 	}
-	_, err := s.db.Exec(ctx, `INSERT INTO results (run_id, summary, tests, lint, files, report, red_flags) VALUES ($1, $2, $3, $4, $5, $6, $7)
-		ON CONFLICT (run_id) DO UPDATE SET summary = $2, tests = $3, lint = $4, files = $5, report = $6, red_flags = $7`,
-		r.RunID, jsonOr(r.Summary, "{}"), jsonOr(r.Tests, "{}"), r.Lint, files, r.Report, flags)
+	harness, _ := json.Marshal(r.Harness)
+	_, err := s.db.Exec(ctx, `INSERT INTO results (run_id, summary, tests, lint, files, report, red_flags, harness) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		ON CONFLICT (run_id) DO UPDATE SET summary = $2, tests = $3, lint = $4, files = $5, report = $6, red_flags = $7, harness = $8`,
+		r.RunID, jsonOr(r.Summary, "{}"), jsonOr(r.Tests, "{}"), r.Lint, files, r.Report, flags, harness)
 	return err
 }
 
@@ -597,16 +625,17 @@ func jsonOr(b json.RawMessage, def string) []byte {
 // LatestResult returns the newest result of a stage for a ticket.
 func (s *Agent) LatestResult(ctx context.Context, ticketID int64, stage domain.Stage) (domain.Result, error) {
 	var r domain.Result
-	var files, flags []byte
-	err := s.db.QueryRow(ctx, `SELECT res.id, res.run_id, res.summary, res.tests, res.lint, res.files, res.report, res.red_flags, res.created_at
+	var files, flags, harness []byte
+	err := s.db.QueryRow(ctx, `SELECT res.id, res.run_id, res.summary, res.tests, res.lint, res.files, res.report, res.red_flags, res.harness, res.created_at
 		FROM results res JOIN runs ON runs.id = res.run_id
 		WHERE runs.ticket_id = $1 AND runs.stage = $2 ORDER BY res.created_at DESC LIMIT 1`, ticketID, string(stage)).
-		Scan(&r.ID, &r.RunID, &r.Summary, &r.Tests, &r.Lint, &files, &r.Report, &flags, &r.CreatedAt)
+		Scan(&r.ID, &r.RunID, &r.Summary, &r.Tests, &r.Lint, &files, &r.Report, &flags, &harness, &r.CreatedAt)
 	if err != nil {
 		return r, notFound(err)
 	}
 	_ = json.Unmarshal(files, &r.Files)
 	_ = json.Unmarshal(flags, &r.RedFlags)
+	_ = json.Unmarshal(harness, &r.Harness)
 	return r, nil
 }
 
@@ -667,18 +696,19 @@ func (s *Agent) Events(ctx context.Context, f orchestrator.EventFilter) ([]domai
 const repoCols = `id, name, kind, provider, clone_url, default_branch, stack, build_cmd, lint_cmd, test_cmd, branch_prefix, claude_md, jira_project, task_prefix, claude_md_status, deploy_workflow, archived_at,
 	preview_cmd, preview_port, preview_ready_path, preview_routes, preview_ui_paths, preview_login, preview_env IS NOT NULL, preview_env_names,
 	toolchains, toolchains_override, toolchains_detected_at, toolchain_notes, runner_image, memory_mb, build_env IS NOT NULL, build_env_names,
-	plane_project, workspace_id`
+	plane_project, workspace_id, harness`
 
 func scanRepo(row pgx.Row) (domain.Repository, error) {
 	var r domain.Repository
-	var tcs []byte
+	var tcs, harness []byte
 	err := row.Scan(&r.ID, &r.Name, &r.Kind, &r.Provider, &r.CloneURL, &r.DefaultBranch, &r.Stack,
 		&r.BuildCmd, &r.LintCmd, &r.TestCmd, &r.BranchPrefix, &r.ClaudeMD, &r.JiraProject, &r.TaskPrefix, &r.ClaudeMDState, &r.DeployWorkflow, &r.ArchivedAt,
 		&r.Preview.Command, &r.Preview.Port, &r.Preview.ReadyPath, &r.Preview.Routes, &r.Preview.UIPaths, &r.Preview.Login, &r.Preview.EnvSet, &r.Preview.EnvNames,
 		&tcs, &r.ToolchainsOverride, &r.ToolchainsDetectedAt, &r.ToolchainNotes, &r.RunnerImage, &r.MemoryMB, &r.BuildEnvSet, &r.BuildEnvNames,
-		&r.PlaneProject, &r.WorkspaceID)
+		&r.PlaneProject, &r.WorkspaceID, &harness)
 	if err == nil {
 		_ = json.Unmarshal(tcs, &r.Toolchains)
+		_ = json.Unmarshal(harness, &r.Harness)
 	}
 	return r, notFound(err)
 }
@@ -909,10 +939,10 @@ func (s *Agent) TicketByPR(ctx context.Context, url, branch string) (domain.Tick
 }
 
 // UnmergedPRs returns done tickets with a pull request not known to be
-// merged, least recently updated first.
+// merged or closed, least recently updated first.
 func (s *Agent) UnmergedPRs(ctx context.Context, limit int) ([]domain.Ticket, error) {
 	rows, err := s.db.Query(ctx, `SELECT `+ticketCols+` FROM tickets
-		WHERE state = 'done' AND pr_number IS NOT NULL AND merged_at IS NULL AND repo_id IS NOT NULL
+		WHERE state = 'done' AND pr_number IS NOT NULL AND merged_at IS NULL AND closed_at IS NULL AND repo_id IS NOT NULL
 		ORDER BY updated_at LIMIT $1`, limit)
 	if err != nil {
 		return nil, err
@@ -929,8 +959,48 @@ func (s *Agent) UnmergedPRs(ctx context.Context, limit int) ([]domain.Ticket, er
 	return out, rows.Err()
 }
 
+// SetPRClosed records that a ticket's pull request was closed without a
+// merge, or clears it on reopen. It reports whether anything changed.
+func (s *Agent) SetPRClosed(ctx context.Context, key string, closed bool) (bool, error) {
+	q := `UPDATE tickets SET closed_at = now() WHERE key = $1 AND closed_at IS NULL AND merged_at IS NULL`
+	if !closed {
+		q = `UPDATE tickets SET closed_at = NULL WHERE key = $1 AND closed_at IS NOT NULL`
+	}
+	tag, err := s.db.Exec(ctx, q, key)
+	return tag.RowsAffected() > 0, err
+}
+
 // SetRunAccount records which Claude account a run used.
 func (s *Agent) SetRunAccount(ctx context.Context, runID int64, connection *int64, credits bool) error {
 	_, err := s.db.Exec(ctx, `UPDATE runs SET claude_connection_id = $2, on_credits = $3 WHERE id = $1`, runID, connection, credits)
 	return err
+}
+
+// ReopenForCI moves a done ticket whose pull request is still open back to
+// coding, when domain.CanReopenForCI allows it at the time of the lock.
+func (s *Agent) ReopenForCI(ctx context.Context, key string, ev domain.Event, mut func(*domain.Ticket)) (domain.Ticket, error) {
+	var out domain.Ticket
+	err := pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
+		t, err := scanTicket(tx.QueryRow(ctx, `SELECT `+ticketCols+` FROM tickets WHERE key = $1 FOR UPDATE`, key))
+		if err != nil {
+			return err
+		}
+		if !domain.CanReopenForCI(t) {
+			return &domain.TransitionError{Key: key, From: t.State, To: domain.StateCoding}
+		}
+		if mut != nil {
+			mut(&t)
+		}
+		from := t.State
+		t.State = domain.StateCoding
+		if out, err = saveTicket(ctx, tx, t); err != nil {
+			return err
+		}
+		if ev.Data == nil {
+			ev.Data = map[string]any{}
+		}
+		ev.Data["from"], ev.Data["to"] = string(from), string(domain.StateCoding)
+		return insertEvent(ctx, tx, ev)
+	})
+	return out, err
 }

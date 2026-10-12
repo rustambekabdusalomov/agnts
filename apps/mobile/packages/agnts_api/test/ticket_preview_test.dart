@@ -17,7 +17,8 @@ void main() {
       // TODO
     });
 
-    // Model model
+    // A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
+    // String model
     test('to test the property `model`', () async {
       // TODO
     });
@@ -46,6 +47,11 @@ void main() {
 
     // List<PreviewIssue> issues
     test('to test the property `issues`', () async {
+      // TODO
+    });
+
+    // Acceptance acceptance
+    test('to test the property `acceptance`', () async {
       // TODO
     });
 

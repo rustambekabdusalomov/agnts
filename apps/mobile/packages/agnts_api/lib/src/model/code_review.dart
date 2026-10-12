@@ -3,7 +3,6 @@
 //
 
 // ignore_for_file: unused_element
-import 'package:agnts_api/src/model/model.dart';
 import 'package:agnts_api/src/model/finding.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -36,6 +35,10 @@ class CodeReview {
 
     required  this.strengths,
 
+     this.deep,
+
+     this.dropped,
+
     required  this.createdAt,
   });
 
@@ -51,6 +54,7 @@ class CodeReview {
 
 
 
+      /// A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
   @JsonKey(
     
     name: r'model',
@@ -59,7 +63,7 @@ class CodeReview {
   )
 
 
-  final Model model;
+  final String model;
 
 
 
@@ -124,6 +128,32 @@ class CodeReview {
 
 
 
+      /// The review ran the specialist passes
+  @JsonKey(
+    
+    name: r'deep',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? deep;
+
+
+
+      /// Findings left out for low confidence or as duplicates
+  @JsonKey(
+    
+    name: r'dropped',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? dropped;
+
+
+
   @JsonKey(
     
     name: r'createdAt',
@@ -147,6 +177,8 @@ class CodeReview {
       other.summary == summary &&
       other.findings == findings &&
       other.strengths == strengths &&
+      other.deep == deep &&
+      other.dropped == dropped &&
       other.createdAt == createdAt;
 
     @override
@@ -158,6 +190,8 @@ class CodeReview {
         summary.hashCode +
         findings.hashCode +
         strengths.hashCode +
+        deep.hashCode +
+        dropped.hashCode +
         createdAt.hashCode;
 
   factory CodeReview.fromJson(Map<String, dynamic> json) => _$CodeReviewFromJson(json);

@@ -76,5 +76,65 @@ void main() {
       // TODO
     });
 
+    // Actions agnts-guard refused in their coding runs
+    // int guardBlocks
+    test('to test the property `guardBlocks`', () async {
+      // TODO
+    });
+
+    // Tickets whose stop gate sent failing checks back and whose checks then passed first time
+    // int stopSaves
+    test('to test the property `stopSaves`', () async {
+      // TODO
+    });
+
+    // Times their runs looked stuck
+    // int stalls
+    test('to test the property `stalls`', () async {
+      // TODO
+    });
+
+    // Tickets with a proof of fix
+    // int proofDue
+    test('to test the property `proofDue`', () async {
+      // TODO
+    });
+
+    // Of those, proven
+    // int proven
+    test('to test the property `proven`', () async {
+      // TODO
+    });
+
+    // Review findings shown on them
+    // int findings
+    test('to test the property `findings`', () async {
+      // TODO
+    });
+
+    // Of those, put into a person's feedback
+    // int adopted
+    test('to test the property `adopted`', () async {
+      // TODO
+    });
+
+    // Average tokens of a done ticket, all stages
+    // num tokens
+    test('to test the property `tokens`', () async {
+      // TODO
+    });
+
+    // Tickets in the fact check group (A/B)
+    // int factCheck
+    test('to test the property `factCheck`', () async {
+      // TODO
+    });
+
+    // Of those, done without a person asking for changes
+    // int factCheckFirst
+    test('to test the property `factCheckFirst`', () async {
+      // TODO
+    });
+
   });
 }

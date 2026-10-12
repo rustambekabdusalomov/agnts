@@ -82,7 +82,15 @@ stopsTests(r'stopsTests'),
 @JsonValue(r'stopsLimit')
 stopsLimit(r'stopsLimit'),
 @JsonValue(r'night')
-night(r'night');
+night(r'night'),
+@JsonValue(r'mergeRate')
+mergeRate(r'mergeRate'),
+@JsonValue(r'slowAnswers')
+slowAnswers(r'slowAnswers'),
+@JsonValue(r'followUpsNoise')
+followUpsNoise(r'followUpsNoise'),
+@JsonValue(r'flakyJob')
+flakyJob(r'flakyJob');
 
 const AnalyticsInsightsInnerKindEnum(this.value);
 

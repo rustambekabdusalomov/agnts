@@ -50,7 +50,11 @@ type Review struct {
 	// ticket still needs; they are stored as suggestions, not kept here.
 	FollowUps []FollowUp `json:"followUps,omitempty"`
 	// HeadSHA is the commit a pull request review read.
-	HeadSHA   string    `json:"headSha,omitempty"`
+	HeadSHA string `json:"headSha,omitempty"`
+	// Deep: the review ran the specialist passes. Dropped counts findings
+	// left out for low confidence or as duplicates.
+	Deep      bool      `json:"deep,omitempty"`
+	Dropped   int       `json:"dropped,omitempty"`
 	CreatedAt time.Time `json:"-"`
 }
 
@@ -63,7 +67,19 @@ type Finding struct {
 	Title      string `json:"title"`
 	Detail     string `json:"detail,omitempty"`
 	Suggestion string `json:"suggestion,omitempty"`
+	// Confidence is how sure the reviewer is that it is a real problem,
+	// 0 to 1; 0 means it did not say.
+	Confidence float64 `json:"confidence,omitempty"`
+	// Pass names the specialist pass that found it (security, failures,
+	// tests, types), "" for the main review.
+	Pass string `json:"pass,omitempty"`
+	// Adopted: a person put it in their feedback.
+	Adopted bool `json:"adopted,omitempty"`
 }
+
+// MinConfidence is the confidence below which a finding is dropped,
+// unless it is a blocker.
+const MinConfidence = 0.8
 
 // Normalize cleans a review written by Claude: it trims and caps every
 // field, drops findings without a title or with an unsafe path, sorts the
@@ -96,11 +112,18 @@ func (r *Review) Normalize() bool {
 		}
 		f.Detail = clip(strings.TrimSpace(f.Detail), 3000)
 		f.Suggestion = clip(strings.TrimSpace(f.Suggestion), 3000)
+		f.Confidence = min(max(f.Confidence, 0), 1)
+		f.Pass = clip(strings.ToLower(strings.TrimSpace(f.Pass)), 40)
+		if f.Confidence > 0 && f.Confidence < MinConfidence && f.Severity != "blocker" {
+			r.Dropped++
+			continue
+		}
 		fs = append(fs, f)
 	}
 	slices.SortStableFunc(fs, func(a, b Finding) int {
 		return slices.Index(FindingSeverities, a.Severity) - slices.Index(FindingSeverities, b.Severity)
 	})
+	fs = r.dedupe(fs)
 	if len(fs) > MaxFindings {
 		fs = fs[:MaxFindings]
 	}
@@ -143,4 +166,36 @@ func (r Review) Counts() map[string]int {
 		out[f.Severity]++
 	}
 	return out
+}
+
+// dedupe keeps one finding per problem: the specialist passes and the
+// main review often find the same thing. Two findings are the same when
+// two passes put them in one category, in one file, within three lines,
+// or when their titles match. fs is sorted most severe first, so the first wins.
+func (r *Review) dedupe(fs []Finding) []Finding {
+	out := fs[:0]
+	for _, f := range fs {
+		dup := false
+		for _, k := range out {
+			// The same spot from two different passes: one problem seen twice.
+			sameSpot := f.Pass != k.Pass && f.File != "" && f.File == k.File && f.Category == k.Category && abs(f.Line-k.Line) <= 3
+			if sameSpot || strings.EqualFold(f.Title, k.Title) {
+				dup = true
+				break
+			}
+		}
+		if dup {
+			r.Dropped++
+			continue
+		}
+		out = append(out, f)
+	}
+	return out
+}
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
 }

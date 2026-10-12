@@ -12,6 +12,7 @@ import 'package:agnts_api/src/api/analytics_api.dart';
 import 'package:agnts_api/src/api/attachments_api.dart';
 import 'package:agnts_api/src/api/auth_api.dart';
 import 'package:agnts_api/src/api/billing_api.dart';
+import 'package:agnts_api/src/api/ci_api.dart';
 import 'package:agnts_api/src/api/dashboard_api.dart';
 import 'package:agnts_api/src/api/devices_api.dart';
 import 'package:agnts_api/src/api/docs_api.dart';
@@ -21,6 +22,7 @@ import 'package:agnts_api/src/api/learn_api.dart';
 import 'package:agnts_api/src/api/logs_api.dart';
 import 'package:agnts_api/src/api/mcp_api.dart';
 import 'package:agnts_api/src/api/meta_api.dart';
+import 'package:agnts_api/src/api/network_api.dart';
 import 'package:agnts_api/src/api/platform_api.dart';
 import 'package:agnts_api/src/api/repos_api.dart';
 import 'package:agnts_api/src/api/reviews_api.dart';
@@ -153,6 +155,12 @@ class AgntsApi {
     return BillingApi(dio);
   }
 
+  /// Get CiApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  CiApi getCiApi() {
+    return CiApi(dio);
+  }
+
   /// Get DashboardApi instance, base route and serializer can be overridden by a given but be careful,
   /// by doing that all interceptors will not be executed
   DashboardApi getDashboardApi() {
@@ -205,6 +213,12 @@ class AgntsApi {
   /// by doing that all interceptors will not be executed
   MetaApi getMetaApi() {
     return MetaApi(dio);
+  }
+
+  /// Get NetworkApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  NetworkApi getNetworkApi() {
+    return NetworkApi(dio);
   }
 
   /// Get PlatformApi instance, base route and serializer can be overridden by a given but be careful,

@@ -22,6 +22,8 @@ class AcceptFollowUps {
   AcceptFollowUps({
 
     required  this.items,
+
+     this.start,
   });
 
   @JsonKey(
@@ -36,15 +38,30 @@ class AcceptFollowUps {
 
 
 
+      /// Queue the new tickets to run now instead of holding them until someone starts each one
+  @JsonKey(
+    
+    name: r'start',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? start;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is AcceptFollowUps &&
-      other.items == items;
+      other.items == items &&
+      other.start == start;
 
     @override
     int get hashCode =>
-        items.hashCode;
+        items.hashCode +
+        start.hashCode;
 
   factory AcceptFollowUps.fromJson(Map<String, dynamic> json) => _$AcceptFollowUpsFromJson(json);
 

@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:agnts_api/agnts_api.dart';
 
@@ -110,4 +111,33 @@ final lessonProvider = FutureProvider.family<Lesson, int>((ref, id) async {
 
 final analyticsProvider = FutureProvider<Analytics>((ref) async {
   return (await requireApi(ref).getAnalyticsApi().getAnalytics(days: 7)).data!;
+});
+
+/// What each CI failures filter shows: red (still failing), flaky, or all.
+const ciFilterStatuses = <String, List<CIStatus>>{
+  'red': [CIStatus.triage, CIStatus.open, CIStatus.fixing, CIStatus.regression],
+  'flaky': [CIStatus.flaky],
+  'all': [],
+};
+
+/// CI failure groups for a filter (red, flaky or all), newest first.
+final ciFailuresProvider = FutureProvider.family<List<CIFailure>, String>((ref, filter) async {
+  final statuses = ciFilterStatuses[filter] ?? const <CIStatus>[];
+  final res = await requireApi(ref).getCiApi().listCIFailures(status: statuses.isEmpty ? null : statuses.map((s) => s.value).join(','));
+  return res.data ?? const [];
+});
+
+/// One CI failure group with its redacted log excerpt.
+final ciFailureProvider = FutureProvider.family<CIFailure, int>((ref, id) async {
+  return (await requireApi(ref).getCiApi().getCIFailure(failureId: id)).data!;
+});
+
+/// The CI failure a ticket fixes; null when it has none (404).
+final ticketCIProvider = FutureProvider.family<CIFailure?, String>((ref, key) async {
+  try {
+    return (await requireApi(ref).getCiApi().getTicketCIFailure(key: key)).data;
+  } on DioException catch (e) {
+    if (e.response?.statusCode == 404) return null;
+    rethrow;
+  }
 });

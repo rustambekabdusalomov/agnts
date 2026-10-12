@@ -1,31 +1,31 @@
 # Analitika
 
-agnts vaqt oʻtishi bilan siz uchun qanchalik yaxshi ishlayapti. 7, 30 yoki 90 kunni tanlang; har bir raqam oldingi davr bilan solishtiriladi.
+agnts vaqt oʻtishi bilan siz uchun qanchalik yaxshi ishlayotgani. 7, 30 yoki 90 kunni tanlang; har bir raqam oldingi davr bilan solishtiriladi, yashil oʻzgarishlar — yaxshilanish. Sahifada oltita boʻlim bor, **CSV eksport** ochiq boʻlimning asosiy jadvalini saqlaydi.
 
-## Asosiy raqamlar
+## Umumiy
 
-Yuborilgan tiketlar, muvaffaqiyat darajasi, birinchi urinishda tasdiqlash, bitta tiketga agnts vaqti, sizni kutish vaqti va qadamlar. Yashil oʻzgarishlar — yaxshilanish.
+Avval xulosalar: raqamlardan chiqarilgan qisqa xulosalar va nimani oʻzgartirish kerakligi. Soʻng asosiy raqamlar (yuborilgan tiketlar, muvaffaqiyat ulushi, birinchi urinishda tasdiqlash, birlashtirilgan pull requestlar, sizni kutish vaqti, yuborilgan tiket narxi), kunlik tiketlar va ular qanday tugagani, hamda agnts kunning qaysi soatlarida ishlashi.
 
-## Unumdorlik va natijalar
+## Yetkazish
 
-Kunlik tiketlar va ular qanday yakunlangani: darhol tasdiqlangan, oʻzgarishlardan keyin, rad etilgan yoki toʻxtagan.
+agnts yuborgandan keyin nima boʻladi. **Pull requestlar natijasi**: davrda ochilgan, birlashtirilgan, birlashtirilmasdan yopilgan va hali ochiq pull requestlar hamda birlashtirish ulushi (birlashtirilgan yoki yopilganlar ichida birlashtirilganlar). Bir haftadan ortiq ochiq turganlar alohida koʻrsatiladi. **Sikl vaqti**: tiketni olishdan yuborish va birlashtirishgacha odatiy vaqt. **Savollar**: nechta tiket koddan oldin savol bergani va javob qancha vaqt olishi. **Eng sekin tiketlar** vaqt qayerga ketganini koʻrsatadi: agnts ishi, javob kutish, tekshiruv kutish yoki navbat. Vaqtlar — mediana; sekin qiymat — oʻntadan eng sekini.
 
-## Tezlik va vaqt
+Birlashtirish va yopishlar git xostingining webhookidan keladi. Webhook boʻlmasa, agnts ochiq pull requestlarni xostingda oʻzi tekshiradi.
 
-agnts necha daqiqa ishlaydi va tiketlar sizni necha daqiqa kutadi, qaysi bosqich eng uzoq davom etadi.
+## Sifat
 
-## Ishlar nega toʻxtaydi
+Tiketga qadamlar, ishlar nega toʻxtashi, prompt versiyalari boʻyicha agent sifati va takroriy natijalar. **CI holati** (CI kuzatuvi yoqilgan boʻlsa): kunlik xatolar sabablari boʻyicha, agnts oʻzi nechtasini va qanchalik tez tuzatgani, eng beqaror vazifalar hamda agnts pull requestlaridagi tekshiruvingizdan oldin tuzatilgan qizil tekshiruvlar.
 
-Yiqilgan testlar, tarif limitlari, siz toʻxtatganlar va qadamlar limiti — tartib bilan.
+**Prompt versiyalari boʻyicha cheklovlar**: agnts-guard rad etgan harakatlar, toʻxtash tekshiruvi qutqargan tasklar, tiqilishlar, isbotlangan tuzatishlar, odamlar qabul qilgan review izohlari ulushi, tayyor taskka tokenlar va faktlarni tekshirish guruhining birinchi urinishdagi ulushi umumiysi yonida.
 
-## Token sarfi
+## Oʻrganish
 
-Claude davr mobaynida sarflagan tokenlar: kunlik kirish va chiqish, kesh alohida, hamda qaysi bosqich va modellar eng koʻp sarflagani. Dollardagi summa — Claude Code'ning API narxlaridagi bahosi; Claude obunasida u toʻlanmaydi.
+agnts fikringizdan oʻrganayaptimi: yozilgan va oʻrganilgan darslar, tiketlardan taklif qilingan va qabul qilingan qoidalar, siz yozgan qoidalar, oʻzgartirilgan yoki rad etilgan tiketlar tahlili, taklif qilingan qoʻshimcha vazifalarning qabul ulushi (tur va ularni topgan bosqich boʻyicha) va eng koʻp izoh qoldirgan tekshiruvchilar.
 
-## Modellar va repozitoriylar
+## Xarajat
 
-Modellar boʻyicha ishlar, muvaffaqiyat va limit sarfi hamda repozitoriylar natijalari, CLAUDE.md taʼsiri bilan.
+Davrda Claude ishlatgan tokenlar, kunlik kirish va chiqish, kesh alohida; bosqichlar va modellar boʻyicha xarajat; yuborilgan tiket narxi va tarifdan kunlik eng yuqori foydalanish. Dollar summasi — Claude Code ning API narxlaridagi hisobi; Claude tarifida u undirilmaydi.
 
-## Xulosalar
+## Repozitoriylar
 
-Raqamlardan qisqa xulosalar va nimani oʻzgartirish kerakligi.
+Har bir repozitoriy qanday ishlaydi: tiketlar, muvaffaqiyat ulushi, birlashtirish ulushi, qadamlar, agnts vaqti, tiketga savollar, CI xatolari va CLAUDE.md bormi.

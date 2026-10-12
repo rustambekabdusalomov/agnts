@@ -37,6 +37,8 @@ abstract class _$TicketCWProxy {
 
   Ticket prUrl(String prUrl);
 
+  Ticket ciFixes(int? ciFixes);
+
   Ticket assignees(List<String>? assignees);
 
   Ticket afterApprove(TicketAfterApproveEnum? afterApprove);
@@ -125,6 +127,7 @@ abstract class _$TicketCWProxy {
     String? headSha,
     int? prNumber,
     String prUrl,
+    int? ciFixes,
     List<String>? assignees,
     TicketAfterApproveEnum? afterApprove,
     bool? held,
@@ -212,6 +215,9 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
 
   @override
   Ticket prUrl(String prUrl) => this(prUrl: prUrl);
+
+  @override
+  Ticket ciFixes(int? ciFixes) => this(ciFixes: ciFixes);
 
   @override
   Ticket assignees(List<String>? assignees) => this(assignees: assignees);
@@ -343,6 +349,7 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
     Object? headSha = const $CopyWithPlaceholder(),
     Object? prNumber = const $CopyWithPlaceholder(),
     Object? prUrl = const $CopyWithPlaceholder(),
+    Object? ciFixes = const $CopyWithPlaceholder(),
     Object? assignees = const $CopyWithPlaceholder(),
     Object? afterApprove = const $CopyWithPlaceholder(),
     Object? held = const $CopyWithPlaceholder(),
@@ -438,6 +445,10 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
           ? _value.prUrl
           // ignore: cast_nullable_to_non_nullable
           : prUrl as String,
+      ciFixes: ciFixes == const $CopyWithPlaceholder()
+          ? _value.ciFixes
+          // ignore: cast_nullable_to_non_nullable
+          : ciFixes as int?,
       assignees: assignees == const $CopyWithPlaceholder()
           ? _value.assignees
           // ignore: cast_nullable_to_non_nullable
@@ -631,6 +642,7 @@ Ticket _$TicketFromJson(
     headSha: $checkedConvert('headSha', (v) => v as String?),
     prNumber: $checkedConvert('prNumber', (v) => (v as num?)?.toInt()),
     prUrl: $checkedConvert('prUrl', (v) => v as String),
+    ciFixes: $checkedConvert('ciFixes', (v) => (v as num?)?.toInt()),
     assignees: $checkedConvert(
       'assignees',
       (v) => (v as List<dynamic>?)?.map((e) => e as String).toList(),
@@ -736,6 +748,7 @@ Map<String, dynamic> _$TicketToJson(Ticket instance) => <String, dynamic>{
   'headSha': ?instance.headSha,
   'prNumber': ?instance.prNumber,
   'prUrl': instance.prUrl,
+  'ciFixes': ?instance.ciFixes,
   'assignees': ?instance.assignees,
   'afterApprove': ?_$TicketAfterApproveEnumEnumMap[instance.afterApprove],
   'held': ?instance.held,
@@ -776,6 +789,7 @@ const _$TicketSource_EnumEnumMap = {
   TicketSource_Enum.plane: 'plane',
   TicketSource_Enum.local: 'local',
   TicketSource_Enum.git: 'git',
+  TicketSource_Enum.ci: 'ci',
 };
 
 const _$TicketStateEnumMap = {

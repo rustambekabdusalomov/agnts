@@ -59,6 +59,8 @@ class Ticket {
 
     required  this.prUrl,
 
+     this.ciFixes,
+
      this.assignees,
 
      this.afterApprove,
@@ -305,6 +307,19 @@ class Ticket {
 
 
   final String prUrl;
+
+
+
+      /// Rounds a red CI check sent the pull request back to coding
+  @JsonKey(
+    
+    name: r'ciFixes',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? ciFixes;
 
 
 
@@ -743,6 +758,7 @@ class Ticket {
       other.headSha == headSha &&
       other.prNumber == prNumber &&
       other.prUrl == prUrl &&
+      other.ciFixes == ciFixes &&
       other.assignees == assignees &&
       other.afterApprove == afterApprove &&
       other.held == held &&
@@ -794,6 +810,7 @@ class Ticket {
         headSha.hashCode +
         prNumber.hashCode +
         prUrl.hashCode +
+        ciFixes.hashCode +
         assignees.hashCode +
         afterApprove.hashCode +
         held.hashCode +
@@ -847,7 +864,9 @@ plane(r'plane'),
 @JsonValue(r'local')
 local(r'local'),
 @JsonValue(r'git')
-git(r'git');
+git(r'git'),
+@JsonValue(r'ci')
+ci(r'ci');
 
 const TicketSource_Enum(this.value);
 

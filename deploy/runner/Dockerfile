@@ -58,6 +58,18 @@ RUN export PATH=/opt/claude/node/bin:$PATH \
 # repository's Node (first on PATH) never changes the Node Claude runs on.
 COPY claude-wrapper /usr/local/bin/claude
 
+# Codex CLI, agnts's second coding tool, only when a version is given
+# (--build-arg CODEX_VERSION=x.y.z): pin it like Claude Code, since agnts
+# parses its `codex exec --json` stream. It runs on Claude's Node too.
+ARG CODEX_VERSION=
+RUN if [ -n "$CODEX_VERSION" ]; then \
+      export PATH=/opt/claude/node/bin:$PATH \
+   && npm install -g --prefix /opt/codex --fetch-retries=5 "@openai/codex@${CODEX_VERSION}" \
+   && printf '#!/bin/sh\nexec /opt/claude/node/bin/node /opt/codex/lib/node_modules/@openai/codex/bin/codex.js "$@"\n' > /usr/local/bin/codex \
+   && chmod 0755 /usr/local/bin/codex && /usr/local/bin/codex --version \
+   && npm cache clean --force && rm -rf /root/.npm; \
+    fi
+
 # Previews: Chromium (with its system libraries) through Playwright, and
 # the two commands preview runs use. The browsers live outside $HOME so the
 # read-only root filesystem keeps them intact; Playwright is pinned in
@@ -71,15 +83,17 @@ RUN cd /opt/agnts-shot \
  && npm cache clean --force \
  && rm -rf /var/lib/apt/lists/* /root/.npm
 COPY preview/agnts-shot.mjs /opt/agnts-shot/agnts-shot.mjs
+COPY preview/agnts-act.mjs /opt/agnts-shot/agnts-act.mjs
 COPY preview/agnts-preview /usr/local/bin/agnts-preview
 RUN printf '#!/bin/sh\nexec /opt/claude/node/bin/node /opt/agnts-shot/agnts-shot.mjs "$@"\n' > /usr/local/bin/agnts-shot \
- && chmod 0755 /usr/local/bin/agnts-shot /usr/local/bin/agnts-preview /usr/local/bin/claude /opt/agnts-shot/agnts-shot.mjs
+ && printf '#!/bin/sh\nexec /opt/claude/node/bin/node /opt/agnts-shot/agnts-act.mjs "$@"\n' > /usr/local/bin/agnts-act \
+ && chmod 0755 /usr/local/bin/agnts-shot /usr/local/bin/agnts-act /usr/local/bin/agnts-preview /usr/local/bin/claude /opt/agnts-shot/agnts-shot.mjs /opt/agnts-shot/agnts-act.mjs
 
 # agnts's archives expect the "agent" user at uid 1000. /opt/toolchains and
 # /home/agent/.cache are owned by it so the volumes mounted there start out
 # writable for it.
 RUN useradd --uid 1000 --create-home --home-dir /home/agent --shell /bin/bash agent \
- && mkdir -p /workspace /agnts/out /home/agent/.claude /home/agent/.cache /home/agent/.local/bin /opt/toolchains \
+ && mkdir -p /workspace /agnts/out /agnts/context /home/agent/.claude /home/agent/.cache /home/agent/.local/bin /opt/toolchains \
  && chown -R agent:agent /workspace /agnts /home/agent /opt/toolchains
 
 # Managed settings outrank anything in the repository's .claude/ folder, so

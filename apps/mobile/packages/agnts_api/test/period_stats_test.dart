@@ -7,6 +7,18 @@ void main() {
   // TODO add properties to the entity
 
   group(PeriodStats, () {
+    // agnts pull requests merged in the period
+    // int merged
+    test('to test the property `merged`', () async {
+      // TODO
+    });
+
+    // agnts pull requests closed without a merge in the period
+    // int closed
+    test('to test the property `closed`', () async {
+      // TODO
+    });
+
     // int picked
     test('to test the property `picked`', () async {
       // TODO

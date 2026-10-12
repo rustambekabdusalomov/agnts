@@ -191,6 +191,15 @@ type ContainerConfig struct {
 	Env        []string
 	// Runtime is the OCI runtime (runsc for gVisor); "" is Docker's default.
 	Runtime string
+	// CapAdd are the capabilities given back after dropping all, and
+	// Devices the host devices passed through: only the OpenVPN sidecar
+	// has any (NET_ADMIN and /dev/net/tun). Run containers never do.
+	CapAdd  []string
+	Devices []string
+	// Sysctls are namespaced kernel settings (the sidecar's rp_filter).
+	Sysctls map[string]string
+	// Networks are more networks to join after creation (the first is Network).
+	Networks []string
 }
 
 // Mount is a named volume mounted into a container.
@@ -229,8 +238,22 @@ func (d *Docker) Create(ctx context.Context, c ContainerConfig) (string, error) 
 			"Init":           true,
 		},
 	}
+	hc := body["HostConfig"].(map[string]any)
 	if c.Runtime != "" {
-		body["HostConfig"].(map[string]any)["Runtime"] = c.Runtime
+		hc["Runtime"] = c.Runtime
+	}
+	if len(c.CapAdd) > 0 {
+		hc["CapAdd"] = c.CapAdd
+	}
+	if len(c.Sysctls) > 0 {
+		hc["Sysctls"] = c.Sysctls
+	}
+	if len(c.Devices) > 0 {
+		devs := make([]map[string]string, 0, len(c.Devices))
+		for _, dev := range c.Devices {
+			devs = append(devs, map[string]string{"PathOnHost": dev, "PathInContainer": dev, "CgroupPermissions": "rwm"})
+		}
+		hc["Devices"] = devs
 	}
 	var out struct {
 		ID string `json:"Id"`
@@ -242,7 +265,62 @@ func (d *Docker) Create(ctx context.Context, c ContainerConfig) (string, error) 
 	if err := d.json(ctx, http.MethodPost, "/containers/create", q, body, &out); err != nil {
 		return "", err
 	}
+	for _, n := range c.Networks {
+		if err := d.ConnectNetwork(ctx, n, out.ID, nil); err != nil {
+			_ = d.Remove(context.WithoutCancel(ctx), out.ID)
+			return "", fmt.Errorf("join network %s: %w", n, err)
+		}
+	}
 	return out.ID, nil
+}
+
+// ContainerIP returns a container's address on network.
+func (d *Docker) ContainerIP(ctx context.Context, id, network string) (string, error) {
+	var out struct {
+		NetworkSettings struct {
+			Networks map[string]struct {
+				IPAddress string `json:"IPAddress"`
+			} `json:"Networks"`
+		} `json:"NetworkSettings"`
+	}
+	if err := d.json(ctx, http.MethodGet, "/containers/"+id+"/json", nil, nil, &out); err != nil {
+		return "", err
+	}
+	if n, ok := out.NetworkSettings.Networks[network]; ok && n.IPAddress != "" {
+		return n.IPAddress, nil
+	}
+	return "", fmt.Errorf("the container has no address on %s", network)
+}
+
+// Container is a container in a list.
+type Container struct {
+	ID     string
+	Name   string
+	State  string // created, running, exited...
+	Labels map[string]string
+}
+
+// Containers lists the containers (running or not) carrying label (k=v or k).
+func (d *Docker) Containers(ctx context.Context, label string) ([]Container, error) {
+	filters, _ := json.Marshal(map[string][]string{"label": {label}})
+	var out []struct {
+		ID     string            `json:"Id"`
+		Names  []string          `json:"Names"`
+		State  string            `json:"State"`
+		Labels map[string]string `json:"Labels"`
+	}
+	if err := d.json(ctx, http.MethodGet, "/containers/json", url.Values{"all": {"1"}, "filters": {string(filters)}}, nil, &out); err != nil {
+		return nil, err
+	}
+	res := make([]Container, 0, len(out))
+	for _, c := range out {
+		name := ""
+		if len(c.Names) > 0 {
+			name = strings.TrimPrefix(c.Names[0], "/")
+		}
+		res = append(res, Container{ID: c.ID, Name: name, State: c.State, Labels: c.Labels})
+	}
+	return res, nil
 }
 
 // Start starts a created container.

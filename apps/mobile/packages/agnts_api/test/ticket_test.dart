@@ -84,6 +84,12 @@ void main() {
       // TODO
     });
 
+    // Rounds a red CI check sent the pull request back to coding
+    // int ciFixes
+    test('to test the property `ciFixes`', () async {
+      // TODO
+    });
+
     // Git host usernames the pull request is (or will be) assigned to
     // List<String> assignees
     test('to test the property `assignees`', () async {

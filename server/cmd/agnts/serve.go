@@ -1,6 +1,8 @@
 package main
 
 import (
+	gitclient "github.com/go-git/go-git/v5/plumbing/transport/client"
+	githttp "github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
 	"context"
@@ -21,15 +23,19 @@ import (
 	"agnts/internal/accounts"
 	"agnts/internal/admin"
 	"agnts/internal/billing"
+	"agnts/internal/ciwatch"
 	"agnts/internal/claude"
 	"agnts/internal/config"
 	"agnts/internal/docs"
 	"agnts/internal/domain"
+	"agnts/internal/egress"
 	"agnts/internal/google"
 	"agnts/internal/httpapi"
 	"agnts/internal/mail"
 	"agnts/internal/mcpserver"
 	"agnts/internal/metrics"
+	"agnts/internal/netroute"
+	"agnts/internal/network"
 	"agnts/internal/notify"
 	"agnts/internal/oauth"
 	"agnts/internal/orchestrator"
@@ -89,7 +95,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 	}, svc, a.users, a.workspaces, a.store, mailer, a.files(), log.With("component", "accounts"))
 
 	mcpSrv := mcpserver.NewServer(mcpserver.Deps{
-		Orch: a.orch, Store: a.store, Usage: a.usage, Settings: a.settings, Dashboard: a.dashboard, Repos: a.repos, Lessons: a.lessons,
+		Orch: a.orch, Store: a.store, Usage: a.usage, Settings: a.settings, Dashboard: a.dashboard, Repos: a.repos, Lessons: a.lessons, CI: a.ci,
 		Analytics: func(ctx context.Context, days int) (any, error) { return a.dashboard.Analytics(ctx, days) },
 		Role:      a.workspaces.Role,
 	}, version)
@@ -104,7 +110,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 	}
 	if cfg.InternalAddr != "" {
 		go func() {
-			is := &http.Server{Addr: cfg.InternalAddr, Handler: internalHandler(a.egressAllow), ReadHeaderTimeout: 5 * time.Second}
+			is := &http.Server{Addr: cfg.InternalAddr, Handler: internalHandler(a.egressAllow, a.network), ReadHeaderTimeout: 5 * time.Second}
 			log.Info("internal listener", "addr", cfg.InternalAddr)
 			if err := is.ListenAndServe(); err != nil {
 				log.Error("internal listener", "err", err)
@@ -151,6 +157,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		Rules:        a.orch,
 		Briefs:       a.orch,
 		Reviews:      a.orch,
+		CI:           a.ci,
 		OAuth:        a.oauth,
 		MCP:          mcpHandler,
 		DB:           pool,
@@ -171,6 +178,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		Google:       googleSignIn(cfg, acc),
 		Feedback:     postgres.NewFeedbacks(pool),
 		SiteURL:      cfg.SiteURL,
+		Network:      a.network,
 		Payments: map[string]http.Handler{
 			"payme": a.billing.PaymeHandler(),
 			"click": a.billing.ClickHandler(),
@@ -179,8 +187,8 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 			"jira":     jira.WebhookHandler(a.jiraConfig, a.jira.AccountID, a.orch, a.store, log.With("component", "jira")),
 			"plane":    plane.WebhookHandler(a.planeConfig, a.plane, a.orch, a.store, log.With("component", "plane")),
 			"telegram": a.notifier.WebhookHandler(),
-			"github":   vcs.GitHubWebhook(hookSecret(cfg.EncKey, "github"), a.orch, a.store, a.vcs.ForgetAll, log.With("component", "github")),
-			"gitlab":   vcs.GitLabWebhook(hookSecret(cfg.EncKey, "gitlab"), a.orch, a.store, a.vcs.ForgetAll, log.With("component", "gitlab")),
+			"github":   vcs.GitHubWebhook(hookSecret(cfg.EncKey, "github"), gitHooks{a.orch, a.ci}, a.store, a.vcs.ForgetAll, log.With("component", "github")),
+			"gitlab":   vcs.GitLabWebhook(hookSecret(cfg.EncKey, "gitlab"), gitHooks{a.orch, a.ci}, a.store, a.vcs.ForgetAll, log.With("component", "gitlab")),
 		},
 	})
 	if err != nil {
@@ -207,6 +215,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		}
 	})
 
+	go a.network.Run(sys)
 	workerDone := make(chan struct{})
 	if cfg.AgentEnabled {
 		if err := a.docker.Ping(ctx); err != nil {
@@ -221,7 +230,32 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		}()
 		go jira.Reconcile(sys, a.jira, a.orch, cfg.JiraSyncEach, a.forEachWorkspace, log.With("component", "jira"))
 		go plane.Reconcile(sys, a.plane, a.planeProjects, a.orch, cfg.PlaneSyncEach, a.forEachWorkspace, log.With("component", "plane"))
+		if a.network.Enabled() {
+			a.network.SetRuns(a.docker, a.runner.WhoIs)
+			// A tracker reached through a VPN cannot send webhooks to agnts:
+			// read it more often (agnts-link relays them, so a tracker
+			// reached through a connector is skipped).
+			jiraSite := func(ctx context.Context) string {
+				c, ok, err := a.jiraConfig(ctx)
+				if err != nil || !ok {
+					return ""
+				}
+				return c.Site
+			}
+			planeURL := func(ctx context.Context) string {
+				c, ok, err := a.planeConfig(ctx)
+				if err != nil || !ok {
+					return ""
+				}
+				return c.BaseURL
+			}
+			go jira.Reconcile(sys, a.jira, a.orch, cfg.PrivatePollEvery, a.network.PolledBy(jiraSite), log.With("component", "jira", "private", true))
+			go plane.Reconcile(sys, a.plane, a.planeProjects, a.orch, max(cfg.PrivatePollEvery, 5*time.Minute), a.network.PolledBy(planeURL),
+				log.With("component", "plane", "private", true))
+		}
 		go pruneDeliveries(sys, a.store, log)
+		// CI watching: poll repositories without webhooks, follow CI tickets.
+		go every(sys, 5*time.Minute, func(ctx context.Context) { a.forEachWorkspace(ctx, a.ci.Tick) })
 		if cfg.UsageRefresh > 0 {
 			go a.refresher.IdleLoop(sys, cfg.UsageRefresh, a.orch.Active, a.claude.PausedAccounts)
 		}
@@ -284,6 +318,8 @@ type agent struct {
 	claude       *claude.Service
 	billing      *billing.Service
 	budget       *orchestrator.MemoryBudget
+	network      *network.Service
+	ci           *ciwatch.Service
 }
 
 func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, error) {
@@ -300,6 +336,18 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		users:        postgres.NewUsers(pool),
 	}
 	a.settings = postgres.NewSettings(pool, defaultSettings(cfg))
+	// Private networks: the server's own calls (GitLab, Jira and Plane
+	// APIs, git) to a host on a workspace's routes go through the gateway.
+	router := netroute.New(cfg.Gateway, cfg.GatewaySecret)
+	netroute.Install(router)
+	routed := githttp.NewClient(&http.Client{Transport: netroute.Transport})
+	gitclient.InstallProtocol("https", routed)
+	gitclient.InstallProtocol("http", routed)
+	a.network = network.New(network.Config{
+		Gateway: cfg.Gateway, GatewaySecret: cfg.GatewaySecret, LinkURL: cfg.LinkURL, Reserved: reservedHosts(cfg),
+		OVPNImage: cfg.OVPNImage, OVPNNetwork: cfg.OVPNNetwork, Polled: cfg.PrivatePollEvery,
+		MaxNetworks: cfg.PrivateNetworksMax, MaxOVPN: cfg.OVPNMax,
+	}, postgres.NewPrivateNetworks(pool), box, router, a.store, log.With("component", "network"))
 	a.jira = jira.New(a.jiraConfig)
 	a.plane = plane.New(a.planeConfig)
 	a.usage = usage.New(postgres.NewUsage(pool), a.store, log.With("component", "usage"))
@@ -338,6 +386,11 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	rcfg.Runtime, rcfg.NetworkPerRun, rcfg.ProxyContainer = cfg.RunRuntime, cfg.RunNetworkPerRun, cfg.EgressContainer
 	rcfg.StampDir = filepath.Join(cfg.DataDir, "cache-stamps")
 	maps.Copy(rcfg.Models, cfg.ClaudeModels)
+	if b, err := os.ReadFile(cfg.GuardBinary); err == nil {
+		rcfg.GuardBinary = b
+	} else {
+		log.Warn("agnts-guard is missing: runs work without the in-run guards (the checks after each run still apply)", "path", cfg.GuardBinary, "err", err)
+	}
 	run := runner.New(a.docker, rcfg, func(ctx context.Context) (runner.Credential, error) {
 		c, err := a.claude.CredentialFor(ctx)
 		return runner.Credential{Env: c.Env, Token: c.Token}, err
@@ -348,6 +401,8 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		DiskFree: func() (int64, bool) { return runner.DiskFreeMB(cfg.DataDir) },
 	}
 	a.runner = run
+	run.SetCA(a.network.CA)
+	run.SetCodexKey(func(ctx context.Context) (string, error) { return a.integrations.Token(ctx, "openai") })
 	a.refresher = usage.NewRefresher(a.usage, run, cfg.RunnerImage, log.With("component", "usage"))
 
 	repos := gitrepo.New(filepath.Join(cfg.DataDir, "repos"),
@@ -387,6 +442,8 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		Accounts: a.claude, Capacity: a.budget, Credits: a.billing,
 	}, log.With("component", "orchestrator"))
 	a.billing.OnChange(a.orch.ForgetWorkspace)
+	a.ci = ciwatch.New(postgres.NewCI(pool, box), a.store, a.orch, a.vcs, repos, a.settings, log.With("component", "ci"))
+	a.orch.SetCIHook(a.ci)
 
 	a.repos = admin.NewRepos(a.store, gh, a.vcs, func(ctx context.Context) string {
 		c, ok, err := a.gitlabConfig(ctx)
@@ -421,6 +478,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		"claude":   admin.ClaudeTokenCheck,
 		"telegram": admin.TelegramCheck(cfg.TelegramAPI),
 		"gitlab":   admin.GitLabCheck,
+		"openai":   admin.OpenAICheck(cfg.OpenAIAPI),
 	}, a.jira, a.orch, cfg.PublicURL.String(), log.With("component", "integrations"))
 	a.adminInteg.SetHooks(hooks{ws: a.workspaces, encKey: cfg.EncKey})
 	a.adminInteg.SetTelegramAPI(cfg.TelegramAPI)
@@ -436,6 +494,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	}
 	a.oauth = oauth.New(pool, cfg.PublicURL.String(), cfg.MCPRedirectHosts, log.With("component", "oauth"))
 	a.notifier = notify.New(a.store, a.orch, a.settings, fcm, a.telegramConfig, cfg.TelegramAPI, log.With("component", "notify"))
+	a.notifier.SetCIFixer(a.ci)
 	return a, nil
 }
 
@@ -721,9 +780,14 @@ func planeSync(ctx context.Context, cfg config.Config, pool postgresPool, log *s
 
 // internalHandler serves what other containers of the stack need from
 // agnts and must not be public: the egress proxy reads the hosts allowed in
-// Settings from /egress/allow. Caddy only routes the main listener.
-func internalHandler(allow func(ctx context.Context) ([]string, error)) http.Handler {
+// Settings from /egress/allow, and asks about private network routes; the
+// gateway reads the private networks (see network.Internal). Caddy only
+// routes the main listener.
+func internalHandler(allow func(ctx context.Context) ([]string, error), nets *network.Service) http.Handler {
 	mux := http.NewServeMux()
+	if nets != nil && nets.Enabled() {
+		nets.Internal(mux)
+	}
 	mux.HandleFunc("GET /egress/allow", func(w http.ResponseWriter, r *http.Request) {
 		hosts, err := allow(r.Context())
 		if err != nil && len(hosts) == 0 {
@@ -846,4 +910,33 @@ func googleSignIn(cfg config.Config, acc *accounts.Service) *httpapi.GoogleSignI
 		return nil
 	}
 	return &httpapi.GoogleSignIn{Verifier: google.New(cfg.GoogleClientID, cfg.GoogleAppClientIDs...), Accounts: acc, ClientID: cfg.GoogleClientID, SiteURL: cfg.SiteURL}
+}
+
+// reservedHosts are hosts no private network route may cover: what the
+// egress proxy reaches directly, and agnts's own domains.
+func reservedHosts(cfg config.Config) []string {
+	out := append([]string{}, egress.DefaultAllow...)
+	out = append(out, cfg.EgressAllow...)
+	for _, u := range []*url.URL{cfg.PublicURL, cfg.SiteURL} {
+		if u != nil && u.Hostname() != "" {
+			out = append(out, u.Hostname())
+		}
+	}
+	if u, err := url.Parse(cfg.LinkURL); err == nil && u.Hostname() != "" {
+		out = append(out, u.Hostname())
+	}
+	return out
+}
+
+// gitHooks receives the git hosts' webhooks: merges and closed pull
+// requests go to the orchestrator, finished CI runs to CI watching.
+type gitHooks struct {
+	*orchestrator.Orchestrator
+	ci *ciwatch.Service
+}
+
+var _ vcs.CloseSink = gitHooks{}
+
+func (h gitHooks) CIRunFinished(ctx context.Context, run domain.CIRun) error {
+	return h.ci.CIRunFinished(ctx, run)
 }

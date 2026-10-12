@@ -43,6 +43,8 @@ class FollowUpSuggestion {
 
     required  this.ready,
 
+     this.after,
+
      this.childKey,
 
      this.decidedAt,
@@ -187,6 +189,19 @@ class FollowUpSuggestion {
 
 
 
+      /// Ids of sibling suggestions that must land first; once both are tickets, this one depends on them
+  @JsonKey(
+    
+    name: r'after',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<int>? after;
+
+
+
       /// The ticket made from it
   @JsonKey(
     
@@ -239,6 +254,7 @@ class FollowUpSuggestion {
       other.priority == priority &&
       other.status == status &&
       other.ready == ready &&
+      other.after == after &&
       other.childKey == childKey &&
       other.decidedAt == decidedAt &&
       other.createdAt == createdAt;
@@ -256,6 +272,7 @@ class FollowUpSuggestion {
         priority.hashCode +
         status.hashCode +
         ready.hashCode +
+        after.hashCode +
         childKey.hashCode +
         decidedAt.hashCode +
         createdAt.hashCode;

@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"agnts/internal/domain"
+	"agnts/internal/netroute"
 	"agnts/internal/orchestrator"
 	"agnts/internal/vcs"
 )
@@ -34,7 +35,7 @@ var _ orchestrator.Host = (*Host)(nil)
 
 // New returns a GitHub host. api is https://api.github.com unless testing.
 func New(api string, token TokenSource) *Host {
-	return &Host{api: strings.TrimRight(api, "/"), token: token, hc: &http.Client{Timeout: 30 * time.Second}, etags: newEtags()}
+	return &Host{api: strings.TrimRight(api, "/"), token: token, hc: netroute.Client(30 * time.Second), etags: newEtags()}
 }
 
 // OwnerRepo extracts owner and name from an https or ssh GitHub URL.
@@ -151,19 +152,27 @@ func (h *Host) OpenPR(ctx context.Context, repo domain.Repository, pr orchestrat
 	return open[0].Number, open[0].HTMLURL, nil
 }
 
-// PRMerged reports whether pull request number was merged.
-func (h *Host) PRMerged(ctx context.Context, repo domain.Repository, number int) (bool, error) {
+// PRState reports whether pull request number is open, merged or closed
+// without a merge (domain.PullOpen, PullMerged, PullClosed).
+func (h *Host) PRState(ctx context.Context, repo domain.Repository, number int) (string, error) {
 	owner, name, err := OwnerRepo(repo.CloneURL)
 	if err != nil {
-		return false, err
+		return "", err
 	}
 	var p struct {
-		Merged bool `json:"merged"`
+		State  string `json:"state"`
+		Merged bool   `json:"merged"`
 	}
 	if _, err := h.call(ctx, http.MethodGet, "/repos/"+url.PathEscape(owner)+"/"+url.PathEscape(name)+"/pulls/"+strconv.Itoa(number), nil, &p); err != nil {
-		return false, err
+		return "", err
 	}
-	return p.Merged, nil
+	switch {
+	case p.Merged:
+		return domain.PullMerged, nil
+	case p.State == "closed":
+		return domain.PullClosed, nil
+	}
+	return domain.PullOpen, nil
 }
 
 // User returns the login the token belongs to (a connection check).

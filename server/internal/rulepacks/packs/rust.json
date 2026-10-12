@@ -1,0 +1,7 @@
+{"name": "Rust", "rules": [
+ {"title": "No unwrap on fallible runtime values", "body": "Do not call unwrap() or expect() on Results and Options that can fail at runtime (I/O, parsing, user input, network); propagate with ? and add context. unwrap is fine in tests and for values proven present a line above (say why in a comment)."},
+ {"title": "Errors carry context", "body": "Errors returned from library code are typed (thiserror) and application code adds context to them (anyhow::Context) saying what was being done."},
+ {"title": "Every unsafe block has a SAFETY comment", "body": "Each unsafe block is preceded by a // SAFETY: comment explaining why the invariants hold. Do not add unsafe code when a safe alternative exists."},
+ {"title": "No blocking in async code", "body": "Async functions do not call blocking APIs (std::fs, std::thread::sleep, blocking HTTP clients, heavy CPU loops); use the async equivalents or spawn_blocking. No lock guard is held across an .await."},
+ {"title": "Checked arithmetic on input-driven values", "body": "Arithmetic on values that come from input or external data uses checked_, saturating_ or wrapping_ operations as appropriate, and casts that can truncate use try_from."}
+]}

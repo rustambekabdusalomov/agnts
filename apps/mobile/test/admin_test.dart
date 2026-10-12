@@ -58,7 +58,7 @@ PlatformWorkspace _ws(int id, String name, {bool suspended = false, DateTime? de
     );
 
 Feedback _fb(int id, String title, FeedbackStatusEnum status) =>
-    Feedback(id: id, title: title, description: 'details', status: status, sender: 'ali', createdAt: _now);
+    Feedback(id: id, kind: FeedbackKindEnum.feedback, title: title, description: 'details', status: status, sender: 'ali', createdAt: _now);
 
 void main() {
   routingTests();

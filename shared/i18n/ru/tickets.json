@@ -11,6 +11,9 @@
     "colTicket": "Тикет",
     "colSource": "Источник",
     "colRepo": "Репозиторий",
+    "repoLabel": "Репозиторий",
+    "allRepos": "Все репозитории",
+    "noRepo": "Без репозитория",
     "colStatus": "Статус",
     "colUpdated": "Обновлено",
     "sourceJira": "Jira",
@@ -22,7 +25,7 @@
     "viewBoard": "Доска",
     "boardEmpty": "Пусто",
     "listSub": "Тикеты Jira и Plane с меткой agnts, а также задачи, которые вы создаёте для своих проектов.",
-    "noMatch": "Нет тикетов по вашему запросу.",
+    "noMatch": "Нет тикетов, подходящих под фильтры.",
     "emptyNeeds": "Сейчас ничего не ждёт вас. Тикеты появятся здесь, когда у agnts будут вопросы или изменения на ревью.",
     "emptyOther": "Здесь пока нет тикетов.",
     "statNeeds": "Ждёт вас",
@@ -33,6 +36,7 @@
     "statPushedNote": "Открыто пул-реквестов",
     "statSession": "Сессия тарифа",
     "sourcePlane": "Plane",
-    "sourceGit": "PR"
+    "sourceGit": "PR",
+    "sourceCi": "CI"
   }
 }

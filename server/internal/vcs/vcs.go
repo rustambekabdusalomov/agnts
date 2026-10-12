@@ -149,6 +149,7 @@ type Provider interface {
 	orchestrator.MergeChecker
 	orchestrator.ReviewHost
 	Browser
+	CIHost
 }
 
 // Multi routes to the provider named on each repository.
@@ -281,13 +282,13 @@ func (m *Multi) Pipelines(ctx context.Context, repo domain.Repository, page, per
 	return remember(ctx, m, key, 20*time.Second, func(ctx context.Context) ([]Pipeline, error) { return p.Pipelines(ctx, repo, page, perPage) })
 }
 
-// PRMerged implements orchestrator.MergeChecker.
-func (m *Multi) PRMerged(ctx context.Context, repo domain.Repository, number int) (bool, error) {
+// PRState implements orchestrator.MergeChecker.
+func (m *Multi) PRState(ctx context.Context, repo domain.Repository, number int) (string, error) {
 	p, err := m.pick(repo)
 	if err != nil {
-		return false, err
+		return "", err
 	}
-	return p.PRMerged(ctx, repo, number)
+	return p.PRState(ctx, repo, number)
 }
 
 // ReviewQueue implements orchestrator.ReviewHost. It is not cached: a

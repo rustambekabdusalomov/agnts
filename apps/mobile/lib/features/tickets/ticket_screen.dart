@@ -9,6 +9,7 @@ import 'package:agnts_api/agnts_api.dart';
 
 import '../../core/api.dart';
 import '../../core/data.dart';
+import '../ci/ci_card.dart';
 import '../learn/ticket_lessons.dart';
 import 'code_review.dart';
 import 'diff_highlight.dart';
@@ -214,6 +215,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         onRefresh: () async {
           ref.invalidate(ticketEventsProvider(widget.ticketKey));
           ref.invalidate(ticketProvider(widget.ticketKey));
+          ref.invalidate(ticketCIProvider(widget.ticketKey));
           await ref.read(ticketProvider(widget.ticketKey).future);
         },
         builder: (d) => ListView(
@@ -221,6 +223,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           padding: const EdgeInsets.only(bottom: 24),
           children: [
             _header(context, d),
+            TicketCICard(d.ticket),
             if (d.ticket.waitReason != null) Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 0), child: WaitBanner(d.ticket)),
             _Track(ticket: d.ticket, history: d.history ?? const []),
             // A viewer reads the stage (questions, the result to review) but cannot act on it.
@@ -1071,7 +1074,12 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
 /// resume at pushing (the server refuses them there, as the admin panel).
 bool _takesRetryNote(Ticket t) => t.state == TicketState.failed && t.resumeState != TicketState.pushing;
 
-String _modelName(Model m) => m.value.isEmpty ? m.value : '${m.value[0].toUpperCase()}${m.value.substring(1)}';
+/// A model's name: Haiku, Sonnet, Opus, or "Codex" and the model for a
+/// run on Codex CLI ("codex:" and the model).
+String _modelName(String m) {
+  if (m.startsWith('codex:')) return 'Codex ${m.substring(6)}';
+  return m.isEmpty ? m : '${m[0].toUpperCase()}${m.substring(1)}';
+}
 
 // ---- Small private pieces of the demo's detail page ----
 

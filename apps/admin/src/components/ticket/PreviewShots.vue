@@ -69,6 +69,11 @@ async function showShot(id: string) {
 }
 const issueShot = (id?: string) => (id ? current.value?.shots.find((s) => s.id === id) : undefined)
 
+// The check of the ticket's acceptance criteria in the running app.
+const acceptance = computed(() => current.value?.acceptance)
+const ACC_TONE = { ok: 'b-ok', partial: 'b-warn', failed: 'b-bad' } as const
+const VERDICT = { pass: 'b-ok', fail: 'b-bad', unknown: 'b-gray' } as const
+
 const zoomed = ref<PreviewShot | null>(null)
 const dlg = ref<HTMLDialogElement | null>(null)
 watch(zoomed, async (s) => {
@@ -96,7 +101,7 @@ watch(zoomed, async (s) => {
       <div v-if="current.status === 'failed'" class="help bad pv-log"><HiIcon name="info" /><pre class="err-text">{{ current.summary }}</pre><CopyButton v-if="current.summary" :text="current.summary" /></div>
       <div v-else class="summary"><p>{{ tr(current.summary) }}</p></div>
       <p class="hint cr-model">
-        {{ t('preview.model', { model: MODEL_NAME[current.model], n: current.shots.length }) }}<template v-if="current.compare"> · {{ t('preview.withBase') }}</template>
+        {{ t('preview.model', { model: MODEL_NAME[current.model] ?? current.model, n: current.shots.length }) }}<template v-if="current.compare"> · {{ t('preview.withBase') }}</template>
       </p>
 
       <ul v-if="current.issues.length" class="cr-list">
@@ -107,6 +112,27 @@ watch(zoomed, async (s) => {
         </li>
       </ul>
       <p v-else-if="current.status !== 'failed'" class="cr-none"><HiIcon name="check" />{{ t('preview.noIssues') }}</p>
+
+      <div v-if="acceptance" class="pv-acc">
+        <div class="cr-h">
+          <h3>{{ t('harnessTicket.accTitle') }}</h3>
+          <span class="badge" :class="ACC_TONE[acceptance.status]">{{ t(`harnessTicket.acc_${acceptance.status}`) }}</span>
+        </div>
+        <p v-if="acceptance.summary" class="hint">{{ tr(acceptance.summary) }}</p>
+        <ul class="cr-list">
+          <li v-for="c in acceptance.criteria" :key="c.id" class="cr-f pv-crit">
+            <div class="pv-issue">
+              <span class="badge" :class="VERDICT[c.verdict]">{{ t(`harnessTicket.verdict_${c.verdict}`) }}</span>
+              <span class="pv-issue-d"><code>{{ c.id }}</code> {{ tr(c.criterion) }}</span>
+            </div>
+            <p v-if="c.evidence" class="pv-ev">{{ tr(c.evidence) }}</p>
+            <p v-if="c.steps?.length" class="hint pv-ev">{{ t('harnessTicket.accSteps') }}: {{ c.steps.join(' → ') }}</p>
+            <span v-for="id in c.shots ?? []" :key="id">
+              <button v-if="issueShot(id)" type="button" class="cr-loc" @click="showShot(id)">{{ t('harnessTicket.accShot') }}: {{ issueShot(id)!.name }}</button>
+            </span>
+          </li>
+        </ul>
+      </div>
 
       <template v-if="pairs.length">
         <div class="pv-ctl">
@@ -192,6 +218,9 @@ watch(zoomed, async (s) => {
 .cr-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
 .pv-issue { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 .pv-issue-d { flex: 1 1 260px; font-size: 14px; }
+.pv-acc { margin-top: 16px; }
+.pv-crit .pv-ev { margin: 6px 0 0; font-size: 13.5px; }
+.pv-crit .cr-loc { display: inline-block; margin: 6px 10px 0 0; }
 .pv-log pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: 12.5px/1.45 var(--mono); max-height: 320px; overflow: auto; }
 .pv-ctl { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0 12px; }
 .pv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }

@@ -664,3 +664,32 @@ func (g *Repos) FetchPR(ctx context.Context, repo domain.Repository, ref, branch
 	}
 	return head.Hash().String(), files, nil
 }
+
+// IsAncestor fetches repo and reports whether commit ancestor is in the
+// history of commit sha. A commit the clone does not have gives an error.
+func (g *Repos) IsAncestor(ctx context.Context, repo domain.Repository, ancestor, sha string) (bool, error) {
+	defer g.lock(repo)()
+	auth, err := g.auth(ctx, repo)
+	if err != nil {
+		return false, err
+	}
+	r, err := g.open(repo)
+	if err != nil {
+		return false, err
+	}
+	if err := fetch(ctx, r, repo, auth, false, originRefs); err != nil {
+		return false, err
+	}
+	a, err := r.CommitObject(plumbing.NewHash(ancestor))
+	if err != nil {
+		return false, fmt.Errorf("commit %s not found: %w", shortSHA(ancestor), err)
+	}
+	c, err := r.CommitObject(plumbing.NewHash(sha))
+	if err != nil {
+		return false, fmt.Errorf("commit %s not found: %w", shortSHA(sha), err)
+	}
+	if a.Hash == c.Hash {
+		return true, nil
+	}
+	return a.IsAncestor(c)
+}

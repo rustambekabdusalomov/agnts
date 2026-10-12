@@ -14,7 +14,7 @@ import (
 
 // Insight is one observation; the client words it in the user's language.
 type Insight struct {
-	Kind   string            // claudeMd, waiting, stopsTests, stopsLimit, night
+	Kind   string            // claudeMd, waiting, stopsTests, stopsLimit, night, mergeRate, slowAnswers, followUpsNoise, flakyJob
 	Values map[string]string // placeholders for the message
 }
 
@@ -26,14 +26,33 @@ type AnalyticsView struct {
 
 // Analytics builds the Analytics page for 7, 30 or 90 days.
 func (d *Dashboard) Analytics(ctx context.Context, days int) (AnalyticsView, error) {
-	if days != 7 && days != 30 && days != 90 {
-		days = 30
-	}
-	a, err := d.store.Analytics(ctx, days, d.tz)
+	a, err := d.store.Analytics(ctx, periodDays(days), d.tz)
 	if err != nil {
 		return AnalyticsView{}, err
 	}
 	return AnalyticsView{Analytics: a, Insights: insights(a)}, nil
+}
+
+func periodDays(days int) int {
+	if days != 7 && days != 30 && days != 90 {
+		return 30
+	}
+	return days
+}
+
+// Delivery builds the Analytics page's Delivery tab.
+func (d *Dashboard) Delivery(ctx context.Context, days int) (postgres.Delivery, error) {
+	return d.store.Delivery(ctx, periodDays(days), d.tz)
+}
+
+// CIHealth builds the CI card of the Analytics page's Quality tab.
+func (d *Dashboard) CIHealth(ctx context.Context, days int) (postgres.CIHealth, error) {
+	return d.store.CIHealth(ctx, periodDays(days), d.tz)
+}
+
+// Learning builds the Analytics page's Learning tab.
+func (d *Dashboard) Learning(ctx context.Context, days int) (postgres.Learning, error) {
+	return d.store.Learning(ctx, periodDays(days), d.tz)
 }
 
 func insights(a postgres.Analytics) []Insight {
@@ -82,6 +101,34 @@ func insights(a postgres.Analytics) []Insight {
 		} else {
 			out = append(out, Insight{Kind: "stopsLimit", Values: map[string]string{"n": formatInt(a.Stops["limit"])}})
 		}
+	}
+
+	// Pull requests: a low merge rate means agnts's work is thrown away.
+	if decided := c.Merged + c.Closed; decided >= 4 {
+		if pct := float64(c.Merged) / float64(decided) * 100; pct < 60 {
+			out = append(out, Insight{Kind: "mergeRate", Values: map[string]string{"pct": itoa(pct), "closed": formatInt(c.Closed)}})
+		}
+	}
+
+	// Questions: tickets wait on a person's answer for hours.
+	if c.AnswerMin >= 120 {
+		out = append(out, Insight{Kind: "slowAnswers", Values: map[string]string{"hours": itoa(c.AnswerMin / 60)}})
+	}
+
+	// Follow-ups: most suggestions get dismissed.
+	if decided := a.FollowUpsAccepted + a.FollowUpsDismissed; decided >= 5 {
+		if pct := float64(a.FollowUpsAccepted) / float64(decided) * 100; pct < 25 {
+			out = append(out, Insight{Kind: "followUpsNoise", Values: map[string]string{"pct": itoa(pct)}})
+		}
+	}
+
+	// CI: the same job keeps failing and passing on re-run.
+	if f := a.Flakiest; f.Flaky >= 3 {
+		job := f.Job
+		if f.Workflow != "" {
+			job = f.Workflow + " / " + f.Job
+		}
+		out = append(out, Insight{Kind: "flakyJob", Values: map[string]string{"job": job, "repo": f.Repo, "n": formatInt(f.Flaky)}})
 	}
 
 	var night, all int

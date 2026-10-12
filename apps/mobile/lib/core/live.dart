@@ -110,6 +110,10 @@ class LiveStream {
       case 'lessons_found':
         ref.invalidate(lessonsProvider);
         ref.invalidate(ticketLessonsProvider);
+      case 'ci_failure':
+        ref.invalidate(ciFailuresProvider);
+        ref.invalidate(ciFailureProvider);
+        ref.invalidate(ticketCIProvider);
     }
     if (e['step'] == 'learn') ref.invalidate(learnQueueProvider);
   }

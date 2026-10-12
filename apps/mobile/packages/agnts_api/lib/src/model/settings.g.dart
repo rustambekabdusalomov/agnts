@@ -41,6 +41,20 @@ abstract class _$SettingsCWProxy {
 
   Settings pullReviews(PullReviewSettings? pullReviews);
 
+  Settings ci(CISettings? ci);
+
+  Settings guard(GuardSettings? guard);
+
+  Settings stalls(String? stalls);
+
+  Settings proveFixes(bool? proveFixes);
+
+  Settings deepReview(String? deepReview);
+
+  Settings learnFromRuns(bool? learnFromRuns);
+
+  Settings secondOpinion(String? secondOpinion);
+
   Settings pauseAbove(int pauseAbove);
 
   Settings parallel(int parallel);
@@ -73,6 +87,13 @@ abstract class _$SettingsCWProxy {
     List<String>? egressAllow,
     bool? suggestFollowUps,
     PullReviewSettings? pullReviews,
+    CISettings? ci,
+    GuardSettings? guard,
+    String? stalls,
+    bool? proveFixes,
+    String? deepReview,
+    bool? learnFromRuns,
+    String? secondOpinion,
     int pauseAbove,
     int parallel,
     GitSettings git,
@@ -141,6 +162,29 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
       this(pullReviews: pullReviews);
 
   @override
+  Settings ci(CISettings? ci) => this(ci: ci);
+
+  @override
+  Settings guard(GuardSettings? guard) => this(guard: guard);
+
+  @override
+  Settings stalls(String? stalls) => this(stalls: stalls);
+
+  @override
+  Settings proveFixes(bool? proveFixes) => this(proveFixes: proveFixes);
+
+  @override
+  Settings deepReview(String? deepReview) => this(deepReview: deepReview);
+
+  @override
+  Settings learnFromRuns(bool? learnFromRuns) =>
+      this(learnFromRuns: learnFromRuns);
+
+  @override
+  Settings secondOpinion(String? secondOpinion) =>
+      this(secondOpinion: secondOpinion);
+
+  @override
   Settings pauseAbove(int pauseAbove) => this(pauseAbove: pauseAbove);
 
   @override
@@ -177,6 +221,13 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
     Object? egressAllow = const $CopyWithPlaceholder(),
     Object? suggestFollowUps = const $CopyWithPlaceholder(),
     Object? pullReviews = const $CopyWithPlaceholder(),
+    Object? ci = const $CopyWithPlaceholder(),
+    Object? guard = const $CopyWithPlaceholder(),
+    Object? stalls = const $CopyWithPlaceholder(),
+    Object? proveFixes = const $CopyWithPlaceholder(),
+    Object? deepReview = const $CopyWithPlaceholder(),
+    Object? learnFromRuns = const $CopyWithPlaceholder(),
+    Object? secondOpinion = const $CopyWithPlaceholder(),
     Object? pauseAbove = const $CopyWithPlaceholder(),
     Object? parallel = const $CopyWithPlaceholder(),
     Object? git = const $CopyWithPlaceholder(),
@@ -251,6 +302,34 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
           ? _value.pullReviews
           // ignore: cast_nullable_to_non_nullable
           : pullReviews as PullReviewSettings?,
+      ci: ci == const $CopyWithPlaceholder()
+          ? _value.ci
+          // ignore: cast_nullable_to_non_nullable
+          : ci as CISettings?,
+      guard: guard == const $CopyWithPlaceholder()
+          ? _value.guard
+          // ignore: cast_nullable_to_non_nullable
+          : guard as GuardSettings?,
+      stalls: stalls == const $CopyWithPlaceholder()
+          ? _value.stalls
+          // ignore: cast_nullable_to_non_nullable
+          : stalls as String?,
+      proveFixes: proveFixes == const $CopyWithPlaceholder()
+          ? _value.proveFixes
+          // ignore: cast_nullable_to_non_nullable
+          : proveFixes as bool?,
+      deepReview: deepReview == const $CopyWithPlaceholder()
+          ? _value.deepReview
+          // ignore: cast_nullable_to_non_nullable
+          : deepReview as String?,
+      learnFromRuns: learnFromRuns == const $CopyWithPlaceholder()
+          ? _value.learnFromRuns
+          // ignore: cast_nullable_to_non_nullable
+          : learnFromRuns as bool?,
+      secondOpinion: secondOpinion == const $CopyWithPlaceholder()
+          ? _value.secondOpinion
+          // ignore: cast_nullable_to_non_nullable
+          : secondOpinion as String?,
       pauseAbove: pauseAbove == const $CopyWithPlaceholder()
           ? _value.pauseAbove
           // ignore: cast_nullable_to_non_nullable
@@ -334,6 +413,20 @@ Settings _$SettingsFromJson(
           ? null
           : PullReviewSettings.fromJson(v as Map<String, dynamic>),
     ),
+    ci: $checkedConvert(
+      'ci',
+      (v) => v == null ? null : CISettings.fromJson(v as Map<String, dynamic>),
+    ),
+    guard: $checkedConvert(
+      'guard',
+      (v) =>
+          v == null ? null : GuardSettings.fromJson(v as Map<String, dynamic>),
+    ),
+    stalls: $checkedConvert('stalls', (v) => v as String?),
+    proveFixes: $checkedConvert('proveFixes', (v) => v as bool?),
+    deepReview: $checkedConvert('deepReview', (v) => v as String?),
+    learnFromRuns: $checkedConvert('learnFromRuns', (v) => v as bool?),
+    secondOpinion: $checkedConvert('secondOpinion', (v) => v as String?),
     pauseAbove: $checkedConvert('pauseAbove', (v) => (v as num).toInt()),
     parallel: $checkedConvert('parallel', (v) => (v as num).toInt()),
     git: $checkedConvert(
@@ -367,6 +460,13 @@ Map<String, dynamic> _$SettingsToJson(Settings instance) => <String, dynamic>{
   'egressAllow': ?instance.egressAllow,
   'suggestFollowUps': ?instance.suggestFollowUps,
   'pullReviews': ?instance.pullReviews?.toJson(),
+  'ci': ?instance.ci?.toJson(),
+  'guard': ?instance.guard?.toJson(),
+  'stalls': ?instance.stalls,
+  'proveFixes': ?instance.proveFixes,
+  'deepReview': ?instance.deepReview,
+  'learnFromRuns': ?instance.learnFromRuns,
+  'secondOpinion': ?instance.secondOpinion,
   'pauseAbove': instance.pauseAbove,
   'parallel': instance.parallel,
   'git': instance.git.toJson(),

@@ -36,6 +36,26 @@ describe('workspace routes', () => {
     expect(r.seen[0]!.body).toBeNull()
   })
 
+  it('sends CI filters comma-separated in the workspace', async () => {
+    const r = recorder()
+    setWorkspace('acme')
+    await api.GET('/ci/failures', { baseUrl: 'http://localhost/api', fetch: r.fetch, params: { query: { repoId: 3, status: 'open,fixing' } } })
+    const url = new URL(r.seen[0]!.url)
+    expect(url.pathname).toBe('/api/w/acme/ci/failures')
+    expect(url.searchParams.get('repoId')).toBe('3')
+    expect(url.searchParams.get('status')).toBe('open,fixing')
+  })
+
+  it('sends a repository CI watch whole, with autoFix null to follow the workspace', async () => {
+    const r = recorder()
+    setWorkspace('acme')
+    const body = { enabled: true, branches: ['release/*'], ignore: [], prs: 'off', autoFix: null }
+    await api.PUT('/repos/{id}/ci-watch', { baseUrl: 'http://localhost/api', fetch: r.fetch, params: { path: { id: 3 } }, body })
+    const req = r.seen[0]!
+    expect(new URL(req.url).pathname).toBe('/api/w/acme/repos/3/ci-watch')
+    expect(JSON.parse(await req.text())).toEqual(body)
+  })
+
   it("leaves the person's own calls where they are", async () => {
     const r = recorder()
     setWorkspace('acme')

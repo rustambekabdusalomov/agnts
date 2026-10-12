@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:agnts_api/src/model/rule_enforce.dart';
 import 'package:agnts_api/src/model/rule_kind.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -30,6 +31,12 @@ class RuleInput {
      this.enabled = true,
 
      this.kind,
+
+     this.enforce,
+
+     this.removeEnforce,
+
+     this.delivery,
   });
 
   @JsonKey(
@@ -93,6 +100,44 @@ class RuleInput {
 
 
 
+  @JsonKey(
+    
+    name: r'enforce',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final RuleEnforce? enforce;
+
+
+
+      /// Remove the enforcement; enforce left out keeps it
+  @JsonKey(
+    
+    name: r'removeEnforce',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? removeEnforce;
+
+
+
+      /// Left out keeps the rule's
+  @JsonKey(
+    
+    name: r'delivery',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final RuleInputDeliveryEnum? delivery;
+
+
+
 
 
     @override
@@ -101,7 +146,10 @@ class RuleInput {
       other.body == body &&
       other.repoId == repoId &&
       other.enabled == enabled &&
-      other.kind == kind;
+      other.kind == kind &&
+      other.enforce == enforce &&
+      other.removeEnforce == removeEnforce &&
+      other.delivery == delivery;
 
     @override
     int get hashCode =>
@@ -109,7 +157,10 @@ class RuleInput {
         body.hashCode +
         repoId.hashCode +
         enabled.hashCode +
-        kind.hashCode;
+        kind.hashCode +
+        enforce.hashCode +
+        removeEnforce.hashCode +
+        delivery.hashCode;
 
   factory RuleInput.fromJson(Map<String, dynamic> json) => _$RuleInputFromJson(json);
 
@@ -121,4 +172,20 @@ class RuleInput {
   }
 
 }
+
+/// Left out keeps the rule's
+enum RuleInputDeliveryEnum {
+@JsonValue(r'prompt')
+prompt(r'prompt'),
+@JsonValue(r'skill')
+skill(r'skill');
+
+const RuleInputDeliveryEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
+}
+
 

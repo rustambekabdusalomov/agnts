@@ -236,7 +236,46 @@ func (o *Orchestrator) preview(ctx context.Context, s domain.Settings, t domain.
 			p.Issues[i].ShotID = ""
 		}
 	}
-	return o.savePreview(ctx, t, run, p, prev)
+	// The acceptance check runs while the app still runs.
+	if criteria := o.acceptanceCriteria(ctx, t, repo); len(criteria) > 0 {
+		acc, shots, err := o.checkAcceptance(ctx, s, ws, t, run, repo, criteria)
+		if err != nil {
+			var stop *stopError
+			if errors.As(err, &stop) {
+				return err
+			}
+			o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(domain.StagePreview), Type: domain.EventError, Level: domain.LevelWarn,
+				Message: "the acceptance check failed: " + err.Error()})
+		} else {
+			p.Acceptance = acc
+			p.Shots = append(p.Shots, shots...)
+			o.event(ctx, acceptanceEvent(t.Key, run, acc))
+		}
+	}
+	if err := o.savePreview(ctx, t, run, p, prev); err != nil {
+		return err
+	}
+	return o.afterAcceptance(ctx, t, run, p.Acceptance)
+}
+
+// acceptanceEvent logs an acceptance check on the ticket.
+func acceptanceEvent(key string, run *domain.Run, a *domain.Acceptance) domain.Event {
+	pass, fail := 0, 0
+	for _, c := range a.Criteria {
+		switch c.Verdict {
+		case "pass":
+			pass++
+		case "fail":
+			fail++
+		}
+	}
+	level := domain.LevelInfo
+	if fail > 0 {
+		level = domain.LevelWarn
+	}
+	return domain.Event{TicketKey: key, RunID: &run.ID, Step: string(domain.StagePreview), Type: domain.EventAcceptance, Level: level,
+		Message: fmt.Sprintf("acceptance: %d of %d criteria met, %d not met", pass, len(a.Criteria), fail),
+		Data:    map[string]any{"status": a.Status, "pass": pass, "fail": fail, "total": len(a.Criteria)}}
 }
 
 // writePreviewFiles puts the app's config and environment where

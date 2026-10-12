@@ -53,6 +53,7 @@
     "platform": "Кабинет администратора",
     "people": "Люди",
     "account": "Аккаунт",
-    "reviews": "Ревью PR"
+    "reviews": "Ревью PR",
+    "ci": "CI"
   }
 }

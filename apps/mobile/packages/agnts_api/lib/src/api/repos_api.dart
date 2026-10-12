@@ -20,6 +20,7 @@ import 'package:agnts_api/src/model/repo_brief.dart';
 import 'package:agnts_api/src/model/repo_brief_input.dart';
 import 'package:agnts_api/src/model/repo_detect_input.dart';
 import 'package:agnts_api/src/model/repo_detection.dart';
+import 'package:agnts_api/src/model/repo_harness_input.dart';
 import 'package:agnts_api/src/model/repo_member.dart';
 import 'package:agnts_api/src/model/repository.dart';
 import 'package:agnts_api/src/model/repository_input.dart';
@@ -1414,6 +1415,110 @@ _responseData = rawData == null ? null : deserialize<RepoBrief, RepoBrief>(rawDa
     }
 
     return Response<RepoBrief>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// Set the repository&#39;s guard profile, per-file checks, coverage and acceptance check
+  /// 
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [repoHarnessInput] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [Repository] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<Repository>> saveRepoHarness({ 
+    required int id,
+    required RepoHarnessInput repoHarnessInput,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/repos/{id}/harness'.replaceAll('{' r'id' '}', id.toString());
+    final _options = Options(
+      method: r'PUT',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'cookieAuth',
+            'keyName': 'hiro_session',
+            'where': '',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(repoHarnessInput);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    Repository? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<Repository, Repository>(rawData, 'Repository', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<Repository>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,

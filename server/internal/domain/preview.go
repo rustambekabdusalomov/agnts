@@ -56,6 +56,9 @@ type Preview struct {
 	Summary  string         `json:"summary"`
 	Shots    []Shot         `json:"shots"`
 	Issues   []PreviewIssue `json:"issues"`
+	// Acceptance is the check of the ticket's acceptance criteria in the
+	// running app, when the repository asks for it.
+	Acceptance *Acceptance `json:"acceptance,omitempty"`
 	// RunID is the run whose files hold the screenshots.
 	RunID     int64     `json:"-"`
 	CreatedAt time.Time `json:"-"`

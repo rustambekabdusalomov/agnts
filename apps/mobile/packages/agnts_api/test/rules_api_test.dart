@@ -45,10 +45,33 @@ void main() {
       // TODO
     });
 
+    // Starter rule packs that fit the repository's toolchains
+    //
+    //Future<List<StarterPack>> listStarterPacks(int id) async
+    test('test listStarterPacks', () async {
+      // TODO
+    });
+
+    // Add a starter pack's rules to the repository as suggestions
+    //
+    // Nothing applies until someone adopts a suggestion (with a review or as written). Rules whose title the repository already has are skipped.
+    //
+    //Future<List<Rule>> offerStarterRules(int id, OfferStarterRulesRequest offerStarterRulesRequest) async
+    test('test offerStarterRules', () async {
+      // TODO
+    });
+
     // Have Claude review a rule again, keeping its answers
     //
     //Future<Rule> reviewRule(int id) async
     test('test reviewRule', () async {
+      // TODO
+    });
+
+    // Check an enforcement against agnts's last changes before turning it on
+    //
+    //Future<TryEnforceResult> tryEnforce(TryEnforceInput tryEnforceInput) async
+    test('test tryEnforce', () async {
       // TODO
     });
 

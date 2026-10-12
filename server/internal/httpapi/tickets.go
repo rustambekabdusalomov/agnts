@@ -20,6 +20,7 @@ type Tickets interface {
 	Events(ctx context.Context, f orchestrator.EventFilter) ([]domain.Event, error)
 	Answer(ctx context.Context, key string, answers []domain.Answer, origin domain.Origin) (domain.Ticket, error)
 	Approve(ctx context.Context, key string, assignees []string, postReport bool, origin domain.Origin) (domain.Ticket, error)
+	AcknowledgeSecrets(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	RequestChanges(ctx context.Context, key, feedback string, shots []domain.ShotRef, files []int64, origin domain.Origin) (domain.Ticket, error)
 	Reject(ctx context.Context, key, reason string, origin domain.Origin) (domain.Ticket, error)
 	RetryWithNote(ctx context.Context, key, note string, files []int64, origin domain.Origin) (domain.Ticket, error)
@@ -131,14 +132,14 @@ func (s *Server) GetTicket(w http.ResponseWriter, r *http.Request, key gen.Ticke
 		*d.History = append(*d.History, item)
 	}
 	em := gen.StageModels{
-		Analyze: gen.Model(v.Settings.ModelFor(v.Ticket, domain.ModelAnalyze)),
-		Coding:  gen.Model(v.Settings.ModelFor(v.Ticket, domain.ModelCoding)),
-		Retry:   gen.Model(v.Settings.ModelFor(v.Ticket, domain.ModelRetry)),
-		Helper:  gen.Model(v.Settings.Models.Helper),
+		Analyze: v.Settings.ModelFor(v.Ticket, domain.ModelAnalyze),
+		Coding:  v.Settings.ModelFor(v.Ticket, domain.ModelCoding),
+		Retry:   v.Settings.ModelFor(v.Ticket, domain.ModelRetry),
+		Helper:  v.Settings.Models.Helper,
 	}
-	rm := gen.ReviewModel(v.Settings.ModelFor(v.Ticket, domain.ModelReview))
+	rm := v.Settings.ModelFor(v.Ticket, domain.ModelReview)
 	em.Review = &rm
-	pm := gen.Model(v.Settings.ModelFor(v.Ticket, domain.ModelPreview))
+	pm := v.Settings.ModelFor(v.Ticket, domain.ModelPreview)
 	em.Preview = &pm
 	canPreview := v.CanPreview
 	d.Ticket.CanPreview = &canPreview
@@ -164,6 +165,17 @@ func (s *Server) GetTicket(w http.ResponseWriter, r *http.Request, key gen.Ticke
 		}
 		d.Analysis.Footprint = toFootprint(v.Analysis.Footprint)
 		toDesign(d.Analysis, *v.Analysis)
+		if v.Analysis.Defect {
+			d.Analysis.Defect = ptr(true)
+		}
+		if len(v.Analysis.Acceptance) > 0 {
+			var g gen.Analysis
+			_ = json.Unmarshal(mustJSON(map[string]any{"acceptance": v.Analysis.Acceptance}), &g)
+			d.Analysis.Acceptance = g.Acceptance
+		}
+		if v.SecondOpinion != nil {
+			d.Analysis.SecondOpinion = ptr(via[gen.SecondOpinion](v.SecondOpinion))
+		}
 	}
 	rels := toRelations(v.Ticket.Key, v.Relations)
 	d.Relations = &rels
@@ -402,6 +414,9 @@ func toTicket(t domain.Ticket) gen.Ticket {
 		Branch: t.Branch, PrNumber: t.PRNumber, PrUrl: t.PRURL, CreatedAt: t.CreatedAt, UpdatedAt: t.UpdatedAt,
 		Kind: gen.TicketKind(t.Kind), KindAuto: t.KindAuto, MemberId: t.MemberID, QueuedAt: t.QueuedAt,
 	}
+	if t.CIFixes > 0 {
+		out.CiFixes = ptr(t.CIFixes)
+	}
 	if t.WaitReason != domain.WaitNone {
 		wr := gen.WaitReason(t.WaitReason)
 		out.WaitReason = &wr
@@ -473,23 +488,23 @@ func toTicket(t domain.Ticket) gen.Ticket {
 	if len(t.Models) > 0 {
 		m := gen.ModelOverrides{}
 		if v, ok := t.Models[domain.ModelAnalyze]; ok {
-			mv := gen.Model(v)
+			mv := v
 			m.Analyze = &mv
 		}
 		if v, ok := t.Models[domain.ModelCoding]; ok {
-			mv := gen.Model(v)
+			mv := v
 			m.Coding = &mv
 		}
 		if v, ok := t.Models[domain.ModelRetry]; ok {
-			mv := gen.Model(v)
+			mv := v
 			m.Retry = &mv
 		}
 		if v, ok := t.Models[domain.ModelReview]; ok {
-			mv := gen.Model(v)
+			mv := v
 			m.Review = &mv
 		}
 		if v, ok := t.Models[domain.ModelPreview]; ok {
-			mv := gen.Model(v)
+			mv := v
 			m.Preview = &mv
 		}
 		out.Models = &m
@@ -569,7 +584,7 @@ func (s *Server) GetPreviewShot(w http.ResponseWriter, r *http.Request, key gen.
 
 func toPreview(key string, p domain.Preview) *gen.TicketPreview {
 	out := &gen.TicketPreview{
-		RunId: p.RunID, Revision: p.Revision, Model: gen.Model(p.Model), Compare: p.Compare,
+		RunId: p.RunID, Revision: p.Revision, Model: p.Model, Compare: p.Compare,
 		Status: gen.TicketPreviewStatus(p.Status), Summary: p.Summary, CreatedAt: p.CreatedAt,
 		Shots: make([]gen.PreviewShot, len(p.Shots)), Issues: make([]gen.PreviewIssue, len(p.Issues)),
 	}
@@ -594,6 +609,9 @@ func toPreview(key string, p domain.Preview) *gen.TicketPreview {
 	}
 	for i, is := range p.Issues {
 		out.Issues[i] = gen.PreviewIssue{Severity: gen.PreviewIssueSeverity(is.Severity), Description: is.Description, ShotId: opt(is.ShotID)}
+	}
+	if p.Acceptance != nil {
+		out.Acceptance = ptr(via[gen.Acceptance](p.Acceptance))
 	}
 	return out
 }
@@ -630,11 +648,17 @@ func (s *Server) TranslateTicket(w http.ResponseWriter, r *http.Request, key gen
 
 func toReview(rv domain.Review) *gen.CodeReview {
 	out := &gen.CodeReview{
-		Revision: rv.Revision, Model: gen.Model(rv.Model), ModelReason: rv.ModelReason, Verdict: gen.CodeReviewVerdict(rv.Verdict),
+		Revision: rv.Revision, Model: rv.Model, ModelReason: rv.ModelReason, Verdict: gen.CodeReviewVerdict(rv.Verdict),
 		Summary: rv.Summary, Findings: make([]gen.Finding, len(rv.Findings)), Strengths: rv.Strengths, CreatedAt: rv.CreatedAt,
 	}
 	if out.Strengths == nil {
 		out.Strengths = []string{}
+	}
+	if rv.Deep {
+		out.Deep = ptr(true)
+	}
+	if rv.Dropped > 0 {
+		out.Dropped = ptr(rv.Dropped)
 	}
 	opt := func(s string) *string {
 		if s == "" {
@@ -644,7 +668,14 @@ func toReview(rv domain.Review) *gen.CodeReview {
 	}
 	for i, f := range rv.Findings {
 		out.Findings[i] = gen.Finding{Severity: gen.FindingSeverity(f.Severity), Category: gen.FindingCategory(f.Category), Title: f.Title,
-			File: opt(f.File), Detail: opt(f.Detail), Suggestion: opt(f.Suggestion)}
+			File: opt(f.File), Detail: opt(f.Detail), Suggestion: opt(f.Suggestion), Pass: opt(f.Pass)}
+		if f.Confidence > 0 {
+			c := float32(f.Confidence)
+			out.Findings[i].Confidence = &c
+		}
+		if f.Adopted {
+			out.Findings[i].Adopted = ptr(true)
+		}
 		if f.Line > 0 {
 			line := f.Line
 			out.Findings[i].Line = &line
@@ -667,6 +698,12 @@ func toResult(r domain.Result) *gen.Result {
 	}
 	if len(sum.Deviations) > 0 {
 		out.Deviations = &sum.Deviations
+	}
+	if p := r.Harness.Proof; p != nil {
+		out.Proof = ptr(via[gen.Proof](p))
+	}
+	if c := r.Harness.Coverage; c != nil {
+		out.Coverage = ptr(via[gen.Coverage](c))
 	}
 	if len(r.RedFlags) > 0 {
 		flags := make([]gen.RedFlag, len(r.RedFlags))

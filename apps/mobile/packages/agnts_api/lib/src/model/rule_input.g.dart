@@ -17,6 +17,12 @@ abstract class _$RuleInputCWProxy {
 
   RuleInput kind(RuleKind? kind);
 
+  RuleInput enforce(RuleEnforce? enforce);
+
+  RuleInput removeEnforce(bool? removeEnforce);
+
+  RuleInput delivery(RuleInputDeliveryEnum? delivery);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `RuleInput(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -29,6 +35,9 @@ abstract class _$RuleInputCWProxy {
     int? repoId,
     bool? enabled,
     RuleKind? kind,
+    RuleEnforce? enforce,
+    bool? removeEnforce,
+    RuleInputDeliveryEnum? delivery,
   });
 }
 
@@ -54,6 +63,17 @@ class _$RuleInputCWProxyImpl implements _$RuleInputCWProxy {
   RuleInput kind(RuleKind? kind) => this(kind: kind);
 
   @override
+  RuleInput enforce(RuleEnforce? enforce) => this(enforce: enforce);
+
+  @override
+  RuleInput removeEnforce(bool? removeEnforce) =>
+      this(removeEnforce: removeEnforce);
+
+  @override
+  RuleInput delivery(RuleInputDeliveryEnum? delivery) =>
+      this(delivery: delivery);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `RuleInput(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -66,6 +86,9 @@ class _$RuleInputCWProxyImpl implements _$RuleInputCWProxy {
     Object? repoId = const $CopyWithPlaceholder(),
     Object? enabled = const $CopyWithPlaceholder(),
     Object? kind = const $CopyWithPlaceholder(),
+    Object? enforce = const $CopyWithPlaceholder(),
+    Object? removeEnforce = const $CopyWithPlaceholder(),
+    Object? delivery = const $CopyWithPlaceholder(),
   }) {
     return RuleInput(
       title: title == const $CopyWithPlaceholder()
@@ -88,6 +111,18 @@ class _$RuleInputCWProxyImpl implements _$RuleInputCWProxy {
           ? _value.kind
           // ignore: cast_nullable_to_non_nullable
           : kind as RuleKind?,
+      enforce: enforce == const $CopyWithPlaceholder()
+          ? _value.enforce
+          // ignore: cast_nullable_to_non_nullable
+          : enforce as RuleEnforce?,
+      removeEnforce: removeEnforce == const $CopyWithPlaceholder()
+          ? _value.removeEnforce
+          // ignore: cast_nullable_to_non_nullable
+          : removeEnforce as bool?,
+      delivery: delivery == const $CopyWithPlaceholder()
+          ? _value.delivery
+          // ignore: cast_nullable_to_non_nullable
+          : delivery as RuleInputDeliveryEnum?,
     );
   }
 }
@@ -102,21 +137,34 @@ extension $RuleInputCopyWith on RuleInput {
 // JsonSerializableGenerator
 // **************************************************************************
 
-RuleInput _$RuleInputFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('RuleInput', json, ($checkedConvert) {
-      $checkKeys(json, requiredKeys: const ['title', 'body']);
-      final val = RuleInput(
-        title: $checkedConvert('title', (v) => v as String),
-        body: $checkedConvert('body', (v) => v as String),
-        repoId: $checkedConvert('repoId', (v) => (v as num?)?.toInt()),
-        enabled: $checkedConvert('enabled', (v) => v as bool? ?? true),
-        kind: $checkedConvert(
-          'kind',
-          (v) => $enumDecodeNullable(_$RuleKindEnumMap, v),
-        ),
-      );
-      return val;
-    });
+RuleInput _$RuleInputFromJson(Map<String, dynamic> json) => $checkedCreate(
+  'RuleInput',
+  json,
+  ($checkedConvert) {
+    $checkKeys(json, requiredKeys: const ['title', 'body']);
+    final val = RuleInput(
+      title: $checkedConvert('title', (v) => v as String),
+      body: $checkedConvert('body', (v) => v as String),
+      repoId: $checkedConvert('repoId', (v) => (v as num?)?.toInt()),
+      enabled: $checkedConvert('enabled', (v) => v as bool? ?? true),
+      kind: $checkedConvert(
+        'kind',
+        (v) => $enumDecodeNullable(_$RuleKindEnumMap, v),
+      ),
+      enforce: $checkedConvert(
+        'enforce',
+        (v) =>
+            v == null ? null : RuleEnforce.fromJson(v as Map<String, dynamic>),
+      ),
+      removeEnforce: $checkedConvert('removeEnforce', (v) => v as bool?),
+      delivery: $checkedConvert(
+        'delivery',
+        (v) => $enumDecodeNullable(_$RuleInputDeliveryEnumEnumMap, v),
+      ),
+    );
+    return val;
+  },
+);
 
 Map<String, dynamic> _$RuleInputToJson(RuleInput instance) => <String, dynamic>{
   'title': instance.title,
@@ -124,6 +172,18 @@ Map<String, dynamic> _$RuleInputToJson(RuleInput instance) => <String, dynamic>{
   'repoId': ?instance.repoId,
   'enabled': ?instance.enabled,
   'kind': ?_$RuleKindEnumMap[instance.kind],
+  'enforce': ?instance.enforce?.toJson(),
+  'removeEnforce': ?instance.removeEnforce,
+  'delivery': ?_$RuleInputDeliveryEnumEnumMap[instance.delivery],
 };
 
-const _$RuleKindEnumMap = {RuleKind.rule: 'rule', RuleKind.context: 'context'};
+const _$RuleKindEnumMap = {
+  RuleKind.rule: 'rule',
+  RuleKind.context: 'context',
+  RuleKind.tip: 'tip',
+};
+
+const _$RuleInputDeliveryEnumEnumMap = {
+  RuleInputDeliveryEnum.prompt: 'prompt',
+  RuleInputDeliveryEnum.skill: 'skill',
+};

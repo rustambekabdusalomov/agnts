@@ -96,6 +96,52 @@ void main() {
       // TODO
     });
 
+    // RuleEnforce enforce
+    test('to test the property `enforce`', () async {
+      // TODO
+    });
+
+    // prompt: in every prompt; skill: a skill Claude loads when its description matches the work
+    // String delivery
+    test('to test the property `delivery`', () async {
+      // TODO
+    });
+
+    // When the rule applies, for its skill
+    // String skillDescription
+    test('to test the property `skillDescription`', () async {
+      // TODO
+    });
+
+    // Where it came from: empty (a person), reflect, run, promoted or pack:<language>
+    // String source_
+    test('to test the property `source_`', () async {
+      // TODO
+    });
+
+    // For a learned suggestion: 0.3 to 0.9, earned each time it is seen again
+    // num confidence
+    test('to test the property `confidence`', () async {
+      // TODO
+    });
+
+    // How many times a learned suggestion was seen
+    // int evidence
+    test('to test the property `evidence`', () async {
+      // TODO
+    });
+
+    // DateTime lastSeen
+    test('to test the property `lastSeen`', () async {
+      // TODO
+    });
+
+    // A learned suggestion with too little evidence to show yet
+    // bool watching
+    test('to test the property `watching`', () async {
+      // TODO
+    });
+
     // DateTime analyzedAt
     test('to test the property `analyzedAt`', () async {
       // TODO

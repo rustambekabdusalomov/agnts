@@ -43,6 +43,26 @@ class QualityStat {
     required  this.redFlags,
 
     required  this.selfFixes,
+
+     this.guardBlocks,
+
+     this.stopSaves,
+
+     this.stalls,
+
+     this.proofDue,
+
+     this.proven,
+
+     this.findings,
+
+     this.adopted,
+
+     this.tokens,
+
+     this.factCheck,
+
+     this.factCheckFirst,
   });
 
       /// Empty for runs from before versions were recorded
@@ -198,6 +218,136 @@ class QualityStat {
 
 
 
+      /// Actions agnts-guard refused in their coding runs
+  @JsonKey(
+    
+    name: r'guardBlocks',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? guardBlocks;
+
+
+
+      /// Tickets whose stop gate sent failing checks back and whose checks then passed first time
+  @JsonKey(
+    
+    name: r'stopSaves',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? stopSaves;
+
+
+
+      /// Times their runs looked stuck
+  @JsonKey(
+    
+    name: r'stalls',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? stalls;
+
+
+
+      /// Tickets with a proof of fix
+  @JsonKey(
+    
+    name: r'proofDue',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? proofDue;
+
+
+
+      /// Of those, proven
+  @JsonKey(
+    
+    name: r'proven',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? proven;
+
+
+
+      /// Review findings shown on them
+  @JsonKey(
+    
+    name: r'findings',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? findings;
+
+
+
+      /// Of those, put into a person's feedback
+  @JsonKey(
+    
+    name: r'adopted',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? adopted;
+
+
+
+      /// Average tokens of a done ticket, all stages
+  @JsonKey(
+    
+    name: r'tokens',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final num? tokens;
+
+
+
+      /// Tickets in the fact check group (A/B)
+  @JsonKey(
+    
+    name: r'factCheck',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? factCheck;
+
+
+
+      /// Of those, done without a person asking for changes
+  @JsonKey(
+    
+    name: r'factCheckFirst',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? factCheckFirst;
+
+
+
 
 
     @override
@@ -213,7 +363,17 @@ class QualityStat {
       other.serious == serious &&
       other.footprintHit == footprintHit &&
       other.redFlags == redFlags &&
-      other.selfFixes == selfFixes;
+      other.selfFixes == selfFixes &&
+      other.guardBlocks == guardBlocks &&
+      other.stopSaves == stopSaves &&
+      other.stalls == stalls &&
+      other.proofDue == proofDue &&
+      other.proven == proven &&
+      other.findings == findings &&
+      other.adopted == adopted &&
+      other.tokens == tokens &&
+      other.factCheck == factCheck &&
+      other.factCheckFirst == factCheckFirst;
 
     @override
     int get hashCode =>
@@ -228,7 +388,17 @@ class QualityStat {
         serious.hashCode +
         footprintHit.hashCode +
         redFlags.hashCode +
-        selfFixes.hashCode;
+        selfFixes.hashCode +
+        guardBlocks.hashCode +
+        stopSaves.hashCode +
+        stalls.hashCode +
+        proofDue.hashCode +
+        proven.hashCode +
+        findings.hashCode +
+        adopted.hashCode +
+        tokens.hashCode +
+        factCheck.hashCode +
+        factCheckFirst.hashCode;
 
   factory QualityStat.fromJson(Map<String, dynamic> json) => _$QualityStatFromJson(json);
 

@@ -3,12 +3,22 @@ package domain
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"slices"
 	"strings"
 )
 
 // Models are the model aliases Claude Code accepts.
 var Models = []string{"haiku", "sonnet", "opus"}
+
+// codexModel matches a Codex CLI model: "codex:" and the model's name.
+var codexModel = regexp.MustCompile(`^codex:[a-z0-9][a-z0-9._-]{0,63}$`)
+
+// ValidModel reports whether m is a Claude model alias or a Codex model.
+func ValidModel(m string) bool { return slices.Contains(Models, m) || codexModel.MatchString(m) }
+
+// IsCodex reports whether m runs on Codex CLI.
+func IsCodex(m string) bool { return strings.HasPrefix(m, "codex:") }
 
 // Model stages a user can pick a model for.
 const (
@@ -19,6 +29,20 @@ const (
 	ModelLearn   = "learn"   // lessons from finished tickets
 	ModelReview  = "review"  // code review while a ticket waits for review
 	ModelPreview = "preview" // screenshots while a ticket waits for review
+)
+
+// When the code review runs its specialist passes.
+const (
+	DeepOff    = "off"
+	DeepAuto   = "auto" // large or complex work, the same as the review model's auto
+	DeepAlways = "always"
+)
+
+// What agnts does when a run looks stuck.
+const (
+	StallsOff = "off" // nothing
+	StallsLog = "log" // note it on the ticket
+	StallsAct = "act" // note it, and tell Claude to step back (once per run)
 )
 
 // ModelAuto lets agnts pick the review model from how complex the ticket is.
@@ -79,6 +103,8 @@ type NotifySettings struct {
 	PreviewPhotos bool `json:"previewPhotos"`
 	// FollowUps announces suggested follow-up tickets.
 	FollowUps bool `json:"followUps"`
+	// CI announces a watched branch going red.
+	CI bool `json:"ci"`
 }
 
 // Settings are the runtime settings edited on the Settings page.
@@ -115,35 +141,61 @@ type Settings struct {
 	SuggestFollowUps bool `json:"suggestFollowUps"`
 	// PullReviews: agnts reviews the pull requests waiting for you.
 	PullReviews PullReviewSettings `json:"pullReviews"`
-	PauseAbove  int                `json:"pauseAbove"`
-	Parallel    int                `json:"parallel"`
-	Git         GitSettings        `json:"git"`
-	Notify      NotifySettings     `json:"notify"`
+	// CI: agnts watches CI pipelines and fixes what fails.
+	CI CISettings `json:"ci"`
+	// Guard: how strict agnts-guard, the hooks inside every run, is.
+	Guard GuardSettings `json:"guard"`
+	// SecondOpinion is the model ("codex:<model>", or a Claude model) that
+	// critiques the chosen approach of complex tickets; "" turns it off.
+	SecondOpinion string `json:"secondOpinion"`
+	// LearnFromRuns has agnts read runs that had trouble (failed checks,
+	// a stall) and suggest tips for the repository.
+	LearnFromRuns bool `json:"learnFromRuns"`
+	// DeepReview runs specialist passes (security, silent failures, tests,
+	// types and data) in the code review: DeepOff, DeepAuto (large or
+	// complex work) or DeepAlways.
+	DeepReview string `json:"deepReview"`
+	// ProveFixes asks bug-fix tickets for a test that fails before the
+	// change and passes after it, and checks it.
+	ProveFixes bool `json:"proveFixes"`
+	// Stalls: what agnts does when a run looks stuck (StallsOff, StallsLog
+	// or StallsAct).
+	Stalls     string         `json:"stalls"`
+	PauseAbove int            `json:"pauseAbove"`
+	Parallel   int            `json:"parallel"`
+	Git        GitSettings    `json:"git"`
+	Notify     NotifySettings `json:"notify"`
 }
 
 // DefaultSettings returns the settings used before any are saved.
 func DefaultSettings() Settings {
 	return Settings{
-		Models:      StageModels{Analyze: "sonnet", Coding: "opus", Retry: "sonnet", Helper: "haiku", Learn: "sonnet", Review: ModelAuto, Preview: "sonnet"},
-		MaxTurns:    150,
-		TimeoutMin:  45,
-		Allow:       []string{},
-		Deny:        []string{},
-		AskFirst:    true,
-		AutoResume:  true,
-		AutoLearn:   true,
-		AutoReview:  true,
-		AutoPreview: true,
-		VisualCheck: true,
-		AutoBrief:   true,
-		SelfReview:  true,
-		Reflect:     true,
-		EgressAllow: []string{},
-		PullReviews: DefaultPullReviewSettings(),
-		PauseAbove:  90,
-		Parallel:    1,
-		Git:         GitSettings{CoAuthor: true, PRTitle: "{key}: {title}"},
-		Notify:      NotifySettings{Push: true, Telegram: true, NeedsYou: true, Stopped: true, Done: true, Lessons: true, Review: true, Preview: true, PreviewPhotos: true, FollowUps: true},
+		Models:        StageModels{Analyze: "sonnet", Coding: "opus", Retry: "sonnet", Helper: "haiku", Learn: "sonnet", Review: ModelAuto, Preview: "sonnet"},
+		MaxTurns:      150,
+		TimeoutMin:    45,
+		Allow:         []string{},
+		Deny:          []string{},
+		AskFirst:      true,
+		AutoResume:    true,
+		AutoLearn:     true,
+		AutoReview:    true,
+		AutoPreview:   true,
+		VisualCheck:   true,
+		AutoBrief:     true,
+		SelfReview:    true,
+		Reflect:       true,
+		EgressAllow:   []string{},
+		PullReviews:   DefaultPullReviewSettings(),
+		CI:            DefaultCISettings(),
+		Guard:         GuardSettings{Profile: GuardStandard, Disabled: []string{}, FactCheck: 50},
+		Stalls:        StallsLog,
+		ProveFixes:    true,
+		DeepReview:    DeepAuto,
+		LearnFromRuns: true,
+		PauseAbove:    90,
+		Parallel:      1,
+		Git:           GitSettings{CoAuthor: true, PRTitle: "{key}: {title}"},
+		Notify:        NotifySettings{Push: true, Telegram: true, NeedsYou: true, Stopped: true, Done: true, Lessons: true, Review: true, Preview: true, PreviewPhotos: true, FollowUps: true, CI: true},
 	}
 }
 
@@ -151,11 +203,11 @@ func DefaultSettings() Settings {
 func (s *Settings) Validate() error {
 	var errs []error
 	for name, m := range map[string]string{"analyze": s.Models.Analyze, "coding": s.Models.Coding, "retry": s.Models.Retry, "helper": s.Models.Helper, "learn": s.Models.Learn, "preview": s.Models.Preview} {
-		if !slices.Contains(Models, m) {
-			errs = append(errs, fmt.Errorf("model for %s must be one of %s", name, strings.Join(Models, ", ")))
+		if !ValidModel(m) {
+			errs = append(errs, fmt.Errorf("model for %s must be one of %s, or codex:<model>", name, strings.Join(Models, ", ")))
 		}
 	}
-	if s.Models.Review != ModelAuto && !slices.Contains(Models, s.Models.Review) {
+	if s.Models.Review != ModelAuto && !ValidModel(s.Models.Review) {
 		errs = append(errs, fmt.Errorf("model for review must be %s or one of %s", ModelAuto, strings.Join(Models, ", ")))
 	}
 	check := func(name string, v, lo, hi int) {
@@ -191,6 +243,27 @@ func (s *Settings) Validate() error {
 	if !slices.Contains(MergeMethods, s.PullReviews.MergeMethod) {
 		errs = append(errs, fmt.Errorf("merge method must be one of %s", strings.Join(MergeMethods, ", ")))
 	}
+	if err := s.CI.Validate(); err != nil {
+		errs = append(errs, err)
+	}
+	if err := s.Guard.Validate(); err != nil {
+		errs = append(errs, err)
+	}
+	if s.SecondOpinion != "" && !ValidModel(s.SecondOpinion) {
+		errs = append(errs, fmt.Errorf("second opinion must be empty, one of %s, or codex:<model>", strings.Join(Models, ", ")))
+	}
+	if s.DeepReview == "" {
+		s.DeepReview = DeepAuto
+	}
+	if !slices.Contains([]string{DeepOff, DeepAuto, DeepAlways}, s.DeepReview) {
+		errs = append(errs, fmt.Errorf("deep review must be %s, %s or %s", DeepOff, DeepAuto, DeepAlways))
+	}
+	if s.Stalls == "" {
+		s.Stalls = StallsLog
+	}
+	if !slices.Contains([]string{StallsOff, StallsLog, StallsAct}, s.Stalls) {
+		errs = append(errs, fmt.Errorf("stalls must be %s, %s or %s", StallsOff, StallsLog, StallsAct))
+	}
 	if s.Git.PRTitle == "" {
 		s.Git.PRTitle = "{key}: {title}"
 	}
@@ -211,7 +284,7 @@ func (s Settings) FollowUpsOn(t Ticket) bool {
 
 // ModelFor returns the model for a stage, honouring a ticket's override.
 func (s Settings) ModelFor(t Ticket, stage string) string {
-	if m := t.Models[stage]; slices.Contains(Models, m) {
+	if m := t.Models[stage]; ValidModel(m) {
 		return m
 	}
 	return s.Models.For(stage)

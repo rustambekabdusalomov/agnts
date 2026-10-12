@@ -45,5 +45,22 @@ void main() {
       // TODO
     });
 
+    // The work fixes broken behaviour; with proveFixes on it must prove the fix
+    // bool defect
+    test('to test the property `defect`', () async {
+      // TODO
+    });
+
+    // What the finished work must do, as checks
+    // List<AnalysisAcceptanceInner> acceptance
+    test('to test the property `acceptance`', () async {
+      // TODO
+    });
+
+    // SecondOpinion secondOpinion
+    test('to test the property `secondOpinion`', () async {
+      // TODO
+    });
+
   });
 }

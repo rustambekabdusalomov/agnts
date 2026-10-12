@@ -27,6 +27,10 @@ const (
 	homeDir    = "/home/agent"
 	claudeHome = "/home/agent/.claude"
 	outDir     = "/agnts/out"
+	// contextDir holds team knowledge agnts copies into a run (the brief,
+	// business context, precedents, review checklists). The root file
+	// system is read-only, so it needs a volume of its own.
+	contextDir = "/agnts/context"
 	agentUser  = "agent"
 	agentUID   = 1000 // the image's agent user, owner of files agnts writes
 )
@@ -58,6 +62,10 @@ type Config struct {
 	// knows, so a pinned older release would pick older models; a full id
 	// does not depend on the release.
 	Models map[string]string
+	// GuardBinary is agnts-guard for the run containers' platform, copied
+	// into every run; empty runs without the in-run guards (the server's
+	// checks after a run still apply).
+	GuardBinary []byte
 }
 
 // DefaultModels are the current Claude models.
@@ -91,10 +99,96 @@ type Runner struct {
 	docker *Docker
 	cfg    Config
 	token  TokenSource
+	// codexKey returns the OpenAI API key Codex runs use, in the workspace
+	// ctx acts in ("" when none is connected).
+	codexKey func(ctx context.Context) (string, error)
 
 	netOnce sync.Once
 	netErr  error
 	prov    provisioner
+
+	// ips maps a run container's address to who it runs for: the egress
+	// proxy asks, to send a run's connections to its workspace's private
+	// network. A container cannot change its address (all capabilities
+	// are dropped), so the address identifies it.
+	ipMu sync.Mutex
+	ips  map[string]Identity
+	// ca returns the CA bundle (PEM) of the workspace ctx acts in, trusted
+	// in its runs besides the system roots.
+	ca func(ctx context.Context) []byte
+}
+
+// Identity is who a run container works for.
+type Identity struct {
+	Workspace int64
+	Ticket    string
+}
+
+// WhoIs returns who the run container at ip works for.
+func (r *Runner) WhoIs(ip string) (Identity, bool) {
+	r.ipMu.Lock()
+	defer r.ipMu.Unlock()
+	id, ok := r.ips[ip]
+	return id, ok
+}
+
+func (r *Runner) remember(ip string, id Identity) {
+	r.ipMu.Lock()
+	defer r.ipMu.Unlock()
+	if r.ips == nil {
+		r.ips = map[string]Identity{}
+	}
+	r.ips[ip] = id
+}
+
+func (r *Runner) forget(ip string) {
+	r.ipMu.Lock()
+	defer r.ipMu.Unlock()
+	delete(r.ips, ip)
+}
+
+// SetCodexKey sets where Codex runs get their OpenAI API key.
+func (r *Runner) SetCodexKey(fn func(ctx context.Context) (string, error)) { r.codexKey = fn }
+
+// SetCA sets where a workspace's CA bundle comes from.
+func (r *Runner) SetCA(fn func(ctx context.Context) []byte) { r.ca = fn }
+
+// Where a workspace's CA bundle goes in a run, and the bundle of the
+// system roots plus it that TLS clients are pointed at.
+const (
+	caFile    = homeDir + "/.agnts/ca.pem"
+	caBundle  = homeDir + "/.agnts/ca-bundle.pem"
+	bundleCmd = `mkdir -p ~/.agnts && { cat /etc/ssl/certs/ca-certificates.crt 2>/dev/null; echo; cat ` + caFile + `; } > ` + caBundle
+)
+
+// caEnv points TLS clients at the bundle: git, curl, OpenSSL, Python
+// (requests, pip) and Node (which adds to its own roots).
+func caEnv() []string {
+	return []string{"SSL_CERT_FILE=" + caBundle, "GIT_SSL_CAINFO=" + caBundle, "CURL_CA_BUNDLE=" + caBundle,
+		"REQUESTS_CA_BUNDLE=" + caBundle, "PIP_CERT=" + caBundle, "NODE_EXTRA_CA_CERTS=" + caFile}
+}
+
+// guardArchive puts agnts-guard where the managed settings' hooks call it.
+func guardArchive(bin []byte) []byte {
+	var buf bytes.Buffer
+	tw := tar.NewWriter(&buf)
+	for _, d := range []string{".agnts/", ".agnts/bin/"} {
+		_ = tw.WriteHeader(&tar.Header{Typeflag: tar.TypeDir, Name: d, Mode: 0o755, Uid: agentUID, Gid: agentUID, ModTime: time.Now()})
+	}
+	_ = tw.WriteHeader(&tar.Header{Typeflag: tar.TypeReg, Name: ".agnts/bin/agnts-guard", Mode: 0o755, Size: int64(len(bin)), Uid: agentUID, Gid: agentUID, ModTime: time.Now()})
+	_, _ = tw.Write(bin)
+	_ = tw.Close()
+	return buf.Bytes()
+}
+
+func caArchive(pem []byte) []byte {
+	var buf bytes.Buffer
+	tw := tar.NewWriter(&buf)
+	_ = tw.WriteHeader(&tar.Header{Typeflag: tar.TypeDir, Name: ".agnts/", Mode: 0o755, Uid: agentUID, Gid: agentUID, ModTime: time.Now()})
+	_ = tw.WriteHeader(&tar.Header{Typeflag: tar.TypeReg, Name: ".agnts/ca.pem", Mode: 0o644, Size: int64(len(pem)), Uid: agentUID, Gid: agentUID, ModTime: time.Now()})
+	_, _ = tw.Write(pem)
+	_ = tw.Close()
+	return buf.Bytes()
 }
 
 var _ orchestrator.Runner = (*Runner)(nil)
@@ -135,6 +229,14 @@ func (r *Runner) Open(ctx context.Context, spec orchestrator.WorkspaceSpec) (orc
 	if spec.MemoryMB > 0 {
 		memory = min(int64(spec.MemoryMB), max(r.cfg.MaxMemoryMB, r.cfg.MemoryMB))
 	}
+	var caPEM []byte
+	if r.ca != nil {
+		caPEM = r.ca(ctx)
+	}
+	env := runEnv(r.cfg.Proxy, spec.Toolchains, prov, spec.Env)
+	if len(caPEM) > 0 {
+		env = dedupeEnv(append(env, caEnv()...))
+	}
 	suffix := make([]byte, 3)
 	_, _ = rand.Read(suffix)
 	network, ownNet := r.cfg.Network, ""
@@ -157,10 +259,10 @@ func (r *Runner) Open(ctx context.Context, spec orchestrator.WorkspaceSpec) (orc
 		Runtime:    r.cfg.Runtime,
 		CPUs:       r.cfg.CPUs,
 		PIDs:       r.cfg.PIDs,
-		Volumes:    []string{workDir, homeDir, outDir},
+		Volumes:    []string{workDir, homeDir, outDir, contextDir},
 		Mounts:     mounts,
 		Tmpfs:      map[string]string{"/tmp": "rw,exec,nosuid,size=2g"},
-		Env:        runEnv(r.cfg.Proxy, spec.Toolchains, prov, spec.Env),
+		Env:        env,
 	})
 	if err != nil {
 		if ownNet != "" {
@@ -168,7 +270,7 @@ func (r *Runner) Open(ctx context.Context, spec orchestrator.WorkspaceSpec) (orc
 		}
 		return nil, err
 	}
-	ws := &workspace{docker: r.docker, id: id, token: r.token, memoryMB: memory, network: ownNet, proxy: r.cfg.ProxyContainer, models: r.cfg.Models}
+	ws := &workspace{docker: r.docker, id: id, token: r.token, codexKey: r.codexKey, memoryMB: memory, network: ownNet, proxy: r.cfg.ProxyContainer, models: r.cfg.Models}
 	fail := func(err error) (orchestrator.Workspace, error) {
 		_ = ws.Close(context.WithoutCancel(ctx))
 		return nil, err
@@ -181,8 +283,32 @@ func (r *Runner) Open(ctx context.Context, spec orchestrator.WorkspaceSpec) (orc
 			return fail(fmt.Errorf("restore claude session: %w", err))
 		}
 	}
+	if len(caPEM) > 0 {
+		if err := r.docker.PutArchive(ctx, id, homeDir, bytes.NewReader(caArchive(caPEM))); err != nil {
+			return fail(fmt.Errorf("copy the CA bundle: %w", err))
+		}
+	}
+	if len(r.cfg.GuardBinary) > 0 {
+		if err := r.docker.PutArchive(ctx, id, homeDir, bytes.NewReader(guardArchive(r.cfg.GuardBinary))); err != nil {
+			return fail(fmt.Errorf("copy agnts-guard: %w", err))
+		}
+	}
 	if err := r.docker.Start(ctx, id); err != nil {
 		return fail(err)
+	}
+	if ip, err := r.docker.ContainerIP(ctx, id, network); err == nil {
+		r.remember(ip, Identity{Workspace: domain.WorkspaceOf(ctx), Ticket: spec.TicketKey})
+		ws.ip, ws.runner = ip, r
+	} else if r.cfg.Proxy != "" {
+		return fail(fmt.Errorf("read the run's address: %w", err))
+	}
+	if len(caPEM) > 0 {
+		if res, err := ws.Exec(ctx, bundleCmd, time.Minute); err != nil || res.ExitCode != 0 {
+			if err == nil {
+				err = fmt.Errorf("exit %d: %s", res.ExitCode, tail(res.Output, 500))
+			}
+			return fail(fmt.Errorf("build the CA bundle: %w", err))
+		}
 	}
 	if len(spec.Toolchains) > 0 {
 		res, err := ws.Exec(ctx, setupScript, 5*time.Minute)
@@ -225,11 +351,15 @@ type workspace struct {
 	docker   *Docker
 	id       string
 	token    TokenSource
+	codexKey func(ctx context.Context) (string, error)
 	memoryMB int64
 	// network is the run's own network ("" on the shared one), removed
 	// with the container; proxy is the egress proxy that joined it.
 	network, proxy string
 	models         map[string]string
+	// ip is the container's address, remembered by runner until Close.
+	ip     string
+	runner *Runner
 }
 
 // runNetwork creates a run's own network: internal (no route out) when
@@ -299,6 +429,9 @@ func timeoutCmd(d time.Duration, argv ...string) []string {
 }
 
 func (w *workspace) Claude(ctx context.Context, req orchestrator.ClaudeRequest, onEvent func(orchestrator.ClaudeEvent)) (orchestrator.ClaudeResult, error) {
+	if model, ok := strings.CutPrefix(req.Model, orchestrator.CodexPrefix); ok {
+		return w.codex(ctx, req, model, onEvent)
+	}
 	cred, err := w.token(ctx)
 	if err != nil {
 		return orchestrator.ClaudeResult{}, fmt.Errorf("claude token: %w", err)
@@ -337,11 +470,11 @@ func (w *workspace) Claude(ctx context.Context, req orchestrator.ClaudeRequest, 
 			Cmd:        timeoutCmd(req.Timeout, argv...),
 			User:       agentUser,
 			WorkingDir: workDir,
-			Env: append([]string{
+			Env: append(append([]string{
 				cred.Env + "=" + cred.Token,
 				"CLAUDE_CONFIG_DIR=" + claudeHome,
 				"DISABLE_AUTOUPDATER=1",
-			}, modelEnv(w.models)...),
+			}, modelEnv(w.models)...), req.Env...),
 		}, pw, &stderr)
 		_ = pw.CloseWithError(err)
 		done <- execOut{code, err}
@@ -362,6 +495,61 @@ func (w *workspace) Claude(ctx context.Context, req orchestrator.ClaudeRequest, 
 		return res, out.err
 	case out.code == 124:
 		return res, fmt.Errorf("claude timed out after %s", req.Timeout)
+	case perr != nil:
+		return res, fmt.Errorf("%w (exit %d): %s", perr, out.code, stderr.String())
+	}
+	return res, nil
+}
+
+// codexHome keeps Codex's sessions inside Claude Code's config dir, which
+// agnts saves between a ticket's runs: a later run can resume them.
+const codexHome = claudeHome + "/codex"
+
+// codex runs one codex exec invocation.
+func (w *workspace) codex(ctx context.Context, req orchestrator.ClaudeRequest, model string, onEvent func(orchestrator.ClaudeEvent)) (orchestrator.ClaudeResult, error) {
+	if w.codexKey == nil {
+		return orchestrator.ClaudeResult{}, errors.New("codex is not available on this server")
+	}
+	key, err := w.codexKey(ctx)
+	if err != nil {
+		return orchestrator.ClaudeResult{}, fmt.Errorf("openai key: %w", err)
+	}
+	if key == "" {
+		return orchestrator.ClaudeResult{}, errors.New("codex runs need an OpenAI API key: connect OpenAI under Integrations")
+	}
+	pr, pw := io.Pipe()
+	var stderr tailBuffer
+	type execOut struct {
+		code int
+		err  error
+	}
+	done := make(chan execOut, 1)
+	go func() {
+		code, err := w.docker.Exec(ctx, w.id, ExecConfig{
+			Cmd:        timeoutCmd(req.Timeout, append([]string{"sh", "-c", `mkdir -p "$CODEX_HOME" && exec "$@"`, "codex"}, codexArgv(req, model)...)...),
+			User:       agentUser,
+			WorkingDir: workDir,
+			Env:        append([]string{"OPENAI_API_KEY=" + key, "CODEX_API_KEY=" + key, "CODEX_HOME=" + codexHome}, req.Env...),
+		}, pw, &stderr)
+		_ = pw.CloseWithError(err)
+		done <- execOut{code, err}
+	}()
+	start := time.Now()
+	res, perr := ParseCodexStream(pr, onEvent)
+	_, _ = io.Copy(io.Discard, pr)
+	out := <-done
+	res.Duration = time.Since(start)
+	res.Model = orchestrator.CodexPrefix + model
+	if oom := w.errOOM(ctx, out.code); oom != nil {
+		return res, oom
+	}
+	switch {
+	case out.err != nil:
+		return res, out.err
+	case out.code == 124:
+		return res, fmt.Errorf("codex timed out after %s", req.Timeout)
+	case out.code == 127:
+		return res, errors.New("codex is not installed in the runner image: build it with --build-arg CODEX_VERSION=<version>")
 	case perr != nil:
 		return res, fmt.Errorf("%w (exit %d): %s", perr, out.code, stderr.String())
 	}
@@ -405,11 +593,34 @@ func (w *workspace) ReadFile(ctx context.Context, path string) ([]byte, error) {
 	}
 }
 
+// WriteFile puts a file into the container. Directories missing under one
+// of the writable roots are created (the archive carries them), so agnts
+// can write /agnts/context/review/go.md into a fresh run.
 func (w *workspace) WriteFile(ctx context.Context, p string, data []byte) error {
+	p = path.Clean(p)
+	root := path.Dir(p)
+	for _, r := range []string{workDir, homeDir, outDir, contextDir} {
+		if strings.HasPrefix(p, r+"/") {
+			root = r
+			break
+		}
+	}
+	rel := strings.TrimPrefix(p, root+"/")
 	var buf bytes.Buffer
 	tw := tar.NewWriter(&buf)
+	dir := ""
+	for _, part := range strings.Split(path.Dir(rel), "/") {
+		if part == "." || part == "" {
+			continue
+		}
+		dir = path.Join(dir, part)
+		if err := tw.WriteHeader(&tar.Header{Name: dir + "/", Mode: 0o755, Typeflag: tar.TypeDir,
+			Uid: agentUID, Gid: agentUID, Uname: agentUser, Gname: agentUser, ModTime: time.Now()}); err != nil {
+			return err
+		}
+	}
 	if err := tw.WriteHeader(&tar.Header{
-		Name: path.Base(p), Mode: 0o644, Size: int64(len(data)), Typeflag: tar.TypeReg,
+		Name: rel, Mode: 0o644, Size: int64(len(data)), Typeflag: tar.TypeReg,
 		Uid: agentUID, Gid: agentUID, Uname: agentUser, Gname: agentUser, ModTime: time.Now(),
 	}); err != nil {
 		return err
@@ -420,7 +631,7 @@ func (w *workspace) WriteFile(ctx context.Context, p string, data []byte) error 
 	if err := tw.Close(); err != nil {
 		return err
 	}
-	return w.docker.PutArchive(ctx, w.id, path.Dir(p), &buf)
+	return w.docker.PutArchive(ctx, w.id, root, &buf)
 }
 
 // ExportRepo streams a tar of the files git would see in /workspace:
@@ -456,6 +667,9 @@ func (w *workspace) ExportClaudeHome(ctx context.Context) ([]byte, error) {
 }
 
 func (w *workspace) Close(ctx context.Context) error {
+	if w.runner != nil && w.ip != "" {
+		w.runner.forget(w.ip)
+	}
 	err := w.docker.Remove(ctx, w.id)
 	if w.network != "" {
 		err = errors.Join(err, w.docker.RemoveNetwork(ctx, w.network, w.proxy))

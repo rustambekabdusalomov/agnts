@@ -11,6 +11,9 @@
     "colTicket": "Tiket",
     "colSource": "Manba",
     "colRepo": "Repozitoriy",
+    "repoLabel": "Repozitoriy",
+    "allRepos": "Barcha repozitoriylar",
+    "noRepo": "Repozitoriysiz",
     "colStatus": "Holat",
     "colUpdated": "Yangilangan",
     "sourceJira": "Jira",
@@ -22,7 +25,7 @@
     "viewBoard": "Doska",
     "boardEmpty": "Boʻsh",
     "listSub": "agnts belgili Jira va Plane tiketlari hamda shaxsiy loyihalaringiz uchun yaratgan vazifalaringiz.",
-    "noMatch": "Qidiruvingiz boʻyicha tiket topilmadi.",
+    "noMatch": "Filtrlarga mos tiket yo'q.",
     "emptyNeeds": "Hozir sizni hech narsa kutmayapti. agnts savol bersa yoki oʻzgarishlarni tekshirishingiz kerak boʻlsa, tiketlar shu yerda chiqadi.",
     "emptyOther": "Bu yerda hozircha tiket yoʻq.",
     "statNeeds": "Sizni kutmoqda",
@@ -33,6 +36,7 @@
     "statPushedNote": "Ochilgan pull requestlar",
     "statSession": "Tarif sessiyasi",
     "sourcePlane": "Plane",
-    "sourceGit": "PR"
+    "sourceGit": "PR",
+    "sourceCi": "CI"
   }
 }

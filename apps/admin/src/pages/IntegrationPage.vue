@@ -91,6 +91,8 @@ const sideHelp = computed(() =>
         ? t('integrations.gitlabHelp')
       : provider.value === 'telegram'
         ? t('integrations.telegramHelp')
+      : provider.value === 'openai'
+        ? t('integrations.openaiHelp')
         : t('integrations.claudeHelp'),
 )
 </script>

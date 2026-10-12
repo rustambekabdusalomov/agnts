@@ -11,6 +11,9 @@
     "colTicket": "Ticket",
     "colSource": "Source",
     "colRepo": "Repository",
+    "repoLabel": "Repository",
+    "allRepos": "All repositories",
+    "noRepo": "No repository",
     "colStatus": "Status",
     "colUpdated": "Updated",
     "sourceJira": "Jira",
@@ -22,7 +25,7 @@
     "viewBoard": "Board",
     "boardEmpty": "Nothing here",
     "listSub": "Jira and Plane tickets with the agnts label, plus tasks you create for side projects.",
-    "noMatch": "No tickets match your search.",
+    "noMatch": "No tickets match your filters.",
     "emptyNeeds": "Nothing is waiting on you. Tickets show up here when agnts has questions or changes to review.",
     "emptyOther": "No tickets here yet.",
     "statNeeds": "Needs you",
@@ -33,6 +36,7 @@
     "statPushedNote": "Pull requests opened",
     "statSession": "Plan session",
     "sourcePlane": "Plane",
-    "sourceGit": "PR"
+    "sourceGit": "PR",
+    "sourceCi": "CI"
   }
 }

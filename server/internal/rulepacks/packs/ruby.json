@@ -1,0 +1,7 @@
+{"name": "Ruby", "rules": [
+ {"title": "No bare rescue", "body": "Never write a bare rescue or rescue => e that only logs and continues. Rescue the specific error classes you can handle and re-raise the rest."},
+ {"title": "Strong parameters, never permit!", "body": "Controllers list permitted attributes explicitly with params.require(...).permit(...); never use permit! or pass params straight to create or update."},
+ {"title": "Eager load associations in lists", "body": "Queries whose records are iterated with their associations use includes or preload so no query runs per record."},
+ {"title": "Safe YAML and no eval on input", "body": "Use YAML.safe_load for data from outside; never eval, instance_eval or send with values that came from users."},
+ {"title": "Side effects after commit", "body": "Emails, jobs and calls to other services triggered by a record change run in after_commit callbacks or after the transaction, never inside it."}
+]}

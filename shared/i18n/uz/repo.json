@@ -76,6 +76,7 @@
     "status": "Holat",
     "duration": "Davomiyligi",
     "openRun": "Git xostingida ochish",
-    "brief": "Tavsif"
+    "brief": "Tavsif",
+    "ci": "CI"
   }
 }

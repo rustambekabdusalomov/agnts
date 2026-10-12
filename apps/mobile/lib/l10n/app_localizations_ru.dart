@@ -721,6 +721,454 @@ class AppLocalizationsRu extends AppLocalizations {
   String get analyticsColSelfFixesHint => 'Сколько раз ревью agnts возвращало замечания кодеру до просмотра человеком';
 
   @override
+  String get analyticsTabOverview => 'Обзор';
+
+  @override
+  String get analyticsTabDelivery => 'Доставка';
+
+  @override
+  String get analyticsTabQuality => 'Качество';
+
+  @override
+  String get analyticsTabLearning => 'Обучение';
+
+  @override
+  String get analyticsTabCost => 'Стоимость';
+
+  @override
+  String get analyticsTabRepos => 'Репозитории';
+
+  @override
+  String analyticsDaysHours(String d, String h) {
+    return '$d д $h ч';
+  }
+
+  @override
+  String get analyticsKpiMerged => 'Влито пул-реквестов';
+
+  @override
+  String analyticsKpiMergedNote(String n) {
+    return '$n закрыто без слияния';
+  }
+
+  @override
+  String get analyticsKpiCostPerTicket => 'Стоимость тикета';
+
+  @override
+  String get analyticsKpiCostPerTicketNote => 'По ценам API, все этапы';
+
+  @override
+  String analyticsInsightMergeRate(String pct, String closed) {
+    return 'Влито только $pct% пул-реквестов agnts; $closed закрыто без слияния. Причины смотрите во вкладке «Доставка».';
+  }
+
+  @override
+  String analyticsInsightSlowAnswers(String hours) {
+    return 'Тикеты ждут ваших ответов на вопросы agnts около $hours ч. Отвечать быстрее — самый простой способ ускорить доставку.';
+  }
+
+  @override
+  String analyticsInsightFollowUpsNoise(String pct) {
+    return 'Принято только $pct% предложенных доработок. Большинство из них отклоняется.';
+  }
+
+  @override
+  String analyticsInsightFlakyJob(String job, String repo, String n) {
+    return '$job в $repo проходил при перезапуске $n раз — похоже, тест нестабилен. Исправив или отключив его, вы сэкономите время CI.';
+  }
+
+  @override
+  String get analyticsPrMerged => 'Влиты';
+
+  @override
+  String get analyticsPrClosed => 'Закрыты без слияния';
+
+  @override
+  String get analyticsPrOpened => 'Открыто';
+
+  @override
+  String get analyticsPrOpen => 'Ещё открыты';
+
+  @override
+  String get analyticsCyclePushed => 'Взят → отправлен';
+
+  @override
+  String get analyticsCycleMerged => 'Взят → влит';
+
+  @override
+  String get analyticsSplitAnswers => 'Ожидание ответов';
+
+  @override
+  String get analyticsSplitReview => 'Ожидание ревью';
+
+  @override
+  String get analyticsSplitQueue => 'В очереди или на паузе';
+
+  @override
+  String get analyticsKpiMergeRate => 'Доля слияний';
+
+  @override
+  String analyticsKpiMergeRateNote(String merged, String closed) {
+    return '$merged влито, $closed закрыто';
+  }
+
+  @override
+  String get analyticsKpiTimeToMerge => 'Время до слияния';
+
+  @override
+  String get analyticsKpiTimeToMergeNote => 'От пул-реквеста до слияния';
+
+  @override
+  String get analyticsKpiCyclePushed => 'Взят → отправлен';
+
+  @override
+  String get analyticsKpiCyclePushedNote => 'Часть работы agnts';
+
+  @override
+  String get analyticsKpiCycleMerged => 'Взят → влит';
+
+  @override
+  String get analyticsKpiCycleMergedNote => 'Реальное время доставки';
+
+  @override
+  String get analyticsKpiAnswer => 'Время ответа';
+
+  @override
+  String get analyticsKpiAnswerNote => 'Пока вы отвечаете на вопросы agnts';
+
+  @override
+  String get analyticsTypicalNote => 'Время — типичное значение (медиана): половина тикетов была быстрее, половина — медленнее.';
+
+  @override
+  String get analyticsPrOutcomes => 'Судьба пул-реквестов';
+
+  @override
+  String get analyticsPrOutcomesSub => 'Пул-реквесты agnts, открытые за период, и что с ними стало; слияния и закрытия по дням';
+
+  @override
+  String analyticsMergeSpread(String p50, String p90) {
+    return 'Обычно пул-реквест вливают за $p50; самый медленный из десяти — за $p90 и дольше.';
+  }
+
+  @override
+  String get analyticsStale => 'Открыты больше недели';
+
+  @override
+  String get analyticsStaleSub => 'Пул-реквесты, которые ещё никто не влил и не закрыл';
+
+  @override
+  String get analyticsNoStale => 'Нет пул-реквестов, открытых дольше недели.';
+
+  @override
+  String analyticsOpenDays(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'открыт $n дня',
+      many: 'открыт $n дней',
+      few: 'открыт $n дня',
+      one: 'открыт $n день',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get analyticsOpenPr => 'Открыть пул-реквест';
+
+  @override
+  String get analyticsCycle => 'Время цикла';
+
+  @override
+  String get analyticsCycleSub => 'Типичное время от взятия тикета до отправки и до слияния, по дням';
+
+  @override
+  String analyticsCycleSpread(String pushed, String pushed90, String merged, String merged90) {
+    return 'Отправка обычно за $pushed (самый медленный из десяти — $pushed90); слияние за $merged ($merged90).';
+  }
+
+  @override
+  String get analyticsQuestions => 'Вопросы';
+
+  @override
+  String get analyticsQuestionsSub => 'Что agnts спрашивал до начала кода и как быстро получал ответы';
+
+  @override
+  String get analyticsQuestionsAsked => 'Задано вопросов';
+
+  @override
+  String get analyticsQuestionsShare => 'Тикетов с вопросами';
+
+  @override
+  String get analyticsAnswerTypical => 'Типичное время ответа';
+
+  @override
+  String get analyticsAnswerSlow => 'Самый медленный из десяти';
+
+  @override
+  String get analyticsUnanswered => 'Ждут ответа сейчас';
+
+  @override
+  String get analyticsSlowest => 'Самые долгие тикеты';
+
+  @override
+  String get analyticsSlowestSub => 'Тикеты, дольше всего шедшие от взятия до отправки за период, и куда ушло их время';
+
+  @override
+  String get analyticsNoSlowest => 'За период не отправлено ни одного тикета.';
+
+  @override
+  String get analyticsKpiCiSeen => 'Падения CI';
+
+  @override
+  String analyticsKpiCiSeenNote(String n) {
+    return '$n новых за период';
+  }
+
+  @override
+  String get analyticsKpiCiAuto => 'Исправлено agnts';
+
+  @override
+  String analyticsKpiCiAutoNote(String auto, String fixed) {
+    return '$auto из $fixed исправленных';
+  }
+
+  @override
+  String get analyticsKpiCiFix => 'Время исправления';
+
+  @override
+  String get analyticsKpiCiFixNote => 'От первого падения до влитого исправления';
+
+  @override
+  String get analyticsKpiCiFlaky => 'Нестабильные падения';
+
+  @override
+  String get analyticsKpiCiFlakyNote => 'Прошли при перезапуске';
+
+  @override
+  String get analyticsKpiCiOwn => 'Свои PR исправлены';
+
+  @override
+  String get analyticsKpiCiOwnNote => 'Красные проверки в PR agnts исправлены до ревью';
+
+  @override
+  String get analyticsCiUnknown => 'Не классифицировано';
+
+  @override
+  String get analyticsCiNew => 'Новые падения';
+
+  @override
+  String get analyticsCiFixed => 'Исправлены';
+
+  @override
+  String get analyticsCiTitle => 'Состояние CI';
+
+  @override
+  String analyticsCiSub(String n) {
+    return 'Новые и исправленные падения CI по дням. Требуют внимания сейчас: $n.';
+  }
+
+  @override
+  String get analyticsCiOffSub =>
+      'Наблюдение за CI не настроено. Включите его для репозитория, и agnts будет разбирать красные сборки и исправлять те, что вызваны кодом.';
+
+  @override
+  String get analyticsCiSetUp => 'Настроить наблюдение за CI';
+
+  @override
+  String get analyticsCiOpen => 'Открыть CI';
+
+  @override
+  String get analyticsCiClasses => 'Падения по причинам';
+
+  @override
+  String get analyticsCiClassesSub => 'К чему разбор отнёс каждое падение';
+
+  @override
+  String get analyticsCiNone => 'За период падений CI не было.';
+
+  @override
+  String get analyticsCiFlakiest => 'Самые нестабильные задачи';
+
+  @override
+  String get analyticsCiFlakiestSub => 'Задачи, которые чаще всего падали и проходили при перезапуске';
+
+  @override
+  String get analyticsCiNoFlaky => 'За период нестабильных задач не было.';
+
+  @override
+  String get analyticsColJob => 'Задача';
+
+  @override
+  String get analyticsColFailure => 'Падение';
+
+  @override
+  String get analyticsColFlaky => 'Прошли при перезапуске';
+
+  @override
+  String get analyticsColFailures => 'Падений';
+
+  @override
+  String get analyticsKpiLessons => 'Уроки';
+
+  @override
+  String analyticsKpiLessonsNote(String n) {
+    return 'Изучено: $n';
+  }
+
+  @override
+  String get analyticsKpiRulesLearned => 'Выученные правила';
+
+  @override
+  String analyticsKpiRulesLearnedNote(String n) {
+    return 'Используются, из $n предложенных по тикетам';
+  }
+
+  @override
+  String get analyticsKpiRulesManual => 'Написанные правила';
+
+  @override
+  String get analyticsKpiRulesManualNote => 'Добавлены людьми';
+
+  @override
+  String get analyticsKpiReflections => 'Разборы';
+
+  @override
+  String analyticsKpiReflectionsNote(String n) {
+    return 'По изменённым и отклонённым тикетам; предложено правил: $n';
+  }
+
+  @override
+  String get analyticsKpiFollowUps => 'Принятые доработки';
+
+  @override
+  String analyticsKpiFollowUpsNote(String n) {
+    return 'Предложено за период: $n';
+  }
+
+  @override
+  String get analyticsKpiReviewerNotes => 'Замечания ревьюеров';
+
+  @override
+  String get analyticsKpiReviewerNotesNote => 'Повторные ревью, отклонённые находки и заметки';
+
+  @override
+  String get analyticsLearningNote =>
+      'Как agnts учится на ваших отзывах: если со временем замечаний меньше, а принятых правил больше — обучение работает.';
+
+  @override
+  String get analyticsFollowUps => 'Доработки по типам';
+
+  @override
+  String get analyticsFollowUpsSub => 'Тикеты-доработки, предложенные agnts за период, и ваши решения';
+
+  @override
+  String get analyticsNoFollowUps => 'За период доработок не предлагалось.';
+
+  @override
+  String get analyticsColType => 'Тип';
+
+  @override
+  String get analyticsColSuggested => 'Предложено';
+
+  @override
+  String get analyticsColAccepted => 'Принято';
+
+  @override
+  String get analyticsColDismissed => 'Отклонено';
+
+  @override
+  String get analyticsColOpen => 'Открыто';
+
+  @override
+  String get analyticsColAcceptRate => 'Доля принятых';
+
+  @override
+  String get analyticsFollowUpSources => 'Откуда доработки';
+
+  @override
+  String get analyticsFollowUpSourcesSub => 'Предложенные доработки по этапу, на котором их нашли';
+
+  @override
+  String get analyticsLessons => 'Уроки по темам';
+
+  @override
+  String analyticsLessonsSub(String n) {
+    return 'Уроки, написанные за период; изучено: $n';
+  }
+
+  @override
+  String get analyticsOpenLearn => 'Открыть «Обучение»';
+
+  @override
+  String get analyticsNoLessons => 'За период уроков нет.';
+
+  @override
+  String get analyticsReviewers => 'Ревьюеры';
+
+  @override
+  String get analyticsReviewersSub => 'Кто чаще всего даёт agnts отзывы на ревью кода';
+
+  @override
+  String get analyticsOpenRules => 'Открыть «Правила»';
+
+  @override
+  String get analyticsNoReviewers => 'За период замечаний ревьюеров нет.';
+
+  @override
+  String get analyticsColReviewer => 'Ревьюер';
+
+  @override
+  String get analyticsColRereview => 'Повторные ревью';
+
+  @override
+  String get analyticsColRereviewHint => 'Сколько раз ревьюер просил agnts посмотреть снова';
+
+  @override
+  String get analyticsColDismissedNotes => 'Отклонено';
+
+  @override
+  String get analyticsColDismissedNotesHint => 'Находки ревью agnts, которые ревьюер отклонил';
+
+  @override
+  String get analyticsColManual => 'Заметки';
+
+  @override
+  String get analyticsColManualHint => 'Заметки, написанные ревьюером вручную';
+
+  @override
+  String get analyticsColRepos => 'Репозитории';
+
+  @override
+  String get analyticsKpiCostNote => 'Все вызовы Claude за период';
+
+  @override
+  String analyticsKpiDaysAboveNote(String n) {
+    return 'Дней выше 80% лимита сессии: $n';
+  }
+
+  @override
+  String get analyticsColCost => 'Стоимость';
+
+  @override
+  String get analyticsColMergeRate => 'Доля слияний';
+
+  @override
+  String get analyticsColMergeRateHint => 'Влитые пул-реквесты среди влитых или закрытых за период';
+
+  @override
+  String get analyticsColQuestions => 'Вопросов на тикет';
+
+  @override
+  String get analyticsColQuestionsHint =>
+      'Вопросы agnts на один проанализированный тикет. Много вопросов — признак отсутствия CLAUDE.md или правил.';
+
+  @override
+  String get analyticsColCi => 'Падения CI';
+
+  @override
+  String get analyticsColCiHint => 'Группы падений CI за период';
+
+  @override
   String get appName => 'agnts';
 
   @override
@@ -1029,6 +1477,427 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get briefDone_save => 'Описание сохранено';
+
+  @override
+  String get ciTitle => 'CI';
+
+  @override
+  String get ciLede =>
+      'Падающие пайплайны на отслеживаемых ветках, сгруппированные по джобу и ошибке. agnts один раз перезапускает новые падения, а настоящие исправляет.';
+
+  @override
+  String get ciBack => 'CI';
+
+  @override
+  String get ciRepo => 'Репозиторий';
+
+  @override
+  String get ciAllRepos => 'Все репозитории';
+
+  @override
+  String get ciFilterLabel => 'Статус';
+
+  @override
+  String get ciFilter_red => 'Красные';
+
+  @override
+  String get ciFilter_flaky => 'Нестабильные';
+
+  @override
+  String get ciFilter_infra => 'Инфраструктура';
+
+  @override
+  String get ciFilter_fixed => 'Исправленные';
+
+  @override
+  String get ciFilter_muted => 'Скрытые';
+
+  @override
+  String get ciFilter_all => 'Все';
+
+  @override
+  String get ciStatus_triage => 'Новое';
+
+  @override
+  String get ciStatus_open => 'Падает';
+
+  @override
+  String get ciStatus_fixing => 'Исправляется';
+
+  @override
+  String get ciStatus_fixed => 'Фикс влит';
+
+  @override
+  String get ciStatus_resolved => 'Снова зелёное';
+
+  @override
+  String get ciStatus_flaky => 'Нестабильное';
+
+  @override
+  String get ciStatus_infra => 'Инфраструктура';
+
+  @override
+  String get ciStatus_muted => 'Скрыто';
+
+  @override
+  String get ciStatus_regression => 'Регрессия';
+
+  @override
+  String get ciStatusHelp_triage => 'Новое падение, ждёт перезапуска для подтверждения';
+
+  @override
+  String get ciStatusHelp_open => 'Подтверждено, тикет над ним не работает';
+
+  @override
+  String get ciStatusHelp_fixing => 'Над ним работает тикет';
+
+  @override
+  String get ciStatusHelp_fixed => 'Исправление влито, ждём зелёного запуска';
+
+  @override
+  String get ciStatusHelp_resolved => 'Ветка снова зелёная';
+
+  @override
+  String get ciStatusHelp_flaky => 'Прошло при перезапуске';
+
+  @override
+  String get ciStatusHelp_infra => 'Упал раннер или сеть, а не код';
+
+  @override
+  String get ciStatusHelp_muted => 'Игнорируется, пока не вернёте';
+
+  @override
+  String get ciStatusHelp_regression => 'Снова упало после влития исправления';
+
+  @override
+  String get ciClass_code => 'Код';
+
+  @override
+  String get ciClass_test => 'Тест';
+
+  @override
+  String get ciClass_config => 'Конфигурация';
+
+  @override
+  String get ciClass_dependency => 'Зависимость';
+
+  @override
+  String get ciClass_infra => 'Инфраструктура';
+
+  @override
+  String get ciClass_flaky => 'Нестабильное';
+
+  @override
+  String get ciClass_report => 'Отчёт';
+
+  @override
+  String get ciColStatus => 'Статус';
+
+  @override
+  String get ciColFailure => 'Падение';
+
+  @override
+  String get ciColCount => 'Падало';
+
+  @override
+  String get ciColLastSeen => 'Последний раз';
+
+  @override
+  String get ciColTicket => 'Тикет';
+
+  @override
+  String get ciColTime => 'Время';
+
+  @override
+  String get ciColCommit => 'Коммит';
+
+  @override
+  String get ciColJob => 'Джоб';
+
+  @override
+  String ciTimes(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n раза', many: '$n раз', few: '$n раза', one: '$n раз');
+    return '$_temp0';
+  }
+
+  @override
+  String get ciFix => 'Исправить';
+
+  @override
+  String ciFixStarted(String key) {
+    return 'Открыт тикет $key';
+  }
+
+  @override
+  String get ciMute => 'Скрыть';
+
+  @override
+  String get ciUnmute => 'Вернуть';
+
+  @override
+  String get ciMuted => 'Скрыто: теперь agnts игнорирует это падение';
+
+  @override
+  String get ciUnmuted => 'Возвращено';
+
+  @override
+  String get ciRerun => 'Перезапустить';
+
+  @override
+  String get ciRerunStarted => 'Перезапуск начат';
+
+  @override
+  String get ciCommentOnly => 'Только комментарий';
+
+  @override
+  String get ciEmptyRed => 'Ничего не горит красным. Все отслеживаемые ветки проходят.';
+
+  @override
+  String get ciEmptyFilter => 'Здесь падений нет.';
+
+  @override
+  String get ciHowTitle => 'Как начать отслеживать';
+
+  @override
+  String get ciHowWatch =>
+      'Откройте репозиторий, перейдите на вкладку CI и включите отслеживание. Ветка по умолчанию отслеживается всегда; добавьте другие, например release/*.';
+
+  @override
+  String get ciHowWebhook =>
+      'Чтобы узнавать о падениях за секунды, добавьте вебхук git-хостинга на события workflow_run (GitHub) или Pipeline events (GitLab). Без него agnts проверяет каждые 5 минут.';
+
+  @override
+  String get ciNotFound => 'Это падение CI не найдено.';
+
+  @override
+  String ciOpenTicket(String key) {
+    return 'Открыть $key';
+  }
+
+  @override
+  String ciPrNote(String n) {
+    return 'Это падение в чужом пул-реквесте #$n. agnts никогда не открывает тикет и не пушит туда; при включённых комментариях он оставляет один комментарий с диагнозом.';
+  }
+
+  @override
+  String ciRegressionNote(String sha) {
+    return 'Снова упало на коммите, который содержит исправление $sha. Исходный тикет получит предложение о доработке.';
+  }
+
+  @override
+  String get ciLogTitle => 'Лог';
+
+  @override
+  String get ciLogSub => 'Очищенный фрагмент последнего упавшего запуска';
+
+  @override
+  String get ciLogAnnotations => 'Аннотации';
+
+  @override
+  String get ciLogFirstError => 'Первая ошибка';
+
+  @override
+  String get ciLogEnd => 'Конец лога';
+
+  @override
+  String get ciLogTail => 'Последние строки';
+
+  @override
+  String get ciNoLog => 'Для этого падения лог не сохранён.';
+
+  @override
+  String get ciOccurrences => 'Упавшие запуски';
+
+  @override
+  String get ciOccurrencesSub => 'Последние 20 запусков с этим падением';
+
+  @override
+  String get ciNoOccurrences => 'Запусков не записано.';
+
+  @override
+  String get ciPassedOnRerun => 'Прошло при перезапуске';
+
+  @override
+  String get ciOpenRun => 'Открыть запуск';
+
+  @override
+  String get ciFacts => 'Подробности';
+
+  @override
+  String get ciCount => 'Падало';
+
+  @override
+  String get ciFlakyCount => 'Прошло при перезапуске';
+
+  @override
+  String get ciFirstSeen => 'Впервые';
+
+  @override
+  String get ciLastSeen => 'Последний раз';
+
+  @override
+  String get ciFirstSha => 'Первый упавший коммит';
+
+  @override
+  String get ciLastSha => 'Последний коммит';
+
+  @override
+  String get ciFixedSha => 'Коммит исправления';
+
+  @override
+  String get ciFixedAt => 'Исправление влито';
+
+  @override
+  String get ciTicket => 'Тикет';
+
+  @override
+  String get ciBranch => 'Ветка';
+
+  @override
+  String get ciWatchTitle => 'Отслеживание CI';
+
+  @override
+  String get ciWatchSub => 'agnts читает пайплайны этого репозитория и исправляет то, что падает';
+
+  @override
+  String get ciWatchEnabled => 'Отслеживать CI';
+
+  @override
+  String get ciWatchEnabledHelp => 'По умолчанию выключено. Падения на отслеживаемых ветках группируются и исправляются.';
+
+  @override
+  String get ciBranches => 'Дополнительные ветки';
+
+  @override
+  String ciBranchesHelp(String branch) {
+    return 'Шаблоны, по одному на строку. Ветка по умолчанию ($branch) отслеживается всегда.';
+  }
+
+  @override
+  String get ciIgnore => 'Игнорируемые воркфлоу и джобы';
+
+  @override
+  String get ciIgnoreHelp =>
+      'Шаблоны, по одному на строку, сверяются с именами воркфлоу и джобов. Если пусто — *deploy*, *release* и *publish*.';
+
+  @override
+  String get ciPrs => 'Чужие пул-реквесты';
+
+  @override
+  String get ciPrsHelp =>
+      'agnts никогда не пушит в ветку коллеги. При включённых комментариях он оставляет в пул-реквесте один комментарий с диагнозом.';
+
+  @override
+  String get ciPrs_off => 'Игнорировать';
+
+  @override
+  String get ciPrs_comment => 'Комментировать';
+
+  @override
+  String get ciAutoFix => 'Исправлять автоматически';
+
+  @override
+  String get ciAutoFixRepoHelp => 'Открывать тикет на каждое подтверждённое падение или ждать кнопки «Исправить»';
+
+  @override
+  String get ciAutoFix_inherit => 'Как в пространстве';
+
+  @override
+  String get ciAutoFix_on => 'Вкл.';
+
+  @override
+  String get ciAutoFix_off => 'Выкл.';
+
+  @override
+  String get ciSave => 'Сохранить';
+
+  @override
+  String get ciWatchSaved => 'Отслеживание CI сохранено';
+
+  @override
+  String get ciFailuresTitle => 'Падения';
+
+  @override
+  String get ciFailuresSub => 'Падающие джобы этого репозитория, сначала новые';
+
+  @override
+  String get ciFlakyTitle => 'Нестабильные тесты';
+
+  @override
+  String get ciFlakySub => 'Падения, которые прошли при перезапуске';
+
+  @override
+  String get ciFlakyEmpty => 'Нестабильных тестов не найдено.';
+
+  @override
+  String get ciCardTitle => 'Падение CI';
+
+  @override
+  String get ciFailingRuns => 'Упавших запусков';
+
+  @override
+  String get ciLastRun => 'Последний упавший запуск';
+
+  @override
+  String get ciStillFailing => 'Всё ещё падает';
+
+  @override
+  String get ciWaitingGreen => 'Исправление влито, ждём зелёного запуска';
+
+  @override
+  String get ciGreenAgain => 'Снова зелёное';
+
+  @override
+  String get ciOpenFailure => 'Открыть падение';
+
+  @override
+  String get ciSettingsTitle => 'CI';
+
+  @override
+  String get ciSettingsSub => 'Что делает agnts, когда отслеживаемый пайплайн краснеет. Отслеживание включается для каждого репозитория.';
+
+  @override
+  String get ciAutoFixHelp => 'Открывать тикет на каждое подтверждённое падение. Если выключено, падения ждут кнопки «Исправить».';
+
+  @override
+  String get ciMaxAutoPerDay => 'Автоматических тикетов в день';
+
+  @override
+  String get ciMaxAutoPerDayHelp => 'Сверх лимита падения ждут кнопки «Исправить». Доработки собственных пул-реквестов agnts не считаются.';
+
+  @override
+  String ciPerDay(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n в день',
+      many: '$n в день',
+      few: '$n в день',
+      one: '$n в день',
+      zero: 'Ни одного',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ciRetryFlaky => 'Перезапускать новые падения один раз';
+
+  @override
+  String get ciRetryFlakyHelp =>
+      'Джобы нового падения запускаются ещё раз, прежде чем agnts в него поверит. Если проходят — падение помечается нестабильным.';
+
+  @override
+  String get ciFeedbackRounds => 'Доработки пул-реквестов agnts';
+
+  @override
+  String get ciFeedbackRoundsHelp => 'Сколько раз красная проверка возвращает собственный пул-реквест agnts в работу. 0 — выключено.';
+
+  @override
+  String get ciInfraPatterns => 'Шаблоны инфраструктуры';
+
+  @override
+  String get ciInfraPatternsHelp =>
+      'Регулярные выражения, по одному на строку. Совпавший лог считается падением инфраструктуры: показывается и учитывается, но тикет не открывается. Добавляются к встроенным.';
 
   @override
   String get commonLoading => 'Загрузка…';
@@ -1474,7 +2343,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get followUpsSub =>
-      'Что, по мнению agnts, ещё нужно, чтобы довести этот тикет до конца. Выберите нужные: они создаются в очереди и не запускаются, пока вы их не запустите.';
+      'Что, по мнению agnts, ещё нужно, чтобы довести этот тикет до конца. Выберите нужные и запустите их сразу или оставьте на удержании, пока не запустите каждый.';
 
   @override
   String get followUpsMode => 'Предложения последующих тикетов';
@@ -1535,6 +2404,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get followUpsServes => 'Зачем';
 
   @override
+  String get followUpsAfter => 'После';
+
+  @override
   String get followUpsDetails => 'Подробнее';
 
   @override
@@ -1567,7 +2439,25 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get followUpsQueuedHint => 'Созданные тикеты ждут в очереди, пока вы их не запустите.';
+  String followUpsCreateStart(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Создать и запустить $count тикета',
+      many: 'Создать и запустить $count тикетов',
+      few: 'Создать и запустить $count тикета',
+      one: 'Создать и запустить $count тикет',
+      zero: 'Создать и запустить',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get followUpsCreateHeld => 'Создать на удержании';
+
+  @override
+  String get followUpsQueuedHint =>
+      'Запущенные тикеты сразу встают в очередь; тикет, который ждёт другой, начнёт писать код после его слияния. Удержанные ждут, пока вы их не запустите.';
 
   @override
   String get followUpsDismiss => 'Отклонить';
@@ -1602,6 +2492,19 @@ class AppLocalizationsRu extends AppLocalizations {
       one: 'Создан $count тикет',
     );
     return '$_temp0, они в очереди до запуска.';
+  }
+
+  @override
+  String followUpsStartedNotice(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Создано $count тикета',
+      many: 'Создано $count тикетов',
+      few: 'Создано $count тикета',
+      one: 'Создан $count тикет',
+    );
+    return '$_temp0, они встали в очередь на запуск.';
   }
 
   @override
@@ -1703,6 +2606,828 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get formNoMatch => 'Ничего не найдено';
+
+  @override
+  String get harnessRepoTab => 'Защита';
+
+  @override
+  String get harnessRepoTitle => 'Защита';
+
+  @override
+  String get harnessRepoSub => 'Насколько строго agnts-guard проверяет работу Claude в этом репозитории — во время работы и после.';
+
+  @override
+  String get harnessRepoSave => 'Сохранить защиту';
+
+  @override
+  String get harnessRepoSaved => 'Защита сохранена';
+
+  @override
+  String get harnessRepoAgentTitle => 'Файлы инструкций для агентов';
+
+  @override
+  String get harnessRepoAgentSub =>
+      'agnts проверяет CLAUDE.md, AGENTS.md, .claude/ и .mcp.json на текст, который пытается управлять агентом. Хуки и MCP-серверы этого репозитория agnts никогда не запускает.';
+
+  @override
+  String harnessRepoAgentScanned(String time) {
+    return 'Проверено $time';
+  }
+
+  @override
+  String get harnessRepoAgentNotScanned => 'Ещё не проверено: следующий запуск в этом репозитории проверит файлы.';
+
+  @override
+  String get harnessRepoAgentNothing => 'Ничего не найдено.';
+
+  @override
+  String harnessRepoAgentWarn(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n строки могут',
+      many: '$n строк могут',
+      few: '$n строки могут',
+      one: '$n строка может',
+    );
+    return '$_temp0 пытаться управлять агентом. Запуски читают эти файлы как данные, а не как инструкции; прочитайте их, прежде чем им доверять.';
+  }
+
+  @override
+  String get harnessRepoAgentInfo => 'Настройки, которые agnts игнорирует';
+
+  @override
+  String get harnessRepoKind_hidden_unicode => 'Скрытые символы';
+
+  @override
+  String get harnessRepoKind_agent_instruction => 'Указание агенту';
+
+  @override
+  String get harnessRepoKind_exfiltration => 'Отправка данных наружу';
+
+  @override
+  String get harnessRepoKind_encoded_blob => 'Закодированный текст';
+
+  @override
+  String get harnessRepoKind_hooks => 'Хуки Claude Code';
+
+  @override
+  String get harnessRepoKind_mcp_server => 'MCP-серверы';
+
+  @override
+  String get harnessRepoProfile => 'Профиль защиты';
+
+  @override
+  String get harnessRepoProfileHelp => 'Насколько строги проверки во время работы в этом репозитории.';
+
+  @override
+  String get harnessRepoProfile_ => 'Как в пространстве';
+
+  @override
+  String get harnessRepoProfile_minimal => 'Минимальный';
+
+  @override
+  String get harnessRepoProfile_standard => 'Обычный';
+
+  @override
+  String get harnessRepoProfile_strict => 'Строгий';
+
+  @override
+  String get harnessRepoProfileHelp_ => 'Как в настройках рабочего пространства.';
+
+  @override
+  String get harnessRepoProfileHelp_minimal => 'Блокируются только секреты и обязательные правила; перед завершением проверяется сборка.';
+
+  @override
+  String get harnessRepoProfileHelp_standard =>
+      'Также блокируются пропущенные тесты, отключённые линтеры и правки конфигурации проверок; перед завершением должны пройти сборка и линтер.';
+
+  @override
+  String get harnessRepoProfileHelp_strict =>
+      'Также блокируются проглоченные ошибки и удалённые проверки в тестах, перед завершением запускаются тесты, и агент может спросить факты перед правкой файла.';
+
+  @override
+  String get harnessRepoSecretAllow => 'Где разрешены примеры ключей';
+
+  @override
+  String get harnessRepoSecretAllowHelp => 'Шаблоны путей, где ожидаются ненастоящие ключи, кроме testdata/, fixtures/ и *.example.';
+
+  @override
+  String get harnessRepoChecksTitle => 'Проверки каждого файла';
+
+  @override
+  String get harnessRepoChecksSub =>
+      'Быстрые форматтеры и линтеры, которые agnts-guard запускает на каждом изменённом Claude файле, чтобы проблемы исправлялись сразу.';
+
+  @override
+  String get harnessRepoChecksOff => 'Отключить проверки файлов';
+
+  @override
+  String get harnessRepoChecksOffHelp => 'Claude не проверяется после каждой правки; проверки после запуска остаются.';
+
+  @override
+  String get harnessRepoOwnChecks => 'Свои проверки';
+
+  @override
+  String get harnessRepoOwnChecksHelp => 'Заменить проверки, которые agnts выводит из инструментов, своим списком.';
+
+  @override
+  String get harnessRepoDerivedTitle => 'Выведены из инструментов';
+
+  @override
+  String get harnessRepoDerivedNone => 'agnts не знает проверок файлов для инструментов этого репозитория.';
+
+  @override
+  String get harnessRepoCheckName => 'Название';
+
+  @override
+  String get harnessRepoCheckGlobs => 'Файлы (шаблоны через запятую)';
+
+  @override
+  String get harnessRepoCheckCmd => 'Команда';
+
+  @override
+  String harnessRepoCheckCmdHelp(String file, String dir) {
+    return '\'$file\' — изменённый файл, \'$dir\' — его папка, оба относительно репозитория.';
+  }
+
+  @override
+  String get harnessRepoCheckEvery => 'Не чаще чем раз в (секунд)';
+
+  @override
+  String get harnessRepoAddCheck => 'Добавить проверку';
+
+  @override
+  String harnessRepoRemoveCheck(String name) {
+    return 'Удалить $name';
+  }
+
+  @override
+  String get harnessRepoCoverageTitle => 'Покрытие изменённых строк';
+
+  @override
+  String get harnessRepoCoverageSub =>
+      'Когда проверки прошли, agnts ещё раз запускает тесты с покрытием и показывает, какие добавленные строки не выполнил ни один тест.';
+
+  @override
+  String get harnessRepoCoverage => 'Измерять покрытие';
+
+  @override
+  String get harnessRepoCoverageHelp => 'Дополнительный запуск тестов после проверок; запуск из-за него не падает.';
+
+  @override
+  String get harnessRepoThreshold => 'Порог';
+
+  @override
+  String get harnessRepoThresholdHelp => 'Ниже порога код-ревью получает замечание о покрытии. 0 отключает замечание.';
+
+  @override
+  String get harnessRepoCoverageCmd => 'Команда покрытия';
+
+  @override
+  String get harnessRepoCoverageCmdHelp => 'Оставьте пустым, чтобы использовать команду, которую выводит agnts.';
+
+  @override
+  String get harnessRepoCoverageReport => 'Файл отчёта';
+
+  @override
+  String get harnessRepoCoverageReportHelp => 'Профиль покрытия Go или lcov, в репозитории или в /agnts/out/.';
+
+  @override
+  String get harnessRepoCoverageNoDerived => 'agnts не знает команды покрытия для этих инструментов: укажите её.';
+
+  @override
+  String get harnessRepoAcceptance => 'Проверять приёмку в приложении';
+
+  @override
+  String get harnessRepoAcceptanceHelp =>
+      'После превью agnts проверяет критерии приёмки тикета в запущенном приложении и показывает результат со скриншотами.';
+
+  @override
+  String get harnessRepoAcceptanceNoPreview => 'Нужна команда превью: укажите её при редактировании репозитория.';
+
+  @override
+  String get harnessRepoStarterTitle => 'Стартовые правила';
+
+  @override
+  String get harnessRepoStarterSub =>
+      'Конкретные проверяемые соглашения для языков этого репозитория. Они добавляются как предложения: ничего не применяется, пока вы их не примете.';
+
+  @override
+  String get harnessRepoStarterNone => 'Для инструментов этого репозитория нет стартового набора.';
+
+  @override
+  String harnessRepoStarterRules(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n правила',
+      many: '$n правил',
+      few: '$n правила',
+      one: '$n правило',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String harnessRepoStarterOffer(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n правила',
+      many: '$n правил',
+      few: '$n правила',
+      one: '$n правило',
+    );
+    return 'Предложить $_temp0';
+  }
+
+  @override
+  String get harnessRepoStarterOffered => 'Уже предложены';
+
+  @override
+  String harnessRepoStarterAdded(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Предложено $n правила',
+      many: 'Предложено $n правил',
+      few: 'Предложено $n правила',
+      one: 'Предложено $n правило',
+      zero: 'Нечего предложить',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get harnessRepoStarterOpenRules => 'Открыть предложения';
+
+  @override
+  String get harnessRulesDelivery => 'Как запуски получают правило';
+
+  @override
+  String get harnessRulesDelivery_prompt => 'В каждом промпте';
+
+  @override
+  String get harnessRulesDelivery_skill => 'Навык';
+
+  @override
+  String get harnessRulesDeliveryHelp_prompt => 'В каждом промпте, всегда на виду.';
+
+  @override
+  String get harnessRulesDeliveryHelp_skill =>
+      'Навык, который Claude загружает, когда его описание подходит к работе: промпты остаются короткими, когда правил много. Важные правила держите в каждом промпте.';
+
+  @override
+  String get harnessRulesEnforce => 'Обязательное';
+
+  @override
+  String get harnessRulesEnforceHelp => 'agnts-guard проверяет правило во время работы Claude, а не только просит его соблюдать.';
+
+  @override
+  String get harnessRulesOn => 'Проверять';
+
+  @override
+  String get harnessRulesOn_file => 'Правки файлов';
+
+  @override
+  String get harnessRulesOn_bash => 'Команды';
+
+  @override
+  String get harnessRulesOn_diff => 'Готовое изменение';
+
+  @override
+  String get harnessRulesOnHelp_file => 'Правки файлов ниже; с шаблоном — только добавленные строки, которые ему соответствуют.';
+
+  @override
+  String get harnessRulesOnHelp_bash => 'Команды оболочки, которые запускает Claude и которые подходят под шаблон.';
+
+  @override
+  String get harnessRulesOnHelp_diff => 'Готовое изменение, проверяется на сервере после запуска.';
+
+  @override
+  String get harnessRulesPaths => 'Файлы (шаблоны)';
+
+  @override
+  String get harnessRulesPathsPlaceholder => 'server/migrations/*.sql';
+
+  @override
+  String get harnessRulesPattern => 'Шаблон (регулярное выражение RE2)';
+
+  @override
+  String get harnessRulesAction => 'При совпадении';
+
+  @override
+  String get harnessRulesAction_block => 'Блокировать';
+
+  @override
+  String get harnessRulesAction_warn => 'Предупреждать';
+
+  @override
+  String get harnessRulesMessage => 'Сообщение для Claude';
+
+  @override
+  String get harnessRulesMessagePlaceholder => 'Добавьте новую миграцию.';
+
+  @override
+  String get harnessRulesTry => 'Проверить на истории';
+
+  @override
+  String get harnessRulesTrying => 'Проверяю…';
+
+  @override
+  String harnessRulesTryChecked(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Проверено $n изменения',
+      many: 'Проверено $n изменений',
+      few: 'Проверено $n изменения',
+      one: 'Проверено $n изменение',
+    );
+    return '$_temp0 от agnts.';
+  }
+
+  @override
+  String get harnessRulesTryNone => 'Ни одно из них не совпало бы.';
+
+  @override
+  String harnessRulesTryHits(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n тикетах',
+      many: '$n тикетах',
+      few: '$n тикетах',
+      one: '$n тикете',
+    );
+    return 'Совпало бы в $_temp0:';
+  }
+
+  @override
+  String get harnessRulesBadgeBlock => 'Обязательное: блокирует';
+
+  @override
+  String get harnessRulesBadgeWarn => 'Обязательное: предупреждает';
+
+  @override
+  String get harnessRulesBadgeSkill => 'Навык';
+
+  @override
+  String get harnessRulesBadgeTip => 'Совет';
+
+  @override
+  String get harnessRulesSource_reflect => 'Из отзыва';
+
+  @override
+  String get harnessRulesSource_run => 'Из запуска';
+
+  @override
+  String get harnessRulesSource_promoted => 'Замечено в нескольких репозиториях';
+
+  @override
+  String harnessRulesSourceStarter(String name) {
+    return 'Стартовое: $name';
+  }
+
+  @override
+  String harnessRulesConfidence(String n) {
+    return 'Уверенность $n%';
+  }
+
+  @override
+  String harnessRulesSeen(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Замечено $n раза',
+      many: 'Замечено $n раз',
+      few: 'Замечено $n раза',
+      one: 'Замечено $n раз',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String harnessRulesWatching(String n) {
+    return 'Наблюдение ($n)';
+  }
+
+  @override
+  String get harnessRulesWatchingHelp =>
+      'Уроки, которые agnts заметил раз или два. Они станут предложениями, когда он увидит их снова; до тех пор они не попадают ни в один тикет.';
+
+  @override
+  String get harnessSettingsTitle => 'Ограничители';
+
+  @override
+  String get harnessSettingsSub =>
+      'agnts-guard проверяет работу Claude внутри каждого запуска, по ходу дела; проверки agnts после запуска по-прежнему действуют.';
+
+  @override
+  String get harnessSettingsProfile => 'Профиль ограничителей';
+
+  @override
+  String get harnessSettingsProfile_minimal => 'Минимальный';
+
+  @override
+  String get harnessSettingsProfile_standard => 'Стандартный';
+
+  @override
+  String get harnessSettingsProfile_strict => 'Строгий';
+
+  @override
+  String get harnessSettingsProfileHelp_minimal =>
+      'Блокирует секреты и файлы .env, применяет правила команды с шаблоном и требует успешной сборки, прежде чем Claude закончит.';
+
+  @override
+  String get harnessSettingsProfileHelp_standard =>
+      'Всё из минимального, а также: блокирует пропущенные и удалённые тесты, отключённые линтеры и изменения конфигурации проверок; линтер в стоп-проверке; быстрые проверки каждого изменённого файла.';
+
+  @override
+  String get harnessSettingsProfileHelp_strict =>
+      'Всё из стандартного, а также: тесты в стоп-проверке, блокировка проглоченных ошибок и удалённых проверок, проверка фактов перед первыми правками.';
+
+  @override
+  String get harnessSettingsFactCheck => 'Доля проверки фактов';
+
+  @override
+  String get harnessSettingsFactCheckHelp =>
+      'Доля задач со строгим профилем, где запуск должен назвать, кто использует файл, прежде чем менять его, и как откатить разрушительные команды. Сравните группы в аналитике.';
+
+  @override
+  String get harnessSettingsStalls => 'Если запуск застрял';
+
+  @override
+  String get harnessSettingsStallsHelp =>
+      'Одна и та же команда снова и снова падает, нет правок много вызовов подряд или один файл читается раз за разом.';
+
+  @override
+  String get harnessSettingsStalls_off => 'Игнорировать';
+
+  @override
+  String get harnessSettingsStalls_log => 'Отметить';
+
+  @override
+  String get harnessSettingsStalls_act => 'Вмешаться';
+
+  @override
+  String get harnessSettingsProveFixes => 'Доказывать исправления';
+
+  @override
+  String get harnessSettingsProveFixesHelp =>
+      'Исправлению бага нужен тест, который падает до изменения и проходит после; agnts запускает его оба раза и показывает результат.';
+
+  @override
+  String get harnessSettingsDeepReview => 'Глубокое ревью';
+
+  @override
+  String get harnessSettingsDeepReviewHelp =>
+      'Специализированные проходы в код-ревью (безопасность, тихие ошибки, тесты, типы). Авто: только большая или сложная работа; стоит больше токенов.';
+
+  @override
+  String get harnessSettingsDeep_off => 'Выкл';
+
+  @override
+  String get harnessSettingsDeep_auto => 'Авто';
+
+  @override
+  String get harnessSettingsDeep_always => 'Всегда';
+
+  @override
+  String get harnessSettingsLearnFromRuns => 'Учиться на запусках';
+
+  @override
+  String get harnessSettingsLearnFromRunsHelp =>
+      'После запуска с упавшими проверками или застреванием agnts может предложить совет для репозитория. Советы наблюдаются, пока не повторятся.';
+
+  @override
+  String get harnessSettingsSecondOpinion => 'Второе мнение';
+
+  @override
+  String get harnessSettingsSecondOpinionHelp =>
+      'Другая модель читает выбранный подход сложных задач и говорит, согласна ли она. Пусто — выключено.';
+
+  @override
+  String get harnessSettingsSecondOpinionHint => 'например, opus или codex:gpt-5-codex';
+
+  @override
+  String get harnessSettingsAdvanced => 'Дополнительно: хуки ограничителей';
+
+  @override
+  String get harnessSettingsAdvancedHelp => 'Отключайте отдельные хуки; остальное решает профиль.';
+
+  @override
+  String get harnessSettingsHook_pre_secret => 'отклонять секреты и файлы .env';
+
+  @override
+  String get harnessSettingsHook_pre_redflags => 'отклонять пропуск тестов, отключение линтеров, ослабление проверок';
+
+  @override
+  String get harnessSettingsHook_pre_rules => 'применять правила команды с шаблоном';
+
+  @override
+  String get harnessSettingsHook_pre_fact_check => 'спрашивать факты перед первой правкой файла';
+
+  @override
+  String get harnessSettingsHook_pre_destructive => 'спрашивать план отката перед разрушительными командами';
+
+  @override
+  String get harnessSettingsHook_post_edit_check => 'проверять каждый изменённый файл (форматтер, линтер)';
+
+  @override
+  String get harnessSettingsHook_stop_gate => 'сборка и линтер должны пройти, прежде чем Claude закончит';
+
+  @override
+  String get harnessSettingsHook_session_progress => 'возвращать план после сжатия контекста';
+
+  @override
+  String get harnessSettingsCodex => 'Код в Codex';
+
+  @override
+  String get harnessSettingsCodexHelp =>
+      'Имя модели Codex запускает написание кода в Codex CLI вместо Claude; пусто — Claude. Нужны интеграция OpenAI и api.openai.com в разрешённых хостах (Настройки → Превью).';
+
+  @override
+  String get harnessSettingsCodexConnect => 'Интеграция OpenAI';
+
+  @override
+  String get harnessSettingsQualityTitle => 'Ограничители по версиям промптов';
+
+  @override
+  String get harnessSettingsQualitySub => 'Что сделали agnts-guard и проверки для задач каждой версии промптов.';
+
+  @override
+  String get harnessSettingsColBlocks => 'Заблокировано';
+
+  @override
+  String get harnessSettingsColBlocksHint => 'Действия, которые agnts-guard отклонил в запусках с кодом';
+
+  @override
+  String get harnessSettingsColStopSaves => 'Спасения стоп-проверкой';
+
+  @override
+  String get harnessSettingsColStopSavesHint =>
+      'Задачи, где стоп-проверка вернула упавшие проверки, после чего проверки agnts прошли с первого раза';
+
+  @override
+  String get harnessSettingsColStalls => 'Застревания';
+
+  @override
+  String get harnessSettingsColStallsHint => 'Сколько раз запуски выглядели застрявшими';
+
+  @override
+  String get harnessSettingsColProven => 'Доказанные исправления';
+
+  @override
+  String get harnessSettingsColProvenHint =>
+      'Исправления багов, тест которых падал до изменения и прошёл после, из тех, где было доказательство';
+
+  @override
+  String get harnessSettingsColAdopted => 'Принятые замечания';
+
+  @override
+  String get harnessSettingsColAdoptedHint => 'Замечания ревью, которые люди включили в свой отзыв';
+
+  @override
+  String get harnessSettingsColTokens => 'Токенов на задачу';
+
+  @override
+  String get harnessSettingsColTokensHint => 'Среднее число токенов готовой задачи, все этапы';
+
+  @override
+  String get harnessSettingsColFactCheck => 'Проверка фактов, с первого раза';
+
+  @override
+  String get harnessSettingsColFactCheckHint =>
+      'Доля задач группы проверки фактов, принятых с первого раза, рядом с долей всех готовых задач';
+
+  @override
+  String harnessSettingsXOfY(String x, String y) {
+    return '$x из $y';
+  }
+
+  @override
+  String harnessSettingsVsAll(String n) {
+    return 'против $n%';
+  }
+
+  @override
+  String get harnessTicketFlag_secret => 'Возможный секрет';
+
+  @override
+  String get harnessTicketFlag_env_file => 'Добавлен файл .env';
+
+  @override
+  String get harnessTicketFlag_debug_leftover => 'Оставлен отладочный вывод';
+
+  @override
+  String get harnessTicketFlag_check_config => 'Изменена настройка проверок';
+
+  @override
+  String get harnessTicketFlag_rule_violation => 'Нарушено правило команды';
+
+  @override
+  String get harnessTicketSecretsTitle => 'В изменении может быть настоящий секрет';
+
+  @override
+  String harnessTicketSecretsBody(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n строки', many: '$n строк', few: '$n строки', one: '$n строку');
+    return 'agnts отметил $_temp0 как возможный секрет или файл .env. Проверьте их в тревожных признаках на вкладке «Ревью»: agnts не отправит изменение, пока вы не подтвердите, что это не настоящие учётные данные.';
+  }
+
+  @override
+  String get harnessTicketSecretsConfirm => 'Я проверил: это не настоящие учётные данные';
+
+  @override
+  String get harnessTicketSecretsDone => 'Подтверждено: отмеченные строки — не настоящие учётные данные.';
+
+  @override
+  String get harnessTicketSecretsNeeded => 'Сначала подтвердите, что строки, отмеченные как секреты, — не настоящие учётные данные.';
+
+  @override
+  String get harnessTicketProofTitle => 'Доказательство исправления';
+
+  @override
+  String get harnessTicketProof_proven => 'Доказано';
+
+  @override
+  String get harnessTicketProof_not_reproduced => 'Не воспроизведено';
+
+  @override
+  String get harnessTicketProof_still_failing => 'Всё ещё падает';
+
+  @override
+  String get harnessTicketProof_inconclusive => 'Неясно';
+
+  @override
+  String get harnessTicketProof_no_test => 'Нет теста';
+
+  @override
+  String get harnessTicketProof_error => 'Не проверено';
+
+  @override
+  String get harnessTicketProofHelp_proven => 'Воспроизводящий тест падает на коде до изменения и проходит после него.';
+
+  @override
+  String get harnessTicketProofHelp_not_reproduced => 'Тест проходит и до изменения, значит, он не показывает ошибку.';
+
+  @override
+  String get harnessTicketProofHelp_still_failing => 'Тест всё ещё падает с изменением.';
+
+  @override
+  String get harnessTicketProofHelp_inconclusive =>
+      'Тест не удалось запустить на коде до изменения; возможно, ему нужно то, что добавляет исправление.';
+
+  @override
+  String get harnessTicketProofHelp_no_test => 'Ни один автотест не воспроизводит ошибку.';
+
+  @override
+  String get harnessTicketProofHelp_error => 'agnts не смог проверить исправление.';
+
+  @override
+  String harnessTicketProofBase(String sha) {
+    return 'Начато с $sha';
+  }
+
+  @override
+  String harnessTicketProofBefore(String code) {
+    return 'До изменения (код выхода $code)';
+  }
+
+  @override
+  String harnessTicketProofAfter(String code) {
+    return 'После изменения (код выхода $code)';
+  }
+
+  @override
+  String get harnessTicketCoverageTitle => 'Покрытие изменённых строк';
+
+  @override
+  String harnessTicketCoveragePct(String pct, String covered, String total) {
+    return 'Тесты выполнили $pct% изменённых строк ($covered из $total)';
+  }
+
+  @override
+  String harnessTicketCoverageBelow(String n) {
+    return 'Ниже порога репозитория в $n%';
+  }
+
+  @override
+  String get harnessTicketCoverageNone => 'Ни одна изменённая строка не относится к коду, который измеряет отчёт о покрытии.';
+
+  @override
+  String harnessTicketCoverageLines(String ranges) {
+    return 'Не выполнены: строки $ranges';
+  }
+
+  @override
+  String harnessTicketCoverageError(String error) {
+    return 'Не удалось измерить покрытие: $error';
+  }
+
+  @override
+  String harnessTicketConfidence(String n) {
+    return 'Уверенность $n%';
+  }
+
+  @override
+  String get harnessTicketPass_security => 'Проверка безопасности';
+
+  @override
+  String get harnessTicketPass_failures => 'Проверка ошибок';
+
+  @override
+  String get harnessTicketPass_tests => 'Проверка тестов';
+
+  @override
+  String get harnessTicketPass_types => 'Проверка типов';
+
+  @override
+  String get harnessTicketAdopted => 'В вашем отзыве';
+
+  @override
+  String get harnessTicketDeep => 'Глубокое ревью';
+
+  @override
+  String harnessTicketDropped(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n замечания',
+      many: '$n замечаний',
+      few: '$n замечания',
+      one: '$n замечание',
+    );
+    return 'Не показано $_temp0 (низкая уверенность или повторы)';
+  }
+
+  @override
+  String get harnessTicketDefect => 'Исправление ошибки';
+
+  @override
+  String get harnessTicketAcceptanceTitle => 'Критерии приёмки';
+
+  @override
+  String get harnessTicketCheck_ui => 'В приложении';
+
+  @override
+  String get harnessTicketCheck_api => 'API';
+
+  @override
+  String get harnessTicketCheck_test => 'Тест';
+
+  @override
+  String get harnessTicketCheck_manual => 'Вручную';
+
+  @override
+  String get harnessTicketSecondTitle => 'Второе мнение';
+
+  @override
+  String harnessTicketSecondBy(String model) {
+    return 'От $model';
+  }
+
+  @override
+  String get harnessTicketSecondAgrees => 'Согласен';
+
+  @override
+  String get harnessTicketSecondConcerns => 'Есть сомнения';
+
+  @override
+  String get harnessTicketSecondAlternative => 'Сделал бы иначе';
+
+  @override
+  String harnessTicketSecondError(String error) {
+    return 'Нет второго мнения: $error';
+  }
+
+  @override
+  String get harnessTicketAccTitle => 'Проверка приёмки';
+
+  @override
+  String get harnessTicketAcc_ok => 'Всё выполнено';
+
+  @override
+  String get harnessTicketAcc_partial => 'Проверено частично';
+
+  @override
+  String get harnessTicketAcc_failed => 'Не выполнено';
+
+  @override
+  String get harnessTicketVerdict_pass => 'Выполнено';
+
+  @override
+  String get harnessTicketVerdict_fail => 'Не выполнено';
+
+  @override
+  String get harnessTicketVerdict_unknown => 'Не проверено';
+
+  @override
+  String get harnessTicketAccSteps => 'Шаги';
+
+  @override
+  String get harnessTicketAccShot => 'Скриншот';
 
   @override
   String get implementTitle => 'Следующий шаг';
@@ -2344,6 +4069,40 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get integrationsName_openai => 'OpenAI';
+
+  @override
+  String get integrationsDesc_openai =>
+      'Ключ OpenAI API для запусков в Codex CLI, втором инструменте agnts для кода. Чтобы использовать его, выберите модель codex: в настройках.';
+
+  @override
+  String get integrationsConnectSub_openai =>
+      'Вставьте ключ OpenAI API. agnts проверит его, сохранит в зашифрованном виде и будет передавать только запускам на Codex.';
+
+  @override
+  String get integrationsTokenOpen_openai => 'Открыть API-ключи';
+
+  @override
+  String get integrationsTokenStep1_openai => 'Откройте страницу API-ключей платформы OpenAI (кнопка ниже) и войдите.';
+
+  @override
+  String get integrationsTokenStep2_openai => 'Создайте новый секретный ключ, лучше в проекте с лимитом расходов.';
+
+  @override
+  String get integrationsTokenStep3_openai => 'Скопируйте ключ (он начинается с sk-) и вставьте его в поле «Ключ API» ниже.';
+
+  @override
+  String get integrationsTokenStep4_openai =>
+      'В «Настройки → Превью» добавьте api.openai.com в разрешённые хосты, чтобы запуски Codex могли обращаться к OpenAI.';
+
+  @override
+  String get integrationsOpenaiKeyHelp => 'Хранится в зашифрованном виде на вашем сервере. Его получают только запуски на Codex.';
+
+  @override
+  String get integrationsOpenaiHelp =>
+      'В запусках Codex нет хуков agnts-guard: проверки agnts после запуска (красные флаги, сборка, линтер, тесты, ревью) работают как обычно. Запускам также нужен api.openai.com в разрешённых хостах.';
+
+  @override
   String get kindTitle => 'Тип';
 
   @override
@@ -2863,6 +4622,172 @@ class AppLocalizationsRu extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n днями', many: '$n днями', few: '$n днями', one: '$n днём');
     return 'Изменения сравниваются с предыдущими $_temp0. Зелёный — лучше.';
   }
+
+  @override
+  String get mciTitle => 'Сбои CI';
+
+  @override
+  String get mciLede => 'Отслеживаемые ветки, которые покраснели: одна строка на ошибку.';
+
+  @override
+  String get mciFilterRed => 'Красные';
+
+  @override
+  String get mciFilterFlaky => 'Нестабильные';
+
+  @override
+  String get mciFilterAll => 'Все';
+
+  @override
+  String get mciEmptyRed => 'Ни одна отслеживаемая ветка не красная.';
+
+  @override
+  String get mciEmpty => 'Здесь нет сбоев CI.';
+
+  @override
+  String get mciStatus_triage => 'Проверка';
+
+  @override
+  String get mciStatus_open => 'Красная';
+
+  @override
+  String get mciStatus_fixing => 'Исправляется';
+
+  @override
+  String get mciStatus_fixed => 'Исправлено';
+
+  @override
+  String get mciStatus_resolved => 'Снова зелёная';
+
+  @override
+  String get mciStatus_flaky => 'Нестабильный';
+
+  @override
+  String get mciStatus_infra => 'Инфраструктура';
+
+  @override
+  String get mciStatus_muted => 'Заглушено';
+
+  @override
+  String get mciStatus_regression => 'Вернулся';
+
+  @override
+  String mciLastSeen(String when) {
+    return 'последний $when';
+  }
+
+  @override
+  String get mciFactFirstCommit => 'Первый упавший коммит';
+
+  @override
+  String get mciFactCount => 'Падал';
+
+  @override
+  String mciTimes(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n раза', many: '$n раз', few: '$n раза', one: '$n раз');
+    return '$_temp0';
+  }
+
+  @override
+  String get mciFactLastSeen => 'Последний раз';
+
+  @override
+  String get mciFactFlaky => 'Прошёл при перезапуске';
+
+  @override
+  String get mciJob => 'Задача';
+
+  @override
+  String get mciBranch => 'Ветка';
+
+  @override
+  String get mciFirstError => 'Первая ошибка';
+
+  @override
+  String get mciLogTail => 'Конец лога';
+
+  @override
+  String get mciLogNote => 'Из лога задачи, секреты удалены.';
+
+  @override
+  String get mciNoSample => 'Для этого сбоя фрагмент лога не сохранён.';
+
+  @override
+  String get mciRuns => 'Упавшие запуски';
+
+  @override
+  String mciRunsCount(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n упавшего запуска',
+      many: '$n упавших запусков',
+      few: '$n упавших запуска',
+      one: '$n упавший запуск',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mciRunFlaky => 'прошёл при перезапуске';
+
+  @override
+  String get mciTicket => 'Тикет';
+
+  @override
+  String mciForeignPr(String n) {
+    return 'Этот сбой в чужом пул-реквесте (#$n): там agnts только оставляет комментарии.';
+  }
+
+  @override
+  String get mciFix => 'Исправить';
+
+  @override
+  String get mciFixConfirm =>
+      'agnts откроет тикет, чтобы исправить этот сбой. Вы проверите исправление до того, как что-либо будет отправлено.';
+
+  @override
+  String get mciMute => 'Заглушить';
+
+  @override
+  String get mciUnmute => 'Включить';
+
+  @override
+  String get mciMutedDone => 'Заглушено: agnts не трогает этот сбой, пока вы его не включите.';
+
+  @override
+  String get mciUnmutedDone => 'Снова включено.';
+
+  @override
+  String get mciRerun => 'Перезапустить';
+
+  @override
+  String get mciRerunDone => 'Перезапуск начат.';
+
+  @override
+  String get mciCardTitle => 'Сбой CI';
+
+  @override
+  String get mciCardOpen => 'Открыть сбой CI';
+
+  @override
+  String mciCiFixes(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'CI вернул пул-реквест $n раза',
+      many: 'CI вернул пул-реквест $n раз',
+      few: 'CI вернул пул-реквест $n раза',
+      one: 'CI вернул пул-реквест $n раз',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mciSourceCi => 'CI';
+
+  @override
+  String get mciNotify => 'Отслеживаемая ветка покраснела';
 
   @override
   String get mcpTitle => 'Чат Claude (MCP)';
@@ -3648,6 +5573,307 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get navReviews => 'Ревью PR';
+
+  @override
+  String get navCi => 'CI';
+
+  @override
+  String get networkTitle => 'Частные сети';
+
+  @override
+  String get networkSub =>
+      'Доступ к GitLab, Jira или реестрам пакетов внутри ваших сетей. Соединение идёт через сеть, чей маршрут подходит к нему точнее всего.';
+
+  @override
+  String get networkUnavailable =>
+      'На этом сервере частные сети не настроены: администратор запускает сервис gateway и задаёт AGNTS_GATEWAY.';
+
+  @override
+  String get networkStatus_up => 'Подключено';
+
+  @override
+  String get networkStatus_connecting => 'Подключение';
+
+  @override
+  String get networkStatus_error => 'Ошибка';
+
+  @override
+  String get networkStatus_gateway_down => 'Шлюз недоступен';
+
+  @override
+  String get networkStatus_disabled => 'Выключено';
+
+  @override
+  String get networkHandshake => 'Последнее рукопожатие';
+
+  @override
+  String get networkHeartbeat => 'Последний сигнал';
+
+  @override
+  String get networkWebhooksRelay => 'Пересылает agnts-link';
+
+  @override
+  String networkWebhooksPolling(String n) {
+    return 'Без вебхуков: трекеры за этой сетью читаются каждые $n мин';
+  }
+
+  @override
+  String get networkKind => 'Подключение';
+
+  @override
+  String get networkKindConnector => 'agnts-link (рекомендуется)';
+
+  @override
+  String get networkKindHelp_connector =>
+      'Небольшой агент, который вы запускаете в своей сети. Он сам подключается к agnts: без учётных данных VPN, без входящих правил файрвола, и пересылает вебхуки.';
+
+  @override
+  String get networkKindHelp_wireguard =>
+      'agnts подключается к вашему пиру WireGuard как клиент. Пир должен принимать UDP с этого сервера.';
+
+  @override
+  String get networkKindHelp_openvpn =>
+      'agnts запускает ваш клиентский конфиг OpenVPN в изолированном контейнере. Сертификаты должны быть встроены; вход с MFA не поддерживается.';
+
+  @override
+  String get networkEnabled => 'Включено';
+
+  @override
+  String get networkConfigWg => 'Конфиг WireGuard';
+
+  @override
+  String get networkConfigOvpn => 'Конфиг OpenVPN (.ovpn)';
+
+  @override
+  String networkSavedConfig(String summary) {
+    return 'Сохранён: $summary. Оставьте пустым, чтобы не менять.';
+  }
+
+  @override
+  String get networkConfigWgHelp =>
+      'Файл, который вы дали бы wg-quick. Добавьте строку DNS, чтобы обращаться к хостам по имени. Ключи шифруются и больше не показываются.';
+
+  @override
+  String get networkConfigOvpnHelp =>
+      'Клиентский конфиг со встроенными блоками ca, cert и key. Скрипты (up, down, plugin…) не принимаются.';
+
+  @override
+  String get networkUsername => 'Имя пользователя';
+
+  @override
+  String get networkPassword => 'Пароль';
+
+  @override
+  String get networkPasswordKeep => 'Сохранён: оставьте пустым';
+
+  @override
+  String get networkRoutes => 'Маршруты';
+
+  @override
+  String get networkRoutesHelp =>
+      'Хосты (gitlab.corp.local), домены (.corp.local) или частные диапазоны (10.20.0.0/16), которые идут через эту сеть, с портами (80 и 443, если пусто). У другой сети может быть более узкий маршрут внутри этих (10.30.0.0/16 внутри 10.0.0.0/8): побеждает более точный. Две сети не могут указывать один и тот же маршрут.';
+
+  @override
+  String get networkRouteTarget => 'Хост, домен или диапазон';
+
+  @override
+  String get networkRoutePorts => 'Порты';
+
+  @override
+  String get networkRemoveRoute => 'Удалить маршрут';
+
+  @override
+  String get networkAddRoute => 'Добавить маршрут';
+
+  @override
+  String get networkBlastRadius =>
+      'Код, который agnts запускает по вашим задачам, может обращаться ко всем хостам из этого списка. Указывайте конкретные хосты, а не целые диапазоны.';
+
+  @override
+  String get networkCa => 'Корпоративный CA';
+
+  @override
+  String networkCaSaved(String subjects, String date) {
+    return 'Доверенные: $subjects (до $date).';
+  }
+
+  @override
+  String get networkCaRemove => 'Удалить';
+
+  @override
+  String get networkCaHelp => 'PEM-сертификаты вашего внутреннего CA. agnts и его запуски доверяют им вместе с публичными корневыми.';
+
+  @override
+  String networkSaved(String name) {
+    return '$name: сохранено';
+  }
+
+  @override
+  String get networkRemove => 'Удалить';
+
+  @override
+  String get networkRemoved => 'Частная сеть удалена';
+
+  @override
+  String networkRemoveConfirm(String name) {
+    return 'Удалить $name? agnts перестанет достигать хостов из её маршрутов.';
+  }
+
+  @override
+  String get networkLinkTitle => 'Запустите agnts-link';
+
+  @override
+  String get networkLinkHelp =>
+      'Запустите это на машине внутри сети, которая видит хосты выше. AGNTS_LINK_ALLOW — ваш собственный предел: agnts-link не подключается ни к чему другому. У каждой сети свой токен, поэтому одна машина может запускать несколько линков.';
+
+  @override
+  String get networkToken => 'Токен';
+
+  @override
+  String get networkTokenOnce => 'Скопируйте сейчас: он показывается один раз.';
+
+  @override
+  String get networkLinkHooks =>
+      'Вебхуки: укажите в GitLab и Jira адрес http://ХОСТ-AGNTS-LINK:8080 с тем же путём /webhooks/…, что на странице интеграций.';
+
+  @override
+  String get networkRotate => 'Заменить токен';
+
+  @override
+  String get networkRotateConfirm => 'Создать новый токен? Запущенный agnts-link отключится, пока вы не перезапустите его с новым.';
+
+  @override
+  String get networkTest => 'Проверить подключение';
+
+  @override
+  String get networkTestRun => 'Проверить';
+
+  @override
+  String get networkTesting => 'Проверяем…';
+
+  @override
+  String networkTestOk(String name, String via, String ip, String ms) {
+    return 'Подключено через $name ($via) к $ip за $ms мс.';
+  }
+
+  @override
+  String networkTlsOk(String subject, String issuer) {
+    return 'Сертификат в порядке: $subject, выдан $issuer.';
+  }
+
+  @override
+  String networkTlsBad(String error) {
+    return 'Сертификату нет доверия: $error';
+  }
+
+  @override
+  String get networkActivity => 'Активность';
+
+  @override
+  String networkActivityCounts(String n, String refused) {
+    return '$n подключений, $refused отклонено или с ошибкой';
+  }
+
+  @override
+  String get networkActivityShow => 'Показать подключения';
+
+  @override
+  String get networkActivityHide => 'Скрыть подключения';
+
+  @override
+  String get networkRefused => 'отклонено';
+
+  @override
+  String networkSecondsAgo(String n) {
+    return '$n с назад';
+  }
+
+  @override
+  String networkMinutesAgo(String n) {
+    return '$n мин назад';
+  }
+
+  @override
+  String networkHoursAgo(String n) {
+    return '$n ч назад';
+  }
+
+  @override
+  String get networkReconnect => 'Переподключить';
+
+  @override
+  String get networkReconnectHelp =>
+      'Перезапустить туннель: новый клиент OpenVPN, новое рукопожатие WireGuard или повторное подключение agnts-link';
+
+  @override
+  String get networkReconnecting => 'Переподключаем: туннель перезапустится в течение 15 секунд';
+
+  @override
+  String get networkAdd => 'Добавить сеть';
+
+  @override
+  String get networkAddTitle => 'Новая частная сеть';
+
+  @override
+  String get networkAddSubmit => 'Добавить сеть';
+
+  @override
+  String get networkEditorSub => 'Туннель в одну из ваших сетей и хосты, которые идут через него';
+
+  @override
+  String get networkEdit => 'Изменить';
+
+  @override
+  String get networkDone => 'Готово';
+
+  @override
+  String get networkName => 'Название';
+
+  @override
+  String get networkNamePlaceholder => 'Клиент А, Офис, Дата-центр';
+
+  @override
+  String get networkNameHelp => 'Уникально в рабочем пространстве: компания, офис или дата-центр, куда ведёт сеть.';
+
+  @override
+  String get networkEmpty => 'Частных сетей пока нет. Добавьте сеть, чтобы достучаться до хостов, доступных только внутри неё.';
+
+  @override
+  String networkLimit(String n) {
+    return 'В рабочем пространстве не больше $n частных сетей';
+  }
+
+  @override
+  String networkCaShort(String subjects) {
+    return 'Доверяет $subjects';
+  }
+
+  @override
+  String get networkTestHelp => 'Введите host:port. agnts выберет сеть, к которой ведут маршруты, подключится и проверит сертификат.';
+
+  @override
+  String get networkTestThrough => 'Через';
+
+  @override
+  String get networkTestAuto => 'Сеть, которую выбирают маршруты';
+
+  @override
+  String get networkActivityAll => 'Все сети';
+
+  @override
+  String get networkActivityNetwork => 'Сеть';
+
+  @override
+  String get networkActivityTime => 'Время';
+
+  @override
+  String get networkActivityTarget => 'Адрес';
+
+  @override
+  String get networkActivitySource => 'Тикет или источник';
+
+  @override
+  String get networkGone => 'удалена';
 
   @override
   String get platformTitle => 'Кабинет администратора';
@@ -4956,6 +7182,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get repoBrief => 'Описание';
 
   @override
+  String get repoCi => 'CI';
+
+  @override
   String get reposTitle => 'Репозитории';
 
   @override
@@ -6133,7 +8362,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsDenyHelp => 'Всегда запрещены, даже если тикет их требует. Отправку кода выполняет agnts, а не Claude Code.';
 
   @override
-  String get settingsCommits => 'Коммиты и пул-реквесты';
+  String get settingsCommits => 'Коммиты и PR';
 
   @override
   String get settingsCommitsSub => 'От чьего имени коммиты и как открываются пул-реквесты';
@@ -6245,9 +8474,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsReviewDone => 'Когда код-ревью agnts завершено';
 
   @override
-  String get settingsOnThisPage => 'На этой странице';
-
-  @override
   String get settingsSecretsHelp =>
       'Токены Jira, GitHub и Claude хранятся на вашем сервере в зашифрованном виде. Эта страница их никогда не показывает.';
 
@@ -6296,6 +8522,9 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get settingsReflectHelp =>
       'Когда вы просите изменения или отклоняете работу с причиной, agnts ищет за этим общее правило и предлагает его на странице «Правила». Ничего не применяется, пока вы его не примете.';
+
+  @override
+  String get settingsCiRed => 'Когда отслеживаемая ветка краснеет';
 
   @override
   String get spendTitle => 'Расход токенов';
@@ -7354,6 +9583,18 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ticketSrcGit => 'Пул-реквест';
 
   @override
+  String get ticketSrcCi => 'Падение CI';
+
+  @override
+  String get ticketKvCi => 'CI';
+
+  @override
+  String ticketCiFixes(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n раза', many: '$n раз', few: '$n раза', one: '$n раз');
+    return 'CI $_temp0 вернул пул-реквест в работу';
+  }
+
+  @override
   String get ticketsTitle => 'Тикеты';
 
   @override
@@ -7389,6 +9630,15 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get ticketsColRepo => 'Репозиторий';
+
+  @override
+  String get ticketsRepoLabel => 'Репозиторий';
+
+  @override
+  String get ticketsAllRepos => 'Все репозитории';
+
+  @override
+  String get ticketsNoRepo => 'Без репозитория';
 
   @override
   String get ticketsColStatus => 'Статус';
@@ -7429,7 +9679,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ticketsListSub => 'Тикеты Jira и Plane с меткой agnts, а также задачи, которые вы создаёте для своих проектов.';
 
   @override
-  String get ticketsNoMatch => 'Нет тикетов по вашему запросу.';
+  String get ticketsNoMatch => 'Нет тикетов, подходящих под фильтры.';
 
   @override
   String get ticketsEmptyNeeds => 'Сейчас ничего не ждёт вас. Тикеты появятся здесь, когда у agnts будут вопросы или изменения на ревью.';
@@ -7463,6 +9713,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get ticketsSourceGit => 'PR';
+
+  @override
+  String get ticketsSourceCi => 'CI';
 
   @override
   String get usageTitle => 'Лимиты тарифа';

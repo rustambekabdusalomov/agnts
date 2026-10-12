@@ -2,6 +2,7 @@ package domain
 
 import (
 	"fmt"
+	"slices"
 	"testing"
 )
 
@@ -64,5 +65,33 @@ func TestFollowUpsOn(t *testing.T) {
 	s.SuggestFollowUps = true
 	if s.FollowUpsOn(Ticket{SuggestFollowUps: &off}) || !s.FollowUpsOn(Ticket{}) {
 		t.Fatal("ticket override off / inherit")
+	}
+}
+
+func TestSuggestionsAfter(t *testing.T) {
+	f := func(title string, after ...int) FollowUp {
+		return FollowUp{Type: "gap", Title: title, Serves: "it", After: after}
+	}
+	got := Suggestions([]FollowUp{
+		f("Build", 9),                    // no follow-up 9
+		{Type: "idea", Title: "Dropped"}, // out of scope, so position 2 points nowhere
+		f("Fix login", 1, 1, 2, 4),       // a repeat and the dropped one are left out
+		f("Rotate keys", 1, 4),           // itself is left out
+		f("Purge logs", 4),
+	}, SuggestFromWork)
+	want := [][]int{nil, {0, 2}, {0}, {2}}
+	if len(got) != len(want) {
+		t.Fatalf("kept %d", len(got))
+	}
+	for i, w := range want {
+		if !slices.Equal(got[i].AfterIndex, w) {
+			t.Fatalf("%s: after %v, want %v", got[i].Title, got[i].AfterIndex, w)
+		}
+	}
+
+	// A cycle is cut where it would close.
+	got = Suggestions([]FollowUp{f("A", 2), f("B", 1)}, SuggestFromWork)
+	if !slices.Equal(got[0].AfterIndex, []int{1}) || len(got[1].AfterIndex) != 0 {
+		t.Fatalf("cycle: %v / %v", got[0].AfterIndex, got[1].AfterIndex)
 	}
 }

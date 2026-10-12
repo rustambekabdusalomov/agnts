@@ -209,6 +209,11 @@ func (f *fakeTickets) Approve(_ context.Context, key string, _ []string, post bo
 	return f.ticket(key, domain.StatePushing)
 }
 
+func (f *fakeTickets) AcknowledgeSecrets(_ context.Context, key string, o domain.Origin) (domain.Ticket, error) {
+	f.lastOrigin = o
+	return f.ticket(key, domain.StateWaitingForReview)
+}
+
 func (f *fakeTickets) RequestChanges(_ context.Context, key, fb string, shots []domain.ShotRef, files []int64, o domain.Origin) (domain.Ticket, error) {
 	f.lastShots, f.lastFeedbackFiles = shots, files
 	f.lastOrigin = o

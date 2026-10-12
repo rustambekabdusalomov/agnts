@@ -26,6 +26,7 @@ func (o *Orchestrator) refreshToolchains(ctx context.Context, repo *domain.Repos
 		o.log.Warn("read repository for toolchains", "repo", repo.Name, "err", err)
 		return
 	}
+	o.scanAgentConfig(ctx, repo, tree, ticketKey, runID)
 	det := toolchain.Detect(tree)
 	noCmds := repo.BuildCmd == "" && repo.LintCmd == "" && repo.TestCmd == ""
 	fillCmds := noCmds && (det.Build != "" || det.Lint != "" || det.Test != "")
@@ -38,6 +39,7 @@ func (o *Orchestrator) refreshToolchains(ctx context.Context, repo *domain.Repos
 		o.log.Warn("store detected toolchains", "repo", repo.Name, "err", err)
 		return
 	}
+	saved.Harness.AgentConfig = repo.Harness.AgentConfig
 	if changed || fillCmds {
 		msg := fmt.Sprintf("%s: detected %s", repo.Name, toolchainList(saved.Toolchains))
 		if fillCmds {

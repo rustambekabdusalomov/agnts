@@ -145,11 +145,12 @@ class ToneBadge extends StatelessWidget {
 /// approving it merges the pull request.
 bool isReportKind(TicketKind k) => k == TicketKind.plan || k == TicketKind.analysis || k == TicketKind.bug || k == TicketKind.review;
 
-/// Where a ticket came from, for its source chip: Jira, Plane or Task.
+/// Where a ticket came from, for its source chip: Jira, Plane, Task, PR or CI.
 String sourceLabel(AppLocalizations l, TicketSource_Enum s) => switch (s) {
   TicketSource_Enum.local => l.ticketsSourceTask,
   TicketSource_Enum.plane => l.ticketsSourcePlane,
   TicketSource_Enum.git => l.ticketsSourceGit,
+  TicketSource_Enum.ci => l.mciSourceCi,
   _ => l.ticketsSourceJira,
 };
 

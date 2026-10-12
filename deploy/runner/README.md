@@ -75,6 +75,14 @@ the highest-priority settings file, so a repository's own `.claude/settings.json
 cannot override it. agnts runs Claude with `--permission-mode dontAsk`: only the
 allowed tools run, and the deny list always wins.
 
+The managed settings also lock out a repository's own agent configuration:
+`allowManagedHooksOnly` keeps hooks from the repository's `.claude/` files
+from running, and `enableAllProjectMcpServers: false` with an empty
+`allowedMcpServers` keeps its `.mcp.json` servers from starting. Without this,
+a pull request from someone else's fork, reviewed by agnts, could run its own
+commands next to the Claude token. `TestHostileRepoInRunner` (below) proves it
+against the real image.
+
 The deny list is a guard rail, not the security boundary. A determined agent
 could reach a denied command indirectly (`bash -c ...`). What actually protects
 you:
@@ -91,6 +99,46 @@ A repository's build environment (Repositories → Advanced, KEY=value lines suc
 as registry tokens) is given to every run container. Claude can read it, so use
 read-only tokens.
 
+## agnts-guard: the hooks inside every run
+
+The managed settings register four Claude Code hooks, all served by one
+static binary, `agnts-guard` (server/cmd/agnts-guard):
+
+| Hook | Event | What it does |
+| --- | --- | --- |
+| `pre` | PreToolUse, every tool | Refuses edits that add credentials or dotenv files, skip or focus tests, silence linters, delete tests or change check configuration (by profile), enforced team rules, and, in the fact-check group, the first edit of a file until Claude states its callers and public surface. Delivers a stall notice from the server. |
+| `post` | PostToolUse, edits and commands | Runs the per-file checks (gofmt, eslint, ruff, ...) on the edited file and sends problems back; reminds Claude of warn-only team rules. |
+| `stop` | Stop | The stop gate: build and lint (and tests in strict) must pass before Claude may finish; at most 3 rounds, then agnts's own checks take over. |
+| `session` | SessionStart (compact, resume) | Gives Claude back `/agnts/out/progress.md`, its plan and progress. |
+
+The server does not bake the binary into this image: the agnts server image
+carries it (`/usr/local/bin/agnts-guard`, or `AGNTS_GUARD_BIN`) and the runner
+copies it into every run at `/home/agent/.agnts/bin/agnts-guard`, so the guard
+always matches the server's version. A run without it (an older server, or
+`make dev-server` without `make dev-guard`) works as before: the hooks exit 0.
+What to enforce comes with each Claude invocation in `AGNTS_GUARD_CONFIG`;
+decisions are logged to `/agnts/out/.guard/guard.jsonl`, which the server reads
+after the run. Every guard has a check on the server after the run (the diff
+scan, the checks), so a guard Claude works around never lets work through
+unchecked. Like the deny list, the guard is a guard rail inside the container
+boundary, not the boundary itself.
+
+Team knowledge (the brief, business context, precedents, review checklists)
+is written to `/agnts/context`, a volume of its own: the root file system is
+read-only, and before this volume existed those files never reached runs.
+
+## Codex CLI (optional)
+
+Runs whose model is `codex:<model>` use Codex CLI instead of Claude Code. The
+image installs it only when built with a pinned version:
+
+    docker compose --profile build build --build-arg CODEX_VERSION=<version> runner
+
+Codex runs need an OpenAI API key (Integrations → OpenAI) and `api.openai.com`
+among the hosts runs may reach (Settings → Preview → allowed hosts). They have
+no hooks, so agnts-guard's in-run checks do not apply; the server's checks
+after the run, the diff scan and stall detection do.
+
 ## Previews
 
 The image also carries Chromium (through Playwright, pinned in
@@ -105,6 +153,11 @@ The image also carries Chromium (through Playwright, pinned in
   screenshot (optionally after `--fill` and `--click` steps) and prints the
   page's console errors and failed requests. It only opens localhost URLs;
   the app's own calls go through the egress proxy like everything else.
+- `agnts-act <steps.json>` runs scripted steps (goto, fill, click, press,
+  expectText, expectUrl, expectVisible, request with expectStatus and
+  expectBody, shot) against the app, for the acceptance check of a ticket's
+  criteria. It stops at the first failed step, keeps a screenshot of it, and
+  only reaches localhost.
 
 ## Smoke tests after a rebuild
 
@@ -132,3 +185,12 @@ Previews:
         cd /workspace && echo "require(\"http\").createServer((q,s)=>s.end(\"hi\")).listen(4173)" > s.js &&
         echo "{\"command\":\"node s.js\",\"port\":4173}" > /agnts/out/preview-config.json &&
         agnts-preview start && agnts-shot http://localhost:4173/ --viewport phone --out /tmp/x.png'
+
+agnts-guard and the lockdown (needs Docker, this image, and a Claude token;
+it builds agnts-guard for Linux itself):
+
+    cd server && AGNTS_TEST_DOCKER=1 AGNTS_TEST_CLAUDE_TOKEN=sk-ant-... go test ./internal/runner -run 'Hostile|WriteFile' -v
+
+agnts-act (after a preview has started, in the same container):
+
+    echo '{"steps":[{"goto":"/"},{"expectText":"hi"},{"shot":"home"}]}' > /tmp/s.json && agnts-act /tmp/s.json

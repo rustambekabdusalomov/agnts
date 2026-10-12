@@ -15,7 +15,13 @@
 		-Server
 	}
 
-	# agnts serves the admin panel, /api, /healthz and (later) /mcp and webhooks.
+	# agnts-link connectors (private networks) go to the gateway service.
+	handle /link {
+		reverse_proxy gateway:3130
+	}
+	# agnts serves the admin panel, /api, /healthz, /mcp and webhooks.
 	# Server-Sent Events are flushed immediately by Caddy.
-	reverse_proxy agnts:8080
+	handle {
+		reverse_proxy agnts:8080
+	}
 }

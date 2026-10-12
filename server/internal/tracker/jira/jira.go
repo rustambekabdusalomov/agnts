@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"agnts/internal/domain"
+	"agnts/internal/netroute"
 	"agnts/internal/orchestrator"
 )
 
@@ -147,7 +148,7 @@ var (
 
 // New returns a Jira client.
 func New(cfg ConfigSource) *Client {
-	return &Client{cfg: cfg, hc: &http.Client{Timeout: 30 * time.Second}}
+	return &Client{cfg: cfg, hc: netroute.Client(30 * time.Second)}
 }
 
 // ErrNotConnected is returned when Jira has not been configured.

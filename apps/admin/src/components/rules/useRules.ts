@@ -15,6 +15,35 @@ export const RULE_TONE: Record<RuleStatus, 'gray' | 'info' | 'warn' | 'ok' | 'ba
   suggested: 'info',
 }
 
+type Translate = (key: string, values?: Record<string, unknown>) => string
+
+/** Starter pack names, for "Starter: Go" (pack:go). */
+const PACK_NAME: Record<string, string> = {
+  go: 'Go', typescript: 'TypeScript', python: 'Python', java: 'Java', kotlin: 'Kotlin', rust: 'Rust',
+  ruby: 'Ruby', php: 'PHP', csharp: 'C#', swift: 'Swift', dart: 'Dart',
+}
+
+/**
+ * The harness badges of a rule: how it is enforced and delivered, its kind
+ * when a tip, where it came from, and what a learned one has earned.
+ */
+export function ruleBadges(r: Rule, t: Translate): { label: string; tone: 'gray' | 'info' | 'warn' | 'ok' | 'bad' }[] {
+  const out: { label: string; tone: 'gray' | 'info' | 'warn' | 'ok' | 'bad' }[] = []
+  if (r.enforce) out.push(r.enforce.action === 'block' ? { label: t('harnessRules.badgeBlock'), tone: 'bad' } : { label: t('harnessRules.badgeWarn'), tone: 'warn' })
+  if (r.delivery === 'skill') out.push({ label: t('harnessRules.badgeSkill'), tone: 'info' })
+  if (r.kind === 'tip') out.push({ label: t('harnessRules.badgeTip'), tone: 'gray' })
+  const src = r.source ?? ''
+  if (src.startsWith('pack:')) {
+    const id = src.slice(5)
+    out.push({ label: t('harnessRules.sourceStarter', { name: PACK_NAME[id] ?? id }), tone: 'gray' })
+  } else if (src === 'reflect' || src === 'run' || src === 'promoted') {
+    out.push({ label: t(`harnessRules.source_${src}`), tone: 'gray' })
+  }
+  if (r.status === 'suggested' && r.confidence) out.push({ label: t('harnessRules.confidence', { n: Math.round(r.confidence * 100) }), tone: 'info' })
+  if (r.status === 'suggested' && (r.evidence ?? 0) > 1) out.push({ label: t('harnessRules.seen', { n: r.evidence }), tone: 'gray' })
+  return out
+}
+
 /**
  * Every rule (query key ['rules']). While a review is queued or running the
  * list refreshes on its own; rule_changed events refresh it too.

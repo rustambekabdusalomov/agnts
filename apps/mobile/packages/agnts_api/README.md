@@ -80,6 +80,9 @@ Class | Method | HTTP request | Description
 [*AccountApi*](doc/AccountApi.md) | [**setMyClaude**](doc/AccountApi.md#setmyclaude) | **PUT** /account/claude | Connect your Claude account
 [*AccountApi*](doc/AccountApi.md) | [**updateProfile**](doc/AccountApi.md#updateprofile) | **PUT** /account/profile | Change the display name or email
 [*AnalyticsApi*](doc/AnalyticsApi.md) | [**getAnalytics**](doc/AnalyticsApi.md#getanalytics) | **GET** /analytics | Throughput, quality, time and plan statistics for a period
+[*AnalyticsApi*](doc/AnalyticsApi.md) | [**getAnalyticsCi**](doc/AnalyticsApi.md#getanalyticsci) | **GET** /analytics/ci | CI failures, fixes and flaky jobs for a period
+[*AnalyticsApi*](doc/AnalyticsApi.md) | [**getAnalyticsDelivery**](doc/AnalyticsApi.md#getanalyticsdelivery) | **GET** /analytics/delivery | What happened to agnts pull requests, cycle time and questions for a period
+[*AnalyticsApi*](doc/AnalyticsApi.md) | [**getAnalyticsLearning**](doc/AnalyticsApi.md#getanalyticslearning) | **GET** /analytics/learning | Lessons, rules, follow-ups and reviewer notes for a period
 [*AnalyticsApi*](doc/AnalyticsApi.md) | [**getReplayReport**](doc/AnalyticsApi.md#getreplayreport) | **GET** /eval/replays | How the newest replays compare with the tickets they re-ran, by prompt version
 [*AttachmentsApi*](doc/AttachmentsApi.md) | [**deleteAttachment**](doc/AttachmentsApi.md#deleteattachment) | **DELETE** /attachments/{id} | Delete an upload that nothing uses yet
 [*AttachmentsApi*](doc/AttachmentsApi.md) | [**getAttachment**](doc/AttachmentsApi.md#getattachment) | **GET** /attachments/{id} | An attached file&#39;s bytes
@@ -97,6 +100,15 @@ Class | Method | HTTP request | Description
 [*BillingApi*](doc/BillingApi.md) | [**checkoutCredits**](doc/BillingApi.md#checkoutcredits) | **POST** /workspace/billing/checkout | Start buying credits; returns the payment page to open
 [*BillingApi*](doc/BillingApi.md) | [**getBilling**](doc/BillingApi.md#getbilling) | **GET** /workspace/billing | The workspace&#39;s plan, slots, members and credits
 [*BillingApi*](doc/BillingApi.md) | [**setSlots**](doc/BillingApi.md#setslots) | **PUT** /workspace/billing/slots | Change how many runs the workspace may have at once
+[*CiApi*](doc/CiApi.md) | [**fixCIFailure**](doc/CiApi.md#fixcifailure) | **POST** /ci/failures/{failureId}/fix | Open a ticket that fixes the failure now (ignores the auto-fix setting and the daily budget)
+[*CiApi*](doc/CiApi.md) | [**getCIFailure**](doc/CiApi.md#getcifailure) | **GET** /ci/failures/{failureId} | One CI failure group with its redacted log excerpt
+[*CiApi*](doc/CiApi.md) | [**getRepoCIWatch**](doc/CiApi.md#getrepociwatch) | **GET** /repos/{id}/ci-watch | How agnts watches this repository&#39;s CI, and whether the git token can read it
+[*CiApi*](doc/CiApi.md) | [**getTicketCIFailure**](doc/CiApi.md#getticketcifailure) | **GET** /tickets/{key}/ci | The CI failure a CI ticket fixes (404 for other tickets)
+[*CiApi*](doc/CiApi.md) | [**listCIFailures**](doc/CiApi.md#listcifailures) | **GET** /ci/failures | CI failure groups, newest occurrence first
+[*CiApi*](doc/CiApi.md) | [**muteCIFailure**](doc/CiApi.md#mutecifailure) | **POST** /ci/failures/{failureId}/mute | Ignore this failure (no tickets, no notifications)
+[*CiApi*](doc/CiApi.md) | [**putRepoCIWatch**](doc/CiApi.md#putrepociwatch) | **PUT** /repos/{id}/ci-watch | Change how agnts watches this repository&#39;s CI
+[*CiApi*](doc/CiApi.md) | [**rerunCIFailure**](doc/CiApi.md#reruncifailure) | **POST** /ci/failures/{failureId}/rerun | Re-run the failed jobs of the newest failing run on the git host
+[*CiApi*](doc/CiApi.md) | [**unmuteCIFailure**](doc/CiApi.md#unmutecifailure) | **POST** /ci/failures/{failureId}/unmute | Watch a muted failure again
 [*DashboardApi*](doc/DashboardApi.md) | [**getDashboard**](doc/DashboardApi.md#getdashboard) | **GET** /dashboard | Everything the dashboard shows, in one call
 [*DevicesApi*](doc/DevicesApi.md) | [**registerDevice**](doc/DevicesApi.md#registerdevice) | **POST** /devices | Register this phone for push notifications (call again when the token changes)
 [*DevicesApi*](doc/DevicesApi.md) | [**unregisterDevice**](doc/DevicesApi.md#unregisterdevice) | **POST** /devices/unregister | Stop push notifications to this phone (on sign-out)
@@ -128,6 +140,15 @@ Class | Method | HTTP request | Description
 [*McpApi*](doc/McpApi.md) | [**revokeMcp**](doc/McpApi.md#revokemcp) | **POST** /mcp-settings/revoke | Disconnect every Claude connection and delete the static token
 [*McpApi*](doc/McpApi.md) | [**rotateMcpToken**](doc/McpApi.md#rotatemcptoken) | **POST** /mcp-settings/token | Create a new static MCP bearer token (shown once; the old one stops working)
 [*MetaApi*](doc/MetaApi.md) | [**getMeta**](doc/MetaApi.md#getmeta) | **GET** /meta | Server version and build information
+[*NetworkApi*](doc/NetworkApi.md) | [**createPrivateNetwork**](doc/NetworkApi.md#createprivatenetwork) | **POST** /networks | Add a private network
+[*NetworkApi*](doc/NetworkApi.md) | [**deletePrivateNetwork**](doc/NetworkApi.md#deleteprivatenetwork) | **DELETE** /networks/{networkId} | Remove a private network
+[*NetworkApi*](doc/NetworkApi.md) | [**getNetworkActivity**](doc/NetworkApi.md#getnetworkactivity) | **GET** /networks/activity | Connections made through private networks (the last 100, and the day&#39;s counts)
+[*NetworkApi*](doc/NetworkApi.md) | [**getPrivateNetwork**](doc/NetworkApi.md#getprivatenetwork) | **GET** /networks/{networkId} | One private network
+[*NetworkApi*](doc/NetworkApi.md) | [**listPrivateNetworks**](doc/NetworkApi.md#listprivatenetworks) | **GET** /networks | The workspace&#39;s private networks (VPNs and agnts-link connectors)
+[*NetworkApi*](doc/NetworkApi.md) | [**reconnectPrivateNetwork**](doc/NetworkApi.md#reconnectprivatenetwork) | **POST** /networks/{networkId}/reconnect | Restart the tunnel (a new OpenVPN sidecar, a new WireGuard handshake, agnts-link reconnects)
+[*NetworkApi*](doc/NetworkApi.md) | [**rotateLinkToken**](doc/NetworkApi.md#rotatelinktoken) | **POST** /networks/{networkId}/token | Make a new agnts-link token for a connector network (shown once; the old one stops working)
+[*NetworkApi*](doc/NetworkApi.md) | [**testPrivateNetwork**](doc/NetworkApi.md#testprivatenetwork) | **POST** /networks/test | Connect to host:port through the network its routes pick, and check its TLS certificate
+[*NetworkApi*](doc/NetworkApi.md) | [**updatePrivateNetwork**](doc/NetworkApi.md#updateprivatenetwork) | **PUT** /networks/{networkId} | Change a private network
 [*PlatformApi*](doc/PlatformApi.md) | [**createPlatformAdmin**](doc/PlatformApi.md#createplatformadmin) | **POST** /platform/admins | Create an Admin account that signs in with a password (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**deletePlatformAdmin**](doc/PlatformApi.md#deleteplatformadmin) | **DELETE** /platform/admins/{id} | Delete an Admin account; not your own (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**getPlatformOverview**](doc/PlatformApi.md#getplatformoverview) | **GET** /platform/overview | Servers, runs and the queue across every workspace (Admin)
@@ -154,6 +175,7 @@ Class | Method | HTTP request | Description
 [*ReposApi*](doc/ReposApi.md) | [**listRepoPipelines**](doc/ReposApi.md#listrepopipelines) | **GET** /repos/{id}/pipelines | CI runs with their stages, newest first, 20 per page; a shorter page is the last
 [*ReposApi*](doc/ReposApi.md) | [**listRepos**](doc/ReposApi.md#listrepos) | **GET** /repos | 
 [*ReposApi*](doc/ReposApi.md) | [**saveRepoBrief**](doc/ReposApi.md#saverepobrief) | **PUT** /repos/{id}/brief | Replace the approved brief with your text; empty text removes it
+[*ReposApi*](doc/ReposApi.md) | [**saveRepoHarness**](doc/ReposApi.md#saverepoharness) | **PUT** /repos/{id}/harness | Set the repository&#39;s guard profile, per-file checks, coverage and acceptance check
 [*ReposApi*](doc/ReposApi.md) | [**surveyRepoBrief**](doc/ReposApi.md#surveyrepobrief) | **POST** /repos/{id}/brief/survey | Have Claude survey the repository and write a draft brief (an update when it has one)
 [*ReposApi*](doc/ReposApi.md) | [**unarchiveRepo**](doc/ReposApi.md#unarchiverepo) | **POST** /repos/{id}/unarchive | Restore an archived repository
 [*ReposApi*](doc/ReposApi.md) | [**updateRepo**](doc/ReposApi.md#updaterepo) | **PUT** /repos/{id} | 
@@ -169,7 +191,10 @@ Class | Method | HTTP request | Description
 [*RulesApi*](doc/RulesApi.md) | [**deleteRule**](doc/RulesApi.md#deleterule) | **DELETE** /rules/{id} | 
 [*RulesApi*](doc/RulesApi.md) | [**getRule**](doc/RulesApi.md#getrule) | **GET** /rules/{id} | 
 [*RulesApi*](doc/RulesApi.md) | [**listRules**](doc/RulesApi.md#listrules) | **GET** /rules | Every rule, global ones first, then by repository
+[*RulesApi*](doc/RulesApi.md) | [**listStarterPacks**](doc/RulesApi.md#liststarterpacks) | **GET** /repos/{id}/starter-rules | Starter rule packs that fit the repository&#39;s toolchains
+[*RulesApi*](doc/RulesApi.md) | [**offerStarterRules**](doc/RulesApi.md#offerstarterrules) | **POST** /repos/{id}/starter-rules | Add a starter pack&#39;s rules to the repository as suggestions
 [*RulesApi*](doc/RulesApi.md) | [**reviewRule**](doc/RulesApi.md#reviewrule) | **POST** /rules/{id}/review | Have Claude review a rule again, keeping its answers
+[*RulesApi*](doc/RulesApi.md) | [**tryEnforce**](doc/RulesApi.md#tryenforce) | **POST** /rules/try | Check an enforcement against agnts&#39;s last changes before turning it on
 [*RulesApi*](doc/RulesApi.md) | [**updateRule**](doc/RulesApi.md#updaterule) | **PUT** /rules/{id} | Edit a rule. Changing its text or repository starts a new review; turning it on or off does not.
 [*SettingsApi*](doc/SettingsApi.md) | [**getSettings**](doc/SettingsApi.md#getsettings) | **GET** /settings | 
 [*SettingsApi*](doc/SettingsApi.md) | [**putSettings**](doc/SettingsApi.md#putsettings) | **PUT** /settings | 
@@ -178,6 +203,7 @@ Class | Method | HTTP request | Description
 [*TasksApi*](doc/TasksApi.md) | [**updateTask**](doc/TasksApi.md#updatetask) | **PATCH** /tasks/{key} | Edit a task that has not started
 [*TicketsApi*](doc/TicketsApi.md) | [**acceptFollowUps**](doc/TicketsApi.md#acceptfollowups) | **POST** /tickets/{key}/follow-ups/accept | Create tickets from chosen suggestions
 [*TicketsApi*](doc/TicketsApi.md) | [**acceptRelation**](doc/TicketsApi.md#acceptrelation) | **POST** /tickets/{key}/relations/{id}/accept | Accept a relation agnts proposed; the queue follows it from now on
+[*TicketsApi*](doc/TicketsApi.md) | [**acknowledgeSecrets**](doc/TicketsApi.md#acknowledgesecrets) | **POST** /tickets/{key}/secrets-ack | Confirm that the lines flagged as secrets in the change under review are not real credentials
 [*TicketsApi*](doc/TicketsApi.md) | [**addRelation**](doc/TicketsApi.md#addrelation) | **POST** /tickets/{key}/relations | Make this ticket wait for another, or keep the two from running side by side
 [*TicketsApi*](doc/TicketsApi.md) | [**answerQuestions**](doc/TicketsApi.md#answerquestions) | **PUT** /tickets/{key}/answers | Answer the ticket&#39;s questions; when all are answered, coding starts
 [*TicketsApi*](doc/TicketsApi.md) | [**approveTicket**](doc/TicketsApi.md#approveticket) | **POST** /tickets/{key}/approve | Approve the reviewed work
@@ -239,9 +265,17 @@ Class | Method | HTTP request | Description
  - [AcceptFollowUpResult](doc/AcceptFollowUpResult.md)
  - [AcceptFollowUps](doc/AcceptFollowUps.md)
  - [AcceptFollowUpsResult](doc/AcceptFollowUpsResult.md)
+ - [Acceptance](doc/Acceptance.md)
+ - [AcceptanceCriteriaInner](doc/AcceptanceCriteriaInner.md)
+ - [AgentConfigFinding](doc/AgentConfigFinding.md)
+ - [AgentConfigScan](doc/AgentConfigScan.md)
  - [Analysis](doc/Analysis.md)
+ - [AnalysisAcceptanceInner](doc/AnalysisAcceptanceInner.md)
  - [Analytics](doc/Analytics.md)
+ - [AnalyticsCI](doc/AnalyticsCI.md)
+ - [AnalyticsDelivery](doc/AnalyticsDelivery.md)
  - [AnalyticsInsightsInner](doc/AnalyticsInsightsInner.md)
+ - [AnalyticsLearning](doc/AnalyticsLearning.md)
  - [AnalyticsModelsInner](doc/AnalyticsModelsInner.md)
  - [AnalyticsReposInner](doc/AnalyticsReposInner.md)
  - [AnswersRequest](doc/AnswersRequest.md)
@@ -257,6 +291,13 @@ Class | Method | HTTP request | Description
  - [Blocker](doc/Blocker.md)
  - [Branch](doc/Branch.md)
  - [CI](doc/CI.md)
+ - [CIDay](doc/CIDay.md)
+ - [CIFailure](doc/CIFailure.md)
+ - [CIOccurrence](doc/CIOccurrence.md)
+ - [CIPeriod](doc/CIPeriod.md)
+ - [CISettings](doc/CISettings.md)
+ - [CIStatus](doc/CIStatus.md)
+ - [CIWatch](doc/CIWatch.md)
  - [Capacity](doc/Capacity.md)
  - [ChangePasswordRequest](doc/ChangePasswordRequest.md)
  - [CheckStep](doc/CheckStep.md)
@@ -269,6 +310,10 @@ Class | Method | HTTP request | Description
  - [ConfirmTotpRequest](doc/ConfirmTotpRequest.md)
  - [ConnectIntegrationRequest](doc/ConnectIntegrationRequest.md)
  - [ConnectResult](doc/ConnectResult.md)
+ - [Coverage](doc/Coverage.md)
+ - [CoverageConfig](doc/CoverageConfig.md)
+ - [CoverageFilesInner](doc/CoverageFilesInner.md)
+ - [CoverageFilesInnerUncoveredInner](doc/CoverageFilesInnerUncoveredInner.md)
  - [CreateInvite201Response](doc/CreateInvite201Response.md)
  - [CreateInviteRequest](doc/CreateInviteRequest.md)
  - [CreatePlatformAdminRequest](doc/CreatePlatformAdminRequest.md)
@@ -279,9 +324,12 @@ Class | Method | HTTP request | Description
  - [DecideConsent200Response](doc/DecideConsent200Response.md)
  - [DecideConsentRequest](doc/DecideConsentRequest.md)
  - [DeleteWorkspaceRequest](doc/DeleteWorkspaceRequest.md)
+ - [DeliveryDay](doc/DeliveryDay.md)
+ - [DeliveryPeriod](doc/DeliveryPeriod.md)
  - [DeployRepoRequest](doc/DeployRepoRequest.md)
  - [DeviceRegistration](doc/DeviceRegistration.md)
  - [DisableTotpRequest](doc/DisableTotpRequest.md)
+ - [EditCheck](doc/EditCheck.md)
  - [Environment](doc/Environment.md)
  - [Error](doc/Error.md)
  - [Event](doc/Event.md)
@@ -290,6 +338,8 @@ Class | Method | HTTP request | Description
  - [Feedback](doc/Feedback.md)
  - [FileChange](doc/FileChange.md)
  - [Finding](doc/Finding.md)
+ - [FlakyJob](doc/FlakyJob.md)
+ - [FollowUpCount](doc/FollowUpCount.md)
  - [FollowUpSuggestion](doc/FollowUpSuggestion.md)
  - [FollowUpTicket](doc/FollowUpTicket.md)
  - [FollowUps](doc/FollowUps.md)
@@ -301,6 +351,9 @@ Class | Method | HTTP request | Description
  - [GitSettings](doc/GitSettings.md)
  - [GoogleSignInRequest](doc/GoogleSignInRequest.md)
  - [GrantCreditsRequest](doc/GrantCreditsRequest.md)
+ - [GuardHook](doc/GuardHook.md)
+ - [GuardProfile](doc/GuardProfile.md)
+ - [GuardSettings](doc/GuardSettings.md)
  - [HistoryItem](doc/HistoryItem.md)
  - [HourBucket](doc/HourBucket.md)
  - [ImplementInput](doc/ImplementInput.md)
@@ -308,10 +361,12 @@ Class | Method | HTTP request | Description
  - [Invite](doc/Invite.md)
  - [InvitePreview](doc/InvitePreview.md)
  - [LearnQueueItem](doc/LearnQueueItem.md)
+ - [LearningPeriod](doc/LearningPeriod.md)
  - [LedgerEntry](doc/LedgerEntry.md)
  - [Lesson](doc/Lesson.md)
  - [LessonBrief](doc/LessonBrief.md)
  - [LessonCategory](doc/LessonCategory.md)
+ - [LessonCount](doc/LessonCount.md)
  - [LessonLevel](doc/LessonLevel.md)
  - [LessonList](doc/LessonList.md)
  - [LessonRef](doc/LessonRef.md)
@@ -323,9 +378,15 @@ Class | Method | HTTP request | Description
  - [McpStatus](doc/McpStatus.md)
  - [Member](doc/Member.md)
  - [Meta](doc/Meta.md)
- - [Model](doc/Model.md)
  - [ModelOverrides](doc/ModelOverrides.md)
+ - [NetworkActivity](doc/NetworkActivity.md)
+ - [NetworkActivityDialsInner](doc/NetworkActivityDialsInner.md)
+ - [NetworkRoute](doc/NetworkRoute.md)
+ - [NetworkTest](doc/NetworkTest.md)
+ - [NetworkTestNetwork](doc/NetworkTestNetwork.md)
+ - [NetworkTestTls](doc/NetworkTestTls.md)
  - [NotifySettings](doc/NotifySettings.md)
+ - [OfferStarterRulesRequest](doc/OfferStarterRulesRequest.md)
  - [PeriodStats](doc/PeriodStats.md)
  - [Pipeline](doc/Pipeline.md)
  - [PlaneState](doc/PlaneState.md)
@@ -337,6 +398,14 @@ Class | Method | HTTP request | Description
  - [PreviewInput](doc/PreviewInput.md)
  - [PreviewIssue](doc/PreviewIssue.md)
  - [PreviewShot](doc/PreviewShot.md)
+ - [PrivateNetwork](doc/PrivateNetwork.md)
+ - [PrivateNetworkCa](doc/PrivateNetworkCa.md)
+ - [PrivateNetworkInput](doc/PrivateNetworkInput.md)
+ - [PrivateNetworkList](doc/PrivateNetworkList.md)
+ - [PrivateNetworkSaved](doc/PrivateNetworkSaved.md)
+ - [Proof](doc/Proof.md)
+ - [ProofRun](doc/ProofRun.md)
+ - [ProofTest](doc/ProofTest.md)
  - [PullRequest](doc/PullRequest.md)
  - [PullReviewSettings](doc/PullReviewSettings.md)
  - [QualityStat](doc/QualityStat.md)
@@ -362,6 +431,9 @@ Class | Method | HTTP request | Description
  - [RepoBriefInput](doc/RepoBriefInput.md)
  - [RepoDetectInput](doc/RepoDetectInput.md)
  - [RepoDetection](doc/RepoDetection.md)
+ - [RepoHarness](doc/RepoHarness.md)
+ - [RepoHarnessAllOfDerivedCoverage](doc/RepoHarnessAllOfDerivedCoverage.md)
+ - [RepoHarnessInput](doc/RepoHarnessInput.md)
  - [RepoMember](doc/RepoMember.md)
  - [RepoPreview](doc/RepoPreview.md)
  - [RepoPreviewInput](doc/RepoPreviewInput.md)
@@ -371,21 +443,23 @@ Class | Method | HTTP request | Description
  - [ResetPasswordRequest](doc/ResetPasswordRequest.md)
  - [Result](doc/Result.md)
  - [RetryTicketRequest](doc/RetryTicketRequest.md)
- - [ReviewModel](doc/ReviewModel.md)
  - [ReviewSync](doc/ReviewSync.md)
  - [Reviewer](doc/Reviewer.md)
  - [ReviewerNote](doc/ReviewerNote.md)
  - [ReviewerNoteInput](doc/ReviewerNoteInput.md)
  - [ReviewerProfileInput](doc/ReviewerProfileInput.md)
+ - [ReviewerStat](doc/ReviewerStat.md)
  - [Reviewers](doc/Reviewers.md)
  - [RotateMcpToken200Response](doc/RotateMcpToken200Response.md)
  - [Rule](doc/Rule.md)
  - [RuleAnswers](doc/RuleAnswers.md)
  - [RuleAnswersAnswersInner](doc/RuleAnswersAnswersInner.md)
+ - [RuleEnforce](doc/RuleEnforce.md)
  - [RuleInput](doc/RuleInput.md)
  - [RuleKind](doc/RuleKind.md)
  - [RuleQuestion](doc/RuleQuestion.md)
  - [RuleStatus](doc/RuleStatus.md)
+ - [SecondOpinion](doc/SecondOpinion.md)
  - [SendFeedbackRequest](doc/SendFeedbackRequest.md)
  - [SetMemberRoleRequest](doc/SetMemberRoleRequest.md)
  - [SetPlaneWebhookSecretRequest](doc/SetPlaneWebhookSecretRequest.md)
@@ -395,14 +469,19 @@ Class | Method | HTTP request | Description
  - [ShipNotes](doc/ShipNotes.md)
  - [ShotRef](doc/ShotRef.md)
  - [SignupInfo](doc/SignupInfo.md)
+ - [SlowTicket](doc/SlowTicket.md)
+ - [Spread](doc/Spread.md)
  - [Stage](doc/Stage.md)
  - [StageModels](doc/StageModels.md)
  - [StageSpend](doc/StageSpend.md)
+ - [StalePR](doc/StalePR.md)
+ - [StarterPack](doc/StarterPack.md)
  - [StepDuration](doc/StepDuration.md)
  - [SyncJira200Response](doc/SyncJira200Response.md)
  - [SyncPlane200Response](doc/SyncPlane200Response.md)
  - [TaskCreate](doc/TaskCreate.md)
  - [TaskUpdate](doc/TaskUpdate.md)
+ - [TestPrivateNetworkRequest](doc/TestPrivateNetworkRequest.md)
  - [Ticket](doc/Ticket.md)
  - [TicketDetail](doc/TicketDetail.md)
  - [TicketKind](doc/TicketKind.md)
@@ -422,6 +501,9 @@ Class | Method | HTTP request | Description
  - [Translation](doc/Translation.md)
  - [TranslationItemsInner](doc/TranslationItemsInner.md)
  - [TranslationLanguage](doc/TranslationLanguage.md)
+ - [TryEnforceInput](doc/TryEnforceInput.md)
+ - [TryEnforceResult](doc/TryEnforceResult.md)
+ - [TryEnforceResultHitsInner](doc/TryEnforceResultHitsInner.md)
  - [UnregisterDeviceRequest](doc/UnregisterDeviceRequest.md)
  - [UpdateIntegrationRequest](doc/UpdateIntegrationRequest.md)
  - [UpdatePlatformFeedbackRequest](doc/UpdatePlatformFeedbackRequest.md)

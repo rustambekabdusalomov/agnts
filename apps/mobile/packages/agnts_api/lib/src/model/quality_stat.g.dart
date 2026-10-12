@@ -31,6 +31,26 @@ abstract class _$QualityStatCWProxy {
 
   QualityStat selfFixes(int selfFixes);
 
+  QualityStat guardBlocks(int? guardBlocks);
+
+  QualityStat stopSaves(int? stopSaves);
+
+  QualityStat stalls(int? stalls);
+
+  QualityStat proofDue(int? proofDue);
+
+  QualityStat proven(int? proven);
+
+  QualityStat findings(int? findings);
+
+  QualityStat adopted(int? adopted);
+
+  QualityStat tokens(num? tokens);
+
+  QualityStat factCheck(int? factCheck);
+
+  QualityStat factCheckFirst(int? factCheckFirst);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `QualityStat(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -50,6 +70,16 @@ abstract class _$QualityStatCWProxy {
     num? footprintHit,
     int redFlags,
     int selfFixes,
+    int? guardBlocks,
+    int? stopSaves,
+    int? stalls,
+    int? proofDue,
+    int? proven,
+    int? findings,
+    int? adopted,
+    num? tokens,
+    int? factCheck,
+    int? factCheckFirst,
   });
 }
 
@@ -100,6 +130,37 @@ class _$QualityStatCWProxyImpl implements _$QualityStatCWProxy {
   QualityStat selfFixes(int selfFixes) => this(selfFixes: selfFixes);
 
   @override
+  QualityStat guardBlocks(int? guardBlocks) => this(guardBlocks: guardBlocks);
+
+  @override
+  QualityStat stopSaves(int? stopSaves) => this(stopSaves: stopSaves);
+
+  @override
+  QualityStat stalls(int? stalls) => this(stalls: stalls);
+
+  @override
+  QualityStat proofDue(int? proofDue) => this(proofDue: proofDue);
+
+  @override
+  QualityStat proven(int? proven) => this(proven: proven);
+
+  @override
+  QualityStat findings(int? findings) => this(findings: findings);
+
+  @override
+  QualityStat adopted(int? adopted) => this(adopted: adopted);
+
+  @override
+  QualityStat tokens(num? tokens) => this(tokens: tokens);
+
+  @override
+  QualityStat factCheck(int? factCheck) => this(factCheck: factCheck);
+
+  @override
+  QualityStat factCheckFirst(int? factCheckFirst) =>
+      this(factCheckFirst: factCheckFirst);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `QualityStat(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -119,6 +180,16 @@ class _$QualityStatCWProxyImpl implements _$QualityStatCWProxy {
     Object? footprintHit = const $CopyWithPlaceholder(),
     Object? redFlags = const $CopyWithPlaceholder(),
     Object? selfFixes = const $CopyWithPlaceholder(),
+    Object? guardBlocks = const $CopyWithPlaceholder(),
+    Object? stopSaves = const $CopyWithPlaceholder(),
+    Object? stalls = const $CopyWithPlaceholder(),
+    Object? proofDue = const $CopyWithPlaceholder(),
+    Object? proven = const $CopyWithPlaceholder(),
+    Object? findings = const $CopyWithPlaceholder(),
+    Object? adopted = const $CopyWithPlaceholder(),
+    Object? tokens = const $CopyWithPlaceholder(),
+    Object? factCheck = const $CopyWithPlaceholder(),
+    Object? factCheckFirst = const $CopyWithPlaceholder(),
   }) {
     return QualityStat(
       promptVersion: promptVersion == const $CopyWithPlaceholder()
@@ -169,6 +240,46 @@ class _$QualityStatCWProxyImpl implements _$QualityStatCWProxy {
           ? _value.selfFixes
           // ignore: cast_nullable_to_non_nullable
           : selfFixes as int,
+      guardBlocks: guardBlocks == const $CopyWithPlaceholder()
+          ? _value.guardBlocks
+          // ignore: cast_nullable_to_non_nullable
+          : guardBlocks as int?,
+      stopSaves: stopSaves == const $CopyWithPlaceholder()
+          ? _value.stopSaves
+          // ignore: cast_nullable_to_non_nullable
+          : stopSaves as int?,
+      stalls: stalls == const $CopyWithPlaceholder()
+          ? _value.stalls
+          // ignore: cast_nullable_to_non_nullable
+          : stalls as int?,
+      proofDue: proofDue == const $CopyWithPlaceholder()
+          ? _value.proofDue
+          // ignore: cast_nullable_to_non_nullable
+          : proofDue as int?,
+      proven: proven == const $CopyWithPlaceholder()
+          ? _value.proven
+          // ignore: cast_nullable_to_non_nullable
+          : proven as int?,
+      findings: findings == const $CopyWithPlaceholder()
+          ? _value.findings
+          // ignore: cast_nullable_to_non_nullable
+          : findings as int?,
+      adopted: adopted == const $CopyWithPlaceholder()
+          ? _value.adopted
+          // ignore: cast_nullable_to_non_nullable
+          : adopted as int?,
+      tokens: tokens == const $CopyWithPlaceholder()
+          ? _value.tokens
+          // ignore: cast_nullable_to_non_nullable
+          : tokens as num?,
+      factCheck: factCheck == const $CopyWithPlaceholder()
+          ? _value.factCheck
+          // ignore: cast_nullable_to_non_nullable
+          : factCheck as int?,
+      factCheckFirst: factCheckFirst == const $CopyWithPlaceholder()
+          ? _value.factCheckFirst
+          // ignore: cast_nullable_to_non_nullable
+          : factCheckFirst as int?,
     );
   }
 }
@@ -183,43 +294,54 @@ extension $QualityStatCopyWith on QualityStat {
 // JsonSerializableGenerator
 // **************************************************************************
 
-QualityStat _$QualityStatFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('QualityStat', json, ($checkedConvert) {
-      $checkKeys(
-        json,
-        requiredKeys: const [
-          'promptVersion',
-          'tickets',
-          'reachedReview',
-          'done',
-          'firstTry',
-          'rejected',
-          'changeRounds',
-          'fixAttempts',
-          'serious',
-          'redFlags',
-          'selfFixes',
-        ],
-      );
-      final val = QualityStat(
-        promptVersion: $checkedConvert('promptVersion', (v) => v as String),
-        tickets: $checkedConvert('tickets', (v) => (v as num).toInt()),
-        reachedReview: $checkedConvert(
-          'reachedReview',
-          (v) => (v as num).toInt(),
-        ),
-        done: $checkedConvert('done', (v) => (v as num).toInt()),
-        firstTry: $checkedConvert('firstTry', (v) => (v as num).toInt()),
-        rejected: $checkedConvert('rejected', (v) => (v as num).toInt()),
-        changeRounds: $checkedConvert('changeRounds', (v) => v as num),
-        fixAttempts: $checkedConvert('fixAttempts', (v) => v as num),
-        serious: $checkedConvert('serious', (v) => (v as num).toInt()),
-        footprintHit: $checkedConvert('footprintHit', (v) => v as num?),
-        redFlags: $checkedConvert('redFlags', (v) => (v as num).toInt()),
-        selfFixes: $checkedConvert('selfFixes', (v) => (v as num).toInt()),
-      );
-      return val;
-    });
+QualityStat _$QualityStatFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate('QualityStat', json, ($checkedConvert) {
+  $checkKeys(
+    json,
+    requiredKeys: const [
+      'promptVersion',
+      'tickets',
+      'reachedReview',
+      'done',
+      'firstTry',
+      'rejected',
+      'changeRounds',
+      'fixAttempts',
+      'serious',
+      'redFlags',
+      'selfFixes',
+    ],
+  );
+  final val = QualityStat(
+    promptVersion: $checkedConvert('promptVersion', (v) => v as String),
+    tickets: $checkedConvert('tickets', (v) => (v as num).toInt()),
+    reachedReview: $checkedConvert('reachedReview', (v) => (v as num).toInt()),
+    done: $checkedConvert('done', (v) => (v as num).toInt()),
+    firstTry: $checkedConvert('firstTry', (v) => (v as num).toInt()),
+    rejected: $checkedConvert('rejected', (v) => (v as num).toInt()),
+    changeRounds: $checkedConvert('changeRounds', (v) => v as num),
+    fixAttempts: $checkedConvert('fixAttempts', (v) => v as num),
+    serious: $checkedConvert('serious', (v) => (v as num).toInt()),
+    footprintHit: $checkedConvert('footprintHit', (v) => v as num?),
+    redFlags: $checkedConvert('redFlags', (v) => (v as num).toInt()),
+    selfFixes: $checkedConvert('selfFixes', (v) => (v as num).toInt()),
+    guardBlocks: $checkedConvert('guardBlocks', (v) => (v as num?)?.toInt()),
+    stopSaves: $checkedConvert('stopSaves', (v) => (v as num?)?.toInt()),
+    stalls: $checkedConvert('stalls', (v) => (v as num?)?.toInt()),
+    proofDue: $checkedConvert('proofDue', (v) => (v as num?)?.toInt()),
+    proven: $checkedConvert('proven', (v) => (v as num?)?.toInt()),
+    findings: $checkedConvert('findings', (v) => (v as num?)?.toInt()),
+    adopted: $checkedConvert('adopted', (v) => (v as num?)?.toInt()),
+    tokens: $checkedConvert('tokens', (v) => v as num?),
+    factCheck: $checkedConvert('factCheck', (v) => (v as num?)?.toInt()),
+    factCheckFirst: $checkedConvert(
+      'factCheckFirst',
+      (v) => (v as num?)?.toInt(),
+    ),
+  );
+  return val;
+});
 
 Map<String, dynamic> _$QualityStatToJson(QualityStat instance) =>
     <String, dynamic>{
@@ -235,4 +357,14 @@ Map<String, dynamic> _$QualityStatToJson(QualityStat instance) =>
       'footprintHit': ?instance.footprintHit,
       'redFlags': instance.redFlags,
       'selfFixes': instance.selfFixes,
+      'guardBlocks': ?instance.guardBlocks,
+      'stopSaves': ?instance.stopSaves,
+      'stalls': ?instance.stalls,
+      'proofDue': ?instance.proofDue,
+      'proven': ?instance.proven,
+      'findings': ?instance.findings,
+      'adopted': ?instance.adopted,
+      'tokens': ?instance.tokens,
+      'factCheck': ?instance.factCheck,
+      'factCheckFirst': ?instance.factCheckFirst,
     };

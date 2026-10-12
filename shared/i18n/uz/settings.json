@@ -42,7 +42,7 @@
     "allowHelp": "Claude Code bularni soʻramasdan bajara oladi",
     "deny": "Taqiqlangan buyruqlar",
     "denyHelp": "Tiket soʻrasa ham doim rad etiladi. Kodni agnts yuboradi, hech qachon Claude Code emas.",
-    "commits": "Commitlar va pull requestlar",
+    "commits": "Commitlar va PR",
     "commitsSub": "Commitlar kimning nomidan va pull requestlar qanday ochiladi",
     "authorName": "Muallif ismi",
     "authorNameHelp": "Commitlar sizning nomingizdan qilinadi",
@@ -78,7 +78,6 @@
     "done": "Oʻzgarishlar yuborilganda",
     "lessons": "agnts oʻrganish uchun yangi narsa topganda",
     "reviewDone": "agnts kod sharhi tugaganda",
-    "onThisPage": "Ushbu sahifada",
     "secretsHelp": "Jira, GitHub va Claude tokenlari serveringizda shifrlangan holda saqlanadi. Bu sahifa ularni hech qachon koʻrsatmaydi.",
     "saved": "Sozlamalar saqlandi",
     "parallelSlots": "Bir vaqtda {n} ta ish",
@@ -90,6 +89,7 @@
     "autoBrief": "Repozitoriylarni o‘rganish",
     "autoBriefHelp": "Repozitoriyning birinchi tiketi tahlil qilinganda repozitoriy tavsifini (arxitektura, retseptlar, kelishuvlar) yozish va har 10 ta birlashtirishdan keyin yangilash. Tavsif agentga faqat siz tasdiqlaganingizdan keyin yetadi.",
     "reflect": "Fikr-mulohazalaringizdan o‘rganish",
-    "reflectHelp": "O‘zgartirish so‘raganingizda yoki ishni sabab bilan rad etganingizda, agnts uning ortidagi umumiy qoidani qidiradi va «Qoidalar» sahifasida taklif qiladi. Siz qabul qilmaguningizcha hech narsa qo‘llanmaydi."
+    "reflectHelp": "O‘zgartirish so‘raganingizda yoki ishni sabab bilan rad etganingizda, agnts uning ortidagi umumiy qoidani qidiradi va «Qoidalar» sahifasida taklif qiladi. Siz qabul qilmaguningizcha hech narsa qo‘llanmaydi.",
+    "ciRed": "Kuzatiladigan branch qizarganda"
   }
 }

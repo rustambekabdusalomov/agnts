@@ -3,7 +3,6 @@
 //
 
 // ignore_for_file: unused_element
-import 'package:agnts_api/src/model/model.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -32,6 +31,7 @@ class ModelOverrides {
      this.preview,
   });
 
+      /// A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
   @JsonKey(
     
     name: r'analyze',
@@ -40,10 +40,11 @@ class ModelOverrides {
   )
 
 
-  final Model? analyze;
+  final String? analyze;
 
 
 
+      /// A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
   @JsonKey(
     
     name: r'coding',
@@ -52,10 +53,11 @@ class ModelOverrides {
   )
 
 
-  final Model? coding;
+  final String? coding;
 
 
 
+      /// A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
   @JsonKey(
     
     name: r'retry',
@@ -64,10 +66,11 @@ class ModelOverrides {
   )
 
 
-  final Model? retry;
+  final String? retry;
 
 
 
+      /// A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
   @JsonKey(
     
     name: r'review',
@@ -76,10 +79,11 @@ class ModelOverrides {
   )
 
 
-  final Model? review;
+  final String? review;
 
 
 
+      /// A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
   @JsonKey(
     
     name: r'preview',
@@ -88,7 +92,7 @@ class ModelOverrides {
   )
 
 
-  final Model? preview;
+  final String? preview;
 
 
 

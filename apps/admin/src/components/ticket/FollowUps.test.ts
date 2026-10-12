@@ -59,20 +59,28 @@ describe('FollowUps', () => {
     expect(w.find('.btn-p').attributes('disabled')).toBeDefined()
   })
 
-  it('creates the picked suggestions with the edits', async () => {
+  it('creates the picked suggestions with the edits, started or held', async () => {
     calls.length = 0
     const w = setup(ticket(), data)
     await w.find('.fu-item input[type=checkbox]').setValue(true)
     await w.find('.fu-title-in').setValue('Add refund_cents column')
-    const btn = w.find('.btn-p')
-    expect(btn.text()).toBe('Create 1 ticket')
-    await btn.trigger('click')
+    const [start, held] = w.findAll('.actions .btn')
+    expect(start.text()).toBe('Create and start 1 ticket')
+    expect(held.text()).toBe('Create, held')
+    await start.trigger('click')
     await flushPromises()
-    const post = calls.find((c) => c.method === 'POST' && c.path === '/tickets/{key}/follow-ups/accept')
-    expect(post?.init).toEqual({
-      params: { path: { key: 'PAY-1' } },
-      body: { items: [{ id: 1, target: 'local', title: 'Add refund_cents column', kind: undefined }] },
-    })
+    const items = [{ id: 1, target: 'local', title: 'Add refund_cents column', kind: undefined }]
+    const posts = () => calls.filter((c) => c.method === 'POST' && c.path === '/tickets/{key}/follow-ups/accept')
+    expect(posts()[0]?.init).toEqual({ params: { path: { key: 'PAY-1' } }, body: { start: true, items } })
+    await held.trigger('click')
+    await flushPromises()
+    expect(posts()[1]?.init).toEqual({ params: { path: { key: 'PAY-1' } }, body: { start: false, items } })
+  })
+
+  it('shows which suggestion must land first', () => {
+    const [a, b] = data.suggestions
+    const w = setup(ticket(), { ...data, suggestions: [a, { ...b, ready: true, after: [a.id] }, ...data.suggestions.slice(2)] })
+    expect(w.findAll('.fu-item')[1].text()).toContain(`After: ${a.title}`)
   })
 
   it('says when suggestions are off', () => {

@@ -700,6 +700,447 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analyticsColSelfFixesHint => 'Times agnts\'s own review sent findings back to the coder before a person looked';
 
   @override
+  String get analyticsTabOverview => 'Overview';
+
+  @override
+  String get analyticsTabDelivery => 'Delivery';
+
+  @override
+  String get analyticsTabQuality => 'Quality';
+
+  @override
+  String get analyticsTabLearning => 'Learning';
+
+  @override
+  String get analyticsTabCost => 'Cost';
+
+  @override
+  String get analyticsTabRepos => 'Repositories';
+
+  @override
+  String analyticsDaysHours(String d, String h) {
+    return '$d d $h h';
+  }
+
+  @override
+  String get analyticsKpiMerged => 'Pull requests merged';
+
+  @override
+  String analyticsKpiMergedNote(String n) {
+    return '$n closed without merging';
+  }
+
+  @override
+  String get analyticsKpiCostPerTicket => 'Cost per pushed ticket';
+
+  @override
+  String get analyticsKpiCostPerTicketNote => 'At API prices, all stages';
+
+  @override
+  String analyticsInsightMergeRate(String pct, String closed) {
+    return 'Only $pct% of agnts\'s pull requests were merged; $closed were closed without merging. Check the Delivery tab for why.';
+  }
+
+  @override
+  String analyticsInsightSlowAnswers(String hours) {
+    return 'Tickets wait about $hours h for your answers to agnts\'s questions. Answering sooner is the quickest way to speed delivery up.';
+  }
+
+  @override
+  String analyticsInsightFollowUpsNoise(String pct) {
+    return 'Only $pct% of suggested follow-ups were accepted. Most of them are being dismissed.';
+  }
+
+  @override
+  String analyticsInsightFlakyJob(String job, String repo, String n) {
+    return '$job in $repo passed on re-run $n times: it looks flaky. Fixing or quarantining it saves CI time.';
+  }
+
+  @override
+  String get analyticsPrMerged => 'Merged';
+
+  @override
+  String get analyticsPrClosed => 'Closed without merging';
+
+  @override
+  String get analyticsPrOpened => 'Opened';
+
+  @override
+  String get analyticsPrOpen => 'Still open';
+
+  @override
+  String get analyticsCyclePushed => 'Picked up → pushed';
+
+  @override
+  String get analyticsCycleMerged => 'Picked up → merged';
+
+  @override
+  String get analyticsSplitAnswers => 'Waiting for answers';
+
+  @override
+  String get analyticsSplitReview => 'Waiting for review';
+
+  @override
+  String get analyticsSplitQueue => 'Queued or paused';
+
+  @override
+  String get analyticsKpiMergeRate => 'Merge rate';
+
+  @override
+  String analyticsKpiMergeRateNote(String merged, String closed) {
+    return '$merged merged, $closed closed';
+  }
+
+  @override
+  String get analyticsKpiTimeToMerge => 'Time to merge';
+
+  @override
+  String get analyticsKpiTimeToMergeNote => 'From pull request to merge';
+
+  @override
+  String get analyticsKpiCyclePushed => 'Picked up → pushed';
+
+  @override
+  String get analyticsKpiCyclePushedNote => 'agnts\'s part of the work';
+
+  @override
+  String get analyticsKpiCycleMerged => 'Picked up → merged';
+
+  @override
+  String get analyticsKpiCycleMergedNote => 'Real delivery time';
+
+  @override
+  String get analyticsKpiAnswer => 'Time to answer';
+
+  @override
+  String get analyticsKpiAnswerNote => 'Until you answer agnts\'s questions';
+
+  @override
+  String get analyticsTypicalNote => 'Times are typical values (median): half the tickets were faster, half slower.';
+
+  @override
+  String get analyticsPrOutcomes => 'Pull request outcomes';
+
+  @override
+  String get analyticsPrOutcomesSub => 'agnts\'s pull requests opened in the period and what happened to them, merges and closes per day';
+
+  @override
+  String analyticsMergeSpread(String p50, String p90) {
+    return 'A typical pull request is merged in $p50; the slowest one in ten takes $p90 or more.';
+  }
+
+  @override
+  String get analyticsStale => 'Open for over a week';
+
+  @override
+  String get analyticsStaleSub => 'Pull requests nobody has merged or closed yet';
+
+  @override
+  String get analyticsNoStale => 'No pull request has been open for more than a week.';
+
+  @override
+  String analyticsOpenDays(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'open $n days', one: 'open $n day');
+    return '$_temp0';
+  }
+
+  @override
+  String get analyticsOpenPr => 'Open pull request';
+
+  @override
+  String get analyticsCycle => 'Cycle time';
+
+  @override
+  String get analyticsCycleSub => 'Typical time from picking a ticket up to pushing and to merging, per day';
+
+  @override
+  String analyticsCycleSpread(String pushed, String pushed90, String merged, String merged90) {
+    return 'Pushed in $pushed typically ($pushed90 for the slowest one in ten); merged in $merged ($merged90).';
+  }
+
+  @override
+  String get analyticsQuestions => 'Questions';
+
+  @override
+  String get analyticsQuestionsSub => 'What agnts asked before coding, and how fast it got answers';
+
+  @override
+  String get analyticsQuestionsAsked => 'Questions asked';
+
+  @override
+  String get analyticsQuestionsShare => 'Tickets with questions';
+
+  @override
+  String get analyticsAnswerTypical => 'Typical time to answer';
+
+  @override
+  String get analyticsAnswerSlow => 'Slowest one in ten';
+
+  @override
+  String get analyticsUnanswered => 'Waiting for an answer now';
+
+  @override
+  String get analyticsSlowest => 'Slowest tickets';
+
+  @override
+  String get analyticsSlowestSub => 'The tickets that took longest from pick-up to push in this period, and where their time went';
+
+  @override
+  String get analyticsNoSlowest => 'No ticket was pushed in this period.';
+
+  @override
+  String get analyticsKpiCiSeen => 'CI failures';
+
+  @override
+  String analyticsKpiCiSeenNote(String n) {
+    return '$n new in this period';
+  }
+
+  @override
+  String get analyticsKpiCiAuto => 'Fixed by agnts';
+
+  @override
+  String analyticsKpiCiAutoNote(String auto, String fixed) {
+    return '$auto of $fixed fixed failures';
+  }
+
+  @override
+  String get analyticsKpiCiFix => 'Time to fix';
+
+  @override
+  String get analyticsKpiCiFixNote => 'From first failure to merged fix';
+
+  @override
+  String get analyticsKpiCiFlaky => 'Flaky failures';
+
+  @override
+  String get analyticsKpiCiFlakyNote => 'Passed when re-run';
+
+  @override
+  String get analyticsKpiCiOwn => 'Own PRs fixed';
+
+  @override
+  String get analyticsKpiCiOwnNote => 'Red checks on agnts\'s PRs fixed before review';
+
+  @override
+  String get analyticsCiUnknown => 'Not classified';
+
+  @override
+  String get analyticsCiNew => 'New failures';
+
+  @override
+  String get analyticsCiFixed => 'Fixed';
+
+  @override
+  String get analyticsCiTitle => 'CI health';
+
+  @override
+  String analyticsCiSub(String n) {
+    return 'New and fixed CI failures per day. $n need attention now.';
+  }
+
+  @override
+  String get analyticsCiOffSub =>
+      'CI watching is not set up. Turn it on for a repository and agnts triages red builds and fixes the ones caused by code.';
+
+  @override
+  String get analyticsCiSetUp => 'Set up CI watching';
+
+  @override
+  String get analyticsCiOpen => 'Open CI';
+
+  @override
+  String get analyticsCiClasses => 'Failures by cause';
+
+  @override
+  String get analyticsCiClassesSub => 'What triage decided each failure was';
+
+  @override
+  String get analyticsCiNone => 'No CI failures in this period.';
+
+  @override
+  String get analyticsCiFlakiest => 'Flakiest jobs';
+
+  @override
+  String get analyticsCiFlakiestSub => 'Jobs that failed and then passed on re-run most often';
+
+  @override
+  String get analyticsCiNoFlaky => 'No flaky jobs in this period.';
+
+  @override
+  String get analyticsColJob => 'Job';
+
+  @override
+  String get analyticsColFailure => 'Failure';
+
+  @override
+  String get analyticsColFlaky => 'Passed on re-run';
+
+  @override
+  String get analyticsColFailures => 'Failures';
+
+  @override
+  String get analyticsKpiLessons => 'Lessons';
+
+  @override
+  String analyticsKpiLessonsNote(String n) {
+    return '$n marked learned';
+  }
+
+  @override
+  String get analyticsKpiRulesLearned => 'Rules learned';
+
+  @override
+  String analyticsKpiRulesLearnedNote(String n) {
+    return 'In use, of $n suggested from tickets';
+  }
+
+  @override
+  String get analyticsKpiRulesManual => 'Rules written';
+
+  @override
+  String get analyticsKpiRulesManualNote => 'Added by people';
+
+  @override
+  String get analyticsKpiReflections => 'Reflections';
+
+  @override
+  String analyticsKpiReflectionsNote(String n) {
+    return 'On changed or rejected tickets; $n rules suggested';
+  }
+
+  @override
+  String get analyticsKpiFollowUps => 'Follow-ups accepted';
+
+  @override
+  String analyticsKpiFollowUpsNote(String n) {
+    return '$n suggested in this period';
+  }
+
+  @override
+  String get analyticsKpiReviewerNotes => 'Reviewer notes';
+
+  @override
+  String get analyticsKpiReviewerNotesNote => 'Re-reviews, dismissed findings and notes';
+
+  @override
+  String get analyticsLearningNote =>
+      'How agnts learns from your feedback: fewer reviewer notes and more adopted rules over time mean it is working.';
+
+  @override
+  String get analyticsFollowUps => 'Follow-ups by type';
+
+  @override
+  String get analyticsFollowUpsSub => 'Follow-up tickets agnts suggested in this period and what you decided';
+
+  @override
+  String get analyticsNoFollowUps => 'No follow-ups were suggested in this period.';
+
+  @override
+  String get analyticsColType => 'Type';
+
+  @override
+  String get analyticsColSuggested => 'Suggested';
+
+  @override
+  String get analyticsColAccepted => 'Accepted';
+
+  @override
+  String get analyticsColDismissed => 'Dismissed';
+
+  @override
+  String get analyticsColOpen => 'Open';
+
+  @override
+  String get analyticsColAcceptRate => 'Accept rate';
+
+  @override
+  String get analyticsFollowUpSources => 'Where follow-ups come from';
+
+  @override
+  String get analyticsFollowUpSourcesSub => 'Suggested follow-ups by the step that found them';
+
+  @override
+  String get analyticsLessons => 'Lessons by topic';
+
+  @override
+  String analyticsLessonsSub(String n) {
+    return 'Lessons written in this period; $n were marked learned';
+  }
+
+  @override
+  String get analyticsOpenLearn => 'Open Learn';
+
+  @override
+  String get analyticsNoLessons => 'No lessons in this period.';
+
+  @override
+  String get analyticsReviewers => 'Reviewers';
+
+  @override
+  String get analyticsReviewersSub => 'Who sends agnts the most feedback on code reviews';
+
+  @override
+  String get analyticsOpenRules => 'Open Rules';
+
+  @override
+  String get analyticsNoReviewers => 'No reviewer notes in this period.';
+
+  @override
+  String get analyticsColReviewer => 'Reviewer';
+
+  @override
+  String get analyticsColRereview => 'Re-reviews';
+
+  @override
+  String get analyticsColRereviewHint => 'Times the reviewer asked agnts to review again';
+
+  @override
+  String get analyticsColDismissedNotes => 'Dismissed';
+
+  @override
+  String get analyticsColDismissedNotesHint => 'Findings of agnts\'s review the reviewer dismissed';
+
+  @override
+  String get analyticsColManual => 'Notes';
+
+  @override
+  String get analyticsColManualHint => 'Notes the reviewer wrote by hand';
+
+  @override
+  String get analyticsColRepos => 'Repositories';
+
+  @override
+  String get analyticsKpiCostNote => 'All Claude calls in the period';
+
+  @override
+  String analyticsKpiDaysAboveNote(String n) {
+    return '$n days above 80% of the session limit';
+  }
+
+  @override
+  String get analyticsColCost => 'Cost';
+
+  @override
+  String get analyticsColMergeRate => 'Merge rate';
+
+  @override
+  String get analyticsColMergeRateHint => 'Pull requests merged, out of those merged or closed in the period';
+
+  @override
+  String get analyticsColQuestions => 'Questions per ticket';
+
+  @override
+  String get analyticsColQuestionsHint =>
+      'Questions agnts asked per analysed ticket. Many questions point to a missing CLAUDE.md or rules.';
+
+  @override
+  String get analyticsColCi => 'CI failures';
+
+  @override
+  String get analyticsColCiHint => 'CI failure groups that failed in the period';
+
+  @override
   String get appName => 'agnts';
 
   @override
@@ -998,6 +1439,417 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get briefDone_save => 'Brief saved';
+
+  @override
+  String get ciTitle => 'CI';
+
+  @override
+  String get ciLede =>
+      'Failing pipelines on your watched branches, grouped by job and error. agnts re-runs new failures once, then fixes the real ones.';
+
+  @override
+  String get ciBack => 'CI';
+
+  @override
+  String get ciRepo => 'Repository';
+
+  @override
+  String get ciAllRepos => 'All repositories';
+
+  @override
+  String get ciFilterLabel => 'Status';
+
+  @override
+  String get ciFilter_red => 'Red';
+
+  @override
+  String get ciFilter_flaky => 'Flaky';
+
+  @override
+  String get ciFilter_infra => 'Infra';
+
+  @override
+  String get ciFilter_fixed => 'Fixed';
+
+  @override
+  String get ciFilter_muted => 'Muted';
+
+  @override
+  String get ciFilter_all => 'All';
+
+  @override
+  String get ciStatus_triage => 'New';
+
+  @override
+  String get ciStatus_open => 'Failing';
+
+  @override
+  String get ciStatus_fixing => 'Fixing';
+
+  @override
+  String get ciStatus_fixed => 'Fix merged';
+
+  @override
+  String get ciStatus_resolved => 'Green again';
+
+  @override
+  String get ciStatus_flaky => 'Flaky';
+
+  @override
+  String get ciStatus_infra => 'Infra';
+
+  @override
+  String get ciStatus_muted => 'Muted';
+
+  @override
+  String get ciStatus_regression => 'Regression';
+
+  @override
+  String get ciStatusHelp_triage => 'New failure, waiting for a re-run to confirm it';
+
+  @override
+  String get ciStatusHelp_open => 'Confirmed; no ticket is working on it';
+
+  @override
+  String get ciStatusHelp_fixing => 'A ticket is working on it';
+
+  @override
+  String get ciStatusHelp_fixed => 'The fix is merged; waiting for a green run';
+
+  @override
+  String get ciStatusHelp_resolved => 'The branch is green again';
+
+  @override
+  String get ciStatusHelp_flaky => 'Passed when re-run';
+
+  @override
+  String get ciStatusHelp_infra => 'The runner or the network failed, not the code';
+
+  @override
+  String get ciStatusHelp_muted => 'Ignored until unmuted';
+
+  @override
+  String get ciStatusHelp_regression => 'Failed again after the fix was merged';
+
+  @override
+  String get ciClass_code => 'Code';
+
+  @override
+  String get ciClass_test => 'Test';
+
+  @override
+  String get ciClass_config => 'Config';
+
+  @override
+  String get ciClass_dependency => 'Dependency';
+
+  @override
+  String get ciClass_infra => 'Infra';
+
+  @override
+  String get ciClass_flaky => 'Flaky';
+
+  @override
+  String get ciClass_report => 'Report';
+
+  @override
+  String get ciColStatus => 'Status';
+
+  @override
+  String get ciColFailure => 'Failure';
+
+  @override
+  String get ciColCount => 'Failed';
+
+  @override
+  String get ciColLastSeen => 'Last seen';
+
+  @override
+  String get ciColTicket => 'Ticket';
+
+  @override
+  String get ciColTime => 'Time';
+
+  @override
+  String get ciColCommit => 'Commit';
+
+  @override
+  String get ciColJob => 'Job';
+
+  @override
+  String ciTimes(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n times', one: '$n time');
+    return '$_temp0';
+  }
+
+  @override
+  String get ciFix => 'Fix it';
+
+  @override
+  String ciFixStarted(String key) {
+    return 'Ticket $key opened';
+  }
+
+  @override
+  String get ciMute => 'Mute';
+
+  @override
+  String get ciUnmute => 'Unmute';
+
+  @override
+  String get ciMuted => 'Muted: agnts ignores this failure now';
+
+  @override
+  String get ciUnmuted => 'Unmuted';
+
+  @override
+  String get ciRerun => 'Re-run';
+
+  @override
+  String get ciRerunStarted => 'Re-run started';
+
+  @override
+  String get ciCommentOnly => 'Comment only';
+
+  @override
+  String get ciEmptyRed => 'Nothing is red. Every watched branch passes.';
+
+  @override
+  String get ciEmptyFilter => 'No failures here.';
+
+  @override
+  String get ciHowTitle => 'How to start watching';
+
+  @override
+  String get ciHowWatch =>
+      'Open a repository, go to its CI tab and turn on watching. The default branch is always watched; add others like release/*.';
+
+  @override
+  String get ciHowWebhook =>
+      'For news within seconds, add the git host webhook for workflow_run (GitHub) or Pipeline events (GitLab). Without it agnts checks every 5 minutes.';
+
+  @override
+  String get ciNotFound => 'This CI failure was not found.';
+
+  @override
+  String ciOpenTicket(String key) {
+    return 'Open $key';
+  }
+
+  @override
+  String ciPrNote(String n) {
+    return 'This failure is on someone else\'s pull request #$n. agnts never opens a ticket or pushes there; with comments on, it posts one diagnosis comment.';
+  }
+
+  @override
+  String ciRegressionNote(String sha) {
+    return 'This failed again on a commit that contains the fix $sha. The original ticket gets a follow-up suggestion.';
+  }
+
+  @override
+  String get ciLogTitle => 'Log';
+
+  @override
+  String get ciLogSub => 'Redacted excerpt of the newest failing run';
+
+  @override
+  String get ciLogAnnotations => 'Annotations';
+
+  @override
+  String get ciLogFirstError => 'First error';
+
+  @override
+  String get ciLogEnd => 'End of the log';
+
+  @override
+  String get ciLogTail => 'Last lines';
+
+  @override
+  String get ciNoLog => 'No log was saved for this failure.';
+
+  @override
+  String get ciOccurrences => 'Failing runs';
+
+  @override
+  String get ciOccurrencesSub => 'The last 20 runs this failure appeared in';
+
+  @override
+  String get ciNoOccurrences => 'No runs recorded.';
+
+  @override
+  String get ciPassedOnRerun => 'Passed on re-run';
+
+  @override
+  String get ciOpenRun => 'Open run';
+
+  @override
+  String get ciFacts => 'Details';
+
+  @override
+  String get ciCount => 'Failed';
+
+  @override
+  String get ciFlakyCount => 'Passed on re-run';
+
+  @override
+  String get ciFirstSeen => 'First seen';
+
+  @override
+  String get ciLastSeen => 'Last seen';
+
+  @override
+  String get ciFirstSha => 'First failing commit';
+
+  @override
+  String get ciLastSha => 'Last commit';
+
+  @override
+  String get ciFixedSha => 'Fix commit';
+
+  @override
+  String get ciFixedAt => 'Fix merged';
+
+  @override
+  String get ciTicket => 'Ticket';
+
+  @override
+  String get ciBranch => 'Branch';
+
+  @override
+  String get ciWatchTitle => 'CI watching';
+
+  @override
+  String get ciWatchSub => 'agnts reads this repository\'s pipelines and fixes what fails';
+
+  @override
+  String get ciWatchEnabled => 'Watch CI';
+
+  @override
+  String get ciWatchEnabledHelp => 'Off by default. Failures on watched branches are grouped and fixed.';
+
+  @override
+  String get ciBranches => 'Extra branches';
+
+  @override
+  String ciBranchesHelp(String branch) {
+    return 'Globs, one per line. The default branch ($branch) is always watched.';
+  }
+
+  @override
+  String get ciIgnore => 'Ignored workflows and jobs';
+
+  @override
+  String get ciIgnoreHelp => 'Globs, one per line, matched against workflow and job names. Empty uses *deploy*, *release* and *publish*.';
+
+  @override
+  String get ciPrs => 'Other people\'s pull requests';
+
+  @override
+  String get ciPrsHelp =>
+      'agnts never pushes to a colleague\'s branch. With comments on, it posts one diagnosis comment on the pull request.';
+
+  @override
+  String get ciPrs_off => 'Ignore';
+
+  @override
+  String get ciPrs_comment => 'Comment';
+
+  @override
+  String get ciAutoFix => 'Fix automatically';
+
+  @override
+  String get ciAutoFixRepoHelp => 'Open a ticket for every confirmed failure, or wait for Fix it';
+
+  @override
+  String get ciAutoFix_inherit => 'Workspace setting';
+
+  @override
+  String get ciAutoFix_on => 'On';
+
+  @override
+  String get ciAutoFix_off => 'Off';
+
+  @override
+  String get ciSave => 'Save';
+
+  @override
+  String get ciWatchSaved => 'CI watching saved';
+
+  @override
+  String get ciFailuresTitle => 'Failures';
+
+  @override
+  String get ciFailuresSub => 'This repository\'s failing jobs, newest first';
+
+  @override
+  String get ciFlakyTitle => 'Flaky tests';
+
+  @override
+  String get ciFlakySub => 'Failures that passed when re-run';
+
+  @override
+  String get ciFlakyEmpty => 'No flaky tests found.';
+
+  @override
+  String get ciCardTitle => 'CI failure';
+
+  @override
+  String get ciFailingRuns => 'Failing runs';
+
+  @override
+  String get ciLastRun => 'Last failing run';
+
+  @override
+  String get ciStillFailing => 'Still failing';
+
+  @override
+  String get ciWaitingGreen => 'Fix merged, waiting for a green run';
+
+  @override
+  String get ciGreenAgain => 'Green again';
+
+  @override
+  String get ciOpenFailure => 'Open the failure';
+
+  @override
+  String get ciSettingsTitle => 'CI';
+
+  @override
+  String get ciSettingsSub => 'What agnts does when a watched pipeline goes red. Watching is turned on per repository.';
+
+  @override
+  String get ciAutoFixHelp => 'Open a ticket for every confirmed failure. Off, failures wait for Fix it.';
+
+  @override
+  String get ciMaxAutoPerDay => 'Automatic tickets a day';
+
+  @override
+  String get ciMaxAutoPerDayHelp => 'Over the limit, failures wait for Fix it. Feedback rounds on agnts\'s own pull requests don\'t count.';
+
+  @override
+  String ciPerDay(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n a day', one: '$n a day', zero: 'None');
+    return '$_temp0';
+  }
+
+  @override
+  String get ciRetryFlaky => 'Re-run new failures once';
+
+  @override
+  String get ciRetryFlakyHelp => 'A new failure\'s jobs run again before agnts believes it. Passing marks it flaky.';
+
+  @override
+  String get ciFeedbackRounds => 'Rounds on agnts\'s pull requests';
+
+  @override
+  String get ciFeedbackRoundsHelp => 'How many times a red check sends agnts\'s own pull request back to coding. 0 turns it off.';
+
+  @override
+  String get ciInfraPatterns => 'Infra patterns';
+
+  @override
+  String get ciInfraPatternsHelp =>
+      'Regular expressions, one per line. A matching log is an infra failure: shown and counted, never a ticket. Added to the built-in ones.';
 
   @override
   String get commonLoading => 'Loading…';
@@ -1436,7 +2288,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get followUpsSub =>
-      'What finishing this ticket still needs, as agnts sees it. Pick the ones you want: they are created queued, so nothing runs until you start them.';
+      'What finishing this ticket still needs, as agnts sees it. Pick the ones you want, then start them now or keep them held until you start each one.';
 
   @override
   String get followUpsMode => 'Follow-up suggestions';
@@ -1496,6 +2348,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get followUpsServes => 'Why';
 
   @override
+  String get followUpsAfter => 'After';
+
+  @override
   String get followUpsDetails => 'Details';
 
   @override
@@ -1526,7 +2381,23 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get followUpsQueuedHint => 'Created tickets wait in the queue until you start them.';
+  String followUpsCreateStart(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Create and start $count tickets',
+      one: 'Create and start $count ticket',
+      zero: 'Create and start',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get followUpsCreateHeld => 'Create, held';
+
+  @override
+  String get followUpsQueuedHint =>
+      'Started tickets go to the queue now; one that must wait for another starts coding after that one is merged. Held ones wait until you start them.';
 
   @override
   String get followUpsDismiss => 'Dismiss';
@@ -1552,6 +2423,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String followUpsCreatedNotice(num count) {
     String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count tickets created', one: '$count ticket created');
     return '$_temp0, queued until you start them.';
+  }
+
+  @override
+  String followUpsStartedNotice(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count tickets created', one: '$count ticket created');
+    return '$_temp0 and queued to run.';
   }
 
   @override
@@ -1645,6 +2522,774 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get formNoMatch => 'No matches';
+
+  @override
+  String get harnessRepoTab => 'Guardrails';
+
+  @override
+  String get harnessRepoTitle => 'Guardrails';
+
+  @override
+  String get harnessRepoSub => 'How strictly agnts-guard checks Claude\'s work in this repository, while it works and after.';
+
+  @override
+  String get harnessRepoSave => 'Save guardrails';
+
+  @override
+  String get harnessRepoSaved => 'Guardrails saved';
+
+  @override
+  String get harnessRepoAgentTitle => 'Agent instruction files';
+
+  @override
+  String get harnessRepoAgentSub =>
+      'agnts scans CLAUDE.md, AGENTS.md, .claude/ and .mcp.json for text that tries to steer an agent. It never runs this repository\'s hooks or MCP servers.';
+
+  @override
+  String harnessRepoAgentScanned(String time) {
+    return 'Scanned $time';
+  }
+
+  @override
+  String get harnessRepoAgentNotScanned => 'Not scanned yet: the next run in this repository scans the files.';
+
+  @override
+  String get harnessRepoAgentNothing => 'Nothing found.';
+
+  @override
+  String harnessRepoAgentWarn(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n lines', one: '$n line');
+    return '$_temp0 may try to steer an agent. Runs treat these files as data, never as instructions; read them before you trust them.';
+  }
+
+  @override
+  String get harnessRepoAgentInfo => 'Configuration agnts ignores';
+
+  @override
+  String get harnessRepoKind_hidden_unicode => 'Hidden characters';
+
+  @override
+  String get harnessRepoKind_agent_instruction => 'Instruction to an agent';
+
+  @override
+  String get harnessRepoKind_exfiltration => 'Sends data out';
+
+  @override
+  String get harnessRepoKind_encoded_blob => 'Encoded text';
+
+  @override
+  String get harnessRepoKind_hooks => 'Claude Code hooks';
+
+  @override
+  String get harnessRepoKind_mcp_server => 'MCP servers';
+
+  @override
+  String get harnessRepoProfile => 'Guard profile';
+
+  @override
+  String get harnessRepoProfileHelp => 'How strict the in-run checks are for this repository.';
+
+  @override
+  String get harnessRepoProfile_ => 'Workspace';
+
+  @override
+  String get harnessRepoProfile_minimal => 'Minimal';
+
+  @override
+  String get harnessRepoProfile_standard => 'Standard';
+
+  @override
+  String get harnessRepoProfile_strict => 'Strict';
+
+  @override
+  String get harnessRepoProfileHelp_ => 'Follows the workspace setting.';
+
+  @override
+  String get harnessRepoProfileHelp_minimal => 'Only secrets and enforced rules are blocked; build checked before Claude finishes.';
+
+  @override
+  String get harnessRepoProfileHelp_standard =>
+      'Also blocks skipped tests, silenced linters and edits to check configuration; build and lint must pass before Claude finishes.';
+
+  @override
+  String get harnessRepoProfileHelp_strict =>
+      'Also blocks swallowed errors and removed assertions, runs the tests before Claude finishes, and may ask for facts before editing a file.';
+
+  @override
+  String get harnessRepoSecretAllow => 'Example credentials allowed in';
+
+  @override
+  String get harnessRepoSecretAllowHelp => 'Path globs where fake keys are expected, besides testdata/, fixtures/ and *.example.';
+
+  @override
+  String get harnessRepoChecksTitle => 'Per-file checks';
+
+  @override
+  String get harnessRepoChecksSub =>
+      'Quick formatters and linters agnts-guard runs on each file Claude edits, so problems are fixed while the change is fresh.';
+
+  @override
+  String get harnessRepoChecksOff => 'Turn per-file checks off';
+
+  @override
+  String get harnessRepoChecksOffHelp => 'Claude is not checked after each edit; the checks after the run still apply.';
+
+  @override
+  String get harnessRepoOwnChecks => 'Use my own checks';
+
+  @override
+  String get harnessRepoOwnChecksHelp => 'Replace the checks agnts derives from the toolchains with your list.';
+
+  @override
+  String get harnessRepoDerivedTitle => 'Derived from the toolchains';
+
+  @override
+  String get harnessRepoDerivedNone => 'agnts knows no per-file checks for this repository\'s toolchains.';
+
+  @override
+  String get harnessRepoCheckName => 'Name';
+
+  @override
+  String get harnessRepoCheckGlobs => 'Files (globs, comma-separated)';
+
+  @override
+  String get harnessRepoCheckCmd => 'Command';
+
+  @override
+  String harnessRepoCheckCmdHelp(String file, String dir) {
+    return '\'$file\' is the edited file and \'$dir\' its directory, both relative to the repository.';
+  }
+
+  @override
+  String get harnessRepoCheckEvery => 'At most every (seconds)';
+
+  @override
+  String get harnessRepoAddCheck => 'Add a check';
+
+  @override
+  String harnessRepoRemoveCheck(String name) {
+    return 'Remove $name';
+  }
+
+  @override
+  String get harnessRepoCoverageTitle => 'Coverage of changed lines';
+
+  @override
+  String get harnessRepoCoverageSub =>
+      'After the checks pass, agnts runs the tests once more with coverage and shows which added lines no test ran.';
+
+  @override
+  String get harnessRepoCoverage => 'Measure coverage';
+
+  @override
+  String get harnessRepoCoverageHelp => 'An extra test run after the checks; it never fails the run.';
+
+  @override
+  String get harnessRepoThreshold => 'Threshold';
+
+  @override
+  String get harnessRepoThresholdHelp => 'Below it, the code review gets a coverage finding. 0 turns the finding off.';
+
+  @override
+  String get harnessRepoCoverageCmd => 'Coverage command';
+
+  @override
+  String get harnessRepoCoverageCmdHelp => 'Leave empty to use the command agnts derives.';
+
+  @override
+  String get harnessRepoCoverageReport => 'Report file';
+
+  @override
+  String get harnessRepoCoverageReportHelp => 'A Go cover profile or lcov file, in the repository or under /agnts/out/.';
+
+  @override
+  String get harnessRepoCoverageNoDerived => 'agnts knows no coverage command for these toolchains: set one.';
+
+  @override
+  String get harnessRepoAcceptance => 'Check acceptance in the app';
+
+  @override
+  String get harnessRepoAcceptanceHelp =>
+      'After the preview, agnts checks the ticket\'s acceptance criteria in the running app and shows the results with screenshots.';
+
+  @override
+  String get harnessRepoAcceptanceNoPreview => 'Needs a preview command: set one when you edit the repository.';
+
+  @override
+  String get harnessRepoStarterTitle => 'Starter rules';
+
+  @override
+  String get harnessRepoStarterSub =>
+      'Specific, checkable conventions for this repository\'s languages. They are added as suggestions: nothing applies until you adopt them.';
+
+  @override
+  String get harnessRepoStarterNone => 'No starter pack fits this repository\'s toolchains.';
+
+  @override
+  String harnessRepoStarterRules(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n rules', one: '$n rule');
+    return '$_temp0';
+  }
+
+  @override
+  String harnessRepoStarterOffer(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n rules', one: '$n rule');
+    return 'Suggest $_temp0';
+  }
+
+  @override
+  String get harnessRepoStarterOffered => 'Already suggested';
+
+  @override
+  String harnessRepoStarterAdded(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n rules suggested',
+      one: '$n rule suggested',
+      zero: 'Nothing new to suggest',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get harnessRepoStarterOpenRules => 'Open the suggestions';
+
+  @override
+  String get harnessRulesDelivery => 'How runs get it';
+
+  @override
+  String get harnessRulesDelivery_prompt => 'Every prompt';
+
+  @override
+  String get harnessRulesDelivery_skill => 'Skill';
+
+  @override
+  String get harnessRulesDeliveryHelp_prompt => 'In every prompt, always in view.';
+
+  @override
+  String get harnessRulesDeliveryHelp_skill =>
+      'A skill Claude loads when its description matches the work: keeps prompts short as rules grow. Keep critical rules in every prompt.';
+
+  @override
+  String get harnessRulesEnforce => 'Enforce';
+
+  @override
+  String get harnessRulesEnforceHelp => 'agnts-guard checks the rule while Claude works, not only asks for it.';
+
+  @override
+  String get harnessRulesOn => 'Check';
+
+  @override
+  String get harnessRulesOn_file => 'File edits';
+
+  @override
+  String get harnessRulesOn_bash => 'Commands';
+
+  @override
+  String get harnessRulesOn_diff => 'Finished change';
+
+  @override
+  String get harnessRulesOnHelp_file => 'Edits of the files below; with a pattern, only added lines that match it.';
+
+  @override
+  String get harnessRulesOnHelp_bash => 'Shell commands Claude runs that match the pattern.';
+
+  @override
+  String get harnessRulesOnHelp_diff => 'The finished change, checked on the server after the run.';
+
+  @override
+  String get harnessRulesPaths => 'Files (globs)';
+
+  @override
+  String get harnessRulesPathsPlaceholder => 'server/migrations/*.sql';
+
+  @override
+  String get harnessRulesPattern => 'Pattern (RE2 regular expression)';
+
+  @override
+  String get harnessRulesAction => 'When it matches';
+
+  @override
+  String get harnessRulesAction_block => 'Block';
+
+  @override
+  String get harnessRulesAction_warn => 'Warn';
+
+  @override
+  String get harnessRulesMessage => 'Message to Claude';
+
+  @override
+  String get harnessRulesMessagePlaceholder => 'Add a new migration instead.';
+
+  @override
+  String get harnessRulesTry => 'Try on history';
+
+  @override
+  String get harnessRulesTrying => 'Checking…';
+
+  @override
+  String harnessRulesTryChecked(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n changes', one: '$n change');
+    return 'Checked $_temp0 agnts made.';
+  }
+
+  @override
+  String get harnessRulesTryNone => 'It would not have matched any of them.';
+
+  @override
+  String harnessRulesTryHits(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n tickets', one: '$n ticket');
+    return 'It would have matched $_temp0:';
+  }
+
+  @override
+  String get harnessRulesBadgeBlock => 'Enforced: blocks';
+
+  @override
+  String get harnessRulesBadgeWarn => 'Enforced: warns';
+
+  @override
+  String get harnessRulesBadgeSkill => 'Skill';
+
+  @override
+  String get harnessRulesBadgeTip => 'Tip';
+
+  @override
+  String get harnessRulesSource_reflect => 'From feedback';
+
+  @override
+  String get harnessRulesSource_run => 'From a run';
+
+  @override
+  String get harnessRulesSource_promoted => 'Seen in several repositories';
+
+  @override
+  String harnessRulesSourceStarter(String name) {
+    return 'Starter: $name';
+  }
+
+  @override
+  String harnessRulesConfidence(String n) {
+    return 'Confidence $n%';
+  }
+
+  @override
+  String harnessRulesSeen(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n times', one: '$n time');
+    return 'Seen $_temp0';
+  }
+
+  @override
+  String harnessRulesWatching(String n) {
+    return 'Watching ($n)';
+  }
+
+  @override
+  String get harnessRulesWatchingHelp =>
+      'Lessons agnts noticed once or twice. They become suggestions when it sees them again; until then they reach no ticket.';
+
+  @override
+  String get harnessSettingsTitle => 'Guardrails';
+
+  @override
+  String get harnessSettingsSub =>
+      'agnts-guard checks Claude\'s work inside every run, while it happens; agnts\'s checks after the run still apply.';
+
+  @override
+  String get harnessSettingsProfile => 'Guard profile';
+
+  @override
+  String get harnessSettingsProfile_minimal => 'Minimal';
+
+  @override
+  String get harnessSettingsProfile_standard => 'Standard';
+
+  @override
+  String get harnessSettingsProfile_strict => 'Strict';
+
+  @override
+  String get harnessSettingsProfileHelp_minimal =>
+      'Blocks secrets and dotenv files, enforces team rules with a pattern, and asks for a green build before Claude finishes.';
+
+  @override
+  String get harnessSettingsProfileHelp_standard =>
+      'Minimal, plus: blocks skipped tests, silenced linters, deleted tests and check config changes; lint in the stop gate; quick checks of each edited file.';
+
+  @override
+  String get harnessSettingsProfileHelp_strict =>
+      'Standard, plus: tests in the stop gate, blocks swallowed errors and removed assertions, and the fact check before first edits.';
+
+  @override
+  String get harnessSettingsFactCheck => 'Fact check share';
+
+  @override
+  String get harnessSettingsFactCheckHelp =>
+      'Share of strict-profile tickets whose runs must say who uses a file before editing it, and how to undo destructive commands. Compare the groups on Analytics.';
+
+  @override
+  String get harnessSettingsStalls => 'When a run looks stuck';
+
+  @override
+  String get harnessSettingsStallsHelp =>
+      'The same command failing again and again, no edits for many tool calls, or one file read over and over.';
+
+  @override
+  String get harnessSettingsStalls_off => 'Ignore';
+
+  @override
+  String get harnessSettingsStalls_log => 'Note it';
+
+  @override
+  String get harnessSettingsStalls_act => 'Step in';
+
+  @override
+  String get harnessSettingsProveFixes => 'Prove bug fixes';
+
+  @override
+  String get harnessSettingsProveFixesHelp =>
+      'A bug fix needs a test that fails before the change and passes after it; agnts runs it both ways and shows the result.';
+
+  @override
+  String get harnessSettingsDeepReview => 'Deep review';
+
+  @override
+  String get harnessSettingsDeepReviewHelp =>
+      'Specialist passes in the code review (security, silent failures, tests, types). Auto: large or complex work only; it costs more tokens.';
+
+  @override
+  String get harnessSettingsDeep_off => 'Off';
+
+  @override
+  String get harnessSettingsDeep_auto => 'Auto';
+
+  @override
+  String get harnessSettingsDeep_always => 'Always';
+
+  @override
+  String get harnessSettingsLearnFromRuns => 'Learn from runs';
+
+  @override
+  String get harnessSettingsLearnFromRunsHelp =>
+      'After a run with failed checks or a stall, agnts may suggest a tip for the repository. Tips stay watched until seen again.';
+
+  @override
+  String get harnessSettingsSecondOpinion => 'Second opinion';
+
+  @override
+  String get harnessSettingsSecondOpinionHelp =>
+      'Another model reads the chosen approach of complex tickets and says whether it agrees. Empty turns it off.';
+
+  @override
+  String get harnessSettingsSecondOpinionHint => 'e.g. opus or codex:gpt-5-codex';
+
+  @override
+  String get harnessSettingsAdvanced => 'Advanced: guard hooks';
+
+  @override
+  String get harnessSettingsAdvancedHelp => 'Turn single hooks off; the profile still decides the rest.';
+
+  @override
+  String get harnessSettingsHook_pre_secret => 'refuse credentials and dotenv files';
+
+  @override
+  String get harnessSettingsHook_pre_redflags => 'refuse skipped tests, silenced linters, weakened checks';
+
+  @override
+  String get harnessSettingsHook_pre_rules => 'enforce team rules with a pattern';
+
+  @override
+  String get harnessSettingsHook_pre_fact_check => 'ask for facts before the first edit of a file';
+
+  @override
+  String get harnessSettingsHook_pre_destructive => 'ask for a rollback plan before destructive commands';
+
+  @override
+  String get harnessSettingsHook_post_edit_check => 'check each edited file (formatter, linter)';
+
+  @override
+  String get harnessSettingsHook_stop_gate => 'build and lint must pass before Claude finishes';
+
+  @override
+  String get harnessSettingsHook_session_progress => 'give the plan back after the context is compacted';
+
+  @override
+  String get harnessSettingsCodex => 'Coding on Codex';
+
+  @override
+  String get harnessSettingsCodexHelp =>
+      'A Codex model name runs coding on Codex CLI instead of Claude; empty uses Claude. Needs the OpenAI integration and api.openai.com in the allowed hosts (Settings → Preview).';
+
+  @override
+  String get harnessSettingsCodexConnect => 'OpenAI integration';
+
+  @override
+  String get harnessSettingsQualityTitle => 'Guardrails by prompt version';
+
+  @override
+  String get harnessSettingsQualitySub => 'What agnts-guard and the harness checks did for the tickets of each prompt version.';
+
+  @override
+  String get harnessSettingsColBlocks => 'Blocked';
+
+  @override
+  String get harnessSettingsColBlocksHint => 'Actions agnts-guard refused in coding runs';
+
+  @override
+  String get harnessSettingsColStopSaves => 'Stop-gate saves';
+
+  @override
+  String get harnessSettingsColStopSavesHint =>
+      'Tickets whose stop gate sent failing checks back, after which agnts\'s checks passed first time';
+
+  @override
+  String get harnessSettingsColStalls => 'Stalls';
+
+  @override
+  String get harnessSettingsColStallsHint => 'Times runs looked stuck';
+
+  @override
+  String get harnessSettingsColProven => 'Fixes proven';
+
+  @override
+  String get harnessSettingsColProvenHint => 'Bug fixes whose test failed before the change and passed after it, of those with a proof';
+
+  @override
+  String get harnessSettingsColAdopted => 'Findings adopted';
+
+  @override
+  String get harnessSettingsColAdoptedHint => 'Review findings people put into their feedback';
+
+  @override
+  String get harnessSettingsColTokens => 'Tokens per done';
+
+  @override
+  String get harnessSettingsColTokensHint => 'Average tokens of a done ticket, all stages';
+
+  @override
+  String get harnessSettingsColFactCheck => 'Fact check first try';
+
+  @override
+  String get harnessSettingsColFactCheckHint => 'First-try rate of tickets in the fact check group, next to the rate of all done tickets';
+
+  @override
+  String harnessSettingsXOfY(String x, String y) {
+    return '$x of $y';
+  }
+
+  @override
+  String harnessSettingsVsAll(String n) {
+    return 'vs $n%';
+  }
+
+  @override
+  String get harnessTicketFlag_secret => 'Possible secret';
+
+  @override
+  String get harnessTicketFlag_env_file => 'Dotenv file added';
+
+  @override
+  String get harnessTicketFlag_debug_leftover => 'Debug output left';
+
+  @override
+  String get harnessTicketFlag_check_config => 'Check configuration changed';
+
+  @override
+  String get harnessTicketFlag_rule_violation => 'Team rule broken';
+
+  @override
+  String get harnessTicketSecretsTitle => 'This change may contain a real credential';
+
+  @override
+  String harnessTicketSecretsBody(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n lines', one: '$n line');
+    return 'agnts flagged $_temp0 as a possible secret or a dotenv file. Check them in the red flags on the Review tab: agnts does not push the change until you confirm they are not real credentials.';
+  }
+
+  @override
+  String get harnessTicketSecretsConfirm => 'I checked them: not real credentials';
+
+  @override
+  String get harnessTicketSecretsDone => 'Confirmed: the flagged lines are not real credentials.';
+
+  @override
+  String get harnessTicketSecretsNeeded => 'First confirm that the lines flagged as secrets are not real credentials.';
+
+  @override
+  String get harnessTicketProofTitle => 'Proof of the fix';
+
+  @override
+  String get harnessTicketProof_proven => 'Proven';
+
+  @override
+  String get harnessTicketProof_not_reproduced => 'Not reproduced';
+
+  @override
+  String get harnessTicketProof_still_failing => 'Still failing';
+
+  @override
+  String get harnessTicketProof_inconclusive => 'Inconclusive';
+
+  @override
+  String get harnessTicketProof_no_test => 'No test';
+
+  @override
+  String get harnessTicketProof_error => 'Not checked';
+
+  @override
+  String get harnessTicketProofHelp_proven => 'The reproducing test fails on the code before the change and passes after it.';
+
+  @override
+  String get harnessTicketProofHelp_not_reproduced => 'The test passes before the change too, so it does not show the bug.';
+
+  @override
+  String get harnessTicketProofHelp_still_failing => 'The test still fails with the change.';
+
+  @override
+  String get harnessTicketProofHelp_inconclusive => 'The test could not run on the code before the change; it may need what the fix adds.';
+
+  @override
+  String get harnessTicketProofHelp_no_test => 'No automated test reproduces the bug.';
+
+  @override
+  String get harnessTicketProofHelp_error => 'agnts could not run the proof.';
+
+  @override
+  String harnessTicketProofBase(String sha) {
+    return 'Started from $sha';
+  }
+
+  @override
+  String harnessTicketProofBefore(String code) {
+    return 'Before the change (exit $code)';
+  }
+
+  @override
+  String harnessTicketProofAfter(String code) {
+    return 'After the change (exit $code)';
+  }
+
+  @override
+  String get harnessTicketCoverageTitle => 'Coverage of changed lines';
+
+  @override
+  String harnessTicketCoveragePct(String pct, String covered, String total) {
+    return '$pct% of the changed lines ran in the tests ($covered of $total)';
+  }
+
+  @override
+  String harnessTicketCoverageBelow(String n) {
+    return 'Below the repository\'s $n%';
+  }
+
+  @override
+  String get harnessTicketCoverageNone => 'No changed line is code the coverage report measures.';
+
+  @override
+  String harnessTicketCoverageLines(String ranges) {
+    return 'Not run: lines $ranges';
+  }
+
+  @override
+  String harnessTicketCoverageError(String error) {
+    return 'Coverage could not be measured: $error';
+  }
+
+  @override
+  String harnessTicketConfidence(String n) {
+    return '$n% sure';
+  }
+
+  @override
+  String get harnessTicketPass_security => 'Security pass';
+
+  @override
+  String get harnessTicketPass_failures => 'Failures pass';
+
+  @override
+  String get harnessTicketPass_tests => 'Tests pass';
+
+  @override
+  String get harnessTicketPass_types => 'Types pass';
+
+  @override
+  String get harnessTicketAdopted => 'In your feedback';
+
+  @override
+  String get harnessTicketDeep => 'Deep review';
+
+  @override
+  String harnessTicketDropped(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n findings', one: '$n finding');
+    return '$_temp0 left out (low confidence or duplicates)';
+  }
+
+  @override
+  String get harnessTicketDefect => 'Bug fix';
+
+  @override
+  String get harnessTicketAcceptanceTitle => 'Acceptance criteria';
+
+  @override
+  String get harnessTicketCheck_ui => 'In the app';
+
+  @override
+  String get harnessTicketCheck_api => 'API';
+
+  @override
+  String get harnessTicketCheck_test => 'Test';
+
+  @override
+  String get harnessTicketCheck_manual => 'By hand';
+
+  @override
+  String get harnessTicketSecondTitle => 'Second opinion';
+
+  @override
+  String harnessTicketSecondBy(String model) {
+    return 'From $model';
+  }
+
+  @override
+  String get harnessTicketSecondAgrees => 'Agrees';
+
+  @override
+  String get harnessTicketSecondConcerns => 'Has concerns';
+
+  @override
+  String get harnessTicketSecondAlternative => 'Would do instead';
+
+  @override
+  String harnessTicketSecondError(String error) {
+    return 'No second opinion: $error';
+  }
+
+  @override
+  String get harnessTicketAccTitle => 'Acceptance check';
+
+  @override
+  String get harnessTicketAcc_ok => 'All met';
+
+  @override
+  String get harnessTicketAcc_partial => 'Partly checked';
+
+  @override
+  String get harnessTicketAcc_failed => 'Not met';
+
+  @override
+  String get harnessTicketVerdict_pass => 'Met';
+
+  @override
+  String get harnessTicketVerdict_fail => 'Not met';
+
+  @override
+  String get harnessTicketVerdict_unknown => 'Not checked';
+
+  @override
+  String get harnessTicketAccSteps => 'Steps';
+
+  @override
+  String get harnessTicketAccShot => 'Screenshot';
 
   @override
   String get implementTitle => 'Next step';
@@ -2285,6 +3930,40 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get integrationsName_openai => 'OpenAI';
+
+  @override
+  String get integrationsDesc_openai =>
+      'An OpenAI API key for runs on Codex CLI, agnts\'s second coding tool. Pick a codex: model in Settings to use it.';
+
+  @override
+  String get integrationsConnectSub_openai =>
+      'Paste an OpenAI API key. agnts checks it, keeps it encrypted, and gives it only to runs that use Codex.';
+
+  @override
+  String get integrationsTokenOpen_openai => 'Open API keys';
+
+  @override
+  String get integrationsTokenStep1_openai => 'Open the OpenAI platform\'s API keys page (button below) and sign in.';
+
+  @override
+  String get integrationsTokenStep2_openai => 'Create a new secret key, ideally in a project with a spending limit.';
+
+  @override
+  String get integrationsTokenStep3_openai => 'Copy the key (it starts with sk-) and paste it into API key below.';
+
+  @override
+  String get integrationsTokenStep4_openai =>
+      'In Settings → Preview, add api.openai.com to the hosts runs may reach, so Codex runs can call OpenAI.';
+
+  @override
+  String get integrationsOpenaiKeyHelp => 'Stored encrypted on your server. Only runs on Codex receive it.';
+
+  @override
+  String get integrationsOpenaiHelp =>
+      'Codex runs have no agnts-guard hooks: agnts\'s checks after the run (red flags, build, lint, tests, review) still apply. Runs also need api.openai.com in the allowed hosts.';
+
+  @override
   String get kindTitle => 'Kind';
 
   @override
@@ -2762,6 +4441,162 @@ class AppLocalizationsEn extends AppLocalizations {
   String manalyticsCompared(num n) {
     return 'Changes are compared with the previous $n days. Green means better.';
   }
+
+  @override
+  String get mciTitle => 'CI failures';
+
+  @override
+  String get mciLede => 'Watched branches that went red, one row per error.';
+
+  @override
+  String get mciFilterRed => 'Red';
+
+  @override
+  String get mciFilterFlaky => 'Flaky';
+
+  @override
+  String get mciFilterAll => 'All';
+
+  @override
+  String get mciEmptyRed => 'No watched branch is red.';
+
+  @override
+  String get mciEmpty => 'No CI failures here.';
+
+  @override
+  String get mciStatus_triage => 'Checking';
+
+  @override
+  String get mciStatus_open => 'Red';
+
+  @override
+  String get mciStatus_fixing => 'Fixing';
+
+  @override
+  String get mciStatus_fixed => 'Fixed';
+
+  @override
+  String get mciStatus_resolved => 'Green again';
+
+  @override
+  String get mciStatus_flaky => 'Flaky';
+
+  @override
+  String get mciStatus_infra => 'Infrastructure';
+
+  @override
+  String get mciStatus_muted => 'Muted';
+
+  @override
+  String get mciStatus_regression => 'Back again';
+
+  @override
+  String mciLastSeen(String when) {
+    return 'last $when';
+  }
+
+  @override
+  String get mciFactFirstCommit => 'First failing commit';
+
+  @override
+  String get mciFactCount => 'Failed';
+
+  @override
+  String mciTimes(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n times', one: '$n time');
+    return '$_temp0';
+  }
+
+  @override
+  String get mciFactLastSeen => 'Last seen';
+
+  @override
+  String get mciFactFlaky => 'Passed on re-run';
+
+  @override
+  String get mciJob => 'Job';
+
+  @override
+  String get mciBranch => 'Branch';
+
+  @override
+  String get mciFirstError => 'The first error';
+
+  @override
+  String get mciLogTail => 'The end of the log';
+
+  @override
+  String get mciLogNote => 'From the job\'s log, with secrets removed.';
+
+  @override
+  String get mciNoSample => 'No log excerpt was kept for this failure.';
+
+  @override
+  String get mciRuns => 'Failing runs';
+
+  @override
+  String mciRunsCount(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n failing runs', one: '$n failing run');
+    return '$_temp0';
+  }
+
+  @override
+  String get mciRunFlaky => 'passed on re-run';
+
+  @override
+  String get mciTicket => 'Ticket';
+
+  @override
+  String mciForeignPr(String n) {
+    return 'This failure is on someone else\'s pull request (#$n): agnts only comments there.';
+  }
+
+  @override
+  String get mciFix => 'Fix it';
+
+  @override
+  String get mciFixConfirm => 'agnts opens a ticket to fix this failure. You review the fix before anything is pushed.';
+
+  @override
+  String get mciMute => 'Mute';
+
+  @override
+  String get mciUnmute => 'Unmute';
+
+  @override
+  String get mciMutedDone => 'Muted: agnts leaves this failure alone until you unmute it.';
+
+  @override
+  String get mciUnmutedDone => 'Unmuted.';
+
+  @override
+  String get mciRerun => 'Re-run';
+
+  @override
+  String get mciRerunDone => 'Re-run started.';
+
+  @override
+  String get mciCardTitle => 'CI failure';
+
+  @override
+  String get mciCardOpen => 'Open the CI failure';
+
+  @override
+  String mciCiFixes(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'CI sent the pull request back $n times',
+      one: 'CI sent the pull request back once',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mciSourceCi => 'CI';
+
+  @override
+  String get mciNotify => 'A watched branch went red';
 
   @override
   String get mcpTitle => 'Claude chat (MCP)';
@@ -3524,6 +5359,304 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navReviews => 'PR reviews';
+
+  @override
+  String get navCi => 'CI';
+
+  @override
+  String get networkTitle => 'Private networks';
+
+  @override
+  String get networkSub =>
+      'Reach self-hosted GitLab, Jira or package registries inside your networks. A connection goes through the network whose route matches it most closely.';
+
+  @override
+  String get networkUnavailable =>
+      'Private networks are not set up on this server: the operator runs the gateway service and sets AGNTS_GATEWAY.';
+
+  @override
+  String get networkStatus_up => 'Connected';
+
+  @override
+  String get networkStatus_connecting => 'Connecting';
+
+  @override
+  String get networkStatus_error => 'Error';
+
+  @override
+  String get networkStatus_gateway_down => 'Gateway down';
+
+  @override
+  String get networkStatus_disabled => 'Off';
+
+  @override
+  String get networkHandshake => 'Last handshake';
+
+  @override
+  String get networkHeartbeat => 'Last heartbeat';
+
+  @override
+  String get networkWebhooksRelay => 'Relayed by agnts-link';
+
+  @override
+  String networkWebhooksPolling(String n) {
+    return 'No webhooks: trackers reached through it are read every $n min';
+  }
+
+  @override
+  String get networkKind => 'Connection';
+
+  @override
+  String get networkKindConnector => 'agnts-link (recommended)';
+
+  @override
+  String get networkKindHelp_connector =>
+      'A small agent you run inside your network. It connects out to agnts: no VPN credentials, no inbound firewall rule, and it relays webhooks.';
+
+  @override
+  String get networkKindHelp_wireguard => 'agnts connects to your WireGuard peer as a client. The peer must accept UDP from this server.';
+
+  @override
+  String get networkKindHelp_openvpn =>
+      'agnts runs your OpenVPN client config in an isolated container. Certificates must be inline; logins that need MFA are not supported.';
+
+  @override
+  String get networkEnabled => 'Turned on';
+
+  @override
+  String get networkConfigWg => 'WireGuard config';
+
+  @override
+  String get networkConfigOvpn => 'OpenVPN config (.ovpn)';
+
+  @override
+  String networkSavedConfig(String summary) {
+    return 'Saved: $summary. Leave empty to keep it.';
+  }
+
+  @override
+  String get networkConfigWgHelp =>
+      'The file you would give wg-quick. Add a DNS line to reach hosts by name. Keys are encrypted and never shown again.';
+
+  @override
+  String get networkConfigOvpnHelp => 'A client config with its ca, cert and key blocks inline. Scripts (up, down, plugin…) are refused.';
+
+  @override
+  String get networkUsername => 'Username';
+
+  @override
+  String get networkPassword => 'Password';
+
+  @override
+  String get networkPasswordKeep => 'Saved: leave empty to keep it';
+
+  @override
+  String get networkRoutes => 'Routes';
+
+  @override
+  String get networkRoutesHelp =>
+      'Hosts (gitlab.corp.local), domains (.corp.local) or private ranges (10.20.0.0/16) that go through this network, with ports (80 and 443 when empty). Another network may have a narrower route inside these (10.30.0.0/16 inside 10.0.0.0/8): the more specific one wins. Two networks may not list the same route.';
+
+  @override
+  String get networkRouteTarget => 'Host, domain or range';
+
+  @override
+  String get networkRoutePorts => 'Ports';
+
+  @override
+  String get networkRemoveRoute => 'Remove route';
+
+  @override
+  String get networkAddRoute => 'Add route';
+
+  @override
+  String get networkBlastRadius =>
+      'Code agnts runs for your tickets can reach every host listed here. List exact hosts rather than whole ranges.';
+
+  @override
+  String get networkCa => 'Company CA bundle';
+
+  @override
+  String networkCaSaved(String subjects, String date) {
+    return 'Trusted: $subjects (until $date).';
+  }
+
+  @override
+  String get networkCaRemove => 'Remove';
+
+  @override
+  String get networkCaHelp => 'PEM certificates of your internal CA. agnts and its runs trust them besides the public roots.';
+
+  @override
+  String networkSaved(String name) {
+    return '$name saved';
+  }
+
+  @override
+  String get networkRemove => 'Remove';
+
+  @override
+  String get networkRemoved => 'Private network removed';
+
+  @override
+  String networkRemoveConfirm(String name) {
+    return 'Remove $name? agnts will stop reaching the hosts on its routes.';
+  }
+
+  @override
+  String get networkLinkTitle => 'Run agnts-link';
+
+  @override
+  String get networkLinkHelp =>
+      'Run this on a machine inside the network that can reach the hosts above. AGNTS_LINK_ALLOW is your own limit: agnts-link never dials anything else. Each network has its own token, so one machine can run several links.';
+
+  @override
+  String get networkToken => 'Token';
+
+  @override
+  String get networkTokenOnce => 'Copy it now: it is shown only once.';
+
+  @override
+  String get networkLinkHooks =>
+      'Webhooks: point GitLab and Jira at http://AGNTS-LINK-HOST:8080 with the same /webhooks/… path the Integrations page shows.';
+
+  @override
+  String get networkRotate => 'Replace token';
+
+  @override
+  String get networkRotateConfirm => 'Make a new token? The running agnts-link disconnects until you restart it with the new one.';
+
+  @override
+  String get networkTest => 'Test a connection';
+
+  @override
+  String get networkTestRun => 'Test';
+
+  @override
+  String get networkTesting => 'Testing…';
+
+  @override
+  String networkTestOk(String name, String via, String ip, String ms) {
+    return 'Connected through $name ($via) to $ip in $ms ms.';
+  }
+
+  @override
+  String networkTlsOk(String subject, String issuer) {
+    return 'Certificate OK: $subject, issued by $issuer.';
+  }
+
+  @override
+  String networkTlsBad(String error) {
+    return 'Certificate not trusted: $error';
+  }
+
+  @override
+  String get networkActivity => 'Activity';
+
+  @override
+  String networkActivityCounts(String n, String refused) {
+    return '$n connections, $refused refused or failed';
+  }
+
+  @override
+  String get networkActivityShow => 'Show connections';
+
+  @override
+  String get networkActivityHide => 'Hide connections';
+
+  @override
+  String get networkRefused => 'refused';
+
+  @override
+  String networkSecondsAgo(String n) {
+    return '$n s ago';
+  }
+
+  @override
+  String networkMinutesAgo(String n) {
+    return '$n min ago';
+  }
+
+  @override
+  String networkHoursAgo(String n) {
+    return '$n h ago';
+  }
+
+  @override
+  String get networkReconnect => 'Reconnect';
+
+  @override
+  String get networkReconnectHelp => 'Restart the tunnel: a fresh OpenVPN client, a new WireGuard handshake, or agnts-link connects again';
+
+  @override
+  String get networkReconnecting => 'Reconnecting: the tunnel restarts within 15 seconds';
+
+  @override
+  String get networkAdd => 'Add network';
+
+  @override
+  String get networkAddTitle => 'New private network';
+
+  @override
+  String get networkAddSubmit => 'Add network';
+
+  @override
+  String get networkEditorSub => 'A tunnel into one of your networks and the hosts that go through it';
+
+  @override
+  String get networkEdit => 'Edit';
+
+  @override
+  String get networkDone => 'Done';
+
+  @override
+  String get networkName => 'Name';
+
+  @override
+  String get networkNamePlaceholder => 'Client A, Office, Data center';
+
+  @override
+  String get networkNameHelp => 'Unique in the workspace: the company, office or data center it reaches.';
+
+  @override
+  String get networkEmpty => 'No private networks yet. Add one to reach hosts that are only inside your network.';
+
+  @override
+  String networkLimit(String n) {
+    return 'A workspace keeps at most $n private networks';
+  }
+
+  @override
+  String networkCaShort(String subjects) {
+    return 'Trusts $subjects';
+  }
+
+  @override
+  String get networkTestHelp => 'Enter host:port. agnts picks the network the routes lead to, connects and checks the certificate.';
+
+  @override
+  String get networkTestThrough => 'Through';
+
+  @override
+  String get networkTestAuto => 'The network the routes pick';
+
+  @override
+  String get networkActivityAll => 'All networks';
+
+  @override
+  String get networkActivityNetwork => 'Network';
+
+  @override
+  String get networkActivityTime => 'Time';
+
+  @override
+  String get networkActivityTarget => 'Target';
+
+  @override
+  String get networkActivitySource => 'Ticket or source';
+
+  @override
+  String get networkGone => 'removed';
 
   @override
   String get platformTitle => 'Admin cabinet';
@@ -4754,6 +6887,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repoBrief => 'Brief';
 
   @override
+  String get repoCi => 'CI';
+
+  @override
   String get reposTitle => 'Repositories';
 
   @override
@@ -5884,7 +8020,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsDenyHelp => 'Always refused, even if a ticket asks for them. Pushing is done by agnts, never by Claude Code.';
 
   @override
-  String get settingsCommits => 'Commits and pull requests';
+  String get settingsCommits => 'Commits and PR';
 
   @override
   String get settingsCommitsSub => 'Who commits appear from, and how pull requests open';
@@ -5996,9 +8132,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsReviewDone => 'When agnts\'s code review finishes';
 
   @override
-  String get settingsOnThisPage => 'On this page';
-
-  @override
   String get settingsSecretsHelp => 'Tokens for Jira, GitHub and Claude are stored encrypted on your server. This page never shows them.';
 
   @override
@@ -6039,6 +8172,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsReflectHelp =>
       'When you ask for changes or reject work with a reason, agnts looks for a convention behind it and suggests a rule on the Rules page. Nothing applies until you adopt it.';
+
+  @override
+  String get settingsCiRed => 'When a watched branch goes red';
 
   @override
   String get spendTitle => 'Token spend';
@@ -7047,6 +9183,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketSrcGit => 'Pull request';
 
   @override
+  String get ticketSrcCi => 'CI failure';
+
+  @override
+  String get ticketKvCi => 'CI';
+
+  @override
+  String ticketCiFixes(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n times', one: '$n time');
+    return 'CI sent the pull request back $_temp0';
+  }
+
+  @override
   String get ticketsTitle => 'Tickets';
 
   @override
@@ -7082,6 +9230,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ticketsColRepo => 'Repository';
+
+  @override
+  String get ticketsRepoLabel => 'Repository';
+
+  @override
+  String get ticketsAllRepos => 'All repositories';
+
+  @override
+  String get ticketsNoRepo => 'No repository';
 
   @override
   String get ticketsColStatus => 'Status';
@@ -7122,7 +9279,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketsListSub => 'Jira and Plane tickets with the agnts label, plus tasks you create for side projects.';
 
   @override
-  String get ticketsNoMatch => 'No tickets match your search.';
+  String get ticketsNoMatch => 'No tickets match your filters.';
 
   @override
   String get ticketsEmptyNeeds => 'Nothing is waiting on you. Tickets show up here when agnts has questions or changes to review.';
@@ -7156,6 +9313,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ticketsSourceGit => 'PR';
+
+  @override
+  String get ticketsSourceCi => 'CI';
 
   @override
   String get usageTitle => 'Plan usage';

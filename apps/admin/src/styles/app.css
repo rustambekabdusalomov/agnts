@@ -229,12 +229,14 @@ a.mem-name:hover { color: var(--primary-ink); }
 .isel-pop { position: absolute; z-index: 40; top: calc(100% + 6px); left: 0; min-width: 100%; max-width: min(420px, 90vw); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 12px 32px -12px var(--shadow); overflow: hidden; }
 .isel-search { display: block; width: 100%; min-height: 40px; padding: 0 12px; border: 0; border-bottom: 1px solid var(--line); background: var(--field); color: var(--ink); font: inherit; font-size: 14.5px; outline: none; }
 .isel-list { list-style: none; margin: 0; padding: 4px; max-height: 280px; overflow-y: auto; outline: none; }
-.isel-opt { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 14.5px; color: var(--ink); }
+.isel-opt { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 14.5px; color: var(--ink); }
 .isel-opt.active { background: var(--hover); }
 .isel-opt.selected .isel-label { font-weight: 700; }
 .isel-opt[aria-disabled="true"] { color: var(--ink-3); cursor: default; }
 .isel-label { flex: 1; min-width: 0; overflow-wrap: anywhere; }
-.isel-hint { flex: none; font-size: 12.5px; color: var(--ink-3); font-family: var(--mono); }
+.isel-hint { flex: 0 1 auto; max-width: 100%; font-size: 12.5px; color: var(--ink-3); font-family: var(--mono); overflow-wrap: anywhere; }
+/* A long hint (why an option is off) goes on its own line under the label. */
+.isel-hint.long { flex-basis: 100%; order: 3; font-family: inherit; line-height: 1.35; }
 .isel-check { flex: none; width: 16px; height: 16px; fill: none; stroke: var(--primary); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .isel-empty { padding: 10px; font-size: 14px; color: var(--ink-3); }
 

@@ -1,31 +1,31 @@
 # Analytics
 
-How well agnts works for you over time. Pick 7, 30 or 90 days; every number is compared with the period before it.
+How well agnts works for you over time. Pick 7, 30 or 90 days; every number is compared with the period before it, and green changes are improvements. The page has six tabs, and **Export CSV** saves the open tab's main table.
 
-## Key numbers
+## Overview
 
-Tickets pushed, success rate, approval on the first try, agnts's time per ticket, time waiting on you, and turns per ticket. Green changes are improvements.
+Insights first: short conclusions drawn from the numbers, with what to change. Then the key numbers (tickets pushed, success rate, approval on the first try, pull requests merged, time waiting on you, cost per pushed ticket), tickets per day and how they ended, and when agnts works during the day.
 
-## Throughput and outcomes
+## Delivery
 
-Tickets per day and how they ended: approved first time, approved after changes, rejected or stopped.
+What happens after agnts pushes. **Pull request outcomes**: pull requests opened in the period, merged, closed without merging or still open, and the merge rate (merged out of merged or closed). Pull requests open for more than a week are listed. **Cycle time**: typical time from picking a ticket up to pushing, and to merging. **Questions**: how many tickets asked something before coding, and how long answers take. The **slowest tickets** show where their time went: agnts working, waiting for answers, waiting for review, or queued. Times are medians; the slow figure is the slowest one in ten.
 
-## Speed and time
+Merges and closes come from the git host's webhook. Without one, agnts checks open pull requests on the git host itself.
 
-Minutes agnts works versus minutes tickets wait for you, and which step takes the longest.
+## Quality
 
-## Why runs stop
+Turns per ticket, why runs stop, agent quality by prompt version and replay results. **CI health** (when CI watching is on): failures per day by cause, how many agnts fixed itself and how fast, the flakiest jobs, and red checks on agnts's own pull requests fixed before your review.
 
-Failing tests, plan limits, your stops and turn limits, ranked.
+**Guardrails by prompt version**: actions agnts-guard refused, tickets the stop gate saved, stalls, bug fixes proven, the share of review findings people adopted, tokens per done ticket, and the fact check group's first-try rate next to everyone's.
 
-## Token spend
+## Learning
 
-Tokens Claude used in the period, input and output per day, with cache traffic listed apart, and which stages and models used the most. The dollar figure is Claude Code's estimate at API prices; on a Claude plan you are not charged it.
+Whether agnts learns from your feedback: lessons written and learned, rules suggested from tickets and adopted, rules you wrote, reflections on changed or rejected tickets, how many suggested follow-ups you accept (by type and by the step that found them), and which reviewers send the most notes.
 
-## Models and repositories
+## Cost
 
-Runs, success and plan cost per model, and how each repository performs, including the effect of CLAUDE.md.
+Tokens Claude used in the period, input and output per day, with cache traffic listed apart; spend by stage and by model; cost per pushed ticket; and peak plan usage per day. The dollar figure is Claude Code's estimate at API prices; on a Claude plan you are not charged it.
 
-## Insights
+## Repositories
 
-Short conclusions drawn from the numbers, with what to change.
+How each repository performs: tickets, success rate, merge rate, turns, agnts's time, questions per ticket, CI failures and whether it has a CLAUDE.md.

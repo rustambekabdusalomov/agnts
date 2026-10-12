@@ -7,6 +7,16 @@ part of 'analytics_repos_inner.dart';
 // **************************************************************************
 
 abstract class _$AnalyticsReposInnerCWProxy {
+  AnalyticsReposInner merged(int merged);
+
+  AnalyticsReposInner closed(int closed);
+
+  AnalyticsReposInner asked(int asked);
+
+  AnalyticsReposInner analyzed(int analyzed);
+
+  AnalyticsReposInner ciFailures(int ciFailures);
+
   AnalyticsReposInner repoId(int repoId);
 
   AnalyticsReposInner name(String name);
@@ -32,6 +42,11 @@ abstract class _$AnalyticsReposInnerCWProxy {
   /// AnalyticsReposInner(...).copyWith(id: 12, name: "My name")
   /// ````
   AnalyticsReposInner call({
+    int merged,
+    int closed,
+    int asked,
+    int analyzed,
+    int ciFailures,
     int repoId,
     String name,
     String kind,
@@ -49,6 +64,22 @@ class _$AnalyticsReposInnerCWProxyImpl implements _$AnalyticsReposInnerCWProxy {
   const _$AnalyticsReposInnerCWProxyImpl(this._value);
 
   final AnalyticsReposInner _value;
+
+  @override
+  AnalyticsReposInner merged(int merged) => this(merged: merged);
+
+  @override
+  AnalyticsReposInner closed(int closed) => this(closed: closed);
+
+  @override
+  AnalyticsReposInner asked(int asked) => this(asked: asked);
+
+  @override
+  AnalyticsReposInner analyzed(int analyzed) => this(analyzed: analyzed);
+
+  @override
+  AnalyticsReposInner ciFailures(int ciFailures) =>
+      this(ciFailures: ciFailures);
 
   @override
   AnalyticsReposInner repoId(int repoId) => this(repoId: repoId);
@@ -85,6 +116,11 @@ class _$AnalyticsReposInnerCWProxyImpl implements _$AnalyticsReposInnerCWProxy {
   /// AnalyticsReposInner(...).copyWith(id: 12, name: "My name")
   /// ````
   AnalyticsReposInner call({
+    Object? merged = const $CopyWithPlaceholder(),
+    Object? closed = const $CopyWithPlaceholder(),
+    Object? asked = const $CopyWithPlaceholder(),
+    Object? analyzed = const $CopyWithPlaceholder(),
+    Object? ciFailures = const $CopyWithPlaceholder(),
     Object? repoId = const $CopyWithPlaceholder(),
     Object? name = const $CopyWithPlaceholder(),
     Object? kind = const $CopyWithPlaceholder(),
@@ -96,6 +132,26 @@ class _$AnalyticsReposInnerCWProxyImpl implements _$AnalyticsReposInnerCWProxy {
     Object? agntsMin = const $CopyWithPlaceholder(),
   }) {
     return AnalyticsReposInner(
+      merged: merged == const $CopyWithPlaceholder()
+          ? _value.merged
+          // ignore: cast_nullable_to_non_nullable
+          : merged as int,
+      closed: closed == const $CopyWithPlaceholder()
+          ? _value.closed
+          // ignore: cast_nullable_to_non_nullable
+          : closed as int,
+      asked: asked == const $CopyWithPlaceholder()
+          ? _value.asked
+          // ignore: cast_nullable_to_non_nullable
+          : asked as int,
+      analyzed: analyzed == const $CopyWithPlaceholder()
+          ? _value.analyzed
+          // ignore: cast_nullable_to_non_nullable
+          : analyzed as int,
+      ciFailures: ciFailures == const $CopyWithPlaceholder()
+          ? _value.ciFailures
+          // ignore: cast_nullable_to_non_nullable
+          : ciFailures as int,
       repoId: repoId == const $CopyWithPlaceholder()
           ? _value.repoId
           // ignore: cast_nullable_to_non_nullable
@@ -152,6 +208,11 @@ AnalyticsReposInner _$AnalyticsReposInnerFromJson(Map<String, dynamic> json) =>
       $checkKeys(
         json,
         requiredKeys: const [
+          'merged',
+          'closed',
+          'asked',
+          'analyzed',
+          'ciFailures',
           'repoId',
           'name',
           'kind',
@@ -164,6 +225,11 @@ AnalyticsReposInner _$AnalyticsReposInnerFromJson(Map<String, dynamic> json) =>
         ],
       );
       final val = AnalyticsReposInner(
+        merged: $checkedConvert('merged', (v) => (v as num).toInt()),
+        closed: $checkedConvert('closed', (v) => (v as num).toInt()),
+        asked: $checkedConvert('asked', (v) => (v as num).toInt()),
+        analyzed: $checkedConvert('analyzed', (v) => (v as num).toInt()),
+        ciFailures: $checkedConvert('ciFailures', (v) => (v as num).toInt()),
         repoId: $checkedConvert('repoId', (v) => (v as num).toInt()),
         name: $checkedConvert('name', (v) => v as String),
         kind: $checkedConvert('kind', (v) => v as String),
@@ -180,6 +246,11 @@ AnalyticsReposInner _$AnalyticsReposInnerFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$AnalyticsReposInnerToJson(
   AnalyticsReposInner instance,
 ) => <String, dynamic>{
+  'merged': instance.merged,
+  'closed': instance.closed,
+  'asked': instance.asked,
+  'analyzed': instance.analyzed,
+  'ciFailures': instance.ciFailures,
   'repoId': instance.repoId,
   'name': instance.name,
   'kind': instance.kind,

@@ -20,6 +20,7 @@ type Rules interface {
 	AcceptRule(ctx context.Context, id int64, origin domain.Origin) (domain.Rule, error)
 	ReviewRule(ctx context.Context, id int64, origin domain.Origin) (domain.Rule, error)
 	DeleteRule(ctx context.Context, id int64, origin domain.Origin) error
+	harnessRules
 }
 
 func (s *Server) rulesReady(w http.ResponseWriter) bool {
@@ -64,6 +65,16 @@ func ruleInput(r *http.Request) (orchestrator.RuleInput, error) {
 	}
 	if req.Kind != nil {
 		in.Kind = domain.RuleKind(*req.Kind)
+	}
+	if req.Enforce != nil {
+		e := via[domain.RuleEnforce](*req.Enforce)
+		in.Enforce, in.EnforceSet = &e, true
+	}
+	if req.RemoveEnforce != nil && *req.RemoveEnforce {
+		in.Enforce, in.EnforceSet = nil, true
+	}
+	if req.Delivery != nil {
+		in.Delivery = string(*req.Delivery)
 	}
 	return in, nil
 }
@@ -177,6 +188,31 @@ func toRule(x domain.Rule) gen.Rule {
 	}
 	if x.Reason != "" {
 		out.Reason = &x.Reason
+	}
+	if x.Enforce != nil {
+		out.Enforce = ptr(via[gen.RuleEnforce](x.Enforce))
+	}
+	d := gen.RuleDelivery(x.Delivery)
+	if d == "" {
+		d = gen.RuleDelivery(domain.DeliverPrompt)
+	}
+	out.Delivery = &d
+	if x.SkillDescription != "" {
+		out.SkillDescription = &x.SkillDescription
+	}
+	if x.Source != "" {
+		out.Source = &x.Source
+	}
+	if x.Confidence > 0 {
+		c := float32(x.Confidence)
+		out.Confidence = &c
+	}
+	if x.Evidence > 0 {
+		out.Evidence = &x.Evidence
+	}
+	out.LastSeen = x.LastSeen
+	if x.Watching() {
+		out.Watching = ptr(true)
 	}
 	for i, q := range x.Questions {
 		out.Questions[i] = gen.RuleQuestion{Index: i, Text: q.Text, Options: q.Options, Round: q.Round}

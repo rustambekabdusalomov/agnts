@@ -209,13 +209,15 @@ func TestPipelinesPaging(t *testing.T) {
 	}
 }
 
-func TestPRMerged(t *testing.T) {
+func TestPRState(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/repos/acme/api/pulls/7":
 			_, _ = w.Write([]byte(`{"number":7,"state":"closed","merged":true}`))
 		case "/repos/acme/api/pulls/8":
 			_, _ = w.Write([]byte(`{"number":8,"state":"closed","merged":false}`))
+		case "/repos/acme/api/pulls/10":
+			_, _ = w.Write([]byte(`{"number":10,"state":"open","merged":false}`))
 		default:
 			http.NotFound(w, r)
 		}
@@ -224,13 +226,16 @@ func TestPRMerged(t *testing.T) {
 	h := New(srv.URL, func(context.Context) (string, error) { return "tok", nil })
 	repo := domain.Repository{CloneURL: "https://github.com/acme/api.git", DefaultBranch: "main"}
 	ctx := context.Background()
-	if ok, err := h.PRMerged(ctx, repo, 7); err != nil || !ok {
-		t.Fatalf("merged: %v %v", ok, err)
+	if s, err := h.PRState(ctx, repo, 7); err != nil || s != domain.PullMerged {
+		t.Fatalf("merged: %v %v", s, err)
 	}
-	if ok, err := h.PRMerged(ctx, repo, 8); err != nil || ok {
-		t.Fatalf("closed unmerged: %v %v", ok, err)
+	if s, err := h.PRState(ctx, repo, 8); err != nil || s != domain.PullClosed {
+		t.Fatalf("closed unmerged: %v %v", s, err)
 	}
-	if _, err := h.PRMerged(ctx, repo, 9); err == nil {
+	if s, err := h.PRState(ctx, repo, 10); err != nil || s != domain.PullOpen {
+		t.Fatalf("open: %v %v", s, err)
+	}
+	if _, err := h.PRState(ctx, repo, 9); err == nil {
 		t.Fatal("missing pull request: no error")
 	}
 }

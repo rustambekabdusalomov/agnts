@@ -35,6 +35,8 @@ func (s TicketSource) Name() string {
 		return "Plane"
 	case SourceGit:
 		return "Git"
+	case SourceCI:
+		return "CI"
 	}
 	return string(s)
 }
@@ -114,6 +116,9 @@ type Ticket struct {
 	// SelfFixes counts the rounds agnts's own review sent findings back to
 	// the coder since a person last asked for changes.
 	SelfFixes int
+	// CIFixes counts the rounds a failing CI check sent the ticket's open
+	// pull request back to coding since a person last approved it.
+	CIFixes int
 	// QuietReview: the ticket reached review without being announced, as
 	// agnts's own review may still send it back; announced when it ends.
 	QuietReview bool
@@ -257,6 +262,8 @@ type Run struct {
 	PromptVersion string
 	// FixAttempts counts failing checks sent back to Claude (coding runs).
 	FixAttempts int
+	// Harness is what the guards recorded during the run.
+	Harness RunHarness
 }
 
 // TokenUsage is what one or more Claude invocations used. CostUSD is what
@@ -331,7 +338,10 @@ type Result struct {
 	Files   []FileChange
 	Report  string // Markdown, for report kinds
 	// RedFlags are what agnts's scan of the change flagged.
-	RedFlags  []RedFlag
+	RedFlags []RedFlag
+	// Harness is what the harness checks found: proof of a fix, coverage
+	// of the change, the acceptance check.
+	Harness   ResultHarness
 	CreatedAt time.Time
 }
 
@@ -411,6 +421,10 @@ const (
 	EventReview         = "review_done"
 	EventPreview        = "preview_done"
 	EventFollowUps      = "follow_ups_suggested"
+	EventCIFailure      = "ci_failure"
+	// EventPRClosed: an agnts pull request was closed without a merge, or
+	// reopened (data "closed").
+	EventPRClosed = "pr_closed"
 	// EventQueued: why a ticket waits for a worker changed (wait_reason).
 	EventQueued = "queued"
 	// EventWorkspace: members, invites or workspace settings changed.
@@ -434,6 +448,27 @@ const (
 	EventRedFlags = "red_flags"
 	// EventCheckpoint: the drift checkpoint partway through a coding run.
 	EventCheckpoint = "checkpoint"
+	// EventGuard: what agnts-guard, the hooks inside the run, refused or
+	// sent back, and what the scan of agent files found.
+	EventGuard = "guard"
+	// EventSecretsAck: a person confirmed the lines flagged as secrets in
+	// the change under review are not real (data "sha": the commit).
+	EventSecretsAck = "secrets_acknowledged"
+	// EventProof: agnts ran a bug fix's reproducing test before and after
+	// the change.
+	EventProof = "proof"
+	// EventRepoHarness: a repository's guard and check settings changed.
+	EventRepoHarness = "repo_harness"
+	// EventSecondOpinion: another model's read of a complex ticket's
+	// chosen approach.
+	EventSecondOpinion = "second_opinion"
+	// EventAcceptance: the check of the acceptance criteria in the app.
+	EventAcceptance = "acceptance"
+	// EventCoverage: how much of a change's lines the tests ran.
+	EventCoverage = "coverage"
+	// EventStall: a run looked stuck (the same failure again and again, no
+	// edits for many turns).
+	EventStall = "stall"
 	// EventReviewer: agnts learned how a person reviews pull requests.
 	EventReviewer = "reviewer_learned"
 	// EventTrackerChanged: the issue changed in the tracker after agnts
@@ -485,6 +520,8 @@ type Repository struct {
 	// describes it.
 	BuildEnvSet   bool
 	BuildEnvNames []string
+	// Harness is the repository's guard and check settings.
+	Harness RepoHarness
 }
 
 // TrackerProject is the project in tracker src whose issues come to r,

@@ -36,6 +36,7 @@ Name | Type | Description | Notes
 **memoryMb** | **int** | Run container memory; 0 uses the server default | [optional] 
 **buildEnvSet** | **bool** |  | [optional] 
 **buildEnvNames** | **List&lt;String&gt;** | Names of the build environment variables; the values are never returned | [optional] 
+**harness** | [**RepoHarness**](RepoHarness.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

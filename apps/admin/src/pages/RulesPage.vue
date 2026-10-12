@@ -40,17 +40,22 @@ const scopeOptions = computed(() => [
 
 // Rules that need you first, then failed reviews, then the rest in order.
 const rank = (r: Rule) => (r.status === 'questions' ? 0 : r.status === 'suggested' ? 1 : r.status === 'failed' ? 2 : 3)
+// Learned lessons seen too rarely to suggest yet are listed apart.
+const watched = computed(() => all.value.filter((r) => r.watching))
+const visible = (r: Rule) => scope.value === 'all' || (scope.value === 'global' ? !r.repoId : r.repoId === scope.value)
+const watching = computed(() => watched.value.filter(visible))
 const rows = computed(() => {
   const q = ui.search.trim().toLowerCase()
   return all.value
-    .filter((r) => scope.value === 'all' || (scope.value === 'global' ? !r.repoId : r.repoId === scope.value))
+    .filter((r) => !r.watching)
+    .filter(visible)
     .filter((r) => !q || [r.title, r.body, r.repoName ?? ''].some((s) => s.toLowerCase().includes(q)))
     .map((r, i) => ({ r, i }))
     .sort((a, b) => rank(a.r) - rank(b.r) || a.i - b.i)
     .map(({ r }) => r)
 })
 const waiting = computed(() => all.value.filter((r) => r.status === 'questions').length)
-const suggested = computed(() => all.value.filter((r) => r.status === 'suggested').length)
+const suggested = computed(() => all.value.filter((r) => r.status === 'suggested' && !r.watching).length)
 
 const drawerOpen = ref(false)
 const editing = ref<Rule | null>(null)
@@ -80,14 +85,21 @@ const presetRepo = computed(() => (typeof scope.value === 'number' ? scope.value
   <section v-else-if="!all.length" class="card">
     <p class="empty">{{ t('rules.none') }}</p>
   </section>
-  <section v-else-if="!rows.length" class="card">
+  <section v-else-if="!rows.length && !watching.length" class="card">
     <p class="empty">{{ t('rules.noMatch') }}</p>
   </section>
   <RuleCard v-for="r in rows" v-else :key="r.id" :rule="r" @edit="openRule" />
+
+  <details v-if="watching.length" class="card rules-watching">
+    <summary>{{ t('harnessRules.watching', { n: watching.length }) }}</summary>
+    <p class="sub">{{ t('harnessRules.watchingHelp') }}</p>
+    <RuleCard v-for="r in watching" :key="r.id" :rule="r" @edit="openRule" />
+  </details>
 
   <RuleDrawer v-model="drawerOpen" :rule="editing" :repo-id="presetRepo" />
 </template>
 
 <style scoped>
 .rules-bar { display: flex; gap: 10px; margin: 0 0 14px; flex-wrap: wrap; }
+.rules-watching summary { cursor: pointer; font-weight: 700; }
 </style>

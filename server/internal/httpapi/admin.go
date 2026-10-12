@@ -62,19 +62,19 @@ func (s *Server) SetTicketModels(w http.ResponseWriter, r *http.Request, key gen
 	}
 	m := map[string]string{}
 	if req.Analyze != nil {
-		m[domain.ModelAnalyze] = string(*req.Analyze)
+		m[domain.ModelAnalyze] = *req.Analyze
 	}
 	if req.Coding != nil {
-		m[domain.ModelCoding] = string(*req.Coding)
+		m[domain.ModelCoding] = *req.Coding
 	}
 	if req.Retry != nil {
-		m[domain.ModelRetry] = string(*req.Retry)
+		m[domain.ModelRetry] = *req.Retry
 	}
 	if req.Preview != nil {
-		m[domain.ModelPreview] = string(*req.Preview)
+		m[domain.ModelPreview] = *req.Preview
 	}
 	if req.Review != nil {
-		m[domain.ModelReview] = string(*req.Review)
+		m[domain.ModelReview] = *req.Review
 	}
 	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
 		return s.opt.Tickets.SetModels(ctx, key, m, origin(r))
@@ -411,18 +411,31 @@ func (s *Server) RefreshUsage(w http.ResponseWriter, r *http.Request) {
 // ---- settings ----
 
 func toSettings(v domain.Settings) gen.Settings {
-	learn, autoLearn, lessons := gen.Model(v.Models.Learn), v.AutoLearn, v.Notify.Lessons
-	review, autoReview, reviewNote := gen.ReviewModel(v.Models.Review), v.AutoReview, v.Notify.Review
+	learn, autoLearn, lessons := v.Models.Learn, v.AutoLearn, v.Notify.Lessons
+	review, autoReview, reviewNote := v.Models.Review, v.AutoReview, v.Notify.Review
 	followUps, followUpsNote := v.SuggestFollowUps, v.Notify.FollowUps
-	preview, autoPreview, visualCheck := gen.Model(v.Models.Preview), v.AutoPreview, v.VisualCheck
+	preview, autoPreview, visualCheck := v.Models.Preview, v.AutoPreview, v.VisualCheck
 	previewNote, previewPhotos, egress := v.Notify.Preview, v.Notify.PreviewPhotos, append([]string{}, v.EgressAllow...)
 	autoBrief, selfReview, reflect := v.AutoBrief, v.SelfReview, v.Reflect
+	ciNote := v.Notify.CI
+	ci := gen.CISettings{AutoFix: v.CI.AutoFix, MaxAutoPerDay: v.CI.MaxAutoPerDay, RetryFlaky: v.CI.RetryFlaky,
+		FeedbackRounds: v.CI.FeedbackRounds, InfraPatterns: append([]string{}, v.CI.InfraPatterns...)}
 	pulls := gen.PullReviewSettings{Enabled: v.PullReviews.Enabled, ReviewRequested: v.PullReviews.ReviewRequested,
 		SkipDrafts: v.PullReviews.SkipDrafts, Rereview: v.PullReviews.Rereview, MergeMethod: gen.PullReviewSettingsMergeMethod(v.PullReviews.MergeMethod)}
+	guard := gen.GuardSettings{Profile: gen.GuardProfile(v.Guard.Profile), FactCheck: v.Guard.FactCheck, Disabled: []gen.GuardHook{}}
+	if guard.Profile == "" {
+		guard.Profile = gen.GuardProfile(domain.GuardStandard)
+	}
+	for _, h := range v.Guard.Disabled {
+		guard.Disabled = append(guard.Disabled, gen.GuardHook(h))
+	}
+	stalls, deep, prove, learnRuns, second := v.Stalls, v.DeepReview, v.ProveFixes, v.LearnFromRuns, v.SecondOpinion
 	return gen.Settings{
+		Guard: &guard, Stalls: &stalls, DeepReview: &deep, ProveFixes: &prove, LearnFromRuns: &learnRuns, SecondOpinion: &second,
 		PullReviews: &pulls,
-		Models: gen.StageModels{Analyze: gen.Model(v.Models.Analyze), Coding: gen.Model(v.Models.Coding),
-			Retry: gen.Model(v.Models.Retry), Helper: gen.Model(v.Models.Helper), Learn: &learn, Review: &review, Preview: &preview},
+		Ci:          &ci,
+		Models: gen.StageModels{Analyze: v.Models.Analyze, Coding: v.Models.Coding,
+			Retry: v.Models.Retry, Helper: v.Models.Helper, Learn: &learn, Review: &review, Preview: &preview},
 		AutoPreview: &autoPreview, VisualCheck: &visualCheck, EgressAllow: &egress, AutoBrief: &autoBrief, SelfReview: &selfReview, Reflect: &reflect,
 		MaxTurns: v.MaxTurns, TimeoutMin: v.TimeoutMin, Allow: v.Allow, Deny: v.Deny,
 		AskFirst: v.AskFirst, AutoResume: v.AutoResume, PauseAbove: v.PauseAbove, Parallel: v.Parallel, AutoLearn: &autoLearn,
@@ -431,7 +444,7 @@ func toSettings(v domain.Settings) gen.Settings {
 			PrTitle: v.Git.PRTitle, Draft: v.Git.Draft},
 		Notify: &gen.NotifySettings{Push: v.Notify.Push, Telegram: v.Notify.Telegram, NeedsYou: v.Notify.NeedsYou,
 			Stopped: v.Notify.Stopped, Done: v.Notify.Done, Lessons: &lessons, Review: &reviewNote, FollowUps: &followUpsNote,
-			Preview: &previewNote, PreviewPhotos: &previewPhotos},
+			Preview: &previewNote, PreviewPhotos: &previewPhotos, Ci: &ciNote},
 	}
 }
 
@@ -474,14 +487,16 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	v := domain.Settings{
-		Models: domain.StageModels{Analyze: string(req.Models.Analyze), Coding: string(req.Models.Coding),
-			Retry: string(req.Models.Retry), Helper: string(req.Models.Helper), Learn: cur.Models.Learn, Review: cur.Models.Review,
+		Models: domain.StageModels{Analyze: req.Models.Analyze, Coding: req.Models.Coding,
+			Retry: req.Models.Retry, Helper: req.Models.Helper, Learn: cur.Models.Learn, Review: cur.Models.Review,
 			Preview: cur.Models.Preview},
 		AutoPreview: cur.AutoPreview, VisualCheck: cur.VisualCheck, EgressAllow: cur.EgressAllow,
 		AutoBrief: cur.AutoBrief, SelfReview: cur.SelfReview, Reflect: cur.Reflect,
 		MaxTurns: req.MaxTurns, TimeoutMin: req.TimeoutMin, Allow: req.Allow, Deny: req.Deny,
 		AskFirst: req.AskFirst, AutoResume: req.AutoResume, PauseAbove: req.PauseAbove, Parallel: cur.Parallel, AutoLearn: cur.AutoLearn,
-		AutoReview: cur.AutoReview, SuggestFollowUps: cur.SuggestFollowUps, PullReviews: cur.PullReviews,
+		AutoReview: cur.AutoReview, SuggestFollowUps: cur.SuggestFollowUps, PullReviews: cur.PullReviews, CI: cur.CI,
+		Guard: cur.Guard, Stalls: cur.Stalls, DeepReview: cur.DeepReview, ProveFixes: cur.ProveFixes, LearnFromRuns: cur.LearnFromRuns,
+		SecondOpinion: cur.SecondOpinion,
 		Git: domain.GitSettings{AuthorName: req.Git.AuthorName, AuthorEmail: req.Git.AuthorEmail, CoAuthor: req.Git.CoAuthor,
 			PRTitle: req.Git.PrTitle, Draft: req.Git.Draft},
 		Notify: cur.Notify,
@@ -489,7 +504,10 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 	if req.Notify != nil {
 		v.Notify = domain.NotifySettings{Push: req.Notify.Push, Telegram: req.Notify.Telegram, NeedsYou: req.Notify.NeedsYou,
 			Stopped: req.Notify.Stopped, Done: req.Notify.Done, Lessons: cur.Notify.Lessons, Review: cur.Notify.Review,
-			FollowUps: cur.Notify.FollowUps, Preview: cur.Notify.Preview, PreviewPhotos: cur.Notify.PreviewPhotos}
+			FollowUps: cur.Notify.FollowUps, Preview: cur.Notify.Preview, PreviewPhotos: cur.Notify.PreviewPhotos, CI: cur.Notify.CI}
+		if req.Notify.Ci != nil {
+			v.Notify.CI = *req.Notify.Ci
+		}
 		if req.Notify.Preview != nil {
 			v.Notify.Preview = *req.Notify.Preview
 		}
@@ -507,13 +525,13 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if req.Models.Learn != nil {
-		v.Models.Learn = string(*req.Models.Learn)
+		v.Models.Learn = *req.Models.Learn
 	}
 	if req.AutoLearn != nil {
 		v.AutoLearn = *req.AutoLearn
 	}
 	if req.Models.Review != nil {
-		v.Models.Review = string(*req.Models.Review)
+		v.Models.Review = *req.Models.Review
 	}
 	if req.AutoReview != nil {
 		v.AutoReview = *req.AutoReview
@@ -522,7 +540,7 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 		v.SuggestFollowUps = *req.SuggestFollowUps
 	}
 	if req.Models.Preview != nil {
-		v.Models.Preview = string(*req.Models.Preview)
+		v.Models.Preview = *req.Models.Preview
 	}
 	if req.AutoPreview != nil {
 		v.AutoPreview = *req.AutoPreview
@@ -545,6 +563,31 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 	if p := req.PullReviews; p != nil {
 		v.PullReviews = domain.PullReviewSettings{Enabled: p.Enabled, ReviewRequested: p.ReviewRequested, SkipDrafts: p.SkipDrafts,
 			Rereview: p.Rereview, MergeMethod: string(p.MergeMethod)}
+	}
+	if g := req.Guard; g != nil {
+		v.Guard = domain.GuardSettings{Profile: string(g.Profile), FactCheck: g.FactCheck, Disabled: []string{}}
+		for _, h := range g.Disabled {
+			v.Guard.Disabled = append(v.Guard.Disabled, string(h))
+		}
+	}
+	if req.Stalls != nil {
+		v.Stalls = *req.Stalls
+	}
+	if req.DeepReview != nil {
+		v.DeepReview = *req.DeepReview
+	}
+	if req.ProveFixes != nil {
+		v.ProveFixes = *req.ProveFixes
+	}
+	if req.LearnFromRuns != nil {
+		v.LearnFromRuns = *req.LearnFromRuns
+	}
+	if req.SecondOpinion != nil {
+		v.SecondOpinion = *req.SecondOpinion
+	}
+	if c := req.Ci; c != nil {
+		v.CI = domain.CISettings{AutoFix: c.AutoFix, MaxAutoPerDay: c.MaxAutoPerDay, RetryFlaky: c.RetryFlaky,
+			FeedbackRounds: c.FeedbackRounds, InfraPatterns: c.InfraPatterns}
 	}
 	saved, err := s.opt.Admin.Settings.Put(r.Context(), v, origin(r))
 	if err != nil {
@@ -569,7 +612,8 @@ func toRepo(x admin.RepoView) gen.Repository {
 		ArchivedAt: x.ArchivedAt, Preview: toRepoPreview(x.Preview),
 		Stack: &x.Stack, Toolchains: ptr(toToolchains(x.Toolchains)), ToolchainsOverride: &x.ToolchainsOverride,
 		ToolchainsDetectedAt: x.ToolchainsDetectedAt, ToolchainNotes: ptr(nonNil(x.ToolchainNotes)),
-		RunnerImage: &x.RunnerImage, MemoryMb: &x.MemoryMB, BuildEnvSet: &x.BuildEnvSet, BuildEnvNames: ptr(nonNil(x.BuildEnvNames))}
+		RunnerImage: &x.RunnerImage, MemoryMb: &x.MemoryMB, BuildEnvSet: &x.BuildEnvSet, BuildEnvNames: ptr(nonNil(x.BuildEnvNames)),
+		Harness: toRepoHarness(x.Repository)}
 }
 
 func ptr[T any](v T) *T { return &v }

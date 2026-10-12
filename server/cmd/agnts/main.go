@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -25,8 +26,11 @@ import (
 	"agnts/internal/config"
 	"agnts/internal/domain"
 	"agnts/internal/egress"
+	"agnts/internal/gateway"
 	"agnts/internal/logging"
 	"agnts/internal/oauth"
+	"agnts/internal/ovpnside"
+	"agnts/internal/privnet"
 	"agnts/internal/secret"
 	"agnts/internal/store/postgres"
 )
@@ -67,6 +71,8 @@ install's default workspace:
   agnts version [--json]         print the version
   agnts healthcheck              exit 0 if the local server is healthy (for Docker)
   agnts egress-proxy             run the allowlist proxy for run containers (AGNTS_EGRESS_ALLOW)
+  agnts gateway                  run the private network gateway (WireGuard, OpenVPN, agnts-link)
+  agnts ovpn-sidecar             run a workspace's OpenVPN client (inside its sidecar container)
 
 Configuration is read from AGNTS_* environment variables; see deploy/.env.example.
 `
@@ -103,6 +109,10 @@ func run(ctx context.Context, args []string) error {
 		return healthcheck(ctx)
 	case "egress-proxy":
 		return egressProxy(ctx)
+	case "gateway":
+		return gatewayCmd(ctx)
+	case "ovpn-sidecar":
+		return ovpnSidecar(ctx)
 	case "help", "-h", "--help":
 		fmt.Print(usageText)
 		return nil
@@ -338,6 +348,21 @@ func egressProxy(ctx context.Context) error {
 	if u := strings.TrimSpace(os.Getenv("AGNTS_EGRESS_EXTRA_URL")); u != "" {
 		go proxy.Follow(ctx, u, 30*time.Second)
 	}
+	// Private networks: a run's connection to a host on its workspace's
+	// routes goes through the gateway. agnts says which workspace a run
+	// container's address belongs to.
+	if gw, secret := strings.TrimSpace(os.Getenv("AGNTS_GATEWAY")), strings.TrimSpace(os.Getenv("AGNTS_GATEWAY_SECRET")); gw != "" && secret != "" {
+		routeURL := strings.TrimSpace(os.Getenv("AGNTS_EGRESS_ROUTE_URL"))
+		if routeURL == "" {
+			routeURL = "http://agnts:8081/egress/route"
+		}
+		proxy.SetPrivate(egress.HTTPRouter{URL: routeURL, Secret: secret, Client: &http.Client{Timeout: 5 * time.Second}},
+			func(ctx context.Context, p egress.Private, target string) (net.Conn, error) {
+				c, _, err := privnet.DialGateway(ctx, gw, secret, privnet.DialRequest{Workspace: p.Workspace, Network: p.Network, Ticket: p.Ticket, Target: target, Source: "run"})
+				return c, err
+			})
+		log.Info("egress proxy: private networks through the gateway", "gateway", gw)
+	}
 	srv := &http.Server{Addr: addr, Handler: proxy, ReadHeaderTimeout: 10 * time.Second}
 	go func() {
 		<-ctx.Done()
@@ -348,4 +373,69 @@ func egressProxy(ctx context.Context) error {
 		return err
 	}
 	return nil
+}
+
+// gatewayCmd runs the private network gateway: the tunnels of every
+// workspace, a CONNECT listener for agnts and the egress proxy, and the
+// listener agnts-link connects to (through Caddy).
+func gatewayCmd(ctx context.Context) error {
+	log := logging.New(os.Stdout, envOr("AGNTS_LOG_FORMAT", "json"), envOr("AGNTS_LOG_LEVEL", "info"))
+	secretVal := strings.TrimSpace(os.Getenv("AGNTS_GATEWAY_SECRET"))
+	if len(secretVal) < 24 {
+		return errors.New("AGNTS_GATEWAY_SECRET must be set (at least 24 characters, the same as agnts and the egress proxy)")
+	}
+	key, err := base64.StdEncoding.DecodeString(strings.TrimSpace(os.Getenv("AGNTS_ENC_KEY")))
+	if err != nil || len(key) != 32 {
+		return errors.New("AGNTS_ENC_KEY must be agnts's key: the gateway opens the VPN configs")
+	}
+	box, err := secret.NewBox(key)
+	if err != nil {
+		return err
+	}
+	g := gateway.New(gateway.Config{
+		Secret:   secretVal,
+		AgntsURL: strings.TrimRight(envOr("AGNTS_GATEWAY_AGNTS_URL", "http://agnts:8081"), "/"),
+		HooksURL: strings.TrimRight(envOr("AGNTS_GATEWAY_HOOKS_URL", "http://agnts:8080"), "/"),
+	}, box, log)
+	addr, linkAddr := envOr("AGNTS_GATEWAY_ADDR", ":3129"), envOr("AGNTS_GATEWAY_LINK_ADDR", ":3130")
+	srv := &http.Server{Addr: addr, Handler: g, ReadHeaderTimeout: 10 * time.Second}
+	link := &http.Server{Addr: linkAddr, Handler: g.LinkHandler(), ReadHeaderTimeout: 10 * time.Second}
+	go g.Run(ctx)
+	go func() {
+		<-ctx.Done()
+		_ = srv.Close()
+		_ = link.Close()
+	}()
+	errc := make(chan error, 2)
+	go func() { errc <- link.ListenAndServe() }()
+	go func() { errc <- srv.ListenAndServe() }()
+	log.Info("gateway listening", "addr", addr, "link", linkAddr)
+	if err := <-errc; err != nil && !errors.Is(err, http.ErrServerClosed) {
+		return err
+	}
+	return nil
+}
+
+// ovpnSidecar runs inside a workspace's OpenVPN sidecar container; agnts
+// starts it with the config and the SOCKS password in its environment.
+func ovpnSidecar(ctx context.Context) error {
+	log := logging.New(os.Stdout, "json", envOr("AGNTS_LOG_LEVEL", "info"))
+	sec, err := ovpnside.ReadSecret(os.Getenv("AGNTS_OVPN_SECRET"))
+	if err != nil {
+		return errors.New("AGNTS_OVPN_SECRET is missing or broken: agnts starts this container itself")
+	}
+	pw := os.Getenv("AGNTS_OVPN_SOCKS_PASSWORD")
+	if pw == "" {
+		return errors.New("AGNTS_OVPN_SOCKS_PASSWORD is missing")
+	}
+	_ = os.Unsetenv("AGNTS_OVPN_SECRET")
+	_ = os.Unsetenv("AGNTS_OVPN_SOCKS_PASSWORD")
+	return ovpnside.New(ovpnside.Config{Secret: sec, SocksPassword: pw, Dir: envOr("AGNTS_OVPN_DIR", "/tmp")}, log).Run(ctx)
+}
+
+func envOr(k, def string) string {
+	if v := strings.TrimSpace(os.Getenv(k)); v != "" {
+		return v
+	}
+	return def
 }

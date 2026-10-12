@@ -7,27 +7,32 @@ void main() {
   // TODO add properties to the entity
 
   group(ModelOverrides, () {
-    // Model analyze
+    // A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
+    // String analyze
     test('to test the property `analyze`', () async {
       // TODO
     });
 
-    // Model coding
+    // A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
+    // String coding
     test('to test the property `coding`', () async {
       // TODO
     });
 
-    // Model retry
+    // A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
+    // String retry
     test('to test the property `retry`', () async {
       // TODO
     });
 
-    // Model review
+    // A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
+    // String review
     test('to test the property `review`', () async {
       // TODO
     });
 
-    // Model preview
+    // A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
+    // String preview
     test('to test the property `preview`', () async {
       // TODO
     });

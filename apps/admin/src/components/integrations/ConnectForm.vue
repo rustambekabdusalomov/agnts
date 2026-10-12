@@ -7,7 +7,7 @@ import { useUi } from '../../stores/ui'
 import CfgRow from '../form/CfgRow.vue'
 import CopyField from '../form/CopyField.vue'
 import HiIcon from '../ui/HiIcon.vue'
-import type { Provider } from './providers'
+import { type Provider } from './providers'
 
 // Connect a provider: the token (and Jira's site and email, or Plane's
 // address and workspace) is checked by the server before it is saved.
@@ -32,6 +32,7 @@ const guide = computed<{ link?: string; command?: string; chatIdLink?: string } 
   if (props.provider === 'claude') return { command: 'claude setup-token' }
   if (props.provider === 'jira') return { link: 'https://id.atlassian.com/manage-profile/security/api-tokens' }
   if (props.provider === 'plane') return { link: 'https://developers.plane.so/api-reference/introduction' }
+  if (props.provider === 'openai') return { link: 'https://platform.openai.com/api-keys' }
   if (props.provider === 'telegram') {
     const tok = form.token.trim()
     return { link: 'https://t.me/BotFather', chatIdLink: /^\d+:[\w-]{20,}$/.test(tok) ? `https://api.telegram.org/bot${tok}/getUpdates` : undefined }
@@ -40,10 +41,10 @@ const guide = computed<{ link?: string; command?: string; chatIdLink?: string } 
 })
 
 const tokenLabel = computed(() =>
-  props.provider === 'jira' ? t('integrations.apiToken') : props.provider === 'plane' ? t('integrations.apiKey') : t('integrations.accessToken'),
+  props.provider === 'jira' ? t('integrations.apiToken') : props.provider === 'plane' || props.provider === 'openai' ? t('integrations.apiKey') : t('integrations.accessToken'),
 )
 const tokenHelp = computed(() =>
-  props.provider === 'jira' ? t('integrations.apiTokenHelp') : props.provider === 'plane' ? t('integrations.apiKeyHelp') : t('integrations.tokenHelp'),
+  props.provider === 'jira' ? t('integrations.apiTokenHelp') : props.provider === 'plane' ? t('integrations.apiKeyHelp') : props.provider === 'openai' ? t('integrations.openaiKeyHelp') : t('integrations.tokenHelp'),
 )
 
 const connect = useMutation({
@@ -149,7 +150,7 @@ const glScopes = [
           required
           minlength="8"
           autocomplete="off"
-          :placeholder="provider === 'plane' ? 'plane_api_…' : provider === 'github' ? 'github_pat_…' : provider === 'gitlab' ? 'glpat-…' : provider === 'claude' ? 'sk-ant-…' : provider === 'telegram' ? '123456:ABC…' : ''"
+          :placeholder="provider === 'plane' ? 'plane_api_…' : provider === 'github' ? 'github_pat_…' : provider === 'gitlab' ? 'glpat-…' : provider === 'claude' ? 'sk-ant-…' : provider === 'telegram' ? '123456:ABC…' : provider === 'openai' ? 'sk-…' : ''"
           :aria-label="tokenLabel"
         >
       </CfgRow>

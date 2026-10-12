@@ -76,6 +76,7 @@
     "status": "Status",
     "duration": "Duration",
     "openRun": "Open on the git host",
-    "brief": "Brief"
+    "brief": "Brief",
+    "ci": "CI"
   }
 }

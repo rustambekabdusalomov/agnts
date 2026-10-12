@@ -29,6 +29,24 @@ type RuleInput struct {
 	RepoID  *int64 // nil: every repository
 	Enabled bool
 	Kind    domain.RuleKind // "" is an instruction
+	// Enforce is set when EnforceSet: nil then removes the enforcement.
+	Enforce    *domain.RuleEnforce
+	EnforceSet bool
+	// Delivery is prompt or skill; "" keeps the rule's.
+	Delivery string
+}
+
+// harness validates the enforcement and delivery of a rule input.
+func (in *RuleInput) harness() error {
+	if in.Enforce != nil {
+		if err := in.Enforce.Validate(); err != nil {
+			return invalid("%s", err)
+		}
+	}
+	if in.Delivery != "" && in.Delivery != domain.DeliverPrompt && in.Delivery != domain.DeliverSkill {
+		return invalid("delivery must be prompt or skill")
+	}
+	return nil
 }
 
 func (in RuleInput) kind() (domain.RuleKind, error) {
@@ -52,7 +70,10 @@ type RuleAnswer struct {
 type RuleReview struct {
 	Interpretation string `json:"interpretation"`
 	Clarified      string `json:"clarified"`
-	Questions      []struct {
+	// SkillDescription says when the rule applies, in one sentence: the
+	// description of the rule's skill.
+	SkillDescription string `json:"skillDescription"`
+	Questions        []struct {
 		Text    string   `json:"text"`
 		Options []string `json:"options"`
 	} `json:"questions"`
@@ -115,9 +136,13 @@ func (o *Orchestrator) CreateRule(ctx context.Context, in RuleInput, origin doma
 	if err != nil {
 		return domain.Rule{}, err
 	}
-	r := domain.Rule{Title: in.Title, Body: in.Body, RepoID: in.RepoID, Enabled: in.Enabled, Status: domain.RulePending, Kind: kind}
+	r := domain.Rule{Title: in.Title, Body: in.Body, RepoID: in.RepoID, Enabled: in.Enabled, Status: domain.RulePending, Kind: kind,
+		Enforce: in.Enforce, Delivery: in.Delivery}
 	if err := r.Validate(); err != nil {
 		return r, invalid("%s", err)
+	}
+	if err := in.harness(); err != nil {
+		return r, err
 	}
 	if err := o.checkRuleRepo(ctx, r.RepoID); err != nil {
 		return r, err
@@ -145,6 +170,9 @@ func (o *Orchestrator) UpdateRule(ctx context.Context, id int64, in RuleInput, o
 	if err := next.Validate(); err != nil {
 		return next, invalid("%s", err)
 	}
+	if err := in.harness(); err != nil {
+		return next, err
+	}
 	if err := o.checkRuleRepo(ctx, in.RepoID); err != nil {
 		return next, err
 	}
@@ -167,6 +195,21 @@ func (o *Orchestrator) UpdateRule(ctx context.Context, id int64, in RuleInput, o
 			msg = fmt.Sprintf("rule %q turned off", x.Title)
 		}
 		x.Enabled = in.Enabled
+		if in.EnforceSet && !sameEnforce(x.Enforce, in.Enforce) {
+			x.Enforce = in.Enforce
+			if msg == "" {
+				msg = fmt.Sprintf("rule %q: enforcement changed", x.Title)
+				if in.Enforce == nil {
+					msg = fmt.Sprintf("rule %q is no longer enforced", x.Title)
+				}
+			}
+		}
+		if in.Delivery != "" && in.Delivery != x.Delivery {
+			x.Delivery = in.Delivery
+			if msg == "" {
+				msg = fmt.Sprintf("rule %q now reaches runs as a %s", x.Title, map[string]string{domain.DeliverSkill: "skill", domain.DeliverPrompt: "part of every prompt"}[in.Delivery])
+			}
+		}
 		return nil
 	}, func(x domain.Rule) *domain.Event {
 		if msg == "" {
@@ -178,6 +221,13 @@ func (o *Orchestrator) UpdateRule(ctx context.Context, id int64, in RuleInput, o
 		o.Wake()
 	}
 	return r, err
+}
+
+func sameEnforce(a, b *domain.RuleEnforce) bool {
+	if a == nil || b == nil {
+		return a == b
+	}
+	return a.On == b.On && a.Pattern == b.Pattern && a.Action == b.Action && a.Message == b.Message && strings.Join(a.Paths, "\x00") == strings.Join(b.Paths, "\x00")
 }
 
 func sameRepo(a, b *int64) bool {
@@ -300,7 +350,7 @@ func (o *Orchestrator) teamRules(ctx context.Context, repoID *int64) ([]domain.R
 	}
 	out := rules[:0:0]
 	for _, r := range rules {
-		if r.Kind != domain.KindContext {
+		if r.Kind == domain.KindInstruction && r.Delivery != domain.DeliverSkill {
 			out = append(out, r)
 		}
 	}
@@ -319,7 +369,7 @@ func (o *Orchestrator) businessNotes(ctx context.Context, repoID *int64) ([]doma
 	}
 	var out []domain.Rule
 	for _, r := range rules {
-		if r.Kind == domain.KindContext {
+		if r.Kind == domain.KindContext && r.Delivery != domain.DeliverSkill {
 			out = append(out, r)
 		}
 	}
@@ -407,6 +457,9 @@ func applyReview(x *domain.Rule, rv RuleReview) string {
 		return fmt.Sprintf("rule %q: %d %s before it applies", x.Title, len(qs), plural(len(qs), "question", "questions"))
 	}
 	x.Status, x.Clarified = domain.RuleReady, strings.TrimSpace(rv.Clarified)
+	if d := strings.TrimSpace(rv.SkillDescription); d != "" {
+		x.SkillDescription = truncate(d, 500)
+	}
 	return fmt.Sprintf("rule %q is clear and applies to new tickets", x.Title)
 }
 

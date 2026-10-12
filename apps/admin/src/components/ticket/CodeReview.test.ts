@@ -55,4 +55,17 @@ describe('CodeReview', () => {
     expect(w.findAll('.cr-f')).toHaveLength(0)
     expect(w.text()).toContain('Queued')
   })
+
+  it('shows the deep review, confidence, passes, adoption and dropped findings', () => {
+    const deep: Review = {
+      ...review, deep: true, dropped: 3,
+      findings: [{ severity: 'major', category: 'security', title: 'No owner check', confidence: 0.92, pass: 'security', adopted: true }],
+    }
+    const w = setup({ ticket: ticket(), review: deep })
+    expect(w.text()).toContain('Deep review')
+    expect(w.text()).toContain('92% sure')
+    expect(w.text()).toContain('Security pass')
+    expect(w.text()).toContain('In your feedback')
+    expect(w.text()).toContain('3 findings left out')
+  })
 })

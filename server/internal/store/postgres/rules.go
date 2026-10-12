@@ -22,22 +22,29 @@ func NewRules(db *pgxpool.Pool) *Rules { return &Rules{db: db} }
 
 const ruleCols = `x.id, x.repo_id, coalesce(r.name, ''), x.title, x.body, x.enabled, x.status, x.interpretation,
 	x.clarified, x.questions, x.rounds, x.revision, x.error, x.analyzed_at, x.created_at, x.updated_at, x.workspace_id,
-	x.kind, x.source_ticket, x.reason`
+	x.kind, x.source_ticket, x.reason, x.enforce, x.delivery, x.skill_description, x.source, x.confidence, x.evidence, x.last_seen`
 
 const ruleFrom = ` FROM rules x LEFT JOIN repositories r ON r.id = x.repo_id`
 
 func scanRule(row pgx.Row) (domain.Rule, error) {
 	var x domain.Rule
 	var status, kind string
-	var qs []byte
+	var qs, enforce []byte
+	var conf float32
 	err := row.Scan(&x.ID, &x.RepoID, &x.RepoName, &x.Title, &x.Body, &x.Enabled, &status, &x.Interpretation,
 		&x.Clarified, &qs, &x.Rounds, &x.Revision, &x.Error, &x.AnalyzedAt, &x.CreatedAt, &x.UpdatedAt, &x.WorkspaceID,
-		&kind, &x.SourceTicket, &x.Reason)
+		&kind, &x.SourceTicket, &x.Reason, &enforce, &x.Delivery, &x.SkillDescription, &x.Source, &conf, &x.Evidence, &x.LastSeen)
 	if err != nil {
 		return x, notFound(err)
 	}
-	x.Status, x.Kind = domain.RuleStatus(status), domain.RuleKind(kind)
+	x.Status, x.Kind, x.Confidence = domain.RuleStatus(status), domain.RuleKind(kind), float64(conf)
 	_ = json.Unmarshal(qs, &x.Questions)
+	if len(enforce) > 0 && string(enforce) != "null" {
+		x.Enforce = &domain.RuleEnforce{}
+		if json.Unmarshal(enforce, x.Enforce) != nil {
+			x.Enforce = nil
+		}
+	}
 	return x, nil
 }
 
@@ -93,9 +100,11 @@ func (s *Rules) CreateRule(ctx context.Context, x domain.Rule, ev func(domain.Ru
 		if !kind.Valid() {
 			kind = domain.KindInstruction
 		}
-		if err := tx.QueryRow(ctx, `INSERT INTO rules (repo_id, title, body, enabled, status, kind, source_ticket, reason)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-			x.RepoID, x.Title, x.Body, x.Enabled, string(x.Status), string(kind), x.SourceTicket, x.Reason).Scan(&id); err != nil {
+		if err := tx.QueryRow(ctx, `INSERT INTO rules (repo_id, title, body, enabled, status, kind, source_ticket, reason,
+			enforce, delivery, skill_description, source, confidence, evidence, last_seen)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING id`,
+			x.RepoID, x.Title, x.Body, x.Enabled, string(x.Status), string(kind), x.SourceTicket, x.Reason,
+			enforceJSON(x.Enforce), delivery(x.Delivery), x.SkillDescription, x.Source, x.Confidence, x.Evidence, x.LastSeen).Scan(&id); err != nil {
 			return err
 		}
 		var err error
@@ -123,9 +132,11 @@ func (s *Rules) UpdateRule(ctx context.Context, id int64, mut func(*domain.Rule)
 		qs, _ := json.Marshal(nonNil(x.Questions))
 		if _, err := tx.Exec(ctx, `UPDATE rules SET repo_id = $2, title = $3, body = $4, enabled = $5, status = $6,
 			interpretation = $7, clarified = $8, questions = $9, rounds = $10, revision = $11, error = $12,
-			analyzed_at = $13, kind = $14, updated_at = now() WHERE id = $1`,
+			analyzed_at = $13, kind = $14, enforce = $15, delivery = $16, skill_description = $17, source = $18,
+			confidence = $19, evidence = $20, last_seen = $21, updated_at = now() WHERE id = $1`,
 			x.ID, x.RepoID, x.Title, x.Body, x.Enabled, string(x.Status), x.Interpretation, x.Clarified, qs,
-			x.Rounds, x.Revision, x.Error, x.AnalyzedAt, string(x.Kind)); err != nil {
+			x.Rounds, x.Revision, x.Error, x.AnalyzedAt, string(x.Kind), enforceJSON(x.Enforce), delivery(x.Delivery),
+			x.SkillDescription, x.Source, x.Confidence, x.Evidence, x.LastSeen); err != nil {
 			return err
 		}
 		if out, err = scanRule(tx.QueryRow(ctx, `SELECT `+ruleCols+ruleFrom+` WHERE x.id = $1`, id)); err != nil {
@@ -187,4 +198,19 @@ func (s *Rules) PendingRuleWorkspaces(ctx context.Context) ([]int64, error) {
 func (s *Rules) RecoverRules(ctx context.Context) (int, error) {
 	tag, err := s.db.Exec(ctx, `UPDATE rules SET status = 'pending', updated_at = now() WHERE status = 'analyzing'`)
 	return int(tag.RowsAffected()), err
+}
+
+func enforceJSON(e *domain.RuleEnforce) []byte {
+	if e == nil {
+		return nil
+	}
+	b, _ := json.Marshal(e)
+	return b
+}
+
+func delivery(d string) string {
+	if d == domain.DeliverSkill {
+		return d
+	}
+	return domain.DeliverPrompt
 }

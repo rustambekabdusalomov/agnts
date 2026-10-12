@@ -2,9 +2,17 @@ import 'package:agnts_api/src/model/accept_follow_up.dart';
 import 'package:agnts_api/src/model/accept_follow_up_result.dart';
 import 'package:agnts_api/src/model/accept_follow_ups.dart';
 import 'package:agnts_api/src/model/accept_follow_ups_result.dart';
+import 'package:agnts_api/src/model/acceptance.dart';
+import 'package:agnts_api/src/model/acceptance_criteria_inner.dart';
+import 'package:agnts_api/src/model/agent_config_finding.dart';
+import 'package:agnts_api/src/model/agent_config_scan.dart';
 import 'package:agnts_api/src/model/analysis.dart';
+import 'package:agnts_api/src/model/analysis_acceptance_inner.dart';
 import 'package:agnts_api/src/model/analytics.dart';
+import 'package:agnts_api/src/model/analytics_ci.dart';
+import 'package:agnts_api/src/model/analytics_delivery.dart';
 import 'package:agnts_api/src/model/analytics_insights_inner.dart';
+import 'package:agnts_api/src/model/analytics_learning.dart';
 import 'package:agnts_api/src/model/analytics_models_inner.dart';
 import 'package:agnts_api/src/model/analytics_repos_inner.dart';
 import 'package:agnts_api/src/model/answers_request.dart';
@@ -19,6 +27,12 @@ import 'package:agnts_api/src/model/billing.dart';
 import 'package:agnts_api/src/model/billing_prices.dart';
 import 'package:agnts_api/src/model/blocker.dart';
 import 'package:agnts_api/src/model/branch.dart';
+import 'package:agnts_api/src/model/ci_day.dart';
+import 'package:agnts_api/src/model/ci_failure.dart';
+import 'package:agnts_api/src/model/ci_occurrence.dart';
+import 'package:agnts_api/src/model/ci_period.dart';
+import 'package:agnts_api/src/model/ci_settings.dart';
+import 'package:agnts_api/src/model/ci_watch.dart';
 import 'package:agnts_api/src/model/capacity.dart';
 import 'package:agnts_api/src/model/change_password_request.dart';
 import 'package:agnts_api/src/model/check_step.dart';
@@ -31,6 +45,10 @@ import 'package:agnts_api/src/model/commit.dart';
 import 'package:agnts_api/src/model/confirm_totp_request.dart';
 import 'package:agnts_api/src/model/connect_integration_request.dart';
 import 'package:agnts_api/src/model/connect_result.dart';
+import 'package:agnts_api/src/model/coverage.dart';
+import 'package:agnts_api/src/model/coverage_config.dart';
+import 'package:agnts_api/src/model/coverage_files_inner.dart';
+import 'package:agnts_api/src/model/coverage_files_inner_uncovered_inner.dart';
 import 'package:agnts_api/src/model/create_invite201_response.dart';
 import 'package:agnts_api/src/model/create_invite_request.dart';
 import 'package:agnts_api/src/model/create_platform_admin_request.dart';
@@ -41,9 +59,12 @@ import 'package:agnts_api/src/model/day_stat.dart';
 import 'package:agnts_api/src/model/decide_consent200_response.dart';
 import 'package:agnts_api/src/model/decide_consent_request.dart';
 import 'package:agnts_api/src/model/delete_workspace_request.dart';
+import 'package:agnts_api/src/model/delivery_day.dart';
+import 'package:agnts_api/src/model/delivery_period.dart';
 import 'package:agnts_api/src/model/deploy_repo_request.dart';
 import 'package:agnts_api/src/model/device_registration.dart';
 import 'package:agnts_api/src/model/disable_totp_request.dart';
+import 'package:agnts_api/src/model/edit_check.dart';
 import 'package:agnts_api/src/model/environment.dart';
 import 'package:agnts_api/src/model/error.dart';
 import 'package:agnts_api/src/model/event.dart';
@@ -52,6 +73,8 @@ import 'package:agnts_api/src/model/event_summary.dart';
 import 'package:agnts_api/src/model/feedback.dart';
 import 'package:agnts_api/src/model/file_change.dart';
 import 'package:agnts_api/src/model/finding.dart';
+import 'package:agnts_api/src/model/flaky_job.dart';
+import 'package:agnts_api/src/model/follow_up_count.dart';
 import 'package:agnts_api/src/model/follow_up_suggestion.dart';
 import 'package:agnts_api/src/model/follow_up_ticket.dart';
 import 'package:agnts_api/src/model/follow_ups.dart';
@@ -62,6 +85,7 @@ import 'package:agnts_api/src/model/get_consent200_response.dart';
 import 'package:agnts_api/src/model/git_settings.dart';
 import 'package:agnts_api/src/model/google_sign_in_request.dart';
 import 'package:agnts_api/src/model/grant_credits_request.dart';
+import 'package:agnts_api/src/model/guard_settings.dart';
 import 'package:agnts_api/src/model/history_item.dart';
 import 'package:agnts_api/src/model/hour_bucket.dart';
 import 'package:agnts_api/src/model/implement_input.dart';
@@ -69,9 +93,11 @@ import 'package:agnts_api/src/model/integration.dart';
 import 'package:agnts_api/src/model/invite.dart';
 import 'package:agnts_api/src/model/invite_preview.dart';
 import 'package:agnts_api/src/model/learn_queue_item.dart';
+import 'package:agnts_api/src/model/learning_period.dart';
 import 'package:agnts_api/src/model/ledger_entry.dart';
 import 'package:agnts_api/src/model/lesson.dart';
 import 'package:agnts_api/src/model/lesson_brief.dart';
+import 'package:agnts_api/src/model/lesson_count.dart';
 import 'package:agnts_api/src/model/lesson_list.dart';
 import 'package:agnts_api/src/model/lesson_ref.dart';
 import 'package:agnts_api/src/model/link.dart';
@@ -83,7 +109,14 @@ import 'package:agnts_api/src/model/mcp_status.dart';
 import 'package:agnts_api/src/model/member.dart';
 import 'package:agnts_api/src/model/meta.dart';
 import 'package:agnts_api/src/model/model_overrides.dart';
+import 'package:agnts_api/src/model/network_activity.dart';
+import 'package:agnts_api/src/model/network_activity_dials_inner.dart';
+import 'package:agnts_api/src/model/network_route.dart';
+import 'package:agnts_api/src/model/network_test.dart';
+import 'package:agnts_api/src/model/network_test_network.dart';
+import 'package:agnts_api/src/model/network_test_tls.dart';
 import 'package:agnts_api/src/model/notify_settings.dart';
+import 'package:agnts_api/src/model/offer_starter_rules_request.dart';
 import 'package:agnts_api/src/model/period_stats.dart';
 import 'package:agnts_api/src/model/pipeline.dart';
 import 'package:agnts_api/src/model/plane_state.dart';
@@ -95,6 +128,14 @@ import 'package:agnts_api/src/model/platform_workspace.dart';
 import 'package:agnts_api/src/model/preview_input.dart';
 import 'package:agnts_api/src/model/preview_issue.dart';
 import 'package:agnts_api/src/model/preview_shot.dart';
+import 'package:agnts_api/src/model/private_network.dart';
+import 'package:agnts_api/src/model/private_network_ca.dart';
+import 'package:agnts_api/src/model/private_network_input.dart';
+import 'package:agnts_api/src/model/private_network_list.dart';
+import 'package:agnts_api/src/model/private_network_saved.dart';
+import 'package:agnts_api/src/model/proof.dart';
+import 'package:agnts_api/src/model/proof_run.dart';
+import 'package:agnts_api/src/model/proof_test.dart';
 import 'package:agnts_api/src/model/pull_request.dart';
 import 'package:agnts_api/src/model/pull_review_settings.dart';
 import 'package:agnts_api/src/model/quality_stat.dart';
@@ -119,6 +160,9 @@ import 'package:agnts_api/src/model/repo_brief.dart';
 import 'package:agnts_api/src/model/repo_brief_input.dart';
 import 'package:agnts_api/src/model/repo_detect_input.dart';
 import 'package:agnts_api/src/model/repo_detection.dart';
+import 'package:agnts_api/src/model/repo_harness.dart';
+import 'package:agnts_api/src/model/repo_harness_all_of_derived_coverage.dart';
+import 'package:agnts_api/src/model/repo_harness_input.dart';
 import 'package:agnts_api/src/model/repo_member.dart';
 import 'package:agnts_api/src/model/repo_preview.dart';
 import 'package:agnts_api/src/model/repo_preview_input.dart';
@@ -133,13 +177,16 @@ import 'package:agnts_api/src/model/reviewer.dart';
 import 'package:agnts_api/src/model/reviewer_note.dart';
 import 'package:agnts_api/src/model/reviewer_note_input.dart';
 import 'package:agnts_api/src/model/reviewer_profile_input.dart';
+import 'package:agnts_api/src/model/reviewer_stat.dart';
 import 'package:agnts_api/src/model/reviewers.dart';
 import 'package:agnts_api/src/model/rotate_mcp_token200_response.dart';
 import 'package:agnts_api/src/model/rule.dart';
 import 'package:agnts_api/src/model/rule_answers.dart';
 import 'package:agnts_api/src/model/rule_answers_answers_inner.dart';
+import 'package:agnts_api/src/model/rule_enforce.dart';
 import 'package:agnts_api/src/model/rule_input.dart';
 import 'package:agnts_api/src/model/rule_question.dart';
+import 'package:agnts_api/src/model/second_opinion.dart';
 import 'package:agnts_api/src/model/send_feedback_request.dart';
 import 'package:agnts_api/src/model/set_member_role_request.dart';
 import 'package:agnts_api/src/model/set_plane_webhook_secret_request.dart';
@@ -149,14 +196,19 @@ import 'package:agnts_api/src/model/settings.dart';
 import 'package:agnts_api/src/model/ship_notes.dart';
 import 'package:agnts_api/src/model/shot_ref.dart';
 import 'package:agnts_api/src/model/signup_info.dart';
+import 'package:agnts_api/src/model/slow_ticket.dart';
+import 'package:agnts_api/src/model/spread.dart';
 import 'package:agnts_api/src/model/stage.dart';
 import 'package:agnts_api/src/model/stage_models.dart';
 import 'package:agnts_api/src/model/stage_spend.dart';
+import 'package:agnts_api/src/model/stale_pr.dart';
+import 'package:agnts_api/src/model/starter_pack.dart';
 import 'package:agnts_api/src/model/step_duration.dart';
 import 'package:agnts_api/src/model/sync_jira200_response.dart';
 import 'package:agnts_api/src/model/sync_plane200_response.dart';
 import 'package:agnts_api/src/model/task_create.dart';
 import 'package:agnts_api/src/model/task_update.dart';
+import 'package:agnts_api/src/model/test_private_network_request.dart';
 import 'package:agnts_api/src/model/ticket.dart';
 import 'package:agnts_api/src/model/ticket_detail.dart';
 import 'package:agnts_api/src/model/ticket_kind_input.dart';
@@ -172,6 +224,9 @@ import 'package:agnts_api/src/model/transfer_workspace_request.dart';
 import 'package:agnts_api/src/model/translate_input.dart';
 import 'package:agnts_api/src/model/translation.dart';
 import 'package:agnts_api/src/model/translation_items_inner.dart';
+import 'package:agnts_api/src/model/try_enforce_input.dart';
+import 'package:agnts_api/src/model/try_enforce_result.dart';
+import 'package:agnts_api/src/model/try_enforce_result_hits_inner.dart';
 import 'package:agnts_api/src/model/unregister_device_request.dart';
 import 'package:agnts_api/src/model/update_integration_request.dart';
 import 'package:agnts_api/src/model/update_platform_feedback_request.dart';
@@ -215,12 +270,28 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return AcceptFollowUps.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AcceptFollowUpsResult':
           return AcceptFollowUpsResult.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'Acceptance':
+          return Acceptance.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AcceptanceCriteriaInner':
+          return AcceptanceCriteriaInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AgentConfigFinding':
+          return AgentConfigFinding.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AgentConfigScan':
+          return AgentConfigScan.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Analysis':
           return Analysis.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AnalysisAcceptanceInner':
+          return AnalysisAcceptanceInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Analytics':
           return Analytics.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AnalyticsCI':
+          return AnalyticsCI.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AnalyticsDelivery':
+          return AnalyticsDelivery.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AnalyticsInsightsInner':
           return AnalyticsInsightsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AnalyticsLearning':
+          return AnalyticsLearning.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AnalyticsModelsInner':
           return AnalyticsModelsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AnalyticsReposInner':
@@ -252,6 +323,21 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
         case 'CI':
           
           
+        case 'CIDay':
+          return CIDay.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CIFailure':
+          return CIFailure.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CIOccurrence':
+          return CIOccurrence.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CIPeriod':
+          return CIPeriod.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CISettings':
+          return CISettings.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CIStatus':
+          
+          
+        case 'CIWatch':
+          return CIWatch.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Capacity':
           return Capacity.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ChangePasswordRequest':
@@ -276,6 +362,14 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ConnectIntegrationRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ConnectResult':
           return ConnectResult.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'Coverage':
+          return Coverage.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CoverageConfig':
+          return CoverageConfig.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CoverageFilesInner':
+          return CoverageFilesInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CoverageFilesInnerUncoveredInner':
+          return CoverageFilesInnerUncoveredInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'CreateInvite201Response':
           return CreateInvite201Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'CreateInviteRequest':
@@ -296,12 +390,18 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return DecideConsentRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DeleteWorkspaceRequest':
           return DeleteWorkspaceRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DeliveryDay':
+          return DeliveryDay.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DeliveryPeriod':
+          return DeliveryPeriod.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DeployRepoRequest':
           return DeployRepoRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DeviceRegistration':
           return DeviceRegistration.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DisableTotpRequest':
           return DisableTotpRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'EditCheck':
+          return EditCheck.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Environment':
           return Environment.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Error':
@@ -318,6 +418,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return FileChange.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Finding':
           return Finding.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'FlakyJob':
+          return FlakyJob.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'FollowUpCount':
+          return FollowUpCount.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'FollowUpSuggestion':
           return FollowUpSuggestion.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'FollowUpTicket':
@@ -341,6 +445,14 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return GoogleSignInRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'GrantCreditsRequest':
           return GrantCreditsRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'GuardHook':
+          
+          
+        case 'GuardProfile':
+          
+          
+        case 'GuardSettings':
+          return GuardSettings.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'HistoryItem':
           return HistoryItem.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'HourBucket':
@@ -355,6 +467,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return InvitePreview.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'LearnQueueItem':
           return LearnQueueItem.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'LearningPeriod':
+          return LearningPeriod.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'LedgerEntry':
           return LedgerEntry.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Lesson':
@@ -364,6 +478,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
         case 'LessonCategory':
           
           
+        case 'LessonCount':
+          return LessonCount.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'LessonLevel':
           
           
@@ -387,13 +503,24 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return Member.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Meta':
           return Meta.fromJson(value as Map<String, dynamic>) as ReturnType;
-        case 'Model':
-          
-          
         case 'ModelOverrides':
           return ModelOverrides.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'NetworkActivity':
+          return NetworkActivity.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'NetworkActivityDialsInner':
+          return NetworkActivityDialsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'NetworkRoute':
+          return NetworkRoute.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'NetworkTest':
+          return NetworkTest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'NetworkTestNetwork':
+          return NetworkTestNetwork.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'NetworkTestTls':
+          return NetworkTestTls.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'NotifySettings':
           return NotifySettings.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'OfferStarterRulesRequest':
+          return OfferStarterRulesRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PeriodStats':
           return PeriodStats.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Pipeline':
@@ -416,6 +543,22 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return PreviewIssue.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PreviewShot':
           return PreviewShot.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PrivateNetwork':
+          return PrivateNetwork.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PrivateNetworkCa':
+          return PrivateNetworkCa.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PrivateNetworkInput':
+          return PrivateNetworkInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PrivateNetworkList':
+          return PrivateNetworkList.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PrivateNetworkSaved':
+          return PrivateNetworkSaved.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'Proof':
+          return Proof.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ProofRun':
+          return ProofRun.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ProofTest':
+          return ProofTest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PullRequest':
           return PullRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PullReviewSettings':
@@ -467,6 +610,12 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return RepoDetectInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RepoDetection':
           return RepoDetection.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RepoHarness':
+          return RepoHarness.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RepoHarnessAllOfDerivedCoverage':
+          return RepoHarnessAllOfDerivedCoverage.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RepoHarnessInput':
+          return RepoHarnessInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RepoMember':
           return RepoMember.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RepoPreview':
@@ -485,9 +634,6 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return Result.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RetryTicketRequest':
           return RetryTicketRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
-        case 'ReviewModel':
-          
-          
         case 'ReviewSync':
           return ReviewSync.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Reviewer':
@@ -498,6 +644,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ReviewerNoteInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ReviewerProfileInput':
           return ReviewerProfileInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ReviewerStat':
+          return ReviewerStat.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Reviewers':
           return Reviewers.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RotateMcpToken200Response':
@@ -508,6 +656,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return RuleAnswers.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RuleAnswersAnswersInner':
           return RuleAnswersAnswersInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RuleEnforce':
+          return RuleEnforce.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RuleInput':
           return RuleInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RuleKind':
@@ -518,6 +668,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
         case 'RuleStatus':
           
           
+        case 'SecondOpinion':
+          return SecondOpinion.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SendFeedbackRequest':
           return SendFeedbackRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetMemberRoleRequest':
@@ -536,12 +688,20 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ShotRef.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SignupInfo':
           return SignupInfo.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SlowTicket':
+          return SlowTicket.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'Spread':
+          return Spread.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Stage':
           return Stage.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'StageModels':
           return StageModels.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'StageSpend':
           return StageSpend.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'StalePR':
+          return StalePR.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'StarterPack':
+          return StarterPack.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'StepDuration':
           return StepDuration.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SyncJira200Response':
@@ -552,6 +712,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return TaskCreate.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TaskUpdate':
           return TaskUpdate.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'TestPrivateNetworkRequest':
+          return TestPrivateNetworkRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Ticket':
           return Ticket.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TicketDetail':
@@ -594,6 +756,12 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
         case 'TranslationLanguage':
           
           
+        case 'TryEnforceInput':
+          return TryEnforceInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'TryEnforceResult':
+          return TryEnforceResult.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'TryEnforceResultHitsInner':
+          return TryEnforceResultHitsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'UnregisterDeviceRequest':
           return UnregisterDeviceRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'UpdateIntegrationRequest':

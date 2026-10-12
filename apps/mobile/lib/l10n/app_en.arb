@@ -356,6 +356,302 @@
   "analyticsColRedFlagsHint": "Skipped tests, removed assertions, silenced linters and the like found in the diffs",
   "analyticsColSelfFixes": "Self-fixes",
   "analyticsColSelfFixesHint": "Times agnts's own review sent findings back to the coder before a person looked",
+  "analyticsTabOverview": "Overview",
+  "analyticsTabDelivery": "Delivery",
+  "analyticsTabQuality": "Quality",
+  "analyticsTabLearning": "Learning",
+  "analyticsTabCost": "Cost",
+  "analyticsTabRepos": "Repositories",
+  "analyticsDaysHours": "{d} d {h} h",
+  "@analyticsDaysHours": {
+    "placeholders": {
+      "d": {
+        "type": "String"
+      },
+      "h": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsKpiMerged": "Pull requests merged",
+  "analyticsKpiMergedNote": "{n} closed without merging",
+  "@analyticsKpiMergedNote": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsKpiCostPerTicket": "Cost per pushed ticket",
+  "analyticsKpiCostPerTicketNote": "At API prices, all stages",
+  "analyticsInsightMergeRate": "Only {pct}% of agnts's pull requests were merged; {closed} were closed without merging. Check the Delivery tab for why.",
+  "@analyticsInsightMergeRate": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      },
+      "closed": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsInsightSlowAnswers": "Tickets wait about {hours} h for your answers to agnts's questions. Answering sooner is the quickest way to speed delivery up.",
+  "@analyticsInsightSlowAnswers": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsInsightFollowUpsNoise": "Only {pct}% of suggested follow-ups were accepted. Most of them are being dismissed.",
+  "@analyticsInsightFollowUpsNoise": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsInsightFlakyJob": "{job} in {repo} passed on re-run {n} times: it looks flaky. Fixing or quarantining it saves CI time.",
+  "@analyticsInsightFlakyJob": {
+    "placeholders": {
+      "job": {
+        "type": "String"
+      },
+      "repo": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsPrMerged": "Merged",
+  "analyticsPrClosed": "Closed without merging",
+  "analyticsPrOpened": "Opened",
+  "analyticsPrOpen": "Still open",
+  "analyticsCyclePushed": "Picked up → pushed",
+  "analyticsCycleMerged": "Picked up → merged",
+  "analyticsSplitAnswers": "Waiting for answers",
+  "analyticsSplitReview": "Waiting for review",
+  "analyticsSplitQueue": "Queued or paused",
+  "analyticsKpiMergeRate": "Merge rate",
+  "analyticsKpiMergeRateNote": "{merged} merged, {closed} closed",
+  "@analyticsKpiMergeRateNote": {
+    "placeholders": {
+      "merged": {
+        "type": "String"
+      },
+      "closed": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsKpiTimeToMerge": "Time to merge",
+  "analyticsKpiTimeToMergeNote": "From pull request to merge",
+  "analyticsKpiCyclePushed": "Picked up → pushed",
+  "analyticsKpiCyclePushedNote": "agnts's part of the work",
+  "analyticsKpiCycleMerged": "Picked up → merged",
+  "analyticsKpiCycleMergedNote": "Real delivery time",
+  "analyticsKpiAnswer": "Time to answer",
+  "analyticsKpiAnswerNote": "Until you answer agnts's questions",
+  "analyticsTypicalNote": "Times are typical values (median): half the tickets were faster, half slower.",
+  "analyticsPrOutcomes": "Pull request outcomes",
+  "analyticsPrOutcomesSub": "agnts's pull requests opened in the period and what happened to them, merges and closes per day",
+  "analyticsMergeSpread": "A typical pull request is merged in {p50}; the slowest one in ten takes {p90} or more.",
+  "@analyticsMergeSpread": {
+    "placeholders": {
+      "p50": {
+        "type": "String"
+      },
+      "p90": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsStale": "Open for over a week",
+  "analyticsStaleSub": "Pull requests nobody has merged or closed yet",
+  "analyticsNoStale": "No pull request has been open for more than a week.",
+  "analyticsOpenDays": "{n, plural, one {open {n} day} other {open {n} days}}",
+  "@analyticsOpenDays": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "analyticsOpenPr": "Open pull request",
+  "analyticsCycle": "Cycle time",
+  "analyticsCycleSub": "Typical time from picking a ticket up to pushing and to merging, per day",
+  "analyticsCycleSpread": "Pushed in {pushed} typically ({pushed90} for the slowest one in ten); merged in {merged} ({merged90}).",
+  "@analyticsCycleSpread": {
+    "placeholders": {
+      "pushed": {
+        "type": "String"
+      },
+      "pushed90": {
+        "type": "String"
+      },
+      "merged": {
+        "type": "String"
+      },
+      "merged90": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsQuestions": "Questions",
+  "analyticsQuestionsSub": "What agnts asked before coding, and how fast it got answers",
+  "analyticsQuestionsAsked": "Questions asked",
+  "analyticsQuestionsShare": "Tickets with questions",
+  "analyticsAnswerTypical": "Typical time to answer",
+  "analyticsAnswerSlow": "Slowest one in ten",
+  "analyticsUnanswered": "Waiting for an answer now",
+  "analyticsSlowest": "Slowest tickets",
+  "analyticsSlowestSub": "The tickets that took longest from pick-up to push in this period, and where their time went",
+  "analyticsNoSlowest": "No ticket was pushed in this period.",
+  "analyticsKpiCiSeen": "CI failures",
+  "analyticsKpiCiSeenNote": "{n} new in this period",
+  "@analyticsKpiCiSeenNote": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsKpiCiAuto": "Fixed by agnts",
+  "analyticsKpiCiAutoNote": "{auto} of {fixed} fixed failures",
+  "@analyticsKpiCiAutoNote": {
+    "placeholders": {
+      "auto": {
+        "type": "String"
+      },
+      "fixed": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsKpiCiFix": "Time to fix",
+  "analyticsKpiCiFixNote": "From first failure to merged fix",
+  "analyticsKpiCiFlaky": "Flaky failures",
+  "analyticsKpiCiFlakyNote": "Passed when re-run",
+  "analyticsKpiCiOwn": "Own PRs fixed",
+  "analyticsKpiCiOwnNote": "Red checks on agnts's PRs fixed before review",
+  "analyticsCiUnknown": "Not classified",
+  "analyticsCiNew": "New failures",
+  "analyticsCiFixed": "Fixed",
+  "analyticsCiTitle": "CI health",
+  "analyticsCiSub": "New and fixed CI failures per day. {n} need attention now.",
+  "@analyticsCiSub": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsCiOffSub": "CI watching is not set up. Turn it on for a repository and agnts triages red builds and fixes the ones caused by code.",
+  "analyticsCiSetUp": "Set up CI watching",
+  "analyticsCiOpen": "Open CI",
+  "analyticsCiClasses": "Failures by cause",
+  "analyticsCiClassesSub": "What triage decided each failure was",
+  "analyticsCiNone": "No CI failures in this period.",
+  "analyticsCiFlakiest": "Flakiest jobs",
+  "analyticsCiFlakiestSub": "Jobs that failed and then passed on re-run most often",
+  "analyticsCiNoFlaky": "No flaky jobs in this period.",
+  "analyticsColJob": "Job",
+  "analyticsColFailure": "Failure",
+  "analyticsColFlaky": "Passed on re-run",
+  "analyticsColFailures": "Failures",
+  "analyticsKpiLessons": "Lessons",
+  "analyticsKpiLessonsNote": "{n} marked learned",
+  "@analyticsKpiLessonsNote": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsKpiRulesLearned": "Rules learned",
+  "analyticsKpiRulesLearnedNote": "In use, of {n} suggested from tickets",
+  "@analyticsKpiRulesLearnedNote": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsKpiRulesManual": "Rules written",
+  "analyticsKpiRulesManualNote": "Added by people",
+  "analyticsKpiReflections": "Reflections",
+  "analyticsKpiReflectionsNote": "On changed or rejected tickets; {n} rules suggested",
+  "@analyticsKpiReflectionsNote": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsKpiFollowUps": "Follow-ups accepted",
+  "analyticsKpiFollowUpsNote": "{n} suggested in this period",
+  "@analyticsKpiFollowUpsNote": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsKpiReviewerNotes": "Reviewer notes",
+  "analyticsKpiReviewerNotesNote": "Re-reviews, dismissed findings and notes",
+  "analyticsLearningNote": "How agnts learns from your feedback: fewer reviewer notes and more adopted rules over time mean it is working.",
+  "analyticsFollowUps": "Follow-ups by type",
+  "analyticsFollowUpsSub": "Follow-up tickets agnts suggested in this period and what you decided",
+  "analyticsNoFollowUps": "No follow-ups were suggested in this period.",
+  "analyticsColType": "Type",
+  "analyticsColSuggested": "Suggested",
+  "analyticsColAccepted": "Accepted",
+  "analyticsColDismissed": "Dismissed",
+  "analyticsColOpen": "Open",
+  "analyticsColAcceptRate": "Accept rate",
+  "analyticsFollowUpSources": "Where follow-ups come from",
+  "analyticsFollowUpSourcesSub": "Suggested follow-ups by the step that found them",
+  "analyticsLessons": "Lessons by topic",
+  "analyticsLessonsSub": "Lessons written in this period; {n} were marked learned",
+  "@analyticsLessonsSub": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsOpenLearn": "Open Learn",
+  "analyticsNoLessons": "No lessons in this period.",
+  "analyticsReviewers": "Reviewers",
+  "analyticsReviewersSub": "Who sends agnts the most feedback on code reviews",
+  "analyticsOpenRules": "Open Rules",
+  "analyticsNoReviewers": "No reviewer notes in this period.",
+  "analyticsColReviewer": "Reviewer",
+  "analyticsColRereview": "Re-reviews",
+  "analyticsColRereviewHint": "Times the reviewer asked agnts to review again",
+  "analyticsColDismissedNotes": "Dismissed",
+  "analyticsColDismissedNotesHint": "Findings of agnts's review the reviewer dismissed",
+  "analyticsColManual": "Notes",
+  "analyticsColManualHint": "Notes the reviewer wrote by hand",
+  "analyticsColRepos": "Repositories",
+  "analyticsKpiCostNote": "All Claude calls in the period",
+  "analyticsKpiDaysAboveNote": "{n} days above 80% of the session limit",
+  "@analyticsKpiDaysAboveNote": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsColCost": "Cost",
+  "analyticsColMergeRate": "Merge rate",
+  "analyticsColMergeRateHint": "Pull requests merged, out of those merged or closed in the period",
+  "analyticsColQuestions": "Questions per ticket",
+  "analyticsColQuestionsHint": "Questions agnts asked per analysed ticket. Many questions point to a missing CLAUDE.md or rules.",
+  "analyticsColCi": "CI failures",
+  "analyticsColCiHint": "CI failure groups that failed in the period",
   "appName": "agnts",
   "appTagline": "Your no sleep agent",
   "authTitle": "Sign in",
@@ -568,6 +864,185 @@
   "briefDone_approve": "Brief approved: new runs read it",
   "briefDone_discard": "Draft discarded",
   "briefDone_save": "Brief saved",
+  "ciTitle": "CI",
+  "ciLede": "Failing pipelines on your watched branches, grouped by job and error. agnts re-runs new failures once, then fixes the real ones.",
+  "ciBack": "CI",
+  "ciRepo": "Repository",
+  "ciAllRepos": "All repositories",
+  "ciFilterLabel": "Status",
+  "ciFilter_red": "Red",
+  "ciFilter_flaky": "Flaky",
+  "ciFilter_infra": "Infra",
+  "ciFilter_fixed": "Fixed",
+  "ciFilter_muted": "Muted",
+  "ciFilter_all": "All",
+  "ciStatus_triage": "New",
+  "ciStatus_open": "Failing",
+  "ciStatus_fixing": "Fixing",
+  "ciStatus_fixed": "Fix merged",
+  "ciStatus_resolved": "Green again",
+  "ciStatus_flaky": "Flaky",
+  "ciStatus_infra": "Infra",
+  "ciStatus_muted": "Muted",
+  "ciStatus_regression": "Regression",
+  "ciStatusHelp_triage": "New failure, waiting for a re-run to confirm it",
+  "ciStatusHelp_open": "Confirmed; no ticket is working on it",
+  "ciStatusHelp_fixing": "A ticket is working on it",
+  "ciStatusHelp_fixed": "The fix is merged; waiting for a green run",
+  "ciStatusHelp_resolved": "The branch is green again",
+  "ciStatusHelp_flaky": "Passed when re-run",
+  "ciStatusHelp_infra": "The runner or the network failed, not the code",
+  "ciStatusHelp_muted": "Ignored until unmuted",
+  "ciStatusHelp_regression": "Failed again after the fix was merged",
+  "ciClass_code": "Code",
+  "ciClass_test": "Test",
+  "ciClass_config": "Config",
+  "ciClass_dependency": "Dependency",
+  "ciClass_infra": "Infra",
+  "ciClass_flaky": "Flaky",
+  "ciClass_report": "Report",
+  "ciColStatus": "Status",
+  "ciColFailure": "Failure",
+  "ciColCount": "Failed",
+  "ciColLastSeen": "Last seen",
+  "ciColTicket": "Ticket",
+  "ciColTime": "Time",
+  "ciColCommit": "Commit",
+  "ciColJob": "Job",
+  "ciTimes": "{n, plural, one {{n} time} other {{n} times}}",
+  "@ciTimes": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "ciFix": "Fix it",
+  "ciFixStarted": "Ticket {key} opened",
+  "@ciFixStarted": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "ciMute": "Mute",
+  "ciUnmute": "Unmute",
+  "ciMuted": "Muted: agnts ignores this failure now",
+  "ciUnmuted": "Unmuted",
+  "ciRerun": "Re-run",
+  "ciRerunStarted": "Re-run started",
+  "ciCommentOnly": "Comment only",
+  "ciEmptyRed": "Nothing is red. Every watched branch passes.",
+  "ciEmptyFilter": "No failures here.",
+  "ciHowTitle": "How to start watching",
+  "ciHowWatch": "Open a repository, go to its CI tab and turn on watching. The default branch is always watched; add others like release/*.",
+  "ciHowWebhook": "For news within seconds, add the git host webhook for workflow_run (GitHub) or Pipeline events (GitLab). Without it agnts checks every 5 minutes.",
+  "ciNotFound": "This CI failure was not found.",
+  "ciOpenTicket": "Open {key}",
+  "@ciOpenTicket": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "ciPrNote": "This failure is on someone else's pull request #{n}. agnts never opens a ticket or pushes there; with comments on, it posts one diagnosis comment.",
+  "@ciPrNote": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "ciRegressionNote": "This failed again on a commit that contains the fix {sha}. The original ticket gets a follow-up suggestion.",
+  "@ciRegressionNote": {
+    "placeholders": {
+      "sha": {
+        "type": "String"
+      }
+    }
+  },
+  "ciLogTitle": "Log",
+  "ciLogSub": "Redacted excerpt of the newest failing run",
+  "ciLogAnnotations": "Annotations",
+  "ciLogFirstError": "First error",
+  "ciLogEnd": "End of the log",
+  "ciLogTail": "Last lines",
+  "ciNoLog": "No log was saved for this failure.",
+  "ciOccurrences": "Failing runs",
+  "ciOccurrencesSub": "The last 20 runs this failure appeared in",
+  "ciNoOccurrences": "No runs recorded.",
+  "ciPassedOnRerun": "Passed on re-run",
+  "ciOpenRun": "Open run",
+  "ciFacts": "Details",
+  "ciCount": "Failed",
+  "ciFlakyCount": "Passed on re-run",
+  "ciFirstSeen": "First seen",
+  "ciLastSeen": "Last seen",
+  "ciFirstSha": "First failing commit",
+  "ciLastSha": "Last commit",
+  "ciFixedSha": "Fix commit",
+  "ciFixedAt": "Fix merged",
+  "ciTicket": "Ticket",
+  "ciBranch": "Branch",
+  "ciWatchTitle": "CI watching",
+  "ciWatchSub": "agnts reads this repository's pipelines and fixes what fails",
+  "ciWatchEnabled": "Watch CI",
+  "ciWatchEnabledHelp": "Off by default. Failures on watched branches are grouped and fixed.",
+  "ciBranches": "Extra branches",
+  "ciBranchesHelp": "Globs, one per line. The default branch ({branch}) is always watched.",
+  "@ciBranchesHelp": {
+    "placeholders": {
+      "branch": {
+        "type": "String"
+      }
+    }
+  },
+  "ciIgnore": "Ignored workflows and jobs",
+  "ciIgnoreHelp": "Globs, one per line, matched against workflow and job names. Empty uses *deploy*, *release* and *publish*.",
+  "ciPrs": "Other people's pull requests",
+  "ciPrsHelp": "agnts never pushes to a colleague's branch. With comments on, it posts one diagnosis comment on the pull request.",
+  "ciPrs_off": "Ignore",
+  "ciPrs_comment": "Comment",
+  "ciAutoFix": "Fix automatically",
+  "ciAutoFixRepoHelp": "Open a ticket for every confirmed failure, or wait for Fix it",
+  "ciAutoFix_inherit": "Workspace setting",
+  "ciAutoFix_on": "On",
+  "ciAutoFix_off": "Off",
+  "ciSave": "Save",
+  "ciWatchSaved": "CI watching saved",
+  "ciFailuresTitle": "Failures",
+  "ciFailuresSub": "This repository's failing jobs, newest first",
+  "ciFlakyTitle": "Flaky tests",
+  "ciFlakySub": "Failures that passed when re-run",
+  "ciFlakyEmpty": "No flaky tests found.",
+  "ciCardTitle": "CI failure",
+  "ciFailingRuns": "Failing runs",
+  "ciLastRun": "Last failing run",
+  "ciStillFailing": "Still failing",
+  "ciWaitingGreen": "Fix merged, waiting for a green run",
+  "ciGreenAgain": "Green again",
+  "ciOpenFailure": "Open the failure",
+  "ciSettingsTitle": "CI",
+  "ciSettingsSub": "What agnts does when a watched pipeline goes red. Watching is turned on per repository.",
+  "ciAutoFixHelp": "Open a ticket for every confirmed failure. Off, failures wait for Fix it.",
+  "ciMaxAutoPerDay": "Automatic tickets a day",
+  "ciMaxAutoPerDayHelp": "Over the limit, failures wait for Fix it. Feedback rounds on agnts's own pull requests don't count.",
+  "ciPerDay": "{n, plural, =0 {None} one {{n} a day} other {{n} a day}}",
+  "@ciPerDay": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "ciRetryFlaky": "Re-run new failures once",
+  "ciRetryFlakyHelp": "A new failure's jobs run again before agnts believes it. Passing marks it flaky.",
+  "ciFeedbackRounds": "Rounds on agnts's pull requests",
+  "ciFeedbackRoundsHelp": "How many times a red check sends agnts's own pull request back to coding. 0 turns it off.",
+  "ciInfraPatterns": "Infra patterns",
+  "ciInfraPatternsHelp": "Regular expressions, one per line. A matching log is an infra failure: shown and counted, never a ticket. Added to the built-in ones.",
   "commonLoading": "Loading…",
   "commonError": "Something went wrong. Try again.",
   "commonSignedInAs": "Signed in as {username}",
@@ -848,7 +1323,7 @@
   "filesFromRetry": "With a retry",
   "filesFromFeedback": "With requested changes",
   "followUpsTitle": "Follow-up tickets",
-  "followUpsSub": "What finishing this ticket still needs, as agnts sees it. Pick the ones you want: they are created queued, so nothing runs until you start them.",
+  "followUpsSub": "What finishing this ticket still needs, as agnts sees it. Pick the ones you want, then start them now or keep them held until you start each one.",
   "followUpsMode": "Follow-up suggestions",
   "followUpsModeInherit": "As in Settings",
   "followUpsModeOn": "On",
@@ -874,6 +1349,7 @@
   },
   "followUpsEditTitle": "Ticket title",
   "followUpsServes": "Why",
+  "followUpsAfter": "After",
   "followUpsDetails": "Details",
   "followUpsWaitsForDone": "It builds on this ticket's work: you can create it once this ticket is done.",
   "followUpsTarget": "Create as",
@@ -888,7 +1364,16 @@
       }
     }
   },
-  "followUpsQueuedHint": "Created tickets wait in the queue until you start them.",
+  "followUpsCreateStart": "{count, plural, =0 {Create and start} one {Create and start {count} ticket} other {Create and start {count} tickets}}",
+  "@followUpsCreateStart": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "followUpsCreateHeld": "Create, held",
+  "followUpsQueuedHint": "Started tickets go to the queue now; one that must wait for another starts coding after that one is merged. Held ones wait until you start them.",
   "followUpsDismiss": "Dismiss",
   "followUpsDismissedCount": "{count, plural, one {{count} dismissed suggestion} other {{count} dismissed suggestions}}",
   "@followUpsDismissedCount": {
@@ -902,6 +1387,14 @@
   "followUpsFollowUpOf": "Follow-up of",
   "followUpsCreatedNotice": "{count, plural, one {{count} ticket created} other {{count} tickets created}}, queued until you start them.",
   "@followUpsCreatedNotice": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "followUpsStartedNotice": "{count, plural, one {{count} ticket created} other {{count} tickets created}} and queued to run.",
+  "@followUpsStartedNotice": {
     "placeholders": {
       "count": {
         "type": "num"
@@ -960,6 +1453,433 @@
   "formSaved": "Saved",
   "formSearch": "Search",
   "formNoMatch": "No matches",
+  "harnessRepoTab": "Guardrails",
+  "harnessRepoTitle": "Guardrails",
+  "harnessRepoSub": "How strictly agnts-guard checks Claude's work in this repository, while it works and after.",
+  "harnessRepoSave": "Save guardrails",
+  "harnessRepoSaved": "Guardrails saved",
+  "harnessRepoAgentTitle": "Agent instruction files",
+  "harnessRepoAgentSub": "agnts scans CLAUDE.md, AGENTS.md, .claude/ and .mcp.json for text that tries to steer an agent. It never runs this repository's hooks or MCP servers.",
+  "harnessRepoAgentScanned": "Scanned {time}",
+  "@harnessRepoAgentScanned": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "harnessRepoAgentNotScanned": "Not scanned yet: the next run in this repository scans the files.",
+  "harnessRepoAgentNothing": "Nothing found.",
+  "harnessRepoAgentWarn": "{n, plural, one {{n} line} other {{n} lines}} may try to steer an agent. Runs treat these files as data, never as instructions; read them before you trust them.",
+  "@harnessRepoAgentWarn": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "harnessRepoAgentInfo": "Configuration agnts ignores",
+  "harnessRepoKind_hidden_unicode": "Hidden characters",
+  "harnessRepoKind_agent_instruction": "Instruction to an agent",
+  "harnessRepoKind_exfiltration": "Sends data out",
+  "harnessRepoKind_encoded_blob": "Encoded text",
+  "harnessRepoKind_hooks": "Claude Code hooks",
+  "harnessRepoKind_mcp_server": "MCP servers",
+  "harnessRepoProfile": "Guard profile",
+  "harnessRepoProfileHelp": "How strict the in-run checks are for this repository.",
+  "harnessRepoProfile_": "Workspace",
+  "harnessRepoProfile_minimal": "Minimal",
+  "harnessRepoProfile_standard": "Standard",
+  "harnessRepoProfile_strict": "Strict",
+  "harnessRepoProfileHelp_": "Follows the workspace setting.",
+  "harnessRepoProfileHelp_minimal": "Only secrets and enforced rules are blocked; build checked before Claude finishes.",
+  "harnessRepoProfileHelp_standard": "Also blocks skipped tests, silenced linters and edits to check configuration; build and lint must pass before Claude finishes.",
+  "harnessRepoProfileHelp_strict": "Also blocks swallowed errors and removed assertions, runs the tests before Claude finishes, and may ask for facts before editing a file.",
+  "harnessRepoSecretAllow": "Example credentials allowed in",
+  "harnessRepoSecretAllowHelp": "Path globs where fake keys are expected, besides testdata/, fixtures/ and *.example.",
+  "harnessRepoChecksTitle": "Per-file checks",
+  "harnessRepoChecksSub": "Quick formatters and linters agnts-guard runs on each file Claude edits, so problems are fixed while the change is fresh.",
+  "harnessRepoChecksOff": "Turn per-file checks off",
+  "harnessRepoChecksOffHelp": "Claude is not checked after each edit; the checks after the run still apply.",
+  "harnessRepoOwnChecks": "Use my own checks",
+  "harnessRepoOwnChecksHelp": "Replace the checks agnts derives from the toolchains with your list.",
+  "harnessRepoDerivedTitle": "Derived from the toolchains",
+  "harnessRepoDerivedNone": "agnts knows no per-file checks for this repository's toolchains.",
+  "harnessRepoCheckName": "Name",
+  "harnessRepoCheckGlobs": "Files (globs, comma-separated)",
+  "harnessRepoCheckCmd": "Command",
+  "harnessRepoCheckCmdHelp": "'{file}' is the edited file and '{dir}' its directory, both relative to the repository.",
+  "@harnessRepoCheckCmdHelp": {
+    "placeholders": {
+      "file": {
+        "type": "String"
+      },
+      "dir": {
+        "type": "String"
+      }
+    }
+  },
+  "harnessRepoCheckEvery": "At most every (seconds)",
+  "harnessRepoAddCheck": "Add a check",
+  "harnessRepoRemoveCheck": "Remove {name}",
+  "@harnessRepoRemoveCheck": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "harnessRepoCoverageTitle": "Coverage of changed lines",
+  "harnessRepoCoverageSub": "After the checks pass, agnts runs the tests once more with coverage and shows which added lines no test ran.",
+  "harnessRepoCoverage": "Measure coverage",
+  "harnessRepoCoverageHelp": "An extra test run after the checks; it never fails the run.",
+  "harnessRepoThreshold": "Threshold",
+  "harnessRepoThresholdHelp": "Below it, the code review gets a coverage finding. 0 turns the finding off.",
+  "harnessRepoCoverageCmd": "Coverage command",
+  "harnessRepoCoverageCmdHelp": "Leave empty to use the command agnts derives.",
+  "harnessRepoCoverageReport": "Report file",
+  "harnessRepoCoverageReportHelp": "A Go cover profile or lcov file, in the repository or under /agnts/out/.",
+  "harnessRepoCoverageNoDerived": "agnts knows no coverage command for these toolchains: set one.",
+  "harnessRepoAcceptance": "Check acceptance in the app",
+  "harnessRepoAcceptanceHelp": "After the preview, agnts checks the ticket's acceptance criteria in the running app and shows the results with screenshots.",
+  "harnessRepoAcceptanceNoPreview": "Needs a preview command: set one when you edit the repository.",
+  "harnessRepoStarterTitle": "Starter rules",
+  "harnessRepoStarterSub": "Specific, checkable conventions for this repository's languages. They are added as suggestions: nothing applies until you adopt them.",
+  "harnessRepoStarterNone": "No starter pack fits this repository's toolchains.",
+  "harnessRepoStarterRules": "{n, plural, one {{n} rule} other {{n} rules}}",
+  "@harnessRepoStarterRules": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "harnessRepoStarterOffer": "Suggest {n, plural, one {{n} rule} other {{n} rules}}",
+  "@harnessRepoStarterOffer": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "harnessRepoStarterOffered": "Already suggested",
+  "harnessRepoStarterAdded": "{n, plural, =0 {Nothing new to suggest} one {{n} rule suggested} other {{n} rules suggested}}",
+  "@harnessRepoStarterAdded": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "harnessRepoStarterOpenRules": "Open the suggestions",
+  "harnessRulesDelivery": "How runs get it",
+  "harnessRulesDelivery_prompt": "Every prompt",
+  "harnessRulesDelivery_skill": "Skill",
+  "harnessRulesDeliveryHelp_prompt": "In every prompt, always in view.",
+  "harnessRulesDeliveryHelp_skill": "A skill Claude loads when its description matches the work: keeps prompts short as rules grow. Keep critical rules in every prompt.",
+  "harnessRulesEnforce": "Enforce",
+  "harnessRulesEnforceHelp": "agnts-guard checks the rule while Claude works, not only asks for it.",
+  "harnessRulesOn": "Check",
+  "harnessRulesOn_file": "File edits",
+  "harnessRulesOn_bash": "Commands",
+  "harnessRulesOn_diff": "Finished change",
+  "harnessRulesOnHelp_file": "Edits of the files below; with a pattern, only added lines that match it.",
+  "harnessRulesOnHelp_bash": "Shell commands Claude runs that match the pattern.",
+  "harnessRulesOnHelp_diff": "The finished change, checked on the server after the run.",
+  "harnessRulesPaths": "Files (globs)",
+  "harnessRulesPathsPlaceholder": "server/migrations/*.sql",
+  "harnessRulesPattern": "Pattern (RE2 regular expression)",
+  "harnessRulesAction": "When it matches",
+  "harnessRulesAction_block": "Block",
+  "harnessRulesAction_warn": "Warn",
+  "harnessRulesMessage": "Message to Claude",
+  "harnessRulesMessagePlaceholder": "Add a new migration instead.",
+  "harnessRulesTry": "Try on history",
+  "harnessRulesTrying": "Checking…",
+  "harnessRulesTryChecked": "Checked {n, plural, one {{n} change} other {{n} changes}} agnts made.",
+  "@harnessRulesTryChecked": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "harnessRulesTryNone": "It would not have matched any of them.",
+  "harnessRulesTryHits": "It would have matched {n, plural, one {{n} ticket} other {{n} tickets}}:",
+  "@harnessRulesTryHits": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "harnessRulesBadgeBlock": "Enforced: blocks",
+  "harnessRulesBadgeWarn": "Enforced: warns",
+  "harnessRulesBadgeSkill": "Skill",
+  "harnessRulesBadgeTip": "Tip",
+  "harnessRulesSource_reflect": "From feedback",
+  "harnessRulesSource_run": "From a run",
+  "harnessRulesSource_promoted": "Seen in several repositories",
+  "harnessRulesSourceStarter": "Starter: {name}",
+  "@harnessRulesSourceStarter": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "harnessRulesConfidence": "Confidence {n}%",
+  "@harnessRulesConfidence": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "harnessRulesSeen": "Seen {n, plural, one {{n} time} other {{n} times}}",
+  "@harnessRulesSeen": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "harnessRulesWatching": "Watching ({n})",
+  "@harnessRulesWatching": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "harnessRulesWatchingHelp": "Lessons agnts noticed once or twice. They become suggestions when it sees them again; until then they reach no ticket.",
+  "harnessSettingsTitle": "Guardrails",
+  "harnessSettingsSub": "agnts-guard checks Claude's work inside every run, while it happens; agnts's checks after the run still apply.",
+  "harnessSettingsProfile": "Guard profile",
+  "harnessSettingsProfile_minimal": "Minimal",
+  "harnessSettingsProfile_standard": "Standard",
+  "harnessSettingsProfile_strict": "Strict",
+  "harnessSettingsProfileHelp_minimal": "Blocks secrets and dotenv files, enforces team rules with a pattern, and asks for a green build before Claude finishes.",
+  "harnessSettingsProfileHelp_standard": "Minimal, plus: blocks skipped tests, silenced linters, deleted tests and check config changes; lint in the stop gate; quick checks of each edited file.",
+  "harnessSettingsProfileHelp_strict": "Standard, plus: tests in the stop gate, blocks swallowed errors and removed assertions, and the fact check before first edits.",
+  "harnessSettingsFactCheck": "Fact check share",
+  "harnessSettingsFactCheckHelp": "Share of strict-profile tickets whose runs must say who uses a file before editing it, and how to undo destructive commands. Compare the groups on Analytics.",
+  "harnessSettingsStalls": "When a run looks stuck",
+  "harnessSettingsStallsHelp": "The same command failing again and again, no edits for many tool calls, or one file read over and over.",
+  "harnessSettingsStalls_off": "Ignore",
+  "harnessSettingsStalls_log": "Note it",
+  "harnessSettingsStalls_act": "Step in",
+  "harnessSettingsProveFixes": "Prove bug fixes",
+  "harnessSettingsProveFixesHelp": "A bug fix needs a test that fails before the change and passes after it; agnts runs it both ways and shows the result.",
+  "harnessSettingsDeepReview": "Deep review",
+  "harnessSettingsDeepReviewHelp": "Specialist passes in the code review (security, silent failures, tests, types). Auto: large or complex work only; it costs more tokens.",
+  "harnessSettingsDeep_off": "Off",
+  "harnessSettingsDeep_auto": "Auto",
+  "harnessSettingsDeep_always": "Always",
+  "harnessSettingsLearnFromRuns": "Learn from runs",
+  "harnessSettingsLearnFromRunsHelp": "After a run with failed checks or a stall, agnts may suggest a tip for the repository. Tips stay watched until seen again.",
+  "harnessSettingsSecondOpinion": "Second opinion",
+  "harnessSettingsSecondOpinionHelp": "Another model reads the chosen approach of complex tickets and says whether it agrees. Empty turns it off.",
+  "harnessSettingsSecondOpinionHint": "e.g. opus or codex:gpt-5-codex",
+  "harnessSettingsAdvanced": "Advanced: guard hooks",
+  "harnessSettingsAdvancedHelp": "Turn single hooks off; the profile still decides the rest.",
+  "harnessSettingsHook_pre_secret": "refuse credentials and dotenv files",
+  "harnessSettingsHook_pre_redflags": "refuse skipped tests, silenced linters, weakened checks",
+  "harnessSettingsHook_pre_rules": "enforce team rules with a pattern",
+  "harnessSettingsHook_pre_fact_check": "ask for facts before the first edit of a file",
+  "harnessSettingsHook_pre_destructive": "ask for a rollback plan before destructive commands",
+  "harnessSettingsHook_post_edit_check": "check each edited file (formatter, linter)",
+  "harnessSettingsHook_stop_gate": "build and lint must pass before Claude finishes",
+  "harnessSettingsHook_session_progress": "give the plan back after the context is compacted",
+  "harnessSettingsCodex": "Coding on Codex",
+  "harnessSettingsCodexHelp": "A Codex model name runs coding on Codex CLI instead of Claude; empty uses Claude. Needs the OpenAI integration and api.openai.com in the allowed hosts (Settings → Preview).",
+  "harnessSettingsCodexConnect": "OpenAI integration",
+  "harnessSettingsQualityTitle": "Guardrails by prompt version",
+  "harnessSettingsQualitySub": "What agnts-guard and the harness checks did for the tickets of each prompt version.",
+  "harnessSettingsColBlocks": "Blocked",
+  "harnessSettingsColBlocksHint": "Actions agnts-guard refused in coding runs",
+  "harnessSettingsColStopSaves": "Stop-gate saves",
+  "harnessSettingsColStopSavesHint": "Tickets whose stop gate sent failing checks back, after which agnts's checks passed first time",
+  "harnessSettingsColStalls": "Stalls",
+  "harnessSettingsColStallsHint": "Times runs looked stuck",
+  "harnessSettingsColProven": "Fixes proven",
+  "harnessSettingsColProvenHint": "Bug fixes whose test failed before the change and passed after it, of those with a proof",
+  "harnessSettingsColAdopted": "Findings adopted",
+  "harnessSettingsColAdoptedHint": "Review findings people put into their feedback",
+  "harnessSettingsColTokens": "Tokens per done",
+  "harnessSettingsColTokensHint": "Average tokens of a done ticket, all stages",
+  "harnessSettingsColFactCheck": "Fact check first try",
+  "harnessSettingsColFactCheckHint": "First-try rate of tickets in the fact check group, next to the rate of all done tickets",
+  "harnessSettingsXOfY": "{x} of {y}",
+  "@harnessSettingsXOfY": {
+    "placeholders": {
+      "x": {
+        "type": "String"
+      },
+      "y": {
+        "type": "String"
+      }
+    }
+  },
+  "harnessSettingsVsAll": "vs {n}%",
+  "@harnessSettingsVsAll": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "harnessTicketFlag_secret": "Possible secret",
+  "harnessTicketFlag_env_file": "Dotenv file added",
+  "harnessTicketFlag_debug_leftover": "Debug output left",
+  "harnessTicketFlag_check_config": "Check configuration changed",
+  "harnessTicketFlag_rule_violation": "Team rule broken",
+  "harnessTicketSecretsTitle": "This change may contain a real credential",
+  "harnessTicketSecretsBody": "agnts flagged {n, plural, one {{n} line} other {{n} lines}} as a possible secret or a dotenv file. Check them in the red flags on the Review tab: agnts does not push the change until you confirm they are not real credentials.",
+  "@harnessTicketSecretsBody": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "harnessTicketSecretsConfirm": "I checked them: not real credentials",
+  "harnessTicketSecretsDone": "Confirmed: the flagged lines are not real credentials.",
+  "harnessTicketSecretsNeeded": "First confirm that the lines flagged as secrets are not real credentials.",
+  "harnessTicketProofTitle": "Proof of the fix",
+  "harnessTicketProof_proven": "Proven",
+  "harnessTicketProof_not_reproduced": "Not reproduced",
+  "harnessTicketProof_still_failing": "Still failing",
+  "harnessTicketProof_inconclusive": "Inconclusive",
+  "harnessTicketProof_no_test": "No test",
+  "harnessTicketProof_error": "Not checked",
+  "harnessTicketProofHelp_proven": "The reproducing test fails on the code before the change and passes after it.",
+  "harnessTicketProofHelp_not_reproduced": "The test passes before the change too, so it does not show the bug.",
+  "harnessTicketProofHelp_still_failing": "The test still fails with the change.",
+  "harnessTicketProofHelp_inconclusive": "The test could not run on the code before the change; it may need what the fix adds.",
+  "harnessTicketProofHelp_no_test": "No automated test reproduces the bug.",
+  "harnessTicketProofHelp_error": "agnts could not run the proof.",
+  "harnessTicketProofBase": "Started from {sha}",
+  "@harnessTicketProofBase": {
+    "placeholders": {
+      "sha": {
+        "type": "String"
+      }
+    }
+  },
+  "harnessTicketProofBefore": "Before the change (exit {code})",
+  "@harnessTicketProofBefore": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "harnessTicketProofAfter": "After the change (exit {code})",
+  "@harnessTicketProofAfter": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "harnessTicketCoverageTitle": "Coverage of changed lines",
+  "harnessTicketCoveragePct": "{pct}% of the changed lines ran in the tests ({covered} of {total})",
+  "@harnessTicketCoveragePct": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      },
+      "covered": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "harnessTicketCoverageBelow": "Below the repository's {n}%",
+  "@harnessTicketCoverageBelow": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "harnessTicketCoverageNone": "No changed line is code the coverage report measures.",
+  "harnessTicketCoverageLines": "Not run: lines {ranges}",
+  "@harnessTicketCoverageLines": {
+    "placeholders": {
+      "ranges": {
+        "type": "String"
+      }
+    }
+  },
+  "harnessTicketCoverageError": "Coverage could not be measured: {error}",
+  "@harnessTicketCoverageError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "harnessTicketConfidence": "{n}% sure",
+  "@harnessTicketConfidence": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "harnessTicketPass_security": "Security pass",
+  "harnessTicketPass_failures": "Failures pass",
+  "harnessTicketPass_tests": "Tests pass",
+  "harnessTicketPass_types": "Types pass",
+  "harnessTicketAdopted": "In your feedback",
+  "harnessTicketDeep": "Deep review",
+  "harnessTicketDropped": "{n, plural, one {{n} finding} other {{n} findings}} left out (low confidence or duplicates)",
+  "@harnessTicketDropped": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "harnessTicketDefect": "Bug fix",
+  "harnessTicketAcceptanceTitle": "Acceptance criteria",
+  "harnessTicketCheck_ui": "In the app",
+  "harnessTicketCheck_api": "API",
+  "harnessTicketCheck_test": "Test",
+  "harnessTicketCheck_manual": "By hand",
+  "harnessTicketSecondTitle": "Second opinion",
+  "harnessTicketSecondBy": "From {model}",
+  "@harnessTicketSecondBy": {
+    "placeholders": {
+      "model": {
+        "type": "String"
+      }
+    }
+  },
+  "harnessTicketSecondAgrees": "Agrees",
+  "harnessTicketSecondConcerns": "Has concerns",
+  "harnessTicketSecondAlternative": "Would do instead",
+  "harnessTicketSecondError": "No second opinion: {error}",
+  "@harnessTicketSecondError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "harnessTicketAccTitle": "Acceptance check",
+  "harnessTicketAcc_ok": "All met",
+  "harnessTicketAcc_partial": "Partly checked",
+  "harnessTicketAcc_failed": "Not met",
+  "harnessTicketVerdict_pass": "Met",
+  "harnessTicketVerdict_fail": "Not met",
+  "harnessTicketVerdict_unknown": "Not checked",
+  "harnessTicketAccSteps": "Steps",
+  "harnessTicketAccShot": "Screenshot",
   "implementTitle": "Next step",
   "implementSubPlan": "Have agnts carry out this plan: a code task linked to this one, with the plan as its brief. You review the diff as usual.",
   "implementSubBug": "Have agnts make the proposed fix: a code task linked to this one, with the investigation as its brief. You review the diff as usual.",
@@ -1271,6 +2191,16 @@
       }
     }
   },
+  "integrationsName_openai": "OpenAI",
+  "integrationsDesc_openai": "An OpenAI API key for runs on Codex CLI, agnts's second coding tool. Pick a codex: model in Settings to use it.",
+  "integrationsConnectSub_openai": "Paste an OpenAI API key. agnts checks it, keeps it encrypted, and gives it only to runs that use Codex.",
+  "integrationsTokenOpen_openai": "Open API keys",
+  "integrationsTokenStep1_openai": "Open the OpenAI platform's API keys page (button below) and sign in.",
+  "integrationsTokenStep2_openai": "Create a new secret key, ideally in a project with a spending limit.",
+  "integrationsTokenStep3_openai": "Copy the key (it starts with sk-) and paste it into API key below.",
+  "integrationsTokenStep4_openai": "In Settings → Preview, add api.openai.com to the hosts runs may reach, so Codex runs can call OpenAI.",
+  "integrationsOpenaiKeyHelp": "Stored encrypted on your server. Only runs on Codex receive it.",
+  "integrationsOpenaiHelp": "Codex runs have no agnts-guard hooks: agnts's checks after the run (red flags, build, lint, tests, review) still apply. Runs also need api.openai.com in the allowed hosts.",
   "kindTitle": "Kind",
   "kindAuto": "Auto",
   "kindAutoHint": "agnts picks the kind while reading the ticket",
@@ -1568,6 +2498,87 @@
       }
     }
   },
+  "mciTitle": "CI failures",
+  "mciLede": "Watched branches that went red, one row per error.",
+  "mciFilterRed": "Red",
+  "mciFilterFlaky": "Flaky",
+  "mciFilterAll": "All",
+  "mciEmptyRed": "No watched branch is red.",
+  "mciEmpty": "No CI failures here.",
+  "mciStatus_triage": "Checking",
+  "mciStatus_open": "Red",
+  "mciStatus_fixing": "Fixing",
+  "mciStatus_fixed": "Fixed",
+  "mciStatus_resolved": "Green again",
+  "mciStatus_flaky": "Flaky",
+  "mciStatus_infra": "Infrastructure",
+  "mciStatus_muted": "Muted",
+  "mciStatus_regression": "Back again",
+  "mciLastSeen": "last {when}",
+  "@mciLastSeen": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "mciFactFirstCommit": "First failing commit",
+  "mciFactCount": "Failed",
+  "mciTimes": "{n, plural, one {{n} time} other {{n} times}}",
+  "@mciTimes": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "mciFactLastSeen": "Last seen",
+  "mciFactFlaky": "Passed on re-run",
+  "mciJob": "Job",
+  "mciBranch": "Branch",
+  "mciFirstError": "The first error",
+  "mciLogTail": "The end of the log",
+  "mciLogNote": "From the job's log, with secrets removed.",
+  "mciNoSample": "No log excerpt was kept for this failure.",
+  "mciRuns": "Failing runs",
+  "mciRunsCount": "{n, plural, one {{n} failing run} other {{n} failing runs}}",
+  "@mciRunsCount": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "mciRunFlaky": "passed on re-run",
+  "mciTicket": "Ticket",
+  "mciForeignPr": "This failure is on someone else's pull request (#{n}): agnts only comments there.",
+  "@mciForeignPr": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "mciFix": "Fix it",
+  "mciFixConfirm": "agnts opens a ticket to fix this failure. You review the fix before anything is pushed.",
+  "mciMute": "Mute",
+  "mciUnmute": "Unmute",
+  "mciMutedDone": "Muted: agnts leaves this failure alone until you unmute it.",
+  "mciUnmutedDone": "Unmuted.",
+  "mciRerun": "Re-run",
+  "mciRerunDone": "Re-run started.",
+  "mciCardTitle": "CI failure",
+  "mciCardOpen": "Open the CI failure",
+  "mciCiFixes": "{n, plural, one {CI sent the pull request back once} other {CI sent the pull request back {n} times}}",
+  "@mciCiFixes": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "mciSourceCi": "CI",
+  "mciNotify": "A watched branch went red",
   "mcpTitle": "Claude chat (MCP)",
   "mcpSub": "Manage agnts from Claude on the web, desktop and phone",
   "mcpUrl": "Connector URL",
@@ -1990,6 +3001,209 @@
   "navPeople": "People",
   "navAccount": "Account",
   "navReviews": "PR reviews",
+  "navCi": "CI",
+  "networkTitle": "Private networks",
+  "networkSub": "Reach self-hosted GitLab, Jira or package registries inside your networks. A connection goes through the network whose route matches it most closely.",
+  "networkUnavailable": "Private networks are not set up on this server: the operator runs the gateway service and sets AGNTS_GATEWAY.",
+  "networkStatus_up": "Connected",
+  "networkStatus_connecting": "Connecting",
+  "networkStatus_error": "Error",
+  "networkStatus_gateway_down": "Gateway down",
+  "networkStatus_disabled": "Off",
+  "networkHandshake": "Last handshake",
+  "networkHeartbeat": "Last heartbeat",
+  "networkWebhooksRelay": "Relayed by agnts-link",
+  "networkWebhooksPolling": "No webhooks: trackers reached through it are read every {n} min",
+  "@networkWebhooksPolling": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "networkKind": "Connection",
+  "networkKindConnector": "agnts-link (recommended)",
+  "networkKindHelp_connector": "A small agent you run inside your network. It connects out to agnts: no VPN credentials, no inbound firewall rule, and it relays webhooks.",
+  "networkKindHelp_wireguard": "agnts connects to your WireGuard peer as a client. The peer must accept UDP from this server.",
+  "networkKindHelp_openvpn": "agnts runs your OpenVPN client config in an isolated container. Certificates must be inline; logins that need MFA are not supported.",
+  "networkEnabled": "Turned on",
+  "networkConfigWg": "WireGuard config",
+  "networkConfigOvpn": "OpenVPN config (.ovpn)",
+  "networkSavedConfig": "Saved: {summary}. Leave empty to keep it.",
+  "@networkSavedConfig": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "networkConfigWgHelp": "The file you would give wg-quick. Add a DNS line to reach hosts by name. Keys are encrypted and never shown again.",
+  "networkConfigOvpnHelp": "A client config with its ca, cert and key blocks inline. Scripts (up, down, plugin…) are refused.",
+  "networkUsername": "Username",
+  "networkPassword": "Password",
+  "networkPasswordKeep": "Saved: leave empty to keep it",
+  "networkRoutes": "Routes",
+  "networkRoutesHelp": "Hosts (gitlab.corp.local), domains (.corp.local) or private ranges (10.20.0.0/16) that go through this network, with ports (80 and 443 when empty). Another network may have a narrower route inside these (10.30.0.0/16 inside 10.0.0.0/8): the more specific one wins. Two networks may not list the same route.",
+  "networkRouteTarget": "Host, domain or range",
+  "networkRoutePorts": "Ports",
+  "networkRemoveRoute": "Remove route",
+  "networkAddRoute": "Add route",
+  "networkBlastRadius": "Code agnts runs for your tickets can reach every host listed here. List exact hosts rather than whole ranges.",
+  "networkCa": "Company CA bundle",
+  "networkCaSaved": "Trusted: {subjects} (until {date}).",
+  "@networkCaSaved": {
+    "placeholders": {
+      "subjects": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networkCaRemove": "Remove",
+  "networkCaHelp": "PEM certificates of your internal CA. agnts and its runs trust them besides the public roots.",
+  "networkSaved": "{name} saved",
+  "@networkSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "networkRemove": "Remove",
+  "networkRemoved": "Private network removed",
+  "networkRemoveConfirm": "Remove {name}? agnts will stop reaching the hosts on its routes.",
+  "@networkRemoveConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "networkLinkTitle": "Run agnts-link",
+  "networkLinkHelp": "Run this on a machine inside the network that can reach the hosts above. AGNTS_LINK_ALLOW is your own limit: agnts-link never dials anything else. Each network has its own token, so one machine can run several links.",
+  "networkToken": "Token",
+  "networkTokenOnce": "Copy it now: it is shown only once.",
+  "networkLinkHooks": "Webhooks: point GitLab and Jira at http://AGNTS-LINK-HOST:8080 with the same /webhooks/… path the Integrations page shows.",
+  "networkRotate": "Replace token",
+  "networkRotateConfirm": "Make a new token? The running agnts-link disconnects until you restart it with the new one.",
+  "networkTest": "Test a connection",
+  "networkTestRun": "Test",
+  "networkTesting": "Testing…",
+  "networkTestOk": "Connected through {name} ({via}) to {ip} in {ms} ms.",
+  "@networkTestOk": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "via": {
+        "type": "String"
+      },
+      "ip": {
+        "type": "String"
+      },
+      "ms": {
+        "type": "String"
+      }
+    }
+  },
+  "networkTlsOk": "Certificate OK: {subject}, issued by {issuer}.",
+  "@networkTlsOk": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      },
+      "issuer": {
+        "type": "String"
+      }
+    }
+  },
+  "networkTlsBad": "Certificate not trusted: {error}",
+  "@networkTlsBad": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "networkActivity": "Activity",
+  "networkActivityCounts": "{n} connections, {refused} refused or failed",
+  "@networkActivityCounts": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "refused": {
+        "type": "String"
+      }
+    }
+  },
+  "networkActivityShow": "Show connections",
+  "networkActivityHide": "Hide connections",
+  "networkRefused": "refused",
+  "networkSecondsAgo": "{n} s ago",
+  "@networkSecondsAgo": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "networkMinutesAgo": "{n} min ago",
+  "@networkMinutesAgo": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "networkHoursAgo": "{n} h ago",
+  "@networkHoursAgo": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "networkReconnect": "Reconnect",
+  "networkReconnectHelp": "Restart the tunnel: a fresh OpenVPN client, a new WireGuard handshake, or agnts-link connects again",
+  "networkReconnecting": "Reconnecting: the tunnel restarts within 15 seconds",
+  "networkAdd": "Add network",
+  "networkAddTitle": "New private network",
+  "networkAddSubmit": "Add network",
+  "networkEditorSub": "A tunnel into one of your networks and the hosts that go through it",
+  "networkEdit": "Edit",
+  "networkDone": "Done",
+  "networkName": "Name",
+  "networkNamePlaceholder": "Client A, Office, Data center",
+  "networkNameHelp": "Unique in the workspace: the company, office or data center it reaches.",
+  "networkEmpty": "No private networks yet. Add one to reach hosts that are only inside your network.",
+  "networkLimit": "A workspace keeps at most {n} private networks",
+  "@networkLimit": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "networkCaShort": "Trusts {subjects}",
+  "@networkCaShort": {
+    "placeholders": {
+      "subjects": {
+        "type": "String"
+      }
+    }
+  },
+  "networkTestHelp": "Enter host:port. agnts picks the network the routes lead to, connects and checks the certificate.",
+  "networkTestThrough": "Through",
+  "networkTestAuto": "The network the routes pick",
+  "networkActivityAll": "All networks",
+  "networkActivityNetwork": "Network",
+  "networkActivityTime": "Time",
+  "networkActivityTarget": "Target",
+  "networkActivitySource": "Ticket or source",
+  "networkGone": "removed",
   "platformTitle": "Admin cabinet",
   "platformLede": "Every workspace, run and user on this server. Workspaces show metadata only: their tickets are their members'.",
   "platformCapacity": "Server",
@@ -2748,6 +3962,7 @@
   "repoDuration": "Duration",
   "repoOpenRun": "Open on the git host",
   "repoBrief": "Brief",
+  "repoCi": "CI",
   "reposTitle": "Repositories",
   "reposLede": "Code agnts can work in. Each run clones the repository into a fresh container on your server, then runs these checks before anything reaches your review.",
   "reposAdd": "Add repository",
@@ -3458,7 +4673,7 @@
   "settingsAllowHelp": "Claude Code can run these without asking",
   "settingsDeny": "Blocked commands",
   "settingsDenyHelp": "Always refused, even if a ticket asks for them. Pushing is done by agnts, never by Claude Code.",
-  "settingsCommits": "Commits and pull requests",
+  "settingsCommits": "Commits and PR",
   "settingsCommitsSub": "Who commits appear from, and how pull requests open",
   "settingsAuthorName": "Author name",
   "settingsAuthorNameHelp": "Commits are made as you",
@@ -3504,7 +4719,6 @@
   "settingsDone": "When changes are pushed",
   "settingsLessons": "When agnts finds something new to learn",
   "settingsReviewDone": "When agnts's code review finishes",
-  "settingsOnThisPage": "On this page",
   "settingsSecretsHelp": "Tokens for Jira, GitHub and Claude are stored encrypted on your server. This page never shows them.",
   "settingsSaved": "Settings saved",
   "settingsParallelSlots": "{n, plural, one {{n} run} other {{n} runs}} at once",
@@ -3524,6 +4738,7 @@
   "settingsAutoBriefHelp": "Write a repository brief (architecture, recipes, conventions) when a repository's first ticket is analysed, and update it after every 10 merges. A brief reaches the agent only after you approve it.",
   "settingsReflect": "Learn from your feedback",
   "settingsReflectHelp": "When you ask for changes or reject work with a reason, agnts looks for a convention behind it and suggests a rule on the Rules page. Nothing applies until you adopt it.",
+  "settingsCiRed": "When a watched branch goes red",
   "spendTitle": "Token spend",
   "spendSub": "{tokens} tokens in and out · about {cost} at API prices",
   "@spendSub": {
@@ -4231,6 +5446,16 @@
   "ticketPickAny": "Pick all that apply",
   "ticketOtherAnswer": "Something else (optional)",
   "ticketSrcGit": "Pull request",
+  "ticketSrcCi": "CI failure",
+  "ticketKvCi": "CI",
+  "ticketCiFixes": "CI sent the pull request back {n, plural, one {{n} time} other {{n} times}}",
+  "@ticketCiFixes": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
   "ticketsTitle": "Tickets",
   "ticketsNeedsYou": "Needs you",
   "ticketsRunning": "Running",
@@ -4256,6 +5481,9 @@
   "ticketsColTicket": "Ticket",
   "ticketsColSource": "Source",
   "ticketsColRepo": "Repository",
+  "ticketsRepoLabel": "Repository",
+  "ticketsAllRepos": "All repositories",
+  "ticketsNoRepo": "No repository",
   "ticketsColStatus": "Status",
   "ticketsColUpdated": "Updated",
   "ticketsSourceJira": "Jira",
@@ -4281,7 +5509,7 @@
   "ticketsViewBoard": "Board",
   "ticketsBoardEmpty": "Nothing here",
   "ticketsListSub": "Jira and Plane tickets with the agnts label, plus tasks you create for side projects.",
-  "ticketsNoMatch": "No tickets match your search.",
+  "ticketsNoMatch": "No tickets match your filters.",
   "ticketsEmptyNeeds": "Nothing is waiting on you. Tickets show up here when agnts has questions or changes to review.",
   "ticketsEmptyOther": "No tickets here yet.",
   "ticketsStatNeeds": "Needs you",
@@ -4293,6 +5521,7 @@
   "ticketsStatSession": "Plan session",
   "ticketsSourcePlane": "Plane",
   "ticketsSourceGit": "PR",
+  "ticketsSourceCi": "CI",
   "usageTitle": "Plan usage",
   "usageLede": "agnts runs on your Claude subscription. These limits are shared with your own Claude and Claude Code use.",
   "usageCard": "Plan usage",

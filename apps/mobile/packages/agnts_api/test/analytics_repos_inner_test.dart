@@ -7,6 +7,36 @@ void main() {
   // TODO add properties to the entity
 
   group(AnalyticsReposInner, () {
+    // Pull requests merged in the period
+    // int merged
+    test('to test the property `merged`', () async {
+      // TODO
+    });
+
+    // Pull requests closed without a merge in the period
+    // int closed
+    test('to test the property `closed`', () async {
+      // TODO
+    });
+
+    // Questions agnts asked in the period
+    // int asked
+    test('to test the property `asked`', () async {
+      // TODO
+    });
+
+    // Tickets analysed in the period
+    // int analyzed
+    test('to test the property `analyzed`', () async {
+      // TODO
+    });
+
+    // CI failure groups that failed in the period
+    // int ciFailures
+    test('to test the property `ciFailures`', () async {
+      // TODO
+    });
+
     // int repoId
     test('to test the property `repoId`', () async {
       // TODO

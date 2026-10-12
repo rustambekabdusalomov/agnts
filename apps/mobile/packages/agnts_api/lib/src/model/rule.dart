@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:agnts_api/src/model/rule_enforce.dart';
 import 'package:agnts_api/src/model/rule_question.dart';
 import 'package:agnts_api/src/model/rule_status.dart';
 import 'package:agnts_api/src/model/rule_kind.dart';
@@ -54,6 +55,22 @@ class Rule {
     required  this.rounds,
 
     required  this.error,
+
+     this.enforce,
+
+     this.delivery,
+
+     this.skillDescription,
+
+     this.source_,
+
+     this.confidence,
+
+     this.evidence,
+
+     this.lastSeen,
+
+     this.watching,
 
      this.analyzedAt,
 
@@ -265,6 +282,108 @@ class Rule {
 
   @JsonKey(
     
+    name: r'enforce',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final RuleEnforce? enforce;
+
+
+
+      /// prompt: in every prompt; skill: a skill Claude loads when its description matches the work
+  @JsonKey(
+    
+    name: r'delivery',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final RuleDeliveryEnum? delivery;
+
+
+
+      /// When the rule applies, for its skill
+  @JsonKey(
+    
+    name: r'skillDescription',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? skillDescription;
+
+
+
+      /// Where it came from: empty (a person), reflect, run, promoted or pack:<language>
+  @JsonKey(
+    
+    name: r'source',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? source_;
+
+
+
+      /// For a learned suggestion: 0.3 to 0.9, earned each time it is seen again
+  @JsonKey(
+    
+    name: r'confidence',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final num? confidence;
+
+
+
+      /// How many times a learned suggestion was seen
+  @JsonKey(
+    
+    name: r'evidence',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? evidence;
+
+
+
+  @JsonKey(
+    
+    name: r'lastSeen',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final DateTime? lastSeen;
+
+
+
+      /// A learned suggestion with too little evidence to show yet
+  @JsonKey(
+    
+    name: r'watching',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? watching;
+
+
+
+  @JsonKey(
+    
     name: r'analyzedAt',
     required: false,
     includeIfNull: false,
@@ -319,6 +438,14 @@ class Rule {
       other.questions == questions &&
       other.rounds == rounds &&
       other.error == error &&
+      other.enforce == enforce &&
+      other.delivery == delivery &&
+      other.skillDescription == skillDescription &&
+      other.source_ == source_ &&
+      other.confidence == confidence &&
+      other.evidence == evidence &&
+      other.lastSeen == lastSeen &&
+      other.watching == watching &&
       other.analyzedAt == analyzedAt &&
       other.createdAt == createdAt &&
       other.updatedAt == updatedAt;
@@ -341,6 +468,14 @@ class Rule {
         questions.hashCode +
         rounds.hashCode +
         error.hashCode +
+        enforce.hashCode +
+        delivery.hashCode +
+        skillDescription.hashCode +
+        source_.hashCode +
+        confidence.hashCode +
+        evidence.hashCode +
+        lastSeen.hashCode +
+        watching.hashCode +
         analyzedAt.hashCode +
         createdAt.hashCode +
         updatedAt.hashCode;
@@ -355,4 +490,20 @@ class Rule {
   }
 
 }
+
+/// prompt: in every prompt; skill: a skill Claude loads when its description matches the work
+enum RuleDeliveryEnum {
+@JsonValue(r'prompt')
+prompt(r'prompt'),
+@JsonValue(r'skill')
+skill(r'skill');
+
+const RuleDeliveryEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
+}
+
 

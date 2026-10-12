@@ -5,6 +5,8 @@
 // ignore_for_file: unused_element
 import 'package:agnts_api/src/model/check_step.dart';
 import 'package:agnts_api/src/model/red_flag.dart';
+import 'package:agnts_api/src/model/coverage.dart';
+import 'package:agnts_api/src/model/proof.dart';
 import 'package:agnts_api/src/model/file_change.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -36,6 +38,10 @@ class Result {
      this.deviations,
 
      this.redFlags,
+
+     this.proof,
+
+     this.coverage,
 
     required  this.createdAt,
   });
@@ -129,6 +135,30 @@ class Result {
 
   @JsonKey(
     
+    name: r'proof',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final Proof? proof;
+
+
+
+  @JsonKey(
+    
+    name: r'coverage',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final Coverage? coverage;
+
+
+
+  @JsonKey(
+    
     name: r'createdAt',
     required: true,
     includeIfNull: false,
@@ -150,6 +180,8 @@ class Result {
       other.report == report &&
       other.deviations == deviations &&
       other.redFlags == redFlags &&
+      other.proof == proof &&
+      other.coverage == coverage &&
       other.createdAt == createdAt;
 
     @override
@@ -161,6 +193,8 @@ class Result {
         report.hashCode +
         deviations.hashCode +
         redFlags.hashCode +
+        proof.hashCode +
+        coverage.hashCode +
         createdAt.hashCode;
 
   factory Result.fromJson(Map<String, dynamic> json) => _$ResultFromJson(json);

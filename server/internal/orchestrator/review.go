@@ -38,10 +38,10 @@ const (
 // one set in Settings; on auto, the larger model reviews complex tickets.
 // It returns the model and why it was picked.
 func reviewModel(s domain.Settings, t domain.Ticket, a *Analysis, res domain.Result) (string, string) {
-	if m := t.Models[domain.ModelReview]; slices.Contains(domain.Models, m) {
+	if m := t.Models[domain.ModelReview]; domain.ValidModel(m) {
 		return m, "chosen for this ticket"
 	}
-	if m := s.Models.Review; slices.Contains(domain.Models, m) {
+	if m := s.Models.Review; domain.ValidModel(m) {
 		return m, "set in Settings"
 	}
 	lines := 0
@@ -185,8 +185,16 @@ func (o *Orchestrator) review(ctx context.Context, s domain.Settings, t domain.T
 	}
 
 	model, why := reviewModel(s, t, a, res)
+	if !report {
+		d.Checklists = o.copyChecklists(ctx, ws, res.Files)
+		d.Deep = deepReview(s, model)
+	}
+	msg := fmt.Sprintf("reviewing with %s: %s", model, why)
+	if d.Deep {
+		msg += "; with specialist passes"
+	}
 	o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(domain.StageReview), Type: domain.EventClaudeText,
-		Message: fmt.Sprintf("reviewing with %s: %s", model, why), Data: map[string]any{"model": model, "reason": why}})
+		Message: msg, Data: map[string]any{"model": model, "reason": why, "deep": d.Deep, "checklists": len(d.Checklists)}})
 	prompt, err := render("review", d)
 	if err == nil {
 		prompt, err = o.withFollowUps(ctx, s, t, d, domain.SuggestFromReview, ReviewPath, prompt)
@@ -198,6 +206,9 @@ func (o *Orchestrator) review(ctx context.Context, s domain.Settings, t domain.T
 	rs.Models.Review = model
 	rs.MaxTurns = min(s.MaxTurns, reviewMaxTurns)
 	rs.TimeoutMin = min(s.TimeoutMin, reviewTimeoutMin)
+	if d.Deep {
+		rs.MaxTurns = min(s.MaxTurns, reviewMaxTurns*2) // the passes need room
+	}
 	if _, err := o.claude(ctx, rs, ws, &t, run, domain.ModelReview, prompt, ""); err != nil {
 		var stop *stopError
 		if errors.As(err, &stop) {
@@ -217,7 +228,11 @@ func (o *Orchestrator) review(ctx context.Context, s domain.Settings, t domain.T
 	if err != nil {
 		return err
 	}
-	rv.Revision, rv.Model, rv.ModelReason = t.Revision, model, why
+	rv.Revision, rv.Model, rv.ModelReason, rv.Deep = t.Revision, model, why, d.Deep
+	if f := coverageFinding(res.Harness.Coverage); f != nil {
+		rv.Findings = append(rv.Findings, *f)
+		rv.Normalize()
+	}
 	o.saveFollowUps(ctx, s, t, run, domain.SuggestFromReview, rv.FollowUps)
 	rv.FollowUps = nil // kept as suggestions
 	b, _ := json.Marshal(rv)

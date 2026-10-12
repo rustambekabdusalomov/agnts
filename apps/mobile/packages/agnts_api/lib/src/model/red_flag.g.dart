@@ -109,11 +109,16 @@ Map<String, dynamic> _$RedFlagToJson(RedFlag instance) => <String, dynamic>{
 };
 
 const _$RedFlagKindEnumEnumMap = {
+  RedFlagKindEnum.secret: 'secret',
+  RedFlagKindEnum.envFile: 'env_file',
   RedFlagKindEnum.skippedTest: 'skipped_test',
   RedFlagKindEnum.removedAssertion: 'removed_assertion',
   RedFlagKindEnum.deletedTest: 'deleted_test',
   RedFlagKindEnum.silencedLint: 'silenced_lint',
+  RedFlagKindEnum.checkConfig: 'check_config',
   RedFlagKindEnum.swallowedError: 'swallowed_error',
+  RedFlagKindEnum.ruleViolation: 'rule_violation',
+  RedFlagKindEnum.debugLeftover: 'debug_leftover',
   RedFlagKindEnum.todo: 'todo',
   RedFlagKindEnum.newDependency: 'new_dependency',
 };

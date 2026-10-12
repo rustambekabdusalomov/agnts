@@ -9,7 +9,7 @@ part of 'code_review.dart';
 abstract class _$CodeReviewCWProxy {
   CodeReview revision(int revision);
 
-  CodeReview model(Model model);
+  CodeReview model(String model);
 
   CodeReview modelReason(String modelReason);
 
@@ -21,6 +21,10 @@ abstract class _$CodeReviewCWProxy {
 
   CodeReview strengths(List<String> strengths);
 
+  CodeReview deep(bool? deep);
+
+  CodeReview dropped(int? dropped);
+
   CodeReview createdAt(DateTime createdAt);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CodeReview(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -31,12 +35,14 @@ abstract class _$CodeReviewCWProxy {
   /// ````
   CodeReview call({
     int revision,
-    Model model,
+    String model,
     String modelReason,
     CodeReviewVerdictEnum verdict,
     String summary,
     List<Finding> findings,
     List<String> strengths,
+    bool? deep,
+    int? dropped,
     DateTime createdAt,
   });
 }
@@ -51,7 +57,7 @@ class _$CodeReviewCWProxyImpl implements _$CodeReviewCWProxy {
   CodeReview revision(int revision) => this(revision: revision);
 
   @override
-  CodeReview model(Model model) => this(model: model);
+  CodeReview model(String model) => this(model: model);
 
   @override
   CodeReview modelReason(String modelReason) => this(modelReason: modelReason);
@@ -67,6 +73,12 @@ class _$CodeReviewCWProxyImpl implements _$CodeReviewCWProxy {
 
   @override
   CodeReview strengths(List<String> strengths) => this(strengths: strengths);
+
+  @override
+  CodeReview deep(bool? deep) => this(deep: deep);
+
+  @override
+  CodeReview dropped(int? dropped) => this(dropped: dropped);
 
   @override
   CodeReview createdAt(DateTime createdAt) => this(createdAt: createdAt);
@@ -86,6 +98,8 @@ class _$CodeReviewCWProxyImpl implements _$CodeReviewCWProxy {
     Object? summary = const $CopyWithPlaceholder(),
     Object? findings = const $CopyWithPlaceholder(),
     Object? strengths = const $CopyWithPlaceholder(),
+    Object? deep = const $CopyWithPlaceholder(),
+    Object? dropped = const $CopyWithPlaceholder(),
     Object? createdAt = const $CopyWithPlaceholder(),
   }) {
     return CodeReview(
@@ -96,7 +110,7 @@ class _$CodeReviewCWProxyImpl implements _$CodeReviewCWProxy {
       model: model == const $CopyWithPlaceholder()
           ? _value.model
           // ignore: cast_nullable_to_non_nullable
-          : model as Model,
+          : model as String,
       modelReason: modelReason == const $CopyWithPlaceholder()
           ? _value.modelReason
           // ignore: cast_nullable_to_non_nullable
@@ -117,6 +131,14 @@ class _$CodeReviewCWProxyImpl implements _$CodeReviewCWProxy {
           ? _value.strengths
           // ignore: cast_nullable_to_non_nullable
           : strengths as List<String>,
+      deep: deep == const $CopyWithPlaceholder()
+          ? _value.deep
+          // ignore: cast_nullable_to_non_nullable
+          : deep as bool?,
+      dropped: dropped == const $CopyWithPlaceholder()
+          ? _value.dropped
+          // ignore: cast_nullable_to_non_nullable
+          : dropped as int?,
       createdAt: createdAt == const $CopyWithPlaceholder()
           ? _value.createdAt
           // ignore: cast_nullable_to_non_nullable
@@ -152,7 +174,7 @@ CodeReview _$CodeReviewFromJson(Map<String, dynamic> json) =>
       );
       final val = CodeReview(
         revision: $checkedConvert('revision', (v) => (v as num).toInt()),
-        model: $checkedConvert('model', (v) => $enumDecode(_$ModelEnumMap, v)),
+        model: $checkedConvert('model', (v) => v as String),
         modelReason: $checkedConvert('modelReason', (v) => v as String),
         verdict: $checkedConvert(
           'verdict',
@@ -169,6 +191,8 @@ CodeReview _$CodeReviewFromJson(Map<String, dynamic> json) =>
           'strengths',
           (v) => (v as List<dynamic>).map((e) => e as String).toList(),
         ),
+        deep: $checkedConvert('deep', (v) => v as bool?),
+        dropped: $checkedConvert('dropped', (v) => (v as num?)?.toInt()),
         createdAt: $checkedConvert(
           'createdAt',
           (v) => DateTime.parse(v as String),
@@ -180,20 +204,16 @@ CodeReview _$CodeReviewFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$CodeReviewToJson(CodeReview instance) =>
     <String, dynamic>{
       'revision': instance.revision,
-      'model': _$ModelEnumMap[instance.model]!,
+      'model': instance.model,
       'modelReason': instance.modelReason,
       'verdict': _$CodeReviewVerdictEnumEnumMap[instance.verdict]!,
       'summary': instance.summary,
       'findings': instance.findings.map((e) => e.toJson()).toList(),
       'strengths': instance.strengths,
+      'deep': ?instance.deep,
+      'dropped': ?instance.dropped,
       'createdAt': instance.createdAt.toIso8601String(),
     };
-
-const _$ModelEnumMap = {
-  Model.haiku: 'haiku',
-  Model.sonnet: 'sonnet',
-  Model.opus: 'opus',
-};
 
 const _$CodeReviewVerdictEnumEnumMap = {
   CodeReviewVerdictEnum.looksGood: 'looks_good',

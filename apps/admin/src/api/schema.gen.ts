@@ -186,6 +186,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tickets/{key}/secrets-ack": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm that the lines flagged as secrets in the change under review are not real credentials
+         * @description A change with lines agnts's scan flagged as secrets (or a dotenv file) cannot be approved until a person confirms, for that commit, that they are not real credentials.
+         */
+        post: operations["acknowledgeSecrets"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tickets/{key}/approve": {
         parameters: {
             query?: never;
@@ -1341,6 +1363,133 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/networks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The workspace's private networks (VPNs and agnts-link connectors)
+         * @description Tunnels into the team's own networks and the routes (hosts, domains,
+         *     private ranges) that go through each: agnts's calls to a self-hosted
+         *     GitLab, Jira or Plane, git, and run containers' connections to those
+         *     hosts. A connection goes through the network whose route matches it
+         *     most closely. Secrets are never returned.
+         */
+        get: operations["listPrivateNetworks"];
+        put?: never;
+        /**
+         * Add a private network
+         * @description Its routes may not claim a host, domain or range another of the
+         *     workspace's networks has (on a common port); a route nested inside
+         *     another network's is fine. A connector's token is returned once.
+         */
+        post: operations["createPrivateNetwork"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/networks/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Connect to host:port through the network its routes pick, and check its TLS certificate */
+        post: operations["testPrivateNetwork"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/networks/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Connections made through private networks (the last 100, and the day's counts) */
+        get: operations["getNetworkActivity"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/networks/{networkId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                networkId: components["parameters"]["NetworkID"];
+            };
+            cookie?: never;
+        };
+        /** One private network */
+        get: operations["getPrivateNetwork"];
+        /**
+         * Change a private network
+         * @description Left-out secrets (config, password) keep the stored ones. Switching
+         *     to a connector makes its token, returned once.
+         */
+        put: operations["updatePrivateNetwork"];
+        post?: never;
+        /** Remove a private network */
+        delete: operations["deletePrivateNetwork"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/networks/{networkId}/reconnect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                networkId: components["parameters"]["NetworkID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Restart the tunnel (a new OpenVPN sidecar, a new WireGuard handshake, agnts-link reconnects) */
+        post: operations["reconnectPrivateNetwork"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/networks/{networkId}/token": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                networkId: components["parameters"]["NetworkID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Make a new agnts-link token for a connector network (shown once; the old one stops working) */
+        post: operations["rotateLinkToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/lessons": {
         parameters: {
             query?: never;
@@ -1521,6 +1670,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/rules/try": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Check an enforcement against agnts's last changes before turning it on */
+        post: operations["tryEnforce"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/rules/{id}": {
         parameters: {
             query?: never;
@@ -1614,6 +1780,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/analytics/delivery": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What happened to agnts pull requests, cycle time and questions for a period */
+        get: operations["getAnalyticsDelivery"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/analytics/ci": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** CI failures, fixes and flaky jobs for a period */
+        get: operations["getAnalyticsCi"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/analytics/learning": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lessons, rules, follow-ups and reviewer notes for a period */
+        get: operations["getAnalyticsLearning"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/eval/replays": {
         parameters: {
             query?: never;
@@ -1663,6 +1880,48 @@ export interface paths {
         put?: never;
         /** Restore an archived repository */
         post: operations["unarchiveRepo"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repos/{id}/harness": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Set the repository's guard profile, per-file checks, coverage and acceptance check */
+        put: operations["saveRepoHarness"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repos/{id}/starter-rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        /** Starter rule packs that fit the repository's toolchains */
+        get: operations["listStarterPacks"];
+        put?: never;
+        /**
+         * Add a starter pack's rules to the repository as suggestions
+         * @description Nothing applies until someone adopts a suggestion (with a review or as written). Rules whose title the repository already has are skipped.
+         */
+        post: operations["offerStarterRules"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2571,6 +2830,157 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/ci/failures": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** CI failure groups, newest occurrence first */
+        get: operations["listCIFailures"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ci/failures/{failureId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                failureId: components["parameters"]["CIFailureID"];
+            };
+            cookie?: never;
+        };
+        /** One CI failure group with its redacted log excerpt */
+        get: operations["getCIFailure"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ci/failures/{failureId}/fix": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                failureId: components["parameters"]["CIFailureID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Open a ticket that fixes the failure now (ignores the auto-fix setting and the daily budget) */
+        post: operations["fixCIFailure"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ci/failures/{failureId}/mute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                failureId: components["parameters"]["CIFailureID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ignore this failure (no tickets, no notifications) */
+        post: operations["muteCIFailure"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ci/failures/{failureId}/unmute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                failureId: components["parameters"]["CIFailureID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Watch a muted failure again */
+        post: operations["unmuteCIFailure"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ci/failures/{failureId}/rerun": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                failureId: components["parameters"]["CIFailureID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Re-run the failed jobs of the newest failing run on the git host */
+        post: operations["rerunCIFailure"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/ci": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        /** The CI failure a CI ticket fixes (404 for other tickets) */
+        get: operations["getTicketCIFailure"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repos/{id}/ci-watch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        /** How agnts watches this repository's CI, and whether the git token can read it */
+        get: operations["getRepoCIWatch"];
+        /** Change how agnts watches this repository's CI */
+        put: operations["putRepoCIWatch"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3096,6 +3506,8 @@ export interface components {
             status: "open" | "accepted" | "dismissed";
             /** @description A ticket can be made from it now (open, and the parent is done unless the analysis suggested it) */
             ready: boolean;
+            /** @description Ids of sibling suggestions that must land first; once both are tickets, this one depends on them */
+            after?: number[];
             /** @description The ticket made from it */
             childKey?: string;
             /** Format: date-time */
@@ -3109,7 +3521,7 @@ export interface components {
             state: components["schemas"]["TicketState"];
             kind: components["schemas"]["TicketKind"];
             /** @enum {string} */
-            source: "jira" | "plane" | "local" | "git";
+            source: "jira" | "plane" | "local" | "git" | "ci";
             held?: boolean;
         };
         FollowUps: {
@@ -3141,6 +3553,8 @@ export interface components {
         };
         AcceptFollowUps: {
             items: components["schemas"]["AcceptFollowUp"][];
+            /** @description Queue the new tickets to run now instead of holding them until someone starts each one */
+            start?: boolean;
         };
         AcceptFollowUpResult: {
             /** Format: int64 */
@@ -3174,7 +3588,7 @@ export interface components {
         Ticket: {
             key: string;
             /** @enum {string} */
-            source: "jira" | "plane" | "local" | "git";
+            source: "jira" | "plane" | "local" | "git" | "ci";
             /** Format: int64 */
             repoId?: number;
             title: string;
@@ -3191,6 +3605,8 @@ export interface components {
             headSha?: string;
             prNumber?: number;
             prUrl: string;
+            /** @description Rounds a red CI check sent the pull request back to coding */
+            ciFixes?: number;
             /** @description Git host usernames the pull request is (or will be) assigned to */
             assignees?: string[];
             /** @enum {string} */
@@ -3371,6 +3787,16 @@ export interface components {
             /** @description What the work will deliberately not do */
             outOfScope?: string[];
             ship?: components["schemas"]["ShipNotes"];
+            /** @description The work fixes broken behaviour; with proveFixes on it must prove the fix */
+            defect?: boolean;
+            /** @description What the finished work must do, as checks */
+            acceptance?: {
+                id: string;
+                criterion: string;
+                /** @enum {string} */
+                check: "ui" | "api" | "test" | "manual";
+            }[];
+            secondOpinion?: components["schemas"]["SecondOpinion"];
         };
         Approach: {
             title: string;
@@ -3402,6 +3828,12 @@ export interface components {
             detail?: string;
             /** @description What to change, written to be sent back as feedback */
             suggestion?: string;
+            /** @description How sure the reviewer was, 0 to 1; absent when it did not say */
+            confidence?: number;
+            /** @description The specialist pass that found it (security, failures, tests, types), empty for the main review */
+            pass?: string;
+            /** @description A person put it in their feedback */
+            adopted?: boolean;
         };
         /** @description agnts's review of the latest result, advice beside the human review. It reviewed an older revision when revision is below the ticket's. */
         CodeReview: {
@@ -3414,6 +3846,10 @@ export interface components {
             summary: string;
             findings: components["schemas"]["Finding"][];
             strengths: string[];
+            /** @description The review ran the specialist passes */
+            deep?: boolean;
+            /** @description Findings left out for low confidence or as duplicates */
+            dropped?: number;
             /** Format: date-time */
             createdAt: string;
         };
@@ -3463,6 +3899,7 @@ export interface components {
             summary: string;
             shots: components["schemas"]["PreviewShot"][];
             issues: components["schemas"]["PreviewIssue"][];
+            acceptance?: components["schemas"]["Acceptance"];
             /** Format: date-time */
             createdAt: string;
         };
@@ -3492,12 +3929,14 @@ export interface components {
             deviations?: string[];
             /** @description Lines agnts's scan of the change flagged for the reviewer: skipped tests, removed assertions, silenced linters and the like */
             redFlags?: components["schemas"]["RedFlag"][];
+            proof?: components["schemas"]["Proof"];
+            coverage?: components["schemas"]["Coverage"];
             /** Format: date-time */
             createdAt: string;
         };
         RedFlag: {
             /** @enum {string} */
-            kind: "skipped_test" | "removed_assertion" | "deleted_test" | "silenced_lint" | "swallowed_error" | "todo" | "new_dependency";
+            kind: "secret" | "env_file" | "skipped_test" | "removed_assertion" | "deleted_test" | "silenced_lint" | "check_config" | "swallowed_error" | "rule_violation" | "debug_leftover" | "todo" | "new_dependency";
             path: string;
             /** @description Line in the new file; absent for the whole file */
             line?: number;
@@ -3556,13 +3995,10 @@ export interface components {
                 attachments?: number[];
             }[];
         };
-        /** @enum {string} */
-        Model: "haiku" | "sonnet" | "opus";
-        /**
-         * @description auto: opus for complex tickets, sonnet otherwise
-         * @enum {string}
-         */
-        ReviewModel: "auto" | "haiku" | "sonnet" | "opus";
+        /** @description A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI */
+        Model: string;
+        /** @description auto: opus for complex tickets, sonnet otherwise */
+        ReviewModel: string;
         StageModels: {
             analyze: components["schemas"]["Model"];
             coding: components["schemas"]["Model"];
@@ -3703,10 +4139,193 @@ export interface components {
             /** @description Runs suggest follow-up tickets (off by default; a ticket can override it) */
             suggestFollowUps?: boolean;
             pullReviews?: components["schemas"]["PullReviewSettings"];
+            ci?: components["schemas"]["CISettings"];
+            guard?: components["schemas"]["GuardSettings"];
+            /** @description What agnts does when a run looks stuck: nothing, note it on the ticket, or also tell Claude to step back (once per run) */
+            stalls?: string;
+            /** @description Bug fixes need a test that fails before the change and passes after it; agnts checks it */
+            proveFixes?: boolean;
+            /** @description Specialist passes in the code review (security, silent failures, tests, types); auto: large or complex work */
+            deepReview?: string;
+            /** @description Suggest tips from runs that had trouble (failed checks, a stall) */
+            learnFromRuns?: boolean;
+            /** @description A model that critiques the chosen approach of complex tickets (codex:<model> or a Claude model); empty turns it off */
+            secondOpinion?: string;
             pauseAbove: number;
             parallel: number;
             git: components["schemas"]["GitSettings"];
             notify?: components["schemas"]["NotifySettings"];
+        };
+        /** @description How strict agnts-guard, the hooks inside every run, is */
+        GuardSettings: {
+            profile: components["schemas"]["GuardProfile"];
+            /** @description Guard hooks turned off */
+            disabled: components["schemas"]["GuardHook"][];
+            /** @description Percent of strict-profile tickets whose runs must state facts before the first edit of each file (A/B) */
+            factCheck: number;
+        };
+        /** @enum {string} */
+        GuardProfile: "minimal" | "standard" | "strict";
+        /** @enum {string} */
+        GuardHook: "pre:secret" | "pre:redflags" | "pre:rules" | "pre:fact-check" | "pre:destructive" | "post:edit-check" | "stop:gate" | "session:progress";
+        EditCheck: {
+            name: string;
+            globs: string[];
+            /** @description {file} is the edited file, {dir} its directory, both relative to the repository */
+            cmd: string;
+            /** @description Seconds between runs; 0 runs it after every edit */
+            every?: number;
+        };
+        CoverageConfig: {
+            enabled?: boolean;
+            /** @description Runs the tests with coverage; empty uses the one agnts derives */
+            command?: string;
+            /** @description The report the command writes (Go profile or lcov), in the repository or under /agnts/out/ */
+            report?: string;
+            threshold?: number;
+        };
+        AgentConfigFinding: {
+            path: string;
+            line?: number;
+            /** @enum {string} */
+            kind: "hidden_unicode" | "agent_instruction" | "exfiltration" | "encoded_blob" | "hooks" | "mcp_server";
+            /** @enum {string} */
+            severity: "high" | "medium" | "info";
+            text: string;
+        };
+        /** @description What agnts found in the repository's instructions for AI agents (CLAUDE.md, AGENTS.md, .claude/, .mcp.json) */
+        AgentConfigScan: {
+            /** Format: date-time */
+            scannedAt: string;
+            findings: components["schemas"]["AgentConfigFinding"][];
+        };
+        RepoHarnessInput: {
+            /**
+             * @description Empty follows the workspace
+             * @enum {string}
+             */
+            guardProfile?: "" | "minimal" | "standard" | "strict";
+            /** @description Path globs where example credentials are expected, besides testdata/, fixtures/ and *.example */
+            secretAllow?: string[];
+            /** @description Per-file checks after each edit; null uses the ones agnts derives from the toolchains */
+            editChecks?: components["schemas"]["EditCheck"][] | null;
+            editChecksOff?: boolean;
+            coverage?: components["schemas"]["CoverageConfig"];
+            /** @description Check the ticket's acceptance criteria in the running app after the preview */
+            acceptance?: boolean;
+        };
+        RepoHarness: components["schemas"]["RepoHarnessInput"] & {
+            /** @description The per-file checks agnts derives from the toolchains */
+            derivedEditChecks?: components["schemas"]["EditCheck"][];
+            /** @description The coverage command agnts derives; empty when it knows none */
+            derivedCoverage?: {
+                command?: string;
+                report?: string;
+            };
+            agentConfig?: components["schemas"]["AgentConfigScan"];
+        };
+        StarterPack: {
+            pack: string;
+            name: string;
+            rules: number;
+            /** @description Its rules are already among the repository's rules or suggestions */
+            offered: boolean;
+        };
+        /** @description agnts-guard checks the rule while Claude works: file (edits of matching files, or added lines matching the pattern), bash (commands), diff (the finished change, on the server) */
+        RuleEnforce: {
+            /** @enum {string} */
+            on: "file" | "bash" | "diff";
+            paths?: string[];
+            /** @description A regular expression (RE2) */
+            pattern?: string;
+            /** @enum {string} */
+            action: "block" | "warn";
+            message?: string;
+        };
+        TryEnforceInput: {
+            enforce: components["schemas"]["RuleEnforce"];
+            /**
+             * Format: int64
+             * @description Leave out to check every repository
+             */
+            repoId?: number;
+        };
+        TryEnforceResult: {
+            /** @description Changes looked at */
+            checked: number;
+            tickets: string[];
+            hits: {
+                ticket: string;
+                path: string;
+                line?: number;
+                text: string;
+            }[];
+            note?: string;
+        };
+        /** @description Evidence that a bug fix fixes the bug: reproducing tests run before and after the change */
+        Proof: {
+            /** @enum {string} */
+            status: "proven" | "not_reproduced" | "still_failing" | "inconclusive" | "no_test" | "error";
+            /** @description The commit the change started from */
+            base?: string;
+            why?: string;
+            tests: components["schemas"]["ProofTest"][];
+        };
+        ProofTest: {
+            file: string;
+            name: string;
+            command: string;
+            status: string;
+            before: components["schemas"]["ProofRun"];
+            after: components["schemas"]["ProofRun"];
+        };
+        ProofRun: {
+            exit: number;
+            output: string;
+            /** Format: int64 */
+            ms: number;
+        };
+        /** @description How much of the change's added lines the tests ran */
+        Coverage: {
+            covered: number;
+            total: number;
+            percent: number;
+            threshold?: number;
+            error?: string;
+            files: {
+                path: string;
+                covered: number;
+                total: number;
+                uncovered: {
+                    from: number;
+                    to: number;
+                }[];
+            }[];
+        };
+        /** @description The check of the ticket's acceptance criteria in the running app */
+        Acceptance: {
+            /** @enum {string} */
+            status: "ok" | "partial" | "failed";
+            summary: string;
+            criteria: {
+                id: string;
+                criterion: string;
+                /** @enum {string} */
+                verdict: "pass" | "fail" | "unknown";
+                evidence?: string;
+                steps?: string[];
+                /** @description Screenshot ids in the preview */
+                shots?: string[];
+            }[];
+        };
+        /** @description Another model's read of the approach a complex ticket's analysis chose */
+        SecondOpinion: {
+            model: string;
+            agrees: boolean;
+            summary: string;
+            concerns?: string[];
+            alternative?: string;
+            error?: string;
         };
         /** @description A newer version of the issue from the tracker, which arrived after agnts started on the ticket. agnts keeps working from the version it started with until you restart the ticket with this one or keep the current one. */
         TrackerUpdate: {
@@ -3717,6 +4336,82 @@ export interface components {
              * @description When agnts saw it
              */
             at: string;
+        };
+        /**
+         * @description triage: new, waiting for a re-run; open: confirmed, no ticket working on it; fixing: a ticket works on it; fixed: the fix is merged, waiting for a green run; resolved: green again; flaky: passed on re-run; infra: the runner or the network, not the code; muted: ignored; regression: failed again after the fix was merged
+         * @enum {string}
+         */
+        CIStatus: "triage" | "open" | "fixing" | "fixed" | "resolved" | "flaky" | "infra" | "muted" | "regression";
+        CIOccurrence: {
+            /** Format: int64 */
+            runId: number;
+            url: string;
+            sha: string;
+            job: string;
+            /** Format: date-time */
+            at: string;
+            /** @description Passed when re-run */
+            flaky?: boolean;
+        };
+        /** @description CI failures of one job with the same fingerprint on one branch */
+        CIFailure: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            repoId: number;
+            repo: string;
+            /** @description The branch, or pr/<number> for a failure on someone else's pull request */
+            branch: string;
+            workflow: string;
+            job: string;
+            title: string;
+            /** @description code, test, config, dependency, infra, flaky, report, or empty while unknown */
+            class: string;
+            status: components["schemas"]["CIStatus"];
+            count: number;
+            flakyCount: number;
+            /** Format: date-time */
+            firstSeenAt: string;
+            /** Format: date-time */
+            lastSeenAt: string;
+            firstSha: string;
+            lastSha: string;
+            occurrences: components["schemas"]["CIOccurrence"][];
+            /** @description The ticket fixing it, or empty */
+            ticketKey: string;
+            ticketState?: components["schemas"]["TicketState"];
+            fixedSha?: string;
+            /** Format: date-time */
+            fixedAt?: string;
+            /** @description Someone else's pull request (diagnosis comment only), 0 otherwise */
+            prNumber: number;
+            /** @description Redacted log excerpt (single reads only) */
+            sample?: string;
+        };
+        CIWatch: {
+            enabled: boolean;
+            /** @description Globs of extra watched branches; the default branch is always watched */
+            branches: string[];
+            /** @description Globs of workflow or job names never watched */
+            ignore: string[];
+            /** @description Failures on other people's pull requests: off (ignore) or comment (post one diagnosis comment) */
+            prs: string;
+            /** @description Overrides the workspace setting for this repository; null follows it */
+            autoFix?: boolean | null;
+            /** @description Why agnts cannot read this repository's CI with the current token, or empty */
+            readonly problem?: string;
+        };
+        CISettings: {
+            /** @description Open a ticket for every confirmed failure on a watched branch; off, failures wait for Fix it */
+            autoFix: boolean;
+            /** @description Automatic CI tickets a day at most */
+            maxAutoPerDay: number;
+            /** @description Re-run the failed jobs of a new failure once before believing it */
+            retryFlaky: boolean;
+            /** @description How many times a red check sends one of agnts's pull requests back to coding; 0 turns it off */
+            feedbackRounds: number;
+            /** @description Extra regular expressions that mark a failure as infra (not the code) */
+            infraPatterns: string[];
         };
         /** @description Reviews of the pull requests waiting for you on GitHub or GitLab */
         PullReviewSettings: {
@@ -3840,6 +4535,8 @@ export interface components {
             previewPhotos?: boolean;
             /** @description Follow-up tickets were suggested */
             followUps?: boolean;
+            /** @description A watched branch went red */
+            ci?: boolean;
         };
         Repository: {
             /** Format: int64 */
@@ -3891,6 +4588,7 @@ export interface components {
             buildEnvSet?: boolean;
             /** @description Names of the build environment variables; the values are never returned */
             buildEnvNames?: string[];
+            harness?: components["schemas"]["RepoHarness"];
         };
         RepositoryInput: {
             name: string;
@@ -4093,6 +4791,128 @@ export interface components {
             /** @description Claude connections authorised with OAuth */
             connections: number;
         };
+        /** @description A host (gitlab.corp.local), a domain (.corp.local) or a private range (10.20.0.0/16), with ports (80 and 443 when none). */
+        NetworkRoute: {
+            host?: string;
+            cidr?: string;
+            ports?: number[];
+        };
+        PrivateNetworkList: {
+            /** @description The server runs the gateway (private networks can be used) */
+            available: boolean;
+            /** @description Where agnts-link connects */
+            linkUrl: string;
+            /** @description How many networks a workspace may keep */
+            max: number;
+            networks: components["schemas"]["PrivateNetwork"][];
+        };
+        PrivateNetwork: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            /** @enum {string} */
+            kind: "wireguard" | "openvpn" | "connector";
+            enabled: boolean;
+            /** @description The config without its keys, e.g. peer vpn.corp.com:51820 */
+            summary?: string;
+            routes: components["schemas"]["NetworkRoute"][];
+            ca?: {
+                subjects: string[];
+                /** Format: date-time */
+                notAfter: string;
+            };
+            /** @enum {string} */
+            status: "connecting" | "up" | "error" | "disabled" | "gateway_down";
+            lastError?: string;
+            /** Format: date-time */
+            upAt?: string;
+            /**
+             * Format: date-time
+             * @description WireGuard's last handshake, or agnts-link's last heartbeat
+             */
+            handshakeAt?: string;
+            detail?: string;
+            /** @description An agnts-link token exists */
+            tokenSet: boolean;
+            /**
+             * @description relay — agnts-link forwards webhooks; polling — trackers reached through it are read every pollMinutes
+             * @enum {string}
+             */
+            webhooks: "relay" | "polling";
+            pollMinutes: number;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        PrivateNetworkInput: {
+            /** @description Unique in the workspace, e.g. the company or office it reaches */
+            name: string;
+            /** @enum {string} */
+            kind: "wireguard" | "openvpn" | "connector";
+            enabled: boolean;
+            /** @description The WireGuard or OpenVPN config; left out keeps the saved one */
+            config?: string;
+            /** @description OpenVPN auth-user-pass */
+            username?: string;
+            /** @description OpenVPN auth-user-pass; left out or empty keeps the saved one */
+            password?: string;
+            routes: components["schemas"]["NetworkRoute"][];
+            /** @description Company CA certificates (PEM); "" removes them, left out keeps them */
+            caPem?: string;
+        };
+        PrivateNetworkSaved: {
+            network: components["schemas"]["PrivateNetwork"];
+            /** @description A new agnts-link token, shown once */
+            token?: string;
+        };
+        NetworkTest: {
+            /** @description The connection was made */
+            ok: boolean;
+            via?: string;
+            /** @description The network the routes pick for the target */
+            network?: {
+                /** Format: int64 */
+                id: number;
+                name: string;
+            };
+            /** @description The address the name resolved to inside the tunnel */
+            resolved?: string;
+            /** Format: int64 */
+            connectMs?: number;
+            error?: string;
+            tls?: {
+                verified: boolean;
+                subject?: string;
+                issuer?: string;
+                /** Format: date-time */
+                notAfter?: string;
+                error?: string;
+            };
+        };
+        NetworkActivity: {
+            /** @description Connections in the last 24 hours */
+            today: number;
+            /** @description Of those, refused or failed */
+            refused: number;
+            dials: {
+                /** Format: date-time */
+                at: string;
+                target: string;
+                /**
+                 * Format: int64
+                 * @description The network that carried it (none: refused before one was picked, or since removed)
+                 */
+                network?: number;
+                ticket?: string;
+                /** @description run, server, test or webhook */
+                source: string;
+                ok: boolean;
+                error?: string;
+                /** Format: int64 */
+                bytesIn: number;
+                /** Format: int64 */
+                bytesOut: number;
+            }[];
+        };
         /** @enum {string} */
         CI: "ok" | "fail" | "run" | "pending" | "manual" | "skip" | "canceled" | "none";
         Branch: {
@@ -4173,6 +4993,10 @@ export interface components {
             url: string;
         };
         PeriodStats: {
+            /** @description agnts pull requests merged in the period */
+            merged: number;
+            /** @description agnts pull requests closed without a merge in the period */
+            closed: number;
             picked: number;
             pushed: number;
             rejected: number;
@@ -4221,6 +5045,16 @@ export interface components {
                 avgTurns: number;
             }[];
             repos: {
+                /** @description Pull requests merged in the period */
+                merged: number;
+                /** @description Pull requests closed without a merge in the period */
+                closed: number;
+                /** @description Questions agnts asked in the period */
+                asked: number;
+                /** @description Tickets analysed in the period */
+                analyzed: number;
+                /** @description CI failure groups that failed in the period */
+                ciFailures: number;
                 /** Format: int64 */
                 repoId: number;
                 name: string;
@@ -4238,11 +5072,173 @@ export interface components {
             spendByStage: components["schemas"]["StageSpend"][];
             insights: {
                 /** @enum {string} */
-                kind: "claudeMd" | "waiting" | "stopsTests" | "stopsLimit" | "night";
+                kind: "claudeMd" | "waiting" | "stopsTests" | "stopsLimit" | "night" | "mergeRate" | "slowAnswers" | "followUpsNoise" | "flakyJob";
                 values: {
                     [key: string]: string;
                 };
             }[];
+        };
+        /** @description Typical (median) and slow (90th percentile) minutes; absent when nothing was measured */
+        Spread: {
+            p50?: number;
+            p90?: number;
+        };
+        DeliveryPeriod: {
+            /** @description Pull requests opened in the period */
+            opened: number;
+            /** @description Of those, merged so far */
+            merged: number;
+            /** @description Of those, closed without a merge so far */
+            closed: number;
+            mergeMin: components["schemas"]["Spread"];
+            /** @description Tickets that first reached done in the period */
+            pushed: number;
+            pushedMin: components["schemas"]["Spread"];
+            /** @description Tickets merged in the period */
+            mergedTickets: number;
+            mergedMin: components["schemas"]["Spread"];
+            questions: number;
+            /** @description Tickets that asked the questions */
+            askedTickets: number;
+            /** @description Tickets analysed in the period */
+            analyzedTickets: number;
+            answerMin: components["schemas"]["Spread"];
+        };
+        DeliveryDay: {
+            /** Format: date */
+            date: string;
+            merged: number;
+            closed: number;
+            /** @description Median minutes picked → pushed of the tickets pushed that day */
+            pushedMin?: number;
+            /** @description Median minutes picked → merged of the tickets merged that day */
+            mergedMin?: number;
+        };
+        SlowTicket: {
+            key: string;
+            title: string;
+            /** @description Minutes picked → pushed */
+            cycleMin: number;
+            agntsMin: number;
+            answersMin: number;
+            reviewMin: number;
+            /** @description The rest: queued, paused or retried */
+            queueMin: number;
+            merged: boolean;
+        };
+        StalePR: {
+            key: string;
+            title: string;
+            repo: string;
+            url: string;
+            /** Format: date-time */
+            openedAt: string;
+        };
+        AnalyticsDelivery: {
+            days: number;
+            current: components["schemas"]["DeliveryPeriod"];
+            previous: components["schemas"]["DeliveryPeriod"];
+            perDay: components["schemas"]["DeliveryDay"][];
+            /** @description The slowest tickets pushed in the period, and where their time went */
+            slowest: components["schemas"]["SlowTicket"][];
+            /** @description Pull requests still open after a week, oldest first */
+            stale: components["schemas"]["StalePR"][];
+            /** @description Questions waiting for an answer now */
+            unanswered: number;
+        };
+        CIPeriod: {
+            /** @description Failure groups that failed in the period */
+            seen: number;
+            /** @description First seen in the period */
+            new: number;
+            fixed: number;
+            /** @description Fixed by an agnts ticket */
+            autoFixed: number;
+            flaky: number;
+            fixMin: components["schemas"]["Spread"];
+            /** @description Times red CI sent agnts's own pull request back to coding */
+            ownFixes: number;
+        };
+        CIDay: {
+            /** Format: date */
+            date: string;
+            new: number;
+            fixed: number;
+        };
+        FlakyJob: {
+            /** Format: int64 */
+            id: number;
+            repo: string;
+            workflow: string;
+            job: string;
+            title: string;
+            /** @description Times it passed on re-run */
+            flaky: number;
+            failures: number;
+        };
+        AnalyticsCI: {
+            days: number;
+            /** @description CI watching is set up for at least one repository */
+            watching: boolean;
+            current: components["schemas"]["CIPeriod"];
+            previous: components["schemas"]["CIPeriod"];
+            /** @description Failure groups seen in the period by class: code, test, config, dependency, infra, flaky, unknown */
+            byClass: {
+                [key: string]: number;
+            };
+            perDay: components["schemas"]["CIDay"][];
+            flakiest: components["schemas"]["FlakyJob"][];
+            /** @description Failure groups that need attention now */
+            open: number;
+        };
+        LearningPeriod: {
+            lessons: number;
+            lessonsLearned: number;
+            /** @description Rules suggested from tickets */
+            rulesSuggested: number;
+            /** @description Of those, in use now */
+            rulesAdopted: number;
+            /** @description Rules written by a person */
+            rulesManual: number;
+            reflections: number;
+            /** @description Rules the reflections suggested */
+            reflectionRules: number;
+            followUps: number;
+            /** @description Follow-ups accepted in the period */
+            accepted: number;
+            /** @description Follow-ups dismissed in the period */
+            dismissed: number;
+            reviewerNotes: number;
+        };
+        LessonCount: {
+            category: string;
+            created: number;
+            learned: number;
+        };
+        FollowUpCount: {
+            name: string;
+            suggested: number;
+            accepted: number;
+            dismissed: number;
+        };
+        ReviewerStat: {
+            login: string;
+            rereview: number;
+            dismissed: number;
+            manual: number;
+            repos: string[];
+        };
+        AnalyticsLearning: {
+            days: number;
+            current: components["schemas"]["LearningPeriod"];
+            previous: components["schemas"]["LearningPeriod"];
+            lessons: components["schemas"]["LessonCount"][];
+            /** @description Follow-ups suggested in the period by type (prerequisite, split, unfinished, gap) */
+            followUpTypes: components["schemas"]["FollowUpCount"][];
+            /** @description Follow-ups suggested in the period by source (analyze, work, review, manual) */
+            followUpSources: components["schemas"]["FollowUpCount"][];
+            /** @description Reviewers with the most notes in the period */
+            reviewers: components["schemas"]["ReviewerStat"][];
         };
         /** @description What agnts knows about how a repository works. A survey writes the draft; once a person approves it, the body reaches every run of the repository's tickets as /agnts/context/brief.md. */
         RepoBrief: {
@@ -4341,6 +5337,26 @@ export interface components {
             redFlags: number;
             /** @description Findings of agnts's own review sent back to the coder */
             selfFixes: number;
+            /** @description Actions agnts-guard refused in their coding runs */
+            guardBlocks?: number;
+            /** @description Tickets whose stop gate sent failing checks back and whose checks then passed first time */
+            stopSaves?: number;
+            /** @description Times their runs looked stuck */
+            stalls?: number;
+            /** @description Tickets with a proof of fix */
+            proofDue?: number;
+            /** @description Of those, proven */
+            proven?: number;
+            /** @description Review findings shown on them */
+            findings?: number;
+            /** @description Of those, put into a person's feedback */
+            adopted?: number;
+            /** @description Average tokens of a done ticket, all stages */
+            tokens?: number;
+            /** @description Tickets in the fact check group (A/B) */
+            factCheck?: number;
+            /** @description Of those, done without a person asking for changes */
+            factCheckFirst?: number;
         };
         /** @enum {string} */
         LessonCategory: "pattern" | "architecture" | "algorithm" | "library" | "language" | "testing" | "security" | "performance" | "tooling" | "other";
@@ -4438,11 +5454,11 @@ export interface components {
          */
         RuleStatus: "pending" | "analyzing" | "questions" | "ready" | "failed" | "suggested";
         /**
-         * @description rule: an instruction tickets follow. context: business knowledge (a glossary, invariants, roles) that runs read as /agnts/context/business.md.
+         * @description rule: an instruction tickets follow. context: business knowledge (a glossary, invariants, roles) that runs read as /agnts/context/business.md. tip: a practical lesson about working in a repository, learned from runs that had trouble; runs get tips as skills.
          * @default rule
          * @enum {string}
          */
-        RuleKind: "rule" | "context";
+        RuleKind: "rule" | "context" | "tip";
         RuleQuestion: {
             /** @description Position in the rule's questions; answers refer to it */
             index: number;
@@ -4484,6 +5500,24 @@ export interface components {
             rounds: number;
             /** @description Why the last review failed */
             error: string;
+            enforce?: components["schemas"]["RuleEnforce"];
+            /**
+             * @description prompt: in every prompt; skill: a skill Claude loads when its description matches the work
+             * @enum {string}
+             */
+            delivery?: "prompt" | "skill";
+            /** @description When the rule applies, for its skill */
+            skillDescription?: string;
+            /** @description Where it came from: empty (a person), reflect, run, promoted or pack:<language> */
+            source?: string;
+            /** @description For a learned suggestion: 0.3 to 0.9, earned each time it is seen again */
+            confidence?: number;
+            /** @description How many times a learned suggestion was seen */
+            evidence?: number;
+            /** Format: date-time */
+            lastSeen?: string;
+            /** @description A learned suggestion with too little evidence to show yet */
+            watching?: boolean;
             /** Format: date-time */
             analyzedAt?: string;
             /** Format: date-time */
@@ -4502,6 +5536,14 @@ export interface components {
             /** @default true */
             enabled: boolean;
             kind?: components["schemas"]["RuleKind"];
+            enforce?: components["schemas"]["RuleEnforce"];
+            /** @description Remove the enforcement; enforce left out keeps it */
+            removeEnforce?: boolean;
+            /**
+             * @description Left out keeps the rule's
+             * @enum {string}
+             */
+            delivery?: "prompt" | "skill";
         };
         RuleAnswers: {
             answers: {
@@ -4610,8 +5652,10 @@ export interface components {
         };
     };
     parameters: {
+        NetworkID: number;
+        CIFailureID: number;
         RepoID: number;
-        Provider: "jira" | "plane" | "github" | "claude" | "telegram" | "gitlab";
+        Provider: "jira" | "plane" | "github" | "claude" | "telegram" | "gitlab" | "openai";
         RuleID: number;
         LessonID: number;
         RelationID: number;
@@ -4876,6 +5920,23 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
+        };
+    };
+    acknowledgeSecrets: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
         };
     };
     approveTicket: {
@@ -6548,6 +7609,244 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
         };
     };
+    listPrivateNetworks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivateNetworkList"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    createPrivateNetwork: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrivateNetworkInput"];
+            };
+        };
+        responses: {
+            /** @description Added */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivateNetworkSaved"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    testPrivateNetwork: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description host:port, e.g. gitlab.corp.local:443 */
+                    target: string;
+                    /**
+                     * Format: int64
+                     * @description The network expected to carry it; the result says if another one would
+                     */
+                    network?: number;
+                };
+            };
+        };
+        responses: {
+            /** @description What the test found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NetworkTest"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    getNetworkActivity: {
+        parameters: {
+            query?: {
+                /** @description Only this network's connections */
+                network?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NetworkActivity"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    getPrivateNetwork: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                networkId: components["parameters"]["NetworkID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivateNetwork"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    updatePrivateNetwork: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                networkId: components["parameters"]["NetworkID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrivateNetworkInput"];
+            };
+        };
+        responses: {
+            /** @description Saved */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivateNetworkSaved"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    deletePrivateNetwork: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                networkId: components["parameters"]["NetworkID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    reconnectPrivateNetwork: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                networkId: components["parameters"]["NetworkID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The network, reconnecting */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivateNetwork"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    rotateLinkToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                networkId: components["parameters"]["NetworkID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The new token */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        token: string;
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
     listLessons: {
         parameters: {
             query?: {
@@ -6837,6 +8136,32 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
         };
     };
+    tryEnforce: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TryEnforceInput"];
+            };
+        };
+        responses: {
+            /** @description What the enforcement would have caught */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TryEnforceResult"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+        };
+    };
     getRule: {
         parameters: {
             query?: never;
@@ -7014,6 +8339,75 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
         };
     };
+    getAnalyticsDelivery: {
+        parameters: {
+            query?: {
+                days?: 7 | 30 | 90;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsDelivery"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    getAnalyticsCi: {
+        parameters: {
+            query?: {
+                days?: 7 | 30 | 90;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsCI"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    getAnalyticsLearning: {
+        parameters: {
+            query?: {
+                days?: 7 | 30 | 90;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsLearning"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
     getReplayReport: {
         parameters: {
             query?: never;
@@ -7079,6 +8473,90 @@ export interface operations {
                     "application/json": components["schemas"]["Repository"];
                 };
             };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    saveRepoHarness: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RepoHarnessInput"];
+            };
+        };
+        responses: {
+            /** @description The repository after the change */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Repository"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    listStarterPacks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StarterPack"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    offerStarterRules: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    pack: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The suggestions added */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Rule"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
         };
@@ -8601,6 +10079,221 @@ export interface operations {
                 };
             };
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    listCIFailures: {
+        parameters: {
+            query?: {
+                repoId?: number;
+                /** @description Comma-separated statuses; empty for all */
+                status?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CIFailure"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    getCIFailure: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                failureId: components["parameters"]["CIFailureID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CIFailure"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    fixCIFailure: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                failureId: components["parameters"]["CIFailureID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    muteCIFailure: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                failureId: components["parameters"]["CIFailureID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CIFailure"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    unmuteCIFailure: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                failureId: components["parameters"]["CIFailureID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CIFailure"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    rerunCIFailure: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                failureId: components["parameters"]["CIFailureID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Re-run started */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            502: components["responses"]["BadGateway"];
+        };
+    };
+    getTicketCIFailure: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CIFailure"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getRepoCIWatch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CIWatch"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    putRepoCIWatch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CIWatch"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CIWatch"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
         };
     };

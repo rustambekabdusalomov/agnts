@@ -53,6 +53,7 @@
     "platform": "Administrator kabineti",
     "people": "Odamlar",
     "account": "Hisob",
-    "reviews": "PR tekshiruvlari"
+    "reviews": "PR tekshiruvlari",
+    "ci": "CI"
   }
 }

@@ -23,6 +23,15 @@ void main() {
       // TODO
     });
 
+    // Confirm that the lines flagged as secrets in the change under review are not real credentials
+    //
+    // A change with lines agnts's scan flagged as secrets (or a dotenv file) cannot be approved until a person confirms, for that commit, that they are not real credentials.
+    //
+    //Future<Ticket> acknowledgeSecrets(String key) async
+    test('test acknowledgeSecrets', () async {
+      // TODO
+    });
+
     // Make this ticket wait for another, or keep the two from running side by side
     //
     // depends_on: this ticket does not start coding until the other is merged (or rejected). conflicts: whichever of the two starts coding second waits until the first is merged. A dependency that would make two tickets wait for each other is refused (400). Adding a relation agnts proposed or someone dismissed makes it active.

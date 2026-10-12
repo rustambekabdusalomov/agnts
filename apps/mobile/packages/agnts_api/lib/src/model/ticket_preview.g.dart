@@ -11,7 +11,7 @@ abstract class _$TicketPreviewCWProxy {
 
   TicketPreview revision(int revision);
 
-  TicketPreview model(Model model);
+  TicketPreview model(String model);
 
   TicketPreview compare(bool compare);
 
@@ -22,6 +22,8 @@ abstract class _$TicketPreviewCWProxy {
   TicketPreview shots(List<PreviewShot> shots);
 
   TicketPreview issues(List<PreviewIssue> issues);
+
+  TicketPreview acceptance(Acceptance? acceptance);
 
   TicketPreview createdAt(DateTime createdAt);
 
@@ -34,12 +36,13 @@ abstract class _$TicketPreviewCWProxy {
   TicketPreview call({
     int runId,
     int revision,
-    Model model,
+    String model,
     bool compare,
     TicketPreviewStatusEnum status,
     String summary,
     List<PreviewShot> shots,
     List<PreviewIssue> issues,
+    Acceptance? acceptance,
     DateTime createdAt,
   });
 }
@@ -57,7 +60,7 @@ class _$TicketPreviewCWProxyImpl implements _$TicketPreviewCWProxy {
   TicketPreview revision(int revision) => this(revision: revision);
 
   @override
-  TicketPreview model(Model model) => this(model: model);
+  TicketPreview model(String model) => this(model: model);
 
   @override
   TicketPreview compare(bool compare) => this(compare: compare);
@@ -73,6 +76,10 @@ class _$TicketPreviewCWProxyImpl implements _$TicketPreviewCWProxy {
 
   @override
   TicketPreview issues(List<PreviewIssue> issues) => this(issues: issues);
+
+  @override
+  TicketPreview acceptance(Acceptance? acceptance) =>
+      this(acceptance: acceptance);
 
   @override
   TicketPreview createdAt(DateTime createdAt) => this(createdAt: createdAt);
@@ -93,6 +100,7 @@ class _$TicketPreviewCWProxyImpl implements _$TicketPreviewCWProxy {
     Object? summary = const $CopyWithPlaceholder(),
     Object? shots = const $CopyWithPlaceholder(),
     Object? issues = const $CopyWithPlaceholder(),
+    Object? acceptance = const $CopyWithPlaceholder(),
     Object? createdAt = const $CopyWithPlaceholder(),
   }) {
     return TicketPreview(
@@ -107,7 +115,7 @@ class _$TicketPreviewCWProxyImpl implements _$TicketPreviewCWProxy {
       model: model == const $CopyWithPlaceholder()
           ? _value.model
           // ignore: cast_nullable_to_non_nullable
-          : model as Model,
+          : model as String,
       compare: compare == const $CopyWithPlaceholder()
           ? _value.compare
           // ignore: cast_nullable_to_non_nullable
@@ -128,6 +136,10 @@ class _$TicketPreviewCWProxyImpl implements _$TicketPreviewCWProxy {
           ? _value.issues
           // ignore: cast_nullable_to_non_nullable
           : issues as List<PreviewIssue>,
+      acceptance: acceptance == const $CopyWithPlaceholder()
+          ? _value.acceptance
+          // ignore: cast_nullable_to_non_nullable
+          : acceptance as Acceptance?,
       createdAt: createdAt == const $CopyWithPlaceholder()
           ? _value.createdAt
           // ignore: cast_nullable_to_non_nullable
@@ -165,7 +177,7 @@ TicketPreview _$TicketPreviewFromJson(Map<String, dynamic> json) =>
       final val = TicketPreview(
         runId: $checkedConvert('runId', (v) => (v as num).toInt()),
         revision: $checkedConvert('revision', (v) => (v as num).toInt()),
-        model: $checkedConvert('model', (v) => $enumDecode(_$ModelEnumMap, v)),
+        model: $checkedConvert('model', (v) => v as String),
         compare: $checkedConvert('compare', (v) => v as bool),
         status: $checkedConvert(
           'status',
@@ -184,6 +196,11 @@ TicketPreview _$TicketPreviewFromJson(Map<String, dynamic> json) =>
               .map((e) => PreviewIssue.fromJson(e as Map<String, dynamic>))
               .toList(),
         ),
+        acceptance: $checkedConvert(
+          'acceptance',
+          (v) =>
+              v == null ? null : Acceptance.fromJson(v as Map<String, dynamic>),
+        ),
         createdAt: $checkedConvert(
           'createdAt',
           (v) => DateTime.parse(v as String),
@@ -196,20 +213,15 @@ Map<String, dynamic> _$TicketPreviewToJson(TicketPreview instance) =>
     <String, dynamic>{
       'runId': instance.runId,
       'revision': instance.revision,
-      'model': _$ModelEnumMap[instance.model]!,
+      'model': instance.model,
       'compare': instance.compare,
       'status': _$TicketPreviewStatusEnumEnumMap[instance.status]!,
       'summary': instance.summary,
       'shots': instance.shots.map((e) => e.toJson()).toList(),
       'issues': instance.issues.map((e) => e.toJson()).toList(),
+      'acceptance': ?instance.acceptance?.toJson(),
       'createdAt': instance.createdAt.toIso8601String(),
     };
-
-const _$ModelEnumMap = {
-  Model.haiku: 'haiku',
-  Model.sonnet: 'sonnet',
-  Model.opus: 'opus',
-};
 
 const _$TicketPreviewStatusEnumEnumMap = {
   TicketPreviewStatusEnum.ok: 'ok',

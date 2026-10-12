@@ -44,5 +44,23 @@ void main() {
       // TODO
     });
 
+    // How sure the reviewer was, 0 to 1; absent when it did not say
+    // num confidence
+    test('to test the property `confidence`', () async {
+      // TODO
+    });
+
+    // The specialist pass that found it (security, failures, tests, types), empty for the main review
+    // String pass
+    test('to test the property `pass`', () async {
+      // TODO
+    });
+
+    // A person put it in their feedback
+    // bool adopted
+    test('to test the property `adopted`', () async {
+      // TODO
+    });
+
   });
 }

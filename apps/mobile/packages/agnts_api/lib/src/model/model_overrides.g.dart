@@ -7,15 +7,15 @@ part of 'model_overrides.dart';
 // **************************************************************************
 
 abstract class _$ModelOverridesCWProxy {
-  ModelOverrides analyze(Model? analyze);
+  ModelOverrides analyze(String? analyze);
 
-  ModelOverrides coding(Model? coding);
+  ModelOverrides coding(String? coding);
 
-  ModelOverrides retry(Model? retry);
+  ModelOverrides retry(String? retry);
 
-  ModelOverrides review(Model? review);
+  ModelOverrides review(String? review);
 
-  ModelOverrides preview(Model? preview);
+  ModelOverrides preview(String? preview);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ModelOverrides(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -24,11 +24,11 @@ abstract class _$ModelOverridesCWProxy {
   /// ModelOverrides(...).copyWith(id: 12, name: "My name")
   /// ````
   ModelOverrides call({
-    Model? analyze,
-    Model? coding,
-    Model? retry,
-    Model? review,
-    Model? preview,
+    String? analyze,
+    String? coding,
+    String? retry,
+    String? review,
+    String? preview,
   });
 }
 
@@ -39,19 +39,19 @@ class _$ModelOverridesCWProxyImpl implements _$ModelOverridesCWProxy {
   final ModelOverrides _value;
 
   @override
-  ModelOverrides analyze(Model? analyze) => this(analyze: analyze);
+  ModelOverrides analyze(String? analyze) => this(analyze: analyze);
 
   @override
-  ModelOverrides coding(Model? coding) => this(coding: coding);
+  ModelOverrides coding(String? coding) => this(coding: coding);
 
   @override
-  ModelOverrides retry(Model? retry) => this(retry: retry);
+  ModelOverrides retry(String? retry) => this(retry: retry);
 
   @override
-  ModelOverrides review(Model? review) => this(review: review);
+  ModelOverrides review(String? review) => this(review: review);
 
   @override
-  ModelOverrides preview(Model? preview) => this(preview: preview);
+  ModelOverrides preview(String? preview) => this(preview: preview);
 
   @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ModelOverrides(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -71,23 +71,23 @@ class _$ModelOverridesCWProxyImpl implements _$ModelOverridesCWProxy {
       analyze: analyze == const $CopyWithPlaceholder()
           ? _value.analyze
           // ignore: cast_nullable_to_non_nullable
-          : analyze as Model?,
+          : analyze as String?,
       coding: coding == const $CopyWithPlaceholder()
           ? _value.coding
           // ignore: cast_nullable_to_non_nullable
-          : coding as Model?,
+          : coding as String?,
       retry: retry == const $CopyWithPlaceholder()
           ? _value.retry
           // ignore: cast_nullable_to_non_nullable
-          : retry as Model?,
+          : retry as String?,
       review: review == const $CopyWithPlaceholder()
           ? _value.review
           // ignore: cast_nullable_to_non_nullable
-          : review as Model?,
+          : review as String?,
       preview: preview == const $CopyWithPlaceholder()
           ? _value.preview
           // ignore: cast_nullable_to_non_nullable
-          : preview as Model?,
+          : preview as String?,
     );
   }
 }
@@ -105,41 +105,20 @@ extension $ModelOverridesCopyWith on ModelOverrides {
 ModelOverrides _$ModelOverridesFromJson(Map<String, dynamic> json) =>
     $checkedCreate('ModelOverrides', json, ($checkedConvert) {
       final val = ModelOverrides(
-        analyze: $checkedConvert(
-          'analyze',
-          (v) => $enumDecodeNullable(_$ModelEnumMap, v),
-        ),
-        coding: $checkedConvert(
-          'coding',
-          (v) => $enumDecodeNullable(_$ModelEnumMap, v),
-        ),
-        retry: $checkedConvert(
-          'retry',
-          (v) => $enumDecodeNullable(_$ModelEnumMap, v),
-        ),
-        review: $checkedConvert(
-          'review',
-          (v) => $enumDecodeNullable(_$ModelEnumMap, v),
-        ),
-        preview: $checkedConvert(
-          'preview',
-          (v) => $enumDecodeNullable(_$ModelEnumMap, v),
-        ),
+        analyze: $checkedConvert('analyze', (v) => v as String?),
+        coding: $checkedConvert('coding', (v) => v as String?),
+        retry: $checkedConvert('retry', (v) => v as String?),
+        review: $checkedConvert('review', (v) => v as String?),
+        preview: $checkedConvert('preview', (v) => v as String?),
       );
       return val;
     });
 
 Map<String, dynamic> _$ModelOverridesToJson(ModelOverrides instance) =>
     <String, dynamic>{
-      'analyze': ?_$ModelEnumMap[instance.analyze],
-      'coding': ?_$ModelEnumMap[instance.coding],
-      'retry': ?_$ModelEnumMap[instance.retry],
-      'review': ?_$ModelEnumMap[instance.review],
-      'preview': ?_$ModelEnumMap[instance.preview],
+      'analyze': ?instance.analyze,
+      'coding': ?instance.coding,
+      'retry': ?instance.retry,
+      'review': ?instance.review,
+      'preview': ?instance.preview,
     };
-
-const _$ModelEnumMap = {
-  Model.haiku: 'haiku',
-  Model.sonnet: 'sonnet',
-  Model.opus: 'opus',
-};

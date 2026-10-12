@@ -49,8 +49,13 @@ function stale(e: TicketEvent): string[] {
     case 'ticket_created':
       keys.push('tickets', 'repos')
       break
+    case 'ci_failure':
+      keys.push('ci')
+      break
   }
   if (e.type === 'state_changed') keys.push('events-summary', 'repos', 'queue')
+  // CI lists show their tickets' states; a merged fix moves its failure on.
+  if (e.type === 'state_changed' || e.type === 'pr_merged') keys.push('ci')
   // Spend is saved when a run finishes, just after its claude_result; the
   // state change that follows a stage comes after the save.
   if (e.type === 'claude_result' || e.type === 'state_changed' || e.type === 'usage_updated') keys.push('ticket-spend')

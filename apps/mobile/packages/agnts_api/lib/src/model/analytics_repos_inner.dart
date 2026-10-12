@@ -20,6 +20,16 @@ class AnalyticsReposInner {
   /// Returns a new [AnalyticsReposInner] instance.
   AnalyticsReposInner({
 
+    required  this.merged,
+
+    required  this.closed,
+
+    required  this.asked,
+
+    required  this.analyzed,
+
+    required  this.ciFailures,
+
     required  this.repoId,
 
     required  this.name,
@@ -38,6 +48,71 @@ class AnalyticsReposInner {
 
     required  this.agntsMin,
   });
+
+      /// Pull requests merged in the period
+  @JsonKey(
+    
+    name: r'merged',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final int merged;
+
+
+
+      /// Pull requests closed without a merge in the period
+  @JsonKey(
+    
+    name: r'closed',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final int closed;
+
+
+
+      /// Questions agnts asked in the period
+  @JsonKey(
+    
+    name: r'asked',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final int asked;
+
+
+
+      /// Tickets analysed in the period
+  @JsonKey(
+    
+    name: r'analyzed',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final int analyzed;
+
+
+
+      /// CI failure groups that failed in the period
+  @JsonKey(
+    
+    name: r'ciFailures',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final int ciFailures;
+
+
 
   @JsonKey(
     
@@ -151,6 +226,11 @@ class AnalyticsReposInner {
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is AnalyticsReposInner &&
+      other.merged == merged &&
+      other.closed == closed &&
+      other.asked == asked &&
+      other.analyzed == analyzed &&
+      other.ciFailures == ciFailures &&
       other.repoId == repoId &&
       other.name == name &&
       other.kind == kind &&
@@ -163,6 +243,11 @@ class AnalyticsReposInner {
 
     @override
     int get hashCode =>
+        merged.hashCode +
+        closed.hashCode +
+        asked.hashCode +
+        analyzed.hashCode +
+        ciFailures.hashCode +
         repoId.hashCode +
         name.hashCode +
         kind.hashCode +

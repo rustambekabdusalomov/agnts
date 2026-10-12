@@ -321,6 +321,9 @@ func (o *Orchestrator) Approve(ctx context.Context, key string, assignees []stri
 	if cur.ReplayOf != "" {
 		return cur, invalid("%s replays %s to evaluate agnts: it is never pushed. Reject it when you are done", cur.Key, cur.ReplayOf)
 	}
+	if err := o.secretsCleared(ctx, cur); err != nil {
+		return cur, err
+	}
 	msg := "approved"
 	switch {
 	case cur.Kind == domain.KindReview:
@@ -404,6 +407,7 @@ func (o *Orchestrator) RequestChanges(ctx context.Context, key, feedback string,
 		}
 		o.queueReflection(ctx, t, domain.ReflectChanges, feedback, origin)
 		o.noteReviewer(ctx, t, domain.NoteRereview, feedback, origin)
+		o.adoptFindings(ctx, cur, feedback) // the revision that was reviewed
 		o.Wake()
 	}
 	return t, err
@@ -551,7 +555,7 @@ func (o *Orchestrator) SetModels(ctx context.Context, key string, models map[str
 		if m == "" || m == "default" {
 			continue
 		}
-		if !slices.Contains(domain.Models, m) {
+		if !domain.ValidModel(m) {
 			return domain.Ticket{}, invalid("unknown model %q", m)
 		}
 		clean[stage] = m
@@ -949,10 +953,12 @@ type TicketView struct {
 	Member, CreatedBy string
 	Questions         []domain.Question
 	Analysis          *Analysis
-	Result            *domain.Result
-	ChildKey          string          // the code task that implements this report, if any
-	Review            *domain.Review  // newest code review; stale when its revision is older
-	Preview           *domain.Preview // newest preview; stale when its revision is older
+	// SecondOpinion is another model's read of the analysis's approach.
+	SecondOpinion *domain.SecondOpinion
+	Result        *domain.Result
+	ChildKey      string          // the code task that implements this report, if any
+	Review        *domain.Review  // newest code review; stale when its revision is older
+	Preview       *domain.Preview // newest preview; stale when its revision is older
 	// CanPreview reports whether the ticket's repository has a preview
 	// command (and the server can store screenshots).
 	CanPreview bool
@@ -1074,6 +1080,7 @@ func (o *Orchestrator) View(ctx context.Context, key string) (TicketView, error)
 		if a, err := parseAnalysis(r.Summary); err == nil {
 			v.Analysis = &a
 		}
+		v.SecondOpinion = r.Harness.SecondOpinion
 	} else if !errors.Is(err, domain.ErrNotFound) {
 		return v, err
 	}
@@ -1148,6 +1155,37 @@ func (o *Orchestrator) MarkMerged(ctx context.Context, prURL, branch string, ori
 		return false, err
 	}
 	return true, nil
+}
+
+// MarkPRClosed records that a ticket's pull request was closed without a
+// merge (closed true) or reopened (false), from a git host webhook. Only
+// analytics read it; the ticket stays done.
+func (o *Orchestrator) MarkPRClosed(ctx context.Context, prURL, branch string, closed bool, origin domain.Origin) (bool, error) {
+	t, err := o.store.TicketByPR(ctx, prURL, branch)
+	if errors.Is(err, domain.ErrNotFound) {
+		return false, nil // not one of agnts's
+	}
+	if err != nil {
+		return false, err
+	}
+	if t.MergedAt != nil {
+		return false, nil
+	}
+	msg := "pull request closed without merging"
+	if !closed {
+		msg = "pull request reopened"
+	}
+	return true, o.setPRClosed(ctx, t, closed, origin, msg)
+}
+
+func (o *Orchestrator) setPRClosed(ctx context.Context, t domain.Ticket, closed bool, origin domain.Origin, msg string) error {
+	changed, err := o.store.SetPRClosed(ctx, t.Key, closed)
+	if err != nil || !changed {
+		return err
+	}
+	o.event(ctx, domain.Event{TicketKey: t.Key, Type: domain.EventPRClosed, Origin: origin, Message: msg,
+		Data: map[string]any{"url": t.PRURL, "closed": closed}})
+	return nil
 }
 
 // SetMember makes userID the ticket's member: in per-member Claude mode its

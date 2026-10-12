@@ -11,6 +11,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**acceptFollowUps**](TicketsApi.md#acceptfollowups) | **POST** /tickets/{key}/follow-ups/accept | Create tickets from chosen suggestions
 [**acceptRelation**](TicketsApi.md#acceptrelation) | **POST** /tickets/{key}/relations/{id}/accept | Accept a relation agnts proposed; the queue follows it from now on
+[**acknowledgeSecrets**](TicketsApi.md#acknowledgesecrets) | **POST** /tickets/{key}/secrets-ack | Confirm that the lines flagged as secrets in the change under review are not real credentials
 [**addRelation**](TicketsApi.md#addrelation) | **POST** /tickets/{key}/relations | Make this ticket wait for another, or keep the two from running side by side
 [**answerQuestions**](TicketsApi.md#answerquestions) | **PUT** /tickets/{key}/answers | Answer the ticket&#39;s questions; when all are answered, coding starts
 [**approveTicket**](TicketsApi.md#approveticket) | **POST** /tickets/{key}/approve | Approve the reviewed work
@@ -127,6 +128,53 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**Relation**](Relation.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **acknowledgeSecrets**
+> Ticket acknowledgeSecrets(key)
+
+Confirm that the lines flagged as secrets in the change under review are not real credentials
+
+A change with lines agnts's scan flagged as secrets (or a dotenv file) cannot be approved until a person confirms, for that commit, that they are not real credentials.
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getTicketsApi();
+final String key = key_example; // String | 
+
+try {
+    final response = api.acknowledgeSecrets(key);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling TicketsApi->acknowledgeSecrets: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **key** | **String**|  | 
+
+### Return type
+
+[**Ticket**](Ticket.md)
 
 ### Authorization
 

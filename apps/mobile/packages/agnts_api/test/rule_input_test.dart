@@ -33,5 +33,22 @@ void main() {
       // TODO
     });
 
+    // RuleEnforce enforce
+    test('to test the property `enforce`', () async {
+      // TODO
+    });
+
+    // Remove the enforcement; enforce left out keeps it
+    // bool removeEnforce
+    test('to test the property `removeEnforce`', () async {
+      // TODO
+    });
+
+    // Left out keeps the rule's
+    // String delivery
+    test('to test the property `delivery`', () async {
+      // TODO
+    });
+
   });
 }

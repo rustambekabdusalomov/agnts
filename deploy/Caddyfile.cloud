@@ -54,6 +54,10 @@ www.{$AGNTS_SITE_DOMAIN} {
 {$AGNTS_API_DOMAIN} {
 	import security
 	encode zstd gzip
+	# agnts-link connectors (private networks): AGNTS_LINK_URL=https://{$AGNTS_API_DOMAIN}/link
+	handle /link {
+		reverse_proxy gateway:3130
+	}
 	# The API, webhooks and MCP; anything else (the panel's pages) lives on the panel's domain.
 	@api path /api/* /webhooks/* /mcp /mcp/* /oauth/* /.well-known/* /auth/*
 	handle @api {

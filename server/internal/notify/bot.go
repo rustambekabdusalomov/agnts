@@ -140,6 +140,19 @@ func (n *Notifier) handleCallback(ctx context.Context, b *Bot, cfg TelegramConfi
 			_ = n.store.SaveTelegramMessage(ctx, postgres.TelegramMessage{ChatID: cfg.ChatID, MessageID: mid, TicketKey: arg, Kind: "confirm"})
 		}
 		return ""
+	case "cif": // cif:<ci failure id>
+		_ = b.ClearButtons(ctx, cfg.ChatID, msg.MessageID)
+		id, err := strconv.ParseInt(arg, 10, 64)
+		if err != nil || n.ci == nil {
+			return "Not available"
+		}
+		t, err := n.ci.FixIt(ctx, id, domain.OriginTelegram)
+		if err != nil {
+			n.say(ctx, b, cfg, "Fix it: "+friendly(err))
+			return "Not done"
+		}
+		n.say(ctx, b, cfg, t.Key+" opened: agnts is on it. You review the fix before anything is pushed.")
+		return "Done"
 	case "rsu", "kpv":
 		_ = b.ClearButtons(ctx, cfg.ChatID, msg.MessageID)
 		var err error

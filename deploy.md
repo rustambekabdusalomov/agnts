@@ -95,6 +95,70 @@ ssh root@45.138.158.39 'cd /opt/agnts && docker compose ps'
 Both URLs should return `200`. `https://api.agnts.uz/healthz` returns `302`,
 which is how that path is routed; the container's own health check is what counts.
 
+## Runner image (when deploy/runner changes)
+
+The agnts image (step 2) carries agnts-guard, the hooks inside every run, and
+the runner copies it into each run. The runner image itself only needs a
+rebuild when `deploy/runner/` changes (managed settings with the hooks and the
+repository lockdown, the `/agnts/context` volume, `agnts-act`):
+
+```sh
+ssh root@45.138.158.39 'cd /opt/agnts/src/deploy && docker compose --profile build build runner > /opt/agnts/runner-build.log 2>&1; \
+  echo exit=$?; tail -3 /opt/agnts/runner-build.log'
+```
+
+Add `--build-arg CODEX_VERSION=<version>` to also install Codex CLI for
+`codex:<model>` runs. New runs use the new image; runs in progress keep theirs.
+
+## Private networks (once)
+
+Settings → Private networks needs three more pieces on the server: the
+`gateway` service, the OpenVPN sidecar image, and Caddy's `/link` route.
+Until `AGNTS_GATEWAY` is set the feature stays off and the page says so.
+
+1. Add to `/opt/agnts/.env`:
+
+   ```sh
+   AGNTS_GATEWAY=gateway:3129
+   AGNTS_GATEWAY_SECRET=<openssl rand -hex 32>
+   AGNTS_LINK_URL=https://api.agnts.uz/link
+   ```
+
+2. Merge from `deploy/docker-compose.yml` into the server's copy by hand: the
+   `gateway` service, the three new `egress` environment lines, the `ovpn`
+   network and the build-only `ovpn` service.
+3. Add the `handle /link { reverse_proxy gateway:3130 }` block to the API
+   domain in `/opt/agnts/Caddyfile.cloud` (see `deploy/Caddyfile.cloud`).
+4. Build the sidecar image after the main image (step 2 above):
+
+   ```sh
+   ssh root@45.138.158.39 'docker build --build-arg AGNTS_IMAGE=agnts:local -t agnts-ovpn:latest /opt/agnts/src/deploy/ovpn'
+   ```
+
+5. Start it:
+
+   ```sh
+   ssh root@45.138.158.39 'cd /opt/agnts && docker compose --profile private-network up -d gateway agnts egress && docker compose restart caddy'
+   ```
+
+The command the page shows for agnts-link uses `registry.agnts.uz/agnts-link:latest`.
+Build it with `docker build -f deploy/link/Dockerfile -t registry.agnts.uz/agnts-link:latest .`
+and push it before telling teams about the connector.
+
+After each later deploy, recreate `gateway` with `agnts` and `egress`
+(`docker compose --profile private-network up -d agnts egress gateway`) and
+rebuild the sidecar image; running sidecars are replaced on their own when
+the image name changes, otherwise remove them (`docker rm -f $(docker ps -aq --filter label=agnts=ovpn)`)
+and agnts starts them again within 30 seconds.
+
+Migration `00038_private_networks_multi.sql` lets a workspace keep several
+networks (`AGNTS_PRIVATE_NETWORKS_MAX`, default 5). On the first start after
+it, agnts seals each existing VPN config again for its network (the gateway
+picks it up within 15 seconds; the tunnel keeps running) and replaces each
+OpenVPN sidecar `agnts-ovpn-<workspace>` with `agnts-ovpn-net-<network>`.
+Deploy agnts, egress and gateway together: an egress or gateway from before
+does not send or check the network.
+
 ## Rollback
 
 ```sh

@@ -15,13 +15,15 @@ import (
 func toPeriod(p postgres.Period) gen.PeriodStats {
 	return gen.PeriodStats{Picked: p.Picked, Pushed: p.Pushed, Rejected: p.Rejected, Stopped: p.Stopped, FirstTry: p.FirstTry,
 		AfterChanges: p.AfterChanges, AgntsMin: float32(p.AgntsMin), WaitMin: float32(p.WaitMin), ReviewMin: float32(p.ReviewMin),
-		AnswerMin: float32(p.AnswerMin), Turns: float32(p.Turns), Spend: toTokenSpend(p.Spend)}
+		AnswerMin: float32(p.AnswerMin), Turns: float32(p.Turns), Merged: p.Merged, Closed: p.Closed, Spend: toTokenSpend(p.Spend)}
 }
 
 func toQualityStat(q postgres.QualityStats) gen.QualityStat {
 	out := gen.QualityStat{PromptVersion: q.PromptVersion, Tickets: q.Tickets, ReachedReview: q.ReachedReview, Done: q.Done,
 		FirstTry: q.FirstTry, Rejected: q.Rejected, ChangeRounds: float32(q.ChangeRounds), FixAttempts: float32(q.FixAttempts),
-		Serious: q.Serious, RedFlags: q.RedFlags, SelfFixes: q.SelfFixes}
+		Serious: q.Serious, RedFlags: q.RedFlags, SelfFixes: q.SelfFixes,
+		GuardBlocks: ptr(q.GuardBlocks), StopSaves: ptr(q.StopSaves), Stalls: ptr(q.Stalls), ProofDue: ptr(q.ProofDue), Proven: ptr(q.Proven),
+		Findings: ptr(q.Findings), Adopted: ptr(q.Adopted), Tokens: ptr(float32(q.Tokens)), FactCheck: ptr(q.FactCheck), FactCheckFirst: ptr(q.FactCheckFirst)}
 	if q.FootprintHit >= 0 {
 		v := float32(q.FootprintHit)
 		out.FootprintHit = &v
@@ -76,19 +78,26 @@ func (s *Server) GetAnalytics(w http.ResponseWriter, r *http.Request, p gen.GetA
 		}{AvgTurns: float32(m.AvgTurns), Model: m.Model, ReachedReview: m.ReachedReview, Runs: m.Runs})
 	}
 	out.Repos = make([]struct {
-		AgntsMin float32 `json:"agntsMin"`
-		AvgTurns float32 `json:"avgTurns"`
-		ClaudeMd string  `json:"claudeMd"`
-		Done     int     `json:"done"`
-		Finished int     `json:"finished"`
-		Kind     string  `json:"kind"`
-		Name     string  `json:"name"`
-		RepoId   int64   `json:"repoId"`
-		Tickets  int     `json:"tickets"`
+		AgntsMin   float32 `json:"agntsMin"`
+		Analyzed   int     `json:"analyzed"`
+		Asked      int     `json:"asked"`
+		AvgTurns   float32 `json:"avgTurns"`
+		CiFailures int     `json:"ciFailures"`
+		ClaudeMd   string  `json:"claudeMd"`
+		Closed     int     `json:"closed"`
+		Done       int     `json:"done"`
+		Finished   int     `json:"finished"`
+		Kind       string  `json:"kind"`
+		Merged     int     `json:"merged"`
+		Name       string  `json:"name"`
+		RepoId     int64   `json:"repoId"`
+		Tickets    int     `json:"tickets"`
 	}, len(a.Repos))
 	for i, x := range a.Repos {
-		out.Repos[i].AvgTurns, out.Repos[i].ClaudeMd, out.Repos[i].Done, out.Repos[i].Finished = float32(x.AvgTurns), x.ClaudeMD, x.Done, x.Finished
-		out.Repos[i].AgntsMin, out.Repos[i].Kind, out.Repos[i].Name, out.Repos[i].RepoId, out.Repos[i].Tickets = float32(x.AgntsMin), x.Kind, x.Name, x.RepoID, x.Tickets
+		r := &out.Repos[i]
+		r.AvgTurns, r.ClaudeMd, r.Done, r.Finished = float32(x.AvgTurns), x.ClaudeMD, x.Done, x.Finished
+		r.AgntsMin, r.Kind, r.Name, r.RepoId, r.Tickets = float32(x.AgntsMin), x.Kind, x.Name, x.RepoID, x.Tickets
+		r.Merged, r.Closed, r.Asked, r.Analyzed, r.CiFailures = x.Merged, x.Closed, x.Asked, x.Analyzed, x.CIFails
 	}
 	out.Insights = make([]struct {
 		Kind   gen.AnalyticsInsightsKind `json:"kind"`

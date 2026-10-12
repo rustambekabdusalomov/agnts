@@ -255,11 +255,12 @@ String? _line(Finding f) {
   return '- ${loc.isEmpty ? '' : '$loc: '}${f.title.trim()}. $s';
 }
 
-String _modelName(Model m) => switch (m) {
-      Model.haiku => 'Haiku',
-      Model.sonnet => 'Sonnet',
-      Model.opus => 'Opus',
-    };
+/// A model's name: Haiku, Sonnet, Opus, or "Codex" and the model for a
+/// run on Codex CLI ("codex:" and the model).
+String _modelName(String m) {
+  if (m.startsWith('codex:')) return 'Codex ${m.substring(6)}';
+  return m.isEmpty ? m : '${m[0].toUpperCase()}${m.substring(1)}';
+}
 
 String _verdictLabel(AppLocalizations l, CodeReviewVerdictEnum v) => switch (v) {
       CodeReviewVerdictEnum.looksGood => l.reviewVerdict_looks_good,

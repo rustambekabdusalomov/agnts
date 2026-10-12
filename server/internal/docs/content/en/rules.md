@@ -19,3 +19,11 @@ Every analysis and coding run gets the enabled rules that apply, under "Team rul
 ## Cost
 
 A review is a short Claude run with the analysis model from Settings. It goes before waiting tickets, since every later ticket follows its result.
+
+## Enforced rules
+
+Give a rule a pattern and agnts-guard enforces it while Claude works: on edits of matching files (optionally only added lines matching a regular expression), on commands, or on the finished change. *Block* refuses the action; *Warn* tells Claude. Use **Try on history** to see what the pattern would have caught in agnts's last changes before you turn it on. A broken enforced rule also shows as a red flag in the review.
+
+## Skills, tips and starter rules
+
+A rule or business note delivered as a **skill** stays out of every prompt; Claude loads it when its description matches the work, which keeps prompts short as rules grow. Keep rules that must always apply in the prompt. **Tips** are practical lessons agnts learned from runs that had trouble; learned suggestions gain confidence each time agnts sees them again and are only *watched* until then, and one seen in two repositories is proposed for every repository. **Starter rules** for a repository's languages are offered on its page; adopting adds them as suggestions.

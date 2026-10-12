@@ -146,7 +146,9 @@ plane(r'plane'),
 @JsonValue(r'local')
 local(r'local'),
 @JsonValue(r'git')
-git(r'git');
+git(r'git'),
+@JsonValue(r'ci')
+ci(r'ci');
 
 const FollowUpTicketSource_Enum(this.value);
 

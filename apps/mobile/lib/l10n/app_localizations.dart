@@ -1377,6 +1377,804 @@ abstract class AppLocalizations {
   /// **'Times agnts\'s own review sent findings back to the coder before a person looked'**
   String get analyticsColSelfFixesHint;
 
+  /// No description provided for @analyticsTabOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get analyticsTabOverview;
+
+  /// No description provided for @analyticsTabDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery'**
+  String get analyticsTabDelivery;
+
+  /// No description provided for @analyticsTabQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality'**
+  String get analyticsTabQuality;
+
+  /// No description provided for @analyticsTabLearning.
+  ///
+  /// In en, this message translates to:
+  /// **'Learning'**
+  String get analyticsTabLearning;
+
+  /// No description provided for @analyticsTabCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost'**
+  String get analyticsTabCost;
+
+  /// No description provided for @analyticsTabRepos.
+  ///
+  /// In en, this message translates to:
+  /// **'Repositories'**
+  String get analyticsTabRepos;
+
+  /// No description provided for @analyticsDaysHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{d} d {h} h'**
+  String analyticsDaysHours(String d, String h);
+
+  /// No description provided for @analyticsKpiMerged.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull requests merged'**
+  String get analyticsKpiMerged;
+
+  /// No description provided for @analyticsKpiMergedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} closed without merging'**
+  String analyticsKpiMergedNote(String n);
+
+  /// No description provided for @analyticsKpiCostPerTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost per pushed ticket'**
+  String get analyticsKpiCostPerTicket;
+
+  /// No description provided for @analyticsKpiCostPerTicketNote.
+  ///
+  /// In en, this message translates to:
+  /// **'At API prices, all stages'**
+  String get analyticsKpiCostPerTicketNote;
+
+  /// No description provided for @analyticsInsightMergeRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Only {pct}% of agnts\'s pull requests were merged; {closed} were closed without merging. Check the Delivery tab for why.'**
+  String analyticsInsightMergeRate(String pct, String closed);
+
+  /// No description provided for @analyticsInsightSlowAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets wait about {hours} h for your answers to agnts\'s questions. Answering sooner is the quickest way to speed delivery up.'**
+  String analyticsInsightSlowAnswers(String hours);
+
+  /// No description provided for @analyticsInsightFollowUpsNoise.
+  ///
+  /// In en, this message translates to:
+  /// **'Only {pct}% of suggested follow-ups were accepted. Most of them are being dismissed.'**
+  String analyticsInsightFollowUpsNoise(String pct);
+
+  /// No description provided for @analyticsInsightFlakyJob.
+  ///
+  /// In en, this message translates to:
+  /// **'{job} in {repo} passed on re-run {n} times: it looks flaky. Fixing or quarantining it saves CI time.'**
+  String analyticsInsightFlakyJob(String job, String repo, String n);
+
+  /// No description provided for @analyticsPrMerged.
+  ///
+  /// In en, this message translates to:
+  /// **'Merged'**
+  String get analyticsPrMerged;
+
+  /// No description provided for @analyticsPrClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed without merging'**
+  String get analyticsPrClosed;
+
+  /// No description provided for @analyticsPrOpened.
+  ///
+  /// In en, this message translates to:
+  /// **'Opened'**
+  String get analyticsPrOpened;
+
+  /// No description provided for @analyticsPrOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Still open'**
+  String get analyticsPrOpen;
+
+  /// No description provided for @analyticsCyclePushed.
+  ///
+  /// In en, this message translates to:
+  /// **'Picked up → pushed'**
+  String get analyticsCyclePushed;
+
+  /// No description provided for @analyticsCycleMerged.
+  ///
+  /// In en, this message translates to:
+  /// **'Picked up → merged'**
+  String get analyticsCycleMerged;
+
+  /// No description provided for @analyticsSplitAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for answers'**
+  String get analyticsSplitAnswers;
+
+  /// No description provided for @analyticsSplitReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for review'**
+  String get analyticsSplitReview;
+
+  /// No description provided for @analyticsSplitQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued or paused'**
+  String get analyticsSplitQueue;
+
+  /// No description provided for @analyticsKpiMergeRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge rate'**
+  String get analyticsKpiMergeRate;
+
+  /// No description provided for @analyticsKpiMergeRateNote.
+  ///
+  /// In en, this message translates to:
+  /// **'{merged} merged, {closed} closed'**
+  String analyticsKpiMergeRateNote(String merged, String closed);
+
+  /// No description provided for @analyticsKpiTimeToMerge.
+  ///
+  /// In en, this message translates to:
+  /// **'Time to merge'**
+  String get analyticsKpiTimeToMerge;
+
+  /// No description provided for @analyticsKpiTimeToMergeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'From pull request to merge'**
+  String get analyticsKpiTimeToMergeNote;
+
+  /// No description provided for @analyticsKpiCyclePushed.
+  ///
+  /// In en, this message translates to:
+  /// **'Picked up → pushed'**
+  String get analyticsKpiCyclePushed;
+
+  /// No description provided for @analyticsKpiCyclePushedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts\'s part of the work'**
+  String get analyticsKpiCyclePushedNote;
+
+  /// No description provided for @analyticsKpiCycleMerged.
+  ///
+  /// In en, this message translates to:
+  /// **'Picked up → merged'**
+  String get analyticsKpiCycleMerged;
+
+  /// No description provided for @analyticsKpiCycleMergedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Real delivery time'**
+  String get analyticsKpiCycleMergedNote;
+
+  /// No description provided for @analyticsKpiAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Time to answer'**
+  String get analyticsKpiAnswer;
+
+  /// No description provided for @analyticsKpiAnswerNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Until you answer agnts\'s questions'**
+  String get analyticsKpiAnswerNote;
+
+  /// No description provided for @analyticsTypicalNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Times are typical values (median): half the tickets were faster, half slower.'**
+  String get analyticsTypicalNote;
+
+  /// No description provided for @analyticsPrOutcomes.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull request outcomes'**
+  String get analyticsPrOutcomes;
+
+  /// No description provided for @analyticsPrOutcomesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts\'s pull requests opened in the period and what happened to them, merges and closes per day'**
+  String get analyticsPrOutcomesSub;
+
+  /// No description provided for @analyticsMergeSpread.
+  ///
+  /// In en, this message translates to:
+  /// **'A typical pull request is merged in {p50}; the slowest one in ten takes {p90} or more.'**
+  String analyticsMergeSpread(String p50, String p90);
+
+  /// No description provided for @analyticsStale.
+  ///
+  /// In en, this message translates to:
+  /// **'Open for over a week'**
+  String get analyticsStale;
+
+  /// No description provided for @analyticsStaleSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull requests nobody has merged or closed yet'**
+  String get analyticsStaleSub;
+
+  /// No description provided for @analyticsNoStale.
+  ///
+  /// In en, this message translates to:
+  /// **'No pull request has been open for more than a week.'**
+  String get analyticsNoStale;
+
+  /// No description provided for @analyticsOpenDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {open {n} day} other {open {n} days}}'**
+  String analyticsOpenDays(num n);
+
+  /// No description provided for @analyticsOpenPr.
+  ///
+  /// In en, this message translates to:
+  /// **'Open pull request'**
+  String get analyticsOpenPr;
+
+  /// No description provided for @analyticsCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle time'**
+  String get analyticsCycle;
+
+  /// No description provided for @analyticsCycleSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Typical time from picking a ticket up to pushing and to merging, per day'**
+  String get analyticsCycleSub;
+
+  /// No description provided for @analyticsCycleSpread.
+  ///
+  /// In en, this message translates to:
+  /// **'Pushed in {pushed} typically ({pushed90} for the slowest one in ten); merged in {merged} ({merged90}).'**
+  String analyticsCycleSpread(String pushed, String pushed90, String merged, String merged90);
+
+  /// No description provided for @analyticsQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions'**
+  String get analyticsQuestions;
+
+  /// No description provided for @analyticsQuestionsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'What agnts asked before coding, and how fast it got answers'**
+  String get analyticsQuestionsSub;
+
+  /// No description provided for @analyticsQuestionsAsked.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions asked'**
+  String get analyticsQuestionsAsked;
+
+  /// No description provided for @analyticsQuestionsShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets with questions'**
+  String get analyticsQuestionsShare;
+
+  /// No description provided for @analyticsAnswerTypical.
+  ///
+  /// In en, this message translates to:
+  /// **'Typical time to answer'**
+  String get analyticsAnswerTypical;
+
+  /// No description provided for @analyticsAnswerSlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Slowest one in ten'**
+  String get analyticsAnswerSlow;
+
+  /// No description provided for @analyticsUnanswered.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for an answer now'**
+  String get analyticsUnanswered;
+
+  /// No description provided for @analyticsSlowest.
+  ///
+  /// In en, this message translates to:
+  /// **'Slowest tickets'**
+  String get analyticsSlowest;
+
+  /// No description provided for @analyticsSlowestSub.
+  ///
+  /// In en, this message translates to:
+  /// **'The tickets that took longest from pick-up to push in this period, and where their time went'**
+  String get analyticsSlowestSub;
+
+  /// No description provided for @analyticsNoSlowest.
+  ///
+  /// In en, this message translates to:
+  /// **'No ticket was pushed in this period.'**
+  String get analyticsNoSlowest;
+
+  /// No description provided for @analyticsKpiCiSeen.
+  ///
+  /// In en, this message translates to:
+  /// **'CI failures'**
+  String get analyticsKpiCiSeen;
+
+  /// No description provided for @analyticsKpiCiSeenNote.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} new in this period'**
+  String analyticsKpiCiSeenNote(String n);
+
+  /// No description provided for @analyticsKpiCiAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed by agnts'**
+  String get analyticsKpiCiAuto;
+
+  /// No description provided for @analyticsKpiCiAutoNote.
+  ///
+  /// In en, this message translates to:
+  /// **'{auto} of {fixed} fixed failures'**
+  String analyticsKpiCiAutoNote(String auto, String fixed);
+
+  /// No description provided for @analyticsKpiCiFix.
+  ///
+  /// In en, this message translates to:
+  /// **'Time to fix'**
+  String get analyticsKpiCiFix;
+
+  /// No description provided for @analyticsKpiCiFixNote.
+  ///
+  /// In en, this message translates to:
+  /// **'From first failure to merged fix'**
+  String get analyticsKpiCiFixNote;
+
+  /// No description provided for @analyticsKpiCiFlaky.
+  ///
+  /// In en, this message translates to:
+  /// **'Flaky failures'**
+  String get analyticsKpiCiFlaky;
+
+  /// No description provided for @analyticsKpiCiFlakyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Passed when re-run'**
+  String get analyticsKpiCiFlakyNote;
+
+  /// No description provided for @analyticsKpiCiOwn.
+  ///
+  /// In en, this message translates to:
+  /// **'Own PRs fixed'**
+  String get analyticsKpiCiOwn;
+
+  /// No description provided for @analyticsKpiCiOwnNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Red checks on agnts\'s PRs fixed before review'**
+  String get analyticsKpiCiOwnNote;
+
+  /// No description provided for @analyticsCiUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Not classified'**
+  String get analyticsCiUnknown;
+
+  /// No description provided for @analyticsCiNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New failures'**
+  String get analyticsCiNew;
+
+  /// No description provided for @analyticsCiFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed'**
+  String get analyticsCiFixed;
+
+  /// No description provided for @analyticsCiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'CI health'**
+  String get analyticsCiTitle;
+
+  /// No description provided for @analyticsCiSub.
+  ///
+  /// In en, this message translates to:
+  /// **'New and fixed CI failures per day. {n} need attention now.'**
+  String analyticsCiSub(String n);
+
+  /// No description provided for @analyticsCiOffSub.
+  ///
+  /// In en, this message translates to:
+  /// **'CI watching is not set up. Turn it on for a repository and agnts triages red builds and fixes the ones caused by code.'**
+  String get analyticsCiOffSub;
+
+  /// No description provided for @analyticsCiSetUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up CI watching'**
+  String get analyticsCiSetUp;
+
+  /// No description provided for @analyticsCiOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open CI'**
+  String get analyticsCiOpen;
+
+  /// No description provided for @analyticsCiClasses.
+  ///
+  /// In en, this message translates to:
+  /// **'Failures by cause'**
+  String get analyticsCiClasses;
+
+  /// No description provided for @analyticsCiClassesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'What triage decided each failure was'**
+  String get analyticsCiClassesSub;
+
+  /// No description provided for @analyticsCiNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No CI failures in this period.'**
+  String get analyticsCiNone;
+
+  /// No description provided for @analyticsCiFlakiest.
+  ///
+  /// In en, this message translates to:
+  /// **'Flakiest jobs'**
+  String get analyticsCiFlakiest;
+
+  /// No description provided for @analyticsCiFlakiestSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs that failed and then passed on re-run most often'**
+  String get analyticsCiFlakiestSub;
+
+  /// No description provided for @analyticsCiNoFlaky.
+  ///
+  /// In en, this message translates to:
+  /// **'No flaky jobs in this period.'**
+  String get analyticsCiNoFlaky;
+
+  /// No description provided for @analyticsColJob.
+  ///
+  /// In en, this message translates to:
+  /// **'Job'**
+  String get analyticsColJob;
+
+  /// No description provided for @analyticsColFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Failure'**
+  String get analyticsColFailure;
+
+  /// No description provided for @analyticsColFlaky.
+  ///
+  /// In en, this message translates to:
+  /// **'Passed on re-run'**
+  String get analyticsColFlaky;
+
+  /// No description provided for @analyticsColFailures.
+  ///
+  /// In en, this message translates to:
+  /// **'Failures'**
+  String get analyticsColFailures;
+
+  /// No description provided for @analyticsKpiLessons.
+  ///
+  /// In en, this message translates to:
+  /// **'Lessons'**
+  String get analyticsKpiLessons;
+
+  /// No description provided for @analyticsKpiLessonsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} marked learned'**
+  String analyticsKpiLessonsNote(String n);
+
+  /// No description provided for @analyticsKpiRulesLearned.
+  ///
+  /// In en, this message translates to:
+  /// **'Rules learned'**
+  String get analyticsKpiRulesLearned;
+
+  /// No description provided for @analyticsKpiRulesLearnedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'In use, of {n} suggested from tickets'**
+  String analyticsKpiRulesLearnedNote(String n);
+
+  /// No description provided for @analyticsKpiRulesManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Rules written'**
+  String get analyticsKpiRulesManual;
+
+  /// No description provided for @analyticsKpiRulesManualNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Added by people'**
+  String get analyticsKpiRulesManualNote;
+
+  /// No description provided for @analyticsKpiReflections.
+  ///
+  /// In en, this message translates to:
+  /// **'Reflections'**
+  String get analyticsKpiReflections;
+
+  /// No description provided for @analyticsKpiReflectionsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'On changed or rejected tickets; {n} rules suggested'**
+  String analyticsKpiReflectionsNote(String n);
+
+  /// No description provided for @analyticsKpiFollowUps.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow-ups accepted'**
+  String get analyticsKpiFollowUps;
+
+  /// No description provided for @analyticsKpiFollowUpsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} suggested in this period'**
+  String analyticsKpiFollowUpsNote(String n);
+
+  /// No description provided for @analyticsKpiReviewerNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewer notes'**
+  String get analyticsKpiReviewerNotes;
+
+  /// No description provided for @analyticsKpiReviewerNotesNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-reviews, dismissed findings and notes'**
+  String get analyticsKpiReviewerNotesNote;
+
+  /// No description provided for @analyticsLearningNote.
+  ///
+  /// In en, this message translates to:
+  /// **'How agnts learns from your feedback: fewer reviewer notes and more adopted rules over time mean it is working.'**
+  String get analyticsLearningNote;
+
+  /// No description provided for @analyticsFollowUps.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow-ups by type'**
+  String get analyticsFollowUps;
+
+  /// No description provided for @analyticsFollowUpsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow-up tickets agnts suggested in this period and what you decided'**
+  String get analyticsFollowUpsSub;
+
+  /// No description provided for @analyticsNoFollowUps.
+  ///
+  /// In en, this message translates to:
+  /// **'No follow-ups were suggested in this period.'**
+  String get analyticsNoFollowUps;
+
+  /// No description provided for @analyticsColType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get analyticsColType;
+
+  /// No description provided for @analyticsColSuggested.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested'**
+  String get analyticsColSuggested;
+
+  /// No description provided for @analyticsColAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted'**
+  String get analyticsColAccepted;
+
+  /// No description provided for @analyticsColDismissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissed'**
+  String get analyticsColDismissed;
+
+  /// No description provided for @analyticsColOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get analyticsColOpen;
+
+  /// No description provided for @analyticsColAcceptRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept rate'**
+  String get analyticsColAcceptRate;
+
+  /// No description provided for @analyticsFollowUpSources.
+  ///
+  /// In en, this message translates to:
+  /// **'Where follow-ups come from'**
+  String get analyticsFollowUpSources;
+
+  /// No description provided for @analyticsFollowUpSourcesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested follow-ups by the step that found them'**
+  String get analyticsFollowUpSourcesSub;
+
+  /// No description provided for @analyticsLessons.
+  ///
+  /// In en, this message translates to:
+  /// **'Lessons by topic'**
+  String get analyticsLessons;
+
+  /// No description provided for @analyticsLessonsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Lessons written in this period; {n} were marked learned'**
+  String analyticsLessonsSub(String n);
+
+  /// No description provided for @analyticsOpenLearn.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Learn'**
+  String get analyticsOpenLearn;
+
+  /// No description provided for @analyticsNoLessons.
+  ///
+  /// In en, this message translates to:
+  /// **'No lessons in this period.'**
+  String get analyticsNoLessons;
+
+  /// No description provided for @analyticsReviewers.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewers'**
+  String get analyticsReviewers;
+
+  /// No description provided for @analyticsReviewersSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Who sends agnts the most feedback on code reviews'**
+  String get analyticsReviewersSub;
+
+  /// No description provided for @analyticsOpenRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Rules'**
+  String get analyticsOpenRules;
+
+  /// No description provided for @analyticsNoReviewers.
+  ///
+  /// In en, this message translates to:
+  /// **'No reviewer notes in this period.'**
+  String get analyticsNoReviewers;
+
+  /// No description provided for @analyticsColReviewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewer'**
+  String get analyticsColReviewer;
+
+  /// No description provided for @analyticsColRereview.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-reviews'**
+  String get analyticsColRereview;
+
+  /// No description provided for @analyticsColRereviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Times the reviewer asked agnts to review again'**
+  String get analyticsColRereviewHint;
+
+  /// No description provided for @analyticsColDismissedNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissed'**
+  String get analyticsColDismissedNotes;
+
+  /// No description provided for @analyticsColDismissedNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Findings of agnts\'s review the reviewer dismissed'**
+  String get analyticsColDismissedNotesHint;
+
+  /// No description provided for @analyticsColManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get analyticsColManual;
+
+  /// No description provided for @analyticsColManualHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes the reviewer wrote by hand'**
+  String get analyticsColManualHint;
+
+  /// No description provided for @analyticsColRepos.
+  ///
+  /// In en, this message translates to:
+  /// **'Repositories'**
+  String get analyticsColRepos;
+
+  /// No description provided for @analyticsKpiCostNote.
+  ///
+  /// In en, this message translates to:
+  /// **'All Claude calls in the period'**
+  String get analyticsKpiCostNote;
+
+  /// No description provided for @analyticsKpiDaysAboveNote.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} days above 80% of the session limit'**
+  String analyticsKpiDaysAboveNote(String n);
+
+  /// No description provided for @analyticsColCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost'**
+  String get analyticsColCost;
+
+  /// No description provided for @analyticsColMergeRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge rate'**
+  String get analyticsColMergeRate;
+
+  /// No description provided for @analyticsColMergeRateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull requests merged, out of those merged or closed in the period'**
+  String get analyticsColMergeRateHint;
+
+  /// No description provided for @analyticsColQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions per ticket'**
+  String get analyticsColQuestions;
+
+  /// No description provided for @analyticsColQuestionsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions agnts asked per analysed ticket. Many questions point to a missing CLAUDE.md or rules.'**
+  String get analyticsColQuestionsHint;
+
+  /// No description provided for @analyticsColCi.
+  ///
+  /// In en, this message translates to:
+  /// **'CI failures'**
+  String get analyticsColCi;
+
+  /// No description provided for @analyticsColCiHint.
+  ///
+  /// In en, this message translates to:
+  /// **'CI failure groups that failed in the period'**
+  String get analyticsColCiHint;
+
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:
@@ -1898,6 +2696,786 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Brief saved'**
   String get briefDone_save;
+
+  /// No description provided for @ciTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'CI'**
+  String get ciTitle;
+
+  /// No description provided for @ciLede.
+  ///
+  /// In en, this message translates to:
+  /// **'Failing pipelines on your watched branches, grouped by job and error. agnts re-runs new failures once, then fixes the real ones.'**
+  String get ciLede;
+
+  /// No description provided for @ciBack.
+  ///
+  /// In en, this message translates to:
+  /// **'CI'**
+  String get ciBack;
+
+  /// No description provided for @ciRepo.
+  ///
+  /// In en, this message translates to:
+  /// **'Repository'**
+  String get ciRepo;
+
+  /// No description provided for @ciAllRepos.
+  ///
+  /// In en, this message translates to:
+  /// **'All repositories'**
+  String get ciAllRepos;
+
+  /// No description provided for @ciFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get ciFilterLabel;
+
+  /// No description provided for @ciFilter_red.
+  ///
+  /// In en, this message translates to:
+  /// **'Red'**
+  String get ciFilter_red;
+
+  /// No description provided for @ciFilter_flaky.
+  ///
+  /// In en, this message translates to:
+  /// **'Flaky'**
+  String get ciFilter_flaky;
+
+  /// No description provided for @ciFilter_infra.
+  ///
+  /// In en, this message translates to:
+  /// **'Infra'**
+  String get ciFilter_infra;
+
+  /// No description provided for @ciFilter_fixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed'**
+  String get ciFilter_fixed;
+
+  /// No description provided for @ciFilter_muted.
+  ///
+  /// In en, this message translates to:
+  /// **'Muted'**
+  String get ciFilter_muted;
+
+  /// No description provided for @ciFilter_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get ciFilter_all;
+
+  /// No description provided for @ciStatus_triage.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get ciStatus_triage;
+
+  /// No description provided for @ciStatus_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Failing'**
+  String get ciStatus_open;
+
+  /// No description provided for @ciStatus_fixing.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixing'**
+  String get ciStatus_fixing;
+
+  /// No description provided for @ciStatus_fixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix merged'**
+  String get ciStatus_fixed;
+
+  /// No description provided for @ciStatus_resolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Green again'**
+  String get ciStatus_resolved;
+
+  /// No description provided for @ciStatus_flaky.
+  ///
+  /// In en, this message translates to:
+  /// **'Flaky'**
+  String get ciStatus_flaky;
+
+  /// No description provided for @ciStatus_infra.
+  ///
+  /// In en, this message translates to:
+  /// **'Infra'**
+  String get ciStatus_infra;
+
+  /// No description provided for @ciStatus_muted.
+  ///
+  /// In en, this message translates to:
+  /// **'Muted'**
+  String get ciStatus_muted;
+
+  /// No description provided for @ciStatus_regression.
+  ///
+  /// In en, this message translates to:
+  /// **'Regression'**
+  String get ciStatus_regression;
+
+  /// No description provided for @ciStatusHelp_triage.
+  ///
+  /// In en, this message translates to:
+  /// **'New failure, waiting for a re-run to confirm it'**
+  String get ciStatusHelp_triage;
+
+  /// No description provided for @ciStatusHelp_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed; no ticket is working on it'**
+  String get ciStatusHelp_open;
+
+  /// No description provided for @ciStatusHelp_fixing.
+  ///
+  /// In en, this message translates to:
+  /// **'A ticket is working on it'**
+  String get ciStatusHelp_fixing;
+
+  /// No description provided for @ciStatusHelp_fixed.
+  ///
+  /// In en, this message translates to:
+  /// **'The fix is merged; waiting for a green run'**
+  String get ciStatusHelp_fixed;
+
+  /// No description provided for @ciStatusHelp_resolved.
+  ///
+  /// In en, this message translates to:
+  /// **'The branch is green again'**
+  String get ciStatusHelp_resolved;
+
+  /// No description provided for @ciStatusHelp_flaky.
+  ///
+  /// In en, this message translates to:
+  /// **'Passed when re-run'**
+  String get ciStatusHelp_flaky;
+
+  /// No description provided for @ciStatusHelp_infra.
+  ///
+  /// In en, this message translates to:
+  /// **'The runner or the network failed, not the code'**
+  String get ciStatusHelp_infra;
+
+  /// No description provided for @ciStatusHelp_muted.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignored until unmuted'**
+  String get ciStatusHelp_muted;
+
+  /// No description provided for @ciStatusHelp_regression.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed again after the fix was merged'**
+  String get ciStatusHelp_regression;
+
+  /// No description provided for @ciClass_code.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get ciClass_code;
+
+  /// No description provided for @ciClass_test.
+  ///
+  /// In en, this message translates to:
+  /// **'Test'**
+  String get ciClass_test;
+
+  /// No description provided for @ciClass_config.
+  ///
+  /// In en, this message translates to:
+  /// **'Config'**
+  String get ciClass_config;
+
+  /// No description provided for @ciClass_dependency.
+  ///
+  /// In en, this message translates to:
+  /// **'Dependency'**
+  String get ciClass_dependency;
+
+  /// No description provided for @ciClass_infra.
+  ///
+  /// In en, this message translates to:
+  /// **'Infra'**
+  String get ciClass_infra;
+
+  /// No description provided for @ciClass_flaky.
+  ///
+  /// In en, this message translates to:
+  /// **'Flaky'**
+  String get ciClass_flaky;
+
+  /// No description provided for @ciClass_report.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get ciClass_report;
+
+  /// No description provided for @ciColStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get ciColStatus;
+
+  /// No description provided for @ciColFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Failure'**
+  String get ciColFailure;
+
+  /// No description provided for @ciColCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get ciColCount;
+
+  /// No description provided for @ciColLastSeen.
+  ///
+  /// In en, this message translates to:
+  /// **'Last seen'**
+  String get ciColLastSeen;
+
+  /// No description provided for @ciColTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket'**
+  String get ciColTicket;
+
+  /// No description provided for @ciColTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get ciColTime;
+
+  /// No description provided for @ciColCommit.
+  ///
+  /// In en, this message translates to:
+  /// **'Commit'**
+  String get ciColCommit;
+
+  /// No description provided for @ciColJob.
+  ///
+  /// In en, this message translates to:
+  /// **'Job'**
+  String get ciColJob;
+
+  /// No description provided for @ciTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} time} other {{n} times}}'**
+  String ciTimes(num n);
+
+  /// No description provided for @ciFix.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix it'**
+  String get ciFix;
+
+  /// No description provided for @ciFixStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket {key} opened'**
+  String ciFixStarted(String key);
+
+  /// No description provided for @ciMute.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute'**
+  String get ciMute;
+
+  /// No description provided for @ciUnmute.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmute'**
+  String get ciUnmute;
+
+  /// No description provided for @ciMuted.
+  ///
+  /// In en, this message translates to:
+  /// **'Muted: agnts ignores this failure now'**
+  String get ciMuted;
+
+  /// No description provided for @ciUnmuted.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmuted'**
+  String get ciUnmuted;
+
+  /// No description provided for @ciRerun.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-run'**
+  String get ciRerun;
+
+  /// No description provided for @ciRerunStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-run started'**
+  String get ciRerunStarted;
+
+  /// No description provided for @ciCommentOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment only'**
+  String get ciCommentOnly;
+
+  /// No description provided for @ciEmptyRed.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is red. Every watched branch passes.'**
+  String get ciEmptyRed;
+
+  /// No description provided for @ciEmptyFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'No failures here.'**
+  String get ciEmptyFilter;
+
+  /// No description provided for @ciHowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How to start watching'**
+  String get ciHowTitle;
+
+  /// No description provided for @ciHowWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a repository, go to its CI tab and turn on watching. The default branch is always watched; add others like release/*.'**
+  String get ciHowWatch;
+
+  /// No description provided for @ciHowWebhook.
+  ///
+  /// In en, this message translates to:
+  /// **'For news within seconds, add the git host webhook for workflow_run (GitHub) or Pipeline events (GitLab). Without it agnts checks every 5 minutes.'**
+  String get ciHowWebhook;
+
+  /// No description provided for @ciNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This CI failure was not found.'**
+  String get ciNotFound;
+
+  /// No description provided for @ciOpenTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {key}'**
+  String ciOpenTicket(String key);
+
+  /// No description provided for @ciPrNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This failure is on someone else\'s pull request #{n}. agnts never opens a ticket or pushes there; with comments on, it posts one diagnosis comment.'**
+  String ciPrNote(String n);
+
+  /// No description provided for @ciRegressionNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This failed again on a commit that contains the fix {sha}. The original ticket gets a follow-up suggestion.'**
+  String ciRegressionNote(String sha);
+
+  /// No description provided for @ciLogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Log'**
+  String get ciLogTitle;
+
+  /// No description provided for @ciLogSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Redacted excerpt of the newest failing run'**
+  String get ciLogSub;
+
+  /// No description provided for @ciLogAnnotations.
+  ///
+  /// In en, this message translates to:
+  /// **'Annotations'**
+  String get ciLogAnnotations;
+
+  /// No description provided for @ciLogFirstError.
+  ///
+  /// In en, this message translates to:
+  /// **'First error'**
+  String get ciLogFirstError;
+
+  /// No description provided for @ciLogEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'End of the log'**
+  String get ciLogEnd;
+
+  /// No description provided for @ciLogTail.
+  ///
+  /// In en, this message translates to:
+  /// **'Last lines'**
+  String get ciLogTail;
+
+  /// No description provided for @ciNoLog.
+  ///
+  /// In en, this message translates to:
+  /// **'No log was saved for this failure.'**
+  String get ciNoLog;
+
+  /// No description provided for @ciOccurrences.
+  ///
+  /// In en, this message translates to:
+  /// **'Failing runs'**
+  String get ciOccurrences;
+
+  /// No description provided for @ciOccurrencesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'The last 20 runs this failure appeared in'**
+  String get ciOccurrencesSub;
+
+  /// No description provided for @ciNoOccurrences.
+  ///
+  /// In en, this message translates to:
+  /// **'No runs recorded.'**
+  String get ciNoOccurrences;
+
+  /// No description provided for @ciPassedOnRerun.
+  ///
+  /// In en, this message translates to:
+  /// **'Passed on re-run'**
+  String get ciPassedOnRerun;
+
+  /// No description provided for @ciOpenRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Open run'**
+  String get ciOpenRun;
+
+  /// No description provided for @ciFacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get ciFacts;
+
+  /// No description provided for @ciCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get ciCount;
+
+  /// No description provided for @ciFlakyCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Passed on re-run'**
+  String get ciFlakyCount;
+
+  /// No description provided for @ciFirstSeen.
+  ///
+  /// In en, this message translates to:
+  /// **'First seen'**
+  String get ciFirstSeen;
+
+  /// No description provided for @ciLastSeen.
+  ///
+  /// In en, this message translates to:
+  /// **'Last seen'**
+  String get ciLastSeen;
+
+  /// No description provided for @ciFirstSha.
+  ///
+  /// In en, this message translates to:
+  /// **'First failing commit'**
+  String get ciFirstSha;
+
+  /// No description provided for @ciLastSha.
+  ///
+  /// In en, this message translates to:
+  /// **'Last commit'**
+  String get ciLastSha;
+
+  /// No description provided for @ciFixedSha.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix commit'**
+  String get ciFixedSha;
+
+  /// No description provided for @ciFixedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix merged'**
+  String get ciFixedAt;
+
+  /// No description provided for @ciTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket'**
+  String get ciTicket;
+
+  /// No description provided for @ciBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch'**
+  String get ciBranch;
+
+  /// No description provided for @ciWatchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'CI watching'**
+  String get ciWatchTitle;
+
+  /// No description provided for @ciWatchSub.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts reads this repository\'s pipelines and fixes what fails'**
+  String get ciWatchSub;
+
+  /// No description provided for @ciWatchEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch CI'**
+  String get ciWatchEnabled;
+
+  /// No description provided for @ciWatchEnabledHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Off by default. Failures on watched branches are grouped and fixed.'**
+  String get ciWatchEnabledHelp;
+
+  /// No description provided for @ciBranches.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra branches'**
+  String get ciBranches;
+
+  /// No description provided for @ciBranchesHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Globs, one per line. The default branch ({branch}) is always watched.'**
+  String ciBranchesHelp(String branch);
+
+  /// No description provided for @ciIgnore.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignored workflows and jobs'**
+  String get ciIgnore;
+
+  /// No description provided for @ciIgnoreHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Globs, one per line, matched against workflow and job names. Empty uses *deploy*, *release* and *publish*.'**
+  String get ciIgnoreHelp;
+
+  /// No description provided for @ciPrs.
+  ///
+  /// In en, this message translates to:
+  /// **'Other people\'s pull requests'**
+  String get ciPrs;
+
+  /// No description provided for @ciPrsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts never pushes to a colleague\'s branch. With comments on, it posts one diagnosis comment on the pull request.'**
+  String get ciPrsHelp;
+
+  /// No description provided for @ciPrs_off.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignore'**
+  String get ciPrs_off;
+
+  /// No description provided for @ciPrs_comment.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment'**
+  String get ciPrs_comment;
+
+  /// No description provided for @ciAutoFix.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix automatically'**
+  String get ciAutoFix;
+
+  /// No description provided for @ciAutoFixRepoHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a ticket for every confirmed failure, or wait for Fix it'**
+  String get ciAutoFixRepoHelp;
+
+  /// No description provided for @ciAutoFix_inherit.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace setting'**
+  String get ciAutoFix_inherit;
+
+  /// No description provided for @ciAutoFix_on.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get ciAutoFix_on;
+
+  /// No description provided for @ciAutoFix_off.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get ciAutoFix_off;
+
+  /// No description provided for @ciSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get ciSave;
+
+  /// No description provided for @ciWatchSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'CI watching saved'**
+  String get ciWatchSaved;
+
+  /// No description provided for @ciFailuresTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Failures'**
+  String get ciFailuresTitle;
+
+  /// No description provided for @ciFailuresSub.
+  ///
+  /// In en, this message translates to:
+  /// **'This repository\'s failing jobs, newest first'**
+  String get ciFailuresSub;
+
+  /// No description provided for @ciFlakyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Flaky tests'**
+  String get ciFlakyTitle;
+
+  /// No description provided for @ciFlakySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Failures that passed when re-run'**
+  String get ciFlakySub;
+
+  /// No description provided for @ciFlakyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No flaky tests found.'**
+  String get ciFlakyEmpty;
+
+  /// No description provided for @ciCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'CI failure'**
+  String get ciCardTitle;
+
+  /// No description provided for @ciFailingRuns.
+  ///
+  /// In en, this message translates to:
+  /// **'Failing runs'**
+  String get ciFailingRuns;
+
+  /// No description provided for @ciLastRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Last failing run'**
+  String get ciLastRun;
+
+  /// No description provided for @ciStillFailing.
+  ///
+  /// In en, this message translates to:
+  /// **'Still failing'**
+  String get ciStillFailing;
+
+  /// No description provided for @ciWaitingGreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix merged, waiting for a green run'**
+  String get ciWaitingGreen;
+
+  /// No description provided for @ciGreenAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Green again'**
+  String get ciGreenAgain;
+
+  /// No description provided for @ciOpenFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the failure'**
+  String get ciOpenFailure;
+
+  /// No description provided for @ciSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'CI'**
+  String get ciSettingsTitle;
+
+  /// No description provided for @ciSettingsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'What agnts does when a watched pipeline goes red. Watching is turned on per repository.'**
+  String get ciSettingsSub;
+
+  /// No description provided for @ciAutoFixHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a ticket for every confirmed failure. Off, failures wait for Fix it.'**
+  String get ciAutoFixHelp;
+
+  /// No description provided for @ciMaxAutoPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic tickets a day'**
+  String get ciMaxAutoPerDay;
+
+  /// No description provided for @ciMaxAutoPerDayHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Over the limit, failures wait for Fix it. Feedback rounds on agnts\'s own pull requests don\'t count.'**
+  String get ciMaxAutoPerDayHelp;
+
+  /// No description provided for @ciPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =0 {None} one {{n} a day} other {{n} a day}}'**
+  String ciPerDay(num n);
+
+  /// No description provided for @ciRetryFlaky.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-run new failures once'**
+  String get ciRetryFlaky;
+
+  /// No description provided for @ciRetryFlakyHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'A new failure\'s jobs run again before agnts believes it. Passing marks it flaky.'**
+  String get ciRetryFlakyHelp;
+
+  /// No description provided for @ciFeedbackRounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounds on agnts\'s pull requests'**
+  String get ciFeedbackRounds;
+
+  /// No description provided for @ciFeedbackRoundsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'How many times a red check sends agnts\'s own pull request back to coding. 0 turns it off.'**
+  String get ciFeedbackRoundsHelp;
+
+  /// No description provided for @ciInfraPatterns.
+  ///
+  /// In en, this message translates to:
+  /// **'Infra patterns'**
+  String get ciInfraPatterns;
+
+  /// No description provided for @ciInfraPatternsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Regular expressions, one per line. A matching log is an infra failure: shown and counted, never a ticket. Added to the built-in ones.'**
+  String get ciInfraPatternsHelp;
 
   /// No description provided for @commonLoading.
   ///
@@ -2688,7 +4266,7 @@ abstract class AppLocalizations {
   /// No description provided for @followUpsSub.
   ///
   /// In en, this message translates to:
-  /// **'What finishing this ticket still needs, as agnts sees it. Pick the ones you want: they are created queued, so nothing runs until you start them.'**
+  /// **'What finishing this ticket still needs, as agnts sees it. Pick the ones you want, then start them now or keep them held until you start each one.'**
   String get followUpsSub;
 
   /// No description provided for @followUpsMode.
@@ -2799,6 +4377,12 @@ abstract class AppLocalizations {
   /// **'Why'**
   String get followUpsServes;
 
+  /// No description provided for @followUpsAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'After'**
+  String get followUpsAfter;
+
   /// No description provided for @followUpsDetails.
   ///
   /// In en, this message translates to:
@@ -2841,10 +4425,22 @@ abstract class AppLocalizations {
   /// **'{count, plural, =0 {Create tickets} one {Create {count} ticket} other {Create {count} tickets}}'**
   String followUpsCreate(num count);
 
+  /// No description provided for @followUpsCreateStart.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0 {Create and start} one {Create and start {count} ticket} other {Create and start {count} tickets}}'**
+  String followUpsCreateStart(num count);
+
+  /// No description provided for @followUpsCreateHeld.
+  ///
+  /// In en, this message translates to:
+  /// **'Create, held'**
+  String get followUpsCreateHeld;
+
   /// No description provided for @followUpsQueuedHint.
   ///
   /// In en, this message translates to:
-  /// **'Created tickets wait in the queue until you start them.'**
+  /// **'Started tickets go to the queue now; one that must wait for another starts coding after that one is merged. Held ones wait until you start them.'**
   String get followUpsQueuedHint;
 
   /// No description provided for @followUpsDismiss.
@@ -2876,6 +4472,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, one {{count} ticket created} other {{count} tickets created}}, queued until you start them.'**
   String followUpsCreatedNotice(num count);
+
+  /// No description provided for @followUpsStartedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} ticket created} other {{count} tickets created}} and queued to run.'**
+  String followUpsStartedNotice(num count);
 
   /// No description provided for @followUpsFailedItem.
   ///
@@ -3044,6 +4646,1362 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No matches'**
   String get formNoMatch;
+
+  /// No description provided for @harnessRepoTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Guardrails'**
+  String get harnessRepoTab;
+
+  /// No description provided for @harnessRepoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Guardrails'**
+  String get harnessRepoTitle;
+
+  /// No description provided for @harnessRepoSub.
+  ///
+  /// In en, this message translates to:
+  /// **'How strictly agnts-guard checks Claude\'s work in this repository, while it works and after.'**
+  String get harnessRepoSub;
+
+  /// No description provided for @harnessRepoSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save guardrails'**
+  String get harnessRepoSave;
+
+  /// No description provided for @harnessRepoSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Guardrails saved'**
+  String get harnessRepoSaved;
+
+  /// No description provided for @harnessRepoAgentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent instruction files'**
+  String get harnessRepoAgentTitle;
+
+  /// No description provided for @harnessRepoAgentSub.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts scans CLAUDE.md, AGENTS.md, .claude/ and .mcp.json for text that tries to steer an agent. It never runs this repository\'s hooks or MCP servers.'**
+  String get harnessRepoAgentSub;
+
+  /// No description provided for @harnessRepoAgentScanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanned {time}'**
+  String harnessRepoAgentScanned(String time);
+
+  /// No description provided for @harnessRepoAgentNotScanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Not scanned yet: the next run in this repository scans the files.'**
+  String get harnessRepoAgentNotScanned;
+
+  /// No description provided for @harnessRepoAgentNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing found.'**
+  String get harnessRepoAgentNothing;
+
+  /// No description provided for @harnessRepoAgentWarn.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} line} other {{n} lines}} may try to steer an agent. Runs treat these files as data, never as instructions; read them before you trust them.'**
+  String harnessRepoAgentWarn(num n);
+
+  /// No description provided for @harnessRepoAgentInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration agnts ignores'**
+  String get harnessRepoAgentInfo;
+
+  /// No description provided for @harnessRepoKind_hidden_unicode.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden characters'**
+  String get harnessRepoKind_hidden_unicode;
+
+  /// No description provided for @harnessRepoKind_agent_instruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Instruction to an agent'**
+  String get harnessRepoKind_agent_instruction;
+
+  /// No description provided for @harnessRepoKind_exfiltration.
+  ///
+  /// In en, this message translates to:
+  /// **'Sends data out'**
+  String get harnessRepoKind_exfiltration;
+
+  /// No description provided for @harnessRepoKind_encoded_blob.
+  ///
+  /// In en, this message translates to:
+  /// **'Encoded text'**
+  String get harnessRepoKind_encoded_blob;
+
+  /// No description provided for @harnessRepoKind_hooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude Code hooks'**
+  String get harnessRepoKind_hooks;
+
+  /// No description provided for @harnessRepoKind_mcp_server.
+  ///
+  /// In en, this message translates to:
+  /// **'MCP servers'**
+  String get harnessRepoKind_mcp_server;
+
+  /// No description provided for @harnessRepoProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Guard profile'**
+  String get harnessRepoProfile;
+
+  /// No description provided for @harnessRepoProfileHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'How strict the in-run checks are for this repository.'**
+  String get harnessRepoProfileHelp;
+
+  /// No description provided for @harnessRepoProfile_.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace'**
+  String get harnessRepoProfile_;
+
+  /// No description provided for @harnessRepoProfile_minimal.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimal'**
+  String get harnessRepoProfile_minimal;
+
+  /// No description provided for @harnessRepoProfile_standard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get harnessRepoProfile_standard;
+
+  /// No description provided for @harnessRepoProfile_strict.
+  ///
+  /// In en, this message translates to:
+  /// **'Strict'**
+  String get harnessRepoProfile_strict;
+
+  /// No description provided for @harnessRepoProfileHelp_.
+  ///
+  /// In en, this message translates to:
+  /// **'Follows the workspace setting.'**
+  String get harnessRepoProfileHelp_;
+
+  /// No description provided for @harnessRepoProfileHelp_minimal.
+  ///
+  /// In en, this message translates to:
+  /// **'Only secrets and enforced rules are blocked; build checked before Claude finishes.'**
+  String get harnessRepoProfileHelp_minimal;
+
+  /// No description provided for @harnessRepoProfileHelp_standard.
+  ///
+  /// In en, this message translates to:
+  /// **'Also blocks skipped tests, silenced linters and edits to check configuration; build and lint must pass before Claude finishes.'**
+  String get harnessRepoProfileHelp_standard;
+
+  /// No description provided for @harnessRepoProfileHelp_strict.
+  ///
+  /// In en, this message translates to:
+  /// **'Also blocks swallowed errors and removed assertions, runs the tests before Claude finishes, and may ask for facts before editing a file.'**
+  String get harnessRepoProfileHelp_strict;
+
+  /// No description provided for @harnessRepoSecretAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Example credentials allowed in'**
+  String get harnessRepoSecretAllow;
+
+  /// No description provided for @harnessRepoSecretAllowHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Path globs where fake keys are expected, besides testdata/, fixtures/ and *.example.'**
+  String get harnessRepoSecretAllowHelp;
+
+  /// No description provided for @harnessRepoChecksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Per-file checks'**
+  String get harnessRepoChecksTitle;
+
+  /// No description provided for @harnessRepoChecksSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick formatters and linters agnts-guard runs on each file Claude edits, so problems are fixed while the change is fresh.'**
+  String get harnessRepoChecksSub;
+
+  /// No description provided for @harnessRepoChecksOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn per-file checks off'**
+  String get harnessRepoChecksOff;
+
+  /// No description provided for @harnessRepoChecksOffHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude is not checked after each edit; the checks after the run still apply.'**
+  String get harnessRepoChecksOffHelp;
+
+  /// No description provided for @harnessRepoOwnChecks.
+  ///
+  /// In en, this message translates to:
+  /// **'Use my own checks'**
+  String get harnessRepoOwnChecks;
+
+  /// No description provided for @harnessRepoOwnChecksHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace the checks agnts derives from the toolchains with your list.'**
+  String get harnessRepoOwnChecksHelp;
+
+  /// No description provided for @harnessRepoDerivedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Derived from the toolchains'**
+  String get harnessRepoDerivedTitle;
+
+  /// No description provided for @harnessRepoDerivedNone.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts knows no per-file checks for this repository\'s toolchains.'**
+  String get harnessRepoDerivedNone;
+
+  /// No description provided for @harnessRepoCheckName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get harnessRepoCheckName;
+
+  /// No description provided for @harnessRepoCheckGlobs.
+  ///
+  /// In en, this message translates to:
+  /// **'Files (globs, comma-separated)'**
+  String get harnessRepoCheckGlobs;
+
+  /// No description provided for @harnessRepoCheckCmd.
+  ///
+  /// In en, this message translates to:
+  /// **'Command'**
+  String get harnessRepoCheckCmd;
+
+  /// No description provided for @harnessRepoCheckCmdHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'\'{file}\' is the edited file and \'{dir}\' its directory, both relative to the repository.'**
+  String harnessRepoCheckCmdHelp(String file, String dir);
+
+  /// No description provided for @harnessRepoCheckEvery.
+  ///
+  /// In en, this message translates to:
+  /// **'At most every (seconds)'**
+  String get harnessRepoCheckEvery;
+
+  /// No description provided for @harnessRepoAddCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a check'**
+  String get harnessRepoAddCheck;
+
+  /// No description provided for @harnessRepoRemoveCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}'**
+  String harnessRepoRemoveCheck(String name);
+
+  /// No description provided for @harnessRepoCoverageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Coverage of changed lines'**
+  String get harnessRepoCoverageTitle;
+
+  /// No description provided for @harnessRepoCoverageSub.
+  ///
+  /// In en, this message translates to:
+  /// **'After the checks pass, agnts runs the tests once more with coverage and shows which added lines no test ran.'**
+  String get harnessRepoCoverageSub;
+
+  /// No description provided for @harnessRepoCoverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Measure coverage'**
+  String get harnessRepoCoverage;
+
+  /// No description provided for @harnessRepoCoverageHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'An extra test run after the checks; it never fails the run.'**
+  String get harnessRepoCoverageHelp;
+
+  /// No description provided for @harnessRepoThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Threshold'**
+  String get harnessRepoThreshold;
+
+  /// No description provided for @harnessRepoThresholdHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Below it, the code review gets a coverage finding. 0 turns the finding off.'**
+  String get harnessRepoThresholdHelp;
+
+  /// No description provided for @harnessRepoCoverageCmd.
+  ///
+  /// In en, this message translates to:
+  /// **'Coverage command'**
+  String get harnessRepoCoverageCmd;
+
+  /// No description provided for @harnessRepoCoverageCmdHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty to use the command agnts derives.'**
+  String get harnessRepoCoverageCmdHelp;
+
+  /// No description provided for @harnessRepoCoverageReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report file'**
+  String get harnessRepoCoverageReport;
+
+  /// No description provided for @harnessRepoCoverageReportHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'A Go cover profile or lcov file, in the repository or under /agnts/out/.'**
+  String get harnessRepoCoverageReportHelp;
+
+  /// No description provided for @harnessRepoCoverageNoDerived.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts knows no coverage command for these toolchains: set one.'**
+  String get harnessRepoCoverageNoDerived;
+
+  /// No description provided for @harnessRepoAcceptance.
+  ///
+  /// In en, this message translates to:
+  /// **'Check acceptance in the app'**
+  String get harnessRepoAcceptance;
+
+  /// No description provided for @harnessRepoAcceptanceHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'After the preview, agnts checks the ticket\'s acceptance criteria in the running app and shows the results with screenshots.'**
+  String get harnessRepoAcceptanceHelp;
+
+  /// No description provided for @harnessRepoAcceptanceNoPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs a preview command: set one when you edit the repository.'**
+  String get harnessRepoAcceptanceNoPreview;
+
+  /// No description provided for @harnessRepoStarterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Starter rules'**
+  String get harnessRepoStarterTitle;
+
+  /// No description provided for @harnessRepoStarterSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Specific, checkable conventions for this repository\'s languages. They are added as suggestions: nothing applies until you adopt them.'**
+  String get harnessRepoStarterSub;
+
+  /// No description provided for @harnessRepoStarterNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No starter pack fits this repository\'s toolchains.'**
+  String get harnessRepoStarterNone;
+
+  /// No description provided for @harnessRepoStarterRules.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} rule} other {{n} rules}}'**
+  String harnessRepoStarterRules(num n);
+
+  /// No description provided for @harnessRepoStarterOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest {n, plural, one {{n} rule} other {{n} rules}}'**
+  String harnessRepoStarterOffer(num n);
+
+  /// No description provided for @harnessRepoStarterOffered.
+  ///
+  /// In en, this message translates to:
+  /// **'Already suggested'**
+  String get harnessRepoStarterOffered;
+
+  /// No description provided for @harnessRepoStarterAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =0 {Nothing new to suggest} one {{n} rule suggested} other {{n} rules suggested}}'**
+  String harnessRepoStarterAdded(num n);
+
+  /// No description provided for @harnessRepoStarterOpenRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the suggestions'**
+  String get harnessRepoStarterOpenRules;
+
+  /// No description provided for @harnessRulesDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'How runs get it'**
+  String get harnessRulesDelivery;
+
+  /// No description provided for @harnessRulesDelivery_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Every prompt'**
+  String get harnessRulesDelivery_prompt;
+
+  /// No description provided for @harnessRulesDelivery_skill.
+  ///
+  /// In en, this message translates to:
+  /// **'Skill'**
+  String get harnessRulesDelivery_skill;
+
+  /// No description provided for @harnessRulesDeliveryHelp_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'In every prompt, always in view.'**
+  String get harnessRulesDeliveryHelp_prompt;
+
+  /// No description provided for @harnessRulesDeliveryHelp_skill.
+  ///
+  /// In en, this message translates to:
+  /// **'A skill Claude loads when its description matches the work: keeps prompts short as rules grow. Keep critical rules in every prompt.'**
+  String get harnessRulesDeliveryHelp_skill;
+
+  /// No description provided for @harnessRulesEnforce.
+  ///
+  /// In en, this message translates to:
+  /// **'Enforce'**
+  String get harnessRulesEnforce;
+
+  /// No description provided for @harnessRulesEnforceHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts-guard checks the rule while Claude works, not only asks for it.'**
+  String get harnessRulesEnforceHelp;
+
+  /// No description provided for @harnessRulesOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Check'**
+  String get harnessRulesOn;
+
+  /// No description provided for @harnessRulesOn_file.
+  ///
+  /// In en, this message translates to:
+  /// **'File edits'**
+  String get harnessRulesOn_file;
+
+  /// No description provided for @harnessRulesOn_bash.
+  ///
+  /// In en, this message translates to:
+  /// **'Commands'**
+  String get harnessRulesOn_bash;
+
+  /// No description provided for @harnessRulesOn_diff.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished change'**
+  String get harnessRulesOn_diff;
+
+  /// No description provided for @harnessRulesOnHelp_file.
+  ///
+  /// In en, this message translates to:
+  /// **'Edits of the files below; with a pattern, only added lines that match it.'**
+  String get harnessRulesOnHelp_file;
+
+  /// No description provided for @harnessRulesOnHelp_bash.
+  ///
+  /// In en, this message translates to:
+  /// **'Shell commands Claude runs that match the pattern.'**
+  String get harnessRulesOnHelp_bash;
+
+  /// No description provided for @harnessRulesOnHelp_diff.
+  ///
+  /// In en, this message translates to:
+  /// **'The finished change, checked on the server after the run.'**
+  String get harnessRulesOnHelp_diff;
+
+  /// No description provided for @harnessRulesPaths.
+  ///
+  /// In en, this message translates to:
+  /// **'Files (globs)'**
+  String get harnessRulesPaths;
+
+  /// No description provided for @harnessRulesPathsPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'server/migrations/*.sql'**
+  String get harnessRulesPathsPlaceholder;
+
+  /// No description provided for @harnessRulesPattern.
+  ///
+  /// In en, this message translates to:
+  /// **'Pattern (RE2 regular expression)'**
+  String get harnessRulesPattern;
+
+  /// No description provided for @harnessRulesAction.
+  ///
+  /// In en, this message translates to:
+  /// **'When it matches'**
+  String get harnessRulesAction;
+
+  /// No description provided for @harnessRulesAction_block.
+  ///
+  /// In en, this message translates to:
+  /// **'Block'**
+  String get harnessRulesAction_block;
+
+  /// No description provided for @harnessRulesAction_warn.
+  ///
+  /// In en, this message translates to:
+  /// **'Warn'**
+  String get harnessRulesAction_warn;
+
+  /// No description provided for @harnessRulesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Message to Claude'**
+  String get harnessRulesMessage;
+
+  /// No description provided for @harnessRulesMessagePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a new migration instead.'**
+  String get harnessRulesMessagePlaceholder;
+
+  /// No description provided for @harnessRulesTry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try on history'**
+  String get harnessRulesTry;
+
+  /// No description provided for @harnessRulesTrying.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking…'**
+  String get harnessRulesTrying;
+
+  /// No description provided for @harnessRulesTryChecked.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked {n, plural, one {{n} change} other {{n} changes}} agnts made.'**
+  String harnessRulesTryChecked(num n);
+
+  /// No description provided for @harnessRulesTryNone.
+  ///
+  /// In en, this message translates to:
+  /// **'It would not have matched any of them.'**
+  String get harnessRulesTryNone;
+
+  /// No description provided for @harnessRulesTryHits.
+  ///
+  /// In en, this message translates to:
+  /// **'It would have matched {n, plural, one {{n} ticket} other {{n} tickets}}:'**
+  String harnessRulesTryHits(num n);
+
+  /// No description provided for @harnessRulesBadgeBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Enforced: blocks'**
+  String get harnessRulesBadgeBlock;
+
+  /// No description provided for @harnessRulesBadgeWarn.
+  ///
+  /// In en, this message translates to:
+  /// **'Enforced: warns'**
+  String get harnessRulesBadgeWarn;
+
+  /// No description provided for @harnessRulesBadgeSkill.
+  ///
+  /// In en, this message translates to:
+  /// **'Skill'**
+  String get harnessRulesBadgeSkill;
+
+  /// No description provided for @harnessRulesBadgeTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip'**
+  String get harnessRulesBadgeTip;
+
+  /// No description provided for @harnessRulesSource_reflect.
+  ///
+  /// In en, this message translates to:
+  /// **'From feedback'**
+  String get harnessRulesSource_reflect;
+
+  /// No description provided for @harnessRulesSource_run.
+  ///
+  /// In en, this message translates to:
+  /// **'From a run'**
+  String get harnessRulesSource_run;
+
+  /// No description provided for @harnessRulesSource_promoted.
+  ///
+  /// In en, this message translates to:
+  /// **'Seen in several repositories'**
+  String get harnessRulesSource_promoted;
+
+  /// No description provided for @harnessRulesSourceStarter.
+  ///
+  /// In en, this message translates to:
+  /// **'Starter: {name}'**
+  String harnessRulesSourceStarter(String name);
+
+  /// No description provided for @harnessRulesConfidence.
+  ///
+  /// In en, this message translates to:
+  /// **'Confidence {n}%'**
+  String harnessRulesConfidence(String n);
+
+  /// No description provided for @harnessRulesSeen.
+  ///
+  /// In en, this message translates to:
+  /// **'Seen {n, plural, one {{n} time} other {{n} times}}'**
+  String harnessRulesSeen(num n);
+
+  /// No description provided for @harnessRulesWatching.
+  ///
+  /// In en, this message translates to:
+  /// **'Watching ({n})'**
+  String harnessRulesWatching(String n);
+
+  /// No description provided for @harnessRulesWatchingHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Lessons agnts noticed once or twice. They become suggestions when it sees them again; until then they reach no ticket.'**
+  String get harnessRulesWatchingHelp;
+
+  /// No description provided for @harnessSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Guardrails'**
+  String get harnessSettingsTitle;
+
+  /// No description provided for @harnessSettingsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts-guard checks Claude\'s work inside every run, while it happens; agnts\'s checks after the run still apply.'**
+  String get harnessSettingsSub;
+
+  /// No description provided for @harnessSettingsProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Guard profile'**
+  String get harnessSettingsProfile;
+
+  /// No description provided for @harnessSettingsProfile_minimal.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimal'**
+  String get harnessSettingsProfile_minimal;
+
+  /// No description provided for @harnessSettingsProfile_standard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get harnessSettingsProfile_standard;
+
+  /// No description provided for @harnessSettingsProfile_strict.
+  ///
+  /// In en, this message translates to:
+  /// **'Strict'**
+  String get harnessSettingsProfile_strict;
+
+  /// No description provided for @harnessSettingsProfileHelp_minimal.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocks secrets and dotenv files, enforces team rules with a pattern, and asks for a green build before Claude finishes.'**
+  String get harnessSettingsProfileHelp_minimal;
+
+  /// No description provided for @harnessSettingsProfileHelp_standard.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimal, plus: blocks skipped tests, silenced linters, deleted tests and check config changes; lint in the stop gate; quick checks of each edited file.'**
+  String get harnessSettingsProfileHelp_standard;
+
+  /// No description provided for @harnessSettingsProfileHelp_strict.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard, plus: tests in the stop gate, blocks swallowed errors and removed assertions, and the fact check before first edits.'**
+  String get harnessSettingsProfileHelp_strict;
+
+  /// No description provided for @harnessSettingsFactCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Fact check share'**
+  String get harnessSettingsFactCheck;
+
+  /// No description provided for @harnessSettingsFactCheckHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Share of strict-profile tickets whose runs must say who uses a file before editing it, and how to undo destructive commands. Compare the groups on Analytics.'**
+  String get harnessSettingsFactCheckHelp;
+
+  /// No description provided for @harnessSettingsStalls.
+  ///
+  /// In en, this message translates to:
+  /// **'When a run looks stuck'**
+  String get harnessSettingsStalls;
+
+  /// No description provided for @harnessSettingsStallsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The same command failing again and again, no edits for many tool calls, or one file read over and over.'**
+  String get harnessSettingsStallsHelp;
+
+  /// No description provided for @harnessSettingsStalls_off.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignore'**
+  String get harnessSettingsStalls_off;
+
+  /// No description provided for @harnessSettingsStalls_log.
+  ///
+  /// In en, this message translates to:
+  /// **'Note it'**
+  String get harnessSettingsStalls_log;
+
+  /// No description provided for @harnessSettingsStalls_act.
+  ///
+  /// In en, this message translates to:
+  /// **'Step in'**
+  String get harnessSettingsStalls_act;
+
+  /// No description provided for @harnessSettingsProveFixes.
+  ///
+  /// In en, this message translates to:
+  /// **'Prove bug fixes'**
+  String get harnessSettingsProveFixes;
+
+  /// No description provided for @harnessSettingsProveFixesHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'A bug fix needs a test that fails before the change and passes after it; agnts runs it both ways and shows the result.'**
+  String get harnessSettingsProveFixesHelp;
+
+  /// No description provided for @harnessSettingsDeepReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Deep review'**
+  String get harnessSettingsDeepReview;
+
+  /// No description provided for @harnessSettingsDeepReviewHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Specialist passes in the code review (security, silent failures, tests, types). Auto: large or complex work only; it costs more tokens.'**
+  String get harnessSettingsDeepReviewHelp;
+
+  /// No description provided for @harnessSettingsDeep_off.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get harnessSettingsDeep_off;
+
+  /// No description provided for @harnessSettingsDeep_auto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get harnessSettingsDeep_auto;
+
+  /// No description provided for @harnessSettingsDeep_always.
+  ///
+  /// In en, this message translates to:
+  /// **'Always'**
+  String get harnessSettingsDeep_always;
+
+  /// No description provided for @harnessSettingsLearnFromRuns.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn from runs'**
+  String get harnessSettingsLearnFromRuns;
+
+  /// No description provided for @harnessSettingsLearnFromRunsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'After a run with failed checks or a stall, agnts may suggest a tip for the repository. Tips stay watched until seen again.'**
+  String get harnessSettingsLearnFromRunsHelp;
+
+  /// No description provided for @harnessSettingsSecondOpinion.
+  ///
+  /// In en, this message translates to:
+  /// **'Second opinion'**
+  String get harnessSettingsSecondOpinion;
+
+  /// No description provided for @harnessSettingsSecondOpinionHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Another model reads the chosen approach of complex tickets and says whether it agrees. Empty turns it off.'**
+  String get harnessSettingsSecondOpinionHelp;
+
+  /// No description provided for @harnessSettingsSecondOpinionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. opus or codex:gpt-5-codex'**
+  String get harnessSettingsSecondOpinionHint;
+
+  /// No description provided for @harnessSettingsAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced: guard hooks'**
+  String get harnessSettingsAdvanced;
+
+  /// No description provided for @harnessSettingsAdvancedHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn single hooks off; the profile still decides the rest.'**
+  String get harnessSettingsAdvancedHelp;
+
+  /// No description provided for @harnessSettingsHook_pre_secret.
+  ///
+  /// In en, this message translates to:
+  /// **'refuse credentials and dotenv files'**
+  String get harnessSettingsHook_pre_secret;
+
+  /// No description provided for @harnessSettingsHook_pre_redflags.
+  ///
+  /// In en, this message translates to:
+  /// **'refuse skipped tests, silenced linters, weakened checks'**
+  String get harnessSettingsHook_pre_redflags;
+
+  /// No description provided for @harnessSettingsHook_pre_rules.
+  ///
+  /// In en, this message translates to:
+  /// **'enforce team rules with a pattern'**
+  String get harnessSettingsHook_pre_rules;
+
+  /// No description provided for @harnessSettingsHook_pre_fact_check.
+  ///
+  /// In en, this message translates to:
+  /// **'ask for facts before the first edit of a file'**
+  String get harnessSettingsHook_pre_fact_check;
+
+  /// No description provided for @harnessSettingsHook_pre_destructive.
+  ///
+  /// In en, this message translates to:
+  /// **'ask for a rollback plan before destructive commands'**
+  String get harnessSettingsHook_pre_destructive;
+
+  /// No description provided for @harnessSettingsHook_post_edit_check.
+  ///
+  /// In en, this message translates to:
+  /// **'check each edited file (formatter, linter)'**
+  String get harnessSettingsHook_post_edit_check;
+
+  /// No description provided for @harnessSettingsHook_stop_gate.
+  ///
+  /// In en, this message translates to:
+  /// **'build and lint must pass before Claude finishes'**
+  String get harnessSettingsHook_stop_gate;
+
+  /// No description provided for @harnessSettingsHook_session_progress.
+  ///
+  /// In en, this message translates to:
+  /// **'give the plan back after the context is compacted'**
+  String get harnessSettingsHook_session_progress;
+
+  /// No description provided for @harnessSettingsCodex.
+  ///
+  /// In en, this message translates to:
+  /// **'Coding on Codex'**
+  String get harnessSettingsCodex;
+
+  /// No description provided for @harnessSettingsCodexHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'A Codex model name runs coding on Codex CLI instead of Claude; empty uses Claude. Needs the OpenAI integration and api.openai.com in the allowed hosts (Settings → Preview).'**
+  String get harnessSettingsCodexHelp;
+
+  /// No description provided for @harnessSettingsCodexConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI integration'**
+  String get harnessSettingsCodexConnect;
+
+  /// No description provided for @harnessSettingsQualityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Guardrails by prompt version'**
+  String get harnessSettingsQualityTitle;
+
+  /// No description provided for @harnessSettingsQualitySub.
+  ///
+  /// In en, this message translates to:
+  /// **'What agnts-guard and the harness checks did for the tickets of each prompt version.'**
+  String get harnessSettingsQualitySub;
+
+  /// No description provided for @harnessSettingsColBlocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked'**
+  String get harnessSettingsColBlocks;
+
+  /// No description provided for @harnessSettingsColBlocksHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions agnts-guard refused in coding runs'**
+  String get harnessSettingsColBlocksHint;
+
+  /// No description provided for @harnessSettingsColStopSaves.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop-gate saves'**
+  String get harnessSettingsColStopSaves;
+
+  /// No description provided for @harnessSettingsColStopSavesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets whose stop gate sent failing checks back, after which agnts\'s checks passed first time'**
+  String get harnessSettingsColStopSavesHint;
+
+  /// No description provided for @harnessSettingsColStalls.
+  ///
+  /// In en, this message translates to:
+  /// **'Stalls'**
+  String get harnessSettingsColStalls;
+
+  /// No description provided for @harnessSettingsColStallsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Times runs looked stuck'**
+  String get harnessSettingsColStallsHint;
+
+  /// No description provided for @harnessSettingsColProven.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixes proven'**
+  String get harnessSettingsColProven;
+
+  /// No description provided for @harnessSettingsColProvenHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Bug fixes whose test failed before the change and passed after it, of those with a proof'**
+  String get harnessSettingsColProvenHint;
+
+  /// No description provided for @harnessSettingsColAdopted.
+  ///
+  /// In en, this message translates to:
+  /// **'Findings adopted'**
+  String get harnessSettingsColAdopted;
+
+  /// No description provided for @harnessSettingsColAdoptedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Review findings people put into their feedback'**
+  String get harnessSettingsColAdoptedHint;
+
+  /// No description provided for @harnessSettingsColTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokens per done'**
+  String get harnessSettingsColTokens;
+
+  /// No description provided for @harnessSettingsColTokensHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Average tokens of a done ticket, all stages'**
+  String get harnessSettingsColTokensHint;
+
+  /// No description provided for @harnessSettingsColFactCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Fact check first try'**
+  String get harnessSettingsColFactCheck;
+
+  /// No description provided for @harnessSettingsColFactCheckHint.
+  ///
+  /// In en, this message translates to:
+  /// **'First-try rate of tickets in the fact check group, next to the rate of all done tickets'**
+  String get harnessSettingsColFactCheckHint;
+
+  /// No description provided for @harnessSettingsXOfY.
+  ///
+  /// In en, this message translates to:
+  /// **'{x} of {y}'**
+  String harnessSettingsXOfY(String x, String y);
+
+  /// No description provided for @harnessSettingsVsAll.
+  ///
+  /// In en, this message translates to:
+  /// **'vs {n}%'**
+  String harnessSettingsVsAll(String n);
+
+  /// No description provided for @harnessTicketFlag_secret.
+  ///
+  /// In en, this message translates to:
+  /// **'Possible secret'**
+  String get harnessTicketFlag_secret;
+
+  /// No description provided for @harnessTicketFlag_env_file.
+  ///
+  /// In en, this message translates to:
+  /// **'Dotenv file added'**
+  String get harnessTicketFlag_env_file;
+
+  /// No description provided for @harnessTicketFlag_debug_leftover.
+  ///
+  /// In en, this message translates to:
+  /// **'Debug output left'**
+  String get harnessTicketFlag_debug_leftover;
+
+  /// No description provided for @harnessTicketFlag_check_config.
+  ///
+  /// In en, this message translates to:
+  /// **'Check configuration changed'**
+  String get harnessTicketFlag_check_config;
+
+  /// No description provided for @harnessTicketFlag_rule_violation.
+  ///
+  /// In en, this message translates to:
+  /// **'Team rule broken'**
+  String get harnessTicketFlag_rule_violation;
+
+  /// No description provided for @harnessTicketSecretsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This change may contain a real credential'**
+  String get harnessTicketSecretsTitle;
+
+  /// No description provided for @harnessTicketSecretsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts flagged {n, plural, one {{n} line} other {{n} lines}} as a possible secret or a dotenv file. Check them in the red flags on the Review tab: agnts does not push the change until you confirm they are not real credentials.'**
+  String harnessTicketSecretsBody(num n);
+
+  /// No description provided for @harnessTicketSecretsConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'I checked them: not real credentials'**
+  String get harnessTicketSecretsConfirm;
+
+  /// No description provided for @harnessTicketSecretsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed: the flagged lines are not real credentials.'**
+  String get harnessTicketSecretsDone;
+
+  /// No description provided for @harnessTicketSecretsNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'First confirm that the lines flagged as secrets are not real credentials.'**
+  String get harnessTicketSecretsNeeded;
+
+  /// No description provided for @harnessTicketProofTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Proof of the fix'**
+  String get harnessTicketProofTitle;
+
+  /// No description provided for @harnessTicketProof_proven.
+  ///
+  /// In en, this message translates to:
+  /// **'Proven'**
+  String get harnessTicketProof_proven;
+
+  /// No description provided for @harnessTicketProof_not_reproduced.
+  ///
+  /// In en, this message translates to:
+  /// **'Not reproduced'**
+  String get harnessTicketProof_not_reproduced;
+
+  /// No description provided for @harnessTicketProof_still_failing.
+  ///
+  /// In en, this message translates to:
+  /// **'Still failing'**
+  String get harnessTicketProof_still_failing;
+
+  /// No description provided for @harnessTicketProof_inconclusive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inconclusive'**
+  String get harnessTicketProof_inconclusive;
+
+  /// No description provided for @harnessTicketProof_no_test.
+  ///
+  /// In en, this message translates to:
+  /// **'No test'**
+  String get harnessTicketProof_no_test;
+
+  /// No description provided for @harnessTicketProof_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Not checked'**
+  String get harnessTicketProof_error;
+
+  /// No description provided for @harnessTicketProofHelp_proven.
+  ///
+  /// In en, this message translates to:
+  /// **'The reproducing test fails on the code before the change and passes after it.'**
+  String get harnessTicketProofHelp_proven;
+
+  /// No description provided for @harnessTicketProofHelp_not_reproduced.
+  ///
+  /// In en, this message translates to:
+  /// **'The test passes before the change too, so it does not show the bug.'**
+  String get harnessTicketProofHelp_not_reproduced;
+
+  /// No description provided for @harnessTicketProofHelp_still_failing.
+  ///
+  /// In en, this message translates to:
+  /// **'The test still fails with the change.'**
+  String get harnessTicketProofHelp_still_failing;
+
+  /// No description provided for @harnessTicketProofHelp_inconclusive.
+  ///
+  /// In en, this message translates to:
+  /// **'The test could not run on the code before the change; it may need what the fix adds.'**
+  String get harnessTicketProofHelp_inconclusive;
+
+  /// No description provided for @harnessTicketProofHelp_no_test.
+  ///
+  /// In en, this message translates to:
+  /// **'No automated test reproduces the bug.'**
+  String get harnessTicketProofHelp_no_test;
+
+  /// No description provided for @harnessTicketProofHelp_error.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts could not run the proof.'**
+  String get harnessTicketProofHelp_error;
+
+  /// No description provided for @harnessTicketProofBase.
+  ///
+  /// In en, this message translates to:
+  /// **'Started from {sha}'**
+  String harnessTicketProofBase(String sha);
+
+  /// No description provided for @harnessTicketProofBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'Before the change (exit {code})'**
+  String harnessTicketProofBefore(String code);
+
+  /// No description provided for @harnessTicketProofAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'After the change (exit {code})'**
+  String harnessTicketProofAfter(String code);
+
+  /// No description provided for @harnessTicketCoverageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Coverage of changed lines'**
+  String get harnessTicketCoverageTitle;
+
+  /// No description provided for @harnessTicketCoveragePct.
+  ///
+  /// In en, this message translates to:
+  /// **'{pct}% of the changed lines ran in the tests ({covered} of {total})'**
+  String harnessTicketCoveragePct(String pct, String covered, String total);
+
+  /// No description provided for @harnessTicketCoverageBelow.
+  ///
+  /// In en, this message translates to:
+  /// **'Below the repository\'s {n}%'**
+  String harnessTicketCoverageBelow(String n);
+
+  /// No description provided for @harnessTicketCoverageNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No changed line is code the coverage report measures.'**
+  String get harnessTicketCoverageNone;
+
+  /// No description provided for @harnessTicketCoverageLines.
+  ///
+  /// In en, this message translates to:
+  /// **'Not run: lines {ranges}'**
+  String harnessTicketCoverageLines(String ranges);
+
+  /// No description provided for @harnessTicketCoverageError.
+  ///
+  /// In en, this message translates to:
+  /// **'Coverage could not be measured: {error}'**
+  String harnessTicketCoverageError(String error);
+
+  /// No description provided for @harnessTicketConfidence.
+  ///
+  /// In en, this message translates to:
+  /// **'{n}% sure'**
+  String harnessTicketConfidence(String n);
+
+  /// No description provided for @harnessTicketPass_security.
+  ///
+  /// In en, this message translates to:
+  /// **'Security pass'**
+  String get harnessTicketPass_security;
+
+  /// No description provided for @harnessTicketPass_failures.
+  ///
+  /// In en, this message translates to:
+  /// **'Failures pass'**
+  String get harnessTicketPass_failures;
+
+  /// No description provided for @harnessTicketPass_tests.
+  ///
+  /// In en, this message translates to:
+  /// **'Tests pass'**
+  String get harnessTicketPass_tests;
+
+  /// No description provided for @harnessTicketPass_types.
+  ///
+  /// In en, this message translates to:
+  /// **'Types pass'**
+  String get harnessTicketPass_types;
+
+  /// No description provided for @harnessTicketAdopted.
+  ///
+  /// In en, this message translates to:
+  /// **'In your feedback'**
+  String get harnessTicketAdopted;
+
+  /// No description provided for @harnessTicketDeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Deep review'**
+  String get harnessTicketDeep;
+
+  /// No description provided for @harnessTicketDropped.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} finding} other {{n} findings}} left out (low confidence or duplicates)'**
+  String harnessTicketDropped(num n);
+
+  /// No description provided for @harnessTicketDefect.
+  ///
+  /// In en, this message translates to:
+  /// **'Bug fix'**
+  String get harnessTicketDefect;
+
+  /// No description provided for @harnessTicketAcceptanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Acceptance criteria'**
+  String get harnessTicketAcceptanceTitle;
+
+  /// No description provided for @harnessTicketCheck_ui.
+  ///
+  /// In en, this message translates to:
+  /// **'In the app'**
+  String get harnessTicketCheck_ui;
+
+  /// No description provided for @harnessTicketCheck_api.
+  ///
+  /// In en, this message translates to:
+  /// **'API'**
+  String get harnessTicketCheck_api;
+
+  /// No description provided for @harnessTicketCheck_test.
+  ///
+  /// In en, this message translates to:
+  /// **'Test'**
+  String get harnessTicketCheck_test;
+
+  /// No description provided for @harnessTicketCheck_manual.
+  ///
+  /// In en, this message translates to:
+  /// **'By hand'**
+  String get harnessTicketCheck_manual;
+
+  /// No description provided for @harnessTicketSecondTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Second opinion'**
+  String get harnessTicketSecondTitle;
+
+  /// No description provided for @harnessTicketSecondBy.
+  ///
+  /// In en, this message translates to:
+  /// **'From {model}'**
+  String harnessTicketSecondBy(String model);
+
+  /// No description provided for @harnessTicketSecondAgrees.
+  ///
+  /// In en, this message translates to:
+  /// **'Agrees'**
+  String get harnessTicketSecondAgrees;
+
+  /// No description provided for @harnessTicketSecondConcerns.
+  ///
+  /// In en, this message translates to:
+  /// **'Has concerns'**
+  String get harnessTicketSecondConcerns;
+
+  /// No description provided for @harnessTicketSecondAlternative.
+  ///
+  /// In en, this message translates to:
+  /// **'Would do instead'**
+  String get harnessTicketSecondAlternative;
+
+  /// No description provided for @harnessTicketSecondError.
+  ///
+  /// In en, this message translates to:
+  /// **'No second opinion: {error}'**
+  String harnessTicketSecondError(String error);
+
+  /// No description provided for @harnessTicketAccTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Acceptance check'**
+  String get harnessTicketAccTitle;
+
+  /// No description provided for @harnessTicketAcc_ok.
+  ///
+  /// In en, this message translates to:
+  /// **'All met'**
+  String get harnessTicketAcc_ok;
+
+  /// No description provided for @harnessTicketAcc_partial.
+  ///
+  /// In en, this message translates to:
+  /// **'Partly checked'**
+  String get harnessTicketAcc_partial;
+
+  /// No description provided for @harnessTicketAcc_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not met'**
+  String get harnessTicketAcc_failed;
+
+  /// No description provided for @harnessTicketVerdict_pass.
+  ///
+  /// In en, this message translates to:
+  /// **'Met'**
+  String get harnessTicketVerdict_pass;
+
+  /// No description provided for @harnessTicketVerdict_fail.
+  ///
+  /// In en, this message translates to:
+  /// **'Not met'**
+  String get harnessTicketVerdict_fail;
+
+  /// No description provided for @harnessTicketVerdict_unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Not checked'**
+  String get harnessTicketVerdict_unknown;
+
+  /// No description provided for @harnessTicketAccSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps'**
+  String get harnessTicketAccSteps;
+
+  /// No description provided for @harnessTicketAccShot.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot'**
+  String get harnessTicketAccShot;
 
   /// No description provided for @implementTitle.
   ///
@@ -4173,6 +7131,66 @@ abstract class AppLocalizations {
   /// **'{found} open work items, {created} new'**
   String integrationsPlaneSynced(String found, String created);
 
+  /// No description provided for @integrationsName_openai.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI'**
+  String get integrationsName_openai;
+
+  /// No description provided for @integrationsDesc_openai.
+  ///
+  /// In en, this message translates to:
+  /// **'An OpenAI API key for runs on Codex CLI, agnts\'s second coding tool. Pick a codex: model in Settings to use it.'**
+  String get integrationsDesc_openai;
+
+  /// No description provided for @integrationsConnectSub_openai.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste an OpenAI API key. agnts checks it, keeps it encrypted, and gives it only to runs that use Codex.'**
+  String get integrationsConnectSub_openai;
+
+  /// No description provided for @integrationsTokenOpen_openai.
+  ///
+  /// In en, this message translates to:
+  /// **'Open API keys'**
+  String get integrationsTokenOpen_openai;
+
+  /// No description provided for @integrationsTokenStep1_openai.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the OpenAI platform\'s API keys page (button below) and sign in.'**
+  String get integrationsTokenStep1_openai;
+
+  /// No description provided for @integrationsTokenStep2_openai.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new secret key, ideally in a project with a spending limit.'**
+  String get integrationsTokenStep2_openai;
+
+  /// No description provided for @integrationsTokenStep3_openai.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy the key (it starts with sk-) and paste it into API key below.'**
+  String get integrationsTokenStep3_openai;
+
+  /// No description provided for @integrationsTokenStep4_openai.
+  ///
+  /// In en, this message translates to:
+  /// **'In Settings → Preview, add api.openai.com to the hosts runs may reach, so Codex runs can call OpenAI.'**
+  String get integrationsTokenStep4_openai;
+
+  /// No description provided for @integrationsOpenaiKeyHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Stored encrypted on your server. Only runs on Codex receive it.'**
+  String get integrationsOpenaiKeyHelp;
+
+  /// No description provided for @integrationsOpenaiHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Codex runs have no agnts-guard hooks: agnts\'s checks after the run (red flags, build, lint, tests, review) still apply. Runs also need api.openai.com in the allowed hosts.'**
+  String get integrationsOpenaiHelp;
+
   /// No description provided for @kindTitle.
   ///
   /// In en, this message translates to:
@@ -5018,6 +8036,282 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Changes are compared with the previous {n} days. Green means better.'**
   String manalyticsCompared(num n);
+
+  /// No description provided for @mciTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'CI failures'**
+  String get mciTitle;
+
+  /// No description provided for @mciLede.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched branches that went red, one row per error.'**
+  String get mciLede;
+
+  /// No description provided for @mciFilterRed.
+  ///
+  /// In en, this message translates to:
+  /// **'Red'**
+  String get mciFilterRed;
+
+  /// No description provided for @mciFilterFlaky.
+  ///
+  /// In en, this message translates to:
+  /// **'Flaky'**
+  String get mciFilterFlaky;
+
+  /// No description provided for @mciFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get mciFilterAll;
+
+  /// No description provided for @mciEmptyRed.
+  ///
+  /// In en, this message translates to:
+  /// **'No watched branch is red.'**
+  String get mciEmptyRed;
+
+  /// No description provided for @mciEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No CI failures here.'**
+  String get mciEmpty;
+
+  /// No description provided for @mciStatus_triage.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking'**
+  String get mciStatus_triage;
+
+  /// No description provided for @mciStatus_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Red'**
+  String get mciStatus_open;
+
+  /// No description provided for @mciStatus_fixing.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixing'**
+  String get mciStatus_fixing;
+
+  /// No description provided for @mciStatus_fixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed'**
+  String get mciStatus_fixed;
+
+  /// No description provided for @mciStatus_resolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Green again'**
+  String get mciStatus_resolved;
+
+  /// No description provided for @mciStatus_flaky.
+  ///
+  /// In en, this message translates to:
+  /// **'Flaky'**
+  String get mciStatus_flaky;
+
+  /// No description provided for @mciStatus_infra.
+  ///
+  /// In en, this message translates to:
+  /// **'Infrastructure'**
+  String get mciStatus_infra;
+
+  /// No description provided for @mciStatus_muted.
+  ///
+  /// In en, this message translates to:
+  /// **'Muted'**
+  String get mciStatus_muted;
+
+  /// No description provided for @mciStatus_regression.
+  ///
+  /// In en, this message translates to:
+  /// **'Back again'**
+  String get mciStatus_regression;
+
+  /// No description provided for @mciLastSeen.
+  ///
+  /// In en, this message translates to:
+  /// **'last {when}'**
+  String mciLastSeen(String when);
+
+  /// No description provided for @mciFactFirstCommit.
+  ///
+  /// In en, this message translates to:
+  /// **'First failing commit'**
+  String get mciFactFirstCommit;
+
+  /// No description provided for @mciFactCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get mciFactCount;
+
+  /// No description provided for @mciTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} time} other {{n} times}}'**
+  String mciTimes(num n);
+
+  /// No description provided for @mciFactLastSeen.
+  ///
+  /// In en, this message translates to:
+  /// **'Last seen'**
+  String get mciFactLastSeen;
+
+  /// No description provided for @mciFactFlaky.
+  ///
+  /// In en, this message translates to:
+  /// **'Passed on re-run'**
+  String get mciFactFlaky;
+
+  /// No description provided for @mciJob.
+  ///
+  /// In en, this message translates to:
+  /// **'Job'**
+  String get mciJob;
+
+  /// No description provided for @mciBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch'**
+  String get mciBranch;
+
+  /// No description provided for @mciFirstError.
+  ///
+  /// In en, this message translates to:
+  /// **'The first error'**
+  String get mciFirstError;
+
+  /// No description provided for @mciLogTail.
+  ///
+  /// In en, this message translates to:
+  /// **'The end of the log'**
+  String get mciLogTail;
+
+  /// No description provided for @mciLogNote.
+  ///
+  /// In en, this message translates to:
+  /// **'From the job\'s log, with secrets removed.'**
+  String get mciLogNote;
+
+  /// No description provided for @mciNoSample.
+  ///
+  /// In en, this message translates to:
+  /// **'No log excerpt was kept for this failure.'**
+  String get mciNoSample;
+
+  /// No description provided for @mciRuns.
+  ///
+  /// In en, this message translates to:
+  /// **'Failing runs'**
+  String get mciRuns;
+
+  /// No description provided for @mciRunsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} failing run} other {{n} failing runs}}'**
+  String mciRunsCount(num n);
+
+  /// No description provided for @mciRunFlaky.
+  ///
+  /// In en, this message translates to:
+  /// **'passed on re-run'**
+  String get mciRunFlaky;
+
+  /// No description provided for @mciTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket'**
+  String get mciTicket;
+
+  /// No description provided for @mciForeignPr.
+  ///
+  /// In en, this message translates to:
+  /// **'This failure is on someone else\'s pull request (#{n}): agnts only comments there.'**
+  String mciForeignPr(String n);
+
+  /// No description provided for @mciFix.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix it'**
+  String get mciFix;
+
+  /// No description provided for @mciFixConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts opens a ticket to fix this failure. You review the fix before anything is pushed.'**
+  String get mciFixConfirm;
+
+  /// No description provided for @mciMute.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute'**
+  String get mciMute;
+
+  /// No description provided for @mciUnmute.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmute'**
+  String get mciUnmute;
+
+  /// No description provided for @mciMutedDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Muted: agnts leaves this failure alone until you unmute it.'**
+  String get mciMutedDone;
+
+  /// No description provided for @mciUnmutedDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmuted.'**
+  String get mciUnmutedDone;
+
+  /// No description provided for @mciRerun.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-run'**
+  String get mciRerun;
+
+  /// No description provided for @mciRerunDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-run started.'**
+  String get mciRerunDone;
+
+  /// No description provided for @mciCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'CI failure'**
+  String get mciCardTitle;
+
+  /// No description provided for @mciCardOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the CI failure'**
+  String get mciCardOpen;
+
+  /// No description provided for @mciCiFixes.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {CI sent the pull request back once} other {CI sent the pull request back {n} times}}'**
+  String mciCiFixes(num n);
+
+  /// No description provided for @mciSourceCi.
+  ///
+  /// In en, this message translates to:
+  /// **'CI'**
+  String get mciSourceCi;
+
+  /// No description provided for @mciNotify.
+  ///
+  /// In en, this message translates to:
+  /// **'A watched branch went red'**
+  String get mciNotify;
 
   /// No description provided for @mcpTitle.
   ///
@@ -6440,6 +9734,528 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'PR reviews'**
   String get navReviews;
+
+  /// No description provided for @navCi.
+  ///
+  /// In en, this message translates to:
+  /// **'CI'**
+  String get navCi;
+
+  /// No description provided for @networkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Private networks'**
+  String get networkTitle;
+
+  /// No description provided for @networkSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Reach self-hosted GitLab, Jira or package registries inside your networks. A connection goes through the network whose route matches it most closely.'**
+  String get networkSub;
+
+  /// No description provided for @networkUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Private networks are not set up on this server: the operator runs the gateway service and sets AGNTS_GATEWAY.'**
+  String get networkUnavailable;
+
+  /// No description provided for @networkStatus_up.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get networkStatus_up;
+
+  /// No description provided for @networkStatus_connecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting'**
+  String get networkStatus_connecting;
+
+  /// No description provided for @networkStatus_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get networkStatus_error;
+
+  /// No description provided for @networkStatus_gateway_down.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateway down'**
+  String get networkStatus_gateway_down;
+
+  /// No description provided for @networkStatus_disabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get networkStatus_disabled;
+
+  /// No description provided for @networkHandshake.
+  ///
+  /// In en, this message translates to:
+  /// **'Last handshake'**
+  String get networkHandshake;
+
+  /// No description provided for @networkHeartbeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Last heartbeat'**
+  String get networkHeartbeat;
+
+  /// No description provided for @networkWebhooksRelay.
+  ///
+  /// In en, this message translates to:
+  /// **'Relayed by agnts-link'**
+  String get networkWebhooksRelay;
+
+  /// No description provided for @networkWebhooksPolling.
+  ///
+  /// In en, this message translates to:
+  /// **'No webhooks: trackers reached through it are read every {n} min'**
+  String networkWebhooksPolling(String n);
+
+  /// No description provided for @networkKind.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection'**
+  String get networkKind;
+
+  /// No description provided for @networkKindConnector.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts-link (recommended)'**
+  String get networkKindConnector;
+
+  /// No description provided for @networkKindHelp_connector.
+  ///
+  /// In en, this message translates to:
+  /// **'A small agent you run inside your network. It connects out to agnts: no VPN credentials, no inbound firewall rule, and it relays webhooks.'**
+  String get networkKindHelp_connector;
+
+  /// No description provided for @networkKindHelp_wireguard.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts connects to your WireGuard peer as a client. The peer must accept UDP from this server.'**
+  String get networkKindHelp_wireguard;
+
+  /// No description provided for @networkKindHelp_openvpn.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts runs your OpenVPN client config in an isolated container. Certificates must be inline; logins that need MFA are not supported.'**
+  String get networkKindHelp_openvpn;
+
+  /// No description provided for @networkEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Turned on'**
+  String get networkEnabled;
+
+  /// No description provided for @networkConfigWg.
+  ///
+  /// In en, this message translates to:
+  /// **'WireGuard config'**
+  String get networkConfigWg;
+
+  /// No description provided for @networkConfigOvpn.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenVPN config (.ovpn)'**
+  String get networkConfigOvpn;
+
+  /// No description provided for @networkSavedConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved: {summary}. Leave empty to keep it.'**
+  String networkSavedConfig(String summary);
+
+  /// No description provided for @networkConfigWgHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The file you would give wg-quick. Add a DNS line to reach hosts by name. Keys are encrypted and never shown again.'**
+  String get networkConfigWgHelp;
+
+  /// No description provided for @networkConfigOvpnHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'A client config with its ca, cert and key blocks inline. Scripts (up, down, plugin…) are refused.'**
+  String get networkConfigOvpnHelp;
+
+  /// No description provided for @networkUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get networkUsername;
+
+  /// No description provided for @networkPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get networkPassword;
+
+  /// No description provided for @networkPasswordKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved: leave empty to keep it'**
+  String get networkPasswordKeep;
+
+  /// No description provided for @networkRoutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Routes'**
+  String get networkRoutes;
+
+  /// No description provided for @networkRoutesHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Hosts (gitlab.corp.local), domains (.corp.local) or private ranges (10.20.0.0/16) that go through this network, with ports (80 and 443 when empty). Another network may have a narrower route inside these (10.30.0.0/16 inside 10.0.0.0/8): the more specific one wins. Two networks may not list the same route.'**
+  String get networkRoutesHelp;
+
+  /// No description provided for @networkRouteTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Host, domain or range'**
+  String get networkRouteTarget;
+
+  /// No description provided for @networkRoutePorts.
+  ///
+  /// In en, this message translates to:
+  /// **'Ports'**
+  String get networkRoutePorts;
+
+  /// No description provided for @networkRemoveRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove route'**
+  String get networkRemoveRoute;
+
+  /// No description provided for @networkAddRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Add route'**
+  String get networkAddRoute;
+
+  /// No description provided for @networkBlastRadius.
+  ///
+  /// In en, this message translates to:
+  /// **'Code agnts runs for your tickets can reach every host listed here. List exact hosts rather than whole ranges.'**
+  String get networkBlastRadius;
+
+  /// No description provided for @networkCa.
+  ///
+  /// In en, this message translates to:
+  /// **'Company CA bundle'**
+  String get networkCa;
+
+  /// No description provided for @networkCaSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Trusted: {subjects} (until {date}).'**
+  String networkCaSaved(String subjects, String date);
+
+  /// No description provided for @networkCaRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get networkCaRemove;
+
+  /// No description provided for @networkCaHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'PEM certificates of your internal CA. agnts and its runs trust them besides the public roots.'**
+  String get networkCaHelp;
+
+  /// No description provided for @networkSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} saved'**
+  String networkSaved(String name);
+
+  /// No description provided for @networkRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get networkRemove;
+
+  /// No description provided for @networkRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Private network removed'**
+  String get networkRemoved;
+
+  /// No description provided for @networkRemoveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}? agnts will stop reaching the hosts on its routes.'**
+  String networkRemoveConfirm(String name);
+
+  /// No description provided for @networkLinkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Run agnts-link'**
+  String get networkLinkTitle;
+
+  /// No description provided for @networkLinkHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Run this on a machine inside the network that can reach the hosts above. AGNTS_LINK_ALLOW is your own limit: agnts-link never dials anything else. Each network has its own token, so one machine can run several links.'**
+  String get networkLinkHelp;
+
+  /// No description provided for @networkToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Token'**
+  String get networkToken;
+
+  /// No description provided for @networkTokenOnce.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy it now: it is shown only once.'**
+  String get networkTokenOnce;
+
+  /// No description provided for @networkLinkHooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Webhooks: point GitLab and Jira at http://AGNTS-LINK-HOST:8080 with the same /webhooks/… path the Integrations page shows.'**
+  String get networkLinkHooks;
+
+  /// No description provided for @networkRotate.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace token'**
+  String get networkRotate;
+
+  /// No description provided for @networkRotateConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Make a new token? The running agnts-link disconnects until you restart it with the new one.'**
+  String get networkRotateConfirm;
+
+  /// No description provided for @networkTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Test a connection'**
+  String get networkTest;
+
+  /// No description provided for @networkTestRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Test'**
+  String get networkTestRun;
+
+  /// No description provided for @networkTesting.
+  ///
+  /// In en, this message translates to:
+  /// **'Testing…'**
+  String get networkTesting;
+
+  /// No description provided for @networkTestOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected through {name} ({via}) to {ip} in {ms} ms.'**
+  String networkTestOk(String name, String via, String ip, String ms);
+
+  /// No description provided for @networkTlsOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate OK: {subject}, issued by {issuer}.'**
+  String networkTlsOk(String subject, String issuer);
+
+  /// No description provided for @networkTlsBad.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate not trusted: {error}'**
+  String networkTlsBad(String error);
+
+  /// No description provided for @networkActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get networkActivity;
+
+  /// No description provided for @networkActivityCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} connections, {refused} refused or failed'**
+  String networkActivityCounts(String n, String refused);
+
+  /// No description provided for @networkActivityShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show connections'**
+  String get networkActivityShow;
+
+  /// No description provided for @networkActivityHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide connections'**
+  String get networkActivityHide;
+
+  /// No description provided for @networkRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'refused'**
+  String get networkRefused;
+
+  /// No description provided for @networkSecondsAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} s ago'**
+  String networkSecondsAgo(String n);
+
+  /// No description provided for @networkMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} min ago'**
+  String networkMinutesAgo(String n);
+
+  /// No description provided for @networkHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} h ago'**
+  String networkHoursAgo(String n);
+
+  /// No description provided for @networkReconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnect'**
+  String get networkReconnect;
+
+  /// No description provided for @networkReconnectHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart the tunnel: a fresh OpenVPN client, a new WireGuard handshake, or agnts-link connects again'**
+  String get networkReconnectHelp;
+
+  /// No description provided for @networkReconnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnecting: the tunnel restarts within 15 seconds'**
+  String get networkReconnecting;
+
+  /// No description provided for @networkAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add network'**
+  String get networkAdd;
+
+  /// No description provided for @networkAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New private network'**
+  String get networkAddTitle;
+
+  /// No description provided for @networkAddSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Add network'**
+  String get networkAddSubmit;
+
+  /// No description provided for @networkEditorSub.
+  ///
+  /// In en, this message translates to:
+  /// **'A tunnel into one of your networks and the hosts that go through it'**
+  String get networkEditorSub;
+
+  /// No description provided for @networkEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get networkEdit;
+
+  /// No description provided for @networkDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get networkDone;
+
+  /// No description provided for @networkName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get networkName;
+
+  /// No description provided for @networkNamePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Client A, Office, Data center'**
+  String get networkNamePlaceholder;
+
+  /// No description provided for @networkNameHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Unique in the workspace: the company, office or data center it reaches.'**
+  String get networkNameHelp;
+
+  /// No description provided for @networkEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No private networks yet. Add one to reach hosts that are only inside your network.'**
+  String get networkEmpty;
+
+  /// No description provided for @networkLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'A workspace keeps at most {n} private networks'**
+  String networkLimit(String n);
+
+  /// No description provided for @networkCaShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Trusts {subjects}'**
+  String networkCaShort(String subjects);
+
+  /// No description provided for @networkTestHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter host:port. agnts picks the network the routes lead to, connects and checks the certificate.'**
+  String get networkTestHelp;
+
+  /// No description provided for @networkTestThrough.
+  ///
+  /// In en, this message translates to:
+  /// **'Through'**
+  String get networkTestThrough;
+
+  /// No description provided for @networkTestAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'The network the routes pick'**
+  String get networkTestAuto;
+
+  /// No description provided for @networkActivityAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All networks'**
+  String get networkActivityAll;
+
+  /// No description provided for @networkActivityNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Network'**
+  String get networkActivityNetwork;
+
+  /// No description provided for @networkActivityTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get networkActivityTime;
+
+  /// No description provided for @networkActivityTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Target'**
+  String get networkActivityTarget;
+
+  /// No description provided for @networkActivitySource.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket or source'**
+  String get networkActivitySource;
+
+  /// No description provided for @networkGone.
+  ///
+  /// In en, this message translates to:
+  /// **'removed'**
+  String get networkGone;
 
   /// No description provided for @platformTitle.
   ///
@@ -8601,6 +12417,12 @@ abstract class AppLocalizations {
   /// **'Brief'**
   String get repoBrief;
 
+  /// No description provided for @repoCi.
+  ///
+  /// In en, this message translates to:
+  /// **'CI'**
+  String get repoCi;
+
   /// No description provided for @reposTitle.
   ///
   /// In en, this message translates to:
@@ -10584,7 +14406,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsCommits.
   ///
   /// In en, this message translates to:
-  /// **'Commits and pull requests'**
+  /// **'Commits and PR'**
   String get settingsCommits;
 
   /// No description provided for @settingsCommitsSub.
@@ -10797,12 +14619,6 @@ abstract class AppLocalizations {
   /// **'When agnts\'s code review finishes'**
   String get settingsReviewDone;
 
-  /// No description provided for @settingsOnThisPage.
-  ///
-  /// In en, this message translates to:
-  /// **'On this page'**
-  String get settingsOnThisPage;
-
   /// No description provided for @settingsSecretsHelp.
   ///
   /// In en, this message translates to:
@@ -10874,6 +14690,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'When you ask for changes or reject work with a reason, agnts looks for a convention behind it and suggests a rule on the Rules page. Nothing applies until you adopt it.'**
   String get settingsReflectHelp;
+
+  /// No description provided for @settingsCiRed.
+  ///
+  /// In en, this message translates to:
+  /// **'When a watched branch goes red'**
+  String get settingsCiRed;
 
   /// No description provided for @spendTitle.
   ///
@@ -12627,6 +16449,24 @@ abstract class AppLocalizations {
   /// **'Pull request'**
   String get ticketSrcGit;
 
+  /// No description provided for @ticketSrcCi.
+  ///
+  /// In en, this message translates to:
+  /// **'CI failure'**
+  String get ticketSrcCi;
+
+  /// No description provided for @ticketKvCi.
+  ///
+  /// In en, this message translates to:
+  /// **'CI'**
+  String get ticketKvCi;
+
+  /// No description provided for @ticketCiFixes.
+  ///
+  /// In en, this message translates to:
+  /// **'CI sent the pull request back {n, plural, one {{n} time} other {{n} times}}'**
+  String ticketCiFixes(num n);
+
   /// No description provided for @ticketsTitle.
   ///
   /// In en, this message translates to:
@@ -12692,6 +16532,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Repository'**
   String get ticketsColRepo;
+
+  /// No description provided for @ticketsRepoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Repository'**
+  String get ticketsRepoLabel;
+
+  /// No description provided for @ticketsAllRepos.
+  ///
+  /// In en, this message translates to:
+  /// **'All repositories'**
+  String get ticketsAllRepos;
+
+  /// No description provided for @ticketsNoRepo.
+  ///
+  /// In en, this message translates to:
+  /// **'No repository'**
+  String get ticketsNoRepo;
 
   /// No description provided for @ticketsColStatus.
   ///
@@ -12762,7 +16620,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketsNoMatch.
   ///
   /// In en, this message translates to:
-  /// **'No tickets match your search.'**
+  /// **'No tickets match your filters.'**
   String get ticketsNoMatch;
 
   /// No description provided for @ticketsEmptyNeeds.
@@ -12830,6 +16688,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'PR'**
   String get ticketsSourceGit;
+
+  /// No description provided for @ticketsSourceCi.
+  ///
+  /// In en, this message translates to:
+  /// **'CI'**
+  String get ticketsSourceCi;
 
   /// No description provided for @usageTitle.
   ///

@@ -20,11 +20,14 @@ ARG COMMIT=unknown
 RUN CGO_ENABLED=0 go build -trimpath \
       -ldflags "-s -w -X main.version=${VERSION} -X main.commit=${COMMIT}" \
       -o /out/agnts ./cmd/agnts \
+ && CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o /out/agnts-guard ./cmd/agnts-guard \
  && mkdir -p /out/data
 
 # Runtime: no shell, no package manager, non-root.
 FROM gcr.io/distroless/static-debian12:nonroot
 COPY --from=server /out/agnts /usr/local/bin/agnts
+# agnts-guard runs inside the run containers (copied in by the runner).
+COPY --from=server /out/agnts-guard /usr/local/bin/agnts-guard
 COPY --from=admin /src/apps/admin/dist /srv/web
 COPY --from=server --chown=nonroot:nonroot /out/data /var/lib/agnts
 ENV AGNTS_WEB_DIR=/srv/web \

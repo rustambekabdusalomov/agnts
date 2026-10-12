@@ -167,13 +167,15 @@ func TestCommitsPaging(t *testing.T) {
 	}
 }
 
-func TestPRMerged(t *testing.T) {
+func TestPRState(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.EscapedPath() {
 		case "/api/v4/projects/acme%2Fapi/merge_requests/5":
 			_, _ = w.Write([]byte(`{"iid":5,"state":"merged"}`))
 		case "/api/v4/projects/acme%2Fapi/merge_requests/6":
 			_, _ = w.Write([]byte(`{"iid":6,"state":"opened"}`))
+		case "/api/v4/projects/acme%2Fapi/merge_requests/7":
+			_, _ = w.Write([]byte(`{"iid":7,"state":"closed"}`))
 		default:
 			http.NotFound(w, r)
 		}
@@ -182,10 +184,13 @@ func TestPRMerged(t *testing.T) {
 	h := WithConfig(Config{URL: srv.URL, Token: "glpat"})
 	repo := domain.Repository{CloneURL: srv.URL + "/acme/api.git", DefaultBranch: "main", Provider: "gitlab"}
 	ctx := context.Background()
-	if ok, err := h.PRMerged(ctx, repo, 5); err != nil || !ok {
-		t.Fatalf("merged: %v %v", ok, err)
+	if s, err := h.PRState(ctx, repo, 5); err != nil || s != domain.PullMerged {
+		t.Fatalf("merged: %v %v", s, err)
 	}
-	if ok, err := h.PRMerged(ctx, repo, 6); err != nil || ok {
-		t.Fatalf("open: %v %v", ok, err)
+	if s, err := h.PRState(ctx, repo, 6); err != nil || s != domain.PullOpen {
+		t.Fatalf("open: %v %v", s, err)
+	}
+	if s, err := h.PRState(ctx, repo, 7); err != nil || s != domain.PullClosed {
+		t.Fatalf("closed: %v %v", s, err)
 	}
 }

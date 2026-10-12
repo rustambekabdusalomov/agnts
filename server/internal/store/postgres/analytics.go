@@ -2,7 +2,10 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"time"
+
+	"github.com/jackc/pgx/v5"
 
 	"agnts/internal/domain"
 )
@@ -27,6 +30,7 @@ type Period struct {
 	FirstTry, AfterChanges            int
 	AgntsMin, WaitMin, Turns          float64
 	ReviewMin, AnswerMin              float64
+	Merged, Closed                    int               // agnts pull requests merged / closed without a merge
 	Spend                             domain.TokenUsage // all Claude calls in the range
 }
 
@@ -49,6 +53,11 @@ type RepoStats struct {
 	Finished int // done, rejected or failed
 	AvgTurns float64
 	AgntsMin float64
+	Merged   int // pull requests merged in the period
+	Closed   int // pull requests closed without a merge in the period
+	Asked    int // questions agnts asked in the period
+	Analyzed int // tickets analysed in the period
+	CIFails  int // CI failure groups that failed in the period
 }
 
 // QualityStats is how well the tickets whose first coding run used one
@@ -66,6 +75,18 @@ type QualityStats struct {
 	FootprintHit  float64 // average share of changed files the analysis predicted (-1: none measured)
 	RedFlags      int     // red flags found in their diffs
 	SelfFixes     int     // findings sent back to the coder by agnts's own review
+
+	// The harness (Harness plan.md).
+	GuardBlocks    int     // actions agnts-guard refused in their coding runs
+	StopSaves      int     // tickets whose stop gate sent failing checks back and whose checks then passed first time
+	Stalls         int     // times their runs looked stuck
+	ProofDue       int     // tickets with a proof of fix (any outcome)
+	Proven         int     // of those, proven: the test failed before the change and passed after it
+	Findings       int     // review findings shown on them
+	Adopted        int     // of those, put into a person's feedback
+	Tokens         float64 // average tokens of a done ticket (all stages)
+	FactCheck      int     // tickets in the fact check group (A/B)
+	FactCheckFirst int     // of those, done without a person asking for changes
 }
 
 // Analytics is everything the Analytics page shows for one period.
@@ -80,6 +101,10 @@ type Analytics struct {
 	Hours   [24]int
 	Spend   []domain.StageUsage // by stage and model, costliest first
 	Quality []QualityStats      // by prompt version, oldest first
+
+	// For the insights only.
+	FollowUpsAccepted, FollowUpsDismissed int      // follow-ups decided in the period
+	Flakiest                              FlakyJob // the job that passed on re-run most often (Flaky 0: none)
 }
 
 // stateSpans is a CTE of how long each ticket stayed in each state.
@@ -94,10 +119,7 @@ var waiting = []string{"waiting_for_answers", "waiting_for_review"}
 // Analytics computes the page for [now-days, now) in tz, with the previous
 // period of the same length for comparison.
 func (s *Agent) Analytics(ctx context.Context, days int, tz *time.Location) (Analytics, error) {
-	now := time.Now().In(tz)
-	end := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, tz).AddDate(0, 0, 1)
-	start := end.AddDate(0, 0, -days)
-	prevStart := start.AddDate(0, 0, -days)
+	start, end, prevStart := window(days, tz)
 	a := Analytics{Steps: map[string]float64{}, Stops: map[string]int{}}
 
 	var err error
@@ -302,7 +324,14 @@ func (s *Agent) Analytics(ctx context.Context, days int, tz *time.Location) (Ana
 		       count(t.id) FILTER (WHERE t.state = 'done'),
 		       count(t.id) FILTER (WHERE t.state IN ('done', 'rejected', 'failed')),
 		       COALESCE(avg(t.turns) FILTER (WHERE t.turns > 0), 0),
-		       COALESCE(avg(h.mins), 0)
+		       COALESCE(avg(h.mins), 0),
+		       count(t.id) FILTER (WHERE t.merged_at >= $1 AND t.merged_at < $2),
+		       count(t.id) FILTER (WHERE t.closed_at >= $1 AND t.closed_at < $2 AND t.merged_at IS NULL),
+		       (SELECT count(*) FROM questions q JOIN tickets qt ON qt.id = q.ticket_id
+		         WHERE qt.repo_id = r.id AND q.created_at >= $1 AND q.created_at < $2),
+		       (SELECT count(DISTINCT x.ticket_id) FROM runs x JOIN tickets xt ON xt.id = x.ticket_id
+		         WHERE xt.repo_id = r.id AND x.stage = 'analyze' AND x.started_at >= $1 AND x.started_at < $2),
+		       (SELECT count(*) FROM ci_failures f WHERE f.repo_id = r.id AND f.last_seen_at >= $1 AND f.first_seen_at < $2)
 		FROM repositories r
 		JOIN tickets t ON t.repo_id = r.id AND t.updated_at >= $1 AND t.updated_at < $2
 		LEFT JOIN agnts h ON h.ticket_key = t.key
@@ -312,7 +341,8 @@ func (s *Agent) Analytics(ctx context.Context, days int, tz *time.Location) (Ana
 	}
 	for rows.Next() {
 		var r RepoStats
-		if err := rows.Scan(&r.RepoID, &r.Name, &r.Kind, &r.ClaudeMD, &r.Tickets, &r.Done, &r.Finished, &r.AvgTurns, &r.AgntsMin); err != nil {
+		if err := rows.Scan(&r.RepoID, &r.Name, &r.Kind, &r.ClaudeMD, &r.Tickets, &r.Done, &r.Finished, &r.AvgTurns, &r.AgntsMin,
+			&r.Merged, &r.Closed, &r.Asked, &r.Analyzed, &r.CIFails); err != nil {
 			rows.Close()
 			return a, err
 		}
@@ -321,6 +351,20 @@ func (s *Agent) Analytics(ctx context.Context, days int, tz *time.Location) (Ana
 	rows.Close()
 
 	if a.Quality, err = s.quality(ctx, start, end); err != nil {
+		return a, err
+	}
+
+	err = s.db.QueryRow(ctx, `SELECT count(*) FILTER (WHERE status = 'accepted'), count(*) FILTER (WHERE status = 'dismissed')
+		FROM ticket_suggestions WHERE decided_at >= $1 AND decided_at < $2`, start, end).Scan(&a.FollowUpsAccepted, &a.FollowUpsDismissed)
+	if err != nil {
+		return a, err
+	}
+	err = s.db.QueryRow(ctx, `SELECT f.id, COALESCE(r.name, ''), f.workflow, f.job, f.title, f.flaky_count, f.count
+		FROM ci_failures f LEFT JOIN repositories r ON r.id = f.repo_id
+		WHERE f.flaky_count > 0 AND f.last_seen_at >= $1 AND f.first_seen_at < $2
+		ORDER BY f.flaky_count DESC, f.last_seen_at DESC LIMIT 1`, start, end).
+		Scan(&a.Flakiest.ID, &a.Flakiest.Repo, &a.Flakiest.Workflow, &a.Flakiest.Job, &a.Flakiest.Title, &a.Flakiest.Flaky, &a.Flakiest.Failures)
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		return a, err
 	}
 
@@ -380,6 +424,12 @@ func (s *Agent) period(ctx context.Context, from, to time.Time) (Period, error) 
 	if err != nil {
 		return p, err
 	}
+	err = s.db.QueryRow(ctx, `SELECT count(*) FILTER (WHERE merged_at >= $1 AND merged_at < $2),
+			count(*) FILTER (WHERE closed_at >= $1 AND closed_at < $2 AND merged_at IS NULL)
+		FROM tickets WHERE kind <> 'review' AND replay_of = '' AND (merged_at >= $1 OR closed_at >= $1)`, from, to).Scan(&p.Merged, &p.Closed)
+	if err != nil {
+		return p, err
+	}
 	err = s.db.QueryRow(ctx, `SELECT COALESCE(sum(input_tokens), 0), COALESCE(sum(output_tokens), 0),
 		COALESCE(sum(cache_read_tokens), 0), COALESCE(sum(cache_write_tokens), 0), COALESCE(sum(cost_usd), 0)::float8
 		FROM claude_calls WHERE created_at >= $1 AND created_at < $2`, from, to).
@@ -408,7 +458,22 @@ func (s *Agent) quality(ctx context.Context, from, to time.Time) ([]QualityStats
 					AND (COALESCE((e.data->'counts'->>'blocker')::int, 0) + COALESCE((e.data->'counts'->>'major')::int, 0)) > 0) AS serious,
 				(SELECT (e.data->>'recall')::float8 FROM events e WHERE e.ticket_key = c.key AND e.type = 'footprint_checked'
 					ORDER BY e.id LIMIT 1) AS recall,
-				(SELECT COALESCE(sum((e.data->>'count')::int), 0) FROM events e WHERE e.ticket_key = c.key AND e.type = 'red_flags') AS flags
+				(SELECT COALESCE(sum((e.data->>'count')::int), 0) FROM events e WHERE e.ticket_key = c.key AND e.type = 'red_flags') AS flags,
+				(SELECT COALESCE(sum(x.v::int), 0) FROM runs r, jsonb_each_text(COALESCE(r.harness->'guard'->'blocks', '{}')) x(k, v)
+					WHERE r.ticket_id = c.ticket_id AND r.stage = 'code') AS blocks,
+				EXISTS (SELECT 1 FROM runs r WHERE r.ticket_id = c.ticket_id AND r.stage = 'code'
+					AND COALESCE((r.harness->'guard'->>'stopFailures')::int, 0) > 0 AND r.fix_attempts = 0 AND r.exit_reason = 'ok') AS stop_saved,
+				(SELECT COALESCE(sum(jsonb_array_length(COALESCE(r.harness->'stalls', '[]'))), 0) FROM runs r WHERE r.ticket_id = c.ticket_id) AS stalls,
+				(SELECT res.harness->'proof'->>'status' FROM results res JOIN runs r ON r.id = res.run_id
+					WHERE r.ticket_id = c.ticket_id AND r.stage = 'code' ORDER BY res.created_at DESC LIMIT 1) AS proof,
+				(SELECT COALESCE(sum(jsonb_array_length(COALESCE(res.summary->'findings', '[]'))), 0) FROM results res JOIN runs r ON r.id = res.run_id
+					WHERE r.ticket_id = c.ticket_id AND r.stage = 'review') AS findings,
+				(SELECT count(*) FROM results res JOIN runs r ON r.id = res.run_id, jsonb_array_elements(COALESCE(res.summary->'findings', '[]')) f
+					WHERE r.ticket_id = c.ticket_id AND r.stage = 'review' AND (f->>'adopted')::boolean) AS adopted,
+				(SELECT COALESCE(sum(cc.input_tokens + cc.output_tokens + cc.cache_read_tokens + cc.cache_write_tokens), 0)
+					FROM claude_calls cc JOIN runs r ON r.id = cc.run_id WHERE r.ticket_id = c.ticket_id) AS tokens,
+				COALESCE((SELECT (r.harness->>'factCheck')::boolean FROM runs r WHERE r.ticket_id = c.ticket_id AND r.stage = 'code'
+					ORDER BY r.started_at, r.id LIMIT 1), false) AS fact_check
 			FROM cohort c)
 		SELECT prompt_version, count(*),
 			count(*) FILTER (WHERE reached),
@@ -420,7 +485,17 @@ func (s *Agent) quality(ctx context.Context, from, to time.Time) ([]QualityStats
 			count(*) FILTER (WHERE serious),
 			COALESCE(avg(recall), -1)::float8,
 			COALESCE(sum(flags), 0)::int,
-			COALESCE(sum(self_fixes), 0)::int
+			COALESCE(sum(self_fixes), 0)::int,
+			COALESCE(sum(blocks), 0)::int,
+			count(*) FILTER (WHERE stop_saved),
+			COALESCE(sum(stalls), 0)::int,
+			count(*) FILTER (WHERE proof IS NOT NULL),
+			count(*) FILTER (WHERE proof = 'proven'),
+			COALESCE(sum(findings), 0)::int,
+			COALESCE(sum(adopted), 0)::int,
+			COALESCE(avg(tokens) FILTER (WHERE state = 'done'), 0)::float8,
+			count(*) FILTER (WHERE fact_check),
+			count(*) FILTER (WHERE fact_check AND state = 'done' AND rounds = 0)
 		FROM per GROUP BY prompt_version ORDER BY min(started_at)`, from, to)
 	if err != nil {
 		return nil, err
@@ -430,7 +505,9 @@ func (s *Agent) quality(ctx context.Context, from, to time.Time) ([]QualityStats
 	for rows.Next() {
 		var q QualityStats
 		if err := rows.Scan(&q.PromptVersion, &q.Tickets, &q.ReachedReview, &q.Done, &q.FirstTry, &q.Rejected,
-			&q.ChangeRounds, &q.FixAttempts, &q.Serious, &q.FootprintHit, &q.RedFlags, &q.SelfFixes); err != nil {
+			&q.ChangeRounds, &q.FixAttempts, &q.Serious, &q.FootprintHit, &q.RedFlags, &q.SelfFixes,
+			&q.GuardBlocks, &q.StopSaves, &q.Stalls, &q.ProofDue, &q.Proven, &q.Findings, &q.Adopted, &q.Tokens,
+			&q.FactCheck, &q.FactCheckFirst); err != nil {
 			return nil, err
 		}
 		out = append(out, q)

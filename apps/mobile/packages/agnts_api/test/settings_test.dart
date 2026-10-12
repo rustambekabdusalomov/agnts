@@ -101,6 +101,46 @@ void main() {
       // TODO
     });
 
+    // CISettings ci
+    test('to test the property `ci`', () async {
+      // TODO
+    });
+
+    // GuardSettings guard
+    test('to test the property `guard`', () async {
+      // TODO
+    });
+
+    // What agnts does when a run looks stuck: nothing, note it on the ticket, or also tell Claude to step back (once per run)
+    // String stalls
+    test('to test the property `stalls`', () async {
+      // TODO
+    });
+
+    // Bug fixes need a test that fails before the change and passes after it; agnts checks it
+    // bool proveFixes
+    test('to test the property `proveFixes`', () async {
+      // TODO
+    });
+
+    // Specialist passes in the code review (security, silent failures, tests, types); auto: large or complex work
+    // String deepReview
+    test('to test the property `deepReview`', () async {
+      // TODO
+    });
+
+    // Suggest tips from runs that had trouble (failed checks, a stall)
+    // bool learnFromRuns
+    test('to test the property `learnFromRuns`', () async {
+      // TODO
+    });
+
+    // A model that critiques the chosen approach of complex tickets (codex:<model> or a Claude model); empty turns it off
+    // String secondOpinion
+    test('to test the property `secondOpinion`', () async {
+      // TODO
+    });
+
     // int pauseAbove
     test('to test the property `pauseAbove`', () async {
       // TODO

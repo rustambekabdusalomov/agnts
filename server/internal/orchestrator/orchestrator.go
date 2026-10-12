@@ -124,6 +124,7 @@ type Orchestrator struct {
 	shots       Shots
 	envs        PreviewEnvs
 	builds      BuildEnvs
+	ciHook      CIHook
 	log         *slog.Logger
 
 	queue      Queue
@@ -240,6 +241,7 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 			lastPrune = time.Now()
 			o.pruneShots(sys)
 			o.prunePendingUploads(sys)
+			o.expireSuggestions(sys)
 		}
 		if ctx.Err() == nil {
 			o.tick(ctx, func(j scheduled) {
@@ -409,6 +411,9 @@ func (o *Orchestrator) work(parent context.Context, t domain.Ticket, run domain.
 	if ferr := o.store.FinishRun(bg, run); ferr != nil {
 		log.Error("finish run", "err", ferr)
 	}
+	if run.Stage == domain.StageCode && len(run.Harness.Trouble) > 0 && ctx.Err() == nil {
+		o.queueRunLesson(bg, t, run)
+	}
 	if err == nil {
 		log.Info("stage finished")
 		return
@@ -488,6 +493,21 @@ func (o *Orchestrator) transition(ctx context.Context, t *domain.Ticket, run *do
 	}
 	*t = nt
 	return nil
+}
+
+// watch adds stall detection to a stream handler, in the stages that do
+// the ticket's work.
+func (o *Orchestrator) watch(ctx context.Context, s domain.Settings, ws Workspace, t domain.Ticket, run *domain.Run, next func(ClaudeEvent)) func(ClaudeEvent) {
+	if s.Stalls == domain.StallsOff || (run.Stage != domain.StageCode && run.Stage != domain.StageAnalyze) {
+		return next
+	}
+	d := newStallDetector(run.Stage == domain.StageCode && !t.Kind.Report())
+	return func(e ClaudeEvent) {
+		next(e)
+		if st := d.observe(e); st != nil {
+			o.onStall(ctx, s, ws, t, run, *st)
+		}
+	}
 }
 
 // streamTo returns a Claude event handler that logs to the ticket and
@@ -577,14 +597,28 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 	if budget > 0 {
 		turns = min(turns, budget)
 	}
+	readOnly := t.Kind.Report() || run.Stage == domain.StageReview || run.Stage == domain.StagePreview
+	if domain.IsCodex(model) && run.Harness.Tool == "" {
+		run.Harness.Tool = "codex"
+		o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventGuard,
+			Message: "this run uses Codex (" + strings.TrimPrefix(model, CodexPrefix) + "): agnts-guard's checks inside the run do not apply to it; agnts's checks after the run do"})
+	}
+	var repo *domain.Repository
+	if t.RepoID != nil {
+		if r, err := o.store.RepositoryByID(ctx, *t.RepoID); err == nil {
+			repo = &r
+		}
+	}
 	res, err := ws.Claude(ctx, ClaudeRequest{
 		Prompt:   prompt,
 		Model:    model,
 		MaxTurns: turns,
 		Resume:   resume,
 		Timeout:  time.Duration(s.TimeoutMin) * time.Minute,
-		Settings: permissionSettings(s, t.Kind.Report() || run.Stage == domain.StageReview || run.Stage == domain.StagePreview),
-	}, o.streamTo(ctx, *t, run))
+		Settings: permissionSettings(s, readOnly),
+		Env:      guardEnv(o.guardConfig(ctx, s, *t, run, repo, readOnly)),
+		ReadOnly: readOnly,
+	}, o.watch(ctx, s, ws, *t, run, o.streamTo(ctx, *t, run)))
 	run.Turns += res.Turns
 	if res.SessionID != "" {
 		run.SessionID = res.SessionID
@@ -805,6 +839,13 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 	if t, err = o.settleKind(ctx, t, run, a); err != nil {
 		return err
 	}
+	if repo != nil && secondOpinionDue(s, t, a) {
+		so := o.secondOpinion(ctx, s, ws, t, run, a)
+		o.event(ctx, secondOpinionEvent(t.Key, run, so))
+		if err := o.store.SaveResult(ctx, domain.Result{RunID: run.ID, Summary: raw, Harness: domain.ResultHarness{SecondOpinion: so}}); err != nil {
+			return err
+		}
+	}
 	o.saveFollowUps(ctx, s, t, run, domain.SuggestFromAnalyze, a.FollowUps)
 	// Before the ticket can be claimed for coding, so the queue sees them.
 	o.applyRelations(ctx, t, run, a, candidates)
@@ -889,6 +930,7 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		return err
 	}
 	defer o.closeWorkspace(ctx, t, ws)
+	defer o.collectGuard(ctx, ws, t, run) // before the container goes
 	knowledge := o.contextFiles(ctx, ws, t, &repo)
 
 	session, err := o.store.LastSessionID(ctx, t.ID)
@@ -922,6 +964,7 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		if r, rerr := o.store.LatestResult(ctx, t.ID, domain.StageAnalyze); rerr == nil {
 			if a, aerr := parseAnalysis(r.Summary); aerr == nil {
 				d.Plan, d.Design, design = a.Plan, &a, &a
+				d.ProveFix = proveDue(s, t, &a)
 			}
 		}
 		if d.Answers, err = o.store.Questions(ctx, t.ID); err != nil {
@@ -961,35 +1004,36 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 	if err := o.transition(ctx, &t, run, domain.StateTesting, "running checks", nil); err != nil {
 		return err
 	}
-	var checks checkReport
-	for attempt := 0; ; attempt++ {
-		checks = o.runChecks(ctx, ws, t, repo, run)
-		run.FixAttempts = attempt
-		if checks.OK || ctx.Err() != nil {
-			break
+	checks, err := o.checkAndFix(ctx, s, ws, &t, run, repo, &res)
+	if err != nil {
+		return err
+	}
+	var proof *domain.Proof
+	if a := o.latestAnalysis(ctx, t); proveDue(s, t, a) {
+		p := o.proveFix(ctx, ws, t, run, repo)
+		o.event(ctx, proofEvent(t.Key, run, p))
+		if p.Status == domain.ProofNotReproduced || p.Status == domain.ProofStillFailing {
+			// Once: send it back, check again, and prove again.
+			if err := o.transition(ctx, &t, run, domain.StateCoding, "the fix is not proven yet: sending the reproducing test back", nil); err != nil {
+				return err
+			}
+			prompt, err := render("proof", promptData{T: t, Proof: &p})
+			if err != nil {
+				return err
+			}
+			if res, err = o.claude(ctx, s, ws, &t, run, domain.ModelRetry, prompt, res.SessionID); err != nil {
+				return err
+			}
+			if err := o.transition(ctx, &t, run, domain.StateTesting, "running checks again", nil); err != nil {
+				return err
+			}
+			if checks, err = o.checkAndFix(ctx, s, ws, &t, run, repo, &res); err != nil {
+				return err
+			}
+			p = o.proveFix(ctx, ws, t, run, repo)
+			o.event(ctx, proofEvent(t.Key, run, p))
 		}
-		if checks.Unfixable != "" {
-			// Not a code problem: retrying with Claude would only burn turns.
-			run.ExitReason = checks.Reason
-			return fmt.Errorf("%s\n%s", checks.Unfixable, truncate(checks.FailOutput, 2000))
-		}
-		if attempt >= o.cfg.FixAttempts {
-			run.ExitReason = "checks_failed"
-			return fmt.Errorf("checks still failing after %d fix attempts:\n%s", attempt, truncate(checks.FailOutput, 2000))
-		}
-		if err := o.transition(ctx, &t, run, domain.StateCoding, fmt.Sprintf("checks failed, fix attempt %d", attempt+1), nil); err != nil {
-			return err
-		}
-		fix, err := render("fix", promptData{T: t, Output: truncate(checks.FailOutput, 8000)})
-		if err != nil {
-			return err
-		}
-		if res, err = o.claude(ctx, s, ws, &t, run, domain.ModelRetry, fix, res.SessionID); err != nil {
-			return err
-		}
-		if err := o.transition(ctx, &t, run, domain.StateTesting, "running checks again", nil); err != nil {
-			return err
-		}
+		proof = &p
 	}
 	if err := ctx.Err(); err != nil {
 		return err
@@ -1017,9 +1061,13 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		return errors.New("claude finished without changing any files")
 	}
 	testsJSON, _ := json.Marshal(checks.Steps)
-	flags := domain.ScanRedFlags(files)
+	flags := domain.ScanRedFlags(files, repo.Harness.SecretAllow...)
+	if rs, err := o.enforced(ctx, t.RepoID); err == nil {
+		flags = append(flags, ruleFlags(ruleHits(files, rs))...)
+	}
 	if err := o.store.SaveResult(ctx, domain.Result{
 		RunID: run.ID, Summary: summary, Tests: testsJSON, Lint: checks.LintOutput, Files: files, RedFlags: flags,
+		Harness: domain.ResultHarness{Proof: proof, Coverage: o.measureCoverage(ctx, ws, t, run, repo, files)},
 	}); err != nil {
 		return err
 	}
@@ -1051,6 +1099,66 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		t = nt
 	}
 	return err
+}
+
+// checkAndFix runs the checks, sending failures back to Claude up to the
+// configured number of fix attempts.
+func (o *Orchestrator) checkAndFix(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, repo domain.Repository, res *ClaudeResult) (checkReport, error) {
+	var checks checkReport
+	for attempt := 0; ; attempt++ {
+		checks = o.runChecks(ctx, ws, *t, repo, run)
+		run.FixAttempts += min(attempt, 1)
+		if checks.OK || ctx.Err() != nil {
+			break
+		}
+		noteTrouble(run, fmt.Sprintf("the checks failed after the change (round %d):\n%s", attempt+1, tail(checks.FailOutput, 800)))
+		if checks.Unfixable != "" {
+			// Not a code problem: retrying with Claude would only burn turns.
+			run.ExitReason = checks.Reason
+			return checks, fmt.Errorf("%s\n%s", checks.Unfixable, truncate(checks.FailOutput, 2000))
+		}
+		if attempt >= o.cfg.FixAttempts {
+			run.ExitReason = "checks_failed"
+			return checks, fmt.Errorf("checks still failing after %d fix attempts:\n%s", attempt, truncate(checks.FailOutput, 2000))
+		}
+		if err := o.transition(ctx, t, run, domain.StateCoding, fmt.Sprintf("checks failed, fix attempt %d", attempt+1), nil); err != nil {
+			return checks, err
+		}
+		fix, err := render("fix", promptData{T: *t, Output: truncate(checks.FailOutput, 8000), Checks: checksLine(repo)})
+		if err != nil {
+			return checks, err
+		}
+		// A second round goes to the coding model when the retry model is a
+		// different (smaller) one: it already failed once.
+		fixStage := domain.ModelRetry
+		if attempt > 0 && s.ModelFor(*t, domain.ModelRetry) != s.ModelFor(*t, domain.ModelCoding) {
+			fixStage = domain.ModelCoding
+			o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventClaudeText,
+				Message: fmt.Sprintf("the checks still fail: fix attempt %d uses the coding model (%s)", attempt+1, s.ModelFor(*t, domain.ModelCoding))})
+		}
+		r, err := o.claude(ctx, s, ws, t, run, fixStage, fix, res.SessionID)
+		*res = r
+		if err != nil {
+			return checks, err
+		}
+		if err := o.transition(ctx, t, run, domain.StateTesting, "running checks again", nil); err != nil {
+			return checks, err
+		}
+	}
+	return checks, ctx.Err()
+}
+
+// latestAnalysis is a ticket's newest analysis, or nil.
+func (o *Orchestrator) latestAnalysis(ctx context.Context, t domain.Ticket) *Analysis {
+	r, err := o.store.LatestResult(ctx, t.ID, domain.StageAnalyze)
+	if err != nil {
+		return nil
+	}
+	a, err := parseAnalysis(r.Summary)
+	if err != nil {
+		return nil
+	}
+	return &a
 }
 
 // redFlagsEvent is the log line for what the scan of a change flagged.
@@ -1249,7 +1357,11 @@ func (o *Orchestrator) push(ctx context.Context, s domain.Settings, t domain.Tic
 			Message: url, Data: map[string]any{"number": number, "url": url}})
 		o.assign(ctx, repo, t, run, number)
 	}
-	o.trackerComment(ctx, t, CommentPR, "agnts opened a pull request: "+url)
+	if t.PRNumber == nil {
+		o.trackerComment(ctx, t, CommentPR, "agnts opened a pull request: "+url)
+	} else {
+		o.trackerComment(ctx, t, CommentPR, "agnts pushed more commits to the pull request: "+url)
+	}
 	if r, err := o.store.LatestResult(ctx, t.ID, domain.StageCode); err == nil {
 		var sum Summary
 		if json.Unmarshal(r.Summary, &sum) == nil && sum.Summary != "" {

@@ -32,7 +32,7 @@ func TestParseSuccess(t *testing.T) {
 	for _, e := range evs {
 		kinds = append(kinds, e.Kind)
 	}
-	want := []orchestrator.ClaudeEventKind{"init", "text", "tool", "tool", "rate_limit", "result"}
+	want := []orchestrator.ClaudeEventKind{"init", "text", "tool", "tool_result", "tool", "rate_limit", "result"}
 	if len(kinds) != len(want) {
 		t.Fatalf("events %v, want %v", kinds, want)
 	}
@@ -41,8 +41,11 @@ func TestParseSuccess(t *testing.T) {
 			t.Fatalf("events %v, want %v", kinds, want)
 		}
 	}
-	if evs[2].Tool != "Read: /workspace/main.go" || evs[3].Tool != "Bash: go test ./... echo done" {
-		t.Fatalf("tool summaries: %q %q", evs[2].Tool, evs[3].Tool)
+	if evs[2].Tool != "Read: /workspace/main.go" || evs[4].Tool != "Bash: go test ./... echo done" {
+		t.Fatalf("tool summaries: %q %q", evs[2].Tool, evs[4].Tool)
+	}
+	if evs[3].Data["id"] != "t1" || evs[3].Data["is_error"] != false {
+		t.Fatalf("tool result: %+v", evs[3].Data)
 	}
 }
 

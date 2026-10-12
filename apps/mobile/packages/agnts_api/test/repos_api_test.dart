@@ -115,6 +115,13 @@ void main() {
       // TODO
     });
 
+    // Set the repository's guard profile, per-file checks, coverage and acceptance check
+    //
+    //Future<Repository> saveRepoHarness(int id, RepoHarnessInput repoHarnessInput) async
+    test('test saveRepoHarness', () async {
+      // TODO
+    });
+
     // Have Claude survey the repository and write a draft brief (an update when it has one)
     //
     //Future<RepoBrief> surveyRepoBrief(int id) async

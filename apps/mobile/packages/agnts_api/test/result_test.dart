@@ -45,6 +45,16 @@ void main() {
       // TODO
     });
 
+    // Proof proof
+    test('to test the property `proof`', () async {
+      // TODO
+    });
+
+    // Coverage coverage
+    test('to test the property `coverage`', () async {
+      // TODO
+    });
+
     // DateTime createdAt
     test('to test the property `createdAt`', () async {
       // TODO

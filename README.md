@@ -55,7 +55,7 @@ the CLI as `agnts server -- ...`:
 
 ```sh
 agnts server -- integration set claude    # token from `claude setup-token` (your Claude plan)
-agnts server -- integration set github    # fine-grained PAT: Contents + Pull requests, read/write
+agnts server -- integration set github    # fine-grained PAT: Contents + Pull requests, read/write (+ Actions for CI watching)
 agnts server -- integration set jira      # site, email, API token, label; prints the webhook to create
 agnts server -- integration set plane     # API address, workspace, API key; prints the webhook to create in Plane
 agnts server -- repo add --name api --url https://github.com/acme/api.git --jira PAY
@@ -94,6 +94,8 @@ agnts server -- mcp token                 # static MCP token for Claude Code / C
   know falls back to the project's repository and logs a warning on the ticket.
 - **GitHub / GitLab webhooks:** the integration page shows a URL and secret.
   Merged pull requests then mark the ticket merged and move the Jira issue.
+  For CI watching also send **Workflow runs** (GitHub) or **Pipeline events**
+  (GitLab); without them agnts polls watched repositories every 5 minutes.
 - **Telegram:** create a bot with @BotFather, send `/start` to it to learn
   your chat id, then connect it under Integrations. agnts registers the webhook.
 - **Push:** set `AGNTS_FCM_CREDENTIALS` to a Firebase service account file; see
@@ -147,6 +149,31 @@ care about, what you call noise, how severe you rate things. Read and edit it
 (or add notes) on the Reviews page. New commits on a reviewed pull request
 are reviewed again, and one merged or closed on the git host ends its
 review. Merging needs the GitHub token's Contents: Read and write permission.
+
+**CI watching.** agnts watches GitHub Actions and GitLab pipelines and
+turns red builds into work; see [CI plan.md](CI%20plan.md).
+- *agnts's own pull requests:* when CI fails on a pull request agnts opened,
+  the failed jobs' errors go back to its ticket as feedback and it codes a fix
+  (Settings → CI → feedback rounds, 2 by default). The fix goes through checks
+  and review again and is pushed to the same pull request after you approve.
+- *Watched branches:* turn it on per repository (Repositories → CI). The
+  default branch is always watched; add globs such as `release/*`. A failed
+  run is triaged without Claude: logs are read and redacted, infra failures
+  (lost runners, rate limits, no disk) are set aside, a new failure is
+  re-run once and marked flaky if it passes, and the same failure on many
+  commits is one entry (a fingerprint of the failing tests or first error).
+  A confirmed failure gets **Fix it**, or a `CI-n` ticket by itself with
+  Settings → CI → auto-fix (at most 5 a day by default). The ticket compares
+  the failing commit with the last green one, reproduces the failure, and
+  fixes it on a branch from the current default branch, or writes a report
+  when the cause is not in the code. Nothing is pushed before you
+  approve. A green run resolves the entry; failing again after the fix was
+  merged reopens it as a regression.
+- *Other people's pull requests:* off, or one diagnosis comment per pull
+  request (what failed, whether `main` fails the same way). agnts never
+  pushes to their branches. Runs from forks are never given to Claude.
+- *Token:* GitHub needs **Actions: Read** (logs) and **Actions: Read and
+  write** (re-runs); GitLab needs `api`. The CI tab shows what is missing.
 
 **Preview.** For front-end work a diff is not enough, so agnts can show the
 change running. Give a repository a preview command and port (Repositories →

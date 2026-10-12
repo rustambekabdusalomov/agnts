@@ -31,6 +31,8 @@ type Config struct {
 	DataDir          string         // AGNTS_DATA_DIR, clones and Claude sessions
 	DockerSocket     string         // AGNTS_DOCKER_SOCKET
 	RunnerImage      string         // AGNTS_RUNNER_IMAGE
+	GuardBinary      string         // AGNTS_GUARD_BIN, agnts-guard built for the run containers (linux)
+	OpenAIAPI        string         // AGNTS_OPENAI_API, checks OpenAI keys for Codex runs
 	RunNetwork       string         // AGNTS_RUN_NETWORK, Docker network for run containers
 	Parallel         int            // AGNTS_PARALLEL, tickets worked on at once
 	ModelAnalyze     string         // AGNTS_MODEL_ANALYZE
@@ -111,6 +113,28 @@ type Config struct {
 	RunNetworkPerRun bool
 	EgressContainer  string
 
+	// Private networks (VPN, connector).
+	// Gateway is the gateway service's CONNECT address (AGNTS_GATEWAY,
+	// e.g. gateway:3129); empty turns private networks off.
+	Gateway string
+	// GatewaySecret authenticates agnts, the egress proxy and the gateway
+	// to each other (AGNTS_GATEWAY_SECRET).
+	GatewaySecret string
+	// LinkURL is where agnts-link connects (AGNTS_LINK_URL; default the
+	// public URL + /link, which Caddy routes to the gateway).
+	LinkURL string
+	// OVPNImage and OVPNNetwork are the OpenVPN sidecars' image and the
+	// network they share with the gateway (AGNTS_OVPN_IMAGE, AGNTS_OVPN_NETWORK).
+	OVPNImage, OVPNNetwork string
+	// PrivatePollEvery is how often the trackers of workspaces on a VPN
+	// are read, since their webhooks cannot reach agnts
+	// (AGNTS_PRIVATE_POLL_EVERY).
+	PrivatePollEvery time.Duration
+	// PrivateNetworksMax is how many private networks a workspace may keep
+	// (AGNTS_PRIVATE_NETWORKS_MAX), and OVPNMax how many OpenVPN networks
+	// (one sidecar container each) the server runs (AGNTS_OVPN_MAX).
+	PrivateNetworksMax, OVPNMax int
+
 	// Billing and credits.
 	// AnthropicAPIKey is agnts's own key, used for runs paid with credits
 	// (AGNTS_ANTHROPIC_API_KEY); empty disables credits.
@@ -158,6 +182,8 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 	c.DataDir = get("AGNTS_DATA_DIR", "/var/lib/agnts")
 	c.DockerSocket = get("AGNTS_DOCKER_SOCKET", "/var/run/docker.sock")
 	c.RunnerImage = get("AGNTS_RUNNER_IMAGE", "agnts-runner:latest")
+	c.GuardBinary = get("AGNTS_GUARD_BIN", "/usr/local/bin/agnts-guard")
+	c.OpenAIAPI = get("AGNTS_OPENAI_API", "https://api.openai.com")
 	c.RunNetwork = get("AGNTS_RUN_NETWORK", "agnts-runs")
 	c.ModelAnalyze = get("AGNTS_MODEL_ANALYZE", "opus")
 	c.ModelCode = get("AGNTS_MODEL_CODE", "opus")
@@ -301,6 +327,23 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 	c.EgressContainer = get("AGNTS_EGRESS_CONTAINER", "")
 	if c.RunNetworkPerRun && c.RunProxy != "" && c.EgressContainer == "" {
 		errs = append(errs, errors.New("AGNTS_RUN_NETWORK_PER_RUN with AGNTS_RUN_PROXY needs AGNTS_EGRESS_CONTAINER (the egress proxy's container name)"))
+	}
+	c.Gateway = get("AGNTS_GATEWAY", "")
+	c.GatewaySecret = get("AGNTS_GATEWAY_SECRET", "")
+	if c.Gateway != "" && len(c.GatewaySecret) < 24 {
+		errs = append(errs, errors.New("AGNTS_GATEWAY needs AGNTS_GATEWAY_SECRET, a random value of at least 24 characters shared with the gateway and the egress proxy"))
+	}
+	c.LinkURL = get("AGNTS_LINK_URL", strings.TrimRight(get("AGNTS_PUBLIC_URL", "http://localhost:8080"), "/")+"/link")
+	c.OVPNImage = get("AGNTS_OVPN_IMAGE", "agnts-ovpn:latest")
+	c.OVPNNetwork = get("AGNTS_OVPN_NETWORK", "agnts-ovpn")
+	if c.PrivatePollEvery, err = time.ParseDuration(get("AGNTS_PRIVATE_POLL_EVERY", "1m")); err != nil || c.PrivatePollEvery < 30*time.Second {
+		errs = append(errs, errors.New("AGNTS_PRIVATE_POLL_EVERY must be a duration of at least 30s"))
+	}
+	if c.PrivateNetworksMax, err = strconv.Atoi(get("AGNTS_PRIVATE_NETWORKS_MAX", "5")); err != nil || c.PrivateNetworksMax < 1 || c.PrivateNetworksMax > 50 {
+		errs = append(errs, errors.New("AGNTS_PRIVATE_NETWORKS_MAX must be a number from 1 to 50"))
+	}
+	if c.OVPNMax, err = strconv.Atoi(get("AGNTS_OVPN_MAX", "50")); err != nil || c.OVPNMax < 1 {
+		errs = append(errs, errors.New("AGNTS_OVPN_MAX must be a number of at least 1"))
 	}
 	c.AnthropicAPIKey = get("AGNTS_ANTHROPIC_API_KEY", "")
 	if c.CreditMarkup, err = strconv.ParseFloat(get("AGNTS_CREDIT_MARKUP", "1.4"), 64); err != nil || c.CreditMarkup < 1 {

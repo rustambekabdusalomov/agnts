@@ -12,7 +12,8 @@ void main() {
       // TODO
     });
 
-    // Model model
+    // A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
+    // String model
     test('to test the property `model`', () async {
       // TODO
     });
@@ -40,6 +41,18 @@ void main() {
 
     // List<String> strengths
     test('to test the property `strengths`', () async {
+      // TODO
+    });
+
+    // The review ran the specialist passes
+    // bool deep
+    test('to test the property `deep`', () async {
+      // TODO
+    });
+
+    // Findings left out for low confidence or as duplicates
+    // int dropped
+    test('to test the property `dropped`', () async {
       // TODO
     });
 

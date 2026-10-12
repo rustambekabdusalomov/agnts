@@ -12,28 +12,46 @@ import (
 )
 
 const suggestionCols = `id, ticket_id, run_id, source, type, revision, title, description, serves, kind, priority, status,
-	COALESCE(child_key, ''), decided_at, created_at`
+	after, COALESCE(child_key, ''), decided_at, created_at`
 
 func scanSuggestion(row pgx.Row) (domain.Suggestion, error) {
 	var s domain.Suggestion
 	var kind string
 	err := row.Scan(&s.ID, &s.TicketID, &s.RunID, &s.Source, &s.Type, &s.Revision, &s.Title, &s.Description, &s.Serves,
-		&kind, &s.Priority, &s.Status, &s.ChildKey, &s.DecidedAt, &s.CreatedAt)
+		&kind, &s.Priority, &s.Status, &s.After, &s.ChildKey, &s.DecidedAt, &s.CreatedAt)
 	s.Kind = domain.TicketKind(kind)
 	return s, notFound(err)
 }
 
 // ReplaceSuggestions swaps the open suggestions a source made for a ticket
 // for a new set. Accepted and dismissed ones are kept: they record what
-// someone decided.
+// someone decided. Each one's AfterIndex is stored as the ids of the
+// others in the set.
 func (s *Agent) ReplaceSuggestions(ctx context.Context, ticketID int64, source string, ss []domain.Suggestion, ev *domain.Event) error {
 	return pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
 		if _, err := tx.Exec(ctx, `DELETE FROM ticket_suggestions WHERE ticket_id = $1 AND source = $2 AND status = 'open'`,
 			ticketID, source); err != nil {
 			return err
 		}
-		for _, x := range ss {
-			if _, err := insertSuggestion(ctx, tx, ticketID, x); err != nil {
+		ids := make([]int64, len(ss))
+		for i, x := range ss {
+			out, err := insertSuggestion(ctx, tx, ticketID, x)
+			if err != nil {
+				return err
+			}
+			ids[i] = out.ID
+		}
+		for i, x := range ss {
+			after := []int64{}
+			for _, j := range x.AfterIndex {
+				if j >= 0 && j < len(ids) && j != i {
+					after = append(after, ids[j])
+				}
+			}
+			if len(after) == 0 {
+				continue
+			}
+			if _, err := tx.Exec(ctx, `UPDATE ticket_suggestions SET after = $2 WHERE id = $1`, ids[i], after); err != nil {
 				return err
 			}
 		}

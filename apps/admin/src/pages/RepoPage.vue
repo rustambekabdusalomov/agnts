@@ -7,7 +7,9 @@ import { api, unwrap } from '../api/client'
 import PageHeader from '../components/PageHeader.vue'
 import BranchesTab from '../components/repo/BranchesTab.vue'
 import BriefTab from '../components/repo/BriefTab.vue'
+import CiTab from '../components/repo/CiTab.vue'
 import CommitsTab from '../components/repo/CommitsTab.vue'
+import GuardrailsTab from '../components/repo/GuardrailsTab.vue'
 import MembersTab from '../components/repo/MembersTab.vue'
 import PipelinesTab from '../components/repo/PipelinesTab.vue'
 import RepoDrawer from '../components/repos/RepoDrawer.vue'
@@ -16,13 +18,14 @@ import HiIcon from '../components/ui/HiIcon.vue'
 import { ago } from '../composables/format'
 import { useLive } from '../composables/useLive'
 
-// One repository: branches, commits, pipelines and members from the git host.
+// One repository: branches, commits, pipelines and members from the git host,
+// and its CI watching.
 const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const qc = useQueryClient()
 const id = computed(() => Number(route.params.id))
-const TABS = ['branches', 'commits', 'pipelines', 'members', 'brief'] as const
+const TABS = ['branches', 'commits', 'pipelines', 'ci', 'members', 'brief', 'guardrails'] as const
 type Tab = (typeof TABS)[number]
 const tab = computed<Tab>(() => (TABS.includes(route.query.tab as Tab) ? (route.query.tab as Tab) : 'branches'))
 const editOpen = ref(false)
@@ -118,14 +121,16 @@ function setTab(v: Tab) {
 
     <div class="tabs" role="tablist">
       <button v-for="v in TABS" :key="v" type="button" class="tab" role="tab" :aria-pressed="tab === v" :aria-selected="tab === v" @click="setTab(v)">
-        {{ t(`repo.${v}`) }}
+        {{ v === 'guardrails' ? t('harnessRepo.tab') : t(`repo.${v}`) }}
       </button>
     </div>
 
     <BranchesTab v-if="tab === 'branches'" :repo-id="id" :default-branch="repo.data.value.defaultBranch" />
     <CommitsTab v-else-if="tab === 'commits'" :repo-id="id" />
     <PipelinesTab v-else-if="tab === 'pipelines'" :repo="repo.data.value" />
+    <CiTab v-else-if="tab === 'ci'" :repo="repo.data.value" />
     <MembersTab v-else-if="tab === 'members'" :repo="repo.data.value" />
+    <GuardrailsTab v-else-if="tab === 'guardrails'" :repo="repo.data.value" />
     <BriefTab v-else :repo-id="id" />
 
     <RepoDrawer v-model="editOpen" :repo="repo.data.value" @saved="() => qc.invalidateQueries({ queryKey: ['repos', id] })" />

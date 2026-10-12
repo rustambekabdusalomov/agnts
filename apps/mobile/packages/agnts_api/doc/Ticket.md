@@ -23,6 +23,7 @@ Name | Type | Description | Notes
 **headSha** | **String** | The reviewed commit: the branch head agnts committed, or for a pull request review the head agnts reviewed | [optional] 
 **prNumber** | **int** |  | [optional] 
 **prUrl** | **String** |  | 
+**ciFixes** | **int** | Rounds a red CI check sent the pull request back to coding | [optional] 
 **assignees** | **List&lt;String&gt;** | Git host usernames the pull request is (or will be) assigned to | [optional] 
 **afterApprove** | **String** |  | [optional] 
 **held** | **bool** | Kept in the queue until started | [optional] 

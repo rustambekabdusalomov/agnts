@@ -3,8 +3,8 @@
 //
 
 // ignore_for_file: unused_element
-import 'package:agnts_api/src/model/model.dart';
 import 'package:agnts_api/src/model/preview_issue.dart';
+import 'package:agnts_api/src/model/acceptance.dart';
 import 'package:agnts_api/src/model/preview_shot.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -39,6 +39,8 @@ class TicketPreview {
 
     required  this.issues,
 
+     this.acceptance,
+
     required  this.createdAt,
   });
 
@@ -66,6 +68,7 @@ class TicketPreview {
 
 
 
+      /// A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
   @JsonKey(
     
     name: r'model',
@@ -74,7 +77,7 @@ class TicketPreview {
   )
 
 
-  final Model model;
+  final String model;
 
 
 
@@ -142,6 +145,18 @@ class TicketPreview {
 
   @JsonKey(
     
+    name: r'acceptance',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final Acceptance? acceptance;
+
+
+
+  @JsonKey(
+    
     name: r'createdAt',
     required: true,
     includeIfNull: false,
@@ -164,6 +179,7 @@ class TicketPreview {
       other.summary == summary &&
       other.shots == shots &&
       other.issues == issues &&
+      other.acceptance == acceptance &&
       other.createdAt == createdAt;
 
     @override
@@ -176,6 +192,7 @@ class TicketPreview {
         summary.hashCode +
         shots.hashCode +
         issues.hashCode +
+        acceptance.hashCode +
         createdAt.hashCode;
 
   factory TicketPreview.fromJson(Map<String, dynamic> json) => _$TicketPreviewFromJson(json);

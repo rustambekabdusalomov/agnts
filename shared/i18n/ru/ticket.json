@@ -199,6 +199,9 @@
     "doneReportPostedPlane": "Отчёт сохранён здесь и опубликован в {key} в Plane.",
     "pickAny": "Выберите все подходящие",
     "otherAnswer": "Что-то другое (необязательно)",
-    "srcGit": "Пул-реквест"
+    "srcGit": "Пул-реквест",
+    "srcCi": "Падение CI",
+    "kvCi": "CI",
+    "ciFixes": "CI {n, plural, one {# раз} few {# раза} many {# раз} other {# раза}} вернул пул-реквест в работу"
   }
 }

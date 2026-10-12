@@ -156,3 +156,13 @@ export function stateKey(state: TicketState, kind?: TicketKind): string {
   if (kind && REPORT_KINDS.includes(kind) && ['coding', 'pushing', 'done'].includes(state)) return `state.report.${state}`
   return `state.${state}`
 }
+export type PrivateNetwork = S['PrivateNetwork']
+export type PrivateNetworkList = S['PrivateNetworkList']
+export type PrivateNetworkInput = S['PrivateNetworkInput']
+export type NetworkTest = S['NetworkTest']
+export type NetworkActivity = S['NetworkActivity']
+export type CIFailure = S['CIFailure']
+export type CIStatus = S['CIStatus']
+export type CIOccurrence = S['CIOccurrence']
+export type CIWatch = S['CIWatch']
+export type CISettings = S['CISettings']

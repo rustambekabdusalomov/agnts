@@ -71,12 +71,15 @@ test-website:
 
 # ---- Local development ----
 
-.PHONY: dev-db dev-server dev-admin dev-website dev-user
+.PHONY: dev-db dev-server dev-guard dev-admin dev-website dev-user
 dev-db: ## Start the local PostgreSQL (Docker)
 	docker compose -f deploy/docker-compose.dev.yml up -d
 
-dev-server: ## Run the server against the local database
+dev-server: dev-guard ## Run the server against the local database
 	cd server && set -a && source ../deploy/.env.dev && set +a && go run ./cmd/agnts serve
+
+dev-guard: ## Build agnts-guard for the local run containers (Linux, this machine's CPU)
+	cd server && CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags "-s -w" -o ../.dev-data-agnts/agnts-guard ./cmd/agnts-guard
 
 dev-admin: ## Run the admin panel with hot reload on :5173
 	cd apps/admin && npm run dev

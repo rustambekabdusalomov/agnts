@@ -1,0 +1,7 @@
+{"name": "Kotlin", "rules": [
+ {"title": "No !! on values that can be null", "body": "Do not use the !! operator on values that can be null at runtime; handle the null case with ?:, let, or an early return."},
+ {"title": "Structured concurrency only", "body": "Never use GlobalScope. Coroutines run in a scope tied to a lifecycle (viewModelScope, a request scope, a supervisor owned by a component), and blocking calls run on Dispatchers.IO."},
+ {"title": "Rethrow CancellationException", "body": "Code that catches Exception or Throwable inside coroutines rethrows CancellationException, so cancellation keeps working."},
+ {"title": "Immutable data classes for values", "body": "Values passed between layers are data classes with val properties; changes are made with copy(), not by mutating shared instances."},
+ {"title": "runCatching results are used", "body": "The Result of runCatching is always handled (getOrElse, onFailure, fold); it is never ignored, which would swallow the error."}
+]}

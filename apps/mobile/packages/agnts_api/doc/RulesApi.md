@@ -15,7 +15,10 @@ Method | HTTP request | Description
 [**deleteRule**](RulesApi.md#deleterule) | **DELETE** /rules/{id} | 
 [**getRule**](RulesApi.md#getrule) | **GET** /rules/{id} | 
 [**listRules**](RulesApi.md#listrules) | **GET** /rules | Every rule, global ones first, then by repository
+[**listStarterPacks**](RulesApi.md#liststarterpacks) | **GET** /repos/{id}/starter-rules | Starter rule packs that fit the repository&#39;s toolchains
+[**offerStarterRules**](RulesApi.md#offerstarterrules) | **POST** /repos/{id}/starter-rules | Add a starter pack&#39;s rules to the repository as suggestions
 [**reviewRule**](RulesApi.md#reviewrule) | **POST** /rules/{id}/review | Have Claude review a rule again, keeping its answers
+[**tryEnforce**](RulesApi.md#tryenforce) | **POST** /rules/try | Check an enforcement against agnts&#39;s last changes before turning it on
 [**updateRule**](RulesApi.md#updaterule) | **PUT** /rules/{id} | Edit a rule. Changing its text or repository starts a new review; turning it on or off does not.
 
 
@@ -286,6 +289,100 @@ This endpoint does not need any parameter.
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **listStarterPacks**
+> List<StarterPack> listStarterPacks(id)
+
+Starter rule packs that fit the repository's toolchains
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getRulesApi();
+final int id = 789; // int | 
+
+try {
+    final response = api.listStarterPacks(id);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling RulesApi->listStarterPacks: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+
+### Return type
+
+[**List&lt;StarterPack&gt;**](StarterPack.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **offerStarterRules**
+> List<Rule> offerStarterRules(id, offerStarterRulesRequest)
+
+Add a starter pack's rules to the repository as suggestions
+
+Nothing applies until someone adopts a suggestion (with a review or as written). Rules whose title the repository already has are skipped.
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getRulesApi();
+final int id = 789; // int | 
+final OfferStarterRulesRequest offerStarterRulesRequest = ; // OfferStarterRulesRequest | 
+
+try {
+    final response = api.offerStarterRules(id, offerStarterRulesRequest);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling RulesApi->offerStarterRules: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **offerStarterRulesRequest** | [**OfferStarterRulesRequest**](OfferStarterRulesRequest.md)|  | 
+
+### Return type
+
+[**List&lt;Rule&gt;**](Rule.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **reviewRule**
 > Rule reviewRule(id)
 
@@ -327,6 +424,51 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **tryEnforce**
+> TryEnforceResult tryEnforce(tryEnforceInput)
+
+Check an enforcement against agnts's last changes before turning it on
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getRulesApi();
+final TryEnforceInput tryEnforceInput = ; // TryEnforceInput | 
+
+try {
+    final response = api.tryEnforce(tryEnforceInput);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling RulesApi->tryEnforce: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tryEnforceInput** | [**TryEnforceInput**](TryEnforceInput.md)|  | 
+
+### Return type
+
+[**TryEnforceResult**](TryEnforceResult.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

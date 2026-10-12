@@ -39,6 +39,22 @@ abstract class _$RuleCWProxy {
 
   Rule error(String error);
 
+  Rule enforce(RuleEnforce? enforce);
+
+  Rule delivery(RuleDeliveryEnum? delivery);
+
+  Rule skillDescription(String? skillDescription);
+
+  Rule source_(String? source_);
+
+  Rule confidence(num? confidence);
+
+  Rule evidence(int? evidence);
+
+  Rule lastSeen(DateTime? lastSeen);
+
+  Rule watching(bool? watching);
+
   Rule analyzedAt(DateTime? analyzedAt);
 
   Rule createdAt(DateTime createdAt);
@@ -68,6 +84,14 @@ abstract class _$RuleCWProxy {
     List<RuleQuestion> questions,
     int rounds,
     String error,
+    RuleEnforce? enforce,
+    RuleDeliveryEnum? delivery,
+    String? skillDescription,
+    String? source_,
+    num? confidence,
+    int? evidence,
+    DateTime? lastSeen,
+    bool? watching,
     DateTime? analyzedAt,
     DateTime createdAt,
     DateTime updatedAt,
@@ -130,6 +154,31 @@ class _$RuleCWProxyImpl implements _$RuleCWProxy {
   Rule error(String error) => this(error: error);
 
   @override
+  Rule enforce(RuleEnforce? enforce) => this(enforce: enforce);
+
+  @override
+  Rule delivery(RuleDeliveryEnum? delivery) => this(delivery: delivery);
+
+  @override
+  Rule skillDescription(String? skillDescription) =>
+      this(skillDescription: skillDescription);
+
+  @override
+  Rule source_(String? source_) => this(source_: source_);
+
+  @override
+  Rule confidence(num? confidence) => this(confidence: confidence);
+
+  @override
+  Rule evidence(int? evidence) => this(evidence: evidence);
+
+  @override
+  Rule lastSeen(DateTime? lastSeen) => this(lastSeen: lastSeen);
+
+  @override
+  Rule watching(bool? watching) => this(watching: watching);
+
+  @override
   Rule analyzedAt(DateTime? analyzedAt) => this(analyzedAt: analyzedAt);
 
   @override
@@ -162,6 +211,14 @@ class _$RuleCWProxyImpl implements _$RuleCWProxy {
     Object? questions = const $CopyWithPlaceholder(),
     Object? rounds = const $CopyWithPlaceholder(),
     Object? error = const $CopyWithPlaceholder(),
+    Object? enforce = const $CopyWithPlaceholder(),
+    Object? delivery = const $CopyWithPlaceholder(),
+    Object? skillDescription = const $CopyWithPlaceholder(),
+    Object? source_ = const $CopyWithPlaceholder(),
+    Object? confidence = const $CopyWithPlaceholder(),
+    Object? evidence = const $CopyWithPlaceholder(),
+    Object? lastSeen = const $CopyWithPlaceholder(),
+    Object? watching = const $CopyWithPlaceholder(),
     Object? analyzedAt = const $CopyWithPlaceholder(),
     Object? createdAt = const $CopyWithPlaceholder(),
     Object? updatedAt = const $CopyWithPlaceholder(),
@@ -231,6 +288,38 @@ class _$RuleCWProxyImpl implements _$RuleCWProxy {
           ? _value.error
           // ignore: cast_nullable_to_non_nullable
           : error as String,
+      enforce: enforce == const $CopyWithPlaceholder()
+          ? _value.enforce
+          // ignore: cast_nullable_to_non_nullable
+          : enforce as RuleEnforce?,
+      delivery: delivery == const $CopyWithPlaceholder()
+          ? _value.delivery
+          // ignore: cast_nullable_to_non_nullable
+          : delivery as RuleDeliveryEnum?,
+      skillDescription: skillDescription == const $CopyWithPlaceholder()
+          ? _value.skillDescription
+          // ignore: cast_nullable_to_non_nullable
+          : skillDescription as String?,
+      source_: source_ == const $CopyWithPlaceholder()
+          ? _value.source_
+          // ignore: cast_nullable_to_non_nullable
+          : source_ as String?,
+      confidence: confidence == const $CopyWithPlaceholder()
+          ? _value.confidence
+          // ignore: cast_nullable_to_non_nullable
+          : confidence as num?,
+      evidence: evidence == const $CopyWithPlaceholder()
+          ? _value.evidence
+          // ignore: cast_nullable_to_non_nullable
+          : evidence as int?,
+      lastSeen: lastSeen == const $CopyWithPlaceholder()
+          ? _value.lastSeen
+          // ignore: cast_nullable_to_non_nullable
+          : lastSeen as DateTime?,
+      watching: watching == const $CopyWithPlaceholder()
+          ? _value.watching
+          // ignore: cast_nullable_to_non_nullable
+          : watching as bool?,
       analyzedAt: analyzedAt == const $CopyWithPlaceholder()
           ? _value.analyzedAt
           // ignore: cast_nullable_to_non_nullable
@@ -304,6 +393,23 @@ Rule _$RuleFromJson(Map<String, dynamic> json) => $checkedCreate('Rule', json, (
     ),
     rounds: $checkedConvert('rounds', (v) => (v as num).toInt()),
     error: $checkedConvert('error', (v) => v as String),
+    enforce: $checkedConvert(
+      'enforce',
+      (v) => v == null ? null : RuleEnforce.fromJson(v as Map<String, dynamic>),
+    ),
+    delivery: $checkedConvert(
+      'delivery',
+      (v) => $enumDecodeNullable(_$RuleDeliveryEnumEnumMap, v),
+    ),
+    skillDescription: $checkedConvert('skillDescription', (v) => v as String?),
+    source_: $checkedConvert('source', (v) => v as String?),
+    confidence: $checkedConvert('confidence', (v) => v as num?),
+    evidence: $checkedConvert('evidence', (v) => (v as num?)?.toInt()),
+    lastSeen: $checkedConvert(
+      'lastSeen',
+      (v) => v == null ? null : DateTime.parse(v as String),
+    ),
+    watching: $checkedConvert('watching', (v) => v as bool?),
     analyzedAt: $checkedConvert(
       'analyzedAt',
       (v) => v == null ? null : DateTime.parse(v as String),
@@ -312,7 +418,7 @@ Rule _$RuleFromJson(Map<String, dynamic> json) => $checkedCreate('Rule', json, (
     updatedAt: $checkedConvert('updatedAt', (v) => DateTime.parse(v as String)),
   );
   return val;
-});
+}, fieldKeyMap: const {'source_': 'source'});
 
 Map<String, dynamic> _$RuleToJson(Rule instance) => <String, dynamic>{
   'id': instance.id,
@@ -331,12 +437,24 @@ Map<String, dynamic> _$RuleToJson(Rule instance) => <String, dynamic>{
   'questions': instance.questions.map((e) => e.toJson()).toList(),
   'rounds': instance.rounds,
   'error': instance.error,
+  'enforce': ?instance.enforce?.toJson(),
+  'delivery': ?_$RuleDeliveryEnumEnumMap[instance.delivery],
+  'skillDescription': ?instance.skillDescription,
+  'source': ?instance.source_,
+  'confidence': ?instance.confidence,
+  'evidence': ?instance.evidence,
+  'lastSeen': ?instance.lastSeen?.toIso8601String(),
+  'watching': ?instance.watching,
   'analyzedAt': ?instance.analyzedAt?.toIso8601String(),
   'createdAt': instance.createdAt.toIso8601String(),
   'updatedAt': instance.updatedAt.toIso8601String(),
 };
 
-const _$RuleKindEnumMap = {RuleKind.rule: 'rule', RuleKind.context: 'context'};
+const _$RuleKindEnumMap = {
+  RuleKind.rule: 'rule',
+  RuleKind.context: 'context',
+  RuleKind.tip: 'tip',
+};
 
 const _$RuleStatusEnumMap = {
   RuleStatus.pending: 'pending',
@@ -345,4 +463,9 @@ const _$RuleStatusEnumMap = {
   RuleStatus.ready: 'ready',
   RuleStatus.failed: 'failed',
   RuleStatus.suggested: 'suggested',
+};
+
+const _$RuleDeliveryEnumEnumMap = {
+  RuleDeliveryEnum.prompt: 'prompt',
+  RuleDeliveryEnum.skill: 'skill',
 };

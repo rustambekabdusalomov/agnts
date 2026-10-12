@@ -21,6 +21,12 @@ abstract class _$FindingCWProxy {
 
   Finding suggestion(String? suggestion);
 
+  Finding confidence(num? confidence);
+
+  Finding pass(String? pass);
+
+  Finding adopted(bool? adopted);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Finding(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -35,6 +41,9 @@ abstract class _$FindingCWProxy {
     String title,
     String? detail,
     String? suggestion,
+    num? confidence,
+    String? pass,
+    bool? adopted,
   });
 }
 
@@ -66,6 +75,15 @@ class _$FindingCWProxyImpl implements _$FindingCWProxy {
   Finding suggestion(String? suggestion) => this(suggestion: suggestion);
 
   @override
+  Finding confidence(num? confidence) => this(confidence: confidence);
+
+  @override
+  Finding pass(String? pass) => this(pass: pass);
+
+  @override
+  Finding adopted(bool? adopted) => this(adopted: adopted);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Finding(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -80,6 +98,9 @@ class _$FindingCWProxyImpl implements _$FindingCWProxy {
     Object? title = const $CopyWithPlaceholder(),
     Object? detail = const $CopyWithPlaceholder(),
     Object? suggestion = const $CopyWithPlaceholder(),
+    Object? confidence = const $CopyWithPlaceholder(),
+    Object? pass = const $CopyWithPlaceholder(),
+    Object? adopted = const $CopyWithPlaceholder(),
   }) {
     return Finding(
       severity: severity == const $CopyWithPlaceholder()
@@ -110,6 +131,18 @@ class _$FindingCWProxyImpl implements _$FindingCWProxy {
           ? _value.suggestion
           // ignore: cast_nullable_to_non_nullable
           : suggestion as String?,
+      confidence: confidence == const $CopyWithPlaceholder()
+          ? _value.confidence
+          // ignore: cast_nullable_to_non_nullable
+          : confidence as num?,
+      pass: pass == const $CopyWithPlaceholder()
+          ? _value.pass
+          // ignore: cast_nullable_to_non_nullable
+          : pass as String?,
+      adopted: adopted == const $CopyWithPlaceholder()
+          ? _value.adopted
+          // ignore: cast_nullable_to_non_nullable
+          : adopted as bool?,
     );
   }
 }
@@ -141,6 +174,9 @@ Finding _$FindingFromJson(Map<String, dynamic> json) =>
         title: $checkedConvert('title', (v) => v as String),
         detail: $checkedConvert('detail', (v) => v as String?),
         suggestion: $checkedConvert('suggestion', (v) => v as String?),
+        confidence: $checkedConvert('confidence', (v) => v as num?),
+        pass: $checkedConvert('pass', (v) => v as String?),
+        adopted: $checkedConvert('adopted', (v) => v as bool?),
       );
       return val;
     });
@@ -153,6 +189,9 @@ Map<String, dynamic> _$FindingToJson(Finding instance) => <String, dynamic>{
   'title': instance.title,
   'detail': ?instance.detail,
   'suggestion': ?instance.suggestion,
+  'confidence': ?instance.confidence,
+  'pass': ?instance.pass,
+  'adopted': ?instance.adopted,
 };
 
 const _$FindingSeverityEnumEnumMap = {

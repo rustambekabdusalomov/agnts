@@ -62,5 +62,11 @@ void main() {
       // TODO
     });
 
+    // A watched branch went red
+    // bool ci
+    test('to test the property `ci`', () async {
+      // TODO
+    });
+
   });
 }

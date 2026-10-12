@@ -25,6 +25,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/storer"
 
+	"agnts/internal/agentcfg"
 	"agnts/internal/domain"
 	"agnts/internal/toolchain"
 )
@@ -311,7 +312,7 @@ func (g *Repos) Tree(_ context.Context, repo domain.Repository, branch string) (
 				continue
 			}
 			out[rel] = nil
-			if e.Mode == filemode.Symlink || !toolchain.Wanted(rel) {
+			if e.Mode == filemode.Symlink || !toolchain.Wanted(rel) && !agentcfg.Wanted(rel) {
 				continue
 			}
 			b, err := object.GetBlob(r.Storer, e.Hash)

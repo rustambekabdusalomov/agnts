@@ -201,7 +201,7 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', onOutside))
           @click="pick(o)"
         >
           <span class="isel-label">{{ o.label }}</span>
-          <span v-if="o.hint" class="isel-hint">{{ o.hint }}</span>
+          <span v-if="o.hint" class="isel-hint" :class="{ long: o.hint.length > 24 }">{{ o.hint }}</span>
           <svg v-if="o.value === modelValue" class="isel-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
         </li>
         <li v-if="!shown.length" class="isel-empty" role="presentation">{{ t('form.noMatch') }}</li>

@@ -7,6 +7,10 @@ part of 'period_stats.dart';
 // **************************************************************************
 
 abstract class _$PeriodStatsCWProxy {
+  PeriodStats merged(int merged);
+
+  PeriodStats closed(int closed);
+
   PeriodStats picked(int picked);
 
   PeriodStats pushed(int pushed);
@@ -38,6 +42,8 @@ abstract class _$PeriodStatsCWProxy {
   /// PeriodStats(...).copyWith(id: 12, name: "My name")
   /// ````
   PeriodStats call({
+    int merged,
+    int closed,
     int picked,
     int pushed,
     int rejected,
@@ -58,6 +64,12 @@ class _$PeriodStatsCWProxyImpl implements _$PeriodStatsCWProxy {
   const _$PeriodStatsCWProxyImpl(this._value);
 
   final PeriodStats _value;
+
+  @override
+  PeriodStats merged(int merged) => this(merged: merged);
+
+  @override
+  PeriodStats closed(int closed) => this(closed: closed);
 
   @override
   PeriodStats picked(int picked) => this(picked: picked);
@@ -104,6 +116,8 @@ class _$PeriodStatsCWProxyImpl implements _$PeriodStatsCWProxy {
   /// PeriodStats(...).copyWith(id: 12, name: "My name")
   /// ````
   PeriodStats call({
+    Object? merged = const $CopyWithPlaceholder(),
+    Object? closed = const $CopyWithPlaceholder(),
     Object? picked = const $CopyWithPlaceholder(),
     Object? pushed = const $CopyWithPlaceholder(),
     Object? rejected = const $CopyWithPlaceholder(),
@@ -118,6 +132,14 @@ class _$PeriodStatsCWProxyImpl implements _$PeriodStatsCWProxy {
     Object? spend = const $CopyWithPlaceholder(),
   }) {
     return PeriodStats(
+      merged: merged == const $CopyWithPlaceholder()
+          ? _value.merged
+          // ignore: cast_nullable_to_non_nullable
+          : merged as int,
+      closed: closed == const $CopyWithPlaceholder()
+          ? _value.closed
+          // ignore: cast_nullable_to_non_nullable
+          : closed as int,
       picked: picked == const $CopyWithPlaceholder()
           ? _value.picked
           // ignore: cast_nullable_to_non_nullable
@@ -187,6 +209,8 @@ PeriodStats _$PeriodStatsFromJson(Map<String, dynamic> json) => $checkedCreate(
     $checkKeys(
       json,
       requiredKeys: const [
+        'merged',
+        'closed',
         'picked',
         'pushed',
         'rejected',
@@ -202,6 +226,8 @@ PeriodStats _$PeriodStatsFromJson(Map<String, dynamic> json) => $checkedCreate(
       ],
     );
     final val = PeriodStats(
+      merged: $checkedConvert('merged', (v) => (v as num).toInt()),
+      closed: $checkedConvert('closed', (v) => (v as num).toInt()),
       picked: $checkedConvert('picked', (v) => (v as num).toInt()),
       pushed: $checkedConvert('pushed', (v) => (v as num).toInt()),
       rejected: $checkedConvert('rejected', (v) => (v as num).toInt()),
@@ -224,6 +250,8 @@ PeriodStats _$PeriodStatsFromJson(Map<String, dynamic> json) => $checkedCreate(
 
 Map<String, dynamic> _$PeriodStatsToJson(PeriodStats instance) =>
     <String, dynamic>{
+      'merged': instance.merged,
+      'closed': instance.closed,
       'picked': instance.picked,
       'pushed': instance.pushed,
       'rejected': instance.rejected,

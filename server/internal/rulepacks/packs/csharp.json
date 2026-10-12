@@ -1,0 +1,7 @@
+{"name": "C#", "rules": [
+ {"title": "Async all the way", "body": "Do not block on tasks with .Result, .Wait() or GetAwaiter().GetResult(); await them. Pass the CancellationToken through every async call that accepts one. async void only for event handlers."},
+ {"title": "Dispose what you create", "body": "IDisposable and IAsyncDisposable objects are created in using statements or declarations. HttpClient instances come from IHttpClientFactory, never new HttpClient() per call."},
+ {"title": "No null-forgiving to silence warnings", "body": "Do not use the ! null-forgiving operator to silence nullable warnings where the value can really be null; handle the null case."},
+ {"title": "Rethrow with throw;", "body": "Rethrow caught exceptions with throw; (not throw ex;) to keep the stack trace, and never catch exceptions only to ignore them."},
+ {"title": "EF Core reads without tracking", "body": "Read-only EF Core queries use AsNoTracking(), project to what they need, and load related data with Include or projections instead of per-row queries."}
+]}

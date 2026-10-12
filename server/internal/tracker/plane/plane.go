@@ -25,6 +25,7 @@ import (
 
 	"golang.org/x/time/rate"
 
+	"agnts/internal/netroute"
 	"agnts/internal/orchestrator"
 )
 
@@ -166,7 +167,7 @@ var (
 
 // New returns a Plane client.
 func New(cfg ConfigSource) *Client {
-	return &Client{cfg: cfg, hc: &http.Client{Timeout: 30 * time.Second}, sleep: sleepCtx,
+	return &Client{cfg: cfg, hc: netroute.Client(30 * time.Second), sleep: sleepCtx,
 		limits: map[string]*rate.Limiter{}, caches: map[string]*scopeCache{}}
 }
 

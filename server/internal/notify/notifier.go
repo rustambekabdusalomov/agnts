@@ -59,7 +59,16 @@ type Notifier struct {
 	botAPI   string
 	log      *slog.Logger
 	wake     chan struct{}
+	ci       CIFixer // nil: no Fix it button
 }
+
+// CIFixer opens a ticket for a CI failure (Telegram's Fix it button).
+type CIFixer interface {
+	FixIt(ctx context.Context, id int64, origin domain.Origin) (domain.Ticket, error)
+}
+
+// SetCIFixer enables the Fix it button on CI messages.
+func (n *Notifier) SetCIFixer(c CIFixer) { n.ci = c }
 
 // New returns a notifier. fcm may be nil.
 func New(store Store, actions Actions, settings orchestrator.SettingsSource, fcm *FCM, telegram TelegramSource, botAPI string, log *slog.Logger) *Notifier {
@@ -163,6 +172,10 @@ func (n *Notifier) handle(ctx context.Context, e domain.Event) {
 	}
 	if e.Type == domain.EventTrackerChanged {
 		n.trackerChanged(ctx, e)
+		return
+	}
+	if e.Type == domain.EventCIFailure {
+		n.ciFailure(ctx, e)
 		return
 	}
 	to, _ := e.Data["to"].(string)
@@ -653,4 +666,51 @@ func newID() string {
 	b := make([]byte, 6)
 	_, _ = rand.Read(b)
 	return hex.EncodeToString(b)
+}
+
+// ciFailure announces a watched branch going red (once per failure group),
+// or a fixed failure coming back. Infra failures and the CI rounds of
+// agnts's own pull requests stay quiet.
+func (n *Notifier) ciFailure(ctx context.Context, e domain.Event) {
+	if on, _ := e.Data["notify"].(bool); !on {
+		return
+	}
+	s, err := n.settings.Get(ctx)
+	if err != nil || !s.Notify.CI {
+		return
+	}
+	repo, _ := e.Data["repo"].(string)
+	branch, _ := e.Data["branch"].(string)
+	what, _ := e.Data["title"].(string)
+	kind, _ := e.Data["kind"].(string)
+	id, _ := e.Data["failureId"].(float64)
+	title := fmt.Sprintf("%s: %s is red", repo, branch)
+	if kind == "regression" {
+		title = fmt.Sprintf("%s: a fixed CI failure is back on %s", repo, branch)
+	}
+	if s.Notify.Push && n.fcm != nil {
+		route := fmt.Sprintf("/ci/%d", int64(id))
+		if e.TicketKey != "" {
+			route = "" // the ticket fixing it
+		}
+		n.push(ctx, Push{Title: title, Body: truncate(what, 180), Ticket: e.TicketKey, Route: route})
+	}
+	if !s.Notify.Telegram {
+		return
+	}
+	b, cfg, ok := n.bot(ctx)
+	if !ok {
+		return
+	}
+	text := title + "\n\n" + truncate(what, 600)
+	var buttons [][]Button
+	if e.TicketKey != "" {
+		text += "\n\nagnts opened " + e.TicketKey + " to fix it; you review the fix before anything is pushed."
+	} else if n.ci != nil && id > 0 {
+		text += "\n\nagnts can fix it: the fix waits for your review before anything is pushed."
+		buttons = [][]Button{{{Text: "Fix it", Data: fmt.Sprintf("cif:%d", int64(id))}}}
+	}
+	if _, err := b.Send(ctx, cfg.ChatID, text, buttons, false); err != nil {
+		n.log.Warn("telegram notify", "ci", int64(id), "err", err)
+	}
 }

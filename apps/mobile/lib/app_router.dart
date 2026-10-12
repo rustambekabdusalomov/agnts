@@ -15,6 +15,8 @@ import 'features/admin/admin_users_screen.dart';
 import 'features/admin/admin_workspaces_screen.dart';
 import 'features/analytics/analytics_screen.dart';
 import 'features/auth/login_screen.dart';
+import 'features/ci/ci_failure_screen.dart';
+import 'features/ci/ci_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/learn/learn_queue.dart';
 import 'features/learn/learn_screen.dart';
@@ -85,6 +87,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         GoRoute(path: '/learn', builder: (_, s) => LearnScreen(ticketKey: s.uri.queryParameters['ticket'])),
         GoRoute(path: '/learn-queue', builder: (_, _) => const LearnQueueScreen()),
         GoRoute(path: '/learn/:id', builder: (_, s) => LessonScreen(id: int.parse(s.pathParameters['id']!))),
+        GoRoute(path: '/ci', builder: (_, _) => const CIFailuresScreen()),
+        GoRoute(path: '/ci/:id', builder: (_, s) => CIFailureScreen(id: int.tryParse(s.pathParameters['id']!) ?? 0)),
         StatefulShellRoute.indexedStack(
           builder: (context, state, shell) => _Shell(shell: shell),
           branches: [

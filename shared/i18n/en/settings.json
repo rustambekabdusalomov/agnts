@@ -42,7 +42,7 @@
     "allowHelp": "Claude Code can run these without asking",
     "deny": "Blocked commands",
     "denyHelp": "Always refused, even if a ticket asks for them. Pushing is done by agnts, never by Claude Code.",
-    "commits": "Commits and pull requests",
+    "commits": "Commits and PR",
     "commitsSub": "Who commits appear from, and how pull requests open",
     "authorName": "Author name",
     "authorNameHelp": "Commits are made as you",
@@ -78,7 +78,6 @@
     "done": "When changes are pushed",
     "lessons": "When agnts finds something new to learn",
     "reviewDone": "When agnts's code review finishes",
-    "onThisPage": "On this page",
     "secretsHelp": "Tokens for Jira, GitHub and Claude are stored encrypted on your server. This page never shows them.",
     "saved": "Settings saved",
     "parallelSlots": "{n, plural, one {# run} other {# runs}} at once",
@@ -90,6 +89,7 @@
     "autoBrief": "Survey repositories",
     "autoBriefHelp": "Write a repository brief (architecture, recipes, conventions) when a repository's first ticket is analysed, and update it after every 10 merges. A brief reaches the agent only after you approve it.",
     "reflect": "Learn from your feedback",
-    "reflectHelp": "When you ask for changes or reject work with a reason, agnts looks for a convention behind it and suggests a rule on the Rules page. Nothing applies until you adopt it."
+    "reflectHelp": "When you ask for changes or reject work with a reason, agnts looks for a convention behind it and suggests a rule on the Rules page. Nothing applies until you adopt it.",
+    "ciRed": "When a watched branch goes red"
   }
 }

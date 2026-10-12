@@ -1,0 +1,7 @@
+{"name": "Dart and Flutter", "rules": [
+ {"title": "Check mounted after await", "body": "After an await inside a State method, check if (!mounted) return; before using BuildContext or calling setState."},
+ {"title": "Dispose controllers and subscriptions", "body": "TextEditingControllers, AnimationControllers, StreamSubscriptions and other disposable objects created by a State are disposed in dispose()."},
+ {"title": "Futures are awaited or unawaited explicitly", "body": "Every Future is awaited, returned, or wrapped in unawaited() with a comment; none is silently dropped."},
+ {"title": "No ! on nullable values from outside", "body": "Do not use the ! operator on values from JSON, platform channels, route arguments or other outside sources; check them."},
+ {"title": "User-facing text is localised", "body": "Strings shown to users come from the app's localisation (AppLocalizations), never string literals in widgets."}
+]}

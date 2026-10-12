@@ -43,6 +43,7 @@ class MoreScreen extends ConsumerWidget {
             ref.invalidate(integrationsProvider);
             ref.invalidate(reposProvider);
             ref.invalidate(lessonsProvider);
+            ref.invalidate(ciFailuresProvider);
             ref.invalidate(meProvider);
           },
           child: ListView(padding: const EdgeInsets.only(bottom: 24), children: [
@@ -120,6 +121,16 @@ class MoreScreen extends ConsumerWidget {
                 title: l.navLearnQueue,
                 value: '${ref.watch(learnQueueProvider).value?.where((x) => x.status == LearnQueueItemStatusEnum.running || x.status == LearnQueueItemStatusEnum.pending).length ?? ''}',
                 onTap: () => context.push('/learn-queue'),
+              ),
+            ]),
+            // CI failures on watched branches, with how many are red.
+            const SizedBox(height: 10),
+            group([
+              ListRow(
+                leading: HIcon('running', size: 22, color: c.badInk),
+                title: l.mciTitle,
+                value: '${ref.watch(ciFailuresProvider('red')).value?.length ?? ''}',
+                onTap: () => context.push('/ci'),
               ),
             ]),
             const AppearanceSection(),
@@ -296,11 +307,12 @@ Future<void> _save(BuildContext context, WidgetRef ref, Settings s, Map<String, 
   }
 }
 
-String _modelName(Model m) => switch (m) {
-      Model.haiku => 'Haiku',
-      Model.sonnet => 'Sonnet',
-      Model.opus => 'Opus',
-    };
+/// A model's name: Haiku, Sonnet, Opus, or "Codex" and the model for a
+/// run on Codex CLI ("codex:" and the model).
+String _modelName(String m) {
+  if (m.startsWith('codex:')) return 'Codex ${m.substring(6)}';
+  return m.isEmpty ? m : '${m[0].toUpperCase()}${m.substring(1)}';
+}
 
 class _ModelsSection extends ConsumerWidget {
   const _ModelsSection(this.s);
@@ -314,7 +326,7 @@ class _ModelsSection extends ConsumerWidget {
       ('coding', l.settingsStageCoding, l.settingsStageCodingHelp, s.models.coding),
       ('retry', l.settingsStageRetry, l.settingsStageRetryHelp, s.models.retry),
       ('helper', l.settingsStageHelper, l.settingsStageHelperHelp, s.models.helper),
-      ('learn', l.settingsStageLearn, l.settingsStageLearnHelp, s.models.learn ?? Model.sonnet),
+      ('learn', l.settingsStageLearn, l.settingsStageLearnHelp, s.models.learn ?? 'sonnet'),
       if (s.models.preview != null) ('preview', l.mpreviewSettingsModel, l.mpreviewSettingsModelHelp, s.models.preview!),
     ];
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -328,17 +340,17 @@ class _ModelsSection extends ConsumerWidget {
               subtitle: help,
               value: _modelName(model),
               onTap: () async {
-                final picked = await _pickOne<Model>(
+                final picked = await _pickOne<String>(
                   context,
                   title: label,
                   sub: l.settingsModelsHelp,
-                  options: [for (final m in const [Model.haiku, Model.sonnet, Model.opus]) (m, _modelName(m))],
+                  options: [for (final m in const ['haiku', 'sonnet', 'opus']) (m, _modelName(m))],
                   current: model,
                 );
                 if (picked == null || picked.$1 == model || !context.mounted) return;
                 await _save(context, ref, s, (j) {
                   final m = Map<String, dynamic>.from(j['models'] as Map);
-                  m[key] = picked.$1.value;
+                  m[key] = picked.$1;
                   return {...j, 'models': m};
                 });
               },
@@ -351,29 +363,24 @@ class _ModelsSection extends ConsumerWidget {
 
   /// Code review may also be Auto: Opus for complex tickets, Sonnet for the rest.
   Widget _reviewRow(BuildContext context, WidgetRef ref, AppLocalizations l) {
-    final model = s.models.review ?? ReviewModel.auto;
-    String name(ReviewModel m) => switch (m) {
-          ReviewModel.auto => l.settingsModelAuto,
-          ReviewModel.haiku => _modelName(Model.haiku),
-          ReviewModel.sonnet => _modelName(Model.sonnet),
-          ReviewModel.opus => _modelName(Model.opus),
-        };
+    final model = s.models.review ?? 'auto';
+    String name(String m) => m == 'auto' ? l.settingsModelAuto : _modelName(m);
     return ListRow(
       title: l.settingsStageReview,
       subtitle: l.settingsStageReviewHelp,
       value: name(model),
       onTap: () async {
-        final picked = await _pickOne<ReviewModel>(
+        final picked = await _pickOne<String>(
           context,
           title: l.settingsStageReview,
           sub: l.settingsModelsHelp,
-          options: [for (final m in ReviewModel.values) (m, name(m))],
+          options: [for (final m in const ['auto', 'haiku', 'sonnet', 'opus']) (m, name(m))],
           current: model,
         );
         if (picked == null || picked.$1 == model || !context.mounted) return;
         await _save(context, ref, s, (j) {
           final m = Map<String, dynamic>.from(j['models'] as Map);
-          m['review'] = picked.$1.value;
+          m['review'] = picked.$1;
           return {...j, 'models': m};
         });
       },
@@ -421,6 +428,7 @@ class _PushSection extends ConsumerWidget {
             if (n.review != null) sw(l.settingsReviewDone, n.review!, 'review'),
             if (n.preview != null) sw(l.mpreviewNotify, n.preview!, 'preview'),
             if (n.followUps != null) sw(l.followUpsNotifyLabel, n.followUps!, 'followUps'),
+            if (n.ci != null) sw(l.mciNotify, n.ci!, 'ci'),
             if (s.suggestFollowUps != null)
               ListRow(
                 title: l.followUpsSettingLabel,

@@ -73,4 +73,23 @@ describe('PreviewShots', () => {
     expect(w.find('.pv-log pre').text()).toContain('missing script')
     expect(w.find('.badge.b-bad').text()).toBe('App did not start')
   })
+
+  it('shows the acceptance check with verdicts and links to its shots', () => {
+    const acc: TicketPreview = {
+      ...preview,
+      shots: [...preview.shots, { ...shot('acc-a1-cart', 'desktop', 'after'), name: 'Acceptance a1: coupon' }],
+      acceptance: {
+        status: 'failed', summary: 'The coupon is not refused.',
+        criteria: [{ id: 'a1', criterion: 'An expired coupon is refused', verdict: 'fail', evidence: 'Saw Applied', steps: ['open /cart'], shots: ['acc-a1-cart'] }],
+      },
+    }
+    const w = setup({ ticket: ticket(), preview: acc })
+    const sec = w.find('.pv-acc')
+    expect(sec.text()).toContain('Acceptance check')
+    expect(sec.find('.badge.b-bad').text()).toBe('Not met')
+    expect(sec.text()).toContain('An expired coupon is refused')
+    expect(sec.text()).toContain('Steps: open /cart')
+    expect(sec.find('button.cr-loc').text()).toContain('Acceptance a1: coupon')
+  })
 })
+

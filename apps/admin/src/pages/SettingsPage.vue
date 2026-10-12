@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import McpCard from '../components/settings/McpCard.vue'
+import PrivateNetworksCard from '../components/settings/PrivateNetworksCard.vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import { api, HttpError, unwrap } from '../api/client'
+import type { components } from '../api/schema.gen'
+import CheckBox from '../components/form/CheckBox.vue'
 import { MODEL_NAME, MODELS, type Model, type ReviewModel, type Settings } from '../api/types'
 import PageHeader from '../components/PageHeader.vue'
 import CfgRow from '../components/form/CfgRow.vue'
@@ -16,6 +20,7 @@ import ProviderTile from '../components/integrations/ProviderTile.vue'
 import { PROVIDERS } from '../components/integrations/providers'
 import { useIntegrations } from '../components/integrations/useIntegrations'
 import HiIcon from '../components/ui/HiIcon.vue'
+import { lines } from '../components/ci/ci'
 import { LOCALES, type Locale } from '../i18n'
 import { usePrefs, type Theme } from '../stores/prefs'
 import { useUi } from '../stores/ui'
@@ -25,6 +30,7 @@ const qc = useQueryClient()
 const ui = useUi()
 const prefs = usePrefs()
 const integrations = useIntegrations()
+const route = useRoute()
 
 const settings = useQuery({ queryKey: ['settings'], queryFn: () => unwrap(api.GET('/settings')) })
 // Query data is a reactive Proxy, which structuredClone rejects; settings are plain JSON.
@@ -86,15 +92,100 @@ function setModel(stage: (typeof stages)[number], m: Model) {
 }
 // The code review model can also be auto: Opus for complex tickets.
 const reviewModels = computed(() => [{ value: 'auto' as ReviewModel, label: t('settings.modelAuto') }, ...models])
+
+// CI infra patterns, one regular expression per line. The text keeps what
+// is typed (a trailing new line); the draft gets the non-empty lines.
+const infraText = ref('')
+watch(
+  () => draft.value?.ci?.infraPatterns,
+  (p) => {
+    if (p && lines(infraText.value).join('\n') !== p.join('\n')) infraText.value = p.join('\n')
+  },
+  { immediate: true, deep: true },
+)
+function setInfra(v: string) {
+  infraText.value = v
+  if (draft.value?.ci) draft.value.ci.infraPatterns = lines(v)
+}
+const perDay = (n: number) => t('ci.perDay', { n })
+
+// Guardrails: agnts-guard, the hooks inside every run, and the checks
+// around it.
+type GuardProfile = components['schemas']['GuardProfile']
+type GuardHook = components['schemas']['GuardHook']
+const profiles = computed(() =>
+  (['minimal', 'standard', 'strict'] as GuardProfile[]).map((p) => ({ value: p, label: t(`harnessSettings.profile_${p}`) })),
+)
+const HOOKS: GuardHook[] = ['pre:secret', 'pre:redflags', 'pre:rules', 'pre:fact-check', 'pre:destructive', 'post:edit-check', 'stop:gate', 'session:progress']
+const hookKey = (h: GuardHook) => h.replace(/[:-]/g, '_')
+function hookOn(h: GuardHook) {
+  return !draft.value?.guard?.disabled.includes(h)
+}
+function setHook(h: GuardHook, on: boolean) {
+  const g = draft.value?.guard
+  if (!g) return
+  g.disabled = on ? g.disabled.filter((x) => x !== h) : [...g.disabled.filter((x) => x !== h), h]
+}
+const stallModes = computed(() => (['off', 'log', 'act'] as string[]).map((v) => ({ value: v, label: t(`harnessSettings.stalls_${v}`) })))
+const deepModes = computed(() => (['off', 'auto', 'always'] as string[]).map((v) => ({ value: v, label: t(`harnessSettings.deep_${v}`) })))
+
+// Coding on Codex: a codex: model in the coding stage. Empty is Claude.
+const codexModel = computed({
+  get: () => (draft.value?.models.coding.startsWith('codex:') ? draft.value.models.coding.slice('codex:'.length) : ''),
+  set: (v: string) => {
+    if (!draft.value) return
+    const m = v.trim().toLowerCase()
+    draft.value.models.coding = m ? `codex:${m}` : 'opus'
+  },
+})
+
+// Each section is its own page at /settings/<section>; the side menu switches
+// between them. Edits are kept across sections until saved or discarded.
+const sections = computed(() => {
+  const d = draft.value
+  return [
+    { key: 'appearance', label: t('settings.appearance') },
+    { key: 'integrations', label: t('settings.integrations') },
+    { key: 'claude', label: t('settings.claude') },
+    { key: 'commits', label: t('settings.commits') },
+    { key: 'runs', label: t('settings.runs') },
+    ...(d?.guard ? [{ key: 'guardrails', label: t('harnessSettings.title') }] : []),
+    ...(d?.autoPreview !== undefined ? [{ key: 'preview', label: t('preview.settingsTitle') }] : []),
+    ...(d?.ci ? [{ key: 'ci', label: t('ci.settingsTitle') }] : []),
+    { key: 'network', label: t('network.title') },
+    ...(d?.notify ? [{ key: 'notify', label: t('settings.notify') }] : []),
+    { key: 'mcp', label: t('mcp.title') },
+  ]
+})
+const section = computed(() => {
+  const s = String(route.params.section ?? '')
+  return sections.value.some((x) => x.key === s) ? s : 'appearance'
+})
 </script>
 
 <template>
   <PageHeader :title="t('settings.title')" doc="settings" />
   <p v-if="settings.isPending.value" class="hint">{{ t('common.loading') }}</p>
   <p v-else-if="settings.isError.value" class="ferr">{{ t('common.error') }}</p>
-  <div v-else-if="draft" class="cfg-grid">
+  <div v-else-if="draft" class="set-grid">
+    <aside class="set-side">
+      <section class="card">
+        <nav class="anchor-nav" :aria-label="t('settings.title')">
+          <RouterLink
+            v-for="x in sections"
+            :key="x.key"
+            :to="{ name: 'settings', params: { section: x.key } }"
+            :class="{ on: section === x.key }"
+            :aria-current="section === x.key ? 'page' : undefined"
+          >
+            {{ x.label }}
+          </RouterLink>
+        </nav>
+      </section>
+      <div class="help"><HiIcon name="info" /><p>{{ t('settings.secretsHelp') }}</p></div>
+    </aside>
     <div class="col">
-      <section id="s-look" class="card">
+      <section v-if="section === 'appearance'" id="s-look" class="card">
         <div class="ch"><div><h2>{{ t('settings.appearance') }}</h2><p class="sub">{{ t('settings.appearanceSub') }}</p></div></div>
         <CfgRow :label="t('settings.theme')" :help="t('settings.themeHelp')">
           <SegButtons v-model="prefs.theme" :options="themes" :label="t('settings.theme')" />
@@ -104,7 +195,7 @@ const reviewModels = computed(() => [{ value: 'auto' as ReviewModel, label: t('s
         </CfgRow>
       </section>
 
-      <section id="s-integ" class="card">
+      <section v-else-if="section === 'integrations'" id="s-integ" class="card">
         <div class="ch">
           <div><h2>{{ t('settings.integrations') }}</h2><p class="sub">{{ t('settings.integrationsSub') }}</p></div>
           <RouterLink class="btn btn-s" :to="{ name: 'integrations' }">{{ t('settings.manageAll') }}</RouterLink>
@@ -125,7 +216,7 @@ const reviewModels = computed(() => [{ value: 'auto' as ReviewModel, label: t('s
         </div>
       </section>
 
-      <section id="s-claude" class="card">
+      <section v-else-if="section === 'claude'" id="s-claude" class="card">
         <div class="ch">
           <div><h2>{{ t('settings.claude') }}</h2><p class="sub">{{ t('settings.claudeSub') }}</p></div>
           <RouterLink class="btn btn-s" :to="{ name: 'workspace', query: { tab: 'claude' } }" :title="t('settings.claudeMoved')">{{ t('settings.claudeOpen') }}</RouterLink>
@@ -147,6 +238,15 @@ const reviewModels = computed(() => [{ value: 'auto' as ReviewModel, label: t('s
             @update:model-value="setModel(st, $event)"
           />
         </CfgRow>
+        <CfgRow :label="t('harnessSettings.codex')" :help="t('harnessSettings.codexHelp')">
+          <span style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
+            <input v-model.lazy="codexModel" class="cfg-in mono" maxlength="64" placeholder="gpt-5-codex" :aria-label="t('harnessSettings.codex')">
+            <span class="badge" :class="integ('openai')?.connected ? 'b-ok' : 'b-gray'">
+              {{ integ('openai')?.connected ? t('settings.connected') : t('settings.notConnected') }}
+            </span>
+            <RouterLink class="btn btn-s" :to="{ name: 'integration', params: { provider: 'openai' } }">{{ t('harnessSettings.codexConnect') }}</RouterLink>
+          </span>
+        </CfgRow>
         <CfgRow v-if="draft.models.review !== undefined" :label="t('settings.stageReview')" :help="t('settings.stageReviewHelp')">
           <SegButtons v-model="draft.models.review" :options="reviewModels" :label="t('settings.stageReview')" />
         </CfgRow>
@@ -164,7 +264,7 @@ const reviewModels = computed(() => [{ value: 'auto' as ReviewModel, label: t('s
         </CfgRow>
       </section>
 
-      <section id="s-git" class="card">
+      <section v-else-if="section === 'commits'" id="s-git" class="card">
         <div class="ch"><div><h2>{{ t('settings.commits') }}</h2><p class="sub">{{ t('settings.commitsSub') }}</p></div></div>
         <CfgRow :label="t('settings.authorName')" :help="t('settings.authorNameHelp')">
           <input v-model="draft.git.authorName" class="cfg-in" maxlength="200" :aria-label="t('settings.authorName')">
@@ -183,7 +283,7 @@ const reviewModels = computed(() => [{ value: 'auto' as ReviewModel, label: t('s
         </CfgRow>
       </section>
 
-      <section id="s-runs" class="card">
+      <section v-else-if="section === 'runs'" id="s-runs" class="card">
         <div class="ch"><div><h2>{{ t('settings.runs') }}</h2><p class="sub">{{ t('settings.runsSub') }}</p></div></div>
         <CfgRow :label="t('settings.askFirst')" :help="t('settings.askFirstHelp')">
           <SwitchToggle v-model="draft.askFirst" :label="t('settings.askFirst')" />
@@ -217,7 +317,41 @@ const reviewModels = computed(() => [{ value: 'auto' as ReviewModel, label: t('s
         </CfgRow>
       </section>
 
-      <section v-if="draft.autoPreview !== undefined" id="s-preview" class="card">
+      <section v-else-if="section === 'guardrails' && draft.guard" id="s-guard" class="card">
+        <div class="ch"><div><h2>{{ t('harnessSettings.title') }}</h2><p class="sub">{{ t('harnessSettings.sub') }}</p></div></div>
+        <CfgRow :label="t('harnessSettings.profile')" :help="t(`harnessSettings.profileHelp_${draft.guard.profile}`)">
+          <SegButtons v-model="draft.guard.profile" :options="profiles" :label="t('harnessSettings.profile')" />
+        </CfgRow>
+        <CfgRow v-if="draft.guard.profile === 'strict'" :label="t('harnessSettings.factCheck')" :help="t('harnessSettings.factCheckHelp')">
+          <NumberStepper v-model="draft.guard.factCheck" :min="0" :max="100" :step="10" :label="t('harnessSettings.factCheck')" :format="percent" />
+        </CfgRow>
+        <CfgRow v-if="draft.stalls !== undefined" :label="t('harnessSettings.stalls')" :help="t('harnessSettings.stallsHelp')">
+          <SegButtons v-model="draft.stalls" :options="stallModes" :label="t('harnessSettings.stalls')" />
+        </CfgRow>
+        <CfgRow v-if="draft.proveFixes !== undefined" :label="t('harnessSettings.proveFixes')" :help="t('harnessSettings.proveFixesHelp')">
+          <SwitchToggle v-model="draft.proveFixes" :label="t('harnessSettings.proveFixes')" />
+        </CfgRow>
+        <CfgRow v-if="draft.deepReview !== undefined" :label="t('harnessSettings.deepReview')" :help="t('harnessSettings.deepReviewHelp')">
+          <SegButtons v-model="draft.deepReview" :options="deepModes" :label="t('harnessSettings.deepReview')" />
+        </CfgRow>
+        <CfgRow v-if="draft.learnFromRuns !== undefined" :label="t('harnessSettings.learnFromRuns')" :help="t('harnessSettings.learnFromRunsHelp')">
+          <SwitchToggle v-model="draft.learnFromRuns" :label="t('harnessSettings.learnFromRuns')" />
+        </CfgRow>
+        <CfgRow v-if="draft.secondOpinion !== undefined" :label="t('harnessSettings.secondOpinion')" :help="t('harnessSettings.secondOpinionHelp')">
+          <input v-model.trim="draft.secondOpinion" class="cfg-in mono" maxlength="80" :placeholder="t('harnessSettings.secondOpinionHint')" :aria-label="t('harnessSettings.secondOpinion')">
+        </CfgRow>
+        <div class="cfg-row" style="display: block">
+          <div class="cfg-lbl">{{ t('harnessSettings.advanced') }}</div>
+          <div class="cfg-help">{{ t('harnessSettings.advancedHelp') }}</div>
+          <div class="guard-hooks">
+            <CheckBox v-for="h in HOOKS" :key="h" :model-value="hookOn(h)" @update:model-value="setHook(h, $event)">
+              <span class="mono">{{ h }}</span> · {{ t(`harnessSettings.hook_${hookKey(h)}`) }}
+            </CheckBox>
+          </div>
+        </div>
+      </section>
+
+      <section v-else-if="section === 'preview' && draft.autoPreview !== undefined" id="s-preview" class="card">
         <div class="ch"><div><h2>{{ t('preview.settingsTitle') }}</h2><p class="sub">{{ t('preview.settingsSub') }}</p></div></div>
         <CfgRow :label="t('preview.autoPreview')" :help="t('preview.autoPreviewHelp')">
           <SwitchToggle v-model="draft.autoPreview" :label="t('preview.autoPreview')" />
@@ -233,7 +367,35 @@ const reviewModels = computed(() => [{ value: 'auto' as ReviewModel, label: t('s
         </CfgRow>
       </section>
 
-      <section v-if="draft.notify" id="s-notify" class="card">
+      <section v-else-if="section === 'ci' && draft.ci" id="s-ci" class="card">
+        <div class="ch"><div><h2>{{ t('ci.settingsTitle') }}</h2><p class="sub">{{ t('ci.settingsSub') }}</p></div></div>
+        <CfgRow :label="t('ci.autoFix')" :help="t('ci.autoFixHelp')">
+          <SwitchToggle v-model="draft.ci.autoFix" :label="t('ci.autoFix')" />
+        </CfgRow>
+        <CfgRow :label="t('ci.maxAutoPerDay')" :help="t('ci.maxAutoPerDayHelp')">
+          <NumberStepper v-model="draft.ci.maxAutoPerDay" :min="0" :max="50" :step="1" :label="t('ci.maxAutoPerDay')" :format="perDay" />
+        </CfgRow>
+        <CfgRow :label="t('ci.retryFlaky')" :help="t('ci.retryFlakyHelp')">
+          <SwitchToggle v-model="draft.ci.retryFlaky" :label="t('ci.retryFlaky')" />
+        </CfgRow>
+        <CfgRow :label="t('ci.feedbackRounds')" :help="t('ci.feedbackRoundsHelp')">
+          <NumberStepper v-model="draft.ci.feedbackRounds" :min="0" :max="5" :step="1" :label="t('ci.feedbackRounds')" />
+        </CfgRow>
+        <CfgRow :label="t('ci.infraPatterns')" :help="t('ci.infraPatternsHelp')">
+          <textarea
+            class="ci-infra"
+            :value="infraText"
+            rows="4"
+            maxlength="8000"
+            placeholder="connection reset by peer"
+            :aria-label="t('ci.infraPatterns')"
+            @input="setInfra(($event.target as HTMLTextAreaElement).value)"
+          />
+        </CfgRow>
+      </section>
+
+      <PrivateNetworksCard v-else-if="section === 'network'" />
+      <section v-else-if="section === 'notify' && draft.notify" id="s-notify" class="card">
         <div class="ch"><div><h2>{{ t('settings.notify') }}</h2><p class="sub">{{ t('settings.notifySub') }}</p></div></div>
         <CfgRow :label="t('settings.push')" :help="t('settings.pushHelp')">
           <SwitchToggle v-model="draft.notify.push" :label="t('settings.push')" />
@@ -265,26 +427,27 @@ const reviewModels = computed(() => [{ value: 'auto' as ReviewModel, label: t('s
         <CfgRow v-if="draft.notify.followUps !== undefined" :label="t('followUps.notifyLabel')">
           <SwitchToggle v-model="draft.notify.followUps" :label="t('followUps.notifyLabel')" />
         </CfgRow>
+        <CfgRow v-if="draft.notify.ci !== undefined" :label="t('settings.ciRed')">
+          <SwitchToggle v-model="draft.notify.ci" :label="t('settings.ciRed')" />
+        </CfgRow>
       </section>
-      <McpCard />
+      <McpCard v-else-if="section === 'mcp'" />
 
       <SaveBar v-if="dirty || error" :busy="save.isPending.value" :error="error" @save="save.mutate(draft)" @discard="discard" />
     </div>
-    <aside class="cfg-side">
-      <section class="card">
-        <h2 style="margin-bottom: 8px">{{ t('settings.onThisPage') }}</h2>
-        <nav class="anchor-nav">
-          <a href="#s-look">{{ t('settings.appearance') }}</a>
-          <a href="#s-integ">{{ t('settings.integrations') }}</a>
-          <a href="#s-claude">{{ t('settings.claude') }}</a>
-          <a href="#s-git">{{ t('settings.commits') }}</a>
-          <a href="#s-runs">{{ t('settings.runs') }}</a>
-          <a href="#s-preview">{{ t('preview.settingsTitle') }}</a>
-          <a href="#s-notify">{{ t('settings.notify') }}</a>
-          <a href="#s-mcp">{{ t('mcp.title') }}</a>
-        </nav>
-      </section>
-      <div class="help"><HiIcon name="info" /><p>{{ t('settings.secretsHelp') }}</p></div>
-    </aside>
   </div>
 </template>
+
+<style scoped>
+.set-grid { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 16px; align-items: start; }
+.set-side { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 88px; min-width: 0; }
+.anchor-nav a.on { background: var(--hover); color: var(--ink); }
+@media (max-width: 900px) {
+  .set-grid { grid-template-columns: minmax(0, 1fr); }
+  .set-side { position: static; }
+  .set-side .anchor-nav { flex-direction: row; overflow-x: auto; }
+  .set-side .anchor-nav a { white-space: nowrap; }
+}
+.guard-hooks { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.ci-infra { width: min(360px, 100%); min-height: 96px; font-family: var(--mono); font-size: 13px; }
+</style>

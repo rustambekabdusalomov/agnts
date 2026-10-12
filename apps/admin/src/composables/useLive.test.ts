@@ -69,4 +69,15 @@ describe('useLive', () => {
     }
     expect(new Set(keys).size).toBe(keys.length) // each once per batch
   })
+
+  it('refreshes the CI lists on CI news and on ticket moves', () => {
+    FakeSource.last.onopen?.()
+    const send = (e: object) => FakeSource.last.onmessage?.({ data: JSON.stringify(e) })
+    for (const type of ['ci_failure', 'state_changed', 'pr_merged']) {
+      calls = []
+      send({ type, ticketKey: type === 'ci_failure' ? '' : 'CI-1' })
+      vi.advanceTimersByTime(400)
+      expect(calls.map((c) => JSON.stringify(c[0]?.queryKey))).toContain(JSON.stringify(['ci']))
+    }
+  })
 })
