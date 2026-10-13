@@ -196,6 +196,7 @@ import 'package:agnts_api/src/model/settings.dart';
 import 'package:agnts_api/src/model/ship_notes.dart';
 import 'package:agnts_api/src/model/shot_ref.dart';
 import 'package:agnts_api/src/model/signup_info.dart';
+import 'package:agnts_api/src/model/skill_stat.dart';
 import 'package:agnts_api/src/model/slow_ticket.dart';
 import 'package:agnts_api/src/model/spread.dart';
 import 'package:agnts_api/src/model/stage.dart';
@@ -688,6 +689,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ShotRef.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SignupInfo':
           return SignupInfo.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SkillStat':
+          return SkillStat.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SlowTicket':
           return SlowTicket.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Spread':

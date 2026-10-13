@@ -244,6 +244,7 @@ export 'package:agnts_api/src/model/settings.dart';
 export 'package:agnts_api/src/model/ship_notes.dart';
 export 'package:agnts_api/src/model/shot_ref.dart';
 export 'package:agnts_api/src/model/signup_info.dart';
+export 'package:agnts_api/src/model/skill_stat.dart';
 export 'package:agnts_api/src/model/slow_ticket.dart';
 export 'package:agnts_api/src/model/spread.dart';
 export 'package:agnts_api/src/model/stage.dart';

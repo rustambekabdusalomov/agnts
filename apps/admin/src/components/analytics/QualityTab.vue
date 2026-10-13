@@ -44,6 +44,12 @@ const autoShare = (p: AnalyticsCI['current']) => pctOf(p.autoFixed, p.fixed)
 
 // The harness numbers: shown when any version has them.
 const harness = computed(() => props.a.quality.some((v) => v.guardBlocks !== undefined))
+
+// Method skills (Skills plan.md): shown once a coding run had one. The row
+// without a skill is the tickets that had none, to compare with.
+const skills = computed(() => props.a.skills ?? [])
+const skillsShown = computed(() => skills.value.some((x) => x.skill !== ''))
+const skillName = (s: string) => (s ? s.replace(/^agnts-method-/, '') : t('harnessSettings.skillNone'))
 </script>
 
 <template>
@@ -171,6 +177,36 @@ const harness = computed(() => props.a.quality.some((v) => v.guardBlocks !== und
                 </template>
                 <template v-else>—</template>
               </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section v-if="skillsShown" class="card span3">
+      <div class="ch"><div><h2>{{ t('harnessSettings.skillsTitle') }}</h2><p class="sub">{{ t('harnessSettings.skillsSub') }}</p></div></div>
+      <div class="tw">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>{{ t('harnessSettings.colSkill') }}</th>
+              <th :title="t('harnessSettings.colSkillTicketsHint')">{{ t('harnessSettings.colSkillTickets') }}</th>
+              <th :title="t('harnessSettings.colLoadedHint')">{{ t('harnessSettings.colLoaded') }}</th>
+              <th :title="t('harnessSettings.colSkillFirstTryHint')">{{ t('harnessSettings.colSkillFirstTry') }}</th>
+              <th :title="t('harnessSettings.colLoadedFirstTryHint')">{{ t('harnessSettings.colLoadedFirstTry') }}</th>
+              <th :title="t('harnessSettings.colTargetedHint')">{{ t('harnessSettings.colTargeted') }}</th>
+              <th :title="t('harnessSettings.colTokensHint')">{{ t('harnessSettings.colTokens') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="x in skills" :key="x.skill">
+              <td class="ttitle mono" style="white-space: nowrap">{{ skillName(x.skill) }}</td>
+              <td>{{ x.tickets }}</td>
+              <td>{{ x.skill ? `${pctOf(x.loaded, x.tickets)}%` : '—' }}</td>
+              <td>{{ x.done ? `${pctOf(x.firstTry, x.done)}%` : '—' }}</td>
+              <td>{{ x.skill && x.loadedDone ? `${pctOf(x.loadedFirstTry, x.loadedDone)}%` : '—' }}</td>
+              <td>{{ x.tickets ? (x.findings / x.tickets).toFixed(2) : '—' }}</td>
+              <td>{{ x.done && x.tokens ? fmtTokens(x.tokens, locale) : '—' }}</td>
             </tr>
           </tbody>
         </table>

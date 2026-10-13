@@ -514,6 +514,7 @@ func (o *Orchestrator) watch(ctx context.Context, s domain.Settings, ws Workspac
 // feeds rate-limit readings to the usage tracker.
 func (o *Orchestrator) streamTo(ctx context.Context, t domain.Ticket, run *domain.Run) func(ClaudeEvent) {
 	return func(e ClaudeEvent) {
+		noteSkill(run, e)
 		ev := domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Data: e.Data}
 		switch e.Kind {
 		case ClaudeInit:
@@ -932,6 +933,9 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 	defer o.closeWorkspace(ctx, t, ws)
 	defer o.collectGuard(ctx, ws, t, run) // before the container goes
 	knowledge := o.contextFiles(ctx, ws, t, &repo)
+	if m := o.methodSkills(ctx, s, ws, run); m != nil {
+		knowledge = append(knowledge, *m)
+	}
 
 	session, err := o.store.LastSessionID(ctx, t.ID)
 	if err != nil {

@@ -49,6 +49,8 @@ abstract class _$SettingsCWProxy {
 
   Settings proveFixes(bool? proveFixes);
 
+  Settings methodSkills(bool? methodSkills);
+
   Settings deepReview(String? deepReview);
 
   Settings learnFromRuns(bool? learnFromRuns);
@@ -91,6 +93,7 @@ abstract class _$SettingsCWProxy {
     GuardSettings? guard,
     String? stalls,
     bool? proveFixes,
+    bool? methodSkills,
     String? deepReview,
     bool? learnFromRuns,
     String? secondOpinion,
@@ -174,6 +177,9 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
   Settings proveFixes(bool? proveFixes) => this(proveFixes: proveFixes);
 
   @override
+  Settings methodSkills(bool? methodSkills) => this(methodSkills: methodSkills);
+
+  @override
   Settings deepReview(String? deepReview) => this(deepReview: deepReview);
 
   @override
@@ -225,6 +231,7 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
     Object? guard = const $CopyWithPlaceholder(),
     Object? stalls = const $CopyWithPlaceholder(),
     Object? proveFixes = const $CopyWithPlaceholder(),
+    Object? methodSkills = const $CopyWithPlaceholder(),
     Object? deepReview = const $CopyWithPlaceholder(),
     Object? learnFromRuns = const $CopyWithPlaceholder(),
     Object? secondOpinion = const $CopyWithPlaceholder(),
@@ -318,6 +325,10 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
           ? _value.proveFixes
           // ignore: cast_nullable_to_non_nullable
           : proveFixes as bool?,
+      methodSkills: methodSkills == const $CopyWithPlaceholder()
+          ? _value.methodSkills
+          // ignore: cast_nullable_to_non_nullable
+          : methodSkills as bool?,
       deepReview: deepReview == const $CopyWithPlaceholder()
           ? _value.deepReview
           // ignore: cast_nullable_to_non_nullable
@@ -424,6 +435,7 @@ Settings _$SettingsFromJson(
     ),
     stalls: $checkedConvert('stalls', (v) => v as String?),
     proveFixes: $checkedConvert('proveFixes', (v) => v as bool?),
+    methodSkills: $checkedConvert('methodSkills', (v) => v as bool?),
     deepReview: $checkedConvert('deepReview', (v) => v as String?),
     learnFromRuns: $checkedConvert('learnFromRuns', (v) => v as bool?),
     secondOpinion: $checkedConvert('secondOpinion', (v) => v as String?),
@@ -464,6 +476,7 @@ Map<String, dynamic> _$SettingsToJson(Settings instance) => <String, dynamic>{
   'guard': ?instance.guard?.toJson(),
   'stalls': ?instance.stalls,
   'proveFixes': ?instance.proveFixes,
+  'methodSkills': ?instance.methodSkills,
   'deepReview': ?instance.deepReview,
   'learnFromRuns': ?instance.learnFromRuns,
   'secondOpinion': ?instance.secondOpinion,

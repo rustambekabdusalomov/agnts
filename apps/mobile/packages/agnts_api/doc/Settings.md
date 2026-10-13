@@ -29,6 +29,7 @@ Name | Type | Description | Notes
 **guard** | [**GuardSettings**](GuardSettings.md) |  | [optional] 
 **stalls** | **String** | What agnts does when a run looks stuck: nothing, note it on the ticket, or also tell Claude to step back (once per run) | [optional] 
 **proveFixes** | **bool** | Bug fixes need a test that fails before the change and passes after it; agnts checks it | [optional] 
+**methodSkills** | **bool** | Coding runs get agnts's method skills: add one more of something the way the repository does, follow its style, reuse before writing, change a schema safely | [optional] 
 **deepReview** | **String** | Specialist passes in the code review (security, silent failures, tests, types); auto: large or complex work | [optional] 
 **learnFromRuns** | **bool** | Suggest tips from runs that had trouble (failed checks, a stall) | [optional] 
 **secondOpinion** | **String** | A model that critiques the chosen approach of complex tickets (codex:<model> or a Claude model); empty turns it off | [optional] 

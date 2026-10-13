@@ -429,9 +429,9 @@ func toSettings(v domain.Settings) gen.Settings {
 	for _, h := range v.Guard.Disabled {
 		guard.Disabled = append(guard.Disabled, gen.GuardHook(h))
 	}
-	stalls, deep, prove, learnRuns, second := v.Stalls, v.DeepReview, v.ProveFixes, v.LearnFromRuns, v.SecondOpinion
+	stalls, deep, prove, learnRuns, second, methods := v.Stalls, v.DeepReview, v.ProveFixes, v.LearnFromRuns, v.SecondOpinion, v.MethodSkills
 	return gen.Settings{
-		Guard: &guard, Stalls: &stalls, DeepReview: &deep, ProveFixes: &prove, LearnFromRuns: &learnRuns, SecondOpinion: &second,
+		Guard: &guard, Stalls: &stalls, DeepReview: &deep, ProveFixes: &prove, LearnFromRuns: &learnRuns, SecondOpinion: &second, MethodSkills: &methods,
 		PullReviews: &pulls,
 		Ci:          &ci,
 		Models: gen.StageModels{Analyze: v.Models.Analyze, Coding: v.Models.Coding,
@@ -495,7 +495,7 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 		MaxTurns: req.MaxTurns, TimeoutMin: req.TimeoutMin, Allow: req.Allow, Deny: req.Deny,
 		AskFirst: req.AskFirst, AutoResume: req.AutoResume, PauseAbove: req.PauseAbove, Parallel: cur.Parallel, AutoLearn: cur.AutoLearn,
 		AutoReview: cur.AutoReview, SuggestFollowUps: cur.SuggestFollowUps, PullReviews: cur.PullReviews, CI: cur.CI,
-		Guard: cur.Guard, Stalls: cur.Stalls, DeepReview: cur.DeepReview, ProveFixes: cur.ProveFixes, LearnFromRuns: cur.LearnFromRuns,
+		Guard: cur.Guard, Stalls: cur.Stalls, DeepReview: cur.DeepReview, ProveFixes: cur.ProveFixes, LearnFromRuns: cur.LearnFromRuns, MethodSkills: cur.MethodSkills,
 		SecondOpinion: cur.SecondOpinion,
 		Git: domain.GitSettings{AuthorName: req.Git.AuthorName, AuthorEmail: req.Git.AuthorEmail, CoAuthor: req.Git.CoAuthor,
 			PRTitle: req.Git.PrTitle, Draft: req.Git.Draft},
@@ -581,6 +581,9 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.LearnFromRuns != nil {
 		v.LearnFromRuns = *req.LearnFromRuns
+	}
+	if req.MethodSkills != nil {
+		v.MethodSkills = *req.MethodSkills
 	}
 	if req.SecondOpinion != nil {
 		v.SecondOpinion = *req.SecondOpinion

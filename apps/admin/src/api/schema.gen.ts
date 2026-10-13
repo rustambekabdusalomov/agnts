@@ -4145,6 +4145,8 @@ export interface components {
             stalls?: string;
             /** @description Bug fixes need a test that fails before the change and passes after it; agnts checks it */
             proveFixes?: boolean;
+            /** @description Coding runs get agnts's method skills: add one more of something the way the repository does, follow its style, reuse before writing, change a schema safely */
+            methodSkills?: boolean;
             /** @description Specialist passes in the code review (security, silent failures, tests, types); auto: large or complex work */
             deepReview?: string;
             /** @description Suggest tips from runs that had trouble (failed checks, a stall) */
@@ -5027,6 +5029,8 @@ export interface components {
             days: number;
             /** @description How the tickets whose first coding run started in the period went, by prompt version, oldest first */
             quality: components["schemas"]["QualityStat"][];
+            /** @description How agnts's method skills did on the tickets whose coding runs started in the period (replays included), by skill; an empty skill is the tickets that had none */
+            skills?: components["schemas"]["SkillStat"][];
             current: components["schemas"]["PeriodStats"];
             previous: components["schemas"]["PeriodStats"];
             perDay: components["schemas"]["DayStat"][];
@@ -5357,6 +5361,25 @@ export interface components {
             factCheck?: number;
             /** @description Of those, done without a person asking for changes */
             factCheckFirst?: number;
+        };
+        SkillStat: {
+            /** @description A method skill (agnts-method-…); empty for the tickets whose coding runs had no method skills */
+            skill: string;
+            /** @description Tickets with a coding run that had the skill */
+            tickets: number;
+            /** @description Of those, tickets where Claude loaded it */
+            loaded: number;
+            done: number;
+            /** @description Done without a person asking for changes */
+            firstTry: number;
+            /** @description Done, of the tickets where Claude loaded it */
+            loadedDone: number;
+            /** @description Done first try, of the tickets where Claude loaded it */
+            loadedFirstTry: number;
+            /** @description Review findings the method skills target: architecture and maintainability, or any on a migration file */
+            findings: number;
+            /** @description Average tokens of a done ticket, all stages */
+            tokens: number;
         };
         /** @enum {string} */
         LessonCategory: "pattern" | "architecture" | "algorithm" | "library" | "language" | "testing" | "security" | "performance" | "tooling" | "other";

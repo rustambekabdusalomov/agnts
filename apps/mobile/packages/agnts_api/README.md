@@ -469,6 +469,7 @@ Class | Method | HTTP request | Description
  - [ShipNotes](doc/ShipNotes.md)
  - [ShotRef](doc/ShotRef.md)
  - [SignupInfo](doc/SignupInfo.md)
+ - [SkillStat](doc/SkillStat.md)
  - [SlowTicket](doc/SlowTicket.md)
  - [Spread](doc/Spread.md)
  - [Stage](doc/Stage.md)

@@ -110,6 +110,25 @@ describe('AnalyticsPage', () => {
     const { w } = await setup('/w/acme/analytics/quality')
     expect(asked()).toEqual(['/analytics', '/analytics/ci', '/eval/replays']) // the replay card loads its own
     expect(w.text()).toContain('CI watching is not set up')
+    expect(w.text()).not.toContain('Method skills') // no coding run had one
+  })
+
+  it('compares method skills with the tickets that had none', async () => {
+    const stat = (skill: string, tickets: number, loaded: number, firstTry: number, loadedFirstTry: number, findings: number) =>
+      ({ skill, tickets, loaded, done: tickets, firstTry, loadedDone: loaded, loadedFirstTry, findings, tokens: 1000 })
+    BODY['/analytics'] = { ...main, skills: [stat('', 4, 0, 2, 0, 4), stat('agnts-method-house-style', 4, 2, 3, 2, 2)] }
+    try {
+      const { w } = await setup('/w/acme/analytics/quality')
+      const rows = w.findAll('tbody tr').map((r) => r.text())
+      expect(w.text()).toContain('Method skills')
+      expect(rows.find((r) => r.startsWith('none (baseline)'))).toContain('50%') // 2 of 4 first try
+      const house = rows.find((r) => r.startsWith('house-style'))!
+      expect(house).toContain('75%') // first try
+      expect(house).toContain('100%') // first try when loaded
+      expect(house).toContain('0.50') // targeted findings per ticket
+    } finally {
+      BODY['/analytics'] = main
+    }
   })
 
   it('switches tabs by route and shows model cost on the Cost tab', async () => {

@@ -240,8 +240,10 @@ func skillMarkdown(r domain.Rule) string {
 
 // writeSkills puts the rules delivered as skills, and the tips, into the
 // run as Claude Code skills, replacing those of earlier runs. It returns
-// how many it wrote.
+// how many it wrote. It removes all of agnts's skills of earlier runs
+// first, method skills included: the coding stage writes those again.
 func (o *Orchestrator) writeSkills(ctx context.Context, ws Workspace, repoID *int64) int {
+	_, _ = ws.Exec(ctx, "rm -rf "+SkillsDir+"/agnts-*", time.Minute)
 	if o.rules == nil {
 		return 0
 	}
@@ -250,7 +252,6 @@ func (o *Orchestrator) writeSkills(ctx context.Context, ws Workspace, repoID *in
 		o.log.Warn("load skill rules", "err", err)
 		return 0
 	}
-	_, _ = ws.Exec(ctx, "rm -rf "+SkillsDir+"/agnts-*", time.Minute)
 	n := 0
 	for _, r := range rules {
 		if r.Delivery != domain.DeliverSkill && r.Kind != domain.KindTip {

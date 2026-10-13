@@ -110,6 +110,12 @@ func (s *Server) GetAnalytics(w http.ResponseWriter, r *http.Request, p gen.GetA
 	for i, q := range a.Quality {
 		out.Quality[i] = toQualityStat(q)
 	}
+	skills := make([]gen.SkillStat, len(a.Skills))
+	for i, x := range a.Skills {
+		skills[i] = gen.SkillStat{Skill: x.Skill, Tickets: x.Tickets, Loaded: x.Loaded, Done: x.Done, FirstTry: x.FirstTry,
+			LoadedDone: x.LoadedDone, LoadedFirstTry: x.LoadedFirstTry, Findings: x.Findings, Tokens: float32(x.Tokens)}
+	}
+	out.Skills = &skills
 	writeJSON(w, http.StatusOK, out)
 }
 

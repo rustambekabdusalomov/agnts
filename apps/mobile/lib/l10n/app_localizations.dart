@@ -5433,6 +5433,18 @@ abstract class AppLocalizations {
   /// **'After a run with failed checks or a stall, agnts may suggest a tip for the repository. Tips stay watched until seen again.'**
   String get harnessSettingsLearnFromRunsHelp;
 
+  /// No description provided for @harnessSettingsMethodSkills.
+  ///
+  /// In en, this message translates to:
+  /// **'Method skills'**
+  String get harnessSettingsMethodSkills;
+
+  /// No description provided for @harnessSettingsMethodSkillsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Coding runs get agnts\'s method skills: add one more of something the way the repository already does it, follow the surrounding style, reuse before writing, and change a database schema safely. Claude loads one only when it fits; compare on Analytics.'**
+  String get harnessSettingsMethodSkillsHelp;
+
   /// No description provided for @harnessSettingsSecondOpinion.
   ///
   /// In en, this message translates to:
@@ -5624,6 +5636,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'First-try rate of tickets in the fact check group, next to the rate of all done tickets'**
   String get harnessSettingsColFactCheckHint;
+
+  /// No description provided for @harnessSettingsSkillsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Method skills'**
+  String get harnessSettingsSkillsTitle;
+
+  /// No description provided for @harnessSettingsSkillsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets whose coding runs had each method skill, replays included, next to the tickets that had none. Replay the same tickets with the setting off and on to compare.'**
+  String get harnessSettingsSkillsSub;
+
+  /// No description provided for @harnessSettingsSkillNone.
+  ///
+  /// In en, this message translates to:
+  /// **'none (baseline)'**
+  String get harnessSettingsSkillNone;
+
+  /// No description provided for @harnessSettingsColSkill.
+  ///
+  /// In en, this message translates to:
+  /// **'Skill'**
+  String get harnessSettingsColSkill;
+
+  /// No description provided for @harnessSettingsColSkillTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets'**
+  String get harnessSettingsColSkillTickets;
+
+  /// No description provided for @harnessSettingsColSkillTicketsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets with a coding run that had the skill'**
+  String get harnessSettingsColSkillTicketsHint;
+
+  /// No description provided for @harnessSettingsColLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded'**
+  String get harnessSettingsColLoaded;
+
+  /// No description provided for @harnessSettingsColLoadedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Share of those tickets where Claude loaded the skill'**
+  String get harnessSettingsColLoadedHint;
+
+  /// No description provided for @harnessSettingsColSkillFirstTry.
+  ///
+  /// In en, this message translates to:
+  /// **'First try'**
+  String get harnessSettingsColSkillFirstTry;
+
+  /// No description provided for @harnessSettingsColSkillFirstTryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Done without a person asking for changes, of the done tickets'**
+  String get harnessSettingsColSkillFirstTryHint;
+
+  /// No description provided for @harnessSettingsColLoadedFirstTry.
+  ///
+  /// In en, this message translates to:
+  /// **'First try, loaded'**
+  String get harnessSettingsColLoadedFirstTry;
+
+  /// No description provided for @harnessSettingsColLoadedFirstTryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'First-try rate of the done tickets where Claude loaded the skill'**
+  String get harnessSettingsColLoadedFirstTryHint;
+
+  /// No description provided for @harnessSettingsColTargeted.
+  ///
+  /// In en, this message translates to:
+  /// **'Targeted findings'**
+  String get harnessSettingsColTargeted;
+
+  /// No description provided for @harnessSettingsColTargetedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Review findings per ticket of the kinds the skills target: architecture, maintainability, and any on a migration file'**
+  String get harnessSettingsColTargetedHint;
 
   /// No description provided for @harnessSettingsXOfY.
   ///

@@ -68,6 +68,8 @@ class Settings {
 
      this.proveFixes,
 
+     this.methodSkills,
+
      this.deepReview,
 
      this.learnFromRuns,
@@ -350,6 +352,19 @@ class Settings {
 
 
 
+      /// Coding runs get agnts's method skills: add one more of something the way the repository does, follow its style, reuse before writing, change a schema safely
+  @JsonKey(
+    
+    name: r'methodSkills',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? methodSkills;
+
+
+
       /// Specialist passes in the code review (security, silent failures, tests, types); auto: large or complex work
   @JsonKey(
     
@@ -466,6 +481,7 @@ class Settings {
       other.guard == guard &&
       other.stalls == stalls &&
       other.proveFixes == proveFixes &&
+      other.methodSkills == methodSkills &&
       other.deepReview == deepReview &&
       other.learnFromRuns == learnFromRuns &&
       other.secondOpinion == secondOpinion &&
@@ -497,6 +513,7 @@ class Settings {
         guard.hashCode +
         stalls.hashCode +
         proveFixes.hashCode +
+        methodSkills.hashCode +
         deepReview.hashCode +
         learnFromRuns.hashCode +
         secondOpinion.hashCode +

@@ -17,7 +17,7 @@ import (
 // Analytics page can compare the quality of the work before and after a
 // change: bump it whenever a change to the prompts or to the context runs
 // get could change what Claude does.
-const PromptVersion = "2026-10-12.5"
+const PromptVersion = "2026-10-13.1"
 
 // Files Claude Code writes for agnts to read back. stream-json output has no
 // structured result, so the contract is a file outside the repository.

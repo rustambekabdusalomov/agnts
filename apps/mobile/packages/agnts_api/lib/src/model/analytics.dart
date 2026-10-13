@@ -10,6 +10,7 @@ import 'package:agnts_api/src/model/stage_spend.dart';
 import 'package:agnts_api/src/model/analytics_repos_inner.dart';
 import 'package:agnts_api/src/model/quality_stat.dart';
 import 'package:agnts_api/src/model/analytics_insights_inner.dart';
+import 'package:agnts_api/src/model/skill_stat.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -30,6 +31,8 @@ class Analytics {
     required  this.days,
 
     required  this.quality,
+
+     this.skills,
 
     required  this.current,
 
@@ -74,6 +77,19 @@ class Analytics {
 
 
   final List<QualityStat> quality;
+
+
+
+      /// How agnts's method skills did on the tickets whose coding runs started in the period (replays included), by skill; an empty skill is the tickets that had none
+  @JsonKey(
+    
+    name: r'skills',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<SkillStat>? skills;
 
 
 
@@ -207,6 +223,7 @@ class Analytics {
     bool operator ==(Object other) => identical(this, other) || other is Analytics &&
       other.days == days &&
       other.quality == quality &&
+      other.skills == skills &&
       other.current == current &&
       other.previous == previous &&
       other.perDay == perDay &&
@@ -222,6 +239,7 @@ class Analytics {
     int get hashCode =>
         days.hashCode +
         quality.hashCode +
+        skills.hashCode +
         current.hashCode +
         previous.hashCode +
         perDay.hashCode +

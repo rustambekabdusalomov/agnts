@@ -2965,6 +2965,13 @@ class AppLocalizationsUz extends AppLocalizations {
       'Tekshiruvlari yiqilgan yoki tiqilib qolgan ishga tushirishdan keyin agnts repozitoriy uchun maslahat taklif qilishi mumkin. Maslahatlar yana koʻringuncha kuzatiladi.';
 
   @override
+  String get harnessSettingsMethodSkills => 'Uslubiy koʻnikmalar';
+
+  @override
+  String get harnessSettingsMethodSkillsHelp =>
+      'Kodlash ishga tushirishlari agnts uslubiy koʻnikmalarini oladi: repozitoriyda allaqachon qilinganidek yana bir element qoʻshish, atrofdagi uslubga amal qilish, yozishdan oldin qayta foydalanish va maʼlumotlar bazasi sxemasini xavfsiz oʻzgartirish. Claude koʻnikmani faqat mos kelganda yuklaydi; Analitikada solishtiring.';
+
+  @override
   String get harnessSettingsSecondOpinion => 'Ikkinchi fikr';
 
   @override
@@ -3064,6 +3071,50 @@ class AppLocalizationsUz extends AppLocalizations {
   @override
   String get harnessSettingsColFactCheckHint =>
       'Faktlarni tekshirish guruhidagi tasklarning birinchi urinishda qabul qilinish ulushi, barcha tayyor tasklar ulushi yonida';
+
+  @override
+  String get harnessSettingsSkillsTitle => 'Uslubiy koʻnikmalar';
+
+  @override
+  String get harnessSettingsSkillsSub =>
+      'Kodlash ishga tushirishlari har bir koʻnikmani olgan tiketlar, takrorlar bilan birga, koʻnikmasiz tiketlar yonida. Solishtirish uchun bir xil tiketlarni sozlama oʻchiq va yoqilgan holda takrorlang.';
+
+  @override
+  String get harnessSettingsSkillNone => 'yoʻq (asos)';
+
+  @override
+  String get harnessSettingsColSkill => 'Koʻnikma';
+
+  @override
+  String get harnessSettingsColSkillTickets => 'Tiketlar';
+
+  @override
+  String get harnessSettingsColSkillTicketsHint => 'Koʻnikmani olgan kodlash ishga tushirishli tiketlar';
+
+  @override
+  String get harnessSettingsColLoaded => 'Yuklangan';
+
+  @override
+  String get harnessSettingsColLoadedHint => 'Claude koʻnikmani yuklagan tiketlar ulushi';
+
+  @override
+  String get harnessSettingsColSkillFirstTry => 'Birinchi urinishda';
+
+  @override
+  String get harnessSettingsColSkillFirstTryHint => 'Tayyor tiketlardan, inson oʻzgartirish soʻramasdan tayyor boʻlganlari';
+
+  @override
+  String get harnessSettingsColLoadedFirstTry => 'Birinchi urinishda, yuklangan';
+
+  @override
+  String get harnessSettingsColLoadedFirstTryHint => 'Claude koʻnikmani yuklagan tayyor tiketlarning birinchi urinish ulushi';
+
+  @override
+  String get harnessSettingsColTargeted => 'Maqsadli izohlar';
+
+  @override
+  String get harnessSettingsColTargetedHint =>
+      'Koʻnikmalar nishonga olgan turdagi tiketdagi koʻrib chiqish izohlari: arxitektura, qoʻllab-quvvatlanuvchanlik va migratsiya fayllaridagi har qanday izoh';
 
   @override
   String harnessSettingsXOfY(String x, String y) {

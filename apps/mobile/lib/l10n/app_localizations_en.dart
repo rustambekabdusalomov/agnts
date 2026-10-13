@@ -2974,6 +2974,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'After a run with failed checks or a stall, agnts may suggest a tip for the repository. Tips stay watched until seen again.';
 
   @override
+  String get harnessSettingsMethodSkills => 'Method skills';
+
+  @override
+  String get harnessSettingsMethodSkillsHelp =>
+      'Coding runs get agnts\'s method skills: add one more of something the way the repository already does it, follow the surrounding style, reuse before writing, and change a database schema safely. Claude loads one only when it fits; compare on Analytics.';
+
+  @override
   String get harnessSettingsSecondOpinion => 'Second opinion';
 
   @override
@@ -3071,6 +3078,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get harnessSettingsColFactCheckHint => 'First-try rate of tickets in the fact check group, next to the rate of all done tickets';
+
+  @override
+  String get harnessSettingsSkillsTitle => 'Method skills';
+
+  @override
+  String get harnessSettingsSkillsSub =>
+      'Tickets whose coding runs had each method skill, replays included, next to the tickets that had none. Replay the same tickets with the setting off and on to compare.';
+
+  @override
+  String get harnessSettingsSkillNone => 'none (baseline)';
+
+  @override
+  String get harnessSettingsColSkill => 'Skill';
+
+  @override
+  String get harnessSettingsColSkillTickets => 'Tickets';
+
+  @override
+  String get harnessSettingsColSkillTicketsHint => 'Tickets with a coding run that had the skill';
+
+  @override
+  String get harnessSettingsColLoaded => 'Loaded';
+
+  @override
+  String get harnessSettingsColLoadedHint => 'Share of those tickets where Claude loaded the skill';
+
+  @override
+  String get harnessSettingsColSkillFirstTry => 'First try';
+
+  @override
+  String get harnessSettingsColSkillFirstTryHint => 'Done without a person asking for changes, of the done tickets';
+
+  @override
+  String get harnessSettingsColLoadedFirstTry => 'First try, loaded';
+
+  @override
+  String get harnessSettingsColLoadedFirstTryHint => 'First-try rate of the done tickets where Claude loaded the skill';
+
+  @override
+  String get harnessSettingsColTargeted => 'Targeted findings';
+
+  @override
+  String get harnessSettingsColTargetedHint =>
+      'Review findings per ticket of the kinds the skills target: architecture, maintainability, and any on a migration file';
 
   @override
   String harnessSettingsXOfY(String x, String y) {

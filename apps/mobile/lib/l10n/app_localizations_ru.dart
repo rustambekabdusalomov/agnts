@@ -3102,6 +3102,13 @@ class AppLocalizationsRu extends AppLocalizations {
       'После запуска с упавшими проверками или застреванием agnts может предложить совет для репозитория. Советы наблюдаются, пока не повторятся.';
 
   @override
+  String get harnessSettingsMethodSkills => 'Навыки-методики';
+
+  @override
+  String get harnessSettingsMethodSkillsHelp =>
+      'Запуски кодинга получают навыки-методики agnts: добавлять ещё один элемент так, как это уже сделано в репозитории, следовать окружающему стилю, переиспользовать перед тем как писать, безопасно менять схему базы данных. Claude загружает навык, только когда он подходит; сравнивайте в Аналитике.';
+
+  @override
   String get harnessSettingsSecondOpinion => 'Второе мнение';
 
   @override
@@ -3201,6 +3208,50 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get harnessSettingsColFactCheckHint =>
       'Доля задач группы проверки фактов, принятых с первого раза, рядом с долей всех готовых задач';
+
+  @override
+  String get harnessSettingsSkillsTitle => 'Навыки-методики';
+
+  @override
+  String get harnessSettingsSkillsSub =>
+      'Тикеты, запуски кодинга которых получили каждый навык, включая повторы, рядом с тикетами без навыков. Чтобы сравнить, повторите одни и те же тикеты с выключенной и включённой настройкой.';
+
+  @override
+  String get harnessSettingsSkillNone => 'нет (база)';
+
+  @override
+  String get harnessSettingsColSkill => 'Навык';
+
+  @override
+  String get harnessSettingsColSkillTickets => 'Тикеты';
+
+  @override
+  String get harnessSettingsColSkillTicketsHint => 'Тикеты с запуском кодинга, получившим навык';
+
+  @override
+  String get harnessSettingsColLoaded => 'Загружен';
+
+  @override
+  String get harnessSettingsColLoadedHint => 'Доля этих тикетов, где Claude загрузил навык';
+
+  @override
+  String get harnessSettingsColSkillFirstTry => 'С первого раза';
+
+  @override
+  String get harnessSettingsColSkillFirstTryHint => 'Готово без просьб человека об изменениях, от готовых тикетов';
+
+  @override
+  String get harnessSettingsColLoadedFirstTry => 'С первого раза, загружен';
+
+  @override
+  String get harnessSettingsColLoadedFirstTryHint => 'Доля готовых с первого раза среди тикетов, где Claude загрузил навык';
+
+  @override
+  String get harnessSettingsColTargeted => 'Целевые замечания';
+
+  @override
+  String get harnessSettingsColTargetedHint =>
+      'Замечания ревью на тикет тех видов, на которые нацелены навыки: архитектура, сопровождаемость и любые по файлам миграций';
 
   @override
   String harnessSettingsXOfY(String x, String y) {

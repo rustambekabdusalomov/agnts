@@ -337,6 +337,9 @@ const section = computed(() => {
         <CfgRow v-if="draft.learnFromRuns !== undefined" :label="t('harnessSettings.learnFromRuns')" :help="t('harnessSettings.learnFromRunsHelp')">
           <SwitchToggle v-model="draft.learnFromRuns" :label="t('harnessSettings.learnFromRuns')" />
         </CfgRow>
+        <CfgRow v-if="draft.methodSkills !== undefined" :label="t('harnessSettings.methodSkills')" :help="t('harnessSettings.methodSkillsHelp')">
+          <SwitchToggle v-model="draft.methodSkills" :label="t('harnessSettings.methodSkills')" />
+        </CfgRow>
         <CfgRow v-if="draft.secondOpinion !== undefined" :label="t('harnessSettings.secondOpinion')" :help="t('harnessSettings.secondOpinionHelp')">
           <input v-model.trim="draft.secondOpinion" class="cfg-in mono" maxlength="80" :placeholder="t('harnessSettings.secondOpinionHint')" :aria-label="t('harnessSettings.secondOpinion')">
         </CfgRow>

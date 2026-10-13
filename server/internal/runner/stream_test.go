@@ -101,3 +101,15 @@ func TestParseUsageCutOff(t *testing.T) {
 		t.Fatal("a cut-off stream with no usage is not partial spend")
 	}
 }
+
+func TestToolSummaryNamesTheSkill(t *testing.T) {
+	for in, want := range map[string]string{
+		`{"skill":"agnts-method-house-style"}`:   "Skill: agnts-method-house-style",
+		`{"command":"agnts-method-reuse-first"}`: "Skill: agnts-method-reuse-first", // older Claude Code versions
+		`{}`:                                     "Skill",
+	} {
+		if got := toolSummary("Skill", []byte(in)); got != want {
+			t.Errorf("%s: %q, want %q", in, got, want)
+		}
+	}
+}

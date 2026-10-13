@@ -18,6 +18,12 @@ void main() {
       // TODO
     });
 
+    // How agnts's method skills did on the tickets whose coding runs started in the period (replays included), by skill; an empty skill is the tickets that had none
+    // List<SkillStat> skills
+    test('to test the property `skills`', () async {
+      // TODO
+    });
+
     // PeriodStats current
     test('to test the property `current`', () async {
       // TODO

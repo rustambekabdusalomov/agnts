@@ -4870,6 +4870,7 @@ components:
           pattern: '^(off|log|act)$'
           description: 'What agnts does when a run looks stuck: nothing, note it on the ticket, or also tell Claude to step back (once per run)'
         proveFixes: { type: boolean, description: 'Bug fixes need a test that fails before the change and passes after it; agnts checks it' }
+        methodSkills: { type: boolean, description: "Coding runs get agnts's method skills: add one more of something the way the repository does, follow its style, reuse before writing, change a schema safely" }
         deepReview:
           type: string
           pattern: '^(off|auto|always)$'
@@ -5916,6 +5917,10 @@ components:
           type: array
           description: How the tickets whose first coding run started in the period went, by prompt version, oldest first
           items: { $ref: '#/components/schemas/QualityStat' }
+        skills:
+          type: array
+          description: "How agnts's method skills did on the tickets whose coding runs started in the period (replays included), by skill; an empty skill is the tickets that had none"
+          items: { $ref: '#/components/schemas/SkillStat' }
         current: { $ref: '#/components/schemas/PeriodStats' }
         previous: { $ref: '#/components/schemas/PeriodStats' }
         perDay:
@@ -6284,6 +6289,20 @@ components:
         tokens: { type: number, description: 'Average tokens of a done ticket, all stages' }
         factCheck: { type: integer, description: Tickets in the fact check group (A/B) }
         factCheckFirst: { type: integer, description: 'Of those, done without a person asking for changes' }
+
+    SkillStat:
+      type: object
+      required: [skill, tickets, loaded, done, firstTry, loadedDone, loadedFirstTry, findings, tokens]
+      properties:
+        skill: { type: string, description: 'A method skill (agnts-method-…); empty for the tickets whose coding runs had no method skills' }
+        tickets: { type: integer, description: Tickets with a coding run that had the skill }
+        loaded: { type: integer, description: 'Of those, tickets where Claude loaded it' }
+        done: { type: integer }
+        firstTry: { type: integer, description: Done without a person asking for changes }
+        loadedDone: { type: integer, description: 'Done, of the tickets where Claude loaded it' }
+        loadedFirstTry: { type: integer, description: 'Done first try, of the tickets where Claude loaded it' }
+        findings: { type: integer, description: 'Review findings the method skills target: architecture and maintainability, or any on a migration file' }
+        tokens: { type: number, description: 'Average tokens of a done ticket, all stages' }
 
     LessonCategory:
       type: string

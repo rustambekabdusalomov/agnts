@@ -242,7 +242,7 @@ func limitedStatus(data map[string]any) bool {
 func toolSummary(name string, input json.RawMessage) string {
 	var in map[string]any
 	_ = json.Unmarshal(input, &in)
-	for _, k := range []string{"command", "file_path", "path", "pattern", "url", "description"} {
+	for _, k := range []string{"command", "skill", "file_path", "path", "pattern", "url", "description"} {
 		if s, ok := in[k].(string); ok && s != "" {
 			s = strings.ReplaceAll(s, "\n", " ")
 			if len(s) > 200 {

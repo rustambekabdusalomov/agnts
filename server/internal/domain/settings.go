@@ -158,6 +158,10 @@ type Settings struct {
 	// ProveFixes asks bug-fix tickets for a test that fails before the
 	// change and passes after it, and checks it.
 	ProveFixes bool `json:"proveFixes"`
+	// MethodSkills gives coding runs agnts's method skills (package
+	// skillpacks): how to add one more of something, follow the house
+	// style, reuse before writing, change a schema safely.
+	MethodSkills bool `json:"methodSkills"`
 	// Stalls: what agnts does when a run looks stuck (StallsOff, StallsLog
 	// or StallsAct).
 	Stalls     string         `json:"stalls"`

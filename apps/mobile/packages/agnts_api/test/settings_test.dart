@@ -123,6 +123,12 @@ void main() {
       // TODO
     });
 
+    // Coding runs get agnts's method skills: add one more of something the way the repository does, follow its style, reuse before writing, change a schema safely
+    // bool methodSkills
+    test('to test the property `methodSkills`', () async {
+      // TODO
+    });
+
     // Specialist passes in the code review (security, silent failures, tests, types); auto: large or complex work
     // String deepReview
     test('to test the property `deepReview`', () async {

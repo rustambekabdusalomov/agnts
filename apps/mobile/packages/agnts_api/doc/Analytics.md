@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **days** | **int** |  | 
 **quality** | [**List&lt;QualityStat&gt;**](QualityStat.md) | How the tickets whose first coding run started in the period went, by prompt version, oldest first | 
+**skills** | [**List&lt;SkillStat&gt;**](SkillStat.md) | How agnts's method skills did on the tickets whose coding runs started in the period (replays included), by skill; an empty skill is the tickets that had none | [optional] 
 **current** | [**PeriodStats**](PeriodStats.md) |  | 
 **previous** | [**PeriodStats**](PeriodStats.md) |  | 
 **perDay** | [**List&lt;DayStat&gt;**](DayStat.md) |  | 

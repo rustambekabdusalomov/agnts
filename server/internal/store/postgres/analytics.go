@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	"agnts/internal/domain"
+	"agnts/internal/skillpacks"
 )
 
 // DayStats is one day of the Analytics page.
@@ -89,6 +90,21 @@ type QualityStats struct {
 	FactCheckFirst int     // of those, done without a person asking for changes
 }
 
+// SkillStats is how the tickets whose coding runs had one method skill
+// went (Skills plan.md). Skill "" is the tickets that had none, to compare
+// with.
+type SkillStats struct {
+	Skill          string
+	Tickets        int // with a coding run in the period that had the skill
+	Loaded         int // of those, where Claude loaded it
+	Done           int
+	FirstTry       int // done without a person asking for changes
+	LoadedDone     int
+	LoadedFirstTry int
+	Findings       int     // targeted review findings: architecture, maintainability, any on a migration file
+	Tokens         float64 // average tokens of a done ticket (all stages)
+}
+
 // Analytics is everything the Analytics page shows for one period.
 type Analytics struct {
 	Days    []DayStats
@@ -101,6 +117,7 @@ type Analytics struct {
 	Hours   [24]int
 	Spend   []domain.StageUsage // by stage and model, costliest first
 	Quality []QualityStats      // by prompt version, oldest first
+	Skills  []SkillStats        // by method skill; "" first: tickets without any
 
 	// For the insights only.
 	FollowUpsAccepted, FollowUpsDismissed int      // follow-ups decided in the period
@@ -353,6 +370,9 @@ func (s *Agent) Analytics(ctx context.Context, days int, tz *time.Location) (Ana
 	if a.Quality, err = s.quality(ctx, start, end); err != nil {
 		return a, err
 	}
+	if a.Skills, err = s.skills(ctx, start, end); err != nil {
+		return a, err
+	}
 
 	err = s.db.QueryRow(ctx, `SELECT count(*) FILTER (WHERE status = 'accepted'), count(*) FILTER (WHERE status = 'dismissed')
 		FROM ticket_suggestions WHERE decided_at >= $1 AND decided_at < $2`, start, end).Scan(&a.FollowUpsAccepted, &a.FollowUpsDismissed)
@@ -511,6 +531,57 @@ func (s *Agent) quality(ctx context.Context, from, to time.Time) ([]QualityStats
 			return nil, err
 		}
 		out = append(out, q)
+	}
+	return out, rows.Err()
+}
+
+// skills groups the tickets whose coding runs started in [from, to) by the
+// method skills those runs had, replays included: replays with method
+// skills off and on are how the skills are judged.
+func (s *Agent) skills(ctx context.Context, from, to time.Time) ([]SkillStats, error) {
+	rows, err := s.db.Query(ctx, `WITH code AS (
+			SELECT r.ticket_id, r.harness FROM runs r JOIN tickets t ON t.id = r.ticket_id
+			WHERE r.stage = 'code' AND r.started_at >= $1 AND r.started_at < $2 AND t.kind <> 'review'),
+		given AS (
+			SELECT DISTINCT c.ticket_id, m.v AS skill
+			FROM code c, jsonb_array_elements_text(COALESCE(c.harness->'methodSkills', '[]')) m(v)),
+		loaded AS (
+			SELECT DISTINCT c.ticket_id, l.v AS skill
+			FROM code c, jsonb_array_elements_text(COALESCE(c.harness->'skills', '[]')) l(v)),
+		groups AS (
+			SELECT ticket_id, skill FROM given
+			UNION ALL
+			SELECT DISTINCT c.ticket_id, '' FROM code c WHERE NOT EXISTS (SELECT 1 FROM given g WHERE g.ticket_id = c.ticket_id)),
+		per AS (
+			SELECT g.skill, t.state,
+				EXISTS (SELECT 1 FROM loaded l WHERE l.ticket_id = g.ticket_id AND l.skill = g.skill) AS loaded,
+				(SELECT count(*) FROM events e WHERE e.ticket_key = t.key AND e.type = 'feedback' AND e.origin <> 'system') AS rounds,
+				(SELECT count(*) FROM results res JOIN runs r ON r.id = res.run_id, jsonb_array_elements(COALESCE(res.summary->'findings', '[]')) f
+					WHERE r.ticket_id = g.ticket_id AND r.stage = 'review'
+						AND (f->>'category' IN ('architecture', 'maintainability') OR COALESCE(f->>'file', '') ~ $3)) AS targeted,
+				(SELECT COALESCE(sum(cc.input_tokens + cc.output_tokens + cc.cache_read_tokens + cc.cache_write_tokens), 0)
+					FROM claude_calls cc JOIN runs r ON r.id = cc.run_id WHERE r.ticket_id = g.ticket_id) AS tokens
+			FROM groups g JOIN tickets t ON t.id = g.ticket_id)
+		SELECT skill, count(*), count(*) FILTER (WHERE loaded),
+			count(*) FILTER (WHERE state = 'done'),
+			count(*) FILTER (WHERE state = 'done' AND rounds = 0),
+			count(*) FILTER (WHERE loaded AND state = 'done'),
+			count(*) FILTER (WHERE loaded AND state = 'done' AND rounds = 0),
+			COALESCE(sum(targeted), 0)::int,
+			COALESCE(avg(tokens) FILTER (WHERE state = 'done'), 0)::float8
+		FROM per GROUP BY skill ORDER BY skill`, from, to, skillpacks.MigrationFiles)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := []SkillStats{}
+	for rows.Next() {
+		var x SkillStats
+		if err := rows.Scan(&x.Skill, &x.Tickets, &x.Loaded, &x.Done, &x.FirstTry, &x.LoadedDone, &x.LoadedFirstTry,
+			&x.Findings, &x.Tokens); err != nil {
+			return nil, err
+		}
+		out = append(out, x)
 	}
 	return out, rows.Err()
 }

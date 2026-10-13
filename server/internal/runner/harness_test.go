@@ -176,7 +176,7 @@ func TestWriteFileCreatesDirs(t *testing.T) {
 		t.Fatal(err)
 	}
 	ws := &workspace{docker: d, id: id}
-	for _, p := range []string{"/agnts/context/brief.md", "/agnts/context/review/go.md", "/home/agent/.claude/skills/agnts-no-sql/SKILL.md", "/agnts/out/summary.json"} {
+	for _, p := range []string{"/agnts/context/brief.md", "/agnts/context/review/go.md", "/home/agent/.claude/skills/agnts-no-sql/SKILL.md", "/home/agent/.claude/skills/agnts-method-house-style/SKILL.md", "/agnts/out/summary.json"} {
 		if err := ws.WriteFile(ctx, p, []byte("content of "+p)); err != nil {
 			t.Fatalf("write %s: %v", p, err)
 		}

@@ -232,6 +232,7 @@ doc/SettingsApi.md
 doc/ShipNotes.md
 doc/ShotRef.md
 doc/SignupInfo.md
+doc/SkillStat.md
 doc/SlowTicket.md
 doc/Spread.md
 doc/Stage.md
@@ -532,6 +533,7 @@ lib/src/model/settings.dart
 lib/src/model/ship_notes.dart
 lib/src/model/shot_ref.dart
 lib/src/model/signup_info.dart
+lib/src/model/skill_stat.dart
 lib/src/model/slow_ticket.dart
 lib/src/model/spread.dart
 lib/src/model/stage.dart
@@ -815,6 +817,7 @@ test/settings_test.dart
 test/ship_notes_test.dart
 test/shot_ref_test.dart
 test/signup_info_test.dart
+test/skill_stat_test.dart
 test/slow_ticket_test.dart
 test/spread_test.dart
 test/stage_models_test.dart

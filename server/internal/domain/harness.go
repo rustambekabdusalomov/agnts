@@ -202,6 +202,10 @@ type RunHarness struct {
 	// Trouble is what went wrong along the way (failed checks, a stall),
 	// condensed for a reflect run that may turn it into a tip.
 	Trouble []string `json:"trouble,omitempty"`
+	// MethodSkills are the method skills agnts gave a coding run, and
+	// Skills the skills (method or team rule skills) Claude loaded in it.
+	MethodSkills []string `json:"methodSkills,omitempty"`
+	Skills       []string `json:"skills,omitempty"`
 }
 
 // GuardSummary sums up a run's guard log.
