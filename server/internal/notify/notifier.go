@@ -495,8 +495,22 @@ func pushText(v orchestrator.TicketView, e domain.Event) (string, string) {
 		if v.Ticket.Kind.Report() {
 			return k + " is done", v.Ticket.Title
 		}
+		if prs := v.Ticket.OpenedPRs(); len(prs) > 1 {
+			return fmt.Sprintf("%s pushed: %d pull requests", k, len(prs)), prURLs(prs)
+		} else if len(prs) == 1 {
+			return k + " pushed", prs[0].PRURL // the primary may have had nothing to push
+		}
 		return k + " pushed", v.Ticket.PRURL
 	}
+}
+
+// prURLs lists the pull requests of a ticket in several repositories.
+func prURLs(prs []domain.TicketRepo) string {
+	urls := make([]string, len(prs))
+	for i, r := range prs {
+		urls[i] = r.PRURL
+	}
+	return strings.Join(urls, "\n")
 }
 
 func (n *Notifier) push(ctx context.Context, p Push) {
@@ -637,6 +651,10 @@ func (n *Notifier) sendTelegram(ctx context.Context, v orchestrator.TicketView, 
 			msg = fmt.Sprintf("%s: pull request merged\n%s", t.Key, t.PRURL)
 		} else if t.Kind.Report() {
 			msg = t.Key + ": report approved."
+		} else if prs := t.OpenedPRs(); len(prs) > 1 {
+			msg = fmt.Sprintf("%s: %d pull requests opened\n%s", t.Key, len(prs), prURLs(prs))
+		} else if len(prs) == 1 {
+			msg = fmt.Sprintf("%s: pull request opened\n%s", t.Key, prs[0].PRURL)
 		} else if t.PRURL != "" {
 			msg = fmt.Sprintf("%s: pull request opened\n%s", t.Key, t.PRURL)
 		}

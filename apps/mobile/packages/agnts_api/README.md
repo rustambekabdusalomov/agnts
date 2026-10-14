@@ -84,6 +84,14 @@ Class | Method | HTTP request | Description
 [*AnalyticsApi*](doc/AnalyticsApi.md) | [**getAnalyticsDelivery**](doc/AnalyticsApi.md#getanalyticsdelivery) | **GET** /analytics/delivery | What happened to agnts pull requests, cycle time and questions for a period
 [*AnalyticsApi*](doc/AnalyticsApi.md) | [**getAnalyticsLearning**](doc/AnalyticsApi.md#getanalyticslearning) | **GET** /analytics/learning | Lessons, rules, follow-ups and reviewer notes for a period
 [*AnalyticsApi*](doc/AnalyticsApi.md) | [**getReplayReport**](doc/AnalyticsApi.md#getreplayreport) | **GET** /eval/replays | How the newest replays compare with the tickets they re-ran, by prompt version
+[*AssistantApi*](doc/AssistantApi.md) | [**askAssistant**](doc/AssistantApi.md#askassistant) | **POST** /assistant/conversations/{conversationId}/messages | Ask a follow-up question in one of your conversations
+[*AssistantApi*](doc/AssistantApi.md) | [**deleteAssistantConversation**](doc/AssistantApi.md#deleteassistantconversation) | **DELETE** /assistant/conversations/{conversationId} | Delete one of your conversations
+[*AssistantApi*](doc/AssistantApi.md) | [**getAssistantConversation**](doc/AssistantApi.md#getassistantconversation) | **GET** /assistant/conversations/{conversationId} | One of your conversations with all its messages
+[*AssistantApi*](doc/AssistantApi.md) | [**getAssistantStats**](doc/AssistantApi.md#getassistantstats) | **GET** /assistant/stats | How the workspace&#39;s assistant did (questions, answer rate, time, ratings, tokens, per prompt version)
+[*AssistantApi*](doc/AssistantApi.md) | [**listAssistantConversations**](doc/AssistantApi.md#listassistantconversations) | **GET** /assistant/conversations | Your assistant conversations, newest first, each with its last message
+[*AssistantApi*](doc/AssistantApi.md) | [**listAssistantRated**](doc/AssistantApi.md#listassistantrated) | **GET** /assistant/rated | Rated answers with their questions, newest rating first
+[*AssistantApi*](doc/AssistantApi.md) | [**rateAssistantAnswer**](doc/AssistantApi.md#rateassistantanswer) | **PUT** /assistant/messages/{messageId}/rating | Rate one of your answers (helpful or not), or take the rating back
+[*AssistantApi*](doc/AssistantApi.md) | [**startAssistantConversation**](doc/AssistantApi.md#startassistantconversation) | **POST** /assistant/conversations | Ask the assistant a question in a new conversation
 [*AttachmentsApi*](doc/AttachmentsApi.md) | [**deleteAttachment**](doc/AttachmentsApi.md#deleteattachment) | **DELETE** /attachments/{id} | Delete an upload that nothing uses yet
 [*AttachmentsApi*](doc/AttachmentsApi.md) | [**getAttachment**](doc/AttachmentsApi.md#getattachment) | **GET** /attachments/{id} | An attached file&#39;s bytes
 [*AttachmentsApi*](doc/AttachmentsApi.md) | [**uploadAttachment**](doc/AttachmentsApi.md#uploadattachment) | **POST** /attachments | Upload a file to attach to a task, an answer or a retry note
@@ -162,14 +170,18 @@ Class | Method | HTTP request | Description
 [*ReposApi*](doc/ReposApi.md) | [**approveRepoBrief**](doc/ReposApi.md#approverepobrief) | **POST** /repos/{id}/brief/approve | Make the draft the brief that runs read
 [*ReposApi*](doc/ReposApi.md) | [**archiveRepo**](doc/ReposApi.md#archiverepo) | **POST** /repos/{id}/archive | Archive the repository; it keeps its history but takes no new tickets or tasks
 [*ReposApi*](doc/ReposApi.md) | [**createRepo**](doc/ReposApi.md#createrepo) | **POST** /repos | 
+[*ReposApi*](doc/ReposApi.md) | [**createRepoGroup**](doc/ReposApi.md#createrepogroup) | **POST** /repo-groups | Create a repository group
+[*ReposApi*](doc/ReposApi.md) | [**deleteRepoGroup**](doc/ReposApi.md#deleterepogroup) | **DELETE** /repo-groups/{id} | Delete a group; its tickets keep their repositories
 [*ReposApi*](doc/ReposApi.md) | [**deployRepo**](doc/ReposApi.md#deployrepo) | **POST** /repos/{id}/deploy | Start a deployment (GitLab manual job, or the GitHub deploy workflow). Never available from MCP.
 [*ReposApi*](doc/ReposApi.md) | [**detectRepo**](doc/ReposApi.md#detectrepo) | **POST** /repos/detect | Work out a repository&#39;s toolchains and check commands
 [*ReposApi*](doc/ReposApi.md) | [**discardRepoBriefDraft**](doc/ReposApi.md#discardrepobriefdraft) | **POST** /repos/{id}/brief/discard | Drop the draft a survey wrote
 [*ReposApi*](doc/ReposApi.md) | [**getRepo**](doc/ReposApi.md#getrepo) | **GET** /repos/{id} | 
 [*ReposApi*](doc/ReposApi.md) | [**getRepoBrief**](doc/ReposApi.md#getrepobrief) | **GET** /repos/{id}/brief | What agnts knows about how the repository works; empty and idle before the first survey
+[*ReposApi*](doc/ReposApi.md) | [**getRepoGroup**](doc/ReposApi.md#getrepogroup) | **GET** /repo-groups/{id} | 
 [*ReposApi*](doc/ReposApi.md) | [**listRepoBranches**](doc/ReposApi.md#listrepobranches) | **GET** /repos/{id}/branches | Branches with their tip, ahead/behind the default branch and checks
 [*ReposApi*](doc/ReposApi.md) | [**listRepoCommits**](doc/ReposApi.md#listrepocommits) | **GET** /repos/{id}/commits | Commits on the default branch, newest first, 50 per page; a shorter page is the last
 [*ReposApi*](doc/ReposApi.md) | [**listRepoEnvironments**](doc/ReposApi.md#listrepoenvironments) | **GET** /repos/{id}/environments | Deployment environments and what runs there
+[*ReposApi*](doc/ReposApi.md) | [**listRepoGroups**](doc/ReposApi.md#listrepogroups) | **GET** /repo-groups | The workspace&#39;s repository groups
 [*ReposApi*](doc/ReposApi.md) | [**listRepoLocalBranches**](doc/ReposApi.md#listrepolocalbranches) | **GET** /repos/{id}/local-branches | Branches in agnts&#39;s own clones on the server, and whether origin has them
 [*ReposApi*](doc/ReposApi.md) | [**listRepoMembers**](doc/ReposApi.md#listrepomembers) | **GET** /repos/{id}/members | People with access to the repository on its git host
 [*ReposApi*](doc/ReposApi.md) | [**listRepoPipelines**](doc/ReposApi.md#listrepopipelines) | **GET** /repos/{id}/pipelines | CI runs with their stages, newest first, 20 per page; a shorter page is the last
@@ -179,6 +191,7 @@ Class | Method | HTTP request | Description
 [*ReposApi*](doc/ReposApi.md) | [**surveyRepoBrief**](doc/ReposApi.md#surveyrepobrief) | **POST** /repos/{id}/brief/survey | Have Claude survey the repository and write a draft brief (an update when it has one)
 [*ReposApi*](doc/ReposApi.md) | [**unarchiveRepo**](doc/ReposApi.md#unarchiverepo) | **POST** /repos/{id}/unarchive | Restore an archived repository
 [*ReposApi*](doc/ReposApi.md) | [**updateRepo**](doc/ReposApi.md#updaterepo) | **PUT** /repos/{id} | 
+[*ReposApi*](doc/ReposApi.md) | [**updateRepoGroup**](doc/ReposApi.md#updaterepogroup) | **PUT** /repo-groups/{id} | Replace a group&#39;s fields and repositories
 [*ReviewsApi*](doc/ReviewsApi.md) | [**addReviewerNote**](doc/ReviewsApi.md#addreviewernote) | **POST** /reviews/notes | Tell agnts something about how you review; the next review for that user reads it
 [*ReviewsApi*](doc/ReviewsApi.md) | [**deleteReviewerNote**](doc/ReviewsApi.md#deletereviewernote) | **DELETE** /reviews/notes/{id} | Forget a note (one already folded into a profile stays there until the profile is edited)
 [*ReviewsApi*](doc/ReviewsApi.md) | [**listReviewers**](doc/ReviewsApi.md#listreviewers) | **GET** /reviews/reviewers | How each person agnts reviews pull requests for reviews, as it learned from their notes
@@ -231,6 +244,7 @@ Class | Method | HTTP request | Description
 [*TicketsApi*](doc/TicketsApi.md) | [**setTicketMember**](doc/TicketsApi.md#setticketmember) | **PUT** /tickets/{key}/member | Make a member the ticket&#39;s member (per-member Claude mode runs it on their account)
 [*TicketsApi*](doc/TicketsApi.md) | [**setTicketModels**](doc/TicketsApi.md#setticketmodels) | **PUT** /tickets/{key}/models | Override models for this ticket; omit a stage to use the default
 [*TicketsApi*](doc/TicketsApi.md) | [**setTicketRepo**](doc/TicketsApi.md#setticketrepo) | **PUT** /tickets/{key}/repo | Link the ticket to a repository
+[*TicketsApi*](doc/TicketsApi.md) | [**setTicketRepos**](doc/TicketsApi.md#setticketrepos) | **PUT** /tickets/{key}/repos | Set the ticket&#39;s repositories (one, several or a group)
 [*TicketsApi*](doc/TicketsApi.md) | [**startTicket**](doc/TicketsApi.md#startticket) | **POST** /tickets/{key}/analyze | Start a held ticket now (it is queued for the next free slot)
 [*TicketsApi*](doc/TicketsApi.md) | [**stopTicket**](doc/TicketsApi.md#stopticket) | **POST** /tickets/{key}/stop | Stop the running stage; the ticket moves to failed and can be retried
 [*TicketsApi*](doc/TicketsApi.md) | [**translateTicket**](doc/TicketsApi.md#translateticket) | **POST** /tickets/{key}/translate | Translate a ticket&#39;s texts (its own and what agnts wrote) into a language
@@ -282,6 +296,15 @@ Class | Method | HTTP request | Description
  - [AnswersRequestAnswersInner](doc/AnswersRequestAnswersInner.md)
  - [Approach](doc/Approach.md)
  - [ApproveTicketRequest](doc/ApproveTicketRequest.md)
+ - [AssistantAsk](doc/AssistantAsk.md)
+ - [AssistantConversation](doc/AssistantConversation.md)
+ - [AssistantLanguage](doc/AssistantLanguage.md)
+ - [AssistantLink](doc/AssistantLink.md)
+ - [AssistantMessage](doc/AssistantMessage.md)
+ - [AssistantRated](doc/AssistantRated.md)
+ - [AssistantRating](doc/AssistantRating.md)
+ - [AssistantStats](doc/AssistantStats.md)
+ - [AssistantStatsVersionsInner](doc/AssistantStatsVersionsInner.md)
  - [Attachment](doc/Attachment.md)
  - [BeginLoginTotp200Response](doc/BeginLoginTotp200Response.md)
  - [BeginLoginTotpRequest](doc/BeginLoginTotpRequest.md)
@@ -431,6 +454,11 @@ Class | Method | HTTP request | Description
  - [RepoBriefInput](doc/RepoBriefInput.md)
  - [RepoDetectInput](doc/RepoDetectInput.md)
  - [RepoDetection](doc/RepoDetection.md)
+ - [RepoGroup](doc/RepoGroup.md)
+ - [RepoGroupInput](doc/RepoGroupInput.md)
+ - [RepoGroupInputMembersInner](doc/RepoGroupInputMembersInner.md)
+ - [RepoGroupMember](doc/RepoGroupMember.md)
+ - [RepoGroupRef](doc/RepoGroupRef.md)
  - [RepoHarness](doc/RepoHarness.md)
  - [RepoHarnessAllOfDerivedCoverage](doc/RepoHarnessAllOfDerivedCoverage.md)
  - [RepoHarnessInput](doc/RepoHarnessInput.md)
@@ -490,6 +518,8 @@ Class | Method | HTTP request | Description
  - [TicketKindInput](doc/TicketKindInput.md)
  - [TicketPreview](doc/TicketPreview.md)
  - [TicketRepo](doc/TicketRepo.md)
+ - [TicketRepoState](doc/TicketRepoState.md)
+ - [TicketReposInput](doc/TicketReposInput.md)
  - [TicketSpendList](doc/TicketSpendList.md)
  - [TicketSpendRow](doc/TicketSpendRow.md)
  - [TicketState](doc/TicketState.md)

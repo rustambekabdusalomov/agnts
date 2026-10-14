@@ -95,6 +95,8 @@ type Options struct {
 	// Network runs the workspace's private network (VPN, agnts-link);
 	// nil answers 501.
 	Network *network.Service
+	// Assistant answers questions about the workspace; nil answers 501.
+	Assistant Assistant
 }
 
 // Server implements gen.ServerInterface.

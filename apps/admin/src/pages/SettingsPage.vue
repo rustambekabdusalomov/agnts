@@ -312,6 +312,9 @@ const section = computed(() => {
         <CfgRow :label="t('settings.pauseAbove')" :help="t('settings.pauseAboveHelp')">
           <NumberStepper v-model="draft.pauseAbove" :min="50" :max="100" :step="5" :label="t('settings.pauseAbove')" :format="percent" />
         </CfgRow>
+        <CfgRow v-if="draft.maxTicketRepos !== undefined" :label="t('groups.maxTicketRepos')" :help="t('groups.maxTicketReposHelp')">
+          <NumberStepper v-model="draft.maxTicketRepos" :min="1" :max="20" :step="1" :label="t('groups.maxTicketRepos')" />
+        </CfgRow>
         <CfgRow :label="t('settings.parallel')" :help="t('settings.parallelSlotsHelp')">
           <RouterLink class="btn btn-s" :to="{ name: 'workspace', query: { tab: 'billing' } }">{{ t('settings.parallelSlots', { n: draft.parallel }) }}</RouterLink>
         </CfgRow>

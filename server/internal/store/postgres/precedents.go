@@ -45,11 +45,12 @@ func (s *Agent) Precedents(ctx context.Context, repoID int64, except []string, f
 			FROM tickets t
 			JOIN LATERAL (SELECT res.summary, res.files FROM results res JOIN runs ON runs.id = res.run_id
 				WHERE runs.ticket_id = t.id AND runs.stage = 'code' ORDER BY res.created_at DESC LIMIT 1) c ON true
-			WHERE t.repo_id = $1 AND t.key <> ALL($2) AND t.replay_of = '' AND t.state = 'done' AND t.kind IN ('code', 'test')
+			WHERE `+touchesSQL+` AND t.key <> ALL($2) AND t.replay_of = '' AND t.state = 'done' AND t.kind IN ('code', 'test')
 			ORDER BY t.updated_at DESC LIMIT 500),
 		scored AS (
 			SELECT key, title, summary, files, updated_at,
-				(SELECT count(*) FROM jsonb_array_elements(files) f WHERE f->>'path' = ANY($3)) AS overlap,
+				(SELECT count(*) FROM jsonb_array_elements(files) f WHERE f->>'path' = ANY($3)
+					AND coalesce((f->>'repoId')::bigint, 0) IN (0, $1)) AS overlap,
 				CASE WHEN $4 = '' THEN 0 ELSE ts_rank(to_tsvector('simple', title || ' ' || description), to_tsquery('simple', $4)) END AS rank
 			FROM cand)
 		SELECT key, title, summary->>'summary', files, overlap FROM scored
@@ -69,11 +70,14 @@ func (s *Agent) Precedents(ctx context.Context, repoID int64, except []string, f
 			p.Summary = *summary
 		}
 		var fs []struct {
-			Path string `json:"path"`
+			Path   string `json:"path"`
+			RepoID int64  `json:"repoId"`
 		}
 		_ = json.Unmarshal(raw, &fs)
 		for _, f := range fs {
-			p.Files = append(p.Files, f.Path)
+			if f.RepoID == 0 || f.RepoID == repoID { // its change in this repository
+				p.Files = append(p.Files, f.Path)
+			}
 		}
 		return p, nil
 	})

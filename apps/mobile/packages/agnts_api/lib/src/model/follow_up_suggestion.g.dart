@@ -33,6 +33,8 @@ abstract class _$FollowUpSuggestionCWProxy {
 
   FollowUpSuggestion childKey(String? childKey);
 
+  FollowUpSuggestion repoIds(List<int>? repoIds);
+
   FollowUpSuggestion decidedAt(DateTime? decidedAt);
 
   FollowUpSuggestion createdAt(DateTime createdAt);
@@ -57,6 +59,7 @@ abstract class _$FollowUpSuggestionCWProxy {
     bool ready,
     List<int>? after,
     String? childKey,
+    List<int>? repoIds,
     DateTime? decidedAt,
     DateTime createdAt,
   });
@@ -112,6 +115,9 @@ class _$FollowUpSuggestionCWProxyImpl implements _$FollowUpSuggestionCWProxy {
   FollowUpSuggestion childKey(String? childKey) => this(childKey: childKey);
 
   @override
+  FollowUpSuggestion repoIds(List<int>? repoIds) => this(repoIds: repoIds);
+
+  @override
   FollowUpSuggestion decidedAt(DateTime? decidedAt) =>
       this(decidedAt: decidedAt);
 
@@ -140,6 +146,7 @@ class _$FollowUpSuggestionCWProxyImpl implements _$FollowUpSuggestionCWProxy {
     Object? ready = const $CopyWithPlaceholder(),
     Object? after = const $CopyWithPlaceholder(),
     Object? childKey = const $CopyWithPlaceholder(),
+    Object? repoIds = const $CopyWithPlaceholder(),
     Object? decidedAt = const $CopyWithPlaceholder(),
     Object? createdAt = const $CopyWithPlaceholder(),
   }) {
@@ -196,6 +203,10 @@ class _$FollowUpSuggestionCWProxyImpl implements _$FollowUpSuggestionCWProxy {
           ? _value.childKey
           // ignore: cast_nullable_to_non_nullable
           : childKey as String?,
+      repoIds: repoIds == const $CopyWithPlaceholder()
+          ? _value.repoIds
+          // ignore: cast_nullable_to_non_nullable
+          : repoIds as List<int>?,
       decidedAt: decidedAt == const $CopyWithPlaceholder()
           ? _value.decidedAt
           // ignore: cast_nullable_to_non_nullable
@@ -268,6 +279,10 @@ FollowUpSuggestion _$FollowUpSuggestionFromJson(
       (v) => (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList(),
     ),
     childKey: $checkedConvert('childKey', (v) => v as String?),
+    repoIds: $checkedConvert(
+      'repoIds',
+      (v) => (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList(),
+    ),
     decidedAt: $checkedConvert(
       'decidedAt',
       (v) => v == null ? null : DateTime.parse(v as String),
@@ -292,6 +307,7 @@ Map<String, dynamic> _$FollowUpSuggestionToJson(FollowUpSuggestion instance) =>
       'ready': instance.ready,
       'after': ?instance.after,
       'childKey': ?instance.childKey,
+      'repoIds': ?instance.repoIds,
       'decidedAt': ?instance.decidedAt?.toIso8601String(),
       'createdAt': instance.createdAt.toIso8601String(),
     };

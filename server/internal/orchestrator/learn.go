@@ -81,7 +81,7 @@ func (o *Orchestrator) Learn(ctx context.Context, key string, origin domain.Orig
 	if t.State != domain.StateDone {
 		return t, invalid("agnts learns from tickets once they are pushed")
 	}
-	if t.RepoID == nil || t.Branch == "" {
+	if !pushedBranch(t) {
 		return t, invalid("this ticket has no pushed branch to learn from")
 	}
 	if t.LearnState == domain.LearnPending {
@@ -96,67 +96,98 @@ func (o *Orchestrator) Learn(ctx context.Context, key string, origin domain.Orig
 	return t, err
 }
 
+// pushedBranch reports whether a ticket has a branch with its work in at
+// least one repository.
+func pushedBranch(t domain.Ticket) bool {
+	for _, id := range t.RepoIDs() {
+		if r, ok := t.RepoState(id); ok && r.Branch != "" && r.State != domain.RepoUnchanged {
+			return true
+		}
+	}
+	return false
+}
+
 // learn reads a pushed change and stores lessons for whatever it does that
-// the repository never did before. It never changes the ticket's state.
+// the repository never did before. It never changes the ticket's state. A
+// ticket in several repositories is learned from in each it changed, one
+// repository at a time: lessons belong to a repository.
 func (o *Orchestrator) learn(ctx context.Context, s domain.Settings, t domain.Ticket, run *domain.Run) error {
 	if o.lessons == nil {
 		return o.setLearnState(ctx, t.Key, domain.LearnNone)
 	}
-	repo, err := o.repoFor(ctx, t)
+	rs, err := o.reposFor(ctx, t)
 	if err != nil {
 		return err
 	}
-	if t.Branch == "" {
+	if !pushedBranch(t) {
 		return errors.New("no pushed branch to learn from")
 	}
 	res, err := o.store.LatestResult(ctx, t.ID, domain.StageCode)
 	if err != nil {
 		return fmt.Errorf("load the reviewed diff: %w", err)
 	}
-	topics, err := o.lessons.LessonTopics(ctx, repo.ID)
+	var found []domain.Lesson
+	for _, r := range rs {
+		if r.Row.Branch == "" || r.Row.State == domain.RepoUnchanged {
+			continue
+		}
+		files := domain.FilesIn(res.Files, r.ID, t.RepoID)
+		if len(rs) > 1 && len(files) == 0 {
+			continue
+		}
+		ls, err := o.learnRepo(ctx, s, t, run, r, files)
+		if err != nil {
+			if len(rs) > 1 {
+				return fmt.Errorf("%s: %w", r.Name, err)
+			}
+			return err
+		}
+		found = append(found, ls...)
+	}
+	_, err = o.lessons.SaveLessons(ctx, t.Key, found, func(saved []domain.Lesson) domain.Event {
+		return lessonsEvent(t.Key, run, saved)
+	})
+	return err
+}
+
+// learnRepo has Claude read the change in one repository (at /workspace,
+// on the ticket's branch) and returns the lessons it found.
+func (o *Orchestrator) learnRepo(ctx context.Context, s domain.Settings, t domain.Ticket, run *domain.Run, r runRepo, files []domain.FileChange) ([]domain.Lesson, error) {
+	topics, err := o.lessons.LessonTopics(ctx, r.ID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if len(topics) > learnMaxTopics {
 		topics = topics[:learnMaxTopics]
 	}
-
-	ws, err := o.openWorkspace(ctx, t, &repo, t.Branch, run)
+	r.Row.Folder, r.Branch = "", r.Row.Branch // alone in its run: at /workspace
+	ws, err := o.openWorkspace(ctx, t, []runRepo{r}, run)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer o.closeWorkspace(ctx, t, ws)
-	if err := ws.WriteFile(ctx, ChangePath, changeDiff(res.Files)); err != nil {
-		return fmt.Errorf("copy the diff into the workspace: %w", err)
+	if err := ws.WriteFile(ctx, ChangePath, changeDiff(files)); err != nil {
+		return nil, fmt.Errorf("copy the diff into the workspace: %w", err)
 	}
 
-	files := res.Files
 	if len(files) > learnMaxFiles {
 		files = files[:learnMaxFiles]
 	}
-	prompt, err := render("learn", promptData{T: t, Repo: repo, Files: files, Topics: topics, MaxLessons: learnMaxLessons})
+	prompt, err := render("learn", promptData{T: t, Repo: r.Repository, Files: files, Topics: topics, MaxLessons: learnMaxLessons})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	ls := s
 	ls.MaxTurns = min(s.MaxTurns, learnMaxTurns)
 	ls.TimeoutMin = min(s.TimeoutMin, learnTimeoutMin)
 	if _, err := o.claude(ctx, ls, ws, &t, run, domain.ModelLearn, prompt, ""); err != nil {
-		return err
+		return nil, err
 	}
 	raw, err := ws.ReadFile(ctx, LessonsPath)
 	if err != nil {
-		return fmt.Errorf("claude did not write %s: %w", LessonsPath, err)
+		return nil, fmt.Errorf("claude did not write %s: %w", LessonsPath, err)
 	}
-	found, err := parseLessons(raw, repo.ID, t.Key)
-	if err != nil {
-		return err
-	}
-
-	_, err = o.lessons.SaveLessons(ctx, t.Key, found, func(saved []domain.Lesson) domain.Event {
-		return lessonsEvent(t.Key, run, saved)
-	})
-	return err
+	return parseLessons(raw, r.ID, t.Key)
 }
 
 // lessonsEvent is the log line for a learn run's outcome; the notifier
@@ -191,13 +222,21 @@ func (o *Orchestrator) learnFailed(ctx context.Context, key string, run domain.R
 	}
 }
 
-// changeDiff joins the reviewed per-file diffs, capped so the run stays cheap.
+// changeDiff joins the reviewed per-file diffs, capped so the run stays
+// cheap. A change in several repositories is grouped by repository, each
+// under a line that names its folder (the diff's paths are the
+// repository's own).
 func changeDiff(files []domain.FileChange) []byte {
 	var b strings.Builder
+	repo := ""
 	for _, f := range files {
 		if b.Len()+len(f.Diff) > learnMaxDiff {
-			fmt.Fprintf(&b, "\n… diff of %s and later files left out; read them in /workspace …\n", f.Path)
+			fmt.Fprintf(&b, "\n… diff of %s and later files left out; read them in /workspace …\n", f.Where())
 			break
+		}
+		if f.Repo != "" && f.Repo != repo {
+			repo = f.Repo
+			fmt.Fprintf(&b, "\n### Repository %s/ (paths below are relative to /workspace/%s)\n\n", repo, repo)
 		}
 		b.WriteString(f.Diff)
 		if !strings.HasSuffix(f.Diff, "\n") {

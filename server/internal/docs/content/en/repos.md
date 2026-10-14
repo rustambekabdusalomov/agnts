@@ -29,3 +29,7 @@ The language runtimes and build tools every run installs, such as go@1.24, node@
 ## Advanced
 
 Runner image replaces the default image for this repository, for system libraries or SDKs toolchains cannot provide (Android, Flutter); build it on the server FROM agnts-runner. Memory raises the run container's memory for heavy builds. The build environment holds KEY=value lines such as private registry tokens; it is stored encrypted, shown only by name, and visible to Claude while it works, so use read-only tokens.
+
+## Groups
+
+A group is a named set of repositories that one task can change together, such as a backend and its web app. Give it instructions that say how the repositories fit together (contracts, which one changes first); every run of the group's tasks reads them. A task made from a group copies its repositories when it is created: editing the group later does not change it. The repositories share one run container, so they need the same runner image and no clashing versions of a tool; agnts refuses a group that cannot share one and warns about build variables both set. Archived repositories stay in their groups but are left out of new tasks.

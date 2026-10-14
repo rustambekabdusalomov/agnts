@@ -68,12 +68,23 @@ This takes a few minutes. Run it in the background and do step 4 meanwhile.
 ### 3. Restart the backend
 
 ```sh
-ssh root@45.138.158.39 'cd /opt/agnts && docker compose up -d agnts egress && \
-  docker compose ps && docker compose logs --since 2m agnts | grep -iE "error|fatal|migrat"'
+ssh root@45.138.158.39 'cd /opt/agnts && \
+  docker build --build-arg AGNTS_IMAGE=agnts:local -t agnts-ovpn:latest src/deploy/ovpn > /opt/agnts/ovpn-build.log 2>&1 && \
+  docker compose --profile private-network up -d agnts egress gateway && \
+  docker rm -f $(docker ps -aq --filter label=agnts=ovpn) 2>/dev/null; \
+  docker compose --profile private-network ps && docker compose logs --since 2m agnts | grep -iE "error|fatal|migrat"'
 ```
 
-`egress` uses the same image, so recreate it too. Database migrations run
-automatically when `agnts` starts. Wait until `agnts` shows `(healthy)`.
+`egress` and `gateway` use the same image, so recreate them too; without
+`--profile private-network` compose leaves `gateway` on the old image. The
+OpenVPN sidecars carry the agnts binary as well: the command rebuilds their
+image and removes the running ones, and agnts starts them again on the new
+image within 30 seconds (VPN tunnels drop for that long).
+
+Database migrations run automatically when `agnts` starts. Wait until `agnts`
+shows `(healthy)`. A warning from `gateway` or `egress` that they could not
+reach `agnts:8081` right after the restart is expected: they started before
+`agnts` was up, and they try again on their own.
 
 ### 4. Website
 
@@ -102,13 +113,33 @@ the runner copies it into each run. The runner image itself only needs a
 rebuild when `deploy/runner/` changes (managed settings with the hooks and the
 repository lockdown, the `/agnts/context` volume, `agnts-act`):
 
+Tag the running image first so you can roll back:
+
 ```sh
-ssh root@45.138.158.39 'cd /opt/agnts/src/deploy && docker compose --profile build build runner > /opt/agnts/runner-build.log 2>&1; \
+ssh root@45.138.158.39 'docker tag agnts-runner:latest agnts-runner:prev; cd /opt/agnts/src/deploy/runner && \
+  docker build -t agnts-runner:latest . > /opt/agnts/runner-build.log 2>&1; \
   echo exit=$?; tail -3 /opt/agnts/runner-build.log'
 ```
 
+Use `docker build`, not `docker compose --profile build build runner`: the
+compose file in `src/deploy` needs `AGNTS_DOMAIN`, which only `/opt/agnts/.env`
+sets, so compose fails before it builds anything. The tag must match
+`AGNTS_RUNNER_IMAGE` in `/opt/agnts/.env` (unset means `agnts-runner:latest`).
+
 Add `--build-arg CODEX_VERSION=<version>` to also install Codex CLI for
 `codex:<model>` runs. New runs use the new image; runs in progress keep theirs.
+
+Check it, and roll back if a run misbehaves:
+
+```sh
+ssh root@45.138.158.39 'docker run --rm agnts-runner:latest claude --version'
+ssh root@45.138.158.39 'docker tag agnts-runner:prev agnts-runner:latest'
+```
+
+Claude Code is a native binary that needs a CPU with SSE4.2/AVX. Before
+moving to a new server, check that `grep -o -w avx2 /proc/cpuinfo` prints
+something: on a VM with the generic CPU type (kvm64) claude hangs at 100% CPU.
+Ask the provider for CPU type `host`.
 
 ## Private networks (once)
 
@@ -145,11 +176,8 @@ The command the page shows for agnts-link uses `registry.agnts.uz/agnts-link:lat
 Build it with `docker build -f deploy/link/Dockerfile -t registry.agnts.uz/agnts-link:latest .`
 and push it before telling teams about the connector.
 
-After each later deploy, recreate `gateway` with `agnts` and `egress`
-(`docker compose --profile private-network up -d agnts egress gateway`) and
-rebuild the sidecar image; running sidecars are replaced on their own when
-the image name changes, otherwise remove them (`docker rm -f $(docker ps -aq --filter label=agnts=ovpn)`)
-and agnts starts them again within 30 seconds.
+This server has it set up (14 October 2026). Every later deploy rebuilds the
+sidecar image and recreates `gateway` in step 3.
 
 Migration `00038_private_networks_multi.sql` lets a workspace keep several
 networks (`AGNTS_PRIVATE_NETWORKS_MAX`, default 5). On the first start after
@@ -162,7 +190,7 @@ does not send or check the network.
 ## Rollback
 
 ```sh
-ssh root@45.138.158.39 'docker tag agnts:prev agnts:local && cd /opt/agnts && docker compose up -d agnts egress'
+ssh root@45.138.158.39 'docker tag agnts:prev agnts:local && cd /opt/agnts && docker compose --profile private-network up -d agnts egress gateway'
 ```
 
 Migrations only go forward. If a deploy applied a migration the old image

@@ -13,6 +13,12 @@ abstract class _$TicketCWProxy {
 
   Ticket repoId(int? repoId);
 
+  Ticket repos(List<TicketRepoState>? repos);
+
+  Ticket group(RepoGroupRef? group);
+
+  Ticket partlyMerged(bool? partlyMerged);
+
   Ticket title(String title);
 
   Ticket description(String description);
@@ -115,6 +121,9 @@ abstract class _$TicketCWProxy {
     String key,
     TicketSource_Enum source_,
     int? repoId,
+    List<TicketRepoState>? repos,
+    RepoGroupRef? group,
+    bool? partlyMerged,
     String title,
     String description,
     String priority,
@@ -178,6 +187,15 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
 
   @override
   Ticket repoId(int? repoId) => this(repoId: repoId);
+
+  @override
+  Ticket repos(List<TicketRepoState>? repos) => this(repos: repos);
+
+  @override
+  Ticket group(RepoGroupRef? group) => this(group: group);
+
+  @override
+  Ticket partlyMerged(bool? partlyMerged) => this(partlyMerged: partlyMerged);
 
   @override
   Ticket title(String title) => this(title: title);
@@ -337,6 +355,9 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
     Object? key = const $CopyWithPlaceholder(),
     Object? source_ = const $CopyWithPlaceholder(),
     Object? repoId = const $CopyWithPlaceholder(),
+    Object? repos = const $CopyWithPlaceholder(),
+    Object? group = const $CopyWithPlaceholder(),
+    Object? partlyMerged = const $CopyWithPlaceholder(),
     Object? title = const $CopyWithPlaceholder(),
     Object? description = const $CopyWithPlaceholder(),
     Object? priority = const $CopyWithPlaceholder(),
@@ -397,6 +418,18 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
           ? _value.repoId
           // ignore: cast_nullable_to_non_nullable
           : repoId as int?,
+      repos: repos == const $CopyWithPlaceholder()
+          ? _value.repos
+          // ignore: cast_nullable_to_non_nullable
+          : repos as List<TicketRepoState>?,
+      group: group == const $CopyWithPlaceholder()
+          ? _value.group
+          // ignore: cast_nullable_to_non_nullable
+          : group as RepoGroupRef?,
+      partlyMerged: partlyMerged == const $CopyWithPlaceholder()
+          ? _value.partlyMerged
+          // ignore: cast_nullable_to_non_nullable
+          : partlyMerged as bool?,
       title: title == const $CopyWithPlaceholder()
           ? _value.title
           // ignore: cast_nullable_to_non_nullable
@@ -624,6 +657,18 @@ Ticket _$TicketFromJson(
       (v) => $enumDecode(_$TicketSource_EnumEnumMap, v),
     ),
     repoId: $checkedConvert('repoId', (v) => (v as num?)?.toInt()),
+    repos: $checkedConvert(
+      'repos',
+      (v) => (v as List<dynamic>?)
+          ?.map((e) => TicketRepoState.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    ),
+    group: $checkedConvert(
+      'group',
+      (v) =>
+          v == null ? null : RepoGroupRef.fromJson(v as Map<String, dynamic>),
+    ),
+    partlyMerged: $checkedConvert('partlyMerged', (v) => v as bool?),
     title: $checkedConvert('title', (v) => v as String),
     description: $checkedConvert('description', (v) => v as String),
     priority: $checkedConvert('priority', (v) => v as String),
@@ -736,6 +781,9 @@ Map<String, dynamic> _$TicketToJson(Ticket instance) => <String, dynamic>{
   'key': instance.key,
   'source': _$TicketSource_EnumEnumMap[instance.source_]!,
   'repoId': ?instance.repoId,
+  'repos': ?instance.repos?.map((e) => e.toJson()).toList(),
+  'group': ?instance.group?.toJson(),
+  'partlyMerged': ?instance.partlyMerged,
   'title': instance.title,
   'description': instance.description,
   'priority': instance.priority,

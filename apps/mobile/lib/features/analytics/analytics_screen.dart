@@ -7,10 +7,13 @@ import 'package:agnts_api/agnts_api.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
 import '../../core/api.dart';
+import '../../core/data.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme.dart';
 import '../../widgets/ui.dart';
 import '../activity/activity_screen.dart';
+import '../assistant/assistant_data.dart' show assistantStatsProvider;
+import '../assistant/assistant_stats.dart';
 
 /// Analytics for the last [days] days, compared with the period before.
 final _analyticsFor = FutureProvider.family<Analytics, int>((ref, days) async {
@@ -89,7 +92,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     final c = Agnts.of(context);
     final value = ref.watch(_analyticsFor(_days));
     return RefreshIndicator(
-      onRefresh: () => ref.refresh(_analyticsFor(_days).future),
+      onRefresh: () {
+        ref.invalidate(assistantStatsProvider);
+        return ref.refresh(_analyticsFor(_days).future);
+      },
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.only(bottom: 28),
@@ -123,6 +129,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 ),
               ],
           },
+          if (isOwner(ref.watch(currentWorkspaceProvider))) AssistantStatsSection(days: _days),
         ],
       ),
     );

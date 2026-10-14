@@ -107,6 +107,16 @@ class MoreScreen extends ConsumerWidget {
               error: (_, _) => Text(l.commonError),
               loading: () => const LinearProgressIndicator(),
             )),
+            // The assistant: questions about the workspace.
+            const SizedBox(height: 10),
+            group([
+              ListRow(
+                leading: HIcon('assistant', size: 22, color: c.primary),
+                title: l.massistantMoreRow,
+                subtitle: l.massistantMoreRowSub,
+                onTap: () => context.push('/assistant'),
+              ),
+            ]),
             // Learn: lessons from pushed changes, with how many are new.
             const SizedBox(height: 10),
             group([

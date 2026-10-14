@@ -54,6 +54,9 @@
     "people": "Люди",
     "account": "Аккаунт",
     "reviews": "Ревью PR",
-    "ci": "CI"
+    "ci": "CI",
+    "aiAssistant": "AI-ассистент",
+    "assistantChat": "Чат",
+    "assistantConversations": "Разговоры"
   }
 }

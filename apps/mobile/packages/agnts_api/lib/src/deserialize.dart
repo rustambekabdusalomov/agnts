@@ -19,6 +19,14 @@ import 'package:agnts_api/src/model/answers_request.dart';
 import 'package:agnts_api/src/model/answers_request_answers_inner.dart';
 import 'package:agnts_api/src/model/approach.dart';
 import 'package:agnts_api/src/model/approve_ticket_request.dart';
+import 'package:agnts_api/src/model/assistant_ask.dart';
+import 'package:agnts_api/src/model/assistant_conversation.dart';
+import 'package:agnts_api/src/model/assistant_link.dart';
+import 'package:agnts_api/src/model/assistant_message.dart';
+import 'package:agnts_api/src/model/assistant_rated.dart';
+import 'package:agnts_api/src/model/assistant_rating.dart';
+import 'package:agnts_api/src/model/assistant_stats.dart';
+import 'package:agnts_api/src/model/assistant_stats_versions_inner.dart';
 import 'package:agnts_api/src/model/attachment.dart';
 import 'package:agnts_api/src/model/begin_login_totp200_response.dart';
 import 'package:agnts_api/src/model/begin_login_totp_request.dart';
@@ -160,6 +168,11 @@ import 'package:agnts_api/src/model/repo_brief.dart';
 import 'package:agnts_api/src/model/repo_brief_input.dart';
 import 'package:agnts_api/src/model/repo_detect_input.dart';
 import 'package:agnts_api/src/model/repo_detection.dart';
+import 'package:agnts_api/src/model/repo_group.dart';
+import 'package:agnts_api/src/model/repo_group_input.dart';
+import 'package:agnts_api/src/model/repo_group_input_members_inner.dart';
+import 'package:agnts_api/src/model/repo_group_member.dart';
+import 'package:agnts_api/src/model/repo_group_ref.dart';
 import 'package:agnts_api/src/model/repo_harness.dart';
 import 'package:agnts_api/src/model/repo_harness_all_of_derived_coverage.dart';
 import 'package:agnts_api/src/model/repo_harness_input.dart';
@@ -215,6 +228,8 @@ import 'package:agnts_api/src/model/ticket_detail.dart';
 import 'package:agnts_api/src/model/ticket_kind_input.dart';
 import 'package:agnts_api/src/model/ticket_preview.dart';
 import 'package:agnts_api/src/model/ticket_repo.dart';
+import 'package:agnts_api/src/model/ticket_repo_state.dart';
+import 'package:agnts_api/src/model/ticket_repos_input.dart';
 import 'package:agnts_api/src/model/ticket_spend_list.dart';
 import 'package:agnts_api/src/model/ticket_spend_row.dart';
 import 'package:agnts_api/src/model/token_request.dart';
@@ -305,6 +320,25 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return Approach.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApproveTicketRequest':
           return ApproveTicketRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AssistantAsk':
+          return AssistantAsk.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AssistantConversation':
+          return AssistantConversation.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AssistantLanguage':
+          
+          
+        case 'AssistantLink':
+          return AssistantLink.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AssistantMessage':
+          return AssistantMessage.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AssistantRated':
+          return AssistantRated.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AssistantRating':
+          return AssistantRating.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AssistantStats':
+          return AssistantStats.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AssistantStatsVersionsInner':
+          return AssistantStatsVersionsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Attachment':
           return Attachment.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'BeginLoginTotp200Response':
@@ -611,6 +645,16 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return RepoDetectInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RepoDetection':
           return RepoDetection.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RepoGroup':
+          return RepoGroup.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RepoGroupInput':
+          return RepoGroupInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RepoGroupInputMembersInner':
+          return RepoGroupInputMembersInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RepoGroupMember':
+          return RepoGroupMember.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RepoGroupRef':
+          return RepoGroupRef.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RepoHarness':
           return RepoHarness.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RepoHarnessAllOfDerivedCoverage':
@@ -733,6 +777,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return TicketPreview.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TicketRepo':
           return TicketRepo.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'TicketRepoState':
+          return TicketRepoState.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'TicketReposInput':
+          return TicketReposInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TicketSpendList':
           return TicketSpendList.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TicketSpendRow':

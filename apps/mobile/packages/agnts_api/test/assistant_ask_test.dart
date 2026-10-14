@@ -1,0 +1,21 @@
+import 'package:test/test.dart';
+import 'package:agnts_api/agnts_api.dart';
+
+// tests for AssistantAsk
+void main() {
+  final AssistantAsk? instance = /* AssistantAsk(...) */ null;
+  // TODO add properties to the entity
+
+  group(AssistantAsk, () {
+    // String question
+    test('to test the property `question`', () async {
+      // TODO
+    });
+
+    // AssistantLanguage lang
+    test('to test the property `lang`', () async {
+      // TODO
+    });
+
+  });
+}

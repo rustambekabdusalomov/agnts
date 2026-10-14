@@ -123,7 +123,8 @@ func NewServer(d Deps, version string) *mcp.Server {
 	addTool(s, d.Role, &mcp.Tool{Name: "get_run_log", Description: "The newest log lines of a ticket's runs (tool calls, checks, state changes).", Annotations: ro}, t.getRunLog)
 	addTool(s, d.Role, &mcp.Tool{Name: "get_usage", Description: "Claude plan usage (session and weekly) and whether new runs are paused.", Annotations: ro}, t.getUsage)
 	addTool(s, d.Role, &mcp.Tool{Name: "get_analytics", Description: "Statistics for the last N days (7, 30 or 90): tickets picked up, pushed, first-try approvals, turns, waiting time, stops, token spend.", Annotations: ro}, t.getAnalytics)
-	addTool(s, d.Role, &mcp.Tool{Name: "list_repositories", Description: "Repositories agnts works on, with open ticket counts.", Annotations: ro}, t.listRepos)
+	addTool(s, d.Role, &mcp.Tool{Name: "list_repositories", Description: "Repositories agnts works on, with open ticket counts and the groups each is in.", Annotations: ro}, t.listRepos)
+	addTool(s, d.Role, &mcp.Tool{Name: "list_repository_groups", Description: "Repository groups: named sets of repositories that one task can change together (a backend and its web app). Use a group's name as create_task's group.", Annotations: ro}, t.listGroups)
 	addTool(s, d.Role, &mcp.Tool{Name: "get_repository", Description: "One repository by name.", Annotations: ro}, t.getRepo)
 	addTool(s, d.Role, &mcp.Tool{Name: "list_lessons", Description: "Lessons agnts wrote about techniques its pushed changes introduced to a repository for the first time (patterns, architecture, algorithms, libraries), newest first.", Annotations: ro}, t.listLessons)
 	addTool(s, d.Role, &mcp.Tool{Name: "get_lesson", Description: "One lesson: explanation, why the change needed it, code references, quiz (with answers: ask the user first, then reveal) and further reading.", Annotations: ro}, t.getLesson)
@@ -135,7 +136,7 @@ func NewServer(d Deps, version string) *mcp.Server {
 	addTool(s, d.Role, &mcp.Tool{Name: "start_run", Description: "Prepare starting a ticket that is held in the queue. Returns an action_id to confirm.", Annotations: write}, t.startRun)
 	addTool(s, d.Role, &mcp.Tool{Name: "request_changes", Description: "Prepare sending a ticket under review back to coding with feedback. Returns an action_id to confirm.", Annotations: write}, t.requestChanges)
 	addTool(s, d.Role, &mcp.Tool{Name: "retry_run", Description: "Prepare retrying a stopped or paused ticket. Returns an action_id to confirm.", Annotations: write}, t.retryRun)
-	addTool(s, d.Role, &mcp.Tool{Name: "create_task", Description: "Prepare a new task. kind says what agnts produces: code or test (a change, needs a repository), plan, analysis or bug (a Markdown report, repository optional), or auto (agnts picks while reading it). Returns an action_id to confirm.", Annotations: write}, t.createTask)
+	addTool(s, d.Role, &mcp.Tool{Name: "create_task", Description: "Prepare a new task. kind says what agnts produces: code or test (a change, needs a repository), plan, analysis or bug (a Markdown report, repository optional), or auto (agnts picks while reading it). Give one repository, several (repositories: the work spans them, one pull request per changed repository) or a group (list_repository_groups). Returns an action_id to confirm.", Annotations: write}, t.createTask)
 	addTool(s, d.Role, &mcp.Tool{Name: "implement_ticket", Description: "Prepare the code task that carries out a done plan or bug investigation: a new task linked to the report, with the report as its brief. repository is needed only when the report has none. Returns an action_id to confirm.", Annotations: write}, t.implementTicket)
 	addTool(s, d.Role, &mcp.Tool{Name: "accept_follow_ups", Description: "Prepare creating tickets from a ticket's suggested follow-ups (ids from get_ticket), each as a local task or a new Jira issue or Plane work item. They are created queued: nothing runs until started. Returns an action_id to confirm.", Annotations: write}, t.acceptFollowUps)
 	addTool(s, d.Role, &mcp.Tool{Name: "dismiss_follow_up", Description: "Prepare declining a suggested follow-up; agnts will not suggest it again. Returns an action_id to confirm.", Annotations: write}, t.dismissFollowUp)
@@ -150,21 +151,32 @@ func NewServer(d Deps, version string) *mcp.Server {
 
 // TicketBrief is a ticket in lists.
 type TicketBrief struct {
-	Key          string `json:"key"`
-	Title        string `json:"title"`
-	Kind         string `json:"kind"`
-	KindAuto     bool   `json:"kind_auto,omitempty"`
-	State        string `json:"state"`
-	Source       string `json:"source"`
-	Repository   string `json:"repository,omitempty"`
-	InStateSince string `json:"in_state_since,omitempty"`
-	StopReason   string `json:"stop_reason,omitempty"`
-	PRURL        string `json:"pr_url,omitempty"`
+	Key        string `json:"key"`
+	Title      string `json:"title"`
+	Kind       string `json:"kind"`
+	KindAuto   bool   `json:"kind_auto,omitempty"`
+	State      string `json:"state"`
+	Source     string `json:"source"`
+	Repository string `json:"repository,omitempty"`
+	// Repositories are all of a ticket's in several; Group the group they
+	// came from.
+	Repositories []string `json:"repositories,omitempty"`
+	Group        string   `json:"group,omitempty"`
+	PartlyMerged bool     `json:"partly_merged,omitempty"`
+	InStateSince string   `json:"in_state_since,omitempty"`
+	StopReason   string   `json:"stop_reason,omitempty"`
+	PRURL        string   `json:"pr_url,omitempty"`
 }
 
 func brief(r orchestrator.TicketRow) TicketBrief {
 	b := TicketBrief{Key: r.Ticket.Key, Title: r.Ticket.Title, Kind: string(r.Ticket.Kind), KindAuto: r.Ticket.KindAuto,
-		State: string(r.Ticket.State), Source: string(r.Ticket.Source), Repository: r.RepoName, PRURL: r.Ticket.PRURL}
+		State: string(r.Ticket.State), Source: string(r.Ticket.Source), Repository: r.RepoName, PRURL: r.Ticket.PRURL,
+		Group: r.Ticket.GroupName, PartlyMerged: r.Ticket.PartlyMerged()}
+	if r.Ticket.Multi() {
+		for _, x := range r.Ticket.Repos {
+			b.Repositories = append(b.Repositories, x.RepoName)
+		}
+	}
 	if !r.Info.Since.IsZero() {
 		b.InStateSince = r.Info.Since.UTC().Format(time.RFC3339)
 	}
@@ -305,6 +317,20 @@ type TicketOut struct {
 	CodeReview   *ReviewOut    `json:"code_review,omitempty"`
 	Preview      *PreviewOut   `json:"preview,omitempty"`
 	History      []string      `json:"history,omitempty"`
+	// RepoStates are a ticket's repositories in several: branch, pull
+	// request and state of each.
+	RepoStates []RepoStateOut `json:"repository_states,omitempty"`
+}
+
+// RepoStateOut is a ticket's work in one of its repositories.
+type RepoStateOut struct {
+	Repository string `json:"repository"`
+	Role       string `json:"role,omitempty"`
+	Folder     string `json:"folder,omitempty"`
+	Branch     string `json:"branch,omitempty"`
+	PRURL      string `json:"pr_url,omitempty"`
+	State      string `json:"state" jsonschema:"pending, unchanged (no pull request), pushed, merged or dropped"`
+	PushError  string `json:"push_error,omitempty"`
 }
 
 // FollowUpOut is a suggested follow-up ticket.
@@ -374,11 +400,18 @@ func (t *tools) getTicket(ctx context.Context, _ *mcp.CallToolRequest, in KeyInp
 			out.Checks = append(out.Checks, s.Command+": "+status)
 		}
 		for _, f := range r.Files {
-			out.ChangedFiles = append(out.ChangedFiles, FileOut{Path: f.Path, Add: f.Add, Del: f.Del})
+			out.ChangedFiles = append(out.ChangedFiles, FileOut{Path: f.Where(), Add: f.Add, Del: f.Del})
 		}
 		out.Report = r.Report
 	}
 	out.ParentKey, out.ChildKey, out.FollowUpOf = v.Ticket.ParentKey, v.ChildKey, v.Ticket.FollowUpOf
+	if v.Ticket.Multi() {
+		for _, id := range v.Ticket.RepoIDs() {
+			r, _ := v.Ticket.RepoState(id)
+			out.RepoStates = append(out.RepoStates, RepoStateOut{Repository: r.RepoName, Role: r.Role, Folder: r.Folder, Branch: r.Branch,
+				PRURL: r.PRURL, State: string(r.State), PushError: r.PushError})
+		}
+	}
 	for _, x := range v.FollowUps.Suggestions {
 		out.FollowUps = append(out.FollowUps, FollowUpOut{ID: x.ID, Type: x.Type, Title: x.Title, Serves: x.Serves, Kind: string(x.Kind),
 			Priority: x.Priority, Status: x.Status, Ready: x.Ready(v.Ticket.State), Ticket: x.ChildKey})
@@ -521,22 +554,32 @@ func (t *tools) getAnalytics(ctx context.Context, _ *mcp.CallToolRequest, in Day
 
 // RepoOut is a repository.
 type RepoOut struct {
-	Name          string `json:"name"`
-	Kind          string `json:"kind"`
-	CloneURL      string `json:"clone_url"`
-	DefaultBranch string `json:"default_branch"`
-	JiraProject   string `json:"jira_project,omitempty"`
-	PlaneProject  string `json:"plane_project,omitempty"`
-	TestCommand   string `json:"test_command,omitempty"`
-	Toolchains    string `json:"toolchains,omitempty"` // installed in runs, tool@version
-	OpenTickets   int    `json:"open_tickets"`
-	ClaudeMD      string `json:"claude_md"`
-	Archived      bool   `json:"archived,omitempty"` // takes no new tickets or tasks
+	Name          string   `json:"name"`
+	Kind          string   `json:"kind"`
+	CloneURL      string   `json:"clone_url"`
+	DefaultBranch string   `json:"default_branch"`
+	JiraProject   string   `json:"jira_project,omitempty"`
+	PlaneProject  string   `json:"plane_project,omitempty"`
+	TestCommand   string   `json:"test_command,omitempty"`
+	Toolchains    string   `json:"toolchains,omitempty"` // installed in runs, tool@version
+	OpenTickets   int      `json:"open_tickets"`
+	ClaudeMD      string   `json:"claude_md"`
+	Archived      bool     `json:"archived,omitempty"` // takes no new tickets or tasks
+	Groups        []string `json:"groups,omitempty"`   // the repository groups it is in
 }
 
 func repoOut(r admin.RepoView) RepoOut {
 	return RepoOut{Name: r.Name, Kind: r.Kind, CloneURL: r.CloneURL, DefaultBranch: r.DefaultBranch, JiraProject: r.JiraProject, PlaneProject: r.PlaneProject,
-		TestCommand: r.TestCmd, Toolchains: toolchainSpecs(r.Toolchains), OpenTickets: r.Open, ClaudeMD: r.ClaudeMDState, Archived: r.ArchivedAt != nil}
+		TestCommand: r.TestCmd, Toolchains: toolchainSpecs(r.Toolchains), OpenTickets: r.Open, ClaudeMD: r.ClaudeMDState, Archived: r.ArchivedAt != nil,
+		Groups: groupNames(r.Groups)}
+}
+
+func groupNames(gs []domain.RepoGroup) []string {
+	var out []string
+	for _, g := range gs {
+		out = append(out, g.Name)
+	}
+	return out
 }
 
 // RepoList is list_repositories's output.
@@ -676,13 +719,15 @@ func (t *tools) retryRun(ctx context.Context, _ *mcp.CallToolRequest, in KeyInpu
 
 // TaskInput creates a task.
 type TaskInput struct {
-	Kind         string `json:"kind,omitempty" jsonschema:"auto, code, test, plan, analysis or bug (default auto)"`
-	Repository   string `json:"repository,omitempty" jsonschema:"repository name; omit for a plan, analysis or bug task without one"`
-	Title        string `json:"title"`
-	Description  string `json:"description,omitempty"`
-	Priority     string `json:"priority,omitempty" jsonschema:"low, medium or high (default medium)"`
-	AfterApprove string `json:"after_approve,omitempty" jsonschema:"pr or main (default pr)"`
-	Start        string `json:"start,omitempty" jsonschema:"ask, code or queue (default ask)"`
+	Kind         string   `json:"kind,omitempty" jsonschema:"auto, code, test, plan, analysis or bug (default auto)"`
+	Repository   string   `json:"repository,omitempty" jsonschema:"repository name; omit for a plan, analysis or bug task without one"`
+	Repositories []string `json:"repositories,omitempty" jsonschema:"several repository names instead of repository: the task changes them together; the first is the primary"`
+	Group        string   `json:"group,omitempty" jsonschema:"a repository group's name instead of repository: the task works in its repositories"`
+	Title        string   `json:"title"`
+	Description  string   `json:"description,omitempty"`
+	Priority     string   `json:"priority,omitempty" jsonschema:"low, medium or high (default medium)"`
+	AfterApprove string   `json:"after_approve,omitempty" jsonschema:"pr or main (default pr)"`
+	Start        string   `json:"start,omitempty" jsonschema:"ask, code or queue (default ask)"`
 }
 
 func (t *tools) createTask(ctx context.Context, _ *mcp.CallToolRequest, in TaskInput) (*mcp.CallToolResult, Pending, error) {
@@ -693,23 +738,12 @@ func (t *tools) createTask(ctx context.Context, _ *mcp.CallToolRequest, in TaskI
 	if in.Kind != "auto" && !kind.Valid() {
 		return nil, Pending{}, fmt.Errorf("kind must be auto, code, test, plan, analysis or bug")
 	}
-	var repo *admin.RepoView
-	where := "without a repository"
-	if strings.TrimSpace(in.Repository) != "" {
-		list, err := t.d.Repos.List(ctx)
-		if err != nil {
-			return nil, Pending{}, err
-		}
-		for i := range list {
-			if strings.EqualFold(list[i].Name, strings.TrimSpace(in.Repository)) {
-				repo = &list[i]
-			}
-		}
-		if repo == nil {
-			return nil, Pending{}, fmt.Errorf("no repository named %q", in.Repository)
-		}
-		where = "in " + repo.Name
-	} else if in.Kind != "auto" && kind.Spec().NeedsRepo {
+	pick, err := t.pickRepos(ctx, in.Repository, in.Repositories, in.Group)
+	if err != nil {
+		return nil, Pending{}, err
+	}
+	where := pick.where
+	if pick.empty() && in.Kind != "auto" && kind.Spec().NeedsRepo {
 		return nil, Pending{}, fmt.Errorf("a %s task needs a repository", kind)
 	}
 	if in.Priority == "" {
@@ -721,26 +755,130 @@ func (t *tools) createTask(ctx context.Context, _ *mcp.CallToolRequest, in TaskI
 	if in.Start == "" {
 		in.Start = "ask"
 	}
-	var repoID int64
-	if repo != nil {
-		repoID = repo.ID
-	}
 	after := ", after approval: " + in.AfterApprove
 	if in.Kind != "auto" && kind.Report() {
 		after = ""
 	}
 	return t.prepare(ctx, "create_task", "", fmt.Sprintf("Create a %s task %s: %q (priority %s%s, start: %s).",
 		in.Kind, where, in.Title, in.Priority, after, in.Start), map[string]any{
-		"repo_id": repoID, "kind": in.Kind, "title": in.Title, "description": in.Description, "priority": in.Priority,
+		"repo_ids": pick.ids, "group_id": pick.group, "kind": in.Kind, "title": in.Title, "description": in.Description, "priority": in.Priority,
 		"after_approve": in.AfterApprove, "start": in.Start,
 	})
 }
 
+// repoPick is the repositories a write tool names: their ids (or a
+// group's), and how to say where in the summary.
+type repoPick struct {
+	ids   []int64
+	group int64
+	where string
+}
+
+func (p repoPick) empty() bool { return len(p.ids) == 0 && p.group == 0 }
+
+// pickRepos resolves a repository name, several, or a group name.
+func (t *tools) pickRepos(ctx context.Context, one string, several []string, group string) (repoPick, error) {
+	out := repoPick{where: "without a repository"}
+	names := several
+	if strings.TrimSpace(one) != "" {
+		names = append([]string{one}, names...)
+	}
+	if strings.TrimSpace(group) != "" {
+		if len(names) > 0 {
+			return out, errors.New("give repositories or a group, not both")
+		}
+		g, err := t.d.Store.GroupByName(ctx, strings.TrimSpace(group))
+		if err != nil {
+			return out, fmt.Errorf("no repository group named %q", group)
+		}
+		var ns []string
+		for _, m := range g.Members {
+			ns = append(ns, m.RepoName)
+		}
+		out.group, out.where = g.ID, "in the group "+g.Name+" ("+strings.Join(ns, ", ")+")"
+		return out, nil
+	}
+	if len(names) == 0 {
+		return out, nil
+	}
+	list, err := t.d.Repos.List(ctx)
+	if err != nil {
+		return out, err
+	}
+	var found []string
+	for _, n := range names {
+		n = strings.TrimSpace(n)
+		var id int64
+		for _, r := range list {
+			if strings.EqualFold(r.Name, n) {
+				id, n = r.ID, r.Name
+			}
+		}
+		if id == 0 {
+			return out, fmt.Errorf("no repository named %q", n)
+		}
+		out.ids = append(out.ids, id)
+		found = append(found, n)
+	}
+	out.where = "in " + strings.Join(found, " and ")
+	return out, nil
+}
+
+// GroupOut is a repository group.
+type GroupOut struct {
+	Name         string   `json:"name"`
+	Description  string   `json:"description,omitempty"`
+	Instructions string   `json:"instructions,omitempty"`
+	Repositories []string `json:"repositories" jsonschema:"in order, each with its role when it has one"`
+}
+
+// GroupList is list_repository_groups's output.
+type GroupList struct {
+	Groups []GroupOut `json:"groups"`
+}
+
+func (t *tools) listGroups(ctx context.Context, _ *mcp.CallToolRequest, _ noInput) (*mcp.CallToolResult, GroupList, error) {
+	gs, err := t.d.Store.ListGroups(ctx)
+	if err != nil {
+		return nil, GroupList{}, err
+	}
+	out := GroupList{Groups: []GroupOut{}}
+	for _, g := range gs {
+		x := GroupOut{Name: g.Name, Description: g.Description, Instructions: g.Instructions, Repositories: []string{}}
+		for _, m := range g.Members {
+			n := m.RepoName
+			if m.Role != "" {
+				n += " (" + m.Role + ")"
+			}
+			if m.Archived {
+				n += " [archived]"
+			}
+			x.Repositories = append(x.Repositories, n)
+		}
+		out.Groups = append(out.Groups, x)
+	}
+	return nil, out, nil
+}
+
+// idsArg reads a list of ids from a pending action's arguments.
+func idsArg(v any) []int64 {
+	list, _ := v.([]any)
+	var out []int64
+	for _, x := range list {
+		if f, ok := x.(float64); ok {
+			out = append(out, int64(f))
+		}
+	}
+	return out
+}
+
 // ImplementInput makes the code task for a report.
 type ImplementInput struct {
-	Key        string `json:"key" jsonschema:"the done plan or bug investigation"`
-	Repository string `json:"repository,omitempty" jsonschema:"repository to implement it in; defaults to the report's"`
-	Queue      bool   `json:"queue,omitempty" jsonschema:"keep the task in the queue instead of starting it"`
+	Key          string   `json:"key" jsonschema:"the done plan or bug investigation"`
+	Repository   string   `json:"repository,omitempty" jsonschema:"repository to implement it in; defaults to the report's repositories"`
+	Repositories []string `json:"repositories,omitempty" jsonschema:"several repositories instead of repository"`
+	Group        string   `json:"group,omitempty" jsonschema:"a repository group instead of repository"`
+	Queue        bool     `json:"queue,omitempty" jsonschema:"keep the task in the queue instead of starting it"`
 }
 
 func (t *tools) implementTicket(ctx context.Context, _ *mcp.CallToolRequest, in ImplementInput) (*mcp.CallToolResult, Pending, error) {
@@ -754,30 +892,23 @@ func (t *tools) implementTicket(ctx context.Context, _ *mcp.CallToolRequest, in 
 	if tk.State != domain.StateDone {
 		return nil, Pending{}, fmt.Errorf("%s is not done yet (it is %s): approve the report first", tk.Key, tk.State)
 	}
-	var repoID int64
-	where := "its repository"
-	if name := strings.TrimSpace(in.Repository); name != "" {
-		list, err := t.d.Repos.List(ctx)
-		if err != nil {
-			return nil, Pending{}, err
+	pick, err := t.pickRepos(ctx, in.Repository, in.Repositories, in.Group)
+	if err != nil {
+		return nil, Pending{}, err
+	}
+	where := strings.TrimPrefix(pick.where, "in ")
+	if pick.empty() {
+		where = "its repositories"
+		if tk.RepoID == nil {
+			return nil, Pending{}, fmt.Errorf("%s has no repository: name the one to implement it in", tk.Key)
 		}
-		for i := range list {
-			if strings.EqualFold(list[i].Name, name) {
-				repoID, where = list[i].ID, list[i].Name
-			}
-		}
-		if repoID == 0 {
-			return nil, Pending{}, fmt.Errorf("no repository named %q", in.Repository)
-		}
-	} else if tk.RepoID == nil {
-		return nil, Pending{}, fmt.Errorf("%s has no repository: name the one to implement it in", tk.Key)
 	}
 	start, when := "code", "start it now"
 	if in.Queue {
 		start, when = "queue", "keep it in the queue"
 	}
 	return t.prepare(ctx, "implement_ticket", tk.Key, fmt.Sprintf("Create a code task in %s that carries out the %s on %s (%s), and %s.", where, tk.Kind, tk.Key, tk.Title, when),
-		map[string]any{"repo_id": repoID, "start": start})
+		map[string]any{"repo_ids": pick.ids, "group_id": pick.group, "start": start})
 }
 
 // FollowUpChoice is one suggestion to create.
@@ -1000,9 +1131,11 @@ func (t *tools) confirmAction(ctx context.Context, _ *mcp.CallToolRequest, in Co
 		post, _ := a.Args["post_report"].(bool)
 		tk, err = o.Approve(ctx, a.TicketKey, nil, post, domain.OriginMCP)
 	case "implement_ticket":
-		id, _ := a.Args["repo_id"].(float64)
+		id, _ := a.Args["repo_id"].(float64) // actions prepared before several repositories
+		gid, _ := a.Args["group_id"].(float64)
 		start, _ := a.Args["start"].(string)
-		tk, err = o.Implement(ctx, a.TicketKey, orchestrator.ImplementInput{RepoID: int64(id), Start: start}, domain.OriginMCP)
+		tk, err = o.Implement(ctx, a.TicketKey, orchestrator.ImplementInput{RepoID: int64(id), RepoIDs: idsArg(a.Args["repo_ids"]),
+			GroupID: int64(gid), Start: start}, domain.OriginMCP)
 	case "set_ticket_kind":
 		kind, _ := a.Args["kind"].(string)
 		tk, err = o.SetKind(ctx, a.TicketKey, kind, domain.OriginMCP)
@@ -1018,9 +1151,11 @@ func (t *tools) confirmAction(ctx context.Context, _ *mcp.CallToolRequest, in Co
 		}
 		return nil, Done{Done: a.Summary}, nil
 	case "create_task":
-		id, _ := a.Args["repo_id"].(float64)
+		id, _ := a.Args["repo_id"].(float64) // actions prepared before several repositories
+		gid, _ := a.Args["group_id"].(float64)
 		str := func(k string) string { s, _ := a.Args[k].(string); return s }
-		tk, err = o.CreateTask(ctx, orchestrator.TaskInput{RepoID: int64(id), Kind: str("kind"), Title: str("title"), Description: str("description"),
+		tk, err = o.CreateTask(ctx, orchestrator.TaskInput{RepoID: int64(id), RepoIDs: idsArg(a.Args["repo_ids"]), GroupID: int64(gid),
+			Kind: str("kind"), Title: str("title"), Description: str("description"),
 			Priority: str("priority"), AfterApprove: str("after_approve"), Start: str("start")}, domain.OriginMCP)
 	default:
 		return nil, Done{}, fmt.Errorf("unknown action %q", a.Tool)

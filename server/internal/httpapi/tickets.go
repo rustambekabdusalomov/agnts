@@ -417,6 +417,15 @@ func toTicket(t domain.Ticket) gen.Ticket {
 	if t.CIFixes > 0 {
 		out.CiFixes = ptr(t.CIFixes)
 	}
+	if rs := toTicketRepos(t); len(rs) > 0 {
+		out.Repos = &rs
+	}
+	if t.GroupID != nil {
+		out.Group = &gen.RepoGroupRef{Id: *t.GroupID, Name: t.GroupName}
+	}
+	if t.PartlyMerged() {
+		out.PartlyMerged = ptr(true)
+	}
 	if t.WaitReason != domain.WaitNone {
 		wr := gen.WaitReason(t.WaitReason)
 		out.WaitReason = &wr
@@ -728,6 +737,9 @@ func toResult(r domain.Result) *gen.Result {
 	}
 	for i, f := range r.Files {
 		out.Files[i] = gen.FileChange{Path: f.Path, Add: f.Add, Del: f.Del, Diff: f.Diff}
+		if f.Repo != "" {
+			out.Files[i].Repo, out.Files[i].RepoId = ptr(f.Repo), ptr(f.RepoID)
+		}
 	}
 	if r.Report != "" {
 		report := r.Report

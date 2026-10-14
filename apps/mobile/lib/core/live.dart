@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../features/assistant/assistant_data.dart';
 import 'api.dart';
 import 'data.dart';
 
@@ -89,6 +90,11 @@ class LiveStream {
       return;
     }
     _events.add(e);
+    // The asker's own answers being made: nothing else changed.
+    if ((e['type'] as String? ?? '').startsWith('assistant_')) {
+      onAssistantEvent(ref, e);
+      return;
+    }
     final key = e['ticketKey'] as String? ?? '';
     ref.invalidate(dashboardProvider);
     ref.invalidate(queueProvider);

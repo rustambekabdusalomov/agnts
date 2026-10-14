@@ -47,6 +47,8 @@ class FollowUpSuggestion {
 
      this.childKey,
 
+     this.repoIds,
+
      this.decidedAt,
 
     required  this.createdAt,
@@ -215,6 +217,19 @@ class FollowUpSuggestion {
 
 
 
+      /// The parent's repositories it is about; absent for all of them
+  @JsonKey(
+    
+    name: r'repoIds',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<int>? repoIds;
+
+
+
   @JsonKey(
     
     name: r'decidedAt',
@@ -256,6 +271,7 @@ class FollowUpSuggestion {
       other.ready == ready &&
       other.after == after &&
       other.childKey == childKey &&
+      other.repoIds == repoIds &&
       other.decidedAt == decidedAt &&
       other.createdAt == createdAt;
 
@@ -274,6 +290,7 @@ class FollowUpSuggestion {
         ready.hashCode +
         after.hashCode +
         childKey.hashCode +
+        repoIds.hashCode +
         decidedAt.hashCode +
         createdAt.hashCode;
 

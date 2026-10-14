@@ -72,6 +72,11 @@ final reposProvider = FutureProvider<List<Repository>>((ref) async {
   return (await requireApi(ref).getReposApi().listRepos()).data ?? const [];
 });
 
+/// Repository groups: a task can start in all of a group's repositories.
+final repoGroupsProvider = FutureProvider<List<RepoGroup>>((ref) async {
+  return (await requireApi(ref).getReposApi().listRepoGroups()).data ?? const [];
+});
+
 final integrationsProvider = FutureProvider<List<Integration>>((ref) async {
   return (await requireApi(ref).getIntegrationsApi().listIntegrations()).data ?? const [];
 });

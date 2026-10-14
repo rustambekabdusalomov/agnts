@@ -19,12 +19,10 @@ FROM debian:trixie-slim
 
 # Pin Claude Code: agnts parses its stream-json output, including the
 # undocumented rate_limit_event, so upgrades are deliberate.
-# 2.1.112 is the last release that runs on Node. From 2.1.113 Claude Code is
-# a native binary that needs a CPU with SSE4.2/AVX: on a VM that hides them
-# (CPU type "QEMU Virtual CPU", kvm64) it starts, then spins at 100% CPU with
-# no output. Move back to a native release (2.1.289 was the last one used)
-# once the server's VM exposes its host CPU.
-ARG CLAUDE_CODE_VERSION=2.1.112
+# Claude Code is a native binary that needs a CPU with SSE4.2/AVX: on a VM
+# that hides them (CPU type "QEMU Virtual CPU", kvm64) it starts, then spins
+# at 100% CPU with no output.
+ARG CLAUDE_CODE_VERSION=2.1.299
 
 # Custom runner images are built FROM this one; agnts checks the label.
 LABEL agnts.runner="1"

@@ -40,8 +40,10 @@ func guardProfile(s domain.Settings, repo *domain.Repository) guard.Profile {
 // runs may change linter, type checker, test runner and CI configuration.
 var checkConfigTicket = regexp.MustCompile(`(?i)\b(lint|linter|linting|eslint|prettier|ruff|golangci|rubocop|stylelint|tsconfig|type ?check|ci|pipeline|workflow|github actions|gitlab|jest|vitest|pytest|test runner|pre-commit)\b`)
 
-// guardConfig is what agnts-guard enforces in one invocation for t.
-func (o *Orchestrator) guardConfig(ctx context.Context, s domain.Settings, t domain.Ticket, run *domain.Run, repo *domain.Repository, readOnly bool) guard.Config {
+// guardConfig is what agnts-guard enforces in one invocation for t, in a
+// run of these repositories (the primary's profile applies to all).
+func (o *Orchestrator) guardConfig(ctx context.Context, s domain.Settings, t domain.Ticket, run *domain.Run, rs []runRepo, readOnly bool) guard.Config {
+	repo := primaryOf(rs)
 	c := guard.Config{Profile: guardProfile(s, repo), ReadOnly: readOnly, Disabled: s.Guard.Disabled}
 	texts := []string{t.Title, t.Description, t.Feedback}
 	if qs, err := o.store.Questions(ctx, t.ID); err == nil {
@@ -55,17 +57,37 @@ func (o *Orchestrator) guardConfig(ctx context.Context, s domain.Settings, t dom
 	if t.Source == domain.SourceCI || checkConfigTicket.MatchString(t.Title+"\n"+t.Description) {
 		c.Allow = append(c.Allow, domain.FlagCheckConfig)
 	}
-	if repo != nil {
-		c.SecretAllow = repo.Harness.SecretAllow
+	for _, r := range rs {
+		for _, g := range r.Harness.SecretAllow {
+			c.SecretAllow = append(c.SecretAllow, r.Rel(g))
+		}
 	}
 	if readOnly || repo == nil || run.Stage != domain.StageCode || t.Kind.Report() {
 		return c
 	}
-	// Coding: the stop gate, the per-file checks and the fact check.
-	c.Stop = stopCommands(*repo, c.Profile, o.cfg.CheckTimeout)
+	// Coding: the stop gate, the per-file checks and the fact check. In a
+	// run of several repositories each repository's checks run in its
+	// folder, the stop gate's only where Claude changed something.
+	multi := len(rs) > 1
+	for _, r := range rs {
+		if r.Frozen {
+			continue
+		}
+		for _, cmd := range stopCommands(r.Repository, c.Profile, o.cfg.CheckTimeout) {
+			if multi {
+				cmd.Name, cmd.Dir, cmd.IfChanged = r.Name+" "+cmd.Name, r.Folder(), true
+			}
+			c.Stop = append(c.Stop, cmd)
+		}
+		for _, ec := range editChecks(r.Repository) {
+			if multi {
+				ec.Name, ec.Dir = r.Name+" "+ec.Name, r.Folder()
+			}
+			c.EditChecks = append(c.EditChecks, ec)
+		}
+	}
 	c.StopAttempts = 3
-	c.EditChecks = editChecks(*repo)
-	c.Rules = o.enforcedRules(ctx, repo.ID)
+	c.Rules = o.enforcedRules(ctx, rs)
 	c.FactCheck = c.Profile == guard.Strict && inShare(t.Key, s.Guard.FactCheck)
 	run.Harness.FactCheck = c.FactCheck
 	return c
@@ -310,7 +332,7 @@ func agentConfigFinding(fs []domain.AgentConfigFinding) *domain.Finding {
 // secretsCleared refuses to push a change agnts flagged as holding a
 // credential until a person said it is not a real one, for this commit.
 func (o *Orchestrator) secretsCleared(ctx context.Context, t domain.Ticket) error {
-	if t.Kind.Report() || t.Kind == domain.KindReview || t.HeadSHA == "" {
+	if t.Kind.Report() || t.Kind == domain.KindReview || t.WorkSHA() == "" {
 		return nil
 	}
 	res, err := o.store.LatestResult(ctx, t.ID, domain.StageCode)
@@ -336,7 +358,7 @@ func (o *Orchestrator) secretsAcknowledged(ctx context.Context, t domain.Ticket)
 	}
 	for _, e := range evs {
 		if e.Type == domain.EventSecretsAck {
-			if sha, _ := e.Data["sha"].(string); sha == t.HeadSHA {
+			if sha, _ := e.Data["sha"].(string); sha == t.WorkSHA() {
 				return true
 			}
 		}
@@ -351,10 +373,10 @@ func (o *Orchestrator) AcknowledgeSecrets(ctx context.Context, key string, origi
 	if err != nil {
 		return t, err
 	}
-	if t.State != domain.StateWaitingForReview || t.HeadSHA == "" {
+	if t.State != domain.StateWaitingForReview || t.WorkSHA() == "" {
 		return t, invalid("only a change waiting for your review can be cleared")
 	}
 	o.event(ctx, domain.Event{TicketKey: key, Type: domain.EventSecretsAck, Origin: origin,
-		Message: "confirmed that the lines flagged as secrets are not real credentials", Data: map[string]any{"sha": t.HeadSHA}})
+		Message: "confirmed that the lines flagged as secrets are not real credentials", Data: map[string]any{"sha": t.WorkSHA()}})
 	return t, nil
 }

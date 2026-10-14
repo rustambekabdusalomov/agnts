@@ -33,6 +33,46 @@ type fakeTickets struct {
 	lastFiles         []int64
 	lastFeedbackFiles []int64
 	lastUpload        string
+	lastGroup         orchestrator.GroupInput
+	lastChoice        domain.RepoChoice
+}
+
+func (f *fakeTickets) Groups(context.Context) ([]domain.RepoGroup, error) {
+	return []domain.RepoGroup{{ID: 4, Name: "Shop", TaskPrefix: "SHOP", Members: []domain.GroupMember{{RepoID: 3, RepoName: "api", Role: "backend"}, {RepoID: 5, RepoName: "web"}}}}, nil
+}
+
+func (f *fakeTickets) Group(_ context.Context, id int64) (orchestrator.GroupView, error) {
+	if id != 4 {
+		return orchestrator.GroupView{}, domain.ErrNotFound
+	}
+	return orchestrator.GroupView{RepoGroup: domain.RepoGroup{ID: 4, Name: "Shop"}, Warnings: []string{"build variable X is set in api and web"}}, nil
+}
+
+func (f *fakeTickets) SaveGroup(_ context.Context, id int64, in orchestrator.GroupInput, _ domain.Origin) (orchestrator.GroupView, error) {
+	f.lastGroup = in
+	if len(in.Members) == 0 {
+		return orchestrator.GroupView{}, fmt.Errorf("%w: a group needs at least one repository", orchestrator.ErrInvalid)
+	}
+	if id == 0 {
+		id = 8
+	}
+	return orchestrator.GroupView{RepoGroup: domain.RepoGroup{ID: id, Name: in.Name}}, nil
+}
+
+func (f *fakeTickets) DeleteGroup(_ context.Context, id int64, _ domain.Origin) error {
+	if id != 4 {
+		return domain.ErrNotFound
+	}
+	return nil
+}
+
+func (f *fakeTickets) SetRepos(_ context.Context, key string, c domain.RepoChoice, _ domain.Origin) (domain.Ticket, error) {
+	f.lastChoice = c
+	api, web, g := int64(3), int64(5), int64(4)
+	n := 7
+	return domain.Ticket{Key: key, Title: "t", State: domain.StateNew, Source: domain.SourceLocal, RepoID: &api, GroupID: &g, GroupName: "Shop",
+		Repos: []domain.TicketRepo{{RepoID: api, RepoName: "api", Folder: "api", Role: "backend"},
+			{RepoID: web, RepoName: "web", Folder: "web", PRNumber: &n, PRURL: "https://github.com/acme/web/pull/7", State: domain.RepoPushed}}}, nil
 }
 
 func (f *fakeTickets) Upload(_ context.Context, name string, data []byte) (domain.Attachment, error) {
@@ -446,12 +486,28 @@ func TestTicketEndpoints(t *testing.T) {
 		{"POST", "/api/tickets/PAY-1/merged", "", 200, `"state":"done"`},
 		{"POST", "/api/tickets/PAY-1/replay", "", 200, `"replayOf":"PAY-1"`},
 		{"GET", "/api/eval/replays", "", 200, `{"replays":[],"versions":[]}`},
+		{"GET", "/api/repo-groups", "", 200, `"members":[{"archived":false,"repoId":3,"repoName":"api","role":"backend"}`},
+		{"GET", "/api/repo-groups/4", "", 200, `"warnings":["build variable X is set in api and web"]`},
+		{"GET", "/api/repo-groups/9", "", 404, `not_found`},
+		{"POST", "/api/repo-groups", `{"name":"Shop","taskPrefix":"shop","members":[{"repoId":3,"role":"backend"},{"repoId":5}]}`, 201, `"id":8`},
+		{"POST", "/api/repo-groups", `{"name":"Shop","members":[]}`, 400, `at least one repository`},
+		{"PUT", "/api/repo-groups/4", `{"name":"Shop","members":[{"repoId":3}]}`, 200, `"id":4`},
+		{"DELETE", "/api/repo-groups/4", "", 204, ``},
+		{"PUT", "/api/tickets/PAY-1/repos", `{"groupId":4}`, 200, `"group":{"id":4,"name":"Shop"}`},
+		{"PUT", "/api/tickets/PAY-1/repos", `{"repoIds":[3,5]}`, 200, `"repos":[{"branch":"","ciFixes":0,"files":0,"folder":"api","headSha":"","prUrl":"","repoId":3,"repoName":"api","role":"backend","state":"pending"},{"branch":"","ciFixes":0,"files":0,"folder":"web"`},
+		{"PUT", "/api/tickets/PAY-1/repos", `{}`, 400, `give repoIds or groupId`},
 	}
 	for _, c := range cases {
 		rec := h.do(c.method, c.path, c.body, cookie)
 		if rec.Code != c.want || !strings.Contains(rec.Body.String(), c.contains) {
 			t.Errorf("%s %s: %d %s (want %d containing %q)", c.method, c.path, rec.Code, rec.Body, c.want, c.contains)
 		}
+	}
+	if g := h.tickets.lastGroup; g.Name != "Shop" || len(g.Members) != 1 {
+		t.Errorf("group input: %+v", g)
+	}
+	if c := h.tickets.lastChoice; len(c.RepoIDs) != 2 || c.RepoIDs[1] != 5 {
+		t.Errorf("ticket repositories input: %+v", c)
 	}
 	if h.tickets.lastRelation != "PAY-1 depends_on" {
 		t.Errorf("relation input: %q", h.tickets.lastRelation)
@@ -476,6 +532,13 @@ func TestTicketEndpoints(t *testing.T) {
 	}
 	if h.tickets.lastOrigin != domain.OriginWeb || len(h.tickets.lastAnswer) != 1 || h.tickets.lastAnswer[0].Note != "n" || len(h.tickets.lastAnswer[0].Attachments) != 1 {
 		t.Errorf("web origin/answers not passed: %v %+v", h.tickets.lastOrigin, h.tickets.lastAnswer)
+	}
+	if rec := h.do("POST", "/api/tasks", `{"title":"x","priority":"low","afterApprove":"pr","start":"queue","repoIds":[5,3]}`, cookie); rec.Code != 201 ||
+		len(h.tickets.lastTask.RepoIDs) != 2 || h.tickets.lastTask.RepoIDs[0] != 5 {
+		t.Errorf("task repositories not passed: %d %+v", rec.Code, h.tickets.lastTask)
+	}
+	if rec := h.do("POST", "/api/tasks", `{"title":"x","priority":"low","afterApprove":"pr","start":"queue","groupId":4}`, cookie); rec.Code != 201 || h.tickets.lastTask.GroupID != 4 {
+		t.Errorf("task group not passed: %d %+v", rec.Code, h.tickets.lastTask)
 	}
 
 	// Mobile: a fresh harness, since each TOTP step signs in only once.

@@ -41,23 +41,33 @@ type previewConfig struct {
 	Port          int    `json:"port"`
 	ReadyPath     string `json:"readyPath"`
 	DefaultBranch string `json:"defaultBranch"`
+	// Dir is the repository's folder in a run of several (agnts-preview
+	// starts the app there); empty for /workspace.
+	Dir string `json:"dir,omitempty"`
 }
 
 // previewState is the preview state a code change gets as it reaches
 // review: pending when the repository can be previewed, previews are on
 // and the change touches its UI paths.
-func (o *Orchestrator) previewState(s domain.Settings, repo domain.Repository, files []domain.FileChange) string {
-	if o.shots == nil || !s.AutoPreview || !repo.Preview.Enabled() {
+// In a ticket of several repositories, any repository whose UI paths the
+// change touches gets one.
+func (o *Orchestrator) previewState(s domain.Settings, rs []runRepo, primary *int64, files []domain.FileChange) string {
+	if o.shots == nil || !s.AutoPreview {
 		return domain.PreviewNone
 	}
-	paths := make([]string, len(files))
-	for i, f := range files {
-		paths[i] = f.Path
+	for _, r := range rs {
+		if !r.Preview.Enabled() || r.Frozen {
+			continue
+		}
+		var paths []string
+		for _, f := range domain.FilesIn(files, r.ID, primary) {
+			paths = append(paths, f.Path)
+		}
+		if len(paths) > 0 && domain.MatchUIPaths(paths, r.Preview.UIPaths) {
+			return domain.PreviewPending
+		}
 	}
-	if !domain.MatchUIPaths(paths, repo.Preview.UIPaths) {
-		return domain.PreviewNone
-	}
-	return domain.PreviewPending
+	return domain.PreviewNone
 }
 
 // dropPreview forgets a queued or running preview of a ticket leaving
@@ -87,12 +97,15 @@ func (o *Orchestrator) Preview(ctx context.Context, key string, compare *bool, o
 	if t.Kind.Report() {
 		return t, invalid("a report has no app to preview")
 	}
-	repo, err := o.repoFor(ctx, t)
+	rs, err := o.reposFor(ctx, t)
 	if err != nil {
 		return t, err
 	}
-	if !repo.Preview.Enabled() {
-		return t, invalid("%s has no preview command: set one on the Repositories page", repo.Name)
+	if len(previewable(rs)) == 0 {
+		if len(rs) > 1 {
+			return t, invalid("none of %s has a preview command: set one on the Repositories page", repoNames(rs))
+		}
+		return t, invalid("%s has no preview command: set one on the Repositories page", rs[0].Name)
 	}
 	msg := "queued for preview"
 	if compare != nil && *compare {
@@ -114,9 +127,22 @@ func (o *Orchestrator) Preview(ctx context.Context, key string, compare *bool, o
 	return t, err
 }
 
+// previewable are the run's repositories that can be previewed.
+func previewable(rs []runRepo) []runRepo {
+	var out []runRepo
+	for _, r := range rs {
+		if r.Preview.Enabled() && !r.Frozen {
+			out = append(out, r)
+		}
+	}
+	return out
+}
+
 // preview starts the app at the change under review, has Claude take
 // screenshots of what it affects, and stores them for the reviewer. It
-// never changes the ticket's state.
+// never changes the ticket's state. In a ticket of several repositories
+// each one that can be previewed and that the change touches is previewed
+// in turn, in the same container; its screenshots carry its name.
 func (o *Orchestrator) preview(ctx context.Context, s domain.Settings, t domain.Ticket, run *domain.Run) error {
 	if o.shots == nil {
 		return errors.New("previews are not available on this server")
@@ -128,34 +154,97 @@ func (o *Orchestrator) preview(ctx context.Context, s domain.Settings, t domain.
 	if len(res.Files) == 0 {
 		return errors.New("no change to preview")
 	}
-	repo, err := o.repoFor(ctx, t)
+	rs, err := o.reposFor(ctx, t)
 	if err != nil {
 		return err
 	}
-	if !repo.Preview.Enabled() {
-		return fmt.Errorf("%s has no preview command", repo.Name)
+	multi := len(rs) > 1
+	var targets []runRepo
+	for _, r := range previewable(rs) {
+		if !multi || len(domain.FilesIn(res.Files, r.ID, t.RepoID)) > 0 {
+			targets = append(targets, r)
+		}
+	}
+	if len(targets) == 0 && multi {
+		targets = previewable(rs) // asked for by hand: show the app as it is
+	}
+	if len(targets) == 0 {
+		return fmt.Errorf("%s has no preview command", rs[0].Name)
 	}
 	prev, _ := o.latestPreview(ctx, t.ID)
 
-	ws, err := o.openWorkspace(ctx, t, &repo, t.Branch, run)
+	ws, err := o.openWorkspace(ctx, t, rs, run)
 	if err != nil {
 		return err
 	}
 	defer o.closeWorkspace(ctx, t, ws)
-	if err := o.writePreviewFiles(ctx, ws, repo); err != nil {
-		return err
-	}
-	if err := ws.WriteFile(ctx, ChangePath, changeDiff(res.Files)); err != nil {
-		return fmt.Errorf("copy the change into the workspace: %w", err)
-	}
 
 	model := s.ModelFor(t, domain.ModelPreview)
 	p := domain.Preview{Revision: t.Revision, Model: model, Compare: t.PreviewCompare}
+	accepted := false
+	for i, r := range targets {
+		if i > 0 {
+			_, _ = ws.Exec(ctx, "agnts-preview stop", 30*time.Second)
+		}
+		part, err := o.previewRepo(ctx, s, ws, t, run, r, multi, res, !accepted)
+		if err != nil {
+			return err
+		}
+		if part.Acceptance != nil {
+			accepted = true
+		}
+		p = mergePreview(p, part, r, multi)
+	}
+	if err := o.savePreview(ctx, t, run, p, prev); err != nil {
+		return err
+	}
+	return o.afterAcceptance(ctx, t, run, p.Acceptance)
+}
+
+// mergePreview adds one repository's preview to a ticket's.
+func mergePreview(p, part domain.Preview, r runRepo, multi bool) domain.Preview {
+	if !multi {
+		part.Revision, part.Model, part.Compare = p.Revision, p.Model, p.Compare
+		return part
+	}
+	rank := map[string]int{domain.PreviewOK: 0, domain.PreviewPartial: 1, domain.PreviewBroken: 2}
+	if p.Status == "" || rank[part.Status] > rank[p.Status] {
+		p.Status = part.Status
+	}
+	if p.Summary != "" {
+		p.Summary += "\n\n"
+	}
+	p.Summary += "**" + r.Name + "**: " + part.Summary
+	p.Shots = append(p.Shots, part.Shots...)
+	p.Issues = append(p.Issues, part.Issues...)
+	if p.Acceptance == nil {
+		p.Acceptance = part.Acceptance
+	}
+	return p
+}
+
+// previewRepo previews one repository's app: it starts it, has Claude take
+// the screenshots and stores them, and checks the acceptance criteria
+// when accept is set and the repository asks for it.
+func (o *Orchestrator) previewRepo(ctx context.Context, s domain.Settings, ws Workspace, t domain.Ticket, run *domain.Run, r runRepo, multi bool,
+	res domain.Result, accept bool) (domain.Preview, error) {
+	repo := r.Repository
+	var p domain.Preview
+	files := res.Files
+	if multi {
+		files = domain.FilesIn(res.Files, r.ID, t.RepoID)
+	}
+	if err := o.writePreviewFiles(ctx, ws, r); err != nil {
+		return p, err
+	}
+	if err := ws.WriteFile(ctx, ChangePath, changeDiff(files)); err != nil {
+		return p, fmt.Errorf("copy the change into the workspace: %w", err)
+	}
 	o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(domain.StagePreview), Type: domain.EventClaudeText,
-		Message: "starting the app: " + repo.Preview.Command})
+		Message: r.Label(multi) + "starting the app: " + repo.Preview.Command})
 	start, err := ws.Exec(ctx, "agnts-preview start", previewStartTimeout+30*time.Second)
 	if err != nil {
-		return fmt.Errorf("start the app: %w", err)
+		return p, fmt.Errorf("start the app: %w", err)
 	}
 	if start.ExitCode != 0 {
 		// The app not starting is a result the reviewer should see: the
@@ -166,23 +255,27 @@ func (o *Orchestrator) preview(ctx context.Context, s domain.Settings, t domain.
 			p.Summary = "The app did not answer within " + previewStartTimeout.String() + ". The end of its log:\n\n" + tail(start.Output, 2500)
 		}
 		run.ExitReason = "app_failed"
-		return o.savePreview(ctx, t, run, p, prev)
+		return p, nil
 	}
 
 	d := promptData{T: t, Repo: repo}
 	var sum Summary
 	_ = json.Unmarshal(res.Summary, &sum)
 	d.WorkSummary, d.Notes = sum.Summary, sum.Notes
-	d.Files = res.Files
+	d.Files = files
 	if len(d.Files) > reviewMaxFiles {
 		d.Files = d.Files[:reviewMaxFiles]
 	}
-	if d.Rules, err = o.teamRules(ctx, t.RepoID); err != nil {
-		return err
+	if d.Rules, err = o.teamRules(ctx, t.RepoIDs()); err != nil {
+		return p, err
 	}
 	prompt, err := render("preview", d)
 	if err != nil {
-		return err
+		return p, err
+	}
+	if multi {
+		prompt += fmt.Sprintf("\n\nThis ticket changes several repositories; this preview is of %s, checked out at /workspace/%s, where the app runs. The diff in %s is its part of the change.\n",
+			r.Name, r.Folder(), ChangePath)
 	}
 	ps := s
 	ps.MaxTurns = min(s.MaxTurns, previewMaxTurns)
@@ -193,20 +286,24 @@ func (o *Orchestrator) preview(ctx context.Context, s domain.Settings, t domain.
 			// Rate limited: claimed again once usage allows.
 			o.setPreviewState(context.WithoutCancel(ctx), t, domain.PreviewPending)
 		}
-		return err
+		return p, err
 	}
 	raw, err := ws.ReadFile(ctx, PreviewPath)
 	if err != nil {
-		return fmt.Errorf("claude did not write %s: %w", PreviewPath, err)
+		return p, fmt.Errorf("claude did not write %s: %w", PreviewPath, err)
+	}
+	if multi {
+		_ = ws.WriteFile(ctx, PreviewPath, nil) // the next repository writes its own
 	}
 	got, err := parsePreview(raw)
 	if err != nil {
-		return err
+		return p, err
 	}
 	p.Status, p.Summary, p.Issues = got.Status, got.Summary, got.Issues
 
 	// Copy the screenshots out; one that is missing or not a PNG is
 	// dropped, not fatal.
+	rename := map[string]string{}
 	for _, sh := range got.Shots {
 		if sh.File == "" {
 			continue
@@ -221,8 +318,16 @@ func (o *Orchestrator) preview(ctx context.Context, s domain.Settings, t domain.
 			o.log.Warn("drop screenshot", "ticket", t.Key, "file", sh.File, "bytes", len(b), "png", ok)
 			continue
 		}
+		if multi {
+			id := r.Folder() + "-" + sh.ID
+			if len(id) > 64 {
+				id = id[:64]
+			}
+			rename[sh.ID], sh.ID = id, id
+			sh.Name = r.Name + ": " + sh.Name
+		}
 		if err := o.shots.Save(t.WorkspaceID, t.Key, run.ID, sh.ID, b); err != nil {
-			return fmt.Errorf("save screenshot %s: %w", sh.ID, err)
+			return p, fmt.Errorf("save screenshot %s: %w", sh.ID, err)
 		}
 		sh.File, sh.Width, sh.Height = "", w, h
 		p.Shots = append(p.Shots, sh)
@@ -232,30 +337,36 @@ func (o *Orchestrator) preview(ctx context.Context, s domain.Settings, t domain.
 	}
 	// An issue about a screenshot that was dropped keeps its text only.
 	for i, is := range p.Issues {
-		if _, ok := p.Shot(is.ShotID); !ok {
+		if id, ok := rename[is.ShotID]; ok {
+			p.Issues[i].ShotID = id
+		}
+		if multi {
+			p.Issues[i].Description = r.Name + ": " + p.Issues[i].Description
+		}
+		if _, ok := p.Shot(p.Issues[i].ShotID); !ok {
 			p.Issues[i].ShotID = ""
 		}
 	}
 	// The acceptance check runs while the app still runs.
+	if !accept {
+		return p, nil
+	}
 	if criteria := o.acceptanceCriteria(ctx, t, repo); len(criteria) > 0 {
 		acc, shots, err := o.checkAcceptance(ctx, s, ws, t, run, repo, criteria)
 		if err != nil {
 			var stop *stopError
 			if errors.As(err, &stop) {
-				return err
+				return p, err
 			}
 			o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(domain.StagePreview), Type: domain.EventError, Level: domain.LevelWarn,
-				Message: "the acceptance check failed: " + err.Error()})
+				Message: r.Label(multi) + "the acceptance check failed: " + err.Error()})
 		} else {
 			p.Acceptance = acc
 			p.Shots = append(p.Shots, shots...)
 			o.event(ctx, acceptanceEvent(t.Key, run, acc))
 		}
 	}
-	if err := o.savePreview(ctx, t, run, p, prev); err != nil {
-		return err
-	}
-	return o.afterAcceptance(ctx, t, run, p.Acceptance)
+	return p, nil
 }
 
 // acceptanceEvent logs an acceptance check on the ticket.
@@ -280,12 +391,13 @@ func acceptanceEvent(key string, run *domain.Run, a *domain.Acceptance) domain.E
 
 // writePreviewFiles puts the app's config and environment where
 // agnts-preview reads them.
-func (o *Orchestrator) writePreviewFiles(ctx context.Context, ws Workspace, repo domain.Repository) error {
+func (o *Orchestrator) writePreviewFiles(ctx context.Context, ws Workspace, r runRepo) error {
+	repo := r.Repository
 	rp := repo.Preview.ReadyPath
 	if rp == "" {
 		rp = "/"
 	}
-	cfg, _ := json.Marshal(previewConfig{Command: repo.Preview.Command, Port: repo.Preview.Port, ReadyPath: rp, DefaultBranch: repo.DefaultBranch})
+	cfg, _ := json.Marshal(previewConfig{Command: repo.Preview.Command, Port: repo.Preview.Port, ReadyPath: rp, DefaultBranch: repo.DefaultBranch, Dir: r.Folder()})
 	if err := ws.WriteFile(ctx, PreviewConfigPath, cfg); err != nil {
 		return fmt.Errorf("write the preview config: %w", err)
 	}

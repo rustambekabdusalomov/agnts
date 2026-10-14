@@ -20,17 +20,16 @@ const MethodsSuffix = "+methods"
 // coding run (Settings → Runs → Method skills), records them on the run
 // and returns the line for the prompt (nil: none). contextFiles, which
 // every run calls first, removes those of earlier runs.
-func (o *Orchestrator) methodSkills(ctx context.Context, s domain.Settings, ws Workspace, run *domain.Run) *ContextFile {
+// In a run of several repositories a skill fits when any repository has
+// the files it is for.
+func (o *Orchestrator) methodSkills(ctx context.Context, s domain.Settings, ws Workspace, run *domain.Run, rs []runRepo) *ContextFile {
 	if !s.MethodSkills {
 		return nil
 	}
 	var names []string
 	for _, sk := range skillpacks.All() {
-		if sk.Files != "" {
-			r, err := ws.Exec(ctx, "git ls-files | grep -E -q -e "+shellArg(sk.Files), time.Minute)
-			if err != nil || r.ExitCode != 0 {
-				continue
-			}
+		if sk.Files != "" && !hasFiles(ctx, ws, rs, sk.Files) {
+			continue
 		}
 		if err := ws.WriteFile(ctx, SkillsDir+"/"+sk.Name+"/SKILL.md", sk.Body); err != nil {
 			o.log.Warn("write method skill", "skill", sk.Name, "err", err)
@@ -45,6 +44,21 @@ func (o *Orchestrator) methodSkills(ctx context.Context, s domain.Settings, ws W
 	run.PromptVersion = PromptVersion + MethodsSuffix
 	return &ContextFile{Path: SkillsDir, What: fmt.Sprintf("agnts's method skills (%s), not team rules: how to do common kinds of work the way this repository already does them. Load one when its description matches what you are about to do; the rules, the brief and the business context win over it",
 		strings.Join(names, ", "))}
+}
+
+// hasFiles reports whether a repository of the run tracks a file matching
+// the extended regular expression re.
+func hasFiles(ctx context.Context, ws Workspace, rs []runRepo, re string) bool {
+	if len(rs) <= 1 {
+		rs = []runRepo{{}} // /workspace itself
+	}
+	for _, r := range rs {
+		res, err := ws.Exec(ctx, r.Cmd("git ls-files | grep -E -q -e "+shellArg(re)), time.Minute)
+		if err == nil && res.ExitCode == 0 {
+			return true
+		}
+	}
+	return false
 }
 
 // noteSkill records a skill Claude loaded in a run, from its Skill tool

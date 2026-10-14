@@ -1,0 +1,26 @@
+{
+  "mgroups": {
+    "groups": "Guruhlar",
+    "repos": "Repozitoriylar",
+    "pickHint": "Bir yoki bir nechtasini tanlang. Birinchisi asosiy boʻladi.",
+    "inTask": "Bu vazifada",
+    "fromGroup": "{name} guruhi toʻliq",
+    "fromGroupEdited": "{name} guruhidan, oʻzgartirilgan",
+    "primary": "asosiy",
+    "remove": "{name} ni olib tashlash",
+    "noMembers": "Bu guruhda faol repozitoriylar yoʻq.",
+    "group": "{name} guruhi",
+    "partlyMerged": "Qisman birlashtirildi",
+    "archived": "arxivda",
+    "pushError": "Yuborib boʻlmadi: {error}",
+    "files": "{n, plural, one {# fayl} other {# fayl}}",
+    "ciFixes": "{n, plural, one {# CI tuzatish} other {# CI tuzatish}}",
+    "state": {
+      "pending": "Kutilmoqda",
+      "unchanged": "Oʻzgarishsiz",
+      "pushed": "Yuborildi",
+      "merged": "Birlashtirildi",
+      "dropped": "Yopildi"
+    }
+  }
+}

@@ -24,10 +24,13 @@ type Reflection struct {
 	WorkspaceID int64
 	TicketKey   string
 	RepoID      *int64
-	Source      string
-	Feedback    string
-	Status      string
-	Suggested   int // rules suggested
-	Error       string
-	CreatedAt   time.Time
+	// RepoIDs are all the ticket's repositories, for a ticket in several
+	// (RepoID is its primary, whose code the reflect run reads).
+	RepoIDs   []int64
+	Source    string
+	Feedback  string
+	Status    string
+	Suggested int // rules suggested
+	Error     string
+	CreatedAt time.Time
 }

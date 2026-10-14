@@ -131,12 +131,12 @@ func (o *Orchestrator) review(ctx context.Context, s domain.Settings, t domain.T
 	if !report && len(res.Files) == 0 {
 		return errors.New("no change to review")
 	}
-	repo, err := o.optionalRepo(ctx, t)
+	rs, err := o.optionalRepos(ctx, t)
 	if err != nil {
 		return err
 	}
 
-	d := promptData{T: t, NoRepo: repo == nil}
+	d := withRepos(promptData{T: t, NoRepo: len(rs) == 0}, rs, o.ticketGroup(ctx, t))
 	var a *Analysis
 	if r, err := o.store.LatestResult(ctx, t.ID, domain.StageAnalyze); err == nil {
 		if x, err := parseAnalysis(r.Summary); err == nil {
@@ -146,7 +146,7 @@ func (o *Orchestrator) review(ctx context.Context, s domain.Settings, t domain.T
 	if d.Answers, err = o.store.Questions(ctx, t.ID); err != nil {
 		return err
 	}
-	if d.Rules, err = o.teamRules(ctx, t.RepoID); err != nil {
+	if d.Rules, err = o.teamRules(ctx, t.RepoIDs()); err != nil {
 		return err
 	}
 	var sum Summary
@@ -162,19 +162,17 @@ func (o *Orchestrator) review(ctx context.Context, s domain.Settings, t domain.T
 		d.Unexpected = unexpectedFiles(a.Footprint.Clean().Files, res.Files)
 	}
 
-	branch := ""
-	if repo != nil {
-		d.Repo, branch = *repo, repo.DefaultBranch
-		if !report {
-			branch = t.Branch // the reviewed commit
-		}
+	for i := range rs {
+		if report || rs[i].Row.Branch == "" {
+			rs[i].Branch = rs[i].DefaultBranch
+		} // else the reviewed commit, on the ticket's branch
 	}
-	ws, err := o.openWorkspace(ctx, t, repo, branch, run)
+	ws, err := o.openWorkspace(ctx, t, rs, run)
 	if err != nil {
 		return err
 	}
 	defer o.closeWorkspace(ctx, t, ws)
-	d.Context = o.contextFiles(ctx, ws, t, repo)
+	d.Context = o.contextFiles(ctx, ws, t, rs)
 	if report {
 		err = ws.WriteFile(ctx, ReportPath, []byte(res.Report))
 	} else {
@@ -202,14 +200,14 @@ func (o *Orchestrator) review(ctx context.Context, s domain.Settings, t domain.T
 	if err != nil {
 		return err
 	}
-	rs := s
-	rs.Models.Review = model
-	rs.MaxTurns = min(s.MaxTurns, reviewMaxTurns)
-	rs.TimeoutMin = min(s.TimeoutMin, reviewTimeoutMin)
+	rvs := s
+	rvs.Models.Review = model
+	rvs.MaxTurns = min(s.MaxTurns, reviewMaxTurns)
+	rvs.TimeoutMin = min(s.TimeoutMin, reviewTimeoutMin)
 	if d.Deep {
-		rs.MaxTurns = min(s.MaxTurns, reviewMaxTurns*2) // the passes need room
+		rvs.MaxTurns = min(s.MaxTurns, reviewMaxTurns*2) // the passes need room
 	}
-	if _, err := o.claude(ctx, rs, ws, &t, run, domain.ModelReview, prompt, ""); err != nil {
+	if _, err := o.claude(ctx, rvs, ws, &t, run, domain.ModelReview, prompt, ""); err != nil {
 		var stop *stopError
 		if errors.As(err, &stop) {
 			// Rate limited: claimed again once usage allows, but nobody
@@ -326,8 +324,8 @@ func unexpectedFiles(predicted []string, changed []domain.FileChange) []string {
 	}
 	var out []string
 	for _, f := range changed {
-		if !slices.Contains(predicted, f.Path) && len(out) < 20 {
-			out = append(out, f.Path)
+		if !slices.Contains(predicted, f.Where()) && len(out) < 20 {
+			out = append(out, f.Where())
 		}
 	}
 	return out

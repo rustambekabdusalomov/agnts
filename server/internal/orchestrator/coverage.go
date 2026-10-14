@@ -11,10 +11,54 @@ import (
 	"agnts/internal/toolchain"
 )
 
-// measureCoverage runs the repository's tests with coverage and measures
+// measureCoverage runs the repositories' tests with coverage and measures
 // the lines the change adds. It never fails the run: what it could not do
-// is in Coverage.Error.
-func (o *Orchestrator) measureCoverage(ctx context.Context, ws Workspace, t domain.Ticket, run *domain.Run, repo domain.Repository, files []domain.FileChange) *domain.Coverage {
+// is in Coverage.Error. In a ticket of several repositories each changed
+// repository with coverage on is measured, and the results are added up.
+func (o *Orchestrator) measureCoverage(ctx context.Context, ws Workspace, t domain.Ticket, run *domain.Run, rs []runRepo, files []domain.FileChange) *domain.Coverage {
+	if len(rs) == 1 {
+		return o.measureRepoCoverage(ctx, ws, t, run, rs[0], files, false)
+	}
+	var sum *domain.Coverage
+	var errs []string
+	for _, r := range rs {
+		fs := domain.FilesIn(files, r.ID, t.RepoID)
+		if len(fs) == 0 || r.Frozen {
+			continue
+		}
+		c := o.measureRepoCoverage(ctx, ws, t, run, r, fs, true)
+		if c == nil {
+			continue
+		}
+		if sum == nil {
+			sum = &domain.Coverage{Threshold: c.Threshold}
+		}
+		if c.Error != "" {
+			errs = append(errs, r.Name+": "+c.Error)
+			continue
+		}
+		sum.Covered += c.Covered
+		sum.Total += c.Total
+		sum.Threshold = max(sum.Threshold, c.Threshold)
+		for _, f := range c.Files {
+			f.Path = r.Rel(f.Path)
+			sum.Files = append(sum.Files, f)
+		}
+	}
+	if sum == nil {
+		return nil
+	}
+	if sum.Total > 0 {
+		sum.Percent = float64(sum.Covered) * 100 / float64(sum.Total)
+	}
+	sum.Error = strings.Join(errs, "; ")
+	return sum
+}
+
+// measureRepoCoverage measures one repository's coverage of the lines its
+// change adds (files, paths relative to it).
+func (o *Orchestrator) measureRepoCoverage(ctx context.Context, ws Workspace, t domain.Ticket, run *domain.Run, r runRepo, files []domain.FileChange, multi bool) *domain.Coverage {
+	repo := r.Repository
 	cfg := repo.Harness.Coverage
 	if !cfg.Enabled {
 		return nil
@@ -27,11 +71,11 @@ func (o *Orchestrator) measureCoverage(ctx context.Context, ws Workspace, t doma
 		return &domain.Coverage{Threshold: cfg.Threshold, Error: "agnts knows no coverage command for this repository's toolchains; set one under Repositories → Checks"}
 	}
 	if !path.IsAbs(report) {
-		report = path.Join("/workspace", report)
+		report = path.Join(r.Dir(), report)
 	}
-	r, err := ws.Exec(ctx, cmd, o.cfg.CheckTimeout)
-	if err != nil || r.ExitCode != 0 {
-		msg := fmt.Sprintf("the coverage run failed (exit %d): %s", r.ExitCode, tail(r.Output, 600))
+	res, err := ws.Exec(ctx, r.Cmd(cmd), o.cfg.CheckTimeout)
+	if err != nil || res.ExitCode != 0 {
+		msg := fmt.Sprintf("the coverage run failed (exit %d): %s", res.ExitCode, tail(res.Output, 600))
 		if err != nil {
 			msg = "the coverage run failed: " + err.Error()
 		}
@@ -41,27 +85,28 @@ func (o *Orchestrator) measureCoverage(ctx context.Context, ws Workspace, t doma
 	if err != nil {
 		return &domain.Coverage{Threshold: cfg.Threshold, Error: "the coverage run wrote no report at " + report}
 	}
-	lines, err := coverage.Parse(raw, "/workspace", o.goModules(ctx, ws, repo))
+	lines, err := coverage.Parse(raw, r.Dir(), o.goModules(ctx, ws, r))
 	if err != nil {
 		return &domain.Coverage{Threshold: cfg.Threshold, Error: err.Error()}
 	}
 	c := coverage.Measure(files, lines, cfg.Threshold)
-	msg := fmt.Sprintf("changed lines covered by tests: %.1f%% (%d of %d)", c.Percent, c.Covered, c.Total)
+	msg := fmt.Sprintf("%schanged lines covered by tests: %.1f%% (%d of %d)", r.Label(multi), c.Percent, c.Covered, c.Total)
 	level := domain.LevelInfo
 	if c.Total == 0 {
-		msg = "no changed line is code the coverage report measures"
+		msg = r.Label(multi) + "no changed line is code the coverage report measures"
 	} else if cfg.Threshold > 0 && c.Percent < float64(cfg.Threshold) {
 		msg += fmt.Sprintf(", below the repository's %d%%", cfg.Threshold)
 		level = domain.LevelWarn
 	}
 	o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: "checks", Type: domain.EventCoverage, Level: level, Message: msg,
-		Data: map[string]any{"percent": c.Percent, "covered": c.Covered, "total": c.Total, "threshold": cfg.Threshold}})
+		Data: map[string]any{"percent": c.Percent, "covered": c.Covered, "total": c.Total, "threshold": cfg.Threshold, "repoId": r.ID}})
 	return &c
 }
 
 // goModules maps the Go modules of a repository to their directories,
 // from the go.mod files next to its Go toolchains.
-func (o *Orchestrator) goModules(ctx context.Context, ws Workspace, repo domain.Repository) map[string]string {
+func (o *Orchestrator) goModules(ctx context.Context, ws Workspace, r runRepo) map[string]string {
+	repo := r.Repository
 	out := map[string]string{}
 	dirs := []string{""}
 	for _, tc := range repo.Toolchains {
@@ -70,7 +115,7 @@ func (o *Orchestrator) goModules(ctx context.Context, ws Workspace, repo domain.
 		}
 	}
 	for _, d := range dirs {
-		b, err := ws.ReadFile(ctx, path.Join("/workspace", d, "go.mod"))
+		b, err := ws.ReadFile(ctx, path.Join(r.Dir(), d, "go.mod"))
 		if err != nil {
 			continue
 		}

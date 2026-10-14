@@ -43,11 +43,30 @@ type RelatedTicket struct {
 
 // relationCandidates loads the tickets an analysis of t compares itself
 // with: open tickets in its repository and unmerged done ones.
+// A ticket in several repositories compares itself with the tickets of
+// each of them.
 func (o *Orchestrator) relationCandidates(ctx context.Context, t domain.Ticket) ([]Candidate, error) {
 	if t.RepoID == nil || t.ReplayOf != "" {
 		return nil, nil // a replay is cut from the past: today's tickets are not its neighbours
 	}
-	return o.store.RelationCandidates(ctx, *t.RepoID, t.Key, relationMaxCandidates)
+	if !t.Multi() {
+		return o.store.RelationCandidates(ctx, *t.RepoID, t.Key, relationMaxCandidates)
+	}
+	var out []Candidate
+	seen := map[string]bool{}
+	for _, id := range t.RepoIDs() {
+		cs, err := o.store.RelationCandidates(ctx, id, t.Key, relationMaxCandidates)
+		if err != nil {
+			return nil, err
+		}
+		for _, c := range cs {
+			if !seen[c.Ticket.Key] && len(out) < relationMaxCandidates {
+				seen[c.Ticket.Key] = true
+				out = append(out, c)
+			}
+		}
+	}
+	return out, nil
 }
 
 // relatedTickets turns candidates into what the prompt lists.
@@ -194,6 +213,11 @@ func foundRelations(t domain.Ticket, a Analysis, cs []Candidate) []domain.Relati
 		}
 		theirs := oa.Footprint.Clean()
 		files := domain.SharedFiles(mine, theirs)
+		if t.Multi() || c.Ticket.Multi() {
+			// Paths are compared with their repository: the same relative
+			// path in two repositories is two files.
+			files = domain.SharedFiles(qualified(t, mine), qualified(c.Ticket, theirs))
+		}
 		var shared []string
 		for _, s := range domain.HotSpots(theirs) {
 			if slices.Contains(spots, s) {
@@ -211,6 +235,29 @@ func foundRelations(t domain.Ticket, a Analysis, cs []Candidate) []domain.Relati
 		rs = append(rs, r.Normalize())
 	}
 	return rs
+}
+
+// qualified is a footprint with each path prefixed by its repository's
+// name: a ticket in several repositories names paths by folder, one in a
+// single repository relative to it.
+func qualified(t domain.Ticket, fp domain.Footprint) domain.Footprint {
+	out := fp
+	out.Files = nil
+	for _, p := range fp.Files {
+		if !t.Multi() {
+			if r, ok := t.Primary(); ok {
+				out.Files = append(out.Files, r.RepoName+"/"+p)
+			}
+			continue
+		}
+		for _, r := range t.Repos {
+			if rest, ok := strings.CutPrefix(p, r.Folder+"/"); ok {
+				out.Files = append(out.Files, r.RepoName+"/"+rest)
+				break
+			}
+		}
+	}
+	return out
 }
 
 // relationsMessage describes found relations for the ticket's log.
@@ -396,23 +443,32 @@ func (o *Orchestrator) DecideRelation(ctx context.Context, key string, id int64,
 	return out, err
 }
 
-// MarkMergedByHand records that a done ticket's pull request was merged,
+// MarkMergedByHand records that a done ticket's pull requests were merged,
 // for setups without a merge webhook: tickets waiting for it may start.
+// A ticket in several repositories has all its open pull requests marked.
 func (o *Orchestrator) MarkMergedByHand(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error) {
 	t, err := o.store.TicketByKey(ctx, key)
 	if err != nil {
 		return t, err
 	}
-	if t.State != domain.StateDone || t.PRURL == "" {
+	if t.State != domain.StateDone || !t.AnyPR() {
 		return t, invalid("only a done ticket with a pull request can be marked merged")
 	}
 	if t.MergedAt != nil {
 		return t, nil
 	}
-	return o.markMerged(ctx, t, origin, "marked merged by hand")
+	for _, r := range t.OpenedPRs() {
+		if r.MergedAt != nil || r.ClosedAt != nil {
+			continue
+		}
+		if t, err = o.markRepoMerged(ctx, t, r.RepoID, origin, "marked merged by hand"); err != nil {
+			return t, err
+		}
+	}
+	return o.store.TicketByKey(ctx, key)
 }
 
-// CheckMerges asks the git host about done tickets whose pull request is
+// CheckMerges asks the git host about done tickets whose pull requests are
 // not known to be merged or closed, and records the merges and closes it
 // finds. It covers a webhook that never arrived; with a working webhook it
 // finds nothing.
@@ -429,53 +485,151 @@ func (o *Orchestrator) CheckMerges(ctx context.Context) {
 	repos := map[int64]domain.Repository{}
 	sys := ctx
 	for _, t := range ts {
-		if ctx.Err() != nil {
-			return
-		}
 		// Each ticket is checked with its workspace's git host token.
 		ctx := domain.WithWorkspace(sys, t.WorkspaceID)
-		repo, seen := repos[*t.RepoID]
-		if !seen {
-			if repo, err = o.store.RepositoryByID(ctx, *t.RepoID); err != nil {
-				o.log.Warn("check merges", "ticket", t.Key, "err", err)
+		for _, r := range t.OpenedPRs() {
+			if ctx.Err() != nil {
+				return
+			}
+			if r.MergedAt != nil || r.ClosedAt != nil {
 				continue
 			}
-			repos[*t.RepoID] = repo
-		}
-		state, err := mc.PRState(ctx, repo, *t.PRNumber)
-		if err != nil {
-			o.log.Debug("check merges", "ticket", t.Key, "err", err)
-			continue
-		}
-		switch state {
-		case domain.PullMerged:
-			_, err = o.markMerged(ctx, t, domain.OriginSystem, "pull request merged (found by checking the git host)")
-		case domain.PullClosed:
-			err = o.setPRClosed(ctx, t, true, domain.OriginSystem, "pull request closed without merging (found by checking the git host)")
-		}
-		if err != nil {
-			o.log.Warn("check merges", "ticket", t.Key, "err", err)
+			repo, seen := repos[r.RepoID]
+			if !seen {
+				if repo, err = o.store.RepositoryByID(ctx, r.RepoID); err != nil {
+					o.log.Warn("check merges", "ticket", t.Key, "err", err)
+					continue
+				}
+				repos[r.RepoID] = repo
+			}
+			state, err := mc.PRState(ctx, repo, *r.PRNumber)
+			if err != nil {
+				o.log.Debug("check merges", "ticket", t.Key, "err", err)
+				continue
+			}
+			switch state {
+			case domain.PullMerged:
+				var nt domain.Ticket
+				if nt, err = o.markRepoMerged(ctx, t, r.RepoID, domain.OriginSystem, "pull request merged (found by checking the git host)"); err == nil {
+					t = nt
+				}
+			case domain.PullClosed:
+				err = o.setPRClosed(ctx, t, r.RepoID, true, domain.OriginSystem, "pull request closed without merging (found by checking the git host)")
+			}
+			if err != nil {
+				o.log.Warn("check merges", "ticket", t.Key, "err", err)
+			}
 		}
 	}
 }
 
-func (o *Orchestrator) markMerged(ctx context.Context, t domain.Ticket, origin domain.Origin, msg string) (domain.Ticket, error) {
+// markRepoMerged records that the ticket's pull request in repoID was
+// merged: its branch goes, its brief counts the merge, and once every pull
+// request the ticket opened is merged (or closed), the ticket is merged.
+func (o *Orchestrator) markRepoMerged(ctx context.Context, t domain.Ticket, repoID int64, origin domain.Origin, msg string) (domain.Ticket, error) {
 	now := time.Now()
+	r, _ := t.RepoState(repoID)
+	if t.Multi() {
+		msg = r.RepoName + ": " + msg
+	}
+	url := r.PRURL
+	became := false
 	out, err := o.store.UpdateTicket(ctx, t.Key, &domain.Event{
-		TicketKey: t.Key, Type: domain.EventMerged, Origin: origin, Message: msg, Data: map[string]any{"url": t.PRURL},
-	}, func(x *domain.Ticket) { x.MergedAt = &now })
+		TicketKey: t.Key, Type: domain.EventMerged, Origin: origin, Message: msg, Data: map[string]any{"url": url, "repoId": repoID},
+	}, func(x *domain.Ticket) {
+		x.UpdateRepo(repoID, func(r *domain.TicketRepo) {
+			if url != "" {
+				r.PRURL = url
+			}
+			r.MergedAt, r.State, r.ClosedAt = &now, domain.RepoMerged, nil
+		})
+		// Decided on the locked row, so two reports of the last merge
+		// cannot both finish the ticket.
+		if x.MergedAt == nil && (!x.Multi() || x.AllMerged()) {
+			x.MergedAt, became = &now, true
+		}
+	})
 	if err != nil {
 		return out, err
 	}
-	o.dropBranch(ctx, out)
-	o.countMerge(ctx, out)
-	o.trackerComment(ctx, t, CommentStatus, "The pull request was merged.")
+	if repo, err := o.store.RepositoryByID(ctx, repoID); err == nil {
+		o.dropRepoBranch(ctx, out, repo, r.Branch)
+		o.countRepoMerge(ctx, out, repoID)
+	}
+	if became {
+		o.mergedNote(ctx, out, origin)
+		o.mergedEverywhere(ctx, out)
+	}
+	return out, nil
+}
+
+// settleMerged sets or clears a ticket's merge after one of its pull
+// requests was closed or reopened: merged once the open ones are all
+// merged, not merged again while a reopened one is open. It reports
+// whether the ticket just became merged.
+func (o *Orchestrator) settleMerged(ctx context.Context, key string) (domain.Ticket, bool, error) {
+	now := time.Now()
+	became := false
+	out, err := o.store.UpdateTicket(ctx, key, nil, func(x *domain.Ticket) {
+		switch {
+		case !x.Multi():
+		case x.MergedAt == nil && x.AllMerged():
+			x.MergedAt, became = &now, true
+		case x.MergedAt != nil && !x.AllMerged():
+			x.MergedAt = nil
+		}
+	})
+	return out, became, err
+}
+
+// mergedNote logs that a ticket in several repositories is merged.
+func (o *Orchestrator) mergedNote(ctx context.Context, t domain.Ticket, origin domain.Origin) {
+	if !t.Multi() {
+		return
+	}
+	msg := "every pull request is merged"
+	if t.PartlyMerged() {
+		msg = "partly merged: the other pull requests are merged, and a closed one was not"
+	}
+	o.event(ctx, domain.Event{TicketKey: t.Key, Type: domain.EventMerged, Origin: origin, Message: msg,
+		Data: map[string]any{"all": true, "partly": t.PartlyMerged()}})
+}
+
+// mergedEverywhere is what follows the ticket-level merge: the tracker
+// hears of it, the CI hooks run and tickets waiting for it may start.
+func (o *Orchestrator) mergedEverywhere(ctx context.Context, t domain.Ticket) {
+	o.trackerComment(ctx, t, CommentStatus, mergedComment(t))
 	o.trackerMove(ctx, t, TrackerMerged)
 	if o.ciHook != nil {
-		o.ciHook.TicketMerged(ctx, out)
+		o.ciHook.TicketMerged(ctx, t)
 	}
 	o.Wake() // tickets waiting for it may start
-	return out, nil
+}
+
+func mergedComment(t domain.Ticket) string {
+	if !t.Multi() {
+		return "The pull request was merged."
+	}
+	if t.PartlyMerged() {
+		return "The pull requests were partly merged: " + prList(t) + "."
+	}
+	return "All pull requests were merged: " + prList(t) + "."
+}
+
+// prList names a ticket's pull requests with their state.
+func prList(t domain.Ticket) string {
+	var parts []string
+	for _, r := range t.OpenedPRs() {
+		s := r.RepoName + " " + r.PRURL
+		switch {
+		case r.MergedAt != nil:
+			s += " (merged)"
+		case r.ClosedAt != nil || r.State == domain.RepoDropped:
+			s += " (closed)"
+		}
+		parts = append(parts, s)
+	}
+	return strings.Join(parts, ", ")
 }
 
 // landedDependencies returns the tickets t waited for whose changes are
@@ -511,7 +665,7 @@ func (o *Orchestrator) checkFootprint(ctx context.Context, t domain.Ticket, run 
 	pred := a.Footprint.Clean().Files
 	actual := make([]string, 0, len(files))
 	for _, f := range files {
-		actual = append(actual, f.Path)
+		actual = append(actual, f.Where())
 	}
 	hit := 0
 	for _, p := range pred {
@@ -543,8 +697,11 @@ func (o *Orchestrator) checkFootprint(ctx context.Context, t domain.Ticket, run 
 // gets an active conflict relation (so the reviewer sees it) and a warning
 // on both tickets. Whether the relation was predicted is logged for the
 // eval.
+// In a ticket of several repositories each repository's change is compared
+// with the others' changes in that repository: files is the change in repo
+// alone, paths relative to it.
 func (o *Orchestrator) checkCollisions(ctx context.Context, t domain.Ticket, run *domain.Run, repo domain.Repository, files []domain.FileChange) {
-	if t.ReplayOf != "" {
+	if t.ReplayOf != "" || len(files) == 0 {
 		return // never merged, so it collides with nothing
 	}
 	others, err := o.store.InFlightResults(ctx, repo.ID, t.Key)
@@ -570,7 +727,7 @@ func (o *Orchestrator) checkCollisions(ctx context.Context, t domain.Ticket, run
 	}
 	for _, f := range others {
 		var lines []string
-		for _, c := range domain.DiffConflicts(files, f.Files) {
+		for _, c := range domain.DiffConflicts(files, domain.FilesIn(f.Files, repo.ID, f.Ticket.RepoID)) {
 			if c.Lines {
 				lines = append(lines, c.Path)
 			}
@@ -579,7 +736,11 @@ func (o *Orchestrator) checkCollisions(ctx context.Context, t domain.Ticket, run
 			continue
 		}
 		was := predicted(f.Ticket.Key)
-		msg := fmt.Sprintf("%s changes the same lines as %s in %s: whichever is merged second needs a rebase", t.Key, f.Ticket.Key, strings.Join(lines, ", "))
+		where := strings.Join(lines, ", ")
+		if t.Multi() || f.Ticket.Multi() {
+			where = repo.Name + ": " + where
+		}
+		msg := fmt.Sprintf("%s changes the same lines as %s in %s: whichever is merged second needs a rebase", t.Key, f.Ticket.Key, where)
 		_, err := o.store.UpsertRelation(ctx, domain.Relation{Type: domain.RelConflicts, TicketKey: t.Key, OtherKey: f.Ticket.Key,
 			Source: domain.RelFromGit, Status: domain.RelActive, Confidence: 1, Basis: domain.BasisDiff, Files: lines},
 			&domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventCollision, Level: domain.LevelWarn,
@@ -605,46 +766,57 @@ type DriftChecker interface {
 // checkDrift warns before a push when the default branch moved on under
 // the same lines the change touches: the pull request will need a rebase.
 // It returns the files, for the pull request body.
-func (o *Orchestrator) checkDrift(ctx context.Context, t domain.Ticket, run *domain.Run, repo domain.Repository) []string {
+func (o *Orchestrator) checkDrift(ctx context.Context, t domain.Ticket, run *domain.Run, r runRepo) []string {
 	dc, ok := o.git.(DriftChecker)
 	if !ok {
 		return nil
 	}
-	r, err := o.store.LatestResult(ctx, t.ID, domain.StageCode)
+	res, err := o.store.LatestResult(ctx, t.ID, domain.StageCode)
 	if err != nil {
 		return nil
 	}
-	drift, err := dc.Drift(ctx, repo, t.Branch)
+	drift, err := dc.Drift(ctx, r.Repository, r.Branch)
 	if err != nil {
-		o.log.Warn("check default branch drift", "ticket", t.Key, "err", err)
+		o.log.Warn("check default branch drift", "ticket", t.Key, "repo", r.Name, "err", err)
 		return nil
 	}
 	var lines []string
-	for _, c := range domain.DiffConflicts(r.Files, drift) {
+	for _, c := range domain.DiffConflicts(domain.FilesIn(res.Files, r.ID, t.RepoID), drift) {
 		if c.Lines {
 			lines = append(lines, c.Path)
 		}
 	}
 	if len(lines) > 0 {
 		o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventCollision, Level: domain.LevelWarn,
-			Message: fmt.Sprintf("%s changed under this branch in %s since it was cut: the pull request will need a rebase", repo.DefaultBranch, strings.Join(lines, ", ")),
-			Data:    map[string]any{"files": lines, "drift": true}})
+			Message: fmt.Sprintf("%s%s changed under this branch in %s since it was cut: the pull request will need a rebase", r.Label(t.Multi()), r.DefaultBranch, strings.Join(lines, ", ")),
+			Data:    map[string]any{"files": lines, "drift": true, "repoId": r.ID}})
 	}
 	return lines
 }
 
-// dropBranch deletes a finished ticket's local branch (merged or rejected):
-// the git host keeps its copy, and the mirror stops growing with refs.
+// dropBranch deletes a finished ticket's local branches (merged or
+// rejected), in every repository: the git host keeps its copy, and the
+// mirror stops growing with refs.
 func (o *Orchestrator) dropBranch(ctx context.Context, t domain.Ticket) {
+	for _, id := range t.RepoIDs() {
+		r, ok := t.RepoState(id)
+		if !ok || r.Branch == "" {
+			continue
+		}
+		repo, err := o.store.RepositoryByID(ctx, id)
+		if err != nil {
+			continue
+		}
+		o.dropRepoBranch(ctx, t, repo, r.Branch)
+	}
+}
+
+func (o *Orchestrator) dropRepoBranch(ctx context.Context, t domain.Ticket, repo domain.Repository, branch string) {
 	bc, ok := o.git.(BranchCleaner)
-	if !ok || t.Branch == "" || t.RepoID == nil {
+	if !ok || branch == "" {
 		return
 	}
-	repo, err := o.store.RepositoryByID(ctx, *t.RepoID)
-	if err != nil {
-		return
-	}
-	if err := bc.DeleteBranch(context.WithoutCancel(ctx), repo, t.Branch); err != nil {
-		o.log.Warn("delete finished branch", "ticket", t.Key, "branch", t.Branch, "err", err)
+	if err := bc.DeleteBranch(context.WithoutCancel(ctx), repo, branch); err != nil {
+		o.log.Warn("delete finished branch", "ticket", t.Key, "repo", repo.Name, "branch", branch, "err", err)
 	}
 }

@@ -17,3 +17,7 @@ Add a repository with its clone URL, a key prefix for task numbers, and the test
 ## Editing
 
 While a task is still in the queue you can edit or delete it from its page.
+
+## Several repositories
+
+Pick several repositories, or a group, when one change spans them (an API and the app that calls it). agnts works on all of them in one run: each repository is a folder of its own, its checks run in its folder, and each changed repository gets its own commit and pull request, linked to the others. A repository the work does not change gets no pull request. The task counts as merged once every pull request it opened is merged; if one is closed without a merge, it shows as partly merged. If a push fails in one repository, the others stay pushed and Retry pushes the rest.

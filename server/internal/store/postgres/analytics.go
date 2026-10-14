@@ -345,12 +345,13 @@ func (s *Agent) Analytics(ctx context.Context, days int, tz *time.Location) (Ana
 		       count(t.id) FILTER (WHERE t.merged_at >= $1 AND t.merged_at < $2),
 		       count(t.id) FILTER (WHERE t.closed_at >= $1 AND t.closed_at < $2 AND t.merged_at IS NULL),
 		       (SELECT count(*) FROM questions q JOIN tickets qt ON qt.id = q.ticket_id
-		         WHERE qt.repo_id = r.id AND q.created_at >= $1 AND q.created_at < $2),
+		         WHERE `+inRepoSQL("qt")+` AND q.created_at >= $1 AND q.created_at < $2),
 		       (SELECT count(DISTINCT x.ticket_id) FROM runs x JOIN tickets xt ON xt.id = x.ticket_id
-		         WHERE xt.repo_id = r.id AND x.stage = 'analyze' AND x.started_at >= $1 AND x.started_at < $2),
+		         WHERE `+inRepoSQL("xt")+` AND x.stage = 'analyze' AND x.started_at >= $1 AND x.started_at < $2),
 		       (SELECT count(*) FROM ci_failures f WHERE f.repo_id = r.id AND f.last_seen_at >= $1 AND f.first_seen_at < $2)
 		FROM repositories r
-		JOIN tickets t ON t.repo_id = r.id AND t.updated_at >= $1 AND t.updated_at < $2
+		-- A ticket counts in every repository it works in.
+		JOIN tickets t ON `+inRepoSQL("t")+` AND t.updated_at >= $1 AND t.updated_at < $2
 		LEFT JOIN agnts h ON h.ticket_key = t.key
 		GROUP BY r.id ORDER BY count(t.id) DESC`, start, end, working)
 	if err != nil {
@@ -584,4 +585,10 @@ func (s *Agent) skills(ctx context.Context, from, to time.Time) ([]SkillStats, e
 		out = append(out, x)
 	}
 	return out, rows.Err()
+}
+
+// inRepoSQL is true for a ticket (alias t) that works in repository r.id,
+// as its primary repository or another of its repositories.
+func inRepoSQL(t string) string {
+	return "(" + t + ".repo_id = r.id OR EXISTS (SELECT 1 FROM ticket_repos tr WHERE tr.ticket_id = " + t + ".id AND tr.repo_id = r.id))"
 }

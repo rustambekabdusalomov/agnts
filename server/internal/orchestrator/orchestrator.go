@@ -141,6 +141,12 @@ type Orchestrator struct {
 	active  int
 
 	translating singleflight.Group // ticket key and language -> its translation run
+
+	assistant   AssistantStore // nil: no assistant
+	snapshots   AssistantSnapshotter
+	assistantEv AssistantEvents
+	asst        assistantState
+	answering   sync.WaitGroup
 }
 
 // New returns an orchestrator.
@@ -210,9 +216,11 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 			o.log.Warn("requeued interrupted reflect runs", "count", n)
 		}
 	}
+	o.recoverAssistant(sys)
 	if o.queue == nil {
 		return errors.New("the store cannot serve the queue")
 	}
+	defer o.closeWarm(context.WithoutCancel(sys))
 
 	var wg sync.WaitGroup
 	defer wg.Wait()
@@ -242,6 +250,7 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 			o.pruneShots(sys)
 			o.prunePendingUploads(sys)
 			o.expireSuggestions(sys)
+			o.pruneAssistant(sys)
 		}
 		if ctx.Err() == nil {
 			o.tick(ctx, func(j scheduled) {
@@ -591,9 +600,11 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 	if run.Model == "" {
 		run.Model = model
 	}
-	turns := s.MaxTurns
+	// A ticket in several repositories has more to read and change.
+	scale := domain.TurnScale(len(t.Repos))
+	turns := int(float64(s.MaxTurns) * scale)
 	if modelStage == domain.ModelAnalyze {
-		turns = min(turns, 60)
+		turns = min(turns, int(60*scale))
 	}
 	if budget > 0 {
 		turns = min(turns, budget)
@@ -604,12 +615,7 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 		o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventGuard,
 			Message: "this run uses Codex (" + strings.TrimPrefix(model, CodexPrefix) + "): agnts-guard's checks inside the run do not apply to it; agnts's checks after the run do"})
 	}
-	var repo *domain.Repository
-	if t.RepoID != nil {
-		if r, err := o.store.RepositoryByID(ctx, *t.RepoID); err == nil {
-			repo = &r
-		}
-	}
+	rs, _ := o.reposFor(ctx, *t) // none: a ticket without a repository
 	res, err := ws.Claude(ctx, ClaudeRequest{
 		Prompt:   prompt,
 		Model:    model,
@@ -617,7 +623,7 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 		Resume:   resume,
 		Timeout:  time.Duration(s.TimeoutMin) * time.Minute,
 		Settings: permissionSettings(s, readOnly),
-		Env:      guardEnv(o.guardConfig(ctx, s, *t, run, repo, readOnly)),
+		Env:      guardEnv(o.guardConfig(ctx, s, *t, run, rs, readOnly)),
 		ReadOnly: readOnly,
 	}, o.watch(ctx, s, ws, *t, run, o.streamTo(ctx, *t, run)))
 	run.Turns += res.Turns
@@ -691,22 +697,6 @@ func (o *Orchestrator) repoFor(ctx context.Context, t domain.Ticket) (domain.Rep
 	return o.store.RepositoryByID(ctx, *t.RepoID)
 }
 
-// optionalRepo returns the ticket's repository, or nil when it has none
-// and its kind can work without one (or agnts has yet to pick the kind).
-func (o *Orchestrator) optionalRepo(ctx context.Context, t domain.Ticket) (*domain.Repository, error) {
-	if t.RepoID == nil {
-		if t.Kind.Spec().NeedsRepo && !t.KindAuto {
-			return nil, errNoRepo
-		}
-		return nil, nil
-	}
-	repo, err := o.store.RepositoryByID(ctx, *t.RepoID)
-	if err != nil {
-		return nil, err
-	}
-	return &repo, nil
-}
-
 func branchFor(repo domain.Repository, key string) string {
 	prefix := repo.BranchPrefix
 	if prefix == "" {
@@ -715,25 +705,41 @@ func branchFor(repo domain.Repository, key string) string {
 	return prefix + key
 }
 
-// openWorkspace starts a container with repo checked out at branch, or an
-// empty /workspace when repo is nil.
-func (o *Orchestrator) openWorkspace(ctx context.Context, t domain.Ticket, repo *domain.Repository, branch string, run *domain.Run) (Workspace, error) {
+// openWorkspace starts a container with the run's repositories checked
+// out (each at its branch: at /workspace for one, in a folder each for
+// several), or an empty /workspace when there are none.
+func (o *Orchestrator) openWorkspace(ctx context.Context, t domain.Ticket, rs []runRepo, run *domain.Run) (Workspace, error) {
 	var tree io.Reader
-	if repo != nil {
-		prepare := func() error { return o.git.Prepare(ctx, *repo, branch) }
-		if rp, ok := o.git.(Replayer); ok && t.BaseSHA != "" && branch != repo.DefaultBranch {
-			prepare = func() error { return rp.PrepareAt(ctx, *repo, branch, t.BaseSHA) }
+	if len(rs) > 0 {
+		for i := range rs {
+			r := &rs[i]
+			prepare := func() error { return o.git.Prepare(ctx, r.Repository, r.Branch) }
+			if rp, ok := o.git.(Replayer); ok && r.Row.BaseSHA != "" && r.Branch != r.DefaultBranch {
+				prepare = func() error { return rp.PrepareAt(ctx, r.Repository, r.Branch, r.Row.BaseSHA) }
+			}
+			if err := prepare(); err != nil {
+				if len(rs) > 1 {
+					return nil, fmt.Errorf("prepare repository %s: %w", r.Name, err)
+				}
+				return nil, fmt.Errorf("prepare repository: %w", err)
+			}
+			o.refreshToolchains(ctx, &r.Repository, r.Branch, t.Key, &run.ID)
 		}
-		if err := prepare(); err != nil {
-			return nil, fmt.Errorf("prepare repository: %w", err)
+		if len(rs) == 1 {
+			rc, err := o.git.Archive(ctx, rs[0].Repository, rs[0].Branch)
+			if err != nil {
+				return nil, fmt.Errorf("archive repository: %w", err)
+			}
+			defer func() { _ = rc.Close() }()
+			tree = rc
+		} else {
+			// One archive at a time: each holds its mirror's read lock until
+			// read, and holding two while another run waits for one of them
+			// (in the other order) would deadlock.
+			wt := workspaceTree(func(i int) (io.ReadCloser, error) { return o.git.Archive(ctx, rs[i].Repository, rs[i].Branch) }, rs)
+			defer func() { _ = wt.Close() }()
+			tree = wt
 		}
-		o.refreshToolchains(ctx, repo, branch, t.Key, &run.ID)
-		rc, err := o.git.Archive(ctx, *repo, branch)
-		if err != nil {
-			return nil, fmt.Errorf("archive repository: %w", err)
-		}
-		defer func() { _ = rc.Close() }()
-		tree = rc
 	} else {
 		var empty bytes.Buffer
 		_ = tar.NewWriter(&empty).Close()
@@ -744,8 +750,8 @@ func (o *Orchestrator) openWorkspace(ctx context.Context, t domain.Ticket, repo 
 		return nil, fmt.Errorf("load claude home: %w", err)
 	}
 	spec := WorkspaceSpec{TicketKey: t.Key, Image: o.cfg.Image, Repo: tree, ClaudeHome: home}
-	if repo != nil {
-		if err := o.repoSpec(ctx, &spec, *repo, t.Key, run); err != nil {
+	if len(rs) > 0 {
+		if err := o.mergeSpec(ctx, &spec, rs, t.Key, run); err != nil {
 			return nil, err
 		}
 	}
@@ -778,31 +784,30 @@ func (o *Orchestrator) closeWorkspace(ctx context.Context, t domain.Ticket, ws W
 // analyze reads the ticket (and the code, if it has a repository), settles
 // its kind, and either asks questions or moves on to the work.
 func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.Ticket, run *domain.Run) error {
-	repo, err := o.optionalRepo(ctx, t)
+	rs, err := o.optionalRepos(ctx, t)
 	if err != nil {
 		return err
 	}
-	branch := ""
-	d := promptData{T: t, NoRepo: repo == nil, NoQuestions: !t.AskFirst}
-	if repo != nil {
-		d.Repo, branch = *repo, branchFor(*repo, t.Key)
-		if t.Kind.Report() && !t.KindAuto {
-			branch = repo.DefaultBranch // a report never commits
+	d := promptData{T: t, NoRepo: len(rs) == 0, NoQuestions: !t.AskFirst}
+	if t.Kind.Report() && !t.KindAuto {
+		for i := range rs {
+			rs[i].Branch = rs[i].DefaultBranch // a report never commits
 		}
 	}
+	d = withRepos(d, rs, o.ticketGroup(ctx, t))
 	o.trackerMove(ctx, t, TrackerStarted)
-	if repo != nil {
-		o.autoSurvey(ctx, s, repo.ID)
+	for _, r := range rs {
+		o.autoSurvey(ctx, s, r.ID)
 	}
 
-	ws, err := o.openWorkspace(ctx, t, repo, branch, run)
+	ws, err := o.openWorkspace(ctx, t, rs, run)
 	if err != nil {
 		return err
 	}
 	defer o.closeWorkspace(ctx, t, ws)
-	d.Context = o.contextFiles(ctx, ws, t, repo)
+	d.Context = o.contextFiles(ctx, ws, t, rs)
 
-	if d.Rules, err = o.teamRules(ctx, t.RepoID); err != nil {
+	if d.Rules, err = o.teamRules(ctx, t.RepoIDs()); err != nil {
 		return err
 	}
 	if len(d.Rules) > 0 {
@@ -840,8 +845,8 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 	if t, err = o.settleKind(ctx, t, run, a); err != nil {
 		return err
 	}
-	if repo != nil && secondOpinionDue(s, t, a) {
-		so := o.secondOpinion(ctx, s, ws, t, run, a)
+	if len(rs) > 0 && secondOpinionDue(s, t, a) {
+		so := o.secondOpinion(ctx, s, ws, t, run, a, d.Repos)
 		o.event(ctx, secondOpinionEvent(t.Key, run, so))
 		if err := o.store.SaveResult(ctx, domain.Result{RunID: run.ID, Summary: raw, Harness: domain.ResultHarness{SecondOpinion: so}}); err != nil {
 			return err
@@ -850,11 +855,8 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 	o.saveFollowUps(ctx, s, t, run, domain.SuggestFromAnalyze, a.FollowUps)
 	// Before the ticket can be claimed for coding, so the queue sees them.
 	o.applyRelations(ctx, t, run, a, candidates)
-	if t.Kind.Spec().NeedsRepo && repo == nil {
+	if t.Kind.Spec().NeedsRepo && len(rs) == 0 {
 		return fmt.Errorf("agnts read this ticket as %s work, which needs a repository: link one and retry, or change the kind", t.Kind)
-	}
-	if t.Kind.Report() {
-		branch = "" // nothing is committed for a report
 	}
 
 	qs := make([]domain.Question, 0, len(a.Questions)+1)
@@ -876,7 +878,20 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 		return err
 	}
 
-	setBranch := func(x *domain.Ticket) { x.Branch = branch }
+	// The branch each repository's work goes on; nothing is committed for
+	// a report, and a repository whose pull request is done keeps its own.
+	setBranch := func(x *domain.Ticket) {
+		for _, r := range rs {
+			if r.Frozen {
+				continue
+			}
+			b := r.Branch
+			if t.Kind.Report() {
+				b = ""
+			}
+			x.UpdateRepo(r.ID, func(row *domain.TicketRepo) { row.Branch = b })
+		}
+	}
 	work := "code"
 	if t.Kind.Report() {
 		work = "write the report"
@@ -916,24 +931,24 @@ func (o *Orchestrator) settleKind(ctx context.Context, t domain.Ticket, run *dom
 }
 
 // code implements the ticket (or the review feedback), runs the checks with
-// a fix loop, and stores the diff for review.
+// a fix loop, and stores the diff for review. In a ticket of several
+// repositories Claude works on all of them at once; each changed one gets
+// its commit, and the run fails only when none changed.
 func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Ticket, run *domain.Run) error {
-	repo, err := o.repoFor(ctx, t)
+	rs, err := o.reposFor(ctx, t)
 	if err != nil {
 		return err
 	}
-	branch := t.Branch
-	if branch == "" {
-		branch = branchFor(repo, t.Key)
-	}
-	ws, err := o.openWorkspace(ctx, t, &repo, branch, run)
+	multi := len(rs) > 1
+	group := o.ticketGroup(ctx, t)
+	ws, err := o.openWorkspace(ctx, t, rs, run)
 	if err != nil {
 		return err
 	}
 	defer o.closeWorkspace(ctx, t, ws)
 	defer o.collectGuard(ctx, ws, t, run) // before the container goes
-	knowledge := o.contextFiles(ctx, ws, t, &repo)
-	if m := o.methodSkills(ctx, s, ws, run); m != nil {
+	knowledge := o.contextFiles(ctx, ws, t, rs)
+	if m := o.methodSkills(ctx, s, ws, run, rs); m != nil {
 		knowledge = append(knowledge, *m)
 	}
 
@@ -941,11 +956,24 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 	if err != nil {
 		return err
 	}
-	visual := s.VisualCheck && o.shots != nil && repo.Preview.Enabled()
+	// The app the coding run may look at: the first repository that can be
+	// previewed (in a ticket of several, the run is told which).
+	var pv *runRepo
+	for i := range rs {
+		if rs[i].Preview.Enabled() && !rs[i].Frozen {
+			pv = &rs[i]
+			break
+		}
+	}
+	visual := s.VisualCheck && o.shots != nil && pv != nil
 	if visual {
-		if err := o.writePreviewFiles(ctx, ws, repo); err != nil {
+		if err := o.writePreviewFiles(ctx, ws, *pv); err != nil {
 			return err
 		}
+	}
+	base := withRepos(promptData{T: t}, rs, group)
+	if visual {
+		base.Repo.Preview = pv.Preview
 	}
 	var prompt string
 	var design *Analysis
@@ -955,14 +983,17 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 	attached := o.copyAttachments(ctx, ws, t)
 	if feedback != "" && session != "" {
 		modelStage = domain.ModelRetry
-		prompt, err = render("feedback", promptData{T: t, Repo: repo, Feedback: feedback, FeedbackShots: shots, Attached: attached})
+		d := base
+		d.Feedback, d.FeedbackShots, d.Attached = feedback, shots, attached
+		prompt, err = render("feedback", d)
 		if err == nil && visual {
-			extra, _ := render("visualcheck", promptData{Repo: repo})
+			extra, _ := render("visualcheck", base)
 			prompt += extra
 		}
 	} else {
-		d := promptData{T: t, Repo: repo, Checks: checksLine(repo), VisualCheck: visual, Attached: attached, Context: knowledge}
-		if d.Rules, err = o.teamRules(ctx, t.RepoID); err != nil {
+		d := base
+		d.Checks, d.VisualCheck, d.Attached, d.Context = checksOf(rs), visual, attached, knowledge
+		if d.Rules, err = o.teamRules(ctx, t.RepoIDs()); err != nil {
 			return err
 		}
 		if r, rerr := o.store.LatestResult(ctx, t.ID, domain.StageAnalyze); rerr == nil {
@@ -985,13 +1016,13 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		}
 	}
 	if err == nil {
-		prompt, err = o.withFollowUps(ctx, s, t, promptData{Repo: repo}, domain.SuggestFromWork, SummaryPath, prompt)
+		prompt, err = o.withFollowUps(ctx, s, t, base, domain.SuggestFromWork, SummaryPath, prompt)
 	}
 	if err != nil {
 		return err
 	}
 
-	res, err := o.codeWithCheckpoint(ctx, s, ws, &t, run, modelStage, prompt, session, design)
+	res, err := o.codeWithCheckpoint(ctx, s, ws, &t, run, rs, modelStage, prompt, session, design)
 	if err != nil {
 		return err
 	}
@@ -1008,13 +1039,13 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 	if err := o.transition(ctx, &t, run, domain.StateTesting, "running checks", nil); err != nil {
 		return err
 	}
-	checks, err := o.checkAndFix(ctx, s, ws, &t, run, repo, &res)
+	checks, err := o.checkAndFix(ctx, s, ws, &t, run, rs, &res)
 	if err != nil {
 		return err
 	}
 	var proof *domain.Proof
 	if a := o.latestAnalysis(ctx, t); proveDue(s, t, a) {
-		p := o.proveFix(ctx, ws, t, run, repo)
+		p := o.proveFix(ctx, ws, t, run, rs)
 		o.event(ctx, proofEvent(t.Key, run, p))
 		if p.Status == domain.ProofNotReproduced || p.Status == domain.ProofStillFailing {
 			// Once: send it back, check again, and prove again.
@@ -1031,10 +1062,10 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 			if err := o.transition(ctx, &t, run, domain.StateTesting, "running checks again", nil); err != nil {
 				return err
 			}
-			if checks, err = o.checkAndFix(ctx, s, ws, &t, run, repo, &res); err != nil {
+			if checks, err = o.checkAndFix(ctx, s, ws, &t, run, rs, &res); err != nil {
 				return err
 			}
-			p = o.proveFix(ctx, ws, t, run, repo)
+			p = o.proveFix(ctx, ws, t, run, rs)
 			o.event(ctx, proofEvent(t.Key, run, p))
 		}
 		proof = &p
@@ -1047,31 +1078,21 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 	if err != nil {
 		summary, _ = json.Marshal(Summary{Summary: res.Text})
 	}
-	tree, err := ws.ExportRepo(ctx)
+	commits, files, flags, err := o.commitRepos(ctx, s, ws, t, run, rs)
 	if err != nil {
-		return fmt.Errorf("export workspace: %w", err)
-	}
-	defer func() { _ = tree.Close() }()
-	sha, files, dropped, err := o.git.Commit(ctx, repo, branch, tree, commitMessage(t, s.Git))
-	if err != nil {
-		return fmt.Errorf("commit: %w", err)
-	}
-	if len(dropped) > 0 {
-		o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventError, Level: domain.LevelWarn,
-			Message: "left out symlinks that point outside the repository (ignore them in .gitignore): " + strings.Join(dropped, ", ")})
+		return err
 	}
 	if len(files) == 0 {
 		run.ExitReason = "no_changes"
+		if multi {
+			return fmt.Errorf("claude finished without changing any files in %s", repoNames(rs))
+		}
 		return errors.New("claude finished without changing any files")
 	}
 	testsJSON, _ := json.Marshal(checks.Steps)
-	flags := domain.ScanRedFlags(files, repo.Harness.SecretAllow...)
-	if rs, err := o.enforced(ctx, t.RepoID); err == nil {
-		flags = append(flags, ruleFlags(ruleHits(files, rs))...)
-	}
 	if err := o.store.SaveResult(ctx, domain.Result{
 		RunID: run.ID, Summary: summary, Tests: testsJSON, Lint: checks.LintOutput, Files: files, RedFlags: flags,
-		Harness: domain.ResultHarness{Proof: proof, Coverage: o.measureCoverage(ctx, ws, t, run, repo, files)},
+		Harness: domain.ResultHarness{Proof: proof, Coverage: o.measureCoverage(ctx, ws, t, run, rs, files)},
 	}); err != nil {
 		return err
 	}
@@ -1082,21 +1103,44 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 	if t.HeadSHA == "" {
 		o.checkFootprint(ctx, t, run, files) // the first change only: later ones follow feedback, not the plan
 	}
-	o.checkCollisions(ctx, t, run, repo, files)
+	for _, c := range commits {
+		o.checkCollisions(ctx, t, run, c.repo.Repository, c.files)
+	}
 	// agnts's own review may still send it back: no one is told yet.
 	quiet := selfReviewDue(s, t)
+	changed := 0
+	for _, c := range commits {
+		if len(c.files) > 0 {
+			changed++
+		}
+	}
 	msg := fmt.Sprintf("%d files changed, ready for review", len(files))
+	if multi {
+		msg = fmt.Sprintf("%d files changed in %d of %d repositories, ready for review", len(files), changed, len(rs))
+	}
 	if quiet {
-		msg = fmt.Sprintf("%d files changed; agnts reviews the change before you do", len(files))
+		msg = strings.Replace(msg, ", ready for review", "; agnts reviews the change before you do", 1)
 	}
 	nt, err := o.store.Transition(ctx, t.Key, domain.StateWaitingForReview, domain.Event{
 		TicketKey: t.Key, RunID: &run.ID, Type: domain.EventStateChanged, Message: msg, Step: string(run.Stage),
 		Data: map[string]any{"quiet": quiet},
 	}, func(x *domain.Ticket) {
-		x.Branch, x.HeadSHA = branch, sha
+		for _, c := range commits {
+			x.UpdateRepo(c.repo.ID, func(row *domain.TicketRepo) {
+				row.Branch, row.HeadSHA, row.Files = c.repo.Branch, c.sha, len(c.files)
+				switch {
+				case len(c.files) == 0:
+					row.State = domain.RepoUnchanged
+				case row.State == domain.RepoUnchanged || row.State == "":
+					row.State = domain.RepoPending
+				case row.State == domain.RepoPushed:
+					row.State = domain.RepoPending // new commits to push
+				}
+			})
+		}
 		x.Turns += run.Turns
 		x.ReviewState = reviewState(s)
-		x.PreviewState = o.previewState(s, repo, files)
+		x.PreviewState = o.previewState(s, rs, x.RepoID, files)
 		x.QuietReview = quiet
 	})
 	if err == nil {
@@ -1105,12 +1149,70 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 	return err
 }
 
+// repoCommit is one repository's commit of a coding run.
+type repoCommit struct {
+	repo  runRepo
+	sha   string
+	files []domain.FileChange // relative to the repository
+}
+
+// commitRepos commits the run's change in each of its repositories that may
+// change, and returns the commits, the change as the reviewer sees it (in
+// a ticket of several, each file with its repository) and the red flags of
+// the scan, with the team's diff rules.
+func (o *Orchestrator) commitRepos(ctx context.Context, s domain.Settings, ws Workspace, t domain.Ticket, run *domain.Run, rs []runRepo) ([]repoCommit, []domain.FileChange, []domain.RedFlag, error) {
+	multi := len(rs) > 1
+	var commits []repoCommit
+	var all []domain.FileChange
+	flags := []domain.RedFlag{}
+	for _, r := range rs {
+		if r.Frozen {
+			continue
+		}
+		tree, err := ws.ExportRepo(ctx, r.Folder())
+		if err != nil {
+			return nil, nil, nil, fmt.Errorf("export workspace: %w", err)
+		}
+		sha, files, dropped, err := o.git.Commit(ctx, r.Repository, r.Branch, tree, commitMessage(t, s.Git))
+		_ = tree.Close()
+		if err != nil {
+			if multi {
+				return nil, nil, nil, fmt.Errorf("commit in %s: %w", r.Name, err)
+			}
+			return nil, nil, nil, fmt.Errorf("commit: %w", err)
+		}
+		if len(dropped) > 0 {
+			o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventError, Level: domain.LevelWarn,
+				Message: r.Label(multi) + "left out symlinks that point outside the repository (ignore them in .gitignore): " + strings.Join(dropped, ", ")})
+		}
+		commits = append(commits, repoCommit{repo: r, sha: sha, files: files})
+		rf := domain.ScanRedFlags(files, r.Harness.SecretAllow...)
+		if rules, err := o.enforced(ctx, []int64{r.ID}); err == nil {
+			rf = append(rf, ruleFlags(ruleHits(files, rules))...)
+		}
+		for _, f := range rf {
+			f.Path = r.Rel(f.Path)
+			flags = append(flags, f)
+		}
+		for _, f := range files {
+			if multi {
+				f.Repo, f.RepoID = r.Folder(), r.ID
+			}
+			all = append(all, f)
+		}
+	}
+	if len(flags) > domain.MaxRedFlags {
+		flags = flags[:domain.MaxRedFlags]
+	}
+	return commits, all, flags, nil
+}
+
 // checkAndFix runs the checks, sending failures back to Claude up to the
 // configured number of fix attempts.
-func (o *Orchestrator) checkAndFix(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, repo domain.Repository, res *ClaudeResult) (checkReport, error) {
+func (o *Orchestrator) checkAndFix(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, rs []runRepo, res *ClaudeResult) (checkReport, error) {
 	var checks checkReport
 	for attempt := 0; ; attempt++ {
-		checks = o.runChecks(ctx, ws, *t, repo, run)
+		checks = o.runChecks(ctx, ws, *t, rs, run)
 		run.FixAttempts += min(attempt, 1)
 		if checks.OK || ctx.Err() != nil {
 			break
@@ -1128,7 +1230,7 @@ func (o *Orchestrator) checkAndFix(ctx context.Context, s domain.Settings, ws Wo
 		if err := o.transition(ctx, t, run, domain.StateCoding, fmt.Sprintf("checks failed, fix attempt %d", attempt+1), nil); err != nil {
 			return checks, err
 		}
-		fix, err := render("fix", promptData{T: *t, Output: truncate(checks.FailOutput, 8000), Checks: checksLine(repo)})
+		fix, err := render("fix", promptData{T: *t, Output: truncate(checks.FailOutput, 8000), Checks: checksOf(rs)})
 		if err != nil {
 			return checks, err
 		}
@@ -1180,21 +1282,20 @@ func redFlagsEvent(key string, run *domain.Run, flags []domain.RedFlag) domain.E
 // reviewer's feedback) and stores it for review. Nothing in /workspace is
 // kept: the container's tree is never exported.
 func (o *Orchestrator) report(ctx context.Context, s domain.Settings, t domain.Ticket, run *domain.Run) error {
-	repo, err := o.optionalRepo(ctx, t)
+	rs, err := o.optionalRepos(ctx, t)
 	if err != nil {
 		return err
 	}
-	d := promptData{T: t, NoRepo: repo == nil}
-	branch := ""
-	if repo != nil {
-		d.Repo, branch = *repo, repo.DefaultBranch
+	for i := range rs {
+		rs[i].Branch = rs[i].DefaultBranch // a report is about the code as it is
 	}
-	ws, err := o.openWorkspace(ctx, t, repo, branch, run)
+	d := withRepos(promptData{T: t, NoRepo: len(rs) == 0}, rs, o.ticketGroup(ctx, t))
+	ws, err := o.openWorkspace(ctx, t, rs, run)
 	if err != nil {
 		return err
 	}
 	defer o.closeWorkspace(ctx, t, ws)
-	d.Context = o.contextFiles(ctx, ws, t, repo)
+	d.Context = o.contextFiles(ctx, ws, t, rs)
 
 	session, err := o.store.LastSessionID(ctx, t.ID)
 	if err != nil {
@@ -1216,7 +1317,7 @@ func (o *Orchestrator) report(ctx context.Context, s domain.Settings, t domain.T
 	if feedback != "" && session != "" {
 		prompt, err = render("report-feedback", promptData{T: t, Feedback: feedback, Attached: d.Attached})
 	} else {
-		if d.Rules, err = o.teamRules(ctx, t.RepoID); err != nil {
+		if d.Rules, err = o.teamRules(ctx, t.RepoIDs()); err != nil {
 			return err
 		}
 		if r, rerr := o.store.LatestResult(ctx, t.ID, domain.StageAnalyze); rerr == nil {
@@ -1311,23 +1412,49 @@ func (o *Orchestrator) deliver(ctx context.Context, t domain.Ticket, run *domain
 }
 
 // push sends the approved work: a branch and pull request, or (for side
-// projects that chose it) a fast-forward push to the default branch.
+// projects that chose it) a fast-forward push to the default branch. A
+// ticket in several repositories pushes each changed repository and opens
+// a pull request in each, cross-linked; one that fails leaves the others
+// pushed, and a retry pushes only what is missing.
 func (o *Orchestrator) push(ctx context.Context, s domain.Settings, t domain.Ticket, run *domain.Run) error {
-	repo, err := o.repoFor(ctx, t)
+	rs, err := o.reposFor(ctx, t)
 	if err != nil {
 		return err
 	}
-	if t.Branch == "" || t.HeadSHA == "" {
+	multi := len(rs) > 1
+	var todo, done []runRepo
+	for _, r := range rs {
+		switch {
+		case r.Frozen || r.Row.Branch == "" || r.Row.HeadSHA == "" || r.Row.State == domain.RepoUnchanged:
+		case multi && r.Row.State == domain.RepoPushed && r.Row.PushError == "":
+			done = append(done, r) // pushed by an earlier try
+		default:
+			todo = append(todo, r)
+		}
+	}
+	if len(todo) == 0 && len(done) == 0 {
 		return errors.New("nothing to push: no reviewed commit on this ticket")
 	}
 
 	if t.AfterApprove == "main" && t.Source == domain.SourceLocal {
-		if err := o.git.PushTo(ctx, repo, t.Branch, repo.DefaultBranch); err != nil {
-			return fmt.Errorf("push to %s: %w", repo.DefaultBranch, err)
+		var pushed []string
+		for _, r := range todo {
+			if err := o.git.PushTo(ctx, r.Repository, r.Row.Branch, r.DefaultBranch); err != nil {
+				o.recordPushError(ctx, t, r, err)
+				return fmt.Errorf("%spush to %s: %w", r.Label(multi), r.DefaultBranch, err)
+			}
+			o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: "push", Type: domain.EventPushed,
+				Message: r.Label(multi) + "pushed to " + r.DefaultBranch, Data: map[string]any{"branch": r.DefaultBranch, "sha": r.Row.HeadSHA, "repoId": r.ID}})
+			if err := o.recordPushed(ctx, t, r, nil, ""); err != nil {
+				return err
+			}
+			pushed = append(pushed, r.Name)
 		}
-		o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: "push", Type: domain.EventPushed,
-			Message: "pushed to " + repo.DefaultBranch, Data: map[string]any{"branch": repo.DefaultBranch, "sha": t.HeadSHA}})
-		if err := o.transition(ctx, &t, run, domain.StateDone, "pushed to "+repo.DefaultBranch, func(x *domain.Ticket) {
+		msg := "pushed to " + rs[0].DefaultBranch
+		if multi {
+			msg = "pushed to the default branches of " + strings.Join(pushed, ", ")
+		}
+		if err := o.transition(ctx, &t, run, domain.StateDone, msg, func(x *domain.Ticket) {
 			if o.learnQueued(s, *x) {
 				x.LearnState = domain.LearnPending
 			}
@@ -1338,33 +1465,85 @@ func (o *Orchestrator) push(ctx context.Context, s domain.Settings, t domain.Tic
 		return nil
 	}
 
-	drift := o.checkDrift(ctx, t, run, repo)
-	if err := o.git.Push(ctx, repo, t.Branch); err != nil {
-		return fmt.Errorf("push %s: %w", t.Branch, err)
+	title := strings.NewReplacer("{key}", t.Key, "{title}", t.Title).Replace(s.Git.PRTitle)
+	var siblings []string // the other repositories with a change, for the bodies
+	for _, r := range append(append([]runRepo{}, done...), todo...) {
+		siblings = append(siblings, r.Name)
 	}
-	o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: "push", Type: domain.EventPushed,
-		Message: "pushed " + t.Branch, Data: map[string]any{"branch": t.Branch, "sha": t.HeadSHA}})
-
-	number, url := 0, t.PRURL
-	if t.PRNumber != nil {
-		number = *t.PRNumber
-	} else {
-		title := strings.NewReplacer("{key}", t.Key, "{title}", t.Title).Replace(s.Git.PRTitle)
-		body := prBody(ctx, o.store, t)
-		if len(drift) > 0 {
-			body += fmt.Sprintf("\n\n> **Needs a rebase:** %s changed the same lines since this branch was cut: %s.", repo.DefaultBranch, strings.Join(drift, ", "))
+	var opened, more []string
+	var failed error
+	for _, r := range todo {
+		drift := o.checkDrift(ctx, t, run, r)
+		if err := o.git.Push(ctx, r.Repository, r.Row.Branch); err != nil {
+			o.recordPushError(ctx, t, r, err)
+			if !multi {
+				return fmt.Errorf("push %s: %w", r.Row.Branch, err)
+			}
+			failed = errors.Join(failed, fmt.Errorf("%s: push %s: %w", r.Name, r.Row.Branch, err))
+			continue
 		}
-		if number, url, err = o.host.OpenPR(ctx, repo, PR{Branch: t.Branch, Title: title, Body: body, Draft: s.Git.Draft}); err != nil {
-			return fmt.Errorf("open pull request: %w", err)
+		o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: "push", Type: domain.EventPushed,
+			Message: r.Label(multi) + "pushed " + r.Row.Branch, Data: map[string]any{"branch": r.Row.Branch, "sha": r.Row.HeadSHA, "repoId": r.ID}})
+		number, url := 0, r.Row.PRURL
+		if r.Row.PRNumber != nil {
+			number = *r.Row.PRNumber
+			more = append(more, url)
+		} else {
+			body := prBody(ctx, o.store, t)
+			if multi {
+				body += "\n\n" + siblingLine(t, r, siblings)
+			}
+			if len(drift) > 0 {
+				body += fmt.Sprintf("\n\n> **Needs a rebase:** %s changed the same lines since this branch was cut: %s.", r.DefaultBranch, strings.Join(drift, ", "))
+			}
+			var err error
+			if number, url, err = o.host.OpenPR(ctx, r.Repository, PR{Branch: r.Row.Branch, Title: title, Body: body, Draft: s.Git.Draft}); err != nil {
+				o.recordPushError(ctx, t, r, err)
+				if !multi {
+					return fmt.Errorf("open pull request: %w", err)
+				}
+				failed = errors.Join(failed, fmt.Errorf("%s: open pull request: %w", r.Name, err))
+				continue
+			}
+			o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: "push", Type: domain.EventPROpened,
+				Message: r.Label(multi) + url, Data: map[string]any{"number": number, "url": url, "repoId": r.ID}})
+			o.assign(ctx, r.Repository, t, run, number)
+			opened = append(opened, url)
 		}
-		o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: "push", Type: domain.EventPROpened,
-			Message: url, Data: map[string]any{"number": number, "url": url}})
-		o.assign(ctx, repo, t, run, number)
+		if err := o.recordPushed(ctx, t, r, &number, url); err != nil {
+			return err
+		}
 	}
-	if t.PRNumber == nil {
-		o.trackerComment(ctx, t, CommentPR, "agnts opened a pull request: "+url)
-	} else {
-		o.trackerComment(ctx, t, CommentPR, "agnts pushed more commits to the pull request: "+url)
+	if failed != nil {
+		// The pushed repositories stay pushed: a retry pushes the rest.
+		run.ExitReason = "push_partial"
+		return fmt.Errorf("some repositories could not be pushed; retry to push them: %w", failed)
+	}
+	if t, err = o.store.TicketByKey(ctx, t.Key); err != nil {
+		return err
+	}
+	if multi {
+		o.linkSiblings(ctx, t, rs)
+		// A try that failed half way opened these before it stopped, and
+		// did not get to tell the tracker.
+		for _, r := range done {
+			if now, ok := t.RepoState(r.ID); ok && now.PRURL != "" {
+				opened = append(opened, now.PRURL)
+			}
+		}
+	}
+	switch {
+	case !multi && len(opened) == 1:
+		o.trackerComment(ctx, t, CommentPR, "agnts opened a pull request: "+opened[0])
+	case !multi && len(more) == 1:
+		o.trackerComment(ctx, t, CommentPR, "agnts pushed more commits to the pull request: "+more[0])
+	case len(opened) > 0:
+		o.trackerComment(ctx, t, CommentPR, "agnts opened pull requests: "+strings.Join(opened, ", "))
+		if len(more) > 0 {
+			o.trackerComment(ctx, t, CommentPR, "agnts pushed more commits to: "+strings.Join(more, ", "))
+		}
+	case len(more) > 0:
+		o.trackerComment(ctx, t, CommentPR, "agnts pushed more commits to the pull requests: "+strings.Join(more, ", "))
 	}
 	if r, err := o.store.LatestResult(ctx, t.ID, domain.StageCode); err == nil {
 		var sum Summary
@@ -1373,12 +1552,91 @@ func (o *Orchestrator) push(ctx context.Context, s domain.Settings, t domain.Tic
 		}
 	}
 	o.trackerMove(ctx, t, TrackerInReview)
-	return o.transition(ctx, &t, run, domain.StateDone, "pull request "+url, func(x *domain.Ticket) {
-		x.PRNumber, x.PRURL = &number, url
+	msg := "pull request " + t.PRURL
+	if multi {
+		var urls []string
+		for _, r := range t.OpenedPRs() {
+			urls = append(urls, r.PRURL)
+		}
+		msg = "pull requests " + strings.Join(urls, ", ")
+	}
+	return o.transition(ctx, &t, run, domain.StateDone, msg, func(x *domain.Ticket) {
 		if o.learnQueued(s, *x) {
 			x.LearnState = domain.LearnPending
 		}
 	})
+}
+
+// recordPushed stores that repository r of the ticket was pushed, with its
+// pull request (nil for a push to the default branch).
+func (o *Orchestrator) recordPushed(ctx context.Context, t domain.Ticket, r runRepo, number *int, url string) error {
+	_, err := o.store.UpdateTicket(ctx, t.Key, nil, func(x *domain.Ticket) {
+		x.UpdateRepo(r.ID, func(row *domain.TicketRepo) {
+			if number != nil {
+				n := *number
+				row.PRNumber, row.PRURL = &n, url
+			}
+			row.State, row.PushError = domain.RepoPushed, ""
+		})
+	})
+	return err
+}
+
+// recordPushError stores why repository r of the ticket could not be
+// pushed, for the ticket page and the retry.
+func (o *Orchestrator) recordPushError(ctx context.Context, t domain.Ticket, r runRepo, cause error) {
+	if _, err := o.store.UpdateTicket(context.WithoutCancel(ctx), t.Key, nil, func(x *domain.Ticket) {
+		x.UpdateRepo(r.ID, func(row *domain.TicketRepo) { row.PushError = truncate(cause.Error(), 1000) })
+	}); err != nil {
+		o.log.Warn("record push error", "ticket", t.Key, "repo", r.Name, "err", err)
+	}
+}
+
+// siblingLine is the line a pull request of a ticket in several
+// repositories gets about the others.
+func siblingLine(t domain.Ticket, r runRepo, names []string) string {
+	var others []string
+	for _, n := range names {
+		if n != r.Name {
+			others = append(others, n)
+		}
+	}
+	if len(others) == 0 {
+		return fmt.Sprintf("Part of %s.", t.Key)
+	}
+	return fmt.Sprintf("Part of %s, with pull requests in %s too: merge them together.", t.Key, strings.Join(others, ", "))
+}
+
+// PRCommenter puts a comment on a pull request, replacing agnts's earlier
+// one with the same id. A Host may implement it.
+type PRCommenter interface {
+	UpsertComment(ctx context.Context, repo domain.Repository, number int, id, body string) (string, error)
+}
+
+// linkSiblings comments on each pull request of a ticket in several
+// repositories with links to the others.
+func (o *Orchestrator) linkSiblings(ctx context.Context, t domain.Ticket, rs []runRepo) {
+	pc, ok := o.host.(PRCommenter)
+	prs := t.OpenedPRs()
+	if !ok || len(prs) < 2 {
+		return
+	}
+	for _, pr := range prs {
+		r, ok := repoByID(rs, pr.RepoID)
+		if !ok || pr.MergedAt != nil {
+			continue
+		}
+		var b strings.Builder
+		fmt.Fprintf(&b, "This pull request is part of %s, which changes %d repositories. Its other pull requests:\n", t.Key, len(prs))
+		for _, other := range prs {
+			if other.RepoID != pr.RepoID {
+				fmt.Fprintf(&b, "\n- %s: %s", other.RepoName, other.PRURL)
+			}
+		}
+		if _, err := pc.UpsertComment(ctx, r.Repository, *pr.PRNumber, "agnts-siblings", b.String()); err != nil {
+			o.log.Warn("link sibling pull requests", "ticket", t.Key, "repo", r.Name, "err", err)
+		}
+	}
 }
 
 // assign gives the new pull request its assignees. The pull request already

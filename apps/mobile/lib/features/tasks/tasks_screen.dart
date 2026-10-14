@@ -13,6 +13,7 @@ import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
 import '../tickets/kinds.dart';
 import '../tickets/spend.dart';
+import 'repo_pick.dart';
 
 /// Side-project tasks (scrTasks in mobile.html): a repository filter, the
 /// tasks as cards, and a "+" that opens the new-task sheet.
@@ -43,6 +44,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           value: all,
           onRefresh: () {
             ref.invalidate(reposProvider);
+            ref.invalidate(repoGroupsProvider);
             return ref.refresh(ticketsProvider('all').future);
           },
           builder: (list) {
@@ -142,6 +144,13 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       if (mounted) showSnack(context, errorMessage(e, l.commonError));
       return;
     }
+    // Groups are optional: without them the sheet offers repositories only.
+    List<RepoGroup> groups;
+    try {
+      groups = await ref.read(repoGroupsProvider.future);
+    } catch (_) {
+      groups = const [];
+    }
     if (!mounted) return;
     // Without repositories a task can still be a report (or let agnts pick).
     final initial = repos.any((r) => r.id == _repo) ? _repo! : (repos.firstOrNull?.id ?? 0);
@@ -150,7 +159,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       isScrollControlled: true,
       useSafeArea: true,
       constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.9),
-      builder: (_) => _NewTaskSheet(repos: repos, initialRepo: initial),
+      builder: (_) => _NewTaskSheet(repos: repos, groups: groups, initialRepo: initial),
     );
     if (key != null && mounted) {
       ref.invalidate(ticketsProvider);
@@ -220,8 +229,9 @@ class _TaskCard extends StatelessWidget {
 /// The new-task sheet (renderSheet "newtask" in mobile.html): repository,
 /// title, description, priority, what happens after approval, how to start.
 class _NewTaskSheet extends ConsumerStatefulWidget {
-  const _NewTaskSheet({required this.repos, required this.initialRepo});
+  const _NewTaskSheet({required this.repos, required this.initialRepo, this.groups = const []});
   final List<Repository> repos;
+  final List<RepoGroup> groups;
   final int initialRepo; // 0: no repository
 
   @override
@@ -229,7 +239,7 @@ class _NewTaskSheet extends ConsumerStatefulWidget {
 }
 
 class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
-  late int _repo = widget.initialRepo;
+  late var _pick = RepoPick.single(widget.initialRepo);
   final _title = TextEditingController();
   final _desc = TextEditingController();
   late final _files = AttachmentsController()..addListener(_filesChanged);
@@ -246,7 +256,7 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
   void _pickKind(TicketKindChoice k) => setState(() {
         _kind = k;
         // Code and tests need a repository: pick the first rather than show an error.
-        if (_changeKind && _repo == 0 && widget.repos.isNotEmpty) _repo = widget.repos.first.id;
+        if (_changeKind && _pick.isEmpty && widget.repos.isNotEmpty) _pick = RepoPick.single(widget.repos.first.id);
       });
   String? _err;
 
@@ -269,7 +279,7 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
       setState(() => _err = l.tasksTitleRequired);
       return;
     }
-    if (_changeKind && _repo == 0) {
+    if (_changeKind && _pick.isEmpty) {
       setState(() => _err = l.tasksRepoNeeded);
       return;
     }
@@ -277,10 +287,13 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
       _busy = true;
       _err = null;
     });
+    final repo = _pick.payload;
     try {
       final res = await ref.read(apiProvider)!.getTasksApi().createTask(
             taskCreate: TaskCreate(
-              repoId: _repo == 0 ? null : _repo,
+              repoId: repo.repoId,
+              repoIds: repo.repoIds,
+              groupId: repo.groupId,
               kind: _kind,
               title: _title.text.trim(),
               description: _desc.text.trim(),
@@ -297,6 +310,73 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  /// The repository choice: groups, then repositories (several can be
+  /// picked), then what the task will work in when it is more than one.
+  Widget _repoChoice(AppLocalizations l, Agnts c) {
+    final groups = widget.groups.where((g) => RepoPick.members(g).isNotEmpty || _pick.group?.id == g.id).toList();
+    final sub = TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.ink3);
+    final hint = TextStyle(fontSize: 13, color: c.ink3, height: 1.35);
+    final group = _pick.group;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      if (groups.isNotEmpty) ...[
+        Text(l.mgroupsGroups, style: sub),
+        const SizedBox(height: 6),
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          for (final g in groups)
+            FilterChipH(
+              label: g.name,
+              count: RepoPick.members(g).length,
+              selected: _pick.wholeGroup?.id == g.id,
+              onTap: () => setState(() => _pick = _pick.wholeGroup?.id == g.id ? const RepoPick() : _pick.pickGroup(g)),
+            ),
+        ]),
+        const SizedBox(height: 12),
+        Text(l.mgroupsRepos, style: sub),
+        const SizedBox(height: 6),
+      ],
+      Wrap(spacing: 8, runSpacing: 8, children: [
+        if (!_changeKind) FilterChipH(label: l.tasksNoRepo, selected: _pick.isEmpty, onTap: () => setState(() => _pick = const RepoPick())),
+        for (final r in widget.repos)
+          FilterChipH(label: r.name, dot: _repoColor(r), selected: _pick.contains(r.id), onTap: () => setState(() => _pick = _pick.toggle(r.id))),
+      ]),
+      if (widget.repos.length > 1) ...[
+        const SizedBox(height: 6),
+        Text(l.mgroupsPickHint, style: hint),
+      ],
+      if (group != null || _pick.ids.length > 1) ...[
+        const SizedBox(height: 12),
+        Text(l.mgroupsInTask, style: sub),
+        if (group != null) ...[
+          const SizedBox(height: 2),
+          Text(_pick.edited ? l.mgroupsFromGroupEdited(group.name) : l.mgroupsFromGroup(group.name), style: hint),
+        ],
+        const SizedBox(height: 6),
+        if (_pick.isEmpty)
+          Text(l.mgroupsNoMembers, style: hint)
+        else
+          Wrap(spacing: 8, runSpacing: 8, children: [
+            for (final (i, id) in _pick.ids.indexed)
+              _RepoTag(
+                name: _repoName(id),
+                primary: i == 0 ? l.mgroupsPrimary : null,
+                removeLabel: l.mgroupsRemove(_repoName(id)),
+                onRemove: _busy ? null : () => setState(() => _pick = _pick.remove(id)),
+              ),
+          ]),
+      ],
+    ]);
+  }
+
+  String _repoName(int id) {
+    for (final r in widget.repos) {
+      if (r.id == id) return r.name;
+    }
+    for (final m in _pick.group?.members ?? const <RepoGroupMember>[]) {
+      if (m.repoId == id) return m.repoName;
+    }
+    return '#$id';
   }
 
   @override
@@ -329,14 +409,7 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
             child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
               _Field(label: l.kindTitle, child: KindChoices(value: _kind, onPick: _pickKind, enabled: !_busy)),
-              _Field(
-                label: l.mobileTaskRepo,
-                child: Wrap(spacing: 8, runSpacing: 8, children: [
-                  if (!_changeKind) FilterChipH(label: l.tasksNoRepo, selected: _repo == 0, onTap: () => setState(() => _repo = 0)),
-                  for (final r in widget.repos)
-                    FilterChipH(label: r.name, dot: _repoColor(r), selected: _repo == r.id, onTap: () => setState(() => _repo = r.id)),
-                ]),
-              ),
+              _Field(label: l.mobileTaskRepo, child: _repoChoice(l, c)),
               _Field(
                 label: l.mobileTaskTitle,
                 child: TextField(
@@ -445,6 +518,40 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
               ),
             ]),
           ]),
+        ),
+      ]),
+    );
+  }
+}
+
+/// A picked repository with a remove button; the main one says so.
+class _RepoTag extends StatelessWidget {
+  const _RepoTag({required this.name, required this.removeLabel, this.primary, this.onRemove});
+  final String name;
+  final String? primary;
+  final String removeLabel;
+  final VoidCallback? onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = Agnts.of(context);
+    return Container(
+      constraints: const BoxConstraints(minHeight: 36),
+      padding: const EdgeInsets.only(left: 14, right: 2),
+      decoration: ShapeDecoration(color: c.surface, shape: StadiumBorder(side: BorderSide(color: c.line4))),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Text(name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: c.ink)),
+        if (primary != null) ...[
+          const SizedBox(width: 6),
+          Text(primary!, style: TextStyle(fontSize: 12.5, color: c.ink3)),
+        ],
+        IconButton(
+          tooltip: removeLabel,
+          visualDensity: VisualDensity.compact,
+          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+          padding: EdgeInsets.zero,
+          onPressed: onRemove,
+          icon: HIcon('close', size: 14, color: c.ink3, stroke: 2.4),
         ),
       ]),
     );

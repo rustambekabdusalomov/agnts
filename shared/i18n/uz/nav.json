@@ -54,6 +54,9 @@
     "people": "Odamlar",
     "account": "Hisob",
     "reviews": "PR tekshiruvlari",
-    "ci": "CI"
+    "ci": "CI",
+    "aiAssistant": "AI yordamchi",
+    "assistantChat": "Chat",
+    "assistantConversations": "Suhbatlar"
   }
 }

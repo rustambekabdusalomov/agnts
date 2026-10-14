@@ -3,6 +3,7 @@ package mcpserver_test
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log/slog"
 	"strings"
@@ -25,6 +26,24 @@ import (
 var testCtx context.Context
 
 func setup(t *testing.T) (*mcp.ClientSession, *postgres.Agent) {
+	t.Helper()
+	d := testDeps(t)
+	srv := mcpserver.NewServer(d, "test")
+	st, ct := mcp.NewInMemoryTransports()
+	if _, err := srv.Connect(testCtx, st, nil); err != nil {
+		t.Fatal(err)
+	}
+	cs, err := mcp.NewClient(&mcp.Implementation{Name: "test"}, nil).Connect(testCtx, ct, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = cs.Close() })
+	return cs, d.Store
+}
+
+// testDeps sets up a workspace with repository api and ticket PAY-1
+// waiting for review, and the use cases over it.
+func testDeps(t *testing.T) mcpserver.Deps {
 	t.Helper()
 	pool := pgtest.Open(t)
 	pgtest.Reset(t, pool)
@@ -56,17 +75,7 @@ func setup(t *testing.T) (*mcp.ClientSession, *postgres.Agent) {
 		}
 	}
 
-	srv := mcpserver.NewServer(mcpserver.Deps{Orch: orch, Store: store, Usage: ut, Settings: settings, Dashboard: dash, Repos: repos}, "test")
-	st, ct := mcp.NewInMemoryTransports()
-	if _, err := srv.Connect(ctx, st, nil); err != nil {
-		t.Fatal(err)
-	}
-	cs, err := mcp.NewClient(&mcp.Implementation{Name: "test"}, nil).Connect(ctx, ct, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = cs.Close() })
-	return cs, store
+	return mcpserver.Deps{Orch: orch, Store: store, Usage: ut, Settings: settings, Dashboard: dash, Repos: repos}
 }
 
 func call(t *testing.T, cs *mcp.ClientSession, name string, args map[string]any) (map[string]any, bool) {
@@ -355,5 +364,52 @@ func TestFollowUpTools(t *testing.T) {
 	}
 	if out, isErr = call(t, cs, "dismiss_follow_up", map[string]any{"key": "PAY-1", "id": ids[1]}); !isErr {
 		t.Fatalf("dismissed twice: %v", out)
+	}
+}
+
+// A task in several repositories, or a group's, from MCP; the ticket shows
+// each repository's state.
+func TestMultiRepoTools(t *testing.T) {
+	cs, store := setup(t)
+	ctx := testCtx
+	api, err := store.RepositoryByName(ctx, "api")
+	if err != nil {
+		t.Fatal(err)
+	}
+	web, err := store.SaveRepository(ctx, domain.Repository{Name: "web", Kind: "side", Provider: "github", CloneURL: "https://github.com/acme/web.git", DefaultBranch: "main"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := store.SaveGroup(ctx, domain.RepoGroup{Name: "Shop", TaskPrefix: "SHOP",
+		Members: []domain.GroupMember{{RepoID: api.ID, Role: "backend"}, {RepoID: web.ID}}}); err != nil {
+		t.Fatal(err)
+	}
+	out, isErr := call(t, cs, "list_repository_groups", nil)
+	gs, _ := out["groups"].([]any)
+	if isErr || len(gs) != 1 || !strings.Contains(fmt.Sprint(gs[0]), "api (backend)") {
+		t.Fatalf("groups: %v", out)
+	}
+	out, isErr = call(t, cs, "create_task", map[string]any{"kind": "code", "title": "Refunds page", "group": "shop"})
+	if isErr || !strings.Contains(out["summary"].(string), "in the group Shop (api, web)") {
+		t.Fatalf("task in a group: %v", out)
+	}
+	if out, isErr = call(t, cs, "confirm_action", map[string]any{"action_id": out["action_id"]}); isErr {
+		t.Fatalf("confirm: %v", out)
+	}
+	key := out["ticket"].(map[string]any)["key"].(string)
+	tk, err := store.TicketByKey(ctx, key)
+	if err != nil || key != "SHOP-1" || len(tk.Repos) != 2 || tk.GroupName != "Shop" {
+		t.Fatalf("task: %s %+v %v", key, tk.Repos, err)
+	}
+	got, _ := call(t, cs, "get_ticket", map[string]any{"key": key})
+	if states, _ := got["repository_states"].([]any); len(states) != 2 || got["group"] != "Shop" {
+		t.Fatalf("get_ticket: %v", got)
+	}
+	out, isErr = call(t, cs, "create_task", map[string]any{"kind": "code", "title": "Both", "repositories": []string{"web", "api"}})
+	if isErr || !strings.Contains(out["summary"].(string), "in web and api") {
+		t.Fatalf("task in two repositories: %v", out)
+	}
+	if out, isErr = call(t, cs, "create_task", map[string]any{"title": "x", "repository": "api", "group": "Shop"}); !isErr {
+		t.Fatalf("repositories and a group at once: %v", out)
 	}
 }

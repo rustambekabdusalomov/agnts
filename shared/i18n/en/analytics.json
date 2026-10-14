@@ -249,6 +249,7 @@
     "colQuestions": "Questions per ticket",
     "colQuestionsHint": "Questions agnts asked per analysed ticket. Many questions point to a missing CLAUDE.md or rules.",
     "colCi": "CI failures",
-    "colCiHint": "CI failure groups that failed in the period"
+    "colCiHint": "CI failure groups that failed in the period",
+    "tabAssistant": "Assistant"
   }
 }

@@ -34,6 +34,7 @@ type harness struct {
 	seed       string
 	tickets    *fakeTickets
 	workspaces *fakeWorkspaces
+	assistant  *fakeAssistant
 	// hookWS and hookID are what the test webhook last saw.
 	hookWS int64
 	hookID string
@@ -84,9 +85,11 @@ func newHarness(t *testing.T, db Pinger) *harness {
 	site, _ := url.Parse("https://agnts.example.org")
 	h.tickets = &fakeTickets{}
 	h.workspaces = newFakeWorkspaces()
+	h.assistant = &fakeAssistant{}
 	h.h, err = NewHandler(Options{
 		Auth:       svc,
 		Tickets:    h.tickets,
+		Assistant:  h.assistant,
 		Workspaces: h.workspaces,
 		Users:      fakeUsers{users},
 		Feedback:   &fakeFeedback{},

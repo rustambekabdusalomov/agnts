@@ -93,13 +93,16 @@ type Store interface {
 	// for failed or paused ones, the reason.
 	StateSince(ctx context.Context, keys []string) (map[string]StateInfo, error)
 	History(ctx context.Context, key string) ([]HistoryItem, error)
-	TicketByPR(ctx context.Context, url, branch string) (domain.Ticket, error)
+	// TicketByPR returns the ticket a pull request belongs to, and the
+	// repository of the ticket it is in.
+	TicketByPR(ctx context.Context, ref domain.PRRef) (domain.Ticket, int64, error)
 	// UnmergedPRs returns done tickets with a pull request not known to be
 	// merged or closed, least recently updated first.
 	UnmergedPRs(ctx context.Context, limit int) ([]domain.Ticket, error)
-	// SetPRClosed records a pull request closed without a merge (or clears
-	// it on reopen) and reports whether anything changed.
-	SetPRClosed(ctx context.Context, key string, closed bool) (bool, error)
+	// SetPRClosed records the pull request of a ticket in repoID closed
+	// without a merge (or clears it on reopen) and reports whether anything
+	// changed.
+	SetPRClosed(ctx context.Context, key string, repoID int64, closed bool) (bool, error)
 	// ChildOf returns the ticket that implements parentKey, or ErrNotFound.
 	ChildOf(ctx context.Context, parentKey string) (domain.Ticket, error)
 
@@ -123,6 +126,26 @@ type Store interface {
 	Usernames(ctx context.Context, ids []int64) (map[int64]string, error)
 
 	RelationStore
+	GroupStore
+}
+
+// GroupStore keeps the workspace's repository groups.
+type GroupStore interface {
+	ListGroups(ctx context.Context) ([]domain.RepoGroup, error)
+	// GroupByID and GroupByName return one group, or ErrNotFound.
+	GroupByID(ctx context.Context, id int64) (domain.RepoGroup, error)
+	GroupByName(ctx context.Context, name string) (domain.RepoGroup, error)
+	// GroupsOfRepos returns the groups (id and name) of each repository.
+	GroupsOfRepos(ctx context.Context) (map[int64][]domain.RepoGroup, error)
+	// SaveGroup creates (ID 0) or replaces a group with its members; a
+	// clashing name or prefix gives ErrConflict.
+	SaveGroup(ctx context.Context, g domain.RepoGroup) (domain.RepoGroup, error)
+	DeleteGroup(ctx context.Context, id int64) error
+	// NextGroupTaskNumber reserves a task number in a group.
+	NextGroupTaskNumber(ctx context.Context, groupID int64) (int, error)
+	// TaskPrefixTaken reports whether a repository or group other than the
+	// ones given already uses prefix.
+	TaskPrefixTaken(ctx context.Context, prefix string, exceptRepo, exceptGroup int64) (bool, error)
 }
 
 // TicketRef names a ticket.
@@ -308,7 +331,8 @@ type Runner interface {
 type WorkspaceSpec struct {
 	TicketKey string
 	Image     string
-	// Repo is a tar of the checked-out repository, unpacked at /workspace.
+	// Repo is a tar of the checked-out repository, unpacked at /workspace
+	// (for several, a folder per repository).
 	Repo io.Reader
 	// ClaudeHome is a tar of Claude Code's config dir from an earlier run of
 	// this ticket (session transcripts for --resume), or nil.
@@ -365,8 +389,9 @@ type Workspace interface {
 	ReadFile(ctx context.Context, path string) ([]byte, error)
 	// WriteFile puts a file into the container, readable by the agent.
 	WriteFile(ctx context.Context, path string, data []byte) error
-	// ExportRepo returns a tar of /workspace.
-	ExportRepo(ctx context.Context) (io.ReadCloser, error)
+	// ExportRepo returns a tar of the repository in /workspace/<dir>
+	// (dir "" for /workspace itself), paths relative to it.
+	ExportRepo(ctx context.Context, dir string) (io.ReadCloser, error)
 	// ExportClaudeHome returns a tar of Claude Code's config dir.
 	ExportClaudeHome(ctx context.Context) ([]byte, error)
 	Close(ctx context.Context) error

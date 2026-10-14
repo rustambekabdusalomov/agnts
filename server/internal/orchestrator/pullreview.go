@@ -442,9 +442,9 @@ func (o *Orchestrator) reviewPullIn(ctx context.Context, s domain.Settings, t do
 	if len(d.Files) > pullMaxFiles {
 		d.Files = d.Files[:pullMaxFiles]
 	}
-	d.Context = o.contextFiles(ctx, ws, domain.Ticket{}, &repo) // precedents are agnts's own tickets: not for others' changes
+	d.Context = o.contextFiles(ctx, ws, domain.Ticket{}, soloRepo(repo)) // precedents are agnts's own tickets: not for others' changes
 	var err error
-	if d.Rules, err = o.teamRules(ctx, &repo.ID); err != nil {
+	if d.Rules, err = o.teamRules(ctx, []int64{repo.ID}); err != nil {
 		return err
 	}
 	pp := &pullPrompt{PullRequest: *t.Pull, RepoName: repo.Name, AgentFindings: agentcfg.Serious(agentcfg.ScanChange(files))}

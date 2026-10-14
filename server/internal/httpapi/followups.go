@@ -58,6 +58,9 @@ func toSuggestion(x domain.Suggestion, parent domain.TicketState) gen.FollowUpSu
 		after := x.After
 		out.After = &after
 	}
+	if len(x.RepoIDs) > 0 {
+		out.RepoIds = ptr(x.RepoIDs)
+	}
 	return out
 }
 
@@ -146,6 +149,12 @@ func (s *Server) AcceptFollowUps(w http.ResponseWriter, r *http.Request, key gen
 		}
 		if it.RepoId != nil {
 			a.RepoID = *it.RepoId
+		}
+		if it.RepoIds != nil {
+			a.RepoIDs = *it.RepoIds
+		}
+		if it.GroupId != nil {
+			a.GroupID = *it.GroupId
 		}
 		in[i] = a
 	}

@@ -29,3 +29,7 @@ Har bir ishga tushirishga o‘rnatiladigan til muhitlari va yig‘ish vositalari
 ## Qo‘shimcha
 
 Ishga tushirish obrazi bu repozitoriy uchun standart obrazni almashtiradi — toolchainlar bera olmaydigan tizim kutubxonalari yoki SDK uchun (Android, Flutter); uni serverda FROM agnts-runner asosida yig‘ing. Xotira og‘ir yig‘ishlar uchun konteyner xotirasini oshiradi. Yig‘ish muhiti — KEY=value qatorlari, masalan xususiy reyestr tokenlari; u shifrlangan holda saqlanadi, faqat nomlari ko‘rsatiladi va ishlayotganda Claude’ga ko‘rinadi, shuning uchun faqat o‘qish uchun tokenlardan foydalaning.
+
+## Guruhlar
+
+Guruh — bitta vazifa birga oʻzgartira oladigan repozitoriylarning nomlangan toʻplami, masalan backend va uning veb-ilovasi. Unga repozitoriylar qanday bogʻlanishi haqida koʻrsatmalar bering (kontraktlar, qaysi biri birinchi oʻzgaradi); guruh vazifalarining har bir ishga tushirilishi ularni oʻqiydi. Guruhdan yaratilgan vazifa yaratilganda uning repozitoriylarini nusxalaydi: keyin guruh oʻzgartirilsa, vazifa oʻzgarmaydi. Repozitoriylar bitta ishga tushirish konteynerini baham koʻradi, shuning uchun ularga bir xil runner image kerak va bitta vositaning bir-biriga zid versiyalari boʻlmasligi kerak; agnts konteynerni baham koʻra olmaydigan guruhni saqlamaydi va ikkalasida berilgan build oʻzgaruvchilari haqida ogohlantiradi. Arxivlangan repozitoriylar oʻz guruhlarida qoladi, lekin yangi vazifalarga kirmaydi.

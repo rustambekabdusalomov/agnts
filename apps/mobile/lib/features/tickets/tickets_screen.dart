@@ -175,7 +175,7 @@ class TicketTile extends StatelessWidget {
       subtitle: Text([
         t.key,
         sourceLabel(l, t.source_),
-        if (t.repoName != null) t.repoName!,
+        ?repoLabel(t),
       ].join(' · ')),
       trailing: StateBadge(t.state, kind: t.kind),
       onTap: () => context.push('/tickets/${t.key}'),

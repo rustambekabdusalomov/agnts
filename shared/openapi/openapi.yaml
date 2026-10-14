@@ -573,13 +573,38 @@ paths:
       description: >-
         Allowed on a new ticket, or a failed or rate-limited one that has not
         pushed. A stopped ticket starts over from analysis on retry, since its
-        analysis and branch belonged to the old repository.
+        analysis and branch belonged to the old repository. The same as
+        PUT /tickets/{key}/repos with one repository.
       tags: [tickets]
       requestBody:
         required: true
         content:
           application/json:
             schema: { $ref: '#/components/schemas/TicketRepo' }
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /tickets/{key}/repos:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    put:
+      operationId: setTicketRepos
+      summary: Set the ticket's repositories (one, several or a group)
+      description: >-
+        Allowed while no stage runs and nothing was pushed: on a new ticket,
+        or a failed or rate-limited one. A stopped ticket starts over from
+        analysis on retry. Give repoIds (the first is the primary) or groupId,
+        not both.
+      tags: [tickets]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TicketReposInput' }
       responses:
         '200': { $ref: '#/components/responses/TicketOK' }
         '400': { $ref: '#/components/responses/BadRequest' }
@@ -1155,6 +1180,88 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '409': { $ref: '#/components/responses/Conflict' }
+
+  /repo-groups:
+    get:
+      operationId: listRepoGroups
+      summary: The workspace's repository groups
+      tags: [repos]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/RepoGroup' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      operationId: createRepoGroup
+      x-role: owner
+      summary: Create a repository group
+      description: >-
+        A named set of repositories that tickets can change together. Its
+        repositories must be able to share one run container (the same runner
+        image, no clashing toolchain versions); what they share uneasily comes
+        back in warnings.
+      tags: [repos]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RepoGroupInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RepoGroup' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /repo-groups/{id}:
+    parameters:
+      - $ref: '#/components/parameters/GroupID'
+    get:
+      operationId: getRepoGroup
+      tags: [repos]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RepoGroup' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      operationId: updateRepoGroup
+      x-role: owner
+      summary: Replace a group's fields and repositories
+      description: Tickets already made from the group keep their repositories.
+      tags: [repos]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RepoGroupInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RepoGroup' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      operationId: deleteRepoGroup
+      x-role: owner
+      summary: Delete a group; its tickets keep their repositories
+      tags: [repos]
+      responses:
+        '204': { description: Deleted }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
 
   /repos/detect:
     post:
@@ -3563,8 +3670,187 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /assistant/conversations:
+    get:
+      operationId: listAssistantConversations
+      summary: Your assistant conversations, newest first, each with its last message
+      description: A conversation belongs to the person who started it; nobody else sees it. Kept for 30 days after its last message.
+      tags: [assistant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/AssistantConversation' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '501': { $ref: '#/components/responses/NotImplemented' }
+    post:
+      operationId: startAssistantConversation
+      x-viewer: true
+      summary: Ask the assistant a question in a new conversation
+      description: >-
+        Stores the question and starts answering it from a read-only
+        snapshot of the workspace. Answers take 10-30 seconds: the response
+        has the answer pending; fetch the conversation again, or wait for
+        the assistant_answered (or assistant_failed) event on the event
+        stream. The assistant takes no actions.
+      tags: [assistant]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AssistantAsk' }
+      responses:
+        '202':
+          description: The conversation, with its answer pending
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssistantConversation' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
+  /assistant/conversations/{conversationId}:
+    parameters:
+      - $ref: '#/components/parameters/ConversationID'
+    get:
+      operationId: getAssistantConversation
+      summary: One of your conversations with all its messages
+      tags: [assistant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssistantConversation' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '501': { $ref: '#/components/responses/NotImplemented' }
+    delete:
+      operationId: deleteAssistantConversation
+      x-viewer: true
+      summary: Delete one of your conversations
+      tags: [assistant]
+      responses:
+        '204': { description: Deleted }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
+  /assistant/conversations/{conversationId}/messages:
+    parameters:
+      - $ref: '#/components/parameters/ConversationID'
+    post:
+      operationId: askAssistant
+      x-viewer: true
+      summary: Ask a follow-up question in one of your conversations
+      description: Answered after the conversation's earlier questions, with the last 6 messages as context.
+      tags: [assistant]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AssistantAsk' }
+      responses:
+        '202':
+          description: The conversation, with the new answer pending
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssistantConversation' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
+  /assistant/messages/{messageId}/rating:
+    parameters:
+      - $ref: '#/components/parameters/MessageID'
+    put:
+      operationId: rateAssistantAnswer
+      x-viewer: true
+      summary: Rate one of your answers (helpful or not), or take the rating back
+      description: >-
+        A rating, its comment, the answer and its question are shown to the
+        workspace's owner. With share, the snapshot the answer was made from
+        is kept with it so new prompts can be tried on the question.
+      tags: [assistant]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AssistantRating' }
+      responses:
+        '200':
+          description: The answer with its rating
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssistantMessage' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
+  /assistant/stats:
+    get:
+      operationId: getAssistantStats
+      x-role: owner
+      summary: How the workspace's assistant did (questions, answer rate, time, ratings, tokens, per prompt version)
+      tags: [assistant]
+      parameters:
+        - name: days
+          in: query
+          required: false
+          schema: { type: integer, enum: [7, 30, 90], default: 7 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssistantStats' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
+  /assistant/rated:
+    get:
+      operationId: listAssistantRated
+      x-role: owner
+      summary: Rated answers with their questions, newest rating first
+      tags: [assistant]
+      parameters:
+        - name: rating
+          in: query
+          required: false
+          description: up or down; both when left out
+          schema: { type: string, enum: [up, down] }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/AssistantRated' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
 components:
   parameters:
+    ConversationID:
+      name: conversationId
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
+    MessageID:
+      name: messageId
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
     NetworkID:
       name: networkId
       in: path
@@ -3576,6 +3862,11 @@ components:
       required: true
       schema: { type: integer, format: int64 }
     RepoID:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
+    GroupID:
       name: id
       in: path
       required: true
@@ -4004,7 +4295,14 @@ components:
     ImplementInput:
       type: object
       properties:
-        repoId: { type: integer, format: int64, description: 'Where to implement it; defaults to the report''s repository' }
+        repoId: { type: integer, format: int64, description: 'Where to implement it; defaults to the report''s repositories' }
+        repoIds:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items: { type: integer, format: int64 }
+          description: Several repositories instead of repoId
+        groupId: { type: integer, format: int64 }
         start:
           type: string
           enum: [code, queue]
@@ -4142,6 +4440,10 @@ components:
           items: { type: integer, format: int64 }
           description: 'Ids of sibling suggestions that must land first; once both are tickets, this one depends on them'
         childKey: { type: string, description: 'The ticket made from it' }
+        repoIds:
+          type: array
+          description: "The parent's repositories it is about; absent for all of them"
+          items: { type: integer, format: int64 }
         decidedAt: { type: string, format: date-time }
         createdAt: { type: string, format: date-time }
 
@@ -4183,7 +4485,13 @@ components:
         description: { type: string, maxLength: 20000 }
         kind: { $ref: '#/components/schemas/TicketKind' }
         priority: { type: string, enum: [low, medium, high] }
-        repoId: { type: integer, format: int64, description: "Defaults to the parent ticket's repository" }
+        repoId: { type: integer, format: int64, description: "Defaults to the parent ticket's repositories (those the suggestion is about)" }
+        repoIds:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items: { type: integer, format: int64 }
+        groupId: { type: integer, format: int64 }
 
     AcceptFollowUps:
       type: object
@@ -4213,6 +4521,120 @@ components:
         results:
           type: array
           items: { $ref: '#/components/schemas/AcceptFollowUpResult' }
+
+    AssistantLanguage:
+      type: string
+      description: The language the assistant answers in (the app's)
+      enum: [en, ru, uz]
+
+    AssistantAsk:
+      type: object
+      required: [question]
+      properties:
+        question: { type: string, minLength: 1, maxLength: 1000 }
+        lang: { $ref: '#/components/schemas/AssistantLanguage' }
+
+    AssistantLink:
+      type: object
+      description: A screen of the app an answer points to
+      required: [kind]
+      properties:
+        kind: { type: string, enum: [ticket, ci, lesson] }
+        key: { type: string, description: 'The ticket key (kind ticket)' }
+        id: { type: integer, format: int64, description: The CI failure or lesson id }
+
+    AssistantMessage:
+      type: object
+      required: [id, role, text, speech, links, status, lang, rating, shared, createdAt]
+      properties:
+        id: { type: integer, format: int64 }
+        role: { type: string, enum: [user, assistant] }
+        text: { type: string, description: 'The question, or the answer in Markdown' }
+        speech: { type: string, description: The answer in 1-3 plain sentences (empty for questions) }
+        links:
+          type: array
+          items: { $ref: '#/components/schemas/AssistantLink' }
+        status: { type: string, enum: [pending, answering, done, failed] }
+        error: { type: string, description: Why the answer failed }
+        lang: { $ref: '#/components/schemas/AssistantLanguage' }
+        durationMs: { type: integer, format: int64 }
+        files:
+          type: array
+          description: The snapshot files the answer was made from
+          items: { type: string }
+        rating: { type: integer, enum: [-1, 0, 1], description: 'Your rating: 1 helpful, -1 not, 0 none' }
+        ratingComment: { type: string }
+        shared: { type: boolean, description: The answer's snapshot is kept for prompt tests }
+        createdAt: { type: string, format: date-time }
+
+    AssistantConversation:
+      type: object
+      required: [id, title, createdAt, updatedAt, messages]
+      properties:
+        id: { type: integer, format: int64 }
+        title: { type: string, description: 'The first question, cut' }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        messages:
+          type: array
+          description: Oldest first; in lists, only the last message
+          items: { $ref: '#/components/schemas/AssistantMessage' }
+
+    AssistantRating:
+      type: object
+      required: [rating]
+      properties:
+        rating: { type: integer, enum: [-1, 0, 1] }
+        comment: { type: string, maxLength: 1000 }
+        share: { type: boolean, description: Keep the answer's snapshot so new prompts can be tried on it }
+
+    AssistantStats:
+      type: object
+      required: [days, questions, answered, failed, people, medianMs, p90Ms, medianStartMs, medianSnapshotMs, medianClaudeMs, warm, up, down, tokens, costUsd, versions]
+      properties:
+        days: { type: integer }
+        questions: { type: integer }
+        answered: { type: integer }
+        failed: { type: integer }
+        people: { type: integer, description: How many people asked }
+        medianMs: { type: integer, format: int64 }
+        p90Ms: { type: integer, format: int64 }
+        medianStartMs: { type: integer, format: int64, description: 'Opening (or reusing) the container, median' }
+        medianSnapshotMs: { type: integer, format: int64, description: 'Reading the workspace, median' }
+        medianClaudeMs: { type: integer, format: int64, description: 'The Claude Code run, median' }
+        warm: { type: integer, description: Answers that reused the container kept from the last one }
+        up: { type: integer }
+        down: { type: integer }
+        tokens: { type: integer, format: int64 }
+        costUsd: { type: number, format: double }
+        versions:
+          type: array
+          description: Per prompt version, newest first
+          items:
+            type: object
+            required: [promptVersion, answered, failed, up, down, medianMs, tokens]
+            properties:
+              promptVersion: { type: string }
+              answered: { type: integer }
+              failed: { type: integer }
+              up: { type: integer }
+              down: { type: integer }
+              medianMs: { type: integer, format: int64 }
+              tokens: { type: integer, format: int64 }
+
+    AssistantRated:
+      type: object
+      required: [messageId, user, question, answer, rating, comment, promptVersion, shared, ratedAt]
+      properties:
+        messageId: { type: integer, format: int64 }
+        user: { type: string }
+        question: { type: string }
+        answer: { type: string }
+        rating: { type: integer, enum: [-1, 1] }
+        comment: { type: string }
+        promptVersion: { type: string }
+        shared: { type: boolean }
+        ratedAt: { type: string, format: date-time }
 
     TranslationLanguage:
       type: string
@@ -4252,7 +4674,13 @@ components:
       properties:
         key: { type: string }
         source: { type: string, enum: [jira, plane, local, git, ci] }
-        repoId: { type: integer, format: int64 }
+        repoId: { type: integer, format: int64, description: 'The primary repository; repos lists all of them' }
+        repos:
+          type: array
+          description: Every repository the ticket works in, the primary first, with its branch and pull request
+          items: { $ref: '#/components/schemas/TicketRepoState' }
+        group: { $ref: '#/components/schemas/RepoGroupRef' }
+        partlyMerged: { type: boolean, description: 'Some pull requests merged and at least one closed without a merge' }
         title: { type: string }
         description: { type: string }
         priority: { type: string }
@@ -4261,10 +4689,10 @@ components:
         revision: { type: integer }
         replayOf: { type: string, description: 'For a replay: the done ticket it re-runs. Replays are never pushed.' }
         turns: { type: integer }
-        branch: { type: string }
-        headSha: { type: string, description: "The reviewed commit: the branch head agnts committed, or for a pull request review the head agnts reviewed" }
-        prNumber: { type: integer }
-        prUrl: { type: string }
+        branch: { type: string, description: "The primary repository's branch (see repos)" }
+        headSha: { type: string, description: "The reviewed commit: the branch head agnts committed (in the primary repository; see repos), or for a pull request review the head agnts reviewed" }
+        prNumber: { type: integer, description: "The primary repository's pull request (see repos)" }
+        prUrl: { type: string, description: "The primary repository's pull request (see repos)" }
         ciFixes: { type: integer, description: 'Rounds a red CI check sent the pull request back to coding' }
         assignees:
           type: array
@@ -4582,6 +5010,8 @@ components:
       type: object
       required: [path, add, del, diff]
       properties:
+        repo: { type: string, description: "The repository's folder, for a ticket in several; path is relative to the repository" }
+        repoId: { type: integer, format: int64 }
         path: { type: string }
         add: { type: integer }
         del: { type: integer }
@@ -4719,6 +5149,98 @@ components:
       properties:
         repoId: { type: integer, format: int64 }
 
+    TicketReposInput:
+      type: object
+      description: Give repoIds (the first is the primary) or groupId
+      properties:
+        repoIds:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items: { type: integer, format: int64 }
+        groupId: { type: integer, format: int64 }
+
+    TicketRepoState:
+      type: object
+      description: >-
+        The ticket's work in one of its repositories: its branch, commit and
+        pull request. The first is the primary repository.
+      required: [repoId, repoName, folder, role, branch, headSha, prUrl, ciFixes, state, files]
+      properties:
+        repoId: { type: integer, format: int64 }
+        repoName: { type: string }
+        role: { type: string, description: 'Its role in the group, as people named it (backend, web)' }
+        folder: { type: string, description: 'Its folder in the run, /workspace/<folder>; empty when the ticket has one repository' }
+        branch: { type: string }
+        headSha: { type: string }
+        prNumber: { type: integer }
+        prUrl: { type: string }
+        ciFixes: { type: integer, description: Rounds a red CI check on its pull request sent the ticket back to coding }
+        state:
+          type: string
+          enum: [pending, unchanged, pushed, merged, dropped]
+          description: 'pending = not pushed yet; unchanged = the work did not change it (no pull request); pushed; merged; dropped = its pull request was closed without a merge'
+        mergedAt: { type: string, format: date-time }
+        closedAt: { type: string, format: date-time }
+        pushError: { type: string, description: Why its last push failed; a retry pushes it again }
+        files: { type: integer, description: Files its change touches }
+        archived: { type: boolean, description: The repository is archived }
+
+    RepoGroupRef:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+
+    RepoGroupMember:
+      type: object
+      required: [repoId, repoName, role, archived]
+      properties:
+        repoId: { type: integer, format: int64 }
+        repoName: { type: string }
+        role: { type: string }
+        archived: { type: boolean, description: 'Archived: tickets made from the group leave it out' }
+
+    RepoGroup:
+      type: object
+      required: [id, name, description, instructions, taskPrefix, members, warnings, createdAt, updatedAt]
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        description: { type: string }
+        instructions: { type: string, description: 'How the repositories fit together; added to every prompt of its tickets' }
+        taskPrefix: { type: string, description: 'Key prefix of tasks made from the group; empty uses the first repository''s' }
+        members:
+          type: array
+          items: { $ref: '#/components/schemas/RepoGroupMember' }
+        warnings:
+          type: array
+          description: What the repositories share uneasily in one run container (a build variable both set)
+          items: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    RepoGroupInput:
+      type: object
+      required: [name, members]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 100 }
+        description: { type: string, maxLength: 1000 }
+        instructions: { type: string, maxLength: 20000 }
+        taskPrefix: { type: string, maxLength: 10 }
+        members:
+          type: array
+          minItems: 1
+          maxItems: 20
+          description: In order; the first is the primary repository of the group's tickets
+          items:
+            type: object
+            required: [repoId]
+            properties:
+              repoId: { type: integer, format: int64 }
+              role: { type: string, maxLength: 40 }
+
     ModelOverrides:
       type: object
       properties:
@@ -4743,6 +5265,13 @@ components:
       required: [title, priority, afterApprove, start]
       properties:
         repoId: { type: integer, format: int64, description: 'Omit for a task without a repository (report kinds or auto)' }
+        repoIds:
+          type: array
+          minItems: 1
+          maxItems: 20
+          description: 'Several repositories instead of repoId; the first is the primary. Give one of repoId, repoIds and groupId.'
+          items: { type: integer, format: int64 }
+        groupId: { type: integer, format: int64, description: "A repository group: the task works in its repositories (copied now)" }
         kind: { $ref: '#/components/schemas/TicketKindChoice' }
         title: { type: string, minLength: 1, maxLength: 300 }
         description: { type: string, maxLength: 20000 }
@@ -4862,6 +5391,7 @@ components:
           description: 'Hosts run containers may reach besides the built-in list, such as a staging API; .example.com matches subdomains'
           items: { type: string, maxLength: 253 }
         suggestFollowUps: { type: boolean, description: 'Runs suggest follow-up tickets (off by default; a ticket can override it)' }
+        maxTicketRepos: { type: integer, minimum: 1, maximum: 20, description: 'How many repositories one ticket, and one repository group, may have (6 by default)' }
         pullReviews: { $ref: '#/components/schemas/PullReviewSettings' }
         ci: { $ref: '#/components/schemas/CISettings' }
         guard: { $ref: '#/components/schemas/GuardSettings' }
@@ -5398,6 +5928,10 @@ components:
           description: Names of the build environment variables; the values are never returned
           items: { type: string }
         harness: { $ref: '#/components/schemas/RepoHarness' }
+        groups:
+          type: array
+          description: The groups it is a member of
+          items: { $ref: '#/components/schemas/RepoGroupRef' }
 
     RepositoryInput:
       type: object

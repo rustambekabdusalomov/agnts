@@ -97,7 +97,7 @@ func TestDependencyWaitsForMerge(t *testing.T) {
 	h.expect("PAY-1", domain.StateDone)
 	h.idle() // pushed is not merged
 
-	if _, err := h.o.MarkMerged(h.ctx, "https://github.com/acme/api/pull/7", "", domain.OriginWebhook); err != nil {
+	if _, err := h.o.MarkMerged(h.ctx, domain.PRRef{URL: "https://github.com/acme/api/pull/7"}, domain.OriginWebhook); err != nil {
 		t.Fatal(err)
 	}
 	h.step()
@@ -220,7 +220,7 @@ func TestCheckMergesRecordsClosedPR(t *testing.T) {
 		t.Fatalf("closed PR changed the ticket: %+v", tk)
 	}
 
-	if ok, err := h.o.MarkPRClosed(h.ctx, tk.PRURL, "", false, domain.OriginWebhook); err != nil || !ok {
+	if ok, err := h.o.MarkPRClosed(h.ctx, domain.PRRef{URL: tk.PRURL}, false, domain.OriginWebhook); err != nil || !ok {
 		t.Fatalf("reopen: %v %v", ok, err)
 	}
 	h.host.closed = nil

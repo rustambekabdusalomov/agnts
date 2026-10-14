@@ -26,6 +26,7 @@ class HomeScreen extends ConsumerWidget {
     // Not in any workspace yet: nothing to show until they join or create one.
     final none = ref.watch(meProvider).value?.workspaces?.isEmpty ?? false;
     return Scaffold(
+      floatingActionButton: none ? null : HFab(icon: 'assistant', tooltip: l.massistantFab, onTap: () => context.push('/assistant')),
       body: SafeArea(
         bottom: false,
         child: Column(children: [

@@ -33,6 +33,7 @@ import 'package:agnts_api/src/model/ticket.dart';
 import 'package:agnts_api/src/model/ticket_detail.dart';
 import 'package:agnts_api/src/model/ticket_kind_input.dart';
 import 'package:agnts_api/src/model/ticket_repo.dart';
+import 'package:agnts_api/src/model/ticket_repos_input.dart';
 import 'package:agnts_api/src/model/ticket_state.dart';
 import 'package:agnts_api/src/model/translate_input.dart';
 import 'package:agnts_api/src/model/translation.dart';
@@ -2752,7 +2753,7 @@ _responseData = rawData == null ? null : deserialize<Ticket, Ticket>(rawData, 'T
   }
 
   /// Link the ticket to a repository
-  /// Allowed on a new ticket, or a failed or rate-limited one that has not pushed. A stopped ticket starts over from analysis on retry, since its analysis and branch belonged to the old repository.
+  /// Allowed on a new ticket, or a failed or rate-limited one that has not pushed. A stopped ticket starts over from analysis on retry, since its analysis and branch belonged to the old repository. The same as PUT /tickets/{key}/repos with one repository.
   ///
   /// Parameters:
   /// * [key] 
@@ -2805,6 +2806,110 @@ _responseData = rawData == null ? null : deserialize<Ticket, Ticket>(rawData, 'T
 
     try {
       _bodyData = jsonEncode(ticketRepo);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    Ticket? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<Ticket, Ticket>(rawData, 'Ticket', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<Ticket>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// Set the ticket&#39;s repositories (one, several or a group)
+  /// Allowed while no stage runs and nothing was pushed: on a new ticket, or a failed or rate-limited one. A stopped ticket starts over from analysis on retry. Give repoIds (the first is the primary) or groupId, not both.
+  ///
+  /// Parameters:
+  /// * [key] 
+  /// * [ticketReposInput] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [Ticket] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<Ticket>> setTicketRepos({ 
+    required String key,
+    required TicketReposInput ticketReposInput,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/tickets/{key}/repos'.replaceAll('{' r'key' '}', key.toString());
+    final _options = Options(
+      method: r'PUT',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'cookieAuth',
+            'keyName': 'hiro_session',
+            'where': '',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(ticketReposInput);
 
     } catch(error, stackTrace) {
       throw DioException(

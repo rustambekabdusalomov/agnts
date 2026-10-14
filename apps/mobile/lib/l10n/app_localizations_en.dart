@@ -1141,6 +1141,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analyticsColCiHint => 'CI failure groups that failed in the period';
 
   @override
+  String get analyticsTabAssistant => 'Assistant';
+
+  @override
   String get appName => 'agnts';
 
   @override
@@ -2522,6 +2525,233 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get formNoMatch => 'No matches';
+
+  @override
+  String groupsView(String n) {
+    return 'Groups ($n)';
+  }
+
+  @override
+  String get groupsSub =>
+      'Repositories that change together. A ticket made from a group works in all of them and opens a pull request in each one it changes.';
+
+  @override
+  String get groupsNone => 'No groups yet. A group lets one ticket change several repositories, such as an API and its web app.';
+
+  @override
+  String get groupsAdd => 'New group';
+
+  @override
+  String get groupsDrawerSub => 'Repositories that change together, in order: the first is the primary repository of the group\'s tickets.';
+
+  @override
+  String get groupsName => 'Name';
+
+  @override
+  String get groupsNamePh => 'Shop';
+
+  @override
+  String get groupsDescription => 'Description';
+
+  @override
+  String get groupsMembers => 'Repositories';
+
+  @override
+  String get groupsMembersHelp =>
+      'Order matters: the first is the primary repository. A role tells agnts what each one is, such as backend or web.';
+
+  @override
+  String get groupsMembersNeeded => 'Add at least one repository.';
+
+  @override
+  String get groupsNoMembers => 'No repositories yet.';
+
+  @override
+  String get groupsAddMember => 'Add a repository…';
+
+  @override
+  String get groupsNoMoreRepos => 'Every active repository is in the group';
+
+  @override
+  String get groupsRolePh => 'Role, e.g. backend';
+
+  @override
+  String groupsRoleOf(String name) {
+    return 'Role of $name';
+  }
+
+  @override
+  String groupsMoveUp(String name) {
+    return 'Move $name up';
+  }
+
+  @override
+  String groupsMoveDown(String name) {
+    return 'Move $name down';
+  }
+
+  @override
+  String get groupsPrimary => 'primary';
+
+  @override
+  String get groupsArchived => 'archived';
+
+  @override
+  String groupsPrefixHelp(String prefix) {
+    return 'Key prefix of tasks made from the group, as $prefix-12. Empty uses the first repository\'s.';
+  }
+
+  @override
+  String get groupsInstructions => 'Instructions';
+
+  @override
+  String get groupsInstructionsPh => 'The web app calls the API through src/api; change both together and keep the OpenAPI spec in sync.';
+
+  @override
+  String get groupsInstructionsHelp => 'How the repositories fit together, in Markdown. Added to every prompt of the group\'s tickets.';
+
+  @override
+  String get groupsWarningsTitle => 'Saved, with warnings:';
+
+  @override
+  String groupsWarningsBadge(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count warnings', one: '$count warning');
+    return '$_temp0';
+  }
+
+  @override
+  String groupsSaved(String name) {
+    return 'Group $name saved';
+  }
+
+  @override
+  String get groupsDelete => 'Delete';
+
+  @override
+  String groupsDeleteConfirm(String name) {
+    return 'Delete the group $name? Its tickets keep their repositories.';
+  }
+
+  @override
+  String groupsDeleted(String name) {
+    return 'Group $name deleted';
+  }
+
+  @override
+  String get groupsColGroup => 'Group';
+
+  @override
+  String get groupsColMembers => 'Repositories';
+
+  @override
+  String get groupsColPrefix => 'Prefix';
+
+  @override
+  String groupsInGroups(String names) {
+    return 'In $names';
+  }
+
+  @override
+  String get groupsInLabel => 'Groups:';
+
+  @override
+  String get groupsPickerGroups => 'Repository groups';
+
+  @override
+  String get groupsChosen => 'Chosen repositories';
+
+  @override
+  String groupsFromGroup(String name) {
+    return 'From group $name';
+  }
+
+  @override
+  String get groupsMakePrimary => 'Make it the primary repository';
+
+  @override
+  String groupsMore(String count) {
+    return '+$count';
+  }
+
+  @override
+  String get groupsAllGroups => 'All groups';
+
+  @override
+  String get groupsFilterLabel => 'Group';
+
+  @override
+  String get groupsKvRepos => 'Repositories';
+
+  @override
+  String get groupsKvGroup => 'Group';
+
+  @override
+  String groupsTicketRepos(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count repositories', one: '$count repository');
+    return '$_temp0';
+  }
+
+  @override
+  String get groupsPartlyMerged => 'Partly merged';
+
+  @override
+  String groupsPr(String number) {
+    return 'PR #$number';
+  }
+
+  @override
+  String groupsOpenPrIn(String repo, String number) {
+    return 'Open $repo #$number';
+  }
+
+  @override
+  String groupsFiles(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count files', one: '$count file');
+    return '$_temp0';
+  }
+
+  @override
+  String groupsFilesIn(String repo, num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count files', one: '$count file');
+    return '$repo · $_temp0';
+  }
+
+  @override
+  String groupsPushError(String error) {
+    return 'Push failed: $error';
+  }
+
+  @override
+  String groupsRetryHint(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'A retry pushes the $count repositories that failed; the others stay as they are.',
+      one: 'A retry pushes the $count repository that failed; the others stay as they are.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupsState_pending => 'Not pushed';
+
+  @override
+  String get groupsState_unchanged => 'Unchanged';
+
+  @override
+  String get groupsState_pushed => 'Pushed';
+
+  @override
+  String get groupsState_merged => 'Merged';
+
+  @override
+  String get groupsState_dropped => 'Closed';
+
+  @override
+  String get groupsMaxTicketRepos => 'Maximum repositories per ticket';
+
+  @override
+  String get groupsMaxTicketReposHelp => 'How many repositories one ticket, and one repository group, may have.';
 
   @override
   String get harnessRepoTab => 'Guardrails';
@@ -4494,6 +4724,231 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get massistantTitle => 'Assistant';
+
+  @override
+  String get massistantFab => 'Ask the assistant';
+
+  @override
+  String get massistantMoreRow => 'Assistant';
+
+  @override
+  String get massistantMoreRowSub => 'Ask about your workspace';
+
+  @override
+  String get massistantPlaceholder => 'Ask about tickets, CI, spend…';
+
+  @override
+  String get massistantSend => 'Send';
+
+  @override
+  String massistantCount(String n) {
+    return '$n / 1000';
+  }
+
+  @override
+  String get massistantNewConversation => 'New conversation';
+
+  @override
+  String get massistantHistory => 'Conversations';
+
+  @override
+  String get massistantHistoryEmpty => 'No conversations yet.';
+
+  @override
+  String get massistantDelete => 'Delete';
+
+  @override
+  String get massistantDeleted => 'Conversation deleted';
+
+  @override
+  String get massistantEmptyTitle => 'Ask agnts about your work';
+
+  @override
+  String get massistantEmptyText =>
+      'It answers from your tickets, CI and spend, and links what it mentions. It cannot start, approve or reject anything.';
+
+  @override
+  String get massistantPrivate => 'Only you see your conversations. They are kept for 30 days.';
+
+  @override
+  String get massistantSuggestWaiting => 'What is waiting on me?';
+
+  @override
+  String get massistantSuggestCi => 'Why is CI red?';
+
+  @override
+  String get massistantSuggestSpend => 'How much did we spend this week?';
+
+  @override
+  String get massistantSuggestDone => 'What did agnts finish this week?';
+
+  @override
+  String massistantThinking(String seconds) {
+    return 'Thinking… ${seconds}s';
+  }
+
+  @override
+  String massistantReading(String what) {
+    return 'Reading $what';
+  }
+
+  @override
+  String get massistantFileInbox => 'your inbox';
+
+  @override
+  String get massistantFileTickets => 'the tickets';
+
+  @override
+  String massistantFileTicket(String key) {
+    return '$key';
+  }
+
+  @override
+  String get massistantFileCi => 'CI failures';
+
+  @override
+  String get massistantFileUsage => 'plan usage';
+
+  @override
+  String get massistantFileAnalytics => 'analytics';
+
+  @override
+  String get massistantFileRepos => 'repositories';
+
+  @override
+  String get massistantFileLessons => 'lessons';
+
+  @override
+  String get massistantFileConversation => 'the conversation';
+
+  @override
+  String get massistantFileQuestion => 'your question';
+
+  @override
+  String get massistantFileOther => 'the workspace';
+
+  @override
+  String get massistantFailed => 'No answer';
+
+  @override
+  String get massistantAskAgain => 'Ask again';
+
+  @override
+  String massistantLinkCi(String id) {
+    return 'CI #$id';
+  }
+
+  @override
+  String massistantLinkLesson(String id) {
+    return 'Lesson #$id';
+  }
+
+  @override
+  String massistantTook(String seconds) {
+    return '${seconds}s';
+  }
+
+  @override
+  String get massistantHelpful => 'Helpful';
+
+  @override
+  String get massistantNotHelpful => 'Not helpful';
+
+  @override
+  String get massistantRateTitle => 'How was this answer?';
+
+  @override
+  String get massistantRateComment => 'What was wrong or missing? (optional)';
+
+  @override
+  String get massistantRateShare => 'Keep this question\'s data so agnts can test better answers';
+
+  @override
+  String get massistantRateNote => 'Your rating, comment, question and answer are shown to the workspace owner.';
+
+  @override
+  String get massistantRateSend => 'Send';
+
+  @override
+  String get massistantRateClear => 'Remove rating';
+
+  @override
+  String get massistantRated => 'Thanks for the rating';
+
+  @override
+  String get massistantStatsTitle => 'Assistant';
+
+  @override
+  String get massistantStatsQuestions => 'Questions';
+
+  @override
+  String get massistantStatsAnswered => 'Answered';
+
+  @override
+  String get massistantStatsMedian => 'Median time';
+
+  @override
+  String get massistantStatsHelpful => 'Helpful';
+
+  @override
+  String get massistantStatsTokens => 'Tokens';
+
+  @override
+  String massistantStatsPeople(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n people asked', one: '$n person asked');
+    return '$_temp0';
+  }
+
+  @override
+  String get massistantStatsVersions => 'By prompt version';
+
+  @override
+  String massistantStatsVersionRow(String answered, String failed, String up, String down, String median) {
+    return '$answered answered · $failed failed · $up 👍 $down 👎 · $median';
+  }
+
+  @override
+  String get massistantStatsNone => 'No questions in this period.';
+
+  @override
+  String get massistantStatsRated => 'Rated answers';
+
+  @override
+  String get massistantRatedEmpty => 'No rated answers yet.';
+
+  @override
+  String get massistantRatedShared => 'Kept for prompt tests';
+
+  @override
+  String massistantStatsParts(String start, String snapshot, String claude) {
+    return 'Container $start · workspace $snapshot · Claude $claude';
+  }
+
+  @override
+  String massistantStatsWarm(String n, String total) {
+    return '$n of $total reused a warm container';
+  }
+
+  @override
+  String get massistantStatsSeeRated => 'Rated answers';
+
+  @override
+  String get massistantDeleteTitle => 'Delete this conversation?';
+
+  @override
+  String get massistantDeleteText => 'Its questions and answers are deleted for good.';
+
+  @override
+  String get massistantSendHint => 'Enter to send, Shift+Enter for a new line';
+
+  @override
+  String get massistantConversationsLede => 'Your questions and the assistant\'s answers. Only you see them; they are kept for 30 days.';
+
+  @override
+  String get massistantOpenChat => 'Open the chat';
+
+  @override
   String get mciTitle => 'CI failures';
 
   @override
@@ -4738,6 +5193,82 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mdetailFactTime => 'Time';
+
+  @override
+  String get mgroupsGroups => 'Groups';
+
+  @override
+  String get mgroupsRepos => 'Repositories';
+
+  @override
+  String get mgroupsPickHint => 'Pick one or more. The first one is the main one.';
+
+  @override
+  String get mgroupsInTask => 'In this task';
+
+  @override
+  String mgroupsFromGroup(String name) {
+    return 'All of $name';
+  }
+
+  @override
+  String mgroupsFromGroupEdited(String name) {
+    return 'From $name, edited';
+  }
+
+  @override
+  String get mgroupsPrimary => 'main';
+
+  @override
+  String mgroupsRemove(String name) {
+    return 'Remove $name';
+  }
+
+  @override
+  String get mgroupsNoMembers => 'This group has no active repositories.';
+
+  @override
+  String mgroupsGroup(String name) {
+    return 'Group $name';
+  }
+
+  @override
+  String get mgroupsPartlyMerged => 'Partly merged';
+
+  @override
+  String get mgroupsArchived => 'archived';
+
+  @override
+  String mgroupsPushError(String error) {
+    return 'Push failed: $error';
+  }
+
+  @override
+  String mgroupsFiles(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n files', one: '$n file');
+    return '$_temp0';
+  }
+
+  @override
+  String mgroupsCiFixes(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n CI fixes', one: '$n CI fix');
+    return '$_temp0';
+  }
+
+  @override
+  String get mgroupsStatePending => 'Pending';
+
+  @override
+  String get mgroupsStateUnchanged => 'No changes';
+
+  @override
+  String get mgroupsStatePushed => 'Pushed';
+
+  @override
+  String get mgroupsStateMerged => 'Merged';
+
+  @override
+  String get mgroupsStateDropped => 'Closed';
 
   @override
   String mhomeRunningNote(String parallel, String queued) {
@@ -5413,6 +5944,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navCi => 'CI';
+
+  @override
+  String get navAiAssistant => 'AI assistant';
+
+  @override
+  String get navAssistantChat => 'Chat';
+
+  @override
+  String get navAssistantConversations => 'Conversations';
 
   @override
   String get networkTitle => 'Private networks';

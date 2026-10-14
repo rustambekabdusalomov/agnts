@@ -1,8 +1,10 @@
 import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
 import { flushPromises, mount } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { i18n } from '../i18n'
+import { useWorkspace, type WorkspaceDetail } from '../stores/workspace'
 import AnalyticsPage from './AnalyticsPage.vue'
 
 const sp = (costUsd = 0) => ({ input: 100, output: 50, cacheRead: 0, cacheWrite: 0, total: 150, costUsd })
@@ -51,8 +53,11 @@ vi.mock('../api/client', () => ({ api: { GET: get }, unwrap: async (p: Promise<u
 const BODY: Record<string, unknown> = { '/analytics': main, '/analytics/delivery': delivery, '/analytics/learning': learning, '/analytics/ci': ci,
   '/eval/replays': { versions: [], replays: [] } }
 
-async function setup(path: string) {
+async function setup(path: string, role: 'owner' | 'user' = 'user') {
   get.mockImplementation(async (p: string) => BODY[p])
+  const pinia = createPinia()
+  setActivePinia(pinia)
+  useWorkspace().detail = { role } as WorkspaceDetail
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
@@ -65,7 +70,7 @@ async function setup(path: string) {
   }
   await router.push(path)
   const w = mount({ template: '<RouterView />' }, {
-    global: { plugins: [i18n, router, [VueQueryPlugin, { queryClient: new QueryClient({ defaultOptions: { queries: { retry: false } } }) }]] },
+    global: { plugins: [i18n, router, pinia, [VueQueryPlugin, { queryClient: new QueryClient({ defaultOptions: { queries: { retry: false } } }) }]] },
   })
   await flushPromises()
   return { w, router }
@@ -75,6 +80,30 @@ const asked = () => get.mock.calls.map((c) => c[0]).sort()
 beforeEach(() => get.mockReset())
 
 describe('AnalyticsPage', () => {
+  it('shows the Assistant tab to the owner only, with its stats and rated answers', async () => {
+    BODY['/assistant/stats'] = { days: 30, questions: 4, answered: 3, failed: 1, people: 2, medianMs: 12000, p90Ms: 24000,
+      medianStartMs: 900, medianSnapshotMs: 300, medianClaudeMs: 10500, warm: 2, up: 3, down: 1, tokens: 5400, costUsd: 0.12,
+      versions: [{ promptVersion: '2026-10-14.1', answered: 3, failed: 1, up: 3, down: 1, medianMs: 12000, tokens: 5400 }] }
+    BODY['/assistant/rated'] = [{ messageId: 2, user: 'alice', question: 'Why is CI red?', answer: 'A **flaky** test.', rating: -1,
+      comment: 'it was the cache', promptVersion: '2026-10-14.1', shared: true, ratedAt: '2026-10-14T09:00:00Z' }]
+    const user = await setup('/w/acme/analytics/assistant')
+    expect(user.w.findAll('.page-tab').map((x) => x.text())).not.toContain('Assistant')
+    expect(user.w.find('.page-tab[aria-current="page"]').text()).toBe('Overview')
+
+    get.mockClear()
+    const { w } = await setup('/w/acme/analytics/assistant', 'owner')
+    expect(w.find('.page-tab[aria-current="page"]').text()).toBe('Assistant')
+    expect(asked()).toEqual(['/assistant/rated', '/assistant/stats']) // not the main analytics
+    const text = w.text()
+    expect(text).toContain('75%') // 3 of 4 answered, and 3 of 4 helpful
+    expect(text).toContain('12s')
+    expect(text).toContain('Container 0.9s · workspace 0.3s · Claude 11s')
+    expect(text).toContain('2 of 3 reused a warm container')
+    expect(text).toContain('Why is CI red?')
+    expect(text).toContain('“it was the cache”')
+    expect(w.find('.as-r strong').text()).toBe('flaky')
+  })
+
   it('opens the overview with insights first and only loads its own data', async () => {
     const { w } = await setup('/w/acme/analytics')
     expect(asked()).toEqual(['/analytics'])

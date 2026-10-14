@@ -96,6 +96,12 @@ void main() {
       // TODO
     });
 
+    // How many repositories one ticket, and one repository group, may have (6 by default)
+    // int maxTicketRepos
+    test('to test the property `maxTicketRepos`', () async {
+      // TODO
+    });
+
     // PullReviewSettings pullReviews
     test('to test the property `pullReviews`', () async {
       // TODO

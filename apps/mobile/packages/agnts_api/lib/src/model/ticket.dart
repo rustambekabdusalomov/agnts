@@ -8,7 +8,9 @@ import 'package:agnts_api/src/model/blocker.dart';
 import 'package:agnts_api/src/model/pull_request.dart';
 import 'package:agnts_api/src/model/tracker_update.dart';
 import 'package:agnts_api/src/model/token_spend.dart';
+import 'package:agnts_api/src/model/repo_group_ref.dart';
 import 'package:agnts_api/src/model/wait_reason.dart';
+import 'package:agnts_api/src/model/ticket_repo_state.dart';
 import 'package:agnts_api/src/model/ticket_kind.dart';
 import 'package:agnts_api/src/model/ticket_state.dart';
 import 'package:agnts_api/src/model/model_overrides.dart';
@@ -34,6 +36,12 @@ class Ticket {
     required  this.source_,
 
      this.repoId,
+
+     this.repos,
+
+     this.group,
+
+     this.partlyMerged,
 
     required  this.title,
 
@@ -152,6 +160,7 @@ class Ticket {
 
 
 
+      /// The primary repository; repos lists all of them
   @JsonKey(
     
     name: r'repoId',
@@ -161,6 +170,44 @@ class Ticket {
 
 
   final int? repoId;
+
+
+
+      /// Every repository the ticket works in, the primary first, with its branch and pull request
+  @JsonKey(
+    
+    name: r'repos',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<TicketRepoState>? repos;
+
+
+
+  @JsonKey(
+    
+    name: r'group',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final RepoGroupRef? group;
+
+
+
+      /// Some pull requests merged and at least one closed without a merge
+  @JsonKey(
+    
+    name: r'partlyMerged',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? partlyMerged;
 
 
 
@@ -261,6 +308,7 @@ class Ticket {
 
 
 
+      /// The primary repository's branch (see repos)
   @JsonKey(
     
     name: r'branch',
@@ -273,7 +321,7 @@ class Ticket {
 
 
 
-      /// The reviewed commit: the branch head agnts committed, or for a pull request review the head agnts reviewed
+      /// The reviewed commit: the branch head agnts committed (in the primary repository; see repos), or for a pull request review the head agnts reviewed
   @JsonKey(
     
     name: r'headSha',
@@ -286,6 +334,7 @@ class Ticket {
 
 
 
+      /// The primary repository's pull request (see repos)
   @JsonKey(
     
     name: r'prNumber',
@@ -298,6 +347,7 @@ class Ticket {
 
 
 
+      /// The primary repository's pull request (see repos)
   @JsonKey(
     
     name: r'prUrl',
@@ -746,6 +796,9 @@ class Ticket {
       other.key == key &&
       other.source_ == source_ &&
       other.repoId == repoId &&
+      other.repos == repos &&
+      other.group == group &&
+      other.partlyMerged == partlyMerged &&
       other.title == title &&
       other.description == description &&
       other.priority == priority &&
@@ -798,6 +851,9 @@ class Ticket {
         key.hashCode +
         source_.hashCode +
         repoId.hashCode +
+        repos.hashCode +
+        group.hashCode +
+        partlyMerged.hashCode +
         title.hashCode +
         description.hashCode +
         priority.hashCode +

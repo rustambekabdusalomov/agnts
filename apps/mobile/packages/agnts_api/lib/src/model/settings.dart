@@ -58,6 +58,8 @@ class Settings {
 
      this.suggestFollowUps,
 
+     this.maxTicketRepos,
+
      this.pullReviews,
 
      this.ci,
@@ -290,6 +292,21 @@ class Settings {
 
 
 
+      /// How many repositories one ticket, and one repository group, may have (6 by default)
+          // minimum: 1
+          // maximum: 20
+  @JsonKey(
+    
+    name: r'maxTicketRepos',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? maxTicketRepos;
+
+
+
   @JsonKey(
     
     name: r'pullReviews',
@@ -476,6 +493,7 @@ class Settings {
       other.reflect == reflect &&
       other.egressAllow == egressAllow &&
       other.suggestFollowUps == suggestFollowUps &&
+      other.maxTicketRepos == maxTicketRepos &&
       other.pullReviews == pullReviews &&
       other.ci == ci &&
       other.guard == guard &&
@@ -508,6 +526,7 @@ class Settings {
         reflect.hashCode +
         egressAllow.hashCode +
         suggestFollowUps.hashCode +
+        maxTicketRepos.hashCode +
         pullReviews.hashCode +
         ci.hashCode +
         guard.hashCode +

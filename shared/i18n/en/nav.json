@@ -54,6 +54,9 @@
     "people": "People",
     "account": "Account",
     "reviews": "PR reviews",
-    "ci": "CI"
+    "ci": "CI",
+    "aiAssistant": "AI assistant",
+    "assistantChat": "Chat",
+    "assistantConversations": "Conversations"
   }
 }

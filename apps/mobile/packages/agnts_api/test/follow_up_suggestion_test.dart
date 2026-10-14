@@ -79,6 +79,12 @@ void main() {
       // TODO
     });
 
+    // The parent's repositories it is about; absent for all of them
+    // List<int> repoIds
+    test('to test the property `repoIds`', () async {
+      // TODO
+    });
+
     // DateTime decidedAt
     test('to test the property `decidedAt`', () async {
       // TODO

@@ -39,6 +39,7 @@ Method | HTTP request | Description
 [**setTicketMember**](TicketsApi.md#setticketmember) | **PUT** /tickets/{key}/member | Make a member the ticket&#39;s member (per-member Claude mode runs it on their account)
 [**setTicketModels**](TicketsApi.md#setticketmodels) | **PUT** /tickets/{key}/models | Override models for this ticket; omit a stage to use the default
 [**setTicketRepo**](TicketsApi.md#setticketrepo) | **PUT** /tickets/{key}/repo | Link the ticket to a repository
+[**setTicketRepos**](TicketsApi.md#setticketrepos) | **PUT** /tickets/{key}/repos | Set the ticket&#39;s repositories (one, several or a group)
 [**startTicket**](TicketsApi.md#startticket) | **POST** /tickets/{key}/analyze | Start a held ticket now (it is queued for the next free slot)
 [**stopTicket**](TicketsApi.md#stopticket) | **POST** /tickets/{key}/stop | Stop the running stage; the ticket moves to failed and can be retried
 [**translateTicket**](TicketsApi.md#translateticket) | **POST** /tickets/{key}/translate | Translate a ticket&#39;s texts (its own and what agnts wrote) into a language
@@ -1414,7 +1415,7 @@ Name | Type | Description  | Notes
 
 Link the ticket to a repository
 
-Allowed on a new ticket, or a failed or rate-limited one that has not pushed. A stopped ticket starts over from analysis on retry, since its analysis and branch belonged to the old repository.
+Allowed on a new ticket, or a failed or rate-limited one that has not pushed. A stopped ticket starts over from analysis on retry, since its analysis and branch belonged to the old repository. The same as PUT /tickets/{key}/repos with one repository.
 
 ### Example
 ```dart
@@ -1442,6 +1443,55 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **key** | **String**|  | 
  **ticketRepo** | [**TicketRepo**](TicketRepo.md)|  | 
+
+### Return type
+
+[**Ticket**](Ticket.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **setTicketRepos**
+> Ticket setTicketRepos(key, ticketReposInput)
+
+Set the ticket's repositories (one, several or a group)
+
+Allowed while no stage runs and nothing was pushed: on a new ticket, or a failed or rate-limited one. A stopped ticket starts over from analysis on retry. Give repoIds (the first is the primary) or groupId, not both.
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getTicketsApi();
+final String key = key_example; // String | 
+final TicketReposInput ticketReposInput = ; // TicketReposInput | 
+
+try {
+    final response = api.setTicketRepos(key, ticketReposInput);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling TicketsApi->setTicketRepos: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **key** | **String**|  | 
+ **ticketReposInput** | [**TicketReposInput**](TicketReposInput.md)|  | 
 
 ### Return type
 

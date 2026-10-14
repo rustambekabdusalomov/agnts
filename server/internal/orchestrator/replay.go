@@ -101,16 +101,36 @@ func (o *Orchestrator) Replay(ctx context.Context, key string, origin domain.Ori
 	case orig.RepoID == nil || orig.HeadSHA == "":
 		return orig, invalid("%s has no approved change to compare with", orig.Key)
 	}
-	repo, err := o.store.RepositoryByID(ctx, *orig.RepoID)
-	if err != nil {
-		return orig, err
-	}
-	if err := o.git.Prepare(ctx, repo, repo.DefaultBranch); err != nil {
-		return orig, fmt.Errorf("prepare repository: %w", err)
-	}
-	base, err := rp.BaseOf(ctx, repo, orig.HeadSHA)
-	if err != nil {
-		return orig, invalid("cannot find where %s started: %v", orig.Key, err)
+	// Each repository is cut from where the original's work in it started.
+	var rows []domain.TicketRepo
+	var repo domain.Repository
+	base := ""
+	for i, id := range orig.RepoIDs() {
+		row, _ := orig.RepoState(id)
+		r, err := o.store.RepositoryByID(ctx, id)
+		if err != nil {
+			return orig, err
+		}
+		if i == 0 {
+			repo = r
+		}
+		if row.HeadSHA == "" {
+			if i == 0 {
+				return orig, invalid("%s has no approved change to compare with", orig.Key)
+			}
+			continue
+		}
+		if err := o.git.Prepare(ctx, r, r.DefaultBranch); err != nil {
+			return orig, fmt.Errorf("prepare repository: %w", err)
+		}
+		b, err := rp.BaseOf(ctx, r, row.HeadSHA)
+		if err != nil {
+			return orig, invalid("cannot find where %s started: %v", orig.Key, err)
+		}
+		if i == 0 {
+			base = b
+		}
+		rows = append(rows, domain.TicketRepo{RepoID: id, RepoName: r.Name, Role: row.Role, BaseSHA: b, State: domain.RepoPending})
 	}
 	qs, err := o.store.Questions(ctx, orig.ID)
 	if err != nil {
@@ -130,8 +150,9 @@ func (o *Orchestrator) Replay(ctx context.Context, key string, origin domain.Ori
 	if len(answered) > 0 {
 		desc = strings.TrimSpace(desc + "\n\nThe author already answered these questions:\n" + strings.Join(answered, "\n"))
 	}
+	domain.AssignFolders(rows)
 	t, err := o.createTask(ctx, domain.Ticket{
-		Source: domain.SourceLocal, RepoID: &repo.ID, Title: "Replay of " + orig.Key + ": " + orig.Title, Description: desc,
+		Source: domain.SourceLocal, RepoID: &repo.ID, Repos: rows, Title: "Replay of " + orig.Key + ": " + orig.Title, Description: desc,
 		Priority: "low", State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: "pr",
 		AskFirst: false, Kind: orig.Kind, Models: orig.Models, ReplayOf: orig.Key, BaseSHA: base,
 	}, TaskPrefix(repo), nil, origin)
@@ -216,7 +237,7 @@ func filePaths(raw []byte) []string {
 	}
 	out := make([]string, 0, len(fs))
 	for _, f := range fs {
-		out = append(out, f.Path)
+		out = append(out, f.Where())
 	}
 	return out
 }

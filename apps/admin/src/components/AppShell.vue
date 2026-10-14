@@ -164,6 +164,9 @@ async function signOut() {
         <div class="grp">{{ t('nav.overview') }}</div>
         <RouterLink class="nav-a" active-class="on" :to="{ name: 'dashboard' }" v-bind="tip(t('nav.dashboard'))"><HiIcon name="dashboard" /><span class="lbl">{{ t('nav.dashboard') }}</span></RouterLink>
         <RouterLink class="nav-a" active-class="on" :to="{ name: 'analytics' }" v-bind="tip(t('nav.analytics'))"><HiIcon name="analytics" /><span class="lbl">{{ t('nav.analytics') }}</span></RouterLink>
+        <div class="grp">{{ t('nav.aiAssistant') }}</div>
+        <RouterLink class="nav-a" active-class="on" :to="{ name: 'assistant' }" v-bind="tip(t('nav.assistantChat'))"><HiIcon name="assistant" /><span class="lbl">{{ t('nav.assistantChat') }}</span></RouterLink>
+        <RouterLink class="nav-a" active-class="on" :to="{ name: 'assistantConversations' }" v-bind="tip(t('nav.assistantConversations'))"><HiIcon name="logs" /><span class="lbl">{{ t('nav.assistantConversations') }}</span></RouterLink>
         <div class="grp">{{ t('nav.tickets') }}</div>
         <RouterLink
           v-for="f in FILTERS"

@@ -37,22 +37,28 @@ const (
 	CIFeedbackSkipped CIFeedbackResult = "skipped" // not a ticket that can be reopened
 )
 
-// CIFeedback sends failing CI on a ticket's open pull request back to
-// coding with the failures as feedback, at most rounds times per ticket.
-// The fix goes through checks and review again and is pushed to the same
-// pull request after approval, like any change.
-func (o *Orchestrator) CIFeedback(ctx context.Context, key, feedback, runURL string, rounds int) (domain.Ticket, CIFeedbackResult, error) {
+// CIFeedback sends failing CI on a ticket's open pull request in repoID
+// back to coding with the failures as feedback, at most rounds times per
+// pull request. The fix goes through checks and review again and is pushed
+// to the same pull request after approval, like any change.
+func (o *Orchestrator) CIFeedback(ctx context.Context, key string, repoID int64, feedback, runURL string, rounds int) (domain.Ticket, CIFeedbackResult, error) {
 	t, err := o.store.TicketByKey(ctx, key)
 	if err != nil {
 		return t, CIFeedbackSkipped, err
 	}
-	if !domain.CanReopenForCI(t) {
+	if !domain.CanReopenForCIIn(t, repoID) {
 		return t, CIFeedbackSkipped, nil
 	}
-	if t.CIFixes >= rounds {
+	r, _ := t.RepoState(repoID)
+	where := ""
+	if t.Multi() {
+		where = r.RepoName + ": "
+		feedback = fmt.Sprintf("This CI failure is in the repository %s (%s/).\n\n%s", r.RepoName, r.Folder, feedback)
+	}
+	if r.CIFixes >= rounds {
 		o.event(ctx, domain.Event{TicketKey: key, Type: domain.EventCIFailure, Origin: domain.OriginWebhook, Level: domain.LevelWarn,
-			Message: fmt.Sprintf("CI still fails on the pull request after %d automatic fix rounds; look at it by hand", t.CIFixes),
-			Data:    map[string]any{"url": runURL, "capped": true}})
+			Message: fmt.Sprintf("%sCI still fails on the pull request after %d automatic fix rounds; look at it by hand", where, r.CIFixes),
+			Data:    map[string]any{"url": runURL, "capped": true, "repoId": repoID}})
 		return t, CIFeedbackCapped, nil
 	}
 	ro, ok := o.store.(Reopener)
@@ -60,13 +66,13 @@ func (o *Orchestrator) CIFeedback(ctx context.Context, key, feedback, runURL str
 		return t, CIFeedbackSkipped, errors.New("the store cannot reopen tickets")
 	}
 	ev := domain.Event{TicketKey: key, Type: domain.EventFeedback, Origin: domain.OriginWebhook,
-		Message: "CI failed on the pull request: " + firstLineOf(feedback), Data: map[string]any{"ci": true, "url": runURL}}
+		Message: where + "CI failed on the pull request: " + firstLineOf(feedback), Data: map[string]any{"ci": true, "url": runURL, "repoId": repoID}}
 	reviewing := false
 	out, err := ro.ReopenForCI(ctx, key, ev, func(x *domain.Ticket) {
 		x.Revision++
 		x.Feedback = feedback
 		x.FeedbackShots, x.FeedbackFiles = nil, nil
-		x.CIFixes++
+		x.UpdateRepo(repoID, func(r *domain.TicketRepo) { r.CIFixes++ })
 		x.SelfFixes, x.QuietReview = 0, false
 		reviewing = dropSideRuns(x)
 	})

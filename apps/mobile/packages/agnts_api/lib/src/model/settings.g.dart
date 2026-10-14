@@ -39,6 +39,8 @@ abstract class _$SettingsCWProxy {
 
   Settings suggestFollowUps(bool? suggestFollowUps);
 
+  Settings maxTicketRepos(int? maxTicketRepos);
+
   Settings pullReviews(PullReviewSettings? pullReviews);
 
   Settings ci(CISettings? ci);
@@ -88,6 +90,7 @@ abstract class _$SettingsCWProxy {
     bool? reflect,
     List<String>? egressAllow,
     bool? suggestFollowUps,
+    int? maxTicketRepos,
     PullReviewSettings? pullReviews,
     CISettings? ci,
     GuardSettings? guard,
@@ -161,6 +164,10 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
       this(suggestFollowUps: suggestFollowUps);
 
   @override
+  Settings maxTicketRepos(int? maxTicketRepos) =>
+      this(maxTicketRepos: maxTicketRepos);
+
+  @override
   Settings pullReviews(PullReviewSettings? pullReviews) =>
       this(pullReviews: pullReviews);
 
@@ -226,6 +233,7 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
     Object? reflect = const $CopyWithPlaceholder(),
     Object? egressAllow = const $CopyWithPlaceholder(),
     Object? suggestFollowUps = const $CopyWithPlaceholder(),
+    Object? maxTicketRepos = const $CopyWithPlaceholder(),
     Object? pullReviews = const $CopyWithPlaceholder(),
     Object? ci = const $CopyWithPlaceholder(),
     Object? guard = const $CopyWithPlaceholder(),
@@ -305,6 +313,10 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
           ? _value.suggestFollowUps
           // ignore: cast_nullable_to_non_nullable
           : suggestFollowUps as bool?,
+      maxTicketRepos: maxTicketRepos == const $CopyWithPlaceholder()
+          ? _value.maxTicketRepos
+          // ignore: cast_nullable_to_non_nullable
+          : maxTicketRepos as int?,
       pullReviews: pullReviews == const $CopyWithPlaceholder()
           ? _value.pullReviews
           // ignore: cast_nullable_to_non_nullable
@@ -418,6 +430,10 @@ Settings _$SettingsFromJson(
       (v) => (v as List<dynamic>?)?.map((e) => e as String).toList(),
     ),
     suggestFollowUps: $checkedConvert('suggestFollowUps', (v) => v as bool?),
+    maxTicketRepos: $checkedConvert(
+      'maxTicketRepos',
+      (v) => (v as num?)?.toInt(),
+    ),
     pullReviews: $checkedConvert(
       'pullReviews',
       (v) => v == null
@@ -471,6 +487,7 @@ Map<String, dynamic> _$SettingsToJson(Settings instance) => <String, dynamic>{
   'reflect': ?instance.reflect,
   'egressAllow': ?instance.egressAllow,
   'suggestFollowUps': ?instance.suggestFollowUps,
+  'maxTicketRepos': ?instance.maxTicketRepos,
   'pullReviews': ?instance.pullReviews?.toJson(),
   'ci': ?instance.ci?.toJson(),
   'guard': ?instance.guard?.toJson(),

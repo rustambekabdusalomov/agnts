@@ -40,16 +40,18 @@ type KindSpec struct {
 	Learn bool
 	// Implementable reports end in a change agnts can be asked to make.
 	Implementable bool
+	// MultiRepo: the work may span several repositories at once.
+	MultiRepo bool
 }
 
 var kindSpecs = map[TicketKind]KindSpec{
-	KindCode:     {Output: OutputChange, NeedsRepo: true, Learn: true},
-	KindTest:     {Output: OutputChange, NeedsRepo: true, Learn: true},
-	KindPlan:     {Output: OutputReport, Implementable: true},
-	KindAnalysis: {Output: OutputReport},
-	KindBug:      {Output: OutputReport, Implementable: true},
+	KindCode:     {Output: OutputChange, NeedsRepo: true, Learn: true, MultiRepo: true},
+	KindTest:     {Output: OutputChange, NeedsRepo: true, Learn: true, MultiRepo: true},
+	KindPlan:     {Output: OutputReport, Implementable: true, MultiRepo: true},
+	KindAnalysis: {Output: OutputReport, MultiRepo: true},
+	KindBug:      {Output: OutputReport, Implementable: true, MultiRepo: true},
 	// A review is a report about someone else's change; approving it
-	// merges the pull request.
+	// merges the pull request. It is one pull request, in one repository.
 	KindReview: {Output: OutputReport, NeedsRepo: true},
 }
 

@@ -24,6 +24,10 @@ class TaskCreate {
 
      this.repoId,
 
+     this.repoIds,
+
+     this.groupId,
+
      this.kind,
 
     required  this.title,
@@ -51,6 +55,32 @@ class TaskCreate {
 
 
   final int? repoId;
+
+
+
+      /// Several repositories instead of repoId; the first is the primary. Give one of repoId, repoIds and groupId.
+  @JsonKey(
+    
+    name: r'repoIds',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<int>? repoIds;
+
+
+
+      /// A repository group: the task works in its repositories (copied now)
+  @JsonKey(
+    
+    name: r'groupId',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? groupId;
 
 
 
@@ -157,6 +187,8 @@ class TaskCreate {
     @override
     bool operator ==(Object other) => identical(this, other) || other is TaskCreate &&
       other.repoId == repoId &&
+      other.repoIds == repoIds &&
+      other.groupId == groupId &&
       other.kind == kind &&
       other.title == title &&
       other.description == description &&
@@ -169,6 +201,8 @@ class TaskCreate {
     @override
     int get hashCode =>
         repoId.hashCode +
+        repoIds.hashCode +
+        groupId.hashCode +
         kind.hashCode +
         title.hashCode +
         description.hashCode +

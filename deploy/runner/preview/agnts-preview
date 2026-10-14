@@ -9,7 +9,9 @@
 #                         started, and restart the app there
 #
 # agnts writes the command, port and ready path to /agnts/out/preview-config.json
-# and the app's environment (KEY=value lines) to /agnts/out/preview.env.
+# and the app's environment (KEY=value lines) to /agnts/out/preview.env. In a
+# run of several repositories, "dir" names the repository's folder under
+# /workspace that the app starts in.
 set -uo pipefail
 
 CONFIG=${AGNTS_PREVIEW_CONFIG:-/agnts/out/preview-config.json}
@@ -25,6 +27,10 @@ COMMAND=$(jq -r '.command // ""' "$CONFIG")
 PORT=$(jq -r '.port // 0' "$CONFIG")
 READY=$(jq -r '.readyPath // "/"' "$CONFIG")
 DEFAULT=$(jq -r '.defaultBranch // "main"' "$CONFIG")
+DIR=$(jq -r '.dir // ""' "$CONFIG")
+ROOT=/workspace
+[ -n "$DIR" ] && ROOT="/workspace/$DIR"
+case "$DIR" in *..*) die "the preview folder $DIR is outside /workspace" ;; esac
 [ -n "$COMMAND" ] && [ "$PORT" -gt 0 ] || die "the preview command or port is not set"
 URL="http://localhost:${PORT}${READY}"
 
@@ -67,7 +73,7 @@ start() {
   echo "agnts-preview: starting \`$COMMAND\` (log: $LOG)"
   (
     load_env
-    cd /workspace || exit 1
+    cd "$ROOT" || exit 1
     # Its own session, so stop can end the whole process group.
     setsid bash -c "$COMMAND" >> "$LOG" 2>&1 < /dev/null &
     echo $! > "$PIDFILE"
@@ -91,7 +97,7 @@ start() {
 }
 
 base() {
-  cd /workspace || die "no /workspace"
+  cd "$ROOT" || die "no $ROOT"
   local b
   b=$(git merge-base HEAD "origin/$DEFAULT" 2>/dev/null) || b=$(git rev-parse "origin/$DEFAULT" 2>/dev/null) ||
     die "the default branch $DEFAULT is not in this checkout"

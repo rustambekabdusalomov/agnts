@@ -634,17 +634,25 @@ func (w *workspace) WriteFile(ctx context.Context, p string, data []byte) error 
 	return w.docker.PutArchive(ctx, w.id, root, &buf)
 }
 
-// ExportRepo streams a tar of the files git would see in /workspace:
-// tracked and untracked-but-not-ignored. Build output and dependencies
-// (node_modules, target/, ...) stay in the container. Paths are relative.
-func (w *workspace) ExportRepo(ctx context.Context) (io.ReadCloser, error) {
+// ExportRepo streams a tar of the files git would see in /workspace (or
+// the repository folder dir under it): tracked and untracked-but-not-
+// ignored. Build output and dependencies (node_modules, target/, ...) stay
+// in the container. Paths are relative.
+func (w *workspace) ExportRepo(ctx context.Context, dir string) (io.ReadCloser, error) {
+	wd := workDir
+	if dir != "" {
+		if strings.Contains(dir, "..") || strings.HasPrefix(dir, "/") {
+			return nil, fmt.Errorf("export workspace: %q is not a folder of /workspace", dir)
+		}
+		wd = path.Join(workDir, dir)
+	}
 	pr, pw := io.Pipe()
 	var stderr tailBuffer
 	go func() {
 		code, err := w.docker.Exec(ctx, w.id, ExecConfig{
 			Cmd:        []string{"bash", "-c", "set -o pipefail; git ls-files -z -co --exclude-standard | tar --null --no-recursion --ignore-failed-read -T - -cf -"},
 			User:       agentUser,
-			WorkingDir: workDir,
+			WorkingDir: wd,
 		}, pw, &stderr)
 		if err == nil && code != 0 {
 			err = fmt.Errorf("export workspace (exit %d): %s", code, stderr.String())

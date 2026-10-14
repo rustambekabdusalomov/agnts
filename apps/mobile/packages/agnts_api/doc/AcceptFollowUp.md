@@ -14,7 +14,9 @@ Name | Type | Description | Notes
 **description** | **String** |  | [optional] 
 **kind** | [**TicketKind**](TicketKind.md) |  | [optional] 
 **priority** | **String** |  | [optional] 
-**repoId** | **int** | Defaults to the parent ticket's repository | [optional] 
+**repoId** | **int** | Defaults to the parent ticket's repositories (those the suggestion is about) | [optional] 
+**repoIds** | **List&lt;int&gt;** |  | [optional] 
+**groupId** | **int** |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

@@ -21,6 +21,7 @@ import (
 	"agnts/internal/admin"
 	"agnts/internal/config"
 	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
 	"agnts/internal/secret"
 	"agnts/internal/store/postgres"
 	"agnts/internal/toolchain"
@@ -87,9 +88,11 @@ func orNone(ts []domain.Toolchain) string {
 func repoCmd(ctx context.Context, cfg config.Config, pool postgresPool, args []string, out io.Writer) error {
 	store := postgres.NewAgent(pool)
 	if len(args) == 0 {
-		return errors.New("usage: agnts repo add|list|detect")
+		return errors.New("usage: agnts repo add|list|detect|group")
 	}
 	switch args[0] {
+	case "group":
+		return groupCmd(ctx, store, args[1:], out)
 	case "detect":
 		if len(args) != 2 {
 			return errors.New("usage: agnts repo detect <name>")
@@ -379,4 +382,172 @@ func (p *prompter) done(err error, name string) error {
 		_, _ = fmt.Fprintf(p.out, "%s connected. The token is stored encrypted.\n", name)
 	}
 	return err
+}
+
+// groupCmd manages repository groups: named sets of repositories that one
+// ticket changes together.
+func groupCmd(ctx context.Context, store *postgres.Agent, args []string, out io.Writer) error {
+	usage := errors.New("usage: agnts repo group list | add <name> --repos api,web [--roles backend,web] [--prefix SHOP] [--description ...] [--instructions-file path] | members <name> | rm <name>")
+	if len(args) == 0 {
+		return usage
+	}
+	byName := func(name string) (domain.RepoGroup, error) {
+		g, err := store.GroupByName(ctx, name)
+		if errors.Is(err, domain.ErrNotFound) {
+			return g, fmt.Errorf("no repository group named %q", name)
+		}
+		return g, err
+	}
+	switch args[0] {
+	case "list":
+		gs, err := store.ListGroups(ctx)
+		if err != nil {
+			return err
+		}
+		tw := tabwriter.NewWriter(out, 0, 4, 2, ' ', 0)
+		_, _ = fmt.Fprintln(tw, "NAME\tPREFIX\tREPOSITORIES")
+		for _, g := range gs {
+			_, _ = fmt.Fprintf(tw, "%s\t%s\t%s\n", g.Name, g.TaskPrefix, memberList(g))
+		}
+		return tw.Flush()
+	case "members":
+		if len(args) != 2 {
+			return errors.New("usage: agnts repo group members <name>")
+		}
+		g, err := byName(args[1])
+		if err != nil {
+			return err
+		}
+		tw := tabwriter.NewWriter(out, 0, 4, 2, ' ', 0)
+		_, _ = fmt.Fprintln(tw, "REPOSITORY\tROLE\tARCHIVED")
+		for _, m := range g.Members {
+			_, _ = fmt.Fprintf(tw, "%s\t%s\t%v\n", m.RepoName, m.Role, m.Archived)
+		}
+		return tw.Flush()
+	case "rm":
+		if len(args) != 2 {
+			return errors.New("usage: agnts repo group rm <name>")
+		}
+		g, err := byName(args[1])
+		if err != nil {
+			return err
+		}
+		if err := store.DeleteGroup(ctx, g.ID); err != nil {
+			return err
+		}
+		_, _ = fmt.Fprintf(out, "Deleted %s; its tickets keep their repositories.\n", g.Name)
+		return nil
+	case "add":
+		if len(args) < 2 || strings.HasPrefix(args[1], "-") {
+			return usage
+		}
+		name := strings.TrimSpace(args[1])
+		fs := flag.NewFlagSet("repo group add", flag.ContinueOnError)
+		fs.SetOutput(out)
+		repos := fs.String("repos", "", "comma-separated repository names, in order; the first is the primary (required)")
+		roles := fs.String("roles", "", "comma-separated roles, one per repository (backend,web)")
+		prefix := fs.String("prefix", "", "task key prefix for the group's tasks, letters only (SHOP)")
+		desc := fs.String("description", "", "a line about the group")
+		instr := fs.String("instructions-file", "", "a Markdown file: how the repositories fit together (added to every prompt)")
+		if err := fs.Parse(args[2:]); err != nil {
+			return err
+		}
+		if *repos == "" {
+			return errors.New("--repos is required")
+		}
+		set := map[string]bool{}
+		fs.Visit(func(f *flag.Flag) { set[f.Name] = true })
+		g := domain.RepoGroup{Name: name, Description: strings.TrimSpace(*desc), TaskPrefix: strings.ToUpper(strings.TrimSpace(*prefix))}
+		if cur, err := store.GroupByName(ctx, name); err == nil {
+			// Changing a group keeps what the flags leave out.
+			g.ID, g.Name, g.Instructions = cur.ID, cur.Name, cur.Instructions
+			if !set["description"] {
+				g.Description = cur.Description
+			}
+			if !set["prefix"] {
+				g.TaskPrefix = cur.TaskPrefix
+			}
+		}
+		for _, c := range g.TaskPrefix {
+			if c < 'A' || c > 'Z' {
+				return errors.New("--prefix may only contain letters")
+			}
+		}
+		if g.TaskPrefix == "TASK" || g.TaskPrefix == "CI" {
+			return fmt.Errorf("%s is agnts's own prefix: pick another", g.TaskPrefix)
+		}
+		if g.TaskPrefix != "" {
+			taken, err := store.TaskPrefixTaken(ctx, g.TaskPrefix, 0, g.ID)
+			if err != nil {
+				return err
+			}
+			all, err := store.ListRepositories(ctx)
+			if err != nil {
+				return err
+			}
+			for _, r := range all {
+				if r.JiraProject == g.TaskPrefix || r.PlaneProject == g.TaskPrefix || orchestrator.TaskPrefix(r) == g.TaskPrefix {
+					taken = true
+				}
+			}
+			if taken {
+				return fmt.Errorf("a repository, group or tracker project already numbers tickets %s-1: pick another --prefix", g.TaskPrefix)
+			}
+		}
+		if *instr != "" {
+			b, err := os.ReadFile(*instr)
+			if err != nil {
+				return err
+			}
+			g.Instructions = strings.TrimSpace(string(b))
+		}
+		roleList := strings.Split(*roles, ",")
+		var picked []domain.Repository
+		for i, n := range strings.Split(*repos, ",") {
+			r, err := store.RepositoryByName(ctx, strings.TrimSpace(n))
+			if err != nil {
+				return fmt.Errorf("no repository named %q", n)
+			}
+			if r.ArchivedAt != nil {
+				return fmt.Errorf("%s is archived", r.Name)
+			}
+			if slices.ContainsFunc(g.Members, func(m domain.GroupMember) bool { return m.RepoID == r.ID }) {
+				return fmt.Errorf("%s is in --repos twice", r.Name)
+			}
+			m := domain.GroupMember{RepoID: r.ID, RepoName: r.Name}
+			if i < len(roleList) {
+				m.Role = strings.TrimSpace(roleList[i])
+			}
+			g.Members = append(g.Members, m)
+			picked = append(picked, r)
+		}
+		if len(g.Members) > domain.DefaultMaxTicketRepos {
+			_, _ = fmt.Fprintf(out, "Warning: %d repositories; a ticket has at most %d unless Settings allow more.\n", len(g.Members), domain.DefaultMaxTicketRepos)
+		}
+		c := orchestrator.Compatible(picked)
+		if !c.OK() {
+			return fmt.Errorf("these repositories cannot share one run container: %s", strings.Join(c.Errors, "; "))
+		}
+		for _, w := range c.Warnings {
+			_, _ = fmt.Fprintln(out, "Warning:", w)
+		}
+		saved, err := store.SaveGroup(ctx, g)
+		if err != nil {
+			return err
+		}
+		_, _ = fmt.Fprintf(out, "Saved %s: %s\n", saved.Name, memberList(saved))
+		return nil
+	}
+	return usage
+}
+
+func memberList(g domain.RepoGroup) string {
+	parts := make([]string, len(g.Members))
+	for i, m := range g.Members {
+		parts[i] = m.RepoName
+		if m.Role != "" {
+			parts[i] += " (" + m.Role + ")"
+		}
+	}
+	return strings.Join(parts, ", ")
 }

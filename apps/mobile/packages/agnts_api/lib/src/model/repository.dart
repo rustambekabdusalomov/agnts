@@ -4,6 +4,7 @@
 
 // ignore_for_file: unused_element
 import 'package:agnts_api/src/model/toolchain.dart';
+import 'package:agnts_api/src/model/repo_group_ref.dart';
 import 'package:agnts_api/src/model/repo_preview.dart';
 import 'package:agnts_api/src/model/repo_harness.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
@@ -80,6 +81,8 @@ class Repository {
      this.buildEnvNames,
 
      this.harness,
+
+     this.groups,
   });
 
   @JsonKey(
@@ -441,6 +444,19 @@ class Repository {
 
 
 
+      /// The groups it is a member of
+  @JsonKey(
+    
+    name: r'groups',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<RepoGroupRef>? groups;
+
+
+
 
 
     @override
@@ -473,7 +489,8 @@ class Repository {
       other.memoryMb == memoryMb &&
       other.buildEnvSet == buildEnvSet &&
       other.buildEnvNames == buildEnvNames &&
-      other.harness == harness;
+      other.harness == harness &&
+      other.groups == groups;
 
     @override
     int get hashCode =>
@@ -505,7 +522,8 @@ class Repository {
         memoryMb.hashCode +
         buildEnvSet.hashCode +
         buildEnvNames.hashCode +
-        harness.hashCode;
+        harness.hashCode +
+        groups.hashCode;
 
   factory Repository.fromJson(Map<String, dynamic> json) => _$RepositoryFromJson(json);
 

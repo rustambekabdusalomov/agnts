@@ -34,6 +34,10 @@ class AcceptFollowUp {
      this.priority,
 
      this.repoId,
+
+     this.repoIds,
+
+     this.groupId,
   });
 
   @JsonKey(
@@ -109,7 +113,7 @@ class AcceptFollowUp {
 
 
 
-      /// Defaults to the parent ticket's repository
+      /// Defaults to the parent ticket's repositories (those the suggestion is about)
   @JsonKey(
     
     name: r'repoId',
@@ -119,6 +123,30 @@ class AcceptFollowUp {
 
 
   final int? repoId;
+
+
+
+  @JsonKey(
+    
+    name: r'repoIds',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<int>? repoIds;
+
+
+
+  @JsonKey(
+    
+    name: r'groupId',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? groupId;
 
 
 
@@ -132,7 +160,9 @@ class AcceptFollowUp {
       other.description == description &&
       other.kind == kind &&
       other.priority == priority &&
-      other.repoId == repoId;
+      other.repoId == repoId &&
+      other.repoIds == repoIds &&
+      other.groupId == groupId;
 
     @override
     int get hashCode =>
@@ -142,7 +172,9 @@ class AcceptFollowUp {
         description.hashCode +
         kind.hashCode +
         priority.hashCode +
-        repoId.hashCode;
+        repoId.hashCode +
+        repoIds.hashCode +
+        groupId.hashCode;
 
   factory AcceptFollowUp.fromJson(Map<String, dynamic> json) => _$AcceptFollowUpFromJson(json);
 

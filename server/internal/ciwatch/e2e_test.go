@@ -52,7 +52,7 @@ func (g *fakeGitHub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 type e2eSink struct{ svc *Service }
 
-func (e2eSink) MarkMerged(context.Context, string, string, domain.Origin) (bool, error) {
+func (e2eSink) MarkMerged(context.Context, domain.PRRef, domain.Origin) (bool, error) {
 	return false, nil
 }
 func (s e2eSink) CIRunFinished(ctx context.Context, r domain.CIRun) error {

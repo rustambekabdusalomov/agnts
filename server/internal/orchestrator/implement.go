@@ -12,8 +12,11 @@ import (
 
 // ImplementInput makes a code task from an approved plan or bug report.
 type ImplementInput struct {
-	RepoID int64  // 0: the report's own repository
-	Start  string // code (default: no questions, the report settled them) or queue
+	RepoID int64 // 0: the report's own repositories
+	// RepoIDs or GroupID pick several repositories instead of RepoID.
+	RepoIDs []int64
+	GroupID int64
+	Start   string // code (default: no questions, the report settled them) or queue
 }
 
 // Implement creates the code task that carries out a done plan or bug
@@ -51,22 +54,31 @@ func (o *Orchestrator) Implement(ctx context.Context, key string, in ImplementIn
 		return p, err
 	}
 
-	repoID := in.RepoID
-	if repoID == 0 && p.RepoID != nil {
-		repoID = *p.RepoID
+	// The report's own repositories, unless the request picks others.
+	choice := domain.RepoChoice{RepoID: in.RepoID, RepoIDs: in.RepoIDs, GroupID: in.GroupID}
+	if choice.Empty() {
+		choice.RepoIDs = p.RepoIDs()
 	}
-	if repoID == 0 {
+	if choice.Empty() {
 		return p, invalid("%s has no repository: pick the one to implement it in", key)
 	}
-	repo, err := o.store.RepositoryByID(ctx, repoID)
-	if errors.Is(err, domain.ErrNotFound) {
-		return p, invalid("no repository %d", repoID)
-	}
+	res, err := o.resolveRepos(ctx, choice, domain.KindCode, false)
 	if err != nil {
 		return p, err
 	}
-	if repo.ArchivedAt != nil {
-		return p, invalid("%s is archived: restore it on the Repositories page first", repo.Name)
+	if choice.GroupID == 0 && in.RepoID == 0 && len(in.RepoIDs) == 0 && p.GroupID != nil {
+		if g, err := o.store.GroupByID(ctx, *p.GroupID); err == nil {
+			res.Group = &g // the same group, for display and its key prefix
+			if g.TaskPrefix != "" {
+				res.Prefix = g.TaskPrefix
+			}
+		}
+	}
+	// The report's roles carry over.
+	for i := range res.Rows {
+		if r, ok := p.RepoState(res.Rows[i].RepoID); ok && res.Rows[i].Role == "" {
+			res.Rows[i].Role = r.Role
+		}
 	}
 
 	title, heading := "Implement: "+p.Title, "Approved plan"
@@ -82,11 +94,13 @@ func (o *Orchestrator) Implement(ctx context.Context, key string, in ImplementIn
 	if !slices.Contains([]string{"low", "medium", "high"}, priority) {
 		priority = "medium"
 	}
-	t, err := o.createTask(ctx, domain.Ticket{
-		Source: domain.SourceLocal, RepoID: &repo.ID, Title: truncate(title, 300), Description: desc, Priority: priority,
+	nt := domain.Ticket{
+		Source: domain.SourceLocal, Title: truncate(title, 300), Description: desc, Priority: priority,
 		State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: "pr", Held: in.Start == "queue",
 		Kind: domain.KindCode, ParentKey: p.Key,
-	}, TaskPrefix(repo), nil, origin)
+	}
+	res.apply(&nt)
+	t, err := o.createTask(ctx, nt, res.Prefix, nil, origin)
 	if err != nil {
 		return t, err
 	}

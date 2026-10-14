@@ -323,12 +323,17 @@ func (s *Agent) Blockers(ctx context.Context, keys []string) (map[string][]domai
 	return out, rows.Err()
 }
 
-// RelationCandidates returns the tickets work on except could relate to.
+// touchesSQL is true for a ticket (t) that works in repository $1, as its
+// primary repository or another of its repositories.
+const touchesSQL = `(t.repo_id = $1 OR EXISTS (SELECT 1 FROM ticket_repos tr WHERE tr.ticket_id = t.id AND tr.repo_id = $1))`
+
+// RelationCandidates returns the tickets work on except could relate to:
+// those working in the repository, whichever of their repositories it is.
 func (s *Agent) RelationCandidates(ctx context.Context, repoID int64, except string, limit int) ([]orchestrator.Candidate, error) {
 	rows, err := s.db.Query(ctx, `SELECT `+ticketCols+`, a.summary FROM tickets t
 		LEFT JOIN LATERAL (SELECT res.summary FROM results res JOIN runs ON runs.id = res.run_id
 			WHERE runs.ticket_id = t.id AND runs.stage = 'analyze' ORDER BY res.created_at DESC LIMIT 1) a ON true
-		WHERE t.repo_id = $1 AND t.key <> $2 AND t.replay_of = '' AND (t.state NOT IN ('done', 'rejected')
+		WHERE `+touchesSQL+` AND t.key <> $2 AND t.replay_of = '' AND (t.state NOT IN ('done', 'rejected')
 			OR (t.state = 'done' AND t.merged_at IS NULL AND t.kind IN ('code', 'test') AND NOT (t.after_approve = 'main' AND t.source = 'local')))
 		ORDER BY t.updated_at DESC LIMIT $3`, repoID, except, limit)
 	if err != nil {
@@ -354,7 +359,9 @@ func (s *Agent) InFlightResults(ctx context.Context, repoID int64, except string
 	rows, err := s.db.Query(ctx, `SELECT `+ticketCols+`, c.files FROM tickets t
 		JOIN LATERAL (SELECT res.files FROM results res JOIN runs ON runs.id = res.run_id
 			WHERE runs.ticket_id = t.id AND runs.stage = 'code' ORDER BY res.created_at DESC LIMIT 1) c ON true
-		WHERE t.repo_id = $1 AND t.key <> $2 AND t.replay_of = '' AND t.head_sha <> '' AND t.kind IN ('code', 'test')
+		WHERE EXISTS (SELECT 1 FROM ticket_repos tr WHERE tr.ticket_id = t.id AND tr.repo_id = $1 AND tr.head_sha <> ''
+				AND tr.merged_at IS NULL AND tr.closed_at IS NULL AND tr.state <> 'unchanged')
+		  AND t.key <> $2 AND t.replay_of = '' AND t.kind IN ('code', 'test')
 		  AND t.state NOT IN ('rejected') AND t.merged_at IS NULL AND NOT (t.state = 'done' AND t.after_approve = 'main' AND t.source = 'local')
 		ORDER BY t.updated_at DESC LIMIT 50`, repoID, except)
 	if err != nil {

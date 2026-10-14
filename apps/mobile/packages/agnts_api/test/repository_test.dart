@@ -163,5 +163,11 @@ void main() {
       // TODO
     });
 
+    // The groups it is a member of
+    // List<RepoGroupRef> groups
+    test('to test the property `groups`', () async {
+      // TODO
+    });
+
   });
 }

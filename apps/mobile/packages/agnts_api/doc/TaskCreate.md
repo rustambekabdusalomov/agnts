@@ -9,6 +9,8 @@ import 'package:agnts_api/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **repoId** | **int** | Omit for a task without a repository (report kinds or auto) | [optional] 
+**repoIds** | **List&lt;int&gt;** | Several repositories instead of repoId; the first is the primary. Give one of repoId, repoIds and groupId. | [optional] 
+**groupId** | **int** | A repository group: the task works in its repositories (copied now) | [optional] 
 **kind** | [**TicketKindChoice**](TicketKindChoice.md) |  | [optional] 
 **title** | **String** |  | 
 **description** | **String** |  | [optional] 

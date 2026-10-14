@@ -45,6 +45,10 @@ const picked = computed(() => open.value.filter((s) => s.ready && edits[s.id]?.p
 const afterOf = (s: FollowUpSuggestion) =>
   (s.after ?? []).map((id) => all.value.find((x) => x.id === id)).filter((x) => !!x).map((x) => x.childKey ?? tr.value(x.title))
 
+// The parent's repositories a suggestion is about, for a ticket in several.
+const repoNames = (s: FollowUpSuggestion) =>
+  (s.repoIds ?? []).map((id) => props.ticket.repos?.find((r) => r.repoId === id)?.repoName).filter((x) => !!x).join(', ')
+
 const kindOptions = computed(() => KINDS.map((k) => ({ value: k, label: t(`kind.${k}`) })))
 const targetOptions = computed(() => [
   { value: 'local' as const, label: t('followUps.targetLocal') },
@@ -133,6 +137,7 @@ const dismiss = useMutation({
               <span class="badge" :class="`b-${s.type === 'prerequisite' ? 'warn' : s.type === 'gap' ? 'bad' : 'info'}`">{{ t(`followUps.type_${s.type}`) }}</span>
               <span class="fu-src">{{ t(`followUps.source_${s.source}`) }}</span>
               <span class="fu-src">· {{ t(`tasks.${s.priority}`) }}</span>
+              <span v-if="repoNames(s)" class="fu-src">· {{ repoNames(s) }}</span>
             </div>
             <input v-if="edits[s.id].picked" v-model="edits[s.id].title" class="cfg-in fu-title-in" :aria-label="t('followUps.editTitle')" maxlength="300">
             <p v-else class="fu-title">{{ tr(s.title) }}</p>

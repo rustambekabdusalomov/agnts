@@ -25,6 +25,8 @@ import PreviewShots from '../components/ticket/PreviewShots.vue'
 import ModelPicker from '../components/ticket/ModelPicker.vue'
 import ReportView from '../components/ticket/ReportView.vue'
 import RepoPicker from '../components/ticket/RepoPicker.vue'
+import TicketRepos from '../components/ticket/TicketRepos.vue'
+import { filePath, filesByRepo, isMultiRepo, ticketRepos } from '../components/repos/repoSet'
 import ProgressTrack from '../components/ticket/ProgressTrack.vue'
 import PullCard from '../components/ticket/PullCard.vue'
 import CiCard from '../components/ticket/CiCard.vue'
@@ -370,7 +372,9 @@ const shotName = (r: ShotRef) => d.value?.preview?.shots.find((s) => s.id === r.
 async function showFile(path: string) {
   tab.value = 'changes'
   await nextTick()
-  const el = document.getElementById(`diff-${path}`) as HTMLDetailsElement | null
+  // In several repositories a path may come without its folder.
+  const f = result.value?.files.find((x) => filePath(x) === path) ?? result.value?.files.find((x) => x.path === path)
+  const el = document.getElementById(`diff-${f ? filePath(f) : path}`) as HTMLDetailsElement | null
   if (!el) return
   el.open = true
   el.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -397,6 +401,12 @@ const ackSecrets = useMutation({
 const waitsFor = computed(() =>
   (d.value?.relations?.items ?? []).filter((r) => r.status === 'active' && r.direction === 'waits_for' && !r.other.landed).map((r) => r.other.key),
 )
+// A ticket in several repositories: names for the texts, its pull requests,
+// and its changed files by repository.
+const multi = computed(() => !!tk.value && isMultiRepo(tk.value))
+const repoNames = computed(() => (tk.value ? ticketRepos(tk.value).map((r) => r.repoName).join(', ') : ''))
+const prs = computed(() => (tk.value?.repos ?? []).filter((r) => r.prUrl))
+const fileGroups = computed(() => filesByRepo(result.value?.files ?? []))
 const totals = computed(() => {
   const files = result.value?.files ?? []
   return { n: files.length, add: files.reduce((a, f) => a + f.add, 0), del: files.reduce((a, f) => a + f.del, 0) }
@@ -614,7 +624,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             <!-- analyzing -->
             <template v-else-if="tk.state === 'analyzing'">
               <h2>{{ tk.repoId ? t('ticket.analyzingTitle') : t('ticket.analyzingTitleNoRepo') }}</h2>
-              <p class="sub">{{ tk.repoId ? t('ticket.analyzingSub', { repo: tk.repoName ?? '' }) : t('ticket.analyzingSubNoRepo') }}</p>
+              <p class="sub">{{ tk.repoId ? t('ticket.analyzingSub', { repo: repoNames }) : t('ticket.analyzingSubNoRepo') }}</p>
               <div class="sec"><LiveLog :events="events" /></div>
               <div class="actions"><button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="confirmThen(t('ticket.stopConfirm', { key }), 'stop')">{{ t('ticket.stopRun') }}</button></div>
             </template>
@@ -786,13 +796,16 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
               <div class="sec">
                 <div class="help ok">
                   <HiIcon name="check" />
-                  <p v-if="isTask && tk.afterApprove === 'main' && !tk.prUrl">{{ t('ticket.doneMain', { repo: tk.repoName ?? '' }) }}</p>
+                  <p v-if="isTask && tk.afterApprove === 'main' && !tk.prUrl">{{ t('ticket.doneMain', { repo: repoNames }) }}</p>
                   <p v-else>{{ t('ticket.donePr', { number: tk.prNumber ?? '', branch }) }}</p>
                 </div>
                 <p v-if="tk.mergedAt" class="hint" style="margin: 8px 0 0">{{ t('ticket.mergedAt', { time: ago(tk.mergedAt, locale) }) }}</p>
               </div>
-              <div v-if="tk.prUrl" class="actions">
-                <a class="btn" :href="tk.prUrl" target="_blank" rel="noopener">{{ t('ticket.openPr', { number: tk.prNumber ?? '' }) }}</a>
+              <div v-if="tk.prUrl || prs.length" class="actions">
+                <template v-if="prs.length > 1">
+                  <a v-for="r in prs" :key="r.repoId" class="btn" :href="r.prUrl" target="_blank" rel="noopener">{{ t('groups.openPrIn', { repo: r.repoName, number: r.prNumber ?? '' }) }}</a>
+                </template>
+                <a v-else class="btn" :href="tk.prUrl || prs[0]?.prUrl" target="_blank" rel="noopener">{{ t('ticket.openPr', { number: tk.prNumber ?? prs[0]?.prNumber ?? '' }) }}</a>
                 <template v-if="!tk.mergedAt">
                   <button class="btn" type="button" :disabled="act.isPending.value" @click="act.mutate('merged')">{{ t('relations.markMerged') }}</button>
                   <span class="hint">{{ t('relations.markMergedHint') }}</span>
@@ -917,7 +930,10 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             </div>
             <div class="sec">
               <h3>{{ t('ticket.diff') }}</h3>
-              <DiffView v-for="(f, i) in result.files" :id="`diff-${f.path}`" :key="f.path" :file="f" :open="i === 0 && tk.state === 'waiting_for_review'" />
+              <template v-for="(g, gi) in fileGroups" :key="g.repo">
+                <h4 v-if="g.repo && fileGroups.length > 1" class="tk-repo-h">{{ t('groups.filesIn', { repo: g.repo, count: g.files.length }) }}</h4>
+                <DiffView v-for="(f, i) in g.files" :id="`diff-${filePath(f)}`" :key="filePath(f)" :file="f" :open="gi === 0 && i === 0 && tk.state === 'waiting_for_review'" />
+              </template>
             </div>
           </section>
 
@@ -950,7 +966,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
 
       <aside class="cfg-side tk-side">
         <section class="card">
-          <div class="ch"><h2>{{ isTask ? t('ticket.sideTask') : t('ticket.sideTicket') }}</h2><span><StateBadge :state="tk.state" :kind="tk.kind" /> <span v-if="tk.mergedAt" class="badge b-ok">{{ t('ticket.merged') }}</span></span></div>
+          <div class="ch"><h2>{{ isTask ? t('ticket.sideTask') : t('ticket.sideTicket') }}</h2><span><StateBadge :state="tk.state" :kind="tk.kind" /> <span v-if="tk.mergedAt" class="badge b-ok">{{ t('ticket.merged') }}</span> <span v-if="tk.partlyMerged" class="badge b-warn">{{ t('groups.partlyMerged') }}</span></span></div>
           <dl class="kv">
             <dt>{{ t('ticket.kvKey') }}</dt><dd>{{ tk.key }}</dd>
             <template v-if="tk.parentKey"><dt>{{ t('implement.implements') }}</dt><dd><RouterLink :to="{ name: 'ticket', params: { key: tk.parentKey } }">{{ tk.parentKey }}</RouterLink></dd></template>
@@ -961,7 +977,9 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             </template>
             <dt>{{ t('kind.title') }}</dt><dd><KindBadge :ticket="tk" /></dd>
             <dt>{{ t('ticket.kvSource') }}</dt><dd>{{ isTask ? t('ticket.srcTask') : isPlane ? t('ticket.srcPlane') : pull ? t('ticket.srcGit') : tk.source === 'ci' ? t('ticket.srcCi') : t('ticket.srcJira') }}</dd>
-            <dt>{{ t('ticket.kvRepo') }}</dt><dd>{{ tk.repoName ?? '—' }}</dd>
+            <template v-if="multi"><dt>{{ t('groups.kvRepos') }}</dt><dd>{{ repoNames }}</dd></template>
+            <template v-else><dt>{{ t('ticket.kvRepo') }}</dt><dd>{{ tk.repoName ?? '—' }}</dd></template>
+            <template v-if="tk.group"><dt>{{ t('groups.kvGroup') }}</dt><dd>{{ tk.group.name }}</dd></template>
             <dt>{{ t('queue.member') }}</dt>
             <dd>
               {{ tk.member ?? '—' }}
@@ -975,10 +993,10 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             <template v-if="tk.createdBy"><dt /><dd class="hint">{{ t('queue.createdBy', { name: tk.createdBy }) }}</dd></template>
             <template v-if="isTask && !report"><dt>{{ t('ticket.kvAfter') }}</dt><dd>{{ tk.afterApprove === 'main' ? t('ticket.afterMain') : t('ticket.afterPr') }}</dd></template>
             <dt>{{ t('ticket.kvPriority') }}</dt><dd>{{ tk.priority }}</dd>
-            <template v-if="!report && !pull"><dt>{{ t('ticket.kvBranch') }}</dt><dd>{{ branch }}</dd></template>
+            <template v-if="!report && !pull && !multi"><dt>{{ t('ticket.kvBranch') }}</dt><dd>{{ branch }}</dd></template>
             <template v-if="tk.assignees?.length"><dt>{{ t('ticket.kvAssignees') }}</dt><dd>{{ tk.assignees.join(', ') }}</dd></template>
             <dt>{{ t('ticket.kvRevision') }}</dt><dd>{{ tk.revision }}</dd>
-            <template v-if="tk.ciFixes"><dt>{{ t('ticket.kvCi') }}</dt><dd><span class="badge b-warn">{{ t('ticket.ciFixes', { n: tk.ciFixes }) }}</span></dd></template>
+            <template v-if="tk.ciFixes && !multi"><dt>{{ t('ticket.kvCi') }}</dt><dd><span class="badge b-warn">{{ t('ticket.ciFixes', { n: tk.ciFixes }) }}</span></dd></template>
             <dt>{{ t('ticket.kvTurns') }}</dt><dd>{{ tk.turns }}</dd>
             <template v-if="d.effectiveModels && !pull">
               <dt>{{ t('ticket.kvCodingModel') }}</dt><dd>{{ MODEL_NAME[d.effectiveModels.coding] }}</dd>
@@ -986,6 +1004,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             </template>
           </dl>
         </section>
+        <TicketRepos v-if="multi" :ticket="tk" :can-retry="tk.state === 'failed' && workspace.canEdit" :busy="act.isPending.value" @retry="act.mutate('retry')" />
         <SpendCard :spend="tk.spend" :stages="d.spendByStage ?? []" :report="report" />
         <section class="card">
           <div class="ch"><h2>{{ t('ticket.historyTitle') }}</h2></div>
@@ -1023,5 +1042,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
 .tk-wait-title { min-width: 0; overflow-wrap: anywhere; }
 .tk-shots { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; }
 .tk-shot { display: inline-flex; align-items: center; gap: 6px; }
+.tk-repo-h { margin: 14px 0 6px; font-size: 13.5px; font-family: var(--mono); color: var(--ink-3); }
+.tk-repo-h:first-child { margin-top: 0; }
 .tk-shot button { border: 0; background: none; padding: 0 2px; font: inherit; font-weight: 700; color: inherit; cursor: pointer; }
 </style>

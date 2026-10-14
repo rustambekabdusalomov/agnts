@@ -94,11 +94,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		IncludedMembers: cfg.IncludedMembers, DefaultSlots: cfg.Parallel,
 	}, svc, a.users, a.workspaces, a.store, mailer, a.files(), log.With("component", "accounts"))
 
-	mcpSrv := mcpserver.NewServer(mcpserver.Deps{
-		Orch: a.orch, Store: a.store, Usage: a.usage, Settings: a.settings, Dashboard: a.dashboard, Repos: a.repos, Lessons: a.lessons, CI: a.ci,
-		Analytics: func(ctx context.Context, days int) (any, error) { return a.dashboard.Analytics(ctx, days) },
-		Role:      a.workspaces.Role,
-	}, version)
+	mcpSrv := mcpserver.NewServer(a.mcpDeps(), version)
 	if cfg.MetricsAddr != "" {
 		go func() {
 			ms := &http.Server{Addr: cfg.MetricsAddr, Handler: metrics.Handler(pool, a.orch.Active), ReadHeaderTimeout: 5 * time.Second}
@@ -133,6 +129,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 	}()
 
 	broker := httpapi.NewBroker(a.store, log.With("component", "stream"))
+	a.orch.SetAssistantEvents(broker)
 	go broker.Run(sys)
 	go a.notifier.Run(sys)
 	go postgres.Listen(sys, pool, "hiro_events", func() {
@@ -158,6 +155,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		Briefs:       a.orch,
 		Reviews:      a.orch,
 		CI:           a.ci,
+		Assistant:    a.orch,
 		OAuth:        a.oauth,
 		MCP:          mcpHandler,
 		DB:           pool,
@@ -320,6 +318,17 @@ type agent struct {
 	budget       *orchestrator.MemoryBudget
 	network      *network.Service
 	ci           *ciwatch.Service
+	assistant    *postgres.Assistant
+}
+
+// mcpDeps are the use cases the MCP tools call, and the assistant's
+// snapshot reads.
+func (a *agent) mcpDeps() mcpserver.Deps {
+	return mcpserver.Deps{
+		Orch: a.orch, Store: a.store, Usage: a.usage, Settings: a.settings, Dashboard: a.dashboard, Repos: a.repos, Lessons: a.lessons, CI: a.ci,
+		Analytics: func(ctx context.Context, days int) (any, error) { return a.dashboard.Analytics(ctx, days) },
+		Role:      a.workspaces.Role,
+	}
 }
 
 func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, error) {
@@ -495,6 +504,8 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.oauth = oauth.New(pool, cfg.PublicURL.String(), cfg.MCPRedirectHosts, log.With("component", "oauth"))
 	a.notifier = notify.New(a.store, a.orch, a.settings, fcm, a.telegramConfig, cfg.TelegramAPI, log.With("component", "notify"))
 	a.notifier.SetCIFixer(a.ci)
+	a.assistant = postgres.NewAssistant(pool, box)
+	a.orch.SetAssistant(a.assistant, mcpserver.NewSnapshotter(a.mcpDeps()))
 	return a, nil
 }
 
@@ -895,6 +906,58 @@ func evalReport(ctx context.Context, cfg config.Config, pool postgresPool, log *
 		_, _ = fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\t%.0f%%\t%s\n", x.Key, x.Original, x.State, orDash(x.PromptVersion), checks, x.Overlap*100, orDash(x.Verdict))
 	}
 	return tw.Flush()
+}
+
+// evalAssistant answers the questions people shared (with their rating)
+// again with the current prompts, from the snapshots their answers were
+// made from, and prints the old and the new answer side by side.
+func evalAssistant(ctx context.Context, cfg config.Config, pool postgresPool, log *slog.Logger, args []string, out io.Writer) error {
+	limit := 20
+	for i := 0; i < len(args); i++ {
+		switch {
+		case args[i] == "--limit" && i+1 < len(args):
+			n, err := strconv.Atoi(args[i+1])
+			if err != nil || n <= 0 {
+				return errors.New("--limit takes a positive number")
+			}
+			limit, i = n, i+1
+		default:
+			return fmt.Errorf("unknown argument %q; usage: agnts eval assistant [--limit N]", args[i])
+		}
+	}
+	a, err := newAgent(cfg, pool, log)
+	if err != nil {
+		return err
+	}
+	cases, err := a.assistant.AssistantReplays(ctx, limit)
+	if err != nil {
+		return err
+	}
+	if len(cases) == 0 {
+		_, _ = fmt.Fprintln(out, "No shared answers yet: people share one when they rate it in the app (\"Keep this question's data\").")
+		return nil
+	}
+	p := func(format string, args ...any) { _, _ = fmt.Fprintf(out, format, args...) }
+	p("# Assistant replay: %d questions, prompts %s\n\n", len(cases), orchestrator.PromptVersion)
+	var failed int
+	var tokens int64
+	var took time.Duration
+	for _, c := range cases {
+		verdict := map[int]string{1: "helpful", -1: "not helpful"}[c.Rating]
+		p("## #%d (%s, prompts %s)\n\n> %s\n\n### Then\n\n%s\n\n### Now\n\n", c.MessageID, verdict, orDash(c.PromptVersion),
+			strings.ReplaceAll(c.Question, "\n", "\n> "), c.Answer)
+		ans, res, err := a.orch.ReplayAnswer(ctx, c.Snapshot, c.Lang, c.UserID)
+		tokens += res.Usage.Total()
+		took += res.Duration
+		if err != nil {
+			failed++
+			p("_No answer: %v_\n\n", err)
+			continue
+		}
+		p("%s\n\n", ans.Answer)
+	}
+	p("---\n%d replayed, %d without an answer, %d tokens, %s of Claude time\n", len(cases), failed, tokens, took.Round(time.Second))
+	return nil
 }
 
 func orDash(s string) string {

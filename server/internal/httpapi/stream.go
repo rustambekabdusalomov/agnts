@@ -21,20 +21,43 @@ type EventSource interface {
 }
 
 // Broker fans new event rows out to SSE subscribers, each only the
-// events of the workspace it subscribed in.
+// events of the workspace it subscribed in. It also delivers live events
+// that are not stored (PublishTo) to one person's subscribers.
 type Broker struct {
 	src  EventSource
 	log  *slog.Logger
 	poke chan struct{}
 
 	mu   sync.Mutex
-	subs map[chan domain.Event]int64 // -> workspace
+	subs map[chan domain.Event]subscriber
 	last int64
 }
 
+// subscriber is whose stream a channel feeds.
+type subscriber struct{ ws, user int64 }
+
+var _ orchestrator.AssistantEvents = (*Broker)(nil)
+
 // NewBroker returns a broker; call Run, and Notify on each database notification.
 func NewBroker(src EventSource, log *slog.Logger) *Broker {
-	return &Broker{src: src, log: log, poke: make(chan struct{}, 1), subs: map[chan domain.Event]int64{}}
+	return &Broker{src: src, log: log, poke: make(chan struct{}, 1), subs: map[chan domain.Event]subscriber{}}
+}
+
+// PublishTo sends e, which is not stored and has no id, to user's streams
+// in workspace ws only. A stream too slow to take it misses it.
+func (b *Broker) PublishTo(ws, user int64, e domain.Event) {
+	e.ID = 0
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	for ch, sub := range b.subs {
+		if sub.ws != ws || sub.user != user {
+			continue
+		}
+		select {
+		case ch <- e:
+		default:
+		}
+	}
 }
 
 // Notify signals that new events may exist.
@@ -75,8 +98,8 @@ func (b *Broker) Run(ctx context.Context) {
 			b.mu.Lock()
 			for _, e := range evs {
 				b.last = e.ID
-				for ch, ws := range b.subs {
-					if e.WorkspaceID != ws {
+				for ch, sub := range b.subs {
+					if e.WorkspaceID != sub.ws {
 						continue
 					}
 					select {
@@ -96,10 +119,10 @@ func (b *Broker) Run(ctx context.Context) {
 	}
 }
 
-func (b *Broker) subscribe(ws int64) (chan domain.Event, int64, func()) {
+func (b *Broker) subscribe(ws, user int64) (chan domain.Event, int64, func()) {
 	ch := make(chan domain.Event, 256)
 	b.mu.Lock()
-	b.subs[ch] = ws
+	b.subs[ch] = subscriber{ws: ws, user: user}
 	last := b.last
 	b.mu.Unlock()
 	return ch, last, func() {
@@ -119,7 +142,11 @@ func (s *Server) StreamEvents(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotImplemented, "unsupported", "streaming is not available")
 		return
 	}
-	ch, live, cancel := s.opt.Broker.subscribe(domain.WorkspaceOf(r.Context()))
+	var user int64
+	if a, ok := domain.ActorOf(r.Context()); ok {
+		user = a.UserID
+	}
+	ch, live, cancel := s.opt.Broker.subscribe(domain.WorkspaceOf(r.Context()), user)
 	defer cancel()
 
 	h := w.Header()
@@ -131,6 +158,13 @@ func (s *Server) StreamEvents(w http.ResponseWriter, r *http.Request) {
 
 	sent := int64(0)
 	send := func(e domain.Event) bool {
+		if e.ID == 0 {
+			// A live event that is not stored: no id, so a reconnect does
+			// not replay from it.
+			b, _ := json.Marshal(toEvent(e))
+			_, err := fmt.Fprintf(w, "data: %s\n\n", b)
+			return err == nil
+		}
 		if e.ID <= sent {
 			return true
 		}

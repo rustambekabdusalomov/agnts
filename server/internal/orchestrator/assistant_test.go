@@ -1,0 +1,320 @@
+package orchestrator_test
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"errors"
+	"strings"
+	"sync"
+	"testing"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
+	"agnts/internal/secret"
+	"agnts/internal/store/postgres"
+	"agnts/internal/store/postgres/pgtest"
+)
+
+type fakeSnap struct {
+	mu   sync.Mutex
+	seen []orchestrator.AssistantQuestion
+}
+
+func (f *fakeSnap) Snapshot(_ context.Context, q orchestrator.AssistantQuestion) ([]orchestrator.AssistantFile, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.seen = append(f.seen, q)
+	return []orchestrator.AssistantFile{{Name: "inbox.json", Content: `{"needs_you":[{"key":"PAY-214"}]}`}, {Name: "tickets.json", Content: `{}`}}, nil
+}
+
+type fakeLive struct {
+	mu    sync.Mutex
+	got   []string // event types, in order
+	users map[int64]bool
+}
+
+func (f *fakeLive) PublishTo(_, user int64, e domain.Event) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.got = append(f.got, e.Type)
+	if f.users == nil {
+		f.users = map[int64]bool{}
+	}
+	f.users[user] = true
+}
+
+type assistantHarness struct {
+	*harness
+	snap  *fakeSnap
+	live  *fakeLive
+	db    *pgxpool.Pool
+	ask   context.Context // acts for the asker
+	other context.Context // another person in the same workspace
+	user  int64
+	reqs  []orchestrator.ClaudeRequest
+}
+
+func newAssistantHarness(t *testing.T) *assistantHarness {
+	t.Helper()
+	h := newHarness(t)
+	pool := pgtest.Open(t)
+	box, err := secret.NewBox(bytes.Repeat([]byte{3}, 32))
+	if err != nil {
+		t.Fatal(err)
+	}
+	a := &assistantHarness{harness: h, snap: &fakeSnap{}, live: &fakeLive{}, db: pool}
+	h.o.SetAssistant(postgres.NewAssistant(pool, box), a.snap)
+	h.o.SetAssistantEvents(a.live)
+	a.user = pgtest.User(t, pool, "asker")
+	a.ask = domain.WithActor(h.ctx, domain.Actor{UserID: a.user, Username: "asker"})
+	a.other = domain.WithActor(h.ctx, domain.Actor{UserID: pgtest.User(t, pool, "someone"), Username: "someone"})
+	h.runner.onClaude = func(r orchestrator.ClaudeRequest) { a.reqs = append(a.reqs, r) }
+	return a
+}
+
+// answers scripts Claude's next run writing answer id.
+func (a *assistantHarness) answers(id int64, answer string) {
+	a.runner.scripts = append(a.runner.scripts, script{result: ok("s"), files: map[string]string{orchestrator.AssistantAnswerPath(id): answer}})
+}
+
+func (a *assistantHarness) conversation(id int64) domain.AssistantConversation {
+	a.t.Helper()
+	a.o.WaitAnswers()
+	c, err := a.o.AssistantConversation(a.ask, id)
+	if err != nil {
+		a.t.Fatal(err)
+	}
+	return c
+}
+
+func TestAssistantAnswersFromTheSnapshot(t *testing.T) {
+	a := newAssistantHarness(t)
+	a.answers(2, `{"answer":"**PAY-214** waits for your review.","speech":"","links":[{"kind":"ticket","key":"pay-214"},{"kind":"ci","id":0},{"kind":"repo"}]}`)
+	c, err := a.o.Ask(a.ask, 0, "  What waits on me? Look at pay-214  ", "ru")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.Title != "What waits on me? Look at pay-214" || len(c.Messages) != 2 || c.Messages[1].Status == domain.AssistantDone {
+		t.Fatalf("asked: %+v", c)
+	}
+	c = a.conversation(c.ID)
+	ans := c.Messages[1]
+	if ans.Status != domain.AssistantDone || ans.Text != "**PAY-214** waits for your review." || ans.Speech != "PAY-214 waits for your review." {
+		t.Fatalf("answer = %+v", ans)
+	}
+	if len(ans.Links) != 1 || ans.Links[0] != (domain.AssistantLink{Kind: "ticket", Key: "PAY-214"}) {
+		t.Fatalf("links = %+v", ans.Links)
+	}
+	if strings.Join(ans.Files, ",") != "inbox.json,tickets.json,conversation.json,question.txt" || ans.PromptVersion != orchestrator.PromptVersion || ans.Lang != "ru" {
+		t.Fatalf("files/version/lang = %v %q %q", ans.Files, ans.PromptVersion, ans.Lang)
+	}
+	if got := a.snap.seen[0]; got.Question != "What waits on me? Look at pay-214" || strings.Join(got.Keys, ",") != "PAY-214" || len(got.History) != 0 {
+		t.Fatalf("snapshot asked for %+v", got)
+	}
+	if q := a.runner.written[orchestrator.AssistantDir(2)+"/question.txt"]; q != "What waits on me? Look at pay-214" {
+		t.Fatalf("question.txt = %q", q)
+	}
+	p := a.runner.prompts[0]
+	if !strings.Contains(p, "Answer in Russian") || !strings.Contains(p, orchestrator.AssistantDir(2)+"/inbox.json") || !strings.Contains(p, orchestrator.AssistantAnswerPath(2)) {
+		t.Fatalf("prompt = %s", p)
+	}
+	req := a.reqs[0]
+	if !req.ReadOnly || req.MaxTurns != 6 || !strings.Contains(req.Settings, `"Bash"`) || !strings.Contains(req.Settings, `"WebFetch"`) {
+		t.Fatalf("request = %+v", req)
+	}
+	if got := strings.Join(a.live.got, " "); got != "assistant_answering assistant_answered" || len(a.live.users) != 1 || !a.live.users[a.user] {
+		t.Fatalf("events = %v to %v", got, a.live.users)
+	}
+}
+
+func TestAssistantFollowUpReusesTheContainerAndSeesHistory(t *testing.T) {
+	a := newAssistantHarness(t)
+	a.answers(2, `{"answer":"PAY-214 needs you.","speech":"PAY-214 needs you."}`)
+	c, err := a.o.Ask(a.ask, 0, "What waits on me?", "en")
+	if err != nil {
+		t.Fatal(err)
+	}
+	a.o.WaitAnswers()
+	a.answers(4, `{"answer":"main is red since abc123.","speech":"Main is red."}`)
+	if _, err := a.o.Ask(a.ask, c.ID, "And why is CI red?", "en"); err != nil {
+		t.Fatal(err)
+	}
+	c = a.conversation(c.ID)
+	if len(c.Messages) != 4 || c.Messages[3].Text != "main is red since abc123." {
+		t.Fatalf("conversation = %+v", c.Messages)
+	}
+	if a.runner.opened != 1 || a.runner.closed != 0 {
+		t.Fatalf("containers opened %d, closed %d; want one kept warm", a.runner.opened, a.runner.closed)
+	}
+	if !c.Messages[3].Timing.Warm {
+		t.Fatalf("timing = %+v", c.Messages[3].Timing)
+	}
+	follow := a.snap.seen[1]
+	if len(follow.History) != 2 || follow.History[0].Text != "What waits on me?" || follow.History[1].Text != "PAY-214 needs you." {
+		t.Fatalf("history = %+v", follow.History)
+	}
+	if !follow.Topics[orchestrator.TopicCI] || follow.Topics[orchestrator.TopicLessons] {
+		t.Fatalf("topics = %v", follow.Topics)
+	}
+	var conv []map[string]string
+	if err := json.Unmarshal([]byte(a.runner.written[orchestrator.AssistantDir(4)+"/conversation.json"]), &conv); err != nil || len(conv) != 2 || conv[0]["role"] != "user" {
+		t.Fatalf("conversation.json = %v %v", conv, err)
+	}
+}
+
+func TestAssistantConversationsArePrivate(t *testing.T) {
+	a := newAssistantHarness(t)
+	a.answers(2, `{"answer":"Nothing waits on you."}`)
+	c, err := a.o.Ask(a.ask, 0, "What waits on me?", "en")
+	if err != nil {
+		t.Fatal(err)
+	}
+	a.o.WaitAnswers()
+	if _, err := a.o.AssistantConversation(a.other, c.ID); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("another person read it: %v", err)
+	}
+	if _, err := a.o.Ask(a.other, c.ID, "and?", "en"); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("another person asked in it: %v", err)
+	}
+	if list, err := a.o.AssistantConversations(a.other); err != nil || len(list) != 0 {
+		t.Fatalf("another person's list: %v %v", list, err)
+	}
+	if _, err := a.o.RateAnswer(a.other, 2, -1, "", false); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("another person rated it: %v", err)
+	}
+	if err := a.o.DeleteAssistantConversation(a.other, c.ID); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("another person deleted it: %v", err)
+	}
+	if list, err := a.o.AssistantConversations(a.ask); err != nil || len(list) != 1 || len(list[0].Messages) != 1 || list[0].Messages[0].Role != domain.AssistantReply {
+		t.Fatalf("own list = %+v %v", list, err)
+	}
+	if err := a.o.DeleteAssistantConversation(a.ask, c.ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := a.o.AssistantConversation(a.ask, c.ID); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("deleted conversation: %v", err)
+	}
+}
+
+func TestAssistantFailures(t *testing.T) {
+	a := newAssistantHarness(t)
+	if _, err := a.o.Ask(a.ask, 0, "   ", "en"); !errors.Is(err, orchestrator.ErrInvalid) {
+		t.Fatalf("empty question: %v", err)
+	}
+	if _, err := a.o.Ask(a.ask, 0, strings.Repeat("я", 1001), "en"); !errors.Is(err, orchestrator.ErrInvalid) {
+		t.Fatalf("long question: %v", err)
+	}
+	if _, err := a.o.Ask(a.ctx, 0, "who am I?", "en"); !errors.Is(err, orchestrator.ErrInvalid) {
+		t.Fatalf("no person: %v", err)
+	}
+
+	// No answer file: the answer fails, in words the person can read.
+	a.runner.scripts = []script{{result: ok("s")}}
+	c, err := a.o.Ask(a.ask, 0, "What waits on me?", "xx")
+	if err != nil {
+		t.Fatal(err)
+	}
+	c = a.conversation(c.ID)
+	if m := c.Messages[1]; m.Status != domain.AssistantFailed || !strings.Contains(m.Error, "Ask again") || m.Lang != "en" {
+		t.Fatalf("no file: %+v", m)
+	}
+	if got := a.live.got[len(a.live.got)-1]; got != "assistant_failed" {
+		t.Fatalf("last event %q", got)
+	}
+
+	// At the plan limit no run starts.
+	a.usage.paused = true
+	if _, err := a.o.Ask(a.ask, c.ID, "and now?", "en"); err != nil {
+		t.Fatal(err)
+	}
+	c = a.conversation(c.ID)
+	if m := c.Messages[3]; m.Status != domain.AssistantFailed || !strings.Contains(m.Error, "plan limit") {
+		t.Fatalf("plan limit: %+v", m)
+	}
+	if len(a.runner.prompts) != 1 {
+		t.Fatalf("claude ran %d times", len(a.runner.prompts))
+	}
+
+	// 30 questions an hour.
+	for range domain.AssistantPerHour - 2 {
+		pgtest.Exec(t, a.db, `INSERT INTO assistant_messages (workspace_id, conversation_id, role, text)
+			SELECT workspace_id, id, 'user', 'q' FROM assistant_conversations WHERE id = $1`, c.ID)
+	}
+	var rl *orchestrator.RateLimitedError
+	if _, err := a.o.Ask(a.ask, c.ID, "one more", "en"); !errors.As(err, &rl) || rl.RetryAfter <= 0 {
+		t.Fatalf("31st question: %v", err)
+	}
+}
+
+func TestAssistantRatingsAndStats(t *testing.T) {
+	a := newAssistantHarness(t)
+	a.answers(2, `{"answer":"PAY-214 needs you."}`)
+	c, err := a.o.Ask(a.ask, 0, "What waits on me?", "en")
+	if err != nil {
+		t.Fatal(err)
+	}
+	a.o.WaitAnswers()
+	if _, err := a.o.RateAnswer(a.ask, 1, 1, "", false); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("rated a question: %v", err)
+	}
+	m, err := a.o.RateAnswer(a.ask, 2, -1, " wrong ticket ", true)
+	if err != nil || m.Rating != -1 || m.RatingComment != "wrong ticket" || !m.Shared {
+		t.Fatalf("rate = %+v %v", m, err)
+	}
+	rated, err := a.o.AssistantRated(a.ask, -1)
+	if err != nil || len(rated) != 1 || rated[0].Question != "What waits on me?" || rated[0].Username != "asker" || rated[0].Comment != "wrong ticket" {
+		t.Fatalf("rated = %+v %v", rated, err)
+	}
+	st, err := a.o.AssistantStats(a.ask, 7)
+	if err != nil || st.Questions != 1 || st.Answered != 1 || st.Down != 1 || st.People != 1 || len(st.Versions) != 1 || st.Versions[0].PromptVersion != orchestrator.PromptVersion {
+		t.Fatalf("stats = %+v %v", st, err)
+	}
+	// Taking the rating back stops sharing too.
+	if m, err = a.o.RateAnswer(a.ask, 2, 0, "x", true); err != nil || m.Rating != 0 || m.Shared || m.RatingComment != "" {
+		t.Fatalf("cleared = %+v %v", m, err)
+	}
+	_ = c
+}
+
+func TestAssistantReplaysSharedAnswers(t *testing.T) {
+	a := newAssistantHarness(t)
+	store := postgres.NewAssistant(a.db, mustBox(t))
+	a.answers(2, `{"answer":"PAY-214 needs you."}`)
+	if _, err := a.o.Ask(a.ask, 0, "What waits on me?", "uz"); err != nil {
+		t.Fatal(err)
+	}
+	a.o.WaitAnswers()
+	if cases, err := store.AssistantReplays(a.ask, 10); err != nil || len(cases) != 0 {
+		t.Fatalf("unshared answers replayed: %v %v", cases, err)
+	}
+	if _, err := a.o.RateAnswer(a.ask, 2, -1, "", true); err != nil {
+		t.Fatal(err)
+	}
+	cases, err := store.AssistantReplays(a.ask, 10)
+	if err != nil || len(cases) != 1 || cases[0].Question != "What waits on me?" || cases[0].Lang != "uz" || cases[0].UserID != a.user {
+		t.Fatalf("cases = %+v %v", cases, err)
+	}
+	a.answers(0, `{"answer":"Ikkita vazifa sizni kutmoqda."}`)
+	ans, _, err := a.o.ReplayAnswer(a.ctx, cases[0].Snapshot, cases[0].Lang, cases[0].UserID)
+	if err != nil || ans.Answer != "Ikkita vazifa sizni kutmoqda." {
+		t.Fatalf("replay = %+v %v", ans, err)
+	}
+	if q := a.runner.written[orchestrator.AssistantDir(0)+"/question.txt"]; q != "What waits on me?" {
+		t.Fatalf("replayed question.txt = %q", q)
+	}
+	if !strings.Contains(a.runner.prompts[1], "Answer in Uzbek") {
+		t.Fatalf("replay prompt = %s", a.runner.prompts[1])
+	}
+}
+
+func mustBox(t *testing.T) *secret.Box {
+	t.Helper()
+	b, err := secret.NewBox(bytes.Repeat([]byte{3}, 32))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return b
+}

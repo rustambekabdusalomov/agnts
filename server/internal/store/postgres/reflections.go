@@ -30,8 +30,8 @@ func scanReflection(row pgx.Row) (domain.Reflection, error) {
 // QueueReflection stores feedback for a reflect run, in the workspace the
 // context acts in.
 func (s *Reflections) QueueReflection(ctx context.Context, r domain.Reflection) error {
-	_, err := s.db.Exec(ctx, `INSERT INTO reflections (ticket_key, repo_id, source, feedback) VALUES ($1, $2, $3, $4)`,
-		r.TicketKey, r.RepoID, r.Source, r.Feedback)
+	_, err := s.db.Exec(ctx, `INSERT INTO reflections (ticket_key, repo_id, source, feedback, repo_ids) VALUES ($1, $2, $3, $4, $5)`,
+		r.TicketKey, r.RepoID, r.Source, r.Feedback, nonNilIDs(r.RepoIDs))
 	return err
 }
 

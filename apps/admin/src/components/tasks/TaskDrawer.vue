@@ -10,6 +10,9 @@ import FileAttach from '../files/FileAttach.vue'
 import FormDrawer from '../form/FormDrawer.vue'
 import SegButtons from '../form/SegButtons.vue'
 import HiIcon from '../ui/HiIcon.vue'
+import RepoSetPicker from '../repos/RepoSetPicker.vue'
+import { selectionBody, type RepoSelection } from '../repos/repoSet'
+import { useRepoGroups } from '../repos/useGroups'
 
 // "New task" drawer from the demo. Creating a task opens its ticket page.
 const props = defineProps<{ repos: Repository[]; repoId?: number | null }>()
@@ -23,10 +26,13 @@ const ui = useUi()
 type Priority = 'low' | 'medium' | 'high'
 type After = 'main' | 'pr'
 type Start = 'ask' | 'code' | 'queue'
-// repoId 0 is "no repository": allowed for reports, and for Auto (agnts
-// then picks a report kind, or stops and asks for a repository).
+// No repository is allowed for reports, and for Auto (agnts then picks a
+// report kind, or stops and asks for a repository). A group or several
+// repositories make one ticket that works in all of them.
+const groups = useRepoGroups(() => open.value)
+const sel = ref<RepoSelection>({ groupId: null, repoIds: [] })
+const single = (id: number | undefined | null): RepoSelection => ({ groupId: null, repoIds: id ? [id] : [] })
 const form = reactive({
-  repoId: 0,
   kind: 'auto' as TicketKindChoice,
   title: '',
   description: '',
@@ -44,7 +50,7 @@ const reportKind = computed(() => REPORT_KINDS.some((k) => k === form.kind))
 const changeKind = computed(() => form.kind === 'code' || form.kind === 'test')
 // Code and test need a repository: pick the first one rather than show an error.
 watch(changeKind, (v) => {
-  if (v && !form.repoId) form.repoId = props.repos[0]?.id ?? 0
+  if (v && !sel.value.repoIds.length) sel.value = single(props.repos[0]?.id)
 })
 const error = ref('')
 
@@ -53,7 +59,7 @@ watch(
   (v) => {
     if (!v) return
     error.value = ''
-    form.repoId = props.repoId ?? props.repos[0]?.id ?? 0
+    sel.value = single(props.repoId ?? props.repos[0]?.id)
   },
   { immediate: true },
 )
@@ -79,7 +85,7 @@ const create = useMutation({
     unwrap(
       api.POST('/tasks', {
         body: {
-          repoId: form.repoId || undefined,
+          ...selectionBody(sel.value),
           kind: form.kind,
           title: form.title.trim(),
           description: form.description.trim(),
@@ -106,7 +112,7 @@ const create = useMutation({
 })
 
 function submit() {
-  if (!form.repoId && changeKind.value) {
+  if (!sel.value.repoIds.length && changeKind.value) {
     error.value = t('tasks.repoNeeded')
     return
   }
@@ -144,32 +150,22 @@ function submit() {
       </div>
       <div class="field">
         <span class="flbl">{{ t('tasks.repository') }}</span>
-        <div class="tabs" role="group" :aria-label="t('tasks.repository')">
-          <button
-            type="button"
-            class="tab"
-            :aria-pressed="form.repoId === 0"
-            :disabled="changeKind"
-            :title="changeKind ? t('tasks.repoNeeded') : undefined"
-            @click="form.repoId = 0"
-          >
-            {{ t('tasks.noRepo') }}
-          </button>
-          <button
-            v-for="r in repos"
-            :key="r.id"
-            type="button"
-            class="tab"
-            :aria-pressed="form.repoId === r.id"
-            @click="form.repoId = r.id"
-          >
-            {{ r.name }}
-          </button>
-          <button type="button" class="tab" @click="$emit('addRepo')">
-            <HiIcon name="import" style="width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.4; vertical-align: -2px" />
-            {{ t('repos.import') }}
-          </button>
-        </div>
+        <RepoSetPicker
+          v-model="sel"
+          :repos="repos"
+          :groups="groups.data.value ?? []"
+          :label="t('tasks.repository')"
+          :none-label="t('tasks.noRepo')"
+          :none-disabled="changeKind"
+          :none-title="changeKind ? t('tasks.repoNeeded') : undefined"
+        >
+          <template #extra>
+            <button type="button" class="tab" @click="$emit('addRepo')">
+              <HiIcon name="import" style="width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.4; vertical-align: -2px" />
+              {{ t('repos.import') }}
+            </button>
+          </template>
+        </RepoSetPicker>
       </div>
       <div class="field">
         <label for="t-title">{{ t('tasks.fieldTitle') }}</label>

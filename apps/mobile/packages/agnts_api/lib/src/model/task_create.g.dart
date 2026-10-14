@@ -9,6 +9,10 @@ part of 'task_create.dart';
 abstract class _$TaskCreateCWProxy {
   TaskCreate repoId(int? repoId);
 
+  TaskCreate repoIds(List<int>? repoIds);
+
+  TaskCreate groupId(int? groupId);
+
   TaskCreate kind(TicketKindChoice? kind);
 
   TaskCreate title(String title);
@@ -33,6 +37,8 @@ abstract class _$TaskCreateCWProxy {
   /// ````
   TaskCreate call({
     int? repoId,
+    List<int>? repoIds,
+    int? groupId,
     TicketKindChoice? kind,
     String title,
     String? description,
@@ -52,6 +58,12 @@ class _$TaskCreateCWProxyImpl implements _$TaskCreateCWProxy {
 
   @override
   TaskCreate repoId(int? repoId) => this(repoId: repoId);
+
+  @override
+  TaskCreate repoIds(List<int>? repoIds) => this(repoIds: repoIds);
+
+  @override
+  TaskCreate groupId(int? groupId) => this(groupId: groupId);
 
   @override
   TaskCreate kind(TicketKindChoice? kind) => this(kind: kind);
@@ -89,6 +101,8 @@ class _$TaskCreateCWProxyImpl implements _$TaskCreateCWProxy {
   /// ````
   TaskCreate call({
     Object? repoId = const $CopyWithPlaceholder(),
+    Object? repoIds = const $CopyWithPlaceholder(),
+    Object? groupId = const $CopyWithPlaceholder(),
     Object? kind = const $CopyWithPlaceholder(),
     Object? title = const $CopyWithPlaceholder(),
     Object? description = const $CopyWithPlaceholder(),
@@ -103,6 +117,14 @@ class _$TaskCreateCWProxyImpl implements _$TaskCreateCWProxy {
           ? _value.repoId
           // ignore: cast_nullable_to_non_nullable
           : repoId as int?,
+      repoIds: repoIds == const $CopyWithPlaceholder()
+          ? _value.repoIds
+          // ignore: cast_nullable_to_non_nullable
+          : repoIds as List<int>?,
+      groupId: groupId == const $CopyWithPlaceholder()
+          ? _value.groupId
+          // ignore: cast_nullable_to_non_nullable
+          : groupId as int?,
       kind: kind == const $CopyWithPlaceholder()
           ? _value.kind
           // ignore: cast_nullable_to_non_nullable
@@ -157,6 +179,11 @@ TaskCreate _$TaskCreateFromJson(Map<String, dynamic> json) =>
       );
       final val = TaskCreate(
         repoId: $checkedConvert('repoId', (v) => (v as num?)?.toInt()),
+        repoIds: $checkedConvert(
+          'repoIds',
+          (v) => (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList(),
+        ),
+        groupId: $checkedConvert('groupId', (v) => (v as num?)?.toInt()),
         kind: $checkedConvert(
           'kind',
           (v) => $enumDecodeNullable(_$TicketKindChoiceEnumMap, v),
@@ -191,6 +218,8 @@ Map<String, dynamic> _$TaskCreateToJson(
   TaskCreate instance,
 ) => <String, dynamic>{
   'repoId': ?instance.repoId,
+  'repoIds': ?instance.repoIds,
+  'groupId': ?instance.groupId,
   'kind': ?_$TicketKindChoiceEnumMap[instance.kind],
   'title': instance.title,
   'description': ?instance.description,

@@ -55,7 +55,7 @@ func (o *Orchestrator) queueReflection(ctx context.Context, t domain.Ticket, sou
 	if err != nil || !s.Reflect {
 		return
 	}
-	if err := o.reflections.QueueReflection(ctx, domain.Reflection{TicketKey: t.Key, RepoID: t.RepoID, Source: source,
+	if err := o.reflections.QueueReflection(ctx, domain.Reflection{TicketKey: t.Key, RepoID: t.RepoID, RepoIDs: multiIDs(t), Source: source,
 		Feedback: truncate(feedback, reflectMaxFeedback)}); err != nil {
 		o.log.Warn("queue reflection", "ticket", t.Key, "err", err)
 		return
@@ -85,7 +85,7 @@ func (o *Orchestrator) queueRunLesson(ctx context.Context, t domain.Ticket, run 
 		return
 	}
 	trouble := fmt.Sprintf("Ticket %s: %s\n\n%s", t.Key, t.Title, strings.Join(run.Harness.Trouble, "\n\n"))
-	if err := o.reflections.QueueReflection(ctx, domain.Reflection{TicketKey: t.Key, RepoID: t.RepoID, Source: domain.ReflectRun,
+	if err := o.reflections.QueueReflection(ctx, domain.Reflection{TicketKey: t.Key, RepoID: t.RepoID, RepoIDs: multiIDs(t), Source: domain.ReflectRun,
 		Feedback: truncate(trouble, 6000)}); err != nil {
 		o.log.Warn("queue a lesson from a run", "ticket", t.Key, "err", err)
 		return
@@ -220,7 +220,11 @@ func (o *Orchestrator) runReflect(ctx context.Context, r domain.Reflection) ([]d
 		}
 		d.HasReport = true
 	}
-	d.Context = o.contextFiles(ctx, ws, domain.Ticket{}, repo) // no precedents: the feedback is about this ticket
+	var rs []runRepo
+	if repo != nil {
+		rs = soloRepo(*repo)
+	}
+	d.Context = o.contextFiles(ctx, ws, domain.Ticket{}, rs) // no precedents: the feedback is about this ticket
 	prompt, err := render("reflect", d)
 	if err != nil {
 		return nil, err
@@ -413,4 +417,12 @@ func (o *Orchestrator) expireSuggestions(ctx context.Context) {
 			}
 		}
 	})
+}
+
+// multiIDs are a ticket's repositories when it has several, else nil.
+func multiIDs(t domain.Ticket) []int64 {
+	if !t.Multi() {
+		return nil
+	}
+	return t.RepoIDs()
 }

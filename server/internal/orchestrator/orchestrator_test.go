@@ -1,10 +1,12 @@
 package orchestrator_test
 
 import (
+	"archive/tar"
 	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"slices"
@@ -42,6 +44,12 @@ type fakeRunner struct {
 	written  map[string]string // every file agnts put into a workspace, last write wins
 	// stream, when set, sends more events during every invocation.
 	stream func(on func(orchestrator.ClaudeEvent))
+	// exported are the folders the runs exported, in order ("" for
+	// /workspace); trees are the names in each run's starting tar.
+	exported []string
+	trees    [][]string
+	specs    []orchestrator.WorkspaceSpec
+	ran      []string // every command run in a workspace, in order
 }
 
 func (f *fakeRunner) Open(_ context.Context, spec orchestrator.WorkspaceSpec) (orchestrator.Workspace, error) {
@@ -49,7 +57,18 @@ func (f *fakeRunner) Open(_ context.Context, spec orchestrator.WorkspaceSpec) (o
 	defer f.mu.Unlock()
 	f.opened++
 	f.lastHome = spec.ClaudeHome
+	var names []string
+	tr := tar.NewReader(spec.Repo)
+	for {
+		h, err := tr.Next()
+		if err != nil {
+			break
+		}
+		names = append(names, h.Name)
+	}
 	_, _ = io.Copy(io.Discard, spec.Repo)
+	f.trees = append(f.trees, names)
+	f.specs = append(f.specs, spec)
 	return &fakeWS{r: f, files: map[string]string{}}, nil
 }
 
@@ -86,7 +105,7 @@ func (w *fakeWS) Claude(_ context.Context, req orchestrator.ClaudeRequest, on fu
 		w.files[k] = v
 	}
 	if s.edit != "" {
-		w.edits = append(w.edits, s.edit)
+		w.edits = append(w.edits, strings.Split(s.edit, "\n")...) // "api:v1\nweb:v1": one edit per line
 	}
 	return s.result, s.err
 }
@@ -94,6 +113,7 @@ func (w *fakeWS) Claude(_ context.Context, req orchestrator.ClaudeRequest, on fu
 func (w *fakeWS) Exec(_ context.Context, cmd string, _ time.Duration) (orchestrator.ExecResult, error) {
 	w.r.mu.Lock()
 	defer w.r.mu.Unlock()
+	w.r.ran = append(w.r.ran, cmd)
 	rs := w.r.execs[cmd]
 	if len(rs) == 0 {
 		return orchestrator.ExecResult{ExitCode: 0, Output: "ok"}, nil
@@ -120,8 +140,20 @@ func (w *fakeWS) WriteFile(_ context.Context, p string, data []byte) error {
 	return nil
 }
 
-func (w *fakeWS) ExportRepo(context.Context) (io.ReadCloser, error) {
-	return io.NopCloser(strings.NewReader(strings.Join(w.edits, "\n"))), nil
+// ExportRepo returns the edits made in a folder: an edit "web:x" is in
+// the folder web, one without a folder in /workspace.
+func (w *fakeWS) ExportRepo(_ context.Context, dir string) (io.ReadCloser, error) {
+	w.r.mu.Lock()
+	w.r.exported = append(w.r.exported, dir)
+	w.r.mu.Unlock()
+	var mine []string
+	for _, e := range w.edits {
+		folder, _, ok := strings.Cut(e, ":")
+		if (!ok && dir == "") || (ok && folder == dir) {
+			mine = append(mine, e)
+		}
+	}
+	return io.NopCloser(strings.NewReader(strings.Join(mine, "\n"))), nil
 }
 
 func (w *fakeWS) ExportClaudeHome(context.Context) ([]byte, error) { return []byte("home"), nil }
@@ -137,7 +169,11 @@ type fakeGit struct {
 	mu      sync.Mutex
 	commits int
 	pushed  []string
-	files   []domain.FileChange // what Commit reports, when set
+	// failPush makes the next push of a repository (by name) fail.
+	failPush map[string]bool
+	// committed names the repository of each commit with a change.
+	committed []string
+	files     []domain.FileChange // what Commit reports, when set
 	// preparedAt records PrepareAt calls as branch@base.
 	preparedAt []string
 }
@@ -159,7 +195,7 @@ func (g *fakeGit) Archive(context.Context, domain.Repository, string) (io.ReadCl
 	return io.NopCloser(bytes.NewReader(nil)), nil
 }
 
-func (g *fakeGit) Commit(_ context.Context, _ domain.Repository, _ string, tree io.Reader, _ string) (string, []domain.FileChange, []string, error) {
+func (g *fakeGit) Commit(_ context.Context, repo domain.Repository, _ string, tree io.Reader, _ string) (string, []domain.FileChange, []string, error) {
 	b, _ := io.ReadAll(tree)
 	if len(b) == 0 {
 		return "base", nil, nil, nil
@@ -167,6 +203,7 @@ func (g *fakeGit) Commit(_ context.Context, _ domain.Repository, _ string, tree 
 	g.mu.Lock()
 	defer g.mu.Unlock()
 	g.commits++
+	g.committed = append(g.committed, repo.Name)
 	if g.files != nil {
 		return "sha" + string(rune('0'+g.commits)), g.files, nil, nil
 	}
@@ -180,9 +217,16 @@ func (g *fakeGit) PushTo(_ context.Context, _ domain.Repository, branch, target 
 	return nil
 }
 
-func (g *fakeGit) Push(_ context.Context, _ domain.Repository, branch string) error {
+func (g *fakeGit) Push(_ context.Context, repo domain.Repository, branch string) error {
 	g.mu.Lock()
 	defer g.mu.Unlock()
+	if g.failPush[repo.Name] {
+		delete(g.failPush, repo.Name)
+		return errors.New("remote rejected")
+	}
+	if repo.Name != "api" {
+		branch = repo.Name + ":" + branch
+	}
 	g.pushed = append(g.pushed, branch)
 	return nil
 }
@@ -190,6 +234,8 @@ func (g *fakeGit) Push(_ context.Context, _ domain.Repository, branch string) er
 type fakeHost struct {
 	opened   int
 	last     orchestrator.PR
+	bodies   []string // each opened pull request's body, after its repository's name
+	comments []string
 	assigned map[int][]string
 	merged   map[int]bool // pull requests PRState reports merged
 	closed   map[int]bool // pull requests PRState reports closed without a merge
@@ -215,10 +261,20 @@ func (h *fakeHost) Assign(_ context.Context, _ domain.Repository, number int, us
 	return nil
 }
 
-func (h *fakeHost) OpenPR(_ context.Context, _ domain.Repository, pr orchestrator.PR) (int, string, error) {
+func (h *fakeHost) OpenPR(_ context.Context, repo domain.Repository, pr orchestrator.PR) (int, string, error) {
 	h.opened++
 	h.last = pr
+	h.bodies = append(h.bodies, repo.Name+": "+pr.Body)
+	if repo.Name != "api" && repo.Name != "" {
+		n := 100 + h.opened
+		return n, fmt.Sprintf("https://github.com/acme/%s/pull/%d", repo.Name, n), nil
+	}
 	return 7, "https://github.com/acme/api/pull/7", nil
+}
+
+func (h *fakeHost) UpsertComment(_ context.Context, repo domain.Repository, number int, id, body string) (string, error) {
+	h.comments = append(h.comments, fmt.Sprintf("%s#%d %s: %s", repo.Name, number, id, body))
+	return id, nil
 }
 
 type fakeTracker struct {

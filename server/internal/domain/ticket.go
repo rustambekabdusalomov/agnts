@@ -58,7 +58,16 @@ type Ticket struct {
 	WorkspaceID int64
 	Key         string
 	Source      TicketSource
-	RepoID      *int64
+	// RepoID is the primary repository: the key prefix, filters and the
+	// ticket's own git fields (Branch, HeadSHA, PRNumber, ...) are its.
+	RepoID *int64
+	// Repos are every repository the ticket works in, the primary first;
+	// one for most tickets. See TicketRepo.
+	Repos []TicketRepo
+	// GroupID is the group the repositories were picked from, if any (for
+	// display: the repositories were copied when the ticket was made).
+	GroupID     *int64
+	GroupName   string
 	Title       string
 	Description string
 	Priority    string
@@ -322,10 +331,15 @@ type StageUsage struct {
 
 // FileChange is one changed file in a result.
 type FileChange struct {
-	Path string `json:"path"`
-	Add  int    `json:"add"`
-	Del  int    `json:"del"`
-	Diff string `json:"diff"`
+	// Repo is the repository's run folder and RepoID its id, for a ticket
+	// in several repositories; both empty for the primary of a ticket with
+	// one. Path is relative to the repository either way.
+	Repo   string `json:"repo,omitempty"`
+	RepoID int64  `json:"repoId,omitempty"`
+	Path   string `json:"path"`
+	Add    int    `json:"add"`
+	Del    int    `json:"del"`
+	Diff   string `json:"diff"`
 }
 
 // Result is what a coding run produced, shown on the review page.
@@ -396,6 +410,7 @@ const (
 	EventStateChanged   = "state_changed"
 	EventTicketCreated  = "ticket_created"
 	EventTicketUpdated  = "ticket_updated"
+	EventGroup          = "repo_group" // a repository group was created, changed or deleted
 	EventClaudeText     = "claude_text"
 	EventClaudeTool     = "claude_tool"
 	EventClaudeResult   = "claude_result"
@@ -591,4 +606,13 @@ func NewTrackerUpdate(title, description string) TrackerUpdate {
 // ticket was worked from.
 func (u TrackerUpdate) Differs(t Ticket) bool {
 	return u.Title != t.Title || u.Description != t.Description
+}
+
+// Where is the file's path from /workspace: its repository's folder, then
+// the path in it.
+func (f FileChange) Where() string {
+	if f.Repo == "" {
+		return f.Path
+	}
+	return f.Repo + "/" + f.Path
 }

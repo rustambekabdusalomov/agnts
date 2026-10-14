@@ -14,6 +14,8 @@ let timer: ReturnType<typeof setTimeout> | undefined
 
 /** Which cached queries an event makes stale. */
 function stale(e: TicketEvent): string[] {
+  // The asker's own answers being made: only the assistant's queries.
+  if (e.type.startsWith('assistant_')) return e.type === 'assistant_progress' || e.type === 'assistant_partial' ? [] : ['assistant']
   const keys = ['dashboard', 'nav']
   if (e.ticketKey) keys.push(`ticket:${e.ticketKey}`, 'tickets')
   switch (e.type) {

@@ -19,6 +19,7 @@ import 'kinds.dart';
 import 'preview_shots.dart';
 import 'relations.dart';
 import 'spend.dart';
+import 'ticket_repos.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme.dart';
 import '../../widgets/attachments.dart';
@@ -252,7 +253,9 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
             StateBadge(t.state, kind: t.kind),
             SourceChip(sourceLabel(l, t.source_), task: isTask),
             KindChip(t),
-            if (t.repoName != null && t.repoName!.isNotEmpty) Text(t.repoName!),
+            if (t.repoName != null && t.repoName!.isNotEmpty) Text(repoLabel(t)!),
+            if (t.group != null) Text(l.mgroupsGroup(t.group!.name)),
+            if (t.partlyMerged == true) ToneBadge(l.mgroupsPartlyMerged, Tone.warn, small: true),
             if (t.priority.isNotEmpty) Text(t.priority),
             if (t.revision > 0) Text(l.ticketRevision(t.revision.toString())),
           ]),
@@ -272,12 +275,14 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           ),
         ],
         AttachmentList(d.attachments.where((a) => a.purpose == AttachmentPurposeEnum.ticket).toList()),
-        if (t.branch.isNotEmpty)
+        // A multi-repo ticket lists each repository's branch and pull request.
+        TicketRepos(t),
+        if (t.branch.isNotEmpty && !isMultiRepo(t))
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text('${l.ticketBranch}: ${t.branch}', style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3)),
           ),
-        if (t.prUrl.isNotEmpty)
+        if (t.prUrl.isNotEmpty && !isMultiRepo(t))
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: SelectableText(t.prUrl, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.primary)),
@@ -1355,7 +1360,7 @@ class _FileDiffState extends State<_FileDiff> {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Expanded(
-                child: Text(f.path, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink)),
+                child: Text(filePath(f), maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink)),
               ),
               const SizedBox(width: 10),
               Text('+${f.add}', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: c.okInk)),

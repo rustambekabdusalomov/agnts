@@ -26,6 +26,22 @@ void main() {
       // TODO
     });
 
+    // Create a repository group
+    //
+    // A named set of repositories that tickets can change together. Its repositories must be able to share one run container (the same runner image, no clashing toolchain versions); what they share uneasily comes back in warnings.
+    //
+    //Future<RepoGroup> createRepoGroup(RepoGroupInput repoGroupInput) async
+    test('test createRepoGroup', () async {
+      // TODO
+    });
+
+    // Delete a group; its tickets keep their repositories
+    //
+    //Future deleteRepoGroup(int id) async
+    test('test deleteRepoGroup', () async {
+      // TODO
+    });
+
     // Start a deployment (GitLab manual job, or the GitHub deploy workflow). Never available from MCP.
     //
     //Future deployRepo(int id, DeployRepoRequest deployRepoRequest) async
@@ -61,6 +77,11 @@ void main() {
       // TODO
     });
 
+    //Future<RepoGroup> getRepoGroup(int id) async
+    test('test getRepoGroup', () async {
+      // TODO
+    });
+
     // Branches with their tip, ahead/behind the default branch and checks
     //
     //Future<List<Branch>> listRepoBranches(int id) async
@@ -79,6 +100,13 @@ void main() {
     //
     //Future<List<Environment>> listRepoEnvironments(int id) async
     test('test listRepoEnvironments', () async {
+      // TODO
+    });
+
+    // The workspace's repository groups
+    //
+    //Future<List<RepoGroup>> listRepoGroups() async
+    test('test listRepoGroups', () async {
       // TODO
     });
 
@@ -138,6 +166,15 @@ void main() {
 
     //Future<Repository> updateRepo(int id, RepositoryInput repositoryInput) async
     test('test updateRepo', () async {
+      // TODO
+    });
+
+    // Replace a group's fields and repositories
+    //
+    // Tickets already made from the group keep their repositories.
+    //
+    //Future<RepoGroup> updateRepoGroup(int id, RepoGroupInput repoGroupInput) async
+    test('test updateRepoGroup', () async {
       // TODO
     });
 

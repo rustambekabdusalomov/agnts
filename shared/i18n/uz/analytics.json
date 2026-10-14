@@ -249,6 +249,7 @@
     "colQuestions": "Tiketga savollar",
     "colQuestionsHint": "Tahlil qilingan bitta tiketga agnts savollari. Savollar koʻp boʻlsa, CLAUDE.md yoki qoidalar yetishmaydi.",
     "colCi": "CI xatolari",
-    "colCiHint": "Davrdagi CI xato guruhlari"
+    "colCiHint": "Davrdagi CI xato guruhlari",
+    "tabAssistant": "Yordamchi"
   }
 }

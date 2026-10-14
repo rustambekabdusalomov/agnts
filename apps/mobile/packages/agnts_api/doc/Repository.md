@@ -37,6 +37,7 @@ Name | Type | Description | Notes
 **buildEnvSet** | **bool** |  | [optional] 
 **buildEnvNames** | **List&lt;String&gt;** | Names of the build environment variables; the values are never returned | [optional] 
 **harness** | [**RepoHarness**](RepoHarness.md) |  | [optional] 
+**groups** | [**List&lt;RepoGroupRef&gt;**](RepoGroupRef.md) | The groups it is a member of | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

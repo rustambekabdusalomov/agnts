@@ -40,22 +40,22 @@ type SecretSource func(ctx context.Context) string
 
 // HookSink receives what the webhooks report.
 type HookSink interface {
-	MarkMerged(ctx context.Context, prURL, branch string, origin domain.Origin) (bool, error)
+	MarkMerged(ctx context.Context, ref domain.PRRef, origin domain.Origin) (bool, error)
 }
 
 // CloseSink records pull requests closed without a merge, or reopened. A
 // HookSink may implement it.
 type CloseSink interface {
-	MarkPRClosed(ctx context.Context, prURL, branch string, closed bool, origin domain.Origin) (bool, error)
+	MarkPRClosed(ctx context.Context, ref domain.PRRef, closed bool, origin domain.Origin) (bool, error)
 }
 
 // prClosed hands a close or reopen to the sink when it takes them.
-func prClosed(ctx context.Context, sink HookSink, prURL, branch string, closed bool) error {
+func prClosed(ctx context.Context, sink HookSink, ref domain.PRRef, closed bool) error {
 	cs, ok := sink.(CloseSink)
 	if !ok {
 		return nil
 	}
-	_, err := cs.MarkPRClosed(ctx, prURL, branch, closed, domain.OriginWebhook)
+	_, err := cs.MarkPRClosed(ctx, ref, closed, domain.OriginWebhook)
 	return err
 }
 
@@ -245,14 +245,18 @@ func GitHubWebhook(secretOf SecretSource, sink HookSink, store HookStore, onPipe
 						Ref string `json:"ref"`
 					} `json:"head"`
 				} `json:"pull_request"`
+				Repository struct {
+					FullName string `json:"full_name"`
+				} `json:"repository"`
 			}
 			if json.Unmarshal(body, &p) == nil {
 				var err error
+				ref := domain.PRRef{URL: p.PR.HTMLURL, Branch: p.PR.Head.Ref, Repo: p.Repository.FullName}
 				switch {
 				case p.Action == "closed" && p.PR.Merged:
-					_, err = sink.MarkMerged(ctx, p.PR.HTMLURL, p.PR.Head.Ref, domain.OriginWebhook)
+					_, err = sink.MarkMerged(ctx, ref, domain.OriginWebhook)
 				case p.Action == "closed" || p.Action == "reopened":
-					err = prClosed(ctx, sink, p.PR.HTMLURL, p.PR.Head.Ref, p.Action == "closed")
+					err = prClosed(ctx, sink, ref, p.Action == "closed")
 				}
 				if err != nil {
 					log.Error("github webhook: pull request", "action", p.Action, "err", err)
@@ -328,11 +332,12 @@ func GitLabWebhook(secretOf SecretSource, sink HookSink, store HookStore, onPipe
 		switch p.Kind {
 		case "merge_request":
 			var err error
+			ref := domain.PRRef{URL: p.Attrs.URL, Branch: p.Attrs.SourceBranch, Repo: p.Project.Path}
 			switch p.Attrs.Action {
 			case "merge":
-				_, err = sink.MarkMerged(ctx, p.Attrs.URL, p.Attrs.SourceBranch, domain.OriginWebhook)
+				_, err = sink.MarkMerged(ctx, ref, domain.OriginWebhook)
 			case "close", "reopen":
-				err = prClosed(ctx, sink, p.Attrs.URL, p.Attrs.SourceBranch, p.Attrs.Action == "close")
+				err = prClosed(ctx, sink, ref, p.Attrs.Action == "close")
 			}
 			if err != nil {
 				log.Error("gitlab webhook: merge request", "action", p.Attrs.Action, "err", err)

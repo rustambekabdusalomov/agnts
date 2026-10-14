@@ -339,12 +339,13 @@ func (o *Orchestrator) DeleteRule(ctx context.Context, id int64, origin domain.O
 	return o.rules.DeleteRule(ctx, id, *ruleEvent(r, origin, "", fmt.Sprintf("rule %q deleted", r.Title)))
 }
 
-// teamRules returns the rules tickets in repoID follow (nil: global only).
-func (o *Orchestrator) teamRules(ctx context.Context, repoID *int64) ([]domain.Rule, error) {
+// teamRules returns the rules tickets in these repositories follow (none:
+// global only).
+func (o *Orchestrator) teamRules(ctx context.Context, repoIDs []int64) ([]domain.Rule, error) {
 	if o.rules == nil {
 		return nil, nil
 	}
-	rules, err := o.rules.ActiveRules(ctx, repoID)
+	rules, err := o.activeRules(ctx, repoIDs)
 	if err != nil {
 		return nil, fmt.Errorf("load team rules: %w", err)
 	}
@@ -357,13 +358,13 @@ func (o *Orchestrator) teamRules(ctx context.Context, repoID *int64) ([]domain.R
 	return out, nil
 }
 
-// businessNotes returns the business context notes runs in repoID read
-// (nil: global ones only).
-func (o *Orchestrator) businessNotes(ctx context.Context, repoID *int64) ([]domain.Rule, error) {
+// businessNotes returns the business context notes runs in these
+// repositories read (none: global ones only).
+func (o *Orchestrator) businessNotes(ctx context.Context, repoIDs []int64) ([]domain.Rule, error) {
 	if o.rules == nil {
 		return nil, nil
 	}
-	rules, err := o.rules.ActiveRules(ctx, repoID)
+	rules, err := o.activeRules(ctx, repoIDs)
 	if err != nil {
 		return nil, fmt.Errorf("load business context: %w", err)
 	}

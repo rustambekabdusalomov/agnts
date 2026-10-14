@@ -1,0 +1,26 @@
+{
+  "mgroups": {
+    "groups": "Группы",
+    "repos": "Репозитории",
+    "pickHint": "Выберите один или несколько. Первый будет основным.",
+    "inTask": "В этой задаче",
+    "fromGroup": "Вся группа {name}",
+    "fromGroupEdited": "Из группы {name}, изменено",
+    "primary": "основной",
+    "remove": "Убрать {name}",
+    "noMembers": "В этой группе нет активных репозиториев.",
+    "group": "Группа {name}",
+    "partlyMerged": "Влито частично",
+    "archived": "в архиве",
+    "pushError": "Не удалось отправить: {error}",
+    "files": "{n, plural, one {# файл} few {# файла} many {# файлов} other {# файла}}",
+    "ciFixes": "{n, plural, one {# исправление CI} few {# исправления CI} many {# исправлений CI} other {# исправления CI}}",
+    "state": {
+      "pending": "Ожидает",
+      "unchanged": "Без изменений",
+      "pushed": "Отправлено",
+      "merged": "Влито",
+      "dropped": "Закрыто"
+    }
+  }
+}

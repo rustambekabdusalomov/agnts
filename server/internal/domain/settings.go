@@ -164,11 +164,14 @@ type Settings struct {
 	MethodSkills bool `json:"methodSkills"`
 	// Stalls: what agnts does when a run looks stuck (StallsOff, StallsLog
 	// or StallsAct).
-	Stalls     string         `json:"stalls"`
-	PauseAbove int            `json:"pauseAbove"`
-	Parallel   int            `json:"parallel"`
-	Git        GitSettings    `json:"git"`
-	Notify     NotifySettings `json:"notify"`
+	Stalls string `json:"stalls"`
+	// MaxTicketRepos caps how many repositories one ticket (and one
+	// repository group) may have; 0 means DefaultMaxTicketRepos.
+	MaxTicketRepos int            `json:"maxTicketRepos"`
+	PauseAbove     int            `json:"pauseAbove"`
+	Parallel       int            `json:"parallel"`
+	Git            GitSettings    `json:"git"`
+	Notify         NotifySettings `json:"notify"`
 }
 
 // DefaultSettings returns the settings used before any are saved.
@@ -198,14 +201,39 @@ func DefaultSettings() Settings {
 		LearnFromRuns: true,
 		PauseAbove:    90,
 		Parallel:      1,
-		Git:           GitSettings{CoAuthor: true, PRTitle: "{key}: {title}"},
-		Notify:        NotifySettings{Push: true, Telegram: true, NeedsYou: true, Stopped: true, Done: true, Lessons: true, Review: true, Preview: true, PreviewPhotos: true, FollowUps: true, CI: true},
+
+		MaxTicketRepos: DefaultMaxTicketRepos,
+		Git:            GitSettings{CoAuthor: true, PRTitle: "{key}: {title}"},
+		Notify:         NotifySettings{Push: true, Telegram: true, NeedsYou: true, Stopped: true, Done: true, Lessons: true, Review: true, Preview: true, PreviewPhotos: true, FollowUps: true, CI: true},
 	}
+}
+
+// TicketRepoLimit is how many repositories a ticket may have.
+func (s Settings) TicketRepoLimit() int {
+	if s.MaxTicketRepos <= 0 {
+		return DefaultMaxTicketRepos
+	}
+	return s.MaxTicketRepos
+}
+
+// TurnScale is how much more room (turns) a ticket in n repositories gets:
+// half as much again for two or three, twice as much for more.
+func TurnScale(n int) float64 {
+	switch {
+	case n <= 1:
+		return 1
+	case n <= 3:
+		return 1.5
+	}
+	return 2
 }
 
 // Validate checks ranges and normalises lists.
 func (s *Settings) Validate() error {
 	var errs []error
+	if s.MaxTicketRepos < 0 || s.MaxTicketRepos > 20 {
+		errs = append(errs, fmt.Errorf("a ticket may have 1 to 20 repositories"))
+	}
 	for name, m := range map[string]string{"analyze": s.Models.Analyze, "coding": s.Models.Coding, "retry": s.Models.Retry, "helper": s.Models.Helper, "learn": s.Models.Learn, "preview": s.Models.Preview} {
 		if !ValidModel(m) {
 			errs = append(errs, fmt.Errorf("model for %s must be one of %s, or codex:<model>", name, strings.Join(Models, ", ")))

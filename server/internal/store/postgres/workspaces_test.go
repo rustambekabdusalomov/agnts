@@ -113,6 +113,46 @@ func TestWorkspaceIsolation(t *testing.T) {
 		t.Fatalf("settings without a workspace: %v", err)
 	}
 
+	// Groups, their members and a ticket's repositories are per workspace
+	// too: B sees none of A's, and cannot put A's repository in its group.
+	ga, err := s.SaveGroup(a, domain.RepoGroup{Name: "Shop", Members: []domain.GroupMember{{RepoID: repoA.ID, Role: "backend"}}})
+	if err != nil || ga.WorkspaceID != wsA || len(ga.Members) != 1 {
+		t.Fatalf("A's group: %+v %v", ga, err)
+	}
+	if gs, _ := s.ListGroups(b); len(gs) != 0 {
+		t.Fatalf("B lists A's groups: %+v", gs)
+	}
+	if _, err := s.GroupByID(b, ga.ID); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("B read A's group: %v", err)
+	}
+	if _, err := s.SaveGroup(b, domain.RepoGroup{Name: "Steal", Members: []domain.GroupMember{{RepoID: repoA.ID}}}); err == nil {
+		t.Fatal("B put A's repository in its group")
+	}
+	var rows int
+	if err := users.db.QueryRow(b, `SELECT count(*) FROM ticket_repos`).Scan(&rows); err != nil || rows != 1 {
+		t.Fatalf("B sees %d ticket repositories (%v), want its own one", rows, err)
+	}
+	if _, err := users.db.Exec(b, `INSERT INTO ticket_repos (ticket_id, repo_id) VALUES ($1, $2)`, ta.ID, repoB.ID); err == nil {
+		t.Fatal("B added a repository to A's ticket")
+	}
+
+	// A webhook finds the ticket by its branch in a repository named by
+	// the host, also when the repository is cloned over SSH.
+	ssh, err := s.SaveRepository(a, domain.Repository{Name: "ssh", Kind: "side", Provider: "github", CloneURL: "git@github.com:a/ssh_repo.git"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.CreateTicket(a, domain.Ticket{Key: "SSH-1", Source: domain.SourceLocal, RepoID: &ssh.ID, Title: "t", State: domain.StateNew,
+		Priority: "medium", AfterApprove: "pr", Branch: "agnts/SSH-1"}, domain.Event{TicketKey: "SSH-1", Type: domain.EventTicketCreated}); err != nil {
+		t.Fatal(err)
+	}
+	if got, id, err := s.TicketByPR(a, domain.PRRef{Branch: "agnts/SSH-1", Repo: "a/ssh_repo"}); err != nil || got.Key != "SSH-1" || id != ssh.ID {
+		t.Fatalf("by branch over SSH: %s %d %v", got.Key, id, err)
+	}
+	if _, _, err := s.TicketByPR(a, domain.PRRef{Branch: "agnts/SSH-1", Repo: "a/sshXrepo"}); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("_ matched as a wildcard: %v", err)
+	}
+
 	// Task numbers without a repository count per workspace.
 	na, _ := s.NextTaskNumber(a, nil)
 	nb, _ := s.NextTaskNumber(b, nil)

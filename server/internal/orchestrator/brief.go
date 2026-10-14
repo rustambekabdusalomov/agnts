@@ -184,7 +184,17 @@ func (o *Orchestrator) autoSurvey(ctx context.Context, s domain.Settings, repoID
 // countMerge notes a merged ticket in its repository's brief, and queues an
 // update of a brief that went stale.
 func (o *Orchestrator) countMerge(ctx context.Context, t domain.Ticket) {
-	if o.briefs == nil || t.RepoID == nil {
+	for _, id := range t.RepoIDs() {
+		if r, ok := t.RepoState(id); ok && (r.Changed() || !t.Multi()) {
+			o.countRepoMerge(ctx, t, id)
+		}
+	}
+}
+
+// countRepoMerge counts a merge of the ticket's change in one repository
+// toward its brief going stale.
+func (o *Orchestrator) countRepoMerge(ctx context.Context, t domain.Ticket, repoID int64) {
+	if o.briefs == nil {
 		return
 	}
 	s, err := o.settings.Get(ctx)
@@ -192,7 +202,7 @@ func (o *Orchestrator) countMerge(ctx context.Context, t domain.Ticket) {
 		return
 	}
 	queued := false
-	_, err = o.briefs.UpdateBrief(ctx, *t.RepoID, func(b *domain.RepoBrief) error {
+	_, err = o.briefs.UpdateBrief(ctx, repoID, func(b *domain.RepoBrief) error {
 		b.MergesSince++
 		if s.AutoBrief && b.Stale() && !b.Busy() && b.Draft == "" {
 			b.Status, b.Error, queued = domain.BriefPending, "", true
@@ -216,8 +226,10 @@ func (o *Orchestrator) countMerge(ctx context.Context, t domain.Ticket) {
 // contextFiles copies the knowledge a ticket's runs get into the
 // workspace and returns what it wrote, for the prompt: the repository
 // brief, the business context notes and, for a ticket, the most similar
-// done tickets. t is zero for runs that are not a ticket's.
-func (o *Orchestrator) contextFiles(ctx context.Context, ws Workspace, t domain.Ticket, repo *domain.Repository) []ContextFile {
+// done tickets. t is zero for runs that are not a ticket's. A run in
+// several repositories gets a brief and precedents per repository
+// (brief-<folder>.md) and the group's instructions (group.md).
+func (o *Orchestrator) contextFiles(ctx context.Context, ws Workspace, t domain.Ticket, rs []runRepo) []ContextFile {
 	var out []ContextFile
 	write := func(path, body, what string) {
 		if err := ws.WriteFile(ctx, path, []byte(body)); err != nil {
@@ -226,47 +238,118 @@ func (o *Orchestrator) contextFiles(ctx context.Context, ws Workspace, t domain.
 		}
 		out = append(out, ContextFile{Path: path, What: what})
 	}
-	var repoID *int64
-	if repo != nil {
-		repoID = &repo.ID
+	multi := len(rs) > 1
+	if g := o.ticketGroup(ctx, t); g != nil && strings.TrimSpace(g.Instructions) != "" && multi {
+		write(GroupPath, groupMarkdown(*g, rs), "how the repositories of the group "+g.Name+" fit together, from the team: contracts between them and the order of changes. Follow it across the repositories")
 	}
-	if repo != nil && o.briefs != nil {
-		b, err := o.briefs.Brief(ctx, repo.ID)
-		switch {
-		case err == nil && b.Ready():
-			write(BriefPath, b.Body+"\n", "the repository brief the team approved: architecture, layers and allowed dependencies, recipes for common changes, files to copy, conventions and pitfalls")
-		case err != nil && !errors.Is(err, domain.ErrNotFound):
-			o.log.Warn("load the brief", "repo", repo.Name, "err", err)
-		}
-	}
-	if notes, err := o.businessNotes(ctx, repoID); err != nil {
-		o.log.Warn("load business context", "err", err)
-	} else if len(notes) > 0 {
-		write(BusinessPath, businessMarkdown(notes), "business context the team wrote: what the product's terms mean, the invariants the code must keep, who uses what. Check your work against it")
-	}
-	if ps, ok := o.store.(PrecedentStore); ok && repo != nil && t.ID != 0 {
-		var files []string
+	var files []string // what the work is expected to change, for the precedents
+	if _, ok := o.store.(PrecedentStore); ok && len(rs) > 0 && t.ID != 0 {
 		if r, err := o.store.LatestResult(ctx, t.ID, domain.StageAnalyze); err == nil {
 			if a, err := parseAnalysis(r.Summary); err == nil && a.Footprint != nil {
 				files = a.Footprint.Clean().Files
 			}
 		}
+	}
+	for _, r := range rs {
+		if o.briefs == nil {
+			break
+		}
+		b, err := o.briefs.Brief(ctx, r.ID)
+		switch {
+		case err == nil && b.Ready():
+			path, what := BriefPath, "the repository brief the team approved: architecture, layers and allowed dependencies, recipes for common changes, files to copy, conventions and pitfalls"
+			if multi {
+				path, what = contextPath("brief", r), "the brief of "+r.Name+" ("+r.Folder()+"/) the team approved: its architecture, layers and allowed dependencies, recipes, files to copy, conventions and pitfalls"
+			}
+			write(path, b.Body+"\n", what)
+		case err != nil && !errors.Is(err, domain.ErrNotFound):
+			o.log.Warn("load the brief", "repo", r.Name, "err", err)
+		}
+	}
+	if notes, err := o.businessNotes(ctx, repoIDsOf(rs)); err != nil {
+		o.log.Warn("load business context", "err", err)
+	} else if len(notes) > 0 {
+		write(BusinessPath, businessMarkdown(notes), "business context the team wrote: what the product's terms mean, the invariants the code must keep, who uses what. Check your work against it")
+	}
+	if ps, ok := o.store.(PrecedentStore); ok && t.ID != 0 {
 		except := []string{t.Key}
 		if t.ReplayOf != "" {
 			except = append(except, t.ReplayOf) // its own answer key
 		}
-		prec, err := ps.Precedents(ctx, repo.ID, except, files, t.Title+" "+t.Description, maxPrecedents)
-		if err != nil {
-			o.log.Warn("load precedents", "ticket", t.Key, "err", err)
-		} else if len(prec) > 0 {
-			write(PrecedentsPath, precedentsMarkdown(repo.Name, prec), "similar tickets this team approved before, with what changed and what reviewers asked for: do similar work the same way, and avoid what reviewers objected to")
+		for _, r := range rs {
+			prec, err := ps.Precedents(ctx, r.ID, except, filesIn(r, files, multi), t.Title+" "+t.Description, maxPrecedents)
+			if err != nil {
+				o.log.Warn("load precedents", "ticket", t.Key, "err", err)
+				continue
+			}
+			if len(prec) == 0 {
+				continue
+			}
+			path, what := PrecedentsPath, "similar tickets this team approved before, with what changed and what reviewers asked for: do similar work the same way, and avoid what reviewers objected to"
+			if multi {
+				path, what = contextPath("precedents", r), "similar tickets this team approved before in "+r.Name+", with what changed and what reviewers asked for"
+			}
+			write(path, precedentsMarkdown(r.Name, prec), what)
 		}
 	}
-	if n := o.writeSkills(ctx, ws, repoID); n > 0 {
+	if n := o.writeSkills(ctx, ws, repoIDsOf(rs)); n > 0 {
 		out = append(out, ContextFile{Path: SkillsDir, What: fmt.Sprintf("%d more team %s as Claude Code skills (named agnts-…): load each one whose description matches what you are doing, and follow it like the rules above",
 			n, plural(n, "rule or tip", "rules and tips"))})
 	}
 	return out
+}
+
+// GroupPath holds a group's instructions in a run of its repositories.
+const GroupPath = ContextDir + "/group.md"
+
+// contextPath is a context file of one repository in a run of several:
+// /agnts/context/brief-api.md.
+func contextPath(kind string, r runRepo) string {
+	return ContextDir + "/" + kind + "-" + r.Folder() + ".md"
+}
+
+// filesIn keeps the paths (seen from /workspace) in r's folder, relative
+// to r; in a run of one repository they are r's already.
+func filesIn(r runRepo, paths []string, multi bool) []string {
+	if !multi {
+		return paths
+	}
+	var out []string
+	for _, p := range paths {
+		if rest, ok := strings.CutPrefix(p, r.Folder()+"/"); ok {
+			out = append(out, rest)
+		}
+	}
+	return out
+}
+
+// ticketGroup is the group a ticket's repositories came from, or nil.
+func (o *Orchestrator) ticketGroup(ctx context.Context, t domain.Ticket) *domain.RepoGroup {
+	if t.GroupID == nil {
+		return nil
+	}
+	g, err := o.store.GroupByID(ctx, *t.GroupID)
+	if err != nil {
+		return nil
+	}
+	return &g
+}
+
+func groupMarkdown(g domain.RepoGroup, rs []runRepo) string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "# %s\n\n", g.Name)
+	if g.Description != "" {
+		b.WriteString(g.Description + "\n\n")
+	}
+	b.WriteString("Repositories in this run:\n")
+	for _, r := range rs {
+		fmt.Fprintf(&b, "\n- %s/: %s", r.Folder(), r.Name)
+		if r.Row.Role != "" {
+			fmt.Fprintf(&b, " (%s)", r.Row.Role)
+		}
+	}
+	fmt.Fprintf(&b, "\n\n## How they fit together\n\n%s\n", strings.TrimSpace(g.Instructions))
+	return b.String()
 }
 
 // maxPrecedents is how many similar tickets a run gets.
@@ -400,7 +483,7 @@ func (o *Orchestrator) runSurvey(ctx context.Context, b domain.RepoBrief) (strin
 			return "", "", fmt.Errorf("copy the brief: %w", err)
 		}
 	}
-	if d.Rules, err = o.teamRules(ctx, &repo.ID); err != nil {
+	if d.Rules, err = o.teamRules(ctx, []int64{repo.ID}); err != nil {
 		return "", "", err
 	}
 	prompt, err := render("survey", d)

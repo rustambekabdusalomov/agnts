@@ -17,8 +17,8 @@ import (
 
 type sink struct{ merged []string }
 
-func (s *sink) MarkMerged(_ context.Context, url, branch string, _ domain.Origin) (bool, error) {
-	s.merged = append(s.merged, url+"|"+branch)
+func (s *sink) MarkMerged(_ context.Context, ref domain.PRRef, _ domain.Origin) (bool, error) {
+	s.merged = append(s.merged, ref.URL+"|"+ref.Branch)
 	return true, nil
 }
 
@@ -98,8 +98,8 @@ type closeSink struct {
 	closed []string
 }
 
-func (s *closeSink) MarkPRClosed(_ context.Context, url, branch string, closed bool, _ domain.Origin) (bool, error) {
-	s.closed = append(s.closed, url+"|"+branch+"|"+map[bool]string{true: "closed", false: "reopened"}[closed])
+func (s *closeSink) MarkPRClosed(_ context.Context, ref domain.PRRef, closed bool, _ domain.Origin) (bool, error) {
+	s.closed = append(s.closed, ref.URL+"|"+ref.Branch+"|"+map[bool]string{true: "closed", false: "reopened"}[closed])
 	return true, nil
 }
 

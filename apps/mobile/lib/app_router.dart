@@ -14,6 +14,8 @@ import 'features/admin/admin_more_screen.dart';
 import 'features/admin/admin_users_screen.dart';
 import 'features/admin/admin_workspaces_screen.dart';
 import 'features/analytics/analytics_screen.dart';
+import 'features/assistant/assistant_screen.dart';
+import 'features/assistant/assistant_stats.dart';
 import 'features/auth/login_screen.dart';
 import 'features/ci/ci_failure_screen.dart';
 import 'features/ci/ci_screen.dart';
@@ -87,6 +89,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         GoRoute(path: '/learn', builder: (_, s) => LearnScreen(ticketKey: s.uri.queryParameters['ticket'])),
         GoRoute(path: '/learn-queue', builder: (_, _) => const LearnQueueScreen()),
         GoRoute(path: '/learn/:id', builder: (_, s) => LessonScreen(id: int.parse(s.pathParameters['id']!))),
+        GoRoute(path: '/assistant', builder: (_, _) => const AssistantScreen()),
+        GoRoute(path: '/assistant-rated', builder: (_, _) => const AssistantRatedScreen()),
+        GoRoute(path: '/assistant/:id', builder: (_, s) => AssistantScreen(conversationId: int.tryParse(s.pathParameters['id']!))),
         GoRoute(path: '/ci', builder: (_, _) => const CIFailuresScreen()),
         GoRoute(path: '/ci/:id', builder: (_, s) => CIFailureScreen(id: int.tryParse(s.pathParameters['id']!) ?? 0)),
         StatefulShellRoute.indexedStack(

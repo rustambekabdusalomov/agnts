@@ -3,10 +3,12 @@ import { computed, ref, watch } from 'vue'
 import type { FileChange } from '../api/types'
 import { numberDiff } from './diffLines'
 import { highlightDiff } from './highlight'
+import { filePath } from './repos/repoSet'
 
 // One changed file as the demo shows it: collapsible, unified diff lines,
 // with old and new line numbers in a gutter that copying leaves out, and
-// syntax highlighting once the file is opened.
+// syntax highlighting once the file is opened. In a ticket with several
+// repositories the path starts with the repository's folder.
 const props = defineProps<{ file: FileChange; open?: boolean }>()
 
 const lines = computed(() => numberDiff(props.file.diff))
@@ -38,7 +40,7 @@ const code = (i: number) => html.value?.[i] ?? null
 <template>
   <details class="file" :open="open" @toggle="shown = ($event.target as HTMLDetailsElement).open || shown">
     <summary>
-      <span>{{ file.path }}</span>
+      <span>{{ filePath(file) }}</span>
       <span class="n"><span class="a">+{{ file.add }}</span><span class="d">−{{ file.del }}</span></span>
     </summary>
     <div class="diff" :style="{ '--ln': width }">

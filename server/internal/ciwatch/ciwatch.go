@@ -36,7 +36,7 @@ type Store interface {
 // Tickets reads tickets and repositories.
 type Tickets interface {
 	TicketByKey(ctx context.Context, key string) (domain.Ticket, error)
-	TicketByPR(ctx context.Context, url, branch string) (domain.Ticket, error)
+	TicketByPR(ctx context.Context, ref domain.PRRef) (domain.Ticket, int64, error)
 	UnmergedPRs(ctx context.Context, limit int) ([]domain.Ticket, error)
 	ListRepositories(ctx context.Context) ([]domain.Repository, error)
 	RepositoryByID(ctx context.Context, id int64) (domain.Repository, error)
@@ -45,7 +45,7 @@ type Tickets interface {
 
 // Work is the orchestrator: it reopens and creates tickets.
 type Work interface {
-	CIFeedback(ctx context.Context, key, feedback, runURL string, rounds int) (domain.Ticket, orchestrator.CIFeedbackResult, error)
+	CIFeedback(ctx context.Context, key string, repoID int64, feedback, runURL string, rounds int) (domain.Ticket, orchestrator.CIFeedbackResult, error)
 	CreateCITicket(ctx context.Context, in orchestrator.CITicketInput, origin domain.Origin) (domain.Ticket, error)
 }
 
@@ -220,8 +220,11 @@ func (s *Service) ownTicket(ctx context.Context, repo domain.Repository, run dom
 	if run.Branch == "" || run.Branch == repo.DefaultBranch {
 		return domain.Ticket{}, false
 	}
-	t, err := s.tickets.TicketByPR(ctx, "", run.Branch)
-	if err != nil || t.RepoID == nil || *t.RepoID != repo.ID || t.PRNumber == nil || t.Source == domain.SourceGit {
+	t, repoID, err := s.tickets.TicketByPR(ctx, domain.PRRef{Branch: run.Branch, RepoID: repo.ID})
+	if err != nil || repoID != repo.ID || t.Source == domain.SourceGit {
+		return domain.Ticket{}, false
+	}
+	if r, ok := t.RepoState(repo.ID); !ok || r.PRNumber == nil {
 		return domain.Ticket{}, false
 	}
 	return t, true
@@ -283,10 +286,10 @@ func compile(patterns []string) []*regexp.Regexp {
 
 // feedBack sends a red check on an agnts pull request back to its ticket.
 func (s *Service) feedBack(ctx context.Context, st domain.Settings, repo domain.Repository, t domain.Ticket, run domain.CIRun) error {
-	if st.CI.FeedbackRounds == 0 || !domain.CanReopenForCI(t) {
+	if st.CI.FeedbackRounds == 0 || !domain.CanReopenForCIIn(t, repo.ID) {
 		return nil
 	}
-	if t.HeadSHA != "" && run.SHA != "" && t.HeadSHA != run.SHA {
+	if r, _ := t.RepoState(repo.ID); r.HeadSHA != "" && run.SHA != "" && r.HeadSHA != run.SHA {
 		return nil // a run on an older commit of the branch
 	}
 	fs, err := s.failures(ctx, st, nil, repo, run)
@@ -312,7 +315,7 @@ func (s *Service) feedBack(ctx context.Context, st domain.Settings, repo domain.
 		}
 		return nil
 	}
-	_, res, err := s.work.CIFeedback(ctx, t.Key, FeedbackText(run, real), run.URL, st.CI.FeedbackRounds)
+	_, res, err := s.work.CIFeedback(ctx, t.Key, repo.ID, FeedbackText(run, real), run.URL, st.CI.FeedbackRounds)
 	if err == nil && res == orchestrator.CIFeedbackSent {
 		s.log.Info("ci: sent red check back to its ticket", "ticket", t.Key, "run", run.URL)
 	}

@@ -116,3 +116,30 @@ func TestStreamReplaysAndGoesLive(t *testing.T) {
 	case <-time.After(200 * time.Millisecond):
 	}
 }
+
+func TestPublishToReachesOnlyThePerson(t *testing.T) {
+	b := NewBroker(nil, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	mine, _, stop1 := b.subscribe(1, 10)
+	defer stop1()
+	other, _, stop2 := b.subscribe(1, 11)
+	defer stop2()
+	elsewhere, _, stop3 := b.subscribe(2, 10)
+	defer stop3()
+
+	b.PublishTo(1, 10, domain.Event{ID: 99, Type: "assistant_answered"})
+	select {
+	case e := <-mine:
+		if e.ID != 0 || e.Type != "assistant_answered" {
+			t.Fatalf("event = %+v (live events have no id)", e)
+		}
+	default:
+		t.Fatal("the asker's stream got nothing")
+	}
+	for name, ch := range map[string]chan domain.Event{"another person": other, "another workspace": elsewhere} {
+		select {
+		case e := <-ch:
+			t.Fatalf("%s got %+v", name, e)
+		default:
+		}
+	}
+}

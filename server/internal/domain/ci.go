@@ -162,8 +162,16 @@ func (f CIFailure) LastRun() (CIOccurrence, bool) {
 // it back to coding: it was pushed with a pull request that is still open,
 // and it is not a replay or a review of someone else's pull request.
 func CanReopenForCI(t Ticket) bool {
-	return t.State == StateDone && t.PRNumber != nil && t.MergedAt == nil && t.ReplayOf == "" &&
+	return t.State == StateDone && t.AnyPR() && t.MergedAt == nil && t.ReplayOf == "" &&
 		t.Source != SourceGit && (t.Kind == KindCode || t.Kind == KindTest)
+}
+
+// CanReopenForCIIn reports whether red CI on the ticket's pull request in
+// repository repoID may send the ticket back to coding: that pull request
+// is open (not merged, not closed) and the ticket may reopen at all.
+func CanReopenForCIIn(t Ticket, repoID int64) bool {
+	r, ok := t.RepoState(repoID)
+	return ok && CanReopenForCI(t) && r.PRNumber != nil && r.MergedAt == nil && r.ClosedAt == nil && r.State != RepoDropped
 }
 
 // CIFilter selects failure groups.

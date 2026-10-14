@@ -9,6 +9,10 @@ part of 'implement_input.dart';
 abstract class _$ImplementInputCWProxy {
   ImplementInput repoId(int? repoId);
 
+  ImplementInput repoIds(List<int>? repoIds);
+
+  ImplementInput groupId(int? groupId);
+
   ImplementInput start(ImplementInputStartEnum? start);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ImplementInput(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -17,7 +21,12 @@ abstract class _$ImplementInputCWProxy {
   /// ```dart
   /// ImplementInput(...).copyWith(id: 12, name: "My name")
   /// ````
-  ImplementInput call({int? repoId, ImplementInputStartEnum? start});
+  ImplementInput call({
+    int? repoId,
+    List<int>? repoIds,
+    int? groupId,
+    ImplementInputStartEnum? start,
+  });
 }
 
 /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfImplementInput.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfImplementInput.copyWith.fieldName(...)`
@@ -28,6 +37,12 @@ class _$ImplementInputCWProxyImpl implements _$ImplementInputCWProxy {
 
   @override
   ImplementInput repoId(int? repoId) => this(repoId: repoId);
+
+  @override
+  ImplementInput repoIds(List<int>? repoIds) => this(repoIds: repoIds);
+
+  @override
+  ImplementInput groupId(int? groupId) => this(groupId: groupId);
 
   @override
   ImplementInput start(ImplementInputStartEnum? start) => this(start: start);
@@ -41,6 +56,8 @@ class _$ImplementInputCWProxyImpl implements _$ImplementInputCWProxy {
   /// ````
   ImplementInput call({
     Object? repoId = const $CopyWithPlaceholder(),
+    Object? repoIds = const $CopyWithPlaceholder(),
+    Object? groupId = const $CopyWithPlaceholder(),
     Object? start = const $CopyWithPlaceholder(),
   }) {
     return ImplementInput(
@@ -48,6 +65,14 @@ class _$ImplementInputCWProxyImpl implements _$ImplementInputCWProxy {
           ? _value.repoId
           // ignore: cast_nullable_to_non_nullable
           : repoId as int?,
+      repoIds: repoIds == const $CopyWithPlaceholder()
+          ? _value.repoIds
+          // ignore: cast_nullable_to_non_nullable
+          : repoIds as List<int>?,
+      groupId: groupId == const $CopyWithPlaceholder()
+          ? _value.groupId
+          // ignore: cast_nullable_to_non_nullable
+          : groupId as int?,
       start: start == const $CopyWithPlaceholder()
           ? _value.start
           // ignore: cast_nullable_to_non_nullable
@@ -70,6 +95,11 @@ ImplementInput _$ImplementInputFromJson(Map<String, dynamic> json) =>
     $checkedCreate('ImplementInput', json, ($checkedConvert) {
       final val = ImplementInput(
         repoId: $checkedConvert('repoId', (v) => (v as num?)?.toInt()),
+        repoIds: $checkedConvert(
+          'repoIds',
+          (v) => (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList(),
+        ),
+        groupId: $checkedConvert('groupId', (v) => (v as num?)?.toInt()),
         start: $checkedConvert(
           'start',
           (v) => $enumDecodeNullable(_$ImplementInputStartEnumEnumMap, v),
@@ -81,6 +111,8 @@ ImplementInput _$ImplementInputFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$ImplementInputToJson(ImplementInput instance) =>
     <String, dynamic>{
       'repoId': ?instance.repoId,
+      'repoIds': ?instance.repoIds,
+      'groupId': ?instance.groupId,
       'start': ?_$ImplementInputStartEnumEnumMap[instance.start],
     };
 

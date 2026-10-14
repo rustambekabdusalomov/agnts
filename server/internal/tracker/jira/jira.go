@@ -436,7 +436,7 @@ func (is issue) incoming(label string) orchestrator.Incoming {
 	in := orchestrator.Incoming{
 		Key: is.Key, Project: is.Fields.Project.Key, Title: is.Fields.Summary,
 		Description: descriptionText(is.Fields.Description), Kind: is.kind(label),
-		Repo: domain.RepoFromLabels(is.Fields.Labels),
+		Repo: domain.RepoFromLabels(is.Fields.Labels), Repos: domain.ReposFromLabels(is.Fields.Labels), Group: domain.GroupFromLabels(is.Fields.Labels),
 	}
 	if in.Project == "" {
 		if i := strings.LastIndex(is.Key, "-"); i > 0 {

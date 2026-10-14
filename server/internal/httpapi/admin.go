@@ -104,6 +104,12 @@ func (s *Server) ImplementTicket(w http.ResponseWriter, r *http.Request, key gen
 	if req.RepoId != nil {
 		in.RepoID = *req.RepoId
 	}
+	if req.RepoIds != nil {
+		in.RepoIDs = *req.RepoIds
+	}
+	if req.GroupId != nil {
+		in.GroupID = *req.GroupId
+	}
 	if req.Start != nil {
 		in.Start = string(*req.Start)
 	}
@@ -142,6 +148,12 @@ func (s *Server) CreateTask(w http.ResponseWriter, r *http.Request) {
 		AfterApprove: string(req.AfterApprove), Start: string(req.Start)}
 	if req.RepoId != nil {
 		in.RepoID = *req.RepoId
+	}
+	if req.RepoIds != nil {
+		in.RepoIDs = *req.RepoIds
+	}
+	if req.GroupId != nil {
+		in.GroupID = *req.GroupId
 	}
 	if req.Kind != nil {
 		in.Kind = string(*req.Kind)
@@ -430,8 +442,10 @@ func toSettings(v domain.Settings) gen.Settings {
 		guard.Disabled = append(guard.Disabled, gen.GuardHook(h))
 	}
 	stalls, deep, prove, learnRuns, second, methods := v.Stalls, v.DeepReview, v.ProveFixes, v.LearnFromRuns, v.SecondOpinion, v.MethodSkills
+	maxRepos := v.TicketRepoLimit()
 	return gen.Settings{
-		Guard: &guard, Stalls: &stalls, DeepReview: &deep, ProveFixes: &prove, LearnFromRuns: &learnRuns, SecondOpinion: &second, MethodSkills: &methods,
+		MaxTicketRepos: &maxRepos,
+		Guard:          &guard, Stalls: &stalls, DeepReview: &deep, ProveFixes: &prove, LearnFromRuns: &learnRuns, SecondOpinion: &second, MethodSkills: &methods,
 		PullReviews: &pulls,
 		Ci:          &ci,
 		Models: gen.StageModels{Analyze: v.Models.Analyze, Coding: v.Models.Coding,
@@ -496,7 +510,7 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 		AskFirst: req.AskFirst, AutoResume: req.AutoResume, PauseAbove: req.PauseAbove, Parallel: cur.Parallel, AutoLearn: cur.AutoLearn,
 		AutoReview: cur.AutoReview, SuggestFollowUps: cur.SuggestFollowUps, PullReviews: cur.PullReviews, CI: cur.CI,
 		Guard: cur.Guard, Stalls: cur.Stalls, DeepReview: cur.DeepReview, ProveFixes: cur.ProveFixes, LearnFromRuns: cur.LearnFromRuns, MethodSkills: cur.MethodSkills,
-		SecondOpinion: cur.SecondOpinion,
+		SecondOpinion: cur.SecondOpinion, MaxTicketRepos: cur.MaxTicketRepos,
 		Git: domain.GitSettings{AuthorName: req.Git.AuthorName, AuthorEmail: req.Git.AuthorEmail, CoAuthor: req.Git.CoAuthor,
 			PRTitle: req.Git.PrTitle, Draft: req.Git.Draft},
 		Notify: cur.Notify,
@@ -538,6 +552,9 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.SuggestFollowUps != nil {
 		v.SuggestFollowUps = *req.SuggestFollowUps
+	}
+	if req.MaxTicketRepos != nil {
+		v.MaxTicketRepos = *req.MaxTicketRepos
 	}
 	if req.Models.Preview != nil {
 		v.Models.Preview = *req.Models.Preview
@@ -616,7 +633,7 @@ func toRepo(x admin.RepoView) gen.Repository {
 		Stack: &x.Stack, Toolchains: ptr(toToolchains(x.Toolchains)), ToolchainsOverride: &x.ToolchainsOverride,
 		ToolchainsDetectedAt: x.ToolchainsDetectedAt, ToolchainNotes: ptr(nonNil(x.ToolchainNotes)),
 		RunnerImage: &x.RunnerImage, MemoryMb: &x.MemoryMB, BuildEnvSet: &x.BuildEnvSet, BuildEnvNames: ptr(nonNil(x.BuildEnvNames)),
-		Harness: toRepoHarness(x.Repository)}
+		Harness: toRepoHarness(x.Repository), Groups: ptr(toGroupRefs(x.Groups))}
 }
 
 func ptr[T any](v T) *T { return &v }

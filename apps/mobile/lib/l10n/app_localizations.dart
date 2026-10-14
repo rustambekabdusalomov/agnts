@@ -2175,6 +2175,12 @@ abstract class AppLocalizations {
   /// **'CI failure groups that failed in the period'**
   String get analyticsColCiHint;
 
+  /// No description provided for @analyticsTabAssistant.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant'**
+  String get analyticsTabAssistant;
+
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:
@@ -4646,6 +4652,360 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No matches'**
   String get formNoMatch;
+
+  /// No description provided for @groupsView.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups ({n})'**
+  String groupsView(String n);
+
+  /// No description provided for @groupsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Repositories that change together. A ticket made from a group works in all of them and opens a pull request in each one it changes.'**
+  String get groupsSub;
+
+  /// No description provided for @groupsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No groups yet. A group lets one ticket change several repositories, such as an API and its web app.'**
+  String get groupsNone;
+
+  /// No description provided for @groupsAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'New group'**
+  String get groupsAdd;
+
+  /// No description provided for @groupsDrawerSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Repositories that change together, in order: the first is the primary repository of the group\'s tickets.'**
+  String get groupsDrawerSub;
+
+  /// No description provided for @groupsName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get groupsName;
+
+  /// No description provided for @groupsNamePh.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop'**
+  String get groupsNamePh;
+
+  /// No description provided for @groupsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get groupsDescription;
+
+  /// No description provided for @groupsMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Repositories'**
+  String get groupsMembers;
+
+  /// No description provided for @groupsMembersHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Order matters: the first is the primary repository. A role tells agnts what each one is, such as backend or web.'**
+  String get groupsMembersHelp;
+
+  /// No description provided for @groupsMembersNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one repository.'**
+  String get groupsMembersNeeded;
+
+  /// No description provided for @groupsNoMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'No repositories yet.'**
+  String get groupsNoMembers;
+
+  /// No description provided for @groupsAddMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a repository…'**
+  String get groupsAddMember;
+
+  /// No description provided for @groupsNoMoreRepos.
+  ///
+  /// In en, this message translates to:
+  /// **'Every active repository is in the group'**
+  String get groupsNoMoreRepos;
+
+  /// No description provided for @groupsRolePh.
+  ///
+  /// In en, this message translates to:
+  /// **'Role, e.g. backend'**
+  String get groupsRolePh;
+
+  /// No description provided for @groupsRoleOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Role of {name}'**
+  String groupsRoleOf(String name);
+
+  /// No description provided for @groupsMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move {name} up'**
+  String groupsMoveUp(String name);
+
+  /// No description provided for @groupsMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move {name} down'**
+  String groupsMoveDown(String name);
+
+  /// No description provided for @groupsPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'primary'**
+  String get groupsPrimary;
+
+  /// No description provided for @groupsArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'archived'**
+  String get groupsArchived;
+
+  /// No description provided for @groupsPrefixHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Key prefix of tasks made from the group, as {prefix}-12. Empty uses the first repository\'s.'**
+  String groupsPrefixHelp(String prefix);
+
+  /// No description provided for @groupsInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions'**
+  String get groupsInstructions;
+
+  /// No description provided for @groupsInstructionsPh.
+  ///
+  /// In en, this message translates to:
+  /// **'The web app calls the API through src/api; change both together and keep the OpenAPI spec in sync.'**
+  String get groupsInstructionsPh;
+
+  /// No description provided for @groupsInstructionsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'How the repositories fit together, in Markdown. Added to every prompt of the group\'s tickets.'**
+  String get groupsInstructionsHelp;
+
+  /// No description provided for @groupsWarningsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved, with warnings:'**
+  String get groupsWarningsTitle;
+
+  /// No description provided for @groupsWarningsBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} warning} other {{count} warnings}}'**
+  String groupsWarningsBadge(num count);
+
+  /// No description provided for @groupsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Group {name} saved'**
+  String groupsSaved(String name);
+
+  /// No description provided for @groupsDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get groupsDelete;
+
+  /// No description provided for @groupsDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the group {name}? Its tickets keep their repositories.'**
+  String groupsDeleteConfirm(String name);
+
+  /// No description provided for @groupsDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Group {name} deleted'**
+  String groupsDeleted(String name);
+
+  /// No description provided for @groupsColGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get groupsColGroup;
+
+  /// No description provided for @groupsColMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Repositories'**
+  String get groupsColMembers;
+
+  /// No description provided for @groupsColPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefix'**
+  String get groupsColPrefix;
+
+  /// No description provided for @groupsInGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'In {names}'**
+  String groupsInGroups(String names);
+
+  /// No description provided for @groupsInLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups:'**
+  String get groupsInLabel;
+
+  /// No description provided for @groupsPickerGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Repository groups'**
+  String get groupsPickerGroups;
+
+  /// No description provided for @groupsChosen.
+  ///
+  /// In en, this message translates to:
+  /// **'Chosen repositories'**
+  String get groupsChosen;
+
+  /// No description provided for @groupsFromGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'From group {name}'**
+  String groupsFromGroup(String name);
+
+  /// No description provided for @groupsMakePrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Make it the primary repository'**
+  String get groupsMakePrimary;
+
+  /// No description provided for @groupsMore.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count}'**
+  String groupsMore(String count);
+
+  /// No description provided for @groupsAllGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'All groups'**
+  String get groupsAllGroups;
+
+  /// No description provided for @groupsFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get groupsFilterLabel;
+
+  /// No description provided for @groupsKvRepos.
+  ///
+  /// In en, this message translates to:
+  /// **'Repositories'**
+  String get groupsKvRepos;
+
+  /// No description provided for @groupsKvGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get groupsKvGroup;
+
+  /// No description provided for @groupsTicketRepos.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} repository} other {{count} repositories}}'**
+  String groupsTicketRepos(num count);
+
+  /// No description provided for @groupsPartlyMerged.
+  ///
+  /// In en, this message translates to:
+  /// **'Partly merged'**
+  String get groupsPartlyMerged;
+
+  /// No description provided for @groupsPr.
+  ///
+  /// In en, this message translates to:
+  /// **'PR #{number}'**
+  String groupsPr(String number);
+
+  /// No description provided for @groupsOpenPrIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {repo} #{number}'**
+  String groupsOpenPrIn(String repo, String number);
+
+  /// No description provided for @groupsFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} file} other {{count} files}}'**
+  String groupsFiles(num count);
+
+  /// No description provided for @groupsFilesIn.
+  ///
+  /// In en, this message translates to:
+  /// **'{repo} · {count, plural, one {{count} file} other {{count} files}}'**
+  String groupsFilesIn(String repo, num count);
+
+  /// No description provided for @groupsPushError.
+  ///
+  /// In en, this message translates to:
+  /// **'Push failed: {error}'**
+  String groupsPushError(String error);
+
+  /// No description provided for @groupsRetryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {A retry pushes the {count} repository that failed; the others stay as they are.} other {A retry pushes the {count} repositories that failed; the others stay as they are.}}'**
+  String groupsRetryHint(num count);
+
+  /// No description provided for @groupsState_pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Not pushed'**
+  String get groupsState_pending;
+
+  /// No description provided for @groupsState_unchanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Unchanged'**
+  String get groupsState_unchanged;
+
+  /// No description provided for @groupsState_pushed.
+  ///
+  /// In en, this message translates to:
+  /// **'Pushed'**
+  String get groupsState_pushed;
+
+  /// No description provided for @groupsState_merged.
+  ///
+  /// In en, this message translates to:
+  /// **'Merged'**
+  String get groupsState_merged;
+
+  /// No description provided for @groupsState_dropped.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get groupsState_dropped;
+
+  /// No description provided for @groupsMaxTicketRepos.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum repositories per ticket'**
+  String get groupsMaxTicketRepos;
+
+  /// No description provided for @groupsMaxTicketReposHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'How many repositories one ticket, and one repository group, may have.'**
+  String get groupsMaxTicketReposHelp;
 
   /// No description provided for @harnessRepoTab.
   ///
@@ -8133,6 +8493,408 @@ abstract class AppLocalizations {
   /// **'Changes are compared with the previous {n} days. Green means better.'**
   String manalyticsCompared(num n);
 
+  /// No description provided for @massistantTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant'**
+  String get massistantTitle;
+
+  /// No description provided for @massistantFab.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the assistant'**
+  String get massistantFab;
+
+  /// No description provided for @massistantMoreRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant'**
+  String get massistantMoreRow;
+
+  /// No description provided for @massistantMoreRowSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about your workspace'**
+  String get massistantMoreRowSub;
+
+  /// No description provided for @massistantPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about tickets, CI, spend…'**
+  String get massistantPlaceholder;
+
+  /// No description provided for @massistantSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get massistantSend;
+
+  /// No description provided for @massistantCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} / 1000'**
+  String massistantCount(String n);
+
+  /// No description provided for @massistantNewConversation.
+  ///
+  /// In en, this message translates to:
+  /// **'New conversation'**
+  String get massistantNewConversation;
+
+  /// No description provided for @massistantHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversations'**
+  String get massistantHistory;
+
+  /// No description provided for @massistantHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No conversations yet.'**
+  String get massistantHistoryEmpty;
+
+  /// No description provided for @massistantDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get massistantDelete;
+
+  /// No description provided for @massistantDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversation deleted'**
+  String get massistantDeleted;
+
+  /// No description provided for @massistantEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask agnts about your work'**
+  String get massistantEmptyTitle;
+
+  /// No description provided for @massistantEmptyText.
+  ///
+  /// In en, this message translates to:
+  /// **'It answers from your tickets, CI and spend, and links what it mentions. It cannot start, approve or reject anything.'**
+  String get massistantEmptyText;
+
+  /// No description provided for @massistantPrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Only you see your conversations. They are kept for 30 days.'**
+  String get massistantPrivate;
+
+  /// No description provided for @massistantSuggestWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'What is waiting on me?'**
+  String get massistantSuggestWaiting;
+
+  /// No description provided for @massistantSuggestCi.
+  ///
+  /// In en, this message translates to:
+  /// **'Why is CI red?'**
+  String get massistantSuggestCi;
+
+  /// No description provided for @massistantSuggestSpend.
+  ///
+  /// In en, this message translates to:
+  /// **'How much did we spend this week?'**
+  String get massistantSuggestSpend;
+
+  /// No description provided for @massistantSuggestDone.
+  ///
+  /// In en, this message translates to:
+  /// **'What did agnts finish this week?'**
+  String get massistantSuggestDone;
+
+  /// No description provided for @massistantThinking.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking… {seconds}s'**
+  String massistantThinking(String seconds);
+
+  /// No description provided for @massistantReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading {what}'**
+  String massistantReading(String what);
+
+  /// No description provided for @massistantFileInbox.
+  ///
+  /// In en, this message translates to:
+  /// **'your inbox'**
+  String get massistantFileInbox;
+
+  /// No description provided for @massistantFileTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'the tickets'**
+  String get massistantFileTickets;
+
+  /// No description provided for @massistantFileTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'{key}'**
+  String massistantFileTicket(String key);
+
+  /// No description provided for @massistantFileCi.
+  ///
+  /// In en, this message translates to:
+  /// **'CI failures'**
+  String get massistantFileCi;
+
+  /// No description provided for @massistantFileUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'plan usage'**
+  String get massistantFileUsage;
+
+  /// No description provided for @massistantFileAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'analytics'**
+  String get massistantFileAnalytics;
+
+  /// No description provided for @massistantFileRepos.
+  ///
+  /// In en, this message translates to:
+  /// **'repositories'**
+  String get massistantFileRepos;
+
+  /// No description provided for @massistantFileLessons.
+  ///
+  /// In en, this message translates to:
+  /// **'lessons'**
+  String get massistantFileLessons;
+
+  /// No description provided for @massistantFileConversation.
+  ///
+  /// In en, this message translates to:
+  /// **'the conversation'**
+  String get massistantFileConversation;
+
+  /// No description provided for @massistantFileQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'your question'**
+  String get massistantFileQuestion;
+
+  /// No description provided for @massistantFileOther.
+  ///
+  /// In en, this message translates to:
+  /// **'the workspace'**
+  String get massistantFileOther;
+
+  /// No description provided for @massistantFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'No answer'**
+  String get massistantFailed;
+
+  /// No description provided for @massistantAskAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask again'**
+  String get massistantAskAgain;
+
+  /// No description provided for @massistantLinkCi.
+  ///
+  /// In en, this message translates to:
+  /// **'CI #{id}'**
+  String massistantLinkCi(String id);
+
+  /// No description provided for @massistantLinkLesson.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson #{id}'**
+  String massistantLinkLesson(String id);
+
+  /// No description provided for @massistantTook.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds}s'**
+  String massistantTook(String seconds);
+
+  /// No description provided for @massistantHelpful.
+  ///
+  /// In en, this message translates to:
+  /// **'Helpful'**
+  String get massistantHelpful;
+
+  /// No description provided for @massistantNotHelpful.
+  ///
+  /// In en, this message translates to:
+  /// **'Not helpful'**
+  String get massistantNotHelpful;
+
+  /// No description provided for @massistantRateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How was this answer?'**
+  String get massistantRateTitle;
+
+  /// No description provided for @massistantRateComment.
+  ///
+  /// In en, this message translates to:
+  /// **'What was wrong or missing? (optional)'**
+  String get massistantRateComment;
+
+  /// No description provided for @massistantRateShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep this question\'s data so agnts can test better answers'**
+  String get massistantRateShare;
+
+  /// No description provided for @massistantRateNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Your rating, comment, question and answer are shown to the workspace owner.'**
+  String get massistantRateNote;
+
+  /// No description provided for @massistantRateSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get massistantRateSend;
+
+  /// No description provided for @massistantRateClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove rating'**
+  String get massistantRateClear;
+
+  /// No description provided for @massistantRated.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for the rating'**
+  String get massistantRated;
+
+  /// No description provided for @massistantStatsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant'**
+  String get massistantStatsTitle;
+
+  /// No description provided for @massistantStatsQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions'**
+  String get massistantStatsQuestions;
+
+  /// No description provided for @massistantStatsAnswered.
+  ///
+  /// In en, this message translates to:
+  /// **'Answered'**
+  String get massistantStatsAnswered;
+
+  /// No description provided for @massistantStatsMedian.
+  ///
+  /// In en, this message translates to:
+  /// **'Median time'**
+  String get massistantStatsMedian;
+
+  /// No description provided for @massistantStatsHelpful.
+  ///
+  /// In en, this message translates to:
+  /// **'Helpful'**
+  String get massistantStatsHelpful;
+
+  /// No description provided for @massistantStatsTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokens'**
+  String get massistantStatsTokens;
+
+  /// No description provided for @massistantStatsPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} person asked} other {{n} people asked}}'**
+  String massistantStatsPeople(num n);
+
+  /// No description provided for @massistantStatsVersions.
+  ///
+  /// In en, this message translates to:
+  /// **'By prompt version'**
+  String get massistantStatsVersions;
+
+  /// No description provided for @massistantStatsVersionRow.
+  ///
+  /// In en, this message translates to:
+  /// **'{answered} answered · {failed} failed · {up} 👍 {down} 👎 · {median}'**
+  String massistantStatsVersionRow(String answered, String failed, String up, String down, String median);
+
+  /// No description provided for @massistantStatsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No questions in this period.'**
+  String get massistantStatsNone;
+
+  /// No description provided for @massistantStatsRated.
+  ///
+  /// In en, this message translates to:
+  /// **'Rated answers'**
+  String get massistantStatsRated;
+
+  /// No description provided for @massistantRatedEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No rated answers yet.'**
+  String get massistantRatedEmpty;
+
+  /// No description provided for @massistantRatedShared.
+  ///
+  /// In en, this message translates to:
+  /// **'Kept for prompt tests'**
+  String get massistantRatedShared;
+
+  /// No description provided for @massistantStatsParts.
+  ///
+  /// In en, this message translates to:
+  /// **'Container {start} · workspace {snapshot} · Claude {claude}'**
+  String massistantStatsParts(String start, String snapshot, String claude);
+
+  /// No description provided for @massistantStatsWarm.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} of {total} reused a warm container'**
+  String massistantStatsWarm(String n, String total);
+
+  /// No description provided for @massistantStatsSeeRated.
+  ///
+  /// In en, this message translates to:
+  /// **'Rated answers'**
+  String get massistantStatsSeeRated;
+
+  /// No description provided for @massistantDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this conversation?'**
+  String get massistantDeleteTitle;
+
+  /// No description provided for @massistantDeleteText.
+  ///
+  /// In en, this message translates to:
+  /// **'Its questions and answers are deleted for good.'**
+  String get massistantDeleteText;
+
+  /// No description provided for @massistantSendHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter to send, Shift+Enter for a new line'**
+  String get massistantSendHint;
+
+  /// No description provided for @massistantConversationsLede.
+  ///
+  /// In en, this message translates to:
+  /// **'Your questions and the assistant\'s answers. Only you see them; they are kept for 30 days.'**
+  String get massistantConversationsLede;
+
+  /// No description provided for @massistantOpenChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the chat'**
+  String get massistantOpenChat;
+
   /// No description provided for @mciTitle.
   ///
   /// In en, this message translates to:
@@ -8576,6 +9338,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Time'**
   String get mdetailFactTime;
+
+  /// No description provided for @mgroupsGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups'**
+  String get mgroupsGroups;
+
+  /// No description provided for @mgroupsRepos.
+  ///
+  /// In en, this message translates to:
+  /// **'Repositories'**
+  String get mgroupsRepos;
+
+  /// No description provided for @mgroupsPickHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick one or more. The first one is the main one.'**
+  String get mgroupsPickHint;
+
+  /// No description provided for @mgroupsInTask.
+  ///
+  /// In en, this message translates to:
+  /// **'In this task'**
+  String get mgroupsInTask;
+
+  /// No description provided for @mgroupsFromGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'All of {name}'**
+  String mgroupsFromGroup(String name);
+
+  /// No description provided for @mgroupsFromGroupEdited.
+  ///
+  /// In en, this message translates to:
+  /// **'From {name}, edited'**
+  String mgroupsFromGroupEdited(String name);
+
+  /// No description provided for @mgroupsPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'main'**
+  String get mgroupsPrimary;
+
+  /// No description provided for @mgroupsRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}'**
+  String mgroupsRemove(String name);
+
+  /// No description provided for @mgroupsNoMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'This group has no active repositories.'**
+  String get mgroupsNoMembers;
+
+  /// No description provided for @mgroupsGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Group {name}'**
+  String mgroupsGroup(String name);
+
+  /// No description provided for @mgroupsPartlyMerged.
+  ///
+  /// In en, this message translates to:
+  /// **'Partly merged'**
+  String get mgroupsPartlyMerged;
+
+  /// No description provided for @mgroupsArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'archived'**
+  String get mgroupsArchived;
+
+  /// No description provided for @mgroupsPushError.
+  ///
+  /// In en, this message translates to:
+  /// **'Push failed: {error}'**
+  String mgroupsPushError(String error);
+
+  /// No description provided for @mgroupsFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} file} other {{n} files}}'**
+  String mgroupsFiles(num n);
+
+  /// No description provided for @mgroupsCiFixes.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} CI fix} other {{n} CI fixes}}'**
+  String mgroupsCiFixes(num n);
+
+  /// No description provided for @mgroupsStatePending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get mgroupsStatePending;
+
+  /// No description provided for @mgroupsStateUnchanged.
+  ///
+  /// In en, this message translates to:
+  /// **'No changes'**
+  String get mgroupsStateUnchanged;
+
+  /// No description provided for @mgroupsStatePushed.
+  ///
+  /// In en, this message translates to:
+  /// **'Pushed'**
+  String get mgroupsStatePushed;
+
+  /// No description provided for @mgroupsStateMerged.
+  ///
+  /// In en, this message translates to:
+  /// **'Merged'**
+  String get mgroupsStateMerged;
+
+  /// No description provided for @mgroupsStateDropped.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get mgroupsStateDropped;
 
   /// No description provided for @mhomeRunningNote.
   ///
@@ -9836,6 +10718,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'CI'**
   String get navCi;
+
+  /// No description provided for @navAiAssistant.
+  ///
+  /// In en, this message translates to:
+  /// **'AI assistant'**
+  String get navAiAssistant;
+
+  /// No description provided for @navAssistantChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get navAssistantChat;
+
+  /// No description provided for @navAssistantConversations.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversations'**
+  String get navAssistantConversations;
 
   /// No description provided for @networkTitle.
   ///

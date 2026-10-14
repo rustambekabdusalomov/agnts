@@ -22,10 +22,14 @@ class ImplementInput {
 
      this.repoId,
 
+     this.repoIds,
+
+     this.groupId,
+
      this.start,
   });
 
-      /// Where to implement it; defaults to the report's repository
+      /// Where to implement it; defaults to the report's repositories
   @JsonKey(
     
     name: r'repoId',
@@ -35,6 +39,31 @@ class ImplementInput {
 
 
   final int? repoId;
+
+
+
+      /// Several repositories instead of repoId
+  @JsonKey(
+    
+    name: r'repoIds',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<int>? repoIds;
+
+
+
+  @JsonKey(
+    
+    name: r'groupId',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? groupId;
 
 
 
@@ -56,11 +85,15 @@ class ImplementInput {
     @override
     bool operator ==(Object other) => identical(this, other) || other is ImplementInput &&
       other.repoId == repoId &&
+      other.repoIds == repoIds &&
+      other.groupId == groupId &&
       other.start == start;
 
     @override
     int get hashCode =>
         repoId.hashCode +
+        repoIds.hashCode +
+        groupId.hashCode +
         start.hashCode;
 
   factory ImplementInput.fromJson(Map<String, dynamic> json) => _$ImplementInputFromJson(json);

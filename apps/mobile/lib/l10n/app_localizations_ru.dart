@@ -1169,6 +1169,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get analyticsColCiHint => 'Группы падений CI за период';
 
   @override
+  String get analyticsTabAssistant => 'Ассистент';
+
+  @override
   String get appName => 'agnts';
 
   @override
@@ -2606,6 +2609,264 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get formNoMatch => 'Ничего не найдено';
+
+  @override
+  String groupsView(String n) {
+    return 'Группы ($n)';
+  }
+
+  @override
+  String get groupsSub =>
+      'Репозитории, которые меняются вместе. Тикет из группы работает во всех них и открывает pull request в каждом, который меняет.';
+
+  @override
+  String get groupsNone => 'Групп пока нет. Группа позволяет одному тикету менять несколько репозиториев, например API и веб-приложение.';
+
+  @override
+  String get groupsAdd => 'Новая группа';
+
+  @override
+  String get groupsDrawerSub => 'Репозитории, которые меняются вместе, по порядку: первый — основной репозиторий тикетов группы.';
+
+  @override
+  String get groupsName => 'Название';
+
+  @override
+  String get groupsNamePh => 'Магазин';
+
+  @override
+  String get groupsDescription => 'Описание';
+
+  @override
+  String get groupsMembers => 'Репозитории';
+
+  @override
+  String get groupsMembersHelp =>
+      'Порядок важен: первый — основной репозиторий. Роль подсказывает agnts, что это за репозиторий, например backend или web.';
+
+  @override
+  String get groupsMembersNeeded => 'Добавьте хотя бы один репозиторий.';
+
+  @override
+  String get groupsNoMembers => 'Репозиториев пока нет.';
+
+  @override
+  String get groupsAddMember => 'Добавить репозиторий…';
+
+  @override
+  String get groupsNoMoreRepos => 'Все активные репозитории уже в группе';
+
+  @override
+  String get groupsRolePh => 'Роль, например backend';
+
+  @override
+  String groupsRoleOf(String name) {
+    return 'Роль $name';
+  }
+
+  @override
+  String groupsMoveUp(String name) {
+    return 'Поднять $name';
+  }
+
+  @override
+  String groupsMoveDown(String name) {
+    return 'Опустить $name';
+  }
+
+  @override
+  String get groupsPrimary => 'основной';
+
+  @override
+  String get groupsArchived => 'в архиве';
+
+  @override
+  String groupsPrefixHelp(String prefix) {
+    return 'Префикс ключа задач из группы, например $prefix-12. Пусто — префикс первого репозитория.';
+  }
+
+  @override
+  String get groupsInstructions => 'Инструкции';
+
+  @override
+  String get groupsInstructionsPh =>
+      'Веб-приложение обращается к API через src/api; меняйте оба вместе и держите спецификацию OpenAPI в актуальном состоянии.';
+
+  @override
+  String get groupsInstructionsHelp => 'Как репозитории связаны между собой, в Markdown. Добавляется в каждый промпт тикетов группы.';
+
+  @override
+  String get groupsWarningsTitle => 'Сохранено, но есть предупреждения:';
+
+  @override
+  String groupsWarningsBadge(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count предупреждения',
+      many: '$count предупреждений',
+      few: '$count предупреждения',
+      one: '$count предупреждение',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupsSaved(String name) {
+    return 'Группа $name сохранена';
+  }
+
+  @override
+  String get groupsDelete => 'Удалить';
+
+  @override
+  String groupsDeleteConfirm(String name) {
+    return 'Удалить группу $name? Её тикеты сохранят свои репозитории.';
+  }
+
+  @override
+  String groupsDeleted(String name) {
+    return 'Группа $name удалена';
+  }
+
+  @override
+  String get groupsColGroup => 'Группа';
+
+  @override
+  String get groupsColMembers => 'Репозитории';
+
+  @override
+  String get groupsColPrefix => 'Префикс';
+
+  @override
+  String groupsInGroups(String names) {
+    return 'В группах: $names';
+  }
+
+  @override
+  String get groupsInLabel => 'Группы:';
+
+  @override
+  String get groupsPickerGroups => 'Группы репозиториев';
+
+  @override
+  String get groupsChosen => 'Выбранные репозитории';
+
+  @override
+  String groupsFromGroup(String name) {
+    return 'Из группы $name';
+  }
+
+  @override
+  String get groupsMakePrimary => 'Сделать основным репозиторием';
+
+  @override
+  String groupsMore(String count) {
+    return '+$count';
+  }
+
+  @override
+  String get groupsAllGroups => 'Все группы';
+
+  @override
+  String get groupsFilterLabel => 'Группа';
+
+  @override
+  String get groupsKvRepos => 'Репозитории';
+
+  @override
+  String get groupsKvGroup => 'Группа';
+
+  @override
+  String groupsTicketRepos(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count репозитория',
+      many: '$count репозиториев',
+      few: '$count репозитория',
+      one: '$count репозиторий',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupsPartlyMerged => 'Влит частично';
+
+  @override
+  String groupsPr(String number) {
+    return 'PR #$number';
+  }
+
+  @override
+  String groupsOpenPrIn(String repo, String number) {
+    return 'Открыть $repo #$number';
+  }
+
+  @override
+  String groupsFiles(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count файла',
+      many: '$count файлов',
+      few: '$count файла',
+      one: '$count файл',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupsFilesIn(String repo, num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count файла',
+      many: '$count файлов',
+      few: '$count файла',
+      one: '$count файл',
+    );
+    return '$repo · $_temp0';
+  }
+
+  @override
+  String groupsPushError(String error) {
+    return 'Не удалось отправить: $error';
+  }
+
+  @override
+  String groupsRetryHint(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Повтор отправит $count репозитория, где была ошибка; остальные останутся как есть.',
+      many: 'Повтор отправит $count репозиториев, где была ошибка; остальные останутся как есть.',
+      few: 'Повтор отправит $count репозитория, где была ошибка; остальные останутся как есть.',
+      one: 'Повтор отправит $count репозиторий, где была ошибка; остальные останутся как есть.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupsState_pending => 'Не отправлен';
+
+  @override
+  String get groupsState_unchanged => 'Без изменений';
+
+  @override
+  String get groupsState_pushed => 'Отправлен';
+
+  @override
+  String get groupsState_merged => 'Влит';
+
+  @override
+  String get groupsState_dropped => 'Закрыт';
+
+  @override
+  String get groupsMaxTicketRepos => 'Максимум репозиториев в тикете';
+
+  @override
+  String get groupsMaxTicketReposHelp => 'Сколько репозиториев может быть у одного тикета и у одной группы репозиториев.';
 
   @override
   String get harnessRepoTab => 'Защита';
@@ -4675,6 +4936,238 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get massistantTitle => 'Ассистент';
+
+  @override
+  String get massistantFab => 'Спросить ассистента';
+
+  @override
+  String get massistantMoreRow => 'Ассистент';
+
+  @override
+  String get massistantMoreRowSub => 'Вопросы о рабочем пространстве';
+
+  @override
+  String get massistantPlaceholder => 'Спросите о задачах, CI, расходах…';
+
+  @override
+  String get massistantSend => 'Отправить';
+
+  @override
+  String massistantCount(String n) {
+    return '$n / 1000';
+  }
+
+  @override
+  String get massistantNewConversation => 'Новый разговор';
+
+  @override
+  String get massistantHistory => 'Разговоры';
+
+  @override
+  String get massistantHistoryEmpty => 'Разговоров пока нет.';
+
+  @override
+  String get massistantDelete => 'Удалить';
+
+  @override
+  String get massistantDeleted => 'Разговор удалён';
+
+  @override
+  String get massistantEmptyTitle => 'Спросите agnts о работе';
+
+  @override
+  String get massistantEmptyText =>
+      'Ассистент отвечает по вашим задачам, CI и расходам и даёт ссылки на то, о чём говорит. Он ничего не запускает, не одобряет и не отклоняет.';
+
+  @override
+  String get massistantPrivate => 'Ваши разговоры видите только вы. Они хранятся 30 дней.';
+
+  @override
+  String get massistantSuggestWaiting => 'Что ждёт меня?';
+
+  @override
+  String get massistantSuggestCi => 'Почему CI красный?';
+
+  @override
+  String get massistantSuggestSpend => 'Сколько мы потратили на этой неделе?';
+
+  @override
+  String get massistantSuggestDone => 'Что agnts закончил на этой неделе?';
+
+  @override
+  String massistantThinking(String seconds) {
+    return 'Думаю… $seconds с';
+  }
+
+  @override
+  String massistantReading(String what) {
+    return 'Читаю $what';
+  }
+
+  @override
+  String get massistantFileInbox => 'входящие';
+
+  @override
+  String get massistantFileTickets => 'задачи';
+
+  @override
+  String massistantFileTicket(String key) {
+    return '$key';
+  }
+
+  @override
+  String get massistantFileCi => 'сбои CI';
+
+  @override
+  String get massistantFileUsage => 'лимиты плана';
+
+  @override
+  String get massistantFileAnalytics => 'аналитику';
+
+  @override
+  String get massistantFileRepos => 'репозитории';
+
+  @override
+  String get massistantFileLessons => 'уроки';
+
+  @override
+  String get massistantFileConversation => 'разговор';
+
+  @override
+  String get massistantFileQuestion => 'ваш вопрос';
+
+  @override
+  String get massistantFileOther => 'рабочее пространство';
+
+  @override
+  String get massistantFailed => 'Нет ответа';
+
+  @override
+  String get massistantAskAgain => 'Спросить ещё раз';
+
+  @override
+  String massistantLinkCi(String id) {
+    return 'CI #$id';
+  }
+
+  @override
+  String massistantLinkLesson(String id) {
+    return 'Урок #$id';
+  }
+
+  @override
+  String massistantTook(String seconds) {
+    return '$seconds с';
+  }
+
+  @override
+  String get massistantHelpful => 'Полезно';
+
+  @override
+  String get massistantNotHelpful => 'Не помогло';
+
+  @override
+  String get massistantRateTitle => 'Как вам ответ?';
+
+  @override
+  String get massistantRateComment => 'Что было не так или чего не хватило? (необязательно)';
+
+  @override
+  String get massistantRateShare => 'Сохранить данные этого вопроса, чтобы agnts проверял на нём ответы получше';
+
+  @override
+  String get massistantRateNote => 'Оценку, комментарий, вопрос и ответ увидит владелец рабочего пространства.';
+
+  @override
+  String get massistantRateSend => 'Отправить';
+
+  @override
+  String get massistantRateClear => 'Убрать оценку';
+
+  @override
+  String get massistantRated => 'Спасибо за оценку';
+
+  @override
+  String get massistantStatsTitle => 'Ассистент';
+
+  @override
+  String get massistantStatsQuestions => 'Вопросы';
+
+  @override
+  String get massistantStatsAnswered => 'Отвечено';
+
+  @override
+  String get massistantStatsMedian => 'Медианное время';
+
+  @override
+  String get massistantStatsHelpful => 'Полезно';
+
+  @override
+  String get massistantStatsTokens => 'Токены';
+
+  @override
+  String massistantStatsPeople(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'спросили $n человека',
+      many: 'спросили $n человек',
+      few: 'спросили $n человека',
+      one: 'спросил $n человек',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get massistantStatsVersions => 'По версиям промптов';
+
+  @override
+  String massistantStatsVersionRow(String answered, String failed, String up, String down, String median) {
+    return '$answered отвечено · $failed сбоев · $up 👍 $down 👎 · $median';
+  }
+
+  @override
+  String get massistantStatsNone => 'За этот период вопросов не было.';
+
+  @override
+  String get massistantStatsRated => 'Оценённые ответы';
+
+  @override
+  String get massistantRatedEmpty => 'Оценённых ответов пока нет.';
+
+  @override
+  String get massistantRatedShared => 'Сохранён для проверки промптов';
+
+  @override
+  String massistantStatsParts(String start, String snapshot, String claude) {
+    return 'Контейнер $start · данные $snapshot · Claude $claude';
+  }
+
+  @override
+  String massistantStatsWarm(String n, String total) {
+    return '$n из $total — в уже запущенном контейнере';
+  }
+
+  @override
+  String get massistantStatsSeeRated => 'Оценённые ответы';
+
+  @override
+  String get massistantDeleteTitle => 'Удалить этот разговор?';
+
+  @override
+  String get massistantDeleteText => 'Его вопросы и ответы будут удалены навсегда.';
+
+  @override
+  String get massistantSendHint => 'Enter — отправить, Shift+Enter — новая строка';
+
+  @override
+  String get massistantConversationsLede => 'Ваши вопросы и ответы ассистента. Их видите только вы; они хранятся 30 дней.';
+
+  @override
+  String get massistantOpenChat => 'Открыть чат';
+
+  @override
   String get mciTitle => 'Сбои CI';
 
   @override
@@ -4929,6 +5422,89 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get mdetailFactTime => 'Время';
+
+  @override
+  String get mgroupsGroups => 'Группы';
+
+  @override
+  String get mgroupsRepos => 'Репозитории';
+
+  @override
+  String get mgroupsPickHint => 'Выберите один или несколько. Первый будет основным.';
+
+  @override
+  String get mgroupsInTask => 'В этой задаче';
+
+  @override
+  String mgroupsFromGroup(String name) {
+    return 'Вся группа $name';
+  }
+
+  @override
+  String mgroupsFromGroupEdited(String name) {
+    return 'Из группы $name, изменено';
+  }
+
+  @override
+  String get mgroupsPrimary => 'основной';
+
+  @override
+  String mgroupsRemove(String name) {
+    return 'Убрать $name';
+  }
+
+  @override
+  String get mgroupsNoMembers => 'В этой группе нет активных репозиториев.';
+
+  @override
+  String mgroupsGroup(String name) {
+    return 'Группа $name';
+  }
+
+  @override
+  String get mgroupsPartlyMerged => 'Влито частично';
+
+  @override
+  String get mgroupsArchived => 'в архиве';
+
+  @override
+  String mgroupsPushError(String error) {
+    return 'Не удалось отправить: $error';
+  }
+
+  @override
+  String mgroupsFiles(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n файла', many: '$n файлов', few: '$n файла', one: '$n файл');
+    return '$_temp0';
+  }
+
+  @override
+  String mgroupsCiFixes(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n исправления CI',
+      many: '$n исправлений CI',
+      few: '$n исправления CI',
+      one: '$n исправление CI',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mgroupsStatePending => 'Ожидает';
+
+  @override
+  String get mgroupsStateUnchanged => 'Без изменений';
+
+  @override
+  String get mgroupsStatePushed => 'Отправлено';
+
+  @override
+  String get mgroupsStateMerged => 'Влито';
+
+  @override
+  String get mgroupsStateDropped => 'Закрыто';
 
   @override
   String mhomeRunningNote(String parallel, String queued) {
@@ -5627,6 +6203,15 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get navCi => 'CI';
+
+  @override
+  String get navAiAssistant => 'AI-ассистент';
+
+  @override
+  String get navAssistantChat => 'Чат';
+
+  @override
+  String get navAssistantConversations => 'Разговоры';
 
   @override
   String get networkTitle => 'Частные сети';

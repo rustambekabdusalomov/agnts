@@ -27,8 +27,10 @@ func (s *Service) Poll(ctx context.Context) error {
 	// Repositories with agnts pull requests waiting, for red-check feedback.
 	if open, err := s.tickets.UnmergedPRs(ctx, 50); err == nil {
 		for _, t := range open {
-			if t.RepoID != nil && byRepo[*t.RepoID] == nil {
-				byRepo[*t.RepoID] = nil
+			for _, r := range t.OpenedPRs() {
+				if _, ok := byRepo[r.RepoID]; !ok {
+					byRepo[r.RepoID] = nil
+				}
 			}
 		}
 	}

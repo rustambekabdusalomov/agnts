@@ -80,6 +80,10 @@ function setTab(v: Tab) {
     <PageHeader :title="repo.data.value.name" doc="repo">
       <template #below>
         <p style="font-family: var(--mono); font-size: 14px">{{ repo.data.value.cloneUrl }}</p>
+        <p v-if="repo.data.value.groups?.length" class="srcs" style="margin-top: 6px">
+          <span class="hint">{{ t('groups.inLabel') }}</span>
+          <RouterLink v-for="g in repo.data.value.groups" :key="g.id" class="src" :to="{ name: 'repos', query: { view: 'groups' } }">{{ g.name }}</RouterLink>
+        </p>
       </template>
       <div class="actions" style="margin: 0">
         <span v-if="repo.data.value.kind === 'jira'" class="src">{{ t('repos.jira', { project: repo.data.value.jiraProject || '—' }) }}</span>

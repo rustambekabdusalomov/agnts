@@ -469,7 +469,15 @@ func (h *handler) editChecks(p string) {
 	}
 	now := h.env.Now().Unix()
 	for _, c := range h.cfg.EditChecks {
-		if !matchAny(c.Globs, p) {
+		rel := p
+		if c.Dir != "" {
+			rest, ok := strings.CutPrefix(p, c.Dir+"/")
+			if !ok {
+				continue
+			}
+			rel = rest
+		}
+		if !matchAny(c.Globs, rel) {
 			continue
 		}
 		if c.Every > 0 {
@@ -481,7 +489,10 @@ func (h *handler) editChecks(p string) {
 			}
 			h.st.LastRun[c.Name] = now
 		}
-		cmd := strings.NewReplacer("{file}", shellQuote(p), "{dir}", shellQuote(dirOf(p))).Replace(c.Cmd)
+		cmd := strings.NewReplacer("{file}", shellQuote(rel), "{dir}", shellQuote(dirOf(rel))).Replace(c.Cmd)
+		if c.Dir != "" {
+			cmd = "cd " + shellQuote(c.Dir) + " && { " + cmd + "\n}"
+		}
 		timeout := time.Duration(max(c.TimeoutSec, 5)) * time.Second
 		exit, out, took := h.env.Run(cmd, timeout)
 		if exit == 0 {
@@ -520,7 +531,7 @@ func (h *handler) stop() {
 	}
 	for _, c := range h.cfg.Stop {
 		timeout := time.Duration(max(c.TimeoutSec, 30)) * time.Second
-		exit, out, took := h.env.Run(c.Cmd, timeout)
+		exit, out, took := h.env.Run(c.Shell(), timeout)
 		if exit == 0 {
 			h.note(Entry{Hook: HookStopGate, Decision: DecisionPass, Kind: c.Name, MS: took.Milliseconds()})
 			continue

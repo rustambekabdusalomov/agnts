@@ -45,6 +45,9 @@ type FollowUp struct {
 	// After numbers the follow-ups in the same list that must be done
 	// first, 1 for the first.
 	After []int `json:"after"`
+	// Repos names the folders of the repositories the follow-up is about,
+	// for a ticket in several; empty means all of the ticket's.
+	Repos []string `json:"repos,omitempty"`
 }
 
 // Suggestion is a follow-up ticket agnts suggests from a ticket. Nothing
@@ -69,8 +72,13 @@ type Suggestion struct {
 	// list being saved. The store turns them into ids.
 	AfterIndex []int
 	ChildKey   string // the ticket made from it, once accepted
-	DecidedAt  *time.Time
-	CreatedAt  time.Time
+	// RepoIDs are the repositories of the parent it is about; empty means
+	// all of the parent's. RepoFolders are what Claude named, before the
+	// orchestrator maps them to ids.
+	RepoIDs     []int64
+	RepoFolders []string
+	DecidedAt   *time.Time
+	CreatedAt   time.Time
 }
 
 // Suggestion builds a suggestion from what Claude wrote, cleaned. It
@@ -85,6 +93,7 @@ func (f FollowUp) Suggestion(source string) (Suggestion, bool) {
 		Serves:      clip(strings.TrimSpace(f.Serves), 1000),
 		Kind:        TicketKind(strings.ToLower(strings.TrimSpace(f.Kind))),
 		Priority:    strings.ToLower(strings.TrimSpace(f.Priority)),
+		RepoFolders: f.Repos,
 	}
 	if s.Title == "" || s.Serves == "" || !slices.Contains(SuggestionTypes, s.Type) {
 		return s, false

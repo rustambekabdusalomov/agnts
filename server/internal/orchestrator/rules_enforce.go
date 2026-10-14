@@ -12,29 +12,67 @@ import (
 	"agnts/internal/guard"
 )
 
-// enforcedRules are the team rules agnts-guard enforces in runs of repoID:
-// the file and command rules (diff rules are checked on the server).
-func (o *Orchestrator) enforcedRules(ctx context.Context, repoID int64) []guard.Rule {
-	rules, err := o.enforced(ctx, &repoID)
+// enforcedRules are the team rules agnts-guard enforces in a run of these
+// repositories: the file and command rules (diff rules are checked on the
+// server). In a run of several, a repository's file rule only covers its
+// folder.
+func (o *Orchestrator) enforcedRules(ctx context.Context, rs []runRepo) []guard.Rule {
+	rules, err := o.enforced(ctx, repoIDsOf(rs))
 	if err != nil {
 		o.log.Warn("load enforced rules", "err", err)
 		return nil
 	}
 	var out []guard.Rule
 	for _, r := range rules {
-		if e := r.Enforce; e.On == guard.OnFile || e.On == guard.OnBash {
-			out = append(out, guard.Rule{ID: r.ID, Title: r.Title, On: e.On, Paths: e.Paths, Pattern: e.Pattern, Action: e.Action, Message: e.Message})
+		e := r.Enforce
+		if e.On != guard.OnFile && e.On != guard.OnBash {
+			continue
 		}
+		paths := e.Paths
+		if r.RepoID == nil && len(rs) > 1 && e.On == guard.OnFile && len(e.Paths) > 0 {
+			// A global rule's globs are relative to a repository: in a run
+			// of several, each repository's folder gets them. A glob
+			// without a slash matches a file's name anywhere already.
+			paths = nil
+			for _, p := range e.Paths {
+				if !strings.Contains(p, "/") {
+					paths = append(paths, p)
+					continue
+				}
+				for _, rr := range rs {
+					paths = append(paths, rr.Rel(p))
+				}
+			}
+		}
+		if rr, ok := ruleRepo(rs, r); ok && rr.Folder() != "" && e.On == guard.OnFile {
+			paths = nil
+			for _, p := range e.Paths {
+				paths = append(paths, rr.Rel(p))
+			}
+			if len(paths) == 0 {
+				paths = []string{rr.Folder() + "/**"}
+			}
+		}
+		out = append(out, guard.Rule{ID: r.ID, Title: r.Title, On: e.On, Paths: paths, Pattern: e.Pattern, Action: e.Action, Message: e.Message})
 	}
 	return out
 }
 
-// enforced returns the active rules with an enforcement for repoID.
-func (o *Orchestrator) enforced(ctx context.Context, repoID *int64) ([]domain.Rule, error) {
+// ruleRepo is the run's repository a repository rule belongs to.
+func ruleRepo(rs []runRepo, r domain.Rule) (runRepo, bool) {
+	if r.RepoID == nil {
+		return runRepo{}, false
+	}
+	return repoByID(rs, *r.RepoID)
+}
+
+// enforced returns the active rules with an enforcement for these
+// repositories.
+func (o *Orchestrator) enforced(ctx context.Context, repoIDs []int64) ([]domain.Rule, error) {
 	if o.rules == nil {
 		return nil, nil
 	}
-	rules, err := o.rules.ActiveRules(ctx, repoID)
+	rules, err := o.activeRules(ctx, repoIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -242,12 +280,12 @@ func skillMarkdown(r domain.Rule) string {
 // run as Claude Code skills, replacing those of earlier runs. It returns
 // how many it wrote. It removes all of agnts's skills of earlier runs
 // first, method skills included: the coding stage writes those again.
-func (o *Orchestrator) writeSkills(ctx context.Context, ws Workspace, repoID *int64) int {
+func (o *Orchestrator) writeSkills(ctx context.Context, ws Workspace, repoIDs []int64) int {
 	_, _ = ws.Exec(ctx, "rm -rf "+SkillsDir+"/agnts-*", time.Minute)
 	if o.rules == nil {
 		return 0
 	}
-	rules, err := o.rules.ActiveRules(ctx, repoID)
+	rules, err := o.activeRules(ctx, repoIDs)
 	if err != nil {
 		o.log.Warn("load skill rules", "err", err)
 		return 0

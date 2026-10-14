@@ -2,14 +2,18 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import type { RemoteRepository, Repository } from '../api/types'
+import type { RemoteRepository, RepoGroup, Repository } from '../api/types'
 import PageHeader from '../components/PageHeader.vue'
 import ImportDrawer from '../components/repos/ImportDrawer.vue'
 import RepoDrawer from '../components/repos/RepoDrawer.vue'
+import GroupDrawer from '../components/repos/GroupDrawer.vue'
+import GroupsTab from '../components/repos/GroupsTab.vue'
+import { useRepoGroups } from '../components/repos/useGroups'
 import { useArchiveRepo, useRepos } from '../components/repos/useRepos'
 import SegButtons from '../components/form/SegButtons.vue'
 import HiIcon from '../components/ui/HiIcon.vue'
 import { useUi } from '../stores/ui'
+import { useWorkspace } from '../stores/workspace'
 
 const { t } = useI18n()
 const ui = useUi()
@@ -17,18 +21,21 @@ const route = useRoute()
 const router = useRouter()
 const repos = useRepos()
 const archive = useArchiveRepo()
+const workspace = useWorkspace()
+const groups = useRepoGroups()
 
-// Active or archived, kept in the URL (?view=archived) so the archive can be linked.
-type View = 'active' | 'archived'
+// Active, archived or groups, kept in the URL (?view=archived, ?view=groups) so each can be linked.
+type View = 'active' | 'archived' | 'groups'
 const view = computed<View>({
-  get: () => (route.query.view === 'archived' ? 'archived' : 'active'),
-  set: (v) => void router.replace({ query: { ...route.query, view: v === 'archived' ? 'archived' : undefined } }),
+  get: () => (route.query.view === 'archived' || route.query.view === 'groups' ? route.query.view : 'active'),
+  set: (v) => void router.replace({ query: { ...route.query, view: v === 'active' ? undefined : v } }),
 })
 const active = computed(() => (repos.data.value ?? []).filter((r) => !r.archivedAt))
 const archivedList = computed(() => (repos.data.value ?? []).filter((r) => r.archivedAt))
 const views = computed(() => [
   { value: 'active' as View, label: t('repos.viewActive', { n: active.value.length }) },
   { value: 'archived' as View, label: t('repos.viewArchived', { n: archivedList.value.length }) },
+  { value: 'groups' as View, label: t('groups.view', { n: groups.data.value?.length ?? 0 }) },
 ])
 const rows = computed(() => {
   const q = ui.search.trim().toLowerCase()
@@ -46,6 +53,14 @@ function openRepo(r: Repository | null) {
   drawerOpen.value = true
 }
 
+// Groups: made, edited and deleted by the owner.
+const groupOpen = ref(false)
+const editingGroup = ref<RepoGroup | null>(null)
+function openGroup(g: RepoGroup | null) {
+  editingGroup.value = g
+  groupOpen.value = true
+}
+
 // Import: pick a repository from GitHub or GitLab, then finish it in the drawer.
 const importOpen = ref(false)
 function onPick(r: RemoteRepository) {
@@ -57,7 +72,10 @@ function onPick(r: RemoteRepository) {
 
 <template>
   <PageHeader :title="t('repos.title')" doc="repos">
-    <div class="actions" style="margin: 0">
+    <div v-if="view === 'groups'" class="actions" style="margin: 0">
+      <button v-if="workspace.isOwner" class="btn btn-p" type="button" @click="openGroup(null)"><HiIcon name="plus" />{{ t('groups.add') }}</button>
+    </div>
+    <div v-else class="actions" style="margin: 0">
       <button class="btn" type="button" @click="importOpen = true"><HiIcon name="import" />{{ t('repos.import') }}</button>
       <button class="btn btn-p" type="button" @click="openRepo(null)"><HiIcon name="plus" />{{ t('repos.add') }}</button>
     </div>
@@ -67,10 +85,11 @@ function onPick(r: RemoteRepository) {
 
   <section class="card">
     <div v-if="repos.data.value?.length" class="ch">
-      <p class="sub" style="margin: 0">{{ view === 'archived' ? t('repos.archivedSub') : '' }}</p>
+      <p class="sub" style="margin: 0">{{ view === 'archived' ? t('repos.archivedSub') : view === 'groups' ? t('groups.sub') : '' }}</p>
       <SegButtons v-model="view" :options="views" :label="t('repos.viewLabel')" />
     </div>
-    <p v-if="repos.isPending.value" class="hint">{{ t('common.loading') }}</p>
+    <GroupsTab v-if="view === 'groups'" @edit="openGroup" />
+    <p v-else-if="repos.isPending.value" class="hint">{{ t('common.loading') }}</p>
     <p v-else-if="repos.isError.value" class="ferr">{{ t('common.error') }}</p>
     <p v-else-if="!repos.data.value?.length" class="empty">{{ t('repos.none') }}</p>
     <div v-else class="tw">
@@ -92,6 +111,7 @@ function onPick(r: RemoteRepository) {
             <td>
               <div class="ttitle">{{ r.name }}</div>
               <div class="tkey">{{ r.cloneUrl }}</div>
+              <div v-if="r.groups?.length" class="hint">{{ t('groups.inGroups', { names: r.groups.map((g) => g.name).join(', ') }) }}</div>
             </td>
             <td>
               <span class="srcs">
@@ -132,4 +152,5 @@ function onPick(r: RemoteRepository) {
 
   <RepoDrawer v-model="drawerOpen" :repo="editing" :preset="preset" />
   <ImportDrawer v-model="importOpen" @pick="onPick" />
+  <GroupDrawer v-model="groupOpen" :group="editingGroup" :repos="repos.data.value ?? []" />
 </template>

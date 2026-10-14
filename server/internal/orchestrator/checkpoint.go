@@ -19,7 +19,7 @@ const checkpointMinTurns = 45
 // changed so far, compares that with the plan, and resumes the session
 // with a checkpoint prompt that asks Claude to get back on course before
 // it finishes.
-func (o *Orchestrator) codeWithCheckpoint(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, modelStage, prompt, session string, design *Analysis) (ClaudeResult, error) {
+func (o *Orchestrator) codeWithCheckpoint(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, rs []runRepo, modelStage, prompt, session string, design *Analysis) (ClaudeResult, error) {
 	at := 0
 	if design != nil && (design.Chosen() != nil || design.Footprint != nil) && s.MaxTurns >= checkpointMinTurns {
 		at = s.MaxTurns / 3
@@ -28,7 +28,7 @@ func (o *Orchestrator) codeWithCheckpoint(ctx context.Context, s domain.Settings
 	if err != nil || at == 0 || !res.IsError || res.Subtype != "error_max_turns" {
 		return res, err
 	}
-	changed := changedFiles(ctx, ws)
+	changed := changedFiles(ctx, ws, rs)
 	var outside []string
 	if design.Footprint != nil {
 		if pred := design.Footprint.Clean().Files; len(pred) > 0 {
@@ -52,14 +52,32 @@ func (o *Orchestrator) codeWithCheckpoint(ctx context.Context, s domain.Settings
 	return o.claudeTurns(ctx, s, ws, t, run, modelStage, cp, res.SessionID, max(s.MaxTurns-res.Turns, 10))
 }
 
-// changedFiles lists the files changed in /workspace so far, at most 100.
-func changedFiles(ctx context.Context, ws Workspace) []string {
-	r, err := ws.Exec(ctx, "git status --porcelain --untracked-files=all", time.Minute)
-	if err != nil || r.ExitCode != 0 {
+// changedFiles lists the files changed in the run's repositories so far,
+// at most 100, as paths from /workspace.
+func changedFiles(ctx context.Context, ws Workspace, rs []runRepo) []string {
+	if len(rs) == 0 {
+		return changedIn(ctx, ws, runRepo{})
+	}
+	var out []string
+	for _, r := range rs {
+		for _, p := range changedIn(ctx, ws, r) {
+			if len(out) < 100 {
+				out = append(out, r.Rel(p))
+			}
+		}
+	}
+	return out
+}
+
+// changedIn lists the files changed in one repository of a run so far, at
+// most 100, relative to it.
+func changedIn(ctx context.Context, ws Workspace, r runRepo) []string {
+	res, err := ws.Exec(ctx, r.Cmd("git status --porcelain --untracked-files=all"), time.Minute)
+	if err != nil || res.ExitCode != 0 {
 		return nil
 	}
 	var out []string
-	for _, l := range strings.Split(r.Output, "\n") {
+	for _, l := range strings.Split(res.Output, "\n") {
 		if len(l) < 4 {
 			continue
 		}

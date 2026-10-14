@@ -1,9 +1,9 @@
 import 'package:test/test.dart';
 import 'package:agnts_api/agnts_api.dart';
 
-// tests for ReviewModel
+// tests for AssistantLanguage
 void main() {
 
-  group(ReviewModel, () {
+  group(AssistantLanguage, () {
   });
 }

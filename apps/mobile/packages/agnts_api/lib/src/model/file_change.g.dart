@@ -7,6 +7,10 @@ part of 'file_change.dart';
 // **************************************************************************
 
 abstract class _$FileChangeCWProxy {
+  FileChange repo(String? repo);
+
+  FileChange repoId(int? repoId);
+
   FileChange path(String path);
 
   FileChange add(int add);
@@ -21,7 +25,14 @@ abstract class _$FileChangeCWProxy {
   /// ```dart
   /// FileChange(...).copyWith(id: 12, name: "My name")
   /// ````
-  FileChange call({String path, int add, int del, String diff});
+  FileChange call({
+    String? repo,
+    int? repoId,
+    String path,
+    int add,
+    int del,
+    String diff,
+  });
 }
 
 /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfFileChange.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfFileChange.copyWith.fieldName(...)`
@@ -29,6 +40,12 @@ class _$FileChangeCWProxyImpl implements _$FileChangeCWProxy {
   const _$FileChangeCWProxyImpl(this._value);
 
   final FileChange _value;
+
+  @override
+  FileChange repo(String? repo) => this(repo: repo);
+
+  @override
+  FileChange repoId(int? repoId) => this(repoId: repoId);
 
   @override
   FileChange path(String path) => this(path: path);
@@ -50,12 +67,22 @@ class _$FileChangeCWProxyImpl implements _$FileChangeCWProxy {
   /// FileChange(...).copyWith(id: 12, name: "My name")
   /// ````
   FileChange call({
+    Object? repo = const $CopyWithPlaceholder(),
+    Object? repoId = const $CopyWithPlaceholder(),
     Object? path = const $CopyWithPlaceholder(),
     Object? add = const $CopyWithPlaceholder(),
     Object? del = const $CopyWithPlaceholder(),
     Object? diff = const $CopyWithPlaceholder(),
   }) {
     return FileChange(
+      repo: repo == const $CopyWithPlaceholder()
+          ? _value.repo
+          // ignore: cast_nullable_to_non_nullable
+          : repo as String?,
+      repoId: repoId == const $CopyWithPlaceholder()
+          ? _value.repoId
+          // ignore: cast_nullable_to_non_nullable
+          : repoId as int?,
       path: path == const $CopyWithPlaceholder()
           ? _value.path
           // ignore: cast_nullable_to_non_nullable
@@ -90,6 +117,8 @@ FileChange _$FileChangeFromJson(Map<String, dynamic> json) =>
     $checkedCreate('FileChange', json, ($checkedConvert) {
       $checkKeys(json, requiredKeys: const ['path', 'add', 'del', 'diff']);
       final val = FileChange(
+        repo: $checkedConvert('repo', (v) => v as String?),
+        repoId: $checkedConvert('repoId', (v) => (v as num?)?.toInt()),
         path: $checkedConvert('path', (v) => v as String),
         add: $checkedConvert('add', (v) => (v as num).toInt()),
         del: $checkedConvert('del', (v) => (v as num).toInt()),
@@ -100,6 +129,8 @@ FileChange _$FileChangeFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$FileChangeToJson(FileChange instance) =>
     <String, dynamic>{
+      'repo': ?instance.repo,
+      'repoId': ?instance.repoId,
       'path': instance.path,
       'add': instance.add,
       'del': instance.del,

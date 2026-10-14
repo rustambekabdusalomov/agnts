@@ -24,6 +24,7 @@ Name | Type | Description | Notes
 **reflect** | **bool** | Learn from change requests and rejections: suggest rules, which apply once someone adopts them | [optional] 
 **egressAllow** | **List&lt;String&gt;** | Hosts run containers may reach besides the built-in list, such as a staging API; .example.com matches subdomains | [optional] 
 **suggestFollowUps** | **bool** | Runs suggest follow-up tickets (off by default; a ticket can override it) | [optional] 
+**maxTicketRepos** | **int** | How many repositories one ticket, and one repository group, may have (6 by default) | [optional] 
 **pullReviews** | [**PullReviewSettings**](PullReviewSettings.md) |  | [optional] 
 **ci** | [**CISettings**](CISettings.md) |  | [optional] 
 **guard** | [**GuardSettings**](GuardSettings.md) |  | [optional] 

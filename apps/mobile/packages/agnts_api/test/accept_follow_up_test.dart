@@ -38,9 +38,19 @@ void main() {
       // TODO
     });
 
-    // Defaults to the parent ticket's repository
+    // Defaults to the parent ticket's repositories (those the suggestion is about)
     // int repoId
     test('to test the property `repoId`', () async {
+      // TODO
+    });
+
+    // List<int> repoIds
+    test('to test the property `repoIds`', () async {
+      // TODO
+    });
+
+    // int groupId
+    test('to test the property `groupId`', () async {
       // TODO
     });
 

@@ -6,6 +6,7 @@ import { ago, fmtTokens, ioTokens } from '../composables/format'
 import StateBadge from './StateBadge.vue'
 import WaitBadge from './WaitBadge.vue'
 import KindBadge from './ticket/KindBadge.vue'
+import RepoChip from './repos/RepoChip.vue'
 
 // The "Board" view of tickets and tasks: one column per group of states,
 // cards in the order the list gives them (most recently updated first).
@@ -50,7 +51,7 @@ const tone = (c: BoardColumn) => STATE_TONE[c.states[0]]
             <KindBadge v-if="tk.kind !== 'code'" :ticket="tk" />
             <span v-if="tk.openSuggestions" class="badge b-info">{{ t('followUps.openBadge', { count: tk.openSuggestions }) }}</span>
             <span v-if="tk.blockedBy?.length" class="badge b-warn" :title="tk.blockedBy.map((b) => b.key).join(', ')">{{ t('relations.waitingBadge') }}</span>
-            <span v-if="tk.repoName">{{ tk.repoName }}</span>
+            <RepoChip :ticket="tk" />
             <span v-if="tk.spend">{{ t('spend.tokens', { n: fmtTokens(ioTokens(tk.spend), locale) }) }}</span>
             <span>{{ ago(tk.updatedAt, locale) }}</span>
           </div>

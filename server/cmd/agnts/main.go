@@ -59,6 +59,8 @@ Workspace commands act in --workspace <slug> (or AGNTS_WORKSPACE), else the
 install's default workspace:
   agnts repo add [flags]         add or update a repository (see agnts repo add -h)
   agnts repo list                list repositories
+  agnts repo group list|add|members|rm
+                                 repository groups: tickets that change several repositories
   agnts integration set <jira|plane|github|claude>
                                 connect a service (secrets are read from the terminal)
   agnts jira sync                pick up labelled Jira issues now
@@ -66,6 +68,8 @@ install's default workspace:
   agnts eval relations           score the queue's predictions (footprints, conflicts) against the real diffs
   agnts eval replay KEY...       re-run done tickets with today's prompts, from the commit each started from
   agnts eval report              compare the replays with the tickets they re-ran, by prompt version
+  agnts eval assistant [--limit N]
+                                answer shared assistant questions again with today's prompts, old and new side by side
   agnts mcp token                create a new static MCP bearer token (the owner's)
   agnts keygen                   print a new AGNTS_ENC_KEY
   agnts version [--json]         print the version
@@ -206,8 +210,10 @@ func workspaceCommand(ctx context.Context, cfg config.Config, log *slog.Logger, 
 			return evalReplay(ctx, cfg, pool, log, args[2:], os.Stdout)
 		case len(args) == 2 && args[1] == "report":
 			return evalReport(ctx, cfg, pool, log, os.Stdout)
+		case len(args) >= 2 && args[1] == "assistant":
+			return evalAssistant(ctx, cfg, pool, log, args[2:], os.Stdout)
 		}
-		return errors.New("usage: agnts eval relations | eval replay KEY... | eval report")
+		return errors.New("usage: agnts eval relations | eval replay KEY... | eval report | eval assistant [--limit N]")
 	}
 	return fmt.Errorf("unknown command %q", args[0])
 }

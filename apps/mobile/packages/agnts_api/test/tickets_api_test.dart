@@ -230,10 +230,19 @@ void main() {
 
     // Link the ticket to a repository
     //
-    // Allowed on a new ticket, or a failed or rate-limited one that has not pushed. A stopped ticket starts over from analysis on retry, since its analysis and branch belonged to the old repository.
+    // Allowed on a new ticket, or a failed or rate-limited one that has not pushed. A stopped ticket starts over from analysis on retry, since its analysis and branch belonged to the old repository. The same as PUT /tickets/{key}/repos with one repository.
     //
     //Future<Ticket> setTicketRepo(String key, TicketRepo ticketRepo) async
     test('test setTicketRepo', () async {
+      // TODO
+    });
+
+    // Set the ticket's repositories (one, several or a group)
+    //
+    // Allowed while no stage runs and nothing was pushed: on a new ticket, or a failed or rate-limited one. A stopped ticket starts over from analysis on retry. Give repoIds (the first is the primary) or groupId, not both.
+    //
+    //Future<Ticket> setTicketRepos(String key, TicketReposInput ticketReposInput) async
+    test('test setTicketRepos', () async {
       // TODO
     });
 

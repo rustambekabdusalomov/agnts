@@ -20,6 +20,10 @@ class FileChange {
   /// Returns a new [FileChange] instance.
   FileChange({
 
+     this.repo,
+
+     this.repoId,
+
     required  this.path,
 
     required  this.add,
@@ -28,6 +32,31 @@ class FileChange {
 
     required  this.diff,
   });
+
+      /// The repository's folder, for a ticket in several; path is relative to the repository
+  @JsonKey(
+    
+    name: r'repo',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? repo;
+
+
+
+  @JsonKey(
+    
+    name: r'repoId',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? repoId;
+
+
 
   @JsonKey(
     
@@ -81,6 +110,8 @@ class FileChange {
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is FileChange &&
+      other.repo == repo &&
+      other.repoId == repoId &&
       other.path == path &&
       other.add == add &&
       other.del == del &&
@@ -88,6 +119,8 @@ class FileChange {
 
     @override
     int get hashCode =>
+        repo.hashCode +
+        repoId.hashCode +
         path.hashCode +
         add.hashCode +
         del.hashCode +

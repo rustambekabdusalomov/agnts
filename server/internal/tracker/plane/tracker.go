@@ -133,7 +133,7 @@ func (it item) closed() bool {
 func (it item) incoming(base string) orchestrator.Incoming {
 	return orchestrator.Incoming{
 		Source: domain.SourcePlane, Key: it.key, Project: it.project, Title: it.title, Description: it.desc,
-		Priority: priority(it.priority), Kind: it.kind(base), Repo: domain.RepoFromLabels(it.labels),
+		Priority: priority(it.priority), Kind: it.kind(base), Repo: domain.RepoFromLabels(it.labels), Repos: domain.ReposFromLabels(it.labels), Group: domain.GroupFromLabels(it.labels),
 		LinksKnown: it.linksKnown, DependsOn: it.dependsOn, Dependents: it.dependents,
 	}
 }

@@ -652,6 +652,7 @@
   "analyticsColQuestionsHint": "Questions agnts asked per analysed ticket. Many questions point to a missing CLAUDE.md or rules.",
   "analyticsColCi": "CI failures",
   "analyticsColCiHint": "CI failure groups that failed in the period",
+  "analyticsTabAssistant": "Assistant",
   "appName": "agnts",
   "appTagline": "Your no sleep agent",
   "authTitle": "Sign in",
@@ -1453,6 +1454,204 @@
   "formSaved": "Saved",
   "formSearch": "Search",
   "formNoMatch": "No matches",
+  "groupsView": "Groups ({n})",
+  "@groupsView": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "groupsSub": "Repositories that change together. A ticket made from a group works in all of them and opens a pull request in each one it changes.",
+  "groupsNone": "No groups yet. A group lets one ticket change several repositories, such as an API and its web app.",
+  "groupsAdd": "New group",
+  "groupsDrawerSub": "Repositories that change together, in order: the first is the primary repository of the group's tickets.",
+  "groupsName": "Name",
+  "groupsNamePh": "Shop",
+  "groupsDescription": "Description",
+  "groupsMembers": "Repositories",
+  "groupsMembersHelp": "Order matters: the first is the primary repository. A role tells agnts what each one is, such as backend or web.",
+  "groupsMembersNeeded": "Add at least one repository.",
+  "groupsNoMembers": "No repositories yet.",
+  "groupsAddMember": "Add a repository…",
+  "groupsNoMoreRepos": "Every active repository is in the group",
+  "groupsRolePh": "Role, e.g. backend",
+  "groupsRoleOf": "Role of {name}",
+  "@groupsRoleOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupsMoveUp": "Move {name} up",
+  "@groupsMoveUp": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupsMoveDown": "Move {name} down",
+  "@groupsMoveDown": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupsPrimary": "primary",
+  "groupsArchived": "archived",
+  "groupsPrefixHelp": "Key prefix of tasks made from the group, as {prefix}-12. Empty uses the first repository's.",
+  "@groupsPrefixHelp": {
+    "placeholders": {
+      "prefix": {
+        "type": "String"
+      }
+    }
+  },
+  "groupsInstructions": "Instructions",
+  "groupsInstructionsPh": "The web app calls the API through src/api; change both together and keep the OpenAPI spec in sync.",
+  "groupsInstructionsHelp": "How the repositories fit together, in Markdown. Added to every prompt of the group's tickets.",
+  "groupsWarningsTitle": "Saved, with warnings:",
+  "groupsWarningsBadge": "{count, plural, one {{count} warning} other {{count} warnings}}",
+  "@groupsWarningsBadge": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "groupsSaved": "Group {name} saved",
+  "@groupsSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupsDelete": "Delete",
+  "groupsDeleteConfirm": "Delete the group {name}? Its tickets keep their repositories.",
+  "@groupsDeleteConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupsDeleted": "Group {name} deleted",
+  "@groupsDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupsColGroup": "Group",
+  "groupsColMembers": "Repositories",
+  "groupsColPrefix": "Prefix",
+  "groupsInGroups": "In {names}",
+  "@groupsInGroups": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "groupsInLabel": "Groups:",
+  "groupsPickerGroups": "Repository groups",
+  "groupsChosen": "Chosen repositories",
+  "groupsFromGroup": "From group {name}",
+  "@groupsFromGroup": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupsMakePrimary": "Make it the primary repository",
+  "groupsMore": "+{count}",
+  "@groupsMore": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "groupsAllGroups": "All groups",
+  "groupsFilterLabel": "Group",
+  "groupsKvRepos": "Repositories",
+  "groupsKvGroup": "Group",
+  "groupsTicketRepos": "{count, plural, one {{count} repository} other {{count} repositories}}",
+  "@groupsTicketRepos": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "groupsPartlyMerged": "Partly merged",
+  "groupsPr": "PR #{number}",
+  "@groupsPr": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "groupsOpenPrIn": "Open {repo} #{number}",
+  "@groupsOpenPrIn": {
+    "placeholders": {
+      "repo": {
+        "type": "String"
+      },
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "groupsFiles": "{count, plural, one {{count} file} other {{count} files}}",
+  "@groupsFiles": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "groupsFilesIn": "{repo} · {count, plural, one {{count} file} other {{count} files}}",
+  "@groupsFilesIn": {
+    "placeholders": {
+      "repo": {
+        "type": "String"
+      },
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "groupsPushError": "Push failed: {error}",
+  "@groupsPushError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "groupsRetryHint": "{count, plural, one {A retry pushes the {count} repository that failed; the others stay as they are.} other {A retry pushes the {count} repositories that failed; the others stay as they are.}}",
+  "@groupsRetryHint": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "groupsState_pending": "Not pushed",
+  "groupsState_unchanged": "Unchanged",
+  "groupsState_pushed": "Pushed",
+  "groupsState_merged": "Merged",
+  "groupsState_dropped": "Closed",
+  "groupsMaxTicketRepos": "Maximum repositories per ticket",
+  "groupsMaxTicketReposHelp": "How many repositories one ticket, and one repository group, may have.",
   "harnessRepoTab": "Guardrails",
   "harnessRepoTitle": "Guardrails",
   "harnessRepoSub": "How strictly agnts-guard checks Claude's work in this repository, while it works and after.",
@@ -2514,6 +2713,171 @@
       }
     }
   },
+  "massistantTitle": "Assistant",
+  "massistantFab": "Ask the assistant",
+  "massistantMoreRow": "Assistant",
+  "massistantMoreRowSub": "Ask about your workspace",
+  "massistantPlaceholder": "Ask about tickets, CI, spend…",
+  "massistantSend": "Send",
+  "massistantCount": "{n} / 1000",
+  "@massistantCount": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "massistantNewConversation": "New conversation",
+  "massistantHistory": "Conversations",
+  "massistantHistoryEmpty": "No conversations yet.",
+  "massistantDelete": "Delete",
+  "massistantDeleted": "Conversation deleted",
+  "massistantEmptyTitle": "Ask agnts about your work",
+  "massistantEmptyText": "It answers from your tickets, CI and spend, and links what it mentions. It cannot start, approve or reject anything.",
+  "massistantPrivate": "Only you see your conversations. They are kept for 30 days.",
+  "massistantSuggestWaiting": "What is waiting on me?",
+  "massistantSuggestCi": "Why is CI red?",
+  "massistantSuggestSpend": "How much did we spend this week?",
+  "massistantSuggestDone": "What did agnts finish this week?",
+  "massistantThinking": "Thinking… {seconds}s",
+  "@massistantThinking": {
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "massistantReading": "Reading {what}",
+  "@massistantReading": {
+    "placeholders": {
+      "what": {
+        "type": "String"
+      }
+    }
+  },
+  "massistantFileInbox": "your inbox",
+  "massistantFileTickets": "the tickets",
+  "massistantFileTicket": "{key}",
+  "@massistantFileTicket": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "massistantFileCi": "CI failures",
+  "massistantFileUsage": "plan usage",
+  "massistantFileAnalytics": "analytics",
+  "massistantFileRepos": "repositories",
+  "massistantFileLessons": "lessons",
+  "massistantFileConversation": "the conversation",
+  "massistantFileQuestion": "your question",
+  "massistantFileOther": "the workspace",
+  "massistantFailed": "No answer",
+  "massistantAskAgain": "Ask again",
+  "massistantLinkCi": "CI #{id}",
+  "@massistantLinkCi": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "massistantLinkLesson": "Lesson #{id}",
+  "@massistantLinkLesson": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "massistantTook": "{seconds}s",
+  "@massistantTook": {
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "massistantHelpful": "Helpful",
+  "massistantNotHelpful": "Not helpful",
+  "massistantRateTitle": "How was this answer?",
+  "massistantRateComment": "What was wrong or missing? (optional)",
+  "massistantRateShare": "Keep this question's data so agnts can test better answers",
+  "massistantRateNote": "Your rating, comment, question and answer are shown to the workspace owner.",
+  "massistantRateSend": "Send",
+  "massistantRateClear": "Remove rating",
+  "massistantRated": "Thanks for the rating",
+  "massistantStatsTitle": "Assistant",
+  "massistantStatsQuestions": "Questions",
+  "massistantStatsAnswered": "Answered",
+  "massistantStatsMedian": "Median time",
+  "massistantStatsHelpful": "Helpful",
+  "massistantStatsTokens": "Tokens",
+  "massistantStatsPeople": "{n, plural, one {{n} person asked} other {{n} people asked}}",
+  "@massistantStatsPeople": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "massistantStatsVersions": "By prompt version",
+  "massistantStatsVersionRow": "{answered} answered · {failed} failed · {up} 👍 {down} 👎 · {median}",
+  "@massistantStatsVersionRow": {
+    "placeholders": {
+      "answered": {
+        "type": "String"
+      },
+      "failed": {
+        "type": "String"
+      },
+      "up": {
+        "type": "String"
+      },
+      "down": {
+        "type": "String"
+      },
+      "median": {
+        "type": "String"
+      }
+    }
+  },
+  "massistantStatsNone": "No questions in this period.",
+  "massistantStatsRated": "Rated answers",
+  "massistantRatedEmpty": "No rated answers yet.",
+  "massistantRatedShared": "Kept for prompt tests",
+  "massistantStatsParts": "Container {start} · workspace {snapshot} · Claude {claude}",
+  "@massistantStatsParts": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "snapshot": {
+        "type": "String"
+      },
+      "claude": {
+        "type": "String"
+      }
+    }
+  },
+  "massistantStatsWarm": "{n} of {total} reused a warm container",
+  "@massistantStatsWarm": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "massistantStatsSeeRated": "Rated answers",
+  "massistantDeleteTitle": "Delete this conversation?",
+  "massistantDeleteText": "Its questions and answers are deleted for good.",
+  "massistantSendHint": "Enter to send, Shift+Enter for a new line",
+  "massistantConversationsLede": "Your questions and the assistant's answers. Only you see them; they are kept for 30 days.",
+  "massistantOpenChat": "Open the chat",
   "mciTitle": "CI failures",
   "mciLede": "Watched branches that went red, one row per error.",
   "mciFilterRed": "Red",
@@ -2640,6 +3004,75 @@
   "mdetailCopyPr": "Copy pull request link",
   "mdetailCopied": "Link copied",
   "mdetailFactTime": "Time",
+  "mgroupsGroups": "Groups",
+  "mgroupsRepos": "Repositories",
+  "mgroupsPickHint": "Pick one or more. The first one is the main one.",
+  "mgroupsInTask": "In this task",
+  "mgroupsFromGroup": "All of {name}",
+  "@mgroupsFromGroup": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mgroupsFromGroupEdited": "From {name}, edited",
+  "@mgroupsFromGroupEdited": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mgroupsPrimary": "main",
+  "mgroupsRemove": "Remove {name}",
+  "@mgroupsRemove": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mgroupsNoMembers": "This group has no active repositories.",
+  "mgroupsGroup": "Group {name}",
+  "@mgroupsGroup": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mgroupsPartlyMerged": "Partly merged",
+  "mgroupsArchived": "archived",
+  "mgroupsPushError": "Push failed: {error}",
+  "@mgroupsPushError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mgroupsFiles": "{n, plural, one {{n} file} other {{n} files}}",
+  "@mgroupsFiles": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "mgroupsCiFixes": "{n, plural, one {{n} CI fix} other {{n} CI fixes}}",
+  "@mgroupsCiFixes": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "mgroupsStatePending": "Pending",
+  "mgroupsStateUnchanged": "No changes",
+  "mgroupsStatePushed": "Pushed",
+  "mgroupsStateMerged": "Merged",
+  "mgroupsStateDropped": "Closed",
   "mhomeRunningNote": "{parallel} at a time allowed, {queued} in queue",
   "@mhomeRunningNote": {
     "placeholders": {
@@ -3018,6 +3451,9 @@
   "navAccount": "Account",
   "navReviews": "PR reviews",
   "navCi": "CI",
+  "navAiAssistant": "AI assistant",
+  "navAssistantChat": "Chat",
+  "navAssistantConversations": "Conversations",
   "networkTitle": "Private networks",
   "networkSub": "Reach self-hosted GitLab, Jira or package registries inside your networks. A connection goes through the network whose route matches it most closely.",
   "networkUnavailable": "Private networks are not set up on this server: the operator runs the gateway service and sets AGNTS_GATEWAY.",

@@ -9,6 +9,8 @@ import PageHeader from '../components/PageHeader.vue'
 import StateBadge from '../components/StateBadge.vue'
 import WaitBadge from '../components/WaitBadge.vue'
 import KindBadge from '../components/ticket/KindBadge.vue'
+import RepoChip from '../components/repos/RepoChip.vue'
+import { hasRepo, ticketRepos } from '../components/repos/repoSet'
 import TicketBoard, { type BoardColumn } from '../components/TicketBoard.vue'
 import InputSelect from '../components/form/InputSelect.vue'
 import SegButtons from '../components/form/SegButtons.vue'
@@ -44,7 +46,8 @@ const dash = useQuery({
 })
 
 // Repository filter, kept in the URL (?repo=<id>, or none for tickets
-// without one). The choices are the repositories these tickets are in.
+// without one). The choices are the repositories these tickets are in; a
+// ticket in several matches any of them.
 const repo = computed<string>({
   get: () => (typeof route.query.repo === 'string' ? route.query.repo : ''),
   set: (v) => void router.replace({ query: { ...route.query, repo: v || undefined } }),
@@ -53,8 +56,9 @@ const repoOptions = computed(() => {
   const names = new Map<string, string>()
   let none = false
   for (const x of tickets.data.value ?? []) {
-    if (x.repoId == null) none = true
-    else names.set(String(x.repoId), x.repoName ?? `#${x.repoId}`)
+    const rs = ticketRepos(x)
+    if (!rs.length) none = true
+    for (const r of rs) names.set(String(r.repoId), r.repoName)
   }
   const opts = [...names].sort((a, b) => a[1].localeCompare(b[1])).map(([value, label]) => ({ value, label }))
   if (none) opts.push({ value: 'none', label: t('tickets.noRepo') })
@@ -62,13 +66,27 @@ const repoOptions = computed(() => {
   if (repo.value && !opts.some((o) => o.value === repo.value)) opts.push({ value: repo.value, label: `#${repo.value}` })
   return [{ value: '', label: t('tickets.allRepos') }, ...opts]
 })
+// Group filter (?group=<id>): tickets made from a repository group.
+const group = computed<string>({
+  get: () => (typeof route.query.group === 'string' ? route.query.group : ''),
+  set: (v) => void router.replace({ query: { ...route.query, group: v || undefined } }),
+})
+const groupOptions = computed(() => {
+  const names = new Map<string, string>()
+  for (const x of tickets.data.value ?? []) if (x.group) names.set(String(x.group.id), x.group.name)
+  const opts = [...names].sort((a, b) => a[1].localeCompare(b[1])).map(([value, label]) => ({ value, label }))
+  if (group.value && !opts.some((o) => o.value === group.value)) opts.push({ value: group.value, label: `#${group.value}` })
+  return [{ value: '', label: t('groups.allGroups') }, ...opts]
+})
 const rows = computed(() => {
   const q = ui.search.trim().toLowerCase()
   const r = repo.value
+  const g = group.value
   return (tickets.data.value ?? []).filter(
     (x) =>
       (!q || `${x.key} ${x.title}`.toLowerCase().includes(q)) &&
-      (!r || (r === 'none' ? x.repoId == null : String(x.repoId) === r)),
+      (!r || (r === 'none' ? !ticketRepos(x).length : hasRepo(x, Number(r)))) &&
+      (!g || String(x.group?.id ?? '') === g),
   )
 })
 // All tickets: a sync button per connected tracker (Jira, Plane), for
@@ -141,6 +159,7 @@ const columns = computed<BoardColumn[]>(() =>
       </div>
       <div class="tk-filters">
         <InputSelect v-if="repoOptions.length > 2 || repo" v-model="repo" :options="repoOptions" :label="t('tickets.repoLabel')" class="tk-repo" />
+        <InputSelect v-if="groupOptions.length > 1 || group" v-model="group" :options="groupOptions" :label="t('groups.filterLabel')" class="tk-repo" />
         <SegButtons v-model="view" :options="viewOptions" :label="t('tickets.viewLabel')" />
       </div>
     </div>
@@ -166,7 +185,7 @@ const columns = computed<BoardColumn[]>(() =>
               <span v-if="tk.source === 'local'" class="src local">{{ t('tickets.sourceTask') }}</span>
               <span v-else class="src">{{ tk.source === 'plane' ? t('tickets.sourcePlane') : tk.source === 'git' ? t('tickets.sourceGit') : tk.source === 'ci' ? t('tickets.sourceCi') : t('tickets.sourceJira') }}</span>
             </td>
-            <td class="muted">{{ tk.repoName ?? '—' }}</td>
+            <td class="muted"><RepoChip :ticket="tk" empty="—" /></td>
             <td>
               <StateBadge :state="tk.state" :kind="tk.kind" /> <WaitBadge :ticket="tk" />
               <span v-if="tk.revision > 0 && !TERMINAL.includes(tk.state)" class="hint"> {{ t('tickets.rev', { n: tk.revision }) }}</span>
@@ -180,7 +199,7 @@ const columns = computed<BoardColumn[]>(() =>
       </table>
     </div>
     <p v-else class="empty">
-      {{ ui.search || repo ? t('tickets.noMatch') : filter.id === 'needs' ? t('tickets.emptyNeeds') : t('tickets.emptyOther') }}
+      {{ ui.search || repo || group ? t('tickets.noMatch') : filter.id === 'needs' ? t('tickets.emptyNeeds') : t('tickets.emptyOther') }}
     </p>
   </section>
 </template>

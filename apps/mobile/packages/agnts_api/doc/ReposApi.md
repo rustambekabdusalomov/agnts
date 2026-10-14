@@ -12,14 +12,18 @@ Method | HTTP request | Description
 [**approveRepoBrief**](ReposApi.md#approverepobrief) | **POST** /repos/{id}/brief/approve | Make the draft the brief that runs read
 [**archiveRepo**](ReposApi.md#archiverepo) | **POST** /repos/{id}/archive | Archive the repository; it keeps its history but takes no new tickets or tasks
 [**createRepo**](ReposApi.md#createrepo) | **POST** /repos | 
+[**createRepoGroup**](ReposApi.md#createrepogroup) | **POST** /repo-groups | Create a repository group
+[**deleteRepoGroup**](ReposApi.md#deleterepogroup) | **DELETE** /repo-groups/{id} | Delete a group; its tickets keep their repositories
 [**deployRepo**](ReposApi.md#deployrepo) | **POST** /repos/{id}/deploy | Start a deployment (GitLab manual job, or the GitHub deploy workflow). Never available from MCP.
 [**detectRepo**](ReposApi.md#detectrepo) | **POST** /repos/detect | Work out a repository&#39;s toolchains and check commands
 [**discardRepoBriefDraft**](ReposApi.md#discardrepobriefdraft) | **POST** /repos/{id}/brief/discard | Drop the draft a survey wrote
 [**getRepo**](ReposApi.md#getrepo) | **GET** /repos/{id} | 
 [**getRepoBrief**](ReposApi.md#getrepobrief) | **GET** /repos/{id}/brief | What agnts knows about how the repository works; empty and idle before the first survey
+[**getRepoGroup**](ReposApi.md#getrepogroup) | **GET** /repo-groups/{id} | 
 [**listRepoBranches**](ReposApi.md#listrepobranches) | **GET** /repos/{id}/branches | Branches with their tip, ahead/behind the default branch and checks
 [**listRepoCommits**](ReposApi.md#listrepocommits) | **GET** /repos/{id}/commits | Commits on the default branch, newest first, 50 per page; a shorter page is the last
 [**listRepoEnvironments**](ReposApi.md#listrepoenvironments) | **GET** /repos/{id}/environments | Deployment environments and what runs there
+[**listRepoGroups**](ReposApi.md#listrepogroups) | **GET** /repo-groups | The workspace&#39;s repository groups
 [**listRepoLocalBranches**](ReposApi.md#listrepolocalbranches) | **GET** /repos/{id}/local-branches | Branches in agnts&#39;s own clones on the server, and whether origin has them
 [**listRepoMembers**](ReposApi.md#listrepomembers) | **GET** /repos/{id}/members | People with access to the repository on its git host
 [**listRepoPipelines**](ReposApi.md#listrepopipelines) | **GET** /repos/{id}/pipelines | CI runs with their stages, newest first, 20 per page; a shorter page is the last
@@ -29,6 +33,7 @@ Method | HTTP request | Description
 [**surveyRepoBrief**](ReposApi.md#surveyrepobrief) | **POST** /repos/{id}/brief/survey | Have Claude survey the repository and write a draft brief (an update when it has one)
 [**unarchiveRepo**](ReposApi.md#unarchiverepo) | **POST** /repos/{id}/unarchive | Restore an archived repository
 [**updateRepo**](ReposApi.md#updaterepo) | **PUT** /repos/{id} | 
+[**updateRepoGroup**](ReposApi.md#updaterepogroup) | **PUT** /repo-groups/{id} | Replace a group&#39;s fields and repositories
 
 
 # **approveRepoBrief**
@@ -162,6 +167,97 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **createRepoGroup**
+> RepoGroup createRepoGroup(repoGroupInput)
+
+Create a repository group
+
+A named set of repositories that tickets can change together. Its repositories must be able to share one run container (the same runner image, no clashing toolchain versions); what they share uneasily comes back in warnings.
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getReposApi();
+final RepoGroupInput repoGroupInput = ; // RepoGroupInput | 
+
+try {
+    final response = api.createRepoGroup(repoGroupInput);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling ReposApi->createRepoGroup: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **repoGroupInput** | [**RepoGroupInput**](RepoGroupInput.md)|  | 
+
+### Return type
+
+[**RepoGroup**](RepoGroup.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **deleteRepoGroup**
+> deleteRepoGroup(id)
+
+Delete a group; its tickets keep their repositories
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getReposApi();
+final int id = 789; // int | 
+
+try {
+    api.deleteRepoGroup(id);
+} on DioException catch (e) {
+    print('Exception when calling ReposApi->deleteRepoGroup: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -394,6 +490,51 @@ Name | Type | Description  | Notes
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **getRepoGroup**
+> RepoGroup getRepoGroup(id)
+
+
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getReposApi();
+final int id = 789; // int | 
+
+try {
+    final response = api.getRepoGroup(id);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling ReposApi->getRepoGroup: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+
+### Return type
+
+[**RepoGroup**](RepoGroup.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **listRepoBranches**
 > List<Branch> listRepoBranches(id)
 
@@ -519,6 +660,47 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**List&lt;Environment&gt;**](Environment.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **listRepoGroups**
+> List<RepoGroup> listRepoGroups()
+
+The workspace's repository groups
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getReposApi();
+
+try {
+    final response = api.listRepoGroups();
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling ReposApi->listRepoGroups: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**List&lt;RepoGroup&gt;**](RepoGroup.md)
 
 ### Authorization
 
@@ -928,6 +1110,55 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**Repository**](Repository.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **updateRepoGroup**
+> RepoGroup updateRepoGroup(id, repoGroupInput)
+
+Replace a group's fields and repositories
+
+Tickets already made from the group keep their repositories.
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getReposApi();
+final int id = 789; // int | 
+final RepoGroupInput repoGroupInput = ; // RepoGroupInput | 
+
+try {
+    final response = api.updateRepoGroup(id, repoGroupInput);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling ReposApi->updateRepoGroup: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **repoGroupInput** | [**RepoGroupInput**](RepoGroupInput.md)|  | 
+
+### Return type
+
+[**RepoGroup**](RepoGroup.md)
 
 ### Authorization
 

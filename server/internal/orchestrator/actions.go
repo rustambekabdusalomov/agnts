@@ -30,8 +30,12 @@ type Incoming struct {
 	// Kind comes from a kind label; empty means agnts picks it.
 	Kind domain.TicketKind
 	// Repo is the repository a repo: label names; it wins over the one
-	// linked to Project. Empty: the project's.
-	Repo string
+	// linked to Project. Empty: the project's. Repos are all the repo:
+	// labels (a ticket in several repositories), and Group the group a
+	// group: label names, which wins over both.
+	Repo  string
+	Repos []string
+	Group string
 	// NoCreate refreshes a known ticket but never creates one (an issue no
 	// longer assigned to you).
 	NoCreate bool
@@ -93,17 +97,66 @@ func (o *Orchestrator) IngestDetail(ctx context.Context, in Incoming, origin dom
 		t.Priority = "medium"
 	}
 	archived, labelled, warn := false, false, ""
-	if in.Repo != "" {
-		repo, err := o.store.RepositoryByName(ctx, in.Repo)
+	var picked resolvedRepos
+	names := in.Repos
+	if len(names) == 0 && in.Repo != "" {
+		names = []string{in.Repo}
+	}
+	switch {
+	case in.Group != "":
+		g, err := o.store.GroupByName(ctx, in.Group)
 		switch {
 		case err == nil:
-			t.RepoID, labelled = &repo.ID, true
-			archived = repo.ArchivedAt != nil
+			if picked, err = o.resolveRepos(ctx, domain.RepoChoice{GroupID: g.ID}, t.Kind, t.KindAuto); err != nil {
+				warn = fmt.Sprintf("the label %s%s cannot be used: %v", domain.GroupLabelPrefix, in.Group, err)
+				break
+			}
+			labelled = true
 		case errors.Is(err, domain.ErrNotFound):
-			warn = fmt.Sprintf("the label %s%s names no repository in agnts; using the one linked to %s, if any", domain.RepoLabelPrefix, in.Repo, in.Project)
+			warn = fmt.Sprintf("the label %s%s names no repository group in agnts", domain.GroupLabelPrefix, in.Group)
 		default:
 			return IngestUnchanged, err
 		}
+	}
+	if !labelled && len(names) > 0 {
+		var ids []int64
+		var missing []string
+		for _, n := range names {
+			repo, err := o.store.RepositoryByName(ctx, n)
+			switch {
+			case err == nil:
+				if repo.ArchivedAt != nil && len(names) == 1 {
+					archived = true
+				}
+				ids = append(ids, repo.ID)
+			case errors.Is(err, domain.ErrNotFound):
+				missing = append(missing, n)
+			default:
+				return IngestUnchanged, err
+			}
+		}
+		switch {
+		case len(missing) > 0 && len(ids) == 0:
+			warn = fmt.Sprintf("the label %s%s names no repository in agnts; using the one linked to %s, if any", domain.RepoLabelPrefix, missing[0], in.Project)
+		case len(missing) > 0:
+			warn = fmt.Sprintf("the label %s%s names no repository in agnts; it was left out", domain.RepoLabelPrefix, strings.Join(missing, ", "+domain.RepoLabelPrefix))
+		}
+		if len(ids) == 1 {
+			if repo, err := o.store.RepositoryByID(ctx, ids[0]); err == nil {
+				picked = resolvedRepos{Repos: []domain.Repository{repo}, Rows: []domain.TicketRepo{{RepoID: repo.ID, RepoName: repo.Name, State: domain.RepoPending}}}
+				labelled = true
+			}
+		} else if len(ids) > 1 {
+			res, err := o.resolveRepos(ctx, domain.RepoChoice{RepoIDs: ids}, t.Kind, t.KindAuto)
+			if err != nil {
+				warn = fmt.Sprintf("the repo: labels cannot be used together: %v", err)
+			} else {
+				picked, labelled = res, true
+			}
+		}
+	}
+	if labelled {
+		picked.apply(&t)
 	}
 	if !labelled {
 		if repo, err := o.store.RepositoryByTrackerProject(ctx, in.Source, in.Project); err == nil {
@@ -165,14 +218,14 @@ func (o *Orchestrator) IngestDetail(ctx context.Context, in Incoming, origin dom
 			}
 		}
 		switch {
-		case labelled && x.State == domain.StateNew && x.PRURL == "" && (x.RepoID == nil || *x.RepoID != *t.RepoID):
-			// A repo: label added or changed before work started.
-			x.RepoID = t.RepoID
+		case labelled && x.State == domain.StateNew && !x.Pushed() && !sameRepos(*x, t):
+			// A repo: or group: label added or changed before work started.
+			picked.apply(x)
 			if out == IngestUnchanged {
 				out = IngestUpdated
 			}
 		case x.RepoID == nil && t.RepoID != nil:
-			x.RepoID = t.RepoID
+			x.RepoID, x.Repos, x.GroupID = t.RepoID, t.Repos, t.GroupID
 		default:
 			warn = "" // the ticket keeps its repository; nothing to warn about
 		}
@@ -281,6 +334,12 @@ func (o *Orchestrator) AnswerOne(ctx context.Context, key string, a domain.Answe
 	}
 	o.Wake()
 	return true, nil
+}
+
+// sameRepos reports whether two tickets work in the same repositories,
+// in the same order.
+func sameRepos(a, b domain.Ticket) bool {
+	return slices.Equal(a.RepoIDs(), b.RepoIDs())
 }
 
 func hasQuestion(qs []domain.Question, id int64) bool {
@@ -429,7 +488,7 @@ func (o *Orchestrator) Reject(ctx context.Context, key, reason string, origin do
 	o.trackerMove(context.WithoutCancel(ctx), t, TrackerRejected)
 	o.queueReflection(context.WithoutCancel(ctx), t, domain.ReflectRejected, reason, origin)
 	o.noteReviewer(ctx, t, domain.NoteDismissed, reason, origin)
-	if t.PRNumber == nil || t.Kind == domain.KindReview {
+	if !t.AnyPR() || t.Kind == domain.KindReview {
 		o.dropBranch(ctx, t) // never pushed (a review's branch is a copy): nothing else needs it
 	}
 	o.Wake() // tickets waiting for it may start
@@ -448,7 +507,7 @@ func (o *Orchestrator) RestartWithUpdate(ctx context.Context, key string, origin
 	if cur.Update == nil {
 		return cur, invalid("%s has no newer version from the tracker", key)
 	}
-	if cur.PRURL != "" || cur.State == domain.StatePushing || cur.ResumeState == domain.StatePushing {
+	if cur.Pushed() || cur.State == domain.StatePushing || cur.ResumeState == domain.StatePushing {
 		return cur, invalid("%s is pushed already: reject it and let agnts take the issue again, or keep the current version", key)
 	}
 	u := *cur.Update
@@ -459,7 +518,8 @@ func (o *Orchestrator) RestartWithUpdate(ctx context.Context, key string, origin
 		x.Title, x.Description = u.Title, u.Description
 		x.Update, x.Kept = nil, ""
 		x.Revision++ // reviews of the old work are stale
-		x.HeadSHA, x.Feedback, x.FeedbackShots, x.FeedbackFiles = "", "", nil, nil
+		x.ResetWork(false)
+		x.Feedback, x.FeedbackShots, x.FeedbackFiles = "", nil, nil
 		x.ResumeState, x.SelfFixes, x.QuietReview = domain.StateNew, 0, false
 		dropSideRuns(x)
 	})
@@ -566,46 +626,18 @@ func (o *Orchestrator) SetModels(ctx context.Context, key string, models map[str
 	}, func(x *domain.Ticket) { x.Models = clean })
 }
 
-// SetRepo links a ticket to another repository. It is allowed while no
-// stage runs and nothing was pushed: on a new ticket, or a failed or
-// rate-limited one. Analysis and the branch belong to the old repository,
-// so a stopped ticket starts over from analysis on Retry.
+// SetRepo links a ticket to another repository (SetRepos with one).
 func (o *Orchestrator) SetRepo(ctx context.Context, key string, repoID int64, origin domain.Origin) (domain.Ticket, error) {
-	repo, err := o.store.RepositoryByID(ctx, repoID)
-	if errors.Is(err, domain.ErrNotFound) {
-		return domain.Ticket{}, invalid("no repository %d", repoID)
-	}
-	if err != nil {
-		return domain.Ticket{}, err
-	}
-	if repo.ArchivedAt != nil {
-		return domain.Ticket{}, invalid("%s is archived: restore it on the Repositories page first", repo.Name)
-	}
-	var bad error
-	t, err := o.store.UpdateTicket(ctx, key, &domain.Event{
-		TicketKey: key, Type: domain.EventTicketUpdated, Origin: origin, Message: "repository set to " + repo.Name,
-		Data: map[string]any{"repoId": repo.ID},
-	}, func(x *domain.Ticket) {
-		stopped := x.State == domain.StateFailed || x.State == domain.StateRateLimited
-		if (x.State != domain.StateNew && !stopped) || x.PRURL != "" || x.ResumeState == domain.StatePushing || x.Kind == domain.KindReview {
-			bad = &domain.TransitionError{Key: key, From: x.State, To: x.State}
-			return
-		}
-		x.RepoID = &repo.ID
-		if stopped {
-			x.ResumeState = domain.StateNew
-			x.Branch, x.HeadSHA, x.Feedback = "", "", ""
-		}
-	})
-	if bad != nil {
-		return t, bad
-	}
-	return t, err
+	return o.SetRepos(ctx, key, domain.RepoChoice{RepoID: repoID}, origin)
 }
 
 // TaskInput creates or edits a side-project task.
 type TaskInput struct {
-	RepoID       int64  // 0: no repository (report kinds, or agnts picks)
+	RepoID int64 // 0: no repository (report kinds, or agnts picks)
+	// RepoIDs (several repositories, the first the primary) or GroupID (a
+	// repository group's members) instead of RepoID: CreateTask only.
+	RepoIDs      []int64
+	GroupID      int64
 	Kind         string // a domain.TicketKind, or "" / "auto" for agnts to pick
 	Title        string
 	Description  string
@@ -639,20 +671,13 @@ func (o *Orchestrator) CreateTask(ctx context.Context, in TaskInput, origin doma
 	if err != nil {
 		return domain.Ticket{}, err
 	}
-	var repoID *int64
+	res, err := o.resolveRepos(ctx, domain.RepoChoice{RepoID: in.RepoID, RepoIDs: in.RepoIDs, GroupID: in.GroupID}, kind, auto)
+	if err != nil {
+		return domain.Ticket{}, err
+	}
 	prefix := NoRepoTaskPrefix
-	if in.RepoID != 0 {
-		repo, err := o.store.RepositoryByID(ctx, in.RepoID)
-		if errors.Is(err, domain.ErrNotFound) {
-			return domain.Ticket{}, invalid("no repository %d", in.RepoID)
-		}
-		if err != nil {
-			return domain.Ticket{}, err
-		}
-		if repo.ArchivedAt != nil {
-			return domain.Ticket{}, invalid("%s is archived: restore it on the Repositories page to add tasks", repo.Name)
-		}
-		repoID, prefix = &repo.ID, TaskPrefix(repo)
+	if len(res.Repos) > 0 {
+		prefix = res.Prefix
 	} else if !auto && kind.Spec().NeedsRepo {
 		return domain.Ticket{}, invalid("a %s task needs a repository", kind)
 	}
@@ -666,13 +691,20 @@ func (o *Orchestrator) CreateTask(ctx context.Context, in TaskInput, origin doma
 	if err != nil {
 		return domain.Ticket{}, err
 	}
-	return o.createTask(ctx, domain.Ticket{
-		Source: domain.SourceLocal, RepoID: repoID,
-		Title: strings.TrimSpace(in.Title), Description: strings.TrimSpace(in.Description), Priority: in.Priority,
+	t := domain.Ticket{
+		Source: domain.SourceLocal,
+		Title:  strings.TrimSpace(in.Title), Description: strings.TrimSpace(in.Description), Priority: in.Priority,
 		State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: in.AfterApprove,
 		Held: in.Start == "queue", AskFirst: in.Start == "ask" || (in.Start == "queue" && st.AskFirst),
 		Kind: kind, KindAuto: auto, SuggestFollowUps: in.FollowUps,
-	}, prefix, files, origin)
+	}
+	res.apply(&t)
+	out, err := o.createTask(ctx, t, prefix, files, origin)
+	if err == nil && len(res.Skipped) > 0 {
+		o.event(ctx, domain.Event{TicketKey: out.Key, Type: domain.EventTicketUpdated, Origin: origin, Level: domain.LevelWarn,
+			Message: "left out the archived repositories of the group: " + strings.Join(res.Skipped, ", ")})
+	}
+	return out, err
 }
 
 // createTask stores a local task under the next free key with prefix
@@ -682,7 +714,7 @@ func (o *Orchestrator) createTask(ctx context.Context, t domain.Ticket, prefix s
 	// A key can be taken by a ticket from elsewhere with the same prefix;
 	// skip to the next number.
 	for range 5 {
-		n, err := o.store.NextTaskNumber(ctx, t.RepoID)
+		n, err := o.nextTaskNumber(ctx, t, prefix)
 		if err != nil {
 			return domain.Ticket{}, err
 		}
@@ -703,6 +735,18 @@ func (o *Orchestrator) createTask(ctx context.Context, t domain.Ticket, prefix s
 		return out, err
 	}
 	return domain.Ticket{}, fmt.Errorf("no free task key with prefix %s", prefix)
+}
+
+// nextTaskNumber reserves the next number for a new task's key: its
+// group's when the key has the group's prefix, else its primary
+// repository's (or among tasks without one).
+func (o *Orchestrator) nextTaskNumber(ctx context.Context, t domain.Ticket, prefix string) (int, error) {
+	if t.GroupID != nil {
+		if g, err := o.store.GroupByID(ctx, *t.GroupID); err == nil && g.TaskPrefix != "" && g.TaskPrefix == prefix {
+			return o.store.NextGroupTaskNumber(ctx, g.ID)
+		}
+	}
+	return o.store.NextTaskNumber(ctx, t.RepoID)
 }
 
 // NoRepoTaskPrefix is the key prefix of tasks without a repository.
@@ -740,7 +784,7 @@ func (o *Orchestrator) SetKind(ctx context.Context, key, kind string, origin dom
 			bad = &domain.TransitionError{Key: key, From: x.State, To: x.State}
 			return
 		}
-		if x.PRURL != "" || x.ResumeState == domain.StatePushing || x.Kind == domain.KindReview {
+		if x.Pushed() || x.ResumeState == domain.StatePushing || x.Kind == domain.KindReview {
 			bad = &domain.TransitionError{Key: key, From: x.State, To: x.State}
 			return
 		}
@@ -748,9 +792,14 @@ func (o *Orchestrator) SetKind(ctx context.Context, key, kind string, origin dom
 			bad = invalid("%s work needs a repository: link one first", k)
 			return
 		}
+		if !auto && x.Multi() && !k.Spec().MultiRepo {
+			bad = invalid("%s work happens in one repository; this ticket has %d", k, len(x.Repos))
+			return
+		}
 		if k.Report() != x.Kind.Report() {
 			// A change and a report share no work past the analysis.
-			x.Branch, x.HeadSHA, x.Feedback = "", "", ""
+			x.ResetWork(true)
+			x.Feedback = ""
 		}
 		x.Kind, x.KindAuto = k, auto
 	})
@@ -1111,8 +1160,10 @@ func (o *Orchestrator) View(ctx context.Context, key string) (TicketView, error)
 		return v, err
 	}
 	if o.shots != nil && t.RepoID != nil && !t.Kind.Report() {
-		if repo, err := o.store.RepositoryByID(ctx, *t.RepoID); err == nil {
-			v.CanPreview = repo.Preview.Enabled()
+		for _, id := range t.RepoIDs() {
+			if repo, err := o.store.RepositoryByID(ctx, id); err == nil && repo.Preview.Enabled() {
+				v.CanPreview = true
+			}
 		}
 	}
 	if v.FollowUps, err = o.followUps(ctx, t); err != nil {
@@ -1136,56 +1187,72 @@ func (o *Orchestrator) Events(ctx context.Context, f EventFilter) ([]domain.Even
 }
 
 // MarkMerged records that a ticket's pull request was merged (from a git
-// host webhook) and moves the tracker issue to the "merged" status.
-func (o *Orchestrator) MarkMerged(ctx context.Context, prURL, branch string, origin domain.Origin) (bool, error) {
-	t, err := o.store.TicketByPR(ctx, prURL, branch)
+// host webhook). Once every pull request of the ticket is merged, the
+// tracker issue moves to the "merged" status.
+func (o *Orchestrator) MarkMerged(ctx context.Context, ref domain.PRRef, origin domain.Origin) (bool, error) {
+	t, repoID, err := o.store.TicketByPR(ctx, ref)
 	if errors.Is(err, domain.ErrNotFound) {
 		return false, nil // not one of agnts's
 	}
 	if err != nil {
 		return false, err
 	}
-	if t.MergedAt != nil {
+	if r, ok := t.RepoState(repoID); !ok || r.MergedAt != nil || (!t.Multi() && t.MergedAt != nil) {
 		return false, nil
 	}
-	if prURL != "" {
-		t.PRURL = prURL
+	if ref.URL != "" {
+		t.UpdateRepo(repoID, func(r *domain.TicketRepo) { r.PRURL = ref.URL })
 	}
-	if _, err := o.markMerged(ctx, t, origin, "pull request merged"); err != nil {
+	if _, err := o.markRepoMerged(ctx, t, repoID, origin, "pull request merged"); err != nil {
 		return false, err
 	}
 	return true, nil
 }
 
 // MarkPRClosed records that a ticket's pull request was closed without a
-// merge (closed true) or reopened (false), from a git host webhook. Only
-// analytics read it; the ticket stays done.
-func (o *Orchestrator) MarkPRClosed(ctx context.Context, prURL, branch string, closed bool, origin domain.Origin) (bool, error) {
-	t, err := o.store.TicketByPR(ctx, prURL, branch)
+// merge (closed true) or reopened (false), from a git host webhook. The
+// ticket stays done; for a ticket in several repositories, the others may
+// still merge (it is then partly merged).
+func (o *Orchestrator) MarkPRClosed(ctx context.Context, ref domain.PRRef, closed bool, origin domain.Origin) (bool, error) {
+	t, repoID, err := o.store.TicketByPR(ctx, ref)
 	if errors.Is(err, domain.ErrNotFound) {
 		return false, nil // not one of agnts's
 	}
 	if err != nil {
 		return false, err
 	}
-	if t.MergedAt != nil {
+	if r, ok := t.RepoState(repoID); !ok || r.MergedAt != nil {
 		return false, nil
 	}
 	msg := "pull request closed without merging"
 	if !closed {
 		msg = "pull request reopened"
 	}
-	return true, o.setPRClosed(ctx, t, closed, origin, msg)
+	return true, o.setPRClosed(ctx, t, repoID, closed, origin, msg)
 }
 
-func (o *Orchestrator) setPRClosed(ctx context.Context, t domain.Ticket, closed bool, origin domain.Origin, msg string) error {
-	changed, err := o.store.SetPRClosed(ctx, t.Key, closed)
+func (o *Orchestrator) setPRClosed(ctx context.Context, t domain.Ticket, repoID int64, closed bool, origin domain.Origin, msg string) error {
+	changed, err := o.store.SetPRClosed(ctx, t.Key, repoID, closed)
 	if err != nil || !changed {
 		return err
 	}
+	r, _ := t.RepoState(repoID)
+	if t.Multi() {
+		msg = r.RepoName + ": " + msg
+	}
 	o.event(ctx, domain.Event{TicketKey: t.Key, Type: domain.EventPRClosed, Origin: origin, Message: msg,
-		Data: map[string]any{"url": t.PRURL, "closed": closed}})
-	return nil
+		Data: map[string]any{"url": r.PRURL, "closed": closed, "repoId": repoID}})
+	if !t.Multi() {
+		return nil
+	}
+	// The open pull requests may all be merged now, or a reopened one
+	// makes the ticket not merged after all.
+	out, became, err := o.settleMerged(ctx, t.Key)
+	if err == nil && became {
+		o.mergedNote(ctx, out, origin)
+		o.mergedEverywhere(ctx, out)
+	}
+	return err
 }
 
 // SetMember makes userID the ticket's member: in per-member Claude mode its

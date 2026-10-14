@@ -1,0 +1,139 @@
+package httpapi
+
+import (
+	"context"
+	"net/http"
+	"strings"
+	"testing"
+	"time"
+
+	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
+)
+
+// fakeAssistant keeps one conversation (id 7) of the signed-in person.
+type fakeAssistant struct {
+	lastLang, lastQuestion string
+	lastConversation       int64
+	lastRating             int
+	lastShare              bool
+	user                   int64
+}
+
+func (f *fakeAssistant) AssistantReady() bool { return true }
+
+func (f *fakeAssistant) conv() domain.AssistantConversation {
+	at := time.Date(2026, 10, 14, 9, 0, 0, 0, time.UTC)
+	return domain.AssistantConversation{ID: 7, Title: "What waits on me?", CreatedAt: at, UpdatedAt: at, Messages: []domain.AssistantMessage{
+		{ID: 1, ConversationID: 7, Role: domain.AssistantUser, Text: "What waits on me?", Status: domain.AssistantDone, Lang: "en", CreatedAt: at},
+		{ID: 2, ConversationID: 7, Role: domain.AssistantReply, Text: "**PAY-214** needs your review.", Speech: "PAY-214 needs your review.",
+			Links: []domain.AssistantLink{{Kind: "ticket", Key: "PAY-214"}, {Kind: "ci", ID: 12}}, Status: domain.AssistantDone, Lang: "en",
+			DurationMS: 9000, Files: []string{"inbox.json"}, CreatedAt: at},
+	}}
+}
+
+func (f *fakeAssistant) Ask(ctx context.Context, id int64, q, lang string) (domain.AssistantConversation, error) {
+	if a, ok := domain.ActorOf(ctx); ok {
+		f.user = a.UserID
+	}
+	f.lastConversation, f.lastQuestion, f.lastLang = id, q, lang
+	switch {
+	case strings.TrimSpace(q) == "":
+		return domain.AssistantConversation{}, orchestrator.ErrInvalid
+	case q == "too many":
+		return domain.AssistantConversation{}, &orchestrator.RateLimitedError{RetryAfter: 90 * time.Second}
+	case id != 0 && id != 7:
+		return domain.AssistantConversation{}, domain.ErrNotFound
+	}
+	c := f.conv()
+	c.Messages[1].Status, c.Messages[1].Text, c.Messages[1].Speech, c.Messages[1].Links = domain.AssistantPending, "", "", nil
+	return c, nil
+}
+
+func (f *fakeAssistant) AssistantConversations(context.Context) ([]domain.AssistantConversation, error) {
+	c := f.conv()
+	c.Messages = c.Messages[1:]
+	return []domain.AssistantConversation{c}, nil
+}
+
+func (f *fakeAssistant) AssistantConversation(_ context.Context, id int64) (domain.AssistantConversation, error) {
+	if id != 7 {
+		return domain.AssistantConversation{}, domain.ErrNotFound
+	}
+	return f.conv(), nil
+}
+
+func (f *fakeAssistant) DeleteAssistantConversation(_ context.Context, id int64) error {
+	if id != 7 {
+		return domain.ErrNotFound
+	}
+	return nil
+}
+
+func (f *fakeAssistant) RateAnswer(_ context.Context, id int64, rating int, comment string, share bool) (domain.AssistantMessage, error) {
+	f.lastRating, f.lastShare = rating, share
+	if id != 2 {
+		return domain.AssistantMessage{}, domain.ErrNotFound
+	}
+	m := f.conv().Messages[1]
+	m.Rating, m.RatingComment, m.Shared = rating, comment, share
+	return m, nil
+}
+
+func (f *fakeAssistant) AssistantStats(_ context.Context, days int) (domain.AssistantStats, error) {
+	return domain.AssistantStats{Days: days, Questions: 4, Answered: 3, Failed: 1, MedianMS: 12000, Up: 2,
+		Versions: []domain.AssistantVersionStats{{PromptVersion: "v2", Answered: 3}}}, nil
+}
+
+func (f *fakeAssistant) AssistantRated(_ context.Context, rating int) ([]domain.AssistantRated, error) {
+	return []domain.AssistantRated{{MessageID: 2, Username: "rustam", Question: "Why red?", Answer: "Flaky test.", Rating: -1, Comment: "wrong"}}, nil
+}
+
+func TestAssistantEndpoints(t *testing.T) {
+	h := newHarness(t, pinger{})
+	if rec := h.do("GET", "/api/assistant/conversations", "", nil); rec.Code != http.StatusUnauthorized {
+		t.Fatalf("without session: %d", rec.Code)
+	}
+	rec := h.do("POST", "/api/auth/login", loginBody("rustam", password, h.code(t, 1), "web"), nil)
+	cookie := map[string]string{"Cookie": rec.Result().Cookies()[0].String()}
+
+	cases := []struct {
+		method, path, body string
+		want               int
+		contains           string
+	}{
+		{"POST", "/api/assistant/conversations", `{"question":"What waits on me?","lang":"ru"}`, 202, `"status":"pending"`},
+		{"POST", "/api/assistant/conversations", `{"question":"x","lang":"de"}`, 400, `bad_request`},
+		{"POST", "/api/assistant/conversations", `{"question":"  "}`, 400, `bad_request`},
+		{"POST", "/api/assistant/conversations", `{"question":"too many"}`, 429, `rate_limited`},
+		{"POST", "/api/assistant/conversations/7/messages", `{"question":"And CI?"}`, 202, `"id":7`},
+		{"POST", "/api/assistant/conversations/8/messages", `{"question":"And CI?"}`, 404, `no such conversation`},
+		{"GET", "/api/assistant/conversations", "", 200, `"title":"What waits on me?"`},
+		{"GET", "/api/assistant/conversations/7", "", 200, `"links":[{"key":"PAY-214","kind":"ticket"},{"id":12,"kind":"ci"}]`},
+		{"GET", "/api/assistant/conversations/7", "", 200, `"speech":"PAY-214 needs your review."`},
+		{"GET", "/api/assistant/conversations/8", "", 404, `not_found`},
+		{"PUT", "/api/assistant/messages/2/rating", `{"rating":5}`, 400, `bad_request`},
+		{"PUT", "/api/assistant/messages/3/rating", `{"rating":1}`, 404, `no such answer`},
+		{"PUT", "/api/assistant/messages/2/rating", `{"rating":-1,"comment":"wrong ticket","share":true}`, 200, `"rating":-1`},
+		{"DELETE", "/api/assistant/conversations/7", "", 204, ``},
+		{"DELETE", "/api/assistant/conversations/8", "", 404, `not_found`},
+		{"GET", "/api/assistant/stats?days=30", "", 200, `"days":30`},
+		{"GET", "/api/assistant/stats", "", 200, `"versions":[{"answered":3`},
+		{"GET", "/api/assistant/rated?rating=down", "", 200, `"comment":"wrong"`},
+	}
+	for _, c := range cases {
+		rec := h.do(c.method, c.path, c.body, cookie)
+		if rec.Code != c.want || !strings.Contains(rec.Body.String(), c.contains) {
+			t.Errorf("%s %s: %d %s (want %d containing %q)", c.method, c.path, rec.Code, rec.Body, c.want, c.contains)
+		}
+		if c.want == 429 && rec.Header().Get("Retry-After") != "91" {
+			t.Errorf("Retry-After = %q", rec.Header().Get("Retry-After"))
+		}
+	}
+	if h.assistant.lastConversation != 8 || h.assistant.lastQuestion != "And CI?" || h.assistant.user == 0 {
+		t.Errorf("ask input: %+v", h.assistant)
+	}
+	if h.assistant.lastRating != -1 || !h.assistant.lastShare {
+		t.Errorf("rating input: %+v", h.assistant)
+	}
+}

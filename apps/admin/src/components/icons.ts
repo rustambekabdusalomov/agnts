@@ -21,6 +21,7 @@ export const ICON: Record<string, string> = {
   "shield": "<path d=\"M12 3l7.5 3v5.5c0 4.4-3.1 8.2-7.5 9.5-4.4-1.3-7.5-5.1-7.5-9.5V6z\"/><path d=\"M9 12l2 2 4-4\"/>",
   "feedback": "<path d=\"M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H9l-5 4z\"/><path d=\"M8 9h8M8 12h5\"/>",
   "plus": "<path d=\"M12 5v14M5 12h14\"/>",
+  "assistant": "<path d=\"M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H9l-5 4z\"/><path d=\"M12 7.2l.9 1.9 1.9.9-1.9.9-.9 1.9-.9-1.9-1.9-.9 1.9-.9z\"/>",
   "close": "<path d=\"M6 6l12 12M18 6L6 18\"/>",
   "check": "<path d=\"M5 12.5l4.5 4.5L19 7.5\"/>",
   "rules": "<path d=\"M7 3h8l4 4v14H7z\"/><path d=\"M15 3v4h4\"/><path d=\"M10 12h6M10 16h4\"/><path d=\"M4 7v13a1 1 0 0 0 1 1h1\"/>",

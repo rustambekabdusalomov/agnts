@@ -12,13 +12,13 @@ import (
 )
 
 const suggestionCols = `id, ticket_id, run_id, source, type, revision, title, description, serves, kind, priority, status,
-	after, COALESCE(child_key, ''), decided_at, created_at`
+	after, COALESCE(child_key, ''), decided_at, created_at, repo_ids`
 
 func scanSuggestion(row pgx.Row) (domain.Suggestion, error) {
 	var s domain.Suggestion
 	var kind string
 	err := row.Scan(&s.ID, &s.TicketID, &s.RunID, &s.Source, &s.Type, &s.Revision, &s.Title, &s.Description, &s.Serves,
-		&kind, &s.Priority, &s.Status, &s.After, &s.ChildKey, &s.DecidedAt, &s.CreatedAt)
+		&kind, &s.Priority, &s.Status, &s.After, &s.ChildKey, &s.DecidedAt, &s.CreatedAt, &s.RepoIDs)
 	s.Kind = domain.TicketKind(kind)
 	return s, notFound(err)
 }
@@ -77,9 +77,16 @@ func (s *Agent) AddSuggestion(ctx context.Context, x domain.Suggestion, ev domai
 
 func insertSuggestion(ctx context.Context, tx pgx.Tx, ticketID int64, x domain.Suggestion) (domain.Suggestion, error) {
 	return scanSuggestion(tx.QueryRow(ctx, `INSERT INTO ticket_suggestions
-		(ticket_id, run_id, source, type, revision, title, description, serves, kind, priority)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING `+suggestionCols,
-		ticketID, x.RunID, x.Source, x.Type, x.Revision, x.Title, x.Description, x.Serves, string(x.Kind), x.Priority))
+		(ticket_id, run_id, source, type, revision, title, description, serves, kind, priority, repo_ids)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING `+suggestionCols,
+		ticketID, x.RunID, x.Source, x.Type, x.Revision, x.Title, x.Description, x.Serves, string(x.Kind), x.Priority, nonNilIDs(x.RepoIDs)))
+}
+
+func nonNilIDs(ids []int64) []int64 {
+	if ids == nil {
+		return []int64{}
+	}
+	return ids
 }
 
 // Suggestions returns a ticket's suggestions, oldest first.
@@ -198,8 +205,8 @@ func (s *Agent) FollowUpsOf(ctx context.Context, parentKey string) ([]domain.Tic
 // OpenTicketRefs returns the newest unfinished tickets of a repository (or
 // of tasks without one), so a run can avoid suggesting what exists.
 func (s *Agent) OpenTicketRefs(ctx context.Context, repoID *int64, limit int) ([]orchestrator.TicketRef, error) {
-	rows, err := s.db.Query(ctx, `SELECT key, title FROM tickets
-		WHERE repo_id IS NOT DISTINCT FROM $1 AND state NOT IN ('done', 'rejected')
+	rows, err := s.db.Query(ctx, `SELECT key, title FROM tickets t
+		WHERE (($1::bigint IS NULL AND t.repo_id IS NULL) OR ($1::bigint IS NOT NULL AND `+touchesSQL+`)) AND state NOT IN ('done', 'rejected')
 		ORDER BY updated_at DESC LIMIT $2`, repoID, limit)
 	if err != nil {
 		return nil, err

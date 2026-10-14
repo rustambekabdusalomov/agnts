@@ -164,13 +164,13 @@ func (f *fakeTickets) TicketByKey(_ context.Context, key string) (domain.Ticket,
 	return domain.Ticket{}, domain.ErrNotFound
 }
 
-func (f *fakeTickets) TicketByPR(_ context.Context, _, branch string) (domain.Ticket, error) {
+func (f *fakeTickets) TicketByPR(_ context.Context, ref domain.PRRef) (domain.Ticket, int64, error) {
 	for _, t := range f.tickets {
-		if t.Branch == branch {
-			return t, nil
+		if t.Branch == ref.Branch && t.RepoID != nil && (ref.RepoID == 0 || *t.RepoID == ref.RepoID) {
+			return t, *t.RepoID, nil
 		}
 	}
-	return domain.Ticket{}, domain.ErrNotFound
+	return domain.Ticket{}, 0, domain.ErrNotFound
 }
 
 func (f *fakeTickets) UnmergedPRs(context.Context, int) ([]domain.Ticket, error) { return nil, nil }
@@ -198,7 +198,7 @@ type fakeWork struct {
 	n        int
 }
 
-func (w *fakeWork) CIFeedback(_ context.Context, key, feedback, _ string, rounds int) (domain.Ticket, orchestrator.CIFeedbackResult, error) {
+func (w *fakeWork) CIFeedback(_ context.Context, key string, _ int64, feedback, _ string, rounds int) (domain.Ticket, orchestrator.CIFeedbackResult, error) {
 	w.feedback = append(w.feedback, key+"\n"+feedback)
 	return domain.Ticket{Key: key}, orchestrator.CIFeedbackSent, nil
 }

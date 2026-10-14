@@ -71,17 +71,38 @@ const (
 // HookIDs lists every hook id.
 var HookIDs = []string{HookSecret, HookRedFlags, HookRules, HookFactCheck, HookDestructive, HookEditCheck, HookStopGate, HookProgress}
 
-// Command is a shell command a hook runs in /workspace.
+// Command is a shell command a hook runs in /workspace, or in its Dir.
 type Command struct {
 	Name       string `json:"name"`
 	Cmd        string `json:"cmd"`
 	TimeoutSec int    `json:"timeoutSec,omitempty"`
+	// Dir is the repository's folder under /workspace in a run of several
+	// repositories ("" for /workspace). With IfChanged the command only
+	// runs when that repository has changes.
+	Dir       string `json:"dir,omitempty"`
+	IfChanged bool   `json:"ifChanged,omitempty"`
+}
+
+// Shell is the command line to run from /workspace.
+func (c Command) Shell() string {
+	cmd := c.Cmd
+	if c.IfChanged {
+		cmd = `if [ -z "$(git status --porcelain)" ]; then exit 0; fi; ` + cmd
+	}
+	if c.Dir == "" {
+		return cmd
+	}
+	return "cd " + shellQuote(c.Dir) + " && { " + cmd + "\n}"
 }
 
 // EditCheck is a quick check of one edited file: Cmd with {file} (the
-// path relative to /workspace) and {dir} (its directory) filled in, run
-// when the path matches one of the globs.
+// path relative to /workspace, or to Dir) and {dir} (its directory)
+// filled in, run when the path matches one of the globs.
 type EditCheck struct {
+	// Dir is the repository's folder in a run of several repositories:
+	// the check covers files under it only, runs in it, and its globs and
+	// {file} are relative to it.
+	Dir        string   `json:"dir,omitempty"`
 	Name       string   `json:"name"`
 	Globs      []string `json:"globs"`
 	Cmd        string   `json:"cmd"`

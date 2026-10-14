@@ -12,6 +12,8 @@ import KindBadge from '../components/ticket/KindBadge.vue'
 import ImportDrawer from '../components/repos/ImportDrawer.vue'
 import RepoDrawer from '../components/repos/RepoDrawer.vue'
 import { useRepos } from '../components/repos/useRepos'
+import RepoChip from '../components/repos/RepoChip.vue'
+import { hasRepo } from '../components/repos/repoSet'
 import TaskDrawer from '../components/tasks/TaskDrawer.vue'
 import TicketBoard from '../components/TicketBoard.vue'
 import SegButtons from '../components/form/SegButtons.vue'
@@ -41,10 +43,10 @@ const rows = computed(() => {
   const q = ui.search.trim().toLowerCase()
   return tasks.value.filter(
     (x) =>
-      (repoFilter.value === 'all' || x.repoId === repoFilter.value) && (!q || `${x.key} ${x.title}`.toLowerCase().includes(q)),
+      (repoFilter.value === 'all' || hasRepo(x, repoFilter.value)) && (!q || `${x.key} ${x.title}`.toLowerCase().includes(q)),
   )
 })
-const countFor = (id: number) => tasks.value.filter((x) => x.repoId === id).length
+const countFor = (id: number) => tasks.value.filter((x) => hasRepo(x, id)).length
 const { view, options: viewOptions } = useListView('tasks')
 const columns = computed(() => BOARD_GROUPS.map((g) => ({ id: g.id, label: t(`nav.${g.id}`), states: g.states })))
 
@@ -141,7 +143,7 @@ function repoSaved(r: Repository) {
                 <div class="tkey">{{ x.key }} <KindBadge v-if="x.kind !== 'code'" :ticket="x" /></div>
                 <div class="ttitle">{{ x.title }}</div>
               </td>
-              <td class="muted">{{ x.repoName ?? '—' }}</td>
+              <td class="muted"><RepoChip :ticket="x" empty="—" /></td>
               <td><StateBadge :state="x.state" :kind="x.kind" /> <WaitBadge :ticket="x" /></td>
               <td class="muted num" :title="x.spend ? t('spend.tokens', { n: ioTokens(x.spend).toLocaleString(locale) }) : undefined">
                 {{ x.spend ? fmtTokens(ioTokens(x.spend), locale) : '—' }}

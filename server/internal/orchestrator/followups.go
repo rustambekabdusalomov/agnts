@@ -139,6 +139,7 @@ func (o *Orchestrator) saveFollowUps(ctx context.Context, s domain.Settings, t d
 	titles := make([]string, len(ss))
 	for i := range ss {
 		ss[i].RunID, ss[i].Revision = &run.ID, t.Revision
+		ss[i].RepoIDs = followUpRepos(t, ss[i].RepoFolders)
 		titles[i] = ss[i].Title
 	}
 	var ev *domain.Event
@@ -152,6 +153,28 @@ func (o *Orchestrator) saveFollowUps(ctx context.Context, s domain.Settings, t d
 	if err := o.store.ReplaceSuggestions(ctx, t.ID, source, ss, ev); err != nil {
 		o.log.Error("save follow-up suggestions", "ticket", t.Key, "err", err)
 	}
+}
+
+// followUpRepos maps the folders a follow-up of a ticket in several
+// repositories names to repository ids; none (or a ticket in one) means
+// all of the ticket's.
+func followUpRepos(t domain.Ticket, folders []string) []int64 {
+	if !t.Multi() || len(folders) == 0 {
+		return nil
+	}
+	var out []int64
+	for _, f := range folders {
+		f = strings.Trim(strings.TrimSpace(f), "/")
+		for _, r := range t.Repos {
+			if (r.Folder == f || strings.EqualFold(r.RepoName, f)) && !slices.Contains(out, r.RepoID) {
+				out = append(out, r.RepoID)
+			}
+		}
+	}
+	if len(out) == len(t.Repos) {
+		return nil
+	}
+	return out
 }
 
 // summaryFollowUps reads the follow-ups from a run's summary.json.
@@ -229,8 +252,11 @@ type AcceptInput struct {
 	Description string
 	Kind        string
 	Priority    string
-	RepoID      int64 // 0: the parent's repository
-	Start       bool  // queue it to run now instead of holding it
+	RepoID      int64 // 0: the parent's repositories (or those the suggestion names)
+	// RepoIDs or GroupID pick several repositories instead of RepoID.
+	RepoIDs []int64
+	GroupID int64
+	Start   bool // queue it to run now instead of holding it
 }
 
 // AcceptResult is what accepting one suggestion did.
@@ -376,25 +402,30 @@ func (o *Orchestrator) accept(ctx context.Context, st domain.Settings, p domain.
 	}
 	desc = followUpDescription(p, x, desc)
 
-	var repo *domain.Repository
-	repoID := a.RepoID
-	if repoID == 0 && p.RepoID != nil {
-		repoID = *p.RepoID
+	// The parent's repositories, narrowed to those the suggestion is
+	// about, unless the person picks others.
+	choice := domain.RepoChoice{RepoID: a.RepoID, RepoIDs: a.RepoIDs, GroupID: a.GroupID}
+	if choice.Empty() {
+		choice.RepoIDs = p.RepoIDs()
+		if len(x.RepoIDs) > 0 {
+			choice.RepoIDs = nil
+			for _, id := range p.RepoIDs() {
+				if slices.Contains(x.RepoIDs, id) {
+					choice.RepoIDs = append(choice.RepoIDs, id)
+				}
+			}
+		}
 	}
-	if repoID != 0 {
-		r, err := o.store.RepositoryByID(ctx, repoID)
-		if errors.Is(err, domain.ErrNotFound) {
-			return domain.Ticket{}, invalid("no repository %d", repoID)
-		}
-		if err != nil {
-			return domain.Ticket{}, err
-		}
-		if r.ArchivedAt != nil {
-			return domain.Ticket{}, invalid("%s is archived: restore it on the Repositories page first", r.Name)
-		}
-		repo = &r
-	} else if kind.Spec().NeedsRepo {
+	res, err := o.resolveRepos(ctx, choice, kind, false)
+	if err != nil {
+		return domain.Ticket{}, err
+	}
+	if len(res.Repos) == 0 && kind.Spec().NeedsRepo {
 		return domain.Ticket{}, invalid("a %s ticket needs a repository: pick one", kind)
+	}
+	var repo *domain.Repository
+	if len(res.Repos) > 0 {
+		repo = &res.Repos[0]
 	}
 
 	t := domain.Ticket{
@@ -402,9 +433,7 @@ func (o *Orchestrator) accept(ctx context.Context, st domain.Settings, p domain.
 		State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: "pr", Held: !a.Start, AskFirst: st.AskFirst,
 		Kind: kind, FollowUpOf: p.Key,
 	}
-	if repo != nil {
-		t.RepoID = &repo.ID
-	}
+	res.apply(&t)
 	ev := domain.Event{TicketKey: p.Key, Type: domain.EventTicketUpdated, Origin: origin, Data: map[string]any{"suggestion": x.ID}}
 
 	if src != "" {
@@ -415,7 +444,7 @@ func (o *Orchestrator) accept(ctx context.Context, st domain.Settings, p domain.
 		prefix = TaskPrefix(*repo)
 	}
 	for range 5 {
-		n, err := o.store.NextTaskNumber(ctx, t.RepoID)
+		n, err := o.nextTaskNumber(ctx, t, prefix)
 		if err != nil {
 			return domain.Ticket{}, err
 		}

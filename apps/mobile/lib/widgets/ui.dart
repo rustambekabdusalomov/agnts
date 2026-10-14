@@ -33,6 +33,7 @@ const _icons = <String, String>{
   'plug': '<path d="M9 7V3M15 7V3M7 7h10v4a5 5 0 0 1-10 0z"/><path d="M12 16v5"/>',
   'tasks': '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
   'plus': '<path d="M12 5v14M5 12h14"/>',
+  'assistant': '<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H9l-5 4z"/><path d="M12 7.2l.9 1.9 1.9.9-1.9.9-.9 1.9-.9-1.9-1.9-.9 1.9-.9z"/>',
   'close': '<path d="M6 6l12 12M18 6L6 18"/>',
   'check': '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
   'search': '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
@@ -137,6 +138,15 @@ class ToneBadge extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A ticket's repository for lists: the main one's name, with "+N" for the
+/// others when the ticket works in several ("api +2"). Null without one.
+String? repoLabel(Ticket t) {
+  final name = t.repoName;
+  if (name == null) return null;
+  final more = (t.repos?.length ?? 0) - 1;
+  return more > 0 ? '$name +$more' : name;
 }
 
 /// The small square source chip: "Jira" or "Plane" (gray), or "Task" (purple) (.src).
@@ -439,7 +449,7 @@ class TicketCard extends StatelessWidget {
                   ToneBadge(AppLocalizations.of(context).followUpsOpenBadge(ticket.openSuggestions!), Tone.info, small: true),
                 if (ticket.blockedBy?.isNotEmpty ?? false)
                   ToneBadge(AppLocalizations.of(context).relationsWaitingBadge, Tone.warn, small: true),
-                if (ticket.repoName != null) Text(ticket.repoName!),
+                if (repoLabel(ticket) case final repo?) Text(repo),
                 ...meta,
               ],
             ),
@@ -1278,11 +1288,12 @@ class ActionBar extends StatelessWidget {
   }
 }
 
-/// The square-ish floating "+" button (.fab).
+/// The square-ish floating "+" button (.fab), or another [icon].
 class HFab extends StatelessWidget {
-  const HFab({super.key, required this.onTap, required this.tooltip});
+  const HFab({super.key, required this.onTap, required this.tooltip, this.icon = 'plus'});
   final VoidCallback onTap;
   final String tooltip;
+  final String icon;
 
   @override
   Widget build(BuildContext context) {
@@ -1303,7 +1314,7 @@ class HFab extends StatelessWidget {
             child: SizedBox(
               width: 58,
               height: 58,
-              child: Center(child: HIcon('plus', size: 26, color: c.onPrimary, stroke: 2.4)),
+              child: Center(child: HIcon(icon, size: 26, color: c.onPrimary, stroke: 2.4)),
             ),
           ),
         ),

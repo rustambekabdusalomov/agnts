@@ -1,0 +1,26 @@
+{
+  "mgroups": {
+    "groups": "Groups",
+    "repos": "Repositories",
+    "pickHint": "Pick one or more. The first one is the main one.",
+    "inTask": "In this task",
+    "fromGroup": "All of {name}",
+    "fromGroupEdited": "From {name}, edited",
+    "primary": "main",
+    "remove": "Remove {name}",
+    "noMembers": "This group has no active repositories.",
+    "group": "Group {name}",
+    "partlyMerged": "Partly merged",
+    "archived": "archived",
+    "pushError": "Push failed: {error}",
+    "files": "{n, plural, one {# file} other {# files}}",
+    "ciFixes": "{n, plural, one {# CI fix} other {# CI fixes}}",
+    "state": {
+      "pending": "Pending",
+      "unchanged": "No changes",
+      "pushed": "Pushed",
+      "merged": "Merged",
+      "dropped": "Closed"
+    }
+  }
+}

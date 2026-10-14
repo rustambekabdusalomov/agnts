@@ -17,8 +17,26 @@ void main() {
       // TODO
     });
 
+    // The primary repository; repos lists all of them
     // int repoId
     test('to test the property `repoId`', () async {
+      // TODO
+    });
+
+    // Every repository the ticket works in, the primary first, with its branch and pull request
+    // List<TicketRepoState> repos
+    test('to test the property `repos`', () async {
+      // TODO
+    });
+
+    // RepoGroupRef group
+    test('to test the property `group`', () async {
+      // TODO
+    });
+
+    // Some pull requests merged and at least one closed without a merge
+    // bool partlyMerged
+    test('to test the property `partlyMerged`', () async {
       // TODO
     });
 
@@ -63,22 +81,25 @@ void main() {
       // TODO
     });
 
+    // The primary repository's branch (see repos)
     // String branch
     test('to test the property `branch`', () async {
       // TODO
     });
 
-    // The reviewed commit: the branch head agnts committed, or for a pull request review the head agnts reviewed
+    // The reviewed commit: the branch head agnts committed (in the primary repository; see repos), or for a pull request review the head agnts reviewed
     // String headSha
     test('to test the property `headSha`', () async {
       // TODO
     });
 
+    // The primary repository's pull request (see repos)
     // int prNumber
     test('to test the property `prNumber`', () async {
       // TODO
     });
 
+    // The primary repository's pull request (see repos)
     // String prUrl
     test('to test the property `prUrl`', () async {
       // TODO

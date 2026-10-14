@@ -723,10 +723,12 @@ func NewRepos(store *postgres.Agent, gh *github.Host, browser vcs.Browser, gitla
 	return &Repos{store: store, gh: gh, browser: browser, gitlabHost: gitlabHost, log: log}
 }
 
-// RepoView is a repository with its open ticket count.
+// RepoView is a repository with its open ticket count and the groups it
+// is in (id and name).
 type RepoView struct {
 	domain.Repository
-	Open int
+	Open   int
+	Groups []domain.RepoGroup
 }
 
 // List returns repositories with open ticket counts.
@@ -739,9 +741,13 @@ func (r *Repos) List(ctx context.Context) ([]RepoView, error) {
 	if err != nil {
 		return nil, err
 	}
+	groups, err := r.store.GroupsOfRepos(ctx)
+	if err != nil {
+		return nil, err
+	}
 	out := make([]RepoView, len(repos))
 	for i, x := range repos {
-		out[i] = RepoView{Repository: x, Open: open[x.ID]}
+		out[i] = RepoView{Repository: x, Open: open[x.ID], Groups: groups[x.ID]}
 	}
 	return out, nil
 }
@@ -793,7 +799,11 @@ func (r *Repos) Get(ctx context.Context, id int64) (RepoView, error) {
 		return RepoView{}, err
 	}
 	open, err := r.store.OpenTicketCounts(ctx)
-	return RepoView{Repository: x, Open: open[id]}, err
+	if err != nil {
+		return RepoView{}, err
+	}
+	groups, err := r.store.GroupsOfRepos(ctx)
+	return RepoView{Repository: x, Open: open[id], Groups: groups[id]}, err
 }
 
 // Validate checks and normalises a repository from the form. gitlabHost is

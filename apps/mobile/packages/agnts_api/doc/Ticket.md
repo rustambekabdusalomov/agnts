@@ -10,7 +10,10 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **key** | **String** |  | 
 **source_** | **String** |  | 
-**repoId** | **int** |  | [optional] 
+**repoId** | **int** | The primary repository; repos lists all of them | [optional] 
+**repos** | [**List&lt;TicketRepoState&gt;**](TicketRepoState.md) | Every repository the ticket works in, the primary first, with its branch and pull request | [optional] 
+**group** | [**RepoGroupRef**](RepoGroupRef.md) |  | [optional] 
+**partlyMerged** | **bool** | Some pull requests merged and at least one closed without a merge | [optional] 
 **title** | **String** |  | 
 **description** | **String** |  | 
 **priority** | **String** |  | 
@@ -19,10 +22,10 @@ Name | Type | Description | Notes
 **revision** | **int** |  | 
 **replayOf** | **String** | For a replay: the done ticket it re-runs. Replays are never pushed. | [optional] 
 **turns** | **int** |  | 
-**branch** | **String** |  | 
-**headSha** | **String** | The reviewed commit: the branch head agnts committed, or for a pull request review the head agnts reviewed | [optional] 
-**prNumber** | **int** |  | [optional] 
-**prUrl** | **String** |  | 
+**branch** | **String** | The primary repository's branch (see repos) | 
+**headSha** | **String** | The reviewed commit: the branch head agnts committed (in the primary repository; see repos), or for a pull request review the head agnts reviewed | [optional] 
+**prNumber** | **int** | The primary repository's pull request (see repos) | [optional] 
+**prUrl** | **String** | The primary repository's pull request (see repos) | 
 **ciFixes** | **int** | Rounds a red CI check sent the pull request back to coding | [optional] 
 **assignees** | **List&lt;String&gt;** | Git host usernames the pull request is (or will be) assigned to | [optional] 
 **afterApprove** | **String** |  | [optional] 

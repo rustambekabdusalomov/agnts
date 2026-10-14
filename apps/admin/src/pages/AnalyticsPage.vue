@@ -10,9 +10,11 @@ import LearningTab from '../components/analytics/LearningTab.vue'
 import OverviewTab from '../components/analytics/OverviewTab.vue'
 import QualityTab from '../components/analytics/QualityTab.vue'
 import ReposTab from '../components/analytics/ReposTab.vue'
+import AssistantTab from '../components/analytics/AssistantTab.vue'
 import { dayLabels, downloadCsv, TABS, type Days, type Tab } from '../components/analytics/analytics'
 import PageHeader from '../components/PageHeader.vue'
 import HiIcon from '../components/ui/HiIcon.vue'
+import { useWorkspace } from '../stores/workspace'
 
 // Analytics over 7, 30 or 90 days, compared with the period before. Each tab
 // is its own page at /analytics/<tab>; Delivery, the CI part of Quality and
@@ -22,9 +24,12 @@ const route = useRoute()
 const days = ref<Days>(30)
 const PERIODS: Days[] = [7, 30, 90]
 
+const workspace = useWorkspace()
+// The Assistant tab is the workspace owner's: it shows people's rated questions.
+const tabs = computed(() => TABS.filter((x) => x !== 'assistant' || workspace.isOwner))
 const tab = computed<Tab>(() => {
   const s = String(route.params.tab ?? '')
-  return (TABS as readonly string[]).includes(s) ? (s as Tab) : 'overview'
+  return (tabs.value as readonly string[]).includes(s) ? (s as Tab) : 'overview'
 })
 const TAB_LABEL: Record<Tab, string> = {
   overview: 'analytics.tabOverview',
@@ -33,12 +38,13 @@ const TAB_LABEL: Record<Tab, string> = {
   learning: 'analytics.tabLearning',
   cost: 'analytics.tabCost',
   repos: 'analytics.tabRepos',
+  assistant: 'analytics.tabAssistant',
 }
 
 const main = useQuery({
   queryKey: computed(() => ['analytics', days.value]),
   queryFn: () => unwrap(api.GET('/analytics', { params: { query: { days: days.value } } })),
-  enabled: computed(() => tab.value !== 'learning'),
+  enabled: computed(() => tab.value !== 'learning' && tab.value !== 'assistant'),
 })
 const delivery = useQuery({
   queryKey: computed(() => ['analytics', 'delivery', days.value]),
@@ -59,11 +65,13 @@ const learning = useQuery({
 const a = computed(() => main.data.value)
 // The tab's own data: still loading, failed, or there.
 const pending = computed(() => {
+  if (tab.value === 'assistant') return false // the tab loads its own
   if (tab.value === 'learning') return learning.isPending.value
   if (tab.value === 'delivery') return main.isPending.value || delivery.isPending.value
   return main.isPending.value
 })
 const failed = computed(() => {
+  if (tab.value === 'assistant') return false
   if (tab.value === 'learning') return learning.isError.value
   if (tab.value === 'delivery') return main.isError.value || delivery.isError.value
   return main.isError.value
@@ -71,7 +79,7 @@ const failed = computed(() => {
 
 const isEmpty = computed(() => {
   const x = a.value
-  if (!x || tab.value === 'learning') return false
+  if (!x || tab.value === 'learning' || tab.value === 'assistant') return false
   const c = x.current
   return (
     c.picked + c.pushed + c.rejected + c.stopped + c.merged + c.closed === 0 &&
@@ -86,6 +94,7 @@ const maxLabels = computed(() => (days.value > 30 ? 9 : 10))
 
 // CSV: the open tab's main table, one row per day or per item.
 const canExport = computed(() => {
+  if (tab.value === 'assistant') return false
   if (tab.value === 'learning') return !!learning.data.value
   if (tab.value === 'delivery') return !!delivery.data.value
   return !!a.value
@@ -158,7 +167,7 @@ function exportCsv() {
 
   <nav class="page-tabs" :aria-label="t('analytics.title')">
     <RouterLink
-      v-for="x in TABS"
+      v-for="x in tabs"
       :key="x"
       class="page-tab"
       :to="{ name: 'analytics', params: { tab: x } }"
@@ -191,6 +200,7 @@ function exportCsv() {
     <LearningTab v-else-if="tab === 'learning' && learning.data.value" :l="learning.data.value" />
     <CostTab v-else-if="tab === 'cost' && a" :a="a" :days="days" :labels="labels" :max-labels="maxLabels" />
     <ReposTab v-else-if="tab === 'repos' && a" :a="a" />
+    <AssistantTab v-else-if="tab === 'assistant'" :days="days" />
   </div>
 </template>
 

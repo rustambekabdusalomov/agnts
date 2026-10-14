@@ -22,9 +22,9 @@ func secondOpinionDue(s domain.Settings, t domain.Ticket, a Analysis) bool {
 // code, in the analysis run's container, and say whether it agrees with
 // the chosen approach. It is advice for the people deciding; nothing waits
 // on it, and a failure is only recorded.
-func (o *Orchestrator) secondOpinion(ctx context.Context, s domain.Settings, ws Workspace, t domain.Ticket, run *domain.Run, a Analysis) *domain.SecondOpinion {
+func (o *Orchestrator) secondOpinion(ctx context.Context, s domain.Settings, ws Workspace, t domain.Ticket, run *domain.Run, a Analysis, repos []RepoView) *domain.SecondOpinion {
 	out := &domain.SecondOpinion{Model: s.SecondOpinion}
-	prompt, err := render("secondopinion", promptData{T: t, Design: &a})
+	prompt, err := render("secondopinion", promptData{T: t, Design: &a, Repos: repos})
 	if err != nil {
 		out.Error = err.Error()
 		return out

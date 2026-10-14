@@ -21,6 +21,10 @@ abstract class _$AcceptFollowUpCWProxy {
 
   AcceptFollowUp repoId(int? repoId);
 
+  AcceptFollowUp repoIds(List<int>? repoIds);
+
+  AcceptFollowUp groupId(int? groupId);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `AcceptFollowUp(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -35,6 +39,8 @@ abstract class _$AcceptFollowUpCWProxy {
     TicketKind? kind,
     AcceptFollowUpPriorityEnum? priority,
     int? repoId,
+    List<int>? repoIds,
+    int? groupId,
   });
 }
 
@@ -69,6 +75,12 @@ class _$AcceptFollowUpCWProxyImpl implements _$AcceptFollowUpCWProxy {
   AcceptFollowUp repoId(int? repoId) => this(repoId: repoId);
 
   @override
+  AcceptFollowUp repoIds(List<int>? repoIds) => this(repoIds: repoIds);
+
+  @override
+  AcceptFollowUp groupId(int? groupId) => this(groupId: groupId);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `AcceptFollowUp(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -83,6 +95,8 @@ class _$AcceptFollowUpCWProxyImpl implements _$AcceptFollowUpCWProxy {
     Object? kind = const $CopyWithPlaceholder(),
     Object? priority = const $CopyWithPlaceholder(),
     Object? repoId = const $CopyWithPlaceholder(),
+    Object? repoIds = const $CopyWithPlaceholder(),
+    Object? groupId = const $CopyWithPlaceholder(),
   }) {
     return AcceptFollowUp(
       id: id == const $CopyWithPlaceholder()
@@ -113,6 +127,14 @@ class _$AcceptFollowUpCWProxyImpl implements _$AcceptFollowUpCWProxy {
           ? _value.repoId
           // ignore: cast_nullable_to_non_nullable
           : repoId as int?,
+      repoIds: repoIds == const $CopyWithPlaceholder()
+          ? _value.repoIds
+          // ignore: cast_nullable_to_non_nullable
+          : repoIds as List<int>?,
+      groupId: groupId == const $CopyWithPlaceholder()
+          ? _value.groupId
+          // ignore: cast_nullable_to_non_nullable
+          : groupId as int?,
     );
   }
 }
@@ -147,6 +169,11 @@ AcceptFollowUp _$AcceptFollowUpFromJson(Map<String, dynamic> json) =>
           (v) => $enumDecodeNullable(_$AcceptFollowUpPriorityEnumEnumMap, v),
         ),
         repoId: $checkedConvert('repoId', (v) => (v as num?)?.toInt()),
+        repoIds: $checkedConvert(
+          'repoIds',
+          (v) => (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList(),
+        ),
+        groupId: $checkedConvert('groupId', (v) => (v as num?)?.toInt()),
       );
       return val;
     });
@@ -160,6 +187,8 @@ Map<String, dynamic> _$AcceptFollowUpToJson(AcceptFollowUp instance) =>
       'kind': ?_$TicketKindEnumMap[instance.kind],
       'priority': ?_$AcceptFollowUpPriorityEnumEnumMap[instance.priority],
       'repoId': ?instance.repoId,
+      'repoIds': ?instance.repoIds,
+      'groupId': ?instance.groupId,
     };
 
 const _$AcceptFollowUpTargetEnumEnumMap = {

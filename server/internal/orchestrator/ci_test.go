@@ -25,7 +25,7 @@ func TestCIFeedbackRound(t *testing.T) {
 	h.expect("PAY-30", domain.StateWaitingForReview)
 
 	// Not pushed yet: CI cannot be about it.
-	if _, res, err := h.o.CIFeedback(h.ctx, "PAY-30", "CI failed", "https://ci/1", 2); err != nil || res != orchestrator.CIFeedbackSkipped {
+	if _, res, err := h.o.CIFeedback(h.ctx, "PAY-30", *h.state("PAY-30").RepoID, "CI failed", "https://ci/1", 2); err != nil || res != orchestrator.CIFeedbackSkipped {
 		t.Fatalf("before push: %v %v", res, err)
 	}
 	if _, err := h.o.Approve(h.ctx, "PAY-30", nil, false, domain.OriginWeb); err != nil {
@@ -35,7 +35,7 @@ func TestCIFeedbackRound(t *testing.T) {
 	before := h.expect("PAY-30", domain.StateDone)
 	opened := h.host.opened
 
-	tk, res, err := h.o.CIFeedback(h.ctx, "PAY-30", "CI failed on the pull request (CI, commit abc): https://ci/1\n\n--- FAIL: TestRefund", "https://ci/1", 1)
+	tk, res, err := h.o.CIFeedback(h.ctx, "PAY-30", *h.state("PAY-30").RepoID, "CI failed on the pull request (CI, commit abc): https://ci/1\n\n--- FAIL: TestRefund", "https://ci/1", 1)
 	if err != nil || res != orchestrator.CIFeedbackSent || tk.State != domain.StateCoding || tk.CIFixes != 1 || tk.Revision != before.Revision+1 {
 		t.Fatalf("feedback: %+v %v %v", tk, res, err)
 	}
@@ -54,7 +54,7 @@ func TestCIFeedbackRound(t *testing.T) {
 	}
 
 	// The cap: one round was allowed.
-	if _, res, err := h.o.CIFeedback(h.ctx, "PAY-30", "CI failed again", "https://ci/2", 1); err != nil || res != orchestrator.CIFeedbackCapped {
+	if _, res, err := h.o.CIFeedback(h.ctx, "PAY-30", *h.state("PAY-30").RepoID, "CI failed again", "https://ci/2", 1); err != nil || res != orchestrator.CIFeedbackCapped {
 		t.Fatalf("capped: %v %v", res, err)
 	}
 	h.expect("PAY-30", domain.StateDone)

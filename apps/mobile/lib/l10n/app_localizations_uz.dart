@@ -1141,6 +1141,9 @@ class AppLocalizationsUz extends AppLocalizations {
   String get analyticsColCiHint => 'Davrdagi CI xato guruhlari';
 
   @override
+  String get analyticsTabAssistant => 'Yordamchi';
+
+  @override
   String get appName => 'agnts';
 
   @override
@@ -2513,6 +2516,235 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get formNoMatch => 'Hech narsa topilmadi';
+
+  @override
+  String groupsView(String n) {
+    return 'Guruhlar ($n)';
+  }
+
+  @override
+  String get groupsSub =>
+      'Birga oʻzgaradigan repozitoriylar. Guruhdan yaratilgan tiket ularning hammasida ishlaydi va oʻzgartirgan har birida pull request ochadi.';
+
+  @override
+  String get groupsNone =>
+      'Hozircha guruhlar yoʻq. Guruh bitta tiketga bir nechta repozitoriyni, masalan API va veb-ilovani oʻzgartirish imkonini beradi.';
+
+  @override
+  String get groupsAdd => 'Yangi guruh';
+
+  @override
+  String get groupsDrawerSub => 'Birga oʻzgaradigan repozitoriylar, tartib bilan: birinchisi guruh tiketlarining asosiy repozitoriysi.';
+
+  @override
+  String get groupsName => 'Nomi';
+
+  @override
+  String get groupsNamePh => 'Doʻkon';
+
+  @override
+  String get groupsDescription => 'Tavsif';
+
+  @override
+  String get groupsMembers => 'Repozitoriylar';
+
+  @override
+  String get groupsMembersHelp =>
+      'Tartib muhim: birinchisi asosiy repozitoriy. Rol agnts ga har biri nima ekanini aytadi, masalan backend yoki web.';
+
+  @override
+  String get groupsMembersNeeded => 'Kamida bitta repozitoriy qoʻshing.';
+
+  @override
+  String get groupsNoMembers => 'Hozircha repozitoriylar yoʻq.';
+
+  @override
+  String get groupsAddMember => 'Repozitoriy qoʻshish…';
+
+  @override
+  String get groupsNoMoreRepos => 'Barcha faol repozitoriylar guruhda';
+
+  @override
+  String get groupsRolePh => 'Rol, masalan backend';
+
+  @override
+  String groupsRoleOf(String name) {
+    return '$name roli';
+  }
+
+  @override
+  String groupsMoveUp(String name) {
+    return '$name ni yuqoriga';
+  }
+
+  @override
+  String groupsMoveDown(String name) {
+    return '$name ni pastga';
+  }
+
+  @override
+  String get groupsPrimary => 'asosiy';
+
+  @override
+  String get groupsArchived => 'arxivda';
+
+  @override
+  String groupsPrefixHelp(String prefix) {
+    return 'Guruhdan yaratilgan vazifalar kaliti prefiksi, masalan $prefix-12. Boʻsh boʻlsa, birinchi repozitoriyniki ishlatiladi.';
+  }
+
+  @override
+  String get groupsInstructions => 'Koʻrsatmalar';
+
+  @override
+  String get groupsInstructionsPh =>
+      'Veb-ilova API ga src/api orqali murojaat qiladi; ikkalasini birga oʻzgartiring va OpenAPI spetsifikatsiyasini dolzarb saqlang.';
+
+  @override
+  String get groupsInstructionsHelp =>
+      'Repozitoriylar bir-biriga qanday bogʻlangani, Markdown da. Guruh tiketlarining har bir promptiga qoʻshiladi.';
+
+  @override
+  String get groupsWarningsTitle => 'Saqlandi, lekin ogohlantirishlar bor:';
+
+  @override
+  String groupsWarningsBadge(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count ta ogohlantirish');
+    return '$_temp0';
+  }
+
+  @override
+  String groupsSaved(String name) {
+    return '$name guruhi saqlandi';
+  }
+
+  @override
+  String get groupsDelete => 'Oʻchirish';
+
+  @override
+  String groupsDeleteConfirm(String name) {
+    return '$name guruhi oʻchirilsinmi? Uning tiketlari oʻz repozitoriylarini saqlab qoladi.';
+  }
+
+  @override
+  String groupsDeleted(String name) {
+    return '$name guruhi oʻchirildi';
+  }
+
+  @override
+  String get groupsColGroup => 'Guruh';
+
+  @override
+  String get groupsColMembers => 'Repozitoriylar';
+
+  @override
+  String get groupsColPrefix => 'Prefiks';
+
+  @override
+  String groupsInGroups(String names) {
+    return 'Guruhlarda: $names';
+  }
+
+  @override
+  String get groupsInLabel => 'Guruhlar:';
+
+  @override
+  String get groupsPickerGroups => 'Repozitoriy guruhlari';
+
+  @override
+  String get groupsChosen => 'Tanlangan repozitoriylar';
+
+  @override
+  String groupsFromGroup(String name) {
+    return '$name guruhidan';
+  }
+
+  @override
+  String get groupsMakePrimary => 'Asosiy repozitoriy qilish';
+
+  @override
+  String groupsMore(String count) {
+    return '+$count';
+  }
+
+  @override
+  String get groupsAllGroups => 'Barcha guruhlar';
+
+  @override
+  String get groupsFilterLabel => 'Guruh';
+
+  @override
+  String get groupsKvRepos => 'Repozitoriylar';
+
+  @override
+  String get groupsKvGroup => 'Guruh';
+
+  @override
+  String groupsTicketRepos(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count ta repozitoriy');
+    return '$_temp0';
+  }
+
+  @override
+  String get groupsPartlyMerged => 'Qisman birlashtirilgan';
+
+  @override
+  String groupsPr(String number) {
+    return 'PR #$number';
+  }
+
+  @override
+  String groupsOpenPrIn(String repo, String number) {
+    return '$repo #$number ni ochish';
+  }
+
+  @override
+  String groupsFiles(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count ta fayl');
+    return '$_temp0';
+  }
+
+  @override
+  String groupsFilesIn(String repo, num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count ta fayl');
+    return '$repo · $_temp0';
+  }
+
+  @override
+  String groupsPushError(String error) {
+    return 'Yuborib boʻlmadi: $error';
+  }
+
+  @override
+  String groupsRetryHint(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Qayta urinish xato boʻlgan $count ta repozitoriyni yuboradi; qolganlari oʻzgarmaydi.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupsState_pending => 'Yuborilmagan';
+
+  @override
+  String get groupsState_unchanged => 'Oʻzgarmagan';
+
+  @override
+  String get groupsState_pushed => 'Yuborilgan';
+
+  @override
+  String get groupsState_merged => 'Birlashtirilgan';
+
+  @override
+  String get groupsState_dropped => 'Yopilgan';
+
+  @override
+  String get groupsMaxTicketRepos => 'Bitta tiketdagi repozitoriylar soni (maksimal)';
+
+  @override
+  String get groupsMaxTicketReposHelp => 'Bitta tiket va bitta repozitoriy guruhida nechta repozitoriy boʻlishi mumkin.';
 
   @override
   String get harnessRepoTab => 'Himoya';
@@ -4492,6 +4724,231 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
+  String get massistantTitle => 'Yordamchi';
+
+  @override
+  String get massistantFab => 'Yordamchidan soʻrash';
+
+  @override
+  String get massistantMoreRow => 'Yordamchi';
+
+  @override
+  String get massistantMoreRowSub => 'Ish maydoni haqida soʻrang';
+
+  @override
+  String get massistantPlaceholder => 'Vazifalar, CI, xarajatlar haqida soʻrang…';
+
+  @override
+  String get massistantSend => 'Yuborish';
+
+  @override
+  String massistantCount(String n) {
+    return '$n / 1000';
+  }
+
+  @override
+  String get massistantNewConversation => 'Yangi suhbat';
+
+  @override
+  String get massistantHistory => 'Suhbatlar';
+
+  @override
+  String get massistantHistoryEmpty => 'Hali suhbatlar yoʻq.';
+
+  @override
+  String get massistantDelete => 'Oʻchirish';
+
+  @override
+  String get massistantDeleted => 'Suhbat oʻchirildi';
+
+  @override
+  String get massistantEmptyTitle => 'agntsdan ishingiz haqida soʻrang';
+
+  @override
+  String get massistantEmptyText =>
+      'Yordamchi vazifalaringiz, CI va xarajatlaringiz boʻyicha javob beradi va tilga olganlariga havola qoʻyadi. U hech narsani ishga tushirmaydi, tasdiqlamaydi yoki rad etmaydi.';
+
+  @override
+  String get massistantPrivate => 'Suhbatlaringizni faqat siz koʻrasiz. Ular 30 kun saqlanadi.';
+
+  @override
+  String get massistantSuggestWaiting => 'Meni nima kutmoqda?';
+
+  @override
+  String get massistantSuggestCi => 'Nega CI qizil?';
+
+  @override
+  String get massistantSuggestSpend => 'Bu hafta qancha sarfladik?';
+
+  @override
+  String get massistantSuggestDone => 'agnts bu hafta nimalarni tugatdi?';
+
+  @override
+  String massistantThinking(String seconds) {
+    return 'Oʻylayapman… $seconds s';
+  }
+
+  @override
+  String massistantReading(String what) {
+    return '$what oʻqilmoqda';
+  }
+
+  @override
+  String get massistantFileInbox => 'kiruvchilar';
+
+  @override
+  String get massistantFileTickets => 'vazifalar';
+
+  @override
+  String massistantFileTicket(String key) {
+    return '$key';
+  }
+
+  @override
+  String get massistantFileCi => 'CI nosozliklari';
+
+  @override
+  String get massistantFileUsage => 'tarif limitlari';
+
+  @override
+  String get massistantFileAnalytics => 'analitika';
+
+  @override
+  String get massistantFileRepos => 'repozitoriylar';
+
+  @override
+  String get massistantFileLessons => 'darslar';
+
+  @override
+  String get massistantFileConversation => 'suhbat';
+
+  @override
+  String get massistantFileQuestion => 'savolingiz';
+
+  @override
+  String get massistantFileOther => 'ish maydoni';
+
+  @override
+  String get massistantFailed => 'Javob yoʻq';
+
+  @override
+  String get massistantAskAgain => 'Yana soʻrash';
+
+  @override
+  String massistantLinkCi(String id) {
+    return 'CI #$id';
+  }
+
+  @override
+  String massistantLinkLesson(String id) {
+    return 'Dars #$id';
+  }
+
+  @override
+  String massistantTook(String seconds) {
+    return '$seconds s';
+  }
+
+  @override
+  String get massistantHelpful => 'Foydali';
+
+  @override
+  String get massistantNotHelpful => 'Foydasiz';
+
+  @override
+  String get massistantRateTitle => 'Javob qanday boʻldi?';
+
+  @override
+  String get massistantRateComment => 'Nima notoʻgʻri yoki yetishmadi? (ixtiyoriy)';
+
+  @override
+  String get massistantRateShare => 'agnts yaxshiroq javoblarni sinashi uchun bu savol maʼlumotlarini saqlash';
+
+  @override
+  String get massistantRateNote => 'Baho, izoh, savol va javobni ish maydoni egasi koʻradi.';
+
+  @override
+  String get massistantRateSend => 'Yuborish';
+
+  @override
+  String get massistantRateClear => 'Bahoni olib tashlash';
+
+  @override
+  String get massistantRated => 'Baho uchun rahmat';
+
+  @override
+  String get massistantStatsTitle => 'Yordamchi';
+
+  @override
+  String get massistantStatsQuestions => 'Savollar';
+
+  @override
+  String get massistantStatsAnswered => 'Javob berildi';
+
+  @override
+  String get massistantStatsMedian => 'Oʻrtacha vaqt';
+
+  @override
+  String get massistantStatsHelpful => 'Foydali';
+
+  @override
+  String get massistantStatsTokens => 'Tokenlar';
+
+  @override
+  String massistantStatsPeople(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n kishi soʻradi', one: '$n kishi soʻradi');
+    return '$_temp0';
+  }
+
+  @override
+  String get massistantStatsVersions => 'Prompt versiyalari boʻyicha';
+
+  @override
+  String massistantStatsVersionRow(String answered, String failed, String up, String down, String median) {
+    return '$answered javob · $failed nosoz · $up 👍 $down 👎 · $median';
+  }
+
+  @override
+  String get massistantStatsNone => 'Bu davrda savollar boʻlmadi.';
+
+  @override
+  String get massistantStatsRated => 'Baholangan javoblar';
+
+  @override
+  String get massistantRatedEmpty => 'Hali baholangan javoblar yoʻq.';
+
+  @override
+  String get massistantRatedShared => 'Promptlarni sinash uchun saqlangan';
+
+  @override
+  String massistantStatsParts(String start, String snapshot, String claude) {
+    return 'Konteyner $start · maʼlumot $snapshot · Claude $claude';
+  }
+
+  @override
+  String massistantStatsWarm(String n, String total) {
+    return '$total tadan $n tasi ishlab turgan konteynerda';
+  }
+
+  @override
+  String get massistantStatsSeeRated => 'Baholangan javoblar';
+
+  @override
+  String get massistantDeleteTitle => 'Bu suhbat oʻchirilsinmi?';
+
+  @override
+  String get massistantDeleteText => 'Undagi savol va javoblar butunlay oʻchiriladi.';
+
+  @override
+  String get massistantSendHint => 'Enter — yuborish, Shift+Enter — yangi qator';
+
+  @override
+  String get massistantConversationsLede => 'Savollaringiz va yordamchining javoblari. Ularni faqat siz koʻrasiz; 30 kun saqlanadi.';
+
+  @override
+  String get massistantOpenChat => 'Chatni ochish';
+
+  @override
   String get mciTitle => 'CI nosozliklari';
 
   @override
@@ -4737,6 +5194,82 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get mdetailFactTime => 'Vaqt';
+
+  @override
+  String get mgroupsGroups => 'Guruhlar';
+
+  @override
+  String get mgroupsRepos => 'Repozitoriylar';
+
+  @override
+  String get mgroupsPickHint => 'Bir yoki bir nechtasini tanlang. Birinchisi asosiy boʻladi.';
+
+  @override
+  String get mgroupsInTask => 'Bu vazifada';
+
+  @override
+  String mgroupsFromGroup(String name) {
+    return '$name guruhi toʻliq';
+  }
+
+  @override
+  String mgroupsFromGroupEdited(String name) {
+    return '$name guruhidan, oʻzgartirilgan';
+  }
+
+  @override
+  String get mgroupsPrimary => 'asosiy';
+
+  @override
+  String mgroupsRemove(String name) {
+    return '$name ni olib tashlash';
+  }
+
+  @override
+  String get mgroupsNoMembers => 'Bu guruhda faol repozitoriylar yoʻq.';
+
+  @override
+  String mgroupsGroup(String name) {
+    return '$name guruhi';
+  }
+
+  @override
+  String get mgroupsPartlyMerged => 'Qisman birlashtirildi';
+
+  @override
+  String get mgroupsArchived => 'arxivda';
+
+  @override
+  String mgroupsPushError(String error) {
+    return 'Yuborib boʻlmadi: $error';
+  }
+
+  @override
+  String mgroupsFiles(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n fayl', one: '$n fayl');
+    return '$_temp0';
+  }
+
+  @override
+  String mgroupsCiFixes(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n CI tuzatish', one: '$n CI tuzatish');
+    return '$_temp0';
+  }
+
+  @override
+  String get mgroupsStatePending => 'Kutilmoqda';
+
+  @override
+  String get mgroupsStateUnchanged => 'Oʻzgarishsiz';
+
+  @override
+  String get mgroupsStatePushed => 'Yuborildi';
+
+  @override
+  String get mgroupsStateMerged => 'Birlashtirildi';
+
+  @override
+  String get mgroupsStateDropped => 'Yopildi';
 
   @override
   String mhomeRunningNote(String parallel, String queued) {
@@ -5415,6 +5948,15 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get navCi => 'CI';
+
+  @override
+  String get navAiAssistant => 'AI yordamchi';
+
+  @override
+  String get navAssistantChat => 'Chat';
+
+  @override
+  String get navAssistantConversations => 'Suhbatlar';
 
   @override
   String get networkTitle => 'Xususiy tarmoqlar';

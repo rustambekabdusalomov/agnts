@@ -13,6 +13,18 @@ void main() {
       // TODO
     });
 
+    // Several repositories instead of repoId; the first is the primary. Give one of repoId, repoIds and groupId.
+    // List<int> repoIds
+    test('to test the property `repoIds`', () async {
+      // TODO
+    });
+
+    // A repository group: the task works in its repositories (copied now)
+    // int groupId
+    test('to test the property `groupId`', () async {
+      // TODO
+    });
+
     // TicketKindChoice kind
     test('to test the property `kind`', () async {
       // TODO

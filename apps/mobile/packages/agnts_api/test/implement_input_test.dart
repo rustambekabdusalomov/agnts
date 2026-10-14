@@ -7,9 +7,20 @@ void main() {
   // TODO add properties to the entity
 
   group(ImplementInput, () {
-    // Where to implement it; defaults to the report's repository
+    // Where to implement it; defaults to the report's repositories
     // int repoId
     test('to test the property `repoId`', () async {
+      // TODO
+    });
+
+    // Several repositories instead of repoId
+    // List<int> repoIds
+    test('to test the property `repoIds`', () async {
+      // TODO
+    });
+
+    // int groupId
+    test('to test the property `groupId`', () async {
       // TODO
     });
 

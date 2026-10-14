@@ -65,6 +65,8 @@ abstract class _$RepositoryCWProxy {
 
   Repository harness(RepoHarness? harness);
 
+  Repository groups(List<RepoGroupRef>? groups);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Repository(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -101,6 +103,7 @@ abstract class _$RepositoryCWProxy {
     bool? buildEnvSet,
     List<String>? buildEnvNames,
     RepoHarness? harness,
+    List<RepoGroupRef>? groups,
   });
 }
 
@@ -210,6 +213,9 @@ class _$RepositoryCWProxyImpl implements _$RepositoryCWProxy {
   Repository harness(RepoHarness? harness) => this(harness: harness);
 
   @override
+  Repository groups(List<RepoGroupRef>? groups) => this(groups: groups);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Repository(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -246,6 +252,7 @@ class _$RepositoryCWProxyImpl implements _$RepositoryCWProxy {
     Object? buildEnvSet = const $CopyWithPlaceholder(),
     Object? buildEnvNames = const $CopyWithPlaceholder(),
     Object? harness = const $CopyWithPlaceholder(),
+    Object? groups = const $CopyWithPlaceholder(),
   }) {
     return Repository(
       id: id == const $CopyWithPlaceholder()
@@ -364,6 +371,10 @@ class _$RepositoryCWProxyImpl implements _$RepositoryCWProxy {
           ? _value.harness
           // ignore: cast_nullable_to_non_nullable
           : harness as RepoHarness?,
+      groups: groups == const $CopyWithPlaceholder()
+          ? _value.groups
+          // ignore: cast_nullable_to_non_nullable
+          : groups as List<RepoGroupRef>?,
     );
   }
 }
@@ -469,6 +480,12 @@ Repository _$RepositoryFromJson(Map<String, dynamic> json) => $checkedCreate(
         (v) =>
             v == null ? null : RepoHarness.fromJson(v as Map<String, dynamic>),
       ),
+      groups: $checkedConvert(
+        'groups',
+        (v) => (v as List<dynamic>?)
+            ?.map((e) => RepoGroupRef.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      ),
     );
     return val;
   },
@@ -505,6 +522,7 @@ Map<String, dynamic> _$RepositoryToJson(Repository instance) =>
       'buildEnvSet': ?instance.buildEnvSet,
       'buildEnvNames': ?instance.buildEnvNames,
       'harness': ?instance.harness?.toJson(),
+      'groups': ?instance.groups?.map((e) => e.toJson()).toList(),
     };
 
 const _$RepositoryKindEnumEnumMap = {

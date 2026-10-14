@@ -7,6 +7,17 @@ void main() {
   // TODO add properties to the entity
 
   group(FileChange, () {
+    // The repository's folder, for a ticket in several; path is relative to the repository
+    // String repo
+    test('to test the property `repo`', () async {
+      // TODO
+    });
+
+    // int repoId
+    test('to test the property `repoId`', () async {
+      // TODO
+    });
+
     // String path
     test('to test the property `path`', () async {
       // TODO

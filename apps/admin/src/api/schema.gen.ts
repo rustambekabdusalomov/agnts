@@ -532,9 +532,31 @@ export interface paths {
         get?: never;
         /**
          * Link the ticket to a repository
-         * @description Allowed on a new ticket, or a failed or rate-limited one that has not pushed. A stopped ticket starts over from analysis on retry, since its analysis and branch belonged to the old repository.
+         * @description Allowed on a new ticket, or a failed or rate-limited one that has not pushed. A stopped ticket starts over from analysis on retry, since its analysis and branch belonged to the old repository. The same as PUT /tickets/{key}/repos with one repository.
          */
         put: operations["setTicketRepo"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/repos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set the ticket's repositories (one, several or a group)
+         * @description Allowed while no stage runs and nothing was pushed: on a new ticket, or a failed or rate-limited one. A stopped ticket starts over from analysis on retry. Give repoIds (the first is the primary) or groupId, not both.
+         */
+        put: operations["setTicketRepos"];
         post?: never;
         delete?: never;
         options?: never;
@@ -1019,6 +1041,50 @@ export interface paths {
         put?: never;
         post: operations["createRepo"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repo-groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The workspace's repository groups */
+        get: operations["listRepoGroups"];
+        put?: never;
+        /**
+         * Create a repository group
+         * @description A named set of repositories that tickets can change together. Its repositories must be able to share one run container (the same runner image, no clashing toolchain versions); what they share uneasily comes back in warnings.
+         */
+        post: operations["createRepoGroup"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repo-groups/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["GroupID"];
+            };
+            cookie?: never;
+        };
+        get: operations["getRepoGroup"];
+        /**
+         * Replace a group's fields and repositories
+         * @description Tickets already made from the group keep their repositories.
+         */
+        put: operations["updateRepoGroup"];
+        post?: never;
+        /** Delete a group; its tickets keep their repositories */
+        delete: operations["deleteRepoGroup"];
         options?: never;
         head?: never;
         patch?: never;
@@ -2981,6 +3047,128 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assistant/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Your assistant conversations, newest first, each with its last message
+         * @description A conversation belongs to the person who started it; nobody else sees it. Kept for 30 days after its last message.
+         */
+        get: operations["listAssistantConversations"];
+        put?: never;
+        /**
+         * Ask the assistant a question in a new conversation
+         * @description Stores the question and starts answering it from a read-only snapshot of the workspace. Answers take 10-30 seconds: the response has the answer pending; fetch the conversation again, or wait for the assistant_answered (or assistant_failed) event on the event stream. The assistant takes no actions.
+         */
+        post: operations["startAssistantConversation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistant/conversations/{conversationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationID"];
+            };
+            cookie?: never;
+        };
+        /** One of your conversations with all its messages */
+        get: operations["getAssistantConversation"];
+        put?: never;
+        post?: never;
+        /** Delete one of your conversations */
+        delete: operations["deleteAssistantConversation"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistant/conversations/{conversationId}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ask a follow-up question in one of your conversations
+         * @description Answered after the conversation's earlier questions, with the last 6 messages as context.
+         */
+        post: operations["askAssistant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistant/messages/{messageId}/rating": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                messageId: components["parameters"]["MessageID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Rate one of your answers (helpful or not), or take the rating back
+         * @description A rating, its comment, the answer and its question are shown to the workspace's owner. With share, the snapshot the answer was made from is kept with it so new prompts can be tried on the question.
+         */
+        put: operations["rateAssistantAnswer"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistant/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** How the workspace's assistant did (questions, answer rate, time, ratings, tokens, per prompt version) */
+        get: operations["getAssistantStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistant/rated": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Rated answers with their questions, newest rating first */
+        get: operations["listAssistantRated"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3389,9 +3577,13 @@ export interface components {
         ImplementInput: {
             /**
              * Format: int64
-             * @description Where to implement it; defaults to the report's repository
+             * @description Where to implement it; defaults to the report's repositories
              */
             repoId?: number;
+            /** @description Several repositories instead of repoId */
+            repoIds?: number[];
+            /** Format: int64 */
+            groupId?: number;
             /**
              * @description code = start now without questions (default), queue = keep until started
              * @enum {string}
@@ -3510,6 +3702,8 @@ export interface components {
             after?: number[];
             /** @description The ticket made from it */
             childKey?: string;
+            /** @description The parent's repositories it is about; absent for all of them */
+            repoIds?: number[];
             /** Format: date-time */
             decidedAt?: string;
             /** Format: date-time */
@@ -3547,9 +3741,12 @@ export interface components {
             priority?: "low" | "medium" | "high";
             /**
              * Format: int64
-             * @description Defaults to the parent ticket's repository
+             * @description Defaults to the parent ticket's repositories (those the suggestion is about)
              */
             repoId?: number;
+            repoIds?: number[];
+            /** Format: int64 */
+            groupId?: number;
         };
         AcceptFollowUps: {
             items: components["schemas"]["AcceptFollowUp"][];
@@ -3565,6 +3762,137 @@ export interface components {
         };
         AcceptFollowUpsResult: {
             results: components["schemas"]["AcceptFollowUpResult"][];
+        };
+        /**
+         * @description The language the assistant answers in (the app's)
+         * @enum {string}
+         */
+        AssistantLanguage: "en" | "ru" | "uz";
+        AssistantAsk: {
+            question: string;
+            lang?: components["schemas"]["AssistantLanguage"];
+        };
+        /** @description A screen of the app an answer points to */
+        AssistantLink: {
+            /** @enum {string} */
+            kind: "ticket" | "ci" | "lesson";
+            /** @description The ticket key (kind ticket) */
+            key?: string;
+            /**
+             * Format: int64
+             * @description The CI failure or lesson id
+             */
+            id?: number;
+        };
+        AssistantMessage: {
+            /** Format: int64 */
+            id: number;
+            /** @enum {string} */
+            role: "user" | "assistant";
+            /** @description The question, or the answer in Markdown */
+            text: string;
+            /** @description The answer in 1-3 plain sentences (empty for questions) */
+            speech: string;
+            links: components["schemas"]["AssistantLink"][];
+            /** @enum {string} */
+            status: "pending" | "answering" | "done" | "failed";
+            /** @description Why the answer failed */
+            error?: string;
+            lang: components["schemas"]["AssistantLanguage"];
+            /** Format: int64 */
+            durationMs?: number;
+            /** @description The snapshot files the answer was made from */
+            files?: string[];
+            /**
+             * @description Your rating: 1 helpful, -1 not, 0 none
+             * @enum {integer}
+             */
+            rating: -1 | 0 | 1;
+            ratingComment?: string;
+            /** @description The answer's snapshot is kept for prompt tests */
+            shared: boolean;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AssistantConversation: {
+            /** Format: int64 */
+            id: number;
+            /** @description The first question, cut */
+            title: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** @description Oldest first; in lists, only the last message */
+            messages: components["schemas"]["AssistantMessage"][];
+        };
+        AssistantRating: {
+            /** @enum {integer} */
+            rating: -1 | 0 | 1;
+            comment?: string;
+            /** @description Keep the answer's snapshot so new prompts can be tried on it */
+            share?: boolean;
+        };
+        AssistantStats: {
+            days: number;
+            questions: number;
+            answered: number;
+            failed: number;
+            /** @description How many people asked */
+            people: number;
+            /** Format: int64 */
+            medianMs: number;
+            /** Format: int64 */
+            p90Ms: number;
+            /**
+             * Format: int64
+             * @description Opening (or reusing) the container, median
+             */
+            medianStartMs: number;
+            /**
+             * Format: int64
+             * @description Reading the workspace, median
+             */
+            medianSnapshotMs: number;
+            /**
+             * Format: int64
+             * @description The Claude Code run, median
+             */
+            medianClaudeMs: number;
+            /** @description Answers that reused the container kept from the last one */
+            warm: number;
+            up: number;
+            down: number;
+            /** Format: int64 */
+            tokens: number;
+            /** Format: double */
+            costUsd: number;
+            /** @description Per prompt version, newest first */
+            versions: {
+                promptVersion: string;
+                answered: number;
+                failed: number;
+                up: number;
+                down: number;
+                /** Format: int64 */
+                medianMs: number;
+                /** Format: int64 */
+                tokens: number;
+            }[];
+        };
+        AssistantRated: {
+            /** Format: int64 */
+            messageId: number;
+            user: string;
+            question: string;
+            answer: string;
+            /** @enum {integer} */
+            rating: -1 | 1;
+            comment: string;
+            promptVersion: string;
+            shared: boolean;
+            /** Format: date-time */
+            ratedAt: string;
         };
         /**
          * @description A language agnts can translate into
@@ -3589,8 +3917,16 @@ export interface components {
             key: string;
             /** @enum {string} */
             source: "jira" | "plane" | "local" | "git" | "ci";
-            /** Format: int64 */
+            /**
+             * Format: int64
+             * @description The primary repository; repos lists all of them
+             */
             repoId?: number;
+            /** @description Every repository the ticket works in, the primary first, with its branch and pull request */
+            repos?: components["schemas"]["TicketRepoState"][];
+            group?: components["schemas"]["RepoGroupRef"];
+            /** @description Some pull requests merged and at least one closed without a merge */
+            partlyMerged?: boolean;
             title: string;
             description: string;
             priority: string;
@@ -3600,10 +3936,13 @@ export interface components {
             /** @description For a replay: the done ticket it re-runs. Replays are never pushed. */
             replayOf?: string;
             turns: number;
+            /** @description The primary repository's branch (see repos) */
             branch: string;
-            /** @description The reviewed commit: the branch head agnts committed, or for a pull request review the head agnts reviewed */
+            /** @description The reviewed commit: the branch head agnts committed (in the primary repository; see repos), or for a pull request review the head agnts reviewed */
             headSha?: string;
+            /** @description The primary repository's pull request (see repos) */
             prNumber?: number;
+            /** @description The primary repository's pull request (see repos) */
             prUrl: string;
             /** @description Rounds a red CI check sent the pull request back to coding */
             ciFixes?: number;
@@ -3913,6 +4252,10 @@ export interface components {
             output?: string;
         };
         FileChange: {
+            /** @description The repository's folder, for a ticket in several; path is relative to the repository */
+            repo?: string;
+            /** Format: int64 */
+            repoId?: number;
             path: string;
             add: number;
             del: number;
@@ -4012,6 +4355,85 @@ export interface components {
             /** Format: int64 */
             repoId: number;
         };
+        /** @description Give repoIds (the first is the primary) or groupId */
+        TicketReposInput: {
+            repoIds?: number[];
+            /** Format: int64 */
+            groupId?: number;
+        };
+        /** @description The ticket's work in one of its repositories: its branch, commit and pull request. The first is the primary repository. */
+        TicketRepoState: {
+            /** Format: int64 */
+            repoId: number;
+            repoName: string;
+            /** @description Its role in the group, as people named it (backend, web) */
+            role: string;
+            /** @description Its folder in the run, /workspace/<folder>; empty when the ticket has one repository */
+            folder: string;
+            branch: string;
+            headSha: string;
+            prNumber?: number;
+            prUrl: string;
+            /** @description Rounds a red CI check on its pull request sent the ticket back to coding */
+            ciFixes: number;
+            /**
+             * @description pending = not pushed yet; unchanged = the work did not change it (no pull request); pushed; merged; dropped = its pull request was closed without a merge
+             * @enum {string}
+             */
+            state: "pending" | "unchanged" | "pushed" | "merged" | "dropped";
+            /** Format: date-time */
+            mergedAt?: string;
+            /** Format: date-time */
+            closedAt?: string;
+            /** @description Why its last push failed; a retry pushes it again */
+            pushError?: string;
+            /** @description Files its change touches */
+            files: number;
+            /** @description The repository is archived */
+            archived?: boolean;
+        };
+        RepoGroupRef: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+        };
+        RepoGroupMember: {
+            /** Format: int64 */
+            repoId: number;
+            repoName: string;
+            role: string;
+            /** @description Archived: tickets made from the group leave it out */
+            archived: boolean;
+        };
+        RepoGroup: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            description: string;
+            /** @description How the repositories fit together; added to every prompt of its tickets */
+            instructions: string;
+            /** @description Key prefix of tasks made from the group; empty uses the first repository's */
+            taskPrefix: string;
+            members: components["schemas"]["RepoGroupMember"][];
+            /** @description What the repositories share uneasily in one run container (a build variable both set) */
+            warnings: string[];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        RepoGroupInput: {
+            name: string;
+            description?: string;
+            instructions?: string;
+            taskPrefix?: string;
+            /** @description In order; the first is the primary repository of the group's tickets */
+            members: {
+                /** Format: int64 */
+                repoId: number;
+                role?: string;
+            }[];
+        };
         ModelOverrides: {
             analyze?: components["schemas"]["Model"];
             coding?: components["schemas"]["Model"];
@@ -4034,6 +4456,13 @@ export interface components {
              * @description Omit for a task without a repository (report kinds or auto)
              */
             repoId?: number;
+            /** @description Several repositories instead of repoId; the first is the primary. Give one of repoId, repoIds and groupId. */
+            repoIds?: number[];
+            /**
+             * Format: int64
+             * @description A repository group: the task works in its repositories (copied now)
+             */
+            groupId?: number;
             kind?: components["schemas"]["TicketKindChoice"];
             title: string;
             description?: string;
@@ -4138,6 +4567,8 @@ export interface components {
             egressAllow?: string[];
             /** @description Runs suggest follow-up tickets (off by default; a ticket can override it) */
             suggestFollowUps?: boolean;
+            /** @description How many repositories one ticket, and one repository group, may have (6 by default) */
+            maxTicketRepos?: number;
             pullReviews?: components["schemas"]["PullReviewSettings"];
             ci?: components["schemas"]["CISettings"];
             guard?: components["schemas"]["GuardSettings"];
@@ -4591,6 +5022,8 @@ export interface components {
             /** @description Names of the build environment variables; the values are never returned */
             buildEnvNames?: string[];
             harness?: components["schemas"]["RepoHarness"];
+            /** @description The groups it is a member of */
+            groups?: components["schemas"]["RepoGroupRef"][];
         };
         RepositoryInput: {
             name: string;
@@ -5675,9 +6108,12 @@ export interface components {
         };
     };
     parameters: {
+        ConversationID: number;
+        MessageID: number;
         NetworkID: number;
         CIFailureID: number;
         RepoID: number;
+        GroupID: number;
         Provider: "jira" | "plane" | "github" | "claude" | "telegram" | "gitlab" | "openai";
         RuleID: number;
         LessonID: number;
@@ -6322,6 +6758,28 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["TicketRepo"];
+            };
+        };
+        responses: {
+            200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    setTicketRepos: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TicketReposInput"];
             };
         };
         responses: {
@@ -7077,6 +7535,128 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             409: components["responses"]["Conflict"];
+        };
+    };
+    listRepoGroups: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RepoGroup"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    createRepoGroup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RepoGroupInput"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RepoGroup"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    getRepoGroup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["GroupID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RepoGroup"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    updateRepoGroup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["GroupID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RepoGroupInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RepoGroup"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    deleteRepoGroup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["GroupID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
         };
     };
     detectRepo: {
@@ -10318,6 +10898,216 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
+        };
+    };
+    listAssistantConversations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantConversation"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    startAssistantConversation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssistantAsk"];
+            };
+        };
+        responses: {
+            /** @description The conversation, with its answer pending */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantConversation"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            429: components["responses"]["TooManyRequests"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    getAssistantConversation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantConversation"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    deleteAssistantConversation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    askAssistant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssistantAsk"];
+            };
+        };
+        responses: {
+            /** @description The conversation, with the new answer pending */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantConversation"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    rateAssistantAnswer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                messageId: components["parameters"]["MessageID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssistantRating"];
+            };
+        };
+        responses: {
+            /** @description The answer with its rating */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantMessage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    getAssistantStats: {
+        parameters: {
+            query?: {
+                days?: 7 | 30 | 90;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantStats"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    listAssistantRated: {
+        parameters: {
+            query?: {
+                /** @description up or down; both when left out */
+                rating?: "up" | "down";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantRated"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            501: components["responses"]["NotImplemented"];
         };
     };
 }

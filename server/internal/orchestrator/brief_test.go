@@ -150,7 +150,7 @@ func TestBriefSurveyFailsAndRefreshesAfterMerges(t *testing.T) {
 	}, nil); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := h.o.MarkMerged(h.ctx, "https://github.com/acme/api/pull/7", "", domain.OriginWebhook); err != nil {
+	if _, err := h.o.MarkMerged(h.ctx, domain.PRRef{URL: "https://github.com/acme/api/pull/7"}, domain.OriginWebhook); err != nil {
 		t.Fatal(err)
 	}
 	b, _ = h.o.RepoBrief(h.ctx, repo)

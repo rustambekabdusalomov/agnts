@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -27,19 +28,26 @@ const ticketCols = `id, key, source, repo_id, title, description, priority, stat
 	revision, turns, models, after_approve, branch, head_sha, pr_number, pr_url, feedback, held, ask_first, merged_at, assignees, learn_state, review_state, kind, kind_auto, post_report, COALESCE(parent_key, ''),
 	COALESCE(follow_up_of, ''), suggest_follow_ups, preview_state, preview_compare, feedback_shots, feedback_files, created_at, updated_at,
 	workspace_id, member_id, created_by, wait_reason, queued_at, wait_message, self_fixes, quiet_review, replay_of, base_sha, pull_request,
-	tracker_update, tracker_kept, ci_fixes`
+	tracker_update, tracker_kept, ci_fixes, group_id, agnts_group_name(group_id), agnts_ticket_repos(id)`
 
 func scanTicket(row pgx.Row) (domain.Ticket, error) {
 	var t domain.Ticket
 	var source, state, resume, kind, wait string
-	var models, shots, files, pull, update []byte
+	var models, shots, files, pull, update, repos []byte
 	err := row.Scan(&t.ID, &t.Key, &source, &t.RepoID, &t.Title, &t.Description, &t.Priority, &state, &resume,
 		&t.Revision, &t.Turns, &models, &t.AfterApprove, &t.Branch, &t.HeadSHA, &t.PRNumber, &t.PRURL, &t.Feedback,
 		&t.Held, &t.AskFirst, &t.MergedAt, &t.Assignees, &t.LearnState, &t.ReviewState, &kind, &t.KindAuto, &t.PostReport, &t.ParentKey,
 		&t.FollowUpOf, &t.SuggestFollowUps, &t.PreviewState, &t.PreviewCompare, &shots, &files, &t.CreatedAt, &t.UpdatedAt,
-		&t.WorkspaceID, &t.MemberID, &t.CreatedBy, &wait, &t.QueuedAt, &t.WaitMessage, &t.SelfFixes, &t.QuietReview, &t.ReplayOf, &t.BaseSHA, &pull, &update, &t.Kept, &t.CIFixes)
+		&t.WorkspaceID, &t.MemberID, &t.CreatedBy, &wait, &t.QueuedAt, &t.WaitMessage, &t.SelfFixes, &t.QuietReview, &t.ReplayOf, &t.BaseSHA, &pull, &update, &t.Kept, &t.CIFixes,
+		&t.GroupID, &t.GroupName, &repos)
 	if err != nil {
 		return t, notFound(err)
+	}
+	if len(repos) > 0 {
+		// A failed read would make the next save drop the other rows.
+		if err := json.Unmarshal(repos, &t.Repos); err != nil {
+			return t, fmt.Errorf("ticket %s repositories: %w", t.Key, err)
+		}
 	}
 	if len(shots) > 0 {
 		_ = json.Unmarshal(shots, &t.FeedbackShots)
@@ -124,19 +132,62 @@ func insertTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket, models []byte
 			t.MemberID = &a.UserID
 		}
 	}
+	t.SyncRepos()
 	out, err := scanTicket(tx.QueryRow(ctx, `INSERT INTO tickets
 		(key, source, repo_id, title, description, priority, state, resume_state, models, after_approve, held, ask_first, kind, kind_auto,
-		 parent_key, follow_up_of, suggest_follow_ups, member_id, created_by, replay_of, base_sha, branch, pr_number, pr_url, pull_request)
+		 parent_key, follow_up_of, suggest_follow_ups, member_id, created_by, replay_of, base_sha, branch, pr_number, pr_url, pull_request, group_id)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NULLIF($15, ''), NULLIF($16, ''), $17, $18, $19, $20, $21,
-		 $22, $23, $24, $25) RETURNING `+ticketCols,
+		 $22, $23, $24, $25, $26) RETURNING `+ticketCols,
 		t.Key, string(t.Source), t.RepoID, t.Title, t.Description, t.Priority, string(t.State),
 		string(t.ResumeState), models, t.AfterApprove, t.Held, t.AskFirst, string(kindOr(t.Kind)), t.KindAuto, t.ParentKey,
-		t.FollowUpOf, t.SuggestFollowUps, t.MemberID, t.CreatedBy, t.ReplayOf, t.BaseSHA, t.Branch, t.PRNumber, t.PRURL, pullJSON(t.Pull)))
+		t.FollowUpOf, t.SuggestFollowUps, t.MemberID, t.CreatedBy, t.ReplayOf, t.BaseSHA, t.Branch, t.PRNumber, t.PRURL, pullJSON(t.Pull), t.GroupID))
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 		return out, domain.ErrConflict
 	}
-	return out, err
+	if err != nil || len(t.Repos) == 0 {
+		return out, err
+	}
+	t.ID = out.ID
+	if err := saveTicketRepos(ctx, tx, t); err != nil {
+		return out, err
+	}
+	return scanTicket(tx.QueryRow(ctx, `SELECT `+ticketCols+` FROM tickets WHERE id = $1`, out.ID))
+}
+
+// saveTicketRepos makes the ticket's ticket_repos rows exactly t.Repos
+// (t.SyncRepos was called): rows of repositories it no longer works in go.
+func saveTicketRepos(ctx context.Context, tx pgx.Tx, t domain.Ticket) error {
+	ids := t.RepoIDs()
+	if t.RepoID == nil {
+		ids = nil
+	}
+	if _, err := tx.Exec(ctx, `DELETE FROM ticket_repos WHERE ticket_id = $1 AND NOT (repo_id = ANY($2::bigint[]))`, t.ID, ids); err != nil {
+		return err
+	}
+	if t.RepoID == nil {
+		return nil
+	}
+	for _, r := range t.Repos {
+		if _, err := tx.Exec(ctx, `INSERT INTO ticket_repos (ticket_id, repo_id, position, folder, role, branch, head_sha, base_sha,
+				pr_number, pr_url, assignees, ci_fixes, merged_at, closed_at, state, push_error, files)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+			ON CONFLICT (ticket_id, repo_id) DO UPDATE SET position = $3, folder = $4, role = $5, branch = $6, head_sha = $7,
+				base_sha = $8, pr_number = $9, pr_url = $10, assignees = $11, ci_fixes = $12, merged_at = $13, closed_at = $14,
+				state = $15, push_error = $16, files = $17`,
+			t.ID, r.RepoID, r.Position, r.Folder, r.Role, r.Branch, r.HeadSHA, r.BaseSHA, r.PRNumber, r.PRURL,
+			nonNilSlice(r.Assignees), r.CIFixes, r.MergedAt, r.ClosedAt, string(repoStateOr(r.State)), r.PushError, r.Files); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func repoStateOr(s domain.TicketRepoState) domain.TicketRepoState {
+	if s == "" {
+		return domain.RepoPending
+	}
+	return s
 }
 
 // UpdateTicket changes fields other than state on a locked row.
@@ -199,6 +250,10 @@ func saveTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket) (domain.Ticket,
 	if t.FeedbackFiles == nil {
 		files = []byte("[]")
 	}
+	t.SyncRepos()
+	if err := saveTicketRepos(ctx, tx, t); err != nil {
+		return domain.Ticket{}, err
+	}
 	return scanTicket(tx.QueryRow(ctx, `UPDATE tickets SET
 		repo_id = $2, title = $3, description = $4, priority = $5, state = $6, resume_state = $7,
 		revision = $8, turns = $9, models = $10, after_approve = $11, branch = $12, head_sha = $13,
@@ -206,6 +261,7 @@ func saveTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket) (domain.Ticket,
 		kind = $22, kind_auto = $23, post_report = $24, review_state = $25, suggest_follow_ups = $26,
 		preview_state = $27, preview_compare = $28, feedback_shots = $29, feedback_files = $30, member_id = $31,
 		self_fixes = $32, quiet_review = $33, pull_request = $34, tracker_update = $35, tracker_kept = $36, ci_fixes = $37,
+		group_id = $38, base_sha = $39,
 		wait_reason = CASE WHEN $6 IN ('new', 'coding', 'pushing') THEN wait_reason ELSE '' END,
 		wait_message = CASE WHEN $6 IN ('new', 'coding', 'pushing') THEN wait_message ELSE '' END,
 		queued_at = CASE WHEN $6 IN ('new', 'coding', 'pushing') THEN queued_at END,
@@ -214,7 +270,8 @@ func saveTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket) (domain.Ticket,
 		t.ID, t.RepoID, t.Title, t.Description, t.Priority, string(t.State), string(t.ResumeState),
 		t.Revision, t.Turns, models, t.AfterApprove, t.Branch, t.HeadSHA, t.PRNumber, t.PRURL, t.Feedback, t.Held, t.AskFirst, t.MergedAt, nonNilSlice(t.Assignees), t.LearnState,
 		string(kindOr(t.Kind)), t.KindAuto, t.PostReport, t.ReviewState, t.SuggestFollowUps,
-		t.PreviewState, t.PreviewCompare, shots, files, t.MemberID, t.SelfFixes, t.QuietReview, pullJSON(t.Pull), updateJSON(t.Update), t.Kept, t.CIFixes))
+		t.PreviewState, t.PreviewCompare, shots, files, t.MemberID, t.SelfFixes, t.QuietReview, pullJSON(t.Pull), updateJSON(t.Update), t.Kept, t.CIFixes,
+		t.GroupID, t.BaseSHA))
 }
 
 // updateJSON is a ticket's pending tracker version, nil (SQL NULL) for none.
@@ -368,8 +425,10 @@ const queueClassSQL = `(CASE
 func (s *Agent) QueueItems(ctx context.Context) ([]orchestrator.QueueItem, error) {
 	rows, err := s.db.Query(ctx, `SELECT t.id, t.workspace_id, t.key, t.state, `+queueClassSQL+`, t.held, `+waitsSQL+`,
 			`+priorityRankSQL+`, `+unblocksSQL+`, t.updated_at, t.queued_at, t.wait_reason, t.member_id, t.repo_id,
-			COALESCE(r.memory_mb, 0), t.kind, t.wait_message
-		FROM tickets t LEFT JOIN repositories r ON r.id = t.repo_id
+			-- The run's checks go one repository at a time: the most any needs.
+			COALESCE((SELECT max(r.memory_mb) FROM ticket_repos tr JOIN repositories r ON r.id = tr.repo_id WHERE tr.ticket_id = t.id), 0),
+			t.kind, t.wait_message
+		FROM tickets t
 		WHERE `+queueClassSQL+` IS NOT NULL
 		  AND NOT EXISTS (SELECT 1 FROM runs x WHERE x.ticket_id = t.id AND x.finished_at IS NULL)`)
 	if err != nil {
@@ -885,7 +944,9 @@ func (s *Agent) DeleteTicket(ctx context.Context, key string, ev domain.Event) e
 
 // OpenTicketCounts returns open tickets per repository id.
 func (s *Agent) OpenTicketCounts(ctx context.Context) (map[int64]int, error) {
-	rows, err := s.db.Query(ctx, `SELECT repo_id, count(*) FROM tickets WHERE repo_id IS NOT NULL AND state NOT IN ('done', 'rejected') GROUP BY repo_id`)
+	// A ticket counts in every repository it works in.
+	rows, err := s.db.Query(ctx, `SELECT tr.repo_id, count(*) FROM ticket_repos tr JOIN tickets t ON t.id = tr.ticket_id
+		WHERE t.state NOT IN ('done', 'rejected') GROUP BY tr.repo_id`)
 	if err != nil {
 		return nil, err
 	}
@@ -931,18 +992,30 @@ func (s *Agent) ChildOf(ctx context.Context, parentKey string) (domain.Ticket, e
 	return scanTicket(s.db.QueryRow(ctx, `SELECT `+ticketCols+` FROM tickets WHERE parent_key = $1`, parentKey))
 }
 
-// TicketByPR finds the ticket whose pull request is url (or whose branch is
-// branch on that repository), for merge webhooks.
-func (s *Agent) TicketByPR(ctx context.Context, url, branch string) (domain.Ticket, error) {
-	return scanTicket(s.db.QueryRow(ctx, `SELECT `+ticketCols+` FROM tickets
-		WHERE ($1 <> '' AND pr_url = $1) OR ($2 <> '' AND branch = $2) ORDER BY updated_at DESC LIMIT 1`, url, branch))
+// TicketByPR finds the ticket and the repository whose pull request ref
+// names, for merge webhooks and CI runs: by the pull request's address
+// first, else by its branch in that repository (the branch name alone is
+// ambiguous: every repository of a ticket has agnts/KEY).
+func (s *Agent) TicketByPR(ctx context.Context, ref domain.PRRef) (domain.Ticket, int64, error) {
+	var repoID int64
+	t, err := scanTicket(scanAppend{s.db.QueryRow(ctx, `SELECT `+ticketCols+`, x.rid FROM tickets JOIN (
+			SELECT tr.ticket_id AS tid, tr.repo_id AS rid, tr.pr_url AS url, tr.branch AS br, r.clone_url AS clone
+			FROM ticket_repos tr JOIN repositories r ON r.id = tr.repo_id) x ON x.tid = tickets.id
+		WHERE ($1 <> '' AND x.url = $1)
+		   OR ($2 <> '' AND x.br = $2 AND ($3 = 0 OR x.rid = $3)
+		       AND ($4 = '' OR right(lower(rtrim(regexp_replace(regexp_replace(x.clone, '^[^@/]+@([^:/]+):', '\1/'), '\.git$', ''), '/')),
+		           length($4) + 1) = '/' || lower($4)))
+		ORDER BY ($1 <> '' AND x.url = $1) DESC, tickets.updated_at DESC LIMIT 1`,
+		ref.URL, ref.Branch, ref.RepoID, strings.Trim(ref.Repo, "/")), &repoID})
+	return t, repoID, err
 }
 
 // UnmergedPRs returns done tickets with a pull request not known to be
 // merged or closed, least recently updated first.
 func (s *Agent) UnmergedPRs(ctx context.Context, limit int) ([]domain.Ticket, error) {
 	rows, err := s.db.Query(ctx, `SELECT `+ticketCols+` FROM tickets
-		WHERE state = 'done' AND pr_number IS NOT NULL AND merged_at IS NULL AND closed_at IS NULL AND repo_id IS NOT NULL
+		WHERE state = 'done' AND repo_id IS NOT NULL AND EXISTS (SELECT 1 FROM ticket_repos tr WHERE tr.ticket_id = tickets.id
+			AND tr.pr_number IS NOT NULL AND tr.merged_at IS NULL AND tr.closed_at IS NULL)
 		ORDER BY updated_at LIMIT $1`, limit)
 	if err != nil {
 		return nil, err
@@ -959,15 +1032,39 @@ func (s *Agent) UnmergedPRs(ctx context.Context, limit int) ([]domain.Ticket, er
 	return out, rows.Err()
 }
 
-// SetPRClosed records that a ticket's pull request was closed without a
-// merge, or clears it on reopen. It reports whether anything changed.
-func (s *Agent) SetPRClosed(ctx context.Context, key string, closed bool) (bool, error) {
-	q := `UPDATE tickets SET closed_at = now() WHERE key = $1 AND closed_at IS NULL AND merged_at IS NULL`
-	if !closed {
-		q = `UPDATE tickets SET closed_at = NULL WHERE key = $1 AND closed_at IS NOT NULL`
-	}
-	tag, err := s.db.Exec(ctx, q, key)
-	return tag.RowsAffected() > 0, err
+// SetPRClosed records that a ticket's pull request in repoID was closed
+// without a merge, or clears it on reopen. It reports whether anything
+// changed. The ticket's own closed_at follows its primary repository's.
+func (s *Agent) SetPRClosed(ctx context.Context, key string, repoID int64, closed bool) (bool, error) {
+	changed := false
+	err := pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
+		// The ticket row first, as every other ticket write locks it: else
+		// a save in flight could deadlock with this, or write back its
+		// older copy of the row.
+		var id int64
+		if err := tx.QueryRow(ctx, `SELECT id FROM tickets WHERE key = $1 FOR UPDATE`, key).Scan(&id); err != nil {
+			return notFound(err)
+		}
+		q := `UPDATE ticket_repos tr SET closed_at = now(), state = 'dropped' FROM tickets t
+			WHERE t.id = tr.ticket_id AND t.key = $1 AND tr.repo_id = $2 AND tr.closed_at IS NULL AND tr.merged_at IS NULL`
+		if !closed {
+			q = `UPDATE ticket_repos tr SET closed_at = NULL, state = 'pushed' FROM tickets t
+				WHERE t.id = tr.ticket_id AND t.key = $1 AND tr.repo_id = $2 AND tr.closed_at IS NOT NULL`
+		}
+		tag, err := tx.Exec(ctx, q, key, repoID)
+		if err != nil {
+			return err
+		}
+		changed = tag.RowsAffected() > 0
+		q = `UPDATE tickets SET closed_at = now() WHERE key = $1 AND repo_id = $2 AND closed_at IS NULL AND merged_at IS NULL`
+		if !closed {
+			q = `UPDATE tickets SET closed_at = NULL WHERE key = $1 AND repo_id = $2 AND closed_at IS NOT NULL`
+		}
+		tag, err = tx.Exec(ctx, q, key, repoID)
+		changed = changed || tag.RowsAffected() > 0
+		return err
+	})
+	return changed, err
 }
 
 // SetRunAccount records which Claude account a run used.
