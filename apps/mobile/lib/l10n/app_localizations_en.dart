@@ -8107,6 +8107,59 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repoCi => 'CI';
 
   @override
+  String get repoCode => 'Code';
+
+  @override
+  String get repoCodeSub => 'The repository\'s files on the chosen branch, read from the git host.';
+
+  @override
+  String get repoCodeBranch => 'Branch';
+
+  @override
+  String get repoCodePath => 'Path';
+
+  @override
+  String get repoCodeRoot => 'Root';
+
+  @override
+  String repoCodeLines(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n lines', one: '$n line');
+    return '$_temp0';
+  }
+
+  @override
+  String get repoCodeView => 'View';
+
+  @override
+  String get repoCodePreview => 'Preview';
+
+  @override
+  String get repoCodeSource => 'Code';
+
+  @override
+  String get repoCodeBinary => 'This is a binary file and can\'t be shown here.';
+
+  @override
+  String get repoCodeTooLarge => 'This file is over 1 MB, too large to show here. Open it on the git host.';
+
+  @override
+  String get repoCodeEmptyFile => 'This file is empty.';
+
+  @override
+  String get repoCodeEmpty => 'This branch has no files yet.';
+
+  @override
+  String get repoCodeSubmodule => 'Submodule';
+
+  @override
+  String get repoCodeSymlink => 'Link';
+
+  @override
+  String repoCodeCapped(String n) {
+    return 'Only the first $n entries of this folder are listed.';
+  }
+
+  @override
   String get reposTitle => 'Repositories';
 
   @override

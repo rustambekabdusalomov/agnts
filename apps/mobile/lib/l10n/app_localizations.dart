@@ -14433,6 +14433,102 @@ abstract class AppLocalizations {
   /// **'CI'**
   String get repoCi;
 
+  /// No description provided for @repoCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get repoCode;
+
+  /// No description provided for @repoCodeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'The repository\'s files on the chosen branch, read from the git host.'**
+  String get repoCodeSub;
+
+  /// No description provided for @repoCodeBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch'**
+  String get repoCodeBranch;
+
+  /// No description provided for @repoCodePath.
+  ///
+  /// In en, this message translates to:
+  /// **'Path'**
+  String get repoCodePath;
+
+  /// No description provided for @repoCodeRoot.
+  ///
+  /// In en, this message translates to:
+  /// **'Root'**
+  String get repoCodeRoot;
+
+  /// No description provided for @repoCodeLines.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} line} other {{n} lines}}'**
+  String repoCodeLines(num n);
+
+  /// No description provided for @repoCodeView.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get repoCodeView;
+
+  /// No description provided for @repoCodePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get repoCodePreview;
+
+  /// No description provided for @repoCodeSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get repoCodeSource;
+
+  /// No description provided for @repoCodeBinary.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a binary file and can\'t be shown here.'**
+  String get repoCodeBinary;
+
+  /// No description provided for @repoCodeTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is over 1 MB, too large to show here. Open it on the git host.'**
+  String get repoCodeTooLarge;
+
+  /// No description provided for @repoCodeEmptyFile.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is empty.'**
+  String get repoCodeEmptyFile;
+
+  /// No description provided for @repoCodeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'This branch has no files yet.'**
+  String get repoCodeEmpty;
+
+  /// No description provided for @repoCodeSubmodule.
+  ///
+  /// In en, this message translates to:
+  /// **'Submodule'**
+  String get repoCodeSubmodule;
+
+  /// No description provided for @repoCodeSymlink.
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get repoCodeSymlink;
+
+  /// No description provided for @repoCodeCapped.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the first {n} entries of this folder are listed.'**
+  String repoCodeCapped(String n);
+
   /// No description provided for @reposTitle.
   ///
   /// In en, this message translates to:

@@ -3,11 +3,15 @@
 package vcs
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"sort"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
+	"unicode/utf8"
 
 	"golang.org/x/sync/singleflight"
 
@@ -84,6 +88,63 @@ type CommitDetail struct {
 
 // MaxCommitFiles caps how many changed files a commit view reads.
 const MaxCommitFiles = 300
+
+// Kinds of a TreeEntry.
+const (
+	EntryDir       = "dir"
+	EntryFile      = "file"
+	EntrySymlink   = "symlink"
+	EntrySubmodule = "submodule"
+)
+
+// TreeEntry is one file or directory in a directory of a repository.
+type TreeEntry struct {
+	Name string
+	Path string // from the repository root
+	Type string // EntryDir, EntryFile, EntrySymlink or EntrySubmodule
+	Size int64  // files only, when the host gives it (GitLab does not)
+}
+
+// SortTree puts directories first, then names in order, as code views do.
+func SortTree(es []TreeEntry) {
+	sort.SliceStable(es, func(i, j int) bool {
+		if di, dj := es[i].Type == EntryDir, es[j].Type == EntryDir; di != dj {
+			return di
+		}
+		return strings.ToLower(es[i].Name) < strings.ToLower(es[j].Name)
+	})
+}
+
+// MaxTreeEntries caps how many entries a directory listing reads.
+const MaxTreeEntries = 1000
+
+// File is one file of a repository at a ref. Content is left empty when
+// the file is binary or larger than MaxFileBytes.
+type File struct {
+	Path     string
+	Size     int64
+	Content  string
+	Binary   bool
+	TooLarge bool
+	URL      string // the file on the git host
+}
+
+// MaxFileBytes caps how large a file the code view shows.
+const MaxFileBytes = 1 << 20
+
+// SetContent fills Content from the file's bytes, or marks it binary.
+func (f *File) SetContent(b []byte) {
+	if len(b) > MaxFileBytes {
+		f.TooLarge = true
+		return
+	}
+	head := b[:min(len(b), 8000)]
+	if bytes.IndexByte(head, 0) >= 0 || !utf8.Valid(b) {
+		f.Binary = true
+		return
+	}
+	f.Content = string(b)
+}
 
 // Stage is one stage (GitLab) or job (GitHub Actions) of a pipeline.
 type Stage struct {
@@ -169,6 +230,10 @@ type Browser interface {
 	Commits(ctx context.Context, repo domain.Repository, page, perPage int) ([]Commit, error)
 	// CommitDetail returns one commit with its files, CI runs and pull requests.
 	CommitDetail(ctx context.Context, repo domain.Repository, sha string) (CommitDetail, error)
+	// Tree lists one directory ("" for the root) at a ref, as the host orders it.
+	Tree(ctx context.Context, repo domain.Repository, ref, path string) ([]TreeEntry, error)
+	// File reads one file at a ref.
+	File(ctx context.Context, repo domain.Repository, ref, path string) (File, error)
 	// Pipelines returns one page (from 1) of CI runs, newest first, with stages.
 	Pipelines(ctx context.Context, repo domain.Repository, page, perPage int) ([]Pipeline, error)
 	Environments(ctx context.Context, repo domain.Repository) ([]Environment, error)
@@ -317,6 +382,26 @@ func (m *Multi) CommitDetail(ctx context.Context, repo domain.Repository, sha st
 	return remember(ctx, m, cacheKey(repo.ID, "commit:"+sha), 15*time.Second, func(ctx context.Context) (CommitDetail, error) {
 		return p.CommitDetail(ctx, repo, sha)
 	})
+}
+
+// Tree implements Browser. Listings are cached briefly, by ref and path.
+func (m *Multi) Tree(ctx context.Context, repo domain.Repository, ref, path string) ([]TreeEntry, error) {
+	p, err := m.pick(repo)
+	if err != nil {
+		return nil, err
+	}
+	return remember(ctx, m, cacheKey(repo.ID, "tree:"+ref+":"+path), time.Minute, func(ctx context.Context) ([]TreeEntry, error) {
+		return p.Tree(ctx, repo, ref, path)
+	})
+}
+
+// File implements Browser. Not cached: files can be large.
+func (m *Multi) File(ctx context.Context, repo domain.Repository, ref, path string) (File, error) {
+	p, err := m.pick(repo)
+	if err != nil {
+		return File{}, err
+	}
+	return p.File(ctx, repo, ref, path)
 }
 
 // Pipelines implements Browser.

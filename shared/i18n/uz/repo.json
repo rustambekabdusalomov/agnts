@@ -77,6 +77,22 @@
     "duration": "Davomiyligi",
     "openRun": "Git xostingida ochish",
     "brief": "Tavsif",
-    "ci": "CI"
+    "ci": "CI",
+    "code": "Kod",
+    "codeSub": "Tanlangan branchdagi repozitoriy fayllari, git hostingdan oʻqilgan.",
+    "codeBranch": "Branch",
+    "codePath": "Yoʻl",
+    "codeRoot": "Ildiz",
+    "codeLines": "{n} ta qator",
+    "codeView": "Koʻrinish",
+    "codePreview": "Koʻrish",
+    "codeSource": "Kod",
+    "codeBinary": "Bu ikkilik fayl, uni bu yerda koʻrsatib boʻlmaydi.",
+    "codeTooLarge": "Fayl 1 MB dan katta, uni bu yerda koʻrsatib boʻlmaydi. Git hostingda oching.",
+    "codeEmptyFile": "Bu fayl boʻsh.",
+    "codeEmpty": "Bu branchda hali fayllar yoʻq.",
+    "codeSubmodule": "Submodul",
+    "codeSymlink": "Havola",
+    "codeCapped": "Bu papkaning faqat dastlabki {n} ta elementi koʻrsatilgan."
   }
 }

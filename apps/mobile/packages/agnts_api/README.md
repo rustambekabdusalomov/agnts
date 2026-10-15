@@ -189,6 +189,7 @@ Class | Method | HTTP request | Description
 [*ReposApi*](doc/ReposApi.md) | [**getRepo**](doc/ReposApi.md#getrepo) | **GET** /repos/{id} | 
 [*ReposApi*](doc/ReposApi.md) | [**getRepoBrief**](doc/ReposApi.md#getrepobrief) | **GET** /repos/{id}/brief | What agnts knows about how the repository works; empty and idle before the first survey
 [*ReposApi*](doc/ReposApi.md) | [**getRepoCommit**](doc/ReposApi.md#getrepocommit) | **GET** /repos/{id}/commits/{sha} | One commit with the files it changes, the CI runs on it and the pull requests that contain it
+[*ReposApi*](doc/ReposApi.md) | [**getRepoFile**](doc/ReposApi.md#getrepofile) | **GET** /repos/{id}/file | One file of the repository at a branch; the content is left out for binary files and files over 1 MB
 [*ReposApi*](doc/ReposApi.md) | [**getRepoGroup**](doc/ReposApi.md#getrepogroup) | **GET** /repo-groups/{id} | 
 [*ReposApi*](doc/ReposApi.md) | [**listRepoBranches**](doc/ReposApi.md#listrepobranches) | **GET** /repos/{id}/branches | Branches with their tip, ahead/behind the default branch and checks
 [*ReposApi*](doc/ReposApi.md) | [**listRepoCommits**](doc/ReposApi.md#listrepocommits) | **GET** /repos/{id}/commits | Commits on the default branch, newest first, 50 per page; a shorter page is the last
@@ -197,6 +198,7 @@ Class | Method | HTTP request | Description
 [*ReposApi*](doc/ReposApi.md) | [**listRepoLocalBranches**](doc/ReposApi.md#listrepolocalbranches) | **GET** /repos/{id}/local-branches | Branches in agnts&#39;s own clones on the server, and whether origin has them
 [*ReposApi*](doc/ReposApi.md) | [**listRepoMembers**](doc/ReposApi.md#listrepomembers) | **GET** /repos/{id}/members | People with access to the repository on its git host
 [*ReposApi*](doc/ReposApi.md) | [**listRepoPipelines**](doc/ReposApi.md#listrepopipelines) | **GET** /repos/{id}/pipelines | CI runs with their stages, newest first, 20 per page; a shorter page is the last
+[*ReposApi*](doc/ReposApi.md) | [**listRepoTree**](doc/ReposApi.md#listrepotree) | **GET** /repos/{id}/tree | One directory of the repository at a branch, directories first, up to 1,000 entries
 [*ReposApi*](doc/ReposApi.md) | [**listRepos**](doc/ReposApi.md#listrepos) | **GET** /repos | 
 [*ReposApi*](doc/ReposApi.md) | [**saveRepoBrief**](doc/ReposApi.md#saverepobrief) | **PUT** /repos/{id}/brief | Replace the approved brief with your text; empty text removes it
 [*ReposApi*](doc/ReposApi.md) | [**saveRepoHarness**](doc/ReposApi.md#saverepoharness) | **PUT** /repos/{id}/harness | Set the repository&#39;s guard profile, per-file checks, coverage and acceptance check
@@ -506,6 +508,7 @@ Class | Method | HTTP request | Description
  - [RepoBriefInput](doc/RepoBriefInput.md)
  - [RepoDetectInput](doc/RepoDetectInput.md)
  - [RepoDetection](doc/RepoDetection.md)
+ - [RepoFile](doc/RepoFile.md)
  - [RepoGroup](doc/RepoGroup.md)
  - [RepoGroupInput](doc/RepoGroupInput.md)
  - [RepoGroupInputMembersInner](doc/RepoGroupInputMembersInner.md)
@@ -517,6 +520,7 @@ Class | Method | HTTP request | Description
  - [RepoMember](doc/RepoMember.md)
  - [RepoPreview](doc/RepoPreview.md)
  - [RepoPreviewInput](doc/RepoPreviewInput.md)
+ - [RepoTree](doc/RepoTree.md)
  - [Repository](doc/Repository.md)
  - [RepositoryInput](doc/RepositoryInput.md)
  - [RequestChangesRequest](doc/RequestChangesRequest.md)
@@ -604,6 +608,7 @@ Class | Method | HTTP request | Description
  - [Translation](doc/Translation.md)
  - [TranslationItemsInner](doc/TranslationItemsInner.md)
  - [TranslationLanguage](doc/TranslationLanguage.md)
+ - [TreeEntry](doc/TreeEntry.md)
  - [TryEnforceInput](doc/TryEnforceInput.md)
  - [TryEnforceResult](doc/TryEnforceResult.md)
  - [TryEnforceResultHitsInner](doc/TryEnforceResultHitsInner.md)

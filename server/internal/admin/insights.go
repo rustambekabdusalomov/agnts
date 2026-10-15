@@ -225,6 +225,34 @@ func (r *Repos) Commit(ctx context.Context, id int64, sha string) (RepoView, vcs
 	return v, c, err
 }
 
+// Tree lists one directory of a repository at a ref (the default branch
+// when ref is empty), and says which ref it read.
+func (r *Repos) Tree(ctx context.Context, id int64, ref, path string) (string, []vcs.TreeEntry, error) {
+	v, err := r.Get(ctx, id)
+	if err != nil {
+		return "", nil, err
+	}
+	if ref == "" {
+		ref = v.DefaultBranch
+	}
+	es, err := r.browser.Tree(ctx, v.Repository, ref, path)
+	return ref, es, err
+}
+
+// File reads one file of a repository at a ref (the default branch when
+// ref is empty), and says which ref it read.
+func (r *Repos) File(ctx context.Context, id int64, ref, path string) (string, vcs.File, error) {
+	v, err := r.Get(ctx, id)
+	if err != nil {
+		return "", vcs.File{}, err
+	}
+	if ref == "" {
+		ref = v.DefaultBranch
+	}
+	f, err := r.browser.File(ctx, v.Repository, ref, path)
+	return ref, f, err
+}
+
 // Push states of a local branch.
 const (
 	LocalOnly     = "local"    // origin does not have the branch

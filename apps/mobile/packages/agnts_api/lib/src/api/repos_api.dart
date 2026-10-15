@@ -21,10 +21,12 @@ import 'package:agnts_api/src/model/repo_brief.dart';
 import 'package:agnts_api/src/model/repo_brief_input.dart';
 import 'package:agnts_api/src/model/repo_detect_input.dart';
 import 'package:agnts_api/src/model/repo_detection.dart';
+import 'package:agnts_api/src/model/repo_file.dart';
 import 'package:agnts_api/src/model/repo_group.dart';
 import 'package:agnts_api/src/model/repo_group_input.dart';
 import 'package:agnts_api/src/model/repo_harness_input.dart';
 import 'package:agnts_api/src/model/repo_member.dart';
+import 'package:agnts_api/src/model/repo_tree.dart';
 import 'package:agnts_api/src/model/repository.dart';
 import 'package:agnts_api/src/model/repository_input.dart';
 
@@ -977,6 +979,99 @@ _responseData = rawData == null ? null : deserialize<CommitDetail, CommitDetail>
     );
   }
 
+  /// One file of the repository at a branch; the content is left out for binary files and files over 1 MB
+  /// 
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [path] - The file from the repository root
+  /// * [ref] - Branch, tag or commit; the default branch when left out
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [RepoFile] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<RepoFile>> getRepoFile({ 
+    required int id,
+    required String path,
+    String? ref,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/repos/{id}/file'.replaceAll('{' r'id' '}', id.toString());
+    final _options = Options(
+      method: r'GET',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'cookieAuth',
+            'keyName': 'hiro_session',
+            'where': '',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _queryParameters = <String, dynamic>{
+      if (ref != null) r'ref': ref,
+      r'path': path,
+    };
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      queryParameters: _queryParameters,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    RepoFile? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<RepoFile, RepoFile>(rawData, 'RepoFile', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<RepoFile>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
   /// getRepoGroup
   /// 
   ///
@@ -1642,6 +1737,99 @@ _responseData = rawData == null ? null : deserialize<List<Pipeline>, Pipeline>(r
     }
 
     return Response<List<Pipeline>>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// One directory of the repository at a branch, directories first, up to 1,000 entries
+  /// 
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [ref] - Branch, tag or commit; the default branch when left out
+  /// * [path] - The directory from the repository root; the root when left out
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [RepoTree] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<RepoTree>> listRepoTree({ 
+    required int id,
+    String? ref,
+    String? path,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/repos/{id}/tree'.replaceAll('{' r'id' '}', id.toString());
+    final _options = Options(
+      method: r'GET',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'cookieAuth',
+            'keyName': 'hiro_session',
+            'where': '',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _queryParameters = <String, dynamic>{
+      if (ref != null) r'ref': ref,
+      if (path != null) r'path': path,
+    };
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      queryParameters: _queryParameters,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    RepoTree? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<RepoTree, RepoTree>(rawData, 'RepoTree', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<RepoTree>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,

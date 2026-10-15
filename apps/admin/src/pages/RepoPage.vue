@@ -8,6 +8,7 @@ import PageHeader from '../components/PageHeader.vue'
 import BranchesTab from '../components/repo/BranchesTab.vue'
 import BriefTab from '../components/repo/BriefTab.vue'
 import CiTab from '../components/repo/CiTab.vue'
+import CodeTab from '../components/repo/CodeTab.vue'
 import CommitsTab from '../components/repo/CommitsTab.vue'
 import GuardrailsTab from '../components/repo/GuardrailsTab.vue'
 import MembersTab from '../components/repo/MembersTab.vue'
@@ -19,14 +20,14 @@ import HiIcon from '../components/ui/HiIcon.vue'
 import { ago } from '../composables/format'
 import { useLive } from '../composables/useLive'
 
-// One repository: branches, commits, pipelines and members from the git host,
+// One repository: branches, code, commits, pipelines and members from the git host,
 // and its CI watching.
 const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const qc = useQueryClient()
 const id = computed(() => Number(route.params.id))
-const TABS = ['branches', 'commits', 'pulls', 'pipelines', 'ci', 'members', 'brief', 'guardrails'] as const
+const TABS = ['branches', 'code', 'commits', 'pulls', 'pipelines', 'ci', 'members', 'brief', 'guardrails'] as const
 type Tab = (typeof TABS)[number]
 const tab = computed<Tab>(() => (TABS.includes(route.query.tab as Tab) ? (route.query.tab as Tab) : 'branches'))
 const editOpen = ref(false)
@@ -131,6 +132,7 @@ function setTab(v: Tab) {
     </div>
 
     <BranchesTab v-if="tab === 'branches'" :repo-id="id" :default-branch="repo.data.value.defaultBranch" />
+    <CodeTab v-else-if="tab === 'code'" :repo-id="id" :default-branch="repo.data.value.defaultBranch" />
     <CommitsTab v-else-if="tab === 'commits'" :repo-id="id" />
     <PullsTab v-else-if="tab === 'pulls'" :repo-id="id" />
     <PipelinesTab v-else-if="tab === 'pipelines'" :repo="repo.data.value" />

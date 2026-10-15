@@ -8114,6 +8114,58 @@ class AppLocalizationsUz extends AppLocalizations {
   String get repoCi => 'CI';
 
   @override
+  String get repoCode => 'Kod';
+
+  @override
+  String get repoCodeSub => 'Tanlangan branchdagi repozitoriy fayllari, git hostingdan oʻqilgan.';
+
+  @override
+  String get repoCodeBranch => 'Branch';
+
+  @override
+  String get repoCodePath => 'Yoʻl';
+
+  @override
+  String get repoCodeRoot => 'Ildiz';
+
+  @override
+  String repoCodeLines(num n) {
+    return '$n ta qator';
+  }
+
+  @override
+  String get repoCodeView => 'Koʻrinish';
+
+  @override
+  String get repoCodePreview => 'Koʻrish';
+
+  @override
+  String get repoCodeSource => 'Kod';
+
+  @override
+  String get repoCodeBinary => 'Bu ikkilik fayl, uni bu yerda koʻrsatib boʻlmaydi.';
+
+  @override
+  String get repoCodeTooLarge => 'Fayl 1 MB dan katta, uni bu yerda koʻrsatib boʻlmaydi. Git hostingda oching.';
+
+  @override
+  String get repoCodeEmptyFile => 'Bu fayl boʻsh.';
+
+  @override
+  String get repoCodeEmpty => 'Bu branchda hali fayllar yoʻq.';
+
+  @override
+  String get repoCodeSubmodule => 'Submodul';
+
+  @override
+  String get repoCodeSymlink => 'Havola';
+
+  @override
+  String repoCodeCapped(String n) {
+    return 'Bu papkaning faqat dastlabki $n ta elementi koʻrsatilgan.';
+  }
+
+  @override
   String get reposTitle => 'Repozitoriylar';
 
   @override

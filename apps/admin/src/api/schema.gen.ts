@@ -2481,6 +2481,44 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/repos/{id}/tree": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        /** One directory of the repository at a branch, directories first, up to 1,000 entries */
+        get: operations["listRepoTree"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repos/{id}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        /** One file of the repository at a branch; the content is left out for binary files and files over 1 MB */
+        get: operations["getRepoFile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/repos/{id}/pipelines": {
         parameters: {
             query?: never;
@@ -6278,6 +6316,38 @@ export interface components {
             ci: components["schemas"]["CI"];
             url?: string;
             ticketKey?: string;
+        };
+        TreeEntry: {
+            name: string;
+            /** @description From the repository root */
+            path: string;
+            /** @enum {string} */
+            type: "dir" | "file" | "symlink" | "submodule";
+            /**
+             * Format: int64
+             * @description Files only, when the git host gives it (GitLab does not)
+             */
+            size?: number;
+        };
+        RepoTree: {
+            ref: string;
+            /** @description "" for the root */
+            path: string;
+            entries: components["schemas"]["TreeEntry"][];
+            /** @description The directory has more entries than are listed */
+            capped?: boolean;
+        };
+        RepoFile: {
+            ref: string;
+            path: string;
+            /** Format: int64 */
+            size: number;
+            /** @description Left out for binary files and files over 1 MB */
+            content?: string;
+            binary: boolean;
+            tooLarge: boolean;
+            /** @description The file on the git host */
+            url: string;
         };
         CommitPull: {
             number: number;
@@ -10896,6 +10966,68 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CommitDetail"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            502: components["responses"]["BadGateway"];
+        };
+    };
+    listRepoTree: {
+        parameters: {
+            query?: {
+                /** @description Branch, tag or commit; the default branch when left out */
+                ref?: string;
+                /** @description The directory from the repository root; the root when left out */
+                path?: string;
+            };
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RepoTree"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            502: components["responses"]["BadGateway"];
+        };
+    };
+    getRepoFile: {
+        parameters: {
+            query: {
+                /** @description Branch, tag or commit; the default branch when left out */
+                ref?: string;
+                /** @description The file from the repository root */
+                path: string;
+            };
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RepoFile"];
                 };
             };
             400: components["responses"]["BadRequest"];

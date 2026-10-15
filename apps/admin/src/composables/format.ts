@@ -60,3 +60,10 @@ export function fmtUsd(usd: number, locale: string): string {
 export function ioTokens(s: { input: number; output: number } | undefined): number {
   return s ? s.input + s.output : 0
 }
+
+/** A file size: "512 B", "3.4 KB", "1.2 MB". */
+export function fmtBytes(n: number): string {
+  if (n < 1024) return `${n} B`
+  if (n < 1 << 20) return `${(n / 1024).toFixed(1)} KB`
+  return `${(n / (1 << 20)).toFixed(1)} MB`
+}

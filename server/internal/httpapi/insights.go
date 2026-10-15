@@ -367,3 +367,101 @@ func (s *Server) DeployRepo(w http.ResponseWriter, r *http.Request, id int64) {
 	}
 	w.WriteHeader(http.StatusAccepted)
 }
+
+// codeParams checks a ref and a path from the repository root for the code
+// view, returning the path without outer slashes.
+func codeParams(w http.ResponseWriter, ref *string, path string) (string, string, bool) {
+	bad := func(s string) bool {
+		return strings.ContainsFunc(s, func(r rune) bool { return r < 0x20 || r == 0x7f })
+	}
+	rf := ""
+	if ref != nil {
+		rf = strings.TrimSpace(*ref)
+	}
+	if bad(rf) || strings.Contains(rf, "..") || strings.ContainsAny(rf, " ~^:?*[\\") {
+		writeError(w, http.StatusBadRequest, "bad_request", "ref is not a valid branch, tag or commit")
+		return "", "", false
+	}
+	path = strings.Trim(path, "/")
+	if bad(path) {
+		writeError(w, http.StatusBadRequest, "bad_request", "path has control characters")
+		return "", "", false
+	}
+	if path != "" {
+		for _, seg := range strings.Split(path, "/") {
+			if seg == "" || seg == "." || seg == ".." {
+				writeError(w, http.StatusBadRequest, "bad_request", "path must not have empty, . or .. parts")
+				return "", "", false
+			}
+		}
+	}
+	return rf, path, true
+}
+
+// codeError writes the error of a code view read.
+func (s *Server) codeError(w http.ResponseWriter, r *http.Request, id int64, path string, err error) {
+	if errors.Is(err, domain.ErrNotFound) {
+		s.writeAdminError(w, r, err, "")
+		return
+	}
+	s.opt.Log.Warn("read repository code", "repo", id, "path", path, "err", err)
+	writeError(w, http.StatusBadGateway, "git_host", err.Error())
+}
+
+// ListRepoTree implements gen.ServerInterface.
+func (s *Server) ListRepoTree(w http.ResponseWriter, r *http.Request, id gen.RepoID, params gen.ListRepoTreeParams) {
+	if !s.adminReady(w) {
+		return
+	}
+	path := ""
+	if params.Path != nil {
+		path = *params.Path
+	}
+	ref, path, ok := codeParams(w, params.Ref, path)
+	if !ok {
+		return
+	}
+	ref, es, err := s.opt.Admin.Repos.Tree(r.Context(), id, ref, path)
+	if err != nil {
+		s.codeError(w, r, id, path, err)
+		return
+	}
+	out := gen.RepoTree{Ref: ref, Path: path, Entries: make([]gen.TreeEntry, len(es))}
+	if len(es) >= vcs.MaxTreeEntries {
+		capped := true
+		out.Capped = &capped
+	}
+	for i, e := range es {
+		out.Entries[i] = gen.TreeEntry{Name: e.Name, Path: e.Path, Type: gen.TreeEntryType(e.Type)}
+		if e.Type == vcs.EntryFile && e.Size > 0 {
+			size := e.Size
+			out.Entries[i].Size = &size
+		}
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+// GetRepoFile implements gen.ServerInterface.
+func (s *Server) GetRepoFile(w http.ResponseWriter, r *http.Request, id gen.RepoID, params gen.GetRepoFileParams) {
+	if !s.adminReady(w) {
+		return
+	}
+	ref, path, ok := codeParams(w, params.Ref, params.Path)
+	if !ok {
+		return
+	}
+	if path == "" {
+		writeError(w, http.StatusBadRequest, "bad_request", "path is required")
+		return
+	}
+	ref, f, err := s.opt.Admin.Repos.File(r.Context(), id, ref, path)
+	if err != nil {
+		s.codeError(w, r, id, path, err)
+		return
+	}
+	out := gen.RepoFile{Ref: ref, Path: path, Size: f.Size, Binary: f.Binary, TooLarge: f.TooLarge, Url: f.URL}
+	if !f.Binary && !f.TooLarge {
+		out.Content = &f.Content
+	}
+	writeJSON(w, http.StatusOK, out)
+}

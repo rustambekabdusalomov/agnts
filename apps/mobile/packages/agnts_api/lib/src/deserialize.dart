@@ -188,6 +188,7 @@ import 'package:agnts_api/src/model/repo_brief.dart';
 import 'package:agnts_api/src/model/repo_brief_input.dart';
 import 'package:agnts_api/src/model/repo_detect_input.dart';
 import 'package:agnts_api/src/model/repo_detection.dart';
+import 'package:agnts_api/src/model/repo_file.dart';
 import 'package:agnts_api/src/model/repo_group.dart';
 import 'package:agnts_api/src/model/repo_group_input.dart';
 import 'package:agnts_api/src/model/repo_group_input_members_inner.dart';
@@ -199,6 +200,7 @@ import 'package:agnts_api/src/model/repo_harness_input.dart';
 import 'package:agnts_api/src/model/repo_member.dart';
 import 'package:agnts_api/src/model/repo_preview.dart';
 import 'package:agnts_api/src/model/repo_preview_input.dart';
+import 'package:agnts_api/src/model/repo_tree.dart';
 import 'package:agnts_api/src/model/repository.dart';
 import 'package:agnts_api/src/model/repository_input.dart';
 import 'package:agnts_api/src/model/request_changes_request.dart';
@@ -280,6 +282,7 @@ import 'package:agnts_api/src/model/transfer_workspace_request.dart';
 import 'package:agnts_api/src/model/translate_input.dart';
 import 'package:agnts_api/src/model/translation.dart';
 import 'package:agnts_api/src/model/translation_items_inner.dart';
+import 'package:agnts_api/src/model/tree_entry.dart';
 import 'package:agnts_api/src/model/try_enforce_input.dart';
 import 'package:agnts_api/src/model/try_enforce_result.dart';
 import 'package:agnts_api/src/model/try_enforce_result_hits_inner.dart';
@@ -729,6 +732,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return RepoDetectInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RepoDetection':
           return RepoDetection.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RepoFile':
+          return RepoFile.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RepoGroup':
           return RepoGroup.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RepoGroupInput':
@@ -751,6 +756,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return RepoPreview.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RepoPreviewInput':
           return RepoPreviewInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RepoTree':
+          return RepoTree.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Repository':
           return Repository.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RepositoryInput':
@@ -931,6 +938,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
         case 'TranslationLanguage':
           
           
+        case 'TreeEntry':
+          return TreeEntry.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TryEnforceInput':
           return TryEnforceInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TryEnforceResult':

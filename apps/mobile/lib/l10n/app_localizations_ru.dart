@@ -8521,6 +8521,59 @@ class AppLocalizationsRu extends AppLocalizations {
   String get repoCi => 'CI';
 
   @override
+  String get repoCode => 'Код';
+
+  @override
+  String get repoCodeSub => 'Файлы репозитория в выбранной ветке, прочитанные с git-хостинга.';
+
+  @override
+  String get repoCodeBranch => 'Ветка';
+
+  @override
+  String get repoCodePath => 'Путь';
+
+  @override
+  String get repoCodeRoot => 'Корень';
+
+  @override
+  String repoCodeLines(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n строки', many: '$n строк', few: '$n строки', one: '$n строка');
+    return '$_temp0';
+  }
+
+  @override
+  String get repoCodeView => 'Вид';
+
+  @override
+  String get repoCodePreview => 'Просмотр';
+
+  @override
+  String get repoCodeSource => 'Код';
+
+  @override
+  String get repoCodeBinary => 'Это двоичный файл, его нельзя показать здесь.';
+
+  @override
+  String get repoCodeTooLarge => 'Файл больше 1 МБ, он слишком большой, чтобы показать его здесь. Откройте его на git-хостинге.';
+
+  @override
+  String get repoCodeEmptyFile => 'Файл пуст.';
+
+  @override
+  String get repoCodeEmpty => 'В этой ветке пока нет файлов.';
+
+  @override
+  String get repoCodeSubmodule => 'Подмодуль';
+
+  @override
+  String get repoCodeSymlink => 'Ссылка';
+
+  @override
+  String repoCodeCapped(String n) {
+    return 'Показаны только первые $n элементов этой папки.';
+  }
+
+  @override
   String get reposTitle => 'Репозитории';
 
   @override

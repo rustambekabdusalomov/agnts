@@ -84,6 +84,13 @@ void main() {
       // TODO
     });
 
+    // One file of the repository at a branch; the content is left out for binary files and files over 1 MB
+    //
+    //Future<RepoFile> getRepoFile(int id, String path, { String ref }) async
+    test('test getRepoFile', () async {
+      // TODO
+    });
+
     //Future<RepoGroup> getRepoGroup(int id) async
     test('test getRepoGroup', () async {
       // TODO
@@ -135,6 +142,13 @@ void main() {
     //
     //Future<List<Pipeline>> listRepoPipelines(int id, { int page }) async
     test('test listRepoPipelines', () async {
+      // TODO
+    });
+
+    // One directory of the repository at a branch, directories first, up to 1,000 entries
+    //
+    //Future<RepoTree> listRepoTree(int id, { String ref, String path }) async
+    test('test listRepoTree', () async {
       // TODO
     });
 

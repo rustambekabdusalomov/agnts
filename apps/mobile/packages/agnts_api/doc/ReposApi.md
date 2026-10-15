@@ -20,6 +20,7 @@ Method | HTTP request | Description
 [**getRepo**](ReposApi.md#getrepo) | **GET** /repos/{id} | 
 [**getRepoBrief**](ReposApi.md#getrepobrief) | **GET** /repos/{id}/brief | What agnts knows about how the repository works; empty and idle before the first survey
 [**getRepoCommit**](ReposApi.md#getrepocommit) | **GET** /repos/{id}/commits/{sha} | One commit with the files it changes, the CI runs on it and the pull requests that contain it
+[**getRepoFile**](ReposApi.md#getrepofile) | **GET** /repos/{id}/file | One file of the repository at a branch; the content is left out for binary files and files over 1 MB
 [**getRepoGroup**](ReposApi.md#getrepogroup) | **GET** /repo-groups/{id} | 
 [**listRepoBranches**](ReposApi.md#listrepobranches) | **GET** /repos/{id}/branches | Branches with their tip, ahead/behind the default branch and checks
 [**listRepoCommits**](ReposApi.md#listrepocommits) | **GET** /repos/{id}/commits | Commits on the default branch, newest first, 50 per page; a shorter page is the last
@@ -28,6 +29,7 @@ Method | HTTP request | Description
 [**listRepoLocalBranches**](ReposApi.md#listrepolocalbranches) | **GET** /repos/{id}/local-branches | Branches in agnts&#39;s own clones on the server, and whether origin has them
 [**listRepoMembers**](ReposApi.md#listrepomembers) | **GET** /repos/{id}/members | People with access to the repository on its git host
 [**listRepoPipelines**](ReposApi.md#listrepopipelines) | **GET** /repos/{id}/pipelines | CI runs with their stages, newest first, 20 per page; a shorter page is the last
+[**listRepoTree**](ReposApi.md#listrepotree) | **GET** /repos/{id}/tree | One directory of the repository at a branch, directories first, up to 1,000 entries
 [**listRepos**](ReposApi.md#listrepos) | **GET** /repos | 
 [**saveRepoBrief**](ReposApi.md#saverepobrief) | **PUT** /repos/{id}/brief | Replace the approved brief with your text; empty text removes it
 [**saveRepoHarness**](ReposApi.md#saverepoharness) | **PUT** /repos/{id}/harness | Set the repository&#39;s guard profile, per-file checks, coverage and acceptance check
@@ -538,6 +540,55 @@ Name | Type | Description  | Notes
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **getRepoFile**
+> RepoFile getRepoFile(id, path, ref)
+
+One file of the repository at a branch; the content is left out for binary files and files over 1 MB
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getReposApi();
+final int id = 789; // int | 
+final String path = path_example; // String | The file from the repository root
+final String ref = ref_example; // String | Branch, tag or commit; the default branch when left out
+
+try {
+    final response = api.getRepoFile(id, path, ref);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling ReposApi->getRepoFile: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **path** | **String**| The file from the repository root | 
+ **ref** | **String**| Branch, tag or commit; the default branch when left out | [optional] 
+
+### Return type
+
+[**RepoFile**](RepoFile.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **getRepoGroup**
 > RepoGroup getRepoGroup(id)
 
@@ -886,6 +937,55 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**List&lt;Pipeline&gt;**](Pipeline.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **listRepoTree**
+> RepoTree listRepoTree(id, ref, path)
+
+One directory of the repository at a branch, directories first, up to 1,000 entries
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getReposApi();
+final int id = 789; // int | 
+final String ref = ref_example; // String | Branch, tag or commit; the default branch when left out
+final String path = path_example; // String | The directory from the repository root; the root when left out
+
+try {
+    final response = api.listRepoTree(id, ref, path);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling ReposApi->listRepoTree: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **ref** | **String**| Branch, tag or commit; the default branch when left out | [optional] 
+ **path** | **String**| The directory from the repository root; the root when left out | [optional] 
+
+### Return type
+
+[**RepoTree**](RepoTree.md)
 
 ### Authorization
 

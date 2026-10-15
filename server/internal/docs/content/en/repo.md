@@ -6,6 +6,10 @@ One repository's branches, commits and pipelines, so you can see what agnts chan
 
 agnts creates its own branch for every ticket, like agnts/pay-214, and never commits to the default branch. Each branch shows its latest commit, how far ahead or behind it is, and its checks. Click a agnts branch to open its ticket.
 
+## Code
+
+The repository's files as they are on the git host. Pick a branch to see its code, click folders to open them and click a file to read it with line numbers. A folder's README is shown under its files. Binary files and files over 1 MB open on the git host instead.
+
 ## Commits
 
 All recent commits grouped by day. agnts's commits start with the ticket key and list you as co-author.

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { numberDiff } from './diffLines'
-import { highlightDiff, languageFor, splitHighlighted } from './highlight'
+import { highlightCode, highlightDiff, languageFor, splitHighlighted } from './highlight'
 
 describe('highlight', () => {
   it('picks a language from the path', () => {
@@ -36,5 +36,13 @@ describe('highlight', () => {
 
   it('leaves unknown files to plain text', async () => {
     expect(await highlightDiff(numberDiff('@@ -0,0 +1 @@\n+hi'), 'README')).toBeNull()
+  })
+
+  it('highlights a whole file line by line', async () => {
+    const out = await highlightCode('/* a\nb */\nx := "s"', 'main.go')
+    expect(out).toHaveLength(3)
+    expect(out![1]).toContain('hljs-comment')
+    expect(out![2]).toContain('hljs-string')
+    expect(await highlightCode('text', 'LICENSE')).toBeNull()
   })
 })

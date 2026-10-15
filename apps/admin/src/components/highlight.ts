@@ -1,8 +1,8 @@
 import type { HLJSApi, LanguageFn } from 'highlight.js'
 import type { DiffLine } from './diffLines'
 
-// Syntax highlighting for diffs. highlight.js and each language load on
-// first use, so pages without a diff never download them.
+// Syntax highlighting for diffs and files. highlight.js and each language load on
+// first use, so pages without code never download them.
 
 type Loader = () => Promise<{ default: LanguageFn }>
 const LANGS: Record<string, Loader> = {
@@ -125,4 +125,15 @@ export async function highlightDiff(lines: DiffLine[], path: string): Promise<(s
   })
   flush(oldIdx, newIdx)
   return out
+}
+
+/**
+ * Highlights a whole file, returning each line's HTML, or null when the
+ * path has no known language. Output is highlight.js's, which escapes the text.
+ */
+export async function highlightCode(text: string, path: string): Promise<string[] | null> {
+  const lang = languageFor(path)
+  if (!lang) return null
+  const hljs = await load(lang)
+  return splitHighlighted(hljs.highlight(text, { language: lang, ignoreIllegals: true }).value)
 }

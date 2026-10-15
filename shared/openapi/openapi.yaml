@@ -2989,6 +2989,64 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '502': { $ref: '#/components/responses/BadGateway' }
 
+  /repos/{id}/tree:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    get:
+      operationId: listRepoTree
+      summary: One directory of the repository at a branch, directories first, up to 1,000 entries
+      tags: [repos]
+      parameters:
+        - name: ref
+          in: query
+          required: false
+          description: Branch, tag or commit; the default branch when left out
+          schema: { type: string, maxLength: 255 }
+        - name: path
+          in: query
+          required: false
+          description: The directory from the repository root; the root when left out
+          schema: { type: string, maxLength: 4096 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RepoTree' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+
+  /repos/{id}/file:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    get:
+      operationId: getRepoFile
+      summary: One file of the repository at a branch; the content is left out for binary files and files over 1 MB
+      tags: [repos]
+      parameters:
+        - name: ref
+          in: query
+          required: false
+          description: Branch, tag or commit; the default branch when left out
+          schema: { type: string, maxLength: 255 }
+        - name: path
+          in: query
+          required: true
+          description: The file from the repository root
+          schema: { type: string, minLength: 1, maxLength: 4096 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RepoFile' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+
   /repos/{id}/pipelines:
     parameters:
       - $ref: '#/components/parameters/RepoID'
@@ -7444,6 +7502,38 @@ components:
         ci: { $ref: '#/components/schemas/CI' }
         url: { type: string }
         ticketKey: { type: string }
+
+    TreeEntry:
+      type: object
+      required: [name, path, type]
+      properties:
+        name: { type: string }
+        path: { type: string, description: From the repository root }
+        type: { type: string, enum: [dir, file, symlink, submodule] }
+        size: { type: integer, format: int64, description: "Files only, when the git host gives it (GitLab does not)" }
+
+    RepoTree:
+      type: object
+      required: [ref, path, entries]
+      properties:
+        ref: { type: string }
+        path: { type: string, description: '"" for the root' }
+        entries:
+          type: array
+          items: { $ref: '#/components/schemas/TreeEntry' }
+        capped: { type: boolean, description: The directory has more entries than are listed }
+
+    RepoFile:
+      type: object
+      required: [ref, path, size, binary, tooLarge, url]
+      properties:
+        ref: { type: string }
+        path: { type: string }
+        size: { type: integer, format: int64 }
+        content: { type: string, description: Left out for binary files and files over 1 MB }
+        binary: { type: boolean }
+        tooLarge: { type: boolean }
+        url: { type: string, description: The file on the git host }
 
     CommitPull:
       type: object

@@ -6,6 +6,10 @@ Bitta repozitoriyning branchlari, commitlari va pipeline'lari — agnts nimani o
 
 agnts har bir tiket uchun agnts/pay-214 kabi alohida branch yaratadi va hech qachon asosiy branchga commit qilmaydi. Har bir branchning soʻnggi commiti, qanchalik oldinda yoki ortda ekani va tekshiruvlari koʻrinadi. Tiketini ochish uchun agnts branchini bosing.
 
+## Kod
+
+Repozitoriy fayllari git hostingdagi holatida. Kodini koʻrish uchun branchni tanlang, papkalarni oching va faylni qator raqamlari bilan oʻqing. Papkadagi README uning fayllari ostida koʻrsatiladi. Ikkilik fayllar va 1 MB dan katta fayllar git hostingda ochiladi.
+
 ## Commitlar
 
 Soʻnggi commitlar kunlar boʻyicha. agnts commitlari tiket kaliti bilan boshlanadi va sizni hammuallif sifatida koʻrsatadi.

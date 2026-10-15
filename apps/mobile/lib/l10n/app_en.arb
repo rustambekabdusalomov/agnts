@@ -4946,6 +4946,36 @@
   "repoOpenRun": "Open on the git host",
   "repoBrief": "Brief",
   "repoCi": "CI",
+  "repoCode": "Code",
+  "repoCodeSub": "The repository's files on the chosen branch, read from the git host.",
+  "repoCodeBranch": "Branch",
+  "repoCodePath": "Path",
+  "repoCodeRoot": "Root",
+  "repoCodeLines": "{n, plural, one {{n} line} other {{n} lines}}",
+  "@repoCodeLines": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "repoCodeView": "View",
+  "repoCodePreview": "Preview",
+  "repoCodeSource": "Code",
+  "repoCodeBinary": "This is a binary file and can't be shown here.",
+  "repoCodeTooLarge": "This file is over 1 MB, too large to show here. Open it on the git host.",
+  "repoCodeEmptyFile": "This file is empty.",
+  "repoCodeEmpty": "This branch has no files yet.",
+  "repoCodeSubmodule": "Submodule",
+  "repoCodeSymlink": "Link",
+  "repoCodeCapped": "Only the first {n} entries of this folder are listed.",
+  "@repoCodeCapped": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
   "reposTitle": "Repositories",
   "reposLede": "Code agnts can work in. Each run clones the repository into a fresh container on your server, then runs these checks before anything reaches your review.",
   "reposAdd": "Add repository",
