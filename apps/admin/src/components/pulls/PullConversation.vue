@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { computed, ref, toRef } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { FileChange, PullThread } from '../../api/types'
+import type { FileChange, PullThread, ReviewDraft } from '../../api/types'
 import HiIcon from '../ui/HiIcon.vue'
 import CommentComposer from './CommentComposer.vue'
 import CommentThread from './CommentThread.vue'
 import PullDiffFile from './PullDiffFile.vue'
+import { draftsOnFile, useDraftWrites } from './useDrafts'
 import { hostName, usePullThreads, usePullWrites } from './usePull'
 
 // A pull request's conversation from the git host: every thread in the
 // order it started, and (with files) the diff with threads under their
-// lines. Comments go out as the git host token's user (login).
+// lines. Comments go out as the git host token's user (login). With a
+// review ticket (ticketKey), agnts's draft comments sit on the diff too.
 const props = defineProps<{
   repoId: number
   number: number
@@ -19,13 +21,19 @@ const props = defineProps<{
   headSha?: string
   files?: FileChange[]
   canEdit: boolean
+  ticketKey?: string
+  drafts?: ReviewDraft[]
+  draftsLocked?: boolean
 }>()
 const { t } = useI18n()
 const repoId = toRef(props, 'repoId')
 const number = toRef(props, 'number')
 const threads = usePullThreads(repoId, number)
 const writes = usePullWrites(repoId, number)
-const view = ref<'conversation' | 'files'>('conversation')
+const draftWrites = useDraftWrites(toRef(props, 'ticketKey'))
+const reviewing = computed(() => !!props.ticketKey && !!props.drafts)
+// Open on the diff while agnts's drafts wait for a decision.
+const view = ref<'conversation' | 'files'>(props.files && props.drafts?.some((d) => d.state === 'draft') ? 'files' : 'conversation')
 const showResolved = ref(false)
 const composer = ref<InstanceType<typeof CommentComposer> | null>(null)
 
@@ -89,6 +97,9 @@ function comment(body: string) {
         :can-edit="canEdit"
         :as="as"
         :head-sha="headSha"
+        :drafts="reviewing ? draftsOnFile(drafts ?? [], f.path) : undefined"
+        :draft-writes="reviewing ? draftWrites : undefined"
+        :drafts-locked="draftsLocked"
       />
     </template>
   </div>

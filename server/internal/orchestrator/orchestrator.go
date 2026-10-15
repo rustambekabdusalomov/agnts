@@ -81,6 +81,9 @@ type Deps struct {
 	// PRPosts keeps what agnts posted on pull requests; nil posts without
 	// remembering (a later review cannot edit or answer its comments).
 	PRPosts PRPosts
+	// ReviewDrafts keeps the draft comments of pull request reviews; nil
+	// posts reviews without drafts (all at once, the old way).
+	ReviewDrafts ReviewDrafts
 	// Translations stores translated ticket texts; nil disables translation.
 	Translations Translations
 	// Shots stores preview screenshots; nil disables previews.
@@ -126,6 +129,7 @@ type Orchestrator struct {
 	reflections Reflections
 	pulls       PullReviews
 	prposts     PRPosts
+	drafts      ReviewDrafts
 	trans       Translations
 	shots       Shots
 	envs        PreviewEnvs
@@ -170,7 +174,7 @@ func New(cfg Config, d Deps, log *slog.Logger) *Orchestrator {
 	}
 	return &Orchestrator{
 		cfg: cfg, store: d.Store, runner: d.Runner, git: d.Git, host: d.Host, trackers: d.Trackers, homes: d.Homes,
-		settings: d.Settings, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, briefs: d.Briefs, reflections: d.Reflections, pulls: d.PullReviews, prposts: d.PRPosts, trans: d.Translations,
+		settings: d.Settings, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, briefs: d.Briefs, reflections: d.Reflections, pulls: d.PullReviews, prposts: d.PRPosts, drafts: d.ReviewDrafts, trans: d.Translations,
 		shots: d.Shots, envs: d.PreviewEnvs, builds: d.BuildEnvs, log: log,
 		queue: q, workspaces: d.Workspaces, accounts: d.Accounts, capacity: d.Capacity, credits: d.Credits, sched: newSchedState(),
 		swagger: d.SwaggerTests, specs: newSpecFetcher(),

@@ -4,6 +4,8 @@
 
 // ignore_for_file: unused_element
 import 'package:agnts_api/src/model/pull_item.dart';
+import 'package:agnts_api/src/model/review_draft.dart';
+import 'package:agnts_api/src/model/ticket_state.dart';
 import 'package:agnts_api/src/model/file_change.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -41,6 +43,14 @@ class PullDetail {
      this.ticketKey,
 
     required  this.own,
+
+     this.ticketState,
+
+     this.reviewedSha,
+
+     this.afterApprove,
+
+     this.drafts,
   });
 
   @JsonKey(
@@ -166,6 +176,56 @@ class PullDetail {
 
 
 
+  @JsonKey(
+    
+    name: r'ticketState',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final TicketState? ticketState;
+
+
+
+      /// The commit agnts reviewed, for a review ticket
+  @JsonKey(
+    
+    name: r'reviewedSha',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? reviewedSha;
+
+
+
+  @JsonKey(
+    
+    name: r'afterApprove',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final PullDetailAfterApproveEnum? afterApprove;
+
+
+
+      /// The draft comments of agnts's review of it, when it has a review ticket
+  @JsonKey(
+    
+    name: r'drafts',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<ReviewDraft>? drafts;
+
+
+
 
 
     @override
@@ -179,7 +239,11 @@ class PullDetail {
       other.files == files &&
       other.filesError == filesError &&
       other.ticketKey == ticketKey &&
-      other.own == own;
+      other.own == own &&
+      other.ticketState == ticketState &&
+      other.reviewedSha == reviewedSha &&
+      other.afterApprove == afterApprove &&
+      other.drafts == drafts;
 
     @override
     int get hashCode =>
@@ -192,7 +256,11 @@ class PullDetail {
         files.hashCode +
         filesError.hashCode +
         ticketKey.hashCode +
-        own.hashCode;
+        own.hashCode +
+        ticketState.hashCode +
+        reviewedSha.hashCode +
+        afterApprove.hashCode +
+        drafts.hashCode;
 
   factory PullDetail.fromJson(Map<String, dynamic> json) => _$PullDetailFromJson(json);
 
@@ -212,6 +280,23 @@ github(r'github'),
 gitlab(r'gitlab');
 
 const PullDetailProviderEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
+}
+
+
+enum PullDetailAfterApproveEnum {
+@JsonValue(r'pr')
+pr(r'pr'),
+@JsonValue(r'main')
+main(r'main'),
+@JsonValue(r'none')
+none(r'none');
+
+const PullDetailAfterApproveEnum(this.value);
 
 final String value;
 

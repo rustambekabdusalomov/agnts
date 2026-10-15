@@ -40,18 +40,21 @@ type Pinger interface {
 type Options struct {
 	Auth    *auth.Service
 	Tickets Tickets
-	Admin   *Admin       // Phase 2 pages; nil answers 501
-	Broker  *Broker      // live event stream; nil answers 501
-	Devices Devices      // push registrations
-	Lessons Lessons      // Learn pages; nil answers 501
-	Rules   Rules        // Rules page; nil answers 501
-	Briefs  Briefs       // repository briefs; nil answers 501
-	Reviews Reviews      // pull request reviews; nil answers 501
-	Pulls   Pulls        // pull request conversations; nil answers 501
-	CI      CI           // CI watching; nil answers 501
-	OAuth   OAuth        // MCP connector authorization; nil disables /mcp
-	MCP     http.Handler // the MCP streamable HTTP handler
-	DB      Pinger
+	Admin   *Admin  // Phase 2 pages; nil answers 501
+	Broker  *Broker // live event stream; nil answers 501
+	Devices Devices // push registrations
+	Lessons Lessons // Learn pages; nil answers 501
+	Rules   Rules   // Rules page; nil answers 501
+	Briefs  Briefs  // repository briefs; nil answers 501
+	Reviews Reviews // pull request reviews; nil answers 501
+	Pulls   Pulls   // pull request conversations; nil answers 501
+	// Drafts asks for reviews from pull request pages and keeps their
+	// draft comments; nil answers 501.
+	Drafts ReviewDrafts
+	CI     CI           // CI watching; nil answers 501
+	OAuth  OAuth        // MCP connector authorization; nil disables /mcp
+	MCP    http.Handler // the MCP streamable HTTP handler
+	DB     Pinger
 	// Webhooks are mounted at /webhooks/{name}/{hook id} (and the URL
 	// without a hook id, from before workspaces). They authenticate with
 	// provider signatures, not sessions.

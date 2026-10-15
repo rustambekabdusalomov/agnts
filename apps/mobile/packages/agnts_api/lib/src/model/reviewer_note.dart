@@ -194,7 +194,9 @@ dismissed(r'dismissed'),
 @JsonValue(r'manual')
 manual(r'manual'),
 @JsonValue(r'host_comment')
-hostComment(r'host_comment');
+hostComment(r'host_comment'),
+@JsonValue(r'draft')
+draft(r'draft');
 
 const ReviewerNoteKindEnum(this.value);
 

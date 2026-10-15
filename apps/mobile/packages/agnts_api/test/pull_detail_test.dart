@@ -60,5 +60,27 @@ void main() {
       // TODO
     });
 
+    // TicketState ticketState
+    test('to test the property `ticketState`', () async {
+      // TODO
+    });
+
+    // The commit agnts reviewed, for a review ticket
+    // String reviewedSha
+    test('to test the property `reviewedSha`', () async {
+      // TODO
+    });
+
+    // String afterApprove
+    test('to test the property `afterApprove`', () async {
+      // TODO
+    });
+
+    // The draft comments of agnts's review of it, when it has a review ticket
+    // List<ReviewDraft> drafts
+    test('to test the property `drafts`', () async {
+      // TODO
+    });
+
   });
 }

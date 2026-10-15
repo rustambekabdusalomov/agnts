@@ -27,6 +27,7 @@
     "emptyAll": "No pull requests to review yet. Assign one to yourself on GitHub or GitLab, then press Sync now.",
     "why_assigned": "assigned",
     "why_review_requested": "review requested",
+    "why_manual": "asked for here",
     "by": "by @{author}",
     "howTitle": "How you review",
     "howSub": "Notes you leave when you ask for another review or dismiss one are folded into your profile on the next review. Every later review reads it.",

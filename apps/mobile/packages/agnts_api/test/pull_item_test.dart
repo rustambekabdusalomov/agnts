@@ -53,7 +53,7 @@ void main() {
       // TODO
     });
 
-    // Why it waits for the token's user: assigned, review_requested, or empty
+    // Why it waits for the token's user: assigned, review_requested, or empty; manual for a review someone asked for from the pull request page
     // String why
     test('to test the property `why`', () async {
       // TODO

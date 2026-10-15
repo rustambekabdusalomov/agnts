@@ -13,6 +13,7 @@ Widget _app(Widget child, List<PullThread> threads, {bool canEdit = true}) => Pr
       overrides: [
         canEditProvider.overrideWith((ref) => canEdit),
         pullThreadsProvider((3, 7)).overrideWith((ref) async => threads),
+        reviewDraftsProvider('PAY-40').overrideWith((ref) async => _drafts),
       ],
       child: MaterialApp(
         theme: agntsTheme(Brightness.light),
@@ -58,6 +59,16 @@ final _threads = [
       comments: [_c('rc:3', 'bob', 'Settled long ago')]),
 ];
 
+ReviewDraft _d(int id, ReviewDraftStateEnum state, String title, {ReviewDraftKindEnum kind = ReviewDraftKindEnum.finding}) => ReviewDraft(
+      id: id, kind: kind, key: 'k$id', severity: 'major', title: title, path: 'refund.go', line: 12, headSha: 'h1',
+      body: '**[major] $title**', edited: false, state: state, createdAt: DateTime(2026), updatedAt: DateTime(2026));
+
+final _drafts = [
+  _d(1, ReviewDraftStateEnum.accepted, 'Rounds down'),
+  _d(2, ReviewDraftStateEnum.draft, 'No test'),
+  _d(3, ReviewDraftStateEnum.dismissed, 'Naming'),
+];
+
 void main() {
   test('a ticket shows the pull request it opened, or the one it reviews', () {
     expect(ticketPulls(_ticket()).single, (repoId: 3, number: 7, url: 'https://github.com/acme/api/pull/7', repoName: null));
@@ -84,5 +95,26 @@ void main() {
     expect(find.textContaining('Round half up here'), findsOneWidget);
     expect(find.text('Reply'), findsNothing);
     expect(find.text('Address 1 comment'), findsNothing);
+  });
+
+  testWidgets("a review's drafts: decide on each, publish the accepted ones", (tester) async {
+    final t = _ticket(kind: TicketKind.review, state: TicketState.waitingForReview);
+    await tester.pumpWidget(_app(ReviewDraftsFold(ticket: t), const []));
+    await tester.pumpAndSettle();
+    expect(find.text('Review comments'), findsOneWidget);
+    expect(find.text('Publish 1 to GitHub'), findsOneWidget);
+    expect(find.textContaining('No test'), findsOneWidget);
+    expect(find.textContaining('Naming'), findsNothing); // dismissed: folded away
+    expect(find.text('Accept'), findsOneWidget); // only on the open draft
+    expect(find.text('Undo'), findsOneWidget);
+  });
+
+  testWidgets('a viewer reads the drafts only', (tester) async {
+    final t = _ticket(kind: TicketKind.review, state: TicketState.waitingForReview);
+    await tester.pumpWidget(_app(ReviewDraftsFold(ticket: t), const [], canEdit: false));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('No test'), findsOneWidget);
+    expect(find.text('Accept'), findsNothing);
+    expect(find.text('Publish 1 to GitHub'), findsNothing);
   });
 }

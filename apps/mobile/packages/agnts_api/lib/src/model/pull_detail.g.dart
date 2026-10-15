@@ -27,6 +27,14 @@ abstract class _$PullDetailCWProxy {
 
   PullDetail own(bool own);
 
+  PullDetail ticketState(TicketState? ticketState);
+
+  PullDetail reviewedSha(String? reviewedSha);
+
+  PullDetail afterApprove(PullDetailAfterApproveEnum? afterApprove);
+
+  PullDetail drafts(List<ReviewDraft>? drafts);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `PullDetail(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -44,6 +52,10 @@ abstract class _$PullDetailCWProxy {
     String? filesError,
     String? ticketKey,
     bool own,
+    TicketState? ticketState,
+    String? reviewedSha,
+    PullDetailAfterApproveEnum? afterApprove,
+    List<ReviewDraft>? drafts,
   });
 }
 
@@ -85,6 +97,20 @@ class _$PullDetailCWProxyImpl implements _$PullDetailCWProxy {
   PullDetail own(bool own) => this(own: own);
 
   @override
+  PullDetail ticketState(TicketState? ticketState) =>
+      this(ticketState: ticketState);
+
+  @override
+  PullDetail reviewedSha(String? reviewedSha) => this(reviewedSha: reviewedSha);
+
+  @override
+  PullDetail afterApprove(PullDetailAfterApproveEnum? afterApprove) =>
+      this(afterApprove: afterApprove);
+
+  @override
+  PullDetail drafts(List<ReviewDraft>? drafts) => this(drafts: drafts);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `PullDetail(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -102,6 +128,10 @@ class _$PullDetailCWProxyImpl implements _$PullDetailCWProxy {
     Object? filesError = const $CopyWithPlaceholder(),
     Object? ticketKey = const $CopyWithPlaceholder(),
     Object? own = const $CopyWithPlaceholder(),
+    Object? ticketState = const $CopyWithPlaceholder(),
+    Object? reviewedSha = const $CopyWithPlaceholder(),
+    Object? afterApprove = const $CopyWithPlaceholder(),
+    Object? drafts = const $CopyWithPlaceholder(),
   }) {
     return PullDetail(
       repoId: repoId == const $CopyWithPlaceholder()
@@ -144,6 +174,22 @@ class _$PullDetailCWProxyImpl implements _$PullDetailCWProxy {
           ? _value.own
           // ignore: cast_nullable_to_non_nullable
           : own as bool,
+      ticketState: ticketState == const $CopyWithPlaceholder()
+          ? _value.ticketState
+          // ignore: cast_nullable_to_non_nullable
+          : ticketState as TicketState?,
+      reviewedSha: reviewedSha == const $CopyWithPlaceholder()
+          ? _value.reviewedSha
+          // ignore: cast_nullable_to_non_nullable
+          : reviewedSha as String?,
+      afterApprove: afterApprove == const $CopyWithPlaceholder()
+          ? _value.afterApprove
+          // ignore: cast_nullable_to_non_nullable
+          : afterApprove as PullDetailAfterApproveEnum?,
+      drafts: drafts == const $CopyWithPlaceholder()
+          ? _value.drafts
+          // ignore: cast_nullable_to_non_nullable
+          : drafts as List<ReviewDraft>?,
     );
   }
 }
@@ -193,25 +239,65 @@ PullDetail _$PullDetailFromJson(Map<String, dynamic> json) =>
         filesError: $checkedConvert('filesError', (v) => v as String?),
         ticketKey: $checkedConvert('ticketKey', (v) => v as String?),
         own: $checkedConvert('own', (v) => v as bool),
+        ticketState: $checkedConvert(
+          'ticketState',
+          (v) => $enumDecodeNullable(_$TicketStateEnumMap, v),
+        ),
+        reviewedSha: $checkedConvert('reviewedSha', (v) => v as String?),
+        afterApprove: $checkedConvert(
+          'afterApprove',
+          (v) => $enumDecodeNullable(_$PullDetailAfterApproveEnumEnumMap, v),
+        ),
+        drafts: $checkedConvert(
+          'drafts',
+          (v) => (v as List<dynamic>?)
+              ?.map((e) => ReviewDraft.fromJson(e as Map<String, dynamic>))
+              .toList(),
+        ),
       );
       return val;
     });
 
-Map<String, dynamic> _$PullDetailToJson(PullDetail instance) =>
-    <String, dynamic>{
-      'repoId': instance.repoId,
-      'repoName': instance.repoName,
-      'provider': _$PullDetailProviderEnumEnumMap[instance.provider]!,
-      'pull': instance.pull.toJson(),
-      'body': ?instance.body,
-      'login': ?instance.login,
-      'files': instance.files.map((e) => e.toJson()).toList(),
-      'filesError': ?instance.filesError,
-      'ticketKey': ?instance.ticketKey,
-      'own': instance.own,
-    };
+Map<String, dynamic> _$PullDetailToJson(
+  PullDetail instance,
+) => <String, dynamic>{
+  'repoId': instance.repoId,
+  'repoName': instance.repoName,
+  'provider': _$PullDetailProviderEnumEnumMap[instance.provider]!,
+  'pull': instance.pull.toJson(),
+  'body': ?instance.body,
+  'login': ?instance.login,
+  'files': instance.files.map((e) => e.toJson()).toList(),
+  'filesError': ?instance.filesError,
+  'ticketKey': ?instance.ticketKey,
+  'own': instance.own,
+  'ticketState': ?_$TicketStateEnumMap[instance.ticketState],
+  'reviewedSha': ?instance.reviewedSha,
+  'afterApprove': ?_$PullDetailAfterApproveEnumEnumMap[instance.afterApprove],
+  'drafts': ?instance.drafts?.map((e) => e.toJson()).toList(),
+};
 
 const _$PullDetailProviderEnumEnumMap = {
   PullDetailProviderEnum.github: 'github',
   PullDetailProviderEnum.gitlab: 'gitlab',
+};
+
+const _$TicketStateEnumMap = {
+  TicketState.new_: 'new',
+  TicketState.analyzing: 'analyzing',
+  TicketState.waitingForAnswers: 'waiting_for_answers',
+  TicketState.coding: 'coding',
+  TicketState.testing: 'testing',
+  TicketState.waitingForReview: 'waiting_for_review',
+  TicketState.pushing: 'pushing',
+  TicketState.done: 'done',
+  TicketState.rejected: 'rejected',
+  TicketState.failed: 'failed',
+  TicketState.rateLimited: 'rate_limited',
+};
+
+const _$PullDetailAfterApproveEnumEnumMap = {
+  PullDetailAfterApproveEnum.pr: 'pr',
+  PullDetailAfterApproveEnum.main: 'main',
+  PullDetailAfterApproveEnum.none: 'none',
 };

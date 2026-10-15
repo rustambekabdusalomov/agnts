@@ -177,6 +177,7 @@ Class | Method | HTTP request | Description
 [*PullsApi*](doc/PullsApi.md) | [**listRepoPulls**](doc/PullsApi.md#listrepopulls) | **GET** /repos/{id}/pulls | The repository&#39;s pull requests (GitLab merge requests), most recently updated first, 30 per page; a shorter page is the last
 [*PullsApi*](doc/PullsApi.md) | [**replyPullThread**](doc/PullsApi.md#replypullthread) | **POST** /repos/{id}/pulls/{number}/replies | Answer in a thread of a pull request
 [*PullsApi*](doc/PullsApi.md) | [**resolvePullThread**](doc/PullsApi.md#resolvepullthread) | **POST** /repos/{id}/pulls/{number}/resolve | Resolve or reopen a thread on a diff line
+[*PullsApi*](doc/PullsApi.md) | [**reviewRepoPull**](doc/PullsApi.md#reviewrepopull) | **POST** /repos/{id}/pulls/{number}/review | Ask agnts to review an open pull request: a review ticket for you, whose comments stay drafts in agnts until you accept and publish them. Approving it finishes the review; it never merges
 [*ReposApi*](doc/ReposApi.md) | [**approveRepoBrief**](doc/ReposApi.md#approverepobrief) | **POST** /repos/{id}/brief/approve | Make the draft the brief that runs read
 [*ReposApi*](doc/ReposApi.md) | [**archiveRepo**](doc/ReposApi.md#archiverepo) | **POST** /repos/{id}/archive | Archive the repository; it keeps its history but takes no new tickets or tasks
 [*ReposApi*](doc/ReposApi.md) | [**createRepo**](doc/ReposApi.md#createrepo) | **POST** /repos | 
@@ -203,12 +204,18 @@ Class | Method | HTTP request | Description
 [*ReposApi*](doc/ReposApi.md) | [**unarchiveRepo**](doc/ReposApi.md#unarchiverepo) | **POST** /repos/{id}/unarchive | Restore an archived repository
 [*ReposApi*](doc/ReposApi.md) | [**updateRepo**](doc/ReposApi.md#updaterepo) | **PUT** /repos/{id} | 
 [*ReposApi*](doc/ReposApi.md) | [**updateRepoGroup**](doc/ReposApi.md#updaterepogroup) | **PUT** /repo-groups/{id} | Replace a group&#39;s fields and repositories
+[*ReviewsApi*](doc/ReviewsApi.md) | [**acceptAllReviewDrafts**](doc/ReviewsApi.md#acceptallreviewdrafts) | **POST** /tickets/{key}/drafts/accept-all | Accept the summary and every open finding at least as severe as minSeverity (every one when left out)
+[*ReviewsApi*](doc/ReviewsApi.md) | [**addReviewDraft**](doc/ReviewsApi.md#addreviewdraft) | **POST** /tickets/{key}/drafts | Add your own comment to the review, on a line of the new version or on the pull request; it is published with the accepted drafts
 [*ReviewsApi*](doc/ReviewsApi.md) | [**addReviewerNote**](doc/ReviewsApi.md#addreviewernote) | **POST** /reviews/notes | Tell agnts something about how you review; the next review for that user reads it
+[*ReviewsApi*](doc/ReviewsApi.md) | [**deleteReviewDraft**](doc/ReviewsApi.md#deletereviewdraft) | **DELETE** /tickets/{key}/drafts/{draftId} | Delete your own draft comment (agnts&#39;s drafts are dismissed instead)
 [*ReviewsApi*](doc/ReviewsApi.md) | [**deleteReviewerNote**](doc/ReviewsApi.md#deletereviewernote) | **DELETE** /reviews/notes/{id} | Forget a note (one already folded into a profile stays there until the profile is edited)
+[*ReviewsApi*](doc/ReviewsApi.md) | [**listReviewDrafts**](doc/ReviewsApi.md#listreviewdrafts) | **GET** /tickets/{key}/drafts | The draft comments of a pull request review: agnts&#39;s summary and findings, and people&#39;s own comments, with what was decided about each
 [*ReviewsApi*](doc/ReviewsApi.md) | [**listReviewers**](doc/ReviewsApi.md#listreviewers) | **GET** /reviews/reviewers | How each person agnts reviews pull requests for reviews, as it learned from their notes
-[*ReviewsApi*](doc/ReviewsApi.md) | [**postPullReview**](doc/ReviewsApi.md#postpullreview) | **POST** /tickets/{key}/post-review | Post agnts&#39;s latest review of a pull request on it (once per reviewed commit): the summary, and the chosen findings on their lines in one review. Posting the review of new commits edits agnts&#39;s earlier summary, answers its findings that are still there and resolves the ones that are gone
+[*ReviewsApi*](doc/ReviewsApi.md) | [**postPullReview**](doc/ReviewsApi.md#postpullreview) | **POST** /tickets/{key}/post-review | Post agnts&#39;s latest review of a pull request on it: accepts the drafts of the summary (with the findings not on a changed line) and of the chosen findings, then publishes every accepted draft (see publishReviewDrafts). Kept for older clients
+[*ReviewsApi*](doc/ReviewsApi.md) | [**publishReviewDrafts**](doc/ReviewsApi.md#publishreviewdrafts) | **POST** /tickets/{key}/drafts/publish | Publish the accepted drafts on the pull request as one review, as the git host token&#39;s user: comments on their lines, the summary (edited in place when agnts posted one before) with the accepted findings not on a changed line. Also answers in the threads of findings agnts posted before that are still there, and resolves the ones that are gone. Drafts not accepted stay in agnts
 [*ReviewsApi*](doc/ReviewsApi.md) | [**saveReviewerProfile**](doc/ReviewsApi.md#savereviewerprofile) | **PUT** /reviews/reviewers/{login} | Replace a reviewer profile with your text; empty text clears it
 [*ReviewsApi*](doc/ReviewsApi.md) | [**syncReviews**](doc/ReviewsApi.md#syncreviews) | **POST** /reviews/sync | Ask the git host for the pull requests waiting for you and queue reviews of the new ones
+[*ReviewsApi*](doc/ReviewsApi.md) | [**updateReviewDraft**](doc/ReviewsApi.md#updatereviewdraft) | **PATCH** /tickets/{key}/drafts/{draftId} | Accept, dismiss or reopen a draft, or rewrite its text before it is published
 [*RulesApi*](doc/RulesApi.md) | [**acceptRule**](doc/RulesApi.md#acceptrule) | **POST** /rules/{id}/accept | Apply a rule as written, skipping its open questions or a failed review
 [*RulesApi*](doc/RulesApi.md) | [**answerRule**](doc/RulesApi.md#answerrule) | **PUT** /rules/{id}/answers | Answer every open question of a rule; Claude then reviews it again
 [*RulesApi*](doc/RulesApi.md) | [**createRule**](doc/RulesApi.md#createrule) | **POST** /rules | Add a rule; Claude reviews it before tickets follow it
@@ -299,12 +306,14 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [AcceptAllReviewDraftsRequest](doc/AcceptAllReviewDraftsRequest.md)
  - [AcceptFollowUp](doc/AcceptFollowUp.md)
  - [AcceptFollowUpResult](doc/AcceptFollowUpResult.md)
  - [AcceptFollowUps](doc/AcceptFollowUps.md)
  - [AcceptFollowUpsResult](doc/AcceptFollowUpsResult.md)
  - [Acceptance](doc/Acceptance.md)
  - [AcceptanceCriteriaInner](doc/AcceptanceCriteriaInner.md)
+ - [AddReviewDraftRequest](doc/AddReviewDraftRequest.md)
  - [AddressPullCommentsRequest](doc/AddressPullCommentsRequest.md)
  - [AgentConfigFinding](doc/AgentConfigFinding.md)
  - [AgentConfigScan](doc/AgentConfigScan.md)
@@ -465,6 +474,8 @@ Class | Method | HTTP request | Description
  - [Proof](doc/Proof.md)
  - [ProofRun](doc/ProofRun.md)
  - [ProofTest](doc/ProofTest.md)
+ - [PublishReviewDraftsRequest](doc/PublishReviewDraftsRequest.md)
+ - [PublishedReview](doc/PublishedReview.md)
  - [PullComment](doc/PullComment.md)
  - [PullDetail](doc/PullDetail.md)
  - [PullItem](doc/PullItem.md)
@@ -513,6 +524,9 @@ Class | Method | HTTP request | Description
  - [ResolvePullThreadRequest](doc/ResolvePullThreadRequest.md)
  - [Result](doc/Result.md)
  - [RetryTicketRequest](doc/RetryTicketRequest.md)
+ - [ReviewDraft](doc/ReviewDraft.md)
+ - [ReviewRepoPull409Response](doc/ReviewRepoPull409Response.md)
+ - [ReviewRepoPullRequest](doc/ReviewRepoPullRequest.md)
  - [ReviewSync](doc/ReviewSync.md)
  - [Reviewer](doc/Reviewer.md)
  - [ReviewerNote](doc/ReviewerNote.md)
@@ -599,6 +613,7 @@ Class | Method | HTTP request | Description
  - [UpdatePlatformUserRequest](doc/UpdatePlatformUserRequest.md)
  - [UpdatePlatformWorkspaceRequest](doc/UpdatePlatformWorkspaceRequest.md)
  - [UpdateProfileRequest](doc/UpdateProfileRequest.md)
+ - [UpdateReviewDraftRequest](doc/UpdateReviewDraftRequest.md)
  - [UpdateWorkspaceClaudeRequest](doc/UpdateWorkspaceClaudeRequest.md)
  - [UpdateWorkspaceRequest](doc/UpdateWorkspaceRequest.md)
  - [Usage](doc/Usage.md)

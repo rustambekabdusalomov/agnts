@@ -30,7 +30,7 @@ import TicketRepos from '../components/ticket/TicketRepos.vue'
 import { filePath, filesByRepo, isMultiRepo, ticketRepos } from '../components/repos/repoSet'
 import ProgressTrack from '../components/ticket/ProgressTrack.vue'
 import PullCard from '../components/ticket/PullCard.vue'
-import PostReviewDialog from '../components/ticket/PostReviewDialog.vue'
+import ReviewDraftsPanel from '../components/pulls/ReviewDraftsPanel.vue'
 import TicketPullComments from '../components/ticket/TicketPullComments.vue'
 import CiCard from '../components/ticket/CiCard.vue'
 import { useRepoMembers } from '../components/repo/useRepoMembers'
@@ -84,8 +84,11 @@ const isPlane = computed(() => tk.value?.source === 'plane')
 const report = computed(() => !!tk.value && isReport(tk.value))
 const swaggerTest = computed(() => !!tk.value && isSwaggerTest(tk.value))
 // A review of someone else's pull request: approve merges it, reject
-// dismisses agnts's review and leaves the pull request to you.
+// dismisses agnts's review and leaves the pull request to you. A review
+// asked for from the pull request page (afterApprove none) never merges:
+// approving it finishes the review.
 const pull = computed(() => !!tk.value && isPullReview(tk.value))
+const finishOnly = computed(() => pull.value && tk.value?.afterApprove === 'none')
 const host = computed(() => pullHost(tk.value?.pull?.url ?? tk.value?.prUrl))
 // Why a review is dismissed; it teaches agnts how you review.
 const dismissReason = ref('')
@@ -303,11 +306,14 @@ async function confirmRestart() {
   if (await askConfirm({ title: label, message, confirmLabel: label, danger: true })) version.mutate('restart')
 }
 
-// Posting agnts's review on the pull request (the summary and findings on
-// their lines), once per reviewed commit.
-const posted = computed(() => !!tk.value?.pull?.postedSha && tk.value.pull.postedSha === tk.value.headSha)
-const canPost = computed(() => pull.value && !!d.value?.review?.summary && !!tk.value?.headSha && !posted.value && tk.value?.state !== 'pushing')
-const postOpen = ref(false)
+// agnts's review comments are drafts kept here: only the accepted ones are
+// published on the pull request, as often as people accept more.
+const drafts = useQuery({
+  queryKey: computed(() => ['drafts', key.value]),
+  queryFn: () => unwrap(api.GET('/tickets/{key}/drafts', { params: { path: { key: key.value } } })),
+  enabled: computed(() => pull.value && !!d.value?.review),
+})
+const draftsLocked = computed(() => tk.value?.state === 'rejected' || (!!tk.value?.pull?.state && tk.value.pull.state !== 'open'))
 
 // The pull requests whose conversation the page shows: the one a review
 // reviews, or the open ones agnts opened.
@@ -322,12 +328,16 @@ const prThreads = computed(() => {
 
 const ACTION_LABEL = { approve: 'ticket.approve', reject: 'ticket.reject', stop: 'ticket.stopRun' } as const
 async function confirmThen(msg: string, a: keyof typeof ACTION_LABEL) {
-  const label = a === 'approve' && pull.value ? t('reviews.mergeBtn') : a === 'reject' && pull.value ? t('reviews.dismissBtn', { host: host.value }) : a === 'approve' && report.value ? t('ticket.approveReport') : t(ACTION_LABEL[a])
+  const label = a === 'approve' && finishOnly.value ? t('drafts.finishBtn') : a === 'approve' && pull.value ? t('reviews.mergeBtn') : a === 'reject' && pull.value ? t('reviews.dismissBtn', { host: host.value }) : a === 'approve' && report.value ? t('ticket.approveReport') : t(ACTION_LABEL[a])
   if (await askConfirm({ title: label, message: msg, confirmLabel: label, danger: a !== 'approve' })) act.mutate(a)
 }
 function approve() {
   const t0 = tk.value
   if (!t0) return
+  if (finishOnly.value) {
+    confirmThen(t('drafts.finishConfirm', { number: t0.pull?.number ?? t0.prNumber ?? '' }), 'approve')
+    return
+  }
   if (pull.value) {
     const method = t(`reviews.merge_${settingsMerge.value}`)
     confirmThen(t('reviews.mergeConfirm', { number: t0.pull?.number ?? t0.prNumber ?? '', host: host.value, method }), 'approve')
@@ -566,19 +576,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
         <section v-if="!reviewingReport" class="card">
           <fieldset class="ro-fs" :disabled="!workspace.canEdit">
             <PullCard v-if="pull" :ticket="tk" />
-            <div v-if="pull && (canPost || posted)" class="sec pr-post">
-              <p v-if="posted" class="hint">{{ t('reviews.posted', { host, when: tk.pull?.postedAt ? new Date(tk.pull.postedAt).toLocaleString() : '' }) }}</p>
-              <button v-else class="btn btn-s" type="button" @click="postOpen = true">{{ t('reviews.postBtn', { host }) }}</button>
-              <PostReviewDialog
-                v-if="d.review"
-                v-model="postOpen"
-                :ticket-key="key"
-                :number="tk.pull?.number ?? 0"
-                :host="host"
-                :findings="d.review.findings"
-                :files="result?.files ?? []"
-              />
-            </div>
+            <p v-if="pull && tk.pull?.postedAt" class="hint sec">{{ t('reviews.posted', { host, when: new Date(tk.pull.postedAt).toLocaleString() }) }}</p>
             <!-- a pull request review: queued, fetching, reviewing, ready, merging, merged, dismissed -->
             <template v-if="pull && ['new', 'analyzing', 'coding'].includes(tk.state)">
               <h2>{{ titleWithRev(tk.state === 'new' ? t('ticket.queuedTitle') : tk.state === 'analyzing' ? t('reviews.fetchingTitle') : t('reviews.reviewingTitle')) }}</h2>
@@ -588,7 +586,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             </template>
             <template v-else-if="pull && tk.state === 'waiting_for_review'">
               <h2>{{ titleWithRev(t('reviews.readyTitle')) }}</h2>
-              <p class="sub">{{ t('reviews.readySub', { host }) }}</p>
+              <p class="sub">{{ finishOnly ? t('drafts.readySub', { host }) : t('reviews.readySub', { host }) }}</p>
               <div v-if="d.review?.summary" class="sec"><div class="summary"><p>{{ tr(d.review.summary) }}</p></div></div>
               <div v-if="result" class="sec">
                 <dl class="facts">
@@ -606,7 +604,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
                 <input id="dismiss-reason" v-model="dismissReason" class="cfg-in" maxlength="4000" :placeholder="t('reviews.dismissReasonHint')">
               </div>
               <div class="actions">
-                <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="approve">{{ t('reviews.mergeBtn') }}</button>
+                <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="approve">{{ finishOnly ? t('drafts.finishBtn') : t('reviews.mergeBtn') }}</button>
                 <button class="btn" type="button" :disabled="!feedback.trim() || feedbackUploading || act.isPending.value" @click="act.mutate('request-changes')">{{ t('reviews.rereviewBtn') }}</button>
                 <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('reviews.dismissBtn', { host }) }}</button>
               </div>
@@ -616,8 +614,13 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
               <div class="sec"><LiveLog :events="events" /></div>
             </template>
             <template v-else-if="pull && tk.state === 'done'">
-              <h2>{{ t('reviews.mergedTitle') }}</h2>
-              <div class="sec"><div class="help ok"><HiIcon name="check" /><p>{{ t('reviews.mergedSub', { number: tk.pull?.number ?? tk.prNumber ?? '' }) }}</p></div></div>
+              <h2>{{ finishOnly ? t('drafts.finishedTitle') : t('reviews.mergedTitle') }}</h2>
+              <div class="sec">
+                <div class="help ok">
+                  <HiIcon name="check" />
+                  <p>{{ finishOnly ? t('drafts.finishedSub', { number: tk.pull?.number ?? tk.prNumber ?? '' }) : t('reviews.mergedSub', { number: tk.pull?.number ?? tk.prNumber ?? '' }) }}</p>
+                </div>
+              </div>
             </template>
             <template v-else-if="pull && tk.state === 'rejected'">
               <h2>{{ tk.mergedAt ? t('reviews.mergedTitle') : t('reviews.dismissedTitle') }}</h2>
@@ -879,6 +882,22 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
               </div>
             </template>
           </fieldset>
+        </section>
+
+        <section v-if="pull && drafts.data.value?.length" class="card">
+          <ReviewDraftsPanel
+            :ticket-key="key"
+            :drafts="drafts.data.value"
+            :listed="drafts.data.value"
+            :host="host"
+            :head-sha="tk.pull?.headSha"
+            :can-edit="workspace.canEdit"
+            :locked="draftsLocked"
+            :own="!!tk.pull?.login && tk.pull.login.toLowerCase() === tk.pull.author.toLowerCase()"
+          />
+          <p v-if="tk.repoId && tk.pull?.number" class="hint">
+            <RouterLink :to="{ name: 'pull', params: { id: tk.repoId, number: tk.pull.number } }">{{ t('drafts.onDiff') }}</RouterLink>
+          </p>
         </section>
 
         <template v-if="tabs.length">

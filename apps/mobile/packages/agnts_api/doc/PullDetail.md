@@ -18,6 +18,10 @@ Name | Type | Description | Notes
 **filesError** | **String** | Why the files could not be read | [optional] 
 **ticketKey** | **String** |  | [optional] 
 **own** | **bool** |  | 
+**ticketState** | [**TicketState**](TicketState.md) |  | [optional] 
+**reviewedSha** | **String** | The commit agnts reviewed, for a review ticket | [optional] 
+**afterApprove** | **String** |  | [optional] 
+**drafts** | [**List&lt;ReviewDraft&gt;**](ReviewDraft.md) | The draft comments of agnts's review of it, when it has a review ticket | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

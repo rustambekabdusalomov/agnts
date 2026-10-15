@@ -64,6 +64,8 @@ export type PullThread = S['PullThread']
 export type PullComment = S['PullComment']
 export type NewPullComment = S['NewPullComment']
 export type PRCommentSettings = S['PRCommentSettings']
+export type ReviewDraft = S['ReviewDraft']
+export type PublishedReview = S['PublishedReview']
 
 /** Tone per state, as in the demo: drives badge colours (b-<tone>). */
 export const STATE_TONE: Record<TicketState, 'gray' | 'info' | 'warn' | 'ok' | 'bad'> = {

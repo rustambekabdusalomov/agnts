@@ -5,12 +5,18 @@ import { api, unwrap } from '../../api/client'
 import type { PullItem } from '../../api/types'
 import { ago } from '../../composables/format'
 import { useScrollPages } from '../../composables/useScrollPages'
+import { useWorkspace } from '../../stores/workspace'
 import ScrollMore from '../repo/ScrollMore.vue'
+import ReviewPullDialog from './ReviewPullDialog.vue'
 
 // A repository's pull requests (GitLab merge requests) on the git host,
-// with agnts's ticket for each: its own change, or its review.
+// with agnts's ticket for each: its own change, or its review. One with
+// neither can be reviewed by agnts from here.
 const props = defineProps<{ repoId: number }>()
 const { t, locale } = useI18n()
+const workspace = useWorkspace()
+const asking = ref(0)
+const askOpen = computed({ get: () => asking.value > 0, set: (v) => { if (!v) asking.value = 0 } })
 const STATES = ['open', 'merged', 'closed', 'all'] as const
 const state = ref<(typeof STATES)[number]>('open')
 
@@ -41,7 +47,7 @@ const TONE: Record<string, string> = { open: 'b-info', merged: 'b-ok', closed: '
     <div v-else-if="query.isError.value" class="help bad"><p>{{ (query.error.value as Error)?.message || t('common.error') }}</p></div>
     <p v-else-if="!all.length" class="empty">{{ t('pulls.none') }}</p>
     <ul v-else class="pl">
-      <li v-for="p in all" :key="p.number">
+      <li v-for="p in all" :key="p.number" class="pl-li">
         <RouterLink class="pl-row" :to="{ name: 'pull', params: { id: repoId, number: p.number } }">
           <span class="pl-n mono">#{{ p.number }}</span>
           <span class="pl-b">
@@ -59,8 +65,17 @@ const TONE: Record<string, string> = { open: 'b-info', merged: 'b-ok', closed: '
             <span class="badge" :class="TONE[p.state]">{{ t(`pulls.state_${p.state}`) }}</span>
           </span>
         </RouterLink>
+        <button
+          v-if="workspace.canEdit && p.state === 'open' && !p.ticketKey"
+          type="button"
+          class="btn btn-s pl-rv"
+          @click="asking = p.number"
+        >
+          {{ t('drafts.reviewWithBtn') }}
+        </button>
       </li>
     </ul>
+    <ReviewPullDialog v-if="asking" v-model="askOpen" :repo-id="repoId" :number="asking" />
     <ScrollMore
       v-if="all.length"
       :ref="sentinel"
@@ -76,6 +91,9 @@ const TONE: Record<string, string> = { open: 'b-info', merged: 'b-ok', closed: '
 <style scoped>
 .pl { list-style: none; margin: 0; padding: 0; display: grid; }
 .pl li + li { border-top: 1px solid var(--line-2); }
+.pl-li { display: flex; align-items: center; gap: 8px; }
+.pl-li .pl-row { flex: 1; }
+.pl-rv { flex: none; }
 .pl-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 4px; color: inherit; text-decoration: none; min-width: 0; }
 .pl-row:hover { background: var(--row-hover); }
 .pl-n { color: var(--ink-3); flex: none; min-width: 3.5ch; }
@@ -86,6 +104,7 @@ const TONE: Record<string, string> = { open: 'b-info', merged: 'b-ok', closed: '
 .pl-tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; flex: none; max-width: 45%; }
 @media (max-width: 640px) {
   .pl-row { flex-wrap: wrap; }
+  .pl-li { flex-wrap: wrap; padding-bottom: 8px; }
   .pl-tags { max-width: none; justify-content: flex-start; flex-basis: 100%; }
 }
 </style>

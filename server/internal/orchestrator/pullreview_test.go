@@ -81,16 +81,23 @@ type pullGit struct {
 
 func (g *pullGit) FetchPR(_ context.Context, _ domain.Repository, ref, branch, base string) (string, []domain.FileChange, error) {
 	g.fetched = append(g.fetched, ref+"->"+branch+"@"+base)
-	n := 0
-	for k, p := range g.host.queue {
+	g.host.mu.Lock()
+	head := ""
+	for _, p := range g.host.pulls {
 		if p.FetchRef == ref {
-			n = k
+			head = p.HeadSHA
 		}
 	}
-	if g.prFiles != nil {
-		return g.host.queue[n].HeadSHA, g.prFiles, nil
+	for _, p := range g.host.queue {
+		if p.FetchRef == ref {
+			head = p.HeadSHA
+		}
 	}
-	return g.host.queue[n].HeadSHA, []domain.FileChange{{Path: "cache.go", Add: 40, Del: 2, Diff: "+func Get() {}"}}, nil
+	g.host.mu.Unlock()
+	if g.prFiles != nil {
+		return head, g.prFiles, nil
+	}
+	return head, []domain.FileChange{{Path: "cache.go", Add: 40, Del: 2, Diff: "+func Get() {}"}}, nil
 }
 
 func pull(n int, sha string) domain.PullRequest {

@@ -1,9 +1,11 @@
+import 'package:agnts_api/src/model/accept_all_review_drafts_request.dart';
 import 'package:agnts_api/src/model/accept_follow_up.dart';
 import 'package:agnts_api/src/model/accept_follow_up_result.dart';
 import 'package:agnts_api/src/model/accept_follow_ups.dart';
 import 'package:agnts_api/src/model/accept_follow_ups_result.dart';
 import 'package:agnts_api/src/model/acceptance.dart';
 import 'package:agnts_api/src/model/acceptance_criteria_inner.dart';
+import 'package:agnts_api/src/model/add_review_draft_request.dart';
 import 'package:agnts_api/src/model/address_pull_comments_request.dart';
 import 'package:agnts_api/src/model/agent_config_finding.dart';
 import 'package:agnts_api/src/model/agent_config_scan.dart';
@@ -155,6 +157,8 @@ import 'package:agnts_api/src/model/private_network_saved.dart';
 import 'package:agnts_api/src/model/proof.dart';
 import 'package:agnts_api/src/model/proof_run.dart';
 import 'package:agnts_api/src/model/proof_test.dart';
+import 'package:agnts_api/src/model/publish_review_drafts_request.dart';
+import 'package:agnts_api/src/model/published_review.dart';
 import 'package:agnts_api/src/model/pull_comment.dart';
 import 'package:agnts_api/src/model/pull_detail.dart';
 import 'package:agnts_api/src/model/pull_item.dart';
@@ -202,6 +206,9 @@ import 'package:agnts_api/src/model/reset_password_request.dart';
 import 'package:agnts_api/src/model/resolve_pull_thread_request.dart';
 import 'package:agnts_api/src/model/result.dart';
 import 'package:agnts_api/src/model/retry_ticket_request.dart';
+import 'package:agnts_api/src/model/review_draft.dart';
+import 'package:agnts_api/src/model/review_repo_pull409_response.dart';
+import 'package:agnts_api/src/model/review_repo_pull_request.dart';
 import 'package:agnts_api/src/model/review_sync.dart';
 import 'package:agnts_api/src/model/reviewer.dart';
 import 'package:agnts_api/src/model/reviewer_note.dart';
@@ -282,6 +289,7 @@ import 'package:agnts_api/src/model/update_platform_feedback_request.dart';
 import 'package:agnts_api/src/model/update_platform_user_request.dart';
 import 'package:agnts_api/src/model/update_platform_workspace_request.dart';
 import 'package:agnts_api/src/model/update_profile_request.dart';
+import 'package:agnts_api/src/model/update_review_draft_request.dart';
 import 'package:agnts_api/src/model/update_workspace_claude_request.dart';
 import 'package:agnts_api/src/model/update_workspace_request.dart';
 import 'package:agnts_api/src/model/usage.dart';
@@ -311,6 +319,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return (valueString == 'true' || valueString == '1') as ReturnType;
         case 'double':
           return (value is double ? value : double.parse('$value')) as ReturnType;
+        case 'AcceptAllReviewDraftsRequest':
+          return AcceptAllReviewDraftsRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AcceptFollowUp':
           return AcceptFollowUp.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AcceptFollowUpResult':
@@ -323,6 +333,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return Acceptance.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AcceptanceCriteriaInner':
           return AcceptanceCriteriaInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AddReviewDraftRequest':
+          return AddReviewDraftRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AddressPullCommentsRequest':
           return AddressPullCommentsRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AgentConfigFinding':
@@ -652,6 +664,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ProofRun.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ProofTest':
           return ProofTest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PublishReviewDraftsRequest':
+          return PublishReviewDraftsRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PublishedReview':
+          return PublishedReview.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PullComment':
           return PullComment.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PullDetail':
@@ -749,6 +765,12 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return Result.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RetryTicketRequest':
           return RetryTicketRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ReviewDraft':
+          return ReviewDraft.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ReviewRepoPull409Response':
+          return ReviewRepoPull409Response.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ReviewRepoPullRequest':
+          return ReviewRepoPullRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ReviewSync':
           return ReviewSync.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Reviewer':
@@ -927,6 +949,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return UpdatePlatformWorkspaceRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'UpdateProfileRequest':
           return UpdateProfileRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'UpdateReviewDraftRequest':
+          return UpdateReviewDraftRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'UpdateWorkspaceClaudeRequest':
           return UpdateWorkspaceClaudeRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'UpdateWorkspaceRequest':

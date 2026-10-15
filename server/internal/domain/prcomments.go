@@ -92,6 +92,10 @@ type NewPRComment struct {
 	OldLine   int
 	StartLine int
 	HeadSHA   string
+	// BaseSHA and StartSHA are the rest of the diff HeadSHA belongs to,
+	// for a comment on an older version (GitLab); empty: the current one.
+	BaseSHA  string
+	StartSHA string
 }
 
 // PRCommentMax caps a comment agnts posts (both hosts take 65,536

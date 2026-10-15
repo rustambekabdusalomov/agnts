@@ -4,9 +4,10 @@ import { useI18n } from 'vue-i18n'
 import CommentBody from './CommentBody.vue'
 
 // Writes or edits a comment: Markdown with a preview. `as` says who it
-// will appear from on the git host.
-const props = defineProps<{ initial?: string; busy?: boolean; submitLabel: string; as?: string; autofocus?: boolean; label?: string }>()
-const emit = defineEmits<{ submit: [body: string]; cancel: [] }>()
+// will appear from on the git host. altLabel adds a second way to send it
+// (keep it as a draft of the review instead of posting it now).
+const props = defineProps<{ initial?: string; busy?: boolean; submitLabel: string; as?: string; autofocus?: boolean; label?: string; altLabel?: string }>()
+const emit = defineEmits<{ submit: [body: string]; alt: [body: string]; cancel: [] }>()
 const { t } = useI18n()
 const body = ref(props.initial ?? '')
 const preview = ref(false)
@@ -15,6 +16,10 @@ const id = useId()
 function submit() {
   const b = body.value.trim()
   if (b && !props.busy) emit('submit', b)
+}
+function alt() {
+  const b = body.value.trim()
+  if (b && !props.busy) emit('alt', b)
 }
 function onKey(e: KeyboardEvent) {
   if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') submit()
@@ -38,6 +43,7 @@ defineExpose({ clear: () => (body.value = '') })
       <span v-if="as" class="hint">{{ as }}</span>
       <span class="cmp-sp" />
       <button type="button" class="btn btn-s" :disabled="busy" @click="emit('cancel')">{{ t('form.cancel') }}</button>
+      <button v-if="altLabel" type="button" class="btn btn-s" :disabled="busy || !body.trim()" @click="alt">{{ altLabel }}</button>
       <button type="button" class="btn btn-s btn-p" :disabled="busy || !body.trim()" @click="submit">
         <span v-if="busy" class="spin" aria-hidden="true" />{{ submitLabel }}
       </button>

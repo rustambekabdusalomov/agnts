@@ -2206,6 +2206,243 @@ class AppLocalizationsEn extends AppLocalizations {
   String get designDeviations => 'Departed from the plan';
 
   @override
+  String get draftsTitle => 'Review comments';
+
+  @override
+  String draftsSub(String host) {
+    return 'agnts\'s comments stay here until you accept them. Only accepted ones are published on $host, together as one review; the rest never leave agnts.';
+  }
+
+  @override
+  String get draftsLockedSub => 'The review is over or the pull request is closed: these comments can only be read.';
+
+  @override
+  String get draftsChip => 'Draft';
+
+  @override
+  String get draftsSummary => 'Summary';
+
+  @override
+  String get draftsSomeone => 'Someone';
+
+  @override
+  String get draftsEdited => 'edited';
+
+  @override
+  String get draftsState_draft => 'Draft';
+
+  @override
+  String get draftsState_accepted => 'Accepted';
+
+  @override
+  String get draftsState_publishing => 'Publishing';
+
+  @override
+  String get draftsState_dismissed => 'Dismissed';
+
+  @override
+  String get draftsState_published => 'Published';
+
+  @override
+  String get draftsState_outdated => 'Outdated';
+
+  @override
+  String get draftsKind_summary => 'summary';
+
+  @override
+  String get draftsKind_finding => 'finding';
+
+  @override
+  String get draftsKind_comment => 'comment';
+
+  @override
+  String get draftsAccept => 'Accept';
+
+  @override
+  String get draftsUndo => 'Undo';
+
+  @override
+  String get draftsDismiss => 'Dismiss';
+
+  @override
+  String get draftsReopen => 'Back to draft';
+
+  @override
+  String get draftsReasonLabel => 'Why? (optional: agnts learns what you call noise)';
+
+  @override
+  String get draftsReasonHint => 'e.g. we never bound caches in this service';
+
+  @override
+  String draftsDismissedBecause(String reason) {
+    return 'Dismissed: $reason';
+  }
+
+  @override
+  String get draftsOutdatedHint => 'agnts\'s newest review no longer finds this.';
+
+  @override
+  String draftsFailed(String error) {
+    return 'Publishing failed: $error';
+  }
+
+  @override
+  String get draftsDeleteTitle => 'Delete your comment?';
+
+  @override
+  String get draftsDeleteConfirm => 'It was never published; it is deleted from agnts.';
+
+  @override
+  String draftsNAccepted(String n) {
+    return '$n accepted';
+  }
+
+  @override
+  String draftsNDraft(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n drafts', one: '$n draft');
+    return '$_temp0';
+  }
+
+  @override
+  String draftsNDismissed(String n) {
+    return '$n dismissed';
+  }
+
+  @override
+  String draftsNPublished(String n) {
+    return '$n published';
+  }
+
+  @override
+  String draftsNOutdated(String n) {
+    return '$n outdated';
+  }
+
+  @override
+  String get draftsAcceptMajor => 'Accept major and above';
+
+  @override
+  String get draftsAcceptAll => 'Accept all';
+
+  @override
+  String draftsPublishBtn(num n, String host) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'Publish $n', zero: 'Publish');
+    return '$_temp0 to $host';
+  }
+
+  @override
+  String draftsPublishTitle(String host) {
+    return 'Publish to $host';
+  }
+
+  @override
+  String draftsPublishSub(num n, String host) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'These $n comments go', one: 'This comment goes');
+    return '$_temp0 on the pull request as one review, as the $host token\'s user. Comments not on a changed line go in the review\'s text.';
+  }
+
+  @override
+  String draftsPublishedToast(num n, String host) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n comments published', one: '$n comment published');
+    return '$_temp0 on $host';
+  }
+
+  @override
+  String draftsHeadMoved(String from, String to, String host) {
+    return 'New commits since agnts reviewed it ($from, now $to): the comments go on the version agnts reviewed, and $host may show them as outdated. To put them on the newest lines, review it again first.';
+  }
+
+  @override
+  String draftsShowClosed(String n) {
+    return 'Show dismissed, outdated and published ($n)';
+  }
+
+  @override
+  String draftsDraftsN(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n drafts', one: '$n draft');
+    return '$_temp0';
+  }
+
+  @override
+  String get draftsNotOnDiff => 'agnts\'s comments not on a line shown here (another version, or outside the diff):';
+
+  @override
+  String get draftsAddToReview => 'Add to review';
+
+  @override
+  String get draftsAddedToast => 'Added to the review: it is published with the accepted comments';
+
+  @override
+  String get draftsOnDiff => 'See them on the diff';
+
+  @override
+  String get draftsReviewWithBtn => 'Review with agnts';
+
+  @override
+  String get draftsReviewAgainBtn => 'Review again with agnts';
+
+  @override
+  String draftsReviewTitle(String number) {
+    return 'Review #$number with agnts';
+  }
+
+  @override
+  String get draftsReviewSub =>
+      'agnts reviews the pull request for you. Its comments stay drafts in agnts until you accept them; only accepted ones go on the pull request. Finishing the review never merges it.';
+
+  @override
+  String get draftsReviewBtn => 'Start the review';
+
+  @override
+  String get draftsFocusLabel => 'Anything to look at especially? (optional)';
+
+  @override
+  String get draftsFocusHint => 'e.g. the migration and the retry logic';
+
+  @override
+  String get draftsDeepLabel => 'Deep review (security, failures, tests and types passes)';
+
+  @override
+  String get draftsDeep_default => 'Workspace setting';
+
+  @override
+  String get draftsDeep_always => 'On';
+
+  @override
+  String get draftsDeep_off => 'Off';
+
+  @override
+  String draftsStartedToast(String key) {
+    return 'agnts is reviewing it in $key';
+  }
+
+  @override
+  String draftsReviewingNow(String key) {
+    return 'agnts is reviewing this pull request ($key). Its comments appear here as drafts when it is done.';
+  }
+
+  @override
+  String get draftsFinishBtn => 'Finish review';
+
+  @override
+  String draftsFinishConfirm(String number) {
+    return 'Finish the review of #$number? Comments not published stay in agnts. The pull request is left as it is: agnts does not merge it.';
+  }
+
+  @override
+  String draftsReadySub(String host) {
+    return 'Go through agnts\'s comments, publish the ones you agree with on $host, then finish the review. Or review again with a note, or dismiss it.';
+  }
+
+  @override
+  String get draftsFinishedTitle => 'Review finished';
+
+  @override
+  String draftsFinishedSub(String number) {
+    return 'The review of #$number is finished. The pull request was left as it is.';
+  }
+
+  @override
   String get feedbackTitle => 'Send feedback';
 
   @override
@@ -8415,6 +8652,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reviewsWhy_review_requested => 'review requested';
+
+  @override
+  String get reviewsWhy_manual => 'asked for here';
 
   @override
   String reviewsBy(String author) {

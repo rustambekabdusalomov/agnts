@@ -17,6 +17,7 @@ Method | HTTP request | Description
 [**listRepoPulls**](PullsApi.md#listrepopulls) | **GET** /repos/{id}/pulls | The repository&#39;s pull requests (GitLab merge requests), most recently updated first, 30 per page; a shorter page is the last
 [**replyPullThread**](PullsApi.md#replypullthread) | **POST** /repos/{id}/pulls/{number}/replies | Answer in a thread of a pull request
 [**resolvePullThread**](PullsApi.md#resolvepullthread) | **POST** /repos/{id}/pulls/{number}/resolve | Resolve or reopen a thread on a diff line
+[**reviewRepoPull**](PullsApi.md#reviewrepopull) | **POST** /repos/{id}/pulls/{number}/review | Ask agnts to review an open pull request: a review ticket for you, whose comments stay drafts in agnts until you accept and publish them. Approving it finishes the review; it never merges
 
 
 # **addPullComment**
@@ -393,6 +394,55 @@ Name | Type | Description  | Notes
 ### Return type
 
 void (empty response body)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **reviewRepoPull**
+> Ticket reviewRepoPull(id, number, reviewRepoPullRequest)
+
+Ask agnts to review an open pull request: a review ticket for you, whose comments stay drafts in agnts until you accept and publish them. Approving it finishes the review; it never merges
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getPullsApi();
+final int id = 789; // int | 
+final int number = 56; // int | 
+final ReviewRepoPullRequest reviewRepoPullRequest = ; // ReviewRepoPullRequest | 
+
+try {
+    final response = api.reviewRepoPull(id, number, reviewRepoPullRequest);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling PullsApi->reviewRepoPull: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **number** | **int**|  | 
+ **reviewRepoPullRequest** | [**ReviewRepoPullRequest**](ReviewRepoPullRequest.md)|  | [optional] 
+
+### Return type
+
+[**Ticket**](Ticket.md)
 
 ### Authorization
 

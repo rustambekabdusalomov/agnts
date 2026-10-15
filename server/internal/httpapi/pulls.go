@@ -117,6 +117,21 @@ func (s *Server) GetRepoPull(w http.ResponseWriter, r *http.Request, id gen.Repo
 	out := gen.PullDetail{RepoId: v.Repo.ID, RepoName: v.Repo.Name, Provider: gen.PullDetailProvider(v.Repo.Provider),
 		Pull: toPullItem(v.Pull, v.TicketKey, v.Own), Body: optStr(v.Pull.Body), Login: optStr(v.Pull.Login),
 		Files: make([]gen.FileChange, len(v.Files)), FilesError: optStr(v.FilesErr), TicketKey: optStr(v.TicketKey), Own: v.Own}
+	if t := v.Ticket; t != nil {
+		st := gen.TicketState(t.State)
+		out.TicketState = &st
+		if t.Kind == domain.KindReview {
+			out.ReviewedSha = optStr(t.HeadSHA)
+		}
+		if t.AfterApprove != "" {
+			aa := gen.PullDetailAfterApprove(t.AfterApprove)
+			out.AfterApprove = &aa
+		}
+	}
+	if v.Drafts != nil {
+		ds := toReviewDrafts(v.Drafts)
+		out.Drafts = &ds
+	}
 	for i, f := range v.Files {
 		out.Files[i] = gen.FileChange{Path: f.Path, Add: f.Add, Del: f.Del, Diff: f.Diff}
 	}

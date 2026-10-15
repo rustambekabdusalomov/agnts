@@ -20,7 +20,22 @@ const (
 const (
 	PullAssigned        = "assigned"
 	PullReviewRequested = "review_requested"
+	// PullManual: someone asked agnts to review it from the pull request
+	// page; it need not wait for the token's user at all.
+	PullManual = "manual"
 )
+
+// AfterApproveNone is the AfterApprove of a review someone asked for from
+// the pull request page: approving it finishes the review and never
+// merges, since the pull request need not be theirs to merge.
+const AfterApproveNone = "none"
+
+// PullDeepChoices are the deep review choices of a review asked for from
+// the pull request page; "" follows Settings.DeepReview.
+var PullDeepChoices = []string{"", DeepOff, DeepAlways}
+
+// PullFocusMax caps what a person asks a review to focus on.
+const PullFocusMax = 2000
 
 // PullRequest is a pull request (GitHub) or merge request (GitLab) someone
 // else opened, which agnts reviews for the person it waits for.
@@ -55,13 +70,21 @@ type PullRequest struct {
 	// request as a comment, and PostedAt when. agnts's own, not the host's.
 	PostedSHA string     `json:"postedSha,omitempty"`
 	PostedAt  *time.Time `json:"postedAt,omitempty"`
+	// Focus is what the person who asked for the review wants it to look
+	// at, and Deep their deep review choice (PullDeepChoices). agnts's own.
+	Focus string `json:"focus,omitempty"`
+	Deep  string `json:"deep,omitempty"`
 }
 
-// Keep carries what agnts recorded on old (what it posted) over to p, a
-// fresher copy from the git host.
+// Keep carries what agnts recorded on old (what it posted, what the review
+// was asked for) over to p, a fresher copy from the git host.
 func (p *PullRequest) Keep(old *PullRequest) {
 	if old != nil {
 		p.PostedSHA, p.PostedAt = old.PostedSHA, old.PostedAt
+		p.Focus, p.Deep = old.Focus, old.Deep
+		if old.Why == PullManual {
+			p.Why = PullManual
+		}
 	}
 }
 
@@ -84,6 +107,8 @@ const (
 	NoteManual    = "manual"    // wrote it on the Reviews page
 	// NoteHostComment: commented on someone's pull request on the git host.
 	NoteHostComment = "host_comment"
+	// NoteDraft: dismissed or rewrote agnts's draft comments.
+	NoteDraft = "draft"
 )
 
 // ReviewerNoteMax caps one note.
@@ -119,7 +144,7 @@ func (n *ReviewerNote) Validate() error {
 		return errors.New("the note is empty")
 	case utf8.RuneCountInString(n.Note) > ReviewerNoteMax:
 		return fmt.Errorf("the note is longer than %d characters", ReviewerNoteMax)
-	case !slices.Contains([]string{NoteRereview, NoteDismissed, NoteManual, NoteHostComment}, n.Kind):
+	case !slices.Contains([]string{NoteRereview, NoteDismissed, NoteManual, NoteHostComment, NoteDraft}, n.Kind):
 		return fmt.Errorf("unknown note kind %q", n.Kind)
 	}
 	n.PullTitle = clip(strings.TrimSpace(n.PullTitle), 300)

@@ -257,7 +257,11 @@ func position(m glMR, c domain.NewPRComment, head string) map[string]any {
 	if head == "" {
 		head = m.DiffRefs.HeadSHA
 	}
-	pos := map[string]any{"position_type": "text", "base_sha": m.DiffRefs.BaseSHA, "start_sha": m.DiffRefs.StartSHA, "head_sha": head,
+	base, start := m.DiffRefs.BaseSHA, m.DiffRefs.StartSHA
+	if c.BaseSHA != "" && c.StartSHA != "" {
+		base, start = c.BaseSHA, c.StartSHA // the version the comment was written on
+	}
+	pos := map[string]any{"position_type": "text", "base_sha": base, "start_sha": start, "head_sha": head,
 		"new_path": c.Path, "old_path": c.Path}
 	if c.Line > 0 {
 		pos["new_line"] = c.Line

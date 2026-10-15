@@ -412,8 +412,87 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Post agnts's latest review of a pull request on it (once per reviewed commit): the summary, and the chosen findings on their lines in one review. Posting the review of new commits edits agnts's earlier summary, answers its findings that are still there and resolves the ones that are gone */
+        /** Post agnts's latest review of a pull request on it: accepts the drafts of the summary (with the findings not on a changed line) and of the chosen findings, then publishes every accepted draft (see publishReviewDrafts). Kept for older clients */
         post: operations["postPullReview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/drafts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        /** The draft comments of a pull request review: agnts's summary and findings, and people's own comments, with what was decided about each */
+        get: operations["listReviewDrafts"];
+        put?: never;
+        /** Add your own comment to the review, on a line of the new version or on the pull request; it is published with the accepted drafts */
+        post: operations["addReviewDraft"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/drafts/{draftId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+                draftId: components["parameters"]["DraftID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete your own draft comment (agnts's drafts are dismissed instead) */
+        delete: operations["deleteReviewDraft"];
+        options?: never;
+        head?: never;
+        /** Accept, dismiss or reopen a draft, or rewrite its text before it is published */
+        patch: operations["updateReviewDraft"];
+        trace?: never;
+    };
+    "/tickets/{key}/drafts/accept-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept the summary and every open finding at least as severe as minSeverity (every one when left out) */
+        post: operations["acceptAllReviewDrafts"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/drafts/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish the accepted drafts on the pull request as one review, as the git host token's user: comments on their lines, the summary (edited in place when agnts posted one before) with the accepted findings not on a changed line. Also answers in the threads of findings agnts posted before that are still there, and resolves the ones that are gone. Drafts not accepted stay in agnts */
+        post: operations["publishReviewDrafts"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2498,6 +2577,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/repos/{id}/pulls/{number}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+                number: components["parameters"]["PullNumber"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ask agnts to review an open pull request: a review ticket for you, whose comments stay drafts in agnts until you accept and publish them. Approving it finishes the review; it never merges */
+        post: operations["reviewRepoPull"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/repos/{id}/pulls/{number}/threads": {
         parameters: {
             query?: never;
@@ -4324,8 +4423,11 @@ export interface components {
             ciFixes?: number;
             /** @description Git host usernames the pull request is (or will be) assigned to */
             assignees?: string[];
-            /** @enum {string} */
-            afterApprove?: "pr" | "main";
+            /**
+             * @description pr: open a pull request (a review: merge it); main: push to the default branch; none: a review asked for from the pull request page, which approving finishes without merging
+             * @enum {string}
+             */
+            afterApprove?: "pr" | "main" | "none";
             /** @description Kept in the queue until started */
             held?: boolean;
             askFirst?: boolean;
@@ -5526,7 +5628,7 @@ export interface components {
             draft: boolean;
             /** @enum {string} */
             state: "open" | "closed" | "merged";
-            /** @description Why it waits for the token's user: assigned, review_requested, or empty */
+            /** @description Why it waits for the token's user: assigned, review_requested, or empty; manual for a review someone asked for from the pull request page */
             why: string;
             /** Format: date-time */
             updatedAt: string;
@@ -5551,6 +5653,13 @@ export interface components {
             filesError?: string;
             ticketKey?: string;
             own: boolean;
+            ticketState?: components["schemas"]["TicketState"];
+            /** @description The commit agnts reviewed, for a review ticket */
+            reviewedSha?: string;
+            /** @enum {string} */
+            afterApprove?: "pr" | "main" | "none";
+            /** @description The draft comments of agnts's review of it, when it has a review ticket */
+            drafts?: components["schemas"]["ReviewDraft"][];
         };
         PullComment: {
             /** @description Opaque: pass it back to edit or delete */
@@ -5621,6 +5730,55 @@ export interface components {
             /** @description Post it as a request for changes (GitHub) */
             requestChanges?: boolean;
         };
+        /** @description A comment of a pull request review kept in agnts: agnts's summary or one of its findings, or a person's own comment. Only accepted ones are published */
+        ReviewDraft: {
+            /** Format: int64 */
+            id: number;
+            /** @enum {string} */
+            kind: "summary" | "finding" | "comment";
+            /** @description Which finding it is across re-reviews (file and title) */
+            key: string;
+            /** @description A finding's severity; for the summary, the verdict */
+            severity?: string;
+            category?: string;
+            title?: string;
+            confidence?: number;
+            pass?: string;
+            path?: string;
+            /** @description Line in the new file; it may be outside the diff */
+            line?: number;
+            /** @description The commit it is about */
+            headSha: string;
+            /** @description Markdown: what is published */
+            body: string;
+            /** @description A person rewrote it; re-reviews keep their text */
+            edited: boolean;
+            /** @enum {string} */
+            state: "draft" | "accepted" | "publishing" | "dismissed" | "published" | "outdated";
+            dismissReason?: string;
+            /** @description Why its last publish failed */
+            error?: string;
+            /** @description Who wrote it (comment) */
+            author?: string;
+            decidedBy?: string;
+            /** Format: date-time */
+            decidedAt?: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        PublishedReview: {
+            ticket: components["schemas"]["Ticket"];
+            /** @enum {string} */
+            summary: "" | "posted" | "edited";
+            /** @description Comments posted on their lines */
+            inline: number;
+            /** @description Findings agnts posted before that are still there (answered in their threads) */
+            still: number;
+            /** @description Findings agnts posted before that are gone (answered and resolved) */
+            resolved: number;
+        };
         /** @description What a sync of the pull requests waiting for you found */
         ReviewSync: {
             /** @description Repositories asked */
@@ -5648,7 +5806,7 @@ export interface components {
             ticketKey?: string;
             pullTitle?: string;
             /** @enum {string} */
-            kind: "rereview" | "dismissed" | "manual" | "host_comment";
+            kind: "rereview" | "dismissed" | "manual" | "host_comment" | "draft";
             note: string;
             /** Format: date-time */
             createdAt: string;
@@ -6883,6 +7041,7 @@ export interface components {
         LessonID: number;
         RelationID: number;
         PullNumber: number;
+        DraftID: number;
         SuiteID: number;
         TicketKey: string;
     };
@@ -7395,6 +7554,192 @@ export interface operations {
         };
         responses: {
             200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            502: components["responses"]["BadGateway"];
+        };
+    };
+    listReviewDrafts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewDraft"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    addReviewDraft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    body: string;
+                    path?: string;
+                    /** @description Line in the new file */
+                    line?: number;
+                    /** @description The commit the line is in; the newest when empty */
+                    headSha?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The new draft */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewDraft"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    deleteReviewDraft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+                draftId: components["parameters"]["DraftID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    updateReviewDraft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+                draftId: components["parameters"]["DraftID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    state?: "draft" | "accepted" | "dismissed";
+                    body?: string;
+                    /** @description Why it was dismissed: teaches agnts what you call noise */
+                    dismissReason?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The draft after the change */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewDraft"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    acceptAllReviewDrafts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    minSeverity?: "blocker" | "major" | "minor" | "nit";
+                };
+            };
+        };
+        responses: {
+            /** @description Every draft after the change */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewDraft"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    publishReviewDrafts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @description Publish it as a request for changes (GitHub) */
+                    requestChanges?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description What was published */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublishedReview"];
+                };
+            };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
@@ -10699,6 +11044,50 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
+            502: components["responses"]["BadGateway"];
+        };
+    };
+    reviewRepoPull: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+                number: components["parameters"]["PullNumber"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @description What the review should look at especially */
+                    focus?: string;
+                    /**
+                     * @description Deep review (specialist passes): '' follows the workspace setting
+                     * @enum {string}
+                     */
+                    deep?: "" | "off" | "always";
+                };
+            };
+        };
+        responses: {
+            201: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            /** @description agnts is already reviewing it; ticketKey says where */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        code: string;
+                        message: string;
+                        ticketKey: string;
+                    };
+                };
+            };
             502: components["responses"]["BadGateway"];
         };
     };

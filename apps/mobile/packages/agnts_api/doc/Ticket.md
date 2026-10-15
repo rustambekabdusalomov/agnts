@@ -28,7 +28,7 @@ Name | Type | Description | Notes
 **prUrl** | **String** | The primary repository's pull request (see repos) | 
 **ciFixes** | **int** | Rounds a red CI check sent the pull request back to coding | [optional] 
 **assignees** | **List&lt;String&gt;** | Git host usernames the pull request is (or will be) assigned to | [optional] 
-**afterApprove** | **String** |  | [optional] 
+**afterApprove** | **String** | pr: open a pull request (a review: merge it); main: push to the default branch; none: a review asked for from the pull request page, which approving finishes without merging | [optional] 
 **held** | **bool** | Kept in the queue until started | [optional] 
 **askFirst** | **bool** |  | [optional] 
 **kind** | [**TicketKind**](TicketKind.md) |  | 

@@ -63,5 +63,12 @@ void main() {
       // TODO
     });
 
+    // Ask agnts to review an open pull request: a review ticket for you, whose comments stay drafts in agnts until you accept and publish them. Approving it finishes the review; it never merges
+    //
+    //Future<Ticket> reviewRepoPull(int id, int number, { ReviewRepoPullRequest reviewRepoPullRequest }) async
+    test('test reviewRepoPull', () async {
+      // TODO
+    });
+
   });
 }

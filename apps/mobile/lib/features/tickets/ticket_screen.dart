@@ -775,6 +775,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           hint: _changed(l, d.result!),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: _resultBody(context, d.result!)),
         ),
+      if (t.kind == TicketKind.review && t.pull != null) ReviewDraftsFold(ticket: t),
       for (final p in ticketPulls(t)) PullCommentsFold(ticket: t, repoId: p.repoId, number: p.number, url: p.url, repoName: p.repoName),
       if (RelationsFold.shows(d)) RelationsFold(d),
       if (d.followUps != null) FollowUpsFold(d),
@@ -917,9 +918,13 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         final toMain = t.afterApprove == TicketAfterApproveEnum.main && t.source_ == TicketSource_Enum.local;
         final plane = t.source_ == TicketSource_Enum.plane;
         final post = report && _postReport && (plane || t.source_ == TicketSource_Enum.jira);
-        final confirm = report
-            ? (post ? (plane ? l.ticketApproveReportPostConfirmPlane(key) : l.ticketApproveReportPostConfirm(key)) : l.ticketApproveReportConfirm)
-            : (toMain ? l.ticketApproveMainConfirm : l.ticketApproveConfirm(t.branch));
+        // A review asked for from the pull request page never merges.
+        final finish = t.kind == TicketKind.review && t.afterApprove == TicketAfterApproveEnum.none;
+        final confirm = finish
+            ? l.draftsFinishConfirm('${t.pull?.number ?? t.prNumber ?? ''}')
+            : report
+                ? (post ? (plane ? l.ticketApproveReportPostConfirmPlane(key) : l.ticketApproveReportPostConfirm(key)) : l.ticketApproveReportConfirm)
+                : (toMain ? l.ticketApproveMainConfirm : l.ticketApproveConfirm(t.branch));
         buttons = [
           Tooltip(
             message: l.ticketReject,
@@ -950,7 +955,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
                             ));
                       }
                     },
-              child: Text(report ? l.ticketApproveReport : l.mdetailApprove, maxLines: 1, overflow: TextOverflow.ellipsis),
+              child: Text(finish ? l.draftsFinishBtn : report ? l.ticketApproveReport : l.mdetailApprove, maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
           ),
         ];

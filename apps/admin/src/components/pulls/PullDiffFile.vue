@@ -1,16 +1,20 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { FileChange, PullThread } from '../../api/types'
+import type { FileChange, PullThread, ReviewDraft } from '../../api/types'
 import { numberDiff, type DiffLine } from '../diffLines'
 import CommentComposer from './CommentComposer.vue'
 import CommentThread from './CommentThread.vue'
+import DraftCard from './DraftCard.vue'
 import HiIcon from '../ui/HiIcon.vue'
+import type { useDraftWrites } from './useDrafts'
 import type { usePullWrites } from './usePull'
 
 // One changed file of a pull request with its review threads under their
 // lines. "+" on a line comments there. Threads written on an earlier
 // version, whose line is not in this diff any more, are listed above.
+// With a review, agnts's draft comments sit under their lines too, and a
+// comment can be kept as a draft of the review (draftWrites).
 const props = defineProps<{
   file: FileChange
   threads: PullThread[]
@@ -19,6 +23,9 @@ const props = defineProps<{
   as: string
   headSha?: string
   open?: boolean
+  drafts?: ReviewDraft[]
+  draftWrites?: ReturnType<typeof useDraftWrites>
+  draftsLocked?: boolean
 }>()
 const { t } = useI18n()
 const lines = computed(() => numberDiff(props.file.diff ?? ''))
@@ -39,6 +46,24 @@ const placed = computed(() => {
   }
   return { at, left }
 })
+// A draft sits under its line when it is about the version shown; one
+// written on another commit, or on a line outside the diff, is listed above.
+const draftsPlaced = computed(() => {
+  const at = new Map<number, ReviewDraft[]>()
+  const left: ReviewDraft[] = []
+  for (const d of props.drafts ?? []) {
+    const same = !props.headSha || !d.headSha || d.headSha === props.headSha
+    const i = same ? lines.value.findIndex((l) => l.kind !== 'del' && l.new === d.line) : -1
+    if (i < 0) left.push(d)
+    else at.set(i, [...(at.get(i) ?? []), d])
+  }
+  return { at, left }
+})
+const drafting = computed(() => !!props.draftWrites && !props.draftsLocked && props.canEdit)
+function addDraft(l: DiffLine, body: string) {
+  if (l.kind === 'del' || !props.draftWrites) return
+  props.draftWrites.add.mutate({ body, path: props.file.path, line: l.new, headSha: props.headSha }, { onSuccess: () => (adding.value = null) })
+}
 const commentable = (l: DiffLine) => props.canEdit && (l.kind === 'add' || l.kind === 'del' || (l.kind === '' && l.new !== undefined))
 
 function add(l: DiffLine, body: string) {
@@ -53,10 +78,11 @@ function add(l: DiffLine, body: string) {
 </script>
 
 <template>
-  <details class="file pfile" :open="open || threads.length > 0">
+  <details class="file pfile" :open="open || threads.length > 0 || (drafts?.length ?? 0) > 0">
     <summary>
       <span>{{ file.path }}</span>
       <span class="n">
+        <span v-if="drafts?.length" class="badge b-info">{{ t('drafts.draftsN', { n: drafts.length }) }}</span>
         <span v-if="threads.length" class="badge b-gray">{{ t('pulls.threadsN', { n: threads.length }) }}</span>
         <span class="a">+{{ file.add }}</span><span class="d">−{{ file.del }}</span>
       </span>
@@ -64,6 +90,10 @@ function add(l: DiffLine, body: string) {
     <div v-if="placed.left.length" class="pf-left">
       <p class="hint">{{ t('pulls.earlierVersion') }}</p>
       <CommentThread v-for="th in placed.left" :key="th.id" :thread="th" :writes="writes" :can-edit="canEdit" :as="as" where />
+    </div>
+    <div v-if="draftsPlaced.left.length && draftWrites" class="pf-left">
+      <p class="hint">{{ t('drafts.notOnDiff') }}</p>
+      <DraftCard v-for="d in draftsPlaced.left" :key="d.id" :draft="d" :writes="draftWrites" :can-edit="canEdit" :locked="draftsLocked" where />
     </div>
     <p v-if="!file.diff" class="hint pf-none">{{ t('pulls.noPatch') }}</p>
     <p v-if="file.diff && canEdit" class="pf-hint">
@@ -87,15 +117,20 @@ function add(l: DiffLine, body: string) {
           <span v-else class="pf-add-sp" />
           <span class="tx">{{ l.text }}</span>
         </div>
-        <div v-if="placed.at.get(i) || adding === i" class="pf-threads">
+        <div v-if="placed.at.get(i) || draftsPlaced.at.get(i) || adding === i" class="pf-threads">
           <CommentThread v-for="th in placed.at.get(i) ?? []" :key="th.id" :thread="th" :writes="writes" :can-edit="canEdit" :as="as" />
+          <template v-if="draftWrites">
+            <DraftCard v-for="d in draftsPlaced.at.get(i) ?? []" :key="d.id" :draft="d" :writes="draftWrites" :can-edit="canEdit" :locked="draftsLocked" />
+          </template>
           <CommentComposer
             v-if="adding === i"
-            :busy="writes.add.isPending.value"
+            :busy="writes.add.isPending.value || (draftWrites?.add.isPending.value ?? false)"
             :submit-label="t('pulls.comment')"
+            :alt-label="drafting && l.kind !== 'del' ? t('drafts.addToReview') : undefined"
             :as="as"
             autofocus
             @submit="(b) => add(l, b)"
+            @alt="(b) => addDraft(l, b)"
             @cancel="adding = null"
           />
         </div>

@@ -3,6 +3,7 @@
 README.md
 analysis_options.yaml
 build.yaml
+doc/AcceptAllReviewDraftsRequest.md
 doc/AcceptFollowUp.md
 doc/AcceptFollowUpResult.md
 doc/AcceptFollowUps.md
@@ -10,6 +11,7 @@ doc/AcceptFollowUpsResult.md
 doc/Acceptance.md
 doc/AcceptanceCriteriaInner.md
 doc/AccountApi.md
+doc/AddReviewDraftRequest.md
 doc/AddressPullCommentsRequest.md
 doc/AgentConfigFinding.md
 doc/AgentConfigScan.md
@@ -187,6 +189,8 @@ doc/PrivateNetworkSaved.md
 doc/Proof.md
 doc/ProofRun.md
 doc/ProofTest.md
+doc/PublishReviewDraftsRequest.md
+doc/PublishedReview.md
 doc/PullComment.md
 doc/PullDetail.md
 doc/PullItem.md
@@ -237,6 +241,9 @@ doc/ResetPasswordRequest.md
 doc/ResolvePullThreadRequest.md
 doc/Result.md
 doc/RetryTicketRequest.md
+doc/ReviewDraft.md
+doc/ReviewRepoPull409Response.md
+doc/ReviewRepoPullRequest.md
 doc/ReviewSync.md
 doc/Reviewer.md
 doc/ReviewerNote.md
@@ -329,6 +336,7 @@ doc/UpdatePlatformFeedbackRequest.md
 doc/UpdatePlatformUserRequest.md
 doc/UpdatePlatformWorkspaceRequest.md
 doc/UpdateProfileRequest.md
+doc/UpdateReviewDraftRequest.md
 doc/UpdateWorkspaceClaudeRequest.md
 doc/UpdateWorkspaceRequest.md
 doc/Usage.md
@@ -381,12 +389,14 @@ lib/src/auth/basic_auth.dart
 lib/src/auth/bearer_auth.dart
 lib/src/auth/oauth.dart
 lib/src/deserialize.dart
+lib/src/model/accept_all_review_drafts_request.dart
 lib/src/model/accept_follow_up.dart
 lib/src/model/accept_follow_up_result.dart
 lib/src/model/accept_follow_ups.dart
 lib/src/model/accept_follow_ups_result.dart
 lib/src/model/acceptance.dart
 lib/src/model/acceptance_criteria_inner.dart
+lib/src/model/add_review_draft_request.dart
 lib/src/model/address_pull_comments_request.dart
 lib/src/model/agent_config_finding.dart
 lib/src/model/agent_config_scan.dart
@@ -547,6 +557,8 @@ lib/src/model/private_network_saved.dart
 lib/src/model/proof.dart
 lib/src/model/proof_run.dart
 lib/src/model/proof_test.dart
+lib/src/model/publish_review_drafts_request.dart
+lib/src/model/published_review.dart
 lib/src/model/pull_comment.dart
 lib/src/model/pull_detail.dart
 lib/src/model/pull_item.dart
@@ -595,6 +607,9 @@ lib/src/model/reset_password_request.dart
 lib/src/model/resolve_pull_thread_request.dart
 lib/src/model/result.dart
 lib/src/model/retry_ticket_request.dart
+lib/src/model/review_draft.dart
+lib/src/model/review_repo_pull409_response.dart
+lib/src/model/review_repo_pull_request.dart
 lib/src/model/review_sync.dart
 lib/src/model/reviewer.dart
 lib/src/model/reviewer_note.dart
@@ -681,6 +696,7 @@ lib/src/model/update_platform_feedback_request.dart
 lib/src/model/update_platform_user_request.dart
 lib/src/model/update_platform_workspace_request.dart
 lib/src/model/update_profile_request.dart
+lib/src/model/update_review_draft_request.dart
 lib/src/model/update_workspace_claude_request.dart
 lib/src/model/update_workspace_request.dart
 lib/src/model/usage.dart
@@ -694,6 +710,7 @@ lib/src/model/workspace_detail.dart
 lib/src/model/workspace_role.dart
 lib/src/model/workspace_summary.dart
 pubspec.yaml
+test/accept_all_review_drafts_request_test.dart
 test/accept_follow_up_result_test.dart
 test/accept_follow_up_test.dart
 test/accept_follow_ups_result_test.dart
@@ -701,6 +718,7 @@ test/accept_follow_ups_test.dart
 test/acceptance_criteria_inner_test.dart
 test/acceptance_test.dart
 test/account_api_test.dart
+test/add_review_draft_request_test.dart
 test/address_pull_comments_request_test.dart
 test/agent_config_finding_test.dart
 test/agent_config_scan_test.dart
@@ -878,6 +896,8 @@ test/private_network_test.dart
 test/proof_run_test.dart
 test/proof_test.dart
 test/proof_test_test.dart
+test/publish_review_drafts_request_test.dart
+test/published_review_test.dart
 test/pull_comment_test.dart
 test/pull_detail_test.dart
 test/pull_item_test.dart
@@ -928,6 +948,9 @@ test/reset_password_request_test.dart
 test/resolve_pull_thread_request_test.dart
 test/result_test.dart
 test/retry_ticket_request_test.dart
+test/review_draft_test.dart
+test/review_repo_pull409_response_test.dart
+test/review_repo_pull_request_test.dart
 test/review_sync_test.dart
 test/reviewer_note_input_test.dart
 test/reviewer_note_test.dart
@@ -1020,6 +1043,7 @@ test/update_platform_feedback_request_test.dart
 test/update_platform_user_request_test.dart
 test/update_platform_workspace_request_test.dart
 test/update_profile_request_test.dart
+test/update_review_draft_request_test.dart
 test/update_workspace_claude_request_test.dart
 test/update_workspace_request_test.dart
 test/usage_api_test.dart

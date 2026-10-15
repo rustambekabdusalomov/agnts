@@ -18,6 +18,9 @@ import 'package:agnts_api/src/model/pull_item.dart';
 import 'package:agnts_api/src/model/pull_thread.dart';
 import 'package:agnts_api/src/model/reply_pull_thread_request.dart';
 import 'package:agnts_api/src/model/resolve_pull_thread_request.dart';
+import 'package:agnts_api/src/model/review_repo_pull409_response.dart';
+import 'package:agnts_api/src/model/review_repo_pull_request.dart';
+import 'package:agnts_api/src/model/ticket.dart';
 
 class PullsApi {
 
@@ -752,6 +755,112 @@ _responseData = rawData == null ? null : deserialize<PullComment, PullComment>(r
     );
 
     return _response;
+  }
+
+  /// Ask agnts to review an open pull request: a review ticket for you, whose comments stay drafts in agnts until you accept and publish them. Approving it finishes the review; it never merges
+  /// 
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [number] 
+  /// * [reviewRepoPullRequest] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [Ticket] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<Ticket>> reviewRepoPull({ 
+    required int id,
+    required int number,
+    ReviewRepoPullRequest? reviewRepoPullRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/repos/{id}/pulls/{number}/review'.replaceAll('{' r'id' '}', id.toString()).replaceAll('{' r'number' '}', number.toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'cookieAuth',
+            'keyName': 'hiro_session',
+            'where': '',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(reviewRepoPullRequest);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    Ticket? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<Ticket, Ticket>(rawData, 'Ticket', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<Ticket>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
 }

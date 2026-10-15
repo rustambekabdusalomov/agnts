@@ -49,7 +49,7 @@ function sendReply(body: string) {
       <span v-if="th.sent" class="badge b-info">{{ th.replied ? t('pulls.answered') : t('pulls.sent') }}</span>
     </header>
     <pre v-if="where && th.kind === 'inline' && hunk" class="th-hunk mono">{{ hunk }}</pre>
-    <div v-for="c in th.comments" :key="c.id" class="cm" :class="{ sys: c.system }">
+    <div v-for="c in th.comments" :key="c.id" :class="{ sys: c.system }">
       <div class="cm-h">
         <span class="cm-av" aria-hidden="true">
           <img v-if="c.avatarUrl" :src="c.avatarUrl" alt="" referrerpolicy="no-referrer">
@@ -109,7 +109,8 @@ function sendReply(body: string) {
 .th.resolved { opacity: 0.8; }
 .th-where { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; overflow-wrap: anywhere; }
 .th-hunk { margin: 0; padding: 8px 10px; border-radius: 8px; background: var(--field); font-size: 12.5px; overflow-x: auto; white-space: pre; }
-.cm { display: grid; gap: 6px; min-width: 0; }
+.cm { min-width: 0; }
+.cm > * + * { margin-top: 6px; }
 .cm + .cm { border-top: 1px solid var(--line-2); padding-top: 10px; }
 .cm.sys { color: var(--ink-3); font-size: 13px; }
 .cm-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13.5px; }

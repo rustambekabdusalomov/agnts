@@ -280,3 +280,184 @@ String _verdict(AppLocalizations l, String v) => switch (v) {
       'DISMISSED' => l.pullsVerdict_DISMISSED,
       _ => l.pullsVerdict_COMMENTED,
     };
+
+/// The draft comments of a pull request review, by ticket key. The live
+/// stream refreshes them when a review run ends or a review is published.
+final reviewDraftsProvider = FutureProvider.family<List<ReviewDraft>, String>((ref, key) async {
+  return (await requireApi(ref).getReviewsApi().listReviewDrafts(key: key)).data ?? const [];
+});
+
+/// agnts's review comments kept in agnts: accept or dismiss each, then
+/// publish the accepted ones on the git host as one review. Drafts not
+/// accepted never leave agnts.
+class ReviewDraftsFold extends ConsumerStatefulWidget {
+  const ReviewDraftsFold({super.key, required this.ticket});
+  final Ticket ticket;
+
+  @override
+  ConsumerState<ReviewDraftsFold> createState() => _ReviewDraftsFoldState();
+}
+
+class _ReviewDraftsFoldState extends ConsumerState<ReviewDraftsFold> {
+  bool _busy = false;
+  bool _closed = false;
+
+  ReviewsApi get _api => ref.read(apiProvider)!.getReviewsApi();
+  String get _key => widget.ticket.key;
+  String get _host => _hostOf(widget.ticket.pull?.url ?? widget.ticket.prUrl);
+  bool get _locked => widget.ticket.state == TicketState.rejected || (widget.ticket.pull?.state != null && widget.ticket.pull!.state != PullRequestStateEnum.open);
+
+  Future<void> _run(Future<void> Function() action, {String? done}) async {
+    final l = AppLocalizations.of(context);
+    setState(() => _busy = true);
+    try {
+      await action();
+      ref.invalidate(reviewDraftsProvider(_key));
+      if (done != null && mounted) showSnack(context, done);
+    } catch (e) {
+      if (mounted) showSnack(context, errorMessage(e, l.commonError));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _set(ReviewDraft d, UpdateReviewDraftRequestStateEnum state, {String? reason}) => _run(() => _api.updateReviewDraft(
+        key: _key,
+        draftId: d.id,
+        updateReviewDraftRequest: UpdateReviewDraftRequest(state: state, dismissReason: reason),
+      ));
+
+  Future<void> _dismiss(ReviewDraft d) async {
+    final l = AppLocalizations.of(context);
+    final text = TextEditingController();
+    final reason = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.fromLTRB(16, 0, 16, 16 + MediaQuery.of(ctx).viewInsets.bottom),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Text(l.draftsReasonLabel, style: TextStyle(fontSize: 13.5, color: Agnts.of(ctx).ink3)),
+          const SizedBox(height: 6),
+          TextField(controller: text, autofocus: true, maxLength: 1000, decoration: InputDecoration(hintText: l.draftsReasonHint)),
+          const SizedBox(height: 10),
+          FilledButton(onPressed: () => Navigator.pop(ctx, text.text.trim()), child: Text(l.draftsDismiss)),
+        ]),
+      ),
+    );
+    if (reason == null) return;
+    await _set(d, UpdateReviewDraftRequestStateEnum.dismissed, reason: reason.isEmpty ? null : reason);
+  }
+
+  Future<void> _publish(int n) async {
+    final l = AppLocalizations.of(context);
+    final label = l.draftsPublishBtn(n, _host);
+    if (!await confirmAction(context, title: l.draftsPublishTitle(_host), body: l.draftsPublishSub(n, _host), action: label)) return;
+    await _run(() async {
+      await _api.publishReviewDrafts(key: _key, publishReviewDraftsRequest: PublishReviewDraftsRequest(requestChanges: false));
+      ref.invalidate(pullThreadsProvider);
+      ref.invalidate(ticketProvider(_key));
+    }, done: l.draftsPublishedToast(n, _host));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = Agnts.of(context);
+    final canEdit = ref.watch(canEditProvider) && !_locked;
+    final drafts = ref.watch(reviewDraftsProvider(_key));
+    final all = drafts.value ?? const <ReviewDraft>[];
+    if (drafts.hasValue && all.isEmpty) return const SizedBox.shrink();
+    int count(ReviewDraftStateEnum s) => all.where((d) => d.state == s).length;
+    final accepted = count(ReviewDraftStateEnum.accepted);
+    final open = count(ReviewDraftStateEnum.draft);
+    bool closed(ReviewDraft d) =>
+        d.state == ReviewDraftStateEnum.dismissed || d.state == ReviewDraftStateEnum.outdated || d.state == ReviewDraftStateEnum.published;
+    final shown = all.where((d) => _closed || !closed(d)).toList();
+    final hidden = all.where(closed).length;
+
+    return Fold(
+      key: ValueKey('drafts-$_key-${open > 0}'),
+      title: l.draftsTitle,
+      hint: drafts.hasValue ? '$accepted / ${all.length}' : null,
+      initiallyOpen: open > 0,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(_locked ? l.draftsLockedSub : l.draftsSub(_host), style: TextStyle(fontSize: 14, height: 1.45, color: c.ink3)),
+        const SizedBox(height: 10),
+        if (drafts.isLoading && !drafts.hasValue)
+          Text(l.commonLoading, style: TextStyle(color: c.ink3))
+        else if (drafts.hasError && !drafts.hasValue)
+          Text(errorMessage(drafts.error!, l.commonError), style: TextStyle(color: c.badInk)),
+        if (canEdit && (open > 0 || accepted > 0))
+          Wrap(spacing: 8, runSpacing: 6, children: [
+            if (open > 0)
+              OutlinedButton(
+                onPressed: _busy
+                    ? null
+                    : () => _run(() => _api.acceptAllReviewDrafts(
+                          key: _key,
+                          acceptAllReviewDraftsRequest: AcceptAllReviewDraftsRequest(minSeverity: AcceptAllReviewDraftsRequestMinSeverityEnum.major),
+                        )),
+                child: Text(l.draftsAcceptMajor),
+              ),
+            FilledButton(onPressed: _busy || accepted == 0 ? null : () => _publish(accepted), child: Text(l.draftsPublishBtn(accepted, _host))),
+          ]),
+        const SizedBox(height: 10),
+        for (final d in shown) _draft(context, d, canEdit),
+        if (hidden > 0)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(onPressed: () => setState(() => _closed = !_closed), child: Text(l.draftsShowClosed(hidden.toString()))),
+          ),
+      ]),
+    );
+  }
+
+  Widget _draft(BuildContext context, ReviewDraft d, bool canEdit) {
+    final l = AppLocalizations.of(context);
+    final c = Agnts.of(context);
+    final (stateText, tone) = switch (d.state) {
+      ReviewDraftStateEnum.draft => (l.draftsState_draft, Tone.gray),
+      ReviewDraftStateEnum.accepted => (l.draftsState_accepted, Tone.ok),
+      ReviewDraftStateEnum.publishing => (l.draftsState_publishing, Tone.info),
+      ReviewDraftStateEnum.dismissed => (l.draftsState_dismissed, Tone.gray),
+      ReviewDraftStateEnum.published => (l.draftsState_published, Tone.info),
+      ReviewDraftStateEnum.outdated => (l.draftsState_outdated, Tone.warn),
+    };
+    final sevTone = switch (d.severity) { 'blocker' => Tone.bad, 'major' => Tone.warn, 'minor' => Tone.info, _ => Tone.gray };
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+      decoration: BoxDecoration(
+        color: c.surface,
+        border: Border.all(color: d.state == ReviewDraftStateEnum.accepted ? c.okInk : c.line),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Wrap(spacing: 6, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
+          Text(d.kind == ReviewDraftKindEnum.comment ? (d.author ?? l.draftsSomeone) : 'agnts', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5)),
+          if (d.kind == ReviewDraftKindEnum.finding && d.severity != null) ToneBadge(d.severity!, sevTone, small: true),
+          if (d.kind == ReviewDraftKindEnum.summary) ToneBadge(l.draftsSummary, Tone.gray, small: true),
+          ToneBadge(stateText, tone, small: true),
+          if (d.path != null) Text('${d.path}${d.line != null ? ':${d.line}' : ''}', style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink2)),
+        ]),
+        if (d.error != null) Padding(padding: const EdgeInsets.only(top: 4), child: Text(l.draftsFailed(d.error!), style: TextStyle(color: c.badInk, fontSize: 13))),
+        if (d.state == ReviewDraftStateEnum.dismissed && d.dismissReason != null)
+          Padding(padding: const EdgeInsets.only(top: 4), child: Text(l.draftsDismissedBecause(d.dismissReason!), style: TextStyle(color: c.ink3, fontSize: 13))),
+        Padding(padding: const EdgeInsets.only(top: 6), child: ReportMarkdown(d.body)),
+        if (canEdit)
+          Wrap(children: [
+            if (d.state == ReviewDraftStateEnum.draft) ...[
+              TextButton(onPressed: _busy ? null : () => _set(d, UpdateReviewDraftRequestStateEnum.accepted), child: Text(l.draftsAccept)),
+              if (d.kind != ReviewDraftKindEnum.comment) TextButton(onPressed: _busy ? null : () => _dismiss(d), child: Text(l.draftsDismiss)),
+            ] else if (d.state == ReviewDraftStateEnum.accepted)
+              TextButton(onPressed: _busy ? null : () => _set(d, UpdateReviewDraftRequestStateEnum.draft), child: Text(l.draftsUndo))
+            else if (d.state == ReviewDraftStateEnum.dismissed || d.state == ReviewDraftStateEnum.outdated)
+              TextButton(onPressed: _busy ? null : () => _set(d, UpdateReviewDraftRequestStateEnum.draft), child: Text(l.draftsReopen)),
+          ]),
+      ]),
+    );
+  }
+}
+
+String _hostOf(String url) => _host(url);

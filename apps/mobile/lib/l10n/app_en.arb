@@ -1298,6 +1298,231 @@
   "designShip_rollout": "Rollout",
   "designShip_rollback": "Rollback",
   "designDeviations": "Departed from the plan",
+  "draftsTitle": "Review comments",
+  "draftsSub": "agnts's comments stay here until you accept them. Only accepted ones are published on {host}, together as one review; the rest never leave agnts.",
+  "@draftsSub": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "draftsLockedSub": "The review is over or the pull request is closed: these comments can only be read.",
+  "draftsChip": "Draft",
+  "draftsSummary": "Summary",
+  "draftsSomeone": "Someone",
+  "draftsEdited": "edited",
+  "draftsState_draft": "Draft",
+  "draftsState_accepted": "Accepted",
+  "draftsState_publishing": "Publishing",
+  "draftsState_dismissed": "Dismissed",
+  "draftsState_published": "Published",
+  "draftsState_outdated": "Outdated",
+  "draftsKind_summary": "summary",
+  "draftsKind_finding": "finding",
+  "draftsKind_comment": "comment",
+  "draftsAccept": "Accept",
+  "draftsUndo": "Undo",
+  "draftsDismiss": "Dismiss",
+  "draftsReopen": "Back to draft",
+  "draftsReasonLabel": "Why? (optional: agnts learns what you call noise)",
+  "draftsReasonHint": "e.g. we never bound caches in this service",
+  "draftsDismissedBecause": "Dismissed: {reason}",
+  "@draftsDismissedBecause": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "draftsOutdatedHint": "agnts's newest review no longer finds this.",
+  "draftsFailed": "Publishing failed: {error}",
+  "@draftsFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "draftsDeleteTitle": "Delete your comment?",
+  "draftsDeleteConfirm": "It was never published; it is deleted from agnts.",
+  "draftsNAccepted": "{n} accepted",
+  "@draftsNAccepted": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "draftsNDraft": "{n, plural, one {{n} draft} other {{n} drafts}}",
+  "@draftsNDraft": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "draftsNDismissed": "{n} dismissed",
+  "@draftsNDismissed": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "draftsNPublished": "{n} published",
+  "@draftsNPublished": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "draftsNOutdated": "{n} outdated",
+  "@draftsNOutdated": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "draftsAcceptMajor": "Accept major and above",
+  "draftsAcceptAll": "Accept all",
+  "draftsPublishBtn": "{n, plural, =0 {Publish} other {Publish {n}}} to {host}",
+  "@draftsPublishBtn": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      },
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "draftsPublishTitle": "Publish to {host}",
+  "@draftsPublishTitle": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "draftsPublishSub": "{n, plural, one {This comment goes} other {These {n} comments go}} on the pull request as one review, as the {host} token's user. Comments not on a changed line go in the review's text.",
+  "@draftsPublishSub": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      },
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "draftsPublishedToast": "{n, plural, one {{n} comment published} other {{n} comments published}} on {host}",
+  "@draftsPublishedToast": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      },
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "draftsHeadMoved": "New commits since agnts reviewed it ({from}, now {to}): the comments go on the version agnts reviewed, and {host} may show them as outdated. To put them on the newest lines, review it again first.",
+  "@draftsHeadMoved": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "draftsShowClosed": "Show dismissed, outdated and published ({n})",
+  "@draftsShowClosed": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "draftsDraftsN": "{n, plural, one {{n} draft} other {{n} drafts}}",
+  "@draftsDraftsN": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "draftsNotOnDiff": "agnts's comments not on a line shown here (another version, or outside the diff):",
+  "draftsAddToReview": "Add to review",
+  "draftsAddedToast": "Added to the review: it is published with the accepted comments",
+  "draftsOnDiff": "See them on the diff",
+  "draftsReviewWithBtn": "Review with agnts",
+  "draftsReviewAgainBtn": "Review again with agnts",
+  "draftsReviewTitle": "Review #{number} with agnts",
+  "@draftsReviewTitle": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "draftsReviewSub": "agnts reviews the pull request for you. Its comments stay drafts in agnts until you accept them; only accepted ones go on the pull request. Finishing the review never merges it.",
+  "draftsReviewBtn": "Start the review",
+  "draftsFocusLabel": "Anything to look at especially? (optional)",
+  "draftsFocusHint": "e.g. the migration and the retry logic",
+  "draftsDeepLabel": "Deep review (security, failures, tests and types passes)",
+  "draftsDeep_default": "Workspace setting",
+  "draftsDeep_always": "On",
+  "draftsDeep_off": "Off",
+  "draftsStartedToast": "agnts is reviewing it in {key}",
+  "@draftsStartedToast": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "draftsReviewingNow": "agnts is reviewing this pull request ({key}). Its comments appear here as drafts when it is done.",
+  "@draftsReviewingNow": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "draftsFinishBtn": "Finish review",
+  "draftsFinishConfirm": "Finish the review of #{number}? Comments not published stay in agnts. The pull request is left as it is: agnts does not merge it.",
+  "@draftsFinishConfirm": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "draftsReadySub": "Go through agnts's comments, publish the ones you agree with on {host}, then finish the review. Or review again with a note, or dismiss it.",
+  "@draftsReadySub": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "draftsFinishedTitle": "Review finished",
+  "draftsFinishedSub": "The review of #{number} is finished. The pull request was left as it is.",
+  "@draftsFinishedSub": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
   "feedbackTitle": "Send feedback",
   "feedbackLede": "Tell the agnts team what works, what doesn’t, or what you’d like next.",
   "feedbackTitleLabel": "Title",
@@ -5028,6 +5253,7 @@
   "reviewsEmptyAll": "No pull requests to review yet. Assign one to yourself on GitHub or GitLab, then press Sync now.",
   "reviewsWhy_assigned": "assigned",
   "reviewsWhy_review_requested": "review requested",
+  "reviewsWhy_manual": "asked for here",
   "reviewsBy": "by @{author}",
   "@reviewsBy": {
     "placeholders": {

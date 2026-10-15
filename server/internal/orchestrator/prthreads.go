@@ -77,6 +77,10 @@ type PullItem struct {
 	domain.PullRequest
 	TicketKey string
 	Own       bool
+	// Ticket is the ticket (nil without one), and Drafts its review's
+	// draft comments (a review ticket's only).
+	Ticket *domain.Ticket
+	Drafts []domain.ReviewDraft
 }
 
 // Pulls returns one page (from 1) of a repository's pull requests in state
@@ -131,6 +135,10 @@ type PullView struct {
 	FilesErr  string // why the files could not be read; the page still shows
 	TicketKey string
 	Own       bool
+	// Ticket is the ticket (nil without one), and Drafts its review's
+	// draft comments (a review ticket's only).
+	Ticket *domain.Ticket
+	Drafts []domain.ReviewDraft
 }
 
 // Pull returns a pull request as it stands on the git host, with its files.
@@ -157,7 +165,10 @@ func (o *Orchestrator) Pull(ctx context.Context, repoID int64, number int) (Pull
 		v.Files = files
 	}
 	if t, own, ok := o.ticketOfPull(ctx, repo, number, pr.URL); ok {
-		v.TicketKey, v.Own = t.Key, own
+		v.TicketKey, v.Own, v.Ticket = t.Key, own, &t
+		if !own {
+			v.Drafts = o.pullDrafts(ctx, t)
+		}
 	}
 	return v, nil
 }
@@ -250,6 +261,21 @@ func (o *Orchestrator) attribute(ctx context.Context, body string) string {
 		return body
 	}
 	return body + "\n\n<sub>via agnts · " + a.Username + "</sub>"
+}
+
+// attributeTo is attribute for a comment username wrote in agnts, which
+// someone else may be publishing.
+func (o *Orchestrator) attributeTo(ctx context.Context, body, username string) string {
+	if username == "" {
+		return o.attribute(ctx, body)
+	}
+	if a, ok := domain.ActorOf(ctx); ok {
+		a.Username = username
+		ctx = domain.WithActor(ctx, a)
+	} else {
+		ctx = domain.WithActor(ctx, domain.Actor{Username: username})
+	}
+	return o.attribute(ctx, body)
 }
 
 // hostErr turns a git host failure into an error for people.

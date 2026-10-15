@@ -121,12 +121,15 @@ class LiveStream {
       case 'threads_feedback':
       case 'review_posted':
         ref.invalidate(pullThreadsProvider); // a pull request's conversation on the git host changed
+        ref.invalidate(reviewDraftsProvider);
       case 'ci_failure':
         ref.invalidate(ciFailuresProvider);
         ref.invalidate(ciFailureProvider);
         ref.invalidate(ticketCIProvider);
     }
     if (e['step'] == 'learn') ref.invalidate(learnQueueProvider);
+    // A finished review run writes its drafts.
+    if (e['type'] == 'state_changed') ref.invalidate(reviewDraftsProvider);
   }
 }
 

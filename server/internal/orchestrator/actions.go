@@ -385,6 +385,9 @@ func (o *Orchestrator) Approve(ctx context.Context, key string, assignees []stri
 	}
 	msg := "approved"
 	switch {
+	case cur.Kind == domain.KindReview && cur.AfterApprove == domain.AfterApproveNone:
+		clean, postReport = nil, false
+		msg = "review finished"
 	case cur.Kind == domain.KindReview:
 		clean, postReport = nil, false
 		msg = "accepted: merging the pull request"

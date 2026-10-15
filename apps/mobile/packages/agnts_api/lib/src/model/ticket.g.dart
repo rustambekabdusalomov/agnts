@@ -857,6 +857,7 @@ const _$TicketStateEnumMap = {
 const _$TicketAfterApproveEnumEnumMap = {
   TicketAfterApproveEnum.pr: 'pr',
   TicketAfterApproveEnum.main: 'main',
+  TicketAfterApproveEnum.none: 'none',
 };
 
 const _$TicketKindEnumMap = {

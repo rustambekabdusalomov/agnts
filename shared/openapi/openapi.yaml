@@ -453,7 +453,7 @@ paths:
       - $ref: '#/components/parameters/TicketKey'
     post:
       operationId: postPullReview
-      summary: "Post agnts's latest review of a pull request on it (once per reviewed commit): the summary, and the chosen findings on their lines in one review. Posting the review of new commits edits agnts's earlier summary, answers its findings that are still there and resolves the ones that are gone"
+      summary: "Post agnts's latest review of a pull request on it: accepts the drafts of the summary (with the findings not on a changed line) and of the chosen findings, then publishes every accepted draft (see publishReviewDrafts). Kept for older clients"
       tags: [reviews]
       requestBody:
         required: false
@@ -466,6 +466,140 @@ paths:
         '502': { $ref: '#/components/responses/BadGateway' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/drafts:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    get:
+      operationId: listReviewDrafts
+      summary: "The draft comments of a pull request review: agnts's summary and findings, and people's own comments, with what was decided about each"
+      tags: [reviews]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ReviewDraft' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      operationId: addReviewDraft
+      summary: Add your own comment to the review, on a line of the new version or on the pull request; it is published with the accepted drafts
+      tags: [reviews]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body]
+              properties:
+                body: { type: string, maxLength: 60000 }
+                path: { type: string, maxLength: 1000 }
+                line: { type: integer, minimum: 0, description: Line in the new file }
+                headSha: { type: string, maxLength: 64, description: The commit the line is in; the newest when empty }
+      responses:
+        '201':
+          description: The new draft
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReviewDraft' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/drafts/{draftId}:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+      - $ref: '#/components/parameters/DraftID'
+    patch:
+      operationId: updateReviewDraft
+      summary: Accept, dismiss or reopen a draft, or rewrite its text before it is published
+      tags: [reviews]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                state: { type: string, enum: [draft, accepted, dismissed] }
+                body: { type: string, maxLength: 60000 }
+                dismissReason: { type: string, maxLength: 1000, description: 'Why it was dismissed: teaches agnts what you call noise' }
+      responses:
+        '200':
+          description: The draft after the change
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReviewDraft' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      operationId: deleteReviewDraft
+      summary: Delete your own draft comment (agnts's drafts are dismissed instead)
+      tags: [reviews]
+      responses:
+        '204': { description: Deleted }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/drafts/accept-all:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: acceptAllReviewDrafts
+      summary: Accept the summary and every open finding at least as severe as minSeverity (every one when left out)
+      tags: [reviews]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                minSeverity: { type: string, enum: [blocker, major, minor, nit] }
+      responses:
+        '200':
+          description: Every draft after the change
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ReviewDraft' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/drafts/publish:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: publishReviewDrafts
+      summary: "Publish the accepted drafts on the pull request as one review, as the git host token's user: comments on their lines, the summary (edited in place when agnts posted one before) with the accepted findings not on a changed line. Also answers in the threads of findings agnts posted before that are still there, and resolves the ones that are gone. Drafts not accepted stay in agnts"
+      tags: [reviews]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requestChanges: { type: boolean, description: 'Publish it as a request for changes (GitHub)' }
+      responses:
+        '200':
+          description: What was published
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PublishedReview' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '502': { $ref: '#/components/responses/BadGateway' }
 
   /tickets/{key}/address-comments:
     parameters:
@@ -2969,6 +3103,41 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '502': { $ref: '#/components/responses/BadGateway' }
 
+  /repos/{id}/pulls/{number}/review:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+      - $ref: '#/components/parameters/PullNumber'
+    post:
+      operationId: reviewRepoPull
+      summary: "Ask agnts to review an open pull request: a review ticket for you, whose comments stay drafts in agnts until you accept and publish them. Approving it finishes the review; it never merges"
+      tags: [pulls]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                focus: { type: string, maxLength: 2000, description: What the review should look at especially }
+                deep: { type: string, enum: ['', 'off', 'always'], description: "Deep review (specialist passes): '' follows the workspace setting" }
+      responses:
+        '201': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: agnts is already reviewing it; ticketKey says where
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [code, message, ticketKey]
+                properties:
+                  code: { type: string }
+                  message: { type: string }
+                  ticketKey: { type: string }
+        '502': { $ref: '#/components/responses/BadGateway' }
+
   /repos/{id}/pulls/{number}/threads:
     parameters:
       - $ref: '#/components/parameters/RepoID'
@@ -4388,6 +4557,11 @@ components:
       in: path
       required: true
       schema: { type: integer, minimum: 1 }
+    DraftID:
+      name: draftId
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
     SuiteID:
       name: id
       in: path
@@ -5202,7 +5376,7 @@ components:
           type: array
           description: Git host usernames the pull request is (or will be) assigned to
           items: { type: string }
-        afterApprove: { type: string, enum: [pr, main] }
+        afterApprove: { type: string, enum: [pr, main, none], description: "pr: open a pull request (a review: merge it); main: push to the default branch; none: a review asked for from the pull request page, which approving finishes without merging" }
         held: { type: boolean, description: Kept in the queue until started }
         askFirst: { type: boolean }
         kind: { $ref: '#/components/schemas/TicketKind' }
@@ -6570,7 +6744,7 @@ components:
         baseRef: { type: string }
         draft: { type: boolean }
         state: { type: string, enum: [open, closed, merged] }
-        why: { type: string, description: 'Why it waits for the token''s user: assigned, review_requested, or empty' }
+        why: { type: string, description: 'Why it waits for the token''s user: assigned, review_requested, or empty; manual for a review someone asked for from the pull request page' }
         updatedAt: { type: string, format: date-time }
         ticketKey: { type: string, description: "agnts's ticket for it: its own change, or its review" }
         own: { type: boolean, description: "It is agnts's own change" }
@@ -6591,6 +6765,13 @@ components:
         filesError: { type: string, description: Why the files could not be read }
         ticketKey: { type: string }
         own: { type: boolean }
+        ticketState: { $ref: '#/components/schemas/TicketState' }
+        reviewedSha: { type: string, description: 'The commit agnts reviewed, for a review ticket' }
+        afterApprove: { type: string, enum: [pr, main, none] }
+        drafts:
+          type: array
+          description: "The draft comments of agnts's review of it, when it has a review ticket"
+          items: { $ref: '#/components/schemas/ReviewDraft' }
 
     PullComment:
       type: object
@@ -6651,6 +6832,43 @@ components:
           items: { type: integer, minimum: 0 }
         requestChanges: { type: boolean, description: 'Post it as a request for changes (GitHub)' }
 
+    ReviewDraft:
+      type: object
+      description: "A comment of a pull request review kept in agnts: agnts's summary or one of its findings, or a person's own comment. Only accepted ones are published"
+      required: [id, kind, key, body, edited, state, headSha, createdAt, updatedAt]
+      properties:
+        id: { type: integer, format: int64 }
+        kind: { type: string, enum: [summary, finding, comment] }
+        key: { type: string, description: "Which finding it is across re-reviews (file and title)" }
+        severity: { type: string, description: 'A finding''s severity; for the summary, the verdict' }
+        category: { type: string }
+        title: { type: string }
+        confidence: { type: number }
+        pass: { type: string }
+        path: { type: string }
+        line: { type: integer, description: 'Line in the new file; it may be outside the diff' }
+        headSha: { type: string, description: The commit it is about }
+        body: { type: string, description: 'Markdown: what is published' }
+        edited: { type: boolean, description: A person rewrote it; re-reviews keep their text }
+        state: { type: string, enum: [draft, accepted, publishing, dismissed, published, outdated] }
+        dismissReason: { type: string }
+        error: { type: string, description: Why its last publish failed }
+        author: { type: string, description: 'Who wrote it (comment)' }
+        decidedBy: { type: string }
+        decidedAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    PublishedReview:
+      type: object
+      required: [ticket, summary, inline, still, resolved]
+      properties:
+        ticket: { $ref: '#/components/schemas/Ticket' }
+        summary: { type: string, enum: ['', posted, edited] }
+        inline: { type: integer, description: Comments posted on their lines }
+        still: { type: integer, description: "Findings agnts posted before that are still there (answered in their threads)" }
+        resolved: { type: integer, description: "Findings agnts posted before that are gone (answered and resolved)" }
+
     ReviewSync:
       type: object
       description: What a sync of the pull requests waiting for you found
@@ -6680,7 +6898,7 @@ components:
         repoName: { type: string }
         ticketKey: { type: string }
         pullTitle: { type: string }
-        kind: { type: string, enum: [rereview, dismissed, manual, host_comment] }
+        kind: { type: string, enum: [rereview, dismissed, manual, host_comment, draft] }
         note: { type: string }
         createdAt: { type: string, format: date-time }
 

@@ -386,6 +386,7 @@ class Ticket {
 
 
 
+      /// pr: open a pull request (a review: merge it); main: push to the default branch; none: a review asked for from the pull request page, which approving finishes without merging
   @JsonKey(
     
     name: r'afterApprove',
@@ -933,11 +934,14 @@ String toString() => value;
 }
 
 
+/// pr: open a pull request (a review: merge it); main: push to the default branch; none: a review asked for from the pull request page, which approving finishes without merging
 enum TicketAfterApproveEnum {
 @JsonValue(r'pr')
 pr(r'pr'),
 @JsonValue(r'main')
-main(r'main');
+main(r'main'),
+@JsonValue(r'none')
+none(r'none');
 
 const TicketAfterApproveEnum(this.value);
 

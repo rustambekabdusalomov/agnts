@@ -117,6 +117,7 @@ void main() {
       // TODO
     });
 
+    // pr: open a pull request (a review: merge it); main: push to the default branch; none: a review asked for from the pull request page, which approving finishes without merging
     // String afterApprove
     test('to test the property `afterApprove`', () async {
       // TODO

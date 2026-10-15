@@ -27,6 +27,7 @@
     "emptyAll": "Hozircha tekshiriladigan pull request yoʻq. GitHub yoki GitLab’da birini oʻzingizga biriktiring va «Sinxronlash»ni bosing.",
     "why_assigned": "biriktirilgan",
     "why_review_requested": "tekshiruv soʻralgan",
+    "why_manual": "agnts’da soʻralgan",
     "by": "muallif @{author}",
     "howTitle": "Siz qanday tekshirasiz",
     "howSub": "Qayta tekshirishni soʻraganda yoki rad etganda qoldirgan izohlaringiz keyingi tekshiruvda profilingizga qoʻshiladi. Keyingi barcha tekshiruvlar uni oʻqiydi.",

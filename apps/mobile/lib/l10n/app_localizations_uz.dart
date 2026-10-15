@@ -2206,6 +2206,243 @@ class AppLocalizationsUz extends AppLocalizations {
   String get designDeviations => 'Rejadan chetlanishlar';
 
   @override
+  String get draftsTitle => 'Ko\'rib chiqish izohlari';
+
+  @override
+  String draftsSub(String host) {
+    return 'agnts izohlari siz qabul qilmaguningizcha shu yerda qoladi. ${host}ga faqat qabul qilinganlari bitta ko\'rib chiqish sifatida chiqariladi; qolganlari agnts\'dan tashqariga chiqmaydi.';
+  }
+
+  @override
+  String get draftsLockedSub => 'Ko\'rib chiqish tugagan yoki pull request yopilgan: bu izohlarni faqat o\'qish mumkin.';
+
+  @override
+  String get draftsChip => 'Qoralama';
+
+  @override
+  String get draftsSummary => 'Xulosa';
+
+  @override
+  String get draftsSomeone => 'Kimdir';
+
+  @override
+  String get draftsEdited => 'tahrirlangan';
+
+  @override
+  String get draftsState_draft => 'Qoralama';
+
+  @override
+  String get draftsState_accepted => 'Qabul qilingan';
+
+  @override
+  String get draftsState_publishing => 'Chiqarilmoqda';
+
+  @override
+  String get draftsState_dismissed => 'Rad etilgan';
+
+  @override
+  String get draftsState_published => 'Chiqarilgan';
+
+  @override
+  String get draftsState_outdated => 'Eskirgan';
+
+  @override
+  String get draftsKind_summary => 'xulosa';
+
+  @override
+  String get draftsKind_finding => 'topilma';
+
+  @override
+  String get draftsKind_comment => 'izoh';
+
+  @override
+  String get draftsAccept => 'Qabul qilish';
+
+  @override
+  String get draftsUndo => 'Bekor qilish';
+
+  @override
+  String get draftsDismiss => 'Rad etish';
+
+  @override
+  String get draftsReopen => 'Qoralamaga qaytarish';
+
+  @override
+  String get draftsReasonLabel => 'Nega? (ixtiyoriy: agnts siz nimani shovqin deb bilishingizni o\'rganadi)';
+
+  @override
+  String get draftsReasonHint => 'masalan, bu xizmatda keshlarni cheklamaymiz';
+
+  @override
+  String draftsDismissedBecause(String reason) {
+    return 'Rad etilgan: $reason';
+  }
+
+  @override
+  String get draftsOutdatedHint => 'agnts\'ning eng yangi ko\'rib chiqishi buni endi topmaydi.';
+
+  @override
+  String draftsFailed(String error) {
+    return 'Chiqarib bo\'lmadi: $error';
+  }
+
+  @override
+  String get draftsDeleteTitle => 'Izohingiz o\'chirilsinmi?';
+
+  @override
+  String get draftsDeleteConfirm => 'U hech qachon chiqarilmagan; agnts\'dan o\'chiriladi.';
+
+  @override
+  String draftsNAccepted(String n) {
+    return '$n ta qabul qilingan';
+  }
+
+  @override
+  String draftsNDraft(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ta qoralama');
+    return '$_temp0';
+  }
+
+  @override
+  String draftsNDismissed(String n) {
+    return '$n ta rad etilgan';
+  }
+
+  @override
+  String draftsNPublished(String n) {
+    return '$n ta chiqarilgan';
+  }
+
+  @override
+  String draftsNOutdated(String n) {
+    return '$n ta eskirgan';
+  }
+
+  @override
+  String get draftsAcceptMajor => 'Major va undan yuqorisini qabul qilish';
+
+  @override
+  String get draftsAcceptAll => 'Hammasini qabul qilish';
+
+  @override
+  String draftsPublishBtn(num n, String host) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n tasini chiqarish', zero: 'Chiqarish');
+    return '$_temp0: $host';
+  }
+
+  @override
+  String draftsPublishTitle(String host) {
+    return '${host}ga chiqarish';
+  }
+
+  @override
+  String draftsPublishSub(num n, String host) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ta izoh');
+    return '$_temp0 pull request\'ga $host token foydalanuvchisi nomidan bitta ko\'rib chiqish sifatida chiqariladi. O\'zgargan qatorda bo\'lmagan izohlar ko\'rib chiqish matniga qo\'shiladi.';
+  }
+
+  @override
+  String draftsPublishedToast(num n, String host) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ta izoh');
+    return '$_temp0 ${host}ga chiqarildi';
+  }
+
+  @override
+  String draftsHeadMoved(String from, String to, String host) {
+    return 'agnts ko\'rib chiqqandan keyin yangi commitlar bor ($from, hozir $to): izohlar agnts ko\'rgan versiyaga qo\'yiladi va $host ularni eskirgan deb ko\'rsatishi mumkin. Ularni eng yangi qatorlarga qo\'yish uchun avval qayta ko\'rib chiqing.';
+  }
+
+  @override
+  String draftsShowClosed(String n) {
+    return 'Rad etilgan, eskirgan va chiqarilganlarni ko\'rsatish ($n)';
+  }
+
+  @override
+  String draftsDraftsN(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ta qoralama');
+    return '$_temp0';
+  }
+
+  @override
+  String get draftsNotOnDiff => 'agnts izohlari bu yerda ko\'rsatilgan qatorlarda emas (boshqa versiya yoki diff tashqarisida):';
+
+  @override
+  String get draftsAddToReview => 'Ko\'rib chiqishga qo\'shish';
+
+  @override
+  String get draftsAddedToast => 'Ko\'rib chiqishga qo\'shildi: qabul qilingan izohlar bilan birga chiqariladi';
+
+  @override
+  String get draftsOnDiff => 'Ularni diffda ko\'rish';
+
+  @override
+  String get draftsReviewWithBtn => 'agnts bilan ko\'rib chiqish';
+
+  @override
+  String get draftsReviewAgainBtn => 'agnts bilan qayta ko\'rib chiqish';
+
+  @override
+  String draftsReviewTitle(String number) {
+    return '#${number}ni agnts bilan ko\'rib chiqish';
+  }
+
+  @override
+  String get draftsReviewSub =>
+      'agnts pull request\'ni siz uchun ko\'rib chiqadi. Uning izohlari siz qabul qilmaguningizcha agnts\'da qoralama bo\'lib qoladi; pull request\'ga faqat qabul qilinganlari tushadi. Ko\'rib chiqishni tugatish uni hech qachon merge qilmaydi.';
+
+  @override
+  String get draftsReviewBtn => 'Ko\'rib chiqishni boshlash';
+
+  @override
+  String get draftsFocusLabel => 'Alohida e\'tibor beradigan joy bormi? (ixtiyoriy)';
+
+  @override
+  String get draftsFocusHint => 'masalan, migratsiya va qayta urinish mantiqi';
+
+  @override
+  String get draftsDeepLabel => 'Chuqur ko\'rib chiqish (xavfsizlik, xatolar, testlar va turlar bo\'yicha)';
+
+  @override
+  String get draftsDeep_default => 'Workspace sozlamasi';
+
+  @override
+  String get draftsDeep_always => 'Yoqilgan';
+
+  @override
+  String get draftsDeep_off => 'O\'chirilgan';
+
+  @override
+  String draftsStartedToast(String key) {
+    return 'agnts uni ${key}da ko\'rib chiqmoqda';
+  }
+
+  @override
+  String draftsReviewingNow(String key) {
+    return 'agnts bu pull request\'ni ko\'rib chiqmoqda ($key). Tugagach, izohlari shu yerda qoralama sifatida paydo bo\'ladi.';
+  }
+
+  @override
+  String get draftsFinishBtn => 'Ko\'rib chiqishni tugatish';
+
+  @override
+  String draftsFinishConfirm(String number) {
+    return '#$number ko\'rib chiqilishi tugatilsinmi? Chiqarilmagan izohlar agnts\'da qoladi. Pull request o\'z holicha qoladi: agnts uni merge qilmaydi.';
+  }
+
+  @override
+  String draftsReadySub(String host) {
+    return 'agnts izohlarini ko\'rib chiqing, rozi bo\'lganlaringizni ${host}ga chiqaring va ko\'rib chiqishni tugating. Yoki eslatma bilan qayta ko\'rib chiqishni so\'rang yoki uni rad eting.';
+  }
+
+  @override
+  String get draftsFinishedTitle => 'Ko\'rib chiqish tugadi';
+
+  @override
+  String draftsFinishedSub(String number) {
+    return '#$number ko\'rib chiqilishi tugadi. Pull request o\'z holicha qoldirildi.';
+  }
+
+  @override
   String get feedbackTitle => 'Fikr yuborish';
 
   @override
@@ -8423,6 +8660,9 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get reviewsWhy_review_requested => 'tekshiruv soʻralgan';
+
+  @override
+  String get reviewsWhy_manual => 'agnts’da soʻralgan';
 
   @override
   String reviewsBy(String author) {

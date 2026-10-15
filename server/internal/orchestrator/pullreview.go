@@ -182,22 +182,18 @@ func (o *Orchestrator) SyncReviews(ctx context.Context, origin domain.Origin) (R
 		// Reviews of this repository's pull requests that no longer wait:
 		// ended if the pull request is merged or closed. One that was only
 		// unassigned keeps its review.
+		// A review someone asked for from the pull request page is
+		// refreshed, and reviewed again on new commits.
 		for _, t := range open {
 			if t.RepoID == nil || *t.RepoID != repo.ID || t.PRNumber == nil || seen[*t.PRNumber] {
 				continue
 			}
-			pr, err := rh.PullRequest(ctx, repo, *t.PRNumber)
-			if err != nil {
-				fail(fmt.Sprintf("%s #%d: %v", repo.Name, *t.PRNumber, err))
-				continue
-			}
-			if pr.State == domain.PullOpen {
-				continue
-			}
-			if ended, err := o.endPull(ctx, t, pr, origin); err != nil {
-				fail(fmt.Sprintf("%s #%d: %v", repo.Name, *t.PRNumber, err))
-			} else if ended {
-				out.Closed++
+			var one ReviewSync
+			o.syncOpenReview(ctx, s, rh, repo, t, origin, &one)
+			out.Closed += one.Closed
+			out.Rereview += one.Rereview
+			for _, e := range one.Errors {
+				fail(e)
 			}
 		}
 	}
@@ -213,7 +209,8 @@ func (o *Orchestrator) SyncReviews(ctx context.Context, origin domain.Origin) (R
 func (o *Orchestrator) syncPull(ctx context.Context, s domain.Settings, repo domain.Repository, pr domain.PullRequest, origin domain.Origin) (bool, bool, error) {
 	t, err := o.pulls.TicketByPull(ctx, repo.ID, pr.Number)
 	if errors.Is(err, domain.ErrNotFound) {
-		return true, false, o.createPullTicket(ctx, repo, pr, origin)
+		_, err := o.createPullTicket(ctx, repo, pr, "pr", "", origin)
+		return true, false, err
 	}
 	if err != nil {
 		return false, false, err
@@ -244,33 +241,38 @@ func (o *Orchestrator) syncPull(ctx context.Context, s domain.Settings, repo dom
 	return false, err == nil, err
 }
 
-func (o *Orchestrator) createPullTicket(ctx context.Context, repo domain.Repository, pr domain.PullRequest, origin domain.Origin) error {
+// createPullTicket creates the review ticket of a pull request.
+// afterApprove is "pr" (approving merges it) or domain.AfterApproveNone;
+// msg is the creation event, "" for the sync's.
+func (o *Orchestrator) createPullTicket(ctx context.Context, repo domain.Repository, pr domain.PullRequest, afterApprove, msg string, origin domain.Origin) (domain.Ticket, error) {
 	number := pr.Number
 	t := domain.Ticket{
 		Source: domain.SourceGit, Kind: domain.KindReview, RepoID: &repo.ID,
 		Title: pr.Title, Description: pr.Body, Priority: "medium",
-		State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: "pr",
+		State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: afterApprove,
 		PRNumber: &number, PRURL: pr.URL, Pull: &pr,
 	}
-	why := "is assigned to you"
-	if pr.Why == domain.PullReviewRequested {
-		why = "asks for your review"
+	if msg == "" {
+		why := "is assigned to you"
+		if pr.Why == domain.PullReviewRequested {
+			why = "asks for your review"
+		}
+		msg = fmt.Sprintf("pull request #%d by @%s %s", pr.Number, pr.Author, why)
 	}
-	msg := fmt.Sprintf("pull request #%d by @%s %s", pr.Number, pr.Author, why)
 	base := pullKey(repo, pr.Number)
 	for i := range 5 {
 		t.Key = base
 		if i > 0 {
-			t.Key = fmt.Sprintf("%s-%d", base, i+1) // a ticket from elsewhere has the key
+			t.Key = fmt.Sprintf("%s-%d", base, i+1) // a ticket from elsewhere, or an earlier review, has the key
 		}
 		t.Branch = branchFor(repo, t.Key)
-		_, err := o.store.CreateTicket(ctx, t, domain.Event{TicketKey: t.Key, Type: domain.EventTicketCreated, Origin: origin, Message: msg,
+		out, err := o.store.CreateTicket(ctx, t, domain.Event{TicketKey: t.Key, Type: domain.EventTicketCreated, Origin: origin, Message: msg,
 			Data: map[string]any{"number": pr.Number, "url": pr.URL, "author": pr.Author}})
 		if !errors.Is(err, domain.ErrConflict) {
-			return err
+			return out, err
 		}
 	}
-	return fmt.Errorf("no free ticket key for %s", base)
+	return domain.Ticket{}, fmt.Errorf("no free ticket key for %s", base)
 }
 
 // endPull ends the review of a pull request merged or closed on the git
@@ -315,10 +317,14 @@ func (o *Orchestrator) autoSyncReviews(ctx context.Context) {
 		defer syncing.Store(false)
 		o.forEachWorkspace(ctx, func(wctx context.Context) {
 			s, err := o.settings.Get(wctx)
-			if err != nil || !s.PullReviews.Enabled {
+			if err != nil {
 				return
 			}
-			res, err := o.SyncReviews(wctx, domain.OriginSystem)
+			sync := o.SyncReviews
+			if !s.PullReviews.Enabled {
+				sync = o.syncManualReviews // only the reviews people asked for
+			}
+			res, err := sync(wctx, domain.OriginSystem)
 			if err != nil && ctx.Err() == nil {
 				o.log.Warn("sync pull requests", "workspace", domain.WorkspaceOf(wctx), "err", err)
 			}
@@ -487,6 +493,12 @@ func (o *Orchestrator) reviewPullIn(ctx context.Context, s domain.Settings, t do
 	model, why := reviewModel(s, t, nil, domain.Result{Files: files})
 	d.Checklists = o.copyChecklists(ctx, ws, files)
 	d.Deep = deepReview(s, model)
+	switch t.Pull.Deep {
+	case domain.DeepAlways:
+		d.Deep = true
+	case domain.DeepOff:
+		d.Deep = false
+	}
 	o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventClaudeText,
 		Message: fmt.Sprintf("reviewing #%d with %s: %s", *t.PRNumber, model, why), Data: map[string]any{"model": model, "reason": why}})
 	prompt, err := render("pull-review", d)
@@ -525,6 +537,10 @@ func (o *Orchestrator) reviewPullIn(ctx context.Context, s domain.Settings, t do
 	b, _ := json.Marshal(rv)
 	if err := o.store.SaveResult(ctx, domain.Result{RunID: run.ID, Summary: b, Files: files, Report: pullReport(*t.Pull, rv)}); err != nil {
 		return err
+	}
+	if err := o.syncDrafts(ctx, t, rv); err != nil {
+		// The review is kept; its drafts are made when someone opens it.
+		o.log.Warn("review drafts", "ticket", t.Key, "err", err)
 	}
 	return o.transition(ctx, &t, run, domain.StateWaitingForReview, pullVerdictLine(*t.PRNumber, rv), func(x *domain.Ticket) {
 		x.HeadSHA = sha
@@ -598,7 +614,7 @@ func reviewerMarkdown(login string, p domain.ReviewerProfile, notes []domain.Rev
 				where = strings.TrimSpace(where + ", \"" + n.PullTitle + "\"")
 			}
 			did := map[string]string{domain.NoteRereview: "asked for another review", domain.NoteDismissed: "dismissed the review", domain.NoteManual: "wrote",
-				domain.NoteHostComment: "commented on the pull request"}[n.Kind]
+				domain.NoteHostComment: "commented on the pull request", domain.NoteDraft: "decided on the review's comments"}[n.Kind]
 			fmt.Fprintf(&b, "\n- %s (%s, %s):\n\n%s\n", did, strings.Trim(where, ", "), n.CreatedAt.Format("2006-01-02"), indentLines(n.Note))
 		}
 	}
@@ -675,6 +691,10 @@ func (o *Orchestrator) mergePull(ctx context.Context, s domain.Settings, t domai
 		return errors.New("nothing to merge: this review has no reviewed commit")
 	}
 	n := *t.PRNumber
+	if t.AfterApprove == domain.AfterApproveNone {
+		// Asked for from the pull request page: it is not ours to merge.
+		return o.transition(ctx, &t, run, domain.StateDone, fmt.Sprintf("review of #%d finished; the pull request is left as it is", n), nil)
+	}
 	pr, err := rh.PullRequest(ctx, repo, n)
 	if err != nil {
 		return fmt.Errorf("read #%d: %w", n, err)
@@ -785,9 +805,6 @@ func (o *Orchestrator) PostPullReview(ctx context.Context, key string, opt PostR
 	if json.Unmarshal(res.Summary, &rv) != nil || rv.Summary == "" {
 		return t, did, invalid("agnts has not reviewed #%d yet", *t.PRNumber)
 	}
-	if rv.HeadSHA != "" && t.Pull.PostedSHA == rv.HeadSHA {
-		return t, did, invalid("this review of #%d is already on the pull request", *t.PRNumber)
-	}
 	for _, i := range opt.Findings {
 		if i < 0 || i >= len(rv.Findings) {
 			return t, did, invalid("the review has no finding %d", i)
@@ -798,6 +815,12 @@ func (o *Orchestrator) PostPullReview(ctx context.Context, key string, opt PostR
 		return t, did, err
 	}
 	conv, inline := o.host.(Conversation)
+	if inline && o.prposts != nil && o.drafts != nil {
+		return o.postThroughDrafts(ctx, conv, rh, repo, t, rv, opt, origin)
+	}
+	if rv.HeadSHA != "" && t.Pull.PostedSHA == rv.HeadSHA {
+		return t, did, invalid("this review of #%d is already on the pull request", *t.PRNumber)
+	}
 	if !inline || o.prposts == nil {
 		if !opt.Summary {
 			return t, did, invalid("this server can post the review only as one comment")
@@ -828,10 +851,67 @@ func (o *Orchestrator) PostPullReview(ctx context.Context, key string, opt PostR
 	return t, did, err
 }
 
+// postThroughDrafts is PostPullReview on a server with review drafts: it
+// accepts the drafts the options name and publishes them. Summary also
+// accepts the findings not on a changed line, which used to be in it;
+// Findings nil accepts every finding on a changed line. Drafts a person
+// dismissed stay dismissed.
+func (o *Orchestrator) postThroughDrafts(ctx context.Context, conv Conversation, rh ReviewHost, repo domain.Repository, t domain.Ticket,
+	rv domain.Review, opt PostReviewOptions, origin domain.Origin) (domain.Ticket, PostedReview, error) {
+	if _, err := o.ensureDrafts(ctx, t); err != nil {
+		return t, PostedReview{}, err
+	}
+	var lines map[string]map[int]bool
+	if pr, err := rh.PullRequest(ctx, repo, *t.PRNumber); err == nil && pr.HeadSHA == rv.HeadSHA {
+		if files, err := conv.PullFiles(ctx, repo, *t.PRNumber); err == nil {
+			lines = commentableLines(files)
+		}
+	} else if _, files, ok, err := o.latestPullReview(ctx, t); err == nil && ok {
+		lines = commentableLines(files)
+	}
+	chosen := map[string]bool{}
+	if opt.Findings == nil {
+		for _, f := range rv.Findings {
+			chosen[domain.FindingKey(f)] = true
+		}
+	}
+	for _, i := range opt.Findings {
+		chosen[domain.FindingKey(rv.Findings[i])] = true
+	}
+	now := time.Now()
+	var by *int64
+	if a, ok := domain.ActorOf(ctx); ok && a.UserID > 0 {
+		by = &a.UserID
+	}
+	if _, err := o.drafts.UpdateReviewDrafts(ctx, t.ID, func(d *domain.ReviewDraft) bool {
+		if d.State != domain.DraftOpen {
+			return false
+		}
+		onLine := d.OnLine() && lines[d.Path][d.Line]
+		accept := false
+		switch d.Kind {
+		case domain.DraftSummary:
+			accept = opt.Summary
+		case domain.DraftFinding:
+			accept = (chosen[d.Key] && onLine) || (opt.Summary && !onLine)
+		}
+		if accept {
+			d.State, d.DecidedAt, d.DecidedBy = domain.DraftAccepted, &now, by
+		}
+		return accept
+	}); err != nil {
+		return t, PostedReview{}, err
+	}
+	return o.PublishDrafts(ctx, t.Key, PublishOptions{RequestChanges: opt.RequestChanges}, origin)
+}
+
 // postReviewInline posts a review through the conversation API and
 // reconciles it with what agnts posted on the pull request before.
 func (o *Orchestrator) postReviewInline(ctx context.Context, conv Conversation, repo domain.Repository, t domain.Ticket, rv domain.Review, opt PostReviewOptions) (PostedReview, error) {
 	var did PostedReview
+	if ownPull(*t.Pull) {
+		opt.RequestChanges = false // GitHub refuses changes requested on your own pull request
+	}
 	n := *t.PRNumber
 	sha := rv.HeadSHA
 	posts, err := o.prposts.PRPosts(ctx, repo.ID, n)
@@ -941,6 +1021,12 @@ func (o *Orchestrator) postReviewInline(ctx context.Context, conv Conversation, 
 
 // findingComment is a finding as an inline comment.
 func findingComment(f domain.Finding, sha string) string {
+	return truncate(findingBody(f, sha)+agntsMark, domain.PRCommentMax)
+}
+
+// findingBody is the text of a finding's comment, without agnts's marker:
+// what its draft holds.
+func findingBody(f domain.Finding, sha string) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "**[%s] %s**", f.Severity, f.Title)
 	if f.Category != "" {
@@ -953,8 +1039,26 @@ func findingComment(f domain.Finding, sha string) string {
 	if f.Suggestion != "" {
 		fmt.Fprintf(&b, "\n**Suggestion:** %s\n", f.Suggestion)
 	}
-	fmt.Fprintf(&b, "\n<sub>agnts review at %s · advice, not a decision</sub>%s", shortSHA(sha), agntsMark)
-	return truncate(b.String(), domain.PRCommentMax)
+	fmt.Fprintf(&b, "\n<sub>agnts review at %s · advice, not a decision</sub>", shortSHA(sha))
+	return truncate(b.String(), domain.PRCommentMax-len(agntsMark)-1)
+}
+
+// summaryComment is the review's summary as the text of a review on the
+// pull request, without its findings: they are comments of their own,
+// and only the accepted ones are published.
+func summaryComment(pr domain.PullRequest, rv domain.Review) string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "## agnts review\n\n**Verdict:** %s\n\n%s\n", strings.ReplaceAll(rv.Verdict, "_", " "), rv.Summary)
+	if len(rv.Strengths) > 0 {
+		b.WriteString("\n**Done well**\n\n")
+		for _, s := range rv.Strengths {
+			fmt.Fprintf(&b, "- %s\n", s)
+		}
+	}
+	if rv.HeadSHA != "" {
+		fmt.Fprintf(&b, "\n---\n_Reviewed at %s by agnts, an AI reviewer%s. Advice, not a decision._\n", shortSHA(rv.HeadSHA), postedFor(pr.Login))
+	}
+	return truncate(b.String(), maxPostedReview)
 }
 
 // commentableLines returns, per file, the lines of the new version a
@@ -1146,6 +1250,14 @@ The full diff from the merge base with {{.Pull.BaseRef}} is in {{.ChangePath}}. 
 ## How @{{$.Pull.Login}} reviews
 
 {{.}} holds {{if $.Pull.HasProfile}}what agnts learned about how @{{$.Pull.Login}} reviews pull requests{{if $.Pull.Notes}}, and {{end}}{{end}}{{if $.Pull.Notes}}{{$.Pull.Notes}} {{if eq $.Pull.Notes 1}}note{{else}}notes{{end}} they wrote about earlier reviews{{end}}. Read it first and review the way they would: flag what they care about, rate severity the way they do, and leave out what they told you is noise. Where it disagrees with the guidance below, it wins.
+{{end}}{{with .Pull.Focus}}
+## What to look at especially
+
+The person who asked agnts for this review wants it to pay special attention to:
+
+{{indent .}}
+
+Review the whole change as usual, and give this extra care.
 {{end}}{{if .Feedback}}
 ## Review again
 

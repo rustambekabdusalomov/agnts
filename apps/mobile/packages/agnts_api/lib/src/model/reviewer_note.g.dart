@@ -190,4 +190,5 @@ const _$ReviewerNoteKindEnumEnumMap = {
   ReviewerNoteKindEnum.dismissed: 'dismissed',
   ReviewerNoteKindEnum.manual: 'manual',
   ReviewerNoteKindEnum.hostComment: 'host_comment',
+  ReviewerNoteKindEnum.draft: 'draft',
 };

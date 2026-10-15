@@ -127,7 +127,7 @@ func convOrchestrator(h *harness, host *convHost) {
 	git := &pullGit{fakeGit: h.git, host: host.reviewHost}
 	h.o = orchestrator.New(orchestrator.DefaultConfig(), orchestrator.Deps{
 		Store: h.store, Runner: h.runner, Git: git, Host: host, Homes: &memHomes{}, Settings: h.settings, Usage: h.usage,
-		PullReviews: h.store, PRPosts: h.store,
+		PullReviews: h.store, PRPosts: h.store, ReviewDrafts: h.store,
 	}, slog.New(slog.NewTextHandler(io.Discard, nil)))
 }
 

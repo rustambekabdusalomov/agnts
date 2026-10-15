@@ -4101,6 +4101,384 @@ abstract class AppLocalizations {
   /// **'Departed from the plan'**
   String get designDeviations;
 
+  /// No description provided for @draftsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review comments'**
+  String get draftsTitle;
+
+  /// No description provided for @draftsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts\'s comments stay here until you accept them. Only accepted ones are published on {host}, together as one review; the rest never leave agnts.'**
+  String draftsSub(String host);
+
+  /// No description provided for @draftsLockedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'The review is over or the pull request is closed: these comments can only be read.'**
+  String get draftsLockedSub;
+
+  /// No description provided for @draftsChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get draftsChip;
+
+  /// No description provided for @draftsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get draftsSummary;
+
+  /// No description provided for @draftsSomeone.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone'**
+  String get draftsSomeone;
+
+  /// No description provided for @draftsEdited.
+  ///
+  /// In en, this message translates to:
+  /// **'edited'**
+  String get draftsEdited;
+
+  /// No description provided for @draftsState_draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get draftsState_draft;
+
+  /// No description provided for @draftsState_accepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted'**
+  String get draftsState_accepted;
+
+  /// No description provided for @draftsState_publishing.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing'**
+  String get draftsState_publishing;
+
+  /// No description provided for @draftsState_dismissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissed'**
+  String get draftsState_dismissed;
+
+  /// No description provided for @draftsState_published.
+  ///
+  /// In en, this message translates to:
+  /// **'Published'**
+  String get draftsState_published;
+
+  /// No description provided for @draftsState_outdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Outdated'**
+  String get draftsState_outdated;
+
+  /// No description provided for @draftsKind_summary.
+  ///
+  /// In en, this message translates to:
+  /// **'summary'**
+  String get draftsKind_summary;
+
+  /// No description provided for @draftsKind_finding.
+  ///
+  /// In en, this message translates to:
+  /// **'finding'**
+  String get draftsKind_finding;
+
+  /// No description provided for @draftsKind_comment.
+  ///
+  /// In en, this message translates to:
+  /// **'comment'**
+  String get draftsKind_comment;
+
+  /// No description provided for @draftsAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get draftsAccept;
+
+  /// No description provided for @draftsUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get draftsUndo;
+
+  /// No description provided for @draftsDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get draftsDismiss;
+
+  /// No description provided for @draftsReopen.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to draft'**
+  String get draftsReopen;
+
+  /// No description provided for @draftsReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Why? (optional: agnts learns what you call noise)'**
+  String get draftsReasonLabel;
+
+  /// No description provided for @draftsReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. we never bound caches in this service'**
+  String get draftsReasonHint;
+
+  /// No description provided for @draftsDismissedBecause.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissed: {reason}'**
+  String draftsDismissedBecause(String reason);
+
+  /// No description provided for @draftsOutdatedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts\'s newest review no longer finds this.'**
+  String get draftsOutdatedHint;
+
+  /// No description provided for @draftsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing failed: {error}'**
+  String draftsFailed(String error);
+
+  /// No description provided for @draftsDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete your comment?'**
+  String get draftsDeleteTitle;
+
+  /// No description provided for @draftsDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'It was never published; it is deleted from agnts.'**
+  String get draftsDeleteConfirm;
+
+  /// No description provided for @draftsNAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} accepted'**
+  String draftsNAccepted(String n);
+
+  /// No description provided for @draftsNDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} draft} other {{n} drafts}}'**
+  String draftsNDraft(num n);
+
+  /// No description provided for @draftsNDismissed.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} dismissed'**
+  String draftsNDismissed(String n);
+
+  /// No description provided for @draftsNPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} published'**
+  String draftsNPublished(String n);
+
+  /// No description provided for @draftsNOutdated.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} outdated'**
+  String draftsNOutdated(String n);
+
+  /// No description provided for @draftsAcceptMajor.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept major and above'**
+  String get draftsAcceptMajor;
+
+  /// No description provided for @draftsAcceptAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept all'**
+  String get draftsAcceptAll;
+
+  /// No description provided for @draftsPublishBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =0 {Publish} other {Publish {n}}} to {host}'**
+  String draftsPublishBtn(num n, String host);
+
+  /// No description provided for @draftsPublishTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish to {host}'**
+  String draftsPublishTitle(String host);
+
+  /// No description provided for @draftsPublishSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {This comment goes} other {These {n} comments go}} on the pull request as one review, as the {host} token\'s user. Comments not on a changed line go in the review\'s text.'**
+  String draftsPublishSub(num n, String host);
+
+  /// No description provided for @draftsPublishedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} comment published} other {{n} comments published}} on {host}'**
+  String draftsPublishedToast(num n, String host);
+
+  /// No description provided for @draftsHeadMoved.
+  ///
+  /// In en, this message translates to:
+  /// **'New commits since agnts reviewed it ({from}, now {to}): the comments go on the version agnts reviewed, and {host} may show them as outdated. To put them on the newest lines, review it again first.'**
+  String draftsHeadMoved(String from, String to, String host);
+
+  /// No description provided for @draftsShowClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Show dismissed, outdated and published ({n})'**
+  String draftsShowClosed(String n);
+
+  /// No description provided for @draftsDraftsN.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} draft} other {{n} drafts}}'**
+  String draftsDraftsN(num n);
+
+  /// No description provided for @draftsNotOnDiff.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts\'s comments not on a line shown here (another version, or outside the diff):'**
+  String get draftsNotOnDiff;
+
+  /// No description provided for @draftsAddToReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to review'**
+  String get draftsAddToReview;
+
+  /// No description provided for @draftsAddedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to the review: it is published with the accepted comments'**
+  String get draftsAddedToast;
+
+  /// No description provided for @draftsOnDiff.
+  ///
+  /// In en, this message translates to:
+  /// **'See them on the diff'**
+  String get draftsOnDiff;
+
+  /// No description provided for @draftsReviewWithBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Review with agnts'**
+  String get draftsReviewWithBtn;
+
+  /// No description provided for @draftsReviewAgainBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Review again with agnts'**
+  String get draftsReviewAgainBtn;
+
+  /// No description provided for @draftsReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review #{number} with agnts'**
+  String draftsReviewTitle(String number);
+
+  /// No description provided for @draftsReviewSub.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts reviews the pull request for you. Its comments stay drafts in agnts until you accept them; only accepted ones go on the pull request. Finishing the review never merges it.'**
+  String get draftsReviewSub;
+
+  /// No description provided for @draftsReviewBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the review'**
+  String get draftsReviewBtn;
+
+  /// No description provided for @draftsFocusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Anything to look at especially? (optional)'**
+  String get draftsFocusLabel;
+
+  /// No description provided for @draftsFocusHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. the migration and the retry logic'**
+  String get draftsFocusHint;
+
+  /// No description provided for @draftsDeepLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Deep review (security, failures, tests and types passes)'**
+  String get draftsDeepLabel;
+
+  /// No description provided for @draftsDeep_default.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace setting'**
+  String get draftsDeep_default;
+
+  /// No description provided for @draftsDeep_always.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get draftsDeep_always;
+
+  /// No description provided for @draftsDeep_off.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get draftsDeep_off;
+
+  /// No description provided for @draftsStartedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts is reviewing it in {key}'**
+  String draftsStartedToast(String key);
+
+  /// No description provided for @draftsReviewingNow.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts is reviewing this pull request ({key}). Its comments appear here as drafts when it is done.'**
+  String draftsReviewingNow(String key);
+
+  /// No description provided for @draftsFinishBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish review'**
+  String get draftsFinishBtn;
+
+  /// No description provided for @draftsFinishConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish the review of #{number}? Comments not published stay in agnts. The pull request is left as it is: agnts does not merge it.'**
+  String draftsFinishConfirm(String number);
+
+  /// No description provided for @draftsReadySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Go through agnts\'s comments, publish the ones you agree with on {host}, then finish the review. Or review again with a note, or dismiss it.'**
+  String draftsReadySub(String host);
+
+  /// No description provided for @draftsFinishedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review finished'**
+  String get draftsFinishedTitle;
+
+  /// No description provided for @draftsFinishedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'The review of #{number} is finished. The pull request was left as it is.'**
+  String draftsFinishedSub(String number);
+
   /// No description provided for @feedbackTitle.
   ///
   /// In en, this message translates to:
@@ -15050,6 +15428,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'review requested'**
   String get reviewsWhy_review_requested;
+
+  /// No description provided for @reviewsWhy_manual.
+  ///
+  /// In en, this message translates to:
+  /// **'asked for here'**
+  String get reviewsWhy_manual;
 
   /// No description provided for @reviewsBy.
   ///

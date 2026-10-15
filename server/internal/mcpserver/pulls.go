@@ -36,6 +36,19 @@ type PullThreadOut struct {
 	Comments    []PullCommentOut `json:"comments"`
 }
 
+// PullDraftOut is a comment of agnts's review kept in agnts: not on the
+// git host unless its state is published.
+type PullDraftOut struct {
+	Kind     string `json:"kind"`
+	State    string `json:"state"`
+	Severity string `json:"severity,omitempty"`
+	Title    string `json:"title,omitempty"`
+	Path     string `json:"path,omitempty"`
+	Line     int    `json:"line,omitempty"`
+	Body     string `json:"body"`
+	Author   string `json:"author,omitempty"`
+}
+
 // PullThreadsOut is get_pull_request_comments's output.
 type PullThreadsOut struct {
 	Title     string          `json:"title"`
@@ -43,6 +56,9 @@ type PullThreadsOut struct {
 	State     string          `json:"state"`
 	TicketKey string          `json:"ticketKey,omitempty"`
 	Threads   []PullThreadOut `json:"threads"`
+	// Drafts are the comments of agnts's review of it that are kept in
+	// agnts: drafts, accepted, dismissed or already published.
+	Drafts []PullDraftOut `json:"drafts,omitempty"`
 }
 
 func (t *tools) getPullComments(ctx context.Context, _ *mcp.CallToolRequest, in PullInput) (*mcp.CallToolResult, PullThreadsOut, error) {
@@ -78,6 +94,10 @@ func (t *tools) getPullComments(ctx context.Context, _ *mcp.CallToolRequest, in 
 			o.Comments = append(o.Comments, PullCommentOut{Author: c.Author, Body: c.Body, At: c.CreatedAt, ByAgnts: c.Agnts, Edited: c.Edited()})
 		}
 		out.Threads = append(out.Threads, o)
+	}
+	for _, d := range v.Drafts {
+		out.Drafts = append(out.Drafts, PullDraftOut{Kind: d.Kind, State: d.State, Severity: d.Severity, Title: d.Title, Path: d.Path,
+			Line: d.Line, Body: d.Body, Author: d.Author})
 	}
 	return nil, out, nil
 }

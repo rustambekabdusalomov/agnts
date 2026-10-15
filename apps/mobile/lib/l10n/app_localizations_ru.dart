@@ -2268,6 +2268,271 @@ class AppLocalizationsRu extends AppLocalizations {
   String get designDeviations => 'Отступления от плана';
 
   @override
+  String get draftsTitle => 'Комментарии ревью';
+
+  @override
+  String draftsSub(String host) {
+    return 'Комментарии agnts остаются здесь, пока вы их не примете. На $host публикуются только принятые, одним ревью; остальные никогда не покидают agnts.';
+  }
+
+  @override
+  String get draftsLockedSub => 'Ревью завершено или пул-реквест закрыт: эти комментарии можно только читать.';
+
+  @override
+  String get draftsChip => 'Черновик';
+
+  @override
+  String get draftsSummary => 'Итог';
+
+  @override
+  String get draftsSomeone => 'Кто-то';
+
+  @override
+  String get draftsEdited => 'изменён';
+
+  @override
+  String get draftsState_draft => 'Черновик';
+
+  @override
+  String get draftsState_accepted => 'Принят';
+
+  @override
+  String get draftsState_publishing => 'Публикуется';
+
+  @override
+  String get draftsState_dismissed => 'Отклонён';
+
+  @override
+  String get draftsState_published => 'Опубликован';
+
+  @override
+  String get draftsState_outdated => 'Устарел';
+
+  @override
+  String get draftsKind_summary => 'итог';
+
+  @override
+  String get draftsKind_finding => 'замечание';
+
+  @override
+  String get draftsKind_comment => 'комментарий';
+
+  @override
+  String get draftsAccept => 'Принять';
+
+  @override
+  String get draftsUndo => 'Отменить';
+
+  @override
+  String get draftsDismiss => 'Отклонить';
+
+  @override
+  String get draftsReopen => 'Вернуть в черновики';
+
+  @override
+  String get draftsReasonLabel => 'Почему? (необязательно: agnts учится, что вы считаете шумом)';
+
+  @override
+  String get draftsReasonHint => 'например, в этом сервисе мы не ограничиваем кэши';
+
+  @override
+  String draftsDismissedBecause(String reason) {
+    return 'Отклонён: $reason';
+  }
+
+  @override
+  String get draftsOutdatedHint => 'Новое ревью agnts этого больше не находит.';
+
+  @override
+  String draftsFailed(String error) {
+    return 'Не удалось опубликовать: $error';
+  }
+
+  @override
+  String get draftsDeleteTitle => 'Удалить ваш комментарий?';
+
+  @override
+  String get draftsDeleteConfirm => 'Он не был опубликован; он удаляется из agnts.';
+
+  @override
+  String draftsNAccepted(String n) {
+    return 'принято: $n';
+  }
+
+  @override
+  String draftsNDraft(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n черновика',
+      many: '$n черновиков',
+      few: '$n черновика',
+      one: '$n черновик',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String draftsNDismissed(String n) {
+    return 'отклонено: $n';
+  }
+
+  @override
+  String draftsNPublished(String n) {
+    return 'опубликовано: $n';
+  }
+
+  @override
+  String draftsNOutdated(String n) {
+    return 'устарело: $n';
+  }
+
+  @override
+  String get draftsAcceptMajor => 'Принять major и выше';
+
+  @override
+  String get draftsAcceptAll => 'Принять все';
+
+  @override
+  String draftsPublishBtn(num n, String host) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'Опубликовать $n', zero: 'Опубликовать');
+    return '$_temp0 на $host';
+  }
+
+  @override
+  String draftsPublishTitle(String host) {
+    return 'Публикация на $host';
+  }
+
+  @override
+  String draftsPublishSub(num n, String host) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Эти $n комментария будут опубликованы',
+      many: 'Эти $n комментариев будут опубликованы',
+      few: 'Эти $n комментария будут опубликованы',
+      one: 'Этот комментарий будет опубликован',
+    );
+    return '$_temp0 в пул-реквесте одним ревью от имени пользователя токена $host. Комментарии не на изменённых строках попадут в текст ревью.';
+  }
+
+  @override
+  String draftsPublishedToast(num n, String host) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Опубликовано $n комментария',
+      many: 'Опубликовано $n комментариев',
+      few: 'Опубликовано $n комментария',
+      one: 'Опубликован $n комментарий',
+    );
+    return '$_temp0 на $host';
+  }
+
+  @override
+  String draftsHeadMoved(String from, String to, String host) {
+    return 'После ревью agnts появились новые коммиты ($from, сейчас $to): комментарии попадут на версию, которую проверял agnts, и $host может показать их как устаревшие. Чтобы они были на новых строках, сначала запустите ревью заново.';
+  }
+
+  @override
+  String draftsShowClosed(String n) {
+    return 'Показать отклонённые, устаревшие и опубликованные ($n)';
+  }
+
+  @override
+  String draftsDraftsN(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n черновика',
+      many: '$n черновиков',
+      few: '$n черновика',
+      one: '$n черновик',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get draftsNotOnDiff => 'Комментарии agnts не на показанных строках (другая версия или вне диффа):';
+
+  @override
+  String get draftsAddToReview => 'Добавить в ревью';
+
+  @override
+  String get draftsAddedToast => 'Добавлено в ревью: будет опубликовано вместе с принятыми комментариями';
+
+  @override
+  String get draftsOnDiff => 'Посмотреть их в диффе';
+
+  @override
+  String get draftsReviewWithBtn => 'Ревью с agnts';
+
+  @override
+  String get draftsReviewAgainBtn => 'Новое ревью с agnts';
+
+  @override
+  String draftsReviewTitle(String number) {
+    return 'Ревью #$number с agnts';
+  }
+
+  @override
+  String get draftsReviewSub =>
+      'agnts проверит пул-реквест за вас. Его комментарии остаются черновиками в agnts, пока вы их не примете; в пул-реквест попадают только принятые. Завершение ревью никогда его не мёржит.';
+
+  @override
+  String get draftsReviewBtn => 'Начать ревью';
+
+  @override
+  String get draftsFocusLabel => 'На что обратить особое внимание? (необязательно)';
+
+  @override
+  String get draftsFocusHint => 'например, миграция и логика повторов';
+
+  @override
+  String get draftsDeepLabel => 'Глубокое ревью (проходы по безопасности, ошибкам, тестам и типам)';
+
+  @override
+  String get draftsDeep_default => 'Настройка воркспейса';
+
+  @override
+  String get draftsDeep_always => 'Вкл.';
+
+  @override
+  String get draftsDeep_off => 'Выкл.';
+
+  @override
+  String draftsStartedToast(String key) {
+    return 'agnts проверяет его в $key';
+  }
+
+  @override
+  String draftsReviewingNow(String key) {
+    return 'agnts проверяет этот пул-реквест ($key). Когда закончит, его комментарии появятся здесь как черновики.';
+  }
+
+  @override
+  String get draftsFinishBtn => 'Завершить ревью';
+
+  @override
+  String draftsFinishConfirm(String number) {
+    return 'Завершить ревью #$number? Неопубликованные комментарии останутся в agnts. Пул-реквест остаётся как есть: agnts его не мёржит.';
+  }
+
+  @override
+  String draftsReadySub(String host) {
+    return 'Просмотрите комментарии agnts, опубликуйте на $host те, с которыми согласны, и завершите ревью. Или запросите новое ревью с заметкой, или отклоните его.';
+  }
+
+  @override
+  String get draftsFinishedTitle => 'Ревью завершено';
+
+  @override
+  String draftsFinishedSub(String number) {
+    return 'Ревью #$number завершено. Пул-реквест оставлен как есть.';
+  }
+
+  @override
   String get feedbackTitle => 'Отправить отзыв';
 
   @override
@@ -8818,6 +9083,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get reviewsWhy_review_requested => 'запрошено ревью';
+
+  @override
+  String get reviewsWhy_manual => 'запрошено в agnts';
 
   @override
   String reviewsBy(String author) {
