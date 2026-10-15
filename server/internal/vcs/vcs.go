@@ -52,6 +52,39 @@ type Commit struct {
 	URL     string
 }
 
+// CommitPull is a pull request (GitLab merge request) that contains a commit.
+type CommitPull struct {
+	Number int
+	Title  string
+	State  string // open, merged or closed
+	URL    string
+}
+
+// CommitDetail is one commit with what it changed, the CI runs on it and
+// the pull requests that carry it.
+type CommitDetail struct {
+	SHA            string
+	Message        string // the full message
+	Author         string
+	AuthorEmail    string
+	AuthorLogin    string // the host account, when the email maps to one
+	AuthorAvatar   string
+	Date           time.Time // authored
+	Committer      string
+	CommitterEmail string
+	CommittedDate  time.Time
+	Parents        []string
+	URL            string
+	Add            int
+	Del            int
+	Files          []domain.FileChange
+	Pipelines      []Pipeline
+	Pulls          []CommitPull
+}
+
+// MaxCommitFiles caps how many changed files a commit view reads.
+const MaxCommitFiles = 300
+
 // Stage is one stage (GitLab) or job (GitHub Actions) of a pipeline.
 type Stage struct {
 	ID       int64
@@ -134,6 +167,8 @@ type Browser interface {
 	Branches(ctx context.Context, repo domain.Repository) ([]Branch, error)
 	// Commits returns one page (from 1) of the default branch's history, newest first.
 	Commits(ctx context.Context, repo domain.Repository, page, perPage int) ([]Commit, error)
+	// CommitDetail returns one commit with its files, CI runs and pull requests.
+	CommitDetail(ctx context.Context, repo domain.Repository, sha string) (CommitDetail, error)
 	// Pipelines returns one page (from 1) of CI runs, newest first, with stages.
 	Pipelines(ctx context.Context, repo domain.Repository, page, perPage int) ([]Pipeline, error)
 	Environments(ctx context.Context, repo domain.Repository) ([]Environment, error)
@@ -271,6 +306,17 @@ func (m *Multi) Commits(ctx context.Context, repo domain.Repository, page, perPa
 	}
 	key := cacheKey(repo.ID, "commits:"+itoa(int64(page))+":"+itoa(int64(perPage)))
 	return remember(ctx, m, key, time.Minute, func(ctx context.Context) ([]Commit, error) { return p.Commits(ctx, repo, page, perPage) })
+}
+
+// CommitDetail implements Browser. A short cache: its CI runs move.
+func (m *Multi) CommitDetail(ctx context.Context, repo domain.Repository, sha string) (CommitDetail, error) {
+	p, err := m.pick(repo)
+	if err != nil {
+		return CommitDetail{}, err
+	}
+	return remember(ctx, m, cacheKey(repo.ID, "commit:"+sha), 15*time.Second, func(ctx context.Context) (CommitDetail, error) {
+		return p.CommitDetail(ctx, repo, sha)
+	})
 }
 
 // Pipelines implements Browser.

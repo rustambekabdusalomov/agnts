@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query'
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { api, unwrap } from '../api/client'
@@ -18,6 +18,7 @@ import { useRules } from './rules/useRules'
 import ConfirmDialog from './ui/ConfirmDialog.vue'
 import FeedbackDialog from './account/FeedbackDialog.vue'
 import HiIcon from './ui/HiIcon.vue'
+import { SETTINGS_SECTIONS, settingsSection } from './settings/sections'
 
 // The demo's layout: sidebar navigation with counts and the plan pill,
 // top bar with search, language, theme and tracker sync.
@@ -94,6 +95,9 @@ useTabBadge(
 )
 
 const isTicketList = computed(() => route.name === 'tickets')
+// Settings opens into its sections in the sidebar while you are in it.
+const inSettings = computed(() => route.name === 'settings')
+const settingsAt = computed(() => (inSettings.value ? settingsSection(route.params.section) : ''))
 const activeFilter = computed(() => (isTicketList.value ? String(route.query.f ?? 'needs') : ''))
 
 const langOpen = ref(false)
@@ -118,13 +122,72 @@ function tip(text: string) {
 // inside it would be cut off.
 const tipBox = ref<{ text: string; top: number; left: number } | null>(null)
 function showTip(e: Event) {
-  const el = prefs.thin && !matchMedia('(max-width: 900px)').matches ? (e.target as HTMLElement).closest<HTMLElement>('[data-tip]') : null
+  const thin = prefs.thin && !matchMedia('(max-width: 900px)').matches
+  const flyItem = thin ? (e.target as HTMLElement).closest<HTMLElement>('[data-flyout]') : null
+  if (flyItem) {
+    tipBox.value = null
+    if (e.type === 'focusin' && quietFocus) quietFocus = false // focus came back from the flyout: stay closed
+    else openFly(flyItem)
+    return
+  }
+  if (fly.value) closeFlySoon()
+  const el = thin ? (e.target as HTMLElement).closest<HTMLElement>('[data-tip]') : null
   if (!el) {
     tipBox.value = null
     return
   }
   const r = el.getBoundingClientRect()
   tipBox.value = { text: el.dataset.tip ?? '', top: r.top + r.height / 2, left: r.right + 10 }
+}
+
+// In the thin sidebar, Settings opens its sections in a flyout to its
+// right. Fixed like the tooltip, so the sidebar's overflow does not clip
+// it; it stays open while the pointer moves from the item into it.
+const fly = ref<{ top: number; left: number } | null>(null)
+let flyTimer: ReturnType<typeof setTimeout> | undefined
+const FLY_HEIGHT = 44 + SETTINGS_SECTIONS.length * 34 // title and rows, to keep it on screen
+function openFly(el: HTMLElement) {
+  clearTimeout(flyTimer)
+  const r = el.getBoundingClientRect()
+  fly.value = { top: Math.max(8, Math.min(r.top - 6, window.innerHeight - FLY_HEIGHT - 8)), left: r.right + 10 }
+}
+function closeFlySoon() {
+  clearTimeout(flyTimer)
+  flyTimer = setTimeout(() => (fly.value = null), 160)
+}
+function keepFly() {
+  clearTimeout(flyTimer)
+}
+function closeFly() {
+  clearTimeout(flyTimer)
+  fly.value = null
+}
+// The flyout sits outside the sidebar in the page, so Tab does not reach
+// it: the arrow keys move into it, through it and back to Settings.
+const flyEl = ref<HTMLElement | null>(null)
+let quietFocus = false
+async function enterFly() {
+  if (!prefs.thin) return
+  if (!fly.value) {
+    const el = document.querySelector<HTMLElement>('[data-flyout="settings"]')
+    if (!el) return
+    openFly(el)
+  }
+  await nextTick()
+  flyEl.value?.querySelector<HTMLElement>('.side-fly-a')?.focus()
+}
+function flyKey(e: KeyboardEvent) {
+  const links = [...(flyEl.value?.querySelectorAll<HTMLElement>('.side-fly-a') ?? [])]
+  const i = links.indexOf(document.activeElement as HTMLElement)
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault()
+    links[(i + (e.key === 'ArrowDown' ? 1 : -1) + links.length) % links.length]?.focus()
+  } else if (e.key === 'Escape' || e.key === 'ArrowLeft') {
+    e.preventDefault()
+    closeFly()
+    quietFocus = true
+    document.querySelector<HTMLElement>('[data-flyout="settings"]')?.focus()
+  }
 }
 
 const initials = computed(() => (session.user?.username ?? '?').slice(0, 2).toUpperCase())
@@ -145,7 +208,16 @@ async function signOut() {
 
 <template>
   <div class="shell" :class="{ thin: prefs.thin }">
-    <aside class="side" @mouseover="showTip" @focusin="showTip" @mouseleave="tipBox = null" @focusout="tipBox = null" @scroll.capture="tipBox = null" @click="tipBox = null">
+    <aside
+      class="side"
+      @mouseover="showTip"
+      @focusin="showTip"
+      @mouseleave="tipBox = null; fly && closeFlySoon()"
+      @focusout="tipBox = null"
+      @scroll.capture="tipBox = null; closeFly()"
+      @click="tipBox = null"
+      @keydown.esc="closeFly"
+    >
       <div class="brandbox">
         <BrandLogo class="brand-mark" mark :size="30" />
         <div class="brand-txt"><BrandLogo :size="24" /></div>
@@ -206,7 +278,34 @@ async function signOut() {
         <RouterLink class="nav-a" active-class="on" :to="{ name: 'rules' }" v-bind="tip(t('nav.rules'))">
           <HiIcon name="rules" /><span class="lbl">{{ t('nav.rules') }}</span><span v-if="ruleQuestions" class="cnt">{{ ruleQuestions }}</span>
         </RouterLink>
-        <RouterLink class="nav-a" active-class="on" :to="{ name: 'settings' }" v-bind="tip(t('nav.settings'))"><HiIcon name="settings" /><span class="lbl">{{ t('nav.settings') }}</span></RouterLink>
+        <RouterLink
+          class="nav-a"
+          active-class="on"
+          :to="{ name: 'settings' }"
+          :aria-expanded="prefs.thin ? !!fly : inSettings"
+          :aria-label="prefs.thin ? t('nav.settings') : undefined"
+          :data-flyout="prefs.thin ? 'settings' : undefined"
+          @keydown.right.prevent="enterFly"
+          @keydown.down="fly && ($event.preventDefault(), enterFly())"
+        >
+          <HiIcon name="settings" /><span class="lbl">{{ t('nav.settings') }}</span>
+          <svg class="nav-chev" :class="{ open: inSettings }" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 7l5 5-5 5" /></svg>
+        </RouterLink>
+        <!-- Always rendered, so opening and closing can animate; closed, it is inert (out of the tab order). -->
+        <div class="nav-sub" :class="{ open: inSettings }" role="group" :aria-label="t('nav.settings')" :inert="!inSettings">
+          <div class="nav-sub-in">
+            <RouterLink
+              v-for="x in SETTINGS_SECTIONS"
+              :key="x.key"
+              class="nav-a nav-sub-a"
+              :class="{ on: settingsAt === x.key }"
+              :to="{ name: 'settings', params: { section: x.key } }"
+              :aria-current="settingsAt === x.key ? 'page' : undefined"
+            >
+              <span class="lbl">{{ t(x.label) }}</span>
+            </RouterLink>
+          </div>
+        </div>
         <div class="grp">{{ t('nav.people') }}</div>
         <RouterLink class="nav-a" active-class="on" :to="{ name: 'workspace' }" v-bind="tip(t('nav.workspace'))"><HiIcon name="repos" /><span class="lbl">{{ t('nav.workspace') }}</span></RouterLink>
         <RouterLink class="nav-a" active-class="on" :to="{ name: 'profile' }" v-bind="tip(t('nav.profile'))"><HiIcon name="settings" /><span class="lbl">{{ t('nav.profile') }}</span></RouterLink>
@@ -272,6 +371,33 @@ async function signOut() {
       </main>
     </div>
   </div>
+  <Transition name="fly">
+    <nav
+      v-if="fly && prefs.thin"
+      ref="flyEl"
+      class="side-fly"
+      :aria-label="t('nav.settings')"
+      :style="{ top: fly.top + 'px', left: fly.left + 'px' }"
+      @mouseenter="keepFly"
+      @mouseleave="closeFlySoon"
+      @focusin="keepFly"
+      @focusout="(e: FocusEvent) => !flyEl?.contains(e.relatedTarget as Node) && closeFlySoon()"
+      @keydown="flyKey"
+    >
+      <div class="side-fly-h">{{ t('nav.settings') }}</div>
+      <RouterLink
+        v-for="x in SETTINGS_SECTIONS"
+        :key="x.key"
+        class="side-fly-a"
+        :class="{ on: settingsAt === x.key }"
+        :to="{ name: 'settings', params: { section: x.key } }"
+        :aria-current="settingsAt === x.key ? 'page' : undefined"
+        @click="closeFly"
+      >
+        {{ t(x.label) }}
+      </RouterLink>
+    </nav>
+  </Transition>
   <div v-if="tipBox" class="side-tip" role="tooltip" :style="{ top: tipBox.top + 'px', left: tipBox.left + 'px' }">{{ tipBox.text }}</div>
   <ConfirmDialog v-model="confirmOut" :title="t('auth.signOutTitle')" :message="session.user?.isAdmin ? t('auth.signOutBody') : t('auth.signOutBodyGoogle')" :confirm-label="t('auth.signOut')" danger :busy="signingOut" @confirm="signOut">
     <template #icon><svg viewBox="0 0 24 24"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10" /></svg></template>

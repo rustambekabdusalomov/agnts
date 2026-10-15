@@ -127,3 +127,45 @@ func TestGraphQLURL(t *testing.T) {
 		}
 	}
 }
+
+func TestCommitDetail(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch p := r.URL.Path; p {
+		case "/repos/acme/api/commits/abc1234":
+			_, _ = io.WriteString(w, `{"sha":"abc1234full","html_url":"https://github.com/acme/api/commit/abc1234full",
+				"commit":{"message":"PAY-1: fix\n\nbody","author":{"name":"Rustam","email":"r@x.io","date":"2026-10-01T10:00:00Z"},
+				"committer":{"name":"GitHub","email":"noreply@github.com","date":"2026-10-01T10:05:00Z"}},
+				"author":{"login":"rustam","avatar_url":"https://a/1"},"parents":[{"sha":"p1"}],
+				"stats":{"additions":3,"deletions":1},"files":[{"filename":"a.go","additions":3,"deletions":1,"patch":"@@ -1 +1,3 @@"}]}`)
+		case "/repos/acme/api/actions/runs":
+			if r.URL.Query().Get("head_sha") != "abc1234full" {
+				t.Errorf("runs query: %s", r.URL.RawQuery)
+			}
+			_, _ = io.WriteString(w, `{"workflow_runs":[{"id":9,"name":"CI","head_sha":"abc1234full","status":"in_progress"}]}`)
+		case "/repos/acme/api/actions/runs/9/jobs":
+			_, _ = io.WriteString(w, `{"jobs":[{"id":1,"name":"test","status":"in_progress"}]}`)
+		case "/repos/acme/api/commits/abc1234full/pulls":
+			_, _ = io.WriteString(w, `[{"number":4,"title":"Fix","state":"closed","merged_at":"2026-10-02T00:00:00Z","html_url":"u"}]`)
+		default:
+			w.WriteHeader(404)
+		}
+	}))
+	defer srv.Close()
+	h := New(srv.URL, func(context.Context) (string, error) { return "tok", nil })
+	c, err := h.CommitDetail(context.Background(), domain.Repository{CloneURL: "https://github.com/acme/api.git"}, "abc1234")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.SHA != "abc1234full" || c.Message != "PAY-1: fix\n\nbody" || c.AuthorLogin != "rustam" || c.Committer != "GitHub" || len(c.Parents) != 1 || c.Add != 3 {
+		t.Fatalf("commit: %+v", c)
+	}
+	if len(c.Files) != 1 || c.Files[0].Diff == "" {
+		t.Fatalf("files: %+v", c.Files)
+	}
+	if len(c.Pipelines) != 1 || c.Pipelines[0].Status != vcs.CIRun || len(c.Pipelines[0].Stages) != 1 {
+		t.Fatalf("pipelines: %+v", c.Pipelines)
+	}
+	if len(c.Pulls) != 1 || c.Pulls[0].State != "merged" {
+		t.Fatalf("pulls: %+v", c.Pulls)
+	}
+}

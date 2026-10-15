@@ -3,7 +3,9 @@ package httpapi
 import (
 	"errors"
 	"net/http"
+	"regexp"
 	"strings"
+	"time"
 
 	"agnts/internal/admin"
 	"agnts/internal/domain"
@@ -196,9 +198,7 @@ func (s *Server) ListRepoCommits(w http.ResponseWriter, r *http.Request, id int6
 			d := c.Date
 			out[i].Date = &d
 		}
-		if k, _, found := strings.Cut(c.Message, ":"); found && strings.Contains(k, "-") && !strings.Contains(k, " ") {
-			out[i].TicketKey = &k
-		}
+		out[i].TicketKey = ticketKeyOf(c.Message)
 	}
 	writeJSON(w, http.StatusOK, out)
 }
@@ -250,8 +250,12 @@ func (s *Server) ListRepoPipelines(w http.ResponseWriter, r *http.Request, id in
 	if !ok {
 		return
 	}
-	out := make([]gen.Pipeline, len(v.Pipelines))
-	for i, p := range v.Pipelines {
+	writeJSON(w, http.StatusOK, toPipelines(v.Pipelines))
+}
+
+func toPipelines(ps []vcs.Pipeline) []gen.Pipeline {
+	out := make([]gen.Pipeline, len(ps))
+	for i, p := range ps {
 		out[i] = gen.Pipeline{Id: p.ID, Name: p.Name, Branch: p.Branch, Sha: p.SHA, Message: p.Message, Trigger: p.Trigger,
 			Status: gen.CI(p.Status), DurationMs: p.Duration.Milliseconds(), Url: p.URL, Stages: make([]gen.Stage, len(p.Stages))}
 		if !p.Created.IsZero() {
@@ -261,6 +265,68 @@ func (s *Server) ListRepoPipelines(w http.ResponseWriter, r *http.Request, id in
 		for j, st := range p.Stages {
 			out[i].Stages[j] = gen.Stage{Id: st.ID, Name: st.Name, Status: gen.CI(st.Status), DurationMs: st.Duration.Milliseconds(), Manual: st.Manual}
 		}
+	}
+	return out
+}
+
+// ticketKeyOf reads the ticket key agnts puts before a commit message ("KEY-1: ...").
+func ticketKeyOf(message string) *string {
+	if k, _, found := strings.Cut(message, ":"); found && strings.Contains(k, "-") && !strings.Contains(k, " ") && !strings.Contains(k, "\n") {
+		return &k
+	}
+	return nil
+}
+
+var shaRe = regexp.MustCompile(`^[0-9a-fA-F]{7,64}$`)
+
+// GetRepoCommit implements gen.ServerInterface.
+func (s *Server) GetRepoCommit(w http.ResponseWriter, r *http.Request, id gen.RepoID, sha string) {
+	if !s.adminReady(w) {
+		return
+	}
+	if !shaRe.MatchString(sha) {
+		writeError(w, http.StatusBadRequest, "bad_request", "sha must be 7 to 64 hex characters")
+		return
+	}
+	v, c, err := s.opt.Admin.Repos.Commit(r.Context(), id, sha)
+	if err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			s.writeAdminError(w, r, err, "")
+			return
+		}
+		s.opt.Log.Warn("read commit", "repo", id, "sha", sha, "err", err)
+		writeError(w, http.StatusBadGateway, "git_host", err.Error())
+		return
+	}
+	str := func(v string) *string {
+		if v == "" {
+			return nil
+		}
+		return &v
+	}
+	at := func(t time.Time) *time.Time {
+		if t.IsZero() {
+			return nil
+		}
+		return &t
+	}
+	out := gen.CommitDetail{Sha: c.SHA, Message: c.Message, Author: c.Author, AuthorEmail: str(c.AuthorEmail), AuthorLogin: str(c.AuthorLogin),
+		AuthorAvatar: str(c.AuthorAvatar), Date: at(c.Date), Committer: str(c.Committer), CommitterEmail: str(c.CommitterEmail),
+		CommittedDate: at(c.CommittedDate), Parents: c.Parents, Url: c.URL, Add: c.Add, Del: c.Del,
+		Files: make([]gen.FileChange, len(c.Files)), Pipelines: toPipelines(c.Pipelines), Pulls: make([]gen.CommitPull, len(c.Pulls)),
+		TicketKey: ticketKeyOf(c.Message), Provider: gen.CommitDetailProvider(v.Provider)}
+	if out.Parents == nil {
+		out.Parents = []string{}
+	}
+	if len(c.Files) >= vcs.MaxCommitFiles {
+		capped := true
+		out.FilesCapped = &capped
+	}
+	for i, f := range c.Files {
+		out.Files[i] = gen.FileChange{Path: f.Path, Add: f.Add, Del: f.Del, Diff: f.Diff}
+	}
+	for i, p := range c.Pulls {
+		out.Pulls[i] = gen.CommitPull{Number: p.Number, Title: p.Title, State: gen.CommitPullState(p.State), Url: p.URL}
 	}
 	writeJSON(w, http.StatusOK, out)
 }

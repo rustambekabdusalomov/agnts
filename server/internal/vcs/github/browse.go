@@ -173,6 +173,11 @@ func (h *Host) Pipelines(ctx context.Context, repo domain.Repository, page, perP
 	if err != nil {
 		return nil, err
 	}
+	return h.runs(ctx, base, url.Values{"per_page": {fmt.Sprint(min(max(perPage, 1), 50))}, "page": {fmt.Sprint(max(page, 1))}})
+}
+
+// runs lists Actions runs matching q, each with its jobs as stages.
+func (h *Host) runs(ctx context.Context, base string, q url.Values) ([]vcs.Pipeline, error) {
 	var runs struct {
 		Runs []struct {
 			ID           int64     `json:"id"`
@@ -188,7 +193,7 @@ func (h *Host) Pipelines(ctx context.Context, repo domain.Repository, page, perP
 			HTMLURL      string    `json:"html_url"`
 		} `json:"workflow_runs"`
 	}
-	if status, err := h.call(ctx, http.MethodGet, fmt.Sprintf("%s/actions/runs?per_page=%d&page=%d", base, min(max(perPage, 1), 50), max(page, 1)), nil, &runs); err != nil {
+	if status, err := h.call(ctx, http.MethodGet, base+"/actions/runs?"+q.Encode(), nil, &runs); err != nil {
 		return nil, needs(status, err, "Actions: Read")
 	}
 	out := make([]vcs.Pipeline, len(runs.Runs))
@@ -219,6 +224,103 @@ func (h *Host) Pipelines(ctx context.Context, repo domain.Repository, page, perP
 				st.Duration = j.CompletedAt.Sub(*j.StartedAt)
 			}
 			out[i].Stages = append(out[i].Stages, st)
+		}
+	})
+	return out, nil
+}
+
+// CommitDetail reads one commit with its files, the Actions runs on it and
+// the pull requests that contain it. Runs and pull requests are best
+// effort: a token without Actions access still shows the commit.
+func (h *Host) CommitDetail(ctx context.Context, repo domain.Repository, sha string) (vcs.CommitDetail, error) {
+	base, err := h.base(repo)
+	if err != nil {
+		return vcs.CommitDetail{}, err
+	}
+	type ghFile struct {
+		Filename  string `json:"filename"`
+		Status    string `json:"status"`
+		Additions int    `json:"additions"`
+		Deletions int    `json:"deletions"`
+		Patch     string `json:"patch"`
+	}
+	var c struct {
+		SHA     string `json:"sha"`
+		HTMLURL string `json:"html_url"`
+		Commit  struct {
+			Message string `json:"message"`
+			Author  struct {
+				Name  string    `json:"name"`
+				Email string    `json:"email"`
+				Date  time.Time `json:"date"`
+			} `json:"author"`
+			Committer struct {
+				Name  string    `json:"name"`
+				Email string    `json:"email"`
+				Date  time.Time `json:"date"`
+			} `json:"committer"`
+		} `json:"commit"`
+		Author *struct {
+			Login     string `json:"login"`
+			AvatarURL string `json:"avatar_url"`
+		} `json:"author"`
+		Parents []struct {
+			SHA string `json:"sha"`
+		} `json:"parents"`
+		Stats struct {
+			Additions int `json:"additions"`
+			Deletions int `json:"deletions"`
+		} `json:"stats"`
+		Files []ghFile `json:"files"`
+	}
+	if _, err := h.call(ctx, http.MethodGet, base+"/commits/"+url.PathEscape(sha), nil, &c); err != nil {
+		return vcs.CommitDetail{}, err
+	}
+	out := vcs.CommitDetail{SHA: c.SHA, Message: c.Commit.Message, Author: c.Commit.Author.Name, AuthorEmail: c.Commit.Author.Email,
+		Date: c.Commit.Author.Date, Committer: c.Commit.Committer.Name, CommitterEmail: c.Commit.Committer.Email,
+		CommittedDate: c.Commit.Committer.Date, URL: c.HTMLURL, Add: c.Stats.Additions, Del: c.Stats.Deletions}
+	if c.Author != nil {
+		out.AuthorLogin, out.AuthorAvatar = c.Author.Login, c.Author.AvatarURL
+	}
+	for _, p := range c.Parents {
+		out.Parents = append(out.Parents, p.SHA)
+	}
+	files := c.Files
+	// The first response carries up to 300 files; larger commits page on.
+	for page := 2; len(c.Files) == 300 && len(files) < vcs.MaxCommitFiles; page++ {
+		var more struct {
+			Files []ghFile `json:"files"`
+		}
+		if _, err := h.call(ctx, http.MethodGet, base+"/commits/"+url.PathEscape(sha)+"?page="+fmt.Sprint(page), nil, &more); err != nil || len(more.Files) == 0 {
+			break
+		}
+		files, c.Files = append(files, more.Files...), more.Files
+	}
+	for _, f := range files[:min(len(files), vcs.MaxCommitFiles)] {
+		out.Files = append(out.Files, domain.FileChange{Path: f.Filename, Add: f.Additions, Del: f.Deletions, Diff: f.Patch})
+	}
+
+	vcs.Limit([]int{0, 1}, 2, func(_ int, which int) {
+		if which == 0 {
+			out.Pipelines, _ = h.runs(ctx, base, url.Values{"head_sha": {out.SHA}, "per_page": {"30"}})
+			return
+		}
+		var pulls []struct {
+			Number   int        `json:"number"`
+			Title    string     `json:"title"`
+			State    string     `json:"state"`
+			MergedAt *time.Time `json:"merged_at"`
+			HTMLURL  string     `json:"html_url"`
+		}
+		if _, err := h.call(ctx, http.MethodGet, base+"/commits/"+url.PathEscape(out.SHA)+"/pulls?per_page=20", nil, &pulls); err != nil {
+			return
+		}
+		for _, p := range pulls {
+			st := p.State
+			if p.MergedAt != nil {
+				st = "merged"
+			}
+			out.Pulls = append(out.Pulls, vcs.CommitPull{Number: p.Number, Title: p.Title, State: st, URL: p.HTMLURL})
 		}
 	})
 	return out, nil

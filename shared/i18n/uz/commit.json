@@ -1,0 +1,23 @@
+{
+  "commit": {
+    "back": "Commitlarga qaytish",
+    "backTo": "{repo} ga qaytish",
+    "authoredAgo": "{name} {time} commit qildi",
+    "filesN": "{n} ta fayl",
+    "author": "Muallif",
+    "authored": "Yozilgan",
+    "committer": "Commit qilgan",
+    "committed": "Commit qilingan",
+    "parents": "{n, plural, one {Ota commit} other {Ota commitlar}}",
+    "pulls": "Pull requestlar",
+    "pullsSub": "Shu commit kirgan pull requestlar (GitLabda merge requestlar).",
+    "noPulls": "Bu commit hech qaysi pull requestda yoʻq.",
+    "message": "Xabar",
+    "pipelinesSub": "Shu commitdagi CI ishlari, yangilari yuqorida.",
+    "noPipelines": "Bu commitda CI ishlari yoʻq.",
+    "changes": "Oʻzgarishlar",
+    "changesSub": "{n} ta fayl oʻzgargan: +{add}, −{del}.",
+    "noFiles": "Bu commit hech qanday faylni oʻzgartirmaydi.",
+    "filesCapped": "Bu commit bu yerda koʻrsatib boʻladiganidan koʻproq faylni oʻzgartiradi. Dastlabki {n} tasi koʻrsatildi; hammasini git xostingida oching."
+  }
+}

@@ -4,11 +4,11 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { api, HttpError, unwrap } from '../../api/client'
 import type { Repository } from '../../api/types'
-import { ago, fmtDur } from '../../composables/format'
+import { ago } from '../../composables/format'
 import { useScrollPages } from '../../composables/useScrollPages'
 import { useUi } from '../../stores/ui'
 import HiIcon from '../ui/HiIcon.vue'
-import CiDot from './CiDot.vue'
+import PipelineRow from './PipelineRow.vue'
 import ScrollMore from './ScrollMore.vue'
 import type { Pipeline } from './types'
 import { askConfirm } from '../../composables/useConfirm'
@@ -89,49 +89,16 @@ const errMsg = (e: unknown) => (e instanceof Error && e.message ? e.message : t(
     <p v-if="pipelines.isPending.value" class="hint">{{ t('common.loading') }}</p>
     <div v-else-if="pipelines.isError.value" class="help bad"><HiIcon name="info" /><p>{{ errMsg(pipelines.error.value) }}</p></div>
     <p v-else-if="!all.length" class="empty">{{ t('repo.none') }}</p>
-    <div v-for="p in all" :key="p.id" class="pp" :class="{ open: open === p.id }">
-      <button type="button" class="pp-h" :aria-expanded="open === p.id" @click="open = open === p.id ? null : p.id">
-        <CiDot :status="p.status" />
-        <span class="pp-id">#{{ p.id }}</span>
-        <span class="pp-m">
-          <span>{{ p.message || p.name || '—' }}</span>
-          <span class="pp-sub">
-            <span class="br">{{ p.branch }}</span><span class="sha">{{ p.sha.slice(0, 7) }}</span><span>{{ p.trigger }}</span>
-          </span>
-        </span>
-        <span class="pp-r">
-          <span>{{ t(`repo.ci_${p.status}`) }}</span>
-          <span v-if="p.durationMs" class="hint">{{ fmtDur(p.durationMs) }}</span>
-          <span v-if="p.created" class="hint">{{ ago(p.created, locale) }}</span>
-        </span>
-      </button>
-      <div v-if="p.stages.length" class="stg">
-        <template v-for="(s, i) in p.stages" :key="s.id">
-          <span v-if="i" class="stg-ln" />
-          <span class="stg-i" :class="`stg-${s.status}`" :title="`${s.name}: ${t(`repo.ci_${s.status}`)}`">
-            <span class="stg-n">{{ s.name }}</span>
-            <button v-if="s.manual" type="button" class="btn btn-s stg-go" :disabled="deploy.isPending.value" @click="deployJob(p, s.id, s.name)">
-              {{ t('repo.deploy') }}
-            </button>
-          </span>
-        </template>
-      </div>
-      <div v-if="open === p.id" class="pp-d">
-        <table class="tbl">
-          <thead>
-            <tr><th>{{ t('repo.stage') }}</th><th>{{ t('repo.status') }}</th><th>{{ t('repo.duration') }}</th></tr>
-          </thead>
-          <tbody>
-            <tr v-for="s in p.stages" :key="s.id">
-              <td>{{ s.name }}</td>
-              <td><CiDot :status="s.status" label /></td>
-              <td class="muted">{{ s.durationMs ? fmtDur(s.durationMs) : '—' }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <a v-if="p.url" :href="p.url" target="_blank" rel="noopener" class="btn btn-s" style="margin-top: 8px">{{ t('repo.openRun') }}</a>
-      </div>
-    </div>
+    <PipelineRow
+      v-for="p in all"
+      :key="p.id"
+      :pipeline="p"
+      :open="open === p.id"
+      can-deploy
+      :deploying="deploy.isPending.value"
+      @toggle="open = open === p.id ? null : p.id"
+      @deploy="(s) => deployJob(p, s.id, s.name)"
+    />
     <ScrollMore
       v-if="all.length"
       :ref="sentinel"

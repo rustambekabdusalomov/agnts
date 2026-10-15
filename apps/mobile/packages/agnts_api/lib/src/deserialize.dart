@@ -51,6 +51,8 @@ import 'package:agnts_api/src/model/claude_connection_input.dart';
 import 'package:agnts_api/src/model/claude_connection_state.dart';
 import 'package:agnts_api/src/model/code_review.dart';
 import 'package:agnts_api/src/model/commit.dart';
+import 'package:agnts_api/src/model/commit_detail.dart';
+import 'package:agnts_api/src/model/commit_pull.dart';
 import 'package:agnts_api/src/model/confirm_totp_request.dart';
 import 'package:agnts_api/src/model/connect_integration_request.dart';
 import 'package:agnts_api/src/model/connect_result.dart';
@@ -404,6 +406,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return CodeReview.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Commit':
           return Commit.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CommitDetail':
+          return CommitDetail.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CommitPull':
+          return CommitPull.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ConfirmTotpRequest':
           return ConfirmTotpRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ConnectIntegrationRequest':

@@ -19,6 +19,7 @@ import SwitchToggle from '../components/form/SwitchToggle.vue'
 import ProviderTile from '../components/integrations/ProviderTile.vue'
 import { PROVIDERS } from '../components/integrations/providers'
 import { useIntegrations } from '../components/integrations/useIntegrations'
+import { settingsSection } from '../components/settings/sections'
 import HiIcon from '../components/ui/HiIcon.vue'
 import { lines } from '../components/ci/ci'
 import { LOCALES, type Locale } from '../i18n'
@@ -139,28 +140,10 @@ const codexModel = computed({
   },
 })
 
-// Each section is its own page at /settings/<section>; the side menu switches
-// between them. Edits are kept across sections until saved or discarded.
-const sections = computed(() => {
-  const d = draft.value
-  return [
-    { key: 'appearance', label: t('settings.appearance') },
-    { key: 'integrations', label: t('settings.integrations') },
-    { key: 'claude', label: t('settings.claude') },
-    { key: 'commits', label: t('settings.commits') },
-    { key: 'runs', label: t('settings.runs') },
-    ...(d?.guard ? [{ key: 'guardrails', label: t('harnessSettings.title') }] : []),
-    ...(d?.autoPreview !== undefined ? [{ key: 'preview', label: t('preview.settingsTitle') }] : []),
-    ...(d?.ci ? [{ key: 'ci', label: t('ci.settingsTitle') }] : []),
-    { key: 'network', label: t('network.title') },
-    ...(d?.notify ? [{ key: 'notify', label: t('settings.notify') }] : []),
-    { key: 'mcp', label: t('mcp.title') },
-  ]
-})
-const section = computed(() => {
-  const s = String(route.params.section ?? '')
-  return sections.value.some((x) => x.key === s) ? s : 'appearance'
-})
+// Each section is its own page at /settings/<section>; the sidebar lists
+// them under Settings. Edits are kept across sections until saved or
+// discarded.
+const section = computed(() => settingsSection(route.params.section))
 </script>
 
 <template>
@@ -168,22 +151,6 @@ const section = computed(() => {
   <p v-if="settings.isPending.value" class="hint">{{ t('common.loading') }}</p>
   <p v-else-if="settings.isError.value" class="ferr">{{ t('common.error') }}</p>
   <div v-else-if="draft" class="set-grid">
-    <aside class="set-side">
-      <section class="card">
-        <nav class="anchor-nav" :aria-label="t('settings.title')">
-          <RouterLink
-            v-for="x in sections"
-            :key="x.key"
-            :to="{ name: 'settings', params: { section: x.key } }"
-            :class="{ on: section === x.key }"
-            :aria-current="section === x.key ? 'page' : undefined"
-          >
-            {{ x.label }}
-          </RouterLink>
-        </nav>
-      </section>
-      <div class="help"><HiIcon name="info" /><p>{{ t('settings.secretsHelp') }}</p></div>
-    </aside>
     <div class="col">
       <section v-if="section === 'appearance'" id="s-look" class="card">
         <div class="ch"><div><h2>{{ t('settings.appearance') }}</h2><p class="sub">{{ t('settings.appearanceSub') }}</p></div></div>
@@ -439,21 +406,15 @@ const section = computed(() => {
       </section>
       <McpCard v-else-if="section === 'mcp'" />
 
+      <div class="help"><HiIcon name="info" /><p>{{ t('settings.secretsHelp') }}</p></div>
+
       <SaveBar v-if="dirty || error" :busy="save.isPending.value" :error="error" @save="save.mutate(draft)" @discard="discard" />
     </div>
   </div>
 </template>
 
 <style scoped>
-.set-grid { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 16px; align-items: start; }
-.set-side { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 88px; min-width: 0; }
-.anchor-nav a.on { background: var(--hover); color: var(--ink); }
-@media (max-width: 900px) {
-  .set-grid { grid-template-columns: minmax(0, 1fr); }
-  .set-side { position: static; }
-  .set-side .anchor-nav { flex-direction: row; overflow-x: auto; }
-  .set-side .anchor-nav a { white-space: nowrap; }
-}
+.set-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
 .guard-hooks { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
 .ci-infra { width: min(360px, 100%); min-height: 96px; font-family: var(--mono); font-size: 13px; }
 </style>

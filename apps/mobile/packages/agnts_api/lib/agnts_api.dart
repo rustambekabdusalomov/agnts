@@ -94,6 +94,8 @@ export 'package:agnts_api/src/model/claude_connection_input.dart';
 export 'package:agnts_api/src/model/claude_connection_state.dart';
 export 'package:agnts_api/src/model/code_review.dart';
 export 'package:agnts_api/src/model/commit.dart';
+export 'package:agnts_api/src/model/commit_detail.dart';
+export 'package:agnts_api/src/model/commit_pull.dart';
 export 'package:agnts_api/src/model/confirm_totp_request.dart';
 export 'package:agnts_api/src/model/connect_integration_request.dart';
 export 'package:agnts_api/src/model/connect_result.dart';

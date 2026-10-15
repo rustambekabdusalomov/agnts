@@ -194,3 +194,48 @@ func TestPRState(t *testing.T) {
 		t.Fatalf("closed: %v %v", s, err)
 	}
 }
+
+func TestCommitDetail(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		const c = "/api/v4/projects/acme%2Fapi/repository/commits/"
+		switch p := r.URL.EscapedPath(); p {
+		case c + "abc1234":
+			_, _ = io.WriteString(w, `{"id":"abc1234full","message":"PAY-1: fix\n","author_name":"Rustam","author_email":"r@x.io",
+				"authored_date":"2026-10-01T10:00:00Z","committer_name":"Rustam","committed_date":"2026-10-01T10:00:00Z",
+				"parent_ids":["p1","p2"],"web_url":"u","stats":{"additions":2,"deletions":1}}`)
+		case c + "abc1234full/diff":
+			_, _ = io.WriteString(w, `[{"old_path":"a.go","new_path":"a.go","diff":"@@ -1 +1,2 @@\n-x\n+y\n+z\n"},{"old_path":"b.go","new_path":"b.go","deleted_file":true,"diff":""}]`)
+		case "/api/v4/projects/acme%2Fapi/pipelines":
+			if r.URL.Query().Get("sha") != "abc1234full" {
+				t.Errorf("pipelines query: %s", r.URL.RawQuery)
+			}
+			_, _ = io.WriteString(w, `[{"id":7,"sha":"abc1234full","ref":"main","status":"success","source":"push"}]`)
+		case "/api/v4/projects/acme%2Fapi/pipelines/7/jobs":
+			_, _ = io.WriteString(w, `[{"id":1,"name":"unit","stage":"test","status":"success","duration":3}]`)
+		case c + "abc1234full/merge_requests":
+			_, _ = io.WriteString(w, `[{"iid":5,"title":"Fix","state":"opened","web_url":"m"}]`)
+		case "/api/v4/avatar":
+			_, _ = io.WriteString(w, `{"avatar_url":"https://a/r"}`)
+		default:
+			w.WriteHeader(404)
+		}
+	}))
+	defer srv.Close()
+	h := WithConfig(Config{URL: srv.URL, Token: "glpat"})
+	got, err := h.CommitDetail(context.Background(), domain.Repository{CloneURL: srv.URL + "/acme/api.git"}, "abc1234")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.SHA != "abc1234full" || len(got.Parents) != 2 || got.Add != 2 || got.AuthorAvatar != "https://a/r" {
+		t.Fatalf("commit: %+v", got)
+	}
+	if len(got.Files) != 2 || got.Files[0].Add != 2 || got.Files[0].Del != 1 || got.Files[1].Path != "b.go" {
+		t.Fatalf("files: %+v", got.Files)
+	}
+	if len(got.Pipelines) != 1 || got.Pipelines[0].Status != vcs.CIOK || len(got.Pipelines[0].Stages) != 1 {
+		t.Fatalf("pipelines: %+v", got.Pipelines)
+	}
+	if len(got.Pulls) != 1 || got.Pulls[0].State != "open" || got.Pulls[0].Number != 5 {
+		t.Fatalf("pulls: %+v", got.Pulls)
+	}
+}

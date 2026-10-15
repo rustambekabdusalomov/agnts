@@ -66,6 +66,8 @@ doc/ClaudeConnectionInput.md
 doc/ClaudeConnectionState.md
 doc/CodeReview.md
 doc/Commit.md
+doc/CommitDetail.md
+doc/CommitPull.md
 doc/ConfirmTotpRequest.md
 doc/ConnectIntegrationRequest.md
 doc/ConnectResult.md
@@ -412,6 +414,8 @@ lib/src/model/claude_connection_input.dart
 lib/src/model/claude_connection_state.dart
 lib/src/model/code_review.dart
 lib/src/model/commit.dart
+lib/src/model/commit_detail.dart
+lib/src/model/commit_pull.dart
 lib/src/model/confirm_totp_request.dart
 lib/src/model/connect_integration_request.dart
 lib/src/model/connect_result.dart
@@ -708,6 +712,8 @@ test/ci_watch_test.dart
 test/claude_connection_input_test.dart
 test/claude_connection_state_test.dart
 test/code_review_test.dart
+test/commit_detail_test.dart
+test/commit_pull_test.dart
 test/commit_test.dart
 test/confirm_totp_request_test.dart
 test/connect_integration_request_test.dart

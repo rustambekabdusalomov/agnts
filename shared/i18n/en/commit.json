@@ -1,0 +1,23 @@
+{
+  "commit": {
+    "back": "Back to commits",
+    "backTo": "Back to {repo}",
+    "authoredAgo": "{name} committed {time}",
+    "filesN": "{n, plural, one {# file} other {# files}}",
+    "author": "Author",
+    "authored": "Authored",
+    "committer": "Committed by",
+    "committed": "Committed",
+    "parents": "{n, plural, one {Parent} other {Parents}}",
+    "pulls": "Pull requests",
+    "pullsSub": "Pull requests (merge requests on GitLab) that contain this commit.",
+    "noPulls": "This commit is not in any pull request.",
+    "message": "Message",
+    "pipelinesSub": "CI runs on this commit, newest first.",
+    "noPipelines": "No CI runs on this commit.",
+    "changes": "Changes",
+    "changesSub": "{n, plural, one {# file} other {# files}} changed, {add} additions, {del} deletions.",
+    "noFiles": "This commit changes no files.",
+    "filesCapped": "This commit changes more files than can be shown here. The first {n} are listed; open it on the git host to see all of them."
+  }
+}

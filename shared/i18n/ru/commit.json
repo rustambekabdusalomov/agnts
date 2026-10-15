@@ -1,0 +1,23 @@
+{
+  "commit": {
+    "back": "Назад к коммитам",
+    "backTo": "Назад к {repo}",
+    "authoredAgo": "{name} закоммитил(а) {time}",
+    "filesN": "{n, plural, one {# файл} few {# файла} many {# файлов} other {# файла}}",
+    "author": "Автор",
+    "authored": "Создан",
+    "committer": "Закоммитил(а)",
+    "committed": "Закоммичен",
+    "parents": "{n, plural, one {Родитель} other {Родители}}",
+    "pulls": "Pull request’ы",
+    "pullsSub": "Pull request’ы (merge request’ы в GitLab), в которых есть этот коммит.",
+    "noPulls": "Этого коммита нет ни в одном pull request’е.",
+    "message": "Сообщение",
+    "pipelinesSub": "CI-запуски на этом коммите, новые сверху.",
+    "noPipelines": "На этом коммите не было CI-запусков.",
+    "changes": "Изменения",
+    "changesSub": "{n, plural, one {Изменён # файл} few {Изменено # файла} many {Изменено # файлов} other {Изменено # файла}}: +{add}, −{del}.",
+    "noFiles": "Этот коммит не меняет файлов.",
+    "filesCapped": "Коммит меняет больше файлов, чем можно показать здесь. Показаны первые {n}; остальные — на git-хостинге."
+  }
+}

@@ -2204,6 +2204,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/repos/{id}/commits/{sha}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+                sha: string;
+            };
+            cookie?: never;
+        };
+        /** One commit with the files it changes, the CI runs on it and the pull requests that contain it */
+        get: operations["getRepoCommit"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/repos/{id}/pipelines": {
         parameters: {
             query?: never;
@@ -5692,6 +5712,44 @@ export interface components {
             ci: components["schemas"]["CI"];
             url?: string;
             ticketKey?: string;
+        };
+        CommitPull: {
+            number: number;
+            title: string;
+            /** @enum {string} */
+            state: "open" | "merged" | "closed";
+            url: string;
+        };
+        CommitDetail: {
+            sha: string;
+            /** @description The full commit message */
+            message: string;
+            author: string;
+            authorEmail?: string;
+            /** @description The git host account, when the author's email maps to one */
+            authorLogin?: string;
+            authorAvatar?: string;
+            /**
+             * Format: date-time
+             * @description Authored
+             */
+            date?: string;
+            committer?: string;
+            committerEmail?: string;
+            /** Format: date-time */
+            committedDate?: string;
+            parents: string[];
+            url: string;
+            add: number;
+            del: number;
+            files: components["schemas"]["FileChange"][];
+            /** @description More files changed than are listed */
+            filesCapped?: boolean;
+            pipelines: components["schemas"]["Pipeline"][];
+            pulls: components["schemas"]["CommitPull"][];
+            ticketKey?: string;
+            /** @enum {string} */
+            provider: "github" | "gitlab";
         };
         Stage: {
             /** Format: int64 */
@@ -9769,6 +9827,33 @@ export interface operations {
                     "application/json": components["schemas"]["Commit"][];
                 };
             };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            502: components["responses"]["BadGateway"];
+        };
+    };
+    getRepoCommit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+                sha: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommitDetail"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
             502: components["responses"]["BadGateway"];

@@ -1044,6 +1044,76 @@
   "ciFeedbackRoundsHelp": "How many times a red check sends agnts's own pull request back to coding. 0 turns it off.",
   "ciInfraPatterns": "Infra patterns",
   "ciInfraPatternsHelp": "Regular expressions, one per line. A matching log is an infra failure: shown and counted, never a ticket. Added to the built-in ones.",
+  "commitBack": "Back to commits",
+  "commitBackTo": "Back to {repo}",
+  "@commitBackTo": {
+    "placeholders": {
+      "repo": {
+        "type": "String"
+      }
+    }
+  },
+  "commitAuthoredAgo": "{name} committed {time}",
+  "@commitAuthoredAgo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "commitFilesN": "{n, plural, one {{n} file} other {{n} files}}",
+  "@commitFilesN": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "commitAuthor": "Author",
+  "commitAuthored": "Authored",
+  "commitCommitter": "Committed by",
+  "commitCommitted": "Committed",
+  "commitParents": "{n, plural, one {Parent} other {Parents}}",
+  "@commitParents": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "commitPulls": "Pull requests",
+  "commitPullsSub": "Pull requests (merge requests on GitLab) that contain this commit.",
+  "commitNoPulls": "This commit is not in any pull request.",
+  "commitMessage": "Message",
+  "commitPipelinesSub": "CI runs on this commit, newest first.",
+  "commitNoPipelines": "No CI runs on this commit.",
+  "commitChanges": "Changes",
+  "commitChangesSub": "{n, plural, one {{n} file} other {{n} files}} changed, {add} additions, {del} deletions.",
+  "@commitChangesSub": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      },
+      "add": {
+        "type": "String"
+      },
+      "del": {
+        "type": "String"
+      }
+    }
+  },
+  "commitNoFiles": "This commit changes no files.",
+  "commitFilesCapped": "This commit changes more files than can be shown here. The first {n} are listed; open it on the git host to see all of them.",
+  "@commitFilesCapped": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
   "commonLoading": "Loading…",
   "commonError": "Something went wrong. Try again.",
   "commonSignedInAs": "Signed in as {username}",

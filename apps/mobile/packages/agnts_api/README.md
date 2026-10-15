@@ -187,6 +187,7 @@ Class | Method | HTTP request | Description
 [*ReposApi*](doc/ReposApi.md) | [**discardRepoBriefDraft**](doc/ReposApi.md#discardrepobriefdraft) | **POST** /repos/{id}/brief/discard | Drop the draft a survey wrote
 [*ReposApi*](doc/ReposApi.md) | [**getRepo**](doc/ReposApi.md#getrepo) | **GET** /repos/{id} | 
 [*ReposApi*](doc/ReposApi.md) | [**getRepoBrief**](doc/ReposApi.md#getrepobrief) | **GET** /repos/{id}/brief | What agnts knows about how the repository works; empty and idle before the first survey
+[*ReposApi*](doc/ReposApi.md) | [**getRepoCommit**](doc/ReposApi.md#getrepocommit) | **GET** /repos/{id}/commits/{sha} | One commit with the files it changes, the CI runs on it and the pull requests that contain it
 [*ReposApi*](doc/ReposApi.md) | [**getRepoGroup**](doc/ReposApi.md#getrepogroup) | **GET** /repo-groups/{id} | 
 [*ReposApi*](doc/ReposApi.md) | [**listRepoBranches**](doc/ReposApi.md#listrepobranches) | **GET** /repos/{id}/branches | Branches with their tip, ahead/behind the default branch and checks
 [*ReposApi*](doc/ReposApi.md) | [**listRepoCommits**](doc/ReposApi.md#listrepocommits) | **GET** /repos/{id}/commits | Commits on the default branch, newest first, 50 per page; a shorter page is the last
@@ -342,6 +343,8 @@ Class | Method | HTTP request | Description
  - [ClaudeConnectionState](doc/ClaudeConnectionState.md)
  - [CodeReview](doc/CodeReview.md)
  - [Commit](doc/Commit.md)
+ - [CommitDetail](doc/CommitDetail.md)
+ - [CommitPull](doc/CommitPull.md)
  - [ConfirmTotpRequest](doc/ConfirmTotpRequest.md)
  - [ConnectIntegrationRequest](doc/ConnectIntegrationRequest.md)
  - [ConnectResult](doc/ConnectResult.md)

@@ -77,6 +77,13 @@ void main() {
       // TODO
     });
 
+    // One commit with the files it changes, the CI runs on it and the pull requests that contain it
+    //
+    //Future<CommitDetail> getRepoCommit(int id, String sha) async
+    test('test getRepoCommit', () async {
+      // TODO
+    });
+
     //Future<RepoGroup> getRepoGroup(int id) async
     test('test getRepoGroup', () async {
       // TODO

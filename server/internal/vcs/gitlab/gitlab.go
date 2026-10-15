@@ -286,6 +286,11 @@ func (h *Host) Pipelines(ctx context.Context, repo domain.Repository, page, perP
 	if err != nil {
 		return nil, err
 	}
+	return h.pipelines(ctx, p, url.Values{"per_page": {fmt.Sprint(min(max(perPage, 1), 50))}, "page": {fmt.Sprint(max(page, 1))}})
+}
+
+// pipelines lists the project's pipelines matching q, with their jobs.
+func (h *Host) pipelines(ctx context.Context, p string, q url.Values) ([]vcs.Pipeline, error) {
 	var list []struct {
 		ID        int64     `json:"id"`
 		SHA       string    `json:"sha"`
@@ -296,7 +301,7 @@ func (h *Host) Pipelines(ctx context.Context, repo domain.Repository, page, perP
 		UpdatedAt time.Time `json:"updated_at"`
 		WebURL    string    `json:"web_url"`
 	}
-	if _, err := h.call(ctx, http.MethodGet, fmt.Sprintf("%s/pipelines?per_page=%d&page=%d", p, min(max(perPage, 1), 50), max(page, 1)), nil, &list); err != nil {
+	if _, err := h.call(ctx, http.MethodGet, p+"/pipelines?"+q.Encode(), nil, &list); err != nil {
 		return nil, err
 	}
 	out := make([]vcs.Pipeline, len(list))
@@ -329,6 +334,107 @@ func (h *Host) Pipelines(ctx context.Context, repo domain.Repository, page, perP
 			}
 			out[i].Stages = append(out[i].Stages, vcs.Stage{ID: jb.ID, Name: jb.Stage + ": " + jb.Name, Status: ciStatus(jb.Status),
 				Duration: time.Duration(jb.Duration * float64(time.Second)), Manual: jb.Status == "manual"})
+		}
+	})
+	return out, nil
+}
+
+// CommitDetail reads one commit with its diff, the pipelines on it and
+// the merge requests that contain it. Pipelines, merge requests and the
+// avatar are best effort.
+func (h *Host) CommitDetail(ctx context.Context, repo domain.Repository, sha string) (vcs.CommitDetail, error) {
+	p, err := h.project(ctx, repo)
+	if err != nil {
+		return vcs.CommitDetail{}, err
+	}
+	var c struct {
+		ID             string    `json:"id"`
+		Message        string    `json:"message"`
+		AuthorName     string    `json:"author_name"`
+		AuthorEmail    string    `json:"author_email"`
+		AuthoredDate   time.Time `json:"authored_date"`
+		CommitterName  string    `json:"committer_name"`
+		CommitterEmail string    `json:"committer_email"`
+		CommittedDate  time.Time `json:"committed_date"`
+		ParentIDs      []string  `json:"parent_ids"`
+		WebURL         string    `json:"web_url"`
+		Stats          *struct {
+			Additions int `json:"additions"`
+			Deletions int `json:"deletions"`
+		} `json:"stats"`
+	}
+	commit := p + "/repository/commits/" + url.PathEscape(sha)
+	if _, err := h.call(ctx, http.MethodGet, commit, nil, &c); err != nil {
+		return vcs.CommitDetail{}, err
+	}
+	out := vcs.CommitDetail{SHA: c.ID, Message: c.Message, Author: c.AuthorName, AuthorEmail: c.AuthorEmail, Date: c.AuthoredDate,
+		Committer: c.CommitterName, CommitterEmail: c.CommitterEmail, CommittedDate: c.CommittedDate, Parents: c.ParentIDs, URL: c.WebURL}
+	if c.Stats != nil {
+		out.Add, out.Del = c.Stats.Additions, c.Stats.Deletions
+	}
+	commit = p + "/repository/commits/" + url.PathEscape(out.SHA)
+	for page := 1; len(out.Files) < vcs.MaxCommitFiles; page++ {
+		var batch []struct {
+			OldPath     string `json:"old_path"`
+			NewPath     string `json:"new_path"`
+			Diff        string `json:"diff"`
+			DeletedFile bool   `json:"deleted_file"`
+		}
+		q := url.Values{"per_page": {"100"}, "page": {strconv.Itoa(page)}}
+		if _, err := h.call(ctx, http.MethodGet, commit+"/diff?"+q.Encode(), nil, &batch); err != nil {
+			return vcs.CommitDetail{}, err
+		}
+		for _, d := range batch {
+			f := domain.FileChange{Path: d.NewPath, Diff: d.Diff}
+			if d.DeletedFile || f.Path == "" {
+				f.Path = d.OldPath
+			}
+			for _, l := range strings.Split(d.Diff, "\n") {
+				switch {
+				case strings.HasPrefix(l, "+"):
+					f.Add++
+				case strings.HasPrefix(l, "-"):
+					f.Del++
+				}
+			}
+			out.Files = append(out.Files, f)
+		}
+		if len(batch) < 100 {
+			break
+		}
+	}
+
+	vcs.Limit([]int{0, 1, 2}, 3, func(_ int, which int) {
+		switch which {
+		case 0:
+			out.Pipelines, _ = h.pipelines(ctx, p, url.Values{"sha": {out.SHA}, "per_page": {"30"}})
+		case 1:
+			var mrs []struct {
+				IID    int    `json:"iid"`
+				Title  string `json:"title"`
+				State  string `json:"state"`
+				WebURL string `json:"web_url"`
+			}
+			if _, err := h.call(ctx, http.MethodGet, commit+"/merge_requests?per_page=20", nil, &mrs); err != nil {
+				return
+			}
+			for _, m := range mrs {
+				st := m.State
+				if st == "opened" || st == "locked" {
+					st = "open"
+				}
+				out.Pulls = append(out.Pulls, vcs.CommitPull{Number: m.IID, Title: m.Title, State: st, URL: m.WebURL})
+			}
+		case 2:
+			if out.AuthorEmail == "" {
+				return
+			}
+			var av struct {
+				AvatarURL string `json:"avatar_url"`
+			}
+			if _, err := h.call(ctx, http.MethodGet, "/avatar?"+url.Values{"email": {out.AuthorEmail}, "size": {"64"}}.Encode(), nil, &av); err == nil {
+				out.AuthorAvatar = av.AvatarURL
+			}
 		}
 	})
 	return out, nil

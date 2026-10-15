@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { api, unwrap } from '../../api/client'
 import { useScrollPages } from '../../composables/useScrollPages'
 import CiDot from './CiDot.vue'
@@ -9,6 +10,13 @@ import type { Commit } from './types'
 
 const props = defineProps<{ repoId: number }>()
 const { t, locale } = useI18n()
+const router = useRouter()
+const detail = (c: Commit) => ({ name: 'commit', params: { id: props.repoId, sha: c.sha } })
+// The whole row opens the commit; links inside it keep their own target.
+function openRow(e: MouseEvent, c: Commit) {
+  if ((e.target as HTMLElement).closest('a, button') || getSelection()?.toString()) return
+  void router.push(detail(c))
+}
 
 // 50 commits a page, the next loading as the bottom scrolls into view.
 const { query: commits, all, more, sentinel } = useScrollPages<Commit>({
@@ -50,10 +58,10 @@ const time = (iso?: string) => (iso ? new Date(iso).toLocaleTimeString(locale.va
     <template v-for="g in groups" :key="g.day">
       <div class="cm-day">{{ g.label }}</div>
       <div class="cm-list">
-        <div v-for="c in g.items" :key="c.sha" class="cm">
+        <div v-for="c in g.items" :key="c.sha" class="cm" data-k @click="openRow($event, c)">
           <CiDot :status="c.ci" />
           <div class="cm-b">
-            <div class="cm-m">{{ c.message }}</div>
+            <RouterLink class="cm-m" :to="detail(c)">{{ c.message }}</RouterLink>
             <div class="cm-meta">
               <span class="au">{{ c.author }}</span>
               <RouterLink v-if="c.ticketKey" :to="{ name: 'ticket', params: { key: c.ticketKey } }" class="badge b-info">{{ c.ticketKey }}</RouterLink>
@@ -79,3 +87,8 @@ const time = (iso?: string) => (iso ? new Date(iso).toLocaleTimeString(locale.va
     />
   </section>
 </template>
+
+<style scoped>
+.cm-m { display: block; color: inherit; text-decoration: none; }
+.cm-m:hover, .cm-m:focus-visible { text-decoration: underline; }
+</style>

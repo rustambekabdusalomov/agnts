@@ -19,6 +19,7 @@ Method | HTTP request | Description
 [**discardRepoBriefDraft**](ReposApi.md#discardrepobriefdraft) | **POST** /repos/{id}/brief/discard | Drop the draft a survey wrote
 [**getRepo**](ReposApi.md#getrepo) | **GET** /repos/{id} | 
 [**getRepoBrief**](ReposApi.md#getrepobrief) | **GET** /repos/{id}/brief | What agnts knows about how the repository works; empty and idle before the first survey
+[**getRepoCommit**](ReposApi.md#getrepocommit) | **GET** /repos/{id}/commits/{sha} | One commit with the files it changes, the CI runs on it and the pull requests that contain it
 [**getRepoGroup**](ReposApi.md#getrepogroup) | **GET** /repo-groups/{id} | 
 [**listRepoBranches**](ReposApi.md#listrepobranches) | **GET** /repos/{id}/branches | Branches with their tip, ahead/behind the default branch and checks
 [**listRepoCommits**](ReposApi.md#listrepocommits) | **GET** /repos/{id}/commits | Commits on the default branch, newest first, 50 per page; a shorter page is the last
@@ -478,6 +479,53 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**RepoBrief**](RepoBrief.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getRepoCommit**
+> CommitDetail getRepoCommit(id, sha)
+
+One commit with the files it changes, the CI runs on it and the pull requests that contain it
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getReposApi();
+final int id = 789; // int | 
+final String sha = sha_example; // String | 
+
+try {
+    final response = api.getRepoCommit(id, sha);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling ReposApi->getRepoCommit: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **sha** | **String**|  | 
+
+### Return type
+
+[**CommitDetail**](CommitDetail.md)
 
 ### Authorization
 

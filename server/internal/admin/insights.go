@@ -215,6 +215,16 @@ func (r *Repos) Browse(ctx context.Context, id int64, part string, page int) (Re
 	return out, err
 }
 
+// Commit reads one commit of a repository from its git host.
+func (r *Repos) Commit(ctx context.Context, id int64, sha string) (RepoView, vcs.CommitDetail, error) {
+	v, err := r.Get(ctx, id)
+	if err != nil {
+		return RepoView{}, vcs.CommitDetail{}, err
+	}
+	c, err := r.browser.CommitDetail(ctx, v.Repository, strings.ToLower(sha))
+	return v, c, err
+}
+
 // Push states of a local branch.
 const (
 	LocalOnly     = "local"    // origin does not have the branch

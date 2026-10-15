@@ -2618,6 +2618,28 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '502': { $ref: '#/components/responses/BadGateway' }
 
+  /repos/{id}/commits/{sha}:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+      - name: sha
+        in: path
+        required: true
+        schema: { type: string, pattern: '^[0-9a-fA-F]{7,64}$' }
+    get:
+      operationId: getRepoCommit
+      summary: One commit with the files it changes, the CI runs on it and the pull requests that contain it
+      tags: [repos]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CommitDetail' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+
   /repos/{id}/pipelines:
     parameters:
       - $ref: '#/components/parameters/RepoID'
@@ -6736,6 +6758,48 @@ components:
         ci: { $ref: '#/components/schemas/CI' }
         url: { type: string }
         ticketKey: { type: string }
+
+    CommitPull:
+      type: object
+      required: [number, title, state, url]
+      properties:
+        number: { type: integer }
+        title: { type: string }
+        state: { type: string, enum: [open, merged, closed] }
+        url: { type: string }
+
+    CommitDetail:
+      type: object
+      required: [sha, message, author, add, del, parents, url, files, pipelines, pulls, provider]
+      properties:
+        sha: { type: string }
+        message: { type: string, description: The full commit message }
+        author: { type: string }
+        authorEmail: { type: string }
+        authorLogin: { type: string, description: "The git host account, when the author's email maps to one" }
+        authorAvatar: { type: string }
+        date: { type: string, format: date-time, description: Authored }
+        committer: { type: string }
+        committerEmail: { type: string }
+        committedDate: { type: string, format: date-time }
+        parents:
+          type: array
+          items: { type: string }
+        url: { type: string }
+        add: { type: integer }
+        del: { type: integer }
+        files:
+          type: array
+          items: { $ref: '#/components/schemas/FileChange' }
+        filesCapped: { type: boolean, description: More files changed than are listed }
+        pipelines:
+          type: array
+          items: { $ref: '#/components/schemas/Pipeline' }
+        pulls:
+          type: array
+          items: { $ref: '#/components/schemas/CommitPull' }
+        ticketKey: { type: string }
+        provider: { type: string, enum: [github, gitlab] }
 
     Stage:
       type: object
