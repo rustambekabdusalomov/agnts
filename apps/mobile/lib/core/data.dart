@@ -146,3 +146,8 @@ final ticketCIProvider = FutureProvider.family<CIFailure?, String>((ref, key) as
     rethrow;
   }
 });
+
+/// A Swagger test's latest results (without the request bodies).
+final apiResultsProvider = FutureProvider.family<SwaggerResults, String>((ref, key) async {
+  return (await requireApi(ref).getSwaggerApi().getApiResults(key: key)).data!;
+});

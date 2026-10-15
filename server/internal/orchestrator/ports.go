@@ -349,6 +349,16 @@ type WorkspaceSpec struct {
 	Env []string
 	// Progress, if set, receives one line per provisioning step.
 	Progress func(msg string)
+	// Grants open host:port through the egress proxy for this container
+	// alone (a Swagger test's base URL, a spec fetch's URL). The proxy
+	// still refuses internal addresses for them.
+	Grants []Grant
+}
+
+// Grant lets one run container reach Host on Port.
+type Grant struct {
+	Host string `json:"host"`
+	Port int    `json:"port"`
 }
 
 // ToolchainError is returned by Runner.Open when a toolchain could not be

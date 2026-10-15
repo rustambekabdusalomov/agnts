@@ -25,6 +25,7 @@ import (
 
 	"agnts/internal/domain"
 	"agnts/internal/netroute"
+	"agnts/internal/orchestrator"
 	"agnts/internal/privnet"
 	"agnts/internal/runner"
 	"agnts/internal/secret"
@@ -210,11 +211,28 @@ func TestSaveAndIsolation(t *testing.T) {
 	// The egress question: only a's runs reach a's routes, and the answer
 	// names the network.
 	h.svc.SetRuns(nil, func(ip string) (runner.Identity, bool) {
-		if ip == "172.18.0.5" {
+		switch ip {
+		case "172.18.0.5":
 			return runner.Identity{Workspace: h.wsA, Ticket: "PAY-1"}, true
+		case "172.18.0.7":
+			return runner.Identity{Workspace: h.wsA, Ticket: "API-7", Grants: []orchestrator.Grant{{Host: "api.staging.test", Port: 8080}, {Host: "gitlab.corp.local", Port: 443}}}, true
 		}
 		return runner.Identity{}, false
 	})
+	// Grants: that container alone, that port alone; a host on the
+	// private network's routes still goes through the network.
+	if got := h.internal(t, http.MethodGet, "/egress/route?ip=172.18.0.7&host=api.staging.test&port=8080", ""); !strings.Contains(got, `"grant":true`) || !strings.Contains(got, `"ticket":"API-7"`) {
+		t.Errorf("grant: %s", got)
+	}
+	if got := h.internal(t, http.MethodGet, "/egress/route?ip=172.18.0.7&host=api.staging.test&port=5432", ""); strings.Contains(got, "grant") {
+		t.Errorf("another port granted: %s", got)
+	}
+	if got := h.internal(t, http.MethodGet, "/egress/route?ip=172.18.0.5&host=api.staging.test&port=8080", ""); strings.Contains(got, "grant") {
+		t.Errorf("another container granted: %s", got)
+	}
+	if got := h.internal(t, http.MethodGet, "/egress/route?ip=172.18.0.7&host=gitlab.corp.local&port=443", ""); strings.Contains(got, "grant") || !strings.Contains(got, `"network"`) {
+		t.Errorf("a routed host: %s", got)
+	}
 	if got := h.internal(t, http.MethodGet, "/egress/route?ip=172.18.0.5&host=gitlab.corp.local&port=443", ""); !strings.Contains(got, `"ticket":"PAY-1"`) ||
 		!strings.Contains(got, fmt.Sprintf(`"network":%d`, id)) {
 		t.Errorf("route: %s", got)

@@ -971,6 +971,221 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '409': { $ref: '#/components/responses/Conflict' }
 
+  /swagger-tests/spec:
+    post:
+      operationId: readSwaggerSpec
+      summary: Fetch (from a URL or a docs page in front of it) or read (uploaded text) a Swagger/OpenAPI spec for the Swagger test form; nothing is stored
+      description: >-
+        A URL is fetched by a short container behind the egress proxy, never
+        by the agnts server: at most one fetch at a time per workspace and 10
+        a minute, and a URL fetched in the last 10 minutes comes from the
+        cache. An uploaded spec is kept for an hour under specRef, which the
+        create call refers to. A docs page offering several specs returns
+        them as choices.
+      tags: [swagger]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SwaggerSpecInput' }
+      responses:
+        '200':
+          description: The spec, or the specs to choose from
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SwaggerSpec' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429':
+          description: Too many spec fetches in the last minute
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /swagger-tests:
+    post:
+      operationId: createSwaggerTest
+      summary: Create a Swagger test ticket; it starts at once (no analysis) unless start is queue
+      tags: [swagger]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SwaggerTestCreate' }
+      responses:
+        '201': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /swagger-suites:
+    get:
+      operationId: listSwaggerSuites
+      summary: Saved Swagger test suites
+      tags: [swagger]
+      responses:
+        '200':
+          description: The suites
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/SwaggerSuite' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      operationId: createSwaggerSuite
+      summary: Keep a Swagger test ticket's test as a suite that runs again on a schedule or after each deploy
+      tags: [swagger]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SwaggerSuiteInput' }
+      responses:
+        '201':
+          description: The suite
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SwaggerSuite' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /swagger-suites/{id}:
+    parameters:
+      - $ref: '#/components/parameters/SuiteID'
+    get:
+      operationId: getSwaggerSuite
+      summary: One suite
+      tags: [swagger]
+      responses:
+        '200':
+          description: The suite
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SwaggerSuite' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      operationId: updateSwaggerSuite
+      summary: Rename a suite, change its schedule, pause it or give it a new token
+      tags: [swagger]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SwaggerSuiteInput' }
+      responses:
+        '200':
+          description: The suite
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SwaggerSuite' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      operationId: deleteSwaggerSuite
+      summary: Delete a suite; its past runs stay
+      tags: [swagger]
+      responses:
+        '204': { description: Deleted }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /swagger-suites/{id}/run:
+    parameters:
+      - $ref: '#/components/parameters/SuiteID'
+    post:
+      operationId: runSwaggerSuite
+      summary: Run a suite now, as a new Swagger test ticket
+      tags: [swagger]
+      responses:
+        '201': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /swagger-suites/{id}/hook:
+    parameters:
+      - $ref: '#/components/parameters/SuiteID'
+    post:
+      operationId: rotateSwaggerSuiteHook
+      summary: Make a new deploy hook URL for a suite (shown once; the old one stops working)
+      description: A deploy pipeline POSTs to the URL, with no body, to run the suite after each deploy.
+      tags: [swagger]
+      responses:
+        '200':
+          description: The hook URL
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [url]
+                properties:
+                  url: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/api-results:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    get:
+      operationId: getApiResults
+      summary: A Swagger test's latest results, its request log (without bodies) and how it compares with the run before
+      tags: [swagger]
+      responses:
+        '200':
+          description: The results
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SwaggerResults' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/api-results/requests/{requestId}:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+      - name: requestId
+        in: path
+        required: true
+        schema: { type: string, pattern: '^r-[0-9]{1,6}$' }
+    get:
+      operationId: getApiRequest
+      summary: One logged request and response of a Swagger test's latest run (credentials masked)
+      tags: [swagger]
+      responses:
+        '200':
+          description: The exchange
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiExchange' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/swagger-test/rerun:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: rerunSwaggerTest
+      summary: Run a Swagger test again
+      description: >-
+        An open test (in review or failed) runs again in place; a new token
+        is optional. A closed one (done or rejected) runs again as a new
+        ticket, returned here, and needs a token: closing deleted the old one.
+      tags: [swagger]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SwaggerRerunInput' }
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
   /tasks:
     post:
       operationId: createTask
@@ -4173,6 +4388,11 @@ components:
       in: path
       required: true
       schema: { type: integer, minimum: 1 }
+    SuiteID:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
     TicketKey:
       name: key
       in: path
@@ -4561,13 +4781,15 @@ components:
 
     TicketKind:
       type: string
-      enum: [code, test, plan, analysis, bug, review]
+      enum: [code, test, plan, analysis, bug, review, swaggertest]
       description: >-
         What the work produces. code and test make a change (diff, checks,
         pull request); plan, analysis and bug write a Markdown report.
         review reviews a pull request someone else opened (source git):
         approving it merges the pull request. Nobody picks review: those
-        tickets come from syncing the git host.
+        tickets come from syncing the git host. swaggertest tests an HTTP
+        API against its Swagger/OpenAPI spec and reports the results; those
+        tickets come from the Swagger test form only.
 
     TicketKindChoice:
       type: string
@@ -5583,6 +5805,252 @@ components:
           maxItems: 10
           description: 'The files the description should have: the task''s files to keep and new uploads. Left out keeps them; files not listed are deleted.'
           items: { type: integer, format: int64 }
+
+    SwaggerSuiteInput:
+      type: object
+      properties:
+        fromTicket: { type: string, maxLength: 64, description: 'Create: the Swagger test ticket whose test to keep' }
+        name: { type: string, maxLength: 100 }
+        schedule: { type: string, enum: ['off', hourly, daily, weekly], description: 'off runs only by hand or the deploy hook' }
+        hour: { type: integer, minimum: 0, maximum: 23, description: 'UTC hour of daily and weekly runs (weekly: Mondays)' }
+        enabled: { type: boolean }
+        token: { type: string, maxLength: 8192, writeOnly: true, description: 'A new token for the suite; left out keeps it (a new suite takes the ticket''s)' }
+
+    SwaggerSuite:
+      type: object
+      required: [id, name, baseUrl, operations, writeEnabled, authKind, hasToken, schedule, hour, enabled, hookSet, createdAt]
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        specUrl: { type: string }
+        baseUrl: { type: string }
+        operations: { type: integer, description: 'How many endpoints it tests' }
+        writeEnabled: { type: boolean }
+        authKind: { $ref: '#/components/schemas/ApiAuthKind' }
+        hasToken: { type: boolean }
+        repoId: { type: integer, format: int64 }
+        schedule: { type: string, enum: ['off', hourly, daily, weekly] }
+        hour: { type: integer }
+        enabled: { type: boolean }
+        hookSet: { type: boolean, description: 'A deploy hook URL exists' }
+        lastRunAt: { type: string, format: date-time }
+        nextRunAt: { type: string, format: date-time }
+        lastTicketKey: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    SwaggerSpecInput:
+      type: object
+      description: >-
+        Give url, or spec (the uploaded or pasted file's text). A spec URL
+        behind auth takes auth: the token goes with the fetch to the spec's
+        host only and is not stored; the answer's specRef then stands for the
+        spec. A URL that answers 401 or 403 without it fails with the error
+        code spec_needs_auth.
+      properties:
+        url: { type: string, maxLength: 2000 }
+        spec: { type: string, maxLength: 5242880 }
+        auth: { $ref: '#/components/schemas/SwaggerAuthInput' }
+        login:
+          type: object
+          description: 'The login and password that open the spec URL (HTTP Basic); used instead of auth. Not stored. A URL that asks for one fails with spec_needs_login.'
+          required: [username, password]
+          properties:
+            username: { type: string, maxLength: 200 }
+            password: { type: string, maxLength: 1000, writeOnly: true }
+
+    SwaggerSpec:
+      type: object
+      required: [operations, servers, securitySchemes, choices]
+      properties:
+        specRef: { type: string, description: 'An uploaded spec, or one fetched with a token, kept for an hour: pass it to createSwaggerTest' }
+        url: { type: string, description: 'Where the spec was found (a docs page leads to its spec)' }
+        title: { type: string }
+        version: { type: string }
+        format: { type: string, description: '"swagger 2.0" or "openapi 3.x"' }
+        servers:
+          type: array
+          items: { $ref: '#/components/schemas/SwaggerServer' }
+        operations:
+          type: array
+          items: { $ref: '#/components/schemas/SwaggerOperation' }
+        securitySchemes:
+          type: array
+          items: { $ref: '#/components/schemas/SwaggerSecurityScheme' }
+        choices:
+          type: array
+          description: The specs a docs page offers; read the chosen one's url
+          items:
+            type: object
+            required: [url]
+            properties:
+              name: { type: string }
+              url: { type: string }
+
+    SwaggerServer:
+      type: object
+      required: [url]
+      properties:
+        url: { type: string, description: 'Variables filled with their defaults; relative URLs resolved against the spec URL' }
+        description: { type: string }
+        variables:
+          type: array
+          items:
+            type: object
+            required: [name, default]
+            properties:
+              name: { type: string }
+              default: { type: string }
+              enum: { type: array, items: { type: string } }
+
+    SwaggerOperation:
+      type: object
+      required: [method, path, default]
+      properties:
+        method: { type: string }
+        path: { type: string }
+        operationId: { type: string }
+        summary: { type: string }
+        tags: { type: array, items: { type: string } }
+        deprecated: { type: boolean }
+        sideEffect: { type: string, description: 'Why a GET probably changes something (logout, export, send ...); such operations start unticked' }
+        security: { type: array, items: { type: string } }
+        default: { type: boolean, description: 'Ticked in the form by default' }
+
+    SwaggerSecurityScheme:
+      type: object
+      required: [name, type]
+      properties:
+        name: { type: string }
+        type: { type: string }
+        scheme: { type: string }
+        in: { type: string }
+        param: { type: string }
+        authKind: { $ref: '#/components/schemas/ApiAuthKind' }
+
+    ApiAuthKind:
+      type: string
+      enum: [none, bearer, header, query, basic]
+
+    SwaggerTestCreate:
+      type: object
+      description: >-
+        Tick operations to test exactly those, or leave them out and say in
+        notes which endpoints to test: the run then sees the whole spec and
+        tests only what the notes name. One of the two is required.
+      required: [baseUrl]
+      properties:
+        title: { type: string, maxLength: 200, description: 'Defaults to "Swagger test: <API> on <host>"' }
+        specUrl: { type: string, maxLength: 2000, description: 'The URL readSwaggerSpec read (served from its cache)' }
+        specRef: { type: string, maxLength: 100, description: 'An uploaded spec, from readSwaggerSpec' }
+        baseUrl: { type: string, maxLength: 2000 }
+        operations:
+          type: array
+          maxItems: 500
+          items: { type: string, maxLength: 1000, description: 'METHOD /path' }
+        writeEnabled: { type: boolean, description: 'Send POST, PUT, PATCH and DELETE too; off by default' }
+        notProduction: { type: boolean, description: 'Confirms the base URL is not production; required with writeEnabled' }
+        auth: { $ref: '#/components/schemas/SwaggerAuthInput' }
+        repoId: { type: integer, format: int64, description: 'Optional: the API''s repository, to explain failures' }
+        notes: { type: string, maxLength: 20000, description: 'What to test: which endpoints, cases or data. Without operations, it decides the scope.' }
+        rateLimit: { type: integer, minimum: 0, maximum: 20, description: 'Requests a second (0: 5)' }
+        maxRequests: { type: integer, minimum: 0, maximum: 1000, description: 'Requests per run (0: 300)' }
+        priority: { type: string, enum: [low, medium, high] }
+        start: { type: string, enum: [code, queue], description: 'code starts now; queue keeps it until started' }
+
+    SwaggerAuthInput:
+      type: object
+      required: [kind]
+      properties:
+        kind: { $ref: '#/components/schemas/ApiAuthKind' }
+        name: { type: string, maxLength: 100, description: 'The header or query parameter of an API key' }
+        value: { type: string, maxLength: 8192, writeOnly: true, description: 'The token (user:password for basic). Sealed, never returned, deleted when the ticket closes' }
+
+    SwaggerRerunInput:
+      type: object
+      properties:
+        token: { type: string, maxLength: 8192, writeOnly: true, description: 'A new token; required for a closed test with auth' }
+
+    SwaggerTestView:
+      type: object
+      required: [baseUrl, operations, writeEnabled, authKind, hasToken, rateLimit, maxRequests]
+      properties:
+        specUrl: { type: string }
+        baseUrl: { type: string }
+        operations: { type: array, items: { type: string } }
+        writeEnabled: { type: boolean }
+        authKind: { $ref: '#/components/schemas/ApiAuthKind' }
+        authName: { type: string }
+        hasToken: { type: boolean, description: 'A sealed token is stored (never returned)' }
+        rateLimit: { type: integer }
+        maxRequests: { type: integer }
+        suiteId: { type: integer, format: int64 }
+
+    ApiCounts:
+      type: object
+      required: [passed, failed, skipped, blocked]
+      properties:
+        passed: { type: integer }
+        failed: { type: integer }
+        skipped: { type: integer }
+        blocked: { type: integer }
+
+    ApiCase:
+      type: object
+      required: [id, operation, case, verdict, requests, source]
+      properties:
+        id: { type: string }
+        operation: { type: string }
+        case: { type: string }
+        expected: { type: string }
+        verdict: { type: string, enum: [pass, fail, skipped, blocked] }
+        reason: { type: string }
+        requests: { type: array, items: { type: string } }
+        source: { type: string, enum: [claude, schema], description: 'schema: agnts''s own check of the response against the spec' }
+
+    ApiRequestRow:
+      type: object
+      required: [id, method, url, status, ms]
+      properties:
+        id: { type: string }
+        case: { type: string }
+        auth: { type: string, description: 'default, none or wrong' }
+        method: { type: string }
+        url: { type: string }
+        status: { type: integer, description: '0 when no response came back' }
+        ms: { type: integer, format: int64 }
+        error: { type: string }
+        truncated: { type: boolean }
+
+    ApiExchange:
+      allOf:
+        - $ref: '#/components/schemas/ApiRequestRow'
+        - type: object
+          properties:
+            requestHeaders: { type: object, additionalProperties: { type: string } }
+            requestBody: { type: string }
+            responseHeaders: { type: object, additionalProperties: { type: string } }
+            responseBody: { type: string }
+            at: { type: string, format: date-time }
+
+    SwaggerResults:
+      type: object
+      required: [test, cases, requests, notes, newFailures]
+      properties:
+        test: { $ref: '#/components/schemas/SwaggerTestView' }
+        runId: { type: integer, format: int64, description: 'Absent until a run finished' }
+        createdAt: { type: string, format: date-time }
+        status: { type: string }
+        summary: { type: string }
+        counts: { $ref: '#/components/schemas/ApiCounts' }
+        cases:
+          type: array
+          items: { $ref: '#/components/schemas/ApiCase' }
+        requests:
+          type: array
+          items: { $ref: '#/components/schemas/ApiRequestRow' }
+        notes: { type: array, items: { type: string }, description: 'What agnts dropped or added while checking' }
+        previous: { $ref: '#/components/schemas/ApiCounts' }
+        newFailures: { type: array, items: { type: string }, description: 'Cases failing now that did not fail in the run before' }
 
     EventPage:
       type: object

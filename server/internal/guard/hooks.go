@@ -273,6 +273,9 @@ func (h *handler) blocks(kind string) bool {
 }
 
 func (h *handler) pre() {
+	if h.cfg.On(HookAPI) && h.preAPI() {
+		return
+	}
 	if h.notice() {
 		return
 	}

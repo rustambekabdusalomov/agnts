@@ -85,8 +85,12 @@ describe('PullConversation', () => {
     await w.findAll('.tab')[1].trigger('click')
     expect(w.text()).toContain('Written on an earlier version')
     expect(w.find('.pf-threads').text()).toContain('Why not LRU?') // under line 2 (+c)
-    // "+" on the unchanged line 1: both numbers, as GitLab needs.
+    // The comment button on the unchanged line 1: both numbers, as GitLab needs.
+    expect(w.find('.pf-hint').text()).toContain('click the comment button')
+    expect(w.findAll('.pf-add')[0].attributes('title')).toBe('Comment on line 1')
+    expect(w.findAll('.pf-add')[0].find('svg').exists()).toBe(true)
     await w.findAll('.pf-add')[0].trigger('click')
+    expect(w.findAll('.pf-add')[0].classes()).toContain('on')
     await w.find('.pf-threads textarea').setValue('nit')
     await w.findAll('.pf-threads button').find((b) => b.text() === 'Comment')!.trigger('click')
     await flushPromises()

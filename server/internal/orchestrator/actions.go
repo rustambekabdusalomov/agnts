@@ -593,7 +593,9 @@ func (o *Orchestrator) Start(ctx context.Context, key string, origin domain.Orig
 	if err != nil {
 		return t, err
 	}
-	if t.State != domain.StateNew || !t.Held {
+	// A queued Swagger test waits in coding: it has no analysis.
+	queuedTest := t.Kind == domain.KindSwaggerTest && t.State == domain.StateCoding
+	if (t.State != domain.StateNew && !queuedTest) || !t.Held {
 		return t, &domain.TransitionError{Key: key, From: t.State, To: domain.StateAnalyzing}
 	}
 	t, err = o.store.UpdateTicket(ctx, key, &domain.Event{
@@ -784,7 +786,7 @@ func (o *Orchestrator) SetKind(ctx context.Context, key, kind string, origin dom
 			bad = &domain.TransitionError{Key: key, From: x.State, To: x.State}
 			return
 		}
-		if x.Pushed() || x.ResumeState == domain.StatePushing || x.Kind == domain.KindReview {
+		if x.Pushed() || x.ResumeState == domain.StatePushing || x.Kind == domain.KindReview || x.Kind == domain.KindSwaggerTest {
 			bad = &domain.TransitionError{Key: key, From: x.State, To: x.State}
 			return
 		}
@@ -1023,6 +1025,9 @@ type TicketView struct {
 	Relations Relations
 	// Attachments are the files attached to the task, answers and retries.
 	Attachments []domain.Attachment
+	// Swagger is a Swagger test's latest results (nil for other kinds, and
+	// before its first run ends). Its log is left out.
+	Swagger *SwaggerView
 }
 
 // TicketRow is a ticket for lists, with when it entered its state.
@@ -1124,6 +1129,12 @@ func (o *Orchestrator) View(ctx context.Context, key string) (TicketView, error)
 	}
 	if v.Attachments, err = o.store.TicketAttachments(ctx, t.ID); err != nil {
 		return v, err
+	}
+	if t.Kind == domain.KindSwaggerTest {
+		if sv, err := o.SwaggerResultsOf(ctx, key); err == nil && sv.Run != nil {
+			sv.Run.Log = nil
+			v.Swagger = &sv
+		}
 	}
 	if r, err := o.store.LatestResult(ctx, t.ID, domain.StageAnalyze); err == nil {
 		if a, err := parseAnalysis(r.Summary); err == nil {

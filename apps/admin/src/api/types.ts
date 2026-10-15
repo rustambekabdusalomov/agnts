@@ -156,16 +156,18 @@ export const isPullReview = (t: Pick<Ticket, 'kind'>) => t.kind === 'review'
 export const pullHost = (url?: string) => (url && /gitlab/i.test(new URL(url, 'https://x').hostname) ? 'GitLab' : 'GitHub')
 /** Kinds whose work is a Markdown report instead of a change. */
 export const REPORT_KINDS: TicketKind[] = ['plan', 'analysis', 'bug']
-export const isReport = (t: Pick<Ticket, 'kind'>) => REPORT_KINDS.includes(t.kind)
+/** Swagger tests report too (results and a report), from a form of their own. */
+export const isSwaggerTest = (t: Pick<Ticket, 'kind'>) => t.kind === 'swaggertest'
+export const isReport = (t: Pick<Ticket, 'kind'>) => REPORT_KINDS.includes(t.kind) || isSwaggerTest(t)
 /** Mirrors the server: code and test need a repository, unless agnts still picks the kind. */
-export const needsRepo = (t: Pick<Ticket, 'kind' | 'kindAuto'>) => !t.kindAuto && !REPORT_KINDS.includes(t.kind)
+export const needsRepo = (t: Pick<Ticket, 'kind' | 'kindAuto'>) => !t.kindAuto && !REPORT_KINDS.includes(t.kind) && !isSwaggerTest(t)
 /** States in which the kind can still change (server: SetKind). */
 export const KIND_EDITABLE: TicketState[] = ['new', 'waiting_for_answers', 'failed', 'rate_limited']
 
 /** i18n key of a ticket's state: reports read "Writing" and "Done" where changes read "Coding" and "Pushed". */
 export function stateKey(state: TicketState, kind?: TicketKind): string {
   if (kind === 'review' && ['analyzing', 'coding', 'waiting_for_review', 'pushing', 'done', 'rejected'].includes(state)) return `state.review.${state}`
-  if (kind && REPORT_KINDS.includes(kind) && ['coding', 'pushing', 'done'].includes(state)) return `state.report.${state}`
+  if (kind && (REPORT_KINDS.includes(kind) || kind === 'swaggertest') && ['coding', 'pushing', 'done'].includes(state)) return `state.report.${state}`
   return `state.${state}`
 }
 export type PrivateNetwork = S['PrivateNetwork']
@@ -184,3 +186,16 @@ export type AssistantLink = S['AssistantLink']
 export type AssistantLanguage = S['AssistantLanguage']
 export type AssistantStats = S['AssistantStats']
 export type AssistantRated = S['AssistantRated']
+
+export type SwaggerSpec = S['SwaggerSpec']
+export type SwaggerOperation = S['SwaggerOperation']
+export type SwaggerSecurityScheme = S['SwaggerSecurityScheme']
+export type SwaggerTestCreate = S['SwaggerTestCreate']
+export type SwaggerResults = S['SwaggerResults']
+export type ApiCase = S['ApiCase']
+export type ApiRequestRow = S['ApiRequestRow']
+export type ApiExchange = S['ApiExchange']
+export type ApiAuthKind = S['ApiAuthKind']
+export type ApiVerdict = ApiCase['verdict']
+export type SwaggerSuite = S['SwaggerSuite']
+export type SwaggerSuiteInput = S['SwaggerSuiteInput']

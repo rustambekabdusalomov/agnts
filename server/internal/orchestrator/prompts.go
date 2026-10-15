@@ -17,7 +17,7 @@ import (
 // Analytics page can compare the quality of the work before and after a
 // change: bump it whenever a change to the prompts or to the context runs
 // get could change what Claude does.
-const PromptVersion = "2026-10-14.1"
+const PromptVersion = "2026-10-15.1"
 
 // Files Claude Code writes for agnts to read back. stream-json output has no
 // structured result, so the contract is a file outside the repository.
@@ -170,6 +170,9 @@ var kindWork = map[domain.TicketKind]string{
 	domain.KindPlan:     "write an implementation plan for a change, without making it",
 	domain.KindAnalysis: "research a question (about the code, a design, the product or anything else) and report the findings",
 	domain.KindBug:      "find the root cause of a bug and propose a fix, without making it",
+	// KindSwaggerTest has a prompt of its own (swaggertest); this names
+	// its work where prompts describe a ticket's kind.
+	domain.KindSwaggerTest: "test an HTTP API against its Swagger/OpenAPI spec and report the results",
 }
 
 var prompts = template.Must(template.New("").Funcs(template.FuncMap{

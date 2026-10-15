@@ -14,8 +14,9 @@ const { t } = useI18n()
 const qc = useQueryClient()
 const ui = useUi()
 
-// A review's kind never changes (the page hides the picker), so it is never a choice here.
-const current = computed<TicketKindChoice | 'review'>(() => (props.ticket.kindAuto ? 'auto' : props.ticket.kind))
+// A review's or Swagger test's kind never changes (the page hides the
+// picker), so it is never a choice here.
+const current = computed<TicketKindChoice | 'review' | 'swaggertest'>(() => (props.ticket.kindAuto ? 'auto' : props.ticket.kind))
 const choices = computed(() => (['auto', ...KINDS] as TicketKindChoice[]).map((k) => ({ value: k, label: t(`kind.${k}`), hint: t(`kind.${k}Hint`) })))
 
 const save = useMutation({

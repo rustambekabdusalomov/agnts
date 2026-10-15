@@ -357,17 +357,24 @@ func egressProxy(ctx context.Context) error {
 	// Private networks: a run's connection to a host on its workspace's
 	// routes goes through the gateway. agnts says which workspace a run
 	// container's address belongs to.
-	if gw, secret := strings.TrimSpace(os.Getenv("AGNTS_GATEWAY")), strings.TrimSpace(os.Getenv("AGNTS_GATEWAY_SECRET")); gw != "" && secret != "" {
+	// The same lookup answers grants: a host one run container alone may
+	// reach (a Swagger test's base URL), which needs the secret but no
+	// gateway.
+	if gw, secret := strings.TrimSpace(os.Getenv("AGNTS_GATEWAY")), strings.TrimSpace(os.Getenv("AGNTS_GATEWAY_SECRET")); secret != "" {
 		routeURL := strings.TrimSpace(os.Getenv("AGNTS_EGRESS_ROUTE_URL"))
 		if routeURL == "" {
 			routeURL = "http://agnts:8081/egress/route"
 		}
-		proxy.SetPrivate(egress.HTTPRouter{URL: routeURL, Secret: secret, Client: &http.Client{Timeout: 5 * time.Second}},
-			func(ctx context.Context, p egress.Private, target string) (net.Conn, error) {
+		var dial egress.GatewayDial
+		if gw != "" {
+			dial = func(ctx context.Context, p egress.Private, target string) (net.Conn, error) {
 				c, _, err := privnet.DialGateway(ctx, gw, secret, privnet.DialRequest{Workspace: p.Workspace, Network: p.Network, Ticket: p.Ticket, Target: target, Source: "run"})
 				return c, err
-			})
-		log.Info("egress proxy: private networks through the gateway", "gateway", gw)
+			}
+			log.Info("egress proxy: private networks through the gateway", "gateway", gw)
+		}
+		proxy.SetPrivate(egress.HTTPRouter{URL: routeURL, Secret: secret, Client: &http.Client{Timeout: 5 * time.Second}}, dial)
+		log.Info("egress proxy: per-run grants on", "route", routeURL)
 	}
 	srv := &http.Server{Addr: addr, Handler: proxy, ReadHeaderTimeout: 10 * time.Second}
 	go func() {

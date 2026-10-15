@@ -206,7 +206,11 @@ func (n *Notifier) handle(ctx context.Context, e domain.Event) {
 	}
 	title, body := pushText(v, e)
 	if s.Notify.Push && n.fcm != nil {
-		n.push(ctx, Push{Title: title, Body: body, Ticket: v.Ticket.Key})
+		p := Push{Title: title, Body: body, Ticket: v.Ticket.Key}
+		if v.Swagger != nil && v.Ticket.State == domain.StateWaitingForReview {
+			p.Route = "/tickets/" + v.Ticket.Key + "/api-results" // the app's results screen
+		}
+		n.push(ctx, p)
 	}
 	if s.Notify.Telegram {
 		if err := n.sendTelegram(ctx, v, e); err != nil {
@@ -470,6 +474,41 @@ func (n *Notifier) preview(ctx context.Context, e domain.Event) {
 	}
 }
 
+// swaggerLine is "API-7: 37 passed, 3 failed", new failures first for a
+// test compared with its last run.
+func swaggerLine(key string, sw orchestrator.SwaggerView) string {
+	line := key + ": " + sw.Run.Results.Counts().SummaryLine()
+	if n := len(sw.NewFailures); n > 0 {
+		line = fmt.Sprintf("%s: %d new %s · %s", key, n, plural(n, "failure", "failures"), sw.Run.Results.Counts().SummaryLine())
+	}
+	return line
+}
+
+// swaggerText is a Swagger test's results for Telegram: the counts, what
+// is new, and the first failures.
+func swaggerText(t domain.Ticket, sw orchestrator.SwaggerView) string {
+	text := swaggerLine(t.Key, sw) + "\n" + t.Title
+	if len(sw.NewFailures) > 0 {
+		text += "\n\nNew since the last run:\n- " + truncate(strings.Join(sw.NewFailures, "\n- "), 900)
+	}
+	shown := 0
+	for _, c := range sw.Run.Results.Cases {
+		if c.Verdict != domain.VerdictFail {
+			continue
+		}
+		if shown == 0 {
+			text += "\n\nFailures:"
+		}
+		if shown == 5 {
+			text += "\n…"
+			break
+		}
+		text += "\n- " + c.Operation + " · " + truncate(c.Case+": "+c.Reason, 200)
+		shown++
+	}
+	return text + "\n\nOpen the API results in agnts for the request and response behind each one."
+}
+
 func plural(n int, one, many string) string {
 	if n == 1 {
 		return one
@@ -483,6 +522,9 @@ func pushText(v orchestrator.TicketView, e domain.Event) (string, string) {
 	case domain.StateWaitingForAnswers:
 		return fmt.Sprintf("%s: %d questions", k, len(v.Questions)), v.Ticket.Title
 	case domain.StateWaitingForReview:
+		if sw := v.Swagger; sw != nil && sw.Run != nil {
+			return swaggerLine(k, *sw), v.Ticket.Title
+		}
 		return k + " is ready for review", v.Ticket.Title
 	case domain.StateRateLimited:
 		return k + " paused at the plan limit", "It resumes after the limit resets."
@@ -599,6 +641,9 @@ func (n *Notifier) sendTelegram(ctx context.Context, v orchestrator.TicketView, 
 				}
 			}
 			text += "\n\n" + t.PRURL + "\n\nMerge merges it at the commit agnts reviewed; Review again takes your note; Dismiss leaves it to you on the git host."
+		} else if sw := v.Swagger; t.Kind == domain.KindSwaggerTest && sw != nil && sw.Run != nil {
+			approve = "Approve"
+			text = swaggerText(t, *sw)
 		} else if t.Kind.Report() {
 			// A report keeps to agnts from here; posting it to the tracker is a choice made in the app.
 			approve = "Approve"

@@ -1857,6 +1857,76 @@ class AppLocalizationsUz extends AppLocalizations {
       'Regulyar ifodalar, har qatorda bittadan. Mos kelgan log infratuzilma yiqilishi hisoblanadi: koʻrsatiladi va sanaladi, lekin tiket ochilmaydi. Oʻrnatilganlariga qoʻshiladi.';
 
   @override
+  String get commitBack => 'Commitlarga qaytish';
+
+  @override
+  String commitBackTo(String repo) {
+    return '$repo ga qaytish';
+  }
+
+  @override
+  String commitAuthoredAgo(String name, String time) {
+    return '$name $time commit qildi';
+  }
+
+  @override
+  String commitFilesN(num n) {
+    return '$n ta fayl';
+  }
+
+  @override
+  String get commitAuthor => 'Muallif';
+
+  @override
+  String get commitAuthored => 'Yozilgan';
+
+  @override
+  String get commitCommitter => 'Commit qilgan';
+
+  @override
+  String get commitCommitted => 'Commit qilingan';
+
+  @override
+  String commitParents(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'Ota commitlar', one: 'Ota commit');
+    return '$_temp0';
+  }
+
+  @override
+  String get commitPulls => 'Pull requestlar';
+
+  @override
+  String get commitPullsSub => 'Shu commit kirgan pull requestlar (GitLabda merge requestlar).';
+
+  @override
+  String get commitNoPulls => 'Bu commit hech qaysi pull requestda yoʻq.';
+
+  @override
+  String get commitMessage => 'Xabar';
+
+  @override
+  String get commitPipelinesSub => 'Shu commitdagi CI ishlari, yangilari yuqorida.';
+
+  @override
+  String get commitNoPipelines => 'Bu commitda CI ishlari yoʻq.';
+
+  @override
+  String get commitChanges => 'Oʻzgarishlar';
+
+  @override
+  String commitChangesSub(num n, String add, String del) {
+    return '$n ta fayl oʻzgargan: +$add, −$del.';
+  }
+
+  @override
+  String get commitNoFiles => 'Bu commit hech qanday faylni oʻzgartirmaydi.';
+
+  @override
+  String commitFilesCapped(String n) {
+    return 'Bu commit bu yerda koʻrsatib boʻladiganidan koʻproq faylni oʻzgartiradi. Dastlabki $n tasi koʻrsatildi; hammasini git xostingida oching.';
+  }
+
+  @override
   String get commonLoading => 'Yuklanmoqda…';
 
   @override
@@ -4296,6 +4366,13 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get kindReviewHint => 'Boshqa birov ochgan pull requestni tekshirish. GitHub yoki GitLab’dan keladi.';
+
+  @override
+  String get kindSwaggertest => 'Swagger testi';
+
+  @override
+  String get kindSwaggertestHint =>
+      'HTTP API\'ni Swagger/OpenAPI spetsifikatsiyasi boʻyicha tekshirish. Repozitoriy ixtiyoriy; natija — tekshiruvlar jadvali va hisobot.';
 
   @override
   String get learnTitle => 'Oʻrganish';
@@ -7162,6 +7239,9 @@ class AppLocalizationsUz extends AppLocalizations {
       'Ko\'rib chiquvchi agnts pull requestida o\'zgartirish so\'rasa, hal qilinmagan muhokamalar o\'zi tiketga qaytadi. Tuzatish baribir tasdig\'ingizni kutadi.';
 
   @override
+  String get pullsCommentHint => 'Satrga kursorni olib boring va unga izoh yozish uchun izoh tugmasini bosing.';
+
+  @override
   String queueHeader(String running, String slots) {
     return 'Bajarilmoqda $running/$slots';
   }
@@ -9227,6 +9307,539 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get stateReviewRejected => 'Rad etildi';
+
+  @override
+  String get swaggerFormSub =>
+      'HTTP API\'ni Swagger/OpenAPI spetsifikatsiyasi boʻyicha tekshirish: agnts tekshiruvlarni tuzadi, haqiqiy soʻrovlar yuboradi va har biri boʻyicha dalil bilan xulosa beradi.';
+
+  @override
+  String get swaggerSpec => 'Spetsifikatsiya';
+
+  @override
+  String get swaggerSpecUrl => 'Spetsifikatsiya yoki hujjatlar sahifasi manzili';
+
+  @override
+  String get swaggerSpecUrlPh => 'https://staging.example.com/swagger/index.html';
+
+  @override
+  String get swaggerSpecRead => 'Oʻqish';
+
+  @override
+  String get swaggerSpecReading => 'Spetsifikatsiya oʻqilmoqda…';
+
+  @override
+  String get swaggerSpecUpload => 'Fayl yuklash';
+
+  @override
+  String get swaggerSpecHint =>
+      'Swagger UI, Springdoc yoki Redoc sahifasi ham boʻladi: agnts uning ortidagi spetsifikatsiyani topadi. Swagger 2.0 va OpenAPI 3.x, 5 MB gacha.';
+
+  @override
+  String swaggerSpecFound(String title, String version, num count, String format) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count ta endpoint');
+    return '$title $version · $_temp0 · $format';
+  }
+
+  @override
+  String get swaggerSpecChoose => 'Bu sahifada bir nechta spetsifikatsiya bor. Bittasini tanlang:';
+
+  @override
+  String get swaggerBaseUrl => 'Asosiy URL';
+
+  @override
+  String get swaggerBaseUrlHint =>
+      'Soʻrovlar shu yerga boradi. Avval bu spetsifikatsiyadagi server, u esa koʻpincha production boʻladi: tekshiring. Xost nomi yoki IP, istalgan port. Ichki xostlarga xususiy tarmoq marshruti kerak.';
+
+  @override
+  String get swaggerEndpoints => 'Endpointlar';
+
+  @override
+  String swaggerEndpointsCount(String n, String total) {
+    return '$total tadan $n tasi belgilangan';
+  }
+
+  @override
+  String get swaggerSearch => 'Endpointlarni qidirish';
+
+  @override
+  String get swaggerAll => 'Hammasi';
+
+  @override
+  String get swaggerNone => 'Hech biri';
+
+  @override
+  String swaggerUntickedSideEffect(String word) {
+    return 'Belgilanmadi: nomiga qaraganda u nimanidir oʻzgartiradi ($word)';
+  }
+
+  @override
+  String get swaggerUntickedDeprecated => 'Belgilanmadi: eskirgan';
+
+  @override
+  String get swaggerAuth => 'Autentifikatsiya';
+
+  @override
+  String get swaggerAuthKind_none => 'Yoʻq';
+
+  @override
+  String get swaggerAuthKind_bearer => 'Bearer token';
+
+  @override
+  String get swaggerAuthKind_header => 'Sarlavhadagi API kalit';
+
+  @override
+  String get swaggerAuthKind_query => 'Soʻrovdagi API kalit';
+
+  @override
+  String get swaggerAuthKind_basic => 'Basic';
+
+  @override
+  String get swaggerAuthName => 'Sarlavha yoki parametr nomi';
+
+  @override
+  String get swaggerAuthValue => 'Token';
+
+  @override
+  String get swaggerAuthValueBasic => 'foydalanuvchi:parol yoki Basic token';
+
+  @override
+  String get swaggerAuthHint =>
+      'Test akkauntining tokenini ishlating, hech qachon shaxsiy yoki production tokenini emas. U muhrlanadi, boshqa koʻrsatilmaydi va tiket yopilganda oʻchiriladi.';
+
+  @override
+  String swaggerAuthFromSpec(String schemes) {
+    return 'Spetsifikatsiyada: $schemes';
+  }
+
+  @override
+  String get swaggerWrite => 'Soʻrovlar';
+
+  @override
+  String get swaggerWriteOff => 'Faqat oʻqish';
+
+  @override
+  String get swaggerWriteOffHint => 'Faqat GET, HEAD va OPTIONS';
+
+  @override
+  String get swaggerWriteOn => 'Yozish soʻrovlari ham';
+
+  @override
+  String get swaggerWriteOnHint => 'POST, PUT, PATCH va DELETE ham';
+
+  @override
+  String swaggerWriteConfirm(String url) {
+    return 'Tasdiqlayman: $url production emas';
+  }
+
+  @override
+  String get swaggerWriteConfirmNeeded => 'Yozish soʻrovlarini yuborish uchun asosiy URL production emasligini tasdiqlang.';
+
+  @override
+  String get swaggerReadOnlyNote =>
+      '«Faqat oʻqish» — bu faqat GET, HEAD va OPTIONS degani, «zararsiz» degani emas: baʼzi API\'lar GET\'da ham maʼlumotni oʻzgartiradi. Qaror sizniki.';
+
+  @override
+  String get swaggerLockoutNote =>
+      'Tokensiz va notoʻgʻri token bilan tekshiruvlar fayrvolga kirishga hujumdek koʻrinishi mumkin. Test bunday soʻrovlardan koʻpi bilan 3 tasini yuboradi, lekin baribir test akkauntini yoki yuboruvchi manzilini bloklatishi mumkin. Xususiy tarmoq ortida bu manzil — ish maydonining VPN ulanishi, undan GitLab va boshqa testlar ham foydalanadi.';
+
+  @override
+  String get swaggerRepository => 'Repozitoriy (ixtiyoriy)';
+
+  @override
+  String get swaggerRepositoryHint =>
+      'U bilan agnts nosozliklarni tushuntirish uchun handlerlarni oʻqiydi, nosozliklarni esa Bug yoki Code tiketiga aylantirish mumkin.';
+
+  @override
+  String get swaggerNoRepo => 'Repozitoriysiz';
+
+  @override
+  String get swaggerNotes => 'Izohlar';
+
+  @override
+  String get swaggerNotesPh => 'Masalan: 42-foydalanuvchi — test akkaunti; buyurtmalarga mavjud mahsulot id\'si kerak';
+
+  @override
+  String get swaggerLimits => 'Cheklovlar';
+
+  @override
+  String get swaggerRate => 'Soniyasiga soʻrovlar';
+
+  @override
+  String get swaggerMaxRequests => 'Bir ishga tushirishdagi soʻrovlar';
+
+  @override
+  String get swaggerStart => 'Boshlash';
+
+  @override
+  String get swaggerStartNow => 'Hozir';
+
+  @override
+  String get swaggerStartQueue => 'Navbatda qoldirish';
+
+  @override
+  String get swaggerCreate => 'Test yaratish';
+
+  @override
+  String get swaggerCreateStart => 'Yaratish va boshlash';
+
+  @override
+  String swaggerCreated(String key) {
+    return '$key yaratildi';
+  }
+
+  @override
+  String get swaggerNeedSpec => 'Avval spetsifikatsiyani oʻqing.';
+
+  @override
+  String get swaggerNeedToken => 'Tokenni kiriting.';
+
+  @override
+  String get swaggerClaudeOnly =>
+      'Swagger testlari ish maydoni qaysi model bilan kod yozishidan qatʼi nazar, doim Claude\'da (Sonnet) bajariladi.';
+
+  @override
+  String get swaggerTab => 'API natijalari';
+
+  @override
+  String get swaggerRequestsTab => 'Soʻrovlar';
+
+  @override
+  String get swaggerNoRun => 'Hali natija yoʻq: test bajarilmoqda yoki hali ishga tushmagan.';
+
+  @override
+  String get swaggerVerdict_pass => 'Oʻtdi';
+
+  @override
+  String get swaggerVerdict_fail => 'Nosoz';
+
+  @override
+  String get swaggerVerdict_skipped => 'Oʻtkazib yuborildi';
+
+  @override
+  String get swaggerVerdict_blocked => 'Bajarilmadi';
+
+  @override
+  String swaggerCount_pass(String n) {
+    return '$n ta oʻtdi';
+  }
+
+  @override
+  String swaggerCount_fail(String n) {
+    return '$n ta nosoz';
+  }
+
+  @override
+  String swaggerCount_skipped(String n) {
+    return '$n ta oʻtkazib yuborildi';
+  }
+
+  @override
+  String swaggerCount_blocked(String n) {
+    return '$n ta bajarilmadi';
+  }
+
+  @override
+  String get swaggerColEndpoint => 'Endpoint';
+
+  @override
+  String get swaggerColCases => 'Tekshiruvlar';
+
+  @override
+  String get swaggerColResult => 'Natija';
+
+  @override
+  String get swaggerAgntsCheck => 'agnts tekshiruvi';
+
+  @override
+  String get swaggerAgntsCheckHint => 'agnts bu javobni spetsifikatsiya sxemasi bilan oʻzi solishtirdi';
+
+  @override
+  String swaggerExpected(String text) {
+    return 'Kutilgan: $text';
+  }
+
+  @override
+  String get swaggerRequestLabel => 'Soʻrov';
+
+  @override
+  String get swaggerResponseLabel => 'Javob';
+
+  @override
+  String get swaggerNoResponse => 'Javob yoʻq';
+
+  @override
+  String get swaggerTruncated => 'Tana 64 KB gacha qisqartirildi';
+
+  @override
+  String get swaggerCopyCurl => 'curl sifatida nusxalash';
+
+  @override
+  String get swaggerCopied => 'Nusxalandi';
+
+  @override
+  String get swaggerLoading => 'Yuklanmoqda…';
+
+  @override
+  String get swaggerCreateBug => 'Bug tiketini yaratish';
+
+  @override
+  String swaggerBugTitle(String key) {
+    return '$key topgan API nosozliklarini tuzatish';
+  }
+
+  @override
+  String swaggerBugIntro(String key, String base) {
+    return '$base uchun $key Swagger testi quyidagi nosozliklarni topdi:';
+  }
+
+  @override
+  String swaggerBugCreated(String key) {
+    return '$key yaratildi';
+  }
+
+  @override
+  String swaggerNewFailures(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ta yangi nosozlik');
+    return 'Oxirgi ishga tushirishdan beri $_temp0';
+  }
+
+  @override
+  String get swaggerNoNewFailures => 'Oxirgi ishga tushirishdan beri yangi nosozlik yoʻq';
+
+  @override
+  String swaggerPrevious(String passed, String failed) {
+    return 'Oxirgi ishga tushirish: $passed ta oʻtdi, $failed ta nosoz';
+  }
+
+  @override
+  String get swaggerRerun => 'Qayta ishga tushirish';
+
+  @override
+  String get swaggerRerunToken => 'Yangi token (ixtiyoriy)';
+
+  @override
+  String get swaggerRerunTokenNeeded => 'Yangi token (majburiy: eskisi tiket yopilganda oʻchirilgan)';
+
+  @override
+  String get swaggerRerunStarted => 'Qayta ishga tushirildi';
+
+  @override
+  String swaggerRerunNew(String key) {
+    return '$key sifatida qayta ishga tushirildi';
+  }
+
+  @override
+  String get swaggerModeRead => 'faqat oʻqish';
+
+  @override
+  String get swaggerModeWrite => 'yozish soʻrovlari yoqilgan';
+
+  @override
+  String get swaggerTokenStored => 'token saqlangan';
+
+  @override
+  String get swaggerTokenGone => 'token yoʻq';
+
+  @override
+  String get swaggerAgntsNotes => 'agnts nimani tuzatdi';
+
+  @override
+  String get swaggerAllPassed => 'Barcha tekshiruvlar oʻtdi.';
+
+  @override
+  String get swaggerRunningTitle => 'API tekshirilmoqda';
+
+  @override
+  String get swaggerRunningSub =>
+      'agnts tekshiruvlarni tuzib, asosiy URL ga haqiqiy soʻrovlar yubormoqda. Ishga tushirish tugagach, natijalar shu yerda chiqadi.';
+
+  @override
+  String get swaggerQueuedTitle => 'Swagger testi navbatda';
+
+  @override
+  String get swaggerQueuedSub => 'Tayyor boʻlganingizda ishga tushiring.';
+
+  @override
+  String get swaggerSuites => 'Swagger toʻplamlari';
+
+  @override
+  String get swaggerSuitesLede =>
+      'Jadval boʻyicha yoki har bir deploydan keyin qayta ishga tushadigan saqlangan Swagger testlari. Har bir ishga tushirish — yangi tiket: u toʻplamning oxirgi ishga tushirishi bilan solishtiriladi va uning rejasidan foydalanadi, shuning uchun takroriy ishga tushirishlar kamroq qadam sarflaydi.';
+
+  @override
+  String get swaggerSuitesEmpty => 'Hali toʻplam yoʻq. Tugagan Swagger testini oching va uni toʻplam sifatida saqlang.';
+
+  @override
+  String get swaggerSaveSuite => 'Toʻplam sifatida saqlash';
+
+  @override
+  String get swaggerSaveSuiteHint =>
+      'Bu testni jadval boʻyicha yoki har bir deploydan keyin qayta ishga tushirish. Toʻplamda tokenning oʻz nusxasi saqlanadi.';
+
+  @override
+  String get swaggerSuiteName => 'Nomi';
+
+  @override
+  String get swaggerSchedule => 'Jadval';
+
+  @override
+  String get swaggerSchedule_off => 'Qoʻlda yoki deploy hooki bilan';
+
+  @override
+  String get swaggerSchedule_hourly => 'Har soatda';
+
+  @override
+  String get swaggerSchedule_daily => 'Har kuni';
+
+  @override
+  String get swaggerSchedule_weekly => 'Har dushanba';
+
+  @override
+  String get swaggerHourUtc => 'Soat (UTC)';
+
+  @override
+  String swaggerSuiteSaved(String name) {
+    return '$name toʻplami sifatida saqlandi';
+  }
+
+  @override
+  String get swaggerRunNow => 'Hozir ishga tushirish';
+
+  @override
+  String swaggerRunStarted(String key) {
+    return '$key ishga tushirildi';
+  }
+
+  @override
+  String get swaggerBusy => 'Oxirgi ishga tushirish hali davom etmoqda';
+
+  @override
+  String get swaggerPause => 'Toʻxtatib turish';
+
+  @override
+  String get swaggerResume => 'Davom ettirish';
+
+  @override
+  String get swaggerPaused => 'Toʻxtatilgan';
+
+  @override
+  String get swaggerDeleteSuite => 'Oʻchirish';
+
+  @override
+  String swaggerDeleteConfirm(String name) {
+    return '$name toʻplami oʻchirilsinmi? Oldingi ishga tushirishlar qoladi.';
+  }
+
+  @override
+  String get swaggerHookCreate => 'Deploy hookini yaratish';
+
+  @override
+  String get swaggerHookRotate => 'Yangi deploy hooki';
+
+  @override
+  String get swaggerHookHint =>
+      'Har bir deploydan keyin toʻplamni ishga tushirish uchun deploy pipeline\'ingizdan bu URL ga tanasiz POST yuboring. U bir marta koʻrsatiladi; yangisi eskisini oʻchiradi.';
+
+  @override
+  String swaggerHookExample(String url) {
+    return 'curl -X POST $url';
+  }
+
+  @override
+  String get swaggerLastRun => 'Oxirgi ishga tushirish';
+
+  @override
+  String get swaggerNextRun => 'Keyingi ishga tushirish';
+
+  @override
+  String get swaggerNever => 'hech qachon';
+
+  @override
+  String get swaggerColSuite => 'Toʻplam';
+
+  @override
+  String get swaggerColSchedule => 'Jadval';
+
+  @override
+  String get swaggerColLast => 'Oxirgi ishga tushirish';
+
+  @override
+  String get swaggerSuiteToken => 'Yangi token (ixtiyoriy)';
+
+  @override
+  String get swaggerSetToken => 'Tokenni oʻrnatish';
+
+  @override
+  String get swaggerSpecAuth => 'Spetsifikatsiya havolasiga kirish kerak';
+
+  @override
+  String get swaggerSpecAuthHint => 'Spetsifikatsiyani yuklashda faqat uning xostiga yuboriladi va saqlanmaydi.';
+
+  @override
+  String get swaggerSpecAuthNeeded => 'Spetsifikatsiya manzili 401/403 javob berdi: kerakli tokenni kiriting va qayta oʻqing.';
+
+  @override
+  String get swaggerSpecAuthReused => 'API soʻrovlari ham shu token bilan yuboriladi. Boshqasi kerak boʻlsa, shu yerda oʻzgartiring.';
+
+  @override
+  String get swaggerSpecAuthLogin => 'Login va parol';
+
+  @override
+  String get swaggerSpecAuthToken => 'Token';
+
+  @override
+  String get swaggerSpecLogin => 'Login';
+
+  @override
+  String get swaggerSpecPassword => 'Parol';
+
+  @override
+  String get swaggerSpecLoginNeeded => 'Spetsifikatsiya havolasi login va parol soʻramoqda: ularni kiriting va qayta oʻqing.';
+
+  @override
+  String get swaggerSpecLoginHint =>
+      'Faqat spetsifikatsiya havolasini ochish uchun kerak va saqlanmaydi. Agentning API soʻrovlari quyidagi «Autentifikatsiya» boʻlimidagi token bilan yuboriladi.';
+
+  @override
+  String get swaggerFilterProblems => 'Nosoz va bajarilmaganlar';
+
+  @override
+  String get swaggerFilterAll => 'Barcha tekshiruvlar';
+
+  @override
+  String get swaggerNothingToShow => 'Nosoz yoki bajarilmagan tekshiruv yoʻq. Qolganlarini koʻrish uchun barcha tekshiruvlarni oching.';
+
+  @override
+  String swaggerCasesHidden(num n) {
+    return 'Nosozligi yoʻq $n ta endpoint yashirilgan';
+  }
+
+  @override
+  String get swaggerWhatToTest => 'Nimani tekshirish kerak';
+
+  @override
+  String get swaggerWhatToTestPh =>
+      'Masalan: faqat /v1/orders va /v1/payments dagi POST endpointlar; validatsiya xatolari va mavjud boʻlmagan id\'larni tekshiring. 42-foydalanuvchi — test akkaunti.';
+
+  @override
+  String get swaggerWhatToTestHint =>
+      'agnts faqat shu yerda yozganingizni tekshiradi. Aniq endpointlarni tekshirish uchun ularni quyida belgilang.';
+
+  @override
+  String get swaggerWhatToTestNeeded => 'Nimani tekshirishni yozing yoki tekshiriladigan endpointlarni belgilang.';
+
+  @override
+  String get swaggerEndpointsOptional => 'Endpointlarni tanlash (ixtiyoriy)';
+
+  @override
+  String get swaggerEndpointsOptionalHint =>
+      'Belgilangan endpointlar aynan belgilangandek tekshiriladi. Hech biri belgilanmasa, nimani tekshirishni yuqoridagi matn hal qiladi.';
+
+  @override
+  String get swaggerSuggested => 'Tavsiya etilganlar';
+
+  @override
+  String get swaggerNoneTicked => 'hech biri belgilanmagan: yuqoridagi matn hal qiladi';
 
   @override
   String get tasksTitle => 'Vazifalar';

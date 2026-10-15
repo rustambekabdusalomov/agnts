@@ -26,6 +26,7 @@ import 'features/learn/lesson_screen.dart';
 import 'features/more/more_screen.dart';
 import 'features/repos/repo_screen.dart';
 import 'features/tasks/tasks_screen.dart';
+import 'features/tickets/api_results.dart';
 import 'features/tickets/ticket_screen.dart';
 import 'features/tickets/tickets_screen.dart';
 import 'l10n/app_localizations.dart';
@@ -82,6 +83,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ] else ...[
         // Notification taps deep-link here.
         GoRoute(path: '/tickets/:key', builder: (_, s) => TicketScreen(ticketKey: s.pathParameters['key']!)),
+        GoRoute(path: '/tickets/:key/api-results', builder: (_, s) => ApiResultsScreen(ticketKey: s.pathParameters['key']!)),
         GoRoute(
           path: '/repos/:id',
           builder: (_, s) => RepoScreen(id: int.parse(s.pathParameters['id']!), name: s.uri.queryParameters['name'] ?? ''),

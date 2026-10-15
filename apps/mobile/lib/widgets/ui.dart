@@ -153,7 +153,8 @@ String? repoLabel(Ticket t) {
 /// Kinds whose work is a Markdown report instead of a change.
 /// A pull request review is one too: its report is agnts's review, and
 /// approving it merges the pull request.
-bool isReportKind(TicketKind k) => k == TicketKind.plan || k == TicketKind.analysis || k == TicketKind.bug || k == TicketKind.review;
+bool isReportKind(TicketKind k) =>
+    k == TicketKind.plan || k == TicketKind.analysis || k == TicketKind.bug || k == TicketKind.review || k == TicketKind.swaggertest;
 
 /// Where a ticket came from, for its source chip: Jira, Plane, Task, PR or CI.
 String sourceLabel(AppLocalizations l, TicketSource_Enum s) => switch (s) {
@@ -172,6 +173,7 @@ String kindLabel(AppLocalizations l, TicketKind k) => switch (k) {
   TicketKind.analysis => l.kindAnalysis,
   TicketKind.bug => l.kindBug,
   TicketKind.review => l.kindReview,
+  TicketKind.swaggertest => l.kindSwaggertest,
 };
 
 /// What a ticket produces, as a small chip; "· Auto" while agnts picks it.
@@ -186,6 +188,7 @@ class KindChip extends StatelessWidget {
     final tone = switch (ticket.kind) {
       TicketKind.plan || TicketKind.analysis => Tone.info,
       TicketKind.bug => Tone.warn,
+      TicketKind.swaggertest => Tone.ok,
       _ => Tone.gray,
     };
     final text = ticket.kindAuto ? '${kindLabel(l, ticket.kind)} · ${l.kindAuto}' : kindLabel(l, ticket.kind);

@@ -1,9 +1,12 @@
 package domain
 
 import (
+	"encoding/base64"
 	"math"
+	"net/url"
 	"path"
 	"regexp"
+	"slices"
 	"strings"
 )
 
@@ -108,4 +111,97 @@ func IsEnvFile(p string) bool {
 		}
 	}
 	return true
+}
+
+// Masked replaces a redacted credential.
+const Masked = "•••"
+
+// Redactor removes one credential, in every form it travels in, from text
+// agnts stores or shows.
+type Redactor struct {
+	forms []string
+}
+
+// NewRedactor returns a redactor for a credential of kind auth: the exact
+// value, the value without a "Bearer " prefix, its URL-encoded form (query
+// keys) and, for basic auth, base64 of user:password. Values under 4
+// characters are not redacted as text (they would mask unrelated words);
+// the headers that carry them still are.
+func NewRedactor(kind APIAuthKind, value string) Redactor {
+	var r Redactor
+	add := func(s string) {
+		if len(s) >= 4 && !slices.Contains(r.forms, s) {
+			r.forms = append(r.forms, s)
+		}
+	}
+	value = strings.TrimSpace(value)
+	values := []string{value}
+	if v, ok := strings.CutPrefix(value, "Bearer "); ok {
+		values = append(values, v)
+	}
+	for _, v := range values {
+		add(v)
+		add(url.QueryEscape(v))
+		add(url.PathEscape(v))
+	}
+	if kind == AuthBasic {
+		value = BasicCredentials(value) // an encoded token is masked as given above, and as user:password here
+		add(value)
+		add(base64.StdEncoding.EncodeToString([]byte(value)))
+		add(base64.RawStdEncoding.EncodeToString([]byte(value)))
+		if _, pass, ok := strings.Cut(value, ":"); ok {
+			add(pass)
+		}
+	}
+	// Longest first, so a form inside another is not replaced first.
+	slices.SortFunc(r.forms, func(a, b string) int { return len(b) - len(a) })
+	return r
+}
+
+// String returns s with every form of the credential masked.
+func (r Redactor) String(s string) string {
+	for _, f := range r.forms {
+		s = strings.ReplaceAll(s, f, Masked)
+	}
+	return s
+}
+
+// Bytes is String for JSON and other text kept as bytes.
+func (r Redactor) Bytes(b []byte) []byte {
+	if len(r.forms) == 0 {
+		return b
+	}
+	return []byte(r.String(string(b)))
+}
+
+// sensitiveHeaders are always masked in logged requests and responses.
+var sensitiveHeaders = []string{"authorization", "proxy-authorization", "cookie", "set-cookie", "x-api-key", "x-auth-token"}
+
+// Headers masks the headers that carry credentials (and extra, the
+// configured API key header), and the credential anywhere else.
+func (r Redactor) Headers(h map[string]string, extra string) map[string]string {
+	if h == nil {
+		return nil
+	}
+	out := make(map[string]string, len(h))
+	for k, v := range h {
+		lk := strings.ToLower(k)
+		if slices.Contains(sensitiveHeaders, lk) || (extra != "" && lk == strings.ToLower(extra)) {
+			out[k] = Masked
+			continue
+		}
+		out[k] = r.String(v)
+	}
+	return out
+}
+
+// Exchange redacts one logged request and response.
+func (r Redactor) Exchange(e APIExchange, apiKeyHeader string) APIExchange {
+	e.URL = r.String(e.URL)
+	e.ReqHeaders = r.Headers(e.ReqHeaders, apiKeyHeader)
+	e.RespHeaders = r.Headers(e.RespHeaders, apiKeyHeader)
+	e.ReqBody = r.String(e.ReqBody)
+	e.RespBody = r.String(e.RespBody)
+	e.Error = r.String(e.Error)
+	return e
 }

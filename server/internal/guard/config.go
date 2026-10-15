@@ -66,6 +66,10 @@ const (
 	HookProgress    = "session:progress" // give the progress file back after a compaction
 	HookDestructive = "pre:destructive"  // ask for a rollback plan before destructive commands
 	HookNotice      = "pre:notice"       // deliver a message from the server (always on)
+	// HookAPI keeps a Swagger test's credential and API to agnts-api: no
+	// tool may touch the credential file, and no other client may call
+	// the API under test. On in every Swagger test run; cannot be turned off.
+	HookAPI = "pre:api"
 )
 
 // HookIDs lists every hook id.
@@ -150,16 +154,32 @@ type Config struct {
 	Rules        []Rule      `json:"rules,omitempty"`
 	// FactCheck asks for facts before the first edit of each existing file.
 	FactCheck bool `json:"factCheck,omitempty"`
+	// API is set in a Swagger test run.
+	API *APIGuard `json:"api,omitempty"`
+}
+
+// APIGuard is what HookAPI protects in a Swagger test run.
+type APIGuard struct {
+	// Host is the base URL's host: only agnts-api may call it.
+	Host string `json:"host"`
+	// AuthPath is the credential file; InDir the directory holding it.
+	AuthPath string `json:"authPath"`
+	InDir    string `json:"inDir"`
 }
 
 // On reports whether hook id runs in this config.
 func (c Config) On(id string) bool {
+	if id == HookAPI {
+		return c.API != nil // protects a credential: never turned off
+	}
 	if slices.Contains(c.Disabled, id) {
 		return false
 	}
 	switch id {
 	case HookSecret, HookProgress, HookRules:
 		return true
+	case HookAPI:
+		return c.API != nil
 	case HookRedFlags:
 		return c.Profile == Standard || c.Profile == Strict
 	case HookEditCheck:

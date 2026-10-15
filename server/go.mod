@@ -44,7 +44,7 @@ require (
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/mfridman/interpolate v0.0.2 // indirect
 	github.com/oapi-codegen/oapi-codegen/v2 v2.8.0 // indirect
-	github.com/oasdiff/yaml v0.1.1 // indirect
+	github.com/oasdiff/yaml v0.1.1
 	github.com/oasdiff/yaml3 v0.0.14 // indirect
 	github.com/pjbgf/sha1cd v0.7.0 // indirect
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2 // indirect

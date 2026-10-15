@@ -76,6 +76,7 @@
     "set_resolveFixed": "Tuzatilgan muhokamalarni yopish",
     "set_resolveFixedHelp": "agnts tuzatishni push qilib, muhokamada javob bergach, uni hal qilingan deb belgilaydi.",
     "set_autoAddress": "O'zgartirish so'rovini hisobga olish",
-    "set_autoAddressHelp": "Ko'rib chiquvchi agnts pull requestida o'zgartirish so'rasa, hal qilinmagan muhokamalar o'zi tiketga qaytadi. Tuzatish baribir tasdig'ingizni kutadi."
+    "set_autoAddressHelp": "Ko'rib chiquvchi agnts pull requestida o'zgartirish so'rasa, hal qilinmagan muhokamalar o'zi tiketga qaytadi. Tuzatish baribir tasdig'ingizni kutadi.",
+    "commentHint": "Satrga kursorni olib boring va unga izoh yozish uchun izoh tugmasini bosing."
   }
 }

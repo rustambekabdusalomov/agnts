@@ -76,6 +76,7 @@
     "set_resolveFixed": "Resolve fixed threads",
     "set_resolveFixedHelp": "Once agnts pushed a fix and answered a reviewer's thread, it resolves the thread.",
     "set_autoAddress": "Address requested changes",
-    "set_autoAddressHelp": "When a reviewer requests changes on agnts's pull request, its unresolved threads go back to the ticket by themselves. The fix still waits for your approval."
+    "set_autoAddressHelp": "When a reviewer requests changes on agnts's pull request, its unresolved threads go back to the ticket by themselves. The fix still waits for your approval.",
+    "commentHint": "Point at a line and click the comment button to comment on it."
   }
 }

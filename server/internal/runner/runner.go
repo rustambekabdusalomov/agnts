@@ -118,10 +118,23 @@ type Runner struct {
 	ca func(ctx context.Context) []byte
 }
 
-// Identity is who a run container works for.
+// Identity is who a run container works for, and the hosts it alone may
+// reach besides the allowlist.
 type Identity struct {
 	Workspace int64
 	Ticket    string
+	Grants    []orchestrator.Grant
+}
+
+// Granted reports whether the container may reach host:port by a grant.
+func (id Identity) Granted(host string, port int) bool {
+	host = strings.ToLower(strings.TrimSuffix(host, "."))
+	for _, g := range id.Grants {
+		if strings.EqualFold(g.Host, host) && g.Port == port {
+			return true
+		}
+	}
+	return false
 }
 
 // WhoIs returns who the run container at ip works for.
@@ -168,18 +181,24 @@ func caEnv() []string {
 		"REQUESTS_CA_BUNDLE=" + caBundle, "PIP_CERT=" + caBundle, "NODE_EXTRA_CA_CERTS=" + caFile}
 }
 
-// guardArchive puts agnts-guard where the managed settings' hooks call it.
+// guardArchive puts agnts-guard where the managed settings' hooks call it,
+// and agnts-api (the same binary, by name) on the PATH.
 func guardArchive(bin []byte) []byte {
 	var buf bytes.Buffer
 	tw := tar.NewWriter(&buf)
-	for _, d := range []string{".agnts/", ".agnts/bin/"} {
+	for _, d := range []string{".agnts/", ".agnts/bin/", ".local/", ".local/bin/"} {
 		_ = tw.WriteHeader(&tar.Header{Typeflag: tar.TypeDir, Name: d, Mode: 0o755, Uid: agentUID, Gid: agentUID, ModTime: time.Now()})
 	}
 	_ = tw.WriteHeader(&tar.Header{Typeflag: tar.TypeReg, Name: ".agnts/bin/agnts-guard", Mode: 0o755, Size: int64(len(bin)), Uid: agentUID, Gid: agentUID, ModTime: time.Now()})
 	_, _ = tw.Write(bin)
+	_ = tw.WriteHeader(&tar.Header{Typeflag: tar.TypeSymlink, Name: ".local/bin/agnts-api", Linkname: APIBinary, Uid: agentUID, Gid: agentUID, ModTime: time.Now()})
 	_ = tw.Close()
 	return buf.Bytes()
 }
+
+// APIBinary is agnts-guard's path in a run; run as agnts-api (the link on
+// the PATH) it is the Swagger test client.
+const APIBinary = homeDir + "/.agnts/bin/agnts-guard"
 
 func caArchive(pem []byte) []byte {
 	var buf bytes.Buffer
@@ -297,7 +316,7 @@ func (r *Runner) Open(ctx context.Context, spec orchestrator.WorkspaceSpec) (orc
 		return fail(err)
 	}
 	if ip, err := r.docker.ContainerIP(ctx, id, network); err == nil {
-		r.remember(ip, Identity{Workspace: domain.WorkspaceOf(ctx), Ticket: spec.TicketKey})
+		r.remember(ip, Identity{Workspace: domain.WorkspaceOf(ctx), Ticket: spec.TicketKey, Grants: spec.Grants})
 		ws.ip, ws.runner = ip, r
 	} else if r.cfg.Proxy != "" {
 		return fail(fmt.Errorf("read the run's address: %w", err))

@@ -16,6 +16,8 @@
     "pickerHint": "What agnts produces. Choosing a kind makes it final; Auto lets agnts decide while reading the ticket.",
     "switchTo": "Switch to {kind}",
     "review": "PR review",
-    "reviewHint": "Review a pull request someone else opened. Comes from GitHub or GitLab."
+    "reviewHint": "Review a pull request someone else opened. Comes from GitHub or GitLab.",
+    "swaggertest": "Swagger test",
+    "swaggertestHint": "Test an HTTP API against its Swagger/OpenAPI spec. Repository optional; ends in a results table and a report."
   }
 }

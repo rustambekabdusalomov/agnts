@@ -16,6 +16,8 @@
     "pickerHint": "agnts nima qiladi. Tanlangan tur oʻzgarmaydi; «Avto»da agnts tiketni oʻqib, oʻzi hal qiladi.",
     "switchTo": "«{kind}»ga oʻtkazish",
     "review": "PR koʻrib chiqish",
-    "reviewHint": "Boshqa birov ochgan pull requestni tekshirish. GitHub yoki GitLab’dan keladi."
+    "reviewHint": "Boshqa birov ochgan pull requestni tekshirish. GitHub yoki GitLab’dan keladi.",
+    "swaggertest": "Swagger testi",
+    "swaggertestHint": "HTTP API'ni Swagger/OpenAPI spetsifikatsiyasi boʻyicha tekshirish. Repozitoriy ixtiyoriy; natija — tekshiruvlar jadvali va hisobot."
   }
 }

@@ -2510,6 +2510,8 @@
   },
   "kindReview": "PR review",
   "kindReviewHint": "Review a pull request someone else opened. Comes from GitHub or GitLab.",
+  "kindSwaggertest": "Swagger test",
+  "kindSwaggertestHint": "Test an HTTP API against its Swagger/OpenAPI spec. Repository optional; ends in a results table and a report.",
   "learnTitle": "Learn",
   "learnLede": "When a change agnts ships does something this codebase never did before, agnts explains it here: what it is, why the change needed it, where to look, and a short quiz.",
   "learnViewNew": "New ({n})",
@@ -4287,6 +4289,7 @@
   "pullsSet_resolveFixedHelp": "Once agnts pushed a fix and answered a reviewer's thread, it resolves the thread.",
   "pullsSet_autoAddress": "Address requested changes",
   "pullsSet_autoAddressHelp": "When a reviewer requests changes on agnts's pull request, its unresolved threads go back to the ticket by themselves. The fix still waits for your approval.",
+  "pullsCommentHint": "Point at a line and click the comment button to comment on it.",
   "queueHeader": "Running {running}/{slots}",
   "@queueHeader": {
     "placeholders": {
@@ -5586,6 +5589,335 @@
   "stateReviewPushing": "Merging",
   "stateReviewDone": "Merged",
   "stateReviewRejected": "Dismissed",
+  "swaggerFormSub": "Test an HTTP API against its Swagger/OpenAPI spec: agnts plans the cases, sends real requests and reports a verdict per case with the evidence.",
+  "swaggerSpec": "Spec",
+  "swaggerSpecUrl": "Spec or docs page URL",
+  "swaggerSpecUrlPh": "https://staging.example.com/swagger/index.html",
+  "swaggerSpecRead": "Read",
+  "swaggerSpecReading": "Reading the spec…",
+  "swaggerSpecUpload": "Upload a file",
+  "swaggerSpecHint": "A Swagger UI, Springdoc or Redoc page works too: agnts finds the spec behind it. Swagger 2.0 and OpenAPI 3.x, up to 5 MB.",
+  "swaggerSpecFound": "{title} {version} · {count, plural, one {{count} endpoint} other {{count} endpoints}} · {format}",
+  "@swaggerSpecFound": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      },
+      "count": {
+        "type": "num"
+      },
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "swaggerSpecChoose": "This page offers several specs. Pick one:",
+  "swaggerBaseUrl": "Base URL",
+  "swaggerBaseUrlHint": "Where requests go. It starts as the spec's server, which often is production: check it. A host name or an IP, on any port. Internal hosts need a Private network route.",
+  "swaggerEndpoints": "Endpoints",
+  "swaggerEndpointsCount": "{n} of {total} ticked",
+  "@swaggerEndpointsCount": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "swaggerSearch": "Search endpoints",
+  "swaggerAll": "All",
+  "swaggerNone": "None",
+  "swaggerUntickedSideEffect": "Left unticked: its name suggests it changes something ({word})",
+  "@swaggerUntickedSideEffect": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "swaggerUntickedDeprecated": "Left unticked: deprecated",
+  "swaggerAuth": "Authentication",
+  "swaggerAuthKind_none": "None",
+  "swaggerAuthKind_bearer": "Bearer token",
+  "swaggerAuthKind_header": "API key in a header",
+  "swaggerAuthKind_query": "API key in the query",
+  "swaggerAuthKind_basic": "Basic",
+  "swaggerAuthName": "Header or parameter name",
+  "swaggerAuthValue": "Token",
+  "swaggerAuthValueBasic": "user:password, or the Basic token",
+  "swaggerAuthHint": "Use a test account's token, never a personal or production one. It is sealed, never shown again, and deleted when the ticket closes.",
+  "swaggerAuthFromSpec": "The spec declares: {schemes}",
+  "@swaggerAuthFromSpec": {
+    "placeholders": {
+      "schemes": {
+        "type": "String"
+      }
+    }
+  },
+  "swaggerWrite": "Requests",
+  "swaggerWriteOff": "Read-only",
+  "swaggerWriteOffHint": "Only GET, HEAD and OPTIONS",
+  "swaggerWriteOn": "Write requests too",
+  "swaggerWriteOnHint": "Also POST, PUT, PATCH and DELETE",
+  "swaggerWriteConfirm": "I confirm {url} is not production",
+  "@swaggerWriteConfirm": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "swaggerWriteConfirmNeeded": "Confirm the base URL is not production to send write requests.",
+  "swaggerReadOnlyNote": "Read-only means only GET, HEAD and OPTIONS, not harmless: some APIs change things on GET. That is your call.",
+  "swaggerLockoutNote": "The no-token and wrong-token cases can look like a login attack to a firewall. A test sends at most 3 of them, but it may still lock the test account or get the caller's address blocked. Behind a Private network, that address is the workspace's VPN connection, which GitLab and other tests also use.",
+  "swaggerRepository": "Repository (optional)",
+  "swaggerRepositoryHint": "With one, agnts reads the handlers to explain failures, and failures can become a Bug or Code ticket.",
+  "swaggerNoRepo": "No repository",
+  "swaggerNotes": "Notes",
+  "swaggerNotesPh": "For example: user 42 is a test account; orders need an existing product id",
+  "swaggerLimits": "Limits",
+  "swaggerRate": "Requests a second",
+  "swaggerMaxRequests": "Requests per run",
+  "swaggerStart": "Start",
+  "swaggerStartNow": "Now",
+  "swaggerStartQueue": "Keep in the queue",
+  "swaggerCreate": "Create test",
+  "swaggerCreateStart": "Create and start",
+  "swaggerCreated": "{key} created",
+  "@swaggerCreated": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "swaggerNeedSpec": "Read a spec first.",
+  "swaggerNeedToken": "Enter the token.",
+  "swaggerClaudeOnly": "Swagger tests always run on Claude (Sonnet), whatever model the workspace codes with.",
+  "swaggerTab": "API results",
+  "swaggerRequestsTab": "Requests",
+  "swaggerNoRun": "No results yet: the test is running or has not run.",
+  "swaggerVerdict_pass": "Passed",
+  "swaggerVerdict_fail": "Failed",
+  "swaggerVerdict_skipped": "Skipped",
+  "swaggerVerdict_blocked": "Blocked",
+  "swaggerCount_pass": "{n} passed",
+  "@swaggerCount_pass": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "swaggerCount_fail": "{n} failed",
+  "@swaggerCount_fail": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "swaggerCount_skipped": "{n} skipped",
+  "@swaggerCount_skipped": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "swaggerCount_blocked": "{n} blocked",
+  "@swaggerCount_blocked": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "swaggerColEndpoint": "Endpoint",
+  "swaggerColCases": "Cases",
+  "swaggerColResult": "Result",
+  "swaggerAgntsCheck": "agnts check",
+  "swaggerAgntsCheckHint": "agnts checked this response against the spec's schema itself",
+  "swaggerExpected": "Expected: {text}",
+  "@swaggerExpected": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "swaggerRequestLabel": "Request",
+  "swaggerResponseLabel": "Response",
+  "swaggerNoResponse": "No response",
+  "swaggerTruncated": "The body was cut at 64 KB",
+  "swaggerCopyCurl": "Copy as curl",
+  "swaggerCopied": "Copied",
+  "swaggerLoading": "Loading…",
+  "swaggerCreateBug": "Create bug ticket",
+  "swaggerBugTitle": "Fix the API failures {key} found",
+  "@swaggerBugTitle": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "swaggerBugIntro": "The Swagger test {key} of {base} found these failures:",
+  "@swaggerBugIntro": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      },
+      "base": {
+        "type": "String"
+      }
+    }
+  },
+  "swaggerBugCreated": "{key} created",
+  "@swaggerBugCreated": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "swaggerNewFailures": "{n, plural, one {{n} new failure} other {{n} new failures}} since the last run",
+  "@swaggerNewFailures": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "swaggerNoNewFailures": "No new failures since the last run",
+  "swaggerPrevious": "Last run: {passed} passed, {failed} failed",
+  "@swaggerPrevious": {
+    "placeholders": {
+      "passed": {
+        "type": "String"
+      },
+      "failed": {
+        "type": "String"
+      }
+    }
+  },
+  "swaggerRerun": "Run again",
+  "swaggerRerunToken": "New token (optional)",
+  "swaggerRerunTokenNeeded": "New token (required: the old one was deleted when the ticket closed)",
+  "swaggerRerunStarted": "Started again",
+  "swaggerRerunNew": "Started again as {key}",
+  "@swaggerRerunNew": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "swaggerModeRead": "read-only",
+  "swaggerModeWrite": "write requests on",
+  "swaggerTokenStored": "token stored",
+  "swaggerTokenGone": "no token stored",
+  "swaggerAgntsNotes": "What agnts adjusted",
+  "swaggerAllPassed": "Every case passed.",
+  "swaggerRunningTitle": "Testing the API",
+  "swaggerRunningSub": "agnts plans the cases and sends real requests to the base URL. Results appear here when the run ends.",
+  "swaggerQueuedTitle": "Swagger test in the queue",
+  "swaggerQueuedSub": "Start it when you are ready.",
+  "swaggerSuites": "Swagger suites",
+  "swaggerSuitesLede": "Saved Swagger tests that run again on a schedule or after each deploy. Each run is a new ticket, compared with the suite's last run, and reuses its plan, so repeat runs cost fewer turns.",
+  "swaggerSuitesEmpty": "No suites yet. Open a finished Swagger test and save it as a suite.",
+  "swaggerSaveSuite": "Save as suite",
+  "swaggerSaveSuiteHint": "Run this test again on a schedule or after each deploy. The suite keeps its own copy of the token.",
+  "swaggerSuiteName": "Name",
+  "swaggerSchedule": "Schedule",
+  "swaggerSchedule_off": "By hand or deploy hook",
+  "swaggerSchedule_hourly": "Every hour",
+  "swaggerSchedule_daily": "Every day",
+  "swaggerSchedule_weekly": "Every Monday",
+  "swaggerHourUtc": "At (UTC hour)",
+  "swaggerSuiteSaved": "Saved as the suite {name}",
+  "@swaggerSuiteSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "swaggerRunNow": "Run now",
+  "swaggerRunStarted": "{key} started",
+  "@swaggerRunStarted": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "swaggerBusy": "The last run is still going",
+  "swaggerPause": "Pause",
+  "swaggerResume": "Resume",
+  "swaggerPaused": "Paused",
+  "swaggerDeleteSuite": "Delete",
+  "swaggerDeleteConfirm": "Delete the suite {name}? Its past runs stay.",
+  "@swaggerDeleteConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "swaggerHookCreate": "Create deploy hook",
+  "swaggerHookRotate": "New deploy hook",
+  "swaggerHookHint": "POST this URL from your deploy pipeline, with no body, to run the suite after each deploy. It is shown once; making a new one stops the old.",
+  "swaggerHookExample": "curl -X POST {url}",
+  "@swaggerHookExample": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "swaggerLastRun": "Last run",
+  "swaggerNextRun": "Next run",
+  "swaggerNever": "never",
+  "swaggerColSuite": "Suite",
+  "swaggerColSchedule": "Schedule",
+  "swaggerColLast": "Last run",
+  "swaggerSuiteToken": "New token (optional)",
+  "swaggerSetToken": "Set token",
+  "swaggerSpecAuth": "The spec link needs a sign-in",
+  "swaggerSpecAuthHint": "Sent with the spec fetch to the spec's host only, and not stored.",
+  "swaggerSpecAuthNeeded": "The spec URL answered 401/403: give the token it needs, then read it again.",
+  "swaggerSpecAuthReused": "The API requests use this token too. Change it here if they need another.",
+  "swaggerSpecAuthLogin": "Login and password",
+  "swaggerSpecAuthToken": "Token",
+  "swaggerSpecLogin": "Login",
+  "swaggerSpecPassword": "Password",
+  "swaggerSpecLoginNeeded": "The spec link asks for a login and password: enter them, then read it again.",
+  "swaggerSpecLoginHint": "Opens the spec link only, and is not stored. The agent's API requests use the token under Authentication below.",
+  "swaggerFilterProblems": "Failures and blocked",
+  "swaggerFilterAll": "All cases",
+  "swaggerNothingToShow": "Nothing failed or was blocked. Show all cases to see the rest.",
+  "swaggerCasesHidden": "{n, plural, one {{n} endpoint} other {{n} endpoints}} without failures hidden",
+  "@swaggerCasesHidden": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "swaggerWhatToTest": "What to test",
+  "swaggerWhatToTestPh": "For example: only the POST endpoints under /v1/orders and /v1/payments; check validation errors and unknown ids. User 42 is a test account.",
+  "swaggerWhatToTestHint": "agnts tests only what you write here. To test exact endpoints instead, tick them below.",
+  "swaggerWhatToTestNeeded": "Write what to test, or tick the endpoints to test.",
+  "swaggerEndpointsOptional": "Pick endpoints (optional)",
+  "swaggerEndpointsOptionalHint": "Ticked endpoints are tested exactly as ticked. With none ticked, the text above decides what is tested.",
+  "swaggerSuggested": "Suggested",
+  "swaggerNoneTicked": "none ticked: the text above decides",
   "tasksTitle": "Tasks",
   "tasksLede": "Work for your side projects. Tasks stay in agnts and never touch Jira. Everything else works the same: questions, coding, your review.",
   "tasksNew": "New task",

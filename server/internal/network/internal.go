@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"agnts/internal/privnet"
+	"agnts/internal/runner"
 )
 
 // Internal serves what the gateway and the egress proxy ask agnts, on the
@@ -20,6 +21,20 @@ func (s *Service) Internal(mux *http.ServeMux) {
 	mux.HandleFunc("POST /gateway/report", s.guard(s.serveReport))
 	mux.HandleFunc("GET /egress/route", s.guard(s.serveRoute))
 }
+
+// InternalRoutes serves only the egress proxy's route lookup: without a
+// gateway there are no private networks, but grants still need answers.
+func (s *Service) InternalRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("GET /egress/route", s.guard(s.serveRoute))
+}
+
+// Grants reports whether the egress proxy can ask about grants: it shares
+// the gateway secret with agnts, with or without a gateway.
+func (s *Service) Grants() bool { return s.cfg.GatewaySecret != "" }
+
+// SetWhoIs lets the service identify run containers for grants, without a
+// gateway (SetRuns does it with one).
+func (s *Service) SetWhoIs(whois func(ip string) (runner.Identity, bool)) { s.whois = whois }
 
 func (s *Service) guard(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -88,6 +103,8 @@ func (s *Service) serveReport(w http.ResponseWriter, r *http.Request) {
 
 // serveRoute answers the egress proxy: does the run container at ip reach
 // host:port through one of its workspace's private networks, and which?
+// Failing that, was host:port granted to that container alone (a Swagger
+// test's base URL)? The proxy checks a grant's addresses itself.
 func (s *Service) serveRoute(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	port, err := strconv.Atoi(q.Get("port"))
@@ -102,6 +119,11 @@ func (s *Service) serveRoute(w http.ResponseWriter, r *http.Request) {
 	}
 	n, ok := s.router.Pick(id.Workspace, q.Get("host"), port)
 	if !ok {
+		if id.Granted(q.Get("host"), port) {
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]any{"workspace": id.Workspace, "ticket": id.Ticket, "grant": true})
+			return
+		}
 		http.Error(w, "no", http.StatusNotFound)
 		return
 	}

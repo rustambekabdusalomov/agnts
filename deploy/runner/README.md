@@ -127,6 +127,28 @@ Team knowledge (the brief, business context, precedents, review checklists)
 is written to `/agnts/context`, a volume of its own: the root file system is
 read-only, and before this volume existed those files never reached runs.
 
+## agnts-api: the Swagger test client
+
+Swagger test runs call the API under test only through `agnts-api`. It is
+not a separate install: it is the agnts-guard binary run under another name.
+The runner links `~/.local/bin/agnts-api` to `/home/agent/.agnts/bin/agnts-guard`
+in every run (and `agnts-guard api ...` does the same).
+
+    agnts-api run <plan.json>             every case of the plan, in order
+    agnts-api GET /path [--query k=v] [--json '{...}'] [--no-auth | --auth wrong]
+    agnts-api describe <METHOD /path>     one operation with its schemas
+    agnts-api fetch-spec <url>            download a spec (agnts runs this, not Claude)
+
+It sends through the egress proxy (`HTTPS_PROXY`, as the runner sets it) to
+the test's base URL host only, adds the credential from
+`/agnts/context/api/.auth` (which agnts-guard keeps every tool away from),
+refuses writes in a read-only test, keeps to the rate, request and
+auth-failure caps, and logs every exchange to `/agnts/out/api/log.jsonl`.
+The egress proxy lets the run reach the base URL by a per-container grant,
+after checking the host resolves to a public address. Grants need
+`AGNTS_GATEWAY_SECRET` on agnts and the egress proxy (a gateway is not
+needed).
+
 ## Codex CLI (optional)
 
 Runs whose model is `codex:<model>` use Codex CLI instead of Claude Code. The
@@ -190,6 +212,11 @@ agnts-guard and the lockdown (needs Docker, this image, and a Claude token;
 it builds agnts-guard for Linux itself):
 
     cd server && AGNTS_TEST_DOCKER=1 AGNTS_TEST_CLAUDE_TOKEN=sk-ant-... go test ./internal/runner -run 'Hostile|WriteFile' -v
+
+agnts-api in this image, against a tiny API in the container (builds
+agnts-guard for Linux itself):
+
+    cd server && AGNTS_TEST_DOCKER=1 go test ./internal/runner/ -run TestAgntsAPIInContainer
 
 agnts-act (after a preview has started, in the same container):
 

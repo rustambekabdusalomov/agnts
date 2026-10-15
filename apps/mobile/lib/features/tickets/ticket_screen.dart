@@ -11,6 +11,7 @@ import '../../core/api.dart';
 import '../../core/data.dart';
 import '../ci/ci_card.dart';
 import '../learn/ticket_lessons.dart';
+import 'api_results.dart';
 import 'code_review.dart';
 import 'diff_highlight.dart';
 import 'diff_lines.dart';
@@ -764,6 +765,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
             AttachmentList(retryFiles, label: l.filesFromRetry),
           ]),
         ),
+      if (t.kind == TicketKind.swaggertest) ApiResultsFold(ticketKey: t.key),
       if (d.analysis != null && t.state != TicketState.waitingForAnswers) _analysisFold(context, d.analysis!),
       if (d.result?.report != null && t.state != TicketState.waitingForReview && t.state != TicketState.done)
         Fold(title: l.ticketReport, child: ReportMarkdown(d.result!.report!))

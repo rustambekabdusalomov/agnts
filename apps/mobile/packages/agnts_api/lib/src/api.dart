@@ -30,6 +30,7 @@ import 'package:agnts_api/src/api/repos_api.dart';
 import 'package:agnts_api/src/api/reviews_api.dart';
 import 'package:agnts_api/src/api/rules_api.dart';
 import 'package:agnts_api/src/api/settings_api.dart';
+import 'package:agnts_api/src/api/swagger_api.dart';
 import 'package:agnts_api/src/api/tasks_api.dart';
 import 'package:agnts_api/src/api/tickets_api.dart';
 import 'package:agnts_api/src/api/usage_api.dart';
@@ -263,6 +264,12 @@ class AgntsApi {
   /// by doing that all interceptors will not be executed
   SettingsApi getSettingsApi() {
     return SettingsApi(dio);
+  }
+
+  /// Get SwaggerApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  SwaggerApi getSwaggerApi() {
+    return SwaggerApi(dio);
   }
 
   /// Get TasksApi instance, base route and serializer can be overridden by a given but be careful,

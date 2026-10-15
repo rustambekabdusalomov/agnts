@@ -98,6 +98,11 @@ type Options struct {
 	Network *network.Service
 	// Assistant answers questions about the workspace; nil answers 501.
 	Assistant Assistant
+	// Swagger runs Swagger tests; nil answers 501.
+	Swagger Swagger
+	// Suites runs saved Swagger test suites; nil answers 501 and turns
+	// off the deploy hook at /webhooks/swagger-suite/{token}.
+	Suites SwaggerSuites
 }
 
 // Server implements gen.ServerInterface.
@@ -107,7 +112,9 @@ type Server struct {
 	mailLimiter  *ipLimiter
 	// feedbackLimiter: a few feedbacks per address every 10 minutes.
 	feedbackLimiter *ipLimiter
-	ops             map[string]opInfo
+	// hookLimiter: deploy hook calls per address every 10 minutes.
+	hookLimiter *ipLimiter
+	ops         map[string]opInfo
 }
 
 var _ gen.ServerInterface = (*Server)(nil)
@@ -119,7 +126,7 @@ func NewHandler(opt Options) (http.Handler, error) {
 		return nil, fmt.Errorf("httpapi: load embedded spec: %w", err)
 	}
 	s := &Server{opt: opt, loginLimiter: newIPLimiter(5, time.Minute), mailLimiter: newIPLimiter(5, 10*time.Minute),
-		feedbackLimiter: newIPLimiter(5, 10*time.Minute), ops: ops}
+		feedbackLimiter: newIPLimiter(5, 10*time.Minute), hookLimiter: newIPLimiter(30, 10*time.Minute), ops: ops}
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
@@ -138,6 +145,11 @@ func NewHandler(opt Options) (http.Handler, error) {
 		r.With(middleware.RequestSize(maxBodyBytes), s.webhookWorkspace).Handle("/webhooks/"+name, h)
 	}
 
+	if opt.Suites != nil {
+		// A deploy pipeline's call, without a session: the token is the
+		// credential and names the suite.
+		r.With(middleware.RequestSize(16<<10), middleware.NoCache).Post("/webhooks/swagger-suite/{token}", s.suiteHook)
+	}
 	for name, h := range opt.Payments {
 		r.With(middleware.RequestSize(maxBodyBytes)).Handle("/webhooks/"+name, h)
 	}
@@ -191,6 +203,9 @@ func bodyLimit(next http.Handler) http.Handler {
 		limit := int64(maxBodyBytes)
 		if r.Method == http.MethodPost && strings.HasSuffix(r.URL.Path, "/attachments") {
 			limit = maxUploadBytes
+		}
+		if r.Method == http.MethodPost && strings.HasSuffix(r.URL.Path, "/swagger-tests/spec") {
+			limit = maxSpecBody
 		}
 		r.Body = http.MaxBytesReader(w, r.Body, limit)
 		next.ServeHTTP(w, r)

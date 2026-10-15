@@ -860,6 +860,184 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/swagger-tests/spec": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Fetch (from a URL or a docs page in front of it) or read (uploaded text) a Swagger/OpenAPI spec for the Swagger test form; nothing is stored
+         * @description A URL is fetched by a short container behind the egress proxy, never by the agnts server: at most one fetch at a time per workspace and 10 a minute, and a URL fetched in the last 10 minutes comes from the cache. An uploaded spec is kept for an hour under specRef, which the create call refers to. A docs page offering several specs returns them as choices.
+         */
+        post: operations["readSwaggerSpec"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/swagger-tests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a Swagger test ticket; it starts at once (no analysis) unless start is queue */
+        post: operations["createSwaggerTest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/swagger-suites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Saved Swagger test suites */
+        get: operations["listSwaggerSuites"];
+        put?: never;
+        /** Keep a Swagger test ticket's test as a suite that runs again on a schedule or after each deploy */
+        post: operations["createSwaggerSuite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/swagger-suites/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["SuiteID"];
+            };
+            cookie?: never;
+        };
+        /** One suite */
+        get: operations["getSwaggerSuite"];
+        put?: never;
+        post?: never;
+        /** Delete a suite; its past runs stay */
+        delete: operations["deleteSwaggerSuite"];
+        options?: never;
+        head?: never;
+        /** Rename a suite, change its schedule, pause it or give it a new token */
+        patch: operations["updateSwaggerSuite"];
+        trace?: never;
+    };
+    "/swagger-suites/{id}/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["SuiteID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Run a suite now, as a new Swagger test ticket */
+        post: operations["runSwaggerSuite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/swagger-suites/{id}/hook": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["SuiteID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Make a new deploy hook URL for a suite (shown once; the old one stops working)
+         * @description A deploy pipeline POSTs to the URL, with no body, to run the suite after each deploy.
+         */
+        post: operations["rotateSwaggerSuiteHook"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/api-results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        /** A Swagger test's latest results, its request log (without bodies) and how it compares with the run before */
+        get: operations["getApiResults"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/api-results/requests/{requestId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+                requestId: string;
+            };
+            cookie?: never;
+        };
+        /** One logged request and response of a Swagger test's latest run (credentials masked) */
+        get: operations["getApiRequest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/swagger-test/rerun": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run a Swagger test again
+         * @description An open test (in review or failed) runs again in place; a new token is optional. A closed one (done or rejected) runs again as a new ticket, returned here, and needs a token: closing deleted the old one.
+         */
+        post: operations["rerunSwaggerTest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tasks": {
         parameters: {
             query?: never;
@@ -3763,10 +3941,10 @@ export interface components {
         /** @enum {string} */
         TicketState: "new" | "analyzing" | "waiting_for_answers" | "coding" | "testing" | "waiting_for_review" | "pushing" | "done" | "rejected" | "failed" | "rate_limited";
         /**
-         * @description What the work produces. code and test make a change (diff, checks, pull request); plan, analysis and bug write a Markdown report. review reviews a pull request someone else opened (source git): approving it merges the pull request. Nobody picks review: those tickets come from syncing the git host.
+         * @description What the work produces. code and test make a change (diff, checks, pull request); plan, analysis and bug write a Markdown report. review reviews a pull request someone else opened (source git): approving it merges the pull request. Nobody picks review: those tickets come from syncing the git host. swaggertest tests an HTTP API against its Swagger/OpenAPI spec and reports the results; those tickets come from the Swagger test form only.
          * @enum {string}
          */
-        TicketKind: "code" | "test" | "plan" | "analysis" | "bug" | "review";
+        TicketKind: "code" | "test" | "plan" | "analysis" | "bug" | "review" | "swaggertest";
         /**
          * @description A kind, or auto for agnts to pick one during analysis
          * @enum {string}
@@ -4687,6 +4865,236 @@ export interface components {
             kind?: components["schemas"]["TicketKindChoice"];
             /** @description The files the description should have: the task's files to keep and new uploads. Left out keeps them; files not listed are deleted. */
             attachments?: number[];
+        };
+        SwaggerSuiteInput: {
+            /** @description Create: the Swagger test ticket whose test to keep */
+            fromTicket?: string;
+            name?: string;
+            /**
+             * @description off runs only by hand or the deploy hook
+             * @enum {string}
+             */
+            schedule?: "off" | "hourly" | "daily" | "weekly";
+            /** @description UTC hour of daily and weekly runs (weekly: Mondays) */
+            hour?: number;
+            enabled?: boolean;
+            /** @description A new token for the suite; left out keeps it (a new suite takes the ticket's) */
+            token?: string;
+        };
+        SwaggerSuite: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            specUrl?: string;
+            baseUrl: string;
+            /** @description How many endpoints it tests */
+            operations: number;
+            writeEnabled: boolean;
+            authKind: components["schemas"]["ApiAuthKind"];
+            hasToken: boolean;
+            /** Format: int64 */
+            repoId?: number;
+            /** @enum {string} */
+            schedule: "off" | "hourly" | "daily" | "weekly";
+            hour: number;
+            enabled: boolean;
+            /** @description A deploy hook URL exists */
+            hookSet: boolean;
+            /** Format: date-time */
+            lastRunAt?: string;
+            /** Format: date-time */
+            nextRunAt?: string;
+            lastTicketKey?: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        /** @description Give url, or spec (the uploaded or pasted file's text). A spec URL behind auth takes auth: the token goes with the fetch to the spec's host only and is not stored; the answer's specRef then stands for the spec. A URL that answers 401 or 403 without it fails with the error code spec_needs_auth. */
+        SwaggerSpecInput: {
+            url?: string;
+            spec?: string;
+            auth?: components["schemas"]["SwaggerAuthInput"];
+            /** @description The login and password that open the spec URL (HTTP Basic); used instead of auth. Not stored. A URL that asks for one fails with spec_needs_login. */
+            login?: {
+                username: string;
+                password: string;
+            };
+        };
+        SwaggerSpec: {
+            /** @description An uploaded spec, or one fetched with a token, kept for an hour: pass it to createSwaggerTest */
+            specRef?: string;
+            /** @description Where the spec was found (a docs page leads to its spec) */
+            url?: string;
+            title?: string;
+            version?: string;
+            /** @description "swagger 2.0" or "openapi 3.x" */
+            format?: string;
+            servers: components["schemas"]["SwaggerServer"][];
+            operations: components["schemas"]["SwaggerOperation"][];
+            securitySchemes: components["schemas"]["SwaggerSecurityScheme"][];
+            /** @description The specs a docs page offers; read the chosen one's url */
+            choices: {
+                name?: string;
+                url: string;
+            }[];
+        };
+        SwaggerServer: {
+            /** @description Variables filled with their defaults; relative URLs resolved against the spec URL */
+            url: string;
+            description?: string;
+            variables?: {
+                name: string;
+                default: string;
+                enum?: string[];
+            }[];
+        };
+        SwaggerOperation: {
+            method: string;
+            path: string;
+            operationId?: string;
+            summary?: string;
+            tags?: string[];
+            deprecated?: boolean;
+            /** @description Why a GET probably changes something (logout, export, send ...); such operations start unticked */
+            sideEffect?: string;
+            security?: string[];
+            /** @description Ticked in the form by default */
+            default: boolean;
+        };
+        SwaggerSecurityScheme: {
+            name: string;
+            type: string;
+            scheme?: string;
+            in?: string;
+            param?: string;
+            authKind?: components["schemas"]["ApiAuthKind"];
+        };
+        /** @enum {string} */
+        ApiAuthKind: "none" | "bearer" | "header" | "query" | "basic";
+        /** @description Tick operations to test exactly those, or leave them out and say in notes which endpoints to test: the run then sees the whole spec and tests only what the notes name. One of the two is required. */
+        SwaggerTestCreate: {
+            /** @description Defaults to "Swagger test: <API> on <host>" */
+            title?: string;
+            /** @description The URL readSwaggerSpec read (served from its cache) */
+            specUrl?: string;
+            /** @description An uploaded spec, from readSwaggerSpec */
+            specRef?: string;
+            baseUrl: string;
+            operations?: string[];
+            /** @description Send POST, PUT, PATCH and DELETE too; off by default */
+            writeEnabled?: boolean;
+            /** @description Confirms the base URL is not production; required with writeEnabled */
+            notProduction?: boolean;
+            auth?: components["schemas"]["SwaggerAuthInput"];
+            /**
+             * Format: int64
+             * @description Optional: the API's repository, to explain failures
+             */
+            repoId?: number;
+            /** @description What to test: which endpoints, cases or data. Without operations, it decides the scope. */
+            notes?: string;
+            /** @description Requests a second (0: 5) */
+            rateLimit?: number;
+            /** @description Requests per run (0: 300) */
+            maxRequests?: number;
+            /** @enum {string} */
+            priority?: "low" | "medium" | "high";
+            /**
+             * @description code starts now; queue keeps it until started
+             * @enum {string}
+             */
+            start?: "code" | "queue";
+        };
+        SwaggerAuthInput: {
+            kind: components["schemas"]["ApiAuthKind"];
+            /** @description The header or query parameter of an API key */
+            name?: string;
+            /** @description The token (user:password for basic). Sealed, never returned, deleted when the ticket closes */
+            value?: string;
+        };
+        SwaggerRerunInput: {
+            /** @description A new token; required for a closed test with auth */
+            token?: string;
+        };
+        SwaggerTestView: {
+            specUrl?: string;
+            baseUrl: string;
+            operations: string[];
+            writeEnabled: boolean;
+            authKind: components["schemas"]["ApiAuthKind"];
+            authName?: string;
+            /** @description A sealed token is stored (never returned) */
+            hasToken: boolean;
+            rateLimit: number;
+            maxRequests: number;
+            /** Format: int64 */
+            suiteId?: number;
+        };
+        ApiCounts: {
+            passed: number;
+            failed: number;
+            skipped: number;
+            blocked: number;
+        };
+        ApiCase: {
+            id: string;
+            operation: string;
+            case: string;
+            expected?: string;
+            /** @enum {string} */
+            verdict: "pass" | "fail" | "skipped" | "blocked";
+            reason?: string;
+            requests: string[];
+            /**
+             * @description schema: agnts's own check of the response against the spec
+             * @enum {string}
+             */
+            source: "claude" | "schema";
+        };
+        ApiRequestRow: {
+            id: string;
+            case?: string;
+            /** @description default, none or wrong */
+            auth?: string;
+            method: string;
+            url: string;
+            /** @description 0 when no response came back */
+            status: number;
+            /** Format: int64 */
+            ms: number;
+            error?: string;
+            truncated?: boolean;
+        };
+        ApiExchange: components["schemas"]["ApiRequestRow"] & {
+            requestHeaders?: {
+                [key: string]: string;
+            };
+            requestBody?: string;
+            responseHeaders?: {
+                [key: string]: string;
+            };
+            responseBody?: string;
+            /** Format: date-time */
+            at?: string;
+        };
+        SwaggerResults: {
+            test: components["schemas"]["SwaggerTestView"];
+            /**
+             * Format: int64
+             * @description Absent until a run finished
+             */
+            runId?: number;
+            /** Format: date-time */
+            createdAt?: string;
+            status?: string;
+            summary?: string;
+            counts?: components["schemas"]["ApiCounts"];
+            cases: components["schemas"]["ApiCase"][];
+            requests: components["schemas"]["ApiRequestRow"][];
+            /** @description What agnts dropped or added while checking */
+            notes: string[];
+            previous?: components["schemas"]["ApiCounts"];
+            /** @description Cases failing now that did not fail in the run before */
+            newFailures: string[];
         };
         EventPage: {
             events: components["schemas"]["Event"][];
@@ -6475,6 +6883,7 @@ export interface components {
         LessonID: number;
         RelationID: number;
         PullNumber: number;
+        SuiteID: number;
         TicketKey: string;
     };
     requestBodies: never;
@@ -7577,6 +7986,297 @@ export interface operations {
                 };
                 content?: never;
             };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    readSwaggerSpec: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SwaggerSpecInput"];
+            };
+        };
+        responses: {
+            /** @description The spec, or the specs to choose from */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SwaggerSpec"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description Too many spec fetches in the last minute */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createSwaggerTest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SwaggerTestCreate"];
+            };
+        };
+        responses: {
+            201: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    listSwaggerSuites: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The suites */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SwaggerSuite"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    createSwaggerSuite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SwaggerSuiteInput"];
+            };
+        };
+        responses: {
+            /** @description The suite */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SwaggerSuite"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getSwaggerSuite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["SuiteID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The suite */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SwaggerSuite"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    deleteSwaggerSuite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["SuiteID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    updateSwaggerSuite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["SuiteID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SwaggerSuiteInput"];
+            };
+        };
+        responses: {
+            /** @description The suite */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SwaggerSuite"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    runSwaggerSuite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["SuiteID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    rotateSwaggerSuiteHook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["SuiteID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The hook URL */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        url: string;
+                    };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getApiResults: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The results */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SwaggerResults"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getApiRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+                requestId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The exchange */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiExchange"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    rerunSwaggerTest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["SwaggerRerunInput"];
+            };
+        };
+        responses: {
+            200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];

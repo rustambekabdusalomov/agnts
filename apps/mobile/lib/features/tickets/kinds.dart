@@ -15,7 +15,8 @@ import '../../widgets/ui.dart';
 bool kindEditable(Ticket t) =>
     const [TicketState.new_, TicketState.waitingForAnswers, TicketState.failed, TicketState.rateLimited].contains(t.state) &&
     t.prUrl.isEmpty &&
-    t.resumeState != TicketState.pushing;
+    t.resumeState != TicketState.pushing &&
+    t.kind != TicketKind.swaggertest; // a Swagger test's kind never changes
 
 String kindChoiceLabel(AppLocalizations l, TicketKindChoice k) => switch (k) {
   TicketKindChoice.auto => l.kindAuto,

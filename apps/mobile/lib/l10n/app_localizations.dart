@@ -3483,6 +3483,120 @@ abstract class AppLocalizations {
   /// **'Regular expressions, one per line. A matching log is an infra failure: shown and counted, never a ticket. Added to the built-in ones.'**
   String get ciInfraPatternsHelp;
 
+  /// No description provided for @commitBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to commits'**
+  String get commitBack;
+
+  /// No description provided for @commitBackTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to {repo}'**
+  String commitBackTo(String repo);
+
+  /// No description provided for @commitAuthoredAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} committed {time}'**
+  String commitAuthoredAgo(String name, String time);
+
+  /// No description provided for @commitFilesN.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} file} other {{n} files}}'**
+  String commitFilesN(num n);
+
+  /// No description provided for @commitAuthor.
+  ///
+  /// In en, this message translates to:
+  /// **'Author'**
+  String get commitAuthor;
+
+  /// No description provided for @commitAuthored.
+  ///
+  /// In en, this message translates to:
+  /// **'Authored'**
+  String get commitAuthored;
+
+  /// No description provided for @commitCommitter.
+  ///
+  /// In en, this message translates to:
+  /// **'Committed by'**
+  String get commitCommitter;
+
+  /// No description provided for @commitCommitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Committed'**
+  String get commitCommitted;
+
+  /// No description provided for @commitParents.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {Parent} other {Parents}}'**
+  String commitParents(num n);
+
+  /// No description provided for @commitPulls.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull requests'**
+  String get commitPulls;
+
+  /// No description provided for @commitPullsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull requests (merge requests on GitLab) that contain this commit.'**
+  String get commitPullsSub;
+
+  /// No description provided for @commitNoPulls.
+  ///
+  /// In en, this message translates to:
+  /// **'This commit is not in any pull request.'**
+  String get commitNoPulls;
+
+  /// No description provided for @commitMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get commitMessage;
+
+  /// No description provided for @commitPipelinesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'CI runs on this commit, newest first.'**
+  String get commitPipelinesSub;
+
+  /// No description provided for @commitNoPipelines.
+  ///
+  /// In en, this message translates to:
+  /// **'No CI runs on this commit.'**
+  String get commitNoPipelines;
+
+  /// No description provided for @commitChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes'**
+  String get commitChanges;
+
+  /// No description provided for @commitChangesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} file} other {{n} files}} changed, {add} additions, {del} deletions.'**
+  String commitChangesSub(num n, String add, String del);
+
+  /// No description provided for @commitNoFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'This commit changes no files.'**
+  String get commitNoFiles;
+
+  /// No description provided for @commitFilesCapped.
+  ///
+  /// In en, this message translates to:
+  /// **'This commit changes more files than can be shown here. The first {n} are listed; open it on the git host to see all of them.'**
+  String commitFilesCapped(String n);
+
   /// No description provided for @commonLoading.
   ///
   /// In en, this message translates to:
@@ -7748,6 +7862,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Review a pull request someone else opened. Comes from GitHub or GitLab.'**
   String get kindReviewHint;
+
+  /// No description provided for @kindSwaggertest.
+  ///
+  /// In en, this message translates to:
+  /// **'Swagger test'**
+  String get kindSwaggertest;
+
+  /// No description provided for @kindSwaggertestHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Test an HTTP API against its Swagger/OpenAPI spec. Repository optional; ends in a results table and a report.'**
+  String get kindSwaggertestHint;
 
   /// No description provided for @learnTitle.
   ///
@@ -12807,6 +12933,12 @@ abstract class AppLocalizations {
   /// **'When a reviewer requests changes on agnts\'s pull request, its unresolved threads go back to the ticket by themselves. The fix still waits for your approval.'**
   String get pullsSet_autoAddressHelp;
 
+  /// No description provided for @pullsCommentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Point at a line and click the comment button to comment on it.'**
+  String get pullsCommentHint;
+
   /// No description provided for @queueHeader.
   ///
   /// In en, this message translates to:
@@ -16484,6 +16616,948 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dismissed'**
   String get stateReviewRejected;
+
+  /// No description provided for @swaggerFormSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Test an HTTP API against its Swagger/OpenAPI spec: agnts plans the cases, sends real requests and reports a verdict per case with the evidence.'**
+  String get swaggerFormSub;
+
+  /// No description provided for @swaggerSpec.
+  ///
+  /// In en, this message translates to:
+  /// **'Spec'**
+  String get swaggerSpec;
+
+  /// No description provided for @swaggerSpecUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Spec or docs page URL'**
+  String get swaggerSpecUrl;
+
+  /// No description provided for @swaggerSpecUrlPh.
+  ///
+  /// In en, this message translates to:
+  /// **'https://staging.example.com/swagger/index.html'**
+  String get swaggerSpecUrlPh;
+
+  /// No description provided for @swaggerSpecRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Read'**
+  String get swaggerSpecRead;
+
+  /// No description provided for @swaggerSpecReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the spec…'**
+  String get swaggerSpecReading;
+
+  /// No description provided for @swaggerSpecUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a file'**
+  String get swaggerSpecUpload;
+
+  /// No description provided for @swaggerSpecHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A Swagger UI, Springdoc or Redoc page works too: agnts finds the spec behind it. Swagger 2.0 and OpenAPI 3.x, up to 5 MB.'**
+  String get swaggerSpecHint;
+
+  /// No description provided for @swaggerSpecFound.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} {version} · {count, plural, one {{count} endpoint} other {{count} endpoints}} · {format}'**
+  String swaggerSpecFound(String title, String version, num count, String format);
+
+  /// No description provided for @swaggerSpecChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'This page offers several specs. Pick one:'**
+  String get swaggerSpecChoose;
+
+  /// No description provided for @swaggerBaseUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Base URL'**
+  String get swaggerBaseUrl;
+
+  /// No description provided for @swaggerBaseUrlHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Where requests go. It starts as the spec\'s server, which often is production: check it. A host name or an IP, on any port. Internal hosts need a Private network route.'**
+  String get swaggerBaseUrlHint;
+
+  /// No description provided for @swaggerEndpoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Endpoints'**
+  String get swaggerEndpoints;
+
+  /// No description provided for @swaggerEndpointsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} of {total} ticked'**
+  String swaggerEndpointsCount(String n, String total);
+
+  /// No description provided for @swaggerSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search endpoints'**
+  String get swaggerSearch;
+
+  /// No description provided for @swaggerAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get swaggerAll;
+
+  /// No description provided for @swaggerNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get swaggerNone;
+
+  /// No description provided for @swaggerUntickedSideEffect.
+  ///
+  /// In en, this message translates to:
+  /// **'Left unticked: its name suggests it changes something ({word})'**
+  String swaggerUntickedSideEffect(String word);
+
+  /// No description provided for @swaggerUntickedDeprecated.
+  ///
+  /// In en, this message translates to:
+  /// **'Left unticked: deprecated'**
+  String get swaggerUntickedDeprecated;
+
+  /// No description provided for @swaggerAuth.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication'**
+  String get swaggerAuth;
+
+  /// No description provided for @swaggerAuthKind_none.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get swaggerAuthKind_none;
+
+  /// No description provided for @swaggerAuthKind_bearer.
+  ///
+  /// In en, this message translates to:
+  /// **'Bearer token'**
+  String get swaggerAuthKind_bearer;
+
+  /// No description provided for @swaggerAuthKind_header.
+  ///
+  /// In en, this message translates to:
+  /// **'API key in a header'**
+  String get swaggerAuthKind_header;
+
+  /// No description provided for @swaggerAuthKind_query.
+  ///
+  /// In en, this message translates to:
+  /// **'API key in the query'**
+  String get swaggerAuthKind_query;
+
+  /// No description provided for @swaggerAuthKind_basic.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic'**
+  String get swaggerAuthKind_basic;
+
+  /// No description provided for @swaggerAuthName.
+  ///
+  /// In en, this message translates to:
+  /// **'Header or parameter name'**
+  String get swaggerAuthName;
+
+  /// No description provided for @swaggerAuthValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Token'**
+  String get swaggerAuthValue;
+
+  /// No description provided for @swaggerAuthValueBasic.
+  ///
+  /// In en, this message translates to:
+  /// **'user:password, or the Basic token'**
+  String get swaggerAuthValueBasic;
+
+  /// No description provided for @swaggerAuthHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a test account\'s token, never a personal or production one. It is sealed, never shown again, and deleted when the ticket closes.'**
+  String get swaggerAuthHint;
+
+  /// No description provided for @swaggerAuthFromSpec.
+  ///
+  /// In en, this message translates to:
+  /// **'The spec declares: {schemes}'**
+  String swaggerAuthFromSpec(String schemes);
+
+  /// No description provided for @swaggerWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests'**
+  String get swaggerWrite;
+
+  /// No description provided for @swaggerWriteOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only'**
+  String get swaggerWriteOff;
+
+  /// No description provided for @swaggerWriteOffHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only GET, HEAD and OPTIONS'**
+  String get swaggerWriteOffHint;
+
+  /// No description provided for @swaggerWriteOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Write requests too'**
+  String get swaggerWriteOn;
+
+  /// No description provided for @swaggerWriteOnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Also POST, PUT, PATCH and DELETE'**
+  String get swaggerWriteOnHint;
+
+  /// No description provided for @swaggerWriteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'I confirm {url} is not production'**
+  String swaggerWriteConfirm(String url);
+
+  /// No description provided for @swaggerWriteConfirmNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the base URL is not production to send write requests.'**
+  String get swaggerWriteConfirmNeeded;
+
+  /// No description provided for @swaggerReadOnlyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only means only GET, HEAD and OPTIONS, not harmless: some APIs change things on GET. That is your call.'**
+  String get swaggerReadOnlyNote;
+
+  /// No description provided for @swaggerLockoutNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The no-token and wrong-token cases can look like a login attack to a firewall. A test sends at most 3 of them, but it may still lock the test account or get the caller\'s address blocked. Behind a Private network, that address is the workspace\'s VPN connection, which GitLab and other tests also use.'**
+  String get swaggerLockoutNote;
+
+  /// No description provided for @swaggerRepository.
+  ///
+  /// In en, this message translates to:
+  /// **'Repository (optional)'**
+  String get swaggerRepository;
+
+  /// No description provided for @swaggerRepositoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'With one, agnts reads the handlers to explain failures, and failures can become a Bug or Code ticket.'**
+  String get swaggerRepositoryHint;
+
+  /// No description provided for @swaggerNoRepo.
+  ///
+  /// In en, this message translates to:
+  /// **'No repository'**
+  String get swaggerNoRepo;
+
+  /// No description provided for @swaggerNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get swaggerNotes;
+
+  /// No description provided for @swaggerNotesPh.
+  ///
+  /// In en, this message translates to:
+  /// **'For example: user 42 is a test account; orders need an existing product id'**
+  String get swaggerNotesPh;
+
+  /// No description provided for @swaggerLimits.
+  ///
+  /// In en, this message translates to:
+  /// **'Limits'**
+  String get swaggerLimits;
+
+  /// No description provided for @swaggerRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests a second'**
+  String get swaggerRate;
+
+  /// No description provided for @swaggerMaxRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests per run'**
+  String get swaggerMaxRequests;
+
+  /// No description provided for @swaggerStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get swaggerStart;
+
+  /// No description provided for @swaggerStartNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get swaggerStartNow;
+
+  /// No description provided for @swaggerStartQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep in the queue'**
+  String get swaggerStartQueue;
+
+  /// No description provided for @swaggerCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create test'**
+  String get swaggerCreate;
+
+  /// No description provided for @swaggerCreateStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Create and start'**
+  String get swaggerCreateStart;
+
+  /// No description provided for @swaggerCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'{key} created'**
+  String swaggerCreated(String key);
+
+  /// No description provided for @swaggerNeedSpec.
+  ///
+  /// In en, this message translates to:
+  /// **'Read a spec first.'**
+  String get swaggerNeedSpec;
+
+  /// No description provided for @swaggerNeedToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the token.'**
+  String get swaggerNeedToken;
+
+  /// No description provided for @swaggerClaudeOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Swagger tests always run on Claude (Sonnet), whatever model the workspace codes with.'**
+  String get swaggerClaudeOnly;
+
+  /// No description provided for @swaggerTab.
+  ///
+  /// In en, this message translates to:
+  /// **'API results'**
+  String get swaggerTab;
+
+  /// No description provided for @swaggerRequestsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests'**
+  String get swaggerRequestsTab;
+
+  /// No description provided for @swaggerNoRun.
+  ///
+  /// In en, this message translates to:
+  /// **'No results yet: the test is running or has not run.'**
+  String get swaggerNoRun;
+
+  /// No description provided for @swaggerVerdict_pass.
+  ///
+  /// In en, this message translates to:
+  /// **'Passed'**
+  String get swaggerVerdict_pass;
+
+  /// No description provided for @swaggerVerdict_fail.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get swaggerVerdict_fail;
+
+  /// No description provided for @swaggerVerdict_skipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get swaggerVerdict_skipped;
+
+  /// No description provided for @swaggerVerdict_blocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked'**
+  String get swaggerVerdict_blocked;
+
+  /// No description provided for @swaggerCount_pass.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} passed'**
+  String swaggerCount_pass(String n);
+
+  /// No description provided for @swaggerCount_fail.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} failed'**
+  String swaggerCount_fail(String n);
+
+  /// No description provided for @swaggerCount_skipped.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} skipped'**
+  String swaggerCount_skipped(String n);
+
+  /// No description provided for @swaggerCount_blocked.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} blocked'**
+  String swaggerCount_blocked(String n);
+
+  /// No description provided for @swaggerColEndpoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Endpoint'**
+  String get swaggerColEndpoint;
+
+  /// No description provided for @swaggerColCases.
+  ///
+  /// In en, this message translates to:
+  /// **'Cases'**
+  String get swaggerColCases;
+
+  /// No description provided for @swaggerColResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Result'**
+  String get swaggerColResult;
+
+  /// No description provided for @swaggerAgntsCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts check'**
+  String get swaggerAgntsCheck;
+
+  /// No description provided for @swaggerAgntsCheckHint.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts checked this response against the spec\'s schema itself'**
+  String get swaggerAgntsCheckHint;
+
+  /// No description provided for @swaggerExpected.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected: {text}'**
+  String swaggerExpected(String text);
+
+  /// No description provided for @swaggerRequestLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Request'**
+  String get swaggerRequestLabel;
+
+  /// No description provided for @swaggerResponseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Response'**
+  String get swaggerResponseLabel;
+
+  /// No description provided for @swaggerNoResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'No response'**
+  String get swaggerNoResponse;
+
+  /// No description provided for @swaggerTruncated.
+  ///
+  /// In en, this message translates to:
+  /// **'The body was cut at 64 KB'**
+  String get swaggerTruncated;
+
+  /// No description provided for @swaggerCopyCurl.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy as curl'**
+  String get swaggerCopyCurl;
+
+  /// No description provided for @swaggerCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get swaggerCopied;
+
+  /// No description provided for @swaggerLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading…'**
+  String get swaggerLoading;
+
+  /// No description provided for @swaggerCreateBug.
+  ///
+  /// In en, this message translates to:
+  /// **'Create bug ticket'**
+  String get swaggerCreateBug;
+
+  /// No description provided for @swaggerBugTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix the API failures {key} found'**
+  String swaggerBugTitle(String key);
+
+  /// No description provided for @swaggerBugIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'The Swagger test {key} of {base} found these failures:'**
+  String swaggerBugIntro(String key, String base);
+
+  /// No description provided for @swaggerBugCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'{key} created'**
+  String swaggerBugCreated(String key);
+
+  /// No description provided for @swaggerNewFailures.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} new failure} other {{n} new failures}} since the last run'**
+  String swaggerNewFailures(num n);
+
+  /// No description provided for @swaggerNoNewFailures.
+  ///
+  /// In en, this message translates to:
+  /// **'No new failures since the last run'**
+  String get swaggerNoNewFailures;
+
+  /// No description provided for @swaggerPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Last run: {passed} passed, {failed} failed'**
+  String swaggerPrevious(String passed, String failed);
+
+  /// No description provided for @swaggerRerun.
+  ///
+  /// In en, this message translates to:
+  /// **'Run again'**
+  String get swaggerRerun;
+
+  /// No description provided for @swaggerRerunToken.
+  ///
+  /// In en, this message translates to:
+  /// **'New token (optional)'**
+  String get swaggerRerunToken;
+
+  /// No description provided for @swaggerRerunTokenNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'New token (required: the old one was deleted when the ticket closed)'**
+  String get swaggerRerunTokenNeeded;
+
+  /// No description provided for @swaggerRerunStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Started again'**
+  String get swaggerRerunStarted;
+
+  /// No description provided for @swaggerRerunNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Started again as {key}'**
+  String swaggerRerunNew(String key);
+
+  /// No description provided for @swaggerModeRead.
+  ///
+  /// In en, this message translates to:
+  /// **'read-only'**
+  String get swaggerModeRead;
+
+  /// No description provided for @swaggerModeWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'write requests on'**
+  String get swaggerModeWrite;
+
+  /// No description provided for @swaggerTokenStored.
+  ///
+  /// In en, this message translates to:
+  /// **'token stored'**
+  String get swaggerTokenStored;
+
+  /// No description provided for @swaggerTokenGone.
+  ///
+  /// In en, this message translates to:
+  /// **'no token stored'**
+  String get swaggerTokenGone;
+
+  /// No description provided for @swaggerAgntsNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'What agnts adjusted'**
+  String get swaggerAgntsNotes;
+
+  /// No description provided for @swaggerAllPassed.
+  ///
+  /// In en, this message translates to:
+  /// **'Every case passed.'**
+  String get swaggerAllPassed;
+
+  /// No description provided for @swaggerRunningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Testing the API'**
+  String get swaggerRunningTitle;
+
+  /// No description provided for @swaggerRunningSub.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts plans the cases and sends real requests to the base URL. Results appear here when the run ends.'**
+  String get swaggerRunningSub;
+
+  /// No description provided for @swaggerQueuedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Swagger test in the queue'**
+  String get swaggerQueuedTitle;
+
+  /// No description provided for @swaggerQueuedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Start it when you are ready.'**
+  String get swaggerQueuedSub;
+
+  /// No description provided for @swaggerSuites.
+  ///
+  /// In en, this message translates to:
+  /// **'Swagger suites'**
+  String get swaggerSuites;
+
+  /// No description provided for @swaggerSuitesLede.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved Swagger tests that run again on a schedule or after each deploy. Each run is a new ticket, compared with the suite\'s last run, and reuses its plan, so repeat runs cost fewer turns.'**
+  String get swaggerSuitesLede;
+
+  /// No description provided for @swaggerSuitesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No suites yet. Open a finished Swagger test and save it as a suite.'**
+  String get swaggerSuitesEmpty;
+
+  /// No description provided for @swaggerSaveSuite.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as suite'**
+  String get swaggerSaveSuite;
+
+  /// No description provided for @swaggerSaveSuiteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Run this test again on a schedule or after each deploy. The suite keeps its own copy of the token.'**
+  String get swaggerSaveSuiteHint;
+
+  /// No description provided for @swaggerSuiteName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get swaggerSuiteName;
+
+  /// No description provided for @swaggerSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get swaggerSchedule;
+
+  /// No description provided for @swaggerSchedule_off.
+  ///
+  /// In en, this message translates to:
+  /// **'By hand or deploy hook'**
+  String get swaggerSchedule_off;
+
+  /// No description provided for @swaggerSchedule_hourly.
+  ///
+  /// In en, this message translates to:
+  /// **'Every hour'**
+  String get swaggerSchedule_hourly;
+
+  /// No description provided for @swaggerSchedule_daily.
+  ///
+  /// In en, this message translates to:
+  /// **'Every day'**
+  String get swaggerSchedule_daily;
+
+  /// No description provided for @swaggerSchedule_weekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Every Monday'**
+  String get swaggerSchedule_weekly;
+
+  /// No description provided for @swaggerHourUtc.
+  ///
+  /// In en, this message translates to:
+  /// **'At (UTC hour)'**
+  String get swaggerHourUtc;
+
+  /// No description provided for @swaggerSuiteSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved as the suite {name}'**
+  String swaggerSuiteSaved(String name);
+
+  /// No description provided for @swaggerRunNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Run now'**
+  String get swaggerRunNow;
+
+  /// No description provided for @swaggerRunStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'{key} started'**
+  String swaggerRunStarted(String key);
+
+  /// No description provided for @swaggerBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'The last run is still going'**
+  String get swaggerBusy;
+
+  /// No description provided for @swaggerPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get swaggerPause;
+
+  /// No description provided for @swaggerResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get swaggerResume;
+
+  /// No description provided for @swaggerPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get swaggerPaused;
+
+  /// No description provided for @swaggerDeleteSuite.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get swaggerDeleteSuite;
+
+  /// No description provided for @swaggerDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the suite {name}? Its past runs stay.'**
+  String swaggerDeleteConfirm(String name);
+
+  /// No description provided for @swaggerHookCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create deploy hook'**
+  String get swaggerHookCreate;
+
+  /// No description provided for @swaggerHookRotate.
+  ///
+  /// In en, this message translates to:
+  /// **'New deploy hook'**
+  String get swaggerHookRotate;
+
+  /// No description provided for @swaggerHookHint.
+  ///
+  /// In en, this message translates to:
+  /// **'POST this URL from your deploy pipeline, with no body, to run the suite after each deploy. It is shown once; making a new one stops the old.'**
+  String get swaggerHookHint;
+
+  /// No description provided for @swaggerHookExample.
+  ///
+  /// In en, this message translates to:
+  /// **'curl -X POST {url}'**
+  String swaggerHookExample(String url);
+
+  /// No description provided for @swaggerLastRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Last run'**
+  String get swaggerLastRun;
+
+  /// No description provided for @swaggerNextRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Next run'**
+  String get swaggerNextRun;
+
+  /// No description provided for @swaggerNever.
+  ///
+  /// In en, this message translates to:
+  /// **'never'**
+  String get swaggerNever;
+
+  /// No description provided for @swaggerColSuite.
+  ///
+  /// In en, this message translates to:
+  /// **'Suite'**
+  String get swaggerColSuite;
+
+  /// No description provided for @swaggerColSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get swaggerColSchedule;
+
+  /// No description provided for @swaggerColLast.
+  ///
+  /// In en, this message translates to:
+  /// **'Last run'**
+  String get swaggerColLast;
+
+  /// No description provided for @swaggerSuiteToken.
+  ///
+  /// In en, this message translates to:
+  /// **'New token (optional)'**
+  String get swaggerSuiteToken;
+
+  /// No description provided for @swaggerSetToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Set token'**
+  String get swaggerSetToken;
+
+  /// No description provided for @swaggerSpecAuth.
+  ///
+  /// In en, this message translates to:
+  /// **'The spec link needs a sign-in'**
+  String get swaggerSpecAuth;
+
+  /// No description provided for @swaggerSpecAuthHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent with the spec fetch to the spec\'s host only, and not stored.'**
+  String get swaggerSpecAuthHint;
+
+  /// No description provided for @swaggerSpecAuthNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'The spec URL answered 401/403: give the token it needs, then read it again.'**
+  String get swaggerSpecAuthNeeded;
+
+  /// No description provided for @swaggerSpecAuthReused.
+  ///
+  /// In en, this message translates to:
+  /// **'The API requests use this token too. Change it here if they need another.'**
+  String get swaggerSpecAuthReused;
+
+  /// No description provided for @swaggerSpecAuthLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Login and password'**
+  String get swaggerSpecAuthLogin;
+
+  /// No description provided for @swaggerSpecAuthToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Token'**
+  String get swaggerSpecAuthToken;
+
+  /// No description provided for @swaggerSpecLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get swaggerSpecLogin;
+
+  /// No description provided for @swaggerSpecPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get swaggerSpecPassword;
+
+  /// No description provided for @swaggerSpecLoginNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'The spec link asks for a login and password: enter them, then read it again.'**
+  String get swaggerSpecLoginNeeded;
+
+  /// No description provided for @swaggerSpecLoginHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens the spec link only, and is not stored. The agent\'s API requests use the token under Authentication below.'**
+  String get swaggerSpecLoginHint;
+
+  /// No description provided for @swaggerFilterProblems.
+  ///
+  /// In en, this message translates to:
+  /// **'Failures and blocked'**
+  String get swaggerFilterProblems;
+
+  /// No description provided for @swaggerFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All cases'**
+  String get swaggerFilterAll;
+
+  /// No description provided for @swaggerNothingToShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing failed or was blocked. Show all cases to see the rest.'**
+  String get swaggerNothingToShow;
+
+  /// No description provided for @swaggerCasesHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} endpoint} other {{n} endpoints}} without failures hidden'**
+  String swaggerCasesHidden(num n);
+
+  /// No description provided for @swaggerWhatToTest.
+  ///
+  /// In en, this message translates to:
+  /// **'What to test'**
+  String get swaggerWhatToTest;
+
+  /// No description provided for @swaggerWhatToTestPh.
+  ///
+  /// In en, this message translates to:
+  /// **'For example: only the POST endpoints under /v1/orders and /v1/payments; check validation errors and unknown ids. User 42 is a test account.'**
+  String get swaggerWhatToTestPh;
+
+  /// No description provided for @swaggerWhatToTestHint.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts tests only what you write here. To test exact endpoints instead, tick them below.'**
+  String get swaggerWhatToTestHint;
+
+  /// No description provided for @swaggerWhatToTestNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Write what to test, or tick the endpoints to test.'**
+  String get swaggerWhatToTestNeeded;
+
+  /// No description provided for @swaggerEndpointsOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick endpoints (optional)'**
+  String get swaggerEndpointsOptional;
+
+  /// No description provided for @swaggerEndpointsOptionalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticked endpoints are tested exactly as ticked. With none ticked, the text above decides what is tested.'**
+  String get swaggerEndpointsOptionalHint;
+
+  /// No description provided for @swaggerSuggested.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested'**
+  String get swaggerSuggested;
+
+  /// No description provided for @swaggerNoneTicked.
+  ///
+  /// In en, this message translates to:
+  /// **'none ticked: the text above decides'**
+  String get swaggerNoneTicked;
 
   /// No description provided for @tasksTitle.
   ///

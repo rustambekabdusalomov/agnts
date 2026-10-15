@@ -18,6 +18,10 @@ import 'package:agnts_api/src/model/analytics_models_inner.dart';
 import 'package:agnts_api/src/model/analytics_repos_inner.dart';
 import 'package:agnts_api/src/model/answers_request.dart';
 import 'package:agnts_api/src/model/answers_request_answers_inner.dart';
+import 'package:agnts_api/src/model/api_case.dart';
+import 'package:agnts_api/src/model/api_counts.dart';
+import 'package:agnts_api/src/model/api_exchange.dart';
+import 'package:agnts_api/src/model/api_request_row.dart';
 import 'package:agnts_api/src/model/approach.dart';
 import 'package:agnts_api/src/model/approve_ticket_request.dart';
 import 'package:agnts_api/src/model/assistant_ask.dart';
@@ -206,6 +210,7 @@ import 'package:agnts_api/src/model/reviewer_profile_input.dart';
 import 'package:agnts_api/src/model/reviewer_stat.dart';
 import 'package:agnts_api/src/model/reviewers.dart';
 import 'package:agnts_api/src/model/rotate_mcp_token200_response.dart';
+import 'package:agnts_api/src/model/rotate_swagger_suite_hook200_response.dart';
 import 'package:agnts_api/src/model/rule.dart';
 import 'package:agnts_api/src/model/rule_answers.dart';
 import 'package:agnts_api/src/model/rule_answers_answers_inner.dart';
@@ -231,6 +236,21 @@ import 'package:agnts_api/src/model/stage_spend.dart';
 import 'package:agnts_api/src/model/stale_pr.dart';
 import 'package:agnts_api/src/model/starter_pack.dart';
 import 'package:agnts_api/src/model/step_duration.dart';
+import 'package:agnts_api/src/model/swagger_auth_input.dart';
+import 'package:agnts_api/src/model/swagger_operation.dart';
+import 'package:agnts_api/src/model/swagger_rerun_input.dart';
+import 'package:agnts_api/src/model/swagger_results.dart';
+import 'package:agnts_api/src/model/swagger_security_scheme.dart';
+import 'package:agnts_api/src/model/swagger_server.dart';
+import 'package:agnts_api/src/model/swagger_server_variables_inner.dart';
+import 'package:agnts_api/src/model/swagger_spec.dart';
+import 'package:agnts_api/src/model/swagger_spec_choices_inner.dart';
+import 'package:agnts_api/src/model/swagger_spec_input.dart';
+import 'package:agnts_api/src/model/swagger_spec_input_login.dart';
+import 'package:agnts_api/src/model/swagger_suite.dart';
+import 'package:agnts_api/src/model/swagger_suite_input.dart';
+import 'package:agnts_api/src/model/swagger_test_create.dart';
+import 'package:agnts_api/src/model/swagger_test_view.dart';
 import 'package:agnts_api/src/model/sync_jira200_response.dart';
 import 'package:agnts_api/src/model/sync_plane200_response.dart';
 import 'package:agnts_api/src/model/task_create.dart';
@@ -331,6 +351,17 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return AnswersRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AnswersRequestAnswersInner':
           return AnswersRequestAnswersInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ApiAuthKind':
+          
+          
+        case 'ApiCase':
+          return ApiCase.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ApiCounts':
+          return ApiCounts.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ApiExchange':
+          return ApiExchange.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ApiRequestRow':
+          return ApiRequestRow.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Approach':
           return Approach.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApproveTicketRequest':
@@ -734,6 +765,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return Reviewers.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RotateMcpToken200Response':
           return RotateMcpToken200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RotateSwaggerSuiteHook200Response':
+          return RotateSwaggerSuiteHook200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Rule':
           return Rule.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RuleAnswers':
@@ -790,6 +823,36 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return StarterPack.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'StepDuration':
           return StepDuration.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SwaggerAuthInput':
+          return SwaggerAuthInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SwaggerOperation':
+          return SwaggerOperation.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SwaggerRerunInput':
+          return SwaggerRerunInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SwaggerResults':
+          return SwaggerResults.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SwaggerSecurityScheme':
+          return SwaggerSecurityScheme.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SwaggerServer':
+          return SwaggerServer.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SwaggerServerVariablesInner':
+          return SwaggerServerVariablesInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SwaggerSpec':
+          return SwaggerSpec.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SwaggerSpecChoicesInner':
+          return SwaggerSpecChoicesInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SwaggerSpecInput':
+          return SwaggerSpecInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SwaggerSpecInputLogin':
+          return SwaggerSpecInputLogin.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SwaggerSuite':
+          return SwaggerSuite.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SwaggerSuiteInput':
+          return SwaggerSuiteInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SwaggerTestCreate':
+          return SwaggerTestCreate.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SwaggerTestView':
+          return SwaggerTestView.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SyncJira200Response':
           return SyncJira200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SyncPlane200Response':

@@ -5,7 +5,7 @@
 // ignore_for_file: unused_element
 import 'package:json_annotation/json_annotation.dart';
 
-/// What the work produces. code and test make a change (diff, checks, pull request); plan, analysis and bug write a Markdown report. review reviews a pull request someone else opened (source git): approving it merges the pull request. Nobody picks review: those tickets come from syncing the git host.
+/// What the work produces. code and test make a change (diff, checks, pull request); plan, analysis and bug write a Markdown report. review reviews a pull request someone else opened (source git): approving it merges the pull request. Nobody picks review: those tickets come from syncing the git host. swaggertest tests an HTTP API against its Swagger/OpenAPI spec and reports the results; those tickets come from the Swagger test form only.
 enum TicketKind {
       @JsonValue(r'code')
       code(r'code'),
@@ -18,7 +18,9 @@ enum TicketKind {
       @JsonValue(r'bug')
       bug(r'bug'),
       @JsonValue(r'review')
-      review(r'review');
+      review(r'review'),
+      @JsonValue(r'swaggertest')
+      swaggertest(r'swaggertest');
 
   const TicketKind(this.value);
 

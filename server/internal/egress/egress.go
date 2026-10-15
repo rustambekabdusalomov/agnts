@@ -7,6 +7,7 @@ package egress
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -18,6 +19,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"agnts/internal/domain"
 )
 
 // DefaultAllow is used when AGNTS_EGRESS_ALLOW is not set.
@@ -60,17 +63,25 @@ type Proxy struct {
 	log   *slog.Logger
 	dial  func(ctx context.Context, network, addr string) (net.Conn, error)
 	// router and viaGateway send a run's connections to a host on its
-	// workspace's private network through the gateway (nil: none).
+	// workspace's private network through the gateway (nil: none). The
+	// router also answers grants: a host one run container alone may reach
+	// (a Swagger test's base URL).
 	router     Router
 	viaGateway GatewayDial
+	// lookup and localNets are the resolver and the proxy's own networks,
+	// for the address check of granted hosts; tests replace them.
+	lookup    func(ctx context.Context, host string) ([]net.IP, error)
+	localNets func() []*net.IPNet
 }
 
 // Private is a decision to send a connection through one of a
-// workspace's private networks.
+// workspace's private networks, or (Grant) straight out to a host granted
+// to that one run container.
 type Private struct {
 	Workspace int64  `json:"workspace"`
 	Network   int64  `json:"network,omitempty"`
 	Ticket    string `json:"ticket,omitempty"`
+	Grant     bool   `json:"grant,omitempty"`
 }
 
 // Router decides whether the run container at clientIP reaches host:port
@@ -82,8 +93,104 @@ type Router interface {
 // GatewayDial connects to target (host:port) through the gateway.
 type GatewayDial func(ctx context.Context, p Private, target string) (net.Conn, error)
 
-// SetPrivate turns on private networks.
+// SetPrivate turns on route lookups: private networks (when dial is not
+// nil) and grants.
 func (p *Proxy) SetPrivate(r Router, dial GatewayDial) { p.router, p.viaGateway = r, dial }
+
+// dialerFor is how a connection the router decided on is made.
+func (p *Proxy) dialerFor(d Private) (func(ctx context.Context, network, addr string) (net.Conn, error), bool) {
+	if d.Grant {
+		return p.grantDial, true
+	}
+	if p.viaGateway == nil {
+		return nil, false
+	}
+	return func(ctx context.Context, _, addr string) (net.Conn, error) { return p.viaGateway(ctx, d, addr) }, true
+}
+
+// ErrInternalAddress refuses a granted host that resolves to an address
+// inside: loopback, private, CGNAT, link-local, unique-local, multicast,
+// or a network the proxy itself is on (agnts's Docker networks).
+var ErrInternalAddress = errors.New("resolves to an internal address")
+
+// grantDial connects to a granted host. Grants come from whoever creates
+// a ticket, so unlike the admin's allowlist the name is resolved here, every
+// address is checked, and the connection goes to the exact address checked:
+// a second DNS answer cannot swap in an internal one (DNS rebinding).
+func (p *Proxy) grantDial(ctx context.Context, network, addr string) (net.Conn, error) {
+	host, port, err := net.SplitHostPort(addr)
+	if err != nil {
+		return nil, err
+	}
+	ips, err := p.resolve(ctx, host)
+	if err != nil {
+		return nil, err
+	}
+	if len(ips) == 0 {
+		return nil, fmt.Errorf("%s: no address", host)
+	}
+	local := p.ownNets()
+	for _, ip := range ips {
+		if !domain.IsPublicIP(ip) || inNets(ip, local) {
+			p.log.Warn("egress: granted host refused", "host", host, "ip", ip.String())
+			return nil, fmt.Errorf("%s %w (%s)", host, ErrInternalAddress, ip)
+		}
+	}
+	var last error
+	for _, ip := range ips {
+		c, err := p.dial(ctx, network, net.JoinHostPort(ip.String(), port))
+		if err == nil {
+			return c, nil
+		}
+		last = err
+	}
+	return nil, last
+}
+
+func (p *Proxy) resolve(ctx context.Context, host string) ([]net.IP, error) {
+	if ip := net.ParseIP(strings.Trim(host, "[]")); ip != nil {
+		return []net.IP{ip}, nil
+	}
+	if p.lookup != nil {
+		return p.lookup(ctx, host)
+	}
+	addrs, err := net.DefaultResolver.LookupIPAddr(ctx, host)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]net.IP, 0, len(addrs))
+	for _, a := range addrs {
+		out = append(out, a.IP)
+	}
+	return out, nil
+}
+
+// ownNets are the networks the proxy's interfaces are on.
+func (p *Proxy) ownNets() []*net.IPNet {
+	if p.localNets != nil {
+		return p.localNets()
+	}
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return nil
+	}
+	var out []*net.IPNet
+	for _, a := range addrs {
+		if n, ok := a.(*net.IPNet); ok {
+			out = append(out, n)
+		}
+	}
+	return out
+}
+
+func inNets(ip net.IP, nets []*net.IPNet) bool {
+	for _, n := range nets {
+		if n.Contains(ip) {
+			return true
+		}
+	}
+	return false
+}
 
 // private asks the router about a connection from r's client; hosts on the
 // built-in allowlist never go through a private network.
@@ -230,7 +337,10 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	dial := p.dial
 	if pn, err := strconv.Atoi(port); err == nil {
 		if d, ok := p.private(r, host, pn); ok {
-			dial = func(ctx context.Context, _, addr string) (net.Conn, error) { return p.viaGateway(ctx, d, addr) }
+			if dial, ok = p.dialerFor(d); !ok {
+				p.deny(w, r.URL.Host)
+				return
+			}
 		} else if !p.Allowed(host) || !p.ports[port] {
 			p.deny(w, r.URL.Host)
 			return
@@ -245,7 +355,11 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	out.Header.Del("Proxy-Connection")
 	resp, err := (&http.Transport{DialContext: dial, Proxy: nil}).RoundTrip(out)
 	if err != nil {
-		http.Error(w, "upstream error", http.StatusBadGateway)
+		msg := "upstream error"
+		if errors.Is(err, ErrInternalAddress) {
+			msg = "agnts egress: " + err.Error()
+		}
+		http.Error(w, msg, http.StatusBadGateway)
 		return
 	}
 	defer func() { _ = resp.Body.Close() }()
@@ -272,9 +386,14 @@ func (p *Proxy) connect(w http.ResponseWriter, r *http.Request) {
 	}
 	var upstream net.Conn
 	if d, ok := p.private(r, host, pn); ok {
-		if upstream, err = p.viaGateway(r.Context(), d, net.JoinHostPort(host, port)); err != nil {
-			p.log.Warn("egress: private network", "target", r.Host, "workspace", d.Workspace, "err", err)
-			http.Error(w, "agnts private network: "+err.Error(), http.StatusBadGateway)
+		dial, ok := p.dialerFor(d)
+		if !ok {
+			p.deny(w, r.Host)
+			return
+		}
+		if upstream, err = dial(r.Context(), "tcp", net.JoinHostPort(host, port)); err != nil {
+			p.log.Warn("egress: routed connection", "target", r.Host, "workspace", d.Workspace, "grant", d.Grant, "err", err)
+			http.Error(w, "agnts egress: "+err.Error(), http.StatusBadGateway)
 			return
 		}
 	} else {
@@ -350,7 +469,7 @@ func (h HTTPRouter) Route(ctx context.Context, clientIP, host string, port int) 
 		if err := json.NewDecoder(io.LimitReader(resp.Body, 4096)).Decode(&d); err != nil {
 			return Private{}, false, err
 		}
-		return d, d.Workspace > 0, nil
+		return d, d.Workspace > 0 || d.Grant, nil
 	case http.StatusNotFound:
 		return Private{}, false, nil
 	default:

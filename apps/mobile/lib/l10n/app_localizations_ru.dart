@@ -1903,6 +1903,85 @@ class AppLocalizationsRu extends AppLocalizations {
       'Регулярные выражения, по одному на строку. Совпавший лог считается падением инфраструктуры: показывается и учитывается, но тикет не открывается. Добавляются к встроенным.';
 
   @override
+  String get commitBack => 'Назад к коммитам';
+
+  @override
+  String commitBackTo(String repo) {
+    return 'Назад к $repo';
+  }
+
+  @override
+  String commitAuthoredAgo(String name, String time) {
+    return '$name закоммитил(а) $time';
+  }
+
+  @override
+  String commitFilesN(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n файла', many: '$n файлов', few: '$n файла', one: '$n файл');
+    return '$_temp0';
+  }
+
+  @override
+  String get commitAuthor => 'Автор';
+
+  @override
+  String get commitAuthored => 'Создан';
+
+  @override
+  String get commitCommitter => 'Закоммитил(а)';
+
+  @override
+  String get commitCommitted => 'Закоммичен';
+
+  @override
+  String commitParents(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'Родители', one: 'Родитель');
+    return '$_temp0';
+  }
+
+  @override
+  String get commitPulls => 'Pull request’ы';
+
+  @override
+  String get commitPullsSub => 'Pull request’ы (merge request’ы в GitLab), в которых есть этот коммит.';
+
+  @override
+  String get commitNoPulls => 'Этого коммита нет ни в одном pull request’е.';
+
+  @override
+  String get commitMessage => 'Сообщение';
+
+  @override
+  String get commitPipelinesSub => 'CI-запуски на этом коммите, новые сверху.';
+
+  @override
+  String get commitNoPipelines => 'На этом коммите не было CI-запусков.';
+
+  @override
+  String get commitChanges => 'Изменения';
+
+  @override
+  String commitChangesSub(num n, String add, String del) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Изменено $n файла',
+      many: 'Изменено $n файлов',
+      few: 'Изменено $n файла',
+      one: 'Изменён $n файл',
+    );
+    return '$_temp0: +$add, −$del.';
+  }
+
+  @override
+  String get commitNoFiles => 'Этот коммит не меняет файлов.';
+
+  @override
+  String commitFilesCapped(String n) {
+    return 'Коммит меняет больше файлов, чем можно показать здесь. Показаны первые $n; остальные — на git-хостинге.';
+  }
+
+  @override
   String get commonLoading => 'Загрузка…';
 
   @override
@@ -4466,6 +4545,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get kindReviewHint => 'Проверить пул-реквест, который открыл кто-то другой. Приходит из GitHub или GitLab.';
+
+  @override
+  String get kindSwaggertest => 'Тест Swagger';
+
+  @override
+  String get kindSwaggertestHint =>
+      'Проверить HTTP API по его спецификации Swagger/OpenAPI. Репозиторий не обязателен; результат — таблица проверок и отчёт.';
 
   @override
   String get learnTitle => 'Обучение';
@@ -7480,6 +7566,9 @@ class AppLocalizationsRu extends AppLocalizations {
       'Когда ревьюер запрашивает изменения в пул-реквесте agnts, его нерешённые ветки сами возвращаются в тикет. Исправление всё равно ждёт вашего одобрения.';
 
   @override
+  String get pullsCommentHint => 'Наведите на строку и нажмите кнопку комментария, чтобы прокомментировать её.';
+
+  @override
   String queueHeader(String running, String slots) {
     return 'Выполняется $running/$slots';
   }
@@ -9671,6 +9760,550 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get stateReviewRejected => 'Отклонено';
+
+  @override
+  String get swaggerFormSub =>
+      'Проверить HTTP API по его спецификации Swagger/OpenAPI: agnts составит проверки, отправит настоящие запросы и вынесет вердикт по каждой с доказательствами.';
+
+  @override
+  String get swaggerSpec => 'Спецификация';
+
+  @override
+  String get swaggerSpecUrl => 'Адрес спецификации или страницы документации';
+
+  @override
+  String get swaggerSpecUrlPh => 'https://staging.example.com/swagger/index.html';
+
+  @override
+  String get swaggerSpecRead => 'Прочитать';
+
+  @override
+  String get swaggerSpecReading => 'Читаем спецификацию…';
+
+  @override
+  String get swaggerSpecUpload => 'Загрузить файл';
+
+  @override
+  String get swaggerSpecHint =>
+      'Подойдёт и страница Swagger UI, Springdoc или Redoc: agnts найдёт за ней спецификацию. Swagger 2.0 и OpenAPI 3.x, до 5 МБ.';
+
+  @override
+  String swaggerSpecFound(String title, String version, num count, String format) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count эндпоинта',
+      many: '$count эндпоинтов',
+      few: '$count эндпоинта',
+      one: '$count эндпоинт',
+    );
+    return '$title $version · $_temp0 · $format';
+  }
+
+  @override
+  String get swaggerSpecChoose => 'На этой странице несколько спецификаций. Выберите одну:';
+
+  @override
+  String get swaggerBaseUrl => 'Базовый URL';
+
+  @override
+  String get swaggerBaseUrlHint =>
+      'Куда идут запросы. Сначала это сервер из спецификации, а он часто боевой: проверьте. Имя хоста или IP, любой порт. Внутренним хостам нужен маршрут частной сети.';
+
+  @override
+  String get swaggerEndpoints => 'Эндпоинты';
+
+  @override
+  String swaggerEndpointsCount(String n, String total) {
+    return 'Отмечено $n из $total';
+  }
+
+  @override
+  String get swaggerSearch => 'Поиск эндпоинтов';
+
+  @override
+  String get swaggerAll => 'Все';
+
+  @override
+  String get swaggerNone => 'Ни одного';
+
+  @override
+  String swaggerUntickedSideEffect(String word) {
+    return 'Не отмечен: по названию он что-то меняет ($word)';
+  }
+
+  @override
+  String get swaggerUntickedDeprecated => 'Не отмечен: устарел';
+
+  @override
+  String get swaggerAuth => 'Аутентификация';
+
+  @override
+  String get swaggerAuthKind_none => 'Нет';
+
+  @override
+  String get swaggerAuthKind_bearer => 'Bearer-токен';
+
+  @override
+  String get swaggerAuthKind_header => 'API-ключ в заголовке';
+
+  @override
+  String get swaggerAuthKind_query => 'API-ключ в запросе';
+
+  @override
+  String get swaggerAuthKind_basic => 'Basic';
+
+  @override
+  String get swaggerAuthName => 'Имя заголовка или параметра';
+
+  @override
+  String get swaggerAuthValue => 'Токен';
+
+  @override
+  String get swaggerAuthValueBasic => 'пользователь:пароль или Basic-токен';
+
+  @override
+  String get swaggerAuthHint =>
+      'Берите токен тестового аккаунта, никогда не личный и не боевой. Он запечатывается, больше не показывается и удаляется, когда тикет закрыт.';
+
+  @override
+  String swaggerAuthFromSpec(String schemes) {
+    return 'В спецификации: $schemes';
+  }
+
+  @override
+  String get swaggerWrite => 'Запросы';
+
+  @override
+  String get swaggerWriteOff => 'Только чтение';
+
+  @override
+  String get swaggerWriteOffHint => 'Только GET, HEAD и OPTIONS';
+
+  @override
+  String get swaggerWriteOn => 'И запросы на запись';
+
+  @override
+  String get swaggerWriteOnHint => 'Также POST, PUT, PATCH и DELETE';
+
+  @override
+  String swaggerWriteConfirm(String url) {
+    return 'Подтверждаю: $url — не боевой сервер';
+  }
+
+  @override
+  String get swaggerWriteConfirmNeeded => 'Подтвердите, что базовый URL не боевой, чтобы отправлять запросы на запись.';
+
+  @override
+  String get swaggerReadOnlyNote =>
+      '«Только чтение» значит только GET, HEAD и OPTIONS, а не «безвредно»: некоторые API меняют данные и на GET. Решать вам.';
+
+  @override
+  String get swaggerLockoutNote =>
+      'Проверки без токена и с неверным токеном могут выглядеть для файрвола как атака на вход. Тест отправит не больше 3 таких запросов, но всё же может заблокировать тестовый аккаунт или адрес отправителя. За частной сетью этот адрес — VPN-подключение рабочего пространства, которым пользуются GitLab и другие тесты.';
+
+  @override
+  String get swaggerRepository => 'Репозиторий (необязательно)';
+
+  @override
+  String get swaggerRepositoryHint => 'С ним agnts читает обработчики, чтобы объяснить сбои, а сбои можно превратить в тикет Bug или Code.';
+
+  @override
+  String get swaggerNoRepo => 'Без репозитория';
+
+  @override
+  String get swaggerNotes => 'Заметки';
+
+  @override
+  String get swaggerNotesPh => 'Например: пользователь 42 — тестовый; заказам нужен существующий id товара';
+
+  @override
+  String get swaggerLimits => 'Ограничения';
+
+  @override
+  String get swaggerRate => 'Запросов в секунду';
+
+  @override
+  String get swaggerMaxRequests => 'Запросов за запуск';
+
+  @override
+  String get swaggerStart => 'Запуск';
+
+  @override
+  String get swaggerStartNow => 'Сейчас';
+
+  @override
+  String get swaggerStartQueue => 'Оставить в очереди';
+
+  @override
+  String get swaggerCreate => 'Создать тест';
+
+  @override
+  String get swaggerCreateStart => 'Создать и запустить';
+
+  @override
+  String swaggerCreated(String key) {
+    return '$key создан';
+  }
+
+  @override
+  String get swaggerNeedSpec => 'Сначала прочитайте спецификацию.';
+
+  @override
+  String get swaggerNeedToken => 'Введите токен.';
+
+  @override
+  String get swaggerClaudeOnly =>
+      'Тесты Swagger всегда выполняются на Claude (Sonnet), какой бы моделью ни программировало рабочее пространство.';
+
+  @override
+  String get swaggerTab => 'Результаты API';
+
+  @override
+  String get swaggerRequestsTab => 'Запросы';
+
+  @override
+  String get swaggerNoRun => 'Результатов пока нет: тест выполняется или ещё не запускался.';
+
+  @override
+  String get swaggerVerdict_pass => 'Пройдено';
+
+  @override
+  String get swaggerVerdict_fail => 'Сбой';
+
+  @override
+  String get swaggerVerdict_skipped => 'Пропущено';
+
+  @override
+  String get swaggerVerdict_blocked => 'Не выполнено';
+
+  @override
+  String swaggerCount_pass(String n) {
+    return 'пройдено: $n';
+  }
+
+  @override
+  String swaggerCount_fail(String n) {
+    return 'сбоев: $n';
+  }
+
+  @override
+  String swaggerCount_skipped(String n) {
+    return 'пропущено: $n';
+  }
+
+  @override
+  String swaggerCount_blocked(String n) {
+    return 'не выполнено: $n';
+  }
+
+  @override
+  String get swaggerColEndpoint => 'Эндпоинт';
+
+  @override
+  String get swaggerColCases => 'Проверки';
+
+  @override
+  String get swaggerColResult => 'Результат';
+
+  @override
+  String get swaggerAgntsCheck => 'проверка agnts';
+
+  @override
+  String get swaggerAgntsCheckHint => 'agnts сам сверил этот ответ со схемой спецификации';
+
+  @override
+  String swaggerExpected(String text) {
+    return 'Ожидалось: $text';
+  }
+
+  @override
+  String get swaggerRequestLabel => 'Запрос';
+
+  @override
+  String get swaggerResponseLabel => 'Ответ';
+
+  @override
+  String get swaggerNoResponse => 'Ответа нет';
+
+  @override
+  String get swaggerTruncated => 'Тело обрезано до 64 КБ';
+
+  @override
+  String get swaggerCopyCurl => 'Скопировать как curl';
+
+  @override
+  String get swaggerCopied => 'Скопировано';
+
+  @override
+  String get swaggerLoading => 'Загрузка…';
+
+  @override
+  String get swaggerCreateBug => 'Создать тикет Bug';
+
+  @override
+  String swaggerBugTitle(String key) {
+    return 'Исправить сбои API, найденные $key';
+  }
+
+  @override
+  String swaggerBugIntro(String key, String base) {
+    return 'Тест Swagger $key сервера $base нашёл такие сбои:';
+  }
+
+  @override
+  String swaggerBugCreated(String key) {
+    return '$key создан';
+  }
+
+  @override
+  String swaggerNewFailures(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n нового сбоя',
+      many: '$n новых сбоев',
+      few: '$n новых сбоя',
+      one: '$n новый сбой',
+    );
+    return '$_temp0 с прошлого запуска';
+  }
+
+  @override
+  String get swaggerNoNewFailures => 'С прошлого запуска новых сбоев нет';
+
+  @override
+  String swaggerPrevious(String passed, String failed) {
+    return 'Прошлый запуск: пройдено $passed, сбоев $failed';
+  }
+
+  @override
+  String get swaggerRerun => 'Запустить снова';
+
+  @override
+  String get swaggerRerunToken => 'Новый токен (необязательно)';
+
+  @override
+  String get swaggerRerunTokenNeeded => 'Новый токен (обязательно: старый удалён при закрытии тикета)';
+
+  @override
+  String get swaggerRerunStarted => 'Запущен снова';
+
+  @override
+  String swaggerRerunNew(String key) {
+    return 'Запущен снова как $key';
+  }
+
+  @override
+  String get swaggerModeRead => 'только чтение';
+
+  @override
+  String get swaggerModeWrite => 'с запросами на запись';
+
+  @override
+  String get swaggerTokenStored => 'токен сохранён';
+
+  @override
+  String get swaggerTokenGone => 'токена нет';
+
+  @override
+  String get swaggerAgntsNotes => 'Что поправил agnts';
+
+  @override
+  String get swaggerAllPassed => 'Все проверки пройдены.';
+
+  @override
+  String get swaggerRunningTitle => 'Проверяем API';
+
+  @override
+  String get swaggerRunningSub =>
+      'agnts составляет проверки и отправляет настоящие запросы на базовый URL. Результаты появятся здесь, когда запуск закончится.';
+
+  @override
+  String get swaggerQueuedTitle => 'Тест Swagger в очереди';
+
+  @override
+  String get swaggerQueuedSub => 'Запустите, когда будете готовы.';
+
+  @override
+  String get swaggerSuites => 'Наборы Swagger';
+
+  @override
+  String get swaggerSuitesLede =>
+      'Сохранённые тесты Swagger, которые запускаются снова по расписанию или после каждого деплоя. Каждый запуск — новый тикет: он сравнивается с прошлым запуском набора и берёт его план, поэтому повторные запуски тратят меньше шагов.';
+
+  @override
+  String get swaggerSuitesEmpty => 'Наборов пока нет. Откройте завершённый тест Swagger и сохраните его как набор.';
+
+  @override
+  String get swaggerSaveSuite => 'Сохранить как набор';
+
+  @override
+  String get swaggerSaveSuiteHint => 'Запускать этот тест снова по расписанию или после каждого деплоя. У набора своя копия токена.';
+
+  @override
+  String get swaggerSuiteName => 'Название';
+
+  @override
+  String get swaggerSchedule => 'Расписание';
+
+  @override
+  String get swaggerSchedule_off => 'Вручную или по хуку деплоя';
+
+  @override
+  String get swaggerSchedule_hourly => 'Каждый час';
+
+  @override
+  String get swaggerSchedule_daily => 'Каждый день';
+
+  @override
+  String get swaggerSchedule_weekly => 'По понедельникам';
+
+  @override
+  String get swaggerHourUtc => 'В (час, UTC)';
+
+  @override
+  String swaggerSuiteSaved(String name) {
+    return 'Сохранено как набор $name';
+  }
+
+  @override
+  String get swaggerRunNow => 'Запустить';
+
+  @override
+  String swaggerRunStarted(String key) {
+    return '$key запущен';
+  }
+
+  @override
+  String get swaggerBusy => 'Прошлый запуск ещё идёт';
+
+  @override
+  String get swaggerPause => 'Приостановить';
+
+  @override
+  String get swaggerResume => 'Возобновить';
+
+  @override
+  String get swaggerPaused => 'Приостановлен';
+
+  @override
+  String get swaggerDeleteSuite => 'Удалить';
+
+  @override
+  String swaggerDeleteConfirm(String name) {
+    return 'Удалить набор $name? Прошлые запуски останутся.';
+  }
+
+  @override
+  String get swaggerHookCreate => 'Создать хук деплоя';
+
+  @override
+  String get swaggerHookRotate => 'Новый хук деплоя';
+
+  @override
+  String get swaggerHookHint =>
+      'Отправьте POST на этот URL из пайплайна деплоя, без тела, чтобы запускать набор после каждого деплоя. Он показывается один раз; новый отключает старый.';
+
+  @override
+  String swaggerHookExample(String url) {
+    return 'curl -X POST $url';
+  }
+
+  @override
+  String get swaggerLastRun => 'Последний запуск';
+
+  @override
+  String get swaggerNextRun => 'Следующий запуск';
+
+  @override
+  String get swaggerNever => 'никогда';
+
+  @override
+  String get swaggerColSuite => 'Набор';
+
+  @override
+  String get swaggerColSchedule => 'Расписание';
+
+  @override
+  String get swaggerColLast => 'Последний запуск';
+
+  @override
+  String get swaggerSuiteToken => 'Новый токен (необязательно)';
+
+  @override
+  String get swaggerSetToken => 'Задать токен';
+
+  @override
+  String get swaggerSpecAuth => 'Для ссылки на спецификацию нужен вход';
+
+  @override
+  String get swaggerSpecAuthHint => 'Отправляется вместе с загрузкой спецификации только на её хост и нигде не сохраняется.';
+
+  @override
+  String get swaggerSpecAuthNeeded => 'Адрес спецификации ответил 401/403: укажите нужный токен и прочитайте снова.';
+
+  @override
+  String get swaggerSpecAuthReused => 'Запросы к API тоже пойдут с этим токеном. Если нужен другой, поменяйте его здесь.';
+
+  @override
+  String get swaggerSpecAuthLogin => 'Логин и пароль';
+
+  @override
+  String get swaggerSpecAuthToken => 'Токен';
+
+  @override
+  String get swaggerSpecLogin => 'Логин';
+
+  @override
+  String get swaggerSpecPassword => 'Пароль';
+
+  @override
+  String get swaggerSpecLoginNeeded => 'Ссылка на спецификацию просит логин и пароль: введите их и прочитайте снова.';
+
+  @override
+  String get swaggerSpecLoginHint =>
+      'Нужны только чтобы открыть ссылку на спецификацию и нигде не сохраняются. Запросы агента к API идут с токеном из раздела «Аутентификация» ниже.';
+
+  @override
+  String get swaggerFilterProblems => 'Сбои и не выполненные';
+
+  @override
+  String get swaggerFilterAll => 'Все проверки';
+
+  @override
+  String get swaggerNothingToShow => 'Сбоев и не выполненных проверок нет. Откройте все проверки, чтобы увидеть остальные.';
+
+  @override
+  String swaggerCasesHidden(num n) {
+    return 'Скрыто эндпоинтов без сбоев: $n';
+  }
+
+  @override
+  String get swaggerWhatToTest => 'Что тестировать';
+
+  @override
+  String get swaggerWhatToTestPh =>
+      'Например: только POST-эндпоинты в /v1/orders и /v1/payments; проверить ошибки валидации и несуществующие id. Пользователь 42 — тестовый.';
+
+  @override
+  String get swaggerWhatToTestHint => 'agnts тестирует только то, что вы здесь напишете. Чтобы задать точные эндпоинты, отметьте их ниже.';
+
+  @override
+  String get swaggerWhatToTestNeeded => 'Напишите, что тестировать, или отметьте эндпоинты.';
+
+  @override
+  String get swaggerEndpointsOptional => 'Выбрать эндпоинты (необязательно)';
+
+  @override
+  String get swaggerEndpointsOptionalHint =>
+      'Отмеченные эндпоинты тестируются ровно как отмечены. Если ничего не отмечено, что тестировать решает текст выше.';
+
+  @override
+  String get swaggerSuggested => 'Рекомендуемые';
+
+  @override
+  String get swaggerNoneTicked => 'ничего не отмечено: решает текст выше';
 
   @override
   String get tasksTitle => 'Задачи';

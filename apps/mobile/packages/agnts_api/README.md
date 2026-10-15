@@ -222,6 +222,18 @@ Class | Method | HTTP request | Description
 [*RulesApi*](doc/RulesApi.md) | [**updateRule**](doc/RulesApi.md#updaterule) | **PUT** /rules/{id} | Edit a rule. Changing its text or repository starts a new review; turning it on or off does not.
 [*SettingsApi*](doc/SettingsApi.md) | [**getSettings**](doc/SettingsApi.md#getsettings) | **GET** /settings | 
 [*SettingsApi*](doc/SettingsApi.md) | [**putSettings**](doc/SettingsApi.md#putsettings) | **PUT** /settings | 
+[*SwaggerApi*](doc/SwaggerApi.md) | [**createSwaggerSuite**](doc/SwaggerApi.md#createswaggersuite) | **POST** /swagger-suites | Keep a Swagger test ticket&#39;s test as a suite that runs again on a schedule or after each deploy
+[*SwaggerApi*](doc/SwaggerApi.md) | [**createSwaggerTest**](doc/SwaggerApi.md#createswaggertest) | **POST** /swagger-tests | Create a Swagger test ticket; it starts at once (no analysis) unless start is queue
+[*SwaggerApi*](doc/SwaggerApi.md) | [**deleteSwaggerSuite**](doc/SwaggerApi.md#deleteswaggersuite) | **DELETE** /swagger-suites/{id} | Delete a suite; its past runs stay
+[*SwaggerApi*](doc/SwaggerApi.md) | [**getApiRequest**](doc/SwaggerApi.md#getapirequest) | **GET** /tickets/{key}/api-results/requests/{requestId} | One logged request and response of a Swagger test&#39;s latest run (credentials masked)
+[*SwaggerApi*](doc/SwaggerApi.md) | [**getApiResults**](doc/SwaggerApi.md#getapiresults) | **GET** /tickets/{key}/api-results | A Swagger test&#39;s latest results, its request log (without bodies) and how it compares with the run before
+[*SwaggerApi*](doc/SwaggerApi.md) | [**getSwaggerSuite**](doc/SwaggerApi.md#getswaggersuite) | **GET** /swagger-suites/{id} | One suite
+[*SwaggerApi*](doc/SwaggerApi.md) | [**listSwaggerSuites**](doc/SwaggerApi.md#listswaggersuites) | **GET** /swagger-suites | Saved Swagger test suites
+[*SwaggerApi*](doc/SwaggerApi.md) | [**readSwaggerSpec**](doc/SwaggerApi.md#readswaggerspec) | **POST** /swagger-tests/spec | Fetch (from a URL or a docs page in front of it) or read (uploaded text) a Swagger/OpenAPI spec for the Swagger test form; nothing is stored
+[*SwaggerApi*](doc/SwaggerApi.md) | [**rerunSwaggerTest**](doc/SwaggerApi.md#rerunswaggertest) | **POST** /tickets/{key}/swagger-test/rerun | Run a Swagger test again
+[*SwaggerApi*](doc/SwaggerApi.md) | [**rotateSwaggerSuiteHook**](doc/SwaggerApi.md#rotateswaggersuitehook) | **POST** /swagger-suites/{id}/hook | Make a new deploy hook URL for a suite (shown once; the old one stops working)
+[*SwaggerApi*](doc/SwaggerApi.md) | [**runSwaggerSuite**](doc/SwaggerApi.md#runswaggersuite) | **POST** /swagger-suites/{id}/run | Run a suite now, as a new Swagger test ticket
+[*SwaggerApi*](doc/SwaggerApi.md) | [**updateSwaggerSuite**](doc/SwaggerApi.md#updateswaggersuite) | **PATCH** /swagger-suites/{id} | Rename a suite, change its schedule, pause it or give it a new token
 [*TasksApi*](doc/TasksApi.md) | [**createTask**](doc/TasksApi.md#createtask) | **POST** /tasks | Create a side-project task
 [*TasksApi*](doc/TasksApi.md) | [**deleteTask**](doc/TasksApi.md#deletetask) | **DELETE** /tasks/{key} | Delete a task that has not started
 [*TasksApi*](doc/TasksApi.md) | [**updateTask**](doc/TasksApi.md#updatetask) | **PATCH** /tasks/{key} | Edit a task that has not started
@@ -307,6 +319,11 @@ Class | Method | HTTP request | Description
  - [AnalyticsReposInner](doc/AnalyticsReposInner.md)
  - [AnswersRequest](doc/AnswersRequest.md)
  - [AnswersRequestAnswersInner](doc/AnswersRequestAnswersInner.md)
+ - [ApiAuthKind](doc/ApiAuthKind.md)
+ - [ApiCase](doc/ApiCase.md)
+ - [ApiCounts](doc/ApiCounts.md)
+ - [ApiExchange](doc/ApiExchange.md)
+ - [ApiRequestRow](doc/ApiRequestRow.md)
  - [Approach](doc/Approach.md)
  - [ApproveTicketRequest](doc/ApproveTicketRequest.md)
  - [AssistantAsk](doc/AssistantAsk.md)
@@ -504,6 +521,7 @@ Class | Method | HTTP request | Description
  - [ReviewerStat](doc/ReviewerStat.md)
  - [Reviewers](doc/Reviewers.md)
  - [RotateMcpToken200Response](doc/RotateMcpToken200Response.md)
+ - [RotateSwaggerSuiteHook200Response](doc/RotateSwaggerSuiteHook200Response.md)
  - [Rule](doc/Rule.md)
  - [RuleAnswers](doc/RuleAnswers.md)
  - [RuleAnswersAnswersInner](doc/RuleAnswersAnswersInner.md)
@@ -531,6 +549,21 @@ Class | Method | HTTP request | Description
  - [StalePR](doc/StalePR.md)
  - [StarterPack](doc/StarterPack.md)
  - [StepDuration](doc/StepDuration.md)
+ - [SwaggerAuthInput](doc/SwaggerAuthInput.md)
+ - [SwaggerOperation](doc/SwaggerOperation.md)
+ - [SwaggerRerunInput](doc/SwaggerRerunInput.md)
+ - [SwaggerResults](doc/SwaggerResults.md)
+ - [SwaggerSecurityScheme](doc/SwaggerSecurityScheme.md)
+ - [SwaggerServer](doc/SwaggerServer.md)
+ - [SwaggerServerVariablesInner](doc/SwaggerServerVariablesInner.md)
+ - [SwaggerSpec](doc/SwaggerSpec.md)
+ - [SwaggerSpecChoicesInner](doc/SwaggerSpecChoicesInner.md)
+ - [SwaggerSpecInput](doc/SwaggerSpecInput.md)
+ - [SwaggerSpecInputLogin](doc/SwaggerSpecInputLogin.md)
+ - [SwaggerSuite](doc/SwaggerSuite.md)
+ - [SwaggerSuiteInput](doc/SwaggerSuiteInput.md)
+ - [SwaggerTestCreate](doc/SwaggerTestCreate.md)
+ - [SwaggerTestView](doc/SwaggerTestView.md)
  - [SyncJira200Response](doc/SyncJira200Response.md)
  - [SyncPlane200Response](doc/SyncPlane200Response.md)
  - [TaskCreate](doc/TaskCreate.md)

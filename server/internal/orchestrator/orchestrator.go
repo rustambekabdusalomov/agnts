@@ -105,6 +105,8 @@ type Deps struct {
 	Capacity Capacity
 	// Credits charges runs on agnts's API key; nil never stops them.
 	Credits Credits
+	// SwaggerTests stores Swagger tests; nil turns the kind off.
+	SwaggerTests SwaggerTests
 }
 
 // Orchestrator runs tickets through their stages.
@@ -138,6 +140,13 @@ type Orchestrator struct {
 	credits    Credits
 	sched      *schedState
 
+	swagger SwaggerTests
+	suites  SwaggerSuites
+	specs   *specFetcher
+	// redactors mask a Swagger test's credential in what its run streams,
+	// by run id.
+	redactors sync.Map
+
 	wake chan struct{}
 
 	mu      sync.Mutex
@@ -164,6 +173,7 @@ func New(cfg Config, d Deps, log *slog.Logger) *Orchestrator {
 		settings: d.Settings, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, briefs: d.Briefs, reflections: d.Reflections, pulls: d.PullReviews, prposts: d.PRPosts, trans: d.Translations,
 		shots: d.Shots, envs: d.PreviewEnvs, builds: d.BuildEnvs, log: log,
 		queue: q, workspaces: d.Workspaces, accounts: d.Accounts, capacity: d.Capacity, credits: d.Credits, sched: newSchedState(),
+		swagger: d.SwaggerTests, specs: newSpecFetcher(),
 		wake:    make(chan struct{}, 1),
 		cancels: map[string]context.CancelFunc{},
 	}
@@ -381,7 +391,9 @@ func (o *Orchestrator) work(parent context.Context, t domain.Ticket, run domain.
 		case domain.StageAnalyze:
 			err = o.analyze(ctx, s, t, &run)
 		case domain.StageCode:
-			if t.Kind.Report() {
+			if t.Kind == domain.KindSwaggerTest {
+				err = o.swaggerRun(ctx, s, t, &run)
+			} else if t.Kind.Report() {
 				err = o.report(ctx, s, t, &run)
 			} else {
 				err = o.code(ctx, s, t, &run)
@@ -550,8 +562,25 @@ func (o *Orchestrator) streamTo(ctx context.Context, t domain.Ticket, run *domai
 		default:
 			return
 		}
+		if r, ok := o.redactors.Load(run.ID); ok {
+			ev = redactEvent(r.(domain.Redactor), ev)
+		}
 		o.event(ctx, ev)
 	}
+}
+
+// redactEvent masks a credential in a streamed event's text and data.
+func redactEvent(r domain.Redactor, ev domain.Event) domain.Event {
+	ev.Message = r.String(ev.Message)
+	if ev.Data != nil {
+		if b, err := json.Marshal(ev.Data); err == nil {
+			var d map[string]any
+			if json.Unmarshal(r.Bytes(b), &d) == nil {
+				ev.Data = d
+			}
+		}
+	}
+	return ev
 }
 
 func rateStatus(data map[string]any) string {
@@ -565,7 +594,7 @@ func rateStatus(data map[string]any) string {
 // permissionSettings is passed to Claude Code with --settings; the
 // managed settings in the runner image still outrank it. readOnly keeps
 // Claude's edit tools out of /workspace (report kinds).
-func permissionSettings(s domain.Settings, readOnly bool) string {
+func permissionSettings(s domain.Settings, readOnly bool, extraDeny ...string) string {
 	allow := make([]string, 0, len(s.Allow))
 	for _, c := range s.Allow {
 		allow = append(allow, bashRule(c))
@@ -578,6 +607,7 @@ func permissionSettings(s domain.Settings, readOnly bool) string {
 		// "//" makes the path absolute in Claude Code permission rules.
 		deny = append(deny, "Edit(//workspace/**)", "Write(//workspace/**)", "NotebookEdit(//workspace/**)")
 	}
+	deny = append(deny, extraDeny...)
 	b, _ := json.Marshal(map[string]any{"permissions": map[string]any{"allow": allow, "deny": deny}})
 	return string(b)
 }
@@ -620,14 +650,20 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 			Message: "this run uses Codex (" + strings.TrimPrefix(model, CodexPrefix) + "): agnts-guard's checks inside the run do not apply to it; agnts's checks after the run do"})
 	}
 	rs, _ := o.reposFor(ctx, *t) // none: a ticket without a repository
+	gc := o.guardConfig(ctx, s, *t, run, rs, readOnly)
+	var extraDeny []string
+	if t.Kind == domain.KindSwaggerTest {
+		gc.API = o.swaggerGuard(ctx, *t)
+		extraDeny = swaggerDeny(gc.API.Host)
+	}
 	res, err := ws.Claude(ctx, ClaudeRequest{
 		Prompt:   prompt,
 		Model:    model,
 		MaxTurns: turns,
 		Resume:   resume,
 		Timeout:  time.Duration(s.TimeoutMin) * time.Minute,
-		Settings: permissionSettings(s, readOnly),
-		Env:      guardEnv(o.guardConfig(ctx, s, *t, run, rs, readOnly)),
+		Settings: permissionSettings(s, readOnly, extraDeny...),
+		Env:      guardEnv(gc),
 		ReadOnly: readOnly,
 	}, o.watch(ctx, s, ws, *t, run, o.streamTo(ctx, *t, run)))
 	run.Turns += res.Turns
@@ -753,7 +789,7 @@ func (o *Orchestrator) openWorkspace(ctx context.Context, t domain.Ticket, rs []
 	if err != nil {
 		return nil, fmt.Errorf("load claude home: %w", err)
 	}
-	spec := WorkspaceSpec{TicketKey: t.Key, Image: o.cfg.Image, Repo: tree, ClaudeHome: home}
+	spec := WorkspaceSpec{TicketKey: t.Key, Image: o.cfg.Image, Repo: tree, ClaudeHome: home, Grants: o.swaggerGrants(ctx, t)}
 	if len(rs) > 0 {
 		if err := o.mergeSpec(ctx, &spec, rs, t.Key, run); err != nil {
 			return nil, err

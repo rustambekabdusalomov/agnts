@@ -1855,6 +1855,78 @@ class AppLocalizationsEn extends AppLocalizations {
       'Regular expressions, one per line. A matching log is an infra failure: shown and counted, never a ticket. Added to the built-in ones.';
 
   @override
+  String get commitBack => 'Back to commits';
+
+  @override
+  String commitBackTo(String repo) {
+    return 'Back to $repo';
+  }
+
+  @override
+  String commitAuthoredAgo(String name, String time) {
+    return '$name committed $time';
+  }
+
+  @override
+  String commitFilesN(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n files', one: '$n file');
+    return '$_temp0';
+  }
+
+  @override
+  String get commitAuthor => 'Author';
+
+  @override
+  String get commitAuthored => 'Authored';
+
+  @override
+  String get commitCommitter => 'Committed by';
+
+  @override
+  String get commitCommitted => 'Committed';
+
+  @override
+  String commitParents(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'Parents', one: 'Parent');
+    return '$_temp0';
+  }
+
+  @override
+  String get commitPulls => 'Pull requests';
+
+  @override
+  String get commitPullsSub => 'Pull requests (merge requests on GitLab) that contain this commit.';
+
+  @override
+  String get commitNoPulls => 'This commit is not in any pull request.';
+
+  @override
+  String get commitMessage => 'Message';
+
+  @override
+  String get commitPipelinesSub => 'CI runs on this commit, newest first.';
+
+  @override
+  String get commitNoPipelines => 'No CI runs on this commit.';
+
+  @override
+  String get commitChanges => 'Changes';
+
+  @override
+  String commitChangesSub(num n, String add, String del) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n files', one: '$n file');
+    return '$_temp0 changed, $add additions, $del deletions.';
+  }
+
+  @override
+  String get commitNoFiles => 'This commit changes no files.';
+
+  @override
+  String commitFilesCapped(String n) {
+    return 'This commit changes more files than can be shown here. The first $n are listed; open it on the git host to see all of them.';
+  }
+
+  @override
   String get commonLoading => 'Loading…';
 
   @override
@@ -4296,6 +4368,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get kindReviewHint => 'Review a pull request someone else opened. Comes from GitHub or GitLab.';
+
+  @override
+  String get kindSwaggertest => 'Swagger test';
+
+  @override
+  String get kindSwaggertestHint =>
+      'Test an HTTP API against its Swagger/OpenAPI spec. Repository optional; ends in a results table and a report.';
 
   @override
   String get learnTitle => 'Learn';
@@ -7143,6 +7222,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'When a reviewer requests changes on agnts\'s pull request, its unresolved threads go back to the ticket by themselves. The fix still waits for your approval.';
 
   @override
+  String get pullsCommentHint => 'Point at a line and click the comment button to comment on it.';
+
+  @override
   String queueHeader(String running, String slots) {
     return 'Running $running/$slots';
   }
@@ -9230,6 +9312,536 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stateReviewRejected => 'Dismissed';
+
+  @override
+  String get swaggerFormSub =>
+      'Test an HTTP API against its Swagger/OpenAPI spec: agnts plans the cases, sends real requests and reports a verdict per case with the evidence.';
+
+  @override
+  String get swaggerSpec => 'Spec';
+
+  @override
+  String get swaggerSpecUrl => 'Spec or docs page URL';
+
+  @override
+  String get swaggerSpecUrlPh => 'https://staging.example.com/swagger/index.html';
+
+  @override
+  String get swaggerSpecRead => 'Read';
+
+  @override
+  String get swaggerSpecReading => 'Reading the spec…';
+
+  @override
+  String get swaggerSpecUpload => 'Upload a file';
+
+  @override
+  String get swaggerSpecHint =>
+      'A Swagger UI, Springdoc or Redoc page works too: agnts finds the spec behind it. Swagger 2.0 and OpenAPI 3.x, up to 5 MB.';
+
+  @override
+  String swaggerSpecFound(String title, String version, num count, String format) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count endpoints', one: '$count endpoint');
+    return '$title $version · $_temp0 · $format';
+  }
+
+  @override
+  String get swaggerSpecChoose => 'This page offers several specs. Pick one:';
+
+  @override
+  String get swaggerBaseUrl => 'Base URL';
+
+  @override
+  String get swaggerBaseUrlHint =>
+      'Where requests go. It starts as the spec\'s server, which often is production: check it. A host name or an IP, on any port. Internal hosts need a Private network route.';
+
+  @override
+  String get swaggerEndpoints => 'Endpoints';
+
+  @override
+  String swaggerEndpointsCount(String n, String total) {
+    return '$n of $total ticked';
+  }
+
+  @override
+  String get swaggerSearch => 'Search endpoints';
+
+  @override
+  String get swaggerAll => 'All';
+
+  @override
+  String get swaggerNone => 'None';
+
+  @override
+  String swaggerUntickedSideEffect(String word) {
+    return 'Left unticked: its name suggests it changes something ($word)';
+  }
+
+  @override
+  String get swaggerUntickedDeprecated => 'Left unticked: deprecated';
+
+  @override
+  String get swaggerAuth => 'Authentication';
+
+  @override
+  String get swaggerAuthKind_none => 'None';
+
+  @override
+  String get swaggerAuthKind_bearer => 'Bearer token';
+
+  @override
+  String get swaggerAuthKind_header => 'API key in a header';
+
+  @override
+  String get swaggerAuthKind_query => 'API key in the query';
+
+  @override
+  String get swaggerAuthKind_basic => 'Basic';
+
+  @override
+  String get swaggerAuthName => 'Header or parameter name';
+
+  @override
+  String get swaggerAuthValue => 'Token';
+
+  @override
+  String get swaggerAuthValueBasic => 'user:password, or the Basic token';
+
+  @override
+  String get swaggerAuthHint =>
+      'Use a test account\'s token, never a personal or production one. It is sealed, never shown again, and deleted when the ticket closes.';
+
+  @override
+  String swaggerAuthFromSpec(String schemes) {
+    return 'The spec declares: $schemes';
+  }
+
+  @override
+  String get swaggerWrite => 'Requests';
+
+  @override
+  String get swaggerWriteOff => 'Read-only';
+
+  @override
+  String get swaggerWriteOffHint => 'Only GET, HEAD and OPTIONS';
+
+  @override
+  String get swaggerWriteOn => 'Write requests too';
+
+  @override
+  String get swaggerWriteOnHint => 'Also POST, PUT, PATCH and DELETE';
+
+  @override
+  String swaggerWriteConfirm(String url) {
+    return 'I confirm $url is not production';
+  }
+
+  @override
+  String get swaggerWriteConfirmNeeded => 'Confirm the base URL is not production to send write requests.';
+
+  @override
+  String get swaggerReadOnlyNote =>
+      'Read-only means only GET, HEAD and OPTIONS, not harmless: some APIs change things on GET. That is your call.';
+
+  @override
+  String get swaggerLockoutNote =>
+      'The no-token and wrong-token cases can look like a login attack to a firewall. A test sends at most 3 of them, but it may still lock the test account or get the caller\'s address blocked. Behind a Private network, that address is the workspace\'s VPN connection, which GitLab and other tests also use.';
+
+  @override
+  String get swaggerRepository => 'Repository (optional)';
+
+  @override
+  String get swaggerRepositoryHint =>
+      'With one, agnts reads the handlers to explain failures, and failures can become a Bug or Code ticket.';
+
+  @override
+  String get swaggerNoRepo => 'No repository';
+
+  @override
+  String get swaggerNotes => 'Notes';
+
+  @override
+  String get swaggerNotesPh => 'For example: user 42 is a test account; orders need an existing product id';
+
+  @override
+  String get swaggerLimits => 'Limits';
+
+  @override
+  String get swaggerRate => 'Requests a second';
+
+  @override
+  String get swaggerMaxRequests => 'Requests per run';
+
+  @override
+  String get swaggerStart => 'Start';
+
+  @override
+  String get swaggerStartNow => 'Now';
+
+  @override
+  String get swaggerStartQueue => 'Keep in the queue';
+
+  @override
+  String get swaggerCreate => 'Create test';
+
+  @override
+  String get swaggerCreateStart => 'Create and start';
+
+  @override
+  String swaggerCreated(String key) {
+    return '$key created';
+  }
+
+  @override
+  String get swaggerNeedSpec => 'Read a spec first.';
+
+  @override
+  String get swaggerNeedToken => 'Enter the token.';
+
+  @override
+  String get swaggerClaudeOnly => 'Swagger tests always run on Claude (Sonnet), whatever model the workspace codes with.';
+
+  @override
+  String get swaggerTab => 'API results';
+
+  @override
+  String get swaggerRequestsTab => 'Requests';
+
+  @override
+  String get swaggerNoRun => 'No results yet: the test is running or has not run.';
+
+  @override
+  String get swaggerVerdict_pass => 'Passed';
+
+  @override
+  String get swaggerVerdict_fail => 'Failed';
+
+  @override
+  String get swaggerVerdict_skipped => 'Skipped';
+
+  @override
+  String get swaggerVerdict_blocked => 'Blocked';
+
+  @override
+  String swaggerCount_pass(String n) {
+    return '$n passed';
+  }
+
+  @override
+  String swaggerCount_fail(String n) {
+    return '$n failed';
+  }
+
+  @override
+  String swaggerCount_skipped(String n) {
+    return '$n skipped';
+  }
+
+  @override
+  String swaggerCount_blocked(String n) {
+    return '$n blocked';
+  }
+
+  @override
+  String get swaggerColEndpoint => 'Endpoint';
+
+  @override
+  String get swaggerColCases => 'Cases';
+
+  @override
+  String get swaggerColResult => 'Result';
+
+  @override
+  String get swaggerAgntsCheck => 'agnts check';
+
+  @override
+  String get swaggerAgntsCheckHint => 'agnts checked this response against the spec\'s schema itself';
+
+  @override
+  String swaggerExpected(String text) {
+    return 'Expected: $text';
+  }
+
+  @override
+  String get swaggerRequestLabel => 'Request';
+
+  @override
+  String get swaggerResponseLabel => 'Response';
+
+  @override
+  String get swaggerNoResponse => 'No response';
+
+  @override
+  String get swaggerTruncated => 'The body was cut at 64 KB';
+
+  @override
+  String get swaggerCopyCurl => 'Copy as curl';
+
+  @override
+  String get swaggerCopied => 'Copied';
+
+  @override
+  String get swaggerLoading => 'Loading…';
+
+  @override
+  String get swaggerCreateBug => 'Create bug ticket';
+
+  @override
+  String swaggerBugTitle(String key) {
+    return 'Fix the API failures $key found';
+  }
+
+  @override
+  String swaggerBugIntro(String key, String base) {
+    return 'The Swagger test $key of $base found these failures:';
+  }
+
+  @override
+  String swaggerBugCreated(String key) {
+    return '$key created';
+  }
+
+  @override
+  String swaggerNewFailures(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n new failures', one: '$n new failure');
+    return '$_temp0 since the last run';
+  }
+
+  @override
+  String get swaggerNoNewFailures => 'No new failures since the last run';
+
+  @override
+  String swaggerPrevious(String passed, String failed) {
+    return 'Last run: $passed passed, $failed failed';
+  }
+
+  @override
+  String get swaggerRerun => 'Run again';
+
+  @override
+  String get swaggerRerunToken => 'New token (optional)';
+
+  @override
+  String get swaggerRerunTokenNeeded => 'New token (required: the old one was deleted when the ticket closed)';
+
+  @override
+  String get swaggerRerunStarted => 'Started again';
+
+  @override
+  String swaggerRerunNew(String key) {
+    return 'Started again as $key';
+  }
+
+  @override
+  String get swaggerModeRead => 'read-only';
+
+  @override
+  String get swaggerModeWrite => 'write requests on';
+
+  @override
+  String get swaggerTokenStored => 'token stored';
+
+  @override
+  String get swaggerTokenGone => 'no token stored';
+
+  @override
+  String get swaggerAgntsNotes => 'What agnts adjusted';
+
+  @override
+  String get swaggerAllPassed => 'Every case passed.';
+
+  @override
+  String get swaggerRunningTitle => 'Testing the API';
+
+  @override
+  String get swaggerRunningSub => 'agnts plans the cases and sends real requests to the base URL. Results appear here when the run ends.';
+
+  @override
+  String get swaggerQueuedTitle => 'Swagger test in the queue';
+
+  @override
+  String get swaggerQueuedSub => 'Start it when you are ready.';
+
+  @override
+  String get swaggerSuites => 'Swagger suites';
+
+  @override
+  String get swaggerSuitesLede =>
+      'Saved Swagger tests that run again on a schedule or after each deploy. Each run is a new ticket, compared with the suite\'s last run, and reuses its plan, so repeat runs cost fewer turns.';
+
+  @override
+  String get swaggerSuitesEmpty => 'No suites yet. Open a finished Swagger test and save it as a suite.';
+
+  @override
+  String get swaggerSaveSuite => 'Save as suite';
+
+  @override
+  String get swaggerSaveSuiteHint => 'Run this test again on a schedule or after each deploy. The suite keeps its own copy of the token.';
+
+  @override
+  String get swaggerSuiteName => 'Name';
+
+  @override
+  String get swaggerSchedule => 'Schedule';
+
+  @override
+  String get swaggerSchedule_off => 'By hand or deploy hook';
+
+  @override
+  String get swaggerSchedule_hourly => 'Every hour';
+
+  @override
+  String get swaggerSchedule_daily => 'Every day';
+
+  @override
+  String get swaggerSchedule_weekly => 'Every Monday';
+
+  @override
+  String get swaggerHourUtc => 'At (UTC hour)';
+
+  @override
+  String swaggerSuiteSaved(String name) {
+    return 'Saved as the suite $name';
+  }
+
+  @override
+  String get swaggerRunNow => 'Run now';
+
+  @override
+  String swaggerRunStarted(String key) {
+    return '$key started';
+  }
+
+  @override
+  String get swaggerBusy => 'The last run is still going';
+
+  @override
+  String get swaggerPause => 'Pause';
+
+  @override
+  String get swaggerResume => 'Resume';
+
+  @override
+  String get swaggerPaused => 'Paused';
+
+  @override
+  String get swaggerDeleteSuite => 'Delete';
+
+  @override
+  String swaggerDeleteConfirm(String name) {
+    return 'Delete the suite $name? Its past runs stay.';
+  }
+
+  @override
+  String get swaggerHookCreate => 'Create deploy hook';
+
+  @override
+  String get swaggerHookRotate => 'New deploy hook';
+
+  @override
+  String get swaggerHookHint =>
+      'POST this URL from your deploy pipeline, with no body, to run the suite after each deploy. It is shown once; making a new one stops the old.';
+
+  @override
+  String swaggerHookExample(String url) {
+    return 'curl -X POST $url';
+  }
+
+  @override
+  String get swaggerLastRun => 'Last run';
+
+  @override
+  String get swaggerNextRun => 'Next run';
+
+  @override
+  String get swaggerNever => 'never';
+
+  @override
+  String get swaggerColSuite => 'Suite';
+
+  @override
+  String get swaggerColSchedule => 'Schedule';
+
+  @override
+  String get swaggerColLast => 'Last run';
+
+  @override
+  String get swaggerSuiteToken => 'New token (optional)';
+
+  @override
+  String get swaggerSetToken => 'Set token';
+
+  @override
+  String get swaggerSpecAuth => 'The spec link needs a sign-in';
+
+  @override
+  String get swaggerSpecAuthHint => 'Sent with the spec fetch to the spec\'s host only, and not stored.';
+
+  @override
+  String get swaggerSpecAuthNeeded => 'The spec URL answered 401/403: give the token it needs, then read it again.';
+
+  @override
+  String get swaggerSpecAuthReused => 'The API requests use this token too. Change it here if they need another.';
+
+  @override
+  String get swaggerSpecAuthLogin => 'Login and password';
+
+  @override
+  String get swaggerSpecAuthToken => 'Token';
+
+  @override
+  String get swaggerSpecLogin => 'Login';
+
+  @override
+  String get swaggerSpecPassword => 'Password';
+
+  @override
+  String get swaggerSpecLoginNeeded => 'The spec link asks for a login and password: enter them, then read it again.';
+
+  @override
+  String get swaggerSpecLoginHint =>
+      'Opens the spec link only, and is not stored. The agent\'s API requests use the token under Authentication below.';
+
+  @override
+  String get swaggerFilterProblems => 'Failures and blocked';
+
+  @override
+  String get swaggerFilterAll => 'All cases';
+
+  @override
+  String get swaggerNothingToShow => 'Nothing failed or was blocked. Show all cases to see the rest.';
+
+  @override
+  String swaggerCasesHidden(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n endpoints', one: '$n endpoint');
+    return '$_temp0 without failures hidden';
+  }
+
+  @override
+  String get swaggerWhatToTest => 'What to test';
+
+  @override
+  String get swaggerWhatToTestPh =>
+      'For example: only the POST endpoints under /v1/orders and /v1/payments; check validation errors and unknown ids. User 42 is a test account.';
+
+  @override
+  String get swaggerWhatToTestHint => 'agnts tests only what you write here. To test exact endpoints instead, tick them below.';
+
+  @override
+  String get swaggerWhatToTestNeeded => 'Write what to test, or tick the endpoints to test.';
+
+  @override
+  String get swaggerEndpointsOptional => 'Pick endpoints (optional)';
+
+  @override
+  String get swaggerEndpointsOptionalHint =>
+      'Ticked endpoints are tested exactly as ticked. With none ticked, the text above decides what is tested.';
+
+  @override
+  String get swaggerSuggested => 'Suggested';
+
+  @override
+  String get swaggerNoneTicked => 'none ticked: the text above decides';
 
   @override
   String get tasksTitle => 'Tasks';

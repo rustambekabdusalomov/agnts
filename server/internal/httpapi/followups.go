@@ -23,11 +23,11 @@ type FollowUpTickets interface {
 func followUpsMode(m gen.FollowUpsMode) (*bool, bool) {
 	on, off := true, false
 	switch m {
-	case gen.Inherit:
+	case gen.FollowUpsModeInherit:
 		return nil, true
-	case gen.On:
+	case gen.FollowUpsModeOn:
 		return &on, true
-	case gen.Off:
+	case gen.FollowUpsModeOff:
 		return &off, true
 	}
 	return nil, false
@@ -36,11 +36,11 @@ func followUpsMode(m gen.FollowUpsMode) (*bool, bool) {
 func toFollowUpsMode(on *bool) gen.FollowUpsMode {
 	switch {
 	case on == nil:
-		return gen.Inherit
+		return gen.FollowUpsModeInherit
 	case *on:
-		return gen.On
+		return gen.FollowUpsModeOn
 	}
-	return gen.Off
+	return gen.FollowUpsModeOff
 }
 
 func toSuggestion(x domain.Suggestion, parent domain.TicketState) gen.FollowUpSuggestion {

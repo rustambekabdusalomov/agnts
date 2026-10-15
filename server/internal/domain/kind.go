@@ -14,6 +14,10 @@ const (
 	// KindReview reviews a pull request someone else wrote. Its tickets
 	// come from the git host, never from a form or a label.
 	KindReview TicketKind = "review"
+	// KindSwaggerTest tests an HTTP API against its Swagger/OpenAPI spec.
+	// Its tickets come from the Swagger test form only: the form carries
+	// the spec, base URL and token a label or the analysis cannot give.
+	KindSwaggerTest TicketKind = "swaggertest"
 )
 
 // Kinds lists every kind people can pick, in the order clients show them.
@@ -53,6 +57,9 @@ var kindSpecs = map[TicketKind]KindSpec{
 	// A review is a report about someone else's change; approving it
 	// merges the pull request. It is one pull request, in one repository.
 	KindReview: {Output: OutputReport, NeedsRepo: true},
+	// A Swagger test reports on an API; a repository is optional (to
+	// explain failures), and failures can become a Bug or Code ticket.
+	KindSwaggerTest: {Output: OutputReport, Implementable: true},
 }
 
 // Valid reports whether k is a known kind.
@@ -62,8 +69,9 @@ func (k TicketKind) Valid() bool {
 }
 
 // Selectable reports whether people (a form, a label, the analysis) may
-// give a ticket kind k: every kind but review.
-func (k TicketKind) Selectable() bool { return k.Valid() && k != KindReview }
+// give a ticket kind k: every kind but review and Swagger test, which have
+// forms of their own.
+func (k TicketKind) Selectable() bool { return k.Valid() && k != KindReview && k != KindSwaggerTest }
 
 // Spec returns how agnts works k; unknown kinds are worked as code.
 func (k TicketKind) Spec() KindSpec {

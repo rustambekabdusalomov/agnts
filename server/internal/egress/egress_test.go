@@ -171,3 +171,115 @@ func TestPrivateNetwork(t *testing.T) {
 		t.Errorf("gateway dials %v", via)
 	}
 }
+
+// grantRouter grants api.staging.test:8080, the bare IP 203.0.113.7:8443
+// and the hosts used for the address check, on port 8080.
+type grantRouter struct{}
+
+func (grantRouter) Route(_ context.Context, _, host string, port int) (Private, bool, error) {
+	switch {
+	case host == "203.0.113.7" && port == 8443,
+		port == 8080 && (host == "api.staging.test" || host == "rebind.test" || host == "internal.test" || host == "docker.test" || host == "127.0.0.1"):
+		return Private{Workspace: 1, Ticket: "API-7", Grant: true}, true, nil
+	}
+	return Private{}, false, nil
+}
+
+func TestGrants(t *testing.T) {
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.WriteString(w, "api "+r.Host)
+	}))
+	defer upstream.Close()
+	p := New(nil, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	p.SetPrivate(grantRouter{}, nil) // grants without a gateway
+	p.lookup = func(_ context.Context, host string) ([]net.IP, error) {
+		switch host {
+		case "api.staging.test":
+			return []net.IP{net.ParseIP("203.0.113.10")}, nil
+		case "rebind.test": // public first, internal second
+			return []net.IP{net.ParseIP("203.0.113.11"), net.ParseIP("172.20.0.9")}, nil
+		case "internal.test":
+			return []net.IP{net.ParseIP("10.0.0.5")}, nil
+		case "docker.test":
+			return []net.IP{net.ParseIP("198.51.100.3")}, nil
+		}
+		return nil, errors.New("no such host")
+	}
+	_, docker, _ := net.ParseCIDR("198.51.100.0/24") // stands for a network the proxy is on
+	p.localNets = func() []*net.IPNet { return []*net.IPNet{docker} }
+	var dialed []string
+	p.dial = func(ctx context.Context, network, addr string) (net.Conn, error) {
+		dialed = append(dialed, addr)
+		var d net.Dialer
+		return d.DialContext(ctx, network, strings.TrimPrefix(upstream.URL, "http://"))
+	}
+	proxy := httptest.NewServer(p)
+	defer proxy.Close()
+	pu, _ := url.Parse(proxy.URL)
+	client := &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(pu)}}
+	get := func(u string) int {
+		resp, err := client.Get(u)
+		if err != nil {
+			t.Fatal(err)
+		}
+		_ = resp.Body.Close()
+		return resp.StatusCode
+	}
+
+	if code := get("http://api.staging.test:8080/users"); code != 200 {
+		t.Errorf("granted host: %d", code)
+	}
+	if code := get("http://203.0.113.7:8443/users"); code != 200 {
+		t.Errorf("granted bare IP: %d", code)
+	}
+	if strings.Join(dialed, ",") != "203.0.113.10:8080,203.0.113.7:8443" {
+		t.Errorf("the proxy must dial the address it checked: %v", dialed)
+	}
+	dialed = nil
+	for _, u := range []string{"http://rebind.test:8080/", "http://internal.test:8080/", "http://docker.test:8080/", "http://127.0.0.1:8080/"} {
+		if code := get(u); code != http.StatusBadGateway {
+			t.Errorf("%s: %d", u, code)
+		}
+	}
+	if code := get("http://api.staging.test:9090/"); code != http.StatusForbidden {
+		t.Errorf("an ungranted port: %d", code)
+	}
+	if len(dialed) != 0 {
+		t.Errorf("refused hosts were dialed: %v", dialed)
+	}
+
+	// CONNECT to a granted host checks the same way.
+	for target, want := range map[string]int{"api.staging.test:8080": 200, "internal.test:8080": http.StatusBadGateway} {
+		conn, err := net.Dial("tcp", strings.TrimPrefix(proxy.URL, "http://"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		_, _ = io.WriteString(conn, "CONNECT "+target+" HTTP/1.1\r\nHost: "+target+"\r\n\r\n")
+		cr, err := http.ReadResponse(bufio.NewReader(conn), &http.Request{Method: http.MethodConnect})
+		if err != nil {
+			t.Fatal(err)
+		}
+		_ = cr.Body.Close()
+		_ = conn.Close()
+		if cr.StatusCode != want {
+			t.Errorf("CONNECT %s: %d", target, cr.StatusCode)
+		}
+	}
+}
+
+func TestGatewayOffRefusesPrivate(t *testing.T) {
+	p := New(nil, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	p.SetPrivate(&fakeRouter{}, nil)
+	proxy := httptest.NewServer(p)
+	defer proxy.Close()
+	pu, _ := url.Parse(proxy.URL)
+	client := &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(pu)}}
+	resp, err := client.Get("http://gitlab.corp.local/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = resp.Body.Close()
+	if resp.StatusCode != http.StatusForbidden {
+		t.Errorf("a private route without a gateway: %d", resp.StatusCode)
+	}
+}

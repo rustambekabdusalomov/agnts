@@ -1,6 +1,7 @@
 package mcpserver_test
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -16,6 +17,7 @@ import (
 	"agnts/internal/domain"
 	"agnts/internal/mcpserver"
 	"agnts/internal/orchestrator"
+	"agnts/internal/secret"
 	"agnts/internal/store/postgres"
 	"agnts/internal/store/postgres/pgtest"
 	"agnts/internal/usage"
@@ -53,7 +55,12 @@ func testDeps(t *testing.T) mcpserver.Deps {
 	store := postgres.NewAgent(pool)
 	settings := postgres.NewSettings(pool, domain.DefaultSettings())
 	ut := usage.New(postgres.NewUsage(pool), store, log)
-	orch := orchestrator.New(orchestrator.DefaultConfig(), orchestrator.Deps{Store: store, Settings: settings, Usage: ut}, log)
+	box, err := secret.NewBox(bytes.Repeat([]byte{5}, 32))
+	if err != nil {
+		t.Fatal(err)
+	}
+	testSwagger, testPool = postgres.NewSwaggerTests(pool, box), pool
+	orch := orchestrator.New(orchestrator.DefaultConfig(), orchestrator.Deps{Store: store, Settings: settings, Usage: ut, SwaggerTests: testSwagger}, log)
 	gh := github.New("http://127.0.0.1:1", func(context.Context) (string, error) { return "", nil })
 	repos := admin.NewRepos(store, gh, gh, nil, log)
 	dash := admin.NewDashboard(store, orch, repos, ut, settings, time.UTC)

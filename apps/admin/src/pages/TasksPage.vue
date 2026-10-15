@@ -92,6 +92,7 @@ function repoSaved(r: Repository) {
   <PageHeader :title="t('tasks.title')" doc="tasks">
     <div class="actions" style="margin: 0">
       <SegButtons v-model="view" :options="viewOptions" :label="t('tickets.viewLabel')" />
+      <RouterLink class="btn" :to="{ name: 'swagger-suites' }">{{ t('swagger.suites') }}</RouterLink>
       <button v-if="workspace.canEdit" class="btn btn-p" type="button" @click="newTask"><HiIcon name="plus" />{{ t('tasks.new') }}</button>
     </div>
   </PageHeader>

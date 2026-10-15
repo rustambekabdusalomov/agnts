@@ -437,6 +437,9 @@ const (
 	EventPreview        = "preview_done"
 	EventFollowUps      = "follow_ups_suggested"
 	EventCIFailure      = "ci_failure"
+	// EventSwaggerResults: a Swagger test finished (data: passed, failed,
+	// skipped, blocked, and newFailures for a suite).
+	EventSwaggerResults = "swagger_results"
 	// EventPRClosed: an agnts pull request was closed without a merge, or
 	// reopened (data "closed").
 	EventPRClosed = "pr_closed"

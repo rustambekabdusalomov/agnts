@@ -204,6 +204,7 @@ const _$TicketKindEnumMap = {
   TicketKind.analysis: 'analysis',
   TicketKind.bug: 'bug',
   TicketKind.review: 'review',
+  TicketKind.swaggertest: 'swaggertest',
 };
 
 const _$AcceptFollowUpPriorityEnumEnumMap = {

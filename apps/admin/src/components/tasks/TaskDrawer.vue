@@ -4,13 +4,14 @@ import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../../api/client'
-import { KINDS, REPORT_KINDS, type FollowUpsMode, type Repository, type TicketKindChoice } from '../../api/types'
+import { KINDS, REPORT_KINDS, type FollowUpsMode, type Repository, type Ticket, type TicketKindChoice } from '../../api/types'
 import { useUi } from '../../stores/ui'
 import FileAttach from '../files/FileAttach.vue'
 import FormDrawer from '../form/FormDrawer.vue'
 import SegButtons from '../form/SegButtons.vue'
 import HiIcon from '../ui/HiIcon.vue'
 import RepoSetPicker from '../repos/RepoSetPicker.vue'
+import SwaggerTestForm from '../swagger/SwaggerTestForm.vue'
 import { selectionBody, type RepoSelection } from '../repos/repoSet'
 import { useRepoGroups } from '../repos/useGroups'
 
@@ -32,8 +33,10 @@ type Start = 'ask' | 'code' | 'queue'
 const groups = useRepoGroups(() => open.value)
 const sel = ref<RepoSelection>({ groupId: null, repoIds: [] })
 const single = (id: number | undefined | null): RepoSelection => ({ groupId: null, repoIds: id ? [id] : [] })
+// The Swagger test has a form of its own, in place of the fields below.
+type KindTab = TicketKindChoice | 'swaggertest'
 const form = reactive({
-  kind: 'auto' as TicketKindChoice,
+  kind: 'auto' as KindTab,
   title: '',
   description: '',
   priority: 'medium' as Priority,
@@ -45,7 +48,15 @@ const form = reactive({
 const files = ref<number[]>([])
 const uploading = ref(false)
 const attach = ref<InstanceType<typeof FileAttach> | null>(null)
-const kinds = computed(() => (['auto', ...KINDS] as TicketKindChoice[]).map((k) => ({ value: k, label: t(`kind.${k}`), hint: t(`kind.${k}Hint`) })))
+const kinds = computed(() => (['auto', ...KINDS, 'swaggertest'] as KindTab[]).map((k) => ({ value: k, label: t(`kind.${k}`), hint: t(`kind.${k}Hint`) })))
+const swagger = computed(() => form.kind === 'swaggertest')
+const swaggerForm = ref<InstanceType<typeof SwaggerTestForm> | null>(null)
+async function swaggerCreated(tk: Ticket) {
+  for (const k of ['tickets', 'nav', 'repos']) void qc.invalidateQueries({ queryKey: [k] })
+  ui.notify(t('swagger.created', { key: tk.key }))
+  open.value = false
+  await router.push({ name: 'ticket', params: { key: tk.key } })
+}
 const reportKind = computed(() => REPORT_KINDS.some((k) => k === form.kind))
 const changeKind = computed(() => form.kind === 'code' || form.kind === 'test')
 // Code and test need a repository: pick the first one rather than show an error.
@@ -86,7 +97,7 @@ const create = useMutation({
       api.POST('/tasks', {
         body: {
           ...selectionBody(sel.value),
-          kind: form.kind,
+          kind: form.kind as TicketKindChoice,
           title: form.title.trim(),
           description: form.description.trim(),
           priority: form.priority,
@@ -112,6 +123,10 @@ const create = useMutation({
 })
 
 function submit() {
+  if (swagger.value) {
+    swaggerForm.value?.submit()
+    return
+  }
   if (!sel.value.repoIds.length && changeKind.value) {
     error.value = t('tasks.repoNeeded')
     return
@@ -148,68 +163,74 @@ function submit() {
         </div>
         <span class="hint">{{ kinds.find((k) => k.value === form.kind)?.hint }}</span>
       </div>
-      <div class="field">
-        <span class="flbl">{{ t('tasks.repository') }}</span>
-        <RepoSetPicker
-          v-model="sel"
-          :repos="repos"
-          :groups="groups.data.value ?? []"
-          :label="t('tasks.repository')"
-          :none-label="t('tasks.noRepo')"
-          :none-disabled="changeKind"
-          :none-title="changeKind ? t('tasks.repoNeeded') : undefined"
-        >
-          <template #extra>
-            <button type="button" class="tab" @click="$emit('addRepo')">
-              <HiIcon name="import" style="width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.4; vertical-align: -2px" />
-              {{ t('repos.import') }}
-            </button>
-          </template>
-        </RepoSetPicker>
-      </div>
-      <div class="field">
-        <label for="t-title">{{ t('tasks.fieldTitle') }}</label>
-        <input id="t-title" v-model="form.title" type="text" maxlength="300" :placeholder="t('tasks.titlePh')">
-      </div>
-      <div class="field">
-        <label for="t-desc">{{ t('tasks.fieldDesc') }}</label>
-        <textarea id="t-desc" v-model="form.description" maxlength="20000" :placeholder="t('tasks.descPh')" @paste="attach?.pasted($event)" />
-        <FileAttach ref="attach" v-model="files" v-model:busy="uploading" />
-      </div>
-      <div class="field">
-        <span class="flbl">{{ t('tasks.priority') }}</span>
-        <SegButtons v-model="form.priority" :options="priorities" :label="t('tasks.priority')" />
-      </div>
-      <div v-if="!reportKind" class="field">
-        <span class="flbl">{{ t('tasks.after') }}</span>
-        <SegButtons v-model="form.after" :options="afters" :label="t('tasks.after')" />
-      </div>
-      <div class="field">
-        <span class="flbl">{{ t('tasks.start') }}</span>
-        <div class="opts" role="group" :aria-label="t('tasks.start')">
-          <button
-            v-for="o in starts"
-            :key="o.value"
-            type="button"
-            class="opt"
-            :aria-pressed="form.start === o.value"
-            @click="form.start = o.value"
+      <SwaggerTestForm v-if="swagger" ref="swaggerForm" :repos="repos" :repo-id="repoId" @created="swaggerCreated" />
+      <template v-else>
+        <div class="field">
+          <span class="flbl">{{ t('tasks.repository') }}</span>
+          <RepoSetPicker
+            v-model="sel"
+            :repos="repos"
+            :groups="groups.data.value ?? []"
+            :label="t('tasks.repository')"
+            :none-label="t('tasks.noRepo')"
+            :none-disabled="changeKind"
+            :none-title="changeKind ? t('tasks.repoNeeded') : undefined"
           >
-            <span class="rd" />
-            <span><b>{{ o.label }}</b><span class="d">{{ o.hint }}</span></span>
-          </button>
+            <template #extra>
+              <button type="button" class="tab" @click="$emit('addRepo')">
+                <HiIcon name="import" style="width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.4; vertical-align: -2px" />
+                {{ t('repos.import') }}
+              </button>
+            </template>
+          </RepoSetPicker>
         </div>
-      </div>
-      <div class="field">
-        <span class="flbl">{{ t('followUps.mode') }}</span>
-        <SegButtons v-model="form.followUps" :options="followUpModes" :label="t('followUps.mode')" />
-        <span class="hint">{{ t('followUps.modeHint') }}</span>
-      </div>
+        <div class="field">
+          <label for="t-title">{{ t('tasks.fieldTitle') }}</label>
+          <input id="t-title" v-model="form.title" type="text" maxlength="300" :placeholder="t('tasks.titlePh')">
+        </div>
+        <div class="field">
+          <label for="t-desc">{{ t('tasks.fieldDesc') }}</label>
+          <textarea id="t-desc" v-model="form.description" maxlength="20000" :placeholder="t('tasks.descPh')" @paste="attach?.pasted($event)" />
+          <FileAttach ref="attach" v-model="files" v-model:busy="uploading" />
+        </div>
+        <div class="field">
+          <span class="flbl">{{ t('tasks.priority') }}</span>
+          <SegButtons v-model="form.priority" :options="priorities" :label="t('tasks.priority')" />
+        </div>
+        <div v-if="!reportKind" class="field">
+          <span class="flbl">{{ t('tasks.after') }}</span>
+          <SegButtons v-model="form.after" :options="afters" :label="t('tasks.after')" />
+        </div>
+        <div class="field">
+          <span class="flbl">{{ t('tasks.start') }}</span>
+          <div class="opts" role="group" :aria-label="t('tasks.start')">
+            <button
+              v-for="o in starts"
+              :key="o.value"
+              type="button"
+              class="opt"
+              :aria-pressed="form.start === o.value"
+              @click="form.start = o.value"
+            >
+              <span class="rd" />
+              <span><b>{{ o.label }}</b><span class="d">{{ o.hint }}</span></span>
+            </button>
+          </div>
+        </div>
+        <div class="field">
+          <span class="flbl">{{ t('followUps.mode') }}</span>
+          <SegButtons v-model="form.followUps" :options="followUpModes" :label="t('followUps.mode')" />
+          <span class="hint">{{ t('followUps.modeHint') }}</span>
+        </div>
+      </template>
       <span v-if="error" class="ferr" role="alert">{{ error }}</span>
     </form>
     <template #footer>
       <button type="button" class="btn" @click="open = false">{{ t('form.cancel') }}</button>
-      <button type="submit" form="task-form" class="btn btn-p" :disabled="create.isPending.value || uploading">
+      <button v-if="swagger" type="submit" form="task-form" class="btn btn-p" :disabled="swaggerForm?.busy">
+        {{ swaggerForm?.start === 'queue' ? t('swagger.create') : t('swagger.createStart') }}
+      </button>
+      <button v-else type="submit" form="task-form" class="btn btn-p" :disabled="create.isPending.value || uploading">
         {{ form.start === 'queue' ? t('tasks.create') : t('tasks.createStart') }}
       </button>
     </template>

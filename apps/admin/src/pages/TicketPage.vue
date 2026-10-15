@@ -4,7 +4,7 @@ import { computed, nextTick, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../api/client'
-import { isPullReview, isReport, KIND_EDITABLE, MODEL_NAME, needsRepo, pullHost, stateKey, TERMINAL, type Question, type ShotRef, type TicketKindChoice } from '../api/types'
+import { isPullReview, isReport, isSwaggerTest, KIND_EDITABLE, MODEL_NAME, needsRepo, pullHost, stateKey, TERMINAL, type Question, type ShotRef, type TicketKindChoice } from '../api/types'
 import UsageCard from '../components/dashboard/UsageCard.vue'
 import DiffView from '../components/DiffView.vue'
 import CheckBox from '../components/form/CheckBox.vue'
@@ -24,6 +24,7 @@ import ReplayButton from '../components/ticket/ReplayButton.vue'
 import PreviewShots from '../components/ticket/PreviewShots.vue'
 import ModelPicker from '../components/ticket/ModelPicker.vue'
 import ReportView from '../components/ticket/ReportView.vue'
+import SwaggerResults from '../components/swagger/SwaggerResults.vue'
 import RepoPicker from '../components/ticket/RepoPicker.vue'
 import TicketRepos from '../components/ticket/TicketRepos.vue'
 import { filePath, filesByRepo, isMultiRepo, ticketRepos } from '../components/repos/repoSet'
@@ -81,13 +82,14 @@ const isTask = computed(() => tk.value?.source === 'local')
 const isPlane = computed(() => tk.value?.source === 'plane')
 // A report kind (plan, analysis, bug): no branch, checks, diff or pull request.
 const report = computed(() => !!tk.value && isReport(tk.value))
+const swaggerTest = computed(() => !!tk.value && isSwaggerTest(tk.value))
 // A review of someone else's pull request: approve merges it, reject
 // dismisses agnts's review and leaves the pull request to you.
 const pull = computed(() => !!tk.value && isPullReview(tk.value))
 const host = computed(() => pullHost(tk.value?.pull?.url ?? tk.value?.prUrl))
 // Why a review is dismissed; it teaches agnts how you review.
 const dismissReason = ref('')
-const kindEditable = computed(() => !!tk.value && KIND_EDITABLE.includes(tk.value.state) && !tk.value.prUrl && tk.value.resumeState !== 'pushing')
+const kindEditable = computed(() => !!tk.value && KIND_EDITABLE.includes(tk.value.state) && !tk.value.prUrl && tk.value.resumeState !== 'pushing' && !isSwaggerTest(tk.value))
 const { events } = useEventLog(key)
 
 // The page can be read in another language; texts show translated where a
@@ -419,11 +421,12 @@ const checksOk = computed(() => (result.value?.checks ?? []).every((c) => c.exit
 // Everything that is not the current decision sits behind tabs under the
 // state card, so the page is one screen of "what now" plus one open panel
 // instead of every section stacked. The first available tab opens by default.
-type Tab = 'decide' | 'report' | 'review' | 'preview' | 'changes' | 'followUps' | 'order' | 'answers' | 'lessons' | 'log'
+type Tab = 'api' | 'decide' | 'report' | 'review' | 'preview' | 'changes' | 'followUps' | 'order' | 'answers' | 'lessons' | 'log'
 const tabs = computed(() => {
   const k = tk.value
   if (!k) return []
   const out: { id: Tab; label: string; n?: number }[] = []
+  if (swaggerTest.value && !['coding', 'new'].includes(k.state)) out.push({ id: 'api', label: t('swagger.tab') })
   if (reviewingReport.value) out.push({ id: 'decide', label: t('ticket.reviewReportTitle') })
   if (report.value && (k.state === 'waiting_for_review' || (k.state === 'done' && result.value?.report))) out.push({ id: 'report', label: t('ticket.report') })
   if (k.state === 'waiting_for_review' || (pull.value && d.value?.review)) out.push({ id: 'review', label: t('ticket.tabReview'), n: d.value?.review?.revision === k.revision ? d.value.review.findings.length || undefined : undefined })
@@ -695,6 +698,17 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             </template>
 
             <!-- coding / testing -->
+            <template v-else-if="swaggerTest && tk.state === 'coding'">
+              <h2>{{ tk.held ? t('swagger.queuedTitle') : t('swagger.runningTitle') }}</h2>
+              <p class="sub">{{ tk.held ? t('swagger.queuedSub') : t('swagger.runningSub') }}</p>
+              <div v-if="tk.held" class="actions">
+                <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="act.mutate('start')">{{ t('ticket.start') }}</button>
+              </div>
+              <template v-else>
+                <div class="sec"><h3>{{ t('ticket.log') }}</h3><LiveLog :events="events" /></div>
+                <div class="actions"><button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="confirmThen(t('ticket.stopConfirm', { key }), 'stop')">{{ t('ticket.stopRun') }}</button></div>
+              </template>
+            </template>
             <template v-else-if="tk.state === 'coding' || tk.state === 'testing'">
               <h2>{{ titleWithRev(report ? t('ticket.writingTitle') : tk.state === 'coding' ? t('ticket.codingTitle') : t('ticket.testingTitle')) }}</h2>
               <p class="sub">{{ report ? t('ticket.writingSub') : t('ticket.codingSub', { branch }) }}</p>
@@ -903,6 +917,10 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             </fieldset>
           </section>
 
+          <section v-else-if="activeTab === 'api'" class="card tk-panel">
+            <SwaggerResults :ticket="tk" />
+          </section>
+
           <section v-else-if="activeTab === 'report'" class="card tk-panel">
             <div class="ch"><h2>{{ t('ticket.report') }}</h2></div>
             <ReportView v-if="result?.report" :markdown="tr(result.report)" />
@@ -1041,7 +1059,10 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
 .tk-update { margin-bottom: 14px; }
 .tk-update-title { margin: 6px 0 4px; font-weight: 600; }
 .tk-update-desc { margin: 0; white-space: pre-wrap; max-height: 240px; overflow: auto; font-size: 14px; }
-.tk-desc { white-space: pre-wrap; }
+.tk-desc { white-space: pre-wrap; overflow-wrap: anywhere; }
+/* A title may hold a long host name or path (Swagger tests): let it wrap. */
+.ph > div { min-width: 0; }
+.ph h1 { overflow-wrap: anywhere; }
 .tk-desc.folded { display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .tk-more { margin-top: 4px; padding: 0; border: 0; background: none; font: inherit; font-size: 14px; font-weight: 700; color: var(--primary-ink); cursor: pointer; }
 .tk-head-act { align-self: flex-start; }

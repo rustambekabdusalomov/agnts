@@ -5,6 +5,7 @@ import type { FileChange, PullThread } from '../../api/types'
 import { numberDiff, type DiffLine } from '../diffLines'
 import CommentComposer from './CommentComposer.vue'
 import CommentThread from './CommentThread.vue'
+import HiIcon from '../ui/HiIcon.vue'
 import type { usePullWrites } from './usePull'
 
 // One changed file of a pull request with its review threads under their
@@ -65,11 +66,24 @@ function add(l: DiffLine, body: string) {
       <CommentThread v-for="th in placed.left" :key="th.id" :thread="th" :writes="writes" :can-edit="canEdit" :as="as" where />
     </div>
     <p v-if="!file.diff" class="hint pf-none">{{ t('pulls.noPatch') }}</p>
-    <div v-else class="diff pdiff" :style="{ '--ln': width }">
+    <p v-if="file.diff && canEdit" class="pf-hint">
+      <span class="pf-hint-ic"><HiIcon name="commentAdd" /></span>{{ t('pulls.commentHint') }}
+    </p>
+    <div v-if="file.diff" class="diff pdiff" :style="{ '--ln': width }">
       <template v-for="(l, i) in lines" :key="i">
         <div class="dl" :class="l.kind">
           <span class="lns" aria-hidden="true"><span class="ln">{{ l.old ?? '' }}</span><span class="ln">{{ l.new ?? '' }}</span></span>
-          <button v-if="commentable(l)" type="button" class="pf-add" :aria-label="t('pulls.commentOnLine', { line: l.new ?? l.old ?? '' })" @click="adding = i">+</button>
+          <button
+            v-if="commentable(l)"
+            type="button"
+            class="pf-add"
+            :class="{ on: adding === i }"
+            :title="t('pulls.commentOnLine', { line: l.new ?? l.old ?? '' })"
+            :aria-label="t('pulls.commentOnLine', { line: l.new ?? l.old ?? '' })"
+            @click="adding = i"
+          >
+            <HiIcon name="commentAdd" />
+          </button>
           <span v-else class="pf-add-sp" />
           <span class="tx">{{ l.text }}</span>
         </div>
@@ -93,16 +107,31 @@ function add(l: DiffLine, body: string) {
 <style scoped>
 .pdiff { font-family: var(--mono); font-size: 12.5px; line-height: 1.55; overflow-x: auto; border-radius: 0 0 10px 10px; }
 .pdiff .tx { white-space: pre-wrap; overflow-wrap: anywhere; }
-.pf-add, .pf-add-sp { flex: none; width: 22px; }
+.pf-add, .pf-add-sp { flex: none; width: 28px; }
 .pf-add-sp { display: block; }
-.pf-add { border: 0; background: none; color: var(--primary); font-weight: 700; cursor: pointer; opacity: 0; padding: 0; }
-.dl:hover .pf-add, .pf-add:focus-visible { opacity: 1; }
+/* The comment button: a faint bubble on every line that takes comments,
+   a filled chip on the line under the pointer (or focused, or open). */
+.pf-add {
+  display: inline-flex; align-items: center; justify-content: center; align-self: flex-start;
+  width: 22px; height: 19px; margin: 0 3px; padding: 0; border: 0; border-radius: 5px;
+  background: transparent; color: currentColor; cursor: pointer; opacity: 0.28;
+  transition: opacity .12s, background-color .12s, color .12s, transform .12s;
+}
+.pf-add svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.dl:hover .pf-add, .pf-add:focus-visible, .pf-add.on {
+  opacity: 1; background: var(--primary); color: #fff; box-shadow: 0 1px 3px rgb(0 0 0 / 0.35);
+}
+.pf-add:hover { transform: scale(1.12); }
+.pf-add:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+.pf-hint { display: flex; align-items: center; gap: 8px; margin: 0; padding: 8px 12px; font-size: 13px; color: var(--ink-3); border-top: 1px solid var(--line-2); }
+.pf-hint-ic { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 19px; border-radius: 5px; background: var(--primary); color: #fff; flex: none; }
+.pf-hint-ic svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 /* Threads sit inside the dark code block: take the page's colours back. */
 .pf-threads { padding: 10px 12px; background: var(--bg); color: var(--ink); display: grid; gap: 10px; font-family: var(--sans, inherit); font-size: 14px; line-height: 1.5; white-space: normal; }
 .pf-left { padding: 10px 12px; display: grid; gap: 10px; }
 .pf-left .hint, .pf-none { margin: 0; }
 .pf-none { padding: 10px 12px; }
 @media (hover: none) {
-  .pf-add { opacity: 0.6; }
+  .pf-add { opacity: 0.7; }
 }
 </style>

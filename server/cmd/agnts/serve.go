@@ -157,6 +157,8 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		Pulls:        a.orch,
 		CI:           a.ci,
 		Assistant:    a.orch,
+		Swagger:      a.orch,
+		Suites:       a.orch,
 		OAuth:        a.oauth,
 		MCP:          mcpHandler,
 		DB:           pool,
@@ -227,8 +229,12 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 				log.Error("orchestrator stopped", "err", err)
 			}
 		}()
+		go every(sys, time.Minute, a.orch.RunDueSuites) // scheduled Swagger test suites
 		go jira.Reconcile(sys, a.jira, a.orch, cfg.JiraSyncEach, a.forEachWorkspace, log.With("component", "jira"))
 		go plane.Reconcile(sys, a.plane, a.planeProjects, a.orch, cfg.PlaneSyncEach, a.forEachWorkspace, log.With("component", "plane"))
+		if !a.network.Enabled() {
+			a.network.SetWhoIs(a.runner.WhoIs) // grants (Swagger tests) without a gateway
+		}
 		if a.network.Enabled() {
 			a.network.SetRuns(a.docker, a.runner.WhoIs)
 			// A tracker reached through a VPN cannot send webhooks to agnts:
@@ -451,7 +457,9 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		Shots:        a.shots, PreviewEnvs: previewEnvs,
 		BuildEnvs: previewEnvs, Workspaces: a.workspaces,
 		Accounts: a.claude, Capacity: a.budget, Credits: a.billing,
+		SwaggerTests: postgres.NewSwaggerTests(pool, box),
 	}, log.With("component", "orchestrator"))
+	a.orch.SetSwaggerSuites(postgres.NewSwaggerSuites(pool, box))
 	a.billing.OnChange(a.orch.ForgetWorkspace)
 	a.ci = ciwatch.New(postgres.NewCI(pool, box), a.store, a.orch, a.vcs, repos, a.settings, log.With("component", "ci"))
 	a.orch.SetCIHook(a.ci)
@@ -800,6 +808,8 @@ func internalHandler(allow func(ctx context.Context) ([]string, error), nets *ne
 	mux := http.NewServeMux()
 	if nets != nil && nets.Enabled() {
 		nets.Internal(mux)
+	} else if nets != nil && nets.Grants() {
+		nets.InternalRoutes(mux)
 	}
 	mux.HandleFunc("GET /egress/allow", func(w http.ResponseWriter, r *http.Request) {
 		hosts, err := allow(r.Context())
