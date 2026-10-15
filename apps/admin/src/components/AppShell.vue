@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query'
-import { computed, nextTick, ref } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { api, unwrap } from '../api/client'
@@ -95,9 +95,24 @@ useTabBadge(
 )
 
 const isTicketList = computed(() => route.name === 'tickets')
-// Settings opens into its sections in the sidebar while you are in it.
+// Settings opens into its sections in the sidebar. Clicking it only shows
+// or hides them, so it can be opened just to see what is there; it opens
+// on its own when a settings page is reached another way.
 const inSettings = computed(() => route.name === 'settings')
 const settingsAt = computed(() => (inSettings.value ? settingsSection(route.params.section) : ''))
+const settingsOpen = ref(inSettings.value)
+watch(inSettings, (v) => {
+  if (v) settingsOpen.value = true
+})
+function toggleSettings(e: MouseEvent) {
+  // The thin sidebar shows the sections in a flyout instead (narrow screens excepted).
+  if (prefs.thin && !matchMedia('(max-width: 900px)').matches) {
+    if (fly.value) closeFly()
+    else openFly(e.currentTarget as HTMLElement)
+    return
+  }
+  settingsOpen.value = !settingsOpen.value
+}
 const activeFilter = computed(() => (isTicketList.value ? String(route.query.f ?? 'needs') : ''))
 
 const langOpen = ref(false)
@@ -145,7 +160,7 @@ function showTip(e: Event) {
 // it; it stays open while the pointer moves from the item into it.
 const fly = ref<{ top: number; left: number } | null>(null)
 let flyTimer: ReturnType<typeof setTimeout> | undefined
-const FLY_HEIGHT = 44 + SETTINGS_SECTIONS.length * 34 // title and rows, to keep it on screen
+const FLY_HEIGHT = 44 + SETTINGS_SECTIONS.length * 41 // title and rows (38px + 3px gap), to keep it on screen
 function openFly(el: HTMLElement) {
   clearTimeout(flyTimer)
   const r = el.getBoundingClientRect()
@@ -278,21 +293,22 @@ async function signOut() {
         <RouterLink class="nav-a" active-class="on" :to="{ name: 'rules' }" v-bind="tip(t('nav.rules'))">
           <HiIcon name="rules" /><span class="lbl">{{ t('nav.rules') }}</span><span v-if="ruleQuestions" class="cnt">{{ ruleQuestions }}</span>
         </RouterLink>
-        <RouterLink
+        <button
+          type="button"
           class="nav-a"
-          active-class="on"
-          :to="{ name: 'settings' }"
-          :aria-expanded="prefs.thin ? !!fly : inSettings"
+          :class="{ on: inSettings }"
+          :aria-expanded="prefs.thin ? !!fly : settingsOpen"
           :aria-label="prefs.thin ? t('nav.settings') : undefined"
           :data-flyout="prefs.thin ? 'settings' : undefined"
+          @click="toggleSettings"
           @keydown.right.prevent="enterFly"
           @keydown.down="fly && ($event.preventDefault(), enterFly())"
         >
           <HiIcon name="settings" /><span class="lbl">{{ t('nav.settings') }}</span>
-          <svg class="nav-chev" :class="{ open: inSettings }" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 7l5 5-5 5" /></svg>
-        </RouterLink>
+          <svg class="nav-chev" :class="{ open: settingsOpen }" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 7l5 5-5 5" /></svg>
+        </button>
         <!-- Always rendered, so opening and closing can animate; closed, it is inert (out of the tab order). -->
-        <div class="nav-sub" :class="{ open: inSettings }" role="group" :aria-label="t('nav.settings')" :inert="!inSettings">
+        <div class="nav-sub" :class="{ open: settingsOpen }" role="group" :aria-label="t('nav.settings')" :inert="!settingsOpen">
           <div class="nav-sub-in">
             <RouterLink
               v-for="x in SETTINGS_SECTIONS"
@@ -302,7 +318,7 @@ async function signOut() {
               :to="{ name: 'settings', params: { section: x.key } }"
               :aria-current="settingsAt === x.key ? 'page' : undefined"
             >
-              <span class="lbl">{{ t(x.label) }}</span>
+              <HiIcon :name="x.icon" /><span class="lbl">{{ t(x.label) }}</span>
             </RouterLink>
           </div>
         </div>
@@ -394,7 +410,7 @@ async function signOut() {
         :aria-current="settingsAt === x.key ? 'page' : undefined"
         @click="closeFly"
       >
-        {{ t(x.label) }}
+        <HiIcon :name="x.icon" />{{ t(x.label) }}
       </RouterLink>
     </nav>
   </Transition>

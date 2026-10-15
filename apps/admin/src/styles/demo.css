@@ -25,8 +25,10 @@
 /* Opens and closes by animating its rows from 0fr to 1fr (a height that needs no measuring). */
 .nav-sub{display:grid; grid-template-rows:0fr; opacity:0; margin:0 0 0 20px; transition:grid-template-rows .28s ease, opacity .2s ease, margin .28s ease}
 .nav-sub.open{grid-template-rows:1fr; opacity:1; margin:2px 0 6px 20px}
-.nav-sub-in{display:flex; flex-direction:column; gap:1px; min-height:0; overflow:hidden; padding-left:10px; border-left:1px solid var(--line)}
-.nav-sub .nav-sub-a{min-height:32px; font-size:14px; padding:0 10px}
+.nav-sub-in{display:flex; flex-direction:column; gap:3px; min-height:0; overflow:hidden; padding-left:10px; border-left:1px solid var(--line)}
+.nav-sub .nav-sub-a{min-height:38px; gap:9px; font-size:14px; padding:0 10px}
+.nav-sub .nav-sub-a svg{width:16px; height:16px}
+.nav-sub .nav-sub-a.on svg{color:var(--primary)}
 .nav-sub .nav-sub-a.on{background:var(--hover); color:var(--ink); font-weight:700}
 .thin .side .nav-sub,.thin .side .nav-chev{display:none}
 .cnt{margin-left:auto; min-width:22px; height:22px; border-radius:11px; background:var(--primary); color:var(--on-primary); font-size:12.5px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; padding:0 6px}
@@ -60,12 +62,14 @@
 .side-tip{position:fixed; z-index:60; transform:translateY(-50%); padding:6px 10px; border-radius:7px; background:var(--ink); color:var(--surface); font-size:13px; font-weight:600; white-space:nowrap; pointer-events:none; box-shadow:0 4px 14px rgba(0,0,0,.18); animation:tip-in .12s ease-out}
 .side-tip::before{content:""; position:absolute; left:-4px; top:50%; width:8px; height:8px; background:inherit; transform:translateY(-50%) rotate(45deg)}
 /* The thin sidebar's flyout of Settings' sections (AppShell.vue). */
-.side-fly{position:fixed; z-index:60; min-width:220px; padding:6px; border:1px solid var(--line); border-radius:12px; background:var(--surface); box-shadow:0 14px 34px -12px rgba(22,24,29,.35); display:flex; flex-direction:column; gap:1px}
+.side-fly{position:fixed; z-index:60; min-width:220px; padding:6px; border:1px solid var(--line); border-radius:12px; background:var(--surface); box-shadow:0 14px 34px -12px rgba(22,24,29,.35); display:flex; flex-direction:column; gap:3px}
 .side-fly::before{content:""; position:absolute; left:-12px; top:0; bottom:0; width:12px} /* a bridge, so the pointer can cross the gap */
 .side-fly-h{font-size:12.5px; font-weight:700; color:var(--ink-3); padding:6px 10px 4px}
-.side-fly-a{display:flex; align-items:center; min-height:34px; padding:0 10px; border-radius:8px; color:var(--ink-nav); font-size:14px; text-decoration:none; white-space:nowrap}
+.side-fly-a{display:flex; align-items:center; gap:9px; min-height:38px; padding:0 10px; border-radius:8px; color:var(--ink-nav); font-size:14px; text-decoration:none; white-space:nowrap}
 .side-fly-a:hover,.side-fly-a:focus-visible{background:var(--hover)}
 .side-fly-a.on{background:var(--primary-soft); color:var(--ink); font-weight:700}
+.side-fly-a svg{flex:none; width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; color:var(--ink-3)}
+.side-fly-a.on svg{color:var(--primary)}
 .fly-enter-active,.fly-leave-active{transition:opacity .16s ease, transform .16s ease}
 .fly-enter-from,.fly-leave-to{opacity:0; transform:translateX(-6px)}
 @keyframes tip-in{from{opacity:0; transform:translate(-4px,-50%)}}
@@ -200,9 +204,10 @@ textarea:focus{border-color:var(--primary); box-shadow:0 0 0 3px var(--ring)}
 .n{font-family:var(--sans); font-size:13px; white-space:nowrap; font-weight:700}
 .n .a{color:var(--ok-ink)} .n .d{color:var(--bad-ink); margin-left:6px}
 .diff{overflow-x:auto; background:var(--code); color:var(--code-ink)}
-.diff pre{margin:0; font-family:var(--mono); font-size:13px; line-height:1.6; min-width:max-content; padding:6px 0}
-.diff span{display:block; padding:0 14px}
-.diff .add{background:var(--code-add)} .diff .del{background:var(--code-del)} .diff .hunk{background:var(--code-hunk); color:#B9C6F5}
+/* Scoped to the code itself: review threads sit inside .diff on a pull request. */
+.diff > pre{margin:0; font-family:var(--mono); font-size:13px; line-height:1.6; min-width:max-content; padding:6px 0}
+.diff > pre span{display:block; padding:0 14px}
+.diff > pre .add{background:var(--code-add)} .diff > pre .del{background:var(--code-del)} .diff > pre .hunk, .diff .dl.hunk{background:var(--code-hunk); color:#B9C6F5}
 
 /* Timeline */
 .tl{display:flex; flex-direction:column; margin:0; padding:0; list-style:none}
@@ -239,9 +244,9 @@ textarea:focus{border-color:var(--primary); box-shadow:0 0 0 3px var(--ring)}
 .field{display:flex; flex-direction:column; gap:6px; font-size:14px}
 .field > label, .field > .flbl{font-weight:700; color:var(--ink)}
 .field .fhelp{font-size:13px; color:var(--ink-3)}
-.field input[type=text]{min-height:42px; border:1px solid var(--line-3); border-radius:9px; padding:0 12px; background:var(--surface); font-size:15px; transition:border-color .15s, box-shadow .15s; width:100%}
-.field input[type=text]:hover{border-color:#B9B5AB}
-.field input[type=text]:focus{border-color:var(--primary); box-shadow:0 0 0 3px var(--ring)}
+.field input[type=text],.field input[type=password]:not(.cfg-in){min-height:42px; border:1px solid var(--line-3); border-radius:9px; padding:0 12px; background:var(--surface); font-size:15px; transition:border-color .15s, box-shadow .15s; width:100%}
+.field input[type=text]:hover,.field input[type=password]:not(.cfg-in):hover{border-color:#B9B5AB}
+.field input[type=text]:focus,.field input[type=password]:not(.cfg-in):focus{border-color:var(--primary); box-shadow:0 0 0 3px var(--ring)}
 .field textarea{min-height:110px}
 .ferr{color:var(--bad-ink); font-size:13px; font-weight:700}
 .seg{display:inline-flex; background:var(--hover); border-radius:10px; padding:3px; gap:3px; flex-wrap:wrap; align-self:flex-start}

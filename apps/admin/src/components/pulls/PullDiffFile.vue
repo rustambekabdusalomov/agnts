@@ -94,9 +94,11 @@ function add(l: DiffLine, body: string) {
 .pdiff { font-family: var(--mono); font-size: 12.5px; line-height: 1.55; overflow-x: auto; border-radius: 0 0 10px 10px; }
 .pdiff .tx { white-space: pre-wrap; overflow-wrap: anywhere; }
 .pf-add, .pf-add-sp { flex: none; width: 22px; }
+.pf-add-sp { display: block; }
 .pf-add { border: 0; background: none; color: var(--primary); font-weight: 700; cursor: pointer; opacity: 0; padding: 0; }
 .dl:hover .pf-add, .pf-add:focus-visible { opacity: 1; }
-.pf-threads { padding: 10px 12px; background: var(--bg); display: grid; gap: 10px; font-family: var(--sans, inherit); font-size: 14px; white-space: normal; }
+/* Threads sit inside the dark code block: take the page's colours back. */
+.pf-threads { padding: 10px 12px; background: var(--bg); color: var(--ink); display: grid; gap: 10px; font-family: var(--sans, inherit); font-size: 14px; line-height: 1.5; white-space: normal; }
 .pf-left { padding: 10px 12px; display: grid; gap: 10px; }
 .pf-left .hint, .pf-none { margin: 0; }
 .pf-none { padding: 10px 12px; }
