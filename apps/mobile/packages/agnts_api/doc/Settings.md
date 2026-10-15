@@ -26,6 +26,7 @@ Name | Type | Description | Notes
 **suggestFollowUps** | **bool** | Runs suggest follow-up tickets (off by default; a ticket can override it) | [optional] 
 **maxTicketRepos** | **int** | How many repositories one ticket, and one repository group, may have (6 by default) | [optional] 
 **pullReviews** | [**PullReviewSettings**](PullReviewSettings.md) |  | [optional] 
+**prComments** | [**PRCommentSettings**](PRCommentSettings.md) |  | [optional] 
 **ci** | [**CISettings**](CISettings.md) |  | [optional] 
 **guard** | [**GuardSettings**](GuardSettings.md) |  | [optional] 
 **stalls** | **String** | What agnts does when a run looks stuck: nothing, note it on the ticket, or also tell Claude to step back (once per run) | [optional] 

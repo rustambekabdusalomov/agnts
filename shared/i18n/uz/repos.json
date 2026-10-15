@@ -100,6 +100,7 @@
     "buildEnvCleared": "Saqlaganda tozalanadi.",
     "plane": "Plane {project}",
     "planeProject": "Plane loyihasi",
-    "planeHelp": "Ixtiyoriy. Loyiha identifikatori (WEB-123 dagi WEB). Shu Plane loyihasidagi agnts belgili vazifalar shu yerda bajariladi."
+    "planeHelp": "Ixtiyoriy. Loyiha identifikatori (WEB-123 dagi WEB). Shu Plane loyihasidagi agnts belgili vazifalar shu yerda bajariladi.",
+    "search": "Nomi, steki, loyihasi yoki guruhi bo'yicha qidirish"
   }
 }

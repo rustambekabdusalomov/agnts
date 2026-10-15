@@ -6259,6 +6259,30 @@ class AppLocalizationsUz extends AppLocalizations {
   String get networkGone => 'oʻchirilgan';
 
   @override
+  String get networkDisconnect => 'Uzish';
+
+  @override
+  String get networkDisconnectHelp =>
+      'Tunnelni to\'xtatish. Qayta ulamaguningizcha ishga tushirishlar u orqali hech narsaga yetmaydi; sozlama saqlanadi';
+
+  @override
+  String networkDisconnectConfirm(String name) {
+    return '$name uzilsinmi? U orqali ishlaydigan ishga tushirishlar va trekerlar qayta ulamaguningizcha ishlamaydi. Sozlamasi saqlanadi.';
+  }
+
+  @override
+  String get networkDisconnected => 'Uzildi';
+
+  @override
+  String get networkConnect => 'Ulash';
+
+  @override
+  String get networkConnectHelp => 'Tunnelni saqlangan sozlama bilan qayta ishga tushirish';
+
+  @override
+  String get networkConnecting => 'Ulanmoqda: tunnel 15 soniya ichida ishga tushadi';
+
+  @override
   String get platformTitle => 'Administrator kabineti';
 
   @override
@@ -6845,6 +6869,297 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get previewNotifyPhotosHelp => 'Telegram xabariga toʻrttagacha skrinshot qoʻshiladi.';
+
+  @override
+  String get pullsTab => 'Pull requestlar';
+
+  @override
+  String get pullsTitle => 'Pull requestlar';
+
+  @override
+  String get pullsSub => 'Git xostingda, oxirgi yangilanganlari birinchi. Izohlarni o\'qish va javob berish uchun oching.';
+
+  @override
+  String get pullsBack => 'Repozitoriyga qaytish';
+
+  @override
+  String get pullsState_open => 'Ochiq';
+
+  @override
+  String get pullsState_merged => 'Birlashtirilgan';
+
+  @override
+  String get pullsState_closed => 'Yopilgan';
+
+  @override
+  String get pullsState_all => 'Hammasi';
+
+  @override
+  String get pullsNone => 'Bu yerda pull request yo\'q.';
+
+  @override
+  String get pullsEnd => 'Hammasi shu.';
+
+  @override
+  String pullsUpdated(String time) {
+    return '$time yangilangan';
+  }
+
+  @override
+  String get pullsDraft => 'Qoralama';
+
+  @override
+  String pullsOwnTicket(String key) {
+    return 'agnts o\'zgarishi · $key';
+  }
+
+  @override
+  String pullsReviewTicket(String key) {
+    return 'Ko\'rib chiqish · $key';
+  }
+
+  @override
+  String get pullsConversation => 'Muhokama';
+
+  @override
+  String get pullsFiles => 'Fayllar';
+
+  @override
+  String pullsUnresolvedN(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n ta hal qilinmagan muhokama',
+      one: '$n ta hal qilinmagan muhokama',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pullsShowResolved(String n) {
+    return 'Hal qilinganlarni ko\'rsatish ($n)';
+  }
+
+  @override
+  String get pullsNoComments => 'Hozircha izoh yo\'q.';
+
+  @override
+  String get pullsNoFiles => 'Pull request hech qanday faylni o\'zgartirmaydi.';
+
+  @override
+  String get pullsNoPatch => 'Ko\'rsatadigan diff yo\'q (ikkilik fayl yoki juda katta).';
+
+  @override
+  String pullsFilesError(String error) {
+    return 'O\'zgargan fayllarni o\'qib bo\'lmadi: $error';
+  }
+
+  @override
+  String get pullsEarlierVersion => 'Faylning oldingi versiyasiga yozilgan:';
+
+  @override
+  String pullsThreadsN(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ta muhokama', one: '$n ta muhokama');
+    return '$_temp0';
+  }
+
+  @override
+  String pullsCommentOnLine(String line) {
+    return '$line-qatorga izoh';
+  }
+
+  @override
+  String get pullsAddComment => 'Izoh qo\'shish';
+
+  @override
+  String get pullsComment => 'Izoh qoldirish';
+
+  @override
+  String get pullsCommentLabel => 'Izoh';
+
+  @override
+  String get pullsPlaceholder => 'Markdown. Ctrl+Enter yuboradi.';
+
+  @override
+  String get pullsWrite => 'Matn';
+
+  @override
+  String get pullsPreview => 'Ko\'rish';
+
+  @override
+  String get pullsReply => 'Javob berish';
+
+  @override
+  String get pullsEdit => 'Tahrirlash';
+
+  @override
+  String get pullsSave => 'Saqlash';
+
+  @override
+  String get pullsEdited => 'tahrirlangan';
+
+  @override
+  String get pullsDelete => 'O\'chirish';
+
+  @override
+  String get pullsDeleteTitle => 'Izohni o\'chirasizmi?';
+
+  @override
+  String get pullsDeleteConfirm => 'U git xostingda hamma uchun o\'chadi. Buni qaytarib bo\'lmaydi.';
+
+  @override
+  String get pullsDeleted => 'Izoh o\'chirildi';
+
+  @override
+  String get pullsResolve => 'Hal qilindi';
+
+  @override
+  String get pullsUnresolve => 'Qayta ochish';
+
+  @override
+  String get pullsResolved => 'Hal qilingan';
+
+  @override
+  String get pullsOutdated => 'Eskirgan';
+
+  @override
+  String get pullsSent => 'agnts\'ga yuborilgan';
+
+  @override
+  String get pullsAnswered => 'agnts javob bergan';
+
+  @override
+  String get pullsVerdict_APPROVED => 'Tasdiqlangan';
+
+  @override
+  String get pullsVerdict_CHANGES_REQUESTED => 'O\'zgartirish so\'ralgan';
+
+  @override
+  String get pullsVerdict_COMMENTED => 'Izoh';
+
+  @override
+  String get pullsVerdict_DISMISSED => 'Rad etilgan';
+
+  @override
+  String pullsPostsAs(String login, String host) {
+    return '${host}da @$login nomidan';
+  }
+
+  @override
+  String pullsPostsAsToken(String host) {
+    return '$host tokeni egasi nomidan';
+  }
+
+  @override
+  String pullsTicketTitle(String number, String host) {
+    return '#$number izohlari ($host)';
+  }
+
+  @override
+  String get pullsTicketSubOwn =>
+      'agnts pull requestiga ko\'rib chiquvchilar izohlari. Shu yerda javob bering yoki ularni agnts\'ga qaytaring.';
+
+  @override
+  String get pullsTicketSubReview => 'Pull requestning git xostingdagi muhokamasi.';
+
+  @override
+  String pullsTicketSubIn(String repo) {
+    return '$repo da.';
+  }
+
+  @override
+  String get pullsOpenWithDiff => 'Diff bilan ochish';
+
+  @override
+  String pullsAddressBtn(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ta izohni hisobga olish', one: '$n ta izohni hisobga olish');
+    return '$_temp0';
+  }
+
+  @override
+  String pullsAddressConfirm(String key, num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'shu $n ta muhokama', one: 'shu muhokama');
+    return 'agnts $key ga $_temp0 bilan qaytadi: kodni o\'zgartiradi yoki har biriga javob beradi. Tuzatish odatdagidek tasdig\'ingizni kutadi; push qilingach, agnts har bir muhokamada javob yozadi.';
+  }
+
+  @override
+  String pullsAddressed(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ta muhokama', one: '$n ta muhokama');
+    return '$_temp0 agnts\'ga qaytarildi';
+  }
+
+  @override
+  String pullsAddressLater(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ta yangi izoh', one: '$n ta yangi izoh');
+    return '$_temp0: ularni tiket ko\'rib chiqishingizni kutayotganda yoki pull requesti ochiq holda tayyor bo\'lganda agnts\'ga qaytarish mumkin.';
+  }
+
+  @override
+  String pullsPostTitle(String number) {
+    return '#$number ga ko\'rib chiqishni joylash';
+  }
+
+  @override
+  String pullsPostSub(String host) {
+    return '${host}da token egasi nomidan bitta ko\'rib chiqish. Diff qatorlaridagi topilmalar o\'sha qatorga izoh bo\'ladi.';
+  }
+
+  @override
+  String pullsPostBtn(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n ta qator izohi bilan joylash',
+      one: '$n ta qator izohi bilan joylash',
+      zero: 'Joylash',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pullsPostSummary => 'Xulosa (hukm va barcha topilmalar)';
+
+  @override
+  String get pullsPostFindings => 'O\'z qatorlarida:';
+
+  @override
+  String get pullsSummaryOnly => 'faqat xulosada: diffda bunday qator yo\'q';
+
+  @override
+  String get pullsRequestChanges => 'O\'zgartirish so\'rash';
+
+  @override
+  String get pullsNoRequestChanges => 'GitLab\'da bu yerda o\'zgartirish so\'rovi yo\'q: izohlar joylanadi, tasdiqlar o\'zgarmaydi.';
+
+  @override
+  String get pullsSettingsTitle => 'Pull request izohlari';
+
+  @override
+  String get pullsSet_attribution => 'Muallifni ko\'rsatish';
+
+  @override
+  String get pullsSet_attributionHelp =>
+      'agnts\'dan yozilgan izohlar git xosting tokeni egasi nomidan ketadi; har birining ostiga \"via agnts · <siz>\" qo\'shiladi.';
+
+  @override
+  String get pullsSet_learnFromComments => 'Izohlaringizdan o\'rganish';
+
+  @override
+  String get pullsSet_learnFromCommentsHelp =>
+      'Boshqalarning pull requestlariga git xostingda yozganlaringiz qanday ko\'rib chiqishingiz haqidagi eslatmaga aylanadi.';
+
+  @override
+  String get pullsSet_resolveFixed => 'Tuzatilgan muhokamalarni yopish';
+
+  @override
+  String get pullsSet_resolveFixedHelp => 'agnts tuzatishni push qilib, muhokamada javob bergach, uni hal qilingan deb belgilaydi.';
+
+  @override
+  String get pullsSet_autoAddress => 'O\'zgartirish so\'rovini hisobga olish';
+
+  @override
+  String get pullsSet_autoAddressHelp =>
+      'Ko\'rib chiquvchi agnts pull requestida o\'zgartirish so\'rasa, hal qilinmagan muhokamalar o\'zi tiketga qaytadi. Tuzatish baribir tasdig\'ingizni kutadi.';
 
   @override
   String queueHeader(String running, String slots) {
@@ -7821,6 +8136,9 @@ class AppLocalizationsUz extends AppLocalizations {
   @override
   String get reposPlaneHelp =>
       'Ixtiyoriy. Loyiha identifikatori (WEB-123 dagi WEB). Shu Plane loyihasidagi agnts belgili vazifalar shu yerda bajariladi.';
+
+  @override
+  String get reposSearch => 'Nomi, steki, loyihasi yoki guruhi bo\'yicha qidirish';
 
   @override
   String get reviewTitle => 'agnts kod sharhi';

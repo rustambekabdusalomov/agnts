@@ -78,6 +78,9 @@ type Deps struct {
 	// what agnts learned from your notes; nil disables them (the git host
 	// must also implement ReviewHost, and Git PRFetcher).
 	PullReviews PullReviews
+	// PRPosts keeps what agnts posted on pull requests; nil posts without
+	// remembering (a later review cannot edit or answer its comments).
+	PRPosts PRPosts
 	// Translations stores translated ticket texts; nil disables translation.
 	Translations Translations
 	// Shots stores preview screenshots; nil disables previews.
@@ -120,6 +123,7 @@ type Orchestrator struct {
 	briefs      Briefs
 	reflections Reflections
 	pulls       PullReviews
+	prposts     PRPosts
 	trans       Translations
 	shots       Shots
 	envs        PreviewEnvs
@@ -157,7 +161,7 @@ func New(cfg Config, d Deps, log *slog.Logger) *Orchestrator {
 	}
 	return &Orchestrator{
 		cfg: cfg, store: d.Store, runner: d.Runner, git: d.Git, host: d.Host, trackers: d.Trackers, homes: d.Homes,
-		settings: d.Settings, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, briefs: d.Briefs, reflections: d.Reflections, pulls: d.PullReviews, trans: d.Translations,
+		settings: d.Settings, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, briefs: d.Briefs, reflections: d.Reflections, pulls: d.PullReviews, prposts: d.PRPosts, trans: d.Translations,
 		shots: d.Shots, envs: d.PreviewEnvs, builds: d.BuildEnvs, log: log,
 		queue: q, workspaces: d.Workspaces, accounts: d.Accounts, capacity: d.Capacity, credits: d.Credits, sched: newSchedState(),
 		wake:    make(chan struct{}, 1),
@@ -1512,6 +1516,9 @@ func (o *Orchestrator) push(ctx context.Context, s domain.Settings, t domain.Tic
 		}
 		if err := o.recordPushed(ctx, t, r, &number, url); err != nil {
 			return err
+		}
+		if r.Row.PRNumber != nil { // more commits on an open pull request: answer what they addressed
+			o.answerThreads(ctx, s, t, r.ID, number, r.Row.HeadSHA)
 		}
 	}
 	if failed != nil {

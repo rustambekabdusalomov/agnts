@@ -25,6 +25,7 @@ import 'package:agnts_api/src/api/mcp_api.dart';
 import 'package:agnts_api/src/api/meta_api.dart';
 import 'package:agnts_api/src/api/network_api.dart';
 import 'package:agnts_api/src/api/platform_api.dart';
+import 'package:agnts_api/src/api/pulls_api.dart';
 import 'package:agnts_api/src/api/repos_api.dart';
 import 'package:agnts_api/src/api/reviews_api.dart';
 import 'package:agnts_api/src/api/rules_api.dart';
@@ -232,6 +233,12 @@ class AgntsApi {
   /// by doing that all interceptors will not be executed
   PlatformApi getPlatformApi() {
     return PlatformApi(dio);
+  }
+
+  /// Get PullsApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  PullsApi getPullsApi() {
+    return PullsApi(dio);
   }
 
   /// Get ReposApi instance, base route and serializer can be overridden by a given but be careful,

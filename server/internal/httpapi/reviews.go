@@ -18,7 +18,7 @@ type Reviews interface {
 	SaveReviewerProfile(ctx context.Context, login, body string) (domain.ReviewerProfile, error)
 	AddReviewerNote(ctx context.Context, login, note string) (domain.ReviewerNote, error)
 	DeleteReviewerNote(ctx context.Context, id int64) error
-	PostPullReview(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
+	PostPullReview(ctx context.Context, key string, opt orchestrator.PostReviewOptions, origin domain.Origin) (domain.Ticket, orchestrator.PostedReview, error)
 }
 
 func (s *Server) reviewsReady(w http.ResponseWriter) bool {

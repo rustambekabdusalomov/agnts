@@ -85,6 +85,13 @@
     "activityTime": "Time",
     "activityTarget": "Target",
     "activitySource": "Ticket or source",
-    "gone": "removed"
+    "gone": "removed",
+    "disconnect": "Disconnect",
+    "disconnectHelp": "Stop the tunnel. Runs reach nothing through it until you connect again; the config is kept",
+    "disconnectConfirm": "Disconnect {name}? Runs and trackers reached through it stop working until you connect it again. Its config is kept.",
+    "disconnected": "Disconnected",
+    "connect": "Connect",
+    "connectHelp": "Start the tunnel again with the saved config",
+    "connecting": "Connecting: the tunnel starts within 15 seconds"
   }
 }

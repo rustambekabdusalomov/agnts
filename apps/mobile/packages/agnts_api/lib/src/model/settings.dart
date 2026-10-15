@@ -4,6 +4,7 @@
 
 // ignore_for_file: unused_element
 import 'package:agnts_api/src/model/notify_settings.dart';
+import 'package:agnts_api/src/model/pr_comment_settings.dart';
 import 'package:agnts_api/src/model/ci_settings.dart';
 import 'package:agnts_api/src/model/guard_settings.dart';
 import 'package:agnts_api/src/model/pull_review_settings.dart';
@@ -61,6 +62,8 @@ class Settings {
      this.maxTicketRepos,
 
      this.pullReviews,
+
+     this.prComments,
 
      this.ci,
 
@@ -321,6 +324,18 @@ class Settings {
 
   @JsonKey(
     
+    name: r'prComments',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final PRCommentSettings? prComments;
+
+
+
+  @JsonKey(
+    
     name: r'ci',
     required: false,
     includeIfNull: false,
@@ -495,6 +510,7 @@ class Settings {
       other.suggestFollowUps == suggestFollowUps &&
       other.maxTicketRepos == maxTicketRepos &&
       other.pullReviews == pullReviews &&
+      other.prComments == prComments &&
       other.ci == ci &&
       other.guard == guard &&
       other.stalls == stalls &&
@@ -528,6 +544,7 @@ class Settings {
         suggestFollowUps.hashCode +
         maxTicketRepos.hashCode +
         pullReviews.hashCode +
+        prComments.hashCode +
         ci.hashCode +
         guard.hashCode +
         stalls.hashCode +

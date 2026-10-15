@@ -6512,6 +6512,30 @@ class AppLocalizationsRu extends AppLocalizations {
   String get networkGone => 'удалена';
 
   @override
+  String get networkDisconnect => 'Отключить';
+
+  @override
+  String get networkDisconnectHelp =>
+      'Остановить туннель. Запуски ничего не достигнут через него, пока вы не подключите снова; конфиг сохраняется';
+
+  @override
+  String networkDisconnectConfirm(String name) {
+    return 'Отключить $name? Запуски и трекеры, доступные через неё, перестанут работать, пока вы снова её не подключите. Конфиг сохраняется.';
+  }
+
+  @override
+  String get networkDisconnected => 'Отключено';
+
+  @override
+  String get networkConnect => 'Подключить';
+
+  @override
+  String get networkConnectHelp => 'Снова запустить туннель с сохранённым конфигом';
+
+  @override
+  String get networkConnecting => 'Подключение: туннель запустится в течение 15 секунд';
+
+  @override
   String get platformTitle => 'Кабинет администратора';
 
   @override
@@ -7132,6 +7156,328 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get previewNotifyPhotosHelp => 'К сообщению в Telegram прикладывается до четырёх скриншотов.';
+
+  @override
+  String get pullsTab => 'Пул-реквесты';
+
+  @override
+  String get pullsTitle => 'Пул-реквесты';
+
+  @override
+  String get pullsSub => 'На git-хостинге, сначала недавно обновлённые. Откройте, чтобы прочитать комментарии и ответить на них.';
+
+  @override
+  String get pullsBack => 'Назад к репозиторию';
+
+  @override
+  String get pullsState_open => 'Открытые';
+
+  @override
+  String get pullsState_merged => 'Слитые';
+
+  @override
+  String get pullsState_closed => 'Закрытые';
+
+  @override
+  String get pullsState_all => 'Все';
+
+  @override
+  String get pullsNone => 'Пул-реквестов нет.';
+
+  @override
+  String get pullsEnd => 'Это все.';
+
+  @override
+  String pullsUpdated(String time) {
+    return 'обновлён $time';
+  }
+
+  @override
+  String get pullsDraft => 'Черновик';
+
+  @override
+  String pullsOwnTicket(String key) {
+    return 'Изменение agnts · $key';
+  }
+
+  @override
+  String pullsReviewTicket(String key) {
+    return 'Ревью · $key';
+  }
+
+  @override
+  String get pullsConversation => 'Обсуждение';
+
+  @override
+  String get pullsFiles => 'Файлы';
+
+  @override
+  String pullsUnresolvedN(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n нерешённой ветки',
+      many: '$n нерешённых веток',
+      few: '$n нерешённые ветки',
+      one: '$n нерешённая ветка',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pullsShowResolved(String n) {
+    return 'Показать решённые ($n)';
+  }
+
+  @override
+  String get pullsNoComments => 'Комментариев пока нет.';
+
+  @override
+  String get pullsNoFiles => 'Пул-реквест не меняет файлов.';
+
+  @override
+  String get pullsNoPatch => 'Нечего показать (бинарный файл или слишком большой дифф).';
+
+  @override
+  String pullsFilesError(String error) {
+    return 'Не удалось прочитать изменённые файлы: $error';
+  }
+
+  @override
+  String get pullsEarlierVersion => 'Написано к более ранней версии файла:';
+
+  @override
+  String pullsThreadsN(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ветки', many: '$n веток', few: '$n ветки', one: '$n ветка');
+    return '$_temp0';
+  }
+
+  @override
+  String pullsCommentOnLine(String line) {
+    return 'Комментарий к строке $line';
+  }
+
+  @override
+  String get pullsAddComment => 'Добавить комментарий';
+
+  @override
+  String get pullsComment => 'Комментировать';
+
+  @override
+  String get pullsCommentLabel => 'Комментарий';
+
+  @override
+  String get pullsPlaceholder => 'Markdown. Ctrl+Enter — отправить.';
+
+  @override
+  String get pullsWrite => 'Текст';
+
+  @override
+  String get pullsPreview => 'Просмотр';
+
+  @override
+  String get pullsReply => 'Ответить';
+
+  @override
+  String get pullsEdit => 'Изменить';
+
+  @override
+  String get pullsSave => 'Сохранить';
+
+  @override
+  String get pullsEdited => 'изменён';
+
+  @override
+  String get pullsDelete => 'Удалить';
+
+  @override
+  String get pullsDeleteTitle => 'Удалить комментарий?';
+
+  @override
+  String get pullsDeleteConfirm => 'Он удалится на git-хостинге для всех. Это нельзя отменить.';
+
+  @override
+  String get pullsDeleted => 'Комментарий удалён';
+
+  @override
+  String get pullsResolve => 'Решено';
+
+  @override
+  String get pullsUnresolve => 'Открыть снова';
+
+  @override
+  String get pullsResolved => 'Решено';
+
+  @override
+  String get pullsOutdated => 'Устарело';
+
+  @override
+  String get pullsSent => 'Отправлено agnts';
+
+  @override
+  String get pullsAnswered => 'agnts ответил';
+
+  @override
+  String get pullsVerdict_APPROVED => 'Одобрено';
+
+  @override
+  String get pullsVerdict_CHANGES_REQUESTED => 'Нужны изменения';
+
+  @override
+  String get pullsVerdict_COMMENTED => 'Комментарий';
+
+  @override
+  String get pullsVerdict_DISMISSED => 'Отклонено';
+
+  @override
+  String pullsPostsAs(String login, String host) {
+    return 'От имени @$login на $host';
+  }
+
+  @override
+  String pullsPostsAsToken(String host) {
+    return 'От имени владельца токена $host';
+  }
+
+  @override
+  String pullsTicketTitle(String number, String host) {
+    return 'Комментарии к #$number ($host)';
+  }
+
+  @override
+  String get pullsTicketSubOwn => 'Комментарии ревьюеров к пул-реквесту agnts. Ответьте здесь или верните их agnts.';
+
+  @override
+  String get pullsTicketSubReview => 'Обсуждение пул-реквеста на git-хостинге.';
+
+  @override
+  String pullsTicketSubIn(String repo) {
+    return 'В $repo.';
+  }
+
+  @override
+  String get pullsOpenWithDiff => 'Открыть с диффом';
+
+  @override
+  String pullsAddressBtn(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Учесть $n комментария',
+      many: 'Учесть $n комментариев',
+      few: 'Учесть $n комментария',
+      one: 'Учесть $n комментарий',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pullsAddressConfirm(String key, num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'этими $n ветками ревью',
+      many: 'этими $n ветками ревью',
+      few: 'этими $n ветками ревью',
+      one: 'этой веткой ревью',
+    );
+    return 'agnts вернётся к $key с $_temp0: исправит код или ответит на каждую. Исправление, как обычно, ждёт вашего одобрения; после пуша agnts ответит в каждой ветке.';
+  }
+
+  @override
+  String pullsAddressed(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n ветки возвращено',
+      many: '$n веток возвращено',
+      few: '$n ветки возвращены',
+      one: '$n ветка возвращена',
+    );
+    return '$_temp0 agnts';
+  }
+
+  @override
+  String pullsAddressLater(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n нового комментария',
+      many: '$n новых комментариев',
+      few: '$n новых комментария',
+      one: '$n новый комментарий',
+    );
+    return '$_temp0 ревью: их можно вернуть agnts, пока тикет ждёт вашего ревью или когда он готов и его пул-реквест открыт.';
+  }
+
+  @override
+  String pullsPostTitle(String number) {
+    return 'Опубликовать ревью в #$number';
+  }
+
+  @override
+  String pullsPostSub(String host) {
+    return 'Одно ревью на $host от имени владельца токена. Находки на строках диффа станут комментариями к ним.';
+  }
+
+  @override
+  String pullsPostBtn(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Опубликовать с $n комментария к строкам',
+      many: 'Опубликовать с $n комментариями к строкам',
+      few: 'Опубликовать с $n комментариями к строкам',
+      one: 'Опубликовать с $n комментарием к строке',
+      zero: 'Опубликовать',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pullsPostSummary => 'Итог (вердикт и все находки)';
+
+  @override
+  String get pullsPostFindings => 'На своих строках:';
+
+  @override
+  String get pullsSummaryOnly => 'только в итоге: строки нет в диффе';
+
+  @override
+  String get pullsRequestChanges => 'Запросить изменения';
+
+  @override
+  String get pullsNoRequestChanges => 'В GitLab здесь нет запроса изменений: комментарии публикуются, одобрения остаются как есть.';
+
+  @override
+  String get pullsSettingsTitle => 'Комментарии к пул-реквестам';
+
+  @override
+  String get pullsSet_attribution => 'Указывать автора';
+
+  @override
+  String get pullsSet_attributionHelp =>
+      'Комментарии из agnts уходят от имени владельца токена git-хостинга; под каждым будет «via agnts · <вы>».';
+
+  @override
+  String get pullsSet_learnFromComments => 'Учиться на ваших комментариях';
+
+  @override
+  String get pullsSet_learnFromCommentsHelp =>
+      'То, что вы пишете в чужих пул-реквестах на git-хостинге, становится заметками о том, как вы делаете ревью.';
+
+  @override
+  String get pullsSet_resolveFixed => 'Закрывать исправленные ветки';
+
+  @override
+  String get pullsSet_resolveFixedHelp => 'Когда agnts запушил исправление и ответил в ветке ревьюера, он помечает её решённой.';
+
+  @override
+  String get pullsSet_autoAddress => 'Учитывать запрос изменений';
+
+  @override
+  String get pullsSet_autoAddressHelp =>
+      'Когда ревьюер запрашивает изменения в пул-реквесте agnts, его нерешённые ветки сами возвращаются в тикет. Исправление всё равно ждёт вашего одобрения.';
 
   @override
   String queueHeader(String running, String slots) {
@@ -8169,6 +8515,9 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get reposPlaneHelp =>
       'Необязательно. Идентификатор проекта (WEB в WEB-123). Задачи этого проекта Plane с меткой agnts выполняются здесь.';
+
+  @override
+  String get reposSearch => 'Поиск по имени, стеку, проекту или группе';
 
   @override
   String get reviewTitle => 'Код-ревью agnts';

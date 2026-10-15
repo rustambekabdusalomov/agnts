@@ -65,6 +65,26 @@ const reconnect = useMutation({
   },
 })
 
+// Disconnect stops the tunnel and keeps the config; Connect starts it again.
+const connection = useMutation({
+  mutationFn: (v: { id: number; on: boolean }) =>
+    unwrap(api.POST(v.on ? '/networks/{networkId}/connect' : '/networks/{networkId}/disconnect', { params: { path: { networkId: v.id } } })),
+  onSuccess: (_, v) => {
+    void qc.invalidateQueries({ queryKey: ['networks'] })
+    testResult.value = null
+    ui.notify(v.on ? t('network.connecting') : t('network.disconnected'))
+  },
+  onError: (e) => {
+    ui.notify(e instanceof HttpError ? e.message : t('common.error'))
+  },
+})
+async function confirmDisconnect(n: PrivateNetwork) {
+  const label = t('network.disconnect')
+  if (await askConfirm({ title: label, message: t('network.disconnectConfirm', { name: n.name }), confirmLabel: label, danger: true })) {
+    connection.mutate({ id: n.id, on: false })
+  }
+}
+
 const testTarget = ref('')
 const testNetwork = ref<number | undefined>(undefined)
 const testResult = ref<NetworkTest | null>(null)
@@ -150,6 +170,16 @@ const showActivity = ref(false)
               @click="reconnect.mutate(n.id)"
             >
               {{ t('network.reconnect') }}
+            </button>
+            <button
+              v-if="list.data.value.available"
+              type="button"
+              class="btn btn-s"
+              :disabled="connection.isPending.value"
+              :title="n.enabled ? t('network.disconnectHelp') : t('network.connectHelp')"
+              @click="n.enabled ? confirmDisconnect(n) : connection.mutate({ id: n.id, on: true })"
+            >
+              {{ n.enabled ? t('network.disconnect') : t('network.connect') }}
             </button>
             <button type="button" class="btn btn-s" @click="openEditor(n)">{{ t('network.edit') }}</button>
             <button type="button" class="btn btn-s btn-d" :disabled="remove.isPending.value" @click="confirmRemove(n)">{{ t('network.remove') }}</button>

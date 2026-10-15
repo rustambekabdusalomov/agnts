@@ -2,7 +2,7 @@
 
 A self-hosted agent that takes Jira tickets and side-project tasks, codes them
 with Claude Code in isolated containers, and ships nothing without your
-approval. See [Implementation plan.md](Implementation%20plan.md).
+approval. See [Implementation plan.md](plans/Implementation%20plan.md).
 
 ## Layout
 
@@ -15,7 +15,7 @@ approval. See [Implementation plan.md](Implementation%20plan.md).
 | `shared/openapi/` | OpenAPI spec, the contract for both clients and the server |
 | `shared/i18n/` | EN/RU/UZ dictionaries (ICU MessageFormat) |
 | `deploy/` | Docker Compose stack: Caddy, agnts, PostgreSQL, nightly backups |
-| `cli/` | Rust CLI that installs and manages agnts on a server; see [CLI plan.md](CLI%20plan.md) |
+| `cli/` | Rust CLI that installs and manages agnts on a server; see [CLI plan.md](plans/CLI%20plan.md) |
 | `admin.html`, `mobile.html` | The original demos the UI is ported from |
 
 Server packages follow Clean Architecture: `domain` (types, no imports) ←
@@ -112,7 +112,7 @@ detected from its files (or set under Repositories → Toolchains), installed
 once per version into the shared `agnts-toolchains` volume and mounted
 read-only into runs; each repository keeps a package cache between runs. See
 [deploy/runner/README.md](deploy/runner/README.md) and
-[Languages plan.md](Languages%20plan.md).
+[Languages plan.md](plans/Languages%20plan.md).
 
 Then label a Jira issue `agnts`. The flow: agnts reads the code and either asks
 questions (answer them on the ticket page) or starts coding; it runs your
@@ -151,7 +151,7 @@ are reviewed again, and one merged or closed on the git host ends its
 review. Merging needs the GitHub token's Contents: Read and write permission.
 
 **CI watching.** agnts watches GitHub Actions and GitLab pipelines and
-turns red builds into work; see [CI plan.md](CI%20plan.md).
+turns red builds into work; see [CI plan.md](plans/CI%20plan.md).
 - *agnts's own pull requests:* when CI fails on a pull request agnts opened,
   the failed jobs' errors go back to its ticket as feedback and it codes a fix
   (Settings → CI → feedback rounds, 2 by default). The fix goes through checks

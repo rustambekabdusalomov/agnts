@@ -54,6 +54,11 @@ function stale(e: TicketEvent): string[] {
     case 'ci_failure':
       keys.push('ci')
       break
+    case 'pr_comment':
+    case 'threads_feedback':
+    case 'review_posted':
+      keys.push('pull') // a pull request's conversation on the git host changed
+      break
   }
   if (e.type === 'state_changed') keys.push('events-summary', 'repos', 'queue')
   // CI lists show their tickets' states; a merged fix moves its failure on.

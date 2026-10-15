@@ -3656,6 +3656,20 @@
   "networkActivityTarget": "Target",
   "networkActivitySource": "Ticket or source",
   "networkGone": "removed",
+  "networkDisconnect": "Disconnect",
+  "networkDisconnectHelp": "Stop the tunnel. Runs reach nothing through it until you connect again; the config is kept",
+  "networkDisconnectConfirm": "Disconnect {name}? Runs and trackers reached through it stop working until you connect it again. Its config is kept.",
+  "@networkDisconnectConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "networkDisconnected": "Disconnected",
+  "networkConnect": "Connect",
+  "networkConnectHelp": "Start the tunnel again with the saved config",
+  "networkConnecting": "Connecting: the tunnel starts within 15 seconds",
   "platformTitle": "Admin cabinet",
   "platformLede": "Every workspace, run and user on this server. Workspaces show metadata only: their tickets are their members'.",
   "platformCapacity": "Server",
@@ -3984,6 +3998,225 @@
   "previewNotify": "When preview screenshots are ready",
   "previewNotifyPhotos": "Send phone screenshots to Telegram",
   "previewNotifyPhotosHelp": "Up to four screenshots go with the Telegram message.",
+  "pullsTab": "Pull requests",
+  "pullsTitle": "Pull requests",
+  "pullsSub": "On the git host, most recently updated first. Open one to read and answer its comments.",
+  "pullsBack": "Back to the repository",
+  "pullsState_open": "Open",
+  "pullsState_merged": "Merged",
+  "pullsState_closed": "Closed",
+  "pullsState_all": "All",
+  "pullsNone": "No pull requests here.",
+  "pullsEnd": "That is all of them.",
+  "pullsUpdated": "updated {time}",
+  "@pullsUpdated": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "pullsDraft": "Draft",
+  "pullsOwnTicket": "agnts's change · {key}",
+  "@pullsOwnTicket": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "pullsReviewTicket": "Review · {key}",
+  "@pullsReviewTicket": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "pullsConversation": "Conversation",
+  "pullsFiles": "Files",
+  "pullsUnresolvedN": "{n, plural, one {{n} unresolved thread} other {{n} unresolved threads}}",
+  "@pullsUnresolvedN": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "pullsShowResolved": "Show resolved ({n})",
+  "@pullsShowResolved": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "pullsNoComments": "No comments yet.",
+  "pullsNoFiles": "The pull request changes no files.",
+  "pullsNoPatch": "No diff to show (a binary file, or too large for the git host to send).",
+  "pullsFilesError": "The changed files could not be read: {error}",
+  "@pullsFilesError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "pullsEarlierVersion": "Written on an earlier version of this file:",
+  "pullsThreadsN": "{n, plural, one {{n} thread} other {{n} threads}}",
+  "@pullsThreadsN": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "pullsCommentOnLine": "Comment on line {line}",
+  "@pullsCommentOnLine": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "pullsAddComment": "Add a comment",
+  "pullsComment": "Comment",
+  "pullsCommentLabel": "Comment",
+  "pullsPlaceholder": "Markdown. Ctrl+Enter posts.",
+  "pullsWrite": "Write",
+  "pullsPreview": "Preview",
+  "pullsReply": "Reply",
+  "pullsEdit": "Edit",
+  "pullsSave": "Save",
+  "pullsEdited": "edited",
+  "pullsDelete": "Delete",
+  "pullsDeleteTitle": "Delete the comment?",
+  "pullsDeleteConfirm": "It is deleted on the git host for everyone. This cannot be undone.",
+  "pullsDeleted": "Comment deleted",
+  "pullsResolve": "Resolve",
+  "pullsUnresolve": "Reopen",
+  "pullsResolved": "Resolved",
+  "pullsOutdated": "Outdated",
+  "pullsSent": "Sent to agnts",
+  "pullsAnswered": "Answered by agnts",
+  "pullsVerdict_APPROVED": "Approved",
+  "pullsVerdict_CHANGES_REQUESTED": "Changes requested",
+  "pullsVerdict_COMMENTED": "Commented",
+  "pullsVerdict_DISMISSED": "Dismissed",
+  "pullsPostsAs": "Posts as @{login} on {host}",
+  "@pullsPostsAs": {
+    "placeholders": {
+      "login": {
+        "type": "String"
+      },
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "pullsPostsAsToken": "Posts as the {host} token's user",
+  "@pullsPostsAsToken": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "pullsTicketTitle": "Comments on #{number} ({host})",
+  "@pullsTicketTitle": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "pullsTicketSubOwn": "Reviewers' comments on agnts's pull request. Answer here, or send them back to agnts.",
+  "pullsTicketSubReview": "The pull request's conversation on the git host.",
+  "pullsTicketSubIn": "In {repo}.",
+  "@pullsTicketSubIn": {
+    "placeholders": {
+      "repo": {
+        "type": "String"
+      }
+    }
+  },
+  "pullsOpenWithDiff": "Open with the diff",
+  "pullsAddressBtn": "{n, plural, one {Address {n} comment} other {Address {n} comments}}",
+  "@pullsAddressBtn": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "pullsAddressConfirm": "agnts goes back to {key} with {n, plural, one {this review thread} other {these {n} review threads}}: it changes the code or answers each. The fix waits for your approval as usual; once it is pushed, agnts replies in each thread.",
+  "@pullsAddressConfirm": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      },
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "pullsAddressed": "{n, plural, one {{n} thread went} other {{n} threads went}} back to agnts",
+  "@pullsAddressed": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "pullsAddressLater": "{n, plural, one {{n} new review comment} other {{n} new review comments}}: they can go back to agnts while the ticket waits for your review, or once it is done with its pull request open.",
+  "@pullsAddressLater": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "pullsPostTitle": "Post the review on #{number}",
+  "@pullsPostTitle": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "pullsPostSub": "One review on {host}, as the token's user. Findings on lines of the diff become comments there.",
+  "@pullsPostSub": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "pullsPostBtn": "{n, plural, =0 {Post} one {Post with {n} line comment} other {Post with {n} line comments}}",
+  "@pullsPostBtn": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "pullsPostSummary": "The summary (the verdict and every finding)",
+  "pullsPostFindings": "On their lines:",
+  "pullsSummaryOnly": "summary only: not a line of the diff",
+  "pullsRequestChanges": "Request changes",
+  "pullsNoRequestChanges": "GitLab has no request for changes here: the comments are posted, approvals stay as they are.",
+  "pullsSettingsTitle": "Comments on pull requests",
+  "pullsSet_attribution": "Say who wrote it",
+  "pullsSet_attributionHelp": "Comments written in agnts go out as the git host token's user; this adds \"via agnts · <you>\" under each.",
+  "pullsSet_learnFromComments": "Learn from your comments",
+  "pullsSet_learnFromCommentsHelp": "What you write on others' pull requests on the git host becomes notes on how you review.",
+  "pullsSet_resolveFixed": "Resolve fixed threads",
+  "pullsSet_resolveFixedHelp": "Once agnts pushed a fix and answered a reviewer's thread, it resolves the thread.",
+  "pullsSet_autoAddress": "Address requested changes",
+  "pullsSet_autoAddressHelp": "When a reviewer requests changes on agnts's pull request, its unresolved threads go back to the ticket by themselves. The fix still waits for your approval.",
   "queueHeader": "Running {running}/{slots}",
   "@queueHeader": {
     "placeholders": {
@@ -4614,6 +4847,7 @@
   },
   "reposPlaneProject": "Plane project",
   "reposPlaneHelp": "Optional. The project identifier (WEB in WEB-123). Work items from this Plane project with the agnts label run here.",
+  "reposSearch": "Search by name, stack, project or group",
   "reviewTitle": "agnts's code review",
   "reviewReportTitle": "agnts's review of the report",
   "reviewSub": "A second opinion while you review. It never blocks approval: you decide.",

@@ -252,6 +252,22 @@ func TestSaveAndIsolation(t *testing.T) {
 		t.Errorf("reconnect another workspace's network: %v", err)
 	}
 
+	// Disconnect: off and routing nothing, the config kept; connect turns it back on.
+	v, err = h.svc.SetConnected(h.a, id, false, domain.OriginWeb)
+	if err != nil || v.Enabled || v.Status != "disabled" || h.router.Match(h.wsA, "gitlab.corp.local", 443) {
+		t.Fatalf("disconnect: %+v %v", v, err)
+	}
+	if _, err := h.svc.Reconnect(h.a, id, domain.OriginWeb); err == nil {
+		t.Error("reconnected a disconnected network")
+	}
+	if _, err := h.svc.SetConnected(h.b, id, true, domain.OriginWeb); !errors.Is(err, domain.ErrNotFound) {
+		t.Errorf("connect another workspace's network: %v", err)
+	}
+	v, err = h.svc.SetConnected(h.a, id, true, domain.OriginWeb)
+	if err != nil || !v.Enabled || v.Name != "Corp" || !v.TokenSet || !h.router.Match(h.wsA, "gitlab.corp.local", 443) {
+		t.Fatalf("connect: %+v %v", v, err)
+	}
+
 	if err := h.svc.Delete(h.a, id, domain.OriginWeb); err != nil {
 		t.Fatal(err)
 	}

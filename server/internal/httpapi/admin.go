@@ -447,7 +447,9 @@ func toSettings(v domain.Settings) gen.Settings {
 		MaxTicketRepos: &maxRepos,
 		Guard:          &guard, Stalls: &stalls, DeepReview: &deep, ProveFixes: &prove, LearnFromRuns: &learnRuns, SecondOpinion: &second, MethodSkills: &methods,
 		PullReviews: &pulls,
-		Ci:          &ci,
+		PrComments: &gen.PRCommentSettings{Attribution: v.PRComments.Attribution, LearnFromComments: v.PRComments.LearnFromComments,
+			ResolveFixed: v.PRComments.ResolveFixed, AutoAddress: v.PRComments.AutoAddress},
+		Ci: &ci,
 		Models: gen.StageModels{Analyze: v.Models.Analyze, Coding: v.Models.Coding,
 			Retry: v.Models.Retry, Helper: v.Models.Helper, Learn: &learn, Review: &review, Preview: &preview},
 		AutoPreview: &autoPreview, VisualCheck: &visualCheck, EgressAllow: &egress, AutoBrief: &autoBrief, SelfReview: &selfReview, Reflect: &reflect,
@@ -508,7 +510,7 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 		AutoBrief: cur.AutoBrief, SelfReview: cur.SelfReview, Reflect: cur.Reflect,
 		MaxTurns: req.MaxTurns, TimeoutMin: req.TimeoutMin, Allow: req.Allow, Deny: req.Deny,
 		AskFirst: req.AskFirst, AutoResume: req.AutoResume, PauseAbove: req.PauseAbove, Parallel: cur.Parallel, AutoLearn: cur.AutoLearn,
-		AutoReview: cur.AutoReview, SuggestFollowUps: cur.SuggestFollowUps, PullReviews: cur.PullReviews, CI: cur.CI,
+		AutoReview: cur.AutoReview, SuggestFollowUps: cur.SuggestFollowUps, PullReviews: cur.PullReviews, PRComments: cur.PRComments, CI: cur.CI,
 		Guard: cur.Guard, Stalls: cur.Stalls, DeepReview: cur.DeepReview, ProveFixes: cur.ProveFixes, LearnFromRuns: cur.LearnFromRuns, MethodSkills: cur.MethodSkills,
 		SecondOpinion: cur.SecondOpinion, MaxTicketRepos: cur.MaxTicketRepos,
 		Git: domain.GitSettings{AuthorName: req.Git.AuthorName, AuthorEmail: req.Git.AuthorEmail, CoAuthor: req.Git.CoAuthor,
@@ -580,6 +582,10 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 	if p := req.PullReviews; p != nil {
 		v.PullReviews = domain.PullReviewSettings{Enabled: p.Enabled, ReviewRequested: p.ReviewRequested, SkipDrafts: p.SkipDrafts,
 			Rereview: p.Rereview, MergeMethod: string(p.MergeMethod)}
+	}
+	if p := req.PrComments; p != nil {
+		v.PRComments = domain.PRCommentSettings{Attribution: p.Attribution, LearnFromComments: p.LearnFromComments,
+			ResolveFixed: p.ResolveFixed, AutoAddress: p.AutoAddress}
 	}
 	if g := req.Guard; g != nil {
 		v.Guard = domain.GuardSettings{Profile: string(g.Profile), FactCheck: g.FactCheck, Disabled: []string{}}

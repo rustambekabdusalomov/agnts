@@ -17,6 +17,7 @@ import 'diff_lines.dart';
 import 'follow_ups.dart';
 import 'kinds.dart';
 import 'preview_shots.dart';
+import 'pull_comments.dart';
 import 'relations.dart';
 import 'spend.dart';
 import 'ticket_repos.dart';
@@ -772,6 +773,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           hint: _changed(l, d.result!),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: _resultBody(context, d.result!)),
         ),
+      for (final p in ticketPulls(t)) PullCommentsFold(ticket: t, repoId: p.repoId, number: p.number, url: p.url, repoName: p.repoName),
       if (RelationsFold.shows(d)) RelationsFold(d),
       if (d.followUps != null) FollowUpsFold(d),
       SpendFold(spend: t.spend, stages: d.spendByStage ?? const [], report: isReportKind(t.kind)),

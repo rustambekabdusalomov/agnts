@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"text/template"
@@ -596,7 +597,8 @@ func reviewerMarkdown(login string, p domain.ReviewerProfile, notes []domain.Rev
 			if n.PullTitle != "" {
 				where = strings.TrimSpace(where + ", \"" + n.PullTitle + "\"")
 			}
-			did := map[string]string{domain.NoteRereview: "asked for another review", domain.NoteDismissed: "dismissed the review", domain.NoteManual: "wrote"}[n.Kind]
+			did := map[string]string{domain.NoteRereview: "asked for another review", domain.NoteDismissed: "dismissed the review", domain.NoteManual: "wrote",
+				domain.NoteHostComment: "commented on the pull request"}[n.Kind]
 			fmt.Fprintf(&b, "\n- %s (%s, %s):\n\n%s\n", did, strings.Trim(where, ", "), n.CreatedAt.Format("2006-01-02"), indentLines(n.Note))
 		}
 	}
@@ -732,48 +734,90 @@ var ErrHost = errors.New("the git host refused")
 // limits (GitHub: 65536 characters).
 const maxPostedReview = 60000
 
-// PostPullReview posts agnts's latest review of a pull request on it as a
-// comment, as the git host token's user. It is posted once per reviewed
+// PostReviewOptions says how a review goes on the pull request.
+type PostReviewOptions struct {
+	// Summary posts the review's summary (all findings, the verdict).
+	Summary bool
+	// Findings are the indexes of the findings to post on their lines;
+	// nil posts every finding whose line is in the diff. A finding whose
+	// line is not in the diff stays in the summary only.
+	Findings []int
+	// RequestChanges posts the review as a request for changes, where the
+	// git host has one (GitHub).
+	RequestChanges bool
+}
+
+// PostedReview says what posting a review did.
+type PostedReview struct {
+	Summary  string // "posted", "edited" or ""
+	Inline   int    // findings posted on their lines
+	Still    int    // findings agnts had posted that are still there
+	Resolved int    // findings agnts had posted that are gone
+}
+
+// PostPullReview posts agnts's latest review of a pull request on it, as
+// the git host token's user: the summary, and the chosen findings on their
+// lines, in one review. Posting the review of new commits edits the
+// summary agnts posted before, answers its findings that are still there
+// and resolves the ones that are gone. It is posted once per reviewed
 // commit: posting again needs a new review.
-func (o *Orchestrator) PostPullReview(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error) {
+func (o *Orchestrator) PostPullReview(ctx context.Context, key string, opt PostReviewOptions, origin domain.Origin) (domain.Ticket, PostedReview, error) {
+	var did PostedReview
 	rh, err := o.pullReviewsReady()
 	if err != nil {
-		return domain.Ticket{}, err
+		return domain.Ticket{}, did, err
 	}
 	t, err := o.store.TicketByKey(ctx, key)
 	if err != nil {
-		return t, err
+		return t, did, err
 	}
 	if t.Kind != domain.KindReview || t.Pull == nil || t.PRNumber == nil {
-		return t, invalid("%s is not a pull request review", key)
+		return t, did, invalid("%s is not a pull request review", key)
 	}
 	res, err := o.store.LatestResult(ctx, t.ID, domain.StageCode)
 	if errors.Is(err, domain.ErrNotFound) {
-		return t, invalid("agnts has not reviewed #%d yet", *t.PRNumber)
+		return t, did, invalid("agnts has not reviewed #%d yet", *t.PRNumber)
 	}
 	if err != nil {
-		return t, err
+		return t, did, err
 	}
 	var rv domain.Review
 	if json.Unmarshal(res.Summary, &rv) != nil || rv.Summary == "" {
-		return t, invalid("agnts has not reviewed #%d yet", *t.PRNumber)
+		return t, did, invalid("agnts has not reviewed #%d yet", *t.PRNumber)
 	}
 	if rv.HeadSHA != "" && t.Pull.PostedSHA == rv.HeadSHA {
-		return t, invalid("this review of #%d is already on the pull request", *t.PRNumber)
+		return t, did, invalid("this review of #%d is already on the pull request", *t.PRNumber)
+	}
+	for _, i := range opt.Findings {
+		if i < 0 || i >= len(rv.Findings) {
+			return t, did, invalid("the review has no finding %d", i)
+		}
 	}
 	repo, err := o.repoFor(ctx, t)
 	if err != nil {
-		return t, err
+		return t, did, err
 	}
-	body := postedReview(*t.Pull, rv)
-	if err := rh.CommentPR(ctx, repo, *t.PRNumber, body); err != nil {
-		return t, fmt.Errorf("%w: post the review on #%d: %w", ErrHost, *t.PRNumber, err)
+	conv, inline := o.host.(Conversation)
+	if !inline || o.prposts == nil {
+		if !opt.Summary {
+			return t, did, invalid("this server can post the review only as one comment")
+		}
+		if err := rh.CommentPR(ctx, repo, *t.PRNumber, postedReview(*t.Pull, rv)); err != nil {
+			return t, did, fmt.Errorf("%w: post the review on #%d: %w", ErrHost, *t.PRNumber, err)
+		}
+		did.Summary = "posted"
+	} else if did, err = o.postReviewInline(ctx, conv, repo, t, rv, opt); err != nil {
+		return t, did, err
 	}
 	now := time.Now()
-	return o.store.UpdateTicket(ctx, key, &domain.Event{
-		TicketKey: key, Type: domain.EventReviewPosted, Origin: origin,
-		Message: fmt.Sprintf("review posted on #%d (%s)", *t.PRNumber, shortSHA(rv.HeadSHA)),
-		Data:    map[string]any{"url": t.PRURL, "sha": rv.HeadSHA, "findings": len(rv.Findings)},
+	msg := fmt.Sprintf("review posted on #%d (%s)", *t.PRNumber, shortSHA(rv.HeadSHA))
+	if did.Inline > 0 {
+		msg += fmt.Sprintf(", %d %s on the lines", did.Inline, plural(did.Inline, "finding", "findings"))
+	}
+	t, err = o.store.UpdateTicket(ctx, key, &domain.Event{
+		TicketKey: key, Type: domain.EventReviewPosted, Origin: origin, Message: msg,
+		Data: map[string]any{"url": t.PRURL, "sha": rv.HeadSHA, "findings": len(rv.Findings), "inline": did.Inline,
+			"still": did.Still, "resolved": did.Resolved, "summary": did.Summary, "repoId": repo.ID, "number": *t.PRNumber},
 	}, func(x *domain.Ticket) {
 		if x.Pull != nil {
 			p := *x.Pull
@@ -781,6 +825,174 @@ func (o *Orchestrator) PostPullReview(ctx context.Context, key string, origin do
 			x.Pull = &p
 		}
 	})
+	return t, did, err
+}
+
+// postReviewInline posts a review through the conversation API and
+// reconciles it with what agnts posted on the pull request before.
+func (o *Orchestrator) postReviewInline(ctx context.Context, conv Conversation, repo domain.Repository, t domain.Ticket, rv domain.Review, opt PostReviewOptions) (PostedReview, error) {
+	var did PostedReview
+	n := *t.PRNumber
+	sha := rv.HeadSHA
+	posts, err := o.prposts.PRPosts(ctx, repo.ID, n)
+	if err != nil {
+		return did, err
+	}
+	var summary *domain.PRPost
+	earlier := map[string]domain.PRPost{} // the newest post of each finding
+	for _, p := range posts {
+		switch p.Kind {
+		case domain.PostSummary:
+			summary = &p
+		case domain.PostFinding:
+			earlier[p.FindingKey] = p
+		}
+	}
+	lines := map[string]map[int]bool{}
+	if files, err := conv.PullFiles(ctx, repo, n); err == nil {
+		lines = commentableLines(files)
+	} else {
+		o.log.Warn("pull request files for inline comments", "ticket", t.Key, "err", err)
+	}
+	chosen := opt.Findings
+	if chosen == nil {
+		chosen = make([]int, len(rv.Findings))
+		for i := range chosen {
+			chosen[i] = i
+		}
+	}
+	current := map[string]bool{}
+	for _, f := range rv.Findings {
+		current[domain.FindingKey(f)] = true
+	}
+	var cs []domain.NewPRComment
+	var keys []string
+	for _, i := range chosen {
+		f := rv.Findings[i]
+		k := domain.FindingKey(f)
+		if p, ok := earlier[k]; ok && !p.Resolved {
+			// Posted on an earlier commit and still there: say so in its
+			// thread rather than posting it again.
+			if p.HeadSHA != sha && p.ThreadID != "" {
+				if _, err := conv.Reply(ctx, repo, n, p.ThreadID, fmt.Sprintf("Still present at %s.\n\n<sub>agnts review</sub>%s", shortSHA(sha), agntsMark)); err == nil {
+					did.Still++
+					_ = o.prposts.UpdatePRPost(ctx, p.ID, sha, false)
+				}
+			}
+			continue
+		}
+		if f.File != "" && f.Line > 0 && lines[f.File][f.Line] {
+			cs = append(cs, domain.NewPRComment{Body: findingComment(f, sha), Path: f.File, Line: f.Line, HeadSHA: sha})
+			keys = append(keys, k)
+		}
+	}
+	for k, p := range earlier {
+		if p.Resolved || current[k] || p.HeadSHA == sha || p.ThreadID == "" {
+			continue
+		}
+		// agnts's finding is gone from the new review: answer and resolve.
+		if _, err := conv.Reply(ctx, repo, n, p.ThreadID, fmt.Sprintf("No longer found at %s.\n\n<sub>agnts review</sub>%s", shortSHA(sha), agntsMark)); err != nil {
+			continue
+		}
+		if err := conv.ResolveThread(ctx, repo, n, p.ThreadID, true); err != nil {
+			o.log.Warn("resolve a finding that is gone", "ticket", t.Key, "err", err)
+		}
+		did.Resolved++
+		_ = o.prposts.UpdatePRPost(ctx, p.ID, sha, true)
+	}
+	body := ""
+	if opt.Summary {
+		body = postedReview(*t.Pull, rv) + "\n" + agntsMark
+		if summary != nil {
+			if _, err := conv.EditComment(ctx, repo, n, summary.CommentID, body); err == nil {
+				did.Summary, body = "edited", ""
+				_ = o.prposts.UpdatePRPost(ctx, summary.ID, sha, false)
+			}
+		}
+	}
+	filler := false // the text is only there to carry the verdict
+	if body == "" && len(cs) > 0 && opt.RequestChanges {
+		body, filler = "agnts asks for changes: see the comments on the lines.\n"+agntsMark, true // GitHub wants a text with a verdict
+	}
+	if body != "" || len(cs) > 0 {
+		sumID, threads, err := conv.PostReview(ctx, repo, n, sha, body, cs, opt.RequestChanges)
+		if err != nil {
+			return did, hostErr(fmt.Sprintf("post the review on #%d", n), err)
+		}
+		if sumID != "" && !filler {
+			did.Summary = "posted"
+			o.recordPost(ctx, domain.PRPost{RepoID: repo.ID, Number: n, TicketID: &t.ID, CommentID: sumID, ThreadID: sumID,
+				Kind: domain.PostSummary, HeadSHA: sha})
+		}
+		did.Inline = len(cs)
+		for i, th := range threads {
+			if i >= len(keys) || len(th.Comments) == 0 {
+				continue
+			}
+			o.recordPost(ctx, domain.PRPost{RepoID: repo.ID, Number: n, TicketID: &t.ID, CommentID: th.Comments[0].ID, ThreadID: th.ID,
+				Kind: domain.PostFinding, FindingKey: keys[i], HeadSHA: sha})
+		}
+	}
+	if did == (PostedReview{}) {
+		return did, invalid("nothing to post: no summary, and no chosen finding is on a line of the diff")
+	}
+	return did, nil
+}
+
+// findingComment is a finding as an inline comment.
+func findingComment(f domain.Finding, sha string) string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "**[%s] %s**", f.Severity, f.Title)
+	if f.Category != "" {
+		fmt.Fprintf(&b, " · _%s_", f.Category)
+	}
+	b.WriteString("\n")
+	if f.Detail != "" {
+		fmt.Fprintf(&b, "\n%s\n", f.Detail)
+	}
+	if f.Suggestion != "" {
+		fmt.Fprintf(&b, "\n**Suggestion:** %s\n", f.Suggestion)
+	}
+	fmt.Fprintf(&b, "\n<sub>agnts review at %s · advice, not a decision</sub>%s", shortSHA(sha), agntsMark)
+	return truncate(b.String(), domain.PRCommentMax)
+}
+
+// commentableLines returns, per file, the lines of the new version a
+// comment can go on: the added and unchanged lines of the diff's hunks.
+func commentableLines(files []domain.FileChange) map[string]map[int]bool {
+	out := map[string]map[int]bool{}
+	for _, f := range files {
+		ls := map[int]bool{}
+		n, in := 0, false
+		for _, l := range strings.Split(f.Diff, "\n") {
+			if strings.HasPrefix(l, "@@") {
+				_, after, ok := strings.Cut(l, "+")
+				if !ok {
+					in = false
+					continue
+				}
+				num, _, _ := strings.Cut(after, ",")
+				num, _, _ = strings.Cut(num, " ")
+				if v, err := strconv.Atoi(num); err == nil {
+					n, in = v, true
+				}
+				continue
+			}
+			if !in || l == "" {
+				continue
+			}
+			switch l[0] {
+			case '+':
+				ls[n] = true
+				n++
+			case ' ':
+				ls[n] = true
+				n++
+			}
+		}
+		out[f.Path] = ls
+	}
+	return out
 }
 
 // postedReview is the comment a review becomes on the pull request.

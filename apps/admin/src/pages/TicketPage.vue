@@ -29,6 +29,8 @@ import TicketRepos from '../components/ticket/TicketRepos.vue'
 import { filePath, filesByRepo, isMultiRepo, ticketRepos } from '../components/repos/repoSet'
 import ProgressTrack from '../components/ticket/ProgressTrack.vue'
 import PullCard from '../components/ticket/PullCard.vue'
+import PostReviewDialog from '../components/ticket/PostReviewDialog.vue'
+import TicketPullComments from '../components/ticket/TicketPullComments.vue'
 import CiCard from '../components/ticket/CiCard.vue'
 import { useRepoMembers } from '../components/repo/useRepoMembers'
 import RunLog from '../components/ticket/RunLog.vue'
@@ -299,21 +301,22 @@ async function confirmRestart() {
   if (await askConfirm({ title: label, message, confirmLabel: label, danger: true })) version.mutate('restart')
 }
 
-// Posting agnts's review on the pull request, once per reviewed commit.
+// Posting agnts's review on the pull request (the summary and findings on
+// their lines), once per reviewed commit.
 const posted = computed(() => !!tk.value?.pull?.postedSha && tk.value.pull.postedSha === tk.value.headSha)
 const canPost = computed(() => pull.value && !!d.value?.review?.summary && !!tk.value?.headSha && !posted.value && tk.value?.state !== 'pushing')
-const postReview = useMutation({
-  mutationFn: () => unwrap(api.POST('/tickets/{key}/post-review', { params: { path: { key: key.value } } })),
-  onSuccess: () => {
-    ui.notify(t('reviews.postedToast', { host: host.value }))
-    void qc.invalidateQueries({ queryKey: ['ticket', key.value] })
-  },
-  onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
+const postOpen = ref(false)
+
+// The pull requests whose conversation the page shows: the one a review
+// reviews, or the open ones agnts opened.
+const prThreads = computed(() => {
+  const k = tk.value
+  if (!k) return []
+  if (pull.value) return k.repoId && k.pull?.number ? [{ repoId: k.repoId, number: k.pull.number, url: k.pull.url }] : []
+  const rs = (k.repos ?? []).filter((r) => r.prNumber && !r.closedAt)
+  if (!rs.length && k.repoId && k.prNumber) return [{ repoId: k.repoId, number: k.prNumber, url: k.prUrl }]
+  return rs.map((r) => ({ repoId: r.repoId, number: r.prNumber ?? 0, url: r.prUrl, repoName: rs.length > 1 ? r.repoName : undefined }))
 })
-async function confirmPost() {
-  const label = t('reviews.postBtn', { host: host.value })
-  if (await askConfirm({ title: label, message: t('reviews.postConfirm', { number: tk.value?.pull?.number ?? '', host: host.value }), confirmLabel: label })) postReview.mutate()
-}
 
 const ACTION_LABEL = { approve: 'ticket.approve', reject: 'ticket.reject', stop: 'ticket.stopRun' } as const
 async function confirmThen(msg: string, a: keyof typeof ACTION_LABEL) {
@@ -562,7 +565,16 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             <PullCard v-if="pull" :ticket="tk" />
             <div v-if="pull && (canPost || posted)" class="sec pr-post">
               <p v-if="posted" class="hint">{{ t('reviews.posted', { host, when: tk.pull?.postedAt ? new Date(tk.pull.postedAt).toLocaleString() : '' }) }}</p>
-              <button v-else class="btn btn-s" type="button" :disabled="postReview.isPending.value" @click="confirmPost">{{ t('reviews.postBtn', { host }) }}</button>
+              <button v-else class="btn btn-s" type="button" @click="postOpen = true">{{ t('reviews.postBtn', { host }) }}</button>
+              <PostReviewDialog
+                v-if="d.review"
+                v-model="postOpen"
+                :ticket-key="key"
+                :number="tk.pull?.number ?? 0"
+                :host="host"
+                :findings="d.review.findings"
+                :files="result?.files ?? []"
+              />
             </div>
             <!-- a pull request review: queued, fetching, reviewing, ready, merging, merged, dismissed -->
             <template v-if="pull && ['new', 'analyzing', 'coding'].includes(tk.state)">
@@ -962,6 +974,8 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
 
           <RunLog v-else-if="activeTab === 'log'" :events="events" :ticket-key="key" />
         </template>
+
+        <TicketPullComments v-for="p in prThreads" :key="`${p.repoId}-${p.number}`" :ticket="tk" v-bind="p" />
       </div>
 
       <aside class="cfg-side tk-side">

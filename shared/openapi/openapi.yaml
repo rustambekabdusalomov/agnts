@@ -453,14 +453,45 @@ paths:
       - $ref: '#/components/parameters/TicketKey'
     post:
       operationId: postPullReview
-      summary: Post agnts's latest review of a pull request on it as a comment (once per reviewed commit)
+      summary: "Post agnts's latest review of a pull request on it (once per reviewed commit): the summary, and the chosen findings on their lines in one review. Posting the review of new commits edits agnts's earlier summary, answers its findings that are still there and resolves the ones that are gone"
       tags: [reviews]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PostReviewInput' }
       responses:
         '200': { $ref: '#/components/responses/TicketOK' }
         '400': { $ref: '#/components/responses/BadRequest' }
         '502': { $ref: '#/components/responses/BadGateway' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/address-comments:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: addressPullComments
+      summary: "Send reviewers' threads on the ticket's open pull requests back to coding: the given ones, or every unresolved thread by someone else not sent yet. After the fix is approved and pushed, agnts answers in each thread"
+      tags: [tickets]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                threadIds:
+                  type: array
+                  maxItems: 50
+                  items: { type: string, maxLength: 300 }
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '502': { $ref: '#/components/responses/BadGateway' }
 
   /tickets/{key}/preview:
     parameters:
@@ -1843,6 +1874,44 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /networks/{networkId}/disconnect:
+    parameters:
+      - $ref: '#/components/parameters/NetworkID'
+    post:
+      operationId: disconnectPrivateNetwork
+      x-role: owner
+      summary: "Disconnect a network: its tunnel stops and it routes nothing until it is connected again. The config is kept"
+      tags: [network]
+      responses:
+        '200':
+          description: The network
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PrivateNetwork' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /networks/{networkId}/connect:
+    parameters:
+      - $ref: '#/components/parameters/NetworkID'
+    post:
+      operationId: connectPrivateNetwork
+      x-role: owner
+      summary: Connect a disconnected network again, with its saved config
+      tags: [network]
+      responses:
+        '200':
+          description: The network
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PrivateNetwork' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /networks/{networkId}/token:
     parameters:
       - $ref: '#/components/parameters/NetworkID'
@@ -2614,6 +2683,192 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
+
+  /repos/{id}/pulls:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    get:
+      operationId: listRepoPulls
+      summary: The repository's pull requests (GitLab merge requests), most recently updated first, 30 per page; a shorter page is the last
+      tags: [pulls]
+      parameters:
+        - name: state
+          in: query
+          required: false
+          schema: { type: string, enum: [open, closed, merged, all], default: open }
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 1000, default: 1 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/PullItem' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+
+  /repos/{id}/pulls/{number}:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+      - $ref: '#/components/parameters/PullNumber'
+    get:
+      operationId: getRepoPull
+      summary: A pull request as it stands on the git host, with the files it changes
+      tags: [pulls]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PullDetail' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+
+  /repos/{id}/pulls/{number}/threads:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+      - $ref: '#/components/parameters/PullNumber'
+    get:
+      operationId: listPullThreads
+      summary: "A pull request's conversation: general comments, review summaries and threads on diff lines, oldest first"
+      tags: [pulls]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/PullThread' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+
+  /repos/{id}/pulls/{number}/comments:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+      - $ref: '#/components/parameters/PullNumber'
+    post:
+      operationId: addPullComment
+      summary: Comment on a pull request, or on a line of its diff, as the git host token's user
+      tags: [pulls]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NewPullComment' }
+      responses:
+        '200':
+          description: The new thread
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PullThread' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+    patch:
+      operationId: editPullComment
+      summary: Replace the text of a comment (your own, on the git host)
+      tags: [pulls]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [commentId, body]
+              properties:
+                commentId: { type: string, maxLength: 300 }
+                body: { type: string, maxLength: 60000 }
+      responses:
+        '200':
+          description: The comment after the edit
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PullComment' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+    delete:
+      operationId: deletePullComment
+      summary: Delete a comment (your own, on the git host)
+      tags: [pulls]
+      parameters:
+        - name: commentId
+          in: query
+          required: true
+          schema: { type: string, maxLength: 300 }
+      responses:
+        '204': { description: Deleted }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+
+  /repos/{id}/pulls/{number}/replies:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+      - $ref: '#/components/parameters/PullNumber'
+    post:
+      operationId: replyPullThread
+      summary: Answer in a thread of a pull request
+      tags: [pulls]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [threadId, body]
+              properties:
+                threadId: { type: string, maxLength: 300 }
+                body: { type: string, maxLength: 60000 }
+      responses:
+        '200':
+          description: The new comment
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PullComment' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+
+  /repos/{id}/pulls/{number}/resolve:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+      - $ref: '#/components/parameters/PullNumber'
+    post:
+      operationId: resolvePullThread
+      summary: Resolve or reopen a thread on a diff line
+      tags: [pulls]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [threadId, resolved]
+              properties:
+                threadId: { type: string, maxLength: 300 }
+                resolved: { type: boolean }
+      responses:
+        '204': { description: Done }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '502': { $ref: '#/components/responses/BadGateway' }
 
   /auth/signup:
     get:
@@ -3891,6 +4146,11 @@ components:
       in: path
       required: true
       schema: { type: integer, format: int64 }
+    PullNumber:
+      name: number
+      in: path
+      required: true
+      schema: { type: integer, minimum: 1 }
     TicketKey:
       name: key
       in: path
@@ -5393,6 +5653,7 @@ components:
         suggestFollowUps: { type: boolean, description: 'Runs suggest follow-up tickets (off by default; a ticket can override it)' }
         maxTicketRepos: { type: integer, minimum: 1, maximum: 20, description: 'How many repositories one ticket, and one repository group, may have (6 by default)' }
         pullReviews: { $ref: '#/components/schemas/PullReviewSettings' }
+        prComments: { $ref: '#/components/schemas/PRCommentSettings' }
         ci: { $ref: '#/components/schemas/CISettings' }
         guard: { $ref: '#/components/schemas/GuardSettings' }
         stalls:
@@ -5795,6 +6056,111 @@ components:
         postedSha: { type: string, description: "The reviewed commit whose review agnts last posted on the pull request" }
         postedAt: { type: string, format: date-time, description: When agnts last posted its review on the pull request }
 
+    PRCommentSettings:
+      type: object
+      description: How agnts takes part in pull request conversations
+      required: [attribution, learnFromComments, resolveFixed, autoAddress]
+      properties:
+        attribution: { type: boolean, description: 'Add "via agnts · <person>" to comments written through agnts (they all go out as the git host token''s user)' }
+        learnFromComments: { type: boolean, description: "Keep the comments you write on others' pull requests on the git host as notes on how you review" }
+        resolveFixed: { type: boolean, description: "Resolve a reviewer's thread once agnts pushed the fix and answered it" }
+        autoAddress: { type: boolean, description: "Send the unresolved threads back to the ticket when a reviewer requests changes on agnts's pull request (the fix still waits for your approval)" }
+
+    PullItem:
+      type: object
+      description: A pull request (GitLab merge request) in a repository's list
+      required: [number, url, title, author, headRef, headSha, baseRef, draft, state, why, updatedAt, own]
+      properties:
+        number: { type: integer, description: 'The pull request number (GitLab: the IID)' }
+        url: { type: string }
+        title: { type: string }
+        author: { type: string }
+        headRef: { type: string }
+        headSha: { type: string }
+        baseRef: { type: string }
+        draft: { type: boolean }
+        state: { type: string, enum: [open, closed, merged] }
+        why: { type: string, description: 'Why it waits for the token''s user: assigned, review_requested, or empty' }
+        updatedAt: { type: string, format: date-time }
+        ticketKey: { type: string, description: "agnts's ticket for it: its own change, or its review" }
+        own: { type: boolean, description: "It is agnts's own change" }
+
+    PullDetail:
+      type: object
+      required: [repoId, repoName, provider, pull, files, own]
+      properties:
+        repoId: { type: integer, format: int64 }
+        repoName: { type: string }
+        provider: { type: string, enum: [github, gitlab] }
+        pull: { $ref: '#/components/schemas/PullItem' }
+        body: { type: string, description: 'The description, Markdown' }
+        login: { type: string, description: 'The git host token''s user: who comments made here appear from' }
+        files:
+          type: array
+          items: { $ref: '#/components/schemas/FileChange' }
+        filesError: { type: string, description: Why the files could not be read }
+        ticketKey: { type: string }
+        own: { type: boolean }
+
+    PullComment:
+      type: object
+      required: [id, author, body, createdAt, updatedAt, mine, system, agnts]
+      properties:
+        id: { type: string, description: 'Opaque: pass it back to edit or delete' }
+        author: { type: string }
+        avatarUrl: { type: string }
+        body: { type: string, description: 'Markdown, as the git host stores it' }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        url: { type: string }
+        mine: { type: boolean, description: "Written by the git host token's user, who may edit and delete it" }
+        system: { type: boolean, description: 'A note the git host wrote ("added 2 commits")' }
+        agnts: { type: boolean, description: agnts posted it }
+
+    PullThread:
+      type: object
+      required: [id, kind, outdated, resolvable, resolved, comments]
+      properties:
+        id: { type: string, description: 'Opaque: pass it back to reply or resolve' }
+        kind: { type: string, enum: [general, inline, review] }
+        path: { type: string }
+        line: { type: integer, description: Line in the new file }
+        oldLine: { type: integer, description: 'Line in the old file, for a removed line' }
+        startLine: { type: integer, description: First line of a range }
+        diffHunk: { type: string }
+        commitSha: { type: string }
+        outdated: { type: boolean, description: The line changed since the thread started }
+        resolvable: { type: boolean }
+        resolved: { type: boolean }
+        reviewState: { type: string, description: 'A review''s verdict: APPROVED, CHANGES_REQUESTED or COMMENTED' }
+        sent: { type: boolean, description: "On agnts's own pull request: sent back to the ticket as feedback, with no newer comment since" }
+        replied: { type: boolean, description: agnts answered it after pushing the fix }
+        comments:
+          type: array
+          items: { $ref: '#/components/schemas/PullComment' }
+
+    NewPullComment:
+      type: object
+      required: [body]
+      properties:
+        body: { type: string, maxLength: 60000 }
+        path: { type: string, maxLength: 1000, description: 'The file, for a comment on a line' }
+        line: { type: integer, minimum: 0, description: Line in the new file (an added or unchanged line) }
+        oldLine: { type: integer, minimum: 0, description: 'Line in the old file: a removed line, or with line an unchanged one' }
+        startLine: { type: integer, minimum: 0, description: 'First line of a range (GitHub)' }
+        headSha: { type: string, maxLength: 64, description: The commit the line is in; the newest when empty }
+
+    PostReviewInput:
+      type: object
+      properties:
+        summary: { type: boolean, default: true, description: Post the summary (verdict and every finding) }
+        findings:
+          type: array
+          maxItems: 200
+          description: Indexes of the findings to post on their lines; left out, every finding on a line of the diff
+          items: { type: integer, minimum: 0 }
+        requestChanges: { type: boolean, description: 'Post it as a request for changes (GitHub)' }
+
     ReviewSync:
       type: object
       description: What a sync of the pull requests waiting for you found
@@ -5824,7 +6190,7 @@ components:
         repoName: { type: string }
         ticketKey: { type: string }
         pullTitle: { type: string }
-        kind: { type: string, enum: [rereview, dismissed, manual] }
+        kind: { type: string, enum: [rereview, dismissed, manual, host_comment] }
         note: { type: string }
         createdAt: { type: string, format: date-time }
 

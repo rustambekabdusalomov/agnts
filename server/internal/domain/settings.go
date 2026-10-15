@@ -141,6 +141,8 @@ type Settings struct {
 	SuggestFollowUps bool `json:"suggestFollowUps"`
 	// PullReviews: agnts reviews the pull requests waiting for you.
 	PullReviews PullReviewSettings `json:"pullReviews"`
+	// PRComments: how agnts takes part in pull request conversations.
+	PRComments PRCommentSettings `json:"prComments"`
 	// CI: agnts watches CI pipelines and fixes what fails.
 	CI CISettings `json:"ci"`
 	// Guard: how strict agnts-guard, the hooks inside every run, is.
@@ -193,6 +195,7 @@ func DefaultSettings() Settings {
 		Reflect:       true,
 		EgressAllow:   []string{},
 		PullReviews:   DefaultPullReviewSettings(),
+		PRComments:    DefaultPRCommentSettings(),
 		CI:            DefaultCISettings(),
 		Guard:         GuardSettings{Profile: GuardStandard, Disabled: []string{}, FactCheck: 50},
 		Stalls:        StallsLog,

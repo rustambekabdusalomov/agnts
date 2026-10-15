@@ -76,6 +76,112 @@ func ciRun(ctx context.Context, sink HookSink, run domain.CIRun, log *slog.Logge
 	}
 }
 
+// CommentSink hears about changes to pull request conversations. A
+// HookSink may implement it.
+type CommentSink interface {
+	PRCommentChanged(ctx context.Context, ev domain.PRCommentEvent) error
+}
+
+// prComment hands a conversation change to the sink when it takes them.
+// Errors are logged: the host would only redeliver the same change.
+func prComment(ctx context.Context, sink HookSink, ev domain.PRCommentEvent, log *slog.Logger) {
+	cs, ok := sink.(CommentSink)
+	if !ok || ev.Number <= 0 || ev.Repo == "" {
+		return
+	}
+	if err := cs.PRCommentChanged(ctx, ev); err != nil {
+		log.Error("pull request comment", "repo", ev.Repo, "number", ev.Number, "err", err)
+	}
+}
+
+// githubComment reads the comment events of GitHub's pull requests:
+// issue_comment (on a pull request), pull_request_review,
+// pull_request_review_comment and pull_request_review_thread.
+func githubComment(event string, body []byte) (domain.PRCommentEvent, bool) {
+	var p struct {
+		Action string `json:"action"`
+		Issue  struct {
+			Number      int             `json:"number"`
+			PullRequest json.RawMessage `json:"pull_request"`
+		} `json:"issue"`
+		PullRequest struct {
+			Number int `json:"number"`
+		} `json:"pull_request"`
+		Comment struct {
+			Body string `json:"body"`
+			User struct {
+				Login string `json:"login"`
+			} `json:"user"`
+		} `json:"comment"`
+		Review struct {
+			Body  string `json:"body"`
+			State string `json:"state"`
+			User  struct {
+				Login string `json:"login"`
+			} `json:"user"`
+		} `json:"review"`
+		Sender struct {
+			Login string `json:"login"`
+		} `json:"sender"`
+		Repository struct {
+			FullName string `json:"full_name"`
+		} `json:"repository"`
+	}
+	if json.Unmarshal(body, &p) != nil {
+		return domain.PRCommentEvent{}, false
+	}
+	ev := domain.PRCommentEvent{Provider: "github", Repo: p.Repository.FullName, Action: p.Action, Number: p.PullRequest.Number}
+	switch event {
+	case "issue_comment":
+		if len(p.Issue.PullRequest) == 0 || string(p.Issue.PullRequest) == "null" {
+			return ev, false // a comment on an issue, not a pull request
+		}
+		ev.Number, ev.Author, ev.Body = p.Issue.Number, p.Comment.User.Login, p.Comment.Body
+	case "pull_request_review_comment":
+		ev.Author, ev.Body, ev.Inline = p.Comment.User.Login, p.Comment.Body, true
+	case "pull_request_review":
+		ev.Author, ev.Body, ev.ReviewState = p.Review.User.Login, p.Review.Body, strings.ToLower(p.Review.State)
+	case "pull_request_review_thread":
+		ev.Author, ev.Inline = p.Sender.Login, true
+	default:
+		return ev, false
+	}
+	return ev, ev.Number > 0
+}
+
+// gitlabNote reads a note event on a merge request.
+func gitlabNote(body []byte) (domain.PRCommentEvent, bool) {
+	var p struct {
+		User struct {
+			Username string `json:"username"`
+		} `json:"user"`
+		Attrs struct {
+			NoteableType string          `json:"noteable_type"` //nolint:misspell // GitLab's field
+			Note         string          `json:"note"`
+			Action       string          `json:"action"`
+			Type         string          `json:"type"`
+			Position     json.RawMessage `json:"position"`
+			System       bool            `json:"system"`
+		} `json:"object_attributes"`
+		MR struct {
+			IID int `json:"iid"`
+		} `json:"merge_request"`
+		Project struct {
+			Path string `json:"path_with_namespace"`
+		} `json:"project"`
+	}
+	if json.Unmarshal(body, &p) != nil || p.Attrs.NoteableType != "MergeRequest" || p.Attrs.System {
+		return domain.PRCommentEvent{}, false
+	}
+	action := "created"
+	if p.Attrs.Action == "update" {
+		action = "edited"
+	}
+	inline := p.Attrs.Type == "DiffNote" || (len(p.Attrs.Position) > 0 && string(p.Attrs.Position) != "null")
+	return domain.PRCommentEvent{Provider: "gitlab", Repo: p.Project.Path, Number: p.MR.IID, Author: p.User.Username,
+		Body: p.Attrs.Note, Action: action, Inline: inline}, p.MR.IID > 0
+}
+
 // githubRun is the workflow_run webhook's payload, as much as CI needs.
 type githubRun struct {
 	Action string `json:"action"`
@@ -211,7 +317,9 @@ func readBody(w http.ResponseWriter, r *http.Request) ([]byte, bool) {
 	return b, true
 }
 
-// GitHubWebhook handles pull_request (merged) and workflow_run events.
+// GitHubWebhook handles pull_request (merged), workflow_run and the pull
+// request comment events (issue_comment, pull_request_review,
+// pull_request_review_comment, pull_request_review_thread).
 // Configure it in the repository (or organisation) settings with content
 // type application/json and the secret from the Integrations page.
 func GitHubWebhook(secretOf SecretSource, sink HookSink, store HookStore, onPipeline func(), log *slog.Logger) http.Handler {
@@ -264,6 +372,10 @@ func GitHubWebhook(secretOf SecretSource, sink HookSink, store HookStore, onPipe
 					return
 				}
 			}
+		case "issue_comment", "pull_request_review", "pull_request_review_comment", "pull_request_review_thread":
+			if ev, ok := githubComment(r.Header.Get("X-GitHub-Event"), body); ok {
+				prComment(ctx, sink, ev, log)
+			}
 		case "workflow_run", "check_suite", "push", "deployment_status":
 			if r.Header.Get("X-GitHub-Event") == "workflow_run" {
 				var wr githubRun
@@ -289,7 +401,8 @@ func GitHubWebhook(secretOf SecretSource, sink HookSink, store HookStore, onPipe
 	})
 }
 
-// GitLabWebhook handles merge request (merged) and pipeline events.
+// GitLabWebhook handles merge request (merged), pipeline and note
+// (comment) events.
 // Configure it in the project's Webhooks settings with the secret token
 // from the Integrations page.
 func GitLabWebhook(secretOf SecretSource, sink HookSink, store HookStore, onPipeline func(), log *slog.Logger) http.Handler {
@@ -343,6 +456,10 @@ func GitLabWebhook(secretOf SecretSource, sink HookSink, store HookStore, onPipe
 				log.Error("gitlab webhook: merge request", "action", p.Attrs.Action, "err", err)
 				w.WriteHeader(http.StatusInternalServerError)
 				return
+			}
+		case "note":
+			if ev, ok := gitlabNote(body); ok {
+				prComment(ctx, sink, ev, log)
 			}
 		case "pipeline", "deployment", "build":
 			if p.Kind == "pipeline" {

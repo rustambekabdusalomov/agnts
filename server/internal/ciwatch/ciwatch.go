@@ -197,24 +197,7 @@ func (s *Service) findRepo(ctx context.Context, provider, name string) (domain.R
 
 // SameRepo reports whether a clone URL is the repository the host names
 // owner/name (GitHub) or group/sub/project (GitLab).
-func SameRepo(cloneURL, name string) bool {
-	if name == "" {
-		return false
-	}
-	u := strings.ToLower(strings.TrimSuffix(strings.TrimSpace(cloneURL), ".git"))
-	if i := strings.Index(u, "://"); i >= 0 {
-		u = u[i+3:]
-		if j := strings.IndexByte(u, '/'); j >= 0 {
-			u = u[j+1:]
-		}
-	} else if i := strings.IndexByte(u, ':'); i >= 0 { // git@host:owner/name
-		u = u[i+1:]
-	}
-	u = strings.Trim(u, "/")
-	n := strings.Trim(strings.ToLower(name), "/")
-	// GitLab under a path prefix (https://host/gitlab/group/project).
-	return u == n || strings.HasSuffix(u, "/"+n)
-}
+func SameRepo(cloneURL, name string) bool { return domain.SameRepo(cloneURL, name) }
 
 func (s *Service) ownTicket(ctx context.Context, repo domain.Repository, run domain.CIRun) (domain.Ticket, bool) {
 	if run.Branch == "" || run.Branch == repo.DefaultBranch {

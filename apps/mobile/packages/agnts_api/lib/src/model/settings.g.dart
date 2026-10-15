@@ -43,6 +43,8 @@ abstract class _$SettingsCWProxy {
 
   Settings pullReviews(PullReviewSettings? pullReviews);
 
+  Settings prComments(PRCommentSettings? prComments);
+
   Settings ci(CISettings? ci);
 
   Settings guard(GuardSettings? guard);
@@ -92,6 +94,7 @@ abstract class _$SettingsCWProxy {
     bool? suggestFollowUps,
     int? maxTicketRepos,
     PullReviewSettings? pullReviews,
+    PRCommentSettings? prComments,
     CISettings? ci,
     GuardSettings? guard,
     String? stalls,
@@ -172,6 +175,10 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
       this(pullReviews: pullReviews);
 
   @override
+  Settings prComments(PRCommentSettings? prComments) =>
+      this(prComments: prComments);
+
+  @override
   Settings ci(CISettings? ci) => this(ci: ci);
 
   @override
@@ -235,6 +242,7 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
     Object? suggestFollowUps = const $CopyWithPlaceholder(),
     Object? maxTicketRepos = const $CopyWithPlaceholder(),
     Object? pullReviews = const $CopyWithPlaceholder(),
+    Object? prComments = const $CopyWithPlaceholder(),
     Object? ci = const $CopyWithPlaceholder(),
     Object? guard = const $CopyWithPlaceholder(),
     Object? stalls = const $CopyWithPlaceholder(),
@@ -321,6 +329,10 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
           ? _value.pullReviews
           // ignore: cast_nullable_to_non_nullable
           : pullReviews as PullReviewSettings?,
+      prComments: prComments == const $CopyWithPlaceholder()
+          ? _value.prComments
+          // ignore: cast_nullable_to_non_nullable
+          : prComments as PRCommentSettings?,
       ci: ci == const $CopyWithPlaceholder()
           ? _value.ci
           // ignore: cast_nullable_to_non_nullable
@@ -440,6 +452,12 @@ Settings _$SettingsFromJson(
           ? null
           : PullReviewSettings.fromJson(v as Map<String, dynamic>),
     ),
+    prComments: $checkedConvert(
+      'prComments',
+      (v) => v == null
+          ? null
+          : PRCommentSettings.fromJson(v as Map<String, dynamic>),
+    ),
     ci: $checkedConvert(
       'ci',
       (v) => v == null ? null : CISettings.fromJson(v as Map<String, dynamic>),
@@ -489,6 +507,7 @@ Map<String, dynamic> _$SettingsToJson(Settings instance) => <String, dynamic>{
   'suggestFollowUps': ?instance.suggestFollowUps,
   'maxTicketRepos': ?instance.maxTicketRepos,
   'pullReviews': ?instance.pullReviews?.toJson(),
+  'prComments': ?instance.prComments?.toJson(),
   'ci': ?instance.ci?.toJson(),
   'guard': ?instance.guard?.toJson(),
   'stalls': ?instance.stalls,

@@ -40,7 +40,10 @@ const views = computed(() => [
 const rows = computed(() => {
   const q = ui.search.trim().toLowerCase()
   const list = view.value === 'archived' ? archivedList.value : active.value
-  return list.filter((r) => !q || r.name.toLowerCase().includes(q) || r.cloneUrl.toLowerCase().includes(q))
+  // Name, address, stack, tracker project or group: whatever people remember a repository by.
+  const hay = (r: Repository) =>
+    [r.name, r.cloneUrl, r.stack ?? '', r.jiraProject, r.planeProject ?? '', r.provider, ...(r.groups ?? []).map((g) => g.name)].join(' ').toLowerCase()
+  return list.filter((r) => !q || hay(r).includes(q))
 })
 const missing = computed(() => active.value.filter((r) => r.claudeMd === 'missing').length)
 
@@ -86,7 +89,14 @@ function onPick(r: RemoteRepository) {
   <section class="card">
     <div v-if="repos.data.value?.length" class="ch">
       <p class="sub" style="margin: 0">{{ view === 'archived' ? t('repos.archivedSub') : view === 'groups' ? t('groups.sub') : '' }}</p>
-      <SegButtons v-model="view" :options="views" :label="t('repos.viewLabel')" />
+      <div class="rp-tools">
+        <!-- the same search as the top bar's, so the two stay in step -->
+        <label class="mini-search">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
+          <input v-model="ui.search" type="search" :placeholder="t('repos.search')" :aria-label="t('repos.search')">
+        </label>
+        <SegButtons v-model="view" :options="views" :label="t('repos.viewLabel')" />
+      </div>
     </div>
     <GroupsTab v-if="view === 'groups'" @edit="openGroup" />
     <p v-else-if="repos.isPending.value" class="hint">{{ t('common.loading') }}</p>
@@ -154,3 +164,12 @@ function onPick(r: RemoteRepository) {
   <ImportDrawer v-model="importOpen" @pick="onPick" />
   <GroupDrawer v-model="groupOpen" :group="editingGroup" :repos="repos.data.value ?? []" />
 </template>
+
+<style scoped>
+.rp-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.rp-tools .mini-search { min-width: 220px; }
+.rp-tools .mini-search input { flex: 1; width: auto; min-width: 0; }
+@media (max-width: 640px) {
+  .rp-tools, .rp-tools .mini-search { width: 100%; }
+}
+</style>

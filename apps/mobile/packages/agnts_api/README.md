@@ -148,8 +148,10 @@ Class | Method | HTTP request | Description
 [*McpApi*](doc/McpApi.md) | [**revokeMcp**](doc/McpApi.md#revokemcp) | **POST** /mcp-settings/revoke | Disconnect every Claude connection and delete the static token
 [*McpApi*](doc/McpApi.md) | [**rotateMcpToken**](doc/McpApi.md#rotatemcptoken) | **POST** /mcp-settings/token | Create a new static MCP bearer token (shown once; the old one stops working)
 [*MetaApi*](doc/MetaApi.md) | [**getMeta**](doc/MetaApi.md#getmeta) | **GET** /meta | Server version and build information
+[*NetworkApi*](doc/NetworkApi.md) | [**connectPrivateNetwork**](doc/NetworkApi.md#connectprivatenetwork) | **POST** /networks/{networkId}/connect | Connect a disconnected network again, with its saved config
 [*NetworkApi*](doc/NetworkApi.md) | [**createPrivateNetwork**](doc/NetworkApi.md#createprivatenetwork) | **POST** /networks | Add a private network
 [*NetworkApi*](doc/NetworkApi.md) | [**deletePrivateNetwork**](doc/NetworkApi.md#deleteprivatenetwork) | **DELETE** /networks/{networkId} | Remove a private network
+[*NetworkApi*](doc/NetworkApi.md) | [**disconnectPrivateNetwork**](doc/NetworkApi.md#disconnectprivatenetwork) | **POST** /networks/{networkId}/disconnect | Disconnect a network: its tunnel stops and it routes nothing until it is connected again. The config is kept
 [*NetworkApi*](doc/NetworkApi.md) | [**getNetworkActivity**](doc/NetworkApi.md#getnetworkactivity) | **GET** /networks/activity | Connections made through private networks (the last 100, and the day&#39;s counts)
 [*NetworkApi*](doc/NetworkApi.md) | [**getPrivateNetwork**](doc/NetworkApi.md#getprivatenetwork) | **GET** /networks/{networkId} | One private network
 [*NetworkApi*](doc/NetworkApi.md) | [**listPrivateNetworks**](doc/NetworkApi.md#listprivatenetworks) | **GET** /networks | The workspace&#39;s private networks (VPNs and agnts-link connectors)
@@ -167,6 +169,14 @@ Class | Method | HTTP request | Description
 [*PlatformApi*](doc/PlatformApi.md) | [**updatePlatformFeedback**](doc/PlatformApi.md#updateplatformfeedback) | **PUT** /platform/feedback/{id} | Mark a feedback done, or new again (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**updatePlatformUser**](doc/PlatformApi.md#updateplatformuser) | **PUT** /platform/users/{id} | Grant or remove the Admin role (Admin); refused when Admins and Users are separate accounts
 [*PlatformApi*](doc/PlatformApi.md) | [**updatePlatformWorkspace**](doc/PlatformApi.md#updateplatformworkspace) | **PUT** /platform/workspaces/{id} | Change a workspace&#39;s plan, slots, member limit, or suspend it (Admin)
+[*PullsApi*](doc/PullsApi.md) | [**addPullComment**](doc/PullsApi.md#addpullcomment) | **POST** /repos/{id}/pulls/{number}/comments | Comment on a pull request, or on a line of its diff, as the git host token&#39;s user
+[*PullsApi*](doc/PullsApi.md) | [**deletePullComment**](doc/PullsApi.md#deletepullcomment) | **DELETE** /repos/{id}/pulls/{number}/comments | Delete a comment (your own, on the git host)
+[*PullsApi*](doc/PullsApi.md) | [**editPullComment**](doc/PullsApi.md#editpullcomment) | **PATCH** /repos/{id}/pulls/{number}/comments | Replace the text of a comment (your own, on the git host)
+[*PullsApi*](doc/PullsApi.md) | [**getRepoPull**](doc/PullsApi.md#getrepopull) | **GET** /repos/{id}/pulls/{number} | A pull request as it stands on the git host, with the files it changes
+[*PullsApi*](doc/PullsApi.md) | [**listPullThreads**](doc/PullsApi.md#listpullthreads) | **GET** /repos/{id}/pulls/{number}/threads | A pull request&#39;s conversation: general comments, review summaries and threads on diff lines, oldest first
+[*PullsApi*](doc/PullsApi.md) | [**listRepoPulls**](doc/PullsApi.md#listrepopulls) | **GET** /repos/{id}/pulls | The repository&#39;s pull requests (GitLab merge requests), most recently updated first, 30 per page; a shorter page is the last
+[*PullsApi*](doc/PullsApi.md) | [**replyPullThread**](doc/PullsApi.md#replypullthread) | **POST** /repos/{id}/pulls/{number}/replies | Answer in a thread of a pull request
+[*PullsApi*](doc/PullsApi.md) | [**resolvePullThread**](doc/PullsApi.md#resolvepullthread) | **POST** /repos/{id}/pulls/{number}/resolve | Resolve or reopen a thread on a diff line
 [*ReposApi*](doc/ReposApi.md) | [**approveRepoBrief**](doc/ReposApi.md#approverepobrief) | **POST** /repos/{id}/brief/approve | Make the draft the brief that runs read
 [*ReposApi*](doc/ReposApi.md) | [**archiveRepo**](doc/ReposApi.md#archiverepo) | **POST** /repos/{id}/archive | Archive the repository; it keeps its history but takes no new tickets or tasks
 [*ReposApi*](doc/ReposApi.md) | [**createRepo**](doc/ReposApi.md#createrepo) | **POST** /repos | 
@@ -195,7 +205,7 @@ Class | Method | HTTP request | Description
 [*ReviewsApi*](doc/ReviewsApi.md) | [**addReviewerNote**](doc/ReviewsApi.md#addreviewernote) | **POST** /reviews/notes | Tell agnts something about how you review; the next review for that user reads it
 [*ReviewsApi*](doc/ReviewsApi.md) | [**deleteReviewerNote**](doc/ReviewsApi.md#deletereviewernote) | **DELETE** /reviews/notes/{id} | Forget a note (one already folded into a profile stays there until the profile is edited)
 [*ReviewsApi*](doc/ReviewsApi.md) | [**listReviewers**](doc/ReviewsApi.md#listreviewers) | **GET** /reviews/reviewers | How each person agnts reviews pull requests for reviews, as it learned from their notes
-[*ReviewsApi*](doc/ReviewsApi.md) | [**postPullReview**](doc/ReviewsApi.md#postpullreview) | **POST** /tickets/{key}/post-review | Post agnts&#39;s latest review of a pull request on it as a comment (once per reviewed commit)
+[*ReviewsApi*](doc/ReviewsApi.md) | [**postPullReview**](doc/ReviewsApi.md#postpullreview) | **POST** /tickets/{key}/post-review | Post agnts&#39;s latest review of a pull request on it (once per reviewed commit): the summary, and the chosen findings on their lines in one review. Posting the review of new commits edits agnts&#39;s earlier summary, answers its findings that are still there and resolves the ones that are gone
 [*ReviewsApi*](doc/ReviewsApi.md) | [**saveReviewerProfile**](doc/ReviewsApi.md#savereviewerprofile) | **PUT** /reviews/reviewers/{login} | Replace a reviewer profile with your text; empty text clears it
 [*ReviewsApi*](doc/ReviewsApi.md) | [**syncReviews**](doc/ReviewsApi.md#syncreviews) | **POST** /reviews/sync | Ask the git host for the pull requests waiting for you and queue reviews of the new ones
 [*RulesApi*](doc/RulesApi.md) | [**acceptRule**](doc/RulesApi.md#acceptrule) | **POST** /rules/{id}/accept | Apply a rule as written, skipping its open questions or a failed review
@@ -218,6 +228,7 @@ Class | Method | HTTP request | Description
 [*TicketsApi*](doc/TicketsApi.md) | [**acceptRelation**](doc/TicketsApi.md#acceptrelation) | **POST** /tickets/{key}/relations/{id}/accept | Accept a relation agnts proposed; the queue follows it from now on
 [*TicketsApi*](doc/TicketsApi.md) | [**acknowledgeSecrets**](doc/TicketsApi.md#acknowledgesecrets) | **POST** /tickets/{key}/secrets-ack | Confirm that the lines flagged as secrets in the change under review are not real credentials
 [*TicketsApi*](doc/TicketsApi.md) | [**addRelation**](doc/TicketsApi.md#addrelation) | **POST** /tickets/{key}/relations | Make this ticket wait for another, or keep the two from running side by side
+[*TicketsApi*](doc/TicketsApi.md) | [**addressPullComments**](doc/TicketsApi.md#addresspullcomments) | **POST** /tickets/{key}/address-comments | Send reviewers&#39; threads on the ticket&#39;s open pull requests back to coding: the given ones, or every unresolved thread by someone else not sent yet. After the fix is approved and pushed, agnts answers in each thread
 [*TicketsApi*](doc/TicketsApi.md) | [**answerQuestions**](doc/TicketsApi.md#answerquestions) | **PUT** /tickets/{key}/answers | Answer the ticket&#39;s questions; when all are answered, coding starts
 [*TicketsApi*](doc/TicketsApi.md) | [**approveTicket**](doc/TicketsApi.md#approveticket) | **POST** /tickets/{key}/approve | Approve the reviewed work
 [*TicketsApi*](doc/TicketsApi.md) | [**dismissFollowUp**](doc/TicketsApi.md#dismissfollowup) | **POST** /tickets/{key}/follow-ups/{id}/dismiss | Decline a suggestion; later runs will not suggest it again
@@ -281,6 +292,7 @@ Class | Method | HTTP request | Description
  - [AcceptFollowUpsResult](doc/AcceptFollowUpsResult.md)
  - [Acceptance](doc/Acceptance.md)
  - [AcceptanceCriteriaInner](doc/AcceptanceCriteriaInner.md)
+ - [AddressPullCommentsRequest](doc/AddressPullCommentsRequest.md)
  - [AgentConfigFinding](doc/AgentConfigFinding.md)
  - [AgentConfigScan](doc/AgentConfigScan.md)
  - [Analysis](doc/Analysis.md)
@@ -353,6 +365,7 @@ Class | Method | HTTP request | Description
  - [DeviceRegistration](doc/DeviceRegistration.md)
  - [DisableTotpRequest](doc/DisableTotpRequest.md)
  - [EditCheck](doc/EditCheck.md)
+ - [EditPullCommentRequest](doc/EditPullCommentRequest.md)
  - [Environment](doc/Environment.md)
  - [Error](doc/Error.md)
  - [Event](doc/Event.md)
@@ -408,8 +421,10 @@ Class | Method | HTTP request | Description
  - [NetworkTest](doc/NetworkTest.md)
  - [NetworkTestNetwork](doc/NetworkTestNetwork.md)
  - [NetworkTestTls](doc/NetworkTestTls.md)
+ - [NewPullComment](doc/NewPullComment.md)
  - [NotifySettings](doc/NotifySettings.md)
  - [OfferStarterRulesRequest](doc/OfferStarterRulesRequest.md)
+ - [PRCommentSettings](doc/PRCommentSettings.md)
  - [PeriodStats](doc/PeriodStats.md)
  - [Pipeline](doc/Pipeline.md)
  - [PlaneState](doc/PlaneState.md)
@@ -418,6 +433,7 @@ Class | Method | HTTP request | Description
  - [PlatformOverviewServerQueueInner](doc/PlatformOverviewServerQueueInner.md)
  - [PlatformUser](doc/PlatformUser.md)
  - [PlatformWorkspace](doc/PlatformWorkspace.md)
+ - [PostReviewInput](doc/PostReviewInput.md)
  - [PreviewInput](doc/PreviewInput.md)
  - [PreviewIssue](doc/PreviewIssue.md)
  - [PreviewShot](doc/PreviewShot.md)
@@ -429,8 +445,12 @@ Class | Method | HTTP request | Description
  - [Proof](doc/Proof.md)
  - [ProofRun](doc/ProofRun.md)
  - [ProofTest](doc/ProofTest.md)
+ - [PullComment](doc/PullComment.md)
+ - [PullDetail](doc/PullDetail.md)
+ - [PullItem](doc/PullItem.md)
  - [PullRequest](doc/PullRequest.md)
  - [PullReviewSettings](doc/PullReviewSettings.md)
+ - [PullThread](doc/PullThread.md)
  - [QualityStat](doc/QualityStat.md)
  - [Question](doc/Question.md)
  - [QueueStatus](doc/QueueStatus.md)
@@ -449,6 +469,7 @@ Class | Method | HTTP request | Description
  - [ReplayReport](doc/ReplayReport.md)
  - [ReplayResult](doc/ReplayResult.md)
  - [ReplayVersion](doc/ReplayVersion.md)
+ - [ReplyPullThreadRequest](doc/ReplyPullThreadRequest.md)
  - [RepoActivity](doc/RepoActivity.md)
  - [RepoBrief](doc/RepoBrief.md)
  - [RepoBriefInput](doc/RepoBriefInput.md)
@@ -469,6 +490,7 @@ Class | Method | HTTP request | Description
  - [RepositoryInput](doc/RepositoryInput.md)
  - [RequestChangesRequest](doc/RequestChangesRequest.md)
  - [ResetPasswordRequest](doc/ResetPasswordRequest.md)
+ - [ResolvePullThreadRequest](doc/ResolvePullThreadRequest.md)
  - [Result](doc/Result.md)
  - [RetryTicketRequest](doc/RetryTicketRequest.md)
  - [ReviewSync](doc/ReviewSync.md)

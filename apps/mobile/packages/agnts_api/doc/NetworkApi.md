@@ -9,8 +9,10 @@ All URIs are relative to */api*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**connectPrivateNetwork**](NetworkApi.md#connectprivatenetwork) | **POST** /networks/{networkId}/connect | Connect a disconnected network again, with its saved config
 [**createPrivateNetwork**](NetworkApi.md#createprivatenetwork) | **POST** /networks | Add a private network
 [**deletePrivateNetwork**](NetworkApi.md#deleteprivatenetwork) | **DELETE** /networks/{networkId} | Remove a private network
+[**disconnectPrivateNetwork**](NetworkApi.md#disconnectprivatenetwork) | **POST** /networks/{networkId}/disconnect | Disconnect a network: its tunnel stops and it routes nothing until it is connected again. The config is kept
 [**getNetworkActivity**](NetworkApi.md#getnetworkactivity) | **GET** /networks/activity | Connections made through private networks (the last 100, and the day&#39;s counts)
 [**getPrivateNetwork**](NetworkApi.md#getprivatenetwork) | **GET** /networks/{networkId} | One private network
 [**listPrivateNetworks**](NetworkApi.md#listprivatenetworks) | **GET** /networks | The workspace&#39;s private networks (VPNs and agnts-link connectors)
@@ -19,6 +21,51 @@ Method | HTTP request | Description
 [**testPrivateNetwork**](NetworkApi.md#testprivatenetwork) | **POST** /networks/test | Connect to host:port through the network its routes pick, and check its TLS certificate
 [**updatePrivateNetwork**](NetworkApi.md#updateprivatenetwork) | **PUT** /networks/{networkId} | Change a private network
 
+
+# **connectPrivateNetwork**
+> PrivateNetwork connectPrivateNetwork(networkId)
+
+Connect a disconnected network again, with its saved config
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getNetworkApi();
+final int networkId = 789; // int | 
+
+try {
+    final response = api.connectPrivateNetwork(networkId);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling NetworkApi->connectPrivateNetwork: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **networkId** | **int**|  | 
+
+### Return type
+
+[**PrivateNetwork**](PrivateNetwork.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **createPrivateNetwork**
 > PrivateNetworkSaved createPrivateNetwork(privateNetworkInput)
@@ -99,6 +146,51 @@ Name | Type | Description  | Notes
 ### Return type
 
 void (empty response body)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **disconnectPrivateNetwork**
+> PrivateNetwork disconnectPrivateNetwork(networkId)
+
+Disconnect a network: its tunnel stops and it routes nothing until it is connected again. The config is kept
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getNetworkApi();
+final int networkId = 789; // int | 
+
+try {
+    final response = api.disconnectPrivateNetwork(networkId);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling NetworkApi->disconnectPrivateNetwork: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **networkId** | **int**|  | 
+
+### Return type
+
+[**PrivateNetwork**](PrivateNetwork.md)
 
 ### Authorization
 

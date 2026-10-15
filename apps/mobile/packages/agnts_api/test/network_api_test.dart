@@ -7,6 +7,13 @@ void main() {
   final instance = AgntsApi().getNetworkApi();
 
   group(NetworkApi, () {
+    // Connect a disconnected network again, with its saved config
+    //
+    //Future<PrivateNetwork> connectPrivateNetwork(int networkId) async
+    test('test connectPrivateNetwork', () async {
+      // TODO
+    });
+
     // Add a private network
     //
     // Its routes may not claim a host, domain or range another of the workspace's networks has (on a common port); a route nested inside another network's is fine. A connector's token is returned once. 
@@ -20,6 +27,13 @@ void main() {
     //
     //Future deletePrivateNetwork(int networkId) async
     test('test deletePrivateNetwork', () async {
+      // TODO
+    });
+
+    // Disconnect a network: its tunnel stops and it routes nothing until it is connected again. The config is kept
+    //
+    //Future<PrivateNetwork> disconnectPrivateNetwork(int networkId) async
+    test('test disconnectPrivateNetwork', () async {
       // TODO
     });
 

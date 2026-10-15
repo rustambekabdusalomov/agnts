@@ -6250,6 +6250,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get networkGone => 'removed';
 
   @override
+  String get networkDisconnect => 'Disconnect';
+
+  @override
+  String get networkDisconnectHelp => 'Stop the tunnel. Runs reach nothing through it until you connect again; the config is kept';
+
+  @override
+  String networkDisconnectConfirm(String name) {
+    return 'Disconnect $name? Runs and trackers reached through it stop working until you connect it again. Its config is kept.';
+  }
+
+  @override
+  String get networkDisconnected => 'Disconnected';
+
+  @override
+  String get networkConnect => 'Connect';
+
+  @override
+  String get networkConnectHelp => 'Start the tunnel again with the saved config';
+
+  @override
+  String get networkConnecting => 'Connecting: the tunnel starts within 15 seconds';
+
+  @override
   String get platformTitle => 'Admin cabinet';
 
   @override
@@ -6834,6 +6857,290 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get previewNotifyPhotosHelp => 'Up to four screenshots go with the Telegram message.';
+
+  @override
+  String get pullsTab => 'Pull requests';
+
+  @override
+  String get pullsTitle => 'Pull requests';
+
+  @override
+  String get pullsSub => 'On the git host, most recently updated first. Open one to read and answer its comments.';
+
+  @override
+  String get pullsBack => 'Back to the repository';
+
+  @override
+  String get pullsState_open => 'Open';
+
+  @override
+  String get pullsState_merged => 'Merged';
+
+  @override
+  String get pullsState_closed => 'Closed';
+
+  @override
+  String get pullsState_all => 'All';
+
+  @override
+  String get pullsNone => 'No pull requests here.';
+
+  @override
+  String get pullsEnd => 'That is all of them.';
+
+  @override
+  String pullsUpdated(String time) {
+    return 'updated $time';
+  }
+
+  @override
+  String get pullsDraft => 'Draft';
+
+  @override
+  String pullsOwnTicket(String key) {
+    return 'agnts\'s change · $key';
+  }
+
+  @override
+  String pullsReviewTicket(String key) {
+    return 'Review · $key';
+  }
+
+  @override
+  String get pullsConversation => 'Conversation';
+
+  @override
+  String get pullsFiles => 'Files';
+
+  @override
+  String pullsUnresolvedN(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n unresolved threads', one: '$n unresolved thread');
+    return '$_temp0';
+  }
+
+  @override
+  String pullsShowResolved(String n) {
+    return 'Show resolved ($n)';
+  }
+
+  @override
+  String get pullsNoComments => 'No comments yet.';
+
+  @override
+  String get pullsNoFiles => 'The pull request changes no files.';
+
+  @override
+  String get pullsNoPatch => 'No diff to show (a binary file, or too large for the git host to send).';
+
+  @override
+  String pullsFilesError(String error) {
+    return 'The changed files could not be read: $error';
+  }
+
+  @override
+  String get pullsEarlierVersion => 'Written on an earlier version of this file:';
+
+  @override
+  String pullsThreadsN(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n threads', one: '$n thread');
+    return '$_temp0';
+  }
+
+  @override
+  String pullsCommentOnLine(String line) {
+    return 'Comment on line $line';
+  }
+
+  @override
+  String get pullsAddComment => 'Add a comment';
+
+  @override
+  String get pullsComment => 'Comment';
+
+  @override
+  String get pullsCommentLabel => 'Comment';
+
+  @override
+  String get pullsPlaceholder => 'Markdown. Ctrl+Enter posts.';
+
+  @override
+  String get pullsWrite => 'Write';
+
+  @override
+  String get pullsPreview => 'Preview';
+
+  @override
+  String get pullsReply => 'Reply';
+
+  @override
+  String get pullsEdit => 'Edit';
+
+  @override
+  String get pullsSave => 'Save';
+
+  @override
+  String get pullsEdited => 'edited';
+
+  @override
+  String get pullsDelete => 'Delete';
+
+  @override
+  String get pullsDeleteTitle => 'Delete the comment?';
+
+  @override
+  String get pullsDeleteConfirm => 'It is deleted on the git host for everyone. This cannot be undone.';
+
+  @override
+  String get pullsDeleted => 'Comment deleted';
+
+  @override
+  String get pullsResolve => 'Resolve';
+
+  @override
+  String get pullsUnresolve => 'Reopen';
+
+  @override
+  String get pullsResolved => 'Resolved';
+
+  @override
+  String get pullsOutdated => 'Outdated';
+
+  @override
+  String get pullsSent => 'Sent to agnts';
+
+  @override
+  String get pullsAnswered => 'Answered by agnts';
+
+  @override
+  String get pullsVerdict_APPROVED => 'Approved';
+
+  @override
+  String get pullsVerdict_CHANGES_REQUESTED => 'Changes requested';
+
+  @override
+  String get pullsVerdict_COMMENTED => 'Commented';
+
+  @override
+  String get pullsVerdict_DISMISSED => 'Dismissed';
+
+  @override
+  String pullsPostsAs(String login, String host) {
+    return 'Posts as @$login on $host';
+  }
+
+  @override
+  String pullsPostsAsToken(String host) {
+    return 'Posts as the $host token\'s user';
+  }
+
+  @override
+  String pullsTicketTitle(String number, String host) {
+    return 'Comments on #$number ($host)';
+  }
+
+  @override
+  String get pullsTicketSubOwn => 'Reviewers\' comments on agnts\'s pull request. Answer here, or send them back to agnts.';
+
+  @override
+  String get pullsTicketSubReview => 'The pull request\'s conversation on the git host.';
+
+  @override
+  String pullsTicketSubIn(String repo) {
+    return 'In $repo.';
+  }
+
+  @override
+  String get pullsOpenWithDiff => 'Open with the diff';
+
+  @override
+  String pullsAddressBtn(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'Address $n comments', one: 'Address $n comment');
+    return '$_temp0';
+  }
+
+  @override
+  String pullsAddressConfirm(String key, num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'these $n review threads', one: 'this review thread');
+    return 'agnts goes back to $key with $_temp0: it changes the code or answers each. The fix waits for your approval as usual; once it is pushed, agnts replies in each thread.';
+  }
+
+  @override
+  String pullsAddressed(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n threads went', one: '$n thread went');
+    return '$_temp0 back to agnts';
+  }
+
+  @override
+  String pullsAddressLater(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n new review comments', one: '$n new review comment');
+    return '$_temp0: they can go back to agnts while the ticket waits for your review, or once it is done with its pull request open.';
+  }
+
+  @override
+  String pullsPostTitle(String number) {
+    return 'Post the review on #$number';
+  }
+
+  @override
+  String pullsPostSub(String host) {
+    return 'One review on $host, as the token\'s user. Findings on lines of the diff become comments there.';
+  }
+
+  @override
+  String pullsPostBtn(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Post with $n line comments',
+      one: 'Post with $n line comment',
+      zero: 'Post',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pullsPostSummary => 'The summary (the verdict and every finding)';
+
+  @override
+  String get pullsPostFindings => 'On their lines:';
+
+  @override
+  String get pullsSummaryOnly => 'summary only: not a line of the diff';
+
+  @override
+  String get pullsRequestChanges => 'Request changes';
+
+  @override
+  String get pullsNoRequestChanges => 'GitLab has no request for changes here: the comments are posted, approvals stay as they are.';
+
+  @override
+  String get pullsSettingsTitle => 'Comments on pull requests';
+
+  @override
+  String get pullsSet_attribution => 'Say who wrote it';
+
+  @override
+  String get pullsSet_attributionHelp =>
+      'Comments written in agnts go out as the git host token\'s user; this adds \"via agnts · <you>\" under each.';
+
+  @override
+  String get pullsSet_learnFromComments => 'Learn from your comments';
+
+  @override
+  String get pullsSet_learnFromCommentsHelp => 'What you write on others\' pull requests on the git host becomes notes on how you review.';
+
+  @override
+  String get pullsSet_resolveFixed => 'Resolve fixed threads';
+
+  @override
+  String get pullsSet_resolveFixedHelp => 'Once agnts pushed a fix and answered a reviewer\'s thread, it resolves the thread.';
+
+  @override
+  String get pullsSet_autoAddress => 'Address requested changes';
+
+  @override
+  String get pullsSet_autoAddressHelp =>
+      'When a reviewer requests changes on agnts\'s pull request, its unresolved threads go back to the ticket by themselves. The fix still waits for your approval.';
 
   @override
   String queueHeader(String running, String slots) {
@@ -7821,6 +8128,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reposPlaneHelp =>
       'Optional. The project identifier (WEB in WEB-123). Work items from this Plane project with the agnts label run here.';
+
+  @override
+  String get reposSearch => 'Search by name, stack, project or group';
 
   @override
   String get reviewTitle => 'agnts\'s code review';

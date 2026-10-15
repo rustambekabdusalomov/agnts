@@ -545,7 +545,19 @@ func (s *Server) PostPullReview(w http.ResponseWriter, r *http.Request, key gen.
 	if !s.reviewsReady(w) {
 		return
 	}
-	t, err := s.opt.Reviews.PostPullReview(r.Context(), key, origin(r))
+	var req gen.PostReviewInput
+	if err := decodeOptionalJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	opt := orchestrator.PostReviewOptions{Summary: req.Summary == nil || *req.Summary, RequestChanges: req.RequestChanges != nil && *req.RequestChanges}
+	if req.Findings != nil {
+		opt.Findings = *req.Findings
+		if opt.Findings == nil {
+			opt.Findings = []int{}
+		}
+	}
+	t, _, err := s.opt.Reviews.PostPullReview(r.Context(), key, opt, origin(r))
 	switch {
 	case errors.Is(err, orchestrator.ErrHost):
 		writeError(w, http.StatusBadGateway, "git_host", err.Error())

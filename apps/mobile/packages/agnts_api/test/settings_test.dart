@@ -107,6 +107,11 @@ void main() {
       // TODO
     });
 
+    // PRCommentSettings prComments
+    test('to test the property `prComments`', () async {
+      // TODO
+    });
+
     // CISettings ci
     test('to test the property `ci`', () async {
       // TODO

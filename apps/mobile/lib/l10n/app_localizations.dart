@@ -11253,6 +11253,48 @@ abstract class AppLocalizations {
   /// **'removed'**
   String get networkGone;
 
+  /// No description provided for @networkDisconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get networkDisconnect;
+
+  /// No description provided for @networkDisconnectHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop the tunnel. Runs reach nothing through it until you connect again; the config is kept'**
+  String get networkDisconnectHelp;
+
+  /// No description provided for @networkDisconnectConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect {name}? Runs and trackers reached through it stop working until you connect it again. Its config is kept.'**
+  String networkDisconnectConfirm(String name);
+
+  /// No description provided for @networkDisconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnected'**
+  String get networkDisconnected;
+
+  /// No description provided for @networkConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get networkConnect;
+
+  /// No description provided for @networkConnectHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the tunnel again with the saved config'**
+  String get networkConnectHelp;
+
+  /// No description provided for @networkConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting: the tunnel starts within 15 seconds'**
+  String get networkConnecting;
+
   /// No description provided for @platformTitle.
   ///
   /// In en, this message translates to:
@@ -12302,6 +12344,468 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Up to four screenshots go with the Telegram message.'**
   String get previewNotifyPhotosHelp;
+
+  /// No description provided for @pullsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull requests'**
+  String get pullsTab;
+
+  /// No description provided for @pullsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull requests'**
+  String get pullsTitle;
+
+  /// No description provided for @pullsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'On the git host, most recently updated first. Open one to read and answer its comments.'**
+  String get pullsSub;
+
+  /// No description provided for @pullsBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the repository'**
+  String get pullsBack;
+
+  /// No description provided for @pullsState_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get pullsState_open;
+
+  /// No description provided for @pullsState_merged.
+  ///
+  /// In en, this message translates to:
+  /// **'Merged'**
+  String get pullsState_merged;
+
+  /// No description provided for @pullsState_closed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get pullsState_closed;
+
+  /// No description provided for @pullsState_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get pullsState_all;
+
+  /// No description provided for @pullsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No pull requests here.'**
+  String get pullsNone;
+
+  /// No description provided for @pullsEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'That is all of them.'**
+  String get pullsEnd;
+
+  /// No description provided for @pullsUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'updated {time}'**
+  String pullsUpdated(String time);
+
+  /// No description provided for @pullsDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get pullsDraft;
+
+  /// No description provided for @pullsOwnTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts\'s change · {key}'**
+  String pullsOwnTicket(String key);
+
+  /// No description provided for @pullsReviewTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Review · {key}'**
+  String pullsReviewTicket(String key);
+
+  /// No description provided for @pullsConversation.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversation'**
+  String get pullsConversation;
+
+  /// No description provided for @pullsFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Files'**
+  String get pullsFiles;
+
+  /// No description provided for @pullsUnresolvedN.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} unresolved thread} other {{n} unresolved threads}}'**
+  String pullsUnresolvedN(num n);
+
+  /// No description provided for @pullsShowResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Show resolved ({n})'**
+  String pullsShowResolved(String n);
+
+  /// No description provided for @pullsNoComments.
+  ///
+  /// In en, this message translates to:
+  /// **'No comments yet.'**
+  String get pullsNoComments;
+
+  /// No description provided for @pullsNoFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'The pull request changes no files.'**
+  String get pullsNoFiles;
+
+  /// No description provided for @pullsNoPatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No diff to show (a binary file, or too large for the git host to send).'**
+  String get pullsNoPatch;
+
+  /// No description provided for @pullsFilesError.
+  ///
+  /// In en, this message translates to:
+  /// **'The changed files could not be read: {error}'**
+  String pullsFilesError(String error);
+
+  /// No description provided for @pullsEarlierVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Written on an earlier version of this file:'**
+  String get pullsEarlierVersion;
+
+  /// No description provided for @pullsThreadsN.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} thread} other {{n} threads}}'**
+  String pullsThreadsN(num n);
+
+  /// No description provided for @pullsCommentOnLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment on line {line}'**
+  String pullsCommentOnLine(String line);
+
+  /// No description provided for @pullsAddComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a comment'**
+  String get pullsAddComment;
+
+  /// No description provided for @pullsComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment'**
+  String get pullsComment;
+
+  /// No description provided for @pullsCommentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment'**
+  String get pullsCommentLabel;
+
+  /// No description provided for @pullsPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Markdown. Ctrl+Enter posts.'**
+  String get pullsPlaceholder;
+
+  /// No description provided for @pullsWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Write'**
+  String get pullsWrite;
+
+  /// No description provided for @pullsPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get pullsPreview;
+
+  /// No description provided for @pullsReply.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply'**
+  String get pullsReply;
+
+  /// No description provided for @pullsEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get pullsEdit;
+
+  /// No description provided for @pullsSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get pullsSave;
+
+  /// No description provided for @pullsEdited.
+  ///
+  /// In en, this message translates to:
+  /// **'edited'**
+  String get pullsEdited;
+
+  /// No description provided for @pullsDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get pullsDelete;
+
+  /// No description provided for @pullsDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the comment?'**
+  String get pullsDeleteTitle;
+
+  /// No description provided for @pullsDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'It is deleted on the git host for everyone. This cannot be undone.'**
+  String get pullsDeleteConfirm;
+
+  /// No description provided for @pullsDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment deleted'**
+  String get pullsDeleted;
+
+  /// No description provided for @pullsResolve.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve'**
+  String get pullsResolve;
+
+  /// No description provided for @pullsUnresolve.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopen'**
+  String get pullsUnresolve;
+
+  /// No description provided for @pullsResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved'**
+  String get pullsResolved;
+
+  /// No description provided for @pullsOutdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Outdated'**
+  String get pullsOutdated;
+
+  /// No description provided for @pullsSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent to agnts'**
+  String get pullsSent;
+
+  /// No description provided for @pullsAnswered.
+  ///
+  /// In en, this message translates to:
+  /// **'Answered by agnts'**
+  String get pullsAnswered;
+
+  /// No description provided for @pullsVerdict_APPROVED.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get pullsVerdict_APPROVED;
+
+  /// No description provided for @pullsVerdict_CHANGES_REQUESTED.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes requested'**
+  String get pullsVerdict_CHANGES_REQUESTED;
+
+  /// No description provided for @pullsVerdict_COMMENTED.
+  ///
+  /// In en, this message translates to:
+  /// **'Commented'**
+  String get pullsVerdict_COMMENTED;
+
+  /// No description provided for @pullsVerdict_DISMISSED.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissed'**
+  String get pullsVerdict_DISMISSED;
+
+  /// No description provided for @pullsPostsAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Posts as @{login} on {host}'**
+  String pullsPostsAs(String login, String host);
+
+  /// No description provided for @pullsPostsAsToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Posts as the {host} token\'s user'**
+  String pullsPostsAsToken(String host);
+
+  /// No description provided for @pullsTicketTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments on #{number} ({host})'**
+  String pullsTicketTitle(String number, String host);
+
+  /// No description provided for @pullsTicketSubOwn.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewers\' comments on agnts\'s pull request. Answer here, or send them back to agnts.'**
+  String get pullsTicketSubOwn;
+
+  /// No description provided for @pullsTicketSubReview.
+  ///
+  /// In en, this message translates to:
+  /// **'The pull request\'s conversation on the git host.'**
+  String get pullsTicketSubReview;
+
+  /// No description provided for @pullsTicketSubIn.
+  ///
+  /// In en, this message translates to:
+  /// **'In {repo}.'**
+  String pullsTicketSubIn(String repo);
+
+  /// No description provided for @pullsOpenWithDiff.
+  ///
+  /// In en, this message translates to:
+  /// **'Open with the diff'**
+  String get pullsOpenWithDiff;
+
+  /// No description provided for @pullsAddressBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {Address {n} comment} other {Address {n} comments}}'**
+  String pullsAddressBtn(num n);
+
+  /// No description provided for @pullsAddressConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts goes back to {key} with {n, plural, one {this review thread} other {these {n} review threads}}: it changes the code or answers each. The fix waits for your approval as usual; once it is pushed, agnts replies in each thread.'**
+  String pullsAddressConfirm(String key, num n);
+
+  /// No description provided for @pullsAddressed.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} thread went} other {{n} threads went}} back to agnts'**
+  String pullsAddressed(num n);
+
+  /// No description provided for @pullsAddressLater.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} new review comment} other {{n} new review comments}}: they can go back to agnts while the ticket waits for your review, or once it is done with its pull request open.'**
+  String pullsAddressLater(num n);
+
+  /// No description provided for @pullsPostTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Post the review on #{number}'**
+  String pullsPostTitle(String number);
+
+  /// No description provided for @pullsPostSub.
+  ///
+  /// In en, this message translates to:
+  /// **'One review on {host}, as the token\'s user. Findings on lines of the diff become comments there.'**
+  String pullsPostSub(String host);
+
+  /// No description provided for @pullsPostBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =0 {Post} one {Post with {n} line comment} other {Post with {n} line comments}}'**
+  String pullsPostBtn(num n);
+
+  /// No description provided for @pullsPostSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'The summary (the verdict and every finding)'**
+  String get pullsPostSummary;
+
+  /// No description provided for @pullsPostFindings.
+  ///
+  /// In en, this message translates to:
+  /// **'On their lines:'**
+  String get pullsPostFindings;
+
+  /// No description provided for @pullsSummaryOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'summary only: not a line of the diff'**
+  String get pullsSummaryOnly;
+
+  /// No description provided for @pullsRequestChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Request changes'**
+  String get pullsRequestChanges;
+
+  /// No description provided for @pullsNoRequestChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'GitLab has no request for changes here: the comments are posted, approvals stay as they are.'**
+  String get pullsNoRequestChanges;
+
+  /// No description provided for @pullsSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments on pull requests'**
+  String get pullsSettingsTitle;
+
+  /// No description provided for @pullsSet_attribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Say who wrote it'**
+  String get pullsSet_attribution;
+
+  /// No description provided for @pullsSet_attributionHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments written in agnts go out as the git host token\'s user; this adds \"via agnts · <you>\" under each.'**
+  String get pullsSet_attributionHelp;
+
+  /// No description provided for @pullsSet_learnFromComments.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn from your comments'**
+  String get pullsSet_learnFromComments;
+
+  /// No description provided for @pullsSet_learnFromCommentsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'What you write on others\' pull requests on the git host becomes notes on how you review.'**
+  String get pullsSet_learnFromCommentsHelp;
+
+  /// No description provided for @pullsSet_resolveFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve fixed threads'**
+  String get pullsSet_resolveFixed;
+
+  /// No description provided for @pullsSet_resolveFixedHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Once agnts pushed a fix and answered a reviewer\'s thread, it resolves the thread.'**
+  String get pullsSet_resolveFixedHelp;
+
+  /// No description provided for @pullsSet_autoAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address requested changes'**
+  String get pullsSet_autoAddress;
+
+  /// No description provided for @pullsSet_autoAddressHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'When a reviewer requests changes on agnts\'s pull request, its unresolved threads go back to the ticket by themselves. The fix still waits for your approval.'**
+  String get pullsSet_autoAddressHelp;
 
   /// No description provided for @queueHeader.
   ///
@@ -14024,6 +14528,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Optional. The project identifier (WEB in WEB-123). Work items from this Plane project with the agnts label run here.'**
   String get reposPlaneHelp;
+
+  /// No description provided for @reposSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name, stack, project or group'**
+  String get reposSearch;
 
   /// No description provided for @reviewTitle.
   ///

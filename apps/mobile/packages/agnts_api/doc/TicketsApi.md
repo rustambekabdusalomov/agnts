@@ -13,6 +13,7 @@ Method | HTTP request | Description
 [**acceptRelation**](TicketsApi.md#acceptrelation) | **POST** /tickets/{key}/relations/{id}/accept | Accept a relation agnts proposed; the queue follows it from now on
 [**acknowledgeSecrets**](TicketsApi.md#acknowledgesecrets) | **POST** /tickets/{key}/secrets-ack | Confirm that the lines flagged as secrets in the change under review are not real credentials
 [**addRelation**](TicketsApi.md#addrelation) | **POST** /tickets/{key}/relations | Make this ticket wait for another, or keep the two from running side by side
+[**addressPullComments**](TicketsApi.md#addresspullcomments) | **POST** /tickets/{key}/address-comments | Send reviewers&#39; threads on the ticket&#39;s open pull requests back to coding: the given ones, or every unresolved thread by someone else not sent yet. After the fix is approved and pushed, agnts answers in each thread
 [**answerQuestions**](TicketsApi.md#answerquestions) | **PUT** /tickets/{key}/answers | Answer the ticket&#39;s questions; when all are answered, coding starts
 [**approveTicket**](TicketsApi.md#approveticket) | **POST** /tickets/{key}/approve | Approve the reviewed work
 [**dismissFollowUp**](TicketsApi.md#dismissfollowup) | **POST** /tickets/{key}/follow-ups/{id}/dismiss | Decline a suggestion; later runs will not suggest it again
@@ -225,6 +226,53 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**Relation**](Relation.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **addressPullComments**
+> Ticket addressPullComments(key, addressPullCommentsRequest)
+
+Send reviewers' threads on the ticket's open pull requests back to coding: the given ones, or every unresolved thread by someone else not sent yet. After the fix is approved and pushed, agnts answers in each thread
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getTicketsApi();
+final String key = key_example; // String | 
+final AddressPullCommentsRequest addressPullCommentsRequest = ; // AddressPullCommentsRequest | 
+
+try {
+    final response = api.addressPullComments(key, addressPullCommentsRequest);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling TicketsApi->addressPullComments: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **key** | **String**|  | 
+ **addressPullCommentsRequest** | [**AddressPullCommentsRequest**](AddressPullCommentsRequest.md)|  | [optional] 
+
+### Return type
+
+[**Ticket**](Ticket.md)
 
 ### Authorization
 

@@ -10,6 +10,7 @@ doc/AcceptFollowUpsResult.md
 doc/Acceptance.md
 doc/AcceptanceCriteriaInner.md
 doc/AccountApi.md
+doc/AddressPullCommentsRequest.md
 doc/AgentConfigFinding.md
 doc/AgentConfigScan.md
 doc/Analysis.md
@@ -91,6 +92,7 @@ doc/DevicesApi.md
 doc/DisableTotpRequest.md
 doc/DocsApi.md
 doc/EditCheck.md
+doc/EditPullCommentRequest.md
 doc/Environment.md
 doc/Error.md
 doc/Event.md
@@ -153,8 +155,10 @@ doc/NetworkRoute.md
 doc/NetworkTest.md
 doc/NetworkTestNetwork.md
 doc/NetworkTestTls.md
+doc/NewPullComment.md
 doc/NotifySettings.md
 doc/OfferStarterRulesRequest.md
+doc/PRCommentSettings.md
 doc/PeriodStats.md
 doc/Pipeline.md
 doc/PlaneState.md
@@ -164,6 +168,7 @@ doc/PlatformOverviewRunsInner.md
 doc/PlatformOverviewServerQueueInner.md
 doc/PlatformUser.md
 doc/PlatformWorkspace.md
+doc/PostReviewInput.md
 doc/PreviewInput.md
 doc/PreviewIssue.md
 doc/PreviewShot.md
@@ -175,8 +180,13 @@ doc/PrivateNetworkSaved.md
 doc/Proof.md
 doc/ProofRun.md
 doc/ProofTest.md
+doc/PullComment.md
+doc/PullDetail.md
+doc/PullItem.md
 doc/PullRequest.md
 doc/PullReviewSettings.md
+doc/PullThread.md
+doc/PullsApi.md
 doc/QualityStat.md
 doc/Question.md
 doc/QueueStatus.md
@@ -195,6 +205,7 @@ doc/RemoteRepository.md
 doc/ReplayReport.md
 doc/ReplayResult.md
 doc/ReplayVersion.md
+doc/ReplyPullThreadRequest.md
 doc/RepoActivity.md
 doc/RepoBrief.md
 doc/RepoBriefInput.md
@@ -216,6 +227,7 @@ doc/Repository.md
 doc/RepositoryInput.md
 doc/RequestChangesRequest.md
 doc/ResetPasswordRequest.md
+doc/ResolvePullThreadRequest.md
 doc/Result.md
 doc/RetryTicketRequest.md
 doc/ReviewSync.md
@@ -328,6 +340,7 @@ lib/src/api/mcp_api.dart
 lib/src/api/meta_api.dart
 lib/src/api/network_api.dart
 lib/src/api/platform_api.dart
+lib/src/api/pulls_api.dart
 lib/src/api/repos_api.dart
 lib/src/api/reviews_api.dart
 lib/src/api/rules_api.dart
@@ -349,6 +362,7 @@ lib/src/model/accept_follow_ups.dart
 lib/src/model/accept_follow_ups_result.dart
 lib/src/model/acceptance.dart
 lib/src/model/acceptance_criteria_inner.dart
+lib/src/model/address_pull_comments_request.dart
 lib/src/model/agent_config_finding.dart
 lib/src/model/agent_config_scan.dart
 lib/src/model/analysis.dart
@@ -421,6 +435,7 @@ lib/src/model/deploy_repo_request.dart
 lib/src/model/device_registration.dart
 lib/src/model/disable_totp_request.dart
 lib/src/model/edit_check.dart
+lib/src/model/edit_pull_comment_request.dart
 lib/src/model/environment.dart
 lib/src/model/error.dart
 lib/src/model/event.dart
@@ -476,6 +491,7 @@ lib/src/model/network_route.dart
 lib/src/model/network_test.dart
 lib/src/model/network_test_network.dart
 lib/src/model/network_test_tls.dart
+lib/src/model/new_pull_comment.dart
 lib/src/model/notify_settings.dart
 lib/src/model/offer_starter_rules_request.dart
 lib/src/model/period_stats.dart
@@ -486,6 +502,8 @@ lib/src/model/platform_overview_runs_inner.dart
 lib/src/model/platform_overview_server_queue_inner.dart
 lib/src/model/platform_user.dart
 lib/src/model/platform_workspace.dart
+lib/src/model/post_review_input.dart
+lib/src/model/pr_comment_settings.dart
 lib/src/model/preview_input.dart
 lib/src/model/preview_issue.dart
 lib/src/model/preview_shot.dart
@@ -497,8 +515,12 @@ lib/src/model/private_network_saved.dart
 lib/src/model/proof.dart
 lib/src/model/proof_run.dart
 lib/src/model/proof_test.dart
+lib/src/model/pull_comment.dart
+lib/src/model/pull_detail.dart
+lib/src/model/pull_item.dart
 lib/src/model/pull_request.dart
 lib/src/model/pull_review_settings.dart
+lib/src/model/pull_thread.dart
 lib/src/model/quality_stat.dart
 lib/src/model/question.dart
 lib/src/model/queue_status.dart
@@ -517,6 +539,7 @@ lib/src/model/remote_repository.dart
 lib/src/model/replay_report.dart
 lib/src/model/replay_result.dart
 lib/src/model/replay_version.dart
+lib/src/model/reply_pull_thread_request.dart
 lib/src/model/repo_activity.dart
 lib/src/model/repo_brief.dart
 lib/src/model/repo_brief_input.dart
@@ -537,6 +560,7 @@ lib/src/model/repository.dart
 lib/src/model/repository_input.dart
 lib/src/model/request_changes_request.dart
 lib/src/model/reset_password_request.dart
+lib/src/model/resolve_pull_thread_request.dart
 lib/src/model/result.dart
 lib/src/model/retry_ticket_request.dart
 lib/src/model/review_sync.dart
@@ -629,6 +653,7 @@ test/accept_follow_ups_test.dart
 test/acceptance_criteria_inner_test.dart
 test/acceptance_test.dart
 test/account_api_test.dart
+test/address_pull_comments_request_test.dart
 test/agent_config_finding_test.dart
 test/agent_config_scan_test.dart
 test/analysis_acceptance_inner_test.dart
@@ -710,6 +735,7 @@ test/devices_api_test.dart
 test/disable_totp_request_test.dart
 test/docs_api_test.dart
 test/edit_check_test.dart
+test/edit_pull_comment_request_test.dart
 test/environment_test.dart
 test/error_test.dart
 test/event_page_test.dart
@@ -772,6 +798,7 @@ test/network_route_test.dart
 test/network_test_network_test.dart
 test/network_test_test.dart
 test/network_test_tls_test.dart
+test/new_pull_comment_test.dart
 test/notify_settings_test.dart
 test/offer_starter_rules_request_test.dart
 test/period_stats_test.dart
@@ -783,6 +810,8 @@ test/platform_overview_server_queue_inner_test.dart
 test/platform_overview_test.dart
 test/platform_user_test.dart
 test/platform_workspace_test.dart
+test/post_review_input_test.dart
+test/pr_comment_settings_test.dart
 test/preview_input_test.dart
 test/preview_issue_test.dart
 test/preview_shot_test.dart
@@ -794,8 +823,13 @@ test/private_network_test.dart
 test/proof_run_test.dart
 test/proof_test.dart
 test/proof_test_test.dart
+test/pull_comment_test.dart
+test/pull_detail_test.dart
+test/pull_item_test.dart
 test/pull_request_test.dart
 test/pull_review_settings_test.dart
+test/pull_thread_test.dart
+test/pulls_api_test.dart
 test/quality_stat_test.dart
 test/question_test.dart
 test/queue_status_server_queue_inner_test.dart
@@ -814,6 +848,7 @@ test/remote_repository_test.dart
 test/replay_report_test.dart
 test/replay_result_test.dart
 test/replay_version_test.dart
+test/reply_pull_thread_request_test.dart
 test/repo_activity_test.dart
 test/repo_brief_input_test.dart
 test/repo_brief_test.dart
@@ -835,6 +870,7 @@ test/repository_input_test.dart
 test/repository_test.dart
 test/request_changes_request_test.dart
 test/reset_password_request_test.dart
+test/resolve_pull_thread_request_test.dart
 test/result_test.dart
 test/retry_ticket_request_test.dart
 test/review_sync_test.dart

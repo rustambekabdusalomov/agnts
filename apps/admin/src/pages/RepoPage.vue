@@ -12,6 +12,7 @@ import CommitsTab from '../components/repo/CommitsTab.vue'
 import GuardrailsTab from '../components/repo/GuardrailsTab.vue'
 import MembersTab from '../components/repo/MembersTab.vue'
 import PipelinesTab from '../components/repo/PipelinesTab.vue'
+import PullsTab from '../components/pulls/PullsTab.vue'
 import RepoDrawer from '../components/repos/RepoDrawer.vue'
 import { useArchiveRepo } from '../components/repos/useRepos'
 import HiIcon from '../components/ui/HiIcon.vue'
@@ -25,7 +26,7 @@ const route = useRoute()
 const router = useRouter()
 const qc = useQueryClient()
 const id = computed(() => Number(route.params.id))
-const TABS = ['branches', 'commits', 'pipelines', 'ci', 'members', 'brief', 'guardrails'] as const
+const TABS = ['branches', 'commits', 'pulls', 'pipelines', 'ci', 'members', 'brief', 'guardrails'] as const
 type Tab = (typeof TABS)[number]
 const tab = computed<Tab>(() => (TABS.includes(route.query.tab as Tab) ? (route.query.tab as Tab) : 'branches'))
 const editOpen = ref(false)
@@ -125,12 +126,13 @@ function setTab(v: Tab) {
 
     <div class="tabs" role="tablist">
       <button v-for="v in TABS" :key="v" type="button" class="tab" role="tab" :aria-pressed="tab === v" :aria-selected="tab === v" @click="setTab(v)">
-        {{ v === 'guardrails' ? t('harnessRepo.tab') : t(`repo.${v}`) }}
+        {{ v === 'guardrails' ? t('harnessRepo.tab') : v === 'pulls' ? t('pulls.tab') : t(`repo.${v}`) }}
       </button>
     </div>
 
     <BranchesTab v-if="tab === 'branches'" :repo-id="id" :default-branch="repo.data.value.defaultBranch" />
     <CommitsTab v-else-if="tab === 'commits'" :repo-id="id" />
+    <PullsTab v-else-if="tab === 'pulls'" :repo-id="id" />
     <PipelinesTab v-else-if="tab === 'pipelines'" :repo="repo.data.value" />
     <CiTab v-else-if="tab === 'ci'" :repo="repo.data.value" />
     <MembersTab v-else-if="tab === 'members'" :repo="repo.data.value" />

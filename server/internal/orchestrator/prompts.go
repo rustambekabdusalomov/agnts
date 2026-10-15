@@ -151,6 +151,9 @@ type Summary struct {
 	// ReproWhy says why there is none.
 	Repro    []ReproTest `json:"repro,omitempty"`
 	ReproWhy string      `json:"reproWhy,omitempty"`
+	// Threads say what the run did about each reviewer thread from the
+	// pull request it was given as feedback.
+	Threads []domain.ThreadAnswer `json:"threads,omitempty"`
 }
 
 // ReproTest is a test that fails without a fix and passes with it.

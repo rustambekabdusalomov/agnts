@@ -35,6 +35,11 @@ type glMR struct {
 	Assignees    []glUser  `json:"assignees"`
 	Reviewers    []glUser  `json:"reviewers"`
 	UpdatedAt    time.Time `json:"updated_at"`
+	DiffRefs     struct {
+		BaseSHA  string `json:"base_sha"`
+		HeadSHA  string `json:"head_sha"`
+		StartSHA string `json:"start_sha"`
+	} `json:"diff_refs"`
 }
 
 func (m glMR) domain(login, why string) domain.PullRequest {
@@ -49,6 +54,7 @@ func (m glMR) domain(login, why string) domain.PullRequest {
 		Number: m.IID, URL: m.WebURL, Title: m.Title, Body: m.Description, Author: m.Author.Username,
 		HeadRef: m.SourceBranch, HeadSHA: m.SHA, BaseRef: m.TargetBranch, FetchRef: "refs/merge-requests/" + strconv.Itoa(m.IID) + "/head",
 		Draft: m.Draft || m.WIP, State: state, Login: login, Why: why, UpdatedAt: m.UpdatedAt,
+		BaseSHA: m.DiffRefs.BaseSHA, StartSHA: m.DiffRefs.StartSHA,
 	}
 }
 

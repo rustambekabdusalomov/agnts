@@ -4,6 +4,7 @@ import 'package:agnts_api/src/model/accept_follow_ups.dart';
 import 'package:agnts_api/src/model/accept_follow_ups_result.dart';
 import 'package:agnts_api/src/model/acceptance.dart';
 import 'package:agnts_api/src/model/acceptance_criteria_inner.dart';
+import 'package:agnts_api/src/model/address_pull_comments_request.dart';
 import 'package:agnts_api/src/model/agent_config_finding.dart';
 import 'package:agnts_api/src/model/agent_config_scan.dart';
 import 'package:agnts_api/src/model/analysis.dart';
@@ -73,6 +74,7 @@ import 'package:agnts_api/src/model/deploy_repo_request.dart';
 import 'package:agnts_api/src/model/device_registration.dart';
 import 'package:agnts_api/src/model/disable_totp_request.dart';
 import 'package:agnts_api/src/model/edit_check.dart';
+import 'package:agnts_api/src/model/edit_pull_comment_request.dart';
 import 'package:agnts_api/src/model/environment.dart';
 import 'package:agnts_api/src/model/error.dart';
 import 'package:agnts_api/src/model/event.dart';
@@ -123,8 +125,10 @@ import 'package:agnts_api/src/model/network_route.dart';
 import 'package:agnts_api/src/model/network_test.dart';
 import 'package:agnts_api/src/model/network_test_network.dart';
 import 'package:agnts_api/src/model/network_test_tls.dart';
+import 'package:agnts_api/src/model/new_pull_comment.dart';
 import 'package:agnts_api/src/model/notify_settings.dart';
 import 'package:agnts_api/src/model/offer_starter_rules_request.dart';
+import 'package:agnts_api/src/model/pr_comment_settings.dart';
 import 'package:agnts_api/src/model/period_stats.dart';
 import 'package:agnts_api/src/model/pipeline.dart';
 import 'package:agnts_api/src/model/plane_state.dart';
@@ -133,6 +137,7 @@ import 'package:agnts_api/src/model/platform_overview_runs_inner.dart';
 import 'package:agnts_api/src/model/platform_overview_server_queue_inner.dart';
 import 'package:agnts_api/src/model/platform_user.dart';
 import 'package:agnts_api/src/model/platform_workspace.dart';
+import 'package:agnts_api/src/model/post_review_input.dart';
 import 'package:agnts_api/src/model/preview_input.dart';
 import 'package:agnts_api/src/model/preview_issue.dart';
 import 'package:agnts_api/src/model/preview_shot.dart';
@@ -144,8 +149,12 @@ import 'package:agnts_api/src/model/private_network_saved.dart';
 import 'package:agnts_api/src/model/proof.dart';
 import 'package:agnts_api/src/model/proof_run.dart';
 import 'package:agnts_api/src/model/proof_test.dart';
+import 'package:agnts_api/src/model/pull_comment.dart';
+import 'package:agnts_api/src/model/pull_detail.dart';
+import 'package:agnts_api/src/model/pull_item.dart';
 import 'package:agnts_api/src/model/pull_request.dart';
 import 'package:agnts_api/src/model/pull_review_settings.dart';
+import 'package:agnts_api/src/model/pull_thread.dart';
 import 'package:agnts_api/src/model/quality_stat.dart';
 import 'package:agnts_api/src/model/question.dart';
 import 'package:agnts_api/src/model/queue_status.dart';
@@ -163,6 +172,7 @@ import 'package:agnts_api/src/model/remote_repository.dart';
 import 'package:agnts_api/src/model/replay_report.dart';
 import 'package:agnts_api/src/model/replay_result.dart';
 import 'package:agnts_api/src/model/replay_version.dart';
+import 'package:agnts_api/src/model/reply_pull_thread_request.dart';
 import 'package:agnts_api/src/model/repo_activity.dart';
 import 'package:agnts_api/src/model/repo_brief.dart';
 import 'package:agnts_api/src/model/repo_brief_input.dart';
@@ -183,6 +193,7 @@ import 'package:agnts_api/src/model/repository.dart';
 import 'package:agnts_api/src/model/repository_input.dart';
 import 'package:agnts_api/src/model/request_changes_request.dart';
 import 'package:agnts_api/src/model/reset_password_request.dart';
+import 'package:agnts_api/src/model/resolve_pull_thread_request.dart';
 import 'package:agnts_api/src/model/result.dart';
 import 'package:agnts_api/src/model/retry_ticket_request.dart';
 import 'package:agnts_api/src/model/review_sync.dart';
@@ -290,6 +301,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return Acceptance.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AcceptanceCriteriaInner':
           return AcceptanceCriteriaInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AddressPullCommentsRequest':
+          return AddressPullCommentsRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AgentConfigFinding':
           return AgentConfigFinding.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AgentConfigScan':
@@ -437,6 +450,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return DisableTotpRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'EditCheck':
           return EditCheck.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'EditPullCommentRequest':
+          return EditPullCommentRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Environment':
           return Environment.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Error':
@@ -552,10 +567,14 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return NetworkTestNetwork.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'NetworkTestTls':
           return NetworkTestTls.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'NewPullComment':
+          return NewPullComment.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'NotifySettings':
           return NotifySettings.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'OfferStarterRulesRequest':
           return OfferStarterRulesRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PRCommentSettings':
+          return PRCommentSettings.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PeriodStats':
           return PeriodStats.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Pipeline':
@@ -572,6 +591,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return PlatformUser.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PlatformWorkspace':
           return PlatformWorkspace.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PostReviewInput':
+          return PostReviewInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PreviewInput':
           return PreviewInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PreviewIssue':
@@ -594,10 +615,18 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ProofRun.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ProofTest':
           return ProofTest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PullComment':
+          return PullComment.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PullDetail':
+          return PullDetail.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PullItem':
+          return PullItem.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PullRequest':
           return PullRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PullReviewSettings':
           return PullReviewSettings.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PullThread':
+          return PullThread.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'QualityStat':
           return QualityStat.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Question':
@@ -635,6 +664,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ReplayResult.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ReplayVersion':
           return ReplayVersion.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ReplyPullThreadRequest':
+          return ReplyPullThreadRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RepoActivity':
           return RepoActivity.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RepoBrief':
@@ -675,6 +706,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return RequestChangesRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ResetPasswordRequest':
           return ResetPasswordRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ResolvePullThreadRequest':
+          return ResolvePullThreadRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Result':
           return Result.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RetryTicketRequest':

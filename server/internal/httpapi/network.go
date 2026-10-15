@@ -186,6 +186,28 @@ func (s *Server) ReconnectPrivateNetwork(w http.ResponseWriter, r *http.Request,
 	writeJSON(w, http.StatusOK, toNetwork(v))
 }
 
+// DisconnectPrivateNetwork implements gen.ServerInterface.
+func (s *Server) DisconnectPrivateNetwork(w http.ResponseWriter, r *http.Request, id gen.NetworkID) {
+	s.setNetworkConnected(w, r, id, false)
+}
+
+// ConnectPrivateNetwork implements gen.ServerInterface.
+func (s *Server) ConnectPrivateNetwork(w http.ResponseWriter, r *http.Request, id gen.NetworkID) {
+	s.setNetworkConnected(w, r, id, true)
+}
+
+func (s *Server) setNetworkConnected(w http.ResponseWriter, r *http.Request, id gen.NetworkID, on bool) {
+	if !s.networkReady(w) {
+		return
+	}
+	v, err := s.opt.Network.SetConnected(r.Context(), id, on, origin(r))
+	if err != nil {
+		s.writeAdminError(w, r, err, "")
+		return
+	}
+	writeJSON(w, http.StatusOK, toNetwork(v))
+}
+
 // RotateLinkToken implements gen.ServerInterface.
 func (s *Server) RotateLinkToken(w http.ResponseWriter, r *http.Request, id gen.NetworkID) {
 	if !s.networkReady(w) {

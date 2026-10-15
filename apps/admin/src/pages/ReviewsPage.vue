@@ -4,7 +4,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../api/client'
-import type { PullReviewSettings, ReviewSync, Settings, Ticket } from '../api/types'
+import type { PRCommentSettings, PullReviewSettings, ReviewSync, Settings, Ticket } from '../api/types'
 import PageHeader from '../components/PageHeader.vue'
 import StateBadge from '../components/StateBadge.vue'
 import CfgRow from '../components/form/CfgRow.vue'
@@ -69,6 +69,14 @@ const saveSettings = useMutation({
 function setPr<K extends keyof PullReviewSettings>(k: K, v: PullReviewSettings[K]) {
   const s = settings.data.value
   if (s) saveSettings.mutate({ ...JSON.parse(JSON.stringify(s)), pullReviews: { ...pr.value, [k]: v } })
+}
+// Settings.prComments: how agnts takes part in pull request conversations.
+const PRC_DEFAULTS: PRCommentSettings = { attribution: true, learnFromComments: true, resolveFixed: true, autoAddress: false }
+const PRC_KEYS = ['attribution', 'learnFromComments', 'resolveFixed', 'autoAddress'] as const
+const prc = computed(() => settings.data.value?.prComments ?? PRC_DEFAULTS)
+function setPrc(k: keyof PRCommentSettings, v: boolean) {
+  const s = settings.data.value
+  if (s) saveSettings.mutate({ ...JSON.parse(JSON.stringify(s)), prComments: { ...prc.value, [k]: v } })
 }
 const methods = computed(() => (['merge', 'squash', 'rebase'] as const).map((m) => ({ value: m, label: t(`reviews.merge_${m}`) })))
 
@@ -228,6 +236,14 @@ const newLogin = ref('')
           </CfgRow>
           <CfgRow :label="t('reviews.mergeMethod')" :help="t('reviews.mergeMethodHelp')">
             <SegButtons :model-value="pr.mergeMethod" :options="methods" :label="t('reviews.mergeMethod')" @update:model-value="(v) => setPr('mergeMethod', v)" />
+          </CfgRow>
+        </fieldset>
+      </section>
+      <section class="card">
+        <div class="ch"><h2>{{ t('pulls.settingsTitle') }}</h2></div>
+        <fieldset class="ro-fs" :disabled="!workspace.canEdit || !settings.data.value || saveSettings.isPending.value">
+          <CfgRow v-for="k in PRC_KEYS" :key="k" :label="t(`pulls.set_${k}`)" :help="t(`pulls.set_${k}Help`)">
+            <SwitchToggle :model-value="prc[k]" :label="t(`pulls.set_${k}`)" @update:model-value="(v) => setPrc(k, v)" />
           </CfgRow>
         </fieldset>
       </section>

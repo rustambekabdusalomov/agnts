@@ -41,6 +41,13 @@ void main() {
       // TODO
     });
 
+    // Send reviewers' threads on the ticket's open pull requests back to coding: the given ones, or every unresolved thread by someone else not sent yet. After the fix is approved and pushed, agnts answers in each thread
+    //
+    //Future<Ticket> addressPullComments(String key, { AddressPullCommentsRequest addressPullCommentsRequest }) async
+    test('test addressPullComments', () async {
+      // TODO
+    });
+
     // Answer the ticket's questions; when all are answered, coding starts
     //
     //Future<Ticket> answerQuestions(String key, AnswersRequest answersRequest) async

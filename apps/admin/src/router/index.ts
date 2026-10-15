@@ -47,6 +47,7 @@ export const router = createRouter({
         { path: 'integrations/:provider', name: 'integration', component: () => import('../pages/IntegrationPage.vue') },
         { path: 'repos', name: 'repos', component: () => import('../pages/ReposPage.vue') },
         { path: 'repos/:id', name: 'repo', component: () => import('../pages/RepoPage.vue') },
+        { path: 'repos/:id/pulls/:number', name: 'pull', component: () => import('../pages/PullPage.vue') },
         { path: 'learn', name: 'learn', component: () => import('../pages/LearnPage.vue') },
         { path: 'learn-queue', name: 'learnQueue', component: () => import('../pages/LearnQueuePage.vue') },
         { path: 'learn/:id', name: 'lesson', component: () => import('../pages/LessonPage.vue') },

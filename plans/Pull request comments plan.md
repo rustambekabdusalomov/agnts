@@ -1,6 +1,6 @@
 # agnts pull request comments (read, write, edit, delete) — Plan
 
-Oct 14, 2026 · draft, not started
+Oct 15, 2026 · implemented (see Implementation notes)
 
 ## Overview
 
@@ -295,3 +295,20 @@ Each phase is shippable on its own; 1+2 already answer "fetch MRs with comments 
 2. Should agnts's own posted comments carry a visible marker (`<!-- agnts:finding:<key> -->` HTML comment) so they can also be found when `pr_posts` is lost or the comment was edited? Proposal: yes, invisible marker plus the table.
 3. Should the Pull requests tab list **all** open PRs, or only those you're assigned/requested plus agnts's own? (All is simple with paging; it's a question of noise.)
 4. Phase 4 auto-address: trigger on any new reviewer comment, or only on "changes requested"? Proposal: changes requested only.
+
+## Implementation notes
+
+All four phases shipped. What differs from the plan above:
+
+- **Open questions, decided.** (1) One token per workspace stays; with `Settings.prComments.attribution` (on by default) comments written in agnts end with `<sub>via agnts · <username></sub>`, which an edit replaces rather than repeats. (2) Everything agnts writes itself (review summary, findings, answers) carries an invisible `<!-- agnts -->` marker besides its `pr_posts` row; the webhooks and the UI use it to tell agnts's comments from people's. (3) The Pull requests tab lists all pull requests, filtered by state (open, merged, closed, all). (4) Auto-address triggers only on a review that requests changes, and is off by default.
+- **Settings are per workspace, not per repository**: `Settings.prComments` = `attribution`, `learnFromComments`, `resolveFixed`, `autoAddress`, edited on the Reviews page.
+- **API shapes.** Comment and thread ids travel in bodies and the query string, not in paths (`POST /repos/{id}/pulls/{number}/replies {threadId, body}`, `PATCH|DELETE /repos/{id}/pulls/{number}/comments`, `POST /repos/{id}/pulls/{number}/resolve`), because GitHub thread ids contain colons and GraphQL ids. The pull request detail is `GET /repos/{id}/pulls/{number}` with the files from the host (`/pulls/n/files`, GitLab `/diffs` with a `/changes` fallback). `POST /tickets/{key}/post-review` takes an optional `{summary, findings, requestChanges}` body (no body = the old behaviour plus inline findings); the address endpoint is `POST /tickets/{key}/address-comments`.
+- **Ids.** GitHub: `ic:` issue comment, `rc:` review comment, `rv:` review, `th:<graphql id>:<first comment id>` thread (the GraphQL id is empty for a thread agnts just started and is looked up when it is resolved). GitLab: `gd:` discussion, `n:` note, `gn:` a general note just posted (its discussion is looked up when answered).
+- **Migration** is `00046_pr_comments.sql`: `pr_posts` and `pr_thread_feedback` (both with workspace row-level security), and reviewer notes gain the kind `host_comment`.
+- **GitLab "outdated"** is approximated: a thread written on another head than the merge request's current one is shown as outdated (GitLab does not say whether the line itself changed). GitLab has no "request changes" here; the option is hidden for it.
+- **Review posting** without a summary but with "request changes" sends a short verdict text (GitHub requires one); it is not recorded as the summary.
+- **Phase 4 replies** use the coding run's new `summary.json` field `threads: [{id, action: fixed|answered|declined, note}]`. They are posted after the push to the existing pull request; threads are resolved when `resolveFixed` is on and the action is `fixed` (or the run did not say). A ticket goes back with `RequestChanges` while it waits for review, else through `ReopenForCI` (done, pull request open), like red CI.
+- **Pull request list** has no unresolved-thread counts (one more host call per row); the ticket and pull request pages show them.
+- **Mobile** shows the conversation on the ticket screen (read, comment, reply, edit, delete, resolve, Address). Posting a review with inline findings and the diff with line comments are admin-only.
+- **MCP** got one read tool, `get_pull_request_comments`; writes stay in the apps (MCP writes need the confirm flow).
+- **Testing**: adapter tests with recorded host responses for both hosts (threads mapping, outdated/removed lines, writes, not-in-diff, batch reviews, GitLab without draft notes), webhook parsing tests, a Postgres test for the two tables (upserts, isolation), orchestrator tests for inline posting across three review rounds (posted / resolved / still present), the full address → re-code → push → answer → resolve loop plus auto-address, learning from host comments and attribution; admin component tests and a Flutter widget test. A manual run against real GitHub and GitLab repositories is still to do.

@@ -100,6 +100,7 @@
     "buildEnvCleared": "Cleared when you save.",
     "plane": "Plane {project}",
     "planeProject": "Plane project",
-    "planeHelp": "Optional. The project identifier (WEB in WEB-123). Work items from this Plane project with the agnts label run here."
+    "planeHelp": "Optional. The project identifier (WEB in WEB-123). Work items from this Plane project with the agnts label run here.",
+    "search": "Search by name, stack, project or group"
   }
 }

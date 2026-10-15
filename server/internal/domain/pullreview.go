@@ -37,6 +37,10 @@ type PullRequest struct {
 	HeadSHA  string `json:"headSha"`
 	BaseRef  string `json:"baseRef"`
 	FetchRef string `json:"fetchRef"`
+	// BaseSHA and StartSHA are GitLab's diff refs, which an inline note
+	// needs; agnts's own, not kept on tickets.
+	BaseSHA  string `json:"-"`
+	StartSHA string `json:"-"`
 	Draft    bool   `json:"draft"`
 	State    string `json:"state"`
 	// Login is the git host user it waits for (the token's owner): whose
@@ -78,6 +82,8 @@ const (
 	NoteRereview  = "rereview"  // asked agnts to review again, with a note
 	NoteDismissed = "dismissed" // dismissed agnts's review, with a reason
 	NoteManual    = "manual"    // wrote it on the Reviews page
+	// NoteHostComment: commented on someone's pull request on the git host.
+	NoteHostComment = "host_comment"
 )
 
 // ReviewerNoteMax caps one note.
@@ -113,7 +119,7 @@ func (n *ReviewerNote) Validate() error {
 		return errors.New("the note is empty")
 	case utf8.RuneCountInString(n.Note) > ReviewerNoteMax:
 		return fmt.Errorf("the note is longer than %d characters", ReviewerNoteMax)
-	case !slices.Contains([]string{NoteRereview, NoteDismissed, NoteManual}, n.Kind):
+	case !slices.Contains([]string{NoteRereview, NoteDismissed, NoteManual, NoteHostComment}, n.Kind):
 		return fmt.Errorf("unknown note kind %q", n.Kind)
 	}
 	n.PullTitle = clip(strings.TrimSpace(n.PullTitle), 300)

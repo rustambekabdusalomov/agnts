@@ -10,6 +10,7 @@ import 'package:agnts_api/src/deserialize.dart';
 import 'package:dio/dio.dart';
 
 import 'package:agnts_api/src/model/error.dart';
+import 'package:agnts_api/src/model/post_review_input.dart';
 import 'package:agnts_api/src/model/review_sync.dart';
 import 'package:agnts_api/src/model/reviewer.dart';
 import 'package:agnts_api/src/model/reviewer_note.dart';
@@ -265,11 +266,12 @@ _responseData = rawData == null ? null : deserialize<Reviewers, Reviewers>(rawDa
     );
   }
 
-  /// Post agnts&#39;s latest review of a pull request on it as a comment (once per reviewed commit)
+  /// Post agnts&#39;s latest review of a pull request on it (once per reviewed commit): the summary, and the chosen findings on their lines in one review. Posting the review of new commits edits agnts&#39;s earlier summary, answers its findings that are still there and resolves the ones that are gone
   /// 
   ///
   /// Parameters:
   /// * [key] 
+  /// * [postReviewInput] 
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -281,6 +283,7 @@ _responseData = rawData == null ? null : deserialize<Reviewers, Reviewers>(rawDa
   /// Throws [DioException] if API call or serialization fails
   Future<Response<Ticket>> postPullReview({ 
     required String key,
+    PostReviewInput? postReviewInput,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -309,11 +312,30 @@ _responseData = rawData == null ? null : deserialize<Reviewers, Reviewers>(rawDa
         ],
         ...?extra,
       },
+      contentType: 'application/json',
       validateStatus: validateStatus,
     );
 
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(postReviewInput);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
     final _response = await _dio.request<Object>(
       _path,
+      data: _bodyData,
       options: _options,
       cancelToken: cancelToken,
       onSendProgress: onSendProgress,

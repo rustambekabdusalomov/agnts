@@ -471,6 +471,46 @@ func (s *Service) Reconnect(ctx context.Context, id int64, origin domain.Origin)
 	return s.view(n), nil
 }
 
+// SetConnected connects (on) or disconnects a network without touching its
+// config: a disconnected network has no tunnel (its OpenVPN sidecar stops)
+// and routes nothing until it is connected again.
+func (s *Service) SetConnected(ctx context.Context, id int64, on bool, origin domain.Origin) (View, error) {
+	if !s.Enabled() {
+		return View{}, invalid("%s", ErrOff.Error())
+	}
+	n, err := s.store.Save(ctx, id, func(_ int64, cur *postgres.PrivateNetwork, _ []postgres.PrivateNetwork) (postgres.PrivateNetwork, error) {
+		n := *cur
+		n.SecretEnc = nil // keep the stored secret
+		if on && !cur.Enabled && cur.Kind == privnet.KindOpenVPN {
+			// The server-wide cap on OpenVPN sidecars counts every workspace.
+			if all, err := s.store.All(ctx); err == nil {
+				running := 0
+				for _, o := range all {
+					if o.ID != id && o.Enabled && o.Kind == privnet.KindOpenVPN {
+						running++
+					}
+				}
+				if running >= s.cfg.MaxOVPN {
+					return n, invalid("this server already runs %d OpenVPN networks, its limit: disconnect another first", s.cfg.MaxOVPN)
+				}
+			}
+		}
+		n.Enabled = on
+		return n, nil
+	})
+	if err != nil {
+		return View{}, err
+	}
+	s.sidecarErr.Delete(n.ID)
+	verb := "disconnected"
+	if on {
+		verb = "connected"
+	}
+	s.event(ctx, origin, fmt.Sprintf("private network %q %s", n.Name, verb))
+	s.changed(ctx)
+	return s.view(n), nil
+}
+
 // Delete removes one of the workspace's networks.
 func (s *Service) Delete(ctx context.Context, id int64, origin domain.Origin) error {
 	cur, err := s.store.Get(ctx, id)

@@ -148,6 +148,7 @@ type Provider interface {
 	orchestrator.Assigner
 	orchestrator.MergeChecker
 	orchestrator.ReviewHost
+	orchestrator.Conversation
 	Browser
 	CIHost
 }

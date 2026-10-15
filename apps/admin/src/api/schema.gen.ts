@@ -412,8 +412,27 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Post agnts's latest review of a pull request on it as a comment (once per reviewed commit) */
+        /** Post agnts's latest review of a pull request on it (once per reviewed commit): the summary, and the chosen findings on their lines in one review. Posting the review of new commits edits agnts's earlier summary, answers its findings that are still there and resolves the ones that are gone */
         post: operations["postPullReview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/address-comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send reviewers' threads on the ticket's open pull requests back to coding: the given ones, or every unresolved thread by someone else not sent yet. After the fix is approved and pushed, agnts answers in each thread */
+        post: operations["addressPullComments"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1537,6 +1556,44 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/networks/{networkId}/disconnect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                networkId: components["parameters"]["NetworkID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Disconnect a network: its tunnel stops and it routes nothing until it is connected again. The config is kept */
+        post: operations["disconnectPrivateNetwork"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/networks/{networkId}/connect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                networkId: components["parameters"]["NetworkID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Connect a disconnected network again, with its saved config */
+        post: operations["connectPrivateNetwork"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/networks/{networkId}/token": {
         parameters: {
             query?: never;
@@ -2198,6 +2255,127 @@ export interface paths {
         put?: never;
         /** Start a deployment (GitLab manual job, or the GitHub deploy workflow). Never available from MCP. */
         post: operations["deployRepo"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repos/{id}/pulls": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        /** The repository's pull requests (GitLab merge requests), most recently updated first, 30 per page; a shorter page is the last */
+        get: operations["listRepoPulls"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repos/{id}/pulls/{number}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+                number: components["parameters"]["PullNumber"];
+            };
+            cookie?: never;
+        };
+        /** A pull request as it stands on the git host, with the files it changes */
+        get: operations["getRepoPull"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repos/{id}/pulls/{number}/threads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+                number: components["parameters"]["PullNumber"];
+            };
+            cookie?: never;
+        };
+        /** A pull request's conversation: general comments, review summaries and threads on diff lines, oldest first */
+        get: operations["listPullThreads"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repos/{id}/pulls/{number}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+                number: components["parameters"]["PullNumber"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Comment on a pull request, or on a line of its diff, as the git host token's user */
+        post: operations["addPullComment"];
+        /** Delete a comment (your own, on the git host) */
+        delete: operations["deletePullComment"];
+        options?: never;
+        head?: never;
+        /** Replace the text of a comment (your own, on the git host) */
+        patch: operations["editPullComment"];
+        trace?: never;
+    };
+    "/repos/{id}/pulls/{number}/replies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+                number: components["parameters"]["PullNumber"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Answer in a thread of a pull request */
+        post: operations["replyPullThread"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repos/{id}/pulls/{number}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+                number: components["parameters"]["PullNumber"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resolve or reopen a thread on a diff line */
+        post: operations["resolvePullThread"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4570,6 +4748,7 @@ export interface components {
             /** @description How many repositories one ticket, and one repository group, may have (6 by default) */
             maxTicketRepos?: number;
             pullReviews?: components["schemas"]["PullReviewSettings"];
+            prComments?: components["schemas"]["PRCommentSettings"];
             ci?: components["schemas"]["CISettings"];
             guard?: components["schemas"]["GuardSettings"];
             /** @description What agnts does when a run looks stuck: nothing, note it on the ticket, or also tell Claude to step back (once per run) */
@@ -4895,6 +5074,125 @@ export interface components {
              */
             postedAt?: string;
         };
+        /** @description How agnts takes part in pull request conversations */
+        PRCommentSettings: {
+            /** @description Add "via agnts · <person>" to comments written through agnts (they all go out as the git host token's user) */
+            attribution: boolean;
+            /** @description Keep the comments you write on others' pull requests on the git host as notes on how you review */
+            learnFromComments: boolean;
+            /** @description Resolve a reviewer's thread once agnts pushed the fix and answered it */
+            resolveFixed: boolean;
+            /** @description Send the unresolved threads back to the ticket when a reviewer requests changes on agnts's pull request (the fix still waits for your approval) */
+            autoAddress: boolean;
+        };
+        /** @description A pull request (GitLab merge request) in a repository's list */
+        PullItem: {
+            /** @description The pull request number (GitLab: the IID) */
+            number: number;
+            url: string;
+            title: string;
+            author: string;
+            headRef: string;
+            headSha: string;
+            baseRef: string;
+            draft: boolean;
+            /** @enum {string} */
+            state: "open" | "closed" | "merged";
+            /** @description Why it waits for the token's user: assigned, review_requested, or empty */
+            why: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** @description agnts's ticket for it: its own change, or its review */
+            ticketKey?: string;
+            /** @description It is agnts's own change */
+            own: boolean;
+        };
+        PullDetail: {
+            /** Format: int64 */
+            repoId: number;
+            repoName: string;
+            /** @enum {string} */
+            provider: "github" | "gitlab";
+            pull: components["schemas"]["PullItem"];
+            /** @description The description, Markdown */
+            body?: string;
+            /** @description The git host token's user: who comments made here appear from */
+            login?: string;
+            files: components["schemas"]["FileChange"][];
+            /** @description Why the files could not be read */
+            filesError?: string;
+            ticketKey?: string;
+            own: boolean;
+        };
+        PullComment: {
+            /** @description Opaque: pass it back to edit or delete */
+            id: string;
+            author: string;
+            avatarUrl?: string;
+            /** @description Markdown, as the git host stores it */
+            body: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            url?: string;
+            /** @description Written by the git host token's user, who may edit and delete it */
+            mine: boolean;
+            /** @description A note the git host wrote ("added 2 commits") */
+            system: boolean;
+            /** @description agnts posted it */
+            agnts: boolean;
+        };
+        PullThread: {
+            /** @description Opaque: pass it back to reply or resolve */
+            id: string;
+            /** @enum {string} */
+            kind: "general" | "inline" | "review";
+            path?: string;
+            /** @description Line in the new file */
+            line?: number;
+            /** @description Line in the old file, for a removed line */
+            oldLine?: number;
+            /** @description First line of a range */
+            startLine?: number;
+            diffHunk?: string;
+            commitSha?: string;
+            /** @description The line changed since the thread started */
+            outdated: boolean;
+            resolvable: boolean;
+            resolved: boolean;
+            /** @description A review's verdict: APPROVED, CHANGES_REQUESTED or COMMENTED */
+            reviewState?: string;
+            /** @description On agnts's own pull request: sent back to the ticket as feedback, with no newer comment since */
+            sent?: boolean;
+            /** @description agnts answered it after pushing the fix */
+            replied?: boolean;
+            comments: components["schemas"]["PullComment"][];
+        };
+        NewPullComment: {
+            body: string;
+            /** @description The file, for a comment on a line */
+            path?: string;
+            /** @description Line in the new file (an added or unchanged line) */
+            line?: number;
+            /** @description Line in the old file: a removed line, or with line an unchanged one */
+            oldLine?: number;
+            /** @description First line of a range (GitHub) */
+            startLine?: number;
+            /** @description The commit the line is in; the newest when empty */
+            headSha?: string;
+        };
+        PostReviewInput: {
+            /**
+             * @description Post the summary (verdict and every finding)
+             * @default true
+             */
+            summary: boolean;
+            /** @description Indexes of the findings to post on their lines; left out, every finding on a line of the diff */
+            findings?: number[];
+            /** @description Post it as a request for changes (GitHub) */
+            requestChanges?: boolean;
+        };
         /** @description What a sync of the pull requests waiting for you found */
         ReviewSync: {
             /** @description Repositories asked */
@@ -4922,7 +5220,7 @@ export interface components {
             ticketKey?: string;
             pullTitle?: string;
             /** @enum {string} */
-            kind: "rereview" | "dismissed" | "manual";
+            kind: "rereview" | "dismissed" | "manual" | "host_comment";
             note: string;
             /** Format: date-time */
             createdAt: string;
@@ -6118,6 +6416,7 @@ export interface components {
         RuleID: number;
         LessonID: number;
         RelationID: number;
+        PullNumber: number;
         TicketKey: string;
     };
     requestBodies: never;
@@ -6622,12 +6921,41 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PostReviewInput"];
+            };
+        };
         responses: {
             200: components["responses"]["TicketOK"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
+            502: components["responses"]["BadGateway"];
+        };
+    };
+    addressPullComments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    threadIds?: string[];
+                };
+            };
+        };
+        responses: {
+            200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
             502: components["responses"]["BadGateway"];
         };
     };
@@ -8422,6 +8750,58 @@ export interface operations {
             404: components["responses"]["NotFound"];
         };
     };
+    disconnectPrivateNetwork: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                networkId: components["parameters"]["NetworkID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The network */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivateNetwork"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    connectPrivateNetwork: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                networkId: components["parameters"]["NetworkID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The network */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivateNetwork"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
     rotateLinkToken: {
         parameters: {
             query?: never;
@@ -9479,6 +9859,247 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
+        };
+    };
+    listRepoPulls: {
+        parameters: {
+            query?: {
+                state?: "open" | "closed" | "merged" | "all";
+                page?: number;
+            };
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PullItem"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            502: components["responses"]["BadGateway"];
+        };
+    };
+    getRepoPull: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+                number: components["parameters"]["PullNumber"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PullDetail"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            502: components["responses"]["BadGateway"];
+        };
+    };
+    listPullThreads: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+                number: components["parameters"]["PullNumber"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PullThread"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            502: components["responses"]["BadGateway"];
+        };
+    };
+    addPullComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+                number: components["parameters"]["PullNumber"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NewPullComment"];
+            };
+        };
+        responses: {
+            /** @description The new thread */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PullThread"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            502: components["responses"]["BadGateway"];
+        };
+    };
+    deletePullComment: {
+        parameters: {
+            query: {
+                commentId: string;
+            };
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+                number: components["parameters"]["PullNumber"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            502: components["responses"]["BadGateway"];
+        };
+    };
+    editPullComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+                number: components["parameters"]["PullNumber"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    commentId: string;
+                    body: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The comment after the edit */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PullComment"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            502: components["responses"]["BadGateway"];
+        };
+    };
+    replyPullThread: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+                number: components["parameters"]["PullNumber"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    threadId: string;
+                    body: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The new comment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PullComment"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            502: components["responses"]["BadGateway"];
+        };
+    };
+    resolvePullThread: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+                number: components["parameters"]["PullNumber"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    threadId: string;
+                    resolved: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description Done */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            502: components["responses"]["BadGateway"];
         };
     };
     getSignupInfo: {

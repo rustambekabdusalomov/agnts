@@ -153,7 +153,7 @@ func TestPullReviewFlow(t *testing.T) {
 	}
 
 	// Posting the review: once per reviewed commit, kept across syncs.
-	tk, err = h.o.PostPullReview(h.ctx, "API-PR4", domain.OriginWeb)
+	tk, _, err = h.o.PostPullReview(h.ctx, "API-PR4", orchestrator.PostReviewOptions{Summary: true}, domain.OriginWeb)
 	if err != nil || len(host.posted) != 1 || tk.Pull.PostedSHA != "aaa1111" || tk.Pull.PostedAt == nil {
 		t.Fatalf("post: %v posted %d pull %+v", err, len(host.posted), tk.Pull)
 	}
@@ -162,7 +162,7 @@ func TestPullReviewFlow(t *testing.T) {
 			t.Fatalf("posted comment lacks %q:\n%s", want, host.posted[0])
 		}
 	}
-	if _, err := h.o.PostPullReview(h.ctx, "API-PR4", domain.OriginWeb); err == nil || len(host.posted) != 1 {
+	if _, _, err := h.o.PostPullReview(h.ctx, "API-PR4", orchestrator.PostReviewOptions{Summary: true}, domain.OriginWeb); err == nil || len(host.posted) != 1 {
 		t.Fatalf("posted the same review twice: %v", err)
 	}
 	p4 := pull(4, "aaa1111")

@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../features/assistant/assistant_data.dart';
+import '../features/tickets/pull_comments.dart';
 import 'api.dart';
 import 'data.dart';
 
@@ -116,6 +117,10 @@ class LiveStream {
       case 'lessons_found':
         ref.invalidate(lessonsProvider);
         ref.invalidate(ticketLessonsProvider);
+      case 'pr_comment':
+      case 'threads_feedback':
+      case 'review_posted':
+        ref.invalidate(pullThreadsProvider); // a pull request's conversation on the git host changed
       case 'ci_failure':
         ref.invalidate(ciFailuresProvider);
         ref.invalidate(ciFailureProvider);

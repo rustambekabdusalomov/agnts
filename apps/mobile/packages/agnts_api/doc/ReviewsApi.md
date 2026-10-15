@@ -12,7 +12,7 @@ Method | HTTP request | Description
 [**addReviewerNote**](ReviewsApi.md#addreviewernote) | **POST** /reviews/notes | Tell agnts something about how you review; the next review for that user reads it
 [**deleteReviewerNote**](ReviewsApi.md#deletereviewernote) | **DELETE** /reviews/notes/{id} | Forget a note (one already folded into a profile stays there until the profile is edited)
 [**listReviewers**](ReviewsApi.md#listreviewers) | **GET** /reviews/reviewers | How each person agnts reviews pull requests for reviews, as it learned from their notes
-[**postPullReview**](ReviewsApi.md#postpullreview) | **POST** /tickets/{key}/post-review | Post agnts&#39;s latest review of a pull request on it as a comment (once per reviewed commit)
+[**postPullReview**](ReviewsApi.md#postpullreview) | **POST** /tickets/{key}/post-review | Post agnts&#39;s latest review of a pull request on it (once per reviewed commit): the summary, and the chosen findings on their lines in one review. Posting the review of new commits edits agnts&#39;s earlier summary, answers its findings that are still there and resolves the ones that are gone
 [**saveReviewerProfile**](ReviewsApi.md#savereviewerprofile) | **PUT** /reviews/reviewers/{login} | Replace a reviewer profile with your text; empty text clears it
 [**syncReviews**](ReviewsApi.md#syncreviews) | **POST** /reviews/sync | Ask the git host for the pull requests waiting for you and queue reviews of the new ones
 
@@ -148,9 +148,9 @@ This endpoint does not need any parameter.
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **postPullReview**
-> Ticket postPullReview(key)
+> Ticket postPullReview(key, postReviewInput)
 
-Post agnts's latest review of a pull request on it as a comment (once per reviewed commit)
+Post agnts's latest review of a pull request on it (once per reviewed commit): the summary, and the chosen findings on their lines in one review. Posting the review of new commits edits agnts's earlier summary, answers its findings that are still there and resolves the ones that are gone
 
 ### Example
 ```dart
@@ -162,9 +162,10 @@ import 'package:agnts_api/api.dart';
 
 final api = AgntsApi().getReviewsApi();
 final String key = key_example; // String | 
+final PostReviewInput postReviewInput = ; // PostReviewInput | 
 
 try {
-    final response = api.postPullReview(key);
+    final response = api.postPullReview(key, postReviewInput);
     print(response);
 } on DioException catch (e) {
     print('Exception when calling ReviewsApi->postPullReview: $e\n');
@@ -176,6 +177,7 @@ try {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **key** | **String**|  | 
+ **postReviewInput** | [**PostReviewInput**](PostReviewInput.md)|  | [optional] 
 
 ### Return type
 
@@ -187,7 +189,7 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

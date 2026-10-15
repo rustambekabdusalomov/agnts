@@ -85,6 +85,13 @@
     "activityTime": "Vaqt",
     "activityTarget": "Manzil",
     "activitySource": "Tiket yoki manba",
-    "gone": "oʻchirilgan"
+    "gone": "oʻchirilgan",
+    "disconnect": "Uzish",
+    "disconnectHelp": "Tunnelni to'xtatish. Qayta ulamaguningizcha ishga tushirishlar u orqali hech narsaga yetmaydi; sozlama saqlanadi",
+    "disconnectConfirm": "{name} uzilsinmi? U orqali ishlaydigan ishga tushirishlar va trekerlar qayta ulamaguningizcha ishlamaydi. Sozlamasi saqlanadi.",
+    "disconnected": "Uzildi",
+    "connect": "Ulash",
+    "connectHelp": "Tunnelni saqlangan sozlama bilan qayta ishga tushirish",
+    "connecting": "Ulanmoqda: tunnel 15 soniya ichida ishga tushadi"
   }
 }

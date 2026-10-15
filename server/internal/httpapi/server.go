@@ -47,6 +47,7 @@ type Options struct {
 	Rules   Rules        // Rules page; nil answers 501
 	Briefs  Briefs       // repository briefs; nil answers 501
 	Reviews Reviews      // pull request reviews; nil answers 501
+	Pulls   Pulls        // pull request conversations; nil answers 501
 	CI      CI           // CI watching; nil answers 501
 	OAuth   OAuth        // MCP connector authorization; nil disables /mcp
 	MCP     http.Handler // the MCP streamable HTTP handler

@@ -28,9 +28,9 @@ void main() {
       // TODO
     });
 
-    // Post agnts's latest review of a pull request on it as a comment (once per reviewed commit)
+    // Post agnts's latest review of a pull request on it (once per reviewed commit): the summary, and the chosen findings on their lines in one review. Posting the review of new commits edits agnts's earlier summary, answers its findings that are still there and resolves the ones that are gone
     //
-    //Future<Ticket> postPullReview(String key) async
+    //Future<Ticket> postPullReview(String key, { PostReviewInput postReviewInput }) async
     test('test postPullReview', () async {
       // TODO
     });
