@@ -414,6 +414,9 @@ func toTicket(t domain.Ticket) gen.Ticket {
 		Branch: t.Branch, PrNumber: t.PRNumber, PrUrl: t.PRURL, CreatedAt: t.CreatedAt, UpdatedAt: t.UpdatedAt,
 		Kind: gen.TicketKind(t.Kind), KindAuto: t.KindAuto, MemberId: t.MemberID, QueuedAt: t.QueuedAt,
 	}
+	if t.TicketNumber != "" {
+		out.TicketNumber = ptr(t.TicketNumber)
+	}
 	if t.CIFixes > 0 {
 		out.CiFixes = ptr(t.CIFixes)
 	}

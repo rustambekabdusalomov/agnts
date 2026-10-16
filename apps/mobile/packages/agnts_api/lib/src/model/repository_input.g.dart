@@ -23,6 +23,10 @@ abstract class _$RepositoryInputCWProxy {
 
   RepositoryInput branchPrefix(String? branchPrefix);
 
+  RepositoryInput branchTemplate(String? branchTemplate);
+
+  RepositoryInput commitTemplate(String? commitTemplate);
+
   RepositoryInput taskPrefix(String? taskPrefix);
 
   RepositoryInput instructions(String? instructions);
@@ -60,6 +64,8 @@ abstract class _$RepositoryInputCWProxy {
     String? lintCmd,
     String? testCmd,
     String? branchPrefix,
+    String? branchTemplate,
+    String? commitTemplate,
     String? taskPrefix,
     String? instructions,
     String? jiraProject,
@@ -105,6 +111,14 @@ class _$RepositoryInputCWProxyImpl implements _$RepositoryInputCWProxy {
   @override
   RepositoryInput branchPrefix(String? branchPrefix) =>
       this(branchPrefix: branchPrefix);
+
+  @override
+  RepositoryInput branchTemplate(String? branchTemplate) =>
+      this(branchTemplate: branchTemplate);
+
+  @override
+  RepositoryInput commitTemplate(String? commitTemplate) =>
+      this(commitTemplate: commitTemplate);
 
   @override
   RepositoryInput taskPrefix(String? taskPrefix) =>
@@ -163,6 +177,8 @@ class _$RepositoryInputCWProxyImpl implements _$RepositoryInputCWProxy {
     Object? lintCmd = const $CopyWithPlaceholder(),
     Object? testCmd = const $CopyWithPlaceholder(),
     Object? branchPrefix = const $CopyWithPlaceholder(),
+    Object? branchTemplate = const $CopyWithPlaceholder(),
+    Object? commitTemplate = const $CopyWithPlaceholder(),
     Object? taskPrefix = const $CopyWithPlaceholder(),
     Object? instructions = const $CopyWithPlaceholder(),
     Object? jiraProject = const $CopyWithPlaceholder(),
@@ -208,6 +224,14 @@ class _$RepositoryInputCWProxyImpl implements _$RepositoryInputCWProxy {
           ? _value.branchPrefix
           // ignore: cast_nullable_to_non_nullable
           : branchPrefix as String?,
+      branchTemplate: branchTemplate == const $CopyWithPlaceholder()
+          ? _value.branchTemplate
+          // ignore: cast_nullable_to_non_nullable
+          : branchTemplate as String?,
+      commitTemplate: commitTemplate == const $CopyWithPlaceholder()
+          ? _value.commitTemplate
+          // ignore: cast_nullable_to_non_nullable
+          : commitTemplate as String?,
       taskPrefix: taskPrefix == const $CopyWithPlaceholder()
           ? _value.taskPrefix
           // ignore: cast_nullable_to_non_nullable
@@ -281,6 +305,8 @@ RepositoryInput _$RepositoryInputFromJson(Map<String, dynamic> json) =>
         lintCmd: $checkedConvert('lintCmd', (v) => v as String?),
         testCmd: $checkedConvert('testCmd', (v) => v as String?),
         branchPrefix: $checkedConvert('branchPrefix', (v) => v as String?),
+        branchTemplate: $checkedConvert('branchTemplate', (v) => v as String?),
+        commitTemplate: $checkedConvert('commitTemplate', (v) => v as String?),
         taskPrefix: $checkedConvert('taskPrefix', (v) => v as String?),
         instructions: $checkedConvert('instructions', (v) => v as String?),
         jiraProject: $checkedConvert('jiraProject', (v) => v as String?),
@@ -319,6 +345,8 @@ Map<String, dynamic> _$RepositoryInputToJson(RepositoryInput instance) =>
       'lintCmd': ?instance.lintCmd,
       'testCmd': ?instance.testCmd,
       'branchPrefix': ?instance.branchPrefix,
+      'branchTemplate': ?instance.branchTemplate,
+      'commitTemplate': ?instance.commitTemplate,
       'taskPrefix': ?instance.taskPrefix,
       'instructions': ?instance.instructions,
       'jiraProject': ?instance.jiraProject,

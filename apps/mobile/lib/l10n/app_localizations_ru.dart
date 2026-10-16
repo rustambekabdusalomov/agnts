@@ -8753,6 +8753,64 @@ class AppLocalizationsRu extends AppLocalizations {
   String get reposBranchHelp => 'Рабочие ветки создаются от неё.';
 
   @override
+  String get reposBranchTemplate => 'Формат имени ветки';
+
+  @override
+  String reposBranchTemplateHelp(String key, String number, String fallback) {
+    return 'Как agnts называет ветку для каждой задачи. Должен содержать $key или $number. Оставьте пустым для $fallback.';
+  }
+
+  @override
+  String reposBranchTemplateExample(String example) {
+    return 'Пример: $example';
+  }
+
+  @override
+  String get reposCommitTemplate => 'Формат сообщения коммита';
+
+  @override
+  String get reposCommitTemplateHelp => 'Как agnts пишет сообщения коммитов. Пустой scope убирает скобки. Оставьте пустым для KEY: Title.';
+
+  @override
+  String reposCommitTemplateExample(String example) {
+    return 'Пример: $example';
+  }
+
+  @override
+  String get reposPlaceholders => 'Подстановки';
+
+  @override
+  String get reposPhPrefix => 'Префикс веток репозитория, по умолчанию agnts/.';
+
+  @override
+  String get reposPhType => 'Вид работы: feature для кода, bugfix для бага, test, swagger-test.';
+
+  @override
+  String get reposPhKey => 'Ключ задачи в agnts: VIS-42 или ключ задачи из Jira или Plane.';
+
+  @override
+  String get reposPhNumber => 'Номер тикета задачи, например AMANAT-2288. Если пуст, используется ключ.';
+
+  @override
+  String get reposPhSlug => 'Название задачи строчными буквами через дефис, до 40 символов.';
+
+  @override
+  String get reposPhUser => 'Имя пользователя, на кого назначена задача, или её автора.';
+
+  @override
+  String get reposPhCommitType =>
+      'Тип изменения, который выбирает агент: feat, fix, chore, refactor, docs, test... Иначе берётся по виду задачи.';
+
+  @override
+  String get reposPhScope => 'Область, которую изменил агент, например deps или auth. Может быть пустой.';
+
+  @override
+  String get reposPhSubject => 'Краткое описание изменения от агента в одну строку. Иначе берётся название задачи.';
+
+  @override
+  String get reposPhTitle => 'Название задачи как есть.';
+
+  @override
   String get reposBuild => 'Команда сборки';
 
   @override
@@ -10694,6 +10752,16 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get tasksTitlePh => 'Например: добавить таймер отдыха между подходами';
+
+  @override
+  String get tasksTicketNumber => 'Номер задачи';
+
+  @override
+  String get tasksTicketNumberPh => 'Например: AMANAT-2288';
+
+  @override
+  String get tasksTicketNumberHelp =>
+      'Необязательно. Номер этой работы у вашей команды; используется в именах веток и коммитов вместо ключа задачи.';
 
   @override
   String get tasksFieldDesc => 'Что нужно сделать';

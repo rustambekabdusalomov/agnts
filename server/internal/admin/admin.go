@@ -836,6 +836,17 @@ func Validate(x *domain.Repository, gitlabHost string) error {
 	if x.BranchPrefix == "" {
 		x.BranchPrefix = "agnts/"
 	}
+	x.BranchTemplate = strings.TrimSpace(x.BranchTemplate)
+	if x.BranchTemplate == domain.DefaultBranchTemplate {
+		x.BranchTemplate = ""
+	}
+	if err := domain.ValidateBranchTemplate(x.BranchTemplate); err != nil {
+		return invalid("%v", err)
+	}
+	x.CommitTemplate = strings.TrimSpace(x.CommitTemplate)
+	if err := domain.ValidateCommitTemplate(x.CommitTemplate); err != nil {
+		return invalid("%v", err)
+	}
 	x.TaskPrefix = strings.ToUpper(strings.TrimSpace(x.TaskPrefix))
 	for _, c := range x.TaskPrefix {
 		if c < 'A' || c > 'Z' {

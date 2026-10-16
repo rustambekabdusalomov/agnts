@@ -34,6 +34,8 @@ class TaskCreate {
 
      this.description,
 
+     this.ticketNumber,
+
     required  this.priority,
 
     required  this.afterApprove,
@@ -120,6 +122,19 @@ class TaskCreate {
 
 
 
+      /// The team's number for the work (AMANAT-2288), used in branch and commit names
+  @JsonKey(
+    
+    name: r'ticketNumber',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? ticketNumber;
+
+
+
   @JsonKey(
     
     name: r'priority',
@@ -192,6 +207,7 @@ class TaskCreate {
       other.kind == kind &&
       other.title == title &&
       other.description == description &&
+      other.ticketNumber == ticketNumber &&
       other.priority == priority &&
       other.afterApprove == afterApprove &&
       other.start == start &&
@@ -206,6 +222,7 @@ class TaskCreate {
         kind.hashCode +
         title.hashCode +
         description.hashCode +
+        ticketNumber.hashCode +
         priority.hashCode +
         afterApprove.hashCode +
         start.hashCode +

@@ -173,6 +173,7 @@ type fakeGit struct {
 	failPush map[string]bool
 	// committed names the repository of each commit with a change.
 	committed []string
+	messages  []string            // the message of each commit with a change
 	files     []domain.FileChange // what Commit reports, when set
 	// preparedAt records PrepareAt calls as branch@base.
 	preparedAt []string
@@ -195,7 +196,7 @@ func (g *fakeGit) Archive(context.Context, domain.Repository, string) (io.ReadCl
 	return io.NopCloser(bytes.NewReader(nil)), nil
 }
 
-func (g *fakeGit) Commit(_ context.Context, repo domain.Repository, _ string, tree io.Reader, _ string) (string, []domain.FileChange, []string, error) {
+func (g *fakeGit) Commit(_ context.Context, repo domain.Repository, _ string, tree io.Reader, message string) (string, []domain.FileChange, []string, error) {
 	b, _ := io.ReadAll(tree)
 	if len(b) == 0 {
 		return "base", nil, nil, nil
@@ -204,6 +205,7 @@ func (g *fakeGit) Commit(_ context.Context, repo domain.Repository, _ string, tr
 	defer g.mu.Unlock()
 	g.commits++
 	g.committed = append(g.committed, repo.Name)
+	g.messages = append(g.messages, message)
 	if g.files != nil {
 		return "sha" + string(rune('0'+g.commits)), g.files, nil, nil
 	}
@@ -1138,5 +1140,67 @@ func TestPlaneTicketsUseThePlaneTracker(t *testing.T) {
 	}
 	if len(h.tracker.moves) != 0 || len(h.tracker.comments) != 0 {
 		t.Fatalf("a Plane ticket talked to Jira: %v %v", h.tracker.moves, h.tracker.comments)
+	}
+}
+
+func TestBranchTemplate(t *testing.T) {
+	h := newHarness(t)
+	repo, err := h.store.RepositoryByName(h.ctx, "api")
+	if err != nil {
+		t.Fatal(err)
+	}
+	repo.BranchTemplate = "{type}/{key}-{slug}"
+	if _, err := h.store.UpdateRepository(h.ctx, repo); err != nil {
+		t.Fatal(err)
+	}
+	h.ingest("PAY-7")
+	h.runner.scripts = []script{{result: ok("s1"), files: map[string]string{orchestrator.AnalysisPath: analysis(1)}}}
+
+	h.step() // analyze: the branch is named once the kind is settled
+	tk := h.expect("PAY-7", domain.StateWaitingForAnswers)
+	if tk.Branch != "feature/PAY-7-fix-refund-rounding" {
+		t.Fatalf("branch %q", tk.Branch)
+	}
+}
+
+func TestTicketNumberBranchAndCommit(t *testing.T) {
+	h := newHarness(t)
+	repo, err := h.store.RepositoryByName(h.ctx, "api")
+	if err != nil {
+		t.Fatal(err)
+	}
+	repo.BranchTemplate, repo.CommitTemplate = "{number}", "[{number}] {type}({scope}): {subject}"
+	if _, err := h.store.UpdateRepository(h.ctx, repo); err != nil {
+		t.Fatal(err)
+	}
+	number := "AMANAT-2288"
+	task := orchestrator.TaskInput{RepoID: repo.ID, Title: "Update protos", Priority: "medium", AfterApprove: "pr", Start: "code", Kind: "code", TicketNumber: &number}
+	tk, err := h.o.CreateTask(h.ctx, task, domain.OriginWeb)
+	if err != nil || tk.TicketNumber != number {
+		t.Fatalf("create: %+v %v", tk, err)
+	}
+	// Two open tickets with one number would share a branch.
+	if _, err := h.o.CreateTask(h.ctx, task, domain.OriginWeb); !errors.Is(err, orchestrator.ErrInvalid) {
+		t.Fatalf("duplicate number accepted: %v", err)
+	}
+	h.runner.scripts = []script{
+		{result: ok("s1"), files: map[string]string{orchestrator.AnalysisPath: analysis(0)}},
+		{result: ok("s1"), edit: "fix", files: map[string]string{orchestrator.SummaryPath: `{"summary":"Bumped protos.","notes":[],
+			"commit":{"type":"chore","scope":"deps","subject":"protos v1.63.0, drop local replace"}}`}},
+	}
+	h.step() // analyze
+	h.step() // code + checks
+	tk = h.expect(tk.Key, domain.StateWaitingForReview)
+	if tk.Branch != number {
+		t.Fatalf("branch %q", tk.Branch)
+	}
+	if len(h.git.messages) != 1 || !strings.HasPrefix(h.git.messages[0], "[AMANAT-2288] chore(deps): protos v1.63.0, drop local replace\n") {
+		t.Fatalf("commit messages %q", h.git.messages)
+	}
+	if p := h.runner.prompts[1]; !strings.Contains(p, `"commit": {"type": "one of feat, fix,`) {
+		t.Fatalf("coding prompt does not ask for the commit:\n%s", p)
+	}
+	if strings.Contains(h.runner.prompts[0], `"commit"`) {
+		t.Fatal("analysis prompt asks for the commit")
 	}
 }

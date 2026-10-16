@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strings"
 	"time"
+	"unicode"
 )
 
 // TicketSource says where a ticket came from.
@@ -58,6 +59,9 @@ type Ticket struct {
 	WorkspaceID int64
 	Key         string
 	Source      TicketSource
+	// TicketNumber is the team's own number for the work (AMANAT-2288),
+	// given with a task; "" uses Key. See Number.
+	TicketNumber string
 	// RepoID is the primary repository: the key prefix, filters and the
 	// ticket's own git fields (Branch, HeadSHA, PRNumber, ...) are its.
 	RepoID *int64
@@ -499,6 +503,30 @@ const (
 	EventToolchain = "toolchain"
 )
 
+// Number is the ticket's number for branches and commits: TicketNumber,
+// else Key.
+func (t Ticket) Number() string {
+	if t.TicketNumber != "" {
+		return t.TicketNumber
+	}
+	return t.Key
+}
+
+// ValidTicketNumber reports whether n can be a ticket number: letters,
+// digits and . _ -, starting with a letter or digit (AMANAT-2288).
+func ValidTicketNumber(n string) bool {
+	if n == "" || len(n) > 64 {
+		return false
+	}
+	for i, c := range n {
+		alnum := c < unicode.MaxASCII && (unicode.IsLetter(c) || unicode.IsDigit(c))
+		if !alnum && (i == 0 || !strings.ContainsRune("._-", c)) {
+			return false
+		}
+	}
+	return true
+}
+
 // Repository is a codebase agnts works on.
 type Repository struct {
 	ID             int64
@@ -513,6 +541,8 @@ type Repository struct {
 	LintCmd        string
 	TestCmd        string
 	BranchPrefix   string
+	BranchTemplate string // names agnts's branches (see BranchName); "" uses DefaultBranchTemplate
+	CommitTemplate string // writes agnts's commit messages (see CommitLine); "" uses KEY: Title
 	ClaudeMD       string // extra instructions added to every prompt
 	JiraProject    string
 	PlaneProject   string     // Plane project identifier whose work items go here

@@ -18,6 +18,8 @@ Name | Type | Description | Notes
 **lintCmd** | **String** |  | 
 **testCmd** | **String** |  | 
 **branchPrefix** | **String** |  | 
+**branchTemplate** | **String** | How agnts names branches, with placeholders {prefix} {type} {key} {number} {slug} {user}; empty uses {prefix}{key} | [optional] 
+**commitTemplate** | **String** | How agnts writes commit messages, with placeholders {number} {key} {type} {scope} {subject} {title}; empty uses KEY: Title | [optional] 
 **taskPrefix** | **String** |  | 
 **instructions** | **String** | Extra instructions added to every prompt | 
 **jiraProject** | **String** |  | 

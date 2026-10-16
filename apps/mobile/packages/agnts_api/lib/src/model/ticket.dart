@@ -33,6 +33,8 @@ class Ticket {
 
     required  this.key,
 
+     this.ticketNumber,
+
     required  this.source_,
 
      this.repoId,
@@ -145,6 +147,19 @@ class Ticket {
 
 
   final String key;
+
+
+
+      /// The team's number for the work (AMANAT-2288), used in branch and commit names; absent uses key
+  @JsonKey(
+    
+    name: r'ticketNumber',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? ticketNumber;
 
 
 
@@ -795,6 +810,7 @@ class Ticket {
     @override
     bool operator ==(Object other) => identical(this, other) || other is Ticket &&
       other.key == key &&
+      other.ticketNumber == ticketNumber &&
       other.source_ == source_ &&
       other.repoId == repoId &&
       other.repos == repos &&
@@ -850,6 +866,7 @@ class Ticket {
     @override
     int get hashCode =>
         key.hashCode +
+        ticketNumber.hashCode +
         source_.hashCode +
         repoId.hashCode +
         repos.hashCode +

@@ -154,6 +154,9 @@ type Summary struct {
 	// Threads say what the run did about each reviewer thread from the
 	// pull request it was given as feedback.
 	Threads []domain.ThreadAnswer `json:"threads,omitempty"`
+	// Commit describes the change for the commit message, when a
+	// repository has a commit template.
+	Commit domain.CommitInfo `json:"commit,omitzero"`
 }
 
 // ReproTest is a test that fails without a fix and passes with it.
@@ -466,7 +469,7 @@ The plan above was written before they landed. Check it against the current code
 {{end}}{{template "environment" .}}{{template "rules" .}}- Run the project's build, lint and tests yourself before finishing{{if .Checks}}: {{.Checks}}{{end}}.
 - Keep {{.ProgressPath}} current as you work: a short Markdown note with the plan, what is done, what is next, and open problems. If your context is compacted or the session resumed, agnts gives it back to you.
 {{if .VisualCheck}}{{template "visualcheck" .}}{{end}}
-{{if .ProveFix}}{{template "provefix" .}}{{end}}When you are done, write {{.SummaryPath}} as {"summary": "what you changed and why", "notes": ["anything the reviewer should check"], "deviations": ["where you departed from the approach or the plan, and why"]{{if .ProveFix}}, "repro": [{"file": "path/of/the/test_file", "name": "the test's name", "command": "the shell command that runs only this test, from the repository root"}], "reproWhy": ""{{end}}}. Leave "deviations" empty when you followed them.
+{{if .ProveFix}}{{template "provefix" .}}{{end}}When you are done, write {{.SummaryPath}} as {"summary": "what you changed and why", "notes": ["anything the reviewer should check"], "deviations": ["where you departed from the approach or the plan, and why"]{{if .ProveFix}}, "repro": [{"file": "path/of/the/test_file", "name": "the test's name", "command": "the shell command that runs only this test, from the repository root"}], "reproWhy": ""{{end}}}. Leave "deviations" empty when you followed them.{{template "commitinfo" .}}
 {{end}}
 
 {{define "provefix"}}
@@ -507,8 +510,10 @@ The reviewer pointed at these screenshots of the running app; read them to see w
 {{range .FeedbackShots}}
 - {{.}}{{end}}
 {{end}}
-Make these changes in /workspace, run the checks again, and update {{.SummaryPath}} and {{.ProgressPath}}.
+Make these changes in /workspace, run the checks again, and update {{.SummaryPath}} and {{.ProgressPath}}.{{template "commitinfo" .}}
 {{end}}
+
+{{define "commitinfo"}}{{with .CommitTypes}} Add "commit" to {{$.SummaryPath}} for the commit message of this change: {"commit": {"type": "one of {{join . ", "}}", "scope": "the area it changes in a word or two, lowercase (deps, auth, api), or \"\" when it is broad", "subject": "what it does, imperative and lowercase, at most 72 characters, no period"}}, for example {"type": "chore", "scope": "deps", "subject": "bump protos to v1.63.0, drop local replace"}.{{end}}{{end}}
 
 {{define "learn"}}You are agnts's teacher. agnts, an AI coding agent, just finished ticket {{.T.Key}} in the repository at /workspace, and the change was approved and pushed. The developers who own this repository did not write it, so they may not know the techniques it uses. Find what this change introduces that the repository had never done before, and teach it to them. Do not change any files in /workspace.
 
@@ -1057,6 +1062,7 @@ type promptData struct {
 	PreviewPath       string
 	PreviewEnvPath    string
 	VisualCheck       bool           // the coding prompt explains how to look at the app
+	CommitTypes       []string       // set: the agent describes its change for a commit template
 	FeedbackShots     []string       // screenshots the reviewer's feedback points at
 	Attached          []AttachedFile // files people attached, copied into the run
 	Language          string         // translate, assistant: the target language's English name

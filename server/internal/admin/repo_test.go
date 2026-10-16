@@ -56,6 +56,9 @@ func TestValidateRunSettings(t *testing.T) {
 		{name: "image", mut: func(x *domain.Repository) { x.RunnerImage = " registry.example.com/agnts-runner-android:1 " }},
 		{name: "bad image", mut: func(x *domain.Repository) { x.RunnerImage = "--privileged" }, wantErr: "Docker image"},
 		{name: "memory too low", mut: func(x *domain.Repository) { x.MemoryMB = 100 }, wantErr: "memory"},
+		{name: "branch template", mut: func(x *domain.Repository) { x.BranchTemplate = " {type}/{key}-{slug} " }},
+		{name: "branch template without key", mut: func(x *domain.Repository) { x.BranchTemplate = "{type}/{slug}" }, wantErr: "must contain {key}"},
+		{name: "branch template unknown placeholder", mut: func(x *domain.Repository) { x.BranchTemplate = "{key}-{title}" }, wantErr: "unknown placeholder"},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {

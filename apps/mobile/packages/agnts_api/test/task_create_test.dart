@@ -40,6 +40,12 @@ void main() {
       // TODO
     });
 
+    // The team's number for the work (AMANAT-2288), used in branch and commit names
+    // String ticketNumber
+    test('to test the property `ticketNumber`', () async {
+      // TODO
+    });
+
     // String priority
     test('to test the property `priority`', () async {
       // TODO

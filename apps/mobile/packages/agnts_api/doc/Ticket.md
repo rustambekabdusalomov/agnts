@@ -9,6 +9,7 @@ import 'package:agnts_api/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **key** | **String** |  | 
+**ticketNumber** | **String** | The team's number for the work (AMANAT-2288), used in branch and commit names; absent uses key | [optional] 
 **source_** | **String** |  | 
 **repoId** | **int** | The primary repository; repos lists all of them | [optional] 
 **repos** | [**List&lt;TicketRepoState&gt;**](TicketRepoState.md) | Every repository the ticket works in, the primary first, with its branch and pull request | [optional] 

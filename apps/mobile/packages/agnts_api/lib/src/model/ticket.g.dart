@@ -9,6 +9,8 @@ part of 'ticket.dart';
 abstract class _$TicketCWProxy {
   Ticket key(String key);
 
+  Ticket ticketNumber(String? ticketNumber);
+
   Ticket source_(TicketSource_Enum source_);
 
   Ticket repoId(int? repoId);
@@ -119,6 +121,7 @@ abstract class _$TicketCWProxy {
   /// ````
   Ticket call({
     String key,
+    String? ticketNumber,
     TicketSource_Enum source_,
     int? repoId,
     List<TicketRepoState>? repos,
@@ -181,6 +184,9 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
 
   @override
   Ticket key(String key) => this(key: key);
+
+  @override
+  Ticket ticketNumber(String? ticketNumber) => this(ticketNumber: ticketNumber);
 
   @override
   Ticket source_(TicketSource_Enum source_) => this(source_: source_);
@@ -353,6 +359,7 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
   /// ````
   Ticket call({
     Object? key = const $CopyWithPlaceholder(),
+    Object? ticketNumber = const $CopyWithPlaceholder(),
     Object? source_ = const $CopyWithPlaceholder(),
     Object? repoId = const $CopyWithPlaceholder(),
     Object? repos = const $CopyWithPlaceholder(),
@@ -410,6 +417,10 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
           ? _value.key
           // ignore: cast_nullable_to_non_nullable
           : key as String,
+      ticketNumber: ticketNumber == const $CopyWithPlaceholder()
+          ? _value.ticketNumber
+          // ignore: cast_nullable_to_non_nullable
+          : ticketNumber as String?,
       source_: source_ == const $CopyWithPlaceholder()
           ? _value.source_
           // ignore: cast_nullable_to_non_nullable
@@ -652,6 +663,7 @@ Ticket _$TicketFromJson(
   );
   final val = Ticket(
     key: $checkedConvert('key', (v) => v as String),
+    ticketNumber: $checkedConvert('ticketNumber', (v) => v as String?),
     source_: $checkedConvert(
       'source',
       (v) => $enumDecode(_$TicketSource_EnumEnumMap, v),
@@ -779,6 +791,7 @@ Ticket _$TicketFromJson(
 
 Map<String, dynamic> _$TicketToJson(Ticket instance) => <String, dynamic>{
   'key': instance.key,
+  'ticketNumber': ?instance.ticketNumber,
   'source': _$TicketSource_EnumEnumMap[instance.source_]!,
   'repoId': ?instance.repoId,
   'repos': ?instance.repos?.map((e) => e.toJson()).toList(),

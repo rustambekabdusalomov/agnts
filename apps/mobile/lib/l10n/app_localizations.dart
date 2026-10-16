@@ -14829,6 +14829,108 @@ abstract class AppLocalizations {
   /// **'Work branches start from here.'**
   String get reposBranchHelp;
 
+  /// No description provided for @reposBranchTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch name format'**
+  String get reposBranchTemplate;
+
+  /// No description provided for @reposBranchTemplateHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'How agnts names the branch for each ticket. Must contain {key} or {number}. Leave empty for {fallback}.'**
+  String reposBranchTemplateHelp(String key, String number, String fallback);
+
+  /// No description provided for @reposBranchTemplateExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: {example}'**
+  String reposBranchTemplateExample(String example);
+
+  /// No description provided for @reposCommitTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Commit message format'**
+  String get reposCommitTemplate;
+
+  /// No description provided for @reposCommitTemplateHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'How agnts writes its commit messages. An empty scope drops its parentheses. Leave empty for KEY: Title.'**
+  String get reposCommitTemplateHelp;
+
+  /// No description provided for @reposCommitTemplateExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: {example}'**
+  String reposCommitTemplateExample(String example);
+
+  /// No description provided for @reposPlaceholders.
+  ///
+  /// In en, this message translates to:
+  /// **'Placeholders'**
+  String get reposPlaceholders;
+
+  /// No description provided for @reposPhPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'The repository\'s branch prefix, agnts/ by default.'**
+  String get reposPhPrefix;
+
+  /// No description provided for @reposPhType.
+  ///
+  /// In en, this message translates to:
+  /// **'The kind of work: feature for code, bugfix for a bug, test, swagger-test.'**
+  String get reposPhType;
+
+  /// No description provided for @reposPhKey.
+  ///
+  /// In en, this message translates to:
+  /// **'The agnts ticket key: VIS-42, or the Jira or Plane issue key.'**
+  String get reposPhKey;
+
+  /// No description provided for @reposPhNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'The task\'s ticket number, such as AMANAT-2288. Falls back to the key when empty.'**
+  String get reposPhNumber;
+
+  /// No description provided for @reposPhSlug.
+  ///
+  /// In en, this message translates to:
+  /// **'The ticket title in lowercase with hyphens, up to 40 characters.'**
+  String get reposPhSlug;
+
+  /// No description provided for @reposPhUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Username of whoever the ticket is assigned to, or its creator.'**
+  String get reposPhUser;
+
+  /// No description provided for @reposPhCommitType.
+  ///
+  /// In en, this message translates to:
+  /// **'The change type the agent picks: feat, fix, chore, refactor, docs, test... Falls back to the ticket kind.'**
+  String get reposPhCommitType;
+
+  /// No description provided for @reposPhScope.
+  ///
+  /// In en, this message translates to:
+  /// **'The area the agent says it changed, such as deps or auth. May be empty.'**
+  String get reposPhScope;
+
+  /// No description provided for @reposPhSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'The agent\'s one-line summary of the change. Falls back to the ticket title.'**
+  String get reposPhSubject;
+
+  /// No description provided for @reposPhTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The ticket title as written.'**
+  String get reposPhTitle;
+
   /// No description provided for @reposBuild.
   ///
   /// In en, this message translates to:
@@ -18164,6 +18266,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'For example: Add a rest timer between sets'**
   String get tasksTitlePh;
+
+  /// No description provided for @tasksTicketNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket number'**
+  String get tasksTicketNumber;
+
+  /// No description provided for @tasksTicketNumberPh.
+  ///
+  /// In en, this message translates to:
+  /// **'For example: AMANAT-2288'**
+  String get tasksTicketNumberPh;
+
+  /// No description provided for @tasksTicketNumberHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional. Your team\'s number for this work, used in branch and commit names in place of the task key.'**
+  String get tasksTicketNumberHelp;
 
   /// No description provided for @tasksFieldDesc.
   ///

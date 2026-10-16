@@ -8331,6 +8331,65 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reposBranchHelp => 'Work branches start from here.';
 
   @override
+  String get reposBranchTemplate => 'Branch name format';
+
+  @override
+  String reposBranchTemplateHelp(String key, String number, String fallback) {
+    return 'How agnts names the branch for each ticket. Must contain $key or $number. Leave empty for $fallback.';
+  }
+
+  @override
+  String reposBranchTemplateExample(String example) {
+    return 'Example: $example';
+  }
+
+  @override
+  String get reposCommitTemplate => 'Commit message format';
+
+  @override
+  String get reposCommitTemplateHelp =>
+      'How agnts writes its commit messages. An empty scope drops its parentheses. Leave empty for KEY: Title.';
+
+  @override
+  String reposCommitTemplateExample(String example) {
+    return 'Example: $example';
+  }
+
+  @override
+  String get reposPlaceholders => 'Placeholders';
+
+  @override
+  String get reposPhPrefix => 'The repository\'s branch prefix, agnts/ by default.';
+
+  @override
+  String get reposPhType => 'The kind of work: feature for code, bugfix for a bug, test, swagger-test.';
+
+  @override
+  String get reposPhKey => 'The agnts ticket key: VIS-42, or the Jira or Plane issue key.';
+
+  @override
+  String get reposPhNumber => 'The task\'s ticket number, such as AMANAT-2288. Falls back to the key when empty.';
+
+  @override
+  String get reposPhSlug => 'The ticket title in lowercase with hyphens, up to 40 characters.';
+
+  @override
+  String get reposPhUser => 'Username of whoever the ticket is assigned to, or its creator.';
+
+  @override
+  String get reposPhCommitType =>
+      'The change type the agent picks: feat, fix, chore, refactor, docs, test... Falls back to the ticket kind.';
+
+  @override
+  String get reposPhScope => 'The area the agent says it changed, such as deps or auth. May be empty.';
+
+  @override
+  String get reposPhSubject => 'The agent\'s one-line summary of the change. Falls back to the ticket title.';
+
+  @override
+  String get reposPhTitle => 'The ticket title as written.';
+
+  @override
   String get reposBuild => 'Build command';
 
   @override
@@ -10204,6 +10263,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tasksTitlePh => 'For example: Add a rest timer between sets';
+
+  @override
+  String get tasksTicketNumber => 'Ticket number';
+
+  @override
+  String get tasksTicketNumberPh => 'For example: AMANAT-2288';
+
+  @override
+  String get tasksTicketNumberHelp =>
+      'Optional. Your team\'s number for this work, used in branch and commit names in place of the task key.';
 
   @override
   String get tasksFieldDesc => 'What should be done';

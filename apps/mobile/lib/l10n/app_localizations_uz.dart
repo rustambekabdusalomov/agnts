@@ -8336,6 +8336,65 @@ class AppLocalizationsUz extends AppLocalizations {
   String get reposBranchHelp => 'Ish branchlari shu yerdan boshlanadi.';
 
   @override
+  String get reposBranchTemplate => 'Branch nomi formati';
+
+  @override
+  String reposBranchTemplateHelp(String key, String number, String fallback) {
+    return 'agnts har bir vazifa uchun branch nomini qanday qo\'yadi. $key yoki $number bo\'lishi shart. Bo\'sh qoldirilsa $fallback.';
+  }
+
+  @override
+  String reposBranchTemplateExample(String example) {
+    return 'Misol: $example';
+  }
+
+  @override
+  String get reposCommitTemplate => 'Commit xabari formati';
+
+  @override
+  String get reposCommitTemplateHelp =>
+      'agnts commit xabarlarini qanday yozadi. Bo\'sh scope qavslarini olib tashlaydi. Bo\'sh qoldirilsa KEY: Title.';
+
+  @override
+  String reposCommitTemplateExample(String example) {
+    return 'Misol: $example';
+  }
+
+  @override
+  String get reposPlaceholders => 'O\'rinbosarlar';
+
+  @override
+  String get reposPhPrefix => 'Repozitoriyning branch prefiksi, odatda agnts/.';
+
+  @override
+  String get reposPhType => 'Ish turi: kod uchun feature, bag uchun bugfix, test, swagger-test.';
+
+  @override
+  String get reposPhKey => 'agnts vazifa kaliti: VIS-42 yoki Jira yoki Plane vazifa kaliti.';
+
+  @override
+  String get reposPhNumber => 'Vazifaning tiket raqami, masalan AMANAT-2288. Bo\'sh bo\'lsa kalit ishlatiladi.';
+
+  @override
+  String get reposPhSlug => 'Vazifa nomi kichik harflarda, defis bilan, 40 belgigacha.';
+
+  @override
+  String get reposPhUser => 'Vazifa biriktirilgan foydalanuvchi yoki uni yaratgan kishining nomi.';
+
+  @override
+  String get reposPhCommitType =>
+      'Agent tanlagan o\'zgarish turi: feat, fix, chore, refactor, docs, test... Aks holda vazifa turidan olinadi.';
+
+  @override
+  String get reposPhScope => 'Agent o\'zgartirgan qism, masalan deps yoki auth. Bo\'sh bo\'lishi mumkin.';
+
+  @override
+  String get reposPhSubject => 'Agentning o\'zgarish haqidagi bir qatorli qisqa tavsifi. Aks holda vazifa nomi olinadi.';
+
+  @override
+  String get reposPhTitle => 'Vazifa nomi o\'zgarishsiz.';
+
+  @override
   String get reposBuild => 'Yigʻish buyrugʻi';
 
   @override
@@ -10201,6 +10260,16 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get tasksTitlePh => 'Masalan: yondashuvlar orasiga dam olish taymerini qoʻshish';
+
+  @override
+  String get tasksTicketNumber => 'Vazifa raqami';
+
+  @override
+  String get tasksTicketNumberPh => 'Masalan: AMANAT-2288';
+
+  @override
+  String get tasksTicketNumberHelp =>
+      'Ixtiyoriy. Jamoangizdagi bu ish raqami; branch va commit nomlarida vazifa kaliti o‘rniga ishlatiladi.';
 
   @override
   String get tasksFieldDesc => 'Nima qilish kerak';

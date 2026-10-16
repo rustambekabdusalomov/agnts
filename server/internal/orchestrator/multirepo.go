@@ -83,7 +83,7 @@ func (o *Orchestrator) reposFor(ctx context.Context, t domain.Ticket) ([]runRepo
 		}
 		r := runRepo{Repository: repo, Row: row, Branch: row.Branch}
 		if r.Branch == "" {
-			r.Branch = branchFor(repo, t.Key)
+			r.Branch = o.branchFor(ctx, repo, t)
 		}
 		if row.MergedAt != nil || row.ClosedAt != nil || row.State == domain.RepoDropped {
 			r.Frozen, r.Branch = true, repo.DefaultBranch

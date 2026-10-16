@@ -4428,6 +4428,8 @@ export interface components {
         };
         Ticket: {
             key: string;
+            /** @description The team's number for the work (AMANAT-2288), used in branch and commit names; absent uses key */
+            ticketNumber?: string;
             /** @enum {string} */
             source: "jira" | "plane" | "local" | "git" | "ci";
             /**
@@ -4982,6 +4984,8 @@ export interface components {
             kind?: components["schemas"]["TicketKindChoice"];
             title: string;
             description?: string;
+            /** @description The team's number for the work (AMANAT-2288), used in branch and commit names */
+            ticketNumber?: string;
             /** @enum {string} */
             priority: "low" | "medium" | "high";
             /** @enum {string} */
@@ -4997,6 +5001,8 @@ export interface components {
         };
         TaskUpdate: {
             title?: string;
+            /** @description The team's number for the work (AMANAT-2288), used in branch and commit names; empty clears it, absent keeps it */
+            ticketNumber?: string;
             description?: string;
             /** @enum {string} */
             priority?: "low" | "medium" | "high";
@@ -5910,6 +5916,10 @@ export interface components {
             lintCmd: string;
             testCmd: string;
             branchPrefix: string;
+            /** @description How agnts names branches, with placeholders {prefix} {type} {key} {number} {slug} {user}; empty uses {prefix}{key} */
+            branchTemplate?: string;
+            /** @description How agnts writes commit messages, with placeholders {number} {key} {type} {scope} {subject} {title}; empty uses KEY: Title */
+            commitTemplate?: string;
             taskPrefix: string;
             /** @description Extra instructions added to every prompt */
             instructions: string;
@@ -5961,6 +5971,10 @@ export interface components {
             lintCmd?: string;
             testCmd?: string;
             branchPrefix?: string;
+            /** @description Branch name template; must contain {key} or {number}. Empty uses {prefix}{key} */
+            branchTemplate?: string;
+            /** @description Commit message template; must contain {subject} or {title}. Empty uses KEY: Title */
+            commitTemplate?: string;
             taskPrefix?: string;
             instructions?: string;
             jiraProject?: string;

@@ -145,7 +145,7 @@ func (s *Server) CreateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	in := orchestrator.TaskInput{Title: req.Title, Priority: string(req.Priority),
-		AfterApprove: string(req.AfterApprove), Start: string(req.Start)}
+		AfterApprove: string(req.AfterApprove), Start: string(req.Start), TicketNumber: req.TicketNumber}
 	if req.RepoId != nil {
 		in.RepoID = *req.RepoId
 	}
@@ -201,6 +201,7 @@ func (s *Server) UpdateTask(w http.ResponseWriter, r *http.Request, key gen.Tick
 	if req.Kind != nil {
 		in.Kind = string(*req.Kind)
 	}
+	in.TicketNumber = req.TicketNumber
 	in.Attachments = req.Attachments
 	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
 		return s.opt.Tickets.UpdateTask(ctx, key, in, origin(r))
@@ -633,7 +634,7 @@ func toRepo(x admin.RepoView) gen.Repository {
 	}
 	return gen.Repository{Id: x.ID, Name: x.Name, Kind: gen.RepositoryKind(x.Kind), Provider: gen.RepositoryProvider(x.Provider),
 		CloneUrl: x.CloneURL, DefaultBranch: x.DefaultBranch, BuildCmd: x.BuildCmd, LintCmd: x.LintCmd, TestCmd: x.TestCmd,
-		BranchPrefix: x.BranchPrefix, TaskPrefix: orchestrator.TaskPrefix(x.Repository), Instructions: x.ClaudeMD,
+		BranchPrefix: x.BranchPrefix, BranchTemplate: &x.BranchTemplate, CommitTemplate: &x.CommitTemplate, TaskPrefix: orchestrator.TaskPrefix(x.Repository), Instructions: x.ClaudeMD,
 		JiraProject: x.JiraProject, PlaneProject: &x.PlaneProject, ClaudeMd: gen.RepositoryClaudeMd(st), OpenTickets: x.Open, DeployWorkflow: &x.DeployWorkflow,
 		ArchivedAt: x.ArchivedAt, Preview: toRepoPreview(x.Preview),
 		Stack: &x.Stack, Toolchains: ptr(toToolchains(x.Toolchains)), ToolchainsOverride: &x.ToolchainsOverride,
@@ -794,6 +795,7 @@ func repoFromInput(in gen.RepositoryInput) domain.Repository {
 	x.DefaultBranch, x.BuildCmd, x.LintCmd, x.TestCmd = str(in.DefaultBranch), str(in.BuildCmd), str(in.LintCmd), str(in.TestCmd)
 	x.BranchPrefix, x.TaskPrefix, x.ClaudeMD, x.JiraProject = str(in.BranchPrefix), str(in.TaskPrefix), str(in.Instructions), str(in.JiraProject)
 	x.DeployWorkflow = str(in.DeployWorkflow)
+	x.BranchTemplate, x.CommitTemplate = str(in.BranchTemplate), str(in.CommitTemplate)
 	x.PlaneProject = str(in.PlaneProject)
 	if in.Toolchains != nil {
 		x.Toolchains = fromToolchains(*in.Toolchains)

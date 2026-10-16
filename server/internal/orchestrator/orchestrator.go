@@ -741,12 +741,35 @@ func (o *Orchestrator) repoFor(ctx context.Context, t domain.Ticket) (domain.Rep
 	return o.store.RepositoryByID(ctx, *t.RepoID)
 }
 
-func branchFor(repo domain.Repository, key string) string {
+// branchFor names the branch the ticket's work goes on in repo, from the
+// repository's branch template.
+func (o *Orchestrator) branchFor(ctx context.Context, repo domain.Repository, t domain.Ticket) string {
 	prefix := repo.BranchPrefix
 	if prefix == "" {
 		prefix = "agnts/"
 	}
-	return prefix + key
+	v := domain.BranchVars{Prefix: prefix, Type: t.Kind.BranchType(), Key: t.Key, Number: t.Number(), Title: t.Title}
+	tmpl := repo.BranchTemplate
+	if strings.Contains(tmpl, "{type}") && t.Kind == domain.KindCode && t.ParentKey != "" {
+		// A change that implements a bug report fixes the bug.
+		if p, err := o.store.TicketByKey(ctx, t.ParentKey); err == nil && p.Kind == domain.KindBug {
+			v.Type = domain.KindBug.BranchType()
+		}
+	}
+	if strings.Contains(tmpl, "{user}") {
+		id := t.MemberID
+		if id == nil {
+			id = t.CreatedBy
+		}
+		if id != nil {
+			if names, err := o.store.Usernames(ctx, []int64{*id}); err == nil {
+				v.User = names[*id]
+			} else {
+				o.log.Warn("branch name: username", "ticket", t.Key, "err", err)
+			}
+		}
+	}
+	return domain.BranchName(tmpl, v)
 }
 
 // openWorkspace starts a container with the run's repositories checked
@@ -924,12 +947,23 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 
 	// The branch each repository's work goes on; nothing is committed for
 	// a report, and a repository whose pull request is done keeps its own.
+	branches := make([]string, len(rs))
+	for i, r := range rs {
+		branches[i] = r.Branch
+		if r.Row.Branch == "" && !r.Frozen && !t.Kind.Report() {
+			// Named again now the analysis settled the kind ({type}); the
+			// analysis's local branch under the old name has nothing on it.
+			if branches[i] = o.branchFor(ctx, r.Repository, t); branches[i] != r.Branch {
+				o.dropRepoBranch(ctx, t, r.Repository, r.Branch)
+			}
+		}
+	}
 	setBranch := func(x *domain.Ticket) {
-		for _, r := range rs {
+		for i, r := range rs {
 			if r.Frozen {
 				continue
 			}
-			b := r.Branch
+			b := branches[i]
 			if t.Kind.Report() {
 				b = ""
 			}
@@ -1016,6 +1050,11 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		}
 	}
 	base := withRepos(promptData{T: t}, rs, group)
+	for _, r := range rs {
+		if r.CommitTemplate != "" && !r.Frozen {
+			base.CommitTypes = domain.CommitTypes
+		}
+	}
 	if visual {
 		base.Repo.Preview = pv.Preview
 	}
@@ -1122,7 +1161,9 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 	if err != nil {
 		summary, _ = json.Marshal(Summary{Summary: res.Text})
 	}
-	commits, files, flags, err := o.commitRepos(ctx, s, ws, t, run, rs)
+	var sum Summary
+	_ = json.Unmarshal(summary, &sum)
+	commits, files, flags, err := o.commitRepos(ctx, s, ws, t, run, rs, sum.Commit)
 	if err != nil {
 		return err
 	}
@@ -1204,7 +1245,7 @@ type repoCommit struct {
 // change, and returns the commits, the change as the reviewer sees it (in
 // a ticket of several, each file with its repository) and the red flags of
 // the scan, with the team's diff rules.
-func (o *Orchestrator) commitRepos(ctx context.Context, s domain.Settings, ws Workspace, t domain.Ticket, run *domain.Run, rs []runRepo) ([]repoCommit, []domain.FileChange, []domain.RedFlag, error) {
+func (o *Orchestrator) commitRepos(ctx context.Context, s domain.Settings, ws Workspace, t domain.Ticket, run *domain.Run, rs []runRepo, info domain.CommitInfo) ([]repoCommit, []domain.FileChange, []domain.RedFlag, error) {
 	multi := len(rs) > 1
 	var commits []repoCommit
 	var all []domain.FileChange
@@ -1217,7 +1258,7 @@ func (o *Orchestrator) commitRepos(ctx context.Context, s domain.Settings, ws Wo
 		if err != nil {
 			return nil, nil, nil, fmt.Errorf("export workspace: %w", err)
 		}
-		sha, files, dropped, err := o.git.Commit(ctx, r.Repository, r.Branch, tree, commitMessage(t, s.Git))
+		sha, files, dropped, err := o.git.Commit(ctx, r.Repository, r.Branch, tree, commitMessage(t, r.CommitTemplate, info, s.Git))
 		_ = tree.Close()
 		if err != nil {
 			if multi {
@@ -1767,10 +1808,18 @@ func analysisComment(a Analysis, withQuestions bool) string {
 	return b.String()
 }
 
-func commitMessage(t domain.Ticket, g domain.GitSettings) string {
-	msg := fmt.Sprintf("%s: %s", t.Key, t.Title)
-	if t.Revision > 0 {
-		msg += fmt.Sprintf(" (revision %d)", t.Revision)
+// commitMessage is a coding run's commit message: the repository's commit
+// template filled from the ticket and what the agent said about its change
+// (info), or "KEY: Title (revision N)" when the repository has none.
+func commitMessage(t domain.Ticket, tmpl string, info domain.CommitInfo, g domain.GitSettings) string {
+	var msg string
+	if tmpl != "" {
+		msg = domain.CommitLine(tmpl, domain.CommitVars{Number: t.Number(), Key: t.Key, Title: t.Title, Kind: t.Kind, Info: info})
+	} else {
+		msg = fmt.Sprintf("%s: %s", t.Key, t.Title)
+		if t.Revision > 0 {
+			msg += fmt.Sprintf(" (revision %d)", t.Revision)
+		}
 	}
 	if g.CoAuthor {
 		msg += "\n\nCo-authored-by: agnts <agnts@users.noreply.github.com>"

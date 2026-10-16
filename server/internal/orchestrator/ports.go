@@ -20,6 +20,9 @@ import (
 type Store interface {
 	TicketByKey(ctx context.Context, key string) (domain.Ticket, error)
 	ListTickets(ctx context.Context, f TicketFilter) ([]domain.Ticket, error)
+	// OpenTicketWithNumber returns an open ticket other than except whose
+	// number is n, or ErrNotFound.
+	OpenTicketWithNumber(ctx context.Context, n, except string) (domain.Ticket, error)
 	// CreateTicket inserts a ticket in state new, or returns ErrConflict if
 	// the key exists.
 	CreateTicket(ctx context.Context, t domain.Ticket, ev domain.Event) (domain.Ticket, error)

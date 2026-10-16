@@ -19,6 +19,8 @@ abstract class _$TaskCreateCWProxy {
 
   TaskCreate description(String? description);
 
+  TaskCreate ticketNumber(String? ticketNumber);
+
   TaskCreate priority(TaskCreatePriorityEnum priority);
 
   TaskCreate afterApprove(TaskCreateAfterApproveEnum afterApprove);
@@ -42,6 +44,7 @@ abstract class _$TaskCreateCWProxy {
     TicketKindChoice? kind,
     String title,
     String? description,
+    String? ticketNumber,
     TaskCreatePriorityEnum priority,
     TaskCreateAfterApproveEnum afterApprove,
     TaskCreateStartEnum start,
@@ -75,6 +78,10 @@ class _$TaskCreateCWProxyImpl implements _$TaskCreateCWProxy {
   TaskCreate description(String? description) => this(description: description);
 
   @override
+  TaskCreate ticketNumber(String? ticketNumber) =>
+      this(ticketNumber: ticketNumber);
+
+  @override
   TaskCreate priority(TaskCreatePriorityEnum priority) =>
       this(priority: priority);
 
@@ -106,6 +113,7 @@ class _$TaskCreateCWProxyImpl implements _$TaskCreateCWProxy {
     Object? kind = const $CopyWithPlaceholder(),
     Object? title = const $CopyWithPlaceholder(),
     Object? description = const $CopyWithPlaceholder(),
+    Object? ticketNumber = const $CopyWithPlaceholder(),
     Object? priority = const $CopyWithPlaceholder(),
     Object? afterApprove = const $CopyWithPlaceholder(),
     Object? start = const $CopyWithPlaceholder(),
@@ -137,6 +145,10 @@ class _$TaskCreateCWProxyImpl implements _$TaskCreateCWProxy {
           ? _value.description
           // ignore: cast_nullable_to_non_nullable
           : description as String?,
+      ticketNumber: ticketNumber == const $CopyWithPlaceholder()
+          ? _value.ticketNumber
+          // ignore: cast_nullable_to_non_nullable
+          : ticketNumber as String?,
       priority: priority == const $CopyWithPlaceholder()
           ? _value.priority
           // ignore: cast_nullable_to_non_nullable
@@ -190,6 +202,7 @@ TaskCreate _$TaskCreateFromJson(Map<String, dynamic> json) =>
         ),
         title: $checkedConvert('title', (v) => v as String),
         description: $checkedConvert('description', (v) => v as String?),
+        ticketNumber: $checkedConvert('ticketNumber', (v) => v as String?),
         priority: $checkedConvert(
           'priority',
           (v) => $enumDecode(_$TaskCreatePriorityEnumEnumMap, v),
@@ -223,6 +236,7 @@ Map<String, dynamic> _$TaskCreateToJson(
   'kind': ?_$TicketKindChoiceEnumMap[instance.kind],
   'title': instance.title,
   'description': ?instance.description,
+  'ticketNumber': ?instance.ticketNumber,
   'priority': _$TaskCreatePriorityEnumEnumMap[instance.priority]!,
   'afterApprove': _$TaskCreateAfterApproveEnumEnumMap[instance.afterApprove]!,
   'start': _$TaskCreateStartEnumEnumMap[instance.start]!,

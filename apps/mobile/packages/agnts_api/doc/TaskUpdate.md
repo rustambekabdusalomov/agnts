@@ -9,6 +9,7 @@ import 'package:agnts_api/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **title** | **String** |  | [optional] 
+**ticketNumber** | **String** | The team's number for the work (AMANAT-2288), used in branch and commit names; empty clears it, absent keeps it | [optional] 
 **description** | **String** |  | [optional] 
 **priority** | **String** |  | [optional] 
 **afterApprove** | **String** |  | [optional] 

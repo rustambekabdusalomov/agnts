@@ -23,6 +23,8 @@ class TaskUpdate {
 
      this.title,
 
+     this.ticketNumber,
+
      this.description,
 
      this.priority,
@@ -43,6 +45,19 @@ class TaskUpdate {
 
 
   final String? title;
+
+
+
+      /// The team's number for the work (AMANAT-2288), used in branch and commit names; empty clears it, absent keeps it
+  @JsonKey(
+    
+    name: r'ticketNumber',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? ticketNumber;
 
 
 
@@ -112,6 +127,7 @@ class TaskUpdate {
     @override
     bool operator ==(Object other) => identical(this, other) || other is TaskUpdate &&
       other.title == title &&
+      other.ticketNumber == ticketNumber &&
       other.description == description &&
       other.priority == priority &&
       other.afterApprove == afterApprove &&
@@ -121,6 +137,7 @@ class TaskUpdate {
     @override
     int get hashCode =>
         title.hashCode +
+        ticketNumber.hashCode +
         description.hashCode +
         priority.hashCode +
         afterApprove.hashCode +

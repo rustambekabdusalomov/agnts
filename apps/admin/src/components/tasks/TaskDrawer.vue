@@ -38,6 +38,7 @@ type KindTab = TicketKindChoice | 'swaggertest'
 const form = reactive({
   kind: 'auto' as KindTab,
   title: '',
+  ticketNumber: '',
   description: '',
   priority: 'medium' as Priority,
   after: 'pr' as After,
@@ -99,6 +100,7 @@ const create = useMutation({
           ...selectionBody(sel.value),
           kind: form.kind as TicketKindChoice,
           title: form.title.trim(),
+          ticketNumber: form.ticketNumber.trim() || undefined,
           description: form.description.trim(),
           priority: form.priority,
           afterApprove: form.after,
@@ -113,6 +115,7 @@ const create = useMutation({
     ui.notify(t('tasks.created', { key: tk.key }))
     open.value = false
     form.title = ''
+    form.ticketNumber = ''
     form.description = ''
     files.value = []
     await router.push({ name: 'ticket', params: { key: tk.key } })
@@ -187,6 +190,11 @@ function submit() {
         <div class="field">
           <label for="t-title">{{ t('tasks.fieldTitle') }}</label>
           <input id="t-title" v-model="form.title" type="text" maxlength="300" :placeholder="t('tasks.titlePh')">
+        </div>
+        <div class="field">
+          <label for="t-number">{{ t('tasks.ticketNumber') }}</label>
+          <input id="t-number" v-model="form.ticketNumber" type="text" maxlength="64" :placeholder="t('tasks.ticketNumberPh')" style="font-family: var(--mono); font-size: 14px">
+          <span class="hint">{{ t('tasks.ticketNumberHelp') }}</span>
         </div>
         <div class="field">
           <label for="t-desc">{{ t('tasks.fieldDesc') }}</label>

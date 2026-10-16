@@ -58,6 +58,18 @@ void main() {
       // TODO
     });
 
+    // How agnts names branches, with placeholders {prefix} {type} {key} {number} {slug} {user}; empty uses {prefix}{key}
+    // String branchTemplate
+    test('to test the property `branchTemplate`', () async {
+      // TODO
+    });
+
+    // How agnts writes commit messages, with placeholders {number} {key} {type} {scope} {subject} {title}; empty uses KEY: Title
+    // String commitTemplate
+    test('to test the property `commitTemplate`', () async {
+      // TODO
+    });
+
     // String taskPrefix
     test('to test the property `taskPrefix`', () async {
       // TODO

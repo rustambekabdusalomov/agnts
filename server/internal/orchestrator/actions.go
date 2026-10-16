@@ -648,6 +648,9 @@ type TaskInput struct {
 	Description  string
 	Priority     string
 	AfterApprove string // pr or main
+	// TicketNumber is the team's number for the work, used in branch and
+	// commit names. On edit, nil keeps it and "" clears it.
+	TicketNumber *string
 	Start        string // ask, code or queue
 	// FollowUps turns follow-up suggestions on or off for the task; nil
 	// follows the setting. CreateTask only.
@@ -676,6 +679,10 @@ func (o *Orchestrator) CreateTask(ctx context.Context, in TaskInput, origin doma
 	if err != nil {
 		return domain.Ticket{}, err
 	}
+	number, err := o.ticketNumber(ctx, in.TicketNumber, "")
+	if err != nil {
+		return domain.Ticket{}, err
+	}
 	res, err := o.resolveRepos(ctx, domain.RepoChoice{RepoID: in.RepoID, RepoIDs: in.RepoIDs, GroupID: in.GroupID}, kind, auto)
 	if err != nil {
 		return domain.Ticket{}, err
@@ -701,7 +708,7 @@ func (o *Orchestrator) CreateTask(ctx context.Context, in TaskInput, origin doma
 		Title:  strings.TrimSpace(in.Title), Description: strings.TrimSpace(in.Description), Priority: in.Priority,
 		State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: in.AfterApprove,
 		Held: in.Start == "queue", AskFirst: in.Start == "ask" || (in.Start == "queue" && st.AskFirst),
-		Kind: kind, KindAuto: auto, SuggestFollowUps: in.FollowUps,
+		Kind: kind, KindAuto: auto, SuggestFollowUps: in.FollowUps, TicketNumber: number,
 	}
 	res.apply(&t)
 	out, err := o.createTask(ctx, t, prefix, files, origin)
@@ -839,6 +846,13 @@ func (o *Orchestrator) UpdateTask(ctx context.Context, key string, in TaskInput,
 			return domain.Ticket{}, invalid("attach at most %d files", domain.MaxAttachments)
 		}
 	}
+	var number string
+	if in.TicketNumber != nil {
+		var err error
+		if number, err = o.ticketNumber(ctx, in.TicketNumber, key); err != nil {
+			return domain.Ticket{}, err
+		}
+	}
 	var bad error
 	t, err := o.store.UpdateTicket(ctx, key, &domain.Event{
 		TicketKey: key, Type: domain.EventTaskChanged, Origin: origin, Message: "task edited",
@@ -858,6 +872,9 @@ func (o *Orchestrator) UpdateTask(ctx context.Context, key string, in TaskInput,
 		}
 		if in.AfterApprove == "pr" || in.AfterApprove == "main" {
 			x.AfterApprove = in.AfterApprove
+		}
+		if in.TicketNumber != nil {
+			x.TicketNumber = number
 		}
 		if in.Kind != "" {
 			k, auto, err := parseKind(in.Kind)
@@ -879,6 +896,25 @@ func (o *Orchestrator) UpdateTask(ctx context.Context, key string, in TaskInput,
 		err = o.setTaskFiles(ctx, t, *in.Attachments)
 	}
 	return t, err
+}
+
+// ticketNumber checks a task's ticket number: valid, and not the number of
+// another open ticket (key except), as both would work on one branch.
+func (o *Orchestrator) ticketNumber(ctx context.Context, n *string, except string) (string, error) {
+	if n == nil || strings.TrimSpace(*n) == "" {
+		return "", nil
+	}
+	v := strings.TrimSpace(*n)
+	if !domain.ValidTicketNumber(v) {
+		return "", invalid("ticket number may only have letters, digits and . _ - (like AMANAT-2288)")
+	}
+	switch t, err := o.store.OpenTicketWithNumber(ctx, v, except); {
+	case err == nil:
+		return "", invalid("ticket %s already has the number %s", t.Key, v)
+	case !errors.Is(err, domain.ErrNotFound):
+		return "", err
+	}
+	return v, nil
 }
 
 // DeleteTask removes a task that has not started yet.

@@ -28,7 +28,7 @@ const ticketCols = `id, key, source, repo_id, title, description, priority, stat
 	revision, turns, models, after_approve, branch, head_sha, pr_number, pr_url, feedback, held, ask_first, merged_at, assignees, learn_state, review_state, kind, kind_auto, post_report, COALESCE(parent_key, ''),
 	COALESCE(follow_up_of, ''), suggest_follow_ups, preview_state, preview_compare, feedback_shots, feedback_files, created_at, updated_at,
 	workspace_id, member_id, created_by, wait_reason, queued_at, wait_message, self_fixes, quiet_review, replay_of, base_sha, pull_request,
-	tracker_update, tracker_kept, ci_fixes, group_id, agnts_group_name(group_id), agnts_ticket_repos(id)`
+	tracker_update, tracker_kept, ci_fixes, group_id, agnts_group_name(group_id), agnts_ticket_repos(id), ticket_number`
 
 func scanTicket(row pgx.Row) (domain.Ticket, error) {
 	var t domain.Ticket
@@ -39,7 +39,7 @@ func scanTicket(row pgx.Row) (domain.Ticket, error) {
 		&t.Held, &t.AskFirst, &t.MergedAt, &t.Assignees, &t.LearnState, &t.ReviewState, &kind, &t.KindAuto, &t.PostReport, &t.ParentKey,
 		&t.FollowUpOf, &t.SuggestFollowUps, &t.PreviewState, &t.PreviewCompare, &shots, &files, &t.CreatedAt, &t.UpdatedAt,
 		&t.WorkspaceID, &t.MemberID, &t.CreatedBy, &wait, &t.QueuedAt, &t.WaitMessage, &t.SelfFixes, &t.QuietReview, &t.ReplayOf, &t.BaseSHA, &pull, &update, &t.Kept, &t.CIFixes,
-		&t.GroupID, &t.GroupName, &repos)
+		&t.GroupID, &t.GroupName, &repos, &t.TicketNumber)
 	if err != nil {
 		return t, notFound(err)
 	}
@@ -135,12 +135,12 @@ func insertTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket, models []byte
 	t.SyncRepos()
 	out, err := scanTicket(tx.QueryRow(ctx, `INSERT INTO tickets
 		(key, source, repo_id, title, description, priority, state, resume_state, models, after_approve, held, ask_first, kind, kind_auto,
-		 parent_key, follow_up_of, suggest_follow_ups, member_id, created_by, replay_of, base_sha, branch, pr_number, pr_url, pull_request, group_id)
+		 parent_key, follow_up_of, suggest_follow_ups, member_id, created_by, replay_of, base_sha, branch, pr_number, pr_url, pull_request, group_id, ticket_number)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NULLIF($15, ''), NULLIF($16, ''), $17, $18, $19, $20, $21,
-		 $22, $23, $24, $25, $26) RETURNING `+ticketCols,
+		 $22, $23, $24, $25, $26, $27) RETURNING `+ticketCols,
 		t.Key, string(t.Source), t.RepoID, t.Title, t.Description, t.Priority, string(t.State),
 		string(t.ResumeState), models, t.AfterApprove, t.Held, t.AskFirst, string(kindOr(t.Kind)), t.KindAuto, t.ParentKey,
-		t.FollowUpOf, t.SuggestFollowUps, t.MemberID, t.CreatedBy, t.ReplayOf, t.BaseSHA, t.Branch, t.PRNumber, t.PRURL, pullJSON(t.Pull), t.GroupID))
+		t.FollowUpOf, t.SuggestFollowUps, t.MemberID, t.CreatedBy, t.ReplayOf, t.BaseSHA, t.Branch, t.PRNumber, t.PRURL, pullJSON(t.Pull), t.GroupID, t.TicketNumber))
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 		return out, domain.ErrConflict
@@ -261,7 +261,7 @@ func saveTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket) (domain.Ticket,
 		kind = $22, kind_auto = $23, post_report = $24, review_state = $25, suggest_follow_ups = $26,
 		preview_state = $27, preview_compare = $28, feedback_shots = $29, feedback_files = $30, member_id = $31,
 		self_fixes = $32, quiet_review = $33, pull_request = $34, tracker_update = $35, tracker_kept = $36, ci_fixes = $37,
-		group_id = $38, base_sha = $39,
+		group_id = $38, base_sha = $39, ticket_number = $40,
 		wait_reason = CASE WHEN $6 IN ('new', 'coding', 'pushing') THEN wait_reason ELSE '' END,
 		wait_message = CASE WHEN $6 IN ('new', 'coding', 'pushing') THEN wait_message ELSE '' END,
 		queued_at = CASE WHEN $6 IN ('new', 'coding', 'pushing') THEN queued_at END,
@@ -271,7 +271,7 @@ func saveTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket) (domain.Ticket,
 		t.Revision, t.Turns, models, t.AfterApprove, t.Branch, t.HeadSHA, t.PRNumber, t.PRURL, t.Feedback, t.Held, t.AskFirst, t.MergedAt, nonNilSlice(t.Assignees), t.LearnState,
 		string(kindOr(t.Kind)), t.KindAuto, t.PostReport, t.ReviewState, t.SuggestFollowUps,
 		t.PreviewState, t.PreviewCompare, shots, files, t.MemberID, t.SelfFixes, t.QuietReview, pullJSON(t.Pull), updateJSON(t.Update), t.Kept, t.CIFixes,
-		t.GroupID, t.BaseSHA))
+		t.GroupID, t.BaseSHA, t.TicketNumber))
 }
 
 // updateJSON is a ticket's pending tracker version, nil (SQL NULL) for none.
@@ -755,7 +755,7 @@ func (s *Agent) Events(ctx context.Context, f orchestrator.EventFilter) ([]domai
 const repoCols = `id, name, kind, provider, clone_url, default_branch, stack, build_cmd, lint_cmd, test_cmd, branch_prefix, claude_md, jira_project, task_prefix, claude_md_status, deploy_workflow, archived_at,
 	preview_cmd, preview_port, preview_ready_path, preview_routes, preview_ui_paths, preview_login, preview_env IS NOT NULL, preview_env_names,
 	toolchains, toolchains_override, toolchains_detected_at, toolchain_notes, runner_image, memory_mb, build_env IS NOT NULL, build_env_names,
-	plane_project, workspace_id, harness`
+	plane_project, workspace_id, harness, branch_template, commit_template`
 
 func scanRepo(row pgx.Row) (domain.Repository, error) {
 	var r domain.Repository
@@ -764,7 +764,7 @@ func scanRepo(row pgx.Row) (domain.Repository, error) {
 		&r.BuildCmd, &r.LintCmd, &r.TestCmd, &r.BranchPrefix, &r.ClaudeMD, &r.JiraProject, &r.TaskPrefix, &r.ClaudeMDState, &r.DeployWorkflow, &r.ArchivedAt,
 		&r.Preview.Command, &r.Preview.Port, &r.Preview.ReadyPath, &r.Preview.Routes, &r.Preview.UIPaths, &r.Preview.Login, &r.Preview.EnvSet, &r.Preview.EnvNames,
 		&tcs, &r.ToolchainsOverride, &r.ToolchainsDetectedAt, &r.ToolchainNotes, &r.RunnerImage, &r.MemoryMB, &r.BuildEnvSet, &r.BuildEnvNames,
-		&r.PlaneProject, &r.WorkspaceID, &harness)
+		&r.PlaneProject, &r.WorkspaceID, &harness, &r.BranchTemplate, &r.CommitTemplate)
 	if err == nil {
 		_ = json.Unmarshal(tcs, &r.Toolchains)
 		_ = json.Unmarshal(harness, &r.Harness)
@@ -836,19 +836,19 @@ func (s *Agent) SaveRepository(ctx context.Context, r domain.Repository) (domain
 	out, err := scanRepo(s.db.QueryRow(ctx, `INSERT INTO repositories
 		(name, kind, provider, clone_url, default_branch, stack, build_cmd, lint_cmd, test_cmd, branch_prefix, claude_md, jira_project, task_prefix, deploy_workflow,
 		 preview_cmd, preview_port, preview_ready_path, preview_routes, preview_ui_paths, preview_login,
-		 toolchains, toolchains_override, runner_image, memory_mb, plane_project)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)
+		 toolchains, toolchains_override, runner_image, memory_mb, plane_project, branch_template, commit_template)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
 		ON CONFLICT (workspace_id, name) DO UPDATE SET kind = $2, provider = $3, clone_url = $4, default_branch = $5, stack = $6,
 			build_cmd = $7, lint_cmd = $8, test_cmd = $9, branch_prefix = $10, claude_md = $11, jira_project = $12,
 			task_prefix = $13, deploy_workflow = $14,
 			toolchains = CASE WHEN $22 OR $21::jsonb <> '[]'::jsonb THEN $21 ELSE repositories.toolchains END,
 			toolchains_override = $22 OR (repositories.toolchains_override AND $21::jsonb = '[]'::jsonb),
-			runner_image = $23, memory_mb = $24, plane_project = $25, updated_at = now()
+			runner_image = $23, memory_mb = $24, plane_project = $25, branch_template = $26, commit_template = $27, updated_at = now()
 		RETURNING `+repoCols,
 		r.Name, r.Kind, r.Provider, r.CloneURL, r.DefaultBranch, stackOf(r), r.BuildCmd, r.LintCmd, r.TestCmd,
 		r.BranchPrefix, r.ClaudeMD, r.JiraProject, r.TaskPrefix, r.DeployWorkflow,
 		r.Preview.Command, r.Preview.Port, readyPath(r.Preview.ReadyPath), nonNilSlice(r.Preview.Routes), nonNilSlice(r.Preview.UIPaths), r.Preview.Login,
-		toolchainsJSON(r.Toolchains), r.ToolchainsOverride, r.RunnerImage, r.MemoryMB, r.PlaneProject))
+		toolchainsJSON(r.Toolchains), r.ToolchainsOverride, r.RunnerImage, r.MemoryMB, r.PlaneProject, r.BranchTemplate, r.CommitTemplate))
 	return out, uniqueConflict(err)
 }
 
@@ -859,11 +859,11 @@ func (s *Agent) UpdateRepository(ctx context.Context, r domain.Repository) (doma
 		jira_project = $12, task_prefix = $13, deploy_workflow = $14, preview_cmd = $15, preview_port = $16,
 		preview_ready_path = $17, preview_routes = $18, preview_ui_paths = $19, preview_login = $20,
 		toolchains = $21, toolchains_override = $22, runner_image = $23, memory_mb = $24, stack = $25,
-		plane_project = $26, updated_at = now() WHERE id = $1 RETURNING `+repoCols,
+		plane_project = $26, branch_template = $27, commit_template = $28, updated_at = now() WHERE id = $1 RETURNING `+repoCols,
 		r.ID, r.Name, r.Kind, r.Provider, r.CloneURL, r.DefaultBranch, r.BuildCmd, r.LintCmd, r.TestCmd,
 		r.BranchPrefix, r.ClaudeMD, r.JiraProject, r.TaskPrefix, r.DeployWorkflow,
 		r.Preview.Command, r.Preview.Port, readyPath(r.Preview.ReadyPath), nonNilSlice(r.Preview.Routes), nonNilSlice(r.Preview.UIPaths), r.Preview.Login,
-		toolchainsJSON(r.Toolchains), r.ToolchainsOverride, r.RunnerImage, r.MemoryMB, stackOf(r), r.PlaneProject))
+		toolchainsJSON(r.Toolchains), r.ToolchainsOverride, r.RunnerImage, r.MemoryMB, stackOf(r), r.PlaneProject, r.BranchTemplate, r.CommitTemplate))
 	return out, uniqueConflict(err)
 }
 
@@ -959,6 +959,34 @@ func (s *Agent) OpenTicketCounts(ctx context.Context) (map[int64]int, error) {
 			return nil, err
 		}
 		out[id] = n
+	}
+	return out, rows.Err()
+}
+
+// OpenTicketWithNumber returns an open ticket other than except whose
+// number (Ticket.Number) is n: its branch would be the same.
+func (s *Agent) OpenTicketWithNumber(ctx context.Context, n, except string) (domain.Ticket, error) {
+	return scanTicket(s.db.QueryRow(ctx, `SELECT `+ticketCols+` FROM tickets
+		WHERE (ticket_number = $1 OR (ticket_number = '' AND key = $1)) AND key <> $2 AND state NOT IN ('done', 'rejected')
+		ORDER BY id LIMIT 1`, n, except))
+}
+
+// TicketBranches maps the branches agnts made in a repository to their
+// ticket keys.
+func (s *Agent) TicketBranches(ctx context.Context, repoID int64) (map[string]string, error) {
+	rows, err := s.db.Query(ctx, `SELECT tr.branch, t.key FROM ticket_repos tr JOIN tickets t ON t.id = tr.ticket_id
+		WHERE tr.repo_id = $1 AND tr.branch <> ''`, repoID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := map[string]string{}
+	for rows.Next() {
+		var branch, key string
+		if err := rows.Scan(&branch, &key); err != nil {
+			return nil, err
+		}
+		out[branch] = key
 	}
 	return out, rows.Err()
 }

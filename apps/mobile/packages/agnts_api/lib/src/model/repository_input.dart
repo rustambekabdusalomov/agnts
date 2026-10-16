@@ -38,6 +38,10 @@ class RepositoryInput {
 
      this.branchPrefix,
 
+     this.branchTemplate,
+
+     this.commitTemplate,
+
      this.taskPrefix,
 
      this.instructions,
@@ -156,6 +160,32 @@ class RepositoryInput {
 
 
   final String? branchPrefix;
+
+
+
+      /// Branch name template; must contain {key} or {number}. Empty uses {prefix}{key}
+  @JsonKey(
+    
+    name: r'branchTemplate',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? branchTemplate;
+
+
+
+      /// Commit message template; must contain {subject} or {title}. Empty uses KEY: Title
+  @JsonKey(
+    
+    name: r'commitTemplate',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? commitTemplate;
 
 
 
@@ -309,6 +339,8 @@ class RepositoryInput {
       other.lintCmd == lintCmd &&
       other.testCmd == testCmd &&
       other.branchPrefix == branchPrefix &&
+      other.branchTemplate == branchTemplate &&
+      other.commitTemplate == commitTemplate &&
       other.taskPrefix == taskPrefix &&
       other.instructions == instructions &&
       other.jiraProject == jiraProject &&
@@ -331,6 +363,8 @@ class RepositoryInput {
         lintCmd.hashCode +
         testCmd.hashCode +
         branchPrefix.hashCode +
+        branchTemplate.hashCode +
+        commitTemplate.hashCode +
         taskPrefix.hashCode +
         instructions.hashCode +
         jiraProject.hashCode +

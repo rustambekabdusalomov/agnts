@@ -48,6 +48,18 @@ void main() {
       // TODO
     });
 
+    // Branch name template; must contain {key} or {number}. Empty uses {prefix}{key}
+    // String branchTemplate
+    test('to test the property `branchTemplate`', () async {
+      // TODO
+    });
+
+    // Commit message template; must contain {subject} or {title}. Empty uses KEY: Title
+    // String commitTemplate
+    test('to test the property `commitTemplate`', () async {
+      // TODO
+    });
+
     // String taskPrefix
     test('to test the property `taskPrefix`', () async {
       // TODO

@@ -144,6 +144,8 @@ func repoCmd(ctx context.Context, cfg config.Config, pool postgresPool, args []s
 		fs.StringVar(&r.LintCmd, "lint", "", "lint command")
 		fs.StringVar(&r.TestCmd, "test", "", "test command")
 		fs.StringVar(&r.BranchPrefix, "prefix", "agnts/", "branch prefix")
+		fs.StringVar(&r.BranchTemplate, "branch-template", "", "branch name template, e.g. {type}/{key}-{slug} (placeholders {prefix} {type} {key} {number} {slug} {user}; default {prefix}{key})")
+		fs.StringVar(&r.CommitTemplate, "commit-template", "", "commit message template, e.g. [{number}] {type}({scope}): {subject} (placeholders {number} {key} {type} {scope} {subject} {title}; default KEY: Title)")
 		claudeMD := fs.String("instructions", "", "file with extra instructions for Claude (optional)")
 		var tcs toolchainFlags
 		fs.Var(&tcs, "toolchain", "tool@version installed in runs, e.g. node@20 (repeatable; detected from the repository when absent)")
@@ -167,6 +169,12 @@ func repoCmd(ctx context.Context, cfg config.Config, pool postgresPool, args []s
 		}
 		if _, _, err := github.OwnerRepo(r.CloneURL); err != nil {
 			return fmt.Errorf("%w (GitLab arrives in phase 5)", err)
+		}
+		if err := domain.ValidateBranchTemplate(r.BranchTemplate); err != nil {
+			return fmt.Errorf("--branch-template: %w", err)
+		}
+		if err := domain.ValidateCommitTemplate(r.CommitTemplate); err != nil {
+			return fmt.Errorf("--commit-template: %w", err)
 		}
 		if *claudeMD != "" {
 			b, err := os.ReadFile(*claudeMD)

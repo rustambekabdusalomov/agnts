@@ -151,8 +151,12 @@ func (s *Server) browse(w http.ResponseWriter, r *http.Request, id int64, part s
 	return v, true
 }
 
-// ticketForBranch links agnts's branches (prefix + KEY) to tickets.
+// ticketForBranch links agnts's branches to tickets: the branch a ticket
+// stored, else prefix + KEY (the default naming).
 func ticketForBranch(v admin.RepoActivityView, branch string) *string {
+	if k, ok := v.Tickets[branch]; ok {
+		return &k
+	}
 	prefix := v.Repo.BranchPrefix
 	if prefix == "" {
 		prefix = "agnts/"

@@ -16,6 +16,8 @@ Name | Type | Description | Notes
 **lintCmd** | **String** |  | [optional] 
 **testCmd** | **String** |  | [optional] 
 **branchPrefix** | **String** |  | [optional] 
+**branchTemplate** | **String** | Branch name template; must contain {key} or {number}. Empty uses {prefix}{key} | [optional] 
+**commitTemplate** | **String** | Commit message template; must contain {subject} or {title}. Empty uses KEY: Title | [optional] 
 **taskPrefix** | **String** |  | [optional] 
 **instructions** | **String** |  | [optional] 
 **jiraProject** | **String** |  | [optional] 

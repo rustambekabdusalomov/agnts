@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **kind** | [**TicketKindChoice**](TicketKindChoice.md) |  | [optional] 
 **title** | **String** |  | 
 **description** | **String** |  | [optional] 
+**ticketNumber** | **String** | The team's number for the work (AMANAT-2288), used in branch and commit names | [optional] 
 **priority** | **String** |  | 
 **afterApprove** | **String** |  | 
 **start** | **String** | ask = analyse and ask first, code = no questions, queue = keep until started | 

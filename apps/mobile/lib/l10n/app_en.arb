@@ -5089,6 +5089,50 @@
   },
   "reposBranch": "Default branch",
   "reposBranchHelp": "Work branches start from here.",
+  "reposBranchTemplate": "Branch name format",
+  "reposBranchTemplateHelp": "How agnts names the branch for each ticket. Must contain {key} or {number}. Leave empty for {fallback}.",
+  "@reposBranchTemplateHelp": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      },
+      "number": {
+        "type": "String"
+      },
+      "fallback": {
+        "type": "String"
+      }
+    }
+  },
+  "reposBranchTemplateExample": "Example: {example}",
+  "@reposBranchTemplateExample": {
+    "placeholders": {
+      "example": {
+        "type": "String"
+      }
+    }
+  },
+  "reposCommitTemplate": "Commit message format",
+  "reposCommitTemplateHelp": "How agnts writes its commit messages. An empty scope drops its parentheses. Leave empty for KEY: Title.",
+  "reposCommitTemplateExample": "Example: {example}",
+  "@reposCommitTemplateExample": {
+    "placeholders": {
+      "example": {
+        "type": "String"
+      }
+    }
+  },
+  "reposPlaceholders": "Placeholders",
+  "reposPhPrefix": "The repository's branch prefix, agnts/ by default.",
+  "reposPhType": "The kind of work: feature for code, bugfix for a bug, test, swagger-test.",
+  "reposPhKey": "The agnts ticket key: VIS-42, or the Jira or Plane issue key.",
+  "reposPhNumber": "The task's ticket number, such as AMANAT-2288. Falls back to the key when empty.",
+  "reposPhSlug": "The ticket title in lowercase with hyphens, up to 40 characters.",
+  "reposPhUser": "Username of whoever the ticket is assigned to, or its creator.",
+  "reposPhCommitType": "The change type the agent picks: feat, fix, chore, refactor, docs, test... Falls back to the ticket kind.",
+  "reposPhScope": "The area the agent says it changed, such as deps or auth. May be empty.",
+  "reposPhSubject": "The agent's one-line summary of the change. Falls back to the ticket title.",
+  "reposPhTitle": "The ticket title as written.",
   "reposBuild": "Build command",
   "reposLint": "Lint command",
   "reposTest": "Test command",
@@ -6212,6 +6256,9 @@
   "tasksRepository": "Repository",
   "tasksFieldTitle": "Title",
   "tasksTitlePh": "For example: Add a rest timer between sets",
+  "tasksTicketNumber": "Ticket number",
+  "tasksTicketNumberPh": "For example: AMANAT-2288",
+  "tasksTicketNumberHelp": "Optional. Your team's number for this work, used in branch and commit names in place of the task key.",
   "tasksFieldDesc": "What should be done",
   "tasksDescPh": "Describe the result you want. The clearer this is, the fewer questions agnts asks.",
   "tasksPriority": "Priority",

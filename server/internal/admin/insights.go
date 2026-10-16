@@ -189,6 +189,11 @@ func (r *Repos) Browse(ctx context.Context, id int64, part string, page int) (Re
 		return RepoActivityView{}, err
 	}
 	out := RepoActivityView{Repo: v, Tickets: map[string]string{}}
+	if part == "branches" || part == "local" {
+		if out.Tickets, err = r.store.TicketBranches(ctx, id); err != nil {
+			return out, err
+		}
+	}
 	switch part {
 	case "branches":
 		out.Branches, err = r.browser.Branches(ctx, v.Repository)

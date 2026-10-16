@@ -44,6 +44,10 @@ class Repository {
 
     required  this.branchPrefix,
 
+     this.branchTemplate,
+
+     this.commitTemplate,
+
     required  this.taskPrefix,
 
     required  this.instructions,
@@ -203,6 +207,32 @@ class Repository {
 
 
   final String branchPrefix;
+
+
+
+      /// How agnts names branches, with placeholders {prefix} {type} {key} {number} {slug} {user}; empty uses {prefix}{key}
+  @JsonKey(
+    
+    name: r'branchTemplate',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? branchTemplate;
+
+
+
+      /// How agnts writes commit messages, with placeholders {number} {key} {type} {scope} {subject} {title}; empty uses KEY: Title
+  @JsonKey(
+    
+    name: r'commitTemplate',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? commitTemplate;
 
 
 
@@ -471,6 +501,8 @@ class Repository {
       other.lintCmd == lintCmd &&
       other.testCmd == testCmd &&
       other.branchPrefix == branchPrefix &&
+      other.branchTemplate == branchTemplate &&
+      other.commitTemplate == commitTemplate &&
       other.taskPrefix == taskPrefix &&
       other.instructions == instructions &&
       other.jiraProject == jiraProject &&
@@ -504,6 +536,8 @@ class Repository {
         lintCmd.hashCode +
         testCmd.hashCode +
         branchPrefix.hashCode +
+        branchTemplate.hashCode +
+        commitTemplate.hashCode +
         taskPrefix.hashCode +
         instructions.hashCode +
         jiraProject.hashCode +

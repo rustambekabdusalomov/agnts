@@ -9,6 +9,8 @@ part of 'task_update.dart';
 abstract class _$TaskUpdateCWProxy {
   TaskUpdate title(String? title);
 
+  TaskUpdate ticketNumber(String? ticketNumber);
+
   TaskUpdate description(String? description);
 
   TaskUpdate priority(TaskUpdatePriorityEnum? priority);
@@ -27,6 +29,7 @@ abstract class _$TaskUpdateCWProxy {
   /// ````
   TaskUpdate call({
     String? title,
+    String? ticketNumber,
     String? description,
     TaskUpdatePriorityEnum? priority,
     TaskUpdateAfterApproveEnum? afterApprove,
@@ -43,6 +46,10 @@ class _$TaskUpdateCWProxyImpl implements _$TaskUpdateCWProxy {
 
   @override
   TaskUpdate title(String? title) => this(title: title);
+
+  @override
+  TaskUpdate ticketNumber(String? ticketNumber) =>
+      this(ticketNumber: ticketNumber);
 
   @override
   TaskUpdate description(String? description) => this(description: description);
@@ -71,6 +78,7 @@ class _$TaskUpdateCWProxyImpl implements _$TaskUpdateCWProxy {
   /// ````
   TaskUpdate call({
     Object? title = const $CopyWithPlaceholder(),
+    Object? ticketNumber = const $CopyWithPlaceholder(),
     Object? description = const $CopyWithPlaceholder(),
     Object? priority = const $CopyWithPlaceholder(),
     Object? afterApprove = const $CopyWithPlaceholder(),
@@ -82,6 +90,10 @@ class _$TaskUpdateCWProxyImpl implements _$TaskUpdateCWProxy {
           ? _value.title
           // ignore: cast_nullable_to_non_nullable
           : title as String?,
+      ticketNumber: ticketNumber == const $CopyWithPlaceholder()
+          ? _value.ticketNumber
+          // ignore: cast_nullable_to_non_nullable
+          : ticketNumber as String?,
       description: description == const $CopyWithPlaceholder()
           ? _value.description
           // ignore: cast_nullable_to_non_nullable
@@ -120,6 +132,7 @@ TaskUpdate _$TaskUpdateFromJson(Map<String, dynamic> json) =>
     $checkedCreate('TaskUpdate', json, ($checkedConvert) {
       final val = TaskUpdate(
         title: $checkedConvert('title', (v) => v as String?),
+        ticketNumber: $checkedConvert('ticketNumber', (v) => v as String?),
         description: $checkedConvert('description', (v) => v as String?),
         priority: $checkedConvert(
           'priority',
@@ -145,6 +158,7 @@ Map<String, dynamic> _$TaskUpdateToJson(
   TaskUpdate instance,
 ) => <String, dynamic>{
   'title': ?instance.title,
+  'ticketNumber': ?instance.ticketNumber,
   'description': ?instance.description,
   'priority': ?_$TaskUpdatePriorityEnumEnumMap[instance.priority],
   'afterApprove': ?_$TaskUpdateAfterApproveEnumEnumMap[instance.afterApprove],

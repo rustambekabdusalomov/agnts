@@ -5409,6 +5409,7 @@ components:
       required: [key, source, title, description, priority, state, revision, turns, branch, prUrl, kind, kindAuto, createdAt, updatedAt]
       properties:
         key: { type: string }
+        ticketNumber: { type: string, description: "The team's number for the work (AMANAT-2288), used in branch and commit names; absent uses key" }
         source: { type: string, enum: [jira, plane, local, git, ci] }
         repoId: { type: integer, format: int64, description: 'The primary repository; repos lists all of them' }
         repos:
@@ -6011,6 +6012,7 @@ components:
         kind: { $ref: '#/components/schemas/TicketKindChoice' }
         title: { type: string, minLength: 1, maxLength: 300 }
         description: { type: string, maxLength: 20000 }
+        ticketNumber: { type: string, maxLength: 64, pattern: '^([A-Za-z0-9][A-Za-z0-9._-]*)?$', description: "The team's number for the work (AMANAT-2288), used in branch and commit names" }
         priority: { type: string, enum: [low, medium, high] }
         afterApprove: { type: string, enum: [pr, main] }
         start:
@@ -6028,6 +6030,7 @@ components:
       type: object
       properties:
         title: { type: string, minLength: 1, maxLength: 300 }
+        ticketNumber: { type: string, maxLength: 64, pattern: '^([A-Za-z0-9][A-Za-z0-9._-]*)?$', description: "The team's number for the work (AMANAT-2288), used in branch and commit names; empty clears it, absent keeps it" }
         description: { type: string, maxLength: 20000 }
         priority: { type: string, enum: [low, medium, high] }
         afterApprove: { type: string, enum: [pr, main] }
@@ -7032,6 +7035,8 @@ components:
         lintCmd: { type: string }
         testCmd: { type: string }
         branchPrefix: { type: string }
+        branchTemplate: { type: string, description: 'How agnts names branches, with placeholders {prefix} {type} {key} {number} {slug} {user}; empty uses {prefix}{key}' }
+        commitTemplate: { type: string, description: 'How agnts writes commit messages, with placeholders {number} {key} {type} {scope} {subject} {title}; empty uses KEY: Title' }
         taskPrefix: { type: string }
         instructions: { type: string, description: Extra instructions added to every prompt }
         jiraProject: { type: string }
@@ -7081,6 +7086,8 @@ components:
         lintCmd: { type: string, maxLength: 500 }
         testCmd: { type: string, maxLength: 500 }
         branchPrefix: { type: string, maxLength: 50 }
+        branchTemplate: { type: string, maxLength: 100, description: 'Branch name template; must contain {key} or {number}. Empty uses {prefix}{key}' }
+        commitTemplate: { type: string, maxLength: 200, description: 'Commit message template; must contain {subject} or {title}. Empty uses KEY: Title' }
         taskPrefix: { type: string, maxLength: 8 }
         instructions: { type: string, maxLength: 20000 }
         jiraProject: { type: string, maxLength: 20 }

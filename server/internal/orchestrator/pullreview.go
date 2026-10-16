@@ -265,7 +265,7 @@ func (o *Orchestrator) createPullTicket(ctx context.Context, repo domain.Reposit
 		if i > 0 {
 			t.Key = fmt.Sprintf("%s-%d", base, i+1) // a ticket from elsewhere, or an earlier review, has the key
 		}
-		t.Branch = branchFor(repo, t.Key)
+		t.Branch = o.branchFor(ctx, repo, t)
 		out, err := o.store.CreateTicket(ctx, t, domain.Event{TicketKey: t.Key, Type: domain.EventTicketCreated, Origin: origin, Message: msg,
 			Data: map[string]any{"number": pr.Number, "url": pr.URL, "author": pr.Author}})
 		if !errors.Is(err, domain.ErrConflict) {
