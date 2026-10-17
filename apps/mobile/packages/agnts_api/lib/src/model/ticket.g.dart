@@ -95,6 +95,10 @@ abstract class _$TicketCWProxy {
 
   Ticket canPreview(bool? canPreview);
 
+  Ticket continueTo(TicketState? continueTo);
+
+  Ticket canStartOver(bool? canStartOver);
+
   Ticket spend(TokenSpend? spend);
 
   Ticket waitReason(WaitReason? waitReason);
@@ -164,6 +168,8 @@ abstract class _$TicketCWProxy {
     TicketPreviewStateEnum? previewState,
     bool? previewCompare,
     bool? canPreview,
+    TicketState? continueTo,
+    bool? canStartOver,
     TokenSpend? spend,
     WaitReason? waitReason,
     String? waitMessage,
@@ -324,6 +330,12 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
   Ticket canPreview(bool? canPreview) => this(canPreview: canPreview);
 
   @override
+  Ticket continueTo(TicketState? continueTo) => this(continueTo: continueTo);
+
+  @override
+  Ticket canStartOver(bool? canStartOver) => this(canStartOver: canStartOver);
+
+  @override
   Ticket spend(TokenSpend? spend) => this(spend: spend);
 
   @override
@@ -402,6 +414,8 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
     Object? previewState = const $CopyWithPlaceholder(),
     Object? previewCompare = const $CopyWithPlaceholder(),
     Object? canPreview = const $CopyWithPlaceholder(),
+    Object? continueTo = const $CopyWithPlaceholder(),
+    Object? canStartOver = const $CopyWithPlaceholder(),
     Object? spend = const $CopyWithPlaceholder(),
     Object? waitReason = const $CopyWithPlaceholder(),
     Object? waitMessage = const $CopyWithPlaceholder(),
@@ -589,6 +603,14 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
           ? _value.canPreview
           // ignore: cast_nullable_to_non_nullable
           : canPreview as bool?,
+      continueTo: continueTo == const $CopyWithPlaceholder()
+          ? _value.continueTo
+          // ignore: cast_nullable_to_non_nullable
+          : continueTo as TicketState?,
+      canStartOver: canStartOver == const $CopyWithPlaceholder()
+          ? _value.canStartOver
+          // ignore: cast_nullable_to_non_nullable
+          : canStartOver as bool?,
       spend: spend == const $CopyWithPlaceholder()
           ? _value.spend
           // ignore: cast_nullable_to_non_nullable
@@ -767,6 +789,11 @@ Ticket _$TicketFromJson(
     ),
     previewCompare: $checkedConvert('previewCompare', (v) => v as bool?),
     canPreview: $checkedConvert('canPreview', (v) => v as bool?),
+    continueTo: $checkedConvert(
+      'continueTo',
+      (v) => $enumDecodeNullable(_$TicketStateEnumMap, v),
+    ),
+    canStartOver: $checkedConvert('canStartOver', (v) => v as bool?),
     spend: $checkedConvert(
       'spend',
       (v) => v == null ? null : TokenSpend.fromJson(v as Map<String, dynamic>),
@@ -834,6 +861,8 @@ Map<String, dynamic> _$TicketToJson(Ticket instance) => <String, dynamic>{
   'previewState': ?_$TicketPreviewStateEnumEnumMap[instance.previewState],
   'previewCompare': ?instance.previewCompare,
   'canPreview': ?instance.canPreview,
+  'continueTo': ?_$TicketStateEnumMap[instance.continueTo],
+  'canStartOver': ?instance.canStartOver,
   'spend': ?instance.spend?.toJson(),
   'waitReason': ?_$WaitReasonEnumMap[instance.waitReason],
   'waitMessage': ?instance.waitMessage,

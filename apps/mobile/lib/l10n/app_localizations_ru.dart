@@ -6082,6 +6082,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mobilePushDone => 'Когда изменения отправлены';
 
   @override
+  String get mobilePushProgress => 'Когда агент завершает шаг';
+
+  @override
+  String get mobilePushProgressHelp => 'Анализ готов, код написан. Только на телефон, без звука, одно уведомление на тикет';
+
+  @override
   String get mobilePushUnavailable => 'Push не настроен на сервере.';
 
   @override
@@ -10540,6 +10546,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsDone => 'Когда изменения отправлены';
 
   @override
+  String get settingsProgress => 'Когда агент завершает шаг';
+
+  @override
+  String get settingsProgressHelp => 'Анализ готов, код написан. Только на телефон, без звука, одно уведомление на тикет';
+
+  @override
   String get settingsLessons => 'Когда agnts находит что-то новое для изучения';
 
   @override
@@ -11570,7 +11582,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String ticketRejectConfirm(String key) {
-    return 'Остановить всю работу над $key? Это нельзя отменить.';
+    return 'Остановить всю работу над $key? Её можно будет продолжить.';
   }
 
   @override
@@ -11847,6 +11859,45 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get ticketRejectedSub => 'agnts прекратил работу над этим тикетом. Ветка не отправлялась.';
+
+  @override
+  String get ticketRejectedSubContinue =>
+      'agnts прекратил работу над этим тикетом. Её можно продолжить с того места, где она остановилась.';
+
+  @override
+  String get ticketContinue => 'Продолжить';
+
+  @override
+  String get ticketContinueNote => 'Заметка для agnts';
+
+  @override
+  String get ticketContinueNoteHint => 'Необязательно. Что сделать иначе; следующий запуск получит заметку, как запрошенные изменения.';
+
+  @override
+  String get ticketContinueToNew => 'Тикет вернётся в очередь и будет проанализирован заново.';
+
+  @override
+  String get ticketContinueToAnswers => 'Тикет вернётся к вопросам; уже данные ответы сохранятся.';
+
+  @override
+  String get ticketContinueToCoding => 'agnts продолжит писать код с того места, где остановился.';
+
+  @override
+  String get ticketContinueToReview => 'Тикет вернётся на ревью. С заметкой agnts сначала внесёт изменения.';
+
+  @override
+  String get ticketContinueToFailed => 'Тикет вернётся к ошибке, на которой остановился, чтобы его можно было повторить.';
+
+  @override
+  String get ticketContinueToRateLimited => 'Тикет снова будет ждать лимита тарифа.';
+
+  @override
+  String get ticketStartOver => 'Начать заново';
+
+  @override
+  String ticketStartOverConfirm(String key) {
+    return 'Начать $key заново? Анализ, ответы и коммиты будут удалены, и agnts проанализирует тикет снова.';
+  }
 
   @override
   String get ticketFailedTitle => 'agnts остановился';

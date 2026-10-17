@@ -128,7 +128,21 @@ type Push struct {
 	// Workspace is the id of the workspace the ticket is in; the app
 	// switches to it before opening the link.
 	Workspace int64
+	// Tag makes a push replace the last one with the same tag on the phone
+	// instead of piling up; empty for one that stands on its own.
+	Tag string
+	// Quiet pushes show without a sound (steps of a running ticket).
+	Quiet bool
+	// Actor is who caused the push, 0 for agnts; never sent. They get no
+	// push about what they did themselves.
+	Actor int64
 }
+
+// Android notification channels; the app creates them.
+const (
+	channelDefault = "agnts"
+	channelQuiet   = "agnts_progress"
+)
 
 // ErrUnregistered means the device token is no longer valid.
 var ErrUnregistered = errors.New("device token is no longer registered")
@@ -143,12 +157,28 @@ func (f *FCM) Send(ctx context.Context, token string, p Push) error {
 	if route == "" {
 		route = "/tickets/" + p.Ticket
 	}
+	android := map[string]string{"channel_id": channelDefault}
+	aps := map[string]any{"sound": "default"}
+	if p.Quiet {
+		android["channel_id"] = channelQuiet
+		aps = map[string]any{"interruption-level": "passive"}
+	}
+	apns := map[string]any{"payload": map[string]any{"aps": aps}}
+	if p.Ticket != "" {
+		aps["thread-id"] = p.Ticket // one group per ticket on iOS
+	}
+	if p.Tag != "" {
+		android["tag"] = p.Tag
+		apns["headers"] = map[string]string{"apns-collapse-id": p.Tag}
+	}
 	msg := map[string]any{"message": map[string]any{
 		"token":        token,
 		"notification": map[string]string{"title": p.Title, "body": p.Body},
-		"data":         map[string]string{"ticket": p.Ticket, "route": route, "workspace": strconv.FormatInt(p.Workspace, 10)},
-		"android":      map[string]any{"priority": "high", "notification": map[string]string{"channel_id": "agnts"}},
-		"apns":         map[string]any{"payload": map[string]any{"aps": map[string]any{"sound": "default"}}},
+		// tag and quiet again for the app, which shows pushes itself while open.
+		"data": map[string]string{"ticket": p.Ticket, "route": route, "workspace": strconv.FormatInt(p.Workspace, 10),
+			"tag": p.Tag, "quiet": strconv.FormatBool(p.Quiet)},
+		"android": map[string]any{"priority": "high", "notification": android},
+		"apns":    apns,
 	}}
 	b, _ := json.Marshal(msg)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost,

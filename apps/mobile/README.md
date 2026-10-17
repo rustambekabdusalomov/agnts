@@ -59,6 +59,11 @@ flutter run --flavor user
 
 Without Firebase files the app still works; push is simply off.
 
+Pushes go to the ticket's owner only. The app creates two Android channels:
+`agnts` for what needs a look and `agnts_progress` (silent) for agents
+finishing a step; a ticket's pushes replace each other. See
+`plans/Push notifications plan.md`.
+
 ## Distribution
 
 - iOS: `flutter build ipa --flavor user` (or `admin`), then upload to

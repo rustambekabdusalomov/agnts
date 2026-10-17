@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"bytes"
 	"context"
+	"errors"
 	"io"
 	"os"
 	"os/exec"
@@ -666,5 +667,45 @@ func TestWorkspaceLayoutAdoptAndDeleteBranch(t *testing.T) {
 	}
 	if _, err := os.Stat(g.repoDir(moved)); !os.IsNotExist(err) {
 		t.Fatal("workspace folder kept")
+	}
+}
+
+func TestRestoreBranch(t *testing.T) {
+	ctx := context.Background()
+	g := newRepos(t)
+	repo := domain.Repository{ID: 1, WorkspaceID: 1, Name: "demo", CloneURL: upstream(t), DefaultBranch: "main", Provider: "github"}
+	if err := g.Prepare(ctx, repo, "agnts/PAY-1"); err != nil {
+		t.Fatal(err)
+	}
+	sha, _, _, err := g.Commit(ctx, repo, "agnts/PAY-1", tarOf(t, map[string]string{"README.md": "# rejected work\n"}), "PAY-1: work")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := g.DeleteBranch(ctx, repo, "agnts/PAY-1"); err != nil {
+		t.Fatal(err)
+	}
+	if err := g.RestoreBranch(ctx, repo, "agnts/PAY-1", sha); err != nil {
+		t.Fatal(err)
+	}
+	head := func() string {
+		r, err := git.PlainOpen(g.mirrorDir(repo))
+		if err != nil {
+			t.Fatal(err)
+		}
+		ref, err := r.Reference(plumbing.NewBranchReferenceName("agnts/PAY-1"), true)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return ref.Hash().String()
+	}
+	if got := head(); got != sha {
+		t.Fatalf("restored at %s, want %s", got, sha)
+	}
+	// A branch that exists stays where it is.
+	if err := g.RestoreBranch(ctx, repo, "agnts/PAY-1", strings.Repeat("a", 40)); err != nil || head() != sha {
+		t.Fatalf("existing branch moved: %v", err)
+	}
+	if err := g.RestoreBranch(ctx, repo, "agnts/PAY-2", strings.Repeat("b", 40)); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("unknown commit: %v", err)
 	}
 }

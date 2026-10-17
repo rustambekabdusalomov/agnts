@@ -108,6 +108,7 @@ export 'package:agnts_api/src/model/commit_pull.dart';
 export 'package:agnts_api/src/model/confirm_totp_request.dart';
 export 'package:agnts_api/src/model/connect_integration_request.dart';
 export 'package:agnts_api/src/model/connect_result.dart';
+export 'package:agnts_api/src/model/continue_ticket_request.dart';
 export 'package:agnts_api/src/model/coverage.dart';
 export 'package:agnts_api/src/model/coverage_config.dart';
 export 'package:agnts_api/src/model/coverage_files_inner.dart';

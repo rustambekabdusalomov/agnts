@@ -453,6 +453,7 @@ class _PushSection extends ConsumerWidget {
             sw(l.mobilePushNeeds, n.needsYou, 'needsYou', help: l.settingsNeedsYouHelp),
             sw(l.mobilePushStopped, n.stopped, 'stopped'),
             sw(l.mobilePushDone, n.done, 'done'),
+            if (n.progress != null) sw(l.mobilePushProgress, n.progress!, 'progress', help: l.mobilePushProgressHelp),
             if (n.lessons != null) sw(l.settingsLessons, n.lessons!, 'lessons'),
             if (n.review != null) sw(l.settingsReviewDone, n.review!, 'review'),
             if (n.preview != null) sw(l.mpreviewNotify, n.preview!, 'preview'),

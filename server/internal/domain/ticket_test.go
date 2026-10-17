@@ -26,6 +26,9 @@ func TestTransitionMatrix(t *testing.T) {
 		{StateRateLimited, StateNew}, {StateRateLimited, StateCoding}, {StateRateLimited, StateRejected},
 		// Restart with a newer version of the issue, before anything is pushed.
 		{StateWaitingForAnswers, StateNew}, {StateCoding, StateNew}, {StateTesting, StateNew}, {StateWaitingForReview, StateNew},
+		// Continue a rejected ticket where it stopped.
+		{StateRejected, StateNew}, {StateRejected, StateWaitingForAnswers}, {StateRejected, StateCoding},
+		{StateRejected, StateWaitingForReview}, {StateRejected, StateFailed}, {StateRejected, StateRateLimited},
 	} {
 		allowed[p] = true
 	}
@@ -35,6 +38,32 @@ func TestTransitionMatrix(t *testing.T) {
 				t.Errorf("%s -> %s: got %v", from, to, got)
 			}
 		}
+	}
+}
+
+func TestContinueState(t *testing.T) {
+	for _, c := range []struct {
+		from TicketState
+		note bool
+		want TicketState
+	}{
+		{StateNew, false, StateNew}, {StateAnalyzing, true, StateNew}, {"", false, StateNew},
+		{StateWaitingForAnswers, false, StateWaitingForAnswers},
+		{StateCoding, false, StateCoding}, {StateTesting, true, StateCoding},
+		{StateWaitingForReview, false, StateWaitingForReview}, {StateWaitingForReview, true, StateCoding},
+		{StateFailed, false, StateFailed}, {StateRateLimited, false, StateRateLimited},
+	} {
+		got := ContinueState(c.from, c.note)
+		if got != c.want {
+			t.Errorf("%q note=%v: got %s, want %s", c.from, c.note, got, c.want)
+		}
+		if !CanTransition(StateRejected, got) {
+			t.Errorf("rejected cannot go to %s", got)
+		}
+	}
+	if CanContinue(Ticket{State: StateRejected, Kind: KindReview}) || CanContinue(Ticket{State: StateRejected, ReplayOf: "PAY-1"}) ||
+		CanContinue(Ticket{State: StateDone}) || !CanContinue(Ticket{State: StateRejected, Kind: KindCode}) {
+		t.Error("CanContinue")
 	}
 }
 
@@ -48,7 +77,8 @@ func TestNoPushWithoutReview(t *testing.T) {
 
 func TestTerminalStates(t *testing.T) {
 	for _, s := range allStates {
-		if s.Terminal() != (len(transitions[s]) == 0) {
+		// Rejected is terminal, yet a person may Continue it.
+		if s != StateRejected && s.Terminal() != (len(transitions[s]) == 0) {
 			t.Errorf("%s: Terminal()=%v but has %d exits", s, s.Terminal(), len(transitions[s]))
 		}
 		if !s.Valid() {

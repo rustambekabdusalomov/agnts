@@ -32,6 +32,8 @@
     "pushNeeds": "Siz kerak boʻlganda",
     "pushStopped": "Ish toʻxtaganda",
     "pushDone": "Oʻzgarishlar yuborilganda",
+    "pushProgress": "Agent bosqichni tugatganda",
+    "pushProgressHelp": "Tahlil tayyor, kod yozildi. Faqat telefonga, ovozsiz, har bir tiket uchun bitta bildirishnoma",
     "pushUnavailable": "Serverda push sozlanmagan.",
     "integrations": "Integratsiyalar",
     "repositories": "Repozitoriylar",

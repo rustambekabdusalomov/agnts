@@ -30,6 +30,8 @@ class NotifySettings {
 
     required  this.done,
 
+     this.progress,
+
      this.lessons,
 
      this.review,
@@ -100,6 +102,19 @@ class NotifySettings {
 
 
   final bool done;
+
+
+
+      /// An agent finished a step (analysis, code); push only, silent
+  @JsonKey(
+    
+    name: r'progress',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? progress;
 
 
 
@@ -190,6 +205,7 @@ class NotifySettings {
       other.needsYou == needsYou &&
       other.stopped == stopped &&
       other.done == done &&
+      other.progress == progress &&
       other.lessons == lessons &&
       other.review == review &&
       other.preview == preview &&
@@ -204,6 +220,7 @@ class NotifySettings {
         needsYou.hashCode +
         stopped.hashCode +
         done.hashCode +
+        progress.hashCode +
         lessons.hashCode +
         review.hashCode +
         preview.hashCode +

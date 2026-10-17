@@ -32,6 +32,12 @@ void main() {
       // TODO
     });
 
+    // An agent finished a step (analysis, code); push only, silent
+    // bool progress
+    test('to test the property `progress`', () async {
+      // TODO
+    });
+
     // New lessons were found
     // bool lessons
     test('to test the property `lessons`', () async {

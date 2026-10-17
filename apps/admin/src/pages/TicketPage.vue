@@ -172,6 +172,10 @@ const feedbackAttach = ref<InstanceType<typeof FileAttach> | null>(null)
 const retryNote = ref('')
 const retryFiles = ref<number[]>([])
 const retryUploading = ref(false)
+// What to do differently when a rejected ticket is continued.
+const continueNote = ref('')
+const continueFiles = ref<number[]>([])
+const continueUploading = ref(false)
 const MAX_FEEDBACK_SHOTS = 6
 const notice = ref('')
 
@@ -210,7 +214,7 @@ function toggleAssignee(u: string) {
   assignees.value = assignees.value.includes(u) ? assignees.value.filter((x) => x !== u) : [...assignees.value, u]
 }
 
-type Action = 'answers' | 'approve' | 'request-changes' | 'reject' | 'retry' | 'start' | 'stop' | 'merged'
+type Action = 'answers' | 'approve' | 'request-changes' | 'reject' | 'retry' | 'continue' | 'start-over' | 'start' | 'stop' | 'merged'
 const act = useMutation({
   mutationFn: (a: Action) => {
     const path = { params: { path: { key: key.value } } }
@@ -259,6 +263,17 @@ const act = useMutation({
             },
           }),
         )
+      case 'continue':
+        return unwrap(
+          api.POST('/tickets/{key}/continue', {
+            ...path,
+            body: continueTakesNote.value
+              ? { note: continueNote.value.trim() || undefined, attachments: continueFiles.value.length ? continueFiles.value : undefined }
+              : {},
+          }),
+        )
+      case 'start-over':
+        return unwrap(api.POST('/tickets/{key}/start-over', path))
       case 'start':
         return unwrap(api.POST('/tickets/{key}/analyze', path))
       case 'stop':
@@ -278,6 +293,10 @@ const act = useMutation({
     if (a === 'retry') {
       retryNote.value = ''
       retryFiles.value = []
+    }
+    if (a === 'continue') {
+      continueNote.value = ''
+      continueFiles.value = []
     }
   },
   onError: (e) => {
@@ -364,6 +383,23 @@ function approve() {
   let msg = opensPr.value ? t('ticket.approveConfirm', { branch: t0.branch }) : t('ticket.approveMainConfirm')
   if (opensPr.value && assignees.value.length) msg += '\n\n' + t('ticket.approveAssignees', { names: assignees.value.join(', ') })
   confirmThen(msg, 'approve')
+}
+// A rejected ticket goes back where it stopped (the server's continueTo); a
+// note sends one rejected at review to coding first.
+const CONTINUE_HINT = {
+  new: 'ticket.continueToNew', waiting_for_answers: 'ticket.continueToAnswers', coding: 'ticket.continueToCoding',
+  waiting_for_review: 'ticket.continueToReview', failed: 'ticket.continueToFailed', rate_limited: 'ticket.continueToRateLimited',
+} as const
+const continueTo = computed(() => tk.value?.continueTo)
+const continueHint = computed(() => {
+  const to = continueTo.value
+  return to && to in CONTINUE_HINT ? t(CONTINUE_HINT[to as keyof typeof CONTINUE_HINT]) : ''
+})
+// Only a stage that runs Claude next can take a note.
+const continueTakesNote = computed(() => ['new', 'coding', 'waiting_for_review'].includes(continueTo.value ?? ''))
+async function startOver() {
+  const label = t('ticket.startOver')
+  if (await askConfirm({ title: label, message: t('ticket.startOverConfirm', { key: key.value }), confirmLabel: label, danger: true })) act.mutate('start-over')
 }
 function reject() {
   if (pull.value) confirmThen(t('reviews.dismissConfirm', { number: tk.value?.pull?.number ?? '', host: host.value }), 'reject')
@@ -859,7 +895,19 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             <!-- rejected -->
             <template v-else-if="tk.state === 'rejected'">
               <h2>{{ t('ticket.rejectedTitle') }}</h2>
-              <p class="sub">{{ t('ticket.rejectedSub') }}</p>
+              <p class="sub">{{ continueTo ? t('ticket.rejectedSubContinue') : t('ticket.rejectedSub') }}</p>
+              <template v-if="continueTo">
+                <div v-if="continueTakesNote" class="sec">
+                  <h3><label for="continue-note">{{ t('ticket.continueNote') }}</label></h3>
+                  <textarea id="continue-note" v-model="continueNote" maxlength="4000" :placeholder="t('ticket.continueNoteHint')" />
+                  <FileAttach v-model="continueFiles" v-model:busy="continueUploading" />
+                </div>
+                <div class="actions">
+                  <button class="btn btn-p" type="button" :disabled="act.isPending.value || continueUploading" @click="act.mutate('continue')">{{ t('ticket.continue') }}</button>
+                  <button v-if="tk.canStartOver" class="btn" type="button" :disabled="act.isPending.value" @click="startOver">{{ t('ticket.startOver') }}</button>
+                  <span class="hint">{{ continueHint }}</span>
+                </div>
+              </template>
             </template>
 
             <!-- failed -->

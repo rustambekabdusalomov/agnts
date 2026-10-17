@@ -17,6 +17,8 @@ abstract class _$NotifySettingsCWProxy {
 
   NotifySettings done(bool done);
 
+  NotifySettings progress(bool? progress);
+
   NotifySettings lessons(bool? lessons);
 
   NotifySettings review(bool? review);
@@ -41,6 +43,7 @@ abstract class _$NotifySettingsCWProxy {
     bool needsYou,
     bool stopped,
     bool done,
+    bool? progress,
     bool? lessons,
     bool? review,
     bool? preview,
@@ -70,6 +73,9 @@ class _$NotifySettingsCWProxyImpl implements _$NotifySettingsCWProxy {
 
   @override
   NotifySettings done(bool done) => this(done: done);
+
+  @override
+  NotifySettings progress(bool? progress) => this(progress: progress);
 
   @override
   NotifySettings lessons(bool? lessons) => this(lessons: lessons);
@@ -103,6 +109,7 @@ class _$NotifySettingsCWProxyImpl implements _$NotifySettingsCWProxy {
     Object? needsYou = const $CopyWithPlaceholder(),
     Object? stopped = const $CopyWithPlaceholder(),
     Object? done = const $CopyWithPlaceholder(),
+    Object? progress = const $CopyWithPlaceholder(),
     Object? lessons = const $CopyWithPlaceholder(),
     Object? review = const $CopyWithPlaceholder(),
     Object? preview = const $CopyWithPlaceholder(),
@@ -131,6 +138,10 @@ class _$NotifySettingsCWProxyImpl implements _$NotifySettingsCWProxy {
           ? _value.done
           // ignore: cast_nullable_to_non_nullable
           : done as bool,
+      progress: progress == const $CopyWithPlaceholder()
+          ? _value.progress
+          // ignore: cast_nullable_to_non_nullable
+          : progress as bool?,
       lessons: lessons == const $CopyWithPlaceholder()
           ? _value.lessons
           // ignore: cast_nullable_to_non_nullable
@@ -181,6 +192,7 @@ NotifySettings _$NotifySettingsFromJson(Map<String, dynamic> json) =>
         needsYou: $checkedConvert('needsYou', (v) => v as bool),
         stopped: $checkedConvert('stopped', (v) => v as bool),
         done: $checkedConvert('done', (v) => v as bool),
+        progress: $checkedConvert('progress', (v) => v as bool?),
         lessons: $checkedConvert('lessons', (v) => v as bool?),
         review: $checkedConvert('review', (v) => v as bool?),
         preview: $checkedConvert('preview', (v) => v as bool?),
@@ -198,6 +210,7 @@ Map<String, dynamic> _$NotifySettingsToJson(NotifySettings instance) =>
       'needsYou': instance.needsYou,
       'stopped': instance.stopped,
       'done': instance.done,
+      'progress': ?instance.progress,
       'lessons': ?instance.lessons,
       'review': ?instance.review,
       'preview': ?instance.preview,

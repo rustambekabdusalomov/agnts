@@ -253,6 +253,17 @@ void main() {
       // TODO
     });
 
+    // TicketState continueTo
+    test('to test the property `continueTo`', () async {
+      // TODO
+    });
+
+    // This rejected ticket can start over from scratch (nothing of it was pushed); continueTo, when set, is where Continue sends it without a note
+    // bool canStartOver
+    test('to test the property `canStartOver`', () async {
+      // TODO
+    });
+
     // TokenSpend spend
     test('to test the property `spend`', () async {
       // TODO

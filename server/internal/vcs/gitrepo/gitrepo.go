@@ -306,6 +306,40 @@ func (g *Repos) DeleteBranch(_ context.Context, repo domain.Repository, branch s
 	return err
 }
 
+// RestoreBranch points a ticket's deleted local branch back at sha, the
+// head agnts saved, when a rejected ticket is continued. DeleteBranch only
+// drops the ref, so the commits are still in the mirror; when they are
+// not (a fresh clone), it returns domain.ErrNotFound. A branch that still
+// exists is left alone.
+func (g *Repos) RestoreBranch(_ context.Context, repo domain.Repository, branch, sha string) error {
+	if branch == "" || branch == repo.DefaultBranch {
+		return nil
+	}
+	defer g.lock(repo)()
+	r, err := git.PlainOpen(g.mirrorDir(repo))
+	if errors.Is(err, git.ErrRepositoryNotExists) {
+		return domain.ErrNotFound
+	}
+	if err != nil {
+		return err
+	}
+	local := plumbing.NewBranchReferenceName(branch)
+	if _, err := r.Reference(local, true); err == nil {
+		return nil
+	}
+	if sha == "" {
+		return domain.ErrNotFound
+	}
+	h := plumbing.NewHash(sha)
+	if _, err := r.CommitObject(h); err != nil {
+		if errors.Is(err, plumbing.ErrObjectNotFound) {
+			return domain.ErrNotFound
+		}
+		return err
+	}
+	return r.Storer.SetReference(plumbing.NewHashReference(local, h))
+}
+
 // Push sends branch to origin. Only fast-forwards: agnts never rewrites history.
 func (g *Repos) Push(ctx context.Context, repo domain.Repository, branch string) error {
 	return g.push(ctx, repo, branch, branch)

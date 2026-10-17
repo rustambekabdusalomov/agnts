@@ -32,6 +32,8 @@
     "pushNeeds": "When something needs you",
     "pushStopped": "When a run stops or pauses",
     "pushDone": "When changes are pushed",
+    "pushProgress": "When an agent finishes a step",
+    "pushProgressHelp": "Analysis done, code written. Phone only, silent, one notification per ticket",
     "pushUnavailable": "Push is not set up on this server.",
     "integrations": "Integrations",
     "repositories": "Repositories",

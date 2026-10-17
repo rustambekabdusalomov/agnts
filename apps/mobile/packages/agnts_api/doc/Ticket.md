@@ -52,6 +52,8 @@ Name | Type | Description | Notes
 **previewState** | **String** | The screenshots agnts takes beside the human review | [optional] 
 **previewCompare** | **bool** | Previews of this ticket also capture the default branch (before shots) | [optional] 
 **canPreview** | **bool** | The ticket's repository has a preview command | [optional] 
+**continueTo** | [**TicketState**](TicketState.md) |  | [optional] 
+**canStartOver** | **bool** | This rejected ticket can start over from scratch (nothing of it was pushed); continueTo, when set, is where Continue sends it without a note | [optional] 
 **spend** | [**TokenSpend**](TokenSpend.md) |  | [optional] 
 **waitReason** | [**WaitReason**](WaitReason.md) |  | [optional] 
 **waitMessage** | **String** | Why it waits, in a sentence | [optional] 

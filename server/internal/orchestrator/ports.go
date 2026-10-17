@@ -301,6 +301,8 @@ type Precedent struct {
 type StateInfo struct {
 	Since  time.Time
 	Reason string
+	// From is the state it left to enter this one ("" when unknown).
+	From domain.TicketState
 }
 
 // HistoryItem is one state change of a ticket.
@@ -506,6 +508,13 @@ type Git interface {
 // rejected. A Git may implement it.
 type BranchCleaner interface {
 	DeleteBranch(ctx context.Context, repo domain.Repository, branch string) error
+}
+
+// BranchRestorer puts a rejected ticket's deleted local branch back at its
+// saved head when the ticket is continued; domain.ErrNotFound means the
+// commits are gone. A Git may implement it.
+type BranchRestorer interface {
+	RestoreBranch(ctx context.Context, repo domain.Repository, branch, sha string) error
 }
 
 // PR is a pull request to open.

@@ -36,6 +36,7 @@ type Store interface {
 	Cursor(ctx context.Context, name string) (int64, error)
 	SetCursor(ctx context.Context, name string, id int64) error
 	Devices(ctx context.Context, ws int64) ([]postgres.Device, error)
+	OwnerDevices(ctx context.Context, ws int64, key string) (int64, []postgres.Device, error)
 	DeleteDevice(ctx context.Context, token string) error
 	SaveTelegramMessage(ctx context.Context, m postgres.TelegramMessage) error
 	TelegramMessage(ctx context.Context, chatID, messageID int64) (postgres.TelegramMessage, error)
@@ -134,8 +135,13 @@ func (n *Notifier) Run(ctx context.Context) {
 	}
 }
 
-// kind of notification for a state, or "" for none.
-func kindFor(to domain.TicketState) string {
+// kind of notification for a state change, or "" for none. "progress" is
+// an agent finishing a step on its own: the analysis (on to coding) or
+// the code (on to the tests). Tests sending the code back stay quiet.
+func kindFor(from, to domain.TicketState) string {
+	if from == domain.StateRejected {
+		return "" // a person continued it: they know where it is
+	}
 	switch to {
 	case domain.StateWaitingForAnswers, domain.StateWaitingForReview:
 		return "needs"
@@ -143,6 +149,14 @@ func kindFor(to domain.TicketState) string {
 		return "stopped"
 	case domain.StateDone:
 		return "done"
+	case domain.StateCoding:
+		if from == domain.StateAnalyzing {
+			return "progress"
+		}
+	case domain.StateTesting:
+		if from == domain.StateCoding {
+			return "progress"
+		}
 	}
 	return ""
 }
@@ -185,7 +199,8 @@ func (n *Notifier) handle(ctx context.Context, e domain.Event) {
 	if quiet, _ := e.Data["quiet"].(bool); quiet {
 		return // announced later, once agnts's own review lets it through
 	}
-	kind := kindFor(domain.TicketState(to))
+	from, _ := e.Data["from"].(string)
+	kind := kindFor(domain.TicketState(from), domain.TicketState(to))
 	if kind == "" {
 		return
 	}
@@ -193,7 +208,7 @@ func (n *Notifier) handle(ctx context.Context, e domain.Event) {
 	if err != nil {
 		return
 	}
-	on := map[string]bool{"needs": s.Notify.NeedsYou, "stopped": s.Notify.Stopped, "done": s.Notify.Done}[kind]
+	on := map[string]bool{"needs": s.Notify.NeedsYou, "stopped": s.Notify.Stopped, "done": s.Notify.Done, "progress": s.Notify.Progress}[kind]
 	if !on {
 		return
 	}
@@ -206,13 +221,14 @@ func (n *Notifier) handle(ctx context.Context, e domain.Event) {
 	}
 	title, body := pushText(v, e)
 	if s.Notify.Push && n.fcm != nil {
-		p := Push{Title: title, Body: body, Ticket: v.Ticket.Key}
+		// One notification per ticket for its steps: each replaces the last.
+		p := Push{Title: title, Body: body, Ticket: v.Ticket.Key, Tag: v.Ticket.Key + ":state", Quiet: kind == "progress", Actor: e.UserID}
 		if v.Swagger != nil && v.Ticket.State == domain.StateWaitingForReview {
 			p.Route = "/tickets/" + v.Ticket.Key + "/api-results" // the app's results screen
 		}
 		n.push(ctx, p)
 	}
-	if s.Notify.Telegram {
+	if s.Notify.Telegram && kind != "progress" { // steps would flood a shared chat
 		if err := n.sendTelegram(ctx, v, e); err != nil {
 			n.log.Warn("telegram notify", "ticket", e.TicketKey, "err", err)
 		}
@@ -519,6 +535,10 @@ func plural(n int, one, many string) string {
 func pushText(v orchestrator.TicketView, e domain.Event) (string, string) {
 	k := v.Ticket.Key
 	switch v.Ticket.State {
+	case domain.StateCoding:
+		return k + ": analysis done, coding", v.Ticket.Title
+	case domain.StateTesting:
+		return k + ": code written, running checks", v.Ticket.Title
 	case domain.StateWaitingForAnswers:
 		return fmt.Sprintf("%s: %d questions", k, len(v.Questions)), v.Ticket.Title
 	case domain.StateWaitingForReview:
@@ -555,9 +575,23 @@ func prURLs(prs []domain.TicketRepo) string {
 	return strings.Join(urls, "\n")
 }
 
+// push sends p to the phones of the ticket's owner, unless the owner did
+// what it announces. A push about no ticket (a red branch) goes to every
+// member.
 func (n *Notifier) push(ctx context.Context, p Push) {
-	p.Workspace = domain.WorkspaceOf(ctx)
-	devs, err := n.store.Devices(ctx, domain.WorkspaceOf(ctx))
+	ws := domain.WorkspaceOf(ctx)
+	p.Workspace = ws
+	var devs []postgres.Device
+	var err error
+	if p.Ticket == "" {
+		devs, err = n.store.Devices(ctx, ws)
+	} else {
+		var owner int64
+		owner, devs, err = n.store.OwnerDevices(ctx, ws, p.Ticket)
+		if owner != 0 && owner == p.Actor {
+			return // they know: they did it
+		}
+	}
 	if err != nil {
 		n.log.Warn("push: devices", "err", err)
 		return

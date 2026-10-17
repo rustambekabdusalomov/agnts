@@ -64,6 +64,15 @@ void main() {
       // TODO
     });
 
+    // Pick a rejected ticket up again where it stopped
+    //
+    // Goes back to the stage it was rejected at (the ticket's continueTo). A ticket rejected at review goes back to review, or to coding when a note or files ask for changes. When the work's commits are gone, it starts over from analysis. 
+    //
+    //Future<Ticket> continueTicket(String key, { ContinueTicketRequest continueTicketRequest }) async
+    test('test continueTicket', () async {
+      // TODO
+    });
+
     // Decline a suggestion; later runs will not suggest it again
     //
     //Future<FollowUpSuggestion> dismissFollowUp(String key, int id) async
@@ -257,6 +266,15 @@ void main() {
     //
     //Future<Ticket> startTicket(String key) async
     test('test startTicket', () async {
+      // TODO
+    });
+
+    // Pick a rejected ticket up again from scratch
+    //
+    // Drops the analysis, answers and commits and analyses the ticket again. Only when nothing of it was pushed (the ticket's canStartOver).
+    //
+    //Future<Ticket> startTicketOver(String key) async
+    test('test startTicketOver', () async {
       // TODO
     });
 

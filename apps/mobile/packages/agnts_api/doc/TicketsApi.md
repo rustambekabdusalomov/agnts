@@ -16,6 +16,7 @@ Method | HTTP request | Description
 [**addressPullComments**](TicketsApi.md#addresspullcomments) | **POST** /tickets/{key}/address-comments | Send reviewers&#39; threads on the ticket&#39;s open pull requests back to coding: the given ones, or every unresolved thread by someone else not sent yet. After the fix is approved and pushed, agnts answers in each thread
 [**answerQuestions**](TicketsApi.md#answerquestions) | **PUT** /tickets/{key}/answers | Answer the ticket&#39;s questions; when all are answered, coding starts
 [**approveTicket**](TicketsApi.md#approveticket) | **POST** /tickets/{key}/approve | Approve the reviewed work
+[**continueTicket**](TicketsApi.md#continueticket) | **POST** /tickets/{key}/continue | Pick a rejected ticket up again where it stopped
 [**dismissFollowUp**](TicketsApi.md#dismissfollowup) | **POST** /tickets/{key}/follow-ups/{id}/dismiss | Decline a suggestion; later runs will not suggest it again
 [**dismissRelation**](TicketsApi.md#dismissrelation) | **POST** /tickets/{key}/relations/{id}/dismiss | Dismiss a relation (run anyway); agnts does not propose it again
 [**followUpFromFinding**](TicketsApi.md#followupfromfinding) | **POST** /tickets/{key}/review/findings/{index}/follow-up | Turn a code review finding into a follow-up suggestion
@@ -42,6 +43,7 @@ Method | HTTP request | Description
 [**setTicketRepo**](TicketsApi.md#setticketrepo) | **PUT** /tickets/{key}/repo | Link the ticket to a repository
 [**setTicketRepos**](TicketsApi.md#setticketrepos) | **PUT** /tickets/{key}/repos | Set the ticket&#39;s repositories (one, several or a group)
 [**startTicket**](TicketsApi.md#startticket) | **POST** /tickets/{key}/analyze | Start a held ticket now (it is queued for the next free slot)
+[**startTicketOver**](TicketsApi.md#startticketover) | **POST** /tickets/{key}/start-over | Pick a rejected ticket up again from scratch
 [**stopTicket**](TicketsApi.md#stopticket) | **POST** /tickets/{key}/stop | Stop the running stage; the ticket moves to failed and can be retried
 [**translateTicket**](TicketsApi.md#translateticket) | **POST** /tickets/{key}/translate | Translate a ticket&#39;s texts (its own and what agnts wrote) into a language
 
@@ -365,6 +367,55 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **key** | **String**|  | 
  **approveTicketRequest** | [**ApproveTicketRequest**](ApproveTicketRequest.md)|  | [optional] 
+
+### Return type
+
+[**Ticket**](Ticket.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **continueTicket**
+> Ticket continueTicket(key, continueTicketRequest)
+
+Pick a rejected ticket up again where it stopped
+
+Goes back to the stage it was rejected at (the ticket's continueTo). A ticket rejected at review goes back to review, or to coding when a note or files ask for changes. When the work's commits are gone, it starts over from analysis. 
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getTicketsApi();
+final String key = key_example; // String | 
+final ContinueTicketRequest continueTicketRequest = ; // ContinueTicketRequest | 
+
+try {
+    final response = api.continueTicket(key, continueTicketRequest);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling TicketsApi->continueTicket: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **key** | **String**|  | 
+ **continueTicketRequest** | [**ContinueTicketRequest**](ContinueTicketRequest.md)|  | [optional] 
 
 ### Return type
 
@@ -1577,6 +1628,53 @@ try {
     print(response);
 } on DioException catch (e) {
     print('Exception when calling TicketsApi->startTicket: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **key** | **String**|  | 
+
+### Return type
+
+[**Ticket**](Ticket.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **startTicketOver**
+> Ticket startTicketOver(key)
+
+Pick a rejected ticket up again from scratch
+
+Drops the analysis, answers and commits and analyses the ticket again. Only when nothing of it was pushed (the ticket's canStartOver).
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getTicketsApi();
+final String key = key_example; // String | 
+
+try {
+    final response = api.startTicketOver(key);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling TicketsApi->startTicketOver: $e\n');
 }
 ```
 

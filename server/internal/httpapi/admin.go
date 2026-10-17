@@ -520,7 +520,7 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.Notify != nil {
 		v.Notify = domain.NotifySettings{Push: req.Notify.Push, Telegram: req.Notify.Telegram, NeedsYou: req.Notify.NeedsYou,
-			Stopped: req.Notify.Stopped, Done: req.Notify.Done, Lessons: cur.Notify.Lessons, Review: cur.Notify.Review,
+			Stopped: req.Notify.Stopped, Done: req.Notify.Done, Progress: cur.Notify.Progress, Lessons: cur.Notify.Lessons, Review: cur.Notify.Review,
 			FollowUps: cur.Notify.FollowUps, Preview: cur.Notify.Preview, PreviewPhotos: cur.Notify.PreviewPhotos, CI: cur.Notify.CI}
 		if req.Notify.Ci != nil {
 			v.Notify.CI = *req.Notify.Ci
@@ -539,6 +539,9 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 		}
 		if req.Notify.FollowUps != nil {
 			v.Notify.FollowUps = *req.Notify.FollowUps
+		}
+		if req.Notify.Progress != nil {
+			v.Notify.Progress = *req.Notify.Progress
 		}
 	}
 	if req.Models.Learn != nil {

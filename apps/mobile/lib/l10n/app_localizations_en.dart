@@ -5811,6 +5811,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mobilePushDone => 'When changes are pushed';
 
   @override
+  String get mobilePushProgress => 'When an agent finishes a step';
+
+  @override
+  String get mobilePushProgressHelp => 'Analysis done, code written. Phone only, silent, one notification per ticket';
+
+  @override
   String get mobilePushUnavailable => 'Push is not set up on this server.';
 
   @override
@@ -10066,6 +10072,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsDone => 'When changes are pushed';
 
   @override
+  String get settingsProgress => 'When an agent finishes a step';
+
+  @override
+  String get settingsProgressHelp => 'Analysis done, code written. Phone only, silent, one notification per ticket';
+
+  @override
   String get settingsLessons => 'When agnts finds something new to learn';
 
   @override
@@ -11060,7 +11072,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String ticketRejectConfirm(String key) {
-    return 'Stop all work on $key? This cannot be undone.';
+    return 'Stop all work on $key? You can continue it later.';
   }
 
   @override
@@ -11316,6 +11328,44 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ticketRejectedSub => 'agnts stopped working on this ticket. The branch was not pushed.';
+
+  @override
+  String get ticketRejectedSubContinue => 'agnts stopped working on this ticket. You can pick it up again where it stopped.';
+
+  @override
+  String get ticketContinue => 'Continue';
+
+  @override
+  String get ticketContinueNote => 'Note for agnts';
+
+  @override
+  String get ticketContinueNoteHint => 'Optional. What to do differently; the next coding run gets it, like requested changes.';
+
+  @override
+  String get ticketContinueToNew => 'It goes back to the queue and is analysed again.';
+
+  @override
+  String get ticketContinueToAnswers => 'It goes back to its questions; answers given so far are kept.';
+
+  @override
+  String get ticketContinueToCoding => 'agnts goes on writing the code where it stopped.';
+
+  @override
+  String get ticketContinueToReview => 'It goes back to review. With a note, agnts makes those changes first.';
+
+  @override
+  String get ticketContinueToFailed => 'It goes back to the error it stopped with, so you can retry it.';
+
+  @override
+  String get ticketContinueToRateLimited => 'It goes back to waiting for the plan limit.';
+
+  @override
+  String get ticketStartOver => 'Start over';
+
+  @override
+  String ticketStartOverConfirm(String key) {
+    return 'Start $key over? The analysis, answers and commits are dropped and agnts analyses it again.';
+  }
 
   @override
   String get ticketFailedTitle => 'agnts stopped';

@@ -119,6 +119,10 @@ class Ticket {
 
      this.canPreview,
 
+     this.continueTo,
+
+     this.canStartOver,
+
      this.spend,
 
      this.waitReason,
@@ -694,6 +698,31 @@ class Ticket {
 
   @JsonKey(
     
+    name: r'continueTo',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final TicketState? continueTo;
+
+
+
+      /// This rejected ticket can start over from scratch (nothing of it was pushed); continueTo, when set, is where Continue sends it without a note
+  @JsonKey(
+    
+    name: r'canStartOver',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? canStartOver;
+
+
+
+  @JsonKey(
+    
     name: r'spend',
     required: false,
     includeIfNull: false,
@@ -853,6 +882,8 @@ class Ticket {
       other.previewState == previewState &&
       other.previewCompare == previewCompare &&
       other.canPreview == canPreview &&
+      other.continueTo == continueTo &&
+      other.canStartOver == canStartOver &&
       other.spend == spend &&
       other.waitReason == waitReason &&
       other.waitMessage == waitMessage &&
@@ -909,6 +940,8 @@ class Ticket {
         previewState.hashCode +
         previewCompare.hashCode +
         canPreview.hashCode +
+        continueTo.hashCode +
+        canStartOver.hashCode +
         spend.hashCode +
         waitReason.hashCode +
         waitMessage.hashCode +

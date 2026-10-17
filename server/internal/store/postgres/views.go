@@ -18,7 +18,7 @@ func (s *Agent) StateSince(ctx context.Context, keys []string) (map[string]orche
 	if len(keys) == 0 {
 		return out, nil
 	}
-	rows, err := s.db.Query(ctx, `SELECT DISTINCT ON (t.key) t.key, e.created_at, e.message
+	rows, err := s.db.Query(ctx, `SELECT DISTINCT ON (t.key) t.key, e.created_at, e.message, COALESCE(e.data->>'from', '')
 		FROM tickets t JOIN events e ON e.ticket_key = t.key AND e.workspace_id = t.workspace_id
 			AND e.type = 'state_changed' AND e.data->>'to' = t.state
 		WHERE t.key = ANY($1) ORDER BY t.key, e.id DESC`, keys)
@@ -29,9 +29,11 @@ func (s *Agent) StateSince(ctx context.Context, keys []string) (map[string]orche
 	for rows.Next() {
 		var k string
 		var si orchestrator.StateInfo
-		if err := rows.Scan(&k, &si.Since, &si.Reason); err != nil {
+		var from string
+		if err := rows.Scan(&k, &si.Since, &si.Reason, &from); err != nil {
 			return nil, err
 		}
+		si.From = domain.TicketState(from)
 		out[k] = si
 	}
 	return out, rows.Err()

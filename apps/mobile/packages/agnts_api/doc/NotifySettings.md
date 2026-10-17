@@ -13,6 +13,7 @@ Name | Type | Description | Notes
 **needsYou** | **bool** |  | 
 **stopped** | **bool** |  | 
 **done** | **bool** |  | 
+**progress** | **bool** | An agent finished a step (analysis, code); push only, silent | [optional] 
 **lessons** | **bool** | New lessons were found | [optional] 
 **review** | **bool** | A code review finished | [optional] 
 **preview** | **bool** | Preview screenshots are ready | [optional] 

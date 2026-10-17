@@ -76,6 +76,8 @@
     "needsYouHelp": "Questions to answer or changes to review",
     "stopped": "When a run stops or pauses",
     "done": "When changes are pushed",
+    "progress": "When an agent finishes a step",
+    "progressHelp": "Analysis done, code written. Phone only, silent, one notification per ticket",
     "lessons": "When agnts finds something new to learn",
     "reviewDone": "When agnts's code review finishes",
     "secretsHelp": "Tokens for Jira, GitHub and Claude are stored encrypted on your server. This page never shows them.",

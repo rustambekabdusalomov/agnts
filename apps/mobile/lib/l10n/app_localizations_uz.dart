@@ -5811,6 +5811,12 @@ class AppLocalizationsUz extends AppLocalizations {
   String get mobilePushDone => 'Oʻzgarishlar yuborilganda';
 
   @override
+  String get mobilePushProgress => 'Agent bosqichni tugatganda';
+
+  @override
+  String get mobilePushProgressHelp => 'Tahlil tayyor, kod yozildi. Faqat telefonga, ovozsiz, har bir tiket uchun bitta bildirishnoma';
+
+  @override
   String get mobilePushUnavailable => 'Serverda push sozlanmagan.';
 
   @override
@@ -10059,6 +10065,12 @@ class AppLocalizationsUz extends AppLocalizations {
   String get settingsDone => 'Oʻzgarishlar yuborilganda';
 
   @override
+  String get settingsProgress => 'Agent bosqichni tugatganda';
+
+  @override
+  String get settingsProgressHelp => 'Tahlil tayyor, kod yozildi. Faqat telefonga, ovozsiz, har bir tiket uchun bitta bildirishnoma';
+
+  @override
   String get settingsLessons => 'agnts oʻrganish uchun yangi narsa topganda';
 
   @override
@@ -11055,7 +11067,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String ticketRejectConfirm(String key) {
-    return '$key boʻyicha barcha ish toʻxtatilsinmi? Buni qaytarib boʻlmaydi.';
+    return '$key boʻyicha barcha ish toʻxtatilsinmi? Keyin davom ettirish mumkin.';
   }
 
   @override
@@ -11307,6 +11319,44 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get ticketRejectedSub => 'agnts bu tiket ustida ishlashni toʻxtatdi. Branch yuborilmadi.';
+
+  @override
+  String get ticketRejectedSubContinue => 'agnts bu tiket ustida ishlashni toʻxtatdi. Ishni toʻxtagan joyidan davom ettirish mumkin.';
+
+  @override
+  String get ticketContinue => 'Davom ettirish';
+
+  @override
+  String get ticketContinueNote => 'agnts uchun izoh';
+
+  @override
+  String get ticketContinueNoteHint => 'Ixtiyoriy. Nimani boshqacha qilish kerak; keyingi ish uni soʻralgan oʻzgarishlar kabi oladi.';
+
+  @override
+  String get ticketContinueToNew => 'Tiket navbatga qaytadi va qayta tahlil qilinadi.';
+
+  @override
+  String get ticketContinueToAnswers => 'Tiket savollariga qaytadi; berilgan javoblar saqlanadi.';
+
+  @override
+  String get ticketContinueToCoding => 'agnts kodni toʻxtagan joyidan yozishda davom etadi.';
+
+  @override
+  String get ticketContinueToReview => 'Tiket reviewga qaytadi. Izoh boʻlsa, agnts avval oʻzgarishlarni kiritadi.';
+
+  @override
+  String get ticketContinueToFailed => 'Tiket toʻxtagan xatosiga qaytadi, uni qayta urinish mumkin.';
+
+  @override
+  String get ticketContinueToRateLimited => 'Tiket yana tarif limitini kutadi.';
+
+  @override
+  String get ticketStartOver => 'Qaytadan boshlash';
+
+  @override
+  String ticketStartOverConfirm(String key) {
+    return '$key qaytadan boshlansinmi? Tahlil, javoblar va commitlar oʻchiriladi va agnts tiketni qayta tahlil qiladi.';
+  }
 
   @override
   String get ticketFailedTitle => 'agnts toʻxtadi';

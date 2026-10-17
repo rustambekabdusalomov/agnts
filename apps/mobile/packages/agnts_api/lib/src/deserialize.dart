@@ -63,6 +63,7 @@ import 'package:agnts_api/src/model/commit_pull.dart';
 import 'package:agnts_api/src/model/confirm_totp_request.dart';
 import 'package:agnts_api/src/model/connect_integration_request.dart';
 import 'package:agnts_api/src/model/connect_result.dart';
+import 'package:agnts_api/src/model/continue_ticket_request.dart';
 import 'package:agnts_api/src/model/coverage.dart';
 import 'package:agnts_api/src/model/coverage_config.dart';
 import 'package:agnts_api/src/model/coverage_files_inner.dart';
@@ -472,6 +473,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ConnectIntegrationRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ConnectResult':
           return ConnectResult.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ContinueTicketRequest':
+          return ContinueTicketRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Coverage':
           return Coverage.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'CoverageConfig':

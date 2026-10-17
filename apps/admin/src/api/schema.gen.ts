@@ -268,6 +268,52 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tickets/{key}/continue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pick a rejected ticket up again where it stopped
+         * @description Goes back to the stage it was rejected at (the ticket's continueTo). A ticket rejected at review goes back to
+         *     review, or to coding when a note or files ask for changes. When the work's commits are gone, it starts over
+         *     from analysis.
+         */
+        post: operations["continueTicket"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/start-over": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pick a rejected ticket up again from scratch
+         * @description Drops the analysis, answers and commits and analyses the ticket again. Only when nothing of it was pushed (the ticket's canStartOver).
+         */
+        post: operations["startTicketOver"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tickets/{key}/retry": {
         parameters: {
             query?: never;
@@ -4797,6 +4843,9 @@ export interface components {
             previewCompare?: boolean;
             /** @description The ticket's repository has a preview command */
             canPreview?: boolean;
+            continueTo?: components["schemas"]["TicketState"];
+            /** @description This rejected ticket can start over from scratch (nothing of it was pushed); continueTo, when set, is where Continue sends it without a note */
+            canStartOver?: boolean;
             spend?: components["schemas"]["TokenSpend"];
             waitReason?: components["schemas"]["WaitReason"];
             /** @description Why it waits, in a sentence */
@@ -6166,6 +6215,8 @@ export interface components {
             needsYou: boolean;
             stopped: boolean;
             done: boolean;
+            /** @description An agent finished a step (analysis, code); push only, silent */
+            progress?: boolean;
             /** @description New lessons were found */
             lessons?: boolean;
             /** @description A code review finished */
@@ -7774,6 +7825,51 @@ export interface operations {
         };
         responses: {
             200: components["responses"]["TicketOK"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    continueTicket: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @description What to do differently. The next coding run gets it, like requested changes. Not allowed when the ticket goes back to answers or to a failed state, since no Claude run follows. */
+                    note?: string;
+                    /** @description Uploads that go with the note; the next coding run reads them. Same rule as note. */
+                    attachments?: number[];
+                };
+            };
+        };
+        responses: {
+            200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    startTicketOver: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];

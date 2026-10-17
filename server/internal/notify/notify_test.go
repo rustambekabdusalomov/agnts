@@ -32,6 +32,7 @@ type memStore struct {
 	events   []domain.Event
 	cursor   int64
 	devices  []postgres.Device
+	owner    int64 // whose every ticket is
 	msgs     map[int64]postgres.TelegramMessage
 	pending  map[string]postgres.PendingAction
 	used     map[string]bool
@@ -68,6 +69,15 @@ func (m *memStore) SetCursor(_ context.Context, _ string, id int64) error {
 	return nil
 }
 func (m *memStore) Devices(context.Context, int64) ([]postgres.Device, error) { return m.devices, nil }
+func (m *memStore) OwnerDevices(context.Context, int64, string) (int64, []postgres.Device, error) {
+	var out []postgres.Device
+	for _, d := range m.devices {
+		if d.UserID == m.owner {
+			out = append(out, d)
+		}
+	}
+	return m.owner, out, nil
+}
 func (m *memStore) DeleteDevice(_ context.Context, token string) error {
 	var keep []postgres.Device
 	for _, d := range m.devices {
@@ -456,6 +466,7 @@ func TestFCM(t *testing.T) {
 	key, _ := rsa.GenerateKey(rand.Reader, 2048)
 	der, _ := x509.MarshalPKCS8PrivateKey(key)
 	var tokenCalls, sends int
+	var last map[string]any // the last message sent
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case r.URL.Path == "/token":
@@ -474,6 +485,7 @@ func TestFCM(t *testing.T) {
 			}
 			var m map[string]map[string]any
 			_ = json.NewDecoder(r.Body).Decode(&m)
+			last = m["message"]
 			if m["message"]["token"] == "dead" {
 				w.WriteHeader(404)
 				_, _ = io.WriteString(w, `{"error":{"status":"NOT_FOUND","details":[{"errorCode":"UNREGISTERED"}]}}`)
@@ -496,12 +508,13 @@ func TestFCM(t *testing.T) {
 	n, st, acts, _ := setup(t)
 	n.fcm = f
 	acts.view.Ticket.State = domain.StateWaitingForReview
-	st.devices = []postgres.Device{{ID: 1, FCMToken: "good"}, {ID: 2, FCMToken: "dead"}}
+	st.owner = 5
+	st.devices = []postgres.Device{{ID: 1, UserID: 5, FCMToken: "good"}, {ID: 2, UserID: 5, FCMToken: "dead"}, {ID: 3, UserID: 6, FCMToken: "other"}}
 	n.handle(context.Background(), domain.Event{WorkspaceID: 1, ID: 1, TicketKey: "PAY-1", Data: map[string]any{"to": "waiting_for_review"}})
 	if sends != 2 || tokenCalls != 1 {
 		t.Fatalf("sends %d token calls %d", sends, tokenCalls)
 	}
-	if len(st.devices) != 1 || st.devices[0].FCMToken != "good" {
+	if len(st.devices) != 2 || st.devices[0].FCMToken != "good" {
 		t.Fatalf("dead token not removed: %+v", st.devices)
 	}
 
@@ -517,6 +530,69 @@ func TestFCM(t *testing.T) {
 		Data: map[string]any{"to": "waiting_for_review"}})
 	if sends != 1 {
 		t.Fatalf("ready for review not announced: %d sends", sends)
+	}
+	android := last["android"].(map[string]any)["notification"].(map[string]any)
+	apns := last["apns"].(map[string]any)
+	if android["tag"] != "PAY-1:state" || android["channel_id"] != "agnts" ||
+		apns["headers"].(map[string]any)["apns-collapse-id"] != "PAY-1:state" || !strings.Contains(toJSON(apns), `"thread-id":"PAY-1"`) {
+		t.Fatalf("ready for review payload: %s", toJSON(last))
+	}
+
+	// An agent finishing a step: a silent push that replaces the last one,
+	// and nothing in Telegram.
+	sends = 0
+	acts.view.Ticket.State = domain.StateTesting
+	n.handle(context.Background(), domain.Event{WorkspaceID: 1, ID: 4, TicketKey: "PAY-1", Type: domain.EventStateChanged,
+		Data: map[string]any{"from": "coding", "to": "testing"}})
+	if sends != 1 {
+		t.Fatalf("progress not announced: %d sends", sends)
+	}
+	android = last["android"].(map[string]any)["notification"].(map[string]any)
+	aps := last["apns"].(map[string]any)["payload"].(map[string]any)["aps"].(map[string]any)
+	title := last["notification"].(map[string]any)["title"]
+	if android["channel_id"] != "agnts_progress" || android["tag"] != "PAY-1:state" || aps["sound"] != nil ||
+		aps["interruption-level"] != "passive" || title != "PAY-1: code written, running checks" ||
+		last["data"].(map[string]any)["quiet"] != "true" || last["data"].(map[string]any)["tag"] != "PAY-1:state" {
+		t.Fatalf("progress payload: %s", toJSON(last))
+	}
+	// The tests sending the code back stay quiet, and so does the owner's
+	// own action.
+	acts.view.Ticket.State = domain.StateCoding
+	n.handle(context.Background(), domain.Event{WorkspaceID: 1, ID: 5, TicketKey: "PAY-1", Type: domain.EventStateChanged,
+		Data: map[string]any{"from": "testing", "to": "coding"}})
+	acts.view.Ticket.State = domain.StateWaitingForReview
+	n.handle(context.Background(), domain.Event{WorkspaceID: 1, ID: 6, UserID: 5, TicketKey: "PAY-1", Type: domain.EventStateChanged,
+		Data: map[string]any{"from": "coding", "to": "waiting_for_review"}})
+	if sends != 1 {
+		t.Fatalf("pushed a send-back or the owner's own action: %d sends", sends)
+	}
+	// Turned off: no step pushes.
+	n.settings = fakeSettings{s: func() domain.Settings { s := domain.DefaultSettings(); s.Notify.Progress = false; return s }()}
+	acts.view.Ticket.State = domain.StateCoding
+	n.handle(context.Background(), domain.Event{WorkspaceID: 1, ID: 7, TicketKey: "PAY-1", Type: domain.EventStateChanged,
+		Data: map[string]any{"from": "analyzing", "to": "coding"}})
+	if sends != 1 {
+		t.Fatalf("progress pushed while turned off: %d sends", sends)
+	}
+}
+
+func TestProgressSkipsTelegram(t *testing.T) {
+	n, _, acts, tg := setup(t)
+	acts.view.Ticket.State = domain.StateCoding
+	n.handle(context.Background(), domain.Event{WorkspaceID: 1, ID: 1, TicketKey: "PAY-1", Type: domain.EventStateChanged,
+		Data: map[string]any{"from": "analyzing", "to": "coding"}})
+	if len(tg.sent("sendMessage")) != 0 {
+		t.Fatal("a step went to Telegram")
+	}
+}
+
+func TestContinueIsQuiet(t *testing.T) {
+	n, _, acts, tg := setup(t)
+	acts.view.Ticket.State = domain.StateFailed
+	n.handle(context.Background(), domain.Event{WorkspaceID: 1, ID: 1, TicketKey: "PAY-1", Type: domain.EventStateChanged,
+		Data: map[string]any{"from": "rejected", "to": "failed"}})
+	if len(tg.sent("sendMessage")) != 0 {
+		t.Fatal("continuing a rejected ticket notified")
 	}
 }
 

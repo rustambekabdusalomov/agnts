@@ -385,6 +385,9 @@ const section = computed(() => settingsSection(route.params.section))
         <CfgRow :label="t('settings.done')">
           <SwitchToggle v-model="draft.notify.done" :label="t('settings.done')" />
         </CfgRow>
+        <CfgRow v-if="draft.notify.progress !== undefined" :label="t('settings.progress')" :help="t('settings.progressHelp')">
+          <SwitchToggle v-model="draft.notify.progress" :label="t('settings.progress')" />
+        </CfgRow>
         <CfgRow v-if="draft.notify.lessons !== undefined" :label="t('settings.lessons')">
           <SwitchToggle v-model="draft.notify.lessons" :label="t('settings.lessons')" />
         </CfgRow>

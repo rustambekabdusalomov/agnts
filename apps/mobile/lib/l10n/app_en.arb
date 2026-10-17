@@ -3523,6 +3523,8 @@
   "mobilePushNeeds": "When something needs you",
   "mobilePushStopped": "When a run stops or pauses",
   "mobilePushDone": "When changes are pushed",
+  "mobilePushProgress": "When an agent finishes a step",
+  "mobilePushProgressHelp": "Analysis done, code written. Phone only, silent, one notification per ticket",
   "mobilePushUnavailable": "Push is not set up on this server.",
   "mobileIntegrations": "Integrations",
   "mobileRepositories": "Repositories",
@@ -6133,6 +6135,8 @@
   "settingsNeedsYouHelp": "Questions to answer or changes to review",
   "settingsStopped": "When a run stops or pauses",
   "settingsDone": "When changes are pushed",
+  "settingsProgress": "When an agent finishes a step",
+  "settingsProgressHelp": "Analysis done, code written. Phone only, silent, one notification per ticket",
   "settingsLessons": "When agnts finds something new to learn",
   "settingsReviewDone": "When agnts's code review finishes",
   "settingsSecretsHelp": "Tokens for Jira, GitHub and Claude are stored encrypted on your server. This page never shows them.",
@@ -6728,7 +6732,7 @@
   "ticketSend": "Send",
   "ticketCancel": "Cancel",
   "ticketReject": "Reject",
-  "ticketRejectConfirm": "Stop all work on {key}? This cannot be undone.",
+  "ticketRejectConfirm": "Stop all work on {key}? You can continue it later.",
   "@ticketRejectConfirm": {
     "placeholders": {
       "key": {
@@ -6964,6 +6968,25 @@
   },
   "ticketRejectedTitle": "Rejected",
   "ticketRejectedSub": "agnts stopped working on this ticket. The branch was not pushed.",
+  "ticketRejectedSubContinue": "agnts stopped working on this ticket. You can pick it up again where it stopped.",
+  "ticketContinue": "Continue",
+  "ticketContinueNote": "Note for agnts",
+  "ticketContinueNoteHint": "Optional. What to do differently; the next coding run gets it, like requested changes.",
+  "ticketContinueToNew": "It goes back to the queue and is analysed again.",
+  "ticketContinueToAnswers": "It goes back to its questions; answers given so far are kept.",
+  "ticketContinueToCoding": "agnts goes on writing the code where it stopped.",
+  "ticketContinueToReview": "It goes back to review. With a note, agnts makes those changes first.",
+  "ticketContinueToFailed": "It goes back to the error it stopped with, so you can retry it.",
+  "ticketContinueToRateLimited": "It goes back to waiting for the plan limit.",
+  "ticketStartOver": "Start over",
+  "ticketStartOverConfirm": "Start {key} over? The analysis, answers and commits are dropped and agnts analyses it again.",
+  "@ticketStartOverConfirm": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
   "ticketFailedTitle": "agnts stopped",
   "ticketFailedUnknown": "The run stopped. Check the run log for details.",
   "ticketRetryNote": "Note for the retry",

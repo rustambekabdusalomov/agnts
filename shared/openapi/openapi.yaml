@@ -332,6 +332,55 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '409': { $ref: '#/components/responses/Conflict' }
 
+  /tickets/{key}/continue:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: continueTicket
+      summary: Pick a rejected ticket up again where it stopped
+      description: |
+        Goes back to the stage it was rejected at (the ticket's continueTo). A ticket rejected at review goes back to
+        review, or to coding when a note or files ask for changes. When the work's commits are gone, it starts over
+        from analysis.
+      tags: [tickets]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note:
+                  type: string
+                  maxLength: 4000
+                  description: What to do differently. The next coding run gets it, like requested changes. Not allowed when the ticket goes back to answers or to a failed state, since no Claude run follows.
+                attachments:
+                  type: array
+                  maxItems: 10
+                  description: Uploads that go with the note; the next coding run reads them. Same rule as note.
+                  items: { type: integer, format: int64 }
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /tickets/{key}/start-over:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: startTicketOver
+      summary: Pick a rejected ticket up again from scratch
+      description: Drops the analysis, answers and commits and analyses the ticket again. Only when nothing of it was pushed (the ticket's canStartOver).
+      tags: [tickets]
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
   /tickets/{key}/retry:
     parameters:
       - $ref: '#/components/parameters/TicketKey'
@@ -5832,6 +5881,8 @@ components:
           description: The screenshots agnts takes beside the human review
         previewCompare: { type: boolean, description: Previews of this ticket also capture the default branch (before shots) }
         canPreview: { type: boolean, description: The ticket's repository has a preview command }
+        continueTo: { $ref: '#/components/schemas/TicketState' }
+        canStartOver: { type: boolean, description: "This rejected ticket can start over from scratch (nothing of it was pushed); continueTo, when set, is where Continue sends it without a note" }
         spend: { $ref: '#/components/schemas/TokenSpend' }
         waitReason: { $ref: '#/components/schemas/WaitReason' }
         waitMessage: { type: string, description: "Why it waits, in a sentence" }
@@ -7371,6 +7422,7 @@ components:
         needsYou: { type: boolean }
         stopped: { type: boolean }
         done: { type: boolean }
+        progress: { type: boolean, description: 'An agent finished a step (analysis, code); push only, silent' }
         lessons: { type: boolean, description: New lessons were found }
         review: { type: boolean, description: A code review finished }
         preview: { type: boolean, description: Preview screenshots are ready }

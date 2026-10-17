@@ -95,6 +95,9 @@ type NotifySettings struct {
 	NeedsYou bool `json:"needsYou"`
 	Stopped  bool `json:"stopped"`
 	Done     bool `json:"done"`
+	// Progress announces an agent finishing a step (analysis, code), on
+	// the phone only.
+	Progress bool `json:"progress"`
 	Lessons  bool `json:"lessons"`
 	Review   bool `json:"review"`  // a code review found something
 	Preview  bool `json:"preview"` // screenshots are ready
@@ -207,7 +210,7 @@ func DefaultSettings() Settings {
 
 		MaxTicketRepos: DefaultMaxTicketRepos,
 		Git:            GitSettings{CoAuthor: true, PRTitle: "{key}: {title}"},
-		Notify:         NotifySettings{Push: true, Telegram: true, NeedsYou: true, Stopped: true, Done: true, Lessons: true, Review: true, Preview: true, PreviewPhotos: true, FollowUps: true, CI: true},
+		Notify:         NotifySettings{Push: true, Telegram: true, NeedsYou: true, Stopped: true, Done: true, Progress: true, Lessons: true, Review: true, Preview: true, PreviewPhotos: true, FollowUps: true, CI: true},
 	}
 }
 

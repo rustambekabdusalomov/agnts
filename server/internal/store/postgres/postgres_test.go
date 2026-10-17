@@ -160,6 +160,28 @@ func TestPendingDevicesTelegram(t *testing.T) {
 		t.Fatalf("devices: %+v", ds)
 	}
 
+	// Pushes about a ticket go to its owner: the member, else the
+	// workspace's owner for a ticket from a webhook.
+	if _, err := s.CreateTicket(ctx, domain.Ticket{Key: "PAY-9", Source: domain.SourceLocal, Title: "x", Priority: "high",
+		State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: "pr", Kind: domain.KindCode, MemberID: &u.ID},
+		domain.Event{Type: domain.EventTicketCreated}); err != nil {
+		t.Fatal(err)
+	}
+	if owner, ds, err := s.OwnerDevices(ctx, ws, "PAY-9"); err != nil || owner != u.ID || len(ds) != 1 {
+		t.Fatalf("owner devices: %d %+v %v", owner, ds, err)
+	}
+	if _, err := s.CreateTicket(ctx, domain.Ticket{Key: "PAY-10", Source: domain.SourceJira, Title: "x", Priority: "high",
+		State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: "pr", Kind: domain.KindCode},
+		domain.Event{Type: domain.EventTicketCreated}); err != nil {
+		t.Fatal(err)
+	}
+	if owner, ds, err := s.OwnerDevices(ctx, ws, "PAY-10"); err != nil || owner == 0 || owner == u.ID || len(ds) != 0 {
+		t.Fatalf("webhook ticket: %d %+v %v", owner, ds, err)
+	}
+	if owner, ds, err := s.OwnerDevices(ctx, ws, "GONE-1"); err != nil || owner != 0 || ds != nil {
+		t.Fatalf("missing ticket: %d %+v %v", owner, ds, err)
+	}
+
 	ref := int64(7)
 	if err := s.SaveTelegramMessage(ctx, TelegramMessage{ChatID: 1, MessageID: 2, TicketKey: "PAY-1", Kind: "question", Ref: &ref}); err != nil {
 		t.Fatal(err)

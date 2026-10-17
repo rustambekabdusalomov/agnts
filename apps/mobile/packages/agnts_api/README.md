@@ -261,6 +261,7 @@ Class | Method | HTTP request | Description
 [*TicketsApi*](doc/TicketsApi.md) | [**addressPullComments**](doc/TicketsApi.md#addresspullcomments) | **POST** /tickets/{key}/address-comments | Send reviewers&#39; threads on the ticket&#39;s open pull requests back to coding: the given ones, or every unresolved thread by someone else not sent yet. After the fix is approved and pushed, agnts answers in each thread
 [*TicketsApi*](doc/TicketsApi.md) | [**answerQuestions**](doc/TicketsApi.md#answerquestions) | **PUT** /tickets/{key}/answers | Answer the ticket&#39;s questions; when all are answered, coding starts
 [*TicketsApi*](doc/TicketsApi.md) | [**approveTicket**](doc/TicketsApi.md#approveticket) | **POST** /tickets/{key}/approve | Approve the reviewed work
+[*TicketsApi*](doc/TicketsApi.md) | [**continueTicket**](doc/TicketsApi.md#continueticket) | **POST** /tickets/{key}/continue | Pick a rejected ticket up again where it stopped
 [*TicketsApi*](doc/TicketsApi.md) | [**dismissFollowUp**](doc/TicketsApi.md#dismissfollowup) | **POST** /tickets/{key}/follow-ups/{id}/dismiss | Decline a suggestion; later runs will not suggest it again
 [*TicketsApi*](doc/TicketsApi.md) | [**dismissRelation**](doc/TicketsApi.md#dismissrelation) | **POST** /tickets/{key}/relations/{id}/dismiss | Dismiss a relation (run anyway); agnts does not propose it again
 [*TicketsApi*](doc/TicketsApi.md) | [**followUpFromFinding**](doc/TicketsApi.md#followupfromfinding) | **POST** /tickets/{key}/review/findings/{index}/follow-up | Turn a code review finding into a follow-up suggestion
@@ -287,6 +288,7 @@ Class | Method | HTTP request | Description
 [*TicketsApi*](doc/TicketsApi.md) | [**setTicketRepo**](doc/TicketsApi.md#setticketrepo) | **PUT** /tickets/{key}/repo | Link the ticket to a repository
 [*TicketsApi*](doc/TicketsApi.md) | [**setTicketRepos**](doc/TicketsApi.md#setticketrepos) | **PUT** /tickets/{key}/repos | Set the ticket&#39;s repositories (one, several or a group)
 [*TicketsApi*](doc/TicketsApi.md) | [**startTicket**](doc/TicketsApi.md#startticket) | **POST** /tickets/{key}/analyze | Start a held ticket now (it is queued for the next free slot)
+[*TicketsApi*](doc/TicketsApi.md) | [**startTicketOver**](doc/TicketsApi.md#startticketover) | **POST** /tickets/{key}/start-over | Pick a rejected ticket up again from scratch
 [*TicketsApi*](doc/TicketsApi.md) | [**stopTicket**](doc/TicketsApi.md#stopticket) | **POST** /tickets/{key}/stop | Stop the running stage; the ticket moves to failed and can be retried
 [*TicketsApi*](doc/TicketsApi.md) | [**translateTicket**](doc/TicketsApi.md#translateticket) | **POST** /tickets/{key}/translate | Translate a ticket&#39;s texts (its own and what agnts wrote) into a language
 [*UsageApi*](doc/UsageApi.md) | [**getTicketSpend**](doc/UsageApi.md#getticketspend) | **GET** /usage/tickets | Tickets that used the most of the plan in a period, by Claude Code&#39;s cost estimate
@@ -385,6 +387,7 @@ Class | Method | HTTP request | Description
  - [ConfirmTotpRequest](doc/ConfirmTotpRequest.md)
  - [ConnectIntegrationRequest](doc/ConnectIntegrationRequest.md)
  - [ConnectResult](doc/ConnectResult.md)
+ - [ContinueTicketRequest](doc/ContinueTicketRequest.md)
  - [Coverage](doc/Coverage.md)
  - [CoverageConfig](doc/CoverageConfig.md)
  - [CoverageFilesInner](doc/CoverageFilesInner.md)

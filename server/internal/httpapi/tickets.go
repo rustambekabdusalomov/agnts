@@ -24,6 +24,8 @@ type Tickets interface {
 	RequestChanges(ctx context.Context, key, feedback string, shots []domain.ShotRef, files []int64, origin domain.Origin) (domain.Ticket, error)
 	Reject(ctx context.Context, key, reason string, origin domain.Origin) (domain.Ticket, error)
 	RetryWithNote(ctx context.Context, key, note string, files []int64, origin domain.Origin) (domain.Ticket, error)
+	Continue(ctx context.Context, key, note string, files []int64, origin domain.Origin) (domain.Ticket, error)
+	StartOver(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	Start(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	Stop(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	SetModels(ctx context.Context, key string, models map[string]string, origin domain.Origin) (domain.Ticket, error)
@@ -143,6 +145,10 @@ func (s *Server) GetTicket(w http.ResponseWriter, r *http.Request, key gen.Ticke
 	em.Preview = &pm
 	canPreview := v.CanPreview
 	d.Ticket.CanPreview = &canPreview
+	if v.ContinueTo != "" {
+		to, startOver := gen.TicketState(v.ContinueTo), v.CanStartOver
+		d.Ticket.ContinueTo, d.Ticket.CanStartOver = &to, &startOver
+	}
 	d.EffectiveModels = &em
 	for i, q := range v.Questions {
 		opts := q.Options
@@ -325,6 +331,31 @@ func (s *Server) RetryTicket(w http.ResponseWriter, r *http.Request, key gen.Tic
 	}
 	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
 		return s.opt.Tickets.RetryWithNote(ctx, key, note, ids(req.Attachments), origin(r))
+	})
+}
+
+// ContinueTicket implements gen.ServerInterface.
+func (s *Server) ContinueTicket(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	var req gen.ContinueTicketJSONRequestBody
+	if r.ContentLength != 0 {
+		if err := decodeJSON(r, &req); err != nil {
+			writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+			return
+		}
+	}
+	note := ""
+	if req.Note != nil {
+		note = *req.Note
+	}
+	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
+		return s.opt.Tickets.Continue(ctx, key, note, ids(req.Attachments), origin(r))
+	})
+}
+
+// StartTicketOver implements gen.ServerInterface.
+func (s *Server) StartTicketOver(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
+		return s.opt.Tickets.StartOver(ctx, key, origin(r))
 	})
 }
 

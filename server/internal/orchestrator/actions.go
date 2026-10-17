@@ -498,6 +498,217 @@ func (o *Orchestrator) Reject(ctx context.Context, key, reason string, origin do
 	return t, nil
 }
 
+// Continue picks a rejected ticket up again where it stopped (see
+// domain.ContinueState). A note and files go to the next run that writes
+// code, the way requested changes do; they send a ticket rejected at
+// review back to coding. When the work's commits are gone the ticket
+// starts over from analysis.
+func (o *Orchestrator) Continue(ctx context.Context, key, note string, files []int64, origin domain.Origin) (domain.Ticket, error) {
+	note = strings.TrimSpace(note)
+	files, err := o.checkUploads(ctx, files)
+	if err != nil {
+		return domain.Ticket{}, err
+	}
+	cur, err := o.store.TicketByKey(ctx, key)
+	if err != nil {
+		return cur, err
+	}
+	if err := o.canContinue(ctx, cur); err != nil {
+		return cur, err
+	}
+	info, err := o.store.StateSince(ctx, []string{key})
+	if err != nil {
+		return cur, err
+	}
+	extra := note != "" || len(files) > 0
+	to := domain.ContinueState(info[key].From, extra)
+	if extra && !domain.ContinueTakesNote(to) {
+		return cur, invalid("%s goes back to %s, where no Claude run follows; continue without a note or files", key, strings.ReplaceAll(string(to), "_", " "))
+	}
+	lost := o.restoreBranches(ctx, cur)
+	if lost && cur.Pushed() {
+		return cur, invalid("the commits of %s are gone from agnts's copy of the repository; start it over instead", key)
+	}
+	if lost {
+		to = domain.StateNew
+	}
+	feedback := ""
+	if extra {
+		if feedback = note; feedback == "" {
+			feedback = "See the attached files."
+		}
+	}
+	msg := "continued"
+	if note != "" {
+		msg += ": " + note
+	}
+	if to == domain.StateFailed || to == domain.StateRateLimited {
+		// The page shows why it stopped from this event: the error again.
+		if msg, err = o.lastReason(ctx, key, to); err != nil {
+			return cur, err
+		}
+	}
+	ev := domain.Event{TicketKey: key, Type: domain.EventStateChanged, Origin: origin, Message: msg}
+	if len(files) > 0 {
+		ev.Data = map[string]any{"attachments": files}
+	}
+	// Link first: once the ticket moves, a run may pick it up.
+	if err := o.store.LinkAttachments(ctx, files, cur.ID, nil, domain.AttachRetry); err != nil {
+		return cur, err
+	}
+	t, err := o.store.Transition(ctx, key, to, ev, func(x *domain.Ticket) {
+		if lost {
+			x.Revision++ // reviews of the old work are stale
+			x.ResetWork(true)
+			x.ResumeState, x.SelfFixes, x.QuietReview = domain.StateNew, 0, false
+		}
+		if info[key].From == domain.StateWaitingForReview && to == domain.StateCoding {
+			x.Revision++ // like Request changes: the reviewed work gets a new round
+			x.SelfFixes, x.QuietReview = 0, false
+		}
+		if feedback != "" {
+			if x.Feedback != "" {
+				x.Feedback += "\n\n" + feedback
+			} else {
+				x.Feedback = feedback
+			}
+			x.FeedbackFiles = append(x.FeedbackFiles, files...)
+		}
+	})
+	if err != nil {
+		return t, err
+	}
+	if lost {
+		o.event(ctx, domain.Event{TicketKey: key, Type: domain.EventTicketUpdated, Origin: origin, Level: domain.LevelWarn,
+			Message: "the earlier commits are gone from agnts's copy of the repository: agnts starts over from analysis"})
+		o.dropQuestions(ctx, t)
+	}
+	o.trackerMove(context.WithoutCancel(ctx), t, continueStatus(to))
+	o.Wake()
+	return t, nil
+}
+
+// StartOver picks a rejected ticket up again from scratch: the analysis,
+// answers and commits are dropped and agnts analyses it again. Anything
+// pushed already cannot start over.
+func (o *Orchestrator) StartOver(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error) {
+	cur, err := o.store.TicketByKey(ctx, key)
+	if err != nil {
+		return cur, err
+	}
+	if err := o.canContinue(ctx, cur); err != nil {
+		return cur, err
+	}
+	if !canStartOver(cur) {
+		return cur, invalid("%s was pushed already: continue it instead", key)
+	}
+	t, err := o.store.Transition(ctx, key, domain.StateNew, domain.Event{
+		TicketKey: key, Type: domain.EventStateChanged, Origin: origin, Message: "started over",
+	}, func(x *domain.Ticket) {
+		x.Revision++ // reviews of the old work are stale
+		x.ResetWork(true)
+		x.Feedback, x.FeedbackShots, x.FeedbackFiles = "", nil, nil
+		x.ResumeState, x.SelfFixes, x.QuietReview = domain.StateNew, 0, false
+	})
+	if err != nil {
+		return t, err
+	}
+	o.dropBranch(ctx, cur) // a branch kept for a pull request it never opened
+	o.dropQuestions(ctx, t)
+	o.trackerMove(context.WithoutCancel(ctx), t, TrackerStarted)
+	o.Wake()
+	return t, nil
+}
+
+// canContinue says why a rejected ticket cannot be picked up again, if it
+// cannot: a review or a replay, an archived repository, or its ticket
+// number taken by another open ticket meanwhile.
+func (o *Orchestrator) canContinue(ctx context.Context, t domain.Ticket) error {
+	if t.State != domain.StateRejected {
+		return &domain.TransitionError{Key: t.Key, From: t.State, To: domain.StateNew}
+	}
+	if !domain.CanContinue(t) {
+		return invalid("%s cannot be continued: it is a review of a pull request or a replay", t.Key)
+	}
+	for _, id := range t.RepoIDs() {
+		repo, err := o.store.RepositoryByID(ctx, id)
+		if err != nil && !errors.Is(err, domain.ErrNotFound) {
+			return err
+		}
+		if err == nil && repo.ArchivedAt != nil {
+			return invalid("the repository %s is archived", repo.Name)
+		}
+	}
+	if t.TicketNumber != "" {
+		if _, err := o.ticketNumber(ctx, &t.TicketNumber, t.Key); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// canStartOver reports whether a rejected ticket may start over: nothing of
+// it was pushed, and it has an analysis to redo (a Swagger test has none).
+func canStartOver(t domain.Ticket) bool {
+	return !t.Pushed() && t.Kind != domain.KindSwaggerTest
+}
+
+// continueStatus is the tracker status of a ticket continued into state s.
+func continueStatus(s domain.TicketState) TrackerStatus {
+	if s == domain.StateWaitingForReview {
+		return TrackerInReview
+	}
+	return TrackerStarted
+}
+
+// restoreBranches puts back the local branches Reject deleted, at the
+// heads the ticket saved; it reports whether some work is gone for good.
+func (o *Orchestrator) restoreBranches(ctx context.Context, t domain.Ticket) bool {
+	br, ok := o.git.(BranchRestorer)
+	if !ok {
+		return false
+	}
+	lost := false
+	for _, id := range t.RepoIDs() {
+		r, ok := t.RepoState(id)
+		if !ok || r.Branch == "" || r.HeadSHA == "" {
+			continue // no commits yet: Prepare cuts the branch
+		}
+		repo, err := o.store.RepositoryByID(ctx, id)
+		if err != nil {
+			continue
+		}
+		switch err := br.RestoreBranch(ctx, repo, r.Branch, r.HeadSHA); {
+		case errors.Is(err, domain.ErrNotFound):
+			lost = true
+		case err != nil:
+			o.log.Warn("restore branch", "ticket", t.Key, "repo", repo.Name, "branch", r.Branch, "err", err)
+		}
+	}
+	return lost
+}
+
+// lastReason is the message of the ticket's last move into state s.
+func (o *Orchestrator) lastReason(ctx context.Context, key string, s domain.TicketState) (string, error) {
+	hist, err := o.store.History(ctx, key)
+	if err != nil {
+		return "", err
+	}
+	for i := len(hist) - 1; i >= 0; i-- {
+		if hist[i].State == s {
+			return hist[i].Message, nil
+		}
+	}
+	return "continued", nil
+}
+
+// dropQuestions forgets a ticket's questions for a fresh analysis.
+func (o *Orchestrator) dropQuestions(ctx context.Context, t domain.Ticket) {
+	if err := o.store.ReplaceQuestions(context.WithoutCancel(ctx), t.ID, nil); err != nil {
+		o.log.Warn("drop the old questions", "ticket", t.Key, "err", err)
+	}
+}
+
 // RestartWithUpdate starts a ticket over from the newer version of its
 // issue that arrived after agnts started: the work so far (analysis,
 // answers, commits, reviews) is dropped and the ticket is analysed again.
@@ -1067,6 +1278,10 @@ type TicketView struct {
 	// Swagger is a Swagger test's latest results (nil for other kinds, and
 	// before its first run ends). Its log is left out.
 	Swagger *SwaggerView
+	// ContinueTo is where Continue sends a rejected ticket without a note
+	// ("" when it cannot continue); CanStartOver says Start over is offered.
+	ContinueTo   domain.TicketState
+	CanStartOver bool
 }
 
 // TicketRow is a ticket for lists, with when it entered its state.
@@ -1215,6 +1430,10 @@ func (o *Orchestrator) View(ctx context.Context, key string) (TicketView, error)
 				v.CanPreview = true
 			}
 		}
+	}
+	if o.canContinue(ctx, t) == nil {
+		v.ContinueTo = domain.ContinueState(v.Info.From, false)
+		v.CanStartOver = canStartOver(t)
 	}
 	if v.FollowUps, err = o.followUps(ctx, t); err != nil {
 		return v, err

@@ -76,6 +76,8 @@
     "needsYouHelp": "Javob berish kerak boʻlgan savollar yoki tekshirish kerak boʻlgan oʻzgarishlar",
     "stopped": "Ish toʻxtaganda yoki pauzaga qoʻyilganda",
     "done": "Oʻzgarishlar yuborilganda",
+    "progress": "Agent bosqichni tugatganda",
+    "progressHelp": "Tahlil tayyor, kod yozildi. Faqat telefonga, ovozsiz, har bir tiket uchun bitta bildirishnoma",
     "lessons": "agnts oʻrganish uchun yangi narsa topganda",
     "reviewDone": "agnts kod sharhi tugaganda",
     "secretsHelp": "Jira, GitHub va Claude tokenlari serveringizda shifrlangan holda saqlanadi. Bu sahifa ularni hech qachon koʻrsatmaydi.",

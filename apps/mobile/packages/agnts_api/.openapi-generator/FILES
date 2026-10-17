@@ -79,6 +79,7 @@ doc/CommitPull.md
 doc/ConfirmTotpRequest.md
 doc/ConnectIntegrationRequest.md
 doc/ConnectResult.md
+doc/ContinueTicketRequest.md
 doc/Coverage.md
 doc/CoverageConfig.md
 doc/CoverageFilesInner.md
@@ -469,6 +470,7 @@ lib/src/model/commit_pull.dart
 lib/src/model/confirm_totp_request.dart
 lib/src/model/connect_integration_request.dart
 lib/src/model/connect_result.dart
+lib/src/model/continue_ticket_request.dart
 lib/src/model/coverage.dart
 lib/src/model/coverage_config.dart
 lib/src/model/coverage_files_inner.dart
@@ -808,6 +810,7 @@ test/commit_test.dart
 test/confirm_totp_request_test.dart
 test/connect_integration_request_test.dart
 test/connect_result_test.dart
+test/continue_ticket_request_test.dart
 test/coverage_config_test.dart
 test/coverage_files_inner_test.dart
 test/coverage_files_inner_uncovered_inner_test.dart

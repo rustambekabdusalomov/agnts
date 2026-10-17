@@ -273,6 +273,16 @@ func (f *fakeTickets) RetryWithNote(_ context.Context, key, note string, files [
 	return f.ticket(key, domain.StateNew)
 }
 
+func (f *fakeTickets) Continue(_ context.Context, key, note string, files []int64, o domain.Origin) (domain.Ticket, error) {
+	f.lastOrigin, f.lastNote, f.lastFiles = o, note, files
+	return f.ticket(key, domain.StateWaitingForReview)
+}
+
+func (f *fakeTickets) StartOver(_ context.Context, key string, o domain.Origin) (domain.Ticket, error) {
+	f.lastOrigin = o
+	return f.ticket(key, domain.StateNew)
+}
+
 func (f *fakeTickets) Start(_ context.Context, key string, o domain.Origin) (domain.Ticket, error) {
 	f.lastOrigin = o
 	return f.ticket(key, domain.StateNew)
@@ -447,6 +457,10 @@ func TestTicketEndpoints(t *testing.T) {
 		{"POST", "/api/tickets/PAY-1/request-changes", `{"feedback":"  "}`, 400, `feedback is required`},
 		{"POST", "/api/tickets/PAY-1/request-changes", `{"feedback":"more tests","attachments":[5,6]}`, 200, `"state":"coding"`},
 		{"POST", "/api/tickets/PAY-1/reject", "", 200, `"state":"rejected"`},
+		{"POST", "/api/tickets/PAY-1/continue", "", 200, `"state":"waiting_for_review"`},
+		{"POST", "/api/tickets/PAY-1/continue", `{"note":"keep the old API","attachments":[7]}`, 200, `"state":"waiting_for_review"`},
+		{"POST", "/api/tickets/PAY-1/continue", `{"reason":"x"}`, 400, `unknown field`},
+		{"POST", "/api/tickets/PAY-1/start-over", "", 200, `"state":"new"`},
 		{"POST", "/api/tickets/PAY-1/retry", "", 200, `"state":"new"`},
 		{"POST", "/api/tickets/PAY-1/retry", `{"note":"skip the symlink","attachments":[9,9]}`, 200, `"state":"new"`},
 		{"GET", "/api/tickets/PAY-1", "", 200, `"multiple":true`},

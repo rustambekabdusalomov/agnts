@@ -179,6 +179,10 @@ type fakeGit struct {
 	files     []domain.FileChange // what Commit reports, when set
 	// preparedAt records PrepareAt calls as branch@base.
 	preparedAt []string
+	// restored records RestoreBranch calls as branch@sha; branchesGone
+	// makes them report the commits gone.
+	restored     []string
+	branchesGone bool
 }
 
 func (g *fakeGit) Prepare(context.Context, domain.Repository, string) error { return nil }

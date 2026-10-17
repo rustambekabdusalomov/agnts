@@ -10365,6 +10365,18 @@ abstract class AppLocalizations {
   /// **'When changes are pushed'**
   String get mobilePushDone;
 
+  /// No description provided for @mobilePushProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'When an agent finishes a step'**
+  String get mobilePushProgress;
+
+  /// No description provided for @mobilePushProgressHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Analysis done, code written. Phone only, silent, one notification per ticket'**
+  String get mobilePushProgressHelp;
+
   /// No description provided for @mobilePushUnavailable.
   ///
   /// In en, this message translates to:
@@ -17931,6 +17943,18 @@ abstract class AppLocalizations {
   /// **'When changes are pushed'**
   String get settingsDone;
 
+  /// No description provided for @settingsProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'When an agent finishes a step'**
+  String get settingsProgress;
+
+  /// No description provided for @settingsProgressHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Analysis done, code written. Phone only, silent, one notification per ticket'**
+  String get settingsProgressHelp;
+
   /// No description provided for @settingsLessons.
   ///
   /// In en, this message translates to:
@@ -19710,7 +19734,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketRejectConfirm.
   ///
   /// In en, this message translates to:
-  /// **'Stop all work on {key}? This cannot be undone.'**
+  /// **'Stop all work on {key}? You can continue it later.'**
   String ticketRejectConfirm(String key);
 
   /// No description provided for @ticketRetry.
@@ -20126,6 +20150,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'agnts stopped working on this ticket. The branch was not pushed.'**
   String get ticketRejectedSub;
+
+  /// No description provided for @ticketRejectedSubContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts stopped working on this ticket. You can pick it up again where it stopped.'**
+  String get ticketRejectedSubContinue;
+
+  /// No description provided for @ticketContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get ticketContinue;
+
+  /// No description provided for @ticketContinueNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note for agnts'**
+  String get ticketContinueNote;
+
+  /// No description provided for @ticketContinueNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional. What to do differently; the next coding run gets it, like requested changes.'**
+  String get ticketContinueNoteHint;
+
+  /// No description provided for @ticketContinueToNew.
+  ///
+  /// In en, this message translates to:
+  /// **'It goes back to the queue and is analysed again.'**
+  String get ticketContinueToNew;
+
+  /// No description provided for @ticketContinueToAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'It goes back to its questions; answers given so far are kept.'**
+  String get ticketContinueToAnswers;
+
+  /// No description provided for @ticketContinueToCoding.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts goes on writing the code where it stopped.'**
+  String get ticketContinueToCoding;
+
+  /// No description provided for @ticketContinueToReview.
+  ///
+  /// In en, this message translates to:
+  /// **'It goes back to review. With a note, agnts makes those changes first.'**
+  String get ticketContinueToReview;
+
+  /// No description provided for @ticketContinueToFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'It goes back to the error it stopped with, so you can retry it.'**
+  String get ticketContinueToFailed;
+
+  /// No description provided for @ticketContinueToRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'It goes back to waiting for the plan limit.'**
+  String get ticketContinueToRateLimited;
+
+  /// No description provided for @ticketStartOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Start over'**
+  String get ticketStartOver;
+
+  /// No description provided for @ticketStartOverConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Start {key} over? The analysis, answers and commits are dropped and agnts analyses it again.'**
+  String ticketStartOverConfirm(String key);
 
   /// No description provided for @ticketFailedTitle.
   ///

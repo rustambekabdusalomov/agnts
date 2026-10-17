@@ -181,7 +181,8 @@ var transitions = map[TicketState][]TicketState{
 	StateFailed:           {StateNew, StateCoding, StatePushing, StateRejected},
 	StateRateLimited:      {StateNew, StateCoding, StateRejected},
 	StateDone:             {},
-	StateRejected:         {},
+	// Only Continue leaves rejected (ContinueState says where to).
+	StateRejected: {StateNew, StateWaitingForAnswers, StateCoding, StateWaitingForReview, StateFailed, StateRateLimited},
 }
 
 // CanTransition reports whether a ticket may move from one state to another.
@@ -197,6 +198,38 @@ func (s TicketState) Valid() bool {
 
 // Terminal reports whether no further work happens on a ticket in state s.
 func (s TicketState) Terminal() bool { return s == StateDone || s == StateRejected }
+
+// CanContinue reports whether t, rejected, may be picked up again: not a
+// review of someone else's pull request (dismissing it went to the git
+// host) and not a replay.
+func CanContinue(t Ticket) bool {
+	return t.State == StateRejected && t.Kind != KindReview && t.Source != SourceGit && t.ReplayOf == ""
+}
+
+// ContinueState is where Continue sends a ticket rejected in state from:
+// back where it stopped. A ticket rejected at review goes back to review,
+// or to coding when a note asks for changes; one that had failed shows its
+// error again. An unknown stage starts over from analysis.
+func ContinueState(from TicketState, note bool) TicketState {
+	switch from {
+	case StateWaitingForAnswers, StateFailed, StateRateLimited:
+		return from
+	case StateCoding, StateTesting:
+		return StateCoding
+	case StateWaitingForReview:
+		if note {
+			return StateCoding
+		}
+		return StateWaitingForReview
+	}
+	return StateNew
+}
+
+// ContinueTakesNote reports whether a ticket resuming at state s runs
+// Claude next, so a note (or files) can go with it.
+func ContinueTakesNote(s TicketState) bool {
+	return s == StateNew || s == StateCoding
+}
 
 // TransitionError is returned when a requested change is not allowed from
 // the ticket's current state (for example approving a ticket twice).

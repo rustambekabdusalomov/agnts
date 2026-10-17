@@ -23,7 +23,12 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final container = ProviderContainer();
   // Push and the event stream follow a workspace's tickets: the user app's.
-  if (!isAdminApp) await Push.init((route, ws) => openFromPush(container, route, ws));
+  if (!isAdminApp) {
+    await Push.init(
+      (route, ws) => openFromPush(container, route, ws),
+      showing: (route) => container.read(routerProvider).state.uri.path == route,
+    );
+  }
   runApp(UncontrolledProviderScope(container: container, child: const AgntsApp()));
 }
 
@@ -93,9 +98,21 @@ class _AgntsAppState extends ConsumerState<AgntsApp> {
       ],
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: ref.watch(routerProvider),
+      builder: (context, child) => Actions(actions: tapOutsideUnfocuses, child: child!),
     );
   }
 }
+
+/// A tap outside a text field closes the keyboard. Flutter keeps the focus
+/// on phones by default, so the keyboard stayed up over the buttons below
+/// the field (Retry under a failed ticket's note) with no way to close it.
+/// Every text field asks its ancestors first, so this covers all screens,
+/// sheets and dialogs.
+final tapOutsideUnfocuses = <Type, Action<Intent>>{
+  EditableTextTapOutsideIntent: CallbackAction<EditableTextTapOutsideIntent>(
+    onInvoke: (intent) => intent.focusNode.unfocus(),
+  ),
+};
 
 /// Opens a notification's screen, first switching to the workspace its
 /// ticket is in.

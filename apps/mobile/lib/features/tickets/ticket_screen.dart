@@ -54,6 +54,9 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
   // A failed run's retry note and its files.
   final _retryNote = TextEditingController();
   late final _retryFiles = AttachmentsController()..addListener(_filesChanged);
+  // What to do differently when a rejected ticket is continued, and files.
+  final _continueNote = TextEditingController();
+  late final _continueFiles = AttachmentsController()..addListener(_filesChanged);
   final _feedback = TextEditingController();
   // Preview screenshots the feedback points at.
   final _feedbackShots = ValueNotifier<List<FeedbackShot>>(const []);
@@ -92,6 +95,8 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     }
     _retryNote.dispose();
     _retryFiles.dispose();
+    _continueNote.dispose();
+    _continueFiles.dispose();
     _feedback.dispose();
     _feedbackShots.dispose();
     _feedbackFiles.dispose();
@@ -172,6 +177,26 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     if (!ok) return;
     _retryNote.clear();
     _retryFiles.clear();
+  }
+
+  /// Picks a rejected ticket up again, with the note and files when its
+  /// next stage runs Claude.
+  Future<void> _continue(Ticket t) async {
+    final note = _continueNote.text.trim();
+    final ids = _continueFiles.ids;
+    final extra = _takesContinueNote(t) && (note.isNotEmpty || ids.isNotEmpty);
+    final ok = await _run(() => _tickets.continueTicket(
+          key: t.key,
+          continueTicketRequest: extra ? ContinueTicketRequest(note: note.isEmpty ? null : note, attachments: ids.isEmpty ? null : ids) : null,
+        ));
+    if (!ok) return;
+    _continueNote.clear();
+    _continueFiles.clear();
+  }
+
+  Future<void> _startOver(BuildContext context, String key) async {
+    final l = AppLocalizations.of(context);
+    if (await _confirm(l.ticketStartOverConfirm(key))) await _run(() => _tickets.startTicketOver(key: key));
   }
 
   TicketsApi get _tickets => ref.read(apiProvider)!.getTicketsApi();
@@ -465,7 +490,30 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         children.add(TicketLessons(t));
         if (!pull && (t.replayOf == null || t.replayOf!.isEmpty) && t.repoId != null) children.add(ReplayButton(t));
       case TicketState.rejected:
-        children.addAll([_H2(l.ticketRejectedTitle), _Sub(l.ticketRejectedSub)]);
+        final whereTo = _continueHint(l, t.continueTo);
+        children.addAll([
+          _H2(l.ticketRejectedTitle),
+          _Sub(t.continueTo == null ? l.ticketRejectedSub : l.ticketRejectedSubContinue),
+          if (_takesContinueNote(t)) ...[
+            _H3(l.ticketContinueNote),
+            TextField(
+              controller: _continueNote,
+              enabled: !_busy,
+              minLines: 2,
+              maxLines: 6,
+              inputFormatters: [LengthLimitingTextInputFormatter(4000)],
+              textCapitalization: TextCapitalization.sentences,
+              style: const TextStyle(fontSize: 16, height: 1.4),
+              decoration: InputDecoration(
+                hintText: l.ticketContinueNoteHint,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+              ),
+            ),
+            const SizedBox(height: 10),
+            AttachmentPicker(controller: _continueFiles, enabled: !_busy),
+          ],
+          if (whereTo != null) Padding(padding: const EdgeInsets.only(top: 10), child: Text(whereTo, style: TextStyle(fontSize: 13, color: c.ink3))),
+        ]);
       case TicketState.failed:
         children.addAll([
           _H2(l.ticketFailedTitle),
@@ -1072,6 +1120,25 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
             ),
           ),
         ];
+      case TicketState.rejected when t.continueTo != null:
+        buttons = [
+          if (t.canStartOver == true)
+            Expanded(
+              child: OutlinedButton(
+                onPressed: _busy ? null : () => _startOver(context, key),
+                child: Text(l.ticketStartOver, maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
+            ),
+          Expanded(
+            child: Tooltip(
+              message: _continueFiles.uploading ? l.filesWait : '',
+              child: FilledButton(
+                onPressed: _busy || (_takesContinueNote(t) && _continueFiles.uploading) ? null : () => _continue(t),
+                child: Text(l.ticketContinue, maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
+            ),
+          ),
+        ];
       case TicketState.analyzing:
       case TicketState.coding:
       case TicketState.testing:
@@ -1176,6 +1243,21 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
 /// Whether a retry may carry a note and files: a failed run that does not
 /// resume at pushing (the server refuses them there, as the admin panel).
 bool _takesRetryNote(Ticket t) => t.state == TicketState.failed && t.resumeState != TicketState.pushing;
+
+/// Only a rejected ticket going back to a stage that runs Claude takes a note.
+bool _takesContinueNote(Ticket t) =>
+    t.state == TicketState.rejected && const [TicketState.new_, TicketState.coding, TicketState.waitingForReview].contains(t.continueTo);
+
+/// Where Continue sends a rejected ticket, in a sentence.
+String? _continueHint(AppLocalizations l, TicketState? to) => switch (to) {
+      TicketState.new_ => l.ticketContinueToNew,
+      TicketState.waitingForAnswers => l.ticketContinueToAnswers,
+      TicketState.coding => l.ticketContinueToCoding,
+      TicketState.waitingForReview => l.ticketContinueToReview,
+      TicketState.failed => l.ticketContinueToFailed,
+      TicketState.rateLimited => l.ticketContinueToRateLimited,
+      _ => null,
+    };
 
 /// A model's name: Haiku, Sonnet, Opus, or "Codex" and the model for a
 /// run on Codex CLI ("codex:" and the model).
