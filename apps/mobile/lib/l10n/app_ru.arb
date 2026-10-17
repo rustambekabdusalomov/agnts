@@ -3438,6 +3438,7 @@
   "ticketApproveReportPostConfirmPlane": "Одобрить отчёт, закрыть тикет и опубликовать отчёт в {key} в Plane?",
   "ticketDoneReportPostedPlane": "Отчёт сохранён здесь и опубликован в {key} в Plane.",
   "ticketPickAny": "Выберите все подходящие",
+  "ticketCopyQuestions": "Скопировать вопросы",
   "ticketOtherAnswer": "Что-то другое (необязательно)",
   "ticketSrcGit": "Пул-реквест",
   "ticketSrcCi": "Падение CI",

@@ -144,6 +144,15 @@ function togglePick(q: Question, o: string) {
 const left = computed(() => (d.value?.questions ?? []).filter((q) => !answerOf(q)).length)
 const answersUploading = computed(() => Object.values(answers).some((a) => a.uploading))
 const answered = computed(() => (d.value?.questions ?? []).filter((q) => q.answer))
+// The questions as plain text, to paste into a chat for whoever can answer.
+const questionsText = computed(() => {
+  if (!tk.value || !d.value) return ''
+  const qs = d.value.questions.map((q, i) => {
+    const opts = q.options.map((o) => `   - ${tr.value(o)}`)
+    return [`${i + 1}. ${tr.value(q.text)}${q.multiple ? ` (${t('ticket.pickAny')})` : ''}`, ...opts].join('\n')
+  })
+  return [`${tk.value.key}: ${tr.value(tk.value.title)}`, '', ...qs].join('\n')
+})
 // The chosen options of a multiple-choice answer, each translated.
 const answerText = (q: Question) => (q.answer ?? '').split('\n').map((l) => tr.value(l)).join(', ')
 const files = computed(() => d.value?.attachments ?? [])
@@ -573,7 +582,9 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
         <CiCard v-if="tk.source === 'ci'" :ticket-key="tk.key" />
         <section class="card"><ProgressTrack :ticket="tk" :spend="d.spendByStage" /></section>
 
-        <section v-if="!reviewingReport" class="card">
+        <section v-if="!reviewingReport" class="card tk-stage">
+          <!-- outside the fieldset: a viewer can copy the questions too -->
+          <CopyButton v-if="!pull && tk.state === 'waiting_for_answers'" class="q-copy" :text="questionsText" :label="t('ticket.copyQuestions')" />
           <fieldset class="ro-fs" :disabled="!workspace.canEdit">
             <PullCard v-if="pull" :ticket="tk" />
             <p v-if="pull && tk.pull?.postedAt" class="hint sec">{{ t('reviews.posted', { host, when: new Date(tk.pull.postedAt).toLocaleString() }) }}</p>
@@ -649,7 +660,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
 
             <!-- waiting_for_answers -->
             <template v-else-if="tk.state === 'waiting_for_answers'">
-              <h2>{{ t('ticket.questionsTitle', { n: d.questions.length }) }}</h2>
+              <h2 class="q-title">{{ t('ticket.questionsTitle', { n: d.questions.length }) }}</h2>
               <p class="sub">{{ t('ticket.questionsSub') }}</p>
               <div v-if="d.analysis?.plan.length" class="sec">
                 <h3>{{ t('ticket.plan') }}</h3>
@@ -1075,6 +1086,14 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
 </template>
 
 <style scoped>
+.tk-stage { position: relative; }
+.tk-stage .q-copy { position: absolute; top: 16px; right: 16px; }
+/* room for the copy button beside the title */
+.q-title { padding-right: 170px; }
+@media (max-width: 560px) {
+  .tk-stage .q-copy { position: static; margin-bottom: 10px; }
+  .q-title { padding-right: 0; }
+}
 .tk-update { margin-bottom: 14px; }
 .tk-update-title { margin: 6px 0 4px; font-weight: 600; }
 .tk-update-desc { margin: 0; white-space: pre-wrap; max-height: 240px; overflow: auto; font-size: 14px; }

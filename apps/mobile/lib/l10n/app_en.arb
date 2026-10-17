@@ -7192,6 +7192,7 @@
     }
   },
   "ticketPickAny": "Pick all that apply",
+  "ticketCopyQuestions": "Copy questions",
   "ticketOtherAnswer": "Something else (optional)",
   "ticketSrcGit": "Pull request",
   "ticketSrcCi": "CI failure",

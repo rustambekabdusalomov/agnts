@@ -12203,6 +12203,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ticketPickAny => 'Выберите все подходящие';
 
   @override
+  String get ticketCopyQuestions => 'Скопировать вопросы';
+
+  @override
   String get ticketOtherAnswer => 'Что-то другое (необязательно)';
 
   @override

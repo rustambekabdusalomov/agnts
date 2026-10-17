@@ -20721,6 +20721,12 @@ abstract class AppLocalizations {
   /// **'Pick all that apply'**
   String get ticketPickAny;
 
+  /// No description provided for @ticketCopyQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy questions'**
+  String get ticketCopyQuestions;
+
   /// No description provided for @ticketOtherAnswer.
   ///
   /// In en, this message translates to:

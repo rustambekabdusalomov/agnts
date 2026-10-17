@@ -3438,6 +3438,7 @@
   "ticketApproveReportPostConfirmPlane": "Hisobot tasdiqlansin, tiket yopilsin va hisobot Plane'dagi {key} ga joylansinmi?",
   "ticketDoneReportPostedPlane": "Hisobot shu yerda saqlandi va Plane'dagi {key} ga joylandi.",
   "ticketPickAny": "Mos keladiganlarning barchasini tanlang",
+  "ticketCopyQuestions": "Savollarni nusxalash",
   "ticketOtherAnswer": "Boshqa narsa (ixtiyoriy)",
   "ticketSrcGit": "Pull request",
   "ticketSrcCi": "CI yiqilishi",

@@ -198,6 +198,7 @@
     "approveReportPostConfirmPlane": "Approve the report, close this ticket and post the report to {key} in Plane?",
     "doneReportPostedPlane": "The report is kept here and was posted to {key} in Plane.",
     "pickAny": "Pick all that apply",
+    "copyQuestions": "Copy questions",
     "otherAnswer": "Something else (optional)",
     "srcGit": "Pull request",
     "srcCi": "CI failure",

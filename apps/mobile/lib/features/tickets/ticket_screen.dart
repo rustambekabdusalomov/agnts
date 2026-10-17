@@ -132,6 +132,16 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     return _picked[q.id] ?? note;
   }
 
+  /// The questions as plain text, to paste into a chat for whoever can answer.
+  String _questionsText(Ticket t, List<Question> qs, AppLocalizations l) => [
+        '${t.key}: ${_tr(t.title)}',
+        '',
+        for (final (i, q) in qs.indexed) ...[
+          '${i + 1}. ${_tr(q.text)}${q.multiple ? ' (${l.ticketPickAny})' : ''}',
+          for (final o in q.options) '   - ${_tr(o)}',
+        ],
+      ].join('\n');
+
   /// The details sent with a picked option (null when the text is the answer).
   String? _noteOf(Question q) {
     if (q.multiple) return null;
@@ -371,6 +381,17 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         children.addAll([
           _H2(l.ticketQuestionsTitle(d.questions.length)),
           _Sub(l.ticketQuestionsSub),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () async {
+                await Clipboard.setData(ClipboardData(text: _questionsText(t, d.questions, l)));
+                if (context.mounted) showSnack(context, l.formCopied);
+              },
+              icon: const Icon(Icons.copy_rounded, size: 16),
+              label: Text(l.ticketCopyQuestions),
+            ),
+          ),
           if (d.analysis != null) _analysisFold(context, d.analysis!),
           DesignRecord(analysis: d.analysis, tr: _tr),
           for (final q in d.questions) _questionCard(context, q),

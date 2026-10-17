@@ -11657,6 +11657,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketPickAny => 'Pick all that apply';
 
   @override
+  String get ticketCopyQuestions => 'Copy questions';
+
+  @override
   String get ticketOtherAnswer => 'Something else (optional)';
 
   @override

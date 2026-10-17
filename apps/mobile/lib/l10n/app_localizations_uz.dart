@@ -11645,6 +11645,9 @@ class AppLocalizationsUz extends AppLocalizations {
   String get ticketPickAny => 'Mos keladiganlarning barchasini tanlang';
 
   @override
+  String get ticketCopyQuestions => 'Savollarni nusxalash';
+
+  @override
   String get ticketOtherAnswer => 'Boshqa narsa (ixtiyoriy)';
 
   @override

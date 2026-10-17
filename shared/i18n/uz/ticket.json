@@ -198,6 +198,7 @@
     "approveReportPostConfirmPlane": "Hisobot tasdiqlansin, tiket yopilsin va hisobot Plane'dagi {key} ga joylansinmi?",
     "doneReportPostedPlane": "Hisobot shu yerda saqlandi va Plane'dagi {key} ga joylandi.",
     "pickAny": "Mos keladiganlarning barchasini tanlang",
+    "copyQuestions": "Savollarni nusxalash",
     "otherAnswer": "Boshqa narsa (ixtiyoriy)",
     "srcGit": "Pull request",
     "srcCi": "CI yiqilishi",

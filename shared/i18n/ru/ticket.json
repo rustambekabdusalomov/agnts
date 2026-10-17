@@ -198,6 +198,7 @@
     "approveReportPostConfirmPlane": "Одобрить отчёт, закрыть тикет и опубликовать отчёт в {key} в Plane?",
     "doneReportPostedPlane": "Отчёт сохранён здесь и опубликован в {key} в Plane.",
     "pickAny": "Выберите все подходящие",
+    "copyQuestions": "Скопировать вопросы",
     "otherAnswer": "Что-то другое (необязательно)",
     "srcGit": "Пул-реквест",
     "srcCi": "Падение CI",
