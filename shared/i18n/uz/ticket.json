@@ -136,6 +136,8 @@
     "kvAfter": "Tasdiqlangandan keyin",
     "kvPriority": "Muhimlik",
     "kvBranch": "Branch",
+    "branchRename": "Nomini oʻzgartirish",
+    "branchRenameHint": "Pull request shu nomdagi branchdan ochiladi. Harflar, raqamlar, - _ . va /; boʻshliqsiz.",
     "kvRevision": "Reviziya",
     "kvTurns": "Sarflangan qadamlar",
     "kvCodingModel": "Kod yozish modeli",

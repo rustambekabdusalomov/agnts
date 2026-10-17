@@ -45,7 +45,7 @@
     "commits": "Commitlar va PR",
     "commitsSub": "Commitlar kimning nomidan va pull requestlar qanday ochiladi",
     "authorName": "Muallif ismi",
-    "authorNameHelp": "Commitlar sizning nomingizdan qilinadi",
+    "authorNameHelp": "Boʻsh qoldirsangiz, commitlar tiket egasi nomidan, uning hisobidagi ism va email bilan qilinadi",
     "authorEmail": "Muallif emaili",
     "authorEmailHelp": "Sizniki boʻlib koʻrinishi uchun GitHub hisobingizga mos kelishi kerak",
     "coAuthor": "Co-authored-by: agnts qatorini qoʻshish",

@@ -381,6 +381,34 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '409': { $ref: '#/components/responses/Conflict' }
 
+  /tickets/{key}/branch:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    put:
+      operationId: renameTicketBranch
+      summary: Rename the ticket's branch before agnts pushes it
+      description: |
+        Only a branch that was never pushed (the repository's canRenameBranch), while the ticket waits for review or
+        stopped on an error. The pull request opens from the new name, and later runs keep it. 409 when the name is
+        taken, in agnts or on the git host.
+      tags: [tickets]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [branch]
+              properties:
+                branch: { type: string, minLength: 1, maxLength: 200, description: 'The new name, as git takes it (no spaces, no .. or //)' }
+                repoId: { type: integer, format: int64, description: 'Which repository of the ticket; absent is the primary' }
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
   /tickets/{key}/retry:
     parameters:
       - $ref: '#/components/parameters/TicketKey'
@@ -6331,6 +6359,7 @@ components:
         mergedAt: { type: string, format: date-time }
         closedAt: { type: string, format: date-time }
         pushError: { type: string, description: Why its last push failed; a retry pushes it again }
+        canRenameBranch: { type: boolean, description: 'Its branch was never pushed and can still be renamed (ticket detail only)' }
         files: { type: integer, description: Files its change touches }
         archived: { type: boolean, description: The repository is archived }
 

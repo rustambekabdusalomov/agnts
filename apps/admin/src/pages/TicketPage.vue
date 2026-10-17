@@ -27,6 +27,7 @@ import ReportView from '../components/ticket/ReportView.vue'
 import SwaggerResults from '../components/swagger/SwaggerResults.vue'
 import RepoPicker from '../components/ticket/RepoPicker.vue'
 import TicketRepos from '../components/ticket/TicketRepos.vue'
+import BranchName from '../components/ticket/BranchName.vue'
 import { filePath, filesByRepo, isMultiRepo, ticketRepos } from '../components/repos/repoSet'
 import ProgressTrack from '../components/ticket/ProgressTrack.vue'
 import PullCard from '../components/ticket/PullCard.vue'
@@ -521,6 +522,8 @@ watch(key, () => {
   feedbackShots.value = []
 })
 const branch = computed(() => tk.value?.branch || `agnts/${key.value}`)
+// The primary repository's branch can be renamed until it is pushed.
+const canRenameBranch = computed(() => !!tk.value?.repos?.[0]?.canRenameBranch)
 const reviewSub = computed(() => {
   if (isTask.value && tk.value?.afterApprove === 'main') return t('ticket.reviewSubMain')
   if (isTask.value) return t('ticket.reviewSubPr', { branch: branch.value })
@@ -788,7 +791,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
                   </div>
                   <div><dt>{{ t('ticket.factChanged') }}</dt><dd>{{ t('ticket.changedValue', { n: totals.n, add: totals.add, del: totals.del }) }}</dd></div>
                   <div><dt>{{ t('ticket.factTurns') }}</dt><dd>{{ tk.turns }}</dd></div>
-                  <div><dt>{{ t('ticket.kvBranch') }}</dt><dd>{{ branch }}</dd></div>
+                  <div v-if="!multi"><dt>{{ t('ticket.kvBranch') }}</dt><dd><BranchName :ticket-key="tk.key" :branch="branch" :can-rename="canRenameBranch" /></dd></div>
                 </dl>
               </div>
               <div v-if="result?.summary" class="sec">
@@ -1105,7 +1108,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             <template v-if="tk.createdBy"><dt /><dd class="hint">{{ t('queue.createdBy', { name: tk.createdBy }) }}</dd></template>
             <template v-if="isTask && !report"><dt>{{ t('ticket.kvAfter') }}</dt><dd>{{ tk.afterApprove === 'main' ? t('ticket.afterMain') : t('ticket.afterPr') }}</dd></template>
             <dt>{{ t('ticket.kvPriority') }}</dt><dd>{{ tk.priority }}</dd>
-            <template v-if="!report && !pull && !multi"><dt>{{ t('ticket.kvBranch') }}</dt><dd>{{ branch }}</dd></template>
+            <template v-if="!report && !pull && !multi"><dt>{{ t('ticket.kvBranch') }}</dt><dd><BranchName :ticket-key="tk.key" :branch="branch" :can-rename="canRenameBranch" /></dd></template>
             <template v-if="tk.assignees?.length"><dt>{{ t('ticket.kvAssignees') }}</dt><dd>{{ tk.assignees.join(', ') }}</dd></template>
             <dt>{{ t('ticket.kvRevision') }}</dt><dd>{{ tk.revision }}</dd>
             <template v-if="tk.ciFixes && !multi"><dt>{{ t('ticket.kvCi') }}</dt><dd><span class="badge b-warn">{{ t('ticket.ciFixes', { n: tk.ciFixes }) }}</span></dd></template>

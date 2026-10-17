@@ -45,7 +45,7 @@
     "commits": "Commits and PR",
     "commitsSub": "Who commits appear from, and how pull requests open",
     "authorName": "Author name",
-    "authorNameHelp": "Commits are made as you",
+    "authorNameHelp": "Leave empty to commit as each ticket's owner, with the name and email of their account",
     "authorEmail": "Author email",
     "authorEmailHelp": "Must match your GitHub account to show as yours",
     "coAuthor": "Add a Co-authored-by: agnts line",

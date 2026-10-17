@@ -283,6 +283,16 @@ func (f *fakeTickets) StartOver(_ context.Context, key string, o domain.Origin) 
 	return f.ticket(key, domain.StateNew)
 }
 
+func (f *fakeTickets) RenameBranch(_ context.Context, key string, repoID int64, name string, o domain.Origin) (domain.Ticket, error) {
+	f.lastOrigin = o
+	if name == "taken" {
+		return domain.Ticket{}, fmt.Errorf("%w: the branch taken already exists on the git host", domain.ErrConflict)
+	}
+	t, err := f.ticket(key, domain.StateWaitingForReview)
+	t.Branch = name
+	return t, err
+}
+
 func (f *fakeTickets) Start(_ context.Context, key string, o domain.Origin) (domain.Ticket, error) {
 	f.lastOrigin = o
 	return f.ticket(key, domain.StateNew)
@@ -461,6 +471,9 @@ func TestTicketEndpoints(t *testing.T) {
 		{"POST", "/api/tickets/PAY-1/continue", `{"note":"keep the old API","attachments":[7]}`, 200, `"state":"waiting_for_review"`},
 		{"POST", "/api/tickets/PAY-1/continue", `{"reason":"x"}`, 400, `unknown field`},
 		{"POST", "/api/tickets/PAY-1/start-over", "", 200, `"state":"new"`},
+		{"PUT", "/api/tickets/PAY-1/branch", `{"branch":"feature/PAY-1-login"}`, 200, `"branch":"feature/PAY-1-login"`},
+		{"PUT", "/api/tickets/PAY-1/branch", `{"branch":"taken","repoId":3}`, 409, `already exists on the git host`},
+		{"PUT", "/api/tickets/PAY-1/branch", `{"name":"x"}`, 400, `unknown field`},
 		{"POST", "/api/tickets/PAY-1/retry", "", 200, `"state":"new"`},
 		{"POST", "/api/tickets/PAY-1/retry", `{"note":"skip the symlink","attachments":[9,9]}`, 200, `"state":"new"`},
 		{"GET", "/api/tickets/PAY-1", "", 200, `"multiple":true`},

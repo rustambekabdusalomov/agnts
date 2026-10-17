@@ -314,6 +314,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tickets/{key}/branch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Rename the ticket's branch before agnts pushes it
+         * @description Only a branch that was never pushed (the repository's canRenameBranch), while the ticket waits for review or
+         *     stopped on an error. The pull request opens from the new name, and later runs keep it. 409 when the name is
+         *     taken, in agnts or on the git host.
+         */
+        put: operations["renameTicketBranch"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tickets/{key}/retry": {
         parameters: {
             query?: never;
@@ -5234,6 +5258,8 @@ export interface components {
             closedAt?: string;
             /** @description Why its last push failed; a retry pushes it again */
             pushError?: string;
+            /** @description Its branch was never pushed and can still be renamed (ticket detail only) */
+            canRenameBranch?: boolean;
             /** @description Files its change touches */
             files: number;
             /** @description The repository is archived */
@@ -7867,6 +7893,36 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    renameTicketBranch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The new name, as git takes it (no spaces, no .. or //) */
+                    branch: string;
+                    /**
+                     * Format: int64
+                     * @description Which repository of the ticket; absent is the primary
+                     */
+                    repoId?: number;
+                };
+            };
+        };
         responses: {
             200: components["responses"]["TicketOK"];
             400: components["responses"]["BadRequest"];

@@ -216,6 +216,7 @@ doc/RelationInput.md
 doc/RelationType.md
 doc/Relations.md
 doc/RemoteRepository.md
+doc/RenameTicketBranchRequest.md
 doc/ReplayReport.md
 doc/ReplayResult.md
 doc/ReplayVersion.md
@@ -595,6 +596,7 @@ lib/src/model/relation_input.dart
 lib/src/model/relation_type.dart
 lib/src/model/relations.dart
 lib/src/model/remote_repository.dart
+lib/src/model/rename_ticket_branch_request.dart
 lib/src/model/replay_report.dart
 lib/src/model/replay_result.dart
 lib/src/model/replay_version.dart
@@ -947,6 +949,7 @@ test/relation_test.dart
 test/relation_type_test.dart
 test/relations_test.dart
 test/remote_repository_test.dart
+test/rename_ticket_branch_request_test.dart
 test/replay_report_test.dart
 test/replay_result_test.dart
 test/replay_version_test.dart

@@ -31,6 +31,7 @@ Method | HTTP request | Description
 [**markTicketMerged**](TicketsApi.md#markticketmerged) | **POST** /tickets/{key}/merged | Record that a done ticket&#39;s pull request was merged
 [**previewTicket**](TicketsApi.md#previewticket) | **POST** /tickets/{key}/preview | Queue a preview (screenshots of the running app) of a ticket waiting for review, again if one already ran
 [**rejectTicket**](TicketsApi.md#rejectticket) | **POST** /tickets/{key}/reject | Stop work on the ticket for good
+[**renameTicketBranch**](TicketsApi.md#renameticketbranch) | **PUT** /tickets/{key}/branch | Rename the ticket&#39;s branch before agnts pushes it
 [**replayTicket**](TicketsApi.md#replayticket) | **POST** /tickets/{key}/replay | Re-run a done code or test ticket with today&#39;s agnts, from the commit it started from, to compare the two (Analytics → Replay evaluation). The replay is a new local task that is never pushed.
 [**requestChanges**](TicketsApi.md#requestchanges) | **POST** /tickets/{key}/request-changes | Send the ticket back to coding with feedback
 [**restartWithUpdate**](TicketsApi.md#restartwithupdate) | **POST** /tickets/{key}/restart-update | Start the ticket over from the newer version of its issue; the work so far is dropped
@@ -1072,6 +1073,55 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **key** | **String**|  | 
  **rejectTicketRequest** | [**RejectTicketRequest**](RejectTicketRequest.md)|  | [optional] 
+
+### Return type
+
+[**Ticket**](Ticket.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **renameTicketBranch**
+> Ticket renameTicketBranch(key, renameTicketBranchRequest)
+
+Rename the ticket's branch before agnts pushes it
+
+Only a branch that was never pushed (the repository's canRenameBranch), while the ticket waits for review or stopped on an error. The pull request opens from the new name, and later runs keep it. 409 when the name is taken, in agnts or on the git host. 
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getTicketsApi();
+final String key = key_example; // String | 
+final RenameTicketBranchRequest renameTicketBranchRequest = ; // RenameTicketBranchRequest | 
+
+try {
+    final response = api.renameTicketBranch(key, renameTicketBranchRequest);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling TicketsApi->renameTicketBranch: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **key** | **String**|  | 
+ **renameTicketBranchRequest** | [**RenameTicketBranchRequest**](RenameTicketBranchRequest.md)|  | 
 
 ### Return type
 

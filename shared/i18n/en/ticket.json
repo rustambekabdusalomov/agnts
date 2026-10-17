@@ -136,6 +136,8 @@
     "kvAfter": "After approval",
     "kvPriority": "Priority",
     "kvBranch": "Branch",
+    "branchRename": "Rename",
+    "branchRenameHint": "The pull request opens from this name. Letters, digits, - _ . and /; no spaces.",
     "kvRevision": "Revision",
     "kvTurns": "Turns used",
     "kvCodingModel": "Coding model",

@@ -182,6 +182,7 @@ import 'package:agnts_api/src/model/relation.dart';
 import 'package:agnts_api/src/model/relation_input.dart';
 import 'package:agnts_api/src/model/relations.dart';
 import 'package:agnts_api/src/model/remote_repository.dart';
+import 'package:agnts_api/src/model/rename_ticket_branch_request.dart';
 import 'package:agnts_api/src/model/replay_report.dart';
 import 'package:agnts_api/src/model/replay_result.dart';
 import 'package:agnts_api/src/model/replay_version.dart';
@@ -729,6 +730,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return Relations.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RemoteRepository':
           return RemoteRepository.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RenameTicketBranchRequest':
+          return RenameTicketBranchRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ReplayReport':
           return ReplayReport.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ReplayResult':

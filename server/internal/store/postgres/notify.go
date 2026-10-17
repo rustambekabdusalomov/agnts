@@ -55,23 +55,31 @@ func (s *Agent) Devices(ctx context.Context, ws int64) ([]Device, error) {
 	return out, rows.Err()
 }
 
-// OwnerDevices returns whose ticket key is in workspace ws and that
-// person's devices. The owner is the ticket's member, else its creator,
-// else the workspace's default member, else its owner (who a run is
-// charged to as well). owner is 0 for a ticket that is gone; someone who
-// has left the workspace has no devices here.
-func (s *Agent) OwnerDevices(ctx context.Context, ws int64, key string) (int64, []Device, error) {
+// TicketOwner returns whose ticket key is in workspace ws: its member,
+// else its creator, else the workspace's default member, else its owner
+// (who a run is charged to as well). It is 0 for a ticket that is gone.
+func (s *Agent) TicketOwner(ctx context.Context, ws int64, key string) (int64, error) {
 	var owner *int64
 	err := s.db.QueryRow(ctx, `SELECT COALESCE(t.member_id, t.created_by, w.default_member_id, w.owner_id)
 		FROM tickets t JOIN workspaces w ON w.id = t.workspace_id WHERE t.workspace_id = $1 AND t.key = $2`, ws, key).Scan(&owner)
 	if errors.Is(err, pgx.ErrNoRows) || err == nil && owner == nil {
-		return 0, nil, nil
+		return 0, nil
 	}
 	if err != nil {
+		return 0, err
+	}
+	return *owner, nil
+}
+
+// OwnerDevices returns the owner of ticket key (TicketOwner) and their
+// devices. Someone who has left the workspace has no devices here.
+func (s *Agent) OwnerDevices(ctx context.Context, ws int64, key string) (int64, []Device, error) {
+	owner, err := s.TicketOwner(ctx, ws, key)
+	if owner == 0 || err != nil {
 		return 0, nil, err
 	}
 	rows, err := s.db.Query(ctx, `SELECT d.id, d.user_id, d.platform, d.fcm_token, d.app_version, d.last_seen FROM devices d
-		JOIN memberships m ON m.user_id = d.user_id AND m.workspace_id = $1 WHERE d.user_id = $2 ORDER BY d.id`, ws, *owner)
+		JOIN memberships m ON m.user_id = d.user_id AND m.workspace_id = $1 WHERE d.user_id = $2 ORDER BY d.id`, ws, owner)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -84,7 +92,7 @@ func (s *Agent) OwnerDevices(ctx context.Context, ws int64, key string) (int64, 
 		}
 		out = append(out, d)
 	}
-	return *owner, out, rows.Err()
+	return owner, out, rows.Err()
 }
 
 // PendingAction is a write waiting for confirmation (MCP and Telegram).

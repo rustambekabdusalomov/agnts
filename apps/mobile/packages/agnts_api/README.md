@@ -276,6 +276,7 @@ Class | Method | HTTP request | Description
 [*TicketsApi*](doc/TicketsApi.md) | [**markTicketMerged**](doc/TicketsApi.md#markticketmerged) | **POST** /tickets/{key}/merged | Record that a done ticket&#39;s pull request was merged
 [*TicketsApi*](doc/TicketsApi.md) | [**previewTicket**](doc/TicketsApi.md#previewticket) | **POST** /tickets/{key}/preview | Queue a preview (screenshots of the running app) of a ticket waiting for review, again if one already ran
 [*TicketsApi*](doc/TicketsApi.md) | [**rejectTicket**](doc/TicketsApi.md#rejectticket) | **POST** /tickets/{key}/reject | Stop work on the ticket for good
+[*TicketsApi*](doc/TicketsApi.md) | [**renameTicketBranch**](doc/TicketsApi.md#renameticketbranch) | **PUT** /tickets/{key}/branch | Rename the ticket&#39;s branch before agnts pushes it
 [*TicketsApi*](doc/TicketsApi.md) | [**replayTicket**](doc/TicketsApi.md#replayticket) | **POST** /tickets/{key}/replay | Re-run a done code or test ticket with today&#39;s agnts, from the commit it started from, to compare the two (Analytics → Replay evaluation). The replay is a new local task that is never pushed.
 [*TicketsApi*](doc/TicketsApi.md) | [**requestChanges**](doc/TicketsApi.md#requestchanges) | **POST** /tickets/{key}/request-changes | Send the ticket back to coding with feedback
 [*TicketsApi*](doc/TicketsApi.md) | [**restartWithUpdate**](doc/TicketsApi.md#restartwithupdate) | **POST** /tickets/{key}/restart-update | Start the ticket over from the newer version of its issue; the work so far is dropped
@@ -512,6 +513,7 @@ Class | Method | HTTP request | Description
  - [RelationType](doc/RelationType.md)
  - [Relations](doc/Relations.md)
  - [RemoteRepository](doc/RemoteRepository.md)
+ - [RenameTicketBranchRequest](doc/RenameTicketBranchRequest.md)
  - [ReplayReport](doc/ReplayReport.md)
  - [ReplayResult](doc/ReplayResult.md)
  - [ReplayVersion](doc/ReplayVersion.md)

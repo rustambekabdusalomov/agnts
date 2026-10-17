@@ -1288,7 +1288,8 @@ func (o *Orchestrator) commitRepos(ctx context.Context, s domain.Settings, ws Wo
 		if err != nil {
 			return nil, nil, nil, fmt.Errorf("export workspace: %w", err)
 		}
-		sha, files, dropped, err := o.git.Commit(ctx, r.Repository, r.Branch, tree, commitMessage(t, r.CommitTemplate, info, s.Git))
+		// The ticket names the author when Settings has none: its owner.
+		sha, files, dropped, err := o.git.Commit(domain.WithTicket(ctx, t.Key), r.Repository, r.Branch, tree, commitMessage(t, r.CommitTemplate, info, s.Git))
 		_ = tree.Close()
 		if err != nil {
 			if multi {

@@ -1,4 +1,6 @@
+import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
 import { mount } from '@vue/test-utils'
+import { createPinia } from 'pinia'
 import { describe, expect, it } from 'vitest'
 import type { Ticket, TicketRepoState } from '../../api/types'
 import { i18n } from '../../i18n'
@@ -17,7 +19,7 @@ const ticket = (over: Partial<Ticket> = {}): Ticket => ({
   ...over,
 })
 const setup = (t: Ticket, canRetry = true) =>
-  mount(TicketRepos, { props: { ticket: t, canRetry }, global: { plugins: [i18n], stubs: { RouterLink: { template: '<a><slot /></a>' } } } })
+  mount(TicketRepos, { props: { ticket: t, canRetry }, global: { plugins: [i18n, createPinia(), [VueQueryPlugin, { queryClient: new QueryClient() }]], stubs: { RouterLink: { template: '<a><slot /></a>' } } } })
 
 describe('TicketRepos', () => {
   it('lists each repository with its role, state, pull request and CI fixes', () => {
@@ -45,5 +47,15 @@ describe('TicketRepos', () => {
   it('says when only some pull requests are merged', () => {
     expect(setup(ticket({ partlyMerged: true })).text()).toContain('Partly merged')
     expect(setup(ticket()).text()).not.toContain('Partly merged')
+  })
+
+  it('offers a rename only for a branch not pushed yet', async () => {
+    const t = ticket()
+    t.repos![1].canRenameBranch = true
+    const [api, web] = setup(t).findAll('.tr-item')
+    expect(api.find('.link-btn').exists()).toBe(false)
+    await web.find('.link-btn').trigger('click')
+    expect((web.find('input').element as HTMLInputElement).value).toBe('agnts/SHOP-3')
+    expect(web.text()).toContain('The pull request opens from this name')
   })
 })

@@ -46,6 +46,8 @@ class TicketRepoState {
 
      this.pushError,
 
+     this.canRenameBranch,
+
     required  this.files,
 
      this.archived,
@@ -212,6 +214,19 @@ class TicketRepoState {
 
 
 
+      /// Its branch was never pushed and can still be renamed (ticket detail only)
+  @JsonKey(
+    
+    name: r'canRenameBranch',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? canRenameBranch;
+
+
+
       /// Files its change touches
   @JsonKey(
     
@@ -255,6 +270,7 @@ class TicketRepoState {
       other.mergedAt == mergedAt &&
       other.closedAt == closedAt &&
       other.pushError == pushError &&
+      other.canRenameBranch == canRenameBranch &&
       other.files == files &&
       other.archived == archived;
 
@@ -273,6 +289,7 @@ class TicketRepoState {
         mergedAt.hashCode +
         closedAt.hashCode +
         pushError.hashCode +
+        canRenameBranch.hashCode +
         files.hashCode +
         archived.hashCode;
 

@@ -9968,7 +9968,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get settingsAuthorName => 'Muallif ismi';
 
   @override
-  String get settingsAuthorNameHelp => 'Commitlar sizning nomingizdan qilinadi';
+  String get settingsAuthorNameHelp => 'Boʻsh qoldirsangiz, commitlar tiket egasi nomidan, uning hisobidagi ism va email bilan qilinadi';
 
   @override
   String get settingsAuthorEmail => 'Muallif emaili';
@@ -11438,6 +11438,12 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get ticketKvBranch => 'Branch';
+
+  @override
+  String get ticketBranchRename => 'Nomini oʻzgartirish';
+
+  @override
+  String get ticketBranchRenameHint => 'Pull request shu nomdagi branchdan ochiladi. Harflar, raqamlar, - _ . va /; boʻshliqsiz.';
 
   @override
   String get ticketKvRevision => 'Reviziya';

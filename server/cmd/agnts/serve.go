@@ -5,6 +5,7 @@ import (
 	githttp "github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
+	"cmp"
 	"context"
 	"errors"
 	"fmt"
@@ -427,16 +428,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 
 	repos := gitrepo.New(filepath.Join(cfg.DataDir, "repos"),
 		func(ctx context.Context, provider string) (string, error) { return a.integrations.Token(ctx, provider) },
-		func(ctx context.Context) (gitrepo.Author, error) {
-			s, err := a.settings.Get(ctx)
-			if err != nil {
-				return gitrepo.Author{}, err
-			}
-			if s.Git.AuthorName == "" || s.Git.AuthorEmail == "" {
-				return gitrepo.Author{}, errors.New("set the commit author name and email in Settings so agnts can commit as you")
-			}
-			return gitrepo.Author{Name: s.Git.AuthorName, Email: s.Git.AuthorEmail}, nil
-		})
+		a.commitAuthor)
 	homes := gitrepo.NewHomes(filepath.Join(cfg.DataDir, "sessions"))
 	a.git, a.homes = repos, homes
 	a.shots = gitrepo.NewShots(filepath.Join(cfg.DataDir, "previews"))
@@ -538,6 +530,52 @@ func defaultSettings(cfg config.Config) domain.Settings {
 	s.Parallel = min(max(cfg.Parallel, 1), 3)
 	s.Git.AuthorName, s.Git.AuthorEmail = cfg.GitName, cfg.GitEmail
 	return s
+}
+
+// commitAuthor is who agnts commits as: the author set in Settings, else
+// the owner of the ticket being committed (whose account its name and
+// email are), so a ticket never stops at the commit for want of one.
+func (a *agent) commitAuthor(ctx context.Context) (gitrepo.Author, error) {
+	s, err := a.settings.Get(ctx)
+	if err != nil {
+		return gitrepo.Author{}, err
+	}
+	if s.Git.AuthorName != "" && s.Git.AuthorEmail != "" {
+		return gitrepo.Author{Name: s.Git.AuthorName, Email: s.Git.AuthorEmail}, nil
+	}
+	missing := errors.New("set the commit author name and email in Settings → Commits and PR so agnts can commit as you")
+	key := domain.TicketOf(ctx)
+	if key == "" {
+		return gitrepo.Author{}, missing
+	}
+	owner, err := a.store.TicketOwner(ctx, domain.WorkspaceOf(ctx), key)
+	if err != nil {
+		return gitrepo.Author{}, err
+	}
+	if owner == 0 {
+		return gitrepo.Author{}, missing
+	}
+	u, err := a.users.ByID(ctx, owner)
+	if err != nil {
+		return gitrepo.Author{}, err
+	}
+	return ownerAuthor(u, s.Git, missing)
+}
+
+// ownerAuthor fills what the settings leave empty from u's account. A
+// name falls back to the username; an email cannot be made up.
+func ownerAuthor(u domain.User, g domain.GitSettings, missing error) (gitrepo.Author, error) {
+	out := gitrepo.Author{Name: g.AuthorName, Email: g.AuthorEmail}
+	if out.Name == "" {
+		out.Name = cmp.Or(strings.TrimSpace(u.DisplayName), u.Username)
+	}
+	if out.Email == "" {
+		out.Email = u.Email
+	}
+	if out.Email == "" {
+		return gitrepo.Author{}, missing
+	}
+	return out, nil
 }
 
 // jiraConfig loads the Jira connection; the secrets live in the encrypted token.

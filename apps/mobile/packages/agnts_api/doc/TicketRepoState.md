@@ -21,6 +21,7 @@ Name | Type | Description | Notes
 **mergedAt** | [**DateTime**](DateTime.md) |  | [optional] 
 **closedAt** | [**DateTime**](DateTime.md) |  | [optional] 
 **pushError** | **String** | Why its last push failed; a retry pushes it again | [optional] 
+**canRenameBranch** | **bool** | Its branch was never pushed and can still be renamed (ticket detail only) | [optional] 
 **files** | **int** | Files its change touches | 
 **archived** | **bool** | The repository is archived | [optional] 
 

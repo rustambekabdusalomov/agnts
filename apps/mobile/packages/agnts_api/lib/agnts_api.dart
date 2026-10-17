@@ -233,6 +233,7 @@ export 'package:agnts_api/src/model/relation_input.dart';
 export 'package:agnts_api/src/model/relation_type.dart';
 export 'package:agnts_api/src/model/relations.dart';
 export 'package:agnts_api/src/model/remote_repository.dart';
+export 'package:agnts_api/src/model/rename_ticket_branch_request.dart';
 export 'package:agnts_api/src/model/replay_report.dart';
 export 'package:agnts_api/src/model/replay_result.dart';
 export 'package:agnts_api/src/model/replay_version.dart';

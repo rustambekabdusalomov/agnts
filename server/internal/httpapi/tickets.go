@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"slices"
 
 	"agnts/internal/domain"
 	"agnts/internal/httpapi/gen"
@@ -26,6 +27,7 @@ type Tickets interface {
 	RetryWithNote(ctx context.Context, key, note string, files []int64, origin domain.Origin) (domain.Ticket, error)
 	Continue(ctx context.Context, key, note string, files []int64, origin domain.Origin) (domain.Ticket, error)
 	StartOver(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
+	RenameBranch(ctx context.Context, key string, repoID int64, name string, origin domain.Origin) (domain.Ticket, error)
 	Start(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	Stop(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	SetModels(ctx context.Context, key string, models map[string]string, origin domain.Origin) (domain.Ticket, error)
@@ -148,6 +150,13 @@ func (s *Server) GetTicket(w http.ResponseWriter, r *http.Request, key gen.Ticke
 	if v.ContinueTo != "" {
 		to, startOver := gen.TicketState(v.ContinueTo), v.CanStartOver
 		d.Ticket.ContinueTo, d.Ticket.CanStartOver = &to, &startOver
+	}
+	if d.Ticket.Repos != nil {
+		for i, r := range *d.Ticket.Repos {
+			if slices.Contains(v.RenameBranch, r.RepoId) {
+				(*d.Ticket.Repos)[i].CanRenameBranch = ptr(true)
+			}
+		}
 	}
 	d.EffectiveModels = &em
 	for i, q := range v.Questions {
@@ -356,6 +365,22 @@ func (s *Server) ContinueTicket(w http.ResponseWriter, r *http.Request, key gen.
 func (s *Server) StartTicketOver(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
 	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
 		return s.opt.Tickets.StartOver(ctx, key, origin(r))
+	})
+}
+
+// RenameTicketBranch implements gen.ServerInterface.
+func (s *Server) RenameTicketBranch(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	var req gen.RenameTicketBranchJSONRequestBody
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	var repoID int64
+	if req.RepoId != nil {
+		repoID = *req.RepoId
+	}
+	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
+		return s.opt.Tickets.RenameBranch(ctx, key, repoID, req.Branch, origin(r))
 	})
 }
 

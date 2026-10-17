@@ -9975,7 +9975,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAuthorName => 'Author name';
 
   @override
-  String get settingsAuthorNameHelp => 'Commits are made as you';
+  String get settingsAuthorNameHelp => 'Leave empty to commit as each ticket\'s owner, with the name and email of their account';
 
   @override
   String get settingsAuthorEmail => 'Author email';
@@ -11447,6 +11447,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ticketKvBranch => 'Branch';
+
+  @override
+  String get ticketBranchRename => 'Rename';
+
+  @override
+  String get ticketBranchRenameHint => 'The pull request opens from this name. Letters, digits, - _ . and /; no spaces.';
 
   @override
   String get ticketKvRevision => 'Revision';

@@ -29,10 +29,12 @@ Tone repoStateTone(TicketRepoStateStateEnum s) => switch (s) {
 
 /// Every repository of a multi-repo ticket, the main one first: its role,
 /// branch, pull request, state and why a push failed. Nothing for a
-/// ticket with one repository.
+/// ticket with one repository. [onRename] renames a branch not pushed yet
+/// (offered where the repository's canRenameBranch is set).
 class TicketRepos extends StatelessWidget {
-  const TicketRepos(this.ticket, {super.key});
+  const TicketRepos(this.ticket, {super.key, this.onRename});
   final Ticket ticket;
+  final void Function(TicketRepoState)? onRename;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +49,7 @@ class TicketRepos extends StatelessWidget {
           child: Text(l.mgroupsRepos, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.ink3)),
         ),
         ListGroup(children: [
-          for (final (i, r) in ticket.repos!.indexed) _RepoRow(repo: r, primary: i == 0),
+          for (final (i, r) in ticket.repos!.indexed) _RepoRow(repo: r, primary: i == 0, onRename: r.canRenameBranch == true ? onRename : null),
         ]),
       ]),
     );
@@ -55,9 +57,10 @@ class TicketRepos extends StatelessWidget {
 }
 
 class _RepoRow extends StatelessWidget {
-  const _RepoRow({required this.repo, required this.primary});
+  const _RepoRow({required this.repo, required this.primary, this.onRename});
   final TicketRepoState repo;
   final bool primary;
+  final void Function(TicketRepoState)? onRename;
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +92,10 @@ class _RepoRow extends StatelessWidget {
         if (r.branch.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 4),
-            child: Text('${l.ticketBranch}: ${r.branch}', style: mono),
+            child: Row(children: [
+              Expanded(child: Text('${l.ticketBranch}: ${r.branch}', style: mono)),
+              if (onRename != null) TextButton(onPressed: () => onRename!(r), child: Text(l.ticketBranchRename)),
+            ]),
           ),
         if (r.prUrl.isNotEmpty)
           Row(children: [

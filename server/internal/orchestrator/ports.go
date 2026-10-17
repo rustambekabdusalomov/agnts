@@ -517,6 +517,13 @@ type BranchRestorer interface {
 	RestoreBranch(ctx context.Context, repo domain.Repository, branch, sha string) error
 }
 
+// BranchRenamer renames a ticket's local branch before it is pushed;
+// domain.ErrConflict means the new name is taken (in agnts or on the git
+// host), domain.ErrNotFound that the branch is gone. A Git may implement it.
+type BranchRenamer interface {
+	RenameBranch(ctx context.Context, repo domain.Repository, from, to string) error
+}
+
 // PR is a pull request to open.
 type PR struct {
 	Branch string

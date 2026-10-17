@@ -1,6 +1,9 @@
 package domain
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestBranchName(t *testing.T) {
 	v := BranchVars{Prefix: "agnts/", Type: KindCode.BranchType(), Key: "PAY-42", Title: "Add login page (OAuth)!", User: "Jane.Doe"}
@@ -49,6 +52,19 @@ func TestValidateBranchTemplate(t *testing.T) {
 	}
 	for _, bad := range []string{"{type}/{slug}", "{key}-{title}", "{key", "key}", "{key}}"} {
 		if err := ValidateBranchTemplate(bad); err == nil {
+			t.Errorf("%q: want an error", bad)
+		}
+	}
+}
+
+func TestValidateBranchName(t *testing.T) {
+	for _, ok := range []string{"feature/PAY-42-login", "fix_login", "release/v1.2", "agnts/PAY-1"} {
+		if err := ValidateBranchName(ok); err != nil {
+			t.Errorf("%q: %v", ok, err)
+		}
+	}
+	for _, bad := range []string{"", "has space", "a//b", "a..b", "-x", "x.", "x.lock", "HEAD", "refs/heads/x", "ветка", "a~b", "a:b", strings.Repeat("a", BranchNameMax+1)} {
+		if err := ValidateBranchName(bad); err == nil {
 			t.Errorf("%q: want an error", bad)
 		}
 	}

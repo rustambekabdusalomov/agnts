@@ -10449,7 +10449,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsAuthorName => 'Имя автора';
 
   @override
-  String get settingsAuthorNameHelp => 'Коммиты делаются от вашего имени';
+  String get settingsAuthorNameHelp => 'Оставьте пустым, чтобы коммитить от имени владельца тикета, с именем и email его аккаунта';
 
   @override
   String get settingsAuthorEmail => 'Email автора';
@@ -11980,6 +11980,12 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get ticketKvBranch => 'Ветка';
+
+  @override
+  String get ticketBranchRename => 'Переименовать';
+
+  @override
+  String get ticketBranchRenameHint => 'Pull request откроется из этой ветки. Буквы, цифры, - _ . и /; без пробелов.';
 
   @override
   String get ticketKvRevision => 'Ревизия';

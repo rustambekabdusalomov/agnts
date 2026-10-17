@@ -177,6 +177,15 @@ void main() {
       // TODO
     });
 
+    // Rename the ticket's branch before agnts pushes it
+    //
+    // Only a branch that was never pushed (the repository's canRenameBranch), while the ticket waits for review or stopped on an error. The pull request opens from the new name, and later runs keep it. 409 when the name is taken, in agnts or on the git host. 
+    //
+    //Future<Ticket> renameTicketBranch(String key, RenameTicketBranchRequest renameTicketBranchRequest) async
+    test('test renameTicketBranch', () async {
+      // TODO
+    });
+
     // Re-run a done code or test ticket with today's agnts, from the commit it started from, to compare the two (Analytics → Replay evaluation). The replay is a new local task that is never pushed.
     //
     //Future<Ticket> replayTicket(String key) async

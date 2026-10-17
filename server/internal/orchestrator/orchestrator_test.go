@@ -183,6 +183,8 @@ type fakeGit struct {
 	// makes them report the commits gone.
 	restored     []string
 	branchesGone bool
+	// renamed records RenameBranch calls as from->to.
+	renamed []string
 }
 
 func (g *fakeGit) Prepare(context.Context, domain.Repository, string) error { return nil }

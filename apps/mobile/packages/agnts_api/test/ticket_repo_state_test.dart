@@ -77,6 +77,12 @@ void main() {
       // TODO
     });
 
+    // Its branch was never pushed and can still be renamed (ticket detail only)
+    // bool canRenameBranch
+    test('to test the property `canRenameBranch`', () async {
+      // TODO
+    });
+
     // Files its change touches
     // int files
     test('to test the property `files`', () async {

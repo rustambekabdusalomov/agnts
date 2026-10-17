@@ -136,6 +136,8 @@
     "kvAfter": "После одобрения",
     "kvPriority": "Приоритет",
     "kvBranch": "Ветка",
+    "branchRename": "Переименовать",
+    "branchRenameHint": "Pull request откроется из этой ветки. Буквы, цифры, - _ . и /; без пробелов.",
     "kvRevision": "Ревизия",
     "kvTurns": "Использовано шагов",
     "kvCodingModel": "Модель разработки",

@@ -245,3 +245,17 @@ func HookOf(ctx context.Context) string {
 	id, _ := ctx.Value(hookKey{}).(string)
 	return id
 }
+
+type ticketKey struct{}
+
+// WithTicket returns ctx working on ticket key, for what needs to know
+// whose work it is (the author of its commits).
+func WithTicket(ctx context.Context, key string) context.Context {
+	return context.WithValue(ctx, ticketKey{}, key)
+}
+
+// TicketOf returns the ticket ctx works on, "" when none.
+func TicketOf(ctx context.Context) string {
+	key, _ := ctx.Value(ticketKey{}).(string)
+	return key
+}

@@ -416,6 +416,89 @@ func (o *Orchestrator) Approve(ctx context.Context, key string, assignees []stri
 	return t, err
 }
 
+// RenameBranch renames the ticket's branch in a repository (0: the
+// primary) before agnts pushes it, so the pull request opens from the name
+// the team wants. Only a branch that was never pushed can be renamed, while
+// the ticket waits for review or stopped on an error; later runs keep the
+// new name.
+func (o *Orchestrator) RenameBranch(ctx context.Context, key string, repoID int64, name string, origin domain.Origin) (domain.Ticket, error) {
+	name = strings.TrimSpace(name)
+	if err := domain.ValidateBranchName(name); err != nil {
+		return domain.Ticket{}, invalid("%s", err)
+	}
+	br, ok := o.git.(BranchRenamer)
+	if !ok {
+		return domain.Ticket{}, invalid("this server cannot rename branches")
+	}
+	cur, err := o.store.TicketByKey(ctx, key)
+	if err != nil {
+		return cur, err
+	}
+	if repoID == 0 && cur.RepoID != nil {
+		repoID = *cur.RepoID
+	}
+	row, ok := cur.RepoState(repoID)
+	if !ok {
+		return cur, invalid("%s does not work in that repository", key)
+	}
+	if err := cannotRename(cur, row); err != nil {
+		return cur, err
+	}
+	if name == row.Branch {
+		return cur, nil
+	}
+	repo, err := o.store.RepositoryByID(ctx, repoID)
+	if err != nil {
+		return cur, err
+	}
+	if repo.ArchivedAt != nil {
+		return cur, invalid("the repository %s is archived", repo.Name)
+	}
+	switch err := br.RenameBranch(ctx, repo, row.Branch, name); {
+	case errors.Is(err, domain.ErrNotFound):
+		return cur, invalid("the branch %s is gone from agnts's copy of the repository", row.Branch)
+	case err != nil:
+		return cur, err
+	}
+	msg := "branch renamed from " + row.Branch + " to " + name
+	if len(cur.Repos) > 1 {
+		msg = repo.Name + ": " + msg
+	}
+	t, err := o.store.UpdateTicket(ctx, key, &domain.Event{TicketKey: key, Type: domain.EventTicketUpdated, Origin: origin, Message: msg,
+		Data: map[string]any{"from": row.Branch, "branch": name, "repoId": repoID}}, func(x *domain.Ticket) {
+		x.UpdateRepo(repoID, func(r *domain.TicketRepo) { r.Branch = name })
+	})
+	if err != nil {
+		// Put the ref back so the ticket's saved name still points at the work.
+		if back := br.RenameBranch(context.WithoutCancel(ctx), repo, name, row.Branch); back != nil {
+			o.log.Error("rename branch back", "ticket", key, "repo", repo.Name, "branch", name, "err", back)
+		}
+		return cur, err
+	}
+	return t, nil
+}
+
+// cannotRename says why the ticket's branch in repository row cannot be
+// renamed, if it cannot: it was pushed (the pull request has its name),
+// there are no commits yet, or the ticket is not between review and push.
+func cannotRename(t domain.Ticket, r domain.TicketRepo) error {
+	switch {
+	case t.Kind == domain.KindReview:
+		return invalid("%s reviews a pull request: its branch belongs to the pull request", t.Key)
+	case t.ReplayOf != "" || t.Kind.Report():
+		return invalid("%s is never pushed", t.Key)
+	case t.AfterApprove == "main" && t.Source == domain.SourceLocal:
+		return invalid("%s is pushed straight to the default branch", t.Key)
+	case t.State != domain.StateWaitingForReview && t.State != domain.StateFailed && t.State != domain.StateRateLimited:
+		return invalid("rename the branch while %s waits for your review", t.Key)
+	case r.PRNumber != nil || r.State == domain.RepoPushed || r.State == domain.RepoMerged || r.State == domain.RepoDropped:
+		return invalid("%s was already pushed: the pull request keeps its name", r.Branch)
+	case r.Branch == "" || r.HeadSHA == "" || r.State == domain.RepoUnchanged:
+		return invalid("%s has no commits in this repository yet", t.Key)
+	}
+	return nil
+}
+
 // dropSideRuns forgets the code review and preview of a ticket leaving
 // review; it reports whether one of them may be running.
 func dropSideRuns(x *domain.Ticket) bool {
@@ -1282,6 +1365,9 @@ type TicketView struct {
 	// ("" when it cannot continue); CanStartOver says Start over is offered.
 	ContinueTo   domain.TicketState
 	CanStartOver bool
+	// RenameBranch are the repositories whose branch can still be renamed
+	// before it is pushed (see RenameBranch).
+	RenameBranch []int64
 }
 
 // TicketRow is a ticket for lists, with when it entered its state.
@@ -1434,6 +1520,13 @@ func (o *Orchestrator) View(ctx context.Context, key string) (TicketView, error)
 	if o.canContinue(ctx, t) == nil {
 		v.ContinueTo = domain.ContinueState(v.Info.From, false)
 		v.CanStartOver = canStartOver(t)
+	}
+	if _, ok := o.git.(BranchRenamer); ok {
+		for _, id := range t.RepoIDs() {
+			if r, ok := t.RepoState(id); ok && cannotRename(t, r) == nil {
+				v.RenameBranch = append(v.RenameBranch, id)
+			}
+		}
 	}
 	if v.FollowUps, err = o.followUps(ctx, t); err != nil {
 		return v, err

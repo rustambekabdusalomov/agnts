@@ -194,6 +194,44 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     _continueFiles.clear();
   }
 
+  bool _canRename(TicketRepoState? r) => r?.canRenameBranch == true && ref.watch(canEditProvider);
+
+  /// Renames a branch agnts has not pushed yet: the pull request opens
+  /// from the new name.
+  Future<void> _renameBranch(String key, TicketRepoState r) async {
+    final l = AppLocalizations.of(context);
+    final text = TextEditingController(text: r.branch);
+    final name = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.fromLTRB(16, 0, 16, 16 + MediaQuery.of(ctx).viewInsets.bottom),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          TextField(
+            controller: text,
+            autofocus: true,
+            maxLength: 200,
+            autocorrect: false,
+            enableSuggestions: false,
+            style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 14),
+            decoration: InputDecoration(labelText: l.ticketBranch),
+            onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
+          ),
+          Text(l.ticketBranchRenameHint, style: TextStyle(fontSize: 12.5, color: Agnts.of(ctx).ink3)),
+          const SizedBox(height: 10),
+          FilledButton(onPressed: () => Navigator.pop(ctx, text.text.trim()), child: Text(l.formSave)),
+        ]),
+      ),
+    );
+    text.dispose();
+    if (name == null || name.isEmpty || name == r.branch) return;
+    await _run(() => _tickets.renameTicketBranch(
+          key: key,
+          renameTicketBranchRequest: RenameTicketBranchRequest(branch: name, repoId: r.repoId),
+        ));
+  }
+
   Future<void> _startOver(BuildContext context, String key) async {
     final l = AppLocalizations.of(context);
     if (await _confirm(l.ticketStartOverConfirm(key))) await _run(() => _tickets.startTicketOver(key: key));
@@ -348,11 +386,18 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         TicketMemberRow(t),
         AttachmentList(d.attachments.where((a) => a.purpose == AttachmentPurposeEnum.ticket).toList()),
         // A multi-repo ticket lists each repository's branch and pull request.
-        TicketRepos(t),
+        TicketRepos(t, onRename: _canRename(t.repos?.firstOrNull) ? (r) => _renameBranch(t.key, r) : null),
         if (t.branch.isNotEmpty && !isMultiRepo(t))
           Padding(
             padding: const EdgeInsets.only(top: 8),
-            child: Text('${l.ticketBranch}: ${t.branch}', style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3)),
+            child: Row(children: [
+              Expanded(child: Text('${l.ticketBranch}: ${t.branch}', style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3))),
+              if (_canRename(t.repos?.firstOrNull))
+                TextButton(
+                  onPressed: _busy ? null : () => _renameBranch(t.key, t.repos!.first),
+                  child: Text(l.ticketBranchRename),
+                ),
+            ]),
           ),
         if (t.prUrl.isNotEmpty && !isMultiRepo(t))
           Padding(

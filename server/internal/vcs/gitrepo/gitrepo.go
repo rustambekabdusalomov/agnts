@@ -63,9 +63,10 @@ type Repos struct {
 }
 
 var (
-	_ orchestrator.Git          = (*Repos)(nil)
-	_ orchestrator.DriftChecker = (*Repos)(nil)
-	_ orchestrator.TreeReader   = (*Repos)(nil)
+	_ orchestrator.Git           = (*Repos)(nil)
+	_ orchestrator.DriftChecker  = (*Repos)(nil)
+	_ orchestrator.TreeReader    = (*Repos)(nil)
+	_ orchestrator.BranchRenamer = (*Repos)(nil)
 )
 
 // New keeps clones under dir.
@@ -338,6 +339,68 @@ func (g *Repos) RestoreBranch(_ context.Context, repo domain.Repository, branch,
 		return err
 	}
 	return r.Storer.SetReference(plumbing.NewHashReference(local, h))
+}
+
+// RenameBranch renames a ticket's local branch that was never pushed, so it
+// is pushed under the new name. It fetches first and refuses (with
+// domain.ErrConflict) a name agnts or the git host already has, or one
+// that clashes with a branch as a folder (a and a/b): pushing there would
+// add the work to someone else's branch. domain.ErrNotFound means the
+// branch is gone.
+func (g *Repos) RenameBranch(ctx context.Context, repo domain.Repository, from, to string) error {
+	if from == to {
+		return nil
+	}
+	if to == repo.DefaultBranch {
+		return fmt.Errorf("%w: %s is the default branch", domain.ErrConflict, to)
+	}
+	defer g.lock(repo)()
+	r, err := git.PlainOpen(g.mirrorDir(repo))
+	if errors.Is(err, git.ErrRepositoryNotExists) {
+		return domain.ErrNotFound
+	}
+	if err != nil {
+		return err
+	}
+	auth, err := g.auth(ctx, repo)
+	if err != nil {
+		return err
+	}
+	if err := fetch(ctx, r, repo, auth, true, originRefs); err != nil {
+		return err
+	}
+	old, err := r.Reference(plumbing.NewBranchReferenceName(from), true)
+	if errors.Is(err, plumbing.ErrReferenceNotFound) {
+		return domain.ErrNotFound
+	}
+	if err != nil {
+		return err
+	}
+	refs, err := r.References()
+	if err != nil {
+		return err
+	}
+	clash := func(name string) bool {
+		return name == to || strings.HasPrefix(name, to+"/") || strings.HasPrefix(to, name+"/")
+	}
+	err = refs.ForEach(func(ref *plumbing.Reference) error {
+		switch n := ref.Name(); {
+		case n.IsBranch() && n.Short() != from && clash(n.Short()):
+			return fmt.Errorf("%w: agnts already has a branch %s", domain.ErrConflict, n.Short())
+		case n.IsRemote() && strings.HasPrefix(n.String(), "refs/remotes/origin/"):
+			if name := strings.TrimPrefix(n.String(), "refs/remotes/origin/"); name != "HEAD" && clash(name) {
+				return fmt.Errorf("%w: the branch %s already exists on the git host", domain.ErrConflict, name)
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	if err := r.Storer.SetReference(plumbing.NewHashReference(plumbing.NewBranchReferenceName(to), old.Hash())); err != nil {
+		return err
+	}
+	return r.Storer.RemoveReference(old.Name())
 }
 
 // Push sends branch to origin. Only fast-forwards: agnts never rewrites history.

@@ -3,9 +3,10 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Ticket } from '../../api/types'
 import { REPO_STATE_TONE } from '../repos/repoSet'
+import BranchName from './BranchName.vue'
 
 // A ticket's repositories, primary first: each with its role, branch, pull
-// request, state and CI fixes. A failed push names its error; a retry
+// request (a branch not pushed yet can be renamed), state and CI fixes. A failed push names its error; a retry
 // pushes only the repositories still missing.
 const props = defineProps<{ ticket: Ticket; canRetry?: boolean; busy?: boolean }>()
 const emit = defineEmits<{ retry: [] }>()
@@ -34,7 +35,7 @@ const failed = computed(() => repos.value.filter((r) => r.pushError))
           <span class="badge tr-state" :class="`b-${REPO_STATE_TONE[r.state]}`">{{ t(`groups.state_${r.state}`) }}</span>
         </div>
         <div class="tr-meta">
-          <span v-if="r.branch" class="mono">{{ r.branch }}</span>
+          <BranchName v-if="r.branch" :ticket-key="ticket.key" :branch="r.branch" :repo-id="r.repoId" :can-rename="r.canRenameBranch" />
           <a v-if="r.prUrl" :href="r.prUrl" target="_blank" rel="noopener">{{ t('groups.pr', { number: r.prNumber ?? '' }) }}</a>
           <span v-if="r.files">{{ t('groups.files', { count: r.files }) }}</span>
           <span v-if="r.ciFixes" class="badge b-warn">{{ t('ticket.ciFixes', { n: r.ciFixes }) }}</span>

@@ -709,3 +709,50 @@ func TestRestoreBranch(t *testing.T) {
 		t.Fatalf("unknown commit: %v", err)
 	}
 }
+
+func TestRenameBranch(t *testing.T) {
+	ctx := context.Background()
+	bare := upstream(t)
+	g := newRepos(t)
+	repo := domain.Repository{ID: 1, WorkspaceID: 1, Name: "demo", CloneURL: bare, DefaultBranch: "main", Provider: "github"}
+	for _, b := range []string{"agnts/PAY-1", "agnts/PAY-2"} {
+		if err := g.Prepare(ctx, repo, b); err != nil {
+			t.Fatal(err)
+		}
+	}
+	sha, _, _, err := g.Commit(ctx, repo, "agnts/PAY-1", tarOf(t, map[string]string{"README.md": "# work\n"}), "PAY-1: work")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := g.Push(ctx, repo, "agnts/PAY-2"); err != nil { // someone's branch on the host
+		t.Fatal(err)
+	}
+	for _, to := range []string{"main", "agnts/PAY-2", "agnts", "agnts/PAY-2/x"} {
+		if err := g.RenameBranch(ctx, repo, "agnts/PAY-1", to); !errors.Is(err, domain.ErrConflict) {
+			t.Errorf("rename to %s: %v, want a conflict", to, err)
+		}
+	}
+	if err := g.RenameBranch(ctx, repo, "agnts/NOPE", "feature/x"); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("missing branch: %v", err)
+	}
+	if err := g.RenameBranch(ctx, repo, "agnts/PAY-1", "feature/PAY-1-login"); err != nil {
+		t.Fatal(err)
+	}
+	r, err := git.PlainOpen(g.mirrorDir(repo))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ref, err := r.Reference(plumbing.NewBranchReferenceName("feature/PAY-1-login"), true); err != nil || ref.Hash().String() != sha {
+		t.Fatalf("renamed branch: %v %v, want %s", ref, err, sha)
+	}
+	if _, err := r.Reference(plumbing.NewBranchReferenceName("agnts/PAY-1"), true); !errors.Is(err, plumbing.ErrReferenceNotFound) {
+		t.Fatalf("old branch still there: %v", err)
+	}
+	if err := g.Push(ctx, repo, "feature/PAY-1-login"); err != nil {
+		t.Fatal(err)
+	}
+	up, _ := git.PlainOpen(bare)
+	if ref, err := up.Reference(plumbing.NewBranchReferenceName("feature/PAY-1-login"), true); err != nil || ref.Hash().String() != sha {
+		t.Fatalf("pushed under the new name: %v %v", ref, err)
+	}
+}

@@ -17760,7 +17760,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsAuthorNameHelp.
   ///
   /// In en, this message translates to:
-  /// **'Commits are made as you'**
+  /// **'Leave empty to commit as each ticket\'s owner, with the name and email of their account'**
   String get settingsAuthorNameHelp;
 
   /// No description provided for @settingsAuthorEmail.
@@ -20372,6 +20372,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Branch'**
   String get ticketKvBranch;
+
+  /// No description provided for @ticketBranchRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get ticketBranchRename;
+
+  /// No description provided for @ticketBranchRenameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The pull request opens from this name. Letters, digits, - _ . and /; no spaces.'**
+  String get ticketBranchRenameHint;
 
   /// No description provided for @ticketKvRevision.
   ///

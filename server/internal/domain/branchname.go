@@ -63,6 +63,27 @@ func ValidateBranchTemplate(tmpl string) error {
 	return nil
 }
 
+// BranchNameMax caps a branch name someone types, in bytes.
+const BranchNameMax = 200
+
+// ValidateBranchName reports what is wrong with a branch name someone
+// typed (a renamed ticket branch): empty, too long, or not a name git
+// accepts as it is. Names are not cleaned up silently: the person sees
+// the name the pull request will have.
+func ValidateBranchName(name string) error {
+	switch {
+	case name == "":
+		return fmt.Errorf("branch name is required")
+	case len(name) > BranchNameMax:
+		return fmt.Errorf("branch name is longer than %d characters", BranchNameMax)
+	case name == "HEAD" || strings.HasPrefix(name, "refs/"):
+		return fmt.Errorf("%q is not a branch name", name)
+	case cleanRef(name) != name:
+		return fmt.Errorf("%q is not a valid branch name: use letters, digits, - _ . and / between parts (no spaces, no // or .., not starting or ending with - or .)", name)
+	}
+	return nil
+}
+
 // checkPlaceholders reports braces that do not pair up and placeholders
 // not in known.
 func checkPlaceholders(tmpl string, known []string, what string) error {

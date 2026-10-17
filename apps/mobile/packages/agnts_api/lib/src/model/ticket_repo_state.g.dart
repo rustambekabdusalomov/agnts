@@ -33,6 +33,8 @@ abstract class _$TicketRepoStateCWProxy {
 
   TicketRepoState pushError(String? pushError);
 
+  TicketRepoState canRenameBranch(bool? canRenameBranch);
+
   TicketRepoState files(int files);
 
   TicketRepoState archived(bool? archived);
@@ -57,6 +59,7 @@ abstract class _$TicketRepoStateCWProxy {
     DateTime? mergedAt,
     DateTime? closedAt,
     String? pushError,
+    bool? canRenameBranch,
     int files,
     bool? archived,
   });
@@ -108,6 +111,10 @@ class _$TicketRepoStateCWProxyImpl implements _$TicketRepoStateCWProxy {
   TicketRepoState pushError(String? pushError) => this(pushError: pushError);
 
   @override
+  TicketRepoState canRenameBranch(bool? canRenameBranch) =>
+      this(canRenameBranch: canRenameBranch);
+
+  @override
   TicketRepoState files(int files) => this(files: files);
 
   @override
@@ -134,6 +141,7 @@ class _$TicketRepoStateCWProxyImpl implements _$TicketRepoStateCWProxy {
     Object? mergedAt = const $CopyWithPlaceholder(),
     Object? closedAt = const $CopyWithPlaceholder(),
     Object? pushError = const $CopyWithPlaceholder(),
+    Object? canRenameBranch = const $CopyWithPlaceholder(),
     Object? files = const $CopyWithPlaceholder(),
     Object? archived = const $CopyWithPlaceholder(),
   }) {
@@ -190,6 +198,10 @@ class _$TicketRepoStateCWProxyImpl implements _$TicketRepoStateCWProxy {
           ? _value.pushError
           // ignore: cast_nullable_to_non_nullable
           : pushError as String?,
+      canRenameBranch: canRenameBranch == const $CopyWithPlaceholder()
+          ? _value.canRenameBranch
+          // ignore: cast_nullable_to_non_nullable
+          : canRenameBranch as bool?,
       files: files == const $CopyWithPlaceholder()
           ? _value.files
           // ignore: cast_nullable_to_non_nullable
@@ -252,6 +264,7 @@ TicketRepoState _$TicketRepoStateFromJson(Map<String, dynamic> json) =>
           (v) => v == null ? null : DateTime.parse(v as String),
         ),
         pushError: $checkedConvert('pushError', (v) => v as String?),
+        canRenameBranch: $checkedConvert('canRenameBranch', (v) => v as bool?),
         files: $checkedConvert('files', (v) => (v as num).toInt()),
         archived: $checkedConvert('archived', (v) => v as bool?),
       );
@@ -273,6 +286,7 @@ Map<String, dynamic> _$TicketRepoStateToJson(TicketRepoState instance) =>
       'mergedAt': ?instance.mergedAt?.toIso8601String(),
       'closedAt': ?instance.closedAt?.toIso8601String(),
       'pushError': ?instance.pushError,
+      'canRenameBranch': ?instance.canRenameBranch,
       'files': instance.files,
       'archived': ?instance.archived,
     };
