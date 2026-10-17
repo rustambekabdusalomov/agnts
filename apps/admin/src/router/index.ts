@@ -25,6 +25,10 @@ export const router = createRouter({
     { path: '/admin/workspaces', name: 'adminWorkspaces', component: () => import('../pages/admin/AdminWorkspacesPage.vue'), meta: { admin: true, global: true } },
     { path: '/admin/users', name: 'adminUsers', component: () => import('../pages/admin/AdminUsersPage.vue'), meta: { admin: true, global: true } },
     { path: '/admin/admins', name: 'adminAdmins', component: () => import('../pages/admin/AdminAdminsPage.vue'), meta: { admin: true, global: true } },
+    // Run history: every Claude Code / Codex invocation; reading one is audited.
+    { path: '/admin/runs', name: 'adminRuns', component: () => import('../pages/admin/AdminRunsPage.vue'), meta: { admin: true, global: true } },
+    { path: '/admin/runs/:id(\\d+)', name: 'adminRun', component: () => import('../pages/admin/AdminRunPage.vue'), meta: { admin: true, global: true } },
+    { path: '/admin/audit', name: 'adminAudit', component: () => import('../pages/admin/AdminAuditPage.vue'), meta: { admin: true, global: true } },
     { path: '/admin/feedback', name: 'adminFeedback', component: () => import('../pages/admin/AdminFeedbackPage.vue'), meta: { admin: true, global: true } },
     { path: '/admin/profile', name: 'adminProfile', component: () => import('../pages/account/ProfilePage.vue'), meta: { admin: true, global: true } },
     {

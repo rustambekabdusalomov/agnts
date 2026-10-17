@@ -179,6 +179,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		Cloud:        cfg.Cloud,
 		Google:       googleSignIn(cfg, acc),
 		Feedback:     postgres.NewFeedbacks(pool),
+		RunHistory:   a.transcripts,
 		SiteURL:      cfg.SiteURL,
 		Network:      a.network,
 		Payments: map[string]http.Handler{
@@ -206,6 +207,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 	}
 
 	go purgeSessions(sys, svc, log)
+	go every(sys, 24*time.Hour, func(ctx context.Context) { pruneRunHistory(ctx, a.transcripts, log) })
 	go every(sys, 24*time.Hour, func(ctx context.Context) {
 		if err := acc.PurgeDeleted(ctx); err != nil {
 			log.Warn("purge deleted workspaces", "err", err)
@@ -300,6 +302,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 // agent holds the components wired together.
 type agent struct {
 	store        *postgres.Agent
+	transcripts  *postgres.Transcripts
 	lessons      *postgres.Lessons
 	integrations *postgres.Integrations
 	settings     *postgres.Settings
@@ -462,6 +465,8 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		SwaggerTests: postgres.NewSwaggerTests(pool, box),
 	}, log.With("component", "orchestrator"))
 	a.orch.SetSwaggerSuites(postgres.NewSwaggerSuites(pool, box))
+	a.transcripts = postgres.NewTranscripts(pool)
+	a.orch.SetRecorder(a.transcripts)
 	a.billing.OnChange(a.orch.ForgetWorkspace)
 	a.ci = ciwatch.New(postgres.NewCI(pool, box), a.store, a.orch, a.vcs, repos, a.settings, log.With("component", "ci"))
 	a.orch.SetCIHook(a.ci)
@@ -621,6 +626,30 @@ func (a *agent) checkRepos(ctx context.Context) {
 			return
 		case <-t.C:
 		}
+	}
+}
+
+// auditKeep is how long the Admin audit log is kept.
+const auditKeep = 365 * 24 * time.Hour
+
+// pruneRunHistory deletes transcripts past the retention an Admin set,
+// and audit rows past auditKeep.
+func pruneRunHistory(ctx context.Context, s *postgres.Transcripts, log *slog.Logger) {
+	set, err := s.RunHistorySettings(ctx)
+	if err != nil {
+		log.Warn("run history settings", "err", err)
+		return
+	}
+	if set.RetentionDays > 0 {
+		n, err := s.PruneTranscripts(ctx, time.Now().AddDate(0, 0, -set.RetentionDays))
+		if err != nil && ctx.Err() == nil {
+			log.Warn("prune run history", "err", err)
+		} else if n > 0 {
+			log.Info("pruned run history", "transcripts", n, "older_than_days", set.RetentionDays)
+		}
+	}
+	if _, err := s.PruneAudit(ctx, time.Now().Add(-auditKeep)); err != nil && ctx.Err() == nil {
+		log.Warn("prune admin audit log", "err", err)
 	}
 }
 

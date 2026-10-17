@@ -11,11 +11,19 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**createPlatformAdmin**](PlatformApi.md#createplatformadmin) | **POST** /platform/admins | Create an Admin account that signs in with a password (Admin)
 [**deletePlatformAdmin**](PlatformApi.md#deleteplatformadmin) | **DELETE** /platform/admins/{id} | Delete an Admin account; not your own (Admin)
+[**downloadPlatformRun**](PlatformApi.md#downloadplatformrun) | **GET** /platform/runs/{id}/download | The transcript as JSON lines, the stored normalised events, not Claude Code&#39;s raw output (Admin). Audited.
 [**getPlatformOverview**](PlatformApi.md#getplatformoverview) | **GET** /platform/overview | Servers, runs and the queue across every workspace (Admin)
+[**getPlatformRun**](PlatformApi.md#getplatformrun) | **GET** /platform/runs/{id} | One transcript with its whole timeline (Admin). Customer content; the read is written to the audit log first.
+[**getPlatformRunPrompt**](PlatformApi.md#getplatformrunprompt) | **GET** /platform/runs/{id}/prompt | The prompt agnts sent (Admin). Audited.
+[**getPlatformRunSummary**](PlatformApi.md#getplatformrunsummary) | **GET** /platform/runs/summary | Totals of the run history matching the filters (Admin)
+[**getRunHistorySettings**](PlatformApi.md#getrunhistorysettings) | **GET** /platform/settings/run-history | How long run history is kept, and its size limits (Admin)
 [**grantCredits**](PlatformApi.md#grantcredits) | **POST** /platform/workspaces/{id}/credits | Grant (or take back, when negative) credits (Admin)
+[**listPlatformAudit**](PlatformApi.md#listplatformaudit) | **GET** /platform/audit | What Admins read of customer content, newest first (Admin)
 [**listPlatformFeedback**](PlatformApi.md#listplatformfeedback) | **GET** /platform/feedback | Every feedback people sent, newest first (Admin)
+[**listPlatformRuns**](PlatformApi.md#listplatformruns) | **GET** /platform/runs | Run history across every workspace, newest first, without prompts or transcripts (Admin)
 [**listPlatformUsers**](PlatformApi.md#listplatformusers) | **GET** /platform/users | Every user, with their workspaces and last sign-in (Admin)
 [**listPlatformWorkspaces**](PlatformApi.md#listplatformworkspaces) | **GET** /platform/workspaces | Every workspace, metadata only (Admin)
+[**setRunHistorySettings**](PlatformApi.md#setrunhistorysettings) | **PUT** /platform/settings/run-history | Change how long run history is kept, and its size limits (Admin)
 [**updatePlatformFeedback**](PlatformApi.md#updateplatformfeedback) | **PUT** /platform/feedback/{id} | Mark a feedback done, or new again (Admin)
 [**updatePlatformUser**](PlatformApi.md#updateplatformuser) | **PUT** /platform/users/{id} | Grant or remove the Admin role (Admin); refused when Admins and Users are separate accounts
 [**updatePlatformWorkspace**](PlatformApi.md#updateplatformworkspace) | **PUT** /platform/workspaces/{id} | Change a workspace&#39;s plan, slots, member limit, or suspend it (Admin)
@@ -110,6 +118,51 @@ void (empty response body)
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **downloadPlatformRun**
+> String downloadPlatformRun(id)
+
+The transcript as JSON lines, the stored normalised events, not Claude Code's raw output (Admin). Audited.
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getPlatformApi();
+final int id = 789; // int | 
+
+try {
+    final response = api.downloadPlatformRun(id);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling PlatformApi->downloadPlatformRun: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+
+### Return type
+
+**String**
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/x-ndjson, application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **getPlatformOverview**
 > PlatformOverview getPlatformOverview()
 
@@ -139,6 +192,200 @@ This endpoint does not need any parameter.
 ### Return type
 
 [**PlatformOverview**](PlatformOverview.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getPlatformRun**
+> RunTranscriptDetail getPlatformRun(id)
+
+One transcript with its whole timeline (Admin). Customer content; the read is written to the audit log first.
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getPlatformApi();
+final int id = 789; // int | 
+
+try {
+    final response = api.getPlatformRun(id);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling PlatformApi->getPlatformRun: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+
+### Return type
+
+[**RunTranscriptDetail**](RunTranscriptDetail.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getPlatformRunPrompt**
+> GetPlatformRunPrompt200Response getPlatformRunPrompt(id)
+
+The prompt agnts sent (Admin). Audited.
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getPlatformApi();
+final int id = 789; // int | 
+
+try {
+    final response = api.getPlatformRunPrompt(id);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling PlatformApi->getPlatformRunPrompt: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+
+### Return type
+
+[**GetPlatformRunPrompt200Response**](GetPlatformRunPrompt200Response.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getPlatformRunSummary**
+> RunHistorySummary getPlatformRunSummary(workspace, purpose, status, engine, model, ticket, stalled, from, to, minCost)
+
+Totals of the run history matching the filters (Admin)
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getPlatformApi();
+final int workspace = 789; // int | 
+final String purpose = purpose_example; // String | A stage (analyze, code, review…), a background call (assistant, brief, detect, reflect, rules, translate), second_opinion, or the groups stages and background
+final String status = status_example; // String | 
+final String engine = engine_example; // String | 
+final String model = model_example; // String | Part of a model name
+final String ticket = ticket_example; // String | A ticket key, or its start
+final bool stalled = true; // bool | Only invocations that had stalls
+final DateTime from = 2013-10-20T19:20:30+01:00; // DateTime | 
+final DateTime to = 2013-10-20T19:20:30+01:00; // DateTime | 
+final num minCost = 8.14; // num | Only invocations that cost at least this many USD
+
+try {
+    final response = api.getPlatformRunSummary(workspace, purpose, status, engine, model, ticket, stalled, from, to, minCost);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling PlatformApi->getPlatformRunSummary: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **workspace** | **int**|  | [optional] 
+ **purpose** | **String**| A stage (analyze, code, review…), a background call (assistant, brief, detect, reflect, rules, translate), second_opinion, or the groups stages and background | [optional] 
+ **status** | **String**|  | [optional] 
+ **engine** | **String**|  | [optional] 
+ **model** | **String**| Part of a model name | [optional] 
+ **ticket** | **String**| A ticket key, or its start | [optional] 
+ **stalled** | **bool**| Only invocations that had stalls | [optional] 
+ **from** | **DateTime**|  | [optional] 
+ **to** | **DateTime**|  | [optional] 
+ **minCost** | **num**| Only invocations that cost at least this many USD | [optional] 
+
+### Return type
+
+[**RunHistorySummary**](RunHistorySummary.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getRunHistorySettings**
+> RunHistorySettings getRunHistorySettings()
+
+How long run history is kept, and its size limits (Admin)
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getPlatformApi();
+
+try {
+    final response = api.getRunHistorySettings();
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling PlatformApi->getRunHistorySettings: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**RunHistorySettings**](RunHistorySettings.md)
 
 ### Authorization
 
@@ -198,6 +445,59 @@ Name | Type | Description  | Notes
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **listPlatformAudit**
+> List<AdminAuditEntry> listPlatformAudit(admin, action, workspace, before, limit)
+
+What Admins read of customer content, newest first (Admin)
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getPlatformApi();
+final int admin = 789; // int | 
+final String action = action_example; // String | 
+final int workspace = 789; // int | 
+final int before = 789; // int | Only rows with a smaller id (pagination)
+final int limit = 56; // int | 
+
+try {
+    final response = api.listPlatformAudit(admin, action, workspace, before, limit);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling PlatformApi->listPlatformAudit: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **admin** | **int**|  | [optional] 
+ **action** | **String**|  | [optional] 
+ **workspace** | **int**|  | [optional] 
+ **before** | **int**| Only rows with a smaller id (pagination) | [optional] 
+ **limit** | **int**|  | [optional] [default to 100]
+
+### Return type
+
+[**List&lt;AdminAuditEntry&gt;**](AdminAuditEntry.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **listPlatformFeedback**
 > List<Feedback> listPlatformFeedback()
 
@@ -227,6 +527,73 @@ This endpoint does not need any parameter.
 ### Return type
 
 [**List&lt;Feedback&gt;**](Feedback.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **listPlatformRuns**
+> RunHistoryPage listPlatformRuns(workspace, purpose, status, engine, model, ticket, stalled, from, to, minCost, cursor, limit)
+
+Run history across every workspace, newest first, without prompts or transcripts (Admin)
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getPlatformApi();
+final int workspace = 789; // int | 
+final String purpose = purpose_example; // String | A stage (analyze, code, review…), a background call (assistant, brief, detect, reflect, rules, translate), second_opinion, or the groups stages and background
+final String status = status_example; // String | 
+final String engine = engine_example; // String | 
+final String model = model_example; // String | Part of a model name
+final String ticket = ticket_example; // String | A ticket key, or its start
+final bool stalled = true; // bool | Only invocations that had stalls
+final DateTime from = 2013-10-20T19:20:30+01:00; // DateTime | 
+final DateTime to = 2013-10-20T19:20:30+01:00; // DateTime | 
+final num minCost = 8.14; // num | Only invocations that cost at least this many USD
+final String cursor = cursor_example; // String | nextCursor of the previous page
+final int limit = 56; // int | 
+
+try {
+    final response = api.listPlatformRuns(workspace, purpose, status, engine, model, ticket, stalled, from, to, minCost, cursor, limit);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling PlatformApi->listPlatformRuns: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **workspace** | **int**|  | [optional] 
+ **purpose** | **String**| A stage (analyze, code, review…), a background call (assistant, brief, detect, reflect, rules, translate), second_opinion, or the groups stages and background | [optional] 
+ **status** | **String**|  | [optional] 
+ **engine** | **String**|  | [optional] 
+ **model** | **String**| Part of a model name | [optional] 
+ **ticket** | **String**| A ticket key, or its start | [optional] 
+ **stalled** | **bool**| Only invocations that had stalls | [optional] 
+ **from** | **DateTime**|  | [optional] 
+ **to** | **DateTime**|  | [optional] 
+ **minCost** | **num**| Only invocations that cost at least this many USD | [optional] 
+ **cursor** | **String**| nextCursor of the previous page | [optional] 
+ **limit** | **int**|  | [optional] [default to 50]
+
+### Return type
+
+[**RunHistoryPage**](RunHistoryPage.md)
 
 ### Authorization
 
@@ -317,6 +684,51 @@ This endpoint does not need any parameter.
 ### HTTP request headers
 
  - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **setRunHistorySettings**
+> RunHistorySettings setRunHistorySettings(runHistorySettings)
+
+Change how long run history is kept, and its size limits (Admin)
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getPlatformApi();
+final RunHistorySettings runHistorySettings = ; // RunHistorySettings | 
+
+try {
+    final response = api.setRunHistorySettings(runHistorySettings);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling PlatformApi->setRunHistorySettings: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **runHistorySettings** | [**RunHistorySettings**](RunHistorySettings.md)|  | 
+
+### Return type
+
+[**RunHistorySettings**](RunHistorySettings.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

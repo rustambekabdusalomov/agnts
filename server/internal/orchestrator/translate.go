@@ -201,7 +201,7 @@ func (o *Orchestrator) translateMissing(ctx context.Context, key, lang string, t
 	if err := ws.WriteFile(ctx, SourcePath, src); err != nil {
 		return fmt.Errorf("write texts: %w", err)
 	}
-	res, err := ws.Claude(ctx, ClaudeRequest{
+	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeTranslate, TicketKey: key, Subject: lang}, ClaudeRequest{
 		Prompt:   prompt,
 		Model:    s.Models.Helper,
 		MaxTurns: min(s.MaxTurns, translateMaxTurns),

@@ -63,6 +63,16 @@ class AdminMoreScreen extends ConsumerWidget {
                 value: admins == null ? null : '$admins',
                 onTap: () => context.push('/admin/admins'),
               ),
+              ListRow(
+                leading: HIcon('running', size: 22, color: c.primary),
+                title: l.runsTitle,
+                onTap: () => context.push('/admin/runs'),
+              ),
+              ListRow(
+                leading: HIcon('logs', size: 22, color: c.primary),
+                title: l.runsAuditTitle,
+                onTap: () => context.push('/admin/audit'),
+              ),
             ]),
             const AppearanceSection(),
             const SizedBox(height: 22),

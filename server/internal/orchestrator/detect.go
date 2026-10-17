@@ -60,7 +60,7 @@ func (o *Orchestrator) DetectDeep(ctx context.Context, repo domain.Repository, b
 			o.log.Warn("remove container", "repo", repo.Name, "err", err)
 		}
 	}()
-	res, err := ws.Claude(ctx, ClaudeRequest{
+	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeDetect, WorkspaceID: repo.WorkspaceID, Subject: repo.Name}, ClaudeRequest{
 		Prompt:   prompt,
 		Model:    s.Models.Helper,
 		MaxTurns: min(s.MaxTurns, detectMaxTurns),

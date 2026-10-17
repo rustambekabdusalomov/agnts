@@ -5797,6 +5797,249 @@
   "rulesKindContext": "Business context",
   "rulesKindRuleHelp": "An instruction agnts follows on every ticket.",
   "rulesKindContextHelp": "Knowledge about your product: what its terms mean, invariants the code must keep, who uses what. Every run reads it before it starts.",
+  "runsNavRuns": "Runs",
+  "runsTitle": "Run history",
+  "runsLede": "Every Claude Code and Codex invocation across workspaces: what it cost, how long it took and how it ended. Opening one shows customer content, and every read is logged.",
+  "runsRunTitle": "Invocation",
+  "runsBack": "All runs",
+  "runsSettings": "Settings",
+  "runsSumCount": "Invocations",
+  "runsSumErrors": "Error rate",
+  "runsSumErrorsNote": "{n} ended in an error, timeout or out of memory",
+  "@runsSumErrorsNote": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "runsSumStalls": "Had stalls",
+  "runsSumStallsNote": "invocations with at least one stall",
+  "runsSumCost": "Cost",
+  "runsSumCostNote": "background {cost}",
+  "@runsSumCostNote": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "runsSumTokens": "Tokens in / out",
+  "runsSumTokensNote": "without cache reads",
+  "runsSumDuration": "Duration p50 / p95",
+  "runsSumDurationNote": "of finished invocations",
+  "runsFWorkspace": "Workspace",
+  "runsAllWorkspaces": "All workspaces",
+  "runsFPurpose": "Purpose",
+  "runsAllPurposes": "All purposes",
+  "runsPStages": "Ticket stages",
+  "runsPBackground": "Background calls",
+  "runsP_analyze": "Analysis",
+  "runsP_code": "Coding",
+  "runsP_review": "Review",
+  "runsP_push": "Push",
+  "runsP_learn": "Learning",
+  "runsP_preview": "Preview",
+  "runsP_second_opinion": "Second opinion",
+  "runsP_assistant": "Assistant",
+  "runsP_brief": "Repository brief",
+  "runsP_detect": "Toolchain detection",
+  "runsP_reflect": "Reflection",
+  "runsP_rules": "Rules",
+  "runsP_translate": "Translation",
+  "runsFStatus": "Status",
+  "runsAnyStatus": "Any status",
+  "runsS_running": "Running",
+  "runsS_done": "Done",
+  "runsS_error": "Error",
+  "runsS_timeout": "Timed out",
+  "runsS_cancelled": "Cancelled",
+  "runsS_oom": "Out of memory",
+  "runsFEngine": "Engine",
+  "runsAnyEngine": "Any engine",
+  "runsE_claude": "Claude",
+  "runsE_codex": "Codex",
+  "runsFModel": "Model",
+  "runsFTicket": "Ticket",
+  "runsFStalled": "Had stalls",
+  "runsFPeriod": "Period",
+  "runsPer_1d": "Last 24 hours",
+  "runsPer_7d": "Last 7 days",
+  "runsPer_30d": "Last 30 days",
+  "runsPer_all": "All time",
+  "runsFMinCost": "Min. cost",
+  "runsClear": "Clear filters",
+  "runsNone": "No invocations match these filters.",
+  "runsLoadMore": "Load more",
+  "runsColStarted": "Started",
+  "runsColWorkspace": "Workspace",
+  "runsColTicket": "Ticket or subject",
+  "runsColPurpose": "Purpose",
+  "runsColModel": "Model",
+  "runsColTurns": "Turns",
+  "runsColTools": "Tools",
+  "runsColCost": "Cost",
+  "runsColDuration": "Duration",
+  "runsColOutcome": "Outcome",
+  "runsToolsTitle": "{calls} tool calls, {errors} failed",
+  "@runsToolsTitle": {
+    "placeholders": {
+      "calls": {
+        "type": "String"
+      },
+      "errors": {
+        "type": "String"
+      }
+    }
+  },
+  "runsStallsTitle": "{n, plural, one {{n} stall} other {{n} stalls}}",
+  "@runsStallsTitle": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "runsSettingsTitle": "Run history settings",
+  "runsSettingsSub": "How long transcripts are kept and how much of each is stored. Caps apply to invocations started after saving.",
+  "runsSet_retentionDays": "Keep transcripts, days",
+  "runsSet_retentionDaysHelp": "Older ones are deleted daily; 0 keeps them",
+  "runsSet_toolOutputKB": "Tool output cap, KB",
+  "runsSet_toolOutputKBHelp": "One tool's output; its start and end are kept",
+  "runsSet_textKB": "Text cap, KB",
+  "runsSet_textKBHelp": "One text block or tool input",
+  "runsSet_transcriptMB": "Transcript cap, MB",
+  "runsSet_transcriptMBHelp": "Past it only tool calls and the result are kept",
+  "runsSettingsSave": "Save",
+  "runsSettingsSaved": "Run history settings saved",
+  "runsBanner": "Viewing customer content. This access is logged.",
+  "runsDownload": "Download JSONL",
+  "runsNotFound": "This transcript no longer exists.",
+  "runsUnreadable": "Part of this transcript could not be read; what follows is what could.",
+  "runsTruncated": "The size limit was reached; later content was left out.",
+  "runsAccount": "Claude account",
+  "runsSession": "Session",
+  "runsStartedAt": "Started",
+  "runsFinishedAt": "Finished",
+  "runsTokens": "Tokens",
+  "runsTokensVal": "{input} in · {output} out",
+  "@runsTokensVal": {
+    "placeholders": {
+      "input": {
+        "type": "String"
+      },
+      "output": {
+        "type": "String"
+      }
+    }
+  },
+  "runsCacheVal": "cache: {read} read · {write} written",
+  "@runsCacheVal": {
+    "placeholders": {
+      "read": {
+        "type": "String"
+      },
+      "write": {
+        "type": "String"
+      }
+    }
+  },
+  "runsSize": "Stored / raw size",
+  "runsExitReason": "Exit reason",
+  "runsRunningNote": "Still running. Reloading reads the transcript again, which is logged.",
+  "runsReload": "Reload",
+  "runsSiblings": "This run's invocations",
+  "runsSiblingsSub": "First pass, fix attempts and second opinion, oldest first",
+  "runsThisOne": "this one",
+  "runsTab_timeline": "Timeline",
+  "runsTab_prompt": "Prompt",
+  "runsTab_result": "Result",
+  "runsEventsCount": "{n, plural, one {{n} event} other {{n} events}}",
+  "@runsEventsCount": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "runsNextError": "Next error ({n})",
+  "@runsNextError": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "runsNoErrors": "No errors",
+  "runsNoEvents": "Nothing was recorded.",
+  "runsShowMore": "Show {n} more",
+  "@runsShowMore": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "runsKTool": "Tool",
+  "runsKToolResult": "Tool result",
+  "runsKInit": "Start",
+  "runsKRateLimit": "Rate limit",
+  "runsKNote": "agnts",
+  "runsKResult": "Result",
+  "runsToolOk": "Succeeded",
+  "runsToolFailed": "Failed",
+  "runsExitCode": "exit {code}",
+  "@runsExitCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "runsInput": "Input",
+  "runsOutput": "Output",
+  "runsNoOutput": "(no output)",
+  "runsCutNote": "cut, original {kb} KB",
+  "@runsCutNote": {
+    "placeholders": {
+      "kb": {
+        "type": "String"
+      }
+    }
+  },
+  "runsTurnsN": "{n, plural, one {{n} turn} other {{n} turns}}",
+  "@runsTurnsN": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "runsNoPrompt": "(empty prompt)",
+  "runsNoResult": "No result was recorded.",
+  "runsSubtype": "Subtype",
+  "runsAuditTitle": "Audit log",
+  "runsAuditLede": "Every time an Admin read customer content (a transcript, a prompt, a download) or changed run history settings, newest first.",
+  "runsAllActions": "All actions",
+  "runsA_transcript_view": "Viewed a transcript",
+  "runsA_transcript_prompt": "Viewed a prompt",
+  "runsA_transcript_download": "Downloaded a transcript",
+  "runsA_run_history_settings": "Changed settings",
+  "runsColTime": "Time",
+  "runsColAdmin": "Admin",
+  "runsColAction": "Action",
+  "runsColTarget": "Target",
+  "runsColIp": "IP",
+  "runsNoAudit": "Nothing in the audit log yet.",
+  "runsAuditSearch": "Search admin, target or workspace",
+  "runsAuditTranscript": "Transcript #{id}",
+  "@runsAuditTranscript": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
   "settingsTitle": "Settings",
   "settingsLede": "How agnts connects to your tools and how it behaves during runs.",
   "settingsAppearance": "Appearance",

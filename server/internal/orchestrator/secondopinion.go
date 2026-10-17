@@ -29,7 +29,8 @@ func (o *Orchestrator) secondOpinion(ctx context.Context, s domain.Settings, ws 
 		out.Error = err.Error()
 		return out
 	}
-	res, err := ws.Claude(ctx, ClaudeRequest{
+	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeSecondOpinion, WorkspaceID: t.WorkspaceID,
+		Run: run, TicketKey: t.Key, ModelStage: "second_opinion"}, ClaudeRequest{
 		Prompt: prompt, Model: s.SecondOpinion, MaxTurns: min(s.MaxTurns, 30), ReadOnly: true,
 		Timeout:  time.Duration(min(s.TimeoutMin, 15)) * time.Minute,
 		Settings: permissionSettings(s, true),

@@ -13,6 +13,7 @@ doc/AcceptanceCriteriaInner.md
 doc/AccountApi.md
 doc/AddReviewDraftRequest.md
 doc/AddressPullCommentsRequest.md
+doc/AdminAuditEntry.md
 doc/AgentConfigFinding.md
 doc/AgentConfigScan.md
 doc/Analysis.md
@@ -121,6 +122,7 @@ doc/FollowUpsSetting.md
 doc/Footprint.md
 doc/ForgotPasswordRequest.md
 doc/GetConsent200Response.md
+doc/GetPlatformRunPrompt200Response.md
 doc/GitSettings.md
 doc/GoogleSignInRequest.md
 doc/GrantCreditsRequest.md
@@ -265,6 +267,12 @@ doc/RuleKind.md
 doc/RuleQuestion.md
 doc/RuleStatus.md
 doc/RulesApi.md
+doc/RunHistoryPage.md
+doc/RunHistorySettings.md
+doc/RunHistorySummary.md
+doc/RunTranscript.md
+doc/RunTranscriptDetail.md
+doc/RunTranscriptEvent.md
 doc/SecondOpinion.md
 doc/SendFeedbackRequest.md
 doc/SetMemberRoleRequest.md
@@ -401,6 +409,7 @@ lib/src/model/acceptance.dart
 lib/src/model/acceptance_criteria_inner.dart
 lib/src/model/add_review_draft_request.dart
 lib/src/model/address_pull_comments_request.dart
+lib/src/model/admin_audit_entry.dart
 lib/src/model/agent_config_finding.dart
 lib/src/model/agent_config_scan.dart
 lib/src/model/analysis.dart
@@ -499,6 +508,7 @@ lib/src/model/follow_ups_setting.dart
 lib/src/model/footprint.dart
 lib/src/model/forgot_password_request.dart
 lib/src/model/get_consent200_response.dart
+lib/src/model/get_platform_run_prompt200_response.dart
 lib/src/model/git_settings.dart
 lib/src/model/google_sign_in_request.dart
 lib/src/model/grant_credits_request.dart
@@ -632,6 +642,12 @@ lib/src/model/rule_input.dart
 lib/src/model/rule_kind.dart
 lib/src/model/rule_question.dart
 lib/src/model/rule_status.dart
+lib/src/model/run_history_page.dart
+lib/src/model/run_history_settings.dart
+lib/src/model/run_history_summary.dart
+lib/src/model/run_transcript.dart
+lib/src/model/run_transcript_detail.dart
+lib/src/model/run_transcript_event.dart
 lib/src/model/second_opinion.dart
 lib/src/model/send_feedback_request.dart
 lib/src/model/set_member_role_request.dart
@@ -726,6 +742,7 @@ test/acceptance_test.dart
 test/account_api_test.dart
 test/add_review_draft_request_test.dart
 test/address_pull_comments_request_test.dart
+test/admin_audit_entry_test.dart
 test/agent_config_finding_test.dart
 test/agent_config_scan_test.dart
 test/analysis_acceptance_inner_test.dart
@@ -834,6 +851,7 @@ test/follow_ups_test.dart
 test/footprint_test.dart
 test/forgot_password_request_test.dart
 test/get_consent200_response_test.dart
+test/get_platform_run_prompt200_response_test.dart
 test/git_settings_test.dart
 test/google_sign_in_request_test.dart
 test/grant_credits_request_test.dart
@@ -978,6 +996,12 @@ test/rule_question_test.dart
 test/rule_status_test.dart
 test/rule_test.dart
 test/rules_api_test.dart
+test/run_history_page_test.dart
+test/run_history_settings_test.dart
+test/run_history_summary_test.dart
+test/run_transcript_detail_test.dart
+test/run_transcript_event_test.dart
+test/run_transcript_test.dart
 test/second_opinion_test.dart
 test/send_feedback_request_test.dart
 test/set_member_role_request_test.dart

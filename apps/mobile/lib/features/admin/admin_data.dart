@@ -28,12 +28,27 @@ final platformFeedbackProvider = FutureProvider<List<Feedback>>((ref) async {
   return (await requireApi(ref).getPlatformApi().listPlatformFeedback()).data ?? const [];
 });
 
+/// Rows of the audit log asked for at a time.
+const auditPage = 100;
+
+/// The newest page of the audit log: what Admins read of customer content.
+/// Older pages are fetched with [fetchAuditBefore].
+final platformAuditProvider = FutureProvider<List<AdminAuditEntry>>((ref) async {
+  return (await requireApi(ref).getPlatformApi().listPlatformAudit(limit: auditPage)).data ?? const [];
+});
+
+/// The page of the audit log below the row [before].
+Future<List<AdminAuditEntry>> fetchAuditBefore(AgntsApi api, int before) async {
+  return (await api.getPlatformApi().listPlatformAudit(before: before, limit: auditPage)).data ?? const [];
+}
+
 /// Refetches everything the cabinet shows.
 void refreshPlatform(WidgetRef ref) {
   ref.invalidate(platformOverviewProvider);
   ref.invalidate(platformWorkspacesProvider);
   ref.invalidate(platformUsersProvider);
   ref.invalidate(platformFeedbackProvider);
+  ref.invalidate(platformAuditProvider);
 }
 
 /// A person's name as the cabinet shows it.

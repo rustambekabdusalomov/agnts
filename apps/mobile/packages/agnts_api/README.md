@@ -161,11 +161,19 @@ Class | Method | HTTP request | Description
 [*NetworkApi*](doc/NetworkApi.md) | [**updatePrivateNetwork**](doc/NetworkApi.md#updateprivatenetwork) | **PUT** /networks/{networkId} | Change a private network
 [*PlatformApi*](doc/PlatformApi.md) | [**createPlatformAdmin**](doc/PlatformApi.md#createplatformadmin) | **POST** /platform/admins | Create an Admin account that signs in with a password (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**deletePlatformAdmin**](doc/PlatformApi.md#deleteplatformadmin) | **DELETE** /platform/admins/{id} | Delete an Admin account; not your own (Admin)
+[*PlatformApi*](doc/PlatformApi.md) | [**downloadPlatformRun**](doc/PlatformApi.md#downloadplatformrun) | **GET** /platform/runs/{id}/download | The transcript as JSON lines, the stored normalised events, not Claude Code&#39;s raw output (Admin). Audited.
 [*PlatformApi*](doc/PlatformApi.md) | [**getPlatformOverview**](doc/PlatformApi.md#getplatformoverview) | **GET** /platform/overview | Servers, runs and the queue across every workspace (Admin)
+[*PlatformApi*](doc/PlatformApi.md) | [**getPlatformRun**](doc/PlatformApi.md#getplatformrun) | **GET** /platform/runs/{id} | One transcript with its whole timeline (Admin). Customer content; the read is written to the audit log first.
+[*PlatformApi*](doc/PlatformApi.md) | [**getPlatformRunPrompt**](doc/PlatformApi.md#getplatformrunprompt) | **GET** /platform/runs/{id}/prompt | The prompt agnts sent (Admin). Audited.
+[*PlatformApi*](doc/PlatformApi.md) | [**getPlatformRunSummary**](doc/PlatformApi.md#getplatformrunsummary) | **GET** /platform/runs/summary | Totals of the run history matching the filters (Admin)
+[*PlatformApi*](doc/PlatformApi.md) | [**getRunHistorySettings**](doc/PlatformApi.md#getrunhistorysettings) | **GET** /platform/settings/run-history | How long run history is kept, and its size limits (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**grantCredits**](doc/PlatformApi.md#grantcredits) | **POST** /platform/workspaces/{id}/credits | Grant (or take back, when negative) credits (Admin)
+[*PlatformApi*](doc/PlatformApi.md) | [**listPlatformAudit**](doc/PlatformApi.md#listplatformaudit) | **GET** /platform/audit | What Admins read of customer content, newest first (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**listPlatformFeedback**](doc/PlatformApi.md#listplatformfeedback) | **GET** /platform/feedback | Every feedback people sent, newest first (Admin)
+[*PlatformApi*](doc/PlatformApi.md) | [**listPlatformRuns**](doc/PlatformApi.md#listplatformruns) | **GET** /platform/runs | Run history across every workspace, newest first, without prompts or transcripts (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**listPlatformUsers**](doc/PlatformApi.md#listplatformusers) | **GET** /platform/users | Every user, with their workspaces and last sign-in (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**listPlatformWorkspaces**](doc/PlatformApi.md#listplatformworkspaces) | **GET** /platform/workspaces | Every workspace, metadata only (Admin)
+[*PlatformApi*](doc/PlatformApi.md) | [**setRunHistorySettings**](doc/PlatformApi.md#setrunhistorysettings) | **PUT** /platform/settings/run-history | Change how long run history is kept, and its size limits (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**updatePlatformFeedback**](doc/PlatformApi.md#updateplatformfeedback) | **PUT** /platform/feedback/{id} | Mark a feedback done, or new again (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**updatePlatformUser**](doc/PlatformApi.md#updateplatformuser) | **PUT** /platform/users/{id} | Grant or remove the Admin role (Admin); refused when Admins and Users are separate accounts
 [*PlatformApi*](doc/PlatformApi.md) | [**updatePlatformWorkspace**](doc/PlatformApi.md#updateplatformworkspace) | **PUT** /platform/workspaces/{id} | Change a workspace&#39;s plan, slots, member limit, or suspend it (Admin)
@@ -317,6 +325,7 @@ Class | Method | HTTP request | Description
  - [AcceptanceCriteriaInner](doc/AcceptanceCriteriaInner.md)
  - [AddReviewDraftRequest](doc/AddReviewDraftRequest.md)
  - [AddressPullCommentsRequest](doc/AddressPullCommentsRequest.md)
+ - [AdminAuditEntry](doc/AdminAuditEntry.md)
  - [AgentConfigFinding](doc/AgentConfigFinding.md)
  - [AgentConfigScan](doc/AgentConfigScan.md)
  - [Analysis](doc/Analysis.md)
@@ -415,6 +424,7 @@ Class | Method | HTTP request | Description
  - [Footprint](doc/Footprint.md)
  - [ForgotPasswordRequest](doc/ForgotPasswordRequest.md)
  - [GetConsent200Response](doc/GetConsent200Response.md)
+ - [GetPlatformRunPrompt200Response](doc/GetPlatformRunPrompt200Response.md)
  - [GitSettings](doc/GitSettings.md)
  - [GoogleSignInRequest](doc/GoogleSignInRequest.md)
  - [GrantCreditsRequest](doc/GrantCreditsRequest.md)
@@ -548,6 +558,12 @@ Class | Method | HTTP request | Description
  - [RuleKind](doc/RuleKind.md)
  - [RuleQuestion](doc/RuleQuestion.md)
  - [RuleStatus](doc/RuleStatus.md)
+ - [RunHistoryPage](doc/RunHistoryPage.md)
+ - [RunHistorySettings](doc/RunHistorySettings.md)
+ - [RunHistorySummary](doc/RunHistorySummary.md)
+ - [RunTranscript](doc/RunTranscript.md)
+ - [RunTranscriptDetail](doc/RunTranscriptDetail.md)
+ - [RunTranscriptEvent](doc/RunTranscriptEvent.md)
  - [SecondOpinion](doc/SecondOpinion.md)
  - [SendFeedbackRequest](doc/SendFeedbackRequest.md)
  - [SetMemberRoleRequest](doc/SetMemberRoleRequest.md)

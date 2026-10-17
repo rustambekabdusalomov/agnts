@@ -15,6 +15,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
+
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres"
@@ -378,6 +380,7 @@ type harness struct {
 	ctx      context.Context
 	store    *postgres.Agent
 	o        *orchestrator.Orchestrator
+	pool     *pgxpool.Pool
 	runner   *fakeRunner
 	git      *fakeGit
 	host     *fakeHost
@@ -401,7 +404,7 @@ func newHarness(t *testing.T) *harness {
 	}); err != nil {
 		t.Fatal(err)
 	}
-	h := &harness{t: t, ctx: ctx, store: store,
+	h := &harness{t: t, ctx: ctx, store: store, pool: pool,
 		runner: &fakeRunner{execs: map[string][]orchestrator.ExecResult{}}, git: &fakeGit{}, host: &fakeHost{}, tracker: &fakeTracker{}, plane: &fakeTracker{},
 		shots: &memShots{m: map[string][]byte{}}}
 	cfg := orchestrator.DefaultConfig()

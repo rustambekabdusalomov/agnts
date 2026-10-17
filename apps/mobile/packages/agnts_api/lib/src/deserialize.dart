@@ -7,6 +7,7 @@ import 'package:agnts_api/src/model/acceptance.dart';
 import 'package:agnts_api/src/model/acceptance_criteria_inner.dart';
 import 'package:agnts_api/src/model/add_review_draft_request.dart';
 import 'package:agnts_api/src/model/address_pull_comments_request.dart';
+import 'package:agnts_api/src/model/admin_audit_entry.dart';
 import 'package:agnts_api/src/model/agent_config_finding.dart';
 import 'package:agnts_api/src/model/agent_config_scan.dart';
 import 'package:agnts_api/src/model/analysis.dart';
@@ -100,6 +101,7 @@ import 'package:agnts_api/src/model/follow_ups_setting.dart';
 import 'package:agnts_api/src/model/footprint.dart';
 import 'package:agnts_api/src/model/forgot_password_request.dart';
 import 'package:agnts_api/src/model/get_consent200_response.dart';
+import 'package:agnts_api/src/model/get_platform_run_prompt200_response.dart';
 import 'package:agnts_api/src/model/git_settings.dart';
 import 'package:agnts_api/src/model/google_sign_in_request.dart';
 import 'package:agnts_api/src/model/grant_credits_request.dart';
@@ -226,6 +228,12 @@ import 'package:agnts_api/src/model/rule_answers_answers_inner.dart';
 import 'package:agnts_api/src/model/rule_enforce.dart';
 import 'package:agnts_api/src/model/rule_input.dart';
 import 'package:agnts_api/src/model/rule_question.dart';
+import 'package:agnts_api/src/model/run_history_page.dart';
+import 'package:agnts_api/src/model/run_history_settings.dart';
+import 'package:agnts_api/src/model/run_history_summary.dart';
+import 'package:agnts_api/src/model/run_transcript.dart';
+import 'package:agnts_api/src/model/run_transcript_detail.dart';
+import 'package:agnts_api/src/model/run_transcript_event.dart';
 import 'package:agnts_api/src/model/second_opinion.dart';
 import 'package:agnts_api/src/model/send_feedback_request.dart';
 import 'package:agnts_api/src/model/set_member_role_request.dart';
@@ -340,6 +348,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return AddReviewDraftRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AddressPullCommentsRequest':
           return AddressPullCommentsRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AdminAuditEntry':
+          return AdminAuditEntry.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AgentConfigFinding':
           return AgentConfigFinding.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AgentConfigScan':
@@ -541,6 +551,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ForgotPasswordRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'GetConsent200Response':
           return GetConsent200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'GetPlatformRunPrompt200Response':
+          return GetPlatformRunPrompt200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'GitSettings':
           return GitSettings.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'GoogleSignInRequest':
@@ -814,6 +826,18 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
         case 'RuleStatus':
           
           
+        case 'RunHistoryPage':
+          return RunHistoryPage.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RunHistorySettings':
+          return RunHistorySettings.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RunHistorySummary':
+          return RunHistorySummary.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RunTranscript':
+          return RunTranscript.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RunTranscriptDetail':
+          return RunTranscriptDetail.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RunTranscriptEvent':
+          return RunTranscriptEvent.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SecondOpinion':
           return SecondOpinion.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SendFeedbackRequest':

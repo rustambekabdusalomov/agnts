@@ -490,7 +490,7 @@ func (o *Orchestrator) runSurvey(ctx context.Context, b domain.RepoBrief) (strin
 	if err != nil {
 		return "", "", err
 	}
-	res, err := ws.Claude(ctx, ClaudeRequest{
+	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeBrief, WorkspaceID: repo.WorkspaceID, Subject: repo.Name}, ClaudeRequest{
 		Prompt:   prompt,
 		Model:    s.Models.Analyze,
 		MaxTurns: min(s.MaxTurns, surveyMaxTurns),

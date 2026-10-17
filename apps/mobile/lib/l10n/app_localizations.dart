@@ -16617,6 +16617,864 @@ abstract class AppLocalizations {
   /// **'Knowledge about your product: what its terms mean, invariants the code must keep, who uses what. Every run reads it before it starts.'**
   String get rulesKindContextHelp;
 
+  /// No description provided for @runsNavRuns.
+  ///
+  /// In en, this message translates to:
+  /// **'Runs'**
+  String get runsNavRuns;
+
+  /// No description provided for @runsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Run history'**
+  String get runsTitle;
+
+  /// No description provided for @runsLede.
+  ///
+  /// In en, this message translates to:
+  /// **'Every Claude Code and Codex invocation across workspaces: what it cost, how long it took and how it ended. Opening one shows customer content, and every read is logged.'**
+  String get runsLede;
+
+  /// No description provided for @runsRunTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invocation'**
+  String get runsRunTitle;
+
+  /// No description provided for @runsBack.
+  ///
+  /// In en, this message translates to:
+  /// **'All runs'**
+  String get runsBack;
+
+  /// No description provided for @runsSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get runsSettings;
+
+  /// No description provided for @runsSumCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Invocations'**
+  String get runsSumCount;
+
+  /// No description provided for @runsSumErrors.
+  ///
+  /// In en, this message translates to:
+  /// **'Error rate'**
+  String get runsSumErrors;
+
+  /// No description provided for @runsSumErrorsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} ended in an error, timeout or out of memory'**
+  String runsSumErrorsNote(String n);
+
+  /// No description provided for @runsSumStalls.
+  ///
+  /// In en, this message translates to:
+  /// **'Had stalls'**
+  String get runsSumStalls;
+
+  /// No description provided for @runsSumStallsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'invocations with at least one stall'**
+  String get runsSumStallsNote;
+
+  /// No description provided for @runsSumCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost'**
+  String get runsSumCost;
+
+  /// No description provided for @runsSumCostNote.
+  ///
+  /// In en, this message translates to:
+  /// **'background {cost}'**
+  String runsSumCostNote(String cost);
+
+  /// No description provided for @runsSumTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokens in / out'**
+  String get runsSumTokens;
+
+  /// No description provided for @runsSumTokensNote.
+  ///
+  /// In en, this message translates to:
+  /// **'without cache reads'**
+  String get runsSumTokensNote;
+
+  /// No description provided for @runsSumDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration p50 / p95'**
+  String get runsSumDuration;
+
+  /// No description provided for @runsSumDurationNote.
+  ///
+  /// In en, this message translates to:
+  /// **'of finished invocations'**
+  String get runsSumDurationNote;
+
+  /// No description provided for @runsFWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace'**
+  String get runsFWorkspace;
+
+  /// No description provided for @runsAllWorkspaces.
+  ///
+  /// In en, this message translates to:
+  /// **'All workspaces'**
+  String get runsAllWorkspaces;
+
+  /// No description provided for @runsFPurpose.
+  ///
+  /// In en, this message translates to:
+  /// **'Purpose'**
+  String get runsFPurpose;
+
+  /// No description provided for @runsAllPurposes.
+  ///
+  /// In en, this message translates to:
+  /// **'All purposes'**
+  String get runsAllPurposes;
+
+  /// No description provided for @runsPStages.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket stages'**
+  String get runsPStages;
+
+  /// No description provided for @runsPBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'Background calls'**
+  String get runsPBackground;
+
+  /// No description provided for @runsP_analyze.
+  ///
+  /// In en, this message translates to:
+  /// **'Analysis'**
+  String get runsP_analyze;
+
+  /// No description provided for @runsP_code.
+  ///
+  /// In en, this message translates to:
+  /// **'Coding'**
+  String get runsP_code;
+
+  /// No description provided for @runsP_review.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get runsP_review;
+
+  /// No description provided for @runsP_push.
+  ///
+  /// In en, this message translates to:
+  /// **'Push'**
+  String get runsP_push;
+
+  /// No description provided for @runsP_learn.
+  ///
+  /// In en, this message translates to:
+  /// **'Learning'**
+  String get runsP_learn;
+
+  /// No description provided for @runsP_preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get runsP_preview;
+
+  /// No description provided for @runsP_second_opinion.
+  ///
+  /// In en, this message translates to:
+  /// **'Second opinion'**
+  String get runsP_second_opinion;
+
+  /// No description provided for @runsP_assistant.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant'**
+  String get runsP_assistant;
+
+  /// No description provided for @runsP_brief.
+  ///
+  /// In en, this message translates to:
+  /// **'Repository brief'**
+  String get runsP_brief;
+
+  /// No description provided for @runsP_detect.
+  ///
+  /// In en, this message translates to:
+  /// **'Toolchain detection'**
+  String get runsP_detect;
+
+  /// No description provided for @runsP_reflect.
+  ///
+  /// In en, this message translates to:
+  /// **'Reflection'**
+  String get runsP_reflect;
+
+  /// No description provided for @runsP_rules.
+  ///
+  /// In en, this message translates to:
+  /// **'Rules'**
+  String get runsP_rules;
+
+  /// No description provided for @runsP_translate.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation'**
+  String get runsP_translate;
+
+  /// No description provided for @runsFStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get runsFStatus;
+
+  /// No description provided for @runsAnyStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Any status'**
+  String get runsAnyStatus;
+
+  /// No description provided for @runsS_running.
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get runsS_running;
+
+  /// No description provided for @runsS_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get runsS_done;
+
+  /// No description provided for @runsS_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get runsS_error;
+
+  /// No description provided for @runsS_timeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Timed out'**
+  String get runsS_timeout;
+
+  /// No description provided for @runsS_cancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get runsS_cancelled;
+
+  /// No description provided for @runsS_oom.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of memory'**
+  String get runsS_oom;
+
+  /// No description provided for @runsFEngine.
+  ///
+  /// In en, this message translates to:
+  /// **'Engine'**
+  String get runsFEngine;
+
+  /// No description provided for @runsAnyEngine.
+  ///
+  /// In en, this message translates to:
+  /// **'Any engine'**
+  String get runsAnyEngine;
+
+  /// No description provided for @runsE_claude.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude'**
+  String get runsE_claude;
+
+  /// No description provided for @runsE_codex.
+  ///
+  /// In en, this message translates to:
+  /// **'Codex'**
+  String get runsE_codex;
+
+  /// No description provided for @runsFModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get runsFModel;
+
+  /// No description provided for @runsFTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket'**
+  String get runsFTicket;
+
+  /// No description provided for @runsFStalled.
+  ///
+  /// In en, this message translates to:
+  /// **'Had stalls'**
+  String get runsFStalled;
+
+  /// No description provided for @runsFPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get runsFPeriod;
+
+  /// No description provided for @runsPer_1d.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 24 hours'**
+  String get runsPer_1d;
+
+  /// No description provided for @runsPer_7d.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 days'**
+  String get runsPer_7d;
+
+  /// No description provided for @runsPer_30d.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 30 days'**
+  String get runsPer_30d;
+
+  /// No description provided for @runsPer_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All time'**
+  String get runsPer_all;
+
+  /// No description provided for @runsFMinCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Min. cost'**
+  String get runsFMinCost;
+
+  /// No description provided for @runsClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get runsClear;
+
+  /// No description provided for @runsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No invocations match these filters.'**
+  String get runsNone;
+
+  /// No description provided for @runsLoadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get runsLoadMore;
+
+  /// No description provided for @runsColStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Started'**
+  String get runsColStarted;
+
+  /// No description provided for @runsColWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace'**
+  String get runsColWorkspace;
+
+  /// No description provided for @runsColTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket or subject'**
+  String get runsColTicket;
+
+  /// No description provided for @runsColPurpose.
+  ///
+  /// In en, this message translates to:
+  /// **'Purpose'**
+  String get runsColPurpose;
+
+  /// No description provided for @runsColModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get runsColModel;
+
+  /// No description provided for @runsColTurns.
+  ///
+  /// In en, this message translates to:
+  /// **'Turns'**
+  String get runsColTurns;
+
+  /// No description provided for @runsColTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get runsColTools;
+
+  /// No description provided for @runsColCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost'**
+  String get runsColCost;
+
+  /// No description provided for @runsColDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get runsColDuration;
+
+  /// No description provided for @runsColOutcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Outcome'**
+  String get runsColOutcome;
+
+  /// No description provided for @runsToolsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{calls} tool calls, {errors} failed'**
+  String runsToolsTitle(String calls, String errors);
+
+  /// No description provided for @runsStallsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} stall} other {{n} stalls}}'**
+  String runsStallsTitle(num n);
+
+  /// No description provided for @runsSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Run history settings'**
+  String get runsSettingsTitle;
+
+  /// No description provided for @runsSettingsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'How long transcripts are kept and how much of each is stored. Caps apply to invocations started after saving.'**
+  String get runsSettingsSub;
+
+  /// No description provided for @runsSet_retentionDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep transcripts, days'**
+  String get runsSet_retentionDays;
+
+  /// No description provided for @runsSet_retentionDaysHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Older ones are deleted daily; 0 keeps them'**
+  String get runsSet_retentionDaysHelp;
+
+  /// No description provided for @runsSet_toolOutputKB.
+  ///
+  /// In en, this message translates to:
+  /// **'Tool output cap, KB'**
+  String get runsSet_toolOutputKB;
+
+  /// No description provided for @runsSet_toolOutputKBHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'One tool\'s output; its start and end are kept'**
+  String get runsSet_toolOutputKBHelp;
+
+  /// No description provided for @runsSet_textKB.
+  ///
+  /// In en, this message translates to:
+  /// **'Text cap, KB'**
+  String get runsSet_textKB;
+
+  /// No description provided for @runsSet_textKBHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'One text block or tool input'**
+  String get runsSet_textKBHelp;
+
+  /// No description provided for @runsSet_transcriptMB.
+  ///
+  /// In en, this message translates to:
+  /// **'Transcript cap, MB'**
+  String get runsSet_transcriptMB;
+
+  /// No description provided for @runsSet_transcriptMBHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Past it only tool calls and the result are kept'**
+  String get runsSet_transcriptMBHelp;
+
+  /// No description provided for @runsSettingsSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get runsSettingsSave;
+
+  /// No description provided for @runsSettingsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Run history settings saved'**
+  String get runsSettingsSaved;
+
+  /// No description provided for @runsBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewing customer content. This access is logged.'**
+  String get runsBanner;
+
+  /// No description provided for @runsDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download JSONL'**
+  String get runsDownload;
+
+  /// No description provided for @runsNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This transcript no longer exists.'**
+  String get runsNotFound;
+
+  /// No description provided for @runsUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'Part of this transcript could not be read; what follows is what could.'**
+  String get runsUnreadable;
+
+  /// No description provided for @runsTruncated.
+  ///
+  /// In en, this message translates to:
+  /// **'The size limit was reached; later content was left out.'**
+  String get runsTruncated;
+
+  /// No description provided for @runsAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude account'**
+  String get runsAccount;
+
+  /// No description provided for @runsSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Session'**
+  String get runsSession;
+
+  /// No description provided for @runsStartedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Started'**
+  String get runsStartedAt;
+
+  /// No description provided for @runsFinishedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished'**
+  String get runsFinishedAt;
+
+  /// No description provided for @runsTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokens'**
+  String get runsTokens;
+
+  /// No description provided for @runsTokensVal.
+  ///
+  /// In en, this message translates to:
+  /// **'{input} in · {output} out'**
+  String runsTokensVal(String input, String output);
+
+  /// No description provided for @runsCacheVal.
+  ///
+  /// In en, this message translates to:
+  /// **'cache: {read} read · {write} written'**
+  String runsCacheVal(String read, String write);
+
+  /// No description provided for @runsSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Stored / raw size'**
+  String get runsSize;
+
+  /// No description provided for @runsExitReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit reason'**
+  String get runsExitReason;
+
+  /// No description provided for @runsRunningNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Still running. Reloading reads the transcript again, which is logged.'**
+  String get runsRunningNote;
+
+  /// No description provided for @runsReload.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload'**
+  String get runsReload;
+
+  /// No description provided for @runsSiblings.
+  ///
+  /// In en, this message translates to:
+  /// **'This run\'s invocations'**
+  String get runsSiblings;
+
+  /// No description provided for @runsSiblingsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'First pass, fix attempts and second opinion, oldest first'**
+  String get runsSiblingsSub;
+
+  /// No description provided for @runsThisOne.
+  ///
+  /// In en, this message translates to:
+  /// **'this one'**
+  String get runsThisOne;
+
+  /// No description provided for @runsTab_timeline.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline'**
+  String get runsTab_timeline;
+
+  /// No description provided for @runsTab_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt'**
+  String get runsTab_prompt;
+
+  /// No description provided for @runsTab_result.
+  ///
+  /// In en, this message translates to:
+  /// **'Result'**
+  String get runsTab_result;
+
+  /// No description provided for @runsEventsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} event} other {{n} events}}'**
+  String runsEventsCount(num n);
+
+  /// No description provided for @runsNextError.
+  ///
+  /// In en, this message translates to:
+  /// **'Next error ({n})'**
+  String runsNextError(String n);
+
+  /// No description provided for @runsNoErrors.
+  ///
+  /// In en, this message translates to:
+  /// **'No errors'**
+  String get runsNoErrors;
+
+  /// No description provided for @runsNoEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was recorded.'**
+  String get runsNoEvents;
+
+  /// No description provided for @runsShowMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Show {n} more'**
+  String runsShowMore(String n);
+
+  /// No description provided for @runsKTool.
+  ///
+  /// In en, this message translates to:
+  /// **'Tool'**
+  String get runsKTool;
+
+  /// No description provided for @runsKToolResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Tool result'**
+  String get runsKToolResult;
+
+  /// No description provided for @runsKInit.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get runsKInit;
+
+  /// No description provided for @runsKRateLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate limit'**
+  String get runsKRateLimit;
+
+  /// No description provided for @runsKNote.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts'**
+  String get runsKNote;
+
+  /// No description provided for @runsKResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Result'**
+  String get runsKResult;
+
+  /// No description provided for @runsToolOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Succeeded'**
+  String get runsToolOk;
+
+  /// No description provided for @runsToolFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get runsToolFailed;
+
+  /// No description provided for @runsExitCode.
+  ///
+  /// In en, this message translates to:
+  /// **'exit {code}'**
+  String runsExitCode(String code);
+
+  /// No description provided for @runsInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Input'**
+  String get runsInput;
+
+  /// No description provided for @runsOutput.
+  ///
+  /// In en, this message translates to:
+  /// **'Output'**
+  String get runsOutput;
+
+  /// No description provided for @runsNoOutput.
+  ///
+  /// In en, this message translates to:
+  /// **'(no output)'**
+  String get runsNoOutput;
+
+  /// No description provided for @runsCutNote.
+  ///
+  /// In en, this message translates to:
+  /// **'cut, original {kb} KB'**
+  String runsCutNote(String kb);
+
+  /// No description provided for @runsTurnsN.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} turn} other {{n} turns}}'**
+  String runsTurnsN(num n);
+
+  /// No description provided for @runsNoPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'(empty prompt)'**
+  String get runsNoPrompt;
+
+  /// No description provided for @runsNoResult.
+  ///
+  /// In en, this message translates to:
+  /// **'No result was recorded.'**
+  String get runsNoResult;
+
+  /// No description provided for @runsSubtype.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtype'**
+  String get runsSubtype;
+
+  /// No description provided for @runsAuditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Audit log'**
+  String get runsAuditTitle;
+
+  /// No description provided for @runsAuditLede.
+  ///
+  /// In en, this message translates to:
+  /// **'Every time an Admin read customer content (a transcript, a prompt, a download) or changed run history settings, newest first.'**
+  String get runsAuditLede;
+
+  /// No description provided for @runsAllActions.
+  ///
+  /// In en, this message translates to:
+  /// **'All actions'**
+  String get runsAllActions;
+
+  /// No description provided for @runsA_transcript_view.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewed a transcript'**
+  String get runsA_transcript_view;
+
+  /// No description provided for @runsA_transcript_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewed a prompt'**
+  String get runsA_transcript_prompt;
+
+  /// No description provided for @runsA_transcript_download.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded a transcript'**
+  String get runsA_transcript_download;
+
+  /// No description provided for @runsA_run_history_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed settings'**
+  String get runsA_run_history_settings;
+
+  /// No description provided for @runsColTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get runsColTime;
+
+  /// No description provided for @runsColAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get runsColAdmin;
+
+  /// No description provided for @runsColAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Action'**
+  String get runsColAction;
+
+  /// No description provided for @runsColTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Target'**
+  String get runsColTarget;
+
+  /// No description provided for @runsColIp.
+  ///
+  /// In en, this message translates to:
+  /// **'IP'**
+  String get runsColIp;
+
+  /// No description provided for @runsNoAudit.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing in the audit log yet.'**
+  String get runsNoAudit;
+
+  /// No description provided for @runsAuditSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search admin, target or workspace'**
+  String get runsAuditSearch;
+
+  /// No description provided for @runsAuditTranscript.
+  ///
+  /// In en, this message translates to:
+  /// **'Transcript #{id}'**
+  String runsAuditTranscript(String id);
+
   /// No description provided for @settingsTitle.
   ///
   /// In en, this message translates to:

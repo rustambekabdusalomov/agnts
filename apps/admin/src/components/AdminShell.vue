@@ -55,6 +55,9 @@ async function signOut() {
         <RouterLink class="nav-a" active-class="on" :to="{ name: 'adminWorkspaces' }" :aria-label="t('platform.workspaces')">
           <HiIcon name="repos" /><span class="lbl">{{ t('platform.workspaces') }}</span>
         </RouterLink>
+        <RouterLink class="nav-a" :class="{ on: $route.name === 'adminRun' }" active-class="on" :to="{ name: 'adminRuns' }" :aria-label="t('runs.navRuns')">
+          <HiIcon name="running" /><span class="lbl">{{ t('runs.navRuns') }}</span>
+        </RouterLink>
         <RouterLink class="nav-a" active-class="on" :to="{ name: 'adminUsers' }" :aria-label="t('platform.users')">
           <HiIcon name="users" /><span class="lbl">{{ t('platform.users') }}</span>
         </RouterLink>
@@ -63,6 +66,9 @@ async function signOut() {
         </RouterLink>
         <RouterLink class="nav-a" active-class="on" :to="{ name: 'adminFeedback' }" :aria-label="t('feedback.adminTitle')">
           <HiIcon name="feedback" /><span class="lbl">{{ t('feedback.adminTitle') }}</span><span v-if="newFeedback" class="cnt">{{ newFeedback }}</span>
+        </RouterLink>
+        <RouterLink class="nav-a" active-class="on" :to="{ name: 'adminAudit' }" :aria-label="t('runs.auditTitle')">
+          <HiIcon name="eye" /><span class="lbl">{{ t('runs.auditTitle') }}</span>
         </RouterLink>
         <div class="grp">{{ t('platform.navMine') }}</div>
         <RouterLink class="nav-a" active-class="on" :to="{ name: 'adminProfile' }" :aria-label="t('nav.profile')">

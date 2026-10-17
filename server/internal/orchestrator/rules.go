@@ -525,7 +525,8 @@ func (o *Orchestrator) runRuleReview(ctx context.Context, r domain.Rule) (RuleRe
 			o.log.Warn("remove container", "rule", r.ID, "err", err)
 		}
 	}()
-	res, err := ws.Claude(ctx, ClaudeRequest{
+	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeRules, WorkspaceID: r.WorkspaceID,
+		Subject: fmt.Sprintf("rule %d: %s", r.ID, truncate(r.Title, 80))}, ClaudeRequest{
 		Prompt:   prompt,
 		Model:    s.Models.Analyze,
 		MaxTurns: min(s.MaxTurns, ruleMaxTurns),

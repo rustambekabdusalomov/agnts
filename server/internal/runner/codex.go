@@ -45,7 +45,9 @@ type codexItem struct {
 	Command  string `json:"command"`
 	ExitCode *int   `json:"exit_code"`
 	Status   string `json:"status"`
-	Changes  []struct {
+	// AggregatedOutput is a command's stdout and stderr together.
+	AggregatedOutput string `json:"aggregated_output"`
+	Changes          []struct {
 		Path string `json:"path"`
 		Kind string `json:"kind"`
 	} `json:"changes"`
@@ -119,19 +121,26 @@ func codexItemEvent(l codexLine, res *orchestrator.ClaudeResult, onEvent func(or
 		}
 	case "command_execution":
 		if started {
-			emit(onEvent, orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeTool, Tool: toolSummary("Bash", mustJSON(map[string]string{"command": it.Command})),
-				Data: map[string]any{"tool": "Bash", "id": it.ID}})
+			input := mustJSON(map[string]string{"command": it.Command})
+			emit(onEvent, orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeTool, Tool: toolSummary("Bash", input),
+				Data: map[string]any{"tool": "Bash", "id": it.ID, "input": input}})
 			return
 		}
 		failed := it.Status == "failed" || it.ExitCode != nil && *it.ExitCode != 0
-		emit(onEvent, orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeToolResult, Data: map[string]any{"id": it.ID, "is_error": failed}})
+		data := map[string]any{"id": it.ID, "is_error": failed, "output": it.AggregatedOutput}
+		if it.ExitCode != nil {
+			data["exit_code"] = *it.ExitCode
+		}
+		emit(onEvent, orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeToolResult, Data: data})
 	case "file_change":
 		if started {
 			return
 		}
 		for _, c := range it.Changes {
+			// Codex reports which files changed and how, not the diff.
 			emit(onEvent, orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeTool, Tool: "Edit: " + c.Path,
-				Data: map[string]any{"tool": "Edit", "id": it.ID + ":" + c.Path}})
+				Data: map[string]any{"tool": "Edit", "id": it.ID + ":" + c.Path,
+					"input": mustJSON(map[string]string{"file_path": c.Path, "kind": c.Kind})}})
 		}
 	}
 }

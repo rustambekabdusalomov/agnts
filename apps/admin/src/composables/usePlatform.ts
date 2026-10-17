@@ -1,22 +1,33 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { computed } from 'vue'
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
+import { computed, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { api, HttpError, unwrap } from '../api/client'
-import type { components } from '../api/schema.gen'
+import type { components, paths } from '../api/schema.gen'
 import { useSession } from '../stores/session'
 import { useUi } from '../stores/ui'
 
 export type PlatformUser = components['schemas']['PlatformUser']
 export type PlatformWorkspace = components['schemas']['PlatformWorkspace']
+export type RunTranscript = components['schemas']['RunTranscript']
+export type RunEvent = components['schemas']['RunTranscriptEvent']
+export type RunHistorySettings = components['schemas']['RunHistorySettings']
+export type AdminAuditEntry = components['schemas']['AdminAuditEntry']
+export type RunFilters = NonNullable<paths['/platform/runs/summary']['get']['parameters']['query']>
 
 /** The Admin cabinet's data: every user and workspace, and the server's runs and queue. */
 export function usePlatform() {
   const session = useSession()
   const enabled = computed(() => !!session.user?.isAdmin)
   const overview = useQuery({ queryKey: ['platform', 'overview'], queryFn: () => unwrap(api.GET('/platform/overview')), refetchInterval: 10_000, enabled })
-  const workspaces = useQuery({ queryKey: ['platform', 'workspaces'], queryFn: () => unwrap(api.GET('/platform/workspaces')), enabled })
+  const workspaces = usePlatformWorkspaces()
   const users = useQuery({ queryKey: ['platform', 'users'], queryFn: () => unwrap(api.GET('/platform/users')), enabled })
   return { overview, workspaces, users }
+}
+
+/** Every workspace on the platform; the same query (and cache) as usePlatform's. */
+export function usePlatformWorkspaces() {
+  const session = useSession()
+  return useQuery({ queryKey: ['platform', 'workspaces'], queryFn: () => unwrap(api.GET('/platform/workspaces')), enabled: computed(() => !!session.user?.isAdmin) })
 }
 
 /** Everything people sent from their accounts (Admins only); new ones are counted in the menu. */
@@ -28,6 +39,100 @@ export function useFeedback() {
     enabled: computed(() => !!session.user?.isAdmin),
     refetchInterval: 60_000,
   })
+}
+
+const RUN_PAGE = 50
+
+/** Run history matching the filters, newest first, a page at a time. While
+ * the first page shows a running invocation it is refreshed now and then. */
+export function useRuns(filters: Ref<RunFilters>) {
+  const session = useSession()
+  return useInfiniteQuery({
+    queryKey: computed(() => ['platform', 'runs', 'list', filters.value]),
+    initialPageParam: '',
+    queryFn: ({ pageParam }) =>
+      unwrap(api.GET('/platform/runs', { params: { query: { ...filters.value, cursor: pageParam || undefined, limit: RUN_PAGE } } })),
+    getNextPageParam: (last) => last.nextCursor || undefined,
+    enabled: computed(() => !!session.user?.isAdmin),
+    refetchInterval: (q) => {
+      const pages = q.state.data?.pages ?? []
+      return pages.length === 1 && pages[0]!.items.some((r) => r.status === 'running') ? 15_000 : false
+    },
+  })
+}
+
+/** Totals of the run history matching the filters. */
+export function useRunSummary(filters: Ref<RunFilters>) {
+  const session = useSession()
+  return useQuery({
+    queryKey: computed(() => ['platform', 'runs', 'summary', filters.value]),
+    queryFn: () => unwrap(api.GET('/platform/runs/summary', { params: { query: filters.value } })),
+    enabled: computed(() => !!session.user?.isAdmin),
+  })
+}
+
+// Reading a transcript or its prompt writes an audit row on the server, so
+// these are fetched once per visit: never refetched on focus, reconnect or
+// a timer, and not retried.
+const AUDITED = { staleTime: Infinity, refetchOnWindowFocus: false, refetchOnReconnect: false, retry: false } as const
+
+/** One transcript with its timeline and the run's other invocations. Audited. */
+export function useRun(id: Ref<number>) {
+  const session = useSession()
+  return useQuery({
+    queryKey: computed(() => ['platform', 'run', id.value]),
+    queryFn: () => unwrap(api.GET('/platform/runs/{id}', { params: { path: { id: id.value } } })),
+    enabled: computed(() => !!session.user?.isAdmin && id.value > 0),
+    ...AUDITED,
+  })
+}
+
+/** The prompt agnts sent, fetched only once asked for (`on`). Audited. */
+export function useRunPrompt(id: Ref<number>, on: Ref<boolean>) {
+  return useQuery({
+    queryKey: computed(() => ['platform', 'run', id.value, 'prompt']),
+    queryFn: () => unwrap(api.GET('/platform/runs/{id}/prompt', { params: { path: { id: id.value } } })),
+    enabled: computed(() => on.value && id.value > 0),
+    ...AUDITED,
+  })
+}
+
+const AUDIT_PAGE = 100
+
+/** What Admins read of customer content, newest first, a page at a time. */
+export function useAudit(action: Ref<string>) {
+  const session = useSession()
+  return useInfiniteQuery({
+    queryKey: computed(() => ['platform', 'audit', action.value]),
+    initialPageParam: 0,
+    queryFn: ({ pageParam }) =>
+      unwrap(api.GET('/platform/audit', { params: { query: { action: action.value || undefined, before: pageParam || undefined, limit: AUDIT_PAGE } } })),
+    // A full page may have more behind it; the next one starts below its last id.
+    getNextPageParam: (last) => (last.length === AUDIT_PAGE ? last[last.length - 1]!.id : undefined),
+    enabled: computed(() => !!session.user?.isAdmin),
+  })
+}
+
+/** How long run history is kept and how much of each transcript is stored. */
+export function useRunHistorySettings() {
+  const { t } = useI18n()
+  const qc = useQueryClient()
+  const ui = useUi()
+  const session = useSession()
+  const settings = useQuery({
+    queryKey: ['platform', 'settings', 'run-history'],
+    queryFn: () => unwrap(api.GET('/platform/settings/run-history')),
+    enabled: computed(() => !!session.user?.isAdmin),
+  })
+  const save = useMutation({
+    mutationFn: (body: RunHistorySettings) => unwrap(api.PUT('/platform/settings/run-history', { body })),
+    onSuccess: (s) => {
+      qc.setQueryData(['platform', 'settings', 'run-history'], s)
+      ui.notify(t('runs.settingsSaved'))
+    },
+    onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
+  })
+  return { settings, save }
 }
 
 export type NewAdmin = { username: string; password: string; email?: string; displayName?: string }

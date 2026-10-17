@@ -93,6 +93,9 @@ type Options struct {
 	Google *GoogleSignIn
 	// Feedback keeps what people send the Admins; nil answers 501.
 	Feedback FeedbackStore
+	// RunHistory is the transcripts of every invocation and the Admin
+	// audit log; nil answers 501.
+	RunHistory RunHistory
 	// SiteURL is the public website (AGNTS_SITE_URL); its "Request a
 	// connector" form posts to /site/connector-request. Nil turns that off.
 	SiteURL *url.URL

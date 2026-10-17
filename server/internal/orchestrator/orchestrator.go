@@ -151,6 +151,11 @@ type Orchestrator struct {
 	// by run id.
 	redactors sync.Map
 
+	// recorder keeps run history (nil: off); transcripts are the
+	// transcripts runs are recording, by run id, for stall notes.
+	recorder    Recorder
+	transcripts sync.Map
+
 	wake chan struct{}
 
 	mu      sync.Mutex
@@ -232,6 +237,13 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 			return fmt.Errorf("recover interrupted reflect runs: %w", err)
 		} else if n > 0 {
 			o.log.Warn("requeued interrupted reflect runs", "count", n)
+		}
+	}
+	if o.recorder != nil {
+		if n, err := o.recorder.RecoverTranscripts(sys); err != nil {
+			o.log.Error("close interrupted transcripts", "err", err) // run history must not stop the worker
+		} else if n > 0 {
+			o.log.Warn("closed interrupted transcripts", "count", n)
 		}
 	}
 	o.recoverAssistant(sys)
@@ -544,7 +556,7 @@ func (o *Orchestrator) watch(ctx context.Context, s domain.Settings, ws Workspac
 func (o *Orchestrator) streamTo(ctx context.Context, t domain.Ticket, run *domain.Run) func(ClaudeEvent) {
 	return func(e ClaudeEvent) {
 		noteSkill(run, e)
-		ev := domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Data: e.Data}
+		ev := domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Data: eventData(e.Data)}
 		switch e.Kind {
 		case ClaudeInit:
 			if id, _ := e.Data["session_id"].(string); id != "" {
@@ -571,6 +583,23 @@ func (o *Orchestrator) streamTo(ctx context.Context, t domain.Ticket, run *domai
 		}
 		o.event(ctx, ev)
 	}
+}
+
+// eventData is a stream event's data as the ticket log keeps it: without
+// the tool input and output, which only the run history keeps.
+func eventData(d map[string]any) map[string]any {
+	if _, in := d["input"]; !in {
+		if _, out := d["output"]; !out {
+			return d
+		}
+	}
+	out := make(map[string]any, len(d))
+	for k, v := range d {
+		if k != "input" && k != "output" {
+			out[k] = v
+		}
+	}
+	return out
 }
 
 // redactEvent masks a credential in a streamed event's text and data.
@@ -660,7 +689,8 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 		gc.API = o.swaggerGuard(ctx, *t)
 		extraDeny = swaggerDeny(gc.API.Host)
 	}
-	res, err := ws.Claude(ctx, ClaudeRequest{
+	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.TranscriptPurpose(run.Stage), WorkspaceID: t.WorkspaceID,
+		Run: run, TicketKey: t.Key, ModelStage: modelStage}, ClaudeRequest{
 		Prompt:   prompt,
 		Model:    model,
 		MaxTurns: turns,
@@ -726,7 +756,7 @@ func (o *Orchestrator) recordSpend(ctx context.Context, run *domain.Run, modelSt
 	// The run may have been stopped; the spend is recorded regardless.
 	if err := o.store.RecordClaudeCall(context.WithoutCancel(ctx), domain.ClaudeCall{
 		RunID: run.ID, ModelStage: modelStage, Model: model, Usage: res.Usage,
-		Turns: res.Turns, Duration: res.Duration, Partial: res.Partial,
+		Turns: res.Turns, Duration: res.Duration, Partial: res.Partial, TranscriptID: res.TranscriptID,
 	}); err != nil {
 		o.log.Error("record claude spend", "run_id", run.ID, "err", err)
 	}

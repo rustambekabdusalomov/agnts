@@ -3409,6 +3409,132 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/platform/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Run history across every workspace, newest first, without prompts or transcripts (Admin) */
+        get: operations["listPlatformRuns"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/runs/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Totals of the run history matching the filters (Admin) */
+        get: operations["getPlatformRunSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/runs/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        /** One transcript with its whole timeline (Admin). Customer content; the read is written to the audit log first. */
+        get: operations["getPlatformRun"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/runs/{id}/prompt": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        /** The prompt agnts sent (Admin). Audited. */
+        get: operations["getPlatformRunPrompt"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/runs/{id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        /** The transcript as JSON lines, the stored normalised events, not Claude Code's raw output (Admin). Audited. */
+        get: operations["downloadPlatformRun"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What Admins read of customer content, newest first (Admin) */
+        get: operations["listPlatformAudit"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/settings/run-history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** How long run history is kept, and its size limits (Admin) */
+        get: operations["getRunHistorySettings"];
+        /** Change how long run history is kept, and its size limits (Admin) */
+        put: operations["setRunHistorySettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/ci/failures": {
         parameters: {
             query?: never;
@@ -3743,6 +3869,160 @@ export interface components {
             workspace?: string;
             /** Format: date-time */
             createdAt: string;
+        };
+        /** @description One recorded Claude Code or Codex invocation, without its prompt and events */
+        RunTranscript: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            workspaceId: number;
+            workspace: string;
+            workspaceSlug: string;
+            /** Format: int64 */
+            runId?: number;
+            ticketKey?: string;
+            /** @description What a background call is about: a repository, a rule, a language */
+            subject?: string;
+            /** @description The Claude account's label */
+            claudeAccount?: string;
+            /** @description The member whose Claude account it is (per-member mode) */
+            claudeUser?: string;
+            purpose: string;
+            /** @description A call outside a ticket's stages */
+            background: boolean;
+            modelStage?: string;
+            /** @enum {string} */
+            engine: "claude" | "codex";
+            model: string;
+            sessionId?: string;
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: date-time */
+            finishedAt?: string;
+            /** @enum {string} */
+            status: "running" | "done" | "error" | "timeout" | "cancelled" | "oom";
+            exitReason: string;
+            turns: number;
+            toolCalls: number;
+            toolErrors: number;
+            stalls: number;
+            /** Format: int64 */
+            inputTokens: number;
+            /** Format: int64 */
+            outputTokens: number;
+            /** Format: int64 */
+            cacheReadTokens: number;
+            /** Format: int64 */
+            cacheWriteTokens: number;
+            costUsd: number;
+            /** @description Uncompressed size of the events */
+            rawBytes: number;
+            /** @description Compressed size as stored */
+            storedBytes: number;
+            /** @description The size limit was reached; later content was left out */
+            truncated: boolean;
+        };
+        RunHistoryPage: {
+            items: components["schemas"]["RunTranscript"][];
+            /** @description Absent on the last page */
+            nextCursor?: string;
+        };
+        RunHistorySummary: {
+            count: number;
+            /** @description Ended in error, timeout or out of memory */
+            errors: number;
+            /** @description Had at least one stall */
+            stalled: number;
+            costUsd: number;
+            /** @description The part of costUsd spent outside a ticket's stages */
+            backgroundCostUsd: number;
+            /** Format: int64 */
+            inputTokens: number;
+            /** Format: int64 */
+            outputTokens: number;
+            /**
+             * Format: int64
+             * @description Median duration of finished invocations
+             */
+            p50Ms: number;
+            /** Format: int64 */
+            p95Ms: number;
+        };
+        /** @description One line of a transcript. k is the kind: init, text, tool, tool_result, rate_limit, result or note. t is milliseconds since the start. Other fields depend on the kind (text, id, name, summary, input, output, error, exit_code, cut, subtype, turns, cost, status). */
+        RunTranscriptEvent: {
+            /** @description init, text, tool, tool_result, rate_limit, result or note; clients show kinds they do not know as is */
+            k: string;
+            /** Format: int64 */
+            t: number;
+            /** @description text, result, note: the text */
+            text?: string;
+            /** @description tool, tool_result: pairs a result with its call */
+            id?: string;
+            /** @description tool: the tool (Bash, Read, Edit…) */
+            name?: string;
+            /** @description tool: a one-line summary of the call */
+            summary?: string;
+            /** @description tool: the input as given (an object), or as text when it was too big to keep as JSON (cut is then set) */
+            input?: unknown;
+            /** @description tool_result: what the tool returned */
+            output?: string;
+            /** @description tool_result, result: it failed */
+            error?: boolean;
+            /** @description tool_result: a command's exit code (Codex) */
+            exit_code?: number;
+            /** @description The original length in bytes when the content was shortened */
+            cut?: number;
+            /** @description result: success, error_max_turns… */
+            subtype?: string;
+            /** @description result: turns taken */
+            turns?: number;
+            /** @description result: cost in USD */
+            cost?: number;
+            /** @description rate_limit: the plan usage status */
+            status?: string;
+            /** @description init: the Claude Code session */
+            session_id?: string;
+            /** @description init: the model Claude Code reported */
+            model?: string;
+        } & {
+            [key: string]: unknown;
+        };
+        RunTranscriptDetail: {
+            transcript: components["schemas"]["RunTranscript"];
+            events: components["schemas"]["RunTranscriptEvent"][];
+            /** @description The run's other invocations (first pass, fix attempts, second opinion), oldest first */
+            siblings: components["schemas"]["RunTranscript"][];
+            /** @description Part of the stored body could not be read; events holds what could */
+            unreadable?: boolean;
+        };
+        AdminAuditEntry: {
+            /** Format: int64 */
+            id: number;
+            /**
+             * Format: int64
+             * @description Absent once the Admin account is deleted
+             */
+            adminId?: number;
+            adminName: string;
+            /** @description transcript.view, transcript.prompt, transcript.download, run_history.settings */
+            action: string;
+            target: string;
+            /** Format: int64 */
+            workspaceId?: number;
+            workspace?: string;
+            ip?: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        RunHistorySettings: {
+            /** @description Transcripts older than this are deleted daily; 0 keeps them */
+            retentionDays: number;
+            /** @description Cap of one tool output; its start and end are kept */
+            toolOutputKB: number;
+            /** @description Cap of one text block or tool input */
+            textKB: number;
+            /** @description Cap of one transcript; past it only tool calls and the result are kept */
+            transcriptMB: number;
         };
         /** @description A user as the Admin cabinet lists them */
         PlatformUser: {
@@ -7114,6 +7394,21 @@ export interface components {
         };
     };
     parameters: {
+        RunWorkspace: number;
+        /** @description A stage (analyze, code, review…), a background call (assistant, brief, detect, reflect, rules, translate), second_opinion, or the groups stages and background */
+        RunPurpose: string;
+        RunStatus: "running" | "done" | "error" | "timeout" | "cancelled" | "oom";
+        RunEngine: "claude" | "codex";
+        /** @description Part of a model name */
+        RunModel: string;
+        /** @description A ticket key, or its start */
+        RunTicket: string;
+        /** @description Only invocations that had stalls */
+        RunStalled: boolean;
+        RunFrom: string;
+        RunTo: string;
+        /** @description Only invocations that cost at least this many USD */
+        RunMinCost: number;
         ConversationID: number;
         MessageID: number;
         NetworkID: number;
@@ -12624,6 +12919,234 @@ export interface operations {
             };
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+        };
+    };
+    listPlatformRuns: {
+        parameters: {
+            query?: {
+                workspace?: components["parameters"]["RunWorkspace"];
+                /** @description A stage (analyze, code, review…), a background call (assistant, brief, detect, reflect, rules, translate), second_opinion, or the groups stages and background */
+                purpose?: components["parameters"]["RunPurpose"];
+                status?: components["parameters"]["RunStatus"];
+                engine?: components["parameters"]["RunEngine"];
+                /** @description Part of a model name */
+                model?: components["parameters"]["RunModel"];
+                /** @description A ticket key, or its start */
+                ticket?: components["parameters"]["RunTicket"];
+                /** @description Only invocations that had stalls */
+                stalled?: components["parameters"]["RunStalled"];
+                from?: components["parameters"]["RunFrom"];
+                to?: components["parameters"]["RunTo"];
+                /** @description Only invocations that cost at least this many USD */
+                minCost?: components["parameters"]["RunMinCost"];
+                /** @description nextCursor of the previous page */
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunHistoryPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    getPlatformRunSummary: {
+        parameters: {
+            query?: {
+                workspace?: components["parameters"]["RunWorkspace"];
+                /** @description A stage (analyze, code, review…), a background call (assistant, brief, detect, reflect, rules, translate), second_opinion, or the groups stages and background */
+                purpose?: components["parameters"]["RunPurpose"];
+                status?: components["parameters"]["RunStatus"];
+                engine?: components["parameters"]["RunEngine"];
+                /** @description Part of a model name */
+                model?: components["parameters"]["RunModel"];
+                /** @description A ticket key, or its start */
+                ticket?: components["parameters"]["RunTicket"];
+                /** @description Only invocations that had stalls */
+                stalled?: components["parameters"]["RunStalled"];
+                from?: components["parameters"]["RunFrom"];
+                to?: components["parameters"]["RunTo"];
+                /** @description Only invocations that cost at least this many USD */
+                minCost?: components["parameters"]["RunMinCost"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunHistorySummary"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    getPlatformRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunTranscriptDetail"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getPlatformRunPrompt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        prompt: string;
+                    };
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    downloadPlatformRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A file download */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/x-ndjson": string;
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    listPlatformAudit: {
+        parameters: {
+            query?: {
+                admin?: number;
+                action?: string;
+                workspace?: number;
+                /** @description Only rows with a smaller id (pagination) */
+                before?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminAuditEntry"][];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    getRunHistorySettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunHistorySettings"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    setRunHistorySettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RunHistorySettings"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunHistorySettings"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
         };
     };
     listCIFailures: {

@@ -4239,6 +4239,194 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /platform/runs:
+    get:
+      operationId: listPlatformRuns
+      summary: Run history across every workspace, newest first, without prompts or transcripts (Admin)
+      tags: [platform]
+      x-scope: admin
+      parameters:
+        - $ref: '#/components/parameters/RunWorkspace'
+        - $ref: '#/components/parameters/RunPurpose'
+        - $ref: '#/components/parameters/RunStatus'
+        - $ref: '#/components/parameters/RunEngine'
+        - $ref: '#/components/parameters/RunModel'
+        - $ref: '#/components/parameters/RunTicket'
+        - $ref: '#/components/parameters/RunStalled'
+        - $ref: '#/components/parameters/RunFrom'
+        - $ref: '#/components/parameters/RunTo'
+        - $ref: '#/components/parameters/RunMinCost'
+        - name: cursor
+          in: query
+          description: nextCursor of the previous page
+          schema: { type: string, maxLength: 64 }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RunHistoryPage' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /platform/runs/summary:
+    get:
+      operationId: getPlatformRunSummary
+      summary: Totals of the run history matching the filters (Admin)
+      tags: [platform]
+      x-scope: admin
+      parameters:
+        - $ref: '#/components/parameters/RunWorkspace'
+        - $ref: '#/components/parameters/RunPurpose'
+        - $ref: '#/components/parameters/RunStatus'
+        - $ref: '#/components/parameters/RunEngine'
+        - $ref: '#/components/parameters/RunModel'
+        - $ref: '#/components/parameters/RunTicket'
+        - $ref: '#/components/parameters/RunStalled'
+        - $ref: '#/components/parameters/RunFrom'
+        - $ref: '#/components/parameters/RunTo'
+        - $ref: '#/components/parameters/RunMinCost'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RunHistorySummary' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /platform/runs/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    get:
+      operationId: getPlatformRun
+      summary: One transcript with its whole timeline (Admin). Customer content; the read is written to the audit log first.
+      tags: [platform]
+      x-scope: admin
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RunTranscriptDetail' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /platform/runs/{id}/prompt:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    get:
+      operationId: getPlatformRunPrompt
+      summary: The prompt agnts sent (Admin). Audited.
+      tags: [platform]
+      x-scope: admin
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [prompt]
+                properties:
+                  prompt: { type: string }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /platform/runs/{id}/download:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    get:
+      operationId: downloadPlatformRun
+      summary: The transcript as JSON lines, the stored normalised events, not Claude Code's raw output (Admin). Audited.
+      tags: [platform]
+      x-scope: admin
+      responses:
+        '200':
+          description: A file download
+          content:
+            application/x-ndjson:
+              schema: { type: string }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /platform/audit:
+    get:
+      operationId: listPlatformAudit
+      summary: What Admins read of customer content, newest first (Admin)
+      tags: [platform]
+      x-scope: admin
+      parameters:
+        - name: admin
+          in: query
+          schema: { type: integer, format: int64 }
+        - name: action
+          in: query
+          schema: { type: string, maxLength: 64 }
+        - name: workspace
+          in: query
+          schema: { type: integer, format: int64 }
+        - name: before
+          in: query
+          description: Only rows with a smaller id (pagination)
+          schema: { type: integer, format: int64 }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 500, default: 100 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/AdminAuditEntry' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /platform/settings/run-history:
+    get:
+      operationId: getRunHistorySettings
+      summary: How long run history is kept, and its size limits (Admin)
+      tags: [platform]
+      x-scope: admin
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RunHistorySettings' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    put:
+      operationId: setRunHistorySettings
+      summary: Change how long run history is kept, and its size limits (Admin)
+      tags: [platform]
+      x-scope: admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RunHistorySettings' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RunHistorySettings' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
   /ci/failures:
     get:
       operationId: listCIFailures
@@ -4560,6 +4748,51 @@ paths:
 
 components:
   parameters:
+    RunWorkspace:
+      name: workspace
+      in: query
+      schema: { type: integer, format: int64 }
+    RunPurpose:
+      name: purpose
+      in: query
+      description: A stage (analyze, code, review…), a background call (assistant, brief, detect, reflect, rules, translate), second_opinion, or the groups stages and background
+      schema: { type: string, maxLength: 32 }
+    RunStatus:
+      name: status
+      in: query
+      schema: { type: string, enum: [running, done, error, timeout, cancelled, oom] }
+    RunEngine:
+      name: engine
+      in: query
+      schema: { type: string, enum: [claude, codex] }
+    RunModel:
+      name: model
+      in: query
+      description: Part of a model name
+      schema: { type: string, maxLength: 64 }
+    RunTicket:
+      name: ticket
+      in: query
+      description: A ticket key, or its start
+      schema: { type: string, maxLength: 64 }
+    RunStalled:
+      name: stalled
+      in: query
+      description: Only invocations that had stalls
+      schema: { type: boolean }
+    RunFrom:
+      name: from
+      in: query
+      schema: { type: string, format: date-time }
+    RunTo:
+      name: to
+      in: query
+      schema: { type: string, format: date-time }
+    RunMinCost:
+      name: minCost
+      in: query
+      description: Only invocations that cost at least this many USD
+      schema: { type: number, minimum: 0 }
     ConversationID:
       name: conversationId
       in: path
@@ -4687,6 +4920,133 @@ components:
         userId: { type: integer, format: int64, description: 'Absent once the account is deleted' }
         workspace: { type: string, description: The name of the workspace it was sent from }
         createdAt: { type: string, format: date-time }
+
+    RunTranscript:
+      type: object
+      description: One recorded Claude Code or Codex invocation, without its prompt and events
+      required: [id, workspaceId, workspace, workspaceSlug, purpose, background, engine, model, startedAt, status, exitReason,
+        turns, toolCalls, toolErrors, stalls, inputTokens, outputTokens, cacheReadTokens, cacheWriteTokens, costUsd,
+        rawBytes, storedBytes, truncated]
+      properties:
+        id: { type: integer, format: int64 }
+        workspaceId: { type: integer, format: int64 }
+        workspace: { type: string }
+        workspaceSlug: { type: string }
+        runId: { type: integer, format: int64 }
+        ticketKey: { type: string }
+        subject: { type: string, description: 'What a background call is about: a repository, a rule, a language' }
+        claudeAccount: { type: string, description: The Claude account's label }
+        claudeUser: { type: string, description: 'The member whose Claude account it is (per-member mode)' }
+        purpose: { type: string }
+        background: { type: boolean, description: A call outside a ticket's stages }
+        modelStage: { type: string }
+        engine: { type: string, enum: [claude, codex] }
+        model: { type: string }
+        sessionId: { type: string }
+        startedAt: { type: string, format: date-time }
+        finishedAt: { type: string, format: date-time }
+        status: { type: string, enum: [running, done, error, timeout, cancelled, oom] }
+        exitReason: { type: string }
+        turns: { type: integer }
+        toolCalls: { type: integer }
+        toolErrors: { type: integer }
+        stalls: { type: integer }
+        inputTokens: { type: integer, format: int64 }
+        outputTokens: { type: integer, format: int64 }
+        cacheReadTokens: { type: integer, format: int64 }
+        cacheWriteTokens: { type: integer, format: int64 }
+        costUsd: { type: number }
+        rawBytes: { type: integer, description: Uncompressed size of the events }
+        storedBytes: { type: integer, description: Compressed size as stored }
+        truncated: { type: boolean, description: The size limit was reached; later content was left out }
+
+    RunHistoryPage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/RunTranscript' }
+        nextCursor: { type: string, description: Absent on the last page }
+
+    RunHistorySummary:
+      type: object
+      required: [count, errors, stalled, costUsd, backgroundCostUsd, inputTokens, outputTokens, p50Ms, p95Ms]
+      properties:
+        count: { type: integer }
+        errors: { type: integer, description: 'Ended in error, timeout or out of memory' }
+        stalled: { type: integer, description: Had at least one stall }
+        costUsd: { type: number }
+        backgroundCostUsd: { type: number, description: The part of costUsd spent outside a ticket's stages }
+        inputTokens: { type: integer, format: int64 }
+        outputTokens: { type: integer, format: int64 }
+        p50Ms: { type: integer, format: int64, description: Median duration of finished invocations }
+        p95Ms: { type: integer, format: int64 }
+
+    RunTranscriptEvent:
+      type: object
+      description: >-
+        One line of a transcript. k is the kind: init, text, tool, tool_result, rate_limit, result or note.
+        t is milliseconds since the start. Other fields depend on the kind (text, id, name, summary, input,
+        output, error, exit_code, cut, subtype, turns, cost, status).
+      required: [k, t]
+      additionalProperties: true
+      properties:
+        k: { type: string, description: 'init, text, tool, tool_result, rate_limit, result or note; clients show kinds they do not know as is' }
+        t: { type: integer, format: int64 }
+        text: { type: string, description: 'text, result, note: the text' }
+        id: { type: string, description: 'tool, tool_result: pairs a result with its call' }
+        name: { type: string, description: 'tool: the tool (Bash, Read, Edit…)' }
+        summary: { type: string, description: 'tool: a one-line summary of the call' }
+        input:
+          description: 'tool: the input as given (an object), or as text when it was too big to keep as JSON (cut is then set)'
+        output: { type: string, description: 'tool_result: what the tool returned' }
+        error: { type: boolean, description: 'tool_result, result: it failed' }
+        exit_code: { type: integer, description: 'tool_result: a command''s exit code (Codex)' }
+        cut: { type: integer, description: 'The original length in bytes when the content was shortened' }
+        subtype: { type: string, description: 'result: success, error_max_turns…' }
+        turns: { type: integer, description: 'result: turns taken' }
+        cost: { type: number, description: 'result: cost in USD' }
+        status: { type: string, description: 'rate_limit: the plan usage status' }
+        session_id: { type: string, description: 'init: the Claude Code session' }
+        model: { type: string, description: 'init: the model Claude Code reported' }
+
+    RunTranscriptDetail:
+      type: object
+      required: [transcript, events, siblings]
+      properties:
+        transcript: { $ref: '#/components/schemas/RunTranscript' }
+        events:
+          type: array
+          items: { $ref: '#/components/schemas/RunTranscriptEvent' }
+        siblings:
+          type: array
+          description: The run's other invocations (first pass, fix attempts, second opinion), oldest first
+          items: { $ref: '#/components/schemas/RunTranscript' }
+        unreadable: { type: boolean, description: Part of the stored body could not be read; events holds what could }
+
+    AdminAuditEntry:
+      type: object
+      required: [id, adminName, action, target, createdAt]
+      properties:
+        id: { type: integer, format: int64 }
+        adminId: { type: integer, format: int64, description: Absent once the Admin account is deleted }
+        adminName: { type: string }
+        action: { type: string, description: 'transcript.view, transcript.prompt, transcript.download, run_history.settings' }
+        target: { type: string }
+        workspaceId: { type: integer, format: int64 }
+        workspace: { type: string }
+        ip: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    RunHistorySettings:
+      type: object
+      required: [retentionDays, toolOutputKB, textKB, transcriptMB]
+      properties:
+        retentionDays: { type: integer, minimum: 0, maximum: 3650, description: Transcripts older than this are deleted daily; 0 keeps them }
+        toolOutputKB: { type: integer, minimum: 1, maximum: 1024, description: Cap of one tool output; its start and end are kept }
+        textKB: { type: integer, minimum: 1, maximum: 1024, description: Cap of one text block or tool input }
+        transcriptMB: { type: integer, minimum: 1, maximum: 64, description: Cap of one transcript; past it only tool calls and the result are kept }
 
     PlatformUser:
       type: object

@@ -233,7 +233,8 @@ func (o *Orchestrator) runReflect(ctx context.Context, r domain.Reflection) ([]d
 	if r.Source == domain.ReflectRun {
 		model = s.Models.Helper // a run's trouble is small and plain: the cheap model reads it
 	}
-	res, err := ws.Claude(ctx, ClaudeRequest{
+	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeReflect, WorkspaceID: r.WorkspaceID,
+		TicketKey: r.TicketKey, Subject: r.Source}, ClaudeRequest{
 		Prompt:   prompt,
 		Model:    model,
 		MaxTurns: min(s.MaxTurns, reflectMaxTurns),

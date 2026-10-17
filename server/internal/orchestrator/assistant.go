@@ -646,7 +646,8 @@ func (o *Orchestrator) runAssistant(ctx context.Context, s domain.Settings, wsID
 	if err != nil {
 		return ClaudeResult{}, err
 	}
-	res, err := ws.Claude(ctx, ClaudeRequest{
+	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeAssistant, WorkspaceID: wsID,
+		Subject: "message " + strconv.FormatInt(a.ID, 10)}, ClaudeRequest{
 		Prompt:   prompt,
 		Model:    s.Models.Helper,
 		MaxTurns: assistantMaxTurns,

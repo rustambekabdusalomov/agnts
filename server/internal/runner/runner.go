@@ -461,6 +461,9 @@ func (w *workspace) Claude(ctx context.Context, req orchestrator.ClaudeRequest, 
 	if cred.Env == "" {
 		cred.Env = "CLAUDE_CODE_OAUTH_TOKEN"
 	}
+	// The token is in the agent's environment, so `env` in a tool call
+	// would print it: nothing above the runner sees it, or req.Env's values.
+	onEvent = maskEvents(domain.NewSecretRedactor(append([]string{cred.Token}, envValues(req.Env)...)...), onEvent)
 	argv := []string{"claude", "-p", req.Prompt,
 		"--output-format", "stream-json", "--verbose",
 		"--permission-mode", "dontAsk"}
@@ -536,6 +539,7 @@ func (w *workspace) codex(ctx context.Context, req orchestrator.ClaudeRequest, m
 	if key == "" {
 		return orchestrator.ClaudeResult{}, errors.New("codex runs need an OpenAI API key: connect OpenAI under Integrations")
 	}
+	onEvent = maskEvents(domain.NewSecretRedactor(append([]string{key}, envValues(req.Env)...)...), onEvent)
 	pr, pw := io.Pipe()
 	var stderr tailBuffer
 	type execOut struct {

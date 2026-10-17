@@ -8,6 +8,7 @@ import 'package:agnts_mobile/app_router.dart';
 import 'package:agnts_mobile/core/data.dart';
 import 'package:agnts_mobile/core/flavor.dart';
 import 'package:agnts_mobile/core/session.dart';
+import 'package:agnts_mobile/features/admin/admin_audit_screen.dart';
 import 'package:agnts_mobile/features/admin/admin_data.dart';
 import 'package:agnts_mobile/features/admin/admin_feedback_screen.dart';
 import 'package:agnts_mobile/features/admin/admin_users_screen.dart';
@@ -128,6 +129,40 @@ void main() {
     expect(find.text('Dark mode'), findsOneWidget);
     expect(find.text('Old bug'), findsNothing);
     expect(find.text('Mark done'), findsOneWidget);
+  });
+
+  testWidgets('the audit log lists reads and filters by action', (tester) async {
+    AdminAuditEntry row(int id, String action, String target, {int? adminId = 7}) => AdminAuditEntry(
+        id: id, adminId: adminId, adminName: 'olim', action: action, target: target, workspace: 'Iman', ip: '203.0.113.9', createdAt: _now);
+    await tester.pumpWidget(_app(const AdminAuditScreen(), overrides: [
+      platformAuditProvider.overrideWith((_) async => [
+            row(3, 'transcript.view', 'transcript:18342'),
+            row(2, 'transcript.prompt', 'transcript:18342', adminId: null),
+            row(1, 'run_history.settings', 'retention 90d, tool 16KB, text 32KB, transcript 8MB'),
+          ]),
+    ]));
+    await tester.pumpAndSettle();
+    expect(find.text('Viewed a transcript'), findsWidgets);
+    expect(find.text('Transcript #18342'), findsNWidgets(2));
+    expect(find.textContaining('olim (account deleted)'), findsOneWidget);
+    expect(find.textContaining('203.0.113.9'), findsNWidgets(3));
+    expect(find.text('Load more'), findsNothing); // fewer than a page
+
+    final chip = find.text('Changed settings').first; // the chip; the row has the same label
+    await tester.ensureVisible(chip);
+    await tester.pumpAndSettle();
+    await tester.tap(chip);
+    await tester.pumpAndSettle();
+    expect(find.text('Transcript #18342'), findsNothing);
+    expect(find.text('retention 90d, tool 16KB, text 32KB, transcript 8MB'), findsOneWidget);
+  });
+
+  test('audit targets and actions read as words', () {
+    final l = lookupAppLocalizations(const Locale('en'));
+    expect(auditTargetLabel(l, 'transcript:12'), 'Transcript #12');
+    expect(auditTargetLabel(l, 'transcript:x'), 'transcript:x');
+    expect(auditActionLabel(l, 'transcript.download'), 'Downloaded a transcript');
+    expect(auditActionLabel(l, 'something.new'), 'something.new');
   });
 }
 

@@ -319,7 +319,9 @@ type ClaudeCall struct {
 	Turns      int
 	Duration   time.Duration
 	Partial    bool
-	CreatedAt  time.Time
+	// TranscriptID is the invocation's run history transcript; 0 for none.
+	TranscriptID int64
+	CreatedAt    time.Time
 }
 
 // StageUsage is a ticket's spend for one model stage and model, in the

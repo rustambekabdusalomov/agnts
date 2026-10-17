@@ -12,11 +12,15 @@ import (
 // ticket is taken from the run.
 func (s *Agent) RecordClaudeCall(ctx context.Context, c domain.ClaudeCall) error {
 	u := c.Usage
+	var transcript *int64
+	if c.TranscriptID > 0 {
+		transcript = &c.TranscriptID
+	}
 	tag, err := s.db.Exec(ctx, `INSERT INTO claude_calls (run_id, ticket_id, model_stage, model,
-			input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, cost_usd, turns, duration_ms, partial)
-		SELECT id, ticket_id, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11 FROM runs WHERE id = $1`,
+			input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, cost_usd, turns, duration_ms, partial, transcript_id)
+		SELECT id, ticket_id, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12 FROM runs WHERE id = $1`,
 		c.RunID, c.ModelStage, c.Model, u.Input, u.Output, u.CacheRead, u.CacheWrite, u.CostUSD,
-		c.Turns, c.Duration.Milliseconds(), c.Partial)
+		c.Turns, c.Duration.Milliseconds(), c.Partial, transcript)
 	if err != nil {
 		return err
 	}

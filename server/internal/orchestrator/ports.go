@@ -438,7 +438,8 @@ const (
 	ClaudeInit ClaudeEventKind = "init"
 	ClaudeText ClaudeEventKind = "text"
 	ClaudeTool ClaudeEventKind = "tool"
-	// ClaudeToolResult: a tool call finished (Data: id, is_error).
+	// ClaudeToolResult: a tool call finished (Data: id, is_error, and
+	// output: the text it returned).
 	ClaudeToolResult ClaudeEventKind = "tool_result"
 	ClaudeRateLimit  ClaudeEventKind = "rate_limit"
 	ClaudeResultEv   ClaudeEventKind = "result"
@@ -469,6 +470,9 @@ type ClaudeResult struct {
 	// assistant messages seen, without a cost.
 	Usage   domain.TokenUsage
 	Partial bool
+	// TranscriptID is the run history transcript the invocation was
+	// recorded in (0: not recorded).
+	TranscriptID int64
 }
 
 // ExecResult is the outcome of Workspace.Exec.

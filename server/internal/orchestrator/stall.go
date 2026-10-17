@@ -151,6 +151,7 @@ func (o *Orchestrator) onStall(ctx context.Context, s domain.Settings, ws Worksp
 	if st.Acted {
 		msg += "; agnts asked Claude to step back"
 	}
+	o.noteTranscript(run.ID, "stall: "+st.Detail)
 	o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventStall, Level: domain.LevelWarn,
 		Message: msg, Data: map[string]any{"reason": st.Reason, "turn": st.Turn, "acted": st.Acted}})
 }

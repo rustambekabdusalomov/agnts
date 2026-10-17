@@ -71,9 +71,40 @@ type contentBlock struct {
 	Name  string          `json:"name"`
 	Input json.RawMessage `json:"input"`
 	ID    string          `json:"id"`
-	// tool_result blocks (in "user" lines): which call, and whether it failed.
-	ToolUseID string `json:"tool_use_id"`
-	IsError   bool   `json:"is_error"`
+	// tool_result blocks (in "user" lines): which call, whether it failed,
+	// and what it returned (a string, or an array of text and image parts).
+	ToolUseID string          `json:"tool_use_id"`
+	IsError   bool            `json:"is_error"`
+	Content   json.RawMessage `json:"content"`
+}
+
+// resultText is the text a tool_result block carries: its string content,
+// or its text parts joined; image parts are named, not kept.
+func resultText(raw json.RawMessage) string {
+	if len(raw) == 0 {
+		return ""
+	}
+	var s string
+	if json.Unmarshal(raw, &s) == nil {
+		return s
+	}
+	var parts []struct {
+		Type string `json:"type"`
+		Text string `json:"text"`
+	}
+	if json.Unmarshal(raw, &parts) != nil {
+		return ""
+	}
+	texts := make([]string, 0, len(parts))
+	for _, p := range parts {
+		switch p.Type {
+		case "text":
+			texts = append(texts, p.Text)
+		case "image":
+			texts = append(texts, "[image]")
+		}
+	}
+	return strings.Join(texts, "\n")
 }
 
 var rateLimitText = regexp.MustCompile(`(?i)(usage limit|rate limit|limit reached|limit will reset|resets? at)`)
@@ -131,7 +162,7 @@ func ParseStream(r io.Reader, onEvent func(orchestrator.ClaudeEvent)) (orchestra
 				case "tool_use":
 					emit(onEvent, orchestrator.ClaudeEvent{
 						Kind: orchestrator.ClaudeTool, Tool: toolSummary(b.Name, b.Input),
-						Data: map[string]any{"tool": b.Name, "id": b.ID},
+						Data: map[string]any{"tool": b.Name, "id": b.ID, "input": b.Input},
 					})
 				}
 			}
@@ -144,7 +175,7 @@ func ParseStream(r io.Reader, onEvent func(orchestrator.ClaudeEvent)) (orchestra
 			for _, b := range blocks {
 				if b.Type == "tool_result" && b.ToolUseID != "" {
 					emit(onEvent, orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeToolResult,
-						Data: map[string]any{"id": b.ToolUseID, "is_error": b.IsError}})
+						Data: map[string]any{"id": b.ToolUseID, "is_error": b.IsError, "output": resultText(b.Content)}})
 				}
 			}
 

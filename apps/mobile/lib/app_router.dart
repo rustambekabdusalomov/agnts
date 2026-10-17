@@ -10,6 +10,9 @@ import 'features/account/feedback_screen.dart';
 import 'features/account/profile_screen.dart';
 import 'features/account/workspaces_screen.dart';
 import 'features/admin/admin_admins_screen.dart';
+import 'features/admin/admin_audit_screen.dart';
+import 'features/admin/admin_run_screen.dart';
+import 'features/admin/admin_runs_screen.dart';
 import 'features/admin/admin_dashboard_screen.dart';
 import 'features/admin/admin_data.dart';
 import 'features/admin/admin_feedback_screen.dart';
@@ -99,6 +102,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/invite/:token', builder: (_, s) => InviteScreen(token: s.pathParameters['token']!)),
       if (adminApp) ...[
         GoRoute(path: '/admin/admins', builder: (_, _) => const AdminAdminsScreen()),
+        GoRoute(path: '/admin/audit', builder: (_, _) => const AdminAuditScreen()),
+        GoRoute(path: '/admin/runs', builder: (_, _) => const AdminRunsScreen()),
+        GoRoute(path: '/admin/runs/:id', builder: (_, s) => AdminRunScreen(id: int.tryParse(s.pathParameters['id'] ?? '') ?? 0)),
         StatefulShellRoute.indexedStack(
           builder: (context, state, shell) => _AdminShell(shell: shell),
           branches: [

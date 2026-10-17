@@ -9830,6 +9830,481 @@ class AppLocalizationsRu extends AppLocalizations {
       'Знания о продукте: что значат термины, какие инварианты должен соблюдать код, кто чем пользуется. Каждый запуск читает это перед началом.';
 
   @override
+  String get runsNavRuns => 'Запуски';
+
+  @override
+  String get runsTitle => 'История запусков';
+
+  @override
+  String get runsLede =>
+      'Каждый вызов Claude Code и Codex во всех рабочих пространствах: сколько он стоил, сколько длился и чем закончился. Открытый запуск показывает данные клиента, и каждый просмотр записывается в журнал.';
+
+  @override
+  String get runsRunTitle => 'Вызов';
+
+  @override
+  String get runsBack => 'Все запуски';
+
+  @override
+  String get runsSettings => 'Настройки';
+
+  @override
+  String get runsSumCount => 'Вызовы';
+
+  @override
+  String get runsSumErrors => 'Доля ошибок';
+
+  @override
+  String runsSumErrorsNote(String n) {
+    return '$n завершились ошибкой, тайм-аутом или нехваткой памяти';
+  }
+
+  @override
+  String get runsSumStalls => 'С зависаниями';
+
+  @override
+  String get runsSumStallsNote => 'вызовы хотя бы с одним зависанием';
+
+  @override
+  String get runsSumCost => 'Стоимость';
+
+  @override
+  String runsSumCostNote(String cost) {
+    return 'фоновые $cost';
+  }
+
+  @override
+  String get runsSumTokens => 'Токены вход / выход';
+
+  @override
+  String get runsSumTokensNote => 'без чтения из кэша';
+
+  @override
+  String get runsSumDuration => 'Длительность p50 / p95';
+
+  @override
+  String get runsSumDurationNote => 'завершённых вызовов';
+
+  @override
+  String get runsFWorkspace => 'Рабочее пространство';
+
+  @override
+  String get runsAllWorkspaces => 'Все рабочие пространства';
+
+  @override
+  String get runsFPurpose => 'Назначение';
+
+  @override
+  String get runsAllPurposes => 'Все назначения';
+
+  @override
+  String get runsPStages => 'Этапы тикета';
+
+  @override
+  String get runsPBackground => 'Фоновые вызовы';
+
+  @override
+  String get runsP_analyze => 'Анализ';
+
+  @override
+  String get runsP_code => 'Написание кода';
+
+  @override
+  String get runsP_review => 'Ревью';
+
+  @override
+  String get runsP_push => 'Отправка';
+
+  @override
+  String get runsP_learn => 'Обучение';
+
+  @override
+  String get runsP_preview => 'Предпросмотр';
+
+  @override
+  String get runsP_second_opinion => 'Второе мнение';
+
+  @override
+  String get runsP_assistant => 'Ассистент';
+
+  @override
+  String get runsP_brief => 'Описание репозитория';
+
+  @override
+  String get runsP_detect => 'Определение инструментов';
+
+  @override
+  String get runsP_reflect => 'Рефлексия';
+
+  @override
+  String get runsP_rules => 'Правила';
+
+  @override
+  String get runsP_translate => 'Перевод';
+
+  @override
+  String get runsFStatus => 'Статус';
+
+  @override
+  String get runsAnyStatus => 'Любой статус';
+
+  @override
+  String get runsS_running => 'Выполняется';
+
+  @override
+  String get runsS_done => 'Готово';
+
+  @override
+  String get runsS_error => 'Ошибка';
+
+  @override
+  String get runsS_timeout => 'Тайм-аут';
+
+  @override
+  String get runsS_cancelled => 'Отменён';
+
+  @override
+  String get runsS_oom => 'Нехватка памяти';
+
+  @override
+  String get runsFEngine => 'Движок';
+
+  @override
+  String get runsAnyEngine => 'Любой движок';
+
+  @override
+  String get runsE_claude => 'Claude';
+
+  @override
+  String get runsE_codex => 'Codex';
+
+  @override
+  String get runsFModel => 'Модель';
+
+  @override
+  String get runsFTicket => 'Тикет';
+
+  @override
+  String get runsFStalled => 'С зависаниями';
+
+  @override
+  String get runsFPeriod => 'Период';
+
+  @override
+  String get runsPer_1d => 'Последние 24 часа';
+
+  @override
+  String get runsPer_7d => 'Последние 7 дней';
+
+  @override
+  String get runsPer_30d => 'Последние 30 дней';
+
+  @override
+  String get runsPer_all => 'За всё время';
+
+  @override
+  String get runsFMinCost => 'Мин. стоимость';
+
+  @override
+  String get runsClear => 'Сбросить фильтры';
+
+  @override
+  String get runsNone => 'Нет вызовов по этим фильтрам.';
+
+  @override
+  String get runsLoadMore => 'Загрузить ещё';
+
+  @override
+  String get runsColStarted => 'Начало';
+
+  @override
+  String get runsColWorkspace => 'Рабочее пространство';
+
+  @override
+  String get runsColTicket => 'Тикет или предмет';
+
+  @override
+  String get runsColPurpose => 'Назначение';
+
+  @override
+  String get runsColModel => 'Модель';
+
+  @override
+  String get runsColTurns => 'Ходы';
+
+  @override
+  String get runsColTools => 'Инструменты';
+
+  @override
+  String get runsColCost => 'Стоимость';
+
+  @override
+  String get runsColDuration => 'Длительность';
+
+  @override
+  String get runsColOutcome => 'Итог';
+
+  @override
+  String runsToolsTitle(String calls, String errors) {
+    return 'Вызовов инструментов: $calls, с ошибкой: $errors';
+  }
+
+  @override
+  String runsStallsTitle(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n зависания',
+      many: '$n зависаний',
+      few: '$n зависания',
+      one: '$n зависание',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get runsSettingsTitle => 'Настройки истории запусков';
+
+  @override
+  String get runsSettingsSub =>
+      'Сколько хранятся записи и какая их часть сохраняется. Ограничения действуют для вызовов, начатых после сохранения.';
+
+  @override
+  String get runsSet_retentionDays => 'Хранить записи, дней';
+
+  @override
+  String get runsSet_retentionDaysHelp => 'Более старые удаляются ежедневно; 0 — хранить всегда';
+
+  @override
+  String get runsSet_toolOutputKB => 'Лимит вывода инструмента, КБ';
+
+  @override
+  String get runsSet_toolOutputKBHelp => 'Вывод одного инструмента; начало и конец сохраняются';
+
+  @override
+  String get runsSet_textKB => 'Лимит текста, КБ';
+
+  @override
+  String get runsSet_textKBHelp => 'Один текстовый блок или вход инструмента';
+
+  @override
+  String get runsSet_transcriptMB => 'Лимит записи, МБ';
+
+  @override
+  String get runsSet_transcriptMBHelp => 'Сверх него сохраняются только вызовы инструментов и результат';
+
+  @override
+  String get runsSettingsSave => 'Сохранить';
+
+  @override
+  String get runsSettingsSaved => 'Настройки истории запусков сохранены';
+
+  @override
+  String get runsBanner => 'Вы просматриваете данные клиента. Этот доступ записывается в журнал.';
+
+  @override
+  String get runsDownload => 'Скачать JSONL';
+
+  @override
+  String get runsNotFound => 'Этой записи больше нет.';
+
+  @override
+  String get runsUnreadable => 'Часть записи не удалось прочитать; ниже то, что удалось.';
+
+  @override
+  String get runsTruncated => 'Достигнут лимит размера; дальнейшее содержимое не сохранено.';
+
+  @override
+  String get runsAccount => 'Аккаунт Claude';
+
+  @override
+  String get runsSession => 'Сессия';
+
+  @override
+  String get runsStartedAt => 'Начало';
+
+  @override
+  String get runsFinishedAt => 'Окончание';
+
+  @override
+  String get runsTokens => 'Токены';
+
+  @override
+  String runsTokensVal(String input, String output) {
+    return '$input вход · $output выход';
+  }
+
+  @override
+  String runsCacheVal(String read, String write) {
+    return 'кэш: $read чтение · $write запись';
+  }
+
+  @override
+  String get runsSize => 'Размер хранения / исходный';
+
+  @override
+  String get runsExitReason => 'Причина завершения';
+
+  @override
+  String get runsRunningNote => 'Ещё выполняется. Обновление снова читает запись и тоже записывается в журнал.';
+
+  @override
+  String get runsReload => 'Обновить';
+
+  @override
+  String get runsSiblings => 'Вызовы этого запуска';
+
+  @override
+  String get runsSiblingsSub => 'Первый проход, попытки исправления и второе мнение, сначала старые';
+
+  @override
+  String get runsThisOne => 'текущий';
+
+  @override
+  String get runsTab_timeline => 'Хронология';
+
+  @override
+  String get runsTab_prompt => 'Промпт';
+
+  @override
+  String get runsTab_result => 'Результат';
+
+  @override
+  String runsEventsCount(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n события',
+      many: '$n событий',
+      few: '$n события',
+      one: '$n событие',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String runsNextError(String n) {
+    return 'Следующая ошибка ($n)';
+  }
+
+  @override
+  String get runsNoErrors => 'Ошибок нет';
+
+  @override
+  String get runsNoEvents => 'Ничего не записано.';
+
+  @override
+  String runsShowMore(String n) {
+    return 'Показать ещё $n';
+  }
+
+  @override
+  String get runsKTool => 'Инструмент';
+
+  @override
+  String get runsKToolResult => 'Результат инструмента';
+
+  @override
+  String get runsKInit => 'Старт';
+
+  @override
+  String get runsKRateLimit => 'Лимит запросов';
+
+  @override
+  String get runsKNote => 'agnts';
+
+  @override
+  String get runsKResult => 'Результат';
+
+  @override
+  String get runsToolOk => 'Успешно';
+
+  @override
+  String get runsToolFailed => 'С ошибкой';
+
+  @override
+  String runsExitCode(String code) {
+    return 'код $code';
+  }
+
+  @override
+  String get runsInput => 'Вход';
+
+  @override
+  String get runsOutput => 'Вывод';
+
+  @override
+  String get runsNoOutput => '(нет вывода)';
+
+  @override
+  String runsCutNote(String kb) {
+    return 'сокращено, исходно $kb КБ';
+  }
+
+  @override
+  String runsTurnsN(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n хода', many: '$n ходов', few: '$n хода', one: '$n ход');
+    return '$_temp0';
+  }
+
+  @override
+  String get runsNoPrompt => '(пустой промпт)';
+
+  @override
+  String get runsNoResult => 'Результат не записан.';
+
+  @override
+  String get runsSubtype => 'Подтип';
+
+  @override
+  String get runsAuditTitle => 'Журнал аудита';
+
+  @override
+  String get runsAuditLede =>
+      'Каждый раз, когда администратор просматривал данные клиента (запись, промпт, скачивание) или менял настройки истории запусков, сначала новые.';
+
+  @override
+  String get runsAllActions => 'Все действия';
+
+  @override
+  String get runsA_transcript_view => 'Просмотр записи';
+
+  @override
+  String get runsA_transcript_prompt => 'Просмотр промпта';
+
+  @override
+  String get runsA_transcript_download => 'Скачивание записи';
+
+  @override
+  String get runsA_run_history_settings => 'Изменение настроек';
+
+  @override
+  String get runsColTime => 'Время';
+
+  @override
+  String get runsColAdmin => 'Администратор';
+
+  @override
+  String get runsColAction => 'Действие';
+
+  @override
+  String get runsColTarget => 'Объект';
+
+  @override
+  String get runsColIp => 'IP';
+
+  @override
+  String get runsNoAudit => 'В журнале аудита пока пусто.';
+
+  @override
+  String get runsAuditSearch => 'Поиск по админу, объекту или пространству';
+
+  @override
+  String runsAuditTranscript(String id) {
+    return 'Транскрипт №$id';
+  }
+
+  @override
   String get settingsTitle => 'Настройки';
 
   @override

@@ -9370,6 +9370,467 @@ class AppLocalizationsEn extends AppLocalizations {
       'Knowledge about your product: what its terms mean, invariants the code must keep, who uses what. Every run reads it before it starts.';
 
   @override
+  String get runsNavRuns => 'Runs';
+
+  @override
+  String get runsTitle => 'Run history';
+
+  @override
+  String get runsLede =>
+      'Every Claude Code and Codex invocation across workspaces: what it cost, how long it took and how it ended. Opening one shows customer content, and every read is logged.';
+
+  @override
+  String get runsRunTitle => 'Invocation';
+
+  @override
+  String get runsBack => 'All runs';
+
+  @override
+  String get runsSettings => 'Settings';
+
+  @override
+  String get runsSumCount => 'Invocations';
+
+  @override
+  String get runsSumErrors => 'Error rate';
+
+  @override
+  String runsSumErrorsNote(String n) {
+    return '$n ended in an error, timeout or out of memory';
+  }
+
+  @override
+  String get runsSumStalls => 'Had stalls';
+
+  @override
+  String get runsSumStallsNote => 'invocations with at least one stall';
+
+  @override
+  String get runsSumCost => 'Cost';
+
+  @override
+  String runsSumCostNote(String cost) {
+    return 'background $cost';
+  }
+
+  @override
+  String get runsSumTokens => 'Tokens in / out';
+
+  @override
+  String get runsSumTokensNote => 'without cache reads';
+
+  @override
+  String get runsSumDuration => 'Duration p50 / p95';
+
+  @override
+  String get runsSumDurationNote => 'of finished invocations';
+
+  @override
+  String get runsFWorkspace => 'Workspace';
+
+  @override
+  String get runsAllWorkspaces => 'All workspaces';
+
+  @override
+  String get runsFPurpose => 'Purpose';
+
+  @override
+  String get runsAllPurposes => 'All purposes';
+
+  @override
+  String get runsPStages => 'Ticket stages';
+
+  @override
+  String get runsPBackground => 'Background calls';
+
+  @override
+  String get runsP_analyze => 'Analysis';
+
+  @override
+  String get runsP_code => 'Coding';
+
+  @override
+  String get runsP_review => 'Review';
+
+  @override
+  String get runsP_push => 'Push';
+
+  @override
+  String get runsP_learn => 'Learning';
+
+  @override
+  String get runsP_preview => 'Preview';
+
+  @override
+  String get runsP_second_opinion => 'Second opinion';
+
+  @override
+  String get runsP_assistant => 'Assistant';
+
+  @override
+  String get runsP_brief => 'Repository brief';
+
+  @override
+  String get runsP_detect => 'Toolchain detection';
+
+  @override
+  String get runsP_reflect => 'Reflection';
+
+  @override
+  String get runsP_rules => 'Rules';
+
+  @override
+  String get runsP_translate => 'Translation';
+
+  @override
+  String get runsFStatus => 'Status';
+
+  @override
+  String get runsAnyStatus => 'Any status';
+
+  @override
+  String get runsS_running => 'Running';
+
+  @override
+  String get runsS_done => 'Done';
+
+  @override
+  String get runsS_error => 'Error';
+
+  @override
+  String get runsS_timeout => 'Timed out';
+
+  @override
+  String get runsS_cancelled => 'Cancelled';
+
+  @override
+  String get runsS_oom => 'Out of memory';
+
+  @override
+  String get runsFEngine => 'Engine';
+
+  @override
+  String get runsAnyEngine => 'Any engine';
+
+  @override
+  String get runsE_claude => 'Claude';
+
+  @override
+  String get runsE_codex => 'Codex';
+
+  @override
+  String get runsFModel => 'Model';
+
+  @override
+  String get runsFTicket => 'Ticket';
+
+  @override
+  String get runsFStalled => 'Had stalls';
+
+  @override
+  String get runsFPeriod => 'Period';
+
+  @override
+  String get runsPer_1d => 'Last 24 hours';
+
+  @override
+  String get runsPer_7d => 'Last 7 days';
+
+  @override
+  String get runsPer_30d => 'Last 30 days';
+
+  @override
+  String get runsPer_all => 'All time';
+
+  @override
+  String get runsFMinCost => 'Min. cost';
+
+  @override
+  String get runsClear => 'Clear filters';
+
+  @override
+  String get runsNone => 'No invocations match these filters.';
+
+  @override
+  String get runsLoadMore => 'Load more';
+
+  @override
+  String get runsColStarted => 'Started';
+
+  @override
+  String get runsColWorkspace => 'Workspace';
+
+  @override
+  String get runsColTicket => 'Ticket or subject';
+
+  @override
+  String get runsColPurpose => 'Purpose';
+
+  @override
+  String get runsColModel => 'Model';
+
+  @override
+  String get runsColTurns => 'Turns';
+
+  @override
+  String get runsColTools => 'Tools';
+
+  @override
+  String get runsColCost => 'Cost';
+
+  @override
+  String get runsColDuration => 'Duration';
+
+  @override
+  String get runsColOutcome => 'Outcome';
+
+  @override
+  String runsToolsTitle(String calls, String errors) {
+    return '$calls tool calls, $errors failed';
+  }
+
+  @override
+  String runsStallsTitle(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n stalls', one: '$n stall');
+    return '$_temp0';
+  }
+
+  @override
+  String get runsSettingsTitle => 'Run history settings';
+
+  @override
+  String get runsSettingsSub =>
+      'How long transcripts are kept and how much of each is stored. Caps apply to invocations started after saving.';
+
+  @override
+  String get runsSet_retentionDays => 'Keep transcripts, days';
+
+  @override
+  String get runsSet_retentionDaysHelp => 'Older ones are deleted daily; 0 keeps them';
+
+  @override
+  String get runsSet_toolOutputKB => 'Tool output cap, KB';
+
+  @override
+  String get runsSet_toolOutputKBHelp => 'One tool\'s output; its start and end are kept';
+
+  @override
+  String get runsSet_textKB => 'Text cap, KB';
+
+  @override
+  String get runsSet_textKBHelp => 'One text block or tool input';
+
+  @override
+  String get runsSet_transcriptMB => 'Transcript cap, MB';
+
+  @override
+  String get runsSet_transcriptMBHelp => 'Past it only tool calls and the result are kept';
+
+  @override
+  String get runsSettingsSave => 'Save';
+
+  @override
+  String get runsSettingsSaved => 'Run history settings saved';
+
+  @override
+  String get runsBanner => 'Viewing customer content. This access is logged.';
+
+  @override
+  String get runsDownload => 'Download JSONL';
+
+  @override
+  String get runsNotFound => 'This transcript no longer exists.';
+
+  @override
+  String get runsUnreadable => 'Part of this transcript could not be read; what follows is what could.';
+
+  @override
+  String get runsTruncated => 'The size limit was reached; later content was left out.';
+
+  @override
+  String get runsAccount => 'Claude account';
+
+  @override
+  String get runsSession => 'Session';
+
+  @override
+  String get runsStartedAt => 'Started';
+
+  @override
+  String get runsFinishedAt => 'Finished';
+
+  @override
+  String get runsTokens => 'Tokens';
+
+  @override
+  String runsTokensVal(String input, String output) {
+    return '$input in · $output out';
+  }
+
+  @override
+  String runsCacheVal(String read, String write) {
+    return 'cache: $read read · $write written';
+  }
+
+  @override
+  String get runsSize => 'Stored / raw size';
+
+  @override
+  String get runsExitReason => 'Exit reason';
+
+  @override
+  String get runsRunningNote => 'Still running. Reloading reads the transcript again, which is logged.';
+
+  @override
+  String get runsReload => 'Reload';
+
+  @override
+  String get runsSiblings => 'This run\'s invocations';
+
+  @override
+  String get runsSiblingsSub => 'First pass, fix attempts and second opinion, oldest first';
+
+  @override
+  String get runsThisOne => 'this one';
+
+  @override
+  String get runsTab_timeline => 'Timeline';
+
+  @override
+  String get runsTab_prompt => 'Prompt';
+
+  @override
+  String get runsTab_result => 'Result';
+
+  @override
+  String runsEventsCount(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n events', one: '$n event');
+    return '$_temp0';
+  }
+
+  @override
+  String runsNextError(String n) {
+    return 'Next error ($n)';
+  }
+
+  @override
+  String get runsNoErrors => 'No errors';
+
+  @override
+  String get runsNoEvents => 'Nothing was recorded.';
+
+  @override
+  String runsShowMore(String n) {
+    return 'Show $n more';
+  }
+
+  @override
+  String get runsKTool => 'Tool';
+
+  @override
+  String get runsKToolResult => 'Tool result';
+
+  @override
+  String get runsKInit => 'Start';
+
+  @override
+  String get runsKRateLimit => 'Rate limit';
+
+  @override
+  String get runsKNote => 'agnts';
+
+  @override
+  String get runsKResult => 'Result';
+
+  @override
+  String get runsToolOk => 'Succeeded';
+
+  @override
+  String get runsToolFailed => 'Failed';
+
+  @override
+  String runsExitCode(String code) {
+    return 'exit $code';
+  }
+
+  @override
+  String get runsInput => 'Input';
+
+  @override
+  String get runsOutput => 'Output';
+
+  @override
+  String get runsNoOutput => '(no output)';
+
+  @override
+  String runsCutNote(String kb) {
+    return 'cut, original $kb KB';
+  }
+
+  @override
+  String runsTurnsN(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n turns', one: '$n turn');
+    return '$_temp0';
+  }
+
+  @override
+  String get runsNoPrompt => '(empty prompt)';
+
+  @override
+  String get runsNoResult => 'No result was recorded.';
+
+  @override
+  String get runsSubtype => 'Subtype';
+
+  @override
+  String get runsAuditTitle => 'Audit log';
+
+  @override
+  String get runsAuditLede =>
+      'Every time an Admin read customer content (a transcript, a prompt, a download) or changed run history settings, newest first.';
+
+  @override
+  String get runsAllActions => 'All actions';
+
+  @override
+  String get runsA_transcript_view => 'Viewed a transcript';
+
+  @override
+  String get runsA_transcript_prompt => 'Viewed a prompt';
+
+  @override
+  String get runsA_transcript_download => 'Downloaded a transcript';
+
+  @override
+  String get runsA_run_history_settings => 'Changed settings';
+
+  @override
+  String get runsColTime => 'Time';
+
+  @override
+  String get runsColAdmin => 'Admin';
+
+  @override
+  String get runsColAction => 'Action';
+
+  @override
+  String get runsColTarget => 'Target';
+
+  @override
+  String get runsColIp => 'IP';
+
+  @override
+  String get runsNoAudit => 'Nothing in the audit log yet.';
+
+  @override
+  String get runsAuditSearch => 'Search admin, target or workspace';
+
+  @override
+  String runsAuditTranscript(String id) {
+    return 'Transcript #$id';
+  }
+
+  @override
   String get settingsTitle => 'Settings';
 
   @override

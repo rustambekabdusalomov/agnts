@@ -9363,6 +9363,467 @@ class AppLocalizationsUz extends AppLocalizations {
       'Mahsulotingiz haqida bilim: atamalar nimani anglatadi, kod saqlashi kerak bo‘lgan invariantlar, kim nimadan foydalanadi. Har bir ishga tushirish boshlashdan oldin uni o‘qiydi.';
 
   @override
+  String get runsNavRuns => 'Ishga tushirishlar';
+
+  @override
+  String get runsTitle => 'Ishga tushirishlar tarixi';
+
+  @override
+  String get runsLede =>
+      'Barcha ish maydonlaridagi har bir Claude Code va Codex chaqiruvi: qancha turgani, qancha davom etgani va qanday tugagani. Ochilgan chaqiruv mijoz ma’lumotlarini ko‘rsatadi, har bir ko‘rish jurnalga yoziladi.';
+
+  @override
+  String get runsRunTitle => 'Chaqiruv';
+
+  @override
+  String get runsBack => 'Barcha ishga tushirishlar';
+
+  @override
+  String get runsSettings => 'Sozlamalar';
+
+  @override
+  String get runsSumCount => 'Chaqiruvlar';
+
+  @override
+  String get runsSumErrors => 'Xatolar ulushi';
+
+  @override
+  String runsSumErrorsNote(String n) {
+    return '$n tasi xato, vaqt tugashi yoki xotira yetishmasligi bilan tugadi';
+  }
+
+  @override
+  String get runsSumStalls => 'Qotib qolganlar';
+
+  @override
+  String get runsSumStallsNote => 'kamida bir marta qotib qolgan chaqiruvlar';
+
+  @override
+  String get runsSumCost => 'Narx';
+
+  @override
+  String runsSumCostNote(String cost) {
+    return 'fon chaqiruvlari $cost';
+  }
+
+  @override
+  String get runsSumTokens => 'Tokenlar kirish / chiqish';
+
+  @override
+  String get runsSumTokensNote => 'keshdan o‘qishlarsiz';
+
+  @override
+  String get runsSumDuration => 'Davomiylik p50 / p95';
+
+  @override
+  String get runsSumDurationNote => 'tugagan chaqiruvlar';
+
+  @override
+  String get runsFWorkspace => 'Ish maydoni';
+
+  @override
+  String get runsAllWorkspaces => 'Barcha ish maydonlari';
+
+  @override
+  String get runsFPurpose => 'Maqsad';
+
+  @override
+  String get runsAllPurposes => 'Barcha maqsadlar';
+
+  @override
+  String get runsPStages => 'Tiket bosqichlari';
+
+  @override
+  String get runsPBackground => 'Fon chaqiruvlari';
+
+  @override
+  String get runsP_analyze => 'Tahlil';
+
+  @override
+  String get runsP_code => 'Kod yozish';
+
+  @override
+  String get runsP_review => 'Ko‘rib chiqish';
+
+  @override
+  String get runsP_push => 'Yuborish';
+
+  @override
+  String get runsP_learn => 'O‘rganish';
+
+  @override
+  String get runsP_preview => 'Oldindan ko‘rish';
+
+  @override
+  String get runsP_second_opinion => 'Ikkinchi fikr';
+
+  @override
+  String get runsP_assistant => 'Yordamchi';
+
+  @override
+  String get runsP_brief => 'Repozitoriy tavsifi';
+
+  @override
+  String get runsP_detect => 'Asboblarni aniqlash';
+
+  @override
+  String get runsP_reflect => 'Mulohaza';
+
+  @override
+  String get runsP_rules => 'Qoidalar';
+
+  @override
+  String get runsP_translate => 'Tarjima';
+
+  @override
+  String get runsFStatus => 'Holat';
+
+  @override
+  String get runsAnyStatus => 'Istalgan holat';
+
+  @override
+  String get runsS_running => 'Bajarilmoqda';
+
+  @override
+  String get runsS_done => 'Tayyor';
+
+  @override
+  String get runsS_error => 'Xato';
+
+  @override
+  String get runsS_timeout => 'Vaqt tugadi';
+
+  @override
+  String get runsS_cancelled => 'Bekor qilindi';
+
+  @override
+  String get runsS_oom => 'Xotira yetmadi';
+
+  @override
+  String get runsFEngine => 'Dvijok';
+
+  @override
+  String get runsAnyEngine => 'Istalgan dvijok';
+
+  @override
+  String get runsE_claude => 'Claude';
+
+  @override
+  String get runsE_codex => 'Codex';
+
+  @override
+  String get runsFModel => 'Model';
+
+  @override
+  String get runsFTicket => 'Tiket';
+
+  @override
+  String get runsFStalled => 'Qotib qolganlar';
+
+  @override
+  String get runsFPeriod => 'Davr';
+
+  @override
+  String get runsPer_1d => 'So‘nggi 24 soat';
+
+  @override
+  String get runsPer_7d => 'So‘nggi 7 kun';
+
+  @override
+  String get runsPer_30d => 'So‘nggi 30 kun';
+
+  @override
+  String get runsPer_all => 'Butun davr';
+
+  @override
+  String get runsFMinCost => 'Min. narx';
+
+  @override
+  String get runsClear => 'Filtrlarni tozalash';
+
+  @override
+  String get runsNone => 'Bu filtrlarga mos chaqiruv yo‘q.';
+
+  @override
+  String get runsLoadMore => 'Yana yuklash';
+
+  @override
+  String get runsColStarted => 'Boshlangan';
+
+  @override
+  String get runsColWorkspace => 'Ish maydoni';
+
+  @override
+  String get runsColTicket => 'Tiket yoki mavzu';
+
+  @override
+  String get runsColPurpose => 'Maqsad';
+
+  @override
+  String get runsColModel => 'Model';
+
+  @override
+  String get runsColTurns => 'Qadamlar';
+
+  @override
+  String get runsColTools => 'Asboblar';
+
+  @override
+  String get runsColCost => 'Narx';
+
+  @override
+  String get runsColDuration => 'Davomiylik';
+
+  @override
+  String get runsColOutcome => 'Natija';
+
+  @override
+  String runsToolsTitle(String calls, String errors) {
+    return 'Asbob chaqiruvlari: $calls, xatolilari: $errors';
+  }
+
+  @override
+  String runsStallsTitle(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n marta qotib qoldi', one: '$n marta qotib qoldi');
+    return '$_temp0';
+  }
+
+  @override
+  String get runsSettingsTitle => 'Ishga tushirishlar tarixi sozlamalari';
+
+  @override
+  String get runsSettingsSub =>
+      'Yozuvlar qancha saqlanadi va ularning qancha qismi yoziladi. Cheklovlar saqlangandan keyin boshlangan chaqiruvlarga amal qiladi.';
+
+  @override
+  String get runsSet_retentionDays => 'Yozuvlarni saqlash, kun';
+
+  @override
+  String get runsSet_retentionDaysHelp => 'Eskilari har kuni o‘chiriladi; 0 — doim saqlash';
+
+  @override
+  String get runsSet_toolOutputKB => 'Asbob chiqishi chegarasi, KB';
+
+  @override
+  String get runsSet_toolOutputKBHelp => 'Bitta asbobning chiqishi; boshi va oxiri saqlanadi';
+
+  @override
+  String get runsSet_textKB => 'Matn chegarasi, KB';
+
+  @override
+  String get runsSet_textKBHelp => 'Bitta matn bloki yoki asbob kirishi';
+
+  @override
+  String get runsSet_transcriptMB => 'Yozuv chegarasi, MB';
+
+  @override
+  String get runsSet_transcriptMBHelp => 'Undan oshgach faqat asbob chaqiruvlari va natija saqlanadi';
+
+  @override
+  String get runsSettingsSave => 'Saqlash';
+
+  @override
+  String get runsSettingsSaved => 'Ishga tushirishlar tarixi sozlamalari saqlandi';
+
+  @override
+  String get runsBanner => 'Siz mijoz ma’lumotlarini ko‘ryapsiz. Bu kirish jurnalga yoziladi.';
+
+  @override
+  String get runsDownload => 'JSONL yuklab olish';
+
+  @override
+  String get runsNotFound => 'Bu yozuv endi mavjud emas.';
+
+  @override
+  String get runsUnreadable => 'Yozuvning bir qismini o‘qib bo‘lmadi; quyida o‘qilgan qismi.';
+
+  @override
+  String get runsTruncated => 'Hajm chegarasiga yetildi; keyingi tarkib saqlanmadi.';
+
+  @override
+  String get runsAccount => 'Claude hisobi';
+
+  @override
+  String get runsSession => 'Seans';
+
+  @override
+  String get runsStartedAt => 'Boshlangan';
+
+  @override
+  String get runsFinishedAt => 'Tugagan';
+
+  @override
+  String get runsTokens => 'Tokenlar';
+
+  @override
+  String runsTokensVal(String input, String output) {
+    return '$input kirish · $output chiqish';
+  }
+
+  @override
+  String runsCacheVal(String read, String write) {
+    return 'kesh: $read o‘qish · $write yozish';
+  }
+
+  @override
+  String get runsSize => 'Saqlangan / asl hajm';
+
+  @override
+  String get runsExitReason => 'Tugash sababi';
+
+  @override
+  String get runsRunningNote => 'Hali bajarilmoqda. Yangilash yozuvni qayta o‘qiydi va bu ham jurnalga yoziladi.';
+
+  @override
+  String get runsReload => 'Yangilash';
+
+  @override
+  String get runsSiblings => 'Bu ishga tushirishning chaqiruvlari';
+
+  @override
+  String get runsSiblingsSub => 'Birinchi o‘tish, tuzatish urinishlari va ikkinchi fikr, eskilari avval';
+
+  @override
+  String get runsThisOne => 'joriy';
+
+  @override
+  String get runsTab_timeline => 'Xronologiya';
+
+  @override
+  String get runsTab_prompt => 'Prompt';
+
+  @override
+  String get runsTab_result => 'Natija';
+
+  @override
+  String runsEventsCount(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n hodisa', one: '$n hodisa');
+    return '$_temp0';
+  }
+
+  @override
+  String runsNextError(String n) {
+    return 'Keyingi xato ($n)';
+  }
+
+  @override
+  String get runsNoErrors => 'Xato yo‘q';
+
+  @override
+  String get runsNoEvents => 'Hech narsa yozilmagan.';
+
+  @override
+  String runsShowMore(String n) {
+    return 'Yana $n tasini ko‘rsatish';
+  }
+
+  @override
+  String get runsKTool => 'Asbob';
+
+  @override
+  String get runsKToolResult => 'Asbob natijasi';
+
+  @override
+  String get runsKInit => 'Boshlanish';
+
+  @override
+  String get runsKRateLimit => 'So‘rovlar chegarasi';
+
+  @override
+  String get runsKNote => 'agnts';
+
+  @override
+  String get runsKResult => 'Natija';
+
+  @override
+  String get runsToolOk => 'Muvaffaqiyatli';
+
+  @override
+  String get runsToolFailed => 'Xato bilan';
+
+  @override
+  String runsExitCode(String code) {
+    return 'kod $code';
+  }
+
+  @override
+  String get runsInput => 'Kirish';
+
+  @override
+  String get runsOutput => 'Chiqish';
+
+  @override
+  String get runsNoOutput => '(chiqish yo‘q)';
+
+  @override
+  String runsCutNote(String kb) {
+    return 'qisqartirilgan, asli $kb KB';
+  }
+
+  @override
+  String runsTurnsN(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n qadam', one: '$n qadam');
+    return '$_temp0';
+  }
+
+  @override
+  String get runsNoPrompt => '(bo‘sh prompt)';
+
+  @override
+  String get runsNoResult => 'Natija yozilmagan.';
+
+  @override
+  String get runsSubtype => 'Turi';
+
+  @override
+  String get runsAuditTitle => 'Audit jurnali';
+
+  @override
+  String get runsAuditLede =>
+      'Administrator mijoz ma’lumotlarini (yozuv, prompt, yuklab olish) ko‘rgan yoki ishga tushirishlar tarixi sozlamalarini o‘zgartirgan har bir holat, yangilari avval.';
+
+  @override
+  String get runsAllActions => 'Barcha amallar';
+
+  @override
+  String get runsA_transcript_view => 'Yozuvni ko‘rish';
+
+  @override
+  String get runsA_transcript_prompt => 'Promptni ko‘rish';
+
+  @override
+  String get runsA_transcript_download => 'Yozuvni yuklab olish';
+
+  @override
+  String get runsA_run_history_settings => 'Sozlamalarni o‘zgartirish';
+
+  @override
+  String get runsColTime => 'Vaqt';
+
+  @override
+  String get runsColAdmin => 'Administrator';
+
+  @override
+  String get runsColAction => 'Amal';
+
+  @override
+  String get runsColTarget => 'Obyekt';
+
+  @override
+  String get runsColIp => 'IP';
+
+  @override
+  String get runsNoAudit => 'Audit jurnali hozircha bo‘sh.';
+
+  @override
+  String get runsAuditSearch => 'Admin, obyekt yoki ish maydoni bo‘yicha qidirish';
+
+  @override
+  String runsAuditTranscript(String id) {
+    return 'Transkript #$id';
+  }
+
+  @override
   String get settingsTitle => 'Sozlamalar';
 
   @override

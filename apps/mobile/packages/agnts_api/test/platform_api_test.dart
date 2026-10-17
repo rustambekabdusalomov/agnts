@@ -21,10 +21,45 @@ void main() {
       // TODO
     });
 
+    // The transcript as JSON lines, the stored normalised events, not Claude Code's raw output (Admin). Audited.
+    //
+    //Future<String> downloadPlatformRun(int id) async
+    test('test downloadPlatformRun', () async {
+      // TODO
+    });
+
     // Servers, runs and the queue across every workspace (Admin)
     //
     //Future<PlatformOverview> getPlatformOverview() async
     test('test getPlatformOverview', () async {
+      // TODO
+    });
+
+    // One transcript with its whole timeline (Admin). Customer content; the read is written to the audit log first.
+    //
+    //Future<RunTranscriptDetail> getPlatformRun(int id) async
+    test('test getPlatformRun', () async {
+      // TODO
+    });
+
+    // The prompt agnts sent (Admin). Audited.
+    //
+    //Future<GetPlatformRunPrompt200Response> getPlatformRunPrompt(int id) async
+    test('test getPlatformRunPrompt', () async {
+      // TODO
+    });
+
+    // Totals of the run history matching the filters (Admin)
+    //
+    //Future<RunHistorySummary> getPlatformRunSummary({ int workspace, String purpose, String status, String engine, String model, String ticket, bool stalled, DateTime from, DateTime to, num minCost }) async
+    test('test getPlatformRunSummary', () async {
+      // TODO
+    });
+
+    // How long run history is kept, and its size limits (Admin)
+    //
+    //Future<RunHistorySettings> getRunHistorySettings() async
+    test('test getRunHistorySettings', () async {
       // TODO
     });
 
@@ -35,10 +70,24 @@ void main() {
       // TODO
     });
 
+    // What Admins read of customer content, newest first (Admin)
+    //
+    //Future<List<AdminAuditEntry>> listPlatformAudit({ int admin, String action, int workspace, int before, int limit }) async
+    test('test listPlatformAudit', () async {
+      // TODO
+    });
+
     // Every feedback people sent, newest first (Admin)
     //
     //Future<List<Feedback>> listPlatformFeedback() async
     test('test listPlatformFeedback', () async {
+      // TODO
+    });
+
+    // Run history across every workspace, newest first, without prompts or transcripts (Admin)
+    //
+    //Future<RunHistoryPage> listPlatformRuns({ int workspace, String purpose, String status, String engine, String model, String ticket, bool stalled, DateTime from, DateTime to, num minCost, String cursor, int limit }) async
+    test('test listPlatformRuns', () async {
       // TODO
     });
 
@@ -53,6 +102,13 @@ void main() {
     //
     //Future<List<PlatformWorkspace>> listPlatformWorkspaces() async
     test('test listPlatformWorkspaces', () async {
+      // TODO
+    });
+
+    // Change how long run history is kept, and its size limits (Admin)
+    //
+    //Future<RunHistorySettings> setRunHistorySettings(RunHistorySettings runHistorySettings) async
+    test('test setRunHistorySettings', () async {
       // TODO
     });
 
