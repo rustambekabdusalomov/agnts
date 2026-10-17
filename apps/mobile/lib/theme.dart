@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:swipeable_page_route/swipeable_page_route.dart';
 
 /// agnts's design tokens, copied from mobile.html's CSS variables (:root and
 /// the dark theme). Keep in sync with apps/admin/src/styles/tokens.css.
@@ -139,6 +140,12 @@ ThemeData agntsTheme(Brightness brightness) {
     scaffoldBackgroundColor: c.bg,
     textTheme: text,
     splashFactory: NoSplash.splashFactory,
+    // iOS: swipe back from anywhere on the page, as native apps do since
+    // iOS 26 (Flutter's own gesture starts only at the left edge).
+    pageTransitionsTheme: const PageTransitionsTheme(builders: {
+      TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
+      TargetPlatform.iOS: SwipeablePageTransitionsBuilder(),
+    }),
     highlightColor: c.hover,
     dividerTheme: DividerThemeData(color: c.line2, thickness: 1, space: 1),
     appBarTheme: AppBarTheme(backgroundColor: c.bg, foregroundColor: c.ink, elevation: 0, scrolledUnderElevation: 0, surfaceTintColor: Colors.transparent),
