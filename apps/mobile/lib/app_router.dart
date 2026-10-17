@@ -6,6 +6,9 @@ import 'package:agnts_api/agnts_api.dart' show FeedbackStatusEnum;
 import 'core/data.dart';
 import 'core/flavor.dart';
 import 'core/session.dart';
+import 'features/account/feedback_screen.dart';
+import 'features/account/profile_screen.dart';
+import 'features/account/workspaces_screen.dart';
 import 'features/admin/admin_admins_screen.dart';
 import 'features/admin/admin_dashboard_screen.dart';
 import 'features/admin/admin_data.dart';
@@ -16,23 +19,43 @@ import 'features/admin/admin_workspaces_screen.dart';
 import 'features/analytics/analytics_screen.dart';
 import 'features/assistant/assistant_screen.dart';
 import 'features/assistant/assistant_stats.dart';
+import 'features/auth/forgot_screen.dart';
+import 'features/auth/invite_screen.dart';
 import 'features/auth/login_screen.dart';
+import 'features/auth/reset_screen.dart';
+import 'features/auth/signup_screen.dart';
+import 'features/auth/verify_screen.dart';
 import 'features/ci/ci_failure_screen.dart';
 import 'features/ci/ci_screen.dart';
 import 'features/home/home_screen.dart';
+import 'features/integrations/integration_screen.dart';
+import 'features/integrations/integrations_screen.dart';
 import 'features/learn/learn_queue.dart';
 import 'features/learn/learn_screen.dart';
 import 'features/learn/lesson_screen.dart';
 import 'features/more/more_screen.dart';
+import 'features/pulls/pull_screen.dart';
+import 'features/repos/commit_screen.dart';
 import 'features/repos/repo_screen.dart';
+import 'features/repos/repos_screen.dart';
+import 'features/reviews/reviews_screen.dart';
+import 'features/rules/rules_screen.dart';
+import 'features/settings/mcp_screen.dart';
+import 'features/settings/networks_screen.dart';
+import 'features/swagger/swagger_suites_screen.dart';
 import 'features/tasks/tasks_screen.dart';
 import 'features/tickets/api_results.dart';
 import 'features/tickets/ticket_screen.dart';
 import 'features/tickets/tickets_screen.dart';
+import 'features/usage/usage_screen.dart';
+import 'features/workspace/workspace_screen.dart';
 import 'l10n/app_localizations.dart';
 import 'main.dart' show signOut;
 import 'theme.dart';
 import 'widgets/ui.dart';
+
+/// Screens open without signing in.
+const _publicPaths = ['/signup', '/forgot', '/reset-password', '/verify', '/invite'];
 
 /// Rebuilds the router's redirect when the session or the account changes.
 class _SessionListenable extends ChangeNotifier {
@@ -54,18 +77,26 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (s.isLoading) return null;
       final signedIn = s.value != null;
       final at = state.matchedLocation;
-      if (!signedIn) return at == '/login' ? null : '/login';
+      // Signed out, only the account screens open; an emailed link
+      // (verify, reset, invite) opens whether signed in or not.
+      final public = _publicPaths.any((p) => at == p || at.startsWith('$p/'));
+      if (!signedIn) return at == '/login' || public ? null : '/login';
       // An account in the wrong app: the admin app is for system Admins, and
       // an Admin account with no workspaces has nothing in the user app.
       final admin = ref.read(adminProvider);
       final wrong = admin != null && (adminApp ? !admin.admin : admin.only);
       if (wrong) return at == '/wrong-app' ? null : '/wrong-app';
-      if (at == '/login' || at == '/wrong-app') return home;
+      if (at == '/login' || at == '/wrong-app' || at == '/signup' || at == '/forgot') return home;
       return null;
     },
     routes: [
       GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
       GoRoute(path: '/wrong-app', builder: (_, _) => const _WrongApp()),
+      GoRoute(path: '/signup', builder: (_, _) => const SignupScreen()),
+      GoRoute(path: '/forgot', builder: (_, _) => const ForgotScreen()),
+      GoRoute(path: '/reset-password', builder: (_, s) => ResetScreen(token: s.uri.queryParameters['token'] ?? '')),
+      GoRoute(path: '/verify', builder: (_, s) => VerifyScreen(token: s.uri.queryParameters['token'])),
+      GoRoute(path: '/invite/:token', builder: (_, s) => InviteScreen(token: s.pathParameters['token']!)),
       if (adminApp) ...[
         GoRoute(path: '/admin/admins', builder: (_, _) => const AdminAdminsScreen()),
         StatefulShellRoute.indexedStack(
@@ -88,6 +119,27 @@ final routerProvider = Provider<GoRouter>((ref) {
           path: '/repos/:id',
           builder: (_, s) => RepoScreen(id: int.parse(s.pathParameters['id']!), name: s.uri.queryParameters['name'] ?? ''),
         ),
+        GoRoute(
+          path: '/repos/:id/commits/:sha',
+          builder: (_, s) => CommitScreen(repoId: int.parse(s.pathParameters['id']!), sha: s.pathParameters['sha']!),
+        ),
+        GoRoute(
+          path: '/repos/:id/pulls/:number',
+          builder: (_, s) => PullScreen(repoId: int.parse(s.pathParameters['id']!), number: int.parse(s.pathParameters['number']!)),
+        ),
+        GoRoute(path: '/repos', builder: (_, _) => const ReposScreen()),
+        GoRoute(path: '/rules', builder: (_, _) => const RulesScreen()),
+        GoRoute(path: '/reviews', builder: (_, _) => const ReviewsScreen()),
+        GoRoute(path: '/swagger-suites', builder: (_, _) => const SwaggerSuitesScreen()),
+        GoRoute(path: '/usage', builder: (_, _) => const UsageScreen()),
+        GoRoute(path: '/integrations', builder: (_, _) => const IntegrationsScreen()),
+        GoRoute(path: '/integrations/:provider', builder: (_, s) => IntegrationScreen(provider: s.pathParameters['provider']!)),
+        GoRoute(path: '/networks', builder: (_, _) => const NetworksScreen()),
+        GoRoute(path: '/mcp', builder: (_, _) => const McpScreen()),
+        GoRoute(path: '/workspace', builder: (_, s) => WorkspaceScreen(tab: s.uri.queryParameters['tab'])),
+        GoRoute(path: '/workspaces', builder: (_, _) => const WorkspacesScreen()),
+        GoRoute(path: '/profile', builder: (_, _) => const ProfileScreen()),
+        GoRoute(path: '/feedback', builder: (_, _) => const FeedbackScreen()),
         GoRoute(path: '/learn', builder: (_, s) => LearnScreen(ticketKey: s.uri.queryParameters['ticket'])),
         GoRoute(path: '/learn-queue', builder: (_, _) => const LearnQueueScreen()),
         GoRoute(path: '/learn/:id', builder: (_, s) => LessonScreen(id: int.parse(s.pathParameters['id']!))),

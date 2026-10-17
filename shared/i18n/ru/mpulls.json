@@ -1,0 +1,7 @@
+{
+  "mpulls": {
+    "placeholder": "Markdown",
+    "lineHint": "Нажмите на строку, чтобы прокомментировать её.",
+    "copyLink": "Открыть в {host}"
+  }
+}

@@ -5237,6 +5237,47 @@ class AppLocalizationsRu extends AppLocalizations {
   String get logsTypeEvent => 'Событие';
 
   @override
+  String get maccountPasswordInstead => 'Войти с паролем';
+
+  @override
+  String get maccountGoogleInstead => 'Продолжить через Google';
+
+  @override
+  String get maccountSetupLede =>
+      'Админы входят с двумя факторами. Добавьте аккаунт в приложение-аутентификатор по секрету ниже (или откройте ссылку настройки на этом телефоне), затем введите 6-значный код из него.';
+
+  @override
+  String get maccountTotpOpen => 'Открыть в аутентификаторе';
+
+  @override
+  String get maccountLinkFailed => 'Не удалось открыть ссылку.';
+
+  @override
+  String get maccountCurrent => 'Текущее';
+
+  @override
+  String get maccountHaveInvite => 'Есть приглашение?';
+
+  @override
+  String get maccountInviteHint => 'Вставьте ссылку-приглашение';
+
+  @override
+  String get maccountInviteOpen => 'Открыть приглашение';
+
+  @override
+  String maccountJoined(String date) {
+    return 'С $date';
+  }
+
+  @override
+  String get maccountPaying => 'Завершите оплату в браузере. Кредиты появятся здесь, как только платёжная система подтвердит платёж.';
+
+  @override
+  String maccountChars(String n, String max) {
+    return '$n / $max';
+  }
+
+  @override
   String manalyticsTickets(num n) {
     String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n тикета', many: '$n тикетов', few: '$n тикета', one: '$n тикет');
     return '$_temp0';
@@ -5889,6 +5930,34 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mhomeSearchEmpty => 'По вашему запросу тикетов нет.';
 
   @override
+  String minsightsSaved(String name) {
+    return '$name сохранён';
+  }
+
+  @override
+  String get minsightsEditTask => 'Изменить задачу';
+
+  @override
+  String get minsightsEditTaskSub => 'Изменить можно только задачу, которая ещё не началась.';
+
+  @override
+  String get minsightsSave => 'Сохранить';
+
+  @override
+  String get minsightsTaskSaved => 'Задача сохранена';
+
+  @override
+  String minsightsTaskDeleted(String key) {
+    return 'Задача $key удалена';
+  }
+
+  @override
+  String get minsightsTaskActions => 'Действия с задачей';
+
+  @override
+  String get mmanageFillAll => 'Заполните обязательные поля.';
+
+  @override
   String mmoreAgo(String time) {
     return '$time назад';
   }
@@ -6337,6 +6406,81 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get mpreviewNotify => 'Скриншоты превью готовы';
+
+  @override
+  String get mpullsPlaceholder => 'Markdown';
+
+  @override
+  String get mpullsLineHint => 'Нажмите на строку, чтобы прокомментировать её.';
+
+  @override
+  String mpullsCopyLink(String host) {
+    return 'Открыть в $host';
+  }
+
+  @override
+  String get mqualityNewTest => 'Новый Swagger-тест';
+
+  @override
+  String get mqualityStarterFor => 'Стартовые правила для';
+
+  @override
+  String get mqualityStarterPick => 'Выберите репозиторий, чтобы увидеть стартовые наборы для его языков.';
+
+  @override
+  String get mqualitySearchRules => 'Поиск правил';
+
+  @override
+  String mqualityRequestTitle(String id) {
+    return 'Запрос $id';
+  }
+
+  @override
+  String mqualitySpecFile(String name) {
+    return 'Файл спецификации: $name';
+  }
+
+  @override
+  String get mqualityDeployHook => 'Хук деплоя';
+
+  @override
+  String get mqualityTokenSaved => 'Токен сохранён';
+
+  @override
+  String get mqualitySuiteDeleted => 'Набор удалён';
+
+  @override
+  String mqualityHourAt(String hour) {
+    return '$hour:00 UTC';
+  }
+
+  @override
+  String get mqualityReviewTickets => 'Пул-реквесты';
+
+  @override
+  String get mqualityAddReviewer => 'Добавить ревьюера';
+
+  @override
+  String get mqualityEndpointsTicked => 'Эндпоинты';
+
+  @override
+  String get mqualityShowCases => 'Показать случаи';
+
+  @override
+  String get mqualityHideCases => 'Скрыть случаи';
+
+  @override
+  String mrepodetailCopyLink(String host) {
+    return 'Открыть в $host';
+  }
+
+  @override
+  String get mrepodetailOnePerLine => 'По одному на строку.';
+
+  @override
+  String mrepodetailLinesCapped(String n) {
+    return 'Здесь показаны только первые $n строк.';
+  }
 
   @override
   String get mtasksActAnswers => 'Ответьте на вопросы agnts';

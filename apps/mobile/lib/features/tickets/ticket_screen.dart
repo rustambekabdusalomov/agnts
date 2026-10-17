@@ -16,18 +16,22 @@ import 'code_review.dart';
 import 'diff_highlight.dart';
 import 'diff_lines.dart';
 import 'follow_ups.dart';
+import 'harness.dart';
 import 'kinds.dart';
 import 'preview_shots.dart';
 import 'pull_comments.dart';
 import 'relations.dart';
 import 'spend.dart';
+import 'ticket_controls.dart';
 import 'ticket_repos.dart';
+import 'translation.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme.dart';
 import '../../widgets/attachments.dart';
 import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
 import '../../widgets/workspace.dart';
+import '../account/account_widgets.dart' show openLink;
 
 /// One ticket (scrDetail in mobile.html): header, the six-stop progress
 /// track, a block for the current state, folds for answers and history, and
@@ -59,6 +63,24 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
   bool _descOpen = false;
   // Reports reach the tracker issue only when the reviewer ticks this.
   bool _postReport = false;
+  // Assignees of the pull request agnts opens on approval, for the
+  // ticket and state they were picked in.
+  final Set<String> _assignees = {};
+  String _assigneesFor = '';
+  // The ticket's texts in the language it is read in.
+  Tr _tr = _asWritten;
+
+  static String _asWritten(String s) => s;
+
+  /// Starts the assignees from the ticket's when it opens or changes state.
+  void _syncAssignees(Ticket t) {
+    final at = '${t.key}@${t.state.name}';
+    if (at == _assigneesFor) return;
+    _assigneesFor = at;
+    _assignees
+      ..clear()
+      ..addAll(t.assignees ?? const []);
+  }
 
   @override
   void dispose() {
@@ -212,6 +234,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         backLabel: l.navBack,
         title: widget.ticketKey,
         onBack: () => context.canPop() ? context.pop() : context.go('/tickets'),
+        actions: [if (detail.value != null) TranslateButton(widget.ticketKey)],
       ),
       body: AsyncBody<TicketDetail>(
         value: detail,
@@ -221,11 +244,19 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           ref.invalidate(ticketCIProvider(widget.ticketKey));
           await ref.read(ticketProvider(widget.ticketKey).future);
         },
-        builder: (d) => ListView(
+        builder: (d) {
+          final translation = watchTranslation(ref, d.ticket);
+          _tr = translation.tr;
+          _syncAssignees(d.ticket);
+          final t = d.ticket;
+          return ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.only(bottom: 24),
           children: [
             _header(context, d),
+            TranslationStatus(translation.state),
+            if (t.replayOf != null && t.replayOf!.isNotEmpty) Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 0), child: ReplayBanner(t.replayOf!)),
+            if (t.trackerUpdate != null) Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 0), child: TrackerUpdateCard(t)),
             TicketCICard(d.ticket),
             if (d.ticket.waitReason != null) Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 0), child: WaitBanner(d.ticket)),
             _Track(ticket: d.ticket, history: d.history ?? const []),
@@ -233,7 +264,8 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
             IgnorePointer(ignoring: !ref.watch(canEditProvider), child: _stage(context, d)),
             _folds(context, d),
           ],
-        ),
+        );
+        },
       ),
       bottomNavigationBar: detail.value == null || !ref.watch(canEditProvider) ? null : _actionBar(context, detail.value!),
     );
@@ -263,19 +295,20 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           ]),
         ),
         const SizedBox(height: 8),
-        Text(t.title, style: Theme.of(context).textTheme.headlineSmall?.copyWith(height: 1.15)),
+        Text(_tr(t.title), style: Theme.of(context).textTheme.headlineSmall?.copyWith(height: 1.15)),
         if (t.description.isNotEmpty) ...[
           const SizedBox(height: 8),
           GestureDetector(
             onTap: () => setState(() => _descOpen = !_descOpen),
             child: Text(
-              t.description,
+              _tr(t.description),
               maxLines: _descOpen ? null : 6,
               overflow: _descOpen ? null : TextOverflow.ellipsis,
               style: TextStyle(fontSize: 15, color: c.ink2, height: 1.45),
             ),
           ),
         ],
+        TicketMemberRow(t),
         AttachmentList(d.attachments.where((a) => a.purpose == AttachmentPurposeEnum.ticket).toList()),
         // A multi-repo ticket lists each repository's branch and pull request.
         TicketRepos(t),
@@ -316,6 +349,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     final c = Agnts.of(context);
     final t = d.ticket;
     final report = isReportKind(t.kind);
+    final pull = isPullReview(t);
     String rev(String title) => t.revision > 0 ? l.ticketRevisionSuffix(title, t.revision.toString()) : title;
     final children = <Widget>[];
     switch (t.state) {
@@ -324,6 +358,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           _H2(l.ticketQueuedTitle),
           _Sub(t.held == true ? l.ticketHeldSub : (report ? l.ticketQueuedSubReport : l.ticketQueuedSub)),
           KindPicker(t),
+          if (!pull) ...[RepoPicker(t), ModelPicker(t, stages: const [ModelStage.analyze, ModelStage.coding])],
         ]);
       case TicketState.analyzing:
         children.addAll([
@@ -337,8 +372,10 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           _H2(l.ticketQuestionsTitle(d.questions.length)),
           _Sub(l.ticketQuestionsSub),
           if (d.analysis != null) _analysisFold(context, d.analysis!),
+          DesignRecord(analysis: d.analysis, tr: _tr),
           for (final q in d.questions) _questionCard(context, q),
           KindPicker(t),
+          ModelPicker(t, stages: const [ModelStage.coding, ModelStage.retry]),
         ]);
       case TicketState.coding when t.blockedBy?.isNotEmpty ?? false:
         children.addAll([
@@ -374,7 +411,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           const SizedBox(height: 8),
           HelpBox(t.postReport == true ? l.ticketDoneReportPosted(t.key) : l.ticketDoneReport, tone: Tone.ok),
           if (t.kind == TicketKind.plan || t.kind == TicketKind.bug) ImplementReport(t, childKey: d.childKey),
-          if (d.result?.report != null) ...[_H3(l.ticketReport), ReportMarkdown(d.result!.report!)],
+          if (d.result?.report != null) ...[_H3(l.ticketReport), ReportMarkdown(_tr(d.result!.report!))],
         ]);
       case TicketState.done:
         final toMain = t.afterApprove == TicketAfterApproveEnum.main && t.source_ == TicketSource_Enum.local;
@@ -403,6 +440,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           ]);
         }
         children.add(TicketLessons(t));
+        if (!pull && (t.replayOf == null || t.replayOf!.isEmpty) && t.repoId != null) children.add(ReplayButton(t));
       case TicketState.rejected:
         children.addAll([_H2(l.ticketRejectedTitle), _Sub(l.ticketRejectedSub)]);
       case TicketState.failed:
@@ -410,7 +448,9 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           _H2(l.ticketFailedTitle),
           const SizedBox(height: 8),
           HelpBox(t.stopReason ?? l.ticketFailedUnknown, tone: Tone.bad, copyable: t.stopReason != null),
-          if (kindEditable(t)) KindPicker(t),
+          if (kindEditable(t) && !pull) KindPicker(t),
+          if (canChangeRepo(t) && !pull) RepoPicker(t),
+          if (!pull) ModelPicker(t, stages: const [ModelStage.retry]),
           // A run that stopped while pushing resumes there: nothing to tell it.
           if (_takesRetryNote(t)) ...[
             _H3(l.ticketRetryNote),
@@ -437,6 +477,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           _H2(l.ticketRateTitle),
           if (t.stopReason != null) ...[const SizedBox(height: 8), HelpBox(t.stopReason!, tone: Tone.warn, copyable: true)],
           if (u != null) Padding(padding: const EdgeInsets.only(top: 10), child: _Sub(l.ticketRateHint('${(u * 100).round()}'))),
+          if (canChangeRepo(t)) RepoPicker(t),
         ]);
     }
     if (t.stopReason != null && t.state != TicketState.failed && t.state != TicketState.rateLimited) {
@@ -480,7 +521,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     final tracked = plane || t.source_ == TicketSource_Enum.jira;
     return [
       _Sub(tracked ? (plane ? l.ticketReviewReportSubPlane : l.ticketReviewReportSubJira) : l.ticketReviewReportSub),
-      if (r != null && r.summary.isNotEmpty) ...[const SizedBox(height: 8), Text(r.summary, style: const TextStyle(fontSize: 15, height: 1.45))],
+      if (r != null && r.summary.isNotEmpty) ...[const SizedBox(height: 8), Text(_tr(r.summary), style: const TextStyle(fontSize: 15, height: 1.45))],
       if (r != null && r.notes.isNotEmpty) ...[
         _H3(l.ticketNotes),
         for (final n in r.notes)
@@ -488,13 +529,14 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
             padding: const EdgeInsets.only(bottom: 4),
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text('•  ', style: TextStyle(color: c.ink3)),
-              Expanded(child: Text(n, style: const TextStyle(fontSize: 15, height: 1.4))),
+              Expanded(child: Text(_tr(n), style: const TextStyle(fontSize: 15, height: 1.4))),
             ]),
           ),
       ],
+      ModelPicker(t, stages: const [ModelStage.retry, ModelStage.review]),
       _codeReview(d),
       _H3(l.ticketReport),
-      if (r?.report != null) ReportMarkdown(r!.report!) else Text(l.ticketReportMissing, style: TextStyle(color: c.ink3)),
+      if (r?.report != null) ReportMarkdown(_tr(r!.report!)) else Text(l.ticketReportMissing, style: TextStyle(color: c.ink3)),
       if (tracked)
         Padding(
           padding: const EdgeInsets.only(top: 12),
@@ -536,7 +578,26 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
                 ? l.ticketReviewSubPlane(t.branch)
                 : l.ticketReviewSubPr(t.branch);
     final r = d.result;
-    if (r == null) return [_Sub(sub), _codeReview(d), _preview(d)];
+    final pull = isPullReview(t);
+    final controls = <Widget>[
+      if (!pull) ...[
+        DesignRecord(analysis: d.analysis, deviations: r?.deviations, tr: _tr),
+        ModelPicker(t, stages: [ModelStage.retry, ModelStage.review, if (t.canPreview == true) ModelStage.preview]),
+      ],
+      if (opensPr(t) && t.repoId != null)
+        AssigneePicker(
+          repoId: t.repoId!,
+          selected: _assignees,
+          onToggle: (u) => setState(() => _assignees.contains(u) ? _assignees.remove(u) : _assignees.add(u)),
+        ),
+    ];
+    final secrets = secretFlagCount(r);
+    final checks = <Widget>[
+      if (r?.redFlags?.isNotEmpty ?? false) RedFlagsList(r!.redFlags!),
+      HarnessChecks(r),
+      if (secrets > 0 && !pull) SecretsAck(ticket: t, count: secrets),
+    ];
+    if (r == null) return [_Sub(sub), _codeReview(d), _preview(d), ...controls];
     final passed = r.checks.where((x) => x.exitCode == 0).length;
     final allOk = passed == r.checks.length;
     final time = _reviewTime(d);
@@ -551,7 +612,9 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         Fact(l.ticketFactTurns, '${t.turns}'),
       ]),
       _codeReview(d),
+      ...checks,
       _preview(d),
+      ...controls,
       ..._resultBody(context, r),
     ];
   }
@@ -560,7 +623,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
   List<Widget> _resultBody(BuildContext context, Result r) {
     final l = AppLocalizations.of(context);
     final c = Agnts.of(context);
-    final paras = r.summary.split(RegExp(r'\n\s*\n')).map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
+    final paras = _tr(r.summary).split(RegExp(r'\n\s*\n')).map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
     return [
       if (paras.isNotEmpty) ...[
         _H3(l.ticketWhatAgntsDid),
@@ -573,7 +636,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
             padding: const EdgeInsets.only(bottom: 4),
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text('•  ', style: TextStyle(color: c.ink3)),
-              Expanded(child: Text(n, style: const TextStyle(fontSize: 15, height: 1.4))),
+              Expanded(child: Text(_tr(n), style: const TextStyle(fontSize: 15, height: 1.4))),
             ]),
           ),
       ],
@@ -630,7 +693,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line), borderRadius: BorderRadius.circular(16)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(q.text, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, height: 1.4, color: c.ink)),
+        Text(_tr(q.text), style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, height: 1.4, color: c.ink)),
         if (q.multiple && q.options.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 2),
@@ -641,7 +704,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           Wrap(spacing: 8, runSpacing: 8, children: [
             for (final o in q.options)
               _OptionPill(
-                label: o,
+                label: _tr(o),
                 selected: q.multiple ? (_chosen[q.id]?.contains(o) ?? false) : _picked[q.id] == o,
                 onTap: enabled ? () => _toggle(q, o) : null,
               ),
@@ -679,7 +742,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         title: a.summary.isEmpty ? l.ticketPlan : l.ticketAnalysis,
         hint: a.plan.isEmpty ? null : '${a.plan.length}',
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          if (a.summary.isNotEmpty) Text(a.summary, style: const TextStyle(fontSize: 15, height: 1.45)),
+          if (a.summary.isNotEmpty) Text(_tr(a.summary), style: const TextStyle(fontSize: 15, height: 1.45)),
           if (a.plan.isNotEmpty) ...[
             if (a.summary.isNotEmpty) _H3(l.ticketPlan),
             for (final (i, p) in a.plan.indexed)
@@ -687,7 +750,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   SizedBox(width: 22, child: Text('${i + 1}.', style: TextStyle(color: c.ink3, fontSize: 15))),
-                  Expanded(child: Text(p, style: const TextStyle(fontSize: 15, height: 1.4))),
+                  Expanded(child: Text(_tr(p), style: const TextStyle(fontSize: 15, height: 1.4))),
                 ]),
               ),
           ],
@@ -768,7 +831,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
       if (t.kind == TicketKind.swaggertest) ApiResultsFold(ticketKey: t.key),
       if (d.analysis != null && t.state != TicketState.waitingForAnswers) _analysisFold(context, d.analysis!),
       if (d.result?.report != null && t.state != TicketState.waitingForReview && t.state != TicketState.done)
-        Fold(title: l.ticketReport, child: ReportMarkdown(d.result!.report!))
+        Fold(title: l.ticketReport, child: ReportMarkdown(_tr(d.result!.report!)))
       else if (d.result != null && !isReportKind(t.kind) && t.state != TicketState.waitingForReview)
         Fold(
           title: l.ticketChanges,
@@ -920,11 +983,13 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         final post = report && _postReport && (plane || t.source_ == TicketSource_Enum.jira);
         // A review asked for from the pull request page never merges.
         final finish = t.kind == TicketKind.review && t.afterApprove == TicketAfterApproveEnum.none;
+        final assign = opensPr(t) ? _assignees.toList() : const <String>[];
         final confirm = finish
             ? l.draftsFinishConfirm('${t.pull?.number ?? t.prNumber ?? ''}')
             : report
                 ? (post ? (plane ? l.ticketApproveReportPostConfirmPlane(key) : l.ticketApproveReportPostConfirm(key)) : l.ticketApproveReportConfirm)
-                : (toMain ? l.ticketApproveMainConfirm : l.ticketApproveConfirm(t.branch));
+                : (toMain ? l.ticketApproveMainConfirm : l.ticketApproveConfirm(t.branch)) +
+                    (assign.isEmpty ? '' : '\n\n${l.ticketApproveAssignees(assign.join(', '))}');
         buttons = [
           Tooltip(
             message: l.ticketReject,
@@ -951,7 +1016,11 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
                       if (await _confirm(confirm)) {
                         await _run(() => _tickets.approveTicket(
                               key: key,
-                              approveTicketRequest: report ? ApproveTicketRequest(postReport: post) : null,
+                              approveTicketRequest: report
+                                  ? ApproveTicketRequest(postReport: post)
+                                  : opensPr(t)
+                                      ? ApproveTicketRequest(assignees: assign)
+                                      : null,
                             ));
                       }
                     },
@@ -974,7 +1043,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
             child: Tooltip(
               message: _retryFiles.uploading ? l.filesWait : '',
               child: FilledButton(
-                onPressed: _busy || (_takesRetryNote(t) && _retryFiles.uploading) ? null : () => _retry(t),
+                onPressed: _busy || (_takesRetryNote(t) && _retryFiles.uploading) || (failed && needsRepo(t) && t.repoId == null) ? null : () => _retry(t),
                 child: Text(failed ? l.mobileRetry : l.ticketResume, maxLines: 1, overflow: TextOverflow.ellipsis),
               ),
             ),
@@ -1008,11 +1077,8 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         buttons = [
           Expanded(
             child: OutlinedButton(
-              onPressed: () async {
-                await Clipboard.setData(ClipboardData(text: t.prUrl));
-                if (context.mounted) showSnack(context, l.mdetailCopied);
-              },
-              child: Text(l.mdetailCopyPr, maxLines: 1, overflow: TextOverflow.ellipsis),
+              onPressed: () => openLink(context, t.prUrl),
+              child: Text(l.analyticsOpenPr, maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
           ),
         ];

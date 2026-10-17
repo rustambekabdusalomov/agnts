@@ -4994,6 +4994,47 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logsTypeEvent => 'Event';
 
   @override
+  String get maccountPasswordInstead => 'Sign in with a password';
+
+  @override
+  String get maccountGoogleInstead => 'Continue with Google instead';
+
+  @override
+  String get maccountSetupLede =>
+      'Admins sign in with two factors. Add this account to an authenticator app with the secret below (or open the setup link on this phone), then enter the 6-digit code it shows.';
+
+  @override
+  String get maccountTotpOpen => 'Open in authenticator app';
+
+  @override
+  String get maccountLinkFailed => 'Couldn\'t open the link.';
+
+  @override
+  String get maccountCurrent => 'Current';
+
+  @override
+  String get maccountHaveInvite => 'Have an invite?';
+
+  @override
+  String get maccountInviteHint => 'Paste the invite link';
+
+  @override
+  String get maccountInviteOpen => 'Open invite';
+
+  @override
+  String maccountJoined(String date) {
+    return 'Joined $date';
+  }
+
+  @override
+  String get maccountPaying => 'Finish the payment in your browser. Credits show here once the payment provider confirms it.';
+
+  @override
+  String maccountChars(String n, String max) {
+    return '$n / $max';
+  }
+
+  @override
   String manalyticsTickets(num n) {
     String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n tickets', one: '$n ticket');
     return '$_temp0';
@@ -5618,6 +5659,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mhomeSearchEmpty => 'No tickets match your search.';
 
   @override
+  String minsightsSaved(String name) {
+    return '$name saved';
+  }
+
+  @override
+  String get minsightsEditTask => 'Edit task';
+
+  @override
+  String get minsightsEditTaskSub => 'Only a task that hasn\'t started can be changed.';
+
+  @override
+  String get minsightsSave => 'Save';
+
+  @override
+  String get minsightsTaskSaved => 'Task saved';
+
+  @override
+  String minsightsTaskDeleted(String key) {
+    return 'Task $key deleted';
+  }
+
+  @override
+  String get minsightsTaskActions => 'Task actions';
+
+  @override
+  String get mmanageFillAll => 'Fill in the required fields.';
+
+  @override
   String mmoreAgo(String time) {
     return '$time ago';
   }
@@ -6051,6 +6120,81 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mpreviewNotify => 'Preview screenshots are ready';
+
+  @override
+  String get mpullsPlaceholder => 'Markdown';
+
+  @override
+  String get mpullsLineHint => 'Tap a line to comment on it.';
+
+  @override
+  String mpullsCopyLink(String host) {
+    return 'Open on $host';
+  }
+
+  @override
+  String get mqualityNewTest => 'New Swagger test';
+
+  @override
+  String get mqualityStarterFor => 'Starter rules for';
+
+  @override
+  String get mqualityStarterPick => 'Pick a repository to see the starter packs for its languages.';
+
+  @override
+  String get mqualitySearchRules => 'Search rules';
+
+  @override
+  String mqualityRequestTitle(String id) {
+    return 'Request $id';
+  }
+
+  @override
+  String mqualitySpecFile(String name) {
+    return 'Spec file: $name';
+  }
+
+  @override
+  String get mqualityDeployHook => 'Deploy hook';
+
+  @override
+  String get mqualityTokenSaved => 'Token saved';
+
+  @override
+  String get mqualitySuiteDeleted => 'Suite deleted';
+
+  @override
+  String mqualityHourAt(String hour) {
+    return '$hour:00 UTC';
+  }
+
+  @override
+  String get mqualityReviewTickets => 'Pull requests';
+
+  @override
+  String get mqualityAddReviewer => 'Add a reviewer';
+
+  @override
+  String get mqualityEndpointsTicked => 'Endpoints';
+
+  @override
+  String get mqualityShowCases => 'Show cases';
+
+  @override
+  String get mqualityHideCases => 'Hide cases';
+
+  @override
+  String mrepodetailCopyLink(String host) {
+    return 'Open on $host';
+  }
+
+  @override
+  String get mrepodetailOnePerLine => 'One per line.';
+
+  @override
+  String mrepodetailLinesCapped(String n) {
+    return 'Only the first $n lines are shown here.';
+  }
 
   @override
   String get mtasksActAnswers => 'Answer agnts\'s questions';

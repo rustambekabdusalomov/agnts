@@ -11,6 +11,12 @@ import '../../l10n/app_localizations.dart';
 import '../../theme.dart';
 import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
+import '../pulls/repo_pulls.dart';
+import 'repo_brief.dart';
+import 'repo_ci.dart';
+import 'repo_code.dart';
+import 'repo_guardrails.dart';
+import 'repo_members.dart';
 
 final _repoProvider = FutureProvider.family<Repository, int>((ref, id) async {
   return (await requireApi(ref).getReposApi().getRepo(id: id)).data!;
@@ -24,13 +30,23 @@ final _commitsProvider = FutureProvider.family<List<Commit>, int>((ref, id) asyn
 final _pipelinesProvider = FutureProvider.family<List<Pipeline>, int>((ref, id) async {
   return (await requireApi(ref).getReposApi().listRepoPipelines(id: id)).data ?? const [];
 });
+final _localBranchesProvider = FutureProvider.autoDispose.family<List<LocalBranch>, int>((ref, id) async {
+  return (await requireApi(ref).getReposApi().listRepoLocalBranches(id: id)).data ?? const [];
+});
 final _envsProvider = FutureProvider.family<List<Environment>, int>((ref, id) async {
   return (await requireApi(ref).getReposApi().listRepoEnvironments(id: id)).data ?? const [];
 });
 
-enum _Tab { branches, commits, pipelines }
+enum _Tab { branches, code, commits, pulls, pipelines, ci, members, brief, guardrails }
 
-/// A repository's numbers, branches, commits and pipelines; manual deploy jobs can be started here.
+enum _Src { origin, local }
+
+enum _BranchFilter { all, agnts, others }
+
+/// A repository as the admin panel's RepoPage.vue shows it: its numbers,
+/// then branches (on origin or in agnts's local clones), code, commits,
+/// pull requests, pipelines (manual deploy jobs can be started), CI
+/// watching, members, the brief and the guardrails.
 class RepoScreen extends ConsumerStatefulWidget {
   const RepoScreen({super.key, required this.id, required this.name});
   final int id;
@@ -42,11 +58,15 @@ class RepoScreen extends ConsumerStatefulWidget {
 
 class _RepoScreenState extends ConsumerState<RepoScreen> {
   _Tab _tab = _Tab.branches;
+  _Src _src = _Src.origin;
+  _BranchFilter _filter = _BranchFilter.all;
 
   Future<void> _refresh() async {
     final id = widget.id;
     ref.invalidate(_repoProvider(id));
     ref.invalidate(_envsProvider(id));
+    ref.invalidate(_localBranchesProvider(id));
+    ref.invalidate(repoBriefProvider(id));
     await Future.wait([
       ref.refresh(_branchesProvider(id).future),
       ref.refresh(_commitsProvider(id).future),
@@ -97,6 +117,14 @@ class _RepoScreenState extends ConsumerState<RepoScreen> {
                 ),
             ]),
           ),
+          if ((repo?.groups ?? const []).isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+              child: Wrap(spacing: 6, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                Text(l.groupsInLabel, style: TextStyle(fontSize: 13, color: c.ink3)),
+                for (final g in repo!.groups!) SourceChip(g.name),
+              ]),
+            ),
           if (repo?.archivedAt != null)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -129,27 +157,89 @@ class _RepoScreenState extends ConsumerState<RepoScreen> {
               ),
             ]),
           ),
+          // The tabs scroll sideways: there are more than fit.
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-            child: Segmented<_Tab>(
-              full: true,
-              options: [
-                (_Tab.branches, l.mobileBranches),
-                (_Tab.commits, l.mobileCommits),
-                (_Tab.pipelines, l.mobilePipelines),
-              ],
-              value: _tab,
-              onChanged: (t) => setState(() => _tab = t),
-            ),
+            padding: const EdgeInsets.only(top: 14, bottom: 12),
+            child: ChipRow(children: [
+              for (final t in _Tab.values) FilterChipH(label: _tabLabel(l, t), selected: _tab == t, onTap: () => setState(() => _tab = t)),
+            ]),
           ),
           ...switch (_tab) {
-            _Tab.branches => _async(context, branches, (list) => [_pad(ListGroup(children: [for (final b in list) _BranchRow(b)]))]),
+            _Tab.branches => _branchesBody(context, branches, repo?.defaultBranch ?? ''),
+            _Tab.code => repo == null
+                ? _loading
+                : [RepoCodeTab(repoId: id, defaultBranch: repo.defaultBranch, branches: [for (final b in bs ?? const <Branch>[]) b.name])],
             _Tab.commits => _async(context, commits, (list) => _commitGroups(context, list)),
+            _Tab.pulls => [RepoPullsList(repoId: id)],
             _Tab.pipelines => _async(context, pipelines, (list) => _pipelinesBody(context, list, envs), emptyOk: envs.isNotEmpty),
+            _Tab.ci => repo == null ? _loading : [RepoCiTab(repo: repo)],
+            _Tab.members => repo == null ? _loading : [RepoMembersTab(repo: repo)],
+            _Tab.brief => [RepoBriefTab(repoId: id)],
+            _Tab.guardrails => repo == null ? _loading : [RepoGuardrailsTab(repo: repo, onSaved: (_) => ref.invalidate(_repoProvider(id)))],
           },
         ]),
       ),
     );
+  }
+
+  static const _loading = [Padding(padding: EdgeInsets.all(32), child: Center(child: CircularProgressIndicator()))];
+
+  String _tabLabel(AppLocalizations l, _Tab t) => switch (t) {
+        _Tab.branches => l.repoBranches,
+        _Tab.code => l.repoCode,
+        _Tab.commits => l.repoCommits,
+        _Tab.pulls => l.pullsTab,
+        _Tab.pipelines => l.repoPipelines,
+        _Tab.ci => l.repoCi,
+        _Tab.members => l.repoMembers,
+        _Tab.brief => l.repoBrief,
+        _Tab.guardrails => l.harnessRepoTab,
+      };
+
+  /// Branches on origin, filtered to agnts's or others', or the ones in agnts's local clones.
+  List<Widget> _branchesBody(BuildContext context, AsyncValue<List<Branch>> branches, String defaultBranch) {
+    final l = AppLocalizations.of(context);
+    final c = Agnts.of(context);
+    final local = _src == _Src.local ? ref.watch(_localBranchesProvider(widget.id)) : null;
+    final n = local?.value?.length;
+    return [
+      _pad(Segmented<_Src>(
+        full: true,
+        options: [(_Src.origin, l.repoSrcOrigin), (_Src.local, n == null ? l.repoSrcLocal : l.repoSrcLocalN('$n'))],
+        value: _src,
+        onChanged: (v) => setState(() => _src = v),
+      )),
+      const SizedBox(height: 8),
+      if (defaultBranch.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+          child: Text(_src == _Src.local ? l.repoLocalSub(defaultBranch) : l.repoBranchesSub(defaultBranch), style: TextStyle(fontSize: 13, color: c.ink3)),
+        ),
+      if (local != null)
+        ...switch (local) {
+          AsyncData(:final value) when value.isEmpty => [EmptyState(title: l.repoLocalNone)],
+          AsyncData(:final value) => [_pad(ListGroup(children: [for (final b in value) _LocalBranchRow(b)]))],
+          AsyncError(:final error) => [_pad(HelpBox(errorMessage(error, l.commonError), tone: Tone.bad))],
+          _ => _loading,
+        }
+      else ...[
+        _pad(Segmented<_BranchFilter>(
+          full: true,
+          options: [(_BranchFilter.all, l.repoFilterAll), (_BranchFilter.agnts, 'agnts'), (_BranchFilter.others, l.repoFilterOthers)],
+          value: _filter,
+          onChanged: (v) => setState(() => _filter = v),
+        )),
+        const SizedBox(height: 10),
+        ..._async(context, branches, (list) {
+          final rows = list.where((b) => switch (_filter) {
+                _BranchFilter.all => true,
+                _BranchFilter.agnts => b.ticketKey != null,
+                _BranchFilter.others => b.ticketKey == null,
+              });
+          return rows.isEmpty ? [EmptyState(title: l.repoNone)] : [_pad(ListGroup(children: [for (final b in rows) _BranchRow(b)]))];
+        }),
+      ],
+    ];
   }
 
   /// Loading, git-host error and empty states around a tab's list.
@@ -178,7 +268,7 @@ class _RepoScreenState extends ConsumerState<RepoScreen> {
               padding: EdgeInsets.fromLTRB(20, i == 0 ? 0 : 18, 20, 8))
         else if (i > 0)
           const SizedBox(height: 18),
-        _pad(ListGroup(children: [for (final x in e.value) _CommitRow(x)])),
+        _pad(ListGroup(children: [for (final x in e.value) _CommitRow(x, repoId: widget.id)])),
       ],
     ];
   }
@@ -200,7 +290,7 @@ class _RepoScreenState extends ConsumerState<RepoScreen> {
       SectionHeader(l.mmorePipelineRuns),
       if (list.isEmpty) EmptyState(title: l.mobileNoEvents),
       for (final (i, p) in list.indexed)
-        Padding(padding: EdgeInsets.fromLTRB(16, i == 0 ? 0 : 10, 16, 0), child: _PipelineCard(repoId: widget.id, p: p)),
+        Padding(padding: EdgeInsets.fromLTRB(16, i == 0 ? 0 : 10, 16, 0), child: RepoPipelineCard(repoId: widget.id, p: p)),
     ];
   }
 }
@@ -317,8 +407,9 @@ class _BranchRow extends StatelessWidget {
 }
 
 class _CommitRow extends StatelessWidget {
-  const _CommitRow(this.x);
+  const _CommitRow(this.x, {required this.repoId});
   final Commit x;
+  final int repoId;
 
   @override
   Widget build(BuildContext context) {
@@ -327,7 +418,7 @@ class _CommitRow extends StatelessWidget {
     final small = TextStyle(fontSize: 13, color: c.ink3);
     return _GitRow(
       ci: x.ci,
-      onTap: x.ticketKey == null ? null : () => context.push('/tickets/${x.ticketKey}'),
+      onTap: () => context.push('/repos/$repoId/commits/${x.sha}'),
       children: [
         Text(x.message, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c.ink)),
         const SizedBox(height: 2),
@@ -349,8 +440,8 @@ class _CommitRow extends StatelessWidget {
 }
 
 /// A pipeline run as a card (.pp-m-card): status, message, branch and sha, then its stages.
-class _PipelineCard extends ConsumerWidget {
-  const _PipelineCard({required this.repoId, required this.p});
+class RepoPipelineCard extends ConsumerWidget {
+  const RepoPipelineCard({super.key, required this.repoId, required this.p});
   final int repoId;
   final Pipeline p;
 
@@ -418,6 +509,64 @@ class _PipelineCard extends ConsumerWidget {
           ),
       ]),
     );
+  }
+}
+
+/// A branch in agnts's own clone on the server: whether origin has it,
+/// how far it is ahead and behind, and its ticket.
+class _LocalBranchRow extends StatelessWidget {
+  const _LocalBranchRow(this.b);
+  final LocalBranch b;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = Agnts.of(context);
+    final small = TextStyle(fontSize: 13, color: c.ink3);
+    final (status, tone) = switch (b.status) {
+      LocalBranchStatusEnum.local => (l.repoPush_local, Tone.warn),
+      LocalBranchStatusEnum.unpushed => (l.repoPush_unpushed(b.unpushed), Tone.warn),
+      LocalBranchStatusEnum.pushed => (l.repoPush_pushed, Tone.ok),
+      LocalBranchStatusEnum.differs => (l.repoPush_differs, Tone.bad),
+    };
+    final help = switch (b.status) {
+      LocalBranchStatusEnum.local => l.repoPush_local_help,
+      LocalBranchStatusEnum.unpushed => l.repoPush_unpushed_help,
+      LocalBranchStatusEnum.pushed => l.repoPush_pushed_help,
+      LocalBranchStatusEnum.differs => l.repoPush_differs_help,
+    };
+    final row = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+      child: Row(children: [
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Wrap(spacing: 6, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
+              _BrChip(b.name),
+              Tooltip(message: help, child: ToneBadge(status, tone, small: true)),
+            ]),
+            Padding(
+              padding: const EdgeInsets.only(top: 3),
+              child: Text.rich(
+                TextSpan(style: TextStyle(fontSize: 13, color: c.ink2), children: [
+                  TextSpan(text: b.message.isEmpty ? '—' : b.message),
+                  if (b.sha.isNotEmpty) TextSpan(text: '  ${_short(b.sha)}', style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12, color: c.ink3)),
+                ]),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Text.rich(TextSpan(style: small, children: [
+              if (b.author.isNotEmpty || b.date != null) TextSpan(text: '${[if (b.author.isNotEmpty) b.author, if (b.date != null) _ago(l, b.date!)].join(', ')}  '),
+              TextSpan(text: '↑${b.ahead}', style: TextStyle(color: c.okInk)),
+              TextSpan(text: ' ↓${b.behind}', style: TextStyle(color: c.badInk)),
+            ])),
+            if (b.ticketKey != null) _TicketTag(b.ticketKey!),
+          ]),
+        ),
+        if (b.ticketKey != null) Padding(padding: const EdgeInsets.only(left: 8), child: HIcon('chevron', size: 16, color: c.line3, stroke: 2.4)),
+      ]),
+    );
+    return b.ticketKey == null ? row : InkWell(onTap: () => context.push('/tickets/${b.ticketKey}'), child: row);
   }
 }
 

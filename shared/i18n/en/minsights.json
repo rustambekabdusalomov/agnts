@@ -1,0 +1,11 @@
+{
+  "minsights": {
+    "saved": "{name} saved",
+    "editTask": "Edit task",
+    "editTaskSub": "Only a task that hasn't started can be changed.",
+    "save": "Save",
+    "taskSaved": "Task saved",
+    "taskDeleted": "Task {key} deleted",
+    "taskActions": "Task actions"
+  }
+}

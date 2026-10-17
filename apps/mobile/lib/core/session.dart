@@ -23,7 +23,7 @@ const _storage = FlutterSecureStorage();
 /// Thrown by [SessionNotifier.signIn] with a message to show.
 class SignInError implements Exception {
   SignInError(this.kind);
-  final String kind; // credentials, codeRequired, rateLimited, server, or a Google reason (signInWithGoogle)
+  final String kind; // credentials, codeRequired, totpSetup, useGoogle, rateLimited, server, or a Google reason (signInWithGoogle)
 }
 
 /// Holds the session; the token lives in the platform's secure storage.
@@ -39,8 +39,9 @@ class SessionNotifier extends AsyncNotifier<Session?> {
   }
 
   /// Signs in; [code] is asked for only when the account has two-factor
-  /// sign-in on (the server answers code_required first).
-  Future<void> signIn(String server, String username, String password, String code) async {
+  /// sign-in on (the server answers code_required first). An Admin without
+  /// it sets it up while signing in: [totpSecret] from [beginLoginTotp].
+  Future<void> signIn(String server, String username, String password, String code, {String? totpSecret}) async {
     server = _trim(server);
     try {
       final res = await _client(server).getAuthApi().login(
@@ -48,6 +49,7 @@ class SessionNotifier extends AsyncNotifier<Session?> {
               username: username.trim(),
               password: password,
               code: code.trim().isEmpty ? null : code.trim(),
+              totpSecret: totpSecret,
               client: LoginRequestClientEnum.mobile,
             ),
           );
@@ -58,12 +60,31 @@ class SessionNotifier extends AsyncNotifier<Session?> {
       final code = data is Map ? data['code'] : null;
       throw SignInError(status == 401 && code == 'code_required'
           ? 'codeRequired'
-          : status == 401
+          : code == 'totp_setup_required'
+              ? 'totpSetup'
+              : status == 403 && code == 'use_google'
+                  ? 'useGoogle'
+                  : status == 401
               ? 'credentials'
               : status == 429
                   ? 'rateLimited'
                   : 'server');
     }
+  }
+
+  /// A new two-factor secret for an Admin who signs in without one yet.
+  Future<BeginLoginTotp200Response> beginLoginTotp(String server, String username, String password) async {
+    final res = await client(server).getAuthApi().beginLoginTotp(
+          beginLoginTotpRequest: BeginLoginTotpRequest(username: username.trim(), password: password),
+        );
+    return res.data!;
+  }
+
+  /// Creates an account with a password and signs in to it.
+  Future<void> register(String server, RegisterRequest request) async {
+    server = _trim(server);
+    final res = await client(server).getAuthApi().register(registerRequest: request);
+    await _signedIn(server, res.data);
   }
 
   /// The server's OAuth web client id for Google sign-in, or null when
@@ -80,10 +101,10 @@ class SessionNotifier extends AsyncNotifier<Session?> {
   /// Signs in with the ID token Google Sign-In gave the app. Errors carry
   /// the server's reason: googleInvalid, signupClosed, admin, invite,
   /// googleOff, rateLimited or server.
-  Future<void> signInWithGoogle(String server, String idToken) async {
+  Future<void> signInWithGoogle(String server, String idToken, {String? invite}) async {
     server = _trim(server);
     try {
-      final res = await _client(server).getAuthApi().signInWithGoogle(googleSignInRequest: GoogleSignInRequest(idToken: idToken));
+      final res = await _client(server).getAuthApi().signInWithGoogle(googleSignInRequest: GoogleSignInRequest(idToken: idToken, invite: invite));
       await _signedIn(server, res.data);
     } on DioException catch (e) {
       final data = e.response?.data;
@@ -100,6 +121,10 @@ class SessionNotifier extends AsyncNotifier<Session?> {
   }
 
   static String _trim(String server) => server.trim().replaceAll(RegExp(r'/+$'), '');
+
+  /// A client for the account calls made signed out (sign-up, password
+  /// reset, email confirmation, invite preview).
+  static AgntsApi client(String server) => _client(_trim(server));
 
   static AgntsApi _client(String server) =>
       AgntsApi(dio: Dio(BaseOptions(baseUrl: '$server/api', connectTimeout: const Duration(seconds: 15))), interceptors: []);

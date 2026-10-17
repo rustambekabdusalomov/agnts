@@ -4,11 +4,18 @@ import 'package:go_router/go_router.dart';
 import 'package:agnts_api/agnts_api.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
+import '../../core/api.dart';
 import '../../core/data.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme.dart';
 import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
+import '../analytics/export.dart';
+
+/// Run statistics and time per step over the last 30 days (the Logs page's summary).
+final eventSummaryProvider = FutureProvider<EventSummary>((ref) async {
+  return (await requireApi(ref).getLogsApi().getEventSummary()).data!;
+});
 
 /// The global event log as a standalone screen. The Analytics tab embeds
 /// [ActivityFeed] directly under its "Events" switch.
@@ -55,12 +62,16 @@ class _ActivityFeedState extends ConsumerState<ActivityFeed> {
 
     return AsyncBody<List<Event>>(
       value: events,
-      onRefresh: () => ref.refresh(activityProvider(_type).future),
+      onRefresh: () {
+        ref.invalidate(eventSummaryProvider);
+        return ref.refresh(activityProvider(_type).future);
+      },
       builder: (list) => ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.only(bottom: 24),
         children: [
           const _WeekStats(),
+          const _RunSummary(),
           SectionHeader(l.analyticsEvents, trailing: list.isEmpty ? null : Text('${list.length}')),
           chips,
           const SizedBox(height: 12),
@@ -73,9 +84,113 @@ class _ActivityFeedState extends ConsumerState<ActivityFeed> {
                   )
                 : ListGroup(children: [for (final e in list) _EventRow(e)]),
           ),
+          // The log's last 90 days as a file, like the Logs page's buttons.
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+            child: Row(children: [
+              Expanded(child: OutlinedButton(onPressed: () => _export('json'), child: Text(l.logsExportJson))),
+              const SizedBox(width: 10),
+              Expanded(child: OutlinedButton(onPressed: () => _export('csv'), child: Text(l.logsExportCsv))),
+            ]),
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _export(String format) async {
+    final l = AppLocalizations.of(context);
+    String text;
+    try {
+      text = (await ref.read(apiProvider)!.getLogsApi().exportEvents(format: format)).data ?? '';
+    } catch (e) {
+      if (mounted) showSnack(context, errorMessage(e, l.commonError));
+      return;
+    }
+    if (!mounted) return;
+    final csv = format == 'csv';
+    await saveTextFile(context, csv ? 'agnts-events.csv' : 'agnts-events.jsonl', text, csv ? 'text/csv' : 'application/x-ndjson');
+  }
+}
+
+/// Run statistics and where the time goes, per step (the Logs page's cards).
+class _RunSummary extends ConsumerWidget {
+  const _RunSummary();
+
+  static const _steps = [
+    (TicketState.analyzing, false),
+    (TicketState.waitingForAnswers, true),
+    (TicketState.coding, false),
+    (TicketState.testing, false),
+    (TicketState.waitingForReview, true),
+    (TicketState.pushing, false),
+  ];
+
+  /// "45s", "5m", "2h 3m".
+  static String _dur(int ms) => ms < 60000 ? '${(ms / 1000).round()}s' : shortDuration(Duration(milliseconds: ms));
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final c = Agnts.of(context);
+    final s = ref.watch(eventSummaryProvider).value;
+    if (s == null) return const SizedBox.shrink();
+    final by = {for (final x in s.steps) x.state: x};
+    final top = s.steps.fold<int>(1, (m, x) => (x.avgMs ?? 0) > m ? x.avgMs! : m);
+    final rate = s.runsStarted == 0 ? 0 : (s.reachedReview * 100 / s.runsStarted).round();
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      SectionHeader(l.logsPeriod),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Grid2(children: [
+          KpiCard(label: l.logsRunsStarted, value: '${s.runsStarted}', note: l.logsRunsNote),
+          KpiCard(label: l.logsReached, value: '$rate%', note: l.logsReachedNote('${s.reachedReview}', '${s.runsStarted}')),
+          KpiCard(label: l.logsAvgTurns, value: '${s.avgTurns}', note: l.logsAvgTurnsNote),
+          KpiCard(label: l.logsStops, value: '${s.stops}', valueColor: s.stops > 0 ? c.badInk : null, note: l.logsStopsNote(s.errors)),
+        ]),
+      ),
+      SectionHeader(l.logsWhereTime),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: HCard(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Text(l.logsWhereTimeSub, style: TextStyle(fontSize: 13.5, color: c.ink3)),
+            const SizedBox(height: 6),
+            for (final (state, you) in _steps)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  Row(children: [
+                    Expanded(
+                      child: Text.rich(TextSpan(children: [
+                        TextSpan(text: stateLabelOf(l, state)),
+                        if ((by[state]?.count ?? 0) > 0) TextSpan(text: ' (${by[state]!.count})', style: TextStyle(color: c.ink3)),
+                      ]), style: TextStyle(fontSize: 13.5, color: c.ink)),
+                    ),
+                    Text(
+                      by[state]?.avgMs == null ? l.logsNoData : _dur(by[state]!.avgMs!),
+                      style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink),
+                    ),
+                  ]),
+                  const SizedBox(height: 4),
+                  Bar(value: (by[state]?.avgMs ?? 0) / top, tone: you ? Tone.warn : Tone.info),
+                ]),
+              ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Wrap(spacing: 14, children: [
+                for (final (tone, label) in [(Tone.info, l.logsLegendAgnts), (Tone.warn, l.logsLegendYou)])
+                  Row(mainAxisSize: MainAxisSize.min, children: [
+                    Container(width: 10, height: 10, decoration: BoxDecoration(color: tone.solid(c), borderRadius: BorderRadius.circular(3))),
+                    const SizedBox(width: 5),
+                    Text(label, style: TextStyle(fontSize: 12.5, color: c.ink3)),
+                  ]),
+              ]),
+            ),
+          ]),
+        ),
+      ),
+    ]);
   }
 }
 

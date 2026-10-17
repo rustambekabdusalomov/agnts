@@ -1,0 +1,16 @@
+{
+  "maccount": {
+    "passwordInstead": "Parol bilan kirish",
+    "googleInstead": "Google orqali davom etish",
+    "setupLede": "Adminlar ikki bosqichli kirish bilan kiradi. Akkauntni quyidagi kalit orqali autentifikator ilovasiga qo‘shing (yoki sozlash havolasini shu telefonda oching), so‘ng u ko‘rsatgan 6 xonali kodni kiriting.",
+    "totpOpen": "Autentifikatorda ochish",
+    "linkFailed": "Havolani ochib bo‘lmadi.",
+    "current": "Joriy",
+    "haveInvite": "Taklifingiz bormi?",
+    "inviteHint": "Taklif havolasini qo‘ying",
+    "inviteOpen": "Taklifni ochish",
+    "joined": "{date} dan beri",
+    "paying": "To‘lovni brauzerda yakunlang. To‘lov tizimi tasdiqlashi bilan kreditlar shu yerda ko‘rinadi.",
+    "chars": "{n} / {max}"
+  }
+}

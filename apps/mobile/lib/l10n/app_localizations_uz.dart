@@ -4992,6 +4992,47 @@ class AppLocalizationsUz extends AppLocalizations {
   String get logsTypeEvent => 'Hodisa';
 
   @override
+  String get maccountPasswordInstead => 'Parol bilan kirish';
+
+  @override
+  String get maccountGoogleInstead => 'Google orqali davom etish';
+
+  @override
+  String get maccountSetupLede =>
+      'Adminlar ikki bosqichli kirish bilan kiradi. Akkauntni quyidagi kalit orqali autentifikator ilovasiga qo‘shing (yoki sozlash havolasini shu telefonda oching), so‘ng u ko‘rsatgan 6 xonali kodni kiriting.';
+
+  @override
+  String get maccountTotpOpen => 'Autentifikatorda ochish';
+
+  @override
+  String get maccountLinkFailed => 'Havolani ochib bo‘lmadi.';
+
+  @override
+  String get maccountCurrent => 'Joriy';
+
+  @override
+  String get maccountHaveInvite => 'Taklifingiz bormi?';
+
+  @override
+  String get maccountInviteHint => 'Taklif havolasini qo‘ying';
+
+  @override
+  String get maccountInviteOpen => 'Taklifni ochish';
+
+  @override
+  String maccountJoined(String date) {
+    return '$date dan beri';
+  }
+
+  @override
+  String get maccountPaying => 'To‘lovni brauzerda yakunlang. To‘lov tizimi tasdiqlashi bilan kreditlar shu yerda ko‘rinadi.';
+
+  @override
+  String maccountChars(String n, String max) {
+    return '$n / $max';
+  }
+
+  @override
   String manalyticsTickets(num n) {
     String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n tiket', one: '$n tiket');
     return '$_temp0';
@@ -5617,6 +5658,34 @@ class AppLocalizationsUz extends AppLocalizations {
   String get mhomeSearchEmpty => 'Qidiruvingiz boʻyicha tiketlar topilmadi.';
 
   @override
+  String minsightsSaved(String name) {
+    return '$name saqlandi';
+  }
+
+  @override
+  String get minsightsEditTask => 'Vazifani tahrirlash';
+
+  @override
+  String get minsightsEditTaskSub => 'Faqat hali boshlanmagan vazifani o‘zgartirish mumkin.';
+
+  @override
+  String get minsightsSave => 'Saqlash';
+
+  @override
+  String get minsightsTaskSaved => 'Vazifa saqlandi';
+
+  @override
+  String minsightsTaskDeleted(String key) {
+    return '$key vazifasi o‘chirildi';
+  }
+
+  @override
+  String get minsightsTaskActions => 'Vazifa amallari';
+
+  @override
+  String get mmanageFillAll => 'Majburiy maydonlarni toʻldiring.';
+
+  @override
   String mmoreAgo(String time) {
     return '$time oldin';
   }
@@ -6052,6 +6121,81 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get mpreviewNotify => 'Oldindan koʻrish skrinshotlari tayyor';
+
+  @override
+  String get mpullsPlaceholder => 'Markdown';
+
+  @override
+  String get mpullsLineHint => 'Izoh qoldirish uchun qatorni bosing.';
+
+  @override
+  String mpullsCopyLink(String host) {
+    return '$host da ochish';
+  }
+
+  @override
+  String get mqualityNewTest => 'Yangi Swagger testi';
+
+  @override
+  String get mqualityStarterFor => 'Boshlangʻich qoidalar:';
+
+  @override
+  String get mqualityStarterPick => 'Tillari uchun boshlangʻich toʻplamlarni koʻrish uchun repozitoriyni tanlang.';
+
+  @override
+  String get mqualitySearchRules => 'Qoidalarni qidirish';
+
+  @override
+  String mqualityRequestTitle(String id) {
+    return 'Soʻrov $id';
+  }
+
+  @override
+  String mqualitySpecFile(String name) {
+    return 'Spetsifikatsiya fayli: $name';
+  }
+
+  @override
+  String get mqualityDeployHook => 'Deploy hook';
+
+  @override
+  String get mqualityTokenSaved => 'Token saqlandi';
+
+  @override
+  String get mqualitySuiteDeleted => 'Toʻplam oʻchirildi';
+
+  @override
+  String mqualityHourAt(String hour) {
+    return '$hour:00 UTC';
+  }
+
+  @override
+  String get mqualityReviewTickets => 'Pull requestlar';
+
+  @override
+  String get mqualityAddReviewer => 'Reviewer qoʻshish';
+
+  @override
+  String get mqualityEndpointsTicked => 'Endpointlar';
+
+  @override
+  String get mqualityShowCases => 'Holatlarni koʻrsatish';
+
+  @override
+  String get mqualityHideCases => 'Holatlarni yashirish';
+
+  @override
+  String mrepodetailCopyLink(String host) {
+    return '$host da ochish';
+  }
+
+  @override
+  String get mrepodetailOnePerLine => 'Har qatorda bittadan.';
+
+  @override
+  String mrepodetailLinesCapped(String n) {
+    return 'Bu yerda faqat birinchi $n qator koʻrsatilgan.';
+  }
 
   @override
   String get mtasksActAnswers => 'agnts savollariga javob bering';

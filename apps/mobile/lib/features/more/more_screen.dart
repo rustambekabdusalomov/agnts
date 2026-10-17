@@ -143,6 +143,24 @@ class MoreScreen extends ConsumerWidget {
                 onTap: () => context.push('/ci'),
               ),
             ]),
+            // Workspace setup and the pages that manage it.
+            const SizedBox(height: 10),
+            group([
+              _NavRow('users', l.navWorkspace, '/workspace'),
+              _NavRow('repos', l.navRepos, '/repos'),
+              _NavRow('plug', l.navIntegrations, '/integrations'),
+              _NavRow('shield', l.navRules, '/rules'),
+              _NavRow('check', l.navReviews, '/reviews'),
+              _NavRow('tasks', l.swaggerSuites, '/swagger-suites'),
+              _NavRow('usage', l.navUsage, '/usage'),
+              _NavRow('dashboard', l.networkTitle, '/networks'),
+              _NavRow('assistant', l.mcpTitle, '/mcp'),
+            ]),
+            const SizedBox(height: 10),
+            group([
+              _NavRow('users', l.navProfile, '/profile'),
+              _NavRow('feedback', l.feedbackTitle, '/feedback'),
+            ]),
             const AppearanceSection(),
             // Default models and push notifications
             ...settings.when(
@@ -162,6 +180,7 @@ class MoreScreen extends ConsumerWidget {
                               title: _providerName(l, i.provider),
                               subtitle: i.account,
                               trailing: ToneBadge(i.connected ? l.mobileConnected : l.mobileNotConnected, i.connected ? Tone.ok : Tone.gray),
+                              onTap: () => context.push('/integrations/${i.provider}'),
                             ),
                         ]),
                   error: (_, _) => card(Text(l.commonError)),
@@ -501,6 +520,21 @@ class _RoundButton extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A More row that opens one of the workspace pages.
+class _NavRow extends StatelessWidget {
+  const _NavRow(this.icon, this.title, this.path);
+  final String icon;
+  final String title;
+  final String path;
+
+  @override
+  Widget build(BuildContext context) => ListRow(
+        leading: HIcon(icon, size: 22, color: Agnts.of(context).primary),
+        title: title,
+        onTap: () => context.push(path),
+      );
 }
 
 String _providerName(AppLocalizations l, String p) => switch (p) {

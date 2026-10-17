@@ -2953,6 +2953,35 @@
   "logsTypeLimit": "Limit",
   "logsTypeError": "Error",
   "logsTypeEvent": "Event",
+  "maccountPasswordInstead": "Sign in with a password",
+  "maccountGoogleInstead": "Continue with Google instead",
+  "maccountSetupLede": "Admins sign in with two factors. Add this account to an authenticator app with the secret below (or open the setup link on this phone), then enter the 6-digit code it shows.",
+  "maccountTotpOpen": "Open in authenticator app",
+  "maccountLinkFailed": "Couldn't open the link.",
+  "maccountCurrent": "Current",
+  "maccountHaveInvite": "Have an invite?",
+  "maccountInviteHint": "Paste the invite link",
+  "maccountInviteOpen": "Open invite",
+  "maccountJoined": "Joined {date}",
+  "@maccountJoined": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "maccountPaying": "Finish the payment in your browser. Credits show here once the payment provider confirms it.",
+  "maccountChars": "{n} / {max}",
+  "@maccountChars": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
   "manalyticsTickets": "{n, plural, one {{n} ticket} other {{n} tickets}}",
   "@manalyticsTickets": {
     "placeholders": {
@@ -3396,6 +3425,28 @@
   "mhomeActStart": "Kept in queue. Tap to start",
   "mhomeLiveFallback": "Working…",
   "mhomeSearchEmpty": "No tickets match your search.",
+  "minsightsSaved": "{name} saved",
+  "@minsightsSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "minsightsEditTask": "Edit task",
+  "minsightsEditTaskSub": "Only a task that hasn't started can be changed.",
+  "minsightsSave": "Save",
+  "minsightsTaskSaved": "Task saved",
+  "minsightsTaskDeleted": "Task {key} deleted",
+  "@minsightsTaskDeleted": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "minsightsTaskActions": "Task actions",
+  "mmanageFillAll": "Fill in the required fields.",
   "mmoreAgo": "{time} ago",
   "@mmoreAgo": {
     "placeholders": {
@@ -3635,6 +3686,69 @@
   "mpreviewSettingsModel": "Preview",
   "mpreviewSettingsModelHelp": "Looks at screenshots of the running app",
   "mpreviewNotify": "Preview screenshots are ready",
+  "mpullsPlaceholder": "Markdown",
+  "mpullsLineHint": "Tap a line to comment on it.",
+  "mpullsCopyLink": "Open on {host}",
+  "@mpullsCopyLink": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "mqualityNewTest": "New Swagger test",
+  "mqualityStarterFor": "Starter rules for",
+  "mqualityStarterPick": "Pick a repository to see the starter packs for its languages.",
+  "mqualitySearchRules": "Search rules",
+  "mqualityRequestTitle": "Request {id}",
+  "@mqualityRequestTitle": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "mqualitySpecFile": "Spec file: {name}",
+  "@mqualitySpecFile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mqualityDeployHook": "Deploy hook",
+  "mqualityTokenSaved": "Token saved",
+  "mqualitySuiteDeleted": "Suite deleted",
+  "mqualityHourAt": "{hour}:00 UTC",
+  "@mqualityHourAt": {
+    "placeholders": {
+      "hour": {
+        "type": "String"
+      }
+    }
+  },
+  "mqualityReviewTickets": "Pull requests",
+  "mqualityAddReviewer": "Add a reviewer",
+  "mqualityEndpointsTicked": "Endpoints",
+  "mqualityShowCases": "Show cases",
+  "mqualityHideCases": "Hide cases",
+  "mrepodetailCopyLink": "Open on {host}",
+  "@mrepodetailCopyLink": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "mrepodetailOnePerLine": "One per line.",
+  "mrepodetailLinesCapped": "Only the first {n} lines are shown here.",
+  "@mrepodetailLinesCapped": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
   "mtasksActAnswers": "Answer agnts's questions",
   "mtasksActReview": "Review the changes",
   "mtasksActFailed": "Stopped. Tell agnts what to try",

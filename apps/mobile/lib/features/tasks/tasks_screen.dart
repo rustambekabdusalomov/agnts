@@ -11,6 +11,7 @@ import '../../theme.dart';
 import '../../widgets/attachments.dart';
 import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
+import '../admin/admin_widgets.dart' show confirmAction;
 import '../tickets/kinds.dart';
 import '../tickets/spend.dart';
 import 'repo_pick.dart';
@@ -184,14 +185,17 @@ Color _repoColor(Repository r) {
   return palette[r.id.abs() % palette.length];
 }
 
-/// A task as a card, with its next step when it needs you.
-class _TaskCard extends StatelessWidget {
+/// A task as a card, with its next step when it needs you. A task that
+/// has not started can be edited or deleted: long-press it, or tap "⋯".
+class _TaskCard extends ConsumerWidget {
   const _TaskCard(this.t);
   final Ticket t;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
+    final c = Agnts.of(context);
+    final editable = t.state == TicketState.new_ && ref.watch(canEditProvider);
     final (String? action, Tone tone) = switch (t.state) {
       TicketState.waitingForAnswers => (l.mtasksActAnswers, Tone.warn),
       TicketState.waitingForReview => (l.mtasksActReview, Tone.warn),
@@ -200,16 +204,28 @@ class _TaskCard extends StatelessWidget {
       TicketState.new_ => (t.held == true ? l.mtasksActHeld : l.mtasksActAnalyze, Tone.info),
       _ => (null, Tone.info),
     };
-    return TicketCard(
+    final card = TicketCard(
       ticket: t,
       onTap: () => context.push('/tickets/${t.key}'),
       meta: [
         Text(_when(context, t.updatedAt)),
         if (t.spend != null) Text(l.spendTokens(fmtTokens(ioTokens(t.spend), Localizations.localeOf(context).toLanguageTag()))),
+        if (editable)
+          Semantics(
+            button: true,
+            label: l.minsightsTaskActions,
+            child: InkResponse(
+              onTap: () => showTaskActions(context, ref, t),
+              radius: 20,
+              child: Padding(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), child: HIcon('more', size: 18, color: c.ink3)),
+            ),
+          ),
       ],
       action: action,
       actionTone: tone,
     );
+    if (!editable) return card;
+    return GestureDetector(onLongPress: () => showTaskActions(context, ref, t), child: card);
   }
 
   static String _when(BuildContext context, DateTime at) {
@@ -629,6 +645,229 @@ class _Choice extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Edit or delete a task that has not started (PUT and DELETE /tasks/{key}).
+Future<void> showTaskActions(BuildContext context, WidgetRef ref, Ticket t) async {
+  final l = AppLocalizations.of(context);
+  final c = Agnts.of(context);
+  final pick = await showModalBottomSheet<String>(
+    context: context,
+    showDragHandle: true,
+    builder: (ctx) => SafeArea(
+      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+          child: Text('${t.key} · ${t.title}', maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(ctx).textTheme.titleMedium),
+        ),
+        ListTile(leading: HIcon('tasks', size: 22, color: c.primary), title: Text(l.minsightsEditTask), onTap: () => Navigator.pop(ctx, 'edit')),
+        ListTile(
+          leading: HIcon('close', size: 22, color: c.badInk),
+          title: Text(l.ticketDelete, style: TextStyle(color: c.badInk)),
+          onTap: () => Navigator.pop(ctx, 'delete'),
+        ),
+        const SizedBox(height: 8),
+      ]),
+    ),
+  );
+  if (!context.mounted) return;
+  if (pick == 'edit') {
+    final saved = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.9),
+      builder: (_) => _EditTaskSheet(t),
+    );
+    if (saved == true && context.mounted) {
+      ref.invalidate(ticketsProvider);
+      ref.invalidate(ticketProvider(t.key));
+      showSnack(context, l.minsightsTaskSaved);
+    }
+  } else if (pick == 'delete') {
+    final ok = await confirmAction(context, title: l.ticketDelete, body: l.ticketDeleteConfirm(t.key), action: l.ticketDelete, danger: true);
+    if (!ok || !context.mounted) return;
+    try {
+      await ref.read(apiProvider)!.getTasksApi().deleteTask(key: t.key);
+      ref.invalidate(ticketsProvider);
+      if (context.mounted) showSnack(context, l.minsightsTaskDeleted(t.key));
+    } catch (e) {
+      if (context.mounted) showSnack(context, errorMessage(e, l.commonError));
+    }
+  }
+}
+
+/// The edit sheet: kind, title, ticket number, description, priority and
+/// what happens after approval. The repository is fixed once created.
+class _EditTaskSheet extends ConsumerStatefulWidget {
+  const _EditTaskSheet(this.t);
+  final Ticket t;
+
+  @override
+  ConsumerState<_EditTaskSheet> createState() => _EditTaskSheetState();
+}
+
+class _EditTaskSheetState extends ConsumerState<_EditTaskSheet> {
+  late final _title = TextEditingController(text: widget.t.title);
+  late final _number = TextEditingController(text: widget.t.ticketNumber ?? '');
+  late final _desc = TextEditingController(text: widget.t.description);
+  late var _priority = TaskUpdatePriorityEnum.values.firstWhere((p) => p.value == widget.t.priority, orElse: () => TaskUpdatePriorityEnum.medium);
+  late var _after = widget.t.afterApprove == TicketAfterApproveEnum.main ? TaskUpdateAfterApproveEnum.main : TaskUpdateAfterApproveEnum.pr;
+  late var _kind = TicketKindChoice.values.firstWhere((k) => k.value == widget.t.kind.value, orElse: () => TicketKindChoice.auto);
+  bool _busy = false;
+  String? _err;
+
+  bool get _reportKind => _kind == TicketKindChoice.plan || _kind == TicketKindChoice.analysis || _kind == TicketKindChoice.bug;
+
+  @override
+  void dispose() {
+    _title.dispose();
+    _number.dispose();
+    _desc.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    final l = AppLocalizations.of(context);
+    if (_title.text.trim().isEmpty) {
+      setState(() => _err = l.tasksTitleRequired);
+      return;
+    }
+    setState(() {
+      _busy = true;
+      _err = null;
+    });
+    try {
+      await ref.read(apiProvider)!.getTasksApi().updateTask(
+            key: widget.t.key,
+            taskUpdate: TaskUpdate(
+              title: _title.text.trim(),
+              ticketNumber: _number.text.trim(),
+              description: _desc.text.trim(),
+              priority: _priority,
+              afterApprove: _reportKind ? null : _after,
+              kind: _kind,
+            ),
+          );
+      if (mounted) Navigator.pop(context, true);
+    } catch (e) {
+      if (mounted) setState(() => _err = errorMessage(e, l.commonError));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = Agnts.of(context);
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
+    return Padding(
+      padding: EdgeInsets.only(bottom: keyboard),
+      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(l.minsightsEditTask, style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 2),
+                Text(l.minsightsEditTaskSub, style: TextStyle(color: c.ink3, fontSize: 14)),
+              ]),
+            ),
+            const SizedBox(width: 12),
+            RoundIconButton('close', tooltip: l.navClose, onTap: () => Navigator.pop(context)),
+          ]),
+        ),
+        Flexible(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              _Field(label: l.kindTitle, child: KindChoices(value: _kind, onPick: (k) => setState(() => _kind = k), enabled: !_busy)),
+              _Field(
+                label: l.mobileTaskTitle,
+                child: TextField(
+                  controller: _title,
+                  textCapitalization: TextCapitalization.sentences,
+                  maxLength: 300,
+                  decoration: InputDecoration(hintText: l.tasksTitlePh, counterText: ''),
+                ),
+              ),
+              _Field(
+                label: l.tasksTicketNumber,
+                child: TextField(
+                  controller: _number,
+                  maxLength: 64,
+                  autocorrect: false,
+                  style: TextStyle(fontFamily: AgntsFonts.mono),
+                  decoration: InputDecoration(hintText: l.tasksTicketNumberPh, helperText: l.tasksTicketNumberHelp, helperMaxLines: 3, counterText: ''),
+                ),
+              ),
+              _Field(
+                label: l.mobileTaskDescription,
+                child: TextField(
+                  controller: _desc,
+                  minLines: 4,
+                  maxLines: 8,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: InputDecoration(hintText: l.tasksDescPh),
+                ),
+              ),
+              _Field(
+                label: l.mobileTaskPriority,
+                last: _reportKind,
+                child: Segmented<TaskUpdatePriorityEnum>(
+                  full: true,
+                  options: [
+                    (TaskUpdatePriorityEnum.low, l.mobilePriorityLow),
+                    (TaskUpdatePriorityEnum.medium, l.mobilePriorityMedium),
+                    (TaskUpdatePriorityEnum.high, l.mobilePriorityHigh),
+                  ],
+                  value: _priority,
+                  onChanged: (v) => setState(() => _priority = v),
+                ),
+              ),
+              if (!_reportKind)
+                _Field(
+                  label: l.mobileAfterApprove,
+                  last: true,
+                  child: Segmented<TaskUpdateAfterApproveEnum>(
+                    full: true,
+                    options: [
+                      (TaskUpdateAfterApproveEnum.main, l.mobileAfterMain),
+                      (TaskUpdateAfterApproveEnum.pr, l.mobileAfterPr),
+                    ],
+                    value: _after,
+                    onChanged: (v) => setState(() => _after = v),
+                  ),
+                ),
+              if (_err != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Text(_err!, style: TextStyle(color: c.badInk, fontSize: 13.5, fontWeight: FontWeight.w700)),
+                ),
+            ]),
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(border: Border(top: BorderSide(color: c.line))),
+          padding: EdgeInsets.fromLTRB(20, 10, 20, 12 + (keyboard > 0 ? 0 : MediaQuery.paddingOf(context).bottom)),
+          child: Row(children: [
+            Expanded(child: OutlinedButton(onPressed: _busy ? null : () => Navigator.pop(context), child: Text(l.mobileCancel))),
+            const SizedBox(width: 10),
+            Expanded(
+              child: FilledButton(
+                onPressed: _busy ? null : _save,
+                child: _busy
+                    ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: c.onPrimary))
+                    : Text(l.minsightsSave),
+              ),
+            ),
+          ]),
+        ),
+      ]),
     );
   }
 }

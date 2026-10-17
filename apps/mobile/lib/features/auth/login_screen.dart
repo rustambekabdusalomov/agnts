@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
+import 'package:agnts_api/agnts_api.dart' show BeginLoginTotp200Response;
 
 import '../../core/flavor.dart';
 import '../../core/google_auth.dart';
@@ -9,6 +11,8 @@ import '../../core/session.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme.dart';
 import '../../widgets/ui.dart';
+import '../account/account_widgets.dart';
+import 'auth_widgets.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -25,7 +29,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _busy = false;
   bool _needCode = false; // the account signs in with a second factor
   bool _asking = false; // the message asks for the code rather than reports an error
+  bool _passwordForm = false; // the user app's password sign-in, shown on request
+  BeginLoginTotp200Response? _setup; // an Admin setting up two-factor sign-in while signing in
   String? _error;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Back from an account screen: keep the server it used.
+    try {
+      final server = GoRouterState.of(context).uri.queryParameters['server'];
+      if (server != null && server.isNotEmpty && _server.text == defaultServer) _server.text = server;
+    } catch (_) {} // shown outside the router (tests)
+  }
 
   @override
   void dispose() {
@@ -93,14 +109,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _error = null;
     });
     try {
-      await ref.read(sessionProvider.notifier).signIn(server, _user.text, _pass.text, _code.text);
+      await ref.read(sessionProvider.notifier).signIn(server, _user.text, _pass.text, _code.text, totpSecret: _setup?.secret);
     } on SignInError catch (e) {
+      if (e.kind == 'totpSetup' && _setup == null) {
+        await _beginSetup(server);
+        return;
+      }
       // The first code_required just asks for the code; after one was typed it was wrong.
       final ask = e.kind == 'codeRequired' && !_needCode;
       _code.clear();
       setState(() => _error = switch (e.kind) {
             _ when ask => l.authCodeLede,
-            'credentials' || 'codeRequired' => l.authWrongCredentials,
+            'credentials' || 'codeRequired' || 'totpSetup' => l.authWrongCredentials,
+            'useGoogle' => l.authUseGoogle,
             'rateLimited' => l.authRateLimited(60),
             _ => l.commonError,
           });
@@ -113,13 +134,47 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  /// An Admin without two-factor sign-in gets a new secret to add, then
+  /// signs in with a code from it.
+  Future<void> _beginSetup(String server) async {
+    final l = AppLocalizations.of(context);
+    try {
+      final setup = await ref.read(sessionProvider.notifier).beginLoginTotp(server, _user.text, _pass.text);
+      if (!mounted) return;
+      _code.clear();
+      setState(() {
+        _setup = setup;
+        _needCode = true;
+        _asking = true;
+        _error = l.maccountSetupLede;
+      });
+    } catch (e) {
+      if (mounted) setState(() => _error = authError(l, e));
+    }
+  }
+
+  /// Back to the username and password, for another account.
+  void _otherAccount() => setState(() {
+        _needCode = false;
+        _setup = null;
+        _asking = false;
+        _error = null;
+        _code.clear();
+        _pass.clear();
+      });
+
+  /// The server typed in, kept for the account screens (unless it is the default).
+  String get _serverParam => _server.text.trim() == defaultServer ? '' : _server.text.trim();
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final c = Agnts.of(context);
-    // The user app signs in with Google; the admin app with a password.
-    final google = !ref.watch(adminAppProvider);
+    // The user app signs in with Google (or a password when asked for);
+    // the admin app with a password.
+    final adminApp = ref.watch(adminAppProvider);
+    final google = !adminApp && !_passwordForm;
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -155,7 +210,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 15),
                         decoration: InputDecoration(labelText: l.mobileServer, hintText: l.mobileServerHint),
                       ),
-                      if (!google) ...[
+                      if (!google && !_needCode) ...[
                         const SizedBox(height: 12),
                         TextField(
                           controller: _user,
@@ -169,26 +224,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           obscureText: true,
                           autofillHints: const [AutofillHints.password],
                           decoration: InputDecoration(labelText: l.authPassword),
-                          onSubmitted: _needCode ? null : (_) => _submit(),
+                          onSubmitted: (_) => _submit(),
                         ),
-                        if (_needCode) ...[
+                      ],
+                      if (!google && _needCode) ...[
+                        if (_setup != null) ...[
                           const SizedBox(height: 12),
-                          TextField(
-                            controller: _code,
-                            autofocus: true,
-                            keyboardType: TextInputType.number,
-                            autofillHints: const [AutofillHints.oneTimeCode],
-                            maxLength: 6,
-                            style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 17, letterSpacing: 4),
-                            decoration: InputDecoration(
-                              labelText: l.authCode,
-                              helperText: l.authCodeHint,
-                              helperStyle: TextStyle(fontSize: 12.5, color: c.ink3),
-                              counterText: '',
-                            ),
-                            onSubmitted: (_) => _submit(),
-                          ),
+                          TotpSecret(secret: _setup!.secret, url: _setup!.url),
                         ],
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _code,
+                          autofocus: true,
+                          keyboardType: TextInputType.number,
+                          autofillHints: const [AutofillHints.oneTimeCode],
+                          maxLength: 6,
+                          style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 17, letterSpacing: 4),
+                          decoration: InputDecoration(
+                            labelText: l.authCode,
+                            helperText: l.authCodeHint,
+                            helperStyle: TextStyle(fontSize: 12.5, color: c.ink3),
+                            counterText: '',
+                          ),
+                          onSubmitted: (_) => _submit(),
+                        ),
                       ],
                     ]),
                   ),
@@ -205,6 +264,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       onPressed: _busy ? null : _submit,
                       child: Text(_busy ? l.authSubmitting : l.authSubmit),
                     ),
+                  const SizedBox(height: 8),
+                  Wrap(alignment: WrapAlignment.center, crossAxisAlignment: WrapCrossAlignment.center, spacing: 4, children: [
+                    if (_needCode)
+                      AuthLink(l.authBack, onTap: _otherAccount)
+                    else ...[
+                      if (!adminApp)
+                        AuthLink(
+                          _passwordForm ? l.maccountGoogleInstead : l.maccountPasswordInstead,
+                          onTap: () => setState(() {
+                            _passwordForm = !_passwordForm;
+                            _error = null;
+                          }),
+                        ),
+                      if (!google) AuthLink(l.accountForgot, onTap: () => context.push(withServer('/forgot', _serverParam))),
+                      if (!adminApp)
+                        AuthLink(l.accountSignUp, prefix: l.accountNoAccount, onTap: () => context.push(withServer('/signup', _serverParam))),
+                    ],
+                  ]),
                 ]),
               ),
             ),

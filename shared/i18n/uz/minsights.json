@@ -1,0 +1,11 @@
+{
+  "minsights": {
+    "saved": "{name} saqlandi",
+    "editTask": "Vazifani tahrirlash",
+    "editTaskSub": "Faqat hali boshlanmagan vazifani o‘zgartirish mumkin.",
+    "save": "Saqlash",
+    "taskSaved": "Vazifa saqlandi",
+    "taskDeleted": "{key} vazifasi o‘chirildi",
+    "taskActions": "Vazifa amallari"
+  }
+}

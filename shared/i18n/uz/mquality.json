@@ -1,0 +1,19 @@
+{
+  "mquality": {
+    "newTest": "Yangi Swagger testi",
+    "starterFor": "Boshlangʻich qoidalar:",
+    "starterPick": "Tillari uchun boshlangʻich toʻplamlarni koʻrish uchun repozitoriyni tanlang.",
+    "searchRules": "Qoidalarni qidirish",
+    "requestTitle": "Soʻrov {id}",
+    "specFile": "Spetsifikatsiya fayli: {name}",
+    "deployHook": "Deploy hook",
+    "tokenSaved": "Token saqlandi",
+    "suiteDeleted": "Toʻplam oʻchirildi",
+    "hourAt": "{hour}:00 UTC",
+    "reviewTickets": "Pull requestlar",
+    "addReviewer": "Reviewer qoʻshish",
+    "endpointsTicked": "Endpointlar",
+    "showCases": "Holatlarni koʻrsatish",
+    "hideCases": "Holatlarni yashirish"
+  }
+}

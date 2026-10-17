@@ -1,0 +1,19 @@
+{
+  "mquality": {
+    "newTest": "New Swagger test",
+    "starterFor": "Starter rules for",
+    "starterPick": "Pick a repository to see the starter packs for its languages.",
+    "searchRules": "Search rules",
+    "requestTitle": "Request {id}",
+    "specFile": "Spec file: {name}",
+    "deployHook": "Deploy hook",
+    "tokenSaved": "Token saved",
+    "suiteDeleted": "Suite deleted",
+    "hourAt": "{hour}:00 UTC",
+    "reviewTickets": "Pull requests",
+    "addReviewer": "Add a reviewer",
+    "endpointsTicked": "Endpoints",
+    "showCases": "Show cases",
+    "hideCases": "Hide cases"
+  }
+}

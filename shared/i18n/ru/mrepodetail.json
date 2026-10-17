@@ -1,0 +1,7 @@
+{
+  "mrepodetail": {
+    "copyLink": "Открыть в {host}",
+    "onePerLine": "По одному на строку.",
+    "linesCapped": "Здесь показаны только первые {n} строк."
+  }
+}

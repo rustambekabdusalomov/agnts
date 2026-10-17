@@ -1,0 +1,19 @@
+{
+  "mquality": {
+    "newTest": "Новый Swagger-тест",
+    "starterFor": "Стартовые правила для",
+    "starterPick": "Выберите репозиторий, чтобы увидеть стартовые наборы для его языков.",
+    "searchRules": "Поиск правил",
+    "requestTitle": "Запрос {id}",
+    "specFile": "Файл спецификации: {name}",
+    "deployHook": "Хук деплоя",
+    "tokenSaved": "Токен сохранён",
+    "suiteDeleted": "Набор удалён",
+    "hourAt": "{hour}:00 UTC",
+    "reviewTickets": "Пул-реквесты",
+    "addReviewer": "Добавить ревьюера",
+    "endpointsTicked": "Эндпоинты",
+    "showCases": "Показать случаи",
+    "hideCases": "Скрыть случаи"
+  }
+}

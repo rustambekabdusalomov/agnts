@@ -14,19 +14,44 @@ import '../../widgets/ui.dart';
 import '../activity/activity_screen.dart';
 import '../assistant/assistant_data.dart' show assistantStatsProvider;
 import '../assistant/assistant_stats.dart';
+import '../tickets/spend.dart';
+import 'export.dart';
+import '../tickets/replay_eval.dart';
+
+part 'analytics_tabs.dart';
 
 /// Analytics for the last [days] days, compared with the period before.
 final _analyticsFor = FutureProvider.family<Analytics, int>((ref, days) async {
   return (await requireApi(ref).getAnalyticsApi().getAnalytics(days: days)).data!;
 });
 
+/// Pull requests, cycle time and questions (the Delivery tab).
+final _deliveryFor = FutureProvider.family<AnalyticsDelivery, int>((ref, days) async {
+  return (await requireApi(ref).getAnalyticsApi().getAnalyticsDelivery(days: days)).data!;
+});
+
+/// CI health (the Quality tab's second half).
+final _ciFor = FutureProvider.family<AnalyticsCI, int>((ref, days) async {
+  return (await requireApi(ref).getAnalyticsApi().getAnalyticsCi(days: days)).data!;
+});
+
+/// Lessons, rules, follow-ups and reviewer notes (the Learning tab).
+final _learningFor = FutureProvider.family<AnalyticsLearning, int>((ref, days) async {
+  return (await requireApi(ref).getAnalyticsApi().getAnalyticsLearning(days: days)).data!;
+});
+
 /// The demo's soft blue (after changes, hourly activity); the theme has no token for it.
 const _softBlue = Color(0xFF7F95E8);
 
-enum _Tab { analytics, events }
+/// The admin panel's peach for "waiting for review" in a ticket's time split.
+const _peach = Color(0xFFE8A87F);
 
-/// Analytics tab: the dashboard (KPIs, charts, insights) and, under
-/// "Events", the activity log.
+/// The Analytics page's tabs, then the activity log under "Events".
+enum _Tab { overview, delivery, quality, learning, cost, repos, assistant, events }
+
+/// Analytics tab: the admin panel's analytics tabs (overview, delivery,
+/// quality, learning, cost, repositories and, for the owner, the
+/// assistant) over 7, 30 or 90 days, and the activity log under "Events".
 class AnalyticsScreen extends ConsumerStatefulWidget {
   const AnalyticsScreen({super.key});
 
@@ -35,7 +60,7 @@ class AnalyticsScreen extends ConsumerStatefulWidget {
 }
 
 class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
-  _Tab _tab = _Tab.analytics;
+  _Tab _tab = _Tab.overview;
   int _days = 30;
 
   void _about() {
@@ -47,54 +72,106 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       builder: (context) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(l.manalyticsAbout, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 10),
-            Text(l.analyticsLede, style: TextStyle(fontSize: 15, color: c.ink2)),
-            const SizedBox(height: 8),
-            Text(l.manalyticsCompared(_days), style: TextStyle(fontSize: 14, color: c.ink3)),
-          ]),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l.manalyticsAbout, style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 10),
+              Text(l.analyticsLede, style: TextStyle(fontSize: 15, color: c.ink2)),
+              const SizedBox(height: 8),
+              Text(l.manalyticsCompared(_days), style: TextStyle(fontSize: 14, color: c.ink3)),
+            ],
+          ),
         ),
       ),
     );
   }
 
+  String _label(AppLocalizations l, _Tab t) => switch (t) {
+    _Tab.overview => l.analyticsTabOverview,
+    _Tab.delivery => l.analyticsTabDelivery,
+    _Tab.quality => l.analyticsTabQuality,
+    _Tab.learning => l.analyticsTabLearning,
+    _Tab.cost => l.analyticsTabCost,
+    _Tab.repos => l.analyticsTabRepos,
+    _Tab.assistant => l.analyticsTabAssistant,
+    _Tab.events => l.analyticsEvents,
+  };
+
+  /// The open tab's table as CSV, as the admin panel exports it; null while
+  /// its data is not loaded (or for the assistant and events tabs).
+  List<List<Object?>>? _csv() {
+    final a = ref.read(_analyticsFor(_days)).value;
+    switch (_tab) {
+      case _Tab.delivery:
+        return deliveryCsv(ref.read(_deliveryFor(_days)).value);
+      case _Tab.learning:
+        return learningCsv(ref.read(_learningFor(_days)).value);
+      case _Tab.quality:
+        return qualityCsv(a);
+      case _Tab.repos:
+        return reposCsv(a);
+      case _Tab.overview || _Tab.cost:
+        return daysCsv(a);
+      case _Tab.assistant || _Tab.events:
+        return null;
+    }
+  }
+
+  Future<void> _export() async {
+    final rows = _csv();
+    if (rows == null) return;
+    await saveTextFile(context, 'agnts-analytics-${_tab.name}-${_days}d.csv', toCsv(rows), 'text/csv');
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    // The Assistant tab is the workspace owner's: it shows people's rated questions.
+    final owner = isOwner(ref.watch(currentWorkspaceProvider));
+    final tabs = [
+      for (final t in _Tab.values)
+        if (t != _Tab.assistant || owner) t,
+    ];
+    final tab = tabs.contains(_tab) ? _tab : _Tab.overview;
+    final canExport = tab != _Tab.events && tab != _Tab.assistant;
     return Scaffold(
       body: SafeArea(
         bottom: false,
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          PageHeader(title: l.analyticsTitle, actions: [RoundIconButton('info', tooltip: l.manalyticsAbout, onTap: _about)]),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: Segmented<_Tab>(
-              full: true,
-              options: [(_Tab.analytics, l.analyticsTitle), (_Tab.events, l.analyticsEvents)],
-              value: _tab,
-              onChanged: (t) => setState(() => _tab = t),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            PageHeader(
+              title: l.analyticsTitle,
+              actions: [
+                if (canExport) RoundIconButton('file', tooltip: l.analyticsExportCsv, onTap: _export),
+                RoundIconButton('info', tooltip: l.manalyticsAbout, onTap: _about),
+              ],
             ),
-          ),
-          Expanded(
-            child: IndexedStack(index: _tab.index, children: [
-              _dashboard(context),
-              const ActivityFeed(),
-            ]),
-          ),
-        ]),
+            ChipRow(
+              children: [for (final t in tabs) FilterChipH(label: _label(l, t), selected: t == tab, onTap: () => setState(() => _tab = t))],
+            ),
+            const SizedBox(height: 12),
+            Expanded(child: tab == _Tab.events ? const ActivityFeed() : _body(context, tab)),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _dashboard(BuildContext context) {
+  Widget _body(BuildContext context, _Tab tab) {
     final l = AppLocalizations.of(context);
     final c = Agnts.of(context);
-    final value = ref.watch(_analyticsFor(_days));
+    final days = _days;
     return RefreshIndicator(
-      onRefresh: () {
+      onRefresh: () async {
         ref.invalidate(assistantStatsProvider);
-        return ref.refresh(_analyticsFor(_days).future);
+        ref.invalidate(_deliveryFor(days));
+        ref.invalidate(_ciFor(days));
+        ref.invalidate(_learningFor(days));
+        ref.invalidate(_analyticsFor(days));
+        await ref.read(_analyticsFor(days).future);
       },
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -104,331 +181,81 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Segmented<int>(
               full: true,
-              options: [for (final d in const [7, 30, 90]) (d, l.manalyticsDays(d))],
-              value: _days,
+              options: [
+                for (final d in const [7, 30, 90]) (d, l.manalyticsDays(d)),
+              ],
+              value: days,
               onChanged: (d) => setState(() => _days = d),
             ),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(18, 8, 18, 12),
-            child: Text(l.manalyticsCompared(_days), style: TextStyle(fontSize: 12.5, color: c.ink3)),
+            child: Text(l.manalyticsCompared(days), style: TextStyle(fontSize: 12.5, color: c.ink3)),
           ),
-          ...switch (value) {
-            AsyncData(:final value) => _Dashboard(a: value, days: _days).children(context),
-            AsyncError() => [
-                Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: HelpBox(l.analyticsError, tone: Tone.bad)),
-              ],
-            _ => [
-                Padding(
-                  padding: const EdgeInsets.all(40),
-                  child: Column(children: [
-                    const CircularProgressIndicator(),
-                    const SizedBox(height: 12),
-                    Text(l.analyticsLoading, style: TextStyle(color: c.ink3)),
-                  ]),
-                ),
-              ],
-          },
-          if (isOwner(ref.watch(currentWorkspaceProvider))) AssistantStatsSection(days: _days),
+          ..._tabContent(context, tab, days),
         ],
       ),
     );
   }
-}
 
-// ---- Dashboard content ----
+  List<Widget> _tabContent(BuildContext context, _Tab tab, int days) {
+    final l = AppLocalizations.of(context);
+    if (tab == _Tab.assistant) return [AssistantStatsSection(days: days)];
+    if (tab == _Tab.learning) return _async(context, ref.watch(_learningFor(days)), (x) => _Learning(x).children(context));
 
-int _pct(num a, num b) => b == 0 ? 0 : (a / b * 100).round();
-
-/// Builds the dashboard's sections from one analytics response.
-class _Dashboard {
-  const _Dashboard({required this.a, required this.days});
-  final Analytics a;
-  final int days;
-
-  String _min(AppLocalizations l, num m) {
-    final v = math.max(0, m.round());
-    if (v < 60) return l.analyticsMinutes('$v');
-    return l.analyticsHoursMinutes('${v ~/ 60}', '${v % 60}');
+    final main = ref.watch(_analyticsFor(days));
+    final delivery = tab == _Tab.delivery ? ref.watch(_deliveryFor(days)) : null;
+    // Delivery needs both; any failure or wait shows as the tab's.
+    final AsyncValue<Analytics> value = switch (delivery) {
+      AsyncError(:final error, :final stackTrace) => AsyncError(error, stackTrace),
+      AsyncData() || null => main,
+      _ => const AsyncLoading(),
+    };
+    return _async(context, value, (a) {
+      if (_isEmpty(a)) return [_card(EmptyState(title: l.analyticsEmptyTitle, text: l.analyticsEmpty))];
+      final v = _View(a, days, Localizations.localeOf(context).toString());
+      return switch (tab) {
+        _Tab.delivery => v.delivery(context, delivery!.requireValue),
+        _Tab.quality => v.quality(context, ref.watch(_ciFor(days))),
+        _Tab.cost => v.cost(context),
+        _Tab.repos => v.repos(context),
+        _ => v.overview(context),
+      };
+    });
   }
 
-  /// "+3%" / "−7%", green when the change is an improvement.
-  Widget _delta(num cur, num prev, {required bool upIsGood}) {
-    if (prev == 0) return const Delta('—', better: null);
-    final d = ((cur - prev) / prev * 100).round();
-    if (d == 0) return const Delta('0%', better: null);
-    return Delta('${d > 0 ? '+' : '−'}${d.abs()}%', better: upIsGood ? d > 0 : d < 0);
-  }
-
-  Widget _card(Widget child) => Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: HCard(child: child));
-
-  List<Widget> children(BuildContext context) {
+  List<Widget> _async<T>(BuildContext context, AsyncValue<T> value, List<Widget> Function(T) data) {
     final l = AppLocalizations.of(context);
     final c = Agnts.of(context);
-    final cur = a.current, prev = a.previous;
-    final locale = Localizations.localeOf(context).toString();
-
-    final empty = cur.picked + cur.pushed + cur.rejected + cur.stopped == 0 && a.models.isEmpty && a.hours.every((h) => h == 0);
-    if (empty) {
-      return [_card(EmptyState(title: l.analyticsEmptyTitle, text: l.analyticsEmpty))];
-    }
-
-    final fmt = days <= 7 ? DateFormat.E(locale) : DateFormat('d MMM', locale);
-    final labels = [for (final d in a.perDay) fmt.format(DateTime(d.date.year, d.date.month, d.date.day))];
-    final maxLabels = days > 30 ? 4 : days > 7 ? 5 : 7;
-    final success = _pct(cur.pushed, cur.picked), first = _pct(cur.firstTry, cur.pushed);
-    Text sub(String s) => Text(s, style: TextStyle(fontSize: 13.5, color: c.ink3));
-
-    // KPIs
-    final kpis = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Grid2(children: [
-        KpiCard(
-            label: l.analyticsKpiPushed,
-            value: '${cur.pushed}',
-            delta: _delta(cur.pushed, prev.pushed, upIsGood: true),
-            note: l.analyticsKpiPushedNote('${cur.picked}')),
-        KpiCard(
-            label: l.analyticsKpiSuccess,
-            value: '$success%',
-            delta: _delta(success, _pct(prev.pushed, prev.picked), upIsGood: true),
-            note: l.analyticsKpiSuccessNote),
-        KpiCard(
-            label: l.analyticsKpiFirstTry,
-            value: '$first%',
-            delta: _delta(first, _pct(prev.firstTry, prev.pushed), upIsGood: true),
-            note: l.analyticsKpiFirstTryNote),
-        KpiCard(
-            label: l.analyticsKpiAgnts,
-            value: _min(l, cur.agntsMin),
-            delta: _delta(cur.agntsMin, prev.agntsMin, upIsGood: false),
-            note: l.analyticsKpiAgntsNote),
-        KpiCard(
-            label: l.analyticsKpiWait,
-            value: _min(l, cur.waitMin),
-            delta: _delta(cur.waitMin, prev.waitMin, upIsGood: false),
-            note: l.analyticsKpiWaitNote),
-        KpiCard(
-            label: l.analyticsKpiTurns,
-            value: '${cur.turns.round()}',
-            delta: _delta(cur.turns, prev.turns, upIsGood: false),
-            note: l.analyticsKpiTurnsNote),
-      ]),
-    );
-
-    // Throughput
-    final throughput = [
-      ChartSeries(l.analyticsPushed, [for (final d in a.perDay) d.pushed], c.primary),
-      ChartSeries(l.analyticsRejected, [for (final d in a.perDay) d.rejected], c.line3),
-      ChartSeries(l.analyticsStopped, [for (final d in a.perDay) d.stopped], c.bad),
-    ];
-
-    // Outcomes
-    final outcomes = [
-      _Part(l.analyticsFirstTry, cur.firstTry, c.ok),
-      _Part(l.analyticsAfterChanges, cur.afterChanges, _softBlue),
-      _Part(l.analyticsRejected, cur.rejected, c.line3),
-      _Part(l.analyticsStopped, cur.stopped, c.bad),
-    ];
-
-    // Where the time goes
-    final steps = [
-      _HRow(stateLabelOf(l, TicketState.analyzing), a.steps['analyzing'] ?? 0),
-      _HRow(stateLabelOf(l, TicketState.waitingForAnswers), a.steps['waiting_for_answers'] ?? 0, Tone.warn),
-      _HRow(stateLabelOf(l, TicketState.coding), a.steps['coding'] ?? 0),
-      _HRow(stateLabelOf(l, TicketState.testing), a.steps['testing'] ?? 0),
-      _HRow(stateLabelOf(l, TicketState.waitingForReview), a.steps['waiting_for_review'] ?? 0, Tone.warn),
-      _HRow(stateLabelOf(l, TicketState.pushing), a.steps['pushing'] ?? 0),
-    ];
-
-    // Why runs stop
-    final stopsTotal = a.stops.values.fold<int>(0, (x, y) => x + y);
-    final stops = [
-      _HRow(l.analyticsStopTests, a.stops['tests'] ?? 0, Tone.bad),
-      _HRow(l.analyticsStopLimit, a.stops['limit'] ?? 0, Tone.warn),
-      _HRow(l.analyticsStopYou, a.stops['you'] ?? 0),
-      _HRow(l.analyticsStopTurns, a.stops['turns'] ?? 0),
-      _HRow(l.analyticsStopOther, a.stops['other'] ?? 0),
-    ]..sort((x, y) => y.v.compareTo(x.v));
-
-    // Models
-    final totalRuns = a.models.fold<int>(0, (x, m) => x + m.runs);
-    String modelName(String m) => const {'haiku': 'Haiku', 'sonnet': 'Sonnet', 'opus': 'Opus'}[m] ?? m;
-
-    // Plan usage
-    final known = a.perDay.where((d) => d.peakUsage != null).toList();
-    final avgPeak = known.isEmpty ? 0 : (known.fold<num>(0, (x, d) => x + d.peakUsage!) / known.length * 100).round();
-    final daysAbove = known.where((d) => d.peakUsage! >= 0.8).length;
-
-    // Hours
-    final hoursMax = a.hours.isEmpty ? 0 : a.hours.reduce(math.max);
-    final busiest = a.hours.indexOf(hoursMax).toString().padLeft(2, '0');
-
-    String mdLabel(String s) => switch (s) { 'found' => l.analyticsMdFound, 'missing' => l.analyticsMdMissing, _ => l.analyticsMdUnknown };
-    String insight(AnalyticsInsightsInner i) {
-      final v = i.values;
-      return switch (i.kind) {
-        AnalyticsInsightsInnerKindEnum.claudeMd => l.analyticsInsightClaudeMd(v['gain'] ?? '', v['repos'] ?? ''),
-        AnalyticsInsightsInnerKindEnum.waiting => l.analyticsInsightWaiting(v['share'] ?? '', v['review'] ?? ''),
-        AnalyticsInsightsInnerKindEnum.stopsTests => l.analyticsInsightStopsTests(v['n'] ?? ''),
-        AnalyticsInsightsInnerKindEnum.stopsLimit => l.analyticsInsightStopsLimit(v['n'] ?? ''),
-        AnalyticsInsightsInnerKindEnum.night => l.analyticsInsightNight(v['pct'] ?? ''),
-        AnalyticsInsightsInnerKindEnum.mergeRate => l.analyticsInsightMergeRate(v['pct'] ?? '', v['closed'] ?? ''),
-        AnalyticsInsightsInnerKindEnum.slowAnswers => l.analyticsInsightSlowAnswers(v['hours'] ?? ''),
-        AnalyticsInsightsInnerKindEnum.followUpsNoise => l.analyticsInsightFollowUpsNoise(v['pct'] ?? ''),
-        AnalyticsInsightsInnerKindEnum.flakyJob => l.analyticsInsightFlakyJob(v['job'] ?? '', v['repo'] ?? '', v['n'] ?? ''),
-      };
-    }
-
-    Widget hint(String s) => Text(s, style: TextStyle(fontSize: 14, color: c.ink3));
-
-    return [
-      kpis,
-      SectionHeader(l.analyticsThroughput),
-      _card(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        sub(l.analyticsThroughputSub),
-        const SizedBox(height: 10),
-        BarChart(series: throughput, labels: labels, maxLabels: maxLabels, height: 190),
-        ChartLegend([for (final s in throughput) (s.color, s.label)]),
-      ])),
-      SectionHeader(l.analyticsOutcomes),
-      _card(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        sub(l.analyticsOutcomesSub),
-        const SizedBox(height: 12),
-        Row(children: [
-          _Donut(parts: outcomes, center: '$success%', sub: l.analyticsDonutSub),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(children: [
-              for (final o in outcomes)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Row(children: [
-                    _Swatch(o.color),
-                    const SizedBox(width: 7),
-                    Expanded(child: Text(o.label, style: TextStyle(fontSize: 13.5, color: c.ink2))),
-                    Text('${o.v}', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink)),
-                  ]),
-                ),
-            ]),
-          ),
-        ]),
-      ])),
-      SectionHeader(l.analyticsSpeed),
-      _card(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        sub(l.analyticsSpeedSub),
-        const SizedBox(height: 10),
-        _LineChart(
-          series: [
-            ChartSeries(l.analyticsAgntsWorking, [for (final d in a.perDay) d.agntsMin], c.primary, area: true),
-            ChartSeries(l.analyticsWaitingOnYou, [for (final d in a.perDay) d.waitMin], c.warn),
-          ],
-          labels: labels,
-          maxLabels: maxLabels,
-          fmt: (v) => _min(l, v),
+    return switch (value) {
+      AsyncData(:final value) => data(value),
+      AsyncError() => [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: HelpBox(l.analyticsError, tone: Tone.bad),
         ),
-        ChartLegend([(c.primary, l.analyticsAgntsWorking), (c.warn, l.analyticsWaitingOnYou)]),
-      ])),
-      SectionHeader(l.analyticsSteps),
-      _card(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        sub(l.analyticsStepsSub),
-        const SizedBox(height: 6),
-        _HBars(steps, fmt: (v) => _min(l, v)),
-        ChartLegend([(c.primary, l.analyticsAgntsWorking), (c.warn, l.analyticsWaitingOnYou)]),
-      ])),
-      SectionHeader(l.analyticsStops, trailing: Text('$stopsTotal')),
-      _card(stopsTotal == 0
-          ? hint(l.manalyticsStopped(0))
-          : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              sub(l.manalyticsStopped(stopsTotal)),
-              const SizedBox(height: 6),
-              _HBars(stops),
-            ])),
-      SectionHeader(l.analyticsModels),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: a.models.isEmpty
-            ? HCard(child: hint(l.analyticsNoRuns))
-            : ListGroup(children: [
-                for (final m in a.models)
-                  ListRow(
-                    title: modelName(m.model),
-                    subtitle: [
-                      l.manalyticsShareOfRuns('${_pct(m.runs, totalRuns)}'),
-                      l.manalyticsReachedReview('${_pct(m.reachedReview, m.runs)}'),
-                      l.manalyticsTurns(m.avgTurns.round()),
-                    ].join(' · '),
-                    value: '${m.runs}',
-                  ),
-              ]),
-      ),
-      SectionHeader(l.analyticsUsage),
-      _card(known.isEmpty
-          ? hint(l.analyticsNoUsage)
-          : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              sub(l.analyticsUsageSub),
-              const SizedBox(height: 10),
-              BarChart(
-                series: [ChartSeries(l.analyticsSession, [for (final d in a.perDay) d.peakUsage == null ? 0 : (d.peakUsage! * 100).round()], c.primary)],
-                labels: labels,
-                maxLabels: maxLabels,
-                height: 170,
-              ),
-              const SizedBox(height: 6),
-              _MiniKv(l.analyticsAvgPeak, '$avgPeak%'),
-              _MiniKv(l.analyticsDaysAbove, '$daysAbove', last: true),
-            ])),
-      SectionHeader(l.analyticsRepos),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: a.repos.isEmpty
-            ? HCard(child: hint(l.analyticsNoRepos))
-            : ListGroup(children: [
-                for (final r in a.repos)
-                  ListRow(
-                    leading: SourceChip(r.kind == 'side' ? l.analyticsSrcTask : l.analyticsSrcJira, task: r.kind == 'side'),
-                    title: r.name,
-                    subtitle: [
-                      l.manalyticsTickets(r.tickets),
-                      l.manalyticsTurns(r.avgTurns.round()),
-                      _min(l, r.agntsMin),
-                      '${l.analyticsColClaudeMd}: ${mdLabel(r.claudeMd)}',
-                    ].join(' · '),
-                    trailing: Text(
-                      r.finished == 0 ? '—' : '${_pct(r.done, r.finished)}%',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: r.finished == 0 ? c.ink3 : _pct(r.done, r.finished) >= 80 ? c.okInk : c.warnInk,
-                      ),
-                    ),
-                    onTap: () => context.push('/repos/${r.repoId}?name=${Uri.encodeQueryComponent(r.name)}'),
-                  ),
-              ]),
-      ),
-      if (hoursMax > 0) ...[
-        SectionHeader(l.analyticsHours),
-        _card(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          sub(l.analyticsHoursSub(busiest)),
-          const SizedBox(height: 10),
-          BarChart(
-            series: [ChartSeries(l.analyticsEvents, a.hours, _softBlue)],
-            labels: [for (var i = 0; i < a.hours.length; i++) i.toString().padLeft(2, '0')],
-            maxLabels: 6,
-            height: 170,
-          ),
-        ])),
       ],
-      SectionHeader(l.analyticsInsights),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: a.insights.isEmpty
-            ? HCard(child: hint(l.analyticsNoInsights))
-            : Column(children: [
-                for (final (i, x) in a.insights.indexed) Padding(padding: EdgeInsets.only(top: i == 0 ? 0 : 10), child: HelpBox(insight(x))),
-              ]),
-      ),
-    ];
+      _ => [
+        Padding(
+          padding: const EdgeInsets.all(40),
+          child: Column(
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 12),
+              Text(l.analyticsLoading, style: TextStyle(color: c.ink3)),
+            ],
+          ),
+        ),
+      ],
+    };
+  }
+
+  static bool _isEmpty(Analytics a) {
+    final c = a.current;
+    return c.picked + c.pushed + c.rejected + c.stopped + c.merged + c.closed == 0 &&
+        a.models.isEmpty &&
+        a.hours.every((h) => h == 0) &&
+        a.spendByStage.isEmpty;
   }
 }
 
@@ -462,8 +289,11 @@ class _Swatch extends StatelessWidget {
   final Color color;
 
   @override
-  Widget build(BuildContext context) =>
-      Container(width: 10, height: 10, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3)));
+  Widget build(BuildContext context) => Container(
+    width: 10,
+    height: 10,
+    decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3)),
+  );
 }
 
 /// Colour keys under a chart (.legend).
@@ -476,14 +306,21 @@ class ChartLegend extends StatelessWidget {
     final c = Agnts.of(context);
     return Padding(
       padding: const EdgeInsets.only(top: 10),
-      child: Wrap(spacing: 14, runSpacing: 6, children: [
-        for (final (color, label) in items)
-          Row(mainAxisSize: MainAxisSize.min, children: [
-            _Swatch(color),
-            const SizedBox(width: 5),
-            Text(label, style: TextStyle(fontSize: 12.5, color: c.ink3)),
-          ]),
-      ]),
+      child: Wrap(
+        spacing: 14,
+        runSpacing: 6,
+        children: [
+          for (final (color, label) in items)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _Swatch(color),
+                const SizedBox(width: 5),
+                Text(label, style: TextStyle(fontSize: 12.5, color: c.ink3)),
+              ],
+            ),
+        ],
+      ),
     );
   }
 }
@@ -500,11 +337,20 @@ class _MiniKv extends StatelessWidget {
     final c = Agnts.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 9),
-      decoration: BoxDecoration(border: last ? null : Border(bottom: BorderSide(color: c.line2))),
-      child: Row(children: [
-        Expanded(child: Text(label, style: TextStyle(fontSize: 14, color: c.ink))),
-        Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: c.ink)),
-      ]),
+      decoration: BoxDecoration(
+        border: last ? null : Border(bottom: BorderSide(color: c.line2)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(label, style: TextStyle(fontSize: 14, color: c.ink)),
+          ),
+          Text(
+            value,
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: c.ink),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -519,29 +365,45 @@ class _HBars extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = Agnts.of(context);
     final max = rows.fold<num>(1, (m, r) => math.max(m, r.v));
-    return Column(children: [
-      for (final r in rows)
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Row(children: [
-              Expanded(child: Text(r.l, style: TextStyle(fontSize: 13.5, color: c.ink))),
-              const SizedBox(width: 10),
-              Text(fmt == null ? '${r.v}' : fmt!(r.v), style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink)),
-            ]),
-            const SizedBox(height: 4),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: Container(
-                height: 8,
-                color: c.line2,
-                alignment: Alignment.centerLeft,
-                child: FractionallySizedBox(widthFactor: math.max(0.02, r.v / max).clamp(0, 1).toDouble(), heightFactor: 1, child: ColoredBox(color: r.tone.solid(c))),
-              ),
+    return Column(
+      children: [
+        for (final r in rows)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(r.l, style: TextStyle(fontSize: 13.5, color: c.ink)),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      fmt == null ? '${r.v}' : fmt!(r.v),
+                      style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: Container(
+                    height: 8,
+                    color: c.line2,
+                    alignment: Alignment.centerLeft,
+                    child: FractionallySizedBox(
+                      widthFactor: math.max(0.02, r.v / max).clamp(0, 1).toDouble(),
+                      heightFactor: 1,
+                      child: ColoredBox(color: r.tone.solid(c)),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ]),
-        ),
-    ]);
+          ),
+      ],
+    );
   }
 }
 
@@ -558,13 +420,22 @@ class _Donut extends StatelessWidget {
     return SizedBox(
       width: 120,
       height: 120,
-      child: Stack(alignment: Alignment.center, children: [
-        Positioned.fill(child: CustomPaint(painter: _DonutPainter(parts, c.line2))),
-        Column(mainAxisSize: MainAxisSize.min, children: [
-          Text(center, style: TextStyle(fontFamily: AgntsFonts.display, fontSize: 22, fontWeight: FontWeight.w700, color: c.ink, height: 1.1)),
-          Text(sub, style: TextStyle(fontSize: 11.5, color: c.ink3)),
-        ]),
-      ]),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned.fill(child: CustomPaint(painter: _DonutPainter(parts, c.line2))),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                center,
+                style: TextStyle(fontFamily: AgntsFonts.display, fontSize: 22, fontWeight: FontWeight.w700, color: c.ink, height: 1.1),
+              ),
+              Text(sub, style: TextStyle(fontSize: 11.5, color: c.ink3)),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -622,7 +493,10 @@ class _Axes {
   double get plotH => size.height - pt - pb;
   double y(num v) => pt + plotH * (1 - v / top);
 
-  TextPainter _tp(String s) => TextPainter(text: TextSpan(text: s, style: text), textDirection: TextDirection.ltr)..layout();
+  TextPainter _tp(String s) => TextPainter(
+    text: TextSpan(text: s, style: text),
+    textDirection: TextDirection.ltr,
+  )..layout();
 
   void drawGrid(Canvas canvas) {
     final line = Paint()
@@ -749,37 +623,47 @@ class _LinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final n = labels.length;
-    final max = series.expand((s) => s.values).fold<num>(0, math.max);
+    // A NaN value is a day without data: the line breaks there.
+    final max = series.expand((s) => s.values).where((v) => !v.isNaN).fold<num>(0, math.max);
     final ax = _Axes(size, _niceTop(max), grid, text, fmt, labels, maxLabels);
     ax.drawGrid(canvas);
     if (n == 0) return;
     double xOf(int i) => n == 1 ? ax.pl : ax.pl + i * (size.width - ax.pl - _Axes.pr) / (n - 1);
     for (final s in series) {
-      final pts = [for (var i = 0; i < n && i < s.values.length; i++) Offset(xOf(i), ax.y(s.values[i]))];
-      if (pts.isEmpty) continue;
-      final path = Path()..addPolygon(pts, false);
-      if (s.area && pts.length > 1) {
-        final fill = Path()..moveTo(pts.first.dx, ax.y(0));
-        for (final p in pts) {
-          fill.lineTo(p.dx, p.dy);
+      // Runs of consecutive days with data.
+      final runs = <List<Offset>>[[]];
+      for (var i = 0; i < n && i < s.values.length; i++) {
+        if (s.values[i].isNaN) {
+          if (runs.last.isNotEmpty) runs.add([]);
+          continue;
         }
-        fill
-          ..lineTo(pts.last.dx, ax.y(0))
-          ..close();
-        canvas.drawPath(fill, Paint()..color = s.color.withValues(alpha: 0.12));
+        runs.last.add(Offset(xOf(i), ax.y(s.values[i])));
       }
-      canvas.drawPath(
-        path,
-        Paint()
-          ..color = s.color
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.4
-          ..strokeJoin = StrokeJoin.round
-          ..strokeCap = StrokeCap.round,
-      );
-      if (n <= 40) {
-        for (final p in pts) {
-          canvas.drawCircle(p, 3, Paint()..color = s.color);
+      for (final pts in runs) {
+        if (pts.isEmpty) continue;
+        if (s.area && pts.length > 1) {
+          final fill = Path()..moveTo(pts.first.dx, ax.y(0));
+          for (final p in pts) {
+            fill.lineTo(p.dx, p.dy);
+          }
+          fill
+            ..lineTo(pts.last.dx, ax.y(0))
+            ..close();
+          canvas.drawPath(fill, Paint()..color = s.color.withValues(alpha: 0.12));
+        }
+        canvas.drawPath(
+          Path()..addPolygon(pts, false),
+          Paint()
+            ..color = s.color
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2.4
+            ..strokeJoin = StrokeJoin.round
+            ..strokeCap = StrokeCap.round,
+        );
+        if (n <= 40) {
+          for (final p in pts) {
+            canvas.drawCircle(p, 3, Paint()..color = s.color);
+          }
         }
       }
     }

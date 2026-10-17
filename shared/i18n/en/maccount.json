@@ -1,0 +1,16 @@
+{
+  "maccount": {
+    "passwordInstead": "Sign in with a password",
+    "googleInstead": "Continue with Google instead",
+    "setupLede": "Admins sign in with two factors. Add this account to an authenticator app with the secret below (or open the setup link on this phone), then enter the 6-digit code it shows.",
+    "totpOpen": "Open in authenticator app",
+    "linkFailed": "Couldn't open the link.",
+    "current": "Current",
+    "haveInvite": "Have an invite?",
+    "inviteHint": "Paste the invite link",
+    "inviteOpen": "Open invite",
+    "joined": "Joined {date}",
+    "paying": "Finish the payment in your browser. Credits show here once the payment provider confirms it.",
+    "chars": "{n} / {max}"
+  }
+}

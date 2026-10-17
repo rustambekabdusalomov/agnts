@@ -8949,6 +8949,78 @@ abstract class AppLocalizations {
   /// **'Event'**
   String get logsTypeEvent;
 
+  /// No description provided for @maccountPasswordInstead.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with a password'**
+  String get maccountPasswordInstead;
+
+  /// No description provided for @maccountGoogleInstead.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google instead'**
+  String get maccountGoogleInstead;
+
+  /// No description provided for @maccountSetupLede.
+  ///
+  /// In en, this message translates to:
+  /// **'Admins sign in with two factors. Add this account to an authenticator app with the secret below (or open the setup link on this phone), then enter the 6-digit code it shows.'**
+  String get maccountSetupLede;
+
+  /// No description provided for @maccountTotpOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in authenticator app'**
+  String get maccountTotpOpen;
+
+  /// No description provided for @maccountLinkFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the link.'**
+  String get maccountLinkFailed;
+
+  /// No description provided for @maccountCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get maccountCurrent;
+
+  /// No description provided for @maccountHaveInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Have an invite?'**
+  String get maccountHaveInvite;
+
+  /// No description provided for @maccountInviteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste the invite link'**
+  String get maccountInviteHint;
+
+  /// No description provided for @maccountInviteOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open invite'**
+  String get maccountInviteOpen;
+
+  /// No description provided for @maccountJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined {date}'**
+  String maccountJoined(String date);
+
+  /// No description provided for @maccountPaying.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish the payment in your browser. Credits show here once the payment provider confirms it.'**
+  String get maccountPaying;
+
+  /// No description provided for @maccountChars.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} / {max}'**
+  String maccountChars(String n, String max);
+
   /// No description provided for @manalyticsTickets.
   ///
   /// In en, this message translates to:
@@ -10017,6 +10089,54 @@ abstract class AppLocalizations {
   /// **'No tickets match your search.'**
   String get mhomeSearchEmpty;
 
+  /// No description provided for @minsightsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} saved'**
+  String minsightsSaved(String name);
+
+  /// No description provided for @minsightsEditTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit task'**
+  String get minsightsEditTask;
+
+  /// No description provided for @minsightsEditTaskSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Only a task that hasn\'t started can be changed.'**
+  String get minsightsEditTaskSub;
+
+  /// No description provided for @minsightsSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get minsightsSave;
+
+  /// No description provided for @minsightsTaskSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Task saved'**
+  String get minsightsTaskSaved;
+
+  /// No description provided for @minsightsTaskDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Task {key} deleted'**
+  String minsightsTaskDeleted(String key);
+
+  /// No description provided for @minsightsTaskActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Task actions'**
+  String get minsightsTaskActions;
+
+  /// No description provided for @mmanageFillAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in the required fields.'**
+  String get mmanageFillAll;
+
   /// No description provided for @mmoreAgo.
   ///
   /// In en, this message translates to:
@@ -10826,6 +10946,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Preview screenshots are ready'**
   String get mpreviewNotify;
+
+  /// No description provided for @mpullsPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Markdown'**
+  String get mpullsPlaceholder;
+
+  /// No description provided for @mpullsLineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a line to comment on it.'**
+  String get mpullsLineHint;
+
+  /// No description provided for @mpullsCopyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Open on {host}'**
+  String mpullsCopyLink(String host);
+
+  /// No description provided for @mqualityNewTest.
+  ///
+  /// In en, this message translates to:
+  /// **'New Swagger test'**
+  String get mqualityNewTest;
+
+  /// No description provided for @mqualityStarterFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Starter rules for'**
+  String get mqualityStarterFor;
+
+  /// No description provided for @mqualityStarterPick.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a repository to see the starter packs for its languages.'**
+  String get mqualityStarterPick;
+
+  /// No description provided for @mqualitySearchRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Search rules'**
+  String get mqualitySearchRules;
+
+  /// No description provided for @mqualityRequestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request {id}'**
+  String mqualityRequestTitle(String id);
+
+  /// No description provided for @mqualitySpecFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Spec file: {name}'**
+  String mqualitySpecFile(String name);
+
+  /// No description provided for @mqualityDeployHook.
+  ///
+  /// In en, this message translates to:
+  /// **'Deploy hook'**
+  String get mqualityDeployHook;
+
+  /// No description provided for @mqualityTokenSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Token saved'**
+  String get mqualityTokenSaved;
+
+  /// No description provided for @mqualitySuiteDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Suite deleted'**
+  String get mqualitySuiteDeleted;
+
+  /// No description provided for @mqualityHourAt.
+  ///
+  /// In en, this message translates to:
+  /// **'{hour}:00 UTC'**
+  String mqualityHourAt(String hour);
+
+  /// No description provided for @mqualityReviewTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull requests'**
+  String get mqualityReviewTickets;
+
+  /// No description provided for @mqualityAddReviewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a reviewer'**
+  String get mqualityAddReviewer;
+
+  /// No description provided for @mqualityEndpointsTicked.
+  ///
+  /// In en, this message translates to:
+  /// **'Endpoints'**
+  String get mqualityEndpointsTicked;
+
+  /// No description provided for @mqualityShowCases.
+  ///
+  /// In en, this message translates to:
+  /// **'Show cases'**
+  String get mqualityShowCases;
+
+  /// No description provided for @mqualityHideCases.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide cases'**
+  String get mqualityHideCases;
+
+  /// No description provided for @mrepodetailCopyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Open on {host}'**
+  String mrepodetailCopyLink(String host);
+
+  /// No description provided for @mrepodetailOnePerLine.
+  ///
+  /// In en, this message translates to:
+  /// **'One per line.'**
+  String get mrepodetailOnePerLine;
+
+  /// No description provided for @mrepodetailLinesCapped.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the first {n} lines are shown here.'**
+  String mrepodetailLinesCapped(String n);
 
   /// No description provided for @mtasksActAnswers.
   ///
