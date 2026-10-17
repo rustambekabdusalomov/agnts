@@ -133,11 +133,13 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
   }
 
   /// The questions as plain text, to paste into a chat for whoever can answer.
+  /// "Q1.", not "1.": chat editors read "1." as a list and restart it at 1
+  /// after each question's options.
   String _questionsText(Ticket t, List<Question> qs, AppLocalizations l) => [
         '${t.key}: ${_tr(t.title)}',
         '',
         for (final (i, q) in qs.indexed) ...[
-          '${i + 1}. ${_tr(q.text)}${q.multiple ? ' (${l.ticketPickAny})' : ''}',
+          'Q${i + 1}. ${_tr(q.text)}${q.multiple ? ' (${l.ticketPickAny})' : ''}',
           for (final o in q.options) '   - ${_tr(o)}',
         ],
       ].join('\n');

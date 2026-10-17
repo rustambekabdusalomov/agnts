@@ -145,11 +145,13 @@ const left = computed(() => (d.value?.questions ?? []).filter((q) => !answerOf(q
 const answersUploading = computed(() => Object.values(answers).some((a) => a.uploading))
 const answered = computed(() => (d.value?.questions ?? []).filter((q) => q.answer))
 // The questions as plain text, to paste into a chat for whoever can answer.
+// "Q1.", not "1.": chat editors read "1." as a list and restart it at 1
+// after each question's options.
 const questionsText = computed(() => {
   if (!tk.value || !d.value) return ''
   const qs = d.value.questions.map((q, i) => {
     const opts = q.options.map((o) => `   - ${tr.value(o)}`)
-    return [`${i + 1}. ${tr.value(q.text)}${q.multiple ? ` (${t('ticket.pickAny')})` : ''}`, ...opts].join('\n')
+    return [`Q${i + 1}. ${tr.value(q.text)}${q.multiple ? ` (${t('ticket.pickAny')})` : ''}`, ...opts].join('\n')
   })
   return [`${tk.value.key}: ${tr.value(tk.value.title)}`, '', ...qs].join('\n')
 })
