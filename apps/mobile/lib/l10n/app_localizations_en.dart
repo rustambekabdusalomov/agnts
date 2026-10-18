@@ -11480,6 +11480,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketBranchRenameHint => 'The pull request opens from this name. Letters, digits, - _ . and /; no spaces.';
 
   @override
+  String get ticketNumberEdit => 'Change';
+
+  @override
+  String get ticketNumberSet => 'Set';
+
+  @override
+  String get ticketNumberHint =>
+      'New branches and commits use it. Existing ones keep their names: rename the branch or re-apply the commit format. Empty uses the key.';
+
+  @override
   String get ticketCommitsTitle => 'Commits';
 
   @override

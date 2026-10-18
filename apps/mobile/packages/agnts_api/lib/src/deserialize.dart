@@ -247,6 +247,7 @@ import 'package:agnts_api/src/model/set_member_role_request.dart';
 import 'package:agnts_api/src/model/set_plane_webhook_secret_request.dart';
 import 'package:agnts_api/src/model/set_slots_request.dart';
 import 'package:agnts_api/src/model/set_ticket_member_request.dart';
+import 'package:agnts_api/src/model/set_ticket_number_request.dart';
 import 'package:agnts_api/src/model/settings.dart';
 import 'package:agnts_api/src/model/ship_notes.dart';
 import 'package:agnts_api/src/model/shot_ref.dart';
@@ -871,6 +872,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return SetSlotsRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetTicketMemberRequest':
           return SetTicketMemberRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SetTicketNumberRequest':
+          return SetTicketNumberRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Settings':
           return Settings.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ShipNotes':

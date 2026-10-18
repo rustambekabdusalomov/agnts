@@ -20427,6 +20427,24 @@ abstract class AppLocalizations {
   /// **'The pull request opens from this name. Letters, digits, - _ . and /; no spaces.'**
   String get ticketBranchRenameHint;
 
+  /// No description provided for @ticketNumberEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get ticketNumberEdit;
+
+  /// No description provided for @ticketNumberSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Set'**
+  String get ticketNumberSet;
+
+  /// No description provided for @ticketNumberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'New branches and commits use it. Existing ones keep their names: rename the branch or re-apply the commit format. Empty uses the key.'**
+  String get ticketNumberHint;
+
   /// No description provided for @ticketCommitsTitle.
   ///
   /// In en, this message translates to:

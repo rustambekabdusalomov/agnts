@@ -271,6 +271,15 @@ void main() {
       // TODO
     });
 
+    // Change the team's number for the work until the ticket is closed
+    //
+    // The number ({number}) branch and commit names are made from, like AMANAT-2677; empty clears it, so the key stands for it. Any state but done and rejected. Branches and commits made from then on use it; ones already made keep their names until renamed (renameTicketBranch, reapplyCommitFormat). The same number changes nothing. 
+    //
+    //Future<Ticket> setTicketNumber(String key, SetTicketNumberRequest setTicketNumberRequest) async
+    test('test setTicketNumber', () async {
+      // TODO
+    });
+
     // Link the ticket to a repository
     //
     // Allowed on a new ticket, or a failed or rate-limited one that has not pushed. A stopped ticket starts over from analysis on retry, since its analysis and branch belonged to the old repository. The same as PUT /tickets/{key}/repos with one repository.

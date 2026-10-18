@@ -338,6 +338,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tickets/{key}/number": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Change the team's number for the work until the ticket is closed
+         * @description The number ({number}) branch and commit names are made from, like AMANAT-2677; empty clears it, so the key
+         *     stands for it. Any state but done and rejected. Branches and commits made from then on use it; ones already
+         *     made keep their names until renamed (renameTicketBranch, reapplyCommitFormat). The same number changes nothing.
+         */
+        put: operations["setTicketNumber"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tickets/{key}/commits/reapply": {
         parameters: {
             query?: never;
@@ -7990,6 +8014,29 @@ export interface operations {
                      * @description Which repository of the ticket; absent is the primary
                      */
                     repoId?: number;
+                };
+            };
+        };
+        responses: {
+            200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    setTicketNumber: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    number: string;
                 };
             };
         };

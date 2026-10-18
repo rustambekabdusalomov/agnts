@@ -12013,6 +12013,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ticketBranchRenameHint => 'Pull request откроется из этой ветки. Буквы, цифры, - _ . и /; без пробелов.';
 
   @override
+  String get ticketNumberEdit => 'Изменить';
+
+  @override
+  String get ticketNumberSet => 'Задать';
+
+  @override
+  String get ticketNumberHint =>
+      'Новые ветки и коммиты используют его. Существующие сохраняют имена: переименуйте ветку или примените формат коммитов заново. Пусто — используется ключ.';
+
+  @override
   String get ticketCommitsTitle => 'Коммиты';
 
   @override

@@ -286,6 +286,7 @@ doc/SetMemberRoleRequest.md
 doc/SetPlaneWebhookSecretRequest.md
 doc/SetSlotsRequest.md
 doc/SetTicketMemberRequest.md
+doc/SetTicketNumberRequest.md
 doc/Settings.md
 doc/SettingsApi.md
 doc/ShipNotes.md
@@ -668,6 +669,7 @@ lib/src/model/set_member_role_request.dart
 lib/src/model/set_plane_webhook_secret_request.dart
 lib/src/model/set_slots_request.dart
 lib/src/model/set_ticket_member_request.dart
+lib/src/model/set_ticket_number_request.dart
 lib/src/model/settings.dart
 lib/src/model/ship_notes.dart
 lib/src/model/shot_ref.dart
@@ -1029,6 +1031,7 @@ test/set_member_role_request_test.dart
 test/set_plane_webhook_secret_request_test.dart
 test/set_slots_request_test.dart
 test/set_ticket_member_request_test.dart
+test/set_ticket_number_request_test.dart
 test/settings_api_test.dart
 test/settings_test.dart
 test/ship_notes_test.dart

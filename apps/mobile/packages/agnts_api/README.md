@@ -288,6 +288,7 @@ Class | Method | HTTP request | Description
 [*TicketsApi*](doc/TicketsApi.md) | [**setTicketKind**](doc/TicketsApi.md#setticketkind) | **PUT** /tickets/{key}/kind | Change what the ticket produces
 [*TicketsApi*](doc/TicketsApi.md) | [**setTicketMember**](doc/TicketsApi.md#setticketmember) | **PUT** /tickets/{key}/member | Make a member the ticket&#39;s member (per-member Claude mode runs it on their account)
 [*TicketsApi*](doc/TicketsApi.md) | [**setTicketModels**](doc/TicketsApi.md#setticketmodels) | **PUT** /tickets/{key}/models | Override models for this ticket; omit a stage to use the default
+[*TicketsApi*](doc/TicketsApi.md) | [**setTicketNumber**](doc/TicketsApi.md#setticketnumber) | **PUT** /tickets/{key}/number | Change the team&#39;s number for the work until the ticket is closed
 [*TicketsApi*](doc/TicketsApi.md) | [**setTicketRepo**](doc/TicketsApi.md#setticketrepo) | **PUT** /tickets/{key}/repo | Link the ticket to a repository
 [*TicketsApi*](doc/TicketsApi.md) | [**setTicketRepos**](doc/TicketsApi.md#setticketrepos) | **PUT** /tickets/{key}/repos | Set the ticket&#39;s repositories (one, several or a group)
 [*TicketsApi*](doc/TicketsApi.md) | [**startTicket**](doc/TicketsApi.md#startticket) | **POST** /tickets/{key}/analyze | Start a held ticket now (it is queued for the next free slot)
@@ -582,6 +583,7 @@ Class | Method | HTTP request | Description
  - [SetPlaneWebhookSecretRequest](doc/SetPlaneWebhookSecretRequest.md)
  - [SetSlotsRequest](doc/SetSlotsRequest.md)
  - [SetTicketMemberRequest](doc/SetTicketMemberRequest.md)
+ - [SetTicketNumberRequest](doc/SetTicketNumberRequest.md)
  - [Settings](doc/Settings.md)
  - [ShipNotes](doc/ShipNotes.md)
  - [ShotRef](doc/ShotRef.md)

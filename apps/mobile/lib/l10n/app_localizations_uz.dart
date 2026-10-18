@@ -11471,6 +11471,16 @@ class AppLocalizationsUz extends AppLocalizations {
   String get ticketBranchRenameHint => 'Pull request shu nomdagi branchdan ochiladi. Harflar, raqamlar, - _ . va /; boʻshliqsiz.';
 
   @override
+  String get ticketNumberEdit => 'Oʻzgartirish';
+
+  @override
+  String get ticketNumberSet => 'Belgilash';
+
+  @override
+  String get ticketNumberHint =>
+      'Yangi branch va commitlar shuni ishlatadi. Mavjudlari nomini saqlaydi: branchni qayta nomlang yoki commit formatini qayta qoʻllang. Boʻsh boʻlsa, kalit ishlatiladi.';
+
+  @override
   String get ticketCommitsTitle => 'Kommitlar';
 
   @override

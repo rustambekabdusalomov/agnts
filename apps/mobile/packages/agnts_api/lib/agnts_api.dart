@@ -300,6 +300,7 @@ export 'package:agnts_api/src/model/set_member_role_request.dart';
 export 'package:agnts_api/src/model/set_plane_webhook_secret_request.dart';
 export 'package:agnts_api/src/model/set_slots_request.dart';
 export 'package:agnts_api/src/model/set_ticket_member_request.dart';
+export 'package:agnts_api/src/model/set_ticket_number_request.dart';
 export 'package:agnts_api/src/model/settings.dart';
 export 'package:agnts_api/src/model/ship_notes.dart';
 export 'package:agnts_api/src/model/shot_ref.dart';

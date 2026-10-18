@@ -240,6 +240,39 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         ));
   }
 
+  /// Changes the team's number for the work ({number} in branch and commit
+  /// names), until the ticket is done or rejected; empty uses the key.
+  Future<void> _setNumber(Ticket t) async {
+    final l = AppLocalizations.of(context);
+    final text = TextEditingController(text: t.ticketNumber ?? '');
+    final number = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.fromLTRB(16, 0, 16, 16 + MediaQuery.of(ctx).viewInsets.bottom),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          TextField(
+            controller: text,
+            autofocus: true,
+            maxLength: 64,
+            autocorrect: false,
+            enableSuggestions: false,
+            style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 14),
+            decoration: InputDecoration(labelText: l.tasksTicketNumber, hintText: t.key),
+            onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
+          ),
+          Text(l.ticketNumberHint, style: TextStyle(fontSize: 12.5, color: Agnts.of(ctx).ink3)),
+          const SizedBox(height: 10),
+          FilledButton(onPressed: () => Navigator.pop(ctx, text.text.trim()), child: Text(l.formSave)),
+        ]),
+      ),
+    );
+    text.dispose();
+    if (number == null || number == (t.ticketNumber ?? '')) return;
+    await _run(() => _tickets.setTicketNumber(key: t.key, setTicketNumberRequest: SetTicketNumberRequest(number: number)));
+  }
+
   /// Re-applies the commit format to the unpushed commits: a preview with
   /// checkboxes first (see CommitReapplySheet), then the ticked changes.
   Future<void> _reapplyFormat(Ticket t) async {
@@ -468,6 +501,20 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
                 TextButton(
                   onPressed: _busy ? null : () => _renameBranch(t.key, t.repos!.first),
                   child: Text(l.ticketBranchRename),
+                ),
+            ]),
+          ),
+        if (!isReportKind(t.kind) && t.source_ != TicketSource_Enum.git)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Row(children: [
+              Expanded(
+                child: Text('${l.tasksTicketNumber}: ${t.ticketNumber ?? '—'}', style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3)),
+              ),
+              if (ref.watch(canEditProvider) && t.state != TicketState.done && t.state != TicketState.rejected)
+                TextButton(
+                  onPressed: _busy ? null : () => _setNumber(t),
+                  child: Text(t.ticketNumber == null ? l.ticketNumberSet : l.ticketNumberEdit),
                 ),
             ]),
           ),

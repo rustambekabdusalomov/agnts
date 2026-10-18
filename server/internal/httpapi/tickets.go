@@ -27,6 +27,7 @@ type Tickets interface {
 	RetryWithNote(ctx context.Context, key, note string, files []int64, origin domain.Origin) (domain.Ticket, error)
 	SetSkipChecks(ctx context.Context, key string, skip bool, origin domain.Origin) (domain.Ticket, error)
 	EditCommitMessage(ctx context.Context, key string, repoID int64, sha, message string, origin domain.Origin) (domain.Ticket, error)
+	SetTicketNumber(ctx context.Context, key, number string, origin domain.Origin) (domain.Ticket, error)
 	ReapplyCommitFormat(ctx context.Context, key string, number *string, dryRun bool, only []string, origin domain.Origin) ([]orchestrator.CommitChange, domain.Ticket, error)
 	Continue(ctx context.Context, key, note string, files []int64, origin domain.Origin) (domain.Ticket, error)
 	StartOver(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
@@ -423,6 +424,18 @@ func (s *Server) EditCommitMessage(w http.ResponseWriter, r *http.Request, key g
 	}
 	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
 		return s.opt.Tickets.EditCommitMessage(ctx, key, repoID, req.Sha, req.Message, origin(r))
+	})
+}
+
+// SetTicketNumber implements gen.ServerInterface.
+func (s *Server) SetTicketNumber(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	var req gen.SetTicketNumberJSONRequestBody
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
+		return s.opt.Tickets.SetTicketNumber(ctx, key, req.Number, origin(r))
 	})
 }
 

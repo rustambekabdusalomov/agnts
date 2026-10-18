@@ -43,6 +43,7 @@ Method | HTTP request | Description
 [**setTicketKind**](TicketsApi.md#setticketkind) | **PUT** /tickets/{key}/kind | Change what the ticket produces
 [**setTicketMember**](TicketsApi.md#setticketmember) | **PUT** /tickets/{key}/member | Make a member the ticket&#39;s member (per-member Claude mode runs it on their account)
 [**setTicketModels**](TicketsApi.md#setticketmodels) | **PUT** /tickets/{key}/models | Override models for this ticket; omit a stage to use the default
+[**setTicketNumber**](TicketsApi.md#setticketnumber) | **PUT** /tickets/{key}/number | Change the team&#39;s number for the work until the ticket is closed
 [**setTicketRepo**](TicketsApi.md#setticketrepo) | **PUT** /tickets/{key}/repo | Link the ticket to a repository
 [**setTicketRepos**](TicketsApi.md#setticketrepos) | **PUT** /tickets/{key}/repos | Set the ticket&#39;s repositories (one, several or a group)
 [**startTicket**](TicketsApi.md#startticket) | **POST** /tickets/{key}/analyze | Start a held ticket now (it is queued for the next free slot)
@@ -1643,6 +1644,55 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **key** | **String**|  | 
  **modelOverrides** | [**ModelOverrides**](ModelOverrides.md)|  | 
+
+### Return type
+
+[**Ticket**](Ticket.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **setTicketNumber**
+> Ticket setTicketNumber(key, setTicketNumberRequest)
+
+Change the team's number for the work until the ticket is closed
+
+The number ({number}) branch and commit names are made from, like AMANAT-2677; empty clears it, so the key stands for it. Any state but done and rejected. Branches and commits made from then on use it; ones already made keep their names until renamed (renameTicketBranch, reapplyCommitFormat). The same number changes nothing. 
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getTicketsApi();
+final String key = key_example; // String | 
+final SetTicketNumberRequest setTicketNumberRequest = ; // SetTicketNumberRequest | 
+
+try {
+    final response = api.setTicketNumber(key, setTicketNumberRequest);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling TicketsApi->setTicketNumber: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **key** | **String**|  | 
+ **setTicketNumberRequest** | [**SetTicketNumberRequest**](SetTicketNumberRequest.md)|  | 
 
 ### Return type
 

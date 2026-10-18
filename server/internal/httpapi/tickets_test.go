@@ -287,6 +287,11 @@ func (f *fakeTickets) ReapplyCommitFormat(_ context.Context, key string, number 
 	return []orchestrator.CommitChange{{RepoID: 3, RepoName: "api", SHA: "abc", From: "PAY-1: x", To: "[AMANAT-2677] feat: x", Suggested: true}}, t, err
 }
 
+func (f *fakeTickets) SetTicketNumber(_ context.Context, key, number string, o domain.Origin) (domain.Ticket, error) {
+	f.lastOrigin, f.lastCommit = o, "number "+number
+	return f.ticket(key, domain.StateCoding)
+}
+
 func (f *fakeTickets) SetSkipChecks(_ context.Context, key string, skip bool, o domain.Origin) (domain.Ticket, error) {
 	f.lastOrigin, f.lastSkipChecks = o, &skip
 	return f.ticket(key, domain.StateFailed)
@@ -493,6 +498,7 @@ func TestTicketEndpoints(t *testing.T) {
 		{"PUT", "/api/tickets/PAY-1/branch", `{"branch":"feature/PAY-1-login"}`, 200, `"branch":"feature/PAY-1-login"`},
 		{"PUT", "/api/tickets/PAY-1/branch", `{"branch":"taken","repoId":3}`, 409, `already exists on the git host`},
 		{"PUT", "/api/tickets/PAY-1/branch", `{"name":"x"}`, 400, `unknown field`},
+		{"PUT", "/api/tickets/PAY-1/number", `{"number":"AMANAT-2677"}`, 200, `"key":"PAY-1"`},
 		{"POST", "/api/tickets/PAY-1/commits/reapply", `{"number":"AMANAT-2677","dryRun":true}`, 200, `"changes":[{"repoId":3,"repoName":"api","sha":"abc","from":"PAY-1: x","to":"[AMANAT-2677] feat: x","suggested":true}]`},
 		{"PUT", "/api/tickets/PAY-1/commit", `{"sha":"abc1234","message":"feat: login","repoId":3}`, 200, `"state":"waiting_for_review"`},
 		{"POST", "/api/tickets/PAY-1/retry", "", 200, `"state":"new"`},

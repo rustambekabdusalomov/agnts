@@ -746,6 +746,37 @@ func TestRetrySkippingChecks(t *testing.T) {
 	}
 }
 
+// The ticket number can change in any state until the ticket is closed,
+// not to another open ticket's number.
+func TestSetTicketNumber(t *testing.T) {
+	h := newHarness(t)
+	h.ingest("PAY-8")
+	h.ingest("PAY-9")
+	tk, err := h.o.SetTicketNumber(h.ctx, "PAY-8", " AMANAT-2677 ", domain.OriginWeb)
+	if err != nil || tk.TicketNumber != "AMANAT-2677" || tk.Number() != "AMANAT-2677" {
+		t.Fatalf("set: %q %v", tk.TicketNumber, err)
+	}
+	evs, _ := h.store.Events(h.ctx, orchestrator.EventFilter{TicketKey: "PAY-8"})
+	if !slices.ContainsFunc(evs, func(e domain.Event) bool { return e.Message == "ticket number set to AMANAT-2677" }) {
+		t.Fatal("no event says the number changed")
+	}
+	if _, err := h.o.SetTicketNumber(h.ctx, "PAY-9", "AMANAT-2677", domain.OriginWeb); err == nil {
+		t.Fatal("two open tickets got one number")
+	}
+	if _, err := h.o.SetTicketNumber(h.ctx, "PAY-9", "bad number", domain.OriginWeb); err == nil {
+		t.Fatal("took a number with a space")
+	}
+	if tk, err := h.o.SetTicketNumber(h.ctx, "PAY-8", "", domain.OriginWeb); err != nil || tk.TicketNumber != "" || tk.Number() != "PAY-8" {
+		t.Fatalf("clear: %q %v", tk.TicketNumber, err)
+	}
+	if _, err := h.o.Reject(h.ctx, "PAY-8", "no", domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := h.o.SetTicketNumber(h.ctx, "PAY-8", "AMANAT-1", domain.OriginWeb); err == nil {
+		t.Fatal("changed the number of a rejected ticket")
+	}
+}
+
 func TestRetryWithNote(t *testing.T) {
 	h := newHarness(t)
 	h.ingest("PAY-6")

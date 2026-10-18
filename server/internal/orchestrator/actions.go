@@ -1047,6 +1047,33 @@ func (o *Orchestrator) SetSkipChecks(ctx context.Context, key string, skip bool,
 	}, func(x *domain.Ticket) { x.SkipChecks = skip })
 }
 
+// SetTicketNumber changes the team's number for the work ({number} in
+// branch and commit names) at any time until the ticket is done or
+// rejected; empty clears it, so the key stands for it. Branches and commits
+// made from now on use it; ones already made keep their names until renamed
+// (RenameBranch, ReapplyCommitFormat).
+func (o *Orchestrator) SetTicketNumber(ctx context.Context, key, number string, origin domain.Origin) (domain.Ticket, error) {
+	n, err := o.ticketNumber(ctx, &number, key)
+	if err != nil {
+		return domain.Ticket{}, err
+	}
+	t, err := o.store.TicketByKey(ctx, key)
+	if err != nil || t.TicketNumber == n {
+		return t, err
+	}
+	if t.State == domain.StateDone || t.State == domain.StateRejected {
+		return t, invalid("the ticket number can change until the ticket is closed, not once it is %s", t.State)
+	}
+	msg := "ticket number set to " + n
+	if n == "" {
+		msg = "ticket number cleared"
+	}
+	return o.store.UpdateTicket(ctx, key, &domain.Event{
+		TicketKey: key, Type: domain.EventTicketUpdated, Origin: origin, Message: msg,
+		Data: map[string]any{"number": n},
+	}, func(x *domain.Ticket) { x.TicketNumber = n })
+}
+
 // SetRepo links a ticket to another repository (SetRepos with one).
 func (o *Orchestrator) SetRepo(ctx context.Context, key string, repoID int64, origin domain.Origin) (domain.Ticket, error) {
 	return o.SetRepos(ctx, key, domain.RepoChoice{RepoID: repoID}, origin)

@@ -412,6 +412,32 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /tickets/{key}/number:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    put:
+      operationId: setTicketNumber
+      summary: Change the team's number for the work until the ticket is closed
+      description: |
+        The number ({number}) branch and commit names are made from, like AMANAT-2677; empty clears it, so the key
+        stands for it. Any state but done and rejected. Branches and commits made from then on use it; ones already
+        made keep their names until renamed (renameTicketBranch, reapplyCommitFormat). The same number changes nothing.
+      tags: [tickets]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [number]
+              properties:
+                number: { type: string, maxLength: 64, pattern: '^([A-Za-z0-9][A-Za-z0-9._-]*)?$' }
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /tickets/{key}/commits/reapply:
     parameters:
       - $ref: '#/components/parameters/TicketKey'
