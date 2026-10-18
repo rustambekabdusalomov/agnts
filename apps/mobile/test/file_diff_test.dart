@@ -50,4 +50,36 @@ void main() {
     expect(find.textContaining('FromGRPCError', findRichText: true), findsOneWidget, reason: 'code after highlighting');
     expect(find.text('272'), findsWidgets); // a line number
   });
+
+  testWidgets('an open file\'s path stays at the top while its diff scrolls under it, then gives way to the next file', (tester) async {
+    tester.view.physicalSize = const Size(400, 600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    String long(String name) => 'diff --git a/$name b/$name\n@@ -1,1 +1,60 @@\n${[for (var i = 0; i < 60; i++) '+line $i'].join('\n')}\n';
+    final a = FileChange(path: 'notes/a.txt', add: 60, del: 0, diff: long('notes/a.txt'));
+    final b = FileChange(path: 'notes/b.txt', add: 60, del: 0, diff: long('notes/b.txt'));
+    await tester.pumpWidget(_app(Column(children: [
+      FileDiff(file: a, initiallyOpen: true),
+      FileDiff(file: b, initiallyOpen: true),
+    ])));
+    await tester.pump();
+    final list = tester.getTopLeft(find.byType(ListView)).dy;
+    // The painted header is the last of the path's two texts (the first keeps its space, unseen).
+    double headerTop(String path) => tester.getTopLeft(find.text(path).last).dy;
+    final atRest = headerTop('notes/a.txt');
+
+    await tester.drag(find.byType(ListView), const Offset(0, -500));
+    await tester.pump();
+    expect(headerTop('notes/a.txt'), lessThan(list + 30), reason: 'a\'s path stays at the top of the page');
+    expect(headerTop('notes/a.txt'), greaterThan(list));
+    expect(atRest, greaterThan(headerTop('notes/a.txt') - 500 + 30));
+
+    // Past a's diff: its path leaves with it, and b's takes the top.
+    final aHeight = tester.getSize(find.byType(FileDiff).first).height;
+    await tester.drag(find.byType(ListView), Offset(0, -(aHeight + 200)));
+    await tester.pump();
+    expect(headerTop('notes/a.txt'), lessThan(list), reason: 'a is gone above');
+    expect(headerTop('notes/b.txt'), lessThan(list + 30), reason: 'b\'s path is stuck now');
+    expect(headerTop('notes/b.txt'), greaterThan(list));
+  });
 }

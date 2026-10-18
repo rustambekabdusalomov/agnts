@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:agnts_api/agnts_api.dart';
 
 import '../../theme.dart';
@@ -32,29 +33,107 @@ class _FileDiffState extends State<FileDiff> {
   Widget build(BuildContext context) {
     final c = Agnts.of(context);
     final f = widget.file;
+    // The path and counts; tapping opens or closes the diff. Stuck at the
+    // top of the page while an open diff scrolls under it, it gets a line.
+    Widget header(bool stuck) => Material(
+          color: c.surface,
+          child: InkWell(
+            onTap: () => setState(() => _open = !_open),
+            child: Container(
+              decoration: stuck
+                  ? BoxDecoration(
+                      border: Border(bottom: BorderSide(color: c.line)),
+                      boxShadow: [BoxShadow(color: const Color(0xFF000000).withValues(alpha: 0.08), blurRadius: 6, offset: const Offset(0, 2))],
+                    )
+                  : null,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Expanded(
+                  child: Text(filePath(f), maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink)),
+                ),
+                const SizedBox(width: 10),
+                Text('+${f.add}', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: c.okInk)),
+                const SizedBox(width: 5),
+                Text('−${f.del}', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: c.badInk)),
+              ]),
+            ),
+          ),
+        );
     return Container(
       margin: const EdgeInsets.only(top: 8),
       decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line), borderRadius: BorderRadius.circular(14)),
       clipBehavior: Clip.antiAlias,
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        InkWell(
-          onTap: () => setState(() => _open = !_open),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Expanded(
-                child: Text(filePath(f), maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink)),
-              ),
-              const SizedBox(width: 10),
-              Text('+${f.add}', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: c.okInk)),
-              const SizedBox(width: 5),
-              Text('−${f.del}', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: c.badInk)),
-            ]),
-          ),
-        ),
-        if (_open) _Diff(f.diff, path: f.path),
-      ]),
+      child: _open ? _StickyHeader(header: header, content: _Diff(f.diff, path: f.path)) : header(false),
     );
+  }
+}
+
+/// Keeps a header in view at the top of the page while the content under
+/// it scrolls past, as far as the content goes; the next file's header then
+/// takes over. The page is a plain list, not slivers, so the header is laid
+/// out at the top once (invisible, keeping its space) and painted over the
+/// content, moved down by how far the page scrolled past it.
+class _StickyHeader extends StatefulWidget {
+  const _StickyHeader({required this.header, required this.content});
+  final Widget Function(bool stuck) header;
+  final Widget content;
+
+  @override
+  State<_StickyHeader> createState() => _StickyHeaderState();
+}
+
+class _StickyHeaderState extends State<_StickyHeader> {
+  final _headerKey = GlobalKey();
+  ScrollPosition? _position;
+  double _shift = 0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final p = Scrollable.maybeOf(context, axis: Axis.vertical)?.position;
+    if (p != _position) {
+      _position?.removeListener(_place);
+      _position = p?..addListener(_place);
+    }
+  }
+
+  @override
+  void dispose() {
+    _position?.removeListener(_place);
+    super.dispose();
+  }
+
+  void _place() {
+    if (!mounted) return;
+    final box = context.findRenderObject() as RenderBox?;
+    final header = _headerKey.currentContext?.findRenderObject() as RenderBox?;
+    final position = _position;
+    if (box == null || header == null || position == null || !box.attached || !box.hasSize || !header.hasSize) return;
+    final viewport = RenderAbstractViewport.maybeOf(box);
+    if (viewport == null) return;
+    // Where the content's top is, from the top of the page's visible part:
+    // the scroll offset that would put it there, less the current one.
+    final top = viewport.getOffsetToReveal(box, 0).offset - position.pixels;
+    final shift = (-top).clamp(0.0, math.max(0.0, box.size.height - header.size.height)).toDouble();
+    if (shift != _shift) setState(() => _shift = shift);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // After layout the content's height may have changed (highlighting).
+    WidgetsBinding.instance.addPostFrameCallback((_) => _place());
+    return Stack(children: [
+      Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Visibility(visible: false, maintainSize: true, maintainAnimation: true, maintainState: true, child: widget.header(false)),
+        widget.content,
+      ]),
+      Positioned(
+        top: 0,
+        left: 0,
+        right: 0,
+        child: Transform.translate(offset: Offset(0, _shift), child: KeyedSubtree(key: _headerKey, child: widget.header(_shift > 0))),
+      ),
+    ]);
   }
 }
 
