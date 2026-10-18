@@ -30,7 +30,7 @@ vi.mock('../../api/client', () => {
 const repo = (id: number, name: string, archivedAt?: string) => ({ id, name, archivedAt, taskPrefix: '' }) as Repository
 const repos = [repo(1, 'api'), repo(2, 'web'), repo(3, 'old', '2026-01-01')]
 const saved = (warnings: string[]): RepoGroup => ({
-  id: 7, name: 'Shop', description: '', instructions: '', taskPrefix: 'SHOP', warnings, createdAt: '', updatedAt: '',
+  id: 7, name: 'Shop', description: '', instructions: '', taskPrefix: 'SHOP', branchTemplate: '{number}', commitTemplate: '', warnings, createdAt: '', updatedAt: '',
   members: [{ repoId: 2, repoName: 'web', role: 'web', archived: false }, { repoId: 1, repoName: 'api', role: '', archived: false }],
 })
 
@@ -54,6 +54,12 @@ describe('GroupDrawer', () => {
     const w = setup()
     await w.find('#g-name').setValue('Shop')
     await w.find('#g-prefix').setValue('shop')
+    // The group's formats: an example shows what they make.
+    expect(w.text()).not.toContain('Example:')
+    await w.find('#g-branch-tmpl').setValue(' {number} ')
+    await w.find('#g-commit-tmpl').setValue('[{number}] {type}({scope}): {subject}')
+    expect(w.text()).toContain('Example: AMANAT-2288')
+    expect(w.text()).toContain('Example: [AMANAT-2288] chore(deps): bump protos to v1.63.0')
     await pickRepo(w, 'api')
     // Archived repositories cannot be added.
     await w.find('.isel-trigger').trigger('click')
@@ -67,7 +73,12 @@ describe('GroupDrawer', () => {
     expect(calls.at(-1)).toMatchObject({
       method: 'POST',
       path: '/repo-groups',
-      init: { body: { name: 'Shop', description: '', taskPrefix: 'SHOP', instructions: '', members: [{ repoId: 2, role: 'web' }, { repoId: 1, role: undefined }] } },
+      init: {
+        body: {
+          name: 'Shop', description: '', taskPrefix: 'SHOP', instructions: '', branchTemplate: '{number}', commitTemplate: '[{number}] {type}({scope}): {subject}',
+          members: [{ repoId: 2, role: 'web' }, { repoId: 1, role: undefined }],
+        },
+      },
     })
     expect(w.find('.help.warn').text()).toContain('both set NODE_ENV')
     expect(w.props('modelValue')).toBe(true)
@@ -79,6 +90,7 @@ describe('GroupDrawer', () => {
     reply.next = 'The task prefix SHOP is used by the repository shop-api'
     const w = setup(saved([]))
     expect(w.findAll('.gr-member b').map((b) => b.text())).toEqual(['web', 'api'])
+    expect((w.find('#g-branch-tmpl').element as HTMLInputElement).value).toBe('{number}')
     await w.find('form').trigger('submit')
     await flushPromises()
     expect(calls.at(-1)).toMatchObject({ method: 'PUT', path: '/repo-groups/{id}', init: { params: { path: { id: 7 } } } })

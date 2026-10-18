@@ -5271,6 +5271,18 @@ abstract class AppLocalizations {
   /// **'Key prefix of tasks made from the group, as {prefix}-12. Empty uses the first repository\'s.'**
   String groupsPrefixHelp(String prefix);
 
+  /// No description provided for @groupsBranchTemplateHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Names the branches of this group\'s tickets in every repository, so they all get the same name. It replaces each repository\'s own format. Must contain {key} or {number}. Leave empty to keep each repository\'s own.'**
+  String groupsBranchTemplateHelp(String key, String number);
+
+  /// No description provided for @groupsCommitTemplateHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Writes the commit messages of this group\'s tickets in every repository, replacing each repository\'s own format. Leave empty to keep each repository\'s own.'**
+  String get groupsCommitTemplateHelp;
+
   /// No description provided for @groupsInstructions.
   ///
   /// In en, this message translates to:
@@ -20067,6 +20079,18 @@ abstract class AppLocalizations {
   /// **'Diff'**
   String get ticketDiff;
 
+  /// No description provided for @ticketDiffReposLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes by repository'**
+  String get ticketDiffReposLabel;
+
+  /// No description provided for @ticketDiffOtherRepo.
+  ///
+  /// In en, this message translates to:
+  /// **'Other files'**
+  String get ticketDiffOtherRepo;
+
   /// No description provided for @ticketFeedback.
   ///
   /// In en, this message translates to:
@@ -20402,6 +20426,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The pull request opens from this name. Letters, digits, - _ . and /; no spaces.'**
   String get ticketBranchRenameHint;
+
+  /// No description provided for @ticketCommitsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Commits'**
+  String get ticketCommitsTitle;
+
+  /// No description provided for @ticketCommitsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts pushes these when you approve. Until then you can change their messages.'**
+  String get ticketCommitsSub;
+
+  /// No description provided for @ticketCommitEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit message'**
+  String get ticketCommitEdit;
+
+  /// No description provided for @ticketCommitEditHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The subject on the first line, then a blank line and the body. Changing an earlier commit makes the ones after it again with the same changes.'**
+  String get ticketCommitEditHint;
+
+  /// No description provided for @ticketCommitsReapply.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-apply format'**
+  String get ticketCommitsReapply;
+
+  /// No description provided for @ticketCommitsReapplyHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Writes these messages again from the commit message format (the group\'s, else each repository\'s), with the type, scope and subject of the run that made each commit. Check the preview, then apply.'**
+  String get ticketCommitsReapplyHelp;
+
+  /// No description provided for @ticketCommitsNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket number for {number}'**
+  String ticketCommitsNumber(String number);
+
+  /// No description provided for @ticketCommitsPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get ticketCommitsPreview;
+
+  /// No description provided for @ticketCommitsApply.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {Apply {n} change} other {Apply {n} changes}}'**
+  String ticketCommitsApply(num n);
+
+  /// No description provided for @ticketCommitsUpToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'The messages already match the format.'**
+  String get ticketCommitsUpToDate;
+
+  /// No description provided for @ticketCommitsNotSuggested.
+  ///
+  /// In en, this message translates to:
+  /// **'Not ticked: this message may have been written by hand, and applying would replace it.'**
+  String get ticketCommitsNotSuggested;
 
   /// No description provided for @ticketKvRevision.
   ///

@@ -43,6 +43,7 @@ import 'package:agnts_api/src/model/billing.dart';
 import 'package:agnts_api/src/model/billing_prices.dart';
 import 'package:agnts_api/src/model/blocker.dart';
 import 'package:agnts_api/src/model/branch.dart';
+import 'package:agnts_api/src/model/branch_commit.dart';
 import 'package:agnts_api/src/model/ci_day.dart';
 import 'package:agnts_api/src/model/ci_failure.dart';
 import 'package:agnts_api/src/model/ci_occurrence.dart';
@@ -84,6 +85,7 @@ import 'package:agnts_api/src/model/deploy_repo_request.dart';
 import 'package:agnts_api/src/model/device_registration.dart';
 import 'package:agnts_api/src/model/disable_totp_request.dart';
 import 'package:agnts_api/src/model/edit_check.dart';
+import 'package:agnts_api/src/model/edit_commit_message_request.dart';
 import 'package:agnts_api/src/model/edit_pull_comment_request.dart';
 import 'package:agnts_api/src/model/environment.dart';
 import 'package:agnts_api/src/model/error.dart';
@@ -174,6 +176,9 @@ import 'package:agnts_api/src/model/queue_status.dart';
 import 'package:agnts_api/src/model/queue_status_server_queue_inner.dart';
 import 'package:agnts_api/src/model/queue_status_waiting.dart';
 import 'package:agnts_api/src/model/quiz_question.dart';
+import 'package:agnts_api/src/model/reapply_commit_format200_response.dart';
+import 'package:agnts_api/src/model/reapply_commit_format200_response_changes_inner.dart';
+import 'package:agnts_api/src/model/reapply_commit_format_request.dart';
 import 'package:agnts_api/src/model/red_flag.dart';
 import 'package:agnts_api/src/model/register_request.dart';
 import 'package:agnts_api/src/model/reject_ticket_request.dart';
@@ -428,6 +433,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return Blocker.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Branch':
           return Branch.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'BranchCommit':
+          return BranchCommit.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'CI':
           
           
@@ -516,6 +523,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return DisableTotpRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'EditCheck':
           return EditCheck.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'EditCommitMessageRequest':
+          return EditCommitMessageRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'EditPullCommentRequest':
           return EditPullCommentRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Environment':
@@ -711,6 +720,12 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return QueueStatusWaiting.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'QuizQuestion':
           return QuizQuestion.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ReapplyCommitFormat200Response':
+          return ReapplyCommitFormat200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ReapplyCommitFormat200ResponseChangesInner':
+          return ReapplyCommitFormat200ResponseChangesInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ReapplyCommitFormatRequest':
+          return ReapplyCommitFormatRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RedFlag':
           return RedFlag.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RegisterRequest':

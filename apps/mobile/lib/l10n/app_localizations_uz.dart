@@ -2901,6 +2901,15 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
+  String groupsBranchTemplateHelp(String key, String number) {
+    return 'Bu guruh vazifalari branchlarining nomi barcha repozitoriylarda bir xil boʻlishi uchun. Har bir repozitoriyning oʻz formatini almashtiradi. $key yoki $number boʻlishi kerak. Har bir repozitoriyning oʻzinikini qoldirish uchun boʻsh qoldiring.';
+  }
+
+  @override
+  String get groupsCommitTemplateHelp =>
+      'Bu guruh vazifalari kommit xabarlari barcha repozitoriylarda shu formatda yoziladi; har bir repozitoriyning oʻz formatini almashtiradi. Har birining oʻzinikini qoldirish uchun boʻsh qoldiring.';
+
+  @override
   String get groupsInstructions => 'Koʻrsatmalar';
 
   @override
@@ -11270,6 +11279,12 @@ class AppLocalizationsUz extends AppLocalizations {
   String get ticketDiff => 'Oʻzgarishlar';
 
   @override
+  String get ticketDiffReposLabel => 'Repozitoriylar boʻyicha oʻzgarishlar';
+
+  @override
+  String get ticketDiffOtherRepo => 'Boshqa fayllar';
+
+  @override
   String get ticketFeedback => 'Fikr-mulohaza';
 
   @override
@@ -11454,6 +11469,45 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get ticketBranchRenameHint => 'Pull request shu nomdagi branchdan ochiladi. Harflar, raqamlar, - _ . va /; boʻshliqsiz.';
+
+  @override
+  String get ticketCommitsTitle => 'Kommitlar';
+
+  @override
+  String get ticketCommitsSub => 'agnts ularni siz tasdiqlaganingizda yuboradi. Ungacha xabarlarini oʻzgartirishingiz mumkin.';
+
+  @override
+  String get ticketCommitEdit => 'Xabarni tahrirlash';
+
+  @override
+  String get ticketCommitEditHint =>
+      'Birinchi qatorda sarlavha, keyin boʻsh qator va tavsif. Oldingi kommitni oʻzgartirsangiz, undan keyingilari xuddi shu oʻzgarishlar bilan qaytadan yaratiladi.';
+
+  @override
+  String get ticketCommitsReapply => 'Formatni qayta qoʻllash';
+
+  @override
+  String get ticketCommitsReapplyHelp =>
+      'Bu xabarlarni kommit xabari formati boʻyicha (guruhniki, boʻlmasa har bir repozitoriyniki) qayta yozadi; turi, sohasi va mavzusi har bir kommitni qilgan ishga tushirishdan olinadi. Oldindan koʻrib chiqing, keyin qoʻllang.';
+
+  @override
+  String ticketCommitsNumber(String number) {
+    return '$number uchun vazifa raqami';
+  }
+
+  @override
+  String get ticketCommitsPreview => 'Oldindan koʻrish';
+
+  @override
+  String ticketCommitsApply(num n) {
+    return '$n ta oʻzgarishni qoʻllash';
+  }
+
+  @override
+  String get ticketCommitsUpToDate => 'Xabarlar formatga allaqachon mos keladi.';
+
+  @override
+  String get ticketCommitsNotSuggested => 'Belgilanmagan: bu xabar qoʻlda yozilgan boʻlishi mumkin, qoʻllash uni almashtiradi.';
 
   @override
   String get ticketKvRevision => 'Reviziya';

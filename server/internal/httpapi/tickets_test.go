@@ -27,6 +27,7 @@ type fakeTickets struct {
 	lastAccept        []orchestrator.AcceptInput
 	lastFollowUps     *bool
 	lastSkipChecks    *bool
+	lastCommit        string
 	lastRelation      string
 	lastCompare       *bool
 	lastShots         []domain.ShotRef
@@ -274,6 +275,18 @@ func (f *fakeTickets) RetryWithNote(_ context.Context, key, note string, files [
 	return f.ticket(key, domain.StateNew)
 }
 
+func (f *fakeTickets) EditCommitMessage(_ context.Context, key string, repoID int64, sha, message string, o domain.Origin) (domain.Ticket, error) {
+	f.lastOrigin, f.lastCommit = o, fmt.Sprintf("%d %s %s", repoID, sha, message)
+	return f.ticket(key, domain.StateWaitingForReview)
+}
+
+func (f *fakeTickets) ReapplyCommitFormat(_ context.Context, key string, number *string, dryRun bool, only []string, o domain.Origin) ([]orchestrator.CommitChange, domain.Ticket, error) {
+	f.lastOrigin = o
+	f.lastCommit = fmt.Sprintf("reapply %v %v %v", number != nil && *number == "AMANAT-2677", dryRun, only)
+	t, err := f.ticket(key, domain.StateWaitingForReview)
+	return []orchestrator.CommitChange{{RepoID: 3, RepoName: "api", SHA: "abc", From: "PAY-1: x", To: "[AMANAT-2677] feat: x", Suggested: true}}, t, err
+}
+
 func (f *fakeTickets) SetSkipChecks(_ context.Context, key string, skip bool, o domain.Origin) (domain.Ticket, error) {
 	f.lastOrigin, f.lastSkipChecks = o, &skip
 	return f.ticket(key, domain.StateFailed)
@@ -480,6 +493,8 @@ func TestTicketEndpoints(t *testing.T) {
 		{"PUT", "/api/tickets/PAY-1/branch", `{"branch":"feature/PAY-1-login"}`, 200, `"branch":"feature/PAY-1-login"`},
 		{"PUT", "/api/tickets/PAY-1/branch", `{"branch":"taken","repoId":3}`, 409, `already exists on the git host`},
 		{"PUT", "/api/tickets/PAY-1/branch", `{"name":"x"}`, 400, `unknown field`},
+		{"POST", "/api/tickets/PAY-1/commits/reapply", `{"number":"AMANAT-2677","dryRun":true}`, 200, `"changes":[{"repoId":3,"repoName":"api","sha":"abc","from":"PAY-1: x","to":"[AMANAT-2677] feat: x","suggested":true}]`},
+		{"PUT", "/api/tickets/PAY-1/commit", `{"sha":"abc1234","message":"feat: login","repoId":3}`, 200, `"state":"waiting_for_review"`},
 		{"POST", "/api/tickets/PAY-1/retry", "", 200, `"state":"new"`},
 		{"POST", "/api/tickets/PAY-1/retry", `{"skipChecks":true}`, 200, `"state":"new"`},
 		{"POST", "/api/tickets/PAY-1/retry", `{"note":"skip the symlink","attachments":[9,9]}`, 200, `"state":"new"`},
@@ -537,6 +552,9 @@ func TestTicketEndpoints(t *testing.T) {
 		if rec.Code != c.want || !strings.Contains(rec.Body.String(), c.contains) {
 			t.Errorf("%s %s: %d %s (want %d containing %q)", c.method, c.path, rec.Code, rec.Body, c.want, c.contains)
 		}
+	}
+	if h.tickets.lastCommit != "3 abc1234 feat: login" { // the reapply call came first
+		t.Errorf("commit input: %q", h.tickets.lastCommit)
 	}
 	if h.tickets.lastSkipChecks == nil || !*h.tickets.lastSkipChecks {
 		t.Errorf("retry skipChecks: %v", h.tickets.lastSkipChecks)

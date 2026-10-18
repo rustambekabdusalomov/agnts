@@ -1,6 +1,9 @@
 package domain
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestCommitLine(t *testing.T) {
 	const tmpl = "[{number}] {type}({scope}): {subject}"
@@ -49,6 +52,23 @@ func TestTicketNumber(t *testing.T) {
 	for n, want := range map[string]bool{"AMANAT-2288": true, "1234": true, "v1.2_x": true, "": false, "-1": false, "A 1": false, "A/1": false} {
 		if ValidTicketNumber(n) != want {
 			t.Errorf("ValidTicketNumber(%q) != %v", n, want)
+		}
+	}
+}
+
+func TestCleanCommitMessage(t *testing.T) {
+	for in, want := range map[string]string{
+		"feat: x":                      "feat: x",
+		"\n\nfeat: x  \r\n\r\nbody \n": "feat: x\n\nbody",
+		"a\n\n\nb":                     "a\n\n\nb",
+	} {
+		if got, err := CleanCommitMessage(in); err != nil || got != want {
+			t.Errorf("CleanCommitMessage(%q) = %q, %v; want %q", in, got, err, want)
+		}
+	}
+	for _, bad := range []string{"", " \n \t\n", strings.Repeat("x", MaxCommitMessage+1)} {
+		if _, err := CleanCommitMessage(bad); err == nil {
+			t.Errorf("CleanCommitMessage(%.20q) took it", bad)
 		}
 	}
 }

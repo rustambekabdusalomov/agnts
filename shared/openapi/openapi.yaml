@@ -384,6 +384,86 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '409': { $ref: '#/components/responses/Conflict' }
 
+  /tickets/{key}/commit:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    put:
+      operationId: editCommitMessage
+      summary: Change the message of one of agnts's commits before it pushes them
+      description: |
+        One of the repository's commits (its commits, ticket detail only), under the rules of renameTicketBranch: a branch
+        never pushed, while the ticket waits for review or stopped on an error. The commits after it are made again on
+        top, so the repository's headSha changes; the same message changes nothing.
+      tags: [tickets]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sha, message]
+              properties:
+                sha: { type: string, minLength: 7, maxLength: 64, description: 'The commit, as its commits list it' }
+                message: { type: string, minLength: 1, maxLength: 10000, description: 'The whole message: the subject line, then a blank line and the body' }
+                repoId: { type: integer, format: int64, description: 'Which repository of the ticket; absent is the primary' }
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/commits/reapply:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: reapplyCommitFormat
+      summary: Write agnts's unpushed commit messages again from the commit format in effect
+      description: |
+        For commits made before a format was set. Each repository's commits (its commits) get the format of the
+        ticket's group, else of the repository, filled with the type, scope and subject the coding run that made the
+        commit gave (the ticket's kind and title when it gave none). Repositories without a format are left as they
+        are. Same rules as editCommitMessage. With dryRun nothing changes: changes lists what would.
+      tags: [tickets]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                number: { type: string, maxLength: 64, description: 'Sets the ticket''s number ({number}) first, like AMANAT-2677' }
+                dryRun: { type: boolean, description: 'Only list the changes' }
+                only:
+                  type: array
+                  maxItems: 200
+                  description: 'Make only these of the preview''s changes (commit shas); absent makes them all'
+                  items: { type: string }
+      responses:
+        '200':
+          description: The changes (made, or that would be), and the ticket
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [changes, ticket]
+                properties:
+                  changes:
+                    type: array
+                    items:
+                      type: object
+                      required: [repoId, repoName, sha, from, to, suggested]
+                      properties:
+                        repoId: { type: integer, format: int64 }
+                        repoName: { type: string }
+                        sha: { type: string }
+                        from: { type: string }
+                        to: { type: string }
+                        suggested: { type: boolean, description: 'Worth making unasked: the run that made the commit described it, or the commit has agnts''s own message. Off, it may undo a message a person wrote' }
+                  ticket: { $ref: '#/components/schemas/Ticket' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /tickets/{key}/branch:
     parameters:
       - $ref: '#/components/parameters/TicketKey'
@@ -6367,8 +6447,19 @@ components:
         closedAt: { type: string, format: date-time }
         pushError: { type: string, description: Why its last push failed; a retry pushes it again }
         canRenameBranch: { type: boolean, description: 'Its branch was never pushed and can still be renamed (ticket detail only)' }
+        commits:
+          type: array
+          description: 'The commits agnts made on its branch whose messages can still change (editCommitMessage), newest first (ticket detail only)'
+          items: { $ref: '#/components/schemas/BranchCommit' }
         files: { type: integer, description: Files its change touches }
         archived: { type: boolean, description: The repository is archived }
+
+    BranchCommit:
+      type: object
+      required: [sha, message]
+      properties:
+        sha: { type: string }
+        message: { type: string, description: 'The whole message: the subject line, then the body after a blank line' }
 
     RepoGroupRef:
       type: object
@@ -6388,13 +6479,15 @@ components:
 
     RepoGroup:
       type: object
-      required: [id, name, description, instructions, taskPrefix, members, warnings, createdAt, updatedAt]
+      required: [id, name, description, instructions, taskPrefix, branchTemplate, commitTemplate, members, warnings, createdAt, updatedAt]
       properties:
         id: { type: integer, format: int64 }
         name: { type: string }
         description: { type: string }
         instructions: { type: string, description: 'How the repositories fit together; added to every prompt of its tickets' }
         taskPrefix: { type: string, description: 'Key prefix of tasks made from the group; empty uses the first repository''s' }
+        branchTemplate: { type: string, description: 'Names the branches of the group''s tickets in every member, replacing each repository''s own; empty keeps theirs' }
+        commitTemplate: { type: string, description: 'Writes the commit messages of the group''s tickets in every member, replacing each repository''s own; empty keeps theirs' }
         members:
           type: array
           items: { $ref: '#/components/schemas/RepoGroupMember' }
@@ -6413,6 +6506,8 @@ components:
         description: { type: string, maxLength: 1000 }
         instructions: { type: string, maxLength: 20000 }
         taskPrefix: { type: string, maxLength: 10 }
+        branchTemplate: { type: string, maxLength: 100, description: 'Branch name template (as a repository''s); must contain {key} or {number}. Empty keeps each repository''s own' }
+        commitTemplate: { type: string, maxLength: 200, description: 'Commit message template (as a repository''s); must contain {subject} or {title}. Empty keeps each repository''s own' }
         members:
           type: array
           minItems: 1

@@ -26,6 +26,7 @@ import ReportView from '../components/ticket/ReportView.vue'
 import SwaggerResults from '../components/swagger/SwaggerResults.vue'
 import RepoPicker from '../components/ticket/RepoPicker.vue'
 import RepoDiffs from '../components/ticket/RepoDiffs.vue'
+import CommitMessages from '../components/ticket/CommitMessages.vue'
 import TicketRepos from '../components/ticket/TicketRepos.vue'
 import BranchName from '../components/ticket/BranchName.vue'
 import { filePath, isMultiRepo, ticketRepos } from '../components/repos/repoSet'
@@ -816,6 +817,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
                 </template>
               </div>
               <DesignRecord :analysis="d.analysis" :deviations="result?.deviations" />
+              <CommitMessages :ticket="tk" />
               <ModelPicker :ticket="tk" :stages="tk.canPreview ? ['retry', 'review', 'preview'] : ['retry', 'review']" />
               <div v-if="opensPr" class="sec">
                 <h3>{{ t('ticket.assignTitle') }}</h3>

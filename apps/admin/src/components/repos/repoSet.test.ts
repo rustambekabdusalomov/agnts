@@ -3,7 +3,7 @@ import type { RepoGroup, Ticket } from '../../api/types'
 import { filePath, filesByRepo, hasRepo, makePrimary, pickGroup, repoChip, selectionBody, ticketRepos, ticketSelection, toggleRepo } from './repoSet'
 
 const group: RepoGroup = {
-  id: 7, name: 'Shop', description: '', instructions: '', taskPrefix: 'SHOP', warnings: [], createdAt: '', updatedAt: '',
+  id: 7, name: 'Shop', description: '', instructions: '', taskPrefix: 'SHOP', branchTemplate: '', commitTemplate: '', warnings: [], createdAt: '', updatedAt: '',
   members: [
     { repoId: 1, repoName: 'api', role: 'backend', archived: false },
     { repoId: 2, repoName: 'web', role: 'web', archived: false },

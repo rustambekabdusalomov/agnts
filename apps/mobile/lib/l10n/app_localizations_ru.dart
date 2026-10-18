@@ -3030,6 +3030,15 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String groupsBranchTemplateHelp(String key, String number) {
+    return 'Имя веток задач этой группы во всех репозиториях, чтобы у всех было одно имя. Заменяет собственный формат каждого репозитория. Должен содержать $key или $number. Оставьте пустым, чтобы у каждого репозитория остался свой.';
+  }
+
+  @override
+  String get groupsCommitTemplateHelp =>
+      'Сообщения коммитов задач этой группы во всех репозиториях; заменяет собственный формат каждого репозитория. Оставьте пустым, чтобы у каждого репозитория остался свой.';
+
+  @override
   String get groupsInstructions => 'Инструкции';
 
   @override
@@ -11810,6 +11819,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ticketDiff => 'Изменения';
 
   @override
+  String get ticketDiffReposLabel => 'Изменения по репозиториям';
+
+  @override
+  String get ticketDiffOtherRepo => 'Другие файлы';
+
+  @override
   String get ticketFeedback => 'Комментарий';
 
   @override
@@ -11996,6 +12011,53 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get ticketBranchRenameHint => 'Pull request откроется из этой ветки. Буквы, цифры, - _ . и /; без пробелов.';
+
+  @override
+  String get ticketCommitsTitle => 'Коммиты';
+
+  @override
+  String get ticketCommitsSub => 'agnts отправит их после одобрения. До этого можно изменить их сообщения.';
+
+  @override
+  String get ticketCommitEdit => 'Изменить сообщение';
+
+  @override
+  String get ticketCommitEditHint =>
+      'Заголовок в первой строке, затем пустая строка и описание. Если изменить более ранний коммит, следующие за ним будут созданы заново с теми же изменениями.';
+
+  @override
+  String get ticketCommitsReapply => 'Применить формат заново';
+
+  @override
+  String get ticketCommitsReapplyHelp =>
+      'Переписывает эти сообщения по формату сообщений коммитов (группы, иначе каждого репозитория), с типом, областью и темой из запуска, который сделал каждый коммит. Проверьте предпросмотр, затем примените.';
+
+  @override
+  String ticketCommitsNumber(String number) {
+    return 'Номер задачи для $number';
+  }
+
+  @override
+  String get ticketCommitsPreview => 'Предпросмотр';
+
+  @override
+  String ticketCommitsApply(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Применить $n изменения',
+      many: 'Применить $n изменений',
+      few: 'Применить $n изменения',
+      one: 'Применить $n изменение',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ticketCommitsUpToDate => 'Сообщения уже соответствуют формату.';
+
+  @override
+  String get ticketCommitsNotSuggested => 'Не отмечено: это сообщение, возможно, написано вручную, и применение заменит его.';
 
   @override
   String get ticketKvRevision => 'Ревизия';

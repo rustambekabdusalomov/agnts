@@ -34,6 +34,18 @@ void main() {
       // TODO
     });
 
+    // Names the branches of the group's tickets in every member, replacing each repository's own; empty keeps theirs
+    // String branchTemplate
+    test('to test the property `branchTemplate`', () async {
+      // TODO
+    });
+
+    // Writes the commit messages of the group's tickets in every member, replacing each repository's own; empty keeps theirs
+    // String commitTemplate
+    test('to test the property `commitTemplate`', () async {
+      // TODO
+    });
+
     // List<RepoGroupMember> members
     test('to test the property `members`', () async {
       // TODO

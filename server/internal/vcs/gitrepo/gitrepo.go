@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
@@ -341,12 +342,17 @@ func (g *Repos) RestoreBranch(_ context.Context, repo domain.Repository, branch,
 	return r.Storer.SetReference(plumbing.NewHashReference(local, h))
 }
 
+// renameFetchTimeout bounds the fetch RenameBranch checks the new name
+// with.
+var renameFetchTimeout = 20 * time.Second
+
 // RenameBranch renames a ticket's local branch that was never pushed, so it
 // is pushed under the new name. It fetches first and refuses (with
 // domain.ErrConflict) a name agnts or the git host already has, or one
 // that clashes with a branch as a folder (a and a/b): pushing there would
 // add the work to someone else's branch. domain.ErrNotFound means the
-// branch is gone.
+// branch is gone; context.DeadlineExceeded, that the git host did not
+// answer within renameFetchTimeout.
 func (g *Repos) RenameBranch(ctx context.Context, repo domain.Repository, from, to string) error {
 	if from == to {
 		return nil
@@ -366,7 +372,15 @@ func (g *Repos) RenameBranch(ctx context.Context, repo domain.Repository, from, 
 	if err != nil {
 		return err
 	}
-	if err := fetch(ctx, r, repo, auth, true, originRefs); err != nil {
+	// A person waits on this, and the repository's lock is held: a git
+	// host that does not answer (a private network that is down) fails it
+	// soon instead of after the system's TCP timeout.
+	fctx, cancel := context.WithTimeout(ctx, renameFetchTimeout)
+	defer cancel()
+	if err := fetch(fctx, r, repo, auth, true, originRefs); err != nil {
+		if errors.Is(fctx.Err(), context.DeadlineExceeded) && ctx.Err() == nil {
+			return fmt.Errorf("%w: %v", context.DeadlineExceeded, err)
+		}
 		return err
 	}
 	old, err := r.Reference(plumbing.NewBranchReferenceName(from), true)

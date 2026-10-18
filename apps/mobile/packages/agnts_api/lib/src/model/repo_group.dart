@@ -31,6 +31,10 @@ class RepoGroup {
 
     required  this.taskPrefix,
 
+    required  this.branchTemplate,
+
+    required  this.commitTemplate,
+
     required  this.members,
 
     required  this.warnings,
@@ -102,6 +106,32 @@ class RepoGroup {
 
 
 
+      /// Names the branches of the group's tickets in every member, replacing each repository's own; empty keeps theirs
+  @JsonKey(
+    
+    name: r'branchTemplate',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final String branchTemplate;
+
+
+
+      /// Writes the commit messages of the group's tickets in every member, replacing each repository's own; empty keeps theirs
+  @JsonKey(
+    
+    name: r'commitTemplate',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final String commitTemplate;
+
+
+
   @JsonKey(
     
     name: r'members',
@@ -160,6 +190,8 @@ class RepoGroup {
       other.description == description &&
       other.instructions == instructions &&
       other.taskPrefix == taskPrefix &&
+      other.branchTemplate == branchTemplate &&
+      other.commitTemplate == commitTemplate &&
       other.members == members &&
       other.warnings == warnings &&
       other.createdAt == createdAt &&
@@ -172,6 +204,8 @@ class RepoGroup {
         description.hashCode +
         instructions.hashCode +
         taskPrefix.hashCode +
+        branchTemplate.hashCode +
+        commitTemplate.hashCode +
         members.hashCode +
         warnings.hashCode +
         createdAt.hashCode +

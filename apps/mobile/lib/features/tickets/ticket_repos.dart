@@ -12,6 +12,24 @@ bool isMultiRepo(Ticket t) => (t.repos?.length ?? 0) > 1;
 /// ticket ("api/server/main.go").
 String filePath(FileChange f) => (f.repo?.isNotEmpty ?? false) ? '${f.repo}/${f.path}' : f.path;
 
+/// A change's files by repository, in the order the repositories first
+/// come up, with each one's lines added and removed. Files of a ticket in
+/// one repository have no repo: they make one group named ''.
+List<({String repo, List<FileChange> files, int add, int del})> filesByRepo(List<FileChange> files) {
+  final out = <({String repo, List<FileChange> files, int add, int del})>[];
+  for (final f in files) {
+    final r = f.repo ?? '';
+    final i = out.indexWhere((g) => g.repo == r);
+    if (i < 0) {
+      out.add((repo: r, files: [f], add: f.add, del: f.del));
+    } else {
+      final g = out[i];
+      out[i] = (repo: r, files: [...g.files, f], add: g.add + f.add, del: g.del + f.del);
+    }
+  }
+  return out;
+}
+
 String repoStateLabel(AppLocalizations l, TicketRepoStateStateEnum s) => switch (s) {
       TicketRepoStateStateEnum.pending => l.mgroupsStatePending,
       TicketRepoStateStateEnum.unchanged => l.mgroupsStateUnchanged,

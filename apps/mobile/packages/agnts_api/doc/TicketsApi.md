@@ -19,6 +19,7 @@ Method | HTTP request | Description
 [**continueTicket**](TicketsApi.md#continueticket) | **POST** /tickets/{key}/continue | Pick a rejected ticket up again where it stopped
 [**dismissFollowUp**](TicketsApi.md#dismissfollowup) | **POST** /tickets/{key}/follow-ups/{id}/dismiss | Decline a suggestion; later runs will not suggest it again
 [**dismissRelation**](TicketsApi.md#dismissrelation) | **POST** /tickets/{key}/relations/{id}/dismiss | Dismiss a relation (run anyway); agnts does not propose it again
+[**editCommitMessage**](TicketsApi.md#editcommitmessage) | **PUT** /tickets/{key}/commit | Change the message of one of agnts&#39;s commits before it pushes them
 [**followUpFromFinding**](TicketsApi.md#followupfromfinding) | **POST** /tickets/{key}/review/findings/{index}/follow-up | Turn a code review finding into a follow-up suggestion
 [**getPreviewShot**](TicketsApi.md#getpreviewshot) | **GET** /tickets/{key}/preview/{runId}/shots/{shotId} | One preview screenshot, as PNG
 [**getTicket**](TicketsApi.md#getticket) | **GET** /tickets/{key} | A ticket with its questions, analysis and latest result
@@ -30,6 +31,7 @@ Method | HTTP request | Description
 [**listTickets**](TicketsApi.md#listtickets) | **GET** /tickets | Tickets, most recently active first
 [**markTicketMerged**](TicketsApi.md#markticketmerged) | **POST** /tickets/{key}/merged | Record that a done ticket&#39;s pull request was merged
 [**previewTicket**](TicketsApi.md#previewticket) | **POST** /tickets/{key}/preview | Queue a preview (screenshots of the running app) of a ticket waiting for review, again if one already ran
+[**reapplyCommitFormat**](TicketsApi.md#reapplycommitformat) | **POST** /tickets/{key}/commits/reapply | Write agnts&#39;s unpushed commit messages again from the commit format in effect
 [**rejectTicket**](TicketsApi.md#rejectticket) | **POST** /tickets/{key}/reject | Stop work on the ticket for good
 [**renameTicketBranch**](TicketsApi.md#renameticketbranch) | **PUT** /tickets/{key}/branch | Rename the ticket&#39;s branch before agnts pushes it
 [**replayTicket**](TicketsApi.md#replayticket) | **POST** /tickets/{key}/replay | Re-run a done code or test ticket with today&#39;s agnts, from the commit it started from, to compare the two (Analytics → Replay evaluation). The replay is a new local task that is never pushed.
@@ -523,6 +525,55 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **editCommitMessage**
+> Ticket editCommitMessage(key, editCommitMessageRequest)
+
+Change the message of one of agnts's commits before it pushes them
+
+One of the repository's commits (its commits, ticket detail only), under the rules of renameTicketBranch: a branch never pushed, while the ticket waits for review or stopped on an error. The commits after it are made again on top, so the repository's headSha changes; the same message changes nothing. 
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getTicketsApi();
+final String key = key_example; // String | 
+final EditCommitMessageRequest editCommitMessageRequest = ; // EditCommitMessageRequest | 
+
+try {
+    final response = api.editCommitMessage(key, editCommitMessageRequest);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling TicketsApi->editCommitMessage: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **key** | **String**|  | 
+ **editCommitMessageRequest** | [**EditCommitMessageRequest**](EditCommitMessageRequest.md)|  | 
+
+### Return type
+
+[**Ticket**](Ticket.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -1030,6 +1081,55 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**Ticket**](Ticket.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **reapplyCommitFormat**
+> ReapplyCommitFormat200Response reapplyCommitFormat(key, reapplyCommitFormatRequest)
+
+Write agnts's unpushed commit messages again from the commit format in effect
+
+For commits made before a format was set. Each repository's commits (its commits) get the format of the ticket's group, else of the repository, filled with the type, scope and subject the coding run that made the commit gave (the ticket's kind and title when it gave none). Repositories without a format are left as they are. Same rules as editCommitMessage. With dryRun nothing changes: changes lists what would. 
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getTicketsApi();
+final String key = key_example; // String | 
+final ReapplyCommitFormatRequest reapplyCommitFormatRequest = ; // ReapplyCommitFormatRequest | 
+
+try {
+    final response = api.reapplyCommitFormat(key, reapplyCommitFormatRequest);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling TicketsApi->reapplyCommitFormat: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **key** | **String**|  | 
+ **reapplyCommitFormatRequest** | [**ReapplyCommitFormatRequest**](ReapplyCommitFormatRequest.md)|  | [optional] 
+
+### Return type
+
+[**ReapplyCommitFormat200Response**](ReapplyCommitFormat200Response.md)
 
 ### Authorization
 

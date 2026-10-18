@@ -3,7 +3,9 @@ package orchestrator_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"slices"
+	"strings"
 	"testing"
 
 	"agnts/internal/domain"
@@ -17,6 +19,9 @@ func (g *fakeGit) RenameBranch(_ context.Context, _ domain.Repository, from, to 
 	defer g.mu.Unlock()
 	if to == "taken" {
 		return domain.ErrConflict
+	}
+	if to == "slow" {
+		return fmt.Errorf("%w: fetch: i/o", context.DeadlineExceeded)
 	}
 	g.renamed = append(g.renamed, from+"->"+to)
 	return nil
@@ -36,6 +41,10 @@ func TestRenameBranchBeforePush(t *testing.T) {
 	}
 	if _, err := h.o.RenameBranch(h.ctx, "PAY-50", 0, "taken", domain.OriginWeb); !errors.Is(err, domain.ErrConflict) {
 		t.Fatalf("taken name: %v", err)
+	}
+	if _, err := h.o.RenameBranch(h.ctx, "PAY-50", 0, "slow", domain.OriginWeb); !errors.Is(err, orchestrator.ErrInvalid) ||
+		!strings.Contains(err.Error(), "could not reach") || !strings.Contains(err.Error(), "Private networks") {
+		t.Fatalf("a silent git host: %v", err)
 	}
 	tk, err := h.o.RenameBranch(h.ctx, "PAY-50", 0, " feature/PAY-50-login ", domain.OriginWeb)
 	if err != nil || tk.Branch != "feature/PAY-50-login" || tk.HeadSHA != before.HeadSHA || tk.State != domain.StateWaitingForReview {

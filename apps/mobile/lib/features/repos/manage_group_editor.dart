@@ -10,6 +10,7 @@ import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
 import 'manage_logic.dart';
 import 'manage_widgets.dart';
+import 'name_format_fields.dart';
 
 /// Add or edit a repository group: repositories that change together, in
 /// order (the first is the primary of the group's tickets), each with a
@@ -34,6 +35,8 @@ class _GroupEditorState extends ConsumerState<GroupEditor> {
   late final _name = TextEditingController(text: widget.group?.name ?? '');
   late final _desc = TextEditingController(text: widget.group?.description ?? '');
   late final _prefix = TextEditingController(text: widget.group?.taskPrefix ?? '');
+  late final _branchTmpl = TextEditingController(text: widget.group?.branchTemplate ?? '');
+  late final _commitTmpl = TextEditingController(text: widget.group?.commitTemplate ?? '');
   late final _instructions = TextEditingController(text: widget.group?.instructions ?? '');
   late var _members = [for (final m in widget.group?.members ?? const <RepoGroupMember>[]) _Member(m.repoId, m.role)];
   // The group as last saved here, while its warnings are shown.
@@ -45,7 +48,7 @@ class _GroupEditorState extends ConsumerState<GroupEditor> {
 
   @override
   void dispose() {
-    for (final c in [_name, _desc, _prefix, _instructions, for (final m in _members) m.role]) {
+    for (final c in [_name, _desc, _prefix, _branchTmpl, _commitTmpl, _instructions, for (final m in _members) m.role]) {
       c.dispose();
     }
     super.dispose();
@@ -70,6 +73,8 @@ class _GroupEditorState extends ConsumerState<GroupEditor> {
       description: _desc.text.trim(),
       taskPrefix: _prefix.text.trim().toUpperCase(),
       instructions: _instructions.text,
+      branchTemplate: _branchTmpl.text.trim(),
+      commitTemplate: _commitTmpl.text.trim(),
       members: [
         for (final m in _members) RepoGroupInputMembersInner(repoId: m.repoId, role: m.role.text.trim().isEmpty ? null : m.role.text.trim()),
       ],
@@ -183,6 +188,7 @@ class _GroupEditorState extends ConsumerState<GroupEditor> {
               help: l.groupsPrefixHelp(prefix),
               child: ManageInput(controller: _prefix, mono: true, hint: 'SHOP', maxLength: 8, onChanged: (_) => setState(() {})),
             ),
+            NameFormatFields(branch: _branchTmpl, commit: _commitTmpl, taskPrefix: prefix, group: true, onChanged: (_) => setState(() {})),
             ManageField(
               label: l.groupsInstructions,
               help: l.groupsInstructionsHelp,

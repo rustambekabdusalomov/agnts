@@ -16,6 +16,7 @@ import 'package:agnts_api/src/model/address_pull_comments_request.dart';
 import 'package:agnts_api/src/model/answers_request.dart';
 import 'package:agnts_api/src/model/approve_ticket_request.dart';
 import 'package:agnts_api/src/model/continue_ticket_request.dart';
+import 'package:agnts_api/src/model/edit_commit_message_request.dart';
 import 'package:agnts_api/src/model/error.dart';
 import 'package:agnts_api/src/model/event.dart';
 import 'package:agnts_api/src/model/follow_up_suggestion.dart';
@@ -24,6 +25,8 @@ import 'package:agnts_api/src/model/follow_ups_setting.dart';
 import 'package:agnts_api/src/model/implement_input.dart';
 import 'package:agnts_api/src/model/model_overrides.dart';
 import 'package:agnts_api/src/model/preview_input.dart';
+import 'package:agnts_api/src/model/reapply_commit_format200_response.dart';
+import 'package:agnts_api/src/model/reapply_commit_format_request.dart';
 import 'package:agnts_api/src/model/reject_ticket_request.dart';
 import 'package:agnts_api/src/model/relation.dart';
 import 'package:agnts_api/src/model/relation_input.dart';
@@ -1009,6 +1012,110 @@ _responseData = rawData == null ? null : deserialize<Relation, Relation>(rawData
     );
   }
 
+  /// Change the message of one of agnts&#39;s commits before it pushes them
+  /// One of the repository&#39;s commits (its commits, ticket detail only), under the rules of renameTicketBranch: a branch never pushed, while the ticket waits for review or stopped on an error. The commits after it are made again on top, so the repository&#39;s headSha changes; the same message changes nothing. 
+  ///
+  /// Parameters:
+  /// * [key] 
+  /// * [editCommitMessageRequest] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [Ticket] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<Ticket>> editCommitMessage({ 
+    required String key,
+    required EditCommitMessageRequest editCommitMessageRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/tickets/{key}/commit'.replaceAll('{' r'key' '}', key.toString());
+    final _options = Options(
+      method: r'PUT',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'cookieAuth',
+            'keyName': 'hiro_session',
+            'where': '',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(editCommitMessageRequest);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    Ticket? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<Ticket, Ticket>(rawData, 'Ticket', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<Ticket>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
   /// Turn a code review finding into a follow-up suggestion
   /// No Claude run is involved.
   ///
@@ -1975,6 +2082,110 @@ _responseData = rawData == null ? null : deserialize<Ticket, Ticket>(rawData, 'T
     }
 
     return Response<Ticket>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// Write agnts&#39;s unpushed commit messages again from the commit format in effect
+  /// For commits made before a format was set. Each repository&#39;s commits (its commits) get the format of the ticket&#39;s group, else of the repository, filled with the type, scope and subject the coding run that made the commit gave (the ticket&#39;s kind and title when it gave none). Repositories without a format are left as they are. Same rules as editCommitMessage. With dryRun nothing changes: changes lists what would. 
+  ///
+  /// Parameters:
+  /// * [key] 
+  /// * [reapplyCommitFormatRequest] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [ReapplyCommitFormat200Response] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<ReapplyCommitFormat200Response>> reapplyCommitFormat({ 
+    required String key,
+    ReapplyCommitFormatRequest? reapplyCommitFormatRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/tickets/{key}/commits/reapply'.replaceAll('{' r'key' '}', key.toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'cookieAuth',
+            'keyName': 'hiro_session',
+            'where': '',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(reapplyCommitFormatRequest);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    ReapplyCommitFormat200Response? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<ReapplyCommitFormat200Response, ReapplyCommitFormat200Response>(rawData, 'ReapplyCommitFormat200Response', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<ReapplyCommitFormat200Response>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,

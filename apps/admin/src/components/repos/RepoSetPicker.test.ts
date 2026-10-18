@@ -8,7 +8,7 @@ import { selectionBody, type RepoSelection } from './repoSet'
 const repo = (id: number, name: string, archivedAt?: string) => ({ id, name, archivedAt }) as Repository
 const repos = [repo(1, 'api'), repo(2, 'web'), repo(3, 'docs'), repo(4, 'old', '2026-01-01')]
 const groups = [{
-  id: 7, name: 'Shop', description: '', instructions: '', taskPrefix: '', warnings: [], createdAt: '', updatedAt: '',
+  id: 7, name: 'Shop', description: '', instructions: '', taskPrefix: '', branchTemplate: '', commitTemplate: '', warnings: [], createdAt: '', updatedAt: '',
   members: [{ repoId: 1, repoName: 'api', role: 'backend', archived: false }, { repoId: 2, repoName: 'web', role: 'web', archived: false }],
 }] satisfies RepoGroup[]
 

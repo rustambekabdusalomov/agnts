@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -754,5 +755,50 @@ func TestRenameBranch(t *testing.T) {
 	up, _ := git.PlainOpen(bare)
 	if ref, err := up.Reference(plumbing.NewBranchReferenceName("feature/PAY-1-login"), true); err != nil || ref.Hash().String() != sha {
 		t.Fatalf("pushed under the new name: %v %v", ref, err)
+	}
+}
+
+// A git host that takes the connection and never answers (a private
+// network that is down) fails the rename within renameFetchTimeout, and
+// the branch keeps its name.
+func TestRenameBranchHostSilent(t *testing.T) {
+	ctx := context.Background()
+	bare := upstream(t)
+	g := newRepos(t)
+	repo := domain.Repository{ID: 1, WorkspaceID: 1, Name: "demo", CloneURL: bare, DefaultBranch: "main", Provider: "github"}
+	if err := g.Prepare(ctx, repo, "agnts/PAY-1"); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, _, err := g.Commit(ctx, repo, "agnts/PAY-1", tarOf(t, map[string]string{"README.md": "# work\n"}), "PAY-1: work"); err != nil {
+		t.Fatal(err)
+	}
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = ln.Close() }()
+	go func() {
+		for {
+			c, err := ln.Accept()
+			if err != nil {
+				return
+			}
+			defer func() { _ = c.Close() }() // held open, never answered
+		}
+	}()
+	was := renameFetchTimeout
+	renameFetchTimeout = 300 * time.Millisecond
+	defer func() { renameFetchTimeout = was }()
+
+	silent := repo
+	silent.CloneURL = "http://" + ln.Addr().String() + "/demo.git"
+	start := time.Now()
+	err = g.RenameBranch(ctx, silent, "agnts/PAY-1", "feature/PAY-1")
+	if !errors.Is(err, context.DeadlineExceeded) || time.Since(start) > 5*time.Second {
+		t.Fatalf("rename against a silent host: %v after %s", err, time.Since(start))
+	}
+	r, _ := git.PlainOpen(g.mirrorDir(repo))
+	if _, err := r.Reference(plumbing.NewBranchReferenceName("agnts/PAY-1"), true); err != nil {
+		t.Fatalf("the branch lost its name: %v", err)
 	}
 }

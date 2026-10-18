@@ -56,6 +56,7 @@ doc/BillingApi.md
 doc/BillingPrices.md
 doc/Blocker.md
 doc/Branch.md
+doc/BranchCommit.md
 doc/CI.md
 doc/CIDay.md
 doc/CIFailure.md
@@ -103,6 +104,7 @@ doc/DevicesApi.md
 doc/DisableTotpRequest.md
 doc/DocsApi.md
 doc/EditCheck.md
+doc/EditCommitMessageRequest.md
 doc/EditPullCommentRequest.md
 doc/Environment.md
 doc/Error.md
@@ -207,6 +209,9 @@ doc/QueueStatus.md
 doc/QueueStatusServerQueueInner.md
 doc/QueueStatusWaiting.md
 doc/QuizQuestion.md
+doc/ReapplyCommitFormat200Response.md
+doc/ReapplyCommitFormat200ResponseChangesInner.md
+doc/ReapplyCommitFormatRequest.md
 doc/RedFlag.md
 doc/RegisterRequest.md
 doc/RejectTicketRequest.md
@@ -449,6 +454,7 @@ lib/src/model/billing.dart
 lib/src/model/billing_prices.dart
 lib/src/model/blocker.dart
 lib/src/model/branch.dart
+lib/src/model/branch_commit.dart
 lib/src/model/capacity.dart
 lib/src/model/change_password_request.dart
 lib/src/model/check_step.dart
@@ -492,6 +498,7 @@ lib/src/model/deploy_repo_request.dart
 lib/src/model/device_registration.dart
 lib/src/model/disable_totp_request.dart
 lib/src/model/edit_check.dart
+lib/src/model/edit_commit_message_request.dart
 lib/src/model/edit_pull_comment_request.dart
 lib/src/model/environment.dart
 lib/src/model/error.dart
@@ -587,6 +594,9 @@ lib/src/model/queue_status.dart
 lib/src/model/queue_status_server_queue_inner.dart
 lib/src/model/queue_status_waiting.dart
 lib/src/model/quiz_question.dart
+lib/src/model/reapply_commit_format200_response.dart
+lib/src/model/reapply_commit_format200_response_changes_inner.dart
+lib/src/model/reapply_commit_format_request.dart
 lib/src/model/red_flag.dart
 lib/src/model/register_request.dart
 lib/src/model/reject_ticket_request.dart
@@ -788,6 +798,7 @@ test/billing_api_test.dart
 test/billing_prices_test.dart
 test/billing_test.dart
 test/blocker_test.dart
+test/branch_commit_test.dart
 test/branch_test.dart
 test/capacity_test.dart
 test/change_password_request_test.dart
@@ -836,6 +847,7 @@ test/devices_api_test.dart
 test/disable_totp_request_test.dart
 test/docs_api_test.dart
 test/edit_check_test.dart
+test/edit_commit_message_request_test.dart
 test/edit_pull_comment_request_test.dart
 test/environment_test.dart
 test/error_test.dart
@@ -940,6 +952,9 @@ test/queue_status_server_queue_inner_test.dart
 test/queue_status_test.dart
 test/queue_status_waiting_test.dart
 test/quiz_question_test.dart
+test/reapply_commit_format200_response_changes_inner_test.dart
+test/reapply_commit_format200_response_test.dart
+test/reapply_commit_format_request_test.dart
 test/red_flag_test.dart
 test/register_request_test.dart
 test/reject_ticket_request_test.dart

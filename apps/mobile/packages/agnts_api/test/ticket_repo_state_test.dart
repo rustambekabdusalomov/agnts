@@ -83,6 +83,12 @@ void main() {
       // TODO
     });
 
+    // The commits agnts made on its branch whose messages can still change (editCommitMessage), newest first (ticket detail only)
+    // List<BranchCommit> commits
+    test('to test the property `commits`', () async {
+      // TODO
+    });
+
     // Files its change touches
     // int files
     test('to test the property `files`', () async {

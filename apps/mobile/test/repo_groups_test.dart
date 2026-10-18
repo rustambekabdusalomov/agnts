@@ -29,6 +29,8 @@ final _group = RepoGroup(
   description: '',
   instructions: '',
   taskPrefix: 'SHOP',
+  branchTemplate: '{number}',
+  commitTemplate: '',
   members: [_m(1, 'api'), _m(2, 'web'), _m(3, 'old', archived: true), _m(4, 'admin')],
   warnings: const [],
   createdAt: DateTime(2026),

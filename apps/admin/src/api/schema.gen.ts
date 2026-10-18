@@ -314,6 +314,55 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tickets/{key}/commit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Change the message of one of agnts's commits before it pushes them
+         * @description One of the repository's commits (its commits, ticket detail only), under the rules of renameTicketBranch: a branch
+         *     never pushed, while the ticket waits for review or stopped on an error. The commits after it are made again on
+         *     top, so the repository's headSha changes; the same message changes nothing.
+         */
+        put: operations["editCommitMessage"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/commits/reapply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Write agnts's unpushed commit messages again from the commit format in effect
+         * @description For commits made before a format was set. Each repository's commits (its commits) get the format of the
+         *     ticket's group, else of the repository, filled with the type, scope and subject the coding run that made the
+         *     commit gave (the ticket's kind and title when it gave none). Repositories without a format are left as they
+         *     are. Same rules as editCommitMessage. With dryRun nothing changes: changes lists what would.
+         */
+        post: operations["reapplyCommitFormat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tickets/{key}/branch": {
         parameters: {
             query?: never;
@@ -5262,10 +5311,17 @@ export interface components {
             pushError?: string;
             /** @description Its branch was never pushed and can still be renamed (ticket detail only) */
             canRenameBranch?: boolean;
+            /** @description The commits agnts made on its branch whose messages can still change (editCommitMessage), newest first (ticket detail only) */
+            commits?: components["schemas"]["BranchCommit"][];
             /** @description Files its change touches */
             files: number;
             /** @description The repository is archived */
             archived?: boolean;
+        };
+        BranchCommit: {
+            sha: string;
+            /** @description The whole message: the subject line, then the body after a blank line */
+            message: string;
         };
         RepoGroupRef: {
             /** Format: int64 */
@@ -5289,6 +5345,10 @@ export interface components {
             instructions: string;
             /** @description Key prefix of tasks made from the group; empty uses the first repository's */
             taskPrefix: string;
+            /** @description Names the branches of the group's tickets in every member, replacing each repository's own; empty keeps theirs */
+            branchTemplate: string;
+            /** @description Writes the commit messages of the group's tickets in every member, replacing each repository's own; empty keeps theirs */
+            commitTemplate: string;
             members: components["schemas"]["RepoGroupMember"][];
             /** @description What the repositories share uneasily in one run container (a build variable both set) */
             warnings: string[];
@@ -5302,6 +5362,10 @@ export interface components {
             description?: string;
             instructions?: string;
             taskPrefix?: string;
+            /** @description Branch name template (as a repository's); must contain {key} or {number}. Empty keeps each repository's own */
+            branchTemplate?: string;
+            /** @description Commit message template (as a repository's); must contain {subject} or {title}. Empty keeps each repository's own */
+            commitTemplate?: string;
             /** @description In order; the first is the primary repository of the group's tickets */
             members: {
                 /** Format: int64 */
@@ -7903,6 +7967,85 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
+        };
+    };
+    editCommitMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The commit, as its commits list it */
+                    sha: string;
+                    /** @description The whole message: the subject line, then a blank line and the body */
+                    message: string;
+                    /**
+                     * Format: int64
+                     * @description Which repository of the ticket; absent is the primary
+                     */
+                    repoId?: number;
+                };
+            };
+        };
+        responses: {
+            200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    reapplyCommitFormat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @description Sets the ticket's number ({number}) first, like AMANAT-2677 */
+                    number?: string;
+                    /** @description Only list the changes */
+                    dryRun?: boolean;
+                    /** @description Make only these of the preview's changes (commit shas); absent makes them all */
+                    only?: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description The changes (made, or that would be), and the ticket */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        changes: {
+                            /** Format: int64 */
+                            repoId: number;
+                            repoName: string;
+                            sha: string;
+                            from: string;
+                            to: string;
+                            /** @description Worth making unasked: the run that made the commit described it, or the commit has agnts's own message. Off, it may undo a message a person wrote */
+                            suggested: boolean;
+                        }[];
+                        ticket: components["schemas"]["Ticket"];
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
         };
     };
     renameTicketBranch: {

@@ -264,6 +264,7 @@ Class | Method | HTTP request | Description
 [*TicketsApi*](doc/TicketsApi.md) | [**continueTicket**](doc/TicketsApi.md#continueticket) | **POST** /tickets/{key}/continue | Pick a rejected ticket up again where it stopped
 [*TicketsApi*](doc/TicketsApi.md) | [**dismissFollowUp**](doc/TicketsApi.md#dismissfollowup) | **POST** /tickets/{key}/follow-ups/{id}/dismiss | Decline a suggestion; later runs will not suggest it again
 [*TicketsApi*](doc/TicketsApi.md) | [**dismissRelation**](doc/TicketsApi.md#dismissrelation) | **POST** /tickets/{key}/relations/{id}/dismiss | Dismiss a relation (run anyway); agnts does not propose it again
+[*TicketsApi*](doc/TicketsApi.md) | [**editCommitMessage**](doc/TicketsApi.md#editcommitmessage) | **PUT** /tickets/{key}/commit | Change the message of one of agnts&#39;s commits before it pushes them
 [*TicketsApi*](doc/TicketsApi.md) | [**followUpFromFinding**](doc/TicketsApi.md#followupfromfinding) | **POST** /tickets/{key}/review/findings/{index}/follow-up | Turn a code review finding into a follow-up suggestion
 [*TicketsApi*](doc/TicketsApi.md) | [**getPreviewShot**](doc/TicketsApi.md#getpreviewshot) | **GET** /tickets/{key}/preview/{runId}/shots/{shotId} | One preview screenshot, as PNG
 [*TicketsApi*](doc/TicketsApi.md) | [**getTicket**](doc/TicketsApi.md#getticket) | **GET** /tickets/{key} | A ticket with its questions, analysis and latest result
@@ -275,6 +276,7 @@ Class | Method | HTTP request | Description
 [*TicketsApi*](doc/TicketsApi.md) | [**listTickets**](doc/TicketsApi.md#listtickets) | **GET** /tickets | Tickets, most recently active first
 [*TicketsApi*](doc/TicketsApi.md) | [**markTicketMerged**](doc/TicketsApi.md#markticketmerged) | **POST** /tickets/{key}/merged | Record that a done ticket&#39;s pull request was merged
 [*TicketsApi*](doc/TicketsApi.md) | [**previewTicket**](doc/TicketsApi.md#previewticket) | **POST** /tickets/{key}/preview | Queue a preview (screenshots of the running app) of a ticket waiting for review, again if one already ran
+[*TicketsApi*](doc/TicketsApi.md) | [**reapplyCommitFormat**](doc/TicketsApi.md#reapplycommitformat) | **POST** /tickets/{key}/commits/reapply | Write agnts&#39;s unpushed commit messages again from the commit format in effect
 [*TicketsApi*](doc/TicketsApi.md) | [**rejectTicket**](doc/TicketsApi.md#rejectticket) | **POST** /tickets/{key}/reject | Stop work on the ticket for good
 [*TicketsApi*](doc/TicketsApi.md) | [**renameTicketBranch**](doc/TicketsApi.md#renameticketbranch) | **PUT** /tickets/{key}/branch | Rename the ticket&#39;s branch before agnts pushes it
 [*TicketsApi*](doc/TicketsApi.md) | [**replayTicket**](doc/TicketsApi.md#replayticket) | **POST** /tickets/{key}/replay | Re-run a done code or test ticket with today&#39;s agnts, from the commit it started from, to compare the two (Analytics → Replay evaluation). The replay is a new local task that is never pushed.
@@ -366,6 +368,7 @@ Class | Method | HTTP request | Description
  - [BillingPrices](doc/BillingPrices.md)
  - [Blocker](doc/Blocker.md)
  - [Branch](doc/Branch.md)
+ - [BranchCommit](doc/BranchCommit.md)
  - [CI](doc/CI.md)
  - [CIDay](doc/CIDay.md)
  - [CIFailure](doc/CIFailure.md)
@@ -409,6 +412,7 @@ Class | Method | HTTP request | Description
  - [DeviceRegistration](doc/DeviceRegistration.md)
  - [DisableTotpRequest](doc/DisableTotpRequest.md)
  - [EditCheck](doc/EditCheck.md)
+ - [EditCommitMessageRequest](doc/EditCommitMessageRequest.md)
  - [EditPullCommentRequest](doc/EditPullCommentRequest.md)
  - [Environment](doc/Environment.md)
  - [Error](doc/Error.md)
@@ -504,6 +508,9 @@ Class | Method | HTTP request | Description
  - [QueueStatusServerQueueInner](doc/QueueStatusServerQueueInner.md)
  - [QueueStatusWaiting](doc/QueueStatusWaiting.md)
  - [QuizQuestion](doc/QuizQuestion.md)
+ - [ReapplyCommitFormat200Response](doc/ReapplyCommitFormat200Response.md)
+ - [ReapplyCommitFormat200ResponseChangesInner](doc/ReapplyCommitFormat200ResponseChangesInner.md)
+ - [ReapplyCommitFormatRequest](doc/ReapplyCommitFormatRequest.md)
  - [RedFlag](doc/RedFlag.md)
  - [RegisterRequest](doc/RegisterRequest.md)
  - [RejectTicketRequest](doc/RejectTicketRequest.md)

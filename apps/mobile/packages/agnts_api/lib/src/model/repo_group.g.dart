@@ -17,6 +17,10 @@ abstract class _$RepoGroupCWProxy {
 
   RepoGroup taskPrefix(String taskPrefix);
 
+  RepoGroup branchTemplate(String branchTemplate);
+
+  RepoGroup commitTemplate(String commitTemplate);
+
   RepoGroup members(List<RepoGroupMember> members);
 
   RepoGroup warnings(List<String> warnings);
@@ -37,6 +41,8 @@ abstract class _$RepoGroupCWProxy {
     String description,
     String instructions,
     String taskPrefix,
+    String branchTemplate,
+    String commitTemplate,
     List<RepoGroupMember> members,
     List<String> warnings,
     DateTime createdAt,
@@ -67,6 +73,14 @@ class _$RepoGroupCWProxyImpl implements _$RepoGroupCWProxy {
   RepoGroup taskPrefix(String taskPrefix) => this(taskPrefix: taskPrefix);
 
   @override
+  RepoGroup branchTemplate(String branchTemplate) =>
+      this(branchTemplate: branchTemplate);
+
+  @override
+  RepoGroup commitTemplate(String commitTemplate) =>
+      this(commitTemplate: commitTemplate);
+
+  @override
   RepoGroup members(List<RepoGroupMember> members) => this(members: members);
 
   @override
@@ -91,6 +105,8 @@ class _$RepoGroupCWProxyImpl implements _$RepoGroupCWProxy {
     Object? description = const $CopyWithPlaceholder(),
     Object? instructions = const $CopyWithPlaceholder(),
     Object? taskPrefix = const $CopyWithPlaceholder(),
+    Object? branchTemplate = const $CopyWithPlaceholder(),
+    Object? commitTemplate = const $CopyWithPlaceholder(),
     Object? members = const $CopyWithPlaceholder(),
     Object? warnings = const $CopyWithPlaceholder(),
     Object? createdAt = const $CopyWithPlaceholder(),
@@ -117,6 +133,14 @@ class _$RepoGroupCWProxyImpl implements _$RepoGroupCWProxy {
           ? _value.taskPrefix
           // ignore: cast_nullable_to_non_nullable
           : taskPrefix as String,
+      branchTemplate: branchTemplate == const $CopyWithPlaceholder()
+          ? _value.branchTemplate
+          // ignore: cast_nullable_to_non_nullable
+          : branchTemplate as String,
+      commitTemplate: commitTemplate == const $CopyWithPlaceholder()
+          ? _value.commitTemplate
+          // ignore: cast_nullable_to_non_nullable
+          : commitTemplate as String,
       members: members == const $CopyWithPlaceholder()
           ? _value.members
           // ignore: cast_nullable_to_non_nullable
@@ -158,6 +182,8 @@ RepoGroup _$RepoGroupFromJson(
       'description',
       'instructions',
       'taskPrefix',
+      'branchTemplate',
+      'commitTemplate',
       'members',
       'warnings',
       'createdAt',
@@ -170,6 +196,8 @@ RepoGroup _$RepoGroupFromJson(
     description: $checkedConvert('description', (v) => v as String),
     instructions: $checkedConvert('instructions', (v) => v as String),
     taskPrefix: $checkedConvert('taskPrefix', (v) => v as String),
+    branchTemplate: $checkedConvert('branchTemplate', (v) => v as String),
+    commitTemplate: $checkedConvert('commitTemplate', (v) => v as String),
     members: $checkedConvert(
       'members',
       (v) => (v as List<dynamic>)
@@ -192,6 +220,8 @@ Map<String, dynamic> _$RepoGroupToJson(RepoGroup instance) => <String, dynamic>{
   'description': instance.description,
   'instructions': instance.instructions,
   'taskPrefix': instance.taskPrefix,
+  'branchTemplate': instance.branchTemplate,
+  'commitTemplate': instance.commitTemplate,
   'members': instance.members.map((e) => e.toJson()).toList(),
   'warnings': instance.warnings,
   'createdAt': instance.createdAt.toIso8601String(),

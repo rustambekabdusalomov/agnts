@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"agnts/internal/domain"
+	"agnts/internal/toolchain"
 )
 
 // ErrInvalid wraps input errors the caller should show to the user.
@@ -457,6 +458,9 @@ func (o *Orchestrator) RenameBranch(ctx context.Context, key string, repoID int6
 	switch err := br.RenameBranch(ctx, repo, row.Branch, name); {
 	case errors.Is(err, domain.ErrNotFound):
 		return cur, invalid("the branch %s is gone from agnts's copy of the repository", row.Branch)
+	case errors.Is(err, context.DeadlineExceeded):
+		return cur, invalid("agnts could not reach %s to check that %s is free: the git host did not answer. If it is on a private network, check under Settings → Private networks that the network is connected, then try again",
+			toolchain.HostOf(repo.CloneURL), name)
 	case err != nil:
 		return cur, err
 	}
@@ -478,10 +482,105 @@ func (o *Orchestrator) RenameBranch(ctx context.Context, key string, repoID int6
 	return t, nil
 }
 
+// EditCommitMessage changes the message of one of the commits agnts made
+// on the ticket's branch in a repository (0: the primary), before the
+// branch is pushed: when it is, the git host has it as it is. The rules are
+// RenameBranch's. The commits after it are made again on top, so the
+// branch's head moves.
+func (o *Orchestrator) EditCommitMessage(ctx context.Context, key string, repoID int64, sha, message string, origin domain.Origin) (domain.Ticket, error) {
+	message, err := domain.CleanCommitMessage(message)
+	if err != nil {
+		return domain.Ticket{}, invalid("%s", err)
+	}
+	cr, ok := o.git.(CommitRewriter)
+	if !ok {
+		return domain.Ticket{}, invalid("this server cannot change commit messages")
+	}
+	cur, err := o.store.TicketByKey(ctx, key)
+	if err != nil {
+		return cur, err
+	}
+	if repoID == 0 && cur.RepoID != nil {
+		repoID = *cur.RepoID
+	}
+	row, ok := cur.RepoState(repoID)
+	if !ok {
+		return cur, invalid("%s does not work in that repository", key)
+	}
+	if err := cannotRewrite(cur, row, "change its commit messages"); err != nil {
+		return cur, err
+	}
+	repo, err := o.store.RepositoryByID(ctx, repoID)
+	if err != nil {
+		return cur, err
+	}
+	if repo.ArchivedAt != nil {
+		return cur, invalid("the repository %s is archived", repo.Name)
+	}
+	head, err := cr.RewordCommits(ctx, repo, row.Branch, map[string]string{sha: message})
+	switch {
+	case errors.Is(err, domain.ErrNotFound):
+		return cur, invalid("%s is not one of the commits on %s that agnts can still change", shortSHA(sha), row.Branch)
+	case err != nil:
+		return cur, err
+	}
+	if head == row.HeadSHA {
+		return cur, nil // the same message
+	}
+	subject, _, _ := strings.Cut(message, "\n")
+	msg := "commit message changed: " + subject
+	if len(cur.Repos) > 1 {
+		msg = repo.Name + ": " + msg
+	}
+	return o.store.UpdateTicket(ctx, key, &domain.Event{TicketKey: key, Type: domain.EventTicketUpdated, Origin: origin, Message: msg,
+		Data: map[string]any{"repoId": repoID, "sha": sha, "head": head}}, func(x *domain.Ticket) {
+		x.UpdateRepo(repoID, func(r *domain.TicketRepo) { r.HeadSHA = head })
+	})
+}
+
+// editableCommits lists, by repository, the commits whose messages can
+// still change (see EditCommitMessage); a repository whose commits cannot
+// be read is left out.
+func (o *Orchestrator) editableCommits(ctx context.Context, t domain.Ticket) map[int64][]domain.BranchCommit {
+	cr, ok := o.git.(CommitRewriter)
+	if !ok {
+		return nil
+	}
+	var out map[int64][]domain.BranchCommit
+	for _, id := range t.RepoIDs() {
+		r, ok := t.RepoState(id)
+		if !ok || cannotRewrite(t, r, "") != nil {
+			continue
+		}
+		repo, err := o.store.RepositoryByID(ctx, id)
+		if err != nil || repo.ArchivedAt != nil {
+			continue
+		}
+		cs, err := cr.BranchCommits(ctx, repo, r.Branch)
+		if err != nil {
+			o.log.Warn("list branch commits", "ticket", t.Key, "repo", repo.Name, "err", err)
+			continue
+		}
+		if len(cs) > 0 {
+			if out == nil {
+				out = map[int64][]domain.BranchCommit{}
+			}
+			out[id] = cs
+		}
+	}
+	return out
+}
+
 // cannotRename says why the ticket's branch in repository row cannot be
 // renamed, if it cannot: it was pushed (the pull request has its name),
 // there are no commits yet, or the ticket is not between review and push.
+// The same holds for rewording its commits (see EditCommitMessage).
 func cannotRename(t domain.Ticket, r domain.TicketRepo) error {
+	return cannotRewrite(t, r, "rename the branch")
+}
+
+// cannotRewrite is cannotRename for what, the change asked for.
+func cannotRewrite(t domain.Ticket, r domain.TicketRepo, what string) error {
 	switch {
 	case t.Kind == domain.KindReview:
 		return invalid("%s reviews a pull request: its branch belongs to the pull request", t.Key)
@@ -490,9 +589,9 @@ func cannotRename(t domain.Ticket, r domain.TicketRepo) error {
 	case t.AfterApprove == "main" && t.Source == domain.SourceLocal:
 		return invalid("%s is pushed straight to the default branch", t.Key)
 	case t.State != domain.StateWaitingForReview && t.State != domain.StateFailed && t.State != domain.StateRateLimited:
-		return invalid("rename the branch while %s waits for your review", t.Key)
+		return invalid("%s while %s waits for your review", what, t.Key)
 	case r.PRNumber != nil || r.State == domain.RepoPushed || r.State == domain.RepoMerged || r.State == domain.RepoDropped:
-		return invalid("%s was already pushed: the pull request keeps its name", r.Branch)
+		return invalid("%s was already pushed: the git host keeps it as it is", r.Branch)
 	case r.Branch == "" || r.HeadSHA == "" || r.State == domain.RepoUnchanged:
 		return invalid("%s has no commits in this repository yet", t.Key)
 	}
@@ -1391,6 +1490,10 @@ type TicketView struct {
 	// RenameBranch are the repositories whose branch can still be renamed
 	// before it is pushed (see RenameBranch).
 	RenameBranch []int64
+	// Commits are, by repository, the commits on the ticket's branch whose
+	// messages can still change before it is pushed (see EditCommitMessage),
+	// newest first.
+	Commits map[int64][]domain.BranchCommit
 }
 
 // TicketRow is a ticket for lists, with when it entered its state.
@@ -1551,6 +1654,7 @@ func (o *Orchestrator) View(ctx context.Context, key string) (TicketView, error)
 			}
 		}
 	}
+	v.Commits = o.editableCommits(ctx, t)
 	if v.FollowUps, err = o.followUps(ctx, t); err != nil {
 		return v, err
 	}

@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:agnts_api/src/model/branch_commit.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -47,6 +48,8 @@ class TicketRepoState {
      this.pushError,
 
      this.canRenameBranch,
+
+     this.commits,
 
     required  this.files,
 
@@ -227,6 +230,19 @@ class TicketRepoState {
 
 
 
+      /// The commits agnts made on its branch whose messages can still change (editCommitMessage), newest first (ticket detail only)
+  @JsonKey(
+    
+    name: r'commits',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<BranchCommit>? commits;
+
+
+
       /// Files its change touches
   @JsonKey(
     
@@ -271,6 +287,7 @@ class TicketRepoState {
       other.closedAt == closedAt &&
       other.pushError == pushError &&
       other.canRenameBranch == canRenameBranch &&
+      other.commits == commits &&
       other.files == files &&
       other.archived == archived;
 
@@ -290,6 +307,7 @@ class TicketRepoState {
         closedAt.hashCode +
         pushError.hashCode +
         canRenameBranch.hashCode +
+        commits.hashCode +
         files.hashCode +
         archived.hashCode;
 

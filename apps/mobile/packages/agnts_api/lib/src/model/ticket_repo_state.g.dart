@@ -35,6 +35,8 @@ abstract class _$TicketRepoStateCWProxy {
 
   TicketRepoState canRenameBranch(bool? canRenameBranch);
 
+  TicketRepoState commits(List<BranchCommit>? commits);
+
   TicketRepoState files(int files);
 
   TicketRepoState archived(bool? archived);
@@ -60,6 +62,7 @@ abstract class _$TicketRepoStateCWProxy {
     DateTime? closedAt,
     String? pushError,
     bool? canRenameBranch,
+    List<BranchCommit>? commits,
     int files,
     bool? archived,
   });
@@ -115,6 +118,10 @@ class _$TicketRepoStateCWProxyImpl implements _$TicketRepoStateCWProxy {
       this(canRenameBranch: canRenameBranch);
 
   @override
+  TicketRepoState commits(List<BranchCommit>? commits) =>
+      this(commits: commits);
+
+  @override
   TicketRepoState files(int files) => this(files: files);
 
   @override
@@ -142,6 +149,7 @@ class _$TicketRepoStateCWProxyImpl implements _$TicketRepoStateCWProxy {
     Object? closedAt = const $CopyWithPlaceholder(),
     Object? pushError = const $CopyWithPlaceholder(),
     Object? canRenameBranch = const $CopyWithPlaceholder(),
+    Object? commits = const $CopyWithPlaceholder(),
     Object? files = const $CopyWithPlaceholder(),
     Object? archived = const $CopyWithPlaceholder(),
   }) {
@@ -202,6 +210,10 @@ class _$TicketRepoStateCWProxyImpl implements _$TicketRepoStateCWProxy {
           ? _value.canRenameBranch
           // ignore: cast_nullable_to_non_nullable
           : canRenameBranch as bool?,
+      commits: commits == const $CopyWithPlaceholder()
+          ? _value.commits
+          // ignore: cast_nullable_to_non_nullable
+          : commits as List<BranchCommit>?,
       files: files == const $CopyWithPlaceholder()
           ? _value.files
           // ignore: cast_nullable_to_non_nullable
@@ -265,6 +277,12 @@ TicketRepoState _$TicketRepoStateFromJson(Map<String, dynamic> json) =>
         ),
         pushError: $checkedConvert('pushError', (v) => v as String?),
         canRenameBranch: $checkedConvert('canRenameBranch', (v) => v as bool?),
+        commits: $checkedConvert(
+          'commits',
+          (v) => (v as List<dynamic>?)
+              ?.map((e) => BranchCommit.fromJson(e as Map<String, dynamic>))
+              .toList(),
+        ),
         files: $checkedConvert('files', (v) => (v as num).toInt()),
         archived: $checkedConvert('archived', (v) => v as bool?),
       );
@@ -287,6 +305,7 @@ Map<String, dynamic> _$TicketRepoStateToJson(TicketRepoState instance) =>
       'closedAt': ?instance.closedAt?.toIso8601String(),
       'pushError': ?instance.pushError,
       'canRenameBranch': ?instance.canRenameBranch,
+      'commits': ?instance.commits?.map((e) => e.toJson()).toList(),
       'files': instance.files,
       'archived': ?instance.archived,
     };

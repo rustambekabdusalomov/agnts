@@ -1805,6 +1805,18 @@
       }
     }
   },
+  "groupsBranchTemplateHelp": "Names the branches of this group's tickets in every repository, so they all get the same name. It replaces each repository's own format. Must contain {key} or {number}. Leave empty to keep each repository's own.",
+  "@groupsBranchTemplateHelp": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      },
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "groupsCommitTemplateHelp": "Writes the commit messages of this group's tickets in every repository, replacing each repository's own format. Leave empty to keep each repository's own.",
   "groupsInstructions": "Instructions",
   "groupsInstructionsPh": "The web app calls the API through src/api; change both together and keep the OpenAPI spec in sync.",
   "groupsInstructionsHelp": "How the repositories fit together, in Markdown. Added to every prompt of the group's tickets.",
@@ -7040,6 +7052,31 @@
   "ticketKvBranch": "Branch",
   "ticketBranchRename": "Rename",
   "ticketBranchRenameHint": "The pull request opens from this name. Letters, digits, - _ . and /; no spaces.",
+  "ticketCommitsTitle": "Commits",
+  "ticketCommitsSub": "agnts pushes these when you approve. Until then you can change their messages.",
+  "ticketCommitEdit": "Edit message",
+  "ticketCommitEditHint": "The subject on the first line, then a blank line and the body. Changing an earlier commit makes the ones after it again with the same changes.",
+  "ticketCommitsReapply": "Re-apply format",
+  "ticketCommitsReapplyHelp": "Writes these messages again from the commit message format (the group's, else each repository's), with the type, scope and subject of the run that made each commit. Check the preview, then apply.",
+  "ticketCommitsNumber": "Ticket number for {number}",
+  "@ticketCommitsNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketCommitsPreview": "Preview",
+  "ticketCommitsApply": "{n, plural, one {Apply {n} change} other {Apply {n} changes}}",
+  "@ticketCommitsApply": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "ticketCommitsUpToDate": "The messages already match the format.",
+  "ticketCommitsNotSuggested": "Not ticked: this message may have been written by hand, and applying would replace it.",
   "ticketKvRevision": "Revision",
   "ticketKvTurns": "Turns used",
   "ticketKvCodingModel": "Coding model",

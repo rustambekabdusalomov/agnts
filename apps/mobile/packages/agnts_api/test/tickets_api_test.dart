@@ -87,6 +87,15 @@ void main() {
       // TODO
     });
 
+    // Change the message of one of agnts's commits before it pushes them
+    //
+    // One of the repository's commits (its commits, ticket detail only), under the rules of renameTicketBranch: a branch never pushed, while the ticket waits for review or stopped on an error. The commits after it are made again on top, so the repository's headSha changes; the same message changes nothing. 
+    //
+    //Future<Ticket> editCommitMessage(String key, EditCommitMessageRequest editCommitMessageRequest) async
+    test('test editCommitMessage', () async {
+      // TODO
+    });
+
     // Turn a code review finding into a follow-up suggestion
     //
     // No Claude run is involved.
@@ -167,6 +176,15 @@ void main() {
     //
     //Future<Ticket> previewTicket(String key, { PreviewInput previewInput }) async
     test('test previewTicket', () async {
+      // TODO
+    });
+
+    // Write agnts's unpushed commit messages again from the commit format in effect
+    //
+    // For commits made before a format was set. Each repository's commits (its commits) get the format of the ticket's group, else of the repository, filled with the type, scope and subject the coding run that made the commit gave (the ticket's kind and title when it gave none). Repositories without a format are left as they are. Same rules as editCommitMessage. With dryRun nothing changes: changes lists what would. 
+    //
+    //Future<ReapplyCommitFormat200Response> reapplyCommitFormat(String key, { ReapplyCommitFormatRequest reapplyCommitFormatRequest }) async
+    test('test reapplyCommitFormat', () async {
       // TODO
     });
 

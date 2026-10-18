@@ -22,6 +22,7 @@ Name | Type | Description | Notes
 **closedAt** | [**DateTime**](DateTime.md) |  | [optional] 
 **pushError** | **String** | Why its last push failed; a retry pushes it again | [optional] 
 **canRenameBranch** | **bool** | Its branch was never pushed and can still be renamed (ticket detail only) | [optional] 
+**commits** | [**List&lt;BranchCommit&gt;**](BranchCommit.md) | The commits agnts made on its branch whose messages can still change (editCommitMessage), newest first (ticket detail only) | [optional] 
 **files** | **int** | Files its change touches | 
 **archived** | **bool** | The repository is archived | [optional] 
 

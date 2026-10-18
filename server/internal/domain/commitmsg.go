@@ -1,9 +1,11 @@
 package domain
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 	"strings"
+	"time"
 	"unicode"
 )
 
@@ -124,4 +126,42 @@ func oneLine(s string, max int) string {
 		s = strings.TrimRight(cut, " ,;:")
 	}
 	return s
+}
+
+// BranchCommit is one of the commits agnts made on a ticket's branch and
+// has not pushed yet, whose message can still be changed.
+type BranchCommit struct {
+	SHA     string
+	Message string
+	When    time.Time // when it was made (its author time)
+}
+
+// RunCommit is what a coding run of a ticket said its commit is (the
+// summary's commit, empty when it gave none) and when its result was
+// saved: agnts commits just before it saves the result.
+type RunCommit struct {
+	At   time.Time
+	Info CommitInfo
+}
+
+// MaxCommitMessage caps a commit message a person writes.
+const MaxCommitMessage = 10000
+
+// CleanCommitMessage is a person's commit message as it is stored: line
+// endings made \n, trailing spaces of each line and blank lines at either
+// end dropped. An empty result, or one over MaxCommitMessage bytes, is an
+// error.
+func CleanCommitMessage(msg string) (string, error) {
+	lines := strings.Split(strings.ReplaceAll(msg, "\r\n", "\n"), "\n")
+	for i, l := range lines {
+		lines[i] = strings.TrimRight(l, " \t\r")
+	}
+	out := strings.Trim(strings.Join(lines, "\n"), "\n")
+	switch {
+	case strings.TrimSpace(out) == "":
+		return "", errors.New("the commit message is empty")
+	case len(out) > MaxCommitMessage:
+		return "", fmt.Errorf("the commit message is longer than %d characters", MaxCommitMessage)
+	}
+	return out, nil
 }

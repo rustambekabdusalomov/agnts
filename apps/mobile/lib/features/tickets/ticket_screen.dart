@@ -1,6 +1,4 @@
-import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,14 +11,16 @@ import '../ci/ci_card.dart';
 import '../learn/ticket_lessons.dart';
 import 'api_results.dart';
 import 'code_review.dart';
-import 'diff_highlight.dart';
-import 'diff_lines.dart';
+import 'file_diff.dart';
 import 'follow_ups.dart';
 import 'harness.dart';
 import 'kinds.dart';
 import 'preview_shots.dart';
 import 'pull_comments.dart';
+import 'commit_messages.dart';
+import 'commit_reapply.dart';
 import 'relations.dart';
+import 'repo_diffs.dart';
 import 'spend.dart';
 import 'ticket_controls.dart';
 import 'ticket_repos.dart';
@@ -66,6 +66,9 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
   bool _descOpen = false;
   // Reports reach the tracker issue only when the reviewer ticks this.
   bool _postReport = false;
+  // Whether coding runs skip the checks, as ticked on the retry or the
+  // request-changes form; null: the ticket's own setting, left as it is.
+  bool? _skipChecks;
   // Assignees of the pull request agnts opens on approval, for the
   // ticket and state they were picked in.
   final Set<String> _assignees = {};
@@ -170,13 +173,17 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     final note = _retryNote.text.trim();
     final ids = _retryFiles.ids;
     final extra = _takesRetryNote(t) && (note.isNotEmpty || ids.isNotEmpty);
+    final skip = _takesRetryNote(t) ? _skipChecks : null;
     final ok = await _run(() => _tickets.retryTicket(
           key: t.key,
-          retryTicketRequest: extra ? RetryTicketRequest(note: note.isEmpty ? null : note, attachments: ids.isEmpty ? null : ids) : null,
+          retryTicketRequest: extra || skip != null
+              ? RetryTicketRequest(note: extra && note.isNotEmpty ? note : null, attachments: extra && ids.isNotEmpty ? ids : null, skipChecks: skip)
+              : null,
         ));
     if (!ok) return;
     _retryNote.clear();
     _retryFiles.clear();
+    _skipChecks = null;
   }
 
   /// Picks a rejected ticket up again, with the note and files when its
@@ -229,6 +236,70 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     await _run(() => _tickets.renameTicketBranch(
           key: key,
           renameTicketBranchRequest: RenameTicketBranchRequest(branch: name, repoId: r.repoId),
+        ));
+  }
+
+  /// Re-applies the commit format to the unpushed commits: a preview with
+  /// checkboxes first (see CommitReapplySheet), then the ticked changes.
+  Future<void> _reapplyFormat(Ticket t) async {
+    final done = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (_) => CommitReapplySheet(
+        ticket: t,
+        call: (number, dryRun, only) async {
+          final res = await _tickets.reapplyCommitFormat(
+            key: t.key,
+            reapplyCommitFormatRequest: ReapplyCommitFormatRequest(number: number, dryRun: dryRun, only: only),
+          );
+          return res.data?.changes ?? const [];
+        },
+      ),
+    );
+    if (done == true) {
+      ref.invalidate(ticketProvider(widget.ticketKey));
+      ref.invalidate(dashboardProvider);
+    }
+  }
+
+  /// Changes the message of one of agnts's commits before it pushes them.
+  Future<void> _editCommit(Ticket t, TicketRepoState r, BranchCommit commit) async {
+    final l = AppLocalizations.of(context);
+    final text = TextEditingController(text: commit.message);
+    final message = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.fromLTRB(16, 0, 16, 16 + MediaQuery.of(ctx).viewInsets.bottom),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Text(l.ticketCommitEdit, style: Theme.of(ctx).textTheme.titleLarge),
+          const SizedBox(height: 10),
+          TextField(
+            controller: text,
+            autofocus: true,
+            minLines: 4,
+            maxLines: 10,
+            inputFormatters: [LengthLimitingTextInputFormatter(10000)],
+            autocorrect: false,
+            enableSuggestions: false,
+            keyboardType: TextInputType.multiline,
+            style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 13.5, height: 1.4),
+            decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 11)),
+          ),
+          const SizedBox(height: 6),
+          Text(l.ticketCommitEditHint, style: TextStyle(fontSize: 12.5, color: Agnts.of(ctx).ink3)),
+          const SizedBox(height: 10),
+          FilledButton(onPressed: () => Navigator.pop(ctx, text.text), child: Text(l.formSave)),
+        ]),
+      ),
+    );
+    text.dispose();
+    if (message == null || message.trim().isEmpty || message.trim() == commit.message.trim()) return;
+    await _run(() => _tickets.editCommitMessage(
+          key: t.key,
+          editCommitMessageRequest: EditCommitMessageRequest(sha: commit.sha, message: message, repoId: isMultiRepo(t) ? r.repoId : null),
         ));
   }
 
@@ -585,6 +656,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
             ),
             const SizedBox(height: 10),
             AttachmentPicker(controller: _retryFiles, enabled: !_busy),
+            _skipChecksBox(t, onChanged: (v) => setState(() => _skipChecks = v)),
           ],
         ]);
       case TicketState.rateLimited:
@@ -721,12 +793,26 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
       _Sub(sub),
       const SizedBox(height: 8),
       Grid2(gap: 8, children: [
-        Fact(l.ticketFactTests, r.checks.isEmpty ? l.ticketNoChecks : l.ticketChecksPassed(passed),
-            tone: r.checks.isEmpty ? null : (allOk ? Tone.ok : Tone.bad)),
+        if (t.skipChecks && r.checks.isEmpty)
+          Fact(l.ticketFactTests, l.ticketChecksSkipped)
+        else
+          Fact(l.ticketFactTests, r.checks.isEmpty ? l.ticketNoChecks : l.ticketChecksPassed(passed),
+              tone: r.checks.isEmpty ? null : (allOk ? Tone.ok : Tone.bad)),
         Fact(l.ticketFactChanged, _changed(l, r)),
         if (time != null) Fact(l.mdetailFactTime, shortDuration(time)),
         Fact(l.ticketFactTurns, '${t.turns}'),
       ]),
+      if (hasEditableCommits(t)) ...[
+        _H3(l.ticketCommitsTitle),
+        _Sub(l.ticketCommitsSub),
+        if (ref.watch(canEditProvider))
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(onPressed: _busy ? null : () => _reapplyFormat(t), child: Text(l.ticketCommitsReapply)),
+          ),
+        const SizedBox(height: 8),
+        CommitMessages(t, onEdit: ref.watch(canEditProvider) && !_busy ? (r, c) => _editCommit(t, r, c) : null),
+      ],
       _codeReview(d),
       ...checks,
       _preview(d),
@@ -774,7 +860,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
       ],
       if (r.files.isNotEmpty) ...[
         _H3(l.ticketDiff),
-        for (final (i, f) in r.files.indexed) _FileDiff(file: f, initiallyOpen: i == 0),
+        RepoDiffs(files: r.files, openFirst: true, file: (f, open) => FileDiff(file: f, initiallyOpen: open)),
       ],
     ];
   }
@@ -1120,7 +1206,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           ),
           Expanded(
             child: OutlinedButton(
-              onPressed: _busy ? null : () => _requestChanges(context, key),
+              onPressed: _busy ? null : () => _requestChanges(context, t),
               child: Text(l.ticketRequestChanges, maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
           ),
@@ -1231,8 +1317,28 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     }
   }
 
-  Future<void> _requestChanges(BuildContext context, String key) async {
+  /// The "skip checks" tick of the retry and request-changes forms, with
+  /// what it means; it starts at the ticket's own setting.
+  Widget _skipChecksBox(Ticket t, {required ValueChanged<bool> onChanged}) {
     final l = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: CheckboxListTile(
+        value: _skipChecks ?? t.skipChecks,
+        onChanged: _busy ? null : (v) => onChanged(v ?? false),
+        title: Text(l.ticketSkipChecks, style: const TextStyle(fontSize: 15)),
+        subtitle: Text(l.ticketSkipChecksHint, style: TextStyle(fontSize: 13, color: Agnts.of(context).ink3)),
+        controlAffinity: ListTileControlAffinity.leading,
+        contentPadding: EdgeInsets.zero,
+      ),
+    );
+  }
+
+  Future<void> _requestChanges(BuildContext context, Ticket t) async {
+    final l = AppLocalizations.of(context);
+    // Only a code change has checks to skip (not a report, not a review
+    // of someone's pull request).
+    final checks = !isReportKind(t.kind) && !isPullReview(t);
     final text = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
@@ -1254,6 +1360,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           FeedbackShotChips(shots: _feedbackShots),
           const SizedBox(height: 12),
           AttachmentPicker(controller: _feedbackFiles),
+          if (checks) StatefulBuilder(builder: (c, set) => _skipChecksBox(t, onChanged: (v) => set(() => _skipChecks = v))),
           const SizedBox(height: 12),
           ListenableBuilder(
             listenable: _feedbackFiles,
@@ -1276,9 +1383,11 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     final shots = [for (final s in _feedbackShots.value) s.ref];
     final ids = _feedbackFiles.ids;
     final ok = await _run(() => _tickets.requestChanges(
-        key: key,
-        requestChangesRequest: RequestChangesRequest(feedback: text, shots: shots.isEmpty ? null : shots, attachments: ids.isEmpty ? null : ids)));
+        key: t.key,
+        requestChangesRequest: RequestChangesRequest(
+            feedback: text, shots: shots.isEmpty ? null : shots, attachments: ids.isEmpty ? null : ids, skipChecks: checks ? _skipChecks : null)));
     if (!ok) return;
+    _skipChecks = null;
     _feedback.clear();
     _feedbackShots.value = const [];
     _feedbackFiles.clear();
@@ -1548,171 +1657,5 @@ class _Mark extends StatelessWidget {
       child: inner,
     );
     return gate ? Transform.rotate(angle: 0.785398, child: box) : box;
-  }
-}
-
-// ---- One changed file with its diff (.file, .diff) ----
-
-const _codeAdd = Color(0x382EA067); // rgba(46,160,103,.22)
-const _codeDel = Color(0x3DD64034); // rgba(214,64,52,.24)
-const _codeHunk = Color(0x2E7D96EB); // rgba(125,150,235,.18)
-const _hunkInk = Color(0xFFB9C6F5);
-
-class _FileDiff extends StatefulWidget {
-  const _FileDiff({required this.file, this.initiallyOpen = false});
-  final FileChange file;
-  final bool initiallyOpen;
-
-  @override
-  State<_FileDiff> createState() => _FileDiffState();
-}
-
-class _FileDiffState extends State<_FileDiff> {
-  late bool _open = widget.initiallyOpen;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = Agnts.of(context);
-    final f = widget.file;
-    return Container(
-      margin: const EdgeInsets.only(top: 8),
-      decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line), borderRadius: BorderRadius.circular(14)),
-      clipBehavior: Clip.antiAlias,
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        InkWell(
-          onTap: () => setState(() => _open = !_open),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Expanded(
-                child: Text(filePath(f), maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink)),
-              ),
-              const SizedBox(width: 10),
-              Text('+${f.add}', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: c.okInk)),
-              const SizedBox(width: 5),
-              Text('−${f.del}', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: c.badInk)),
-            ]),
-          ),
-        ),
-        if (_open) _Diff(f.diff, path: f.path),
-      ]),
-    );
-  }
-}
-
-class _Diff extends StatefulWidget {
-  const _Diff(this.diff, {required this.path});
-  final String diff;
-  final String path;
-
-  @override
-  State<_Diff> createState() => _DiffState();
-}
-
-class _DiffState extends State<_Diff> {
-  late List<DiffLine> _lines;
-  // Highlighted spans per line (null: show as plain text). Until they are
-  // ready, or for files with no known language, the diff shows as plain text.
-  List<List<CodeSpan>?>? _spans;
-
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  @override
-  void didUpdateWidget(_Diff old) {
-    super.didUpdateWidget(old);
-    if (old.diff != widget.diff || old.path != widget.path) _load();
-  }
-
-  Future<void> _load() async {
-    final lines = _lines = numberDiff(widget.diff).take(400).toList();
-    _spans = null;
-    if (languageFor(widget.path) == null) return;
-    try {
-      final spans = await compute(highlightDiff, (lines: lines, path: widget.path));
-      if (mounted && identical(lines, _lines)) setState(() => _spans = spans);
-    } catch (_) {
-      // highlighting is a nicety; plain text still works
-    }
-  }
-
-  static Color? _bg(DiffKind k) => switch (k) {
-        DiffKind.add => _codeAdd,
-        DiffKind.del => _codeDel,
-        DiffKind.hunk => _codeHunk,
-        DiffKind.plain => null,
-      };
-
-  @override
-  Widget build(BuildContext context) {
-    final c = Agnts.of(context);
-    const style = TextStyle(fontFamily: AgntsFonts.mono, fontSize: 11.5, height: 1.6);
-    final lines = _lines;
-    // Gutter wide enough for the largest line number in the file.
-    final digits = lines.fold(2, (w, l) => math.max(w, '${l.old ?? l.neu ?? ''}'.length));
-    final numStyle = style.copyWith(color: c.codeDim);
-    final tp = TextPainter(
-      text: TextSpan(text: '0' * digits, style: numStyle),
-      textDirection: TextDirection.ltr,
-      textScaler: MediaQuery.textScalerOf(context),
-    )..layout();
-    final numWidth = tp.width;
-    tp.dispose();
-    Widget num(int? n) => SizedBox(
-          width: numWidth.ceilToDouble() + 1,
-          child: Text(n?.toString() ?? '', textAlign: TextAlign.right, softWrap: false, style: numStyle),
-        );
-    // Old and new numbers stay put while long lines scroll sideways, as in
-    // the admin panel's DiffView.vue. Every row is one line of the same
-    // style, so the gutter and code rows line up.
-    return Container(
-      color: c.code,
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Container(
-          decoration: BoxDecoration(border: Border(right: BorderSide(color: const Color(0xFF7F7F7F).withValues(alpha: 0.25)))),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, mainAxisSize: MainAxisSize.min, children: [
-            for (final l in lines)
-              Container(
-                color: _bg(l.kind),
-                padding: const EdgeInsets.only(left: 4, right: 8),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [num(l.old), const SizedBox(width: 6), num(l.neu)]),
-              ),
-          ]),
-        ),
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, box) => SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minWidth: box.maxWidth),
-                child: IntrinsicWidth(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                    for (final (i, l) in lines.indexed)
-                      Container(
-                        padding: const EdgeInsets.only(left: 10, right: 14),
-                        color: _bg(l.kind),
-                        child: switch (_spans?[i]) {
-                          final spans? => Text.rich(
-                              TextSpan(text: l.text[0], children: [
-                                for (final sp in spans) TextSpan(text: sp.text, style: styleFor(sp.scope)),
-                              ]),
-                              softWrap: false,
-                              style: style.copyWith(color: c.codeInk),
-                            ),
-                          null => Text(l.text, softWrap: false, style: style.copyWith(color: l.kind == DiffKind.hunk ? _hunkInk : c.codeInk)),
-                        },
-                      ),
-                  ]),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ]),
-    );
   }
 }

@@ -185,6 +185,8 @@ type fakeGit struct {
 	branchesGone bool
 	// renamed records RenameBranch calls as from->to.
 	renamed []string
+	// reworded is the message RewordCommit gave the branch's commit.
+	reworded string
 }
 
 func (g *fakeGit) Prepare(context.Context, domain.Repository, string) error { return nil }

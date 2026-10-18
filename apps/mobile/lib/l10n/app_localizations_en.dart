@@ -2911,6 +2911,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String groupsBranchTemplateHelp(String key, String number) {
+    return 'Names the branches of this group\'s tickets in every repository, so they all get the same name. It replaces each repository\'s own format. Must contain $key or $number. Leave empty to keep each repository\'s own.';
+  }
+
+  @override
+  String get groupsCommitTemplateHelp =>
+      'Writes the commit messages of this group\'s tickets in every repository, replacing each repository\'s own format. Leave empty to keep each repository\'s own.';
+
+  @override
   String get groupsInstructions => 'Instructions';
 
   @override
@@ -11279,6 +11288,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketDiff => 'Diff';
 
   @override
+  String get ticketDiffReposLabel => 'Changes by repository';
+
+  @override
+  String get ticketDiffOtherRepo => 'Other files';
+
+  @override
   String get ticketFeedback => 'Feedback';
 
   @override
@@ -11463,6 +11478,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ticketBranchRenameHint => 'The pull request opens from this name. Letters, digits, - _ . and /; no spaces.';
+
+  @override
+  String get ticketCommitsTitle => 'Commits';
+
+  @override
+  String get ticketCommitsSub => 'agnts pushes these when you approve. Until then you can change their messages.';
+
+  @override
+  String get ticketCommitEdit => 'Edit message';
+
+  @override
+  String get ticketCommitEditHint =>
+      'The subject on the first line, then a blank line and the body. Changing an earlier commit makes the ones after it again with the same changes.';
+
+  @override
+  String get ticketCommitsReapply => 'Re-apply format';
+
+  @override
+  String get ticketCommitsReapplyHelp =>
+      'Writes these messages again from the commit message format (the group\'s, else each repository\'s), with the type, scope and subject of the run that made each commit. Check the preview, then apply.';
+
+  @override
+  String ticketCommitsNumber(String number) {
+    return 'Ticket number for $number';
+  }
+
+  @override
+  String get ticketCommitsPreview => 'Preview';
+
+  @override
+  String ticketCommitsApply(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'Apply $n changes', one: 'Apply $n change');
+    return '$_temp0';
+  }
+
+  @override
+  String get ticketCommitsUpToDate => 'The messages already match the format.';
+
+  @override
+  String get ticketCommitsNotSuggested => 'Not ticked: this message may have been written by hand, and applying would replace it.';
 
   @override
   String get ticketKvRevision => 'Revision';

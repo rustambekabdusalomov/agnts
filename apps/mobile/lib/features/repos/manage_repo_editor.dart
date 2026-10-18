@@ -10,6 +10,7 @@ import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
 import 'manage_logic.dart';
 import 'manage_widgets.dart';
+import 'name_format_fields.dart';
 
 /// A repository picked for import: what the new one starts from.
 typedef RepoPreset = ({String name, String cloneUrl, String defaultBranch});
@@ -264,23 +265,6 @@ class _RepoEditorScreenState extends ConsumerState<RepoEditorScreen> {
     final c = Agnts.of(context);
     final grey = TextStyle(fontSize: 12.5, color: c.ink3);
     final prefix = (_prefix.text.isEmpty ? 'VIS' : _prefix.text).toUpperCase();
-    final commitEx = commitExample(_commitTmpl.text, taskPrefix: _prefix.text);
-    Widget ph(List<(String, String)> list) => Padding(
-          padding: const EdgeInsets.only(top: 6),
-          child: Fold(
-            title: l.reposPlaceholders,
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              for (final (k, v) in list)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text.rich(TextSpan(children: [
-                    TextSpan(text: '$k  ', style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink2)),
-                    TextSpan(text: v, style: grey),
-                  ])),
-                ),
-            ]),
-          ),
-        );
     void rebuild(String _) => setState(() {});
 
     return Scaffold(
@@ -310,37 +294,7 @@ class _RepoEditorScreenState extends ConsumerState<RepoEditorScreen> {
               child: ManageInput(controller: _prefix, mono: true, hint: 'VIS', maxLength: 8, onChanged: rebuild),
             ),
             ManageField(label: l.reposBranch, help: l.reposBranchHelp, child: ManageInput(controller: _branch, mono: true)),
-            ManageField(
-              label: l.reposBranchTemplate,
-              help: '${l.reposBranchTemplateHelp('{key}', '{number}', branchDefault)}\n'
-                  '${l.reposBranchTemplateExample(branchExample(_branchTmpl.text, branchPrefix: r?.branchPrefix ?? '', taskPrefix: _prefix.text))}',
-              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                ManageInput(controller: _branchTmpl, mono: true, hint: branchDefault, maxLength: 100, onChanged: rebuild),
-                ph([
-                  ('{prefix}', l.reposPhPrefix),
-                  ('{type}', l.reposPhType),
-                  ('{key}', l.reposPhKey),
-                  ('{number}', l.reposPhNumber),
-                  ('{slug}', l.reposPhSlug),
-                  ('{user}', l.reposPhUser),
-                ]),
-              ]),
-            ),
-            ManageField(
-              label: l.reposCommitTemplate,
-              help: [l.reposCommitTemplateHelp, if (commitEx.isNotEmpty) l.reposCommitTemplateExample(commitEx)].join('\n'),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                ManageInput(controller: _commitTmpl, mono: true, hint: commitPlaceholder, maxLength: 200, onChanged: rebuild),
-                ph([
-                  ('{number}', l.reposPhNumber),
-                  ('{key}', l.reposPhKey),
-                  ('{type}', l.reposPhCommitType),
-                  ('{scope}', l.reposPhScope),
-                  ('{subject}', l.reposPhSubject),
-                  ('{title}', l.reposPhTitle),
-                ]),
-              ]),
-            ),
+            NameFormatFields(branch: _branchTmpl, commit: _commitTmpl, taskPrefix: _prefix.text, branchPrefix: r?.branchPrefix ?? '', onChanged: rebuild),
           ]),
         ),
         const SizedBox(height: 12),

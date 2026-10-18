@@ -16,7 +16,12 @@ type GroupInput struct {
 	Description  string
 	Instructions string
 	TaskPrefix   string
-	Members      []GroupMemberInput
+	// BranchTemplate and CommitTemplate name the branches and write the
+	// commit messages of the group's tickets in every member; "" leaves
+	// each repository's own.
+	BranchTemplate string
+	CommitTemplate string
+	Members        []GroupMemberInput
 }
 
 // GroupMemberInput is a repository of a group, in order.
@@ -71,6 +76,13 @@ func (o *Orchestrator) SaveGroup(ctx context.Context, id int64, in GroupInput, o
 	}
 	if len(g.TaskPrefix) > 10 {
 		return GroupView{}, invalid("task prefix is at most 10 letters")
+	}
+	g.BranchTemplate, g.CommitTemplate = strings.TrimSpace(in.BranchTemplate), strings.TrimSpace(in.CommitTemplate)
+	if err := domain.ValidateBranchTemplate(g.BranchTemplate); err != nil {
+		return GroupView{}, invalid("%v", err)
+	}
+	if err := domain.ValidateCommitTemplate(g.CommitTemplate); err != nil {
+		return GroupView{}, invalid("%v", err)
 	}
 	var cur *domain.RepoGroup
 	if id != 0 {

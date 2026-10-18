@@ -10,7 +10,7 @@ import (
 	"agnts/internal/domain"
 )
 
-const groupCols = `g.id, g.workspace_id, g.name, g.description, g.instructions, g.task_prefix, g.created_at, g.updated_at,
+const groupCols = `g.id, g.workspace_id, g.name, g.description, g.instructions, g.task_prefix, g.branch_template, g.commit_template, g.created_at, g.updated_at,
 	coalesce((SELECT jsonb_agg(jsonb_build_object('repoId', m.repo_id, 'repoName', r.name, 'role', m.role, 'position', m.position,
 		'archived', r.archived_at IS NOT NULL) ORDER BY m.position, r.name)
 		FROM repository_group_members m JOIN repositories r ON r.id = m.repo_id WHERE m.group_id = g.id), '[]'::jsonb)`
@@ -18,7 +18,7 @@ const groupCols = `g.id, g.workspace_id, g.name, g.description, g.instructions, 
 func scanGroup(row pgx.Row) (domain.RepoGroup, error) {
 	var g domain.RepoGroup
 	var members []byte
-	if err := row.Scan(&g.ID, &g.WorkspaceID, &g.Name, &g.Description, &g.Instructions, &g.TaskPrefix, &g.CreatedAt, &g.UpdatedAt, &members); err != nil {
+	if err := row.Scan(&g.ID, &g.WorkspaceID, &g.Name, &g.Description, &g.Instructions, &g.TaskPrefix, &g.BranchTemplate, &g.CommitTemplate, &g.CreatedAt, &g.UpdatedAt, &members); err != nil {
 		return g, notFound(err)
 	}
 	if err := json.Unmarshal(members, &g.Members); err != nil {
@@ -84,11 +84,12 @@ func (s *Agent) SaveGroup(ctx context.Context, g domain.RepoGroup) (domain.RepoG
 	err := pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
 		var err error
 		if g.ID == 0 {
-			err = tx.QueryRow(ctx, `INSERT INTO repository_groups (name, description, instructions, task_prefix)
-				VALUES ($1, $2, $3, $4) RETURNING id`, g.Name, g.Description, g.Instructions, g.TaskPrefix).Scan(&id)
+			err = tx.QueryRow(ctx, `INSERT INTO repository_groups (name, description, instructions, task_prefix, branch_template, commit_template)
+				VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`, g.Name, g.Description, g.Instructions, g.TaskPrefix, g.BranchTemplate, g.CommitTemplate).Scan(&id)
 		} else {
 			err = tx.QueryRow(ctx, `UPDATE repository_groups SET name = $2, description = $3, instructions = $4, task_prefix = $5,
-				updated_at = now() WHERE id = $1 RETURNING id`, g.ID, g.Name, g.Description, g.Instructions, g.TaskPrefix).Scan(&id)
+				branch_template = $6, commit_template = $7, updated_at = now() WHERE id = $1 RETURNING id`,
+				g.ID, g.Name, g.Description, g.Instructions, g.TaskPrefix, g.BranchTemplate, g.CommitTemplate).Scan(&id)
 		}
 		if err != nil {
 			return notFound(err)

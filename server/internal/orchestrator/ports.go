@@ -73,6 +73,9 @@ type Store interface {
 	SaveResult(ctx context.Context, r domain.Result) error
 	// LatestResult returns the newest result of a stage, or ErrNotFound.
 	LatestResult(ctx context.Context, ticketID int64, stage domain.Stage) (domain.Result, error)
+	// RunCommits are the coding runs' commits as their summaries gave them,
+	// oldest first (see domain.RunCommit).
+	RunCommits(ctx context.Context, ticketID int64) ([]domain.RunCommit, error)
 
 	AppendEvent(ctx context.Context, ev domain.Event) error
 	Events(ctx context.Context, f EventFilter) ([]domain.Event, error)
@@ -522,6 +525,17 @@ type BranchRestorer interface {
 // host), domain.ErrNotFound that the branch is gone. A Git may implement it.
 type BranchRenamer interface {
 	RenameBranch(ctx context.Context, repo domain.Repository, from, to string) error
+}
+
+// CommitRewriter lists the commits agnts made on a ticket's branch and
+// changes their messages, before the branch is pushed.
+type CommitRewriter interface {
+	// BranchCommits are the branch's own commits, newest first.
+	BranchCommits(ctx context.Context, repo domain.Repository, branch string) ([]domain.BranchCommit, error)
+	// RewordCommits gives each commit (by sha) its message, in one pass,
+	// and returns the branch's new head; domain.ErrNotFound when a sha is
+	// not one of the branch's own commits.
+	RewordCommits(ctx context.Context, repo domain.Repository, branch string, messages map[string]string) (string, error)
 }
 
 // PR is a pull request to open.

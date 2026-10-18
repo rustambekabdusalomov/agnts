@@ -29,6 +29,10 @@ class RepoGroupInput {
 
      this.taskPrefix,
 
+     this.branchTemplate,
+
+     this.commitTemplate,
+
     required  this.members,
   });
 
@@ -80,6 +84,32 @@ class RepoGroupInput {
 
 
 
+      /// Branch name template (as a repository's); must contain {key} or {number}. Empty keeps each repository's own
+  @JsonKey(
+    
+    name: r'branchTemplate',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? branchTemplate;
+
+
+
+      /// Commit message template (as a repository's); must contain {subject} or {title}. Empty keeps each repository's own
+  @JsonKey(
+    
+    name: r'commitTemplate',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? commitTemplate;
+
+
+
       /// In order; the first is the primary repository of the group's tickets
   @JsonKey(
     
@@ -101,6 +131,8 @@ class RepoGroupInput {
       other.description == description &&
       other.instructions == instructions &&
       other.taskPrefix == taskPrefix &&
+      other.branchTemplate == branchTemplate &&
+      other.commitTemplate == commitTemplate &&
       other.members == members;
 
     @override
@@ -109,6 +141,8 @@ class RepoGroupInput {
         description.hashCode +
         instructions.hashCode +
         taskPrefix.hashCode +
+        branchTemplate.hashCode +
+        commitTemplate.hashCode +
         members.hashCode;
 
   factory RepoGroupInput.fromJson(Map<String, dynamic> json) => _$RepoGroupInputFromJson(json);

@@ -15,6 +15,10 @@ abstract class _$RepoGroupInputCWProxy {
 
   RepoGroupInput taskPrefix(String? taskPrefix);
 
+  RepoGroupInput branchTemplate(String? branchTemplate);
+
+  RepoGroupInput commitTemplate(String? commitTemplate);
+
   RepoGroupInput members(List<RepoGroupInputMembersInner> members);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `RepoGroupInput(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -28,6 +32,8 @@ abstract class _$RepoGroupInputCWProxy {
     String? description,
     String? instructions,
     String? taskPrefix,
+    String? branchTemplate,
+    String? commitTemplate,
     List<RepoGroupInputMembersInner> members,
   });
 }
@@ -53,6 +59,14 @@ class _$RepoGroupInputCWProxyImpl implements _$RepoGroupInputCWProxy {
   RepoGroupInput taskPrefix(String? taskPrefix) => this(taskPrefix: taskPrefix);
 
   @override
+  RepoGroupInput branchTemplate(String? branchTemplate) =>
+      this(branchTemplate: branchTemplate);
+
+  @override
+  RepoGroupInput commitTemplate(String? commitTemplate) =>
+      this(commitTemplate: commitTemplate);
+
+  @override
   RepoGroupInput members(List<RepoGroupInputMembersInner> members) =>
       this(members: members);
 
@@ -68,6 +82,8 @@ class _$RepoGroupInputCWProxyImpl implements _$RepoGroupInputCWProxy {
     Object? description = const $CopyWithPlaceholder(),
     Object? instructions = const $CopyWithPlaceholder(),
     Object? taskPrefix = const $CopyWithPlaceholder(),
+    Object? branchTemplate = const $CopyWithPlaceholder(),
+    Object? commitTemplate = const $CopyWithPlaceholder(),
     Object? members = const $CopyWithPlaceholder(),
   }) {
     return RepoGroupInput(
@@ -87,6 +103,14 @@ class _$RepoGroupInputCWProxyImpl implements _$RepoGroupInputCWProxy {
           ? _value.taskPrefix
           // ignore: cast_nullable_to_non_nullable
           : taskPrefix as String?,
+      branchTemplate: branchTemplate == const $CopyWithPlaceholder()
+          ? _value.branchTemplate
+          // ignore: cast_nullable_to_non_nullable
+          : branchTemplate as String?,
+      commitTemplate: commitTemplate == const $CopyWithPlaceholder()
+          ? _value.commitTemplate
+          // ignore: cast_nullable_to_non_nullable
+          : commitTemplate as String?,
       members: members == const $CopyWithPlaceholder()
           ? _value.members
           // ignore: cast_nullable_to_non_nullable
@@ -113,6 +137,8 @@ RepoGroupInput _$RepoGroupInputFromJson(Map<String, dynamic> json) =>
         description: $checkedConvert('description', (v) => v as String?),
         instructions: $checkedConvert('instructions', (v) => v as String?),
         taskPrefix: $checkedConvert('taskPrefix', (v) => v as String?),
+        branchTemplate: $checkedConvert('branchTemplate', (v) => v as String?),
+        commitTemplate: $checkedConvert('commitTemplate', (v) => v as String?),
         members: $checkedConvert(
           'members',
           (v) => (v as List<dynamic>)
@@ -133,5 +159,7 @@ Map<String, dynamic> _$RepoGroupInputToJson(RepoGroupInput instance) =>
       'description': ?instance.description,
       'instructions': ?instance.instructions,
       'taskPrefix': ?instance.taskPrefix,
+      'branchTemplate': ?instance.branchTemplate,
+      'commitTemplate': ?instance.commitTemplate,
       'members': instance.members.map((e) => e.toJson()).toList(),
     };

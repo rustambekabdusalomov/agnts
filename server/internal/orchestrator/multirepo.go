@@ -72,6 +72,7 @@ func (o *Orchestrator) reposFor(ctx context.Context, t domain.Ticket) ([]runRepo
 		return nil, errNoRepo
 	}
 	t.SyncRepos()
+	group := o.ticketGroup(ctx, t)
 	out := make([]runRepo, 0, len(t.Repos))
 	for _, row := range t.Repos {
 		repo, err := o.store.RepositoryByID(ctx, row.RepoID)
@@ -81,6 +82,7 @@ func (o *Orchestrator) reposFor(ctx context.Context, t domain.Ticket) ([]runRepo
 			}
 			return nil, err
 		}
+		groupFormats(&repo, group)
 		if row.RepoName == "" {
 			row.RepoName = repo.Name
 		}
@@ -100,6 +102,20 @@ func (o *Orchestrator) reposFor(ctx context.Context, t domain.Ticket) ([]runRepo
 		out[0].Row.Folder = "" // the primary alone is /workspace
 	}
 	return out, nil
+}
+
+// groupFormats gives repo the branch and commit message formats of g, the
+// group its ticket came from, where g sets them.
+func groupFormats(repo *domain.Repository, g *domain.RepoGroup) {
+	if g == nil {
+		return
+	}
+	if g.BranchTemplate != "" {
+		repo.BranchTemplate = g.BranchTemplate
+	}
+	if g.CommitTemplate != "" {
+		repo.CommitTemplate = g.CommitTemplate
+	}
 }
 
 // optionalRepos is reposFor for stages that also run without a repository:

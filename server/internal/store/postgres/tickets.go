@@ -698,6 +698,29 @@ func (s *Agent) LatestResult(ctx context.Context, ticketID int64, stage domain.S
 	return r, nil
 }
 
+// RunCommits returns, oldest first, when each coding run of a ticket saved
+// its result and the commit its summary described.
+func (s *Agent) RunCommits(ctx context.Context, ticketID int64) ([]domain.RunCommit, error) {
+	rows, err := s.db.Query(ctx, `SELECT res.created_at, coalesce(res.summary->'commit', 'null'::jsonb)
+		FROM results res JOIN runs ON runs.id = res.run_id
+		WHERE runs.ticket_id = $1 AND runs.stage = 'code' ORDER BY res.created_at`, ticketID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []domain.RunCommit
+	for rows.Next() {
+		var rc domain.RunCommit
+		var info []byte
+		if err := rows.Scan(&rc.At, &info); err != nil {
+			return nil, err
+		}
+		_ = json.Unmarshal(info, &rc.Info) // a summary without a commit, or a malformed one, leaves it empty
+		out = append(out, rc)
+	}
+	return out, rows.Err()
+}
+
 // AppendEvent writes one event.
 func (s *Agent) AppendEvent(ctx context.Context, ev domain.Event) error {
 	return insertEvent(ctx, s.db, ev)

@@ -26,6 +26,8 @@ type Tickets interface {
 	Reject(ctx context.Context, key, reason string, origin domain.Origin) (domain.Ticket, error)
 	RetryWithNote(ctx context.Context, key, note string, files []int64, origin domain.Origin) (domain.Ticket, error)
 	SetSkipChecks(ctx context.Context, key string, skip bool, origin domain.Origin) (domain.Ticket, error)
+	EditCommitMessage(ctx context.Context, key string, repoID int64, sha, message string, origin domain.Origin) (domain.Ticket, error)
+	ReapplyCommitFormat(ctx context.Context, key string, number *string, dryRun bool, only []string, origin domain.Origin) ([]orchestrator.CommitChange, domain.Ticket, error)
 	Continue(ctx context.Context, key, note string, files []int64, origin domain.Origin) (domain.Ticket, error)
 	StartOver(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	RenameBranch(ctx context.Context, key string, repoID int64, name string, origin domain.Origin) (domain.Ticket, error)
@@ -156,6 +158,13 @@ func (s *Server) GetTicket(w http.ResponseWriter, r *http.Request, key gen.Ticke
 		for i, r := range *d.Ticket.Repos {
 			if slices.Contains(v.RenameBranch, r.RepoId) {
 				(*d.Ticket.Repos)[i].CanRenameBranch = ptr(true)
+			}
+			if cs := v.Commits[r.RepoId]; len(cs) > 0 {
+				out := make([]gen.BranchCommit, len(cs))
+				for j, c := range cs {
+					out[j] = gen.BranchCommit{Sha: c.SHA, Message: c.Message}
+				}
+				(*d.Ticket.Repos)[i].Commits = &out
 			}
 		}
 	}
@@ -399,6 +408,60 @@ func (s *Server) RenameTicketBranch(w http.ResponseWriter, r *http.Request, key 
 	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
 		return s.opt.Tickets.RenameBranch(ctx, key, repoID, req.Branch, origin(r))
 	})
+}
+
+// EditCommitMessage implements gen.ServerInterface.
+func (s *Server) EditCommitMessage(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	var req gen.EditCommitMessageJSONRequestBody
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	var repoID int64
+	if req.RepoId != nil {
+		repoID = *req.RepoId
+	}
+	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
+		return s.opt.Tickets.EditCommitMessage(ctx, key, repoID, req.Sha, req.Message, origin(r))
+	})
+}
+
+// commitChange is one change of ReapplyCommitFormat's answer.
+type commitChange struct {
+	RepoID    int64  `json:"repoId"`
+	RepoName  string `json:"repoName"`
+	SHA       string `json:"sha"`
+	From      string `json:"from"`
+	To        string `json:"to"`
+	Suggested bool   `json:"suggested"`
+}
+
+// ReapplyCommitFormat implements gen.ServerInterface.
+func (s *Server) ReapplyCommitFormat(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	var req gen.ReapplyCommitFormatJSONRequestBody
+	if r.ContentLength != 0 {
+		if err := decodeJSON(r, &req); err != nil {
+			writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+			return
+		}
+	}
+	var only []string
+	if req.Only != nil {
+		only = *req.Only
+	}
+	changes, t, err := s.opt.Tickets.ReapplyCommitFormat(r.Context(), key, req.Number, req.DryRun != nil && *req.DryRun, only, origin(r))
+	if err != nil {
+		s.writeUseCaseError(w, r, err)
+		return
+	}
+	out := struct {
+		Changes []commitChange `json:"changes"`
+		Ticket  gen.Ticket     `json:"ticket"`
+	}{Changes: make([]commitChange, len(changes)), Ticket: toTicket(t)}
+	for i, c := range changes {
+		out.Changes[i] = commitChange{RepoID: c.RepoID, RepoName: c.RepoName, SHA: c.SHA, From: c.From, To: c.To, Suggested: c.Suggested}
+	}
+	writeJSON(w, http.StatusOK, out)
 }
 
 func (s *Server) ticketAction(w http.ResponseWriter, r *http.Request, f func(context.Context) (domain.Ticket, error)) {
