@@ -57,6 +57,14 @@ import 'main.dart' show signOut;
 import 'theme.dart';
 import 'widgets/ui.dart';
 
+/// A screen opened over the tabs. go_router gives a route no transition of
+/// its own unless it is a MaterialPage; this one slides in and, on iOS,
+/// swipes back from anywhere on the page (theme.dart's pageTransitionsTheme).
+GoRoute screenRoute(String path, Widget Function(BuildContext, GoRouterState) builder) => GoRoute(
+      path: path,
+      pageBuilder: (context, s) => MaterialPage<void>(key: s.pageKey, name: s.path, restorationId: s.pageKey.value, child: builder(context, s)),
+    );
+
 /// Screens open without signing in.
 const _publicPaths = ['/signup', '/forgot', '/reset-password', '/verify', '/invite'];
 
@@ -93,18 +101,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
-      GoRoute(path: '/wrong-app', builder: (_, _) => const _WrongApp()),
-      GoRoute(path: '/signup', builder: (_, _) => const SignupScreen()),
-      GoRoute(path: '/forgot', builder: (_, _) => const ForgotScreen()),
-      GoRoute(path: '/reset-password', builder: (_, s) => ResetScreen(token: s.uri.queryParameters['token'] ?? '')),
-      GoRoute(path: '/verify', builder: (_, s) => VerifyScreen(token: s.uri.queryParameters['token'])),
-      GoRoute(path: '/invite/:token', builder: (_, s) => InviteScreen(token: s.pathParameters['token']!)),
+      screenRoute('/login', (_, _) => const LoginScreen()),
+      screenRoute('/wrong-app', (_, _) => const _WrongApp()),
+      screenRoute('/signup', (_, _) => const SignupScreen()),
+      screenRoute('/forgot', (_, _) => const ForgotScreen()),
+      screenRoute('/reset-password', (_, s) => ResetScreen(token: s.uri.queryParameters['token'] ?? '')),
+      screenRoute('/verify', (_, s) => VerifyScreen(token: s.uri.queryParameters['token'])),
+      screenRoute('/invite/:token', (_, s) => InviteScreen(token: s.pathParameters['token']!)),
       if (adminApp) ...[
-        GoRoute(path: '/admin/admins', builder: (_, _) => const AdminAdminsScreen()),
-        GoRoute(path: '/admin/audit', builder: (_, _) => const AdminAuditScreen()),
-        GoRoute(path: '/admin/runs', builder: (_, _) => const AdminRunsScreen()),
-        GoRoute(path: '/admin/runs/:id', builder: (_, s) => AdminRunScreen(id: int.tryParse(s.pathParameters['id'] ?? '') ?? 0)),
+        screenRoute('/admin/admins', (_, _) => const AdminAdminsScreen()),
+        screenRoute('/admin/audit', (_, _) => const AdminAuditScreen()),
+        screenRoute('/admin/runs', (_, _) => const AdminRunsScreen()),
+        screenRoute('/admin/runs/:id', (_, s) => AdminRunScreen(id: int.tryParse(s.pathParameters['id'] ?? '') ?? 0)),
         StatefulShellRoute.indexedStack(
           builder: (context, state, shell) => _AdminShell(shell: shell),
           branches: [
@@ -119,44 +127,38 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ] else ...[
         // Notification taps deep-link here.
-        GoRoute(path: '/tickets/:key', builder: (_, s) => TicketScreen(ticketKey: s.pathParameters['key']!)),
-        GoRoute(path: '/tickets/:key/api-results', builder: (_, s) => ApiResultsScreen(ticketKey: s.pathParameters['key']!)),
-        GoRoute(
-          path: '/repos/:id',
-          builder: (_, s) => RepoScreen(id: int.parse(s.pathParameters['id']!), name: s.uri.queryParameters['name'] ?? ''),
+        screenRoute('/tickets/:key', (_, s) => TicketScreen(ticketKey: s.pathParameters['key']!)),
+        screenRoute('/tickets/:key/api-results', (_, s) => ApiResultsScreen(ticketKey: s.pathParameters['key']!)),
+        screenRoute('/repos/:id', (_, s) => RepoScreen(id: int.parse(s.pathParameters['id']!), name: s.uri.queryParameters['name'] ?? ''),
         ),
-        GoRoute(
-          path: '/repos/:id/commits/:sha',
-          builder: (_, s) => CommitScreen(repoId: int.parse(s.pathParameters['id']!), sha: s.pathParameters['sha']!),
+        screenRoute('/repos/:id/commits/:sha', (_, s) => CommitScreen(repoId: int.parse(s.pathParameters['id']!), sha: s.pathParameters['sha']!),
         ),
-        GoRoute(
-          path: '/repos/:id/pulls/:number',
-          builder: (_, s) => PullScreen(repoId: int.parse(s.pathParameters['id']!), number: int.parse(s.pathParameters['number']!)),
+        screenRoute('/repos/:id/pulls/:number', (_, s) => PullScreen(repoId: int.parse(s.pathParameters['id']!), number: int.parse(s.pathParameters['number']!)),
         ),
-        GoRoute(path: '/repos', builder: (_, _) => const ReposScreen()),
-        GoRoute(path: '/rules', builder: (_, _) => const RulesScreen()),
-        GoRoute(path: '/reviews', builder: (_, _) => const ReviewsScreen()),
-        GoRoute(path: '/swagger-suites', builder: (_, _) => const SwaggerSuitesScreen()),
-        GoRoute(path: '/usage', builder: (_, _) => const UsageScreen()),
-        GoRoute(path: '/integrations', builder: (_, _) => const IntegrationsScreen()),
-        GoRoute(path: '/integrations/:provider', builder: (_, s) => IntegrationScreen(provider: s.pathParameters['provider']!)),
-        GoRoute(path: '/networks', builder: (_, _) => const NetworksScreen()),
-        GoRoute(path: '/mcp', builder: (_, _) => const McpScreen()),
-        GoRoute(path: '/workspace', builder: (_, s) => WorkspaceScreen(tab: s.uri.queryParameters['tab'])),
-        GoRoute(path: '/workspaces', builder: (_, _) => const WorkspacesScreen()),
-        GoRoute(path: '/profile', builder: (_, _) => const ProfileScreen()),
-        GoRoute(path: '/feedback', builder: (_, _) => const FeedbackScreen()),
-        GoRoute(path: '/settings/appearance', builder: (_, _) => const AppearancePage()),
-        GoRoute(path: '/settings/models', builder: (_, _) => const DefaultModelsPage()),
-        GoRoute(path: '/settings/notifications', builder: (_, _) => const NotificationsPage()),
-        GoRoute(path: '/learn', builder: (_, s) => LearnScreen(ticketKey: s.uri.queryParameters['ticket'])),
-        GoRoute(path: '/learn-queue', builder: (_, _) => const LearnQueueScreen()),
-        GoRoute(path: '/learn/:id', builder: (_, s) => LessonScreen(id: int.parse(s.pathParameters['id']!))),
-        GoRoute(path: '/assistant', builder: (_, _) => const AssistantScreen()),
-        GoRoute(path: '/assistant-rated', builder: (_, _) => const AssistantRatedScreen()),
-        GoRoute(path: '/assistant/:id', builder: (_, s) => AssistantScreen(conversationId: int.tryParse(s.pathParameters['id']!))),
-        GoRoute(path: '/ci', builder: (_, _) => const CIFailuresScreen()),
-        GoRoute(path: '/ci/:id', builder: (_, s) => CIFailureScreen(id: int.tryParse(s.pathParameters['id']!) ?? 0)),
+        screenRoute('/repos', (_, _) => const ReposScreen()),
+        screenRoute('/rules', (_, _) => const RulesScreen()),
+        screenRoute('/reviews', (_, _) => const ReviewsScreen()),
+        screenRoute('/swagger-suites', (_, _) => const SwaggerSuitesScreen()),
+        screenRoute('/usage', (_, _) => const UsageScreen()),
+        screenRoute('/integrations', (_, _) => const IntegrationsScreen()),
+        screenRoute('/integrations/:provider', (_, s) => IntegrationScreen(provider: s.pathParameters['provider']!)),
+        screenRoute('/networks', (_, _) => const NetworksScreen()),
+        screenRoute('/mcp', (_, _) => const McpScreen()),
+        screenRoute('/workspace', (_, s) => WorkspaceScreen(tab: s.uri.queryParameters['tab'])),
+        screenRoute('/workspaces', (_, _) => const WorkspacesScreen()),
+        screenRoute('/profile', (_, _) => const ProfileScreen()),
+        screenRoute('/feedback', (_, _) => const FeedbackScreen()),
+        screenRoute('/settings/appearance', (_, _) => const AppearancePage()),
+        screenRoute('/settings/models', (_, _) => const DefaultModelsPage()),
+        screenRoute('/settings/notifications', (_, _) => const NotificationsPage()),
+        screenRoute('/learn', (_, s) => LearnScreen(ticketKey: s.uri.queryParameters['ticket'])),
+        screenRoute('/learn-queue', (_, _) => const LearnQueueScreen()),
+        screenRoute('/learn/:id', (_, s) => LessonScreen(id: int.parse(s.pathParameters['id']!))),
+        screenRoute('/assistant', (_, _) => const AssistantScreen()),
+        screenRoute('/assistant-rated', (_, _) => const AssistantRatedScreen()),
+        screenRoute('/assistant/:id', (_, s) => AssistantScreen(conversationId: int.tryParse(s.pathParameters['id']!))),
+        screenRoute('/ci', (_, _) => const CIFailuresScreen()),
+        screenRoute('/ci/:id', (_, s) => CIFailureScreen(id: int.tryParse(s.pathParameters['id']!) ?? 0)),
         StatefulShellRoute.indexedStack(
           builder: (context, state, shell) => _Shell(shell: shell),
           branches: [
