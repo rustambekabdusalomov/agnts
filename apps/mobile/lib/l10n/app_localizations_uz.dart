@@ -11230,6 +11230,16 @@ class AppLocalizationsUz extends AppLocalizations {
   String get ticketNoChecks => 'Tekshiruvlar sozlanmagan';
 
   @override
+  String get ticketChecksSkipped => 'Bu vazifa uchun oʻtkazib yuborildi';
+
+  @override
+  String get ticketSkipChecks => 'Tekshiruvlarni oʻtkazib yuborish: faqat kod boʻyicha koʻrib chiqish';
+
+  @override
+  String get ticketSkipChecksHint =>
+      'Konteynerda ishga tushirib boʻlmaydigan tekshiruvlar uchun, masalan, u yopiq bogʻliqlikni yuklab ololmasa. Claude ham build, lint va testlarni ishga tushirmaydi, shuning uchun kodni oʻzingiz tekshirasiz. Belgini olib tashlamaguningizcha bu vazifa uchun amal qiladi.';
+
+  @override
   String get ticketStopRun => 'Ishni toʻxtatish';
 
   @override

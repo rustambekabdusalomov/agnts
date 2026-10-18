@@ -23,7 +23,7 @@ func TestWorkspaceTreePrefixesFolders(t *testing.T) {
 	}
 	rs := []runRepo{{Row: domain.TicketRepo{Folder: "api"}}, {Row: domain.TicketRepo{Folder: "web"}}}
 	trees := []io.Reader{mk("go.mod", ".git/HEAD"), mk("package.json")}
-	rc := workspaceTree(func(i int) (io.ReadCloser, error) { return io.NopCloser(trees[i]), nil }, rs)
+	rc := workspaceTree(func(i int) (io.ReadCloser, error) { return io.NopCloser(trees[i]), nil }, rs, "")
 	defer func() { _ = rc.Close() }()
 	var names []string
 	tr := tar.NewReader(rc)

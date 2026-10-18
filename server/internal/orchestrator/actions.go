@@ -925,6 +925,29 @@ func (o *Orchestrator) SetModels(ctx context.Context, key string, models map[str
 	}, func(x *domain.Ticket) { x.Models = clean })
 }
 
+// SetSkipChecks turns the checks of a ticket's coding runs off or back on.
+// It goes with a retry or requested changes, so only a ticket that stopped
+// or waits for review takes it; the same value again changes nothing.
+func (o *Orchestrator) SetSkipChecks(ctx context.Context, key string, skip bool, origin domain.Origin) (domain.Ticket, error) {
+	t, err := o.store.TicketByKey(ctx, key)
+	if err != nil || t.SkipChecks == skip {
+		return t, err
+	}
+	switch t.State {
+	case domain.StateFailed, domain.StateRateLimited, domain.StateWaitingForReview:
+	default:
+		return t, invalid("checks can be skipped or turned back on when the ticket stopped or waits for review, not while it is %s", t.State)
+	}
+	msg := "checks turned back on"
+	if skip {
+		msg = "checks skipped from now on: coding runs go to review without build, lint or test results"
+	}
+	return o.store.UpdateTicket(ctx, key, &domain.Event{
+		TicketKey: key, Type: domain.EventTicketUpdated, Origin: origin, Message: msg,
+		Data: map[string]any{"skipChecks": skip},
+	}, func(x *domain.Ticket) { x.SkipChecks = skip })
+}
+
 // SetRepo links a ticket to another repository (SetRepos with one).
 func (o *Orchestrator) SetRepo(ctx context.Context, key string, repoID int64, origin domain.Origin) (domain.Ticket, error) {
 	return o.SetRepos(ctx, key, domain.RepoChoice{RepoID: repoID}, origin)

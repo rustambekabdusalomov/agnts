@@ -54,6 +54,7 @@ TicketDetail _detail(FollowUps f) => TicketDetail(
         prUrl: '',
         kind: TicketKind.code,
         kindAuto: false,
+        skipChecks: false,
         createdAt: DateTime(2026),
         updatedAt: DateTime(2026),
         suggestFollowUps: FollowUpsMode.on_,

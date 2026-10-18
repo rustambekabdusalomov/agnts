@@ -26,6 +26,8 @@ class RequestChangesRequest {
      this.shots,
 
      this.attachments,
+
+     this.skipChecks,
   });
 
   @JsonKey(
@@ -66,19 +68,34 @@ class RequestChangesRequest {
 
 
 
+      /// Skip the build, lint and test checks (and the proof and coverage that run tests) in this and later coding runs of the ticket, going to review on the code alone; false turns them back on. Left out, the ticket keeps its setting.
+  @JsonKey(
+    
+    name: r'skipChecks',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? skipChecks;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is RequestChangesRequest &&
       other.feedback == feedback &&
       other.shots == shots &&
-      other.attachments == attachments;
+      other.attachments == attachments &&
+      other.skipChecks == skipChecks;
 
     @override
     int get hashCode =>
         feedback.hashCode +
         shots.hashCode +
-        attachments.hashCode;
+        attachments.hashCode +
+        skipChecks.hashCode;
 
   factory RequestChangesRequest.fromJson(Map<String, dynamic> json) => _$RequestChangesRequestFromJson(json);
 

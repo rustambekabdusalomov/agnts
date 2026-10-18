@@ -11,7 +11,7 @@ const st = (over: Partial<TicketRepoState>): TicketRepoState => ({
 })
 const ticket = (over: Partial<Ticket> = {}): Ticket => ({
   key: 'SHOP-3', source: 'local', title: 't', description: '', priority: 'medium', state: 'failed', revision: 0, turns: 3,
-  branch: 'agnts/SHOP-3', prUrl: '', kind: 'code', kindAuto: false, createdAt: '', updatedAt: '', group: { id: 7, name: 'Shop' },
+  branch: 'agnts/SHOP-3', prUrl: '', kind: 'code', kindAuto: false, skipChecks: false, createdAt: '', updatedAt: '', group: { id: 7, name: 'Shop' },
   repos: [
     st({ repoId: 1, repoName: 'api', role: 'backend', state: 'pushed', prUrl: 'https://github.com/x/api/pull/12', prNumber: 12, files: 3, ciFixes: 1 }),
     st({ repoId: 2, repoName: 'web', role: 'web', pushError: 'remote rejected' }),

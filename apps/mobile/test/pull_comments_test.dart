@@ -43,6 +43,7 @@ Ticket _ticket({TicketKind kind = TicketKind.code, TicketState state = TicketSta
       repoId: 3,
       kind: kind,
       kindAuto: false,
+      skipChecks: false,
       createdAt: DateTime(2026),
       updatedAt: DateTime(2026),
     );

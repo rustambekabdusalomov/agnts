@@ -82,7 +82,7 @@ const results: Results = {
 }
 const ticket: Ticket = {
   key: 'TASK-1', source: 'local', title: 'Swagger test', description: '', priority: 'medium', state: 'waiting_for_review', revision: 0, turns: 3,
-  branch: '', prUrl: '', kind: 'swaggertest', kindAuto: false, createdAt: '', updatedAt: '',
+  branch: '', prUrl: '', kind: 'swaggertest', kindAuto: false, skipChecks: false, createdAt: '', updatedAt: '',
 }
 
 function plugins() {

@@ -41,6 +41,7 @@ Ticket _ticket(WaitReason? reason, {String? message}) => Ticket(
       prUrl: '',
       kind: TicketKind.code,
       kindAuto: false,
+      skipChecks: false,
       createdAt: DateTime(2026),
       updatedAt: DateTime(2026),
       waitReason: reason,

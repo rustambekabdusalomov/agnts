@@ -83,6 +83,8 @@ class Ticket {
 
     required  this.kindAuto,
 
+    required  this.skipChecks,
+
      this.postReport,
 
      this.parentKey,
@@ -465,6 +467,19 @@ class Ticket {
 
 
   final bool kindAuto;
+
+
+
+      /// coding runs skip the checks and go to review on the code alone (set with retryTicket or requestChanges)
+  @JsonKey(
+    
+    name: r'skipChecks',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool skipChecks;
 
 
 
@@ -864,6 +879,7 @@ class Ticket {
       other.askFirst == askFirst &&
       other.kind == kind &&
       other.kindAuto == kindAuto &&
+      other.skipChecks == skipChecks &&
       other.postReport == postReport &&
       other.parentKey == parentKey &&
       other.followUpOf == followUpOf &&
@@ -922,6 +938,7 @@ class Ticket {
         askFirst.hashCode +
         kind.hashCode +
         kindAuto.hashCode +
+        skipChecks.hashCode +
         postReport.hashCode +
         parentKey.hashCode +
         followUpOf.hashCode +

@@ -11239,6 +11239,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketNoChecks => 'No checks configured';
 
   @override
+  String get ticketChecksSkipped => 'Skipped for this ticket';
+
+  @override
+  String get ticketSkipChecks => 'Skip checks: go to review on the code alone';
+
+  @override
+  String get ticketSkipChecksHint =>
+      'For checks the run container can\'t run, such as a private dependency it can\'t fetch. Claude won\'t run the build, lint or tests either, so you review the code yourself. It stays on for this ticket until you untick it.';
+
+  @override
   String get ticketStopRun => 'Stop run';
 
   @override

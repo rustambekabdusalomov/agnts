@@ -27,7 +27,8 @@ type checkReport struct {
 	LintOutput string
 	// Unfixable is set when a check failed for a reason Claude cannot fix
 	// in the code (a command missing from the container, the container
-	// out of memory); it says what the person should change instead.
+	// out of memory, a private host it cannot reach or log in to); it says
+	// what the person should change instead.
 	Unfixable string
 	Reason    string // run exit reason for Unfixable
 }
@@ -50,7 +51,7 @@ func unfixable(repo domain.Repository, exit int, output string) (msg, reason str
 		return fmt.Sprintf("the check was killed (exit 137), most likely because the container ran out of memory. Raise the memory under Repositories → %s → Advanced, or make the check use less (fewer parallel jobs).",
 			repo.Name), "out_of_memory"
 	}
-	return "", ""
+	return diagnose(repo, output)
 }
 
 // runChecks runs build, lint and test in order, stopping at the first

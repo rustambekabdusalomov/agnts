@@ -6,7 +6,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../api/client'
 import { isPullReview, isReport, isSwaggerTest, KIND_EDITABLE, MODEL_NAME, needsRepo, pullHost, stateKey, TERMINAL, type Question, type ShotRef, type TicketKindChoice } from '../api/types'
 import UsageCard from '../components/dashboard/UsageCard.vue'
-import DiffView from '../components/DiffView.vue'
 import CheckBox from '../components/form/CheckBox.vue'
 import TicketLessons from '../components/learn/TicketLessons.vue'
 import StateBadge from '../components/StateBadge.vue'
@@ -26,9 +25,10 @@ import ModelPicker from '../components/ticket/ModelPicker.vue'
 import ReportView from '../components/ticket/ReportView.vue'
 import SwaggerResults from '../components/swagger/SwaggerResults.vue'
 import RepoPicker from '../components/ticket/RepoPicker.vue'
+import RepoDiffs from '../components/ticket/RepoDiffs.vue'
 import TicketRepos from '../components/ticket/TicketRepos.vue'
 import BranchName from '../components/ticket/BranchName.vue'
-import { filePath, filesByRepo, isMultiRepo, ticketRepos } from '../components/repos/repoSet'
+import { filePath, isMultiRepo, ticketRepos } from '../components/repos/repoSet'
 import ProgressTrack from '../components/ticket/ProgressTrack.vue'
 import PullCard from '../components/ticket/PullCard.vue'
 import ReviewDraftsPanel from '../components/pulls/ReviewDraftsPanel.vue'
@@ -185,6 +185,11 @@ const notice = ref('')
 const opensPr = computed(() => !report.value && !pull.value && !(isTask.value && tk.value?.afterApprove === 'main'))
 // Reports reach the tracker issue only when the reviewer ticks this.
 const postReport = ref(false)
+// Coding runs go to review without the checks; retry and requested
+// changes send it, starting from the ticket's own setting.
+const skipChecks = ref(false)
+// The repository whose diffs the Changes tab shows, in a ticket of several.
+const diffRepo = ref('')
 const reviewing = computed(() => tk.value?.state === 'waiting_for_review' && opensPr.value)
 // Mirrors the server's rule: no pull request and no pending push.
 const canChangeRepo = computed(() => !!tk.value && !tk.value.prUrl && tk.value.resumeState !== 'pushing')
@@ -195,6 +200,8 @@ watch(
   () => {
     assignees.value = [...(tk.value?.assignees ?? [])]
     postReport.value = false
+    skipChecks.value = !!tk.value?.skipChecks
+    diffRepo.value = ''
   },
   { immediate: true },
 )
@@ -249,6 +256,7 @@ const act = useMutation({
               feedback: feedback.value.trim(),
               shots: feedbackShots.value.length ? feedbackShots.value : undefined,
               attachments: feedbackFiles.value.length ? feedbackFiles.value : undefined,
+              skipChecks: skipChecks.value,
             },
           }),
         )
@@ -261,6 +269,7 @@ const act = useMutation({
             body: {
               note: retryNote.value.trim() || undefined,
               attachments: retryFiles.value.length ? retryFiles.value : undefined,
+              skipChecks: skipChecks.value,
             },
           }),
         )
@@ -437,6 +446,10 @@ async function showFile(path: string) {
   await nextTick()
   // In several repositories a path may come without its folder.
   const f = result.value?.files.find((x) => filePath(x) === path) ?? result.value?.files.find((x) => x.path === path)
+  if (f) {
+    diffRepo.value = f.repo ?? ''
+    await nextTick()
+  }
   const el = document.getElementById(`diff-${f ? filePath(f) : path}`) as HTMLDetailsElement | null
   if (!el) return
   el.open = true
@@ -469,7 +482,6 @@ const waitsFor = computed(() =>
 const multi = computed(() => !!tk.value && isMultiRepo(tk.value))
 const repoNames = computed(() => (tk.value ? ticketRepos(tk.value).map((r) => r.repoName).join(', ') : ''))
 const prs = computed(() => (tk.value?.repos ?? []).filter((r) => r.prUrl))
-const fileGroups = computed(() => filesByRepo(result.value?.files ?? []))
 const totals = computed(() => {
   const files = result.value?.files ?? []
   return { n: files.length, add: files.reduce((a, f) => a + f.add, 0), del: files.reduce((a, f) => a + f.del, 0) }
@@ -787,7 +799,8 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
                 <dl class="facts">
                   <div>
                     <dt>{{ t('ticket.factTests') }}</dt>
-                    <dd :class="checksOk ? 'ok' : 'bad'">{{ result.checks.length ? t('ticket.checksPassed', { n: result.checks.filter((c) => c.exitCode === 0).length }) : t('ticket.noChecks') }}</dd>
+                    <dd v-if="tk.skipChecks && !result.checks.length">{{ t('ticket.checksSkipped') }}</dd>
+                    <dd v-else :class="checksOk ? 'ok' : 'bad'">{{ result.checks.length ? t('ticket.checksPassed', { n: result.checks.filter((c) => c.exitCode === 0).length }) : t('ticket.noChecks') }}</dd>
                   </div>
                   <div><dt>{{ t('ticket.factChanged') }}</dt><dd>{{ t('ticket.changedValue', { n: totals.n, add: totals.add, del: totals.del }) }}</dd></div>
                   <div><dt>{{ t('ticket.factTurns') }}</dt><dd>{{ tk.turns }}</dd></div>
@@ -830,6 +843,10 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
                 <h3><label for="feedback">{{ t('ticket.feedback') }}</label></h3>
                 <textarea id="feedback" v-model="feedback" :placeholder="t('ticket.feedbackHint')" @paste="feedbackAttach?.pasted($event)" />
                 <FileAttach ref="feedbackAttach" v-model="feedbackFiles" v-model:busy="feedbackUploading" />
+                <div class="tk-skip">
+                  <CheckBox v-model="skipChecks">{{ t('ticket.skipChecks') }}</CheckBox>
+                  <p class="hint">{{ t('ticket.skipChecksHint') }}</p>
+                </div>
                 <div v-if="feedbackShots.length" class="tk-shots" :aria-label="t('preview.attached')">
                   <span class="hint">{{ t('preview.attached') }}:</span>
                   <span v-for="(r, i) in feedbackShots" :key="`${r.runId}-${r.shotId}`" class="badge b-info tk-shot">
@@ -926,6 +943,10 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
                 <h3><label for="retry-note">{{ t('ticket.retryNote') }}</label></h3>
                 <textarea id="retry-note" v-model="retryNote" maxlength="4000" :placeholder="t('ticket.retryNoteHint')" />
                 <FileAttach v-model="retryFiles" v-model:busy="retryUploading" />
+                <div class="tk-skip">
+                  <CheckBox v-model="skipChecks">{{ t('ticket.skipChecks') }}</CheckBox>
+                  <p class="hint">{{ t('ticket.skipChecksHint') }}</p>
+                </div>
               </div>
               <div class="actions">
                 <button class="btn btn-p" type="button" :disabled="act.isPending.value || retryUploading || (needsRepo(tk) && !tk.repoId)" @click="act.mutate('retry')">{{ t('ticket.retry') }}</button>
@@ -1043,10 +1064,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             </div>
             <div class="sec">
               <h3>{{ t('ticket.diff') }}</h3>
-              <template v-for="(g, gi) in fileGroups" :key="g.repo">
-                <h4 v-if="g.repo && fileGroups.length > 1" class="tk-repo-h">{{ t('groups.filesIn', { repo: g.repo, count: g.files.length }) }}</h4>
-                <DiffView v-for="(f, i) in g.files" :id="`diff-${filePath(f)}`" :key="filePath(f)" :file="f" :open="gi === 0 && i === 0 && tk.state === 'waiting_for_review'" />
-              </template>
+              <RepoDiffs v-model:repo="diffRepo" :files="result.files" :open-first="tk.state === 'waiting_for_review'" />
             </div>
           </section>
 
@@ -1151,6 +1169,8 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
 .tk-update-title { margin: 6px 0 4px; font-weight: 600; }
 .tk-update-desc { margin: 0; white-space: pre-wrap; max-height: 240px; overflow: auto; font-size: 14px; }
 .tk-desc { white-space: pre-wrap; overflow-wrap: anywhere; }
+.tk-skip { margin-top: 12px; }
+.tk-skip .hint { margin: 4px 0 0 26px; }
 /* A title may hold a long host name or path (Swagger tests): let it wrap. */
 .ph > div { min-width: 0; }
 .ph h1 { overflow-wrap: anywhere; }
@@ -1168,7 +1188,5 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
 .tk-wait-title { min-width: 0; overflow-wrap: anywhere; }
 .tk-shots { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; }
 .tk-shot { display: inline-flex; align-items: center; gap: 6px; }
-.tk-repo-h { margin: 14px 0 6px; font-size: 13.5px; font-family: var(--mono); color: var(--ink-3); }
-.tk-repo-h:first-child { margin-top: 0; }
 .tk-shot button { border: 0; background: none; padding: 0 2px; font: inherit; font-weight: 700; color: inherit; cursor: pointer; }
 </style>

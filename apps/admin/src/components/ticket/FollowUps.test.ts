@@ -23,7 +23,7 @@ vi.mock('../../api/client', () => {
 
 const ticket = (over: Partial<Ticket> = {}): Ticket => ({
   key: 'PAY-1', source: 'jira', title: 't', description: '', priority: 'medium', state: 'waiting_for_review', revision: 0, turns: 3,
-  branch: '', prUrl: '', kind: 'code', kindAuto: false, createdAt: '', updatedAt: '', suggestFollowUps: 'on', ...over,
+  branch: '', prUrl: '', kind: 'code', kindAuto: false, skipChecks: false, createdAt: '', updatedAt: '', suggestFollowUps: 'on', ...over,
 })
 const data: Data = {
   enabled: true,

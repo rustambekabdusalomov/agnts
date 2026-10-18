@@ -62,6 +62,7 @@ Ticket _ticket({List<TicketRepoState>? repos}) => Ticket(
       prUrl: '',
       kind: TicketKind.code,
       kindAuto: false,
+      skipChecks: false,
       repoId: 1,
       repoName: 'api',
       repos: repos,

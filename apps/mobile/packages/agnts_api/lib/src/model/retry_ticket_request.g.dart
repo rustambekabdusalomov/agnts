@@ -11,13 +11,19 @@ abstract class _$RetryTicketRequestCWProxy {
 
   RetryTicketRequest attachments(List<int>? attachments);
 
+  RetryTicketRequest skipChecks(bool? skipChecks);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `RetryTicketRequest(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
   /// ```dart
   /// RetryTicketRequest(...).copyWith(id: 12, name: "My name")
   /// ````
-  RetryTicketRequest call({String? note, List<int>? attachments});
+  RetryTicketRequest call({
+    String? note,
+    List<int>? attachments,
+    bool? skipChecks,
+  });
 }
 
 /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfRetryTicketRequest.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfRetryTicketRequest.copyWith.fieldName(...)`
@@ -34,6 +40,10 @@ class _$RetryTicketRequestCWProxyImpl implements _$RetryTicketRequestCWProxy {
       this(attachments: attachments);
 
   @override
+  RetryTicketRequest skipChecks(bool? skipChecks) =>
+      this(skipChecks: skipChecks);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `RetryTicketRequest(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -43,6 +53,7 @@ class _$RetryTicketRequestCWProxyImpl implements _$RetryTicketRequestCWProxy {
   RetryTicketRequest call({
     Object? note = const $CopyWithPlaceholder(),
     Object? attachments = const $CopyWithPlaceholder(),
+    Object? skipChecks = const $CopyWithPlaceholder(),
   }) {
     return RetryTicketRequest(
       note: note == const $CopyWithPlaceholder()
@@ -53,6 +64,10 @@ class _$RetryTicketRequestCWProxyImpl implements _$RetryTicketRequestCWProxy {
           ? _value.attachments
           // ignore: cast_nullable_to_non_nullable
           : attachments as List<int>?,
+      skipChecks: skipChecks == const $CopyWithPlaceholder()
+          ? _value.skipChecks
+          // ignore: cast_nullable_to_non_nullable
+          : skipChecks as bool?,
     );
   }
 }
@@ -76,6 +91,7 @@ RetryTicketRequest _$RetryTicketRequestFromJson(Map<String, dynamic> json) =>
           'attachments',
           (v) => (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList(),
         ),
+        skipChecks: $checkedConvert('skipChecks', (v) => v as bool?),
       );
       return val;
     });
@@ -84,4 +100,5 @@ Map<String, dynamic> _$RetryTicketRequestToJson(RetryTicketRequest instance) =>
     <String, dynamic>{
       'note': ?instance.note,
       'attachments': ?instance.attachments,
+      'skipChecks': ?instance.skipChecks,
     };

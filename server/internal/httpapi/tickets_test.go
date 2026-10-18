@@ -26,6 +26,7 @@ type fakeTickets struct {
 	lastAnswer        []domain.Answer
 	lastAccept        []orchestrator.AcceptInput
 	lastFollowUps     *bool
+	lastSkipChecks    *bool
 	lastRelation      string
 	lastCompare       *bool
 	lastShots         []domain.ShotRef
@@ -273,6 +274,11 @@ func (f *fakeTickets) RetryWithNote(_ context.Context, key, note string, files [
 	return f.ticket(key, domain.StateNew)
 }
 
+func (f *fakeTickets) SetSkipChecks(_ context.Context, key string, skip bool, o domain.Origin) (domain.Ticket, error) {
+	f.lastOrigin, f.lastSkipChecks = o, &skip
+	return f.ticket(key, domain.StateFailed)
+}
+
 func (f *fakeTickets) Continue(_ context.Context, key, note string, files []int64, o domain.Origin) (domain.Ticket, error) {
 	f.lastOrigin, f.lastNote, f.lastFiles = o, note, files
 	return f.ticket(key, domain.StateWaitingForReview)
@@ -475,6 +481,7 @@ func TestTicketEndpoints(t *testing.T) {
 		{"PUT", "/api/tickets/PAY-1/branch", `{"branch":"taken","repoId":3}`, 409, `already exists on the git host`},
 		{"PUT", "/api/tickets/PAY-1/branch", `{"name":"x"}`, 400, `unknown field`},
 		{"POST", "/api/tickets/PAY-1/retry", "", 200, `"state":"new"`},
+		{"POST", "/api/tickets/PAY-1/retry", `{"skipChecks":true}`, 200, `"state":"new"`},
 		{"POST", "/api/tickets/PAY-1/retry", `{"note":"skip the symlink","attachments":[9,9]}`, 200, `"state":"new"`},
 		{"GET", "/api/tickets/PAY-1", "", 200, `"multiple":true`},
 		{"GET", "/api/tickets/PAY-1", "", 200, `"attachments":[{"contentType":"image/png","createdAt":"0001-01-01T00:00:00Z","id":4,"image":true,"name":"a.png","purpose":"answer","questionId":9,"size":3,"url":"/attachments/4"}]`},
@@ -523,12 +530,16 @@ func TestTicketEndpoints(t *testing.T) {
 		{"PUT", "/api/tickets/PAY-1/repos", `{"groupId":4}`, 200, `"group":{"id":4,"name":"Shop"}`},
 		{"PUT", "/api/tickets/PAY-1/repos", `{"repoIds":[3,5]}`, 200, `"repos":[{"branch":"","ciFixes":0,"files":0,"folder":"api","headSha":"","prUrl":"","repoId":3,"repoName":"api","role":"backend","state":"pending"},{"branch":"","ciFixes":0,"files":0,"folder":"web"`},
 		{"PUT", "/api/tickets/PAY-1/repos", `{}`, 400, `give repoIds or groupId`},
+		{"GET", "/api/tickets/PAY-1", "", 200, `"skipChecks":false`},
 	}
 	for _, c := range cases {
 		rec := h.do(c.method, c.path, c.body, cookie)
 		if rec.Code != c.want || !strings.Contains(rec.Body.String(), c.contains) {
 			t.Errorf("%s %s: %d %s (want %d containing %q)", c.method, c.path, rec.Code, rec.Body, c.want, c.contains)
 		}
+	}
+	if h.tickets.lastSkipChecks == nil || !*h.tickets.lastSkipChecks {
+		t.Errorf("retry skipChecks: %v", h.tickets.lastSkipChecks)
 	}
 	if g := h.tickets.lastGroup; g.Name != "Shop" || len(g.Members) != 1 {
 		t.Errorf("group input: %+v", g)

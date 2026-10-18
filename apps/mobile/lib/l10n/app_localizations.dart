@@ -20001,6 +20001,24 @@ abstract class AppLocalizations {
   /// **'No checks configured'**
   String get ticketNoChecks;
 
+  /// No description provided for @ticketChecksSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped for this ticket'**
+  String get ticketChecksSkipped;
+
+  /// No description provided for @ticketSkipChecks.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip checks: go to review on the code alone'**
+  String get ticketSkipChecks;
+
+  /// No description provided for @ticketSkipChecksHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For checks the run container can\'t run, such as a private dependency it can\'t fetch. Claude won\'t run the build, lint or tests either, so you review the code yourself. It stays on for this ticket until you untick it.'**
+  String get ticketSkipChecksHint;
+
   /// No description provided for @ticketStopRun.
   ///
   /// In en, this message translates to:

@@ -8,7 +8,7 @@ import PreviewShots from './PreviewShots.vue'
 
 const ticket = (over: Partial<Ticket> = {}): Ticket => ({
   key: 'PAY-1', source: 'jira', title: 't', description: '', priority: 'm', state: 'waiting_for_review', revision: 1, turns: 3,
-  branch: 'agnts/PAY-1', prUrl: '', kind: 'code', kindAuto: false, createdAt: '', updatedAt: '', previewState: 'done', canPreview: true, ...over,
+  branch: 'agnts/PAY-1', prUrl: '', kind: 'code', kindAuto: false, skipChecks: false, createdAt: '', updatedAt: '', previewState: 'done', canPreview: true, ...over,
 })
 const shot = (id: string, viewport: 'desktop' | 'phone', side: 'after' | 'before') => ({
   id, name: 'Tickets', route: '/tickets', viewport, side, url: `/tickets/PAY-1/preview/9/shots/${id}`,

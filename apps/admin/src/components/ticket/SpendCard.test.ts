@@ -65,7 +65,7 @@ describe('ProgressTrack spend', () => {
   it('puts analysis tokens under Analyze and coding plus fixes under Coding', () => {
     const ticket = {
       key: 'PAY-1', source: 'jira', title: 't', description: '', priority: 'm', state: 'waiting_for_review', revision: 1, turns: 3,
-      branch: 'agnts/PAY-1', prUrl: '', kind: 'code', kindAuto: false, createdAt: '', updatedAt: '',
+      branch: 'agnts/PAY-1', prUrl: '', kind: 'code', kindAuto: false, skipChecks: false, createdAt: '', updatedAt: '',
     } as const
     const w = mount(ProgressTrack, { props: { ticket, spend: stages }, global: { plugins: [i18n] } })
     expect(w.findAll('.stop .tok').map((x) => x.text())).toEqual(['1.5K tokens', '6.5K tokens'])

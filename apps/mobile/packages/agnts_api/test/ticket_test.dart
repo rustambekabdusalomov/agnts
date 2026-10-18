@@ -151,6 +151,12 @@ void main() {
       // TODO
     });
 
+    // coding runs skip the checks and go to review on the code alone (set with retryTicket or requestChanges)
+    // bool skipChecks
+    test('to test the property `skipChecks`', () async {
+      // TODO
+    });
+
     // The approved report is posted to the tracker issue
     // bool postReport
     test('to test the property `postReport`', () async {

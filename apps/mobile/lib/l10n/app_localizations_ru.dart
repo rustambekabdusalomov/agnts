@@ -11770,6 +11770,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ticketNoChecks => 'Проверки не настроены';
 
   @override
+  String get ticketChecksSkipped => 'Пропущены для этой задачи';
+
+  @override
+  String get ticketSkipChecks => 'Пропустить проверки: на ревью только по коду';
+
+  @override
+  String get ticketSkipChecksHint =>
+      'Для проверок, которые нельзя запустить в контейнере, например если он не может скачать приватную зависимость. Claude тоже не будет запускать сборку, линтер и тесты, поэтому код проверяете вы. Настройка действует для задачи, пока вы не снимете галочку.';
+
+  @override
   String get ticketStopRun => 'Остановить запуск';
 
   @override

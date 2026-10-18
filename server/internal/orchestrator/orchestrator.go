@@ -833,7 +833,7 @@ func (o *Orchestrator) openWorkspace(ctx context.Context, t domain.Ticket, rs []
 			// One archive at a time: each holds its mirror's read lock until
 			// read, and holding two while another run waits for one of them
 			// (in the other order) would deadlock.
-			wt := workspaceTree(func(i int) (io.ReadCloser, error) { return o.git.Archive(ctx, rs[i].Repository, rs[i].Branch) }, rs)
+			wt := workspaceTree(func(i int) (io.ReadCloser, error) { return o.git.Archive(ctx, rs[i].Repository, rs[i].Branch) }, rs, o.goWork(ctx, t, rs, run))
 			defer func() { _ = wt.Close() }()
 			tree = wt
 		}
@@ -1149,15 +1149,23 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		_, _ = ws.Exec(ctx, "agnts-preview stop", 30*time.Second)
 	}
 
-	if err := o.transition(ctx, &t, run, domain.StateTesting, "running checks", nil); err != nil {
-		return err
-	}
-	checks, err := o.checkAndFix(ctx, s, ws, &t, run, rs, &res)
-	if err != nil {
-		return err
+	var checks checkReport
+	if t.SkipChecks {
+		// The person reviews the code alone: nothing that runs the checks
+		// (the fix loop, the proof, coverage) runs either.
+		checks.OK = true
+		o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: "checks", Type: domain.EventCheck, Level: domain.LevelWarn,
+			Message: "checks skipped for this ticket: review the code without build, lint or test results"})
+	} else {
+		if err := o.transition(ctx, &t, run, domain.StateTesting, "running checks", nil); err != nil {
+			return err
+		}
+		if checks, err = o.checkAndFix(ctx, s, ws, &t, run, rs, &res); err != nil {
+			return err
+		}
 	}
 	var proof *domain.Proof
-	if a := o.latestAnalysis(ctx, t); proveDue(s, t, a) {
+	if a := o.latestAnalysis(ctx, t); !t.SkipChecks && proveDue(s, t, a) {
 		p := o.proveFix(ctx, ws, t, run, rs)
 		o.event(ctx, proofEvent(t.Key, run, p))
 		if p.Status == domain.ProofNotReproduced || p.Status == domain.ProofStillFailing {

@@ -27,7 +27,7 @@ func (o *Orchestrator) refreshToolchains(ctx context.Context, repo *domain.Repos
 		return
 	}
 	o.scanAgentConfig(ctx, repo, tree, ticketKey, runID)
-	det := toolchain.Detect(tree)
+	det := toolchain.DetectFor(tree, toolchain.Repo{GitHosts: []string{toolchain.HostOf(repo.CloneURL)}, EnvNames: repo.BuildEnvNames})
 	noCmds := repo.BuildCmd == "" && repo.LintCmd == "" && repo.TestCmd == ""
 	fillCmds := noCmds && (det.Build != "" || det.Lint != "" || det.Test != "")
 	changed := !repo.ToolchainsOverride && !sameToolchains(repo.Toolchains, det.Toolchains)

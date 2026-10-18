@@ -13,6 +13,8 @@ abstract class _$RequestChangesRequestCWProxy {
 
   RequestChangesRequest attachments(List<int>? attachments);
 
+  RequestChangesRequest skipChecks(bool? skipChecks);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `RequestChangesRequest(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -23,6 +25,7 @@ abstract class _$RequestChangesRequestCWProxy {
     String feedback,
     List<ShotRef>? shots,
     List<int>? attachments,
+    bool? skipChecks,
   });
 }
 
@@ -44,6 +47,10 @@ class _$RequestChangesRequestCWProxyImpl
       this(attachments: attachments);
 
   @override
+  RequestChangesRequest skipChecks(bool? skipChecks) =>
+      this(skipChecks: skipChecks);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `RequestChangesRequest(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -54,6 +61,7 @@ class _$RequestChangesRequestCWProxyImpl
     Object? feedback = const $CopyWithPlaceholder(),
     Object? shots = const $CopyWithPlaceholder(),
     Object? attachments = const $CopyWithPlaceholder(),
+    Object? skipChecks = const $CopyWithPlaceholder(),
   }) {
     return RequestChangesRequest(
       feedback: feedback == const $CopyWithPlaceholder()
@@ -68,6 +76,10 @@ class _$RequestChangesRequestCWProxyImpl
           ? _value.attachments
           // ignore: cast_nullable_to_non_nullable
           : attachments as List<int>?,
+      skipChecks: skipChecks == const $CopyWithPlaceholder()
+          ? _value.skipChecks
+          // ignore: cast_nullable_to_non_nullable
+          : skipChecks as bool?,
     );
   }
 }
@@ -99,6 +111,7 @@ RequestChangesRequest _$RequestChangesRequestFromJson(
       'attachments',
       (v) => (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList(),
     ),
+    skipChecks: $checkedConvert('skipChecks', (v) => v as bool?),
   );
   return val;
 });
@@ -109,4 +122,5 @@ Map<String, dynamic> _$RequestChangesRequestToJson(
   'feedback': instance.feedback,
   'shots': ?instance.shots?.map((e) => e.toJson()).toList(),
   'attachments': ?instance.attachments,
+  'skipChecks': ?instance.skipChecks,
 };

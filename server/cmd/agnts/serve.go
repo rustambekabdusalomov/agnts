@@ -903,7 +903,7 @@ func (d repoDetector) Detect(ctx context.Context, repo domain.Repository) (toolc
 	if err != nil {
 		return toolchain.Detection{}, err
 	}
-	return toolchain.Detect(tree), nil
+	return toolchain.DetectFor(tree, toolchain.Repo{GitHosts: []string{toolchain.HostOf(repo.CloneURL)}, EnvNames: repo.BuildEnvNames}), nil
 }
 
 // sweepCaches empties repository package caches that grew over max or

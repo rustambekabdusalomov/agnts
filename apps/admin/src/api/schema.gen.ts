@@ -4824,6 +4824,8 @@ export interface components {
             kind: components["schemas"]["TicketKind"];
             /** @description agnts picks the kind; the analysis may still change it */
             kindAuto: boolean;
+            /** @description coding runs skip the checks and go to review on the code alone (set with retryTicket or requestChanges) */
+            skipChecks: boolean;
             /** @description The approved report is posted to the tracker issue */
             postReport?: boolean;
             /** @description The plan or bug investigation this ticket implements */
@@ -7822,6 +7824,8 @@ export interface operations {
                     shots?: components["schemas"]["ShotRef"][];
                     /** @description Uploads that go with the feedback (mockups, logs, screenshots); the coding run reads them */
                     attachments?: number[];
+                    /** @description Skip the build, lint and test checks (and the proof and coverage that run tests) in this and later coding runs of the ticket, going to review on the code alone; false turns them back on. Left out, the ticket keeps its setting. */
+                    skipChecks?: boolean;
                 };
             };
         };
@@ -7947,6 +7951,8 @@ export interface operations {
                     note?: string;
                     /** @description Uploads that help get past the failure; the next coding run reads them. Same rule as note. */
                     attachments?: number[];
+                    /** @description Skip the build, lint and test checks (and the proof and coverage that run tests) in this and later coding runs of the ticket, going to review on the code alone; false turns them back on. Left out, the ticket keeps its setting. */
+                    skipChecks?: boolean;
                 };
             };
         };

@@ -41,7 +41,7 @@ func SkipDir(name string) bool {
 var wantedNames = map[string]bool{
 	"mise.toml": true, ".mise.toml": true, ".tool-versions": true,
 	"go.mod": true, "go.work": true,
-	"package.json": true, ".nvmrc": true, ".node-version": true, "deno.json": true, "deno.jsonc": true, ".dvmrc": true, ".bun-version": true,
+	"package.json": true, ".npmrc": true, ".nvmrc": true, ".node-version": true, "deno.json": true, "deno.jsonc": true, ".dvmrc": true, ".bun-version": true,
 	"pyproject.toml": true, ".python-version": true, "runtime.txt": true, "requirements.txt": true, "requirements-dev.txt": true,
 	"dev-requirements.txt": true, "requirements_dev.txt": true, "setup.cfg": true, "Pipfile": true,
 	"Cargo.toml": true, "rust-toolchain": true, "rust-toolchain.toml": true,
@@ -90,11 +90,30 @@ type detector struct {
 	cmds  map[string]*steps // by project dir
 	dirs  []string          // project dirs in the order commands were added
 	notes []string
+	// gitHosts are the self-hosted git hosts whose modules runs cannot
+	// fetch without a token.
+	gitHosts []string
+	env      []string // build environment names
+}
+
+// Repo is what detection knows of the repository besides its tree.
+type Repo struct {
+	// GitHosts are the hosts it is cloned from (HostOf its clone URL): Go
+	// modules required from one of them, unless it is a public git host,
+	// get a note about the token runs need to fetch them.
+	GitHosts []string
+	// EnvNames are its build environment's variable names: a note about a
+	// token the build environment has already is left out.
+	EnvNames []string
 }
 
 // Detect looks at a repository tree.
-func Detect(t Tree) Detection {
-	d := &detector{t: t, pins: map[string]domain.Toolchain{}, tools: map[string]domain.Toolchain{}, cmds: map[string]*steps{}}
+func Detect(t Tree) Detection { return DetectFor(t, Repo{}) }
+
+// DetectFor looks at a repository tree, with what is known of it.
+func DetectFor(t Tree, r Repo) Detection {
+	d := &detector{t: t, pins: map[string]domain.Toolchain{}, tools: map[string]domain.Toolchain{}, cmds: map[string]*steps{},
+		gitHosts: selfHosted(r.GitHosts), env: r.EnvNames}
 	dirs := t.projectDirs()
 	for _, dir := range dirs {
 		d.readPins(dir)
@@ -105,6 +124,7 @@ func Detect(t Tree) Detection {
 	if len(d.dirs) == 0 {
 		d.makeProject("") // no known project anywhere: the root Makefile, if any
 	}
+	d.privateNotes(dirs)
 	// Pinned tools no detector asked for (terraform in .tool-versions, ...).
 	pinned := make([]string, 0, len(d.pins))
 	for k := range d.pins {

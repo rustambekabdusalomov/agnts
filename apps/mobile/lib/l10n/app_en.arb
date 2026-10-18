@@ -6884,6 +6884,9 @@
     }
   },
   "ticketNoChecks": "No checks configured",
+  "ticketChecksSkipped": "Skipped for this ticket",
+  "ticketSkipChecks": "Skip checks: go to review on the code alone",
+  "ticketSkipChecksHint": "For checks the run container can't run, such as a private dependency it can't fetch. Claude won't run the build, lint or tests either, so you review the code yourself. It stays on for this ticket until you untick it.",
   "ticketStopRun": "Stop run",
   "ticketStopConfirm": "Stop the run on {key}? You can retry it later.",
   "@ticketStopConfirm": {
@@ -6913,6 +6916,8 @@
   "ticketReviewSubMain": "Nothing has left the server yet. Approving pushes straight to the default branch.",
   "ticketWhatAgntsDid": "What agnts did",
   "ticketDiff": "Diff",
+  "ticketDiffReposLabel": "Changes by repository",
+  "ticketDiffOtherRepo": "Other files",
   "ticketFeedback": "Feedback",
   "ticketAssignTitle": "Assign the pull request",
   "ticketAssignSub": "Optional. Pick who it is assigned to on the git host when agnts opens it.",

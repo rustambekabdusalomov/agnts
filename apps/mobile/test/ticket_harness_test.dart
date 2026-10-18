@@ -49,6 +49,7 @@ Ticket _ticket({
       afterApprove: after,
       kind: kind,
       kindAuto: kindAuto,
+      skipChecks: false,
       createdAt: DateTime(2026),
       updatedAt: DateTime(2026),
     );

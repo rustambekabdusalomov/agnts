@@ -693,6 +693,57 @@ func TestChecksKeepFailingThenRetry(t *testing.T) {
 	h.expect("PAY-3", domain.StateCoding)
 }
 
+// Checks the container cannot run (a private dependency it cannot fetch)
+// fail every round; retried with the checks skipped, the coding run goes
+// to review on the code alone, and they stay skipped until turned back on.
+func TestRetrySkippingChecks(t *testing.T) {
+	h := newHarness(t)
+	h.ingest("PAY-8")
+	h.runner.scripts = []script{
+		{result: ok("s8"), files: map[string]string{orchestrator.AnalysisPath: analysis(0)}},
+		{result: ok("s8"), edit: "v1"},
+		{result: ok("s8"), edit: "v2"},
+		{result: ok("s8"), edit: "v3"},
+	}
+	h.runner.execs["go test ./..."] = []orchestrator.ExecResult{{ExitCode: 1, Output: "boom"}, {ExitCode: 1, Output: "boom"}}
+	h.step()
+	h.step()
+	h.expect("PAY-8", domain.StateFailed)
+	h.idle()
+
+	if _, err := h.o.SetSkipChecks(h.ctx, "PAY-8", true, domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := h.o.Retry(h.ctx, "PAY-8", domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
+	h.step()
+	tk := h.expect("PAY-8", domain.StateWaitingForReview)
+	if !tk.SkipChecks {
+		t.Fatal("skipChecks not kept")
+	}
+	if n := len(h.runner.execs["go test ./..."]); n != 0 {
+		t.Fatalf("%d check results left unused, want 0: the skipped run ran no checks", n)
+	}
+	last := h.runner.prompts[len(h.runner.prompts)-1]
+	if !strings.Contains(last, "The checks are skipped for this ticket") || strings.Contains(last, "Run the project's build, lint and tests yourself") {
+		t.Fatalf("prompt does not say the checks are skipped:\n%s", last)
+	}
+	evs, _ := h.store.Events(h.ctx, orchestrator.EventFilter{TicketKey: "PAY-8"})
+	if !slices.ContainsFunc(evs, func(e domain.Event) bool { return strings.HasPrefix(e.Message, "checks skipped for this ticket") }) {
+		t.Fatal("no event says the checks were skipped")
+	}
+
+	// Waiting for review, they can be turned back on; while coding, not.
+	if tk, err := h.o.SetSkipChecks(h.ctx, "PAY-8", false, domain.OriginWeb); err != nil || tk.SkipChecks {
+		t.Fatalf("turn back on: %+v %v", tk.SkipChecks, err)
+	}
+	h.ingest("PAY-9")
+	if _, err := h.o.SetSkipChecks(h.ctx, "PAY-9", true, domain.OriginWeb); err == nil {
+		t.Fatal("skipped the checks of a new ticket")
+	}
+}
+
 func TestRetryWithNote(t *testing.T) {
 	h := newHarness(t)
 	h.ingest("PAY-6")

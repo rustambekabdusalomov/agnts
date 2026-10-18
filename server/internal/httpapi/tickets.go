@@ -25,6 +25,7 @@ type Tickets interface {
 	RequestChanges(ctx context.Context, key, feedback string, shots []domain.ShotRef, files []int64, origin domain.Origin) (domain.Ticket, error)
 	Reject(ctx context.Context, key, reason string, origin domain.Origin) (domain.Ticket, error)
 	RetryWithNote(ctx context.Context, key, note string, files []int64, origin domain.Origin) (domain.Ticket, error)
+	SetSkipChecks(ctx context.Context, key string, skip bool, origin domain.Origin) (domain.Ticket, error)
 	Continue(ctx context.Context, key, note string, files []int64, origin domain.Origin) (domain.Ticket, error)
 	StartOver(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	RenameBranch(ctx context.Context, key string, repoID int64, name string, origin domain.Origin) (domain.Ticket, error)
@@ -303,6 +304,9 @@ func (s *Server) RequestChanges(w http.ResponseWriter, r *http.Request, key gen.
 				shots = append(shots, domain.ShotRef{RunID: x.RunId, ShotID: x.ShotId})
 			}
 		}
+		if err := s.skipChecks(ctx, key, req.SkipChecks, origin(r)); err != nil {
+			return domain.Ticket{}, err
+		}
 		return s.opt.Tickets.RequestChanges(ctx, key, req.Feedback, shots, ids(req.Attachments), origin(r))
 	})
 }
@@ -339,8 +343,21 @@ func (s *Server) RetryTicket(w http.ResponseWriter, r *http.Request, key gen.Tic
 		note = *req.Note
 	}
 	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
+		if err := s.skipChecks(ctx, key, req.SkipChecks, origin(r)); err != nil {
+			return domain.Ticket{}, err
+		}
 		return s.opt.Tickets.RetryWithNote(ctx, key, note, ids(req.Attachments), origin(r))
 	})
+}
+
+// skipChecks sets the ticket's skipChecks before a retry or requested
+// changes, when the request gives it.
+func (s *Server) skipChecks(ctx context.Context, key string, skip *bool, o domain.Origin) error {
+	if skip == nil {
+		return nil
+	}
+	_, err := s.opt.Tickets.SetSkipChecks(ctx, key, *skip, o)
+	return err
 }
 
 // ContinueTicket implements gen.ServerInterface.
@@ -468,7 +485,7 @@ func toTicket(t domain.Ticket) gen.Ticket {
 		Key: t.Key, Source: gen.TicketSource(t.Source), RepoId: t.RepoID, Title: t.Title, Description: t.Description,
 		Priority: t.Priority, State: gen.TicketState(t.State), Revision: t.Revision, Turns: t.Turns,
 		Branch: t.Branch, PrNumber: t.PRNumber, PrUrl: t.PRURL, CreatedAt: t.CreatedAt, UpdatedAt: t.UpdatedAt,
-		Kind: gen.TicketKind(t.Kind), KindAuto: t.KindAuto, MemberId: t.MemberID, QueuedAt: t.QueuedAt,
+		Kind: gen.TicketKind(t.Kind), KindAuto: t.KindAuto, SkipChecks: t.SkipChecks, MemberId: t.MemberID, QueuedAt: t.QueuedAt,
 	}
 	if t.TicketNumber != "" {
 		out.TicketNumber = ptr(t.TicketNumber)

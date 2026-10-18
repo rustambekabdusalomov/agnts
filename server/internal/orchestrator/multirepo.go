@@ -24,6 +24,9 @@ type runRepo struct {
 	// Frozen: its pull request is merged or closed. The run sees it at the
 	// default branch, and nothing in it is committed or pushed again.
 	Frozen bool
+	// GoLocal names the repositories of the run whose folders its Go
+	// builds use through /workspace/go.work (see goWorkFor).
+	GoLocal []string
 }
 
 // Folder is the repository's folder under /workspace ("" for /workspace).
@@ -155,9 +158,10 @@ func repoNames(rs []runRepo) string {
 }
 
 // workspaceTree is the tar a run of several repositories starts from: each
-// repository under its folder. open archives the i-th repository; it is
-// called only once the one before is read and closed.
-func workspaceTree(open func(i int) (io.ReadCloser, error), rs []runRepo) io.ReadCloser {
+// repository under its folder, then the go.work, if any, at the top. open
+// archives the i-th repository; it is called only once the one before is
+// read and closed.
+func workspaceTree(open func(i int) (io.ReadCloser, error), rs []runRepo, gowork string) io.ReadCloser {
 	pr, pw := io.Pipe()
 	go func() {
 		tw := tar.NewWriter(pw)
@@ -169,6 +173,17 @@ func workspaceTree(open func(i int) (io.ReadCloser, error), rs []runRepo) io.Rea
 			}
 			if err != nil {
 				_ = pw.CloseWithError(fmt.Errorf("%s: %w", rs[i].Name, err))
+				return
+			}
+		}
+		if gowork != "" {
+			if err := tw.WriteHeader(&tar.Header{Name: "go.work", Typeflag: tar.TypeReg, Mode: 0o644, Size: int64(len(gowork)),
+				Uid: agentUID, Gid: agentUID, Uname: "agent", Gname: "agent"}); err != nil {
+				_ = pw.CloseWithError(err)
+				return
+			}
+			if _, err := io.WriteString(tw, gowork); err != nil {
+				_ = pw.CloseWithError(err)
 				return
 			}
 		}

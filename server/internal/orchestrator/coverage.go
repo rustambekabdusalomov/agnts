@@ -15,7 +15,11 @@ import (
 // the lines the change adds. It never fails the run: what it could not do
 // is in Coverage.Error. In a ticket of several repositories each changed
 // repository with coverage on is measured, and the results are added up.
+// None for a ticket whose checks are skipped: coverage runs the tests.
 func (o *Orchestrator) measureCoverage(ctx context.Context, ws Workspace, t domain.Ticket, run *domain.Run, rs []runRepo, files []domain.FileChange) *domain.Coverage {
+	if t.SkipChecks {
+		return nil
+	}
 	if len(rs) == 1 {
 		return o.measureRepoCoverage(ctx, ws, t, run, rs[0], files, false)
 	}

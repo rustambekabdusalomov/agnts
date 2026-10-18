@@ -59,6 +59,8 @@ abstract class _$TicketCWProxy {
 
   Ticket kindAuto(bool kindAuto);
 
+  Ticket skipChecks(bool skipChecks);
+
   Ticket postReport(bool? postReport);
 
   Ticket parentKey(String? parentKey);
@@ -150,6 +152,7 @@ abstract class _$TicketCWProxy {
     bool? askFirst,
     TicketKind kind,
     bool kindAuto,
+    bool skipChecks,
     bool? postReport,
     String? parentKey,
     String? followUpOf,
@@ -267,6 +270,9 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
 
   @override
   Ticket kindAuto(bool kindAuto) => this(kindAuto: kindAuto);
+
+  @override
+  Ticket skipChecks(bool skipChecks) => this(skipChecks: skipChecks);
 
   @override
   Ticket postReport(bool? postReport) => this(postReport: postReport);
@@ -396,6 +402,7 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
     Object? askFirst = const $CopyWithPlaceholder(),
     Object? kind = const $CopyWithPlaceholder(),
     Object? kindAuto = const $CopyWithPlaceholder(),
+    Object? skipChecks = const $CopyWithPlaceholder(),
     Object? postReport = const $CopyWithPlaceholder(),
     Object? parentKey = const $CopyWithPlaceholder(),
     Object? followUpOf = const $CopyWithPlaceholder(),
@@ -531,6 +538,10 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
           ? _value.kindAuto
           // ignore: cast_nullable_to_non_nullable
           : kindAuto as bool,
+      skipChecks: skipChecks == const $CopyWithPlaceholder()
+          ? _value.skipChecks
+          // ignore: cast_nullable_to_non_nullable
+          : skipChecks as bool,
       postReport: postReport == const $CopyWithPlaceholder()
           ? _value.postReport
           // ignore: cast_nullable_to_non_nullable
@@ -679,6 +690,7 @@ Ticket _$TicketFromJson(
       'prUrl',
       'kind',
       'kindAuto',
+      'skipChecks',
       'createdAt',
       'updatedAt',
     ],
@@ -734,6 +746,7 @@ Ticket _$TicketFromJson(
     askFirst: $checkedConvert('askFirst', (v) => v as bool?),
     kind: $checkedConvert('kind', (v) => $enumDecode(_$TicketKindEnumMap, v)),
     kindAuto: $checkedConvert('kindAuto', (v) => v as bool),
+    skipChecks: $checkedConvert('skipChecks', (v) => v as bool),
     postReport: $checkedConvert('postReport', (v) => v as bool?),
     parentKey: $checkedConvert('parentKey', (v) => v as String?),
     followUpOf: $checkedConvert('followUpOf', (v) => v as String?),
@@ -843,6 +856,7 @@ Map<String, dynamic> _$TicketToJson(Ticket instance) => <String, dynamic>{
   'askFirst': ?instance.askFirst,
   'kind': _$TicketKindEnumMap[instance.kind]!,
   'kindAuto': instance.kindAuto,
+  'skipChecks': instance.skipChecks,
   'postReport': ?instance.postReport,
   'parentKey': ?instance.parentKey,
   'followUpOf': ?instance.followUpOf,

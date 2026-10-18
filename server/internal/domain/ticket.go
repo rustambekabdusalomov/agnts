@@ -109,6 +109,10 @@ type Ticket struct {
 	KindAuto bool
 	// PostReport posts an approved report to the tracker issue.
 	PostReport bool
+	// SkipChecks: coding runs skip the check commands (and the proof and
+	// coverage that run tests) and go to review on the code alone. Set on
+	// retry or requested changes, for checks the container cannot run.
+	SkipChecks bool
 	// ParentKey is the plan or bug report this ticket implements, or "".
 	ParentKey string
 	// FollowUpOf is the ticket that suggested this one as a follow-up, or "".

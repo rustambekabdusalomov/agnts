@@ -37,6 +37,7 @@ Ticket _ticket(TicketKind kind, {bool auto = false, TicketState state = TicketSt
       prUrl: '',
       kind: kind,
       kindAuto: auto,
+      skipChecks: false,
       createdAt: DateTime(2026),
       updatedAt: DateTime(2026),
     );

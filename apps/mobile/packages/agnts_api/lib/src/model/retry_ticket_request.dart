@@ -23,6 +23,8 @@ class RetryTicketRequest {
      this.note,
 
      this.attachments,
+
+     this.skipChecks,
   });
 
       /// How to get past the failure. The next coding run gets it with the error, like requested changes. Not allowed when the ticket resumes at pushing, since no Claude run follows.
@@ -51,17 +53,32 @@ class RetryTicketRequest {
 
 
 
+      /// Skip the build, lint and test checks (and the proof and coverage that run tests) in this and later coding runs of the ticket, going to review on the code alone; false turns them back on. Left out, the ticket keeps its setting.
+  @JsonKey(
+    
+    name: r'skipChecks',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? skipChecks;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is RetryTicketRequest &&
       other.note == note &&
-      other.attachments == attachments;
+      other.attachments == attachments &&
+      other.skipChecks == skipChecks;
 
     @override
     int get hashCode =>
         note.hashCode +
-        attachments.hashCode;
+        attachments.hashCode +
+        skipChecks.hashCode;
 
   factory RetryTicketRequest.fromJson(Map<String, dynamic> json) => _$RetryTicketRequestFromJson(json);
 
