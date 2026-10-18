@@ -2,10 +2,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:agnts_api/agnts_api.dart';
 
 import '../../theme.dart';
+import '../../widgets/sticky.dart';
 import 'diff_highlight.dart';
 import 'diff_lines.dart';
 import 'ticket_repos.dart';
@@ -63,77 +63,8 @@ class _FileDiffState extends State<FileDiff> {
       margin: const EdgeInsets.only(top: 8),
       decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line), borderRadius: BorderRadius.circular(14)),
       clipBehavior: Clip.antiAlias,
-      child: _open ? _StickyHeader(header: header, content: _Diff(f.diff, path: f.path)) : header(false),
+      child: _open ? StickyHeader(header: header, content: _Diff(f.diff, path: f.path)) : header(false),
     );
-  }
-}
-
-/// Keeps a header in view at the top of the page while the content under
-/// it scrolls past, as far as the content goes; the next file's header then
-/// takes over. The page is a plain list, not slivers, so the header is laid
-/// out at the top once (invisible, keeping its space) and painted over the
-/// content, moved down by how far the page scrolled past it.
-class _StickyHeader extends StatefulWidget {
-  const _StickyHeader({required this.header, required this.content});
-  final Widget Function(bool stuck) header;
-  final Widget content;
-
-  @override
-  State<_StickyHeader> createState() => _StickyHeaderState();
-}
-
-class _StickyHeaderState extends State<_StickyHeader> {
-  final _headerKey = GlobalKey();
-  ScrollPosition? _position;
-  double _shift = 0;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final p = Scrollable.maybeOf(context, axis: Axis.vertical)?.position;
-    if (p != _position) {
-      _position?.removeListener(_place);
-      _position = p?..addListener(_place);
-    }
-  }
-
-  @override
-  void dispose() {
-    _position?.removeListener(_place);
-    super.dispose();
-  }
-
-  void _place() {
-    if (!mounted) return;
-    final box = context.findRenderObject() as RenderBox?;
-    final header = _headerKey.currentContext?.findRenderObject() as RenderBox?;
-    final position = _position;
-    if (box == null || header == null || position == null || !box.attached || !box.hasSize || !header.hasSize) return;
-    final viewport = RenderAbstractViewport.maybeOf(box);
-    if (viewport == null) return;
-    // Where the content's top is, from the top of the page's visible part:
-    // the scroll offset that would put it there, less the current one.
-    final top = viewport.getOffsetToReveal(box, 0).offset - position.pixels;
-    final shift = (-top).clamp(0.0, math.max(0.0, box.size.height - header.size.height)).toDouble();
-    if (shift != _shift) setState(() => _shift = shift);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // After layout the content's height may have changed (highlighting).
-    WidgetsBinding.instance.addPostFrameCallback((_) => _place());
-    return Stack(children: [
-      Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Visibility(visible: false, maintainSize: true, maintainAnimation: true, maintainState: true, child: widget.header(false)),
-        widget.content,
-      ]),
-      Positioned(
-        top: 0,
-        left: 0,
-        right: 0,
-        child: Transform.translate(offset: Offset(0, _shift), child: KeyedSubtree(key: _headerKey, child: widget.header(_shift > 0))),
-      ),
-    ]);
   }
 }
 

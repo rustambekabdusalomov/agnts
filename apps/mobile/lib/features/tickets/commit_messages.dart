@@ -9,6 +9,9 @@ import 'ticket_repos.dart';
 /// change before agnts pushes them.
 bool hasEditableCommits(Ticket t) => (t.repos ?? const []).any((r) => r.commits?.isNotEmpty ?? false);
 
+/// How many such commits [t] has, in all its repositories.
+int commitCount(Ticket t) => (t.repos ?? const []).fold(0, (n, r) => n + (r.commits?.length ?? 0));
+
 /// The commits agnts made on a ticket's branches and has not pushed yet,
 /// newest first: the short sha and subject line of each, a tap on one
 /// editing its message ([onEdit]; null: read only). In a ticket of several

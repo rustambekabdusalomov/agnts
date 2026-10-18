@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:agnts_api/agnts_api.dart';
 
@@ -25,7 +24,6 @@ class MoreScreen extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final c = Agnts.of(context);
     final usage = ref.watch(usageProvider);
-    final settings = ref.watch(settingsProvider);
     final session = ref.watch(sessionProvider).value;
     final workspace = ref.watch(currentWorkspaceProvider);
     final workspaces = ref.watch(meProvider).value?.workspaces?.length ?? 0;
@@ -161,52 +159,13 @@ class MoreScreen extends ConsumerWidget {
               _NavRow('users', l.navProfile, '/profile'),
               _NavRow('feedback', l.feedbackTitle, '/feedback'),
             ]),
-            const AppearanceSection(),
-            // Default models and push notifications
-            ...settings.when(
-              data: (s) => [_ModelsSection(s), _PushSection(s)],
-              error: (_, _) => [SectionHeader(l.mobileDefaultModels), card(Text(l.commonError))],
-              loading: () => [const Padding(padding: EdgeInsets.all(16), child: LinearProgressIndicator())],
-            ),
-            // Integrations
-            SectionHeader(l.mobileIntegrations),
-            ref.watch(integrationsProvider).when(
-                  data: (list) => list.isEmpty
-                      ? card(Text(l.mobileNoEvents, style: TextStyle(color: c.ink3)))
-                      : group([
-                          for (final i in list)
-                            ListRow(
-                              leading: _ProviderTile(i.provider),
-                              title: _providerName(l, i.provider),
-                              subtitle: i.account,
-                              trailing: ToneBadge(i.connected ? l.mobileConnected : l.mobileNotConnected, i.connected ? Tone.ok : Tone.gray),
-                              onTap: () => context.push('/integrations/${i.provider}'),
-                            ),
-                        ]),
-                  error: (_, _) => card(Text(l.commonError)),
-                  loading: () => const Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: LinearProgressIndicator()),
-                ),
-            // Repositories
-            SectionHeader(l.mobileRepositories),
-            ref.watch(reposProvider).when(
-                  data: (list) => list.isEmpty
-                      ? card(Text(l.mobileNoEvents, style: TextStyle(color: c.ink3)))
-                      : group([
-                          for (final r in list)
-                            ListRow(
-                              title: r.name,
-                              subtitle: [
-                                r.defaultBranch,
-                                if ((r.toolchains ?? const []).isNotEmpty) r.toolchains!.map((t) => '${t.tool} ${t.version}').join(', '),
-                                r.testCmd.isEmpty ? '—' : r.testCmd,
-                              ].join(' · '),
-                              value: '${r.openTickets}',
-                              onTap: () => context.push(Uri(path: '/repos/${r.id}', queryParameters: {'name': r.name}).toString()),
-                            ),
-                        ]),
-                  error: (_, _) => card(Text(l.commonError)),
-                  loading: () => const Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: LinearProgressIndicator()),
-                ),
+            // Settings, each on a page of its own: the list here stays short.
+            SectionHeader(l.navSettings),
+            group([
+              _NavRow('image', l.mobileAppearance, '/settings/appearance'),
+              _NavRow('analytics', l.mobileDefaultModels, '/settings/models'),
+              _NavRow('needs', l.mobilePush, '/settings/notifications'),
+            ]),
             const SizedBox(height: 22),
             group([
               ListRow(title: l.mobileSignOut, titleColor: c.badInk, trailing: const SizedBox.shrink(), onTap: () => signOut(ref)),
@@ -223,9 +182,62 @@ class MoreScreen extends ConsumerWidget {
   }
 }
 
+/// A More setting on a page of its own, under a bar back to More.
+class _SettingsPage extends StatelessWidget {
+  const _SettingsPage({required this.title, required this.child});
+  final String title;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        appBar: DetailBar(backLabel: AppLocalizations.of(context).mobileMore, title: title),
+        body: ListView(padding: const EdgeInsets.only(top: 8, bottom: 24), children: [child]),
+      );
+}
+
+/// Theme and language (Settings → Appearance).
+class AppearancePage extends StatelessWidget {
+  const AppearancePage({super.key});
+
+  @override
+  Widget build(BuildContext context) =>
+      _SettingsPage(title: AppLocalizations.of(context).mobileAppearance, child: const AppearanceSection(header: false));
+}
+
+/// The workspace's models per stage (Settings → Default models).
+class DefaultModelsPage extends ConsumerWidget {
+  const DefaultModelsPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => _SettingsPage(
+        title: AppLocalizations.of(context).mobileDefaultModels,
+        child: _settingsBody(context, ref, (s) => _ModelsSection(s)),
+      );
+}
+
+/// Which push notifications this phone gets (Settings → Notifications).
+class NotificationsPage extends ConsumerWidget {
+  const NotificationsPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => _SettingsPage(
+        title: AppLocalizations.of(context).mobilePush,
+        child: _settingsBody(context, ref, (s) => _PushSection(s)),
+      );
+}
+
+Widget _settingsBody(BuildContext context, WidgetRef ref, Widget Function(Settings s) of) => ref.watch(settingsProvider).when(
+      data: of,
+      error: (_, _) => Padding(padding: const EdgeInsets.all(16), child: Text(AppLocalizations.of(context).commonError)),
+      loading: () => const Padding(padding: EdgeInsets.all(16), child: LinearProgressIndicator()),
+    );
+
 /// Theme and language: on this phone only.
 class AppearanceSection extends ConsumerWidget {
-  const AppearanceSection({super.key});
+  const AppearanceSection({super.key, this.header = true});
+
+  /// Off on its own page, whose title says it already.
+  final bool header;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -234,7 +246,7 @@ class AppearanceSection extends ConsumerWidget {
     final prefs = ref.watch(prefsProvider);
     final lang = prefs.locale?.languageCode;
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      SectionHeader(l.mobileAppearance),
+      if (header) SectionHeader(l.mobileAppearance),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: ListGroup(children: [
@@ -346,6 +358,7 @@ String _modelName(String m) {
 class _ModelsSection extends ConsumerWidget {
   const _ModelsSection(this.s);
   final Settings s;
+  static const header = false; // on its own page
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -359,7 +372,7 @@ class _ModelsSection extends ConsumerWidget {
       if (s.models.preview != null) ('preview', l.mpreviewSettingsModel, l.mpreviewSettingsModelHelp, s.models.preview!),
     ];
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      SectionHeader(l.mobileDefaultModels),
+      if (header) SectionHeader(l.mobileDefaultModels),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: ListGroup(children: [
@@ -420,6 +433,7 @@ class _ModelsSection extends ConsumerWidget {
 class _PushSection extends ConsumerWidget {
   const _PushSection(this.s);
   final Settings s;
+  static const header = false; // on its own page
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -439,7 +453,7 @@ class _PushSection extends ConsumerWidget {
           ),
         );
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      SectionHeader(l.mobilePush),
+      if (header) SectionHeader(l.mobilePush),
       if (!Push.available)
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
@@ -538,50 +552,3 @@ class _NavRow extends StatelessWidget {
       );
 }
 
-String _providerName(AppLocalizations l, String p) => switch (p) {
-      'jira' => l.integrationsName_jira,
-      'plane' => l.integrationsName_plane,
-      'github' => l.integrationsName_github,
-      'gitlab' => l.integrationsName_gitlab,
-      'claude' => l.integrationsName_claude,
-      'telegram' => l.integrationsName_telegram,
-      _ => p.isEmpty ? p : p[0].toUpperCase() + p.substring(1),
-    };
-
-const _gitIcon = '<circle cx="6" cy="5" r="2.2"/><circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="7" r="2.2"/>'
-    '<path d="M6 7.2v9.6M18 9.2c0 4-6 3.5-11.2 8"/>';
-const _trackerIcon = '<rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M8 8h8M8 12h8M8 16h5"/>';
-const _plugIcon = '<path d="M9 7V3M15 7V3M7 7h10v4a5 5 0 0 1-10 0z"/><path d="M12 16v5"/>';
-const _sendIcon = '<path d="M21 4L3 11l6 2.5L11 20l3-5 5 4z"/>';
-const _sparkIcon = '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"/>';
-
-/// The coloured square provider tile (.ptile).
-class _ProviderTile extends StatelessWidget {
-  const _ProviderTile(this.provider);
-  final String provider;
-
-  @override
-  Widget build(BuildContext context) {
-    final (tint, icon) = switch (provider) {
-      'github' => (const Color(0xFF24292F), _gitIcon),
-      'gitlab' => (const Color(0xFFC2410C), _gitIcon),
-      'jira' => (const Color(0xFF1D4ED8), _trackerIcon),
-      'plane' => (const Color(0xFF3F76FF), _trackerIcon),
-      'telegram' => (const Color(0xFF229ED9), _sendIcon),
-      'claude' => (const Color(0xFFC15F3C), _sparkIcon),
-      _ => (const Color(0xFF6B6F7A), _plugIcon),
-    };
-    return Container(
-      width: 32,
-      height: 32,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(color: tint, borderRadius: BorderRadius.circular(9)),
-      child: SvgPicture.string(
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" '
-        'stroke-linecap="round" stroke-linejoin="round">$icon</svg>',
-        width: 18,
-        height: 18,
-      ),
-    );
-  }
-}

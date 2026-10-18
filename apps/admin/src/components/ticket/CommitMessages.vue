@@ -6,6 +6,7 @@ import { api, HttpError, unwrap } from '../../api/client'
 import type { Ticket } from '../../api/types'
 import { useWorkspace } from '../../stores/workspace'
 import CheckBox from '../form/CheckBox.vue'
+import TicketSection from './TicketSection.vue'
 
 // The commits agnts made on a ticket's branches and has not pushed yet
 // (each repository's commits, newest first), each message editable until
@@ -18,6 +19,7 @@ const workspace = useWorkspace()
 
 const repos = computed(() => (props.ticket.repos ?? []).filter((r) => r.commits?.length))
 const multi = computed(() => (props.ticket.repos?.length ?? 0) > 1)
+const count = computed(() => repos.value.reduce((n, r) => n + (r.commits?.length ?? 0), 0))
 
 const editing = ref('') // sha of the commit being edited
 const message = ref('')
@@ -108,8 +110,7 @@ const reapply = useMutation({
 </script>
 
 <template>
-  <div v-if="repos.length" class="sec">
-    <h3>{{ t('ticket.commitsTitle') }}</h3>
+  <TicketSection v-if="repos.length" id="commits" :title="t('ticket.commitsTitle')" :hint="String(count)">
     <p class="hint cm-sub">{{ t('ticket.commitsSub') }}</p>
     <div v-if="workspace.canEdit" class="cm-re">
       <button v-if="!reapplying" type="button" class="btn btn-s" :disabled="!!editing" @click="openReapply">{{ t('ticket.commitsReapply') }}</button>
@@ -169,7 +170,7 @@ const reapply = useMutation({
         </li>
       </ul>
     </div>
-  </div>
+  </TicketSection>
 </template>
 
 <style scoped>

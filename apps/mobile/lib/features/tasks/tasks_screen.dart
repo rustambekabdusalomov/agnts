@@ -257,6 +257,9 @@ class _NewTaskSheet extends ConsumerStatefulWidget {
 class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
   late var _pick = RepoPick.single(widget.initialRepo);
   final _title = TextEditingController();
+  // The team's own number for the work (AMANAT-2677): branch and commit
+  // names use it; empty uses the ticket key.
+  final _number = TextEditingController();
   final _desc = TextEditingController();
   late final _files = AttachmentsController()..addListener(_filesChanged);
   var _priority = TaskCreatePriorityEnum.medium;
@@ -279,6 +282,7 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
   @override
   void dispose() {
     _title.dispose();
+    _number.dispose();
     _desc.dispose();
     _files.dispose();
     super.dispose();
@@ -312,6 +316,7 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
               groupId: repo.groupId,
               kind: _kind,
               title: _title.text.trim(),
+              ticketNumber: _number.text.trim().isEmpty ? null : _number.text.trim(),
               description: _desc.text.trim(),
               priority: _priority,
               afterApprove: _after,
@@ -437,6 +442,19 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
                     if (_err != null) setState(() => _err = null);
                   },
                   decoration: InputDecoration(hintText: l.tasksTitlePh),
+                ),
+              ),
+              _Field(
+                label: l.tasksTicketNumber,
+                child: TextField(
+                  controller: _number,
+                  enabled: !_busy,
+                  maxLength: 64,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  textInputAction: TextInputAction.next,
+                  style: TextStyle(fontFamily: AgntsFonts.mono),
+                  decoration: InputDecoration(hintText: l.tasksTicketNumberPh, helperText: l.tasksTicketNumberHelp, helperMaxLines: 3, counterText: ''),
                 ),
               ),
               _Field(

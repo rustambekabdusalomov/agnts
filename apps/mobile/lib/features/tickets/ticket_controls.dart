@@ -10,6 +10,7 @@ import '../../theme.dart';
 import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
 import '../tasks/repo_pick.dart';
+import 'ticket_section.dart';
 
 // Per-ticket controls of the detail screen, as the admin panel's ticket page
 // has them: models, repositories, the pull request's assignees, taking a
@@ -154,21 +155,17 @@ class _ModelPickerState extends ConsumerState<ModelPicker> {
     final c = Agnts.of(context);
     final settings = ref.watch(settingsProvider).value?.models;
     final overrides = widget.ticket.models?.toJson() ?? const <String, dynamic>{};
-    return Padding(
-      padding: const EdgeInsets.only(top: 14),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        _title(c, l.ticketModelsTitle),
-        _hint(c, l.ticketModelsHint),
-        ListGroup(children: [
-          for (final s in widget.stages)
-            ListRow(
-              title: _label(l, s),
-              value: overrides[s.name] is String ? _modelName(overrides[s.name] as String) : _defaultLabel(l, settings, s),
-              onTap: _busy || !ref.watch(canEditProvider) ? null : () => _pick(s, _defaultLabel(l, settings, s)),
-            ),
-        ]),
+    return TicketSection(id: 'models', title: l.ticketModelsTitle, children: [
+      _hint(c, l.ticketModelsHint),
+      ListGroup(children: [
+        for (final s in widget.stages)
+          ListRow(
+            title: _label(l, s),
+            value: overrides[s.name] is String ? _modelName(overrides[s.name] as String) : _defaultLabel(l, settings, s),
+            onTap: _busy || !ref.watch(canEditProvider) ? null : () => _pick(s, _defaultLabel(l, settings, s)),
+          ),
       ]),
-    );
+    ]);
   }
 }
 
@@ -339,10 +336,11 @@ class AssigneePicker extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final c = Agnts.of(context);
     final members = ref.watch(repoMembersProvider(repoId));
-    return Padding(
-      padding: const EdgeInsets.only(top: 14),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        _title(c, l.ticketAssignTitle),
+    return TicketSection(
+      id: 'assign',
+      title: l.ticketAssignTitle,
+      hint: selected.isEmpty ? null : '${selected.length}',
+      children: [
         _hint(c, l.ticketAssignSub),
         members.when(
           data: (ms) => ms.isEmpty
@@ -358,7 +356,7 @@ class AssigneePicker extends ConsumerWidget {
           error: (e, _) => Text(l.ticketAssignError(errorMessage(e, l.commonError)), style: TextStyle(fontSize: 13.5, color: c.ink3)),
           loading: () => const LinearProgressIndicator(),
         ),
-      ]),
+      ],
     );
   }
 }

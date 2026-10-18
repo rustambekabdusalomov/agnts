@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query'
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { api, unwrap } from '../api/client'
@@ -219,6 +219,19 @@ async function signOut() {
     signingOut.value = false
   }
 }
+
+// The top bar's height as --top-h, for what sticks under it (a ticket
+// page's section titles); it wraps on narrow screens.
+const topBar = ref<HTMLElement | null>(null)
+let topObserver: ResizeObserver | undefined
+onMounted(() => {
+  if (!topBar.value || typeof ResizeObserver === 'undefined') return
+  topObserver = new ResizeObserver(([e]) => {
+    document.documentElement.style.setProperty('--top-h', `${Math.round(e.borderBoxSize?.[0]?.blockSize ?? e.target.getBoundingClientRect().height)}px`)
+  })
+  topObserver.observe(topBar.value)
+})
+onBeforeUnmount(() => topObserver?.disconnect())
 </script>
 
 <template>
@@ -340,7 +353,7 @@ async function signOut() {
       </div>
     </aside>
     <div class="main">
-      <header class="top">
+      <header ref="topBar" class="top">
         <div class="ws-menu">
           <button class="ws-btn" aria-haspopup="menu" :aria-expanded="wsOpen" :aria-label="t('ws.switcher')" @click="wsOpen = !wsOpen">
             <span class="ws-av">{{ wsInitials(workspace.name) }}</span>

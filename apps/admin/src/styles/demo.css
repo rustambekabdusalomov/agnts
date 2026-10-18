@@ -197,7 +197,9 @@ textarea:focus{border-color:var(--primary); box-shadow:0 0 0 3px var(--ring)}
 .log .t{color:var(--code-dim); margin-right:10px}
 .log .cur::after{content:"▍"; animation:blink 1s steps(1) infinite; color:#8FA4F0}
 @keyframes blink{50%{opacity:0}}
-.file{border:1px solid var(--line); border-radius:10px; margin:0 0 10px; overflow:hidden}
+.file{border:1px solid var(--line); border-radius:10px; margin:0 0 10px; overflow:clip} /* clip, not hidden: an open file's header sticks to the page */
+.file{scroll-margin-top:calc(var(--top-h, 0px) + 48px)} /* below the stuck section title when scrolled to */
+.file[open] > summary{position:sticky; top:var(--sticky-in, var(--top-h, 0px)); z-index:2; border-bottom:1px solid var(--line)}
 .file summary{list-style:none; cursor:pointer; padding:10px 14px; display:flex; justify-content:space-between; gap:12px; font-family:var(--mono); font-size:13.5px; background:var(--field)}
 .file summary::-webkit-details-marker{display:none}
 .file summary:hover{background:var(--hover)}
@@ -388,7 +390,8 @@ section[id]{scroll-margin-top:84px}
 .delta{display:inline-block; font-family:var(--sans); font-size:12.5px; font-weight:700; padding:2px 7px; border-radius:10px; vertical-align:middle; margin-left:4px; line-height:1.4}
 .delta.up{background:var(--ok-soft); color:var(--ok-ink)} .delta.down{background:var(--bad-soft); color:var(--bad-ink)} .delta.flat{background:var(--gray-soft); color:var(--gray-ink)}
 .stat .val .delta{font-size:12.5px}
-.kpi-btn{display:block; width:100%; text-align:left; cursor:pointer; transition:border-color .15s, box-shadow .15s, transform .15s}
+.kpi-btn{display:block; width:100%; text-align:left; cursor:pointer; transition:border-color .15s, box-shadow .15s, transform .15s; position:relative; color:var(--ink); text-decoration:none} /* a link card: its text in the page colour, not the link blue */
+.kpi-btn .lbl{padding-right:26px} /* room for the corner arrow (KpiArrow) */
 .kpi-btn:hover{border-color:var(--line-3); box-shadow:0 10px 24px -16px var(--shadow); transform:translateY(-1px)}
 .mini-kv{display:flex; justify-content:space-between; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid var(--line-2); font-size:14.5px}
 .mini-kv:last-of-type{border-bottom:0}

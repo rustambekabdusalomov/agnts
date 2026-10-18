@@ -4,6 +4,7 @@ import 'package:agnts_api/agnts_api.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme.dart';
 import '../../widgets/ui.dart';
+import 'ticket_section.dart';
 
 /// agnts's own code review of a result waiting for review: advice beside the
 /// human review that never blocks approval. Findings with a suggestion can be
@@ -68,24 +69,20 @@ class CodeReviewCard extends StatelessWidget {
       }
     }
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: HCard(
-        padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
-        radius: 16,
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Expanded(
-              child: Text(isReportKind(t.kind) ? l.reviewReportTitle : l.reviewTitle,
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c.ink)),
-            ),
-            if (showReview) ToneBadge(_verdictLabel(l, review.verdict), _verdictTone(review.verdict), small: true),
-          ]),
-          const SizedBox(height: 2),
-          Text(l.reviewSub, style: TextStyle(fontSize: 12.5, height: 1.4, color: c.ink3)),
-          ...body,
-        ]),
-      ),
+    return TicketSection(
+      id: 'codeReview',
+      title: isReportKind(t.kind) ? l.reviewReportTitle : l.reviewTitle,
+      // The verdict next to the title: a closed section still says it.
+      hint: showReview ? _verdictLabel(l, review.verdict) : null,
+      children: [
+        if (showReview)
+          Align(alignment: Alignment.centerLeft, child: ToneBadge(_verdictLabel(l, review.verdict), _verdictTone(review.verdict), small: true)),
+        Padding(
+          padding: EdgeInsets.only(top: showReview ? 6 : 0),
+          child: Text(l.reviewSub, style: TextStyle(fontSize: 12.5, height: 1.4, color: c.ink3)),
+        ),
+        ...body,
+      ],
     );
   }
 

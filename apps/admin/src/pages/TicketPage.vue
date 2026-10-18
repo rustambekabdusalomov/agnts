@@ -27,6 +27,8 @@ import SwaggerResults from '../components/swagger/SwaggerResults.vue'
 import RepoPicker from '../components/ticket/RepoPicker.vue'
 import RepoDiffs from '../components/ticket/RepoDiffs.vue'
 import CommitMessages from '../components/ticket/CommitMessages.vue'
+import TicketSection from '../components/ticket/TicketSection.vue'
+import { useClosedSections } from '../composables/useClosedSections'
 import TicketRepos from '../components/ticket/TicketRepos.vue'
 import BranchName from '../components/ticket/BranchName.vue'
 import { filePath, isMultiRepo, ticketRepos } from '../components/repos/repoSet'
@@ -441,9 +443,11 @@ function dropShot(i: number) {
   feedbackShots.value = feedbackShots.value.filter((_, j) => j !== i)
 }
 const shotName = (r: ShotRef) => d.value?.preview?.shots.find((s) => s.id === r.shotId)?.name ?? r.shotId
+const sections = useClosedSections()
 // Opens a changed file's diff and scrolls to it.
 async function showFile(path: string) {
   tab.value = 'changes'
+  if (!sections.isOpen('diff')) sections.toggle('diff') // closed earlier: the file is in it
   await nextTick()
   // In several repositories a path may come without its folder.
   const f = result.value?.files.find((x) => filePath(x) === path) ?? result.value?.files.find((x) => x.path === path)
@@ -716,10 +720,9 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             <template v-else-if="tk.state === 'waiting_for_answers'">
               <h2 class="q-title">{{ t('ticket.questionsTitle', { n: d.questions.length }) }}</h2>
               <p class="sub">{{ t('ticket.questionsSub') }}</p>
-              <div v-if="d.analysis?.plan.length" class="sec">
-                <h3>{{ t('ticket.plan') }}</h3>
+              <TicketSection v-if="d.analysis?.plan.length" id="plan" :title="t('ticket.plan')" :hint="String(d.analysis.plan.length)">
                 <ol class="plan"><li v-for="(p, i) in d.analysis.plan" :key="i">{{ tr(p) }}</li></ol>
-              </div>
+              </TicketSection>
               <DesignRecord :analysis="d.analysis" />
               <form class="sec" @submit.prevent="act.mutate('answers')">
                 <h3>{{ t('ticket.questions') }}</h3>
@@ -773,7 +776,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
                 <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="act.mutate('start')">{{ t('ticket.start') }}</button>
               </div>
               <template v-else>
-                <div class="sec"><h3>{{ t('ticket.log') }}</h3><LiveLog :events="events" /></div>
+                <TicketSection id="log" :title="t('ticket.log')"><LiveLog :events="events" /></TicketSection>
                 <div class="actions"><button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="confirmThen(t('ticket.stopConfirm', { key }), 'stop')">{{ t('ticket.stopRun') }}</button></div>
               </template>
             </template>
@@ -788,7 +791,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
                   <div><dt>{{ t('ticket.factSession') }}</dt><dd>{{ sessionPct }}%</dd></div>
                 </dl>
               </div>
-              <div class="sec"><h3>{{ t('ticket.log') }}</h3><LiveLog :events="events" /></div>
+              <TicketSection id="log" :title="t('ticket.log')"><LiveLog :events="events" /></TicketSection>
               <div class="actions"><button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="confirmThen(t('ticket.stopConfirm', { key }), 'stop')">{{ t('ticket.stopRun') }}</button></div>
             </template>
 
@@ -808,14 +811,12 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
                   <div v-if="!multi"><dt>{{ t('ticket.kvBranch') }}</dt><dd><BranchName :ticket-key="tk.key" :branch="branch" :can-rename="canRenameBranch" /></dd></div>
                 </dl>
               </div>
-              <div v-if="result?.summary" class="sec">
-                <h3>{{ t('ticket.whatAgntsDid') }}</h3>
+              <TicketSection v-if="result?.summary" id="summary" :title="t('ticket.whatAgntsDid')">
                 <div class="summary"><p>{{ tr(result.summary) }}</p></div>
-                <template v-if="result.notes.length">
-                  <h3>{{ t('ticket.notes') }}</h3>
-                  <ul><li v-for="(n, i) in result.notes" :key="i">{{ tr(n) }}</li></ul>
-                </template>
-              </div>
+              </TicketSection>
+              <TicketSection v-if="result?.notes.length" id="notes" :title="t('ticket.notes')" :hint="String(result.notes.length)">
+                <ul><li v-for="(n, i) in result.notes" :key="i">{{ tr(n) }}</li></ul>
+              </TicketSection>
               <DesignRecord :analysis="d.analysis" :deviations="result?.deviations" />
               <CommitMessages :ticket="tk" />
               <ModelPicker :ticket="tk" :stages="tk.canPreview ? ['retry', 'review', 'preview'] : ['retry', 'review']" />
@@ -1001,11 +1002,10 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
               <p class="sub">{{ isTask ? t('ticket.reviewReportSub') : isPlane ? t('ticket.reviewReportSubPlane') : t('ticket.reviewReportSubJira') }}</p>
               <div v-if="result?.summary" class="sec">
                 <div class="summary"><p>{{ tr(result.summary) }}</p></div>
-                <template v-if="result.notes.length">
-                  <h3>{{ t('ticket.notes') }}</h3>
-                  <ul><li v-for="(n, i) in result.notes" :key="i">{{ tr(n) }}</li></ul>
-                </template>
               </div>
+              <TicketSection v-if="result?.notes.length" id="notes" :title="t('ticket.notes')" :hint="String(result.notes.length)">
+                <ul><li v-for="(n, i) in result.notes" :key="i">{{ tr(n) }}</li></ul>
+              </TicketSection>
               <ModelPicker :ticket="tk" :stages="['retry', 'review']" />
               <div v-if="!isTask" class="sec">
                 <CheckBox v-model="postReport">{{ t(isPlane ? 'ticket.postReportPlane' : 'ticket.postReport', { key: tk.key }) }}</CheckBox>
@@ -1055,19 +1055,20 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
               </div>
             </div>
             <div v-if="result.summary && tk.state !== 'waiting_for_review'" class="summary"><p>{{ tr(result.summary) }}</p></div>
-            <div v-if="result.checks.length" class="sec">
-              <h3>{{ t('ticket.checks') }}</h3>
+            <TicketSection
+              v-if="result.checks.length" id="checks" :title="t('ticket.checks')"
+              :hint="`${result.checks.filter((c) => c.exitCode === 0).length}/${result.checks.length}`"
+            >
               <dl class="kv">
                 <template v-for="c in result.checks" :key="c.name">
                   <dt class="mono">{{ c.command }}</dt>
                   <dd :class="c.exitCode === 0 ? 'repo-ok' : 'repo-miss'">{{ c.exitCode === 0 ? t('ticket.passed') : t('ticket.failedCheck') }} · {{ (c.durationMs / 1000).toFixed(1) }}s</dd>
                 </template>
               </dl>
-            </div>
-            <div class="sec">
-              <h3>{{ t('ticket.diff') }}</h3>
+            </TicketSection>
+            <TicketSection id="diff" :title="t('ticket.diff')" :hint="String(result.files.length)">
               <RepoDiffs v-model:repo="diffRepo" :files="result.files" :open-first="tk.state === 'waiting_for_review'" />
-            </div>
+            </TicketSection>
           </section>
 
           <fieldset v-else-if="activeTab === 'followUps'" class="ro-fs" :disabled="!workspace.canEdit">

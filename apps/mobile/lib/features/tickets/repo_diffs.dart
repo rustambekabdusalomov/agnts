@@ -46,7 +46,7 @@ class _RepoDiffsState extends State<RepoDiffs> {
                     Padding(
                       padding: EdgeInsets.only(left: i == 0 ? 0 : 8),
                       child: FilterChipH(
-                        label: '${g.repo.isEmpty ? l.ticketDiffOtherRepo : g.repo}  +${g.add} −${g.del}',
+                        label: g.repo.isEmpty ? l.ticketDiffOtherRepo : g.repo,
                         count: g.files.length,
                         selected: g.repo == shown.repo,
                         onTap: () => setState(() => _repo = g.repo),

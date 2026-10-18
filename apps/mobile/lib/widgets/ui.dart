@@ -5,6 +5,7 @@ import 'package:agnts_api/agnts_api.dart';
 
 import '../l10n/app_localizations.dart';
 import '../theme.dart';
+import 'sticky.dart';
 
 // agnts's mobile components, as mobile.html draws them. Class names in the
 // comments are the demo's CSS classes.
@@ -192,14 +193,17 @@ class KindChip extends StatelessWidget {
       _ => Tone.gray,
     };
     final text = ticket.kindAuto ? '${kindLabel(l, ticket.kind)} · ${l.kindAuto}' : kindLabel(l, ticket.kind);
+    // Centred without filling the row: a chip is as wide as its text.
     return Container(
       height: 20,
       padding: const EdgeInsets.symmetric(horizontal: 7),
-      alignment: Alignment.center,
       decoration: BoxDecoration(color: tone.soft(c), borderRadius: BorderRadius.circular(6)),
-      child: Text(
-        text,
-        style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: tone.ink(c)),
+      child: Center(
+        widthFactor: 1,
+        child: Text(
+          text,
+          style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: tone.ink(c)),
+        ),
       ),
     );
   }
@@ -216,11 +220,13 @@ class SourceChip extends StatelessWidget {
     return Container(
       height: 20,
       padding: const EdgeInsets.symmetric(horizontal: 7),
-      alignment: Alignment.center,
       decoration: BoxDecoration(color: task ? c.taskSoft : c.graySoft, borderRadius: BorderRadius.circular(6)),
-      child: Text(
-        text,
-        style: TextStyle(color: task ? c.taskInk : c.grayInk, fontSize: 11.5, fontWeight: FontWeight.w700, height: 1),
+      child: Center(
+        widthFactor: 1,
+        child: Text(
+          text,
+          style: TextStyle(color: task ? c.taskInk : c.grayInk, fontSize: 11.5, fontWeight: FontWeight.w700, height: 1),
+        ),
       ),
     );
   }
@@ -1000,35 +1006,44 @@ class ListRow extends StatelessWidget {
 
 /// A collapsible card with a title, a grey count and a chevron (details.fold).
 class Fold extends StatefulWidget {
-  const Fold({super.key, required this.title, required this.child, this.hint, this.initiallyOpen = false});
+  const Fold({super.key, required this.title, required this.child, this.hint, this.initiallyOpen = false, this.open, this.onToggle});
   final String title;
   final String? hint;
   final Widget child;
   final bool initiallyOpen;
+
+  /// Set, the fold is open or closed as the parent keeps it (a choice
+  /// remembered elsewhere), and [onToggle] runs on a tap instead.
+  final bool? open;
+  final VoidCallback? onToggle;
 
   @override
   State<Fold> createState() => _FoldState();
 }
 
 class _FoldState extends State<Fold> {
-  late bool _open = widget.initiallyOpen;
+  late bool _ownOpen = widget.initiallyOpen;
+  bool get _open => widget.open ?? _ownOpen;
+
+  void _toggle() {
+    if (widget.open != null) {
+      widget.onToggle?.call();
+    } else {
+      setState(() => _ownOpen = !_ownOpen);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final c = Agnts.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        color: c.surface,
-        border: Border.all(color: c.line),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          InkWell(
-            onTap: () => setState(() => _open = !_open),
-            child: Padding(
+    // While open, the title stays at the top of the page as the content
+    // scrolls past (see StickyHeader); a line sets it apart then.
+    Widget header(bool stuck) => Material(
+          color: c.surface,
+          child: InkWell(
+            onTap: _toggle,
+            child: Container(
+              decoration: stuck ? BoxDecoration(border: Border(bottom: BorderSide(color: c.line))) : null,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               child: Row(
                 children: [
@@ -1046,14 +1061,20 @@ class _FoldState extends State<Fold> {
               ),
             ),
           ),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 180),
-            alignment: Alignment.topCenter,
-            child: _open
-                ? Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 14), child: widget.child)
-                : const SizedBox(width: double.infinity),
-          ),
-        ],
+        );
+    return Container(
+      decoration: BoxDecoration(
+        color: c.surface,
+        border: Border.all(color: c.line),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: AnimatedSize(
+        duration: const Duration(milliseconds: 180),
+        alignment: Alignment.topCenter,
+        child: _open
+            ? StickyHeader(header: header, content: Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 14), child: widget.child))
+            : header(false),
       ),
     );
   }

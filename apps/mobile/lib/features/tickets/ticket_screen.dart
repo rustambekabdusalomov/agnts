@@ -24,6 +24,7 @@ import 'repo_diffs.dart';
 import 'spend.dart';
 import 'ticket_controls.dart';
 import 'ticket_repos.dart';
+import 'ticket_section.dart';
 import 'translation.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme.dart';
@@ -517,8 +518,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         children.addAll([
           _H2(t.repoId == null ? l.ticketAnalyzingTitleNoRepo : l.ticketAnalyzingTitle),
           _Sub(t.repoId == null ? l.ticketAnalyzingSubNoRepo : l.ticketAnalyzingSub(t.repoName ?? '')),
-          _H3(l.ticketLog),
-          _liveLog(context, true),
+          TicketSection(id: 'log', title: l.ticketLog, children: [_liveLog(context, true)]),
         ]);
       case TicketState.waitingForAnswers:
         children.addAll([
@@ -555,8 +555,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           _Sub(report ? l.ticketWritingSub : l.ticketCodingSub(t.branch)),
           const SizedBox(height: 8),
           _runFacts(context, d),
-          _H3(l.ticketLog),
-          _liveLog(context, true),
+          TicketSection(id: 'log', title: l.ticketLog, children: [_liveLog(context, true)]),
         ]);
       case TicketState.waitingForReview when report:
         children.addAll([_H2(rev(l.ticketReviewReportTitle)), ..._reviewReport(context, d)]);
@@ -566,8 +565,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         children.addAll([
           _H2(report ? l.ticketDeliveringTitle : l.ticketPushingTitle),
           _Sub(report ? l.ticketDeliveringSub : l.ticketPushingSub),
-          _H3(l.ticketLog),
-          _liveLog(context, true),
+          TicketSection(id: 'log', title: l.ticketLog, children: [_liveLog(context, true)]),
         ]);
       case TicketState.done when report:
         children.addAll([
@@ -575,7 +573,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           const SizedBox(height: 8),
           HelpBox(t.postReport == true ? l.ticketDoneReportPosted(t.key) : l.ticketDoneReport, tone: Tone.ok),
           if (t.kind == TicketKind.plan || t.kind == TicketKind.bug) ImplementReport(t, childKey: d.childKey),
-          if (d.result?.report != null) ...[_H3(l.ticketReport), ReportMarkdown(_tr(d.result!.report!))],
+          if (d.result?.report != null) TicketSection(id: 'report', title: l.ticketReport, children: [ReportMarkdown(_tr(d.result!.report!))]),
         ]);
       case TicketState.done:
         final toMain = t.afterApprove == TicketAfterApproveEnum.main && t.source_ == TicketSource_Enum.local;
@@ -710,21 +708,12 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     return [
       _Sub(tracked ? (plane ? l.ticketReviewReportSubPlane : l.ticketReviewReportSubJira) : l.ticketReviewReportSub),
       if (r != null && r.summary.isNotEmpty) ...[const SizedBox(height: 8), Text(_tr(r.summary), style: const TextStyle(fontSize: 15, height: 1.45))],
-      if (r != null && r.notes.isNotEmpty) ...[
-        _H3(l.ticketNotes),
-        for (final n in r.notes)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('•  ', style: TextStyle(color: c.ink3)),
-              Expanded(child: Text(_tr(n), style: const TextStyle(fontSize: 15, height: 1.4))),
-            ]),
-          ),
-      ],
+      if (r != null && r.notes.isNotEmpty) TicketSection(id: 'notes', title: l.ticketNotes, hint: '${r.notes.length}', children: _noteList(r.notes)),
       ModelPicker(t, stages: const [ModelStage.retry, ModelStage.review]),
       _codeReview(d),
-      _H3(l.ticketReport),
-      if (r?.report != null) ReportMarkdown(_tr(r!.report!)) else Text(l.ticketReportMissing, style: TextStyle(color: c.ink3)),
+      TicketSection(id: 'report', title: l.ticketReport, children: [
+        if (r?.report != null) ReportMarkdown(_tr(r!.report!)) else Text(l.ticketReportMissing, style: TextStyle(color: c.ink3)),
+      ]),
       if (tracked)
         Padding(
           padding: const EdgeInsets.only(top: 12),
@@ -802,49 +791,43 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         if (time != null) Fact(l.mdetailFactTime, shortDuration(time)),
         Fact(l.ticketFactTurns, '${t.turns}'),
       ]),
-      if (hasEditableCommits(t)) ...[
-        _H3(l.ticketCommitsTitle),
-        _Sub(l.ticketCommitsSub),
-        if (ref.watch(canEditProvider))
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(onPressed: _busy ? null : () => _reapplyFormat(t), child: Text(l.ticketCommitsReapply)),
-          ),
-        const SizedBox(height: 8),
-        CommitMessages(t, onEdit: ref.watch(canEditProvider) && !_busy ? (r, c) => _editCommit(t, r, c) : null),
-      ],
-      _codeReview(d),
+      ..._resultBody(context, r, checking: false),
+      if (hasEditableCommits(t))
+        TicketSection(id: 'commits', title: l.ticketCommitsTitle, hint: '${commitCount(t)}', children: [
+          _Sub(l.ticketCommitsSub),
+          if (ref.watch(canEditProvider))
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(onPressed: _busy ? null : () => _reapplyFormat(t), child: Text(l.ticketCommitsReapply)),
+            ),
+          const SizedBox(height: 8),
+          CommitMessages(t, onEdit: ref.watch(canEditProvider) && !_busy ? (r, c) => _editCommit(t, r, c) : null),
+        ]),
       ...checks,
+      ..._resultBody(context, r, reading: false),
+      _codeReview(d),
       _preview(d),
       ...controls,
-      ..._resultBody(context, r),
     ];
   }
 
-  /// Summary, notes, checks and per-file diffs of a result.
-  List<Widget> _resultBody(BuildContext context, Result r) {
+  /// Summary and notes of a result (what to read), then its checks and
+  /// per-file diffs (what to check): the review shows its commits and
+  /// safety checks between the two.
+  List<Widget> _resultBody(BuildContext context, Result r, {bool reading = true, bool checking = true}) {
     final l = AppLocalizations.of(context);
     final c = Agnts.of(context);
     final paras = _tr(r.summary).split(RegExp(r'\n\s*\n')).map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
+    final passed = r.checks.where((x) => x.exitCode == 0).length;
     return [
-      if (paras.isNotEmpty) ...[
-        _H3(l.ticketWhatAgntsDid),
-        for (final p in paras) Padding(padding: const EdgeInsets.only(bottom: 8), child: Text(p, style: const TextStyle(fontSize: 15, height: 1.45))),
-      ],
-      if (r.notes.isNotEmpty) ...[
-        _H3(l.ticketNotes),
-        for (final n in r.notes)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('•  ', style: TextStyle(color: c.ink3)),
-              Expanded(child: Text(_tr(n), style: const TextStyle(fontSize: 15, height: 1.4))),
-            ]),
-          ),
-      ],
-      if (r.checks.isNotEmpty) ...[
-        _H3(l.ticketChecks),
-        ListGroup(children: [
+      if (reading && paras.isNotEmpty)
+        TicketSection(id: 'summary', title: l.ticketWhatAgntsDid, children: [
+          for (final p in paras) Padding(padding: const EdgeInsets.only(bottom: 8), child: Text(p, style: const TextStyle(fontSize: 15, height: 1.45))),
+        ]),
+      if (reading && r.notes.isNotEmpty) TicketSection(id: 'notes', title: l.ticketNotes, hint: '${r.notes.length}', children: _noteList(r.notes)),
+      if (checking && r.checks.isNotEmpty)
+        TicketSection(id: 'checks', title: l.ticketChecks, hint: '$passed/${r.checks.length}', children: [
+          ListGroup(children: [
           for (final x in r.checks)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -856,12 +839,27 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
                     style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: x.exitCode == 0 ? c.okInk : c.badInk)),
               ]),
             ),
+          ]),
         ]),
-      ],
-      if (r.files.isNotEmpty) ...[
-        _H3(l.ticketDiff),
-        RepoDiffs(files: r.files, openFirst: true, file: (f, open) => FileDiff(file: f, initiallyOpen: open)),
-      ],
+      if (checking && r.files.isNotEmpty)
+        TicketSection(id: 'diff', title: l.ticketDiff, hint: '${r.files.length}', children: [
+          RepoDiffs(files: r.files, openFirst: true, file: (f, open) => FileDiff(file: f, initiallyOpen: open)),
+        ]),
+    ];
+  }
+
+  /// A result's notes for the reviewer, one bullet each.
+  List<Widget> _noteList(List<String> notes) {
+    final c = Agnts.of(context);
+    return [
+      for (final n in notes)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 4),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('•  ', style: TextStyle(color: c.ink3)),
+            Expanded(child: Text(_tr(n), style: const TextStyle(fontSize: 15, height: 1.4))),
+          ]),
+        ),
     ];
   }
 
@@ -1034,12 +1032,10 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
       if (d.analysis != null && t.state != TicketState.waitingForAnswers) _analysisFold(context, d.analysis!),
       if (d.result?.report != null && t.state != TicketState.waitingForReview && t.state != TicketState.done)
         Fold(title: l.ticketReport, child: ReportMarkdown(_tr(d.result!.report!)))
+      // The last change's sections, as cards among the folds (not a fold of
+      // cards): the review shows them in its stage instead.
       else if (d.result != null && !isReportKind(t.kind) && t.state != TicketState.waitingForReview)
-        Fold(
-          title: l.ticketChanges,
-          hint: _changed(l, d.result!),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: _resultBody(context, d.result!)),
-        ),
+        ..._resultBody(context, d.result!),
       if (t.kind == TicketKind.review && t.pull != null) ReviewDraftsFold(ticket: t),
       for (final p in ticketPulls(t)) PullCommentsFold(ticket: t, repoId: p.repoId, number: p.number, url: p.url, repoName: p.repoName),
       if (RelationsFold.shows(d)) RelationsFold(d),
@@ -1118,7 +1114,8 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        for (final (i, f) in folds.indexed) Padding(padding: EdgeInsets.only(top: i == 0 ? 0 : 10), child: f),
+        // A section keeps its own space above.
+        for (final (i, f) in folds.indexed) f is TicketSection ? f : Padding(padding: EdgeInsets.only(top: i == 0 ? 0 : 10), child: f),
       ]),
     );
   }

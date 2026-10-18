@@ -8,6 +8,7 @@ import type { TicketState } from '../api/types'
 import ChartLegend from '../components/charts/ChartLegend.vue'
 import StackedBars from '../components/charts/StackedBars.vue'
 import DeltaTag from '../components/dashboard/DeltaTag.vue'
+import KpiArrow from '../components/dashboard/KpiArrow.vue'
 import UsageCard from '../components/dashboard/UsageCard.vue'
 import EventTypeBadge from '../components/logs/EventTypeBadge.vue'
 import PageHeader from '../components/PageHeader.vue'
@@ -75,21 +76,25 @@ const fmtMin = (m: number) => (m < 60 ? `${Math.max(0, m)}m` : `${Math.floor(m /
   <template v-else-if="d">
     <div class="g4">
       <RouterLink class="card stat kpi-btn" :to="{ name: 'tickets', query: { f: 'needs' } }">
+        <KpiArrow />
         <div class="lbl">{{ t('dashboard.needsYou') }}</div>
         <div class="val" :style="{ color: d.counts.needs ? 'var(--warn-ink)' : 'inherit' }">{{ d.counts.needs }}</div>
         <div class="note">{{ t('dashboard.needsNote', { answers: d.counts.answers, reviews: d.counts.reviews, stopped: d.counts.stopped }) }}</div>
       </RouterLink>
       <RouterLink class="card stat kpi-btn" :to="{ name: 'tickets', query: { f: 'running' } }">
+        <KpiArrow />
         <div class="lbl">{{ t('dashboard.runningNow') }}</div>
         <div class="val">{{ d.counts.running }}</div>
         <div class="note">{{ t('dashboard.runningNote', { n: d.parallel }) }}</div>
       </RouterLink>
       <RouterLink class="card stat kpi-btn" :to="{ name: 'analytics' }">
+        <KpiArrow />
         <div class="lbl">{{ t('dashboard.pushedWeek') }}</div>
         <div class="val">{{ d.week.pushed }} <DeltaTag :cur="d.week.pushed" :prev="d.lastWeek.pushed" good-when-up /></div>
         <div class="note">{{ t('dashboard.pushedNote', { n: d.lastWeek.pushed }) }}</div>
       </RouterLink>
       <RouterLink class="card stat kpi-btn" :to="{ name: 'usage' }">
+        <KpiArrow />
         <div class="lbl">{{ t('dashboard.planSession') }}</div>
         <div class="val" :style="{ color: level(session5) === 'warn' ? 'var(--warn-ink)' : level(session5) === 'bad' ? 'var(--bad-ink)' : 'inherit' }">
           {{ session5 == null ? '—' : pct(session5) + '%' }}

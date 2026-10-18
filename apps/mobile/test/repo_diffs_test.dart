@@ -36,8 +36,11 @@ void main() {
 
   testWidgets('a chip per repository; the first is shown, its first file open', (tester) async {
     await tester.pumpWidget(_app(RepoDiffs(files: _files, openFirst: true, file: _file)));
-    expect(find.textContaining('gateway  +5 −1'), findsOneWidget);
-    expect(find.textContaining('protos  +10 −4'), findsOneWidget);
+    // Each chip: the repository and its file count.
+    expect(find.text('gateway'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+    expect(find.text('protos'), findsOneWidget);
+    expect(find.text('1'), findsOneWidget);
     expect(find.text('api/a.go (open)'), findsOneWidget);
     expect(find.text('api/b.go'), findsOneWidget);
     expect(find.text('content.proto'), findsNothing);
@@ -45,7 +48,7 @@ void main() {
 
   testWidgets('picking a repository shows only its files, none opened', (tester) async {
     await tester.pumpWidget(_app(RepoDiffs(files: _files, openFirst: true, file: _file)));
-    await tester.tap(find.textContaining('protos  +10'));
+    await tester.tap(find.text('protos'));
     await tester.pump();
     expect(find.text('content.proto'), findsOneWidget);
     expect(find.text('api/a.go (open)'), findsNothing);
