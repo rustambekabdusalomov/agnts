@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"encoding/json"
 	"regexp"
 	"strings"
 	"time"
@@ -8,7 +9,9 @@ import (
 )
 
 // The assistant answers a person's questions about their workspace, in
-// text, from a read-only snapshot of it. It takes no actions.
+// text, from a read-only snapshot of it. It takes no actions itself: asked
+// to act, it proposes actions on its answer, and only the person's confirm
+// does them.
 
 // AssistantRole says who wrote a message.
 type AssistantRole string
@@ -80,7 +83,50 @@ type AssistantMessage struct {
 	Rating         int      // -1, 0 (none) or 1
 	RatingComment  string
 	Shared         bool // its snapshot was kept for replays
-	CreatedAt      time.Time
+	// Actions are the writes the answer proposes; ActionErrors the ones it
+	// tried to propose that could not be prepared, and why.
+	Actions      []AssistantAction
+	ActionErrors []string
+	CreatedAt    time.Time
+}
+
+// AssistantProposal is a write an answer asks for: a write tool's name and
+// its input, as the run wrote them. Nothing trusts it until it is checked.
+type AssistantProposal struct {
+	Tool string          `json:"tool"`
+	Args json.RawMessage `json:"args"`
+}
+
+// DestructiveAction reports whether the write tool cannot be taken back
+// (it pushes or stops work): people are asked once more before it.
+func DestructiveAction(tool string) bool { return tool == "approve_ticket" || tool == "reject_ticket" }
+
+// AssistantActionStatus is where a proposed action stands.
+type AssistantActionStatus string
+
+// Action statuses. Running is between the confirm and its outcome; expired
+// is a proposal nobody confirmed in time.
+const (
+	ActionProposed  AssistantActionStatus = "proposed"
+	ActionRunning   AssistantActionStatus = "running"
+	ActionDone      AssistantActionStatus = "done"
+	ActionFailed    AssistantActionStatus = "failed"
+	ActionCancelled AssistantActionStatus = "cancelled"
+	ActionExpired   AssistantActionStatus = "expired"
+)
+
+// AssistantAction is a checked proposal, waiting for its asker or done.
+type AssistantAction struct {
+	ID             string
+	MessageID      int64
+	ConversationID int64
+	Tool           string
+	TicketKey      string // the ticket it acts on, or the one it made
+	Summary        string // agnts's words for what it does, not the model's
+	Destructive    bool
+	Status         AssistantActionStatus
+	Result         string // what happened, or why not
+	ExpiresAt      time.Time
 }
 
 // AssistantConversation is one person's thread of questions.
@@ -102,6 +148,9 @@ const (
 	AssistantHistory     = 6 // earlier messages a question sees
 	AssistantPerHour     = 30
 	AssistantKeepDays    = 30
+	AssistantMaxActions  = 3 // actions one answer may propose
+	// AssistantActionTTL is how long a proposed action waits for a confirm.
+	AssistantActionTTL = 30 * time.Minute
 )
 
 // AssistantLanguages are the languages the assistant answers in: the app's.

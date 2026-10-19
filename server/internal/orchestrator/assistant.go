@@ -23,7 +23,9 @@ import (
 // The assistant answers a person's questions about their workspace from a
 // snapshot of it, written as files into a run container. The run can read
 // those files and write its answer, nothing else: it has no repository, no
-// agnts token, and its permission rules deny commands and the web.
+// agnts token, and its permission rules deny commands and the web. Asked to
+// act, it can only propose actions in its answer: agnts checks them, and
+// only the asker's confirm does them (AssistantActions).
 
 // Where the assistant's files go in its container. Each question gets its
 // own folder and answer file, so a container kept warm between questions
@@ -52,7 +54,20 @@ const (
 	EventAssistantPartial   = "assistant_partial"
 	EventAssistantAnswered  = "assistant_answered"
 	EventAssistantFailed    = "assistant_failed"
+	// EventAssistantAction says a proposed action was confirmed (done or
+	// failed) or declined.
+	EventAssistantAction = "assistant_action"
 )
+
+// AssistantActions checks, stores and does the writes the assistant
+// proposes. Every call names the person: an action is theirs alone.
+type AssistantActions interface {
+	// Propose checks the proposals of answer messageID and stores the ones
+	// that pass for user to confirm; it says why the others did not.
+	Propose(ctx context.Context, user, messageID int64, ps []domain.AssistantProposal) ([]domain.AssistantAction, []string)
+	Confirm(ctx context.Context, user int64, id string) (domain.AssistantAction, error)
+	Cancel(ctx context.Context, user int64, id string) (domain.AssistantAction, error)
+}
 
 // AssistantStore keeps conversations. Every call names the person; a
 // conversation of someone else is domain.ErrNotFound.
@@ -94,6 +109,10 @@ const (
 	TopicSpend   AssistantTopic = "spend"
 	TopicLessons AssistantTopic = "lessons"
 	TopicRepos   AssistantTopic = "repos"
+	// TopicAct is a question that asks to create work (a task, a report's
+	// code task, follow-ups): the snapshot then has the repositories and
+	// groups the action may name.
+	TopicAct AssistantTopic = "act"
 )
 
 // AssistantFile is one file of a snapshot.
@@ -142,6 +161,10 @@ func (o *Orchestrator) SetAssistant(st AssistantStore, snap AssistantSnapshotter
 // SetAssistantEvents sets where live assistant events go (the event
 // stream); without it answers are only stored.
 func (o *Orchestrator) SetAssistantEvents(ev AssistantEvents) { o.assistantEv = ev }
+
+// SetAssistantActions lets the assistant propose actions; without it,
+// asked to act, it says where in the app to do it.
+func (o *Orchestrator) SetAssistantActions(a AssistantActions) { o.assistantActs = a }
 
 // AssistantReady reports whether the assistant can answer.
 func (o *Orchestrator) AssistantReady() bool { return o.assistant != nil && o.snapshots != nil }
@@ -283,6 +306,35 @@ func (o *Orchestrator) RateAnswer(ctx context.Context, messageID int64, rating i
 		comment, share = "", false
 	}
 	return o.assistant.RateAssistantMessage(ctx, user, messageID, rating, comment, share)
+}
+
+// ConfirmAssistantAction does one of the asker's proposed actions and tells
+// their open streams how it went.
+func (o *Orchestrator) ConfirmAssistantAction(ctx context.Context, id string) (domain.AssistantAction, error) {
+	return o.assistantAction(ctx, id, AssistantActions.Confirm)
+}
+
+// CancelAssistantAction declines one of the asker's proposed actions.
+func (o *Orchestrator) CancelAssistantAction(ctx context.Context, id string) (domain.AssistantAction, error) {
+	return o.assistantAction(ctx, id, AssistantActions.Cancel)
+}
+
+func (o *Orchestrator) assistantAction(ctx context.Context, id string,
+	do func(AssistantActions, context.Context, int64, string) (domain.AssistantAction, error)) (domain.AssistantAction, error) {
+	if !o.AssistantReady() || o.assistantActs == nil {
+		return domain.AssistantAction{}, invalid("the assistant cannot act here")
+	}
+	ws, user, err := asker(ctx)
+	if err != nil {
+		return domain.AssistantAction{}, err
+	}
+	a, err := do(o.assistantActs, ctx, user, strings.TrimSpace(id))
+	if err != nil {
+		return a, err
+	}
+	o.publish(ws, user, EventAssistantAction, domain.AssistantMessage{ID: a.MessageID, ConversationID: a.ConversationID},
+		map[string]any{"action_id": a.ID, "status": string(a.Status), "result": a.Result, "ticket_key": a.TicketKey})
+	return a, nil
 }
 
 // AssistantStats reports how the workspace's assistant did (Analytics).
@@ -477,6 +529,16 @@ func (o *Orchestrator) makeAnswer(ctx context.Context, ws, user int64, q, a doma
 		return out, nil, err
 	}
 	out.Text, out.Speech, out.Links = ans.Answer, ans.Speech, ans.Links
+	if len(ans.Actions) > 0 {
+		if o.assistantActs == nil {
+			out.ActionErrors = []string{"The assistant cannot act here; use the links instead."}
+		} else {
+			out.Actions, out.ActionErrors = o.assistantActs.Propose(ctx, user, a.ID, ans.Actions)
+			for i := range out.Actions {
+				out.Actions[i].ConversationID = a.ConversationID
+			}
+		}
+	}
 	for _, f := range files {
 		out.Files = append(out.Files, f.Name)
 	}
@@ -531,7 +593,20 @@ func assistantConversationFiles(question string, history []domain.AssistantMessa
 	}
 	conv := make([]turn, 0, len(history))
 	for _, m := range history {
-		conv = append(conv, turn{Role: string(m.Role), Text: m.Text})
+		text := m.Text
+		// What became of the actions the answer proposed, so "and the
+		// other one?" knows.
+		for _, a := range m.Actions {
+			text += "\n\n[action " + string(a.Status) + ": " + a.Summary
+			if a.Result != "" {
+				text += " → " + a.Result
+			}
+			text += "]"
+		}
+		for _, e := range m.ActionErrors {
+			text += "\n\n[action not offered: " + e + "]"
+		}
+		conv = append(conv, turn{Role: string(m.Role), Text: text})
 	}
 	b, _ := json.MarshalIndent(conv, "", " ")
 	return []AssistantFile{{Name: "conversation.json", Content: string(b)}, {Name: "question.txt", Content: question}}
@@ -642,7 +717,7 @@ func (o *Orchestrator) runAssistant(ctx context.Context, s domain.Settings, wsID
 		names = append(names, f.Name)
 	}
 	prompt, err := render("assistant", promptData{Language: domain.AssistantLanguages[a.Lang], AssistantDir: dir, AssistantFiles: names,
-		AnswerPath: AssistantAnswerPath(a.ID), AsOf: time.Now().UTC().Format("2006-01-02 15:04 UTC")})
+		AnswerPath: AssistantAnswerPath(a.ID), AsOf: time.Now().UTC().Format("2006-01-02 15:04 UTC"), AssistantTools: AssistantTools})
 	if err != nil {
 		return ClaudeResult{}, err
 	}
@@ -705,13 +780,17 @@ type AssistantAnswer struct {
 	Answer string                 `json:"answer"`
 	Speech string                 `json:"speech"`
 	Links  []domain.AssistantLink `json:"links"`
+	// Actions are writes the run proposes; nothing trusts them until
+	// they are checked.
+	Actions []domain.AssistantProposal `json:"actions"`
 }
 
 const assistantMaxLinks = 6
 
 // ParseAssistantAnswer reads an answer file. An answer without speech gets
 // the answer's text without Markdown; links the app cannot open are
-// dropped, and ticket keys upper-cased.
+// dropped, and ticket keys upper-cased. At most AssistantMaxActions actions
+// are kept.
 func ParseAssistantAnswer(raw []byte) (AssistantAnswer, error) {
 	var a AssistantAnswer
 	if err := json.Unmarshal(raw, &a); err != nil {
@@ -740,6 +819,16 @@ func ParseAssistantAnswer(raw []byte) (AssistantAnswer, error) {
 		}
 	}
 	a.Links = links
+	var acts []domain.AssistantProposal
+	for _, p := range a.Actions {
+		if p.Tool = strings.TrimSpace(p.Tool); p.Tool != "" {
+			acts = append(acts, p)
+		}
+		if len(acts) == domain.AssistantMaxActions {
+			break
+		}
+	}
+	a.Actions = acts
 	return a, nil
 }
 
@@ -777,6 +866,8 @@ var topicWords = map[AssistantTopic][]string{
 		"xarajat", "sarf", "narx", "limit", "token", "hafta", "bugun", "kredit"},
 	TopicLessons: {"lesson", "lessons", "learn", "learned", "technique", "pattern", "урок", "научи", "изуч", "dars", "o'rgan", "oʻrgan", "texnika"},
 	TopicRepos:   {"repo", "repos", "repository", "repositories", "project", "репозитор", "проект", "loyiha", "repozitoriy"},
+	TopicAct: {"create", "new task", "implement", "follow-up", "follow up", "follow-ups",
+		"созда", "новую задач", "новая задач", "реализ", "yarat", "yangi vazifa", "amalga osh"},
 }
 
 // AssistantTopicsOf returns the parts of the workspace a question is about,
@@ -829,4 +920,25 @@ func containsWord(s, w string) bool {
 func isLetter(s string) bool {
 	r, _ := utf8.DecodeLastRuneInString(s)
 	return unicode.IsLetter(r) || unicode.IsDigit(r) || r == '\'' || r == 'ʻ'
+}
+
+// AssistantTool is a write the assistant may propose, as its prompt lists
+// it. The names and inputs are the MCP write tools' (package actions).
+type AssistantTool struct{ Name, Args, Does string }
+
+// AssistantTools are the actions the assistant may propose.
+var AssistantTools = []AssistantTool{
+	{"answer_questions", `{"key", "answers": [{"question_id", "answer"}]}`,
+		"answer every question of a ticket waiting for answers (ids in its ticket file); for a question marked multiple, the chosen options one per line. agnts then starts coding"},
+	{"start_run", `{"key"}`, "start a ticket held in the queue"},
+	{"request_changes", `{"key", "feedback"}`, "send a ticket waiting for review back to coding with the person's feedback"},
+	{"retry_run", `{"key"}`, "retry a stopped or paused ticket from where it stopped"},
+	{"create_task", `{"title", "description", "kind", "repository" or "repositories" or "group", "priority", "start"}`,
+		"a new task. kind: auto (default), code, test, plan, analysis or bug; code and test need a repository (repositories.json) or a group (groups.json). priority low, medium or high; start ask (default), code or queue"},
+	{"implement_ticket", `{"key", "repository", "queue"}`, "the code task that carries out a done plan or bug investigation; repository only when it has none; queue true keeps it from starting"},
+	{"accept_follow_ups", `{"key", "items": [{"id", "target"}]}`, "create tickets from a ticket's suggested follow-ups (ids in its ticket file); target local (default), jira or plane"},
+	{"dismiss_follow_up", `{"key", "id"}`, "decline a suggested follow-up"},
+	{"set_ticket_kind", `{"key", "kind"}`, "change what a ticket produces (auto, code, test, plan, analysis or bug), before work starts or on a stopped ticket"},
+	{"approve_ticket", `{"key", "post_report"}`, "approve work waiting for review: a change is pushed and its pull request opened; a report closes the ticket. post_report true also posts a report to its Jira or Plane issue, only when asked"},
+	{"reject_ticket", `{"key", "reason"}`, "reject a ticket and stop all work on it"},
 }

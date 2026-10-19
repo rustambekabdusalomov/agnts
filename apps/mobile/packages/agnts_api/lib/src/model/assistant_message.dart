@@ -5,6 +5,7 @@
 // ignore_for_file: unused_element
 import 'package:agnts_api/src/model/assistant_link.dart';
 import 'package:agnts_api/src/model/assistant_language.dart';
+import 'package:agnts_api/src/model/assistant_action.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -47,6 +48,10 @@ class AssistantMessage {
      this.ratingComment,
 
     required  this.shared,
+
+     this.actions,
+
+     this.actionErrors,
 
     required  this.createdAt,
   });
@@ -213,6 +218,32 @@ class AssistantMessage {
 
 
 
+      /// Actions the answer proposes, each waiting for you to confirm
+  @JsonKey(
+    
+    name: r'actions',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<AssistantAction>? actions;
+
+
+
+      /// Actions the assistant tried to propose that agnts could not prepare, and why
+  @JsonKey(
+    
+    name: r'actionErrors',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<String>? actionErrors;
+
+
+
   @JsonKey(
     
     name: r'createdAt',
@@ -242,6 +273,8 @@ class AssistantMessage {
       other.rating == rating &&
       other.ratingComment == ratingComment &&
       other.shared == shared &&
+      other.actions == actions &&
+      other.actionErrors == actionErrors &&
       other.createdAt == createdAt;
 
     @override
@@ -259,6 +292,8 @@ class AssistantMessage {
         rating.hashCode +
         ratingComment.hashCode +
         shared.hashCode +
+        actions.hashCode +
+        actionErrors.hashCode +
         createdAt.hashCode;
 
   factory AssistantMessage.fromJson(Map<String, dynamic> json) => _$AssistantMessageFromJson(json);

@@ -9,6 +9,7 @@ import (
 	"agnts/internal/domain"
 	"agnts/internal/httpapi/gen"
 	"agnts/internal/orchestrator"
+	"agnts/internal/store/postgres"
 )
 
 // Assistant answers a person's questions about their workspace. Every call
@@ -22,6 +23,8 @@ type Assistant interface {
 	RateAnswer(ctx context.Context, messageID int64, rating int, comment string, share bool) (domain.AssistantMessage, error)
 	AssistantStats(ctx context.Context, days int) (domain.AssistantStats, error)
 	AssistantRated(ctx context.Context, rating int) ([]domain.AssistantRated, error)
+	ConfirmAssistantAction(ctx context.Context, id string) (domain.AssistantAction, error)
+	CancelAssistantAction(ctx context.Context, id string) (domain.AssistantAction, error)
 }
 
 func (s *Server) assistantReady(w http.ResponseWriter) bool {
@@ -160,6 +163,49 @@ func (s *Server) RateAssistantAnswer(w http.ResponseWriter, r *http.Request, id 
 	writeJSON(w, http.StatusOK, toAssistantMessage(m))
 }
 
+// ConfirmAssistantAction implements gen.ServerInterface.
+func (s *Server) ConfirmAssistantAction(w http.ResponseWriter, r *http.Request, id gen.ActionID) {
+	s.assistantAction(w, r, id, s.opt.Assistant.ConfirmAssistantAction)
+}
+
+// CancelAssistantAction implements gen.ServerInterface.
+func (s *Server) CancelAssistantAction(w http.ResponseWriter, r *http.Request, id gen.ActionID) {
+	s.assistantAction(w, r, id, s.opt.Assistant.CancelAssistantAction)
+}
+
+func (s *Server) assistantAction(w http.ResponseWriter, r *http.Request, id string, do func(context.Context, string) (domain.AssistantAction, error)) {
+	if !s.assistantReady(w) {
+		return
+	}
+	a, err := do(r.Context(), id)
+	switch {
+	case errors.Is(err, domain.ErrNotFound):
+		writeError(w, http.StatusNotFound, "not_found", "no such action")
+	case errors.Is(err, postgres.ErrExpired):
+		writeError(w, http.StatusConflict, "conflict", "this action expired, or was already confirmed or declined; ask again")
+	case errors.Is(err, domain.ErrForbidden):
+		writeError(w, http.StatusForbidden, "forbidden", "viewers can see this workspace but not change it")
+	case err != nil:
+		s.writeAssistantError(w, r, err)
+	default:
+		writeJSON(w, http.StatusOK, toAssistantAction(a))
+	}
+}
+
+func toAssistantAction(a domain.AssistantAction) gen.AssistantAction {
+	out := gen.AssistantAction{Id: a.ID, MessageId: a.MessageID, ConversationId: a.ConversationID, Tool: gen.AssistantActionTool(a.Tool),
+		Summary: a.Summary, Destructive: a.Destructive, Status: gen.AssistantActionStatus(a.Status), ExpiresAt: a.ExpiresAt}
+	if a.TicketKey != "" {
+		k := a.TicketKey
+		out.TicketKey = &k
+	}
+	if a.Result != "" {
+		r := a.Result
+		out.Result = &r
+	}
+	return out
+}
+
 // GetAssistantStats implements gen.ServerInterface.
 func (s *Server) GetAssistantStats(w http.ResponseWriter, r *http.Request, p gen.GetAssistantStatsParams) {
 	if !s.assistantReady(w) {
@@ -246,6 +292,17 @@ func toAssistantMessage(m domain.AssistantMessage) gen.AssistantMessage {
 	if m.RatingComment != "" {
 		c := m.RatingComment
 		out.RatingComment = &c
+	}
+	if len(m.Actions) > 0 {
+		acts := make([]gen.AssistantAction, len(m.Actions))
+		for i, a := range m.Actions {
+			acts[i] = toAssistantAction(a)
+		}
+		out.Actions = &acts
+	}
+	if len(m.ActionErrors) > 0 {
+		errs := m.ActionErrors
+		out.ActionErrors = &errs
 	}
 	if m.Role == domain.AssistantReply && m.Status == domain.AssistantDone {
 		d := m.DurationMS

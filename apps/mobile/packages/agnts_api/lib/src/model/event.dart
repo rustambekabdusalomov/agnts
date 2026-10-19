@@ -264,7 +264,9 @@ mcp(r'mcp'),
 @JsonValue(r'telegram')
 telegram(r'telegram'),
 @JsonValue(r'webhook')
-webhook(r'webhook');
+webhook(r'webhook'),
+@JsonValue(r'assistant')
+assistant(r'assistant');
 
 const EventOriginEnum(this.value);
 

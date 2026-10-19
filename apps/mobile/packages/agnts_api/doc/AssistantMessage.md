@@ -21,6 +21,8 @@ Name | Type | Description | Notes
 **rating** | **int** | Your rating: 1 helpful, -1 not, 0 none | 
 **ratingComment** | **String** |  | [optional] 
 **shared** | **bool** | The answer's snapshot is kept for prompt tests | 
+**actions** | [**List&lt;AssistantAction&gt;**](AssistantAction.md) | Actions the answer proposes, each waiting for you to confirm | [optional] 
+**actionErrors** | **List&lt;String&gt;** | Actions the assistant tried to propose that agnts could not prepare, and why | [optional] 
 **createdAt** | [**DateTime**](DateTime.md) |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

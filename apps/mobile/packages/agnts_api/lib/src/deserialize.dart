@@ -27,6 +27,7 @@ import 'package:agnts_api/src/model/api_exchange.dart';
 import 'package:agnts_api/src/model/api_request_row.dart';
 import 'package:agnts_api/src/model/approach.dart';
 import 'package:agnts_api/src/model/approve_ticket_request.dart';
+import 'package:agnts_api/src/model/assistant_action.dart';
 import 'package:agnts_api/src/model/assistant_ask.dart';
 import 'package:agnts_api/src/model/assistant_conversation.dart';
 import 'package:agnts_api/src/model/assistant_link.dart';
@@ -402,6 +403,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return Approach.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApproveTicketRequest':
           return ApproveTicketRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AssistantAction':
+          return AssistantAction.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AssistantAsk':
           return AssistantAsk.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AssistantConversation':

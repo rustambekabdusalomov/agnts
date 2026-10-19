@@ -252,4 +252,5 @@ const _$EventOriginEnumEnumMap = {
   EventOriginEnum.mcp: 'mcp',
   EventOriginEnum.telegram: 'telegram',
   EventOriginEnum.webhook: 'webhook',
+  EventOriginEnum.assistant: 'assistant',
 };

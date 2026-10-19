@@ -1,10 +1,12 @@
 package mcpserver_test
 
 import (
+	"context"
 	"encoding/json"
 	"strings"
 	"testing"
 
+	"agnts/internal/domain"
 	"agnts/internal/mcpserver"
 	"agnts/internal/orchestrator"
 )
@@ -27,7 +29,7 @@ func TestSnapshotHasTheReadToolsData(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := names(files); got != "inbox.json,tickets.json,ticket-PAY-1.json,usage.json,analytics.json,repositories.json,missing.json" {
+	if got := names(files); got != "me.json,inbox.json,tickets.json,ticket-PAY-1.json,usage.json,analytics.json,repositories.json,groups.json,missing.json" {
 		t.Fatalf("files = %s", got)
 	}
 	byName := map[string]string{}
@@ -46,6 +48,9 @@ func TestSnapshotHasTheReadToolsData(t *testing.T) {
 	if !strings.Contains(byName["missing.json"], "no ticket NOPE-9") {
 		t.Fatalf("missing = %s", byName["missing.json"])
 	}
+	if !strings.Contains(byName["me.json"], `"can_act": true`) || !strings.Contains(byName["groups.json"], `"groups": []`) {
+		t.Fatalf("me = %s\ngroups = %s", byName["me.json"], byName["groups.json"])
+	}
 	if strings.Contains(byName["repositories.json"], "github.com/acme") {
 		t.Fatalf("clone URLs left in: %s", byName["repositories.json"])
 	}
@@ -55,7 +60,25 @@ func TestSnapshotHasTheReadToolsData(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := names(files); got != "inbox.json,tickets.json,usage.json,analytics.json" {
+	if got := names(files); got != "me.json,inbox.json,tickets.json,usage.json,analytics.json" {
 		t.Fatalf("spend files = %s", got)
+	}
+}
+
+func TestSnapshotSaysWhoAsks(t *testing.T) {
+	d := testDeps(t)
+	d.Role = func(context.Context, int64, int64) (domain.WorkspaceRole, error) { return domain.RoleViewer, nil }
+	ctx := domain.WithActor(testCtx, domain.Actor{UserID: 1, Username: "viewer"})
+	// A question that creates work gets the repositories and groups.
+	files, err := mcpserver.NewSnapshotter(d).Snapshot(ctx, orchestrator.AssistantQuestion{Question: "create a task",
+		Topics: map[orchestrator.AssistantTopic]bool{orchestrator.TopicAct: true}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := names(files); got != "me.json,inbox.json,tickets.json,repositories.json,groups.json" {
+		t.Fatalf("files = %s", got)
+	}
+	if files[0].Content != "{\n \"role\": \"viewer\",\n \"can_act\": false\n}" {
+		t.Fatalf("me.json = %s", files[0].Content)
 	}
 }

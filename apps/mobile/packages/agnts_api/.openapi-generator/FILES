@@ -35,6 +35,7 @@ doc/ApiExchange.md
 doc/ApiRequestRow.md
 doc/Approach.md
 doc/ApproveTicketRequest.md
+doc/AssistantAction.md
 doc/AssistantApi.md
 doc/AssistantAsk.md
 doc/AssistantConversation.md
@@ -441,6 +442,7 @@ lib/src/model/api_exchange.dart
 lib/src/model/api_request_row.dart
 lib/src/model/approach.dart
 lib/src/model/approve_ticket_request.dart
+lib/src/model/assistant_action.dart
 lib/src/model/assistant_ask.dart
 lib/src/model/assistant_conversation.dart
 lib/src/model/assistant_language.dart
@@ -786,6 +788,7 @@ test/api_exchange_test.dart
 test/api_request_row_test.dart
 test/approach_test.dart
 test/approve_ticket_request_test.dart
+test/assistant_action_test.dart
 test/assistant_api_test.dart
 test/assistant_ask_test.dart
 test/assistant_conversation_test.dart

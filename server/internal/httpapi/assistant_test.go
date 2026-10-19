@@ -9,6 +9,7 @@ import (
 
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
+	"agnts/internal/store/postgres"
 )
 
 // fakeAssistant keeps one conversation (id 7) of the signed-in person.
@@ -28,7 +29,8 @@ func (f *fakeAssistant) conv() domain.AssistantConversation {
 		{ID: 1, ConversationID: 7, Role: domain.AssistantUser, Text: "What waits on me?", Status: domain.AssistantDone, Lang: "en", CreatedAt: at},
 		{ID: 2, ConversationID: 7, Role: domain.AssistantReply, Text: "**PAY-214** needs your review.", Speech: "PAY-214 needs your review.",
 			Links: []domain.AssistantLink{{Kind: "ticket", Key: "PAY-214"}, {Kind: "ci", ID: 12}}, Status: domain.AssistantDone, Lang: "en",
-			DurationMS: 9000, Files: []string{"inbox.json"}, CreatedAt: at},
+			DurationMS: 9000, Files: []string{"inbox.json"}, CreatedAt: at,
+			Actions: []domain.AssistantAction{f.action(domain.ActionProposed, "")}, ActionErrors: []string{"start_run: no ticket \"PAY-9\""}},
 	}}
 }
 
@@ -89,6 +91,31 @@ func (f *fakeAssistant) AssistantRated(_ context.Context, rating int) ([]domain.
 	return []domain.AssistantRated{{MessageID: 2, Username: "rustam", Question: "Why red?", Answer: "Flaky test.", Rating: -1, Comment: "wrong"}}, nil
 }
 
+func (f *fakeAssistant) action(status domain.AssistantActionStatus, result string) domain.AssistantAction {
+	return domain.AssistantAction{ID: "a1", MessageID: 2, ConversationID: 7, Tool: "approve_ticket", TicketKey: "PAY-214",
+		Summary: "Approve PAY-214 (Fix rounding): agnts will push agnts/PAY-214 and open a pull request.", Destructive: true,
+		Status: status, Result: result, ExpiresAt: time.Date(2026, 10, 14, 9, 30, 0, 0, time.UTC)}
+}
+
+func (f *fakeAssistant) ConfirmAssistantAction(_ context.Context, id string) (domain.AssistantAction, error) {
+	switch id {
+	case "a1":
+		return f.action(domain.ActionDone, "PAY-214 is now pushing."), nil
+	case "gone":
+		return domain.AssistantAction{}, postgres.ErrExpired
+	case "viewer":
+		return domain.AssistantAction{}, domain.ErrForbidden
+	}
+	return domain.AssistantAction{}, domain.ErrNotFound
+}
+
+func (f *fakeAssistant) CancelAssistantAction(_ context.Context, id string) (domain.AssistantAction, error) {
+	if id != "a1" {
+		return domain.AssistantAction{}, domain.ErrNotFound
+	}
+	return f.action(domain.ActionCancelled, ""), nil
+}
+
 func TestAssistantEndpoints(t *testing.T) {
 	h := newHarness(t, pinger{})
 	if rec := h.do("GET", "/api/assistant/conversations", "", nil); rec.Code != http.StatusUnauthorized {
@@ -112,6 +139,14 @@ func TestAssistantEndpoints(t *testing.T) {
 		{"GET", "/api/assistant/conversations/7", "", 200, `"links":[{"key":"PAY-214","kind":"ticket"},{"id":12,"kind":"ci"}]`},
 		{"GET", "/api/assistant/conversations/7", "", 200, `"speech":"PAY-214 needs your review."`},
 		{"GET", "/api/assistant/conversations/8", "", 404, `not_found`},
+		{"GET", "/api/assistant/conversations/7", "", 200, `"actions":[{"conversationId":7,"destructive":true,`},
+		{"GET", "/api/assistant/conversations/7", "", 200, `"actionErrors":["start_run: no ticket \"PAY-9\""]`},
+		{"POST", "/api/assistant/actions/a1/confirm", "", 200, `"result":"PAY-214 is now pushing.","status":"done"`},
+		{"POST", "/api/assistant/actions/gone/confirm", "", 409, `conflict`},
+		{"POST", "/api/assistant/actions/viewer/confirm", "", 403, `forbidden`},
+		{"POST", "/api/assistant/actions/nope/confirm", "", 404, `no such action`},
+		{"POST", "/api/assistant/actions/a1/cancel", "", 200, `"status":"cancelled"`},
+		{"POST", "/api/assistant/actions/nope/cancel", "", 404, `no such action`},
 		{"PUT", "/api/assistant/messages/2/rating", `{"rating":5}`, 400, `bad_request`},
 		{"PUT", "/api/assistant/messages/3/rating", `{"rating":1}`, 404, `no such answer`},
 		{"PUT", "/api/assistant/messages/2/rating", `{"rating":-1,"comment":"wrong ticket","share":true}`, 200, `"rating":-1`},

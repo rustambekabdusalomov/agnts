@@ -28,8 +28,21 @@ func TestParseAssistantAnswer(t *testing.T) {
 		t.Errorf("links = %+v", a.Links)
 	}
 	a, _ = orchestrator.ParseAssistantAnswer([]byte(`{"answer":"x","speech":" Two tickets wait. "}`))
-	if a.Speech != "Two tickets wait." {
-		t.Errorf("given speech = %q", a.Speech)
+	if a.Speech != "Two tickets wait." || len(a.Actions) != 0 {
+		t.Errorf("given speech = %q, actions %v", a.Speech, a.Actions)
+	}
+	// At most three actions, and none without a tool.
+	a, err = orchestrator.ParseAssistantAnswer([]byte(`{"answer":"x","actions":[{"tool":" "},{"tool":" approve_ticket ","args":{"key":"PAY-1"}},
+		{"tool":"start_run"},{"tool":"retry_run"},{"tool":"reject_ticket"}]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var tools []string
+	for _, p := range a.Actions {
+		tools = append(tools, p.Tool)
+	}
+	if strings.Join(tools, ",") != "approve_ticket,start_run,retry_run" || string(a.Actions[0].Args) != `{"key":"PAY-1"}` {
+		t.Errorf("actions = %s", tools)
 	}
 }
 
@@ -48,6 +61,9 @@ func TestAssistantTopicsOf(t *testing.T) {
 		"Bu hafta qancha xarajat qildik?":  {orchestrator.TopicSpend},
 		"Какие уроки новые?":               {orchestrator.TopicLessons},
 		"Which repositories are archived?": {orchestrator.TopicRepos},
+		"Create a task to add retries":     {orchestrator.TopicAct},
+		"Создай задачу на ретраи":          {orchestrator.TopicAct},
+		"Approve PAY-214":                  nil, // the ticket's file is enough
 		"What waits on me?":                nil,
 		"We need to decide on PAY-1":       nil, // "decide" is not "ci"
 	}

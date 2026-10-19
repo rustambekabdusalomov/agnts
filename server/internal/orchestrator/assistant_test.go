@@ -318,3 +318,85 @@ func mustBox(t *testing.T) *secret.Box {
 	}
 	return b
 }
+
+// fakeActs proposes every proposal but "bad", and confirms anything.
+type fakeActs struct {
+	mu        sync.Mutex
+	got       []domain.AssistantProposal
+	user, msg int64
+}
+
+func (f *fakeActs) Propose(_ context.Context, user, msg int64, ps []domain.AssistantProposal) ([]domain.AssistantAction, []string) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.got, f.user, f.msg = ps, user, msg
+	var out []domain.AssistantAction
+	var errs []string
+	for _, p := range ps {
+		if p.Tool == "bad" {
+			errs = append(errs, "bad: unknown action")
+			continue
+		}
+		out = append(out, domain.AssistantAction{ID: p.Tool, MessageID: msg, Tool: p.Tool, Status: domain.ActionProposed})
+	}
+	return out, errs
+}
+
+func (f *fakeActs) Confirm(_ context.Context, user int64, id string) (domain.AssistantAction, error) {
+	if user != f.user {
+		return domain.AssistantAction{}, domain.ErrNotFound
+	}
+	return domain.AssistantAction{ID: id, MessageID: f.msg, ConversationID: 1, Tool: id, Status: domain.ActionDone, Result: "PAY-214 is now pushing."}, nil
+}
+
+func (f *fakeActs) Cancel(_ context.Context, _ int64, id string) (domain.AssistantAction, error) {
+	return domain.AssistantAction{ID: id, Status: domain.ActionCancelled}, nil
+}
+
+func TestAssistantProposesActions(t *testing.T) {
+	a := newAssistantHarness(t)
+	acts := &fakeActs{}
+	a.o.SetAssistantActions(acts)
+	a.answers(2, `{"answer":"PAY-214 passed review. Confirm to approve it.","actions":[{"tool":"approve_ticket","args":{"key":"PAY-214"}},{"tool":"bad"}]}`)
+	c, err := a.o.Ask(a.ask, 0, "Approve PAY-214", "en")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ans := a.conversation(c.ID).Messages[1]
+	if acts.user != a.user || acts.msg != ans.ID || len(acts.got) != 2 || string(acts.got[0].Args) != `{"key":"PAY-214"}` {
+		t.Fatalf("proposed %+v for %d/%d", acts.got, acts.user, acts.msg)
+	}
+	if strings.Join(ans.ActionErrors, ";") != "bad: unknown action" {
+		t.Fatalf("action errors = %v", ans.ActionErrors)
+	}
+	if p := a.runner.prompts[0]; !strings.Contains(p, "- approve_ticket {") || !strings.Contains(p, "propose it in \"actions\"") {
+		t.Fatalf("prompt lacks the actions: %s", p)
+	}
+
+	got, err := a.o.ConfirmAssistantAction(a.ask, " approve_ticket ")
+	if err != nil || got.Status != domain.ActionDone {
+		t.Fatalf("confirm = %+v, %v", got, err)
+	}
+	if _, err := a.o.ConfirmAssistantAction(a.other, "approve_ticket"); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("someone else confirmed: %v", err)
+	}
+	if last := a.live.got[len(a.live.got)-1]; last != orchestrator.EventAssistantAction {
+		t.Fatalf("events = %v", a.live.got)
+	}
+}
+
+func TestAssistantWithoutActionsSaysSo(t *testing.T) {
+	a := newAssistantHarness(t)
+	a.answers(2, `{"answer":"Confirm to approve.","actions":[{"tool":"approve_ticket","args":{"key":"PAY-214"}}]}`)
+	c, err := a.o.Ask(a.ask, 0, "Approve PAY-214", "en")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ans := a.conversation(c.ID).Messages[1]
+	if ans.Status != domain.AssistantDone || len(ans.Actions) != 0 || len(ans.ActionErrors) != 1 {
+		t.Fatalf("answer = %+v", ans)
+	}
+	if _, err := a.o.ConfirmAssistantAction(a.ask, "x"); !errors.Is(err, orchestrator.ErrInvalid) {
+		t.Fatalf("confirm without actions: %v", err)
+	}
+}

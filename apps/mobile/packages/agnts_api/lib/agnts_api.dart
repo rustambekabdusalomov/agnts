@@ -69,6 +69,7 @@ export 'package:agnts_api/src/model/api_exchange.dart';
 export 'package:agnts_api/src/model/api_request_row.dart';
 export 'package:agnts_api/src/model/approach.dart';
 export 'package:agnts_api/src/model/approve_ticket_request.dart';
+export 'package:agnts_api/src/model/assistant_action.dart';
 export 'package:agnts_api/src/model/assistant_ask.dart';
 export 'package:agnts_api/src/model/assistant_conversation.dart';
 export 'package:agnts_api/src/model/assistant_language.dart';

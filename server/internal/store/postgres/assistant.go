@@ -26,14 +26,14 @@ func NewAssistant(db *pgxpool.Pool, box *secret.Box) *Assistant { return &Assist
 var replayAAD = []byte("assistant_replay")
 
 const assistantMsgCols = `m.id, m.conversation_id, m.role, m.text, m.speech, m.links, m.status, m.error, m.lang, m.prompt_version, m.model,
-	m.tokens, m.cost_usd, m.duration_ms, m.timing, m.files, m.rating, m.rating_comment, m.shared, m.created_at`
+	m.tokens, m.cost_usd, m.duration_ms, m.timing, m.files, m.rating, m.rating_comment, m.shared, m.action_errors, m.created_at`
 
 func scanAssistantMsg(row pgx.Row) (domain.AssistantMessage, error) {
 	var m domain.AssistantMessage
 	var role, status string
 	var links, timing []byte
 	err := row.Scan(&m.ID, &m.ConversationID, &role, &m.Text, &m.Speech, &links, &status, &m.Error, &m.Lang, &m.PromptVersion, &m.Model,
-		&m.Tokens, &m.CostUSD, &m.DurationMS, &timing, &m.Files, &m.Rating, &m.RatingComment, &m.Shared, &m.CreatedAt)
+		&m.Tokens, &m.CostUSD, &m.DurationMS, &timing, &m.Files, &m.Rating, &m.RatingComment, &m.Shared, &m.ActionErrors, &m.CreatedAt)
 	if err != nil {
 		return m, notFound(err)
 	}
@@ -77,8 +77,10 @@ func (s *Assistant) AssistantConversation(ctx context.Context, userID, id int64)
 	if err != nil {
 		return c, err
 	}
-	c.Messages, err = scanAssistantMsgs(rows)
-	return c, err
+	if c.Messages, err = scanAssistantMsgs(rows); err != nil {
+		return c, err
+	}
+	return c, attachAssistantActions(ctx, s.db, c.Messages)
 }
 
 // AssistantConversations returns userID's conversations, newest first, each
@@ -103,7 +105,7 @@ func (s *Assistant) AssistantConversations(ctx context.Context, userID int64, li
 		var links, timing []byte
 		if err := rows.Scan(&c.ID, &c.UserID, &c.Title, &c.CreatedAt, &c.UpdatedAt,
 			&m.ID, &m.ConversationID, &role, &m.Text, &m.Speech, &links, &status, &m.Error, &m.Lang, &m.PromptVersion, &m.Model,
-			&m.Tokens, &m.CostUSD, &m.DurationMS, &timing, &m.Files, &m.Rating, &m.RatingComment, &m.Shared, &m.CreatedAt); err != nil {
+			&m.Tokens, &m.CostUSD, &m.DurationMS, &timing, &m.Files, &m.Rating, &m.RatingComment, &m.Shared, &m.ActionErrors, &m.CreatedAt); err != nil {
 			return nil, err
 		}
 		m.Role, m.Status = domain.AssistantRole(role), domain.AssistantStatus(status)
@@ -112,7 +114,21 @@ func (s *Assistant) AssistantConversations(ctx context.Context, userID int64, li
 		c.Messages = []domain.AssistantMessage{m}
 		out = append(out, c)
 	}
-	return out, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	rows.Close()
+	last := make([]domain.AssistantMessage, len(out))
+	for i, c := range out {
+		last[i] = c.Messages[0]
+	}
+	if err := attachAssistantActions(ctx, s.db, last); err != nil {
+		return nil, err
+	}
+	for i := range out {
+		out[i].Messages[0] = last[i]
+	}
+	return out, nil
 }
 
 // DeleteAssistantConversation deletes one of userID's conversations.
@@ -178,10 +194,15 @@ func (s *Assistant) FinishAssistantMessage(ctx context.Context, m domain.Assista
 	if files == nil {
 		files = []string{}
 	}
+	actionErrors := m.ActionErrors
+	if actionErrors == nil {
+		actionErrors = []string{}
+	}
 	_, err = s.db.Exec(ctx, `UPDATE assistant_messages SET text = $2, speech = $3, links = $4, status = $5, error = $6,
-		prompt_version = $7, model = $8, tokens = $9, cost_usd = $10, duration_ms = $11, timing = $12, files = $13, replay = $14
+		prompt_version = $7, model = $8, tokens = $9, cost_usd = $10, duration_ms = $11, timing = $12, files = $13, replay = $14,
+		action_errors = $15
 		WHERE id = $1`, m.ID, m.Text, m.Speech, links, string(m.Status), m.Error, m.PromptVersion, m.Model, m.Tokens, m.CostUSD,
-		m.DurationMS, timing, files, sealed)
+		m.DurationMS, timing, files, sealed, actionErrors)
 	return err
 }
 
@@ -195,7 +216,11 @@ func (s *Assistant) AssistantHistory(ctx context.Context, conversationID, before
 	if err != nil {
 		return nil, err
 	}
-	return scanAssistantMsgs(rows)
+	msgs, err := scanAssistantMsgs(rows)
+	if err != nil {
+		return nil, err
+	}
+	return msgs, attachAssistantActions(ctx, s.db, msgs)
 }
 
 // AssistantMessage returns one of userID's messages.

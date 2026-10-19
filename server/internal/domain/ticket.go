@@ -413,6 +413,9 @@ const (
 	OriginMCP      Origin = "mcp"
 	OriginTelegram Origin = "telegram"
 	OriginWebhook  Origin = "webhook"
+	// OriginAssistant is an action the assistant proposed and its asker
+	// confirmed.
+	OriginAssistant Origin = "assistant"
 )
 
 // Level is an event's severity.

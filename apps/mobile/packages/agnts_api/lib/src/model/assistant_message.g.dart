@@ -33,6 +33,10 @@ abstract class _$AssistantMessageCWProxy {
 
   AssistantMessage shared(bool shared);
 
+  AssistantMessage actions(List<AssistantAction>? actions);
+
+  AssistantMessage actionErrors(List<String>? actionErrors);
+
   AssistantMessage createdAt(DateTime createdAt);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `AssistantMessage(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -55,6 +59,8 @@ abstract class _$AssistantMessageCWProxy {
     AssistantMessageRatingEnum rating,
     String? ratingComment,
     bool shared,
+    List<AssistantAction>? actions,
+    List<String>? actionErrors,
     DateTime createdAt,
   });
 }
@@ -108,6 +114,14 @@ class _$AssistantMessageCWProxyImpl implements _$AssistantMessageCWProxy {
   AssistantMessage shared(bool shared) => this(shared: shared);
 
   @override
+  AssistantMessage actions(List<AssistantAction>? actions) =>
+      this(actions: actions);
+
+  @override
+  AssistantMessage actionErrors(List<String>? actionErrors) =>
+      this(actionErrors: actionErrors);
+
+  @override
   AssistantMessage createdAt(DateTime createdAt) => this(createdAt: createdAt);
 
   @override
@@ -131,6 +145,8 @@ class _$AssistantMessageCWProxyImpl implements _$AssistantMessageCWProxy {
     Object? rating = const $CopyWithPlaceholder(),
     Object? ratingComment = const $CopyWithPlaceholder(),
     Object? shared = const $CopyWithPlaceholder(),
+    Object? actions = const $CopyWithPlaceholder(),
+    Object? actionErrors = const $CopyWithPlaceholder(),
     Object? createdAt = const $CopyWithPlaceholder(),
   }) {
     return AssistantMessage(
@@ -186,6 +202,14 @@ class _$AssistantMessageCWProxyImpl implements _$AssistantMessageCWProxy {
           ? _value.shared
           // ignore: cast_nullable_to_non_nullable
           : shared as bool,
+      actions: actions == const $CopyWithPlaceholder()
+          ? _value.actions
+          // ignore: cast_nullable_to_non_nullable
+          : actions as List<AssistantAction>?,
+      actionErrors: actionErrors == const $CopyWithPlaceholder()
+          ? _value.actionErrors
+          // ignore: cast_nullable_to_non_nullable
+          : actionErrors as List<String>?,
       createdAt: createdAt == const $CopyWithPlaceholder()
           ? _value.createdAt
           // ignore: cast_nullable_to_non_nullable
@@ -255,6 +279,16 @@ AssistantMessage _$AssistantMessageFromJson(Map<String, dynamic> json) =>
         ),
         ratingComment: $checkedConvert('ratingComment', (v) => v as String?),
         shared: $checkedConvert('shared', (v) => v as bool),
+        actions: $checkedConvert(
+          'actions',
+          (v) => (v as List<dynamic>?)
+              ?.map((e) => AssistantAction.fromJson(e as Map<String, dynamic>))
+              .toList(),
+        ),
+        actionErrors: $checkedConvert(
+          'actionErrors',
+          (v) => (v as List<dynamic>?)?.map((e) => e as String).toList(),
+        ),
         createdAt: $checkedConvert(
           'createdAt',
           (v) => DateTime.parse(v as String),
@@ -278,6 +312,8 @@ Map<String, dynamic> _$AssistantMessageToJson(AssistantMessage instance) =>
       'rating': _$AssistantMessageRatingEnumEnumMap[instance.rating]!,
       'ratingComment': ?instance.ratingComment,
       'shared': instance.shared,
+      'actions': ?instance.actions?.map((e) => e.toJson()).toList(),
+      'actionErrors': ?instance.actionErrors,
       'createdAt': instance.createdAt.toIso8601String(),
     };
 

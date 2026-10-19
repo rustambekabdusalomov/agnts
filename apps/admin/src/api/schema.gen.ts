@@ -3861,7 +3861,7 @@ export interface paths {
         put?: never;
         /**
          * Ask the assistant a question in a new conversation
-         * @description Stores the question and starts answering it from a read-only snapshot of the workspace. Answers take 10-30 seconds: the response has the answer pending; fetch the conversation again, or wait for the assistant_answered (or assistant_failed) event on the event stream. The assistant takes no actions.
+         * @description Stores the question and starts answering it from a read-only snapshot of the workspace. Answers take 10-30 seconds: the response has the answer pending; fetch the conversation again, or wait for the assistant_answered (or assistant_failed) event on the event stream. The assistant takes no actions itself: when asked to act it proposes them as actions on its answer, which you confirm.
          */
         post: operations["startAssistantConversation"];
         delete?: never;
@@ -3928,6 +3928,47 @@ export interface paths {
          */
         put: operations["rateAssistantAnswer"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistant/actions/{actionId}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                actionId: components["parameters"]["ActionID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Do an action the assistant proposed on one of your answers
+         * @description Runs the action once, as you. When agnts cannot do it now (the ticket moved on), the action comes back failed with the reason. Proposed actions expire after 30 minutes.
+         */
+        post: operations["confirmAssistantAction"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistant/actions/{actionId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                actionId: components["parameters"]["ActionID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decline an action the assistant proposed */
+        post: operations["cancelAssistantAction"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4764,8 +4805,33 @@ export interface components {
             ratingComment?: string;
             /** @description The answer's snapshot is kept for prompt tests */
             shared: boolean;
+            /** @description Actions the answer proposes, each waiting for you to confirm */
+            actions?: components["schemas"]["AssistantAction"][];
+            /** @description Actions the assistant tried to propose that agnts could not prepare, and why */
+            actionErrors?: string[];
             /** Format: date-time */
             createdAt: string;
+        };
+        /** @description A write the assistant proposed. Nothing happens until you confirm it; the summary is agnts's own words for what it will do. */
+        AssistantAction: {
+            id: string;
+            /** Format: int64 */
+            messageId: number;
+            /** Format: int64 */
+            conversationId: number;
+            /** @enum {string} */
+            tool: "answer_questions" | "start_run" | "request_changes" | "retry_run" | "create_task" | "implement_ticket" | "accept_follow_ups" | "dismiss_follow_up" | "set_ticket_kind" | "approve_ticket" | "reject_ticket";
+            /** @description The ticket it acts on, or the one it created */
+            ticketKey?: string;
+            summary: string;
+            /** @description It cannot be taken back (approve, reject): ask once more before confirming */
+            destructive: boolean;
+            /** @enum {string} */
+            status: "proposed" | "running" | "done" | "failed" | "cancelled" | "expired";
+            /** @description What happened (done), or why not (failed) */
+            result?: string;
+            /** Format: date-time */
+            expiresAt: string;
         };
         AssistantConversation: {
             /** Format: int64 */
@@ -5278,7 +5344,7 @@ export interface components {
             /** @enum {string} */
             level: "debug" | "info" | "warn" | "error";
             /** @enum {string} */
-            origin: "system" | "web" | "mobile" | "mcp" | "telegram" | "webhook";
+            origin: "system" | "web" | "mobile" | "mcp" | "telegram" | "webhook" | "assistant";
             message: string;
             data: {
                 [key: string]: unknown;
@@ -7628,6 +7694,7 @@ export interface components {
         RunMinCost: number;
         ConversationID: number;
         MessageID: number;
+        ActionID: string;
         NetworkID: number;
         CIFailureID: number;
         RepoID: number;
@@ -13940,6 +14007,60 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    confirmAssistantAction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                actionId: components["parameters"]["ActionID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The action, done or failed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantAction"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    cancelAssistantAction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                actionId: components["parameters"]["ActionID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The action, cancelled */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantAction"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
             501: components["responses"]["NotImplemented"];
         };
     };

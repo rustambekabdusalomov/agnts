@@ -95,7 +95,8 @@ func (s *Agent) OwnerDevices(ctx context.Context, ws int64, key string) (int64, 
 	return owner, out, rows.Err()
 }
 
-// PendingAction is a write waiting for confirmation (MCP and Telegram).
+// PendingAction is a write waiting for confirmation (MCP, Telegram and the
+// assistant).
 type PendingAction struct {
 	WorkspaceID int64
 	ID          string
@@ -105,13 +106,18 @@ type PendingAction struct {
 	Args        map[string]any
 	Summary     string
 	ExpiresAt   time.Time
+	// The assistant's: the person who alone may confirm it, and the answer
+	// that proposed it.
+	UserID    int64
+	MessageID int64
 }
 
 // CreatePending stores a pending action.
 func (s *Agent) CreatePending(ctx context.Context, a PendingAction) error {
 	args, _ := json.Marshal(a.Args)
-	_, err := s.db.Exec(ctx, `INSERT INTO pending_actions (id, origin, tool, ticket_key, args, summary, expires_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)`, a.ID, string(a.Origin), a.Tool, a.TicketKey, args, a.Summary, a.ExpiresAt)
+	_, err := s.db.Exec(ctx, `INSERT INTO pending_actions (id, origin, tool, ticket_key, args, summary, expires_at, user_id, assistant_message_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, NULLIF($8, 0), NULLIF($9, 0))`, a.ID, string(a.Origin), a.Tool, a.TicketKey, args, a.Summary, a.ExpiresAt,
+		a.UserID, a.MessageID)
 	return err
 }
 

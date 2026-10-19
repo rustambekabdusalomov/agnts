@@ -16,6 +16,22 @@ void main() {
       // TODO
     });
 
+    // Decline an action the assistant proposed
+    //
+    //Future<AssistantAction> cancelAssistantAction(String actionId) async
+    test('test cancelAssistantAction', () async {
+      // TODO
+    });
+
+    // Do an action the assistant proposed on one of your answers
+    //
+    // Runs the action once, as you. When agnts cannot do it now (the ticket moved on), the action comes back failed with the reason. Proposed actions expire after 30 minutes.
+    //
+    //Future<AssistantAction> confirmAssistantAction(String actionId) async
+    test('test confirmAssistantAction', () async {
+      // TODO
+    });
+
     // Delete one of your conversations
     //
     //Future deleteAssistantConversation(int conversationId) async
@@ -64,7 +80,7 @@ void main() {
 
     // Ask the assistant a question in a new conversation
     //
-    // Stores the question and starts answering it from a read-only snapshot of the workspace. Answers take 10-30 seconds: the response has the answer pending; fetch the conversation again, or wait for the assistant_answered (or assistant_failed) event on the event stream. The assistant takes no actions.
+    // Stores the question and starts answering it from a read-only snapshot of the workspace. Answers take 10-30 seconds: the response has the answer pending; fetch the conversation again, or wait for the assistant_answered (or assistant_failed) event on the event stream. The assistant takes no actions itself: when asked to act it proposes them as actions on its answer, which you confirm.
     //
     //Future<AssistantConversation> startAssistantConversation(AssistantAsk assistantAsk) async
     test('test startAssistantConversation', () async {

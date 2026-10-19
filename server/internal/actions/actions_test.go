@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/jackc/pgx/v5/pgxpool"
+
 	"agnts/internal/actions"
 	"agnts/internal/admin"
 	"agnts/internal/domain"
@@ -21,6 +23,12 @@ import (
 // setup makes a workspace with repository api and ticket PAY-1 waiting for
 // review.
 func setup(t *testing.T) (context.Context, actions.Deps) {
+	t.Helper()
+	ctx, d, _ := setupPool(t)
+	return ctx, d
+}
+
+func setupPool(t *testing.T) (context.Context, actions.Deps, *pgxpool.Pool) {
 	t.Helper()
 	pool := pgtest.Open(t)
 	pgtest.Reset(t, pool)
@@ -49,7 +57,7 @@ func setup(t *testing.T) (context.Context, actions.Deps) {
 			t.Fatal(err)
 		}
 	}
-	return ctx, actions.Deps{Orch: orch, Store: store, Repos: repos}
+	return ctx, actions.Deps{Orch: orch, Store: store, Repos: repos}, pool
 }
 
 func TestPrepare(t *testing.T) {

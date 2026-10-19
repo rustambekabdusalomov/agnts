@@ -78,6 +78,18 @@ void main() {
       // TODO
     });
 
+    // Actions the answer proposes, each waiting for you to confirm
+    // List<AssistantAction> actions
+    test('to test the property `actions`', () async {
+      // TODO
+    });
+
+    // Actions the assistant tried to propose that agnts could not prepare, and why
+    // List<String> actionErrors
+    test('to test the property `actionErrors`', () async {
+      // TODO
+    });
+
     // DateTime createdAt
     test('to test the property `createdAt`', () async {
       // TODO

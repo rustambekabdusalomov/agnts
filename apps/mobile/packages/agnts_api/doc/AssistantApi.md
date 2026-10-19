@@ -10,6 +10,8 @@ All URIs are relative to */api*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**askAssistant**](AssistantApi.md#askassistant) | **POST** /assistant/conversations/{conversationId}/messages | Ask a follow-up question in one of your conversations
+[**cancelAssistantAction**](AssistantApi.md#cancelassistantaction) | **POST** /assistant/actions/{actionId}/cancel | Decline an action the assistant proposed
+[**confirmAssistantAction**](AssistantApi.md#confirmassistantaction) | **POST** /assistant/actions/{actionId}/confirm | Do an action the assistant proposed on one of your answers
 [**deleteAssistantConversation**](AssistantApi.md#deleteassistantconversation) | **DELETE** /assistant/conversations/{conversationId} | Delete one of your conversations
 [**getAssistantConversation**](AssistantApi.md#getassistantconversation) | **GET** /assistant/conversations/{conversationId} | One of your conversations with all its messages
 [**getAssistantStats**](AssistantApi.md#getassistantstats) | **GET** /assistant/stats | How the workspace&#39;s assistant did (questions, answer rate, time, ratings, tokens, per prompt version)
@@ -64,6 +66,98 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **cancelAssistantAction**
+> AssistantAction cancelAssistantAction(actionId)
+
+Decline an action the assistant proposed
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getAssistantApi();
+final String actionId = actionId_example; // String | 
+
+try {
+    final response = api.cancelAssistantAction(actionId);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling AssistantApi->cancelAssistantAction: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **actionId** | **String**|  | 
+
+### Return type
+
+[**AssistantAction**](AssistantAction.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **confirmAssistantAction**
+> AssistantAction confirmAssistantAction(actionId)
+
+Do an action the assistant proposed on one of your answers
+
+Runs the action once, as you. When agnts cannot do it now (the ticket moved on), the action comes back failed with the reason. Proposed actions expire after 30 minutes.
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getAssistantApi();
+final String actionId = actionId_example; // String | 
+
+try {
+    final response = api.confirmAssistantAction(actionId);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling AssistantApi->confirmAssistantAction: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **actionId** | **String**|  | 
+
+### Return type
+
+[**AssistantAction**](AssistantAction.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -344,7 +438,7 @@ Name | Type | Description  | Notes
 
 Ask the assistant a question in a new conversation
 
-Stores the question and starts answering it from a read-only snapshot of the workspace. Answers take 10-30 seconds: the response has the answer pending; fetch the conversation again, or wait for the assistant_answered (or assistant_failed) event on the event stream. The assistant takes no actions.
+Stores the question and starts answering it from a read-only snapshot of the workspace. Answers take 10-30 seconds: the response has the answer pending; fetch the conversation again, or wait for the assistant_answered (or assistant_failed) event on the event stream. The assistant takes no actions itself: when asked to act it proposes them as actions on its answer, which you confirm.
 
 ### Example
 ```dart

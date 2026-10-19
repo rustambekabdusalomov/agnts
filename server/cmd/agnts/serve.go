@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"agnts/internal/accounts"
+	"agnts/internal/actions"
 	"agnts/internal/admin"
 	"agnts/internal/billing"
 	"agnts/internal/ciwatch"
@@ -515,6 +516,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.notifier.SetCIFixer(a.ci)
 	a.assistant = postgres.NewAssistant(pool, box)
 	a.orch.SetAssistant(a.assistant, mcpserver.NewSnapshotter(a.mcpDeps()))
+	a.orch.SetAssistantActions(&actions.Assistant{Deps: actions.Deps{Orch: a.orch, Store: a.store, Repos: a.repos}, Role: a.workspaces.Role})
 	return a, nil
 }
 
@@ -1036,6 +1038,13 @@ func evalAssistant(ctx context.Context, cfg config.Config, pool postgresPool, lo
 			continue
 		}
 		p("%s\n\n", ans.Answer)
+		// Proposed actions are shown, never stored: nobody can confirm a replay.
+		for _, x := range ans.Actions {
+			p("- _would propose_ `%s` %s\n", x.Tool, x.Args)
+		}
+		if len(ans.Actions) > 0 {
+			p("\n")
+		}
 	}
 	p("---\n%d replayed, %d without an answer, %d tokens, %s of Claude time\n", len(cases), failed, tokens, took.Round(time.Second))
 	return nil

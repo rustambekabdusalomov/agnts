@@ -164,11 +164,12 @@ type Orchestrator struct {
 
 	translating singleflight.Group // ticket key and language -> its translation run
 
-	assistant   AssistantStore // nil: no assistant
-	snapshots   AssistantSnapshotter
-	assistantEv AssistantEvents
-	asst        assistantState
-	answering   sync.WaitGroup
+	assistant     AssistantStore // nil: no assistant
+	snapshots     AssistantSnapshotter
+	assistantEv   AssistantEvents
+	assistantActs AssistantActions // nil: the assistant only answers
+	asst          assistantState
+	answering     sync.WaitGroup
 }
 
 // New returns an orchestrator.

@@ -55,6 +55,7 @@ func (s *Snapshotter) Snapshot(ctx context.Context, q orchestrator.AssistantQues
 		files = append(files, orchestrator.AssistantFile{Name: name, Content: string(b)})
 	}
 
+	add("me.json", s.me(ctx), nil)
 	_, inbox, err := s.t.getInbox(ctx, nil, noInput{})
 	add("inbox.json", inbox, err)
 	tickets, err := s.tickets(ctx)
@@ -96,12 +97,14 @@ func (s *Snapshotter) Snapshot(ctx context.Context, q orchestrator.AssistantQues
 		_, a, err := s.t.getAnalytics(ctx, nil, DaysInput{Days: 7})
 		add("analytics.json", a, err)
 	}
-	if want(orchestrator.TopicRepos) {
+	if want(orchestrator.TopicRepos) || want(orchestrator.TopicAct) {
 		_, r, err := s.t.listRepos(ctx, nil, noInput{})
 		for i := range r.Repositories {
 			r.Repositories[i].CloneURL = ""
 		}
 		add("repositories.json", r, err)
+		_, g, err := s.t.listGroups(ctx, nil, noInput{})
+		add("groups.json", g, err)
 	}
 	if want(orchestrator.TopicLessons) && s.t.d.Lessons != nil {
 		_, l, err := s.t.listLessons(ctx, nil, LessonsInput{Status: "new", Limit: snapLessons})
@@ -111,6 +114,25 @@ func (s *Snapshotter) Snapshot(ctx context.Context, q orchestrator.AssistantQues
 		add("missing.json", map[string][]string{"not_available": missing}, nil)
 	}
 	return files, nil
+}
+
+// snapshotMe is me.json: the asker's role, which says whether the
+// assistant may propose actions to them.
+type snapshotMe struct {
+	Role   string `json:"role"`
+	CanAct bool   `json:"can_act"`
+}
+
+func (s *Snapshotter) me(ctx context.Context) snapshotMe {
+	a, ok := domain.ActorOf(ctx)
+	if s.t.d.Role == nil || !ok {
+		return snapshotMe{Role: string(domain.RoleUser), CanAct: true}
+	}
+	r, err := s.t.d.Role(ctx, domain.WorkspaceOf(ctx), a.UserID)
+	if err != nil {
+		return snapshotMe{Role: string(domain.RoleViewer)}
+	}
+	return snapshotMe{Role: string(r), CanAct: r.CanEdit()}
 }
 
 // snapshotTickets is tickets.json: what needs the person, what runs and

@@ -41,7 +41,7 @@ const (
 
 // Destructive reports whether tool cannot be taken back (it pushes or stops
 // work): callers ask once more before it.
-func Destructive(tool string) bool { return tool == ApproveTicket || tool == RejectTicket }
+func Destructive(tool string) bool { return domain.DestructiveAction(tool) }
 
 // Prepared is a checked write: what to store until it is confirmed, and the
 // summary to show the person.

@@ -4805,7 +4805,8 @@ paths:
         snapshot of the workspace. Answers take 10-30 seconds: the response
         has the answer pending; fetch the conversation again, or wait for
         the assistant_answered (or assistant_failed) event on the event
-        stream. The assistant takes no actions.
+        stream. The assistant takes no actions itself: when asked to act it
+        proposes them as actions on its answer, which you confirm.
       tags: [assistant]
       requestBody:
         required: true
@@ -4902,6 +4903,48 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
+  /assistant/actions/{actionId}/confirm:
+    parameters:
+      - $ref: '#/components/parameters/ActionID'
+    post:
+      operationId: confirmAssistantAction
+      summary: Do an action the assistant proposed on one of your answers
+      description: >-
+        Runs the action once, as you. When agnts cannot do it now (the
+        ticket moved on), the action comes back failed with the reason.
+        Proposed actions expire after 30 minutes.
+      tags: [assistant]
+      responses:
+        '200':
+          description: The action, done or failed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssistantAction' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
+  /assistant/actions/{actionId}/cancel:
+    parameters:
+      - $ref: '#/components/parameters/ActionID'
+    post:
+      operationId: cancelAssistantAction
+      summary: Decline an action the assistant proposed
+      tags: [assistant]
+      responses:
+        '200':
+          description: The action, cancelled
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssistantAction' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
         '501': { $ref: '#/components/responses/NotImplemented' }
 
   /assistant/stats:
@@ -5006,6 +5049,11 @@ components:
       in: path
       required: true
       schema: { type: integer, format: int64 }
+    ActionID:
+      name: actionId
+      in: path
+      required: true
+      schema: { type: string }
     NetworkID:
       name: networkId
       in: path
@@ -5864,7 +5912,37 @@ components:
         rating: { type: integer, enum: [-1, 0, 1], description: 'Your rating: 1 helpful, -1 not, 0 none' }
         ratingComment: { type: string }
         shared: { type: boolean, description: The answer's snapshot is kept for prompt tests }
+        actions:
+          type: array
+          description: Actions the answer proposes, each waiting for you to confirm
+          items: { $ref: '#/components/schemas/AssistantAction' }
+        actionErrors:
+          type: array
+          description: Actions the assistant tried to propose that agnts could not prepare, and why
+          items: { type: string }
         createdAt: { type: string, format: date-time }
+
+    AssistantAction:
+      type: object
+      description: >-
+        A write the assistant proposed. Nothing happens until you confirm
+        it; the summary is agnts's own words for what it will do.
+      required: [id, messageId, conversationId, tool, summary, destructive, status, expiresAt]
+      properties:
+        id: { type: string }
+        messageId: { type: integer, format: int64 }
+        conversationId: { type: integer, format: int64 }
+        tool:
+          type: string
+          enum: [answer_questions, start_run, request_changes, retry_run, create_task, implement_ticket, accept_follow_ups, dismiss_follow_up, set_ticket_kind, approve_ticket, reject_ticket]
+        ticketKey: { type: string, description: 'The ticket it acts on, or the one it created' }
+        summary: { type: string }
+        destructive: { type: boolean, description: 'It cannot be taken back (approve, reject): ask once more before confirming' }
+        status:
+          type: string
+          enum: [proposed, running, done, failed, cancelled, expired]
+        result: { type: string, description: 'What happened (done), or why not (failed)' }
+        expiresAt: { type: string, format: date-time }
 
     AssistantConversation:
       type: object
@@ -6395,7 +6473,7 @@ components:
         step: { type: string }
         type: { type: string }
         level: { type: string, enum: [debug, info, warn, error] }
-        origin: { type: string, enum: [system, web, mobile, mcp, telegram, webhook] }
+        origin: { type: string, enum: [system, web, mobile, mcp, telegram, webhook, assistant] }
         message: { type: string }
         data:
           type: object

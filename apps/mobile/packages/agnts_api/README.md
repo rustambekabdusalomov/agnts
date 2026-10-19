@@ -85,6 +85,8 @@ Class | Method | HTTP request | Description
 [*AnalyticsApi*](doc/AnalyticsApi.md) | [**getAnalyticsLearning**](doc/AnalyticsApi.md#getanalyticslearning) | **GET** /analytics/learning | Lessons, rules, follow-ups and reviewer notes for a period
 [*AnalyticsApi*](doc/AnalyticsApi.md) | [**getReplayReport**](doc/AnalyticsApi.md#getreplayreport) | **GET** /eval/replays | How the newest replays compare with the tickets they re-ran, by prompt version
 [*AssistantApi*](doc/AssistantApi.md) | [**askAssistant**](doc/AssistantApi.md#askassistant) | **POST** /assistant/conversations/{conversationId}/messages | Ask a follow-up question in one of your conversations
+[*AssistantApi*](doc/AssistantApi.md) | [**cancelAssistantAction**](doc/AssistantApi.md#cancelassistantaction) | **POST** /assistant/actions/{actionId}/cancel | Decline an action the assistant proposed
+[*AssistantApi*](doc/AssistantApi.md) | [**confirmAssistantAction**](doc/AssistantApi.md#confirmassistantaction) | **POST** /assistant/actions/{actionId}/confirm | Do an action the assistant proposed on one of your answers
 [*AssistantApi*](doc/AssistantApi.md) | [**deleteAssistantConversation**](doc/AssistantApi.md#deleteassistantconversation) | **DELETE** /assistant/conversations/{conversationId} | Delete one of your conversations
 [*AssistantApi*](doc/AssistantApi.md) | [**getAssistantConversation**](doc/AssistantApi.md#getassistantconversation) | **GET** /assistant/conversations/{conversationId} | One of your conversations with all its messages
 [*AssistantApi*](doc/AssistantApi.md) | [**getAssistantStats**](doc/AssistantApi.md#getassistantstats) | **GET** /assistant/stats | How the workspace&#39;s assistant did (questions, answer rate, time, ratings, tokens, per prompt version)
@@ -353,6 +355,7 @@ Class | Method | HTTP request | Description
  - [ApiRequestRow](doc/ApiRequestRow.md)
  - [Approach](doc/Approach.md)
  - [ApproveTicketRequest](doc/ApproveTicketRequest.md)
+ - [AssistantAction](doc/AssistantAction.md)
  - [AssistantAsk](doc/AssistantAsk.md)
  - [AssistantConversation](doc/AssistantConversation.md)
  - [AssistantLanguage](doc/AssistantLanguage.md)

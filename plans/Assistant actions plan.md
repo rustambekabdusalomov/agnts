@@ -1,6 +1,6 @@
 # agnts Assistant actions — Plan
 
-Oct 19, 2026 · draft; phase 1 implemented
+Oct 19, 2026 · draft; phases 1 and 2 implemented
 
 ## Overview
 
@@ -89,6 +89,16 @@ The input structs (`AnswersInput`, `TaskInput`, …) move with them. `mcpserver`
 Tests: the existing `mcpserver_test.go` write tests must pass unchanged. Add table tests in `actions` for each tool's checks.
 
 ## Phase 2: Server
+
+**As built:**
+- **Confirm results:** when the action can't be done now (the ticket moved on), confirm returns 200 with the action `failed` and the reason in `result`, not 409. The outcome is stored, so the card keeps showing it. 409 is only for an action that expired or was already confirmed or declined.
+- **Where the code lives:** `orchestrator.AssistantActions` is an interface, implemented by `actions.Assistant` and wired in `serve.go`; this avoids an import cycle. Store methods are in `postgres/assistant_actions.go`.
+- **History:** `conversation.json` gets `[action <status>: <summary> → <result>]` and `[action not offered: …]` lines.
+- **Topic detection:** the action topic (`TopicAct`) only covers creating work (create, new task, implement, follow-ups), since only those actions need `repositories.json` and `groups.json`. Approve, reject, start and retry need only the ticket's file.
+- **Duplicates and keys:** the same proposal twice in one answer gets one card. Ticket keys are matched exactly, as in MCP.
+- **Event:** `assistant_action` `{conversation_id, message_id, action_id, status, result, ticket_key}`.
+- **Replays:** `agnts eval assistant` prints proposed actions under each new answer.
+- **Not handled:** an action left `running` by a server restart stays that way.
 
 ### Data
 
