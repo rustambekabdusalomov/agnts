@@ -80,6 +80,10 @@
     "actionExpired": "Expired. Ask again for a new one.",
     "actionConfirmTitle": "Confirm this?",
     "actionConfirmText": "{summary}\n\nThis cannot be undone.",
-    "actionNotOffered": "Not offered: {reason}"
+    "actionNotOffered": "Not offered: {reason}",
+    "statsActions": "Actions confirmed",
+    "statsActionsLine": "{proposed} offered · {done} done · {failed} not done · {cancelled} declined · {expired} expired · {notOffered} not offered",
+    "statsActionsOffered": "Offered",
+    "statsVersionActions": "{proposed} actions offered · {done} done"
   }
 }

@@ -400,3 +400,28 @@ func TestAssistantWithoutActionsSaysSo(t *testing.T) {
 		t.Fatalf("confirm without actions: %v", err)
 	}
 }
+
+func TestAssistantCaseReplaysProposeButStoreNothing(t *testing.T) {
+	a := newAssistantHarness(t)
+	a.o.SetAssistantActions(&fakeActs{})
+	cs, err := orchestrator.AssistantCases()
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := cs[0] // approve PAY-214
+	a.answers(0, `{"answer":"PAY-214 passed review. Confirm to approve it.","actions":[{"tool":"approve_ticket","args":{"key":"PAY-214"}}]}`)
+	ans, _, err := a.o.ReplayAnswer(a.ctx, c.Snapshot(), c.Lang, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if problems := orchestrator.CheckProposals(ans.Actions, c.Want); problems != nil {
+		t.Fatalf("problems: %v", problems)
+	}
+	if me := a.runner.written[orchestrator.AssistantDir(0)+"/me.json"]; !strings.Contains(me, `"can_act": true`) {
+		t.Fatalf("me.json = %q", me)
+	}
+	var n int
+	if err := a.db.QueryRow(a.ctx, `SELECT count(*) FROM pending_actions WHERE origin = 'assistant'`).Scan(&n); err != nil || n != 0 {
+		t.Fatalf("a replay stored %d actions (%v)", n, err)
+	}
+}

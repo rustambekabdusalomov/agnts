@@ -23,6 +23,8 @@ abstract class _$AssistantRatedCWProxy {
 
   AssistantRated shared(bool shared);
 
+  AssistantRated actions(List<AssistantAction>? actions);
+
   AssistantRated ratedAt(DateTime ratedAt);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `AssistantRated(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -40,6 +42,7 @@ abstract class _$AssistantRatedCWProxy {
     String comment,
     String promptVersion,
     bool shared,
+    List<AssistantAction>? actions,
     DateTime ratedAt,
   });
 }
@@ -77,6 +80,10 @@ class _$AssistantRatedCWProxyImpl implements _$AssistantRatedCWProxy {
   AssistantRated shared(bool shared) => this(shared: shared);
 
   @override
+  AssistantRated actions(List<AssistantAction>? actions) =>
+      this(actions: actions);
+
+  @override
   AssistantRated ratedAt(DateTime ratedAt) => this(ratedAt: ratedAt);
 
   @override
@@ -95,6 +102,7 @@ class _$AssistantRatedCWProxyImpl implements _$AssistantRatedCWProxy {
     Object? comment = const $CopyWithPlaceholder(),
     Object? promptVersion = const $CopyWithPlaceholder(),
     Object? shared = const $CopyWithPlaceholder(),
+    Object? actions = const $CopyWithPlaceholder(),
     Object? ratedAt = const $CopyWithPlaceholder(),
   }) {
     return AssistantRated(
@@ -130,6 +138,10 @@ class _$AssistantRatedCWProxyImpl implements _$AssistantRatedCWProxy {
           ? _value.shared
           // ignore: cast_nullable_to_non_nullable
           : shared as bool,
+      actions: actions == const $CopyWithPlaceholder()
+          ? _value.actions
+          // ignore: cast_nullable_to_non_nullable
+          : actions as List<AssistantAction>?,
       ratedAt: ratedAt == const $CopyWithPlaceholder()
           ? _value.ratedAt
           // ignore: cast_nullable_to_non_nullable
@@ -176,6 +188,12 @@ AssistantRated _$AssistantRatedFromJson(Map<String, dynamic> json) =>
         comment: $checkedConvert('comment', (v) => v as String),
         promptVersion: $checkedConvert('promptVersion', (v) => v as String),
         shared: $checkedConvert('shared', (v) => v as bool),
+        actions: $checkedConvert(
+          'actions',
+          (v) => (v as List<dynamic>?)
+              ?.map((e) => AssistantAction.fromJson(e as Map<String, dynamic>))
+              .toList(),
+        ),
         ratedAt: $checkedConvert('ratedAt', (v) => DateTime.parse(v as String)),
       );
       return val;
@@ -191,6 +209,7 @@ Map<String, dynamic> _$AssistantRatedToJson(AssistantRated instance) =>
       'comment': instance.comment,
       'promptVersion': instance.promptVersion,
       'shared': instance.shared,
+      'actions': ?instance.actions?.map((e) => e.toJson()).toList(),
       'ratedAt': instance.ratedAt.toIso8601String(),
     };
 

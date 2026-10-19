@@ -364,6 +364,7 @@ Class | Method | HTTP request | Description
  - [AssistantRated](doc/AssistantRated.md)
  - [AssistantRating](doc/AssistantRating.md)
  - [AssistantStats](doc/AssistantStats.md)
+ - [AssistantStatsActions](doc/AssistantStatsActions.md)
  - [AssistantStatsVersionsInner](doc/AssistantStatsVersionsInner.md)
  - [Attachment](doc/Attachment.md)
  - [BeginLoginTotp200Response](doc/BeginLoginTotp200Response.md)

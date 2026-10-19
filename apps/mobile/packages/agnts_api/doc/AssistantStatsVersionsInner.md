@@ -15,6 +15,8 @@ Name | Type | Description | Notes
 **down** | **int** |  | 
 **medianMs** | **int** |  | 
 **tokens** | **int** |  | 
+**proposed** | **int** | Actions proposed | 
+**done** | **int** | Actions confirmed and done | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

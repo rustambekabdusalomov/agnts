@@ -5361,6 +5361,22 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get massistantStatsActions => 'Actions confirmed';
+
+  @override
+  String massistantStatsActionsLine(String proposed, String done, String failed, String cancelled, String expired, String notOffered) {
+    return '$proposed offered · $done done · $failed not done · $cancelled declined · $expired expired · $notOffered not offered';
+  }
+
+  @override
+  String get massistantStatsActionsOffered => 'Offered';
+
+  @override
+  String massistantStatsVersionActions(String proposed, String done) {
+    return '$proposed actions offered · $done done';
+  }
+
+  @override
   String get mciTitle => 'CI failures';
 
   @override

@@ -21,6 +21,10 @@ abstract class _$AssistantStatsVersionsInnerCWProxy {
 
   AssistantStatsVersionsInner tokens(int tokens);
 
+  AssistantStatsVersionsInner proposed(int proposed);
+
+  AssistantStatsVersionsInner done(int done);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `AssistantStatsVersionsInner(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -35,6 +39,8 @@ abstract class _$AssistantStatsVersionsInnerCWProxy {
     int down,
     int medianMs,
     int tokens,
+    int proposed,
+    int done,
   });
 }
 
@@ -70,6 +76,13 @@ class _$AssistantStatsVersionsInnerCWProxyImpl
   AssistantStatsVersionsInner tokens(int tokens) => this(tokens: tokens);
 
   @override
+  AssistantStatsVersionsInner proposed(int proposed) =>
+      this(proposed: proposed);
+
+  @override
+  AssistantStatsVersionsInner done(int done) => this(done: done);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `AssistantStatsVersionsInner(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -84,6 +97,8 @@ class _$AssistantStatsVersionsInnerCWProxyImpl
     Object? down = const $CopyWithPlaceholder(),
     Object? medianMs = const $CopyWithPlaceholder(),
     Object? tokens = const $CopyWithPlaceholder(),
+    Object? proposed = const $CopyWithPlaceholder(),
+    Object? done = const $CopyWithPlaceholder(),
   }) {
     return AssistantStatsVersionsInner(
       promptVersion: promptVersion == const $CopyWithPlaceholder()
@@ -114,6 +129,14 @@ class _$AssistantStatsVersionsInnerCWProxyImpl
           ? _value.tokens
           // ignore: cast_nullable_to_non_nullable
           : tokens as int,
+      proposed: proposed == const $CopyWithPlaceholder()
+          ? _value.proposed
+          // ignore: cast_nullable_to_non_nullable
+          : proposed as int,
+      done: done == const $CopyWithPlaceholder()
+          ? _value.done
+          // ignore: cast_nullable_to_non_nullable
+          : done as int,
     );
   }
 }
@@ -142,6 +165,8 @@ AssistantStatsVersionsInner _$AssistantStatsVersionsInnerFromJson(
       'down',
       'medianMs',
       'tokens',
+      'proposed',
+      'done',
     ],
   );
   final val = AssistantStatsVersionsInner(
@@ -152,6 +177,8 @@ AssistantStatsVersionsInner _$AssistantStatsVersionsInnerFromJson(
     down: $checkedConvert('down', (v) => (v as num).toInt()),
     medianMs: $checkedConvert('medianMs', (v) => (v as num).toInt()),
     tokens: $checkedConvert('tokens', (v) => (v as num).toInt()),
+    proposed: $checkedConvert('proposed', (v) => (v as num).toInt()),
+    done: $checkedConvert('done', (v) => (v as num).toInt()),
   );
   return val;
 });
@@ -166,4 +193,6 @@ Map<String, dynamic> _$AssistantStatsVersionsInnerToJson(
   'down': instance.down,
   'medianMs': instance.medianMs,
   'tokens': instance.tokens,
+  'proposed': instance.proposed,
+  'done': instance.done,
 };

@@ -80,6 +80,10 @@
     "actionExpired": "Срок истёк. Спросите ещё раз.",
     "actionConfirmTitle": "Подтвердить?",
     "actionConfirmText": "{summary}\n\nЭто нельзя отменить.",
-    "actionNotOffered": "Не предложено: {reason}"
+    "actionNotOffered": "Не предложено: {reason}",
+    "statsActions": "Подтверждённые действия",
+    "statsActionsLine": "{proposed} предложено · {done} выполнено · {failed} не выполнено · {cancelled} отклонено · {expired} истекло · {notOffered} не предложено",
+    "statsActionsOffered": "Предложено",
+    "statsVersionActions": "{proposed} действий предложено · {done} выполнено"
   }
 }

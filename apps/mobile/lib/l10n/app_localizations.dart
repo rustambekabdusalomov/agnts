@@ -9567,6 +9567,30 @@ abstract class AppLocalizations {
   /// **'Not offered: {reason}'**
   String massistantActionNotOffered(String reason);
 
+  /// No description provided for @massistantStatsActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions confirmed'**
+  String get massistantStatsActions;
+
+  /// No description provided for @massistantStatsActionsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{proposed} offered · {done} done · {failed} not done · {cancelled} declined · {expired} expired · {notOffered} not offered'**
+  String massistantStatsActionsLine(String proposed, String done, String failed, String cancelled, String expired, String notOffered);
+
+  /// No description provided for @massistantStatsActionsOffered.
+  ///
+  /// In en, this message translates to:
+  /// **'Offered'**
+  String get massistantStatsActionsOffered;
+
+  /// No description provided for @massistantStatsVersionActions.
+  ///
+  /// In en, this message translates to:
+  /// **'{proposed} actions offered · {done} done'**
+  String massistantStatsVersionActions(String proposed, String done);
+
   /// No description provided for @mciTitle.
   ///
   /// In en, this message translates to:

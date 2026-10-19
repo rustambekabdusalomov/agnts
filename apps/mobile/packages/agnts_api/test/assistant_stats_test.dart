@@ -87,6 +87,11 @@ void main() {
       // TODO
     });
 
+    // AssistantStatsActions actions
+    test('to test the property `actions`', () async {
+      // TODO
+    });
+
     // Per prompt version, newest first
     // List<AssistantStatsVersionsInner> versions
     test('to test the property `versions`', () async {

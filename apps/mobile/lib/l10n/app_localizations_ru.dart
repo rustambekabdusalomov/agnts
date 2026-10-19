@@ -5615,6 +5615,22 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get massistantStatsActions => 'Подтверждённые действия';
+
+  @override
+  String massistantStatsActionsLine(String proposed, String done, String failed, String cancelled, String expired, String notOffered) {
+    return '$proposed предложено · $done выполнено · $failed не выполнено · $cancelled отклонено · $expired истекло · $notOffered не предложено';
+  }
+
+  @override
+  String get massistantStatsActionsOffered => 'Предложено';
+
+  @override
+  String massistantStatsVersionActions(String proposed, String done) {
+    return '$proposed действий предложено · $done выполнено';
+  }
+
+  @override
   String get mciTitle => 'Сбои CI';
 
   @override

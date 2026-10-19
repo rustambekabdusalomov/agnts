@@ -5967,7 +5967,7 @@ components:
 
     AssistantStats:
       type: object
-      required: [days, questions, answered, failed, people, medianMs, p90Ms, medianStartMs, medianSnapshotMs, medianClaudeMs, warm, up, down, tokens, costUsd, versions]
+      required: [days, questions, answered, failed, people, medianMs, p90Ms, medianStartMs, medianSnapshotMs, medianClaudeMs, warm, up, down, tokens, costUsd, actions, versions]
       properties:
         days: { type: integer }
         questions: { type: integer }
@@ -5984,12 +5984,26 @@ components:
         down: { type: integer }
         tokens: { type: integer, format: int64 }
         costUsd: { type: number, format: double }
+        actions:
+          type: object
+          description: >-
+            The actions answers proposed and what became of them. Few
+            confirmed of many proposed means the assistant offers too
+            eagerly.
+          required: [proposed, done, failed, cancelled, expired, notOffered]
+          properties:
+            proposed: { type: integer }
+            done: { type: integer }
+            failed: { type: integer }
+            cancelled: { type: integer, description: Declined by the person }
+            expired: { type: integer }
+            notOffered: { type: integer, description: Proposals that failed agnts's checks }
         versions:
           type: array
           description: Per prompt version, newest first
           items:
             type: object
-            required: [promptVersion, answered, failed, up, down, medianMs, tokens]
+            required: [promptVersion, answered, failed, up, down, medianMs, tokens, proposed, done]
             properties:
               promptVersion: { type: string }
               answered: { type: integer }
@@ -5998,6 +6012,8 @@ components:
               down: { type: integer }
               medianMs: { type: integer, format: int64 }
               tokens: { type: integer, format: int64 }
+              proposed: { type: integer, description: Actions proposed }
+              done: { type: integer, description: Actions confirmed and done }
 
     AssistantRated:
       type: object
@@ -6011,6 +6027,10 @@ components:
         comment: { type: string }
         promptVersion: { type: string }
         shared: { type: boolean }
+        actions:
+          type: array
+          description: The actions the answer proposed, and what became of them
+          items: { $ref: '#/components/schemas/AssistantAction' }
         ratedAt: { type: string, format: date-time }
 
     TranslationLanguage:

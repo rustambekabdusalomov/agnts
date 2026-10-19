@@ -23,6 +23,7 @@ Name | Type | Description | Notes
 **down** | **int** |  | 
 **tokens** | **int** |  | 
 **costUsd** | **double** |  | 
+**actions** | [**AssistantStatsActions**](AssistantStatsActions.md) |  | 
 **versions** | [**List&lt;AssistantStatsVersionsInner&gt;**](AssistantStatsVersionsInner.md) | Per prompt version, newest first | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

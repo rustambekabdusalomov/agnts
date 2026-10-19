@@ -150,6 +150,26 @@ func TestAssistantActions(t *testing.T) {
 		t.Fatalf("late = %+v, %v", x, err)
 	}
 
+	// Stats count them by what became of them, and the not-offered one.
+	st, err := conv.AssistantStats(me, 7)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := (domain.AssistantActionStats{Proposed: 4, Done: 1, Failed: 1, Cancelled: 1, Expired: 1, NotOffered: 1}); st.Actions != want {
+		t.Fatalf("action stats = %+v, want %+v", st.Actions, want)
+	}
+	if len(st.Versions) != 1 || st.Versions[0].Proposed != 4 || st.Versions[0].Done != 1 {
+		t.Fatalf("version stats = %+v", st.Versions)
+	}
+	// A rated answer shows its actions to the owner.
+	if _, err := conv.RateAssistantMessage(me, asker, ans.ID, -1, "should not have offered retry", false); err != nil {
+		t.Fatal(err)
+	}
+	rated, err := conv.AssistantRated(me, 0, 10)
+	if err != nil || len(rated) != 1 || len(rated[0].Actions) != 4 || rated[0].Actions[0].Status != domain.ActionDone {
+		t.Fatalf("rated = %+v, %v", rated, err)
+	}
+
 	// Deleting the conversation deletes its actions.
 	if err := conv.DeleteAssistantConversation(me, asker, c.ID); err != nil {
 		t.Fatal(err)

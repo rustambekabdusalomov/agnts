@@ -37,6 +37,8 @@ abstract class _$AssistantStatsCWProxy {
 
   AssistantStats costUsd(double costUsd);
 
+  AssistantStats actions(AssistantStatsActions actions);
+
   AssistantStats versions(List<AssistantStatsVersionsInner> versions);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `AssistantStats(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -61,6 +63,7 @@ abstract class _$AssistantStatsCWProxy {
     int down,
     int tokens,
     double costUsd,
+    AssistantStatsActions actions,
     List<AssistantStatsVersionsInner> versions,
   });
 }
@@ -120,6 +123,10 @@ class _$AssistantStatsCWProxyImpl implements _$AssistantStatsCWProxy {
   AssistantStats costUsd(double costUsd) => this(costUsd: costUsd);
 
   @override
+  AssistantStats actions(AssistantStatsActions actions) =>
+      this(actions: actions);
+
+  @override
   AssistantStats versions(List<AssistantStatsVersionsInner> versions) =>
       this(versions: versions);
 
@@ -146,6 +153,7 @@ class _$AssistantStatsCWProxyImpl implements _$AssistantStatsCWProxy {
     Object? down = const $CopyWithPlaceholder(),
     Object? tokens = const $CopyWithPlaceholder(),
     Object? costUsd = const $CopyWithPlaceholder(),
+    Object? actions = const $CopyWithPlaceholder(),
     Object? versions = const $CopyWithPlaceholder(),
   }) {
     return AssistantStats(
@@ -209,6 +217,10 @@ class _$AssistantStatsCWProxyImpl implements _$AssistantStatsCWProxy {
           ? _value.costUsd
           // ignore: cast_nullable_to_non_nullable
           : costUsd as double,
+      actions: actions == const $CopyWithPlaceholder()
+          ? _value.actions
+          // ignore: cast_nullable_to_non_nullable
+          : actions as AssistantStatsActions,
       versions: versions == const $CopyWithPlaceholder()
           ? _value.versions
           // ignore: cast_nullable_to_non_nullable
@@ -248,6 +260,7 @@ AssistantStats _$AssistantStatsFromJson(
       'down',
       'tokens',
       'costUsd',
+      'actions',
       'versions',
     ],
   );
@@ -273,6 +286,10 @@ AssistantStats _$AssistantStatsFromJson(
     down: $checkedConvert('down', (v) => (v as num).toInt()),
     tokens: $checkedConvert('tokens', (v) => (v as num).toInt()),
     costUsd: $checkedConvert('costUsd', (v) => (v as num).toDouble()),
+    actions: $checkedConvert(
+      'actions',
+      (v) => AssistantStatsActions.fromJson(v as Map<String, dynamic>),
+    ),
     versions: $checkedConvert(
       'versions',
       (v) => (v as List<dynamic>)
@@ -303,5 +320,6 @@ Map<String, dynamic> _$AssistantStatsToJson(AssistantStats instance) =>
       'down': instance.down,
       'tokens': instance.tokens,
       'costUsd': instance.costUsd,
+      'actions': instance.actions.toJson(),
       'versions': instance.versions.map((e) => e.toJson()).toList(),
     };

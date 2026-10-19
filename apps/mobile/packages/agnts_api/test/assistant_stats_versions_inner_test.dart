@@ -42,5 +42,17 @@ void main() {
       // TODO
     });
 
+    // Actions proposed
+    // int proposed
+    test('to test the property `proposed`', () async {
+      // TODO
+    });
+
+    // Actions confirmed and done
+    // int done
+    test('to test the property `done`', () async {
+      // TODO
+    });
+
   });
 }

@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:agnts_api/src/model/assistant_action.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -35,6 +36,8 @@ class AssistantRated {
     required  this.promptVersion,
 
     required  this.shared,
+
+     this.actions,
 
     required  this.ratedAt,
   });
@@ -135,6 +138,19 @@ class AssistantRated {
 
 
 
+      /// The actions the answer proposed, and what became of them
+  @JsonKey(
+    
+    name: r'actions',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<AssistantAction>? actions;
+
+
+
   @JsonKey(
     
     name: r'ratedAt',
@@ -159,6 +175,7 @@ class AssistantRated {
       other.comment == comment &&
       other.promptVersion == promptVersion &&
       other.shared == shared &&
+      other.actions == actions &&
       other.ratedAt == ratedAt;
 
     @override
@@ -171,6 +188,7 @@ class AssistantRated {
         comment.hashCode +
         promptVersion.hashCode +
         shared.hashCode +
+        actions.hashCode +
         ratedAt.hashCode;
 
   factory AssistantRated.fromJson(Map<String, dynamic> json) => _$AssistantRatedFromJson(json);

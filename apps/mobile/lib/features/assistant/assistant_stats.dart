@@ -13,8 +13,8 @@ import 'assistant_data.dart';
 String _secs(int ms) => '${(ms / 1000).toStringAsFixed(ms < 10000 ? 1 : 0)}s';
 
 /// The Assistant section of Analytics, for the workspace's owner: how many
-/// questions, how many got an answer, how fast, how they were rated, and
-/// the same per prompt version.
+/// questions, how many got an answer, how fast, how they were rated, what
+/// became of the actions answers proposed, and the same per prompt version.
 class AssistantStatsSection extends ConsumerWidget {
   const AssistantStatsSection({super.key, required this.days});
   final int days;
@@ -61,6 +61,20 @@ class AssistantStatsSection extends ConsumerWidget {
               Text(l.massistantStatsWarm('${st.warm}', '${st.answered}'), style: TextStyle(fontSize: 13, color: c.ink3)),
               const SizedBox(height: 4),
               Text('${l.massistantStatsTokens}: ${st.tokens} · \$${st.costUsd.toStringAsFixed(2)}', style: TextStyle(fontSize: 13, color: c.ink3)),
+              if (st.actions.proposed + st.actions.notOffered > 0) ...[
+                const SizedBox(height: 12),
+                Text(
+                  '${l.massistantStatsActions}: '
+                  '${st.actions.proposed == 0 ? '—' : '${(st.actions.done * 100 / st.actions.proposed).round()}%'}',
+                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink2),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  l.massistantStatsActionsLine('${st.actions.proposed}', '${st.actions.done}', '${st.actions.failed}', '${st.actions.cancelled}',
+                      '${st.actions.expired}', '${st.actions.notOffered}'),
+                  style: TextStyle(fontSize: 13, color: c.ink3),
+                ),
+              ],
               if (st.versions.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Text(l.massistantStatsVersions, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink3)),
@@ -72,6 +86,8 @@ class AssistantStatsSection extends ConsumerWidget {
                           style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink2)),
                       Text(l.massistantStatsVersionRow('${v.answered}', '${v.failed}', '${v.up}', '${v.down}', _secs(v.medianMs)),
                           style: TextStyle(fontSize: 13, color: c.ink3)),
+                      if (v.proposed > 0)
+                        Text(l.massistantStatsVersionActions('${v.proposed}', '${v.done}'), style: TextStyle(fontSize: 13, color: c.ink3)),
                     ]),
                   ),
               ],
@@ -131,6 +147,7 @@ class AssistantRatedScreen extends ConsumerWidget {
                     Text(r.question, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c.ink)),
                     const SizedBox(height: 6),
                     ReportMarkdown(r.answer),
+                    for (final a in r.actions ?? const <AssistantAction>[]) _RatedAction(a),
                     if (r.comment.isNotEmpty) ...[
                       const SizedBox(height: 8),
                       Text('“${r.comment}”', style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic, color: c.ink2)),
@@ -145,6 +162,40 @@ class AssistantRatedScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// An action a rated answer proposed, with what became of it.
+class _RatedAction extends StatelessWidget {
+  const _RatedAction(this.a);
+  final AssistantAction a;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = Agnts.of(context);
+    final status = a.status == AssistantActionStatusEnum.proposed && !actionWaits(a) ? AssistantActionStatusEnum.expired : a.status;
+    final (label, color) = switch (status) {
+      AssistantActionStatusEnum.proposed => (l.massistantStatsActionsOffered, c.ink3),
+      AssistantActionStatusEnum.running => (l.massistantActionRunning, c.ink3),
+      AssistantActionStatusEnum.done => (l.massistantActionDone, c.okInk),
+      AssistantActionStatusEnum.failed => (l.massistantActionFailed, c.badInk),
+      AssistantActionStatusEnum.cancelled => (l.massistantActionCancelled, c.ink3),
+      AssistantActionStatusEnum.expired => (l.massistantActionExpired, c.ink3),
+    };
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(color: c.bg, borderRadius: BorderRadius.circular(10), border: Border.all(color: c.line)),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(a.summary, style: TextStyle(fontSize: 13.5, color: c.ink)),
+        const SizedBox(height: 4),
+        Text.rich(TextSpan(children: [
+          TextSpan(text: label, style: TextStyle(fontWeight: FontWeight.w700, color: color)),
+          if (a.result != null && a.result!.isNotEmpty) TextSpan(text: ' · ${a.result}', style: TextStyle(color: c.ink2)),
+        ]), style: const TextStyle(fontSize: 13)),
+      ]),
     );
   }
 }

@@ -4886,6 +4886,17 @@ export interface components {
             tokens: number;
             /** Format: double */
             costUsd: number;
+            /** @description The actions answers proposed and what became of them. Few confirmed of many proposed means the assistant offers too eagerly. */
+            actions: {
+                proposed: number;
+                done: number;
+                failed: number;
+                /** @description Declined by the person */
+                cancelled: number;
+                expired: number;
+                /** @description Proposals that failed agnts's checks */
+                notOffered: number;
+            };
             /** @description Per prompt version, newest first */
             versions: {
                 promptVersion: string;
@@ -4897,6 +4908,10 @@ export interface components {
                 medianMs: number;
                 /** Format: int64 */
                 tokens: number;
+                /** @description Actions proposed */
+                proposed: number;
+                /** @description Actions confirmed and done */
+                done: number;
             }[];
         };
         AssistantRated: {
@@ -4910,6 +4925,8 @@ export interface components {
             comment: string;
             promptVersion: string;
             shared: boolean;
+            /** @description The actions the answer proposed, and what became of them */
+            actions?: components["schemas"]["AssistantAction"][];
             /** Format: date-time */
             ratedAt: string;
         };

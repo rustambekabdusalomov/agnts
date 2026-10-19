@@ -80,6 +80,10 @@
     "actionExpired": "Muddati oʻtdi. Qaytadan soʻrang.",
     "actionConfirmTitle": "Tasdiqlaysizmi?",
     "actionConfirmText": "{summary}\n\nBuni bekor qilib boʻlmaydi.",
-    "actionNotOffered": "Taklif qilinmadi: {reason}"
+    "actionNotOffered": "Taklif qilinmadi: {reason}",
+    "statsActions": "Tasdiqlangan amallar",
+    "statsActionsLine": "{proposed} taklif qilindi · {done} bajarildi · {failed} bajarilmadi · {cancelled} rad etildi · {expired} muddati oʻtdi · {notOffered} taklif qilinmadi",
+    "statsActionsOffered": "Taklif qilindi",
+    "statsVersionActions": "{proposed} amal taklif qilindi · {done} bajarildi"
   }
 }

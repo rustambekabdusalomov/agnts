@@ -201,7 +201,14 @@ type AssistantStats struct {
 	Up, Down                      int
 	Tokens                        int64
 	CostUSD                       float64
+	Actions                       AssistantActionStats
 	Versions                      []AssistantVersionStats // newest prompt version first
+}
+
+// AssistantActionStats counts the actions answers proposed by what became
+// of them; NotOffered the proposals that failed agnts's checks.
+type AssistantActionStats struct {
+	Proposed, Done, Failed, Cancelled, Expired, NotOffered int
 }
 
 // AssistantVersionStats is AssistantStats for one prompt version.
@@ -212,6 +219,8 @@ type AssistantVersionStats struct {
 	Up, Down      int
 	MedianMS      int64
 	Tokens        int64
+	Proposed      int // actions proposed
+	Done          int // actions confirmed and done
 }
 
 // AssistantRated is an answer someone rated, with its question: what
@@ -225,5 +234,6 @@ type AssistantRated struct {
 	Comment       string
 	PromptVersion string
 	Shared        bool
+	Actions       []AssistantAction // what the answer proposed
 	RatedAt       time.Time
 }

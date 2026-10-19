@@ -83,7 +83,8 @@ describe('AnalyticsPage', () => {
   it('shows the Assistant tab to the owner only, with its stats and rated answers', async () => {
     BODY['/assistant/stats'] = { days: 30, questions: 4, answered: 3, failed: 1, people: 2, medianMs: 12000, p90Ms: 24000,
       medianStartMs: 900, medianSnapshotMs: 300, medianClaudeMs: 10500, warm: 2, up: 3, down: 1, tokens: 5400, costUsd: 0.12,
-      versions: [{ promptVersion: '2026-10-14.1', answered: 3, failed: 1, up: 3, down: 1, medianMs: 12000, tokens: 5400 }] }
+      actions: { proposed: 0, done: 0, failed: 0, cancelled: 0, expired: 0, notOffered: 0 },
+      versions: [{ promptVersion: '2026-10-14.1', answered: 3, failed: 1, up: 3, down: 1, medianMs: 12000, tokens: 5400, proposed: 0, done: 0 }] }
     BODY['/assistant/rated'] = [{ messageId: 2, user: 'alice', question: 'Why is CI red?', answer: 'A **flaky** test.', rating: -1,
       comment: 'it was the cache', promptVersion: '2026-10-14.1', shared: true, ratedAt: '2026-10-14T09:00:00Z' }]
     const user = await setup('/w/acme/analytics/assistant')

@@ -222,18 +222,14 @@ func (s *Server) GetAssistantStats(w http.ResponseWriter, r *http.Request, p gen
 	}
 	out := gen.AssistantStats{Days: st.Days, Questions: st.Questions, Answered: st.Answered, Failed: st.Failed, People: st.People,
 		MedianMs: st.MedianMS, P90Ms: st.P90MS, MedianStartMs: st.StartMS, MedianSnapshotMs: st.SnapshotMS, MedianClaudeMs: st.ClaudeMS, Warm: st.Warm, Up: st.Up, Down: st.Down, Tokens: st.Tokens, CostUsd: st.CostUSD}
-	out.Versions = make([]struct {
-		Answered      int    `json:"answered"`
-		Down          int    `json:"down"`
-		Failed        int    `json:"failed"`
-		MedianMs      int64  `json:"medianMs"`
-		PromptVersion string `json:"promptVersion"`
-		Tokens        int64  `json:"tokens"`
-		Up            int    `json:"up"`
-	}, len(st.Versions))
+	a := &out.Actions
+	a.Proposed, a.Done, a.Failed, a.Cancelled, a.Expired, a.NotOffered = st.Actions.Proposed, st.Actions.Done, st.Actions.Failed,
+		st.Actions.Cancelled, st.Actions.Expired, st.Actions.NotOffered
+	out.Versions = makeLike(out.Versions, len(st.Versions))
 	for i, v := range st.Versions {
-		out.Versions[i].Answered, out.Versions[i].Down, out.Versions[i].Failed = v.Answered, v.Down, v.Failed
-		out.Versions[i].MedianMs, out.Versions[i].PromptVersion, out.Versions[i].Tokens, out.Versions[i].Up = v.MedianMS, v.PromptVersion, v.Tokens, v.Up
+		x := &out.Versions[i]
+		x.Answered, x.Down, x.Failed, x.MedianMs, x.PromptVersion, x.Tokens, x.Up = v.Answered, v.Down, v.Failed, v.MedianMS, v.PromptVersion, v.Tokens, v.Up
+		x.Proposed, x.Done = v.Proposed, v.Done
 	}
 	writeJSON(w, http.StatusOK, out)
 }
@@ -256,9 +252,20 @@ func (s *Server) ListAssistantRated(w http.ResponseWriter, r *http.Request, p ge
 	for i, x := range list {
 		out[i] = gen.AssistantRated{MessageId: x.MessageID, User: x.Username, Question: x.Question, Answer: x.Answer,
 			Rating: gen.AssistantRatedRating(x.Rating), Comment: x.Comment, PromptVersion: x.PromptVersion, Shared: x.Shared, RatedAt: x.RatedAt}
+		if len(x.Actions) > 0 {
+			acts := make([]gen.AssistantAction, len(x.Actions))
+			for j, a := range x.Actions {
+				acts[j] = toAssistantAction(a)
+			}
+			out[i].Actions = &acts
+		}
 	}
 	writeJSON(w, http.StatusOK, out)
 }
+
+// makeLike makes a slice of n elements of s's type: the generated
+// anonymous element types need no spelling out.
+func makeLike[S ~[]E, E any](_ S, n int) S { return make(S, n) }
 
 func toConversation(c domain.AssistantConversation) gen.AssistantConversation {
 	out := gen.AssistantConversation{Id: c.ID, Title: c.Title, CreatedAt: c.CreatedAt, UpdatedAt: c.UpdatedAt,

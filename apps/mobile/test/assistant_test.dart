@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:agnts_mobile/features/assistant/assistant_data.dart';
 import 'package:agnts_mobile/features/assistant/assistant_screen.dart';
+import 'package:agnts_mobile/features/assistant/assistant_stats.dart';
 import 'package:agnts_mobile/l10n/app_localizations.dart';
 import 'package:agnts_mobile/l10n/app_localizations_en.dart';
 import 'package:agnts_mobile/theme.dart';
@@ -171,5 +172,44 @@ void main() {
     expect(find.text('Confirm'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('the stats say what became of the actions', (tester) async {
+    final st = AssistantStats(
+      days: 7,
+      questions: 10,
+      answered: 9,
+      failed: 1,
+      people: 2,
+      medianMs: 12000,
+      p90Ms: 20000,
+      medianStartMs: 1000,
+      medianSnapshotMs: 500,
+      medianClaudeMs: 10000,
+      warm: 4,
+      up: 3,
+      down: 1,
+      tokens: 12000,
+      costUsd: 0.4,
+      actions: AssistantStatsActions(proposed: 4, done: 3, failed: 0, cancelled: 1, expired: 0, notOffered: 2),
+      versions: [
+        AssistantStatsVersionsInner(promptVersion: '2026-10-19.1', answered: 9, failed: 1, up: 3, down: 1, medianMs: 12000, tokens: 12000, proposed: 4, done: 3),
+      ],
+    );
+    await tester.pumpWidget(ProviderScope(
+      overrides: [assistantStatsProvider(7).overrideWith((ref) async => st)],
+      child: MaterialApp(
+        theme: agntsTheme(Brightness.light),
+        locale: const Locale('en'),
+        localizationsDelegates: const [AppLocalizations.delegate, ...GlobalMaterialLocalizations.delegates],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const Scaffold(body: SingleChildScrollView(child: AssistantStatsSection(days: 7))),
+      ),
+    ));
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('Actions confirmed: 75%'), findsOneWidget);
+    expect(find.text('4 offered · 3 done · 0 not done · 1 declined · 0 expired · 2 not offered'), findsOneWidget);
+    expect(find.text('4 actions offered · 3 done'), findsOneWidget);
   });
 }

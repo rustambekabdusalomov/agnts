@@ -16,6 +16,7 @@ Name | Type | Description | Notes
 **comment** | **String** |  | 
 **promptVersion** | **String** |  | 
 **shared** | **bool** |  | 
+**actions** | [**List&lt;AssistantAction&gt;**](AssistantAction.md) | The actions the answer proposed, and what became of them | [optional] 
 **ratedAt** | [**DateTime**](DateTime.md) |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

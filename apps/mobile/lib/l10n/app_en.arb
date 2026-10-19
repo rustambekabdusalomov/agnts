@@ -3244,6 +3244,42 @@
       }
     }
   },
+  "massistantStatsActions": "Actions confirmed",
+  "massistantStatsActionsLine": "{proposed} offered · {done} done · {failed} not done · {cancelled} declined · {expired} expired · {notOffered} not offered",
+  "@massistantStatsActionsLine": {
+    "placeholders": {
+      "proposed": {
+        "type": "String"
+      },
+      "done": {
+        "type": "String"
+      },
+      "failed": {
+        "type": "String"
+      },
+      "cancelled": {
+        "type": "String"
+      },
+      "expired": {
+        "type": "String"
+      },
+      "notOffered": {
+        "type": "String"
+      }
+    }
+  },
+  "massistantStatsActionsOffered": "Offered",
+  "massistantStatsVersionActions": "{proposed} actions offered · {done} done",
+  "@massistantStatsVersionActions": {
+    "placeholders": {
+      "proposed": {
+        "type": "String"
+      },
+      "done": {
+        "type": "String"
+      }
+    }
+  },
   "mciTitle": "CI failures",
   "mciLede": "Watched branches that went red, one row per error.",
   "mciFilterRed": "Red",

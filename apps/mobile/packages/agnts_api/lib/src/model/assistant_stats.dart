@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:agnts_api/src/model/assistant_stats_actions.dart';
 import 'package:agnts_api/src/model/assistant_stats_versions_inner.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -50,6 +51,8 @@ class AssistantStats {
     required  this.tokens,
 
     required  this.costUsd,
+
+    required  this.actions,
 
     required  this.versions,
   });
@@ -239,6 +242,18 @@ class AssistantStats {
 
 
 
+  @JsonKey(
+    
+    name: r'actions',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final AssistantStatsActions actions;
+
+
+
       /// Per prompt version, newest first
   @JsonKey(
     
@@ -271,6 +286,7 @@ class AssistantStats {
       other.down == down &&
       other.tokens == tokens &&
       other.costUsd == costUsd &&
+      other.actions == actions &&
       other.versions == versions;
 
     @override
@@ -290,6 +306,7 @@ class AssistantStats {
         down.hashCode +
         tokens.hashCode +
         costUsd.hashCode +
+        actions.hashCode +
         versions.hashCode;
 
   factory AssistantStats.fromJson(Map<String, dynamic> json) => _$AssistantStatsFromJson(json);

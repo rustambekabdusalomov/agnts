@@ -289,6 +289,36 @@ func (s *Assistant) AssistantStats(ctx context.Context, days int) (domain.Assist
 	if err != nil {
 		return st, err
 	}
+	a := &st.Actions
+	err = s.db.QueryRow(ctx, `SELECT count(*), count(*) FILTER (WHERE p.outcome = 'done'), count(*) FILTER (WHERE p.outcome = 'failed'),
+		count(*) FILTER (WHERE p.outcome = 'cancelled'),
+		count(*) FILTER (WHERE p.outcome IS NULL AND p.confirmed_at IS NULL AND p.expires_at <= now()),
+		(SELECT COALESCE(sum(cardinality(m.action_errors)), 0) FROM assistant_messages m WHERE m.role = 'assistant' AND m.created_at >= $1)
+		FROM pending_actions p WHERE p.origin = 'assistant' AND p.created_at >= $1`, since).
+		Scan(&a.Proposed, &a.Done, &a.Failed, &a.Cancelled, &a.Expired, &a.NotOffered)
+	if err != nil {
+		return st, err
+	}
+	acts := map[string][2]int{} // per prompt version: proposed, done
+	arows, err := s.db.Query(ctx, `SELECT m.prompt_version, count(*), count(*) FILTER (WHERE p.outcome = 'done')
+		FROM pending_actions p JOIN assistant_messages m ON m.id = p.assistant_message_id
+		WHERE p.origin = 'assistant' AND p.created_at >= $1 GROUP BY m.prompt_version`, since)
+	if err != nil {
+		return st, err
+	}
+	for arows.Next() {
+		var v string
+		var n [2]int
+		if err := arows.Scan(&v, &n[0], &n[1]); err != nil {
+			arows.Close()
+			return st, err
+		}
+		acts[v] = n
+	}
+	arows.Close()
+	if err := arows.Err(); err != nil {
+		return st, err
+	}
 	rows, err := s.db.Query(ctx, `SELECT m.prompt_version, count(*) FILTER (WHERE m.status = 'done'), count(*) FILTER (WHERE m.status = 'failed'),
 		count(*) FILTER (WHERE m.rating = 1), count(*) FILTER (WHERE m.rating = -1),
 		COALESCE(percentile_disc(0.5) WITHIN GROUP (ORDER BY m.duration_ms) FILTER (WHERE m.status = 'done'), 0),
@@ -305,6 +335,7 @@ func (s *Assistant) AssistantStats(ctx context.Context, days int) (domain.Assist
 		if err := rows.Scan(&v.PromptVersion, &v.Answered, &v.Failed, &v.Up, &v.Down, &v.MedianMS, &v.Tokens); err != nil {
 			return st, err
 		}
+		v.Proposed, v.Done = acts[v.PromptVersion][0], acts[v.PromptVersion][1]
 		st.Versions = append(st.Versions, v)
 	}
 	return st, rows.Err()
@@ -334,7 +365,22 @@ func (s *Assistant) AssistantRated(ctx context.Context, rating, limit int) ([]do
 		}
 		out = append(out, r)
 	}
-	return out, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	rows.Close()
+	ids := make([]int64, len(out))
+	for i, r := range out {
+		ids[i] = r.MessageID
+	}
+	by, err := assistantActionsOf(ctx, s.db, ids)
+	if err != nil {
+		return nil, err
+	}
+	for i := range out {
+		out[i].Actions = by[out[i].MessageID]
+	}
+	return out, nil
 }
 
 // AssistantReplayCase is a shared answer with what it was made from.

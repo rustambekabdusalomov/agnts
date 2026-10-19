@@ -213,7 +213,7 @@ func workspaceCommand(ctx context.Context, cfg config.Config, log *slog.Logger, 
 		case len(args) >= 2 && args[1] == "assistant":
 			return evalAssistant(ctx, cfg, pool, log, args[2:], os.Stdout)
 		}
-		return errors.New("usage: agnts eval relations | eval replay KEY... | eval report | eval assistant [--limit N]")
+		return errors.New("usage: agnts eval relations | eval replay KEY... | eval report | eval assistant [--limit N | --cases]")
 	}
 	return fmt.Errorf("unknown command %q", args[0])
 }

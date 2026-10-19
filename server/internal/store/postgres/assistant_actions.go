@@ -101,30 +101,41 @@ func (s *Agent) FinishAssistantAction(ctx context.Context, id string, outcome do
 // attachAssistantActions loads the actions each of msgs proposed.
 func attachAssistantActions(ctx context.Context, db *pgxpool.Pool, msgs []domain.AssistantMessage) error {
 	var ids []int64
-	at := map[int64]int{}
-	for i, m := range msgs {
+	for _, m := range msgs {
 		if m.Role == domain.AssistantReply {
 			ids = append(ids, m.ID)
-			at[m.ID] = i
 		}
 	}
+	by, err := assistantActionsOf(ctx, db, ids)
+	if err != nil {
+		return err
+	}
+	for i := range msgs {
+		msgs[i].Actions = by[msgs[i].ID]
+	}
+	return nil
+}
+
+// assistantActionsOf returns the actions the answers ids proposed, by
+// answer, oldest first.
+func assistantActionsOf(ctx context.Context, db *pgxpool.Pool, ids []int64) (map[int64][]domain.AssistantAction, error) {
 	if len(ids) == 0 {
-		return nil
+		return nil, nil
 	}
 	rows, err := db.Query(ctx, `SELECT `+assistantActionCols+` FROM pending_actions p
 		JOIN assistant_messages m ON m.id = p.assistant_message_id
 		WHERE p.origin = 'assistant' AND p.assistant_message_id = ANY($1) ORDER BY p.created_at, p.id`, ids)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer rows.Close()
+	out := map[int64][]domain.AssistantAction{}
 	for rows.Next() {
 		a, err := scanAssistantAction(rows)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		i := at[a.MessageID]
-		msgs[i].Actions = append(msgs[i].Actions, a)
+		out[a.MessageID] = append(out[a.MessageID], a)
 	}
-	return rows.Err()
+	return out, rows.Err()
 }

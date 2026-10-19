@@ -5359,6 +5359,22 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
+  String get massistantStatsActions => 'Tasdiqlangan amallar';
+
+  @override
+  String massistantStatsActionsLine(String proposed, String done, String failed, String cancelled, String expired, String notOffered) {
+    return '$proposed taklif qilindi · $done bajarildi · $failed bajarilmadi · $cancelled rad etildi · $expired muddati oʻtdi · $notOffered taklif qilinmadi';
+  }
+
+  @override
+  String get massistantStatsActionsOffered => 'Taklif qilindi';
+
+  @override
+  String massistantStatsVersionActions(String proposed, String done) {
+    return '$proposed amal taklif qilindi · $done bajarildi';
+  }
+
+  @override
   String get mciTitle => 'CI nosozliklari';
 
   @override

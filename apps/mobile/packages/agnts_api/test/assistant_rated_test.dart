@@ -47,6 +47,12 @@ void main() {
       // TODO
     });
 
+    // The actions the answer proposed, and what became of them
+    // List<AssistantAction> actions
+    test('to test the property `actions`', () async {
+      // TODO
+    });
+
     // DateTime ratedAt
     test('to test the property `ratedAt`', () async {
       // TODO

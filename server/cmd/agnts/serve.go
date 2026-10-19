@@ -993,11 +993,15 @@ func evalReport(ctx context.Context, cfg config.Config, pool postgresPool, log *
 
 // evalAssistant answers the questions people shared (with their rating)
 // again with the current prompts, from the snapshots their answers were
-// made from, and prints the old and the new answer side by side.
+// made from, and prints the old and the new answer side by side. With
+// --cases it answers the built-in cases instead and checks the actions
+// each proposes.
 func evalAssistant(ctx context.Context, cfg config.Config, pool postgresPool, log *slog.Logger, args []string, out io.Writer) error {
 	limit := 20
 	for i := 0; i < len(args); i++ {
 		switch {
+		case args[i] == "--cases" && len(args) == 1:
+			return evalAssistantCases(ctx, cfg, pool, log, out)
 		case args[i] == "--limit" && i+1 < len(args):
 			n, err := strconv.Atoi(args[i+1])
 			if err != nil || n <= 0 {
@@ -1005,7 +1009,7 @@ func evalAssistant(ctx context.Context, cfg config.Config, pool postgresPool, lo
 			}
 			limit, i = n, i+1
 		default:
-			return fmt.Errorf("unknown argument %q; usage: agnts eval assistant [--limit N]", args[i])
+			return fmt.Errorf("unknown argument %q; usage: agnts eval assistant [--limit N | --cases]", args[i])
 		}
 	}
 	a, err := newAgent(cfg, pool, log)
@@ -1048,6 +1052,58 @@ func evalAssistant(ctx context.Context, cfg config.Config, pool postgresPool, lo
 	}
 	p("---\n%d replayed, %d without an answer, %d tokens, %s of Claude time\n", len(cases), failed, tokens, took.Round(time.Second))
 	return nil
+}
+
+// evalAssistantCases answers the built-in cases with the current prompt
+// and checks the actions each proposes: acting when asked, not when the
+// files only talk about acting. It fails when a case does.
+func evalAssistantCases(ctx context.Context, cfg config.Config, pool postgresPool, log *slog.Logger, out io.Writer) error {
+	cases, err := orchestrator.AssistantCases()
+	if err != nil {
+		return err
+	}
+	a, err := newAgent(cfg, pool, log)
+	if err != nil {
+		return err
+	}
+	p := func(format string, args ...any) { _, _ = fmt.Fprintf(out, format, args...) }
+	p("# Assistant cases: %d, prompts %s\n\n", len(cases), orchestrator.PromptVersion)
+	var failed int
+	var tokens int64
+	for _, c := range cases {
+		ans, res, err := a.orch.ReplayAnswer(ctx, c.Snapshot(), c.Lang, 0)
+		tokens += res.Usage.Total()
+		problems := orchestrator.CheckProposals(ans.Actions, c.Want)
+		if err != nil {
+			problems = []string{"no answer: " + err.Error()}
+		}
+		if len(problems) == 0 {
+			p("- ✓ %s\n", c.Name)
+			continue
+		}
+		failed++
+		p("- ✗ %s\n", c.Name)
+		for _, x := range problems {
+			p("  - %s\n", x)
+		}
+		if ans.Answer != "" {
+			p("  > %s\n", strings.ReplaceAll(truncateLine(ans.Answer, 300), "\n", " "))
+		}
+	}
+	p("\n%d passed, %d failed, %d tokens\n", len(cases)-failed, failed, tokens)
+	if failed > 0 {
+		return fmt.Errorf("%d of %d assistant cases failed", failed, len(cases))
+	}
+	return nil
+}
+
+// truncateLine cuts s to at most n runes.
+func truncateLine(s string, n int) string {
+	r := []rune(s)
+	if len(r) <= n {
+		return s
+	}
+	return string(r[:n]) + "…"
 }
 
 func orDash(s string) string {

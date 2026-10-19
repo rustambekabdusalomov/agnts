@@ -33,6 +33,10 @@ class AssistantStatsVersionsInner {
     required  this.medianMs,
 
     required  this.tokens,
+
+    required  this.proposed,
+
+    required  this.done,
   });
 
   @JsonKey(
@@ -119,6 +123,32 @@ class AssistantStatsVersionsInner {
 
 
 
+      /// Actions proposed
+  @JsonKey(
+    
+    name: r'proposed',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final int proposed;
+
+
+
+      /// Actions confirmed and done
+  @JsonKey(
+    
+    name: r'done',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final int done;
+
+
+
 
 
     @override
@@ -129,7 +159,9 @@ class AssistantStatsVersionsInner {
       other.up == up &&
       other.down == down &&
       other.medianMs == medianMs &&
-      other.tokens == tokens;
+      other.tokens == tokens &&
+      other.proposed == proposed &&
+      other.done == done;
 
     @override
     int get hashCode =>
@@ -139,7 +171,9 @@ class AssistantStatsVersionsInner {
         up.hashCode +
         down.hashCode +
         medianMs.hashCode +
-        tokens.hashCode;
+        tokens.hashCode +
+        proposed.hashCode +
+        done.hashCode;
 
   factory AssistantStatsVersionsInner.fromJson(Map<String, dynamic> json) => _$AssistantStatsVersionsInnerFromJson(json);
 
