@@ -5379,7 +5379,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get massistantEmptyText =>
-      'Ассистент отвечает по вашим задачам, CI и расходам и даёт ссылки на то, о чём говорит. Он ничего не запускает, не одобряет и не отклоняет.';
+      'Ассистент отвечает по вашим задачам, CI и расходам и даёт ссылки на то, о чём говорит. Попросите его одобрить, запустить или создать что-то — он предложит действие, а вы подтвердите.';
 
   @override
   String get massistantPrivate => 'Ваши разговоры видите только вы. Они хранятся 30 дней.';
@@ -5567,6 +5567,52 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get massistantOpenChat => 'Открыть чат';
+
+  @override
+  String get massistantSuggestAct => 'Одобри то, что прошло ревью';
+
+  @override
+  String get massistantFileMe => 'вашу роль';
+
+  @override
+  String get massistantFileGroups => 'группы репозиториев';
+
+  @override
+  String get massistantActionHint => 'Ничего не произойдёт, пока вы не подтвердите.';
+
+  @override
+  String get massistantActionConfirm => 'Подтвердить';
+
+  @override
+  String get massistantActionDecline => 'Отклонить';
+
+  @override
+  String get massistantActionRunning => 'Выполняю…';
+
+  @override
+  String get massistantActionDone => 'Готово';
+
+  @override
+  String get massistantActionFailed => 'Не выполнено';
+
+  @override
+  String get massistantActionCancelled => 'Отклонено';
+
+  @override
+  String get massistantActionExpired => 'Срок истёк. Спросите ещё раз.';
+
+  @override
+  String get massistantActionConfirmTitle => 'Подтвердить?';
+
+  @override
+  String massistantActionConfirmText(String summary) {
+    return '$summary\n\nЭто нельзя отменить.';
+  }
+
+  @override
+  String massistantActionNotOffered(String reason) {
+    return 'Не предложено: $reason';
+  }
 
   @override
   String get mciTitle => 'Сбои CI';

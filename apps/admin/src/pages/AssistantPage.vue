@@ -6,14 +6,17 @@ import { useRoute, useRouter } from 'vue-router'
 import { api, unwrap } from '../api/client'
 import type { AssistantConversation, AssistantLink, AssistantMessage } from '../api/types'
 import { applyLive, assistantLang, fileLabel, isOpen, live, MAX_QUESTION, secs } from '../components/assistant/assistant'
+import AssistantActionCard from '../components/assistant/AssistantActionCard.vue'
 import PageHeader from '../components/PageHeader.vue'
 import ReportView from '../components/ticket/ReportView.vue'
 import HiIcon from '../components/ui/HiIcon.vue'
 import { livePoll, useLive } from '../composables/useLive'
+import { useWorkspace } from '../stores/workspace'
 
 // The assistant's chat: questions about the workspace, typed, answered in
 // 10-30 seconds from a snapshot of it, with links to what the answers name.
-// It takes no actions. The open conversation is in the URL (/assistant/<id>);
+// Asked to act, an answer carries the actions as cards; nothing happens
+// until the person confirms one. The open conversation is in the URL (/assistant/<id>);
 // the person's conversations are listed on their own page.
 const { t, locale } = useI18n()
 const route = useRoute()
@@ -119,7 +122,11 @@ function linkLabel(l: AssistantLink) {
   return l.kind === 'ci' ? t('massistant.linkCi', { id: l.id }) : t('massistant.linkLesson', { id: l.id })
 }
 
-const suggestions = computed(() => [t('massistant.suggestWaiting'), t('massistant.suggestCi'), t('massistant.suggestSpend'), t('massistant.suggestDone')])
+const workspace = useWorkspace()
+const suggestions = computed(() => [
+  t('massistant.suggestWaiting'), t('massistant.suggestCi'), t('massistant.suggestSpend'), t('massistant.suggestDone'),
+  ...(workspace.canEdit ? [t('massistant.suggestAct')] : []),
+])
 </script>
 
 <template>
@@ -158,6 +165,8 @@ const suggestions = computed(() => [t('massistant.suggestWaiting'), t('massistan
           </template>
           <template v-else>
             <ReportView :markdown="m.text" />
+            <AssistantActionCard v-for="a in m.actions ?? []" :key="a.id" :action="a" />
+            <p v-for="(e, i) in m.actionErrors ?? []" :key="i" class="hint as-noact">{{ t('massistant.actionNotOffered', { reason: e }) }}</p>
             <div v-if="m.links.length" class="as-links">
               <RouterLink v-for="(l, i) in m.links" :key="i" class="as-link" :class="{ mono: l.kind === 'ticket' }" :to="linkTo(l)">{{ linkLabel(l) }}</RouterLink>
             </div>
@@ -215,6 +224,7 @@ const suggestions = computed(() => [t('massistant.suggestWaiting'), t('massistan
 .as-spin { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--line-3); border-top-color: var(--primary); animation: as-spin 0.8s linear infinite; }
 @keyframes as-spin { to { transform: rotate(360deg); } }
 .as-partial { opacity: 0.6; }
+.as-noact { margin: 8px 0 0; }
 .as-links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .as-link { padding: 3px 10px; border-radius: 999px; background: var(--primary-soft); color: var(--primary-ink); font-size: 13.5px; font-weight: 700; text-decoration: none; }
 .as-link.mono { font-family: var(--mono); }

@@ -1,5 +1,5 @@
 import { reactive } from 'vue'
-import type { AssistantLanguage, AssistantMessage, TicketEvent } from '../../api/types'
+import type { AssistantAction, AssistantLanguage, AssistantMessage, TicketEvent } from '../../api/types'
 
 type T = (key: string, values?: Record<string, unknown>) => string
 
@@ -29,6 +29,14 @@ export function applyLive(e: TicketEvent) {
 /** Whether the answer is still being made. */
 export const isOpen = (m: AssistantMessage) => m.status === 'pending' || m.status === 'answering'
 
+/**
+ * Where a proposed action stands now: one still marked proposed after its
+ * time ran out is expired.
+ */
+export function actionStatus(a: AssistantAction, now = Date.now()): AssistantAction['status'] {
+  return a.status === 'proposed' && new Date(a.expiresAt).getTime() <= now ? 'expired' : a.status
+}
+
 /** The language answers come in: the panel's. */
 export function assistantLang(locale: string): AssistantLanguage {
   return locale === 'ru' || locale === 'uz' ? locale : 'en'
@@ -44,6 +52,8 @@ export function fileLabel(t: T, file: string): string {
     'usage.json': 'fileUsage',
     'analytics.json': 'fileAnalytics',
     'repositories.json': 'fileRepos',
+    'groups.json': 'fileGroups',
+    'me.json': 'fileMe',
     'lessons.json': 'fileLessons',
     'conversation.json': 'fileConversation',
     'question.txt': 'fileQuestion',

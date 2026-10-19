@@ -1,9 +1,10 @@
 import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
 import { flushPromises, mount } from '@vue/test-utils'
+import { createPinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
-import { applyLive, fileLabel, live } from '../components/assistant/assistant'
+import { actionStatus, applyLive, fileLabel, live } from '../components/assistant/assistant'
 import { i18n } from '../i18n'
 import AssistantConversationsPage from './AssistantConversationsPage.vue'
 import AssistantPage from './AssistantPage.vue'
@@ -28,8 +29,8 @@ const conv = {
   ],
 }
 
-async function setup(path: string) {
-  call.GET.mockImplementation(async (p: string) => (p === '/assistant/conversations' ? [{ ...conv, messages: [conv.messages[1]] }] : conv))
+async function setup(path: string, c: typeof conv = conv) {
+  call.GET.mockImplementation(async (p: string) => (p === '/assistant/conversations' ? [{ ...c, messages: [c.messages[1]] }] : c))
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
@@ -42,7 +43,7 @@ async function setup(path: string) {
   })
   await router.push(path)
   const w = mount({ template: '<RouterView />' }, {
-    global: { plugins: [i18n, router, [VueQueryPlugin, { queryClient: new QueryClient({ defaultOptions: { queries: { retry: false } } }) }]] },
+    global: { plugins: [i18n, router, createPinia(), [VueQueryPlugin, { queryClient: new QueryClient({ defaultOptions: { queries: { retry: false } } }) }]] },
     attachTo: document.body,
   })
   await flushPromises()
@@ -114,6 +115,40 @@ describe('AssistantPage', () => {
     w.unmount()
   })
 
+  it('shows proposed actions to confirm or decline, and what became of the others', async () => {
+    const soon = new Date(Date.now() + 20 * 60_000).toISOString()
+    const act = (id: string, extra: Record<string, unknown>) => ({
+      id, messageId: 2, conversationId: 7, tool: 'start_run', summary: `Action ${id}.`, destructive: false, status: 'proposed', expiresAt: soon, ...extra,
+    })
+    const withActions = { ...conv, messages: [conv.messages[0]!, msg(2, 'assistant', 'PAY-214 passed review.', {
+      actions: [
+        act('a1', { tool: 'approve_ticket', destructive: true, summary: 'Approve PAY-214: agnts will push it.' }),
+        act('a2', {}),
+        act('a3', { status: 'done', result: 'PAY-1 is now rejected.', ticketKey: 'PAY-1' }),
+        act('a4', { expiresAt: new Date(Date.now() - 60_000).toISOString() }),
+      ],
+      actionErrors: ['start_run: no ticket "PAY-404"'],
+    })] }
+    const { w } = await setup('/w/acme/assistant/7', withActions as typeof conv)
+    const cards = w.findAll('.aa')
+    expect(cards.map((c) => c.classes().find((x) => ['proposed', 'done', 'expired'].includes(x)))).toEqual(['proposed', 'proposed', 'done', 'expired'])
+    expect(cards[0]!.classes()).toContain('danger')
+    expect(cards[0]!.text()).toContain('Approve PAY-214: agnts will push it.')
+    expect(cards[2]!.text()).toContain('PAY-1 is now rejected.')
+    expect(cards[2]!.find('a').attributes('href')).toBe('/w/acme/tickets/PAY-1')
+    expect(cards[3]!.text()).toContain('Expired')
+    expect(w.text()).toContain('Not offered: start_run: no ticket "PAY-404"')
+
+    call.POST.mockResolvedValue({})
+    await cards[0]!.findAll('button').find((b) => b.text() === 'Confirm')!.trigger('click')
+    await flushPromises()
+    expect(call.POST).toHaveBeenCalledWith('/assistant/actions/{actionId}/confirm', { params: { path: { actionId: 'a1' } } })
+    await cards[1]!.findAll('button').find((b) => b.text() === 'Decline')!.trigger('click')
+    await flushPromises()
+    expect(call.POST).toHaveBeenCalledWith('/assistant/actions/{actionId}/cancel', { params: { path: { actionId: 'a2' } } })
+    w.unmount()
+  })
+
   it('lists conversations to open or delete', async () => {
     const { w, router } = await setup('/w/acme/assistant/conversations')
     expect(w.find('h1').text()).toBe('Conversations')
@@ -143,6 +178,13 @@ describe('assistant helpers', () => {
     expect(live.get(4)).toEqual({ file: 'usage.json', text: 'You spent $3.' })
     applyLive({ type: 'assistant_answered', data: { message_id: 4 } } as never)
     expect(live.has(4)).toBe(false)
+  })
+
+  it('expires an action nobody confirmed in time', () => {
+    const a = { status: 'proposed', expiresAt: '2026-10-19T10:00:00Z' } as never
+    expect(actionStatus(a, Date.parse('2026-10-19T09:59:00Z'))).toBe('proposed')
+    expect(actionStatus(a, Date.parse('2026-10-19T10:01:00Z'))).toBe('expired')
+    expect(actionStatus({ status: 'done', expiresAt: '2026-10-19T10:00:00Z' } as never, Date.parse('2026-10-19T11:00:00Z'))).toBe('done')
   })
 
   it('names snapshot files in words', () => {

@@ -13,7 +13,7 @@
     "delete": "Oʻchirish",
     "deleted": "Suhbat oʻchirildi",
     "emptyTitle": "agntsdan ishingiz haqida soʻrang",
-    "emptyText": "Yordamchi vazifalaringiz, CI va xarajatlaringiz boʻyicha javob beradi va tilga olganlariga havola qoʻyadi. U hech narsani ishga tushirmaydi, tasdiqlamaydi yoki rad etmaydi.",
+    "emptyText": "Yordamchi vazifalaringiz, CI va xarajatlaringiz boʻyicha javob beradi va tilga olganlariga havola qoʻyadi. Undan biror narsani tasdiqlash, ishga tushirish yoki yaratishni soʻrasangiz, u amalni taklif qiladi, siz esa tasdiqlaysiz.",
     "private": "Suhbatlaringizni faqat siz koʻrasiz. Ular 30 kun saqlanadi.",
     "suggestWaiting": "Meni nima kutmoqda?",
     "suggestCi": "Nega CI qizil?",
@@ -66,6 +66,20 @@
     "deleteText": "Undagi savol va javoblar butunlay oʻchiriladi.",
     "sendHint": "Enter — yuborish, Shift+Enter — yangi qator",
     "conversationsLede": "Savollaringiz va yordamchining javoblari. Ularni faqat siz koʻrasiz; 30 kun saqlanadi.",
-    "openChat": "Chatni ochish"
+    "openChat": "Chatni ochish",
+    "suggestAct": "Koʻrikdan oʻtganlarini tasdiqla",
+    "fileMe": "rolingiz",
+    "fileGroups": "repozitoriy guruhlari",
+    "actionHint": "Siz tasdiqlamaguningizcha hech narsa boʻlmaydi.",
+    "actionConfirm": "Tasdiqlash",
+    "actionDecline": "Rad etish",
+    "actionRunning": "Bajarilmoqda…",
+    "actionDone": "Bajarildi",
+    "actionFailed": "Bajarilmadi",
+    "actionCancelled": "Rad etildi",
+    "actionExpired": "Muddati oʻtdi. Qaytadan soʻrang.",
+    "actionConfirmTitle": "Tasdiqlaysizmi?",
+    "actionConfirmText": "{summary}\n\nBuni bekor qilib boʻlmaydi.",
+    "actionNotOffered": "Taklif qilinmadi: {reason}"
   }
 }

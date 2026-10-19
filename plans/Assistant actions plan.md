@@ -1,6 +1,6 @@
 # agnts Assistant actions — Plan
 
-Oct 19, 2026 · draft; phases 1 and 2 implemented
+Oct 19, 2026 · phases 1–3 implemented; phase 4 to do
 
 ## Overview
 
@@ -173,6 +173,12 @@ Orchestrator: `ConfirmAssistantAction(ctx, id)` and `CancelAssistantAction(ctx, 
 - The replay path stores no rows.
 
 ## Phase 3: Clients
+
+**As built:**
+- **Mobile:** `_ActionCard` in `assistant_screen.dart`; `decideAction` and `actionWaits` in `assistant_data.dart`. The card re-checks expiry when it's drawn, so a proposed action whose time ran out shows as expired before the server is asked.
+- **Admin:** `components/assistant/AssistantActionCard.vue` and `actionStatus` in `assistant.ts`. Approve and reject use the shared `askConfirm` dialog.
+- **Refresh:** both clients refresh the conversation on `assistant_action` events. Ticket screens update from the ticket's own events on the stream. The mobile app also refreshes Home and the named ticket after a done action.
+- **Texts:** the "act" suggestion shows only to people who can edit. New strings are in `shared/i18n/*/massistant.json` (`action*`, `suggestAct`, `fileMe`, `fileGroups`), and the empty-chat text no longer says the assistant can't act.
 
 ### Mobile (`apps/mobile/lib/features/assistant/`)
 

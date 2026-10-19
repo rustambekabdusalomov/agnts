@@ -13,7 +13,7 @@
     "delete": "Delete",
     "deleted": "Conversation deleted",
     "emptyTitle": "Ask agnts about your work",
-    "emptyText": "It answers from your tickets, CI and spend, and links what it mentions. It cannot start, approve or reject anything.",
+    "emptyText": "It answers from your tickets, CI and spend, and links what it mentions. Ask it to approve, start or create something and it offers the action for you to confirm.",
     "private": "Only you see your conversations. They are kept for 30 days.",
     "suggestWaiting": "What is waiting on me?",
     "suggestCi": "Why is CI red?",
@@ -66,6 +66,20 @@
     "deleteText": "Its questions and answers are deleted for good.",
     "sendHint": "Enter to send, Shift+Enter for a new line",
     "conversationsLede": "Your questions and the assistant's answers. Only you see them; they are kept for 30 days.",
-    "openChat": "Open the chat"
+    "openChat": "Open the chat",
+    "suggestAct": "Approve what passed review",
+    "fileMe": "your role",
+    "fileGroups": "repository groups",
+    "actionHint": "Nothing happens until you confirm.",
+    "actionConfirm": "Confirm",
+    "actionDecline": "Decline",
+    "actionRunning": "Doing it…",
+    "actionDone": "Done",
+    "actionFailed": "Not done",
+    "actionCancelled": "Declined",
+    "actionExpired": "Expired. Ask again for a new one.",
+    "actionConfirmTitle": "Confirm this?",
+    "actionConfirmText": "{summary}\n\nThis cannot be undone.",
+    "actionNotOffered": "Not offered: {reason}"
   }
 }

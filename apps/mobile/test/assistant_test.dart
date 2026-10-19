@@ -13,7 +13,11 @@ import 'package:agnts_mobile/theme.dart';
 final _at = DateTime.now().subtract(const Duration(seconds: 5));
 
 AssistantMessage _m(int id, AssistantMessageRoleEnum role, String text,
-        {AssistantMessageStatusEnum status = AssistantMessageStatusEnum.done, List<AssistantLink> links = const [], String? error}) =>
+        {AssistantMessageStatusEnum status = AssistantMessageStatusEnum.done,
+        List<AssistantLink> links = const [],
+        String? error,
+        List<AssistantAction>? actions,
+        List<String>? actionErrors}) =>
     AssistantMessage(
       id: id,
       role: role,
@@ -26,6 +30,8 @@ AssistantMessage _m(int id, AssistantMessageRoleEnum role, String text,
       rating: AssistantMessageRatingEnum.number0,
       shared: false,
       createdAt: _at,
+      actions: actions,
+      actionErrors: actionErrors,
       durationMs: status == AssistantMessageStatusEnum.done && role == AssistantMessageRoleEnum.assistant ? 12000 : null,
     );
 
@@ -105,5 +111,65 @@ void main() {
     await tester.pump();
     expect(find.text('Что ждёт меня?'), findsOneWidget);
     expect(find.text('Почему CI красный?'), findsOneWidget);
+  });
+
+  testWidgets('an answer shows the actions it proposes, and approve asks once more', (tester) async {
+    AssistantAction act(String id, AssistantActionToolEnum tool, String summary, AssistantActionStatusEnum status,
+            {bool destructive = false, String? result, String? key, Duration expires = const Duration(minutes: 20)}) =>
+        AssistantAction(
+          id: id,
+          messageId: 2,
+          conversationId: 7,
+          tool: tool,
+          summary: summary,
+          destructive: destructive,
+          status: status,
+          result: result,
+          ticketKey: key,
+          expiresAt: DateTime.now().add(expires),
+        );
+    final answer = _m(2, _a, 'PAY-214 passed review.',
+      actions: [
+        act('a1', AssistantActionToolEnum.approveTicket, 'Approve PAY-214 (Fix rounding): agnts will push it.', AssistantActionStatusEnum.proposed,
+            destructive: true, key: 'PAY-214'),
+        act('a2', AssistantActionToolEnum.rejectTicket, 'Reject PAY-1 (Old) and stop all work on it.', AssistantActionStatusEnum.done,
+            destructive: true, result: 'PAY-1 is now rejected.', key: 'PAY-1'),
+        act('a3', AssistantActionToolEnum.startRun, 'Start PAY-9 now.', AssistantActionStatusEnum.proposed, expires: const Duration(minutes: -1)),
+      ],
+      actionErrors: ['start_run: no ticket "PAY-404"'],
+    );
+    final conv = AssistantConversation(id: 7, title: 'Approve', createdAt: _at, updatedAt: _at, messages: [_m(1, _q, 'Approve PAY-214'), answer]);
+    await tester.pumpWidget(ProviderScope(
+      overrides: [assistantConversationProvider(7).overrideWith((ref) async => conv)],
+      child: MaterialApp(
+        theme: agntsTheme(Brightness.light),
+        locale: const Locale('en'),
+        localizationsDelegates: const [AppLocalizations.delegate, ...GlobalMaterialLocalizations.delegates],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const AssistantScreen(conversationId: 7),
+      ),
+    ));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Approve PAY-214 (Fix rounding): agnts will push it.'), findsOneWidget);
+    expect(find.text('Confirm'), findsOneWidget); // only the one still waiting
+    expect(find.text('Decline'), findsOneWidget);
+    expect(find.text('Nothing happens until you confirm.'), findsOneWidget);
+    expect(find.textContaining('PAY-1 is now rejected.'), findsOneWidget);
+    expect(find.text('PAY-1'), findsOneWidget); // the done action links its ticket
+    expect(find.text('Expired. Ask again for a new one.'), findsOneWidget);
+    expect(find.text('Not offered: start_run: no ticket "PAY-404"'), findsOneWidget);
+
+    await tester.tap(find.text('Confirm'));
+    await tester.pumpAndSettle();
+    expect(find.text('Confirm this?'), findsOneWidget);
+    expect(find.textContaining('This cannot be undone.'), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(find.text('Confirm this?'), findsNothing);
+    expect(find.text('Confirm'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox());
   });
 }

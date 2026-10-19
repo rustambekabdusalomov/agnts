@@ -9162,7 +9162,7 @@ abstract class AppLocalizations {
   /// No description provided for @massistantEmptyText.
   ///
   /// In en, this message translates to:
-  /// **'It answers from your tickets, CI and spend, and links what it mentions. It cannot start, approve or reject anything.'**
+  /// **'It answers from your tickets, CI and spend, and links what it mentions. Ask it to approve, start or create something and it offers the action for you to confirm.'**
   String get massistantEmptyText;
 
   /// No description provided for @massistantPrivate.
@@ -9482,6 +9482,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open the chat'**
   String get massistantOpenChat;
+
+  /// No description provided for @massistantSuggestAct.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve what passed review'**
+  String get massistantSuggestAct;
+
+  /// No description provided for @massistantFileMe.
+  ///
+  /// In en, this message translates to:
+  /// **'your role'**
+  String get massistantFileMe;
+
+  /// No description provided for @massistantFileGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'repository groups'**
+  String get massistantFileGroups;
+
+  /// No description provided for @massistantActionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing happens until you confirm.'**
+  String get massistantActionHint;
+
+  /// No description provided for @massistantActionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get massistantActionConfirm;
+
+  /// No description provided for @massistantActionDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get massistantActionDecline;
+
+  /// No description provided for @massistantActionRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Doing it…'**
+  String get massistantActionRunning;
+
+  /// No description provided for @massistantActionDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get massistantActionDone;
+
+  /// No description provided for @massistantActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not done'**
+  String get massistantActionFailed;
+
+  /// No description provided for @massistantActionCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Declined'**
+  String get massistantActionCancelled;
+
+  /// No description provided for @massistantActionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired. Ask again for a new one.'**
+  String get massistantActionExpired;
+
+  /// No description provided for @massistantActionConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm this?'**
+  String get massistantActionConfirmTitle;
+
+  /// No description provided for @massistantActionConfirmText.
+  ///
+  /// In en, this message translates to:
+  /// **'{summary}\n\nThis cannot be undone.'**
+  String massistantActionConfirmText(String summary);
+
+  /// No description provided for @massistantActionNotOffered.
+  ///
+  /// In en, this message translates to:
+  /// **'Not offered: {reason}'**
+  String massistantActionNotOffered(String reason);
 
   /// No description provided for @mciTitle.
   ///

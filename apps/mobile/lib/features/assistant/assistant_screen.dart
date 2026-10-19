@@ -10,6 +10,8 @@ import '../../l10n/app_localizations.dart';
 import '../../theme.dart';
 import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
+import '../../core/data.dart' show canEditProvider;
+import '../repos/manage_widgets.dart' show confirmAction;
 import '../tickets/kinds.dart' show ReportMarkdown;
 import 'assistant_data.dart';
 import 'conversations_sheet.dart';
@@ -18,7 +20,8 @@ const _maxQuestion = 1000;
 
 /// The assistant: a chat about the workspace. Questions are typed; answers
 /// come from a snapshot of the workspace in 10-30 seconds and link the
-/// tickets, CI failures and lessons they name. It takes no actions.
+/// tickets, CI failures and lessons they name. Asked to act, an answer
+/// carries the actions as cards; nothing happens until the person confirms.
 class AssistantScreen extends ConsumerStatefulWidget {
   const AssistantScreen({super.key, this.conversationId});
   final int? conversationId;
@@ -156,15 +159,21 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
 }
 
 /// The start of a conversation: what the assistant does and questions to tap.
-class _Empty extends StatelessWidget {
+class _Empty extends ConsumerWidget {
   const _Empty({required this.onAsk});
   final void Function(String) onAsk;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final c = Agnts.of(context);
-    final suggestions = [l.massistantSuggestWaiting, l.massistantSuggestCi, l.massistantSuggestSpend, l.massistantSuggestDone];
+    final suggestions = [
+      l.massistantSuggestWaiting,
+      l.massistantSuggestCi,
+      l.massistantSuggestSpend,
+      l.massistantSuggestDone,
+      if (ref.watch(canEditProvider)) l.massistantSuggestAct,
+    ];
     return ListView(padding: const EdgeInsets.fromLTRB(16, 24, 16, 16), children: [
       Center(child: HIcon('assistant', size: 40, color: c.primary)),
       EmptyState(title: l.massistantEmptyTitle, text: l.massistantEmptyText),
@@ -204,7 +213,8 @@ class _Question extends StatelessWidget {
 }
 
 /// An answer: thinking (with seconds and what it reads), failed (with a way
-/// to ask again), or the Markdown answer with its links and a rating.
+/// to ask again), or the Markdown answer with the actions it proposes, its
+/// links and a rating.
 class _Answer extends ConsumerWidget {
   const _Answer(this.m, {this.onAskAgain});
   final AssistantMessage m;
@@ -253,6 +263,12 @@ class _Answer extends ConsumerWidget {
     } else {
       child = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         ReportMarkdown(m.text),
+        for (final a in m.actions ?? const <AssistantAction>[]) _ActionCard(a, key: ValueKey(a.id)),
+        for (final e in m.actionErrors ?? const <String>[])
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(l.massistantActionNotOffered(e), style: TextStyle(fontSize: 13, color: c.ink3)),
+          ),
         if (m.links.isNotEmpty) ...[
           const SizedBox(height: 10),
           Wrap(spacing: 8, runSpacing: 8, children: [for (final link in m.links) _LinkChip(link)]),
@@ -283,11 +299,118 @@ String fileLabel(AppLocalizations l, String file) {
     'usage.json' => l.massistantFileUsage,
     'analytics.json' => l.massistantFileAnalytics,
     'repositories.json' => l.massistantFileRepos,
+    'groups.json' => l.massistantFileGroups,
+    'me.json' => l.massistantFileMe,
     'lessons.json' => l.massistantFileLessons,
     'conversation.json' => l.massistantFileConversation,
     'question.txt' => l.massistantFileQuestion,
     _ => l.massistantFileOther,
   };
+}
+
+/// An action an answer proposes: agnts's summary of what it does, and
+/// Confirm and Decline while it waits; then what became of it. Approve and
+/// reject ask once more before they run.
+class _ActionCard extends ConsumerStatefulWidget {
+  const _ActionCard(this.a, {super.key});
+  final AssistantAction a;
+
+  @override
+  ConsumerState<_ActionCard> createState() => _ActionCardState();
+}
+
+class _ActionCardState extends ConsumerState<_ActionCard> {
+  bool _busy = false;
+
+  Future<void> _decide(bool confirm) async {
+    final l = AppLocalizations.of(context);
+    final a = widget.a;
+    if (confirm && a.destructive) {
+      final ok = await confirmAction(context,
+          title: l.massistantActionConfirmTitle,
+          message: l.massistantActionConfirmText(a.summary),
+          confirmLabel: l.massistantActionConfirm,
+          danger: true);
+      if (!ok || !mounted) return;
+    }
+    setState(() => _busy = true);
+    try {
+      await decideAction(ref, a, confirm: confirm);
+    } catch (e) {
+      if (mounted) showSnack(context, errorMessage(e, l.commonError));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = Agnts.of(context);
+    final a = widget.a;
+    final waits = actionWaits(a);
+    final status = a.status == AssistantActionStatusEnum.proposed && !waits ? AssistantActionStatusEnum.expired : a.status;
+    Widget outcome(IconData icon, Color color, String label, String? result) => Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Icon(icon, size: 18, color: color),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text.rich(TextSpan(children: [
+              TextSpan(text: label, style: TextStyle(fontWeight: FontWeight.w700, color: color)),
+              if (result != null && result.isNotEmpty) TextSpan(text: ' · $result', style: TextStyle(color: c.ink2)),
+            ])),
+          ),
+        ]);
+    final Widget foot = switch (status) {
+      AssistantActionStatusEnum.proposed => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Text(l.massistantActionHint, style: TextStyle(fontSize: 12.5, color: c.ink3)),
+          const SizedBox(height: 6),
+          Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+            TextButton(onPressed: _busy ? null : () => _decide(false), child: Text(l.massistantActionDecline)),
+            const SizedBox(width: 6),
+            FilledButton(
+              style: a.destructive ? FilledButton.styleFrom(backgroundColor: c.bad, foregroundColor: Colors.white) : null,
+              onPressed: _busy ? null : () => _decide(true),
+              child: _busy
+                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                  : Text(l.massistantActionConfirm),
+            ),
+          ]),
+        ]),
+      AssistantActionStatusEnum.running => Row(children: [
+          const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)),
+          const SizedBox(width: 10),
+          Text(l.massistantActionRunning, style: TextStyle(color: c.ink2)),
+        ]),
+      AssistantActionStatusEnum.done => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          outcome(Icons.check_circle_outline, c.okInk, l.massistantActionDone, a.result),
+          if (a.ticketKey != null && a.ticketKey!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: _LinkChip(AssistantLink(kind: AssistantLinkKindEnum.ticket, key: a.ticketKey)),
+            ),
+        ]),
+      AssistantActionStatusEnum.failed => outcome(Icons.error_outline, c.badInk, l.massistantActionFailed, a.result),
+      AssistantActionStatusEnum.cancelled => Text(l.massistantActionCancelled, style: TextStyle(color: c.ink3)),
+      AssistantActionStatusEnum.expired => Text(l.massistantActionExpired, style: TextStyle(color: c.ink3)),
+    };
+    return Container(
+      margin: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+      decoration: BoxDecoration(
+        color: c.bg,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: waits && a.destructive ? c.bad.withValues(alpha: 0.5) : c.line),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Opacity(
+          opacity: waits || status == AssistantActionStatusEnum.done || status == AssistantActionStatusEnum.running ? 1 : 0.6,
+          child: SelectableText(a.summary, style: TextStyle(fontSize: 14.5, height: 1.4, color: c.ink)),
+        ),
+        const SizedBox(height: 8),
+        foot,
+      ]),
+    );
+  }
 }
 
 /// A link to a ticket, a CI failure or a lesson.

@@ -1,13 +1,15 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show ProviderOrFamily;
 import 'package:agnts_api/agnts_api.dart';
 
 import '../../core/api.dart';
+import '../../core/data.dart';
 import '../../core/prefs.dart';
 
 // The assistant's server data. The live stream (live.dart) refreshes it on
-// assistant_answered and assistant_failed; the screen also polls while an
-// answer is being made, in case the stream is down.
+// assistant_answered, assistant_failed and assistant_action; the screen
+// also polls while an answer is being made, in case the stream is down.
 
 /// The person's conversations, newest first, each with its last message.
 final assistantConversationsProvider = FutureProvider<List<AssistantConversation>>((ref) async {
@@ -64,12 +66,42 @@ final assistantLiveProvider = NotifierProvider<AssistantLiveNotifier, Map<int, A
 void onAssistantEvent(Ref ref, Map<String, dynamic> e) {
   ref.read(assistantLiveProvider.notifier).apply(e);
   final type = e['type'];
-  if (type != 'assistant_answered' && type != 'assistant_failed' && type != 'assistant_answering') return;
+  if (type != 'assistant_answered' && type != 'assistant_failed' && type != 'assistant_answering' && type != 'assistant_action') return;
   final data = e['data'];
   final conv = data is Map ? (data['conversation_id'] as num?)?.toInt() : null;
   if (conv != null) ref.invalidate(assistantConversationProvider(conv));
   ref.invalidate(assistantConversationsProvider);
+  if (type == 'assistant_action' && data is Map && data['status'] == 'done') {
+    _actionDone(ref.invalidate, data['ticket_key'] as String?);
+  }
 }
+
+/// Does a proposed action (confirm true) or declines it, and refreshes
+/// what it changed. It returns the action as it ended up; it throws when
+/// the server refused (expired, already used).
+Future<AssistantAction> decideAction(WidgetRef ref, AssistantAction a, {required bool confirm}) async {
+  final api = ref.read(apiProvider)!.getAssistantApi();
+  try {
+    final res = confirm ? await api.confirmAssistantAction(actionId: a.id) : await api.cancelAssistantAction(actionId: a.id);
+    final out = res.data!;
+    if (out.status == AssistantActionStatusEnum.done) _actionDone(ref.invalidate, out.ticketKey ?? a.ticketKey);
+    return out;
+  } finally {
+    ref.invalidate(assistantConversationProvider(a.conversationId));
+  }
+}
+
+/// A done action changed tickets: refresh Home and the tickets it named.
+void _actionDone(void Function(ProviderOrFamily) invalidate, String? key) {
+  invalidate(dashboardProvider);
+  invalidate(queueProvider);
+  invalidate(ticketsProvider);
+  if (key != null && key.isNotEmpty) invalidate(ticketProvider(key));
+}
+
+/// Whether a proposed action still waits for the person (it may have
+/// expired since the conversation was fetched).
+bool actionWaits(AssistantAction a) => a.status == AssistantActionStatusEnum.proposed && a.expiresAt.isAfter(DateTime.now());
 
 /// The language answers come in: the app's, else the phone's, else English.
 AssistantLanguage assistantLanguage(WidgetRef ref, BuildContext context) {

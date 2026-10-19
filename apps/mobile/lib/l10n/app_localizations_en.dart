@@ -5132,7 +5132,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get massistantEmptyText =>
-      'It answers from your tickets, CI and spend, and links what it mentions. It cannot start, approve or reject anything.';
+      'It answers from your tickets, CI and spend, and links what it mentions. Ask it to approve, start or create something and it offers the action for you to confirm.';
 
   @override
   String get massistantPrivate => 'Only you see your conversations. They are kept for 30 days.';
@@ -5313,6 +5313,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get massistantOpenChat => 'Open the chat';
+
+  @override
+  String get massistantSuggestAct => 'Approve what passed review';
+
+  @override
+  String get massistantFileMe => 'your role';
+
+  @override
+  String get massistantFileGroups => 'repository groups';
+
+  @override
+  String get massistantActionHint => 'Nothing happens until you confirm.';
+
+  @override
+  String get massistantActionConfirm => 'Confirm';
+
+  @override
+  String get massistantActionDecline => 'Decline';
+
+  @override
+  String get massistantActionRunning => 'Doing it…';
+
+  @override
+  String get massistantActionDone => 'Done';
+
+  @override
+  String get massistantActionFailed => 'Not done';
+
+  @override
+  String get massistantActionCancelled => 'Declined';
+
+  @override
+  String get massistantActionExpired => 'Expired. Ask again for a new one.';
+
+  @override
+  String get massistantActionConfirmTitle => 'Confirm this?';
+
+  @override
+  String massistantActionConfirmText(String summary) {
+    return '$summary\n\nThis cannot be undone.';
+  }
+
+  @override
+  String massistantActionNotOffered(String reason) {
+    return 'Not offered: $reason';
+  }
 
   @override
   String get mciTitle => 'CI failures';

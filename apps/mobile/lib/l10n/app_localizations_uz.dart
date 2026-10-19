@@ -5130,7 +5130,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get massistantEmptyText =>
-      'Yordamchi vazifalaringiz, CI va xarajatlaringiz boʻyicha javob beradi va tilga olganlariga havola qoʻyadi. U hech narsani ishga tushirmaydi, tasdiqlamaydi yoki rad etmaydi.';
+      'Yordamchi vazifalaringiz, CI va xarajatlaringiz boʻyicha javob beradi va tilga olganlariga havola qoʻyadi. Undan biror narsani tasdiqlash, ishga tushirish yoki yaratishni soʻrasangiz, u amalni taklif qiladi, siz esa tasdiqlaysiz.';
 
   @override
   String get massistantPrivate => 'Suhbatlaringizni faqat siz koʻrasiz. Ular 30 kun saqlanadi.';
@@ -5311,6 +5311,52 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get massistantOpenChat => 'Chatni ochish';
+
+  @override
+  String get massistantSuggestAct => 'Koʻrikdan oʻtganlarini tasdiqla';
+
+  @override
+  String get massistantFileMe => 'rolingiz';
+
+  @override
+  String get massistantFileGroups => 'repozitoriy guruhlari';
+
+  @override
+  String get massistantActionHint => 'Siz tasdiqlamaguningizcha hech narsa boʻlmaydi.';
+
+  @override
+  String get massistantActionConfirm => 'Tasdiqlash';
+
+  @override
+  String get massistantActionDecline => 'Rad etish';
+
+  @override
+  String get massistantActionRunning => 'Bajarilmoqda…';
+
+  @override
+  String get massistantActionDone => 'Bajarildi';
+
+  @override
+  String get massistantActionFailed => 'Bajarilmadi';
+
+  @override
+  String get massistantActionCancelled => 'Rad etildi';
+
+  @override
+  String get massistantActionExpired => 'Muddati oʻtdi. Qaytadan soʻrang.';
+
+  @override
+  String get massistantActionConfirmTitle => 'Tasdiqlaysizmi?';
+
+  @override
+  String massistantActionConfirmText(String summary) {
+    return '$summary\n\nBuni bekor qilib boʻlmaydi.';
+  }
+
+  @override
+  String massistantActionNotOffered(String reason) {
+    return 'Taklif qilinmadi: $reason';
+  }
 
   @override
   String get mciTitle => 'CI nosozliklari';

@@ -3071,7 +3071,7 @@
   "massistantDelete": "Delete",
   "massistantDeleted": "Conversation deleted",
   "massistantEmptyTitle": "Ask agnts about your work",
-  "massistantEmptyText": "It answers from your tickets, CI and spend, and links what it mentions. It cannot start, approve or reject anything.",
+  "massistantEmptyText": "It answers from your tickets, CI and spend, and links what it mentions. Ask it to approve, start or create something and it offers the action for you to confirm.",
   "massistantPrivate": "Only you see your conversations. They are kept for 30 days.",
   "massistantSuggestWaiting": "What is waiting on me?",
   "massistantSuggestCi": "Why is CI red?",
@@ -3216,6 +3216,34 @@
   "massistantSendHint": "Enter to send, Shift+Enter for a new line",
   "massistantConversationsLede": "Your questions and the assistant's answers. Only you see them; they are kept for 30 days.",
   "massistantOpenChat": "Open the chat",
+  "massistantSuggestAct": "Approve what passed review",
+  "massistantFileMe": "your role",
+  "massistantFileGroups": "repository groups",
+  "massistantActionHint": "Nothing happens until you confirm.",
+  "massistantActionConfirm": "Confirm",
+  "massistantActionDecline": "Decline",
+  "massistantActionRunning": "Doing it…",
+  "massistantActionDone": "Done",
+  "massistantActionFailed": "Not done",
+  "massistantActionCancelled": "Declined",
+  "massistantActionExpired": "Expired. Ask again for a new one.",
+  "massistantActionConfirmTitle": "Confirm this?",
+  "massistantActionConfirmText": "{summary}\n\nThis cannot be undone.",
+  "@massistantActionConfirmText": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "massistantActionNotOffered": "Not offered: {reason}",
+  "@massistantActionNotOffered": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "mciTitle": "CI failures",
   "mciLede": "Watched branches that went red, one row per error.",
   "mciFilterRed": "Red",
