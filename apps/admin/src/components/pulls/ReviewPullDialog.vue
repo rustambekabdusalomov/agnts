@@ -36,6 +36,7 @@ const start = useMutation({
     open.value = false
     ui.notify(t('drafts.startedToast', { key: tk.key }))
     void qc.invalidateQueries({ queryKey: ['pull'] })
+    void qc.invalidateQueries({ queryKey: ['reviews', 'pulls'] })
   },
   onError: (e) => {
     // Already under review (someone else asked meanwhile): the page shows it.

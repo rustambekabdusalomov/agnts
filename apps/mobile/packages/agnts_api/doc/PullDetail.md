@@ -21,7 +21,8 @@ Name | Type | Description | Notes
 **ticketState** | [**TicketState**](TicketState.md) |  | [optional] 
 **reviewedSha** | **String** | The commit agnts reviewed, for a review ticket | [optional] 
 **afterApprove** | **String** |  | [optional] 
-**drafts** | [**List&lt;ReviewDraft&gt;**](ReviewDraft.md) | The draft comments of agnts's review of it, when it has a review ticket | [optional] 
+**reviews** | [**List&lt;PullReviewRef&gt;**](PullReviewRef.md) | agnts's reviews of it, newest first | [optional] 
+**drafts** | [**List&lt;ReviewDraft&gt;**](ReviewDraft.md) | The draft comments of agnts's newest review of it | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

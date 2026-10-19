@@ -31,6 +31,12 @@ type PullReviews interface {
 	// TicketByPull returns the newest review ticket of pull request number
 	// in repoID, or domain.ErrNotFound.
 	TicketByPull(ctx context.Context, repoID int64, number int) (domain.Ticket, error)
+	// ReviewsOfPull returns the review tickets of pull request number in
+	// repoID, newest first.
+	ReviewsOfPull(ctx context.Context, repoID int64, number int, limit int) ([]domain.Ticket, error)
+	// LatestReviews returns the newest review ticket of each pull request
+	// in repoID that has one, by number.
+	LatestReviews(ctx context.Context, repoID int64) (map[int]domain.Ticket, error)
 	// OpenReviews returns the review tickets not done or rejected.
 	OpenReviews(ctx context.Context) ([]domain.Ticket, error)
 	AddReviewerNote(ctx context.Context, n domain.ReviewerNote) (domain.ReviewerNote, error)
@@ -103,12 +109,12 @@ func (o *Orchestrator) pullReviewsReady() (ReviewHost, error) {
 	return rh, nil
 }
 
-// ReviewSync is what a sync of the pull requests waiting for review found.
+// ReviewSync is what a sync of agnts's open reviews found.
 type ReviewSync struct {
-	Repos    int // repositories asked
-	Open     int // pull requests waiting for you
-	Created  int // new reviews queued
-	Rereview int // reviews queued again for new commits
+	Repos    int // repositories with an open review
+	Open     int // open reviews checked
+	Created  int // always 0: reviews start from the pull request's page
+	Rereview int // always 0: reviewing again is the person's call
 	Closed   int // reviews ended: merged or closed on the git host
 	Errors   []string
 }
@@ -118,22 +124,14 @@ func pullKey(repo domain.Repository, n int) string {
 	return fmt.Sprintf("%s-PR%d", TaskPrefix(repo), n)
 }
 
-// SyncReviews asks the git host for the open pull requests waiting for
-// you in every repository, queues a review of each new one, queues
-// another when new commits arrive while the review waits for you (if
-// Settings allow), and ends reviews whose pull request was merged or
-// closed on the git host.
+// SyncReviews brings agnts's open reviews up to date with the git host: a
+// review whose pull request was merged or closed ends, and the others take
+// the pull request as it stands now. It starts no review: a person starts
+// one from the pull request's page, again whenever they want (after new
+// commits, say).
 func (o *Orchestrator) SyncReviews(ctx context.Context, origin domain.Origin) (ReviewSync, error) {
 	var out ReviewSync
 	rh, err := o.pullReviewsReady()
-	if err != nil {
-		return out, err
-	}
-	s, err := o.settings.Get(ctx)
-	if err != nil {
-		return out, err
-	}
-	repos, err := o.pulls.ListRepositories(ctx)
 	if err != nil {
 		return out, err
 	}
@@ -146,136 +144,75 @@ func (o *Orchestrator) SyncReviews(ctx context.Context, origin domain.Origin) (R
 			out.Errors = append(out.Errors, msg)
 		}
 	}
-	for _, repo := range repos {
+	repos := map[int64]domain.Repository{}
+	for _, t := range open {
 		if ctx.Err() != nil {
 			return out, ctx.Err()
+		}
+		if t.RepoID == nil || t.PRNumber == nil {
+			continue
+		}
+		repo, ok := repos[*t.RepoID]
+		if !ok {
+			if repo, err = o.store.RepositoryByID(ctx, *t.RepoID); err != nil {
+				fail(err.Error())
+				continue
+			}
+			repos[repo.ID] = repo
 		}
 		if repo.ArchivedAt != nil {
 			continue
 		}
-		prs, err := rh.ReviewQueue(ctx, repo, s.PullReviews.ReviewRequested, s.PullReviews.All)
+		out.Open++
+		pr, err := rh.PullRequest(ctx, repo, *t.PRNumber)
 		if err != nil {
-			fail(repo.Name + ": " + err.Error())
+			fail(fmt.Sprintf("%s #%d: %v", repo.Name, *t.PRNumber, err))
 			continue
 		}
-		out.Repos++
-		seen := map[int]bool{}
-		for _, pr := range prs {
-			pr.Clean()
-			if pr.Draft && s.PullReviews.SkipDrafts {
-				continue
+		pr.Clean()
+		if pr.State != domain.PullOpen {
+			if ended, err := o.endPull(ctx, t, pr, origin); err != nil {
+				fail(fmt.Sprintf("%s #%d: %v", repo.Name, *t.PRNumber, err))
+			} else if ended {
+				out.Closed++
 			}
-			seen[pr.Number] = true
-			out.Open++
-			created, again, err := o.syncPull(ctx, s, repo, pr, origin)
-			if err != nil {
-				fail(fmt.Sprintf("%s #%d: %v", repo.Name, pr.Number, err))
-				continue
-			}
-			if created {
-				out.Created++
-			}
-			if again {
-				out.Rereview++
-			}
+			continue
 		}
-		// Reviews of this repository's pull requests that no longer wait:
-		// ended if the pull request is merged or closed. One that was only
-		// unassigned keeps its review.
-		// A review someone asked for from the pull request page is
-		// refreshed, and reviewed again on new commits.
-		for _, t := range open {
-			if t.RepoID == nil || *t.RepoID != repo.ID || t.PRNumber == nil || seen[*t.PRNumber] {
-				continue
-			}
-			var one ReviewSync
-			o.syncOpenReview(ctx, s, rh, repo, t, origin, &one)
-			out.Closed += one.Closed
-			out.Rereview += one.Rereview
-			for _, e := range one.Errors {
-				fail(e)
-			}
+		if err := o.refreshPull(ctx, t, pr); err != nil {
+			fail(fmt.Sprintf("%s #%d: %v", repo.Name, *t.PRNumber, err))
 		}
 	}
-	if out.Created+out.Rereview > 0 {
-		o.Wake()
-	}
+	out.Repos = len(repos)
 	return out, nil
 }
 
-// syncPull records one pull request waiting for review: a new review
-// ticket, held until someone starts it, or the latest state of the known
-// one. It reports whether a
-// ticket was created and whether a review was queued again.
-func (o *Orchestrator) syncPull(ctx context.Context, s domain.Settings, repo domain.Repository, pr domain.PullRequest, origin domain.Origin) (bool, bool, error) {
-	t, err := o.pulls.TicketByPull(ctx, repo.ID, pr.Number)
-	if errors.Is(err, domain.ErrNotFound) {
-		// Approving merges only what waits for you; one taken because it
-		// is open (yours included) is merged where it was opened.
-		after := "pr"
-		if pr.Why == domain.PullOpenRepo || pr.Why == domain.PullOwn {
-			after = domain.AfterApproveNone
-		}
-		_, err := o.createPullTicket(ctx, repo, pr, after, "", origin)
-		return true, false, err
-	}
-	if err != nil {
-		return false, false, err
-	}
+// refreshPull records the pull request as it stands now on its open
+// review. New commits do not review it again: the person does, when they
+// want.
+func (o *Orchestrator) refreshPull(ctx context.Context, t domain.Ticket, pr domain.PullRequest) error {
 	pr.Keep(t.Pull)
-	if t.State.Terminal() {
-		return false, false, nil // merged, or you dismissed it: it stays yours
+	if t.Pull != nil && *t.Pull == pr {
+		return nil
 	}
-	again := s.PullReviews.Rereview && t.State == domain.StateWaitingForReview &&
-		pr.HeadSHA != "" && t.HeadSHA != "" && pr.HeadSHA != t.HeadSHA
-	if !again {
-		if t.Pull != nil && *t.Pull == pr {
-			return false, false, nil
-		}
-		_, err = o.store.UpdateTicket(ctx, t.Key, nil, func(x *domain.Ticket) {
-			x.Pull, x.Title, x.Description = &pr, pr.Title, pr.Body
-		})
-		return false, false, err
-	}
-	_, err = o.store.Transition(ctx, t.Key, domain.StateCoding, domain.Event{
-		TicketKey: t.Key, Type: domain.EventStateChanged, Origin: origin,
-		Message: fmt.Sprintf("new commits on #%d (%s): reviewing it again", pr.Number, shortSHA(pr.HeadSHA)),
-		Data:    map[string]any{"sha": pr.HeadSHA},
-	}, func(x *domain.Ticket) {
+	_, err := o.store.UpdateTicket(ctx, t.Key, nil, func(x *domain.Ticket) {
 		x.Pull, x.Title, x.Description = &pr, pr.Title, pr.Body
-		x.Revision++
 	})
-	return false, err == nil, err
+	return err
 }
 
 // createPullTicket creates the review ticket of a pull request.
 // afterApprove is "pr" (approving merges it) or domain.AfterApproveNone;
-// msg is the creation event, "" for the sync's.
+// msg is the creation event.
 func (o *Orchestrator) createPullTicket(ctx context.Context, repo domain.Repository, pr domain.PullRequest, afterApprove, msg string, origin domain.Origin) (domain.Ticket, error) {
 	number := pr.Number
 	t := domain.Ticket{
 		Source: domain.SourceGit, Kind: domain.KindReview, RepoID: &repo.ID,
 		Title: pr.Title, Description: pr.Body, Priority: "medium",
 		State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: afterApprove,
-		// The sync's are held: a review spends tokens, so it runs when
-		// someone starts it. One asked for from the pull request page runs.
-		Held:     msg == "",
 		PRNumber: &number, PRURL: pr.URL, Pull: &pr,
 	}
-	if msg == "" {
-		why := "is assigned to you"
-		switch pr.Why {
-		case domain.PullReviewRequested:
-			why = "asks for your review"
-		case domain.PullOpenRepo:
-			why = "is open in " + repo.Name
-		case domain.PullOwn:
-			why = "is your own, open in " + repo.Name
-		}
-		msg = fmt.Sprintf("pull request #%d by @%s %s; the review starts when you start it", pr.Number, pr.Author, why)
-	}
 	base := pullKey(repo, pr.Number)
-	for i := range 5 {
+	for i := range 100 { // a pull request may be reviewed many times
 		t.Key = base
 		if i > 0 {
 			t.Key = fmt.Sprintf("%s-%d", base, i+1) // a ticket from elsewhere, or an earlier review, has the key
@@ -331,15 +268,7 @@ func (o *Orchestrator) autoSyncReviews(ctx context.Context) {
 	go func() {
 		defer syncing.Store(false)
 		o.forEachWorkspace(ctx, func(wctx context.Context) {
-			s, err := o.settings.Get(wctx)
-			if err != nil {
-				return
-			}
-			sync := o.SyncReviews
-			if !s.PullReviews.Enabled {
-				sync = o.syncManualReviews // only the reviews people asked for
-			}
-			res, err := sync(wctx, domain.OriginSystem)
+			res, err := o.SyncReviews(wctx, domain.OriginSystem)
 			if err != nil && ctx.Err() == nil {
 				o.log.Warn("sync pull requests", "workspace", domain.WorkspaceOf(wctx), "err", err)
 			}

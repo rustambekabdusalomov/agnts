@@ -33,7 +33,7 @@ class ReviewSync {
     required  this.errors,
   });
 
-      /// Repositories asked
+      /// Repositories with an open review
   @JsonKey(
     
     name: r'repos',
@@ -46,7 +46,7 @@ class ReviewSync {
 
 
 
-      /// Pull requests waiting for you
+      /// Open reviews checked
   @JsonKey(
     
     name: r'open',
@@ -59,7 +59,7 @@ class ReviewSync {
 
 
 
-      /// New reviews queued
+      /// Always 0; reviews start from the pull request
   @JsonKey(
     
     name: r'created',
@@ -72,7 +72,7 @@ class ReviewSync {
 
 
 
-      /// Reviews queued again for new commits
+      /// Always 0; reviewing again is your call
   @JsonKey(
     
     name: r'rereview',

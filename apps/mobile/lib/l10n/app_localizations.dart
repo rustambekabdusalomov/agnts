@@ -4392,7 +4392,7 @@ abstract class AppLocalizations {
   /// No description provided for @draftsReviewSub.
   ///
   /// In en, this message translates to:
-  /// **'agnts reviews the pull request for you. Its comments stay drafts in agnts until you accept them; only accepted ones go on the pull request. Finishing the review never merges it.'**
+  /// **'agnts reviews the pull request as it is now. Its comments stay drafts in agnts until you accept them; only accepted ones go on the pull request. Approving the review merges it only when it is assigned to you or asks for your review.'**
   String get draftsReviewSub;
 
   /// No description provided for @draftsReviewBtn.
@@ -15744,26 +15744,14 @@ abstract class AppLocalizations {
   /// No description provided for @reviewsLede.
   ///
   /// In en, this message translates to:
-  /// **'agnts lists the open pull requests of your repositories on GitHub and GitLab and reviews one when you press Review. Merge from here when the review looks good, or dismiss it and review on the git host yourself.'**
+  /// **'agnts lists the open pull requests of your repositories on GitHub and GitLab. Open one and press Review to have agnts review it as it is now; review it again whenever you want, after new commits say. Its reviews stay on the pull request.'**
   String get reviewsLede;
-
-  /// No description provided for @reviewsSync.
-  ///
-  /// In en, this message translates to:
-  /// **'Sync now'**
-  String get reviewsSync;
 
   /// No description provided for @reviewsSyncing.
   ///
   /// In en, this message translates to:
   /// **'Syncing…'**
   String get reviewsSyncing;
-
-  /// No description provided for @reviewsSynced.
-  ///
-  /// In en, this message translates to:
-  /// **'{open} waiting for you in {repos} repositories · {created} new · {rereview} reviewed again · {closed} ended'**
-  String reviewsSynced(String open, String repos, String created, String rereview, String closed);
 
   /// No description provided for @reviewsSyncErrors.
   ///
@@ -15776,18 +15764,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'How agnts picks them up'**
   String get reviewsSettingsTitle;
-
-  /// No description provided for @reviewsEnabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Sync automatically'**
-  String get reviewsEnabled;
-
-  /// No description provided for @reviewsEnabledHelp.
-  ///
-  /// In en, this message translates to:
-  /// **'Check the git host every 5 minutes for new pull requests. Their reviews still wait for you to press Review. When off, only Sync now does it.'**
-  String get reviewsEnabledHelp;
 
   /// No description provided for @reviewsReviewRequested.
   ///
@@ -15825,18 +15801,6 @@ abstract class AppLocalizations {
   /// **'Leave draft pull requests alone until they are ready.'**
   String get reviewsSkipDraftsHelp;
 
-  /// No description provided for @reviewsRereview.
-  ///
-  /// In en, this message translates to:
-  /// **'Review new commits'**
-  String get reviewsRereview;
-
-  /// No description provided for @reviewsRereviewHelp.
-  ///
-  /// In en, this message translates to:
-  /// **'Review again when the author pushes while the review waits for you.'**
-  String get reviewsRereviewHelp;
-
   /// No description provided for @reviewsMergeMethod.
   ///
   /// In en, this message translates to:
@@ -15867,18 +15831,6 @@ abstract class AppLocalizations {
   /// **'Rebase'**
   String get reviewsMerge_rebase;
 
-  /// No description provided for @reviewsNotStarted.
-  ///
-  /// In en, this message translates to:
-  /// **'Not started'**
-  String get reviewsNotStarted;
-
-  /// No description provided for @reviewsStart.
-  ///
-  /// In en, this message translates to:
-  /// **'Review'**
-  String get reviewsStart;
-
   /// No description provided for @reviewsWaiting.
   ///
   /// In en, this message translates to:
@@ -15906,7 +15858,7 @@ abstract class AppLocalizations {
   /// No description provided for @reviewsEmptyAll.
   ///
   /// In en, this message translates to:
-  /// **'No pull requests to review yet. Press Sync now to fetch the open ones; each review starts when you press Review.'**
+  /// **'No open pull requests. Check which ones are taken in the settings, then press Refresh.'**
   String get reviewsEmptyAll;
 
   /// No description provided for @reviewsWhy_assigned.
@@ -16062,8 +16014,8 @@ abstract class AppLocalizations {
   /// No description provided for @reviewsNewCommits.
   ///
   /// In en, this message translates to:
-  /// **'New commits since agnts reviewed {sha}: it reviews them again'**
-  String reviewsNewCommits(String sha);
+  /// **'New commits since'**
+  String get reviewsNewCommits;
 
   /// No description provided for @reviewsPostBtn.
   ///
@@ -16220,6 +16172,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'agnts\'s review of the pull request'**
   String get reviewsReviewTitle;
+
+  /// No description provided for @reviewsRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get reviewsRefresh;
+
+  /// No description provided for @reviewsOpenPulls.
+  ///
+  /// In en, this message translates to:
+  /// **'Open pull requests'**
+  String get reviewsOpenPulls;
+
+  /// No description provided for @reviewsNotReviewed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not reviewed'**
+  String get reviewsNotReviewed;
+
+  /// No description provided for @reviewsHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews'**
+  String get reviewsHistory;
+
+  /// No description provided for @reviewsHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Not reviewed yet. Press Review with agnts to start one.'**
+  String get reviewsHistoryEmpty;
+
+  /// No description provided for @reviewsReviewedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'at {sha}'**
+  String reviewsReviewedAt(String sha);
 
   /// No description provided for @rulesTitle.
   ///

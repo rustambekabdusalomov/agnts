@@ -2388,7 +2388,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get draftsReviewSub =>
-      'agnts pull request\'ni siz uchun ko\'rib chiqadi. Uning izohlari siz qabul qilmaguningizcha agnts\'da qoralama bo\'lib qoladi; pull request\'ga faqat qabul qilinganlari tushadi. Ko\'rib chiqishni tugatish uni hech qachon merge qilmaydi.';
+      'agnts pull request\'ni hozirgi holatida ko\'rib chiqadi. Uning izohlari siz qabul qilmaguningizcha agnts\'da qoralama bo\'lib qoladi; pull request\'ga faqat qabul qilinganlari tushadi. Tekshiruvni tasdiqlash uni faqat sizga biriktirilgan yoki sizdan tekshiruv so\'ralgan bo\'lsa merge qiladi.';
 
   @override
   String get draftsReviewBtn => 'Ko\'rib chiqishni boshlash';
@@ -8850,31 +8850,16 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get reviewsLede =>
-      'agnts GitHub va GitLab’dagi repozitoriylaringizning ochiq pull requestlarini koʻrsatadi va «Tekshirish»ni bosganingizda tekshiradi. Tekshiruv yaxshi boʻlsa, shu yerdan birlashtiring yoki rad etib, git hostingda oʻzingiz tekshiring.';
-
-  @override
-  String get reviewsSync => 'Sinxronlash';
+      'agnts GitHub va GitLab’dagi repozitoriylaringizning ochiq pull requestlarini koʻrsatadi. Keraklisini oching va agnts uni hozirgi holatida tekshirishi uchun «Tekshirish»ni bosing; xohlagan paytingizda, masalan yangi commitlardan keyin, qayta tekshiring. Uning tekshiruvlari pull requestda saqlanadi.';
 
   @override
   String get reviewsSyncing => 'Sinxronlanmoqda…';
-
-  @override
-  String reviewsSynced(String open, String repos, String created, String rereview, String closed) {
-    return '$repos ta repozitoriyda $open ta sizni kutmoqda · $created ta yangi · $rereview ta qayta tekshirildi · $closed ta yakunlandi';
-  }
 
   @override
   String get reviewsSyncErrors => 'Baʼzilarini oʻqib boʻlmadi:';
 
   @override
   String get reviewsSettingsTitle => 'agnts ularni qanday oladi';
-
-  @override
-  String get reviewsEnabled => 'Avtomatik sinxronlash';
-
-  @override
-  String get reviewsEnabledHelp =>
-      'Har 5 daqiqada git hostingdan yangi pull requestlarni olish. Ularning tekshiruvi baribir «Tekshirish»ni bosishingizni kutadi. Oʻchiq boʻlsa, faqat «Sinxronlash» tugmasi bilan.';
 
   @override
   String get reviewsReviewRequested => 'Tekshiruv soʻrovlari ham';
@@ -8896,12 +8881,6 @@ class AppLocalizationsUz extends AppLocalizations {
   String get reviewsSkipDraftsHelp => 'Qoralama pull requestlar tayyor boʻlguncha tegilmaydi.';
 
   @override
-  String get reviewsRereview => 'Yangi commitlarni tekshirish';
-
-  @override
-  String get reviewsRereviewHelp => 'Tekshiruv sizni kutayotganda muallif push qilsa, qayta tekshirish.';
-
-  @override
   String get reviewsMergeMethod => 'Birlashtirish usuli';
 
   @override
@@ -8917,12 +8896,6 @@ class AppLocalizationsUz extends AppLocalizations {
   String get reviewsMerge_rebase => 'Rebase';
 
   @override
-  String get reviewsNotStarted => 'Boshlanmagan';
-
-  @override
-  String get reviewsStart => 'Tekshirish';
-
-  @override
   String get reviewsWaiting => 'Sizni kutmoqda';
 
   @override
@@ -8935,8 +8908,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get reviewsEmpty => 'Bu yerda hech narsa yoʻq.';
 
   @override
-  String get reviewsEmptyAll =>
-      'Hozircha tekshiriladigan pull request yoʻq. Ochiqlarini olish uchun «Sinxronlash»ni bosing; har birining tekshiruvi «Tekshirish»ni bosganingizda boshlanadi.';
+  String get reviewsEmptyAll => 'Ochiq pull requestlar yoʻq. Sozlamalarda qaysilari olinishini tekshiring va «Yangilash»ni bosing.';
 
   @override
   String get reviewsWhy_assigned => 'biriktirilgan';
@@ -9026,9 +8998,7 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
-  String reviewsNewCommits(String sha) {
-    return 'agnts koʻrib chiqqandan ($sha) keyin yangi commitlar: ularni qayta koʻrib chiqadi';
-  }
+  String get reviewsNewCommits => 'Yangi commitlar bor';
 
   @override
   String reviewsPostBtn(String host) {
@@ -9130,6 +9100,26 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get reviewsReviewTitle => 'agnts’ning pull request tekshiruvi';
+
+  @override
+  String get reviewsRefresh => 'Yangilash';
+
+  @override
+  String get reviewsOpenPulls => 'Ochiq pull requestlar';
+
+  @override
+  String get reviewsNotReviewed => 'Tekshirilmagan';
+
+  @override
+  String get reviewsHistory => 'Tekshiruvlar';
+
+  @override
+  String get reviewsHistoryEmpty => 'Hali tekshirilmagan. Boshlash uchun «agnts bilan ko\'rib chiqish»ni bosing.';
+
+  @override
+  String reviewsReviewedAt(String sha) {
+    return '$sha da';
+  }
 
   @override
   String get rulesTitle => 'Qoidalar';

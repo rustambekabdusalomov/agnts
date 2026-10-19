@@ -15,11 +15,12 @@ Method | HTTP request | Description
 [**deleteReviewDraft**](ReviewsApi.md#deletereviewdraft) | **DELETE** /tickets/{key}/drafts/{draftId} | Delete your own draft comment (agnts&#39;s drafts are dismissed instead)
 [**deleteReviewerNote**](ReviewsApi.md#deletereviewernote) | **DELETE** /reviews/notes/{id} | Forget a note (one already folded into a profile stays there until the profile is edited)
 [**listReviewDrafts**](ReviewsApi.md#listreviewdrafts) | **GET** /tickets/{key}/drafts | The draft comments of a pull request review: agnts&#39;s summary and findings, and people&#39;s own comments, with what was decided about each
+[**listReviewPulls**](ReviewsApi.md#listreviewpulls) | **GET** /reviews/pulls | The open pull requests of every repository (as pullReviews settings pick them), most recently updated first, each with agnts&#39;s newest review of it. Nothing is reviewed: a review starts from the pull request
 [**listReviewers**](ReviewsApi.md#listreviewers) | **GET** /reviews/reviewers | How each person agnts reviews pull requests for reviews, as it learned from their notes
 [**postPullReview**](ReviewsApi.md#postpullreview) | **POST** /tickets/{key}/post-review | Post agnts&#39;s latest review of a pull request on it: accepts the drafts of the summary (with the findings not on a changed line) and of the chosen findings, then publishes every accepted draft (see publishReviewDrafts). Kept for older clients
 [**publishReviewDrafts**](ReviewsApi.md#publishreviewdrafts) | **POST** /tickets/{key}/drafts/publish | Publish the accepted drafts on the pull request as one review, as the git host token&#39;s user: comments on their lines, the summary (edited in place when agnts posted one before) with the accepted findings not on a changed line. Also answers in the threads of findings agnts posted before that are still there, and resolves the ones that are gone. Drafts not accepted stay in agnts
 [**saveReviewerProfile**](ReviewsApi.md#savereviewerprofile) | **PUT** /reviews/reviewers/{login} | Replace a reviewer profile with your text; empty text clears it
-[**syncReviews**](ReviewsApi.md#syncreviews) | **POST** /reviews/sync | Ask the git host for the pull requests waiting for you and queue reviews of the new ones
+[**syncReviews**](ReviewsApi.md#syncreviews) | **POST** /reviews/sync | Bring agnts&#39;s open reviews up to date with the git host: end those whose pull request was merged or closed. It starts no review
 [**updateReviewDraft**](ReviewsApi.md#updatereviewdraft) | **PATCH** /tickets/{key}/drafts/{draftId} | Accept, dismiss or reopen a draft, or rewrite its text before it is published
 
 
@@ -297,6 +298,47 @@ Name | Type | Description  | Notes
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **listReviewPulls**
+> ReviewPullList listReviewPulls()
+
+The open pull requests of every repository (as pullReviews settings pick them), most recently updated first, each with agnts's newest review of it. Nothing is reviewed: a review starts from the pull request
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getReviewsApi();
+
+try {
+    final response = api.listReviewPulls();
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling ReviewsApi->listReviewPulls: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**ReviewPullList**](ReviewPullList.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **listReviewers**
 > Reviewers listReviewers()
 
@@ -482,7 +524,7 @@ Name | Type | Description  | Notes
 # **syncReviews**
 > ReviewSync syncReviews()
 
-Ask the git host for the pull requests waiting for you and queue reviews of the new ones
+Bring agnts's open reviews up to date with the git host: end those whose pull request was merged or closed. It starts no review
 
 ### Example
 ```dart

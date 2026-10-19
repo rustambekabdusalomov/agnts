@@ -128,6 +128,11 @@ func (s *Server) GetRepoPull(w http.ResponseWriter, r *http.Request, id gen.Repo
 			out.AfterApprove = &aa
 		}
 	}
+	reviews := make([]gen.PullReviewRef, len(v.Reviews))
+	for i, t := range v.Reviews {
+		reviews[i] = toPullReviewRef(t)
+	}
+	out.Reviews = &reviews
 	if v.Drafts != nil {
 		ds := toReviewDrafts(v.Drafts)
 		out.Drafts = &ds

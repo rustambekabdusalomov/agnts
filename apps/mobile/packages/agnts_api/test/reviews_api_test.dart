@@ -49,6 +49,13 @@ void main() {
       // TODO
     });
 
+    // The open pull requests of every repository (as pullReviews settings pick them), most recently updated first, each with agnts's newest review of it. Nothing is reviewed: a review starts from the pull request
+    //
+    //Future<ReviewPullList> listReviewPulls() async
+    test('test listReviewPulls', () async {
+      // TODO
+    });
+
     // How each person agnts reviews pull requests for reviews, as it learned from their notes
     //
     //Future<Reviewers> listReviewers() async
@@ -77,7 +84,7 @@ void main() {
       // TODO
     });
 
-    // Ask the git host for the pull requests waiting for you and queue reviews of the new ones
+    // Bring agnts's open reviews up to date with the git host: end those whose pull request was merged or closed. It starts no review
     //
     //Future<ReviewSync> syncReviews() async
     test('test syncReviews', () async {

@@ -140,10 +140,7 @@ func TestPostReviewInline(t *testing.T) {
 	convOrchestrator(h, host)
 	host.files = []domain.FileChange{{Path: "cache.go", Diff: "@@ -1,2 +1,4 @@\n a\n+b\n+c\n d"}}
 	host.set(pull(4, "aaa1111"))
-	if res, err := h.o.SyncReviews(h.ctx, domain.OriginWeb); err != nil || res.Created != 1 {
-		t.Fatalf("sync: %+v %v", res, err)
-	}
-	if _, err := h.o.Start(h.ctx, "API-PR4", domain.OriginWeb); err != nil {
+	if _, err := h.o.ReviewPull(h.ctx, 1, 4, orchestrator.ReviewPullOptions{}, domain.OriginWeb); err != nil {
 		t.Fatal(err)
 	}
 	h.step() // fetch
@@ -177,9 +174,16 @@ func TestPostReviewInline(t *testing.T) {
 
 	// New commits: the eviction is fixed, a typo is new.
 	host.set(pull(4, "bbb2222"))
-	if res, _ := h.o.SyncReviews(h.ctx, domain.OriginWeb); res.Rereview != 1 {
-		t.Fatalf("rereview: %+v", res)
+	rereview := func() {
+		t.Helper()
+		if _, err := h.o.SyncReviews(h.ctx, domain.OriginWeb); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := h.o.RequestChanges(h.ctx, "API-PR4", "Look at the new commits.", nil, nil, domain.OriginWeb); err != nil {
+			t.Fatal(err)
+		}
 	}
+	rereview()
 	typo := `{"verdict":"has_concerns","summary":"One typo.","findings":[{"severity":"minor","category":"style","file":"cache.go","line":2,"title":"Typo in the name"}]}`
 	h.runner.scripts = []script{{result: ok("r2"), files: map[string]string{orchestrator.ReviewPath: typo}}}
 	h.step()
@@ -202,7 +206,7 @@ func TestPostReviewInline(t *testing.T) {
 
 	// Again: the typo is still there and is not posted twice.
 	host.set(pull(4, "ccc3333"))
-	_, _ = h.o.SyncReviews(h.ctx, domain.OriginWeb)
+	rereview()
 	h.runner.scripts = []script{{result: ok("r3"), files: map[string]string{orchestrator.ReviewPath: typo}}}
 	h.step()
 	_, did, err = h.o.PostPullReview(h.ctx, "API-PR4", orchestrator.PostReviewOptions{Summary: true}, domain.OriginWeb)

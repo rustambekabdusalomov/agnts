@@ -135,10 +135,13 @@ type PullView struct {
 	FilesErr  string // why the files could not be read; the page still shows
 	TicketKey string
 	Own       bool
-	// Ticket is the ticket (nil without one), and Drafts its review's
-	// draft comments (a review ticket's only).
+	// Ticket is the ticket (nil without one): its own change, else its
+	// newest review.
 	Ticket *domain.Ticket
-	Drafts []domain.ReviewDraft
+	// Reviews are its review tickets, newest first, and Drafts the newest
+	// one's draft comments.
+	Reviews []domain.Ticket
+	Drafts  []domain.ReviewDraft
 }
 
 // Pull returns a pull request as it stands on the git host, with its files.
@@ -166,8 +169,14 @@ func (o *Orchestrator) Pull(ctx context.Context, repoID int64, number int) (Pull
 	}
 	if t, own, ok := o.ticketOfPull(ctx, repo, number, pr.URL); ok {
 		v.TicketKey, v.Own, v.Ticket = t.Key, own, &t
-		if !own {
-			v.Drafts = o.pullDrafts(ctx, t)
+	}
+	// Its reviews, newest first: the drafts are the newest one's.
+	if o.pulls != nil {
+		if rs, err := o.pulls.ReviewsOfPull(ctx, repo.ID, number, 50); err == nil {
+			v.Reviews = rs
+			if len(rs) > 0 {
+				v.Drafts = o.pullDrafts(ctx, rs[0])
+			}
 		}
 	}
 	return v, nil

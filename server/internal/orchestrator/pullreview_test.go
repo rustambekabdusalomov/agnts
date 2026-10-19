@@ -2,6 +2,7 @@ package orchestrator_test
 
 import (
 	"context"
+	"errors"
 	"io"
 	"log/slog"
 	"strconv"
@@ -120,21 +121,26 @@ func TestPullReviewFlow(t *testing.T) {
 	}, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	host.set(pull(4, "aaa1111"))
 
-	res, err := h.o.SyncReviews(h.ctx, domain.OriginWeb)
-	if err != nil || res.Created != 1 || res.Open != 1 || res.Repos != 1 {
+	// The sync starts no review: a person does, from the pull request.
+	if res, err := h.o.SyncReviews(h.ctx, domain.OriginWeb); err != nil || res.Created != 0 || res.Open != 0 {
 		t.Fatalf("sync: %+v %v", res, err)
 	}
-	if res, _ := h.o.SyncReviews(h.ctx, domain.OriginWeb); res.Created != 0 {
-		t.Fatalf("second sync created again: %+v", res)
+	h.idle()
+	open, err := h.o.OpenPulls(h.ctx)
+	if err != nil || len(open.Pulls) != 1 || open.Pulls[0].Pull.Number != 4 || open.Pulls[0].Review != nil {
+		t.Fatalf("open pulls: %+v %v", open, err)
+	}
+	if _, err := h.o.ReviewPull(h.ctx, 1, 4, orchestrator.ReviewPullOptions{}, domain.OriginWeb); err != nil {
+		t.Fatal(err)
 	}
 	tk := h.expect("API-PR4", domain.StateNew)
-	if tk.Kind != domain.KindReview || tk.Source != domain.SourceGit || tk.Pull == nil || *tk.PRNumber != 4 || tk.Branch != "agnts/API-PR4" || !tk.Held {
+	if tk.Kind != domain.KindReview || tk.Source != domain.SourceGit || tk.Pull == nil || *tk.PRNumber != 4 || tk.Branch != "agnts/API-PR4" ||
+		tk.AfterApprove != "pr" || tk.Pull.Why != domain.PullAssigned {
 		t.Fatalf("review ticket: %+v", tk)
 	}
-	// Held: the review runs when someone starts it.
-	h.idle()
-	if _, err := h.o.Start(h.ctx, "API-PR4", domain.OriginWeb); err != nil {
-		t.Fatal(err)
+	var exists *orchestrator.ReviewExistsError
+	if _, err := h.o.ReviewPull(h.ctx, 1, 4, orchestrator.ReviewPullOptions{}, domain.OriginWeb); !errors.As(err, &exists) || exists.Key != "API-PR4" {
+		t.Fatalf("asked while it runs: %v", err)
 	}
 
 	h.step() // fetch: no Claude
@@ -215,16 +221,31 @@ func TestPullReviewFlow(t *testing.T) {
 		t.Fatalf("profile: %+v %v", prof, err)
 	}
 
-	// New commits while the review waits: reviewed again, with the profile
-	// and nothing left to fold in.
+	// New commits while the review waits: the sync only records them. A
+	// new review, asked for, replaces the one waiting; it reads the profile
+	// with nothing left to fold in.
 	host.set(pull(4, "bbb2222"))
-	if res, _ := h.o.SyncReviews(h.ctx, domain.OriginWeb); res.Rereview != 1 {
+	if res, _ := h.o.SyncReviews(h.ctx, domain.OriginWeb); res.Rereview != 0 || res.Open != 1 {
 		t.Fatalf("sync after new commits: %+v", res)
 	}
-	h.expect("API-PR4", domain.StateCoding)
+	if tk := h.expect("API-PR4", domain.StateWaitingForReview); tk.Pull.HeadSHA != "bbb2222" || tk.HeadSHA != "aaa1111" {
+		t.Fatalf("new commits not recorded: pull %s reviewed %s", tk.Pull.HeadSHA, tk.HeadSHA)
+	}
+	h.idle()
+	if _, err := h.o.ReviewPull(h.ctx, 1, 4, orchestrator.ReviewPullOptions{}, domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
+	h.expect("API-PR4", domain.StateRejected)
+	h.step() // fetch
 	h.runner.scripts = []script{{result: ok("r3"), files: map[string]string{orchestrator.ReviewPath: `{"verdict":"looks_good","summary":"Still fine.","findings":[]}`}}}
 	h.step()
-	tk = h.expect("API-PR4", domain.StateWaitingForReview)
+	tk = h.expect("API-PR4-2", domain.StateWaitingForReview)
+	if rs, err := h.store.ReviewsOfPull(h.ctx, 1, 4, 10); err != nil || len(rs) != 2 || rs[0].Key != "API-PR4-2" || rs[1].Key != "API-PR4" {
+		t.Fatalf("review history: %+v %v", rs, err)
+	}
+	if open, _ := h.o.OpenPulls(h.ctx); len(open.Pulls) != 1 || open.Pulls[0].Review == nil || open.Pulls[0].Review.Key != "API-PR4-2" {
+		t.Fatalf("open pulls after two reviews: %+v", open)
+	}
 	p = h.runner.prompts[2]
 	if tk.HeadSHA != "bbb2222" || !strings.Contains(p, orchestrator.ReviewerPath) || strings.Contains(p, orchestrator.ProfileOutPath) || strings.Contains(p, "Review again") {
 		t.Fatalf("review of new commits: head %q\n%s", tk.HeadSHA, p)
@@ -236,26 +257,26 @@ func TestPullReviewFlow(t *testing.T) {
 	// Accepting merges at the reviewed commit; a head that moved since
 	// sends it back for review instead.
 	host.set(pull(4, "ccc3333"))
-	if _, err := h.o.Approve(h.ctx, "API-PR4", []string{"someone"}, true, domain.OriginWeb); err != nil {
+	if _, err := h.o.Approve(h.ctx, "API-PR4-2", []string{"someone"}, true, domain.OriginWeb); err != nil {
 		t.Fatal(err)
 	}
 	h.step()
-	tk = h.expect("API-PR4", domain.StateFailed)
+	tk = h.expect("API-PR4-2", domain.StateFailed)
 	if tk.ResumeState != domain.StateCoding || len(host.merges) != 0 {
 		t.Fatalf("moved head: resume %s merges %v", tk.ResumeState, host.merges)
 	}
-	if _, err := h.o.Retry(h.ctx, "API-PR4", domain.OriginWeb); err != nil {
+	if _, err := h.o.Retry(h.ctx, "API-PR4-2", domain.OriginWeb); err != nil {
 		t.Fatal(err)
 	}
 	h.runner.scripts = []script{{result: ok("r4"), files: map[string]string{orchestrator.ReviewPath: `{"verdict":"looks_good","summary":"Fine.","findings":[]}`}}}
 	h.step()
-	h.expect("API-PR4", domain.StateWaitingForReview)
+	h.expect("API-PR4-2", domain.StateWaitingForReview)
 	h.settings.s.PullReviews.MergeMethod = "squash"
-	if _, err := h.o.Approve(h.ctx, "API-PR4", nil, false, domain.OriginWeb); err != nil {
+	if _, err := h.o.Approve(h.ctx, "API-PR4-2", nil, false, domain.OriginWeb); err != nil {
 		t.Fatal(err)
 	}
 	h.step()
-	tk = h.expect("API-PR4", domain.StateDone)
+	tk = h.expect("API-PR4-2", domain.StateDone)
 	if len(host.merges) != 1 || host.merges[0] != "4@ccc3333/squash" || tk.MergedAt == nil || tk.Pull.State != domain.PullMerged || len(tk.Assignees) != 0 {
 		t.Fatalf("merge: %v merged %v pull %+v", host.merges, tk.MergedAt, tk.Pull)
 	}
@@ -265,8 +286,10 @@ func TestPullReviewFlow(t *testing.T) {
 	// with a reason teaches agnts and is not reviewed again.
 	host.set(pull(5, "ddd4444"))
 	host.set(pull(6, "eee5555"))
-	if res, _ := h.o.SyncReviews(h.ctx, domain.OriginWeb); res.Created != 2 {
-		t.Fatalf("sync two more: %+v", res)
+	for _, n := range []int{5, 6} {
+		if _, err := h.o.ReviewPull(h.ctx, 1, n, orchestrator.ReviewPullOptions{}, domain.OriginWeb); err != nil {
+			t.Fatal(err)
+		}
 	}
 	host.close(5, domain.PullMerged)
 	if res, _ := h.o.SyncReviews(h.ctx, domain.OriginWeb); res.Closed != 1 {

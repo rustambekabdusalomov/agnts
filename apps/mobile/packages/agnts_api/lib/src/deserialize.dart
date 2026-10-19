@@ -168,6 +168,7 @@ import 'package:agnts_api/src/model/pull_comment.dart';
 import 'package:agnts_api/src/model/pull_detail.dart';
 import 'package:agnts_api/src/model/pull_item.dart';
 import 'package:agnts_api/src/model/pull_request.dart';
+import 'package:agnts_api/src/model/pull_review_ref.dart';
 import 'package:agnts_api/src/model/pull_review_settings.dart';
 import 'package:agnts_api/src/model/pull_thread.dart';
 import 'package:agnts_api/src/model/quality_stat.dart';
@@ -218,6 +219,8 @@ import 'package:agnts_api/src/model/resolve_pull_thread_request.dart';
 import 'package:agnts_api/src/model/result.dart';
 import 'package:agnts_api/src/model/retry_ticket_request.dart';
 import 'package:agnts_api/src/model/review_draft.dart';
+import 'package:agnts_api/src/model/review_pull_list.dart';
+import 'package:agnts_api/src/model/review_pull_row.dart';
 import 'package:agnts_api/src/model/review_repo_pull409_response.dart';
 import 'package:agnts_api/src/model/review_repo_pull_request.dart';
 import 'package:agnts_api/src/model/review_sync.dart';
@@ -705,6 +708,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return PullItem.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PullRequest':
           return PullRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PullReviewRef':
+          return PullReviewRef.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PullReviewSettings':
           return PullReviewSettings.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PullThread':
@@ -808,6 +813,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return RetryTicketRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ReviewDraft':
           return ReviewDraft.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ReviewPullList':
+          return ReviewPullList.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ReviewPullRow':
+          return ReviewPullRow.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ReviewRepoPull409Response':
           return ReviewRepoPull409Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ReviewRepoPullRequest':

@@ -50,8 +50,8 @@ type ReviewPullOptions struct {
 	Deep  string // "", domain.DeepOff or domain.DeepAlways
 }
 
-// ReviewExistsError is returned when the pull request already has a
-// review in progress.
+// ReviewExistsError is returned when agnts is reviewing the pull request
+// right now.
 type ReviewExistsError struct{ Key string }
 
 func (e *ReviewExistsError) Error() string {
@@ -60,9 +60,22 @@ func (e *ReviewExistsError) Error() string {
 
 func (e *ReviewExistsError) Unwrap() error { return domain.ErrConflict }
 
-// ReviewPull starts an agnts review of any open pull request, for the
-// person who asked: the usual review ticket, except that approving it
-// finishes the review and never merges.
+// reviewRunning reports whether a review ticket is being worked on (or
+// queued to be): a new review would race it.
+func reviewRunning(t domain.Ticket) bool {
+	switch t.State {
+	case domain.StateNew, domain.StateAnalyzing, domain.StateCoding, domain.StateTesting, domain.StatePushing:
+		return true
+	}
+	return false
+}
+
+// ReviewPull starts a new agnts review of an open pull request, the
+// person's own included: a review ticket of the pull request as it stands
+// now. It may be reviewed again whenever no review runs; the earlier
+// review, if it still waits for you, is replaced. Approving merges only a
+// pull request that waits for you (assigned, or asking for your review);
+// otherwise it finishes the review.
 func (o *Orchestrator) ReviewPull(ctx context.Context, repoID int64, number int, opt ReviewPullOptions, origin domain.Origin) (domain.Ticket, error) {
 	if err := checkNumber(number); err != nil {
 		return domain.Ticket{}, err
@@ -93,108 +106,40 @@ func (o *Orchestrator) ReviewPull(ctx context.Context, repoID int64, number int,
 	if pr.State != domain.PullOpen {
 		return domain.Ticket{}, invalid("#%d is %s: only an open pull request can be reviewed", number, pr.State)
 	}
-	if t, own, ok := o.ticketOfPull(ctx, repo, number, pr.URL); ok {
-		if own {
-			return domain.Ticket{}, invalid("#%d is agnts's own change in %s: its review is on that ticket", number, t.Key)
-		}
-		if t.State == domain.StateNew && t.Held {
-			// The sync's review, waiting to be started: asking for one
-			// starts it, with what was asked.
-			if opt.Focus != "" || opt.Deep != "" {
-				if _, err := o.store.UpdateTicket(ctx, t.Key, nil, func(x *domain.Ticket) {
-					if x.Pull != nil {
-						p := *x.Pull
-						p.Focus, p.Deep = opt.Focus, opt.Deep
-						x.Pull = &p
-					}
-				}); err != nil {
-					return t, err
-				}
-			}
-			return o.Start(ctx, t.Key, origin)
-		}
-		if !t.State.Terminal() {
-			return t, &ReviewExistsError{Key: t.Key}
-		}
+	prev, err := o.pulls.TicketByPull(ctx, repo.ID, number)
+	switch {
+	case errors.Is(err, domain.ErrNotFound):
+		prev = domain.Ticket{}
+	case err != nil:
+		return domain.Ticket{}, err
+	case reviewRunning(prev):
+		return prev, &ReviewExistsError{Key: prev.Key}
 	}
-	pr.Why, pr.Focus, pr.Deep = domain.PullManual, opt.Focus, opt.Deep
+	after := domain.AfterApproveNone
+	if pr.Why == domain.PullAssigned || pr.Why == domain.PullReviewRequested {
+		after = "pr"
+	}
+	pr.Focus, pr.Deep = opt.Focus, opt.Deep
 	who := "someone"
 	if a, ok := domain.ActorOf(ctx); ok && a.Username != "" {
 		who = a.Username
 	}
-	t, err := o.createPullTicket(ctx, repo, pr, domain.AfterApproveNone,
-		fmt.Sprintf("review of #%d by @%s asked by %s", pr.Number, pr.Author, who), origin)
+	t, err := o.createPullTicket(ctx, repo, pr, after,
+		fmt.Sprintf("review of #%d at %s by @%s asked by %s", pr.Number, shortSHA(pr.HeadSHA), pr.Author, who), origin)
 	if err != nil {
 		return t, err
 	}
+	if prev.Key != "" && !prev.State.Terminal() {
+		// Waiting for you, or stopped: the new review replaces it.
+		if _, err := o.store.Transition(ctx, prev.Key, domain.StateRejected, domain.Event{
+			TicketKey: prev.Key, Type: domain.EventStateChanged, Origin: origin,
+			Message: fmt.Sprintf("replaced by a new review of #%d in %s", number, t.Key),
+		}, nil); err != nil {
+			o.log.Warn("replace earlier review", "ticket", prev.Key, "err", err)
+		}
+	}
 	o.Wake()
 	return t, nil
-}
-
-// syncManualReviews keeps the reviews asked for from pull request pages
-// up to date when the sync of the pull requests waiting for you is off:
-// new commits, closing and merging.
-func (o *Orchestrator) syncManualReviews(ctx context.Context, origin domain.Origin) (ReviewSync, error) {
-	var out ReviewSync
-	rh, err := o.pullReviewsReady()
-	if err != nil {
-		return out, err
-	}
-	s, err := o.settings.Get(ctx)
-	if err != nil {
-		return out, err
-	}
-	open, err := o.pulls.OpenReviews(ctx)
-	if err != nil {
-		return out, err
-	}
-	repos := map[int64]domain.Repository{}
-	for _, t := range open {
-		if t.AfterApprove != domain.AfterApproveNone || t.RepoID == nil || t.PRNumber == nil {
-			continue
-		}
-		repo, ok := repos[*t.RepoID]
-		if !ok {
-			if repo, err = o.store.RepositoryByID(ctx, *t.RepoID); err != nil {
-				out.Errors = append(out.Errors, err.Error())
-				continue
-			}
-			repos[repo.ID] = repo
-		}
-		o.syncOpenReview(ctx, s, rh, repo, t, origin, &out)
-	}
-	if out.Rereview > 0 {
-		o.Wake()
-	}
-	return out, nil
-}
-
-// syncOpenReview brings one review not in the queue up to date: ended if
-// its pull request was merged or closed, and for a review someone asked
-// for, refreshed and reviewed again on new commits.
-func (o *Orchestrator) syncOpenReview(ctx context.Context, s domain.Settings, rh ReviewHost, repo domain.Repository, t domain.Ticket, origin domain.Origin, out *ReviewSync) {
-	pr, err := rh.PullRequest(ctx, repo, *t.PRNumber)
-	if err != nil {
-		out.Errors = append(out.Errors, fmt.Sprintf("%s #%d: %v", repo.Name, *t.PRNumber, err))
-		return
-	}
-	if pr.State != domain.PullOpen {
-		if ended, err := o.endPull(ctx, t, pr, origin); err != nil {
-			out.Errors = append(out.Errors, fmt.Sprintf("%s #%d: %v", repo.Name, *t.PRNumber, err))
-		} else if ended {
-			out.Closed++
-		}
-		return
-	}
-	if t.AfterApprove != domain.AfterApproveNone {
-		return // only unassigned: it keeps its review
-	}
-	pr.Clean()
-	if _, again, err := o.syncPull(ctx, s, repo, pr, origin); err != nil {
-		out.Errors = append(out.Errors, fmt.Sprintf("%s #%d: %v", repo.Name, *t.PRNumber, err))
-	} else if again {
-		out.Rereview++
-	}
 }
 
 // latestPullReview returns the newest review of a review ticket.

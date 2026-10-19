@@ -18,6 +18,45 @@ func (s *Agent) TicketByPull(ctx context.Context, repoID int64, number int) (dom
 		WHERE repo_id = $1 AND pr_number = $2 AND kind = 'review' ORDER BY id DESC LIMIT 1`, repoID, number))
 }
 
+// ReviewsOfPull returns the review tickets of pull request number in
+// repoID, newest first.
+func (s *Agent) ReviewsOfPull(ctx context.Context, repoID int64, number int, limit int) ([]domain.Ticket, error) {
+	return s.reviewTickets(ctx, `SELECT `+ticketCols+` FROM tickets
+		WHERE repo_id = $1 AND pr_number = $2 AND kind = 'review' ORDER BY id DESC LIMIT $3`, repoID, number, limit)
+}
+
+// LatestReviews returns the newest review ticket of each pull request in
+// repoID that has one, by number.
+func (s *Agent) LatestReviews(ctx context.Context, repoID int64) (map[int]domain.Ticket, error) {
+	ts, err := s.reviewTickets(ctx, `SELECT DISTINCT ON (pr_number) `+ticketCols+` FROM tickets
+		WHERE repo_id = $1 AND pr_number IS NOT NULL AND kind = 'review' ORDER BY pr_number, id DESC`, repoID)
+	if err != nil {
+		return nil, err
+	}
+	out := make(map[int]domain.Ticket, len(ts))
+	for _, t := range ts {
+		out[*t.PRNumber] = t
+	}
+	return out, nil
+}
+
+func (s *Agent) reviewTickets(ctx context.Context, q string, args ...any) ([]domain.Ticket, error) {
+	rows, err := s.db.Query(ctx, q, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []domain.Ticket
+	for rows.Next() {
+		t, err := scanTicket(rows)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, t)
+	}
+	return out, rows.Err()
+}
+
 // OpenReviews returns the review tickets that are not done or rejected,
 // oldest first.
 func (s *Agent) OpenReviews(ctx context.Context) ([]domain.Ticket, error) {

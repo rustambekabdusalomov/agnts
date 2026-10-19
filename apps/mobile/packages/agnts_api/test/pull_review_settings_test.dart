@@ -7,7 +7,7 @@ void main() {
   // TODO add properties to the entity
 
   group(PullReviewSettings, () {
-    // Sync the pull requests waiting for you every few minutes and review the new ones
+    // Unused: reviews start from the pull request, and open reviews are kept up to date always
     // bool enabled
     test('to test the property `enabled`', () async {
       // TODO
@@ -31,7 +31,7 @@ void main() {
       // TODO
     });
 
-    // Review again when the author pushes new commits while agnts's review waits for you
+    // Unused: reviewing again after new commits is your call, from the pull request
     // bool rereview
     test('to test the property `rereview`', () async {
       // TODO

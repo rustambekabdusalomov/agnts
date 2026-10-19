@@ -23,19 +23,21 @@ final pullDetailProvider = FutureProvider.family<PullDetail, (int, int)>((ref, k
 /// "GitHub" or "GitLab", for "posts as … on GitHub".
 String hostName(PullDetailProviderEnum? p) => p == PullDetailProviderEnum.gitlab ? 'GitLab' : 'GitHub';
 
-const _busyStates = {TicketState.new_, TicketState.analyzing, TicketState.coding};
-const _endStates = {TicketState.done, TicketState.rejected};
+const _busyStates = {TicketState.new_, TicketState.analyzing, TicketState.coding, TicketState.testing, TicketState.pushing};
 
-/// agnts is reviewing someone else's pull request right now.
-bool pullReviewing(PullDetail d) => !d.own && d.ticketKey != null && _busyStates.contains(d.ticketState);
+/// agnts's newest review of the pull request, if any.
+PullReviewRef? latestReview(PullDetail d) => d.reviews?.firstOrNull;
 
-/// A review can be asked for on an open pull request that is not agnts's
-/// own, when it has none in progress.
-bool pullCanAsk(PullDetail d) =>
-    d.pull.state == PullItemStateEnum.open && !d.own && (d.ticketKey == null || _endStates.contains(d.ticketState));
+/// agnts is reviewing the pull request right now.
+bool pullReviewing(PullDetail d) => _busyStates.contains(latestReview(d)?.state);
 
-/// The review's drafts can only be read: the pull request is closed or the review dismissed.
-bool pullDraftsLocked(PullDetail d) => d.pull.state != PullItemStateEnum.open || d.ticketState == TicketState.rejected;
+/// A new review can be asked for on an open pull request (agnts's own
+/// included) whenever none runs: again after new commits, say.
+bool pullCanAsk(PullDetail d) => d.pull.state == PullItemStateEnum.open && !pullReviewing(d);
+
+/// The newest review's drafts can only be read: the pull request is closed
+/// or the review dismissed (or replaced).
+bool pullDraftsLocked(PullDetail d) => d.pull.state != PullItemStateEnum.open || latestReview(d)?.state == TicketState.rejected;
 
 /// The conversation threads worth showing: system notes ("added 2 commits")
 /// say little, and resolved threads fold away unless asked for.

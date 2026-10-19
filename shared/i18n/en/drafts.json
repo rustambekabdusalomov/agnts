@@ -48,7 +48,7 @@
     "reviewWithBtn": "Review with agnts",
     "reviewAgainBtn": "Review again with agnts",
     "reviewTitle": "Review #{number} with agnts",
-    "reviewSub": "agnts reviews the pull request for you. Its comments stay drafts in agnts until you accept them; only accepted ones go on the pull request. Finishing the review never merges it.",
+    "reviewSub": "agnts reviews the pull request as it is now. Its comments stay drafts in agnts until you accept them; only accepted ones go on the pull request. Approving the review merges it only when it is assigned to you or asks for your review.",
     "reviewBtn": "Start the review",
     "focusLabel": "Anything to look at especially? (optional)",
     "focusHint": "e.g. the migration and the retry logic",

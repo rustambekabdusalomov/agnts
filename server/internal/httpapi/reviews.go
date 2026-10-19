@@ -14,6 +14,7 @@ import (
 // pull requests waiting for you, and what agnts learned from your notes.
 type Reviews interface {
 	SyncReviews(ctx context.Context, origin domain.Origin) (orchestrator.ReviewSync, error)
+	OpenPulls(ctx context.Context) (orchestrator.OpenPulls, error)
 	Reviewers(ctx context.Context) ([]orchestrator.ReviewerView, []domain.ReviewerNote, error)
 	SaveReviewerProfile(ctx context.Context, login, body string) (domain.ReviewerProfile, error)
 	AddReviewerNote(ctx context.Context, login, note string) (domain.ReviewerNote, error)
@@ -38,6 +39,37 @@ func (s *Server) reviewsError(w http.ResponseWriter, r *http.Request, err error)
 	default:
 		s.writeInternal(w, r, err)
 	}
+}
+
+// ListReviewPulls implements gen.ServerInterface.
+func (s *Server) ListReviewPulls(w http.ResponseWriter, r *http.Request) {
+	if !s.reviewsReady(w) {
+		return
+	}
+	res, err := s.opt.Reviews.OpenPulls(r.Context())
+	if err != nil {
+		s.reviewsError(w, r, err)
+		return
+	}
+	out := gen.ReviewPullList{Pulls: make([]gen.ReviewPullRow, len(res.Pulls)), Errors: res.Errors}
+	if out.Errors == nil {
+		out.Errors = []string{}
+	}
+	for i, p := range res.Pulls {
+		row := gen.ReviewPullRow{RepoId: p.Repo.ID, RepoName: p.Repo.Name, Provider: gen.ReviewPullRowProvider(p.Repo.Provider),
+			Pull: toPullItem(p.Pull, "", false)}
+		if p.Review != nil {
+			ref := toPullReviewRef(*p.Review)
+			row.Review = &ref
+			row.Pull.TicketKey = &ref.Key
+		}
+		out.Pulls[i] = row
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+func toPullReviewRef(t domain.Ticket) gen.PullReviewRef {
+	return gen.PullReviewRef{Key: t.Key, State: gen.TicketState(t.State), HeadSha: optStr(t.HeadSHA), CreatedAt: t.CreatedAt, UpdatedAt: t.UpdatedAt}
 }
 
 // SyncReviews implements gen.ServerInterface.

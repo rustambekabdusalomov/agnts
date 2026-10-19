@@ -757,7 +757,7 @@ _responseData = rawData == null ? null : deserialize<PullComment, PullComment>(r
     return _response;
   }
 
-  /// Ask agnts to review an open pull request: a review ticket for you, whose comments stay drafts in agnts until you accept and publish them. Approving it finishes the review; it never merges
+  /// Ask agnts to review an open pull request as it stands now (again, whenever no review runs; an earlier review still waiting for you is replaced): a review ticket whose comments stay drafts in agnts until you accept and publish them. Approving merges it only when it waits for you (assigned or asking for your review); otherwise it finishes the review
   /// 
   ///
   /// Parameters:

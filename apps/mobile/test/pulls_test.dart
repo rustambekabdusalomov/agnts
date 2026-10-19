@@ -79,16 +79,18 @@ PullItem _item(int n, {PullItemStateEnum state = PullItemStateEnum.open, String?
   own: own,
 );
 
-PullDetail _detail({PullItemStateEnum state = PullItemStateEnum.open, String? ticketKey, TicketState? ticketState, bool own = false}) =>
+PullDetail _detail({PullItemStateEnum state = PullItemStateEnum.open, List<TicketState> reviews = const [], bool own = false}) =>
     PullDetail(
       repoId: 3,
       repoName: 'api',
       provider: PullDetailProviderEnum.github,
       pull: _item(7, state: state),
       files: const [],
-      ticketKey: ticketKey,
-      ticketState: ticketState,
       own: own,
+      reviews: [
+        for (final (i, s) in reviews.indexed)
+          PullReviewRef(key: 'API-PR7${i == reviews.length - 1 ? '' : '-${reviews.length - i}'}', state: s, createdAt: DateTime(2026), updatedAt: DateTime(2026)),
+      ],
     );
 
 void main() {
@@ -137,14 +139,16 @@ void main() {
     expect([del, add, ctx].every(lineCommentable), isTrue);
   });
 
-  test('a review can be asked for on an open pull request with none in progress', () {
+  test('a review can be asked for on an open pull request whenever none runs', () {
     expect(pullCanAsk(_detail()), isTrue);
-    expect(pullCanAsk(_detail(own: true, ticketKey: 'PAY-1')), isFalse);
+    expect(pullCanAsk(_detail(own: true)), isTrue);
     expect(pullCanAsk(_detail(state: PullItemStateEnum.merged)), isFalse);
-    expect(pullCanAsk(_detail(ticketKey: 'PAY-2', ticketState: TicketState.analyzing)), isFalse);
-    expect(pullCanAsk(_detail(ticketKey: 'PAY-2', ticketState: TicketState.done)), isTrue);
-    expect(pullReviewing(_detail(ticketKey: 'PAY-2', ticketState: TicketState.coding)), isTrue);
-    expect(pullDraftsLocked(_detail(ticketKey: 'PAY-2', ticketState: TicketState.rejected)), isTrue);
+    expect(pullCanAsk(_detail(reviews: [TicketState.analyzing])), isFalse);
+    expect(pullCanAsk(_detail(reviews: [TicketState.waitingForReview])), isTrue);
+    expect(pullCanAsk(_detail(reviews: [TicketState.done, TicketState.rejected])), isTrue);
+    expect(pullReviewing(_detail(reviews: [TicketState.coding, TicketState.rejected])), isTrue);
+    expect(latestReview(_detail(reviews: [TicketState.coding, TicketState.rejected]))?.key, 'API-PR7-2');
+    expect(pullDraftsLocked(_detail(reviews: [TicketState.rejected])), isTrue);
   });
 
   test('system notes and resolved threads fold away', () {
@@ -189,6 +193,7 @@ void main() {
       ticketKey: 'PAY-2',
       ticketState: TicketState.waitingForReview,
       own: false,
+      reviews: [PullReviewRef(key: 'PAY-2', state: TicketState.waitingForReview, headSha: 'h1', createdAt: DateTime(2026), updatedAt: DateTime(2026))],
     );
     await tester.pumpWidget(
       ProviderScope(

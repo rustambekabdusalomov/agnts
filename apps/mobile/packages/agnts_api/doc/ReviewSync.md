@@ -8,10 +8,10 @@ import 'package:agnts_api/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**repos** | **int** | Repositories asked | 
-**open** | **int** | Pull requests waiting for you | 
-**created** | **int** | New reviews queued | 
-**rereview** | **int** | Reviews queued again for new commits | 
+**repos** | **int** | Repositories with an open review | 
+**open** | **int** | Open reviews checked | 
+**created** | **int** | Always 0; reviews start from the pull request | 
+**rereview** | **int** | Always 0; reviewing again is your call | 
 **closed** | **int** | Reviews ended because the pull request was merged or closed on the git host | 
 **errors** | **List&lt;String&gt;** | Repositories or pull requests that could not be read | 
 

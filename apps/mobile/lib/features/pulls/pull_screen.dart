@@ -48,7 +48,7 @@ class _PullScreenState extends ConsumerState<PullScreen> implements PullOps {
   PullsApi get _pulls => ref.read(apiProvider)!.getPullsApi();
   ReviewsApi get _reviews => ref.read(apiProvider)!.getReviewsApi();
   PullDetail? get _d => ref.read(pullDetailProvider(_k)).value;
-  String? get _review => _d == null || _d!.own ? null : _d!.ticketKey;
+  String? get _review => _d == null ? null : latestReview(_d!)?.key;
 
   @override
   void initState() {
@@ -409,12 +409,14 @@ class _PullScreenState extends ConsumerState<PullScreen> implements PullOps {
         value: pull,
         onRefresh: _refresh,
         builder: (d) {
-          final drafts = d.own || d.ticketKey == null ? null : (ref.watch(reviewDraftsProvider(d.ticketKey!)).value ?? d.drafts);
+          final review = latestReview(d);
+          final drafts = review == null ? null : (ref.watch(reviewDraftsProvider(review.key)).value ?? d.drafts);
           return ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.only(bottom: 32),
             children: [
               _header(context, d),
+              _history(context, d),
               if ((d.body ?? '').trim().isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -425,7 +427,7 @@ class _PullScreenState extends ConsumerState<PullScreen> implements PullOps {
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                   child: HelpBox(l.pullsFilesError(d.filesError!), tone: Tone.warn),
                 ),
-              if (pullReviewing(d)) Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 0), child: HelpBox(l.draftsReviewingNow(d.ticketKey ?? ''))),
+              if (pullReviewing(d)) Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 0), child: HelpBox(l.draftsReviewingNow(review?.key ?? ''))),
               if (drafts != null && drafts.isNotEmpty) _draftsPanel(context, d, drafts),
               ..._conversation(context, d, drafts),
             ],
@@ -481,12 +483,12 @@ class _PullScreenState extends ConsumerState<PullScreen> implements PullOps {
                             ref.invalidate(pullDetailProvider(_k));
                           }
                         },
-                  child: Text(d.ticketKey != null ? l.draftsReviewAgainBtn : l.draftsReviewWithBtn),
+                  child: Text(latestReview(d) != null ? l.draftsReviewAgainBtn : l.draftsReviewWithBtn),
                 ),
-              if (d.ticketKey != null)
+              if (d.own && d.ticketKey != null)
                 OutlinedButton(
                   onPressed: () => context.push('/tickets/${d.ticketKey}'),
-                  child: Text(d.own ? l.pullsOwnTicket(d.ticketKey!) : l.pullsReviewTicket(d.ticketKey!)),
+                  child: Text(l.pullsOwnTicket(d.ticketKey!)),
                 ),
               OutlinedButton(onPressed: () => openLink(context, p.url), child: Text(l.mpullsCopyLink(host))),
             ],
@@ -494,6 +496,36 @@ class _PullScreenState extends ConsumerState<PullScreen> implements PullOps {
         ],
       ),
     );
+  }
+
+  /// agnts's reviews of the pull request, newest first; each opens its ticket.
+  Widget _history(BuildContext context, PullDetail d) {
+    final l = AppLocalizations.of(context);
+    final c = Agnts.of(context);
+    final reviews = d.reviews ?? const <PullReviewRef>[];
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      SectionHeader(l.reviewsHistory, trailing: reviews.isEmpty ? null : Text('${reviews.length}')),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: reviews.isEmpty
+            ? HCard(child: Text(l.reviewsHistoryEmpty, style: TextStyle(color: c.ink3)))
+            : ListGroup(children: [
+                for (final (i, r) in reviews.indexed)
+                  ListRow(
+                    title: r.key,
+                    subtitle: [
+                      if ((r.headSha ?? '').length >= 7) l.reviewsReviewedAt(r.headSha!.substring(0, 7)),
+                      ciAgo(l, r.createdAt),
+                    ].join(' · '),
+                    trailing: Wrap(spacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                      if (i == 0 && (r.headSha ?? '').isNotEmpty && r.headSha != d.pull.headSha) ToneBadge(l.reviewsNewCommits, Tone.warn, small: true),
+                      StateBadge(r.state, kind: TicketKind.review),
+                    ]),
+                    onTap: () => context.push('/tickets/${r.key}'),
+                  ),
+              ]),
+      ),
+    ]);
   }
 
   Widget _draftsPanel(BuildContext context, PullDetail d, List<ReviewDraft> drafts) {

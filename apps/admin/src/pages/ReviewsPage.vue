@@ -4,7 +4,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../api/client'
-import type { PRCommentSettings, PullReviewSettings, ReviewSync, Settings, Ticket } from '../api/types'
+import type { PRCommentSettings, PullReviewSettings, ReviewPullRow, Settings } from '../api/types'
 import PageHeader from '../components/PageHeader.vue'
 import StateBadge from '../components/StateBadge.vue'
 import CfgRow from '../components/form/CfgRow.vue'
@@ -24,46 +24,24 @@ const qc = useQueryClient()
 const ui = useUi()
 const workspace = useWorkspace()
 useLive()
-const fail = (e: unknown) => ui.notify(e instanceof HttpError ? e.message : t('common.error'))
+const errMsg = (e: unknown) => (e instanceof HttpError ? e.message : t('common.error'))
+const fail = (e: unknown) => ui.notify(errMsg(e))
 
-const tickets = useQuery({
-  queryKey: ['tickets', 'reviews'],
-  queryFn: () => unwrap(api.GET('/tickets')),
-  refetchInterval: () => livePoll(30_000),
+// The open pull requests of every repository, each with agnts's newest
+// review of it. Nothing is reviewed from here: open a pull request and
+// press Review there.
+const list = useQuery({
+  queryKey: ['reviews', 'pulls'],
+  queryFn: () => unwrap(api.GET('/reviews/pulls')),
+  refetchInterval: () => livePoll(60_000),
 })
-const reviews = computed(() => {
+const pulls = computed(() => {
   const q = ui.search.trim().toLowerCase()
-  return (tickets.data.value ?? [])
-    .filter((x) => x.kind === 'review')
-    .filter((x) => !q || [x.key, x.title, x.repoName ?? '', x.pull?.author ?? ''].some((s) => s.toLowerCase().includes(q)))
+  return (list.data.value?.pulls ?? []).filter(
+    (x) => !q || [x.repoName, x.pull.title, x.pull.author, `#${x.pull.number}`].some((s) => s.toLowerCase().includes(q)),
+  )
 })
-const FINISHED = ['done', 'rejected']
-// The sync's reviews are held: nothing runs until you press Review.
-const notStarted = (x: Ticket) => x.state === 'new' && x.held
-const groups = computed(() => [
-  { id: 'notStarted', rows: reviews.value.filter(notStarted) },
-  { id: 'waiting', rows: reviews.value.filter((x) => x.state === 'waiting_for_review') },
-  { id: 'inProgress', rows: reviews.value.filter((x) => x.state !== 'waiting_for_review' && !FINISHED.includes(x.state) && !notStarted(x)) },
-  { id: 'finished', rows: reviews.value.filter((x) => FINISHED.includes(x.state)).slice(0, 20) },
-])
-const open = (x: Ticket) => router.push({ name: 'ticket', params: { key: x.key } })
-const start = useMutation({
-  mutationFn: (key: string) => unwrap(api.POST('/tickets/{key}/analyze', { params: { path: { key } } })),
-  onSuccess: () => void qc.invalidateQueries({ queryKey: ['tickets'] }),
-  onError: fail,
-})
-
-// Sync now.
-const lastSync = ref<ReviewSync | null>(null)
-const sync = useMutation({
-  mutationFn: () => unwrap(api.POST('/reviews/sync')),
-  onSuccess: (r) => {
-    lastSync.value = r
-    void qc.invalidateQueries({ queryKey: ['tickets'] })
-    void qc.invalidateQueries({ queryKey: ['nav'] })
-  },
-  onError: fail,
-})
+const open = (x: ReviewPullRow) => router.push({ name: 'pull', params: { id: x.repoId, number: x.pull.number } })
 
 // Settings.pullReviews, saved with the rest of the settings on each change.
 const settings = useQuery({ queryKey: ['settings'], queryFn: () => unwrap(api.GET('/settings')) })
@@ -99,12 +77,8 @@ watch(
   },
   { immediate: true },
 )
-// Logins agnts reviews for: those it knows, and those of the pull requests it has.
-const logins = computed(() => {
-  const set = new Set((reviewers.data.value?.reviewers ?? []).map((r) => r.login))
-  for (const x of reviews.value) if (x.pull?.login) set.add(x.pull.login)
-  return [...set].sort()
-})
+// Logins agnts reviews for: those it knows.
+const logins = computed(() => [...new Set((reviewers.data.value?.reviewers ?? []).map((r) => r.login))].sort())
 const reviewerOf = (login: string) => reviewers.data.value?.reviewers.find((r) => r.login === login)
 const refresh = () => qc.invalidateQueries({ queryKey: ['reviewers'] })
 const saveProfile = useMutation({
@@ -137,56 +111,53 @@ const newLogin = ref('')
   <PageHeader :title="t('reviews.title')">
     <template #below><p class="sub" style="margin: 4px 0 0">{{ t('reviews.lede') }}</p></template>
     <div class="actions" style="margin: 0">
-      <button v-if="workspace.canEdit" class="btn btn-p" type="button" :disabled="sync.isPending.value" @click="sync.mutate()">
-        <span v-if="sync.isPending.value" class="spin" aria-hidden="true" />{{ sync.isPending.value ? t('reviews.syncing') : t('reviews.sync') }}
+      <button class="btn btn-p" type="button" :disabled="list.isFetching.value" @click="list.refetch()">
+        <span v-if="list.isFetching.value" class="spin" aria-hidden="true" />{{ list.isFetching.value ? t('reviews.syncing') : t('reviews.refresh') }}
       </button>
     </div>
   </PageHeader>
 
   <div class="cfg-grid">
     <div class="col">
-      <div v-if="lastSync" class="help" :class="{ warn: lastSync.errors.length }" role="status">
+      <div v-if="list.data.value?.errors.length" class="help warn" role="status">
         <HiIcon name="info" />
         <div>
-          <p style="margin: 0">{{ t('reviews.synced', { ...lastSync }) }}</p>
-          <template v-if="lastSync.errors.length">
-            <p style="margin: 6px 0 0">{{ t('reviews.syncErrors') }}</p>
-            <ul class="rv-errs"><li v-for="(e, i) in lastSync.errors" :key="i">{{ e }}</li></ul>
-          </template>
+          <p style="margin: 0">{{ t('reviews.syncErrors') }}</p>
+          <ul class="rv-errs"><li v-for="(e, i) in list.data.value.errors" :key="i">{{ e }}</li></ul>
         </div>
       </div>
+      <div v-if="list.isError.value" class="help bad"><HiIcon name="info" /><p>{{ errMsg(list.error.value) }}</p></div>
 
-      <p v-if="tickets.isPending.value" class="hint">{{ t('common.loading') }}</p>
-      <section v-else-if="!reviews.length" class="card"><div class="empty"><p style="margin: 0">{{ t('reviews.emptyAll') }}</p></div></section>
-      <template v-else>
-        <section v-for="g in groups" :key="g.id" class="card">
-          <div class="ch"><h2>{{ t(`reviews.${g.id}`) }} <span v-if="g.rows.length" class="tk-n">{{ g.rows.length }}</span></h2></div>
-          <p v-if="!g.rows.length" class="hint" style="margin: 0">{{ t('reviews.empty') }}</p>
-          <div v-else class="tw">
-            <table class="tbl">
-              <tbody>
-                <tr v-for="x in g.rows" :key="x.key" tabindex="0" @click="open(x)" @keydown.enter="open(x)">
-                  <td>
-                    <div class="tkey">
-                      {{ x.repoName ?? '—' }}
-                      <a v-if="x.pull" :href="x.pull.url" target="_blank" rel="noopener" @click.stop>#{{ x.pull.number }}</a>
-                    </div>
-                    <div class="ttitle">{{ x.title }}</div>
-                    <div v-if="x.pull" class="hint rv-meta">
-                      {{ t('reviews.by', { author: x.pull.author }) }} · {{ t(`reviews.why_${x.pull.why}`) }}
-                    </div>
-                  </td>
-                  <td v-if="notStarted(x)">
-                    <button v-if="workspace.canEdit" class="btn btn-s" type="button" :disabled="start.isPending.value" @click.stop="start.mutate(x.key)">{{ t('reviews.start') }}</button>
-                  </td>
-                  <td v-else><StateBadge :state="x.state" :kind="x.kind" /> <span v-if="x.mergedAt" class="badge b-ok">{{ t('ticket.merged') }}</span></td>
-                  <td class="muted">{{ ago(x.updatedAt, locale) }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </template>
+      <p v-if="list.isPending.value" class="hint">{{ t('common.loading') }}</p>
+      <section v-else-if="!pulls.length" class="card"><div class="empty"><p style="margin: 0">{{ t('reviews.emptyAll') }}</p></div></section>
+      <section v-else class="card">
+        <div class="ch"><h2>{{ t('reviews.openPulls') }} <span class="tk-n">{{ pulls.length }}</span></h2></div>
+        <div class="tw">
+          <table class="tbl">
+            <tbody>
+              <tr v-for="x in pulls" :key="`${x.repoId}-${x.pull.number}`" tabindex="0" @click="open(x)" @keydown.enter="open(x)">
+                <td>
+                  <div class="tkey">
+                    {{ x.repoName }}
+                    <a :href="x.pull.url" target="_blank" rel="noopener" @click.stop>#{{ x.pull.number }}</a>
+                    <span v-if="x.pull.draft" class="badge b-gray">{{ t('pulls.draft') }}</span>
+                  </div>
+                  <div class="ttitle">{{ x.pull.title }}</div>
+                  <div class="hint rv-meta">
+                    {{ t('reviews.by', { author: x.pull.author }) }}<template v-if="x.pull.why"> · {{ t(`reviews.why_${x.pull.why}`) }}</template>
+                  </div>
+                </td>
+                <td>
+                  <StateBadge v-if="x.review" :state="x.review.state" kind="review" />
+                  <span v-else class="badge b-gray">{{ t('reviews.notReviewed') }}</span>
+                  <span v-if="x.review && x.review.headSha && x.review.headSha !== x.pull.headSha" class="badge b-warn">{{ t('reviews.newCommits') }}</span>
+                </td>
+                <td class="muted">{{ ago(x.pull.updatedAt, locale) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
 
       <section class="card">
         <div class="ch"><div><h2>{{ t('reviews.howTitle') }}</h2><p class="sub">{{ t('reviews.howSub') }}</p></div></div>
@@ -233,9 +204,6 @@ const newLogin = ref('')
       <section class="card">
         <div class="ch"><h2>{{ t('reviews.settingsTitle') }}</h2></div>
         <fieldset class="ro-fs" :disabled="!workspace.canEdit || !settings.data.value || saveSettings.isPending.value">
-          <CfgRow :label="t('reviews.enabled')" :help="t('reviews.enabledHelp')">
-            <SwitchToggle :model-value="pr.enabled" :label="t('reviews.enabled')" @update:model-value="(v) => setPr('enabled', v)" />
-          </CfgRow>
           <CfgRow :label="t('reviews.reviewRequested')" :help="t('reviews.reviewRequestedHelp')">
             <SwitchToggle :model-value="pr.reviewRequested" :label="t('reviews.reviewRequested')" @update:model-value="(v) => setPr('reviewRequested', v)" />
           </CfgRow>
@@ -244,9 +212,6 @@ const newLogin = ref('')
           </CfgRow>
           <CfgRow :label="t('reviews.skipDrafts')" :help="t('reviews.skipDraftsHelp')">
             <SwitchToggle :model-value="pr.skipDrafts" :label="t('reviews.skipDrafts')" @update:model-value="(v) => setPr('skipDrafts', v)" />
-          </CfgRow>
-          <CfgRow :label="t('reviews.rereview')" :help="t('reviews.rereviewHelp')">
-            <SwitchToggle :model-value="pr.rereview" :label="t('reviews.rereview')" @update:model-value="(v) => setPr('rereview', v)" />
           </CfgRow>
           <CfgRow :label="t('reviews.mergeMethod')" :help="t('reviews.mergeMethodHelp')">
             <SegButtons :model-value="pr.mergeMethod" :options="methods" :label="t('reviews.mergeMethod')" @update:model-value="(v) => setPr('mergeMethod', v)" />

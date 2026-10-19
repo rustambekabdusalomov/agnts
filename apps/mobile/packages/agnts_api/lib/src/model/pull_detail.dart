@@ -5,6 +5,7 @@
 // ignore_for_file: unused_element
 import 'package:agnts_api/src/model/pull_item.dart';
 import 'package:agnts_api/src/model/review_draft.dart';
+import 'package:agnts_api/src/model/pull_review_ref.dart';
 import 'package:agnts_api/src/model/ticket_state.dart';
 import 'package:agnts_api/src/model/file_change.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
@@ -49,6 +50,8 @@ class PullDetail {
      this.reviewedSha,
 
      this.afterApprove,
+
+     this.reviews,
 
      this.drafts,
   });
@@ -213,7 +216,20 @@ class PullDetail {
 
 
 
-      /// The draft comments of agnts's review of it, when it has a review ticket
+      /// agnts's reviews of it, newest first
+  @JsonKey(
+    
+    name: r'reviews',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<PullReviewRef>? reviews;
+
+
+
+      /// The draft comments of agnts's newest review of it
   @JsonKey(
     
     name: r'drafts',
@@ -243,6 +259,7 @@ class PullDetail {
       other.ticketState == ticketState &&
       other.reviewedSha == reviewedSha &&
       other.afterApprove == afterApprove &&
+      other.reviews == reviews &&
       other.drafts == drafts;
 
     @override
@@ -260,6 +277,7 @@ class PullDetail {
         ticketState.hashCode +
         reviewedSha.hashCode +
         afterApprove.hashCode +
+        reviews.hashCode +
         drafts.hashCode;
 
   factory PullDetail.fromJson(Map<String, dynamic> json) => _$PullDetailFromJson(json);

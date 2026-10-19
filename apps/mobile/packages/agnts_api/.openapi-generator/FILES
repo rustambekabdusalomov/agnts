@@ -200,6 +200,7 @@ doc/PullComment.md
 doc/PullDetail.md
 doc/PullItem.md
 doc/PullRequest.md
+doc/PullReviewRef.md
 doc/PullReviewSettings.md
 doc/PullThread.md
 doc/PullsApi.md
@@ -253,6 +254,8 @@ doc/ResolvePullThreadRequest.md
 doc/Result.md
 doc/RetryTicketRequest.md
 doc/ReviewDraft.md
+doc/ReviewPullList.md
+doc/ReviewPullRow.md
 doc/ReviewRepoPull409Response.md
 doc/ReviewRepoPullRequest.md
 doc/ReviewSync.md
@@ -587,6 +590,7 @@ lib/src/model/pull_comment.dart
 lib/src/model/pull_detail.dart
 lib/src/model/pull_item.dart
 lib/src/model/pull_request.dart
+lib/src/model/pull_review_ref.dart
 lib/src/model/pull_review_settings.dart
 lib/src/model/pull_thread.dart
 lib/src/model/quality_stat.dart
@@ -638,6 +642,8 @@ lib/src/model/resolve_pull_thread_request.dart
 lib/src/model/result.dart
 lib/src/model/retry_ticket_request.dart
 lib/src/model/review_draft.dart
+lib/src/model/review_pull_list.dart
+lib/src/model/review_pull_row.dart
 lib/src/model/review_repo_pull409_response.dart
 lib/src/model/review_repo_pull_request.dart
 lib/src/model/review_sync.dart
@@ -945,6 +951,7 @@ test/pull_comment_test.dart
 test/pull_detail_test.dart
 test/pull_item_test.dart
 test/pull_request_test.dart
+test/pull_review_ref_test.dart
 test/pull_review_settings_test.dart
 test/pull_thread_test.dart
 test/pulls_api_test.dart
@@ -998,6 +1005,8 @@ test/resolve_pull_thread_request_test.dart
 test/result_test.dart
 test/retry_ticket_request_test.dart
 test/review_draft_test.dart
+test/review_pull_list_test.dart
+test/review_pull_row_test.dart
 test/review_repo_pull409_response_test.dart
 test/review_repo_pull_request_test.dart
 test/review_sync_test.dart

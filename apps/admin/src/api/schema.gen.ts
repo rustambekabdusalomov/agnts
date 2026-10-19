@@ -2086,6 +2086,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/reviews/pulls": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The open pull requests of every repository (as pullReviews settings pick them), most recently updated first, each with agnts's newest review of it. Nothing is reviewed: a review starts from the pull request */
+        get: operations["listReviewPulls"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/reviews/sync": {
         parameters: {
             query?: never;
@@ -2095,7 +2112,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Ask the git host for the pull requests waiting for you and queue reviews of the new ones */
+        /** Bring agnts's open reviews up to date with the git host: end those whose pull request was merged or closed. It starts no review */
         post: operations["syncReviews"];
         delete?: never;
         options?: never;
@@ -2770,7 +2787,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Ask agnts to review an open pull request: a review ticket for you, whose comments stay drafts in agnts until you accept and publish them. Approving it finishes the review; it never merges */
+        /** Ask agnts to review an open pull request as it stands now (again, whenever no review runs; an earlier review still waiting for you is replaced): a review ticket whose comments stay drafts in agnts until you accept and publish them. Approving merges it only when it waits for you (assigned or asking for your review); otherwise it finishes the review */
         post: operations["reviewRepoPull"];
         delete?: never;
         options?: never;
@@ -6046,7 +6063,7 @@ export interface components {
         };
         /** @description Reviews of the pull requests waiting for you on GitHub or GitLab */
         PullReviewSettings: {
-            /** @description Sync the open pull requests every few minutes; their reviews are held until someone starts them */
+            /** @description Unused: reviews start from the pull request, and open reviews are kept up to date always */
             enabled: boolean;
             /** @description Also take pull requests whose review is requested from you, not only those assigned to you */
             reviewRequested: boolean;
@@ -6054,7 +6071,7 @@ export interface components {
             all?: boolean;
             /** @description Leave draft pull requests alone until they are ready */
             skipDrafts: boolean;
-            /** @description Review again when the author pushes new commits while agnts's review waits for you */
+            /** @description Unused: reviewing again after new commits is your call, from the pull request */
             rereview: boolean;
             /**
              * @description How an accepted pull request is merged
@@ -6152,7 +6169,9 @@ export interface components {
             reviewedSha?: string;
             /** @enum {string} */
             afterApprove?: "pr" | "main" | "none";
-            /** @description The draft comments of agnts's review of it, when it has a review ticket */
+            /** @description agnts's reviews of it, newest first */
+            reviews?: components["schemas"]["PullReviewRef"][];
+            /** @description The draft comments of agnts's newest review of it */
             drafts?: components["schemas"]["ReviewDraft"][];
         };
         PullComment: {
@@ -6273,15 +6292,41 @@ export interface components {
             /** @description Findings agnts posted before that are gone (answered and resolved) */
             resolved: number;
         };
-        /** @description What a sync of the pull requests waiting for you found */
+        ReviewPullList: {
+            pulls: components["schemas"]["ReviewPullRow"][];
+            /** @description Repositories the git host did not answer for */
+            errors: string[];
+        };
+        /** @description An open pull request on the Reviews page */
+        ReviewPullRow: {
+            /** Format: int64 */
+            repoId: number;
+            repoName: string;
+            /** @enum {string} */
+            provider: "github" | "gitlab";
+            pull: components["schemas"]["PullItem"];
+            review?: components["schemas"]["PullReviewRef"];
+        };
+        /** @description One agnts review of a pull request (a review ticket) */
+        PullReviewRef: {
+            key: string;
+            state: components["schemas"]["TicketState"];
+            /** @description The commit it reviewed, once reviewed */
+            headSha?: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @description What a sync of agnts's open reviews found */
         ReviewSync: {
-            /** @description Repositories asked */
+            /** @description Repositories with an open review */
             repos: number;
-            /** @description Pull requests waiting for you */
+            /** @description Open reviews checked */
             open: number;
-            /** @description New reviews queued */
+            /** @description Always 0; reviews start from the pull request */
             created: number;
-            /** @description Reviews queued again for new commits */
+            /** @description Always 0; reviewing again is your call */
             rereview: number;
             /** @description Reviews ended because the pull request was merged or closed on the git host */
             closed: number;
@@ -10786,6 +10831,28 @@ export interface operations {
             };
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
+        };
+    };
+    listReviewPulls: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewPullList"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
         };
     };
     syncReviews: {

@@ -7,25 +7,25 @@ void main() {
   // TODO add properties to the entity
 
   group(ReviewSync, () {
-    // Repositories asked
+    // Repositories with an open review
     // int repos
     test('to test the property `repos`', () async {
       // TODO
     });
 
-    // Pull requests waiting for you
+    // Open reviews checked
     // int open
     test('to test the property `open`', () async {
       // TODO
     });
 
-    // New reviews queued
+    // Always 0; reviews start from the pull request
     // int created
     test('to test the property `created`', () async {
       // TODO
     });
 
-    // Reviews queued again for new commits
+    // Always 0; reviewing again is your call
     // int rereview
     test('to test the property `rereview`', () async {
       // TODO

@@ -2564,10 +2564,24 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /reviews/pulls:
+    get:
+      operationId: listReviewPulls
+      summary: "The open pull requests of every repository (as pullReviews settings pick them), most recently updated first, each with agnts's newest review of it. Nothing is reviewed: a review starts from the pull request"
+      tags: [reviews]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReviewPullList' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
   /reviews/sync:
     post:
       operationId: syncReviews
-      summary: Ask the git host for the pull requests waiting for you and queue reviews of the new ones
+      summary: "Bring agnts's open reviews up to date with the git host: end those whose pull request was merged or closed. It starts no review"
       tags: [reviews]
       responses:
         '200':
@@ -3356,7 +3370,7 @@ paths:
       - $ref: '#/components/parameters/PullNumber'
     post:
       operationId: reviewRepoPull
-      summary: "Ask agnts to review an open pull request: a review ticket for you, whose comments stay drafts in agnts until you accept and publish them. Approving it finishes the review; it never merges"
+      summary: "Ask agnts to review an open pull request as it stands now (again, whenever no review runs; an earlier review still waiting for you is replaced): a review ticket whose comments stay drafts in agnts until you accept and publish them. Approving merges it only when it waits for you (assigned or asking for your review); otherwise it finishes the review"
       tags: [pulls]
       requestBody:
         required: false
@@ -7321,11 +7335,11 @@ components:
       description: Reviews of the pull requests waiting for you on GitHub or GitLab
       required: [enabled, reviewRequested, skipDrafts, rereview, mergeMethod]
       properties:
-        enabled: { type: boolean, description: 'Sync the open pull requests every few minutes; their reviews are held until someone starts them' }
+        enabled: { type: boolean, description: 'Unused: reviews start from the pull request, and open reviews are kept up to date always' }
         reviewRequested: { type: boolean, description: 'Also take pull requests whose review is requested from you, not only those assigned to you' }
         all: { type: boolean, description: "Take every open pull request in your repositories, yours included, whether or not it waits for you; left out, it stays as it is" }
         skipDrafts: { type: boolean, description: Leave draft pull requests alone until they are ready }
-        rereview: { type: boolean, description: "Review again when the author pushes new commits while agnts's review waits for you" }
+        rereview: { type: boolean, description: "Unused: reviewing again after new commits is your call, from the pull request" }
         mergeMethod: { type: string, enum: [merge, squash, rebase], description: How an accepted pull request is merged }
 
     PullRequest:
@@ -7398,9 +7412,13 @@ components:
         ticketState: { $ref: '#/components/schemas/TicketState' }
         reviewedSha: { type: string, description: 'The commit agnts reviewed, for a review ticket' }
         afterApprove: { type: string, enum: [pr, main, none] }
+        reviews:
+          type: array
+          description: "agnts's reviews of it, newest first"
+          items: { $ref: '#/components/schemas/PullReviewRef' }
         drafts:
           type: array
-          description: "The draft comments of agnts's review of it, when it has a review ticket"
+          description: "The draft comments of agnts's newest review of it"
           items: { $ref: '#/components/schemas/ReviewDraft' }
 
     PullComment:
@@ -7499,15 +7517,49 @@ components:
         still: { type: integer, description: "Findings agnts posted before that are still there (answered in their threads)" }
         resolved: { type: integer, description: "Findings agnts posted before that are gone (answered and resolved)" }
 
+    ReviewPullList:
+      type: object
+      required: [pulls, errors]
+      properties:
+        pulls:
+          type: array
+          items: { $ref: '#/components/schemas/ReviewPullRow' }
+        errors:
+          type: array
+          description: Repositories the git host did not answer for
+          items: { type: string }
+
+    ReviewPullRow:
+      type: object
+      description: An open pull request on the Reviews page
+      required: [repoId, repoName, provider, pull]
+      properties:
+        repoId: { type: integer, format: int64 }
+        repoName: { type: string }
+        provider: { type: string, enum: [github, gitlab] }
+        pull: { $ref: '#/components/schemas/PullItem' }
+        review: { $ref: '#/components/schemas/PullReviewRef' }
+
+    PullReviewRef:
+      type: object
+      description: One agnts review of a pull request (a review ticket)
+      required: [key, state, createdAt, updatedAt]
+      properties:
+        key: { type: string }
+        state: { $ref: '#/components/schemas/TicketState' }
+        headSha: { type: string, description: 'The commit it reviewed, once reviewed' }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
     ReviewSync:
       type: object
-      description: What a sync of the pull requests waiting for you found
+      description: What a sync of agnts's open reviews found
       required: [repos, open, created, rereview, closed, errors]
       properties:
-        repos: { type: integer, description: Repositories asked }
-        open: { type: integer, description: Pull requests waiting for you }
-        created: { type: integer, description: New reviews queued }
-        rereview: { type: integer, description: Reviews queued again for new commits }
+        repos: { type: integer, description: Repositories with an open review }
+        open: { type: integer, description: Open reviews checked }
+        created: { type: integer, description: Always 0; reviews start from the pull request }
+        rereview: { type: integer, description: Always 0; reviewing again is your call }
         closed: { type: integer, description: Reviews ended because the pull request was merged or closed on the git host }
         errors:
           type: array

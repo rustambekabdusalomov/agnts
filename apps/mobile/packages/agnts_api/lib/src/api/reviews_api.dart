@@ -16,6 +16,7 @@ import 'package:agnts_api/src/model/post_review_input.dart';
 import 'package:agnts_api/src/model/publish_review_drafts_request.dart';
 import 'package:agnts_api/src/model/published_review.dart';
 import 'package:agnts_api/src/model/review_draft.dart';
+import 'package:agnts_api/src/model/review_pull_list.dart';
 import 'package:agnts_api/src/model/review_sync.dart';
 import 'package:agnts_api/src/model/reviewer.dart';
 import 'package:agnts_api/src/model/reviewer_note.dart';
@@ -542,6 +543,87 @@ _responseData = rawData == null ? null : deserialize<List<ReviewDraft>, ReviewDr
     );
   }
 
+  /// The open pull requests of every repository (as pullReviews settings pick them), most recently updated first, each with agnts&#39;s newest review of it. Nothing is reviewed: a review starts from the pull request
+  /// 
+  ///
+  /// Parameters:
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [ReviewPullList] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<ReviewPullList>> listReviewPulls({ 
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/reviews/pulls';
+    final _options = Options(
+      method: r'GET',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'cookieAuth',
+            'keyName': 'hiro_session',
+            'where': '',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    ReviewPullList? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<ReviewPullList, ReviewPullList>(rawData, 'ReviewPullList', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<ReviewPullList>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
   /// How each person agnts reviews pull requests for reviews, as it learned from their notes
   /// 
   ///
@@ -935,7 +1017,7 @@ _responseData = rawData == null ? null : deserialize<Reviewer, Reviewer>(rawData
     );
   }
 
-  /// Ask the git host for the pull requests waiting for you and queue reviews of the new ones
+  /// Bring agnts&#39;s open reviews up to date with the git host: end those whose pull request was merged or closed. It starts no review
   /// 
   ///
   /// Parameters:

@@ -2388,7 +2388,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get draftsReviewSub =>
-      'agnts reviews the pull request for you. Its comments stay drafts in agnts until you accept them; only accepted ones go on the pull request. Finishing the review never merges it.';
+      'agnts reviews the pull request as it is now. Its comments stay drafts in agnts until you accept them; only accepted ones go on the pull request. Approving the review merges it only when it is assigned to you or asks for your review.';
 
   @override
   String get draftsReviewBtn => 'Start the review';
@@ -8845,31 +8845,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reviewsLede =>
-      'agnts lists the open pull requests of your repositories on GitHub and GitLab and reviews one when you press Review. Merge from here when the review looks good, or dismiss it and review on the git host yourself.';
-
-  @override
-  String get reviewsSync => 'Sync now';
+      'agnts lists the open pull requests of your repositories on GitHub and GitLab. Open one and press Review to have agnts review it as it is now; review it again whenever you want, after new commits say. Its reviews stay on the pull request.';
 
   @override
   String get reviewsSyncing => 'Syncing…';
-
-  @override
-  String reviewsSynced(String open, String repos, String created, String rereview, String closed) {
-    return '$open waiting for you in $repos repositories · $created new · $rereview reviewed again · $closed ended';
-  }
 
   @override
   String get reviewsSyncErrors => 'Some could not be read:';
 
   @override
   String get reviewsSettingsTitle => 'How agnts picks them up';
-
-  @override
-  String get reviewsEnabled => 'Sync automatically';
-
-  @override
-  String get reviewsEnabledHelp =>
-      'Check the git host every 5 minutes for new pull requests. Their reviews still wait for you to press Review. When off, only Sync now does it.';
 
   @override
   String get reviewsReviewRequested => 'Review requests too';
@@ -8891,12 +8876,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reviewsSkipDraftsHelp => 'Leave draft pull requests alone until they are ready.';
 
   @override
-  String get reviewsRereview => 'Review new commits';
-
-  @override
-  String get reviewsRereviewHelp => 'Review again when the author pushes while the review waits for you.';
-
-  @override
   String get reviewsMergeMethod => 'Merge method';
 
   @override
@@ -8912,12 +8891,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reviewsMerge_rebase => 'Rebase';
 
   @override
-  String get reviewsNotStarted => 'Not started';
-
-  @override
-  String get reviewsStart => 'Review';
-
-  @override
   String get reviewsWaiting => 'Waiting for you';
 
   @override
@@ -8930,8 +8903,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reviewsEmpty => 'Nothing here.';
 
   @override
-  String get reviewsEmptyAll =>
-      'No pull requests to review yet. Press Sync now to fetch the open ones; each review starts when you press Review.';
+  String get reviewsEmptyAll => 'No open pull requests. Check which ones are taken in the settings, then press Refresh.';
 
   @override
   String get reviewsWhy_assigned => 'assigned';
@@ -9020,9 +8992,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String reviewsNewCommits(String sha) {
-    return 'New commits since agnts reviewed $sha: it reviews them again';
-  }
+  String get reviewsNewCommits => 'New commits since';
 
   @override
   String reviewsPostBtn(String host) {
@@ -9123,6 +9093,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reviewsReviewTitle => 'agnts\'s review of the pull request';
+
+  @override
+  String get reviewsRefresh => 'Refresh';
+
+  @override
+  String get reviewsOpenPulls => 'Open pull requests';
+
+  @override
+  String get reviewsNotReviewed => 'Not reviewed';
+
+  @override
+  String get reviewsHistory => 'Reviews';
+
+  @override
+  String get reviewsHistoryEmpty => 'Not reviewed yet. Press Review with agnts to start one.';
+
+  @override
+  String reviewsReviewedAt(String sha) {
+    return 'at $sha';
+  }
 
   @override
   String get rulesTitle => 'Rules';

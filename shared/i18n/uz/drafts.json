@@ -48,7 +48,7 @@
     "reviewWithBtn": "agnts bilan ko'rib chiqish",
     "reviewAgainBtn": "agnts bilan qayta ko'rib chiqish",
     "reviewTitle": "#{number}ni agnts bilan ko'rib chiqish",
-    "reviewSub": "agnts pull request'ni siz uchun ko'rib chiqadi. Uning izohlari siz qabul qilmaguningizcha agnts'da qoralama bo'lib qoladi; pull request'ga faqat qabul qilinganlari tushadi. Ko'rib chiqishni tugatish uni hech qachon merge qilmaydi.",
+    "reviewSub": "agnts pull request'ni hozirgi holatida ko'rib chiqadi. Uning izohlari siz qabul qilmaguningizcha agnts'da qoralama bo'lib qoladi; pull request'ga faqat qabul qilinganlari tushadi. Tekshiruvni tasdiqlash uni faqat sizga biriktirilgan yoki sizdan tekshiruv so'ralgan bo'lsa merge qiladi.",
     "reviewBtn": "Ko'rib chiqishni boshlash",
     "focusLabel": "Alohida e'tibor beradigan joy bormi? (ixtiyoriy)",
     "focusHint": "masalan, migratsiya va qayta urinish mantiqi",

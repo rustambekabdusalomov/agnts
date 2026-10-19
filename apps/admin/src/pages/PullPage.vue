@@ -6,6 +6,7 @@ import { useRoute } from 'vue-router'
 import { api, unwrap } from '../api/client'
 import type { ReviewDraft } from '../api/types'
 import PageHeader from '../components/PageHeader.vue'
+import StateBadge from '../components/StateBadge.vue'
 import CommentBody from '../components/pulls/CommentBody.vue'
 import PullConversation from '../components/pulls/PullConversation.vue'
 import ReviewDraftsPanel from '../components/pulls/ReviewDraftsPanel.vue'
@@ -19,9 +20,10 @@ import { useWorkspace } from '../stores/workspace'
 
 // One pull request (GitLab merge request) as it stands on the git host:
 // its description, conversation and diff, with comments made here going
-// out as the git host token's user. "Review with agnts" asks for a review
-// of it; the review's comments stay drafts here until accepted and
-// published.
+// out as the git host token's user. "Review with agnts" starts a new review
+// of it as it stands now, whenever no review runs (after new commits, say);
+// the reviews so far are listed, newest first, and the newest one's
+// comments stay drafts here until accepted and published.
 const { t, locale } = useI18n()
 const route = useRoute()
 const workspace = useWorkspace()
@@ -29,25 +31,27 @@ const repoId = computed(() => Number(route.params.id))
 const number = computed(() => Number(route.params.number))
 const asking = ref(false)
 
+const RUNNING = ['new', 'analyzing', 'coding', 'testing', 'pushing']
 const pull = useQuery({
   queryKey: computed(() => pullKey(repoId.value, number.value, 'detail')),
   queryFn: () => unwrap(api.GET('/repos/{id}/pulls/{number}', { params: { path: { id: repoId.value, number: number.value } } })),
   // Faster while agnts is reviewing, so its drafts show up when ready.
-  refetchInterval: (q): number => livePoll(['new', 'analyzing', 'coding'].includes(q.state.data?.ticketState ?? '') ? 10_000 : 60_000),
+  refetchInterval: (q): number => livePoll(RUNNING.includes(q.state.data?.reviews?.[0]?.state ?? '') ? 10_000 : 60_000),
 })
 const d = computed(() => pull.data.value)
 const TONE: Record<string, string> = { open: 'b-info', merged: 'b-ok', closed: 'b-gray' }
 const errMsg = (e: unknown) => (e instanceof Error && e.message ? e.message : t('common.error'))
 const host = computed(() => hostName(d.value?.provider))
 
-// A review can be asked for on an open pull request that is not agnts's
-// own, when it has none in progress.
-const TERMINAL = ['done', 'rejected']
-const reviewEnded = computed(() => !d.value?.ticketKey || TERMINAL.includes(d.value.ticketState ?? ''))
-const canAsk = computed(() => workspace.canEdit && d.value?.pull.state === 'open' && !d.value.own && reviewEnded.value)
-const reviewing = computed(() => !d.value?.own && ['new', 'analyzing', 'coding'].includes(d.value?.ticketState ?? ''))
-const drafts = computed<ReviewDraft[] | undefined>(() => (d.value?.own ? undefined : d.value?.drafts ?? undefined))
-const locked = computed(() => d.value?.pull.state !== 'open' || d.value?.ticketState === 'rejected')
+// Its reviews, newest first. A new one can be asked for on an open pull
+// request (agnts's own included) whenever none runs.
+const reviews = computed(() => d.value?.reviews ?? [])
+const latest = computed(() => reviews.value[0])
+const reviewing = computed(() => RUNNING.includes(latest.value?.state ?? ''))
+const canAsk = computed(() => workspace.canEdit && d.value?.pull.state === 'open' && !reviewing.value)
+const drafts = computed<ReviewDraft[] | undefined>(() => (latest.value ? d.value?.drafts ?? undefined : undefined))
+const locked = computed(() => d.value?.pull.state !== 'open' || latest.value?.state === 'rejected')
+const short = (sha?: string) => (sha ?? '').slice(0, 7)
 
 // The drafts the diff cannot show under a line: the summary, general
 // comments, and those on a line outside the diff or on another commit.
@@ -78,10 +82,10 @@ const listed = computed(() => {
       </template>
       <div class="actions" style="margin: 0">
         <button v-if="canAsk" class="btn btn-p" type="button" @click="asking = true">
-          {{ d.ticketKey ? t('drafts.reviewAgainBtn') : t('drafts.reviewWithBtn') }}
+          {{ latest ? t('drafts.reviewAgainBtn') : t('drafts.reviewWithBtn') }}
         </button>
-        <RouterLink v-if="d.ticketKey" class="btn" :to="{ name: 'ticket', params: { key: d.ticketKey } }">
-          {{ d.own ? t('pulls.ownTicket', { key: d.ticketKey }) : t('pulls.reviewTicket', { key: d.ticketKey }) }}
+        <RouterLink v-if="d.own && d.ticketKey" class="btn" :to="{ name: 'ticket', params: { key: d.ticketKey } }">
+          {{ t('pulls.ownTicket', { key: d.ticketKey }) }}
         </RouterLink>
         <a class="btn" :href="d.pull.url" target="_blank" rel="noopener">{{ t('reviews.openOn', { host }) }}</a>
       </div>
@@ -93,13 +97,33 @@ const listed = computed(() => {
     </section>
     <div v-if="d.filesError" class="help warn"><HiIcon name="info" /><p>{{ t('pulls.filesError', { error: d.filesError }) }}</p></div>
 
+    <section class="card">
+      <div class="ch"><h2>{{ t('reviews.history') }} <span v-if="reviews.length" class="tk-n">{{ reviews.length }}</span></h2></div>
+      <p v-if="!reviews.length" class="hint" style="margin: 0">{{ t('reviews.historyEmpty') }}</p>
+      <div v-else class="tw">
+        <table class="tbl">
+          <tbody>
+            <tr v-for="(r, i) in reviews" :key="r.key">
+              <td><RouterLink :to="{ name: 'ticket', params: { key: r.key } }" class="mono">{{ r.key }}</RouterLink></td>
+              <td>
+                <StateBadge :state="r.state" kind="review" />
+                <span v-if="i === 0 && r.headSha && r.headSha !== d.pull.headSha" class="badge b-warn">{{ t('reviews.newCommits') }}</span>
+              </td>
+              <td class="muted mono">{{ r.headSha ? t('reviews.reviewedAt', { sha: short(r.headSha) }) : '' }}</td>
+              <td class="muted">{{ ago(r.createdAt, locale) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
     <div v-if="reviewing" class="help info pp-busy">
       <span class="spin" aria-hidden="true" />
-      <p>{{ t('drafts.reviewingNow', { key: d.ticketKey ?? '' }) }}</p>
+      <p>{{ t('drafts.reviewingNow', { key: latest?.key ?? '' }) }}</p>
     </div>
-    <section v-if="d.ticketKey && drafts?.length" class="card">
+    <section v-if="latest && drafts?.length" class="card">
       <ReviewDraftsPanel
-        :ticket-key="d.ticketKey"
+        :ticket-key="latest.key"
         :drafts="drafts"
         :listed="listed"
         :host="host"
@@ -112,7 +136,7 @@ const listed = computed(() => {
 
     <section class="card">
       <PullConversation
-        :key="d.ticketKey ?? 'none'"
+        :key="latest?.key ?? 'none'"
         :repo-id="repoId"
         :number="number"
         :provider="d.provider"
@@ -120,7 +144,7 @@ const listed = computed(() => {
         :head-sha="d.pull.headSha"
         :files="d.files"
         :can-edit="workspace.canEdit"
-        :ticket-key="d.ticketKey"
+        :ticket-key="latest?.key"
         :drafts="drafts"
         :drafts-locked="locked"
       />

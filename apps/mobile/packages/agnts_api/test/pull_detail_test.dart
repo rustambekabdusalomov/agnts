@@ -76,7 +76,13 @@ void main() {
       // TODO
     });
 
-    // The draft comments of agnts's review of it, when it has a review ticket
+    // agnts's reviews of it, newest first
+    // List<PullReviewRef> reviews
+    test('to test the property `reviews`', () async {
+      // TODO
+    });
+
+    // The draft comments of agnts's newest review of it
     // List<ReviewDraft> drafts
     test('to test the property `drafts`', () async {
       // TODO

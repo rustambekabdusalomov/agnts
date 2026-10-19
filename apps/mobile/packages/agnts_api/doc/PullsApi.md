@@ -17,7 +17,7 @@ Method | HTTP request | Description
 [**listRepoPulls**](PullsApi.md#listrepopulls) | **GET** /repos/{id}/pulls | The repository&#39;s pull requests (GitLab merge requests), most recently updated first, 30 per page; a shorter page is the last
 [**replyPullThread**](PullsApi.md#replypullthread) | **POST** /repos/{id}/pulls/{number}/replies | Answer in a thread of a pull request
 [**resolvePullThread**](PullsApi.md#resolvepullthread) | **POST** /repos/{id}/pulls/{number}/resolve | Resolve or reopen a thread on a diff line
-[**reviewRepoPull**](PullsApi.md#reviewrepopull) | **POST** /repos/{id}/pulls/{number}/review | Ask agnts to review an open pull request: a review ticket for you, whose comments stay drafts in agnts until you accept and publish them. Approving it finishes the review; it never merges
+[**reviewRepoPull**](PullsApi.md#reviewrepopull) | **POST** /repos/{id}/pulls/{number}/review | Ask agnts to review an open pull request as it stands now (again, whenever no review runs; an earlier review still waiting for you is replaced): a review ticket whose comments stay drafts in agnts until you accept and publish them. Approving merges it only when it waits for you (assigned or asking for your review); otherwise it finishes the review
 
 
 # **addPullComment**
@@ -409,7 +409,7 @@ void (empty response body)
 # **reviewRepoPull**
 > Ticket reviewRepoPull(id, number, reviewRepoPullRequest)
 
-Ask agnts to review an open pull request: a review ticket for you, whose comments stay drafts in agnts until you accept and publish them. Approving it finishes the review; it never merges
+Ask agnts to review an open pull request as it stands now (again, whenever no review runs; an earlier review still waiting for you is replaced): a review ticket whose comments stay drafts in agnts until you accept and publish them. Approving merges it only when it waits for you (assigned or asking for your review); otherwise it finishes the review
 
 ### Example
 ```dart

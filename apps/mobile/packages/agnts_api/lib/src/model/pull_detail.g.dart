@@ -33,6 +33,8 @@ abstract class _$PullDetailCWProxy {
 
   PullDetail afterApprove(PullDetailAfterApproveEnum? afterApprove);
 
+  PullDetail reviews(List<PullReviewRef>? reviews);
+
   PullDetail drafts(List<ReviewDraft>? drafts);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `PullDetail(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -55,6 +57,7 @@ abstract class _$PullDetailCWProxy {
     TicketState? ticketState,
     String? reviewedSha,
     PullDetailAfterApproveEnum? afterApprove,
+    List<PullReviewRef>? reviews,
     List<ReviewDraft>? drafts,
   });
 }
@@ -108,6 +111,9 @@ class _$PullDetailCWProxyImpl implements _$PullDetailCWProxy {
       this(afterApprove: afterApprove);
 
   @override
+  PullDetail reviews(List<PullReviewRef>? reviews) => this(reviews: reviews);
+
+  @override
   PullDetail drafts(List<ReviewDraft>? drafts) => this(drafts: drafts);
 
   @override
@@ -131,6 +137,7 @@ class _$PullDetailCWProxyImpl implements _$PullDetailCWProxy {
     Object? ticketState = const $CopyWithPlaceholder(),
     Object? reviewedSha = const $CopyWithPlaceholder(),
     Object? afterApprove = const $CopyWithPlaceholder(),
+    Object? reviews = const $CopyWithPlaceholder(),
     Object? drafts = const $CopyWithPlaceholder(),
   }) {
     return PullDetail(
@@ -186,6 +193,10 @@ class _$PullDetailCWProxyImpl implements _$PullDetailCWProxy {
           ? _value.afterApprove
           // ignore: cast_nullable_to_non_nullable
           : afterApprove as PullDetailAfterApproveEnum?,
+      reviews: reviews == const $CopyWithPlaceholder()
+          ? _value.reviews
+          // ignore: cast_nullable_to_non_nullable
+          : reviews as List<PullReviewRef>?,
       drafts: drafts == const $CopyWithPlaceholder()
           ? _value.drafts
           // ignore: cast_nullable_to_non_nullable
@@ -248,6 +259,12 @@ PullDetail _$PullDetailFromJson(Map<String, dynamic> json) =>
           'afterApprove',
           (v) => $enumDecodeNullable(_$PullDetailAfterApproveEnumEnumMap, v),
         ),
+        reviews: $checkedConvert(
+          'reviews',
+          (v) => (v as List<dynamic>?)
+              ?.map((e) => PullReviewRef.fromJson(e as Map<String, dynamic>))
+              .toList(),
+        ),
         drafts: $checkedConvert(
           'drafts',
           (v) => (v as List<dynamic>?)
@@ -274,6 +291,7 @@ Map<String, dynamic> _$PullDetailToJson(
   'ticketState': ?_$TicketStateEnumMap[instance.ticketState],
   'reviewedSha': ?instance.reviewedSha,
   'afterApprove': ?_$PullDetailAfterApproveEnumEnumMap[instance.afterApprove],
+  'reviews': ?instance.reviews?.map((e) => e.toJson()).toList(),
   'drafts': ?instance.drafts?.map((e) => e.toJson()).toList(),
 };
 

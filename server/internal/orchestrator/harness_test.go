@@ -118,10 +118,7 @@ func TestPullRequestChangingAgentFilesGetsASecurityFinding(t *testing.T) {
 		PullReviews: h.store,
 	}, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	host.set(pull(9, "bbb2222"))
-	if _, err := h.o.SyncReviews(h.ctx, domain.OriginWeb); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := h.o.Start(h.ctx, "API-PR9", domain.OriginWeb); err != nil {
+	if _, err := h.o.ReviewPull(h.ctx, 1, 9, orchestrator.ReviewPullOptions{}, domain.OriginWeb); err != nil {
 		t.Fatal(err)
 	}
 	h.step() // fetch

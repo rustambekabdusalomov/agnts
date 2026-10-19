@@ -2478,7 +2478,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get draftsReviewSub =>
-      'agnts проверит пул-реквест за вас. Его комментарии остаются черновиками в agnts, пока вы их не примете; в пул-реквест попадают только принятые. Завершение ревью никогда его не мёржит.';
+      'agnts проверит пул-реквест в текущем виде. Его комментарии остаются черновиками в agnts, пока вы их не примете; в пул-реквест попадают только принятые. Одобрение ревью мёржит его, только если он назначен вам или у вас запрошено ревью.';
 
   @override
   String get draftsReviewBtn => 'Начать ревью';
@@ -9274,31 +9274,16 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get reviewsLede =>
-      'agnts показывает открытые пул-реквесты ваших репозиториев в GitHub и GitLab и проверяет пул-реквест, когда вы нажмёте «Проверить». Если ревью в порядке, слейте отсюда, или отклоните его и проверьте сами на git-хостинге.';
-
-  @override
-  String get reviewsSync => 'Синхронизировать';
+      'agnts показывает открытые пул-реквесты ваших репозиториев в GitHub и GitLab. Откройте нужный и нажмите «Ревью», чтобы agnts проверил его в текущем виде; проверяйте снова когда захотите, например после новых коммитов. Его ревью остаются в пул-реквесте.';
 
   @override
   String get reviewsSyncing => 'Синхронизация…';
-
-  @override
-  String reviewsSynced(String open, String repos, String created, String rereview, String closed) {
-    return '$open ждут вас в $repos репозиториях · $created новых · $rereview проверены заново · $closed завершены';
-  }
 
   @override
   String get reviewsSyncErrors => 'Не удалось прочитать:';
 
   @override
   String get reviewsSettingsTitle => 'Как agnts их берёт';
-
-  @override
-  String get reviewsEnabled => 'Синхронизировать автоматически';
-
-  @override
-  String get reviewsEnabledHelp =>
-      'Каждые 5 минут смотреть git-хостинг на новые пул-реквесты. Их ревью всё равно ждёт, пока вы нажмёте «Проверить». Когда выключено, только по кнопке «Синхронизировать».';
 
   @override
   String get reviewsReviewRequested => 'И запросы на ревью';
@@ -9320,12 +9305,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get reviewsSkipDraftsHelp => 'Не трогать черновики, пока они не готовы.';
 
   @override
-  String get reviewsRereview => 'Проверять новые коммиты';
-
-  @override
-  String get reviewsRereviewHelp => 'Проверять заново, если автор запушил, пока ревью ждёт вас.';
-
-  @override
   String get reviewsMergeMethod => 'Способ слияния';
 
   @override
@@ -9341,12 +9320,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get reviewsMerge_rebase => 'Rebase';
 
   @override
-  String get reviewsNotStarted => 'Не начаты';
-
-  @override
-  String get reviewsStart => 'Проверить';
-
-  @override
   String get reviewsWaiting => 'Ждут вас';
 
   @override
@@ -9359,8 +9332,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get reviewsEmpty => 'Здесь пусто.';
 
   @override
-  String get reviewsEmptyAll =>
-      'Пул-реквестов для ревью пока нет. Нажмите «Синхронизировать», чтобы получить открытые; ревью каждого начинается, когда вы нажмёте «Проверить».';
+  String get reviewsEmptyAll => 'Открытых пул-реквестов нет. Проверьте в настройках, какие берутся, и нажмите «Обновить».';
 
   @override
   String get reviewsWhy_assigned => 'назначен';
@@ -9456,9 +9428,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String reviewsNewCommits(String sha) {
-    return 'Новые коммиты после ревью agnts ($sha): он проверит их снова';
-  }
+  String get reviewsNewCommits => 'Есть новые коммиты';
 
   @override
   String reviewsPostBtn(String host) {
@@ -9559,6 +9529,26 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get reviewsReviewTitle => 'Ревью пул-реквеста от agnts';
+
+  @override
+  String get reviewsRefresh => 'Обновить';
+
+  @override
+  String get reviewsOpenPulls => 'Открытые пул-реквесты';
+
+  @override
+  String get reviewsNotReviewed => 'Без ревью';
+
+  @override
+  String get reviewsHistory => 'Ревью';
+
+  @override
+  String get reviewsHistoryEmpty => 'Ревью ещё не было. Нажмите «Ревью с agnts», чтобы начать.';
+
+  @override
+  String reviewsReviewedAt(String sha) {
+    return 'на $sha';
+  }
 
   @override
   String get rulesTitle => 'Правила';

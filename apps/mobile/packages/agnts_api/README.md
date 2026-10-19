@@ -185,7 +185,7 @@ Class | Method | HTTP request | Description
 [*PullsApi*](doc/PullsApi.md) | [**listRepoPulls**](doc/PullsApi.md#listrepopulls) | **GET** /repos/{id}/pulls | The repository&#39;s pull requests (GitLab merge requests), most recently updated first, 30 per page; a shorter page is the last
 [*PullsApi*](doc/PullsApi.md) | [**replyPullThread**](doc/PullsApi.md#replypullthread) | **POST** /repos/{id}/pulls/{number}/replies | Answer in a thread of a pull request
 [*PullsApi*](doc/PullsApi.md) | [**resolvePullThread**](doc/PullsApi.md#resolvepullthread) | **POST** /repos/{id}/pulls/{number}/resolve | Resolve or reopen a thread on a diff line
-[*PullsApi*](doc/PullsApi.md) | [**reviewRepoPull**](doc/PullsApi.md#reviewrepopull) | **POST** /repos/{id}/pulls/{number}/review | Ask agnts to review an open pull request: a review ticket for you, whose comments stay drafts in agnts until you accept and publish them. Approving it finishes the review; it never merges
+[*PullsApi*](doc/PullsApi.md) | [**reviewRepoPull**](doc/PullsApi.md#reviewrepopull) | **POST** /repos/{id}/pulls/{number}/review | Ask agnts to review an open pull request as it stands now (again, whenever no review runs; an earlier review still waiting for you is replaced): a review ticket whose comments stay drafts in agnts until you accept and publish them. Approving merges it only when it waits for you (assigned or asking for your review); otherwise it finishes the review
 [*ReposApi*](doc/ReposApi.md) | [**approveRepoBrief**](doc/ReposApi.md#approverepobrief) | **POST** /repos/{id}/brief/approve | Make the draft the brief that runs read
 [*ReposApi*](doc/ReposApi.md) | [**archiveRepo**](doc/ReposApi.md#archiverepo) | **POST** /repos/{id}/archive | Archive the repository; it keeps its history but takes no new tickets or tasks
 [*ReposApi*](doc/ReposApi.md) | [**createRepo**](doc/ReposApi.md#createrepo) | **POST** /repos | 
@@ -220,11 +220,12 @@ Class | Method | HTTP request | Description
 [*ReviewsApi*](doc/ReviewsApi.md) | [**deleteReviewDraft**](doc/ReviewsApi.md#deletereviewdraft) | **DELETE** /tickets/{key}/drafts/{draftId} | Delete your own draft comment (agnts&#39;s drafts are dismissed instead)
 [*ReviewsApi*](doc/ReviewsApi.md) | [**deleteReviewerNote**](doc/ReviewsApi.md#deletereviewernote) | **DELETE** /reviews/notes/{id} | Forget a note (one already folded into a profile stays there until the profile is edited)
 [*ReviewsApi*](doc/ReviewsApi.md) | [**listReviewDrafts**](doc/ReviewsApi.md#listreviewdrafts) | **GET** /tickets/{key}/drafts | The draft comments of a pull request review: agnts&#39;s summary and findings, and people&#39;s own comments, with what was decided about each
+[*ReviewsApi*](doc/ReviewsApi.md) | [**listReviewPulls**](doc/ReviewsApi.md#listreviewpulls) | **GET** /reviews/pulls | The open pull requests of every repository (as pullReviews settings pick them), most recently updated first, each with agnts&#39;s newest review of it. Nothing is reviewed: a review starts from the pull request
 [*ReviewsApi*](doc/ReviewsApi.md) | [**listReviewers**](doc/ReviewsApi.md#listreviewers) | **GET** /reviews/reviewers | How each person agnts reviews pull requests for reviews, as it learned from their notes
 [*ReviewsApi*](doc/ReviewsApi.md) | [**postPullReview**](doc/ReviewsApi.md#postpullreview) | **POST** /tickets/{key}/post-review | Post agnts&#39;s latest review of a pull request on it: accepts the drafts of the summary (with the findings not on a changed line) and of the chosen findings, then publishes every accepted draft (see publishReviewDrafts). Kept for older clients
 [*ReviewsApi*](doc/ReviewsApi.md) | [**publishReviewDrafts**](doc/ReviewsApi.md#publishreviewdrafts) | **POST** /tickets/{key}/drafts/publish | Publish the accepted drafts on the pull request as one review, as the git host token&#39;s user: comments on their lines, the summary (edited in place when agnts posted one before) with the accepted findings not on a changed line. Also answers in the threads of findings agnts posted before that are still there, and resolves the ones that are gone. Drafts not accepted stay in agnts
 [*ReviewsApi*](doc/ReviewsApi.md) | [**saveReviewerProfile**](doc/ReviewsApi.md#savereviewerprofile) | **PUT** /reviews/reviewers/{login} | Replace a reviewer profile with your text; empty text clears it
-[*ReviewsApi*](doc/ReviewsApi.md) | [**syncReviews**](doc/ReviewsApi.md#syncreviews) | **POST** /reviews/sync | Ask the git host for the pull requests waiting for you and queue reviews of the new ones
+[*ReviewsApi*](doc/ReviewsApi.md) | [**syncReviews**](doc/ReviewsApi.md#syncreviews) | **POST** /reviews/sync | Bring agnts&#39;s open reviews up to date with the git host: end those whose pull request was merged or closed. It starts no review
 [*ReviewsApi*](doc/ReviewsApi.md) | [**updateReviewDraft**](doc/ReviewsApi.md#updatereviewdraft) | **PATCH** /tickets/{key}/drafts/{draftId} | Accept, dismiss or reopen a draft, or rewrite its text before it is published
 [*RulesApi*](doc/RulesApi.md) | [**acceptRule**](doc/RulesApi.md#acceptrule) | **POST** /rules/{id}/accept | Apply a rule as written, skipping its open questions or a failed review
 [*RulesApi*](doc/RulesApi.md) | [**answerRule**](doc/RulesApi.md#answerrule) | **PUT** /rules/{id}/answers | Answer every open question of a rule; Claude then reviews it again
@@ -501,6 +502,7 @@ Class | Method | HTTP request | Description
  - [PullDetail](doc/PullDetail.md)
  - [PullItem](doc/PullItem.md)
  - [PullRequest](doc/PullRequest.md)
+ - [PullReviewRef](doc/PullReviewRef.md)
  - [PullReviewSettings](doc/PullReviewSettings.md)
  - [PullThread](doc/PullThread.md)
  - [QualityStat](doc/QualityStat.md)
@@ -552,6 +554,8 @@ Class | Method | HTTP request | Description
  - [Result](doc/Result.md)
  - [RetryTicketRequest](doc/RetryTicketRequest.md)
  - [ReviewDraft](doc/ReviewDraft.md)
+ - [ReviewPullList](doc/ReviewPullList.md)
+ - [ReviewPullRow](doc/ReviewPullRow.md)
  - [ReviewRepoPull409Response](doc/ReviewRepoPull409Response.md)
  - [ReviewRepoPullRequest](doc/ReviewRepoPullRequest.md)
  - [ReviewSync](doc/ReviewSync.md)

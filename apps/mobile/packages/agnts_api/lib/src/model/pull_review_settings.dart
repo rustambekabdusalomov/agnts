@@ -33,7 +33,7 @@ class PullReviewSettings {
     required  this.mergeMethod,
   });
 
-      /// Sync the pull requests waiting for you every few minutes and review the new ones
+      /// Unused: reviews start from the pull request, and open reviews are kept up to date always
   @JsonKey(
     
     name: r'enabled',
@@ -85,7 +85,7 @@ class PullReviewSettings {
 
 
 
-      /// Review again when the author pushes new commits while agnts's review waits for you
+      /// Unused: reviewing again after new commits is your call, from the pull request
   @JsonKey(
     
     name: r'rereview',
