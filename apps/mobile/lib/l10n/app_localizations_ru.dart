@@ -7967,7 +7967,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get pullsSet_attributionHelp =>
-      'Комментарии из agnts уходят от имени владельца токена git-хостинга; под каждым будет «via agnts · <вы>».';
+      'Комментарии из agnts уходят от имени владельца токена git-хостинга; под каждым будет «via agnts · ваше имя».';
 
   @override
   String get pullsSet_learnFromComments => 'Учиться на ваших комментариях';
@@ -9274,7 +9274,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get reviewsLede =>
-      'agnts проверяет пул-реквесты, назначенные вам в GitHub и GitLab. Если ревью в порядке, слейте отсюда, или отклоните его и проверьте сами на git-хостинге.';
+      'agnts показывает открытые пул-реквесты ваших репозиториев в GitHub и GitLab и проверяет пул-реквест, когда вы нажмёте «Проверить». Если ревью в порядке, слейте отсюда, или отклоните его и проверьте сами на git-хостинге.';
 
   @override
   String get reviewsSync => 'Синхронизировать';
@@ -9294,17 +9294,24 @@ class AppLocalizationsRu extends AppLocalizations {
   String get reviewsSettingsTitle => 'Как agnts их берёт';
 
   @override
-  String get reviewsEnabled => 'Проверять автоматически';
+  String get reviewsEnabled => 'Синхронизировать автоматически';
 
   @override
   String get reviewsEnabledHelp =>
-      'Каждые 5 минут смотреть git-хостинг и проверять новые пул-реквесты. Когда выключено, только по кнопке «Синхронизировать».';
+      'Каждые 5 минут смотреть git-хостинг на новые пул-реквесты. Их ревью всё равно ждёт, пока вы нажмёте «Проверить». Когда выключено, только по кнопке «Синхронизировать».';
 
   @override
   String get reviewsReviewRequested => 'И запросы на ревью';
 
   @override
   String get reviewsReviewRequestedHelp => 'Брать также пул-реквесты, где у вас запрошено ревью, а не только назначенные вам.';
+
+  @override
+  String get reviewsAll => 'Все открытые пул-реквесты';
+
+  @override
+  String get reviewsAllHelp =>
+      'Брать все открытые пул-реквесты в ваших репозиториях, включая ваши собственные, а не только назначенные вам или с запросом ревью. Одобрение такого пул-реквеста не сливает его.';
 
   @override
   String get reviewsSkipDrafts => 'Пропускать черновики';
@@ -9334,6 +9341,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get reviewsMerge_rebase => 'Rebase';
 
   @override
+  String get reviewsNotStarted => 'Не начаты';
+
+  @override
+  String get reviewsStart => 'Проверить';
+
+  @override
   String get reviewsWaiting => 'Ждут вас';
 
   @override
@@ -9346,13 +9359,20 @@ class AppLocalizationsRu extends AppLocalizations {
   String get reviewsEmpty => 'Здесь пусто.';
 
   @override
-  String get reviewsEmptyAll => 'Пул-реквестов для ревью пока нет. Назначьте себе один в GitHub или GitLab и нажмите «Синхронизировать».';
+  String get reviewsEmptyAll =>
+      'Пул-реквестов для ревью пока нет. Нажмите «Синхронизировать», чтобы получить открытые; ревью каждого начинается, когда вы нажмёте «Проверить».';
 
   @override
   String get reviewsWhy_assigned => 'назначен';
 
   @override
   String get reviewsWhy_review_requested => 'запрошено ревью';
+
+  @override
+  String get reviewsWhy_open => 'открыт';
+
+  @override
+  String get reviewsWhy_own => 'ваш';
 
   @override
   String get reviewsWhy_manual => 'запрошено в agnts';

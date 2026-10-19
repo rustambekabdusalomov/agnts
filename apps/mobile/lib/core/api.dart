@@ -43,6 +43,15 @@ AgntsApi requireApi(Ref ref) {
 }
 
 /// A short message for a failed call: the server's own message when it sent one.
+/// How providers retry a failed load. A server that answered (a 4xx or
+/// 5xx, such as the git host being unreachable) answers the same again, so
+/// the error shows at once; Riverpod's default retries it for about 40
+/// seconds behind a spinner. Only network failures are tried again.
+Duration? apiRetry(int retryCount, Object error) {
+  if (error is DioException && error.response != null) return null;
+  return ProviderContainer.defaultRetry(retryCount, error, maxRetries: 4);
+}
+
 String errorMessage(Object e, String fallback) {
   if (e is DioException) {
     final data = e.response?.data;

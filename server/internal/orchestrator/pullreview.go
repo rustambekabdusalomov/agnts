@@ -51,8 +51,8 @@ type PullReviews interface {
 type ReviewHost interface {
 	// ReviewQueue returns repo's open pull requests assigned to the token's
 	// user and, when requested is set, those whose review is requested
-	// from them.
-	ReviewQueue(ctx context.Context, repo domain.Repository, requested bool) ([]domain.PullRequest, error)
+	// from them; with all, every open pull request, theirs included.
+	ReviewQueue(ctx context.Context, repo domain.Repository, requested, all bool) ([]domain.PullRequest, error)
 	// PullRequest returns one pull request as it stands now.
 	PullRequest(ctx context.Context, repo domain.Repository, number int) (domain.PullRequest, error)
 	// MergePR merges a pull request whose head is sha with method (merge,
@@ -153,7 +153,7 @@ func (o *Orchestrator) SyncReviews(ctx context.Context, origin domain.Origin) (R
 		if repo.ArchivedAt != nil {
 			continue
 		}
-		prs, err := rh.ReviewQueue(ctx, repo, s.PullReviews.ReviewRequested)
+		prs, err := rh.ReviewQueue(ctx, repo, s.PullReviews.ReviewRequested, s.PullReviews.All)
 		if err != nil {
 			fail(repo.Name + ": " + err.Error())
 			continue
@@ -204,12 +204,19 @@ func (o *Orchestrator) SyncReviews(ctx context.Context, origin domain.Origin) (R
 }
 
 // syncPull records one pull request waiting for review: a new review
-// ticket, or the latest state of the known one. It reports whether a
+// ticket, held until someone starts it, or the latest state of the known
+// one. It reports whether a
 // ticket was created and whether a review was queued again.
 func (o *Orchestrator) syncPull(ctx context.Context, s domain.Settings, repo domain.Repository, pr domain.PullRequest, origin domain.Origin) (bool, bool, error) {
 	t, err := o.pulls.TicketByPull(ctx, repo.ID, pr.Number)
 	if errors.Is(err, domain.ErrNotFound) {
-		_, err := o.createPullTicket(ctx, repo, pr, "pr", "", origin)
+		// Approving merges only what waits for you; one taken because it
+		// is open (yours included) is merged where it was opened.
+		after := "pr"
+		if pr.Why == domain.PullOpenRepo || pr.Why == domain.PullOwn {
+			after = domain.AfterApproveNone
+		}
+		_, err := o.createPullTicket(ctx, repo, pr, after, "", origin)
 		return true, false, err
 	}
 	if err != nil {
@@ -250,14 +257,22 @@ func (o *Orchestrator) createPullTicket(ctx context.Context, repo domain.Reposit
 		Source: domain.SourceGit, Kind: domain.KindReview, RepoID: &repo.ID,
 		Title: pr.Title, Description: pr.Body, Priority: "medium",
 		State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: afterApprove,
+		// The sync's are held: a review spends tokens, so it runs when
+		// someone starts it. One asked for from the pull request page runs.
+		Held:     msg == "",
 		PRNumber: &number, PRURL: pr.URL, Pull: &pr,
 	}
 	if msg == "" {
 		why := "is assigned to you"
-		if pr.Why == domain.PullReviewRequested {
+		switch pr.Why {
+		case domain.PullReviewRequested:
 			why = "asks for your review"
+		case domain.PullOpenRepo:
+			why = "is open in " + repo.Name
+		case domain.PullOwn:
+			why = "is your own, open in " + repo.Name
 		}
-		msg = fmt.Sprintf("pull request #%d by @%s %s", pr.Number, pr.Author, why)
+		msg = fmt.Sprintf("pull request #%d by @%s %s; the review starts when you start it", pr.Number, pr.Author, why)
 	}
 	base := pullKey(repo, pr.Number)
 	for i := range 5 {

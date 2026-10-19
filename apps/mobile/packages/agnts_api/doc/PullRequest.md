@@ -18,7 +18,7 @@ Name | Type | Description | Notes
 **draft** | **bool** |  | 
 **state** | **String** |  | 
 **login** | **String** | The git host user it waits for; their reviewer profile shapes its reviews | 
-**why** | **String** |  | 
+**why** | **String** | open: taken because it is open in the repository (all); own: the token's user opened it (all); manual: asked for from the pull request page | 
 **additions** | **int** |  | [optional] 
 **deletions** | **int** |  | [optional] 
 **updatedAt** | [**DateTime**](DateTime.md) |  | [optional] 

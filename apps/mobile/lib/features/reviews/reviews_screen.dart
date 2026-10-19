@@ -15,13 +15,18 @@ final reviewersProvider = FutureProvider<Reviewers>((ref) async {
   return (await requireApi(ref).getReviewsApi().listReviewers()).data!;
 });
 
-/// Review tickets by group: waiting for you, in progress, finished (the last 20).
-({List<Ticket> waiting, List<Ticket> inProgress, List<Ticket> finished}) reviewGroups(List<Ticket> tickets) {
+/// Whether a review is the sync's, held until someone presses Review.
+bool reviewNotStarted(Ticket t) => t.state == TicketState.new_ && t.held == true;
+
+/// Review tickets by group: not started, waiting for you, in progress,
+/// finished (the last 20).
+({List<Ticket> notStarted, List<Ticket> waiting, List<Ticket> inProgress, List<Ticket> finished}) reviewGroups(List<Ticket> tickets) {
   final reviews = tickets.where((t) => t.kind == TicketKind.review).toList();
   bool finished(Ticket t) => t.state == TicketState.done || t.state == TicketState.rejected;
   return (
+    notStarted: reviews.where(reviewNotStarted).toList(),
     waiting: reviews.where((t) => t.state == TicketState.waitingForReview).toList(),
-    inProgress: reviews.where((t) => t.state != TicketState.waitingForReview && !finished(t)).toList(),
+    inProgress: reviews.where((t) => t.state != TicketState.waitingForReview && !finished(t) && !reviewNotStarted(t)).toList(),
     finished: reviews.where(finished).take(20).toList(),
   );
 }
@@ -92,6 +97,19 @@ class _ReviewsScreenState extends ConsumerState<ReviewsScreen> {
     }
   }
 
+  Future<void> _start(String key) async {
+    final l = AppLocalizations.of(context);
+    setState(() => _busy = true);
+    try {
+      await ref.read(apiProvider)!.getTicketsApi().startTicket(key: key);
+      ref.invalidate(ticketsProvider);
+    } catch (e) {
+      if (mounted) showSnack(context, errorMessage(e, l.commonError));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   Future<void> _saveSettings(Settings s, Map<String, dynamic> Function(Map<String, dynamic>) change) async {
     final l = AppLocalizations.of(context);
     try {
@@ -120,7 +138,7 @@ class _ReviewsScreenState extends ConsumerState<ReviewsScreen> {
         },
         builder: (all) {
           final g = reviewGroups(all);
-          final any = g.waiting.isNotEmpty || g.inProgress.isNotEmpty || g.finished.isNotEmpty;
+          final any = g.notStarted.isNotEmpty || g.waiting.isNotEmpty || g.inProgress.isNotEmpty || g.finished.isNotEmpty;
           final sync = _lastSync;
           return ListView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -149,13 +167,15 @@ class _ReviewsScreenState extends ConsumerState<ReviewsScreen> {
               if (!any)
                 Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: HCard(child: Text(l.reviewsEmptyAll, style: TextStyle(color: c.ink3))))
               else
-                for (final (title, rows) in [(l.reviewsWaiting, g.waiting), (l.reviewsInProgress, g.inProgress), (l.reviewsFinished, g.finished)]) ...[
+                for (final (title, rows) in [(l.reviewsNotStarted, g.notStarted), (l.reviewsWaiting, g.waiting), (l.reviewsInProgress, g.inProgress), (l.reviewsFinished, g.finished)]) ...[
                   SectionHeader(title, trailing: rows.isEmpty ? null : Text('${rows.length}')),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: rows.isEmpty
                         ? HCard(child: Text(l.reviewsEmpty, style: TextStyle(color: c.ink3)))
-                        : ListGroup(children: [for (final t in rows) _ReviewRow(t)]),
+                        : ListGroup(children: [
+                            for (final t in rows) _ReviewRow(t, onStart: canEdit && reviewNotStarted(t) && !_busy ? () => _start(t.key) : null),
+                          ]),
                   ),
                 ],
               _howYouReview(l, c, all, canEdit),
@@ -272,7 +292,7 @@ class _ReviewsScreenState extends ConsumerState<ReviewsScreen> {
     final s = ref.watch(settingsProvider).value;
     if (s == null) return const [];
     final pr = s.pullReviews ??
-        PullReviewSettings(enabled: false, reviewRequested: true, skipDrafts: true, rereview: true, mergeMethod: PullReviewSettingsMergeMethodEnum.merge);
+        PullReviewSettings(enabled: false, reviewRequested: true, all: true, skipDrafts: true, rereview: true, mergeMethod: PullReviewSettingsMergeMethodEnum.merge);
     final prc = s.prComments ?? PRCommentSettings(attribution: true, learnFromComments: true, resolveFixed: true, autoAddress: false);
     void setPr(String k, Object v) => _saveSettings(s, (j) => j..['pullReviews'] = {...pr.toJson(), k: v});
     void setPrc(String k, bool v) => _saveSettings(s, (j) => j..['prComments'] = {...prc.toJson(), k: v});
@@ -288,6 +308,7 @@ class _ReviewsScreenState extends ConsumerState<ReviewsScreen> {
         child: ListGroup(children: [
           sw(l.reviewsEnabled, l.reviewsEnabledHelp, pr.enabled, (v) => setPr('enabled', v)),
           sw(l.reviewsReviewRequested, l.reviewsReviewRequestedHelp, pr.reviewRequested, (v) => setPr('reviewRequested', v)),
+          sw(l.reviewsAll, l.reviewsAllHelp, pr.all ?? true, (v) => setPr('all', v)),
           sw(l.reviewsSkipDrafts, l.reviewsSkipDraftsHelp, pr.skipDrafts, (v) => setPr('skipDrafts', v)),
           sw(l.reviewsRereview, l.reviewsRereviewHelp, pr.rereview, (v) => setPr('rereview', v)),
           Padding(
@@ -329,8 +350,11 @@ class _ReviewsScreenState extends ConsumerState<ReviewsScreen> {
 /// One review ticket: repository and pull request number, title, author
 /// and why it came, its state.
 class _ReviewRow extends StatelessWidget {
-  const _ReviewRow(this.t);
+  const _ReviewRow(this.t, {this.onStart});
   final Ticket t;
+
+  /// Starts a review that is not started yet; null hides the button.
+  final VoidCallback? onStart;
 
   @override
   Widget build(BuildContext context) {
@@ -340,6 +364,9 @@ class _ReviewRow extends StatelessWidget {
     final why = switch (p?.why) {
       PullRequestWhyEnum.assigned => l.reviewsWhy_assigned,
       PullRequestWhyEnum.reviewRequested => l.reviewsWhy_review_requested,
+      PullRequestWhyEnum.open => l.reviewsWhy_open,
+      PullRequestWhyEnum.own => l.reviewsWhy_own,
+      PullRequestWhyEnum.manual => l.reviewsWhy_manual,
       null => null,
     };
     return InkWell(
@@ -363,10 +390,13 @@ class _ReviewRow extends StatelessWidget {
             ]),
           ),
           const SizedBox(width: 8),
-          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            StateBadge(t.state, kind: t.kind),
-            if (t.mergedAt != null) ...[const SizedBox(height: 4), ToneBadge(l.ticketMerged, Tone.ok, small: true)],
-          ]),
+          if (onStart != null)
+            FilledButton(onPressed: onStart, child: Text(l.reviewsStart))
+          else
+            Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+              StateBadge(t.state, kind: t.kind),
+              if (t.mergedAt != null) ...[const SizedBox(height: 4), ToneBadge(l.ticketMerged, Tone.ok, small: true)],
+            ]),
         ]),
       ),
     );

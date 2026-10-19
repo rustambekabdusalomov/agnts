@@ -425,12 +425,12 @@ func (m *Multi) PRState(ctx context.Context, repo domain.Repository, number int)
 
 // ReviewQueue implements orchestrator.ReviewHost. It is not cached: a
 // sync wants the pull requests as they are.
-func (m *Multi) ReviewQueue(ctx context.Context, repo domain.Repository, requested bool) ([]domain.PullRequest, error) {
+func (m *Multi) ReviewQueue(ctx context.Context, repo domain.Repository, requested, all bool) ([]domain.PullRequest, error) {
 	p, err := m.pick(repo)
 	if err != nil {
 		return nil, err
 	}
-	return p.ReviewQueue(ctx, repo, requested)
+	return p.ReviewQueue(ctx, repo, requested, all)
 }
 
 // PullRequest implements orchestrator.ReviewHost.

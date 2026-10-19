@@ -70,7 +70,7 @@
     "noRequestChanges": "GitLab has no request for changes here: the comments are posted, approvals stay as they are.",
     "settingsTitle": "Comments on pull requests",
     "set_attribution": "Say who wrote it",
-    "set_attributionHelp": "Comments written in agnts go out as the git host token's user; this adds \"via agnts · <you>\" under each.",
+    "set_attributionHelp": "Comments written in agnts go out as the git host token's user; this adds \"via agnts · your name\" under each.",
     "set_learnFromComments": "Learn from your comments",
     "set_learnFromCommentsHelp": "What you write on others' pull requests on the git host becomes notes on how you review.",
     "set_resolveFixed": "Resolve fixed threads",

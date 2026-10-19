@@ -11,6 +11,8 @@ abstract class _$PullReviewSettingsCWProxy {
 
   PullReviewSettings reviewRequested(bool reviewRequested);
 
+  PullReviewSettings all(bool? all);
+
   PullReviewSettings skipDrafts(bool skipDrafts);
 
   PullReviewSettings rereview(bool rereview);
@@ -26,6 +28,7 @@ abstract class _$PullReviewSettingsCWProxy {
   PullReviewSettings call({
     bool enabled,
     bool reviewRequested,
+    bool? all,
     bool skipDrafts,
     bool rereview,
     PullReviewSettingsMergeMethodEnum mergeMethod,
@@ -44,6 +47,9 @@ class _$PullReviewSettingsCWProxyImpl implements _$PullReviewSettingsCWProxy {
   @override
   PullReviewSettings reviewRequested(bool reviewRequested) =>
       this(reviewRequested: reviewRequested);
+
+  @override
+  PullReviewSettings all(bool? all) => this(all: all);
 
   @override
   PullReviewSettings skipDrafts(bool skipDrafts) =>
@@ -67,6 +73,7 @@ class _$PullReviewSettingsCWProxyImpl implements _$PullReviewSettingsCWProxy {
   PullReviewSettings call({
     Object? enabled = const $CopyWithPlaceholder(),
     Object? reviewRequested = const $CopyWithPlaceholder(),
+    Object? all = const $CopyWithPlaceholder(),
     Object? skipDrafts = const $CopyWithPlaceholder(),
     Object? rereview = const $CopyWithPlaceholder(),
     Object? mergeMethod = const $CopyWithPlaceholder(),
@@ -80,6 +87,10 @@ class _$PullReviewSettingsCWProxyImpl implements _$PullReviewSettingsCWProxy {
           ? _value.reviewRequested
           // ignore: cast_nullable_to_non_nullable
           : reviewRequested as bool,
+      all: all == const $CopyWithPlaceholder()
+          ? _value.all
+          // ignore: cast_nullable_to_non_nullable
+          : all as bool?,
       skipDrafts: skipDrafts == const $CopyWithPlaceholder()
           ? _value.skipDrafts
           // ignore: cast_nullable_to_non_nullable
@@ -122,6 +133,7 @@ PullReviewSettings _$PullReviewSettingsFromJson(Map<String, dynamic> json) =>
       final val = PullReviewSettings(
         enabled: $checkedConvert('enabled', (v) => v as bool),
         reviewRequested: $checkedConvert('reviewRequested', (v) => v as bool),
+        all: $checkedConvert('all', (v) => v as bool?),
         skipDrafts: $checkedConvert('skipDrafts', (v) => v as bool),
         rereview: $checkedConvert('rereview', (v) => v as bool),
         mergeMethod: $checkedConvert(
@@ -136,6 +148,7 @@ Map<String, dynamic> _$PullReviewSettingsToJson(PullReviewSettings instance) =>
     <String, dynamic>{
       'enabled': instance.enabled,
       'reviewRequested': instance.reviewRequested,
+      'all': ?instance.all,
       'skipDrafts': instance.skipDrafts,
       'rereview': instance.rereview,
       'mergeMethod':

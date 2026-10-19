@@ -72,9 +72,10 @@ func pullsPath(repo domain.Repository) (string, error) {
 }
 
 // ReviewQueue returns the open pull requests of repo assigned to the
-// token's user or, with requested, waiting for their review. Their own
-// pull requests are left out.
-func (h *Host) ReviewQueue(ctx context.Context, repo domain.Repository, requested bool) ([]domain.PullRequest, error) {
+// token's user or, with requested, waiting for their review. With all,
+// every other open pull request comes too, their own included (else left
+// out).
+func (h *Host) ReviewQueue(ctx context.Context, repo domain.Repository, requested, all bool) ([]domain.PullRequest, error) {
 	base, err := pullsPath(repo)
 	if err != nil {
 		return nil, err
@@ -92,6 +93,9 @@ func (h *Host) ReviewQueue(ctx context.Context, repo domain.Repository, requeste
 		}
 		for _, p := range batch {
 			if strings.EqualFold(p.User.Login, login) {
+				if all {
+					out = append(out, p.domain(login, domain.PullOwn))
+				}
 				continue
 			}
 			switch {
@@ -99,6 +103,8 @@ func (h *Host) ReviewQueue(ctx context.Context, repo domain.Repository, requeste
 				out = append(out, p.domain(login, domain.PullAssigned))
 			case requested && has(p.RequestedReviewers, login):
 				out = append(out, p.domain(login, domain.PullReviewRequested))
+			case all:
+				out = append(out, p.domain(login, domain.PullOpenRepo))
 			}
 		}
 		if len(batch) < 100 {
@@ -119,8 +125,13 @@ func (h *Host) PullRequest(ctx context.Context, repo domain.Repository, number i
 		return domain.PullRequest{}, err
 	}
 	login, _ := h.User(ctx)
-	why := domain.PullAssigned
-	if !has(p.Assignees, login) && has(p.RequestedReviewers, login) {
+	why := domain.PullOpenRepo
+	switch {
+	case strings.EqualFold(p.User.Login, login):
+		why = domain.PullOwn
+	case has(p.Assignees, login):
+		why = domain.PullAssigned
+	case has(p.RequestedReviewers, login):
 		why = domain.PullReviewRequested
 	}
 	return p.domain(login, why), nil

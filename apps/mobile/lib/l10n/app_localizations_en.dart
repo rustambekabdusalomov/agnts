@@ -7596,7 +7596,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pullsSet_attributionHelp =>
-      'Comments written in agnts go out as the git host token\'s user; this adds \"via agnts · <you>\" under each.';
+      'Comments written in agnts go out as the git host token\'s user; this adds \"via agnts · your name\" under each.';
 
   @override
   String get pullsSet_learnFromComments => 'Learn from your comments';
@@ -8845,7 +8845,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reviewsLede =>
-      'agnts reviews the pull requests assigned to you on GitHub and GitLab. Merge from here when the review looks good, or dismiss it and review on the git host yourself.';
+      'agnts lists the open pull requests of your repositories on GitHub and GitLab and reviews one when you press Review. Merge from here when the review looks good, or dismiss it and review on the git host yourself.';
 
   @override
   String get reviewsSync => 'Sync now';
@@ -8865,16 +8865,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reviewsSettingsTitle => 'How agnts picks them up';
 
   @override
-  String get reviewsEnabled => 'Review automatically';
+  String get reviewsEnabled => 'Sync automatically';
 
   @override
-  String get reviewsEnabledHelp => 'Check the git host every 5 minutes and review new pull requests. When off, only Sync now does it.';
+  String get reviewsEnabledHelp =>
+      'Check the git host every 5 minutes for new pull requests. Their reviews still wait for you to press Review. When off, only Sync now does it.';
 
   @override
   String get reviewsReviewRequested => 'Review requests too';
 
   @override
   String get reviewsReviewRequestedHelp => 'Also take pull requests whose review is requested from you, not only those assigned to you.';
+
+  @override
+  String get reviewsAll => 'Every open pull request';
+
+  @override
+  String get reviewsAllHelp =>
+      'Take every open pull request in your repositories, your own included, not only those assigned to you or asking for your review. Approving one of these does not merge it.';
 
   @override
   String get reviewsSkipDrafts => 'Skip drafts';
@@ -8904,6 +8912,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reviewsMerge_rebase => 'Rebase';
 
   @override
+  String get reviewsNotStarted => 'Not started';
+
+  @override
+  String get reviewsStart => 'Review';
+
+  @override
   String get reviewsWaiting => 'Waiting for you';
 
   @override
@@ -8916,13 +8930,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reviewsEmpty => 'Nothing here.';
 
   @override
-  String get reviewsEmptyAll => 'No pull requests to review yet. Assign one to yourself on GitHub or GitLab, then press Sync now.';
+  String get reviewsEmptyAll =>
+      'No pull requests to review yet. Press Sync now to fetch the open ones; each review starts when you press Review.';
 
   @override
   String get reviewsWhy_assigned => 'assigned';
 
   @override
   String get reviewsWhy_review_requested => 'review requested';
+
+  @override
+  String get reviewsWhy_open => 'open';
+
+  @override
+  String get reviewsWhy_own => 'yours';
 
   @override
   String get reviewsWhy_manual => 'asked for here';

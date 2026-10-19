@@ -24,6 +24,8 @@ class PullReviewSettings {
 
     required  this.reviewRequested,
 
+     this.all,
+
     required  this.skipDrafts,
 
     required  this.rereview,
@@ -54,6 +56,19 @@ class PullReviewSettings {
 
 
   final bool reviewRequested;
+
+
+
+      /// Take every open pull request in your repositories, yours included, whether or not it waits for you; left out, it stays as it is
+  @JsonKey(
+    
+    name: r'all',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? all;
 
 
 
@@ -102,6 +117,7 @@ class PullReviewSettings {
     bool operator ==(Object other) => identical(this, other) || other is PullReviewSettings &&
       other.enabled == enabled &&
       other.reviewRequested == reviewRequested &&
+      other.all == all &&
       other.skipDrafts == skipDrafts &&
       other.rereview == rereview &&
       other.mergeMethod == mergeMethod;
@@ -110,6 +126,7 @@ class PullReviewSettings {
     int get hashCode =>
         enabled.hashCode +
         reviewRequested.hashCode +
+        all.hashCode +
         skipDrafts.hashCode +
         rereview.hashCode +
         mergeMethod.hashCode;

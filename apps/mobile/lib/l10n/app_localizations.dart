@@ -13542,7 +13542,7 @@ abstract class AppLocalizations {
   /// No description provided for @pullsSet_attributionHelp.
   ///
   /// In en, this message translates to:
-  /// **'Comments written in agnts go out as the git host token\'s user; this adds \"via agnts · <you>\" under each.'**
+  /// **'Comments written in agnts go out as the git host token\'s user; this adds \"via agnts · your name\" under each.'**
   String get pullsSet_attributionHelp;
 
   /// No description provided for @pullsSet_learnFromComments.
@@ -15744,7 +15744,7 @@ abstract class AppLocalizations {
   /// No description provided for @reviewsLede.
   ///
   /// In en, this message translates to:
-  /// **'agnts reviews the pull requests assigned to you on GitHub and GitLab. Merge from here when the review looks good, or dismiss it and review on the git host yourself.'**
+  /// **'agnts lists the open pull requests of your repositories on GitHub and GitLab and reviews one when you press Review. Merge from here when the review looks good, or dismiss it and review on the git host yourself.'**
   String get reviewsLede;
 
   /// No description provided for @reviewsSync.
@@ -15780,13 +15780,13 @@ abstract class AppLocalizations {
   /// No description provided for @reviewsEnabled.
   ///
   /// In en, this message translates to:
-  /// **'Review automatically'**
+  /// **'Sync automatically'**
   String get reviewsEnabled;
 
   /// No description provided for @reviewsEnabledHelp.
   ///
   /// In en, this message translates to:
-  /// **'Check the git host every 5 minutes and review new pull requests. When off, only Sync now does it.'**
+  /// **'Check the git host every 5 minutes for new pull requests. Their reviews still wait for you to press Review. When off, only Sync now does it.'**
   String get reviewsEnabledHelp;
 
   /// No description provided for @reviewsReviewRequested.
@@ -15800,6 +15800,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Also take pull requests whose review is requested from you, not only those assigned to you.'**
   String get reviewsReviewRequestedHelp;
+
+  /// No description provided for @reviewsAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Every open pull request'**
+  String get reviewsAll;
+
+  /// No description provided for @reviewsAllHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Take every open pull request in your repositories, your own included, not only those assigned to you or asking for your review. Approving one of these does not merge it.'**
+  String get reviewsAllHelp;
 
   /// No description provided for @reviewsSkipDrafts.
   ///
@@ -15855,6 +15867,18 @@ abstract class AppLocalizations {
   /// **'Rebase'**
   String get reviewsMerge_rebase;
 
+  /// No description provided for @reviewsNotStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Not started'**
+  String get reviewsNotStarted;
+
+  /// No description provided for @reviewsStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get reviewsStart;
+
   /// No description provided for @reviewsWaiting.
   ///
   /// In en, this message translates to:
@@ -15882,7 +15906,7 @@ abstract class AppLocalizations {
   /// No description provided for @reviewsEmptyAll.
   ///
   /// In en, this message translates to:
-  /// **'No pull requests to review yet. Assign one to yourself on GitHub or GitLab, then press Sync now.'**
+  /// **'No pull requests to review yet. Press Sync now to fetch the open ones; each review starts when you press Review.'**
   String get reviewsEmptyAll;
 
   /// No description provided for @reviewsWhy_assigned.
@@ -15896,6 +15920,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'review requested'**
   String get reviewsWhy_review_requested;
+
+  /// No description provided for @reviewsWhy_open.
+  ///
+  /// In en, this message translates to:
+  /// **'open'**
+  String get reviewsWhy_open;
+
+  /// No description provided for @reviewsWhy_own.
+  ///
+  /// In en, this message translates to:
+  /// **'yours'**
+  String get reviewsWhy_own;
 
   /// No description provided for @reviewsWhy_manual.
   ///

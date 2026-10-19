@@ -21,7 +21,7 @@ const appVersion = '0.1.0';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final container = ProviderContainer();
+  final container = ProviderContainer(retry: apiRetry);
   // Push and the event stream follow a workspace's tickets: the user app's.
   if (!isAdminApp) {
     await Push.init(

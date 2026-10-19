@@ -132,6 +132,8 @@ Tone pullStateTone(PullItemStateEnum s) => switch (s) {
 String? whyLabel(AppLocalizations l, String why) => switch (why) {
   'assigned' => l.reviewsWhy_assigned,
   'review_requested' => l.reviewsWhy_review_requested,
+  'open' => l.reviewsWhy_open,
+  'own' => l.reviewsWhy_own,
   'manual' => l.reviewsWhy_manual,
   _ => null,
 };

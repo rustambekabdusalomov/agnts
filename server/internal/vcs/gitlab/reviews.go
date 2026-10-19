@@ -63,9 +63,10 @@ func hasUser(us []glUser, login string) bool {
 }
 
 // ReviewQueue returns the open merge requests of repo assigned to the
-// token's user or, with requested, that list them as a reviewer. Their own
-// merge requests are left out.
-func (h *Host) ReviewQueue(ctx context.Context, repo domain.Repository, requested bool) ([]domain.PullRequest, error) {
+// token's user or, with requested, that list them as a reviewer. With all,
+// every other open merge request comes too, their own included (else left
+// out).
+func (h *Host) ReviewQueue(ctx context.Context, repo domain.Repository, requested, all bool) ([]domain.PullRequest, error) {
 	p, err := h.project(ctx, repo)
 	if err != nil {
 		return nil, err
@@ -83,6 +84,9 @@ func (h *Host) ReviewQueue(ctx context.Context, repo domain.Repository, requeste
 		}
 		for _, m := range batch {
 			if strings.EqualFold(m.Author.Username, login) {
+				if all {
+					out = append(out, m.domain(login, domain.PullOwn))
+				}
 				continue
 			}
 			switch {
@@ -90,6 +94,8 @@ func (h *Host) ReviewQueue(ctx context.Context, repo domain.Repository, requeste
 				out = append(out, m.domain(login, domain.PullAssigned))
 			case requested && hasUser(m.Reviewers, login):
 				out = append(out, m.domain(login, domain.PullReviewRequested))
+			case all:
+				out = append(out, m.domain(login, domain.PullOpenRepo))
 			}
 		}
 		if len(batch) < 100 {
@@ -110,8 +116,13 @@ func (h *Host) PullRequest(ctx context.Context, repo domain.Repository, number i
 		return domain.PullRequest{}, err
 	}
 	login, _ := h.User(ctx)
-	why := domain.PullAssigned
-	if !hasUser(m.Assignees, login) && hasUser(m.Reviewers, login) {
+	why := domain.PullOpenRepo
+	switch {
+	case strings.EqualFold(m.Author.Username, login):
+		why = domain.PullOwn
+	case hasUser(m.Assignees, login):
+		why = domain.PullAssigned
+	case hasUser(m.Reviewers, login):
 		why = domain.PullReviewRequested
 	}
 	return m.domain(login, why), nil

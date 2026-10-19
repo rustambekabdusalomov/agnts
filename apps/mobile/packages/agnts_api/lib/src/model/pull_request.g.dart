@@ -303,4 +303,7 @@ const _$PullRequestStateEnumEnumMap = {
 const _$PullRequestWhyEnumEnumMap = {
   PullRequestWhyEnum.assigned: 'assigned',
   PullRequestWhyEnum.reviewRequested: 'review_requested',
+  PullRequestWhyEnum.open: 'open',
+  PullRequestWhyEnum.own: 'own',
+  PullRequestWhyEnum.manual: 'manual',
 };

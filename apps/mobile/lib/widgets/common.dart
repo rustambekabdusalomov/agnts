@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:agnts_api/agnts_api.dart';
 
+import '../core/api.dart';
 import '../l10n/app_localizations.dart';
 import '../theme.dart';
 import 'ui.dart';
@@ -52,8 +53,8 @@ class AsyncBody<T> extends StatelessWidget {
       onRefresh: onRefresh,
       child: switch (value) {
         AsyncData(:final value) => builder(value),
-        AsyncError() => ListView(children: [
-            Padding(padding: const EdgeInsets.all(24), child: Text(l.mobileOffline, textAlign: TextAlign.center)),
+        AsyncError(:final error) => ListView(children: [
+            Padding(padding: const EdgeInsets.all(24), child: Text(errorMessage(error, l.mobileOffline), textAlign: TextAlign.center)),
           ]),
         _ => const Center(child: CircularProgressIndicator()),
       },

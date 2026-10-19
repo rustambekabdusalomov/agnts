@@ -179,6 +179,7 @@ class PullRequest {
 
 
 
+      /// open: taken because it is open in the repository (all); own: the token's user opened it (all); manual: asked for from the pull request page
   @JsonKey(
     
     name: r'why',
@@ -321,11 +322,18 @@ String toString() => value;
 }
 
 
+/// open: taken because it is open in the repository (all); own: the token's user opened it (all); manual: asked for from the pull request page
 enum PullRequestWhyEnum {
 @JsonValue(r'assigned')
 assigned(r'assigned'),
 @JsonValue(r'review_requested')
-reviewRequested(r'review_requested');
+reviewRequested(r'review_requested'),
+@JsonValue(r'open')
+open(r'open'),
+@JsonValue(r'own')
+own(r'own'),
+@JsonValue(r'manual')
+manual(r'manual');
 
 const PullRequestWhyEnum(this.value);
 

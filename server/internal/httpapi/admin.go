@@ -433,7 +433,7 @@ func toSettings(v domain.Settings) gen.Settings {
 	ciNote := v.Notify.CI
 	ci := gen.CISettings{AutoFix: v.CI.AutoFix, MaxAutoPerDay: v.CI.MaxAutoPerDay, RetryFlaky: v.CI.RetryFlaky,
 		FeedbackRounds: v.CI.FeedbackRounds, InfraPatterns: append([]string{}, v.CI.InfraPatterns...)}
-	pulls := gen.PullReviewSettings{Enabled: v.PullReviews.Enabled, ReviewRequested: v.PullReviews.ReviewRequested,
+	pulls := gen.PullReviewSettings{Enabled: v.PullReviews.Enabled, ReviewRequested: v.PullReviews.ReviewRequested, All: &v.PullReviews.All,
 		SkipDrafts: v.PullReviews.SkipDrafts, Rereview: v.PullReviews.Rereview, MergeMethod: gen.PullReviewSettingsMergeMethod(v.PullReviews.MergeMethod)}
 	guard := gen.GuardSettings{Profile: gen.GuardProfile(v.Guard.Profile), FactCheck: v.Guard.FactCheck, Disabled: []gen.GuardHook{}}
 	if guard.Profile == "" {
@@ -584,7 +584,11 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 		v.EgressAllow = *req.EgressAllow
 	}
 	if p := req.PullReviews; p != nil {
-		v.PullReviews = domain.PullReviewSettings{Enabled: p.Enabled, ReviewRequested: p.ReviewRequested, SkipDrafts: p.SkipDrafts,
+		all := v.PullReviews.All // a client that does not know it leaves it alone
+		if p.All != nil {
+			all = *p.All
+		}
+		v.PullReviews = domain.PullReviewSettings{Enabled: p.Enabled, ReviewRequested: p.ReviewRequested, All: all, SkipDrafts: p.SkipDrafts,
 			Rereview: p.Rereview, MergeMethod: string(p.MergeMethod)}
 	}
 	if p := req.PrComments; p != nil {

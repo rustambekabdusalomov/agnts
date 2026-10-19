@@ -7321,8 +7321,9 @@ components:
       description: Reviews of the pull requests waiting for you on GitHub or GitLab
       required: [enabled, reviewRequested, skipDrafts, rereview, mergeMethod]
       properties:
-        enabled: { type: boolean, description: 'Sync the pull requests waiting for you every few minutes and review the new ones' }
+        enabled: { type: boolean, description: 'Sync the open pull requests every few minutes; their reviews are held until someone starts them' }
         reviewRequested: { type: boolean, description: 'Also take pull requests whose review is requested from you, not only those assigned to you' }
+        all: { type: boolean, description: "Take every open pull request in your repositories, yours included, whether or not it waits for you; left out, it stays as it is" }
         skipDrafts: { type: boolean, description: Leave draft pull requests alone until they are ready }
         rereview: { type: boolean, description: "Review again when the author pushes new commits while agnts's review waits for you" }
         mergeMethod: { type: string, enum: [merge, squash, rebase], description: How an accepted pull request is merged }
@@ -7342,7 +7343,7 @@ components:
         draft: { type: boolean }
         state: { type: string, enum: [open, closed, merged] }
         login: { type: string, description: The git host user it waits for; their reviewer profile shapes its reviews }
-        why: { type: string, enum: [assigned, review_requested] }
+        why: { type: string, enum: [assigned, review_requested, open, own, manual], description: 'open: taken because it is open in the repository (all); own: the token''s user opened it (all); manual: asked for from the pull request page' }
         additions: { type: integer }
         deletions: { type: integer }
         updatedAt: { type: string, format: date-time }
@@ -7373,7 +7374,7 @@ components:
         baseRef: { type: string }
         draft: { type: boolean }
         state: { type: string, enum: [open, closed, merged] }
-        why: { type: string, description: 'Why it waits for the token''s user: assigned, review_requested, or empty; manual for a review someone asked for from the pull request page' }
+        why: { type: string, description: 'Why it waits for the token''s user: assigned, review_requested, open or own (taken because it is open, all), or empty; manual for a review someone asked for from the pull request page' }
         updatedAt: { type: string, format: date-time }
         ticketKey: { type: string, description: "agnts's ticket for it: its own change, or its review" }
         own: { type: boolean, description: "It is agnts's own change" }

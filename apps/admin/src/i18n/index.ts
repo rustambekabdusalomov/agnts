@@ -21,7 +21,15 @@ const compile: MessageCompiler = (message, { locale, key, onError }) => {
     onError?.(new Error(`message ${key} is not a string`) as never)
     return () => key
   }
-  const fmt = new IntlMessageFormat(message, locale)
+  // A message that does not parse shows as written: one bad string must
+  // not take its whole page down. i18n.test.ts parses every message.
+  let fmt: IntlMessageFormat
+  try {
+    fmt = new IntlMessageFormat(message, locale)
+  } catch (e) {
+    onError?.(e as never)
+    return () => message
+  }
   return (ctx: MessageContext) => String(fmt.format(ctx.values as Record<string, unknown>))
 }
 

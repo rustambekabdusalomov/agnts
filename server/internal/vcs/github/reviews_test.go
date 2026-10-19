@@ -39,13 +39,16 @@ func TestReviewQueueMergeAndComment(t *testing.T) {
 	repo := domain.Repository{CloneURL: "https://github.com/acme/api.git", DefaultBranch: "main"}
 	ctx := context.Background()
 
-	prs, err := h.ReviewQueue(ctx, repo, true)
+	prs, err := h.ReviewQueue(ctx, repo, true, false)
 	if err != nil || len(prs) != 2 || prs[0].Number != 2 || prs[0].Why != domain.PullAssigned || prs[1].Why != domain.PullReviewRequested ||
 		prs[0].FetchRef != "refs/pull/2/head" || prs[0].Login != "me" {
 		t.Fatalf("queue: %+v %v", prs, err)
 	}
-	if prs, _ := h.ReviewQueue(ctx, repo, false); len(prs) != 1 {
+	if prs, _ := h.ReviewQueue(ctx, repo, false, false); len(prs) != 1 {
 		t.Fatalf("assigned only: %+v", prs)
+	}
+	if prs, _ := h.ReviewQueue(ctx, repo, true, true); len(prs) != 4 || prs[0].Why != domain.PullOwn || prs[3].Number != 4 || prs[3].Why != domain.PullOpenRepo {
+		t.Fatalf("all: %+v", prs)
 	}
 	if err := h.MergePR(ctx, repo, 2, "s2", "squash"); err != nil || merged["sha"] != "s2" || merged["merge_method"] != "squash" {
 		t.Fatalf("merge: %v %v", merged, err)

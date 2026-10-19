@@ -70,7 +70,7 @@
     "noRequestChanges": "GitLab'da bu yerda o'zgartirish so'rovi yo'q: izohlar joylanadi, tasdiqlar o'zgarmaydi.",
     "settingsTitle": "Pull request izohlari",
     "set_attribution": "Muallifni ko'rsatish",
-    "set_attributionHelp": "agnts'dan yozilgan izohlar git xosting tokeni egasi nomidan ketadi; har birining ostiga \"via agnts · <siz>\" qo'shiladi.",
+    "set_attributionHelp": "agnts'dan yozilgan izohlar git xosting tokeni egasi nomidan ketadi; har birining ostiga \"via agnts · ismingiz\" qo'shiladi.",
     "set_learnFromComments": "Izohlaringizdan o'rganish",
     "set_learnFromCommentsHelp": "Boshqalarning pull requestlariga git xostingda yozganlaringiz qanday ko'rib chiqishingiz haqidagi eslatmaga aylanadi.",
     "set_resolveFixed": "Tuzatilgan muhokamalarni yopish",

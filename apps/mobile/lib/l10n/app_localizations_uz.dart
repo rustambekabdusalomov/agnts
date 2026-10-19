@@ -7612,7 +7612,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get pullsSet_attributionHelp =>
-      'agnts\'dan yozilgan izohlar git xosting tokeni egasi nomidan ketadi; har birining ostiga \"via agnts · <siz>\" qo\'shiladi.';
+      'agnts\'dan yozilgan izohlar git xosting tokeni egasi nomidan ketadi; har birining ostiga \"via agnts · ismingiz\" qo\'shiladi.';
 
   @override
   String get pullsSet_learnFromComments => 'Izohlaringizdan o\'rganish';
@@ -8850,7 +8850,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get reviewsLede =>
-      'agnts GitHub va GitLab’da sizga biriktirilgan pull requestlarni tekshiradi. Tekshiruv yaxshi boʻlsa, shu yerdan birlashtiring yoki rad etib, git hostingda oʻzingiz tekshiring.';
+      'agnts GitHub va GitLab’dagi repozitoriylaringizning ochiq pull requestlarini koʻrsatadi va «Tekshirish»ni bosganingizda tekshiradi. Tekshiruv yaxshi boʻlsa, shu yerdan birlashtiring yoki rad etib, git hostingda oʻzingiz tekshiring.';
 
   @override
   String get reviewsSync => 'Sinxronlash';
@@ -8870,17 +8870,24 @@ class AppLocalizationsUz extends AppLocalizations {
   String get reviewsSettingsTitle => 'agnts ularni qanday oladi';
 
   @override
-  String get reviewsEnabled => 'Avtomatik tekshirish';
+  String get reviewsEnabled => 'Avtomatik sinxronlash';
 
   @override
   String get reviewsEnabledHelp =>
-      'Har 5 daqiqada git hostingni tekshirib, yangi pull requestlarni koʻrib chiqish. Oʻchiq boʻlsa, faqat «Sinxronlash» tugmasi bilan.';
+      'Har 5 daqiqada git hostingdan yangi pull requestlarni olish. Ularning tekshiruvi baribir «Tekshirish»ni bosishingizni kutadi. Oʻchiq boʻlsa, faqat «Sinxronlash» tugmasi bilan.';
 
   @override
   String get reviewsReviewRequested => 'Tekshiruv soʻrovlari ham';
 
   @override
   String get reviewsReviewRequestedHelp => 'Faqat sizga biriktirilganlarini emas, sizdan tekshiruv soʻralgan pull requestlarni ham olish.';
+
+  @override
+  String get reviewsAll => 'Barcha ochiq pull requestlar';
+
+  @override
+  String get reviewsAllHelp =>
+      'Faqat sizga biriktirilgan yoki sizdan tekshiruv soʻralganlarini emas, repozitoriylaringizdagi barcha ochiq pull requestlarni, oʻzingiznikilarini ham olish. Bunday pull requestni tasdiqlash uni birlashtirmaydi.';
 
   @override
   String get reviewsSkipDrafts => 'Qoralamalarni oʻtkazib yuborish';
@@ -8910,6 +8917,12 @@ class AppLocalizationsUz extends AppLocalizations {
   String get reviewsMerge_rebase => 'Rebase';
 
   @override
+  String get reviewsNotStarted => 'Boshlanmagan';
+
+  @override
+  String get reviewsStart => 'Tekshirish';
+
+  @override
   String get reviewsWaiting => 'Sizni kutmoqda';
 
   @override
@@ -8923,13 +8936,19 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get reviewsEmptyAll =>
-      'Hozircha tekshiriladigan pull request yoʻq. GitHub yoki GitLab’da birini oʻzingizga biriktiring va «Sinxronlash»ni bosing.';
+      'Hozircha tekshiriladigan pull request yoʻq. Ochiqlarini olish uchun «Sinxronlash»ni bosing; har birining tekshiruvi «Tekshirish»ni bosganingizda boshlanadi.';
 
   @override
   String get reviewsWhy_assigned => 'biriktirilgan';
 
   @override
   String get reviewsWhy_review_requested => 'tekshiruv soʻralgan';
+
+  @override
+  String get reviewsWhy_open => 'ochiq';
+
+  @override
+  String get reviewsWhy_own => 'sizniki';
 
   @override
   String get reviewsWhy_manual => 'agnts’da soʻralgan';

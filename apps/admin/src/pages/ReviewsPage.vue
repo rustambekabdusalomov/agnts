@@ -38,12 +38,20 @@ const reviews = computed(() => {
     .filter((x) => !q || [x.key, x.title, x.repoName ?? '', x.pull?.author ?? ''].some((s) => s.toLowerCase().includes(q)))
 })
 const FINISHED = ['done', 'rejected']
+// The sync's reviews are held: nothing runs until you press Review.
+const notStarted = (x: Ticket) => x.state === 'new' && x.held
 const groups = computed(() => [
+  { id: 'notStarted', rows: reviews.value.filter(notStarted) },
   { id: 'waiting', rows: reviews.value.filter((x) => x.state === 'waiting_for_review') },
-  { id: 'inProgress', rows: reviews.value.filter((x) => x.state !== 'waiting_for_review' && !FINISHED.includes(x.state)) },
+  { id: 'inProgress', rows: reviews.value.filter((x) => x.state !== 'waiting_for_review' && !FINISHED.includes(x.state) && !notStarted(x)) },
   { id: 'finished', rows: reviews.value.filter((x) => FINISHED.includes(x.state)).slice(0, 20) },
 ])
 const open = (x: Ticket) => router.push({ name: 'ticket', params: { key: x.key } })
+const start = useMutation({
+  mutationFn: (key: string) => unwrap(api.POST('/tickets/{key}/analyze', { params: { path: { key } } })),
+  onSuccess: () => void qc.invalidateQueries({ queryKey: ['tickets'] }),
+  onError: fail,
+})
 
 // Sync now.
 const lastSync = ref<ReviewSync | null>(null)
@@ -59,7 +67,7 @@ const sync = useMutation({
 
 // Settings.pullReviews, saved with the rest of the settings on each change.
 const settings = useQuery({ queryKey: ['settings'], queryFn: () => unwrap(api.GET('/settings')) })
-const DEFAULTS: PullReviewSettings = { enabled: false, reviewRequested: true, skipDrafts: true, rereview: true, mergeMethod: 'merge' }
+const DEFAULTS: PullReviewSettings = { enabled: false, reviewRequested: true, all: true, skipDrafts: true, rereview: true, mergeMethod: 'merge' }
 const pr = computed(() => settings.data.value?.pullReviews ?? DEFAULTS)
 const saveSettings = useMutation({
   mutationFn: (s: Settings) => unwrap(api.PUT('/settings', { body: s })),
@@ -168,7 +176,10 @@ const newLogin = ref('')
                       {{ t('reviews.by', { author: x.pull.author }) }} · {{ t(`reviews.why_${x.pull.why}`) }}
                     </div>
                   </td>
-                  <td><StateBadge :state="x.state" :kind="x.kind" /> <span v-if="x.mergedAt" class="badge b-ok">{{ t('ticket.merged') }}</span></td>
+                  <td v-if="notStarted(x)">
+                    <button v-if="workspace.canEdit" class="btn btn-s" type="button" :disabled="start.isPending.value" @click.stop="start.mutate(x.key)">{{ t('reviews.start') }}</button>
+                  </td>
+                  <td v-else><StateBadge :state="x.state" :kind="x.kind" /> <span v-if="x.mergedAt" class="badge b-ok">{{ t('ticket.merged') }}</span></td>
                   <td class="muted">{{ ago(x.updatedAt, locale) }}</td>
                 </tr>
               </tbody>
@@ -227,6 +238,9 @@ const newLogin = ref('')
           </CfgRow>
           <CfgRow :label="t('reviews.reviewRequested')" :help="t('reviews.reviewRequestedHelp')">
             <SwitchToggle :model-value="pr.reviewRequested" :label="t('reviews.reviewRequested')" @update:model-value="(v) => setPr('reviewRequested', v)" />
+          </CfgRow>
+          <CfgRow :label="t('reviews.all')" :help="t('reviews.allHelp')">
+            <SwitchToggle :model-value="pr.all ?? true" :label="t('reviews.all')" @update:model-value="(v) => setPr('all', v)" />
           </CfgRow>
           <CfgRow :label="t('reviews.skipDrafts')" :help="t('reviews.skipDraftsHelp')">
             <SwitchToggle :model-value="pr.skipDrafts" :label="t('reviews.skipDrafts')" @update:model-value="(v) => setPr('skipDrafts', v)" />

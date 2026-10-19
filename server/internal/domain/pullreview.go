@@ -20,6 +20,12 @@ const (
 const (
 	PullAssigned        = "assigned"
 	PullReviewRequested = "review_requested"
+	// PullOpenRepo: open in one of your repositories, neither assigned to
+	// you nor asking for your review (PullReviewSettings.All).
+	PullOpenRepo = "open"
+	// PullOwn: the token's user opened it (agnts opens its own with their
+	// token), taken because PullReviewSettings.All.
+	PullOwn = "own"
 	// PullManual: someone asked agnts to review it from the pull request
 	// page; it need not wait for the token's user at all.
 	PullManual = "manual"
@@ -60,7 +66,7 @@ type PullRequest struct {
 	State    string `json:"state"`
 	// Login is the git host user it waits for (the token's owner): whose
 	// reviewer profile its reviews read. Why says how: assigned, or
-	// review_requested.
+	// review_requested (or open, own: taken because PullReviewSettings.All).
 	Login     string    `json:"login"`
 	Why       string    `json:"why"`
 	Additions int       `json:"additions,omitempty"`
@@ -187,13 +193,16 @@ var MergeMethods = []string{"merge", "squash", "rebase"}
 
 // PullReviewSettings control the reviews of pull requests waiting for you.
 type PullReviewSettings struct {
-	// Enabled syncs the open pull requests waiting for you every few
-	// minutes and reviews the new ones. Off, Sync on the Reviews page
-	// still does it once.
+	// Enabled syncs the open pull requests every few minutes; each new
+	// review is held until someone starts it. Off, Sync on the Reviews
+	// page still does it once.
 	Enabled bool `json:"enabled"`
 	// ReviewRequested also takes pull requests whose review is requested
 	// from you, not only those assigned to you.
 	ReviewRequested bool `json:"reviewRequested"`
+	// All takes every open pull request of your repositories, yours
+	// included, whether or not it waits for you.
+	All bool `json:"all"`
 	// SkipDrafts leaves draft pull requests alone until they are ready.
 	SkipDrafts bool `json:"skipDrafts"`
 	// Rereview reviews a pull request again when its author pushes new
@@ -205,5 +214,5 @@ type PullReviewSettings struct {
 
 // DefaultPullReviewSettings returns the settings used before any are saved.
 func DefaultPullReviewSettings() PullReviewSettings {
-	return PullReviewSettings{ReviewRequested: true, SkipDrafts: true, Rereview: true, MergeMethod: "merge"}
+	return PullReviewSettings{ReviewRequested: true, All: true, SkipDrafts: true, Rereview: true, MergeMethod: "merge"}
 }

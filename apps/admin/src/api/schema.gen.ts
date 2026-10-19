@@ -6046,10 +6046,12 @@ export interface components {
         };
         /** @description Reviews of the pull requests waiting for you on GitHub or GitLab */
         PullReviewSettings: {
-            /** @description Sync the pull requests waiting for you every few minutes and review the new ones */
+            /** @description Sync the open pull requests every few minutes; their reviews are held until someone starts them */
             enabled: boolean;
             /** @description Also take pull requests whose review is requested from you, not only those assigned to you */
             reviewRequested: boolean;
+            /** @description Take every open pull request in your repositories, yours included, whether or not it waits for you; left out, it stays as it is */
+            all?: boolean;
             /** @description Leave draft pull requests alone until they are ready */
             skipDrafts: boolean;
             /** @description Review again when the author pushes new commits while agnts's review waits for you */
@@ -6079,8 +6081,11 @@ export interface components {
             state: "open" | "closed" | "merged";
             /** @description The git host user it waits for; their reviewer profile shapes its reviews */
             login: string;
-            /** @enum {string} */
-            why: "assigned" | "review_requested";
+            /**
+             * @description open: taken because it is open in the repository (all); own: the token's user opened it (all); manual: asked for from the pull request page
+             * @enum {string}
+             */
+            why: "assigned" | "review_requested" | "open" | "own" | "manual";
             additions?: number;
             deletions?: number;
             /** Format: date-time */
@@ -6117,7 +6122,7 @@ export interface components {
             draft: boolean;
             /** @enum {string} */
             state: "open" | "closed" | "merged";
-            /** @description Why it waits for the token's user: assigned, review_requested, or empty; manual for a review someone asked for from the pull request page */
+            /** @description Why it waits for the token's user: assigned, review_requested, open or own (taken because it is open, all), or empty; manual for a review someone asked for from the pull request page */
             why: string;
             /** Format: date-time */
             updatedAt: string;

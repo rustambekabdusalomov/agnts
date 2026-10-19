@@ -121,6 +121,9 @@ func TestPullRequestChangingAgentFilesGetsASecurityFinding(t *testing.T) {
 	if _, err := h.o.SyncReviews(h.ctx, domain.OriginWeb); err != nil {
 		t.Fatal(err)
 	}
+	if _, err := h.o.Start(h.ctx, "API-PR9", domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
 	h.step() // fetch
 	h.runner.scripts = []script{{result: ok("r1"), files: map[string]string{orchestrator.ReviewPath: `{"verdict":"looks_good","summary":"Fine.","findings":[]}`}}}
 	h.step() // review

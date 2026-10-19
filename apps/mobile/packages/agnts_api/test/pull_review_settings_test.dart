@@ -19,6 +19,12 @@ void main() {
       // TODO
     });
 
+    // Take every open pull request in your repositories, yours included, whether or not it waits for you; left out, it stays as it is
+    // bool all
+    test('to test the property `all`', () async {
+      // TODO
+    });
+
     // Leave draft pull requests alone until they are ready
     // bool skipDrafts
     test('to test the property `skipDrafts`', () async {

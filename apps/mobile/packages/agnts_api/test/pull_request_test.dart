@@ -63,6 +63,7 @@ void main() {
       // TODO
     });
 
+    // open: taken because it is open in the repository (all); own: the token's user opened it (all); manual: asked for from the pull request page
     // String why
     test('to test the property `why`', () async {
       // TODO

@@ -143,6 +143,9 @@ func TestPostReviewInline(t *testing.T) {
 	if res, err := h.o.SyncReviews(h.ctx, domain.OriginWeb); err != nil || res.Created != 1 {
 		t.Fatalf("sync: %+v %v", res, err)
 	}
+	if _, err := h.o.Start(h.ctx, "API-PR4", domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
 	h.step() // fetch
 	h.runner.scripts = []script{{result: ok("r1"), files: map[string]string{orchestrator.ReviewPath: pullReviewJSON}}}
 	h.step() // review

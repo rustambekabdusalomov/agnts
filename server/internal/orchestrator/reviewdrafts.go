@@ -97,6 +97,22 @@ func (o *Orchestrator) ReviewPull(ctx context.Context, repoID int64, number int,
 		if own {
 			return domain.Ticket{}, invalid("#%d is agnts's own change in %s: its review is on that ticket", number, t.Key)
 		}
+		if t.State == domain.StateNew && t.Held {
+			// The sync's review, waiting to be started: asking for one
+			// starts it, with what was asked.
+			if opt.Focus != "" || opt.Deep != "" {
+				if _, err := o.store.UpdateTicket(ctx, t.Key, nil, func(x *domain.Ticket) {
+					if x.Pull != nil {
+						p := *x.Pull
+						p.Focus, p.Deep = opt.Focus, opt.Deep
+						x.Pull = &p
+					}
+				}); err != nil {
+					return t, err
+				}
+			}
+			return o.Start(ctx, t.Key, origin)
+		}
 		if !t.State.Terminal() {
 			return t, &ReviewExistsError{Key: t.Key}
 		}

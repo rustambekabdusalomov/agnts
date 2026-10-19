@@ -30,7 +30,7 @@ func (h *reviewHost) CommentPR(_ context.Context, _ domain.Repository, _ int, bo
 	return nil
 }
 
-func (h *reviewHost) ReviewQueue(context.Context, domain.Repository, bool) ([]domain.PullRequest, error) {
+func (h *reviewHost) ReviewQueue(context.Context, domain.Repository, bool, bool) ([]domain.PullRequest, error) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	var out []domain.PullRequest
@@ -128,8 +128,13 @@ func TestPullReviewFlow(t *testing.T) {
 		t.Fatalf("second sync created again: %+v", res)
 	}
 	tk := h.expect("API-PR4", domain.StateNew)
-	if tk.Kind != domain.KindReview || tk.Source != domain.SourceGit || tk.Pull == nil || *tk.PRNumber != 4 || tk.Branch != "agnts/API-PR4" {
+	if tk.Kind != domain.KindReview || tk.Source != domain.SourceGit || tk.Pull == nil || *tk.PRNumber != 4 || tk.Branch != "agnts/API-PR4" || !tk.Held {
 		t.Fatalf("review ticket: %+v", tk)
+	}
+	// Held: the review runs when someone starts it.
+	h.idle()
+	if _, err := h.o.Start(h.ctx, "API-PR4", domain.OriginWeb); err != nil {
+		t.Fatal(err)
 	}
 
 	h.step() // fetch: no Claude

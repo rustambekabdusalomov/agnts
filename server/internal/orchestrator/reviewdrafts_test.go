@@ -73,6 +73,28 @@ func (h *harness) decide(key string, id int64, state string, reason string) doma
 
 const evicts, nit = "The cache never evicts", "Name could be clearer"
 
+// Asking for a review of a pull request the sync took (held, waiting to be
+// started) starts that review with what was asked, not a second one.
+func TestReviewPullStartsHeldReview(t *testing.T) {
+	h, host, _ := draftsHarness(t)
+	p := pull(7, "ccc3333")
+	p.Why = domain.PullOpenRepo
+	host.set(p)
+	if res, err := h.o.SyncReviews(h.ctx, domain.OriginWeb); err != nil || res.Created != 1 {
+		t.Fatalf("sync: %+v %v", res, err)
+	}
+	if tk := h.state("API-PR7"); !tk.Held || tk.AfterApprove != domain.AfterApproveNone {
+		t.Fatalf("synced review: held %v after %q", tk.Held, tk.AfterApprove)
+	}
+	h.idle()
+	tk, err := h.o.ReviewPull(h.ctx, 1, 7, orchestrator.ReviewPullOptions{Focus: "the cache"}, domain.OriginWeb)
+	if err != nil || tk.Key != "API-PR7" || tk.Held || tk.Pull.Focus != "the cache" {
+		t.Fatalf("started: %+v %v", tk, err)
+	}
+	h.step() // fetch
+	h.expect("API-PR7", domain.StateCoding)
+}
+
 // A review asked for from the pull request page: for any open pull
 // request, once at a time, with the person's focus; it is kept up to date
 // with the sync off, and approving it never merges.
