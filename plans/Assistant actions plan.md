@@ -1,6 +1,6 @@
 # agnts Assistant actions — Plan
 
-Oct 19, 2026 · draft
+Oct 19, 2026 · draft; phase 1 implemented
 
 ## Overview
 
@@ -56,6 +56,8 @@ This is the "Actions" item under "Later" in `Assistant plan.md`, built on the tw
 Order: 1 → 2 → 3 → 4. Phase 1 can ship alone. Ship 2 and 3 together; a server that proposes cards no client shows would be confusing.
 
 ## Phase 1: `internal/actions`
+
+**As built:** `Prepare(ctx, tool, json.RawMessage)` dispatches to one method per tool (`d.ApproveTicket(ctx, in)` …), and `Destructive(tool)` replaces the `Destructive` field. `Execute` returns `Result{Done, Ticket, Created, Errors}` and turns a transition error into "not possible now". The MCP input types are aliases of the actions ones, so their schemas didn't change. The `Tools` list for the prompt is left for phase 2.
 
 Move from `internal/mcpserver/mcpserver.go`:
 

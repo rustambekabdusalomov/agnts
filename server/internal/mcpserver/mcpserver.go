@@ -18,6 +18,7 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/auth"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
+	"agnts/internal/actions"
 	"agnts/internal/admin"
 	"agnts/internal/ciwatch"
 	"agnts/internal/domain"
@@ -276,9 +277,7 @@ func (t *tools) listTickets(ctx context.Context, _ *mcp.CallToolRequest, in List
 }
 
 // KeyInput names a ticket.
-type KeyInput struct {
-	Key string `json:"key" jsonschema:"ticket or task key, e.g. PAY-214"`
-}
+type KeyInput = actions.KeyInput
 
 // QuestionOut is a question in get_ticket.
 type QuestionOut struct {
@@ -621,209 +620,146 @@ func (t *tools) getRepo(ctx context.Context, _ *mcp.CallToolRequest, in NameInpu
 
 // ---- writes (two-step) ----
 
-func (t *tools) prepare(ctx context.Context, tool, key, summary string, args map[string]any) (*mcp.CallToolResult, Pending, error) {
+// The write tools' inputs are the actions package's, which checks them.
+type (
+	// AnswerInput is actions.AnswerInput.
+	AnswerInput = actions.AnswerInput
+	// AnswersInput is actions.AnswersInput.
+	AnswersInput = actions.AnswersInput
+	// FeedbackInput is actions.FeedbackInput.
+	FeedbackInput = actions.FeedbackInput
+	// TaskInput is actions.TaskInput.
+	TaskInput = actions.TaskInput
+	// ImplementInput is actions.ImplementInput.
+	ImplementInput = actions.ImplementInput
+	// FollowUpChoice is actions.FollowUpChoice.
+	FollowUpChoice = actions.FollowUpChoice
+	// AcceptFollowUpsInput is actions.AcceptFollowUpsInput.
+	AcceptFollowUpsInput = actions.AcceptFollowUpsInput
+	// DismissInput is actions.DismissInput.
+	DismissInput = actions.DismissInput
+	// KindInput is actions.KindInput.
+	KindInput = actions.KindInput
+	// ApproveInput is actions.ApproveInput.
+	ApproveInput = actions.ApproveInput
+	// RejectInput is actions.RejectInput.
+	RejectInput = actions.RejectInput
+)
+
+func (t *tools) acts() actions.Deps {
+	return actions.Deps{Orch: t.d.Orch, Store: t.d.Store, Repos: t.d.Repos}
+}
+
+// prepare stores a checked write until confirm_action.
+func (t *tools) prepare(ctx context.Context, p actions.Prepared, err error) (*mcp.CallToolResult, Pending, error) {
+	if err != nil {
+		return nil, Pending{}, err
+	}
 	b := make([]byte, 8)
 	_, _ = rand.Read(b)
 	id := hex.EncodeToString(b)
 	exp := time.Now().Add(ConfirmTTL)
-	if args == nil {
-		args = map[string]any{}
-	}
-	if err := t.d.Store.CreatePending(ctx, postgres.PendingAction{ID: id, Origin: domain.OriginMCP, Tool: tool, TicketKey: key,
-		Args: args, Summary: summary, ExpiresAt: exp}); err != nil {
+	if err := t.d.Store.CreatePending(ctx, postgres.PendingAction{ID: id, Origin: domain.OriginMCP, Tool: p.Tool, TicketKey: p.TicketKey,
+		Args: p.Args, Summary: p.Summary, ExpiresAt: exp}); err != nil {
 		return nil, Pending{}, err
 	}
-	return nil, Pending{ActionID: id, Summary: summary, ExpiresAt: exp.UTC().Format(time.RFC3339),
+	return nil, Pending{ActionID: id, Summary: p.Summary, ExpiresAt: exp.UTC().Format(time.RFC3339),
 		Next: "Show this summary to the user. Call confirm_action with this action_id only after they explicitly agree."}, nil
 }
 
-func (t *tools) ticket(ctx context.Context, key string) (domain.Ticket, error) {
-	tk, err := t.d.Store.TicketByKey(ctx, strings.TrimSpace(key))
-	return tk, notFound(err, key)
-}
-
-// AnswerInput is one answer.
-type AnswerInput struct {
-	QuestionID int64  `json:"question_id"`
-	Answer     string `json:"answer"`
-	Note       string `json:"note,omitempty"`
-}
-
-// AnswersInput answers a ticket's questions.
-type AnswersInput struct {
-	Key     string        `json:"key"`
-	Answers []AnswerInput `json:"answers"`
-}
-
 func (t *tools) answerQuestions(ctx context.Context, _ *mcp.CallToolRequest, in AnswersInput) (*mcp.CallToolResult, Pending, error) {
-	tk, err := t.ticket(ctx, in.Key)
-	if err != nil {
-		return nil, Pending{}, err
-	}
-	if tk.State != domain.StateWaitingForAnswers {
-		return nil, Pending{}, fmt.Errorf("%s is not waiting for answers (it is %s)", tk.Key, tk.State)
-	}
-	qs, err := t.d.Store.Questions(ctx, tk.ID)
-	if err != nil {
-		return nil, Pending{}, err
-	}
-	text := map[int64]string{}
-	for _, q := range qs {
-		text[q.ID] = q.Text
-	}
-	var lines []string
-	args := []any{}
-	for _, a := range in.Answers {
-		q, ok := text[a.QuestionID]
-		if !ok {
-			return nil, Pending{}, fmt.Errorf("question %d is not on %s", a.QuestionID, tk.Key)
-		}
-		lines = append(lines, fmt.Sprintf("- %s → %s", q, a.Answer))
-		args = append(args, map[string]any{"question_id": a.QuestionID, "answer": a.Answer, "note": a.Note})
-	}
-	return t.prepare(ctx, "answer_questions", tk.Key, fmt.Sprintf("Answer %d question(s) on %s and start coding:\n%s", len(in.Answers), tk.Key, strings.Join(lines, "\n")),
-		map[string]any{"answers": args})
+	p, err := t.acts().AnswerQuestions(ctx, in)
+	return t.prepare(ctx, p, err)
 }
 
 func (t *tools) startRun(ctx context.Context, _ *mcp.CallToolRequest, in KeyInput) (*mcp.CallToolResult, Pending, error) {
-	tk, err := t.ticket(ctx, in.Key)
-	if err != nil {
-		return nil, Pending{}, err
-	}
-	return t.prepare(ctx, "start_run", tk.Key, fmt.Sprintf("Start %s (%s) now.", tk.Key, tk.Title), nil)
-}
-
-// FeedbackInput requests changes.
-type FeedbackInput struct {
-	Key      string `json:"key"`
-	Feedback string `json:"feedback"`
+	p, err := t.acts().StartRun(ctx, in)
+	return t.prepare(ctx, p, err)
 }
 
 func (t *tools) requestChanges(ctx context.Context, _ *mcp.CallToolRequest, in FeedbackInput) (*mcp.CallToolResult, Pending, error) {
-	tk, err := t.ticket(ctx, in.Key)
-	if err != nil {
-		return nil, Pending{}, err
-	}
-	if strings.TrimSpace(in.Feedback) == "" {
-		return nil, Pending{}, errors.New("feedback is required")
-	}
-	return t.prepare(ctx, "request_changes", tk.Key, fmt.Sprintf("Send %s back to coding with this feedback:\n%s", tk.Key, in.Feedback),
-		map[string]any{"feedback": in.Feedback})
+	p, err := t.acts().RequestChanges(ctx, in)
+	return t.prepare(ctx, p, err)
 }
 
 func (t *tools) retryRun(ctx context.Context, _ *mcp.CallToolRequest, in KeyInput) (*mcp.CallToolResult, Pending, error) {
-	tk, err := t.ticket(ctx, in.Key)
-	if err != nil {
-		return nil, Pending{}, err
-	}
-	return t.prepare(ctx, "retry_run", tk.Key, fmt.Sprintf("Retry %s (%s) from where it stopped.", tk.Key, tk.Title), nil)
-}
-
-// TaskInput creates a task.
-type TaskInput struct {
-	Kind         string   `json:"kind,omitempty" jsonschema:"auto, code, test, plan, analysis or bug (default auto)"`
-	Repository   string   `json:"repository,omitempty" jsonschema:"repository name; omit for a plan, analysis or bug task without one"`
-	Repositories []string `json:"repositories,omitempty" jsonschema:"several repository names instead of repository: the task changes them together; the first is the primary"`
-	Group        string   `json:"group,omitempty" jsonschema:"a repository group's name instead of repository: the task works in its repositories"`
-	Title        string   `json:"title"`
-	Description  string   `json:"description,omitempty"`
-	Priority     string   `json:"priority,omitempty" jsonschema:"low, medium or high (default medium)"`
-	AfterApprove string   `json:"after_approve,omitempty" jsonschema:"pr or main (default pr)"`
-	Start        string   `json:"start,omitempty" jsonschema:"ask, code or queue (default ask)"`
+	p, err := t.acts().RetryRun(ctx, in)
+	return t.prepare(ctx, p, err)
 }
 
 func (t *tools) createTask(ctx context.Context, _ *mcp.CallToolRequest, in TaskInput) (*mcp.CallToolResult, Pending, error) {
-	if in.Kind == "" {
-		in.Kind = "auto"
-	}
-	kind := domain.TicketKind(in.Kind)
-	if in.Kind != "auto" && !kind.Valid() {
-		return nil, Pending{}, fmt.Errorf("kind must be auto, code, test, plan, analysis or bug")
-	}
-	pick, err := t.pickRepos(ctx, in.Repository, in.Repositories, in.Group)
-	if err != nil {
-		return nil, Pending{}, err
-	}
-	where := pick.where
-	if pick.empty() && in.Kind != "auto" && kind.Spec().NeedsRepo {
-		return nil, Pending{}, fmt.Errorf("a %s task needs a repository", kind)
-	}
-	if in.Priority == "" {
-		in.Priority = "medium"
-	}
-	if in.AfterApprove == "" {
-		in.AfterApprove = "pr"
-	}
-	if in.Start == "" {
-		in.Start = "ask"
-	}
-	after := ", after approval: " + in.AfterApprove
-	if in.Kind != "auto" && kind.Report() {
-		after = ""
-	}
-	return t.prepare(ctx, "create_task", "", fmt.Sprintf("Create a %s task %s: %q (priority %s%s, start: %s).",
-		in.Kind, where, in.Title, in.Priority, after, in.Start), map[string]any{
-		"repo_ids": pick.ids, "group_id": pick.group, "kind": in.Kind, "title": in.Title, "description": in.Description, "priority": in.Priority,
-		"after_approve": in.AfterApprove, "start": in.Start,
-	})
+	p, err := t.acts().CreateTask(ctx, in)
+	return t.prepare(ctx, p, err)
 }
 
-// repoPick is the repositories a write tool names: their ids (or a
-// group's), and how to say where in the summary.
-type repoPick struct {
-	ids   []int64
-	group int64
-	where string
+func (t *tools) implementTicket(ctx context.Context, _ *mcp.CallToolRequest, in ImplementInput) (*mcp.CallToolResult, Pending, error) {
+	p, err := t.acts().ImplementTicket(ctx, in)
+	return t.prepare(ctx, p, err)
 }
 
-func (p repoPick) empty() bool { return len(p.ids) == 0 && p.group == 0 }
+func (t *tools) acceptFollowUps(ctx context.Context, _ *mcp.CallToolRequest, in AcceptFollowUpsInput) (*mcp.CallToolResult, Pending, error) {
+	p, err := t.acts().AcceptFollowUps(ctx, in)
+	return t.prepare(ctx, p, err)
+}
 
-// pickRepos resolves a repository name, several, or a group name.
-func (t *tools) pickRepos(ctx context.Context, one string, several []string, group string) (repoPick, error) {
-	out := repoPick{where: "without a repository"}
-	names := several
-	if strings.TrimSpace(one) != "" {
-		names = append([]string{one}, names...)
-	}
-	if strings.TrimSpace(group) != "" {
-		if len(names) > 0 {
-			return out, errors.New("give repositories or a group, not both")
-		}
-		g, err := t.d.Store.GroupByName(ctx, strings.TrimSpace(group))
-		if err != nil {
-			return out, fmt.Errorf("no repository group named %q", group)
-		}
-		var ns []string
-		for _, m := range g.Members {
-			ns = append(ns, m.RepoName)
-		}
-		out.group, out.where = g.ID, "in the group "+g.Name+" ("+strings.Join(ns, ", ")+")"
-		return out, nil
-	}
-	if len(names) == 0 {
-		return out, nil
-	}
-	list, err := t.d.Repos.List(ctx)
+func (t *tools) dismissFollowUp(ctx context.Context, _ *mcp.CallToolRequest, in DismissInput) (*mcp.CallToolResult, Pending, error) {
+	p, err := t.acts().DismissFollowUp(ctx, in)
+	return t.prepare(ctx, p, err)
+}
+
+func (t *tools) setKind(ctx context.Context, _ *mcp.CallToolRequest, in KindInput) (*mcp.CallToolResult, Pending, error) {
+	p, err := t.acts().SetKind(ctx, in)
+	return t.prepare(ctx, p, err)
+}
+
+func (t *tools) approveTicket(ctx context.Context, _ *mcp.CallToolRequest, in ApproveInput) (*mcp.CallToolResult, Pending, error) {
+	p, err := t.acts().ApproveTicket(ctx, in)
+	return t.prepare(ctx, p, err)
+}
+
+func (t *tools) rejectTicket(ctx context.Context, _ *mcp.CallToolRequest, in RejectInput) (*mcp.CallToolResult, Pending, error) {
+	p, err := t.acts().RejectTicket(ctx, in)
+	return t.prepare(ctx, p, err)
+}
+
+// ConfirmInput confirms a prepared action.
+type ConfirmInput struct {
+	ActionID string `json:"action_id"`
+}
+
+// Done is confirm_action's output.
+type Done struct {
+	Done    string        `json:"done"`
+	Ticket  *TicketBrief  `json:"ticket,omitempty"`
+	Created []TicketBrief `json:"created,omitempty"` // accept_follow_ups
+	Errors  []string      `json:"errors,omitempty"`  // follow-ups that could not be created
+}
+
+func (t *tools) confirmAction(ctx context.Context, _ *mcp.CallToolRequest, in ConfirmInput) (*mcp.CallToolResult, Done, error) {
+	a, err := t.d.Store.ConfirmPending(ctx, strings.TrimSpace(in.ActionID), domain.OriginMCP)
 	if err != nil {
-		return out, err
+		return nil, Done{}, err
 	}
-	var found []string
-	for _, n := range names {
-		n = strings.TrimSpace(n)
-		var id int64
-		for _, r := range list {
-			if strings.EqualFold(r.Name, n) {
-				id, n = r.ID, r.Name
-			}
-		}
-		if id == 0 {
-			return out, fmt.Errorf("no repository named %q", n)
-		}
-		out.ids = append(out.ids, id)
-		found = append(found, n)
+	res, err := t.acts().Execute(ctx, a, domain.OriginMCP)
+	if err != nil {
+		return nil, Done{}, err
 	}
-	out.where = "in " + strings.Join(found, " and ")
-	return out, nil
+	out := Done{Done: res.Done, Errors: res.Errors}
+	if res.Ticket != nil {
+		if rows, err := t.d.Orch.Rows(ctx, []domain.Ticket{*res.Ticket}); err == nil && len(rows) == 1 {
+			b := brief(rows[0])
+			out.Ticket = &b
+		}
+	}
+	if len(res.Created) == 0 {
+		return nil, out, nil
+	}
+	if rows, err := t.d.Orch.Rows(ctx, res.Created); err == nil {
+		for _, row := range rows {
+			out.Created = append(out.Created, brief(row))
+		}
+	}
+	return nil, out, nil
 }
 
 // GroupOut is a repository group.
@@ -858,352 +794,6 @@ func (t *tools) listGroups(ctx context.Context, _ *mcp.CallToolRequest, _ noInpu
 			x.Repositories = append(x.Repositories, n)
 		}
 		out.Groups = append(out.Groups, x)
-	}
-	return nil, out, nil
-}
-
-// idsArg reads a list of ids from a pending action's arguments.
-func idsArg(v any) []int64 {
-	list, _ := v.([]any)
-	var out []int64
-	for _, x := range list {
-		if f, ok := x.(float64); ok {
-			out = append(out, int64(f))
-		}
-	}
-	return out
-}
-
-// ImplementInput makes the code task for a report.
-type ImplementInput struct {
-	Key          string   `json:"key" jsonschema:"the done plan or bug investigation"`
-	Repository   string   `json:"repository,omitempty" jsonschema:"repository to implement it in; defaults to the report's repositories"`
-	Repositories []string `json:"repositories,omitempty" jsonschema:"several repositories instead of repository"`
-	Group        string   `json:"group,omitempty" jsonschema:"a repository group instead of repository"`
-	Queue        bool     `json:"queue,omitempty" jsonschema:"keep the task in the queue instead of starting it"`
-}
-
-func (t *tools) implementTicket(ctx context.Context, _ *mcp.CallToolRequest, in ImplementInput) (*mcp.CallToolResult, Pending, error) {
-	tk, err := t.ticket(ctx, in.Key)
-	if err != nil {
-		return nil, Pending{}, err
-	}
-	if !tk.Kind.Spec().Implementable {
-		return nil, Pending{}, fmt.Errorf("only a plan or a bug investigation can be implemented; %s is %s", tk.Key, tk.Kind)
-	}
-	if tk.State != domain.StateDone {
-		return nil, Pending{}, fmt.Errorf("%s is not done yet (it is %s): approve the report first", tk.Key, tk.State)
-	}
-	pick, err := t.pickRepos(ctx, in.Repository, in.Repositories, in.Group)
-	if err != nil {
-		return nil, Pending{}, err
-	}
-	where := strings.TrimPrefix(pick.where, "in ")
-	if pick.empty() {
-		where = "its repositories"
-		if tk.RepoID == nil {
-			return nil, Pending{}, fmt.Errorf("%s has no repository: name the one to implement it in", tk.Key)
-		}
-	}
-	start, when := "code", "start it now"
-	if in.Queue {
-		start, when = "queue", "keep it in the queue"
-	}
-	return t.prepare(ctx, "implement_ticket", tk.Key, fmt.Sprintf("Create a code task in %s that carries out the %s on %s (%s), and %s.", where, tk.Kind, tk.Key, tk.Title, when),
-		map[string]any{"repo_ids": pick.ids, "group_id": pick.group, "start": start})
-}
-
-// FollowUpChoice is one suggestion to create.
-type FollowUpChoice struct {
-	ID     int64  `json:"id"`
-	Target string `json:"target,omitempty" jsonschema:"local (an agnts task, default), jira (a new Jira issue) or plane (a new Plane work item); ask the user"`
-	Title  string `json:"title,omitempty" jsonschema:"a new title, if the user wants one"`
-	Kind   string `json:"kind,omitempty" jsonschema:"code, test, plan, analysis or bug, if the user wants another kind"`
-}
-
-// AcceptFollowUpsInput creates tickets from suggestions.
-type AcceptFollowUpsInput struct {
-	Key   string           `json:"key" jsonschema:"the ticket that suggested them"`
-	Items []FollowUpChoice `json:"items"`
-}
-
-func (t *tools) acceptFollowUps(ctx context.Context, _ *mcp.CallToolRequest, in AcceptFollowUpsInput) (*mcp.CallToolResult, Pending, error) {
-	tk, err := t.ticket(ctx, in.Key)
-	if err != nil {
-		return nil, Pending{}, err
-	}
-	if len(in.Items) == 0 {
-		return nil, Pending{}, errors.New("pick at least one follow-up")
-	}
-	f, err := t.d.Orch.ListFollowUps(ctx, tk.Key)
-	if err != nil {
-		return nil, Pending{}, err
-	}
-	var lines []string
-	items := make([]any, 0, len(in.Items))
-	for _, c := range in.Items {
-		var x *domain.Suggestion
-		for i := range f.Suggestions {
-			if f.Suggestions[i].ID == c.ID {
-				x = &f.Suggestions[i]
-			}
-		}
-		if x == nil {
-			return nil, Pending{}, fmt.Errorf("%s has no follow-up %d", tk.Key, c.ID)
-		}
-		if !x.Ready(tk.State) {
-			return nil, Pending{}, fmt.Errorf("follow-up %d (%s) cannot be created now: it is %s, or it waits until %s is done", c.ID, x.Title, x.Status, tk.Key)
-		}
-		if c.Target == "" {
-			c.Target = orchestrator.TargetLocal
-		}
-		if c.Target != orchestrator.TargetLocal && c.Target != orchestrator.TargetJira && c.Target != orchestrator.TargetPlane {
-			return nil, Pending{}, errors.New("target must be local, jira or plane")
-		}
-		if c.Kind != "" && !domain.TicketKind(c.Kind).Selectable() {
-			return nil, Pending{}, fmt.Errorf("kind must be code, test, plan, analysis or bug")
-		}
-		title, kind := x.Title, string(x.Kind)
-		if c.Title != "" {
-			title = c.Title
-		}
-		if c.Kind != "" {
-			kind = c.Kind
-		}
-		where := "a local task"
-		switch c.Target {
-		case orchestrator.TargetJira:
-			where = "a new Jira issue"
-		case orchestrator.TargetPlane:
-			where = "a new Plane work item"
-		}
-		lines = append(lines, fmt.Sprintf("%q (%s) as %s", title, kind, where))
-		items = append(items, map[string]any{"id": c.ID, "target": c.Target, "title": c.Title, "kind": c.Kind})
-	}
-	return t.prepare(ctx, "accept_follow_ups", tk.Key, fmt.Sprintf("Create %d follow-up %s of %s, queued until started: %s.",
-		len(lines), plural(len(lines), "ticket", "tickets"), tk.Key, strings.Join(lines, "; ")), map[string]any{"items": items})
-}
-
-// DismissInput declines a suggestion.
-type DismissInput struct {
-	Key string `json:"key"`
-	ID  int64  `json:"id" jsonschema:"the follow-up's id from get_ticket"`
-}
-
-func (t *tools) dismissFollowUp(ctx context.Context, _ *mcp.CallToolRequest, in DismissInput) (*mcp.CallToolResult, Pending, error) {
-	tk, err := t.ticket(ctx, in.Key)
-	if err != nil {
-		return nil, Pending{}, err
-	}
-	f, err := t.d.Orch.ListFollowUps(ctx, tk.Key)
-	if err != nil {
-		return nil, Pending{}, err
-	}
-	for _, x := range f.Suggestions {
-		if x.ID == in.ID {
-			if x.Status != domain.SuggestionOpen {
-				return nil, Pending{}, fmt.Errorf("follow-up %d is already %s", in.ID, x.Status)
-			}
-			return t.prepare(ctx, "dismiss_follow_up", tk.Key, fmt.Sprintf("Dismiss the follow-up %q suggested by %s.", x.Title, tk.Key),
-				map[string]any{"id": in.ID})
-		}
-	}
-	return nil, Pending{}, fmt.Errorf("%s has no follow-up %d", tk.Key, in.ID)
-}
-
-func plural(n int, one, many string) string {
-	if n == 1 {
-		return one
-	}
-	return many
-}
-
-// KindInput changes a ticket's kind.
-type KindInput struct {
-	Key  string `json:"key"`
-	Kind string `json:"kind" jsonschema:"auto, code, test, plan, analysis or bug"`
-}
-
-func (t *tools) setKind(ctx context.Context, _ *mcp.CallToolRequest, in KindInput) (*mcp.CallToolResult, Pending, error) {
-	tk, err := t.ticket(ctx, in.Key)
-	if err != nil {
-		return nil, Pending{}, err
-	}
-	if in.Kind != "auto" && !domain.TicketKind(in.Kind).Selectable() {
-		return nil, Pending{}, fmt.Errorf("kind must be auto, code, test, plan, analysis or bug")
-	}
-	what := "make " + tk.Key + " a " + in.Kind + " ticket"
-	if in.Kind == "auto" {
-		what = "let agnts pick the kind of " + tk.Key + " while reading it"
-	}
-	return t.prepare(ctx, "set_ticket_kind", tk.Key, fmt.Sprintf("Change %s (%s, now %s): %s.", tk.Key, tk.Title, tk.Kind, what),
-		map[string]any{"kind": in.Kind})
-}
-
-// ApproveInput approves a ticket under review.
-type ApproveInput struct {
-	Key        string `json:"key"`
-	PostReport bool   `json:"post_report,omitempty" jsonschema:"for a report on a Jira or Plane ticket: also post it as a comment on the issue; only when the user asks"`
-}
-
-func (t *tools) approveTicket(ctx context.Context, _ *mcp.CallToolRequest, in ApproveInput) (*mcp.CallToolResult, Pending, error) {
-	tk, err := t.ticket(ctx, in.Key)
-	if err != nil {
-		return nil, Pending{}, err
-	}
-	if tk.State != domain.StateWaitingForReview {
-		return nil, Pending{}, fmt.Errorf("%s is not waiting for review (it is %s)", tk.Key, tk.State)
-	}
-	if tk.Kind.Report() {
-		if in.PostReport && !tk.Source.Tracked() {
-			return nil, Pending{}, fmt.Errorf("%s has no tracker issue to post the report to", tk.Key)
-		}
-		what := "close it and keep the report in agnts"
-		if in.PostReport {
-			what = "close it, keep the report in agnts and post it as a comment on the " + tk.Source.Name() + " issue"
-		}
-		return t.prepare(ctx, "approve_ticket", tk.Key, fmt.Sprintf("Approve the %s report on %s (%s): agnts will %s.", tk.Kind, tk.Key, tk.Title, what),
-			map[string]any{"post_report": in.PostReport})
-	}
-	if in.PostReport {
-		return nil, Pending{}, fmt.Errorf("%s is a change, not a report: post_report does not apply", tk.Key)
-	}
-	what := fmt.Sprintf("push %s and open a pull request", tk.Branch)
-	if tk.Source == domain.SourceLocal && tk.AfterApprove == "main" {
-		what = "push the changes straight to the default branch"
-	}
-	return t.prepare(ctx, "approve_ticket", tk.Key, fmt.Sprintf("Approve %s (%s): agnts will %s.", tk.Key, tk.Title, what), nil)
-}
-
-// RejectInput rejects a ticket.
-type RejectInput struct {
-	Key    string `json:"key"`
-	Reason string `json:"reason,omitempty"`
-}
-
-func (t *tools) rejectTicket(ctx context.Context, _ *mcp.CallToolRequest, in RejectInput) (*mcp.CallToolResult, Pending, error) {
-	tk, err := t.ticket(ctx, in.Key)
-	if err != nil {
-		return nil, Pending{}, err
-	}
-	return t.prepare(ctx, "reject_ticket", tk.Key, fmt.Sprintf("Reject %s (%s) and stop all work on it.", tk.Key, tk.Title),
-		map[string]any{"reason": in.Reason})
-}
-
-// ConfirmInput confirms a prepared action.
-type ConfirmInput struct {
-	ActionID string `json:"action_id"`
-}
-
-// Done is confirm_action's output.
-type Done struct {
-	Done    string        `json:"done"`
-	Ticket  *TicketBrief  `json:"ticket,omitempty"`
-	Created []TicketBrief `json:"created,omitempty"` // accept_follow_ups
-	Errors  []string      `json:"errors,omitempty"`  // follow-ups that could not be created
-}
-
-func (t *tools) confirmAction(ctx context.Context, _ *mcp.CallToolRequest, in ConfirmInput) (*mcp.CallToolResult, Done, error) {
-	a, err := t.d.Store.ConfirmPending(ctx, strings.TrimSpace(in.ActionID), domain.OriginMCP)
-	if err != nil {
-		return nil, Done{}, err
-	}
-	o := t.d.Orch
-	var tk domain.Ticket
-	switch a.Tool {
-	case "answer_questions":
-		var as []domain.Answer
-		list, _ := a.Args["answers"].([]any)
-		for _, x := range list {
-			m, _ := x.(map[string]any)
-			id, _ := m["question_id"].(float64)
-			ans, _ := m["answer"].(string)
-			note, _ := m["note"].(string)
-			as = append(as, domain.Answer{QuestionID: int64(id), Answer: ans, Note: note})
-		}
-		tk, err = o.Answer(ctx, a.TicketKey, as, domain.OriginMCP)
-	case "start_run":
-		tk, err = o.Start(ctx, a.TicketKey, domain.OriginMCP)
-	case "request_changes":
-		fb, _ := a.Args["feedback"].(string)
-		tk, err = o.RequestChanges(ctx, a.TicketKey, fb, nil, nil, domain.OriginMCP)
-	case "retry_run":
-		tk, err = o.Retry(ctx, a.TicketKey, domain.OriginMCP)
-	case "approve_ticket":
-		post, _ := a.Args["post_report"].(bool)
-		tk, err = o.Approve(ctx, a.TicketKey, nil, post, domain.OriginMCP)
-	case "implement_ticket":
-		id, _ := a.Args["repo_id"].(float64) // actions prepared before several repositories
-		gid, _ := a.Args["group_id"].(float64)
-		start, _ := a.Args["start"].(string)
-		tk, err = o.Implement(ctx, a.TicketKey, orchestrator.ImplementInput{RepoID: int64(id), RepoIDs: idsArg(a.Args["repo_ids"]),
-			GroupID: int64(gid), Start: start}, domain.OriginMCP)
-	case "set_ticket_kind":
-		kind, _ := a.Args["kind"].(string)
-		tk, err = o.SetKind(ctx, a.TicketKey, kind, domain.OriginMCP)
-	case "reject_ticket":
-		reason, _ := a.Args["reason"].(string)
-		tk, err = o.Reject(ctx, a.TicketKey, reason, domain.OriginMCP)
-	case "accept_follow_ups":
-		return t.confirmFollowUps(ctx, a.TicketKey, a.Summary, a.Args)
-	case "dismiss_follow_up":
-		id, _ := a.Args["id"].(float64)
-		if _, err := o.DismissSuggestion(ctx, a.TicketKey, int64(id), domain.OriginMCP); err != nil {
-			return nil, Done{}, err
-		}
-		return nil, Done{Done: a.Summary}, nil
-	case "create_task":
-		id, _ := a.Args["repo_id"].(float64) // actions prepared before several repositories
-		gid, _ := a.Args["group_id"].(float64)
-		str := func(k string) string { s, _ := a.Args[k].(string); return s }
-		tk, err = o.CreateTask(ctx, orchestrator.TaskInput{RepoID: int64(id), RepoIDs: idsArg(a.Args["repo_ids"]), GroupID: int64(gid),
-			Kind: str("kind"), Title: str("title"), Description: str("description"),
-			Priority: str("priority"), AfterApprove: str("after_approve"), Start: str("start")}, domain.OriginMCP)
-	default:
-		return nil, Done{}, fmt.Errorf("unknown action %q", a.Tool)
-	}
-	if err != nil {
-		var te *domain.TransitionError
-		if errors.As(err, &te) {
-			return nil, Done{}, fmt.Errorf("not possible now: %s is %s", te.Key, te.From)
-		}
-		return nil, Done{}, err
-	}
-	rows, err := o.Rows(ctx, []domain.Ticket{tk})
-	out := Done{Done: a.Summary}
-	if err == nil && len(rows) == 1 {
-		b := brief(rows[0])
-		out.Ticket = &b
-	}
-	return nil, out, nil
-}
-
-func (t *tools) confirmFollowUps(ctx context.Context, key, summary string, args map[string]any) (*mcp.CallToolResult, Done, error) {
-	var in []orchestrator.AcceptInput
-	list, _ := args["items"].([]any)
-	for _, x := range list {
-		m, _ := x.(map[string]any)
-		id, _ := m["id"].(float64)
-		str := func(k string) string { s, _ := m[k].(string); return s }
-		in = append(in, orchestrator.AcceptInput{ID: int64(id), Target: str("target"), Title: str("title"), Kind: str("kind")})
-	}
-	res, err := t.d.Orch.AcceptSuggestions(ctx, key, in, domain.OriginMCP)
-	if err != nil {
-		return nil, Done{}, err
-	}
-	out := Done{Done: summary}
-	var made []domain.Ticket
-	for _, r := range res {
-		if r.Err != nil {
-			out.Errors = append(out.Errors, fmt.Sprintf("follow-up %d: %v", r.ID, r.Err))
-			continue
-		}
-		made = append(made, *r.Ticket)
-	}
-	if rows, err := t.d.Orch.Rows(ctx, made); err == nil {
-		for _, row := range rows {
-			out.Created = append(out.Created, brief(row))
-		}
 	}
 	return nil, out, nil
 }
