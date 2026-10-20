@@ -168,7 +168,7 @@
     "tagline": "Vaqtingizni kod yozishga sarflamang. Muhandislik bilan shug'ullaning."
   },
   "hero": {
-    "accent": "Muhandislik",
+    "accent": "PR",
     "lead": "agnts kod yozish bilan bog'liq barcha ishlarni o'z zimmasiga oladi. agnts bilan dasturchilar haqiqiy muhandisga aylanadi.",
     "log1": "2 ta savol berdi, telefondan javob berildi",
     "log3": "48 ta o'tdi",
@@ -176,7 +176,7 @@
     "ready": "Tekshiruvingizga tayyor",
     "see": "Qanday ishlashini ko'ring",
     "ticketTitle": "O'tkazma yaratishda idempotentlik kalitini talab qilish",
-    "title": "Dasturlashning yangi davri. Vaqtingizni kod yozishga sarflamang. {accent} bilan shug'ullaning."
+    "title": "Barcha kod tiketlaringizni olib, {accent} gacha yetkazadigan AI jamoadoshingiz."
   },
   "how": {
     "lead": "Junior, middle yoki senior: oddiy vazifalarni agnts'ga topshiring, vaqtingizni esa sizni talab qiladigan ishlarga qoldiring.",

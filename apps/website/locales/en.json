@@ -168,7 +168,7 @@
     "tagline": "Don't spend time on coding. Start engineering."
   },
   "hero": {
-    "accent": "engineering.",
+    "accent": "PR.",
     "lead": "agnts takes on all the coding work. With agnts, programmers become real engineers.",
     "log1": "asked 2 questions, answered from phone",
     "log3": "48 passed",
@@ -176,7 +176,7 @@
     "ready": "Ready for your review",
     "see": "See how it works",
     "ticketTitle": "Require idempotency key on transfer creation",
-    "title": "New era of programming. Don't spend time on coding. Start {accent}"
+    "title": "Your AI teammate who takes all your coding tickets and ships them to {accent}"
   },
   "how": {
     "lead": "Junior, mid-level or senior: hand agnts the routine tickets and keep your hours for the work that needs you.",
