@@ -63,6 +63,7 @@ import 'package:agnts_api/src/model/code_review.dart';
 import 'package:agnts_api/src/model/commit.dart';
 import 'package:agnts_api/src/model/commit_detail.dart';
 import 'package:agnts_api/src/model/commit_pull.dart';
+import 'package:agnts_api/src/model/commit_ticket.dart';
 import 'package:agnts_api/src/model/confirm_totp_request.dart';
 import 'package:agnts_api/src/model/connect_integration_request.dart';
 import 'package:agnts_api/src/model/connect_result.dart';
@@ -126,6 +127,8 @@ import 'package:agnts_api/src/model/lesson_count.dart';
 import 'package:agnts_api/src/model/lesson_list.dart';
 import 'package:agnts_api/src/model/lesson_ref.dart';
 import 'package:agnts_api/src/model/link.dart';
+import 'package:agnts_api/src/model/linked_commit.dart';
+import 'package:agnts_api/src/model/linked_commits.dart';
 import 'package:agnts_api/src/model/live_run.dart';
 import 'package:agnts_api/src/model/local_branch.dart';
 import 'package:agnts_api/src/model/login_request.dart';
@@ -485,6 +488,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return CommitDetail.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'CommitPull':
           return CommitPull.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CommitTicket':
+          return CommitTicket.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ConfirmTotpRequest':
           return ConfirmTotpRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ConnectIntegrationRequest':
@@ -626,6 +631,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return LessonRef.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Link':
           return Link.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'LinkedCommit':
+          return LinkedCommit.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'LinkedCommits':
+          return LinkedCommits.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'LiveRun':
           return LiveRun.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'LocalBranch':

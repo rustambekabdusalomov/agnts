@@ -2646,9 +2646,9 @@
   "integrationsMapMerged": "When the pull request is merged",
   "integrationsGitWebhookSteps_github": "In the repository (or organisation) go to Settings → Webhooks → Add webhook. Content type application/json, paste the URL and secret below.",
   "integrationsGitWebhookSteps_gitlab": "In the project go to Settings → Webhooks. Paste the URL, put the secret below in Secret token.",
-  "integrationsGitEvents_github": "Pull requests, Workflow runs",
-  "integrationsGitEvents_gitlab": "Merge request events, Pipeline events",
-  "integrationsGitWebhookWhy": "When a pull or merge request is merged, agnts marks the ticket merged and moves the Jira issue or Plane work item to the merged status set on its tracker's page. Pipeline events keep the repository page current.",
+  "integrationsGitEvents_github": "Pushes, Pull requests, Workflow runs",
+  "integrationsGitEvents_gitlab": "Push events, Merge request events, Pipeline events",
+  "integrationsGitWebhookWhy": "When a pull or merge request is merged, agnts marks the ticket merged and moves the Jira issue or Plane work item to the merged status set on its tracker's page. Pipeline events keep the repository page current. Pushes link commits whose branch or message has a ticket's number to that ticket.",
   "integrationsName_plane": "Plane",
   "integrationsDesc_plane": "Pick up work items with the agnts label from Plane Cloud or your own Plane, and keep their state up to date.",
   "integrationsConnectSub_plane": "Use a personal access token from Plane. Works with Plane Cloud and self-hosted Plane.",
@@ -2893,6 +2893,59 @@
   },
   "learnQueueLede": "Pushed tickets agnts reads for techniques the codebase never used before. Queue any done ticket, or retry one that failed.",
   "learnQueueEmpty": "Nothing to learn from right now: every pushed ticket has been read.",
+  "linkedCommitsTitle": "Commits",
+  "linkedCommitsSub": "Anyone's commits whose branch or message has {number}, from pushes and the repositories' recent history.",
+  "@linkedCommitsSub": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "linkedCommitsNone": "No commits with {number} yet. Push a branch or write a commit message with it, and the commits show here.",
+  "@linkedCommitsNone": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "linkedCommitsTotal": "{n, plural, one {{n} commit} other {{n} commits}}",
+  "@linkedCommitsTotal": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "linkedCommitsOnBranch": "branch",
+  "linkedCommitsOnMessage": "message",
+  "linkedCommitsOnBranchHint": "The branch name has the number",
+  "linkedCommitsOnMessageHint": "The commit message has the number",
+  "linkedCommitsMeta": "{author} · {repo} · {branch}",
+  "@linkedCommitsMeta": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      },
+      "repo": {
+        "type": "String"
+      },
+      "branch": {
+        "type": "String"
+      }
+    }
+  },
+  "linkedCommitsMore": "Show more ({n} left)",
+  "@linkedCommitsMore": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "linkedCommitsLoadError": "Could not load the commits.",
+  "linkedCommitsTickets": "Tickets",
   "logsTitle": "Logs",
   "logsLede": "Every step agnts takes, recorded as it happens. Use it to see where time goes and why runs stop.",
   "logsLive": "Live",

@@ -45,6 +45,8 @@ abstract class _$CommitDetailCWProxy {
 
   CommitDetail ticketKey(String? ticketKey);
 
+  CommitDetail tickets(List<CommitTicket>? tickets);
+
   CommitDetail provider(CommitDetailProviderEnum provider);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CommitDetail(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -73,6 +75,7 @@ abstract class _$CommitDetailCWProxy {
     List<Pipeline> pipelines,
     List<CommitPull> pulls,
     String? ticketKey,
+    List<CommitTicket>? tickets,
     CommitDetailProviderEnum provider,
   });
 }
@@ -147,6 +150,9 @@ class _$CommitDetailCWProxyImpl implements _$CommitDetailCWProxy {
   CommitDetail ticketKey(String? ticketKey) => this(ticketKey: ticketKey);
 
   @override
+  CommitDetail tickets(List<CommitTicket>? tickets) => this(tickets: tickets);
+
+  @override
   CommitDetail provider(CommitDetailProviderEnum provider) =>
       this(provider: provider);
 
@@ -177,6 +183,7 @@ class _$CommitDetailCWProxyImpl implements _$CommitDetailCWProxy {
     Object? pipelines = const $CopyWithPlaceholder(),
     Object? pulls = const $CopyWithPlaceholder(),
     Object? ticketKey = const $CopyWithPlaceholder(),
+    Object? tickets = const $CopyWithPlaceholder(),
     Object? provider = const $CopyWithPlaceholder(),
   }) {
     return CommitDetail(
@@ -256,6 +263,10 @@ class _$CommitDetailCWProxyImpl implements _$CommitDetailCWProxy {
           ? _value.ticketKey
           // ignore: cast_nullable_to_non_nullable
           : ticketKey as String?,
+      tickets: tickets == const $CopyWithPlaceholder()
+          ? _value.tickets
+          // ignore: cast_nullable_to_non_nullable
+          : tickets as List<CommitTicket>?,
       provider: provider == const $CopyWithPlaceholder()
           ? _value.provider
           // ignore: cast_nullable_to_non_nullable
@@ -336,6 +347,12 @@ CommitDetail _$CommitDetailFromJson(Map<String, dynamic> json) =>
               .toList(),
         ),
         ticketKey: $checkedConvert('ticketKey', (v) => v as String?),
+        tickets: $checkedConvert(
+          'tickets',
+          (v) => (v as List<dynamic>?)
+              ?.map((e) => CommitTicket.fromJson(e as Map<String, dynamic>))
+              .toList(),
+        ),
         provider: $checkedConvert(
           'provider',
           (v) => $enumDecode(_$CommitDetailProviderEnumEnumMap, v),
@@ -365,6 +382,7 @@ Map<String, dynamic> _$CommitDetailToJson(CommitDetail instance) =>
       'pipelines': instance.pipelines.map((e) => e.toJson()).toList(),
       'pulls': instance.pulls.map((e) => e.toJson()).toList(),
       'ticketKey': ?instance.ticketKey,
+      'tickets': ?instance.tickets?.map((e) => e.toJson()).toList(),
       'provider': _$CommitDetailProviderEnumEnumMap[instance.provider]!,
     };
 

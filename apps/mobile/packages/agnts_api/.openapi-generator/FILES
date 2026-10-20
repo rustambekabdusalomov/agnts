@@ -79,6 +79,7 @@ doc/CodeReview.md
 doc/Commit.md
 doc/CommitDetail.md
 doc/CommitPull.md
+doc/CommitTicket.md
 doc/ConfirmTotpRequest.md
 doc/ConnectIntegrationRequest.md
 doc/ConnectResult.md
@@ -153,6 +154,8 @@ doc/LessonLevel.md
 doc/LessonList.md
 doc/LessonRef.md
 doc/Link.md
+doc/LinkedCommit.md
+doc/LinkedCommits.md
 doc/LiveRun.md
 doc/LocalBranch.md
 doc/LoginRequest.md
@@ -482,6 +485,7 @@ lib/src/model/code_review.dart
 lib/src/model/commit.dart
 lib/src/model/commit_detail.dart
 lib/src/model/commit_pull.dart
+lib/src/model/commit_ticket.dart
 lib/src/model/confirm_totp_request.dart
 lib/src/model/connect_integration_request.dart
 lib/src/model/connect_result.dart
@@ -550,6 +554,8 @@ lib/src/model/lesson_level.dart
 lib/src/model/lesson_list.dart
 lib/src/model/lesson_ref.dart
 lib/src/model/link.dart
+lib/src/model/linked_commit.dart
+lib/src/model/linked_commits.dart
 lib/src/model/live_run.dart
 lib/src/model/local_branch.dart
 lib/src/model/login_request.dart
@@ -834,6 +840,7 @@ test/code_review_test.dart
 test/commit_detail_test.dart
 test/commit_pull_test.dart
 test/commit_test.dart
+test/commit_ticket_test.dart
 test/confirm_totp_request_test.dart
 test/connect_integration_request_test.dart
 test/connect_result_test.dart
@@ -908,6 +915,8 @@ test/lesson_list_test.dart
 test/lesson_ref_test.dart
 test/lesson_test.dart
 test/link_test.dart
+test/linked_commit_test.dart
+test/linked_commits_test.dart
 test/live_run_test.dart
 test/local_branch_test.dart
 test/login_request_test.dart

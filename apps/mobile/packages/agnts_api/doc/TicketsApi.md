@@ -28,6 +28,7 @@ Method | HTTP request | Description
 [**listFollowUps**](TicketsApi.md#listfollowups) | **GET** /tickets/{key}/follow-ups | Suggested follow-up tickets and the tickets made from them
 [**listRelations**](TicketsApi.md#listrelations) | **GET** /tickets/{key}/relations | The ticket&#39;s ordering constraints and what holds it back now
 [**listTicketEvents**](TicketsApi.md#listticketevents) | **GET** /tickets/{key}/events | The ticket&#39;s log, oldest first; poll with &#x60;after&#x60; for live updates
+[**listTicketLinkedCommits**](TicketsApi.md#listticketlinkedcommits) | **GET** /tickets/{key}/linked-commits | Commits on the git host linked to the ticket by its number or key, newest first
 [**listTickets**](TicketsApi.md#listtickets) | **GET** /tickets | Tickets, most recently active first
 [**markTicketMerged**](TicketsApi.md#markticketmerged) | **POST** /tickets/{key}/merged | Record that a done ticket&#39;s pull request was merged
 [**previewTicket**](TicketsApi.md#previewticket) | **POST** /tickets/{key}/preview | Queue a preview (screenshots of the running app) of a ticket waiting for review, again if one already ran
@@ -943,6 +944,57 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**List&lt;Event&gt;**](Event.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **listTicketLinkedCommits**
+> LinkedCommits listTicketLinkedCommits(key, limit, offset)
+
+Commits on the git host linked to the ticket by its number or key, newest first
+
+Anyone's commits whose branch or message has the ticket's number (or its key), as whole words ignoring case: feature/AMANAT-2288-login, \"AMANAT-2288: fix\". They come from the git hosts' push webhooks, and from a scan of the repositories' recent history when the ticket arrives, its number changes or a repository is added. A number that open and closed tickets share links to the open one. Commit subjects are written by people. 
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getTicketsApi();
+final String key = key_example; // String | 
+final int limit = 56; // int | 
+final int offset = 56; // int | 
+
+try {
+    final response = api.listTicketLinkedCommits(key, limit, offset);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling TicketsApi->listTicketLinkedCommits: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **key** | **String**|  | 
+ **limit** | **int**|  | [optional] [default to 20]
+ **offset** | **int**|  | [optional] [default to 0]
+
+### Return type
+
+[**LinkedCommits**](LinkedCommits.md)
 
 ### Authorization
 

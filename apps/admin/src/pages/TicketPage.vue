@@ -37,6 +37,7 @@ import ProgressTrack from '../components/ticket/ProgressTrack.vue'
 import PullCard from '../components/ticket/PullCard.vue'
 import ReviewDraftsPanel from '../components/pulls/ReviewDraftsPanel.vue'
 import TicketPullComments from '../components/ticket/TicketPullComments.vue'
+import TicketCommits from '../components/ticket/TicketCommits.vue'
 import CiCard from '../components/ticket/CiCard.vue'
 import { useRepoMembers } from '../components/repo/useRepoMembers'
 import RunLog from '../components/ticket/RunLog.vue'
@@ -1099,6 +1100,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
         </template>
 
         <TicketPullComments v-for="p in prThreads" :key="`${p.repoId}-${p.number}`" :ticket="tk" v-bind="p" />
+        <TicketCommits v-if="!report" :ticket="tk" />
       </div>
 
       <aside class="cfg-side tk-side">

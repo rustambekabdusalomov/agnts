@@ -195,6 +195,11 @@ func (s *Server) ListRepoCommits(w http.ResponseWriter, r *http.Request, id int6
 	if !ok {
 		return
 	}
+	shas := make([]string, len(v.Commits))
+	for i, c := range v.Commits {
+		shas[i] = c.SHA
+	}
+	linked := s.commitTickets(r.Context(), v.Repo.ID, shas)
 	out := make([]gen.Commit, len(v.Commits))
 	for i, c := range v.Commits {
 		out[i] = gen.Commit{Sha: c.SHA, Message: c.Message, Author: c.Author, Add: c.Add, Del: c.Del, Ci: gen.CI(c.CI), Url: &c.URL}
@@ -202,7 +207,7 @@ func (s *Server) ListRepoCommits(w http.ResponseWriter, r *http.Request, id int6
 			d := c.Date
 			out[i].Date = &d
 		}
-		out[i].TicketKey = ticketKeyOf(c.Message)
+		out[i].Tickets, out[i].TicketKey = toCommitTickets(linked[strings.ToLower(c.SHA)], ticketKeyOf(c.Message))
 	}
 	writeJSON(w, http.StatusOK, out)
 }
@@ -318,7 +323,8 @@ func (s *Server) GetRepoCommit(w http.ResponseWriter, r *http.Request, id gen.Re
 		AuthorAvatar: str(c.AuthorAvatar), Date: at(c.Date), Committer: str(c.Committer), CommitterEmail: str(c.CommitterEmail),
 		CommittedDate: at(c.CommittedDate), Parents: c.Parents, Url: c.URL, Add: c.Add, Del: c.Del,
 		Files: make([]gen.FileChange, len(c.Files)), Pipelines: toPipelines(c.Pipelines), Pulls: make([]gen.CommitPull, len(c.Pulls)),
-		TicketKey: ticketKeyOf(c.Message), Provider: gen.CommitDetailProvider(v.Provider)}
+		Provider: gen.CommitDetailProvider(v.Provider)}
+	out.Tickets, out.TicketKey = toCommitTickets(s.commitTickets(r.Context(), id, []string{c.SHA})[strings.ToLower(c.SHA)], ticketKeyOf(c.Message))
 	if out.Parents == nil {
 		out.Parents = []string{}
 	}

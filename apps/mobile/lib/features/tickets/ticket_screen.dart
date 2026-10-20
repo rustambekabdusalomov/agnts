@@ -15,6 +15,7 @@ import 'file_diff.dart';
 import 'follow_ups.dart';
 import 'harness.dart';
 import 'kinds.dart';
+import 'linked_commits.dart';
 import 'preview_shots.dart';
 import 'pull_comments.dart';
 import 'commit_messages.dart';
@@ -1085,6 +1086,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         ..._resultBody(context, d.result!),
       if (t.kind == TicketKind.review && t.pull != null) ReviewDraftsFold(ticket: t),
       for (final p in ticketPulls(t)) PullCommentsFold(ticket: t, repoId: p.repoId, number: p.number, url: p.url, repoName: p.repoName),
+      if (!isReportKind(t.kind)) LinkedCommitsFold(ticket: t),
       if (RelationsFold.shows(d)) RelationsFold(d),
       if (d.followUps != null) FollowUpsFold(d),
       SpendFold(spend: t.spend, stages: d.spendByStage ?? const [], report: isReportKind(t.kind)),

@@ -156,6 +156,15 @@ void main() {
       // TODO
     });
 
+    // Commits on the git host linked to the ticket by its number or key, newest first
+    //
+    // Anyone's commits whose branch or message has the ticket's number (or its key), as whole words ignoring case: feature/AMANAT-2288-login, \"AMANAT-2288: fix\". They come from the git hosts' push webhooks, and from a scan of the repositories' recent history when the ticket arrives, its number changes or a repository is added. A number that open and closed tickets share links to the open one. Commit subjects are written by people. 
+    //
+    //Future<LinkedCommits> listTicketLinkedCommits(String key, { int limit, int offset }) async
+    test('test listTicketLinkedCommits', () async {
+      // TODO
+    });
+
     // Tickets, most recently active first
     //
     //Future<List<Ticket>> listTickets({ List<TicketState> state }) async

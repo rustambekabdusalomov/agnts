@@ -1,0 +1,16 @@
+{
+  "linkedCommits": {
+    "title": "Commitlar",
+    "sub": "Branchi yoki xabarida {number} bor barcha commitlar: pushlardan va repozitoriylarning yaqin tarixidan.",
+    "none": "{number} bilan commitlar hali yo'q. Shu raqam bilan branch push qiling yoki commit xabarini yozing, commitlar shu yerda ko'rinadi.",
+    "total": "{n, plural, other {# ta commit}}",
+    "onBranch": "branch",
+    "onMessage": "xabar",
+    "onBranchHint": "Raqam branch nomida bor",
+    "onMessageHint": "Raqam commit xabarida bor",
+    "meta": "{author} · {repo} · {branch}",
+    "more": "Yana ko'rsatish ({n} ta qoldi)",
+    "loadError": "Commitlarni yuklab bo'lmadi.",
+    "tickets": "Tiketlar"
+  }
+}

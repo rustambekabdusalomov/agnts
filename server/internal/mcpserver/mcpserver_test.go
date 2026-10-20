@@ -117,7 +117,7 @@ func TestToolsAndAnnotations(t *testing.T) {
 	for _, tl := range list.Tools {
 		byName[tl.Name] = tl
 	}
-	for _, n := range []string{"get_inbox", "list_tickets", "get_ticket", "get_run_log", "get_usage", "get_analytics", "list_repositories", "get_repository"} {
+	for _, n := range []string{"get_inbox", "list_tickets", "get_ticket", "get_run_log", "get_usage", "get_analytics", "list_repositories", "get_repository", "list_ticket_commits"} {
 		if tl := byName[n]; tl == nil || tl.Annotations == nil || !tl.Annotations.ReadOnlyHint {
 			t.Errorf("%s should exist and be read-only", n)
 		}

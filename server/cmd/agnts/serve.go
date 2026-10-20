@@ -27,6 +27,7 @@ import (
 	"agnts/internal/billing"
 	"agnts/internal/ciwatch"
 	"agnts/internal/claude"
+	"agnts/internal/commitlink"
 	"agnts/internal/config"
 	"agnts/internal/docs"
 	"agnts/internal/domain"
@@ -159,6 +160,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		Pulls:        a.orch,
 		Drafts:       a.orch,
 		CI:           a.ci,
+		CommitLinks:  a.store,
 		Assistant:    a.orch,
 		Swagger:      a.orch,
 		Suites:       a.orch,
@@ -192,8 +194,8 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 			"jira":     jira.WebhookHandler(a.jiraConfig, a.jira.AccountID, a.orch, a.store, log.With("component", "jira")),
 			"plane":    plane.WebhookHandler(a.planeConfig, a.plane, a.orch, a.store, log.With("component", "plane")),
 			"telegram": a.notifier.WebhookHandler(),
-			"github":   vcs.GitHubWebhook(hookSecret(cfg.EncKey, "github"), gitHooks{a.orch, a.ci}, a.store, a.vcs.ForgetAll, log.With("component", "github")),
-			"gitlab":   vcs.GitLabWebhook(hookSecret(cfg.EncKey, "gitlab"), gitHooks{a.orch, a.ci}, a.store, a.vcs.ForgetAll, log.With("component", "gitlab")),
+			"github":   vcs.GitHubWebhook(hookSecret(cfg.EncKey, "github"), gitHooks{a.orch, a.ci, a.links}, a.store, a.vcs.ForgetAll, log.With("component", "github")),
+			"gitlab":   vcs.GitLabWebhook(hookSecret(cfg.EncKey, "gitlab"), gitHooks{a.orch, a.ci, a.links}, a.store, a.vcs.ForgetAll, log.With("component", "gitlab")),
 		},
 	})
 	if err != nil {
@@ -331,6 +333,7 @@ type agent struct {
 	budget       *orchestrator.MemoryBudget
 	network      *network.Service
 	ci           *ciwatch.Service
+	links        *commitlink.Service
 	assistant    *postgres.Assistant
 }
 
@@ -463,6 +466,8 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.billing.OnChange(a.orch.ForgetWorkspace)
 	a.ci = ciwatch.New(postgres.NewCI(pool, box), a.store, a.orch, a.vcs, repos, a.settings, log.With("component", "ci"))
 	a.orch.SetCIHook(a.ci)
+	a.links = commitlink.New(a.store, a.vcs, log.With("component", "commit-links"))
+	a.orch.SetCommitLinker(a.links)
 
 	a.repos = admin.NewRepos(a.store, gh, a.vcs, func(ctx context.Context) string {
 		c, ok, err := a.gitlabConfig(ctx)
@@ -480,6 +485,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.repos.SetPreviewEnvs(previewEnvs)
 	a.repos.SetBuildEnvs(previewEnvs)
 	a.repos.SetImageCheck(run.ImageOK)
+	a.repos.OnAdd(a.links.RepositoryAdded)
 	a.repos.OnArchive(func(ctx context.Context, r domain.Repository) {
 		if err := run.RemoveCache(ctx, "repo-"+strconv.FormatInt(r.ID, 10)); err != nil {
 			log.Warn("remove an archived repository's package cache", "repo", r.ID, "err", err)
@@ -1138,13 +1144,22 @@ func reservedHosts(cfg config.Config) []string {
 }
 
 // gitHooks receives the git hosts' webhooks: merges and closed pull
-// requests go to the orchestrator, finished CI runs to CI watching.
+// requests go to the orchestrator, finished CI runs to CI watching, pushes
+// to commit linking.
 type gitHooks struct {
 	*orchestrator.Orchestrator
-	ci *ciwatch.Service
+	ci    *ciwatch.Service
+	links *commitlink.Service
 }
 
-var _ vcs.CloseSink = gitHooks{}
+var (
+	_ vcs.CloseSink = gitHooks{}
+	_ vcs.PushSink  = gitHooks{}
+)
+
+func (h gitHooks) CommitsPushed(ctx context.Context, p domain.Push) error {
+	return h.links.CommitsPushed(ctx, p)
+}
 
 func (h gitHooks) CIRunFinished(ctx context.Context, run domain.CIRun) error {
 	return h.ci.CIRunFinished(ctx, run)

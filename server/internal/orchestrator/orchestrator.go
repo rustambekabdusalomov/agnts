@@ -135,6 +135,7 @@ type Orchestrator struct {
 	envs        PreviewEnvs
 	builds      BuildEnvs
 	ciHook      CIHook
+	links       CommitLinker
 	log         *slog.Logger
 
 	queue      Queue

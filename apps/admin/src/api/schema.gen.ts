@@ -362,6 +362,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tickets/{key}/linked-commits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Commits on the git host linked to the ticket by its number or key, newest first
+         * @description Anyone's commits whose branch or message has the ticket's number (or its key), as whole words ignoring case:
+         *     feature/AMANAT-2288-login, "AMANAT-2288: fix". They come from the git hosts' push webhooks, and from a scan of
+         *     the repositories' recent history when the ticket arrives, its number changes or a repository is added. A
+         *     number that open and closed tickets share links to the open one. Commit subjects are written by people.
+         */
+        get: operations["listTicketLinkedCommits"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tickets/{key}/commits/reapply": {
         parameters: {
             query?: never;
@@ -6909,7 +6934,43 @@ export interface components {
             del: number;
             ci: components["schemas"]["CI"];
             url?: string;
+            /** @description The first linked ticket's key, else the KEY-1 before the message's colon */
             ticketKey?: string;
+            /** @description The tickets the commit is linked to */
+            tickets?: components["schemas"]["CommitTicket"][];
+        };
+        /** @description A ticket a commit is linked to (its branch or message has the ticket's number or key) */
+        CommitTicket: {
+            key: string;
+            /** @description The team's number, when the ticket has one */
+            number?: string;
+            title: string;
+            state: components["schemas"]["TicketState"];
+        };
+        LinkedCommit: {
+            sha: string;
+            shortSha: string;
+            /** @description The message's first line */
+            subject: string;
+            author: string;
+            /** @description The git host account, when known */
+            authorLogin?: string;
+            /** @description The branch it was first seen on */
+            branch: string;
+            /** Format: int64 */
+            repoId: number;
+            repo: string;
+            /** @description The commit on the git host */
+            url: string;
+            /** Format: date-time */
+            committedAt: string;
+            /** @description Where the ticket's number was found */
+            matchedOn: ("branch" | "message")[];
+        };
+        LinkedCommits: {
+            commits: components["schemas"]["LinkedCommit"][];
+            /** @description How many commits are linked in all */
+            total: number;
         };
         TreeEntry: {
             name: string;
@@ -6977,7 +7038,10 @@ export interface components {
             filesCapped?: boolean;
             pipelines: components["schemas"]["Pipeline"][];
             pulls: components["schemas"]["CommitPull"][];
+            /** @description The first linked ticket's key, else the KEY-1 before the message's colon */
             ticketKey?: string;
+            /** @description The tickets the commit is linked to */
+            tickets?: components["schemas"]["CommitTicket"][];
             /** @enum {string} */
             provider: "github" | "gitlab";
         };
@@ -8177,6 +8241,33 @@ export interface operations {
         responses: {
             200: components["responses"]["TicketOK"];
             400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    listTicketLinkedCommits: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LinkedCommits"];
+                };
+            };
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
         };

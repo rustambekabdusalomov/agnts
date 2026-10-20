@@ -175,11 +175,12 @@ func (o *Orchestrator) IngestDetail(ctx context.Context, in Incoming, origin dom
 
 	// An archived repository takes no new tickets; known ones still refresh.
 	if !archived && !in.NoCreate {
-		_, err = o.store.CreateTicket(ctx, t, domain.Event{
+		created, err := o.store.CreateTicket(ctx, t, domain.Event{
 			TicketKey: in.Key, Type: domain.EventTicketCreated, Origin: origin, Message: in.Title,
 		})
 		if err == nil {
 			o.syncTrackerRelations(ctx, in, origin)
+			o.numberChanged(ctx, created, "")
 			o.Wake()
 			return IngestCreated, nil
 		}
@@ -1068,10 +1069,14 @@ func (o *Orchestrator) SetTicketNumber(ctx context.Context, key, number string, 
 	if n == "" {
 		msg = "ticket number cleared"
 	}
-	return o.store.UpdateTicket(ctx, key, &domain.Event{
+	out, err := o.store.UpdateTicket(ctx, key, &domain.Event{
 		TicketKey: key, Type: domain.EventTicketUpdated, Origin: origin, Message: msg,
 		Data: map[string]any{"number": n},
 	}, func(x *domain.Ticket) { x.TicketNumber = n })
+	if err == nil {
+		o.numberChanged(ctx, out, t.TicketNumber)
+	}
+	return out, err
 }
 
 // SetRepo links a ticket to another repository (SetRepos with one).
@@ -1182,6 +1187,9 @@ func (o *Orchestrator) createTask(ctx context.Context, t domain.Ticket, prefix s
 			// Before the wake, so the analysis sees the files.
 			if lerr := o.store.LinkAttachments(ctx, files, out.ID, nil, domain.AttachTicket); lerr != nil {
 				o.log.Warn("attach files", "ticket", out.Key, "err", lerr)
+			}
+			if out.TicketNumber != "" {
+				o.numberChanged(ctx, out, "")
 			}
 			if !out.Held {
 				o.Wake()
@@ -1297,6 +1305,7 @@ func (o *Orchestrator) UpdateTask(ctx context.Context, key string, in TaskInput,
 		}
 	}
 	var bad error
+	var oldNumber string
 	t, err := o.store.UpdateTicket(ctx, key, &domain.Event{
 		TicketKey: key, Type: domain.EventTaskChanged, Origin: origin, Message: "task edited",
 	}, func(x *domain.Ticket) {
@@ -1304,6 +1313,7 @@ func (o *Orchestrator) UpdateTask(ctx context.Context, key string, in TaskInput,
 			bad = &domain.TransitionError{Key: key, From: x.State, To: domain.StateNew}
 			return
 		}
+		oldNumber = x.TicketNumber
 		if v := strings.TrimSpace(in.Title); v != "" {
 			x.Title = v
 		}
@@ -1334,6 +1344,9 @@ func (o *Orchestrator) UpdateTask(ctx context.Context, key string, in TaskInput,
 	})
 	if bad != nil {
 		return t, bad
+	}
+	if err == nil && in.TicketNumber != nil && number != oldNumber {
+		o.numberChanged(ctx, t, oldNumber)
 	}
 	if err == nil && in.Attachments != nil {
 		err = o.setTaskFiles(ctx, t, *in.Attachments)

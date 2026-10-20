@@ -777,6 +777,36 @@ func TestSetTicketNumber(t *testing.T) {
 	}
 }
 
+type heardNumber struct{ key, number, old string }
+
+type linker struct{ heard []heardNumber }
+
+func (l *linker) TicketNumberChanged(_ context.Context, t domain.Ticket, old string) {
+	l.heard = append(l.heard, heardNumber{t.Key, t.TicketNumber, old})
+}
+
+// The commit linker hears about new tickets and changed numbers, to scan
+// the git host for their commits.
+func TestCommitLinkerHearsNumbers(t *testing.T) {
+	h := newHarness(t)
+	l := &linker{}
+	h.o.SetCommitLinker(l)
+	h.ingest("PAY-8")
+	if _, err := h.o.SetTicketNumber(h.ctx, "PAY-8", "AMANAT-1", domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := h.o.SetTicketNumber(h.ctx, "PAY-8", "AMANAT-1", domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := h.o.SetTicketNumber(h.ctx, "PAY-8", "AMANAT-2", domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
+	want := []heardNumber{{"PAY-8", "", ""}, {"PAY-8", "AMANAT-1", ""}, {"PAY-8", "AMANAT-2", "AMANAT-1"}}
+	if !slices.Equal(l.heard, want) {
+		t.Fatalf("heard %+v, want %+v", l.heard, want)
+	}
+}
+
 func TestRetryWithNote(t *testing.T) {
 	h := newHarness(t)
 	h.ingest("PAY-6")

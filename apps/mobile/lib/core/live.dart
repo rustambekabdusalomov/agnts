@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../features/assistant/assistant_data.dart';
+import '../features/tickets/linked_commits.dart';
 import '../features/tickets/pull_comments.dart';
 import 'api.dart';
 import 'data.dart';
@@ -126,6 +127,8 @@ class LiveStream {
         ref.invalidate(ciFailuresProvider);
         ref.invalidate(ciFailureProvider);
         ref.invalidate(ticketCIProvider);
+      case 'commits_linked':
+        ref.invalidate(linkedCommitsProvider);
     }
     if (e['step'] == 'learn') ref.invalidate(learnQueueProvider);
     // A finished review run writes its drafts.

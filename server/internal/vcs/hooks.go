@@ -94,6 +94,114 @@ func prComment(ctx context.Context, sink HookSink, ev domain.PRCommentEvent, log
 	}
 }
 
+// PushSink hears about pushes to branches, to link their commits to
+// tickets. A HookSink may implement it.
+type PushSink interface {
+	CommitsPushed(ctx context.Context, p domain.Push) error
+}
+
+// pushed hands a branch push to the sink when it takes them. Errors are
+// logged: the host would only redeliver the same push.
+func pushed(ctx context.Context, sink HookSink, p domain.Push, log *slog.Logger) {
+	ps, ok := sink.(PushSink)
+	if !ok || p.Repo == "" || p.Branch == "" || p.Deleted() {
+		return
+	}
+	if err := ps.CommitsPushed(ctx, p); err != nil {
+		log.Error("push", "repo", p.Repo, "branch", p.Branch, "err", err)
+	}
+}
+
+// branchOf returns the branch a ref names; "" for tags and other refs.
+func branchOf(ref string) string {
+	b, _ := strings.CutPrefix(ref, "refs/heads/")
+	if b == ref {
+		return ""
+	}
+	return b
+}
+
+// githubPush reads GitHub's push event. Commits already on the
+// repository (distinct false, as when a branch takes in the default
+// branch) are left out.
+func githubPush(body []byte) (domain.Push, bool) {
+	var p struct {
+		Ref     string `json:"ref"`
+		Before  string `json:"before"`
+		After   string `json:"after"`
+		Commits []struct {
+			ID        string    `json:"id"`
+			Message   string    `json:"message"`
+			Timestamp time.Time `json:"timestamp"`
+			URL       string    `json:"url"`
+			Distinct  bool      `json:"distinct"`
+			Author    struct {
+				Name     string `json:"name"`
+				Username string `json:"username"`
+			} `json:"author"`
+		} `json:"commits"`
+		Pusher struct {
+			Name string `json:"name"`
+		} `json:"pusher"`
+		Sender struct {
+			Login string `json:"login"`
+		} `json:"sender"`
+		Repository struct {
+			FullName string `json:"full_name"`
+		} `json:"repository"`
+	}
+	if json.Unmarshal(body, &p) != nil {
+		return domain.Push{}, false
+	}
+	out := domain.Push{Provider: "github", Repo: p.Repository.FullName, Branch: branchOf(p.Ref), Before: p.Before, After: p.After,
+		Pusher: p.Sender.Login}
+	if out.Pusher == "" {
+		out.Pusher = p.Pusher.Name
+	}
+	for _, c := range p.Commits {
+		if !c.Distinct {
+			continue
+		}
+		out.Commits = append(out.Commits, domain.PushedCommit{SHA: c.ID, Message: c.Message, Author: c.Author.Name,
+			AuthorLogin: c.Author.Username, Date: c.Timestamp, URL: c.URL})
+	}
+	out.Total = len(out.Commits)
+	return out, out.Branch != ""
+}
+
+// gitlabPush reads GitLab's push event; it lists up to 20 commits, and
+// total_commits_count says how many the push brought.
+func gitlabPush(body []byte) (domain.Push, bool) {
+	var p struct {
+		Ref      string `json:"ref"`
+		Before   string `json:"before"`
+		After    string `json:"after"`
+		Username string `json:"user_username"`
+		Total    int    `json:"total_commits_count"`
+		Commits  []struct {
+			ID        string    `json:"id"`
+			Message   string    `json:"message"`
+			Timestamp time.Time `json:"timestamp"`
+			URL       string    `json:"url"`
+			Author    struct {
+				Name string `json:"name"`
+			} `json:"author"`
+		} `json:"commits"`
+		Project struct {
+			Path string `json:"path_with_namespace"`
+		} `json:"project"`
+	}
+	if json.Unmarshal(body, &p) != nil {
+		return domain.Push{}, false
+	}
+	out := domain.Push{Provider: "gitlab", Repo: p.Project.Path, Branch: branchOf(p.Ref), Before: p.Before, After: p.After,
+		Pusher: p.Username, Total: max(p.Total, len(p.Commits))}
+	for _, c := range p.Commits {
+		out.Commits = append(out.Commits, domain.PushedCommit{SHA: c.ID, Message: c.Message, Author: c.Author.Name, Date: c.Timestamp, URL: c.URL})
+	}
+	return out, out.Branch != ""
+}
+
 // githubComment reads the comment events of GitHub's pull requests:
 // issue_comment (on a pull request), pull_request_review,
 // pull_request_review_comment and pull_request_review_thread.
@@ -377,12 +485,17 @@ func GitHubWebhook(secretOf SecretSource, sink HookSink, store HookStore, onPipe
 				prComment(ctx, sink, ev, log)
 			}
 		case "workflow_run", "check_suite", "push", "deployment_status":
-			if r.Header.Get("X-GitHub-Event") == "workflow_run" {
+			switch r.Header.Get("X-GitHub-Event") {
+			case "workflow_run":
 				var wr githubRun
 				if json.Unmarshal(body, &wr) == nil {
 					if run, ok := wr.run(); ok {
 						ciRun(ctx, sink, run, log)
 					}
+				}
+			case "push":
+				if p, ok := githubPush(body); ok {
+					pushed(ctx, sink, p, log)
 				}
 			}
 			var p struct {
@@ -401,7 +514,7 @@ func GitHubWebhook(secretOf SecretSource, sink HookSink, store HookStore, onPipe
 	})
 }
 
-// GitLabWebhook handles merge request (merged), pipeline and note
+// GitLabWebhook handles merge request (merged), pipeline, push and note
 // (comment) events.
 // Configure it in the project's Webhooks settings with the secret token
 // from the Integrations page.
@@ -460,6 +573,10 @@ func GitLabWebhook(secretOf SecretSource, sink HookSink, store HookStore, onPipe
 		case "note":
 			if ev, ok := gitlabNote(body); ok {
 				prComment(ctx, sink, ev, log)
+			}
+		case "push":
+			if p, ok := gitlabPush(body); ok {
+				pushed(ctx, sink, p, log)
 			}
 		case "pipeline", "deployment", "build":
 			if p.Kind == "pipeline" {

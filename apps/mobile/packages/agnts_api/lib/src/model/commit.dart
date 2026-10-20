@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:agnts_api/src/model/commit_ticket.dart';
 import 'package:agnts_api/src/model/ci.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -38,6 +39,8 @@ class Commit {
      this.url,
 
      this.ticketKey,
+
+     this.tickets,
   });
 
   @JsonKey(
@@ -136,6 +139,7 @@ class Commit {
 
 
 
+      /// The first linked ticket's key, else the KEY-1 before the message's colon
   @JsonKey(
     
     name: r'ticketKey',
@@ -145,6 +149,19 @@ class Commit {
 
 
   final String? ticketKey;
+
+
+
+      /// The tickets the commit is linked to
+  @JsonKey(
+    
+    name: r'tickets',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<CommitTicket>? tickets;
 
 
 
@@ -160,7 +177,8 @@ class Commit {
       other.del == del &&
       other.ci == ci &&
       other.url == url &&
-      other.ticketKey == ticketKey;
+      other.ticketKey == ticketKey &&
+      other.tickets == tickets;
 
     @override
     int get hashCode =>
@@ -172,7 +190,8 @@ class Commit {
         del.hashCode +
         ci.hashCode +
         url.hashCode +
-        ticketKey.hashCode;
+        ticketKey.hashCode +
+        tickets.hashCode;
 
   factory Commit.fromJson(Map<String, dynamic> json) => _$CommitFromJson(json);
 

@@ -101,8 +101,15 @@ void main() {
       // TODO
     });
 
+    // The first linked ticket's key, else the KEY-1 before the message's colon
     // String ticketKey
     test('to test the property `ticketKey`', () async {
+      // TODO
+    });
+
+    // The tickets the commit is linked to
+    // List<CommitTicket> tickets
+    test('to test the property `tickets`', () async {
       // TODO
     });
 

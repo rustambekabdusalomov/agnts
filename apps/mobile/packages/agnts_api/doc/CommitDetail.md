@@ -26,7 +26,8 @@ Name | Type | Description | Notes
 **filesCapped** | **bool** | More files changed than are listed | [optional] 
 **pipelines** | [**List&lt;Pipeline&gt;**](Pipeline.md) |  | 
 **pulls** | [**List&lt;CommitPull&gt;**](CommitPull.md) |  | 
-**ticketKey** | **String** |  | [optional] 
+**ticketKey** | **String** | The first linked ticket's key, else the KEY-1 before the message's colon | [optional] 
+**tickets** | [**List&lt;CommitTicket&gt;**](CommitTicket.md) | The tickets the commit is linked to | [optional] 
 **provider** | **String** |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

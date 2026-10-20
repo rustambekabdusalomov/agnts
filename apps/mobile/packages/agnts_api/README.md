@@ -276,6 +276,7 @@ Class | Method | HTTP request | Description
 [*TicketsApi*](doc/TicketsApi.md) | [**listFollowUps**](doc/TicketsApi.md#listfollowups) | **GET** /tickets/{key}/follow-ups | Suggested follow-up tickets and the tickets made from them
 [*TicketsApi*](doc/TicketsApi.md) | [**listRelations**](doc/TicketsApi.md#listrelations) | **GET** /tickets/{key}/relations | The ticket&#39;s ordering constraints and what holds it back now
 [*TicketsApi*](doc/TicketsApi.md) | [**listTicketEvents**](doc/TicketsApi.md#listticketevents) | **GET** /tickets/{key}/events | The ticket&#39;s log, oldest first; poll with &#x60;after&#x60; for live updates
+[*TicketsApi*](doc/TicketsApi.md) | [**listTicketLinkedCommits**](doc/TicketsApi.md#listticketlinkedcommits) | **GET** /tickets/{key}/linked-commits | Commits on the git host linked to the ticket by its number or key, newest first
 [*TicketsApi*](doc/TicketsApi.md) | [**listTickets**](doc/TicketsApi.md#listtickets) | **GET** /tickets | Tickets, most recently active first
 [*TicketsApi*](doc/TicketsApi.md) | [**markTicketMerged**](doc/TicketsApi.md#markticketmerged) | **POST** /tickets/{key}/merged | Record that a done ticket&#39;s pull request was merged
 [*TicketsApi*](doc/TicketsApi.md) | [**previewTicket**](doc/TicketsApi.md#previewticket) | **POST** /tickets/{key}/preview | Queue a preview (screenshots of the running app) of a ticket waiting for review, again if one already ran
@@ -394,6 +395,7 @@ Class | Method | HTTP request | Description
  - [Commit](doc/Commit.md)
  - [CommitDetail](doc/CommitDetail.md)
  - [CommitPull](doc/CommitPull.md)
+ - [CommitTicket](doc/CommitTicket.md)
  - [ConfirmTotpRequest](doc/ConfirmTotpRequest.md)
  - [ConnectIntegrationRequest](doc/ConnectIntegrationRequest.md)
  - [ConnectResult](doc/ConnectResult.md)
@@ -462,6 +464,8 @@ Class | Method | HTTP request | Description
  - [LessonList](doc/LessonList.md)
  - [LessonRef](doc/LessonRef.md)
  - [Link](doc/Link.md)
+ - [LinkedCommit](doc/LinkedCommit.md)
+ - [LinkedCommits](doc/LinkedCommits.md)
  - [LiveRun](doc/LiveRun.md)
  - [LocalBranch](doc/LocalBranch.md)
  - [LoginRequest](doc/LoginRequest.md)

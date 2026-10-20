@@ -51,10 +51,13 @@ type Options struct {
 	// Drafts asks for reviews from pull request pages and keeps their
 	// draft comments; nil answers 501.
 	Drafts ReviewDrafts
-	CI     CI           // CI watching; nil answers 501
-	OAuth  OAuth        // MCP connector authorization; nil disables /mcp
-	MCP    http.Handler // the MCP streamable HTTP handler
-	DB     Pinger
+	CI     CI // CI watching; nil answers 501
+	// CommitLinks reads commits linked to tickets by number; nil answers
+	// 501 (and commits show no linked tickets).
+	CommitLinks CommitLinks
+	OAuth       OAuth        // MCP connector authorization; nil disables /mcp
+	MCP         http.Handler // the MCP streamable HTTP handler
+	DB          Pinger
 	// Webhooks are mounted at /webhooks/{name}/{hook id} (and the URL
 	// without a hook id, from before workspaces). They authenticate with
 	// provider signatures, not sessions.

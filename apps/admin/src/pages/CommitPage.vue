@@ -8,6 +8,7 @@ import DiffView from '../components/DiffView.vue'
 import PageHeader from '../components/PageHeader.vue'
 import { hostName } from '../components/pulls/usePull'
 import CiDot from '../components/repo/CiDot.vue'
+import CommitTickets from '../components/repo/CommitTickets.vue'
 import PipelineRow from '../components/repo/PipelineRow.vue'
 import type { CommitDetail } from '../components/repo/types'
 import CopyButton from '../components/ui/CopyButton.vue'
@@ -80,7 +81,7 @@ const when = (iso?: string) => (iso ? new Date(iso).toLocaleString(locale.value,
         </p>
       </template>
       <div class="actions" style="margin: 0">
-        <RouterLink v-if="c.ticketKey" class="btn" :to="{ name: 'ticket', params: { key: c.ticketKey } }">{{ c.ticketKey }}</RouterLink>
+        <CommitTickets :tickets="c.tickets" :ticket-key="c.ticketKey" button />
         <a v-if="c.url" class="btn" :href="c.url" target="_blank" rel="noopener">{{ t('reviews.openOn', { host: hostName(c.provider) }) }}</a>
       </div>
     </PageHeader>

@@ -54,6 +54,9 @@ function stale(e: TicketEvent): string[] {
     case 'ci_failure':
       keys.push('ci')
       break
+    case 'commits_linked':
+      keys.push(`ticket-commits:${e.ticketKey}`, 'repo') // commit lists show their tickets
+      break
     case 'pr_comment':
     case 'threads_feedback':
     case 'review_posted':

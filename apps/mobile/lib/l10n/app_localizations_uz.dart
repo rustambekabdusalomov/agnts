@@ -4398,14 +4398,14 @@ class AppLocalizationsUz extends AppLocalizations {
       'Loyihada Settings → Webhooks ni oching. URL ni qoʻying, quyidagi sirni Secret token maydoniga kiriting.';
 
   @override
-  String get integrationsGitEvents_github => 'Pull requests, Workflow runs';
+  String get integrationsGitEvents_github => 'Pushes, Pull requests, Workflow runs';
 
   @override
-  String get integrationsGitEvents_gitlab => 'Merge request events, Pipeline events';
+  String get integrationsGitEvents_gitlab => 'Push events, Merge request events, Pipeline events';
 
   @override
   String get integrationsGitWebhookWhy =>
-      'Pull yoki merge request birlashtirilganda agnts tiketni belgilaydi va Jira yoki Plane vazifasini treker sahifasida tanlangan holatga oʻtkazadi. Pipeline hodisalari repozitoriy sahifasini yangilab turadi.';
+      'Pull yoki merge request birlashtirilganda agnts tiketni belgilaydi va Jira yoki Plane vazifasini treker sahifasida tanlangan holatga oʻtkazadi. Pipeline hodisalari repozitoriy sahifasini yangilab turadi. Pushlar branchi yoki xabarida tiket raqami bor commitlarni o\'sha tiketga bog\'laydi.';
 
   @override
   String get integrationsName_plane => 'Plane';
@@ -4848,6 +4848,53 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get learnQueueEmpty => 'Hozir oʻrganadigan narsa yoʻq: barcha yuborilgan tiketlar oʻqilgan.';
+
+  @override
+  String get linkedCommitsTitle => 'Commitlar';
+
+  @override
+  String linkedCommitsSub(String number) {
+    return 'Branchi yoki xabarida $number bor barcha commitlar: pushlardan va repozitoriylarning yaqin tarixidan.';
+  }
+
+  @override
+  String linkedCommitsNone(String number) {
+    return '$number bilan commitlar hali yo\'q. Shu raqam bilan branch push qiling yoki commit xabarini yozing, commitlar shu yerda ko\'rinadi.';
+  }
+
+  @override
+  String linkedCommitsTotal(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ta commit');
+    return '$_temp0';
+  }
+
+  @override
+  String get linkedCommitsOnBranch => 'branch';
+
+  @override
+  String get linkedCommitsOnMessage => 'xabar';
+
+  @override
+  String get linkedCommitsOnBranchHint => 'Raqam branch nomida bor';
+
+  @override
+  String get linkedCommitsOnMessageHint => 'Raqam commit xabarida bor';
+
+  @override
+  String linkedCommitsMeta(String author, String repo, String branch) {
+    return '$author · $repo · $branch';
+  }
+
+  @override
+  String linkedCommitsMore(String n) {
+    return 'Yana ko\'rsatish ($n ta qoldi)';
+  }
+
+  @override
+  String get linkedCommitsLoadError => 'Commitlarni yuklab bo\'lmadi.';
+
+  @override
+  String get linkedCommitsTickets => 'Tiketlar';
 
   @override
   String get logsTitle => 'Loglar';

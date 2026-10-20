@@ -438,6 +438,36 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /tickets/{key}/linked-commits:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    get:
+      operationId: listTicketLinkedCommits
+      summary: Commits on the git host linked to the ticket by its number or key, newest first
+      description: |
+        Anyone's commits whose branch or message has the ticket's number (or its key), as whole words ignoring case:
+        feature/AMANAT-2288-login, "AMANAT-2288: fix". They come from the git hosts' push webhooks, and from a scan of
+        the repositories' recent history when the ticket arrives, its number changes or a repository is added. A
+        number that open and closed tickets share links to the open one. Commit subjects are written by people.
+      tags: [tickets]
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - name: offset
+          in: query
+          required: false
+          schema: { type: integer, minimum: 0, maximum: 100000, default: 0 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LinkedCommits' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /tickets/{key}/commits/reapply:
     parameters:
       - $ref: '#/components/parameters/TicketKey'
@@ -8228,7 +8258,49 @@ components:
         del: { type: integer }
         ci: { $ref: '#/components/schemas/CI' }
         url: { type: string }
-        ticketKey: { type: string }
+        ticketKey: { type: string, description: "The first linked ticket's key, else the KEY-1 before the message's colon" }
+        tickets:
+          type: array
+          description: The tickets the commit is linked to
+          items: { $ref: '#/components/schemas/CommitTicket' }
+
+    CommitTicket:
+      type: object
+      description: A ticket a commit is linked to (its branch or message has the ticket's number or key)
+      required: [key, title, state]
+      properties:
+        key: { type: string }
+        number: { type: string, description: "The team's number, when the ticket has one" }
+        title: { type: string }
+        state: { $ref: '#/components/schemas/TicketState' }
+
+    LinkedCommit:
+      type: object
+      required: [sha, shortSha, subject, author, branch, repoId, repo, url, committedAt, matchedOn]
+      properties:
+        sha: { type: string }
+        shortSha: { type: string }
+        subject: { type: string, description: "The message's first line" }
+        author: { type: string }
+        authorLogin: { type: string, description: 'The git host account, when known' }
+        branch: { type: string, description: The branch it was first seen on }
+        repoId: { type: integer, format: int64 }
+        repo: { type: string }
+        url: { type: string, description: The commit on the git host }
+        committedAt: { type: string, format: date-time }
+        matchedOn:
+          type: array
+          description: Where the ticket's number was found
+          items: { type: string, enum: [branch, message] }
+
+    LinkedCommits:
+      type: object
+      required: [commits, total]
+      properties:
+        commits:
+          type: array
+          items: { $ref: '#/components/schemas/LinkedCommit' }
+        total: { type: integer, description: How many commits are linked in all }
 
     TreeEntry:
       type: object
@@ -8301,7 +8373,11 @@ components:
         pulls:
           type: array
           items: { $ref: '#/components/schemas/CommitPull' }
-        ticketKey: { type: string }
+        ticketKey: { type: string, description: "The first linked ticket's key, else the KEY-1 before the message's colon" }
+        tickets:
+          type: array
+          description: The tickets the commit is linked to
+          items: { $ref: '#/components/schemas/CommitTicket' }
         provider: { type: string, enum: [github, gitlab] }
 
     Stage:

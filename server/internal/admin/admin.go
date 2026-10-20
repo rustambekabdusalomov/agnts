@@ -576,10 +576,16 @@ type Repos struct {
 	// onArchive frees what an archived repository held on the server
 	// (its package cache); nil does nothing.
 	onArchive func(ctx context.Context, repo domain.Repository)
+	// onAdd hears about a repository just added (its history is scanned
+	// for ticket numbers); nil does nothing. It must return at once.
+	onAdd func(ctx context.Context, repo domain.Repository)
 }
 
 // OnArchive sets what frees an archived repository's server resources.
 func (r *Repos) OnArchive(f func(ctx context.Context, repo domain.Repository)) { r.onArchive = f }
+
+// OnAdd sets what hears about a repository just added.
+func (r *Repos) OnAdd(f func(ctx context.Context, repo domain.Repository)) { r.onAdd = f }
 
 // PreviewEnvSetter stores a repository's sealed preview environment.
 type PreviewEnvSetter interface {
@@ -1076,6 +1082,9 @@ func (r *Repos) SaveRun(ctx context.Context, x domain.Repository, o SaveOptions)
 		}
 	}
 	go r.CheckClaudeMD(context.WithoutCancel(ctx), saved)
+	if x.ID == 0 && r.onAdd != nil {
+		r.onAdd(ctx, saved)
+	}
 	if x.ID == 0 && len(saved.Toolchains) == 0 && !saved.ToolchainsOverride {
 		go r.detectAndStore(context.WithoutCancel(ctx), saved)
 	}

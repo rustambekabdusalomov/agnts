@@ -37,6 +37,7 @@ type harness struct {
 	assistant  *fakeAssistant
 	swagger    *fakeSwagger
 	runs       *fakeRunHistory
+	links      *fakeLinks
 	// hookWS and hookID are what the test webhook last saw.
 	hookWS int64
 	hookID string
@@ -90,17 +91,19 @@ func newHarness(t *testing.T, db Pinger) *harness {
 	h.assistant = &fakeAssistant{}
 	h.swagger = &fakeSwagger{}
 	h.runs = newFakeRunHistory()
+	h.links = &fakeLinks{}
 	h.h, err = NewHandler(Options{
-		Auth:       svc,
-		Tickets:    h.tickets,
-		Assistant:  h.assistant,
-		Swagger:    h.swagger,
-		Suites:     h.swagger,
-		Workspaces: h.workspaces,
-		Users:      fakeUsers{users},
-		Feedback:   &fakeFeedback{},
-		RunHistory: h.runs,
-		SiteURL:    site,
+		CommitLinks: h.links,
+		Auth:        svc,
+		Tickets:     h.tickets,
+		Assistant:   h.assistant,
+		Swagger:     h.swagger,
+		Suites:      h.swagger,
+		Workspaces:  h.workspaces,
+		Users:       fakeUsers{users},
+		Feedback:    &fakeFeedback{},
+		RunHistory:  h.runs,
+		SiteURL:     site,
 		Webhooks: map[string]http.Handler{"test": http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			h.hookWS, h.hookID = domain.WorkspaceOf(r.Context()), domain.HookOf(r.Context())
 			w.WriteHeader(http.StatusOK)

@@ -23,6 +23,7 @@ import 'package:agnts_api/src/model/follow_up_suggestion.dart';
 import 'package:agnts_api/src/model/follow_ups.dart';
 import 'package:agnts_api/src/model/follow_ups_setting.dart';
 import 'package:agnts_api/src/model/implement_input.dart';
+import 'package:agnts_api/src/model/linked_commits.dart';
 import 'package:agnts_api/src/model/model_overrides.dart';
 import 'package:agnts_api/src/model/preview_input.dart';
 import 'package:agnts_api/src/model/reapply_commit_format200_response.dart';
@@ -1808,6 +1809,99 @@ _responseData = rawData == null ? null : deserialize<List<Event>, Event>(rawData
     }
 
     return Response<List<Event>>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// Commits on the git host linked to the ticket by its number or key, newest first
+  /// Anyone&#39;s commits whose branch or message has the ticket&#39;s number (or its key), as whole words ignoring case: feature/AMANAT-2288-login, \&quot;AMANAT-2288: fix\&quot;. They come from the git hosts&#39; push webhooks, and from a scan of the repositories&#39; recent history when the ticket arrives, its number changes or a repository is added. A number that open and closed tickets share links to the open one. Commit subjects are written by people. 
+  ///
+  /// Parameters:
+  /// * [key] 
+  /// * [limit] 
+  /// * [offset] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [LinkedCommits] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<LinkedCommits>> listTicketLinkedCommits({ 
+    required String key,
+    int? limit = 20,
+    int? offset = 0,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/tickets/{key}/linked-commits'.replaceAll('{' r'key' '}', key.toString());
+    final _options = Options(
+      method: r'GET',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'cookieAuth',
+            'keyName': 'hiro_session',
+            'where': '',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _queryParameters = <String, dynamic>{
+      if (limit != null) r'limit': limit,
+      if (offset != null) r'offset': offset,
+    };
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      queryParameters: _queryParameters,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    LinkedCommits? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<LinkedCommits, LinkedCommits>(rawData, 'LinkedCommits', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<LinkedCommits>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,

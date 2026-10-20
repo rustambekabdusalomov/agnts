@@ -200,3 +200,70 @@ func TestGitLabPipelineRun(t *testing.T) {
 		t.Errorf("run %+v", r)
 	}
 }
+
+type pushSink struct {
+	sink
+	pushes []domain.Push
+}
+
+func (s *pushSink) CommitsPushed(_ context.Context, p domain.Push) error {
+	s.pushes = append(s.pushes, p)
+	return nil
+}
+
+func TestGitHubPush(t *testing.T) {
+	sk, st := &pushSink{}, &store{}
+	h := GitHubWebhook(func(context.Context) string { return "s" }, sk, st, nil, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	post := func(id, body string) {
+		m := hmac.New(sha256.New, []byte("s"))
+		m.Write([]byte(body))
+		req := httptest.NewRequest("POST", "/webhooks/github", strings.NewReader(body))
+		req.Header.Set("X-Hub-Signature-256", "sha256="+hex.EncodeToString(m.Sum(nil)))
+		req.Header.Set("X-GitHub-Delivery", id)
+		req.Header.Set("X-GitHub-Event", "push")
+		h.ServeHTTP(httptest.NewRecorder(), req)
+	}
+	post("1", `{"ref":"refs/heads/feature/AMANAT-2288-login","before":"0000000000000000000000000000000000000000","after":"bbb",
+		"commits":[{"id":"aaa","message":"AMANAT-2288: log in\n\nbody","timestamp":"2026-10-20T09:00:00+05:00","url":"https://github.com/acme/api/commit/aaa",
+		"distinct":true,"author":{"name":"Alice","username":"alice"}},
+		{"id":"old","message":"from main","distinct":false,"author":{"name":"Bob"}}],
+		"pusher":{"name":"alice"},"sender":{"login":"alice"},"repository":{"full_name":"acme/api"}}`)
+	post("1", `{"ref":"refs/heads/x"}`) // a redelivery
+	post("2", `{"ref":"refs/tags/v1","before":"0000","after":"ccc","commits":[],"repository":{"full_name":"acme/api"}}`)
+	post("3", `{"ref":"refs/heads/gone","before":"ccc","after":"0000000000000000000000000000000000000000","commits":[],"repository":{"full_name":"acme/api"}}`)
+	if len(sk.pushes) != 1 {
+		t.Fatalf("pushes %+v", sk.pushes)
+	}
+	p := sk.pushes[0]
+	if p.Repo != "acme/api" || p.Branch != "feature/AMANAT-2288-login" || !p.NewBranch() || p.Pusher != "alice" || p.Total != 1 || len(p.Commits) != 1 {
+		t.Fatalf("push %+v", p)
+	}
+	if c := p.Commits[0]; c.SHA != "aaa" || c.AuthorLogin != "alice" || c.Author != "Alice" || c.Date.IsZero() || !strings.HasPrefix(c.Message, "AMANAT-2288: log in") {
+		t.Errorf("commit %+v", c)
+	}
+	if len(st.events) != 3 {
+		t.Errorf("pipeline events still recorded: %d", len(st.events))
+	}
+}
+
+func TestGitLabPush(t *testing.T) {
+	sk, st := &pushSink{}, &store{}
+	h := GitLabWebhook(func(context.Context) string { return "tok" }, sk, st, nil, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	post := func(body string) {
+		req := httptest.NewRequest("POST", "/webhooks/gitlab", strings.NewReader(body))
+		req.Header.Set("X-Gitlab-Token", "tok")
+		h.ServeHTTP(httptest.NewRecorder(), req)
+	}
+	post(`{"object_kind":"push","ref":"refs/heads/main","before":"aaa","after":"ccc","user_username":"bo","total_commits_count":25,
+		"commits":[{"id":"ccc","message":"AMANAT-1: fix\n","timestamp":"2026-10-20T09:00:00Z","url":"https://gitlab.com/g/p/-/commit/ccc","author":{"name":"Bo"}}],
+		"project":{"path_with_namespace":"g/p"}}`)
+	post(`{"object_kind":"tag_push","ref":"refs/tags/v1","project":{"path_with_namespace":"g/p"}}`)
+	if len(sk.pushes) != 1 {
+		t.Fatalf("pushes %+v", sk.pushes)
+	}
+	p := sk.pushes[0]
+	if p.Provider != "gitlab" || p.Repo != "g/p" || p.Branch != "main" || p.NewBranch() || p.Total != 25 || len(p.Commits) != 1 || p.Pusher != "bo" ||
+		p.Commits[0].URL == "" {
+		t.Fatalf("push %+v", p)
+	}
+}

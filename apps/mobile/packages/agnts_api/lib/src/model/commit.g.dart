@@ -25,6 +25,8 @@ abstract class _$CommitCWProxy {
 
   Commit ticketKey(String? ticketKey);
 
+  Commit tickets(List<CommitTicket>? tickets);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Commit(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -41,6 +43,7 @@ abstract class _$CommitCWProxy {
     CI ci,
     String? url,
     String? ticketKey,
+    List<CommitTicket>? tickets,
   });
 }
 
@@ -78,6 +81,9 @@ class _$CommitCWProxyImpl implements _$CommitCWProxy {
   Commit ticketKey(String? ticketKey) => this(ticketKey: ticketKey);
 
   @override
+  Commit tickets(List<CommitTicket>? tickets) => this(tickets: tickets);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Commit(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -94,6 +100,7 @@ class _$CommitCWProxyImpl implements _$CommitCWProxy {
     Object? ci = const $CopyWithPlaceholder(),
     Object? url = const $CopyWithPlaceholder(),
     Object? ticketKey = const $CopyWithPlaceholder(),
+    Object? tickets = const $CopyWithPlaceholder(),
   }) {
     return Commit(
       sha: sha == const $CopyWithPlaceholder()
@@ -132,6 +139,10 @@ class _$CommitCWProxyImpl implements _$CommitCWProxy {
           ? _value.ticketKey
           // ignore: cast_nullable_to_non_nullable
           : ticketKey as String?,
+      tickets: tickets == const $CopyWithPlaceholder()
+          ? _value.tickets
+          // ignore: cast_nullable_to_non_nullable
+          : tickets as List<CommitTicket>?,
     );
   }
 }
@@ -165,6 +176,12 @@ Commit _$CommitFromJson(Map<String, dynamic> json) =>
         ci: $checkedConvert('ci', (v) => $enumDecode(_$CIEnumMap, v)),
         url: $checkedConvert('url', (v) => v as String?),
         ticketKey: $checkedConvert('ticketKey', (v) => v as String?),
+        tickets: $checkedConvert(
+          'tickets',
+          (v) => (v as List<dynamic>?)
+              ?.map((e) => CommitTicket.fromJson(e as Map<String, dynamic>))
+              .toList(),
+        ),
       );
       return val;
     });
@@ -179,6 +196,7 @@ Map<String, dynamic> _$CommitToJson(Commit instance) => <String, dynamic>{
   'ci': _$CIEnumMap[instance.ci]!,
   'url': ?instance.url,
   'ticketKey': ?instance.ticketKey,
+  'tickets': ?instance.tickets?.map((e) => e.toJson()).toList(),
 };
 
 const _$CIEnumMap = {

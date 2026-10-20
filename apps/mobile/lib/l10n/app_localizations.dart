@@ -7878,19 +7878,19 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsGitEvents_github.
   ///
   /// In en, this message translates to:
-  /// **'Pull requests, Workflow runs'**
+  /// **'Pushes, Pull requests, Workflow runs'**
   String get integrationsGitEvents_github;
 
   /// No description provided for @integrationsGitEvents_gitlab.
   ///
   /// In en, this message translates to:
-  /// **'Merge request events, Pipeline events'**
+  /// **'Push events, Merge request events, Pipeline events'**
   String get integrationsGitEvents_gitlab;
 
   /// No description provided for @integrationsGitWebhookWhy.
   ///
   /// In en, this message translates to:
-  /// **'When a pull or merge request is merged, agnts marks the ticket merged and moves the Jira issue or Plane work item to the merged status set on its tracker\'s page. Pipeline events keep the repository page current.'**
+  /// **'When a pull or merge request is merged, agnts marks the ticket merged and moves the Jira issue or Plane work item to the merged status set on its tracker\'s page. Pipeline events keep the repository page current. Pushes link commits whose branch or message has a ticket\'s number to that ticket.'**
   String get integrationsGitWebhookWhy;
 
   /// No description provided for @integrationsName_plane.
@@ -8672,6 +8672,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nothing to learn from right now: every pushed ticket has been read.'**
   String get learnQueueEmpty;
+
+  /// No description provided for @linkedCommitsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Commits'**
+  String get linkedCommitsTitle;
+
+  /// No description provided for @linkedCommitsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone\'s commits whose branch or message has {number}, from pushes and the repositories\' recent history.'**
+  String linkedCommitsSub(String number);
+
+  /// No description provided for @linkedCommitsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No commits with {number} yet. Push a branch or write a commit message with it, and the commits show here.'**
+  String linkedCommitsNone(String number);
+
+  /// No description provided for @linkedCommitsTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} commit} other {{n} commits}}'**
+  String linkedCommitsTotal(num n);
+
+  /// No description provided for @linkedCommitsOnBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'branch'**
+  String get linkedCommitsOnBranch;
+
+  /// No description provided for @linkedCommitsOnMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'message'**
+  String get linkedCommitsOnMessage;
+
+  /// No description provided for @linkedCommitsOnBranchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The branch name has the number'**
+  String get linkedCommitsOnBranchHint;
+
+  /// No description provided for @linkedCommitsOnMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The commit message has the number'**
+  String get linkedCommitsOnMessageHint;
+
+  /// No description provided for @linkedCommitsMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'{author} · {repo} · {branch}'**
+  String linkedCommitsMeta(String author, String repo, String branch);
+
+  /// No description provided for @linkedCommitsMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Show more ({n} left)'**
+  String linkedCommitsMore(String n);
+
+  /// No description provided for @linkedCommitsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the commits.'**
+  String get linkedCommitsLoadError;
+
+  /// No description provided for @linkedCommitsTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets'**
+  String get linkedCommitsTickets;
 
   /// No description provided for @logsTitle.
   ///

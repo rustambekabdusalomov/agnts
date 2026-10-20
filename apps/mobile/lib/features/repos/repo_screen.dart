@@ -305,10 +305,13 @@ String _ago(AppLocalizations l, DateTime at) {
   return d.inMinutes < 1 ? l.mmoreJustNow : l.mmoreAgo(shortDuration(d));
 }
 
-/// The linked ticket's key and state badge, when agnts knows the ticket.
+/// The linked ticket's key (after the team's number, when it has one) and
+/// state badge, when agnts knows the ticket.
 class _TicketTag extends ConsumerWidget {
-  const _TicketTag(this.ticketKey);
+  const _TicketTag(this.ticketKey, {this.number, this.state});
   final String ticketKey;
+  final String? number;
+  final TicketState? state;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -324,8 +327,9 @@ class _TicketTag extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 6),
       child: Wrap(spacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
-        Text(ticketKey, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12, color: c.ink3)),
-        if (t != null) ToneBadge(stateLabelOf(l, t.state), stateTone(t.state), small: true),
+        Text(number != null && number != ticketKey ? '$number · $ticketKey' : ticketKey,
+            style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12, color: c.ink3)),
+        if ((t?.state ?? state) case final st?) ToneBadge(stateLabelOf(l, st), stateTone(st), small: true),
       ]),
     );
   }
@@ -433,7 +437,10 @@ class _CommitRow extends StatelessWidget {
             TextSpan(text: '+${x.add}', style: TextStyle(color: c.okInk)),
             TextSpan(text: '  −${x.del}', style: TextStyle(color: c.badInk)),
           ])),
-        if (x.ticketKey != null) _TicketTag(x.ticketKey!),
+        if (x.tickets?.isNotEmpty ?? false)
+          for (final t in x.tickets!) _TicketTag(t.key, number: t.number, state: t.state)
+        else if (x.ticketKey != null)
+          _TicketTag(x.ticketKey!),
       ],
     );
   }

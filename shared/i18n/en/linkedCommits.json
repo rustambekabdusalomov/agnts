@@ -1,0 +1,16 @@
+{
+  "linkedCommits": {
+    "title": "Commits",
+    "sub": "Anyone's commits whose branch or message has {number}, from pushes and the repositories' recent history.",
+    "none": "No commits with {number} yet. Push a branch or write a commit message with it, and the commits show here.",
+    "total": "{n, plural, one {# commit} other {# commits}}",
+    "onBranch": "branch",
+    "onMessage": "message",
+    "onBranchHint": "The branch name has the number",
+    "onMessageHint": "The commit message has the number",
+    "meta": "{author} · {repo} · {branch}",
+    "more": "Show more ({n} left)",
+    "loadError": "Could not load the commits.",
+    "tickets": "Tickets"
+  }
+}

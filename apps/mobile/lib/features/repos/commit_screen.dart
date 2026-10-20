@@ -148,14 +148,21 @@ class _CommitScreenState extends ConsumerState<CommitScreen> {
                   Text(l.commitFilesN(x.files.length), style: hint),
                 ],
               ),
-              if (x.ticketKey != null || x.url.isNotEmpty)
+              if (x.ticketKey != null || (x.tickets?.isNotEmpty ?? false) || x.url.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 10),
                   child: Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      if (x.ticketKey != null) OutlinedButton(onPressed: () => context.push('/tickets/${x.ticketKey}'), child: Text(x.ticketKey!)),
+                      if (x.tickets?.isNotEmpty ?? false)
+                        for (final t in x.tickets!)
+                          OutlinedButton(
+                            onPressed: () => context.push('/tickets/${t.key}'),
+                            child: Text(t.number != null && t.number != t.key ? '${t.number} · ${t.key}' : t.key),
+                          )
+                      else if (x.ticketKey != null)
+                        OutlinedButton(onPressed: () => context.push('/tickets/${x.ticketKey}'), child: Text(x.ticketKey!)),
                       if (x.url.isNotEmpty)
                         OutlinedButton.icon(
                           onPressed: () => openLink(context, x.url),

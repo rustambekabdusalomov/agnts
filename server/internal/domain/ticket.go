@@ -540,6 +540,9 @@ const (
 	EventTrackerChanged = "tracker_changed"
 	// EventReviewPosted: agnts posted its review on the pull request.
 	EventReviewPosted = "review_posted"
+	// EventCommitsLinked: commits on the git host with the ticket's number
+	// (pushed, or found in the history) were linked to the ticket.
+	EventCommitsLinked = "commits_linked"
 	// EventToolchain: toolchains were detected for a repository, or
 	// installed into the shared toolchain volume before a run.
 	EventToolchain = "toolchain"

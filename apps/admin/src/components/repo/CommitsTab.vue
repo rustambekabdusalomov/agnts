@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import { api, unwrap } from '../../api/client'
 import { useScrollPages } from '../../composables/useScrollPages'
 import CiDot from './CiDot.vue'
+import CommitTickets from './CommitTickets.vue'
 import ScrollMore from './ScrollMore.vue'
 import type { Commit } from './types'
 
@@ -64,7 +65,7 @@ const time = (iso?: string) => (iso ? new Date(iso).toLocaleTimeString(locale.va
             <RouterLink class="cm-m" :to="detail(c)">{{ c.message }}</RouterLink>
             <div class="cm-meta">
               <span class="au">{{ c.author }}</span>
-              <RouterLink v-if="c.ticketKey" :to="{ name: 'ticket', params: { key: c.ticketKey } }" class="badge b-info">{{ c.ticketKey }}</RouterLink>
+              <CommitTickets :tickets="c.tickets" :ticket-key="c.ticketKey" />
               <span v-if="c.add || c.del" class="n"><span style="color: var(--ok-ink)">+{{ c.add }}</span> <span style="color: var(--bad-ink)">−{{ c.del }}</span></span>
             </div>
           </div>

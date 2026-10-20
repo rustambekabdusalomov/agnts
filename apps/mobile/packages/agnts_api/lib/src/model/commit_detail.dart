@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:agnts_api/src/model/commit_ticket.dart';
 import 'package:agnts_api/src/model/pipeline.dart';
 import 'package:agnts_api/src/model/commit_pull.dart';
 import 'package:agnts_api/src/model/file_change.dart';
@@ -60,6 +61,8 @@ class CommitDetail {
     required  this.pulls,
 
      this.ticketKey,
+
+     this.tickets,
 
     required  this.provider,
   });
@@ -284,6 +287,7 @@ class CommitDetail {
 
 
 
+      /// The first linked ticket's key, else the KEY-1 before the message's colon
   @JsonKey(
     
     name: r'ticketKey',
@@ -293,6 +297,19 @@ class CommitDetail {
 
 
   final String? ticketKey;
+
+
+
+      /// The tickets the commit is linked to
+  @JsonKey(
+    
+    name: r'tickets',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<CommitTicket>? tickets;
 
 
 
@@ -331,6 +348,7 @@ class CommitDetail {
       other.pipelines == pipelines &&
       other.pulls == pulls &&
       other.ticketKey == ticketKey &&
+      other.tickets == tickets &&
       other.provider == provider;
 
     @override
@@ -354,6 +372,7 @@ class CommitDetail {
         pipelines.hashCode +
         pulls.hashCode +
         ticketKey.hashCode +
+        tickets.hashCode +
         provider.hashCode;
 
   factory CommitDetail.fromJson(Map<String, dynamic> json) => _$CommitDetailFromJson(json);

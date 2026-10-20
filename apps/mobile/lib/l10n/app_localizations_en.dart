@@ -4402,14 +4402,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'In the project go to Settings → Webhooks. Paste the URL, put the secret below in Secret token.';
 
   @override
-  String get integrationsGitEvents_github => 'Pull requests, Workflow runs';
+  String get integrationsGitEvents_github => 'Pushes, Pull requests, Workflow runs';
 
   @override
-  String get integrationsGitEvents_gitlab => 'Merge request events, Pipeline events';
+  String get integrationsGitEvents_gitlab => 'Push events, Merge request events, Pipeline events';
 
   @override
   String get integrationsGitWebhookWhy =>
-      'When a pull or merge request is merged, agnts marks the ticket merged and moves the Jira issue or Plane work item to the merged status set on its tracker\'s page. Pipeline events keep the repository page current.';
+      'When a pull or merge request is merged, agnts marks the ticket merged and moves the Jira issue or Plane work item to the merged status set on its tracker\'s page. Pipeline events keep the repository page current. Pushes link commits whose branch or message has a ticket\'s number to that ticket.';
 
   @override
   String get integrationsName_plane => 'Plane';
@@ -4849,6 +4849,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get learnQueueEmpty => 'Nothing to learn from right now: every pushed ticket has been read.';
+
+  @override
+  String get linkedCommitsTitle => 'Commits';
+
+  @override
+  String linkedCommitsSub(String number) {
+    return 'Anyone\'s commits whose branch or message has $number, from pushes and the repositories\' recent history.';
+  }
+
+  @override
+  String linkedCommitsNone(String number) {
+    return 'No commits with $number yet. Push a branch or write a commit message with it, and the commits show here.';
+  }
+
+  @override
+  String linkedCommitsTotal(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n commits', one: '$n commit');
+    return '$_temp0';
+  }
+
+  @override
+  String get linkedCommitsOnBranch => 'branch';
+
+  @override
+  String get linkedCommitsOnMessage => 'message';
+
+  @override
+  String get linkedCommitsOnBranchHint => 'The branch name has the number';
+
+  @override
+  String get linkedCommitsOnMessageHint => 'The commit message has the number';
+
+  @override
+  String linkedCommitsMeta(String author, String repo, String branch) {
+    return '$author · $repo · $branch';
+  }
+
+  @override
+  String linkedCommitsMore(String n) {
+    return 'Show more ($n left)';
+  }
+
+  @override
+  String get linkedCommitsLoadError => 'Could not load the commits.';
+
+  @override
+  String get linkedCommitsTickets => 'Tickets';
 
   @override
   String get logsTitle => 'Logs';

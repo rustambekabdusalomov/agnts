@@ -4606,14 +4606,14 @@ class AppLocalizationsRu extends AppLocalizations {
       'В проекте откройте Settings → Webhooks. Вставьте URL, а секрет ниже — в поле Secret token.';
 
   @override
-  String get integrationsGitEvents_github => 'Pull requests, Workflow runs';
+  String get integrationsGitEvents_github => 'Pushes, Pull requests, Workflow runs';
 
   @override
-  String get integrationsGitEvents_gitlab => 'Merge request events, Pipeline events';
+  String get integrationsGitEvents_gitlab => 'Push events, Merge request events, Pipeline events';
 
   @override
   String get integrationsGitWebhookWhy =>
-      'Когда пул- или merge request смёржен, agnts отмечает тикет и переводит задачу Jira или Plane в статус, выбранный на странице трекера. События пайплайнов обновляют страницу репозитория.';
+      'Когда пул- или merge request смёржен, agnts отмечает тикет и переводит задачу Jira или Plane в статус, выбранный на странице трекера. События пайплайнов обновляют страницу репозитория. Пуши привязывают к тикету коммиты, в ветке или сообщении которых есть его номер.';
 
   @override
   String get integrationsName_plane => 'Plane';
@@ -5077,6 +5077,60 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get learnQueueEmpty => 'Сейчас изучать нечего: все отправленные тикеты прочитаны.';
+
+  @override
+  String get linkedCommitsTitle => 'Коммиты';
+
+  @override
+  String linkedCommitsSub(String number) {
+    return 'Коммиты всех участников, в ветке или сообщении которых есть $number: из пушей и недавней истории репозиториев.';
+  }
+
+  @override
+  String linkedCommitsNone(String number) {
+    return 'Пока нет коммитов с $number. Запушьте ветку или напишите сообщение коммита с этим номером, и коммиты появятся здесь.';
+  }
+
+  @override
+  String linkedCommitsTotal(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n коммита',
+      many: '$n коммитов',
+      few: '$n коммита',
+      one: '$n коммит',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get linkedCommitsOnBranch => 'ветка';
+
+  @override
+  String get linkedCommitsOnMessage => 'сообщение';
+
+  @override
+  String get linkedCommitsOnBranchHint => 'Номер есть в названии ветки';
+
+  @override
+  String get linkedCommitsOnMessageHint => 'Номер есть в сообщении коммита';
+
+  @override
+  String linkedCommitsMeta(String author, String repo, String branch) {
+    return '$author · $repo · $branch';
+  }
+
+  @override
+  String linkedCommitsMore(String n) {
+    return 'Показать ещё (осталось $n)';
+  }
+
+  @override
+  String get linkedCommitsLoadError => 'Не удалось загрузить коммиты.';
+
+  @override
+  String get linkedCommitsTickets => 'Тикеты';
 
   @override
   String get logsTitle => 'Логи';
