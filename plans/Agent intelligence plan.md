@@ -10,7 +10,7 @@ A senior engineer working with Claude differs in judgment, not typing: they load
 
 **Principles**
 
-1. Every piece of knowledge that reaches a prompt was approved by a person (the brief, business context, suggested rules). agnts proposes; people decide.
+1. Every piece of knowledge that reaches a prompt was approved by a person (the brief, business context, suggested rules), or comes from work a person approved (precedents and their reviewer feedback). agnts proposes; people decide.
 2. Measure first: every change below is judged by the quality numbers of Phase 0, per prompt version.
 3. Reuse what exists: rules, questions, the review run, the event log. No vector database, no new services.
 4. Context goes to the agent as files under `/agnts/context/`, named in the prompt; prompts stay short (they go through argv).
@@ -63,7 +63,7 @@ Order of work: 0 → 1 → 3/3b → 4/4b → 5 → 2 → 6.
 
 - Review category `architecture`: layer and dependency violations against the brief, files outside the footprint without a reason.
 - Setting `selfReview` (default on): a review with a blocker or major finding sends the findings back to the coder once per change request by a person (`tickets.self_fixes`), origin system. While that review may still send it back, the ticket reaches review quietly (`quiet_review`: no "needs you" notification); it is announced with a `review_ready` event once the review lets it through, fails, or waits for the Claude limit.
-- Red flags (`redflags.go`): added lines that skip or focus tests, removed assertions in test files, deleted test files, `eslint-disable`/`nolint`/`@ts-ignore`/`type: ignore`, empty catch blocks, new TODO/FIXME, new dependencies in manifests. Stored with the code result, shown on the ticket, and given to the reviewer to confirm.
+- Red flags (`domain/redflag.go`): added lines that skip or focus tests, removed assertions in test files, deleted test files, `eslint-disable`/`nolint`/`@ts-ignore`/`type: ignore`, empty catch blocks, new TODO/FIXME, new dependencies in manifests. Stored with the code result, shown on the ticket, and given to the reviewer to confirm.
 - Drift checkpoint: the first coding invocation is capped at a third of the turns. If it hits the cap, agnts lists the files changed so far, flags those outside the footprint, and resumes with a checkpoint prompt: compare with the chosen approach, re-plan if drifting, then continue.
 
 ## Phase 5 — Learning from feedback
@@ -81,6 +81,17 @@ Order of work: 0 → 1 → 3/3b → 4/4b → 5 → 2 → 6.
 
 - `agnts server -- eval replay KEY...` (and the API) creates a local replay ticket per done ticket, pinned to the commit the original started from, with the same text and answers, no questions.
 - `agnts server -- eval report` scores replays against the originals: checks passed, file overlap with the approved change, reviewer verdict, turns and cost, per prompt version.
+
+## Known gaps (Oct 21, 2026)
+
+A review of the pipeline on real tickets found these gaps in what this plan built; `Code quality plan.md` fixes them:
+
+- **Metrics:** change-request rounds count CI failures as human feedback, so the Agent quality table and precedents are skewed (Code quality Phase 0, B1).
+- **Reflect:** review threads on the pull request never reach it (Phase 0, B2). Rules are deduplicated by exact title and their effect is not measured (Phase 7).
+- **Drift checkpoint:** drops the extra turns of tickets in several repositories (Phase 0, B3) and interrupts the run mid-step (Phase 4).
+- **Brief:** layers and examples are free text, so nothing can check against them, and cited paths are not verified (Phase 5, `architecture.json`).
+- **Precedents and replay:** use done tickets and agnts's own last commit instead of what merged; no diffs, no negative examples, no model comparison (Phases 1 and 6).
+- **Self-review:** runs once and the fix is not reviewed again (Phase 4).
 
 ## Manual testing
 
