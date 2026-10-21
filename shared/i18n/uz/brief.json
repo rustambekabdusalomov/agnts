@@ -25,6 +25,14 @@
     "done_survey": "O‘rganish navbatga qo‘yildi",
     "done_approve": "Tavsif tasdiqlandi: yangi ishga tushirishlar uni o‘qiydi",
     "done_discard": "Qoralama o‘chirildi",
-    "done_save": "Tavsif saqlandi"
+    "done_save": "Tavsif saqlandi",
+    "archTitle": "Arxitektura",
+    "archSub": "agnts ishni solishtiradigan qism: qatlamlar va ularga ruxsat etilgan importlar, umumiy yordamchilar, namuna fayllari bilan retseptlar. Ishga tushirishlar uni architecture.json sifatida o‘qiydi; qatlamlar orasidagi taqiqlangan import belgilanadi.",
+    "archNone": "Hozircha arxitektura yo‘q. Keyingi so‘rov uni tavsif bilan birga yozadi yoki o‘zingiz yozing.",
+    "archCounts": "{layers} qatlam · {helpers} yordamchi · {recipes} retsept",
+    "archEdit": "JSONni tahrirlash",
+    "archEditHint": "Bo‘sh qiymat uni o‘chiradi. Yo‘llar repozitoriyga nisbatan; qatlam yo‘llari shablonlar (** istalgan chuqurlik uchun); cheklovsiz qatlam uchun mayImport’ni yozmang.",
+    "archDraft": "Tavsif qoralamasi bilan birga shu arxitektura keladi; tavsifni tasdiqlash uni ham tasdiqlaydi.",
+    "done_saveArch": "Arxitektura saqlandi"
   }
 }

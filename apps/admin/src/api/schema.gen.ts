@@ -512,6 +512,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tickets/{key}/benchmark": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Put a merged code or test ticket in the benchmark, or take it out */
+        put: operations["setTicketBenchmark"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tickets/{key}/review": {
         parameters: {
             query?: never;
@@ -2407,6 +2426,24 @@ export interface paths {
         get: operations["getReplayReport"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/eval/benchmark": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The tickets in the benchmark */
+        get: operations["getBenchmark"];
+        put?: never;
+        /** Replay every ticket in the benchmark with today's prompts, and the given models */
+        post: operations["runBenchmark"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5024,6 +5061,8 @@ export interface components {
             kindAuto: boolean;
             /** @description coding runs skip the checks and go to review on the code alone (set with retryTicket or requestChanges) */
             skipChecks: boolean;
+            /** @description A merged ticket in the benchmark that changes to agnts are replayed against (setTicketBenchmark) */
+            benchmark?: boolean;
             /** @description The approved report is posted to the tracker issue */
             postReport?: boolean;
             /** @description The plan or bug investigation this ticket implements */
@@ -5206,7 +5245,41 @@ export interface components {
                 /** @enum {string} */
                 check: "ui" | "api" | "test" | "manual";
             }[];
+            /** @description For each file the work changes, the existing code it follows (copy, adapt) or that it is new */
+            patterns?: components["schemas"]["Pattern"][];
+            /** @description Existing helpers the work must use instead of writing its own */
+            reuse?: {
+                name: string;
+                where: string;
+                for?: string;
+            }[];
+            /** @description Tests the work must add or change */
+            testPlan?: {
+                file: string;
+                what: string;
+            }[];
+            /** @description Inputs and failures the work must handle */
+            edgeCases?: string[];
+            /** @description How the analysis reproduced the reported bug */
+            repro?: {
+                reproduced: boolean;
+                command?: string;
+                output?: string;
+                why?: string;
+            };
             secondOpinion?: components["schemas"]["SecondOpinion"];
+        };
+        Pattern: {
+            file: string;
+            /** @enum {string} */
+            kind: "copy" | "adapt" | "new";
+            /** @description The existing file to follow; for a new pattern, the one to take conventions from (may be empty) */
+            like: string;
+            layer?: string;
+            why?: string;
+            place?: string;
+            /** @description A new pattern other code will copy; the author is asked about it */
+            precedent?: boolean;
         };
         Approach: {
             title: string;
@@ -5905,6 +5978,11 @@ export interface components {
             deepReview?: string;
             /** @description Suggest tips from runs that had trouble (failed checks, a stall) */
             learnFromRuns?: boolean;
+            effort?: components["schemas"]["EffortSettings"];
+            /** @description The coding model re-checks the analysis of a ticket the analysis model rated complex, before any code is written */
+            recheckComplex?: boolean;
+            /** @description Run the checks on the commit a ticket starts from before its first coding run: what fails there is not the ticket's to fix */
+            baselineChecks?: boolean;
             /** @description A model that critiques the chosen approach of complex tickets (codex:<model> or a Claude model); empty turns it off */
             secondOpinion?: string;
             pauseAbove: number;
@@ -5966,6 +6044,8 @@ export interface components {
             /** @description Per-file checks after each edit; null uses the ones agnts derives from the toolchains */
             editChecks?: components["schemas"]["EditCheck"][] | null;
             editChecksOff?: boolean;
+            /** @description An import the approved architecture does not allow is a blocker agnts's review sends back, not only a red flag */
+            layersBlock?: boolean;
             coverage?: components["schemas"]["CoverageConfig"];
             /** @description Check the ticket's acceptance criteria in the running app after the preview */
             acceptance?: boolean;
@@ -6073,6 +6153,20 @@ export interface components {
                 /** @description Screenshot ids in the preview */
                 shots?: string[];
             }[];
+        };
+        /** @description How hard runs think (Claude Code's --effort); empty leaves Claude Code's default */
+        EffortSettings: {
+            /** @enum {string} */
+            analyze: "" | "low" | "medium" | "high";
+            /** @enum {string} */
+            coding: "" | "low" | "medium" | "high";
+            /** @enum {string} */
+            review: "" | "low" | "medium" | "high";
+            /**
+             * @description For the coding and review of complex tickets, and the re-check of their analysis; empty keeps the stage effort
+             * @enum {string}
+             */
+            complex: "" | "low" | "medium" | "high";
         };
         /** @description Another model's read of the approach a complex ticket's analysis chose */
         SecondOpinion: {
@@ -7353,19 +7447,42 @@ export interface components {
             approvedAt?: string;
             /** Format: date-time */
             updatedAt: string;
+            /** @description The approved architecture.json (layers and allowed imports, shared helpers, recipes), JSON text; runs read it and agnts checks changes against its layers. Empty when there is none */
+            architecture?: string;
+            /** @description The architecture the latest survey wrote, approved with the draft brief */
+            architectureDraft?: string;
         };
         RepoBriefInput: {
             body: string;
+            /** @description Replaces the approved architecture.json when given; empty removes it */
+            architecture?: string;
+        };
+        BenchmarkRun: {
+            original: string;
+            /** @description The replay ticket's key */
+            replay?: string;
+            /** @description Why the ticket could not be replayed */
+            error?: string;
         };
         ReplayReport: {
-            /** @description Replays with a change, summed by the prompt version they ran with */
+            /** @description Replays with a change, summed by the prompt version and coding model they ran with */
             versions: components["schemas"]["ReplayVersion"][];
+            /** @description The same, for the replays of tickets in the benchmark only */
+            benchmark?: components["schemas"]["ReplayVersion"][];
             /** @description The newest replays first */
             replays: components["schemas"]["ReplayResult"][];
         };
         ReplayVersion: {
             promptVersion: string;
+            /** @description The coding model of the replays */
+            model?: string;
             replays: number;
+            /** @description Replays scored against what the original merged as */
+            merged?: number;
+            /** @description Average share of the merged change's added lines the replays add too; absent when none was scored against a merge */
+            avgLineRecall?: number;
+            /** @description The same for the originals' own changes, to compare with */
+            originalLineRecall?: number;
             checksPassed: number;
             /** @description Replays agnts's code review read */
             reviewed: number;
@@ -7387,6 +7504,18 @@ export interface components {
             title: string;
             state: components["schemas"]["TicketState"];
             promptVersion: string;
+            model?: string;
+            /** @description The original is in the benchmark */
+            benchmark?: boolean;
+            /**
+             * @description What the replay is scored against: what the original merged as, or the original's own change
+             * @enum {string}
+             */
+            against?: "merged" | "agnts";
+            /** @description Share of the merged change's added lines the replay adds too; absent when scored against agnts */
+            lineRecall?: number;
+            /** @description The same for the original's own change */
+            originalLineRecall?: number;
             hasChange: boolean;
             checksPassed: boolean;
             files: string[];
@@ -7414,6 +7543,20 @@ export interface components {
             rejected: number;
             /** @description Average change requests by a person, over the tickets that reached review */
             changeRounds: number;
+            /** @description Average times red CI on the pull request sent the work back, over the tickets that reached review */
+            ciRounds?: number;
+            /** @description Their pull requests merged */
+            merged?: number;
+            /** @description What all their runs cost */
+            costUsd?: number;
+            /** @description Cost over merged tickets; absent when none merged */
+            costPerMerged?: number;
+            /** @description 0–100: done first time 35%, merged 25%, no serious finding 20%, few change rounds 20% */
+            score?: number;
+            /** @description Average share of agnts's lines people changed before merging; absent when no merge was recorded */
+            peopleEdited?: number;
+            /** @description Tickets whose merged work people reverted */
+            reverted?: number;
             /** @description Average failing checks sent back to Claude */
             fixAttempts: number;
             /** @description Reviewed with a blocker or major finding at least once */
@@ -7582,6 +7725,11 @@ export interface components {
             kind: components["schemas"]["RuleKind"];
             /** @description For a rule agnts suggested: the ticket whose feedback taught it */
             sourceTicket?: string;
+            /**
+             * @description For a rule agnts learned: what kind of lesson it is
+             * @enum {string}
+             */
+            tag?: "reuse" | "layer" | "tests" | "style" | "logic" | "other";
             /** @description For a rule agnts suggested: which feedback shows it */
             reason?: string;
             /**
@@ -8433,6 +8581,29 @@ export interface operations {
                     "application/json": components["schemas"]["Ticket"];
                 };
             };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    setTicketBenchmark: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    benchmark: boolean;
+                };
+            };
+        };
+        responses: {
+            200: components["responses"]["TicketOK"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
@@ -11486,6 +11657,58 @@ export interface operations {
                     "application/json": components["schemas"]["ReplayReport"];
                 };
             };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    getBenchmark: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Ticket"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    runBenchmark: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @description Stage (analyze, coding, retry, review) → model, for these replays only */
+                    models?: {
+                        [key: string]: string;
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description One entry per ticket in the benchmark */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BenchmarkRun"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
         };
     };

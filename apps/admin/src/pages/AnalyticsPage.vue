@@ -126,10 +126,10 @@ function exportCsv() {
       if (!x) return
       downloadCsv([
         ['prompt_version', 'tickets', 'reached_review', 'done', 'first_try', 'rejected', 'change_rounds', 'fix_attempts', 'serious', 'footprint_hit', 'red_flags', 'self_fixes',
-          'guard_blocks', 'stop_saves', 'stalls', 'proof_due', 'proven', 'findings', 'adopted', 'tokens_per_done', 'fact_check', 'fact_check_first_try'],
+          'guard_blocks', 'stop_saves', 'stalls', 'proof_due', 'proven', 'findings', 'adopted', 'tokens_per_done', 'fact_check', 'fact_check_first_try', 'ci_rounds'],
         ...x.quality.map((v) => [v.promptVersion, v.tickets, v.reachedReview, v.done, v.firstTry, v.rejected, v.changeRounds.toFixed(2),
           v.fixAttempts.toFixed(2), v.serious, v.footprintHit?.toFixed(2), v.redFlags, v.selfFixes,
-          v.guardBlocks, v.stopSaves, v.stalls, v.proofDue, v.proven, v.findings, v.adopted, v.tokens?.toFixed(0), v.factCheck, v.factCheckFirst]),
+          v.guardBlocks, v.stopSaves, v.stalls, v.proofDue, v.proven, v.findings, v.adopted, v.tokens?.toFixed(0), v.factCheck, v.factCheckFirst, v.ciRounds?.toFixed(2)]),
       ], name)
       return
     case 'repos':

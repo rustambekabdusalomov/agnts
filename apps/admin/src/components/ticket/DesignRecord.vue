@@ -22,8 +22,14 @@ const ship = computed(() => {
 const devs = computed(() => props.deviations ?? [])
 const criteria = computed(() => props.analysis?.acceptance ?? [])
 const second = computed(() => props.analysis?.secondOpinion)
+const patterns = computed(() => props.analysis?.patterns ?? [])
+const reuse = computed(() => props.analysis?.reuse ?? [])
+const testPlan = computed(() => props.analysis?.testPlan ?? [])
+const edges = computed(() => props.analysis?.edgeCases ?? [])
+const repro = computed(() => props.analysis?.repro)
 const any = computed(() => !!chosen.value || scope.value.length > 0 || ship.value.length > 0 || devs.value.length > 0 ||
-  !!props.analysis?.defect || criteria.value.length > 0 || !!second.value)
+  !!props.analysis?.defect || criteria.value.length > 0 || !!second.value || patterns.value.length > 0 || reuse.value.length > 0 ||
+  testPlan.value.length > 0 || edges.value.length > 0 || !!repro.value)
 </script>
 
 <template>
@@ -45,6 +51,44 @@ const any = computed(() => !!chosen.value || scope.value.length > 0 || ship.valu
           </ul>
         </div>
       </details>
+    </template>
+    <template v-if="repro">
+      <h3>{{ t('design.reproTitle') }}</h3>
+      <template v-if="repro.reproduced">
+        <pre class="design-repro"><span v-if="repro.command">$ {{ repro.command }}</span>{{ repro.output ? `\n${repro.output}` : '' }}</pre>
+      </template>
+      <p v-else class="hint">{{ t('design.reproNot') }}<template v-if="repro.why">: {{ tr(repro.why) }}</template></p>
+    </template>
+    <template v-if="patterns.length || reuse.length">
+      <h3>{{ t('design.fitTitle') }}</h3>
+      <ul class="design-acc">
+        <li v-for="p in patterns" :key="p.file">
+          <code>{{ p.file }}</code>
+          <span class="badge" :class="p.kind === 'new' ? 'b-warn' : 'b-gray'">{{ t(`design.kind_${p.kind}`) }}</span>
+          <template v-if="p.kind === 'new'">
+            <span v-if="p.like" class="hint"> {{ t('design.conventionsFrom') }} <code>{{ p.like }}</code></span>
+            <span v-if="p.place" class="hint"> · {{ t('design.goesIn') }} {{ tr(p.place) }}</span>
+          </template>
+          <span v-else class="hint"> {{ t('design.like') }} <code>{{ p.like }}</code></span>
+          <span v-if="p.layer" class="hint"> · {{ tr(p.layer) }}</span>
+          <p v-if="p.why" class="hint" style="margin: 2px 0 0">{{ tr(p.why) }}</p>
+          <p v-if="p.precedent" class="hint" style="margin: 2px 0 0; color: var(--warn-ink)">{{ t('design.precedent') }}</p>
+        </li>
+      </ul>
+      <template v-if="reuse.length">
+        <p class="hint" style="margin: 8px 0 4px">{{ t('design.reuseTitle') }}</p>
+        <ul class="design-acc">
+          <li v-for="r in reuse" :key="`${r.where}/${r.name}`"><code>{{ r.name }}</code> <span class="hint">{{ r.where }}</span><template v-if="r.for"> — {{ tr(r.for) }}</template></li>
+        </ul>
+      </template>
+    </template>
+    <template v-if="testPlan.length">
+      <h3>{{ t('design.testPlanTitle') }}</h3>
+      <ul class="design-acc"><li v-for="(x, i) in testPlan" :key="i"><code>{{ x.file }}</code> {{ tr(x.what) }}</li></ul>
+    </template>
+    <template v-if="edges.length">
+      <h3>{{ t('design.edgeCasesTitle') }}</h3>
+      <ul class="design-acc"><li v-for="(e, i) in edges" :key="i">{{ tr(e) }}</li></ul>
     </template>
     <template v-if="scope.length">
       <h3>{{ t('design.outOfScope') }}</h3>
@@ -97,6 +141,7 @@ const any = computed(() => !!chosen.value || scope.value.length > 0 || ship.valu
 .design-ship { margin: 0 0 6px; }
 .design-acc { padding-left: 18px; margin: 0 0 6px; }
 .design-acc li { margin: 4px 0; }
+.design-repro { white-space: pre-wrap; font-size: 12.5px; background: var(--code); color: var(--code-ink); border-radius: 8px; padding: 8px 10px; margin: 0 0 6px; overflow-x: auto; }
 .design-second { border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; margin-bottom: 6px; }
 .design-ship div { display: grid; grid-template-columns: 130px 1fr; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line-2); }
 .design-ship div:first-child { border-top: 0; padding-top: 0; }

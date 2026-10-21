@@ -66,6 +66,8 @@
     "starterOffer": "Suggest {n, plural, one {# rule} other {# rules}}",
     "starterOffered": "Already suggested",
     "starterAdded": "{n, plural, =0 {Nothing new to suggest} one {# rule suggested} other {# rules suggested}}",
-    "starterOpenRules": "Open the suggestions"
+    "starterOpenRules": "Open the suggestions",
+    "layersBlock": "Block imports across layers",
+    "layersBlockHelp": "With an approved architecture, agnts flags a change that adds an import its layers do not allow. On, the flag is a blocker that agnts's own review sends back to the coder before you see the change."
   }
 }

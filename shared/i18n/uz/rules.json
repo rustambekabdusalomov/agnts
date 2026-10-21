@@ -75,6 +75,12 @@
     "kindRule": "Qoida",
     "kindContext": "Biznes konteksti",
     "kindRuleHelp": "agnts har bir tiketda amal qiladigan ko‘rsatma.",
-    "kindContextHelp": "Mahsulotingiz haqida bilim: atamalar nimani anglatadi, kod saqlashi kerak bo‘lgan invariantlar, kim nimadan foydalanadi. Har bir ishga tushirish boshlashdan oldin uni o‘qiydi."
+    "kindContextHelp": "Mahsulotingiz haqida bilim: atamalar nimani anglatadi, kod saqlashi kerak bo‘lgan invariantlar, kim nimadan foydalanadi. Har bir ishga tushirish boshlashdan oldin uni o‘qiydi.",
+    "tag_reuse": "qayta foydalanish",
+    "tag_layer": "qatlam",
+    "tag_tests": "testlar",
+    "tag_style": "uslub",
+    "tag_logic": "mantiq",
+    "tag_other": "boshqa"
   }
 }

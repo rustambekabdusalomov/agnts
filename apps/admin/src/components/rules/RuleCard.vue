@@ -91,6 +91,7 @@ async function remove() {
       <div class="help">
         <p>
           {{ t('rules.suggestedFrom') }}
+          <span v-if="rule.tag" class="badge b-gray" style="margin-right: 6px">{{ t(`rules.tag_${rule.tag}`) }}</span>
           <RouterLink v-if="rule.sourceTicket" :to="{ name: 'ticket', params: { key: rule.sourceTicket } }">{{ rule.sourceTicket }}</RouterLink><template v-if="rule.reason">: {{ rule.reason }}</template>
         </p>
       </div>

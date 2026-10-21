@@ -75,6 +75,12 @@
     "kindRule": "Rule",
     "kindContext": "Business context",
     "kindRuleHelp": "An instruction agnts follows on every ticket.",
-    "kindContextHelp": "Knowledge about your product: what its terms mean, invariants the code must keep, who uses what. Every run reads it before it starts."
+    "kindContextHelp": "Knowledge about your product: what its terms mean, invariants the code must keep, who uses what. Every run reads it before it starts.",
+    "tag_reuse": "reuse",
+    "tag_layer": "layer",
+    "tag_tests": "tests",
+    "tag_style": "style",
+    "tag_logic": "logic",
+    "tag_other": "other"
   }
 }

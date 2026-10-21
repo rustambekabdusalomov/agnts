@@ -7,7 +7,7 @@ import LineChart from '../charts/LineChart.vue'
 import StackedBars from '../charts/StackedBars.vue'
 import DeltaTag from '../dashboard/DeltaTag.vue'
 import ReplayEval from '../eval/ReplayEval.vue'
-import { fmtTokens } from '../../composables/format'
+import { fmtTokens, fmtUsd } from '../../composables/format'
 import { minutesText, pctOf, type Analytics, type AnalyticsCI } from './analytics'
 
 // Quality: how the agent's work turns out, by prompt version, and CI health.
@@ -114,14 +114,19 @@ const skillName = (s: string) => (s ? s.replace(/^agnts-method-/, '') : t('harne
             <tr>
               <th>{{ t('analytics.colVersion') }}</th>
               <th>{{ t('analytics.colTickets') }}</th>
+              <th :title="t('analytics.colScoreHint')">{{ t('analytics.colScore') }}</th>
               <th :title="t('analytics.colFirstPassHint')">{{ t('analytics.colFirstPass') }}</th>
               <th :title="t('analytics.colRoundsHint')">{{ t('analytics.colRounds') }}</th>
+              <th :title="t('analytics.colCIRoundsHint')">{{ t('analytics.colCIRounds') }}</th>
               <th :title="t('analytics.colFixesHint')">{{ t('analytics.colFixes') }}</th>
               <th :title="t('analytics.colSeriousHint')">{{ t('analytics.colSerious') }}</th>
               <th :title="t('analytics.colFootprintHint')">{{ t('analytics.colFootprint') }}</th>
               <th :title="t('analytics.colRedFlagsHint')">{{ t('analytics.colRedFlags') }}</th>
               <th :title="t('analytics.colSelfFixesHint')">{{ t('analytics.colSelfFixes') }}</th>
               <th>{{ t('analytics.rejected') }}</th>
+              <th :title="t('analytics.colCostMergedHint')">{{ t('analytics.colCostMerged') }}</th>
+              <th :title="t('analytics.colPeopleEditedHint')">{{ t('analytics.colPeopleEdited') }}</th>
+              <th :title="t('analytics.colRevertedHint')">{{ t('analytics.colReverted') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -129,16 +134,24 @@ const skillName = (s: string) => (s ? s.replace(/^agnts-method-/, '') : t('harne
               <td class="ttitle mono" style="white-space: nowrap">{{ v.promptVersion || t('analytics.versionUnknown') }}</td>
               <td>{{ v.tickets }}</td>
               <td>
+                <b v-if="v.score != null">{{ v.score.toFixed(0) }}</b><span v-else class="hint">—</span>
+                <span v-if="v.tickets < 10" class="hint" style="display: block; font-size: 11px">{{ t('analytics.fewTickets') }}</span>
+              </td>
+              <td>
                 <span v-if="v.done" :class="pctOf(v.firstTry, v.done) >= 70 ? 'repo-ok' : 'repo-miss'">{{ pctOf(v.firstTry, v.done) }}%</span>
                 <span v-else class="hint">—</span>
               </td>
               <td>{{ v.reachedReview ? v.changeRounds.toFixed(1) : '—' }}</td>
+              <td>{{ v.reachedReview && v.ciRounds != null ? v.ciRounds.toFixed(1) : '—' }}</td>
               <td>{{ v.fixAttempts.toFixed(1) }}</td>
               <td>{{ v.reachedReview ? `${pctOf(v.serious, v.reachedReview)}%` : '—' }}</td>
               <td>{{ v.footprintHit == null ? '—' : `${Math.round(v.footprintHit * 100)}%` }}</td>
               <td>{{ v.redFlags }}</td>
               <td>{{ v.selfFixes }}</td>
               <td>{{ v.rejected }}</td>
+              <td>{{ v.costPerMerged == null ? '—' : fmtUsd(v.costPerMerged, locale) }}</td>
+              <td>{{ v.peopleEdited == null ? '—' : `${Math.round(v.peopleEdited * 100)}%` }}</td>
+              <td>{{ v.reverted ?? 0 }}</td>
             </tr>
           </tbody>
         </table>

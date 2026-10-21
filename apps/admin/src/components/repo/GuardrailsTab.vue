@@ -40,6 +40,7 @@ interface Form {
   editChecksOff: boolean
   coverage: { enabled: boolean; command: string; report: string; threshold: number }
   acceptance: boolean
+  layersBlock: boolean
 }
 const toRow = (c: S['EditCheck']): CheckRow => ({ name: c.name, globs: c.globs.join(', '), cmd: c.cmd, every: c.every ?? 0 })
 const toForm = (h: Harness): Form => ({
@@ -55,6 +56,7 @@ const toForm = (h: Harness): Form => ({
     threshold: h.coverage?.threshold ?? 0,
   },
   acceptance: !!h.acceptance,
+  layersBlock: !!h.layersBlock,
 })
 const form = reactive<Form>(toForm(harness.value))
 const saved = ref(JSON.stringify(form))
@@ -86,6 +88,7 @@ function body(f: Form): S['RepoHarnessInput'] {
       threshold: f.coverage.threshold,
     },
     acceptance: f.acceptance,
+    layersBlock: f.layersBlock,
   }
 }
 
@@ -231,6 +234,10 @@ const offer = useMutation({
 
       <CfgRow :label="t('harnessRepo.acceptance')" :help="hasPreview ? t('harnessRepo.acceptanceHelp') : t('harnessRepo.acceptanceNoPreview')">
         <SwitchToggle v-model="form.acceptance" :disabled="!hasPreview && !form.acceptance" :label="t('harnessRepo.acceptance')" />
+      </CfgRow>
+
+      <CfgRow :label="t('harnessRepo.layersBlock')" :help="t('harnessRepo.layersBlockHelp')">
+        <SwitchToggle v-model="form.layersBlock" :label="t('harnessRepo.layersBlock')" />
       </CfgRow>
 
       <div class="actions" style="margin: 12px 0 0">

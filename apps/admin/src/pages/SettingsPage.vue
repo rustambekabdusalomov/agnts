@@ -129,6 +129,9 @@ function setHook(h: GuardHook, on: boolean) {
 }
 const stallModes = computed(() => (['off', 'log', 'act'] as string[]).map((v) => ({ value: v, label: t(`harnessSettings.stalls_${v}`) })))
 const deepModes = computed(() => (['off', 'auto', 'always'] as string[]).map((v) => ({ value: v, label: t(`harnessSettings.deep_${v}`) })))
+const effortLevels = computed(() => (['', 'low', 'medium', 'high'] as const).map((v) => ({ value: v, label: t(`harnessSettings.effort_${v}`) })))
+const effortStages = ['analyze', 'coding', 'review', 'complex'] as const
+const effortLabel = (s: (typeof effortStages)[number]) => t(`harnessSettings.effort${s[0].toUpperCase()}${s.slice(1)}`)
 
 // Coding on Codex: a codex: model in the coding stage. Empty is Claude.
 const codexModel = computed({
@@ -310,6 +313,20 @@ const section = computed(() => settingsSection(route.params.section))
         <CfgRow v-if="draft.methodSkills !== undefined" :label="t('harnessSettings.methodSkills')" :help="t('harnessSettings.methodSkillsHelp')">
           <SwitchToggle v-model="draft.methodSkills" :label="t('harnessSettings.methodSkills')" />
         </CfgRow>
+        <CfgRow v-if="draft.effort" :label="t('harnessSettings.effort')" :help="t('harnessSettings.effortHelp')">
+          <div class="effort-grid">
+            <template v-for="st in effortStages" :key="st">
+              <span class="hint">{{ effortLabel(st) }}</span>
+              <SegButtons v-model="draft.effort[st]" :options="effortLevels" :label="effortLabel(st)" />
+            </template>
+          </div>
+        </CfgRow>
+        <CfgRow v-if="draft.baselineChecks !== undefined" :label="t('harnessSettings.baselineChecks')" :help="t('harnessSettings.baselineChecksHelp')">
+          <SwitchToggle v-model="draft.baselineChecks" :label="t('harnessSettings.baselineChecks')" />
+        </CfgRow>
+        <CfgRow v-if="draft.recheckComplex !== undefined" :label="t('harnessSettings.recheckComplex')" :help="t('harnessSettings.recheckComplexHelp')">
+          <SwitchToggle v-model="draft.recheckComplex" :label="t('harnessSettings.recheckComplex')" />
+        </CfgRow>
         <CfgRow v-if="draft.secondOpinion !== undefined" :label="t('harnessSettings.secondOpinion')" :help="t('harnessSettings.secondOpinionHelp')">
           <input v-model.trim="draft.secondOpinion" class="cfg-in mono" maxlength="80" :placeholder="t('harnessSettings.secondOpinionHint')" :aria-label="t('harnessSettings.secondOpinion')">
         </CfgRow>
@@ -420,4 +437,6 @@ const section = computed(() => settingsSection(route.params.section))
 .set-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
 .guard-hooks { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
 .ci-infra { width: min(360px, 100%); min-height: 96px; font-family: var(--mono); font-size: 13px; }
+.effort-grid { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; align-items: center; }
+@media (max-width: 560px) { .effort-grid { grid-template-columns: 1fr; } }
 </style>

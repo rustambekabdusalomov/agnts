@@ -25,6 +25,14 @@
     "done_survey": "Survey queued",
     "done_approve": "Brief approved: new runs read it",
     "done_discard": "Draft discarded",
-    "done_save": "Brief saved"
+    "done_save": "Brief saved",
+    "archTitle": "Architecture",
+    "archSub": "The part of the brief agnts checks work against: layers and the imports each may make, shared helpers to reuse, recipes with files to copy. Runs read it as architecture.json; a change that imports across layers it should not is flagged.",
+    "archNone": "No architecture yet. The next survey writes one with the brief, or write it yourself.",
+    "archCounts": "{layers} layers · {helpers} helpers · {recipes} recipes",
+    "archEdit": "Edit JSON",
+    "archEditHint": "Empty removes it. Paths are relative to the repository; layer paths are globs (** for any depth); leave out mayImport for a layer that may import anything.",
+    "archDraft": "The draft brief comes with this architecture; approving the brief approves it too.",
+    "done_saveArch": "Architecture saved"
   }
 }

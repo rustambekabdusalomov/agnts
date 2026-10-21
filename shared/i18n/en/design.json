@@ -10,6 +10,19 @@
     "ship_compatibility": "Compatibility",
     "ship_rollout": "Rollout",
     "ship_rollback": "Rollback",
-    "deviations": "Departed from the plan"
+    "deviations": "Departed from the plan",
+    "fitTitle": "Following the existing code",
+    "kind_copy": "copy",
+    "kind_adapt": "adapt",
+    "kind_new": "new pattern",
+    "like": "like",
+    "conventionsFrom": "conventions from",
+    "goesIn": "goes in",
+    "precedent": "sets a precedent: later work will copy it",
+    "reuseTitle": "Existing helpers to use",
+    "testPlanTitle": "Tests to add or change",
+    "edgeCasesTitle": "Edge cases to handle",
+    "reproTitle": "The bug, reproduced",
+    "reproNot": "The analysis could not reproduce it"
   }
 }

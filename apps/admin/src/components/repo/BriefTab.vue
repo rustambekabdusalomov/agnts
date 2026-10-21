@@ -29,7 +29,7 @@ function busy(x?: RepoBrief) {
   return x?.status === 'pending' || x?.status === 'surveying'
 }
 
-type Action = { kind: 'survey' | 'approve' | 'discard' } | { kind: 'save'; body: string }
+type Action = { kind: 'survey' | 'approve' | 'discard' } | { kind: 'save'; body: string } | { kind: 'saveArch'; arch: string }
 const act = useMutation({
   mutationFn: (a: Action) => {
     const path = { params: { path: { id: props.repoId } } }
@@ -42,11 +42,14 @@ const act = useMutation({
         return unwrap(api.POST('/repos/{id}/brief/discard', path))
       case 'save':
         return unwrap(api.PUT('/repos/{id}/brief', { ...path, body: { body: a.body } }))
+      case 'saveArch':
+        return unwrap(api.PUT('/repos/{id}/brief', { ...path, body: { body: b.value?.body ?? '', architecture: a.arch } }))
     }
   },
   onSuccess: (x, a) => {
     qc.setQueryData(key.value, x)
     if (a.kind === 'save') editing.value = false
+    if (a.kind === 'saveArch') archEditing.value = false
     ui.notify(t(`brief.done_${a.kind}`))
   },
   onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
@@ -64,6 +67,22 @@ async function discard() {
   }
 }
 const short = (sha: string) => sha.slice(0, 7)
+
+// The architecture: shown as JSON, edited as JSON.
+const archEditing = ref(false)
+const archText = ref('')
+function editArch() {
+  archText.value = b.value?.architecture ?? ''
+  archEditing.value = true
+}
+function counts(json?: string) {
+  try {
+    const a = JSON.parse(json ?? '{}') as { layers?: unknown[]; helpers?: unknown[]; recipes?: unknown[] }
+    return { layers: a.layers?.length ?? 0, helpers: a.helpers?.length ?? 0, recipes: a.recipes?.length ?? 0 }
+  } catch {
+    return { layers: 0, helpers: 0, recipes: 0 }
+  }
+}
 </script>
 
 <template>
@@ -121,11 +140,51 @@ const short = (sha: string) => sha.slice(0, 7)
         </div>
       </div>
       <ReportView :markdown="b.draft" />
+      <template v-if="b.architectureDraft">
+        <p class="hint" style="margin-top: 12px">{{ t('brief.archDraft') }} {{ t('brief.archCounts', counts(b.architectureDraft)) }}</p>
+        <details><summary class="hint">architecture.json</summary><pre class="arch-json">{{ b.architectureDraft }}</pre></details>
+      </template>
+    </section>
+
+    <section v-if="!editing" class="card">
+      <div class="ch">
+        <div>
+          <h2>{{ t('brief.archTitle') }}</h2>
+          <p class="sub">{{ t('brief.archSub') }}</p>
+        </div>
+        <div class="actions" style="margin: 0">
+          <button v-if="!archEditing" type="button" class="btn btn-s" @click="editArch">{{ t('brief.archEdit') }}</button>
+        </div>
+      </div>
+      <template v-if="archEditing">
+        <textarea v-model="archText" class="brief-edit" rows="20" aria-label="architecture.json" spellcheck="false" />
+        <p class="hint">{{ t('brief.archEditHint') }}</p>
+        <div class="actions">
+          <button type="button" class="btn btn-p" :disabled="act.isPending.value" @click="act.mutate({ kind: 'saveArch', arch: archText })">{{ t('brief.save') }}</button>
+          <button type="button" class="btn" @click="archEditing = false">{{ t('brief.cancel') }}</button>
+        </div>
+      </template>
+      <template v-else-if="b.architecture">
+        <p class="hint">{{ t('brief.archCounts', counts(b.architecture)) }}</p>
+        <details><summary class="hint">architecture.json</summary><pre class="arch-json">{{ b.architecture }}</pre></details>
+      </template>
+      <p v-else class="empty">{{ t('brief.archNone') }}</p>
     </section>
   </template>
 </template>
 
 <style scoped>
+.arch-json {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  background: var(--code);
+  color: var(--code-ink);
+  border-radius: 10px;
+  padding: 12px;
+  max-height: 480px;
+  overflow: auto;
+  white-space: pre;
+}
 .brief-edit {
   width: 100%;
   font-family: var(--mono);

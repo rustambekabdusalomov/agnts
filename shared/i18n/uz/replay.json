@@ -27,6 +27,26 @@
     "fail": "o‘tmadi",
     "verdict_looks_good": "yaxshi",
     "verdict_has_concerns": "shubhalar bor",
-    "verdict_needs_changes": "o‘zgartirish kerak"
+    "verdict_needs_changes": "o‘zgartirish kerak",
+    "benchmarkTitle": "Benchmark",
+    "benchmarkSub": "agnts’dagi har bir o‘zgarish qayta ishga tushiriladigan va birlashtirilgan natija bilan solishtiriladigan birlashtirilgan tiketlar. Turli hajmdagi 20–30 tasini tanlang.",
+    "benchmarkAdd": "Benchmarkka qo‘shish",
+    "benchmarkRemove": "Benchmarkdan olib tashlash",
+    "benchmarkIn": "Benchmarkda: agnts’dagi o‘zgarishlar shu tiketda qayta ishga tushiriladi.",
+    "benchmarkNeedsMerge": "Benchmarkka faqat birlashtirilgan tiketlar kiradi: qayta ishga tushirishlar birlashtirilgan natija bilan solishtiriladi.",
+    "benchmarkRun": "Benchmarkni ishga tushirish",
+    "benchmarkModel": "Kod modeli",
+    "benchmarkModelDefault": "asl tiketlardagidek",
+    "benchmarkConfirm": "agnts benchmarkdagi {n} ta tiketni har biri boshlangan joydan qayta ishga tushiradi. Ular oddiy tiketlar kabi Claude rejangizdan foydalanadi.",
+    "benchmarkStarted": "Navbatga {n} ta qayta ishga tushirish qo‘yildi",
+    "benchmarkFailed": "{n} tasini qayta ishga tushirib bo‘lmadi: {why}",
+    "benchmarkEmpty": "Benchmark bo‘sh. Birlashtirilgan tiketni oching va «Benchmarkka qo‘shish»ni bosing.",
+    "benchmarkCount": "{n} ta tiket",
+    "allReplays": "Barcha qayta ishga tushirishlar",
+    "colModel": "Model",
+    "colLines": "Birlashtirilgan qatorlar",
+    "colLinesHint": "Birlashtirilgan pull request qo‘shgan qatorlardan qayta ishga tushirish ham qo‘shganlari ulushi; qavsda — agnts’ning asl o‘zgarishi uchun. Qanchalik yuqori bo‘lsa, odamlar chiqargan narsaga shunchalik yaqin.",
+    "against_merged": "birlashtirilganga",
+    "against_agnts": "agnts’ga"
   }
 }

@@ -10,6 +10,19 @@
     "ship_compatibility": "Moslik",
     "ship_rollout": "Chiqarish tartibi",
     "ship_rollback": "Orqaga qaytarish",
-    "deviations": "Rejadan chetlanishlar"
+    "deviations": "Rejadan chetlanishlar",
+    "fitTitle": "Mavjud kodga qanday ergashish",
+    "kind_copy": "nusxa",
+    "kind_adapt": "moslash",
+    "kind_new": "yangi pattern",
+    "like": "kabi",
+    "conventionsFrom": "qoidalar manbai",
+    "goesIn": "joylashuvi",
+    "precedent": "namuna bo‘ladi: keyingi ishlar undan nusxa oladi",
+    "reuseTitle": "Foydalaniladigan mavjud yordamchilar",
+    "testPlanTitle": "Qo‘shiladigan yoki o‘zgartiriladigan testlar",
+    "edgeCasesTitle": "Chegaraviy holatlar",
+    "reproTitle": "Xato qayta ko‘rsatildi",
+    "reproNot": "Tahlil xatoni qayta ko‘rsata olmadi"
   }
 }

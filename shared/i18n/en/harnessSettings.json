@@ -74,6 +74,20 @@
     "colTargeted": "Targeted findings",
     "colTargetedHint": "Review findings per ticket of the kinds the skills target: architecture, maintainability, and any on a migration file",
     "xOfY": "{x} of {y}",
-    "vsAll": "vs {n}%"
+    "vsAll": "vs {n}%",
+    "effort": "Thinking effort",
+    "effortHelp": "How hard Claude thinks in each stage (Claude Code's --effort). Higher is slower and costs more of your plan. Complex tickets use their own level for coding and review.",
+    "effortAnalyze": "Analysis",
+    "effortCoding": "Coding",
+    "effortReview": "Review",
+    "effortComplex": "Complex tickets",
+    "effort_": "Default",
+    "effort_low": "Low",
+    "effort_medium": "Medium",
+    "effort_high": "High",
+    "recheckComplex": "Re-check complex analyses",
+    "recheckComplexHelp": "When the analysis model rates a ticket complex, the coding model reads the analysis again before any code is written, and fixes what is wrong or missing.",
+    "baselineChecks": "Check the starting commit first",
+    "baselineChecksHelp": "Before a ticket's first coding run, agnts runs the checks on the commit the work starts from. What already fails there is not the ticket's: no fix attempts go to it, and the reviewer sees it failed before. Results are shared by tickets from the same commit."
   }
 }

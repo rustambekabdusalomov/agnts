@@ -74,6 +74,20 @@
     "colTargeted": "Maqsadli izohlar",
     "colTargetedHint": "Koʻnikmalar nishonga olgan turdagi tiketdagi koʻrib chiqish izohlari: arxitektura, qoʻllab-quvvatlanuvchanlik va migratsiya fayllaridagi har qanday izoh",
     "xOfY": "{y} dan {x}",
-    "vsAll": "barchasi {n}%"
+    "vsAll": "barchasi {n}%",
+    "effort": "Fikrlash darajasi",
+    "effortHelp": "Claude har bir bosqichda qanchalik chuqur o‘ylashi (Claude Code’dagi --effort). Yuqori daraja sekinroq va rejangizdan ko‘proq sarflaydi. Murakkab tiketlarda kod va ko‘rib chiqish o‘z darajasidan foydalanadi.",
+    "effortAnalyze": "Tahlil",
+    "effortCoding": "Kod",
+    "effortReview": "Ko‘rib chiqish",
+    "effortComplex": "Murakkab tiketlar",
+    "effort_": "Standart",
+    "effort_low": "Past",
+    "effort_medium": "O‘rta",
+    "effort_high": "Yuqori",
+    "recheckComplex": "Murakkab tahlillarni qayta tekshirish",
+    "recheckComplexHelp": "Tahlil modeli tiketni murakkab deb baholasa, kod modeli kod yozilishidan oldin tahlilni qayta o‘qiydi va xato yoki yetishmayotgan joylarni tuzatadi.",
+    "baselineChecks": "Avval boshlang‘ich kommitni tekshirish",
+    "baselineChecksHelp": "Tiketning birinchi kod yozish bosqichidan oldin agnts ish boshlanadigan kommitda tekshiruvlarni ishga tushiradi. U yerda allaqachon yiqilayotgan narsa tiketga tegishli emas: unga tuzatish urinishlari sarflanmaydi va ko‘rib chiquvchi u avval ham yiqilganini ko‘radi. Natijalar bir kommitdan boshlangan tiketlar uchun umumiy."
   }
 }

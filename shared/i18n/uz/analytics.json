@@ -107,6 +107,8 @@
     "colFirstPassHint": "Inson o‘zgartirish so‘ramasdan tasdiqlangan yakunlangan tiketlar",
     "colRounds": "Tuzatish bosqichlari",
     "colRoundsHint": "Ko‘rib chiqishga yetgan har bir tiket uchun insondan o‘rtacha o‘zgartirish so‘rovlari",
+    "colCIRounds": "CI bosqichlari",
+    "colCIRoundsHint": "Ko‘rib chiqishga yetgan har bir tiket uchun pull requestdagi qizil CI ishni o‘rtacha necha marta qaytargani (tuzatish bosqichlariga kirmaydi)",
     "colFixes": "Tekshiruv tuzatishlari",
     "colFixesHint": "Muvaffaqiyatsiz tekshiruvlar Claude’ga o‘rtacha necha marta qaytarilgan",
     "colSerious": "Jiddiy kamchiliklar",
@@ -250,6 +252,15 @@
     "colQuestionsHint": "Tahlil qilingan bitta tiketga agnts savollari. Savollar koʻp boʻlsa, CLAUDE.md yoki qoidalar yetishmaydi.",
     "colCi": "CI xatolari",
     "colCiHint": "Davrdagi CI xato guruhlari",
-    "tabAssistant": "Yordamchi"
+    "tabAssistant": "Yordamchi",
+    "colScore": "Ball",
+    "colScoreHint": "0–100: birinchi urinishda tayyor 35%, birlashtirilgan 25%, jiddiy kamchiliksiz 20%, kam tuzatish bosqichi 20%. Yangi versiyalar pull requestlari birlashtirilguncha pastroq ball oladi.",
+    "colCostMerged": "$/birlashtirilgan",
+    "colCostMergedHint": "Versiyadagi barcha tiketlar narxi, birlashtirilganlar soniga bo‘lingan",
+    "fewTickets": "10 tadan kam tiket: solishtirish uchun juda oz",
+    "colPeopleEdited": "Odamlar tuzatishi",
+    "colPeopleEditedHint": "Birlashtirishdan oldin odamlar o‘zgartirgan yoki olib tashlagan agnts qatorlarining o‘rtacha ulushi. Qanchalik kam bo‘lsa, shuncha yaxshi.",
+    "colReverted": "Bekor qilingan",
+    "colRevertedHint": "Birlashtirilgan ishi odamlar tomonidan bekor qilingan tiketlar"
   }
 }

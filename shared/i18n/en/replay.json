@@ -27,6 +27,26 @@
     "fail": "fail",
     "verdict_looks_good": "looks good",
     "verdict_has_concerns": "has concerns",
-    "verdict_needs_changes": "needs changes"
+    "verdict_needs_changes": "needs changes",
+    "benchmarkTitle": "Benchmark",
+    "benchmarkSub": "Merged tickets that every change to agnts is replayed against, and scored against what they merged as. Pick 20–30 of different sizes.",
+    "benchmarkAdd": "Add to benchmark",
+    "benchmarkRemove": "Remove from benchmark",
+    "benchmarkIn": "In the benchmark: changes to agnts are replayed against this ticket.",
+    "benchmarkNeedsMerge": "Only merged tickets can be in the benchmark: replays are scored against what they merged as.",
+    "benchmarkRun": "Run benchmark",
+    "benchmarkModel": "Coding model",
+    "benchmarkModelDefault": "as the originals",
+    "benchmarkConfirm": "agnts replays the {n} benchmark tickets from where each started. They use your Claude plan like any ticket.",
+    "benchmarkStarted": "{n} replays queued",
+    "benchmarkFailed": "{n} could not be replayed: {why}",
+    "benchmarkEmpty": "The benchmark is empty. Open a merged ticket and press Add to benchmark.",
+    "benchmarkCount": "{n} tickets",
+    "allReplays": "All replays",
+    "colModel": "Model",
+    "colLines": "Merged lines",
+    "colLinesHint": "Share of the lines the merged pull request added that the replay adds too; in brackets the same for agnts's original change. Higher is closer to what people shipped.",
+    "against_merged": "vs merged",
+    "against_agnts": "vs agnts"
   }
 }

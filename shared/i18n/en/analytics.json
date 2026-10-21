@@ -107,6 +107,8 @@
     "colFirstPassHint": "Done tickets approved without a person asking for changes",
     "colRounds": "Change rounds",
     "colRoundsHint": "Average change requests by a person per ticket that reached review",
+    "colCIRounds": "CI rounds",
+    "colCIRoundsHint": "Average times red CI on the pull request sent the work back, per ticket that reached review (not counted in change rounds)",
     "colFixes": "Check fixes",
     "colFixesHint": "Average times failing checks were sent back to Claude",
     "colSerious": "Serious findings",
@@ -250,6 +252,15 @@
     "colQuestionsHint": "Questions agnts asked per analysed ticket. Many questions point to a missing CLAUDE.md or rules.",
     "colCi": "CI failures",
     "colCiHint": "CI failure groups that failed in the period",
-    "tabAssistant": "Assistant"
+    "tabAssistant": "Assistant",
+    "colScore": "Score",
+    "colScoreHint": "0–100: done first time 35%, merged 25%, no serious review finding 20%, few change rounds 20%. Recent versions score lower until their pull requests merge.",
+    "colCostMerged": "$/merged",
+    "colCostMergedHint": "What all the version's tickets cost, over the ones that merged",
+    "fewTickets": "under 10 tickets: too few to compare",
+    "colPeopleEdited": "People edits",
+    "colPeopleEditedHint": "Average share of agnts's lines people changed or removed before merging. Lower is better.",
+    "colReverted": "Reverted",
+    "colRevertedHint": "Tickets whose merged work people reverted"
   }
 }

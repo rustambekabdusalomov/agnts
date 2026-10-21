@@ -66,6 +66,8 @@
     "starterOffer": "{n, plural, other {# qoidani}} taklif qilish",
     "starterOffered": "Allaqachon taklif qilingan",
     "starterAdded": "{n, plural, =0 {Taklif qilinadigan yangi narsa yoʻq} other {# qoida taklif qilindi}}",
-    "starterOpenRules": "Takliflarni ochish"
+    "starterOpenRules": "Takliflarni ochish",
+    "layersBlock": "Qatlamlararo importlarni bloklash",
+    "layersBlockHelp": "Tasdiqlangan arxitektura bo‘lsa, agnts qatlamlar ruxsat bermaydigan import qo‘shgan o‘zgarishni belgilaydi. Yoqilgan bo‘lsa, bu bloklovchi bo‘ladi va agnts’ning o‘z ko‘rib chiqishi uni siz ko‘rishingizdan oldin dasturchiga qaytaradi."
   }
 }
