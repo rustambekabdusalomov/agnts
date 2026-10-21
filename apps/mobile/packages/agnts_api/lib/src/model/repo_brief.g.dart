@@ -33,6 +33,10 @@ abstract class _$RepoBriefCWProxy {
 
   RepoBrief updatedAt(DateTime updatedAt);
 
+  RepoBrief architecture(String? architecture);
+
+  RepoBrief architectureDraft(String? architectureDraft);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `RepoBrief(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -53,6 +57,8 @@ abstract class _$RepoBriefCWProxy {
     DateTime? surveyedAt,
     DateTime? approvedAt,
     DateTime updatedAt,
+    String? architecture,
+    String? architectureDraft,
   });
 }
 
@@ -102,6 +108,14 @@ class _$RepoBriefCWProxyImpl implements _$RepoBriefCWProxy {
   RepoBrief updatedAt(DateTime updatedAt) => this(updatedAt: updatedAt);
 
   @override
+  RepoBrief architecture(String? architecture) =>
+      this(architecture: architecture);
+
+  @override
+  RepoBrief architectureDraft(String? architectureDraft) =>
+      this(architectureDraft: architectureDraft);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `RepoBrief(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -122,6 +136,8 @@ class _$RepoBriefCWProxyImpl implements _$RepoBriefCWProxy {
     Object? surveyedAt = const $CopyWithPlaceholder(),
     Object? approvedAt = const $CopyWithPlaceholder(),
     Object? updatedAt = const $CopyWithPlaceholder(),
+    Object? architecture = const $CopyWithPlaceholder(),
+    Object? architectureDraft = const $CopyWithPlaceholder(),
   }) {
     return RepoBrief(
       repoId: repoId == const $CopyWithPlaceholder()
@@ -176,6 +192,14 @@ class _$RepoBriefCWProxyImpl implements _$RepoBriefCWProxy {
           ? _value.updatedAt
           // ignore: cast_nullable_to_non_nullable
           : updatedAt as DateTime,
+      architecture: architecture == const $CopyWithPlaceholder()
+          ? _value.architecture
+          // ignore: cast_nullable_to_non_nullable
+          : architecture as String?,
+      architectureDraft: architectureDraft == const $CopyWithPlaceholder()
+          ? _value.architectureDraft
+          // ignore: cast_nullable_to_non_nullable
+          : architectureDraft as String?,
     );
   }
 }
@@ -232,6 +256,11 @@ RepoBrief _$RepoBriefFromJson(
       (v) => v == null ? null : DateTime.parse(v as String),
     ),
     updatedAt: $checkedConvert('updatedAt', (v) => DateTime.parse(v as String)),
+    architecture: $checkedConvert('architecture', (v) => v as String?),
+    architectureDraft: $checkedConvert(
+      'architectureDraft',
+      (v) => v as String?,
+    ),
   );
   return val;
 });
@@ -250,6 +279,8 @@ Map<String, dynamic> _$RepoBriefToJson(RepoBrief instance) => <String, dynamic>{
   'surveyedAt': ?instance.surveyedAt?.toIso8601String(),
   'approvedAt': ?instance.approvedAt?.toIso8601String(),
   'updatedAt': instance.updatedAt.toIso8601String(),
+  'architecture': ?instance.architecture,
+  'architectureDraft': ?instance.architectureDraft,
 };
 
 const _$RepoBriefStatusEnumEnumMap = {

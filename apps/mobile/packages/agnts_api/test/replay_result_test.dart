@@ -32,6 +32,35 @@ void main() {
       // TODO
     });
 
+    // String model
+    test('to test the property `model`', () async {
+      // TODO
+    });
+
+    // The original is in the benchmark
+    // bool benchmark
+    test('to test the property `benchmark`', () async {
+      // TODO
+    });
+
+    // What the replay is scored against: what the original merged as, or the original's own change
+    // String against
+    test('to test the property `against`', () async {
+      // TODO
+    });
+
+    // Share of the merged change's added lines the replay adds too; absent when scored against agnts
+    // num lineRecall
+    test('to test the property `lineRecall`', () async {
+      // TODO
+    });
+
+    // The same for the original's own change
+    // num originalLineRecall
+    test('to test the property `originalLineRecall`', () async {
+      // TODO
+    });
+
     // bool hasChange
     test('to test the property `hasChange`', () async {
       // TODO

@@ -83,7 +83,9 @@ Class | Method | HTTP request | Description
 [*AnalyticsApi*](doc/AnalyticsApi.md) | [**getAnalyticsCi**](doc/AnalyticsApi.md#getanalyticsci) | **GET** /analytics/ci | CI failures, fixes and flaky jobs for a period
 [*AnalyticsApi*](doc/AnalyticsApi.md) | [**getAnalyticsDelivery**](doc/AnalyticsApi.md#getanalyticsdelivery) | **GET** /analytics/delivery | What happened to agnts pull requests, cycle time and questions for a period
 [*AnalyticsApi*](doc/AnalyticsApi.md) | [**getAnalyticsLearning**](doc/AnalyticsApi.md#getanalyticslearning) | **GET** /analytics/learning | Lessons, rules, follow-ups and reviewer notes for a period
+[*AnalyticsApi*](doc/AnalyticsApi.md) | [**getBenchmark**](doc/AnalyticsApi.md#getbenchmark) | **GET** /eval/benchmark | The tickets in the benchmark
 [*AnalyticsApi*](doc/AnalyticsApi.md) | [**getReplayReport**](doc/AnalyticsApi.md#getreplayreport) | **GET** /eval/replays | How the newest replays compare with the tickets they re-ran, by prompt version
+[*AnalyticsApi*](doc/AnalyticsApi.md) | [**runBenchmark**](doc/AnalyticsApi.md#runbenchmark) | **POST** /eval/benchmark | Replay every ticket in the benchmark with today&#39;s prompts, and the given models
 [*AssistantApi*](doc/AssistantApi.md) | [**askAssistant**](doc/AssistantApi.md#askassistant) | **POST** /assistant/conversations/{conversationId}/messages | Ask a follow-up question in one of your conversations
 [*AssistantApi*](doc/AssistantApi.md) | [**cancelAssistantAction**](doc/AssistantApi.md#cancelassistantaction) | **POST** /assistant/actions/{actionId}/cancel | Decline an action the assistant proposed
 [*AssistantApi*](doc/AssistantApi.md) | [**confirmAssistantAction**](doc/AssistantApi.md#confirmassistantaction) | **POST** /assistant/actions/{actionId}/confirm | Do an action the assistant proposed on one of your answers
@@ -289,6 +291,7 @@ Class | Method | HTTP request | Description
 [*TicketsApi*](doc/TicketsApi.md) | [**retryTicket**](doc/TicketsApi.md#retryticket) | **POST** /tickets/{key}/retry | Resume a failed or rate-limited ticket where it stopped
 [*TicketsApi*](doc/TicketsApi.md) | [**reviewTicket**](doc/TicketsApi.md#reviewticket) | **POST** /tickets/{key}/review | Queue a code review of a ticket waiting for review (again, if one already ran)
 [*TicketsApi*](doc/TicketsApi.md) | [**setFollowUps**](doc/TicketsApi.md#setfollowups) | **PUT** /tickets/{key}/follow-ups | Turn follow-up suggestions on or off for this ticket
+[*TicketsApi*](doc/TicketsApi.md) | [**setTicketBenchmark**](doc/TicketsApi.md#setticketbenchmark) | **PUT** /tickets/{key}/benchmark | Put a merged code or test ticket in the benchmark, or take it out
 [*TicketsApi*](doc/TicketsApi.md) | [**setTicketKind**](doc/TicketsApi.md#setticketkind) | **PUT** /tickets/{key}/kind | Change what the ticket produces
 [*TicketsApi*](doc/TicketsApi.md) | [**setTicketMember**](doc/TicketsApi.md#setticketmember) | **PUT** /tickets/{key}/member | Make a member the ticket&#39;s member (per-member Claude mode runs it on their account)
 [*TicketsApi*](doc/TicketsApi.md) | [**setTicketModels**](doc/TicketsApi.md#setticketmodels) | **PUT** /tickets/{key}/models | Override models for this ticket; omit a stage to use the default
@@ -340,6 +343,9 @@ Class | Method | HTTP request | Description
  - [AgentConfigScan](doc/AgentConfigScan.md)
  - [Analysis](doc/Analysis.md)
  - [AnalysisAcceptanceInner](doc/AnalysisAcceptanceInner.md)
+ - [AnalysisRepro](doc/AnalysisRepro.md)
+ - [AnalysisReuseInner](doc/AnalysisReuseInner.md)
+ - [AnalysisTestPlanInner](doc/AnalysisTestPlanInner.md)
  - [Analytics](doc/Analytics.md)
  - [AnalyticsCI](doc/AnalyticsCI.md)
  - [AnalyticsDelivery](doc/AnalyticsDelivery.md)
@@ -371,6 +377,7 @@ Class | Method | HTTP request | Description
  - [BeginLoginTotp200Response](doc/BeginLoginTotp200Response.md)
  - [BeginLoginTotpRequest](doc/BeginLoginTotpRequest.md)
  - [BeginTotp200Response](doc/BeginTotp200Response.md)
+ - [BenchmarkRun](doc/BenchmarkRun.md)
  - [Billing](doc/Billing.md)
  - [BillingPrices](doc/BillingPrices.md)
  - [Blocker](doc/Blocker.md)
@@ -422,6 +429,7 @@ Class | Method | HTTP request | Description
  - [EditCheck](doc/EditCheck.md)
  - [EditCommitMessageRequest](doc/EditCommitMessageRequest.md)
  - [EditPullCommentRequest](doc/EditPullCommentRequest.md)
+ - [EffortSettings](doc/EffortSettings.md)
  - [Environment](doc/Environment.md)
  - [Error](doc/Error.md)
  - [Event](doc/Event.md)
@@ -484,6 +492,7 @@ Class | Method | HTTP request | Description
  - [NotifySettings](doc/NotifySettings.md)
  - [OfferStarterRulesRequest](doc/OfferStarterRulesRequest.md)
  - [PRCommentSettings](doc/PRCommentSettings.md)
+ - [Pattern](doc/Pattern.md)
  - [PeriodStats](doc/PeriodStats.md)
  - [Pipeline](doc/Pipeline.md)
  - [PlaneState](doc/PlaneState.md)
@@ -583,6 +592,7 @@ Class | Method | HTTP request | Description
  - [RuleKind](doc/RuleKind.md)
  - [RuleQuestion](doc/RuleQuestion.md)
  - [RuleStatus](doc/RuleStatus.md)
+ - [RunBenchmarkRequest](doc/RunBenchmarkRequest.md)
  - [RunHistoryPage](doc/RunHistoryPage.md)
  - [RunHistorySettings](doc/RunHistorySettings.md)
  - [RunHistorySummary](doc/RunHistorySummary.md)
@@ -594,6 +604,7 @@ Class | Method | HTTP request | Description
  - [SetMemberRoleRequest](doc/SetMemberRoleRequest.md)
  - [SetPlaneWebhookSecretRequest](doc/SetPlaneWebhookSecretRequest.md)
  - [SetSlotsRequest](doc/SetSlotsRequest.md)
+ - [SetTicketBenchmarkRequest](doc/SetTicketBenchmarkRequest.md)
  - [SetTicketMemberRequest](doc/SetTicketMemberRequest.md)
  - [SetTicketNumberRequest](doc/SetTicketNumberRequest.md)
  - [Settings](doc/Settings.md)

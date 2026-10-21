@@ -691,6 +691,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get analyticsColRoundsHint => 'Среднее число запросов изменений от человека на тикет, дошедший до ревью';
 
   @override
+  String get analyticsColCIRounds => 'Раундов CI';
+
+  @override
+  String get analyticsColCIRoundsHint =>
+      'Сколько раз в среднем красный CI в пул-реквесте возвращал работу, на тикет, дошедший до ревью (не входит в раунды правок)';
+
+  @override
   String get analyticsColFixes => 'Исправлений проверок';
 
   @override
@@ -1172,6 +1179,35 @@ class AppLocalizationsRu extends AppLocalizations {
   String get analyticsTabAssistant => 'Ассистент';
 
   @override
+  String get analyticsColScore => 'Оценка';
+
+  @override
+  String get analyticsColScoreHint =>
+      '0–100: принято с первого раза 35%, слито 25%, без серьёзных замечаний ревью 20%, мало раундов правок 20%. У свежих версий оценка ниже, пока их пул-реквесты не слиты.';
+
+  @override
+  String get analyticsColCostMerged => '\$/слитый';
+
+  @override
+  String get analyticsColCostMergedHint => 'Стоимость всех тикетов версии, делённая на слитые';
+
+  @override
+  String get analyticsFewTickets => 'меньше 10 тикетов: слишком мало для сравнения';
+
+  @override
+  String get analyticsColPeopleEdited => 'Правки людей';
+
+  @override
+  String get analyticsColPeopleEditedHint =>
+      'Средняя доля строк agnts, которые люди изменили или удалили перед слиянием. Чем меньше, тем лучше.';
+
+  @override
+  String get analyticsColReverted => 'Откачено';
+
+  @override
+  String get analyticsColRevertedHint => 'Тикеты, слитую работу которых люди откатили';
+
+  @override
   String get appName => 'agnts';
 
   @override
@@ -1480,6 +1516,34 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get briefDone_save => 'Описание сохранено';
+
+  @override
+  String get briefArchTitle => 'Архитектура';
+
+  @override
+  String get briefArchSub =>
+      'Часть описания, с которой agnts сверяет работу: слои и разрешённые импорты, общие помощники, рецепты с файлами-образцами. Запуски читают её как architecture.json; изменение с запрещённым импортом между слоями помечается.';
+
+  @override
+  String get briefArchNone => 'Архитектуры пока нет. Следующий обзор напишет её вместе с описанием, или напишите сами.';
+
+  @override
+  String briefArchCounts(String layers, String helpers, String recipes) {
+    return 'Слоёв: $layers · помощников: $helpers · рецептов: $recipes';
+  }
+
+  @override
+  String get briefArchEdit => 'Изменить JSON';
+
+  @override
+  String get briefArchEditHint =>
+      'Пустое значение удаляет её. Пути — относительно репозитория; пути слоёв — шаблоны (** для любой глубины); не указывайте mayImport для слоя без ограничений.';
+
+  @override
+  String get briefArchDraft => 'К черновику описания прилагается эта архитектура; утверждая описание, вы утверждаете и её.';
+
+  @override
+  String get briefDone_saveArch => 'Архитектура сохранена';
 
   @override
   String get ciTitle => 'CI';
@@ -2266,6 +2330,45 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get designDeviations => 'Отступления от плана';
+
+  @override
+  String get designFitTitle => 'Как следовать существующему коду';
+
+  @override
+  String get designKind_copy => 'копия';
+
+  @override
+  String get designKind_adapt => 'адаптация';
+
+  @override
+  String get designKind_new => 'новый паттерн';
+
+  @override
+  String get designLike => 'как';
+
+  @override
+  String get designConventionsFrom => 'соглашения из';
+
+  @override
+  String get designGoesIn => 'размещается в';
+
+  @override
+  String get designPrecedent => 'задаёт пример: следующая работа будет его копировать';
+
+  @override
+  String get designReuseTitle => 'Существующие помощники';
+
+  @override
+  String get designTestPlanTitle => 'Тесты, которые нужно добавить или изменить';
+
+  @override
+  String get designEdgeCasesTitle => 'Граничные случаи';
+
+  @override
+  String get designReproTitle => 'Воспроизведение бага';
+
+  @override
+  String get designReproNot => 'Анализу не удалось воспроизвести баг';
 
   @override
   String get draftsTitle => 'Комментарии ревью';
@@ -3477,6 +3580,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get harnessRepoStarterOpenRules => 'Открыть предложения';
 
   @override
+  String get harnessRepoLayersBlock => 'Блокировать импорты между слоями';
+
+  @override
+  String get harnessRepoLayersBlockHelp =>
+      'При утверждённой архитектуре agnts помечает изменение, добавляющее запрещённый импорт между слоями. Если включено, это блокер, который собственное ревью agnts возвращает кодеру до того, как вы увидите изменение.';
+
+  @override
   String get harnessRulesDelivery => 'Как запуски получают правило';
 
   @override
@@ -3876,6 +3986,51 @@ class AppLocalizationsRu extends AppLocalizations {
   String harnessSettingsVsAll(String n) {
     return 'против $n%';
   }
+
+  @override
+  String get harnessSettingsEffort => 'Глубина размышлений';
+
+  @override
+  String get harnessSettingsEffortHelp =>
+      'Насколько глубоко Claude думает на каждом этапе (--effort в Claude Code). Выше — медленнее и дороже для вашего плана. Для сложных тикетов кодинг и ревью используют свой уровень.';
+
+  @override
+  String get harnessSettingsEffortAnalyze => 'Анализ';
+
+  @override
+  String get harnessSettingsEffortCoding => 'Код';
+
+  @override
+  String get harnessSettingsEffortReview => 'Ревью';
+
+  @override
+  String get harnessSettingsEffortComplex => 'Сложные тикеты';
+
+  @override
+  String get harnessSettingsEffort_ => 'По умолчанию';
+
+  @override
+  String get harnessSettingsEffort_low => 'Низкая';
+
+  @override
+  String get harnessSettingsEffort_medium => 'Средняя';
+
+  @override
+  String get harnessSettingsEffort_high => 'Высокая';
+
+  @override
+  String get harnessSettingsRecheckComplex => 'Перепроверять сложные анализы';
+
+  @override
+  String get harnessSettingsRecheckComplexHelp =>
+      'Когда модель анализа считает тикет сложным, модель для кода перечитывает анализ до начала работы и исправляет ошибки и пропуски.';
+
+  @override
+  String get harnessSettingsBaselineChecks => 'Сначала проверять исходный коммит';
+
+  @override
+  String get harnessSettingsBaselineChecksHelp =>
+      'Перед первым запуском кодинга agnts прогоняет проверки на коммите, с которого начинается работа. То, что уже падает там, не относится к тикету: на это не тратятся попытки исправления, а ревьюер видит, что оно падало и раньше. Результаты общие для тикетов с одного коммита.';
 
   @override
   String get harnessTicketFlag_secret => 'Возможный секрет';
@@ -8508,6 +8663,76 @@ class AppLocalizationsRu extends AppLocalizations {
   String get replayVerdict_needs_changes => 'нужны правки';
 
   @override
+  String get replayBenchmarkTitle => 'Бенчмарк';
+
+  @override
+  String get replayBenchmarkSub =>
+      'Слитые тикеты, на которых повторяется каждое изменение agnts и сравнивается с тем, что было слито. Выберите 20–30 разного размера.';
+
+  @override
+  String get replayBenchmarkAdd => 'Добавить в бенчмарк';
+
+  @override
+  String get replayBenchmarkRemove => 'Убрать из бенчмарка';
+
+  @override
+  String get replayBenchmarkIn => 'В бенчмарке: изменения agnts повторяются на этом тикете.';
+
+  @override
+  String get replayBenchmarkNeedsMerge => 'В бенчмарк попадают только слитые тикеты: повторы сравниваются с тем, что было слито.';
+
+  @override
+  String get replayBenchmarkRun => 'Запустить бенчмарк';
+
+  @override
+  String get replayBenchmarkModel => 'Модель для кода';
+
+  @override
+  String get replayBenchmarkModelDefault => 'как у оригиналов';
+
+  @override
+  String replayBenchmarkConfirm(String n) {
+    return 'agnts повторит $n тикетов бенчмарка с того места, где каждый начинался. Они расходуют ваш план Claude, как обычные тикеты.';
+  }
+
+  @override
+  String replayBenchmarkStarted(String n) {
+    return 'В очереди повторов: $n';
+  }
+
+  @override
+  String replayBenchmarkFailed(String n, String why) {
+    return 'Не удалось повторить $n: $why';
+  }
+
+  @override
+  String get replayBenchmarkEmpty => 'Бенчмарк пуст. Откройте слитый тикет и нажмите «Добавить в бенчмарк».';
+
+  @override
+  String replayBenchmarkCount(String n) {
+    return 'Тикетов: $n';
+  }
+
+  @override
+  String get replayAllReplays => 'Все повторы';
+
+  @override
+  String get replayColModel => 'Модель';
+
+  @override
+  String get replayColLines => 'Слитые строки';
+
+  @override
+  String get replayColLinesHint =>
+      'Доля строк, добавленных слитым пул-реквестом, которые добавляет и повтор; в скобках — то же для исходного изменения agnts. Чем выше, тем ближе к тому, что выпустили люди.';
+
+  @override
+  String get replayAgainst_merged => 'к слитому';
+
+  @override
+  String get replayAgainst_agnts => 'к agnts';
+
+  @override
   String get repoBack => 'Назад к репозиториям';
 
   @override
@@ -9969,6 +10194,24 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get rulesKindContextHelp =>
       'Знания о продукте: что значат термины, какие инварианты должен соблюдать код, кто чем пользуется. Каждый запуск читает это перед началом.';
+
+  @override
+  String get rulesTag_reuse => 'переиспользование';
+
+  @override
+  String get rulesTag_layer => 'слой';
+
+  @override
+  String get rulesTag_tests => 'тесты';
+
+  @override
+  String get rulesTag_style => 'стиль';
+
+  @override
+  String get rulesTag_logic => 'логика';
+
+  @override
+  String get rulesTag_other => 'другое';
 
   @override
   String get runsNavRuns => 'Запуски';

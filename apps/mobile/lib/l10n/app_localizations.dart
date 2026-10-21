@@ -1317,6 +1317,18 @@ abstract class AppLocalizations {
   /// **'Average change requests by a person per ticket that reached review'**
   String get analyticsColRoundsHint;
 
+  /// No description provided for @analyticsColCIRounds.
+  ///
+  /// In en, this message translates to:
+  /// **'CI rounds'**
+  String get analyticsColCIRounds;
+
+  /// No description provided for @analyticsColCIRoundsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Average times red CI on the pull request sent the work back, per ticket that reached review (not counted in change rounds)'**
+  String get analyticsColCIRoundsHint;
+
   /// No description provided for @analyticsColFixes.
   ///
   /// In en, this message translates to:
@@ -2181,6 +2193,60 @@ abstract class AppLocalizations {
   /// **'Assistant'**
   String get analyticsTabAssistant;
 
+  /// No description provided for @analyticsColScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Score'**
+  String get analyticsColScore;
+
+  /// No description provided for @analyticsColScoreHint.
+  ///
+  /// In en, this message translates to:
+  /// **'0–100: done first time 35%, merged 25%, no serious review finding 20%, few change rounds 20%. Recent versions score lower until their pull requests merge.'**
+  String get analyticsColScoreHint;
+
+  /// No description provided for @analyticsColCostMerged.
+  ///
+  /// In en, this message translates to:
+  /// **'\$/merged'**
+  String get analyticsColCostMerged;
+
+  /// No description provided for @analyticsColCostMergedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What all the version\'s tickets cost, over the ones that merged'**
+  String get analyticsColCostMergedHint;
+
+  /// No description provided for @analyticsFewTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'under 10 tickets: too few to compare'**
+  String get analyticsFewTickets;
+
+  /// No description provided for @analyticsColPeopleEdited.
+  ///
+  /// In en, this message translates to:
+  /// **'People edits'**
+  String get analyticsColPeopleEdited;
+
+  /// No description provided for @analyticsColPeopleEditedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Average share of agnts\'s lines people changed or removed before merging. Lower is better.'**
+  String get analyticsColPeopleEditedHint;
+
+  /// No description provided for @analyticsColReverted.
+  ///
+  /// In en, this message translates to:
+  /// **'Reverted'**
+  String get analyticsColReverted;
+
+  /// No description provided for @analyticsColRevertedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets whose merged work people reverted'**
+  String get analyticsColRevertedHint;
+
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:
@@ -2702,6 +2768,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Brief saved'**
   String get briefDone_save;
+
+  /// No description provided for @briefArchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Architecture'**
+  String get briefArchTitle;
+
+  /// No description provided for @briefArchSub.
+  ///
+  /// In en, this message translates to:
+  /// **'The part of the brief agnts checks work against: layers and the imports each may make, shared helpers to reuse, recipes with files to copy. Runs read it as architecture.json; a change that imports across layers it should not is flagged.'**
+  String get briefArchSub;
+
+  /// No description provided for @briefArchNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No architecture yet. The next survey writes one with the brief, or write it yourself.'**
+  String get briefArchNone;
+
+  /// No description provided for @briefArchCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'{layers} layers · {helpers} helpers · {recipes} recipes'**
+  String briefArchCounts(String layers, String helpers, String recipes);
+
+  /// No description provided for @briefArchEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit JSON'**
+  String get briefArchEdit;
+
+  /// No description provided for @briefArchEditHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty removes it. Paths are relative to the repository; layer paths are globs (** for any depth); leave out mayImport for a layer that may import anything.'**
+  String get briefArchEditHint;
+
+  /// No description provided for @briefArchDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'The draft brief comes with this architecture; approving the brief approves it too.'**
+  String get briefArchDraft;
+
+  /// No description provided for @briefDone_saveArch.
+  ///
+  /// In en, this message translates to:
+  /// **'Architecture saved'**
+  String get briefDone_saveArch;
 
   /// No description provided for @ciTitle.
   ///
@@ -4100,6 +4214,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Departed from the plan'**
   String get designDeviations;
+
+  /// No description provided for @designFitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Following the existing code'**
+  String get designFitTitle;
+
+  /// No description provided for @designKind_copy.
+  ///
+  /// In en, this message translates to:
+  /// **'copy'**
+  String get designKind_copy;
+
+  /// No description provided for @designKind_adapt.
+  ///
+  /// In en, this message translates to:
+  /// **'adapt'**
+  String get designKind_adapt;
+
+  /// No description provided for @designKind_new.
+  ///
+  /// In en, this message translates to:
+  /// **'new pattern'**
+  String get designKind_new;
+
+  /// No description provided for @designLike.
+  ///
+  /// In en, this message translates to:
+  /// **'like'**
+  String get designLike;
+
+  /// No description provided for @designConventionsFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'conventions from'**
+  String get designConventionsFrom;
+
+  /// No description provided for @designGoesIn.
+  ///
+  /// In en, this message translates to:
+  /// **'goes in'**
+  String get designGoesIn;
+
+  /// No description provided for @designPrecedent.
+  ///
+  /// In en, this message translates to:
+  /// **'sets a precedent: later work will copy it'**
+  String get designPrecedent;
+
+  /// No description provided for @designReuseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Existing helpers to use'**
+  String get designReuseTitle;
+
+  /// No description provided for @designTestPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tests to add or change'**
+  String get designTestPlanTitle;
+
+  /// No description provided for @designEdgeCasesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edge cases to handle'**
+  String get designEdgeCasesTitle;
+
+  /// No description provided for @designReproTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The bug, reproduced'**
+  String get designReproTitle;
+
+  /// No description provided for @designReproNot.
+  ///
+  /// In en, this message translates to:
+  /// **'The analysis could not reproduce it'**
+  String get designReproNot;
 
   /// No description provided for @draftsTitle.
   ///
@@ -5913,6 +6105,18 @@ abstract class AppLocalizations {
   /// **'Open the suggestions'**
   String get harnessRepoStarterOpenRules;
 
+  /// No description provided for @harnessRepoLayersBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Block imports across layers'**
+  String get harnessRepoLayersBlock;
+
+  /// No description provided for @harnessRepoLayersBlockHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'With an approved architecture, agnts flags a change that adds an import its layers do not allow. On, the flag is a blocker that agnts\'s own review sends back to the coder before you see the change.'**
+  String get harnessRepoLayersBlockHelp;
+
   /// No description provided for @harnessRulesDelivery.
   ///
   /// In en, this message translates to:
@@ -6596,6 +6800,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'vs {n}%'**
   String harnessSettingsVsAll(String n);
+
+  /// No description provided for @harnessSettingsEffort.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking effort'**
+  String get harnessSettingsEffort;
+
+  /// No description provided for @harnessSettingsEffortHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'How hard Claude thinks in each stage (Claude Code\'s --effort). Higher is slower and costs more of your plan. Complex tickets use their own level for coding and review.'**
+  String get harnessSettingsEffortHelp;
+
+  /// No description provided for @harnessSettingsEffortAnalyze.
+  ///
+  /// In en, this message translates to:
+  /// **'Analysis'**
+  String get harnessSettingsEffortAnalyze;
+
+  /// No description provided for @harnessSettingsEffortCoding.
+  ///
+  /// In en, this message translates to:
+  /// **'Coding'**
+  String get harnessSettingsEffortCoding;
+
+  /// No description provided for @harnessSettingsEffortReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get harnessSettingsEffortReview;
+
+  /// No description provided for @harnessSettingsEffortComplex.
+  ///
+  /// In en, this message translates to:
+  /// **'Complex tickets'**
+  String get harnessSettingsEffortComplex;
+
+  /// No description provided for @harnessSettingsEffort_.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get harnessSettingsEffort_;
+
+  /// No description provided for @harnessSettingsEffort_low.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get harnessSettingsEffort_low;
+
+  /// No description provided for @harnessSettingsEffort_medium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get harnessSettingsEffort_medium;
+
+  /// No description provided for @harnessSettingsEffort_high.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get harnessSettingsEffort_high;
+
+  /// No description provided for @harnessSettingsRecheckComplex.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-check complex analyses'**
+  String get harnessSettingsRecheckComplex;
+
+  /// No description provided for @harnessSettingsRecheckComplexHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'When the analysis model rates a ticket complex, the coding model reads the analysis again before any code is written, and fixes what is wrong or missing.'**
+  String get harnessSettingsRecheckComplexHelp;
+
+  /// No description provided for @harnessSettingsBaselineChecks.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the starting commit first'**
+  String get harnessSettingsBaselineChecks;
+
+  /// No description provided for @harnessSettingsBaselineChecksHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Before a ticket\'s first coding run, agnts runs the checks on the commit the work starts from. What already fails there is not the ticket\'s: no fix attempts go to it, and the reviewer sees it failed before. Results are shared by tickets from the same commit.'**
+  String get harnessSettingsBaselineChecksHelp;
 
   /// No description provided for @harnessTicketFlag_secret.
   ///
@@ -14415,6 +14703,126 @@ abstract class AppLocalizations {
   /// **'needs changes'**
   String get replayVerdict_needs_changes;
 
+  /// No description provided for @replayBenchmarkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Benchmark'**
+  String get replayBenchmarkTitle;
+
+  /// No description provided for @replayBenchmarkSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Merged tickets that every change to agnts is replayed against, and scored against what they merged as. Pick 20–30 of different sizes.'**
+  String get replayBenchmarkSub;
+
+  /// No description provided for @replayBenchmarkAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to benchmark'**
+  String get replayBenchmarkAdd;
+
+  /// No description provided for @replayBenchmarkRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from benchmark'**
+  String get replayBenchmarkRemove;
+
+  /// No description provided for @replayBenchmarkIn.
+  ///
+  /// In en, this message translates to:
+  /// **'In the benchmark: changes to agnts are replayed against this ticket.'**
+  String get replayBenchmarkIn;
+
+  /// No description provided for @replayBenchmarkNeedsMerge.
+  ///
+  /// In en, this message translates to:
+  /// **'Only merged tickets can be in the benchmark: replays are scored against what they merged as.'**
+  String get replayBenchmarkNeedsMerge;
+
+  /// No description provided for @replayBenchmarkRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Run benchmark'**
+  String get replayBenchmarkRun;
+
+  /// No description provided for @replayBenchmarkModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Coding model'**
+  String get replayBenchmarkModel;
+
+  /// No description provided for @replayBenchmarkModelDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'as the originals'**
+  String get replayBenchmarkModelDefault;
+
+  /// No description provided for @replayBenchmarkConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts replays the {n} benchmark tickets from where each started. They use your Claude plan like any ticket.'**
+  String replayBenchmarkConfirm(String n);
+
+  /// No description provided for @replayBenchmarkStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} replays queued'**
+  String replayBenchmarkStarted(String n);
+
+  /// No description provided for @replayBenchmarkFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} could not be replayed: {why}'**
+  String replayBenchmarkFailed(String n, String why);
+
+  /// No description provided for @replayBenchmarkEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'The benchmark is empty. Open a merged ticket and press Add to benchmark.'**
+  String get replayBenchmarkEmpty;
+
+  /// No description provided for @replayBenchmarkCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} tickets'**
+  String replayBenchmarkCount(String n);
+
+  /// No description provided for @replayAllReplays.
+  ///
+  /// In en, this message translates to:
+  /// **'All replays'**
+  String get replayAllReplays;
+
+  /// No description provided for @replayColModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get replayColModel;
+
+  /// No description provided for @replayColLines.
+  ///
+  /// In en, this message translates to:
+  /// **'Merged lines'**
+  String get replayColLines;
+
+  /// No description provided for @replayColLinesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Share of the lines the merged pull request added that the replay adds too; in brackets the same for agnts\'s original change. Higher is closer to what people shipped.'**
+  String get replayColLinesHint;
+
+  /// No description provided for @replayAgainst_merged.
+  ///
+  /// In en, this message translates to:
+  /// **'vs merged'**
+  String get replayAgainst_merged;
+
+  /// No description provided for @replayAgainst_agnts.
+  ///
+  /// In en, this message translates to:
+  /// **'vs agnts'**
+  String get replayAgainst_agnts;
+
   /// No description provided for @repoBack.
   ///
   /// In en, this message translates to:
@@ -16844,6 +17252,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Knowledge about your product: what its terms mean, invariants the code must keep, who uses what. Every run reads it before it starts.'**
   String get rulesKindContextHelp;
+
+  /// No description provided for @rulesTag_reuse.
+  ///
+  /// In en, this message translates to:
+  /// **'reuse'**
+  String get rulesTag_reuse;
+
+  /// No description provided for @rulesTag_layer.
+  ///
+  /// In en, this message translates to:
+  /// **'layer'**
+  String get rulesTag_layer;
+
+  /// No description provided for @rulesTag_tests.
+  ///
+  /// In en, this message translates to:
+  /// **'tests'**
+  String get rulesTag_tests;
+
+  /// No description provided for @rulesTag_style.
+  ///
+  /// In en, this message translates to:
+  /// **'style'**
+  String get rulesTag_style;
+
+  /// No description provided for @rulesTag_logic.
+  ///
+  /// In en, this message translates to:
+  /// **'logic'**
+  String get rulesTag_logic;
+
+  /// No description provided for @rulesTag_other.
+  ///
+  /// In en, this message translates to:
+  /// **'other'**
+  String get rulesTag_other;
 
   /// No description provided for @runsNavRuns.
   ///

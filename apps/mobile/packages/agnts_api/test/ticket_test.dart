@@ -157,6 +157,12 @@ void main() {
       // TODO
     });
 
+    // A merged ticket in the benchmark that changes to agnts are replayed against (setTicketBenchmark)
+    // bool benchmark
+    test('to test the property `benchmark`', () async {
+      // TODO
+    });
+
     // The approved report is posted to the tracker issue
     // bool postReport
     test('to test the property `postReport`', () async {

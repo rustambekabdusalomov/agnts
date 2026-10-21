@@ -25,6 +25,16 @@ abstract class _$AnalysisCWProxy {
 
   Analysis acceptance(List<AnalysisAcceptanceInner>? acceptance);
 
+  Analysis patterns(List<Pattern>? patterns);
+
+  Analysis reuse(List<AnalysisReuseInner>? reuse);
+
+  Analysis testPlan(List<AnalysisTestPlanInner>? testPlan);
+
+  Analysis edgeCases(List<String>? edgeCases);
+
+  Analysis repro(AnalysisRepro? repro);
+
   Analysis secondOpinion(SecondOpinion? secondOpinion);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Analysis(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -43,6 +53,11 @@ abstract class _$AnalysisCWProxy {
     ShipNotes? ship,
     bool? defect,
     List<AnalysisAcceptanceInner>? acceptance,
+    List<Pattern>? patterns,
+    List<AnalysisReuseInner>? reuse,
+    List<AnalysisTestPlanInner>? testPlan,
+    List<String>? edgeCases,
+    AnalysisRepro? repro,
     SecondOpinion? secondOpinion,
   });
 }
@@ -84,6 +99,22 @@ class _$AnalysisCWProxyImpl implements _$AnalysisCWProxy {
       this(acceptance: acceptance);
 
   @override
+  Analysis patterns(List<Pattern>? patterns) => this(patterns: patterns);
+
+  @override
+  Analysis reuse(List<AnalysisReuseInner>? reuse) => this(reuse: reuse);
+
+  @override
+  Analysis testPlan(List<AnalysisTestPlanInner>? testPlan) =>
+      this(testPlan: testPlan);
+
+  @override
+  Analysis edgeCases(List<String>? edgeCases) => this(edgeCases: edgeCases);
+
+  @override
+  Analysis repro(AnalysisRepro? repro) => this(repro: repro);
+
+  @override
   Analysis secondOpinion(SecondOpinion? secondOpinion) =>
       this(secondOpinion: secondOpinion);
 
@@ -104,6 +135,11 @@ class _$AnalysisCWProxyImpl implements _$AnalysisCWProxy {
     Object? ship = const $CopyWithPlaceholder(),
     Object? defect = const $CopyWithPlaceholder(),
     Object? acceptance = const $CopyWithPlaceholder(),
+    Object? patterns = const $CopyWithPlaceholder(),
+    Object? reuse = const $CopyWithPlaceholder(),
+    Object? testPlan = const $CopyWithPlaceholder(),
+    Object? edgeCases = const $CopyWithPlaceholder(),
+    Object? repro = const $CopyWithPlaceholder(),
     Object? secondOpinion = const $CopyWithPlaceholder(),
   }) {
     return Analysis(
@@ -143,6 +179,26 @@ class _$AnalysisCWProxyImpl implements _$AnalysisCWProxy {
           ? _value.acceptance
           // ignore: cast_nullable_to_non_nullable
           : acceptance as List<AnalysisAcceptanceInner>?,
+      patterns: patterns == const $CopyWithPlaceholder()
+          ? _value.patterns
+          // ignore: cast_nullable_to_non_nullable
+          : patterns as List<Pattern>?,
+      reuse: reuse == const $CopyWithPlaceholder()
+          ? _value.reuse
+          // ignore: cast_nullable_to_non_nullable
+          : reuse as List<AnalysisReuseInner>?,
+      testPlan: testPlan == const $CopyWithPlaceholder()
+          ? _value.testPlan
+          // ignore: cast_nullable_to_non_nullable
+          : testPlan as List<AnalysisTestPlanInner>?,
+      edgeCases: edgeCases == const $CopyWithPlaceholder()
+          ? _value.edgeCases
+          // ignore: cast_nullable_to_non_nullable
+          : edgeCases as List<String>?,
+      repro: repro == const $CopyWithPlaceholder()
+          ? _value.repro
+          // ignore: cast_nullable_to_non_nullable
+          : repro as AnalysisRepro?,
       secondOpinion: secondOpinion == const $CopyWithPlaceholder()
           ? _value.secondOpinion
           // ignore: cast_nullable_to_non_nullable
@@ -161,58 +217,84 @@ extension $AnalysisCopyWith on Analysis {
 // JsonSerializableGenerator
 // **************************************************************************
 
-Analysis _$AnalysisFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('Analysis', json, ($checkedConvert) {
-      $checkKeys(json, requiredKeys: const ['summary', 'plan']);
-      final val = Analysis(
-        summary: $checkedConvert('summary', (v) => v as String),
-        plan: $checkedConvert(
-          'plan',
-          (v) => (v as List<dynamic>).map((e) => e as String).toList(),
-        ),
-        complexity: $checkedConvert(
-          'complexity',
-          (v) => $enumDecodeNullable(_$AnalysisComplexityEnumEnumMap, v),
-        ),
-        footprint: $checkedConvert(
-          'footprint',
-          (v) =>
-              v == null ? null : Footprint.fromJson(v as Map<String, dynamic>),
-        ),
-        approaches: $checkedConvert(
-          'approaches',
-          (v) => (v as List<dynamic>?)
-              ?.map((e) => Approach.fromJson(e as Map<String, dynamic>))
-              .toList(),
-        ),
-        outOfScope: $checkedConvert(
-          'outOfScope',
-          (v) => (v as List<dynamic>?)?.map((e) => e as String).toList(),
-        ),
-        ship: $checkedConvert(
-          'ship',
-          (v) =>
-              v == null ? null : ShipNotes.fromJson(v as Map<String, dynamic>),
-        ),
-        defect: $checkedConvert('defect', (v) => v as bool?),
-        acceptance: $checkedConvert(
-          'acceptance',
-          (v) => (v as List<dynamic>?)
-              ?.map(
-                (e) =>
-                    AnalysisAcceptanceInner.fromJson(e as Map<String, dynamic>),
-              )
-              .toList(),
-        ),
-        secondOpinion: $checkedConvert(
-          'secondOpinion',
-          (v) => v == null
-              ? null
-              : SecondOpinion.fromJson(v as Map<String, dynamic>),
-        ),
-      );
-      return val;
-    });
+Analysis _$AnalysisFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate('Analysis', json, ($checkedConvert) {
+  $checkKeys(json, requiredKeys: const ['summary', 'plan']);
+  final val = Analysis(
+    summary: $checkedConvert('summary', (v) => v as String),
+    plan: $checkedConvert(
+      'plan',
+      (v) => (v as List<dynamic>).map((e) => e as String).toList(),
+    ),
+    complexity: $checkedConvert(
+      'complexity',
+      (v) => $enumDecodeNullable(_$AnalysisComplexityEnumEnumMap, v),
+    ),
+    footprint: $checkedConvert(
+      'footprint',
+      (v) => v == null ? null : Footprint.fromJson(v as Map<String, dynamic>),
+    ),
+    approaches: $checkedConvert(
+      'approaches',
+      (v) => (v as List<dynamic>?)
+          ?.map((e) => Approach.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    ),
+    outOfScope: $checkedConvert(
+      'outOfScope',
+      (v) => (v as List<dynamic>?)?.map((e) => e as String).toList(),
+    ),
+    ship: $checkedConvert(
+      'ship',
+      (v) => v == null ? null : ShipNotes.fromJson(v as Map<String, dynamic>),
+    ),
+    defect: $checkedConvert('defect', (v) => v as bool?),
+    acceptance: $checkedConvert(
+      'acceptance',
+      (v) => (v as List<dynamic>?)
+          ?.map(
+            (e) => AnalysisAcceptanceInner.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(),
+    ),
+    patterns: $checkedConvert(
+      'patterns',
+      (v) => (v as List<dynamic>?)
+          ?.map((e) => Pattern.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    ),
+    reuse: $checkedConvert(
+      'reuse',
+      (v) => (v as List<dynamic>?)
+          ?.map((e) => AnalysisReuseInner.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    ),
+    testPlan: $checkedConvert(
+      'testPlan',
+      (v) => (v as List<dynamic>?)
+          ?.map(
+            (e) => AnalysisTestPlanInner.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(),
+    ),
+    edgeCases: $checkedConvert(
+      'edgeCases',
+      (v) => (v as List<dynamic>?)?.map((e) => e as String).toList(),
+    ),
+    repro: $checkedConvert(
+      'repro',
+      (v) =>
+          v == null ? null : AnalysisRepro.fromJson(v as Map<String, dynamic>),
+    ),
+    secondOpinion: $checkedConvert(
+      'secondOpinion',
+      (v) =>
+          v == null ? null : SecondOpinion.fromJson(v as Map<String, dynamic>),
+    ),
+  );
+  return val;
+});
 
 Map<String, dynamic> _$AnalysisToJson(Analysis instance) => <String, dynamic>{
   'summary': instance.summary,
@@ -224,6 +306,11 @@ Map<String, dynamic> _$AnalysisToJson(Analysis instance) => <String, dynamic>{
   'ship': ?instance.ship?.toJson(),
   'defect': ?instance.defect,
   'acceptance': ?instance.acceptance?.map((e) => e.toJson()).toList(),
+  'patterns': ?instance.patterns?.map((e) => e.toJson()).toList(),
+  'reuse': ?instance.reuse?.map((e) => e.toJson()).toList(),
+  'testPlan': ?instance.testPlan?.map((e) => e.toJson()).toList(),
+  'edgeCases': ?instance.edgeCases,
+  'repro': ?instance.repro?.toJson(),
   'secondOpinion': ?instance.secondOpinion?.toJson(),
 };
 

@@ -9,7 +9,15 @@ part of 'replay_version.dart';
 abstract class _$ReplayVersionCWProxy {
   ReplayVersion promptVersion(String promptVersion);
 
+  ReplayVersion model(String? model);
+
   ReplayVersion replays(int replays);
+
+  ReplayVersion merged(int? merged);
+
+  ReplayVersion avgLineRecall(num? avgLineRecall);
+
+  ReplayVersion originalLineRecall(num? originalLineRecall);
 
   ReplayVersion checksPassed(int checksPassed);
 
@@ -37,7 +45,11 @@ abstract class _$ReplayVersionCWProxy {
   /// ````
   ReplayVersion call({
     String promptVersion,
+    String? model,
     int replays,
+    int? merged,
+    num? avgLineRecall,
+    num? originalLineRecall,
     int checksPassed,
     int reviewed,
     int looksGood,
@@ -61,7 +73,21 @@ class _$ReplayVersionCWProxyImpl implements _$ReplayVersionCWProxy {
       this(promptVersion: promptVersion);
 
   @override
+  ReplayVersion model(String? model) => this(model: model);
+
+  @override
   ReplayVersion replays(int replays) => this(replays: replays);
+
+  @override
+  ReplayVersion merged(int? merged) => this(merged: merged);
+
+  @override
+  ReplayVersion avgLineRecall(num? avgLineRecall) =>
+      this(avgLineRecall: avgLineRecall);
+
+  @override
+  ReplayVersion originalLineRecall(num? originalLineRecall) =>
+      this(originalLineRecall: originalLineRecall);
 
   @override
   ReplayVersion checksPassed(int checksPassed) =>
@@ -102,7 +128,11 @@ class _$ReplayVersionCWProxyImpl implements _$ReplayVersionCWProxy {
   /// ````
   ReplayVersion call({
     Object? promptVersion = const $CopyWithPlaceholder(),
+    Object? model = const $CopyWithPlaceholder(),
     Object? replays = const $CopyWithPlaceholder(),
+    Object? merged = const $CopyWithPlaceholder(),
+    Object? avgLineRecall = const $CopyWithPlaceholder(),
+    Object? originalLineRecall = const $CopyWithPlaceholder(),
     Object? checksPassed = const $CopyWithPlaceholder(),
     Object? reviewed = const $CopyWithPlaceholder(),
     Object? looksGood = const $CopyWithPlaceholder(),
@@ -118,10 +148,26 @@ class _$ReplayVersionCWProxyImpl implements _$ReplayVersionCWProxy {
           ? _value.promptVersion
           // ignore: cast_nullable_to_non_nullable
           : promptVersion as String,
+      model: model == const $CopyWithPlaceholder()
+          ? _value.model
+          // ignore: cast_nullable_to_non_nullable
+          : model as String?,
       replays: replays == const $CopyWithPlaceholder()
           ? _value.replays
           // ignore: cast_nullable_to_non_nullable
           : replays as int,
+      merged: merged == const $CopyWithPlaceholder()
+          ? _value.merged
+          // ignore: cast_nullable_to_non_nullable
+          : merged as int?,
+      avgLineRecall: avgLineRecall == const $CopyWithPlaceholder()
+          ? _value.avgLineRecall
+          // ignore: cast_nullable_to_non_nullable
+          : avgLineRecall as num?,
+      originalLineRecall: originalLineRecall == const $CopyWithPlaceholder()
+          ? _value.originalLineRecall
+          // ignore: cast_nullable_to_non_nullable
+          : originalLineRecall as num?,
       checksPassed: checksPassed == const $CopyWithPlaceholder()
           ? _value.checksPassed
           // ignore: cast_nullable_to_non_nullable
@@ -172,47 +218,53 @@ extension $ReplayVersionCopyWith on ReplayVersion {
 // JsonSerializableGenerator
 // **************************************************************************
 
-ReplayVersion _$ReplayVersionFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('ReplayVersion', json, ($checkedConvert) {
-      $checkKeys(
-        json,
-        requiredKeys: const [
-          'promptVersion',
-          'replays',
-          'checksPassed',
-          'reviewed',
-          'looksGood',
-          'avgOverlap',
-          'avgRecall',
-          'avgTurns',
-          'avgCostUsd',
-          'originalTurns',
-          'originalCostUsd',
-        ],
-      );
-      final val = ReplayVersion(
-        promptVersion: $checkedConvert('promptVersion', (v) => v as String),
-        replays: $checkedConvert('replays', (v) => (v as num).toInt()),
-        checksPassed: $checkedConvert(
-          'checksPassed',
-          (v) => (v as num).toInt(),
-        ),
-        reviewed: $checkedConvert('reviewed', (v) => (v as num).toInt()),
-        looksGood: $checkedConvert('looksGood', (v) => (v as num).toInt()),
-        avgOverlap: $checkedConvert('avgOverlap', (v) => v as num),
-        avgRecall: $checkedConvert('avgRecall', (v) => v as num),
-        avgTurns: $checkedConvert('avgTurns', (v) => v as num),
-        avgCostUsd: $checkedConvert('avgCostUsd', (v) => v as num),
-        originalTurns: $checkedConvert('originalTurns', (v) => v as num),
-        originalCostUsd: $checkedConvert('originalCostUsd', (v) => v as num),
-      );
-      return val;
-    });
+ReplayVersion _$ReplayVersionFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate('ReplayVersion', json, ($checkedConvert) {
+  $checkKeys(
+    json,
+    requiredKeys: const [
+      'promptVersion',
+      'replays',
+      'checksPassed',
+      'reviewed',
+      'looksGood',
+      'avgOverlap',
+      'avgRecall',
+      'avgTurns',
+      'avgCostUsd',
+      'originalTurns',
+      'originalCostUsd',
+    ],
+  );
+  final val = ReplayVersion(
+    promptVersion: $checkedConvert('promptVersion', (v) => v as String),
+    model: $checkedConvert('model', (v) => v as String?),
+    replays: $checkedConvert('replays', (v) => (v as num).toInt()),
+    merged: $checkedConvert('merged', (v) => (v as num?)?.toInt()),
+    avgLineRecall: $checkedConvert('avgLineRecall', (v) => v as num?),
+    originalLineRecall: $checkedConvert('originalLineRecall', (v) => v as num?),
+    checksPassed: $checkedConvert('checksPassed', (v) => (v as num).toInt()),
+    reviewed: $checkedConvert('reviewed', (v) => (v as num).toInt()),
+    looksGood: $checkedConvert('looksGood', (v) => (v as num).toInt()),
+    avgOverlap: $checkedConvert('avgOverlap', (v) => v as num),
+    avgRecall: $checkedConvert('avgRecall', (v) => v as num),
+    avgTurns: $checkedConvert('avgTurns', (v) => v as num),
+    avgCostUsd: $checkedConvert('avgCostUsd', (v) => v as num),
+    originalTurns: $checkedConvert('originalTurns', (v) => v as num),
+    originalCostUsd: $checkedConvert('originalCostUsd', (v) => v as num),
+  );
+  return val;
+});
 
 Map<String, dynamic> _$ReplayVersionToJson(ReplayVersion instance) =>
     <String, dynamic>{
       'promptVersion': instance.promptVersion,
+      'model': ?instance.model,
       'replays': instance.replays,
+      'merged': ?instance.merged,
+      'avgLineRecall': ?instance.avgLineRecall,
+      'originalLineRecall': ?instance.originalLineRecall,
       'checksPassed': instance.checksPassed,
       'reviewed': instance.reviewed,
       'looksGood': instance.looksGood,

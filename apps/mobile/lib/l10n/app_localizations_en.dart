@@ -670,6 +670,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analyticsColRoundsHint => 'Average change requests by a person per ticket that reached review';
 
   @override
+  String get analyticsColCIRounds => 'CI rounds';
+
+  @override
+  String get analyticsColCIRoundsHint =>
+      'Average times red CI on the pull request sent the work back, per ticket that reached review (not counted in change rounds)';
+
+  @override
   String get analyticsColFixes => 'Check fixes';
 
   @override
@@ -1144,6 +1151,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analyticsTabAssistant => 'Assistant';
 
   @override
+  String get analyticsColScore => 'Score';
+
+  @override
+  String get analyticsColScoreHint =>
+      '0–100: done first time 35%, merged 25%, no serious review finding 20%, few change rounds 20%. Recent versions score lower until their pull requests merge.';
+
+  @override
+  String get analyticsColCostMerged => '\$/merged';
+
+  @override
+  String get analyticsColCostMergedHint => 'What all the version\'s tickets cost, over the ones that merged';
+
+  @override
+  String get analyticsFewTickets => 'under 10 tickets: too few to compare';
+
+  @override
+  String get analyticsColPeopleEdited => 'People edits';
+
+  @override
+  String get analyticsColPeopleEditedHint => 'Average share of agnts\'s lines people changed or removed before merging. Lower is better.';
+
+  @override
+  String get analyticsColReverted => 'Reverted';
+
+  @override
+  String get analyticsColRevertedHint => 'Tickets whose merged work people reverted';
+
+  @override
   String get appName => 'agnts';
 
   @override
@@ -1442,6 +1477,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get briefDone_save => 'Brief saved';
+
+  @override
+  String get briefArchTitle => 'Architecture';
+
+  @override
+  String get briefArchSub =>
+      'The part of the brief agnts checks work against: layers and the imports each may make, shared helpers to reuse, recipes with files to copy. Runs read it as architecture.json; a change that imports across layers it should not is flagged.';
+
+  @override
+  String get briefArchNone => 'No architecture yet. The next survey writes one with the brief, or write it yourself.';
+
+  @override
+  String briefArchCounts(String layers, String helpers, String recipes) {
+    return '$layers layers · $helpers helpers · $recipes recipes';
+  }
+
+  @override
+  String get briefArchEdit => 'Edit JSON';
+
+  @override
+  String get briefArchEditHint =>
+      'Empty removes it. Paths are relative to the repository; layer paths are globs (** for any depth); leave out mayImport for a layer that may import anything.';
+
+  @override
+  String get briefArchDraft => 'The draft brief comes with this architecture; approving the brief approves it too.';
+
+  @override
+  String get briefDone_saveArch => 'Architecture saved';
 
   @override
   String get ciTitle => 'CI';
@@ -2204,6 +2267,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get designDeviations => 'Departed from the plan';
+
+  @override
+  String get designFitTitle => 'Following the existing code';
+
+  @override
+  String get designKind_copy => 'copy';
+
+  @override
+  String get designKind_adapt => 'adapt';
+
+  @override
+  String get designKind_new => 'new pattern';
+
+  @override
+  String get designLike => 'like';
+
+  @override
+  String get designConventionsFrom => 'conventions from';
+
+  @override
+  String get designGoesIn => 'goes in';
+
+  @override
+  String get designPrecedent => 'sets a precedent: later work will copy it';
+
+  @override
+  String get designReuseTitle => 'Existing helpers to use';
+
+  @override
+  String get designTestPlanTitle => 'Tests to add or change';
+
+  @override
+  String get designEdgeCasesTitle => 'Edge cases to handle';
+
+  @override
+  String get designReproTitle => 'The bug, reproduced';
+
+  @override
+  String get designReproNot => 'The analysis could not reproduce it';
 
   @override
   String get draftsTitle => 'Review comments';
@@ -3304,6 +3406,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get harnessRepoStarterOpenRules => 'Open the suggestions';
 
   @override
+  String get harnessRepoLayersBlock => 'Block imports across layers';
+
+  @override
+  String get harnessRepoLayersBlockHelp =>
+      'With an approved architecture, agnts flags a change that adds an import its layers do not allow. On, the flag is a blocker that agnts\'s own review sends back to the coder before you see the change.';
+
+  @override
   String get harnessRulesDelivery => 'How runs get it';
 
   @override
@@ -3680,6 +3789,51 @@ class AppLocalizationsEn extends AppLocalizations {
   String harnessSettingsVsAll(String n) {
     return 'vs $n%';
   }
+
+  @override
+  String get harnessSettingsEffort => 'Thinking effort';
+
+  @override
+  String get harnessSettingsEffortHelp =>
+      'How hard Claude thinks in each stage (Claude Code\'s --effort). Higher is slower and costs more of your plan. Complex tickets use their own level for coding and review.';
+
+  @override
+  String get harnessSettingsEffortAnalyze => 'Analysis';
+
+  @override
+  String get harnessSettingsEffortCoding => 'Coding';
+
+  @override
+  String get harnessSettingsEffortReview => 'Review';
+
+  @override
+  String get harnessSettingsEffortComplex => 'Complex tickets';
+
+  @override
+  String get harnessSettingsEffort_ => 'Default';
+
+  @override
+  String get harnessSettingsEffort_low => 'Low';
+
+  @override
+  String get harnessSettingsEffort_medium => 'Medium';
+
+  @override
+  String get harnessSettingsEffort_high => 'High';
+
+  @override
+  String get harnessSettingsRecheckComplex => 'Re-check complex analyses';
+
+  @override
+  String get harnessSettingsRecheckComplexHelp =>
+      'When the analysis model rates a ticket complex, the coding model reads the analysis again before any code is written, and fixes what is wrong or missing.';
+
+  @override
+  String get harnessSettingsBaselineChecks => 'Check the starting commit first';
+
+  @override
+  String get harnessSettingsBaselineChecksHelp =>
+      'Before a ticket\'s first coding run, agnts runs the checks on the commit the work starts from. What already fails there is not the ticket\'s: no fix attempts go to it, and the reviewer sees it failed before. Results are shared by tickets from the same commit.';
 
   @override
   String get harnessTicketFlag_secret => 'Possible secret';
@@ -8108,6 +8262,76 @@ class AppLocalizationsEn extends AppLocalizations {
   String get replayVerdict_needs_changes => 'needs changes';
 
   @override
+  String get replayBenchmarkTitle => 'Benchmark';
+
+  @override
+  String get replayBenchmarkSub =>
+      'Merged tickets that every change to agnts is replayed against, and scored against what they merged as. Pick 20–30 of different sizes.';
+
+  @override
+  String get replayBenchmarkAdd => 'Add to benchmark';
+
+  @override
+  String get replayBenchmarkRemove => 'Remove from benchmark';
+
+  @override
+  String get replayBenchmarkIn => 'In the benchmark: changes to agnts are replayed against this ticket.';
+
+  @override
+  String get replayBenchmarkNeedsMerge => 'Only merged tickets can be in the benchmark: replays are scored against what they merged as.';
+
+  @override
+  String get replayBenchmarkRun => 'Run benchmark';
+
+  @override
+  String get replayBenchmarkModel => 'Coding model';
+
+  @override
+  String get replayBenchmarkModelDefault => 'as the originals';
+
+  @override
+  String replayBenchmarkConfirm(String n) {
+    return 'agnts replays the $n benchmark tickets from where each started. They use your Claude plan like any ticket.';
+  }
+
+  @override
+  String replayBenchmarkStarted(String n) {
+    return '$n replays queued';
+  }
+
+  @override
+  String replayBenchmarkFailed(String n, String why) {
+    return '$n could not be replayed: $why';
+  }
+
+  @override
+  String get replayBenchmarkEmpty => 'The benchmark is empty. Open a merged ticket and press Add to benchmark.';
+
+  @override
+  String replayBenchmarkCount(String n) {
+    return '$n tickets';
+  }
+
+  @override
+  String get replayAllReplays => 'All replays';
+
+  @override
+  String get replayColModel => 'Model';
+
+  @override
+  String get replayColLines => 'Merged lines';
+
+  @override
+  String get replayColLinesHint =>
+      'Share of the lines the merged pull request added that the replay adds too; in brackets the same for agnts\'s original change. Higher is closer to what people shipped.';
+
+  @override
+  String get replayAgainst_merged => 'vs merged';
+
+  @override
+  String get replayAgainst_agnts => 'vs agnts';
+
+  @override
   String get repoBack => 'Back to repositories';
 
   @override
@@ -9503,6 +9727,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get rulesKindContextHelp =>
       'Knowledge about your product: what its terms mean, invariants the code must keep, who uses what. Every run reads it before it starts.';
+
+  @override
+  String get rulesTag_reuse => 'reuse';
+
+  @override
+  String get rulesTag_layer => 'layer';
+
+  @override
+  String get rulesTag_tests => 'tests';
+
+  @override
+  String get rulesTag_style => 'style';
+
+  @override
+  String get rulesTag_logic => 'logic';
+
+  @override
+  String get rulesTag_other => 'other';
 
   @override
   String get runsNavRuns => 'Runs';

@@ -12,5 +12,11 @@ void main() {
       // TODO
     });
 
+    // Replaces the approved architecture.json when given; empty removes it
+    // String architecture
+    test('to test the property `architecture`', () async {
+      // TODO
+    });
+
   });
 }

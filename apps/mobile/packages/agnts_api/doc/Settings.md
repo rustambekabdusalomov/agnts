@@ -34,6 +34,9 @@ Name | Type | Description | Notes
 **methodSkills** | **bool** | Coding runs get agnts's method skills: add one more of something the way the repository does, follow its style, reuse before writing, change a schema safely | [optional] 
 **deepReview** | **String** | Specialist passes in the code review (security, silent failures, tests, types); auto: large or complex work | [optional] 
 **learnFromRuns** | **bool** | Suggest tips from runs that had trouble (failed checks, a stall) | [optional] 
+**effort** | [**EffortSettings**](EffortSettings.md) |  | [optional] 
+**recheckComplex** | **bool** | The coding model re-checks the analysis of a ticket the analysis model rated complex, before any code is written | [optional] 
+**baselineChecks** | **bool** | Run the checks on the commit a ticket starts from before its first coding run: what fails there is not the ticket's to fix | [optional] 
 **secondOpinion** | **String** | A model that critiques the chosen approach of complex tickets (codex:<model> or a Claude model); empty turns it off | [optional] 
 **pauseAbove** | **int** |  | 
 **parallel** | **int** |  | 

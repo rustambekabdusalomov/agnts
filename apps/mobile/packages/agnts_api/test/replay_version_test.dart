@@ -12,8 +12,32 @@ void main() {
       // TODO
     });
 
+    // The coding model of the replays
+    // String model
+    test('to test the property `model`', () async {
+      // TODO
+    });
+
     // int replays
     test('to test the property `replays`', () async {
+      // TODO
+    });
+
+    // Replays scored against what the original merged as
+    // int merged
+    test('to test the property `merged`', () async {
+      // TODO
+    });
+
+    // Average share of the merged change's added lines the replays add too; absent when none was scored against a merge
+    // num avgLineRecall
+    test('to test the property `avgLineRecall`', () async {
+      // TODO
+    });
+
+    // The same for the originals' own changes, to compare with
+    // num originalLineRecall
+    test('to test the property `originalLineRecall`', () async {
       // TODO
     });
 

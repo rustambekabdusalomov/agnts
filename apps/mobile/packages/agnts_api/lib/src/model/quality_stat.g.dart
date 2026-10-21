@@ -21,6 +21,20 @@ abstract class _$QualityStatCWProxy {
 
   QualityStat changeRounds(num changeRounds);
 
+  QualityStat ciRounds(num? ciRounds);
+
+  QualityStat merged(int? merged);
+
+  QualityStat costUsd(num? costUsd);
+
+  QualityStat costPerMerged(num? costPerMerged);
+
+  QualityStat score(num? score);
+
+  QualityStat peopleEdited(num? peopleEdited);
+
+  QualityStat reverted(int? reverted);
+
   QualityStat fixAttempts(num fixAttempts);
 
   QualityStat serious(int serious);
@@ -65,6 +79,13 @@ abstract class _$QualityStatCWProxy {
     int firstTry,
     int rejected,
     num changeRounds,
+    num? ciRounds,
+    int? merged,
+    num? costUsd,
+    num? costPerMerged,
+    num? score,
+    num? peopleEdited,
+    int? reverted,
     num fixAttempts,
     int serious,
     num? footprintHit,
@@ -112,6 +133,29 @@ class _$QualityStatCWProxyImpl implements _$QualityStatCWProxy {
   @override
   QualityStat changeRounds(num changeRounds) =>
       this(changeRounds: changeRounds);
+
+  @override
+  QualityStat ciRounds(num? ciRounds) => this(ciRounds: ciRounds);
+
+  @override
+  QualityStat merged(int? merged) => this(merged: merged);
+
+  @override
+  QualityStat costUsd(num? costUsd) => this(costUsd: costUsd);
+
+  @override
+  QualityStat costPerMerged(num? costPerMerged) =>
+      this(costPerMerged: costPerMerged);
+
+  @override
+  QualityStat score(num? score) => this(score: score);
+
+  @override
+  QualityStat peopleEdited(num? peopleEdited) =>
+      this(peopleEdited: peopleEdited);
+
+  @override
+  QualityStat reverted(int? reverted) => this(reverted: reverted);
 
   @override
   QualityStat fixAttempts(num fixAttempts) => this(fixAttempts: fixAttempts);
@@ -175,6 +219,13 @@ class _$QualityStatCWProxyImpl implements _$QualityStatCWProxy {
     Object? firstTry = const $CopyWithPlaceholder(),
     Object? rejected = const $CopyWithPlaceholder(),
     Object? changeRounds = const $CopyWithPlaceholder(),
+    Object? ciRounds = const $CopyWithPlaceholder(),
+    Object? merged = const $CopyWithPlaceholder(),
+    Object? costUsd = const $CopyWithPlaceholder(),
+    Object? costPerMerged = const $CopyWithPlaceholder(),
+    Object? score = const $CopyWithPlaceholder(),
+    Object? peopleEdited = const $CopyWithPlaceholder(),
+    Object? reverted = const $CopyWithPlaceholder(),
     Object? fixAttempts = const $CopyWithPlaceholder(),
     Object? serious = const $CopyWithPlaceholder(),
     Object? footprintHit = const $CopyWithPlaceholder(),
@@ -220,6 +271,34 @@ class _$QualityStatCWProxyImpl implements _$QualityStatCWProxy {
           ? _value.changeRounds
           // ignore: cast_nullable_to_non_nullable
           : changeRounds as num,
+      ciRounds: ciRounds == const $CopyWithPlaceholder()
+          ? _value.ciRounds
+          // ignore: cast_nullable_to_non_nullable
+          : ciRounds as num?,
+      merged: merged == const $CopyWithPlaceholder()
+          ? _value.merged
+          // ignore: cast_nullable_to_non_nullable
+          : merged as int?,
+      costUsd: costUsd == const $CopyWithPlaceholder()
+          ? _value.costUsd
+          // ignore: cast_nullable_to_non_nullable
+          : costUsd as num?,
+      costPerMerged: costPerMerged == const $CopyWithPlaceholder()
+          ? _value.costPerMerged
+          // ignore: cast_nullable_to_non_nullable
+          : costPerMerged as num?,
+      score: score == const $CopyWithPlaceholder()
+          ? _value.score
+          // ignore: cast_nullable_to_non_nullable
+          : score as num?,
+      peopleEdited: peopleEdited == const $CopyWithPlaceholder()
+          ? _value.peopleEdited
+          // ignore: cast_nullable_to_non_nullable
+          : peopleEdited as num?,
+      reverted: reverted == const $CopyWithPlaceholder()
+          ? _value.reverted
+          // ignore: cast_nullable_to_non_nullable
+          : reverted as int?,
       fixAttempts: fixAttempts == const $CopyWithPlaceholder()
           ? _value.fixAttempts
           // ignore: cast_nullable_to_non_nullable
@@ -321,6 +400,13 @@ QualityStat _$QualityStatFromJson(
     firstTry: $checkedConvert('firstTry', (v) => (v as num).toInt()),
     rejected: $checkedConvert('rejected', (v) => (v as num).toInt()),
     changeRounds: $checkedConvert('changeRounds', (v) => v as num),
+    ciRounds: $checkedConvert('ciRounds', (v) => v as num?),
+    merged: $checkedConvert('merged', (v) => (v as num?)?.toInt()),
+    costUsd: $checkedConvert('costUsd', (v) => v as num?),
+    costPerMerged: $checkedConvert('costPerMerged', (v) => v as num?),
+    score: $checkedConvert('score', (v) => v as num?),
+    peopleEdited: $checkedConvert('peopleEdited', (v) => v as num?),
+    reverted: $checkedConvert('reverted', (v) => (v as num?)?.toInt()),
     fixAttempts: $checkedConvert('fixAttempts', (v) => v as num),
     serious: $checkedConvert('serious', (v) => (v as num).toInt()),
     footprintHit: $checkedConvert('footprintHit', (v) => v as num?),
@@ -352,6 +438,13 @@ Map<String, dynamic> _$QualityStatToJson(QualityStat instance) =>
       'firstTry': instance.firstTry,
       'rejected': instance.rejected,
       'changeRounds': instance.changeRounds,
+      'ciRounds': ?instance.ciRounds,
+      'merged': ?instance.merged,
+      'costUsd': ?instance.costUsd,
+      'costPerMerged': ?instance.costPerMerged,
+      'score': ?instance.score,
+      'peopleEdited': ?instance.peopleEdited,
+      'reverted': ?instance.reverted,
       'fixAttempts': instance.fixAttempts,
       'serious': instance.serious,
       'footprintHit': ?instance.footprintHit,

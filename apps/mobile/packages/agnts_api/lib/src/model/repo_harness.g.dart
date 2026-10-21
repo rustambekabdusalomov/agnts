@@ -15,6 +15,8 @@ abstract class _$RepoHarnessCWProxy {
 
   RepoHarness editChecksOff(bool? editChecksOff);
 
+  RepoHarness layersBlock(bool? layersBlock);
+
   RepoHarness coverage(CoverageConfig? coverage);
 
   RepoHarness acceptance(bool? acceptance);
@@ -36,6 +38,7 @@ abstract class _$RepoHarnessCWProxy {
     List<String>? secretAllow,
     List<EditCheck>? editChecks,
     bool? editChecksOff,
+    bool? layersBlock,
     CoverageConfig? coverage,
     bool? acceptance,
     List<EditCheck>? derivedEditChecks,
@@ -65,6 +68,9 @@ class _$RepoHarnessCWProxyImpl implements _$RepoHarnessCWProxy {
   @override
   RepoHarness editChecksOff(bool? editChecksOff) =>
       this(editChecksOff: editChecksOff);
+
+  @override
+  RepoHarness layersBlock(bool? layersBlock) => this(layersBlock: layersBlock);
 
   @override
   RepoHarness coverage(CoverageConfig? coverage) => this(coverage: coverage);
@@ -97,6 +103,7 @@ class _$RepoHarnessCWProxyImpl implements _$RepoHarnessCWProxy {
     Object? secretAllow = const $CopyWithPlaceholder(),
     Object? editChecks = const $CopyWithPlaceholder(),
     Object? editChecksOff = const $CopyWithPlaceholder(),
+    Object? layersBlock = const $CopyWithPlaceholder(),
     Object? coverage = const $CopyWithPlaceholder(),
     Object? acceptance = const $CopyWithPlaceholder(),
     Object? derivedEditChecks = const $CopyWithPlaceholder(),
@@ -120,6 +127,10 @@ class _$RepoHarnessCWProxyImpl implements _$RepoHarnessCWProxy {
           ? _value.editChecksOff
           // ignore: cast_nullable_to_non_nullable
           : editChecksOff as bool?,
+      layersBlock: layersBlock == const $CopyWithPlaceholder()
+          ? _value.layersBlock
+          // ignore: cast_nullable_to_non_nullable
+          : layersBlock as bool?,
       coverage: coverage == const $CopyWithPlaceholder()
           ? _value.coverage
           // ignore: cast_nullable_to_non_nullable
@@ -173,6 +184,7 @@ RepoHarness _$RepoHarnessFromJson(
           .toList(),
     ),
     editChecksOff: $checkedConvert('editChecksOff', (v) => v as bool?),
+    layersBlock: $checkedConvert('layersBlock', (v) => v as bool?),
     coverage: $checkedConvert(
       'coverage',
       (v) =>
@@ -208,6 +220,7 @@ Map<String, dynamic> _$RepoHarnessToJson(
   'secretAllow': ?instance.secretAllow,
   'editChecks': ?instance.editChecks?.map((e) => e.toJson()).toList(),
   'editChecksOff': ?instance.editChecksOff,
+  'layersBlock': ?instance.layersBlock,
   'coverage': ?instance.coverage?.toJson(),
   'acceptance': ?instance.acceptance,
   'derivedEditChecks': ?instance.derivedEditChecks

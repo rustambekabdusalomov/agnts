@@ -9,6 +9,8 @@ part of 'replay_report.dart';
 abstract class _$ReplayReportCWProxy {
   ReplayReport versions(List<ReplayVersion> versions);
 
+  ReplayReport benchmark(List<ReplayVersion>? benchmark);
+
   ReplayReport replays(List<ReplayResult> replays);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ReplayReport(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -17,7 +19,11 @@ abstract class _$ReplayReportCWProxy {
   /// ```dart
   /// ReplayReport(...).copyWith(id: 12, name: "My name")
   /// ````
-  ReplayReport call({List<ReplayVersion> versions, List<ReplayResult> replays});
+  ReplayReport call({
+    List<ReplayVersion> versions,
+    List<ReplayVersion>? benchmark,
+    List<ReplayResult> replays,
+  });
 }
 
 /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfReplayReport.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfReplayReport.copyWith.fieldName(...)`
@@ -31,6 +37,10 @@ class _$ReplayReportCWProxyImpl implements _$ReplayReportCWProxy {
       this(versions: versions);
 
   @override
+  ReplayReport benchmark(List<ReplayVersion>? benchmark) =>
+      this(benchmark: benchmark);
+
+  @override
   ReplayReport replays(List<ReplayResult> replays) => this(replays: replays);
 
   @override
@@ -42,6 +52,7 @@ class _$ReplayReportCWProxyImpl implements _$ReplayReportCWProxy {
   /// ````
   ReplayReport call({
     Object? versions = const $CopyWithPlaceholder(),
+    Object? benchmark = const $CopyWithPlaceholder(),
     Object? replays = const $CopyWithPlaceholder(),
   }) {
     return ReplayReport(
@@ -49,6 +60,10 @@ class _$ReplayReportCWProxyImpl implements _$ReplayReportCWProxy {
           ? _value.versions
           // ignore: cast_nullable_to_non_nullable
           : versions as List<ReplayVersion>,
+      benchmark: benchmark == const $CopyWithPlaceholder()
+          ? _value.benchmark
+          // ignore: cast_nullable_to_non_nullable
+          : benchmark as List<ReplayVersion>?,
       replays: replays == const $CopyWithPlaceholder()
           ? _value.replays
           // ignore: cast_nullable_to_non_nullable
@@ -77,6 +92,12 @@ ReplayReport _$ReplayReportFromJson(Map<String, dynamic> json) =>
               .map((e) => ReplayVersion.fromJson(e as Map<String, dynamic>))
               .toList(),
         ),
+        benchmark: $checkedConvert(
+          'benchmark',
+          (v) => (v as List<dynamic>?)
+              ?.map((e) => ReplayVersion.fromJson(e as Map<String, dynamic>))
+              .toList(),
+        ),
         replays: $checkedConvert(
           'replays',
           (v) => (v as List<dynamic>)
@@ -90,5 +111,6 @@ ReplayReport _$ReplayReportFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$ReplayReportToJson(ReplayReport instance) =>
     <String, dynamic>{
       'versions': instance.versions.map((e) => e.toJson()).toList(),
+      'benchmark': ?instance.benchmark?.map((e) => e.toJson()).toList(),
       'replays': instance.replays.map((e) => e.toJson()).toList(),
     };

@@ -59,6 +59,12 @@ abstract class _$SettingsCWProxy {
 
   Settings learnFromRuns(bool? learnFromRuns);
 
+  Settings effort(EffortSettings? effort);
+
+  Settings recheckComplex(bool? recheckComplex);
+
+  Settings baselineChecks(bool? baselineChecks);
+
   Settings secondOpinion(String? secondOpinion);
 
   Settings pauseAbove(int pauseAbove);
@@ -102,6 +108,9 @@ abstract class _$SettingsCWProxy {
     bool? methodSkills,
     String? deepReview,
     bool? learnFromRuns,
+    EffortSettings? effort,
+    bool? recheckComplex,
+    bool? baselineChecks,
     String? secondOpinion,
     int pauseAbove,
     int parallel,
@@ -201,6 +210,17 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
       this(learnFromRuns: learnFromRuns);
 
   @override
+  Settings effort(EffortSettings? effort) => this(effort: effort);
+
+  @override
+  Settings recheckComplex(bool? recheckComplex) =>
+      this(recheckComplex: recheckComplex);
+
+  @override
+  Settings baselineChecks(bool? baselineChecks) =>
+      this(baselineChecks: baselineChecks);
+
+  @override
   Settings secondOpinion(String? secondOpinion) =>
       this(secondOpinion: secondOpinion);
 
@@ -250,6 +270,9 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
     Object? methodSkills = const $CopyWithPlaceholder(),
     Object? deepReview = const $CopyWithPlaceholder(),
     Object? learnFromRuns = const $CopyWithPlaceholder(),
+    Object? effort = const $CopyWithPlaceholder(),
+    Object? recheckComplex = const $CopyWithPlaceholder(),
+    Object? baselineChecks = const $CopyWithPlaceholder(),
     Object? secondOpinion = const $CopyWithPlaceholder(),
     Object? pauseAbove = const $CopyWithPlaceholder(),
     Object? parallel = const $CopyWithPlaceholder(),
@@ -361,6 +384,18 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
           ? _value.learnFromRuns
           // ignore: cast_nullable_to_non_nullable
           : learnFromRuns as bool?,
+      effort: effort == const $CopyWithPlaceholder()
+          ? _value.effort
+          // ignore: cast_nullable_to_non_nullable
+          : effort as EffortSettings?,
+      recheckComplex: recheckComplex == const $CopyWithPlaceholder()
+          ? _value.recheckComplex
+          // ignore: cast_nullable_to_non_nullable
+          : recheckComplex as bool?,
+      baselineChecks: baselineChecks == const $CopyWithPlaceholder()
+          ? _value.baselineChecks
+          // ignore: cast_nullable_to_non_nullable
+          : baselineChecks as bool?,
       secondOpinion: secondOpinion == const $CopyWithPlaceholder()
           ? _value.secondOpinion
           // ignore: cast_nullable_to_non_nullable
@@ -472,6 +507,13 @@ Settings _$SettingsFromJson(
     methodSkills: $checkedConvert('methodSkills', (v) => v as bool?),
     deepReview: $checkedConvert('deepReview', (v) => v as String?),
     learnFromRuns: $checkedConvert('learnFromRuns', (v) => v as bool?),
+    effort: $checkedConvert(
+      'effort',
+      (v) =>
+          v == null ? null : EffortSettings.fromJson(v as Map<String, dynamic>),
+    ),
+    recheckComplex: $checkedConvert('recheckComplex', (v) => v as bool?),
+    baselineChecks: $checkedConvert('baselineChecks', (v) => v as bool?),
     secondOpinion: $checkedConvert('secondOpinion', (v) => v as String?),
     pauseAbove: $checkedConvert('pauseAbove', (v) => (v as num).toInt()),
     parallel: $checkedConvert('parallel', (v) => (v as num).toInt()),
@@ -515,6 +557,9 @@ Map<String, dynamic> _$SettingsToJson(Settings instance) => <String, dynamic>{
   'methodSkills': ?instance.methodSkills,
   'deepReview': ?instance.deepReview,
   'learnFromRuns': ?instance.learnFromRuns,
+  'effort': ?instance.effort?.toJson(),
+  'recheckComplex': ?instance.recheckComplex,
+  'baselineChecks': ?instance.baselineChecks,
   'secondOpinion': ?instance.secondOpinion,
   'pauseAbove': instance.pauseAbove,
   'parallel': instance.parallel,

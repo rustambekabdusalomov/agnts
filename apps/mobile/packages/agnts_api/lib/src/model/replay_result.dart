@@ -31,6 +31,16 @@ class ReplayResult {
 
     required  this.promptVersion,
 
+     this.model,
+
+     this.benchmark,
+
+     this.against,
+
+     this.lineRecall,
+
+     this.originalLineRecall,
+
     required  this.hasChange,
 
     required  this.checksPassed,
@@ -113,6 +123,70 @@ class ReplayResult {
 
 
   final String promptVersion;
+
+
+
+  @JsonKey(
+    
+    name: r'model',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? model;
+
+
+
+      /// The original is in the benchmark
+  @JsonKey(
+    
+    name: r'benchmark',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? benchmark;
+
+
+
+      /// What the replay is scored against: what the original merged as, or the original's own change
+  @JsonKey(
+    
+    name: r'against',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final ReplayResultAgainstEnum? against;
+
+
+
+      /// Share of the merged change's added lines the replay adds too; absent when scored against agnts
+  @JsonKey(
+    
+    name: r'lineRecall',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final num? lineRecall;
+
+
+
+      /// The same for the original's own change
+  @JsonKey(
+    
+    name: r'originalLineRecall',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final num? originalLineRecall;
 
 
 
@@ -269,6 +343,11 @@ class ReplayResult {
       other.title == title &&
       other.state == state &&
       other.promptVersion == promptVersion &&
+      other.model == model &&
+      other.benchmark == benchmark &&
+      other.against == against &&
+      other.lineRecall == lineRecall &&
+      other.originalLineRecall == originalLineRecall &&
       other.hasChange == hasChange &&
       other.checksPassed == checksPassed &&
       other.files == files &&
@@ -289,6 +368,11 @@ class ReplayResult {
         title.hashCode +
         state.hashCode +
         promptVersion.hashCode +
+        model.hashCode +
+        benchmark.hashCode +
+        against.hashCode +
+        lineRecall.hashCode +
+        originalLineRecall.hashCode +
         hasChange.hashCode +
         checksPassed.hashCode +
         files.hashCode +
@@ -312,6 +396,22 @@ class ReplayResult {
   }
 
 }
+
+/// What the replay is scored against: what the original merged as, or the original's own change
+enum ReplayResultAgainstEnum {
+@JsonValue(r'merged')
+merged(r'merged'),
+@JsonValue(r'agnts')
+agnts(r'agnts');
+
+const ReplayResultAgainstEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
+}
+
 
 enum ReplayResultVerdictEnum {
 @JsonValue(r'looks_good')

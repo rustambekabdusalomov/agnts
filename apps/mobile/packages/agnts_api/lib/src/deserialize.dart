@@ -12,6 +12,9 @@ import 'package:agnts_api/src/model/agent_config_finding.dart';
 import 'package:agnts_api/src/model/agent_config_scan.dart';
 import 'package:agnts_api/src/model/analysis.dart';
 import 'package:agnts_api/src/model/analysis_acceptance_inner.dart';
+import 'package:agnts_api/src/model/analysis_repro.dart';
+import 'package:agnts_api/src/model/analysis_reuse_inner.dart';
+import 'package:agnts_api/src/model/analysis_test_plan_inner.dart';
 import 'package:agnts_api/src/model/analytics.dart';
 import 'package:agnts_api/src/model/analytics_ci.dart';
 import 'package:agnts_api/src/model/analytics_delivery.dart';
@@ -41,6 +44,7 @@ import 'package:agnts_api/src/model/attachment.dart';
 import 'package:agnts_api/src/model/begin_login_totp200_response.dart';
 import 'package:agnts_api/src/model/begin_login_totp_request.dart';
 import 'package:agnts_api/src/model/begin_totp200_response.dart';
+import 'package:agnts_api/src/model/benchmark_run.dart';
 import 'package:agnts_api/src/model/billing.dart';
 import 'package:agnts_api/src/model/billing_prices.dart';
 import 'package:agnts_api/src/model/blocker.dart';
@@ -90,6 +94,7 @@ import 'package:agnts_api/src/model/disable_totp_request.dart';
 import 'package:agnts_api/src/model/edit_check.dart';
 import 'package:agnts_api/src/model/edit_commit_message_request.dart';
 import 'package:agnts_api/src/model/edit_pull_comment_request.dart';
+import 'package:agnts_api/src/model/effort_settings.dart';
 import 'package:agnts_api/src/model/environment.dart';
 import 'package:agnts_api/src/model/error.dart';
 import 'package:agnts_api/src/model/event.dart';
@@ -147,6 +152,7 @@ import 'package:agnts_api/src/model/new_pull_comment.dart';
 import 'package:agnts_api/src/model/notify_settings.dart';
 import 'package:agnts_api/src/model/offer_starter_rules_request.dart';
 import 'package:agnts_api/src/model/pr_comment_settings.dart';
+import 'package:agnts_api/src/model/pattern.dart';
 import 'package:agnts_api/src/model/period_stats.dart';
 import 'package:agnts_api/src/model/pipeline.dart';
 import 'package:agnts_api/src/model/plane_state.dart';
@@ -243,6 +249,7 @@ import 'package:agnts_api/src/model/rule_answers_answers_inner.dart';
 import 'package:agnts_api/src/model/rule_enforce.dart';
 import 'package:agnts_api/src/model/rule_input.dart';
 import 'package:agnts_api/src/model/rule_question.dart';
+import 'package:agnts_api/src/model/run_benchmark_request.dart';
 import 'package:agnts_api/src/model/run_history_page.dart';
 import 'package:agnts_api/src/model/run_history_settings.dart';
 import 'package:agnts_api/src/model/run_history_summary.dart';
@@ -254,6 +261,7 @@ import 'package:agnts_api/src/model/send_feedback_request.dart';
 import 'package:agnts_api/src/model/set_member_role_request.dart';
 import 'package:agnts_api/src/model/set_plane_webhook_secret_request.dart';
 import 'package:agnts_api/src/model/set_slots_request.dart';
+import 'package:agnts_api/src/model/set_ticket_benchmark_request.dart';
 import 'package:agnts_api/src/model/set_ticket_member_request.dart';
 import 'package:agnts_api/src/model/set_ticket_number_request.dart';
 import 'package:agnts_api/src/model/settings.dart';
@@ -374,6 +382,12 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return Analysis.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AnalysisAcceptanceInner':
           return AnalysisAcceptanceInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AnalysisRepro':
+          return AnalysisRepro.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AnalysisReuseInner':
+          return AnalysisReuseInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AnalysisTestPlanInner':
+          return AnalysisTestPlanInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Analytics':
           return Analytics.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AnalyticsCI':
@@ -438,6 +452,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return BeginLoginTotpRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'BeginTotp200Response':
           return BeginTotp200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'BenchmarkRun':
+          return BenchmarkRun.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Billing':
           return Billing.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'BillingPrices':
@@ -542,6 +558,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return EditCommitMessageRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'EditPullCommentRequest':
           return EditPullCommentRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'EffortSettings':
+          return EffortSettings.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Environment':
           return Environment.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Error':
@@ -671,6 +689,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return OfferStarterRulesRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PRCommentSettings':
           return PRCommentSettings.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'Pattern':
+          return Pattern.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PeriodStats':
           return PeriodStats.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Pipeline':
@@ -872,6 +892,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
         case 'RuleStatus':
           
           
+        case 'RunBenchmarkRequest':
+          return RunBenchmarkRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RunHistoryPage':
           return RunHistoryPage.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RunHistorySettings':
@@ -894,6 +916,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return SetPlaneWebhookSecretRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetSlotsRequest':
           return SetSlotsRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SetTicketBenchmarkRequest':
+          return SetTicketBenchmarkRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetTicketMemberRequest':
           return SetTicketMemberRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetTicketNumberRequest':

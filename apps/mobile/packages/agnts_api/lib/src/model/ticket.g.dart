@@ -61,6 +61,8 @@ abstract class _$TicketCWProxy {
 
   Ticket skipChecks(bool skipChecks);
 
+  Ticket benchmark(bool? benchmark);
+
   Ticket postReport(bool? postReport);
 
   Ticket parentKey(String? parentKey);
@@ -153,6 +155,7 @@ abstract class _$TicketCWProxy {
     TicketKind kind,
     bool kindAuto,
     bool skipChecks,
+    bool? benchmark,
     bool? postReport,
     String? parentKey,
     String? followUpOf,
@@ -273,6 +276,9 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
 
   @override
   Ticket skipChecks(bool skipChecks) => this(skipChecks: skipChecks);
+
+  @override
+  Ticket benchmark(bool? benchmark) => this(benchmark: benchmark);
 
   @override
   Ticket postReport(bool? postReport) => this(postReport: postReport);
@@ -403,6 +409,7 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
     Object? kind = const $CopyWithPlaceholder(),
     Object? kindAuto = const $CopyWithPlaceholder(),
     Object? skipChecks = const $CopyWithPlaceholder(),
+    Object? benchmark = const $CopyWithPlaceholder(),
     Object? postReport = const $CopyWithPlaceholder(),
     Object? parentKey = const $CopyWithPlaceholder(),
     Object? followUpOf = const $CopyWithPlaceholder(),
@@ -542,6 +549,10 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
           ? _value.skipChecks
           // ignore: cast_nullable_to_non_nullable
           : skipChecks as bool,
+      benchmark: benchmark == const $CopyWithPlaceholder()
+          ? _value.benchmark
+          // ignore: cast_nullable_to_non_nullable
+          : benchmark as bool?,
       postReport: postReport == const $CopyWithPlaceholder()
           ? _value.postReport
           // ignore: cast_nullable_to_non_nullable
@@ -747,6 +758,7 @@ Ticket _$TicketFromJson(
     kind: $checkedConvert('kind', (v) => $enumDecode(_$TicketKindEnumMap, v)),
     kindAuto: $checkedConvert('kindAuto', (v) => v as bool),
     skipChecks: $checkedConvert('skipChecks', (v) => v as bool),
+    benchmark: $checkedConvert('benchmark', (v) => v as bool?),
     postReport: $checkedConvert('postReport', (v) => v as bool?),
     parentKey: $checkedConvert('parentKey', (v) => v as String?),
     followUpOf: $checkedConvert('followUpOf', (v) => v as String?),
@@ -857,6 +869,7 @@ Map<String, dynamic> _$TicketToJson(Ticket instance) => <String, dynamic>{
   'kind': _$TicketKindEnumMap[instance.kind]!,
   'kindAuto': instance.kindAuto,
   'skipChecks': instance.skipChecks,
+  'benchmark': ?instance.benchmark,
   'postReport': ?instance.postReport,
   'parentKey': ?instance.parentKey,
   'followUpOf': ?instance.followUpOf,

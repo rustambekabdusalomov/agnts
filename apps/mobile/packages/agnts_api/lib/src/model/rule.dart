@@ -30,6 +30,8 @@ class Rule {
 
      this.sourceTicket,
 
+     this.tag,
+
      this.reason,
 
      this.repoId,
@@ -113,6 +115,19 @@ class Rule {
 
 
   final String? sourceTicket;
+
+
+
+      /// For a rule agnts learned: what kind of lesson it is
+  @JsonKey(
+    
+    name: r'tag',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final RuleTagEnum? tag;
 
 
 
@@ -425,6 +440,7 @@ class Rule {
       other.id == id &&
       other.kind == kind &&
       other.sourceTicket == sourceTicket &&
+      other.tag == tag &&
       other.reason == reason &&
       other.repoId == repoId &&
       other.repoName == repoName &&
@@ -455,6 +471,7 @@ class Rule {
         id.hashCode +
         kind.hashCode +
         sourceTicket.hashCode +
+        tag.hashCode +
         reason.hashCode +
         repoId.hashCode +
         repoName.hashCode +
@@ -490,6 +507,30 @@ class Rule {
   }
 
 }
+
+/// For a rule agnts learned: what kind of lesson it is
+enum RuleTagEnum {
+@JsonValue(r'reuse')
+reuse(r'reuse'),
+@JsonValue(r'layer')
+layer(r'layer'),
+@JsonValue(r'tests')
+tests(r'tests'),
+@JsonValue(r'style')
+style(r'style'),
+@JsonValue(r'logic')
+logic(r'logic'),
+@JsonValue(r'other')
+other(r'other');
+
+const RuleTagEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
+}
+
 
 /// prompt: in every prompt; skill: a skill Claude loads when its description matches the work
 enum RuleDeliveryEnum {

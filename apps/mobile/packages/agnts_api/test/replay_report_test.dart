@@ -7,9 +7,15 @@ void main() {
   // TODO add properties to the entity
 
   group(ReplayReport, () {
-    // Replays with a change, summed by the prompt version they ran with
+    // Replays with a change, summed by the prompt version and coding model they ran with
     // List<ReplayVersion> versions
     test('to test the property `versions`', () async {
+      // TODO
+    });
+
+    // The same, for the replays of tickets in the benchmark only
+    // List<ReplayVersion> benchmark
+    test('to test the property `benchmark`', () async {
       // TODO
     });
 

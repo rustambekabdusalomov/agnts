@@ -3,11 +3,15 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:agnts_api/src/model/pattern.dart';
 import 'package:agnts_api/src/model/analysis_acceptance_inner.dart';
 import 'package:agnts_api/src/model/footprint.dart';
 import 'package:agnts_api/src/model/second_opinion.dart';
+import 'package:agnts_api/src/model/analysis_repro.dart';
 import 'package:agnts_api/src/model/approach.dart';
 import 'package:agnts_api/src/model/ship_notes.dart';
+import 'package:agnts_api/src/model/analysis_test_plan_inner.dart';
+import 'package:agnts_api/src/model/analysis_reuse_inner.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -42,6 +46,16 @@ class Analysis {
      this.defect,
 
      this.acceptance,
+
+     this.patterns,
+
+     this.reuse,
+
+     this.testPlan,
+
+     this.edgeCases,
+
+     this.repro,
 
      this.secondOpinion,
   });
@@ -159,6 +173,70 @@ class Analysis {
 
 
 
+      /// For each file the work changes, the existing code it follows (copy, adapt) or that it is new
+  @JsonKey(
+    
+    name: r'patterns',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<Pattern>? patterns;
+
+
+
+      /// Existing helpers the work must use instead of writing its own
+  @JsonKey(
+    
+    name: r'reuse',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<AnalysisReuseInner>? reuse;
+
+
+
+      /// Tests the work must add or change
+  @JsonKey(
+    
+    name: r'testPlan',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<AnalysisTestPlanInner>? testPlan;
+
+
+
+      /// Inputs and failures the work must handle
+  @JsonKey(
+    
+    name: r'edgeCases',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<String>? edgeCases;
+
+
+
+  @JsonKey(
+    
+    name: r'repro',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final AnalysisRepro? repro;
+
+
+
   @JsonKey(
     
     name: r'secondOpinion',
@@ -184,6 +262,11 @@ class Analysis {
       other.ship == ship &&
       other.defect == defect &&
       other.acceptance == acceptance &&
+      other.patterns == patterns &&
+      other.reuse == reuse &&
+      other.testPlan == testPlan &&
+      other.edgeCases == edgeCases &&
+      other.repro == repro &&
       other.secondOpinion == secondOpinion;
 
     @override
@@ -197,6 +280,11 @@ class Analysis {
         ship.hashCode +
         defect.hashCode +
         acceptance.hashCode +
+        patterns.hashCode +
+        reuse.hashCode +
+        testPlan.hashCode +
+        edgeCases.hashCode +
+        repro.hashCode +
         secondOpinion.hashCode;
 
   factory Analysis.fromJson(Map<String, dynamic> json) => _$AnalysisFromJson(json);

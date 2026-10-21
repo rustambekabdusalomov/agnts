@@ -346,6 +346,8 @@
   "analyticsColFirstPassHint": "Done tickets approved without a person asking for changes",
   "analyticsColRounds": "Change rounds",
   "analyticsColRoundsHint": "Average change requests by a person per ticket that reached review",
+  "analyticsColCIRounds": "CI rounds",
+  "analyticsColCIRoundsHint": "Average times red CI on the pull request sent the work back, per ticket that reached review (not counted in change rounds)",
   "analyticsColFixes": "Check fixes",
   "analyticsColFixesHint": "Average times failing checks were sent back to Claude",
   "analyticsColSerious": "Serious findings",
@@ -653,6 +655,15 @@
   "analyticsColCi": "CI failures",
   "analyticsColCiHint": "CI failure groups that failed in the period",
   "analyticsTabAssistant": "Assistant",
+  "analyticsColScore": "Score",
+  "analyticsColScoreHint": "0–100: done first time 35%, merged 25%, no serious review finding 20%, few change rounds 20%. Recent versions score lower until their pull requests merge.",
+  "analyticsColCostMerged": "$/merged",
+  "analyticsColCostMergedHint": "What all the version's tickets cost, over the ones that merged",
+  "analyticsFewTickets": "under 10 tickets: too few to compare",
+  "analyticsColPeopleEdited": "People edits",
+  "analyticsColPeopleEditedHint": "Average share of agnts's lines people changed or removed before merging. Lower is better.",
+  "analyticsColReverted": "Reverted",
+  "analyticsColRevertedHint": "Tickets whose merged work people reverted",
   "appName": "agnts",
   "appTagline": "Your no sleep agent",
   "authTitle": "Sign in",
@@ -865,6 +876,27 @@
   "briefDone_approve": "Brief approved: new runs read it",
   "briefDone_discard": "Draft discarded",
   "briefDone_save": "Brief saved",
+  "briefArchTitle": "Architecture",
+  "briefArchSub": "The part of the brief agnts checks work against: layers and the imports each may make, shared helpers to reuse, recipes with files to copy. Runs read it as architecture.json; a change that imports across layers it should not is flagged.",
+  "briefArchNone": "No architecture yet. The next survey writes one with the brief, or write it yourself.",
+  "briefArchCounts": "{layers} layers · {helpers} helpers · {recipes} recipes",
+  "@briefArchCounts": {
+    "placeholders": {
+      "layers": {
+        "type": "String"
+      },
+      "helpers": {
+        "type": "String"
+      },
+      "recipes": {
+        "type": "String"
+      }
+    }
+  },
+  "briefArchEdit": "Edit JSON",
+  "briefArchEditHint": "Empty removes it. Paths are relative to the repository; layer paths are globs (** for any depth); leave out mayImport for a layer that may import anything.",
+  "briefArchDraft": "The draft brief comes with this architecture; approving the brief approves it too.",
+  "briefDone_saveArch": "Architecture saved",
   "ciTitle": "CI",
   "ciLede": "Failing pipelines on your watched branches, grouped by job and error. agnts re-runs new failures once, then fixes the real ones.",
   "ciBack": "CI",
@@ -1298,6 +1330,19 @@
   "designShip_rollout": "Rollout",
   "designShip_rollback": "Rollback",
   "designDeviations": "Departed from the plan",
+  "designFitTitle": "Following the existing code",
+  "designKind_copy": "copy",
+  "designKind_adapt": "adapt",
+  "designKind_new": "new pattern",
+  "designLike": "like",
+  "designConventionsFrom": "conventions from",
+  "designGoesIn": "goes in",
+  "designPrecedent": "sets a precedent: later work will copy it",
+  "designReuseTitle": "Existing helpers to use",
+  "designTestPlanTitle": "Tests to add or change",
+  "designEdgeCasesTitle": "Edge cases to handle",
+  "designReproTitle": "The bug, reproduced",
+  "designReproNot": "The analysis could not reproduce it",
   "draftsTitle": "Review comments",
   "draftsSub": "agnts's comments stay here until you accept them. Only accepted ones are published on {host}, together as one review; the rest never leave agnts.",
   "@draftsSub": {
@@ -2078,6 +2123,8 @@
     }
   },
   "harnessRepoStarterOpenRules": "Open the suggestions",
+  "harnessRepoLayersBlock": "Block imports across layers",
+  "harnessRepoLayersBlockHelp": "With an approved architecture, agnts flags a change that adds an import its layers do not allow. On, the flag is a blocker that agnts's own review sends back to the coder before you see the change.",
   "harnessRulesDelivery": "How runs get it",
   "harnessRulesDelivery_prompt": "Every prompt",
   "harnessRulesDelivery_skill": "Skill",
@@ -2251,6 +2298,20 @@
       }
     }
   },
+  "harnessSettingsEffort": "Thinking effort",
+  "harnessSettingsEffortHelp": "How hard Claude thinks in each stage (Claude Code's --effort). Higher is slower and costs more of your plan. Complex tickets use their own level for coding and review.",
+  "harnessSettingsEffortAnalyze": "Analysis",
+  "harnessSettingsEffortCoding": "Coding",
+  "harnessSettingsEffortReview": "Review",
+  "harnessSettingsEffortComplex": "Complex tickets",
+  "harnessSettingsEffort_": "Default",
+  "harnessSettingsEffort_low": "Low",
+  "harnessSettingsEffort_medium": "Medium",
+  "harnessSettingsEffort_high": "High",
+  "harnessSettingsRecheckComplex": "Re-check complex analyses",
+  "harnessSettingsRecheckComplexHelp": "When the analysis model rates a ticket complex, the coding model reads the analysis again before any code is written, and fixes what is wrong or missing.",
+  "harnessSettingsBaselineChecks": "Check the starting commit first",
+  "harnessSettingsBaselineChecksHelp": "Before a ticket's first coding run, agnts runs the checks on the commit the work starts from. What already fails there is not the ticket's: no fix attempts go to it, and the reviewer sees it failed before. Results are shared by tickets from the same commit.",
   "harnessTicketFlag_secret": "Possible secret",
   "harnessTicketFlag_env_file": "Dotenv file added",
   "harnessTicketFlag_debug_leftover": "Debug output left",
@@ -5009,6 +5070,57 @@
   "replayVerdict_looks_good": "looks good",
   "replayVerdict_has_concerns": "has concerns",
   "replayVerdict_needs_changes": "needs changes",
+  "replayBenchmarkTitle": "Benchmark",
+  "replayBenchmarkSub": "Merged tickets that every change to agnts is replayed against, and scored against what they merged as. Pick 20–30 of different sizes.",
+  "replayBenchmarkAdd": "Add to benchmark",
+  "replayBenchmarkRemove": "Remove from benchmark",
+  "replayBenchmarkIn": "In the benchmark: changes to agnts are replayed against this ticket.",
+  "replayBenchmarkNeedsMerge": "Only merged tickets can be in the benchmark: replays are scored against what they merged as.",
+  "replayBenchmarkRun": "Run benchmark",
+  "replayBenchmarkModel": "Coding model",
+  "replayBenchmarkModelDefault": "as the originals",
+  "replayBenchmarkConfirm": "agnts replays the {n} benchmark tickets from where each started. They use your Claude plan like any ticket.",
+  "@replayBenchmarkConfirm": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "replayBenchmarkStarted": "{n} replays queued",
+  "@replayBenchmarkStarted": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "replayBenchmarkFailed": "{n} could not be replayed: {why}",
+  "@replayBenchmarkFailed": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "why": {
+        "type": "String"
+      }
+    }
+  },
+  "replayBenchmarkEmpty": "The benchmark is empty. Open a merged ticket and press Add to benchmark.",
+  "replayBenchmarkCount": "{n} tickets",
+  "@replayBenchmarkCount": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "replayAllReplays": "All replays",
+  "replayColModel": "Model",
+  "replayColLines": "Merged lines",
+  "replayColLinesHint": "Share of the lines the merged pull request added that the replay adds too; in brackets the same for agnts's original change. Higher is closer to what people shipped.",
+  "replayAgainst_merged": "vs merged",
+  "replayAgainst_agnts": "vs agnts",
   "repoBack": "Back to repositories",
   "repoNotFound": "No such repository.",
   "repoEdit": "Edit settings",
@@ -5913,6 +6025,12 @@
   "rulesKindContext": "Business context",
   "rulesKindRuleHelp": "An instruction agnts follows on every ticket.",
   "rulesKindContextHelp": "Knowledge about your product: what its terms mean, invariants the code must keep, who uses what. Every run reads it before it starts.",
+  "rulesTag_reuse": "reuse",
+  "rulesTag_layer": "layer",
+  "rulesTag_tests": "tests",
+  "rulesTag_style": "style",
+  "rulesTag_logic": "logic",
+  "rulesTag_other": "other",
   "runsNavRuns": "Runs",
   "runsTitle": "Run history",
   "runsLede": "Every Claude Code and Codex invocation across workspaces: what it cost, how long it took and how it ended. Opening one shows customer content, and every read is logged.",

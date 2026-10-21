@@ -13,6 +13,11 @@ Name | Type | Description | Notes
 **title** | **String** |  | 
 **state** | [**TicketState**](TicketState.md) |  | 
 **promptVersion** | **String** |  | 
+**model** | **String** |  | [optional] 
+**benchmark** | **bool** | The original is in the benchmark | [optional] 
+**against** | **String** | What the replay is scored against: what the original merged as, or the original's own change | [optional] 
+**lineRecall** | **num** | Share of the merged change's added lines the replay adds too; absent when scored against agnts | [optional] 
+**originalLineRecall** | **num** | The same for the original's own change | [optional] 
 **hasChange** | **bool** |  | 
 **checksPassed** | **bool** |  | 
 **files** | **List&lt;String&gt;** |  | 

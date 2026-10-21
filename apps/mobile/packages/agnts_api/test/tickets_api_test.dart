@@ -257,6 +257,13 @@ void main() {
       // TODO
     });
 
+    // Put a merged code or test ticket in the benchmark, or take it out
+    //
+    //Future<Ticket> setTicketBenchmark(String key, SetTicketBenchmarkRequest setTicketBenchmarkRequest) async
+    test('test setTicketBenchmark', () async {
+      // TODO
+    });
+
     // Change what the ticket produces
     //
     // Allowed on a new ticket, while agnts waits for answers, and on a failed or rate-limited one that has not pushed. auto lets the analysis pick the kind again; any other kind is final.

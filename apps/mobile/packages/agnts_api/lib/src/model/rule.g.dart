@@ -13,6 +13,8 @@ abstract class _$RuleCWProxy {
 
   Rule sourceTicket(String? sourceTicket);
 
+  Rule tag(RuleTagEnum? tag);
+
   Rule reason(String? reason);
 
   Rule repoId(int? repoId);
@@ -71,6 +73,7 @@ abstract class _$RuleCWProxy {
     int id,
     RuleKind kind,
     String? sourceTicket,
+    RuleTagEnum? tag,
     String? reason,
     int? repoId,
     String? repoName,
@@ -112,6 +115,9 @@ class _$RuleCWProxyImpl implements _$RuleCWProxy {
 
   @override
   Rule sourceTicket(String? sourceTicket) => this(sourceTicket: sourceTicket);
+
+  @override
+  Rule tag(RuleTagEnum? tag) => this(tag: tag);
 
   @override
   Rule reason(String? reason) => this(reason: reason);
@@ -198,6 +204,7 @@ class _$RuleCWProxyImpl implements _$RuleCWProxy {
     Object? id = const $CopyWithPlaceholder(),
     Object? kind = const $CopyWithPlaceholder(),
     Object? sourceTicket = const $CopyWithPlaceholder(),
+    Object? tag = const $CopyWithPlaceholder(),
     Object? reason = const $CopyWithPlaceholder(),
     Object? repoId = const $CopyWithPlaceholder(),
     Object? repoName = const $CopyWithPlaceholder(),
@@ -236,6 +243,10 @@ class _$RuleCWProxyImpl implements _$RuleCWProxy {
           ? _value.sourceTicket
           // ignore: cast_nullable_to_non_nullable
           : sourceTicket as String?,
+      tag: tag == const $CopyWithPlaceholder()
+          ? _value.tag
+          // ignore: cast_nullable_to_non_nullable
+          : tag as RuleTagEnum?,
       reason: reason == const $CopyWithPlaceholder()
           ? _value.reason
           // ignore: cast_nullable_to_non_nullable
@@ -372,6 +383,10 @@ Rule _$RuleFromJson(Map<String, dynamic> json) => $checkedCreate('Rule', json, (
     id: $checkedConvert('id', (v) => (v as num).toInt()),
     kind: $checkedConvert('kind', (v) => $enumDecode(_$RuleKindEnumMap, v)),
     sourceTicket: $checkedConvert('sourceTicket', (v) => v as String?),
+    tag: $checkedConvert(
+      'tag',
+      (v) => $enumDecodeNullable(_$RuleTagEnumEnumMap, v),
+    ),
     reason: $checkedConvert('reason', (v) => v as String?),
     repoId: $checkedConvert('repoId', (v) => (v as num?)?.toInt()),
     repoName: $checkedConvert('repoName', (v) => v as String?),
@@ -424,6 +439,7 @@ Map<String, dynamic> _$RuleToJson(Rule instance) => <String, dynamic>{
   'id': instance.id,
   'kind': _$RuleKindEnumMap[instance.kind]!,
   'sourceTicket': ?instance.sourceTicket,
+  'tag': ?_$RuleTagEnumEnumMap[instance.tag],
   'reason': ?instance.reason,
   'repoId': ?instance.repoId,
   'repoName': ?instance.repoName,
@@ -454,6 +470,15 @@ const _$RuleKindEnumMap = {
   RuleKind.rule: 'rule',
   RuleKind.context: 'context',
   RuleKind.tip: 'tip',
+};
+
+const _$RuleTagEnumEnumMap = {
+  RuleTagEnum.reuse: 'reuse',
+  RuleTagEnum.layer: 'layer',
+  RuleTagEnum.tests: 'tests',
+  RuleTagEnum.style: 'style',
+  RuleTagEnum.logic: 'logic',
+  RuleTagEnum.other: 'other',
 };
 
 const _$RuleStatusEnumMap = {

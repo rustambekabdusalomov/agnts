@@ -45,6 +45,10 @@ class RepoBrief {
      this.approvedAt,
 
     required  this.updatedAt,
+
+     this.architecture,
+
+     this.architectureDraft,
   });
 
   @JsonKey(
@@ -209,6 +213,32 @@ class RepoBrief {
 
 
 
+      /// The approved architecture.json (layers and allowed imports, shared helpers, recipes), JSON text; runs read it and agnts checks changes against its layers. Empty when there is none
+  @JsonKey(
+    
+    name: r'architecture',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? architecture;
+
+
+
+      /// The architecture the latest survey wrote, approved with the draft brief
+  @JsonKey(
+    
+    name: r'architectureDraft',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? architectureDraft;
+
+
+
 
 
     @override
@@ -225,7 +255,9 @@ class RepoBrief {
       other.error == error &&
       other.surveyedAt == surveyedAt &&
       other.approvedAt == approvedAt &&
-      other.updatedAt == updatedAt;
+      other.updatedAt == updatedAt &&
+      other.architecture == architecture &&
+      other.architectureDraft == architectureDraft;
 
     @override
     int get hashCode =>
@@ -241,7 +273,9 @@ class RepoBrief {
         error.hashCode +
         surveyedAt.hashCode +
         approvedAt.hashCode +
-        updatedAt.hashCode;
+        updatedAt.hashCode +
+        architecture.hashCode +
+        architectureDraft.hashCode;
 
   factory RepoBrief.fromJson(Map<String, dynamic> json) => _$RepoBriefFromJson(json);
 

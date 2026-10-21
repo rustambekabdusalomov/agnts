@@ -78,5 +78,17 @@ void main() {
       // TODO
     });
 
+    // The approved architecture.json (layers and allowed imports, shared helpers, recipes), JSON text; runs read it and agnts checks changes against its layers. Empty when there is none
+    // String architecture
+    test('to test the property `architecture`', () async {
+      // TODO
+    });
+
+    // The architecture the latest survey wrote, approved with the draft brief
+    // String architectureDraft
+    test('to test the property `architectureDraft`', () async {
+      // TODO
+    });
+
   });
 }

@@ -15,6 +15,13 @@ Name | Type | Description | Notes
 **firstTry** | **int** | Done without a person asking for changes | 
 **rejected** | **int** |  | 
 **changeRounds** | **num** | Average change requests by a person, over the tickets that reached review | 
+**ciRounds** | **num** | Average times red CI on the pull request sent the work back, over the tickets that reached review | [optional] 
+**merged** | **int** | Their pull requests merged | [optional] 
+**costUsd** | **num** | What all their runs cost | [optional] 
+**costPerMerged** | **num** | Cost over merged tickets; absent when none merged | [optional] 
+**score** | **num** | 0–100: done first time 35%, merged 25%, no serious finding 20%, few change rounds 20% | [optional] 
+**peopleEdited** | **num** | Average share of agnts's lines people changed before merging; absent when no merge was recorded | [optional] 
+**reverted** | **int** | Tickets whose merged work people reverted | [optional] 
 **fixAttempts** | **num** | Average failing checks sent back to Claude | 
 **serious** | **int** | Reviewed with a blocker or major finding at least once | 
 **footprintHit** | **num** | Average share of the changed files the analysis predicted; absent when none was measured | [optional] 

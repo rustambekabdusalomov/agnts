@@ -15,6 +15,8 @@ abstract class _$RepoHarnessInputCWProxy {
 
   RepoHarnessInput editChecksOff(bool? editChecksOff);
 
+  RepoHarnessInput layersBlock(bool? layersBlock);
+
   RepoHarnessInput coverage(CoverageConfig? coverage);
 
   RepoHarnessInput acceptance(bool? acceptance);
@@ -30,6 +32,7 @@ abstract class _$RepoHarnessInputCWProxy {
     List<String>? secretAllow,
     List<EditCheck>? editChecks,
     bool? editChecksOff,
+    bool? layersBlock,
     CoverageConfig? coverage,
     bool? acceptance,
   });
@@ -59,6 +62,10 @@ class _$RepoHarnessInputCWProxyImpl implements _$RepoHarnessInputCWProxy {
       this(editChecksOff: editChecksOff);
 
   @override
+  RepoHarnessInput layersBlock(bool? layersBlock) =>
+      this(layersBlock: layersBlock);
+
+  @override
   RepoHarnessInput coverage(CoverageConfig? coverage) =>
       this(coverage: coverage);
 
@@ -77,6 +84,7 @@ class _$RepoHarnessInputCWProxyImpl implements _$RepoHarnessInputCWProxy {
     Object? secretAllow = const $CopyWithPlaceholder(),
     Object? editChecks = const $CopyWithPlaceholder(),
     Object? editChecksOff = const $CopyWithPlaceholder(),
+    Object? layersBlock = const $CopyWithPlaceholder(),
     Object? coverage = const $CopyWithPlaceholder(),
     Object? acceptance = const $CopyWithPlaceholder(),
   }) {
@@ -97,6 +105,10 @@ class _$RepoHarnessInputCWProxyImpl implements _$RepoHarnessInputCWProxy {
           ? _value.editChecksOff
           // ignore: cast_nullable_to_non_nullable
           : editChecksOff as bool?,
+      layersBlock: layersBlock == const $CopyWithPlaceholder()
+          ? _value.layersBlock
+          // ignore: cast_nullable_to_non_nullable
+          : layersBlock as bool?,
       coverage: coverage == const $CopyWithPlaceholder()
           ? _value.coverage
           // ignore: cast_nullable_to_non_nullable
@@ -138,6 +150,7 @@ RepoHarnessInput _$RepoHarnessInputFromJson(Map<String, dynamic> json) =>
               .toList(),
         ),
         editChecksOff: $checkedConvert('editChecksOff', (v) => v as bool?),
+        layersBlock: $checkedConvert('layersBlock', (v) => v as bool?),
         coverage: $checkedConvert(
           'coverage',
           (v) => v == null
@@ -156,6 +169,7 @@ Map<String, dynamic> _$RepoHarnessInputToJson(RepoHarnessInput instance) =>
       'secretAllow': ?instance.secretAllow,
       'editChecks': ?instance.editChecks?.map((e) => e.toJson()).toList(),
       'editChecksOff': ?instance.editChecksOff,
+      'layersBlock': ?instance.layersBlock,
       'coverage': ?instance.coverage?.toJson(),
       'acceptance': ?instance.acceptance,
     };

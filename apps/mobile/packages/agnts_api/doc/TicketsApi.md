@@ -41,6 +41,7 @@ Method | HTTP request | Description
 [**retryTicket**](TicketsApi.md#retryticket) | **POST** /tickets/{key}/retry | Resume a failed or rate-limited ticket where it stopped
 [**reviewTicket**](TicketsApi.md#reviewticket) | **POST** /tickets/{key}/review | Queue a code review of a ticket waiting for review (again, if one already ran)
 [**setFollowUps**](TicketsApi.md#setfollowups) | **PUT** /tickets/{key}/follow-ups | Turn follow-up suggestions on or off for this ticket
+[**setTicketBenchmark**](TicketsApi.md#setticketbenchmark) | **PUT** /tickets/{key}/benchmark | Put a merged code or test ticket in the benchmark, or take it out
 [**setTicketKind**](TicketsApi.md#setticketkind) | **PUT** /tickets/{key}/kind | Change what the ticket produces
 [**setTicketMember**](TicketsApi.md#setticketmember) | **PUT** /tickets/{key}/member | Make a member the ticket&#39;s member (per-member Claude mode runs it on their account)
 [**setTicketModels**](TicketsApi.md#setticketmodels) | **PUT** /tickets/{key}/models | Override models for this ticket; omit a stage to use the default
@@ -1553,6 +1554,53 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **key** | **String**|  | 
  **followUpsSetting** | [**FollowUpsSetting**](FollowUpsSetting.md)|  | 
+
+### Return type
+
+[**Ticket**](Ticket.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **setTicketBenchmark**
+> Ticket setTicketBenchmark(key, setTicketBenchmarkRequest)
+
+Put a merged code or test ticket in the benchmark, or take it out
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getTicketsApi();
+final String key = key_example; // String | 
+final SetTicketBenchmarkRequest setTicketBenchmarkRequest = ; // SetTicketBenchmarkRequest | 
+
+try {
+    final response = api.setTicketBenchmark(key, setTicketBenchmarkRequest);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling TicketsApi->setTicketBenchmark: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **key** | **String**|  | 
+ **setTicketBenchmarkRequest** | [**SetTicketBenchmarkRequest**](SetTicketBenchmarkRequest.md)|  | 
 
 ### Return type
 

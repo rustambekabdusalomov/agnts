@@ -30,6 +30,12 @@ void main() {
       // TODO
     });
 
+    // An import the approved architecture does not allow is a blocker agnts's review sends back, not only a red flag
+    // bool layersBlock
+    test('to test the property `layersBlock`', () async {
+      // TODO
+    });
+
     // CoverageConfig coverage
     test('to test the property `coverage`', () async {
       // TODO

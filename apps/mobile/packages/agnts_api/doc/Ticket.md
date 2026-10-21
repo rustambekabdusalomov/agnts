@@ -35,6 +35,7 @@ Name | Type | Description | Notes
 **kind** | [**TicketKind**](TicketKind.md) |  | 
 **kindAuto** | **bool** | agnts picks the kind; the analysis may still change it | 
 **skipChecks** | **bool** | coding runs skip the checks and go to review on the code alone (set with retryTicket or requestChanges) | 
+**benchmark** | **bool** | A merged ticket in the benchmark that changes to agnts are replayed against (setTicketBenchmark) | [optional] 
 **postReport** | **bool** | The approved report is posted to the tracker issue | [optional] 
 **parentKey** | **String** | The plan or bug investigation this ticket implements | [optional] 
 **followUpOf** | **String** | The ticket that suggested this one as a follow-up | [optional] 

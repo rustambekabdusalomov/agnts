@@ -21,6 +21,8 @@ class RepoBriefInput {
   RepoBriefInput({
 
     required  this.body,
+
+     this.architecture,
   });
 
   @JsonKey(
@@ -35,15 +37,30 @@ class RepoBriefInput {
 
 
 
+      /// Replaces the approved architecture.json when given; empty removes it
+  @JsonKey(
+    
+    name: r'architecture',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? architecture;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is RepoBriefInput &&
-      other.body == body;
+      other.body == body &&
+      other.architecture == architecture;
 
     @override
     int get hashCode =>
-        body.hashCode;
+        body.hashCode +
+        architecture.hashCode;
 
   factory RepoBriefInput.fromJson(Map<String, dynamic> json) => _$RepoBriefInputFromJson(json);
 

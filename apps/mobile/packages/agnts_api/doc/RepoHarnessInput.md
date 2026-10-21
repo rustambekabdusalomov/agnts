@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **secretAllow** | **List&lt;String&gt;** | Path globs where example credentials are expected, besides testdata/, fixtures/ and *.example | [optional] 
 **editChecks** | [**List&lt;EditCheck&gt;**](EditCheck.md) | Per-file checks after each edit; null uses the ones agnts derives from the toolchains | [optional] 
 **editChecksOff** | **bool** |  | [optional] 
+**layersBlock** | **bool** | An import the approved architecture does not allow is a blocker agnts's review sends back, not only a red flag | [optional] 
 **coverage** | [**CoverageConfig**](CoverageConfig.md) |  | [optional] 
 **acceptance** | **bool** | Check the ticket's acceptance criteria in the running app after the preview | [optional] 
 

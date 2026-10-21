@@ -18,6 +18,9 @@ doc/AgentConfigFinding.md
 doc/AgentConfigScan.md
 doc/Analysis.md
 doc/AnalysisAcceptanceInner.md
+doc/AnalysisRepro.md
+doc/AnalysisReuseInner.md
+doc/AnalysisTestPlanInner.md
 doc/Analytics.md
 doc/AnalyticsApi.md
 doc/AnalyticsCI.md
@@ -53,6 +56,7 @@ doc/AuthApi.md
 doc/BeginLoginTotp200Response.md
 doc/BeginLoginTotpRequest.md
 doc/BeginTotp200Response.md
+doc/BenchmarkRun.md
 doc/Billing.md
 doc/BillingApi.md
 doc/BillingPrices.md
@@ -109,6 +113,7 @@ doc/DocsApi.md
 doc/EditCheck.md
 doc/EditCommitMessageRequest.md
 doc/EditPullCommentRequest.md
+doc/EffortSettings.md
 doc/Environment.md
 doc/Error.md
 doc/Event.md
@@ -178,6 +183,7 @@ doc/NewPullComment.md
 doc/NotifySettings.md
 doc/OfferStarterRulesRequest.md
 doc/PRCommentSettings.md
+doc/Pattern.md
 doc/PeriodStats.md
 doc/Pipeline.md
 doc/PlaneState.md
@@ -282,6 +288,7 @@ doc/RuleKind.md
 doc/RuleQuestion.md
 doc/RuleStatus.md
 doc/RulesApi.md
+doc/RunBenchmarkRequest.md
 doc/RunHistoryPage.md
 doc/RunHistorySettings.md
 doc/RunHistorySummary.md
@@ -293,6 +300,7 @@ doc/SendFeedbackRequest.md
 doc/SetMemberRoleRequest.md
 doc/SetPlaneWebhookSecretRequest.md
 doc/SetSlotsRequest.md
+doc/SetTicketBenchmarkRequest.md
 doc/SetTicketMemberRequest.md
 doc/SetTicketNumberRequest.md
 doc/Settings.md
@@ -430,6 +438,9 @@ lib/src/model/agent_config_finding.dart
 lib/src/model/agent_config_scan.dart
 lib/src/model/analysis.dart
 lib/src/model/analysis_acceptance_inner.dart
+lib/src/model/analysis_repro.dart
+lib/src/model/analysis_reuse_inner.dart
+lib/src/model/analysis_test_plan_inner.dart
 lib/src/model/analytics.dart
 lib/src/model/analytics_ci.dart
 lib/src/model/analytics_delivery.dart
@@ -461,6 +472,7 @@ lib/src/model/attachment.dart
 lib/src/model/begin_login_totp200_response.dart
 lib/src/model/begin_login_totp_request.dart
 lib/src/model/begin_totp200_response.dart
+lib/src/model/benchmark_run.dart
 lib/src/model/billing.dart
 lib/src/model/billing_prices.dart
 lib/src/model/blocker.dart
@@ -512,6 +524,7 @@ lib/src/model/disable_totp_request.dart
 lib/src/model/edit_check.dart
 lib/src/model/edit_commit_message_request.dart
 lib/src/model/edit_pull_comment_request.dart
+lib/src/model/effort_settings.dart
 lib/src/model/environment.dart
 lib/src/model/error.dart
 lib/src/model/event.dart
@@ -573,6 +586,7 @@ lib/src/model/network_test_tls.dart
 lib/src/model/new_pull_comment.dart
 lib/src/model/notify_settings.dart
 lib/src/model/offer_starter_rules_request.dart
+lib/src/model/pattern.dart
 lib/src/model/period_stats.dart
 lib/src/model/pipeline.dart
 lib/src/model/plane_state.dart
@@ -673,6 +687,7 @@ lib/src/model/rule_input.dart
 lib/src/model/rule_kind.dart
 lib/src/model/rule_question.dart
 lib/src/model/rule_status.dart
+lib/src/model/run_benchmark_request.dart
 lib/src/model/run_history_page.dart
 lib/src/model/run_history_settings.dart
 lib/src/model/run_history_summary.dart
@@ -684,6 +699,7 @@ lib/src/model/send_feedback_request.dart
 lib/src/model/set_member_role_request.dart
 lib/src/model/set_plane_webhook_secret_request.dart
 lib/src/model/set_slots_request.dart
+lib/src/model/set_ticket_benchmark_request.dart
 lib/src/model/set_ticket_member_request.dart
 lib/src/model/set_ticket_number_request.dart
 lib/src/model/settings.dart
@@ -778,7 +794,10 @@ test/admin_audit_entry_test.dart
 test/agent_config_finding_test.dart
 test/agent_config_scan_test.dart
 test/analysis_acceptance_inner_test.dart
+test/analysis_repro_test.dart
+test/analysis_reuse_inner_test.dart
 test/analysis_test.dart
+test/analysis_test_plan_inner_test.dart
 test/analytics_api_test.dart
 test/analytics_ci_test.dart
 test/analytics_delivery_test.dart
@@ -814,6 +833,7 @@ test/auth_api_test.dart
 test/begin_login_totp200_response_test.dart
 test/begin_login_totp_request_test.dart
 test/begin_totp200_response_test.dart
+test/benchmark_run_test.dart
 test/billing_api_test.dart
 test/billing_prices_test.dart
 test/billing_test.dart
@@ -870,6 +890,7 @@ test/docs_api_test.dart
 test/edit_check_test.dart
 test/edit_commit_message_request_test.dart
 test/edit_pull_comment_request_test.dart
+test/effort_settings_test.dart
 test/environment_test.dart
 test/error_test.dart
 test/event_page_test.dart
@@ -938,6 +959,7 @@ test/network_test_tls_test.dart
 test/new_pull_comment_test.dart
 test/notify_settings_test.dart
 test/offer_starter_rules_request_test.dart
+test/pattern_test.dart
 test/period_stats_test.dart
 test/pipeline_test.dart
 test/plane_state_test.dart
@@ -1043,6 +1065,7 @@ test/rule_question_test.dart
 test/rule_status_test.dart
 test/rule_test.dart
 test/rules_api_test.dart
+test/run_benchmark_request_test.dart
 test/run_history_page_test.dart
 test/run_history_settings_test.dart
 test/run_history_summary_test.dart
@@ -1054,6 +1077,7 @@ test/send_feedback_request_test.dart
 test/set_member_role_request_test.dart
 test/set_plane_webhook_secret_request_test.dart
 test/set_slots_request_test.dart
+test/set_ticket_benchmark_request_test.dart
 test/set_ticket_member_request_test.dart
 test/set_ticket_number_request_test.dart
 test/settings_api_test.dart

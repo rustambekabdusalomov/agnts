@@ -35,10 +35,24 @@ void main() {
       // TODO
     });
 
+    // The tickets in the benchmark
+    //
+    //Future<List<Ticket>> getBenchmark() async
+    test('test getBenchmark', () async {
+      // TODO
+    });
+
     // How the newest replays compare with the tickets they re-ran, by prompt version
     //
     //Future<ReplayReport> getReplayReport() async
     test('test getReplayReport', () async {
+      // TODO
+    });
+
+    // Replay every ticket in the benchmark with today's prompts, and the given models
+    //
+    //Future<List<BenchmarkRun>> runBenchmark({ RunBenchmarkRequest runBenchmarkRequest }) async
+    test('test runBenchmark', () async {
       // TODO
     });
 

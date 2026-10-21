@@ -32,6 +32,8 @@ class RepoHarness {
 
      this.editChecksOff,
 
+     this.layersBlock,
+
      this.coverage,
 
      this.acceptance,
@@ -91,6 +93,19 @@ class RepoHarness {
 
 
   final bool? editChecksOff;
+
+
+
+      /// An import the approved architecture does not allow is a blocker agnts's review sends back, not only a red flag
+  @JsonKey(
+    
+    name: r'layersBlock',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? layersBlock;
 
 
 
@@ -164,6 +179,7 @@ class RepoHarness {
       other.secretAllow == secretAllow &&
       other.editChecks == editChecks &&
       other.editChecksOff == editChecksOff &&
+      other.layersBlock == layersBlock &&
       other.coverage == coverage &&
       other.acceptance == acceptance &&
       other.derivedEditChecks == derivedEditChecks &&
@@ -176,6 +192,7 @@ class RepoHarness {
         secretAllow.hashCode +
         (editChecks == null ? 0 : editChecks.hashCode) +
         editChecksOff.hashCode +
+        layersBlock.hashCode +
         coverage.hashCode +
         acceptance.hashCode +
         derivedEditChecks.hashCode +

@@ -23,6 +23,12 @@ void main() {
       // TODO
     });
 
+    // For a rule agnts learned: what kind of lesson it is
+    // String tag
+    test('to test the property `tag`', () async {
+      // TODO
+    });
+
     // For a rule agnts suggested: which feedback shows it
     // String reason
     test('to test the property `reason`', () async {

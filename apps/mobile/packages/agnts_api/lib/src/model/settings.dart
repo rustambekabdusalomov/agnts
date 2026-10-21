@@ -10,6 +10,7 @@ import 'package:agnts_api/src/model/guard_settings.dart';
 import 'package:agnts_api/src/model/pull_review_settings.dart';
 import 'package:agnts_api/src/model/stage_models.dart';
 import 'package:agnts_api/src/model/git_settings.dart';
+import 'package:agnts_api/src/model/effort_settings.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -78,6 +79,12 @@ class Settings {
      this.deepReview,
 
      this.learnFromRuns,
+
+     this.effort,
+
+     this.recheckComplex,
+
+     this.baselineChecks,
 
      this.secondOpinion,
 
@@ -423,6 +430,44 @@ class Settings {
 
 
 
+  @JsonKey(
+    
+    name: r'effort',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final EffortSettings? effort;
+
+
+
+      /// The coding model re-checks the analysis of a ticket the analysis model rated complex, before any code is written
+  @JsonKey(
+    
+    name: r'recheckComplex',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? recheckComplex;
+
+
+
+      /// Run the checks on the commit a ticket starts from before its first coding run: what fails there is not the ticket's to fix
+  @JsonKey(
+    
+    name: r'baselineChecks',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? baselineChecks;
+
+
+
       /// A model that critiques the chosen approach of complex tickets (codex:<model> or a Claude model); empty turns it off
   @JsonKey(
     
@@ -518,6 +563,9 @@ class Settings {
       other.methodSkills == methodSkills &&
       other.deepReview == deepReview &&
       other.learnFromRuns == learnFromRuns &&
+      other.effort == effort &&
+      other.recheckComplex == recheckComplex &&
+      other.baselineChecks == baselineChecks &&
       other.secondOpinion == secondOpinion &&
       other.pauseAbove == pauseAbove &&
       other.parallel == parallel &&
@@ -552,6 +600,9 @@ class Settings {
         methodSkills.hashCode +
         deepReview.hashCode +
         learnFromRuns.hashCode +
+        effort.hashCode +
+        recheckComplex.hashCode +
+        baselineChecks.hashCode +
         secondOpinion.hashCode +
         pauseAbove.hashCode +
         parallel.hashCode +

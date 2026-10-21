@@ -13,7 +13,9 @@ Method | HTTP request | Description
 [**getAnalyticsCi**](AnalyticsApi.md#getanalyticsci) | **GET** /analytics/ci | CI failures, fixes and flaky jobs for a period
 [**getAnalyticsDelivery**](AnalyticsApi.md#getanalyticsdelivery) | **GET** /analytics/delivery | What happened to agnts pull requests, cycle time and questions for a period
 [**getAnalyticsLearning**](AnalyticsApi.md#getanalyticslearning) | **GET** /analytics/learning | Lessons, rules, follow-ups and reviewer notes for a period
+[**getBenchmark**](AnalyticsApi.md#getbenchmark) | **GET** /eval/benchmark | The tickets in the benchmark
 [**getReplayReport**](AnalyticsApi.md#getreplayreport) | **GET** /eval/replays | How the newest replays compare with the tickets they re-ran, by prompt version
+[**runBenchmark**](AnalyticsApi.md#runbenchmark) | **POST** /eval/benchmark | Replay every ticket in the benchmark with today&#39;s prompts, and the given models
 
 
 # **getAnalytics**
@@ -196,6 +198,47 @@ Name | Type | Description  | Notes
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **getBenchmark**
+> List<Ticket> getBenchmark()
+
+The tickets in the benchmark
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getAnalyticsApi();
+
+try {
+    final response = api.getBenchmark();
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling AnalyticsApi->getBenchmark: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**List&lt;Ticket&gt;**](Ticket.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **getReplayReport**
 > ReplayReport getReplayReport()
 
@@ -233,6 +276,51 @@ This endpoint does not need any parameter.
 ### HTTP request headers
 
  - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **runBenchmark**
+> List<BenchmarkRun> runBenchmark(runBenchmarkRequest)
+
+Replay every ticket in the benchmark with today's prompts, and the given models
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getAnalyticsApi();
+final RunBenchmarkRequest runBenchmarkRequest = ; // RunBenchmarkRequest | 
+
+try {
+    final response = api.runBenchmark(runBenchmarkRequest);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling AnalyticsApi->runBenchmark: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **runBenchmarkRequest** | [**RunBenchmarkRequest**](RunBenchmarkRequest.md)|  | [optional] 
+
+### Return type
+
+[**List&lt;BenchmarkRun&gt;**](BenchmarkRun.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

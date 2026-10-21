@@ -34,6 +34,20 @@ class QualityStat {
 
     required  this.changeRounds,
 
+     this.ciRounds,
+
+     this.merged,
+
+     this.costUsd,
+
+     this.costPerMerged,
+
+     this.score,
+
+     this.peopleEdited,
+
+     this.reverted,
+
     required  this.fixAttempts,
 
     required  this.serious,
@@ -150,6 +164,97 @@ class QualityStat {
 
 
   final num changeRounds;
+
+
+
+      /// Average times red CI on the pull request sent the work back, over the tickets that reached review
+  @JsonKey(
+    
+    name: r'ciRounds',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final num? ciRounds;
+
+
+
+      /// Their pull requests merged
+  @JsonKey(
+    
+    name: r'merged',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? merged;
+
+
+
+      /// What all their runs cost
+  @JsonKey(
+    
+    name: r'costUsd',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final num? costUsd;
+
+
+
+      /// Cost over merged tickets; absent when none merged
+  @JsonKey(
+    
+    name: r'costPerMerged',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final num? costPerMerged;
+
+
+
+      /// 0–100: done first time 35%, merged 25%, no serious finding 20%, few change rounds 20%
+  @JsonKey(
+    
+    name: r'score',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final num? score;
+
+
+
+      /// Average share of agnts's lines people changed before merging; absent when no merge was recorded
+  @JsonKey(
+    
+    name: r'peopleEdited',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final num? peopleEdited;
+
+
+
+      /// Tickets whose merged work people reverted
+  @JsonKey(
+    
+    name: r'reverted',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? reverted;
 
 
 
@@ -359,6 +464,13 @@ class QualityStat {
       other.firstTry == firstTry &&
       other.rejected == rejected &&
       other.changeRounds == changeRounds &&
+      other.ciRounds == ciRounds &&
+      other.merged == merged &&
+      other.costUsd == costUsd &&
+      other.costPerMerged == costPerMerged &&
+      other.score == score &&
+      other.peopleEdited == peopleEdited &&
+      other.reverted == reverted &&
       other.fixAttempts == fixAttempts &&
       other.serious == serious &&
       other.footprintHit == footprintHit &&
@@ -384,6 +496,13 @@ class QualityStat {
         firstTry.hashCode +
         rejected.hashCode +
         changeRounds.hashCode +
+        ciRounds.hashCode +
+        merged.hashCode +
+        costUsd.hashCode +
+        costPerMerged.hashCode +
+        score.hashCode +
+        peopleEdited.hashCode +
+        reverted.hashCode +
         fixAttempts.hashCode +
         serious.hashCode +
         footprintHit.hashCode +

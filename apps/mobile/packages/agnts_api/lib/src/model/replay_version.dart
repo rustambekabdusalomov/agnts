@@ -22,7 +22,15 @@ class ReplayVersion {
 
     required  this.promptVersion,
 
+     this.model,
+
     required  this.replays,
+
+     this.merged,
+
+     this.avgLineRecall,
+
+     this.originalLineRecall,
 
     required  this.checksPassed,
 
@@ -55,6 +63,19 @@ class ReplayVersion {
 
 
 
+      /// The coding model of the replays
+  @JsonKey(
+    
+    name: r'model',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? model;
+
+
+
   @JsonKey(
     
     name: r'replays',
@@ -64,6 +85,45 @@ class ReplayVersion {
 
 
   final int replays;
+
+
+
+      /// Replays scored against what the original merged as
+  @JsonKey(
+    
+    name: r'merged',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? merged;
+
+
+
+      /// Average share of the merged change's added lines the replays add too; absent when none was scored against a merge
+  @JsonKey(
+    
+    name: r'avgLineRecall',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final num? avgLineRecall;
+
+
+
+      /// The same for the originals' own changes, to compare with
+  @JsonKey(
+    
+    name: r'originalLineRecall',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final num? originalLineRecall;
 
 
 
@@ -185,7 +245,11 @@ class ReplayVersion {
     @override
     bool operator ==(Object other) => identical(this, other) || other is ReplayVersion &&
       other.promptVersion == promptVersion &&
+      other.model == model &&
       other.replays == replays &&
+      other.merged == merged &&
+      other.avgLineRecall == avgLineRecall &&
+      other.originalLineRecall == originalLineRecall &&
       other.checksPassed == checksPassed &&
       other.reviewed == reviewed &&
       other.looksGood == looksGood &&
@@ -199,7 +263,11 @@ class ReplayVersion {
     @override
     int get hashCode =>
         promptVersion.hashCode +
+        model.hashCode +
         replays.hashCode +
+        merged.hashCode +
+        avgLineRecall.hashCode +
+        originalLineRecall.hashCode +
         checksPassed.hashCode +
         reviewed.hashCode +
         looksGood.hashCode +

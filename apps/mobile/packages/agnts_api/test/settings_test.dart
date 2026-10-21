@@ -152,6 +152,23 @@ void main() {
       // TODO
     });
 
+    // EffortSettings effort
+    test('to test the property `effort`', () async {
+      // TODO
+    });
+
+    // The coding model re-checks the analysis of a ticket the analysis model rated complex, before any code is written
+    // bool recheckComplex
+    test('to test the property `recheckComplex`', () async {
+      // TODO
+    });
+
+    // Run the checks on the commit a ticket starts from before its first coding run: what fails there is not the ticket's to fix
+    // bool baselineChecks
+    test('to test the property `baselineChecks`', () async {
+      // TODO
+    });
+
     // A model that critiques the chosen approach of complex tickets (codex:<model> or a Claude model); empty turns it off
     // String secondOpinion
     test('to test the property `secondOpinion`', () async {

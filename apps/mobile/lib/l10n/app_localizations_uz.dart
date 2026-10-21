@@ -668,6 +668,13 @@ class AppLocalizationsUz extends AppLocalizations {
   String get analyticsColRoundsHint => 'Ko‘rib chiqishga yetgan har bir tiket uchun insondan o‘rtacha o‘zgartirish so‘rovlari';
 
   @override
+  String get analyticsColCIRounds => 'CI bosqichlari';
+
+  @override
+  String get analyticsColCIRoundsHint =>
+      'Ko‘rib chiqishga yetgan har bir tiket uchun pull requestdagi qizil CI ishni o‘rtacha necha marta qaytargani (tuzatish bosqichlariga kirmaydi)';
+
+  @override
   String get analyticsColFixes => 'Tekshiruv tuzatishlari';
 
   @override
@@ -1144,6 +1151,35 @@ class AppLocalizationsUz extends AppLocalizations {
   String get analyticsTabAssistant => 'Yordamchi';
 
   @override
+  String get analyticsColScore => 'Ball';
+
+  @override
+  String get analyticsColScoreHint =>
+      '0–100: birinchi urinishda tayyor 35%, birlashtirilgan 25%, jiddiy kamchiliksiz 20%, kam tuzatish bosqichi 20%. Yangi versiyalar pull requestlari birlashtirilguncha pastroq ball oladi.';
+
+  @override
+  String get analyticsColCostMerged => '\$/birlashtirilgan';
+
+  @override
+  String get analyticsColCostMergedHint => 'Versiyadagi barcha tiketlar narxi, birlashtirilganlar soniga bo‘lingan';
+
+  @override
+  String get analyticsFewTickets => '10 tadan kam tiket: solishtirish uchun juda oz';
+
+  @override
+  String get analyticsColPeopleEdited => 'Odamlar tuzatishi';
+
+  @override
+  String get analyticsColPeopleEditedHint =>
+      'Birlashtirishdan oldin odamlar o‘zgartirgan yoki olib tashlagan agnts qatorlarining o‘rtacha ulushi. Qanchalik kam bo‘lsa, shuncha yaxshi.';
+
+  @override
+  String get analyticsColReverted => 'Bekor qilingan';
+
+  @override
+  String get analyticsColRevertedHint => 'Birlashtirilgan ishi odamlar tomonidan bekor qilingan tiketlar';
+
+  @override
   String get appName => 'agnts';
 
   @override
@@ -1441,6 +1477,34 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get briefDone_save => 'Tavsif saqlandi';
+
+  @override
+  String get briefArchTitle => 'Arxitektura';
+
+  @override
+  String get briefArchSub =>
+      'agnts ishni solishtiradigan qism: qatlamlar va ularga ruxsat etilgan importlar, umumiy yordamchilar, namuna fayllari bilan retseptlar. Ishga tushirishlar uni architecture.json sifatida o‘qiydi; qatlamlar orasidagi taqiqlangan import belgilanadi.';
+
+  @override
+  String get briefArchNone => 'Hozircha arxitektura yo‘q. Keyingi so‘rov uni tavsif bilan birga yozadi yoki o‘zingiz yozing.';
+
+  @override
+  String briefArchCounts(String layers, String helpers, String recipes) {
+    return '$layers qatlam · $helpers yordamchi · $recipes retsept';
+  }
+
+  @override
+  String get briefArchEdit => 'JSONni tahrirlash';
+
+  @override
+  String get briefArchEditHint =>
+      'Bo‘sh qiymat uni o‘chiradi. Yo‘llar repozitoriyga nisbatan; qatlam yo‘llari shablonlar (** istalgan chuqurlik uchun); cheklovsiz qatlam uchun mayImport’ni yozmang.';
+
+  @override
+  String get briefArchDraft => 'Tavsif qoralamasi bilan birga shu arxitektura keladi; tavsifni tasdiqlash uni ham tasdiqlaydi.';
+
+  @override
+  String get briefDone_saveArch => 'Arxitektura saqlandi';
 
   @override
   String get ciTitle => 'CI';
@@ -2204,6 +2268,45 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get designDeviations => 'Rejadan chetlanishlar';
+
+  @override
+  String get designFitTitle => 'Mavjud kodga qanday ergashish';
+
+  @override
+  String get designKind_copy => 'nusxa';
+
+  @override
+  String get designKind_adapt => 'moslash';
+
+  @override
+  String get designKind_new => 'yangi pattern';
+
+  @override
+  String get designLike => 'kabi';
+
+  @override
+  String get designConventionsFrom => 'qoidalar manbai';
+
+  @override
+  String get designGoesIn => 'joylashuvi';
+
+  @override
+  String get designPrecedent => 'namuna bo‘ladi: keyingi ishlar undan nusxa oladi';
+
+  @override
+  String get designReuseTitle => 'Foydalaniladigan mavjud yordamchilar';
+
+  @override
+  String get designTestPlanTitle => 'Qo‘shiladigan yoki o‘zgartiriladigan testlar';
+
+  @override
+  String get designEdgeCasesTitle => 'Chegaraviy holatlar';
+
+  @override
+  String get designReproTitle => 'Xato qayta ko‘rsatildi';
+
+  @override
+  String get designReproNot => 'Tahlil xatoni qayta ko‘rsata olmadi';
 
   @override
   String get draftsTitle => 'Ko\'rib chiqish izohlari';
@@ -3295,6 +3398,13 @@ class AppLocalizationsUz extends AppLocalizations {
   String get harnessRepoStarterOpenRules => 'Takliflarni ochish';
 
   @override
+  String get harnessRepoLayersBlock => 'Qatlamlararo importlarni bloklash';
+
+  @override
+  String get harnessRepoLayersBlockHelp =>
+      'Tasdiqlangan arxitektura bo‘lsa, agnts qatlamlar ruxsat bermaydigan import qo‘shgan o‘zgarishni belgilaydi. Yoqilgan bo‘lsa, bu bloklovchi bo‘ladi va agnts’ning o‘z ko‘rib chiqishi uni siz ko‘rishingizdan oldin dasturchiga qaytaradi.';
+
+  @override
   String get harnessRulesDelivery => 'Ishga tushirishlar uni qanday oladi';
 
   @override
@@ -3673,6 +3783,51 @@ class AppLocalizationsUz extends AppLocalizations {
   String harnessSettingsVsAll(String n) {
     return 'barchasi $n%';
   }
+
+  @override
+  String get harnessSettingsEffort => 'Fikrlash darajasi';
+
+  @override
+  String get harnessSettingsEffortHelp =>
+      'Claude har bir bosqichda qanchalik chuqur o‘ylashi (Claude Code’dagi --effort). Yuqori daraja sekinroq va rejangizdan ko‘proq sarflaydi. Murakkab tiketlarda kod va ko‘rib chiqish o‘z darajasidan foydalanadi.';
+
+  @override
+  String get harnessSettingsEffortAnalyze => 'Tahlil';
+
+  @override
+  String get harnessSettingsEffortCoding => 'Kod';
+
+  @override
+  String get harnessSettingsEffortReview => 'Ko‘rib chiqish';
+
+  @override
+  String get harnessSettingsEffortComplex => 'Murakkab tiketlar';
+
+  @override
+  String get harnessSettingsEffort_ => 'Standart';
+
+  @override
+  String get harnessSettingsEffort_low => 'Past';
+
+  @override
+  String get harnessSettingsEffort_medium => 'O‘rta';
+
+  @override
+  String get harnessSettingsEffort_high => 'Yuqori';
+
+  @override
+  String get harnessSettingsRecheckComplex => 'Murakkab tahlillarni qayta tekshirish';
+
+  @override
+  String get harnessSettingsRecheckComplexHelp =>
+      'Tahlil modeli tiketni murakkab deb baholasa, kod modeli kod yozilishidan oldin tahlilni qayta o‘qiydi va xato yoki yetishmayotgan joylarni tuzatadi.';
+
+  @override
+  String get harnessSettingsBaselineChecks => 'Avval boshlang‘ich kommitni tekshirish';
+
+  @override
+  String get harnessSettingsBaselineChecksHelp =>
+      'Tiketning birinchi kod yozish bosqichidan oldin agnts ish boshlanadigan kommitda tekshiruvlarni ishga tushiradi. U yerda allaqachon yiqilayotgan narsa tiketga tegishli emas: unga tuzatish urinishlari sarflanmaydi va ko‘rib chiquvchi u avval ham yiqilganini ko‘radi. Natijalar bir kommitdan boshlangan tiketlar uchun umumiy.';
 
   @override
   String get harnessTicketFlag_secret => 'Ehtimoliy maxfiy kalit';
@@ -8117,6 +8272,77 @@ class AppLocalizationsUz extends AppLocalizations {
   String get replayVerdict_needs_changes => 'o‘zgartirish kerak';
 
   @override
+  String get replayBenchmarkTitle => 'Benchmark';
+
+  @override
+  String get replayBenchmarkSub =>
+      'agnts’dagi har bir o‘zgarish qayta ishga tushiriladigan va birlashtirilgan natija bilan solishtiriladigan birlashtirilgan tiketlar. Turli hajmdagi 20–30 tasini tanlang.';
+
+  @override
+  String get replayBenchmarkAdd => 'Benchmarkka qo‘shish';
+
+  @override
+  String get replayBenchmarkRemove => 'Benchmarkdan olib tashlash';
+
+  @override
+  String get replayBenchmarkIn => 'Benchmarkda: agnts’dagi o‘zgarishlar shu tiketda qayta ishga tushiriladi.';
+
+  @override
+  String get replayBenchmarkNeedsMerge =>
+      'Benchmarkka faqat birlashtirilgan tiketlar kiradi: qayta ishga tushirishlar birlashtirilgan natija bilan solishtiriladi.';
+
+  @override
+  String get replayBenchmarkRun => 'Benchmarkni ishga tushirish';
+
+  @override
+  String get replayBenchmarkModel => 'Kod modeli';
+
+  @override
+  String get replayBenchmarkModelDefault => 'asl tiketlardagidek';
+
+  @override
+  String replayBenchmarkConfirm(String n) {
+    return 'agnts benchmarkdagi $n ta tiketni har biri boshlangan joydan qayta ishga tushiradi. Ular oddiy tiketlar kabi Claude rejangizdan foydalanadi.';
+  }
+
+  @override
+  String replayBenchmarkStarted(String n) {
+    return 'Navbatga $n ta qayta ishga tushirish qo‘yildi';
+  }
+
+  @override
+  String replayBenchmarkFailed(String n, String why) {
+    return '$n tasini qayta ishga tushirib bo‘lmadi: $why';
+  }
+
+  @override
+  String get replayBenchmarkEmpty => 'Benchmark bo‘sh. Birlashtirilgan tiketni oching va «Benchmarkka qo‘shish»ni bosing.';
+
+  @override
+  String replayBenchmarkCount(String n) {
+    return '$n ta tiket';
+  }
+
+  @override
+  String get replayAllReplays => 'Barcha qayta ishga tushirishlar';
+
+  @override
+  String get replayColModel => 'Model';
+
+  @override
+  String get replayColLines => 'Birlashtirilgan qatorlar';
+
+  @override
+  String get replayColLinesHint =>
+      'Birlashtirilgan pull request qo‘shgan qatorlardan qayta ishga tushirish ham qo‘shganlari ulushi; qavsda — agnts’ning asl o‘zgarishi uchun. Qanchalik yuqori bo‘lsa, odamlar chiqargan narsaga shunchalik yaqin.';
+
+  @override
+  String get replayAgainst_merged => 'birlashtirilganga';
+
+  @override
+  String get replayAgainst_agnts => 'agnts’ga';
+
+  @override
   String get repoBack => 'Repozitoriylarga qaytish';
 
   @override
@@ -9494,6 +9720,24 @@ class AppLocalizationsUz extends AppLocalizations {
   @override
   String get rulesKindContextHelp =>
       'Mahsulotingiz haqida bilim: atamalar nimani anglatadi, kod saqlashi kerak bo‘lgan invariantlar, kim nimadan foydalanadi. Har bir ishga tushirish boshlashdan oldin uni o‘qiydi.';
+
+  @override
+  String get rulesTag_reuse => 'qayta foydalanish';
+
+  @override
+  String get rulesTag_layer => 'qatlam';
+
+  @override
+  String get rulesTag_tests => 'testlar';
+
+  @override
+  String get rulesTag_style => 'uslub';
+
+  @override
+  String get rulesTag_logic => 'mantiq';
+
+  @override
+  String get rulesTag_other => 'boshqa';
 
   @override
   String get runsNavRuns => 'Ishga tushirishlar';

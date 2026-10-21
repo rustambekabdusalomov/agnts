@@ -85,6 +85,8 @@ class Ticket {
 
     required  this.skipChecks,
 
+     this.benchmark,
+
      this.postReport,
 
      this.parentKey,
@@ -480,6 +482,19 @@ class Ticket {
 
 
   final bool skipChecks;
+
+
+
+      /// A merged ticket in the benchmark that changes to agnts are replayed against (setTicketBenchmark)
+  @JsonKey(
+    
+    name: r'benchmark',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? benchmark;
 
 
 
@@ -880,6 +895,7 @@ class Ticket {
       other.kind == kind &&
       other.kindAuto == kindAuto &&
       other.skipChecks == skipChecks &&
+      other.benchmark == benchmark &&
       other.postReport == postReport &&
       other.parentKey == parentKey &&
       other.followUpOf == followUpOf &&
@@ -939,6 +955,7 @@ class Ticket {
         kind.hashCode +
         kindAuto.hashCode +
         skipChecks.hashCode +
+        benchmark.hashCode +
         postReport.hashCode +
         parentKey.hashCode +
         followUpOf.hashCode +

@@ -57,6 +57,35 @@ void main() {
       // TODO
     });
 
+    // For each file the work changes, the existing code it follows (copy, adapt) or that it is new
+    // List<Pattern> patterns
+    test('to test the property `patterns`', () async {
+      // TODO
+    });
+
+    // Existing helpers the work must use instead of writing its own
+    // List<AnalysisReuseInner> reuse
+    test('to test the property `reuse`', () async {
+      // TODO
+    });
+
+    // Tests the work must add or change
+    // List<AnalysisTestPlanInner> testPlan
+    test('to test the property `testPlan`', () async {
+      // TODO
+    });
+
+    // Inputs and failures the work must handle
+    // List<String> edgeCases
+    test('to test the property `edgeCases`', () async {
+      // TODO
+    });
+
+    // AnalysisRepro repro
+    test('to test the property `repro`', () async {
+      // TODO
+    });
+
     // SecondOpinion secondOpinion
     test('to test the property `secondOpinion`', () async {
       // TODO

@@ -46,6 +46,48 @@ void main() {
       // TODO
     });
 
+    // Average times red CI on the pull request sent the work back, over the tickets that reached review
+    // num ciRounds
+    test('to test the property `ciRounds`', () async {
+      // TODO
+    });
+
+    // Their pull requests merged
+    // int merged
+    test('to test the property `merged`', () async {
+      // TODO
+    });
+
+    // What all their runs cost
+    // num costUsd
+    test('to test the property `costUsd`', () async {
+      // TODO
+    });
+
+    // Cost over merged tickets; absent when none merged
+    // num costPerMerged
+    test('to test the property `costPerMerged`', () async {
+      // TODO
+    });
+
+    // 0–100: done first time 35%, merged 25%, no serious finding 20%, few change rounds 20%
+    // num score
+    test('to test the property `score`', () async {
+      // TODO
+    });
+
+    // Average share of agnts's lines people changed before merging; absent when no merge was recorded
+    // num peopleEdited
+    test('to test the property `peopleEdited`', () async {
+      // TODO
+    });
+
+    // Tickets whose merged work people reverted
+    // int reverted
+    test('to test the property `reverted`', () async {
+      // TODO
+    });
+
     // Average failing checks sent back to Claude
     // num fixAttempts
     test('to test the property `fixAttempts`', () async {

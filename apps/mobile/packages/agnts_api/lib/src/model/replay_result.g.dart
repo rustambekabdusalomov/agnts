@@ -17,6 +17,16 @@ abstract class _$ReplayResultCWProxy {
 
   ReplayResult promptVersion(String promptVersion);
 
+  ReplayResult model(String? model);
+
+  ReplayResult benchmark(bool? benchmark);
+
+  ReplayResult against(ReplayResultAgainstEnum? against);
+
+  ReplayResult lineRecall(num? lineRecall);
+
+  ReplayResult originalLineRecall(num? originalLineRecall);
+
   ReplayResult hasChange(bool hasChange);
 
   ReplayResult checksPassed(bool checksPassed);
@@ -53,6 +63,11 @@ abstract class _$ReplayResultCWProxy {
     String title,
     TicketState state,
     String promptVersion,
+    String? model,
+    bool? benchmark,
+    ReplayResultAgainstEnum? against,
+    num? lineRecall,
+    num? originalLineRecall,
     bool hasChange,
     bool checksPassed,
     List<String> files,
@@ -89,6 +104,23 @@ class _$ReplayResultCWProxyImpl implements _$ReplayResultCWProxy {
   @override
   ReplayResult promptVersion(String promptVersion) =>
       this(promptVersion: promptVersion);
+
+  @override
+  ReplayResult model(String? model) => this(model: model);
+
+  @override
+  ReplayResult benchmark(bool? benchmark) => this(benchmark: benchmark);
+
+  @override
+  ReplayResult against(ReplayResultAgainstEnum? against) =>
+      this(against: against);
+
+  @override
+  ReplayResult lineRecall(num? lineRecall) => this(lineRecall: lineRecall);
+
+  @override
+  ReplayResult originalLineRecall(num? originalLineRecall) =>
+      this(originalLineRecall: originalLineRecall);
 
   @override
   ReplayResult hasChange(bool hasChange) => this(hasChange: hasChange);
@@ -144,6 +176,11 @@ class _$ReplayResultCWProxyImpl implements _$ReplayResultCWProxy {
     Object? title = const $CopyWithPlaceholder(),
     Object? state = const $CopyWithPlaceholder(),
     Object? promptVersion = const $CopyWithPlaceholder(),
+    Object? model = const $CopyWithPlaceholder(),
+    Object? benchmark = const $CopyWithPlaceholder(),
+    Object? against = const $CopyWithPlaceholder(),
+    Object? lineRecall = const $CopyWithPlaceholder(),
+    Object? originalLineRecall = const $CopyWithPlaceholder(),
     Object? hasChange = const $CopyWithPlaceholder(),
     Object? checksPassed = const $CopyWithPlaceholder(),
     Object? files = const $CopyWithPlaceholder(),
@@ -178,6 +215,26 @@ class _$ReplayResultCWProxyImpl implements _$ReplayResultCWProxy {
           ? _value.promptVersion
           // ignore: cast_nullable_to_non_nullable
           : promptVersion as String,
+      model: model == const $CopyWithPlaceholder()
+          ? _value.model
+          // ignore: cast_nullable_to_non_nullable
+          : model as String?,
+      benchmark: benchmark == const $CopyWithPlaceholder()
+          ? _value.benchmark
+          // ignore: cast_nullable_to_non_nullable
+          : benchmark as bool?,
+      against: against == const $CopyWithPlaceholder()
+          ? _value.against
+          // ignore: cast_nullable_to_non_nullable
+          : against as ReplayResultAgainstEnum?,
+      lineRecall: lineRecall == const $CopyWithPlaceholder()
+          ? _value.lineRecall
+          // ignore: cast_nullable_to_non_nullable
+          : lineRecall as num?,
+      originalLineRecall: originalLineRecall == const $CopyWithPlaceholder()
+          ? _value.originalLineRecall
+          // ignore: cast_nullable_to_non_nullable
+          : originalLineRecall as num?,
       hasChange: hasChange == const $CopyWithPlaceholder()
           ? _value.hasChange
           // ignore: cast_nullable_to_non_nullable
@@ -273,6 +330,14 @@ ReplayResult _$ReplayResultFromJson(
       (v) => $enumDecode(_$TicketStateEnumMap, v),
     ),
     promptVersion: $checkedConvert('promptVersion', (v) => v as String),
+    model: $checkedConvert('model', (v) => v as String?),
+    benchmark: $checkedConvert('benchmark', (v) => v as bool?),
+    against: $checkedConvert(
+      'against',
+      (v) => $enumDecodeNullable(_$ReplayResultAgainstEnumEnumMap, v),
+    ),
+    lineRecall: $checkedConvert('lineRecall', (v) => v as num?),
+    originalLineRecall: $checkedConvert('originalLineRecall', (v) => v as num?),
     hasChange: $checkedConvert('hasChange', (v) => v as bool),
     checksPassed: $checkedConvert('checksPassed', (v) => v as bool),
     files: $checkedConvert(
@@ -305,6 +370,11 @@ Map<String, dynamic> _$ReplayResultToJson(ReplayResult instance) =>
       'title': instance.title,
       'state': _$TicketStateEnumMap[instance.state]!,
       'promptVersion': instance.promptVersion,
+      'model': ?instance.model,
+      'benchmark': ?instance.benchmark,
+      'against': ?_$ReplayResultAgainstEnumEnumMap[instance.against],
+      'lineRecall': ?instance.lineRecall,
+      'originalLineRecall': ?instance.originalLineRecall,
       'hasChange': instance.hasChange,
       'checksPassed': instance.checksPassed,
       'files': instance.files,
@@ -331,6 +401,11 @@ const _$TicketStateEnumMap = {
   TicketState.rejected: 'rejected',
   TicketState.failed: 'failed',
   TicketState.rateLimited: 'rate_limited',
+};
+
+const _$ReplayResultAgainstEnumEnumMap = {
+  ReplayResultAgainstEnum.merged: 'merged',
+  ReplayResultAgainstEnum.agnts: 'agnts',
 };
 
 const _$ReplayResultVerdictEnumEnumMap = {
