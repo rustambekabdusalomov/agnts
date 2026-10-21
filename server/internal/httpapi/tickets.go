@@ -45,6 +45,9 @@ type Tickets interface {
 	Learn(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	Replay(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	ReplayReport(ctx context.Context) (orchestrator.ReplayReport, error)
+	SetBenchmark(ctx context.Context, key string, on bool, origin domain.Origin) (domain.Ticket, error)
+	Benchmark(ctx context.Context) ([]domain.Ticket, error)
+	RunBenchmark(ctx context.Context, models map[string]string, origin domain.Origin) ([]orchestrator.BenchmarkRun, error)
 	Review(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	RestartWithUpdate(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	KeepCurrentVersion(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
@@ -563,6 +566,9 @@ func toTicket(t domain.Ticket) gen.Ticket {
 		Branch: t.Branch, PrNumber: t.PRNumber, PrUrl: t.PRURL, CreatedAt: t.CreatedAt, UpdatedAt: t.UpdatedAt,
 		Kind: gen.TicketKind(t.Kind), KindAuto: t.KindAuto, SkipChecks: t.SkipChecks, MemberId: t.MemberID, QueuedAt: t.QueuedAt,
 	}
+	if t.Benchmark {
+		out.Benchmark = ptr(true)
+	}
 	if t.TicketNumber != "" {
 		out.TicketNumber = ptr(t.TicketNumber)
 	}
@@ -952,6 +958,70 @@ func (s *Server) SetTicketMember(w http.ResponseWriter, r *http.Request, key gen
 
 // toDesign adds the analysis's approaches, scope and ship notes.
 func toDesign(out *gen.Analysis, a orchestrator.Analysis) {
+	if len(a.Patterns) > 0 {
+		ps := make([]gen.Pattern, len(a.Patterns))
+		for i, p := range a.Patterns {
+			ps[i] = gen.Pattern{File: p.File, Kind: gen.PatternKind(p.Kind), Like: p.Like}
+			if p.Layer != "" {
+				ps[i].Layer = ptr(p.Layer)
+			}
+			if p.Why != "" {
+				ps[i].Why = ptr(p.Why)
+			}
+			if p.Place != "" {
+				ps[i].Place = ptr(p.Place)
+			}
+			if p.Precedent {
+				ps[i].Precedent = ptr(true)
+			}
+		}
+		out.Patterns = &ps
+	}
+	if len(a.Reuse) > 0 {
+		rs := make([]struct {
+			For   *string `json:"for,omitempty"`
+			Name  string  `json:"name"`
+			Where string  `json:"where"`
+		}, len(a.Reuse))
+		for i, r := range a.Reuse {
+			rs[i].Name, rs[i].Where = r.Name, r.Where
+			if r.For != "" {
+				rs[i].For = ptr(r.For)
+			}
+		}
+		out.Reuse = &rs
+	}
+	if len(a.TestPlan) > 0 {
+		tp := make([]struct {
+			File string `json:"file"`
+			What string `json:"what"`
+		}, len(a.TestPlan))
+		for i, x := range a.TestPlan {
+			tp[i].File, tp[i].What = x.File, x.What
+		}
+		out.TestPlan = &tp
+	}
+	if len(a.EdgeCases) > 0 {
+		ec := a.EdgeCases
+		out.EdgeCases = &ec
+	}
+	if r := a.Repro; r != nil {
+		out.Repro = &struct {
+			Command    *string `json:"command,omitempty"`
+			Output     *string `json:"output,omitempty"`
+			Reproduced bool    `json:"reproduced"`
+			Why        *string `json:"why,omitempty"`
+		}{Reproduced: r.Reproduced}
+		if r.Command != "" {
+			out.Repro.Command = ptr(r.Command)
+		}
+		if r.Output != "" {
+			out.Repro.Output = ptr(r.Output)
+		}
+		if r.Why != "" {
+			out.Repro.Why = ptr(r.Why)
+		}
+	}
 	if len(a.Approaches) > 0 {
 		aps := make([]gen.Approach, len(a.Approaches))
 		for i, x := range a.Approaches {

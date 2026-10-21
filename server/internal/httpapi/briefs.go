@@ -2,6 +2,7 @@ package httpapi
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -13,7 +14,7 @@ import (
 // Briefs is what the repository page's Brief tab reads and changes.
 type Briefs interface {
 	RepoBrief(ctx context.Context, repoID int64) (domain.RepoBrief, error)
-	SaveBrief(ctx context.Context, repoID int64, text string, origin domain.Origin) (domain.RepoBrief, error)
+	SaveBrief(ctx context.Context, repoID int64, text string, arch *string, origin domain.Origin) (domain.RepoBrief, error)
 	SurveyBrief(ctx context.Context, repoID int64, origin domain.Origin) (domain.RepoBrief, error)
 	ApproveBrief(ctx context.Context, repoID int64, origin domain.Origin) (domain.RepoBrief, error)
 	DiscardBriefDraft(ctx context.Context, repoID int64, origin domain.Origin) (domain.RepoBrief, error)
@@ -50,7 +51,7 @@ func (s *Server) SaveRepoBrief(w http.ResponseWriter, r *http.Request, id gen.Re
 		return
 	}
 	s.briefAction(w, r, func(ctx context.Context) (domain.RepoBrief, error) {
-		return s.opt.Briefs.SaveBrief(ctx, id, req.Body, origin(r))
+		return s.opt.Briefs.SaveBrief(ctx, id, req.Body, req.Architecture, origin(r))
 	})
 }
 
@@ -83,5 +84,16 @@ func toRepoBrief(b domain.RepoBrief) gen.RepoBrief {
 	return gen.RepoBrief{RepoId: b.RepoID, RepoName: b.RepoName, Body: b.Body, BodySha: b.BodySHA, Draft: b.Draft,
 		DraftSha: b.DraftSHA, Status: gen.RepoBriefStatus(status), MergesSince: b.MergesSince,
 		RefreshAfter: domain.BriefRefreshMerges, Error: b.Error, SurveyedAt: b.SurveyedAt, ApprovedAt: b.ApprovedAt,
-		UpdatedAt: b.UpdatedAt}
+		UpdatedAt: b.UpdatedAt, Architecture: archText(b.Arch), ArchitectureDraft: archText(b.ArchDraft)}
+}
+
+// archText is an architecture as indented JSON for people to read and
+// edit, nil for none.
+func archText(a *domain.Architecture) *string {
+	if a == nil {
+		return nil
+	}
+	b, _ := json.MarshalIndent(a, "", "  ")
+	s := string(b)
+	return &s
 }

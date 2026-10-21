@@ -444,7 +444,11 @@ func toSettings(v domain.Settings) gen.Settings {
 	}
 	stalls, deep, prove, learnRuns, second, methods := v.Stalls, v.DeepReview, v.ProveFixes, v.LearnFromRuns, v.SecondOpinion, v.MethodSkills
 	maxRepos := v.TicketRepoLimit()
+	recheck, baseline := v.RecheckComplex, v.BaselineChecks
+	effort := gen.EffortSettings{Analyze: gen.EffortSettingsAnalyze(v.Effort.Analyze), Coding: gen.EffortSettingsCoding(v.Effort.Coding),
+		Review: gen.EffortSettingsReview(v.Effort.Review), Complex: gen.EffortSettingsComplex(v.Effort.Complex)}
 	return gen.Settings{
+		Effort: &effort, RecheckComplex: &recheck, BaselineChecks: &baseline,
 		MaxTicketRepos: &maxRepos,
 		Guard:          &guard, Stalls: &stalls, DeepReview: &deep, ProveFixes: &prove, LearnFromRuns: &learnRuns, SecondOpinion: &second, MethodSkills: &methods,
 		PullReviews: &pulls,
@@ -513,7 +517,7 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 		AskFirst: req.AskFirst, AutoResume: req.AutoResume, PauseAbove: req.PauseAbove, Parallel: cur.Parallel, AutoLearn: cur.AutoLearn,
 		AutoReview: cur.AutoReview, SuggestFollowUps: cur.SuggestFollowUps, PullReviews: cur.PullReviews, PRComments: cur.PRComments, CI: cur.CI,
 		Guard: cur.Guard, Stalls: cur.Stalls, DeepReview: cur.DeepReview, ProveFixes: cur.ProveFixes, LearnFromRuns: cur.LearnFromRuns, MethodSkills: cur.MethodSkills,
-		SecondOpinion: cur.SecondOpinion, MaxTicketRepos: cur.MaxTicketRepos,
+		SecondOpinion: cur.SecondOpinion, MaxTicketRepos: cur.MaxTicketRepos, Effort: cur.Effort, RecheckComplex: cur.RecheckComplex, BaselineChecks: cur.BaselineChecks,
 		Git: domain.GitSettings{AuthorName: req.Git.AuthorName, AuthorEmail: req.Git.AuthorEmail, CoAuthor: req.Git.CoAuthor,
 			PRTitle: req.Git.PrTitle, Draft: req.Git.Draft},
 		Notify: cur.Notify,
@@ -618,6 +622,15 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.SecondOpinion != nil {
 		v.SecondOpinion = *req.SecondOpinion
+	}
+	if e := req.Effort; e != nil {
+		v.Effort = domain.EffortSettings{Analyze: string(e.Analyze), Coding: string(e.Coding), Review: string(e.Review), Complex: string(e.Complex)}
+	}
+	if req.RecheckComplex != nil {
+		v.RecheckComplex = *req.RecheckComplex
+	}
+	if req.BaselineChecks != nil {
+		v.BaselineChecks = *req.BaselineChecks
 	}
 	if c := req.Ci; c != nil {
 		v.CI = domain.CISettings{AutoFix: c.AutoFix, MaxAutoPerDay: c.MaxAutoPerDay, RetryFlaky: c.RetryFlaky,

@@ -62,6 +62,22 @@ func TestPrecedents(t *testing.T) {
 	}
 	h.step() // push
 	h.expect("PAY-1", domain.StateDone)
+	// Only merged work is a precedent.
+	if _, err := h.o.MarkMergedByHand(h.ctx, "PAY-1", domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
+
+	// PAY-3 touched the same file and was rejected: what not to do.
+	h.ingest("PAY-3")
+	h.runner.scripts = []script{
+		{result: ok("s3"), files: map[string]string{orchestrator.AnalysisPath: analysis(0)}},
+		{result: ok("s3"), edit: "fix 3"},
+	}
+	h.step()
+	h.step()
+	if _, err := h.o.Reject(h.ctx, "PAY-3", "It rewrote the rounding in the handler instead of the money package.", domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
 
 	// PAY-2 is about refunds too: its runs get PAY-1 as a precedent.
 	h.ingest("PAY-2")
@@ -72,7 +88,9 @@ func TestPrecedents(t *testing.T) {
 	}
 	got := h.runner.written[orchestrator.PrecedentsPath]
 	for _, want := range []string{"## PAY-1: Fix refund rounding", "What changed: Round refunds half up in refund.go.",
-		"Files: refund/refund.go, refund/refund_test.go", "A reviewer asked: Use the money package, not float64."} {
+		"Files: refund/refund.go, refund/refund_test.go", "A reviewer asked: Use the money package, not float64.",
+		"From agnts's change:", "--- refund/refund.go\n+x", "# Rejected: what not to do", "## PAY-3:",
+		"Why it was rejected: It rewrote the rounding in the handler instead of the money package."} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("precedents.md lacks %q:\n%s", want, got)
 		}

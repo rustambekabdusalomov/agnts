@@ -221,6 +221,9 @@ func (o *Orchestrator) reopenWithThreads(ctx context.Context, t domain.Ticket, f
 	if reviewing {
 		o.cancelRun(ctx, t.Key)
 	}
+	// Reviewers' threads are feedback on agnts's work like a change request
+	// in agnts (which reflects through RequestChanges): learn from them too.
+	o.queueReflection(context.WithoutCancel(ctx), out, domain.ReflectChanges, feedback, origin)
 	o.Wake()
 	return out, nil
 }

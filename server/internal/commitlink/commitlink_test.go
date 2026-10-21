@@ -248,3 +248,33 @@ func TestSnapshotStopsAtOldCommits(t *testing.T) {
 		t.Fatalf("history: %d %v", len(snap.history), err)
 	}
 }
+
+// A revert of a ticket's work pushed to the default branch is reported;
+// one on another branch, or a redelivery, is not.
+func TestPushReportsReverts(t *testing.T) {
+	s, _, _ := setup()
+	var got []domain.CommitLink
+	s.OnRevert(func(_ context.Context, l domain.CommitLink) { got = append(got, l) })
+	push := domain.Push{Provider: "github", Repo: "acme/api", Branch: "main", Before: "a", After: "b", Total: 2,
+		Commits: []domain.PushedCommit{commit("r1", `Revert "AMANAT-2288: log in (#7)"`), commit("c2", "AMANAT-2288 tidy")}}
+	if err := s.Push(context.Background(), push); err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 1 || got[0].SHA != "r1" || got[0].TicketKey != "VIS-1" || got[0].RepoName != "api" {
+		t.Fatalf("reverts: %+v", got)
+	}
+	if err := s.Push(context.Background(), push); err != nil {
+		t.Fatal(err)
+	}
+	other := domain.Push{Provider: "github", Repo: "acme/api", Branch: "feature/x", Before: "a", After: "c", Total: 1,
+		Commits: []domain.PushedCommit{commit("r2", `Revert "AMANAT-2288: log in (#7)"`)}}
+	if err := s.Push(context.Background(), other); err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 1 {
+		t.Fatalf("reported again: %+v", got)
+	}
+	if !IsRevert(`Revert "x"`) || IsRevert("Reverting is fine") {
+		t.Fatal("IsRevert")
+	}
+}

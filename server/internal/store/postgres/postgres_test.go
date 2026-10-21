@@ -252,6 +252,7 @@ func TestAnalytics(t *testing.T) {
 	for _, q := range []string{
 		`INSERT INTO events (ticket_key, type, origin, data, created_at) VALUES ('PAY-1', 'review_done', 'system', '{"counts":{"major":1,"minor":2}}', $1)`,
 		`INSERT INTO events (ticket_key, type, origin, data, created_at) VALUES ('PAY-1', 'feedback', 'system', '{}', $1)`,
+		`INSERT INTO events (ticket_key, type, origin, data, created_at) VALUES ('PAY-1', 'feedback', 'webhook', '{"ci":true}', $1)`,
 		`INSERT INTO events (ticket_key, type, origin, data, created_at) VALUES ('PAY-1', 'footprint_checked', 'system', '{"recall":0.5}', $1)`,
 		`INSERT INTO events (ticket_key, type, origin, data, created_at) VALUES ('PAY-1', 'red_flags', 'system', '{"count":2}', $1)`,
 	} {
@@ -319,9 +320,10 @@ func TestAnalytics(t *testing.T) {
 		t.Fatalf("spend by stage: %+v", a.Spend)
 	}
 	// Only PAY-1 had a coding run: done first time (agnts's own feedback
-	// does not count against it).
+	// and red CI do not count against it; CI rounds are their own number).
 	want := QualityStats{PromptVersion: "v1", Tickets: 1, ReachedReview: 1, Done: 1, FirstTry: 1, FixAttempts: 1,
-		Serious: 1, FootprintHit: 0.5, RedFlags: 2, SelfFixes: 1, Tokens: 12400}
+		Serious: 1, FootprintHit: 0.5, RedFlags: 2, SelfFixes: 1, Tokens: 12400, CIRounds: 1,
+		CostUSD: 3, CostPerMerged: -1, Score: 55, PeopleEdited: -1} // 35 done first time + 20 no change rounds; not merged, a serious finding
 	if len(a.Quality) != 1 || a.Quality[0] != want {
 		t.Fatalf("quality: %+v", a.Quality)
 	}
@@ -348,6 +350,18 @@ func TestAnalytics(t *testing.T) {
 	if q.GuardBlocks != 2 || q.StopSaves != 0 || q.Stalls != 1 || q.ProofDue != 1 || q.Proven != 1 || q.Findings != 2 || q.Adopted != 1 ||
 		q.FactCheck != 1 || q.FactCheckFirst != 1 {
 		t.Fatalf("harness quality: %+v", q)
+	}
+
+	// Once its pull request merges, the cost per merged ticket and the
+	// merged part of the score count.
+	if _, err := s.db.Exec(ctx, `UPDATE tickets SET merged_at = now() WHERE key = 'PAY-1'`); err != nil {
+		t.Fatal(err)
+	}
+	if a, err = s.Analytics(ctx, 7, time.UTC); err != nil {
+		t.Fatal(err)
+	}
+	if q := a.Quality[0]; q.Merged != 1 || q.CostPerMerged != 3 || q.Score != 80 {
+		t.Fatalf("merged quality: %+v", q)
 	}
 }
 

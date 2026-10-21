@@ -17,6 +17,13 @@ import (
 // newReflectHarness has the rules and reflection stores.
 func newReflectHarness(t *testing.T) (*harness, *postgres.Reflections) {
 	t.Helper()
+	return newReflectHarnessWith(t, nil)
+}
+
+// newReflectHarnessWith is newReflectHarness with the orchestrator's deps
+// changed by with first.
+func newReflectHarnessWith(t *testing.T, with func(*orchestrator.Deps)) (*harness, *postgres.Reflections) {
+	t.Helper()
 	h := newRulesHarness(t)
 	pool, err := postgres.Open(h.ctx, os.Getenv("AGNTS_TEST_DATABASE_URL"))
 	if err != nil {
@@ -29,11 +36,47 @@ func newReflectHarness(t *testing.T) (*harness, *postgres.Reflections) {
 	refl := postgres.NewReflections(pool)
 	cfg := orchestrator.DefaultConfig()
 	cfg.FixAttempts = 1
-	h.o = orchestrator.New(cfg, orchestrator.Deps{
+	deps := orchestrator.Deps{
 		Store: h.store, Runner: h.runner, Git: h.git, Host: h.host, Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: h.tracker}, Homes: &memHomes{},
 		Settings: h.settings, Usage: h.usage, Rules: postgres.NewRules(pool), Reflections: refl,
-	}, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	}
+	if with != nil {
+		with(&deps)
+	}
+	h.o = orchestrator.New(cfg, deps, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	return h, refl
+}
+
+// Review threads on agnts's merged-to-be pull request are feedback like a
+// change request in agnts: sending them back to coding queues a reflection.
+func TestReflectFromPullRequestThreads(t *testing.T) {
+	host := newConvHost()
+	h, refl := newReflectHarnessWith(t, func(d *orchestrator.Deps) {
+		d.Git, d.Host = &pullGit{fakeGit: d.Git.(*fakeGit), host: host.reviewHost}, host
+		d.PullReviews, d.PRPosts, d.ReviewDrafts = d.Store.(orchestrator.PullReviews), d.Store.(orchestrator.PRPosts), d.Store.(orchestrator.ReviewDrafts)
+	})
+	h.ingest("PAY-40")
+	h.runner.scripts = []script{
+		{result: ok("s40"), files: map[string]string{orchestrator.AnalysisPath: analysis(0)}},
+		{result: ok("s40"), edit: "v1"},
+	}
+	h.step() // analyze
+	h.step() // code
+	if _, err := h.o.Approve(h.ctx, "PAY-40", nil, false, domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
+	h.step() // push: pull request #7
+	h.expect("PAY-40", domain.StateDone)
+	host.pulls[7] = domain.PullRequest{Number: 7, URL: "https://github.com/acme/api/pull/7", Author: "me", Login: "me", State: domain.PullOpen}
+	host.threads[7] = []domain.PRThread{{ID: "T1", Kind: domain.ThreadInline, Path: "refund.go", Line: 3, Resolvable: true,
+		Comments: []domain.PRComment{{ID: "c1", Author: "bob", Body: "We never round in handlers; use money.Round."}}}}
+	if _, err := h.o.AddressThreads(h.ctx, "PAY-40", nil, domain.OriginWebhook); err != nil {
+		t.Fatal(err)
+	}
+	rs, _ := refl.Reflections(h.ctx, "PAY-40")
+	if len(rs) != 1 || rs[0].Source != domain.ReflectChanges || !strings.Contains(rs[0].Feedback, "use money.Round") {
+		t.Fatalf("queued reflections: %+v", rs)
+	}
 }
 
 func reflectJSON(s ...map[string]any) string {

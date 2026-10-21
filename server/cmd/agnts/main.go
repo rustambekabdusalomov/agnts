@@ -67,7 +67,9 @@ install's default workspace:
   agnts plane sync               pick up labelled Plane work items now
   agnts eval relations           score the queue's predictions (footprints, conflicts) against the real diffs
   agnts eval replay KEY...       re-run done tickets with today's prompts, from the commit each started from
-  agnts eval report              compare the replays with the tickets they re-ran, by prompt version
+  agnts eval bench [STAGE=MODEL...]
+                                replay every benchmark ticket with today's prompts (and these models, e.g. coding=opus)
+  agnts eval report              compare the replays with what their tickets merged as, by prompt version and model
   agnts eval assistant [--limit N]
                                 answer shared assistant questions again with today's prompts, old and new side by side
   agnts mcp token                create a new static MCP bearer token (the owner's)
@@ -208,12 +210,14 @@ func workspaceCommand(ctx context.Context, cfg config.Config, log *slog.Logger, 
 			return evalRelations(ctx, pool, os.Stdout)
 		case len(args) >= 3 && args[1] == "replay":
 			return evalReplay(ctx, cfg, pool, log, args[2:], os.Stdout)
+		case len(args) >= 2 && args[1] == "bench":
+			return evalBench(ctx, cfg, pool, log, args[2:], os.Stdout)
 		case len(args) == 2 && args[1] == "report":
 			return evalReport(ctx, cfg, pool, log, os.Stdout)
 		case len(args) >= 2 && args[1] == "assistant":
 			return evalAssistant(ctx, cfg, pool, log, args[2:], os.Stdout)
 		}
-		return errors.New("usage: agnts eval relations | eval replay KEY... | eval report | eval assistant [--limit N | --cases]")
+		return errors.New("usage: agnts eval relations | eval replay KEY... | eval bench [STAGE=MODEL...] | eval report | eval assistant [--limit N | --cases]")
 	}
 	return fmt.Errorf("unknown command %q", args[0])
 }

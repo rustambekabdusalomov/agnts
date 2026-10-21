@@ -22,7 +22,7 @@ func NewRules(db *pgxpool.Pool) *Rules { return &Rules{db: db} }
 
 const ruleCols = `x.id, x.repo_id, coalesce(r.name, ''), x.title, x.body, x.enabled, x.status, x.interpretation,
 	x.clarified, x.questions, x.rounds, x.revision, x.error, x.analyzed_at, x.created_at, x.updated_at, x.workspace_id,
-	x.kind, x.source_ticket, x.reason, x.enforce, x.delivery, x.skill_description, x.source, x.confidence, x.evidence, x.last_seen`
+	x.kind, x.source_ticket, x.reason, x.enforce, x.delivery, x.skill_description, x.source, x.confidence, x.evidence, x.last_seen, x.tag`
 
 const ruleFrom = ` FROM rules x LEFT JOIN repositories r ON r.id = x.repo_id`
 
@@ -33,7 +33,7 @@ func scanRule(row pgx.Row) (domain.Rule, error) {
 	var conf float32
 	err := row.Scan(&x.ID, &x.RepoID, &x.RepoName, &x.Title, &x.Body, &x.Enabled, &status, &x.Interpretation,
 		&x.Clarified, &qs, &x.Rounds, &x.Revision, &x.Error, &x.AnalyzedAt, &x.CreatedAt, &x.UpdatedAt, &x.WorkspaceID,
-		&kind, &x.SourceTicket, &x.Reason, &enforce, &x.Delivery, &x.SkillDescription, &x.Source, &conf, &x.Evidence, &x.LastSeen)
+		&kind, &x.SourceTicket, &x.Reason, &enforce, &x.Delivery, &x.SkillDescription, &x.Source, &conf, &x.Evidence, &x.LastSeen, &x.Tag)
 	if err != nil {
 		return x, notFound(err)
 	}
@@ -101,10 +101,10 @@ func (s *Rules) CreateRule(ctx context.Context, x domain.Rule, ev func(domain.Ru
 			kind = domain.KindInstruction
 		}
 		if err := tx.QueryRow(ctx, `INSERT INTO rules (repo_id, title, body, enabled, status, kind, source_ticket, reason,
-			enforce, delivery, skill_description, source, confidence, evidence, last_seen)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING id`,
+			enforce, delivery, skill_description, source, confidence, evidence, last_seen, tag)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING id`,
 			x.RepoID, x.Title, x.Body, x.Enabled, string(x.Status), string(kind), x.SourceTicket, x.Reason,
-			enforceJSON(x.Enforce), delivery(x.Delivery), x.SkillDescription, x.Source, x.Confidence, x.Evidence, x.LastSeen).Scan(&id); err != nil {
+			enforceJSON(x.Enforce), delivery(x.Delivery), x.SkillDescription, x.Source, x.Confidence, x.Evidence, x.LastSeen, x.Tag).Scan(&id); err != nil {
 			return err
 		}
 		var err error

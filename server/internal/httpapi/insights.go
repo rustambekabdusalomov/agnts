@@ -22,10 +22,18 @@ func toPeriod(p postgres.Period) gen.PeriodStats {
 
 func toQualityStat(q postgres.QualityStats) gen.QualityStat {
 	out := gen.QualityStat{PromptVersion: q.PromptVersion, Tickets: q.Tickets, ReachedReview: q.ReachedReview, Done: q.Done,
-		FirstTry: q.FirstTry, Rejected: q.Rejected, ChangeRounds: float32(q.ChangeRounds), FixAttempts: float32(q.FixAttempts),
+		FirstTry: q.FirstTry, Rejected: q.Rejected, ChangeRounds: float32(q.ChangeRounds), CiRounds: ptr(float32(q.CIRounds)), FixAttempts: float32(q.FixAttempts),
 		Serious: q.Serious, RedFlags: q.RedFlags, SelfFixes: q.SelfFixes,
 		GuardBlocks: ptr(q.GuardBlocks), StopSaves: ptr(q.StopSaves), Stalls: ptr(q.Stalls), ProofDue: ptr(q.ProofDue), Proven: ptr(q.Proven),
 		Findings: ptr(q.Findings), Adopted: ptr(q.Adopted), Tokens: ptr(float32(q.Tokens)), FactCheck: ptr(q.FactCheck), FactCheckFirst: ptr(q.FactCheckFirst)}
+	out.Merged, out.CostUsd, out.Score = ptr(q.Merged), ptr(float32(q.CostUSD)), ptr(float32(q.Score))
+	out.Reverted = ptr(q.Reverted)
+	if q.PeopleEdited >= 0 {
+		out.PeopleEdited = ptr(float32(q.PeopleEdited))
+	}
+	if q.CostPerMerged >= 0 {
+		out.CostPerMerged = ptr(float32(q.CostPerMerged))
+	}
 	if q.FootprintHit >= 0 {
 		v := float32(q.FootprintHit)
 		out.FootprintHit = &v

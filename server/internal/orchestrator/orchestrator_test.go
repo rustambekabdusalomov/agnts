@@ -297,6 +297,13 @@ type fakeTracker struct {
 	calls    []string     // issue calls in order: create KEY, label KEY kind, link KEY OTHER
 	onLabel  func(string) // runs inside LabelIssue
 	issueErr error
+	context  domain.TicketContext // what TicketContext returns
+}
+
+func (t *fakeTracker) TicketContext(context.Context, string) (domain.TicketContext, error) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	return t.context, nil
 }
 
 func (t *fakeTracker) CreateIssue(_ context.Context, in orchestrator.NewIssue) (string, error) {
@@ -419,7 +426,8 @@ func newHarness(t *testing.T) *harness {
 	cfg.FixAttempts = 1
 	h.settings = &fakeSettings{s: domain.DefaultSettings()}
 	h.settings.s.Git.AuthorName, h.settings.s.Git.AuthorEmail = "Rustam", "r@example.com"
-	h.settings.s.AutoReview = false // review_test.go turns it on
+	h.settings.s.AutoReview = false     // review_test.go turns it on
+	h.settings.s.RecheckComplex = false // planning_test.go turns it on
 	h.usage = &fakeUsage{}
 	h.o = orchestrator.New(cfg, orchestrator.Deps{
 		Store: store, Runner: h.runner, Git: h.git, Host: h.host, Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: h.tracker, domain.SourcePlane: h.plane},

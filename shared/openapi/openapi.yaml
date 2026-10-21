@@ -627,6 +627,28 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /tickets/{key}/benchmark:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    put:
+      operationId: setTicketBenchmark
+      summary: Put a merged code or test ticket in the benchmark, or take it out
+      tags: [tickets]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [benchmark]
+              properties:
+                benchmark: { type: boolean }
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /tickets/{key}/review:
     parameters:
       - $ref: '#/components/parameters/TicketKey'
@@ -2925,6 +2947,45 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ReplayReport' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /eval/benchmark:
+    get:
+      operationId: getBenchmark
+      summary: The tickets in the benchmark
+      tags: [analytics]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Ticket' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      operationId: runBenchmark
+      summary: Replay every ticket in the benchmark with today's prompts, and the given models
+      tags: [analytics]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                models:
+                  type: object
+                  description: 'Stage (analyze, coding, retry, review) → model, for these replays only'
+                  additionalProperties: { type: string }
+      responses:
+        '200':
+          description: One entry per ticket in the benchmark
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/BenchmarkRun' }
+        '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
 
   /repos/{id}/archive:
@@ -6132,6 +6193,7 @@ components:
         kind: { $ref: '#/components/schemas/TicketKind' }
         kindAuto: { type: boolean, description: 'agnts picks the kind; the analysis may still change it' }
         skipChecks: { type: boolean, description: 'coding runs skip the checks and go to review on the code alone (set with retryTicket or requestChanges)' }
+        benchmark: { type: boolean, description: 'A merged ticket in the benchmark that changes to agnts are replayed against (setTicketBenchmark)' }
         postReport: { type: boolean, description: 'The approved report is posted to the tracker issue' }
         parentKey: { type: string, description: 'The plan or bug investigation this ticket implements' }
         followUpOf: { type: string, description: 'The ticket that suggested this one as a follow-up' }
@@ -6302,7 +6364,55 @@ components:
               id: { type: string }
               criterion: { type: string }
               check: { type: string, enum: [ui, api, test, manual] }
+        patterns:
+          type: array
+          description: For each file the work changes, the existing code it follows (copy, adapt) or that it is new
+          items: { $ref: '#/components/schemas/Pattern' }
+        reuse:
+          type: array
+          description: Existing helpers the work must use instead of writing its own
+          items:
+            type: object
+            required: [name, where]
+            properties:
+              name: { type: string }
+              where: { type: string }
+              for: { type: string }
+        testPlan:
+          type: array
+          description: Tests the work must add or change
+          items:
+            type: object
+            required: [file, what]
+            properties:
+              file: { type: string }
+              what: { type: string }
+        edgeCases:
+          type: array
+          description: Inputs and failures the work must handle
+          items: { type: string }
+        repro:
+          type: object
+          description: How the analysis reproduced the reported bug
+          required: [reproduced]
+          properties:
+            reproduced: { type: boolean }
+            command: { type: string }
+            output: { type: string }
+            why: { type: string }
         secondOpinion: { $ref: '#/components/schemas/SecondOpinion' }
+
+    Pattern:
+      type: object
+      required: [file, kind, like]
+      properties:
+        file: { type: string }
+        kind: { type: string, enum: [copy, adapt, new] }
+        like: { type: string, description: 'The existing file to follow; for a new pattern, the one to take conventions from (may be empty)' }
+        layer: { type: string }
+        why: { type: string }
+        place: { type: string }
+        precedent: { type: boolean, description: 'A new pattern other code will copy; the author is asked about it' }
 
     Approach:
       type: object
@@ -7102,6 +7212,9 @@ components:
           pattern: '^(off|auto|always)$'
           description: 'Specialist passes in the code review (security, silent failures, tests, types); auto: large or complex work'
         learnFromRuns: { type: boolean, description: 'Suggest tips from runs that had trouble (failed checks, a stall)' }
+        effort: { $ref: '#/components/schemas/EffortSettings' }
+        recheckComplex: { type: boolean, description: "The coding model re-checks the analysis of a ticket the analysis model rated complex, before any code is written" }
+        baselineChecks: { type: boolean, description: 'Run the checks on the commit a ticket starts from before its first coding run: what fails there is not the ticket''s to fix' }
         secondOpinion:
           type: string
           maxLength: 80
@@ -7191,6 +7304,7 @@ components:
           description: 'Per-file checks after each edit; null uses the ones agnts derives from the toolchains'
           items: { $ref: '#/components/schemas/EditCheck' }
         editChecksOff: { type: boolean }
+        layersBlock: { type: boolean, description: "An import the approved architecture does not allow is a blocker agnts's review sends back, not only a red flag" }
         coverage: { $ref: '#/components/schemas/CoverageConfig' }
         acceptance: { type: boolean, description: "Check the ticket's acceptance criteria in the running app after the preview" }
 
@@ -7344,6 +7458,16 @@ components:
                 type: array
                 description: Screenshot ids in the preview
                 items: { type: string }
+
+    EffortSettings:
+      type: object
+      description: "How hard runs think (Claude Code's --effort); empty leaves Claude Code's default"
+      required: [analyze, coding, review, complex]
+      properties:
+        analyze: { type: string, enum: ['', low, medium, high] }
+        coding: { type: string, enum: ['', low, medium, high] }
+        review: { type: string, enum: ['', low, medium, high] }
+        complex: { type: string, enum: ['', low, medium, high], description: 'For the coding and review of complex tickets, and the re-check of their analysis; empty keeps the stage effort' }
 
     SecondOpinion:
       type: object
@@ -8744,12 +8868,23 @@ components:
         surveyedAt: { type: string, format: date-time }
         approvedAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
+        architecture: { type: string, description: 'The approved architecture.json (layers and allowed imports, shared helpers, recipes), JSON text; runs read it and agnts checks changes against its layers. Empty when there is none' }
+        architectureDraft: { type: string, description: 'The architecture the latest survey wrote, approved with the draft brief' }
 
     RepoBriefInput:
       type: object
       required: [body]
       properties:
         body: { type: string, maxLength: 40000 }
+        architecture: { type: string, maxLength: 200000, description: 'Replaces the approved architecture.json when given; empty removes it' }
+
+    BenchmarkRun:
+      type: object
+      required: [original]
+      properties:
+        original: { type: string }
+        replay: { type: string, description: The replay ticket's key }
+        error: { type: string, description: Why the ticket could not be replayed }
 
     ReplayReport:
       type: object
@@ -8757,7 +8892,11 @@ components:
       properties:
         versions:
           type: array
-          description: Replays with a change, summed by the prompt version they ran with
+          description: Replays with a change, summed by the prompt version and coding model they ran with
+          items: { $ref: '#/components/schemas/ReplayVersion' }
+        benchmark:
+          type: array
+          description: The same, for the replays of tickets in the benchmark only
           items: { $ref: '#/components/schemas/ReplayVersion' }
         replays:
           type: array
@@ -8769,7 +8908,11 @@ components:
       required: [promptVersion, replays, checksPassed, reviewed, looksGood, avgOverlap, avgRecall, avgTurns, avgCostUsd, originalTurns, originalCostUsd]
       properties:
         promptVersion: { type: string }
+        model: { type: string, description: The coding model of the replays }
         replays: { type: integer }
+        merged: { type: integer, description: Replays scored against what the original merged as }
+        avgLineRecall: { type: number, description: "Average share of the merged change's added lines the replays add too; absent when none was scored against a merge" }
+        originalLineRecall: { type: number, description: "The same for the originals' own changes, to compare with" }
         checksPassed: { type: integer }
         reviewed: { type: integer, description: "Replays agnts's code review read" }
         looksGood: { type: integer, description: Reviews that found nothing to block }
@@ -8789,6 +8932,11 @@ components:
         title: { type: string }
         state: { $ref: '#/components/schemas/TicketState' }
         promptVersion: { type: string }
+        model: { type: string }
+        benchmark: { type: boolean, description: The original is in the benchmark }
+        against: { type: string, enum: [merged, agnts], description: "What the replay is scored against: what the original merged as, or the original's own change" }
+        lineRecall: { type: number, description: "Share of the merged change's added lines the replay adds too; absent when scored against agnts" }
+        originalLineRecall: { type: number, description: "The same for the original's own change" }
         hasChange: { type: boolean }
         checksPassed: { type: boolean }
         files:
@@ -8817,6 +8965,13 @@ components:
         firstTry: { type: integer, description: Done without a person asking for changes }
         rejected: { type: integer }
         changeRounds: { type: number, description: 'Average change requests by a person, over the tickets that reached review' }
+        ciRounds: { type: number, description: 'Average times red CI on the pull request sent the work back, over the tickets that reached review' }
+        merged: { type: integer, description: Their pull requests merged }
+        costUsd: { type: number, description: What all their runs cost }
+        costPerMerged: { type: number, description: 'Cost over merged tickets; absent when none merged' }
+        score: { type: number, description: '0–100: done first time 35%, merged 25%, no serious finding 20%, few change rounds 20%' }
+        peopleEdited: { type: number, description: "Average share of agnts's lines people changed before merging; absent when no merge was recorded" }
+        reverted: { type: integer, description: Tickets whose merged work people reverted }
         fixAttempts: { type: number, description: Average failing checks sent back to Claude }
         serious: { type: integer, description: Reviewed with a blocker or major finding at least once }
         footprintHit: { type: number, description: 'Average share of the changed files the analysis predicted; absent when none was measured' }
@@ -8991,6 +9146,7 @@ components:
         id: { type: integer, format: int64 }
         kind: { $ref: '#/components/schemas/RuleKind' }
         sourceTicket: { type: string, description: 'For a rule agnts suggested: the ticket whose feedback taught it' }
+        tag: { type: string, enum: [reuse, layer, tests, style, logic, other], description: 'For a rule agnts learned: what kind of lesson it is' }
         reason: { type: string, description: 'For a rule agnts suggested: which feedback shows it' }
         repoId: { type: integer, format: int64, description: Absent for a global rule }
         repoName: { type: string }

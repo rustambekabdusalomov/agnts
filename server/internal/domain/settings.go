@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"cmp"
 	"errors"
 	"fmt"
 	"regexp"
@@ -29,7 +30,51 @@ const (
 	ModelLearn   = "learn"   // lessons from finished tickets
 	ModelReview  = "review"  // code review while a ticket waits for review
 	ModelPreview = "preview" // screenshots while a ticket waits for review
+	// ModelRecheck re-checks a complex ticket's analysis; it is the
+	// coding model, so nobody picks it on its own.
+	ModelRecheck = "recheck"
 )
+
+// How hard Claude Code thinks (its --effort); "" leaves its default.
+const (
+	EffortLow    = "low"
+	EffortMedium = "medium"
+	EffortHigh   = "high"
+)
+
+// Efforts are the effort levels a setting may name.
+var Efforts = []string{"", EffortLow, EffortMedium, EffortHigh}
+
+// EffortSettings is how hard runs think, by stage. Complex raises the
+// coding and review of tickets their analysis rated complex, and the
+// re-check of that analysis (RecheckComplex).
+type EffortSettings struct {
+	Analyze string `json:"analyze"`
+	Coding  string `json:"coding"`
+	Review  string `json:"review"`
+	Complex string `json:"complex"`
+}
+
+// For returns the effort of a model stage, for a complex ticket or not.
+func (e EffortSettings) For(stage string, complex bool) string {
+	var v string
+	switch stage {
+	case ModelAnalyze:
+		v = e.Analyze
+	case ModelCoding, ModelRetry:
+		v = e.Coding
+	case ModelReview:
+		v = e.Review
+	case ModelRecheck:
+		return cmp.Or(e.Complex, e.Analyze)
+	default:
+		return ""
+	}
+	if complex && e.Complex != "" && stage != ModelAnalyze {
+		return e.Complex
+	}
+	return v
+}
 
 // When the code review runs its specialist passes.
 const (
@@ -156,6 +201,14 @@ type Settings struct {
 	// LearnFromRuns has agnts read runs that had trouble (failed checks,
 	// a stall) and suggest tips for the repository.
 	LearnFromRuns bool `json:"learnFromRuns"`
+	// Effort is how hard runs think (Claude Code's --effort).
+	Effort EffortSettings `json:"effort"`
+	// RecheckComplex has the coding model re-check the analysis of a ticket
+	// the analysis model rated complex, before any code is written.
+	RecheckComplex bool `json:"recheckComplex"`
+	// BaselineChecks runs the checks on the commit a ticket starts from
+	// before its first coding run: failures there are not the ticket's.
+	BaselineChecks bool `json:"baselineChecks"`
 	// DeepReview runs specialist passes (security, silent failures, tests,
 	// types and data) in the code review: DeepOff, DeepAuto (large or
 	// complex work) or DeepAlways.
@@ -182,31 +235,34 @@ type Settings struct {
 // DefaultSettings returns the settings used before any are saved.
 func DefaultSettings() Settings {
 	return Settings{
-		Models:        StageModels{Analyze: "sonnet", Coding: "opus", Retry: "sonnet", Helper: "haiku", Learn: "sonnet", Review: ModelAuto, Preview: "sonnet"},
-		MaxTurns:      150,
-		TimeoutMin:    45,
-		Allow:         []string{},
-		Deny:          []string{},
-		AskFirst:      true,
-		AutoResume:    true,
-		AutoLearn:     true,
-		AutoReview:    true,
-		AutoPreview:   true,
-		VisualCheck:   true,
-		AutoBrief:     true,
-		SelfReview:    true,
-		Reflect:       true,
-		EgressAllow:   []string{},
-		PullReviews:   DefaultPullReviewSettings(),
-		PRComments:    DefaultPRCommentSettings(),
-		CI:            DefaultCISettings(),
-		Guard:         GuardSettings{Profile: GuardStandard, Disabled: []string{}, FactCheck: 50},
-		Stalls:        StallsLog,
-		ProveFixes:    true,
-		DeepReview:    DeepAuto,
-		LearnFromRuns: true,
-		PauseAbove:    90,
-		Parallel:      1,
+		Models:         StageModels{Analyze: "sonnet", Coding: "opus", Retry: "sonnet", Helper: "haiku", Learn: "sonnet", Review: ModelAuto, Preview: "sonnet"},
+		MaxTurns:       150,
+		TimeoutMin:     45,
+		Allow:          []string{},
+		Deny:           []string{},
+		AskFirst:       true,
+		AutoResume:     true,
+		AutoLearn:      true,
+		AutoReview:     true,
+		AutoPreview:    true,
+		VisualCheck:    true,
+		AutoBrief:      true,
+		SelfReview:     true,
+		Reflect:        true,
+		EgressAllow:    []string{},
+		PullReviews:    DefaultPullReviewSettings(),
+		PRComments:     DefaultPRCommentSettings(),
+		CI:             DefaultCISettings(),
+		Guard:          GuardSettings{Profile: GuardStandard, Disabled: []string{}, FactCheck: 50},
+		Stalls:         StallsLog,
+		ProveFixes:     true,
+		DeepReview:     DeepAuto,
+		LearnFromRuns:  true,
+		Effort:         EffortSettings{Complex: EffortHigh},
+		RecheckComplex: true,
+		BaselineChecks: true,
+		PauseAbove:     90,
+		Parallel:       1,
 
 		MaxTicketRepos: DefaultMaxTicketRepos,
 		Git:            GitSettings{CoAuthor: true, PRTitle: "{key}: {title}"},
@@ -289,6 +345,11 @@ func (s *Settings) Validate() error {
 	}
 	if s.SecondOpinion != "" && !ValidModel(s.SecondOpinion) {
 		errs = append(errs, fmt.Errorf("second opinion must be empty, one of %s, or codex:<model>", strings.Join(Models, ", ")))
+	}
+	for name, v := range map[string]string{"analyze": s.Effort.Analyze, "coding": s.Effort.Coding, "review": s.Effort.Review, "complex": s.Effort.Complex} {
+		if !slices.Contains(Efforts, v) {
+			errs = append(errs, fmt.Errorf("effort for %s must be empty, %s, %s or %s", name, EffortLow, EffortMedium, EffortHigh))
+		}
 	}
 	if s.DeepReview == "" {
 		s.DeepReview = DeepAuto

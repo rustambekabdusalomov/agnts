@@ -144,6 +144,9 @@ type Ticket struct {
 	// for evaluation: never pushed, and never shown to other tickets.
 	ReplayOf string
 	BaseSHA  string
+	// Benchmark: a person picked this merged ticket for the benchmark that
+	// changes to agnts are replayed against.
+	Benchmark bool
 	// Pull is the pull request a review ticket reviews (kind review), as
 	// of the last sync; nil for other tickets.
 	Pull *PullRequest
@@ -385,6 +388,18 @@ type FileChange struct {
 	Diff   string `json:"diff"`
 }
 
+// MergedChange is what a ticket's pull request in one repository merged
+// as: its files and patches on the git host at the merge, with people's
+// commits on the branch. HeadSHA is agnts's last commit on the branch.
+type MergedChange struct {
+	TicketID  int64
+	RepoID    int64
+	Number    int
+	HeadSHA   string
+	Files     []FileChange
+	CreatedAt time.Time
+}
+
 // Result is what a coding run produced, shown on the review page.
 type Result struct {
 	ID      int64
@@ -512,6 +527,17 @@ const (
 	EventRedFlags = "red_flags"
 	// EventCheckpoint: the drift checkpoint partway through a coding run.
 	EventCheckpoint = "checkpoint"
+	// EventAnalysisChecked: the analysis was re-checked (complex tickets)
+	// or named files that do not exist.
+	EventAnalysisChecked = "analysis_checked"
+	// EventBaseline: a check already fails on the commit a ticket's work
+	// starts from.
+	EventBaseline = "baseline"
+	// EventPeopleEdits: what people changed in agnts's work before it
+	// merged (data: share, added, removed).
+	EventPeopleEdits = "people_edits"
+	// EventReverted: people reverted agnts's merged work.
+	EventReverted = "reverted"
 	// EventGuard: what agnts-guard, the hooks inside the run, refused or
 	// sent back, and what the scan of agent files found.
 	EventGuard = "guard"

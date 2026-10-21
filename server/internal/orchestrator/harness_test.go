@@ -382,7 +382,8 @@ func TestCoverageOfChangedLines(t *testing.T) {
 	}
 	h.step() // review
 	v, _ = h.o.View(h.ctx, "PAY-80")
-	if v.Review == nil || len(v.Review.Findings) != 1 || !strings.Contains(v.Review.Findings[0].Title, "50.0% of the changed lines") || v.Review.Findings[0].Line != 12 {
+	if v.Review == nil || len(v.Review.Findings) != 1 || !strings.Contains(v.Review.Findings[0].Title, "50.0% of the changed lines") || v.Review.Findings[0].Line != 12 ||
+		v.Review.Findings[0].Severity != "major" {
 		t.Fatalf("review: %+v", v.Review)
 	}
 }
@@ -470,6 +471,11 @@ func TestCodexRunsAndSecondOpinion(t *testing.T) {
 	r, err := h.store.LatestResult(h.ctx, h.state("PAY-95").ID, domain.StageAnalyze)
 	if err != nil || r.Harness.SecondOpinion == nil || r.Harness.SecondOpinion.Agrees || len(r.Harness.SecondOpinion.Concerns) != 1 {
 		t.Fatalf("second opinion: %+v %v", r.Harness, err)
+	}
+	// The coder reads the concerns, to handle them or say why not.
+	if p := h.runner.prompts[2]; !strings.Contains(p, "## Second opinion") || !strings.Contains(p, "has concerns about it: A ledger is right but needs an index.") ||
+		!strings.Contains(p, "- No index on refund_id: lookups scan the table.") {
+		t.Fatalf("coding prompt lacks the second opinion:\n%s", p)
 	}
 	if evs := h.events("PAY-95", domain.EventGuard); len(evs) == 0 || !strings.Contains(evs[0].Message, "uses Codex") {
 		t.Fatalf("no note that the run used Codex: %+v", evs)

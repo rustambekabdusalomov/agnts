@@ -378,6 +378,20 @@ func (f *fakeTickets) ReplayReport(context.Context) (orchestrator.ReplayReport, 
 	return orchestrator.ReplayReport{}, nil
 }
 
+func (f *fakeTickets) SetBenchmark(_ context.Context, key string, on bool, o domain.Origin) (domain.Ticket, error) {
+	f.lastOrigin = o
+	t, err := f.ticket(key, domain.StateDone)
+	t.Benchmark = on
+	return t, err
+}
+
+func (f *fakeTickets) Benchmark(context.Context) ([]domain.Ticket, error) { return nil, nil }
+
+func (f *fakeTickets) RunBenchmark(_ context.Context, models map[string]string, o domain.Origin) ([]orchestrator.BenchmarkRun, error) {
+	f.lastOrigin = o
+	return []orchestrator.BenchmarkRun{{Original: "PAY-1", Replay: &domain.Ticket{Key: "PAY-9"}}, {Original: "PAY-2", Error: "no change"}}, nil
+}
+
 func (f *fakeTickets) Learn(_ context.Context, key string, o domain.Origin) (domain.Ticket, error) {
 	f.lastOrigin = o
 	t, err := f.ticket(key, domain.StateDone)
@@ -540,7 +554,10 @@ func TestTicketEndpoints(t *testing.T) {
 		{"POST", "/api/tickets/PAY-1/relations/9/dismiss", "", 404, `not_found`},
 		{"POST", "/api/tickets/PAY-1/merged", "", 200, `"state":"done"`},
 		{"POST", "/api/tickets/PAY-1/replay", "", 200, `"replayOf":"PAY-1"`},
-		{"GET", "/api/eval/replays", "", 200, `{"replays":[],"versions":[]}`},
+		{"GET", "/api/eval/replays", "", 200, `{"benchmark":[],"replays":[],"versions":[]}`},
+		{"PUT", "/api/tickets/PAY-1/benchmark", `{"benchmark":true}`, 200, `"benchmark":true`},
+		{"GET", "/api/eval/benchmark", "", 200, `[]`},
+		{"POST", "/api/eval/benchmark", `{"models":{"coding":"opus"}}`, 200, `[{"original":"PAY-1","replay":"PAY-9"},{"error":"no change","original":"PAY-2"}]`},
 		{"GET", "/api/repo-groups", "", 200, `"members":[{"archived":false,"repoId":3,"repoName":"api","role":"backend"}`},
 		{"GET", "/api/repo-groups/4", "", 200, `"warnings":["build variable X is set in api and web"]`},
 		{"GET", "/api/repo-groups/9", "", 404, `not_found`},

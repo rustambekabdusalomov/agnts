@@ -40,6 +40,10 @@ type RepoBrief struct {
 	BodySHA     string // the commit the approved body describes
 	Draft       string // the latest survey, waiting for a person
 	DraftSHA    string // the commit the draft describes
+	// Arch is the approved architecture runs read, and ArchDraft the one
+	// the latest survey wrote with Draft; nil when there is none.
+	Arch        *Architecture
+	ArchDraft   *Architecture
 	Status      BriefStatus
 	MergesSince int // tickets merged since the body was approved
 	Error       string

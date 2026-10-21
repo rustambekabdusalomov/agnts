@@ -298,6 +298,14 @@ type Precedent struct {
 	Files    []string // what it changed
 	Overlap  int      // of those, files the work at hand expects to change
 	Feedback []string // what people asked to change, at most 3
+	// Excerpt is the key part of its diff: what merged (Merged) or else
+	// agnts's last change.
+	Excerpt string
+	Merged  bool
+	// Rejected: a person rejected the work, for Reason; it shows what not
+	// to do.
+	Rejected bool
+	Reason   string
 }
 
 // StateInfo is when a ticket entered its state, and why it stopped.
@@ -429,6 +437,9 @@ type ClaudeRequest struct {
 	// ReadOnly: the run must not change /workspace (Codex runs enforce it
 	// with their sandbox; Claude Code with the permission rules).
 	ReadOnly bool
+	// Effort is how hard Claude Code thinks (--effort); "" leaves its
+	// default. Codex runs ignore it.
+	Effort string
 }
 
 // CodexPrefix marks a model as one Codex CLI runs ("codex:<model>"); any

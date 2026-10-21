@@ -53,6 +53,21 @@ const (
 	DeliverSkill  = "skill"  // a skill Claude loads when its description matches the work
 )
 
+// Lesson tags: what kind of lesson a learned rule is, for counting which
+// kinds agnts keeps getting wrong.
+var LessonTags = []string{"reuse", "layer", "tests", "style", "logic", "other"}
+
+// CleanLessonTag returns tag when it is one of LessonTags, else "".
+func CleanLessonTag(tag string) string {
+	tag = strings.ToLower(strings.TrimSpace(tag))
+	for _, t := range LessonTags {
+		if t == tag {
+			return tag
+		}
+	}
+	return ""
+}
+
 // RuleEnforce makes a rule something agnts-guard checks, not only asks
 // for: On "file" checks edits of files matching Paths (and, with a
 // Pattern, only added lines matching it), "bash" checks commands against
@@ -152,6 +167,9 @@ type Rule struct {
 	AnalyzedAt *time.Time
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
+	// Tag is what kind of lesson a learned rule is (LessonTags); "" for
+	// rules people wrote.
+	Tag string
 }
 
 // RuleQuestion is one question from a rule's review, with its answer once

@@ -467,6 +467,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.ci = ciwatch.New(postgres.NewCI(pool, box), a.store, a.orch, a.vcs, repos, a.settings, log.With("component", "ci"))
 	a.orch.SetCIHook(a.ci)
 	a.links = commitlink.New(a.store, a.vcs, log.With("component", "commit-links"))
+	a.links.OnRevert(a.orch.Reverted)
 	a.orch.SetCommitLinker(a.links)
 
 	a.repos = admin.NewRepos(a.store, gh, a.vcs, func(ctx context.Context) string {
@@ -963,6 +964,33 @@ func evalReplay(ctx context.Context, cfg config.Config, pool postgresPool, log *
 	return errors.Join(errs...)
 }
 
+// evalBench replays every ticket in the benchmark, with the models given
+// as stage=model; the running server works the replays.
+func evalBench(ctx context.Context, cfg config.Config, pool postgresPool, log *slog.Logger, args []string, out io.Writer) error {
+	models := map[string]string{}
+	for _, a := range args {
+		k, v, ok := strings.Cut(a, "=")
+		if !ok {
+			return fmt.Errorf("%q: give models as STAGE=MODEL, e.g. coding=opus", a)
+		}
+		models[strings.TrimSpace(k)] = strings.TrimSpace(v)
+	}
+	a, err := newAgent(cfg, pool, log)
+	if err != nil {
+		return err
+	}
+	runs, err := a.orch.RunBenchmark(ctx, models, domain.OriginSystem)
+	if err != nil {
+		return err
+	}
+	for _, r := range runs {
+		if r.Replay != nil {
+			_, _ = fmt.Fprintf(out, "%s replays %s from commit %.7s\n", r.Replay.Key, r.Original, r.Replay.BaseSHA)
+		}
+	}
+	return orchestrator.BenchmarkError(runs)
+}
+
 // evalReport prints how the replays compare with the tickets they re-ran.
 func evalReport(ctx context.Context, cfg config.Config, pool postgresPool, log *slog.Logger, out io.Writer) error {
 	a, err := newAgent(cfg, pool, log)
@@ -977,24 +1005,44 @@ func evalReport(ctx context.Context, cfg config.Config, pool postgresPool, log *
 		_, _ = fmt.Fprintln(out, "No replays yet: run `agnts eval replay KEY...` first.")
 		return nil
 	}
-	tw := tabwriter.NewWriter(out, 0, 0, 2, ' ', 0)
-	_, _ = fmt.Fprintln(tw, "PROMPTS\tREPLAYS\tCHECKS PASS\tLOOKS GOOD\tFILE OVERLAP\tRECALL\tTURNS (ORIG)\tCOST (ORIG)")
-	for _, v := range rep.Versions {
-		_, _ = fmt.Fprintf(tw, "%s\t%d\t%d\t%d/%d\t%.0f%%\t%.0f%%\t%.0f (%.0f)\t$%.2f ($%.2f)\n", orDash(v.PromptVersion), v.Replays, v.ChecksPassed,
-			v.LooksGood, v.Reviewed, v.AvgOverlap*100, v.AvgRecall*100, v.AvgTurns, v.OriginalTurns, v.AvgCostUSD, v.OriginalCostUSD)
+	if len(rep.Benchmark) > 0 {
+		_, _ = fmt.Fprintln(out, "Benchmark")
+		printEvalVersions(out, rep.Benchmark)
+		_, _ = fmt.Fprintln(out, "\nAll replays")
 	}
-	_ = tw.Flush()
+	printEvalVersions(out, rep.Versions)
 	_, _ = fmt.Fprintln(out)
-	tw = tabwriter.NewWriter(out, 0, 0, 2, ' ', 0)
-	_, _ = fmt.Fprintln(tw, "REPLAY\tOF\tSTATE\tPROMPTS\tCHECKS\tOVERLAP\tREVIEW")
+	tw := tabwriter.NewWriter(out, 0, 0, 2, ' ', 0)
+	_, _ = fmt.Fprintln(tw, "REPLAY\tOF\tSTATE\tPROMPTS\tMODEL\tCHECKS\tAGAINST\tFILES\tLINES (ORIG)\tREVIEW")
 	for _, x := range rep.Replays {
 		checks := "-"
 		if x.HasChange {
 			checks = map[bool]string{true: "pass", false: "fail"}[x.ChecksPassed]
 		}
-		_, _ = fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\t%.0f%%\t%s\n", x.Key, x.Original, x.State, orDash(x.PromptVersion), checks, x.Overlap*100, orDash(x.Verdict))
+		_, _ = fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%.0f%%\t%s (%s)\t%s\n", x.Key, x.Original, x.State, orDash(x.PromptVersion), orDash(x.Model),
+			checks, x.Against, x.Overlap*100, pctOrDash(x.LineRecall), pctOrDash(x.OriginalLineRecall), orDash(x.Verdict))
 	}
 	return tw.Flush()
+}
+
+// printEvalVersions prints replays summed by prompt version and model.
+func printEvalVersions(out io.Writer, vs []orchestrator.EvalVersion) {
+	tw := tabwriter.NewWriter(out, 0, 0, 2, ' ', 0)
+	_, _ = fmt.Fprintln(tw, "PROMPTS\tMODEL\tREPLAYS\tCHECKS PASS\tLOOKS GOOD\tFILE OVERLAP\tRECALL\tMERGED LINES (ORIG)\tTURNS (ORIG)\tCOST (ORIG)")
+	for _, v := range vs {
+		_, _ = fmt.Fprintf(tw, "%s\t%s\t%d\t%d\t%d/%d\t%.0f%%\t%.0f%%\t%s (%s) of %d\t%.0f (%.0f)\t$%.2f ($%.2f)\n", orDash(v.PromptVersion), orDash(v.Model),
+			v.Replays, v.ChecksPassed, v.LooksGood, v.Reviewed, v.AvgOverlap*100, v.AvgRecall*100, pctOrDash(v.AvgLineRecall), pctOrDash(v.OriginalLineRecall),
+			v.Merged, v.AvgTurns, v.OriginalTurns, v.AvgCostUSD, v.OriginalCostUSD)
+	}
+	_ = tw.Flush()
+}
+
+// pctOrDash is a share as a percentage, or "-" when it is negative (none).
+func pctOrDash(v float64) string {
+	if v < 0 {
+		return "-"
+	}
+	return fmt.Sprintf("%.0f%%", v*100)
 }
 
 // evalAssistant answers the questions people shared (with their rating)

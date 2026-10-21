@@ -20,9 +20,12 @@ const checkpointMinTurns = 45
 // with a checkpoint prompt that asks Claude to get back on course before
 // it finishes.
 func (o *Orchestrator) codeWithCheckpoint(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, rs []runRepo, modelStage, prompt, session string, design *Analysis) (ClaudeResult, error) {
+	// The same budget claudeTurns gives the run: tickets in several
+	// repositories get more turns.
+	total := int(float64(s.MaxTurns) * domain.TurnScale(len(t.Repos)))
 	at := 0
-	if design != nil && (design.Chosen() != nil || design.Footprint != nil) && s.MaxTurns >= checkpointMinTurns {
-		at = s.MaxTurns / 3
+	if design != nil && (design.Chosen() != nil || design.Footprint != nil) && total >= checkpointMinTurns {
+		at = total / 3
 	}
 	res, err := o.claudeTurns(ctx, s, ws, t, run, modelStage, prompt, session, at)
 	if err != nil || at == 0 || !res.IsError || res.Subtype != "error_max_turns" {
@@ -49,7 +52,7 @@ func (o *Orchestrator) codeWithCheckpoint(ctx context.Context, s domain.Settings
 	if err != nil {
 		return res, err
 	}
-	return o.claudeTurns(ctx, s, ws, t, run, modelStage, cp, res.SessionID, max(s.MaxTurns-res.Turns, 10))
+	return o.claudeTurns(ctx, s, ws, t, run, modelStage, cp, res.SessionID, max(total-res.Turns, 10))
 }
 
 // changedFiles lists the files changed in the run's repositories so far,

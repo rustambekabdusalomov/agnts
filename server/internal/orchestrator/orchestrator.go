@@ -114,6 +114,7 @@ type Deps struct {
 
 // Orchestrator runs tickets through their stages.
 type Orchestrator struct {
+	baselines   baselines // check results on base commits
 	cfg         Config
 	store       Store
 	runner      Runner
@@ -678,6 +679,16 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 	if budget > 0 {
 		turns = min(turns, budget)
 	}
+	effort := ""
+	if !domain.IsCodex(model) {
+		complex := false
+		if modelStage != domain.ModelAnalyze && s.Effort.Complex != "" {
+			if a := o.latestAnalysis(ctx, *t); a != nil {
+				complex = a.Complexity == ComplexityComplex
+			}
+		}
+		effort = s.Effort.For(modelStage, complex)
+	}
 	readOnly := t.Kind.Report() || run.Stage == domain.StageReview || run.Stage == domain.StagePreview
 	if domain.IsCodex(model) && run.Harness.Tool == "" {
 		run.Harness.Tool = "codex"
@@ -701,6 +712,7 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 		Settings: permissionSettings(s, readOnly, extraDeny...),
 		Env:      guardEnv(gc),
 		ReadOnly: readOnly,
+		Effort:   effort,
 	}, o.watch(ctx, s, ws, *t, run, o.streamTo(ctx, *t, run)))
 	run.Turns += res.Turns
 	if res.SessionID != "" {
@@ -887,7 +899,7 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 	if err != nil {
 		return err
 	}
-	d := promptData{T: t, NoRepo: len(rs) == 0, NoQuestions: !t.AskFirst}
+	d := promptData{T: t, NoRepo: len(rs) == 0, NoQuestions: !t.AskFirst, Checks: checksOf(rs)}
 	if t.Kind.Report() && !t.KindAuto {
 		for i := range rs {
 			rs[i].Branch = rs[i].DefaultBranch // a report never commits
@@ -904,7 +916,7 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 		return err
 	}
 	defer o.closeWorkspace(ctx, t, ws)
-	d.Context = o.contextFiles(ctx, ws, t, rs)
+	d.Context, d.Tracker = o.contextFiles(ctx, ws, t, rs), o.trackerContext(ctx, ws, t)
 
 	if d.Rules, err = o.teamRules(ctx, t.RepoIDs()); err != nil {
 		return err
@@ -938,6 +950,11 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 	if err != nil {
 		return err
 	}
+	if len(rs) > 0 {
+		if raw, a, err = o.refineAnalysis(ctx, s, ws, &t, run, raw, a); err != nil {
+			return err
+		}
+	}
 	if err := o.store.SaveResult(ctx, domain.Result{RunID: run.ID, Summary: raw}); err != nil {
 		return err
 	}
@@ -969,6 +986,7 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 		if q, ok := approachQuestion(t, a, qs); ok {
 			qs = append([]domain.Question{q}, qs...)
 		}
+		qs = append(qs, precedentQuestions(t, a, qs)...)
 		for i := range qs {
 			qs[i].Position = i + 1
 		}
@@ -1057,7 +1075,7 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 	}
 	defer o.closeWorkspace(ctx, t, ws)
 	defer o.collectGuard(ctx, ws, t, run) // before the container goes
-	knowledge := o.contextFiles(ctx, ws, t, rs)
+	knowledge, tracker := o.contextFiles(ctx, ws, t, rs), o.trackerContext(ctx, ws, t)
 	if m := o.methodSkills(ctx, s, ws, run, rs); m != nil {
 		knowledge = append(knowledge, *m)
 	}
@@ -1107,7 +1125,7 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		}
 	} else {
 		d := base
-		d.Checks, d.VisualCheck, d.Attached, d.Context = checksOf(rs), visual, attached, knowledge
+		d.Checks, d.VisualCheck, d.Attached, d.Context, d.Tracker = checksOf(rs), visual, attached, knowledge, tracker
 		if d.Rules, err = o.teamRules(ctx, t.RepoIDs()); err != nil {
 			return err
 		}
@@ -1115,6 +1133,9 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 			if a, aerr := parseAnalysis(r.Summary); aerr == nil {
 				d.Plan, d.Design, design = a.Plan, &a, &a
 				d.ProveFix = proveDue(s, t, &a)
+				if so := r.Harness.SecondOpinion; so != nil && so.Error == "" && (!so.Agrees || len(so.Concerns) > 0) {
+					d.SecondOpinion = so
+				}
 			}
 		}
 		if d.Answers, err = o.store.Questions(ctx, t.ID); err != nil {
@@ -1122,6 +1143,16 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		}
 		if t.HeadSHA == "" {
 			d.Landed = o.landedDependencies(ctx, t)
+		}
+		if baselineDue(s, t) && len(rs) > 0 {
+			d.Baseline = o.baselineChecks(ctx, ws, t, rs, run)
+		}
+		if design != nil && design.Footprint != nil {
+			var fs []domain.FileChange
+			for _, f := range design.Footprint.Clean().Files {
+				fs = append(fs, domain.FileChange{Path: f})
+			}
+			d.CoderChecklists = o.copyChecklists(ctx, ws, fs)
 		}
 		prompt, err = render("code", d)
 		if err == nil && feedback != "" {
@@ -1217,7 +1248,7 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 	testsJSON, _ := json.Marshal(checks.Steps)
 	if err := o.store.SaveResult(ctx, domain.Result{
 		RunID: run.ID, Summary: summary, Tests: testsJSON, Lint: checks.LintOutput, Files: files, RedFlags: flags,
-		Harness: domain.ResultHarness{Proof: proof, Coverage: o.measureCoverage(ctx, ws, t, run, rs, files)},
+		Harness: domain.ResultHarness{Proof: proof, Coverage: o.measureCoverage(ctx, ws, t, run, rs, files), Preexisting: run.Harness.BaselineFailed},
 	}); err != nil {
 		return err
 	}
@@ -1316,6 +1347,9 @@ func (o *Orchestrator) commitRepos(ctx context.Context, s domain.Settings, ws Wo
 		if rules, err := o.enforced(ctx, []int64{r.ID}); err == nil {
 			rf = append(rf, ruleFlags(ruleHits(files, rules))...)
 		}
+		if arch := o.approvedArch(ctx, r.ID); arch != nil {
+			rf = append(rf, layerFlags(files, arch, o.goModule(ctx, ws, r))...)
+		}
 		for _, f := range rf {
 			f.Path = r.Rel(f.Path)
 			flags = append(flags, f)
@@ -1348,6 +1382,14 @@ func (o *Orchestrator) checkAndFix(ctx context.Context, s domain.Settings, ws Wo
 			// Not a code problem: retrying with Claude would only burn turns.
 			run.ExitReason = checks.Reason
 			return checks, fmt.Errorf("%s\n%s", checks.Unfixable, truncate(checks.FailOutput, 2000))
+		}
+		if step, ok := preexisting(checks, run.Harness.BaselineFailed); ok {
+			// It failed before the change too: not the change's to fix.
+			checks.Preexisting = step.Name
+			o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: "checks", Type: domain.EventCheck, Level: domain.LevelWarn,
+				Message: fmt.Sprintf("%s fails as it did on the commit the work started from: going on to review", step.Name),
+				Data:    map[string]any{"name": step.Name, "preexisting": true}})
+			break
 		}
 		if attempt >= o.cfg.FixAttempts {
 			run.ExitReason = "checks_failed"
@@ -1421,7 +1463,7 @@ func (o *Orchestrator) report(ctx context.Context, s domain.Settings, t domain.T
 		return err
 	}
 	defer o.closeWorkspace(ctx, t, ws)
-	d.Context = o.contextFiles(ctx, ws, t, rs)
+	d.Context, d.Tracker = o.contextFiles(ctx, ws, t, rs), o.trackerContext(ctx, ws, t)
 
 	session, err := o.store.LastSessionID(ctx, t.ID)
 	if err != nil {

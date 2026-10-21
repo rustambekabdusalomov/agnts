@@ -134,6 +134,8 @@ func (o *Orchestrator) goModules(ctx context.Context, ws Workspace, r runRepo) m
 }
 
 // coverageFinding is the review finding for a change below the threshold.
+// A repository sets a threshold because it wants changes tested, so the
+// finding is major: agnts's own review sends it back to the coder once.
 func coverageFinding(c *domain.Coverage) *domain.Finding {
 	if c == nil || c.Threshold <= 0 || c.Total == 0 || c.Percent >= float64(c.Threshold) {
 		return nil
@@ -164,7 +166,7 @@ func coverageFinding(c *domain.Coverage) *domain.Finding {
 			break
 		}
 	}
-	return &domain.Finding{Severity: "minor", Category: "tests", File: first, Line: line, Confidence: 1,
+	return &domain.Finding{Severity: "major", Category: "tests", File: first, Line: line, Confidence: 1,
 		Title:      fmt.Sprintf("Tests cover %.1f%% of the changed lines, below the repository's %d%%", c.Percent, c.Threshold),
 		Detail:     "These added lines never ran in the tests:" + b.String(),
 		Suggestion: "Add tests that exercise the uncovered changed lines listed in the review."}

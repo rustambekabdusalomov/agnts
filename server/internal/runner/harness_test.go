@@ -132,6 +132,7 @@ func TestHostileRepoInRunner(t *testing.T) {
 		MaxTurns: 4,
 		Timeout:  5 * time.Minute,
 		Env:      []string{guard.ConfigEnv + "=" + gc.Encode()},
+		Effort:   "low", // the image's Claude Code must know --effort
 	}, nil)
 	if err != nil {
 		t.Fatalf("claude: %v (%+v)", err, res)

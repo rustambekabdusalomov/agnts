@@ -130,6 +130,19 @@ func ticketTexts(v TicketView) []string {
 			add(x.Cons...)
 		}
 		add(a.OutOfScope...)
+		for _, p := range a.Patterns {
+			add(p.Layer, p.Why, p.Place)
+		}
+		for _, r := range a.Reuse {
+			add(r.For)
+		}
+		for _, x := range a.TestPlan {
+			add(x.What)
+		}
+		add(a.EdgeCases...)
+		if a.Repro != nil {
+			add(a.Repro.Why)
+		}
 		if n := a.ShipPlan(); n != nil {
 			add(n.Migrations, n.Compatibility, n.Rollout, n.Rollback)
 		}

@@ -73,6 +73,10 @@ type RepoHarness struct {
 	// Acceptance checks the ticket's acceptance criteria in the running
 	// app after the preview (repositories with a preview command).
 	Acceptance bool `json:"acceptance,omitempty"`
+	// LayersBlock makes an import its approved architecture does not
+	// allow a blocker, which agnts's own review sends back to the coder;
+	// otherwise it is a red flag for the reviewer.
+	LayersBlock bool `json:"layersBlock,omitempty"`
 	// AgentConfig is what agnts found in the repository's agent
 	// instructions and configuration; agnts sets it, people read it.
 	AgentConfig *AgentConfigScan `json:"agentConfig,omitempty"`
@@ -206,6 +210,9 @@ type RunHarness struct {
 	// Skills the skills (method or team rule skills) Claude loaded in it.
 	MethodSkills []string `json:"methodSkills,omitempty"`
 	Skills       []string `json:"skills,omitempty"`
+	// BaselineFailed are the checks that already failed on the commit the
+	// work started from: not the run's to fix.
+	BaselineFailed []string `json:"baselineFailed,omitempty"`
 }
 
 // GuardSummary sums up a run's guard log.
@@ -248,6 +255,9 @@ type ResultHarness struct {
 	Proof         *Proof         `json:"proof,omitempty"`
 	Coverage      *Coverage      `json:"coverage,omitempty"`
 	Acceptance    *Acceptance    `json:"acceptance,omitempty"`
+	// Preexisting are the checks that already failed on the commit the
+	// work started from (code results).
+	Preexisting []string `json:"preexisting,omitempty"`
 }
 
 // Proof statuses.

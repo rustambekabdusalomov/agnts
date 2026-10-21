@@ -151,13 +151,15 @@ func (o *Orchestrator) review(ctx context.Context, s domain.Settings, t domain.T
 	}
 	var sum Summary
 	_ = json.Unmarshal(res.Summary, &sum)
-	d.WorkSummary, d.Notes, d.Deviations = sum.Summary, sum.Notes, sum.Deviations
+	d.WorkSummary, d.Notes, d.Deviations, d.Claims = sum.Summary, sum.Notes, sum.Deviations, sum.Criteria
+	d.Coverage, d.Proof, d.Accepted, d.Preexisting = res.Harness.Coverage, res.Harness.Proof, res.Harness.Acceptance, res.Harness.Preexisting
 	_ = json.Unmarshal(res.Tests, &d.CheckSteps)
 	d.Files = res.Files
 	if len(d.Files) > reviewMaxFiles {
 		d.Files = d.Files[:reviewMaxFiles]
 	}
 	d.RedFlags = res.RedFlags
+	d.NewNames = newNames(res.Files, 30)
 	if a != nil && a.Footprint != nil {
 		d.Unexpected = unexpectedFiles(a.Footprint.Clean().Files, res.Files)
 	}
@@ -172,7 +174,7 @@ func (o *Orchestrator) review(ctx context.Context, s domain.Settings, t domain.T
 		return err
 	}
 	defer o.closeWorkspace(ctx, t, ws)
-	d.Context = o.contextFiles(ctx, ws, t, rs)
+	d.Context, d.Tracker = o.contextFiles(ctx, ws, t, rs), o.trackerContext(ctx, ws, t)
 	if report {
 		err = ws.WriteFile(ctx, ReportPath, []byte(res.Report))
 	} else {
@@ -230,6 +232,12 @@ func (o *Orchestrator) review(ctx context.Context, s domain.Settings, t domain.T
 	if f := coverageFinding(res.Harness.Coverage); f != nil {
 		rv.Findings = append(rv.Findings, *f)
 		rv.Normalize()
+	}
+	if slices.ContainsFunc(rs, func(r runRepo) bool { return r.Harness.LayersBlock }) {
+		if fs := layerFindings(res.RedFlags); len(fs) > 0 {
+			rv.Findings = append(rv.Findings, fs...)
+			rv.Normalize()
+		}
 	}
 	o.saveFollowUps(ctx, s, t, run, domain.SuggestFromReview, rv.FollowUps)
 	rv.FollowUps = nil // kept as suggestions

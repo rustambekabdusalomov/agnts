@@ -37,7 +37,7 @@ func majorFinding() map[string]any {
 		"title": "SQL in the handler", "detail": "The handler queries the database directly.", "suggestion": "Move it to the store."}
 }
 
-func TestSelfReviewSendsSeriousFindingsBackOnce(t *testing.T) {
+func TestSelfReviewSendsSeriousFindingsBack(t *testing.T) {
 	h := newSelfReviewHarness(t)
 	h.toReview("PAY-1", withComplexity("simple"))
 	tk := h.state("PAY-1")
@@ -66,18 +66,38 @@ func TestSelfReviewSendsSeriousFindingsBackOnce(t *testing.T) {
 		t.Fatal("announced although it went back to the coder")
 	}
 
-	// The fix arrives loudly: agnts's review had its round.
+	// The fix arrives quietly again: agnts's review looks once more, and
+	// a major finding now stays for the person.
 	h.runner.scripts = []script{{result: ok("s-PAY-1"), edit: "fix again"}}
 	h.step() // code (feedback)
 	tk = h.expect("PAY-1", domain.StateWaitingForReview)
-	if tk.QuietReview || !strings.Contains(h.runner.prompts[len(h.runner.prompts)-1], "SQL in the handler") {
+	if !tk.QuietReview || !strings.Contains(h.runner.prompts[len(h.runner.prompts)-1], "SQL in the handler") {
 		t.Fatalf("after the fix: quiet=%v prompt:\n%s", tk.QuietReview, h.runner.prompts[len(h.runner.prompts)-1])
 	}
 	h.runner.scripts = []script{reviewScript("r2", codeReviewJSON("needs_changes", majorFinding()))}
-	h.step() // review again: findings stay for the person
+	h.step() // review again: the major stays for the person
 	tk = h.expect("PAY-1", domain.StateWaitingForReview)
-	if tk.SelfFixes != 1 || tk.ReviewState != domain.ReviewDone {
+	if tk.SelfFixes != 1 || tk.ReviewState != domain.ReviewDone || len(h.events("PAY-1", domain.EventReadyForReview)) != 1 {
 		t.Fatalf("second review: %+v", tk)
+	}
+
+	// A blocker in the second look goes back once more; the next fix
+	// arrives loudly.
+	if _, err := h.o.Review(h.ctx, "PAY-1", domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
+	blocker := majorFinding()
+	blocker["severity"], blocker["title"] = "blocker", "Refunds twice"
+	h.runner.scripts = []script{reviewScript("r3", codeReviewJSON("needs_changes", blocker, majorFinding()))}
+	h.step() // review
+	tk = h.expect("PAY-1", domain.StateCoding)
+	if tk.SelfFixes != 2 || !strings.Contains(tk.Feedback, "Refunds twice") || strings.Contains(tk.Feedback, "SQL in the handler") {
+		t.Fatalf("blocker round: %+v", tk)
+	}
+	h.runner.scripts = []script{{result: ok("s-PAY-1"), edit: "fix a third time"}}
+	h.step() // code
+	if tk = h.expect("PAY-1", domain.StateWaitingForReview); tk.QuietReview {
+		t.Fatal("the last fix arrived quietly")
 	}
 
 	// A person's change request gives agnts's review a new round.

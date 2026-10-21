@@ -71,6 +71,7 @@ type QualityStats struct {
 	FirstTry      int // done without a person asking for changes
 	Rejected      int
 	ChangeRounds  float64 // average change requests by a person, over those that reached review
+	CIRounds      float64 // average times red CI on the pull request sent them back, over those that reached review
 	FixAttempts   float64 // average failing checks sent back to Claude
 	Serious       int     // reviewed with a blocker or major finding at least once
 	FootprintHit  float64 // average share of changed files the analysis predicted (-1: none measured)
@@ -88,6 +89,35 @@ type QualityStats struct {
 	Tokens         float64 // average tokens of a done ticket (all stages)
 	FactCheck      int     // tickets in the fact check group (A/B)
 	FactCheckFirst int     // of those, done without a person asking for changes
+
+	// Outcome (Code quality plan, Phase 1).
+	Merged        int     // their pull requests merged
+	CostUSD       float64 // what all their runs cost
+	CostPerMerged float64 // CostUSD over Merged; -1 when none merged
+	Score         float64 // 0–100, see qualityScore
+	// PeopleEdited is the average share of agnts's lines people changed
+	// before merging (-1: no merge recorded); Reverted counts tickets whose
+	// merged work was reverted.
+	PeopleEdited float64
+	Reverted     int
+}
+
+// qualityScore sums a prompt version's outcome in one number from 0 to
+// 100: done first time (35%), merged (25%), no serious review finding
+// (20%) and few change rounds (20%, none at 0, nothing at 3 or more). Recent
+// versions score lower until their pull requests merge.
+func qualityScore(q QualityStats) float64 {
+	if q.Tickets == 0 {
+		return 0
+	}
+	n := float64(q.Tickets)
+	clean := 0.0
+	if q.ReachedReview > 0 {
+		clean = 1 - float64(q.Serious)/float64(q.ReachedReview)
+	}
+	rounds := 1 - min(q.ChangeRounds, 3)/3
+	s := 100 * (0.35*float64(q.FirstTry)/n + 0.25*float64(q.Merged)/n + 0.2*clean + 0.2*rounds)
+	return float64(int(s*10+0.5)) / 10
 }
 
 // SkillStats is how the tickets whose coding runs had one method skill
@@ -465,14 +495,19 @@ func (s *Agent) quality(ctx context.Context, from, to time.Time) ([]QualityStats
 			SELECT DISTINCT ON (ticket_id) ticket_id, prompt_version, started_at
 			FROM runs WHERE stage = 'code' ORDER BY ticket_id, started_at, id),
 		cohort AS (
-			SELECT f.ticket_id, f.prompt_version, f.started_at, t.key, t.state
+			SELECT f.ticket_id, f.prompt_version, f.started_at, t.key, t.state, t.merged_at
 			FROM first_code f JOIN tickets t ON t.id = f.ticket_id
 			WHERE f.started_at >= $1 AND f.started_at < $2 AND t.replay_of = '' AND t.kind <> 'review'),
 		per AS (
-			SELECT c.prompt_version, c.started_at, c.state,
+			SELECT c.prompt_version, c.started_at, c.state, c.merged_at IS NOT NULL AS merged,
+				(SELECT COALESCE(sum(cc.cost_usd), 0) FROM claude_calls cc WHERE cc.ticket_id = c.ticket_id)::float8 AS cost,
+				(SELECT avg((e.data->>'share')::float8) FROM events e WHERE e.ticket_key = c.key AND e.type = 'people_edits') AS edited,
+				EXISTS (SELECT 1 FROM events e WHERE e.ticket_key = c.key AND e.type = 'reverted') AS reverted,
 				EXISTS (SELECT 1 FROM events e WHERE e.ticket_key = c.key AND e.type = 'state_changed'
 					AND e.data->>'to' = 'waiting_for_review') AS reached,
-				(SELECT count(*) FROM events e WHERE e.ticket_key = c.key AND e.type = 'feedback' AND e.origin <> 'system') AS rounds,
+				(SELECT count(*) FROM events e WHERE e.ticket_key = c.key AND e.type = 'feedback' AND e.origin <> 'system'
+					AND COALESCE(e.data->>'ci', '') <> 'true') AS rounds,
+				(SELECT count(*) FROM events e WHERE e.ticket_key = c.key AND e.type = 'feedback' AND e.data->>'ci' = 'true') AS ci_rounds,
 				(SELECT count(*) FROM events e WHERE e.ticket_key = c.key AND e.type = 'feedback' AND e.origin = 'system') AS self_fixes,
 				(SELECT COALESCE(sum(r.fix_attempts), 0) FROM runs r WHERE r.ticket_id = c.ticket_id AND r.stage = 'code') AS fixes,
 				EXISTS (SELECT 1 FROM events e WHERE e.ticket_key = c.key AND e.type = 'review_done'
@@ -516,7 +551,12 @@ func (s *Agent) quality(ctx context.Context, from, to time.Time) ([]QualityStats
 			COALESCE(sum(adopted), 0)::int,
 			COALESCE(avg(tokens) FILTER (WHERE state = 'done'), 0)::float8,
 			count(*) FILTER (WHERE fact_check),
-			count(*) FILTER (WHERE fact_check AND state = 'done' AND rounds = 0)
+			count(*) FILTER (WHERE fact_check AND state = 'done' AND rounds = 0),
+			COALESCE(avg(ci_rounds) FILTER (WHERE reached), 0)::float8,
+			count(*) FILTER (WHERE merged),
+			COALESCE(sum(cost), 0)::float8,
+			COALESCE(avg(edited), -1)::float8,
+			count(*) FILTER (WHERE reverted)
 		FROM per GROUP BY prompt_version ORDER BY min(started_at)`, from, to)
 	if err != nil {
 		return nil, err
@@ -528,9 +568,14 @@ func (s *Agent) quality(ctx context.Context, from, to time.Time) ([]QualityStats
 		if err := rows.Scan(&q.PromptVersion, &q.Tickets, &q.ReachedReview, &q.Done, &q.FirstTry, &q.Rejected,
 			&q.ChangeRounds, &q.FixAttempts, &q.Serious, &q.FootprintHit, &q.RedFlags, &q.SelfFixes,
 			&q.GuardBlocks, &q.StopSaves, &q.Stalls, &q.ProofDue, &q.Proven, &q.Findings, &q.Adopted, &q.Tokens,
-			&q.FactCheck, &q.FactCheckFirst); err != nil {
+			&q.FactCheck, &q.FactCheckFirst, &q.CIRounds, &q.Merged, &q.CostUSD, &q.PeopleEdited, &q.Reverted); err != nil {
 			return nil, err
 		}
+		q.CostPerMerged = -1
+		if q.Merged > 0 {
+			q.CostPerMerged = q.CostUSD / float64(q.Merged)
+		}
+		q.Score = qualityScore(q)
 		out = append(out, q)
 	}
 	return out, rows.Err()
@@ -556,7 +601,8 @@ func (s *Agent) skills(ctx context.Context, from, to time.Time) ([]SkillStats, e
 		per AS (
 			SELECT g.skill, t.state,
 				EXISTS (SELECT 1 FROM loaded l WHERE l.ticket_id = g.ticket_id AND l.skill = g.skill) AS loaded,
-				(SELECT count(*) FROM events e WHERE e.ticket_key = t.key AND e.type = 'feedback' AND e.origin <> 'system') AS rounds,
+				(SELECT count(*) FROM events e WHERE e.ticket_key = t.key AND e.type = 'feedback' AND e.origin <> 'system'
+					AND COALESCE(e.data->>'ci', '') <> 'true') AS rounds,
 				(SELECT count(*) FROM results res JOIN runs r ON r.id = res.run_id, jsonb_array_elements(COALESCE(res.summary->'findings', '[]')) f
 					WHERE r.ticket_id = g.ticket_id AND r.stage = 'review'
 						AND (f->>'category' IN ('architecture', 'maintainability') OR COALESCE(f->>'file', '') ~ $3)) AS targeted,

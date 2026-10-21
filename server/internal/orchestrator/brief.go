@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -13,8 +14,12 @@ import (
 // Where a survey writes the brief, and where runs find the approved one.
 const (
 	BriefOutPath = "/agnts/out/brief.md"
-	ContextDir   = "/agnts/context"
-	BriefPath    = ContextDir + "/brief.md"
+	// ArchOutPath is where a survey writes the architecture, and ArchPath
+	// where runs (and the next survey) read the approved one.
+	ArchOutPath = "/agnts/out/architecture.json"
+	ArchPath    = ContextDir + "/architecture.json"
+	ContextDir  = "/agnts/context"
+	BriefPath   = ContextDir + "/brief.md"
 	// BusinessPath holds the business context notes runs read.
 	BusinessPath = ContextDir + "/business.md"
 	// PrecedentsPath holds the similar tickets done before.
@@ -121,6 +126,9 @@ func (o *Orchestrator) ApproveBrief(ctx context.Context, repoID int64, origin do
 		}
 		now := time.Now()
 		b.Body, b.BodySHA, b.Draft, b.DraftSHA = b.Draft, b.DraftSHA, "", ""
+		if b.ArchDraft != nil {
+			b.Arch, b.ArchDraft = b.ArchDraft, nil
+		}
 		b.MergesSince, b.ApprovedAt = 0, &now
 		b.Revision++
 		return nil
@@ -131,7 +139,8 @@ func (o *Orchestrator) ApproveBrief(ctx context.Context, repoID int64, origin do
 
 // SaveBrief replaces the approved brief with text a person wrote; empty
 // text removes it, so runs get no brief.
-func (o *Orchestrator) SaveBrief(ctx context.Context, repoID int64, text string, origin domain.Origin) (domain.RepoBrief, error) {
+// arch, when given, replaces the approved architecture (empty removes it).
+func (o *Orchestrator) SaveBrief(ctx context.Context, repoID int64, text string, arch *string, origin domain.Origin) (domain.RepoBrief, error) {
 	if err := o.briefsReady(); err != nil {
 		return domain.RepoBrief{}, err
 	}
@@ -139,9 +148,18 @@ func (o *Orchestrator) SaveBrief(ctx context.Context, repoID int64, text string,
 	if err != nil {
 		return domain.RepoBrief{}, invalid("%s", err.Error())
 	}
+	var a *domain.Architecture
+	if arch != nil {
+		if a, err = domain.ParseArchitecture(*arch); err != nil {
+			return domain.RepoBrief{}, invalid("%s", err.Error())
+		}
+	}
 	return o.briefs.UpdateBrief(ctx, repoID, func(b *domain.RepoBrief) error {
 		now := time.Now()
 		b.Body, b.ApprovedAt = text, &now
+		if arch != nil {
+			b.Arch = a
+		}
 		b.Revision++
 		return nil
 	}, func(b domain.RepoBrief) *domain.Event {
@@ -159,7 +177,7 @@ func (o *Orchestrator) DiscardBriefDraft(ctx context.Context, repoID int64, orig
 		return domain.RepoBrief{}, err
 	}
 	return o.briefs.UpdateBrief(ctx, repoID, func(b *domain.RepoBrief) error {
-		b.Draft, b.DraftSHA = "", ""
+		b.Draft, b.DraftSHA, b.ArchDraft = "", "", nil
 		b.Revision++
 		return nil
 	}, func(b domain.RepoBrief) *domain.Event {
@@ -262,6 +280,13 @@ func (o *Orchestrator) contextFiles(ctx context.Context, ws Workspace, t domain.
 				path, what = contextPath("brief", r), "the brief of "+r.Name+" ("+r.Folder()+"/) the team approved: its architecture, layers and allowed dependencies, recipes, files to copy, conventions and pitfalls"
 			}
 			write(path, b.Body+"\n", what)
+			if b.Arch != nil {
+				path, what := ArchPath, "the team's architecture.json: the layers and the imports each may make, the shared helpers to reuse, the recipes with files to copy. agnts checks changes against its layers"
+				if multi {
+					path, what = ContextDir+"/architecture-"+r.Folder()+".json", "the architecture.json of "+r.Name+" ("+r.Folder()+"/, paths relative to it): layers and allowed imports, shared helpers, recipes"
+				}
+				write(path, string(mustJSON(b.Arch))+"\n", what)
+			}
 		case err != nil && !errors.Is(err, domain.ErrNotFound):
 			o.log.Warn("load the brief", "repo", r.Name, "err", err)
 		}
@@ -370,9 +395,17 @@ func businessMarkdown(notes []domain.Rule) string {
 
 func precedentsMarkdown(repo string, ps []Precedent) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "# Similar tickets done before in %s\n\nThe team approved these changes.\n", repo)
+	fmt.Fprintf(&b, "# Similar tickets done before in %s\n\nThe team merged these changes; do similar work the same way.\n", repo)
+	rejected := false
 	for _, p := range ps {
+		if p.Rejected && !rejected {
+			rejected = true
+			b.WriteString("\n# Rejected: what not to do\n\nA person rejected these. Do not repeat what they objected to.\n")
+		}
 		fmt.Fprintf(&b, "\n## %s: %s\n", p.Key, p.Title)
+		if p.Rejected && p.Reason != "" {
+			fmt.Fprintf(&b, "\nWhy it was rejected: %s\n", truncate(p.Reason, 800))
+		}
 		if p.Summary != "" {
 			fmt.Fprintf(&b, "\nWhat changed: %s\n", truncate(p.Summary, 1500))
 		}
@@ -387,8 +420,47 @@ func precedentsMarkdown(repo string, ps []Precedent) string {
 		for _, f := range p.Feedback {
 			fmt.Fprintf(&b, "\nA reviewer asked: %s\n", truncate(strings.ReplaceAll(f, "\n", " "), 800))
 		}
+		if p.Excerpt != "" && !p.Rejected {
+			what := "From agnts's change"
+			if p.Merged {
+				what = "From what merged"
+			}
+			fmt.Fprintf(&b, "\n%s:\n\n```diff\n%s\n```\n", what, p.Excerpt)
+		}
 	}
 	return b.String()
+}
+
+// DiffExcerpt is the key part of a change for a precedent: the files the
+// work at hand also touches first, then the largest, at most maxLines
+// lines of diff in all.
+func DiffExcerpt(files []domain.FileChange, prefer []string, maxLines int) string {
+	fs := slices.Clone(files)
+	slices.SortStableFunc(fs, func(a, b domain.FileChange) int {
+		pa, pb := slices.Contains(prefer, a.Path), slices.Contains(prefer, b.Path)
+		if pa != pb {
+			if pa {
+				return -1
+			}
+			return 1
+		}
+		return (b.Add + b.Del) - (a.Add + a.Del)
+	})
+	var b strings.Builder
+	left := maxLines
+	for _, f := range fs {
+		if left <= 0 || strings.TrimSpace(f.Diff) == "" {
+			continue
+		}
+		lines := strings.Split(strings.TrimRight(f.Diff, "\n"), "\n")
+		take := min(len(lines), left, 40)
+		fmt.Fprintf(&b, "--- %s\n%s\n", f.Where(), strings.Join(lines[:take], "\n"))
+		if take < len(lines) {
+			b.WriteString("…\n")
+		}
+		left -= take
+	}
+	return strings.TrimRight(b.String(), "\n")
 }
 
 // surveyBrief has Claude survey a claimed repository and stores the draft
@@ -396,7 +468,7 @@ func precedentsMarkdown(repo string, ps []Precedent) string {
 func (o *Orchestrator) surveyBrief(ctx context.Context, b domain.RepoBrief) {
 	log := o.log.With("repo", b.RepoID)
 	log.Info("survey started")
-	draft, sha, err := o.runSurvey(ctx, b)
+	draft, sha, arch, err := o.runSurvey(ctx, b)
 	if ctx.Err() != nil {
 		log.Info("survey interrupted") // RecoverBriefs requeues it
 		return
@@ -421,7 +493,7 @@ func (o *Orchestrator) surveyBrief(ctx context.Context, b domain.RepoBrief) {
 			level, msg = domain.LevelWarn, fmt.Sprintf("could not survey %s: %v", x.RepoName, err)
 		default:
 			now := time.Now()
-			x.Status, x.Error, x.Draft, x.DraftSHA, x.SurveyedAt = domain.BriefIdle, "", draft, sha, &now
+			x.Status, x.Error, x.Draft, x.DraftSHA, x.ArchDraft, x.SurveyedAt = domain.BriefIdle, "", draft, sha, arch, &now
 			msg = fmt.Sprintf("survey of %s finished: a draft brief waits for your approval", x.RepoName)
 		}
 		return nil
@@ -443,27 +515,27 @@ func (o *Orchestrator) surveyBrief(ctx context.Context, b domain.RepoBrief) {
 	}
 }
 
-func (o *Orchestrator) runSurvey(ctx context.Context, b domain.RepoBrief) (string, string, error) {
+func (o *Orchestrator) runSurvey(ctx context.Context, b domain.RepoBrief) (string, string, *domain.Architecture, error) {
 	s, err := o.settings.Get(ctx)
 	if err != nil {
-		return "", "", err
+		return "", "", nil, err
 	}
 	repo, err := o.store.RepositoryByID(ctx, b.RepoID)
 	if err != nil {
-		return "", "", err
+		return "", "", nil, err
 	}
 	if err := o.git.Prepare(ctx, repo, repo.DefaultBranch); err != nil {
-		return "", "", fmt.Errorf("prepare repository: %w", err)
+		return "", "", nil, fmt.Errorf("prepare repository: %w", err)
 	}
 	rc, err := o.git.Archive(ctx, repo, repo.DefaultBranch)
 	if err != nil {
-		return "", "", fmt.Errorf("archive repository: %w", err)
+		return "", "", nil, fmt.Errorf("archive repository: %w", err)
 	}
 	defer func() { _ = rc.Close() }()
 
 	ws, err := o.runner.Open(ctx, WorkspaceSpec{TicketKey: fmt.Sprintf("brief-%d", repo.ID), Image: o.cfg.Image, Repo: rc})
 	if err != nil {
-		return "", "", fmt.Errorf("start container: %w", err)
+		return "", "", nil, fmt.Errorf("start container: %w", err)
 	}
 	defer func() {
 		if err := ws.Close(context.WithoutCancel(ctx)); err != nil {
@@ -480,15 +552,18 @@ func (o *Orchestrator) runSurvey(ctx context.Context, b domain.RepoBrief) (strin
 	d := promptData{Repo: repo, Brief: b}
 	if b.Ready() {
 		if err := ws.WriteFile(ctx, BriefPath, []byte(b.Body+"\n")); err != nil {
-			return "", "", fmt.Errorf("copy the brief: %w", err)
+			return "", "", nil, fmt.Errorf("copy the brief: %w", err)
+		}
+		if b.Arch != nil {
+			_ = ws.WriteFile(ctx, ArchPath, mustJSON(b.Arch))
 		}
 	}
 	if d.Rules, err = o.teamRules(ctx, []int64{repo.ID}); err != nil {
-		return "", "", err
+		return "", "", nil, err
 	}
 	prompt, err := render("survey", d)
 	if err != nil {
-		return "", "", err
+		return "", "", nil, err
 	}
 	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeBrief, WorkspaceID: repo.WorkspaceID, Subject: repo.Name}, ClaudeRequest{
 		Prompt:   prompt,
@@ -502,28 +577,51 @@ func (o *Orchestrator) runSurvey(ctx context.Context, b domain.RepoBrief) (strin
 		}
 	})
 	if err != nil {
-		return "", "", err
+		return "", "", nil, err
 	}
 	if res.RateLimited {
 		o.usage.RecordLimited(ctx)
-		return "", "", &stopError{"rate limited"}
+		return "", "", nil, &stopError{"rate limited"}
 	}
 	if res.IsError {
 		if res.Subtype == "error_max_turns" {
-			return "", "", fmt.Errorf("stopped at the turn limit (%d) before writing the brief", min(s.MaxTurns, surveyMaxTurns))
+			return "", "", nil, fmt.Errorf("stopped at the turn limit (%d) before writing the brief", min(s.MaxTurns, surveyMaxTurns))
 		}
-		return "", "", fmt.Errorf("claude ended with %s: %s", res.Subtype, truncate(res.Text, 500))
+		return "", "", nil, fmt.Errorf("claude ended with %s: %s", res.Subtype, truncate(res.Text, 500))
 	}
 	raw, err := ws.ReadFile(ctx, BriefOutPath)
 	if err != nil {
-		return "", "", fmt.Errorf("claude did not write %s: %w", BriefOutPath, err)
+		return "", "", nil, fmt.Errorf("claude did not write %s: %w", BriefOutPath, err)
 	}
 	draft, err := domain.CleanBriefText(string(raw))
 	if err != nil {
-		return "", "", err
+		return "", "", nil, err
 	}
 	if len(draft) < 200 {
-		return "", "", errors.New("the survey wrote an almost empty brief")
+		return "", "", nil, errors.New("the survey wrote an almost empty brief")
 	}
-	return draft, sha, nil
+	return draft, sha, o.surveyArchitecture(ctx, ws, repo.Name), nil
+}
+
+// surveyArchitecture reads the architecture a survey wrote, without the
+// files it names that do not exist; nil when there is none or it is not
+// valid (the brief is kept either way).
+func (o *Orchestrator) surveyArchitecture(ctx context.Context, ws Workspace, repo string) *domain.Architecture {
+	raw, err := ws.ReadFile(ctx, ArchOutPath)
+	if err != nil {
+		return nil
+	}
+	a, err := domain.ParseArchitecture(string(raw))
+	if err != nil || a == nil {
+		if err != nil {
+			o.log.Warn("survey architecture", "repo", repo, "err", err)
+		}
+		return nil
+	}
+	if missing := missingFiles(ctx, ws, a.Files()); len(missing) > 0 {
+		o.log.Info("survey architecture names files that do not exist; dropped", "repo", repo, "files", missing)
+		x := a.Without(missing)
+		a = &x
+	}
+	return a
 }

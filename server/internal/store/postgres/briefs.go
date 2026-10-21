@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
 	"github.com/jackc/pgx/v5"
@@ -20,18 +21,21 @@ var _ orchestrator.Briefs = (*Briefs)(nil)
 func NewBriefs(db *pgxpool.Pool) *Briefs { return &Briefs{db: db} }
 
 const briefCols = `b.repo_id, b.workspace_id, r.name, b.body, b.body_sha, b.draft, b.draft_sha, b.status, b.merges_since,
-	b.error, b.revision, b.surveyed_at, b.approved_at, b.updated_at`
+	b.error, b.revision, b.surveyed_at, b.approved_at, b.updated_at, b.architecture, b.architecture_draft`
 
 const briefFrom = ` FROM repo_briefs b JOIN repositories r ON r.id = b.repo_id`
 
 func scanBrief(row pgx.Row) (domain.RepoBrief, error) {
 	var b domain.RepoBrief
 	var status string
+	var arch, draft []byte
 	err := row.Scan(&b.RepoID, &b.WorkspaceID, &b.RepoName, &b.Body, &b.BodySHA, &b.Draft, &b.DraftSHA, &status, &b.MergesSince,
-		&b.Error, &b.Revision, &b.SurveyedAt, &b.ApprovedAt, &b.UpdatedAt)
+		&b.Error, &b.Revision, &b.SurveyedAt, &b.ApprovedAt, &b.UpdatedAt, &arch, &draft)
 	if err != nil {
 		return b, notFound(err)
 	}
+	b.Arch, _ = domain.ParseArchitecture(string(arch))
+	b.ArchDraft, _ = domain.ParseArchitecture(string(draft))
 	b.Status = domain.BriefStatus(status)
 	return b, nil
 }
@@ -63,10 +67,11 @@ func (s *Briefs) UpdateBrief(ctx context.Context, repoID int64, mut func(*domain
 			return err
 		}
 		if _, err := tx.Exec(ctx, `UPDATE repo_briefs SET body = $2, body_sha = $3, draft = $4, draft_sha = $5, status = $6,
-			merges_since = $7, error = $8, revision = $9, surveyed_at = $10, approved_at = $11, updated_at = now()
+			merges_since = $7, error = $8, revision = $9, surveyed_at = $10, approved_at = $11, architecture = $12,
+			architecture_draft = $13, updated_at = now()
 			WHERE repo_id = $1`,
 			b.RepoID, b.Body, b.BodySHA, b.Draft, b.DraftSHA, string(b.Status), b.MergesSince, b.Error, b.Revision,
-			b.SurveyedAt, b.ApprovedAt); err != nil {
+			b.SurveyedAt, b.ApprovedAt, archJSON(b.Arch), archJSON(b.ArchDraft)); err != nil {
 			return err
 		}
 		if out, err = scanBrief(tx.QueryRow(ctx, `SELECT `+briefCols+briefFrom+` WHERE b.repo_id = $1`, repoID)); err != nil {
@@ -81,6 +86,15 @@ func (s *Briefs) UpdateBrief(ctx context.Context, repoID int64, mut func(*domain
 		return nil
 	})
 	return out, err
+}
+
+// archJSON is an architecture for a jsonb column, nil (NULL) for none.
+func archJSON(a *domain.Architecture) []byte {
+	if a == nil {
+		return nil
+	}
+	b, _ := json.Marshal(a)
+	return b
 }
 
 // ClaimBrief moves the oldest pending brief to surveying and returns it; ok

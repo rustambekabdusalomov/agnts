@@ -32,6 +32,7 @@ type ReflectFile struct {
 		Body  string `json:"body"`
 		Scope string `json:"scope"` // repository or global
 		Why   string `json:"why"`
+		Tag   string `json:"tag"` // reuse, layer, tests, style, logic or other
 	} `json:"suggestions"`
 	// Reinforces are suggestions already made that this feedback shows
 	// again.
@@ -319,7 +320,10 @@ func (o *Orchestrator) saveLessons(ctx context.Context, t domain.Ticket, r domai
 		}
 		rule := domain.Rule{Title: x.Title, Body: x.Body, Enabled: true, Status: domain.RuleSuggested, Kind: domain.KindInstruction,
 			SourceTicket: t.Key, Reason: truncate(strings.TrimSpace(x.Why), 1000),
-			Source: "reflect", Confidence: domain.ConfidenceFromFeedback, Evidence: 1, LastSeen: &now}
+			Source: "reflect", Confidence: domain.ConfidenceFromFeedback, Evidence: 1, LastSeen: &now, Tag: domain.CleanLessonTag(x.Tag)}
+		if r.Source == domain.ReflectMerged || r.Source == domain.ReflectReverted {
+			rule.Source = r.Source
+		}
 		if fromRun {
 			rule.Kind, rule.Delivery, rule.Source, rule.Confidence = domain.KindTip, domain.DeliverSkill, "run", domain.ConfidenceFromRun
 		}

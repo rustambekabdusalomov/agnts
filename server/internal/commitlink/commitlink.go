@@ -66,6 +66,19 @@ type Service struct {
 
 	mu    sync.Mutex
 	snaps map[int64]snapshot // by repository
+	// reverted hears of commits pushed to a default branch that revert a
+	// ticket's work (nil: nobody listens).
+	reverted func(ctx context.Context, l domain.CommitLink)
+}
+
+// OnRevert sets what hears of a revert of a ticket's work pushed to a
+// repository's default branch.
+func (s *Service) OnRevert(f func(ctx context.Context, l domain.CommitLink)) { s.reverted = f }
+
+// IsRevert reports whether a commit subject reverts another commit, as git
+// and the git hosts write it.
+func IsRevert(subject string) bool {
+	return strings.HasPrefix(subject, `Revert "`) || strings.HasPrefix(subject, "Revert '") || strings.HasPrefix(subject, "revert: ")
 }
 
 // snapshot is a repository's branch names and default-branch history.
@@ -132,6 +145,14 @@ func (s *Service) Push(ctx context.Context, p domain.Push) error {
 	added, err := s.store.UpsertCommitLinks(ctx, links)
 	if err != nil {
 		return err
+	}
+	if s.reverted != nil && p.Branch == repo.DefaultBranch {
+		for _, l := range links {
+			if added[l.TicketID] > 0 && IsRevert(l.Subject) {
+				l.RepoName = repo.Name
+				s.reverted(ctx, l)
+			}
+		}
 	}
 	who := p.Pusher
 	if who == "" {

@@ -555,6 +555,7 @@ func (o *Orchestrator) markRepoMerged(ctx context.Context, t domain.Ticket, repo
 	if repo, err := o.store.RepositoryByID(ctx, repoID); err == nil {
 		o.dropRepoBranch(ctx, out, repo, r.Branch)
 		o.countRepoMerge(ctx, out, repoID)
+		o.saveMergedChange(ctx, out, repo, r)
 	}
 	if became {
 		o.mergedNote(ctx, out, origin)

@@ -103,7 +103,7 @@ func TestBriefSurveyApproveAndUse(t *testing.T) {
 	}
 
 	// A person's edit wins, and an update survey starts from it.
-	if _, err := h.o.SaveBrief(h.ctx, repo, briefMarkdown()+"\n## Pitfalls\nNever edit gen/ by hand.\n", domain.OriginWeb); err != nil {
+	if _, err := h.o.SaveBrief(h.ctx, repo, briefMarkdown()+"\n## Pitfalls\nNever edit gen/ by hand.\n", nil, domain.OriginWeb); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := h.o.SurveyBrief(h.ctx, repo, domain.OriginWeb); err != nil {

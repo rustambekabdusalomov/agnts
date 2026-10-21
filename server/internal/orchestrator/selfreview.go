@@ -4,14 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 
 	"agnts/internal/domain"
 )
 
 // maxSelfFixes is how many rounds agnts's own review may send a change
-// back before a person sees it, per change request by a person.
-const maxSelfFixes = 1
+// back before a person sees it, per change request by a person: once for
+// blockers and majors, then once more for blockers only.
+const maxSelfFixes = 2
 
 // selfReviewDue reports whether agnts's own review of t's next result may
 // still send it back to the coder: the ticket then reaches review quietly.
@@ -60,6 +62,10 @@ func selfFixFeedback(fs []domain.Finding) string {
 // ticket is announced to the people who review it.
 func (o *Orchestrator) afterReview(ctx context.Context, s domain.Settings, t domain.Ticket, run *domain.Run, rv domain.Review) error {
 	fs := seriousFindings(rv)
+	if t.SelfFixes > 0 {
+		// The second look at a fixed revision sends back blockers only.
+		fs = slices.DeleteFunc(fs, func(f domain.Finding) bool { return f.Severity != "blocker" })
+	}
 	if len(fs) == 0 || !selfReviewDue(s, t) {
 		o.announceQuiet(ctx, t.Key, run, "agnts's code review: "+strings.ReplaceAll(rv.Verdict, "_", " "))
 		return nil

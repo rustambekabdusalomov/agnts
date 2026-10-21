@@ -30,7 +30,7 @@ func mustJSON(v any) []byte {
 func toRepoHarness(x domain.Repository) *gen.RepoHarness {
 	h := x.Harness
 	out := gen.RepoHarness{
-		Acceptance: ptr(h.Acceptance), EditChecksOff: ptr(h.EditChecksOff), SecretAllow: ptr(nonNil(h.SecretAllow)),
+		Acceptance: ptr(h.Acceptance), EditChecksOff: ptr(h.EditChecksOff), SecretAllow: ptr(nonNil(h.SecretAllow)), LayersBlock: ptr(h.LayersBlock),
 		Coverage: ptr(via[gen.CoverageConfig](h.Coverage)),
 	}
 	if h.GuardProfile != "" {
@@ -87,6 +87,9 @@ func (s *Server) SaveRepoHarness(w http.ResponseWriter, r *http.Request, id int6
 	}
 	if in.Acceptance != nil {
 		h.Acceptance = *in.Acceptance
+	}
+	if in.LayersBlock != nil {
+		h.LayersBlock = *in.LayersBlock
 	}
 	x, err := s.opt.Admin.Repos.SetHarness(r.Context(), id, h, origin(r))
 	if err != nil {

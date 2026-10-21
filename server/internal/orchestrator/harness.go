@@ -77,6 +77,9 @@ func (o *Orchestrator) guardConfig(ctx context.Context, s domain.Settings, t dom
 			if multi {
 				cmd.Name, cmd.Dir, cmd.IfChanged = r.Name+" "+cmd.Name, r.Folder(), true
 			}
+			if slices.Contains(run.Harness.BaselineFailed, cmd.Name) {
+				continue // it fails on the base commit: Claude cannot make it pass
+			}
 			c.Stop = append(c.Stop, cmd)
 		}
 		for _, ec := range editChecks(r.Repository) {

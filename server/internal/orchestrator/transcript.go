@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -60,6 +61,7 @@ type transcriptMeta struct {
 // transcript. Every invocation goes through here; recording problems are
 // logged and never fail the run.
 func (o *Orchestrator) callClaude(ctx context.Context, ws Workspace, m transcriptMeta, req ClaudeRequest, onEvent func(ClaudeEvent)) (ClaudeResult, error) {
+	req = o.fitPrompt(ctx, ws, m, req)
 	if o.recorder == nil {
 		return ws.Claude(ctx, req, onEvent)
 	}
@@ -386,4 +388,30 @@ func gzipBytes(b []byte) []byte {
 	_, _ = zw.Write(b)
 	_ = zw.Close()
 	return buf.Bytes()
+}
+
+// Prompts travel as one command-line argument, which Linux caps at 128 KiB
+// (MAX_ARG_STRLEN). A prompt near that size goes into a file the run reads
+// first.
+const (
+	maxArgPrompt = 96 << 10
+	// PromptPath is where a run finds a prompt too long for the command line.
+	PromptPath = ContextDir + "/prompt.md"
+)
+
+// fitPrompt moves a prompt too long for the command line into PromptPath.
+func (o *Orchestrator) fitPrompt(ctx context.Context, ws Workspace, m transcriptMeta, req ClaudeRequest) ClaudeRequest {
+	if len(req.Prompt) <= maxArgPrompt {
+		return req
+	}
+	if err := ws.WriteFile(ctx, PromptPath, []byte(req.Prompt)); err != nil {
+		o.log.Warn("write a long prompt to a file", "ticket", m.TicketKey, "err", err)
+		return req
+	}
+	if m.TicketKey != "" {
+		o.event(ctx, domain.Event{TicketKey: m.TicketKey, Level: domain.LevelWarn, Type: domain.EventClaudeText,
+			Message: fmt.Sprintf("the prompt is %d KB, too long for the command line: the run reads it from %s (fewer or shorter team rules keep it small)", len(req.Prompt)>>10, PromptPath)})
+	}
+	req.Prompt = "Your full instructions are in " + PromptPath + ". Read the whole file first (it is long: read it in parts if you must), then follow it exactly as if it were this message."
+	return req
 }

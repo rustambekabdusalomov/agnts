@@ -31,6 +31,9 @@ type checkReport struct {
 	// what the person should change instead.
 	Unfixable string
 	Reason    string // run exit reason for Unfixable
+	// Preexisting names the failing check when it failed the same way on
+	// the commit the work started from.
+	Preexisting string
 }
 
 // notFoundRe matches bash's own message for a command of the check line

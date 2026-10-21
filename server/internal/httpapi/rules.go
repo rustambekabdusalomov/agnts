@@ -177,6 +177,9 @@ func toRule(x domain.Rule) gen.Rule {
 		AnalyzedAt: x.AnalyzedAt, CreatedAt: x.CreatedAt, UpdatedAt: x.UpdatedAt,
 		Questions: make([]gen.RuleQuestion, len(x.Questions)),
 	}
+	if x.Tag != "" {
+		out.Tag = ptr(gen.RuleTag(x.Tag))
+	}
 	if x.RepoName != "" {
 		out.RepoName = &x.RepoName
 	}

@@ -476,6 +476,9 @@ func (w *workspace) Claude(ctx context.Context, req orchestrator.ClaudeRequest, 
 	if req.Resume != "" {
 		argv = append(argv, "--resume", req.Resume)
 	}
+	if req.Effort != "" {
+		argv = append(argv, "--effort", req.Effort)
+	}
 	if req.Settings != "" {
 		argv = append(argv, "--settings", req.Settings)
 	}

@@ -40,6 +40,34 @@ func (h *harness) apiRepo() int64 {
 	return r.ID
 }
 
+// A ticket in two repositories gets half as many turns again, and the
+// drift checkpoint keeps that budget: a third of it, then the rest.
+func TestMultiRepoCheckpointKeepsTheBudget(t *testing.T) {
+	h := newHarness(t)
+	_, _, group := h.shop()
+	var budgets []int
+	h.runner.onClaude = func(r orchestrator.ClaudeRequest) { budgets = append(budgets, r.MaxTurns) }
+	if _, err := h.o.CreateTask(h.ctx, orchestrator.TaskInput{GroupID: group, Kind: "code", Title: "Show refunds", Priority: "medium",
+		AfterApprove: "pr", Start: "code"}, domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
+	h.runner.scripts = []script{
+		{result: ok("s1"), files: map[string]string{orchestrator.AnalysisPath: `{"summary":"s","plan":["p"],"complexity":"simple",` +
+			`"approaches":[{"title":"Both","sketch":"API then page."}],"footprint":{"files":["api/main.go"]}}`}},
+		{result: orchestrator.ClaudeResult{SessionID: "s1", Turns: 75, Subtype: "error_max_turns", IsError: true}, edit: "api:half"},
+		{result: ok("s1"), edit: "api:v1\nweb:v1"},
+	}
+	for _, f := range []string{"api", "web"} {
+		h.runner.execs["cd '"+f+"' && {\ngit status --porcelain --untracked-files=all\n}"] = []orchestrator.ExecResult{
+			{Output: " M main.go"}, {Output: " M main.go"}, {Output: " M main.go"}, {Output: " M main.go"}}
+	}
+	h.step() // analyze
+	h.step() // code, with the checkpoint
+	if len(budgets) != 3 || budgets[1] != 75 || budgets[2] != 150 {
+		t.Fatalf("turn budgets (150 turns × 1.5): %v", budgets)
+	}
+}
+
 func repoRow(t *testing.T, tk domain.Ticket, id int64) domain.TicketRepo {
 	t.Helper()
 	r, ok := tk.RepoState(id)
