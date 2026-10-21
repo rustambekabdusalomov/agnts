@@ -168,14 +168,14 @@
     "tagline": "Don't spend time on coding. Start engineering."
   },
   "hero": {
-    "accent": "24/7.",
+    "accent": "platform.",
     "log1": "asked 2 questions, answered from phone",
     "log3": "48 passed",
     "log4": "waiting for your review",
     "ready": "Ready for your review",
     "see": "See how it works",
     "ticketTitle": "Require idempotency key on transfer creation",
-    "title": "Your AI teammate who never sleeps and works {accent}"
+    "title": "AI-driven development {accent}"
   },
   "how": {
     "lead": "Junior, mid-level or senior: hand agnts the routine tickets and keep your hours for the work that needs you.",

@@ -168,14 +168,14 @@
     "tagline": "Vaqtingizni kod yozishga sarflamang. Muhandislik bilan shug'ullaning."
   },
   "hero": {
-    "accent": "24/7",
+    "accent": "platformasi.",
     "log1": "2 ta savol berdi, telefondan javob berildi",
     "log3": "48 ta o'tdi",
     "log4": "tekshiruvingizni kutmoqda",
     "ready": "Tekshiruvingizga tayyor",
     "see": "Qanday ishlashini ko'ring",
     "ticketTitle": "O'tkazma yaratishda idempotentlik kalitini talab qilish",
-    "title": "Hech qachon uxlamaydigan va {accent} ishlaydigan AI jamoadoshingiz."
+    "title": "AI-driven dasturlash {accent}"
   },
   "how": {
     "lead": "Junior, middle yoki senior: oddiy vazifalarni agnts'ga topshiring, vaqtingizni esa sizni talab qiladigan ishlarga qoldiring.",

@@ -87,6 +87,18 @@ dev-admin: ## Run the admin panel with hot reload on :5173
 dev-website: ## Run the public website on :3000
 	cd apps/website && npm run dev
 
+.PHONY: demo-db demo-server
+DEMO_DB := docker exec -i agnts-dev-postgres-1 psql -U hiro -v ON_ERROR_STOP=1 -q
+demo-db: ## Recreate the demo database (agnts_demo) with screenshot data: DEMO_EMAIL=you@gmail.com DEMO_NAME="Your Name"
+	@test -n "$(DEMO_EMAIL)" || (echo "set DEMO_EMAIL to the Google account you sign in with" && exit 1)
+	$(DEMO_DB) -d hiro -c "DROP DATABASE IF EXISTS agnts_demo WITH (FORCE)" -c "CREATE DATABASE agnts_demo"
+	cd server && set -a && source ../deploy/.env.demo && set +a && go run ./cmd/agnts migrate
+	python3 scripts/demo_seed.py "$(DEMO_EMAIL)" "$(or $(DEMO_NAME),Demo Owner)" | $(DEMO_DB) -d agnts_demo
+
+demo-server: ## Run the server against the demo database (API only, no agent runs)
+	mkdir -p .dev-data-demo
+	cd server && set -a && source ../deploy/.env.demo && set +a && go run ./cmd/agnts serve
+
 dev-user: ## Create the local admin user
 	cd server && set -a && source ../deploy/.env.dev && set +a && go run ./cmd/agnts user create $${USERNAME:-admin}
 
