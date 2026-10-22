@@ -21,7 +21,7 @@ func TestTransitionMatrix(t *testing.T) {
 		{StateCoding, StateTesting}, {StateCoding, StateWaitingForReview}, {StateCoding, StateFailed}, {StateCoding, StateRateLimited}, {StateCoding, StateRejected},
 		{StateTesting, StateWaitingForReview}, {StateTesting, StateCoding}, {StateTesting, StateFailed}, {StateTesting, StateRejected},
 		{StateWaitingForReview, StatePushing}, {StateWaitingForReview, StateCoding}, {StateWaitingForReview, StateRejected},
-		{StatePushing, StateDone}, {StatePushing, StateFailed},
+		{StatePushing, StateDone}, {StatePushing, StateFailed}, {StatePushing, StateRejected},
 		{StateFailed, StateNew}, {StateFailed, StateCoding}, {StateFailed, StatePushing}, {StateFailed, StateRejected},
 		{StateRateLimited, StateNew}, {StateRateLimited, StateCoding}, {StateRateLimited, StateRejected},
 		// Restart with a newer version of the issue, before anything is pushed.
@@ -51,6 +51,7 @@ func TestContinueState(t *testing.T) {
 		{StateWaitingForAnswers, false, StateWaitingForAnswers},
 		{StateCoding, false, StateCoding}, {StateTesting, true, StateCoding},
 		{StateWaitingForReview, false, StateWaitingForReview}, {StateWaitingForReview, true, StateCoding},
+		{StatePushing, false, StateWaitingForReview}, {StatePushing, true, StateCoding},
 		{StateFailed, false, StateFailed}, {StateRateLimited, false, StateRateLimited},
 	} {
 		got := ContinueState(c.from, c.note)

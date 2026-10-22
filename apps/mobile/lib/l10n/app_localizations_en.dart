@@ -11447,6 +11447,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String ticketRejectPushingConfirm(String key) {
+    return 'Stop pushing $key? What already reached the git host stays there. You can continue it later.';
+  }
+
+  @override
   String get ticketRetry => 'Retry';
 
   @override

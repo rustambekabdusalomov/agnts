@@ -11442,6 +11442,11 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
+  String ticketRejectPushingConfirm(String key) {
+    return '$key yuborilishi toʻxtatilsinmi? Git xostingga yetib borgan narsalar u yerda qoladi. Keyin davom ettirish mumkin.';
+  }
+
+  @override
   String get ticketRetry => 'Qayta urinish';
 
   @override

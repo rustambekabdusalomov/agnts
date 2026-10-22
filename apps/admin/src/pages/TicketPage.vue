@@ -418,7 +418,7 @@ async function startOver() {
 }
 function reject() {
   if (pull.value) confirmThen(t('reviews.dismissConfirm', { number: tk.value?.pull?.number ?? '', host: host.value }), 'reject')
-  else confirmThen(t('ticket.rejectConfirm', { key: key.value }), 'reject')
+  else confirmThen(t(tk.value?.state === 'pushing' ? 'ticket.rejectPushingConfirm' : 'ticket.rejectConfirm', { key: key.value }), 'reject')
 }
 // The merge method agnts uses, for the merge confirmation.
 const settingsQuery = useQuery({ queryKey: ['settings'], queryFn: () => unwrap(api.GET('/settings')), enabled: pull })
@@ -653,7 +653,10 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
               <h2>{{ titleWithRev(tk.state === 'new' ? t('ticket.queuedTitle') : tk.state === 'analyzing' ? t('reviews.fetchingTitle') : t('reviews.reviewingTitle')) }}</h2>
               <p class="sub">{{ tk.state === 'new' ? t('reviews.queuedSub') : t('reviews.reviewingSub') }}</p>
               <div v-if="tk.state !== 'new'" class="sec"><LiveLog :events="events" /></div>
-              <div v-if="tk.state !== 'new'" class="actions"><button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="confirmThen(t('ticket.stopConfirm', { key }), 'stop')">{{ t('ticket.stopRun') }}</button></div>
+              <div class="actions">
+                <button v-if="tk.state !== 'new'" class="btn btn-d" type="button" :disabled="act.isPending.value" @click="confirmThen(t('ticket.stopConfirm', { key }), 'stop')">{{ t('ticket.stopRun') }}</button>
+                <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('reviews.dismissBtn', { host }) }}</button>
+              </div>
             </template>
             <template v-else-if="pull && tk.state === 'waiting_for_review'">
               <h2>{{ titleWithRev(t('reviews.readyTitle')) }}</h2>
@@ -683,6 +686,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             <template v-else-if="pull && tk.state === 'pushing'">
               <h2>{{ t('reviews.mergingTitle') }}</h2>
               <div class="sec"><LiveLog :events="events" /></div>
+              <div class="actions"><button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('reviews.dismissBtn', { host }) }}</button></div>
             </template>
             <template v-else-if="pull && tk.state === 'done'">
               <h2>{{ finishOnly ? t('drafts.finishedTitle') : t('reviews.mergedTitle') }}</h2>
@@ -704,9 +708,10 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
               <KindPicker :ticket="tk" />
               <RepoPicker :ticket="tk" />
               <ModelPicker :ticket="tk" :stages="['analyze', 'coding']" />
-              <div v-if="tk.held" class="actions">
-                <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="act.mutate('start')">{{ t('ticket.start') }}</button>
-                <span class="hint">{{ t('ticket.startHint') }}</span>
+              <div class="actions">
+                <button v-if="tk.held" class="btn btn-p" type="button" :disabled="act.isPending.value" @click="act.mutate('start')">{{ t('ticket.start') }}</button>
+                <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.reject') }}</button>
+                <span v-if="tk.held" class="hint">{{ t('ticket.startHint') }}</span>
               </div>
             </template>
 
@@ -715,7 +720,10 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
               <h2>{{ tk.repoId ? t('ticket.analyzingTitle') : t('ticket.analyzingTitleNoRepo') }}</h2>
               <p class="sub">{{ tk.repoId ? t('ticket.analyzingSub', { repo: repoNames }) : t('ticket.analyzingSubNoRepo') }}</p>
               <div class="sec"><LiveLog :events="events" /></div>
-              <div class="actions"><button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="confirmThen(t('ticket.stopConfirm', { key }), 'stop')">{{ t('ticket.stopRun') }}</button></div>
+              <div class="actions">
+                <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="confirmThen(t('ticket.stopConfirm', { key }), 'stop')">{{ t('ticket.stopRun') }}</button>
+                <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.reject') }}</button>
+              </div>
             </template>
 
             <!-- waiting_for_answers -->
@@ -750,6 +758,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
                 <ModelPicker :ticket="tk" :stages="['coding', 'retry']" />
                 <div class="actions">
                   <button class="btn btn-p" type="submit" :disabled="left > 0 || answersUploading || act.isPending.value">{{ report ? t('ticket.startWriting') : t('ticket.startCoding') }}</button>
+                  <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.reject') }}</button>
                   <span class="hint">{{ left ? t('ticket.questionsLeft', { n: left }) : answersUploading ? t('files.wait') : t('ticket.allAnswered') }}</span>
                 </div>
               </form>
@@ -767,7 +776,10 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
                   <StateBadge :state="b.state" />
                 </li>
               </ul>
-              <div class="actions"><button class="btn" type="button" @click="tab = 'order'">{{ t('relations.title') }}</button></div>
+              <div class="actions">
+                <button class="btn" type="button" @click="tab = 'order'">{{ t('relations.title') }}</button>
+                <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.reject') }}</button>
+              </div>
             </template>
 
             <!-- coding / testing -->
@@ -776,10 +788,14 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
               <p class="sub">{{ tk.held ? t('swagger.queuedSub') : t('swagger.runningSub') }}</p>
               <div v-if="tk.held" class="actions">
                 <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="act.mutate('start')">{{ t('ticket.start') }}</button>
+                <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.reject') }}</button>
               </div>
               <template v-else>
                 <TicketSection id="log" :title="t('ticket.log')"><LiveLog :events="events" /></TicketSection>
-                <div class="actions"><button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="confirmThen(t('ticket.stopConfirm', { key }), 'stop')">{{ t('ticket.stopRun') }}</button></div>
+                <div class="actions">
+                  <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="confirmThen(t('ticket.stopConfirm', { key }), 'stop')">{{ t('ticket.stopRun') }}</button>
+                  <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.reject') }}</button>
+                </div>
               </template>
             </template>
             <template v-else-if="tk.state === 'coding' || tk.state === 'testing'">
@@ -794,7 +810,10 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
                 </dl>
               </div>
               <TicketSection id="log" :title="t('ticket.log')"><LiveLog :events="events" /></TicketSection>
-              <div class="actions"><button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="confirmThen(t('ticket.stopConfirm', { key }), 'stop')">{{ t('ticket.stopRun') }}</button></div>
+              <div class="actions">
+                <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="confirmThen(t('ticket.stopConfirm', { key }), 'stop')">{{ t('ticket.stopRun') }}</button>
+                <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.reject') }}</button>
+              </div>
             </template>
 
             <!-- waiting_for_review -->
@@ -880,6 +899,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
               <h2>{{ report ? t('ticket.deliveringTitle') : t('ticket.pushingTitle') }}</h2>
               <p class="sub">{{ report ? t('ticket.deliveringSub') : t('ticket.pushingSub') }}</p>
               <div class="sec"><LiveLog :events="events" /></div>
+              <div class="actions"><button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.reject') }}</button></div>
             </template>
 
             <!-- done -->
@@ -968,6 +988,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
               <RepoPicker v-if="canChangeRepo" :ticket="tk" />
               <div class="actions">
                 <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="act.mutate('retry')">{{ t('ticket.resume') }}</button>
+                <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.reject') }}</button>
                 <span class="hint">{{ t('ticket.rateHint', { pct: sessionPct }) }}</span>
               </div>
             </template>

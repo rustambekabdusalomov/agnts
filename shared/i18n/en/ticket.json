@@ -30,6 +30,7 @@
     "cancel": "Cancel",
     "reject": "Reject",
     "rejectConfirm": "Stop all work on {key}? You can continue it later.",
+    "rejectPushingConfirm": "Stop pushing {key}? What already reached the git host stays there. You can continue it later.",
     "retry": "Retry",
     "pullRequest": "Pull request #{number}",
     "branch": "Branch",

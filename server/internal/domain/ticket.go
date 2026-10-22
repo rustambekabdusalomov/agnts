@@ -184,10 +184,11 @@ var transitions = map[TicketState][]TicketState{
 	StateCoding:           {StateTesting, StateWaitingForReview, StateFailed, StateRateLimited, StateRejected, StateNew},
 	StateTesting:          {StateWaitingForReview, StateCoding, StateFailed, StateRejected, StateNew},
 	StateWaitingForReview: {StatePushing, StateCoding, StateRejected, StateNew},
-	StatePushing:          {StateDone, StateFailed},
-	StateFailed:           {StateNew, StateCoding, StatePushing, StateRejected},
-	StateRateLimited:      {StateNew, StateCoding, StateRejected},
-	StateDone:             {},
+	// Rejecting while pushing keeps what reached the git host.
+	StatePushing:     {StateDone, StateFailed, StateRejected},
+	StateFailed:      {StateNew, StateCoding, StatePushing, StateRejected},
+	StateRateLimited: {StateNew, StateCoding, StateRejected},
+	StateDone:        {},
 	// Only Continue leaves rejected (ContinueState says where to).
 	StateRejected: {StateNew, StateWaitingForAnswers, StateCoding, StateWaitingForReview, StateFailed, StateRateLimited},
 }
@@ -214,16 +215,16 @@ func CanContinue(t Ticket) bool {
 }
 
 // ContinueState is where Continue sends a ticket rejected in state from:
-// back where it stopped. A ticket rejected at review goes back to review,
-// or to coding when a note asks for changes; one that had failed shows its
-// error again. An unknown stage starts over from analysis.
+// back where it stopped. A ticket rejected at review or while pushing goes
+// back to review, or to coding when a note asks for changes; one that had
+// failed shows its error again. An unknown stage starts over from analysis.
 func ContinueState(from TicketState, note bool) TicketState {
 	switch from {
 	case StateWaitingForAnswers, StateFailed, StateRateLimited:
 		return from
 	case StateCoding, StateTesting:
 		return StateCoding
-	case StateWaitingForReview:
+	case StateWaitingForReview, StatePushing:
 		if note {
 			return StateCoding
 		}

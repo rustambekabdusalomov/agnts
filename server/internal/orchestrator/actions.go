@@ -664,9 +664,10 @@ func (o *Orchestrator) Reject(ctx context.Context, key, reason string, origin do
 	if r := strings.TrimSpace(reason); r != "" {
 		msg += ": " + r
 	}
+	var from domain.TicketState
 	t, err := o.store.Transition(ctx, key, domain.StateRejected, domain.Event{
 		TicketKey: key, Type: domain.EventStateChanged, Origin: origin, Message: msg,
-	}, func(x *domain.Ticket) { dropSideRuns(x) })
+	}, func(x *domain.Ticket) { from = x.State; dropSideRuns(x) })
 	if err != nil {
 		return t, err
 	}
@@ -674,7 +675,9 @@ func (o *Orchestrator) Reject(ctx context.Context, key, reason string, origin do
 	o.trackerMove(context.WithoutCancel(ctx), t, TrackerRejected)
 	o.queueReflection(context.WithoutCancel(ctx), t, domain.ReflectRejected, reason, origin)
 	o.noteReviewer(ctx, t, domain.NoteDismissed, reason, origin)
-	if !t.AnyPR() || t.Kind == domain.KindReview {
+	// A push stopped half way may have reached the git host: keep the
+	// branch for Continue.
+	if (!t.AnyPR() && from != domain.StatePushing) || t.Kind == domain.KindReview {
 		o.dropBranch(ctx, t) // never pushed (a review's branch is a copy): nothing else needs it
 	}
 	o.Wake() // tickets waiting for it may start

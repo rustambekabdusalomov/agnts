@@ -20397,6 +20397,12 @@ abstract class AppLocalizations {
   /// **'Stop all work on {key}? You can continue it later.'**
   String ticketRejectConfirm(String key);
 
+  /// No description provided for @ticketRejectPushingConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop pushing {key}? What already reached the git host stays there. You can continue it later.'**
+  String ticketRejectPushingConfirm(String key);
+
   /// No description provided for @ticketRetry.
   ///
   /// In en, this message translates to:

@@ -3384,6 +3384,7 @@
   "ticketCancel": "Bekor qilish",
   "ticketReject": "Rad etish",
   "ticketRejectConfirm": "{key} boʻyicha barcha ish toʻxtatilsinmi? Keyin davom ettirish mumkin.",
+  "ticketRejectPushingConfirm": "{key} yuborilishi toʻxtatilsinmi? Git xostingga yetib borgan narsalar u yerda qoladi. Keyin davom ettirish mumkin.",
   "ticketRetry": "Qayta urinish",
   "ticketPullRequest": "Pull request #{number}",
   "ticketBranch": "Branch",

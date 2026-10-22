@@ -1741,7 +1741,9 @@ func (o *Orchestrator) push(ctx context.Context, s domain.Settings, t domain.Tic
 // recordPushed stores that repository r of the ticket was pushed, with its
 // pull request (nil for a push to the default branch).
 func (o *Orchestrator) recordPushed(ctx context.Context, t domain.Ticket, r runRepo, number *int, url string) error {
-	_, err := o.store.UpdateTicket(ctx, t.Key, nil, func(x *domain.Ticket) {
+	// Recorded even when a reject cancels the push: the branch and pull
+	// request are on the git host now.
+	_, err := o.store.UpdateTicket(context.WithoutCancel(ctx), t.Key, nil, func(x *domain.Ticket) {
 		x.UpdateRepo(r.ID, func(row *domain.TicketRepo) {
 			if number != nil {
 				n := *number

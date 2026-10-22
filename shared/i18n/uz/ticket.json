@@ -30,6 +30,7 @@
     "cancel": "Bekor qilish",
     "reject": "Rad etish",
     "rejectConfirm": "{key} boʻyicha barcha ish toʻxtatilsinmi? Keyin davom ettirish mumkin.",
+    "rejectPushingConfirm": "{key} yuborilishi toʻxtatilsinmi? Git xostingga yetib borgan narsalar u yerda qoladi. Keyin davom ettirish mumkin.",
     "retry": "Qayta urinish",
     "pullRequest": "Pull request #{number}",
     "branch": "Branch",

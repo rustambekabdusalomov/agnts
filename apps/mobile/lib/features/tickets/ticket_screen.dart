@@ -1188,12 +1188,25 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     final key = t.key;
     final danger = OutlinedButton.styleFrom(foregroundColor: c.badInk);
     Widget hint(String text) => Expanded(child: Text(text, style: TextStyle(fontSize: 13, color: c.ink3)));
+    // A ticket can be rejected at any stage before it is done.
+    final reject = Tooltip(
+      message: l.ticketReject,
+      child: SizedBox(
+        width: 48,
+        child: OutlinedButton(
+          style: danger.copyWith(padding: const WidgetStatePropertyAll(EdgeInsets.zero)),
+          onPressed: _busy ? null : () => _reject(context, t),
+          child: HIcon('close', size: 20, stroke: 2.2, color: _busy ? c.line3 : c.badInk),
+        ),
+      ),
+    );
     List<Widget> buttons;
     switch (t.state) {
       case TicketState.waitingForAnswers:
         final left = d.questions.where((q) => _answerOf(q).isEmpty).length;
         final uploading = d.questions.any((q) => _filesFor(q).uploading);
         buttons = [
+          reject,
           hint(uploading
               ? l.filesWait
               : left > 0
@@ -1239,17 +1252,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
                 : (toMain ? l.ticketApproveMainConfirm : l.ticketApproveConfirm(t.branch)) +
                     (assign.isEmpty ? '' : '\n\n${l.ticketApproveAssignees(assign.join(', '))}');
         buttons = [
-          Tooltip(
-            message: l.ticketReject,
-            child: SizedBox(
-              width: 48,
-              child: OutlinedButton(
-                style: danger.copyWith(padding: const WidgetStatePropertyAll(EdgeInsets.zero)),
-                onPressed: _busy ? null : () => _reject(context, key),
-                child: HIcon('close', size: 20, stroke: 2.2, color: _busy ? c.line3 : c.badInk),
-              ),
-            ),
-          ),
+          reject,
           Expanded(
             child: OutlinedButton(
               onPressed: _busy ? null : () => _requestChanges(context, t),
@@ -1283,7 +1286,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           Expanded(
             child: OutlinedButton(
               style: danger,
-              onPressed: _busy ? null : () => _reject(context, key),
+              onPressed: _busy ? null : () => _reject(context, t),
               child: Text(failed ? l.ticketTakeItMyself : l.ticketReject, maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
           ),
@@ -1320,6 +1323,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
       case TicketState.coding:
       case TicketState.testing:
         buttons = [
+          reject,
           Expanded(
             child: OutlinedButton(
               style: danger,
@@ -1333,13 +1337,14 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           ),
         ];
       case TicketState.pushing:
-        buttons = [hint(l.mdetailWorking)];
+        buttons = [reject, hint(l.mdetailWorking)];
       case TicketState.new_ when t.held == true:
         buttons = [
+          reject,
           Expanded(child: FilledButton(onPressed: _busy ? null : () => _run(() => _tickets.startTicket(key: key)), child: Text(l.ticketStart))),
         ];
       case TicketState.new_:
-        buttons = [hint(l.ticketStartHint)];
+        buttons = [reject, hint(l.ticketStartHint)];
       case TicketState.done when t.prUrl.isNotEmpty:
         buttons = [
           Expanded(
@@ -1355,9 +1360,10 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     return ActionBar(children: buttons);
   }
 
-  Future<void> _reject(BuildContext context, String key) async {
+  Future<void> _reject(BuildContext context, Ticket t) async {
     final l = AppLocalizations.of(context);
-    if (await _confirm(l.ticketRejectConfirm(key))) {
+    final key = t.key;
+    if (await _confirm(t.state == TicketState.pushing ? l.ticketRejectPushingConfirm(key) : l.ticketRejectConfirm(key))) {
       await _run(() => _tickets.rejectTicket(key: key, rejectTicketRequest: RejectTicketRequest(reason: 'rejected from the phone')));
       if (context.mounted) context.pop();
     }

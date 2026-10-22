@@ -11964,6 +11964,11 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String ticketRejectPushingConfirm(String key) {
+    return 'Остановить отправку $key? То, что уже попало на git-хостинг, там и останется. Её можно будет продолжить.';
+  }
+
+  @override
   String get ticketRetry => 'Повторить';
 
   @override

@@ -3384,6 +3384,7 @@
   "ticketCancel": "Отмена",
   "ticketReject": "Отклонить",
   "ticketRejectConfirm": "Остановить всю работу над {key}? Её можно будет продолжить.",
+  "ticketRejectPushingConfirm": "Остановить отправку {key}? То, что уже попало на git-хостинг, там и останется. Её можно будет продолжить.",
   "ticketRetry": "Повторить",
   "ticketPullRequest": "Пул-реквест #{number}",
   "ticketBranch": "Ветка",

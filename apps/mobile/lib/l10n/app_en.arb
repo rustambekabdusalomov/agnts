@@ -6972,6 +6972,14 @@
       }
     }
   },
+  "ticketRejectPushingConfirm": "Stop pushing {key}? What already reached the git host stays there. You can continue it later.",
+  "@ticketRejectPushingConfirm": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
   "ticketRetry": "Retry",
   "ticketPullRequest": "Pull request #{number}",
   "@ticketPullRequest": {
