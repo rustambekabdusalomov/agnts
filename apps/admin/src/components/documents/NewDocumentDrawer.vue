@@ -218,7 +218,11 @@ const canSubmit = computed(() => form.title.trim().length > 0 && !create.isPendi
         </div>
       </div>
 
-      <InputSelect v-model="form.template" :options="templates" :label="t('documents.template')" />
+      <div class="field">
+        <span class="flbl">{{ t('documents.template') }}</span>
+        <InputSelect v-model="form.template" :options="templates" :label="t('documents.template')" />
+        <span v-if="form.template" class="fhelp">{{ t(`documents.templateHint_${form.template}`) }}</span>
+      </div>
       <div class="field">
         <label for="nd-ins">{{ t('documents.instruction') }}</label>
         <textarea id="nd-ins" v-model="form.instruction" rows="3" maxlength="2000" :placeholder="t('documents.instructionPlaceholder')" />

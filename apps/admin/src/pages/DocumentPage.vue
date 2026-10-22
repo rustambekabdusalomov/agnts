@@ -107,7 +107,7 @@ function openRegen() {
   regenOpen.value = true
 }
 const regenTemplates = computed(() =>
-  d.value?.source ? TEMPLATES[d.value.source.kind].map((x) => ({ value: x, label: t(`documents.template_${x}`) })) : [],
+  d.value?.source ? TEMPLATES[d.value.source.kind].map((x) => ({ value: x, label: t(`documents.template_${x}`), hint: t(`documents.templateHint_${x}`) })) : [],
 )
 const regenerate = useMutation({
   mutationFn: () =>
@@ -253,7 +253,11 @@ const restore = useMutation({
 
     <ShareDrawer v-if="isOwner" v-model="shareOpen" :doc="d" />
     <FormDrawer v-model="regenOpen" :title="t('documents.regenerate')" :subtitle="t('documents.regenerateSub')">
-      <InputSelect v-if="regenTemplates.length" v-model="regen.template" :options="regenTemplates" :label="t('documents.template')" />
+      <div v-if="regenTemplates.length" class="field">
+        <span class="flbl">{{ t('documents.template') }}</span>
+        <InputSelect v-model="regen.template" :options="regenTemplates" :label="t('documents.template')" />
+        <span v-if="regen.template" class="fhelp">{{ t(`documents.templateHint_${regen.template}`) }}</span>
+      </div>
       <div class="field">
         <label for="dp-ins">{{ t('documents.instruction') }}</label>
         <textarea id="dp-ins" v-model="regen.instruction" rows="4" maxlength="2000" :placeholder="t('documents.instructionPlaceholder')" />

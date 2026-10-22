@@ -73,7 +73,7 @@
     "prNumbersHelp": "Optional, in one repository. Empty: by state and period.",
     "from": "From",
     "to": "To",
-    "template": "Shape",
+    "template": "Format",
     "template_status": "Status report",
     "template_release_notes": "Release notes",
     "template_pr_review": "Pull request review",
