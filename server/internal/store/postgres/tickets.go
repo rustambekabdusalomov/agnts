@@ -124,6 +124,10 @@ func (s *Agent) CreateTicket(ctx context.Context, t domain.Ticket, ev domain.Eve
 }
 
 func insertTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket, models []byte) (domain.Ticket, error) {
+	// Every ticket has a number people see: the team's own, else its key.
+	if strings.TrimSpace(t.TicketNumber) == "" {
+		t.TicketNumber = t.Key
+	}
 	if a, ok := domain.ActorOf(ctx); ok {
 		if t.CreatedBy == nil {
 			t.CreatedBy = &a.UserID

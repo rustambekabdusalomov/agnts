@@ -809,7 +809,8 @@ func TestCommitLinkerHearsNumbers(t *testing.T) {
 	if _, err := h.o.SetTicketNumber(h.ctx, "PAY-8", "AMANAT-2", domain.OriginWeb); err != nil {
 		t.Fatal(err)
 	}
-	want := []heardNumber{{"PAY-8", "", ""}, {"PAY-8", "AMANAT-1", ""}, {"PAY-8", "AMANAT-2", "AMANAT-1"}}
+	// A ticket created without a number has its key as its number.
+	want := []heardNumber{{"PAY-8", "PAY-8", ""}, {"PAY-8", "AMANAT-1", "PAY-8"}, {"PAY-8", "AMANAT-2", "AMANAT-1"}}
 	if !slices.Equal(l.heard, want) {
 		t.Fatalf("heard %+v, want %+v", l.heard, want)
 	}

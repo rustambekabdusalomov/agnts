@@ -112,7 +112,7 @@ func TestReapplyCommitFormat(t *testing.T) {
 		!changes[0].Suggested { // agnts's own message: worth changing unasked
 		t.Fatalf("preview: %+v %v", changes, err)
 	}
-	if tk.TicketNumber != "" || h.git.reworded != "" {
+	if tk.TicketNumber != "PAY-70" || h.git.reworded != "" { // still its key, the number it was created with
 		t.Fatal("the preview changed something")
 	}
 

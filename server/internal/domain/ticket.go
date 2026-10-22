@@ -60,7 +60,8 @@ type Ticket struct {
 	Key         string
 	Source      TicketSource
 	// TicketNumber is the team's own number for the work (AMANAT-2288),
-	// given with a task; "" uses Key. See Number.
+	// given with a task. A ticket created without one gets its Key; ""
+	// (older tickets, a cleared number) also means Key. See Number.
 	TicketNumber string
 	// RepoID is the primary repository: the key prefix, filters and the
 	// ticket's own git fields (Branch, HeadSHA, PRNumber, ...) are its.

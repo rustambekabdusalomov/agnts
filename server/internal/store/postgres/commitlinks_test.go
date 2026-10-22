@@ -29,6 +29,9 @@ func TestCommitLinks(t *testing.T) {
 	}
 	a := newTicket("CL-1", "AMANAT-2288")
 	b := newTicket("CL-2", "")
+	if b.TicketNumber != "CL-2" {
+		t.Fatalf("a ticket created without a number gets its key: %q", b.TicketNumber)
+	}
 
 	found, err := s.TicketsByTokens(ctx, []string{"amanat-2288", "cl-2", "nope-1"})
 	if err != nil || len(found) != 2 {

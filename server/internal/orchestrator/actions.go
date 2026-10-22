@@ -1191,7 +1191,9 @@ func (o *Orchestrator) createTask(ctx context.Context, t domain.Ticket, prefix s
 			if lerr := o.store.LinkAttachments(ctx, files, out.ID, nil, domain.AttachTicket); lerr != nil {
 				o.log.Warn("attach files", "ticket", out.Key, "err", lerr)
 			}
-			if out.TicketNumber != "" {
+			// A number of its own (not the key it defaults to) can match
+			// commits pushed before the task existed.
+			if out.TicketNumber != out.Key {
 				o.numberChanged(ctx, out, "")
 			}
 			if !out.Held {
