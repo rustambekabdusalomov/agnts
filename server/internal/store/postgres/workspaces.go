@@ -289,6 +289,11 @@ func (s *Workspaces) RemoveMember(ctx context.Context, ws, userID int64) error {
 		if _, err := tx.Exec(ctx, `DELETE FROM memberships WHERE workspace_id = $1 AND user_id = $2`, ws, userID); err != nil {
 			return err
 		}
+		// Their documents go to the workspace owner and their grants go,
+		// in this transaction: nobody is left owning what they cannot open.
+		if err := handOverDocuments(ctx, tx, ws, userID); err != nil {
+			return err
+		}
 		_, err := tx.Exec(ctx, `UPDATE workspaces SET default_member_id = NULL, updated_at = now()
 			WHERE id = $1 AND default_member_id = $2`, ws, userID)
 		return err

@@ -81,6 +81,6 @@ func Reset(t *testing.T, pool *pgxpool.Pool) {
 		rules, lessons, ticket_relations, ticket_suggestions, claude_calls, attachments, integrations, settings,
 		pending_actions, telegram_messages, credit_ledger, payments, claude_connections, usage_snapshots, reviewer_notes, reviewer_profiles,
 		assistant_conversations, assistant_messages, repository_groups, repository_group_members, ticket_repos,
-		transcripts, admin_audit RESTART IDENTITY CASCADE`)
+		transcripts, admin_audit, documents RESTART IDENTITY CASCADE`)
 	Exec(t, pool, `DELETE FROM system_settings WHERE key = 'run_history'`)
 }

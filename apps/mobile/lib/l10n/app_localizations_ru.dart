@@ -1428,6 +1428,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get billingReason_grant => 'Начисление';
 
   @override
+  String get billingReason_document => 'Потрачено на документ';
+
+  @override
   String get briefTitle => 'Описание репозитория';
 
   @override
@@ -2369,6 +2372,571 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get designReproNot => 'Анализу не удалось воспроизвести баг';
+
+  @override
+  String get documentsPageTitle => 'Документы';
+
+  @override
+  String get documentsLede =>
+      'Отчёты и заметки для команды: написанные вами или agnts по тикетам, коммитам, pull request’ам и репозиториям.';
+
+  @override
+  String get documentsNew => 'Новый документ';
+
+  @override
+  String get documentsNewLinked => 'Новый документ';
+
+  @override
+  String get documentsScope => 'Какие документы';
+
+  @override
+  String get documentsScope_all => 'Все доступные мне';
+
+  @override
+  String get documentsScope_mine => 'Мои';
+
+  @override
+  String get documentsScope_shared => 'Доступные мне';
+
+  @override
+  String get documentsScope_deleted => 'Корзина';
+
+  @override
+  String get documentsEmpty => 'Документов пока нет. Создайте документ или попросите agnts написать отчёт.';
+
+  @override
+  String get documentsTrashEmpty => 'Корзина пуста.';
+
+  @override
+  String get documentsColTitle => 'Название';
+
+  @override
+  String get documentsColOwner => 'Владелец';
+
+  @override
+  String get documentsColTickets => 'Тикеты';
+
+  @override
+  String get documentsColUpdated => 'Обновлён';
+
+  @override
+  String get documentsColDeleted => 'Можно восстановить';
+
+  @override
+  String documentsDaysLeft(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'ещё $n дня',
+      many: 'ещё $n дней',
+      few: 'ещё $n дня',
+      one: 'ещё $n день',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get documentsRestore => 'Восстановить';
+
+  @override
+  String get documentsRestored => 'Документ восстановлен';
+
+  @override
+  String get documentsPublic => 'Публичный';
+
+  @override
+  String get documentsPrivate => 'Приватный';
+
+  @override
+  String get documentsWriting => 'agnts пишет';
+
+  @override
+  String get documentsGenFailed => 'Не удалось написать';
+
+  @override
+  String get documentsAccess_none => 'Нет доступа';
+
+  @override
+  String get documentsAccess_view => 'Просмотр';
+
+  @override
+  String get documentsAccess_edit => 'Редактирование';
+
+  @override
+  String get documentsAccess_owner => 'Владелец';
+
+  @override
+  String get documentsYouCan_view => 'Вы можете просматривать';
+
+  @override
+  String get documentsYouCan_edit => 'Вы можете редактировать';
+
+  @override
+  String get documentsRole_owner => 'Владелец пространства';
+
+  @override
+  String get documentsRole_user => 'Участник';
+
+  @override
+  String get documentsRole_viewer => 'Наблюдатель';
+
+  @override
+  String get documentsNewTitle => 'Новый документ';
+
+  @override
+  String get documentsNewSub => 'Напишите сами или поручите agnts написать его по данным пространства.';
+
+  @override
+  String get documentsTitle => 'Название';
+
+  @override
+  String get documentsTitlePlaceholder => 'Отчёт по спринту 42';
+
+  @override
+  String get documentsWhoWrites => 'Кто пишет';
+
+  @override
+  String get documentsByAgnts => 'agnts';
+
+  @override
+  String get documentsByMe => 'Я сам';
+
+  @override
+  String get documentsLanguage => 'Язык';
+
+  @override
+  String get documentsSource => 'На основе';
+
+  @override
+  String get documentsKind_report => 'Отчёт тикета';
+
+  @override
+  String get documentsKind_tickets => 'Тикеты';
+
+  @override
+  String get documentsKind_commits => 'Коммиты';
+
+  @override
+  String get documentsKind_pulls => 'Pull request’ы';
+
+  @override
+  String get documentsKind_repo => 'Репозиторий';
+
+  @override
+  String get documentsKindHelp_report => 'Утверждённый отчёт тикета (план, анализ, баг или ревью), переписанный для читателей.';
+
+  @override
+  String get documentsKindHelp_tickets => 'Выбранные тикеты или тикеты по состоянию и периоду: состояние, даты, отчёты и коммиты.';
+
+  @override
+  String get documentsKindHelp_commits => 'Коммиты репозиториев за период вместе со связанными тикетами.';
+
+  @override
+  String get documentsKindHelp_pulls => 'Pull request’ы с описаниями и диффами: обзор для ревью или заметки о выпуске.';
+
+  @override
+  String get documentsKindHelp_repo => 'agnts читает весь репозиторий в песочнице: архитектура, качество, тесты, риски.';
+
+  @override
+  String get documentsTicket => 'Тикет';
+
+  @override
+  String get documentsTickets => 'Тикеты';
+
+  @override
+  String get documentsTicketsPlaceholder => 'AMANAT-12, AMANAT-15';
+
+  @override
+  String get documentsByFilter => 'По состоянию и периоду';
+
+  @override
+  String get documentsChosen => 'Выбранные тикеты';
+
+  @override
+  String get documentsStates => 'Состояния';
+
+  @override
+  String get documentsStatesHelp => 'Ничего не отмечено — все состояния. Период ограничивает по последнему обновлению.';
+
+  @override
+  String get documentsRepos => 'Репозитории';
+
+  @override
+  String get documentsRepo => 'Репозиторий';
+
+  @override
+  String get documentsChooseRepo => 'Выберите репозиторий';
+
+  @override
+  String get documentsBranch => 'Ветка';
+
+  @override
+  String get documentsBranchPlaceholder => 'Ветка по умолчанию';
+
+  @override
+  String get documentsAuthor => 'Автор';
+
+  @override
+  String get documentsAuthorPlaceholder => 'Все';
+
+  @override
+  String get documentsPrState => 'Pull request’ы';
+
+  @override
+  String get documentsPr_merged => 'Слитые';
+
+  @override
+  String get documentsPr_open => 'Открытые';
+
+  @override
+  String get documentsPr_all => 'Все';
+
+  @override
+  String get documentsPrNumbers => 'Номера';
+
+  @override
+  String get documentsPrNumbersHelp => 'Необязательно, в одном репозитории. Пусто — по состоянию и периоду.';
+
+  @override
+  String get documentsFrom => 'С';
+
+  @override
+  String get documentsTo => 'По';
+
+  @override
+  String get documentsTemplate => 'Формат';
+
+  @override
+  String get documentsTemplate_status => 'Отчёт о статусе';
+
+  @override
+  String get documentsTemplate_release_notes => 'Заметки о выпуске';
+
+  @override
+  String get documentsTemplate_pr_review => 'Обзор pull request’ов';
+
+  @override
+  String get documentsTemplate_repo_review => 'Обзор репозитория';
+
+  @override
+  String get documentsTemplate_ticket_summary => 'Сводка';
+
+  @override
+  String get documentsTemplate_blank => 'Только ваша инструкция';
+
+  @override
+  String get documentsTemplateHint_status => 'Готово, в работе, заблокировано, риски, следующие шаги';
+
+  @override
+  String get documentsTemplateHint_release_notes => 'Новое, улучшено, исправлено, внутреннее';
+
+  @override
+  String get documentsTemplateHint_pr_review => 'Каждое изменение, его риск, на что смотреть';
+
+  @override
+  String get documentsTemplateHint_repo_review => 'Архитектура, качество, тесты, долг, рекомендации';
+
+  @override
+  String get documentsTemplateHint_ticket_summary => 'Цель, выводы, изменения, открытые вопросы';
+
+  @override
+  String get documentsTemplateHint_blank => 'Формат, который задаёт ваша инструкция';
+
+  @override
+  String get documentsInstruction => 'Инструкция';
+
+  @override
+  String get documentsInstructionPlaceholder => 'Для клиента, без технических деталей. Сосредоточься на рисках.';
+
+  @override
+  String get documentsGenerate => 'Поручить agnts';
+
+  @override
+  String get documentsCreate => 'Создать и редактировать';
+
+  @override
+  String get documentsBack => 'Документы';
+
+  @override
+  String get documentsNotFound => 'Такого документа нет, или у вас нет к нему доступа.';
+
+  @override
+  String get documentsEditing => 'Редактирование';
+
+  @override
+  String documentsVersionN(String n) {
+    return 'Версия $n';
+  }
+
+  @override
+  String documentsOwnedBy(String name) {
+    return 'Владелец: $name';
+  }
+
+  @override
+  String documentsDataAsOf(String when) {
+    return 'По данным на $when';
+  }
+
+  @override
+  String get documentsEdit => 'Редактировать';
+
+  @override
+  String get documentsRegenerate => 'Написать заново';
+
+  @override
+  String get documentsRegenerateSub => 'agnts напишет его заново из того же источника. Результат — новая версия, ничего не теряется.';
+
+  @override
+  String get documentsShare => 'Поделиться';
+
+  @override
+  String get documentsDelete => 'Удалить';
+
+  @override
+  String documentsDeleteConfirm(String title) {
+    return 'Переместить «$title» в корзину? Его можно восстановить в течение 30 дней.';
+  }
+
+  @override
+  String get documentsDeleted => 'Перемещён в корзину';
+
+  @override
+  String get documentsQueued => 'Ждёт, когда agnts начнёт писать…';
+
+  @override
+  String get documentsWritingNow => 'agnts пишет этот документ. Он появится здесь, когда будет готов.';
+
+  @override
+  String get documentsGenFailedTitle => 'agnts не смог написать документ:';
+
+  @override
+  String get documentsTryAgain => 'Попробовать снова';
+
+  @override
+  String documentsOverwrote(String name, String when) {
+    return 'agnts написал новую версию поверх правок $name ($when).';
+  }
+
+  @override
+  String documentsRestoreVersion(String n) {
+    return 'Восстановить версию $n';
+  }
+
+  @override
+  String get documentsMarkdown => 'Markdown';
+
+  @override
+  String get documentsPreview => 'Предпросмотр';
+
+  @override
+  String get documentsConflictTitle => 'Кто-то сохранил документ раньше вас.';
+
+  @override
+  String documentsConflictHelp(String n) {
+    return 'Сейчас документ в версии $n. Сохраните свой текст поверх неё или начните заново с их текста.';
+  }
+
+  @override
+  String get documentsTheirText => 'Их текст';
+
+  @override
+  String get documentsKeepMine => 'Оставить мой';
+
+  @override
+  String get documentsTakeTheirs => 'Взять их';
+
+  @override
+  String get documentsSave => 'Сохранить';
+
+  @override
+  String get documentsSaved => 'Сохранено как новая версия';
+
+  @override
+  String get documentsLeaveUnsaved => 'Уйти, не сохранив правки?';
+
+  @override
+  String get documentsEmptyBody => 'Пока ничего не написано.';
+
+  @override
+  String get documentsPublicLink => 'Публичная ссылка';
+
+  @override
+  String get documentsDownloadMd => 'Markdown';
+
+  @override
+  String get documentsDownloadPdf => 'PDF';
+
+  @override
+  String get documentsPreparingPdf => 'Готовим PDF…';
+
+  @override
+  String get documentsPdfFailed => 'Не удалось сделать PDF. Попробуйте через несколько минут или скачайте Markdown.';
+
+  @override
+  String get documentsPdfSlow => 'PDF готовится долго. Попробуйте через минуту.';
+
+  @override
+  String get documentsLinkedTickets => 'Тикеты';
+
+  @override
+  String get documentsLinkedTicketsSub => 'Тикеты, к которым относится документ';
+
+  @override
+  String get documentsNoTickets => 'Не привязан к тикетам.';
+
+  @override
+  String get documentsLinkedByAgnts => 'привязал agnts';
+
+  @override
+  String get documentsLinkedByAgntsHint => 'agnts привязал тикеты, по которым написан документ';
+
+  @override
+  String get documentsUnlink => 'Отвязать';
+
+  @override
+  String get documentsLinkTicket => 'Привязать';
+
+  @override
+  String get documentsLinkPlaceholder => 'Номер тикета';
+
+  @override
+  String get documentsBadKey => 'Это не номер тикета.';
+
+  @override
+  String get documentsVersions => 'Версии';
+
+  @override
+  String get documentsNoVersions => 'Версий пока нет.';
+
+  @override
+  String get documentsCurrent => 'текущая';
+
+  @override
+  String documentsByAgntsFor(String name) {
+    return 'agnts для $name';
+  }
+
+  @override
+  String documentsRestoredBy(String name) {
+    return '$name восстановил';
+  }
+
+  @override
+  String documentsVersionTitle(String n) {
+    return 'Версия $n';
+  }
+
+  @override
+  String get documentsIsCurrent => 'Это текущая версия.';
+
+  @override
+  String documentsDiffHelp(String n) {
+    return 'Что изменилось с версии $n до текущего текста: удалённые строки зачёркнуты, добавленные — зелёные.';
+  }
+
+  @override
+  String get documentsSameText => 'Текст такой же, как сейчас.';
+
+  @override
+  String get documentsShareTitle => 'Доступ';
+
+  @override
+  String get documentsType => 'Кто может читать';
+
+  @override
+  String get documentsPrivateHelp => 'Только вы, люди ниже и владелец пространства.';
+
+  @override
+  String get documentsPublicHelp =>
+      'Любой, у кого есть ссылка, может читать и скачивать документ без входа. Имена и тикеты не показываются.';
+
+  @override
+  String get documentsPublicOff => 'Публичные документы выключены в настройках пространства.';
+
+  @override
+  String get documentsSecretsTitle => 'Похоже, в тексте есть секреты.';
+
+  @override
+  String get documentsSecretsHelp => 'Уберите их из этих строк, сохраните и снова сделайте документ публичным.';
+
+  @override
+  String documentsLine(String n) {
+    return 'Строка $n';
+  }
+
+  @override
+  String get documentsResetLink => 'Сменить ссылку';
+
+  @override
+  String get documentsResetHelp => 'Старая ссылка сразу перестанет работать.';
+
+  @override
+  String get documentsWorkspaceAccess => 'Все в пространстве';
+
+  @override
+  String get documentsWorkspaceAccessHelp => 'Как минимум этот доступ для каждого участника. Наблюдатели могут только читать.';
+
+  @override
+  String get documentsPeople => 'Люди';
+
+  @override
+  String get documentsAddPerson => 'Добавить человека';
+
+  @override
+  String get documentsRemove => 'Убрать';
+
+  @override
+  String get documentsOwnerNote => 'Владелец пространства всегда может открыть этот документ.';
+
+  @override
+  String get documentsSaveSharing => 'Сохранить';
+
+  @override
+  String get documentsTransfer => 'Передать другому участнику';
+
+  @override
+  String get documentsTransferTo => 'Новый владелец';
+
+  @override
+  String documentsTransferConfirm(String name) {
+    return 'Сделать $name владельцем? У вас останется доступ на редактирование.';
+  }
+
+  @override
+  String get documentsTicketTitle => 'Документы';
+
+  @override
+  String get documentsTicketSub => 'Документы по этому тикету, доступные вам';
+
+  @override
+  String get documentsTicketEmpty => 'Документов пока нет.';
+
+  @override
+  String get documentsFromReport => 'Сделать документ из отчёта';
+
+  @override
+  String get documentsPublicGoneTitle => 'Ссылка не работает';
+
+  @override
+  String get documentsPublicGone => 'Документ сделали приватным, удалили или сменили ссылку.';
+
+  @override
+  String documentsPublicUpdated(String when) {
+    return 'Обновлён $when';
+  }
+
+  @override
+  String get documentsSettingLabel => 'Публичные документы';
+
+  @override
+  String get documentsSettingHelp =>
+      'Разрешить владельцам документов делиться публичной ссылкой. Выключено — все публичные ссылки пространства сразу перестают работать.';
+
+  @override
+  String documentsNewForTicket(String number) {
+    return 'Будет привязан к $number. Напишите сами или поручите agnts.';
+  }
 
   @override
   String get draftsTitle => 'Комментарии ревью';
@@ -6096,6 +6664,151 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mdetailFactTime => 'Время';
 
   @override
+  String get mdocumentsTitle => 'Документы';
+
+  @override
+  String get mdocumentsMoreRowSub => 'Отчёты и страницы рабочего пространства';
+
+  @override
+  String get mdocumentsAll => 'Все';
+
+  @override
+  String get mdocumentsMine => 'Мои';
+
+  @override
+  String get mdocumentsShared => 'Доступные мне';
+
+  @override
+  String get mdocumentsEmpty => 'Пока нет документов';
+
+  @override
+  String get mdocumentsEmptyText => 'Пишите документы в веб-приложении или создайте документ из отчёта тикета.';
+
+  @override
+  String get mdocumentsTypePrivate => 'Приватный';
+
+  @override
+  String get mdocumentsTypePublic => 'Публичный';
+
+  @override
+  String get mdocumentsWriting => 'agnts пишет';
+
+  @override
+  String get mdocumentsFailed => 'Не удалось написать';
+
+  @override
+  String mdocumentsFailedText(String error) {
+    return 'agnts не смог написать документ: $error';
+  }
+
+  @override
+  String mdocumentsVersion(String n) {
+    return 'Версия $n';
+  }
+
+  @override
+  String mdocumentsAsOf(String date) {
+    return 'По данным на $date';
+  }
+
+  @override
+  String mdocumentsMeta(String owner, String time) {
+    return '$owner · $time';
+  }
+
+  @override
+  String get mdocumentsNoBody => 'Пока ничего не написано.';
+
+  @override
+  String get mdocumentsLinkedTickets => 'Связанные тикеты';
+
+  @override
+  String get mdocumentsCopyLink => 'Скопировать публичную ссылку';
+
+  @override
+  String get mdocumentsLinkCopied => 'Ссылка скопирована';
+
+  @override
+  String get mdocumentsSharing => 'Доступ';
+
+  @override
+  String get mdocumentsDownloadMd => 'Скачать .md';
+
+  @override
+  String get mdocumentsDownloadPdf => 'Скачать .pdf';
+
+  @override
+  String get mdocumentsPreparingPdf => 'Готовим PDF…';
+
+  @override
+  String get mdocumentsPdfSlow => 'PDF готовится дольше обычного. Попробуйте через минуту.';
+
+  @override
+  String get mdocumentsDownloadFailed => 'Не удалось скачать';
+
+  @override
+  String get mdocumentsPublicLink => 'Публичная ссылка';
+
+  @override
+  String get mdocumentsPublicHint => 'Любой, у кого есть ссылка, может читать документ без входа.';
+
+  @override
+  String get mdocumentsPublicOff => 'Публичные документы отключены в настройках этого пространства.';
+
+  @override
+  String get mdocumentsResetLink => 'Сменить ссылку';
+
+  @override
+  String get mdocumentsResetDone => 'Создана новая ссылка; старая больше не работает.';
+
+  @override
+  String get mdocumentsWorkspaceAccess => 'Все в пространстве';
+
+  @override
+  String get mdocumentsAccessNone => 'Нет доступа';
+
+  @override
+  String get mdocumentsAccessView => 'Могут читать';
+
+  @override
+  String get mdocumentsAccessEdit => 'Могут редактировать';
+
+  @override
+  String get mdocumentsPeople => 'Люди';
+
+  @override
+  String get mdocumentsViewerOnlyView => 'Наблюдатели могут только читать';
+
+  @override
+  String get mdocumentsSave => 'Сохранить';
+
+  @override
+  String get mdocumentsSaved => 'Сохранено';
+
+  @override
+  String get mdocumentsSecrets => 'Похоже, в документе есть секреты. Уберите их перед публикацией:';
+
+  @override
+  String mdocumentsSecretLine(String line, String excerpt) {
+    return 'Строка $line: $excerpt';
+  }
+
+  @override
+  String get mdocumentsTicketSection => 'Документы';
+
+  @override
+  String get mdocumentsTicketNone => 'Связанных документов пока нет.';
+
+  @override
+  String get mdocumentsFromReport => 'Создать документ из отчёта';
+
+  @override
+  String get mdocumentsFromReportStarted => 'agnts пишет документ';
+
+  @override
+  String get mdocumentsLedgerSpent => 'Списание за документ';
+
+  @override
   String get mgroupsGroups => 'Группы';
 
   @override
@@ -6993,6 +7706,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get navAssistantConversations => 'Разговоры';
+
+  @override
+  String get navDocuments => 'Документы';
 
   @override
   String get networkTitle => 'Частные сети';

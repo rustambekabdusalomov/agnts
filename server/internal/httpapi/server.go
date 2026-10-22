@@ -21,6 +21,7 @@ import (
 
 	"agnts/internal/accounts"
 	"agnts/internal/auth"
+	"agnts/internal/documents"
 	"agnts/internal/domain"
 	"agnts/internal/httpapi/gen"
 	"agnts/internal/network"
@@ -112,6 +113,8 @@ type Options struct {
 	// Suites runs saved Swagger test suites; nil answers 501 and turns
 	// off the deploy hook at /webhooks/swagger-suite/{token}.
 	Suites SwaggerSuites
+	// Documents runs the Documents module; nil answers 501.
+	Documents *documents.Service
 }
 
 // Server implements gen.ServerInterface.
@@ -123,7 +126,9 @@ type Server struct {
 	feedbackLimiter *ipLimiter
 	// hookLimiter: deploy hook calls per address every 10 minutes.
 	hookLimiter *ipLimiter
-	ops         map[string]opInfo
+	// publicLimiter: public document reads per address every minute.
+	publicLimiter *ipLimiter
+	ops           map[string]opInfo
 }
 
 var _ gen.ServerInterface = (*Server)(nil)
@@ -135,7 +140,8 @@ func NewHandler(opt Options) (http.Handler, error) {
 		return nil, fmt.Errorf("httpapi: load embedded spec: %w", err)
 	}
 	s := &Server{opt: opt, loginLimiter: newIPLimiter(5, time.Minute), mailLimiter: newIPLimiter(5, 10*time.Minute),
-		feedbackLimiter: newIPLimiter(5, 10*time.Minute), hookLimiter: newIPLimiter(30, 10*time.Minute), ops: ops}
+		feedbackLimiter: newIPLimiter(5, 10*time.Minute), hookLimiter: newIPLimiter(30, 10*time.Minute),
+		publicLimiter: newIPLimiter(60, time.Minute), ops: ops}
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
@@ -200,7 +206,14 @@ func NewHandler(opt Options) (http.Handler, error) {
 	})
 
 	if opt.WebDir != "" {
-		r.NotFound(spaHandler(opt.WebDir).ServeHTTP)
+		spa := spaHandler(opt.WebDir)
+		// A public document's page: the admin app, kept out of search
+		// engines and without a Referer that carries its token.
+		r.Get("/d/{token}", func(w http.ResponseWriter, r *http.Request) {
+			publicHeaders(w)
+			spa.ServeHTTP(w, r)
+		})
+		r.NotFound(spa.ServeHTTP)
 	}
 	return r, nil
 }

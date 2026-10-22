@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -153,13 +154,30 @@ func (s *Users) Create(ctx context.Context, u domain.User) (domain.User, error) 
 	return out, err
 }
 
-// Delete removes a user; their sessions and tokens go with them.
+// Delete removes a user; their sessions and tokens go with them. The
+// documents they own go to each workspace's owner first, in the same
+// transaction (documents.owner_id refuses the delete otherwise).
 func (s *Users) Delete(ctx context.Context, id int64) error {
-	tag, err := s.db.Exec(ctx, `DELETE FROM users WHERE id = $1`, id)
-	if err == nil && tag.RowsAffected() == 0 {
-		return domain.ErrNotFound
-	}
-	return err
+	return pgx.BeginFunc(domain.System(ctx), s.db, func(tx pgx.Tx) error {
+		rows, err := tx.Query(ctx, `SELECT DISTINCT workspace_id FROM documents WHERE owner_id = $1`, id)
+		if err != nil {
+			return err
+		}
+		wss, err := pgx.CollectRows(rows, pgx.RowTo[int64])
+		if err != nil {
+			return err
+		}
+		for _, ws := range wss {
+			if err := handOverDocuments(ctx, tx, ws, id); err != nil {
+				return err
+			}
+		}
+		tag, err := tx.Exec(ctx, `DELETE FROM users WHERE id = $1`, id)
+		if err == nil && tag.RowsAffected() == 0 {
+			return domain.ErrNotFound
+		}
+		return err
+	})
 }
 
 // LastSignIns returns when each user last signed in: their newest session

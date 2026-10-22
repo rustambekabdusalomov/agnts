@@ -169,7 +169,9 @@ func TestPublicRoutesComeFromSpec(t *testing.T) {
 	}
 	want := map[string]bool{"POST /api/auth/login": true, "GET /api/meta": true, "GET /api/auth/signup": true, "POST /api/auth/signup": true,
 		"POST /api/auth/verify": true, "POST /api/auth/password/forgot": true, "POST /api/auth/login/totp": true, "POST /api/auth/password/reset": true, "GET /api/invites/{token}": true,
-		"POST /api/auth/google": true}
+		"POST /api/auth/google": true,
+		// Public documents: anyone with the link reads and downloads them.
+		"GET /api/public/documents/{token}": true, "GET /api/public/documents/{token}/download": true}
 	if len(got) != len(want) {
 		t.Fatalf("public routes = %v, want %v", got, want)
 	}

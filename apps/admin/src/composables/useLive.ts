@@ -54,6 +54,16 @@ function stale(e: TicketEvent): string[] {
     case 'ci_failure':
       keys.push('ci')
       break
+    case 'document_updated': {
+      // Sent only to the people who can open the document.
+      const id = String((e.data as { documentId?: number } | undefined)?.documentId ?? '')
+      keys.push('documents', 'ticket-documents')
+      if (id) keys.push(`document:${id}`, `document-versions:${id}`, `document-sharing:${id}`, `document-tickets:${id}`)
+      break
+    }
+    case 'documents_changed':
+      keys.push('documents')
+      break
     case 'commits_linked':
       keys.push(`ticket-commits:${e.ticketKey}`, 'repo') // commit lists show their tickets
       break

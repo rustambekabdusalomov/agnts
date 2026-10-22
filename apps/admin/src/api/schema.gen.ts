@@ -4071,6 +4071,349 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The documents you can open, most recently changed first
+         * @description Your own documents, the ones shared with you (by a grant or the workspace default), and for the workspace
+         *     owner every document. scope=deleted lists the trash: your own deleted documents (all of them for the workspace
+         *     owner), restorable for 30 days.
+         */
+        get: operations["listDocuments"];
+        put?: never;
+        /**
+         * Create a document, written by you or by agnts from a source
+         * @description Without a source the body is yours and becomes version 1. With a source, agnts gathers the facts (a ticket's
+         *     report, tickets, commits, pull requests or a repository) and writes the body; the document starts at version 0
+         *     and its generation shows the progress. Workspace viewers may create documents; they own what they create.
+         */
+        post: operations["createDocument"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documents/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        /** A document with your access to it; 404 when you cannot open it */
+        get: operations["getDocument"];
+        /**
+         * Save an edit as a new version (edit access)
+         * @description baseVersion is the version the edit started from. When someone saved in between, the answer is 409 with the
+         *     document as it is now, so the editor can show both texts. While agnts writes the body only the title changes.
+         */
+        put: operations["saveDocument"];
+        post?: never;
+        /** Move a document to the trash (its owner); restorable for 30 days */
+        delete: operations["deleteDocument"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documents/{id}/undelete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Take a document out of the trash (its owner or the workspace owner) */
+        post: operations["undeleteDocument"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documents/{id}/regenerate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Have agnts write the document again (edit access); the result is a new version */
+        post: operations["regenerateDocument"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documents/{id}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        /** Every version of a document, newest first, without their text */
+        get: operations["listDocumentVersions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documents/{id}/versions/{version}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+                version: components["parameters"]["DocumentVersionNo"];
+            };
+            cookie?: never;
+        };
+        /** One version with its text */
+        get: operations["getDocumentVersion"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documents/{id}/versions/{version}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+                version: components["parameters"]["DocumentVersionNo"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Make an earlier version the current one, as a new version (edit access) */
+        post: operations["restoreDocumentVersion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documents/{id}/sharing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        /** Who can open a document, and its public link */
+        get: operations["getDocumentSharing"];
+        /**
+         * Set a document's type, workspace access and grants (its owner)
+         * @description Grants replace the current ones. Workspace viewers can only be given view. Going public needs public documents
+         *     on in Settings and a text without secrets: when the scan finds some, the answer is 422 with the lines. A
+         *     document that goes public gets a new link; one made private loses its link at once.
+         */
+        put: operations["shareDocument"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documents/{id}/reset-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Give a public document a new link; the old one stops working (its owner) */
+        post: operations["resetDocumentLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documents/{id}/owner": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Give a document to another member (its owner); the old owner keeps edit access */
+        put: operations["setDocumentOwner"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documents/{id}/tickets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        /** The tickets linked to a document */
+        get: operations["listDocumentTickets"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documents/{id}/tickets/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Link a ticket to a document (edit access on the document) */
+        post: operations["linkDocumentTicket"];
+        /** Remove a link between a ticket and a document */
+        delete: operations["unlinkDocumentTicket"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documents/{id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Download a version as Markdown or PDF (view access)
+         * @description version 0 (the default) is the current one. The first PDF download of a version starts making it and answers
+         *     202 with Retry-After; ask again then. A made PDF is kept: later downloads are instant.
+         */
+        get: operations["downloadDocument"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        /**
+         * The documents linked to the ticket that you can open
+         * @description Documents you cannot open are neither listed nor counted.
+         */
+        get: operations["listTicketDocuments"];
+        put?: never;
+        /** Have agnts make a document from the ticket's report, linked to the ticket */
+        post: operations["createTicketDocument"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/documents/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: components["parameters"]["PublicToken"];
+            };
+            cookie?: never;
+        };
+        /**
+         * A public document, for anyone with its link
+         * @description Only the title, text, version and last update. Rate limited per address.
+         */
+        get: operations["getPublicDocument"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/documents/{token}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: components["parameters"]["PublicToken"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Download a public document's current version
+         * @description The PDF is made ahead when the document is published or saved; until it is ready the answer is 202.
+         */
+        get: operations["downloadPublicDocument"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -4467,7 +4810,7 @@ export interface components {
              */
             amount: number;
             /** @enum {string} */
-            reason: "purchase" | "run" | "refund" | "grant";
+            reason: "purchase" | "run" | "document" | "refund" | "grant";
             ticketKey?: string;
             note?: string;
             /** Format: date-time */
@@ -5954,6 +6297,8 @@ export interface components {
             visualCheck?: boolean;
             /** @description Survey a repository without a brief when its first ticket is analysed, and refresh the brief after merges */
             autoBrief?: boolean;
+            /** @description Let documents have public links; off makes every public link of the workspace stop working */
+            publicDocuments?: boolean;
             /** @description Send blocker and major findings of agnts's code review back to the coder once per revision, before a person reviews */
             selfReview?: boolean;
             /** @description Learn from change requests and rejections: suggest rules, which apply once someone adopts them */
@@ -7811,8 +8156,224 @@ export interface components {
             code: string;
             message: string;
         };
+        /**
+         * @description What you may do: view reads and downloads; edit also changes the text, regenerates and links tickets; owner also shares, publishes, transfers and deletes
+         * @enum {string}
+         */
+        DocumentAccess: "none" | "view" | "edit" | "owner";
+        /**
+         * @description What agnts makes the document from. report: one ticket's report (tickets has its key). tickets: chosen tickets,
+         *     or a filter, with the period limiting by last update. commits: repositories' commits in a period (from is
+         *     required), on branch (the default branch when empty), optionally by one author. pulls: repositories' pull
+         *     requests by state and period, or chosen numbers in one repository. repo: one repository read in the sandbox.
+         */
+        DocumentSourceInput: {
+            /** @enum {string} */
+            kind: "report" | "tickets" | "commits" | "pulls" | "repo";
+            /**
+             * @description Defaults by kind
+             * @enum {string}
+             */
+            template?: "status" | "release_notes" | "pr_review" | "repo_review" | "ticket_summary" | "blank";
+            instruction?: string;
+            tickets?: string[];
+            filter?: {
+                states?: string[];
+                kinds?: string[];
+                /** Format: int64 */
+                repoId?: number;
+            };
+            repoIds?: number[];
+            branch?: string;
+            author?: string;
+            /** @enum {string} */
+            prState?: "open" | "merged" | "all";
+            prNumbers?: number[];
+            /** Format: date-time */
+            from?: string;
+            /** Format: date-time */
+            to?: string;
+        };
+        /** @description The latest time agnts wrote (or is writing) the document */
+        DocumentGeneration: {
+            /** Format: int64 */
+            id: number;
+            /** @enum {string} */
+            status: "queued" | "writing" | "done" | "failed";
+            error: string;
+            source?: components["schemas"]["DocumentSourceInput"];
+            /** Format: int64 */
+            requestedBy?: number;
+            /** Format: date-time */
+            startedAt?: string;
+            /** Format: date-time */
+            finishedAt?: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        DocumentSummary: {
+            /** Format: int64 */
+            id: number;
+            title: string;
+            /** @description The current version; 0 while agnts writes the first one */
+            version: number;
+            /** @enum {string} */
+            type: "private" | "public";
+            /**
+             * @description Everyone in the workspace gets at least this
+             * @enum {string}
+             */
+            workspaceAccess: "none" | "view" | "edit";
+            /** Format: int64 */
+            ownerId: number;
+            ownerName: string;
+            /** @enum {string} */
+            language: "en" | "ru" | "uz";
+            access: components["schemas"]["DocumentAccess"];
+            ticketCount: number;
+            generation?: components["schemas"]["DocumentGeneration"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: date-time */
+            deletedAt?: string;
+        };
+        Document: components["schemas"]["DocumentSummary"] & {
+            /** @description Markdown */
+            body: string;
+            /** @description The public link, while the document is public */
+            publicUrl?: string;
+            source?: components["schemas"]["DocumentSourceInput"];
+            /**
+             * Format: date-time
+             * @description When agnts gathered the facts of the current AI version
+             */
+            dataAsOf?: string;
+        };
+        DocumentConflict: {
+            code: string;
+            message: string;
+            current?: components["schemas"]["Document"];
+        };
+        DocumentInput: {
+            title: string;
+            body?: string;
+            /** @enum {string} */
+            language?: "en" | "ru" | "uz";
+            source?: components["schemas"]["DocumentSourceInput"];
+            linkTickets?: string[];
+        };
+        DocumentSave: {
+            title: string;
+            body: string;
+            /** @description The version the edit started from */
+            baseVersion: number;
+        };
+        DocumentRegenerate: {
+            source?: components["schemas"]["DocumentSourceInput"];
+        };
+        DocumentVersion: {
+            version: number;
+            title: string;
+            /** @description Only when one version is asked for */
+            body?: string;
+            /** @enum {string} */
+            source: "human" | "ai" | "restore";
+            note: string;
+            /** Format: int64 */
+            authorId?: number;
+            authorName?: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        DocumentGrant: {
+            /** Format: int64 */
+            userId: number;
+            username?: string;
+            /** @enum {string} */
+            level: "view" | "edit";
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        DocumentSharing: {
+            /** @enum {string} */
+            type: "private" | "public";
+            publicUrl?: string;
+            /** @enum {string} */
+            workspaceAccess: "none" | "view" | "edit";
+            /** Format: int64 */
+            ownerId: number;
+            grants: components["schemas"]["DocumentGrant"][];
+            /** @description Whether the workspace allows public documents */
+            publicAllowed: boolean;
+        };
+        DocumentShareInput: {
+            /** @enum {string} */
+            type: "private" | "public";
+            /** @enum {string} */
+            workspaceAccess: "none" | "view" | "edit";
+            grants: {
+                /** Format: int64 */
+                userId: number;
+                /** @enum {string} */
+                level: "view" | "edit";
+            }[];
+        };
+        SecretFindings: {
+            code: string;
+            message: string;
+            findings: {
+                /** @description 1-based line of the text */
+                line: number;
+                /** @description The line with the secret masked */
+                excerpt: string;
+            }[];
+        };
+        DocumentTicket: {
+            key: string;
+            number: string;
+            title: string;
+            state: string;
+            kind: string;
+            /**
+             * Format: int64
+             * @description Absent when agnts linked it
+             */
+            linkedBy?: number;
+            /** Format: date-time */
+            linkedAt: string;
+        };
+        PublicDocument: {
+            title: string;
+            /** @description Markdown */
+            body: string;
+            version: number;
+            /** Format: date-time */
+            updatedAt: string;
+        };
     };
     responses: {
+        /** @description The PDF is being made; ask again after Retry-After seconds */
+        Preparing: {
+            headers: {
+                "Retry-After"?: number;
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Error"];
+            };
+        };
+        /** @description The PDF could not be made; the Markdown download still works */
+        RenderFailed: {
+            headers: {
+                "Retry-After"?: number;
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Error"];
+            };
+        };
         /** @description The git host returned an error */
         BadGateway: {
             headers: {
@@ -7906,6 +8467,10 @@ export interface components {
         };
     };
     parameters: {
+        DocumentID: number;
+        DocumentVersionNo: number;
+        DocumentFormat: "md" | "pdf";
+        PublicToken: string;
         RunWorkspace: number;
         /** @description A stage (analyze, code, review…), a background call (assistant, brief, detect, reflect, rules, translate), second_opinion, or the groups stages and background */
         RunPurpose: string;
@@ -14444,6 +15009,615 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             501: components["responses"]["NotImplemented"];
+        };
+    };
+    listDocuments: {
+        parameters: {
+            query?: {
+                scope?: "all" | "mine" | "shared" | "deleted";
+                /** @description Words in the title */
+                q?: string;
+                /** @description Only documents linked to this ticket */
+                ticket?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentSummary"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    createDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentInput"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Document"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    getDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Document"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    saveDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentSave"];
+            };
+        };
+        responses: {
+            /** @description Saved */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Document"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            /** @description Someone saved in between, or agnts is writing the document */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentConflict"];
+                };
+            };
+        };
+    };
+    deleteDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    undeleteDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Restored */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Document"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    regenerateDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["DocumentRegenerate"];
+            };
+        };
+        responses: {
+            /** @description Queued */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Document"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    listDocumentVersions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentVersion"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getDocumentVersion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+                version: components["parameters"]["DocumentVersionNo"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentVersion"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    restoreDocumentVersion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+                version: components["parameters"]["DocumentVersionNo"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Restored */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Document"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    getDocumentSharing: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentSharing"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    shareDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentShareInput"];
+            };
+        };
+        responses: {
+            /** @description Saved */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentSharing"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            /** @description The document looks like it holds secrets */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecretFindings"];
+                };
+            };
+        };
+    };
+    resetDocumentLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentSharing"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    setDocumentOwner: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: int64 */
+                    userId: number;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Document"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    listDocumentTickets: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentTicket"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    linkDocumentTicket: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Linked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    unlinkDocumentTicket: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unlinked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    downloadDocument: {
+        parameters: {
+            query?: {
+                format?: components["parameters"]["DocumentFormat"];
+                version?: number;
+            };
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The file, as an attachment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/markdown": string;
+                    "application/pdf": string;
+                };
+            };
+            202: components["responses"]["Preparing"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            503: components["responses"]["RenderFailed"];
+        };
+    };
+    listTicketDocuments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentSummary"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    createTicketDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @description How to write it: "for the client, no technical detail" */
+                    instruction?: string;
+                    /** @enum {string} */
+                    language?: "en" | "ru" | "uz";
+                };
+            };
+        };
+        responses: {
+            /** @description Created; agnts is writing it */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Document"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getPublicDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: components["parameters"]["PublicToken"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicDocument"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
+    downloadPublicDocument: {
+        parameters: {
+            query?: {
+                format?: components["parameters"]["DocumentFormat"];
+            };
+            header?: never;
+            path: {
+                token: components["parameters"]["PublicToken"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The file, as an attachment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/markdown": string;
+                    "application/pdf": string;
+                };
+            };
+            202: components["responses"]["Preparing"];
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
+            503: components["responses"]["RenderFailed"];
         };
     };
 }

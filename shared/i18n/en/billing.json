@@ -28,6 +28,7 @@
     "reason_purchase": "Bought",
     "reason_run": "Spent",
     "reason_refund": "Refunded",
-    "reason_grant": "Granted"
+    "reason_grant": "Granted",
+    "reason_document": "Spent on a document"
   }
 }

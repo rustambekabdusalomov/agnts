@@ -30,6 +30,8 @@ import 'features/auth/signup_screen.dart';
 import 'features/auth/verify_screen.dart';
 import 'features/ci/ci_failure_screen.dart';
 import 'features/ci/ci_screen.dart';
+import 'features/documents/document_screen.dart';
+import 'features/documents/documents_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/integrations/integration_screen.dart';
 import 'features/integrations/integrations_screen.dart';
@@ -137,6 +139,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
         screenRoute('/repos', (_, _) => const ReposScreen()),
         screenRoute('/rules', (_, _) => const RulesScreen()),
+        screenRoute('/documents', (_, _) => const DocumentsScreen()),
+        screenRoute('/documents/:id', (_, s) => DocumentScreen(id: int.tryParse(s.pathParameters['id'] ?? '') ?? 0)),
         screenRoute('/reviews', (_, _) => const ReviewsScreen()),
         screenRoute('/swagger-suites', (_, _) => const SwaggerSuitesScreen()),
         screenRoute('/usage', (_, _) => const UsageScreen()),

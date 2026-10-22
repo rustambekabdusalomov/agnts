@@ -20,6 +20,7 @@ Name | Type | Description | Notes
 **autoPreview** | **bool** | Take screenshots of every UI change in repositories with a preview command | [optional] 
 **visualCheck** | **bool** | Coding runs may start the app and look at the pages they changed | [optional] 
 **autoBrief** | **bool** | Survey a repository without a brief when its first ticket is analysed, and refresh the brief after merges | [optional] 
+**publicDocuments** | **bool** | Let documents have public links; off makes every public link of the workspace stop working | [optional] 
 **selfReview** | **bool** | Send blocker and major findings of agnts's code review back to the coder once per revision, before a person reviews | [optional] 
 **reflect** | **bool** | Learn from change requests and rejections: suggest rules, which apply once someone adopts them | [optional] 
 **egressAllow** | **List&lt;String&gt;** | Hosts run containers may reach besides the built-in list, such as a staging API; .example.com matches subdomains | [optional] 

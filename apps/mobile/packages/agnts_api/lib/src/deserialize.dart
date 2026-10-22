@@ -79,6 +79,7 @@ import 'package:agnts_api/src/model/coverage_files_inner_uncovered_inner.dart';
 import 'package:agnts_api/src/model/create_invite201_response.dart';
 import 'package:agnts_api/src/model/create_invite_request.dart';
 import 'package:agnts_api/src/model/create_platform_admin_request.dart';
+import 'package:agnts_api/src/model/create_ticket_document_request.dart';
 import 'package:agnts_api/src/model/create_workspace_request.dart';
 import 'package:agnts_api/src/model/dashboard.dart';
 import 'package:agnts_api/src/model/dashboard_counts.dart';
@@ -91,6 +92,21 @@ import 'package:agnts_api/src/model/delivery_period.dart';
 import 'package:agnts_api/src/model/deploy_repo_request.dart';
 import 'package:agnts_api/src/model/device_registration.dart';
 import 'package:agnts_api/src/model/disable_totp_request.dart';
+import 'package:agnts_api/src/model/document.dart';
+import 'package:agnts_api/src/model/document_conflict.dart';
+import 'package:agnts_api/src/model/document_generation.dart';
+import 'package:agnts_api/src/model/document_grant.dart';
+import 'package:agnts_api/src/model/document_input.dart';
+import 'package:agnts_api/src/model/document_regenerate.dart';
+import 'package:agnts_api/src/model/document_save.dart';
+import 'package:agnts_api/src/model/document_share_input.dart';
+import 'package:agnts_api/src/model/document_share_input_grants_inner.dart';
+import 'package:agnts_api/src/model/document_sharing.dart';
+import 'package:agnts_api/src/model/document_source_input.dart';
+import 'package:agnts_api/src/model/document_source_input_filter.dart';
+import 'package:agnts_api/src/model/document_summary.dart';
+import 'package:agnts_api/src/model/document_ticket.dart';
+import 'package:agnts_api/src/model/document_version.dart';
 import 'package:agnts_api/src/model/edit_check.dart';
 import 'package:agnts_api/src/model/edit_commit_message_request.dart';
 import 'package:agnts_api/src/model/edit_pull_comment_request.dart';
@@ -173,6 +189,7 @@ import 'package:agnts_api/src/model/private_network_saved.dart';
 import 'package:agnts_api/src/model/proof.dart';
 import 'package:agnts_api/src/model/proof_run.dart';
 import 'package:agnts_api/src/model/proof_test.dart';
+import 'package:agnts_api/src/model/public_document.dart';
 import 'package:agnts_api/src/model/publish_review_drafts_request.dart';
 import 'package:agnts_api/src/model/published_review.dart';
 import 'package:agnts_api/src/model/pull_comment.dart';
@@ -257,6 +274,8 @@ import 'package:agnts_api/src/model/run_transcript.dart';
 import 'package:agnts_api/src/model/run_transcript_detail.dart';
 import 'package:agnts_api/src/model/run_transcript_event.dart';
 import 'package:agnts_api/src/model/second_opinion.dart';
+import 'package:agnts_api/src/model/secret_findings.dart';
+import 'package:agnts_api/src/model/secret_findings_findings_inner.dart';
 import 'package:agnts_api/src/model/send_feedback_request.dart';
 import 'package:agnts_api/src/model/set_member_role_request.dart';
 import 'package:agnts_api/src/model/set_plane_webhook_secret_request.dart';
@@ -528,6 +547,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return CreateInviteRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'CreatePlatformAdminRequest':
           return CreatePlatformAdminRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CreateTicketDocumentRequest':
+          return CreateTicketDocumentRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'CreateWorkspaceRequest':
           return CreateWorkspaceRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Dashboard':
@@ -552,6 +573,39 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return DeviceRegistration.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DisableTotpRequest':
           return DisableTotpRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'Document':
+          return Document.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DocumentAccess':
+          
+          
+        case 'DocumentConflict':
+          return DocumentConflict.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DocumentGeneration':
+          return DocumentGeneration.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DocumentGrant':
+          return DocumentGrant.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DocumentInput':
+          return DocumentInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DocumentRegenerate':
+          return DocumentRegenerate.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DocumentSave':
+          return DocumentSave.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DocumentShareInput':
+          return DocumentShareInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DocumentShareInputGrantsInner':
+          return DocumentShareInputGrantsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DocumentSharing':
+          return DocumentSharing.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DocumentSourceInput':
+          return DocumentSourceInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DocumentSourceInputFilter':
+          return DocumentSourceInputFilter.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DocumentSummary':
+          return DocumentSummary.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DocumentTicket':
+          return DocumentTicket.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DocumentVersion':
+          return DocumentVersion.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'EditCheck':
           return EditCheck.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'EditCommitMessageRequest':
@@ -731,6 +785,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ProofRun.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ProofTest':
           return ProofTest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PublicDocument':
+          return PublicDocument.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PublishReviewDraftsRequest':
           return PublishReviewDraftsRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PublishedReview':
@@ -908,6 +964,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return RunTranscriptEvent.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SecondOpinion':
           return SecondOpinion.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SecretFindings':
+          return SecretFindings.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SecretFindingsFindingsInner':
+          return SecretFindingsFindingsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SendFeedbackRequest':
           return SendFeedbackRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetMemberRoleRequest':

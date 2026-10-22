@@ -30,6 +30,7 @@ import (
 	"agnts/internal/commitlink"
 	"agnts/internal/config"
 	"agnts/internal/docs"
+	"agnts/internal/documents"
 	"agnts/internal/domain"
 	"agnts/internal/egress"
 	"agnts/internal/google"
@@ -144,6 +145,15 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 	if cfg.AgentEnabled {
 		refresher = a.refresher
 	}
+	// Documents: generations and PDFs need the worker's containers; without
+	// them people still write, share and download Markdown.
+	docDeps := documents.Deps{Store: a.docStore, Workspaces: a.workspaces, Tickets: a.store, Settings: a.settings,
+		Notifier: broker, Log: log.With("component", "documents")}
+	if cfg.AgentEnabled {
+		docDeps.Generator, docDeps.PDF = a.orch, a.orch
+	}
+	docSvc := documents.New(docDeps)
+	a.orch.SetDocumentWatcher(docSvc)
 	handler, err := httpapi.NewHandler(httpapi.Options{
 		Auth:    svc,
 		Tickets: a.orch,
@@ -164,6 +174,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		Assistant:    a.orch,
 		Swagger:      a.orch,
 		Suites:       a.orch,
+		Documents:    docSvc,
 		OAuth:        a.oauth,
 		MCP:          mcpHandler,
 		DB:           pool,
@@ -215,6 +226,13 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 	go every(sys, 24*time.Hour, func(ctx context.Context) {
 		if err := acc.PurgeDeleted(ctx); err != nil {
 			log.Warn("purge deleted workspaces", "err", err)
+		}
+	})
+	go every(sys, 24*time.Hour, func(ctx context.Context) {
+		if n, err := docSvc.Purge(ctx); err != nil {
+			log.Warn("purge deleted documents", "err", err)
+		} else if n > 0 {
+			log.Info("purged deleted documents", "count", n)
 		}
 	})
 	go every(sys, time.Hour, func(ctx context.Context) {
@@ -335,6 +353,7 @@ type agent struct {
 	ci           *ciwatch.Service
 	links        *commitlink.Service
 	assistant    *postgres.Assistant
+	docStore     *postgres.Documents
 }
 
 // mcpDeps are the use cases the MCP tools call, and the assistant's
@@ -446,6 +465,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	ocfg := orchestrator.DefaultConfig()
 	ocfg.Image = cfg.RunnerImage
 	previewEnvs := postgres.NewPreviewEnvs(pool, box)
+	a.docStore = postgres.NewDocuments(pool)
 	a.orch = orchestrator.New(ocfg, orchestrator.Deps{
 		Store: a.store, Runner: run, Git: repos, Host: a.vcs, Homes: homes,
 		Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: a.jira, domain.SourcePlane: a.plane},
@@ -459,6 +479,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		BuildEnvs: previewEnvs, Workspaces: a.workspaces,
 		Accounts: a.claude, Capacity: a.budget, Credits: a.billing,
 		SwaggerTests: postgres.NewSwaggerTests(pool, box),
+		Documents:    a.docStore, DocumentHost: a.vcs,
 	}, log.With("component", "orchestrator"))
 	a.orch.SetSwaggerSuites(postgres.NewSwaggerSuites(pool, box))
 	a.transcripts = postgres.NewTranscripts(pool)

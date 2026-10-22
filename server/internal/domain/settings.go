@@ -184,6 +184,10 @@ type Settings struct {
 	// EgressAllow are hosts run containers may reach besides the built-in
 	// list (a staging API for previews); ".domain" matches subdomains.
 	EgressAllow []string `json:"egressAllow"`
+	// PublicDocuments lets documents have public links. Turning it off
+	// makes every public link of the workspace stop working, without
+	// changing the documents.
+	PublicDocuments bool `json:"publicDocuments"`
 	// SuggestFollowUps has the runs suggest follow-up tickets. Off by
 	// default: it makes every prompt and answer a little longer.
 	SuggestFollowUps bool `json:"suggestFollowUps"`
@@ -235,34 +239,35 @@ type Settings struct {
 // DefaultSettings returns the settings used before any are saved.
 func DefaultSettings() Settings {
 	return Settings{
-		Models:         StageModels{Analyze: "sonnet", Coding: "opus", Retry: "sonnet", Helper: "haiku", Learn: "sonnet", Review: ModelAuto, Preview: "sonnet"},
-		MaxTurns:       150,
-		TimeoutMin:     45,
-		Allow:          []string{},
-		Deny:           []string{},
-		AskFirst:       true,
-		AutoResume:     true,
-		AutoLearn:      true,
-		AutoReview:     true,
-		AutoPreview:    true,
-		VisualCheck:    true,
-		AutoBrief:      true,
-		SelfReview:     true,
-		Reflect:        true,
-		EgressAllow:    []string{},
-		PullReviews:    DefaultPullReviewSettings(),
-		PRComments:     DefaultPRCommentSettings(),
-		CI:             DefaultCISettings(),
-		Guard:          GuardSettings{Profile: GuardStandard, Disabled: []string{}, FactCheck: 50},
-		Stalls:         StallsLog,
-		ProveFixes:     true,
-		DeepReview:     DeepAuto,
-		LearnFromRuns:  true,
-		Effort:         EffortSettings{Complex: EffortHigh},
-		RecheckComplex: true,
-		BaselineChecks: true,
-		PauseAbove:     90,
-		Parallel:       1,
+		Models:          StageModels{Analyze: "sonnet", Coding: "opus", Retry: "sonnet", Helper: "haiku", Learn: "sonnet", Review: ModelAuto, Preview: "sonnet"},
+		MaxTurns:        150,
+		TimeoutMin:      45,
+		Allow:           []string{},
+		Deny:            []string{},
+		AskFirst:        true,
+		AutoResume:      true,
+		AutoLearn:       true,
+		AutoReview:      true,
+		AutoPreview:     true,
+		VisualCheck:     true,
+		AutoBrief:       true,
+		PublicDocuments: true,
+		SelfReview:      true,
+		Reflect:         true,
+		EgressAllow:     []string{},
+		PullReviews:     DefaultPullReviewSettings(),
+		PRComments:      DefaultPRCommentSettings(),
+		CI:              DefaultCISettings(),
+		Guard:           GuardSettings{Profile: GuardStandard, Disabled: []string{}, FactCheck: 50},
+		Stalls:          StallsLog,
+		ProveFixes:      true,
+		DeepReview:      DeepAuto,
+		LearnFromRuns:   true,
+		Effort:          EffortSettings{Complex: EffortHigh},
+		RecheckComplex:  true,
+		BaselineChecks:  true,
+		PauseAbove:      90,
+		Parallel:        1,
 
 		MaxTicketRepos: DefaultMaxTicketRepos,
 		Git:            GitSettings{CoAuthor: true, PRTitle: "{key}: {title}"},

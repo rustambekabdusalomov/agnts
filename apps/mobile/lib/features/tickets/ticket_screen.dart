@@ -8,6 +8,7 @@ import 'package:agnts_api/agnts_api.dart';
 import '../../core/api.dart';
 import '../../core/data.dart';
 import '../ci/ci_card.dart';
+import '../documents/ticket_documents.dart';
 import '../learn/ticket_lessons.dart';
 import 'api_results.dart';
 import 'code_review.dart';
@@ -1087,6 +1088,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
       if (t.kind == TicketKind.review && t.pull != null) ReviewDraftsFold(ticket: t),
       for (final p in ticketPulls(t)) PullCommentsFold(ticket: t, repoId: p.repoId, number: p.number, url: p.url, repoName: p.repoName),
       if (!isReportKind(t.kind)) LinkedCommitsFold(ticket: t),
+      TicketDocumentsFold(ticket: t, hasReport: isReportKind(t.kind) && (d.result?.report?.trim().isNotEmpty ?? false)),
       if (RelationsFold.shows(d)) RelationsFold(d),
       if (d.followUps != null) FollowUpsFold(d),
       SpendFold(spend: t.spend, stages: d.spendByStage ?? const [], report: isReportKind(t.kind)),

@@ -144,6 +144,7 @@ Map<String, dynamic> _$LedgerEntryToJson(LedgerEntry instance) =>
 const _$LedgerEntryReasonEnumEnumMap = {
   LedgerEntryReasonEnum.purchase: 'purchase',
   LedgerEntryReasonEnum.run: 'run',
+  LedgerEntryReasonEnum.document: 'document',
   LedgerEntryReasonEnum.refund: 'refund',
   LedgerEntryReasonEnum.grant: 'grant',
 };

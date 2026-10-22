@@ -284,6 +284,9 @@ onBeforeUnmount(() => topObserver?.disconnect())
         <RouterLink class="nav-a" active-class="on" :to="{ name: 'tasks' }" v-bind="tip(t('nav.tasks'))">
           <HiIcon name="tasks" /><span class="lbl">{{ t('nav.tasks') }}</span><span v-if="openTasks" class="cnt dim">{{ openTasks }}</span>
         </RouterLink>
+        <RouterLink class="nav-a" active-class="on" :to="{ name: 'documents' }" v-bind="tip(t('nav.documents'))">
+          <HiIcon name="rules" /><span class="lbl">{{ t('nav.documents') }}</span>
+        </RouterLink>
         <RouterLink class="nav-a" active-class="on" :to="{ name: 'reviews' }" v-bind="tip(t('nav.reviews'))">
           <HiIcon name="pull" /><span class="lbl">{{ t('nav.reviews') }}</span><span v-if="readyReviews" class="cnt">{{ readyReviews }}</span>
         </RouterLink>

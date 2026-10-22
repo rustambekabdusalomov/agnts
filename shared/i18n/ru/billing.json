@@ -28,6 +28,7 @@
     "reason_purchase": "Покупка",
     "reason_run": "Списание",
     "reason_refund": "Возврат",
-    "reason_grant": "Начисление"
+    "reason_grant": "Начисление",
+    "reason_document": "Потрачено на документ"
   }
 }

@@ -2613,6 +2613,12 @@ abstract class AppLocalizations {
   /// **'Granted'**
   String get billingReason_grant;
 
+  /// No description provided for @billingReason_document.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent on a document'**
+  String get billingReason_document;
+
   /// No description provided for @briefTitle.
   ///
   /// In en, this message translates to:
@@ -4292,6 +4298,1050 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The analysis could not reproduce it'**
   String get designReproNot;
+
+  /// No description provided for @documentsPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get documentsPageTitle;
+
+  /// No description provided for @documentsLede.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports and notes for the team: written by you, or by agnts from tickets, commits, pull requests and repositories.'**
+  String get documentsLede;
+
+  /// No description provided for @documentsNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New document'**
+  String get documentsNew;
+
+  /// No description provided for @documentsNewLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'New document'**
+  String get documentsNewLinked;
+
+  /// No description provided for @documentsScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Which documents'**
+  String get documentsScope;
+
+  /// No description provided for @documentsScope_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All I can open'**
+  String get documentsScope_all;
+
+  /// No description provided for @documentsScope_mine.
+  ///
+  /// In en, this message translates to:
+  /// **'Mine'**
+  String get documentsScope_mine;
+
+  /// No description provided for @documentsScope_shared.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared with me'**
+  String get documentsScope_shared;
+
+  /// No description provided for @documentsScope_deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Trash'**
+  String get documentsScope_deleted;
+
+  /// No description provided for @documentsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No documents yet. Create one, or ask agnts to write a report.'**
+  String get documentsEmpty;
+
+  /// No description provided for @documentsTrashEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'The trash is empty.'**
+  String get documentsTrashEmpty;
+
+  /// No description provided for @documentsColTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get documentsColTitle;
+
+  /// No description provided for @documentsColOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get documentsColOwner;
+
+  /// No description provided for @documentsColTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets'**
+  String get documentsColTickets;
+
+  /// No description provided for @documentsColUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated'**
+  String get documentsColUpdated;
+
+  /// No description provided for @documentsColDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Restorable for'**
+  String get documentsColDeleted;
+
+  /// No description provided for @documentsDaysLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} day left} other {{n} days left}}'**
+  String documentsDaysLeft(num n);
+
+  /// No description provided for @documentsRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get documentsRestore;
+
+  /// No description provided for @documentsRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Document restored'**
+  String get documentsRestored;
+
+  /// No description provided for @documentsPublic.
+  ///
+  /// In en, this message translates to:
+  /// **'Public'**
+  String get documentsPublic;
+
+  /// No description provided for @documentsPrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
+  String get documentsPrivate;
+
+  /// No description provided for @documentsWriting.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts is writing'**
+  String get documentsWriting;
+
+  /// No description provided for @documentsGenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation failed'**
+  String get documentsGenFailed;
+
+  /// No description provided for @documentsAccess_none.
+  ///
+  /// In en, this message translates to:
+  /// **'No access'**
+  String get documentsAccess_none;
+
+  /// No description provided for @documentsAccess_view.
+  ///
+  /// In en, this message translates to:
+  /// **'Can view'**
+  String get documentsAccess_view;
+
+  /// No description provided for @documentsAccess_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Can edit'**
+  String get documentsAccess_edit;
+
+  /// No description provided for @documentsAccess_owner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get documentsAccess_owner;
+
+  /// No description provided for @documentsYouCan_view.
+  ///
+  /// In en, this message translates to:
+  /// **'You can view'**
+  String get documentsYouCan_view;
+
+  /// No description provided for @documentsYouCan_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'You can edit'**
+  String get documentsYouCan_edit;
+
+  /// No description provided for @documentsRole_owner.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace owner'**
+  String get documentsRole_owner;
+
+  /// No description provided for @documentsRole_user.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get documentsRole_user;
+
+  /// No description provided for @documentsRole_viewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewer'**
+  String get documentsRole_viewer;
+
+  /// No description provided for @documentsNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New document'**
+  String get documentsNewTitle;
+
+  /// No description provided for @documentsNewSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Write it yourself, or have agnts write it from what the workspace knows.'**
+  String get documentsNewSub;
+
+  /// No description provided for @documentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get documentsTitle;
+
+  /// No description provided for @documentsTitlePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Sprint 42 status report'**
+  String get documentsTitlePlaceholder;
+
+  /// No description provided for @documentsWhoWrites.
+  ///
+  /// In en, this message translates to:
+  /// **'Who writes it'**
+  String get documentsWhoWrites;
+
+  /// No description provided for @documentsByAgnts.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts'**
+  String get documentsByAgnts;
+
+  /// No description provided for @documentsByMe.
+  ///
+  /// In en, this message translates to:
+  /// **'I write it'**
+  String get documentsByMe;
+
+  /// No description provided for @documentsLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get documentsLanguage;
+
+  /// No description provided for @documentsSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Made from'**
+  String get documentsSource;
+
+  /// No description provided for @documentsKind_report.
+  ///
+  /// In en, this message translates to:
+  /// **'A ticket’s report'**
+  String get documentsKind_report;
+
+  /// No description provided for @documentsKind_tickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets'**
+  String get documentsKind_tickets;
+
+  /// No description provided for @documentsKind_commits.
+  ///
+  /// In en, this message translates to:
+  /// **'Commits'**
+  String get documentsKind_commits;
+
+  /// No description provided for @documentsKind_pulls.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull requests'**
+  String get documentsKind_pulls;
+
+  /// No description provided for @documentsKind_repo.
+  ///
+  /// In en, this message translates to:
+  /// **'Repository'**
+  String get documentsKind_repo;
+
+  /// No description provided for @documentsKindHelp_report.
+  ///
+  /// In en, this message translates to:
+  /// **'The approved report of a plan, analysis, bug or review ticket, rewritten for its readers.'**
+  String get documentsKindHelp_report;
+
+  /// No description provided for @documentsKindHelp_tickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Chosen tickets, or tickets by state and period: their state, dates, reports and commits.'**
+  String get documentsKindHelp_tickets;
+
+  /// No description provided for @documentsKindHelp_commits.
+  ///
+  /// In en, this message translates to:
+  /// **'Commits of repositories in a period, with the tickets they are linked to.'**
+  String get documentsKindHelp_commits;
+
+  /// No description provided for @documentsKindHelp_pulls.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull requests with their descriptions and diffs: a review digest or release notes.'**
+  String get documentsKindHelp_pulls;
+
+  /// No description provided for @documentsKindHelp_repo.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts reads the whole repository in a sandbox: architecture, quality, tests, risks.'**
+  String get documentsKindHelp_repo;
+
+  /// No description provided for @documentsTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket'**
+  String get documentsTicket;
+
+  /// No description provided for @documentsTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets'**
+  String get documentsTickets;
+
+  /// No description provided for @documentsTicketsPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'AMANAT-12, AMANAT-15'**
+  String get documentsTicketsPlaceholder;
+
+  /// No description provided for @documentsByFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'By state and period'**
+  String get documentsByFilter;
+
+  /// No description provided for @documentsChosen.
+  ///
+  /// In en, this message translates to:
+  /// **'Chosen tickets'**
+  String get documentsChosen;
+
+  /// No description provided for @documentsStates.
+  ///
+  /// In en, this message translates to:
+  /// **'States'**
+  String get documentsStates;
+
+  /// No description provided for @documentsStatesHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'None ticked: every state. The period limits by last update.'**
+  String get documentsStatesHelp;
+
+  /// No description provided for @documentsRepos.
+  ///
+  /// In en, this message translates to:
+  /// **'Repositories'**
+  String get documentsRepos;
+
+  /// No description provided for @documentsRepo.
+  ///
+  /// In en, this message translates to:
+  /// **'Repository'**
+  String get documentsRepo;
+
+  /// No description provided for @documentsChooseRepo.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a repository'**
+  String get documentsChooseRepo;
+
+  /// No description provided for @documentsBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch'**
+  String get documentsBranch;
+
+  /// No description provided for @documentsBranchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'The default branch'**
+  String get documentsBranchPlaceholder;
+
+  /// No description provided for @documentsAuthor.
+  ///
+  /// In en, this message translates to:
+  /// **'Author'**
+  String get documentsAuthor;
+
+  /// No description provided for @documentsAuthorPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone'**
+  String get documentsAuthorPlaceholder;
+
+  /// No description provided for @documentsPrState.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull requests'**
+  String get documentsPrState;
+
+  /// No description provided for @documentsPr_merged.
+  ///
+  /// In en, this message translates to:
+  /// **'Merged'**
+  String get documentsPr_merged;
+
+  /// No description provided for @documentsPr_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get documentsPr_open;
+
+  /// No description provided for @documentsPr_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get documentsPr_all;
+
+  /// No description provided for @documentsPrNumbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Numbers'**
+  String get documentsPrNumbers;
+
+  /// No description provided for @documentsPrNumbersHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional, in one repository. Empty: by state and period.'**
+  String get documentsPrNumbersHelp;
+
+  /// No description provided for @documentsFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get documentsFrom;
+
+  /// No description provided for @documentsTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get documentsTo;
+
+  /// No description provided for @documentsTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Shape'**
+  String get documentsTemplate;
+
+  /// No description provided for @documentsTemplate_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status report'**
+  String get documentsTemplate_status;
+
+  /// No description provided for @documentsTemplate_release_notes.
+  ///
+  /// In en, this message translates to:
+  /// **'Release notes'**
+  String get documentsTemplate_release_notes;
+
+  /// No description provided for @documentsTemplate_pr_review.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull request review'**
+  String get documentsTemplate_pr_review;
+
+  /// No description provided for @documentsTemplate_repo_review.
+  ///
+  /// In en, this message translates to:
+  /// **'Repository review'**
+  String get documentsTemplate_repo_review;
+
+  /// No description provided for @documentsTemplate_ticket_summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get documentsTemplate_ticket_summary;
+
+  /// No description provided for @documentsTemplate_blank.
+  ///
+  /// In en, this message translates to:
+  /// **'Your instruction only'**
+  String get documentsTemplate_blank;
+
+  /// No description provided for @documentsTemplateHint_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Done, in progress, blocked, risks, next steps'**
+  String get documentsTemplateHint_status;
+
+  /// No description provided for @documentsTemplateHint_release_notes.
+  ///
+  /// In en, this message translates to:
+  /// **'New, improved, fixed, internal'**
+  String get documentsTemplateHint_release_notes;
+
+  /// No description provided for @documentsTemplateHint_pr_review.
+  ///
+  /// In en, this message translates to:
+  /// **'Each change, its risk, what to look at'**
+  String get documentsTemplateHint_pr_review;
+
+  /// No description provided for @documentsTemplateHint_repo_review.
+  ///
+  /// In en, this message translates to:
+  /// **'Architecture, quality, tests, debt, recommendations'**
+  String get documentsTemplateHint_repo_review;
+
+  /// No description provided for @documentsTemplateHint_ticket_summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal, findings, changes, open questions'**
+  String get documentsTemplateHint_ticket_summary;
+
+  /// No description provided for @documentsTemplateHint_blank.
+  ///
+  /// In en, this message translates to:
+  /// **'The shape your instruction asks for'**
+  String get documentsTemplateHint_blank;
+
+  /// No description provided for @documentsInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Instruction'**
+  String get documentsInstruction;
+
+  /// No description provided for @documentsInstructionPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'For the client, no technical detail. Focus on risks.'**
+  String get documentsInstructionPlaceholder;
+
+  /// No description provided for @documentsGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask agnts to write it'**
+  String get documentsGenerate;
+
+  /// No description provided for @documentsCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create and edit'**
+  String get documentsCreate;
+
+  /// No description provided for @documentsBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get documentsBack;
+
+  /// No description provided for @documentsNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This document does not exist, or you cannot open it.'**
+  String get documentsNotFound;
+
+  /// No description provided for @documentsEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'Editing'**
+  String get documentsEditing;
+
+  /// No description provided for @documentsVersionN.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {n}'**
+  String documentsVersionN(String n);
+
+  /// No description provided for @documentsOwnedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner: {name}'**
+  String documentsOwnedBy(String name);
+
+  /// No description provided for @documentsDataAsOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on data up to {when}'**
+  String documentsDataAsOf(String when);
+
+  /// No description provided for @documentsEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get documentsEdit;
+
+  /// No description provided for @documentsRegenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Write again'**
+  String get documentsRegenerate;
+
+  /// No description provided for @documentsRegenerateSub.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts writes it again from the same source. The result is a new version; nothing is lost.'**
+  String get documentsRegenerateSub;
+
+  /// No description provided for @documentsShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get documentsShare;
+
+  /// No description provided for @documentsDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get documentsDelete;
+
+  /// No description provided for @documentsDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Move “{title}” to the trash? It can be restored for 30 days.'**
+  String documentsDeleteConfirm(String title);
+
+  /// No description provided for @documentsDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved to the trash'**
+  String get documentsDeleted;
+
+  /// No description provided for @documentsQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for agnts to start writing…'**
+  String get documentsQueued;
+
+  /// No description provided for @documentsWritingNow.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts is writing this document. It appears here when it is done.'**
+  String get documentsWritingNow;
+
+  /// No description provided for @documentsGenFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts could not write it:'**
+  String get documentsGenFailedTitle;
+
+  /// No description provided for @documentsTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get documentsTryAgain;
+
+  /// No description provided for @documentsOverwrote.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts wrote a new version over edits by {name} from {when}.'**
+  String documentsOverwrote(String name, String when);
+
+  /// No description provided for @documentsRestoreVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore version {n}'**
+  String documentsRestoreVersion(String n);
+
+  /// No description provided for @documentsMarkdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Markdown'**
+  String get documentsMarkdown;
+
+  /// No description provided for @documentsPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get documentsPreview;
+
+  /// No description provided for @documentsConflictTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone saved in between.'**
+  String get documentsConflictTitle;
+
+  /// No description provided for @documentsConflictHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The document is at version {n} now. Keep your text on top of it, or start again from theirs.'**
+  String documentsConflictHelp(String n);
+
+  /// No description provided for @documentsTheirText.
+  ///
+  /// In en, this message translates to:
+  /// **'Their text'**
+  String get documentsTheirText;
+
+  /// No description provided for @documentsKeepMine.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep mine'**
+  String get documentsKeepMine;
+
+  /// No description provided for @documentsTakeTheirs.
+  ///
+  /// In en, this message translates to:
+  /// **'Use theirs'**
+  String get documentsTakeTheirs;
+
+  /// No description provided for @documentsSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get documentsSave;
+
+  /// No description provided for @documentsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved as a new version'**
+  String get documentsSaved;
+
+  /// No description provided for @documentsLeaveUnsaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave without saving your edits?'**
+  String get documentsLeaveUnsaved;
+
+  /// No description provided for @documentsEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing written yet.'**
+  String get documentsEmptyBody;
+
+  /// No description provided for @documentsPublicLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Public link'**
+  String get documentsPublicLink;
+
+  /// No description provided for @documentsDownloadMd.
+  ///
+  /// In en, this message translates to:
+  /// **'Markdown'**
+  String get documentsDownloadMd;
+
+  /// No description provided for @documentsDownloadPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF'**
+  String get documentsDownloadPdf;
+
+  /// No description provided for @documentsPreparingPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing PDF…'**
+  String get documentsPreparingPdf;
+
+  /// No description provided for @documentsPdfFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The PDF could not be made. Try again in a few minutes, or download Markdown.'**
+  String get documentsPdfFailed;
+
+  /// No description provided for @documentsPdfSlow.
+  ///
+  /// In en, this message translates to:
+  /// **'The PDF is taking long. Try again in a minute.'**
+  String get documentsPdfSlow;
+
+  /// No description provided for @documentsLinkedTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets'**
+  String get documentsLinkedTickets;
+
+  /// No description provided for @documentsLinkedTicketsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets this document is about'**
+  String get documentsLinkedTicketsSub;
+
+  /// No description provided for @documentsNoTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Not linked to any ticket.'**
+  String get documentsNoTickets;
+
+  /// No description provided for @documentsLinkedByAgnts.
+  ///
+  /// In en, this message translates to:
+  /// **'linked by agnts'**
+  String get documentsLinkedByAgnts;
+
+  /// No description provided for @documentsLinkedByAgntsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts linked the tickets the document was made from'**
+  String get documentsLinkedByAgntsHint;
+
+  /// No description provided for @documentsUnlink.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink'**
+  String get documentsUnlink;
+
+  /// No description provided for @documentsLinkTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get documentsLinkTicket;
+
+  /// No description provided for @documentsLinkPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket number'**
+  String get documentsLinkPlaceholder;
+
+  /// No description provided for @documentsBadKey.
+  ///
+  /// In en, this message translates to:
+  /// **'That is not a ticket number.'**
+  String get documentsBadKey;
+
+  /// No description provided for @documentsVersions.
+  ///
+  /// In en, this message translates to:
+  /// **'Versions'**
+  String get documentsVersions;
+
+  /// No description provided for @documentsNoVersions.
+  ///
+  /// In en, this message translates to:
+  /// **'No versions yet.'**
+  String get documentsNoVersions;
+
+  /// No description provided for @documentsCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'current'**
+  String get documentsCurrent;
+
+  /// No description provided for @documentsByAgntsFor.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts, for {name}'**
+  String documentsByAgntsFor(String name);
+
+  /// No description provided for @documentsRestoredBy.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} restored it'**
+  String documentsRestoredBy(String name);
+
+  /// No description provided for @documentsVersionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {n}'**
+  String documentsVersionTitle(String n);
+
+  /// No description provided for @documentsIsCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'This is the current version.'**
+  String get documentsIsCurrent;
+
+  /// No description provided for @documentsDiffHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'What changed from version {n} to the current text: removed lines are struck through, added ones green.'**
+  String documentsDiffHelp(String n);
+
+  /// No description provided for @documentsSameText.
+  ///
+  /// In en, this message translates to:
+  /// **'The text is the same as now.'**
+  String get documentsSameText;
+
+  /// No description provided for @documentsShareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get documentsShareTitle;
+
+  /// No description provided for @documentsType.
+  ///
+  /// In en, this message translates to:
+  /// **'Who can read it'**
+  String get documentsType;
+
+  /// No description provided for @documentsPrivateHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Only you, the people below and the workspace owner.'**
+  String get documentsPrivateHelp;
+
+  /// No description provided for @documentsPublicHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone with the link can read and download it, without signing in. It shows no names or tickets.'**
+  String get documentsPublicHelp;
+
+  /// No description provided for @documentsPublicOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Public documents are turned off in this workspace’s Settings.'**
+  String get documentsPublicOff;
+
+  /// No description provided for @documentsSecretsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This text looks like it holds secrets.'**
+  String get documentsSecretsTitle;
+
+  /// No description provided for @documentsSecretsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove them from these lines, save, then make the document public.'**
+  String get documentsSecretsHelp;
+
+  /// No description provided for @documentsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Line {n}'**
+  String documentsLine(String n);
+
+  /// No description provided for @documentsResetLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset the link'**
+  String get documentsResetLink;
+
+  /// No description provided for @documentsResetHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The old link stops working at once.'**
+  String get documentsResetHelp;
+
+  /// No description provided for @documentsWorkspaceAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone in the workspace'**
+  String get documentsWorkspaceAccess;
+
+  /// No description provided for @documentsWorkspaceAccessHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'At least this for every member. Viewers can only read.'**
+  String get documentsWorkspaceAccessHelp;
+
+  /// No description provided for @documentsPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get documentsPeople;
+
+  /// No description provided for @documentsAddPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a person'**
+  String get documentsAddPerson;
+
+  /// No description provided for @documentsRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get documentsRemove;
+
+  /// No description provided for @documentsOwnerNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The workspace owner can always open this document.'**
+  String get documentsOwnerNote;
+
+  /// No description provided for @documentsSaveSharing.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get documentsSaveSharing;
+
+  /// No description provided for @documentsTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Give to another member'**
+  String get documentsTransfer;
+
+  /// No description provided for @documentsTransferTo.
+  ///
+  /// In en, this message translates to:
+  /// **'New owner'**
+  String get documentsTransferTo;
+
+  /// No description provided for @documentsTransferConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Make {name} the owner? You keep edit access.'**
+  String documentsTransferConfirm(String name);
+
+  /// No description provided for @documentsTicketTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get documentsTicketTitle;
+
+  /// No description provided for @documentsTicketSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents about this ticket that you can open'**
+  String get documentsTicketSub;
+
+  /// No description provided for @documentsTicketEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No documents yet.'**
+  String get documentsTicketEmpty;
+
+  /// No description provided for @documentsFromReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Make a document from the report'**
+  String get documentsFromReport;
+
+  /// No description provided for @documentsPublicGoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This link does not work'**
+  String get documentsPublicGoneTitle;
+
+  /// No description provided for @documentsPublicGone.
+  ///
+  /// In en, this message translates to:
+  /// **'The document was made private or deleted, or its link was changed.'**
+  String get documentsPublicGone;
+
+  /// No description provided for @documentsPublicUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {when}'**
+  String documentsPublicUpdated(String when);
+
+  /// No description provided for @documentsSettingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Public documents'**
+  String get documentsSettingLabel;
+
+  /// No description provided for @documentsSettingHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Let document owners share a public link that anyone can open. Off: every public link of this workspace stops working at once.'**
+  String get documentsSettingHelp;
+
+  /// No description provided for @documentsNewForTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked to {number}. Write it yourself, or have agnts write it.'**
+  String documentsNewForTicket(String number);
 
   /// No description provided for @draftsTitle.
   ///
@@ -10395,6 +11445,276 @@ abstract class AppLocalizations {
   /// **'Time'**
   String get mdetailFactTime;
 
+  /// No description provided for @mdocumentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get mdocumentsTitle;
+
+  /// No description provided for @mdocumentsMoreRowSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports and pages of the workspace'**
+  String get mdocumentsMoreRowSub;
+
+  /// No description provided for @mdocumentsAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get mdocumentsAll;
+
+  /// No description provided for @mdocumentsMine.
+  ///
+  /// In en, this message translates to:
+  /// **'Mine'**
+  String get mdocumentsMine;
+
+  /// No description provided for @mdocumentsShared.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared with me'**
+  String get mdocumentsShared;
+
+  /// No description provided for @mdocumentsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No documents yet'**
+  String get mdocumentsEmpty;
+
+  /// No description provided for @mdocumentsEmptyText.
+  ///
+  /// In en, this message translates to:
+  /// **'Write documents in the web app, or make one from a ticket\'s report.'**
+  String get mdocumentsEmptyText;
+
+  /// No description provided for @mdocumentsTypePrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
+  String get mdocumentsTypePrivate;
+
+  /// No description provided for @mdocumentsTypePublic.
+  ///
+  /// In en, this message translates to:
+  /// **'Public'**
+  String get mdocumentsTypePublic;
+
+  /// No description provided for @mdocumentsWriting.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts is writing'**
+  String get mdocumentsWriting;
+
+  /// No description provided for @mdocumentsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing failed'**
+  String get mdocumentsFailed;
+
+  /// No description provided for @mdocumentsFailedText.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts could not write it: {error}'**
+  String mdocumentsFailedText(String error);
+
+  /// No description provided for @mdocumentsVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {n}'**
+  String mdocumentsVersion(String n);
+
+  /// No description provided for @mdocumentsAsOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on data up to {date}'**
+  String mdocumentsAsOf(String date);
+
+  /// No description provided for @mdocumentsMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'{owner} · {time}'**
+  String mdocumentsMeta(String owner, String time);
+
+  /// No description provided for @mdocumentsNoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing written yet.'**
+  String get mdocumentsNoBody;
+
+  /// No description provided for @mdocumentsLinkedTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked tickets'**
+  String get mdocumentsLinkedTickets;
+
+  /// No description provided for @mdocumentsCopyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy public link'**
+  String get mdocumentsCopyLink;
+
+  /// No description provided for @mdocumentsLinkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied'**
+  String get mdocumentsLinkCopied;
+
+  /// No description provided for @mdocumentsSharing.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing'**
+  String get mdocumentsSharing;
+
+  /// No description provided for @mdocumentsDownloadMd.
+  ///
+  /// In en, this message translates to:
+  /// **'Download .md'**
+  String get mdocumentsDownloadMd;
+
+  /// No description provided for @mdocumentsDownloadPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Download .pdf'**
+  String get mdocumentsDownloadPdf;
+
+  /// No description provided for @mdocumentsPreparingPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing the PDF…'**
+  String get mdocumentsPreparingPdf;
+
+  /// No description provided for @mdocumentsPdfSlow.
+  ///
+  /// In en, this message translates to:
+  /// **'The PDF is taking longer than usual. Try again in a minute.'**
+  String get mdocumentsPdfSlow;
+
+  /// No description provided for @mdocumentsDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Download failed'**
+  String get mdocumentsDownloadFailed;
+
+  /// No description provided for @mdocumentsPublicLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Public link'**
+  String get mdocumentsPublicLink;
+
+  /// No description provided for @mdocumentsPublicHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone with the link can read it without signing in.'**
+  String get mdocumentsPublicHint;
+
+  /// No description provided for @mdocumentsPublicOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Public documents are turned off in this workspace\'s Settings.'**
+  String get mdocumentsPublicOff;
+
+  /// No description provided for @mdocumentsResetLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset link'**
+  String get mdocumentsResetLink;
+
+  /// No description provided for @mdocumentsResetDone.
+  ///
+  /// In en, this message translates to:
+  /// **'New link made; the old one no longer works.'**
+  String get mdocumentsResetDone;
+
+  /// No description provided for @mdocumentsWorkspaceAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone in the workspace'**
+  String get mdocumentsWorkspaceAccess;
+
+  /// No description provided for @mdocumentsAccessNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No access'**
+  String get mdocumentsAccessNone;
+
+  /// No description provided for @mdocumentsAccessView.
+  ///
+  /// In en, this message translates to:
+  /// **'Can view'**
+  String get mdocumentsAccessView;
+
+  /// No description provided for @mdocumentsAccessEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Can edit'**
+  String get mdocumentsAccessEdit;
+
+  /// No description provided for @mdocumentsPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get mdocumentsPeople;
+
+  /// No description provided for @mdocumentsViewerOnlyView.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewers can only view'**
+  String get mdocumentsViewerOnlyView;
+
+  /// No description provided for @mdocumentsSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get mdocumentsSave;
+
+  /// No description provided for @mdocumentsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get mdocumentsSaved;
+
+  /// No description provided for @mdocumentsSecrets.
+  ///
+  /// In en, this message translates to:
+  /// **'The document looks like it holds secrets. Remove them before publishing:'**
+  String get mdocumentsSecrets;
+
+  /// No description provided for @mdocumentsSecretLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Line {line}: {excerpt}'**
+  String mdocumentsSecretLine(String line, String excerpt);
+
+  /// No description provided for @mdocumentsTicketSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get mdocumentsTicketSection;
+
+  /// No description provided for @mdocumentsTicketNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No documents linked yet.'**
+  String get mdocumentsTicketNone;
+
+  /// No description provided for @mdocumentsFromReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Make a document from this report'**
+  String get mdocumentsFromReport;
+
+  /// No description provided for @mdocumentsFromReportStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts is writing the document'**
+  String get mdocumentsFromReportStarted;
+
+  /// No description provided for @mdocumentsLedgerSpent.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent on a document'**
+  String get mdocumentsLedgerSpent;
+
   /// No description provided for @mgroupsGroups.
   ///
   /// In en, this message translates to:
@@ -11978,6 +13298,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Conversations'**
   String get navAssistantConversations;
+
+  /// No description provided for @navDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get navDocuments;
 
   /// No description provided for @networkTitle.
   ///

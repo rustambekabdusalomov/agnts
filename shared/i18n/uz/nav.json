@@ -57,6 +57,7 @@
     "ci": "CI",
     "aiAssistant": "AI yordamchi",
     "assistantChat": "Chat",
-    "assistantConversations": "Suhbatlar"
+    "assistantConversations": "Suhbatlar",
+    "documents": "Hujjatlar"
   }
 }

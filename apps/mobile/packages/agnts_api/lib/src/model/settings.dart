@@ -52,6 +52,8 @@ class Settings {
 
      this.autoBrief,
 
+     this.publicDocuments,
+
      this.selfReview,
 
      this.reflect,
@@ -247,6 +249,19 @@ class Settings {
 
 
   final bool? autoBrief;
+
+
+
+      /// Let documents have public links; off makes every public link of the workspace stop working
+  @JsonKey(
+    
+    name: r'publicDocuments',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? publicDocuments;
 
 
 
@@ -549,6 +564,7 @@ class Settings {
       other.autoPreview == autoPreview &&
       other.visualCheck == visualCheck &&
       other.autoBrief == autoBrief &&
+      other.publicDocuments == publicDocuments &&
       other.selfReview == selfReview &&
       other.reflect == reflect &&
       other.egressAllow == egressAllow &&
@@ -586,6 +602,7 @@ class Settings {
         autoPreview.hashCode +
         visualCheck.hashCode +
         autoBrief.hashCode +
+        publicDocuments.hashCode +
         selfReview.hashCode +
         reflect.hashCode +
         egressAllow.hashCode +

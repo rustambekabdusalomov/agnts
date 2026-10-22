@@ -429,7 +429,7 @@ func toSettings(v domain.Settings) gen.Settings {
 	followUps, followUpsNote := v.SuggestFollowUps, v.Notify.FollowUps
 	preview, autoPreview, visualCheck := v.Models.Preview, v.AutoPreview, v.VisualCheck
 	previewNote, previewPhotos, egress := v.Notify.Preview, v.Notify.PreviewPhotos, append([]string{}, v.EgressAllow...)
-	autoBrief, selfReview, reflect := v.AutoBrief, v.SelfReview, v.Reflect
+	autoBrief, selfReview, reflect, publicDocs := v.AutoBrief, v.SelfReview, v.Reflect, v.PublicDocuments
 	ciNote := v.Notify.CI
 	ci := gen.CISettings{AutoFix: v.CI.AutoFix, MaxAutoPerDay: v.CI.MaxAutoPerDay, RetryFlaky: v.CI.RetryFlaky,
 		FeedbackRounds: v.CI.FeedbackRounds, InfraPatterns: append([]string{}, v.CI.InfraPatterns...)}
@@ -457,7 +457,7 @@ func toSettings(v domain.Settings) gen.Settings {
 		Ci: &ci,
 		Models: gen.StageModels{Analyze: v.Models.Analyze, Coding: v.Models.Coding,
 			Retry: v.Models.Retry, Helper: v.Models.Helper, Learn: &learn, Review: &review, Preview: &preview},
-		AutoPreview: &autoPreview, VisualCheck: &visualCheck, EgressAllow: &egress, AutoBrief: &autoBrief, SelfReview: &selfReview, Reflect: &reflect,
+		AutoPreview: &autoPreview, VisualCheck: &visualCheck, EgressAllow: &egress, AutoBrief: &autoBrief, SelfReview: &selfReview, Reflect: &reflect, PublicDocuments: &publicDocs,
 		MaxTurns: v.MaxTurns, TimeoutMin: v.TimeoutMin, Allow: v.Allow, Deny: v.Deny,
 		AskFirst: v.AskFirst, AutoResume: v.AutoResume, PauseAbove: v.PauseAbove, Parallel: v.Parallel, AutoLearn: &autoLearn,
 		AutoReview: &autoReview, SuggestFollowUps: &followUps,
@@ -512,7 +512,7 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 			Retry: req.Models.Retry, Helper: req.Models.Helper, Learn: cur.Models.Learn, Review: cur.Models.Review,
 			Preview: cur.Models.Preview},
 		AutoPreview: cur.AutoPreview, VisualCheck: cur.VisualCheck, EgressAllow: cur.EgressAllow,
-		AutoBrief: cur.AutoBrief, SelfReview: cur.SelfReview, Reflect: cur.Reflect,
+		AutoBrief: cur.AutoBrief, SelfReview: cur.SelfReview, Reflect: cur.Reflect, PublicDocuments: cur.PublicDocuments,
 		MaxTurns: req.MaxTurns, TimeoutMin: req.TimeoutMin, Allow: req.Allow, Deny: req.Deny,
 		AskFirst: req.AskFirst, AutoResume: req.AutoResume, PauseAbove: req.PauseAbove, Parallel: cur.Parallel, AutoLearn: cur.AutoLearn,
 		AutoReview: cur.AutoReview, SuggestFollowUps: cur.SuggestFollowUps, PullReviews: cur.PullReviews, PRComments: cur.PRComments, CI: cur.CI,
@@ -577,6 +577,9 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.AutoBrief != nil {
 		v.AutoBrief = *req.AutoBrief
+	}
+	if req.PublicDocuments != nil {
+		v.PublicDocuments = *req.PublicDocuments
 	}
 	if req.SelfReview != nil {
 		v.SelfReview = *req.SelfReview

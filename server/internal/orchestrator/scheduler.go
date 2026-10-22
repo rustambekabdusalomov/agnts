@@ -25,10 +25,13 @@ const (
 	ClassPreview QueueClass = "preview"
 	ClassLearn   QueueClass = "learn"
 	ClassReflect QueueClass = "reflect"
+	// ClassDocument is a document generation: someone waits for it, so
+	// it ranks right after the ticket's own stages.
+	ClassDocument QueueClass = "document"
 )
 
 func (c QueueClass) rank() int {
-	return map[QueueClass]int{ClassRule: 0, ClassMain: 1, ClassBrief: 2, ClassReview: 3, ClassPreview: 4, ClassLearn: 5, ClassReflect: 6}[c]
+	return map[QueueClass]int{ClassRule: 0, ClassMain: 1, ClassDocument: 2, ClassBrief: 3, ClassReview: 4, ClassPreview: 5, ClassLearn: 6, ClassReflect: 7}[c]
 }
 
 // QueueItem is a ticket waiting for a run.
@@ -259,6 +262,13 @@ func (o *Orchestrator) tick(ctx context.Context, start func(job scheduled)) {
 		}
 	}
 
+	var docWS []domain.PendingDocument
+	if o.docs != nil {
+		if docWS, err = o.docs.PendingDocumentWorkspaces(sys); err != nil && ctx.Err() == nil {
+			o.log.Warn("read pending document generations", "err", err)
+		}
+	}
+
 	var reflectWS []int64
 	if o.reflections != nil {
 		if reflectWS, err = o.reflections.PendingReflectionWorkspaces(sys); err != nil && ctx.Err() == nil {
@@ -298,6 +308,12 @@ func (o *Orchestrator) tick(ctx context.Context, start func(job scheduled)) {
 	for _, id := range briefWS {
 		if q := get(id); q != nil {
 			q.items = append(q.items, QueueItem{WorkspaceID: id, Class: ClassBrief})
+		}
+	}
+	for _, p := range docWS {
+		if q := get(p.WorkspaceID); q != nil {
+			// The person who asked: their Claude account in per-member mode.
+			q.items = append(q.items, QueueItem{WorkspaceID: p.WorkspaceID, Class: ClassDocument, MemberID: p.RequestedBy, UpdatedAt: p.Since})
 		}
 	}
 	for _, id := range reflectWS {
@@ -523,6 +539,8 @@ type scheduled struct {
 	release func()
 	acct    domain.ClaudeAccount
 	hasAcct bool
+	// docRunID is the document generation it runs, 0 for anything else.
+	docRunID int64
 }
 
 // claimItem claims the run an item waits for.
@@ -547,6 +565,16 @@ func (o *Orchestrator) claimItem(ctx context.Context, it QueueItem) (scheduled, 
 			return scheduled{}, false
 		}
 		return scheduled{ws: it.WorkspaceID, stage: "brief", work: func(ctx context.Context) { o.surveyBrief(ctx, b) }}, true
+	}
+	if it.Class == ClassDocument {
+		r, ok, err := o.docs.ClaimDocumentRun(wctx)
+		if err != nil {
+			o.log.Error("claim document generation", "workspace", it.WorkspaceID, "err", err)
+		}
+		if !ok {
+			return scheduled{}, false
+		}
+		return scheduled{ws: it.WorkspaceID, stage: "document", docRunID: r.ID, work: func(ctx context.Context) { o.writeDocument(ctx, r) }}, true
 	}
 	if it.Class == ClassReflect {
 		r, ok, err := o.reflections.ClaimReflection(wctx)
@@ -611,10 +639,24 @@ func (o *Orchestrator) runScheduled(ctx context.Context, j scheduled) {
 			}
 		}
 	}
+	if j.hasAcct && j.docRunID > 0 && o.docs != nil {
+		var conn *int64
+		if j.acct.ConnectionID > 0 {
+			conn = &j.acct.ConnectionID
+		}
+		if err := o.docs.SetDocumentRunAccount(wctx, j.docRunID, conn, j.acct.Credits); err != nil {
+			o.log.Warn("record document run account", "document_run", j.docRunID, "err", err)
+		}
+	}
 	j.work(wctx)
 	if j.hasAcct && j.acct.Credits && o.credits != nil && j.runID > 0 {
 		if err := o.credits.Settle(context.WithoutCancel(wctx), j.ws, j.runID, j.key); err != nil {
 			o.log.Error("charge run to credits", "run_id", j.runID, "err", err)
+		}
+	}
+	if dc, ok := o.credits.(DocumentCredits); ok && j.hasAcct && j.acct.Credits && j.docRunID > 0 {
+		if err := dc.SettleDocument(context.WithoutCancel(wctx), j.ws, j.docRunID); err != nil {
+			o.log.Error("charge document generation to credits", "document_run", j.docRunID, "err", err)
 		}
 	}
 }

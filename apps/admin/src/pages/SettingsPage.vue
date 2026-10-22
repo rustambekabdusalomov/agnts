@@ -276,6 +276,9 @@ const section = computed(() => settingsSection(route.params.section))
         <CfgRow v-if="draft.autoBrief !== undefined" :label="t('settings.autoBrief')" :help="t('settings.autoBriefHelp')">
           <SwitchToggle v-model="draft.autoBrief" :label="t('settings.autoBrief')" />
         </CfgRow>
+        <CfgRow v-if="draft.publicDocuments !== undefined" :label="t('documents.settingLabel')" :help="t('documents.settingHelp')">
+          <SwitchToggle v-model="draft.publicDocuments" :label="t('documents.settingLabel')" />
+        </CfgRow>
         <CfgRow v-if="draft.suggestFollowUps !== undefined" :label="t('followUps.settingLabel')" :help="t('followUps.settingHelp')">
           <SwitchToggle v-model="draft.suggestFollowUps" :label="t('followUps.settingLabel')" />
         </CfgRow>

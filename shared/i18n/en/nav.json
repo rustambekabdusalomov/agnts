@@ -57,6 +57,7 @@
     "ci": "CI",
     "aiAssistant": "AI assistant",
     "assistantChat": "Chat",
-    "assistantConversations": "Conversations"
+    "assistantConversations": "Conversations",
+    "documents": "Documents"
   }
 }

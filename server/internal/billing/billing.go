@@ -44,6 +44,7 @@ type Store interface {
 	Balance(ctx context.Context, ws int64) (int64, error)
 	Ledger(ctx context.Context, ws int64, limit int) ([]postgres.LedgerEntry, error)
 	RunCostUSD(ctx context.Context, runID int64) (float64, error)
+	DocumentRunCostUSD(ctx context.Context, runID int64) (float64, error)
 	CreatePayment(ctx context.Context, p postgres.Payment) (postgres.Payment, error)
 	PaymentByID(ctx context.Context, id int64) (postgres.Payment, error)
 	PaymentByTxn(ctx context.Context, provider, txn string) (postgres.Payment, error)
@@ -284,6 +285,27 @@ func (s *Service) Settle(ctx context.Context, ws, runID int64, key string) error
 	}
 	_, err = s.store.Add(ctx, postgres.LedgerEntry{WorkspaceID: ws, Amount: -credits, Reason: postgres.CreditRun, RunID: &runID, TicketKey: key,
 		Note: fmt.Sprintf("$%.2f of API cost", usd)})
+	if errors.Is(err, postgres.ErrAlreadyCharged) {
+		return nil
+	}
+	if err == nil {
+		s.changed(ws)
+	}
+	return err
+}
+
+// SettleDocument charges a finished document generation's cost, once.
+func (s *Service) SettleDocument(ctx context.Context, ws, runID int64) error {
+	usd, err := s.store.DocumentRunCostUSD(ctx, runID)
+	if err != nil {
+		return err
+	}
+	credits := int64(math.Ceil(usd * 100))
+	if credits <= 0 {
+		return nil
+	}
+	_, err = s.store.Add(ctx, postgres.LedgerEntry{WorkspaceID: ws, Amount: -credits, Reason: postgres.CreditDocument, DocumentRunID: &runID,
+		Note: fmt.Sprintf("$%.2f of API cost (document)", usd)})
 	if errors.Is(err, postgres.ErrAlreadyCharged) {
 		return nil
 	}

@@ -38,6 +38,7 @@ RUN apt-get update \
       libgdbm-dev libgmp-dev libyaml-dev libxml2-dev libxslt1-dev libcurl4-openssl-dev libpq-dev \
       default-libmysqlclient-dev libjpeg-dev libpng-dev uuid-dev libicu76 libkrb5-3 libunwind8 \
       php-cli php-curl php-mbstring php-xml php-zip php-intl php-bcmath php-gd php-sqlite3 php-pgsql php-mysql composer \
+      fonts-noto-core fonts-noto-mono fonts-dejavu-core \
  && rm -rf /var/lib/apt/lists/*
 
 COPY --from=mise /usr/local/bin/mise /usr/local/bin/mise

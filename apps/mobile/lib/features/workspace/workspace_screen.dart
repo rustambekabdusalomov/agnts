@@ -786,6 +786,7 @@ class _BillingTabState extends ConsumerState<_BillingTab> {
 String _reason(AppLocalizations l, LedgerEntryReasonEnum r) => switch (r) {
       LedgerEntryReasonEnum.purchase => l.billingReason_purchase,
       LedgerEntryReasonEnum.run => l.billingReason_run,
+      LedgerEntryReasonEnum.document => l.mdocumentsLedgerSpent,
       LedgerEntryReasonEnum.refund => l.billingReason_refund,
       LedgerEntryReasonEnum.grant => l.billingReason_grant,
     };

@@ -72,6 +72,12 @@ void main() {
       // TODO
     });
 
+    // Let documents have public links; off makes every public link of the workspace stop working
+    // bool publicDocuments
+    test('to test the property `publicDocuments`', () async {
+      // TODO
+    });
+
     // Send blocker and major findings of agnts's code review back to the coder once per revision, before a person reviews
     // bool selfReview
     test('to test the property `selfReview`', () async {

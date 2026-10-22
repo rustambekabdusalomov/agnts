@@ -28,6 +28,7 @@
     "reason_purchase": "Sotib olindi",
     "reason_run": "Sarflandi",
     "reason_refund": "Qaytarildi",
-    "reason_grant": "Berildi"
+    "reason_grant": "Berildi",
+    "reason_document": "Hujjatga sarflandi"
   }
 }

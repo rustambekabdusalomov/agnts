@@ -11,6 +11,7 @@ const (
 	PurposeAssistant     TranscriptPurpose = "assistant"
 	PurposeBrief         TranscriptPurpose = "brief"
 	PurposeDetect        TranscriptPurpose = "detect"
+	PurposeDocument      TranscriptPurpose = "document"
 	PurposeReflect       TranscriptPurpose = "reflect"
 	PurposeRules         TranscriptPurpose = "rules"
 	PurposeSecondOpinion TranscriptPurpose = "second_opinion"
@@ -21,7 +22,7 @@ const (
 // stages, which never had a claude_calls row.
 func (p TranscriptPurpose) Background() bool {
 	switch p {
-	case PurposeAssistant, PurposeBrief, PurposeDetect, PurposeReflect, PurposeRules, PurposeTranslate:
+	case PurposeAssistant, PurposeBrief, PurposeDetect, PurposeDocument, PurposeReflect, PurposeRules, PurposeTranslate:
 		return true
 	}
 	return false

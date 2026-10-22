@@ -15,6 +15,8 @@ export const router = createRouter({
     { path: '/forgot', name: 'forgot', component: () => import('../pages/account/ForgotPage.vue'), meta: { public: true, bare: true } },
     { path: '/reset-password', name: 'reset', component: () => import('../pages/account/ResetPage.vue'), meta: { public: true, bare: true, any: true } },
     { path: '/verify', name: 'verify', component: () => import('../pages/account/VerifyPage.vue'), meta: { public: true, bare: true, any: true } },
+    // A public document: anyone with the link, signed in or not.
+    { path: '/d/:token', name: 'publicDocument', component: () => import('../pages/PublicDocumentPage.vue'), meta: { public: true, bare: true, any: true } },
     { path: '/invite/:token', name: 'invite', component: () => import('../pages/account/InvitePage.vue'), meta: { public: true, bare: true, any: true } },
     { path: '/workspaces', name: 'workspaces', component: () => import('../pages/account/WorkspacesPage.vue'), meta: { bare: true, global: true } },
     { path: '/oauth/consent', name: 'consent', component: () => import('../pages/ConsentPage.vue'), meta: { bare: true, global: true } },
@@ -42,6 +44,8 @@ export const router = createRouter({
         { path: 'tickets', name: 'tickets', component: () => import('../pages/TicketsPage.vue') },
         { path: 'tickets/:key', name: 'ticket', component: () => import('../pages/TicketPage.vue') },
         { path: 'tasks', name: 'tasks', component: () => import('../pages/TasksPage.vue') },
+        { path: 'documents', name: 'documents', component: () => import('../pages/DocumentsPage.vue') },
+        { path: 'documents/:id(\\d+)', name: 'document', component: () => import('../pages/DocumentPage.vue') },
         { path: 'swagger-suites', name: 'swagger-suites', component: () => import('../pages/SwaggerSuitesPage.vue') },
         { path: 'reviews', name: 'reviews', component: () => import('../pages/ReviewsPage.vue') },
         { path: 'ci', name: 'ci', component: () => import('../pages/CiPage.vue') },

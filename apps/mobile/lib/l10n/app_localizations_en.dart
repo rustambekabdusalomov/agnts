@@ -1390,6 +1390,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get billingReason_grant => 'Granted';
 
   @override
+  String get billingReason_document => 'Spent on a document';
+
+  @override
   String get briefTitle => 'Repository brief';
 
   @override
@@ -2306,6 +2309,563 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get designReproNot => 'The analysis could not reproduce it';
+
+  @override
+  String get documentsPageTitle => 'Documents';
+
+  @override
+  String get documentsLede =>
+      'Reports and notes for the team: written by you, or by agnts from tickets, commits, pull requests and repositories.';
+
+  @override
+  String get documentsNew => 'New document';
+
+  @override
+  String get documentsNewLinked => 'New document';
+
+  @override
+  String get documentsScope => 'Which documents';
+
+  @override
+  String get documentsScope_all => 'All I can open';
+
+  @override
+  String get documentsScope_mine => 'Mine';
+
+  @override
+  String get documentsScope_shared => 'Shared with me';
+
+  @override
+  String get documentsScope_deleted => 'Trash';
+
+  @override
+  String get documentsEmpty => 'No documents yet. Create one, or ask agnts to write a report.';
+
+  @override
+  String get documentsTrashEmpty => 'The trash is empty.';
+
+  @override
+  String get documentsColTitle => 'Title';
+
+  @override
+  String get documentsColOwner => 'Owner';
+
+  @override
+  String get documentsColTickets => 'Tickets';
+
+  @override
+  String get documentsColUpdated => 'Updated';
+
+  @override
+  String get documentsColDeleted => 'Restorable for';
+
+  @override
+  String documentsDaysLeft(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n days left', one: '$n day left');
+    return '$_temp0';
+  }
+
+  @override
+  String get documentsRestore => 'Restore';
+
+  @override
+  String get documentsRestored => 'Document restored';
+
+  @override
+  String get documentsPublic => 'Public';
+
+  @override
+  String get documentsPrivate => 'Private';
+
+  @override
+  String get documentsWriting => 'agnts is writing';
+
+  @override
+  String get documentsGenFailed => 'Generation failed';
+
+  @override
+  String get documentsAccess_none => 'No access';
+
+  @override
+  String get documentsAccess_view => 'Can view';
+
+  @override
+  String get documentsAccess_edit => 'Can edit';
+
+  @override
+  String get documentsAccess_owner => 'Owner';
+
+  @override
+  String get documentsYouCan_view => 'You can view';
+
+  @override
+  String get documentsYouCan_edit => 'You can edit';
+
+  @override
+  String get documentsRole_owner => 'Workspace owner';
+
+  @override
+  String get documentsRole_user => 'Member';
+
+  @override
+  String get documentsRole_viewer => 'Viewer';
+
+  @override
+  String get documentsNewTitle => 'New document';
+
+  @override
+  String get documentsNewSub => 'Write it yourself, or have agnts write it from what the workspace knows.';
+
+  @override
+  String get documentsTitle => 'Title';
+
+  @override
+  String get documentsTitlePlaceholder => 'Sprint 42 status report';
+
+  @override
+  String get documentsWhoWrites => 'Who writes it';
+
+  @override
+  String get documentsByAgnts => 'agnts';
+
+  @override
+  String get documentsByMe => 'I write it';
+
+  @override
+  String get documentsLanguage => 'Language';
+
+  @override
+  String get documentsSource => 'Made from';
+
+  @override
+  String get documentsKind_report => 'A ticket’s report';
+
+  @override
+  String get documentsKind_tickets => 'Tickets';
+
+  @override
+  String get documentsKind_commits => 'Commits';
+
+  @override
+  String get documentsKind_pulls => 'Pull requests';
+
+  @override
+  String get documentsKind_repo => 'Repository';
+
+  @override
+  String get documentsKindHelp_report => 'The approved report of a plan, analysis, bug or review ticket, rewritten for its readers.';
+
+  @override
+  String get documentsKindHelp_tickets => 'Chosen tickets, or tickets by state and period: their state, dates, reports and commits.';
+
+  @override
+  String get documentsKindHelp_commits => 'Commits of repositories in a period, with the tickets they are linked to.';
+
+  @override
+  String get documentsKindHelp_pulls => 'Pull requests with their descriptions and diffs: a review digest or release notes.';
+
+  @override
+  String get documentsKindHelp_repo => 'agnts reads the whole repository in a sandbox: architecture, quality, tests, risks.';
+
+  @override
+  String get documentsTicket => 'Ticket';
+
+  @override
+  String get documentsTickets => 'Tickets';
+
+  @override
+  String get documentsTicketsPlaceholder => 'AMANAT-12, AMANAT-15';
+
+  @override
+  String get documentsByFilter => 'By state and period';
+
+  @override
+  String get documentsChosen => 'Chosen tickets';
+
+  @override
+  String get documentsStates => 'States';
+
+  @override
+  String get documentsStatesHelp => 'None ticked: every state. The period limits by last update.';
+
+  @override
+  String get documentsRepos => 'Repositories';
+
+  @override
+  String get documentsRepo => 'Repository';
+
+  @override
+  String get documentsChooseRepo => 'Choose a repository';
+
+  @override
+  String get documentsBranch => 'Branch';
+
+  @override
+  String get documentsBranchPlaceholder => 'The default branch';
+
+  @override
+  String get documentsAuthor => 'Author';
+
+  @override
+  String get documentsAuthorPlaceholder => 'Everyone';
+
+  @override
+  String get documentsPrState => 'Pull requests';
+
+  @override
+  String get documentsPr_merged => 'Merged';
+
+  @override
+  String get documentsPr_open => 'Open';
+
+  @override
+  String get documentsPr_all => 'All';
+
+  @override
+  String get documentsPrNumbers => 'Numbers';
+
+  @override
+  String get documentsPrNumbersHelp => 'Optional, in one repository. Empty: by state and period.';
+
+  @override
+  String get documentsFrom => 'From';
+
+  @override
+  String get documentsTo => 'To';
+
+  @override
+  String get documentsTemplate => 'Shape';
+
+  @override
+  String get documentsTemplate_status => 'Status report';
+
+  @override
+  String get documentsTemplate_release_notes => 'Release notes';
+
+  @override
+  String get documentsTemplate_pr_review => 'Pull request review';
+
+  @override
+  String get documentsTemplate_repo_review => 'Repository review';
+
+  @override
+  String get documentsTemplate_ticket_summary => 'Summary';
+
+  @override
+  String get documentsTemplate_blank => 'Your instruction only';
+
+  @override
+  String get documentsTemplateHint_status => 'Done, in progress, blocked, risks, next steps';
+
+  @override
+  String get documentsTemplateHint_release_notes => 'New, improved, fixed, internal';
+
+  @override
+  String get documentsTemplateHint_pr_review => 'Each change, its risk, what to look at';
+
+  @override
+  String get documentsTemplateHint_repo_review => 'Architecture, quality, tests, debt, recommendations';
+
+  @override
+  String get documentsTemplateHint_ticket_summary => 'Goal, findings, changes, open questions';
+
+  @override
+  String get documentsTemplateHint_blank => 'The shape your instruction asks for';
+
+  @override
+  String get documentsInstruction => 'Instruction';
+
+  @override
+  String get documentsInstructionPlaceholder => 'For the client, no technical detail. Focus on risks.';
+
+  @override
+  String get documentsGenerate => 'Ask agnts to write it';
+
+  @override
+  String get documentsCreate => 'Create and edit';
+
+  @override
+  String get documentsBack => 'Documents';
+
+  @override
+  String get documentsNotFound => 'This document does not exist, or you cannot open it.';
+
+  @override
+  String get documentsEditing => 'Editing';
+
+  @override
+  String documentsVersionN(String n) {
+    return 'Version $n';
+  }
+
+  @override
+  String documentsOwnedBy(String name) {
+    return 'Owner: $name';
+  }
+
+  @override
+  String documentsDataAsOf(String when) {
+    return 'Based on data up to $when';
+  }
+
+  @override
+  String get documentsEdit => 'Edit';
+
+  @override
+  String get documentsRegenerate => 'Write again';
+
+  @override
+  String get documentsRegenerateSub => 'agnts writes it again from the same source. The result is a new version; nothing is lost.';
+
+  @override
+  String get documentsShare => 'Share';
+
+  @override
+  String get documentsDelete => 'Delete';
+
+  @override
+  String documentsDeleteConfirm(String title) {
+    return 'Move “$title” to the trash? It can be restored for 30 days.';
+  }
+
+  @override
+  String get documentsDeleted => 'Moved to the trash';
+
+  @override
+  String get documentsQueued => 'Waiting for agnts to start writing…';
+
+  @override
+  String get documentsWritingNow => 'agnts is writing this document. It appears here when it is done.';
+
+  @override
+  String get documentsGenFailedTitle => 'agnts could not write it:';
+
+  @override
+  String get documentsTryAgain => 'Try again';
+
+  @override
+  String documentsOverwrote(String name, String when) {
+    return 'agnts wrote a new version over edits by $name from $when.';
+  }
+
+  @override
+  String documentsRestoreVersion(String n) {
+    return 'Restore version $n';
+  }
+
+  @override
+  String get documentsMarkdown => 'Markdown';
+
+  @override
+  String get documentsPreview => 'Preview';
+
+  @override
+  String get documentsConflictTitle => 'Someone saved in between.';
+
+  @override
+  String documentsConflictHelp(String n) {
+    return 'The document is at version $n now. Keep your text on top of it, or start again from theirs.';
+  }
+
+  @override
+  String get documentsTheirText => 'Their text';
+
+  @override
+  String get documentsKeepMine => 'Keep mine';
+
+  @override
+  String get documentsTakeTheirs => 'Use theirs';
+
+  @override
+  String get documentsSave => 'Save';
+
+  @override
+  String get documentsSaved => 'Saved as a new version';
+
+  @override
+  String get documentsLeaveUnsaved => 'Leave without saving your edits?';
+
+  @override
+  String get documentsEmptyBody => 'Nothing written yet.';
+
+  @override
+  String get documentsPublicLink => 'Public link';
+
+  @override
+  String get documentsDownloadMd => 'Markdown';
+
+  @override
+  String get documentsDownloadPdf => 'PDF';
+
+  @override
+  String get documentsPreparingPdf => 'Preparing PDF…';
+
+  @override
+  String get documentsPdfFailed => 'The PDF could not be made. Try again in a few minutes, or download Markdown.';
+
+  @override
+  String get documentsPdfSlow => 'The PDF is taking long. Try again in a minute.';
+
+  @override
+  String get documentsLinkedTickets => 'Tickets';
+
+  @override
+  String get documentsLinkedTicketsSub => 'Tickets this document is about';
+
+  @override
+  String get documentsNoTickets => 'Not linked to any ticket.';
+
+  @override
+  String get documentsLinkedByAgnts => 'linked by agnts';
+
+  @override
+  String get documentsLinkedByAgntsHint => 'agnts linked the tickets the document was made from';
+
+  @override
+  String get documentsUnlink => 'Unlink';
+
+  @override
+  String get documentsLinkTicket => 'Link';
+
+  @override
+  String get documentsLinkPlaceholder => 'Ticket number';
+
+  @override
+  String get documentsBadKey => 'That is not a ticket number.';
+
+  @override
+  String get documentsVersions => 'Versions';
+
+  @override
+  String get documentsNoVersions => 'No versions yet.';
+
+  @override
+  String get documentsCurrent => 'current';
+
+  @override
+  String documentsByAgntsFor(String name) {
+    return 'agnts, for $name';
+  }
+
+  @override
+  String documentsRestoredBy(String name) {
+    return '$name restored it';
+  }
+
+  @override
+  String documentsVersionTitle(String n) {
+    return 'Version $n';
+  }
+
+  @override
+  String get documentsIsCurrent => 'This is the current version.';
+
+  @override
+  String documentsDiffHelp(String n) {
+    return 'What changed from version $n to the current text: removed lines are struck through, added ones green.';
+  }
+
+  @override
+  String get documentsSameText => 'The text is the same as now.';
+
+  @override
+  String get documentsShareTitle => 'Share';
+
+  @override
+  String get documentsType => 'Who can read it';
+
+  @override
+  String get documentsPrivateHelp => 'Only you, the people below and the workspace owner.';
+
+  @override
+  String get documentsPublicHelp => 'Anyone with the link can read and download it, without signing in. It shows no names or tickets.';
+
+  @override
+  String get documentsPublicOff => 'Public documents are turned off in this workspace’s Settings.';
+
+  @override
+  String get documentsSecretsTitle => 'This text looks like it holds secrets.';
+
+  @override
+  String get documentsSecretsHelp => 'Remove them from these lines, save, then make the document public.';
+
+  @override
+  String documentsLine(String n) {
+    return 'Line $n';
+  }
+
+  @override
+  String get documentsResetLink => 'Reset the link';
+
+  @override
+  String get documentsResetHelp => 'The old link stops working at once.';
+
+  @override
+  String get documentsWorkspaceAccess => 'Everyone in the workspace';
+
+  @override
+  String get documentsWorkspaceAccessHelp => 'At least this for every member. Viewers can only read.';
+
+  @override
+  String get documentsPeople => 'People';
+
+  @override
+  String get documentsAddPerson => 'Add a person';
+
+  @override
+  String get documentsRemove => 'Remove';
+
+  @override
+  String get documentsOwnerNote => 'The workspace owner can always open this document.';
+
+  @override
+  String get documentsSaveSharing => 'Save';
+
+  @override
+  String get documentsTransfer => 'Give to another member';
+
+  @override
+  String get documentsTransferTo => 'New owner';
+
+  @override
+  String documentsTransferConfirm(String name) {
+    return 'Make $name the owner? You keep edit access.';
+  }
+
+  @override
+  String get documentsTicketTitle => 'Documents';
+
+  @override
+  String get documentsTicketSub => 'Documents about this ticket that you can open';
+
+  @override
+  String get documentsTicketEmpty => 'No documents yet.';
+
+  @override
+  String get documentsFromReport => 'Make a document from the report';
+
+  @override
+  String get documentsPublicGoneTitle => 'This link does not work';
+
+  @override
+  String get documentsPublicGone => 'The document was made private or deleted, or its link was changed.';
+
+  @override
+  String documentsPublicUpdated(String when) {
+    return 'Updated $when';
+  }
+
+  @override
+  String get documentsSettingLabel => 'Public documents';
+
+  @override
+  String get documentsSettingHelp =>
+      'Let document owners share a public link that anyone can open. Off: every public link of this workspace stops working at once.';
+
+  @override
+  String documentsNewForTicket(String number) {
+    return 'Linked to $number. Write it yourself, or have agnts write it.';
+  }
 
   @override
   String get draftsTitle => 'Review comments';
@@ -5824,6 +6384,151 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mdetailFactTime => 'Time';
 
   @override
+  String get mdocumentsTitle => 'Documents';
+
+  @override
+  String get mdocumentsMoreRowSub => 'Reports and pages of the workspace';
+
+  @override
+  String get mdocumentsAll => 'All';
+
+  @override
+  String get mdocumentsMine => 'Mine';
+
+  @override
+  String get mdocumentsShared => 'Shared with me';
+
+  @override
+  String get mdocumentsEmpty => 'No documents yet';
+
+  @override
+  String get mdocumentsEmptyText => 'Write documents in the web app, or make one from a ticket\'s report.';
+
+  @override
+  String get mdocumentsTypePrivate => 'Private';
+
+  @override
+  String get mdocumentsTypePublic => 'Public';
+
+  @override
+  String get mdocumentsWriting => 'agnts is writing';
+
+  @override
+  String get mdocumentsFailed => 'Writing failed';
+
+  @override
+  String mdocumentsFailedText(String error) {
+    return 'agnts could not write it: $error';
+  }
+
+  @override
+  String mdocumentsVersion(String n) {
+    return 'Version $n';
+  }
+
+  @override
+  String mdocumentsAsOf(String date) {
+    return 'Based on data up to $date';
+  }
+
+  @override
+  String mdocumentsMeta(String owner, String time) {
+    return '$owner · $time';
+  }
+
+  @override
+  String get mdocumentsNoBody => 'Nothing written yet.';
+
+  @override
+  String get mdocumentsLinkedTickets => 'Linked tickets';
+
+  @override
+  String get mdocumentsCopyLink => 'Copy public link';
+
+  @override
+  String get mdocumentsLinkCopied => 'Link copied';
+
+  @override
+  String get mdocumentsSharing => 'Sharing';
+
+  @override
+  String get mdocumentsDownloadMd => 'Download .md';
+
+  @override
+  String get mdocumentsDownloadPdf => 'Download .pdf';
+
+  @override
+  String get mdocumentsPreparingPdf => 'Preparing the PDF…';
+
+  @override
+  String get mdocumentsPdfSlow => 'The PDF is taking longer than usual. Try again in a minute.';
+
+  @override
+  String get mdocumentsDownloadFailed => 'Download failed';
+
+  @override
+  String get mdocumentsPublicLink => 'Public link';
+
+  @override
+  String get mdocumentsPublicHint => 'Anyone with the link can read it without signing in.';
+
+  @override
+  String get mdocumentsPublicOff => 'Public documents are turned off in this workspace\'s Settings.';
+
+  @override
+  String get mdocumentsResetLink => 'Reset link';
+
+  @override
+  String get mdocumentsResetDone => 'New link made; the old one no longer works.';
+
+  @override
+  String get mdocumentsWorkspaceAccess => 'Everyone in the workspace';
+
+  @override
+  String get mdocumentsAccessNone => 'No access';
+
+  @override
+  String get mdocumentsAccessView => 'Can view';
+
+  @override
+  String get mdocumentsAccessEdit => 'Can edit';
+
+  @override
+  String get mdocumentsPeople => 'People';
+
+  @override
+  String get mdocumentsViewerOnlyView => 'Viewers can only view';
+
+  @override
+  String get mdocumentsSave => 'Save';
+
+  @override
+  String get mdocumentsSaved => 'Saved';
+
+  @override
+  String get mdocumentsSecrets => 'The document looks like it holds secrets. Remove them before publishing:';
+
+  @override
+  String mdocumentsSecretLine(String line, String excerpt) {
+    return 'Line $line: $excerpt';
+  }
+
+  @override
+  String get mdocumentsTicketSection => 'Documents';
+
+  @override
+  String get mdocumentsTicketNone => 'No documents linked yet.';
+
+  @override
+  String get mdocumentsFromReport => 'Make a document from this report';
+
+  @override
+  String get mdocumentsFromReportStarted => 'agnts is writing the document';
+
+  @override
+  String get mdocumentsLedgerSpent => 'Spent on a document';
+
+  @override
   String get mgroupsGroups => 'Groups';
 
   @override
@@ -6691,6 +7396,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navAssistantConversations => 'Conversations';
+
+  @override
+  String get navDocuments => 'Documents';
 
   @override
   String get networkTitle => 'Private networks';

@@ -17,6 +17,7 @@ import 'package:agnts_api/src/api/ci_api.dart';
 import 'package:agnts_api/src/api/dashboard_api.dart';
 import 'package:agnts_api/src/api/devices_api.dart';
 import 'package:agnts_api/src/api/docs_api.dart';
+import 'package:agnts_api/src/api/documents_api.dart';
 import 'package:agnts_api/src/api/feedback_api.dart';
 import 'package:agnts_api/src/api/integrations_api.dart';
 import 'package:agnts_api/src/api/learn_api.dart';
@@ -186,6 +187,12 @@ class AgntsApi {
   /// by doing that all interceptors will not be executed
   DocsApi getDocsApi() {
     return DocsApi(dio);
+  }
+
+  /// Get DocumentsApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  DocumentsApi getDocumentsApi() {
+    return DocumentsApi(dio);
   }
 
   /// Get FeedbackApi instance, base route and serializer can be overridden by a given but be careful,

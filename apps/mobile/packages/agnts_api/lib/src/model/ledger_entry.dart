@@ -142,6 +142,8 @@ enum LedgerEntryReasonEnum {
 purchase(r'purchase'),
 @JsonValue(r'run')
 run(r'run'),
+@JsonValue(r'document')
+document(r'document'),
 @JsonValue(r'refund')
 refund(r'refund'),
 @JsonValue(r'grant')

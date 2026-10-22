@@ -31,6 +31,8 @@ abstract class _$SettingsCWProxy {
 
   Settings autoBrief(bool? autoBrief);
 
+  Settings publicDocuments(bool? publicDocuments);
+
   Settings selfReview(bool? selfReview);
 
   Settings reflect(bool? reflect);
@@ -94,6 +96,7 @@ abstract class _$SettingsCWProxy {
     bool? autoPreview,
     bool? visualCheck,
     bool? autoBrief,
+    bool? publicDocuments,
     bool? selfReview,
     bool? reflect,
     List<String>? egressAllow,
@@ -160,6 +163,10 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
 
   @override
   Settings autoBrief(bool? autoBrief) => this(autoBrief: autoBrief);
+
+  @override
+  Settings publicDocuments(bool? publicDocuments) =>
+      this(publicDocuments: publicDocuments);
 
   @override
   Settings selfReview(bool? selfReview) => this(selfReview: selfReview);
@@ -256,6 +263,7 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
     Object? autoPreview = const $CopyWithPlaceholder(),
     Object? visualCheck = const $CopyWithPlaceholder(),
     Object? autoBrief = const $CopyWithPlaceholder(),
+    Object? publicDocuments = const $CopyWithPlaceholder(),
     Object? selfReview = const $CopyWithPlaceholder(),
     Object? reflect = const $CopyWithPlaceholder(),
     Object? egressAllow = const $CopyWithPlaceholder(),
@@ -328,6 +336,10 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
           ? _value.autoBrief
           // ignore: cast_nullable_to_non_nullable
           : autoBrief as bool?,
+      publicDocuments: publicDocuments == const $CopyWithPlaceholder()
+          ? _value.publicDocuments
+          // ignore: cast_nullable_to_non_nullable
+          : publicDocuments as bool?,
       selfReview: selfReview == const $CopyWithPlaceholder()
           ? _value.selfReview
           // ignore: cast_nullable_to_non_nullable
@@ -470,6 +482,7 @@ Settings _$SettingsFromJson(
     autoPreview: $checkedConvert('autoPreview', (v) => v as bool?),
     visualCheck: $checkedConvert('visualCheck', (v) => v as bool?),
     autoBrief: $checkedConvert('autoBrief', (v) => v as bool?),
+    publicDocuments: $checkedConvert('publicDocuments', (v) => v as bool?),
     selfReview: $checkedConvert('selfReview', (v) => v as bool?),
     reflect: $checkedConvert('reflect', (v) => v as bool?),
     egressAllow: $checkedConvert(
@@ -543,6 +556,7 @@ Map<String, dynamic> _$SettingsToJson(Settings instance) => <String, dynamic>{
   'autoPreview': ?instance.autoPreview,
   'visualCheck': ?instance.visualCheck,
   'autoBrief': ?instance.autoBrief,
+  'publicDocuments': ?instance.publicDocuments,
   'selfReview': ?instance.selfReview,
   'reflect': ?instance.reflect,
   'egressAllow': ?instance.egressAllow,

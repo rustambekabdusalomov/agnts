@@ -1390,6 +1390,9 @@ class AppLocalizationsUz extends AppLocalizations {
   String get billingReason_grant => 'Berildi';
 
   @override
+  String get billingReason_document => 'Hujjatga sarflandi';
+
+  @override
   String get briefTitle => 'Repozitoriy tavsifi';
 
   @override
@@ -2307,6 +2310,565 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get designReproNot => 'Tahlil xatoni qayta ko‘rsata olmadi';
+
+  @override
+  String get documentsPageTitle => 'Hujjatlar';
+
+  @override
+  String get documentsLede =>
+      'Jamoa uchun hisobotlar va qaydlar: siz yozgan yoki agnts tiketlar, commitlar, pull requestlar va repozitoriylar asosida yozgan.';
+
+  @override
+  String get documentsNew => 'Yangi hujjat';
+
+  @override
+  String get documentsNewLinked => 'Yangi hujjat';
+
+  @override
+  String get documentsScope => 'Qaysi hujjatlar';
+
+  @override
+  String get documentsScope_all => 'Men ocha oladiganlar';
+
+  @override
+  String get documentsScope_mine => 'Meniki';
+
+  @override
+  String get documentsScope_shared => 'Men bilan ulashilgan';
+
+  @override
+  String get documentsScope_deleted => 'Savat';
+
+  @override
+  String get documentsEmpty => 'Hozircha hujjat yoʻq. Hujjat yarating yoki agnts’dan hisobot yozishni soʻrang.';
+
+  @override
+  String get documentsTrashEmpty => 'Savat boʻsh.';
+
+  @override
+  String get documentsColTitle => 'Nomi';
+
+  @override
+  String get documentsColOwner => 'Egasi';
+
+  @override
+  String get documentsColTickets => 'Tiketlar';
+
+  @override
+  String get documentsColUpdated => 'Yangilangan';
+
+  @override
+  String get documentsColDeleted => 'Tiklash mumkin';
+
+  @override
+  String documentsDaysLeft(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'yana $n kun', one: 'yana $n kun');
+    return '$_temp0';
+  }
+
+  @override
+  String get documentsRestore => 'Tiklash';
+
+  @override
+  String get documentsRestored => 'Hujjat tiklandi';
+
+  @override
+  String get documentsPublic => 'Ochiq';
+
+  @override
+  String get documentsPrivate => 'Yopiq';
+
+  @override
+  String get documentsWriting => 'agnts yozmoqda';
+
+  @override
+  String get documentsGenFailed => 'Yozib boʻlmadi';
+
+  @override
+  String get documentsAccess_none => 'Ruxsat yoʻq';
+
+  @override
+  String get documentsAccess_view => 'Koʻrish';
+
+  @override
+  String get documentsAccess_edit => 'Tahrirlash';
+
+  @override
+  String get documentsAccess_owner => 'Egasi';
+
+  @override
+  String get documentsYouCan_view => 'Siz koʻra olasiz';
+
+  @override
+  String get documentsYouCan_edit => 'Siz tahrirlay olasiz';
+
+  @override
+  String get documentsRole_owner => 'Maydon egasi';
+
+  @override
+  String get documentsRole_user => 'Aʼzo';
+
+  @override
+  String get documentsRole_viewer => 'Kuzatuvchi';
+
+  @override
+  String get documentsNewTitle => 'Yangi hujjat';
+
+  @override
+  String get documentsNewSub => 'Oʻzingiz yozing yoki agnts maydondagi maʼlumotlar asosida yozsin.';
+
+  @override
+  String get documentsTitle => 'Nomi';
+
+  @override
+  String get documentsTitlePlaceholder => '42-sprint boʻyicha hisobot';
+
+  @override
+  String get documentsWhoWrites => 'Kim yozadi';
+
+  @override
+  String get documentsByAgnts => 'agnts';
+
+  @override
+  String get documentsByMe => 'Oʻzim yozaman';
+
+  @override
+  String get documentsLanguage => 'Til';
+
+  @override
+  String get documentsSource => 'Asosi';
+
+  @override
+  String get documentsKind_report => 'Tiket hisoboti';
+
+  @override
+  String get documentsKind_tickets => 'Tiketlar';
+
+  @override
+  String get documentsKind_commits => 'Commitlar';
+
+  @override
+  String get documentsKind_pulls => 'Pull requestlar';
+
+  @override
+  String get documentsKind_repo => 'Repozitoriy';
+
+  @override
+  String get documentsKindHelp_report =>
+      'Reja, tahlil, xato yoki koʻrib chiqish tiketining tasdiqlangan hisoboti, oʻquvchilar uchun qayta yozilgan.';
+
+  @override
+  String get documentsKindHelp_tickets =>
+      'Tanlangan tiketlar yoki holat va davr boʻyicha tiketlar: holati, sanalari, hisobotlari va commitlari.';
+
+  @override
+  String get documentsKindHelp_commits => 'Davr ichidagi repozitoriy commitlari va ularga bogʻlangan tiketlar.';
+
+  @override
+  String get documentsKindHelp_pulls => 'Tavsifi va diffi bilan pull requestlar: koʻrib chiqish sharhi yoki reliz qaydlari.';
+
+  @override
+  String get documentsKindHelp_repo => 'agnts butun repozitoriyni izolyatsiyada oʻqiydi: arxitektura, sifat, testlar, xavflar.';
+
+  @override
+  String get documentsTicket => 'Tiket';
+
+  @override
+  String get documentsTickets => 'Tiketlar';
+
+  @override
+  String get documentsTicketsPlaceholder => 'AMANAT-12, AMANAT-15';
+
+  @override
+  String get documentsByFilter => 'Holat va davr boʻyicha';
+
+  @override
+  String get documentsChosen => 'Tanlangan tiketlar';
+
+  @override
+  String get documentsStates => 'Holatlar';
+
+  @override
+  String get documentsStatesHelp => 'Hech biri belgilanmasa — barcha holatlar. Davr oxirgi yangilanish boʻyicha cheklaydi.';
+
+  @override
+  String get documentsRepos => 'Repozitoriylar';
+
+  @override
+  String get documentsRepo => 'Repozitoriy';
+
+  @override
+  String get documentsChooseRepo => 'Repozitoriyni tanlang';
+
+  @override
+  String get documentsBranch => 'Tarmoq';
+
+  @override
+  String get documentsBranchPlaceholder => 'Asosiy tarmoq';
+
+  @override
+  String get documentsAuthor => 'Muallif';
+
+  @override
+  String get documentsAuthorPlaceholder => 'Hamma';
+
+  @override
+  String get documentsPrState => 'Pull requestlar';
+
+  @override
+  String get documentsPr_merged => 'Birlashtirilgan';
+
+  @override
+  String get documentsPr_open => 'Ochiq';
+
+  @override
+  String get documentsPr_all => 'Hammasi';
+
+  @override
+  String get documentsPrNumbers => 'Raqamlar';
+
+  @override
+  String get documentsPrNumbersHelp => 'Ixtiyoriy, bitta repozitoriyda. Boʻsh boʻlsa — holat va davr boʻyicha.';
+
+  @override
+  String get documentsFrom => 'Dan';
+
+  @override
+  String get documentsTo => 'Gacha';
+
+  @override
+  String get documentsTemplate => 'Shakl';
+
+  @override
+  String get documentsTemplate_status => 'Holat hisoboti';
+
+  @override
+  String get documentsTemplate_release_notes => 'Reliz qaydlari';
+
+  @override
+  String get documentsTemplate_pr_review => 'Pull requestlar sharhi';
+
+  @override
+  String get documentsTemplate_repo_review => 'Repozitoriy sharhi';
+
+  @override
+  String get documentsTemplate_ticket_summary => 'Xulosa';
+
+  @override
+  String get documentsTemplate_blank => 'Faqat sizning koʻrsatmangiz';
+
+  @override
+  String get documentsTemplateHint_status => 'Bajarildi, jarayonda, bloklangan, xavflar, keyingi qadamlar';
+
+  @override
+  String get documentsTemplateHint_release_notes => 'Yangi, yaxshilangan, tuzatilgan, ichki';
+
+  @override
+  String get documentsTemplateHint_pr_review => 'Har bir oʻzgarish, xavfi, nimaga qarash kerak';
+
+  @override
+  String get documentsTemplateHint_repo_review => 'Arxitektura, sifat, testlar, qarz, tavsiyalar';
+
+  @override
+  String get documentsTemplateHint_ticket_summary => 'Maqsad, xulosalar, oʻzgarishlar, ochiq savollar';
+
+  @override
+  String get documentsTemplateHint_blank => 'Koʻrsatmangiz soʻragan shakl';
+
+  @override
+  String get documentsInstruction => 'Koʻrsatma';
+
+  @override
+  String get documentsInstructionPlaceholder => 'Mijoz uchun, texnik tafsilotlarsiz. Xavflarga eʼtibor qarat.';
+
+  @override
+  String get documentsGenerate => 'agnts yozsin';
+
+  @override
+  String get documentsCreate => 'Yaratish va tahrirlash';
+
+  @override
+  String get documentsBack => 'Hujjatlar';
+
+  @override
+  String get documentsNotFound => 'Bunday hujjat yoʻq yoki uni ochishga ruxsatingiz yoʻq.';
+
+  @override
+  String get documentsEditing => 'Tahrirlash';
+
+  @override
+  String documentsVersionN(String n) {
+    return '$n-versiya';
+  }
+
+  @override
+  String documentsOwnedBy(String name) {
+    return 'Egasi: $name';
+  }
+
+  @override
+  String documentsDataAsOf(String when) {
+    return '$when holatidagi maʼlumotlar asosida';
+  }
+
+  @override
+  String get documentsEdit => 'Tahrirlash';
+
+  @override
+  String get documentsRegenerate => 'Qayta yozish';
+
+  @override
+  String get documentsRegenerateSub => 'agnts uni xuddi shu manbadan qayta yozadi. Natija yangi versiya boʻladi, hech narsa yoʻqolmaydi.';
+
+  @override
+  String get documentsShare => 'Ulashish';
+
+  @override
+  String get documentsDelete => 'Oʻchirish';
+
+  @override
+  String documentsDeleteConfirm(String title) {
+    return '“$title” savatga oʻtkazilsinmi? Uni 30 kun ichida tiklash mumkin.';
+  }
+
+  @override
+  String get documentsDeleted => 'Savatga oʻtkazildi';
+
+  @override
+  String get documentsQueued => 'agnts yozishni boshlashini kutmoqda…';
+
+  @override
+  String get documentsWritingNow => 'agnts bu hujjatni yozmoqda. Tayyor boʻlgach shu yerda paydo boʻladi.';
+
+  @override
+  String get documentsGenFailedTitle => 'agnts uni yoza olmadi:';
+
+  @override
+  String get documentsTryAgain => 'Qayta urinish';
+
+  @override
+  String documentsOverwrote(String name, String when) {
+    return 'agnts $name tomonidan $when kiritilgan tahrirlar ustidan yangi versiya yozdi.';
+  }
+
+  @override
+  String documentsRestoreVersion(String n) {
+    return '$n-versiyani tiklash';
+  }
+
+  @override
+  String get documentsMarkdown => 'Markdown';
+
+  @override
+  String get documentsPreview => 'Koʻrinishi';
+
+  @override
+  String get documentsConflictTitle => 'Kimdir oraliqda saqladi.';
+
+  @override
+  String documentsConflictHelp(String n) {
+    return 'Hujjat hozir $n-versiyada. Matningizni uning ustiga saqlang yoki ularning matnidan qayta boshlang.';
+  }
+
+  @override
+  String get documentsTheirText => 'Ularning matni';
+
+  @override
+  String get documentsKeepMine => 'Meniki qolsin';
+
+  @override
+  String get documentsTakeTheirs => 'Ularnikini olish';
+
+  @override
+  String get documentsSave => 'Saqlash';
+
+  @override
+  String get documentsSaved => 'Yangi versiya sifatida saqlandi';
+
+  @override
+  String get documentsLeaveUnsaved => 'Tahrirlarni saqlamasdan chiqilsinmi?';
+
+  @override
+  String get documentsEmptyBody => 'Hali hech narsa yozilmagan.';
+
+  @override
+  String get documentsPublicLink => 'Ochiq havola';
+
+  @override
+  String get documentsDownloadMd => 'Markdown';
+
+  @override
+  String get documentsDownloadPdf => 'PDF';
+
+  @override
+  String get documentsPreparingPdf => 'PDF tayyorlanmoqda…';
+
+  @override
+  String get documentsPdfFailed => 'PDF yaratib boʻlmadi. Bir necha daqiqadan soʻng qayta urinib koʻring yoki Markdown yuklab oling.';
+
+  @override
+  String get documentsPdfSlow => 'PDF uzoq tayyorlanmoqda. Bir daqiqadan soʻng qayta urinib koʻring.';
+
+  @override
+  String get documentsLinkedTickets => 'Tiketlar';
+
+  @override
+  String get documentsLinkedTicketsSub => 'Hujjat tegishli boʻlgan tiketlar';
+
+  @override
+  String get documentsNoTickets => 'Hech qanday tiketga bogʻlanmagan.';
+
+  @override
+  String get documentsLinkedByAgnts => 'agnts bogʻlagan';
+
+  @override
+  String get documentsLinkedByAgntsHint => 'agnts hujjat asosidagi tiketlarni bogʻlagan';
+
+  @override
+  String get documentsUnlink => 'Uzish';
+
+  @override
+  String get documentsLinkTicket => 'Bogʻlash';
+
+  @override
+  String get documentsLinkPlaceholder => 'Tiket raqami';
+
+  @override
+  String get documentsBadKey => 'Bu tiket raqami emas.';
+
+  @override
+  String get documentsVersions => 'Versiyalar';
+
+  @override
+  String get documentsNoVersions => 'Hozircha versiyalar yoʻq.';
+
+  @override
+  String get documentsCurrent => 'joriy';
+
+  @override
+  String documentsByAgntsFor(String name) {
+    return 'agnts, $name uchun';
+  }
+
+  @override
+  String documentsRestoredBy(String name) {
+    return '$name tikladi';
+  }
+
+  @override
+  String documentsVersionTitle(String n) {
+    return '$n-versiya';
+  }
+
+  @override
+  String get documentsIsCurrent => 'Bu joriy versiya.';
+
+  @override
+  String documentsDiffHelp(String n) {
+    return '$n-versiyadan joriy matngacha nima oʻzgargan: oʻchirilgan qatorlar chizilgan, qoʻshilganlari yashil.';
+  }
+
+  @override
+  String get documentsSameText => 'Matn hozirgisi bilan bir xil.';
+
+  @override
+  String get documentsShareTitle => 'Ulashish';
+
+  @override
+  String get documentsType => 'Kim oʻqiy oladi';
+
+  @override
+  String get documentsPrivateHelp => 'Faqat siz, quyidagi odamlar va maydon egasi.';
+
+  @override
+  String get documentsPublicHelp => 'Havolasi bor har kim tizimga kirmasdan oʻqiy va yuklab oladi. Ismlar va tiketlar koʻrsatilmaydi.';
+
+  @override
+  String get documentsPublicOff => 'Ochiq hujjatlar maydon sozlamalarida oʻchirilgan.';
+
+  @override
+  String get documentsSecretsTitle => 'Matnda maxfiy maʼlumotlar borga oʻxshaydi.';
+
+  @override
+  String get documentsSecretsHelp => 'Ularni shu qatorlardan olib tashlang, saqlang va hujjatni qayta ochiq qiling.';
+
+  @override
+  String documentsLine(String n) {
+    return '$n-qator';
+  }
+
+  @override
+  String get documentsResetLink => 'Havolani yangilash';
+
+  @override
+  String get documentsResetHelp => 'Eski havola darhol ishlamay qoladi.';
+
+  @override
+  String get documentsWorkspaceAccess => 'Maydondagi hamma';
+
+  @override
+  String get documentsWorkspaceAccessHelp => 'Har bir aʼzo uchun kamida shu ruxsat. Kuzatuvchilar faqat oʻqiy oladi.';
+
+  @override
+  String get documentsPeople => 'Odamlar';
+
+  @override
+  String get documentsAddPerson => 'Odam qoʻshish';
+
+  @override
+  String get documentsRemove => 'Olib tashlash';
+
+  @override
+  String get documentsOwnerNote => 'Maydon egasi bu hujjatni har doim ocha oladi.';
+
+  @override
+  String get documentsSaveSharing => 'Saqlash';
+
+  @override
+  String get documentsTransfer => 'Boshqa aʼzoga berish';
+
+  @override
+  String get documentsTransferTo => 'Yangi egasi';
+
+  @override
+  String documentsTransferConfirm(String name) {
+    return '$name egasi boʻlsinmi? Sizda tahrirlash ruxsati qoladi.';
+  }
+
+  @override
+  String get documentsTicketTitle => 'Hujjatlar';
+
+  @override
+  String get documentsTicketSub => 'Bu tiket haqidagi siz ocha oladigan hujjatlar';
+
+  @override
+  String get documentsTicketEmpty => 'Hozircha hujjat yoʻq.';
+
+  @override
+  String get documentsFromReport => 'Hisobotdan hujjat yaratish';
+
+  @override
+  String get documentsPublicGoneTitle => 'Bu havola ishlamaydi';
+
+  @override
+  String get documentsPublicGone => 'Hujjat yopiq qilingan, oʻchirilgan yoki havolasi oʻzgartirilgan.';
+
+  @override
+  String documentsPublicUpdated(String when) {
+    return 'Yangilangan: $when';
+  }
+
+  @override
+  String get documentsSettingLabel => 'Ochiq hujjatlar';
+
+  @override
+  String get documentsSettingHelp =>
+      'Hujjat egalariga har kim ocha oladigan ochiq havola ulashishga ruxsat berish. Oʻchirilsa — maydondagi barcha ochiq havolalar darhol ishlamay qoladi.';
+
+  @override
+  String documentsNewForTicket(String number) {
+    return '$number ga bogʻlanadi. Oʻzingiz yozing yoki agnts yozsin.';
+  }
 
   @override
   String get draftsTitle => 'Ko\'rib chiqish izohlari';
@@ -5824,6 +6386,151 @@ class AppLocalizationsUz extends AppLocalizations {
   String get mdetailFactTime => 'Vaqt';
 
   @override
+  String get mdocumentsTitle => 'Hujjatlar';
+
+  @override
+  String get mdocumentsMoreRowSub => 'Ish maydonining hisobotlari va sahifalari';
+
+  @override
+  String get mdocumentsAll => 'Hammasi';
+
+  @override
+  String get mdocumentsMine => 'Meniki';
+
+  @override
+  String get mdocumentsShared => 'Menga ulashilgan';
+
+  @override
+  String get mdocumentsEmpty => 'Hali hujjatlar yoʻq';
+
+  @override
+  String get mdocumentsEmptyText => 'Hujjatlarni veb-ilovada yozing yoki tiket hisobotidan hujjat yarating.';
+
+  @override
+  String get mdocumentsTypePrivate => 'Shaxsiy';
+
+  @override
+  String get mdocumentsTypePublic => 'Ochiq';
+
+  @override
+  String get mdocumentsWriting => 'agnts yozmoqda';
+
+  @override
+  String get mdocumentsFailed => 'Yozib boʻlmadi';
+
+  @override
+  String mdocumentsFailedText(String error) {
+    return 'agnts hujjatni yoza olmadi: $error';
+  }
+
+  @override
+  String mdocumentsVersion(String n) {
+    return '$n-versiya';
+  }
+
+  @override
+  String mdocumentsAsOf(String date) {
+    return '$date holatidagi maʼlumotlar asosida';
+  }
+
+  @override
+  String mdocumentsMeta(String owner, String time) {
+    return '$owner · $time';
+  }
+
+  @override
+  String get mdocumentsNoBody => 'Hali hech narsa yozilmagan.';
+
+  @override
+  String get mdocumentsLinkedTickets => 'Bogʻlangan tiketlar';
+
+  @override
+  String get mdocumentsCopyLink => 'Ochiq havolani nusxalash';
+
+  @override
+  String get mdocumentsLinkCopied => 'Havola nusxalandi';
+
+  @override
+  String get mdocumentsSharing => 'Ruxsatlar';
+
+  @override
+  String get mdocumentsDownloadMd => '.md yuklab olish';
+
+  @override
+  String get mdocumentsDownloadPdf => '.pdf yuklab olish';
+
+  @override
+  String get mdocumentsPreparingPdf => 'PDF tayyorlanmoqda…';
+
+  @override
+  String get mdocumentsPdfSlow => 'PDF odatdagidan uzoqroq tayyorlanmoqda. Bir daqiqadan soʻng qayta urinib koʻring.';
+
+  @override
+  String get mdocumentsDownloadFailed => 'Yuklab boʻlmadi';
+
+  @override
+  String get mdocumentsPublicLink => 'Ochiq havola';
+
+  @override
+  String get mdocumentsPublicHint => 'Havolasi bor har kim tizimga kirmasdan oʻqiy oladi.';
+
+  @override
+  String get mdocumentsPublicOff => 'Bu ish maydoni sozlamalarida ochiq hujjatlar oʻchirilgan.';
+
+  @override
+  String get mdocumentsResetLink => 'Havolani yangilash';
+
+  @override
+  String get mdocumentsResetDone => 'Yangi havola yaratildi; eskisi endi ishlamaydi.';
+
+  @override
+  String get mdocumentsWorkspaceAccess => 'Ish maydonidagi hamma';
+
+  @override
+  String get mdocumentsAccessNone => 'Ruxsat yoʻq';
+
+  @override
+  String get mdocumentsAccessView => 'Koʻra oladi';
+
+  @override
+  String get mdocumentsAccessEdit => 'Tahrirlay oladi';
+
+  @override
+  String get mdocumentsPeople => 'Odamlar';
+
+  @override
+  String get mdocumentsViewerOnlyView => 'Kuzatuvchilar faqat koʻra oladi';
+
+  @override
+  String get mdocumentsSave => 'Saqlash';
+
+  @override
+  String get mdocumentsSaved => 'Saqlandi';
+
+  @override
+  String get mdocumentsSecrets => 'Hujjatda maxfiy maʼlumotlar borga oʻxshaydi. Eʼlon qilishdan oldin ularni olib tashlang:';
+
+  @override
+  String mdocumentsSecretLine(String line, String excerpt) {
+    return '$line-qator: $excerpt';
+  }
+
+  @override
+  String get mdocumentsTicketSection => 'Hujjatlar';
+
+  @override
+  String get mdocumentsTicketNone => 'Hali bogʻlangan hujjatlar yoʻq.';
+
+  @override
+  String get mdocumentsFromReport => 'Hisobotdan hujjat yaratish';
+
+  @override
+  String get mdocumentsFromReportStarted => 'agnts hujjatni yozmoqda';
+
+  @override
+  String get mdocumentsLedgerSpent => 'Hujjat uchun sarflandi';
+
+  @override
   String get mgroupsGroups => 'Guruhlar';
 
   @override
@@ -6694,6 +7401,9 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get navAssistantConversations => 'Suhbatlar';
+
+  @override
+  String get navDocuments => 'Hujjatlar';
 
   @override
   String get networkTitle => 'Xususiy tarmoqlar';

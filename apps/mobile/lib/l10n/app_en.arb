@@ -812,6 +812,7 @@
   "billingReason_run": "Spent",
   "billingReason_refund": "Refunded",
   "billingReason_grant": "Granted",
+  "billingReason_document": "Spent on a document",
   "briefTitle": "Repository brief",
   "briefSub": "How this code base works: architecture, recipes for common changes, files to copy, conventions and pitfalls. Every run of this repository's tickets reads it, so agnts builds things the way your team does.",
   "briefSurvey": "Survey",
@@ -1343,6 +1344,295 @@
   "designEdgeCasesTitle": "Edge cases to handle",
   "designReproTitle": "The bug, reproduced",
   "designReproNot": "The analysis could not reproduce it",
+  "documentsPageTitle": "Documents",
+  "documentsLede": "Reports and notes for the team: written by you, or by agnts from tickets, commits, pull requests and repositories.",
+  "documentsNew": "New document",
+  "documentsNewLinked": "New document",
+  "documentsScope": "Which documents",
+  "documentsScope_all": "All I can open",
+  "documentsScope_mine": "Mine",
+  "documentsScope_shared": "Shared with me",
+  "documentsScope_deleted": "Trash",
+  "documentsEmpty": "No documents yet. Create one, or ask agnts to write a report.",
+  "documentsTrashEmpty": "The trash is empty.",
+  "documentsColTitle": "Title",
+  "documentsColOwner": "Owner",
+  "documentsColTickets": "Tickets",
+  "documentsColUpdated": "Updated",
+  "documentsColDeleted": "Restorable for",
+  "documentsDaysLeft": "{n, plural, one {{n} day left} other {{n} days left}}",
+  "@documentsDaysLeft": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "documentsRestore": "Restore",
+  "documentsRestored": "Document restored",
+  "documentsPublic": "Public",
+  "documentsPrivate": "Private",
+  "documentsWriting": "agnts is writing",
+  "documentsGenFailed": "Generation failed",
+  "documentsAccess_none": "No access",
+  "documentsAccess_view": "Can view",
+  "documentsAccess_edit": "Can edit",
+  "documentsAccess_owner": "Owner",
+  "documentsYouCan_view": "You can view",
+  "documentsYouCan_edit": "You can edit",
+  "documentsRole_owner": "Workspace owner",
+  "documentsRole_user": "Member",
+  "documentsRole_viewer": "Viewer",
+  "documentsNewTitle": "New document",
+  "documentsNewSub": "Write it yourself, or have agnts write it from what the workspace knows.",
+  "documentsTitle": "Title",
+  "documentsTitlePlaceholder": "Sprint 42 status report",
+  "documentsWhoWrites": "Who writes it",
+  "documentsByAgnts": "agnts",
+  "documentsByMe": "I write it",
+  "documentsLanguage": "Language",
+  "documentsSource": "Made from",
+  "documentsKind_report": "A ticket’s report",
+  "documentsKind_tickets": "Tickets",
+  "documentsKind_commits": "Commits",
+  "documentsKind_pulls": "Pull requests",
+  "documentsKind_repo": "Repository",
+  "documentsKindHelp_report": "The approved report of a plan, analysis, bug or review ticket, rewritten for its readers.",
+  "documentsKindHelp_tickets": "Chosen tickets, or tickets by state and period: their state, dates, reports and commits.",
+  "documentsKindHelp_commits": "Commits of repositories in a period, with the tickets they are linked to.",
+  "documentsKindHelp_pulls": "Pull requests with their descriptions and diffs: a review digest or release notes.",
+  "documentsKindHelp_repo": "agnts reads the whole repository in a sandbox: architecture, quality, tests, risks.",
+  "documentsTicket": "Ticket",
+  "documentsTickets": "Tickets",
+  "documentsTicketsPlaceholder": "AMANAT-12, AMANAT-15",
+  "documentsByFilter": "By state and period",
+  "documentsChosen": "Chosen tickets",
+  "documentsStates": "States",
+  "documentsStatesHelp": "None ticked: every state. The period limits by last update.",
+  "documentsRepos": "Repositories",
+  "documentsRepo": "Repository",
+  "documentsChooseRepo": "Choose a repository",
+  "documentsBranch": "Branch",
+  "documentsBranchPlaceholder": "The default branch",
+  "documentsAuthor": "Author",
+  "documentsAuthorPlaceholder": "Everyone",
+  "documentsPrState": "Pull requests",
+  "documentsPr_merged": "Merged",
+  "documentsPr_open": "Open",
+  "documentsPr_all": "All",
+  "documentsPrNumbers": "Numbers",
+  "documentsPrNumbersHelp": "Optional, in one repository. Empty: by state and period.",
+  "documentsFrom": "From",
+  "documentsTo": "To",
+  "documentsTemplate": "Shape",
+  "documentsTemplate_status": "Status report",
+  "documentsTemplate_release_notes": "Release notes",
+  "documentsTemplate_pr_review": "Pull request review",
+  "documentsTemplate_repo_review": "Repository review",
+  "documentsTemplate_ticket_summary": "Summary",
+  "documentsTemplate_blank": "Your instruction only",
+  "documentsTemplateHint_status": "Done, in progress, blocked, risks, next steps",
+  "documentsTemplateHint_release_notes": "New, improved, fixed, internal",
+  "documentsTemplateHint_pr_review": "Each change, its risk, what to look at",
+  "documentsTemplateHint_repo_review": "Architecture, quality, tests, debt, recommendations",
+  "documentsTemplateHint_ticket_summary": "Goal, findings, changes, open questions",
+  "documentsTemplateHint_blank": "The shape your instruction asks for",
+  "documentsInstruction": "Instruction",
+  "documentsInstructionPlaceholder": "For the client, no technical detail. Focus on risks.",
+  "documentsGenerate": "Ask agnts to write it",
+  "documentsCreate": "Create and edit",
+  "documentsBack": "Documents",
+  "documentsNotFound": "This document does not exist, or you cannot open it.",
+  "documentsEditing": "Editing",
+  "documentsVersionN": "Version {n}",
+  "@documentsVersionN": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsOwnedBy": "Owner: {name}",
+  "@documentsOwnedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsDataAsOf": "Based on data up to {when}",
+  "@documentsDataAsOf": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsEdit": "Edit",
+  "documentsRegenerate": "Write again",
+  "documentsRegenerateSub": "agnts writes it again from the same source. The result is a new version; nothing is lost.",
+  "documentsShare": "Share",
+  "documentsDelete": "Delete",
+  "documentsDeleteConfirm": "Move “{title}” to the trash? It can be restored for 30 days.",
+  "@documentsDeleteConfirm": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsDeleted": "Moved to the trash",
+  "documentsQueued": "Waiting for agnts to start writing…",
+  "documentsWritingNow": "agnts is writing this document. It appears here when it is done.",
+  "documentsGenFailedTitle": "agnts could not write it:",
+  "documentsTryAgain": "Try again",
+  "documentsOverwrote": "agnts wrote a new version over edits by {name} from {when}.",
+  "@documentsOverwrote": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsRestoreVersion": "Restore version {n}",
+  "@documentsRestoreVersion": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsMarkdown": "Markdown",
+  "documentsPreview": "Preview",
+  "documentsConflictTitle": "Someone saved in between.",
+  "documentsConflictHelp": "The document is at version {n} now. Keep your text on top of it, or start again from theirs.",
+  "@documentsConflictHelp": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsTheirText": "Their text",
+  "documentsKeepMine": "Keep mine",
+  "documentsTakeTheirs": "Use theirs",
+  "documentsSave": "Save",
+  "documentsSaved": "Saved as a new version",
+  "documentsLeaveUnsaved": "Leave without saving your edits?",
+  "documentsEmptyBody": "Nothing written yet.",
+  "documentsPublicLink": "Public link",
+  "documentsDownloadMd": "Markdown",
+  "documentsDownloadPdf": "PDF",
+  "documentsPreparingPdf": "Preparing PDF…",
+  "documentsPdfFailed": "The PDF could not be made. Try again in a few minutes, or download Markdown.",
+  "documentsPdfSlow": "The PDF is taking long. Try again in a minute.",
+  "documentsLinkedTickets": "Tickets",
+  "documentsLinkedTicketsSub": "Tickets this document is about",
+  "documentsNoTickets": "Not linked to any ticket.",
+  "documentsLinkedByAgnts": "linked by agnts",
+  "documentsLinkedByAgntsHint": "agnts linked the tickets the document was made from",
+  "documentsUnlink": "Unlink",
+  "documentsLinkTicket": "Link",
+  "documentsLinkPlaceholder": "Ticket number",
+  "documentsBadKey": "That is not a ticket number.",
+  "documentsVersions": "Versions",
+  "documentsNoVersions": "No versions yet.",
+  "documentsCurrent": "current",
+  "documentsByAgntsFor": "agnts, for {name}",
+  "@documentsByAgntsFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsRestoredBy": "{name} restored it",
+  "@documentsRestoredBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsVersionTitle": "Version {n}",
+  "@documentsVersionTitle": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsIsCurrent": "This is the current version.",
+  "documentsDiffHelp": "What changed from version {n} to the current text: removed lines are struck through, added ones green.",
+  "@documentsDiffHelp": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsSameText": "The text is the same as now.",
+  "documentsShareTitle": "Share",
+  "documentsType": "Who can read it",
+  "documentsPrivateHelp": "Only you, the people below and the workspace owner.",
+  "documentsPublicHelp": "Anyone with the link can read and download it, without signing in. It shows no names or tickets.",
+  "documentsPublicOff": "Public documents are turned off in this workspace’s Settings.",
+  "documentsSecretsTitle": "This text looks like it holds secrets.",
+  "documentsSecretsHelp": "Remove them from these lines, save, then make the document public.",
+  "documentsLine": "Line {n}",
+  "@documentsLine": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsResetLink": "Reset the link",
+  "documentsResetHelp": "The old link stops working at once.",
+  "documentsWorkspaceAccess": "Everyone in the workspace",
+  "documentsWorkspaceAccessHelp": "At least this for every member. Viewers can only read.",
+  "documentsPeople": "People",
+  "documentsAddPerson": "Add a person",
+  "documentsRemove": "Remove",
+  "documentsOwnerNote": "The workspace owner can always open this document.",
+  "documentsSaveSharing": "Save",
+  "documentsTransfer": "Give to another member",
+  "documentsTransferTo": "New owner",
+  "documentsTransferConfirm": "Make {name} the owner? You keep edit access.",
+  "@documentsTransferConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsTicketTitle": "Documents",
+  "documentsTicketSub": "Documents about this ticket that you can open",
+  "documentsTicketEmpty": "No documents yet.",
+  "documentsFromReport": "Make a document from the report",
+  "documentsPublicGoneTitle": "This link does not work",
+  "documentsPublicGone": "The document was made private or deleted, or its link was changed.",
+  "documentsPublicUpdated": "Updated {when}",
+  "@documentsPublicUpdated": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsSettingLabel": "Public documents",
+  "documentsSettingHelp": "Let document owners share a public link that anyone can open. Off: every public link of this workspace stops working at once.",
+  "documentsNewForTicket": "Linked to {number}. Write it yourself, or have agnts write it.",
+  "@documentsNewForTicket": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
   "draftsTitle": "Review comments",
   "draftsSub": "agnts's comments stay here until you accept them. Only accepted ones are published on {host}, together as one review; the rest never leave agnts.",
   "@draftsSub": {
@@ -3520,6 +3810,92 @@
   "mdetailCopyPr": "Copy pull request link",
   "mdetailCopied": "Link copied",
   "mdetailFactTime": "Time",
+  "mdocumentsTitle": "Documents",
+  "mdocumentsMoreRowSub": "Reports and pages of the workspace",
+  "mdocumentsAll": "All",
+  "mdocumentsMine": "Mine",
+  "mdocumentsShared": "Shared with me",
+  "mdocumentsEmpty": "No documents yet",
+  "mdocumentsEmptyText": "Write documents in the web app, or make one from a ticket's report.",
+  "mdocumentsTypePrivate": "Private",
+  "mdocumentsTypePublic": "Public",
+  "mdocumentsWriting": "agnts is writing",
+  "mdocumentsFailed": "Writing failed",
+  "mdocumentsFailedText": "agnts could not write it: {error}",
+  "@mdocumentsFailedText": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mdocumentsVersion": "Version {n}",
+  "@mdocumentsVersion": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "mdocumentsAsOf": "Based on data up to {date}",
+  "@mdocumentsAsOf": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "mdocumentsMeta": "{owner} · {time}",
+  "@mdocumentsMeta": {
+    "placeholders": {
+      "owner": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "mdocumentsNoBody": "Nothing written yet.",
+  "mdocumentsLinkedTickets": "Linked tickets",
+  "mdocumentsCopyLink": "Copy public link",
+  "mdocumentsLinkCopied": "Link copied",
+  "mdocumentsSharing": "Sharing",
+  "mdocumentsDownloadMd": "Download .md",
+  "mdocumentsDownloadPdf": "Download .pdf",
+  "mdocumentsPreparingPdf": "Preparing the PDF…",
+  "mdocumentsPdfSlow": "The PDF is taking longer than usual. Try again in a minute.",
+  "mdocumentsDownloadFailed": "Download failed",
+  "mdocumentsPublicLink": "Public link",
+  "mdocumentsPublicHint": "Anyone with the link can read it without signing in.",
+  "mdocumentsPublicOff": "Public documents are turned off in this workspace's Settings.",
+  "mdocumentsResetLink": "Reset link",
+  "mdocumentsResetDone": "New link made; the old one no longer works.",
+  "mdocumentsWorkspaceAccess": "Everyone in the workspace",
+  "mdocumentsAccessNone": "No access",
+  "mdocumentsAccessView": "Can view",
+  "mdocumentsAccessEdit": "Can edit",
+  "mdocumentsPeople": "People",
+  "mdocumentsViewerOnlyView": "Viewers can only view",
+  "mdocumentsSave": "Save",
+  "mdocumentsSaved": "Saved",
+  "mdocumentsSecrets": "The document looks like it holds secrets. Remove them before publishing:",
+  "mdocumentsSecretLine": "Line {line}: {excerpt}",
+  "@mdocumentsSecretLine": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      },
+      "excerpt": {
+        "type": "String"
+      }
+    }
+  },
+  "mdocumentsTicketSection": "Documents",
+  "mdocumentsTicketNone": "No documents linked yet.",
+  "mdocumentsFromReport": "Make a document from this report",
+  "mdocumentsFromReportStarted": "agnts is writing the document",
+  "mdocumentsLedgerSpent": "Spent on a document",
   "mgroupsGroups": "Groups",
   "mgroupsRepos": "Repositories",
   "mgroupsPickHint": "Pick one or more. The first one is the main one.",
@@ -4057,6 +4433,7 @@
   "navAiAssistant": "AI assistant",
   "navAssistantChat": "Chat",
   "navAssistantConversations": "Conversations",
+  "navDocuments": "Documents",
   "networkTitle": "Private networks",
   "networkSub": "Reach self-hosted GitLab, Jira or package registries inside your networks. A connection goes through the network whose route matches it most closely.",
   "networkUnavailable": "Private networks are not set up on this server: the operator runs the gateway service and sets AGNTS_GATEWAY.",

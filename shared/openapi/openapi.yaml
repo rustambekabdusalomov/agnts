@@ -5083,8 +5083,482 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '501': { $ref: '#/components/responses/NotImplemented' }
 
+  /documents:
+    get:
+      operationId: listDocuments
+      summary: The documents you can open, most recently changed first
+      description: |
+        Your own documents, the ones shared with you (by a grant or the workspace default), and for the workspace
+        owner every document. scope=deleted lists the trash: your own deleted documents (all of them for the workspace
+        owner), restorable for 30 days.
+      tags: [documents]
+      parameters:
+        - name: scope
+          in: query
+          schema: { type: string, enum: [all, mine, shared, deleted], default: all }
+        - name: q
+          in: query
+          description: Words in the title
+          schema: { type: string, maxLength: 200 }
+        - name: ticket
+          in: query
+          description: Only documents linked to this ticket
+          schema: { type: string, maxLength: 64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/DocumentSummary' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      operationId: createDocument
+      x-viewer: true
+      summary: Create a document, written by you or by agnts from a source
+      description: |
+        Without a source the body is yours and becomes version 1. With a source, agnts gathers the facts (a ticket's
+        report, tickets, commits, pull requests or a repository) and writes the body; the document starts at version 0
+        and its generation shows the progress. Workspace viewers may create documents; they own what they create.
+      tags: [documents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DocumentInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Document' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /documents/{id}:
+    parameters:
+      - $ref: '#/components/parameters/DocumentID'
+    get:
+      operationId: getDocument
+      summary: A document with your access to it; 404 when you cannot open it
+      tags: [documents]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Document' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      operationId: saveDocument
+      x-viewer: true
+      summary: Save an edit as a new version (edit access)
+      description: |
+        baseVersion is the version the edit started from. When someone saved in between, the answer is 409 with the
+        document as it is now, so the editor can show both texts. While agnts writes the body only the title changes.
+      tags: [documents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DocumentSave' }
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Document' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: Someone saved in between, or agnts is writing the document
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DocumentConflict' }
+    delete:
+      operationId: deleteDocument
+      x-viewer: true
+      summary: Move a document to the trash (its owner); restorable for 30 days
+      tags: [documents]
+      responses:
+        '204': { description: Deleted }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /documents/{id}/undelete:
+    parameters:
+      - $ref: '#/components/parameters/DocumentID'
+    post:
+      operationId: undeleteDocument
+      x-viewer: true
+      summary: Take a document out of the trash (its owner or the workspace owner)
+      tags: [documents]
+      responses:
+        '200':
+          description: Restored
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Document' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /documents/{id}/regenerate:
+    parameters:
+      - $ref: '#/components/parameters/DocumentID'
+    post:
+      operationId: regenerateDocument
+      x-viewer: true
+      summary: Have agnts write the document again (edit access); the result is a new version
+      tags: [documents]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DocumentRegenerate' }
+      responses:
+        '200':
+          description: Queued
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Document' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /documents/{id}/versions:
+    parameters:
+      - $ref: '#/components/parameters/DocumentID'
+    get:
+      operationId: listDocumentVersions
+      summary: Every version of a document, newest first, without their text
+      tags: [documents]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/DocumentVersion' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /documents/{id}/versions/{version}:
+    parameters:
+      - $ref: '#/components/parameters/DocumentID'
+      - $ref: '#/components/parameters/DocumentVersionNo'
+    get:
+      operationId: getDocumentVersion
+      summary: One version with its text
+      tags: [documents]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DocumentVersion' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /documents/{id}/versions/{version}/restore:
+    parameters:
+      - $ref: '#/components/parameters/DocumentID'
+      - $ref: '#/components/parameters/DocumentVersionNo'
+    post:
+      operationId: restoreDocumentVersion
+      x-viewer: true
+      summary: Make an earlier version the current one, as a new version (edit access)
+      tags: [documents]
+      responses:
+        '200':
+          description: Restored
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Document' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /documents/{id}/sharing:
+    parameters:
+      - $ref: '#/components/parameters/DocumentID'
+    get:
+      operationId: getDocumentSharing
+      summary: Who can open a document, and its public link
+      tags: [documents]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DocumentSharing' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      operationId: shareDocument
+      x-viewer: true
+      summary: Set a document's type, workspace access and grants (its owner)
+      description: |
+        Grants replace the current ones. Workspace viewers can only be given view. Going public needs public documents
+        on in Settings and a text without secrets: when the scan finds some, the answer is 422 with the lines. A
+        document that goes public gets a new link; one made private loses its link at once.
+      tags: [documents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DocumentShareInput' }
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DocumentSharing' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422':
+          description: The document looks like it holds secrets
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SecretFindings' }
+
+  /documents/{id}/reset-link:
+    parameters:
+      - $ref: '#/components/parameters/DocumentID'
+    post:
+      operationId: resetDocumentLink
+      x-viewer: true
+      summary: Give a public document a new link; the old one stops working (its owner)
+      tags: [documents]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DocumentSharing' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /documents/{id}/owner:
+    parameters:
+      - $ref: '#/components/parameters/DocumentID'
+    put:
+      operationId: setDocumentOwner
+      x-viewer: true
+      summary: Give a document to another member (its owner); the old owner keeps edit access
+      tags: [documents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId]
+              properties:
+                userId: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Document' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /documents/{id}/tickets:
+    parameters:
+      - $ref: '#/components/parameters/DocumentID'
+    get:
+      operationId: listDocumentTickets
+      summary: The tickets linked to a document
+      tags: [documents]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/DocumentTicket' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /documents/{id}/tickets/{key}:
+    parameters:
+      - $ref: '#/components/parameters/DocumentID'
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: linkDocumentTicket
+      summary: Link a ticket to a document (edit access on the document)
+      tags: [documents]
+      responses:
+        '204': { description: Linked }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      operationId: unlinkDocumentTicket
+      summary: Remove a link between a ticket and a document
+      tags: [documents]
+      responses:
+        '204': { description: Unlinked }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /documents/{id}/download:
+    parameters:
+      - $ref: '#/components/parameters/DocumentID'
+    get:
+      operationId: downloadDocument
+      summary: Download a version as Markdown or PDF (view access)
+      description: |
+        version 0 (the default) is the current one. The first PDF download of a version starts making it and answers
+        202 with Retry-After; ask again then. A made PDF is kept: later downloads are instant.
+      tags: [documents]
+      parameters:
+        - $ref: '#/components/parameters/DocumentFormat'
+        - name: version
+          in: query
+          schema: { type: integer, minimum: 0, default: 0 }
+      responses:
+        '200':
+          description: The file, as an attachment
+          content:
+            text/markdown:
+              schema: { type: string, format: binary }
+            application/pdf:
+              schema: { type: string, format: binary }
+        '202': { $ref: '#/components/responses/Preparing' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '503': { $ref: '#/components/responses/RenderFailed' }
+
+  /tickets/{key}/documents:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    get:
+      operationId: listTicketDocuments
+      summary: The documents linked to the ticket that you can open
+      description: Documents you cannot open are neither listed nor counted.
+      tags: [documents]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/DocumentSummary' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      operationId: createTicketDocument
+      x-viewer: true
+      summary: Have agnts make a document from the ticket's report, linked to the ticket
+      tags: [documents]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                instruction: { type: string, maxLength: 2000, description: 'How to write it: "for the client, no technical detail"' }
+                language: { type: string, enum: [en, ru, uz] }
+      responses:
+        '201':
+          description: Created; agnts is writing it
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Document' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /public/documents/{token}:
+    parameters:
+      - $ref: '#/components/parameters/PublicToken'
+    get:
+      operationId: getPublicDocument
+      summary: A public document, for anyone with its link
+      description: Only the title, text, version and last update. Rate limited per address.
+      tags: [documents]
+      x-scope: user
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PublicDocument' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /public/documents/{token}/download:
+    parameters:
+      - $ref: '#/components/parameters/PublicToken'
+    get:
+      operationId: downloadPublicDocument
+      summary: Download a public document's current version
+      description: The PDF is made ahead when the document is published or saved; until it is ready the answer is 202.
+      tags: [documents]
+      x-scope: user
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/DocumentFormat'
+      responses:
+        '200':
+          description: The file, as an attachment
+          content:
+            text/markdown:
+              schema: { type: string, format: binary }
+            application/pdf:
+              schema: { type: string, format: binary }
+        '202': { $ref: '#/components/responses/Preparing' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+        '503': { $ref: '#/components/responses/RenderFailed' }
+
 components:
   parameters:
+    DocumentID:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
+    DocumentVersionNo:
+      name: version
+      in: path
+      required: true
+      schema: { type: integer, minimum: 1 }
+    DocumentFormat:
+      name: format
+      in: query
+      schema: { type: string, enum: [md, pdf], default: md }
+    PublicToken:
+      name: token
+      in: path
+      required: true
+      schema: { type: string, pattern: '^[0-9A-Za-z]{20,64}$' }
     RunWorkspace:
       name: workspace
       in: query
@@ -5565,7 +6039,7 @@ components:
       properties:
         id: { type: integer, format: int64 }
         amount: { type: integer, format: int64, description: Credits; negative for spend }
-        reason: { type: string, enum: [purchase, run, refund, grant] }
+        reason: { type: string, enum: [purchase, run, document, refund, grant] }
         ticketKey: { type: string }
         note: { type: string }
         createdAt: { type: string, format: date-time }
@@ -7188,6 +7662,7 @@ components:
         autoPreview: { type: boolean, description: Take screenshots of every UI change in repositories with a preview command }
         visualCheck: { type: boolean, description: Coding runs may start the app and look at the pages they changed }
         autoBrief: { type: boolean, description: 'Survey a repository without a brief when its first ticket is analysed, and refresh the brief after merges' }
+        publicDocuments: { type: boolean, description: 'Let documents have public links; off makes every public link of the workspace stop working' }
         selfReview: { type: boolean, description: "Send blocker and major findings of agnts's code review back to the coder once per revision, before a person reviews" }
         reflect: { type: boolean, description: 'Learn from change requests and rejections: suggest rules, which apply once someone adopts them' }
         egressAllow:
@@ -9211,7 +9686,233 @@ components:
           description: Stable machine-readable code, e.g. unauthorized, bad_request
         message: { type: string }
 
+    DocumentAccess:
+      type: string
+      description: 'What you may do: view reads and downloads; edit also changes the text, regenerates and links tickets; owner also shares, publishes, transfers and deletes'
+      enum: [none, view, edit, owner]
+
+    DocumentSourceInput:
+      type: object
+      description: |
+        What agnts makes the document from. report: one ticket's report (tickets has its key). tickets: chosen tickets,
+        or a filter, with the period limiting by last update. commits: repositories' commits in a period (from is
+        required), on branch (the default branch when empty), optionally by one author. pulls: repositories' pull
+        requests by state and period, or chosen numbers in one repository. repo: one repository read in the sandbox.
+      required: [kind]
+      properties:
+        kind: { type: string, enum: [report, tickets, commits, pulls, repo] }
+        template: { type: string, enum: [status, release_notes, pr_review, repo_review, ticket_summary, blank], description: 'Defaults by kind' }
+        instruction: { type: string, maxLength: 2000 }
+        tickets:
+          type: array
+          maxItems: 50
+          items: { type: string, maxLength: 64 }
+        filter:
+          type: object
+          properties:
+            states:
+              type: array
+              items: { type: string }
+            kinds:
+              type: array
+              items: { type: string }
+            repoId: { type: integer, format: int64 }
+        repoIds:
+          type: array
+          maxItems: 10
+          items: { type: integer, format: int64 }
+        branch: { type: string, maxLength: 255 }
+        author: { type: string, maxLength: 255 }
+        prState: { type: string, enum: [open, merged, all] }
+        prNumbers:
+          type: array
+          maxItems: 30
+          items: { type: integer }
+        from: { type: string, format: date-time }
+        to: { type: string, format: date-time }
+
+    DocumentGeneration:
+      type: object
+      description: The latest time agnts wrote (or is writing) the document
+      required: [id, status, error, createdAt]
+      properties:
+        id: { type: integer, format: int64 }
+        status: { type: string, enum: [queued, writing, done, failed] }
+        error: { type: string }
+        source: { $ref: '#/components/schemas/DocumentSourceInput' }
+        requestedBy: { type: integer, format: int64 }
+        startedAt: { type: string, format: date-time }
+        finishedAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    DocumentSummary:
+      type: object
+      required: [id, title, version, type, workspaceAccess, ownerId, ownerName, language, access, ticketCount, createdAt, updatedAt]
+      properties:
+        id: { type: integer, format: int64 }
+        title: { type: string }
+        version: { type: integer, description: 'The current version; 0 while agnts writes the first one' }
+        type: { type: string, enum: [private, public] }
+        workspaceAccess: { type: string, enum: [none, view, edit], description: Everyone in the workspace gets at least this }
+        ownerId: { type: integer, format: int64 }
+        ownerName: { type: string }
+        language: { type: string, enum: [en, ru, uz] }
+        access: { $ref: '#/components/schemas/DocumentAccess' }
+        ticketCount: { type: integer }
+        generation: { $ref: '#/components/schemas/DocumentGeneration' }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        deletedAt: { type: string, format: date-time }
+
+    Document:
+      allOf:
+        - $ref: '#/components/schemas/DocumentSummary'
+        - type: object
+          required: [body]
+          properties:
+            body: { type: string, description: Markdown }
+            publicUrl: { type: string, description: 'The public link, while the document is public' }
+            source: { $ref: '#/components/schemas/DocumentSourceInput' }
+            dataAsOf: { type: string, format: date-time, description: When agnts gathered the facts of the current AI version }
+
+    DocumentConflict:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        current: { $ref: '#/components/schemas/Document' }
+
+    DocumentInput:
+      type: object
+      required: [title]
+      properties:
+        title: { type: string, minLength: 1, maxLength: 200 }
+        body: { type: string, maxLength: 204800 }
+        language: { type: string, enum: [en, ru, uz] }
+        source: { $ref: '#/components/schemas/DocumentSourceInput' }
+        linkTickets:
+          type: array
+          maxItems: 20
+          items: { type: string, maxLength: 64 }
+
+    DocumentSave:
+      type: object
+      required: [title, body, baseVersion]
+      properties:
+        title: { type: string, minLength: 1, maxLength: 200 }
+        body: { type: string, maxLength: 204800 }
+        baseVersion: { type: integer, minimum: 0, description: The version the edit started from }
+
+    DocumentRegenerate:
+      type: object
+      properties:
+        source: { $ref: '#/components/schemas/DocumentSourceInput' }
+
+    DocumentVersion:
+      type: object
+      required: [version, title, source, note, createdAt]
+      properties:
+        version: { type: integer }
+        title: { type: string }
+        body: { type: string, description: 'Only when one version is asked for' }
+        source: { type: string, enum: [human, ai, restore] }
+        note: { type: string }
+        authorId: { type: integer, format: int64 }
+        authorName: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    DocumentGrant:
+      type: object
+      required: [userId, level]
+      properties:
+        userId: { type: integer, format: int64 }
+        username: { type: string }
+        level: { type: string, enum: [view, edit] }
+        createdAt: { type: string, format: date-time }
+
+    DocumentSharing:
+      type: object
+      required: [type, workspaceAccess, grants, ownerId, publicAllowed]
+      properties:
+        type: { type: string, enum: [private, public] }
+        publicUrl: { type: string }
+        workspaceAccess: { type: string, enum: [none, view, edit] }
+        ownerId: { type: integer, format: int64 }
+        grants:
+          type: array
+          items: { $ref: '#/components/schemas/DocumentGrant' }
+        publicAllowed: { type: boolean, description: Whether the workspace allows public documents }
+
+    DocumentShareInput:
+      type: object
+      required: [type, workspaceAccess, grants]
+      properties:
+        type: { type: string, enum: [private, public] }
+        workspaceAccess: { type: string, enum: [none, view, edit] }
+        grants:
+          type: array
+          maxItems: 200
+          items:
+            type: object
+            required: [userId, level]
+            properties:
+              userId: { type: integer, format: int64 }
+              level: { type: string, enum: [view, edit] }
+
+    SecretFindings:
+      type: object
+      required: [code, message, findings]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        findings:
+          type: array
+          items:
+            type: object
+            required: [line, excerpt]
+            properties:
+              line: { type: integer, description: 1-based line of the text }
+              excerpt: { type: string, description: The line with the secret masked }
+
+    DocumentTicket:
+      type: object
+      required: [key, number, title, state, kind, linkedAt]
+      properties:
+        key: { type: string }
+        number: { type: string }
+        title: { type: string }
+        state: { type: string }
+        kind: { type: string }
+        linkedBy: { type: integer, format: int64, description: Absent when agnts linked it }
+        linkedAt: { type: string, format: date-time }
+
+    PublicDocument:
+      type: object
+      required: [title, body, version, updatedAt]
+      properties:
+        title: { type: string }
+        body: { type: string, description: Markdown }
+        version: { type: integer }
+        updatedAt: { type: string, format: date-time }
+
   responses:
+    Preparing:
+      description: The PDF is being made; ask again after Retry-After seconds
+      headers:
+        Retry-After:
+          schema: { type: integer }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    RenderFailed:
+      description: The PDF could not be made; the Markdown download still works
+      headers:
+        Retry-After:
+          schema: { type: integer }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
     BadGateway:
       description: The git host returned an error
       content:

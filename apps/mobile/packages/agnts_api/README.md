@@ -125,6 +125,28 @@ Class | Method | HTTP request | Description
 [*DevicesApi*](doc/DevicesApi.md) | [**registerDevice**](doc/DevicesApi.md#registerdevice) | **POST** /devices | Register this phone for push notifications (call again when the token changes)
 [*DevicesApi*](doc/DevicesApi.md) | [**unregisterDevice**](doc/DevicesApi.md#unregisterdevice) | **POST** /devices/unregister | Stop push notifications to this phone (on sign-out)
 [*DocsApi*](doc/DocsApi.md) | [**getPageDoc**](doc/DocsApi.md#getpagedoc) | **GET** /docs/{page} | The \&quot;How this page works\&quot; text, as Markdown
+[*DocumentsApi*](doc/DocumentsApi.md) | [**createDocument**](doc/DocumentsApi.md#createdocument) | **POST** /documents | Create a document, written by you or by agnts from a source
+[*DocumentsApi*](doc/DocumentsApi.md) | [**createTicketDocument**](doc/DocumentsApi.md#createticketdocument) | **POST** /tickets/{key}/documents | Have agnts make a document from the ticket&#39;s report, linked to the ticket
+[*DocumentsApi*](doc/DocumentsApi.md) | [**deleteDocument**](doc/DocumentsApi.md#deletedocument) | **DELETE** /documents/{id} | Move a document to the trash (its owner); restorable for 30 days
+[*DocumentsApi*](doc/DocumentsApi.md) | [**downloadDocument**](doc/DocumentsApi.md#downloaddocument) | **GET** /documents/{id}/download | Download a version as Markdown or PDF (view access)
+[*DocumentsApi*](doc/DocumentsApi.md) | [**downloadPublicDocument**](doc/DocumentsApi.md#downloadpublicdocument) | **GET** /public/documents/{token}/download | Download a public document&#39;s current version
+[*DocumentsApi*](doc/DocumentsApi.md) | [**getDocument**](doc/DocumentsApi.md#getdocument) | **GET** /documents/{id} | A document with your access to it; 404 when you cannot open it
+[*DocumentsApi*](doc/DocumentsApi.md) | [**getDocumentSharing**](doc/DocumentsApi.md#getdocumentsharing) | **GET** /documents/{id}/sharing | Who can open a document, and its public link
+[*DocumentsApi*](doc/DocumentsApi.md) | [**getDocumentVersion**](doc/DocumentsApi.md#getdocumentversion) | **GET** /documents/{id}/versions/{version} | One version with its text
+[*DocumentsApi*](doc/DocumentsApi.md) | [**getPublicDocument**](doc/DocumentsApi.md#getpublicdocument) | **GET** /public/documents/{token} | A public document, for anyone with its link
+[*DocumentsApi*](doc/DocumentsApi.md) | [**linkDocumentTicket**](doc/DocumentsApi.md#linkdocumentticket) | **POST** /documents/{id}/tickets/{key} | Link a ticket to a document (edit access on the document)
+[*DocumentsApi*](doc/DocumentsApi.md) | [**listDocumentTickets**](doc/DocumentsApi.md#listdocumenttickets) | **GET** /documents/{id}/tickets | The tickets linked to a document
+[*DocumentsApi*](doc/DocumentsApi.md) | [**listDocumentVersions**](doc/DocumentsApi.md#listdocumentversions) | **GET** /documents/{id}/versions | Every version of a document, newest first, without their text
+[*DocumentsApi*](doc/DocumentsApi.md) | [**listDocuments**](doc/DocumentsApi.md#listdocuments) | **GET** /documents | The documents you can open, most recently changed first
+[*DocumentsApi*](doc/DocumentsApi.md) | [**listTicketDocuments**](doc/DocumentsApi.md#listticketdocuments) | **GET** /tickets/{key}/documents | The documents linked to the ticket that you can open
+[*DocumentsApi*](doc/DocumentsApi.md) | [**regenerateDocument**](doc/DocumentsApi.md#regeneratedocument) | **POST** /documents/{id}/regenerate | Have agnts write the document again (edit access); the result is a new version
+[*DocumentsApi*](doc/DocumentsApi.md) | [**resetDocumentLink**](doc/DocumentsApi.md#resetdocumentlink) | **POST** /documents/{id}/reset-link | Give a public document a new link; the old one stops working (its owner)
+[*DocumentsApi*](doc/DocumentsApi.md) | [**restoreDocumentVersion**](doc/DocumentsApi.md#restoredocumentversion) | **POST** /documents/{id}/versions/{version}/restore | Make an earlier version the current one, as a new version (edit access)
+[*DocumentsApi*](doc/DocumentsApi.md) | [**saveDocument**](doc/DocumentsApi.md#savedocument) | **PUT** /documents/{id} | Save an edit as a new version (edit access)
+[*DocumentsApi*](doc/DocumentsApi.md) | [**setDocumentOwner**](doc/DocumentsApi.md#setdocumentowner) | **PUT** /documents/{id}/owner | Give a document to another member (its owner); the old owner keeps edit access
+[*DocumentsApi*](doc/DocumentsApi.md) | [**shareDocument**](doc/DocumentsApi.md#sharedocument) | **PUT** /documents/{id}/sharing | Set a document&#39;s type, workspace access and grants (its owner)
+[*DocumentsApi*](doc/DocumentsApi.md) | [**undeleteDocument**](doc/DocumentsApi.md#undeletedocument) | **POST** /documents/{id}/undelete | Take a document out of the trash (its owner or the workspace owner)
+[*DocumentsApi*](doc/DocumentsApi.md) | [**unlinkDocumentTicket**](doc/DocumentsApi.md#unlinkdocumentticket) | **DELETE** /documents/{id}/tickets/{key} | Remove a link between a ticket and a document
 [*FeedbackApi*](doc/FeedbackApi.md) | [**sendFeedback**](doc/FeedbackApi.md#sendfeedback) | **POST** /feedback | Send feedback to the platform&#39;s Admins
 [*IntegrationsApi*](doc/IntegrationsApi.md) | [**connectIntegration**](doc/IntegrationsApi.md#connectintegration) | **POST** /integrations/{provider}/connect | Save a token (and settings), check it against the provider, and connect
 [*IntegrationsApi*](doc/IntegrationsApi.md) | [**disconnectIntegration**](doc/IntegrationsApi.md#disconnectintegration) | **POST** /integrations/{provider}/disconnect | Forget the token
@@ -414,6 +436,7 @@ Class | Method | HTTP request | Description
  - [CreateInvite201Response](doc/CreateInvite201Response.md)
  - [CreateInviteRequest](doc/CreateInviteRequest.md)
  - [CreatePlatformAdminRequest](doc/CreatePlatformAdminRequest.md)
+ - [CreateTicketDocumentRequest](doc/CreateTicketDocumentRequest.md)
  - [CreateWorkspaceRequest](doc/CreateWorkspaceRequest.md)
  - [Dashboard](doc/Dashboard.md)
  - [DashboardCounts](doc/DashboardCounts.md)
@@ -426,6 +449,22 @@ Class | Method | HTTP request | Description
  - [DeployRepoRequest](doc/DeployRepoRequest.md)
  - [DeviceRegistration](doc/DeviceRegistration.md)
  - [DisableTotpRequest](doc/DisableTotpRequest.md)
+ - [Document](doc/Document.md)
+ - [DocumentAccess](doc/DocumentAccess.md)
+ - [DocumentConflict](doc/DocumentConflict.md)
+ - [DocumentGeneration](doc/DocumentGeneration.md)
+ - [DocumentGrant](doc/DocumentGrant.md)
+ - [DocumentInput](doc/DocumentInput.md)
+ - [DocumentRegenerate](doc/DocumentRegenerate.md)
+ - [DocumentSave](doc/DocumentSave.md)
+ - [DocumentShareInput](doc/DocumentShareInput.md)
+ - [DocumentShareInputGrantsInner](doc/DocumentShareInputGrantsInner.md)
+ - [DocumentSharing](doc/DocumentSharing.md)
+ - [DocumentSourceInput](doc/DocumentSourceInput.md)
+ - [DocumentSourceInputFilter](doc/DocumentSourceInputFilter.md)
+ - [DocumentSummary](doc/DocumentSummary.md)
+ - [DocumentTicket](doc/DocumentTicket.md)
+ - [DocumentVersion](doc/DocumentVersion.md)
  - [EditCheck](doc/EditCheck.md)
  - [EditCommitMessageRequest](doc/EditCommitMessageRequest.md)
  - [EditPullCommentRequest](doc/EditPullCommentRequest.md)
@@ -513,6 +552,7 @@ Class | Method | HTTP request | Description
  - [Proof](doc/Proof.md)
  - [ProofRun](doc/ProofRun.md)
  - [ProofTest](doc/ProofTest.md)
+ - [PublicDocument](doc/PublicDocument.md)
  - [PublishReviewDraftsRequest](doc/PublishReviewDraftsRequest.md)
  - [PublishedReview](doc/PublishedReview.md)
  - [PullComment](doc/PullComment.md)
@@ -600,6 +640,8 @@ Class | Method | HTTP request | Description
  - [RunTranscriptDetail](doc/RunTranscriptDetail.md)
  - [RunTranscriptEvent](doc/RunTranscriptEvent.md)
  - [SecondOpinion](doc/SecondOpinion.md)
+ - [SecretFindings](doc/SecretFindings.md)
+ - [SecretFindingsFindingsInner](doc/SecretFindingsFindingsInner.md)
  - [SendFeedbackRequest](doc/SendFeedbackRequest.md)
  - [SetMemberRoleRequest](doc/SetMemberRoleRequest.md)
  - [SetPlaneWebhookSecretRequest](doc/SetPlaneWebhookSecretRequest.md)

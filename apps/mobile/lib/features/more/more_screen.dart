@@ -141,6 +141,16 @@ class MoreScreen extends ConsumerWidget {
                 onTap: () => context.push('/ci'),
               ),
             ]),
+            // Documents: reports and pages of the workspace.
+            const SizedBox(height: 10),
+            group([
+              ListRow(
+                leading: HIcon('file', size: 22, color: c.primary),
+                title: l.mdocumentsTitle,
+                subtitle: l.mdocumentsMoreRowSub,
+                onTap: () => context.push('/documents'),
+              ),
+            ]),
             // Workspace setup and the pages that manage it.
             const SizedBox(height: 10),
             group([

@@ -110,6 +110,12 @@ type Deps struct {
 	Credits Credits
 	// SwaggerTests stores Swagger tests; nil turns the kind off.
 	SwaggerTests SwaggerTests
+	// Documents stores documents for their generations; nil turns
+	// generations off.
+	Documents DocumentRuns
+	// DocumentHost reads commits and pull requests for documents; nil
+	// leaves those sources out.
+	DocumentHost DocumentHost
 }
 
 // Orchestrator runs tickets through their stages.
@@ -145,6 +151,10 @@ type Orchestrator struct {
 	capacity   Capacity
 	credits    Credits
 	sched      *schedState
+
+	docs     DocumentRuns
+	docHost  DocumentHost
+	docWatch DocumentWatcher
 
 	swagger SwaggerTests
 	suites  SwaggerSuites
@@ -185,7 +195,7 @@ func New(cfg Config, d Deps, log *slog.Logger) *Orchestrator {
 		settings: d.Settings, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, briefs: d.Briefs, reflections: d.Reflections, pulls: d.PullReviews, prposts: d.PRPosts, drafts: d.ReviewDrafts, trans: d.Translations,
 		shots: d.Shots, envs: d.PreviewEnvs, builds: d.BuildEnvs, log: log,
 		queue: q, workspaces: d.Workspaces, accounts: d.Accounts, capacity: d.Capacity, credits: d.Credits, sched: newSchedState(),
-		swagger: d.SwaggerTests, specs: newSpecFetcher(),
+		swagger: d.SwaggerTests, specs: newSpecFetcher(), docs: d.Documents, docHost: d.DocumentHost,
 		wake:    make(chan struct{}, 1),
 		cancels: map[string]context.CancelFunc{},
 	}
@@ -233,6 +243,13 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 			return fmt.Errorf("recover interrupted surveys: %w", err)
 		} else if n > 0 {
 			o.log.Warn("requeued interrupted surveys", "count", n)
+		}
+	}
+	if o.docs != nil {
+		if n, err := o.docs.RecoverDocumentRuns(sys); err != nil {
+			return fmt.Errorf("recover interrupted document generations: %w", err)
+		} else if n > 0 {
+			o.log.Warn("requeued interrupted document generations", "count", n)
 		}
 	}
 	if o.reflections != nil {
@@ -364,6 +381,15 @@ func (o *Orchestrator) claim(ctx context.Context) (func(context.Context), bool, 
 	}
 	if ok {
 		return func(ctx context.Context) { o.work(domain.WithWorkspace(ctx, t.WorkspaceID), t, run) }, true, nil
+	}
+	if o.docs != nil {
+		r, ok, err := o.docs.ClaimDocumentRun(ctx)
+		if err != nil {
+			return nil, false, err
+		}
+		if ok {
+			return func(ctx context.Context) { o.writeDocument(ctx, r) }, true, nil
+		}
 	}
 	if o.briefs != nil {
 		b, ok, err := o.briefs.ClaimBrief(ctx)
