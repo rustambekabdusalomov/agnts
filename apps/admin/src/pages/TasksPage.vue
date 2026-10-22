@@ -4,7 +4,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { api, unwrap } from '../api/client'
-import { BOARD_GROUPS, type RemoteRepository, type Repository } from '../api/types'
+import { BOARD_GROUPS, ticketNo, type RemoteRepository, type Repository } from '../api/types'
 import PageHeader from '../components/PageHeader.vue'
 import StateBadge from '../components/StateBadge.vue'
 import WaitBadge from '../components/WaitBadge.vue'
@@ -43,7 +43,7 @@ const rows = computed(() => {
   const q = ui.search.trim().toLowerCase()
   return tasks.value.filter(
     (x) =>
-      (repoFilter.value === 'all' || hasRepo(x, repoFilter.value)) && (!q || `${x.key} ${x.title}`.toLowerCase().includes(q)),
+      (repoFilter.value === 'all' || hasRepo(x, repoFilter.value)) && (!q || `${x.key} ${x.ticketNumber ?? ''} ${x.title}`.toLowerCase().includes(q)),
   )
 })
 const countFor = (id: number) => tasks.value.filter((x) => hasRepo(x, id)).length
@@ -141,7 +141,7 @@ function repoSaved(r: Repository) {
               @keydown.enter="router.push({ name: 'ticket', params: { key: x.key } })"
             >
               <td>
-                <div class="tkey">{{ x.key }} <KindBadge v-if="x.kind !== 'code'" :ticket="x" /></div>
+                <div class="tkey">{{ ticketNo(x) }} <KindBadge v-if="x.kind !== 'code'" :ticket="x" /></div>
                 <div class="ttitle">{{ x.title }}</div>
               </td>
               <td class="muted"><RepoChip :ticket="x" empty="—" /></td>

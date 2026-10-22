@@ -158,6 +158,8 @@ export const KINDS: TicketKind[] = ['code', 'test', 'plan', 'analysis', 'bug']
 export const isPullReview = (t: Pick<Ticket, 'kind'>) => t.kind === 'review'
 /** The git host a pull request lives on, for labels ("GitHub", "GitLab"). */
 export const pullHost = (url?: string) => (url && /gitlab/i.test(new URL(url, 'https://x').hostname) ? 'GitLab' : 'GitHub')
+/** The ticket's number as people know it: the team's ticket number, else the key. */
+export const ticketNo = (t: Pick<Ticket, 'key' | 'ticketNumber'>) => t.ticketNumber || t.key
 /** Kinds whose work is a Markdown report instead of a change. */
 export const REPORT_KINDS: TicketKind[] = ['plan', 'analysis', 'bug']
 /** Swagger tests report too (results and a report), from a form of their own. */

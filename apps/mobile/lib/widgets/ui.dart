@@ -157,6 +157,9 @@ String? repoLabel(Ticket t) {
 bool isReportKind(TicketKind k) =>
     k == TicketKind.plan || k == TicketKind.analysis || k == TicketKind.bug || k == TicketKind.review || k == TicketKind.swaggertest;
 
+/// The ticket's number as people know it: the team's ticket number, else the key.
+String ticketNo(Ticket t) => (t.ticketNumber?.isNotEmpty ?? false) ? t.ticketNumber! : t.key;
+
 /// Where a ticket came from, for its source chip: Jira, Plane, Task, PR or CI.
 String sourceLabel(AppLocalizations l, TicketSource_Enum s) => switch (s) {
   TicketSource_Enum.local => l.ticketsSourceTask,
@@ -432,7 +435,7 @@ class TicketCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  ticket.key,
+                  ticketNo(ticket),
                   style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3),
                 ),
               ),

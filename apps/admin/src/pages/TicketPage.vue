@@ -1108,7 +1108,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
           <div class="ch"><h2>{{ isTask ? t('ticket.sideTask') : t('ticket.sideTicket') }}</h2><span><StateBadge :state="tk.state" :kind="tk.kind" /> <span v-if="tk.mergedAt" class="badge b-ok">{{ t('ticket.merged') }}</span> <span v-if="tk.partlyMerged" class="badge b-warn">{{ t('groups.partlyMerged') }}</span></span></div>
           <dl class="kv">
             <dt>{{ t('ticket.kvKey') }}</dt><dd>{{ tk.key }}</dd>
-            <template v-if="!report && !pull"><dt>{{ t('tasks.ticketNumber') }}</dt><dd><TicketNumber :ticket="tk" /></dd></template>
+            <template v-if="!pull"><dt>{{ t('tasks.ticketNumber') }}</dt><dd><TicketNumber :ticket="tk" /></dd></template>
             <template v-if="tk.parentKey"><dt>{{ t('implement.implements') }}</dt><dd><RouterLink :to="{ name: 'ticket', params: { key: tk.parentKey } }">{{ tk.parentKey }}</RouterLink></dd></template>
             <template v-if="tk.followUpOf"><dt>{{ t('followUps.followUpOf') }}</dt><dd><RouterLink :to="{ name: 'ticket', params: { key: tk.followUpOf } }">{{ tk.followUpOf }}</RouterLink></dd></template>
             <template v-if="waitsFor.length">

@@ -83,7 +83,7 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
                 return ref.refresh(ticketsProvider('all').future);
               },
               builder: (list) {
-                final rows = list.where((t) => _inFilter(t, _filter) && (q.isEmpty || '${t.key} ${t.title}'.toLowerCase().contains(q))).toList();
+                final rows = list.where((t) => _inFilter(t, _filter) && (q.isEmpty || '${t.key} ${t.ticketNumber ?? ''} ${t.title}'.toLowerCase().contains(q))).toList();
                 if (rows.isEmpty) {
                   return ListView(children: [
                     EmptyState(title: q.isNotEmpty ? l.mhomeSearchEmpty : _filter == 'needs' ? l.ticketsEmptyNeeds : l.ticketsEmpty),
@@ -173,7 +173,7 @@ class TicketTile extends StatelessWidget {
     return ListTile(
       title: Text(t.title, maxLines: 2, overflow: TextOverflow.ellipsis),
       subtitle: Text([
-        t.key,
+        ticketNo(t),
         sourceLabel(l, t.source_),
         ?repoLabel(t),
       ].join(' · ')),

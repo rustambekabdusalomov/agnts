@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { computed, nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { api, HttpError, unwrap } from '../../api/client'
-import type { Ticket } from '../../api/types'
+import { ticketNo, type Ticket } from '../../api/types'
 import { useWorkspace } from '../../stores/workspace'
 
 // The team's number for the work ({number} in branch and commit names),
@@ -56,7 +56,7 @@ function submit() {
     <p v-else class="hint tn-err">{{ t('ticket.numberHint') }}</p>
   </form>
   <span v-else class="tn">
-    <span :class="ticket.ticketNumber ? 'mono' : 'hint'">{{ ticket.ticketNumber || '—' }}</span>
+    <span :class="ticket.ticketNumber ? 'mono' : 'mono hint'">{{ ticketNo(ticket) }}</span>
     <button v-if="canEdit" type="button" class="link-btn" @click="edit">{{ ticket.ticketNumber ? t('ticket.numberEdit') : t('ticket.numberSet') }}</button>
   </span>
 </template>

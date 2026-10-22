@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { STATE_TONE, TERMINAL, type Ticket, type TicketState } from '../api/types'
+import { STATE_TONE, TERMINAL, ticketNo, type Ticket, type TicketState } from '../api/types'
 import { ago, fmtTokens, ioTokens } from '../composables/format'
 import StateBadge from './StateBadge.vue'
 import WaitBadge from './WaitBadge.vue'
@@ -38,7 +38,7 @@ const tone = (c: BoardColumn) => STATE_TONE[c.states[0]]
           @keydown.enter="emit('open', tk.key)"
         >
           <div class="bcard-top">
-            <span class="tkey">{{ tk.key }}</span>
+            <span class="tkey">{{ ticketNo(tk) }}</span>
             <span v-if="tk.revision > 0 && !TERMINAL.includes(tk.state)" class="hint">{{ t('tickets.rev', { n: tk.revision }) }}</span>
           </div>
           <div class="bcard-title">{{ tk.title }}</div>

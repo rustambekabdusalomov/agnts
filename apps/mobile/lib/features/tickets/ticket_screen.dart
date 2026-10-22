@@ -413,7 +413,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
       backgroundColor: c.bg,
       appBar: DetailBar(
         backLabel: l.navBack,
-        title: widget.ticketKey,
+        title: detail.value == null ? widget.ticketKey : ticketNo(detail.value!.ticket),
         onBack: () => context.canPop() ? context.pop() : context.go('/tickets'),
         actions: [if (detail.value != null) TranslateButton(widget.ticketKey)],
       ),
@@ -505,12 +505,12 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
                 ),
             ]),
           ),
-        if (!isReportKind(t.kind) && t.source_ != TicketSource_Enum.git)
+        if (t.source_ != TicketSource_Enum.git)
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Row(children: [
               Expanded(
-                child: Text('${l.tasksTicketNumber}: ${t.ticketNumber ?? '—'}', style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3)),
+                child: Text('${l.tasksTicketNumber}: ${ticketNo(t)}', style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3)),
               ),
               if (ref.watch(canEditProvider) && t.state != TicketState.done && t.state != TicketState.rejected)
                 TextButton(

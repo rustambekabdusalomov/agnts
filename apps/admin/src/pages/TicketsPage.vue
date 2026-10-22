@@ -4,7 +4,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../api/client'
-import { FILTERS, TERMINAL, BOARD_GROUPS } from '../api/types'
+import { FILTERS, TERMINAL, BOARD_GROUPS, ticketNo } from '../api/types'
 import PageHeader from '../components/PageHeader.vue'
 import StateBadge from '../components/StateBadge.vue'
 import WaitBadge from '../components/WaitBadge.vue'
@@ -84,7 +84,7 @@ const rows = computed(() => {
   const g = group.value
   return (tickets.data.value ?? []).filter(
     (x) =>
-      (!q || `${x.key} ${x.title}`.toLowerCase().includes(q)) &&
+      (!q || `${x.key} ${x.ticketNumber ?? ''} ${x.title}`.toLowerCase().includes(q)) &&
       (!r || (r === 'none' ? !ticketRepos(x).length : hasRepo(x, Number(r)))) &&
       (!g || String(x.group?.id ?? '') === g),
   )
@@ -180,7 +180,7 @@ const columns = computed<BoardColumn[]>(() =>
         </thead>
         <tbody>
           <tr v-for="tk in rows" :key="tk.key" tabindex="0" @click="open(tk.key)" @keydown.enter="open(tk.key)">
-            <td><div class="tkey">{{ tk.key }} <KindBadge v-if="tk.kind !== 'code'" :ticket="tk" /> <span v-if="tk.openSuggestions" class="badge b-info">{{ t('followUps.openBadge', { count: tk.openSuggestions }) }}</span> <span v-if="tk.blockedBy?.length" class="badge b-warn" :title="tk.blockedBy.map((b) => b.key).join(', ')">{{ t('relations.waitingBadge') }}</span></div><div class="ttitle">{{ tk.title }}</div></td>
+            <td><div class="tkey">{{ ticketNo(tk) }} <KindBadge v-if="tk.kind !== 'code'" :ticket="tk" /> <span v-if="tk.openSuggestions" class="badge b-info">{{ t('followUps.openBadge', { count: tk.openSuggestions }) }}</span> <span v-if="tk.blockedBy?.length" class="badge b-warn" :title="tk.blockedBy.map((b) => b.key).join(', ')">{{ t('relations.waitingBadge') }}</span></div><div class="ttitle">{{ tk.title }}</div></td>
             <td>
               <span v-if="tk.source === 'local'" class="src local">{{ t('tickets.sourceTask') }}</span>
               <span v-else class="src">{{ tk.source === 'plane' ? t('tickets.sourcePlane') : tk.source === 'git' ? t('tickets.sourceGit') : tk.source === 'ci' ? t('tickets.sourceCi') : t('tickets.sourceJira') }}</span>
