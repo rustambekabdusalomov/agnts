@@ -38,11 +38,44 @@ String networkStatusLabel(AppLocalizations l, PrivateNetworkStatusEnum s) => swi
       PrivateNetworkStatusEnum.disabled => l.networkStatus_disabled,
     };
 
+/// Runs one network action, refreshes the list and says how it went.
+/// Settings and the Home header's sheet both use it; true when it worked.
+Future<bool> runNetworkAction(BuildContext context, WidgetRef ref, Future<void> Function(NetworkApi api) f, String done) async {
+  final l = AppLocalizations.of(context);
+  try {
+    await f(ref.read(apiProvider)!.getNetworkApi());
+    ref.invalidate(networksProvider);
+    if (context.mounted) showSnack(context, done);
+    return true;
+  } catch (e) {
+    if (context.mounted) showSnack(context, errorMessage(e, l.commonError));
+    return false;
+  }
+}
+
+/// Connects a network that is off; asks before disconnecting one that is on.
+Future<bool> toggleNetwork(BuildContext context, WidgetRef ref, PrivateNetwork n) async {
+  final l = AppLocalizations.of(context);
+  if (!n.enabled) return runNetworkAction(context, ref, (api) => api.connectPrivateNetwork(networkId: n.id), l.networkConnecting);
+  final ok = await confirmAction(
+    context,
+    title: l.networkDisconnect,
+    message: l.networkDisconnectConfirm(n.name),
+    confirmLabel: l.networkDisconnect,
+    danger: true,
+  );
+  if (!ok || !context.mounted) return false;
+  return runNetworkAction(context, ref, (api) => api.disconnectPrivateNetwork(networkId: n.id), l.networkDisconnected);
+}
+
 /// The workspace's private networks: tunnels into the team's own networks
 /// (WireGuard, OpenVPN or agnts-link), each with its routes, plus a
 /// connection test and recent activity (PrivateNetworksCard).
 class NetworksScreen extends ConsumerStatefulWidget {
-  const NetworksScreen({super.key});
+  const NetworksScreen({super.key, this.add = false});
+
+  /// Opens the add form straight away (the Home header's "Add network").
+  final bool add;
 
   @override
   ConsumerState<NetworksScreen> createState() => _NetworksScreenState();
@@ -63,6 +96,18 @@ class _NetworksScreenState extends ConsumerState<NetworksScreen> {
     super.initState();
     // Status changes on the server side (handshakes, reconnects): keep it fresh.
     _poll = Timer.periodic(const Duration(seconds: 15), (_) => ref.invalidate(networksProvider));
+    if (widget.add) WidgetsBinding.instance.addPostFrameCallback((_) => _openAdd());
+  }
+
+  Future<void> _openAdd() async {
+    final PrivateNetworkList list;
+    try {
+      list = await ref.read(networksProvider.future);
+    } catch (_) {
+      return;
+    }
+    final owner = ref.read(currentWorkspaceProvider)?.role == WorkspaceRole.owner;
+    if (mounted && owner && list.available && list.networks.length < list.max) _edit(list, null);
   }
 
   @override
@@ -72,45 +117,26 @@ class _NetworksScreenState extends ConsumerState<NetworksScreen> {
     super.dispose();
   }
 
-  Future<void> _act(Future<void> Function(NetworkApi api) f, String done) async {
-    final l = AppLocalizations.of(context);
+  Future<void> _act(Future<bool> Function() f) async {
     setState(() => _busy = true);
-    try {
-      await f(ref.read(apiProvider)!.getNetworkApi());
-      ref.invalidate(networksProvider);
-      if (mounted) {
-        setState(() => _result = null);
-        showSnack(context, done);
-      }
-    } catch (e) {
-      if (mounted) showSnack(context, errorMessage(e, l.commonError));
-    } finally {
-      if (mounted) setState(() => _busy = false);
+    final ok = await f();
+    if (mounted) {
+      setState(() {
+        _busy = false;
+        if (ok) _result = null;
+      });
     }
   }
+
+  Future<void> _run(Future<void> Function(NetworkApi api) f, String done) => _act(() => runNetworkAction(context, ref, f, done));
 
   Future<void> _remove(PrivateNetwork n) async {
     final l = AppLocalizations.of(context);
     if (!await confirmAction(context, title: l.networkRemove, message: l.networkRemoveConfirm(n.name), confirmLabel: l.networkRemove, danger: true)) return;
-    await _act((api) => api.deletePrivateNetwork(networkId: n.id), l.networkRemoved);
+    await _run((api) => api.deletePrivateNetwork(networkId: n.id), l.networkRemoved);
   }
 
-  Future<void> _toggle(PrivateNetwork n) async {
-    final l = AppLocalizations.of(context);
-    if (n.enabled) {
-      final ok = await confirmAction(
-        context,
-        title: l.networkDisconnect,
-        message: l.networkDisconnectConfirm(n.name),
-        confirmLabel: l.networkDisconnect,
-        danger: true,
-      );
-      if (!ok) return;
-      await _act((api) => api.disconnectPrivateNetwork(networkId: n.id), l.networkDisconnected);
-    } else {
-      await _act((api) => api.connectPrivateNetwork(networkId: n.id), l.networkConnecting);
-    }
-  }
+  Future<void> _toggle(PrivateNetwork n) => _act(() => toggleNetwork(context, ref, n));
 
   Future<void> _test() async {
     final l = AppLocalizations.of(context);
@@ -207,7 +233,7 @@ class _NetworksScreenState extends ConsumerState<NetworksScreen> {
                     Wrap(spacing: 8, runSpacing: 8, children: [
                       if (n.enabled)
                         OutlinedButton(
-                          onPressed: _busy ? null : () => _act((api) => api.reconnectPrivateNetwork(networkId: n.id), l.networkReconnecting),
+                          onPressed: _busy ? null : () => _run((api) => api.reconnectPrivateNetwork(networkId: n.id), l.networkReconnecting),
                           child: Text(l.networkReconnect),
                         ),
                       OutlinedButton(onPressed: _busy ? null : () => _toggle(n), child: Text(n.enabled ? l.networkDisconnect : l.networkConnect)),

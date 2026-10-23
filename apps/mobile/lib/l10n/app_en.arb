@@ -1685,6 +1685,71 @@
   "documentsNoNotes": "No notes for this slide.",
   "documentsStarterSubtitle": "What it is about, and when",
   "documentsStarterPoint": "The first point",
+  "documentsComments": "Comments",
+  "documentsAddComment": "Comment",
+  "documentsCommentPlaceholder": "Add a comment…",
+  "documentsReplyPlaceholder": "Reply…",
+  "documentsPost": "Comment",
+  "documentsNoComments": "No comments yet.",
+  "documentsNoCommentsHint": "Select text to comment on it.",
+  "documentsGuestsCanRead": "This document is public: guests with the link read comments.",
+  "documentsSlideN": "Slide {n}",
+  "@documentsSlideN": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsTextChanged": "The text it was on has changed.",
+  "documentsEdited": "edited",
+  "documentsResolve": "Resolve",
+  "documentsResolveHelp": "Mark as done: the thread is folded away",
+  "documentsReopen": "Reopen",
+  "documentsResolvedN": "Resolved ({n})",
+  "@documentsResolvedN": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsResolvedBy": "Resolved by {name}",
+  "@documentsResolvedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsRepliesN": "{n, plural, one {{n} reply} other {{n} replies}}",
+  "@documentsRepliesN": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "documentsDeleteThreadConfirm": "Delete this comment and its replies?",
+  "documentsDeleteCommentConfirm": "Delete this reply?",
+  "documentsViewingNow": "{n, plural, one {{n} viewing now} other {{n} viewing now}}",
+  "@documentsViewingNow": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "documentsYou": "you",
+  "documentsGuest": "guest",
+  "documentsViaGoogle": "guest via Google",
+  "documentsWhoAreYou": "Who are you?",
+  "documentsWhoAreYouSub": "Your name is shown to the people working on this document, next to your comments and while you have it open.",
+  "documentsYourName": "Your name",
+  "documentsYourNamePlaceholder": "Name and company",
+  "documentsEnter": "Enter",
+  "documentsOrGoogle": "Or, if you prefer, show who you are with Google:",
+  "documentsViaAccount": "signed in",
   "draftsTitle": "Review comments",
   "draftsSub": "agnts's comments stay here until you accept them. Only accepted ones are published on {host}, together as one review; the rest never leave agnts.",
   "@draftsSub": {
@@ -4718,6 +4783,7 @@
   "networkConnect": "Connect",
   "networkConnectHelp": "Start the tunnel again with the saved config",
   "networkConnecting": "Connecting: the tunnel starts within 15 seconds",
+  "networkManage": "Manage",
   "platformTitle": "Admin cabinet",
   "platformLede": "Every workspace, run and user on this server. Workspaces show metadata only: their tickets are their members'.",
   "platformCapacity": "Server",

@@ -2969,6 +2969,109 @@ class AppLocalizationsEn extends AppLocalizations {
   String get documentsStarterPoint => 'The first point';
 
   @override
+  String get documentsComments => 'Comments';
+
+  @override
+  String get documentsAddComment => 'Comment';
+
+  @override
+  String get documentsCommentPlaceholder => 'Add a comment…';
+
+  @override
+  String get documentsReplyPlaceholder => 'Reply…';
+
+  @override
+  String get documentsPost => 'Comment';
+
+  @override
+  String get documentsNoComments => 'No comments yet.';
+
+  @override
+  String get documentsNoCommentsHint => 'Select text to comment on it.';
+
+  @override
+  String get documentsGuestsCanRead => 'This document is public: guests with the link read comments.';
+
+  @override
+  String documentsSlideN(String n) {
+    return 'Slide $n';
+  }
+
+  @override
+  String get documentsTextChanged => 'The text it was on has changed.';
+
+  @override
+  String get documentsEdited => 'edited';
+
+  @override
+  String get documentsResolve => 'Resolve';
+
+  @override
+  String get documentsResolveHelp => 'Mark as done: the thread is folded away';
+
+  @override
+  String get documentsReopen => 'Reopen';
+
+  @override
+  String documentsResolvedN(String n) {
+    return 'Resolved ($n)';
+  }
+
+  @override
+  String documentsResolvedBy(String name) {
+    return 'Resolved by $name';
+  }
+
+  @override
+  String documentsRepliesN(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n replies', one: '$n reply');
+    return '$_temp0';
+  }
+
+  @override
+  String get documentsDeleteThreadConfirm => 'Delete this comment and its replies?';
+
+  @override
+  String get documentsDeleteCommentConfirm => 'Delete this reply?';
+
+  @override
+  String documentsViewingNow(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n viewing now', one: '$n viewing now');
+    return '$_temp0';
+  }
+
+  @override
+  String get documentsYou => 'you';
+
+  @override
+  String get documentsGuest => 'guest';
+
+  @override
+  String get documentsViaGoogle => 'guest via Google';
+
+  @override
+  String get documentsWhoAreYou => 'Who are you?';
+
+  @override
+  String get documentsWhoAreYouSub =>
+      'Your name is shown to the people working on this document, next to your comments and while you have it open.';
+
+  @override
+  String get documentsYourName => 'Your name';
+
+  @override
+  String get documentsYourNamePlaceholder => 'Name and company';
+
+  @override
+  String get documentsEnter => 'Enter';
+
+  @override
+  String get documentsOrGoogle => 'Or, if you prefer, show who you are with Google:';
+
+  @override
+  String get documentsViaAccount => 'signed in';
+
+  @override
   String get draftsTitle => 'Review comments';
 
   @override
@@ -7847,6 +7950,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get networkConnecting => 'Connecting: the tunnel starts within 15 seconds';
+
+  @override
+  String get networkManage => 'Manage';
 
   @override
   String get platformTitle => 'Admin cabinet';

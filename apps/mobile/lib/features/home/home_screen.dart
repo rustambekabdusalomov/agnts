@@ -11,6 +11,8 @@ import '../../theme.dart';
 import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
 import '../../widgets/workspace.dart';
+import '../settings/network_menu.dart';
+import '../settings/networks_screen.dart' show networksProvider;
 import '../tickets/tickets_screen.dart';
 
 /// The Home tab (scrHome): greeting and date, four KPI tiles, what waits on
@@ -30,7 +32,7 @@ class HomeScreen extends ConsumerWidget {
       body: SafeArea(
         bottom: false,
         child: Column(children: [
-          PageHeader(title: user.isEmpty ? l.mobileHome : _greeting(l, user), sub: _today(context), actions: const [WorkspaceChip()]),
+          PageHeader(title: user.isEmpty ? l.mobileHome : _greeting(l, user), sub: _today(context), actions: [if (!none) const NetworkButton(), const WorkspaceChip()]),
           Expanded(
             child: none
                 ? RefreshIndicator(
@@ -45,6 +47,7 @@ class HomeScreen extends ConsumerWidget {
                     value: dash,
                     onRefresh: () {
                       ref.invalidate(queueProvider);
+                      ref.invalidate(networksProvider);
                       return ref.refresh(dashboardProvider.future);
                     },
                     builder: (d) => _HomeBody(d),

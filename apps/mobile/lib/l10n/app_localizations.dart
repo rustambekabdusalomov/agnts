@@ -5529,6 +5529,186 @@ abstract class AppLocalizations {
   /// **'The first point'**
   String get documentsStarterPoint;
 
+  /// No description provided for @documentsComments.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments'**
+  String get documentsComments;
+
+  /// No description provided for @documentsAddComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment'**
+  String get documentsAddComment;
+
+  /// No description provided for @documentsCommentPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a comment…'**
+  String get documentsCommentPlaceholder;
+
+  /// No description provided for @documentsReplyPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply…'**
+  String get documentsReplyPlaceholder;
+
+  /// No description provided for @documentsPost.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment'**
+  String get documentsPost;
+
+  /// No description provided for @documentsNoComments.
+  ///
+  /// In en, this message translates to:
+  /// **'No comments yet.'**
+  String get documentsNoComments;
+
+  /// No description provided for @documentsNoCommentsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select text to comment on it.'**
+  String get documentsNoCommentsHint;
+
+  /// No description provided for @documentsGuestsCanRead.
+  ///
+  /// In en, this message translates to:
+  /// **'This document is public: guests with the link read comments.'**
+  String get documentsGuestsCanRead;
+
+  /// No description provided for @documentsSlideN.
+  ///
+  /// In en, this message translates to:
+  /// **'Slide {n}'**
+  String documentsSlideN(String n);
+
+  /// No description provided for @documentsTextChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'The text it was on has changed.'**
+  String get documentsTextChanged;
+
+  /// No description provided for @documentsEdited.
+  ///
+  /// In en, this message translates to:
+  /// **'edited'**
+  String get documentsEdited;
+
+  /// No description provided for @documentsResolve.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve'**
+  String get documentsResolve;
+
+  /// No description provided for @documentsResolveHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as done: the thread is folded away'**
+  String get documentsResolveHelp;
+
+  /// No description provided for @documentsReopen.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopen'**
+  String get documentsReopen;
+
+  /// No description provided for @documentsResolvedN.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved ({n})'**
+  String documentsResolvedN(String n);
+
+  /// No description provided for @documentsResolvedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved by {name}'**
+  String documentsResolvedBy(String name);
+
+  /// No description provided for @documentsRepliesN.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} reply} other {{n} replies}}'**
+  String documentsRepliesN(num n);
+
+  /// No description provided for @documentsDeleteThreadConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this comment and its replies?'**
+  String get documentsDeleteThreadConfirm;
+
+  /// No description provided for @documentsDeleteCommentConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this reply?'**
+  String get documentsDeleteCommentConfirm;
+
+  /// No description provided for @documentsViewingNow.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} viewing now} other {{n} viewing now}}'**
+  String documentsViewingNow(num n);
+
+  /// No description provided for @documentsYou.
+  ///
+  /// In en, this message translates to:
+  /// **'you'**
+  String get documentsYou;
+
+  /// No description provided for @documentsGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'guest'**
+  String get documentsGuest;
+
+  /// No description provided for @documentsViaGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'guest via Google'**
+  String get documentsViaGoogle;
+
+  /// No description provided for @documentsWhoAreYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Who are you?'**
+  String get documentsWhoAreYou;
+
+  /// No description provided for @documentsWhoAreYouSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Your name is shown to the people working on this document, next to your comments and while you have it open.'**
+  String get documentsWhoAreYouSub;
+
+  /// No description provided for @documentsYourName.
+  ///
+  /// In en, this message translates to:
+  /// **'Your name'**
+  String get documentsYourName;
+
+  /// No description provided for @documentsYourNamePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Name and company'**
+  String get documentsYourNamePlaceholder;
+
+  /// No description provided for @documentsEnter.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter'**
+  String get documentsEnter;
+
+  /// No description provided for @documentsOrGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Or, if you prefer, show who you are with Google:'**
+  String get documentsOrGoogle;
+
+  /// No description provided for @documentsViaAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'signed in'**
+  String get documentsViaAccount;
+
   /// No description provided for @draftsTitle.
   ///
   /// In en, this message translates to:
@@ -14102,6 +14282,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Connecting: the tunnel starts within 15 seconds'**
   String get networkConnecting;
+
+  /// No description provided for @networkManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get networkManage;
 
   /// No description provided for @platformTitle.
   ///

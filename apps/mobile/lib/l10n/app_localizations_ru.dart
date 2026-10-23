@@ -3040,6 +3040,116 @@ class AppLocalizationsRu extends AppLocalizations {
   String get documentsStarterPoint => 'Первый пункт';
 
   @override
+  String get documentsComments => 'Комментарии';
+
+  @override
+  String get documentsAddComment => 'Комментировать';
+
+  @override
+  String get documentsCommentPlaceholder => 'Добавьте комментарий…';
+
+  @override
+  String get documentsReplyPlaceholder => 'Ответить…';
+
+  @override
+  String get documentsPost => 'Отправить';
+
+  @override
+  String get documentsNoComments => 'Комментариев пока нет.';
+
+  @override
+  String get documentsNoCommentsHint => 'Выделите текст, чтобы его прокомментировать.';
+
+  @override
+  String get documentsGuestsCanRead => 'Документ публичный: гости по ссылке видят комментарии.';
+
+  @override
+  String documentsSlideN(String n) {
+    return 'Слайд $n';
+  }
+
+  @override
+  String get documentsTextChanged => 'Текст, к которому он относился, изменился.';
+
+  @override
+  String get documentsEdited => 'изменено';
+
+  @override
+  String get documentsResolve => 'Решено';
+
+  @override
+  String get documentsResolveHelp => 'Отметить решённым: обсуждение свернётся';
+
+  @override
+  String get documentsReopen => 'Открыть снова';
+
+  @override
+  String documentsResolvedN(String n) {
+    return 'Решённые ($n)';
+  }
+
+  @override
+  String documentsResolvedBy(String name) {
+    return 'Решено: $name';
+  }
+
+  @override
+  String documentsRepliesN(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ответа', many: '$n ответов', few: '$n ответа', one: '$n ответ');
+    return '$_temp0';
+  }
+
+  @override
+  String get documentsDeleteThreadConfirm => 'Удалить комментарий вместе с ответами?';
+
+  @override
+  String get documentsDeleteCommentConfirm => 'Удалить ответ?';
+
+  @override
+  String documentsViewingNow(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n смотрят сейчас',
+      many: '$n смотрят сейчас',
+      few: '$n смотрят сейчас',
+      one: '$n смотрит сейчас',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get documentsYou => 'вы';
+
+  @override
+  String get documentsGuest => 'гость';
+
+  @override
+  String get documentsViaGoogle => 'гость через Google';
+
+  @override
+  String get documentsWhoAreYou => 'Представьтесь';
+
+  @override
+  String get documentsWhoAreYouSub =>
+      'Ваше имя увидят те, кто работает с документом: рядом с вашими комментариями и пока документ у вас открыт.';
+
+  @override
+  String get documentsYourName => 'Ваше имя';
+
+  @override
+  String get documentsYourNamePlaceholder => 'Имя и компания';
+
+  @override
+  String get documentsEnter => 'Продолжить';
+
+  @override
+  String get documentsOrGoogle => 'Или, если хотите, подтвердите себя через Google:';
+
+  @override
+  String get documentsViaAccount => 'вошёл в аккаунт';
+
+  @override
   String get draftsTitle => 'Комментарии ревью';
 
   @override
@@ -8161,6 +8271,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get networkConnecting => 'Подключение: туннель запустится в течение 15 секунд';
+
+  @override
+  String get networkManage => 'Управление';
 
   @override
   String get platformTitle => 'Кабинет администратора';

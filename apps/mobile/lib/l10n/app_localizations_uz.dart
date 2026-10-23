@@ -2972,6 +2972,106 @@ class AppLocalizationsUz extends AppLocalizations {
   String get documentsStarterPoint => 'Birinchi fikr';
 
   @override
+  String get documentsComments => 'Izohlar';
+
+  @override
+  String get documentsAddComment => 'Izoh qoldirish';
+
+  @override
+  String get documentsCommentPlaceholder => 'Izoh yozing…';
+
+  @override
+  String get documentsReplyPlaceholder => 'Javob…';
+
+  @override
+  String get documentsPost => 'Yuborish';
+
+  @override
+  String get documentsNoComments => 'Hozircha izohlar yoʻq.';
+
+  @override
+  String get documentsNoCommentsHint => 'Izoh qoldirish uchun matnni belgilang.';
+
+  @override
+  String get documentsGuestsCanRead => 'Hujjat ochiq: havola orqali kirgan mehmonlar izohlarni koʻradi.';
+
+  @override
+  String documentsSlideN(String n) {
+    return '$n-slayd';
+  }
+
+  @override
+  String get documentsTextChanged => 'Izoh tegishli boʻlgan matn oʻzgargan.';
+
+  @override
+  String get documentsEdited => 'tahrirlangan';
+
+  @override
+  String get documentsResolve => 'Hal qilindi';
+
+  @override
+  String get documentsResolveHelp => 'Hal qilingan deb belgilash: muhokama yigʻiladi';
+
+  @override
+  String get documentsReopen => 'Qayta ochish';
+
+  @override
+  String documentsResolvedN(String n) {
+    return 'Hal qilinganlar ($n)';
+  }
+
+  @override
+  String documentsResolvedBy(String name) {
+    return 'Hal qildi: $name';
+  }
+
+  @override
+  String documentsRepliesN(num n) {
+    return '$n ta javob';
+  }
+
+  @override
+  String get documentsDeleteThreadConfirm => 'Izoh va unga javoblar oʻchirilsinmi?';
+
+  @override
+  String get documentsDeleteCommentConfirm => 'Javob oʻchirilsinmi?';
+
+  @override
+  String documentsViewingNow(num n) {
+    return 'Hozir $n kishi koʻrmoqda';
+  }
+
+  @override
+  String get documentsYou => 'siz';
+
+  @override
+  String get documentsGuest => 'mehmon';
+
+  @override
+  String get documentsViaGoogle => 'Google orqali mehmon';
+
+  @override
+  String get documentsWhoAreYou => 'Siz kimsiz?';
+
+  @override
+  String get documentsWhoAreYouSub => 'Ismingiz hujjat ustida ishlayotganlarga koʻrinadi: izohlaringiz yonida va hujjat ochiq turganida.';
+
+  @override
+  String get documentsYourName => 'Ismingiz';
+
+  @override
+  String get documentsYourNamePlaceholder => 'Ism va kompaniya';
+
+  @override
+  String get documentsEnter => 'Davom etish';
+
+  @override
+  String get documentsOrGoogle => 'Yoki xohlasangiz, Google orqali kim ekaningizni koʻrsating:';
+
+  @override
+  String get documentsViaAccount => 'akkaunt orqali';
+
+  @override
   String get draftsTitle => 'Ko\'rib chiqish izohlari';
 
   @override
@@ -7858,6 +7958,9 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get networkConnecting => 'Ulanmoqda: tunnel 15 soniya ichida ishga tushadi';
+
+  @override
+  String get networkManage => 'Boshqarish';
 
   @override
   String get platformTitle => 'Administrator kabineti';
