@@ -15,10 +15,12 @@ import MembersTab from '../components/repo/MembersTab.vue'
 import PipelinesTab from '../components/repo/PipelinesTab.vue'
 import PullsTab from '../components/pulls/PullsTab.vue'
 import RepoDrawer from '../components/repos/RepoDrawer.vue'
-import { useArchiveRepo } from '../components/repos/useRepos'
+import { useArchiveRepo, useRepos } from '../components/repos/useRepos'
+import TaskDrawer from '../components/tasks/TaskDrawer.vue'
 import HiIcon from '../components/ui/HiIcon.vue'
 import { ago } from '../composables/format'
 import { useLive } from '../composables/useLive'
+import { useWorkspace } from '../stores/workspace'
 
 // One repository: branches, code, commits, pipelines and members from the git host,
 // and its CI watching.
@@ -32,6 +34,11 @@ type Tab = (typeof TABS)[number]
 const tab = computed<Tab>(() => (TABS.includes(route.query.tab as Tab) ? (route.query.tab as Tab) : 'branches'))
 const editOpen = ref(false)
 const archive = useArchiveRepo()
+const workspace = useWorkspace()
+// New task: the task drawer with this repository already picked.
+const repos = useRepos()
+const taskRepos = computed(() => (repos.data.value ?? []).filter((r) => !r.archivedAt))
+const taskOpen = ref(false)
 
 const repo = useQuery({
   queryKey: computed(() => ['repos', id.value]),
@@ -92,6 +99,9 @@ function setTab(v: Tab) {
         <span v-if="repo.data.value.planeProject" class="src">{{ t('repos.plane', { project: repo.data.value.planeProject }) }}</span>
         <span v-else class="src local">{{ t('repos.side') }}</span>
         <button v-if="!repo.data.value.archivedAt" type="button" class="btn" @click="editOpen = true">{{ t('repo.edit') }}</button>
+        <button v-if="!repo.data.value.archivedAt && workspace.canEdit" type="button" class="btn btn-p" @click="taskOpen = true">
+          <HiIcon name="plus" />{{ t('tasks.new') }}
+        </button>
         <button type="button" class="btn" :disabled="archive.pending.value" @click="archive.toggle(repo.data.value)">
           {{ repo.data.value.archivedAt ? t('repos.restore') : t('repos.archive') }}
         </button>
@@ -141,6 +151,7 @@ function setTab(v: Tab) {
     <GuardrailsTab v-else-if="tab === 'guardrails'" :repo="repo.data.value" />
     <BriefTab v-else :repo-id="id" />
 
+    <TaskDrawer v-model="taskOpen" :repos="taskRepos" :repo-id="id" no-import />
     <RepoDrawer v-model="editOpen" :repo="repo.data.value" @saved="() => qc.invalidateQueries({ queryKey: ['repos', id] })" />
   </template>
 </template>

@@ -16,7 +16,8 @@ import { selectionBody, type RepoSelection } from '../repos/repoSet'
 import { useRepoGroups } from '../repos/useGroups'
 
 // "New task" drawer from the demo. Creating a task opens its ticket page.
-const props = defineProps<{ repos: Repository[]; repoId?: number | null }>()
+// noImport hides "Import repository" where the drawer has nowhere to return to.
+const props = defineProps<{ repos: Repository[]; repoId?: number | null; noImport?: boolean }>()
 const open = defineModel<boolean>({ default: false })
 defineEmits<{ addRepo: [] }>()
 const { t } = useI18n()
@@ -179,7 +180,7 @@ function submit() {
             :none-disabled="changeKind"
             :none-title="changeKind ? t('tasks.repoNeeded') : undefined"
           >
-            <template #extra>
+            <template v-if="!noImport" #extra>
               <button type="button" class="tab" @click="$emit('addRepo')">
                 <HiIcon name="import" style="width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.4; vertical-align: -2px" />
                 {{ t('repos.import') }}

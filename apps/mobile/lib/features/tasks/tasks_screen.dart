@@ -136,36 +136,41 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     );
   }
 
-  Future<void> _newTask() async {
-    final l = AppLocalizations.of(context);
-    List<Repository> repos;
-    try {
-      repos = _taskRepos(await ref.read(reposProvider.future));
-    } catch (e) {
-      if (mounted) showSnack(context, errorMessage(e, l.commonError));
-      return;
-    }
-    // Groups are optional: without them the sheet offers repositories only.
-    List<RepoGroup> groups;
-    try {
-      groups = await ref.read(repoGroupsProvider.future);
-    } catch (_) {
-      groups = const [];
-    }
-    if (!mounted) return;
-    // Without repositories a task can still be a report (or let agnts pick).
-    final initial = repos.any((r) => r.id == _repo) ? _repo! : (repos.firstOrNull?.id ?? 0);
-    final key = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.9),
-      builder: (_) => _NewTaskSheet(repos: repos, groups: groups, initialRepo: initial),
-    );
-    if (key != null && mounted) {
-      ref.invalidate(ticketsProvider);
-      context.push('/tickets/$key');
-    }
+  Future<void> _newTask() => openNewTask(context, ref, repoId: _repo);
+}
+
+/// Opens the new-task sheet with [repoId] picked when it can take tasks (else
+/// the first repository), and opens the created ticket. The tasks screen and
+/// a repository's screen both start tasks here.
+Future<void> openNewTask(BuildContext context, WidgetRef ref, {int? repoId}) async {
+  final l = AppLocalizations.of(context);
+  List<Repository> repos;
+  try {
+    repos = _TasksScreenState._taskRepos(await ref.read(reposProvider.future));
+  } catch (e) {
+    if (context.mounted) showSnack(context, errorMessage(e, l.commonError));
+    return;
+  }
+  // Groups are optional: without them the sheet offers repositories only.
+  List<RepoGroup> groups;
+  try {
+    groups = await ref.read(repoGroupsProvider.future);
+  } catch (_) {
+    groups = const [];
+  }
+  if (!context.mounted) return;
+  // Without repositories a task can still be a report (or let agnts pick).
+  final initial = repos.any((r) => r.id == repoId) ? repoId! : (repos.firstOrNull?.id ?? 0);
+  final key = await showModalBottomSheet<String>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.9),
+    builder: (_) => _NewTaskSheet(repos: repos, groups: groups, initialRepo: initial),
+  );
+  if (key != null && context.mounted) {
+    ref.invalidate(ticketsProvider);
+    context.push('/tickets/$key');
   }
 }
 

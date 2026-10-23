@@ -12,6 +12,7 @@ import '../../theme.dart';
 import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
 import '../pulls/repo_pulls.dart';
+import '../tasks/tasks_screen.dart' show openNewTask;
 import 'repo_brief.dart';
 import 'repo_ci.dart';
 import 'repo_code.dart';
@@ -102,6 +103,10 @@ class _RepoScreenState extends ConsumerState<RepoScreen> {
 
     return Scaffold(
       appBar: DetailBar(backLabel: l.mobileMore),
+      // New task with this repository picked; archived ones take no tasks.
+      floatingActionButton: repo != null && repo.archivedAt == null && ref.watch(canEditProvider)
+          ? HFab(onTap: () => openNewTask(context, ref, repoId: id), tooltip: l.mobileNewTask)
+          : null,
       body: RefreshIndicator(
         onRefresh: _refresh,
         child: ListView(padding: const EdgeInsets.only(bottom: 32), children: [
