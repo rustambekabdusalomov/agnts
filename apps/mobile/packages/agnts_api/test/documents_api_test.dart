@@ -7,6 +7,20 @@ void main() {
   final instance = AgntsApi().getDocumentsApi();
 
   group(DocumentsApi, () {
+    // Comment on selected text, or reply to a comment (view access is enough)
+    //
+    //Future<DocumentComment> addDocumentComment(int id, DocumentCommentInput documentCommentInput) async
+    test('test addDocumentComment', () async {
+      // TODO
+    });
+
+    // A guest comments on selected text, or replies
+    //
+    //Future<DocumentComment> addPublicDocumentComment(String token, DocumentCommentInput documentCommentInput, { String xGuestToken }) async
+    test('test addPublicDocumentComment', () async {
+      // TODO
+    });
+
     // Create a document, written by you or by agnts from a source
     //
     // Without a source the body is yours and becomes version 1. With a source, agnts gathers the facts (a ticket's report, tickets, commits, pull requests or a repository) and writes the body; the document starts at version 0 and its generation shows the progress. Workspace viewers may create documents; they own what they create. 
@@ -30,6 +44,27 @@ void main() {
       // TODO
     });
 
+    // Delete a comment, and a thread's replies with it (its author, or the document's owner)
+    //
+    //Future deleteDocumentComment(int id, int commentId) async
+    test('test deleteDocumentComment', () async {
+      // TODO
+    });
+
+    // A guest deletes their comment
+    //
+    //Future deletePublicDocumentComment(String token, int commentId, { String xGuestToken }) async
+    test('test deletePublicDocumentComment', () async {
+      // TODO
+    });
+
+    // Say you have the document open (every 10 seconds) or are leaving; answers who is viewing it now
+    //
+    //Future<DocumentPresence> documentPresence(int id, { PresenceInput presenceInput }) async
+    test('test documentPresence', () async {
+      // TODO
+    });
+
     // Download a version as Markdown or PDF (view access)
     //
     // version 0 (the default) is the current one. The first PDF download of a version starts making it and answers 202 with Retry-After; ask again then. A made PDF is kept: later downloads are instant. 
@@ -41,9 +76,9 @@ void main() {
 
     // Download a public document's current version
     //
-    // The PDF is made ahead when the document is published or saved; until it is ready the answer is 202.
+    // The PDF is made ahead when the document is published or saved; until it is ready the answer is 202. Needs the guest's token.
     //
-    //Future<Uint8List> downloadPublicDocument(String token, { String format }) async
+    //Future<Uint8List> downloadPublicDocument(String token, { String format, String xGuestToken }) async
     test('test downloadPublicDocument', () async {
       // TODO
     });
@@ -69,12 +104,30 @@ void main() {
       // TODO
     });
 
-    // A public document, for anyone with its link
+    // A public document, for a guest of its link
     //
-    // Only the title, text, version and last update. Rate limited per address.
+    // Only the kind, title, text, version and last update. Needs the guest's token (401 guest_required without). Rate limited per address.
     //
-    //Future<PublicDocument> getPublicDocument(String token) async
+    //Future<PublicDocument> getPublicDocument(String token, { String xGuestToken }) async
     test('test getPublicDocument', () async {
+      // TODO
+    });
+
+    // What a public link opens, before the reader says who they are
+    //
+    // The kind and title only, and Google's client id when \"Continue with Google\" is on.
+    //
+    //Future<PublicDocumentInfo> getPublicDocumentInfo(String token) async
+    test('test getPublicDocumentInfo', () async {
+      // TODO
+    });
+
+    // Say who you are to open a public document; signed in, your account says it
+    //
+    // Answers the guest's secret token, sent afterwards as X-Guest-Token. It works only on this document, and only while it is public.
+    //
+    //Future<GuestSession> joinPublicDocument(String token, GuestJoin guestJoin) async
+    test('test joinPublicDocument', () async {
       // TODO
     });
 
@@ -82,6 +135,13 @@ void main() {
     //
     //Future linkDocumentTicket(int id, String key) async
     test('test linkDocumentTicket', () async {
+      // TODO
+    });
+
+    // The comments on a document, oldest first (view access)
+    //
+    //Future<List<DocumentComment>> listDocumentComments(int id) async
+    test('test listDocumentComments', () async {
       // TODO
     });
 
@@ -103,8 +163,15 @@ void main() {
     //
     // Your own documents, the ones shared with you (by a grant or the workspace default), and for the workspace owner every document. scope=deleted lists the trash: your own deleted documents (all of them for the workspace owner), restorable for 30 days. 
     //
-    //Future<List<DocumentSummary>> listDocuments({ String scope, String q, String ticket }) async
+    //Future<List<DocumentSummary>> listDocuments({ String scope, String q, String ticket, DocumentKind kind, int derivedFrom }) async
     test('test listDocuments', () async {
+      // TODO
+    });
+
+    // The comments on a public document, for its guests
+    //
+    //Future<List<DocumentComment>> listPublicDocumentComments(String token, { String xGuestToken }) async
+    test('test listPublicDocumentComments', () async {
       // TODO
     });
 
@@ -114,6 +181,13 @@ void main() {
     //
     //Future<List<DocumentSummary>> listTicketDocuments(String key) async
     test('test listTicketDocuments', () async {
+      // TODO
+    });
+
+    // A guest says they have the document open, or are leaving; answers who is viewing it now
+    //
+    //Future<DocumentPresence> publicDocumentPresence(String token, { String xGuestToken, PresenceInput presenceInput }) async
+    test('test publicDocumentPresence', () async {
       // TODO
     });
 
@@ -174,6 +248,20 @@ void main() {
     //
     //Future unlinkDocumentTicket(int id, String key) async
     test('test unlinkDocumentTicket', () async {
+      // TODO
+    });
+
+    // Edit your comment, or resolve or reopen a thread (its author, or edit access)
+    //
+    //Future<DocumentComment> updateDocumentComment(int id, int commentId, DocumentCommentPatch documentCommentPatch) async
+    test('test updateDocumentComment', () async {
+      // TODO
+    });
+
+    // A guest edits their comment, or resolves or reopens their thread
+    //
+    //Future<DocumentComment> updatePublicDocumentComment(String token, int commentId, DocumentCommentPatch documentCommentPatch, { String xGuestToken }) async
+    test('test updatePublicDocumentComment', () async {
       // TODO
     });
 

@@ -10,6 +10,8 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **kind** | **String** |  | 
 **template** | **String** | Defaults by kind | [optional] 
+**documentId** | **int** |  | [optional] 
+**documentVersion** | **int** |  | [optional] 
 **instruction** | **String** |  | [optional] 
 **tickets** | **List&lt;String&gt;** |  | [optional] 
 **filter** | [**DocumentSourceInputFilter**](DocumentSourceInputFilter.md) |  | [optional] 

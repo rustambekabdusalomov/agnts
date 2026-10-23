@@ -64,6 +64,11 @@ function stale(e: TicketEvent): string[] {
     case 'documents_changed':
       keys.push('documents')
       break
+    case 'document_comments': {
+      const id = String((e.data as { documentId?: number } | undefined)?.documentId ?? '')
+      if (id) keys.push(`document-comments:${id}`)
+      break
+    }
     case 'commits_linked':
       keys.push(`ticket-commits:${e.ticketKey}`, 'repo') // commit lists show their tickets
       break

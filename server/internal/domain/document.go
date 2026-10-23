@@ -30,6 +30,19 @@ const (
 // Valid reports whether t is a known type.
 func (t DocumentType) Valid() bool { return t == DocPrivate || t == DocPublic }
 
+// DocumentKind is what a document is: a page to read, or a slide deck to
+// present. It is chosen when the document is made and never changes.
+type DocumentKind string
+
+// Document kinds.
+const (
+	DocKindPage   DocumentKind = "page"
+	DocKindSlides DocumentKind = "slides"
+)
+
+// Valid reports whether k is a known kind.
+func (k DocumentKind) Valid() bool { return k == DocKindPage || k == DocKindSlides }
+
 // AccessLevel is what a person may do with a document, from least to most.
 type AccessLevel int
 
@@ -90,10 +103,11 @@ func EffectiveAccess(d Document, userID int64, role WorkspaceRole, grant AccessL
 	return lvl
 }
 
-// Document is a Markdown page of a workspace.
+// Document is a Markdown page or slide deck of a workspace.
 type Document struct {
 	ID              int64
 	WorkspaceID     int64
+	Kind            DocumentKind
 	Title           string
 	Body            string
 	Version         int // the current version; 0 before the first save
@@ -104,11 +118,15 @@ type Document struct {
 	Language        string
 	// Source is what the latest generation was made from; nil for a
 	// document people wrote.
-	Source    *DocumentSource
-	DataAsOf  *time.Time
-	DeletedAt *time.Time
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Source   *DocumentSource
+	DataAsOf *time.Time
+	// DerivedFromID is the page a deck was made from, and DerivedFromVersion
+	// the version its current AI version read; nil for anything else.
+	DerivedFromID      *int64
+	DerivedFromVersion *int
+	DeletedAt          *time.Time
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
 
 	// Filled on reads.
 	OwnerName   string
@@ -265,11 +283,12 @@ type SourceKind string
 
 // Source kinds.
 const (
-	SourceReport  SourceKind = "report"  // one ticket's approved report
-	SourceTickets SourceKind = "tickets" // chosen tickets, or a filter
-	SourceCommits SourceKind = "commits" // commits of repositories in a period
-	SourcePulls   SourceKind = "pulls"   // pull requests of repositories
-	SourceRepo    SourceKind = "repo"    // one repository, read in the sandbox
+	SourceReport  SourceKind = "report"   // one ticket's approved report
+	SourceTickets SourceKind = "tickets"  // chosen tickets, or a filter
+	SourceCommits SourceKind = "commits"  // commits of repositories in a period
+	SourcePulls   SourceKind = "pulls"    // pull requests of repositories
+	SourceRepo    SourceKind = "repo"     // one repository, read in the sandbox
+	SourceDoc     SourceKind = "document" // a page of the workspace, made into slides
 )
 
 // DocTemplate shapes what a generation writes.
@@ -282,11 +301,13 @@ const (
 	TemplatePullReview    DocTemplate = "pr_review"
 	TemplateRepoReview    DocTemplate = "repo_review"
 	TemplateTicketSummary DocTemplate = "ticket_summary"
+	TemplatePresentation  DocTemplate = "presentation"
 	TemplateBlank         DocTemplate = "blank"
 )
 
 // DocTemplates lists the templates, in the order clients show them.
-var DocTemplates = []DocTemplate{TemplateStatus, TemplateReleaseNotes, TemplatePullReview, TemplateRepoReview, TemplateTicketSummary, TemplateBlank}
+var DocTemplates = []DocTemplate{TemplateStatus, TemplateReleaseNotes, TemplatePullReview, TemplateRepoReview, TemplateTicketSummary,
+	TemplatePresentation, TemplateBlank}
 
 // DefaultTemplate is the template a source kind starts with.
 func DefaultTemplate(k SourceKind) DocTemplate {
@@ -299,6 +320,8 @@ func DefaultTemplate(k SourceKind) DocTemplate {
 		return TemplatePullReview
 	case SourceRepo:
 		return TemplateRepoReview
+	case SourceDoc:
+		return TemplatePresentation
 	}
 	return TemplateStatus
 }
@@ -325,6 +348,10 @@ type DocumentSource struct {
 	PRNumbers   []int         `json:"prNumbers,omitempty"`
 	From        *time.Time    `json:"from,omitempty"`
 	To          *time.Time    `json:"to,omitempty"`
+	// document: the page, and the version read (0 until the run is queued,
+	// which pins the current one).
+	DocumentID      int64 `json:"documentId,omitempty"`
+	DocumentVersion int   `json:"documentVersion,omitempty"`
 }
 
 // Validate checks a source and fills its defaults.
@@ -405,6 +432,13 @@ func (s *DocumentSource) Validate() error {
 	case SourceRepo:
 		if len(s.RepoIDs) != 1 {
 			return docInvalid("a repository source names exactly one repository")
+		}
+	case SourceDoc:
+		if s.DocumentID <= 0 {
+			return docInvalid("a document source names the document")
+		}
+		if s.DocumentVersion < 0 {
+			return docInvalid("the document's version is 1 or more, or 0 for the current one")
 		}
 	default:
 		return docInvalid("unknown source kind %q", s.Kind)
@@ -550,6 +584,15 @@ func foldLatin(r rune) rune {
 	return ' '
 }
 
+// DocumentFile is a version of a document of kind k as a .md file: a page
+// as MarkdownFile, a deck as its text (its title slide is its heading).
+func DocumentFile(k DocumentKind, title, body string) string {
+	if k != DocKindSlides {
+		return MarkdownFile(title, body)
+	}
+	return strings.TrimRight(strings.TrimLeft(strings.ReplaceAll(body, "\r\n", "\n"), "\n"), "\n") + "\n"
+}
+
 // MarkdownFile is a version as a .md file: the body under the title as a
 // heading (unless the body starts with it already), LF line endings, and
 // a final newline.
@@ -577,4 +620,6 @@ type DocRunResult struct {
 	Version  *DocumentVersion
 	Tickets  []int64 // tickets the source named, linked to the document
 	DataAsOf time.Time
+	// FromVersion is the version of the source page a document source read.
+	FromVersion int
 }

@@ -42,6 +42,11 @@ func (s *Server) documentError(w http.ResponseWriter, r *http.Request, err error
 			}{Excerpt: f.Excerpt, Line: f.Line})
 		}
 		writeJSON(w, http.StatusUnprocessableEntity, out)
+	case errors.Is(err, documents.ErrNoGuest):
+		writeError(w, http.StatusUnauthorized, "guest_required", err.Error())
+	case errors.Is(err, documents.ErrTooMany):
+		w.Header().Set("Retry-After", "60")
+		writeError(w, http.StatusTooManyRequests, "rate_limited", err.Error())
 	case errors.Is(err, documents.ErrPreparing):
 		w.Header().Set("Retry-After", "3")
 		writeError(w, http.StatusAccepted, "preparing", err.Error())
@@ -76,7 +81,7 @@ func (s *Server) publicURL(token string) *string {
 
 func toDocumentSummary(v documents.View) gen.DocumentSummary {
 	d := v.Doc
-	return gen.DocumentSummary{Id: d.ID, Title: d.Title, Version: d.Version, Type: gen.DocumentSummaryType(d.Type),
+	return gen.DocumentSummary{Id: d.ID, Kind: gen.DocumentKind(d.Kind), Title: d.Title, Version: d.Version, Type: gen.DocumentSummaryType(d.Type),
 		WorkspaceAccess: gen.DocumentSummaryWorkspaceAccess(d.WorkspaceAccess.String()), OwnerId: d.OwnerID, OwnerName: d.OwnerName,
 		Language: gen.DocumentSummaryLanguage(d.Language), Access: gen.DocumentAccess(v.Access.String()), TicketCount: d.TicketCount,
 		Generation: toDocumentGeneration(d.Run), CreatedAt: d.CreatedAt, UpdatedAt: d.UpdatedAt, DeletedAt: d.DeletedAt}
@@ -85,7 +90,7 @@ func toDocumentSummary(v documents.View) gen.DocumentSummary {
 func (s *Server) toDocument(v documents.View) gen.Document {
 	d := v.Doc
 	sum := toDocumentSummary(v)
-	out := gen.Document{Id: sum.Id, Title: sum.Title, Version: sum.Version, Type: gen.DocumentType(sum.Type),
+	out := gen.Document{Id: sum.Id, Kind: sum.Kind, Title: sum.Title, Version: sum.Version, Type: gen.DocumentType(sum.Type),
 		WorkspaceAccess: gen.DocumentWorkspaceAccess(sum.WorkspaceAccess), OwnerId: sum.OwnerId, OwnerName: sum.OwnerName,
 		Language: gen.DocumentLanguage(sum.Language), Access: sum.Access, TicketCount: sum.TicketCount, Generation: sum.Generation,
 		CreatedAt: sum.CreatedAt, UpdatedAt: sum.UpdatedAt, DeletedAt: sum.DeletedAt,
@@ -93,6 +98,14 @@ func (s *Server) toDocument(v documents.View) gen.Document {
 	if d.Source != nil {
 		src := toSourceInput(*d.Source)
 		out.Source = &src
+	}
+	if f := v.From; f != nil {
+		out.DerivedFrom = &struct {
+			CurrentVersion int    `json:"currentVersion"`
+			Id             int64  `json:"id"`
+			Title          string `json:"title"`
+			Version        int    `json:"version"`
+		}{CurrentVersion: f.Current, Id: f.ID, Title: f.Title, Version: f.Version}
 	}
 	return out
 }
@@ -131,6 +144,10 @@ func toSourceInput(s domain.DocumentSource) gen.DocumentSourceInput {
 	}
 	if len(s.PRNumbers) > 0 {
 		out.PrNumbers = &s.PRNumbers
+	}
+	if s.DocumentID != 0 {
+		out.DocumentId = &s.DocumentID
+		out.DocumentVersion = &s.DocumentVersion
 	}
 	if f := s.Filter; f != nil {
 		out.Filter = &struct {
@@ -185,6 +202,12 @@ func fromSourceInput(in *gen.DocumentSourceInput) *domain.DocumentSource {
 	if in.PrNumbers != nil {
 		s.PRNumbers = *in.PrNumbers
 	}
+	if in.DocumentId != nil {
+		s.DocumentID = *in.DocumentId
+	}
+	if in.DocumentVersion != nil {
+		s.DocumentVersion = *in.DocumentVersion
+	}
 	if f := in.Filter; f != nil {
 		s.Filter = &domain.TicketFilter{RepoID: f.RepoId}
 		if f.Kinds != nil {
@@ -224,6 +247,12 @@ func (s *Server) ListDocuments(w http.ResponseWriter, r *http.Request, params ge
 	if params.Ticket != nil {
 		f.TicketKey = *params.Ticket
 	}
+	if params.Kind != nil {
+		f.Kind = domain.DocumentKind(*params.Kind)
+	}
+	if params.DerivedFrom != nil {
+		f.DerivedFrom = *params.DerivedFrom
+	}
 	vs, err := s.opt.Documents.List(r.Context(), caller(r), f)
 	if err != nil {
 		s.documentError(w, r, err)
@@ -247,6 +276,9 @@ func (s *Server) CreateDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	in := documents.NewDocument{Title: req.Title, Source: fromSourceInput(req.Source)}
+	if req.Kind != nil {
+		in.Kind = domain.DocumentKind(*req.Kind)
+	}
 	if req.Body != nil {
 		in.Body = *req.Body
 	}
@@ -597,30 +629,36 @@ func publicHeaders(w http.ResponseWriter) {
 }
 
 // GetPublicDocument implements gen.ServerInterface.
-func (s *Server) GetPublicDocument(w http.ResponseWriter, r *http.Request, token gen.PublicToken) {
-	publicHeaders(w)
-	if !s.documentsReady(w) || !s.limit(w, r, s.publicLimiter, "too many requests, try again later") {
+func (s *Server) GetPublicDocument(w http.ResponseWriter, r *http.Request, token gen.PublicToken, params gen.GetPublicDocumentParams) {
+	if !s.publicGate(w, r) {
 		return
 	}
-	p, err := s.opt.Documents.PublicDocument(domain.System(r.Context()), token)
+	g, ok := s.guest(w, r, token, params.XGuestToken)
+	if !ok {
+		return
+	}
+	p, err := s.opt.Documents.PublicDocument(g)
 	if err != nil {
 		s.documentError(w, r, err)
 		return
 	}
-	writeJSON(w, http.StatusOK, gen.PublicDocument{Title: p.Title, Body: p.Body, Version: p.Version, UpdatedAt: p.UpdatedAt})
+	writeJSON(w, http.StatusOK, gen.PublicDocument{Kind: gen.DocumentKind(p.Kind), Title: p.Title, Body: p.Body, Version: p.Version, UpdatedAt: p.UpdatedAt})
 }
 
 // DownloadPublicDocument implements gen.ServerInterface.
 func (s *Server) DownloadPublicDocument(w http.ResponseWriter, r *http.Request, token gen.PublicToken, params gen.DownloadPublicDocumentParams) {
-	publicHeaders(w)
-	if !s.documentsReady(w) || !s.limit(w, r, s.publicLimiter, "too many requests, try again later") {
+	if !s.publicGate(w, r) {
+		return
+	}
+	g, ok := s.guest(w, r, token, params.XGuestToken)
+	if !ok {
 		return
 	}
 	format := documents.FormatMarkdown
 	if params.Format != nil {
 		format = string(*params.Format)
 	}
-	f, err := s.opt.Documents.PublicDownload(domain.System(r.Context()), token, format)
+	f, err := s.opt.Documents.PublicDownload(g, format)
 	if err != nil {
 		s.documentError(w, r, err)
 		return

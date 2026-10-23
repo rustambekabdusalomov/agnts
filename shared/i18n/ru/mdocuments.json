@@ -44,6 +44,15 @@
     "ticketNone": "Связанных документов пока нет.",
     "fromReport": "Создать документ из отчёта",
     "fromReportStarted": "agnts пишет документ",
-    "ledgerSpent": "Списание за документ"
+    "ledgerSpent": "Списание за документ",
+    "slides": "Слайды",
+    "present": "Показать",
+    "notes": "Заметки",
+    "noNotes": "К этому слайду заметок нет.",
+    "noSlides": "Слайдов пока нет.",
+    "prevSlide": "Предыдущий слайд",
+    "nextSlide": "Следующий слайд",
+    "stopPresenting": "Закончить показ",
+    "madeFrom": "Сделано из «{title}»"
   }
 }

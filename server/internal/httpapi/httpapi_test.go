@@ -170,8 +170,14 @@ func TestPublicRoutesComeFromSpec(t *testing.T) {
 	want := map[string]bool{"POST /api/auth/login": true, "GET /api/meta": true, "GET /api/auth/signup": true, "POST /api/auth/signup": true,
 		"POST /api/auth/verify": true, "POST /api/auth/password/forgot": true, "POST /api/auth/login/totp": true, "POST /api/auth/password/reset": true, "GET /api/invites/{token}": true,
 		"POST /api/auth/google": true,
-		// Public documents: anyone with the link reads and downloads them.
-		"GET /api/public/documents/{token}": true, "GET /api/public/documents/{token}/download": true}
+		// Public documents: a guest of the link reads and downloads them (the
+		// handlers check the guest's own token).
+		"GET /api/public/documents/{token}": true, "GET /api/public/documents/{token}/download": true,
+		// Guests of a public link: they say who they are, then comment and are seen.
+		"GET /api/public/documents/{token}/info": true, "POST /api/public/documents/{token}/guest": true,
+		"GET /api/public/documents/{token}/comments": true, "POST /api/public/documents/{token}/comments": true,
+		"PATCH /api/public/documents/{token}/comments/{commentId}": true, "DELETE /api/public/documents/{token}/comments/{commentId}": true,
+		"POST /api/public/documents/{token}/presence": true}
 	if len(got) != len(want) {
 		t.Fatalf("public routes = %v, want %v", got, want)
 	}

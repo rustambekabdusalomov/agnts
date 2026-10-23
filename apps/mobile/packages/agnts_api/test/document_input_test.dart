@@ -7,6 +7,11 @@ void main() {
   // TODO add properties to the entity
 
   group(DocumentInput, () {
+    // DocumentKind kind
+    test('to test the property `kind`', () async {
+      // TODO
+    });
+
     // String title
     test('to test the property `title`', () async {
       // TODO

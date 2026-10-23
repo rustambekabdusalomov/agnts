@@ -93,10 +93,15 @@ import 'package:agnts_api/src/model/deploy_repo_request.dart';
 import 'package:agnts_api/src/model/device_registration.dart';
 import 'package:agnts_api/src/model/disable_totp_request.dart';
 import 'package:agnts_api/src/model/document.dart';
+import 'package:agnts_api/src/model/document_all_of_derived_from.dart';
+import 'package:agnts_api/src/model/document_comment.dart';
+import 'package:agnts_api/src/model/document_comment_input.dart';
+import 'package:agnts_api/src/model/document_comment_patch.dart';
 import 'package:agnts_api/src/model/document_conflict.dart';
 import 'package:agnts_api/src/model/document_generation.dart';
 import 'package:agnts_api/src/model/document_grant.dart';
 import 'package:agnts_api/src/model/document_input.dart';
+import 'package:agnts_api/src/model/document_presence.dart';
 import 'package:agnts_api/src/model/document_regenerate.dart';
 import 'package:agnts_api/src/model/document_save.dart';
 import 'package:agnts_api/src/model/document_share_input.dart';
@@ -107,6 +112,7 @@ import 'package:agnts_api/src/model/document_source_input_filter.dart';
 import 'package:agnts_api/src/model/document_summary.dart';
 import 'package:agnts_api/src/model/document_ticket.dart';
 import 'package:agnts_api/src/model/document_version.dart';
+import 'package:agnts_api/src/model/document_viewer.dart';
 import 'package:agnts_api/src/model/edit_check.dart';
 import 'package:agnts_api/src/model/edit_commit_message_request.dart';
 import 'package:agnts_api/src/model/edit_pull_comment_request.dart';
@@ -133,6 +139,8 @@ import 'package:agnts_api/src/model/git_settings.dart';
 import 'package:agnts_api/src/model/google_sign_in_request.dart';
 import 'package:agnts_api/src/model/grant_credits_request.dart';
 import 'package:agnts_api/src/model/guard_settings.dart';
+import 'package:agnts_api/src/model/guest_join.dart';
+import 'package:agnts_api/src/model/guest_session.dart';
 import 'package:agnts_api/src/model/history_item.dart';
 import 'package:agnts_api/src/model/hour_bucket.dart';
 import 'package:agnts_api/src/model/implement_input.dart';
@@ -178,6 +186,7 @@ import 'package:agnts_api/src/model/platform_overview_server_queue_inner.dart';
 import 'package:agnts_api/src/model/platform_user.dart';
 import 'package:agnts_api/src/model/platform_workspace.dart';
 import 'package:agnts_api/src/model/post_review_input.dart';
+import 'package:agnts_api/src/model/presence_input.dart';
 import 'package:agnts_api/src/model/preview_input.dart';
 import 'package:agnts_api/src/model/preview_issue.dart';
 import 'package:agnts_api/src/model/preview_shot.dart';
@@ -190,6 +199,7 @@ import 'package:agnts_api/src/model/proof.dart';
 import 'package:agnts_api/src/model/proof_run.dart';
 import 'package:agnts_api/src/model/proof_test.dart';
 import 'package:agnts_api/src/model/public_document.dart';
+import 'package:agnts_api/src/model/public_document_info.dart';
 import 'package:agnts_api/src/model/publish_review_drafts_request.dart';
 import 'package:agnts_api/src/model/published_review.dart';
 import 'package:agnts_api/src/model/pull_comment.dart';
@@ -578,6 +588,14 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
         case 'DocumentAccess':
           
           
+        case 'DocumentAllOfDerivedFrom':
+          return DocumentAllOfDerivedFrom.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DocumentComment':
+          return DocumentComment.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DocumentCommentInput':
+          return DocumentCommentInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DocumentCommentPatch':
+          return DocumentCommentPatch.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DocumentConflict':
           return DocumentConflict.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DocumentGeneration':
@@ -586,6 +604,11 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return DocumentGrant.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DocumentInput':
           return DocumentInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DocumentKind':
+          
+          
+        case 'DocumentPresence':
+          return DocumentPresence.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DocumentRegenerate':
           return DocumentRegenerate.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DocumentSave':
@@ -606,6 +629,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return DocumentTicket.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DocumentVersion':
           return DocumentVersion.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DocumentViewer':
+          return DocumentViewer.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'EditCheck':
           return EditCheck.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'EditCommitMessageRequest':
@@ -667,6 +692,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           
         case 'GuardSettings':
           return GuardSettings.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'GuestJoin':
+          return GuestJoin.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'GuestSession':
+          return GuestSession.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'HistoryItem':
           return HistoryItem.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'HourBucket':
@@ -763,6 +792,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return PlatformWorkspace.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PostReviewInput':
           return PostReviewInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PresenceInput':
+          return PresenceInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PreviewInput':
           return PreviewInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PreviewIssue':
@@ -787,6 +818,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ProofTest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PublicDocument':
           return PublicDocument.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PublicDocumentInfo':
+          return PublicDocumentInfo.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PublishReviewDraftsRequest':
           return PublishReviewDraftsRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PublishedReview':

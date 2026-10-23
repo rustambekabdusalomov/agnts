@@ -7,6 +7,8 @@ part of 'document_input.dart';
 // **************************************************************************
 
 abstract class _$DocumentInputCWProxy {
+  DocumentInput kind(DocumentKind? kind);
+
   DocumentInput title(String title);
 
   DocumentInput body(String? body);
@@ -24,6 +26,7 @@ abstract class _$DocumentInputCWProxy {
   /// DocumentInput(...).copyWith(id: 12, name: "My name")
   /// ````
   DocumentInput call({
+    DocumentKind? kind,
     String title,
     String? body,
     DocumentInputLanguageEnum? language,
@@ -37,6 +40,9 @@ class _$DocumentInputCWProxyImpl implements _$DocumentInputCWProxy {
   const _$DocumentInputCWProxyImpl(this._value);
 
   final DocumentInput _value;
+
+  @override
+  DocumentInput kind(DocumentKind? kind) => this(kind: kind);
 
   @override
   DocumentInput title(String title) => this(title: title);
@@ -63,6 +69,7 @@ class _$DocumentInputCWProxyImpl implements _$DocumentInputCWProxy {
   /// DocumentInput(...).copyWith(id: 12, name: "My name")
   /// ````
   DocumentInput call({
+    Object? kind = const $CopyWithPlaceholder(),
     Object? title = const $CopyWithPlaceholder(),
     Object? body = const $CopyWithPlaceholder(),
     Object? language = const $CopyWithPlaceholder(),
@@ -70,6 +77,10 @@ class _$DocumentInputCWProxyImpl implements _$DocumentInputCWProxy {
     Object? linkTickets = const $CopyWithPlaceholder(),
   }) {
     return DocumentInput(
+      kind: kind == const $CopyWithPlaceholder()
+          ? _value.kind
+          // ignore: cast_nullable_to_non_nullable
+          : kind as DocumentKind?,
       title: title == const $CopyWithPlaceholder()
           ? _value.title
           // ignore: cast_nullable_to_non_nullable
@@ -108,6 +119,10 @@ DocumentInput _$DocumentInputFromJson(Map<String, dynamic> json) =>
     $checkedCreate('DocumentInput', json, ($checkedConvert) {
       $checkKeys(json, requiredKeys: const ['title']);
       final val = DocumentInput(
+        kind: $checkedConvert(
+          'kind',
+          (v) => $enumDecodeNullable(_$DocumentKindEnumMap, v),
+        ),
         title: $checkedConvert('title', (v) => v as String),
         body: $checkedConvert('body', (v) => v as String?),
         language: $checkedConvert(
@@ -130,12 +145,18 @@ DocumentInput _$DocumentInputFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$DocumentInputToJson(DocumentInput instance) =>
     <String, dynamic>{
+      'kind': ?_$DocumentKindEnumMap[instance.kind],
       'title': instance.title,
       'body': ?instance.body,
       'language': ?_$DocumentInputLanguageEnumEnumMap[instance.language],
       'source': ?instance.source_?.toJson(),
       'linkTickets': ?instance.linkTickets,
     };
+
+const _$DocumentKindEnumMap = {
+  DocumentKind.page: 'page',
+  DocumentKind.slides: 'slides',
+};
 
 const _$DocumentInputLanguageEnumEnumMap = {
   DocumentInputLanguageEnum.en: 'en',

@@ -5104,6 +5104,14 @@ paths:
           in: query
           description: Only documents linked to this ticket
           schema: { type: string, maxLength: 64 }
+        - name: kind
+          in: query
+          description: Only pages, or only slide decks
+          schema: { $ref: '#/components/schemas/DocumentKind' }
+        - name: derivedFrom
+          in: query
+          description: Only the slide decks made from this page
+          schema: { type: integer, format: int64 }
       responses:
         '200':
           description: OK
@@ -5452,6 +5460,94 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '503': { $ref: '#/components/responses/RenderFailed' }
 
+  /documents/{id}/comments:
+    parameters:
+      - $ref: '#/components/parameters/DocumentID'
+    get:
+      operationId: listDocumentComments
+      summary: The comments on a document, oldest first (view access)
+      tags: [documents]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/DocumentComment' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      operationId: addDocumentComment
+      x-viewer: true
+      summary: Comment on selected text, or reply to a comment (view access is enough)
+      tags: [documents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DocumentCommentInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DocumentComment' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /documents/{id}/comments/{commentId}:
+    parameters:
+      - $ref: '#/components/parameters/DocumentID'
+      - $ref: '#/components/parameters/CommentID'
+    patch:
+      operationId: updateDocumentComment
+      x-viewer: true
+      summary: Edit your comment, or resolve or reopen a thread (its author, or edit access)
+      tags: [documents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DocumentCommentPatch' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DocumentComment' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      operationId: deleteDocumentComment
+      x-viewer: true
+      summary: Delete a comment, and a thread's replies with it (its author, or the document's owner)
+      tags: [documents]
+      responses:
+        '204': { description: Deleted }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /documents/{id}/presence:
+    parameters:
+      - $ref: '#/components/parameters/DocumentID'
+    post:
+      operationId: documentPresence
+      x-viewer: true
+      summary: Say you have the document open (every 10 seconds) or are leaving; answers who is viewing it now
+      tags: [documents]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PresenceInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DocumentPresence' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /tickets/{key}/documents:
     parameters:
       - $ref: '#/components/parameters/TicketKey'
@@ -5499,11 +5595,13 @@ paths:
       - $ref: '#/components/parameters/PublicToken'
     get:
       operationId: getPublicDocument
-      summary: A public document, for anyone with its link
-      description: Only the title, text, version and last update. Rate limited per address.
+      summary: A public document, for a guest of its link
+      description: Only the kind, title, text, version and last update. Needs the guest's token (401 guest_required without). Rate limited per address.
       tags: [documents]
       x-scope: user
       security: []
+      parameters:
+        - $ref: '#/components/parameters/GuestToken'
       responses:
         '200':
           description: OK
@@ -5519,12 +5617,13 @@ paths:
     get:
       operationId: downloadPublicDocument
       summary: Download a public document's current version
-      description: The PDF is made ahead when the document is published or saved; until it is ready the answer is 202.
+      description: The PDF is made ahead when the document is published or saved; until it is ready the answer is 202. Needs the guest's token.
       tags: [documents]
       x-scope: user
       security: []
       parameters:
         - $ref: '#/components/parameters/DocumentFormat'
+        - $ref: '#/components/parameters/GuestToken'
       responses:
         '200':
           description: The file, as an attachment
@@ -5538,8 +5637,169 @@ paths:
         '429': { $ref: '#/components/responses/TooManyRequests' }
         '503': { $ref: '#/components/responses/RenderFailed' }
 
+  /public/documents/{token}/info:
+    parameters:
+      - $ref: '#/components/parameters/PublicToken'
+    get:
+      operationId: getPublicDocumentInfo
+      summary: What a public link opens, before the reader says who they are
+      description: The kind and title only, and Google's client id when "Continue with Google" is on.
+      tags: [documents]
+      x-scope: user
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PublicDocumentInfo' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /public/documents/{token}/guest:
+    parameters:
+      - $ref: '#/components/parameters/PublicToken'
+    post:
+      operationId: joinPublicDocument
+      summary: Say who you are to open a public document; signed in, your account says it
+      description: Answers the guest's secret token, sent afterwards as X-Guest-Token. It works only on this document, and only while it is public.
+      tags: [documents]
+      x-scope: user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/GuestJoin' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GuestSession' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /public/documents/{token}/comments:
+    parameters:
+      - $ref: '#/components/parameters/PublicToken'
+      - $ref: '#/components/parameters/GuestToken'
+    get:
+      operationId: listPublicDocumentComments
+      summary: The comments on a public document, for its guests
+      tags: [documents]
+      x-scope: user
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/DocumentComment' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+    post:
+      operationId: addPublicDocumentComment
+      summary: A guest comments on selected text, or replies
+      tags: [documents]
+      x-scope: user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DocumentCommentInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DocumentComment' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /public/documents/{token}/comments/{commentId}:
+    parameters:
+      - $ref: '#/components/parameters/PublicToken'
+      - $ref: '#/components/parameters/CommentID'
+      - $ref: '#/components/parameters/GuestToken'
+    patch:
+      operationId: updatePublicDocumentComment
+      summary: A guest edits their comment, or resolves or reopens their thread
+      tags: [documents]
+      x-scope: user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DocumentCommentPatch' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DocumentComment' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+    delete:
+      operationId: deletePublicDocumentComment
+      summary: A guest deletes their comment
+      tags: [documents]
+      x-scope: user
+      security: []
+      responses:
+        '204': { description: Deleted }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /public/documents/{token}/presence:
+    parameters:
+      - $ref: '#/components/parameters/PublicToken'
+      - $ref: '#/components/parameters/GuestToken'
+    post:
+      operationId: publicDocumentPresence
+      summary: A guest says they have the document open, or are leaving; answers who is viewing it now
+      tags: [documents]
+      x-scope: user
+      security: []
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PresenceInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DocumentPresence' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
 components:
   parameters:
+    CommentID:
+      name: commentId
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
+    GuestToken:
+      name: X-Guest-Token
+      in: header
+      description: The guest's secret token from joinPublicDocument
+      schema: { type: string, maxLength: 100 }
     DocumentID:
       name: id
       in: path
@@ -9691,6 +9951,11 @@ components:
       description: 'What you may do: view reads and downloads; edit also changes the text, regenerates and links tickets; owner also shares, publishes, transfers and deletes'
       enum: [none, view, edit, owner]
 
+    DocumentKind:
+      type: string
+      description: 'page: a document to read; slides: a deck to present, Markdown with a line --- between slides and "Notes:" starting a slide''s speaker notes'
+      enum: [page, slides]
+
     DocumentSourceInput:
       type: object
       description: |
@@ -9698,10 +9963,14 @@ components:
         or a filter, with the period limiting by last update. commits: repositories' commits in a period (from is
         required), on branch (the default branch when empty), optionally by one author. pulls: repositories' pull
         requests by state and period, or chosen numbers in one repository. repo: one repository read in the sandbox.
+        document: a page you can open (documentId), made into slides; only for slide decks. documentVersion is the
+        version read: 0 or absent reads the current one, and the server records which.
       required: [kind]
       properties:
-        kind: { type: string, enum: [report, tickets, commits, pulls, repo] }
-        template: { type: string, enum: [status, release_notes, pr_review, repo_review, ticket_summary, blank], description: 'Defaults by kind' }
+        kind: { type: string, enum: [report, tickets, commits, pulls, repo, document] }
+        template: { type: string, enum: [status, release_notes, pr_review, repo_review, ticket_summary, presentation, blank], description: 'Defaults by kind' }
+        documentId: { type: integer, format: int64 }
+        documentVersion: { type: integer, minimum: 0 }
         instruction: { type: string, maxLength: 2000 }
         tickets:
           type: array
@@ -9747,9 +10016,10 @@ components:
 
     DocumentSummary:
       type: object
-      required: [id, title, version, type, workspaceAccess, ownerId, ownerName, language, access, ticketCount, createdAt, updatedAt]
+      required: [id, kind, title, version, type, workspaceAccess, ownerId, ownerName, language, access, ticketCount, createdAt, updatedAt]
       properties:
         id: { type: integer, format: int64 }
+        kind: { $ref: '#/components/schemas/DocumentKind' }
         title: { type: string }
         version: { type: integer, description: 'The current version; 0 while agnts writes the first one' }
         type: { type: string, enum: [private, public] }
@@ -9774,6 +10044,15 @@ components:
             publicUrl: { type: string, description: 'The public link, while the document is public' }
             source: { $ref: '#/components/schemas/DocumentSourceInput' }
             dataAsOf: { type: string, format: date-time, description: When agnts gathered the facts of the current AI version }
+            derivedFrom:
+              type: object
+              description: The page a slide deck was made from; absent when there is none or you cannot open it
+              required: [id, title, version, currentVersion]
+              properties:
+                id: { type: integer, format: int64 }
+                title: { type: string }
+                version: { type: integer, description: 'The version the current slides were made from; 0 while the first are being made' }
+                currentVersion: { type: integer, description: The page's version now }
 
     DocumentConflict:
       type: object
@@ -9787,6 +10066,7 @@ components:
       type: object
       required: [title]
       properties:
+        kind: { $ref: '#/components/schemas/DocumentKind' }
         title: { type: string, minLength: 1, maxLength: 200 }
         body: { type: string, maxLength: 204800 }
         language: { type: string, enum: [en, ru, uz] }
@@ -9887,12 +10167,102 @@ components:
         linkedBy: { type: integer, format: int64, description: Absent when agnts linked it }
         linkedAt: { type: string, format: date-time }
 
+    DocumentComment:
+      type: object
+      description: A comment. A thread's first comment is on a selection (quote, with prefix and suffix to tell repeats apart, and for slides the slide); replies have parentId.
+      required: [id, authorName, authorKind, body, quote, prefix, suffix, version, mine, canResolve, canDelete, createdAt, updatedAt]
+      properties:
+        id: { type: integer, format: int64 }
+        parentId: { type: integer, format: int64 }
+        authorName: { type: string }
+        authorKind: { type: string, enum: [member, guest, gone], description: gone when the member or guest no longer exists }
+        authorVia: { type: string, enum: [name, google, account], description: 'How a guest said who they are: a typed name, Google, or their agnts account' }
+        authorEmail: { type: string, description: 'The email Google or an account gave for a guest; members only see it' }
+        body: { type: string }
+        quote: { type: string }
+        prefix: { type: string }
+        suffix: { type: string }
+        slide: { type: integer, description: 'The slide, from 0, for slides' }
+        version: { type: integer, description: The document's version when it was written }
+        resolvedAt: { type: string, format: date-time }
+        resolvedBy: { type: string }
+        mine: { type: boolean, description: You wrote it }
+        canResolve: { type: boolean, description: You may resolve or reopen this thread }
+        canDelete: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    DocumentCommentInput:
+      type: object
+      required: [body]
+      properties:
+        body: { type: string, minLength: 1, maxLength: 20000 }
+        parentId: { type: integer, format: int64, description: The thread this replies to }
+        quote: { type: string, maxLength: 4000, description: 'The selected text; required for a thread' }
+        prefix: { type: string, maxLength: 1000 }
+        suffix: { type: string, maxLength: 1000 }
+        slide: { type: integer, minimum: 0 }
+
+    DocumentCommentPatch:
+      type: object
+      properties:
+        body: { type: string, minLength: 1, maxLength: 20000 }
+        resolved: { type: boolean }
+
+    PresenceInput:
+      type: object
+      properties:
+        leaving: { type: boolean }
+
+    DocumentViewer:
+      type: object
+      required: [kind, id, name, you]
+      properties:
+        kind: { type: string, enum: [member, guest] }
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        via: { type: string, enum: [name, google, account], description: How a guest said who they are }
+        you: { type: boolean }
+
+    DocumentPresence:
+      type: object
+      required: [viewers, commentsStamp]
+      properties:
+        viewers:
+          type: array
+          items: { $ref: '#/components/schemas/DocumentViewer' }
+        commentsStamp: { type: string, description: Changes whenever the comments do; fetch them again when it moves }
+
+    PublicDocumentInfo:
+      type: object
+      required: [kind, title]
+      properties:
+        kind: { $ref: '#/components/schemas/DocumentKind' }
+        title: { type: string }
+        googleClientId: { type: string, description: 'Shown when "Continue with Google" is on' }
+
+    GuestJoin:
+      type: object
+      description: A name, or the ID token from Google's button. Neither, from someone signed in to agnts, joins as their account; without a session that is a 400.
+      properties:
+        name: { type: string, maxLength: 200 }
+        googleCredential: { type: string, maxLength: 8000 }
+
+    GuestSession:
+      type: object
+      required: [token, name, via]
+      properties:
+        token: { type: string, description: Send it as X-Guest-Token }
+        name: { type: string }
+        via: { type: string, enum: [name, google, account] }
+
     PublicDocument:
       type: object
-      required: [title, body, version, updatedAt]
+      required: [kind, title, body, version, updatedAt]
       properties:
+        kind: { $ref: '#/components/schemas/DocumentKind' }
         title: { type: string }
-        body: { type: string, description: Markdown }
+        body: { type: string, description: 'Markdown; a slide deck''s speaker notes are left out' }
         version: { type: integer }
         updatedAt: { type: string, format: date-time }
 

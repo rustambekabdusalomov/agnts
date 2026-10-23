@@ -2871,6 +2871,107 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
+  String get documentsDocKind => 'Turi';
+
+  @override
+  String get documentsDocKind_page => 'Sahifa';
+
+  @override
+  String get documentsDocKind_slides => 'Slaydlar';
+
+  @override
+  String get documentsDocKindHelp_page => 'Oʻqish uchun hujjat: batafsil, jamoa uchun.';
+
+  @override
+  String get documentsDocKindHelp_slides => 'Taqdimot: qisqa, mijozlar va jamoadan tashqaridagilar uchun.';
+
+  @override
+  String get documentsKindFilter_all => 'Sahifalar va slaydlar';
+
+  @override
+  String get documentsKindFilter_page => 'Sahifalar';
+
+  @override
+  String get documentsKindFilter_slides => 'Slaydlar';
+
+  @override
+  String get documentsKind_document => 'Hujjat';
+
+  @override
+  String get documentsKindHelp_document =>
+      'Ushbu ish maydonidagi sahifa, slaydlar bilan qayta aytilgan. Slaydlar — oʻz ruxsatlariga ega alohida hujjat.';
+
+  @override
+  String get documentsSourceDocument => 'Hujjat';
+
+  @override
+  String get documentsChooseDocument => 'Hujjatni tanlang';
+
+  @override
+  String get documentsTemplate_presentation => 'Taqdimot';
+
+  @override
+  String get documentsTemplateHint_presentation => 'Asosiy fikrlar, ularning maʼnosi, keyingi qadamlar';
+
+  @override
+  String get documentsMakeSlides => 'Slaydlar yasash';
+
+  @override
+  String documentsSlidesOf(String title) {
+    return '$title — slaydlar';
+  }
+
+  @override
+  String get documentsSlidesSub => 'agnts ushbu hujjatni slaydlar bilan qayta aytadi — alohida ulashiladigan yangi hujjatda.';
+
+  @override
+  String get documentsMadeFrom => 'Manba hujjat:';
+
+  @override
+  String documentsSourceChanged(String n) {
+    return 'Shundan beri hujjat oʻzgargan (hozir $n-versiya).';
+  }
+
+  @override
+  String get documentsDecksTitle => 'Ushbu hujjatdan yasalgan slaydlar';
+
+  @override
+  String get documentsSlidesHelp =>
+      'Faqat --- dan iborat qator yangi slaydni boshlaydi. Notes: bilan boshlanadigan qator slayd uchun maʼruzachi izohlarini boshlaydi.';
+
+  @override
+  String get documentsNoSlides => 'Hozircha slaydlar yoʻq. Slaydlarni --- qatori bilan ajrating.';
+
+  @override
+  String get documentsPresent => 'Namoyish qilish';
+
+  @override
+  String documentsPresentFrom(String n) {
+    return '$n-slayddan namoyish qilish';
+  }
+
+  @override
+  String get documentsStopPresenting => 'Namoyishni tugatish';
+
+  @override
+  String get documentsPrevSlide => 'Oldingi slayd';
+
+  @override
+  String get documentsNextSlide => 'Keyingi slayd';
+
+  @override
+  String get documentsNotes => 'Izohlar';
+
+  @override
+  String get documentsNoNotes => 'Bu slayd uchun izoh yoʻq.';
+
+  @override
+  String get documentsStarterSubtitle => 'Nima haqida va qachon';
+
+  @override
+  String get documentsStarterPoint => 'Birinchi fikr';
+
+  @override
   String get draftsTitle => 'Ko\'rib chiqish izohlari';
 
   @override
@@ -6529,6 +6630,35 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get mdocumentsLedgerSpent => 'Hujjat uchun sarflandi';
+
+  @override
+  String get mdocumentsSlides => 'Slaydlar';
+
+  @override
+  String get mdocumentsPresent => 'Namoyish qilish';
+
+  @override
+  String get mdocumentsNotes => 'Izohlar';
+
+  @override
+  String get mdocumentsNoNotes => 'Bu slayd uchun izoh yoʻq.';
+
+  @override
+  String get mdocumentsNoSlides => 'Hozircha slaydlar yoʻq.';
+
+  @override
+  String get mdocumentsPrevSlide => 'Oldingi slayd';
+
+  @override
+  String get mdocumentsNextSlide => 'Keyingi slayd';
+
+  @override
+  String get mdocumentsStopPresenting => 'Namoyishni tugatish';
+
+  @override
+  String mdocumentsMadeFrom(String title) {
+    return 'Manba: “$title”';
+  }
 
   @override
   String get mgroupsGroups => 'Guruhlar';

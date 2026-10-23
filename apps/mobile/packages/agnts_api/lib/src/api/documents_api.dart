@@ -12,8 +12,13 @@ import 'package:dio/dio.dart';
 import 'dart:typed_data';
 import 'package:agnts_api/src/model/create_ticket_document_request.dart';
 import 'package:agnts_api/src/model/document.dart';
+import 'package:agnts_api/src/model/document_comment.dart';
+import 'package:agnts_api/src/model/document_comment_input.dart';
+import 'package:agnts_api/src/model/document_comment_patch.dart';
 import 'package:agnts_api/src/model/document_conflict.dart';
 import 'package:agnts_api/src/model/document_input.dart';
+import 'package:agnts_api/src/model/document_kind.dart';
+import 'package:agnts_api/src/model/document_presence.dart';
 import 'package:agnts_api/src/model/document_regenerate.dart';
 import 'package:agnts_api/src/model/document_save.dart';
 import 'package:agnts_api/src/model/document_share_input.dart';
@@ -22,7 +27,11 @@ import 'package:agnts_api/src/model/document_summary.dart';
 import 'package:agnts_api/src/model/document_ticket.dart';
 import 'package:agnts_api/src/model/document_version.dart';
 import 'package:agnts_api/src/model/error.dart';
+import 'package:agnts_api/src/model/guest_join.dart';
+import 'package:agnts_api/src/model/guest_session.dart';
+import 'package:agnts_api/src/model/presence_input.dart';
 import 'package:agnts_api/src/model/public_document.dart';
+import 'package:agnts_api/src/model/public_document_info.dart';
 import 'package:agnts_api/src/model/secret_findings.dart';
 import 'package:agnts_api/src/model/transfer_workspace_request.dart';
 
@@ -31,6 +40,206 @@ class DocumentsApi {
   final Dio _dio;
 
   const DocumentsApi(this._dio);
+
+  /// Comment on selected text, or reply to a comment (view access is enough)
+  /// 
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [documentCommentInput] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [DocumentComment] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<DocumentComment>> addDocumentComment({ 
+    required int id,
+    required DocumentCommentInput documentCommentInput,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/documents/{id}/comments'.replaceAll('{' r'id' '}', id.toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'cookieAuth',
+            'keyName': 'hiro_session',
+            'where': '',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(documentCommentInput);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    DocumentComment? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<DocumentComment, DocumentComment>(rawData, 'DocumentComment', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<DocumentComment>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// A guest comments on selected text, or replies
+  /// 
+  ///
+  /// Parameters:
+  /// * [token] 
+  /// * [documentCommentInput] 
+  /// * [xGuestToken] - The guest's secret token from joinPublicDocument
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [DocumentComment] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<DocumentComment>> addPublicDocumentComment({ 
+    required String token,
+    required DocumentCommentInput documentCommentInput,
+    String? xGuestToken,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/public/documents/{token}/comments'.replaceAll('{' r'token' '}', token.toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        if (xGuestToken != null) r'X-Guest-Token': xGuestToken,
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(documentCommentInput);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    DocumentComment? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<DocumentComment, DocumentComment>(rawData, 'DocumentComment', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<DocumentComment>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
 
   /// Create a document, written by you or by agnts from a source
   /// Without a source the body is yours and becomes version 1. With a source, agnts gathers the facts (a ticket&#39;s report, tickets, commits, pull requests or a repository) and writes the body; the document starts at version 0 and its generation shows the progress. Workspace viewers may create documents; they own what they create. 
@@ -296,6 +505,222 @@ _responseData = rawData == null ? null : deserialize<Document, Document>(rawData
     return _response;
   }
 
+  /// Delete a comment, and a thread&#39;s replies with it (its author, or the document&#39;s owner)
+  /// 
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [commentId] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future]
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<void>> deleteDocumentComment({ 
+    required int id,
+    required int commentId,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/documents/{id}/comments/{commentId}'.replaceAll('{' r'id' '}', id.toString()).replaceAll('{' r'commentId' '}', commentId.toString());
+    final _options = Options(
+      method: r'DELETE',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'cookieAuth',
+            'keyName': 'hiro_session',
+            'where': '',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    return _response;
+  }
+
+  /// A guest deletes their comment
+  /// 
+  ///
+  /// Parameters:
+  /// * [token] 
+  /// * [commentId] 
+  /// * [xGuestToken] - The guest's secret token from joinPublicDocument
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future]
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<void>> deletePublicDocumentComment({ 
+    required String token,
+    required int commentId,
+    String? xGuestToken,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/public/documents/{token}/comments/{commentId}'.replaceAll('{' r'token' '}', token.toString()).replaceAll('{' r'commentId' '}', commentId.toString());
+    final _options = Options(
+      method: r'DELETE',
+      headers: <String, dynamic>{
+        if (xGuestToken != null) r'X-Guest-Token': xGuestToken,
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    return _response;
+  }
+
+  /// Say you have the document open (every 10 seconds) or are leaving; answers who is viewing it now
+  /// 
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [presenceInput] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [DocumentPresence] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<DocumentPresence>> documentPresence({ 
+    required int id,
+    PresenceInput? presenceInput,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/documents/{id}/presence'.replaceAll('{' r'id' '}', id.toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'cookieAuth',
+            'keyName': 'hiro_session',
+            'where': '',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(presenceInput);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    DocumentPresence? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<DocumentPresence, DocumentPresence>(rawData, 'DocumentPresence', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<DocumentPresence>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
   /// Download a version as Markdown or PDF (view access)
   /// version 0 (the default) is the current one. The first PDF download of a version starts making it and answers 202 with Retry-After; ask again then. A made PDF is kept: later downloads are instant. 
   ///
@@ -391,11 +816,12 @@ _responseData = rawData == null ? null : rawData as Uint8List;
   }
 
   /// Download a public document&#39;s current version
-  /// The PDF is made ahead when the document is published or saved; until it is ready the answer is 202.
+  /// The PDF is made ahead when the document is published or saved; until it is ready the answer is 202. Needs the guest&#39;s token.
   ///
   /// Parameters:
   /// * [token] 
   /// * [format] 
+  /// * [xGuestToken] - The guest's secret token from joinPublicDocument
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -408,6 +834,7 @@ _responseData = rawData == null ? null : rawData as Uint8List;
   Future<Response<Uint8List>> downloadPublicDocument({ 
     required String token,
     String? format = 'md',
+    String? xGuestToken,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -420,6 +847,7 @@ _responseData = rawData == null ? null : rawData as Uint8List;
       method: r'GET',
       responseType: ResponseType.bytes,
       headers: <String, dynamic>{
+        if (xGuestToken != null) r'X-Guest-Token': xGuestToken,
         ...?headers,
       },
       extra: <String, dynamic>{
@@ -721,11 +1149,12 @@ _responseData = rawData == null ? null : deserialize<DocumentVersion, DocumentVe
     );
   }
 
-  /// A public document, for anyone with its link
-  /// Only the title, text, version and last update. Rate limited per address.
+  /// A public document, for a guest of its link
+  /// Only the kind, title, text, version and last update. Needs the guest&#39;s token (401 guest_required without). Rate limited per address.
   ///
   /// Parameters:
   /// * [token] 
+  /// * [xGuestToken] - The guest's secret token from joinPublicDocument
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -737,6 +1166,7 @@ _responseData = rawData == null ? null : deserialize<DocumentVersion, DocumentVe
   /// Throws [DioException] if API call or serialization fails
   Future<Response<PublicDocument>> getPublicDocument({ 
     required String token,
+    String? xGuestToken,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -748,6 +1178,7 @@ _responseData = rawData == null ? null : deserialize<DocumentVersion, DocumentVe
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
+        if (xGuestToken != null) r'X-Guest-Token': xGuestToken,
         ...?headers,
       },
       extra: <String, dynamic>{
@@ -782,6 +1213,171 @@ _responseData = rawData == null ? null : deserialize<PublicDocument, PublicDocum
     }
 
     return Response<PublicDocument>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// What a public link opens, before the reader says who they are
+  /// The kind and title only, and Google&#39;s client id when \&quot;Continue with Google\&quot; is on.
+  ///
+  /// Parameters:
+  /// * [token] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [PublicDocumentInfo] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<PublicDocumentInfo>> getPublicDocumentInfo({ 
+    required String token,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/public/documents/{token}/info'.replaceAll('{' r'token' '}', token.toString());
+    final _options = Options(
+      method: r'GET',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    PublicDocumentInfo? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<PublicDocumentInfo, PublicDocumentInfo>(rawData, 'PublicDocumentInfo', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<PublicDocumentInfo>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// Say who you are to open a public document; signed in, your account says it
+  /// Answers the guest&#39;s secret token, sent afterwards as X-Guest-Token. It works only on this document, and only while it is public.
+  ///
+  /// Parameters:
+  /// * [token] 
+  /// * [guestJoin] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [GuestSession] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<GuestSession>> joinPublicDocument({ 
+    required String token,
+    required GuestJoin guestJoin,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/public/documents/{token}/guest'.replaceAll('{' r'token' '}', token.toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(guestJoin);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    GuestSession? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<GuestSession, GuestSession>(rawData, 'GuestSession', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<GuestSession>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,
@@ -851,6 +1447,89 @@ _responseData = rawData == null ? null : deserialize<PublicDocument, PublicDocum
     );
 
     return _response;
+  }
+
+  /// The comments on a document, oldest first (view access)
+  /// 
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [List<DocumentComment>] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<List<DocumentComment>>> listDocumentComments({ 
+    required int id,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/documents/{id}/comments'.replaceAll('{' r'id' '}', id.toString());
+    final _options = Options(
+      method: r'GET',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'cookieAuth',
+            'keyName': 'hiro_session',
+            'where': '',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    List<DocumentComment>? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<List<DocumentComment>, DocumentComment>(rawData, 'List<DocumentComment>', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<List<DocumentComment>>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// The tickets linked to a document
@@ -1026,6 +1705,8 @@ _responseData = rawData == null ? null : deserialize<List<DocumentVersion>, Docu
   /// * [scope] 
   /// * [q] - Words in the title
   /// * [ticket] - Only documents linked to this ticket
+  /// * [kind] - Only pages, or only slide decks
+  /// * [derivedFrom] - Only the slide decks made from this page
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -1039,6 +1720,8 @@ _responseData = rawData == null ? null : deserialize<List<DocumentVersion>, Docu
     String? scope = 'all',
     String? q,
     String? ticket,
+    DocumentKind? kind,
+    int? derivedFrom,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -1074,6 +1757,8 @@ _responseData = rawData == null ? null : deserialize<List<DocumentVersion>, Docu
       if (scope != null) r'scope': scope,
       if (q != null) r'q': q,
       if (ticket != null) r'ticket': ticket,
+      if (kind != null) r'kind': kind,
+      if (derivedFrom != null) r'derivedFrom': derivedFrom,
     };
 
     final _response = await _dio.request<Object>(
@@ -1102,6 +1787,81 @@ _responseData = rawData == null ? null : deserialize<List<DocumentSummary>, Docu
     }
 
     return Response<List<DocumentSummary>>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// The comments on a public document, for its guests
+  /// 
+  ///
+  /// Parameters:
+  /// * [token] 
+  /// * [xGuestToken] - The guest's secret token from joinPublicDocument
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [List<DocumentComment>] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<List<DocumentComment>>> listPublicDocumentComments({ 
+    required String token,
+    String? xGuestToken,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/public/documents/{token}/comments'.replaceAll('{' r'token' '}', token.toString());
+    final _options = Options(
+      method: r'GET',
+      headers: <String, dynamic>{
+        if (xGuestToken != null) r'X-Guest-Token': xGuestToken,
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    List<DocumentComment>? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<List<DocumentComment>, DocumentComment>(rawData, 'List<DocumentComment>', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<List<DocumentComment>>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,
@@ -1185,6 +1945,102 @@ _responseData = rawData == null ? null : deserialize<List<DocumentSummary>, Docu
     }
 
     return Response<List<DocumentSummary>>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// A guest says they have the document open, or are leaving; answers who is viewing it now
+  /// 
+  ///
+  /// Parameters:
+  /// * [token] 
+  /// * [xGuestToken] - The guest's secret token from joinPublicDocument
+  /// * [presenceInput] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [DocumentPresence] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<DocumentPresence>> publicDocumentPresence({ 
+    required String token,
+    String? xGuestToken,
+    PresenceInput? presenceInput,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/public/documents/{token}/presence'.replaceAll('{' r'token' '}', token.toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        if (xGuestToken != null) r'X-Guest-Token': xGuestToken,
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(presenceInput);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    DocumentPresence? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<DocumentPresence, DocumentPresence>(rawData, 'DocumentPresence', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<DocumentPresence>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,
@@ -1921,6 +2777,210 @@ _responseData = rawData == null ? null : deserialize<Document, Document>(rawData
     );
 
     return _response;
+  }
+
+  /// Edit your comment, or resolve or reopen a thread (its author, or edit access)
+  /// 
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [commentId] 
+  /// * [documentCommentPatch] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [DocumentComment] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<DocumentComment>> updateDocumentComment({ 
+    required int id,
+    required int commentId,
+    required DocumentCommentPatch documentCommentPatch,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/documents/{id}/comments/{commentId}'.replaceAll('{' r'id' '}', id.toString()).replaceAll('{' r'commentId' '}', commentId.toString());
+    final _options = Options(
+      method: r'PATCH',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'cookieAuth',
+            'keyName': 'hiro_session',
+            'where': '',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(documentCommentPatch);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    DocumentComment? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<DocumentComment, DocumentComment>(rawData, 'DocumentComment', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<DocumentComment>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// A guest edits their comment, or resolves or reopens their thread
+  /// 
+  ///
+  /// Parameters:
+  /// * [token] 
+  /// * [commentId] 
+  /// * [documentCommentPatch] 
+  /// * [xGuestToken] - The guest's secret token from joinPublicDocument
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [DocumentComment] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<DocumentComment>> updatePublicDocumentComment({ 
+    required String token,
+    required int commentId,
+    required DocumentCommentPatch documentCommentPatch,
+    String? xGuestToken,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/public/documents/{token}/comments/{commentId}'.replaceAll('{' r'token' '}', token.toString()).replaceAll('{' r'commentId' '}', commentId.toString());
+    final _options = Options(
+      method: r'PATCH',
+      headers: <String, dynamic>{
+        if (xGuestToken != null) r'X-Guest-Token': xGuestToken,
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(documentCommentPatch);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    DocumentComment? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<DocumentComment, DocumentComment>(rawData, 'DocumentComment', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<DocumentComment>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
 }

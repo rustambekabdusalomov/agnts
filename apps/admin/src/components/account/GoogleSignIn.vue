@@ -7,7 +7,10 @@ import { usePrefs } from '../../stores/prefs'
 // signs the person in (registering new people as solo developers with a workspace of their own) and
 // opens the panel. A failed sign-in comes back to /login?signin=<reason>.
 // With an invite token the sign-in also joins that workspace and opens it.
-const props = defineProps<{ clientId: string; invite?: string }>()
+// With onCredential the ID token goes there instead, and nobody is signed
+// in (a guest of a public document says who they are with it); the page
+// around it says what the button is for, so there is no "or" above it.
+const props = defineProps<{ clientId: string; invite?: string; onCredential?: (credential: string) => void }>()
 
 const { t, locale } = useI18n()
 const prefs = usePrefs()
@@ -69,7 +72,7 @@ async function draw() {
     failed.value = true
     return
   }
-  g.accounts.id.initialize({ client_id: props.clientId, ux_mode: 'popup', callback: ({ credential }) => submit(credential) })
+  g.accounts.id.initialize({ client_id: props.clientId, ux_mode: 'popup', callback: ({ credential }) => (props.onCredential ? props.onCredential(credential) : submit(credential)) })
   slot.value.innerHTML = ''
   g.accounts.id.renderButton(slot.value, {
     type: 'standard', theme: dark() ? 'filled_black' : 'outline', size: 'large', shape: 'pill', text: 'continue_with',
@@ -86,7 +89,7 @@ onBeforeUnmount(stop)
 
 <template>
   <div class="gsi">
-    <div v-if="!invite" class="gsi-or" aria-hidden="true"><span>{{ t('auth.or') }}</span></div>
+    <div v-if="!invite && !onCredential" class="gsi-or" aria-hidden="true"><span>{{ t('auth.or') }}</span></div>
     <p v-if="redirecting" class="gsi-wait" role="status"><span class="spin" aria-hidden="true" />{{ t('auth.googleRedirecting') }}</p>
     <div v-show="!redirecting" ref="slot" class="gsi-btn" />
     <p v-if="failed" class="fhelp">{{ t('auth.googleUnavailable') }}</p>

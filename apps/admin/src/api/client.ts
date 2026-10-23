@@ -28,7 +28,10 @@ export function setUnauthorizedHandler(fn: () => void) {
 
 const authRedirect: Middleware = {
   onResponse({ response, schemaPath }) {
-    if (response.status === 401 && schemaPath !== '/auth/login') onUnauthorized()
+    // Not a session ending: /auth/me only asks whether anyone is signed in
+    // (the router decides what a signed-out visitor may open, public pages
+    // included), and a public link's 401 asks its reader who they are.
+    if (response.status === 401 && schemaPath !== '/auth/login' && schemaPath !== '/auth/me' && !schemaPath.startsWith('/public/')) onUnauthorized()
   },
 }
 

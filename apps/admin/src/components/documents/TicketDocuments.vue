@@ -44,6 +44,7 @@ const fromReport = useMutation({
       <li v-for="d in docs.data.value" :key="d.id">
         <RouterLink :to="{ name: 'document', params: { id: d.id } }" class="td-a">{{ d.title }}</RouterLink>
         <span class="td-m">
+          <span v-if="d.kind === 'slides'" class="badge b-gray">{{ t('documents.docKind_slides') }}</span>
           <span v-if="d.type === 'public'" class="badge b-info">{{ t('documents.public') }}</span>
           <span v-if="writing(d)" class="badge b-warn">{{ t('documents.writing') }}</span>
           <span class="hint">{{ d.ownerName }} · {{ ago(d.updatedAt, locale) }}</span>

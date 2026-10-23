@@ -126,7 +126,9 @@ type Server struct {
 	feedbackLimiter *ipLimiter
 	// hookLimiter: deploy hook calls per address every 10 minutes.
 	hookLimiter *ipLimiter
-	// publicLimiter: public document reads per address every minute.
+	// publicLimiter: public document requests per address every minute. A
+	// guest's page asks every 10 seconds, and a client's office may share
+	// one address.
 	publicLimiter *ipLimiter
 	ops           map[string]opInfo
 }
@@ -141,7 +143,7 @@ func NewHandler(opt Options) (http.Handler, error) {
 	}
 	s := &Server{opt: opt, loginLimiter: newIPLimiter(5, time.Minute), mailLimiter: newIPLimiter(5, 10*time.Minute),
 		feedbackLimiter: newIPLimiter(5, 10*time.Minute), hookLimiter: newIPLimiter(30, 10*time.Minute),
-		publicLimiter: newIPLimiter(60, time.Minute), ops: ops}
+		publicLimiter: newIPLimiter(300, time.Minute), ops: ops}
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)

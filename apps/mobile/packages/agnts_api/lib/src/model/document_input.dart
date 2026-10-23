@@ -4,6 +4,7 @@
 
 // ignore_for_file: unused_element
 import 'package:agnts_api/src/model/document_source_input.dart';
+import 'package:agnts_api/src/model/document_kind.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -21,6 +22,8 @@ class DocumentInput {
   /// Returns a new [DocumentInput] instance.
   DocumentInput({
 
+     this.kind,
+
     required  this.title,
 
      this.body,
@@ -31,6 +34,18 @@ class DocumentInput {
 
      this.linkTickets,
   });
+
+  @JsonKey(
+    
+    name: r'kind',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final DocumentKind? kind;
+
+
 
   @JsonKey(
     
@@ -96,6 +111,7 @@ class DocumentInput {
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is DocumentInput &&
+      other.kind == kind &&
       other.title == title &&
       other.body == body &&
       other.language == language &&
@@ -104,6 +120,7 @@ class DocumentInput {
 
     @override
     int get hashCode =>
+        kind.hashCode +
         title.hashCode +
         body.hashCode +
         language.hashCode +

@@ -9,6 +9,7 @@ import 'package:agnts_api/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **id** | **int** |  | 
+**kind** | [**DocumentKind**](DocumentKind.md) |  | 
 **title** | **String** |  | 
 **version** | **int** | The current version; 0 while agnts writes the first one | 
 **type** | **String** |  | 

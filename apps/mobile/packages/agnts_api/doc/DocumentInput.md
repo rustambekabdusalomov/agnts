@@ -8,6 +8,7 @@ import 'package:agnts_api/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**kind** | [**DocumentKind**](DocumentKind.md) |  | [optional] 
 **title** | **String** |  | 
 **body** | **String** |  | [optional] 
 **language** | **String** |  | [optional] 

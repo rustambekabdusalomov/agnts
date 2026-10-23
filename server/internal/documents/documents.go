@@ -115,8 +115,9 @@ type Deps struct {
 
 // Service is the Documents module.
 type Service struct {
-	d   Deps
-	now func() time.Time
+	d       Deps
+	now     func() time.Time
+	viewers *presence
 }
 
 // New returns the service.
@@ -124,7 +125,7 @@ func New(d Deps) *Service {
 	if d.Log == nil {
 		d.Log = slog.Default()
 	}
-	return &Service{d: d, now: time.Now}
+	return &Service{d: d, now: time.Now, viewers: newPresence()}
 }
 
 // Caller is the signed-in person acting in their workspace.
@@ -138,6 +139,17 @@ type Caller struct {
 type View struct {
 	Doc    domain.Document
 	Access domain.AccessLevel
+	// From is the page a deck was made from, filled by Get only when the
+	// person can open that page.
+	From *From
+}
+
+// From is the page a deck was made from.
+type From struct {
+	ID      int64
+	Title   string
+	Version int // the version the deck's current AI version read; 0 before it
+	Current int // the page's version now
 }
 
 func invalid(format string, args ...any) error {
@@ -191,13 +203,31 @@ func (s *Service) List(ctx context.Context, c Caller, f postgres.DocumentFilter)
 	return out, nil
 }
 
-// Get returns one document.
+// Get returns one document, with the page it was made from when the
+// caller can open that page.
 func (s *Service) Get(ctx context.Context, c Caller, id int64) (View, error) {
-	return s.open(ctx, c, id)
+	v, err := s.open(ctx, c, id)
+	if err != nil || v.Doc.DerivedFromID == nil {
+		return v, err
+	}
+	p, err := s.open(ctx, c, *v.Doc.DerivedFromID)
+	switch {
+	case errors.Is(err, domain.ErrNotFound):
+		return v, nil // gone, or not theirs to see: say nothing about it
+	case err != nil:
+		return v, err
+	}
+	v.From = &From{ID: p.Doc.ID, Title: p.Doc.Title, Current: p.Doc.Version}
+	if v.Doc.DerivedFromVersion != nil {
+		v.From.Version = *v.Doc.DerivedFromVersion
+	}
+	return v, nil
 }
 
 // NewDocument is what a person creates a document with.
 type NewDocument struct {
+	// Kind is a page (the default) or a slide deck; it never changes.
+	Kind     domain.DocumentKind
 	Title    string
 	Body     string
 	Language string
@@ -224,6 +254,13 @@ func (s *Service) Create(ctx context.Context, c Caller, in NewDocument) (View, e
 	if lang != "ru" && lang != "uz" {
 		lang = "en"
 	}
+	kind := in.Kind
+	if kind == "" {
+		kind = domain.DocKindPage
+	}
+	if !kind.Valid() {
+		return View{}, invalid("kind is page or slides")
+	}
 	var links []domain.Ticket
 	if len(in.LinkTickets) > 0 {
 		if !c.Role.CanEdit() {
@@ -237,17 +274,20 @@ func (s *Service) Create(ctx context.Context, c Caller, in NewDocument) (View, e
 			links = append(links, t)
 		}
 	}
-	d := domain.Document{Title: title, OwnerID: c.UserID, Language: lang}
+	d := domain.Document{Kind: kind, Title: title, OwnerID: c.UserID, Language: lang}
 	var first *domain.DocumentVersion
 	if in.Source != nil {
 		if s.d.Generator == nil {
 			return View{}, invalid("generating documents is not available on this server")
 		}
 		src := *in.Source
-		if err := s.checkSource(ctx, &src); err != nil {
+		if err := s.checkSource(ctx, c, kind, &src); err != nil {
 			return View{}, err
 		}
 		d.Source = &src
+		if src.Kind == domain.SourceDoc {
+			d.DerivedFromID = &src.DocumentID
+		}
 		if src.Kind == domain.SourceReport {
 			t, _ := s.ticket(ctx, src.TicketKeys[0])
 			links = append(links, t)
@@ -275,7 +315,7 @@ func (s *Service) Create(ctx context.Context, c Caller, in NewDocument) (View, e
 
 // DocumentPromptVersion is recorded with each generation (the
 // orchestrator's prompt version for documents).
-var DocumentPromptVersion = "doc-1"
+var DocumentPromptVersion = "doc-2"
 
 // ticket finds the ticket a person named by its number (AMANAT-12) or
 // its key: an open ticket with that number first, then the key (see
@@ -302,10 +342,15 @@ func invalidTicket(key string, err error) error {
 	return err
 }
 
-// checkSource validates a source and that what it names exists.
-func (s *Service) checkSource(ctx context.Context, src *domain.DocumentSource) error {
+// checkSource validates a source for a document of kind, and that what
+// it names exists. A document source needs the caller to be able to open
+// the page, and pins the version it will read.
+func (s *Service) checkSource(ctx context.Context, c Caller, kind domain.DocumentKind, src *domain.DocumentSource) error {
 	if err := src.Validate(); err != nil {
 		return err
+	}
+	if src.Kind == domain.SourceDoc {
+		return s.checkPageSource(ctx, c, kind, src)
 	}
 	// People name tickets by number (AMANAT-12) or key; the source keeps
 	// the key, which never changes.
@@ -336,6 +381,31 @@ func (s *Service) checkSource(ctx context.Context, src *domain.DocumentSource) e
 			}
 			return err
 		}
+	}
+	return nil
+}
+
+// checkPageSource checks the page a deck is made from: the caller can open
+// it, it is a page with text, and the version read exists (0: the current
+// one, pinned now).
+func (s *Service) checkPageSource(ctx context.Context, c Caller, kind domain.DocumentKind, src *domain.DocumentSource) error {
+	if kind != domain.DocKindSlides {
+		return invalid("only slides are made from a document")
+	}
+	p, err := s.open(ctx, c, src.DocumentID)
+	switch {
+	case errors.Is(err, domain.ErrNotFound):
+		return invalid("the source document is gone, or you cannot open it")
+	case err != nil:
+		return err
+	case p.Doc.Kind != domain.DocKindPage:
+		return invalid("slides are made from a page, not from other slides")
+	case p.Doc.Version == 0:
+		return invalid("the source document has no text yet")
+	case src.DocumentVersion == 0:
+		src.DocumentVersion = p.Doc.Version
+	case src.DocumentVersion > p.Doc.Version:
+		return invalid("the source document has no version %d", src.DocumentVersion)
 	}
 	return nil
 }
@@ -406,9 +476,10 @@ func (s *Service) Regenerate(ctx context.Context, c Caller, id int64, src *domai
 			return v, invalid("this document was written by hand; choose what to make it from")
 		}
 		cp := *v.Doc.Source
+		cp.DocumentVersion = 0 // read the page again as it is now
 		src = &cp
 	}
-	if err := s.checkSource(ctx, src); err != nil {
+	if err := s.checkSource(ctx, c, v.Doc.Kind, src); err != nil {
 		return v, err
 	}
 	if _, err := s.d.Store.CreateDocumentRun(ctx, id, *src, &c.UserID, DocumentPromptVersion); err != nil {
@@ -700,6 +771,11 @@ func (s *Service) changed(ctx context.Context, d domain.Document) {
 	if d.Type == domain.DocPublic && d.DeletedAt == nil && d.Version > 0 {
 		s.prepare(ctx, d, d.Version)
 	}
+	s.notify(ctx, d, EventDocumentUpdated)
+}
+
+// notify sends an event of type typ about d to everyone who can open it.
+func (s *Service) notify(ctx context.Context, d domain.Document, typ string) {
 	if s.d.Notifier == nil {
 		return
 	}
@@ -721,7 +797,7 @@ func (s *Service) changed(ctx context.Context, d domain.Document) {
 		if domain.EffectiveAccess(d, m.UserID, m.Role, byUser[m.UserID]) == domain.AccessNone {
 			continue
 		}
-		s.d.Notifier.PublishTo(d.WorkspaceID, m.UserID, domain.Event{WorkspaceID: d.WorkspaceID, Type: EventDocumentUpdated,
+		s.d.Notifier.PublishTo(d.WorkspaceID, m.UserID, domain.Event{WorkspaceID: d.WorkspaceID, Type: typ,
 			Origin: domain.OriginSystem, Data: map[string]any{"documentId": d.ID, "version": d.Version}, CreatedAt: s.now()})
 	}
 }

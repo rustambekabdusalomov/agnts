@@ -9,6 +9,8 @@ part of 'document.dart';
 abstract class _$DocumentCWProxy {
   Document id(int id);
 
+  Document kind(DocumentKind kind);
+
   Document title(String title);
 
   Document version(int version);
@@ -43,6 +45,8 @@ abstract class _$DocumentCWProxy {
 
   Document dataAsOf(DateTime? dataAsOf);
 
+  Document derivedFrom(DocumentAllOfDerivedFrom? derivedFrom);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Document(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -51,6 +55,7 @@ abstract class _$DocumentCWProxy {
   /// ````
   Document call({
     int id,
+    DocumentKind kind,
     String title,
     int version,
     DocumentTypeEnum type,
@@ -68,6 +73,7 @@ abstract class _$DocumentCWProxy {
     String? publicUrl,
     DocumentSourceInput? source_,
     DateTime? dataAsOf,
+    DocumentAllOfDerivedFrom? derivedFrom,
   });
 }
 
@@ -79,6 +85,9 @@ class _$DocumentCWProxyImpl implements _$DocumentCWProxy {
 
   @override
   Document id(int id) => this(id: id);
+
+  @override
+  Document kind(DocumentKind kind) => this(kind: kind);
 
   @override
   Document title(String title) => this(title: title);
@@ -134,6 +143,10 @@ class _$DocumentCWProxyImpl implements _$DocumentCWProxy {
   Document dataAsOf(DateTime? dataAsOf) => this(dataAsOf: dataAsOf);
 
   @override
+  Document derivedFrom(DocumentAllOfDerivedFrom? derivedFrom) =>
+      this(derivedFrom: derivedFrom);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Document(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -142,6 +155,7 @@ class _$DocumentCWProxyImpl implements _$DocumentCWProxy {
   /// ````
   Document call({
     Object? id = const $CopyWithPlaceholder(),
+    Object? kind = const $CopyWithPlaceholder(),
     Object? title = const $CopyWithPlaceholder(),
     Object? version = const $CopyWithPlaceholder(),
     Object? type = const $CopyWithPlaceholder(),
@@ -159,12 +173,17 @@ class _$DocumentCWProxyImpl implements _$DocumentCWProxy {
     Object? publicUrl = const $CopyWithPlaceholder(),
     Object? source_ = const $CopyWithPlaceholder(),
     Object? dataAsOf = const $CopyWithPlaceholder(),
+    Object? derivedFrom = const $CopyWithPlaceholder(),
   }) {
     return Document(
       id: id == const $CopyWithPlaceholder()
           ? _value.id
           // ignore: cast_nullable_to_non_nullable
           : id as int,
+      kind: kind == const $CopyWithPlaceholder()
+          ? _value.kind
+          // ignore: cast_nullable_to_non_nullable
+          : kind as DocumentKind,
       title: title == const $CopyWithPlaceholder()
           ? _value.title
           // ignore: cast_nullable_to_non_nullable
@@ -233,6 +252,10 @@ class _$DocumentCWProxyImpl implements _$DocumentCWProxy {
           ? _value.dataAsOf
           // ignore: cast_nullable_to_non_nullable
           : dataAsOf as DateTime?,
+      derivedFrom: derivedFrom == const $CopyWithPlaceholder()
+          ? _value.derivedFrom
+          // ignore: cast_nullable_to_non_nullable
+          : derivedFrom as DocumentAllOfDerivedFrom?,
     );
   }
 }
@@ -254,6 +277,7 @@ Document _$DocumentFromJson(
     json,
     requiredKeys: const [
       'id',
+      'kind',
       'title',
       'version',
       'type',
@@ -270,6 +294,7 @@ Document _$DocumentFromJson(
   );
   final val = Document(
     id: $checkedConvert('id', (v) => (v as num).toInt()),
+    kind: $checkedConvert('kind', (v) => $enumDecode(_$DocumentKindEnumMap, v)),
     title: $checkedConvert('title', (v) => v as String),
     version: $checkedConvert('version', (v) => (v as num).toInt()),
     type: $checkedConvert(
@@ -315,12 +340,19 @@ Document _$DocumentFromJson(
       'dataAsOf',
       (v) => v == null ? null : DateTime.parse(v as String),
     ),
+    derivedFrom: $checkedConvert(
+      'derivedFrom',
+      (v) => v == null
+          ? null
+          : DocumentAllOfDerivedFrom.fromJson(v as Map<String, dynamic>),
+    ),
   );
   return val;
 }, fieldKeyMap: const {'source_': 'source'});
 
 Map<String, dynamic> _$DocumentToJson(Document instance) => <String, dynamic>{
   'id': instance.id,
+  'kind': _$DocumentKindEnumMap[instance.kind]!,
   'title': instance.title,
   'version': instance.version,
   'type': _$DocumentTypeEnumEnumMap[instance.type]!,
@@ -339,6 +371,12 @@ Map<String, dynamic> _$DocumentToJson(Document instance) => <String, dynamic>{
   'publicUrl': ?instance.publicUrl,
   'source': ?instance.source_?.toJson(),
   'dataAsOf': ?instance.dataAsOf?.toIso8601String(),
+  'derivedFrom': ?instance.derivedFrom?.toJson(),
+};
+
+const _$DocumentKindEnumMap = {
+  DocumentKind.page: 'page',
+  DocumentKind.slides: 'slides',
 };
 
 const _$DocumentTypeEnumEnumMap = {

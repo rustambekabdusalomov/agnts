@@ -12,6 +12,11 @@ void main() {
       // TODO
     });
 
+    // DocumentKind kind
+    test('to test the property `kind`', () async {
+      // TODO
+    });
+
     // String title
     test('to test the property `title`', () async {
       // TODO
@@ -99,6 +104,11 @@ void main() {
     // When agnts gathered the facts of the current AI version
     // DateTime dataAsOf
     test('to test the property `dataAsOf`', () async {
+      // TODO
+    });
+
+    // DocumentAllOfDerivedFrom derivedFrom
+    test('to test the property `derivedFrom`', () async {
       // TODO
     });
 

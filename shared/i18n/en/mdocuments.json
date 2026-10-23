@@ -44,6 +44,15 @@
     "ticketNone": "No documents linked yet.",
     "fromReport": "Make a document from this report",
     "fromReportStarted": "agnts is writing the document",
-    "ledgerSpent": "Spent on a document"
+    "ledgerSpent": "Spent on a document",
+    "slides": "Slides",
+    "present": "Present",
+    "notes": "Notes",
+    "noNotes": "No notes for this slide.",
+    "noSlides": "No slides yet.",
+    "prevSlide": "Previous slide",
+    "nextSlide": "Next slide",
+    "stopPresenting": "Stop presenting",
+    "madeFrom": "Made from “{title}”"
   }
 }

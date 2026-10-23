@@ -7,6 +7,8 @@ part of 'public_document.dart';
 // **************************************************************************
 
 abstract class _$PublicDocumentCWProxy {
+  PublicDocument kind(DocumentKind kind);
+
   PublicDocument title(String title);
 
   PublicDocument body(String body);
@@ -22,6 +24,7 @@ abstract class _$PublicDocumentCWProxy {
   /// PublicDocument(...).copyWith(id: 12, name: "My name")
   /// ````
   PublicDocument call({
+    DocumentKind kind,
     String title,
     String body,
     int version,
@@ -34,6 +37,9 @@ class _$PublicDocumentCWProxyImpl implements _$PublicDocumentCWProxy {
   const _$PublicDocumentCWProxyImpl(this._value);
 
   final PublicDocument _value;
+
+  @override
+  PublicDocument kind(DocumentKind kind) => this(kind: kind);
 
   @override
   PublicDocument title(String title) => this(title: title);
@@ -55,12 +61,17 @@ class _$PublicDocumentCWProxyImpl implements _$PublicDocumentCWProxy {
   /// PublicDocument(...).copyWith(id: 12, name: "My name")
   /// ````
   PublicDocument call({
+    Object? kind = const $CopyWithPlaceholder(),
     Object? title = const $CopyWithPlaceholder(),
     Object? body = const $CopyWithPlaceholder(),
     Object? version = const $CopyWithPlaceholder(),
     Object? updatedAt = const $CopyWithPlaceholder(),
   }) {
     return PublicDocument(
+      kind: kind == const $CopyWithPlaceholder()
+          ? _value.kind
+          // ignore: cast_nullable_to_non_nullable
+          : kind as DocumentKind,
       title: title == const $CopyWithPlaceholder()
           ? _value.title
           // ignore: cast_nullable_to_non_nullable
@@ -91,28 +102,33 @@ extension $PublicDocumentCopyWith on PublicDocument {
 // JsonSerializableGenerator
 // **************************************************************************
 
-PublicDocument _$PublicDocumentFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('PublicDocument', json, ($checkedConvert) {
-      $checkKeys(
-        json,
-        requiredKeys: const ['title', 'body', 'version', 'updatedAt'],
-      );
-      final val = PublicDocument(
-        title: $checkedConvert('title', (v) => v as String),
-        body: $checkedConvert('body', (v) => v as String),
-        version: $checkedConvert('version', (v) => (v as num).toInt()),
-        updatedAt: $checkedConvert(
-          'updatedAt',
-          (v) => DateTime.parse(v as String),
-        ),
-      );
-      return val;
-    });
+PublicDocument _$PublicDocumentFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate('PublicDocument', json, ($checkedConvert) {
+  $checkKeys(
+    json,
+    requiredKeys: const ['kind', 'title', 'body', 'version', 'updatedAt'],
+  );
+  final val = PublicDocument(
+    kind: $checkedConvert('kind', (v) => $enumDecode(_$DocumentKindEnumMap, v)),
+    title: $checkedConvert('title', (v) => v as String),
+    body: $checkedConvert('body', (v) => v as String),
+    version: $checkedConvert('version', (v) => (v as num).toInt()),
+    updatedAt: $checkedConvert('updatedAt', (v) => DateTime.parse(v as String)),
+  );
+  return val;
+});
 
 Map<String, dynamic> _$PublicDocumentToJson(PublicDocument instance) =>
     <String, dynamic>{
+      'kind': _$DocumentKindEnumMap[instance.kind]!,
       'title': instance.title,
       'body': instance.body,
       'version': instance.version,
       'updatedAt': instance.updatedAt.toIso8601String(),
     };
+
+const _$DocumentKindEnumMap = {
+  DocumentKind.page: 'page',
+  DocumentKind.slides: 'slides',
+};

@@ -4,19 +4,22 @@ import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../../api/client'
-import type { DocumentSource, TicketState } from '../../api/types'
+import type { DocumentKind, DocumentSource, TicketState } from '../../api/types'
 import CheckBox from '../form/CheckBox.vue'
 import FormDrawer from '../form/FormDrawer.vue'
 import InputSelect from '../form/InputSelect.vue'
 import SegButtons from '../form/SegButtons.vue'
+import { starterDeck } from './slides'
 import { TEMPLATES, useDocumentsRefresh } from './useDocuments'
 
-// A new document: written by hand, or by agnts from a ticket's report,
-// tickets, commits, pull requests or a whole repository. Opened from a
-// ticket, it links the ticket and starts from its report. People know
-// tickets by their number, so that is what the form shows (the key when
-// there is none); the server takes either.
-const props = defineProps<{ ticketKey?: string; ticketNumber?: string }>()
+// A new document, a page or a slide deck: written by hand, or by agnts
+// from a ticket's report, tickets, commits, pull requests or a whole
+// repository; a deck also from a page. Opened from a ticket, it links the
+// ticket and starts from its report; opened from a page (fromDoc), it
+// makes slides of that page. People know tickets by their number, so that
+// is what the form shows (the key when there is none); the server takes
+// either.
+const props = defineProps<{ ticketKey?: string; ticketNumber?: string; fromDoc?: { id: number; title: string } }>()
 const open = defineModel<boolean>({ default: false })
 const { t, locale } = useI18n()
 const router = useRouter()
@@ -25,6 +28,8 @@ const refresh = useDocumentsRefresh()
 type Kind = DocumentSource['kind']
 type Template = NonNullable<DocumentSource['template']>
 const form = reactive({
+  docKind: 'page' as DocumentKind,
+  documentId: 0,
   title: '',
   language: 'en' as 'en' | 'ru' | 'uz',
   by: 'agnts' as 'me' | 'agnts',
@@ -47,6 +52,12 @@ const error = ref('')
 
 const repos = useQuery({ queryKey: ['repos'], queryFn: () => unwrap(api.GET('/repos')), enabled: open })
 const repoOptions = computed(() => (repos.data.value ?? []).filter((r) => !r.archivedAt).map((r) => ({ value: r.id, label: r.name })))
+const pages = useQuery({
+  queryKey: ['documents', 'all', '', 'page'],
+  queryFn: () => unwrap(api.GET('/documents', { params: { query: { kind: 'page' } } })),
+  enabled: computed(() => open.value && form.docKind === 'slides'),
+})
+const pageOptions = computed(() => (pages.data.value ?? []).filter((d) => d.version > 0).map((d) => ({ value: d.id, label: d.title })))
 
 watch(open, (v) => {
   if (!v) return
@@ -56,10 +67,27 @@ watch(open, (v) => {
     form.kind = 'report'
     form.tickets = props.ticketNumber || props.ticketKey
   }
+  if (props.fromDoc) {
+    form.docKind = 'slides'
+    form.by = 'agnts'
+    form.kind = 'document'
+    form.documentId = props.fromDoc.id
+    form.title = t('documents.slidesOf', { title: props.fromDoc.title }).slice(0, 200)
+  }
 })
 watch(() => form.kind, (k) => (form.template = TEMPLATES[k][0]), { immediate: false })
+// Only decks are made from a page.
+watch(() => form.docKind, (k) => {
+  if (k === 'page' && form.kind === 'document') form.kind = 'tickets'
+})
 
-const kinds = computed(() => (['report', 'tickets', 'commits', 'pulls', 'repo'] as Kind[]).map((k) => ({ value: k, label: t(`documents.kind_${k}`) })))
+const docKinds = computed(() => (['page', 'slides'] as DocumentKind[]).map((k) => ({ value: k, label: t(`documents.docKind_${k}`) })))
+const kinds = computed(() =>
+  ((form.docKind === 'slides' ? ['document', 'report', 'tickets', 'commits', 'pulls', 'repo'] : ['report', 'tickets', 'commits', 'pulls', 'repo']) as Kind[]).map((k) => ({
+    value: k,
+    label: t(`documents.kind_${k}`),
+  })),
+)
 const templates = computed(() => TEMPLATES[form.kind].map((x) => ({ value: x, label: t(`documents.template_${x}`), hint: t(`documents.templateHint_${x}`) })))
 const stateChoices: TicketState[] = ['new', 'analyzing', 'waiting_for_answers', 'coding', 'waiting_for_review', 'done', 'rejected', 'failed']
 const keys = (s: string) => s.split(/[\s,]+/).map((x) => x.trim()).filter(Boolean)
@@ -102,6 +130,9 @@ function source(): DocumentSource {
       s.repoIds = form.repoId ? [form.repoId] : []
       s.branch = form.branch.trim() || undefined
       break
+    case 'document':
+      s.documentId = form.documentId
+      break
   }
   return s
 }
@@ -111,9 +142,10 @@ const create = useMutation({
     unwrap(
       api.POST('/documents', {
         body: {
+          kind: form.docKind,
           title: form.title.trim(),
           language: form.language,
-          body: form.by === 'me' ? '' : undefined,
+          body: form.by === 'me' ? (form.docKind === 'slides' ? starterDeck(form.title.trim(), t('documents.starterSubtitle'), t('documents.starterPoint')) : '') : undefined,
           source: form.by === 'agnts' ? source() : undefined,
           linkTickets: props.ticketKey && !(form.by === 'agnts' && form.kind === 'report') ? [props.ticketKey] : undefined,
         },
@@ -126,15 +158,22 @@ const create = useMutation({
   },
   onError: (e) => (error.value = e instanceof HttpError ? e.message : t('common.error')),
 })
-const canSubmit = computed(() => form.title.trim().length > 0 && !create.isPending.value)
+const canSubmit = computed(
+  () => form.title.trim().length > 0 && !create.isPending.value && !(form.by === 'agnts' && form.kind === 'document' && !form.documentId),
+)
 </script>
 
 <template>
   <FormDrawer
     v-model="open"
     :title="t('documents.newTitle')"
-    :subtitle="ticketKey ? t('documents.newForTicket', { number: ticketNumber || ticketKey }) : t('documents.newSub')"
+    :subtitle="fromDoc ? t('documents.slidesSub') : ticketKey ? t('documents.newForTicket', { number: ticketNumber || ticketKey }) : t('documents.newSub')"
   >
+    <div v-if="!fromDoc" class="field">
+      <span class="flbl">{{ t('documents.docKind') }}</span>
+      <SegButtons v-model="form.docKind" :options="docKinds" :label="t('documents.docKind')" />
+      <span class="fhelp">{{ t(`documents.docKindHelp_${form.docKind}`) }}</span>
+    </div>
     <div class="field">
       <label for="nd-title">{{ t('documents.title') }}</label>
       <input id="nd-title" v-model="form.title" type="text" maxlength="200" :placeholder="t('documents.titlePlaceholder')">
@@ -155,6 +194,13 @@ const canSubmit = computed(() => form.title.trim().length > 0 && !create.isPendi
         <span class="fhelp">{{ t(`documents.kindHelp_${form.kind}`) }}</span>
       </div>
 
+      <InputSelect
+        v-if="form.kind === 'document'"
+        v-model="form.documentId"
+        :options="pageOptions"
+        :label="t('documents.sourceDocument')"
+        :placeholder="t('documents.chooseDocument')"
+      />
       <div v-if="form.kind === 'report'" class="field">
         <label for="nd-ticket">{{ t('documents.ticket') }}</label>
         <input id="nd-ticket" v-model="form.tickets" type="text" placeholder="AMANAT-12">

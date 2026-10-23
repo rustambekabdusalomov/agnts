@@ -8,8 +8,9 @@ import 'package:agnts_api/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**kind** | [**DocumentKind**](DocumentKind.md) |  | 
 **title** | **String** |  | 
-**body** | **String** | Markdown | 
+**body** | **String** | Markdown; a slide deck's speaker notes are left out | 
 **version** | **int** |  | 
 **updatedAt** | [**DateTime**](DateTime.md) |  | 
 

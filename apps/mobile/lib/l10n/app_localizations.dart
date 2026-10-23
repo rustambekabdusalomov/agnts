@@ -4740,7 +4740,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentsTemplate.
   ///
   /// In en, this message translates to:
-  /// **'Shape'**
+  /// **'Format'**
   String get documentsTemplate;
 
   /// No description provided for @documentsTemplate_status.
@@ -5342,6 +5342,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Linked to {number}. Write it yourself, or have agnts write it.'**
   String documentsNewForTicket(String number);
+
+  /// No description provided for @documentsDocKind.
+  ///
+  /// In en, this message translates to:
+  /// **'Kind'**
+  String get documentsDocKind;
+
+  /// No description provided for @documentsDocKind_page.
+  ///
+  /// In en, this message translates to:
+  /// **'Page'**
+  String get documentsDocKind_page;
+
+  /// No description provided for @documentsDocKind_slides.
+  ///
+  /// In en, this message translates to:
+  /// **'Slides'**
+  String get documentsDocKind_slides;
+
+  /// No description provided for @documentsDocKindHelp_page.
+  ///
+  /// In en, this message translates to:
+  /// **'A document to read: detailed, for the team.'**
+  String get documentsDocKindHelp_page;
+
+  /// No description provided for @documentsDocKindHelp_slides.
+  ///
+  /// In en, this message translates to:
+  /// **'A deck to present: short, for clients and people outside the team.'**
+  String get documentsDocKindHelp_slides;
+
+  /// No description provided for @documentsKindFilter_all.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages and slides'**
+  String get documentsKindFilter_all;
+
+  /// No description provided for @documentsKindFilter_page.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages'**
+  String get documentsKindFilter_page;
+
+  /// No description provided for @documentsKindFilter_slides.
+  ///
+  /// In en, this message translates to:
+  /// **'Slides'**
+  String get documentsKindFilter_slides;
+
+  /// No description provided for @documentsKind_document.
+  ///
+  /// In en, this message translates to:
+  /// **'A document'**
+  String get documentsKind_document;
+
+  /// No description provided for @documentsKindHelp_document.
+  ///
+  /// In en, this message translates to:
+  /// **'A page of this workspace, retold as slides. The slides are a separate document with their own sharing.'**
+  String get documentsKindHelp_document;
+
+  /// No description provided for @documentsSourceDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Document'**
+  String get documentsSourceDocument;
+
+  /// No description provided for @documentsChooseDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a document'**
+  String get documentsChooseDocument;
+
+  /// No description provided for @documentsTemplate_presentation.
+  ///
+  /// In en, this message translates to:
+  /// **'Presentation'**
+  String get documentsTemplate_presentation;
+
+  /// No description provided for @documentsTemplateHint_presentation.
+  ///
+  /// In en, this message translates to:
+  /// **'Key points, what they mean, next steps'**
+  String get documentsTemplateHint_presentation;
+
+  /// No description provided for @documentsMakeSlides.
+  ///
+  /// In en, this message translates to:
+  /// **'Make slides'**
+  String get documentsMakeSlides;
+
+  /// No description provided for @documentsSlidesOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} — slides'**
+  String documentsSlidesOf(String title);
+
+  /// No description provided for @documentsSlidesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts retells this document as slides, in a new document you share on its own.'**
+  String get documentsSlidesSub;
+
+  /// No description provided for @documentsMadeFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Made from'**
+  String get documentsMadeFrom;
+
+  /// No description provided for @documentsSourceChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'The document has changed since (now version {n}).'**
+  String documentsSourceChanged(String n);
+
+  /// No description provided for @documentsDecksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Slides made from this document'**
+  String get documentsDecksTitle;
+
+  /// No description provided for @documentsSlidesHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'A line with only --- starts a new slide. A line starting with Notes: begins the speaker notes of its slide.'**
+  String get documentsSlidesHelp;
+
+  /// No description provided for @documentsNoSlides.
+  ///
+  /// In en, this message translates to:
+  /// **'No slides yet. Separate slides with a line of ---.'**
+  String get documentsNoSlides;
+
+  /// No description provided for @documentsPresent.
+  ///
+  /// In en, this message translates to:
+  /// **'Present'**
+  String get documentsPresent;
+
+  /// No description provided for @documentsPresentFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Present from slide {n}'**
+  String documentsPresentFrom(String n);
+
+  /// No description provided for @documentsStopPresenting.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop presenting'**
+  String get documentsStopPresenting;
+
+  /// No description provided for @documentsPrevSlide.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous slide'**
+  String get documentsPrevSlide;
+
+  /// No description provided for @documentsNextSlide.
+  ///
+  /// In en, this message translates to:
+  /// **'Next slide'**
+  String get documentsNextSlide;
+
+  /// No description provided for @documentsNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get documentsNotes;
+
+  /// No description provided for @documentsNoNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'No notes for this slide.'**
+  String get documentsNoNotes;
+
+  /// No description provided for @documentsStarterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What it is about, and when'**
+  String get documentsStarterSubtitle;
+
+  /// No description provided for @documentsStarterPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'The first point'**
+  String get documentsStarterPoint;
 
   /// No description provided for @draftsTitle.
   ///
@@ -11714,6 +11900,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Spent on a document'**
   String get mdocumentsLedgerSpent;
+
+  /// No description provided for @mdocumentsSlides.
+  ///
+  /// In en, this message translates to:
+  /// **'Slides'**
+  String get mdocumentsSlides;
+
+  /// No description provided for @mdocumentsPresent.
+  ///
+  /// In en, this message translates to:
+  /// **'Present'**
+  String get mdocumentsPresent;
+
+  /// No description provided for @mdocumentsNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get mdocumentsNotes;
+
+  /// No description provided for @mdocumentsNoNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'No notes for this slide.'**
+  String get mdocumentsNoNotes;
+
+  /// No description provided for @mdocumentsNoSlides.
+  ///
+  /// In en, this message translates to:
+  /// **'No slides yet.'**
+  String get mdocumentsNoSlides;
+
+  /// No description provided for @mdocumentsPrevSlide.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous slide'**
+  String get mdocumentsPrevSlide;
+
+  /// No description provided for @mdocumentsNextSlide.
+  ///
+  /// In en, this message translates to:
+  /// **'Next slide'**
+  String get mdocumentsNextSlide;
+
+  /// No description provided for @mdocumentsStopPresenting.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop presenting'**
+  String get mdocumentsStopPresenting;
+
+  /// No description provided for @mdocumentsMadeFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Made from “{title}”'**
+  String mdocumentsMadeFrom(String title);
 
   /// No description provided for @mgroupsGroups.
   ///

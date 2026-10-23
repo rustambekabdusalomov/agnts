@@ -9,6 +9,8 @@ part of 'document_summary.dart';
 abstract class _$DocumentSummaryCWProxy {
   DocumentSummary id(int id);
 
+  DocumentSummary kind(DocumentKind kind);
+
   DocumentSummary title(String title);
 
   DocumentSummary version(int version);
@@ -45,6 +47,7 @@ abstract class _$DocumentSummaryCWProxy {
   /// ````
   DocumentSummary call({
     int id,
+    DocumentKind kind,
     String title,
     int version,
     DocumentSummaryTypeEnum type,
@@ -69,6 +72,9 @@ class _$DocumentSummaryCWProxyImpl implements _$DocumentSummaryCWProxy {
 
   @override
   DocumentSummary id(int id) => this(id: id);
+
+  @override
+  DocumentSummary kind(DocumentKind kind) => this(kind: kind);
 
   @override
   DocumentSummary title(String title) => this(title: title);
@@ -123,6 +129,7 @@ class _$DocumentSummaryCWProxyImpl implements _$DocumentSummaryCWProxy {
   /// ````
   DocumentSummary call({
     Object? id = const $CopyWithPlaceholder(),
+    Object? kind = const $CopyWithPlaceholder(),
     Object? title = const $CopyWithPlaceholder(),
     Object? version = const $CopyWithPlaceholder(),
     Object? type = const $CopyWithPlaceholder(),
@@ -142,6 +149,10 @@ class _$DocumentSummaryCWProxyImpl implements _$DocumentSummaryCWProxy {
           ? _value.id
           // ignore: cast_nullable_to_non_nullable
           : id as int,
+      kind: kind == const $CopyWithPlaceholder()
+          ? _value.kind
+          // ignore: cast_nullable_to_non_nullable
+          : kind as DocumentKind,
       title: title == const $CopyWithPlaceholder()
           ? _value.title
           // ignore: cast_nullable_to_non_nullable
@@ -215,6 +226,7 @@ DocumentSummary _$DocumentSummaryFromJson(
     json,
     requiredKeys: const [
       'id',
+      'kind',
       'title',
       'version',
       'type',
@@ -230,6 +242,7 @@ DocumentSummary _$DocumentSummaryFromJson(
   );
   final val = DocumentSummary(
     id: $checkedConvert('id', (v) => (v as num).toInt()),
+    kind: $checkedConvert('kind', (v) => $enumDecode(_$DocumentKindEnumMap, v)),
     title: $checkedConvert('title', (v) => v as String),
     version: $checkedConvert('version', (v) => (v as num).toInt()),
     type: $checkedConvert(
@@ -271,6 +284,7 @@ Map<String, dynamic> _$DocumentSummaryToJson(
   DocumentSummary instance,
 ) => <String, dynamic>{
   'id': instance.id,
+  'kind': _$DocumentKindEnumMap[instance.kind]!,
   'title': instance.title,
   'version': instance.version,
   'type': _$DocumentSummaryTypeEnumEnumMap[instance.type]!,
@@ -285,6 +299,11 @@ Map<String, dynamic> _$DocumentSummaryToJson(
   'createdAt': instance.createdAt.toIso8601String(),
   'updatedAt': instance.updatedAt.toIso8601String(),
   'deletedAt': ?instance.deletedAt?.toIso8601String(),
+};
+
+const _$DocumentKindEnumMap = {
+  DocumentKind.page: 'page',
+  DocumentKind.slides: 'slides',
 };
 
 const _$DocumentSummaryTypeEnumEnumMap = {

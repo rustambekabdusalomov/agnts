@@ -3,9 +3,11 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:agnts_api/src/model/document_all_of_derived_from.dart';
 import 'package:agnts_api/src/model/document_source_input.dart';
 import 'package:agnts_api/src/model/document_access.dart';
 import 'package:agnts_api/src/model/document_generation.dart';
+import 'package:agnts_api/src/model/document_kind.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -24,6 +26,8 @@ class Document {
   Document({
 
     required  this.id,
+
+    required  this.kind,
 
     required  this.title,
 
@@ -58,6 +62,8 @@ class Document {
      this.source_,
 
      this.dataAsOf,
+
+     this.derivedFrom,
   });
 
   @JsonKey(
@@ -69,6 +75,18 @@ class Document {
 
 
   final int id;
+
+
+
+  @JsonKey(
+    
+    name: r'kind',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final DocumentKind kind;
 
 
 
@@ -281,11 +299,24 @@ class Document {
 
 
 
+  @JsonKey(
+    
+    name: r'derivedFrom',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final DocumentAllOfDerivedFrom? derivedFrom;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is Document &&
       other.id == id &&
+      other.kind == kind &&
       other.title == title &&
       other.version == version &&
       other.type == type &&
@@ -302,11 +333,13 @@ class Document {
       other.body == body &&
       other.publicUrl == publicUrl &&
       other.source_ == source_ &&
-      other.dataAsOf == dataAsOf;
+      other.dataAsOf == dataAsOf &&
+      other.derivedFrom == derivedFrom;
 
     @override
     int get hashCode =>
         id.hashCode +
+        kind.hashCode +
         title.hashCode +
         version.hashCode +
         type.hashCode +
@@ -323,7 +356,8 @@ class Document {
         body.hashCode +
         publicUrl.hashCode +
         source_.hashCode +
-        dataAsOf.hashCode;
+        dataAsOf.hashCode +
+        derivedFrom.hashCode;
 
   factory Document.fromJson(Map<String, dynamic> json) => _$DocumentFromJson(json);
 

@@ -2534,7 +2534,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get documentsTo => 'To';
 
   @override
-  String get documentsTemplate => 'Shape';
+  String get documentsTemplate => 'Format';
 
   @override
   String get documentsTemplate_status => 'Status report';
@@ -2866,6 +2866,107 @@ class AppLocalizationsEn extends AppLocalizations {
   String documentsNewForTicket(String number) {
     return 'Linked to $number. Write it yourself, or have agnts write it.';
   }
+
+  @override
+  String get documentsDocKind => 'Kind';
+
+  @override
+  String get documentsDocKind_page => 'Page';
+
+  @override
+  String get documentsDocKind_slides => 'Slides';
+
+  @override
+  String get documentsDocKindHelp_page => 'A document to read: detailed, for the team.';
+
+  @override
+  String get documentsDocKindHelp_slides => 'A deck to present: short, for clients and people outside the team.';
+
+  @override
+  String get documentsKindFilter_all => 'Pages and slides';
+
+  @override
+  String get documentsKindFilter_page => 'Pages';
+
+  @override
+  String get documentsKindFilter_slides => 'Slides';
+
+  @override
+  String get documentsKind_document => 'A document';
+
+  @override
+  String get documentsKindHelp_document =>
+      'A page of this workspace, retold as slides. The slides are a separate document with their own sharing.';
+
+  @override
+  String get documentsSourceDocument => 'Document';
+
+  @override
+  String get documentsChooseDocument => 'Choose a document';
+
+  @override
+  String get documentsTemplate_presentation => 'Presentation';
+
+  @override
+  String get documentsTemplateHint_presentation => 'Key points, what they mean, next steps';
+
+  @override
+  String get documentsMakeSlides => 'Make slides';
+
+  @override
+  String documentsSlidesOf(String title) {
+    return '$title — slides';
+  }
+
+  @override
+  String get documentsSlidesSub => 'agnts retells this document as slides, in a new document you share on its own.';
+
+  @override
+  String get documentsMadeFrom => 'Made from';
+
+  @override
+  String documentsSourceChanged(String n) {
+    return 'The document has changed since (now version $n).';
+  }
+
+  @override
+  String get documentsDecksTitle => 'Slides made from this document';
+
+  @override
+  String get documentsSlidesHelp =>
+      'A line with only --- starts a new slide. A line starting with Notes: begins the speaker notes of its slide.';
+
+  @override
+  String get documentsNoSlides => 'No slides yet. Separate slides with a line of ---.';
+
+  @override
+  String get documentsPresent => 'Present';
+
+  @override
+  String documentsPresentFrom(String n) {
+    return 'Present from slide $n';
+  }
+
+  @override
+  String get documentsStopPresenting => 'Stop presenting';
+
+  @override
+  String get documentsPrevSlide => 'Previous slide';
+
+  @override
+  String get documentsNextSlide => 'Next slide';
+
+  @override
+  String get documentsNotes => 'Notes';
+
+  @override
+  String get documentsNoNotes => 'No notes for this slide.';
+
+  @override
+  String get documentsStarterSubtitle => 'What it is about, and when';
+
+  @override
+  String get documentsStarterPoint => 'The first point';
 
   @override
   String get draftsTitle => 'Review comments';
@@ -6527,6 +6628,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mdocumentsLedgerSpent => 'Spent on a document';
+
+  @override
+  String get mdocumentsSlides => 'Slides';
+
+  @override
+  String get mdocumentsPresent => 'Present';
+
+  @override
+  String get mdocumentsNotes => 'Notes';
+
+  @override
+  String get mdocumentsNoNotes => 'No notes for this slide.';
+
+  @override
+  String get mdocumentsNoSlides => 'No slides yet.';
+
+  @override
+  String get mdocumentsPrevSlide => 'Previous slide';
+
+  @override
+  String get mdocumentsNextSlide => 'Next slide';
+
+  @override
+  String get mdocumentsStopPresenting => 'Stop presenting';
+
+  @override
+  String mdocumentsMadeFrom(String title) {
+    return 'Made from “$title”';
+  }
 
   @override
   String get mgroupsGroups => 'Groups';

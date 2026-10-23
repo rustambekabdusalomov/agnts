@@ -31,7 +31,7 @@ func (f *fakePDF) RenderPDF(_ context.Context, html []byte) ([]byte, error) {
 	if fail {
 		return nil, errors.New("chromium crashed")
 	}
-	if !strings.Contains(string(html), "<h1 class=\"doc-title\">") {
+	if !strings.Contains(string(html), "<h1 class=\"doc-title\">") && !strings.Contains(string(html), `<meta name="agnts-layout" content="slides">`) {
 		return nil, errors.New("not the print page")
 	}
 	return []byte("%PDF-1.7 fake"), nil
@@ -122,6 +122,25 @@ func (f fixture) settled(t *testing.T, docID int64, version int) {
 		time.Sleep(20 * time.Millisecond)
 	}
 	t.Fatal("the PDF stayed pending")
+}
+
+// join makes a guest of the public document with token and returns it
+// with its secret token.
+func (f fixture) join(t *testing.T, token, name string) (Guest, string) {
+	t.Helper()
+	sys := domain.System(context.Background())
+	if _, _, err := f.s.Join(sys, token, domain.DocumentGuest{Name: "x"}); !errors.Is(err, domain.ErrDocInvalid) {
+		t.Fatalf("a one-letter name: %v", err)
+	}
+	_, tok, err := f.s.Join(sys, token, domain.DocumentGuest{Name: name})
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := f.s.Guest(sys, token, tok)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return g, tok
 }
 
 func (f fixture) create(t *testing.T, c Caller, title, body string) View {
@@ -229,15 +248,16 @@ func TestPublishing(t *testing.T) {
 	f.settled(t, v.Doc.ID, 2) // rendered ahead
 	tok := pub.Doc.PublicToken
 	sys := domain.System(context.Background())
-	p, err := f.s.PublicDocument(sys, tok)
+	g, gtok := f.join(t, tok, "Client")
+	p, err := f.s.PublicDocument(g)
 	if err != nil || p.Title != "Status" || p.Version != 2 {
 		t.Fatalf("public: %+v %v", p, err)
 	}
-	file, err := f.s.PublicDownload(sys, tok, FormatPDF)
+	file, err := f.s.PublicDownload(g, FormatPDF)
 	if err != nil || file.ContentType != "application/pdf" || file.Name != "status-v2.pdf" {
 		t.Fatalf("public pdf: %+v %v", file, err)
 	}
-	md, err := f.s.PublicDownload(sys, tok, FormatMarkdown)
+	md, err := f.s.PublicDownload(g, FormatMarkdown)
 	if err != nil || !strings.HasPrefix(string(md.Data), "# Status\n\n# All good") {
 		t.Fatalf("public md: %q %v", md.Data, err)
 	}
@@ -250,9 +270,10 @@ func TestPublishing(t *testing.T) {
 		t.Fatal(err)
 	}
 	f.settled(t, v.Doc.ID, 3)
+	g, _ = f.s.Guest(sys, tok, gtok) // each request reads the document as it is now
 	calls := f.pdf.calls
 	for range 3 {
-		if _, err := f.s.PublicDownload(sys, tok, FormatPDF); err == nil {
+		if _, err := f.s.PublicDownload(g, FormatPDF); err == nil {
 			t.Fatal("a failed render served")
 		}
 	}
@@ -264,7 +285,7 @@ func TestPublishing(t *testing.T) {
 	if err != nil || reset.Doc.PublicToken == tok {
 		t.Fatalf("reset: %v", err)
 	}
-	if _, err := f.s.PublicDocument(sys, tok); !errors.Is(err, domain.ErrNotFound) {
+	if _, err := f.s.Guest(sys, tok, gtok); !errors.Is(err, domain.ErrNotFound) {
 		t.Fatalf("old link: %v", err)
 	}
 	// Private, then public again: a new token.
@@ -283,10 +304,10 @@ func TestPublishing(t *testing.T) {
 	if _, err := f.s.Share(f.ctx, f.alice, other.Doc.ID, Sharing{Type: domain.DocPublic}); !errors.Is(err, domain.ErrDocInvalid) {
 		t.Fatalf("publish with the setting off: %v", err)
 	}
-	if _, err := f.s.PublicDocument(sys, again.Doc.PublicToken); !errors.Is(err, domain.ErrNotFound) {
+	if _, err := f.s.Info(sys, again.Doc.PublicToken); !errors.Is(err, domain.ErrNotFound) {
 		t.Fatalf("link with the setting off: %v", err)
 	}
-	if _, err := f.s.PublicDocument(sys, "../../etc"); !errors.Is(err, domain.ErrNotFound) {
+	if _, err := f.s.Info(sys, "../../etc"); !errors.Is(err, domain.ErrNotFound) {
 		t.Fatalf("bad token: %v", err)
 	}
 }

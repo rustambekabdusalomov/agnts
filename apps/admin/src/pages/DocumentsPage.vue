@@ -4,7 +4,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { api, unwrap } from '../api/client'
-import type { DocumentSummary } from '../api/types'
+import type { DocumentKind, DocumentSummary } from '../api/types'
 import PageHeader from '../components/PageHeader.vue'
 import NewDocumentDrawer from '../components/documents/NewDocumentDrawer.vue'
 import { useDocumentList, useDocumentsRefresh, writing, type DocScope } from '../components/documents/useDocuments'
@@ -14,7 +14,8 @@ import { useLive } from '../composables/useLive'
 import { useUi } from '../stores/ui'
 
 // Documents: written by people or by agnts from tickets, commits, pull
-// requests and repositories. The scope lives in the URL (?scope=mine).
+// requests and repositories, as pages or slide decks. The scope and the
+// kind live in the URL (?scope=mine&kind=slides).
 const { t, locale } = useI18n()
 const ui = useUi()
 const route = useRoute()
@@ -27,7 +28,12 @@ const scope = computed<DocScope>({
   get: () => (scopes.includes(route.query.scope as DocScope) ? (route.query.scope as DocScope) : 'all'),
   set: (v) => void router.replace({ query: { ...route.query, scope: v === 'all' ? undefined : v } }),
 })
-const docs = useDocumentList(scope, ref(''))
+const kinds: (DocumentKind | '')[] = ['', 'page', 'slides']
+const kind = computed<DocumentKind | ''>({
+  get: () => (kinds.includes(route.query.kind as DocumentKind) ? (route.query.kind as DocumentKind) : ''),
+  set: (v) => void router.replace({ query: { ...route.query, kind: v || undefined } }),
+})
+const docs = useDocumentList(scope, ref(''), kind)
 const rows = computed(() => {
   const q = ui.search.trim().toLowerCase()
   return (docs.data.value ?? []).filter((d) => !q || d.title.toLowerCase().includes(q) || d.ownerName.toLowerCase().includes(q))
@@ -53,6 +59,9 @@ const daysLeft = (iso?: string) => (iso ? Math.max(0, 30 - Math.floor((Date.now(
     <div class="tabs" role="group" :aria-label="t('documents.scope')">
       <button v-for="s in scopes" :key="s" type="button" class="tab" :aria-pressed="scope === s" @click="scope = s">{{ t(`documents.scope_${s}`) }}</button>
     </div>
+    <div class="tabs" role="group" :aria-label="t('documents.docKind')">
+      <button v-for="k in kinds" :key="k" type="button" class="tab" :aria-pressed="kind === k" @click="kind = k">{{ t(`documents.kindFilter_${k || 'all'}`) }}</button>
+    </div>
     <p v-if="docs.isPending.value" class="hint">{{ t('common.loading') }}</p>
     <p v-else-if="docs.isError.value" class="ferr">{{ t('common.error') }}</p>
     <p v-else-if="!rows.length" class="empty">{{ scope === 'deleted' ? t('documents.trashEmpty') : t('documents.empty') }}</p>
@@ -73,6 +82,7 @@ const daysLeft = (iso?: string) => (iso ? Math.max(0, 30 - Math.floor((Date.now(
               <RouterLink v-if="scope !== 'deleted'" class="dl-title" :to="{ name: 'document', params: { id: d.id } }">{{ d.title }}</RouterLink>
               <span v-else class="dl-title">{{ d.title }}</span>
               <span class="dl-badges">
+                <span v-if="d.kind === 'slides'" class="badge b-gray">{{ t('documents.docKind_slides') }}</span>
                 <span v-if="d.type === 'public'" class="badge b-info">{{ t('documents.public') }}</span>
                 <span v-else class="badge b-gray">{{ t('documents.private') }}</span>
                 <span v-if="writing(d)" class="badge b-warn">{{ t('documents.writing') }}</span>

@@ -25,6 +25,10 @@ class DocumentSourceInput {
 
      this.template,
 
+     this.documentId,
+
+     this.documentVersion,
+
      this.instruction,
 
      this.tickets,
@@ -68,6 +72,31 @@ class DocumentSourceInput {
 
 
   final DocumentSourceInputTemplateEnum? template;
+
+
+
+  @JsonKey(
+    
+    name: r'documentId',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? documentId;
+
+
+
+          // minimum: 0
+  @JsonKey(
+    
+    name: r'documentVersion',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? documentVersion;
 
 
 
@@ -197,6 +226,8 @@ class DocumentSourceInput {
     bool operator ==(Object other) => identical(this, other) || other is DocumentSourceInput &&
       other.kind == kind &&
       other.template == template &&
+      other.documentId == documentId &&
+      other.documentVersion == documentVersion &&
       other.instruction == instruction &&
       other.tickets == tickets &&
       other.filter == filter &&
@@ -212,6 +243,8 @@ class DocumentSourceInput {
     int get hashCode =>
         kind.hashCode +
         template.hashCode +
+        documentId.hashCode +
+        documentVersion.hashCode +
         instruction.hashCode +
         tickets.hashCode +
         filter.hashCode +
@@ -244,7 +277,9 @@ commits(r'commits'),
 @JsonValue(r'pulls')
 pulls(r'pulls'),
 @JsonValue(r'repo')
-repo(r'repo');
+repo(r'repo'),
+@JsonValue(r'document')
+document(r'document');
 
 const DocumentSourceInputKindEnum(this.value);
 
@@ -267,6 +302,8 @@ prReview(r'pr_review'),
 repoReview(r'repo_review'),
 @JsonValue(r'ticket_summary')
 ticketSummary(r'ticket_summary'),
+@JsonValue(r'presentation')
+presentation(r'presentation'),
 @JsonValue(r'blank')
 blank(r'blank');
 

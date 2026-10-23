@@ -5,6 +5,7 @@
 // ignore_for_file: unused_element
 import 'package:agnts_api/src/model/document_access.dart';
 import 'package:agnts_api/src/model/document_generation.dart';
+import 'package:agnts_api/src/model/document_kind.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -23,6 +24,8 @@ class DocumentSummary {
   DocumentSummary({
 
     required  this.id,
+
+    required  this.kind,
 
     required  this.title,
 
@@ -60,6 +63,18 @@ class DocumentSummary {
 
 
   final int id;
+
+
+
+  @JsonKey(
+    
+    name: r'kind',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final DocumentKind kind;
 
 
 
@@ -226,6 +241,7 @@ class DocumentSummary {
     @override
     bool operator ==(Object other) => identical(this, other) || other is DocumentSummary &&
       other.id == id &&
+      other.kind == kind &&
       other.title == title &&
       other.version == version &&
       other.type == type &&
@@ -243,6 +259,7 @@ class DocumentSummary {
     @override
     int get hashCode =>
         id.hashCode +
+        kind.hashCode +
         title.hashCode +
         version.hashCode +
         type.hashCode +

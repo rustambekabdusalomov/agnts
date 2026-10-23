@@ -113,10 +113,16 @@ doc/DisableTotpRequest.md
 doc/DocsApi.md
 doc/Document.md
 doc/DocumentAccess.md
+doc/DocumentAllOfDerivedFrom.md
+doc/DocumentComment.md
+doc/DocumentCommentInput.md
+doc/DocumentCommentPatch.md
 doc/DocumentConflict.md
 doc/DocumentGeneration.md
 doc/DocumentGrant.md
 doc/DocumentInput.md
+doc/DocumentKind.md
+doc/DocumentPresence.md
 doc/DocumentRegenerate.md
 doc/DocumentSave.md
 doc/DocumentShareInput.md
@@ -127,6 +133,7 @@ doc/DocumentSourceInputFilter.md
 doc/DocumentSummary.md
 doc/DocumentTicket.md
 doc/DocumentVersion.md
+doc/DocumentViewer.md
 doc/DocumentsApi.md
 doc/EditCheck.md
 doc/EditCommitMessageRequest.md
@@ -158,6 +165,8 @@ doc/GrantCreditsRequest.md
 doc/GuardHook.md
 doc/GuardProfile.md
 doc/GuardSettings.md
+doc/GuestJoin.md
+doc/GuestSession.md
 doc/HistoryItem.md
 doc/HourBucket.md
 doc/ImplementInput.md
@@ -212,6 +221,7 @@ doc/PlatformOverviewServerQueueInner.md
 doc/PlatformUser.md
 doc/PlatformWorkspace.md
 doc/PostReviewInput.md
+doc/PresenceInput.md
 doc/PreviewInput.md
 doc/PreviewIssue.md
 doc/PreviewShot.md
@@ -224,6 +234,7 @@ doc/Proof.md
 doc/ProofRun.md
 doc/ProofTest.md
 doc/PublicDocument.md
+doc/PublicDocumentInfo.md
 doc/PublishReviewDraftsRequest.md
 doc/PublishedReview.md
 doc/PullComment.md
@@ -546,10 +557,16 @@ lib/src/model/device_registration.dart
 lib/src/model/disable_totp_request.dart
 lib/src/model/document.dart
 lib/src/model/document_access.dart
+lib/src/model/document_all_of_derived_from.dart
+lib/src/model/document_comment.dart
+lib/src/model/document_comment_input.dart
+lib/src/model/document_comment_patch.dart
 lib/src/model/document_conflict.dart
 lib/src/model/document_generation.dart
 lib/src/model/document_grant.dart
 lib/src/model/document_input.dart
+lib/src/model/document_kind.dart
+lib/src/model/document_presence.dart
 lib/src/model/document_regenerate.dart
 lib/src/model/document_save.dart
 lib/src/model/document_share_input.dart
@@ -560,6 +577,7 @@ lib/src/model/document_source_input_filter.dart
 lib/src/model/document_summary.dart
 lib/src/model/document_ticket.dart
 lib/src/model/document_version.dart
+lib/src/model/document_viewer.dart
 lib/src/model/edit_check.dart
 lib/src/model/edit_commit_message_request.dart
 lib/src/model/edit_pull_comment_request.dart
@@ -589,6 +607,8 @@ lib/src/model/grant_credits_request.dart
 lib/src/model/guard_hook.dart
 lib/src/model/guard_profile.dart
 lib/src/model/guard_settings.dart
+lib/src/model/guest_join.dart
+lib/src/model/guest_session.dart
 lib/src/model/history_item.dart
 lib/src/model/hour_bucket.dart
 lib/src/model/implement_input.dart
@@ -636,6 +656,7 @@ lib/src/model/platform_user.dart
 lib/src/model/platform_workspace.dart
 lib/src/model/post_review_input.dart
 lib/src/model/pr_comment_settings.dart
+lib/src/model/presence_input.dart
 lib/src/model/preview_input.dart
 lib/src/model/preview_issue.dart
 lib/src/model/preview_shot.dart
@@ -648,6 +669,7 @@ lib/src/model/proof.dart
 lib/src/model/proof_run.dart
 lib/src/model/proof_test.dart
 lib/src/model/public_document.dart
+lib/src/model/public_document_info.dart
 lib/src/model/publish_review_drafts_request.dart
 lib/src/model/published_review.dart
 lib/src/model/pull_comment.dart
@@ -931,10 +953,16 @@ test/devices_api_test.dart
 test/disable_totp_request_test.dart
 test/docs_api_test.dart
 test/document_access_test.dart
+test/document_all_of_derived_from_test.dart
+test/document_comment_input_test.dart
+test/document_comment_patch_test.dart
+test/document_comment_test.dart
 test/document_conflict_test.dart
 test/document_generation_test.dart
 test/document_grant_test.dart
 test/document_input_test.dart
+test/document_kind_test.dart
+test/document_presence_test.dart
 test/document_regenerate_test.dart
 test/document_save_test.dart
 test/document_share_input_grants_inner_test.dart
@@ -946,6 +974,7 @@ test/document_summary_test.dart
 test/document_test.dart
 test/document_ticket_test.dart
 test/document_version_test.dart
+test/document_viewer_test.dart
 test/documents_api_test.dart
 test/edit_check_test.dart
 test/edit_commit_message_request_test.dart
@@ -977,6 +1006,8 @@ test/grant_credits_request_test.dart
 test/guard_hook_test.dart
 test/guard_profile_test.dart
 test/guard_settings_test.dart
+test/guest_join_test.dart
+test/guest_session_test.dart
 test/history_item_test.dart
 test/hour_bucket_test.dart
 test/implement_input_test.dart
@@ -1031,6 +1062,7 @@ test/platform_user_test.dart
 test/platform_workspace_test.dart
 test/post_review_input_test.dart
 test/pr_comment_settings_test.dart
+test/presence_input_test.dart
 test/preview_input_test.dart
 test/preview_issue_test.dart
 test/preview_shot_test.dart
@@ -1042,6 +1074,7 @@ test/private_network_test.dart
 test/proof_run_test.dart
 test/proof_test.dart
 test/proof_test_test.dart
+test/public_document_info_test.dart
 test/public_document_test.dart
 test/publish_review_drafts_request_test.dart
 test/published_review_test.dart

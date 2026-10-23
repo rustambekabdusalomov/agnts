@@ -24,7 +24,7 @@ func NewDocuments(db *pgxpool.Pool) *Documents { return &Documents{db: db} }
 
 const docCols = `d.id, d.workspace_id, d.title, d.body, d.version, d.type, COALESCE(d.public_token, ''), d.workspace_access,
 	d.owner_id, COALESCE(NULLIF(u.display_name, ''), u.username), d.language, d.source, d.data_as_of, d.deleted_at,
-	d.created_at, d.updated_at,
+	d.created_at, d.updated_at, d.kind, d.derived_from_id, d.derived_from_version,
 	(SELECT count(*) FROM document_tickets dt WHERE dt.document_id = d.id),
 	r.id, r.status, r.source, r.prompt_version, r.error, r.requested_by, r.started_at, r.finished_at, r.created_at`
 
@@ -34,7 +34,7 @@ const docFrom = ` FROM documents d JOIN users u ON u.id = d.owner_id
 
 func scanDocument(row pgx.Row, extra ...any) (domain.Document, error) {
 	var d domain.Document
-	var typ, access string
+	var typ, access, kind string
 	var source []byte
 	var runID *int64
 	var runStatus, runPrompt, runError *string
@@ -42,12 +42,13 @@ func scanDocument(row pgx.Row, extra ...any) (domain.Document, error) {
 	var runBy *int64
 	var runStarted, runFinished, runCreated *time.Time
 	dest := []any{&d.ID, &d.WorkspaceID, &d.Title, &d.Body, &d.Version, &typ, &d.PublicToken, &access,
-		&d.OwnerID, &d.OwnerName, &d.Language, &source, &d.DataAsOf, &d.DeletedAt, &d.CreatedAt, &d.UpdatedAt, &d.TicketCount,
+		&d.OwnerID, &d.OwnerName, &d.Language, &source, &d.DataAsOf, &d.DeletedAt, &d.CreatedAt, &d.UpdatedAt,
+		&kind, &d.DerivedFromID, &d.DerivedFromVersion, &d.TicketCount,
 		&runID, &runStatus, &runSource, &runPrompt, &runError, &runBy, &runStarted, &runFinished, &runCreated}
 	if err := row.Scan(append(dest, extra...)...); err != nil {
 		return d, notFound(err)
 	}
-	d.Type = domain.DocumentType(typ)
+	d.Type, d.Kind = domain.DocumentType(typ), domain.DocumentKind(kind)
 	d.WorkspaceAccess, _ = domain.ParseAccessLevel(access)
 	if len(source) > 0 {
 		var s domain.DocumentSource
@@ -82,9 +83,13 @@ func (s *Documents) CreateDocument(ctx context.Context, d domain.Document, first
 		if first != nil {
 			version, body = 1, first.Body
 		}
-		if err := tx.QueryRow(ctx, `INSERT INTO documents (title, body, version, type, workspace_access, owner_id, language, source)
-			VALUES ($1, $2, $3, 'private', $4, $5, $6, $7) RETURNING id`,
-			d.Title, body, version, d.WorkspaceAccess.String(), d.OwnerID, d.Language, sourceJSON(d.Source)).Scan(&id); err != nil {
+		kind := d.Kind
+		if !kind.Valid() {
+			kind = domain.DocKindPage
+		}
+		if err := tx.QueryRow(ctx, `INSERT INTO documents (kind, title, body, version, type, workspace_access, owner_id, language, source, derived_from_id)
+			VALUES ($1, $2, $3, $4, 'private', $5, $6, $7, $8, $9) RETURNING id`,
+			string(kind), d.Title, body, version, d.WorkspaceAccess.String(), d.OwnerID, d.Language, sourceJSON(d.Source), d.DerivedFromID).Scan(&id); err != nil {
 			return err
 		}
 		if first == nil {
@@ -125,7 +130,11 @@ type DocumentFilter struct {
 	Scope     string
 	Query     string // in the title, ignoring case
 	TicketKey string // linked to this ticket
-	Limit     int
+	// Kind keeps only pages or only decks; "" keeps both.
+	Kind domain.DocumentKind
+	// DerivedFrom keeps the decks made from this page.
+	DerivedFrom int64
+	Limit       int
 }
 
 // visibleTo is the SQL test for the documents a person can open, with
@@ -159,6 +168,14 @@ func (s *Documents) ListDocuments(ctx context.Context, userID int64, role domain
 		args = append(args, f.TicketKey)
 		where = append(where, fmt.Sprintf(`EXISTS (SELECT 1 FROM document_tickets dt JOIN tickets t ON t.id = dt.ticket_id
 			WHERE dt.document_id = d.id AND t.key = $%d)`, len(args)))
+	}
+	if f.Kind != "" {
+		args = append(args, string(f.Kind))
+		where = append(where, fmt.Sprintf("d.kind = $%d", len(args)))
+	}
+	if f.DerivedFrom > 0 {
+		args = append(args, f.DerivedFrom)
+		where = append(where, fmt.Sprintf("d.derived_from_id = $%d", len(args)))
 	}
 	limit := f.Limit
 	if limit <= 0 || limit > 500 {
@@ -610,6 +627,14 @@ func (s *Documents) FinishDocumentRun(ctx context.Context, runID int64, res doma
 		if _, err := tx.Exec(ctx, `UPDATE documents SET data_as_of = $2 WHERE id = $1`, docID, res.DataAsOf); err != nil {
 			return err
 		}
+		if res.FromVersion > 0 {
+			// A deck made from a page: the page and the version it read.
+			if _, err := tx.Exec(ctx, `UPDATE documents d SET derived_from_id = (r.source->>'documentId')::bigint, derived_from_version = $3
+				FROM document_runs r WHERE d.id = $1 AND r.id = $2
+				  AND EXISTS (SELECT 1 FROM documents p WHERE p.id = (r.source->>'documentId')::bigint)`, docID, runID, res.FromVersion); err != nil {
+				return err
+			}
+		}
 		for _, t := range res.Tickets {
 			if _, err := tx.Exec(ctx, `INSERT INTO document_tickets (document_id, ticket_id) VALUES ($1, $2)
 				ON CONFLICT (document_id, ticket_id) DO NOTHING`, docID, t); err != nil {
@@ -648,20 +673,21 @@ func (s *Documents) RecordDocumentCall(ctx context.Context, runID int64, c domai
 }
 
 // PublicDocument returns the current version of the public document with
-// token, for anyone: only its title, body, version and last update. It is
+// token, for anyone: only its kind, title, body, version and last update. It is
 // domain.ErrNotFound when the token is unknown, the document is private
 // or deleted, or its workspace turned public documents off. ctx must be
 // system work.
 func (s *Documents) PublicDocument(ctx context.Context, token string) (domain.Document, error) {
 	var d domain.Document
-	err := s.db.QueryRow(ctx, `SELECT d.id, d.workspace_id, d.title, d.body, d.version, d.updated_at
+	var kind string
+	err := s.db.QueryRow(ctx, `SELECT d.id, d.workspace_id, d.kind, d.title, d.body, d.version, d.updated_at
 		FROM documents d JOIN workspaces w ON w.id = d.workspace_id
 		WHERE d.public_token = $1 AND d.type = 'public' AND d.deleted_at IS NULL
 		  AND w.deleted_at IS NULL AND w.suspended_at IS NULL
 		  AND COALESCE((SELECT (s.value->>'publicDocuments')::boolean FROM settings s
 		                WHERE s.workspace_id = d.workspace_id AND s.key = $2), true)`, token, settingsKey).
-		Scan(&d.ID, &d.WorkspaceID, &d.Title, &d.Body, &d.Version, &d.UpdatedAt)
-	d.Type, d.PublicToken = domain.DocPublic, token
+		Scan(&d.ID, &d.WorkspaceID, &kind, &d.Title, &d.Body, &d.Version, &d.UpdatedAt)
+	d.Type, d.PublicToken, d.Kind = domain.DocPublic, token, domain.DocumentKind(kind)
 	return d, notFound(err)
 }
 

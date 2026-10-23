@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:agnts_api/src/model/document_kind.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -20,6 +21,8 @@ class PublicDocument {
   /// Returns a new [PublicDocument] instance.
   PublicDocument({
 
+    required  this.kind,
+
     required  this.title,
 
     required  this.body,
@@ -28,6 +31,18 @@ class PublicDocument {
 
     required  this.updatedAt,
   });
+
+  @JsonKey(
+    
+    name: r'kind',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final DocumentKind kind;
+
+
 
   @JsonKey(
     
@@ -41,7 +56,7 @@ class PublicDocument {
 
 
 
-      /// Markdown
+      /// Markdown; a slide deck's speaker notes are left out
   @JsonKey(
     
     name: r'body',
@@ -82,6 +97,7 @@ class PublicDocument {
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is PublicDocument &&
+      other.kind == kind &&
       other.title == title &&
       other.body == body &&
       other.version == version &&
@@ -89,6 +105,7 @@ class PublicDocument {
 
     @override
     int get hashCode =>
+        kind.hashCode +
         title.hashCode +
         body.hashCode +
         version.hashCode +

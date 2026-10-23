@@ -18,6 +18,16 @@ void main() {
       // TODO
     });
 
+    // int documentId
+    test('to test the property `documentId`', () async {
+      // TODO
+    });
+
+    // int documentVersion
+    test('to test the property `documentVersion`', () async {
+      // TODO
+    });
+
     // String instruction
     test('to test the property `instruction`', () async {
       // TODO

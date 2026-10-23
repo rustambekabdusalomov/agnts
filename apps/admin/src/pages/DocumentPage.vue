@@ -7,11 +7,19 @@ import { api, HttpError, unwrap } from '../api/client'
 import type { components } from '../api/schema.gen'
 import type { Document, DocumentSource } from '../api/types'
 import PageHeader from '../components/PageHeader.vue'
+import CommentableText from '../components/documents/CommentableText.vue'
+import CommentsPanel from '../components/documents/CommentsPanel.vue'
 import DocumentTickets from '../components/documents/DocumentTickets.vue'
 import DocumentVersions from '../components/documents/DocumentVersions.vue'
 import DownloadMenu from '../components/documents/DownloadMenu.vue'
+import NewDocumentDrawer from '../components/documents/NewDocumentDrawer.vue'
+import PresentMode from '../components/documents/PresentMode.vue'
 import ShareDrawer from '../components/documents/ShareDrawer.vue'
-import { downloadPath, TEMPLATES, useDocument, useDocumentsRefresh, writing } from '../components/documents/useDocuments'
+import SlideDeck from '../components/documents/SlideDeck.vue'
+import ViewersBar from '../components/documents/ViewersBar.vue'
+import type { Anchor } from '../components/documents/anchors'
+import { memberTarget, useComments, usePresence } from '../components/documents/useComments'
+import { downloadPath, TEMPLATES, useDerivedDecks, useDocument, useDocumentsRefresh, writing } from '../components/documents/useDocuments'
 import FormDrawer from '../components/form/FormDrawer.vue'
 import InputSelect from '../components/form/InputSelect.vue'
 import ReportView from '../components/ticket/ReportView.vue'
@@ -24,6 +32,9 @@ type Conflict = components['schemas']['DocumentConflict']
 
 // One document: read it, edit it (Markdown with a live preview), share it,
 // have agnts write it again, compare and restore versions, download it.
+// A deck reads as slides and can be presented; a page can be made into
+// slides, and lists the decks made from it. Anyone who can open it
+// comments on selected words, and sees who else has it open.
 const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
@@ -37,6 +48,36 @@ const d = computed(() => doc.data.value)
 const canEdit = computed(() => d.value?.access === 'edit' || d.value?.access === 'owner')
 const isOwner = computed(() => d.value?.access === 'owner')
 const busy = computed(() => writing(d.value))
+const isSlides = computed(() => d.value?.kind === 'slides')
+
+// Comments and who is here. The target depends on the id only, so a
+// refetch of the document does not restart presence.
+const loaded = computed(() => !!d.value)
+const target = computed(() => (loaded.value ? memberTarget(id.value) : null))
+const comments = useComments(target)
+const { viewers } = usePresence(target, comments.refresh)
+const pending = ref<{ anchor: Anchor; slide?: number } | null>(null)
+const active = ref<number | null>(null)
+const missing = ref<number[]>([])
+const commentable = ref<InstanceType<typeof CommentableText> | null>(null)
+function activate(cid: number) {
+  active.value = cid
+  commentable.value?.reveal(cid)
+}
+
+const presentOpen = ref(false)
+const presentStart = ref(0)
+function present(from = 0) {
+  presentStart.value = from
+  presentOpen.value = true
+}
+const slidesOpen = ref(false)
+const decks = useDerivedDecks(id, computed(() => d.value?.kind === 'page'))
+// The page moved on since the deck's slides were made from it.
+const fromOutdated = computed(() => {
+  const f = d.value?.derivedFrom
+  return !!f && f.version > 0 && f.currentVersion > f.version
+})
 
 // Editing: the version the edit started from goes with the save, so a
 // save over someone else's is refused and both texts are shown.
@@ -114,8 +155,16 @@ const regenerate = useMutation({
     unwrap(
       api.POST('/documents/{id}/regenerate', {
         params: { path: { id: id.value } },
+        // A deck made from a page reads the page as it is now.
         body: d.value?.source
-          ? { source: { ...d.value.source, instruction: regen.instruction.trim() || undefined, template: regen.template || d.value.source.template } }
+          ? {
+              source: {
+                ...d.value.source,
+                instruction: regen.instruction.trim() || undefined,
+                template: regen.template || d.value.source.template,
+                documentVersion: undefined,
+              },
+            }
           : {},
       }),
     ),
@@ -162,6 +211,7 @@ const restore = useMutation({
     <PageHeader :title="editing ? t('documents.editing') : d.title">
       <template #below>
         <div class="dp-meta">
+          <span v-if="isSlides" class="badge b-gray">{{ t('documents.docKind_slides') }}</span>
           <span v-if="d.type === 'public'" class="badge b-info">{{ t('documents.public') }}</span>
           <span v-else class="badge b-gray">{{ t('documents.private') }}</span>
           <span class="tkey">{{ t('documents.versionN', { n: d.version }) }}</span>
@@ -169,10 +219,13 @@ const restore = useMutation({
           <span class="tkey">{{ ago(d.updatedAt, locale) }}</span>
           <span v-if="d.dataAsOf" class="tkey">{{ t('documents.dataAsOf', { when: new Date(d.dataAsOf).toLocaleString(locale) }) }}</span>
           <span v-if="d.access !== 'owner'" class="tkey">{{ t(`documents.youCan_${d.access}`) }}</span>
+          <ViewersBar :viewers="viewers" />
         </div>
       </template>
       <div v-if="!editing" class="dp-actions">
-        <button v-if="canEdit" type="button" class="btn btn-p" :disabled="busy" @click="startEdit(d)"><HiIcon name="rules" />{{ t('documents.edit') }}</button>
+        <button v-if="isSlides && d.version > 0" type="button" class="btn btn-p" @click="present()"><HiIcon name="play" />{{ t('documents.present') }}</button>
+        <button v-if="canEdit" type="button" class="btn" :class="{ 'btn-p': !isSlides }" :disabled="busy" @click="startEdit(d)"><HiIcon name="rules" />{{ t('documents.edit') }}</button>
+        <button v-if="!isSlides && d.version > 0" type="button" class="btn" @click="slidesOpen = true"><HiIcon name="slides" />{{ t('documents.makeSlides') }}</button>
         <button v-if="canEdit && d.source" type="button" class="btn" :disabled="busy" @click="openRegen"><HiIcon name="assistant" />{{ t('documents.regenerate') }}</button>
         <button v-if="isOwner" type="button" class="btn" @click="shareOpen = true"><HiIcon name="users" />{{ t('documents.share') }}</button>
         <DownloadMenu v-if="d.version > 0" :md-path="downloadPath(d.id, 'md')" :pdf-path="downloadPath(d.id, 'pdf')" :name="`document-${d.id}`" />
@@ -198,6 +251,19 @@ const restore = useMutation({
         </button>
       </div>
     </div>
+    <div v-if="d.derivedFrom && !editing" class="help" :class="{ warn: fromOutdated }" style="margin-bottom: 16px">
+      <div>
+        <p>
+          {{ t('documents.madeFrom') }}
+          <RouterLink :to="{ name: 'document', params: { id: d.derivedFrom.id } }">{{ d.derivedFrom.title }}</RouterLink>
+          <template v-if="d.derivedFrom.version"> · {{ t('documents.versionN', { n: d.derivedFrom.version }) }}.</template>
+          <template v-if="fromOutdated"> {{ t('documents.sourceChanged', { n: d.derivedFrom.currentVersion }) }}</template>
+        </p>
+        <button v-if="fromOutdated && canEdit && d.source" type="button" class="btn btn-s" style="margin-top: 8px" :disabled="busy || regenerate.isPending.value" @click="regenerate.mutate()">
+          {{ t('documents.regenerate') }}
+        </button>
+      </div>
+    </div>
     <span v-if="error && !editing" class="ferr" role="alert">{{ error }}</span>
 
     <div class="cfg-grid">
@@ -211,10 +277,14 @@ const restore = useMutation({
             <div class="field">
               <label for="dp-body">{{ t('documents.markdown') }}</label>
               <textarea id="dp-body" v-model="draft.body" class="dp-text" spellcheck="true" />
+              <span v-if="isSlides" class="fhelp">{{ t('documents.slidesHelp') }}</span>
             </div>
             <div class="field">
               <span class="flbl">{{ t('documents.preview') }}</span>
-              <div class="dp-preview"><ReportView :markdown="draft.body" /></div>
+              <div class="dp-preview">
+                <SlideDeck v-if="isSlides" :markdown="draft.body" notes compact @present="present" />
+                <ReportView v-else :markdown="draft.body" />
+              </div>
             </div>
           </div>
           <div v-if="conflict" class="help warn" role="alert">
@@ -238,13 +308,51 @@ const restore = useMutation({
         </section>
         <section v-else class="card">
           <p v-if="!d.body && d.version === 0" class="hint">{{ busy ? t('documents.writingNow') : t('documents.emptyBody') }}</p>
-          <ReportView v-else :markdown="d.body" />
+          <CommentableText
+            v-else
+            ref="commentable"
+            :threads="comments.threads.value"
+            :active-id="active"
+            :slides="isSlides"
+            :can-comment="true"
+            :content-key="d.body"
+            @select="(v) => (pending = v)"
+            @activate="activate"
+            @missing="(ids) => (missing = ids)"
+          >
+            <SlideDeck v-if="isSlides" :markdown="d.body" notes @present="present" />
+            <ReportView v-else :markdown="d.body" />
+          </CommentableText>
         </section>
       </div>
       <aside class="cfg-side">
+        <CommentsPanel
+          v-if="d.version > 0"
+          :c="comments"
+          :pending="editing ? null : pending"
+          :active-id="active"
+          :missing="missing"
+          :can-comment="true"
+          :public-notice="d.type === 'public'"
+          @activate="activate"
+          @cancel="pending = null"
+        />
         <section v-if="d.type === 'public' && d.publicUrl" class="card">
           <div class="ch"><h2>{{ t('documents.publicLink') }}</h2></div>
           <a :href="d.publicUrl" target="_blank" rel="noopener noreferrer" class="dp-url">{{ d.publicUrl }}</a>
+        </section>
+        <section v-if="!isSlides && decks.data.value?.length" class="card">
+          <div class="ch"><h2>{{ t('documents.decksTitle') }}</h2></div>
+          <ul class="dp-decks">
+            <li v-for="x in decks.data.value" :key="x.id">
+              <RouterLink :to="{ name: 'document', params: { id: x.id } }">{{ x.title }}</RouterLink>
+              <span class="hint">
+                <span v-if="writing(x)" class="badge b-warn">{{ t('documents.writing') }}</span>
+                <span v-if="x.type === 'public'" class="badge b-info">{{ t('documents.public') }}</span>
+                {{ x.ownerName }} · {{ ago(x.updatedAt, locale) }}
+              </span>
+            </li>
+          </ul>
         </section>
         <DocumentTickets :doc="d" />
         <DocumentVersions ref="versionsRef" :doc="d" />
@@ -252,6 +360,8 @@ const restore = useMutation({
     </div>
 
     <ShareDrawer v-if="isOwner" v-model="shareOpen" :doc="d" />
+    <PresentMode v-if="isSlides" v-model="presentOpen" :markdown="editing ? draft.body : d.body" :start="presentStart" allow-notes />
+    <NewDocumentDrawer v-if="!isSlides" v-model="slidesOpen" :from-doc="{ id: d.id, title: d.title }" />
     <FormDrawer v-model="regenOpen" :title="t('documents.regenerate')" :subtitle="t('documents.regenerateSub')">
       <div v-if="regenTemplates.length" class="field">
         <span class="flbl">{{ t('documents.template') }}</span>
@@ -281,5 +391,9 @@ const restore = useMutation({
 .dp-preview { min-height: 520px; max-height: 70vh; overflow: auto; border: 1px solid var(--line-2); border-radius: 9px; padding: 12px; background: var(--field); }
 .dp-theirs { white-space: pre-wrap; word-break: break-word; max-height: 240px; overflow: auto; font-size: 12.5px; }
 .dp-url { word-break: break-all; font-size: 13.5px; }
+.dp-decks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.dp-decks li { display: flex; flex-direction: column; gap: 3px; }
+.dp-decks a { font-weight: 700; color: inherit; text-decoration: none; }
+.dp-decks a:hover { text-decoration: underline; }
 textarea { font: inherit; }
 </style>

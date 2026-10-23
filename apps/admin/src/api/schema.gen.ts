@@ -4347,6 +4347,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/documents/{id}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        /** The comments on a document, oldest first (view access) */
+        get: operations["listDocumentComments"];
+        put?: never;
+        /** Comment on selected text, or reply to a comment (view access is enough) */
+        post: operations["addDocumentComment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documents/{id}/comments/{commentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+                commentId: components["parameters"]["CommentID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a comment, and a thread's replies with it (its author, or the document's owner) */
+        delete: operations["deleteDocumentComment"];
+        options?: never;
+        head?: never;
+        /** Edit your comment, or resolve or reopen a thread (its author, or edit access) */
+        patch: operations["updateDocumentComment"];
+        trace?: never;
+    };
+    "/documents/{id}/presence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Say you have the document open (every 10 seconds) or are leaving; answers who is viewing it now */
+        post: operations["documentPresence"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tickets/{key}/documents": {
         parameters: {
             query?: never;
@@ -4380,8 +4440,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * A public document, for anyone with its link
-         * @description Only the title, text, version and last update. Rate limited per address.
+         * A public document, for a guest of its link
+         * @description Only the kind, title, text, version and last update. Needs the guest's token (401 guest_required without). Rate limited per address.
          */
         get: operations["getPublicDocument"];
         put?: never;
@@ -4403,11 +4463,124 @@ export interface paths {
         };
         /**
          * Download a public document's current version
-         * @description The PDF is made ahead when the document is published or saved; until it is ready the answer is 202.
+         * @description The PDF is made ahead when the document is published or saved; until it is ready the answer is 202. Needs the guest's token.
          */
         get: operations["downloadPublicDocument"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/documents/{token}/info": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: components["parameters"]["PublicToken"];
+            };
+            cookie?: never;
+        };
+        /**
+         * What a public link opens, before the reader says who they are
+         * @description The kind and title only, and Google's client id when "Continue with Google" is on.
+         */
+        get: operations["getPublicDocumentInfo"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/documents/{token}/guest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: components["parameters"]["PublicToken"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Say who you are to open a public document; signed in, your account says it
+         * @description Answers the guest's secret token, sent afterwards as X-Guest-Token. It works only on this document, and only while it is public.
+         */
+        post: operations["joinPublicDocument"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/documents/{token}/comments": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The guest's secret token from joinPublicDocument */
+                "X-Guest-Token"?: components["parameters"]["GuestToken"];
+            };
+            path: {
+                token: components["parameters"]["PublicToken"];
+            };
+            cookie?: never;
+        };
+        /** The comments on a public document, for its guests */
+        get: operations["listPublicDocumentComments"];
+        put?: never;
+        /** A guest comments on selected text, or replies */
+        post: operations["addPublicDocumentComment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/documents/{token}/comments/{commentId}": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The guest's secret token from joinPublicDocument */
+                "X-Guest-Token"?: components["parameters"]["GuestToken"];
+            };
+            path: {
+                token: components["parameters"]["PublicToken"];
+                commentId: components["parameters"]["CommentID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** A guest deletes their comment */
+        delete: operations["deletePublicDocumentComment"];
+        options?: never;
+        head?: never;
+        /** A guest edits their comment, or resolves or reopens their thread */
+        patch: operations["updatePublicDocumentComment"];
+        trace?: never;
+    };
+    "/public/documents/{token}/presence": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The guest's secret token from joinPublicDocument */
+                "X-Guest-Token"?: components["parameters"]["GuestToken"];
+            };
+            path: {
+                token: components["parameters"]["PublicToken"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** A guest says they have the document open, or are leaving; answers who is viewing it now */
+        post: operations["publicDocumentPresence"];
         delete?: never;
         options?: never;
         head?: never;
@@ -8162,19 +8335,29 @@ export interface components {
          */
         DocumentAccess: "none" | "view" | "edit" | "owner";
         /**
+         * @description page: a document to read; slides: a deck to present, Markdown with a line --- between slides and "Notes:" starting a slide's speaker notes
+         * @enum {string}
+         */
+        DocumentKind: "page" | "slides";
+        /**
          * @description What agnts makes the document from. report: one ticket's report (tickets has its key). tickets: chosen tickets,
          *     or a filter, with the period limiting by last update. commits: repositories' commits in a period (from is
          *     required), on branch (the default branch when empty), optionally by one author. pulls: repositories' pull
          *     requests by state and period, or chosen numbers in one repository. repo: one repository read in the sandbox.
+         *     document: a page you can open (documentId), made into slides; only for slide decks. documentVersion is the
+         *     version read: 0 or absent reads the current one, and the server records which.
          */
         DocumentSourceInput: {
             /** @enum {string} */
-            kind: "report" | "tickets" | "commits" | "pulls" | "repo";
+            kind: "report" | "tickets" | "commits" | "pulls" | "repo" | "document";
             /**
              * @description Defaults by kind
              * @enum {string}
              */
-            template?: "status" | "release_notes" | "pr_review" | "repo_review" | "ticket_summary" | "blank";
+            template?: "status" | "release_notes" | "pr_review" | "repo_review" | "ticket_summary" | "presentation" | "blank";
+            /** Format: int64 */
+            documentId?: number;
+            documentVersion?: number;
             instruction?: string;
             tickets?: string[];
             filter?: {
@@ -8214,6 +8397,7 @@ export interface components {
         DocumentSummary: {
             /** Format: int64 */
             id: number;
+            kind: components["schemas"]["DocumentKind"];
             title: string;
             /** @description The current version; 0 while agnts writes the first one */
             version: number;
@@ -8250,6 +8434,16 @@ export interface components {
              * @description When agnts gathered the facts of the current AI version
              */
             dataAsOf?: string;
+            /** @description The page a slide deck was made from; absent when there is none or you cannot open it */
+            derivedFrom?: {
+                /** Format: int64 */
+                id: number;
+                title: string;
+                /** @description The version the current slides were made from; 0 while the first are being made */
+                version: number;
+                /** @description The page's version now */
+                currentVersion: number;
+            };
         };
         DocumentConflict: {
             code: string;
@@ -8257,6 +8451,7 @@ export interface components {
             current?: components["schemas"]["Document"];
         };
         DocumentInput: {
+            kind?: components["schemas"]["DocumentKind"];
             title: string;
             body?: string;
             /** @enum {string} */
@@ -8344,9 +8539,106 @@ export interface components {
             /** Format: date-time */
             linkedAt: string;
         };
-        PublicDocument: {
+        /** @description A comment. A thread's first comment is on a selection (quote, with prefix and suffix to tell repeats apart, and for slides the slide); replies have parentId. */
+        DocumentComment: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            parentId?: number;
+            authorName: string;
+            /**
+             * @description gone when the member or guest no longer exists
+             * @enum {string}
+             */
+            authorKind: "member" | "guest" | "gone";
+            /**
+             * @description How a guest said who they are: a typed name, Google, or their agnts account
+             * @enum {string}
+             */
+            authorVia?: "name" | "google" | "account";
+            /** @description The email Google or an account gave for a guest; members only see it */
+            authorEmail?: string;
+            body: string;
+            quote: string;
+            prefix: string;
+            suffix: string;
+            /** @description The slide, from 0, for slides */
+            slide?: number;
+            /** @description The document's version when it was written */
+            version: number;
+            /** Format: date-time */
+            resolvedAt?: string;
+            resolvedBy?: string;
+            /** @description You wrote it */
+            mine: boolean;
+            /** @description You may resolve or reopen this thread */
+            canResolve: boolean;
+            canDelete: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        DocumentCommentInput: {
+            body: string;
+            /**
+             * Format: int64
+             * @description The thread this replies to
+             */
+            parentId?: number;
+            /** @description The selected text; required for a thread */
+            quote?: string;
+            prefix?: string;
+            suffix?: string;
+            slide?: number;
+        };
+        DocumentCommentPatch: {
+            body?: string;
+            resolved?: boolean;
+        };
+        PresenceInput: {
+            leaving?: boolean;
+        };
+        DocumentViewer: {
+            /** @enum {string} */
+            kind: "member" | "guest";
+            /** Format: int64 */
+            id: number;
+            name: string;
+            /**
+             * @description How a guest said who they are
+             * @enum {string}
+             */
+            via?: "name" | "google" | "account";
+            you: boolean;
+        };
+        DocumentPresence: {
+            viewers: components["schemas"]["DocumentViewer"][];
+            /** @description Changes whenever the comments do; fetch them again when it moves */
+            commentsStamp: string;
+        };
+        PublicDocumentInfo: {
+            kind: components["schemas"]["DocumentKind"];
             title: string;
-            /** @description Markdown */
+            /** @description Shown when "Continue with Google" is on */
+            googleClientId?: string;
+        };
+        /** @description A name, or the ID token from Google's button. Neither, from someone signed in to agnts, joins as their account; without a session that is a 400. */
+        GuestJoin: {
+            name?: string;
+            googleCredential?: string;
+        };
+        GuestSession: {
+            /** @description Send it as X-Guest-Token */
+            token: string;
+            name: string;
+            /** @enum {string} */
+            via: "name" | "google" | "account";
+        };
+        PublicDocument: {
+            kind: components["schemas"]["DocumentKind"];
+            title: string;
+            /** @description Markdown; a slide deck's speaker notes are left out */
             body: string;
             version: number;
             /** Format: date-time */
@@ -8467,6 +8759,9 @@ export interface components {
         };
     };
     parameters: {
+        CommentID: number;
+        /** @description The guest's secret token from joinPublicDocument */
+        GuestToken: string;
         DocumentID: number;
         DocumentVersionNo: number;
         DocumentFormat: "md" | "pdf";
@@ -15019,6 +15314,10 @@ export interface operations {
                 q?: string;
                 /** @description Only documents linked to this ticket */
                 ticket?: string;
+                /** @description Only pages, or only slide decks */
+                kind?: components["schemas"]["DocumentKind"];
+                /** @description Only the slide decks made from this page */
+                derivedFrom?: number;
             };
             header?: never;
             path?: never;
@@ -15509,6 +15808,137 @@ export interface operations {
             503: components["responses"]["RenderFailed"];
         };
     };
+    listDocumentComments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentComment"][];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    addDocumentComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentCommentInput"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentComment"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    deleteDocumentComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+                commentId: components["parameters"]["CommentID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    updateDocumentComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+                commentId: components["parameters"]["CommentID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentCommentPatch"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentComment"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    documentPresence: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PresenceInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentPresence"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
     listTicketDocuments: {
         parameters: {
             query?: never;
@@ -15570,7 +16000,10 @@ export interface operations {
     getPublicDocument: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description The guest's secret token from joinPublicDocument */
+                "X-Guest-Token"?: components["parameters"]["GuestToken"];
+            };
             path: {
                 token: components["parameters"]["PublicToken"];
             };
@@ -15596,7 +16029,10 @@ export interface operations {
             query?: {
                 format?: components["parameters"]["DocumentFormat"];
             };
-            header?: never;
+            header?: {
+                /** @description The guest's secret token from joinPublicDocument */
+                "X-Guest-Token"?: components["parameters"]["GuestToken"];
+            };
             path: {
                 token: components["parameters"]["PublicToken"];
             };
@@ -15618,6 +16054,215 @@ export interface operations {
             404: components["responses"]["NotFound"];
             429: components["responses"]["TooManyRequests"];
             503: components["responses"]["RenderFailed"];
+        };
+    };
+    getPublicDocumentInfo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: components["parameters"]["PublicToken"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicDocumentInfo"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
+    joinPublicDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: components["parameters"]["PublicToken"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GuestJoin"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GuestSession"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
+    listPublicDocumentComments: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The guest's secret token from joinPublicDocument */
+                "X-Guest-Token"?: components["parameters"]["GuestToken"];
+            };
+            path: {
+                token: components["parameters"]["PublicToken"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentComment"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
+    addPublicDocumentComment: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The guest's secret token from joinPublicDocument */
+                "X-Guest-Token"?: components["parameters"]["GuestToken"];
+            };
+            path: {
+                token: components["parameters"]["PublicToken"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentCommentInput"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentComment"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
+    deletePublicDocumentComment: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The guest's secret token from joinPublicDocument */
+                "X-Guest-Token"?: components["parameters"]["GuestToken"];
+            };
+            path: {
+                token: components["parameters"]["PublicToken"];
+                commentId: components["parameters"]["CommentID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
+    updatePublicDocumentComment: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The guest's secret token from joinPublicDocument */
+                "X-Guest-Token"?: components["parameters"]["GuestToken"];
+            };
+            path: {
+                token: components["parameters"]["PublicToken"];
+                commentId: components["parameters"]["CommentID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentCommentPatch"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentComment"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
+    publicDocumentPresence: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The guest's secret token from joinPublicDocument */
+                "X-Guest-Token"?: components["parameters"]["GuestToken"];
+            };
+            path: {
+                token: components["parameters"]["PublicToken"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PresenceInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentPresence"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
         };
     };
 }

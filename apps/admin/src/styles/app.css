@@ -78,6 +78,8 @@
 .gsi-or { display: flex; align-items: center; gap: 12px; color: var(--ink-3); font-size: 12.5px; }
 .gsi-or::before, .gsi-or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 .gsi-btn { display: flex; justify-content: center; min-height: 44px; color-scheme: normal; }
+/* Google draws a bare logo when it refuses the button (an origin it does not know): keep it small. */
+.gsi-btn > svg { width: 24px; height: 24px; }
 .gsi-wait { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; margin: 0; color: var(--ink-2); font-size: 14px; }
 .spin { width: 16px; height: 16px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: spin .7s linear infinite; }
 .prefs { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }

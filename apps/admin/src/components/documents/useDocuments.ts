@@ -1,15 +1,16 @@
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
-import { computed, type Ref } from 'vue'
+import { computed, ref, type Ref } from 'vue'
 import { api, apiPath, HttpError, unwrap } from '../../api/client'
-import type { Document, DocumentSource, DocumentSummary } from '../../api/types'
+import type { Document, DocumentKind, DocumentSource, DocumentSummary } from '../../api/types'
 
 export type DocScope = 'all' | 'mine' | 'shared' | 'deleted'
 
-/** The documents the person can open, by scope and title words. */
-export function useDocumentList(scope: Ref<DocScope>, q: Ref<string>) {
+/** The documents the person can open, by scope, kind ('' for both) and title words. */
+export function useDocumentList(scope: Ref<DocScope>, q: Ref<string>, kind: Ref<DocumentKind | ''> = ref('')) {
   return useQuery({
-    queryKey: computed(() => ['documents', scope.value, q.value]),
-    queryFn: () => unwrap(api.GET('/documents', { params: { query: { scope: scope.value, q: q.value || undefined } } })),
+    queryKey: computed(() => ['documents', scope.value, q.value, kind.value]),
+    queryFn: () =>
+      unwrap(api.GET('/documents', { params: { query: { scope: scope.value, q: q.value || undefined, kind: kind.value || undefined } } })),
     // A generation in progress: look again until it is written.
     refetchInterval: (query) => (busy(query.state.data) ? 4000 : false),
   })
@@ -57,6 +58,17 @@ export const TEMPLATES: Record<DocumentSource['kind'], NonNullable<DocumentSourc
   commits: ['release_notes', 'status', 'blank'],
   pulls: ['pr_review', 'release_notes', 'blank'],
   repo: ['repo_review', 'blank'],
+  document: ['presentation', 'blank'],
+}
+
+/** The slide decks made from a page that the person can open. */
+export function useDerivedDecks(id: Ref<number>, enabled: Ref<boolean>) {
+  return useQuery({
+    queryKey: computed(() => ['documents', 'derived', id.value]),
+    queryFn: () => unwrap(api.GET('/documents', { params: { query: { derivedFrom: id.value } } })),
+    enabled: computed(() => enabled.value && id.value > 0),
+    refetchInterval: (query) => (busy(query.state.data) ? 4000 : false),
+  })
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -72,10 +84,10 @@ function fileName(h: string | null, fallback: string): string {
  * Downloads a file from an API path. A PDF being made answers 202: it asks
  * again after Retry-After, up to about a minute, calling onWait meanwhile.
  */
-export async function downloadFile(path: string, fallback: string, onWait?: () => void): Promise<void> {
+export async function downloadFile(path: string, fallback: string, onWait?: () => void, headers?: Record<string, string>): Promise<void> {
   const deadline = Date.now() + 75_000
   for (;;) {
-    const res = await fetch(path, { credentials: 'same-origin' })
+    const res = await fetch(path, { credentials: 'same-origin', headers })
     if (res.status === 202 && Date.now() < deadline) {
       onWait?.()
       const ra = Number(res.headers.get('Retry-After'))

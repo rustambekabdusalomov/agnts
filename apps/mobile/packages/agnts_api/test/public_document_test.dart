@@ -7,12 +7,17 @@ void main() {
   // TODO add properties to the entity
 
   group(PublicDocument, () {
+    // DocumentKind kind
+    test('to test the property `kind`', () async {
+      // TODO
+    });
+
     // String title
     test('to test the property `title`', () async {
       // TODO
     });
 
-    // Markdown
+    // Markdown; a slide deck's speaker notes are left out
     // String body
     test('to test the property `body`', () async {
       // TODO

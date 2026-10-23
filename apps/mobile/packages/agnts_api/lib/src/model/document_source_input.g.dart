@@ -11,6 +11,10 @@ abstract class _$DocumentSourceInputCWProxy {
 
   DocumentSourceInput template(DocumentSourceInputTemplateEnum? template);
 
+  DocumentSourceInput documentId(int? documentId);
+
+  DocumentSourceInput documentVersion(int? documentVersion);
+
   DocumentSourceInput instruction(String? instruction);
 
   DocumentSourceInput tickets(List<String>? tickets);
@@ -40,6 +44,8 @@ abstract class _$DocumentSourceInputCWProxy {
   DocumentSourceInput call({
     DocumentSourceInputKindEnum kind,
     DocumentSourceInputTemplateEnum? template,
+    int? documentId,
+    int? documentVersion,
     String? instruction,
     List<String>? tickets,
     DocumentSourceInputFilter? filter,
@@ -66,6 +72,14 @@ class _$DocumentSourceInputCWProxyImpl implements _$DocumentSourceInputCWProxy {
   @override
   DocumentSourceInput template(DocumentSourceInputTemplateEnum? template) =>
       this(template: template);
+
+  @override
+  DocumentSourceInput documentId(int? documentId) =>
+      this(documentId: documentId);
+
+  @override
+  DocumentSourceInput documentVersion(int? documentVersion) =>
+      this(documentVersion: documentVersion);
 
   @override
   DocumentSourceInput instruction(String? instruction) =>
@@ -111,6 +125,8 @@ class _$DocumentSourceInputCWProxyImpl implements _$DocumentSourceInputCWProxy {
   DocumentSourceInput call({
     Object? kind = const $CopyWithPlaceholder(),
     Object? template = const $CopyWithPlaceholder(),
+    Object? documentId = const $CopyWithPlaceholder(),
+    Object? documentVersion = const $CopyWithPlaceholder(),
     Object? instruction = const $CopyWithPlaceholder(),
     Object? tickets = const $CopyWithPlaceholder(),
     Object? filter = const $CopyWithPlaceholder(),
@@ -131,6 +147,14 @@ class _$DocumentSourceInputCWProxyImpl implements _$DocumentSourceInputCWProxy {
           ? _value.template
           // ignore: cast_nullable_to_non_nullable
           : template as DocumentSourceInputTemplateEnum?,
+      documentId: documentId == const $CopyWithPlaceholder()
+          ? _value.documentId
+          // ignore: cast_nullable_to_non_nullable
+          : documentId as int?,
+      documentVersion: documentVersion == const $CopyWithPlaceholder()
+          ? _value.documentVersion
+          // ignore: cast_nullable_to_non_nullable
+          : documentVersion as int?,
       instruction: instruction == const $CopyWithPlaceholder()
           ? _value.instruction
           // ignore: cast_nullable_to_non_nullable
@@ -199,6 +223,11 @@ DocumentSourceInput _$DocumentSourceInputFromJson(Map<String, dynamic> json) =>
           (v) =>
               $enumDecodeNullable(_$DocumentSourceInputTemplateEnumEnumMap, v),
         ),
+        documentId: $checkedConvert('documentId', (v) => (v as num?)?.toInt()),
+        documentVersion: $checkedConvert(
+          'documentVersion',
+          (v) => (v as num?)?.toInt(),
+        ),
         instruction: $checkedConvert('instruction', (v) => v as String?),
         tickets: $checkedConvert(
           'tickets',
@@ -242,6 +271,8 @@ Map<String, dynamic> _$DocumentSourceInputToJson(
 ) => <String, dynamic>{
   'kind': _$DocumentSourceInputKindEnumEnumMap[instance.kind]!,
   'template': ?_$DocumentSourceInputTemplateEnumEnumMap[instance.template],
+  'documentId': ?instance.documentId,
+  'documentVersion': ?instance.documentVersion,
   'instruction': ?instance.instruction,
   'tickets': ?instance.tickets,
   'filter': ?instance.filter?.toJson(),
@@ -260,6 +291,7 @@ const _$DocumentSourceInputKindEnumEnumMap = {
   DocumentSourceInputKindEnum.commits: 'commits',
   DocumentSourceInputKindEnum.pulls: 'pulls',
   DocumentSourceInputKindEnum.repo: 'repo',
+  DocumentSourceInputKindEnum.document: 'document',
 };
 
 const _$DocumentSourceInputTemplateEnumEnumMap = {
@@ -268,6 +300,7 @@ const _$DocumentSourceInputTemplateEnumEnumMap = {
   DocumentSourceInputTemplateEnum.prReview: 'pr_review',
   DocumentSourceInputTemplateEnum.repoReview: 'repo_review',
   DocumentSourceInputTemplateEnum.ticketSummary: 'ticket_summary',
+  DocumentSourceInputTemplateEnum.presentation: 'presentation',
   DocumentSourceInputTemplateEnum.blank: 'blank',
 };
 

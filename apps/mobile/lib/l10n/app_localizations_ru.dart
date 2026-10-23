@@ -2939,6 +2939,107 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get documentsDocKind => 'Вид';
+
+  @override
+  String get documentsDocKind_page => 'Страница';
+
+  @override
+  String get documentsDocKind_slides => 'Слайды';
+
+  @override
+  String get documentsDocKindHelp_page => 'Документ для чтения: подробный, для команды.';
+
+  @override
+  String get documentsDocKindHelp_slides => 'Презентация: коротко, для клиентов и людей вне команды.';
+
+  @override
+  String get documentsKindFilter_all => 'Страницы и слайды';
+
+  @override
+  String get documentsKindFilter_page => 'Страницы';
+
+  @override
+  String get documentsKindFilter_slides => 'Слайды';
+
+  @override
+  String get documentsKind_document => 'Документ';
+
+  @override
+  String get documentsKindHelp_document =>
+      'Страница этого пространства, пересказанная слайдами. Слайды — отдельный документ со своим доступом.';
+
+  @override
+  String get documentsSourceDocument => 'Документ';
+
+  @override
+  String get documentsChooseDocument => 'Выберите документ';
+
+  @override
+  String get documentsTemplate_presentation => 'Презентация';
+
+  @override
+  String get documentsTemplateHint_presentation => 'Главное, что это значит, следующие шаги';
+
+  @override
+  String get documentsMakeSlides => 'Сделать слайды';
+
+  @override
+  String documentsSlidesOf(String title) {
+    return '$title — слайды';
+  }
+
+  @override
+  String get documentsSlidesSub => 'agnts перескажет этот документ слайдами, в новом документе со своим доступом.';
+
+  @override
+  String get documentsMadeFrom => 'Сделано из документа';
+
+  @override
+  String documentsSourceChanged(String n) {
+    return 'С тех пор документ изменился (сейчас версия $n).';
+  }
+
+  @override
+  String get documentsDecksTitle => 'Слайды из этого документа';
+
+  @override
+  String get documentsSlidesHelp =>
+      'Строка из одних --- начинает новый слайд. Строка, начинающаяся с Notes:, открывает заметки докладчика к слайду.';
+
+  @override
+  String get documentsNoSlides => 'Слайдов пока нет. Разделяйте слайды строкой ---.';
+
+  @override
+  String get documentsPresent => 'Показать';
+
+  @override
+  String documentsPresentFrom(String n) {
+    return 'Показать со слайда $n';
+  }
+
+  @override
+  String get documentsStopPresenting => 'Закончить показ';
+
+  @override
+  String get documentsPrevSlide => 'Предыдущий слайд';
+
+  @override
+  String get documentsNextSlide => 'Следующий слайд';
+
+  @override
+  String get documentsNotes => 'Заметки';
+
+  @override
+  String get documentsNoNotes => 'К этому слайду заметок нет.';
+
+  @override
+  String get documentsStarterSubtitle => 'О чём это и когда';
+
+  @override
+  String get documentsStarterPoint => 'Первый пункт';
+
+  @override
   String get draftsTitle => 'Комментарии ревью';
 
   @override
@@ -6807,6 +6908,35 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get mdocumentsLedgerSpent => 'Списание за документ';
+
+  @override
+  String get mdocumentsSlides => 'Слайды';
+
+  @override
+  String get mdocumentsPresent => 'Показать';
+
+  @override
+  String get mdocumentsNotes => 'Заметки';
+
+  @override
+  String get mdocumentsNoNotes => 'К этому слайду заметок нет.';
+
+  @override
+  String get mdocumentsNoSlides => 'Слайдов пока нет.';
+
+  @override
+  String get mdocumentsPrevSlide => 'Предыдущий слайд';
+
+  @override
+  String get mdocumentsNextSlide => 'Следующий слайд';
+
+  @override
+  String get mdocumentsStopPresenting => 'Закончить показ';
+
+  @override
+  String mdocumentsMadeFrom(String title) {
+    return 'Сделано из «$title»';
+  }
 
   @override
   String get mgroupsGroups => 'Группы';

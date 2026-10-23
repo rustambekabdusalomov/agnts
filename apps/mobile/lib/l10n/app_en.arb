@@ -1424,7 +1424,7 @@
   "documentsPrNumbersHelp": "Optional, in one repository. Empty: by state and period.",
   "documentsFrom": "From",
   "documentsTo": "To",
-  "documentsTemplate": "Shape",
+  "documentsTemplate": "Format",
   "documentsTemplate_status": "Status report",
   "documentsTemplate_release_notes": "Release notes",
   "documentsTemplate_pr_review": "Pull request review",
@@ -1633,6 +1633,58 @@
       }
     }
   },
+  "documentsDocKind": "Kind",
+  "documentsDocKind_page": "Page",
+  "documentsDocKind_slides": "Slides",
+  "documentsDocKindHelp_page": "A document to read: detailed, for the team.",
+  "documentsDocKindHelp_slides": "A deck to present: short, for clients and people outside the team.",
+  "documentsKindFilter_all": "Pages and slides",
+  "documentsKindFilter_page": "Pages",
+  "documentsKindFilter_slides": "Slides",
+  "documentsKind_document": "A document",
+  "documentsKindHelp_document": "A page of this workspace, retold as slides. The slides are a separate document with their own sharing.",
+  "documentsSourceDocument": "Document",
+  "documentsChooseDocument": "Choose a document",
+  "documentsTemplate_presentation": "Presentation",
+  "documentsTemplateHint_presentation": "Key points, what they mean, next steps",
+  "documentsMakeSlides": "Make slides",
+  "documentsSlidesOf": "{title} — slides",
+  "@documentsSlidesOf": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsSlidesSub": "agnts retells this document as slides, in a new document you share on its own.",
+  "documentsMadeFrom": "Made from",
+  "documentsSourceChanged": "The document has changed since (now version {n}).",
+  "@documentsSourceChanged": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsDecksTitle": "Slides made from this document",
+  "documentsSlidesHelp": "A line with only --- starts a new slide. A line starting with Notes: begins the speaker notes of its slide.",
+  "documentsNoSlides": "No slides yet. Separate slides with a line of ---.",
+  "documentsPresent": "Present",
+  "documentsPresentFrom": "Present from slide {n}",
+  "@documentsPresentFrom": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsStopPresenting": "Stop presenting",
+  "documentsPrevSlide": "Previous slide",
+  "documentsNextSlide": "Next slide",
+  "documentsNotes": "Notes",
+  "documentsNoNotes": "No notes for this slide.",
+  "documentsStarterSubtitle": "What it is about, and when",
+  "documentsStarterPoint": "The first point",
   "draftsTitle": "Review comments",
   "draftsSub": "agnts's comments stay here until you accept them. Only accepted ones are published on {host}, together as one review; the rest never leave agnts.",
   "@draftsSub": {
@@ -3896,6 +3948,22 @@
   "mdocumentsFromReport": "Make a document from this report",
   "mdocumentsFromReportStarted": "agnts is writing the document",
   "mdocumentsLedgerSpent": "Spent on a document",
+  "mdocumentsSlides": "Slides",
+  "mdocumentsPresent": "Present",
+  "mdocumentsNotes": "Notes",
+  "mdocumentsNoNotes": "No notes for this slide.",
+  "mdocumentsNoSlides": "No slides yet.",
+  "mdocumentsPrevSlide": "Previous slide",
+  "mdocumentsNextSlide": "Next slide",
+  "mdocumentsStopPresenting": "Stop presenting",
+  "mdocumentsMadeFrom": "Made from “{title}”",
+  "@mdocumentsMadeFrom": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "mgroupsGroups": "Groups",
   "mgroupsRepos": "Repositories",
   "mgroupsPickHint": "Pick one or more. The first one is the main one.",

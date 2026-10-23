@@ -7,7 +7,8 @@ import { downloadFile } from './useDocuments'
 
 // Download buttons for Markdown and PDF. A PDF made for the first time
 // takes a few seconds: the button says so while it waits.
-const props = defineProps<{ mdPath: string; pdfPath: string; name: string; small?: boolean }>()
+// headers go with each request (a guest's token on a public link).
+const props = defineProps<{ mdPath: string; pdfPath: string; name: string; small?: boolean; headers?: Record<string, string> }>()
 const { t } = useI18n()
 const busy = ref<'' | 'md' | 'pdf'>('')
 const preparing = ref(false)
@@ -18,7 +19,7 @@ async function get(format: 'md' | 'pdf') {
   preparing.value = false
   error.value = ''
   try {
-    await downloadFile(format === 'md' ? props.mdPath : props.pdfPath, `${props.name}.${format}`, () => (preparing.value = true))
+    await downloadFile(format === 'md' ? props.mdPath : props.pdfPath, `${props.name}.${format}`, () => (preparing.value = true), props.headers)
   } catch (e) {
     error.value = e instanceof HttpError && e.status === 503 ? t('documents.pdfFailed') : e instanceof HttpError && e.status === 202 ? t('documents.pdfSlow') : t('common.error')
   } finally {

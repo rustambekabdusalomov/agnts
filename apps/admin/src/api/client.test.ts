@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { api, setWorkspace } from './client'
+import { api, setUnauthorizedHandler, setWorkspace } from './client'
 
 // Records what the client sends, instead of the network.
 function recorder() {
@@ -61,5 +61,26 @@ describe('workspace routes', () => {
     setWorkspace('acme')
     await api.PUT('/account/claude', { baseUrl: 'http://localhost/api', fetch: r.fetch, body: { kind: 'subscription', token: 'x' } })
     expect(new URL(r.seen[0]!.url).pathname).toBe('/api/account/claude')
+  })
+})
+
+describe('signing out on 401', () => {
+  afterEach(() => setUnauthorizedHandler(() => {}))
+  const unauthorized = async () => new Response('{"code":"unauthorized","message":"no"}', { status: 401, headers: { 'Content-Type': 'application/json' } })
+
+  it('does not sign out when /auth/me says nobody is signed in, or a public link asks who you are', async () => {
+    // Public pages (/d/:token) load signed out: the router decides, not a 401.
+    let calls = 0
+    setUnauthorizedHandler(() => calls++)
+    await api.GET('/auth/me', { baseUrl: 'http://localhost/api', fetch: unauthorized })
+    await api.GET('/public/documents/{token}', { baseUrl: 'http://localhost/api', fetch: unauthorized, params: { path: { token: 'x' } } })
+    expect(calls).toBe(0)
+  })
+
+  it('signs out when any other call finds the session gone', async () => {
+    let calls = 0
+    setUnauthorizedHandler(() => calls++)
+    await api.GET('/documents', { baseUrl: 'http://localhost/api', fetch: unauthorized })
+    expect(calls).toBe(1)
   })
 })

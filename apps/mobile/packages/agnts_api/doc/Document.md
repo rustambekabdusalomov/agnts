@@ -9,6 +9,7 @@ import 'package:agnts_api/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **id** | **int** |  | 
+**kind** | [**DocumentKind**](DocumentKind.md) |  | 
 **title** | **String** |  | 
 **version** | **int** | The current version; 0 while agnts writes the first one | 
 **type** | **String** |  | 
@@ -26,6 +27,7 @@ Name | Type | Description | Notes
 **publicUrl** | **String** | The public link, while the document is public | [optional] 
 **source_** | [**DocumentSourceInput**](DocumentSourceInput.md) |  | [optional] 
 **dataAsOf** | [**DateTime**](DateTime.md) | When agnts gathered the facts of the current AI version | [optional] 
+**derivedFrom** | [**DocumentAllOfDerivedFrom**](DocumentAllOfDerivedFrom.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

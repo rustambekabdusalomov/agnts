@@ -80,6 +80,7 @@ class DocumentRow extends StatelessWidget {
             Text(l.mdocumentsMeta(d.ownerName, ciAgo(l, d.updatedAt.toLocal())), style: TextStyle(fontSize: 13, color: c.ink3)),
             const SizedBox(height: 6),
             Wrap(spacing: 6, runSpacing: 4, children: [
+              if (d.kind == DocumentKind.slides) ToneBadge(l.mdocumentsSlides, Tone.gray, small: true),
               d.type == DocumentSummaryTypeEnum.public
                   ? ToneBadge(l.mdocumentsTypePublic, Tone.info, small: true)
                   : ToneBadge(l.mdocumentsTypePrivate, Tone.gray, small: true),

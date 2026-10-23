@@ -44,6 +44,15 @@
     "ticketNone": "Hali bogʻlangan hujjatlar yoʻq.",
     "fromReport": "Hisobotdan hujjat yaratish",
     "fromReportStarted": "agnts hujjatni yozmoqda",
-    "ledgerSpent": "Hujjat uchun sarflandi"
+    "ledgerSpent": "Hujjat uchun sarflandi",
+    "slides": "Slaydlar",
+    "present": "Namoyish qilish",
+    "notes": "Izohlar",
+    "noNotes": "Bu slayd uchun izoh yoʻq.",
+    "noSlides": "Hozircha slaydlar yoʻq.",
+    "prevSlide": "Oldingi slayd",
+    "nextSlide": "Keyingi slayd",
+    "stopPresenting": "Namoyishni tugatish",
+    "madeFrom": "Manba: “{title}”"
   }
 }
