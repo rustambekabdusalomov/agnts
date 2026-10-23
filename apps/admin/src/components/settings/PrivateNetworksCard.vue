@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../../api/client'
 import type { NetworkTest, PrivateNetwork } from '../../api/types'
 import { askConfirm } from '../../composables/useConfirm'
@@ -10,6 +11,7 @@ import { useWorkspace } from '../../stores/workspace'
 import InputSelect from '../form/InputSelect.vue'
 import HiIcon from '../ui/HiIcon.vue'
 import PrivateNetworkEditor from './PrivateNetworkEditor.vue'
+import { STATUS_BADGE, useNetworkActions, useNetworkList } from './useNetworks'
 
 // The workspace's private networks: tunnels into the team's own networks
 // (WireGuard, OpenVPN or agnts-link), each with its routes. A connection
@@ -20,8 +22,7 @@ const qc = useQueryClient()
 const ui = useUi()
 const workspace = useWorkspace()
 
-const list = useQuery({ queryKey: ['networks'], queryFn: () => unwrap(api.GET('/networks')), refetchInterval: 15000 })
-const networks = computed(() => list.data.value?.networks ?? [])
+const { list, networks } = useNetworkList()
 const activityFilter = ref<number | undefined>(undefined)
 const activity = useQuery({
   queryKey: ['network-activity', activityFilter],
@@ -35,6 +36,20 @@ function openEditor(n: PrivateNetwork | null) {
   editing.value = n
   editorOpen.value = true
 }
+// The top bar's "Add network" lands here with ?add=1: open the editor.
+const route = useRoute()
+const router = useRouter()
+watch(
+  () => route.query.add,
+  (add) => {
+    if (add === undefined) return
+    const query = { ...route.query }
+    delete query.add
+    void router.replace({ query })
+    if (workspace.isOwner) openEditor(null)
+  },
+  { immediate: true },
+)
 const atMax = computed(() => !!list.data.value && networks.value.length >= list.data.value.max)
 
 const remove = useMutation({
@@ -53,41 +68,11 @@ async function confirmRemove(n: PrivateNetwork) {
   }
 }
 
-const reconnect = useMutation({
-  mutationFn: (id: number) => unwrap(api.POST('/networks/{networkId}/reconnect', { params: { path: { networkId: id } } })),
-  onSuccess: () => {
-    void qc.invalidateQueries({ queryKey: ['networks'] })
-    testResult.value = null
-    ui.notify(t('network.reconnecting'))
-  },
-  onError: (e) => {
-    ui.notify(e instanceof HttpError ? e.message : t('common.error'))
-  },
-})
-
-// Disconnect stops the tunnel and keeps the config; Connect starts it again.
-const connection = useMutation({
-  mutationFn: (v: { id: number; on: boolean }) =>
-    unwrap(api.POST(v.on ? '/networks/{networkId}/connect' : '/networks/{networkId}/disconnect', { params: { path: { networkId: v.id } } })),
-  onSuccess: (_, v) => {
-    void qc.invalidateQueries({ queryKey: ['networks'] })
-    testResult.value = null
-    ui.notify(v.on ? t('network.connecting') : t('network.disconnected'))
-  },
-  onError: (e) => {
-    ui.notify(e instanceof HttpError ? e.message : t('common.error'))
-  },
-})
-async function confirmDisconnect(n: PrivateNetwork) {
-  const label = t('network.disconnect')
-  if (await askConfirm({ title: label, message: t('network.disconnectConfirm', { name: n.name }), confirmLabel: label, danger: true })) {
-    connection.mutate({ id: n.id, on: false })
-  }
-}
+const testResult = ref<NetworkTest | null>(null)
+const { reconnect, connection, toggle } = useNetworkActions(() => (testResult.value = null))
 
 const testTarget = ref('')
 const testNetwork = ref<number | undefined>(undefined)
-const testResult = ref<NetworkTest | null>(null)
 const test = useMutation({
   mutationFn: () => unwrap(api.POST('/networks/test', { body: { target: testTarget.value, network: testNetwork.value } })),
   onSuccess: (r) => {
@@ -110,13 +95,6 @@ const activityOptions = computed(() => [
 const nameOf = (id?: number) => (id ? (networks.value.find((n) => n.id === id)?.name ?? t('network.gone')) : '—')
 
 const KIND_LABEL: Record<PrivateNetwork['kind'], string> = { connector: 'agnts-link', wireguard: 'WireGuard', openvpn: 'OpenVPN' }
-const STATUS_BADGE: Record<PrivateNetwork['status'], string> = {
-  up: 'b-ok',
-  connecting: 'b-warn',
-  error: 'b-bad',
-  gateway_down: 'b-bad',
-  disabled: 'b-gray',
-}
 const routeText = (n: PrivateNetwork) =>
   n.routes.map((r) => (r.host ?? r.cidr ?? '') + (r.ports?.length ? ` :${r.ports.join(' :')}` : '')).join(', ')
 const ago = (iso?: string) => {
@@ -177,7 +155,7 @@ const showActivity = ref(false)
               class="btn btn-s"
               :disabled="connection.isPending.value"
               :title="n.enabled ? t('network.disconnectHelp') : t('network.connectHelp')"
-              @click="n.enabled ? confirmDisconnect(n) : connection.mutate({ id: n.id, on: true })"
+              @click="toggle(n)"
             >
               {{ n.enabled ? t('network.disconnect') : t('network.connect') }}
             </button>

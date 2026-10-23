@@ -13,6 +13,7 @@ import { useSession } from '../stores/session'
 import { useUi } from '../stores/ui'
 import { useWorkspace } from '../stores/workspace'
 import BrandLogo from './BrandLogo.vue'
+import NetworkMenu from './network/NetworkMenu.vue'
 import UsagePill from './UsagePill.vue'
 import { useRules } from './rules/useRules'
 import ConfirmDialog from './ui/ConfirmDialog.vue'
@@ -380,6 +381,7 @@ onBeforeUnmount(() => topObserver?.disconnect())
         </label>
         <div class="top-right">
           <span v-if="!connected" class="hint">{{ t('nav.offline') }}</span>
+          <NetworkMenu v-if="workspace.detail" />
           <div class="lang-menu">
             <button class="lang-btn" aria-haspopup="menu" :aria-expanded="langOpen" :aria-label="t('nav.language')" @click="langOpen = !langOpen">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h9M8.5 3v2M6.2 5c.8 3.2 3 5.8 6.3 7.3" /><path d="M11 5c-.9 3.7-3.6 6.8-7 8.2" /><path d="M12.5 21l4.2-10 4.3 10M14 17.5h5.5" /></svg>

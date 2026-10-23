@@ -92,6 +92,7 @@
     "disconnected": "Uzildi",
     "connect": "Ulash",
     "connectHelp": "Tunnelni saqlangan sozlama bilan qayta ishga tushirish",
-    "connecting": "Ulanmoqda: tunnel 15 soniya ichida ishga tushadi"
+    "connecting": "Ulanmoqda: tunnel 15 soniya ichida ishga tushadi",
+    "manage": "Boshqarish"
   }
 }

@@ -92,6 +92,7 @@
     "disconnected": "Disconnected",
     "connect": "Connect",
     "connectHelp": "Start the tunnel again with the saved config",
-    "connecting": "Connecting: the tunnel starts within 15 seconds"
+    "connecting": "Connecting: the tunnel starts within 15 seconds",
+    "manage": "Manage"
   }
 }
