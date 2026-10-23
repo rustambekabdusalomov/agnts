@@ -178,7 +178,10 @@ const reapply = useMutation({
 .cm-repo + .cm-repo { margin-top: 12px; }
 .cm-repo-h { margin: 0 0 6px; font-size: 13.5px; font-weight: 600; }
 .cm-repo-h .mono { font-family: var(--mono); font-weight: 400; color: var(--ink-3); margin-left: 6px; overflow-wrap: anywhere; }
-.cm-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.cm-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+/* Rows inside the bordered list, as in the other commit lists. */
+.cm-item, .cm-change { padding: 10px 14px; border-bottom: 1px solid var(--line-2); }
+.cm-item:last-child, .cm-change:last-child { border-bottom: 0; }
 .cm-item { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
 .cm-sha { font-family: var(--mono); font-size: 12.5px; color: var(--ink-3); }
 .cm-subj { flex: 1 1 200px; min-width: 0; font-family: var(--mono); font-size: 13.5px; overflow-wrap: anywhere; }
@@ -190,7 +193,6 @@ const reapply = useMutation({
 .cm-re-form { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; }
 .cm-num { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 13.5px; }
 .cm-num input { flex: 0 1 220px; min-width: 0; font-family: var(--mono); font-size: 14px; }
-.cm-preview { gap: 10px; }
 .cm-change { display: grid; gap: 2px; }
 .cm-from { font-family: var(--mono); font-size: 13px; color: var(--ink-3); text-decoration: line-through; overflow-wrap: anywhere; }
 .cm-to { margin: 0; font-family: var(--mono); font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
