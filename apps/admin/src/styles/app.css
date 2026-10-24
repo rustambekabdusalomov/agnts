@@ -267,10 +267,6 @@ a.mem-name:hover { color: var(--primary-ink); }
 .cfg-side .card { overflow-wrap: anywhere; }
 .tl li > span:last-child { min-width: 0; overflow-wrap: anywhere; }
 
-/* Ticket page: the sidebar is taller than the screen, so it scrolls with the
-   page (one scroll) instead of sticking with a scrollbar of its own. */
-.tk-side { position: static; }
-
 /* Sign-up, invites, links from emails and the workspace chooser. */
 .login-links { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13.5px; color: var(--ink-3); }
 .login-links a { color: var(--primary-ink); font-weight: 600; }
