@@ -89,9 +89,16 @@ reach `agnts:8081` right after the restart is expected: they started before
 ### 4. Website
 
 ```sh
-cd apps/website && npm run generate
+cd apps/website && \
+  NUXT_PUBLIC_GOOGLE_CLIENT_ID=340542876762-6bqfc0a1s9eumku5qv7b14nvpu5qdvs1.apps.googleusercontent.com \
+  NUXT_PUBLIC_APP_URL=https://app.agnts.uz \
+  npm run generate
 rsync -az --delete --stats .output/public/ root@45.138.158.39:/opt/agnts/website/
 ```
+
+The two variables are baked into the static build. Without them the site falls back to
+`nuxt.config.ts`'s dev defaults (no client id, `appUrl` on localhost) and "Sign in" does not work.
+The client id must match the server's `AGNTS_GOOGLE_CLIENT_ID`.
 
 `--delete` is safe here because `website/` holds only generated output. Caddy
 serves the files directly, so nothing needs restarting.
