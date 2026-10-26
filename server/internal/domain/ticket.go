@@ -267,6 +267,19 @@ type Question struct {
 	Multiple bool
 	Answer   *string
 	Note     string
+	// Draft is what someone typed but has not sent yet, if anything.
+	Draft *AnswerDraft
+}
+
+// AnswerDraft is an unsent answer to a question, kept so closing the app
+// loses nothing. Answer has the same form as a sent answer, and may be
+// empty when only a note or files were added.
+type AnswerDraft struct {
+	Answer string
+	Note   string
+	// Files are the pending uploads the draft attaches.
+	Files []Attachment
+	At    time.Time
 }
 
 // Answer is a reply to one question.

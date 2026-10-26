@@ -21,6 +21,8 @@ abstract class _$QuestionCWProxy {
 
   Question note(String note);
 
+  Question draft(AnswerDraft? draft);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Question(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -35,6 +37,7 @@ abstract class _$QuestionCWProxy {
     bool multiple,
     String? answer,
     String note,
+    AnswerDraft? draft,
   });
 }
 
@@ -66,6 +69,9 @@ class _$QuestionCWProxyImpl implements _$QuestionCWProxy {
   Question note(String note) => this(note: note);
 
   @override
+  Question draft(AnswerDraft? draft) => this(draft: draft);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Question(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -80,6 +86,7 @@ class _$QuestionCWProxyImpl implements _$QuestionCWProxy {
     Object? multiple = const $CopyWithPlaceholder(),
     Object? answer = const $CopyWithPlaceholder(),
     Object? note = const $CopyWithPlaceholder(),
+    Object? draft = const $CopyWithPlaceholder(),
   }) {
     return Question(
       id: id == const $CopyWithPlaceholder()
@@ -110,6 +117,10 @@ class _$QuestionCWProxyImpl implements _$QuestionCWProxy {
           ? _value.note
           // ignore: cast_nullable_to_non_nullable
           : note as String,
+      draft: draft == const $CopyWithPlaceholder()
+          ? _value.draft
+          // ignore: cast_nullable_to_non_nullable
+          : draft as AnswerDraft?,
     );
   }
 }
@@ -124,33 +135,41 @@ extension $QuestionCopyWith on Question {
 // JsonSerializableGenerator
 // **************************************************************************
 
-Question _$QuestionFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('Question', json, ($checkedConvert) {
-      $checkKeys(
-        json,
-        requiredKeys: const [
-          'id',
-          'position',
-          'text',
-          'options',
-          'multiple',
-          'note',
-        ],
-      );
-      final val = Question(
-        id: $checkedConvert('id', (v) => (v as num).toInt()),
-        position: $checkedConvert('position', (v) => (v as num).toInt()),
-        text: $checkedConvert('text', (v) => v as String),
-        options: $checkedConvert(
-          'options',
-          (v) => (v as List<dynamic>).map((e) => e as String).toList(),
-        ),
-        multiple: $checkedConvert('multiple', (v) => v as bool),
-        answer: $checkedConvert('answer', (v) => v as String?),
-        note: $checkedConvert('note', (v) => v as String),
-      );
-      return val;
-    });
+Question _$QuestionFromJson(Map<String, dynamic> json) => $checkedCreate(
+  'Question',
+  json,
+  ($checkedConvert) {
+    $checkKeys(
+      json,
+      requiredKeys: const [
+        'id',
+        'position',
+        'text',
+        'options',
+        'multiple',
+        'note',
+      ],
+    );
+    final val = Question(
+      id: $checkedConvert('id', (v) => (v as num).toInt()),
+      position: $checkedConvert('position', (v) => (v as num).toInt()),
+      text: $checkedConvert('text', (v) => v as String),
+      options: $checkedConvert(
+        'options',
+        (v) => (v as List<dynamic>).map((e) => e as String).toList(),
+      ),
+      multiple: $checkedConvert('multiple', (v) => v as bool),
+      answer: $checkedConvert('answer', (v) => v as String?),
+      note: $checkedConvert('note', (v) => v as String),
+      draft: $checkedConvert(
+        'draft',
+        (v) =>
+            v == null ? null : AnswerDraft.fromJson(v as Map<String, dynamic>),
+      ),
+    );
+    return val;
+  },
+);
 
 Map<String, dynamic> _$QuestionToJson(Question instance) => <String, dynamic>{
   'id': instance.id,
@@ -160,4 +179,5 @@ Map<String, dynamic> _$QuestionToJson(Question instance) => <String, dynamic>{
   'multiple': instance.multiple,
   'answer': ?instance.answer,
   'note': instance.note,
+  'draft': ?instance.draft?.toJson(),
 };

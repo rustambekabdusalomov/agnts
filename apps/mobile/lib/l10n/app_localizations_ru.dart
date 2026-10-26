@@ -13056,6 +13056,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ticketAllAnswered => 'На все вопросы есть ответы';
 
   @override
+  String get ticketDraftSaving => 'Сохраняем черновик…';
+
+  @override
+  String get ticketDraftSaved => 'Черновик сохранён';
+
+  @override
+  String get ticketDraftFailed => 'Черновик не сохранён, попробуем ещё раз';
+
+  @override
   String get ticketCodingTitle => 'Разработка';
 
   @override

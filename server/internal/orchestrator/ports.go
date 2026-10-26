@@ -57,6 +57,10 @@ type Store interface {
 	// SaveAnswers also links each answer's attachments, failing with
 	// ErrConflict when one is not pending.
 	SaveAnswers(ctx context.Context, ticketID int64, as []domain.Answer) error
+	// SaveAnswerDraft stores unsent answers; Attachments are pending
+	// uploads, left pending. It fails with ErrConflict when a question
+	// is answered or the ticket no longer waits for answers.
+	SaveAnswerDraft(ctx context.Context, ticketID int64, as []domain.Answer) error
 
 	// SaveAttachment stores an upload as pending.
 	SaveAttachment(ctx context.Context, a domain.Attachment, data []byte) (domain.Attachment, error)

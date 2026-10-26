@@ -324,6 +324,7 @@ Class | Method | HTTP request | Description
 [*TicketsApi*](doc/TicketsApi.md) | [**restartWithUpdate**](doc/TicketsApi.md#restartwithupdate) | **POST** /tickets/{key}/restart-update | Start the ticket over from the newer version of its issue; the work so far is dropped
 [*TicketsApi*](doc/TicketsApi.md) | [**retryTicket**](doc/TicketsApi.md#retryticket) | **POST** /tickets/{key}/retry | Resume a failed or rate-limited ticket where it stopped
 [*TicketsApi*](doc/TicketsApi.md) | [**reviewTicket**](doc/TicketsApi.md#reviewticket) | **POST** /tickets/{key}/review | Queue a code review of a ticket waiting for review (again, if one already ran)
+[*TicketsApi*](doc/TicketsApi.md) | [**saveAnswerDraft**](doc/TicketsApi.md#saveanswerdraft) | **PUT** /tickets/{key}/answers/draft | Keep answers that are not sent yet
 [*TicketsApi*](doc/TicketsApi.md) | [**setFollowUps**](doc/TicketsApi.md#setfollowups) | **PUT** /tickets/{key}/follow-ups | Turn follow-up suggestions on or off for this ticket
 [*TicketsApi*](doc/TicketsApi.md) | [**setTicketBenchmark**](doc/TicketsApi.md#setticketbenchmark) | **PUT** /tickets/{key}/benchmark | Put a merged code or test ticket in the benchmark, or take it out
 [*TicketsApi*](doc/TicketsApi.md) | [**setTicketKind**](doc/TicketsApi.md#setticketkind) | **PUT** /tickets/{key}/kind | Change what the ticket produces
@@ -387,6 +388,9 @@ Class | Method | HTTP request | Description
  - [AnalyticsLearning](doc/AnalyticsLearning.md)
  - [AnalyticsModelsInner](doc/AnalyticsModelsInner.md)
  - [AnalyticsReposInner](doc/AnalyticsReposInner.md)
+ - [AnswerDraft](doc/AnswerDraft.md)
+ - [AnswerDraftRequest](doc/AnswerDraftRequest.md)
+ - [AnswerDraftRequestAnswersInner](doc/AnswerDraftRequestAnswersInner.md)
  - [AnswersRequest](doc/AnswersRequest.md)
  - [AnswersRequestAnswersInner](doc/AnswersRequestAnswersInner.md)
  - [ApiAuthKind](doc/ApiAuthKind.md)

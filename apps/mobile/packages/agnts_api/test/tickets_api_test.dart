@@ -248,6 +248,15 @@ void main() {
       // TODO
     });
 
+    // Keep answers that are not sent yet
+    //
+    // Saves what someone has typed so far, so it is there when the ticket is opened again, on any device and for everyone answering it (last write wins). Starts nothing. Each listed question's draft is replaced; questions not listed keep theirs. Sending the answers clears the drafts.
+    //
+    //Future saveAnswerDraft(String key, AnswerDraftRequest answerDraftRequest) async
+    test('test saveAnswerDraft', () async {
+      // TODO
+    });
+
     // Turn follow-up suggestions on or off for this ticket
     //
     // inherit follows Settings (suggestFollowUps). Suggestions add a little to every prompt of the ticket's runs, so they are off unless asked for.

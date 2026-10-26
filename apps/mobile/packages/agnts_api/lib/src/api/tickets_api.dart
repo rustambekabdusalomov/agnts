@@ -13,6 +13,7 @@ import 'dart:typed_data';
 import 'package:agnts_api/src/model/accept_follow_ups.dart';
 import 'package:agnts_api/src/model/accept_follow_ups_result.dart';
 import 'package:agnts_api/src/model/address_pull_comments_request.dart';
+import 'package:agnts_api/src/model/answer_draft_request.dart';
 import 'package:agnts_api/src/model/answers_request.dart';
 import 'package:agnts_api/src/model/approve_ticket_request.dart';
 import 'package:agnts_api/src/model/continue_ticket_request.dart';
@@ -2956,6 +2957,85 @@ _responseData = rawData == null ? null : deserialize<Ticket, Ticket>(rawData, 'T
       statusMessage: _response.statusMessage,
       extra: _response.extra,
     );
+  }
+
+  /// Keep answers that are not sent yet
+  /// Saves what someone has typed so far, so it is there when the ticket is opened again, on any device and for everyone answering it (last write wins). Starts nothing. Each listed question&#39;s draft is replaced; questions not listed keep theirs. Sending the answers clears the drafts.
+  ///
+  /// Parameters:
+  /// * [key] 
+  /// * [answerDraftRequest] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future]
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<void>> saveAnswerDraft({ 
+    required String key,
+    required AnswerDraftRequest answerDraftRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/tickets/{key}/answers/draft'.replaceAll('{' r'key' '}', key.toString());
+    final _options = Options(
+      method: r'PUT',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'cookieAuth',
+            'keyName': 'hiro_session',
+            'where': '',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(answerDraftRequest);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    return _response;
   }
 
   /// Turn follow-up suggestions on or off for this ticket

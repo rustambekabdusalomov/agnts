@@ -43,5 +43,10 @@ void main() {
       // TODO
     });
 
+    // AnswerDraft draft
+    test('to test the property `draft`', () async {
+      // TODO
+    });
+
   });
 }

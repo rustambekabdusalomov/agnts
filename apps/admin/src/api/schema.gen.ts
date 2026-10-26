@@ -186,6 +186,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tickets/{key}/answers/draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Keep answers that are not sent yet
+         * @description Saves what someone has typed so far, so it is there when the ticket is opened again, on any device and for everyone answering it (last write wins). Starts nothing. Each listed question's draft is replaced; questions not listed keep theirs. Sending the answers clears the drafts.
+         */
+        put: operations["saveAnswerDraft"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tickets/{key}/secrets-ack": {
         parameters: {
             query?: never;
@@ -5713,6 +5735,16 @@ export interface components {
             multiple: boolean;
             answer?: string;
             note: string;
+            draft?: components["schemas"]["AnswerDraft"];
+        };
+        /** @description What someone typed but has not sent yet (see saveAnswerDraft) */
+        AnswerDraft: {
+            /** @description As the answer would be sent; may be empty */
+            answer: string;
+            note: string;
+            attachments: components["schemas"]["Attachment"][];
+            /** Format: date-time */
+            updatedAt: string;
         };
         Attachment: {
             /** Format: int64 */
@@ -5995,6 +6027,17 @@ export interface components {
                 answer: string;
                 note?: string;
                 /** @description Uploads to attach to this answer */
+                attachments?: number[];
+            }[];
+        };
+        AnswerDraftRequest: {
+            answers: {
+                /** Format: int64 */
+                questionId: number;
+                /** @description As in AnswersRequest; may be empty */
+                answer: string;
+                note?: string;
+                /** @description Pending uploads the answer will attach; they stay pending */
                 attachments?: number[];
             }[];
         };
@@ -9052,6 +9095,34 @@ export interface operations {
         };
         responses: {
             200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    saveAnswerDraft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnswerDraftRequest"];
+            };
+        };
+        responses: {
+            /** @description Saved */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];

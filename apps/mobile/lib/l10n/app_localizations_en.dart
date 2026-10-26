@@ -12510,6 +12510,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketAllAnswered => 'All questions answered';
 
   @override
+  String get ticketDraftSaving => 'Saving draft…';
+
+  @override
+  String get ticketDraftSaved => 'Draft saved';
+
+  @override
+  String get ticketDraftFailed => 'Draft not saved, will try again';
+
+  @override
   String get ticketCodingTitle => 'Coding';
 
   @override

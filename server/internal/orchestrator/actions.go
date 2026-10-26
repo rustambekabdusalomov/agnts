@@ -298,6 +298,62 @@ func (o *Orchestrator) Answer(ctx context.Context, key string, answers []domain.
 	return t, err
 }
 
+// SaveAnswerDraft keeps answers someone is still typing, so they are
+// there when the ticket is opened again, on any device. It starts
+// nothing. Questions answered already (one by one, in Telegram) keep
+// their answer, and files that are not pending uploads any more are
+// left out.
+func (o *Orchestrator) SaveAnswerDraft(ctx context.Context, key string, answers []domain.Answer) error {
+	t, err := o.store.TicketByKey(ctx, key)
+	if err != nil {
+		return err
+	}
+	if t.State != domain.StateWaitingForAnswers {
+		return &domain.TransitionError{Key: key, From: t.State, To: domain.StateWaitingForAnswers}
+	}
+	qs, err := o.store.Questions(ctx, t.ID)
+	if err != nil {
+		return err
+	}
+	var ids []int64
+	for _, a := range answers {
+		if !hasQuestion(qs, a.QuestionID) {
+			return invalid("question %d does not belong to %s", a.QuestionID, key)
+		}
+		if len(a.Answer) > maxAnswerLen || len(a.Note) > maxAnswerLen {
+			return invalid("the answer to question %d is too long", a.QuestionID)
+		}
+		if len(a.Attachments) > domain.MaxAttachments {
+			return invalid("an answer can have %d files at most", domain.MaxAttachments)
+		}
+		ids = append(ids, a.Attachments...)
+	}
+	answers = slices.DeleteFunc(slices.Clone(answers), func(a domain.Answer) bool {
+		i := slices.IndexFunc(qs, func(q domain.Question) bool { return q.ID == a.QuestionID })
+		return qs[i].Answer != nil
+	})
+	if len(answers) == 0 {
+		return nil
+	}
+	if len(ids) > 0 {
+		as, err := o.store.Attachments(ctx, ids)
+		if err != nil {
+			return err
+		}
+		pending := map[int64]bool{}
+		for _, a := range as {
+			pending[a.ID] = a.Purpose == domain.AttachPending
+		}
+		for i, a := range answers {
+			answers[i].Attachments = slices.DeleteFunc(slices.Clone(a.Attachments), func(id int64) bool { return !pending[id] })
+		}
+	}
+	return o.store.SaveAnswerDraft(ctx, t.ID, answers)
+}
+
+// maxAnswerLen caps a drafted answer or note, as the API caps sent ones.
+const maxAnswerLen = 5000
+
 // AnswerOne answers a single question (Telegram asks them one by one) and
 // starts coding once every question has an answer. It reports whether
 // coding started.

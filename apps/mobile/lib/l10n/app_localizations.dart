@@ -22341,6 +22341,24 @@ abstract class AppLocalizations {
   /// **'All questions answered'**
   String get ticketAllAnswered;
 
+  /// No description provided for @ticketDraftSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving draft…'**
+  String get ticketDraftSaving;
+
+  /// No description provided for @ticketDraftSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft saved'**
+  String get ticketDraftSaved;
+
+  /// No description provided for @ticketDraftFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft not saved, will try again'**
+  String get ticketDraftFailed;
+
   /// No description provided for @ticketCodingTitle.
   ///
   /// In en, this message translates to:

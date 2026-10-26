@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { api, HttpError, MAX_ATTACHMENT_BYTES, MAX_ATTACHMENTS, uploadAttachment } from '../../api/client'
+import { api, apiPath, HttpError, MAX_ATTACHMENT_BYTES, MAX_ATTACHMENTS, uploadAttachment } from '../../api/client'
+import type { Attachment } from '../../api/types'
 import HiIcon from '../ui/HiIcon.vue'
 
 // Attach files to a task, an answer or a retry note. Files upload as soon
@@ -9,12 +10,15 @@ import HiIcon from '../ui/HiIcon.vue'
 // request. Clearing the ids (after a successful send) clears the list.
 const ids = defineModel<number[]>({ default: () => [] })
 const busy = defineModel<boolean>('busy', { default: false })
-defineProps<{ label?: string }>()
+// restored: uploads made earlier (an answer draft's), shown from the start.
+const props = defineProps<{ label?: string; restored?: Attachment[] }>()
 const { t } = useI18n()
 
 type Item = { key: number; name: string; size: number; id?: number; preview?: string; error?: string }
-const items = ref<Item[]>([])
 let seq = 0
+const items = ref<Item[]>(
+  (props.restored ?? []).map((a) => ({ key: ++seq, name: a.name, size: a.size, id: a.id, preview: a.image ? apiPath(a.url) : undefined })),
+)
 const input = ref<HTMLInputElement | null>(null)
 const dragging = ref(false)
 

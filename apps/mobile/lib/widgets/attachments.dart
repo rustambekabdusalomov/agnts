@@ -56,6 +56,14 @@ class AttachmentsController extends ChangeNotifier {
   /// Whether a file is still uploading: submitting now would leave it out.
   bool get uploading => _files.any((f) => f.uploaded == null);
 
+  /// Shows uploads made earlier (an answer draft's) as picked. Call it
+  /// before the picker is shown; it does not notify.
+  void restore(List<Attachment> uploaded) {
+    for (final a in uploaded) {
+      _files.add(PendingUpload._(a.name, a.size, null)..uploaded = a);
+    }
+  }
+
   /// Forgets the files after the action that used them succeeded.
   void clear() {
     if (_files.isEmpty) return;

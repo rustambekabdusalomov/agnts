@@ -230,6 +230,31 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '409': { $ref: '#/components/responses/Conflict' }
 
+  /tickets/{key}/answers/draft:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    put:
+      operationId: saveAnswerDraft
+      summary: Keep answers that are not sent yet
+      description: >-
+        Saves what someone has typed so far, so it is there when the ticket
+        is opened again, on any device and for everyone answering it (last
+        write wins). Starts nothing. Each listed question's draft is
+        replaced; questions not listed keep theirs. Sending the answers
+        clears the drafts.
+      tags: [tickets]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AnswerDraftRequest' }
+      responses:
+        '204': { description: Saved }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
   /tickets/{key}/secrets-ack:
     parameters:
       - $ref: '#/components/parameters/TicketKey'
@@ -7047,6 +7072,19 @@ components:
           description: Several options may be chosen; the answer then lists the chosen ones, one per line
         answer: { type: string }
         note: { type: string }
+        draft: { $ref: '#/components/schemas/AnswerDraft' }
+
+    AnswerDraft:
+      type: object
+      description: What someone typed but has not sent yet (see saveAnswerDraft)
+      required: [answer, note, attachments, updatedAt]
+      properties:
+        answer: { type: string, description: 'As the answer would be sent; may be empty' }
+        note: { type: string }
+        attachments:
+          type: array
+          items: { $ref: '#/components/schemas/Attachment' }
+        updatedAt: { type: string, format: date-time }
 
     Attachment:
       type: object
@@ -7394,6 +7432,26 @@ components:
                 type: array
                 maxItems: 10
                 description: Uploads to attach to this answer
+                items: { type: integer, format: int64 }
+
+    AnswerDraftRequest:
+      type: object
+      required: [answers]
+      properties:
+        answers:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [questionId, answer]
+            properties:
+              questionId: { type: integer, format: int64 }
+              answer: { type: string, maxLength: 5000, description: 'As in AnswersRequest; may be empty' }
+              note: { type: string, maxLength: 5000 }
+              attachments:
+                type: array
+                maxItems: 10
+                description: Pending uploads the answer will attach; they stay pending
                 items: { type: integer, format: int64 }
 
     Model:

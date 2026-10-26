@@ -12502,6 +12502,15 @@ class AppLocalizationsUz extends AppLocalizations {
   String get ticketAllAnswered => 'Barcha savollarga javob berildi';
 
   @override
+  String get ticketDraftSaving => 'Qoralama saqlanmoqda…';
+
+  @override
+  String get ticketDraftSaved => 'Qoralama saqlandi';
+
+  @override
+  String get ticketDraftFailed => 'Qoralama saqlanmadi, yana urinib ko‘ramiz';
+
+  @override
   String get ticketCodingTitle => 'Kod yozish';
 
   @override

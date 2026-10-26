@@ -22,6 +22,9 @@ import 'package:agnts_api/src/model/analytics_insights_inner.dart';
 import 'package:agnts_api/src/model/analytics_learning.dart';
 import 'package:agnts_api/src/model/analytics_models_inner.dart';
 import 'package:agnts_api/src/model/analytics_repos_inner.dart';
+import 'package:agnts_api/src/model/answer_draft.dart';
+import 'package:agnts_api/src/model/answer_draft_request.dart';
+import 'package:agnts_api/src/model/answer_draft_request_answers_inner.dart';
 import 'package:agnts_api/src/model/answers_request.dart';
 import 'package:agnts_api/src/model/answers_request_answers_inner.dart';
 import 'package:agnts_api/src/model/api_case.dart';
@@ -431,6 +434,12 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return AnalyticsModelsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AnalyticsReposInner':
           return AnalyticsReposInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AnswerDraft':
+          return AnswerDraft.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AnswerDraftRequest':
+          return AnswerDraftRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AnswerDraftRequestAnswersInner':
+          return AnswerDraftRequestAnswersInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AnswersRequest':
           return AnswersRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AnswersRequestAnswersInner':

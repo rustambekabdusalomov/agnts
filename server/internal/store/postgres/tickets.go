@@ -617,34 +617,96 @@ func nonNilSlice(s []string) []string {
 	return s
 }
 
-// Questions returns a ticket's questions in order.
+// Questions returns a ticket's questions in order, with their drafts.
 func (s *Agent) Questions(ctx context.Context, ticketID int64) ([]domain.Question, error) {
-	rows, err := s.db.Query(ctx, `SELECT id, ticket_id, position, text, options, multiple, answer, note
+	rows, err := s.db.Query(ctx, `SELECT id, ticket_id, position, text, options, multiple, answer, note,
+			draft_answer, draft_note, draft_attachments, draft_at
 		FROM questions WHERE ticket_id = $1 ORDER BY position`, ticketID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	var out []domain.Question
+	draftFiles := map[int64][]int64{}
+	var allFiles []int64
 	for rows.Next() {
 		var q domain.Question
-		var opts []byte
-		if err := rows.Scan(&q.ID, &q.TicketID, &q.Position, &q.Text, &opts, &q.Multiple, &q.Answer, &q.Note); err != nil {
+		var opts, files []byte
+		var d domain.AnswerDraft
+		var at *time.Time
+		if err := rows.Scan(&q.ID, &q.TicketID, &q.Position, &q.Text, &opts, &q.Multiple, &q.Answer, &q.Note,
+			&d.Answer, &d.Note, &files, &at); err != nil {
 			return nil, err
 		}
 		_ = json.Unmarshal(opts, &q.Options)
+		if at != nil {
+			d.At = *at
+			q.Draft = &d
+			var ids []int64
+			_ = json.Unmarshal(files, &ids)
+			draftFiles[q.ID] = ids
+			allFiles = append(allFiles, ids...)
+		}
 		out = append(out, q)
 	}
-	return out, rows.Err()
+	if err := rows.Err(); err != nil || len(allFiles) == 0 {
+		return out, err
+	}
+	// A draft's files, while they are still pending uploads.
+	as, err := s.Attachments(ctx, allFiles)
+	if err != nil {
+		return nil, err
+	}
+	byID := map[int64]domain.Attachment{}
+	for _, a := range as {
+		if a.Purpose == domain.AttachPending {
+			byID[a.ID] = a
+		}
+	}
+	for i, q := range out {
+		for _, id := range draftFiles[q.ID] {
+			if a, ok := byID[id]; ok {
+				out[i].Draft.Files = append(out[i].Draft.Files, a)
+			}
+		}
+	}
+	return out, nil
 }
 
-// SaveAnswers stores answers to a ticket's questions and links the
-// uploads each answer attaches, or fails with ErrConflict when one of them
+// SaveAnswerDraft stores unsent answers to a ticket's questions; files
+// lists each one's pending uploads. It fails with ErrConflict when a
+// question is answered or the ticket waits for answers no more, so a
+// save that loses the race with sending the answers keeps nothing.
+func (s *Agent) SaveAnswerDraft(ctx context.Context, ticketID int64, as []domain.Answer) error {
+	return pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
+		for _, a := range as {
+			files, _ := json.Marshal(a.Attachments)
+			if a.Attachments == nil {
+				files = []byte("[]")
+			}
+			tag, err := tx.Exec(ctx, `UPDATE questions SET draft_answer = $3, draft_note = $4, draft_attachments = $5, draft_at = now()
+				WHERE id = $1 AND ticket_id = $2 AND answer IS NULL
+					AND EXISTS (SELECT 1 FROM tickets WHERE id = $2 AND state = 'waiting_for_answers')`,
+				a.QuestionID, ticketID, a.Answer, a.Note, files)
+			if err != nil {
+				return err
+			}
+			if tag.RowsAffected() != 1 {
+				return fmt.Errorf("question %d: %w", a.QuestionID, domain.ErrConflict)
+			}
+		}
+		return nil
+	})
+}
+
+// SaveAnswers stores answers to a ticket's questions, clearing their
+// drafts, and links the uploads each answer attaches, or fails with ErrConflict when one of them
 // is no longer pending.
 func (s *Agent) SaveAnswers(ctx context.Context, ticketID int64, as []domain.Answer) error {
 	return pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
 		for _, a := range as {
-			tag, err := tx.Exec(ctx, `UPDATE questions SET answer = $3, note = $4, answered_at = now()
+			tag, err := tx.Exec(ctx, `UPDATE questions SET answer = $3, note = $4, answered_at = now(),
+					draft_answer = '', draft_note = '', draft_attachments = '[]', draft_at = NULL
 				WHERE id = $1 AND ticket_id = $2`, a.QuestionID, ticketID, a.Answer, a.Note)
 			if err != nil {
 				return err

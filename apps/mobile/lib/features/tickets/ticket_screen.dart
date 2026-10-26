@@ -1,4 +1,7 @@
 
+import 'dart:async';
+
+import 'package:dio/dio.dart' show DioException;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,6 +57,18 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
   final Map<int, Set<String>> _chosen = {};
   final Map<int, TextEditingController> _notes = {};
   final Map<int, AttachmentsController> _answerFiles = {};
+  // Unsent answers are saved as they are typed (see _saveDrafts), so
+  // closing the app loses nothing; they come back on any device. Each
+  // question's draft as last sent, the questions being answered now, and
+  // the API to save with (kept for dispose, when ref is gone).
+  final Map<int, String> _savedDraft = {};
+  List<Question> _answering = const [];
+  TicketsApi? _draftApi;
+  Timer? _draftTimer;
+  _DraftState? _draftState;
+  late final _lifecycle = AppLifecycleListener(onHide: _flushDrafts);
+  // Set in dispose, whose last save must not rebuild.
+  bool _gone = false;
   // A failed run's retry note and its files.
   final _retryNote = TextEditingController();
   late final _retryFiles = AttachmentsController()..addListener(_filesChanged);
@@ -92,7 +107,16 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _lifecycle;
+  }
+
+  @override
   void dispose() {
+    _gone = true;
+    _flushDrafts();
+    _lifecycle.dispose();
     for (final c in _notes.values) {
       c.dispose();
     }
@@ -114,22 +138,96 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     if (mounted) setState(() {});
   }
 
-  AttachmentsController _filesFor(Question q) => _answerFiles.putIfAbsent(q.id, () => AttachmentsController()..addListener(_filesChanged));
+  AttachmentsController _filesFor(Question q) => _answerFiles.putIfAbsent(
+      q.id,
+      () => AttachmentsController()
+        ..addListener(_filesChanged)
+        ..addListener(_draftChanged));
 
-  TextEditingController _noteFor(Question q) => _notes.putIfAbsent(q.id, () {
-        final a = q.answer;
-        if (q.multiple) {
-          // One option per line; lines that are not options are the own text.
-          final lines = (a ?? '').split('\n').where((x) => x.trim().isNotEmpty).toList();
-          _chosen[q.id] = {for (final x in lines) if (q.options.contains(x)) x};
-          return TextEditingController(text: lines.where((x) => !q.options.contains(x)).join('\n'));
-        }
-        if (a != null && q.options.contains(a)) {
-          _picked[q.id] = a;
-          return TextEditingController(text: q.note);
-        }
-        return TextEditingController(text: a ?? '');
+  /// The question's text field, started from its unsent draft when it has
+  /// no answer yet, else from its answer.
+  TextEditingController _noteFor(Question q) {
+    final have = _notes[q.id];
+    if (have != null) return have;
+    final draft = q.answer == null ? q.draft : null;
+    if (draft != null && draft.attachments.isNotEmpty) _filesFor(q).restore(draft.attachments);
+    final a = draft?.answer ?? q.answer;
+    final note = draft?.note ?? q.note;
+    // A draft made on the web keeps its details apart even where this
+    // screen has one field for both: they go after the text, not lost.
+    final draftNote = draft != null && draft.note.trim().isNotEmpty ? draft.note.trim() : null;
+    final TextEditingController c;
+    if (q.multiple) {
+      // One option per line; lines that are not options are the own text.
+      final lines = (a ?? '').split('\n').where((x) => x.trim().isNotEmpty).toList();
+      _chosen[q.id] = {for (final x in lines) if (q.options.contains(x)) x};
+      c = TextEditingController(text: [...lines.where((x) => !q.options.contains(x)), ?draftNote].join('\n'));
+    } else if (a != null && q.options.contains(a)) {
+      _picked[q.id] = a;
+      c = TextEditingController(text: note);
+    } else {
+      c = TextEditingController(text: [if (a != null && a.trim().isNotEmpty) a, ?draftNote].join('\n'));
+    }
+    _notes[q.id] = c;
+    _savedDraft[q.id] = _draftKey(q);
+    return c..addListener(_draftChanged);
+  }
+
+  /// The question's uploads, without making a picker for it: dispose
+  /// reads them too.
+  List<int> _fileIds(Question q) => _answerFiles[q.id]?.ids ?? const [];
+
+  String _draftKey(Question q) => [_answerOf(q), _noteOf(q) ?? '', _fileIds(q).join(',')].join('\u0000');
+
+  /// Saves the drafts a moment after the typing stops.
+  void _draftChanged() {
+    if (_answering.isEmpty || _busy) return;
+    _draftTimer?.cancel();
+    _draftTimer = Timer(const Duration(milliseconds: 800), _flushDrafts);
+  }
+
+  void _flushDrafts() {
+    _draftTimer?.cancel();
+    _draftTimer = null;
+    _saveDrafts(widget.ticketKey, _answering);
+  }
+
+  /// Sends the drafts of the questions changed since the last save. The
+  /// request is built before the first await: dispose may follow at once.
+  Future<void> _saveDrafts(String key, List<Question> qs) async {
+    final api = _draftApi;
+    final changed = [for (final q in qs) if (_notes.containsKey(q.id) && _draftKey(q) != _savedDraft[q.id]) q];
+    if (api == null || changed.isEmpty) return;
+    final sent = {for (final q in changed) q.id: _draftKey(q)};
+    final req = AnswerDraftRequest(answers: [
+      for (final q in changed)
+        AnswerDraftRequestAnswersInner(
+          questionId: q.id,
+          answer: _answerOf(q),
+          note: _noteOf(q),
+          attachments: _fileIds(q).isEmpty ? null : _fileIds(q),
+        ),
+    ]);
+    _savedDraft.addAll(sent);
+    _setDraftState(_DraftState.saving);
+    try {
+      await api.saveAnswerDraft(key: key, answerDraftRequest: req);
+      if (_draftState == _DraftState.saving) _setDraftState(_DraftState.saved);
+    } catch (e) {
+      sent.forEach((id, k) {
+        if (_savedDraft[id] == k) _savedDraft.remove(id);
       });
+      // 409: the questions are answered or gone; nothing to keep.
+      if (e is DioException && e.response?.statusCode == 409) return _setDraftState(null);
+      _setDraftState(_DraftState.failed);
+      if (!_gone) _draftTimer ??= Timer(const Duration(seconds: 5), _flushDrafts);
+    }
+  }
+
+  void _setDraftState(_DraftState? s) {
+    _draftState = s;
+    if (mounted && !_gone) setState(() {});
+  }
 
   /// The answer sent for [q]: the picked option, else the typed text. For a
   /// multiple-choice question: the picked options in their order, then the
@@ -169,6 +267,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         } else {
           _picked[q.id] = _picked[q.id] == o ? null : o;
         }
+        _draftChanged();
       });
 
   /// Retries a stopped run, with the note and files when it can take them.
@@ -431,6 +530,9 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           _tr = translation.tr;
           _syncAssignees(d.ticket);
           final t = d.ticket;
+          final answering = t.state == TicketState.waitingForAnswers && ref.watch(canEditProvider);
+          _answering = answering ? d.questions : const [];
+          _draftApi = answering ? ref.read(apiProvider)?.getTicketsApi() : null;
           return ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.only(bottom: 24),
@@ -1209,15 +1311,26 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         final uploading = d.questions.any((q) => _filesFor(q).uploading);
         buttons = [
           reject,
-          hint(uploading
-              ? l.filesWait
-              : left > 0
-                  ? l.ticketQuestionsLeft(left)
-                  : l.ticketAllAnswered),
+          hint([
+            uploading
+                ? l.filesWait
+                : left > 0
+                    ? l.ticketQuestionsLeft(left)
+                    : l.ticketAllAnswered,
+            if (_draftState != null)
+              switch (_draftState!) {
+                _DraftState.saving => l.ticketDraftSaving,
+                _DraftState.saved => l.ticketDraftSaved,
+                _DraftState.failed => l.ticketDraftFailed,
+              },
+          ].join('\n')),
           FilledButton(
             onPressed: _busy || left > 0 || uploading
                 ? null
                 : () async {
+                    // Sending the answers clears their drafts.
+                    _draftTimer?.cancel();
+                    _draftTimer = null;
                     final ok = await _run(() => _tickets.answerQuestions(
                           key: key,
                           answersRequest: AnswersRequest(answers: [
@@ -1525,6 +1638,9 @@ class _H3 extends StatelessWidget {
         child: Text(text, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Agnts.of(context).ink3)),
       );
 }
+
+/// Where saving the unsent answers is.
+enum _DraftState { saving, saved, failed }
 
 /// An answer option (.opt): black when picked.
 class _OptionPill extends StatelessWidget {

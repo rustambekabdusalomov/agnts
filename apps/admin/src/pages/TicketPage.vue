@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { computed, nextTick, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../api/client'
@@ -117,22 +117,27 @@ const usage = useUsage()
 
 // Answers: option or free text, plus an optional note and files per
 // question. A multiple-choice question takes several options, and the text
-// is one more choice; the answer lists them one per line.
+// is one more choice; the answer lists them one per line. They start from
+// the unsent draft when there is one (see saveDrafts), else the answer.
 type Draft = { answer: string; note: string; picked: string[]; files: number[]; uploading: boolean }
 const answers = reactive<Record<number, Draft>>({})
+// Each question's draft as last sent (see saveDrafts).
+const savedDraft: Record<number, string> = {}
 watch(
   () => d.value?.questions,
   (qs) => {
     for (const q of qs ?? []) {
       if (answers[q.id]) continue
-      const lines = q.multiple ? (q.answer ?? '').split('\n').filter(Boolean) : []
+      const from = (q.answer == null && q.draft) || { answer: q.answer ?? '', note: q.note, attachments: [] }
+      const lines = q.multiple ? from.answer.split('\n').filter(Boolean) : []
       answers[q.id] = {
-        answer: q.multiple ? lines.filter((l) => !q.options.includes(l)).join(' ') : (q.answer ?? ''),
-        note: q.note,
+        answer: q.multiple ? lines.filter((l) => !q.options.includes(l)).join(' ') : from.answer,
+        note: from.note,
         picked: lines.filter((l) => q.options.includes(l)),
-        files: [],
+        files: from.attachments.map((a) => a.id),
         uploading: false,
       }
+      savedDraft[q.id] = draftKey(q)
     }
   },
   { immediate: true },
@@ -148,6 +153,80 @@ function togglePick(q: Question, o: string) {
   a.picked = a.picked.includes(o) ? a.picked.filter((x) => x !== o) : [...a.picked, o]
 }
 const left = computed(() => (d.value?.questions ?? []).filter((q) => !answerOf(q)).length)
+
+// Unsent answers are saved as they are typed, so closing the tab or the
+// app loses nothing; they come back on any device, for anyone answering.
+// Only the questions changed since the last save are sent.
+const draftState = ref<'' | 'saving' | 'saved' | 'failed'>('')
+let draftTimer: ReturnType<typeof setTimeout> | undefined
+function draftOf(q: Question) {
+  const a = answers[q.id]
+  return { questionId: q.id, answer: answerOf(q), note: a.note.trim() || undefined, attachments: a.files.length ? a.files : undefined }
+}
+function draftKey(q: Question) {
+  return JSON.stringify(draftOf(q))
+}
+function saveDrafts(ticketKey: string, qs: Question[], keepalive = false) {
+  clearTimeout(draftTimer)
+  draftTimer = undefined
+  const changed = qs.filter((q) => answers[q.id] && draftKey(q) !== savedDraft[q.id])
+  if (!changed.length) return
+  const sent = changed.map((q) => [q.id, draftKey(q)] as const)
+  for (const [id, k] of sent) savedDraft[id] = k
+  draftState.value = 'saving'
+  const body = { answers: changed.map(draftOf) }
+  // Browsers refuse a keepalive request over 64 KB; a bigger one is sent
+  // plainly and may not make it out of a closing page.
+  keepalive &&= JSON.stringify(body).length < 60_000
+  unwrap(api.PUT('/tickets/{key}/answers/draft', { params: { path: { key: ticketKey } }, body, keepalive }))
+    .then(() => {
+      if (draftState.value === 'saving') draftState.value = 'saved'
+    })
+    .catch((e) => {
+      for (const [id, k] of sent) if (savedDraft[id] === k) delete savedDraft[id]
+      // 409: the questions are answered or gone; nothing to keep.
+      if (e instanceof HttpError && e.status === 409) {
+        draftState.value = ''
+        return
+      }
+      draftState.value = 'failed'
+      // Only a lost connection or a server error can go better next time,
+      // and only while the page is open.
+      const retry = !(e instanceof HttpError) || e.status >= 500
+      if (retry && !gone && !draftTimer) {
+        // Kept as waiting, so leaving the page tries once more.
+        draftFor ??= { key: ticketKey, qs }
+        draftTimer = setTimeout(flushDrafts, 5000)
+      }
+    })
+}
+// Set on unmount: the last save there must not schedule another.
+let gone = false
+// What a pending save is for: the ticket open when the typing happened.
+let draftFor: { key: string; qs: Question[] } | undefined
+function flushDrafts(keepalive = false) {
+  if (draftFor) saveDrafts(draftFor.key, draftFor.qs, keepalive)
+  draftFor = undefined
+}
+watch(
+  () => (tk.value?.state === 'waiting_for_answers' && workspace.canEdit ? (d.value?.questions ?? []).map((q) => (answers[q.id] ? draftKey(q) : '')).join('\u0000') : ''),
+  (now, was) => {
+    if (!now || now === was || act.isPending.value) return
+    draftFor = { key: key.value, qs: d.value?.questions ?? [] }
+    clearTimeout(draftTimer)
+    draftTimer = setTimeout(flushDrafts, 800)
+  },
+)
+// Leaving the ticket or the page saves what is waiting.
+watch(key, () => flushDrafts(), { flush: 'sync' })
+const onPageHide = () => flushDrafts(true)
+window.addEventListener('pagehide', onPageHide)
+onBeforeUnmount(() => {
+  window.removeEventListener('pagehide', onPageHide)
+  gone = true
+  flushDrafts(true)
+  clearTimeout(draftTimer)
+})
 const answersUploading = computed(() => Object.values(answers).some((a) => a.uploading))
 const answered = computed(() => (d.value?.questions ?? []).filter((q) => q.answer))
 // The questions as plain text, to paste into a chat for whoever can answer.
@@ -233,6 +312,9 @@ const act = useMutation({
     const path = { params: { path: { key: key.value } } }
     switch (a) {
       case 'answers':
+        // Sending the answers clears their drafts.
+        clearTimeout(draftTimer)
+        draftFor = undefined
         return unwrap(
           api.PUT('/tickets/{key}/answers', {
             ...path,
@@ -747,16 +829,16 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
                   <div class="tabs" role="group">
                     <button v-for="o in q.options" :key="o" type="button" class="tab" :aria-pressed="answers[q.id].picked.includes(o)" @click="togglePick(q, o)">{{ tr(o) }}</button>
                   </div>
-                  <input v-model="answers[q.id].answer" class="cfg-in" :placeholder="t('ticket.otherAnswer')" :aria-label="t('ticket.answerFor', { n: i + 1 })">
+                  <input v-model="answers[q.id].answer" maxlength="5000" class="cfg-in" :placeholder="t('ticket.otherAnswer')" :aria-label="t('ticket.answerFor', { n: i + 1 })">
                 </template>
                 <template v-else>
                   <div v-if="q.options.length" class="tabs" role="group">
                     <button v-for="o in q.options" :key="o" type="button" class="tab" :aria-pressed="answers[q.id].answer === o" @click="answers[q.id].answer = o">{{ tr(o) }}</button>
                   </div>
-                  <input v-model="answers[q.id].answer" class="cfg-in" :placeholder="t('ticket.yourAnswer')" :aria-label="t('ticket.answerFor', { n: i + 1 })">
+                  <input v-model="answers[q.id].answer" maxlength="5000" class="cfg-in" :placeholder="t('ticket.yourAnswer')" :aria-label="t('ticket.answerFor', { n: i + 1 })">
                 </template>
-                <textarea v-model="answers[q.id].note" :placeholder="t('ticket.addDetails')" :aria-label="t('ticket.detailsFor', { n: i + 1 })" />
-                <FileAttach v-model="answers[q.id].files" v-model:busy="answers[q.id].uploading" />
+                <textarea v-model="answers[q.id].note" maxlength="5000" :placeholder="t('ticket.addDetails')" :aria-label="t('ticket.detailsFor', { n: i + 1 })" />
+                <FileAttach v-model="answers[q.id].files" v-model:busy="answers[q.id].uploading" :restored="q.answer == null ? q.draft?.attachments : undefined" />
               </div>
               <KindPicker :ticket="tk" />
               <ModelPicker :ticket="tk" :stages="['coding', 'retry']" />
@@ -764,6 +846,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
                 <button class="btn btn-p" type="submit" :disabled="left > 0 || answersUploading || act.isPending.value">{{ report ? t('ticket.startWriting') : t('ticket.startCoding') }}</button>
                 <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.reject') }}</button>
                 <span class="hint">{{ left ? t('ticket.questionsLeft', { n: left }) : answersUploading ? t('files.wait') : t('ticket.allAnswered') }}</span>
+                <span v-if="draftState" class="hint" role="status">{{ t(draftState === 'saving' ? 'ticket.draftSaving' : draftState === 'saved' ? 'ticket.draftSaved' : 'ticket.draftFailed') }}</span>
               </div>
             </form>
           </template>

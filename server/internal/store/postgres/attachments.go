@@ -104,8 +104,13 @@ func (s *Agent) DeleteAttachments(ctx context.Context, ids []int64) error {
 }
 
 // PrunePendingAttachments deletes uploads nobody used that are older than
-// before, and returns how many.
+// before, and returns how many. Uploads an answer draft names are kept
+// while its ticket waits for the answers; a ticket rejected or closed
+// before they were sent lets them go.
 func (s *Agent) PrunePendingAttachments(ctx context.Context, before time.Time) (int64, error) {
-	tag, err := s.db.Exec(ctx, `DELETE FROM attachments WHERE purpose = 'pending' AND created_at < $1`, before)
+	tag, err := s.db.Exec(ctx, `DELETE FROM attachments WHERE purpose = 'pending' AND created_at < $1
+		AND id NOT IN (SELECT jsonb_array_elements_text(q.draft_attachments)::bigint FROM questions q
+			JOIN tickets t ON t.id = q.ticket_id
+			WHERE q.draft_attachments <> '[]' AND t.state = 'waiting_for_answers')`, before)
 	return tag.RowsAffected(), err
 }

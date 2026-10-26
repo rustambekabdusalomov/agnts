@@ -40,6 +40,7 @@ Method | HTTP request | Description
 [**restartWithUpdate**](TicketsApi.md#restartwithupdate) | **POST** /tickets/{key}/restart-update | Start the ticket over from the newer version of its issue; the work so far is dropped
 [**retryTicket**](TicketsApi.md#retryticket) | **POST** /tickets/{key}/retry | Resume a failed or rate-limited ticket where it stopped
 [**reviewTicket**](TicketsApi.md#reviewticket) | **POST** /tickets/{key}/review | Queue a code review of a ticket waiting for review (again, if one already ran)
+[**saveAnswerDraft**](TicketsApi.md#saveanswerdraft) | **PUT** /tickets/{key}/answers/draft | Keep answers that are not sent yet
 [**setFollowUps**](TicketsApi.md#setfollowups) | **PUT** /tickets/{key}/follow-ups | Turn follow-up suggestions on or off for this ticket
 [**setTicketBenchmark**](TicketsApi.md#setticketbenchmark) | **PUT** /tickets/{key}/benchmark | Put a merged code or test ticket in the benchmark, or take it out
 [**setTicketKind**](TicketsApi.md#setticketkind) | **PUT** /tickets/{key}/kind | Change what the ticket produces
@@ -1517,6 +1518,54 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **saveAnswerDraft**
+> saveAnswerDraft(key, answerDraftRequest)
+
+Keep answers that are not sent yet
+
+Saves what someone has typed so far, so it is there when the ticket is opened again, on any device and for everyone answering it (last write wins). Starts nothing. Each listed question's draft is replaced; questions not listed keep theirs. Sending the answers clears the drafts.
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getTicketsApi();
+final String key = key_example; // String | 
+final AnswerDraftRequest answerDraftRequest = ; // AnswerDraftRequest | 
+
+try {
+    api.saveAnswerDraft(key, answerDraftRequest);
+} on DioException catch (e) {
+    print('Exception when calling TicketsApi->saveAnswerDraft: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **key** | **String**|  | 
+ **answerDraftRequest** | [**AnswerDraftRequest**](AnswerDraftRequest.md)|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

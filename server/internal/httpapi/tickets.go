@@ -20,6 +20,7 @@ type Tickets interface {
 	View(ctx context.Context, key string) (orchestrator.TicketView, error)
 	Events(ctx context.Context, f orchestrator.EventFilter) ([]domain.Event, error)
 	Answer(ctx context.Context, key string, answers []domain.Answer, origin domain.Origin) (domain.Ticket, error)
+	SaveAnswerDraft(ctx context.Context, key string, answers []domain.Answer) error
 	Approve(ctx context.Context, key string, assignees []string, postReport bool, origin domain.Origin) (domain.Ticket, error)
 	AcknowledgeSecrets(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	RequestChanges(ctx context.Context, key, feedback string, shots []domain.ShotRef, files []int64, origin domain.Origin) (domain.Ticket, error)
@@ -179,6 +180,13 @@ func (s *Server) GetTicket(w http.ResponseWriter, r *http.Request, key gen.Ticke
 			opts = []string{}
 		}
 		d.Questions[i] = gen.Question{Id: q.ID, Position: q.Position, Text: q.Text, Options: opts, Multiple: q.Multiple, Answer: q.Answer, Note: q.Note}
+		if q.Draft != nil {
+			files := make([]gen.Attachment, len(q.Draft.Files))
+			for j, a := range q.Draft.Files {
+				files[j] = toAttachment(a)
+			}
+			d.Questions[i].Draft = &gen.AnswerDraft{Answer: q.Draft.Answer, Note: q.Draft.Note, Attachments: files, UpdatedAt: q.Draft.At}
+		}
 	}
 	for i, a := range v.Attachments {
 		d.Attachments[i] = toAttachment(a)
@@ -284,6 +292,27 @@ func (s *Server) AnswerQuestions(w http.ResponseWriter, r *http.Request, key gen
 	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
 		return s.opt.Tickets.Answer(ctx, key, as, origin(r))
 	})
+}
+
+// SaveAnswerDraft implements gen.ServerInterface.
+func (s *Server) SaveAnswerDraft(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	var req gen.AnswerDraftRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	as := make([]domain.Answer, len(req.Answers))
+	for i, a := range req.Answers {
+		as[i] = domain.Answer{QuestionID: a.QuestionId, Answer: a.Answer, Attachments: ids(a.Attachments)}
+		if a.Note != nil {
+			as[i].Note = *a.Note
+		}
+	}
+	if err := s.opt.Tickets.SaveAnswerDraft(r.Context(), key, as); err != nil {
+		s.writeUseCaseError(w, r, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // ApproveTicket implements gen.ServerInterface.

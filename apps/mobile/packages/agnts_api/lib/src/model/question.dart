@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:agnts_api/src/model/answer_draft.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -33,6 +34,8 @@ class Question {
      this.answer,
 
     required  this.note,
+
+     this.draft,
   });
 
   @JsonKey(
@@ -120,6 +123,18 @@ class Question {
 
 
 
+  @JsonKey(
+    
+    name: r'draft',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final AnswerDraft? draft;
+
+
+
 
 
     @override
@@ -130,7 +145,8 @@ class Question {
       other.options == options &&
       other.multiple == multiple &&
       other.answer == answer &&
-      other.note == note;
+      other.note == note &&
+      other.draft == draft;
 
     @override
     int get hashCode =>
@@ -140,7 +156,8 @@ class Question {
         options.hashCode +
         multiple.hashCode +
         answer.hashCode +
-        note.hashCode;
+        note.hashCode +
+        draft.hashCode;
 
   factory Question.fromJson(Map<String, dynamic> json) => _$QuestionFromJson(json);
 

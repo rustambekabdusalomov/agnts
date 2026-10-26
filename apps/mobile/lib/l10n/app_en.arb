@@ -7585,6 +7585,9 @@
     }
   },
   "ticketAllAnswered": "All questions answered",
+  "ticketDraftSaving": "Saving draft…",
+  "ticketDraftSaved": "Draft saved",
+  "ticketDraftFailed": "Draft not saved, will try again",
   "ticketCodingTitle": "Coding",
   "ticketTestingTitle": "Running tests",
   "ticketRevisionSuffix": "{title}, revision {n}",

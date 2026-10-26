@@ -24,6 +24,7 @@ type fakeTickets struct {
 	lastImplement     orchestrator.ImplementInput
 	lastOrigin        domain.Origin
 	lastAnswer        []domain.Answer
+	lastDraft         []domain.Answer
 	lastAccept        []orchestrator.AcceptInput
 	lastFollowUps     *bool
 	lastSkipChecks    *bool
@@ -241,6 +242,14 @@ func (f *fakeTickets) Events(context.Context, orchestrator.EventFilter) ([]domai
 func (f *fakeTickets) Answer(_ context.Context, key string, as []domain.Answer, o domain.Origin) (domain.Ticket, error) {
 	f.lastOrigin, f.lastAnswer = o, as
 	return f.ticket(key, domain.StateCoding)
+}
+
+func (f *fakeTickets) SaveAnswerDraft(_ context.Context, key string, as []domain.Answer) error {
+	if key == "DONE-1" {
+		return &domain.TransitionError{Key: key, From: domain.StateDone, To: domain.StateWaitingForAnswers}
+	}
+	f.lastDraft = as
+	return nil
 }
 
 func (f *fakeTickets) Approve(_ context.Context, key string, _ []string, post bool, o domain.Origin) (domain.Ticket, error) {
@@ -474,6 +483,8 @@ func TestTicketEndpoints(t *testing.T) {
 		{"GET", "/api/tickets/NOPE-1", "", 404, `not_found`},
 		{"GET", "/api/tickets/PAY-1/events?after=4", "", 200, `"message":"Read: a.go"`},
 		{"PUT", "/api/tickets/PAY-1/answers", `{"answers":[{"questionId":9,"answer":"half up","note":"n","attachments":[4]}]}`, 200, `"state":"coding"`},
+		{"PUT", "/api/tickets/PAY-1/answers/draft", `{"answers":[{"questionId":9,"answer":"","note":"half","attachments":[7]}]}`, 204, ``},
+		{"PUT", "/api/tickets/DONE-1/answers/draft", `{"answers":[{"questionId":9,"answer":"x"}]}`, 409, `conflict`},
 		{"POST", "/api/tickets/PAY-1/approve", "", 200, `"state":"pushing"`},
 		{"POST", "/api/tickets/PAY-1/approve", `{"assignees":["alice"]}`, 200, `"state":"pushing"`},
 		{"POST", "/api/tickets/PAY-1/approve", `{"assignees":"alice"}`, 400, `bad_request`},
@@ -608,6 +619,9 @@ func TestTicketEndpoints(t *testing.T) {
 	}
 	if len(h.tickets.lastFiles) != 2 || h.tickets.lastFiles[0] != 9 {
 		t.Errorf("retry files not passed: %v", h.tickets.lastFiles)
+	}
+	if d := h.tickets.lastDraft; len(d) != 1 || d[0].QuestionID != 9 || d[0].Answer != "" || d[0].Note != "half" || len(d[0].Attachments) != 1 || d[0].Attachments[0] != 7 {
+		t.Errorf("answer draft not passed: %+v", d)
 	}
 	if h.tickets.lastOrigin != domain.OriginWeb || len(h.tickets.lastAnswer) != 1 || h.tickets.lastAnswer[0].Note != "n" || len(h.tickets.lastAnswer[0].Attachments) != 1 {
 		t.Errorf("web origin/answers not passed: %v %+v", h.tickets.lastOrigin, h.tickets.lastAnswer)
