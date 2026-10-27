@@ -56,6 +56,12 @@ func (r *Runner) SetMuse(eng *muse.Engine, budgets MuseBudgets) {
 	r.muse, r.museBudgets = eng, budgets
 }
 
+// SetMuseLoginKeeper sets what saves a Muse login that Muse refreshed
+// during a run (the account is in ctx).
+func (r *Runner) SetMuseLoginKeeper(fn func(ctx context.Context, file []byte) error) {
+	r.keepLogin = fn
+}
+
 // museModel resolves "muse:spark" or "muse:muse-spark-1.3" to a Muse id.
 func museModel(name string) model.ID {
 	name = strings.TrimPrefix(name, orchestrator.MusePrefix)
@@ -102,7 +108,7 @@ func (w *workspace) muse(ctx context.Context, req orchestrator.ClaudeRequest, on
 		Prompt: req.Prompt, Workdir: workDir, Model: id, Effort: req.Effort, SessionID: req.Resume,
 		Budget: b, AnnounceBudget: b != nil && b.Limit > 0, Credential: &cred, AuthPath: museAuthPath,
 		Env: req.Env, Guard: g, MaxCalls: req.MaxTurns,
-	}, &dockerExecutor{w: w}, func(e muse.Event) { museEvent(e, limit, onEvent) })
+	}, &dockerExecutor{w: w, ctx: ctx}, func(e muse.Event) { museEvent(e, limit, onEvent) })
 	out := orchestrator.ClaudeResult{
 		SessionID: res.SessionID, Turns: res.Usage.Calls, Text: res.Text, Duration: res.Duration,
 		Model: orchestrator.MusePrefix + string(res.Model),
@@ -146,11 +152,7 @@ func museCredential(c Credential) (credential.Credential, error) {
 	case c.Token == "":
 		return credential.Credential{}, errors.New("muse is not connected: connect your Meta account in Workspace settings → Muse")
 	case c.Env == MuseLoginEnv:
-		tok, err := credential.ParseAuthFile([]byte(c.Token))
-		if err != nil {
-			return credential.Credential{}, err
-		}
-		return credential.Login(tok, "")
+		return credential.LoginFile([]byte(c.Token), "")
 	case c.Env == MuseKeyEnv:
 		return credential.APIKey(c.Token)
 	}
@@ -254,7 +256,10 @@ func firstNonEmpty(s ...string) string {
 }
 
 // dockerExecutor runs `muse serve` in the run container.
-type dockerExecutor struct{ w *workspace }
+type dockerExecutor struct {
+	w   *workspace
+	ctx context.Context // the run's: whose account a refreshed login is kept for
+}
 
 // Start implements muse.Executor.
 func (d *dockerExecutor) Start(ctx context.Context, cmd muse.Command) (muse.Process, error) {
@@ -274,7 +279,7 @@ func (d *dockerExecutor) Start(ctx context.Context, cmd muse.Command) (muse.Proc
 	if err != nil {
 		return nil, err
 	}
-	return &museProcess{a: a, w: d.w, files: cmd.Files, stderr: &stderr}, nil
+	return &museProcess{a: a, w: d.w, files: cmd.Files, stderr: &stderr, ctx: d.ctx}, nil
 }
 
 type museProcess struct {
@@ -282,6 +287,7 @@ type museProcess struct {
 	w      *workspace
 	files  []credential.File
 	stderr *tailBuffer
+	ctx    context.Context
 
 	once sync.Once
 	err  error
@@ -298,6 +304,7 @@ func (p *museProcess) Wait() error {
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 		code, err := p.a.Wait(ctx)
+		p.keepLogin(ctx)
 		for _, f := range p.files {
 			_, _ = p.w.docker.Exec(ctx, p.w.id, ExecConfig{Cmd: []string{"rm", "-f", f.Path}, User: agentUser}, io.Discard, io.Discard)
 		}
@@ -315,4 +322,22 @@ func (p *museProcess) Wait() error {
 		}
 	})
 	return p.err
+}
+
+// keepLogin saves the credential file back when Muse refreshed it during
+// the run (it rewrites the file at MUSE_AUTH_PATH).
+func (p *museProcess) keepLogin(ctx context.Context) {
+	if p.w.keepLogin == nil || p.ctx == nil {
+		return
+	}
+	for _, f := range p.files {
+		if f.Path != museAuthPath {
+			continue
+		}
+		now, err := p.w.ReadFile(ctx, f.Path)
+		if err != nil || len(now) == 0 || string(now) == string(f.Data) {
+			return
+		}
+		_ = p.w.keepLogin(context.WithoutCancel(p.ctx), now)
+	}
 }

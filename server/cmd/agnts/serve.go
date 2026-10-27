@@ -419,7 +419,6 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.claude = claude.New(claude.Config{PlatformKey: cfg.AnthropicAPIKey, Subscriptions: !cfg.Cloud, MuseKey: cfg.MusePlatformKey,
 		Free: func(ctx context.Context, user int64) bool { return a.museCredits.FreeAvailable(ctx, user) > 0 }},
 		conns, a.usage, a.settings, a.users)
-	a.museDevice = musecredits.NewLogins(a.claude, log.With("component", "muse-login"))
 	a.usage.OnPaused(a.claude.Paused)
 	a.usage.SetResolver(func(ctx context.Context) (domain.ClaudeAccount, bool) {
 		ws, err := domain.MustWorkspace(ctx)
@@ -474,6 +473,19 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	if err != nil {
 		return nil, fmt.Errorf("AGNTS_MUSE_PRICES: %w", err)
 	}
+	a.museDevice = musecredits.NewLogins(func(ctx context.Context) (string, string, time.Time, <-chan musecredits.SignInResult, error) {
+		p, res, err := run.MuseLogin(ctx, cfg.RunnerImage)
+		if err != nil {
+			return "", "", time.Time{}, nil, err
+		}
+		out := make(chan musecredits.SignInResult, 1)
+		go func() {
+			r := <-res
+			out <- musecredits.SignInResult{File: r.File, Err: r.Err}
+		}()
+		return p.URL, p.Code, p.ExpiresAt, out, nil
+	}, a.claude, log.With("component", "muse-login"))
+	run.SetMuseLoginKeeper(a.claude.KeepMuseLogin)
 	run.SetMuse(muse.New(muse.Config{Binary: cfg.MuseBinary, Catalog: catalog, Ledger: a.museCredits.Ledger(),
 		Observer: muse.SlogObserver{Logger: log.With("component", "muse")}}), a.museCredits)
 	a.refresher = usage.NewRefresher(a.usage, run, cfg.RunnerImage, log.With("component", "usage"))

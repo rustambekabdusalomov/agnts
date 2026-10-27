@@ -9,8 +9,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rustambekabdusalomov/agnts-muse/credential"
-
 	"agnts/internal/domain"
 	"agnts/internal/store/postgres"
 )
@@ -19,6 +17,17 @@ import (
 type Savers interface {
 	SetWorkspace(ctx context.Context, ws int64, kind, token string) (postgres.ClaudeConnection, error)
 	SetUser(ctx context.Context, userID int64, kind, token string) (postgres.ClaudeConnection, error)
+}
+
+// SignIn runs Muse Code's own `muse login` (the runner does it in a
+// throwaway container): it returns the page and code to show, and later
+// Muse's credential file.
+type SignIn func(ctx context.Context) (page, code string, expires time.Time, result <-chan SignInResult, err error)
+
+// SignInResult is how a sign-in ended.
+type SignInResult struct {
+	File []byte
+	Err  error
 }
 
 // Login statuses.
@@ -45,22 +54,24 @@ type Login struct {
 	ws, user int64
 }
 
-// Logins connects Muse accounts by signing in with Meta (OAuth device
-// flow), the way `muse login` does: agnts shows the code, the person
-// approves it on Meta's page, and agnts keeps the account's token sealed as
-// the person's or the workspace's Muse connection. Nobody copies a token.
+// Logins connects Muse accounts the way `muse login` does, because it is
+// `muse login`: it runs in a throwaway container, agnts shows its page and
+// code, the person approves on Meta's page, and agnts keeps the
+// credential file Muse saved, sealed, as the person's or the workspace's
+// Muse connection. Runs then use that login, billed to the person's Meta
+// account rather than to agnts credits.
 type Logins struct {
-	Flow  credential.DeviceFlow
-	saver Savers
-	log   *slog.Logger
+	signIn SignIn
+	saver  Savers
+	log    *slog.Logger
 
 	mu      sync.Mutex
 	pending map[string]*Login
 }
 
 // NewLogins returns the sign-in service.
-func NewLogins(saver Savers, log *slog.Logger) *Logins {
-	return &Logins{saver: saver, log: log, pending: map[string]*Login{}}
+func NewLogins(signIn SignIn, saver Savers, log *slog.Logger) *Logins {
+	return &Logins{signIn: signIn, saver: saver, log: log, pending: map[string]*Login{}}
 }
 
 // Start begins a sign-in for a workspace (ws > 0) or a person (user > 0).
@@ -68,19 +79,22 @@ func (l *Logins) Start(ctx context.Context, ws, user int64) (Login, error) {
 	if (ws > 0) == (user > 0) {
 		return Login{}, errors.New("a Muse sign-in is for a workspace or a person")
 	}
-	a, err := l.Flow.Start(ctx)
+	if l.signIn == nil {
+		return Login{}, errors.New("signing in with Meta is not available on this server; use a Meta Model API key")
+	}
+	page, code, expires, result, err := l.signIn(ctx)
 	if err != nil {
 		return Login{}, err
 	}
 	var b [12]byte
 	_, _ = rand.Read(b[:])
-	lg := &Login{ID: hex.EncodeToString(b[:]), UserCode: a.UserCode, VerificationURI: a.VerificationURI,
-		VerificationURIComplete: a.VerificationURIComplete, ExpiresAt: a.ExpiresAt, Status: LoginPending, ws: ws, user: user}
+	lg := &Login{ID: hex.EncodeToString(b[:]), UserCode: code, VerificationURI: page, VerificationURIComplete: page,
+		ExpiresAt: expires, Status: LoginPending, ws: ws, user: user}
 	l.mu.Lock()
 	l.prune()
 	l.pending[lg.ID] = lg
 	l.mu.Unlock()
-	go l.wait(lg, a) //nolint:gosec // G118: the sign-in outlives the request that started it
+	go l.wait(lg, result) //nolint:gosec // G118: the sign-in outlives the request that started it
 	return *lg, nil
 }
 
@@ -95,34 +109,26 @@ func (l *Logins) Status(id string, ws, user int64) (Login, bool) {
 	return *lg, true
 }
 
-func (l *Logins) wait(lg *Login, a credential.Authorization) {
-	ctx, cancel := context.WithDeadline(domain.System(context.Background()), a.ExpiresAt.Add(time.Minute))
-	defer cancel()
-	tok, err := l.Flow.Wait(ctx, a)
+func (l *Logins) wait(lg *Login, result <-chan SignInResult) {
+	r := <-result
 	status, msg, account := LoginConnected, "", ""
+	err := r.Err
 	if err == nil {
-		var c credential.Credential
-		var file []byte
-		if c, err = credential.Login(tok, ""); err == nil {
-			file, err = c.AuthFile()
+		ctx, cancel := context.WithTimeout(domain.System(context.Background()), time.Minute)
+		defer cancel()
+		var conn postgres.ClaudeConnection
+		if lg.ws > 0 {
+			conn, err = l.saver.SetWorkspace(domain.WithWorkspace(ctx, lg.ws), lg.ws, postgres.MuseLogin, string(r.File))
+		} else {
+			conn, err = l.saver.SetUser(ctx, lg.user, postgres.MuseLogin, string(r.File))
 		}
-		if err == nil {
-			var conn postgres.ClaudeConnection
-			if lg.ws > 0 {
-				conn, err = l.saver.SetWorkspace(domain.WithWorkspace(ctx, lg.ws), lg.ws, postgres.MuseLogin, string(file))
-			} else {
-				conn, err = l.saver.SetUser(ctx, lg.user, postgres.MuseLogin, string(file))
-			}
-			account = conn.Account
-		}
+		account = conn.Account
 	}
-	switch {
-	case errors.Is(err, credential.ErrDenied):
-		status, msg = LoginDenied, "the sign-in was declined on Meta's page"
-	case errors.Is(err, credential.ErrExpired), errors.Is(err, context.DeadlineExceeded):
-		status, msg = LoginExpired, "the code expired before it was approved; start again"
-	case err != nil:
+	if err != nil {
 		status, msg = LoginFailed, err.Error()
+		if time.Now().After(lg.ExpiresAt) {
+			status = LoginExpired
+		}
 		l.log.Warn("muse sign-in failed", "err", err)
 	}
 	l.mu.Lock()

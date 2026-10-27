@@ -32,6 +32,7 @@ type Connections interface {
 	SetPaused(ctx context.Context, id int64, until *time.Time) error
 	MemberConnections(ctx context.Context, ws int64) (map[int64]*time.Time, error)
 	Paused(ctx context.Context) ([]int64, error)
+	UpdateToken(ctx context.Context, id int64, token string) error
 }
 
 // Usage says whether an account is at its limit (the account is in ctx).
@@ -318,8 +319,8 @@ func (s *Service) Check(ctx context.Context, kind, token string) (string, error)
 		}
 		return "Meta Model API key", nil
 	case postgres.MuseLogin:
-		if _, err := credential.ParseAuthFile([]byte(token)); err != nil {
-			return "", errors.New("the Meta sign-in did not return a usable token; sign in again")
+		if _, err := credential.LoginFile([]byte(token), ""); err != nil {
+			return "", errors.New("the Meta sign-in did not return a usable login; sign in again")
 		}
 		return "Meta account", nil
 	}
@@ -426,4 +427,18 @@ func (s *Service) Resolve(ctx context.Context, ws domain.Workspace) (domain.Clau
 		uid = a.UserID
 	}
 	return s.AccountFor(ctx, ws, uid)
+}
+
+// KeepMuseLogin saves the Muse login a run ended with, when Muse refreshed
+// it during the run, so the connection does not expire. Runs on credits
+// and on API keys have nothing to keep.
+func (s *Service) KeepMuseLogin(ctx context.Context, file []byte) error {
+	a, ok := domain.ClaudeOf(ctx)
+	if !ok || a.Credits || a.ConnectionID == 0 {
+		return nil
+	}
+	if _, err := credential.LoginFile(file, ""); err != nil {
+		return err
+	}
+	return s.conns.UpdateToken(ctx, a.ConnectionID, string(file))
 }

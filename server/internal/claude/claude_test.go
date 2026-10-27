@@ -65,6 +65,12 @@ func (f *fakeConns) MemberConnections(context.Context, int64) (map[int64]*time.T
 	return nil, nil
 }
 func (f *fakeConns) Paused(context.Context) ([]int64, error) { return nil, nil }
+func (f *fakeConns) UpdateToken(_ context.Context, id int64, token string) error {
+	c := f.byID[id]
+	c.Token = token
+	f.byID[id] = c
+	return nil
+}
 
 // fakeUsage pauses the connections in paused.
 type fakeUsage struct{ paused map[int64]bool }

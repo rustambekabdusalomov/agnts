@@ -182,3 +182,18 @@ func (s *ClaudeConnections) Paused(ctx context.Context) ([]int64, error) {
 	}
 	return pgx.CollectRows(rows, pgx.RowTo[int64])
 }
+
+// UpdateToken replaces a connection's token in place (a Muse login Muse
+// refreshed during a run), sealed for the same owner.
+func (s *ClaudeConnections) UpdateToken(ctx context.Context, id int64, token string) error {
+	var c ClaudeConnection
+	if err := s.db.QueryRow(ctx, `SELECT workspace_id, user_id FROM claude_connections WHERE id = $1`, id).Scan(&c.WorkspaceID, &c.UserID); err != nil {
+		return notFound(err)
+	}
+	enc, err := s.box.Seal([]byte(token), claudeAAD(c))
+	if err != nil {
+		return err
+	}
+	_, err = s.db.Exec(ctx, `UPDATE claude_connections SET token_enc = $2, updated_at = now() WHERE id = $1`, id, enc)
+	return err
+}
