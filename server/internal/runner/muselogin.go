@@ -25,13 +25,13 @@ import (
 // keychain_fallback_file.)
 const museFileCredentials = "TBH_CREDENTIAL_BACKEND=file"
 
-// museLoginHome is the login container's home, on a tmpfs (the root
-// filesystem stays read-only).
-const museLoginHome = "/tmp/home"
+// museLoginHome is the login container's home: the agent user's real one,
+// on a tmpfs (the root filesystem stays read-only). Muse saves its login
+// under the user's home from the system, not $HOME.
+const museLoginHome = homeDir
 
-// museLoginFiles are where `muse login` may save its credentials on Linux;
-// the first found wins.
-var museLoginFiles = []string{museLoginHome + "/.config/muse/auth.json", museLoginHome + "/.local/share/muse/auth.json"}
+// museLoginFiles is where `muse login` saves its credential file.
+var museLoginFiles = []string{museAuthPath}
 
 // MuseLoginPrompt is what the person needs to approve the sign-in.
 type MuseLoginPrompt struct {
@@ -64,7 +64,8 @@ func (r *Runner) MuseLogin(ctx context.Context, image string) (MuseLoginPrompt, 
 	id, err := r.docker.Create(bg, ContainerConfig{
 		Image: image, User: agentUser, Cmd: []string{"sleep", "900"}, Network: "bridge",
 		MemoryMB: 512, CPUs: 1, PIDs: 256, Labels: map[string]string{"agnts": "muse-login"},
-		Tmpfs: map[string]string{"/tmp": "rw,exec,nosuid,size=256m,uid=1000,gid=1000"},
+		Tmpfs: map[string]string{"/tmp": "rw,exec,nosuid,size=256m,uid=1000,gid=1000",
+			homeDir: "rw,exec,nosuid,size=256m,uid=1000,gid=1000"},
 	})
 	if err != nil {
 		cancel()

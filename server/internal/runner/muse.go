@@ -39,8 +39,11 @@ const (
 // Claude Code's config dir, which agnts saves between a ticket's runs, so
 // a later run can resume the session.
 const (
-	museHome     = claudeHome + "/muse"
-	museAuthPath = museHome + "/auth.json"
+	museHome = claudeHome + "/muse"
+	// museAuthPath is the only place Muse Code reads its login from: the
+	// agent's own ~/.config/muse (it ignores MUSE_AUTH_PATH, which only its
+	// installer's launcher reads, and $HOME).
+	museAuthPath = homeDir + "/.config/muse/auth.json"
 )
 
 // MuseBudgets decides what a Muse run on agnts's key may spend. It returns
