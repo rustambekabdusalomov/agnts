@@ -159,11 +159,11 @@ func museCredential(c Credential) (credential.Credential, error) {
 // museEvent maps agnts-muse's events onto Claude Code's, which the ticket
 // log, transcripts and stall detection read.
 func museEvent(e muse.Event, limit float64, on func(orchestrator.ClaudeEvent)) {
-	budget := func(text, level string, data map[string]any) {
+	budget := func(kind, text, level string, data map[string]any) {
 		if data == nil {
 			data = map[string]any{}
 		}
-		data["level"] = level
+		data["kind"], data["level"] = kind, level
 		on(orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeBudget, Text: text, Data: data})
 	}
 	switch e.Kind {
@@ -179,23 +179,23 @@ func museEvent(e muse.Event, limit float64, on func(orchestrator.ClaudeEvent)) {
 	case muse.EventUsage:
 		c := e.Charge
 		text := fmt.Sprintf("model call %d on %s: %s (total %s)", c.Calls, e.Model, c.Cost, c.Total)
-		budget(text, "info", map[string]any{"cost_usd": c.Cost.Float(), "total_usd": c.Total.Float(), "held_usd": e.Held.Float(),
+		budget("usage", text, "info", map[string]any{"cost_usd": c.Cost.Float(), "total_usd": c.Total.Float(), "held_usd": e.Held.Float(),
 			"limit_usd": limit, "calls": c.Calls, "model": string(e.Model),
 			"input_tokens": c.Usage.Input, "cached_tokens": c.Usage.Cached, "output_tokens": c.Usage.Output})
 	case muse.EventSteer:
-		budget("budget running low: told Muse to wrap up", "warn", nil)
+		budget("steer", "budget running low: told Muse to wrap up", "warn", nil)
 	case muse.EventEscalate:
-		budget("moved to "+string(e.Model)+": "+e.Reason, "info", map[string]any{"model": string(e.Model)})
+		budget("escalate", "moved to "+string(e.Model)+": "+e.Reason, "info", map[string]any{"model": string(e.Model)})
 	case muse.EventInterrupt:
-		budget("stopped: "+e.Reason, "warn", nil)
+		budget("stop", "stopped: "+e.Reason, "warn", nil)
 	case muse.EventApproval:
 		if a := e.Approval; a != nil && !a.Allow {
-			budget(fmt.Sprintf("guard refused %s (%s): %s", firstNonEmpty(a.Command, a.Path, a.Tool), a.Rule, a.Reason), "warn",
+			budget("guard", fmt.Sprintf("guard refused %s (%s): %s", firstNonEmpty(a.Command, a.Path, a.Tool), a.Rule, a.Reason), "warn",
 				map[string]any{"rule": a.Rule})
 		}
 	case muse.EventSettled:
 		if r := e.Receipt; r != nil {
-			budget(fmt.Sprintf("charged %s, released %s", r.Charged, r.Released), "info",
+			budget("settled", fmt.Sprintf("charged %s, released %s", r.Charged, r.Released), "info",
 				map[string]any{"charged_usd": r.Charged.Float(), "released_usd": r.Released.Float(), "unbilled_usd": r.Unbilled.Float()})
 		}
 	}
