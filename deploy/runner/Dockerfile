@@ -57,6 +57,22 @@ RUN export PATH=/opt/claude/node/bin:$PATH \
 # repository's Node (first on PATH) never changes the Node Claude runs on.
 COPY claude-wrapper /usr/local/bin/claude
 
+# Muse Code (Meta), agnts's primary coding tool. Pinned like Claude Code:
+# agnts speaks its session protocol (MSP, `muse serve`), checked against
+# the schema of this release. The binary comes straight from Meta's
+# release manifest and is verified against its sha256; the self-updating
+# launcher is not installed, so a run never changes its Muse version.
+ARG MUSE_VERSION=1.4.13-R6996.1
+RUN set -eu; \
+    case "$(uname -m)" in x86_64) p=x86_linux ;; aarch64|arm64) p=aarch64_linux ;; *) echo "no Muse build for $(uname -m)"; exit 1 ;; esac; \
+    curl -fsSL --retry 5 "https://lookaside.facebook.com/lookaside/muse/download/?channel=muse&version=${MUSE_VERSION}&file=manifest.json" -o /tmp/muse.json; \
+    url="$(jq -r --arg p "$p" '.artifacts[$p].url' /tmp/muse.json)"; \
+    sum="$(jq -r --arg p "$p" '.artifacts[$p].checksum' /tmp/muse.json)"; \
+    curl -fsSL --retry 5 "$url" -o /usr/local/bin/muse; \
+    echo "$sum  /usr/local/bin/muse" | sha256sum -c -; \
+    chmod 0755 /usr/local/bin/muse; rm /tmp/muse.json; \
+    /usr/local/bin/muse --version
+
 # Codex CLI, agnts's second coding tool, only when a version is given
 # (--build-arg CODEX_VERSION=x.y.z): pin it like Claude Code, since agnts
 # parses its `codex exec --json` stream. It runs on Claude's Node too.

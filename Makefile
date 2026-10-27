@@ -5,6 +5,7 @@ SHELL := /bin/bash
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 COMMIT  ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 IMAGE   ?= agnts:local
+MUSE_DIR ?= ../agnts-muse
 
 GOLANGCI := go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
 OPENAPI_GEN := npx --yes @openapitools/openapi-generator-cli@2.41.0
@@ -111,7 +112,7 @@ build: ## Build the server binary, the admin panel and the website
 	cd server && go build -trimpath -ldflags "-X main.version=$(VERSION) -X main.commit=$(COMMIT)" -o ../bin/agnts ./cmd/agnts
 
 image: ## Build the production Docker image
-	docker build --build-arg VERSION=$(VERSION) --build-arg COMMIT=$(COMMIT) -t $(IMAGE) .
+	docker build --build-context agnts-muse=$(MUSE_DIR) --build-arg VERSION=$(VERSION) --build-arg COMMIT=$(COMMIT) -t $(IMAGE) .
 
 # ---- CLI (Rust; installs and manages agnts on a server) ----
 

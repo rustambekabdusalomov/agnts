@@ -25,6 +25,8 @@ import (
 
 // DefaultAllow is used when AGNTS_EGRESS_ALLOW is not set.
 var DefaultAllow = []string{
+	// Muse Code: Meta's model API and sign-in (token refresh)
+	"api.meta.ai", "auth.meta.com",
 	// Claude Code, and git hosts (GitHub release assets carry most
 	// prebuilt toolchains: Python, Temurin, aqua and ubi tools).
 	"api.anthropic.com", "statsig.anthropic.com", "sentry.io", ".sentry.io",

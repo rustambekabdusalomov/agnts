@@ -11,6 +11,10 @@ RUN npm run build
 
 # Server
 FROM golang:1.26-alpine AS server
+# agnts-muse is a sibling module (server/go.mod replaces it with
+# ../../agnts-muse): pass it as a named context,
+#   docker build --build-context agnts-muse=../agnts-muse .
+COPY --from=agnts-muse . /agnts-muse
 WORKDIR /src/server
 COPY server/go.mod server/go.sum ./
 RUN go mod download
