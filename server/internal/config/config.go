@@ -200,8 +200,9 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 	c.GuardBinary = get("AGNTS_GUARD_BIN", "/usr/local/bin/agnts-guard")
 	c.OpenAIAPI = get("AGNTS_OPENAI_API", "https://api.openai.com")
 	c.RunNetwork = get("AGNTS_RUN_NETWORK", "agnts-runs")
-	c.ModelAnalyze = get("AGNTS_MODEL_ANALYZE", "opus")
-	c.ModelCode = get("AGNTS_MODEL_CODE", "opus")
+	// Empty leaves the primary tool's defaults (Muse Spark, or Claude's).
+	c.ModelAnalyze = get("AGNTS_MODEL_ANALYZE", "")
+	c.ModelCode = get("AGNTS_MODEL_CODE", "")
 	c.GitName = get("AGNTS_GIT_AUTHOR_NAME", "")
 	c.GitEmail = get("AGNTS_GIT_AUTHOR_EMAIL", "")
 	c.GitHubAPI = get("AGNTS_GITHUB_API", "https://api.github.com")

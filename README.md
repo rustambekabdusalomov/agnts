@@ -1,8 +1,34 @@
 # agnts
 
 A self-hosted agent that takes Jira tickets and side-project tasks, codes them
-with Claude Code in isolated containers, and ships nothing without your
-approval. See [Implementation plan.md](plans/Implementation%20plan.md).
+with Meta's Muse Code in isolated containers, and ships nothing without your
+approval. See [Implementation plan.md](plans/Implementation%20plan.md) and
+[Muse plan.md](plans/Muse%20plan.md).
+
+## Muse Code
+
+Muse Code is agnts's coding tool (`AGNTS_PROVIDERS=muse`; Claude Code and
+Codex stay available behind the same switch). agnts drives it with
+[agnts-muse](https://github.com/rustambekabdusalomov/agnts-muse), which speaks
+Muse's session protocol (`muse serve`) inside each run container:
+
+- **Live cost.** Every model call is charged as Muse reports it and shows on the
+  ticket's log; a run on credits holds money ahead of its spend and is told to
+  wrap up at 80% of its budget, then stopped before the call that would pass it.
+- **Escalation without a restart.** A Spark session that keeps failing moves to
+  Wonder in the same session, with its context.
+- **agnts's rules decide tool calls.** The guard vetoes `git push`, reading
+  secrets, piping downloads into a shell and the like through Muse's approvals.
+- **Accounts.** A person or workspace connects Muse by signing in with Meta
+  (a code to confirm, like `muse login`) or with a Meta Model API key. Without
+  one, runs use agnts's key (`AGNTS_MUSE_PLATFORM_KEY`) and are paid with
+  credits: first the person's **free credits** (set by an Admin per person,
+  0 by default; Admin → Users), then the workspace's bought credits, under a
+  monthly cap for the whole server (`AGNTS_MUSE_GLOBAL_CAP_USD`).
+
+agnts-muse sits beside this repository (`../agnts-muse`, see
+`server/go.mod`); the server image builds with
+`docker build --build-context agnts-muse=../agnts-muse .` (`make build` does).
 
 ## Layout
 
@@ -54,7 +80,7 @@ Settings). The server commands still work for a headless first run, through
 the CLI as `agnts server -- ...`:
 
 ```sh
-agnts server -- integration set claude    # token from `claude setup-token` (your Claude plan)
+agnts server -- integration set claude    # token from `claude setup-token` (only with AGNTS_PROVIDERS including claude)
 agnts server -- integration set github    # fine-grained PAT: Contents + Pull requests, read/write (+ Actions for CI watching)
 agnts server -- integration set jira      # site, email, API token, label; prints the webhook to create
 agnts server -- integration set plane     # API address, workspace, API key; prints the webhook to create in Plane
