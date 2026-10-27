@@ -19,6 +19,8 @@ import (
 
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
+
+	muse "github.com/rustambekabdusalomov/agnts-muse"
 )
 
 // Paths inside the runner image (deploy/runner/Dockerfile).
@@ -102,6 +104,9 @@ type Runner struct {
 	// codexKey returns the OpenAI API key Codex runs use, in the workspace
 	// ctx acts in ("" when none is connected).
 	codexKey func(ctx context.Context) (string, error)
+	// muse runs Muse Code; museBudgets limits runs on credits.
+	muse        *muse.Engine
+	museBudgets MuseBudgets
 
 	netOnce sync.Once
 	netErr  error
@@ -289,7 +294,7 @@ func (r *Runner) Open(ctx context.Context, spec orchestrator.WorkspaceSpec) (orc
 		}
 		return nil, err
 	}
-	ws := &workspace{docker: r.docker, id: id, token: r.token, codexKey: r.codexKey, memoryMB: memory, network: ownNet, proxy: r.cfg.ProxyContainer, models: r.cfg.Models}
+	ws := &workspace{docker: r.docker, id: id, token: r.token, codexKey: r.codexKey, museEng: r.muse, museBudgets: r.museBudgets, memoryMB: memory, network: ownNet, proxy: r.cfg.ProxyContainer, models: r.cfg.Models}
 	fail := func(err error) (orchestrator.Workspace, error) {
 		_ = ws.Close(context.WithoutCancel(ctx))
 		return nil, err
@@ -367,11 +372,13 @@ func proxyEnv(proxy string) []string {
 }
 
 type workspace struct {
-	docker   *Docker
-	id       string
-	token    TokenSource
-	codexKey func(ctx context.Context) (string, error)
-	memoryMB int64
+	docker      *Docker
+	id          string
+	token       TokenSource
+	codexKey    func(ctx context.Context) (string, error)
+	museEng     *muse.Engine
+	museBudgets MuseBudgets
+	memoryMB    int64
 	// network is the run's own network ("" on the shared one), removed
 	// with the container; proxy is the egress proxy that joined it.
 	network, proxy string
@@ -450,6 +457,9 @@ func timeoutCmd(d time.Duration, argv ...string) []string {
 func (w *workspace) Claude(ctx context.Context, req orchestrator.ClaudeRequest, onEvent func(orchestrator.ClaudeEvent)) (orchestrator.ClaudeResult, error) {
 	if model, ok := strings.CutPrefix(req.Model, orchestrator.CodexPrefix); ok {
 		return w.codex(ctx, req, model, onEvent)
+	}
+	if strings.HasPrefix(req.Model, orchestrator.MusePrefix) {
+		return w.muse(ctx, req, onEvent)
 	}
 	cred, err := w.token(ctx)
 	if err != nil {

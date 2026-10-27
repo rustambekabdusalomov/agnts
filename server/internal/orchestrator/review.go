@@ -39,10 +39,10 @@ const (
 // It returns the model and why it was picked.
 func reviewModel(s domain.Settings, t domain.Ticket, a *Analysis, res domain.Result) (string, string) {
 	if m := t.Models[domain.ModelReview]; domain.ValidModel(m) {
-		return m, "chosen for this ticket"
+		return domain.EffectiveModel(m), "chosen for this ticket"
 	}
 	if m := s.Models.Review; domain.ValidModel(m) {
-		return m, "set in Settings"
+		return domain.EffectiveModel(m), "set in Settings"
 	}
 	lines := 0
 	for _, f := range res.Files {
@@ -50,15 +50,15 @@ func reviewModel(s domain.Settings, t domain.Ticket, a *Analysis, res domain.Res
 	}
 	switch {
 	case a != nil && a.Complexity == ComplexityComplex:
-		return "opus", "the analysis rated this ticket complex"
+		return domain.StrongModel(), "the analysis rated this ticket complex"
 	case len(res.Files) >= complexFiles || lines >= complexLines:
-		return "opus", fmt.Sprintf("a large change (%d %s, %d lines)", len(res.Files), plural(len(res.Files), "file", "files"), lines)
+		return domain.StrongModel(), fmt.Sprintf("a large change (%d %s, %d lines)", len(res.Files), plural(len(res.Files), "file", "files"), lines)
 	case len(res.Report) >= complexReport:
-		return "opus", "a long report"
+		return domain.StrongModel(), "a long report"
 	case t.Revision >= complexRevisions:
-		return "opus", fmt.Sprintf("changes were requested %d times", t.Revision)
+		return domain.StrongModel(), fmt.Sprintf("changes were requested %d times", t.Revision)
 	}
-	return "sonnet", "a simple ticket"
+	return domain.LightModel(), "a simple ticket"
 }
 
 // parseReview reads review.json and cleans it.

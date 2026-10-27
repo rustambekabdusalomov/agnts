@@ -62,6 +62,12 @@ type transcriptMeta struct {
 // logged and never fail the run.
 func (o *Orchestrator) callClaude(ctx context.Context, ws Workspace, m transcriptMeta, req ClaudeRequest, onEvent func(ClaudeEvent)) (ClaudeResult, error) {
 	req = o.fitPrompt(ctx, ws, m, req)
+	if m.Run != nil && req.RunID == 0 {
+		req.RunID = m.Run.ID
+	}
+	if req.WorkspaceID == 0 {
+		req.WorkspaceID = m.WorkspaceID
+	}
 	if o.recorder == nil {
 		return ws.Claude(ctx, req, onEvent)
 	}

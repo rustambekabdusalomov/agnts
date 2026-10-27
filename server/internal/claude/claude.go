@@ -13,6 +13,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rustambekabdusalomov/agnts-muse/credential"
+
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres"
@@ -56,6 +58,13 @@ type Config struct {
 	MinCredits int64
 	// APIBase is Anthropic's API, for checking keys (tests replace it).
 	APIBase string
+	// MuseKey is agnts's Meta Model API key for Muse runs on credits;
+	// it, not PlatformKey, enables credits when Muse is the primary tool.
+	MuseKey string
+	// Free says whether a person has free credits left (an Admin gave
+	// them); a run then continues on credits even when the workspace has
+	// not turned on continuing with credits.
+	Free func(ctx context.Context, userID int64) bool
 }
 
 // Service picks accounts and manages connections.
@@ -81,8 +90,29 @@ func New(cfg Config, conns Connections, usage Usage, settings orchestrator.Setti
 	return &Service{cfg: cfg, conns: conns, usage: usage, settings: settings, users: users, hc: &http.Client{Timeout: 15 * time.Second}}
 }
 
-// CreditsEnabled reports whether runs can fall back to credits here.
-func (s *Service) CreditsEnabled() bool { return s.cfg.PlatformKey != "" }
+// CreditsEnabled reports whether runs can fall back to credits here: agnts
+// has its own key for the primary coding tool.
+func (s *Service) CreditsEnabled() bool {
+	if muse() {
+		return s.cfg.MuseKey != ""
+	}
+	return s.cfg.PlatformKey != ""
+}
+
+// muse reports whether Muse Code is the primary tool: then accounts are
+// Meta ones and Claude connections are not used.
+func muse() bool { return domain.PrimaryProvider() == domain.ProviderMuse }
+
+// isMuseKind reports whether a connection is a Muse account.
+func isMuseKind(kind string) bool { return kind == postgres.MuseAPIKey || kind == postgres.MuseLogin }
+
+// toolName names the primary tool in messages.
+func toolName() string {
+	if muse() {
+		return "Muse"
+	}
+	return "Claude"
+}
 
 // SubscriptionsAllowed reports whether subscription tokens are accepted.
 func (s *Service) SubscriptionsAllowed() bool { return s.cfg.Subscriptions }
@@ -115,15 +145,18 @@ func (s *Service) Pick(ctx context.Context, w domain.Workspace, member *int64) (
 		who = "the workspace"
 	}
 	why, until := "", time.Time{}
+	if err == nil && isMuseKind(conn.Kind) != muse() {
+		err = domain.ErrNotFound // a connection for a tool this server does not run
+	}
 	switch {
 	case errors.Is(err, domain.ErrNotFound):
 		if w.ClaudeMode == domain.ClaudePerMember {
-			why = who + " has not connected a Claude account (Profile → Claude)"
+			why = who + " has not connected a " + toolName() + " account (Profile → " + toolName() + ")"
 		} else {
-			why = "no Claude account is connected (Workspace settings → Claude)"
+			why = "no " + toolName() + " account is connected (Workspace settings → " + toolName() + ")"
 		}
 	case err != nil:
-		why = "could not read the Claude account: " + err.Error()
+		why = "could not read the " + toolName() + " account: " + err.Error()
 	case conn.Kind == postgres.ClaudeSubscription && !s.cfg.Subscriptions:
 		why = "this server accepts Anthropic API keys only; connect one instead of a subscription token"
 	default:
@@ -136,14 +169,18 @@ func (s *Service) Pick(ctx context.Context, w domain.Workspace, member *int64) (
 		if !paused {
 			return acct, true, "", time.Time{}
 		}
-		why, until = "Claude limit reached on "+acct.Label, at
+		why, until = toolName()+" limit reached on "+acct.Label, at
 		if !at.IsZero() {
 			why += "; resumes at " + at.Format("15:04")
 		}
 	}
+	payer := whose(w, member)
+	if s.CreditsEnabled() && s.cfg.Free != nil && s.cfg.Free(ctx, payer) {
+		return domain.ClaudeAccount{Credits: true, Label: "free credits", UserID: payer}, true, "", time.Time{}
+	}
 	if w.ClaudeFallback && s.CreditsEnabled() {
 		if w.CreditsBalance >= s.cfg.MinCredits {
-			return domain.ClaudeAccount{Credits: true, Label: "workspace credits"}, true, "", time.Time{}
+			return domain.ClaudeAccount{Credits: true, Label: "workspace credits", UserID: payer}, true, "", time.Time{}
 		}
 		why += "; the workspace has no credits left to continue on"
 	} else if s.CreditsEnabled() {
@@ -190,8 +227,11 @@ type Credential struct {
 func (s *Service) CredentialFor(ctx context.Context) (Credential, error) {
 	a, ok := domain.ClaudeOf(ctx)
 	if ok && a.Credits {
-		if s.cfg.PlatformKey == "" {
+		if !s.CreditsEnabled() {
 			return Credential{}, errors.New("credits are not available on this server")
+		}
+		if muse() {
+			return Credential{Env: EnvMuseKey, Token: s.cfg.MuseKey}, nil
 		}
 		return Credential{Env: "ANTHROPIC_API_KEY", Token: s.cfg.PlatformKey}, nil
 	}
@@ -213,16 +253,28 @@ func (s *Service) CredentialFor(ctx context.Context) (Credential, error) {
 		}
 	}
 	if errors.Is(err, domain.ErrNotFound) {
-		return Credential{}, errors.New("claude is not connected: connect an account in Workspace settings → Claude")
+		return Credential{}, fmt.Errorf("%s is not connected: connect an account in Workspace settings → %s", strings.ToLower(toolName()), toolName())
 	}
 	if err != nil {
 		return Credential{}, err
+	}
+	switch c.Kind {
+	case postgres.MuseAPIKey:
+		return Credential{Env: EnvMuseKey, Token: c.Token}, nil
+	case postgres.MuseLogin:
+		return Credential{Env: EnvMuseLogin, Token: c.Token}, nil
 	}
 	if c.Kind == postgres.ClaudeAPIKey {
 		return Credential{Env: "ANTHROPIC_API_KEY", Token: c.Token}, nil
 	}
 	return Credential{Env: "CLAUDE_CODE_OAUTH_TOKEN", Token: c.Token}, nil
 }
+
+// Environment names of Muse credentials (the runner reads them).
+const (
+	EnvMuseKey   = "META_API_KEY"
+	EnvMuseLogin = "MUSE_LOGIN"
+)
 
 // Check validates a token before it is saved and returns the account
 // label to show. API keys are tried against Anthropic's API; subscription
@@ -260,8 +312,18 @@ func (s *Service) Check(ctx context.Context, kind, token string) (string, error)
 			return "", fmt.Errorf("anthropic answered %s while checking the key", resp.Status)
 		}
 		return "Anthropic API key", nil
+	case postgres.MuseAPIKey:
+		if _, err := credential.APIKey(token); err != nil {
+			return "", errors.New("expected a Meta Model API key (LLM_...)")
+		}
+		return "Meta Model API key", nil
+	case postgres.MuseLogin:
+		if _, err := credential.ParseAuthFile([]byte(token)); err != nil {
+			return "", errors.New("the Meta sign-in did not return a usable token; sign in again")
+		}
+		return "Meta account", nil
 	}
-	return "", fmt.Errorf("unknown kind %q (want subscription or api_key)", kind)
+	return "", fmt.Errorf("unknown kind %q (want subscription, api_key, muse_api_key or muse_login)", kind)
 }
 
 // SetWorkspace connects a workspace's shared account.

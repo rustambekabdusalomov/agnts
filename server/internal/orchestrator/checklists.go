@@ -118,7 +118,7 @@ func deepReview(s domain.Settings, model string) bool {
 		return true
 	case domain.DeepAuto:
 		// The same signal that picks the larger model: complex or large work.
-		return model == "opus"
+		return domain.IsStrong(model)
 	}
 	return false
 }

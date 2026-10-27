@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/binary"
@@ -20,7 +21,8 @@ import (
 // Paths are unversioned so the daemon answers in its own API version;
 // every field used here has been stable since API 1.25.
 type Docker struct {
-	hc *http.Client
+	hc     *http.Client
+	socket string
 }
 
 // NewDocker connects to the Docker socket at path (usually /var/run/docker.sock).
@@ -32,7 +34,7 @@ func NewDocker(socket string) *Docker {
 		},
 		DisableCompression: true,
 	}
-	return &Docker{hc: &http.Client{Transport: tr}}
+	return &Docker{hc: &http.Client{Transport: tr}, socket: socket}
 }
 
 type apiError struct {
@@ -401,6 +403,91 @@ func (d *Docker) Exec(ctx context.Context, id string, c ExecConfig, stdout, stde
 		return -1, err
 	}
 	return info.ExitCode, nil
+}
+
+// Attached is an exec with stdin attached: Write feeds the process's
+// stdin, Read returns its stdout, Close ends stdin. Wait returns the exit
+// code once the process ended; Kill drops the connection, which ends the
+// exec's streams (the process itself ends with its container or timeout).
+type Attached struct {
+	conn   net.Conn
+	stdout *io.PipeReader
+	done   chan error
+	d      *Docker
+	execID string
+}
+
+func (a *Attached) Read(p []byte) (int, error)  { return a.stdout.Read(p) }
+func (a *Attached) Write(p []byte) (int, error) { return a.conn.Write(p) }
+
+// Close ends the process's stdin.
+func (a *Attached) Close() error {
+	if cw, ok := a.conn.(interface{ CloseWrite() error }); ok {
+		return cw.CloseWrite()
+	}
+	return a.conn.Close()
+}
+
+// Kill drops the connection.
+func (a *Attached) Kill() error { return a.conn.Close() }
+
+// Wait waits for the output to end and returns the exit code.
+func (a *Attached) Wait(ctx context.Context) (int, error) {
+	err := <-a.done
+	_ = a.conn.Close()
+	var info struct {
+		ExitCode int  `json:"ExitCode"`
+		Running  bool `json:"Running"`
+	}
+	if ierr := a.d.json(ctx, http.MethodGet, "/exec/"+a.execID+"/json", nil, nil, &info); ierr != nil {
+		return -1, errors.Join(err, ierr)
+	}
+	return info.ExitCode, err
+}
+
+// ExecAttach starts a command with stdin attached, for processes that
+// speak a protocol over stdio (`muse serve`). The Engine API hijacks the
+// HTTP connection for it, so this dials the socket itself.
+func (d *Docker) ExecAttach(ctx context.Context, id string, c ExecConfig, stderr io.Writer) (*Attached, error) {
+	var created struct {
+		ID string `json:"Id"`
+	}
+	if err := d.json(ctx, http.MethodPost, "/containers/"+id+"/exec", nil, map[string]any{
+		"Cmd": c.Cmd, "Env": c.Env, "User": c.User, "WorkingDir": c.WorkingDir,
+		"AttachStdin": true, "AttachStdout": true, "AttachStderr": true, "Tty": false,
+	}, &created); err != nil {
+		return nil, err
+	}
+	var dialer net.Dialer
+	conn, err := dialer.DialContext(ctx, "unix", d.socket)
+	if err != nil {
+		return nil, fmt.Errorf("docker exec attach: %w", err)
+	}
+	body := `{"Detach":false,"Tty":false}`
+	req := "POST /exec/" + created.ID + "/start HTTP/1.1\r\nHost: docker\r\nContent-Type: application/json\r\n" +
+		"Connection: Upgrade\r\nUpgrade: tcp\r\nContent-Length: " + fmt.Sprint(len(body)) + "\r\n\r\n" + body
+	if _, err := io.WriteString(conn, req); err != nil {
+		_ = conn.Close()
+		return nil, err
+	}
+	br := bufio.NewReader(conn)
+	resp, err := http.ReadResponse(br, nil)
+	if err != nil {
+		_ = conn.Close()
+		return nil, fmt.Errorf("docker exec attach: %w", err)
+	}
+	if resp.StatusCode != http.StatusSwitchingProtocols && resp.StatusCode != http.StatusOK {
+		_ = conn.Close()
+		return nil, &apiError{Status: resp.StatusCode, Message: resp.Status}
+	}
+	pr, pw := io.Pipe()
+	a := &Attached{conn: conn, stdout: pr, done: make(chan error, 1), d: d, execID: created.ID}
+	go func() {
+		err := demux(br, pw, stderr)
+		_ = pw.CloseWithError(err)
+		a.done <- err
+	}()
+	return a, nil
 }
 
 // demux splits Docker's multiplexed stream: 8-byte header (stream id,

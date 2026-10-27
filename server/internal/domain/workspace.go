@@ -215,6 +215,9 @@ type ClaudeAccount struct {
 	ConnectionID int64
 	Credits      bool
 	Label        string
+	// UserID is whose free credits a run on credits spends first (the
+	// ticket's member); 0 for none.
+	UserID int64
 }
 
 type claudeKey struct{}

@@ -556,6 +556,10 @@ const (
 	// EventGuard: what agnts-guard, the hooks inside the run, refused or
 	// sent back, and what the scan of agent files found.
 	EventGuard = "guard"
+	// EventBudget: a Muse run's spend against its budget, after every
+	// model call (data cost_usd, total_usd, held_usd, limit_usd), and its
+	// budget steering, escalations and stops.
+	EventBudget = "budget"
 	// EventSecretsAck: a person confirmed the lines flagged as secrets in
 	// the change under review are not real (data "sha": the commit).
 	EventSecretsAck = "secrets_acknowledged"

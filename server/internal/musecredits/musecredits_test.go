@@ -1,0 +1,163 @@
+package musecredits_test
+
+import (
+	"context"
+	"io"
+	"log/slog"
+	"strconv"
+	"testing"
+
+	"github.com/rustambekabdusalomov/agnts-muse/budget"
+	"github.com/rustambekabdusalomov/agnts-muse/money"
+
+	"agnts/internal/billing"
+	"agnts/internal/domain"
+	"agnts/internal/musecredits"
+	"agnts/internal/orchestrator"
+	"agnts/internal/store/postgres"
+	"agnts/internal/store/postgres/pgtest"
+)
+
+// TestRunPaysFreeCreditsFirst follows the money of one Muse run on
+// agnts's key: an Admin gives a judge 20 free credits, the workspace has
+// 500 bought ones, the run holds and spends 27¢ live, and billing charges
+// the workspace only the 7¢ the free credits did not cover.
+func TestRunPaysFreeCreditsFirst(t *testing.T) {
+	pool := pgtest.Open(t)
+	pgtest.Reset(t, pool)
+	pgtest.Exec(t, pool, `DROP TABLE IF EXISTS muse_entries, muse_hold_legs, muse_holds, muse_accounts`)
+	ctx, ws := pgtest.Workspace(t, pool, "muse-money")
+	sys := domain.System(ctx)
+	judge := pgtest.User(t, pool, "judge")
+	admin := pgtest.User(t, pool, "admin")
+	pgtest.Exec(t, pool, `UPDATE users SET free_credits_limit = 0 WHERE id = $1`, judge)
+	pgtest.Exec(t, pool, `UPDATE workspaces SET credits_balance = 0 WHERE id = $1`, ws)
+
+	credits := postgres.NewCredits(pool)
+	svc := musecredits.New(musecredits.Config{RunCap: 2500, GlobalCapUSD: 100}, pool, credits)
+	if err := svc.Migrate(ctx); err != nil {
+		t.Fatal(err)
+	}
+	f, err := svc.SetFree(ctx, judge, 20, admin)
+	if err != nil || f.Limit != 20 || f.Remaining != 20 || f.Used != 0 || f.SetBy == nil || *f.SetBy != admin {
+		t.Fatalf("set free = %+v, %v", f, err)
+	}
+	if _, err := credits.Add(sys, postgres.LedgerEntry{WorkspaceID: ws, Amount: 500, Reason: postgres.CreditGrant}); err != nil {
+		t.Fatal(err)
+	}
+
+	store := postgres.NewAgent(pool)
+	tk, err := store.CreateTicket(ctx, domain.Ticket{Key: "M-1", Source: domain.SourceLocal, Title: "t", State: domain.StateNew, Priority: "medium",
+		Kind: domain.KindPlan, AfterApprove: "pr"}, domain.Event{TicketKey: "M-1", Type: domain.EventTicketCreated})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, run, ok, err := store.ClaimTicket(ctx, tk.ID, "main")
+	if err != nil || !ok {
+		t.Fatal(err)
+	}
+
+	// The run's budget: the judge's free credits, then the wallet, under
+	// the platform's monthly cap and the run cap.
+	rctx := domain.WithClaude(ctx, domain.ClaudeAccount{Credits: true, UserID: judge})
+	b, err := svc.Budget(rctx, orchestrator.ClaudeRequest{RunID: run.ID, WorkspaceID: ws})
+	if err != nil || b == nil {
+		t.Fatalf("budget = %+v, %v", b, err)
+	}
+	if len(b.Payers) != 2 || b.Payers[0] != budget.AccountID("user:"+itoa(judge)+":free") || len(b.Caps) != 1 || b.Limit != 2500*money.Cent {
+		t.Fatalf("budget = %+v", b)
+	}
+	// What agnts-muse does during the run: hold, extend, commit.
+	l := svc.Ledger()
+	h, err := l.Hold(ctx, budget.HoldRequest{Key: b.Key, Payers: b.Payers, Caps: b.Caps, Amount: 20 * money.Cent})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if h, err = l.Extend(ctx, h.ID, 10*money.Cent); err != nil {
+		t.Fatal(err)
+	}
+	r, err := l.Commit(ctx, h.ID, 27*money.Cent)
+	if err != nil || r.Charged != 27*money.Cent || r.Legs[0].Charged != 20*money.Cent || r.Legs[1].Charged != 7*money.Cent {
+		t.Fatalf("receipt = %+v, %v", r, err)
+	}
+	if usd, err := svc.FreeChargedUSD(ctx, run.ID); err != nil || usd != 0.20 {
+		t.Fatalf("free charged = %v, %v", usd, err)
+	}
+	if f, _ := svc.Free(ctx, judge); f.Used != 20 || f.Remaining != 0 {
+		t.Fatalf("free after the run = %+v", f)
+	}
+
+	// A second run before billing settled the first must not see the 7¢
+	// again: the wallet copy counts unsettled spend.
+	b2, err := svc.Budget(rctx, orchestrator.ClaudeRequest{RunID: run.ID, WorkspaceID: ws})
+	if err != nil {
+		t.Fatal(err)
+	}
+	h2, err := l.Hold(ctx, budget.HoldRequest{Key: b2.Key, Payers: b2.Payers, Caps: b2.Caps, Amount: 493 * money.Cent})
+	if err != nil {
+		t.Fatalf("the wallet should have exactly $4.93 left: %v", err)
+	}
+	if err := l.Release(ctx, h2.ID); err != nil {
+		t.Fatal(err)
+	}
+
+	// Billing charges the wallet the paid part only.
+	if err := store.RecordClaudeCall(ctx, domain.ClaudeCall{RunID: run.ID, ModelStage: domain.ModelCoding, Model: "muse:muse-spark-1.3",
+		Usage: domain.TokenUsage{Input: 1, CostUSD: 0.27}}); err != nil {
+		t.Fatal(err)
+	}
+	bill := billing.New(billing.Config{Enabled: true, RunCap: 2500, Markup: 1.4}, credits, postgres.NewWorkspaces(pool), store,
+		slog.New(slog.NewTextHandler(io.Discard, nil)))
+	bill.SetFree(svc.FreeChargedUSD)
+	if err := bill.Settle(sys, ws, run.ID, "M-1"); err != nil {
+		t.Fatal(err)
+	}
+	if bal, _ := credits.Balance(sys, ws); bal != 493 {
+		t.Fatalf("wallet = %d credits, want 493 (500 - 7)", bal)
+	}
+	// After settling, the copy still matches the wallet.
+	if _, err := svc.Budget(rctx, orchestrator.ClaudeRequest{RunID: run.ID + 1, WorkspaceID: ws}); err != nil {
+		t.Fatal(err)
+	}
+	var total int64
+	if err := pool.QueryRow(sys, `SELECT total FROM muse_accounts WHERE id = $1`, "ws:"+itoa(ws)+":wallet").Scan(&total); err != nil || total != 4_930_000 {
+		t.Fatalf("wallet copy = %d µ$, %v; want 4930000", total, err)
+	}
+}
+
+func TestOwnAccountRunsHaveNoBudget(t *testing.T) {
+	svc := musecredits.New(musecredits.Config{}, nil, nil)
+	ctx := domain.WithClaude(context.Background(), domain.ClaudeAccount{ConnectionID: 5})
+	if b, err := svc.Budget(ctx, orchestrator.ClaudeRequest{RunID: 1, WorkspaceID: 1}); b != nil || err != nil {
+		t.Fatalf("own account: %+v, %v", b, err)
+	}
+	ctx = domain.WithClaude(context.Background(), domain.ClaudeAccount{Credits: true})
+	if b, err := svc.Budget(ctx, orchestrator.ClaudeRequest{}); b != nil || err != nil {
+		t.Fatalf("outside a run: %+v, %v", b, err)
+	}
+}
+
+func TestLoweringFreeCreditsKeepsWhatWasSpent(t *testing.T) {
+	pool := pgtest.Open(t)
+	pgtest.Reset(t, pool)
+	ctx := context.Background()
+	u := pgtest.User(t, pool, "trial")
+	svc := musecredits.New(musecredits.Config{}, pool, nil)
+	if err := svc.Migrate(ctx); err != nil {
+		t.Fatal(err)
+	}
+	pgtest.Exec(t, pool, `DELETE FROM muse_entries WHERE account_id = $1`, "user:"+itoa(u)+":free")
+	pgtest.Exec(t, pool, `UPDATE muse_accounts SET total = 0, held = 0 WHERE id = $1`, "user:"+itoa(u)+":free")
+	if _, err := svc.SetFree(ctx, u, 100, u); err != nil {
+		t.Fatal(err)
+	}
+	f, err := svc.SetFree(ctx, u, 30, u)
+	if err != nil || f.Limit != 30 || f.Remaining != 30 {
+		t.Fatalf("lowered = %+v, %v", f, err)
+	}
+	if _, err := svc.SetFree(ctx, u, -1, u); err == nil {
+		t.Fatal("negative limit accepted")
+	}
+}
+
+func itoa(n int64) string { return strconv.FormatInt(n, 10) }

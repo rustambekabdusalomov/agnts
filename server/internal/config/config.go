@@ -135,6 +135,21 @@ type Config struct {
 	// (one sidecar container each) the server runs (AGNTS_OVPN_MAX).
 	PrivateNetworksMax, OVPNMax int
 
+	// Providers are the coding tools this server offers, the first being
+	// the default (AGNTS_PROVIDERS: muse, claude, codex; default "muse").
+	Providers []string
+	// Muse Code (Meta). MuseBinary is the CLI in the run image
+	// (AGNTS_MUSE_BINARY). MusePlatformKey is agnts's own Meta Model API
+	// key, used for runs paid with credits (AGNTS_MUSE_PLATFORM_KEY);
+	// empty disables Muse credits. MuseGlobalCapUSD caps what all
+	// workspaces together may spend on it a month (AGNTS_MUSE_GLOBAL_CAP_USD,
+	// 0: no cap). MusePrices overrides model prices, e.g.
+	// "muse-spark-1.3=1.25/0.15/4.25" (AGNTS_MUSE_PRICES).
+	MuseBinary       string
+	MusePlatformKey  string
+	MuseGlobalCapUSD float64
+	MusePrices       string
+
 	// Billing and credits.
 	// AnthropicAPIKey is agnts's own key, used for runs paid with credits
 	// (AGNTS_ANTHROPIC_API_KEY); empty disables credits.
@@ -346,6 +361,13 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 		errs = append(errs, errors.New("AGNTS_OVPN_MAX must be a number of at least 1"))
 	}
 	c.AnthropicAPIKey = get("AGNTS_ANTHROPIC_API_KEY", "")
+	c.Providers = strings.Split(get("AGNTS_PROVIDERS", "muse"), ",")
+	c.MuseBinary = get("AGNTS_MUSE_BINARY", "muse")
+	c.MusePlatformKey = get("AGNTS_MUSE_PLATFORM_KEY", "")
+	c.MusePrices = get("AGNTS_MUSE_PRICES", "")
+	if c.MuseGlobalCapUSD, err = strconv.ParseFloat(get("AGNTS_MUSE_GLOBAL_CAP_USD", "0"), 64); err != nil || c.MuseGlobalCapUSD < 0 {
+		errs = append(errs, errors.New("AGNTS_MUSE_GLOBAL_CAP_USD must be a dollar amount, 0 for no cap"))
+	}
 	if c.CreditMarkup, err = strconv.ParseFloat(get("AGNTS_CREDIT_MARKUP", "1.4"), 64); err != nil || c.CreditMarkup < 1 {
 		errs = append(errs, errors.New("AGNTS_CREDIT_MARKUP must be a number of at least 1"))
 	}

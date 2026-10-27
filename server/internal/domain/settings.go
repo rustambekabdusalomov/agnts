@@ -15,8 +15,15 @@ var Models = []string{"haiku", "sonnet", "opus"}
 // codexModel matches a Codex CLI model: "codex:" and the model's name.
 var codexModel = regexp.MustCompile(`^codex:[a-z0-9][a-z0-9._-]{0,63}$`)
 
-// ValidModel reports whether m is a Claude model alias or a Codex model.
-func ValidModel(m string) bool { return slices.Contains(Models, m) || codexModel.MatchString(m) }
+// ValidModel reports whether m names a model of any provider: a Claude
+// alias, codex:<model> or muse:<model>.
+func ValidModel(m string) bool {
+	return slices.Contains(Models, m) || codexModel.MatchString(m) || museModel.MatchString(m)
+}
+
+// AllowedModel reports whether settings may pick m on this server: a
+// valid model of an enabled provider.
+func AllowedModel(m string) bool { return ValidModel(m) && ProviderEnabled(ProviderOf(m)) }
 
 // IsCodex reports whether m runs on Codex CLI.
 func IsCodex(m string) bool { return strings.HasPrefix(m, "codex:") }
@@ -236,10 +243,20 @@ type Settings struct {
 	Notify         NotifySettings `json:"notify"`
 }
 
+// defaultModels are the primary provider's models per stage. On Muse,
+// every stage starts on Spark: the review's auto choice and a stuck
+// session's escalation move hard work to Wonder.
+func defaultModels() StageModels {
+	if PrimaryProvider() == ProviderMuse {
+		return StageModels{Analyze: MuseSpark, Coding: MuseSpark, Retry: MuseSpark, Helper: MuseSpark, Learn: MuseSpark, Review: ModelAuto, Preview: MuseSpark}
+	}
+	return StageModels{Analyze: "sonnet", Coding: "opus", Retry: "sonnet", Helper: "haiku", Learn: "sonnet", Review: ModelAuto, Preview: "sonnet"}
+}
+
 // DefaultSettings returns the settings used before any are saved.
 func DefaultSettings() Settings {
 	return Settings{
-		Models:          StageModels{Analyze: "sonnet", Coding: "opus", Retry: "sonnet", Helper: "haiku", Learn: "sonnet", Review: ModelAuto, Preview: "sonnet"},
+		Models:          defaultModels(),
 		MaxTurns:        150,
 		TimeoutMin:      45,
 		Allow:           []string{},
@@ -302,12 +319,12 @@ func (s *Settings) Validate() error {
 		errs = append(errs, fmt.Errorf("a ticket may have 1 to 20 repositories"))
 	}
 	for name, m := range map[string]string{"analyze": s.Models.Analyze, "coding": s.Models.Coding, "retry": s.Models.Retry, "helper": s.Models.Helper, "learn": s.Models.Learn, "preview": s.Models.Preview} {
-		if !ValidModel(m) {
-			errs = append(errs, fmt.Errorf("model for %s must be one of %s, or codex:<model>", name, strings.Join(Models, ", ")))
+		if !AllowedModel(m) {
+			errs = append(errs, fmt.Errorf("model for %s must be one of %s", name, strings.Join(AvailableModels(), ", ")))
 		}
 	}
-	if s.Models.Review != ModelAuto && !ValidModel(s.Models.Review) {
-		errs = append(errs, fmt.Errorf("model for review must be %s or one of %s", ModelAuto, strings.Join(Models, ", ")))
+	if s.Models.Review != ModelAuto && !AllowedModel(s.Models.Review) {
+		errs = append(errs, fmt.Errorf("model for review must be %s or one of %s", ModelAuto, strings.Join(AvailableModels(), ", ")))
 	}
 	check := func(name string, v, lo, hi int) {
 		if v < lo || v > hi {
@@ -389,9 +406,9 @@ func (s Settings) FollowUpsOn(t Ticket) bool {
 // ModelFor returns the model for a stage, honouring a ticket's override.
 func (s Settings) ModelFor(t Ticket, stage string) string {
 	if m := t.Models[stage]; ValidModel(m) {
-		return m
+		return EffectiveModel(m)
 	}
-	return s.Models.For(stage)
+	return EffectiveModel(s.Models.For(stage))
 }
 
 // validHost reports whether h is a host name, optionally with a leading

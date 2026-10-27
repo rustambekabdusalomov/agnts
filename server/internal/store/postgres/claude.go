@@ -31,6 +31,10 @@ type ClaudeConnection struct {
 const (
 	ClaudeSubscription = "subscription"
 	ClaudeAPIKey       = "api_key"
+	// Muse Code accounts: a Meta Model API key, or a Meta sign-in (Muse
+	// Code's credential file).
+	MuseAPIKey = "muse_api_key"
+	MuseLogin  = "muse_login"
 )
 
 // ClaudeConnections stores Claude accounts, sealed with the server key.

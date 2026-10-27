@@ -48,6 +48,8 @@ require (
 	github.com/oasdiff/yaml v0.1.1
 	github.com/oasdiff/yaml3 v0.0.14 // indirect
 	github.com/pjbgf/sha1cd v0.7.0 // indirect
+	github.com/rustambekabdusalomov/agnts-muse v0.0.0
+	github.com/rustambekabdusalomov/agnts-muse/ledger/pgledger v0.0.0
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/segmentio/encoding v0.5.4 // indirect
@@ -76,3 +78,7 @@ require (
 toolchain go1.26.7
 
 tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
+
+replace github.com/rustambekabdusalomov/agnts-muse => ../../agnts-muse
+
+replace github.com/rustambekabdusalomov/agnts-muse/ledger/pgledger => ../../agnts-muse/ledger/pgledger

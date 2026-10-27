@@ -1,6 +1,9 @@
 package main
 
 import (
+	muse "github.com/rustambekabdusalomov/agnts-muse"
+	"github.com/rustambekabdusalomov/agnts-muse/model"
+
 	gitclient "github.com/go-git/go-git/v5/plumbing/transport/client"
 	githttp "github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -38,6 +41,7 @@ import (
 	"agnts/internal/mail"
 	"agnts/internal/mcpserver"
 	"agnts/internal/metrics"
+	"agnts/internal/musecredits"
 	"agnts/internal/netroute"
 	"agnts/internal/network"
 	"agnts/internal/notify"
@@ -240,6 +244,13 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 			log.Warn("renew plans", "err", err)
 		}
 	})
+	go every(sys, time.Minute, func(ctx context.Context) {
+		if n, err := a.museCredits.Reap(ctx); err != nil {
+			log.Warn("release expired muse holds", "err", err)
+		} else if n > 0 {
+			log.Info("released expired muse holds", "count", n)
+		}
+	})
 
 	go a.network.Run(sys)
 	workerDone := make(chan struct{})
@@ -348,6 +359,8 @@ type agent struct {
 	users        *postgres.Users
 	claude       *claude.Service
 	billing      *billing.Service
+	museCredits  *musecredits.Service
+	museDevice   *musecredits.Logins
 	budget       *orchestrator.MemoryBudget
 	network      *network.Service
 	ci           *ciwatch.Service
@@ -371,6 +384,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	if err != nil {
 		return nil, err
 	}
+	domain.SetProviders(cfg.Providers)
 	a := &agent{
 		store:        postgres.NewAgent(pool),
 		lessons:      postgres.NewLessons(pool),
@@ -396,8 +410,15 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.plane = plane.New(a.planeConfig)
 	a.usage = usage.New(postgres.NewUsage(pool), a.store, log.With("component", "usage"))
 	conns := postgres.NewClaudeConnections(pool, box)
-	a.claude = claude.New(claude.Config{PlatformKey: cfg.AnthropicAPIKey, Subscriptions: !cfg.Cloud},
+	credits := postgres.NewCredits(pool)
+	a.museCredits = musecredits.New(musecredits.Config{RunCap: cfg.RunCreditCap, GlobalCapUSD: cfg.MuseGlobalCapUSD}, pool, credits)
+	if err := a.museCredits.Migrate(context.Background()); err != nil {
+		return nil, fmt.Errorf("muse ledger: %w", err)
+	}
+	a.claude = claude.New(claude.Config{PlatformKey: cfg.AnthropicAPIKey, Subscriptions: !cfg.Cloud, MuseKey: cfg.MusePlatformKey,
+		Free: func(ctx context.Context, user int64) bool { return a.museCredits.FreeAvailable(ctx, user) > 0 }},
 		conns, a.usage, a.settings, a.users)
+	a.museDevice = musecredits.NewLogins(a.claude, log.With("component", "muse-login"))
 	a.usage.OnPaused(a.claude.Paused)
 	a.usage.SetResolver(func(ctx context.Context) (domain.ClaudeAccount, bool) {
 		ws, err := domain.MustWorkspace(ctx)
@@ -417,7 +438,8 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		RunCap: cfg.RunCreditCap, PublicURL: cfg.PublicURL.String(),
 		Payme: billing.PaymeConfig{MerchantID: cfg.PaymeMerchantID, Key: cfg.PaymeKey},
 		Click: billing.ClickConfig{ServiceID: cfg.ClickServiceID, MerchantID: cfg.ClickMerchantID, SecretKey: cfg.ClickSecretKey},
-	}, postgres.NewCredits(pool), a.workspaces, a.store, log.With("component", "billing"))
+	}, credits, a.workspaces, a.store, log.With("component", "billing"))
+	a.billing.SetFree(a.museCredits.FreeChargedUSD)
 
 	tokenFor := func(provider string) func(ctx context.Context) (string, error) {
 		return func(ctx context.Context) (string, error) { return a.integrations.Token(ctx, provider) }
@@ -447,6 +469,12 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.runner = run
 	run.SetCA(a.network.CA)
 	run.SetCodexKey(func(ctx context.Context) (string, error) { return a.integrations.Token(ctx, "openai") })
+	catalog, err := model.Default.WithPrices(cfg.MusePrices)
+	if err != nil {
+		return nil, fmt.Errorf("AGNTS_MUSE_PRICES: %w", err)
+	}
+	run.SetMuse(muse.New(muse.Config{Binary: cfg.MuseBinary, Catalog: catalog, Ledger: a.museCredits.Ledger(),
+		Observer: muse.SlogObserver{Logger: log.With("component", "muse")}}), a.museCredits)
 	a.refresher = usage.NewRefresher(a.usage, run, cfg.RunnerImage, log.With("component", "usage"))
 
 	repos := gitrepo.New(filepath.Join(cfg.DataDir, "repos"),

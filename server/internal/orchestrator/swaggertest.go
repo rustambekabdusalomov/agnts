@@ -34,13 +34,13 @@ type SwaggerTests interface {
 	SuiteResultsBefore(ctx context.Context, suiteID, runID int64) (domain.SwaggerRun, error)
 }
 
-// SwaggerModel is the model every Swagger test runs on, and SwaggerTurns
-// its turn cap: sending is one batch call, so turns go to planning,
-// following up on surprises and writing the verdicts.
-const (
-	SwaggerModel = "sonnet"
-	SwaggerTurns = 60
-)
+// SwaggerTurns is a Swagger test's turn cap: sending is one batch call,
+// so turns go to planning, following up on surprises and writing the
+// verdicts.
+const SwaggerTurns = 60
+
+// SwaggerModel is the model every Swagger test runs on.
+func SwaggerModel() string { return domain.LightModel() }
 
 // swaggerData is the Swagger test prompt's data.
 type swaggerData struct {
@@ -171,7 +171,7 @@ func (o *Orchestrator) swaggerRun(ctx context.Context, s domain.Settings, t doma
 	if tc.Models == nil {
 		tc.Models = map[string]string{}
 	}
-	tc.Models[domain.ModelCoding], tc.Models[domain.ModelRetry] = SwaggerModel, SwaggerModel
+	tc.Models[domain.ModelCoding], tc.Models[domain.ModelRetry] = SwaggerModel(), SwaggerModel()
 	if _, err := o.claudeTurns(ctx, s, ws, &tc, run, domain.ModelCoding, b.String(), "", SwaggerTurns); err != nil {
 		return err
 	}

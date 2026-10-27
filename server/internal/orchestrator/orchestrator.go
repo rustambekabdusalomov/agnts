@@ -604,6 +604,11 @@ func (o *Orchestrator) streamTo(ctx context.Context, t domain.Ticket, run *domai
 			}
 		case ClaudeResultEv:
 			ev.Type, ev.Message = domain.EventClaudeResult, truncate(e.Text, 4000)
+		case ClaudeBudget:
+			ev.Type, ev.Message = domain.EventBudget, e.Text
+			if lvl, _ := e.Data["level"].(string); lvl == "warn" {
+				ev.Level = domain.LevelWarn
+			}
 		default:
 			return
 		}
@@ -716,6 +721,11 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 		effort = s.Effort.For(modelStage, complex)
 	}
 	readOnly := t.Kind.Report() || run.Stage == domain.StageReview || run.Stage == domain.StagePreview
+	if domain.IsMuse(model) && run.Harness.Tool == "" {
+		run.Harness.Tool = "muse"
+		o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventGuard,
+			Message: "this run uses Muse Code (" + strings.TrimPrefix(model, MusePrefix) + "): agnts's guard rules decide its tool approvals during the run, and agnts's checks run after it"})
+	}
 	if domain.IsCodex(model) && run.Harness.Tool == "" {
 		run.Harness.Tool = "codex"
 		o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventGuard,

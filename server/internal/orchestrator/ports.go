@@ -444,11 +444,19 @@ type ClaudeRequest struct {
 	// Effort is how hard Claude Code thinks (--effort); "" leaves its
 	// default. Codex runs ignore it.
 	Effort string
+	// RunID and WorkspaceID say whose invocation this is (0: not a
+	// ticket run); Muse runs on credits budget by them.
+	RunID       int64
+	WorkspaceID int64
 }
 
-// CodexPrefix marks a model as one Codex CLI runs ("codex:<model>"); any
-// other model is Claude Code's.
-const CodexPrefix = "codex:"
+// CodexPrefix marks a model as one Codex CLI runs ("codex:<model>"),
+// MusePrefix one Muse Code runs ("muse:<model>"); any other model is
+// Claude Code's.
+const (
+	CodexPrefix = "codex:"
+	MusePrefix  = domain.MusePrefix
+)
 
 // ClaudeEventKind classifies stream lines.
 type ClaudeEventKind string
@@ -462,7 +470,10 @@ const (
 	// output: the text it returned).
 	ClaudeToolResult ClaudeEventKind = "tool_result"
 	ClaudeRateLimit  ClaudeEventKind = "rate_limit"
-	ClaudeResultEv   ClaudeEventKind = "result"
+	// ClaudeBudget: a Muse run's spend or budget decision (Text: what
+	// happened; Data: cost_usd, total_usd, held_usd, limit_usd, level).
+	ClaudeBudget   ClaudeEventKind = "budget"
+	ClaudeResultEv ClaudeEventKind = "result"
 )
 
 // ClaudeEvent is one parsed line of Claude Code's stream-json output.

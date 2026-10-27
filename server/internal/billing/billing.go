@@ -81,6 +81,35 @@ type Service struct {
 	// changed is told when a workspace's plan or balance changed (the
 	// scheduler's cache).
 	changed func(ws int64)
+	// free returns what free credits already paid of a run (Muse runs
+	// spend a person's free credits before the workspace's).
+	free func(ctx context.Context, runID int64) (float64, error)
+}
+
+// creditsOf converts an API cost to credits (1 credit = $0.01), rounding
+// up once in integer micro-dollars: a float product such as 0.07 × 100 =
+// 7.000000000000001 would otherwise round up a credit too many.
+func creditsOf(usd float64) int64 {
+	micro := int64(math.Round(usd * 1e6))
+	return (micro + 9_999) / 10_000
+}
+
+// SetFree sets where the free-credit part of a run is read from; Within
+// and Settle count only the rest against the workspace.
+func (s *Service) SetFree(f func(ctx context.Context, runID int64) (float64, error)) { s.free = f }
+
+// paidUSD is what a run cost the workspace: its cost less what free
+// credits paid.
+func (s *Service) paidUSD(ctx context.Context, runID int64) (float64, error) {
+	usd, err := s.store.RunCostUSD(ctx, runID)
+	if err != nil || s.free == nil {
+		return usd, err
+	}
+	free, err := s.free(ctx, runID)
+	if err != nil {
+		return usd, err
+	}
+	return float64(max(math.Round(usd*1e6)-math.Round(free*1e6), 0)) / 1e6, nil
 }
 
 // New returns the billing service.
@@ -257,11 +286,11 @@ func (s *Service) Grant(ctx context.Context, ws, amount int64, note string, by i
 // Within implements orchestrator.Credits: a run on credits may go on while
 // what it spent stays under the run cap and the balance.
 func (s *Service) Within(ctx context.Context, ws, runID int64) (bool, string) {
-	usd, err := s.store.RunCostUSD(ctx, runID)
+	usd, err := s.paidUSD(ctx, runID)
 	if err != nil {
 		return true, ""
 	}
-	spent := int64(math.Ceil(usd * 100))
+	spent := creditsOf(usd)
 	if s.cfg.RunCap > 0 && spent >= s.cfg.RunCap {
 		return false, fmt.Sprintf("stopped at the cap of %d credits a run", s.cfg.RunCap)
 	}
@@ -275,11 +304,11 @@ func (s *Service) Within(ctx context.Context, ws, runID int64) (bool, string) {
 // Settle implements orchestrator.Credits: it charges a finished run's API
 // cost to its workspace, once.
 func (s *Service) Settle(ctx context.Context, ws, runID int64, key string) error {
-	usd, err := s.store.RunCostUSD(ctx, runID)
+	usd, err := s.paidUSD(ctx, runID)
 	if err != nil {
 		return err
 	}
-	credits := int64(math.Ceil(usd * 100))
+	credits := creditsOf(usd)
 	if credits <= 0 {
 		return nil
 	}
@@ -300,7 +329,7 @@ func (s *Service) SettleDocument(ctx context.Context, ws, runID int64) error {
 	if err != nil {
 		return err
 	}
-	credits := int64(math.Ceil(usd * 100))
+	credits := creditsOf(usd)
 	if credits <= 0 {
 		return nil
 	}
