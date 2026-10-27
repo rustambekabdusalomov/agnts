@@ -115,14 +115,21 @@ func AvailableModels() []string {
 }
 
 // EffectiveModel maps a saved model whose provider is hidden on this
-// server to the primary provider's model of the same weight, so settings
-// saved before the switch keep working.
+// server to the primary provider's light model, so settings saved before
+// the switch keep working. Not to the strong one: Claude settings often
+// named opus for analysis and coding, and on Muse that would put every
+// run on Wonder, about three times Spark's price. Hard work still reaches
+// Wonder: the review's auto choice for complex tickets, and a stuck
+// session's escalation.
 func EffectiveModel(m string) string {
 	if m == "" || m == ModelAuto || ProviderEnabled(ProviderOf(m)) {
 		return m
 	}
-	if m == "opus" || IsStrong(m) {
-		return StrongModel()
-	}
 	return LightModel()
+}
+
+// EffectiveModels applies EffectiveModel to every stage.
+func (m StageModels) EffectiveModels() StageModels {
+	return StageModels{Analyze: EffectiveModel(m.Analyze), Coding: EffectiveModel(m.Coding), Retry: EffectiveModel(m.Retry),
+		Helper: EffectiveModel(m.Helper), Learn: EffectiveModel(m.Learn), Review: EffectiveModel(m.Review), Preview: EffectiveModel(m.Preview)}
 }

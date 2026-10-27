@@ -52,6 +52,11 @@ func (s *Settings) Get(ctx context.Context) (domain.Settings, error) {
 			return clone(s.defaults), err
 		}
 	}
+	// Models saved for a tool this server does not offer read as its own.
+	out.Models = out.Models.EffectiveModels()
+	if out.SecondOpinion != "" && !domain.ProviderEnabled(domain.ProviderOf(out.SecondOpinion)) {
+		out.SecondOpinion = ""
+	}
 	s.cache[ws] = &out
 	return clone(out), nil
 }

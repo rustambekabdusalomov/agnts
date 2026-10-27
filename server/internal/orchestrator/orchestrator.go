@@ -596,6 +596,9 @@ func (o *Orchestrator) streamTo(ctx context.Context, t domain.Ticket, run *domai
 			ev.Type, ev.Message = domain.EventClaudeText, truncate(e.Text, 4000)
 		case ClaudeTool:
 			ev.Type, ev.Message = domain.EventClaudeTool, e.Tool
+			if target, _ := e.Data["target"].(string); target != "" {
+				ev.Message = e.Tool + " · " + target
+			}
 		case ClaudeRateLimit:
 			o.usage.Record(ctx, e.Data)
 			ev.Type, ev.Message = domain.EventRateLimit, "plan usage update"

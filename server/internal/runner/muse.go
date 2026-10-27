@@ -2,6 +2,7 @@ package runner
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -100,7 +101,7 @@ func (w *workspace) muse(ctx context.Context, req orchestrator.ClaudeRequest, on
 	res, err := w.museEng.Run(ctx, muse.Request{
 		Prompt: req.Prompt, Workdir: workDir, Model: id, Effort: req.Effort, SessionID: req.Resume,
 		Budget: b, AnnounceBudget: b != nil && b.Limit > 0, Credential: &cred, AuthPath: museAuthPath,
-		Env: req.Env, Guard: g,
+		Env: req.Env, Guard: g, MaxCalls: req.MaxTurns,
 	}, &dockerExecutor{w: w}, func(e muse.Event) { museEvent(e, limit, onEvent) })
 	out := orchestrator.ClaudeResult{
 		SessionID: res.SessionID, Turns: res.Usage.Calls, Text: res.Text, Duration: res.Duration,
@@ -173,7 +174,11 @@ func museEvent(e muse.Event, limit float64, on func(orchestrator.ClaudeEvent)) {
 	case muse.EventMessage:
 		on(orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeText, Text: e.Text})
 	case muse.EventToolStart:
-		on(orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeTool, Tool: museTool(e.Tool), Data: map[string]any{"input": e.Args}})
+		data := map[string]any{"input": e.Args}
+		if t := toolTarget(e.Args); t != "" {
+			data["target"] = t
+		}
+		on(orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeTool, Tool: museTool(e.Tool), Data: data})
 	case muse.EventToolEnd:
 		on(orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeToolResult, Tool: museTool(e.Tool), Data: map[string]any{"is_error": e.Failed, "output": e.Output}})
 	case muse.EventUsage:
@@ -199,6 +204,26 @@ func museEvent(e muse.Event, limit float64, on func(orchestrator.ClaudeEvent)) {
 				map[string]any{"charged_usd": r.Charged.Float(), "released_usd": r.Released.Float(), "unbilled_usd": r.Unbilled.Float()})
 		}
 	}
+}
+
+// toolTarget is the short subject of a tool call for the ticket log: the
+// file read or edited, the pattern searched, the command run. The full
+// input stays in the run history only.
+func toolTarget(args string) string {
+	var in map[string]any
+	if json.Unmarshal([]byte(args), &in) != nil {
+		return ""
+	}
+	for _, k := range []string{"path", "file_path", "pattern", "query", "command", "url"} {
+		if v, ok := in[k].(string); ok && strings.TrimSpace(v) != "" {
+			v = strings.Join(strings.Fields(v), " ")
+			if len(v) > 120 {
+				v = v[:117] + "..."
+			}
+			return v
+		}
+	}
+	return ""
 }
 
 // museTool names Muse's tools the way the ticket log and stall detection

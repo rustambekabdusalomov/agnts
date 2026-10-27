@@ -64,7 +64,7 @@ func TestMuseEvents(t *testing.T) {
 	if strings.Join(kinds, " ") != want {
 		t.Fatalf("kinds = %v, want %s", kinds, want)
 	}
-	if got[0].Data["session_id"] != "s1" || got[1].Tool != "Bash" || got[2].Data["is_error"] != true {
+	if got[0].Data["session_id"] != "s1" || got[1].Tool != "Bash" || got[1].Data["target"] != "go test" || got[2].Data["is_error"] != true {
 		t.Fatalf("mapped = %+v", got[:3])
 	}
 	u := got[4]

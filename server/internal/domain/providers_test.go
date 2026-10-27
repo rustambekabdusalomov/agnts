@@ -21,7 +21,7 @@ func TestProviders(t *testing.T) {
 	}
 	// Settings saved before the switch keep working on Muse.
 	old := Settings{Models: StageModels{Coding: "opus", Analyze: "sonnet"}}
-	if old.ModelFor(Ticket{}, ModelCoding) != MuseWonder || old.ModelFor(Ticket{}, ModelAnalyze) != MuseSpark {
+	if old.ModelFor(Ticket{}, ModelCoding) != MuseSpark || old.ModelFor(Ticket{}, ModelAnalyze) != MuseSpark {
 		t.Fatalf("mapped %q %q", old.ModelFor(Ticket{}, ModelCoding), old.ModelFor(Ticket{}, ModelAnalyze))
 	}
 	if StrongModel() != MuseWonder || LightModel() != MuseSpark || !IsStrong(MuseWonder) || IsStrong(MuseSpark) {
@@ -29,6 +29,9 @@ func TestProviders(t *testing.T) {
 	}
 
 	SetProviders([]string{"claude", "codex"})
+	if m := (StageModels{Coding: MuseWonder, Review: ModelAuto}).EffectiveModels(); m.Coding != "sonnet" || m.Review != ModelAuto {
+		t.Fatalf("effective = %+v", m)
+	}
 	if DefaultSettings().Models.Coding != "opus" || EffectiveModel("muse:spark") != "sonnet" || !AllowedModel("codex:gpt-5") || AllowedModel(MuseSpark) {
 		t.Fatal("claude server")
 	}
