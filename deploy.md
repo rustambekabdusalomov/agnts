@@ -53,13 +53,20 @@ rsync -az --stats \
 The excludes matter: `.dev-data/` holds about 20k files of local test repos,
 and `apps/mobile` isn't part of the image.
 
+agnts-muse, the Muse engine, is a sibling module (`server/go.mod` replaces it
+with `../../agnts-muse`). Copy it beside `src/`:
+
+```sh
+rsync -az --stats --exclude .git ../agnts-muse/ root@45.138.158.39:/opt/agnts/agnts-muse/
+```
+
 ### 2. Build the image on the server
 
 Tag the running image first so you can roll back:
 
 ```sh
 ssh root@45.138.158.39 'docker tag agnts:local agnts:prev; cd /opt/agnts/src && \
-  docker build --build-arg COMMIT=$(date +%Y%m%d%H%M) -t agnts:local . > /opt/agnts/build.log 2>&1; \
+  docker build --build-context agnts-muse=/opt/agnts/agnts-muse --build-arg COMMIT=$(date +%Y%m%d%H%M) -t agnts:local . > /opt/agnts/build.log 2>&1; \
   echo exit=$?; tail -5 /opt/agnts/build.log'
 ```
 
@@ -139,7 +146,7 @@ Add `--build-arg CODEX_VERSION=<version>` to also install Codex CLI for
 Check it, and roll back if a run misbehaves:
 
 ```sh
-ssh root@45.138.158.39 'docker run --rm agnts-runner:latest claude --version'
+ssh root@45.138.158.39 'docker run --rm agnts-runner:latest muse --version'
 ssh root@45.138.158.39 'docker tag agnts-runner:prev agnts-runner:latest'
 ```
 
