@@ -94,7 +94,9 @@ func (w *workspace) muse(ctx context.Context, req orchestrator.ClaudeRequest, on
 	}
 	g := guard.Policy(guard.Defaults())
 	if req.ReadOnly {
-		g = guard.Chain{guard.Defaults(), guard.ReadOnly}
+		// Read-only for the code, but its result goes to /agnts/out
+		// (analysis.json, review.json), which agnts reads back.
+		g = guard.Chain{guard.Defaults(), guard.ReadOnlyExcept(outDir)}
 	}
 	if req.Timeout > 0 {
 		var cancel context.CancelFunc
@@ -110,7 +112,7 @@ func (w *workspace) muse(ctx context.Context, req orchestrator.ClaudeRequest, on
 	res, err := w.museEng.Run(ctx, muse.Request{
 		Prompt: req.Prompt, Workdir: workDir, Model: id, Effort: req.Effort, SessionID: req.Resume,
 		Budget: b, AnnounceBudget: b != nil && b.Limit > 0, Credential: &cred, AuthPath: museAuthPath,
-		Env: req.Env, Guard: g, MaxCalls: req.MaxTurns,
+		Env: req.Env, Guard: g, MaxCalls: req.MaxTurns, ExtraRoots: []string{outDir},
 	}, &dockerExecutor{w: w, ctx: ctx}, func(e muse.Event) { museEvent(e, limit, onEvent) })
 	out := orchestrator.ClaudeResult{
 		SessionID: res.SessionID, Turns: res.Usage.Calls, Text: res.Text, Duration: res.Duration,

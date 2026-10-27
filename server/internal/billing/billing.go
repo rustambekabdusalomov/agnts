@@ -291,6 +291,9 @@ func (s *Service) Within(ctx context.Context, ws, runID int64) (bool, string) {
 		return true, ""
 	}
 	spent := creditsOf(usd)
+	if spent <= 0 {
+		return true, "" // free credits paid it all: nothing is owed
+	}
 	if s.cfg.RunCap > 0 && spent >= s.cfg.RunCap {
 		return false, fmt.Sprintf("stopped at the cap of %d credits a run", s.cfg.RunCap)
 	}

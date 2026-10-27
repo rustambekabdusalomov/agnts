@@ -271,3 +271,29 @@ func TestMonthlyUSD(t *testing.T) {
 		}
 	}
 }
+
+// TestFreeCreditsOweNothing: a run its member's free credits paid in full
+// owes the workspace nothing, so an empty workspace balance must not stop
+// it (it did: 0 owed >= 0 balance read as "ran out of credits").
+func TestFreeCreditsOweNothing(t *testing.T) {
+	s, _, ws, ctx := setup(t)
+	sys := domain.System(ctx)
+	store := postgres.NewAgent(pgtest.Open(t))
+	tk, err := store.CreateTicket(ctx, domain.Ticket{Key: "F-1", Source: domain.SourceLocal, Title: "t", State: domain.StateNew, Priority: "medium",
+		Kind: domain.KindPlan, AfterApprove: "pr"}, domain.Event{TicketKey: "F-1", Type: domain.EventTicketCreated})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, run, ok, err := store.ClaimTicket(ctx, tk.ID, "main")
+	if err != nil || !ok {
+		t.Fatal(err)
+	}
+	if err := store.RecordClaudeCall(ctx, domain.ClaudeCall{RunID: run.ID, ModelStage: domain.ModelAnalyze, Model: "muse:muse-spark-1.3",
+		Usage: domain.TokenUsage{Input: 1, CostUSD: 0.36}}); err != nil {
+		t.Fatal(err)
+	}
+	s.SetFree(func(context.Context, int64) (float64, error) { return 0.36, nil })
+	if ok, why := s.Within(sys, ws, run.ID); !ok {
+		t.Fatalf("a run free credits paid in full was stopped: %s", why)
+	}
+}
