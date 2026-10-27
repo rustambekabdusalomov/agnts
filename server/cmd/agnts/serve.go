@@ -194,6 +194,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		Claude:       a.claude,
 		Queue:        a.orch,
 		Billing:      a.billing,
+		Muse:         museAPI{a.museCredits, a.museDevice},
 		EventLog:     a.store,
 		Cloud:        cfg.Cloud,
 		Google:       googleSignIn(cfg, acc),
@@ -1260,4 +1261,18 @@ func (h gitHooks) CommitsPushed(ctx context.Context, p domain.Push) error {
 
 func (h gitHooks) CIRunFinished(ctx context.Context, run domain.CIRun) error {
 	return h.ci.CIRunFinished(ctx, run)
+}
+
+// museAPI serves the Muse operations: Meta sign-in and free credits.
+type museAPI struct {
+	*musecredits.Service
+	logins *musecredits.Logins
+}
+
+func (m museAPI) StartLogin(ctx context.Context, ws, user int64) (musecredits.Login, error) {
+	return m.logins.Start(ctx, ws, user)
+}
+
+func (m museAPI) LoginStatus(id string, ws, user int64) (musecredits.Login, bool) {
+	return m.logins.Status(id, ws, user)
 }

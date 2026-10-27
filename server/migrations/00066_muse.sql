@@ -15,7 +15,14 @@ ALTER TABLE users ADD COLUMN free_credits_limit  bigint NOT NULL DEFAULT 0 CHECK
 ALTER TABLE users ADD COLUMN free_credits_set_by bigint REFERENCES users (id) ON DELETE SET NULL;
 ALTER TABLE users ADD COLUMN free_credits_set_at timestamptz;
 
+-- Run history records Muse invocations as their own engine.
+ALTER TABLE transcripts DROP CONSTRAINT IF EXISTS transcripts_engine_check;
+ALTER TABLE transcripts ADD CONSTRAINT transcripts_engine_check CHECK (engine IN ('claude', 'codex', 'muse'));
+
 -- +goose Down
+DELETE FROM transcripts WHERE engine = 'muse';
+ALTER TABLE transcripts DROP CONSTRAINT IF EXISTS transcripts_engine_check;
+ALTER TABLE transcripts ADD CONSTRAINT transcripts_engine_check CHECK (engine IN ('claude', 'codex'));
 ALTER TABLE users DROP COLUMN free_credits_set_at;
 ALTER TABLE users DROP COLUMN free_credits_set_by;
 ALTER TABLE users DROP COLUMN free_credits_limit;

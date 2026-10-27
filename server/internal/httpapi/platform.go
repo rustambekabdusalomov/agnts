@@ -265,6 +265,12 @@ func (s *Server) ListPlatformUsers(w http.ResponseWriter, r *http.Request) {
 		if t, ok := last[u.ID]; ok {
 			p.LastSignInAt = &t
 		}
+		if s.opt.Muse != nil {
+			if f, err := s.opt.Muse.Free(ctx, u.ID); err == nil {
+				fc := toFreeCredits(f)
+				p.FreeCredits = &fc
+			}
+		}
 		out = append(out, p)
 	}
 	writeJSON(w, http.StatusOK, out)

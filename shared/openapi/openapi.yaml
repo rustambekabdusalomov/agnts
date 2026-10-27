@@ -3895,6 +3895,62 @@ paths:
       responses:
         '204': { description: Disconnected }
 
+  /account/muse/login:
+    post:
+      operationId: startMyMuseLogin
+      summary: Connect your Muse account by signing in with Meta (shows a code to confirm on Meta's page)
+      tags: [account]
+      x-scope: user
+      responses:
+        '200':
+          description: Started
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MuseLogin' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /account/muse/login/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string, maxLength: 64 } }
+    get:
+      operationId: getMyMuseLogin
+      summary: How your Meta sign-in is going
+      tags: [account]
+      x-scope: user
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MuseLogin' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /account/free-credits:
+    get:
+      operationId: getMyFreeCredits
+      summary: Free credits an Admin gave you; runs on agnts's Muse key spend them before your workspace's credits
+      tags: [account]
+      x-scope: user
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FreeCredits' }
+
+  /models:
+    get:
+      operationId: listModels
+      summary: The coding tools and models this server offers
+      tags: [settings]
+      x-scope: user
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ModelCatalog' }
+
   /feedback:
     post:
       operationId: sendFeedback
@@ -4311,6 +4367,37 @@ paths:
       responses:
         '204': { description: Disconnected }
 
+
+  /workspace/muse/login:
+    post:
+      operationId: startWorkspaceMuseLogin
+      summary: Connect the workspace's Muse account by signing in with Meta
+      tags: [workspaces]
+      x-role: owner
+      responses:
+        '200':
+          description: Started
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MuseLogin' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /workspace/muse/login/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string, maxLength: 64 } }
+    get:
+      operationId: getWorkspaceMuseLogin
+      summary: How the workspace's Meta sign-in is going
+      tags: [workspaces]
+      x-role: owner
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MuseLogin' }
+        '404': { $ref: '#/components/responses/NotFound' }
   /workspace/billing:
     get:
       operationId: getBilling
@@ -4558,6 +4645,35 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+
+  /platform/users/{id}/free-credits:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    put:
+      operationId: setFreeCredits
+      summary: Set how many free credits a person may spend on agnts's Muse key (Admin); 0 gives none
+      tags: [platform]
+      x-scope: admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [limit]
+              properties:
+                limit: { type: integer, format: int64, minimum: 0, maximum: 10000000, description: 'Credits (1 credit = $0.01 of model cost)' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FreeCredits' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
   /platform/runs:
     get:
       operationId: listPlatformRuns
@@ -5893,7 +6009,7 @@ components:
     RunEngine:
       name: engine
       in: query
-      schema: { type: string, enum: [claude, codex] }
+      schema: { type: string, enum: [muse, claude, codex] }
     RunModel:
       name: model
       in: query
@@ -6074,7 +6190,7 @@ components:
         purpose: { type: string }
         background: { type: boolean, description: A call outside a ticket's stages }
         modelStage: { type: string }
-        engine: { type: string, enum: [claude, codex] }
+        engine: { type: string, enum: [muse, claude, codex] }
         model: { type: string }
         sessionId: { type: string }
         startedAt: { type: string, format: date-time }
@@ -6194,6 +6310,7 @@ components:
           type: array
           description: The workspaces they belong to (not deleted), with their role
           items: { $ref: '#/components/schemas/WorkspaceSummary' }
+        freeCredits: { $ref: '#/components/schemas/FreeCredits' }
 
     WorkspaceSummary:
       type: object
@@ -6313,7 +6430,7 @@ components:
       type: object
       required: [kind, token]
       properties:
-        kind: { type: string, enum: [subscription, api_key], description: 'subscription: a token from `claude setup-token`; api_key: an Anthropic API key' }
+        kind: { type: string, enum: [subscription, api_key, muse_api_key], description: 'subscription: a token from `claude setup-token`; api_key: an Anthropic API key; muse_api_key: a Meta Model API key (LLM_…). A Meta sign-in connects through the muse/login operations.' }
         token: { type: string, minLength: 10, maxLength: 500 }
 
     ClaudeConnectionState:
@@ -6321,7 +6438,7 @@ components:
       required: [connected]
       properties:
         connected: { type: boolean }
-        kind: { type: string, enum: [subscription, api_key] }
+        kind: { type: string, enum: [subscription, api_key, muse_api_key, muse_login] }
         tokenHint: { type: string, description: The token's last four characters }
         account: { type: string }
         lastError: { type: string }
@@ -7499,13 +7616,59 @@ components:
 
     Model:
       type: string
-      pattern: '^(haiku|sonnet|opus|codex:[a-z0-9][a-z0-9._-]{0,63})$'
-      description: 'A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI'
+      pattern: '^(haiku|sonnet|opus|codex:[a-z0-9][a-z0-9._-]{0,63}|muse:[a-z0-9][a-z0-9._-]{0,63})$'
+      description: 'muse:<model> for Muse Code (muse:spark, muse:wonder), a Claude model (haiku, sonnet, opus), or codex:<model> for Codex CLI. listModels says which this server offers.'
 
     ReviewModel:
       type: string
-      pattern: '^(auto|haiku|sonnet|opus|codex:[a-z0-9][a-z0-9._-]{0,63})$'
-      description: 'auto: opus for complex tickets, sonnet otherwise'
+      pattern: '^(auto|haiku|sonnet|opus|codex:[a-z0-9][a-z0-9._-]{0,63}|muse:[a-z0-9][a-z0-9._-]{0,63})$'
+      description: 'auto: the stronger model (muse:wonder, opus) for complex tickets, the lighter one otherwise'
+
+    ModelCatalog:
+      type: object
+      required: [providers, primary, models]
+      properties:
+        providers:
+          type: array
+          description: The coding tools this server offers
+          items: { type: string, enum: [muse, claude, codex] }
+        primary: { type: string, enum: [muse, claude, codex], description: The default tool }
+        models:
+          type: array
+          items:
+            type: object
+            required: [id, label, provider, strong]
+            properties:
+              id: { $ref: '#/components/schemas/Model' }
+              label: { type: string }
+              provider: { type: string, enum: [muse, claude, codex] }
+              strong: { type: boolean, description: The stronger, dearer tier }
+              inputPerMillionUSD: { type: number }
+              outputPerMillionUSD: { type: number }
+
+    MuseLogin:
+      type: object
+      description: A Meta sign-in in progress (OAuth device flow, like `muse login`)
+      required: [id, userCode, verificationUri, expiresAt, status]
+      properties:
+        id: { type: string }
+        userCode: { type: string, description: The code to confirm on Meta's page }
+        verificationUri: { type: string }
+        verificationUriComplete: { type: string, description: The page with the code filled in }
+        expiresAt: { type: string, format: date-time }
+        status: { type: string, enum: [pending, connected, denied, expired, failed] }
+        error: { type: string }
+        account: { type: string }
+
+    FreeCredits:
+      type: object
+      description: Free credits an Admin gave a person (1 credit = $0.01)
+      required: [limit, used, remaining]
+      properties:
+        limit: { type: integer, format: int64 }
+        used: { type: integer, format: int64 }
+        remaining: { type: integer, format: int64 }
+        setAt: { type: string, format: date-time }
 
     StageModels:
       type: object

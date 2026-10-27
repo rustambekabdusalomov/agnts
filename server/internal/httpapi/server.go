@@ -82,6 +82,9 @@ type Options struct {
 	Accounts *accounts.Service
 	// Claude manages Claude connections; nil answers 501.
 	Claude ClaudeService
+	// Muse signs people in to Meta for Muse and keeps free credits; nil
+	// answers 501.
+	Muse MuseService
 	// Queue reports the queue and the server's capacity; nil answers 501.
 	Queue QueueReporter
 	// Billing runs plans, slots and credits; nil answers 501.

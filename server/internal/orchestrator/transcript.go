@@ -137,6 +137,9 @@ func (o *Orchestrator) startTranscript(ctx context.Context, m transcriptMeta, re
 	if domain.IsCodex(req.Model) {
 		s.Engine = "codex"
 	}
+	if domain.IsMuse(req.Model) {
+		s.Engine = "muse"
+	}
 	if m.Run != nil {
 		s.RunID = &m.Run.ID
 	}
