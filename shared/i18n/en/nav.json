@@ -23,6 +23,7 @@
     "synced": "Jira synced: {found} open, {created} new, {updated} updated, {waiting} waiting for your choice",
     "session": "Current session",
     "week": "This week",
+    "creditsLeft": "{amount} of {total} credits left",
     "dayMode": "Switch to day mode",
     "nightMode": "Switch to night mode",
     "collapseSidebar": "Collapse sidebar",

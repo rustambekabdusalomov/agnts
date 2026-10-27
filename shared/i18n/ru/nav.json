@@ -23,6 +23,7 @@
     "synced": "Jira синхронизирована: открыто {found}, новых {created}, обновлено {updated}, ждут вашего решения {waiting}",
     "session": "Текущая сессия",
     "week": "Эта неделя",
+    "creditsLeft": "Осталось {amount} из {total}",
     "dayMode": "Включить дневной режим",
     "nightMode": "Включить ночной режим",
     "collapseSidebar": "Свернуть боковую панель",

@@ -53,7 +53,8 @@ const refresh = useMutation({
 
 <template>
   <PageHeader :title="t('usage.title')" doc="usage" />
-  <div class="cfg-grid">
+  <!-- Muse has no help column: the cards take the full width. -->
+  <div class="cfg-grid" :class="{ solo: catalog.isMuse.value }">
     <div class="col">
       <section v-if="!catalog.isMuse.value" class="card" :aria-label="t('usage.card')">
         <div class="ch">

@@ -23,6 +23,7 @@
     "synced": "Jira sinxronlandi: {found} ta ochiq, {created} ta yangi, {updated} ta yangilandi, {waiting} tasi qaroringizni kutmoqda",
     "session": "Joriy sessiya",
     "week": "Shu hafta",
+    "creditsLeft": "{total} dan {amount} kredit qoldi",
     "dayMode": "Kunduzgi rejimga oʻtish",
     "nightMode": "Tungi rejimga oʻtish",
     "collapseSidebar": "Yon panelni yigʻish",

@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter, type RouteLocationRaw } from 'vue-router'
 import { api, unwrap } from '../api/client'
 import { FILTERS, NEEDS, RUNNING } from '../api/types'
+import { fmtUsd } from '../composables/format'
 import { livePoll, useLive } from '../composables/useLive'
 import { useModels } from '../composables/useModels'
 import { useTabBadge } from '../composables/tabBadge'
@@ -254,6 +255,19 @@ function flyKey(e: KeyboardEvent) {
 }
 
 const initials = computed(() => (session.user?.username ?? '?').slice(0, 2).toUpperCase())
+// The person's free credits from an Admin, under their name; shown only
+// once they have a limit (1 credit = $0.01).
+const free = useQuery({ queryKey: ['free-credits'], queryFn: () => unwrap(api.GET('/account/free-credits')) })
+const creditsLeft = computed(() => {
+  const f = free.data.value
+  return f && f.limit > 0 ? t('nav.creditsLeft', { amount: fmtUsd(f.remaining / 100, prefs.lang), total: fmtUsd(f.limit / 100, prefs.lang) }) : ''
+})
+// The bar shows what is left: amber from a fifth left, red from a twentieth.
+const creditsPct = computed(() => {
+  const f = free.data.value
+  return f && f.limit > 0 ? Math.max(0, Math.min(100, Math.round((f.remaining / f.limit) * 100))) : 0
+})
+const creditsLevel = computed(() => (creditsPct.value <= 5 ? 'bad' : creditsPct.value <= 20 ? 'warn' : ''))
 const confirmOut = ref(false)
 const feedbackOpen = ref(false)
 const signingOut = ref(false)
@@ -373,10 +387,12 @@ onBeforeUnmount(() => {
         </template>
       </nav>
       <div class="me">
-        <button class="nav-a me-btn" v-bind="tip(`${t('common.signedInAs', { username: session.user?.username })} · ${t('auth.signOut')}`)" @click="confirmOut = true">
+        <button class="nav-a me-btn" v-bind="tip([t('common.signedInAs', { username: session.user?.username }), creditsLeft, t('auth.signOut')].filter(Boolean).join(' · '))" @click="confirmOut = true">
           <span class="av"><span class="av-ini">{{ initials }}</span><svg class="av-out" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10" /></svg></span>
           <span class="lbl me-txt">
             <span class="me-name">{{ session.user?.username }}</span>
+            <span v-if="creditsLeft" class="me-credits">{{ creditsLeft }}</span>
+            <span v-if="creditsLeft" class="bar me-bar" :class="creditsLevel" aria-hidden="true"><span :style="{ width: creditsPct + '%' }" /></span>
             <span>{{ t('auth.signOut') }}</span>
           </span>
         </button>
