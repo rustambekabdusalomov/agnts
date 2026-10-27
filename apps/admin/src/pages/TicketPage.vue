@@ -1216,43 +1216,70 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
         <template v-else-if="activeTab === 'task'">
           <section class="card tk-panel">
             <div class="ch"><h2>{{ isTask ? t('ticket.sideTask') : t('ticket.sideTicket') }}</h2><span><StateBadge :state="tk.state" :kind="tk.kind" /> <span v-if="tk.mergedAt" class="badge b-ok">{{ t('ticket.merged') }}</span> <span v-if="tk.partlyMerged" class="badge b-warn">{{ t('groups.partlyMerged') }}</span></span></div>
-            <dl class="kv">
-              <dt>{{ t('ticket.kvKey') }}</dt><dd>{{ tk.key }}</dd>
-              <template v-if="!pull"><dt>{{ t('tasks.ticketNumber') }}</dt><dd><TicketNumber :ticket="tk" /></dd></template>
-              <template v-if="tk.parentKey"><dt>{{ t('implement.implements') }}</dt><dd><RouterLink :to="{ name: 'ticket', params: { key: tk.parentKey } }">{{ tk.parentKey }}</RouterLink></dd></template>
-              <template v-if="tk.followUpOf"><dt>{{ t('followUps.followUpOf') }}</dt><dd><RouterLink :to="{ name: 'ticket', params: { key: tk.followUpOf } }">{{ tk.followUpOf }}</RouterLink></dd></template>
-              <template v-if="waitsFor.length">
-                <dt>{{ t('relations.waitsFor') }}</dt>
-                <dd><template v-for="(k2, i) in waitsFor" :key="k2"><template v-if="i">, </template><RouterLink :to="{ name: 'ticket', params: { key: k2 } }">{{ k2 }}</RouterLink></template></dd>
-              </template>
-              <dt>{{ t('kind.title') }}</dt><dd><KindBadge :ticket="tk" /></dd>
-              <dt>{{ t('ticket.kvSource') }}</dt><dd>{{ isTask ? t('ticket.srcTask') : isPlane ? t('ticket.srcPlane') : pull ? t('ticket.srcGit') : tk.source === 'ci' ? t('ticket.srcCi') : t('ticket.srcJira') }}</dd>
-              <template v-if="multi"><dt>{{ t('groups.kvRepos') }}</dt><dd>{{ repoNames }}</dd></template>
-              <template v-else><dt>{{ t('ticket.kvRepo') }}</dt><dd>{{ tk.repoName ?? '—' }}</dd></template>
-              <template v-if="tk.group"><dt>{{ t('groups.kvGroup') }}</dt><dd>{{ tk.group.name }}</dd></template>
-              <dt>{{ t('queue.member') }}</dt>
-              <dd>
-                {{ tk.member ?? '—' }}
-                <button
-                  v-if="workspace.canEdit && tk.memberId !== session.user?.id && !['done', 'rejected'].includes(tk.state)" type="button" class="link-btn" style="margin-left: 6px"
-                  :disabled="takeOver.isPending.value" @click="takeOver.mutate()"
-                >
-                  {{ t('queue.takeOver') }}
-                </button>
-              </dd>
-              <template v-if="tk.createdBy"><dt /><dd class="hint">{{ t('queue.createdBy', { name: tk.createdBy }) }}</dd></template>
-              <template v-if="isTask && !report"><dt>{{ t('ticket.kvAfter') }}</dt><dd>{{ tk.afterApprove === 'main' ? t('ticket.afterMain') : t('ticket.afterPr') }}</dd></template>
-              <dt>{{ t('ticket.kvPriority') }}</dt><dd>{{ tk.priority }}</dd>
-              <template v-if="!report && !pull && !multi"><dt>{{ t('ticket.kvBranch') }}</dt><dd><BranchName :ticket-key="tk.key" :branch="branch" :can-rename="canRenameBranch" /></dd></template>
-              <template v-if="tk.assignees?.length"><dt>{{ t('ticket.kvAssignees') }}</dt><dd>{{ tk.assignees.join(', ') }}</dd></template>
-              <dt>{{ t('ticket.kvRevision') }}</dt><dd>{{ tk.revision }}</dd>
-              <template v-if="tk.ciFixes && !multi"><dt>{{ t('ticket.kvCi') }}</dt><dd><span class="badge b-warn">{{ t('ticket.ciFixes', { n: tk.ciFixes }) }}</span></dd></template>
-              <dt>{{ t('ticket.kvTurns') }}</dt><dd>{{ tk.turns }}</dd>
-              <template v-if="d.effectiveModels && !pull">
-                <dt>{{ t('ticket.kvCodingModel') }}</dt><dd>{{ models.label(d.effectiveModels.coding) }}</dd>
-                <dt>{{ t('ticket.kvRetryModel') }}</dt><dd>{{ models.label(d.effectiveModels.retry) }}</dd>
-              </template>
-            </dl>
+            <!-- Facts in small titled groups, each label beside its value: one
+                 list across the full width put them too far apart to read. -->
+            <div class="tk-facts">
+              <section class="tk-fgrp">
+                <h3>{{ t('ticket.factsTicket') }}</h3>
+                <dl class="tk-dl">
+                  <dt>{{ t('ticket.kvKey') }}</dt><dd class="mono">{{ tk.key }}</dd>
+                  <template v-if="!pull"><dt>{{ t('tasks.ticketNumber') }}</dt><dd><TicketNumber :ticket="tk" /></dd></template>
+                  <dt>{{ t('kind.title') }}</dt><dd><KindBadge :ticket="tk" /></dd>
+                  <dt>{{ t('ticket.kvSource') }}</dt><dd>{{ isTask ? t('ticket.srcTask') : isPlane ? t('ticket.srcPlane') : pull ? t('ticket.srcGit') : tk.source === 'ci' ? t('ticket.srcCi') : t('ticket.srcJira') }}</dd>
+                  <dt>{{ t('ticket.kvPriority') }}</dt><dd>{{ tk.priority }}</dd>
+                </dl>
+              </section>
+              <section class="tk-fgrp">
+                <h3>{{ t('ticket.factsCode') }}</h3>
+                <dl class="tk-dl">
+                  <template v-if="multi"><dt>{{ t('groups.kvRepos') }}</dt><dd>{{ repoNames }}</dd></template>
+                  <template v-else><dt>{{ t('ticket.kvRepo') }}</dt><dd>{{ tk.repoName ?? '—' }}</dd></template>
+                  <template v-if="tk.group"><dt>{{ t('groups.kvGroup') }}</dt><dd>{{ tk.group.name }}</dd></template>
+                  <template v-if="!report && !pull && !multi"><dt>{{ t('ticket.kvBranch') }}</dt><dd><BranchName :ticket-key="tk.key" :branch="branch" :can-rename="canRenameBranch" /></dd></template>
+                  <template v-if="isTask && !report"><dt>{{ t('ticket.kvAfter') }}</dt><dd>{{ tk.afterApprove === 'main' ? t('ticket.afterMain') : t('ticket.afterPr') }}</dd></template>
+                  <template v-if="tk.ciFixes && !multi"><dt>{{ t('ticket.kvCi') }}</dt><dd><span class="badge b-warn">{{ t('ticket.ciFixes', { n: tk.ciFixes }) }}</span></dd></template>
+                </dl>
+              </section>
+              <section class="tk-fgrp">
+                <h3>{{ t('ticket.factsPeople') }}</h3>
+                <dl class="tk-dl">
+                  <dt>{{ t('queue.member') }}</dt>
+                  <dd>
+                    {{ tk.member ?? '—' }}
+                    <button
+                      v-if="workspace.canEdit && tk.memberId !== session.user?.id && !['done', 'rejected'].includes(tk.state)" type="button" class="link-btn" style="margin-left: 6px"
+                      :disabled="takeOver.isPending.value" @click="takeOver.mutate()"
+                    >
+                      {{ t('queue.takeOver') }}
+                    </button>
+                    <div v-if="tk.createdBy" class="hint tk-dd-note">{{ t('queue.createdBy', { name: tk.createdBy }) }}</div>
+                  </dd>
+                  <template v-if="tk.assignees?.length"><dt>{{ t('ticket.kvAssignees') }}</dt><dd>{{ tk.assignees.join(', ') }}</dd></template>
+                </dl>
+              </section>
+              <section v-if="tk.parentKey || tk.followUpOf || waitsFor.length" class="tk-fgrp">
+                <h3>{{ t('ticket.factsLinks') }}</h3>
+                <dl class="tk-dl">
+                  <template v-if="tk.parentKey"><dt>{{ t('implement.implements') }}</dt><dd><RouterLink :to="{ name: 'ticket', params: { key: tk.parentKey } }">{{ tk.parentKey }}</RouterLink></dd></template>
+                  <template v-if="tk.followUpOf"><dt>{{ t('followUps.followUpOf') }}</dt><dd><RouterLink :to="{ name: 'ticket', params: { key: tk.followUpOf } }">{{ tk.followUpOf }}</RouterLink></dd></template>
+                  <template v-if="waitsFor.length">
+                    <dt>{{ t('relations.waitsFor') }}</dt>
+                    <dd><template v-for="(k2, i) in waitsFor" :key="k2"><template v-if="i">, </template><RouterLink :to="{ name: 'ticket', params: { key: k2 } }">{{ k2 }}</RouterLink></template></dd>
+                  </template>
+                </dl>
+              </section>
+              <section class="tk-fgrp">
+                <h3>{{ t('ticket.factsRuns') }}</h3>
+                <dl class="tk-dl">
+                  <dt>{{ t('ticket.kvRevision') }}</dt><dd>{{ tk.revision }}</dd>
+                  <dt>{{ t('ticket.kvTurns') }}</dt><dd>{{ tk.turns }}</dd>
+                  <template v-if="d.effectiveModels && !pull">
+                    <dt>{{ t('ticket.kvCodingModel') }}</dt><dd>{{ models.label(d.effectiveModels.coding) }}</dd>
+                    <dt>{{ t('ticket.kvRetryModel') }}</dt><dd>{{ models.label(d.effectiveModels.retry) }}</dd>
+                  </template>
+                </dl>
+              </section>
+            </div>
           </section>
           <TicketRepos v-if="multi" :ticket="tk" :can-retry="tk.state === 'failed' && workspace.canEdit" :busy="act.isPending.value" @retry="act.mutate('retry')" />
         </template>
@@ -1306,6 +1333,19 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
 .tk-lang { width: 200px; }
 .tk-tr-note { display: flex; align-items: center; gap: 8px; margin: 10px 0 0; }
 .tk-tabs { margin: 4px 0 -4px; }
+.tk-facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; margin-top: 14px; align-items: start; }
+.tk-fgrp { min-width: 0; padding: 14px 16px 6px; border: 1px solid var(--line); border-radius: 12px; }
+.tk-fgrp h3 { margin: 0 0 6px; font-size: 13px; font-weight: 700; color: var(--ink-3); }
+.tk-dl { display: grid; grid-template-columns: minmax(96px, max-content) minmax(0, 1fr); margin: 0; font-size: 14px; }
+.tk-dl dt, .tk-dl dd { min-width: 0; padding: 8px 0; border-top: 1px solid var(--line-2); overflow-wrap: anywhere; }
+.tk-dl dt { padding-right: 14px; color: var(--ink-3); }
+.tk-dl dd { margin: 0; font-weight: 600; }
+.tk-dl dt:first-of-type, .tk-dl dt:first-of-type + dd { border-top: 0; }
+.tk-dd-note { margin-top: 2px; font-weight: 400; }
+.tk-dl .mono { font-family: var(--mono); font-size: 13.5px; }
+.tk-dl .badge { white-space: normal; height: auto; min-height: 24px; padding-block: 3px; line-height: 1.3; }
+.tk-dl a { color: var(--primary-ink); font-family: var(--mono); font-size: 13.5px; font-weight: 700; text-decoration: none; }
+.tk-dl a:hover { text-decoration: underline; }
 .tk-n { margin-left: 6px; font-size: 12.5px; opacity: .7; font-variant-numeric: tabular-nums; }
 .tk-panel > .sec:first-child { margin-top: 0; }
 .tk-wait { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
