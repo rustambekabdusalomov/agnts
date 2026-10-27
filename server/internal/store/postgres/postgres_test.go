@@ -473,3 +473,55 @@ func TestTopTicketSpend(t *testing.T) {
 		t.Fatalf("wider period, limit 1: %+v %v", got, err)
 	}
 }
+
+func TestLastSessionIDKeepsMuseOnItsAccount(t *testing.T) {
+	users, _ := testDB(t)
+	ctx, ws := testWS(t, users)
+	s := NewAgent(users.db)
+	var ticketID, conn int64
+	if err := s.db.QueryRow(ctx, `INSERT INTO tickets (key, source, title, state, revision, turns, updated_at)
+		VALUES ('PAY-1', 'jira', 't', 'coding', 0, 0, now()) RETURNING id`).Scan(&ticketID); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.db.QueryRow(ctx, `INSERT INTO claude_connections (workspace_id, kind, token_enc, account) VALUES ($1, 'muse_login', '\x00', 'Meta account') RETURNING id`, ws).Scan(&conn); err != nil {
+		t.Fatal(err)
+	}
+	run := func(model, session string, minutes int, conn *int64, credits bool) {
+		t.Helper()
+		if _, err := s.db.Exec(ctx, `INSERT INTO runs (ticket_id, stage, model, session_id, started_at, finished_at, claude_connection_id, on_credits)
+			VALUES ($1, 'code', $2, $3, now() - make_interval(mins => $4), now() - make_interval(mins => $4), $5, $6)`, ticketID, model, session, 60-minutes, conn, credits); err != nil {
+			t.Fatal(err)
+		}
+	}
+	mine := domain.ClaudeAccount{ConnectionID: conn}
+	onCredits := domain.ClaudeAccount{Credits: true}
+	last := func(a domain.ClaudeAccount) string {
+		t.Helper()
+		id, err := s.LastSessionID(ctx, ticketID, a)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return id
+	}
+
+	// Started on agnts's key, then retried on the member's account: the
+	// retry's run carries the session, but only credits may resume it.
+	run("muse:spark", "s1", 0, nil, true)
+	run("muse:spark", "s1", 10, &conn, false)
+	if got := last(onCredits); got != "s1" {
+		t.Fatalf("same account: %q", got)
+	}
+	if got := last(mine); got != "" {
+		t.Fatalf("other account resumed %q", got)
+	}
+	// A session the account started itself is resumed.
+	run("muse:spark", "s2", 20, &conn, false)
+	if got := last(mine); got != "s2" {
+		t.Fatalf("own session: %q", got)
+	}
+	// Claude Code sessions resume on any account.
+	run("sonnet", "s3", 30, nil, true)
+	if got := last(mine); got != "s3" {
+		t.Fatalf("claude session: %q", got)
+	}
+}

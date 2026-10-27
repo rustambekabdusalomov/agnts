@@ -10,6 +10,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"agnts/internal/domain"
@@ -539,16 +540,32 @@ func (s *Agent) SetAgentConfigScan(ctx context.Context, id int64, scan domain.Ag
 	return err
 }
 
-// LastSessionID returns the newest Claude session of a ticket's own work
+// LastSessionID returns the newest session of a ticket's own work
 // (analysis and coding), or "". Learn and review sessions are not resumed.
-func (s *Agent) LastSessionID(ctx context.Context, ticketID int64) (string, error) {
-	var id string
-	err := s.db.QueryRow(ctx, `SELECT session_id FROM runs WHERE ticket_id = $1 AND session_id <> '' AND stage NOT IN ('learn', 'review', 'preview')
-		ORDER BY started_at DESC LIMIT 1`, ticketID).Scan(&id)
+// A Muse session is resumable only on the account that started it: Muse
+// refuses reasoning it issued to another caller, so after a switch between
+// an account and agnts's key (credits) the work starts a new session.
+func (s *Agent) LastSessionID(ctx context.Context, ticketID int64, acct domain.ClaudeAccount) (string, error) {
+	var (
+		id, model string
+		conn      pgtype.Int8
+		credits   bool
+	)
+	err := s.db.QueryRow(ctx, `SELECT r.session_id, f.model, f.claude_connection_id, f.on_credits FROM runs r
+		CROSS JOIN LATERAL (SELECT model, claude_connection_id, on_credits FROM runs
+			WHERE ticket_id = r.ticket_id AND session_id = r.session_id ORDER BY started_at LIMIT 1) f
+		WHERE r.ticket_id = $1 AND r.session_id <> '' AND r.stage NOT IN ('learn', 'review', 'preview')
+		ORDER BY r.started_at DESC LIMIT 1`, ticketID).Scan(&id, &model, &conn, &credits)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return "", nil
 	}
-	return id, err
+	if err != nil {
+		return "", err
+	}
+	if domain.IsMuse(model) && (conn.Int64 != acct.ConnectionID || credits != acct.Credits) {
+		return "", nil
+	}
+	return id, nil
 }
 
 // RecoverInterrupted closes runs a crash left open and requeues their tickets.

@@ -1120,7 +1120,8 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		knowledge = append(knowledge, *m)
 	}
 
-	session, err := o.store.LastSessionID(ctx, t.ID)
+	acct, _ := domain.ClaudeOf(ctx)
+	session, err := o.store.LastSessionID(ctx, t.ID, acct)
 	if err != nil {
 		return err
 	}
@@ -1505,7 +1506,8 @@ func (o *Orchestrator) report(ctx context.Context, s domain.Settings, t domain.T
 	defer o.closeWorkspace(ctx, t, ws)
 	d.Context, d.Tracker = o.contextFiles(ctx, ws, t, rs), o.trackerContext(ctx, ws, t)
 
-	session, err := o.store.LastSessionID(ctx, t.ID)
+	acct, _ := domain.ClaudeOf(ctx)
+	session, err := o.store.LastSessionID(ctx, t.ID, acct)
 	if err != nil {
 		return err
 	}

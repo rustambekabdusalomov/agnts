@@ -47,7 +47,9 @@ type Store interface {
 	// SpendByKeys returns each ticket's total spend; tickets without any
 	// are absent.
 	SpendByKeys(ctx context.Context, keys []string) (map[string]domain.TokenUsage, error)
-	LastSessionID(ctx context.Context, ticketID int64) (string, error)
+	// LastSessionID returns the newest session of a ticket's own work that
+	// account acct can resume, or "".
+	LastSessionID(ctx context.Context, ticketID int64, acct domain.ClaudeAccount) (string, error)
 	// RecoverInterrupted closes runs left unfinished by a crash and moves
 	// their tickets back to a claimable state.
 	RecoverInterrupted(ctx context.Context) (int, error)
