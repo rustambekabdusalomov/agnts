@@ -33,7 +33,7 @@ const (
 	ClaudeAPIKey       = "api_key"
 	// Muse Code accounts: a Meta Model API key, or a Meta sign-in (Muse
 	// Code's credential file).
-	MuseAPIKey = "muse_api_key"
+	MuseAPIKey = "muse_api_key" //nolint:gosec // a kind name, not a credential
 	MuseLogin  = "muse_login"
 )
 

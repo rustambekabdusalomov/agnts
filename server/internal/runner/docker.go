@@ -471,7 +471,8 @@ func (d *Docker) ExecAttach(ctx context.Context, id string, c ExecConfig, stderr
 		return nil, err
 	}
 	br := bufio.NewReader(conn)
-	resp, err := http.ReadResponse(br, nil)
+	// The body is the hijacked stream itself, read through br below.
+	resp, err := http.ReadResponse(br, nil) //nolint:bodyclose // the connection is the body; Kill and Wait close it
 	if err != nil {
 		_ = conn.Close()
 		return nil, fmt.Errorf("docker exec attach: %w", err)

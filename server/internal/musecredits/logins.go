@@ -80,7 +80,7 @@ func (l *Logins) Start(ctx context.Context, ws, user int64) (Login, error) {
 	l.prune()
 	l.pending[lg.ID] = lg
 	l.mu.Unlock()
-	go l.wait(lg, a)
+	go l.wait(lg, a) //nolint:gosec // G118: the sign-in outlives the request that started it
 	return *lg, nil
 }
 

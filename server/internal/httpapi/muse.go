@@ -165,7 +165,7 @@ func (s *Server) ListModels(w http.ResponseWriter, r *http.Request) {
 			OutputPerMillionUSD *float32                       `json:"outputPerMillionUSD,omitempty"`
 			Provider            gen.ModelCatalogModelsProvider `json:"provider"`
 			Strong              bool                           `json:"strong"`
-		}{Id: gen.Model(m.ID), Label: m.Label, Provider: gen.ModelCatalogModelsProvider(m.Provider), Strong: m.Strong}
+		}{Id: m.ID, Label: m.Label, Provider: gen.ModelCatalogModelsProvider(m.Provider), Strong: m.Strong}
 		if m.InputPerM > 0 {
 			in, outP := float32(m.InputPerM), float32(m.OutputPM)
 			row.InputPerMillionUSD, row.OutputPerMillionUSD = &in, &outP
