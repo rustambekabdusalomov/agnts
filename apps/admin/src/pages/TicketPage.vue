@@ -582,7 +582,7 @@ const checksOk = computed(() => (result.value?.checks ?? []).every((c) => c.exit
 // instead of every section stacked. The first available tab opens by default.
 // The ticket's details, token spend and history come last, as tabs rather
 // than a side column, so the main panel keeps the full width.
-type Tab = 'api' | 'decide' | 'report' | 'review' | 'preview' | 'changes' | 'followUps' | 'order' | 'answers' | 'lessons' | 'log' | 'task' | 'spend' | 'history'
+type Tab = 'api' | 'decide' | 'report' | 'review' | 'preview' | 'changes' | 'followUps' | 'order' | 'answers' | 'lessons' | 'documents' | 'log' | 'task' | 'spend' | 'history'
 const tabs = computed(() => {
   const k = tk.value
   if (!k) return []
@@ -604,6 +604,7 @@ const tabs = computed(() => {
   }
   if (answered.value.length && !['new', 'analyzing', 'waiting_for_answers'].includes(k.state)) out.push({ id: 'answers', label: t('ticket.tabAnswers'), n: answered.value.length })
   if (k.state === 'done' && !pull.value) out.push({ id: 'lessons', label: t('ticket.tabLessons') })
+  out.push({ id: 'documents', label: t('documents.ticketTitle') })
   if (events.value.length) out.push({ id: 'log', label: t('ticket.runLog') })
   out.push({ id: 'task', label: isTask.value ? t('ticket.sideTask') : t('ticket.sideTicket') })
   out.push({ id: 'spend', label: t('spend.title') })
@@ -1204,6 +1205,8 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
           <TicketLessons :ticket="tk" />
         </fieldset>
 
+        <TicketDocuments v-else-if="activeTab === 'documents'" class="tk-panel" :ticket="tk" :has-report="report && !!result?.report" />
+
         <RunLog v-else-if="activeTab === 'log'" :events="events" :ticket-key="key" />
 
         <template v-else-if="activeTab === 'task'">
@@ -1269,7 +1272,6 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
 
       <TicketPullComments v-for="p in prThreads" :key="`${p.repoId}-${p.number}`" :ticket="tk" v-bind="p" />
       <TicketCommits v-if="!report" :ticket="tk" />
-      <TicketDocuments :ticket="tk" :has-report="report && !!result?.report" />
     </div>
   </template>
 </template>
