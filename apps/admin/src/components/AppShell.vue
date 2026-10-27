@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/vue-query'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter, type RouteLocationRaw } from 'vue-router'
 import { api, unwrap } from '../api/client'
 import { FILTERS, NEEDS, RUNNING } from '../api/types'
 import { livePoll, useLive } from '../composables/useLive'
@@ -99,17 +99,13 @@ useTabBadge(
 
 const isTicketList = computed(() => route.name === 'tickets')
 // Settings opens into its sections in the sidebar. Clicking it only shows
-// or hides them, so it can be opened just to see what is there; it opens
-// on its own when a settings page is reached another way.
+// or hides them, so it can be opened just to see what is there.
 const inSettings = computed(() => route.name === 'settings')
 const settingsAt = computed(() => (inSettings.value ? settingsSection(route.params.section) : ''))
 const settingsOpen = ref(inSettings.value)
-watch(inSettings, (v) => {
-  if (v) settingsOpen.value = true
-})
 function toggleSettings(e: MouseEvent) {
   // The thin sidebar shows the sections in a flyout instead (narrow screens excepted).
-  if (prefs.thin && !matchMedia('(max-width: 900px)').matches) {
+  if (prefs.thin && !narrow.value) {
     if (fly.value) closeFly()
     else openFly(e.currentTarget as HTMLElement)
     return
@@ -117,6 +113,71 @@ function toggleSettings(e: MouseEvent) {
   settingsOpen.value = !settingsOpen.value
 }
 const activeFilter = computed(() => (isTicketList.value ? String(route.query.f ?? 'needs') : ''))
+
+// The sidebar's menus, each opening into its pages; Settings, under Setup,
+// opens once more into its sections. One menu is open at a time, and only a
+// click opens one: a page reached another way marks its closed menu instead.
+type NavItem = { key: string; icon: string; label: string; to?: RouteLocationRaw; on: boolean; cnt?: number; dim?: boolean; kind?: 'settings' | 'feedback' }
+type NavMenu = { key: string; icon: string; items: NavItem[] }
+const page = (name: string, icon: string, more: Partial<NavItem> = {}): NavItem => ({
+  key: name, icon, label: `nav.${name}`, to: { name }, on: route.name === name, ...more,
+})
+const menus = computed<NavMenu[]>(() => [
+  { key: 'overview', icon: 'dashboard', items: [page('dashboard', 'dashboard'), page('analytics', 'analytics')] },
+  { key: 'aiAssistant', icon: 'assistant', items: [page('assistant', 'assistant', { label: 'nav.assistantChat' }), page('assistantConversations', 'logs')] },
+  {
+    key: 'tickets',
+    icon: 'all',
+    items: FILTERS.map((f) => ({
+      key: f.id, icon: f.icon, label: `nav.${f.id}`, to: { name: 'tickets', query: { f: f.id } }, on: activeFilter.value === f.id,
+      cnt: ['needs', 'running', 'queue'].includes(f.id) ? count(f.states) : 0, dim: f.id !== 'needs',
+    })),
+  },
+  {
+    key: 'sideProjects',
+    icon: 'folder',
+    items: [
+      page('tasks', 'tasks', { cnt: openTasks.value, dim: true }),
+      page('documents', 'rules'),
+      page('reviews', 'pull', { cnt: readyReviews.value }),
+      page('ci', 'ci', { cnt: redPipelines.value }),
+    ],
+  },
+  { key: 'knowledge', icon: 'learn', items: [page('learn', 'learn', { cnt: unlearned.value }), page('learnQueue', 'learnQueue', { cnt: learning.value, dim: true })] },
+  { key: 'monitor', icon: 'usage', items: [page('logs', 'logs'), page('usage', 'usage')] },
+  {
+    key: 'setup',
+    icon: 'tool',
+    items: [
+      page('integrations', 'plug'),
+      page('repos', 'repos'),
+      page('rules', 'rules', { cnt: ruleQuestions.value }),
+      { key: 'settings', icon: 'settings', label: 'nav.settings', on: inSettings.value, kind: 'settings' },
+    ],
+  },
+  {
+    key: 'people',
+    icon: 'users',
+    items: [
+      page('workspace', 'repos'),
+      page('profile', 'settings'),
+      { key: 'feedback', icon: 'feedback', label: 'feedback.title', on: false, kind: 'feedback' },
+      ...(session.user?.isAdmin ? [page('adminDashboard', 'shield', { label: 'nav.platform' })] : []),
+    ],
+  },
+])
+const openMenu = ref(menus.value.find((m) => m.items.some((x) => x.on))?.key ?? '')
+function toggleMenu(key: string) {
+  openMenu.value = openMenu.value === key ? '' : key
+}
+// What needs you in a closed menu shows on it, so closing one hides nothing.
+const urgent = (m: NavMenu) => m.items.reduce((n, x) => n + (x.dim ? 0 : (x.cnt ?? 0)), 0)
+// The thin sidebar and narrow screens list every page without the menus.
+const narrowQuery = matchMedia('(max-width: 900px)')
+const narrow = ref(narrowQuery.matches)
+const onNarrow = (e: MediaQueryListEvent) => (narrow.value = e.matches)
+narrowQuery.addEventListener('change', onNarrow)
+const shown = (key: string) => prefs.thin || narrow.value || openMenu.value === key
 
 const langOpen = ref(false)
 const LANG_NAMES: Record<Locale, [string, string]> = { en: ['EN', 'English'], ru: ['RU', 'Русский'], uz: ['UZ', 'Oʻzbekcha'] }
@@ -140,17 +201,9 @@ function tip(text: string) {
 // inside it would be cut off.
 const tipBox = ref<{ text: string; top: number; left: number } | null>(null)
 function showTip(e: Event) {
-  const thin = prefs.thin && !matchMedia('(max-width: 900px)').matches
-  const flyItem = thin ? (e.target as HTMLElement).closest<HTMLElement>('[data-flyout]') : null
-  if (flyItem) {
-    tipBox.value = null
-    if (e.type === 'focusin' && quietFocus) quietFocus = false // focus came back from the flyout: stay closed
-    else openFly(flyItem)
-    return
-  }
-  if (fly.value) closeFlySoon()
+  const thin = prefs.thin && !narrow.value
   const el = thin ? (e.target as HTMLElement).closest<HTMLElement>('[data-tip]') : null
-  if (!el) {
+  if (!el || (fly.value && el.dataset.flyout)) {
     tipBox.value = null
     return
   }
@@ -158,32 +211,25 @@ function showTip(e: Event) {
   tipBox.value = { text: el.dataset.tip ?? '', top: r.top + r.height / 2, left: r.right + 10 }
 }
 
-// In the thin sidebar, Settings opens its sections in a flyout to its
-// right. Fixed like the tooltip, so the sidebar's overflow does not clip
-// it; it stays open while the pointer moves from the item into it.
+// In the thin sidebar, a click on Settings opens its sections in a flyout
+// to its right. Fixed like the tooltip, so the sidebar's overflow does not
+// clip it; it stays open until a click or focus lands elsewhere.
 const fly = ref<{ top: number; left: number } | null>(null)
-let flyTimer: ReturnType<typeof setTimeout> | undefined
 const FLY_HEIGHT = 44 + SETTINGS_SECTIONS.length * 41 // title and rows (38px + 3px gap), to keep it on screen
 function openFly(el: HTMLElement) {
-  clearTimeout(flyTimer)
   const r = el.getBoundingClientRect()
   fly.value = { top: Math.max(8, Math.min(r.top - 6, window.innerHeight - FLY_HEIGHT - 8)), left: r.right + 10 }
 }
-function closeFlySoon() {
-  clearTimeout(flyTimer)
-  flyTimer = setTimeout(() => (fly.value = null), 160)
-}
-function keepFly() {
-  clearTimeout(flyTimer)
-}
 function closeFly() {
-  clearTimeout(flyTimer)
   fly.value = null
 }
+// Settings itself toggles the flyout, so a click or focus there is not "elsewhere".
+const inFly = (n: EventTarget | null) => !!n && (!!flyEl.value?.contains(n as Node) || !!(n as Element).closest?.('[data-flyout]'))
+const flyOutside = (e: PointerEvent) => !inFly(e.target) && closeFly()
+watch(fly, (v) => (v ? document.addEventListener('pointerdown', flyOutside) : document.removeEventListener('pointerdown', flyOutside)))
 // The flyout sits outside the sidebar in the page, so Tab does not reach
 // it: the arrow keys move into it, through it and back to Settings.
 const flyEl = ref<HTMLElement | null>(null)
-let quietFocus = false
 async function enterFly() {
   if (!prefs.thin) return
   if (!fly.value) {
@@ -203,7 +249,6 @@ function flyKey(e: KeyboardEvent) {
   } else if (e.key === 'Escape' || e.key === 'ArrowLeft') {
     e.preventDefault()
     closeFly()
-    quietFocus = true
     document.querySelector<HTMLElement>('[data-flyout="settings"]')?.focus()
   }
 }
@@ -234,7 +279,11 @@ onMounted(() => {
   })
   topObserver.observe(topBar.value)
 })
-onBeforeUnmount(() => topObserver?.disconnect())
+onBeforeUnmount(() => {
+  topObserver?.disconnect()
+  narrowQuery.removeEventListener('change', onNarrow)
+  document.removeEventListener('pointerdown', flyOutside)
+})
 </script>
 
 <template>
@@ -243,7 +292,7 @@ onBeforeUnmount(() => topObserver?.disconnect())
       class="side"
       @mouseover="showTip"
       @focusin="showTip"
-      @mouseleave="tipBox = null; fly && closeFlySoon()"
+      @mouseleave="tipBox = null"
       @focusout="tipBox = null"
       @scroll.capture="tipBox = null; closeFly()"
       @click="tipBox = null"
@@ -264,88 +313,64 @@ onBeforeUnmount(() => topObserver?.disconnect())
         </button>
       </div>
       <nav class="navscroll" :aria-label="t('nav.main')">
-        <div class="grp">{{ t('nav.overview') }}</div>
-        <RouterLink class="nav-a" active-class="on" :to="{ name: 'dashboard' }" v-bind="tip(t('nav.dashboard'))"><HiIcon name="dashboard" /><span class="lbl">{{ t('nav.dashboard') }}</span></RouterLink>
-        <RouterLink class="nav-a" active-class="on" :to="{ name: 'analytics' }" v-bind="tip(t('nav.analytics'))"><HiIcon name="analytics" /><span class="lbl">{{ t('nav.analytics') }}</span></RouterLink>
-        <div class="grp">{{ t('nav.aiAssistant') }}</div>
-        <RouterLink class="nav-a" active-class="on" :to="{ name: 'assistant' }" v-bind="tip(t('nav.assistantChat'))"><HiIcon name="assistant" /><span class="lbl">{{ t('nav.assistantChat') }}</span></RouterLink>
-        <RouterLink class="nav-a" active-class="on" :to="{ name: 'assistantConversations' }" v-bind="tip(t('nav.assistantConversations'))"><HiIcon name="logs" /><span class="lbl">{{ t('nav.assistantConversations') }}</span></RouterLink>
-        <div class="grp">{{ t('nav.tickets') }}</div>
-        <RouterLink
-          v-for="f in FILTERS"
-          :key="f.id"
-          class="nav-a"
-          :class="{ on: activeFilter === f.id }"
-          :to="{ name: 'tickets', query: { f: f.id } }"
-          v-bind="tip(t(`nav.${f.id}`))"
-        >
-          <HiIcon :name="f.icon" /><span class="lbl">{{ t(`nav.${f.id}`) }}</span>
-          <span v-if="f.id === 'needs' && count(f.states)" class="cnt">{{ count(f.states) }}</span>
-          <span v-else-if="(f.id === 'running' || f.id === 'queue') && count(f.states)" class="cnt dim">{{ count(f.states) }}</span>
-        </RouterLink>
-        <div class="grp">{{ t('nav.sideProjects') }}</div>
-        <RouterLink class="nav-a" active-class="on" :to="{ name: 'tasks' }" v-bind="tip(t('nav.tasks'))">
-          <HiIcon name="tasks" /><span class="lbl">{{ t('nav.tasks') }}</span><span v-if="openTasks" class="cnt dim">{{ openTasks }}</span>
-        </RouterLink>
-        <RouterLink class="nav-a" active-class="on" :to="{ name: 'documents' }" v-bind="tip(t('nav.documents'))">
-          <HiIcon name="rules" /><span class="lbl">{{ t('nav.documents') }}</span>
-        </RouterLink>
-        <RouterLink class="nav-a" active-class="on" :to="{ name: 'reviews' }" v-bind="tip(t('nav.reviews'))">
-          <HiIcon name="pull" /><span class="lbl">{{ t('nav.reviews') }}</span><span v-if="readyReviews" class="cnt">{{ readyReviews }}</span>
-        </RouterLink>
-        <RouterLink class="nav-a" active-class="on" :to="{ name: 'ci' }" v-bind="tip(t('nav.ci'))">
-          <HiIcon name="ci" /><span class="lbl">{{ t('nav.ci') }}</span><span v-if="redPipelines" class="cnt">{{ redPipelines }}</span>
-        </RouterLink>
-        <div class="grp">{{ t('nav.knowledge') }}</div>
-        <RouterLink class="nav-a" active-class="on" :to="{ name: 'learn' }" v-bind="tip(t('nav.learn'))">
-          <HiIcon name="learn" /><span class="lbl">{{ t('nav.learn') }}</span><span v-if="unlearned" class="cnt">{{ unlearned }}</span>
-        </RouterLink>
-        <RouterLink class="nav-a" active-class="on" :to="{ name: 'learnQueue' }" v-bind="tip(t('nav.learnQueue'))">
-          <HiIcon name="learnQueue" /><span class="lbl">{{ t('nav.learnQueue') }}</span><span v-if="learning" class="cnt dim">{{ learning }}</span>
-        </RouterLink>
-        <div class="grp">{{ t('nav.monitor') }}</div>
-        <RouterLink class="nav-a" active-class="on" :to="{ name: 'logs' }" v-bind="tip(t('nav.logs'))"><HiIcon name="logs" /><span class="lbl">{{ t('nav.logs') }}</span></RouterLink>
-        <RouterLink class="nav-a" active-class="on" :to="{ name: 'usage' }" v-bind="tip(t('nav.usage'))"><HiIcon name="usage" /><span class="lbl">{{ t('nav.usage') }}</span></RouterLink>
-        <div class="grp">{{ t('nav.setup') }}</div>
-        <RouterLink class="nav-a" active-class="on" :to="{ name: 'integrations' }" v-bind="tip(t('nav.integrations'))"><HiIcon name="plug" /><span class="lbl">{{ t('nav.integrations') }}</span></RouterLink>
-        <RouterLink class="nav-a" active-class="on" :to="{ name: 'repos' }" v-bind="tip(t('nav.repos'))"><HiIcon name="repos" /><span class="lbl">{{ t('nav.repos') }}</span></RouterLink>
-        <RouterLink class="nav-a" active-class="on" :to="{ name: 'rules' }" v-bind="tip(t('nav.rules'))">
-          <HiIcon name="rules" /><span class="lbl">{{ t('nav.rules') }}</span><span v-if="ruleQuestions" class="cnt">{{ ruleQuestions }}</span>
-        </RouterLink>
-        <button
-          type="button"
-          class="nav-a"
-          :class="{ on: inSettings }"
-          :aria-expanded="prefs.thin ? !!fly : settingsOpen"
-          :aria-label="prefs.thin ? t('nav.settings') : undefined"
-          :data-flyout="prefs.thin ? 'settings' : undefined"
-          @click="toggleSettings"
-          @keydown.right.prevent="enterFly"
-          @keydown.down="fly && ($event.preventDefault(), enterFly())"
-        >
-          <HiIcon name="settings" /><span class="lbl">{{ t('nav.settings') }}</span>
-          <svg class="nav-chev" :class="{ open: settingsOpen }" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 7l5 5-5 5" /></svg>
-        </button>
-        <!-- Always rendered, so opening and closing can animate; closed, it is inert (out of the tab order). -->
-        <div class="nav-sub" :class="{ open: settingsOpen }" role="group" :aria-label="t('nav.settings')" :inert="!settingsOpen">
-          <div class="nav-sub-in">
-            <RouterLink
-              v-for="x in visibleSections(catalog.claudeOff.value)"
-              :key="x.key"
-              class="nav-a nav-sub-a"
-              :class="{ on: settingsAt === x.key }"
-              :to="{ name: 'settings', params: { section: x.key } }"
-              :aria-current="settingsAt === x.key ? 'page' : undefined"
-            >
-              <HiIcon :name="sectionIcon(x, catalog.claudeOff.value)" /><span class="lbl">{{ t(sectionLabel(x, catalog.claudeOff.value)) }}</span>
-            </RouterLink>
+        <template v-for="m in menus" :key="m.key">
+          <button
+            type="button"
+            class="nav-a nav-menu"
+            :class="{ here: openMenu !== m.key && m.items.some((x) => x.on) }"
+            :aria-expanded="openMenu === m.key"
+            :aria-controls="`nav-${m.key}`"
+            @click="toggleMenu(m.key)"
+          >
+            <HiIcon :name="m.icon" /><span class="lbl">{{ t(`nav.${m.key}`) }}</span>
+            <span v-if="openMenu !== m.key && urgent(m)" class="cnt">{{ urgent(m) }}</span>
+            <svg class="nav-chev" :class="{ open: openMenu === m.key }" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 7l5 5-5 5" /></svg>
+          </button>
+          <!-- Always rendered, so opening and closing can animate; closed, it is inert (out of the tab order). -->
+          <div :id="`nav-${m.key}`" class="nav-grp" :class="{ open: shown(m.key) }" role="group" :aria-label="t(`nav.${m.key}`)" :inert="!shown(m.key)">
+            <div class="nav-grp-in">
+              <template v-for="x in m.items" :key="x.key">
+                <template v-if="x.kind === 'settings'">
+                  <button
+                    type="button"
+                    class="nav-a"
+                    :class="{ on: x.on }"
+                    :aria-expanded="prefs.thin ? !!fly : settingsOpen"
+                    :data-flyout="prefs.thin ? 'settings' : undefined"
+                    v-bind="tip(t(x.label))"
+                    @click="toggleSettings"
+                    @keydown.right.prevent="enterFly"
+                    @keydown.down="fly && ($event.preventDefault(), enterFly())"
+                  >
+                    <HiIcon :name="x.icon" /><span class="lbl">{{ t(x.label) }}</span>
+                    <svg class="nav-chev" :class="{ open: settingsOpen }" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 7l5 5-5 5" /></svg>
+                  </button>
+                  <div class="nav-sub" :class="{ open: settingsOpen }" role="group" :aria-label="t(x.label)" :inert="!settingsOpen">
+                    <div class="nav-sub-in">
+                      <RouterLink
+                        v-for="s in visibleSections(catalog.claudeOff.value)"
+                        :key="s.key"
+                        class="nav-a nav-sub-a"
+                        :class="{ on: settingsAt === s.key }"
+                        :to="{ name: 'settings', params: { section: s.key } }"
+                        :aria-current="settingsAt === s.key ? 'page' : undefined"
+                      >
+                        <HiIcon :name="sectionIcon(s, catalog.claudeOff.value)" /><span class="lbl">{{ t(sectionLabel(s, catalog.claudeOff.value)) }}</span>
+                      </RouterLink>
+                    </div>
+                  </div>
+                </template>
+                <button v-else-if="x.kind === 'feedback'" type="button" class="nav-a" v-bind="tip(t(x.label))" @click="feedbackOpen = true">
+                  <HiIcon :name="x.icon" /><span class="lbl">{{ t(x.label) }}</span>
+                </button>
+                <RouterLink v-else-if="x.to" class="nav-a" :class="{ on: x.on }" :to="x.to" v-bind="tip(t(x.label))">
+                  <HiIcon :name="x.icon" /><span class="lbl">{{ t(x.label) }}</span>
+                  <span v-if="x.cnt" class="cnt" :class="{ dim: x.dim }">{{ x.cnt }}</span>
+                </RouterLink>
+              </template>
+            </div>
           </div>
-        </div>
-        <div class="grp">{{ t('nav.people') }}</div>
-        <RouterLink class="nav-a" active-class="on" :to="{ name: 'workspace' }" v-bind="tip(t('nav.workspace'))"><HiIcon name="repos" /><span class="lbl">{{ t('nav.workspace') }}</span></RouterLink>
-        <RouterLink class="nav-a" active-class="on" :to="{ name: 'profile' }" v-bind="tip(t('nav.profile'))"><HiIcon name="settings" /><span class="lbl">{{ t('nav.profile') }}</span></RouterLink>
-        <button type="button" class="nav-a" v-bind="tip(t('feedback.title'))" @click="feedbackOpen = true"><HiIcon name="feedback" /><span class="lbl">{{ t('feedback.title') }}</span></button>
-        <RouterLink v-if="session.user?.isAdmin" class="nav-a" active-class="on" :to="{ name: 'adminDashboard' }" v-bind="tip(t('nav.platform'))"><HiIcon name="shield" /><span class="lbl">{{ t('nav.platform') }}</span></RouterLink>
+        </template>
       </nav>
       <div class="me">
         <button class="nav-a me-btn" v-bind="tip(`${t('common.signedInAs', { username: session.user?.username })} · ${t('auth.signOut')}`)" @click="confirmOut = true">
@@ -415,10 +440,7 @@ onBeforeUnmount(() => topObserver?.disconnect())
       class="side-fly"
       :aria-label="t('nav.settings')"
       :style="{ top: fly.top + 'px', left: fly.left + 'px' }"
-      @mouseenter="keepFly"
-      @mouseleave="closeFlySoon"
-      @focusin="keepFly"
-      @focusout="(e: FocusEvent) => !flyEl?.contains(e.relatedTarget as Node) && closeFlySoon()"
+      @focusout="(e: FocusEvent) => e.relatedTarget && !inFly(e.relatedTarget) && closeFly()"
       @keydown="flyKey"
     >
       <div class="side-fly-h">{{ t('nav.settings') }}</div>

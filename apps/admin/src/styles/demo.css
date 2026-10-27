@@ -31,6 +31,21 @@
 .nav-sub .nav-sub-a.on svg{color:var(--primary)}
 .nav-sub .nav-sub-a.on{background:var(--hover); color:var(--ink); font-weight:700}
 .thin .side .nav-sub,.thin .side .nav-chev{display:none}
+/* The sidebar's menus (AppShell): a header opening into its pages, animated like .nav-sub. */
+.nav-menu.here{color:var(--ink); font-weight:700}
+.nav-menu.here svg{color:var(--primary)}
+.nav-menu .cnt + .nav-chev{margin-left:6px}
+.nav-grp{display:grid; grid-template-rows:0fr; opacity:0; margin:0 0 0 20px; transition:grid-template-rows .28s ease, opacity .2s ease, margin .28s ease}
+.nav-grp.open{grid-template-rows:1fr; opacity:1; margin:2px 0 6px 20px}
+.nav-grp-in{display:flex; flex-direction:column; gap:3px; min-height:0; overflow:hidden; padding-left:10px; border-left:1px solid var(--line)}
+.nav-grp-in > .nav-a{min-height:38px; gap:9px; font-size:14px}
+.nav-grp-in > .nav-a svg{width:17px; height:17px}
+/* Thin, every page shows as an icon without the menus. */
+.thin .side .nav-menu{display:none}
+.thin .side .nav-grp{margin:0; transition:none}
+.thin .side .nav-grp-in{align-items:center; gap:4px; padding:0; border:0; overflow:visible}
+.thin .side .nav-grp-in > .nav-a{min-height:40px}
+.thin .side .nav-grp-in > .nav-a svg{width:19px; height:19px}
 .cnt{margin-left:auto; min-width:22px; height:22px; border-radius:11px; background:var(--primary); color:var(--on-primary); font-size:12.5px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; padding:0 6px}
 .cnt.dim{background:var(--gray-soft); color:var(--gray-ink)}
 .me{flex:none; padding:10px 14px; border-top:1px solid var(--line)}
@@ -490,6 +505,8 @@ select.cfg-in{appearance:none; -webkit-appearance:none; padding-right:34px; back
   .navscroll{flex-direction:row; overflow-x:auto; overflow-y:hidden; padding:10px}
   .side .grp,.side .brandbox,.side .me{display:none}
   .side .nav-chev{display:none}
+  .side .nav-menu{display:none}
+  .side .nav-grp,.side .nav-grp-in{display:contents}
   .side .nav-sub{display:none; margin:0}
   .side .nav-sub.open{display:flex; margin:0}
   .side .nav-sub-in{flex-direction:row; gap:4px; padding-left:8px; overflow:visible}
