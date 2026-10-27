@@ -40,12 +40,13 @@
 .nav-grp-in{display:flex; flex-direction:column; gap:3px; min-height:0; overflow:hidden; padding-left:10px; border-left:1px solid var(--line)}
 .nav-grp-in > .nav-a{min-height:38px; gap:9px; font-size:14px}
 .nav-grp-in > .nav-a svg{width:17px; height:17px}
-/* Thin, every page shows as an icon without the menus. */
-.thin .side .nav-menu{display:none}
-.thin .side .nav-grp{margin:0; transition:none}
-.thin .side .nav-grp-in{align-items:center; gap:4px; padding:0; border:0; overflow:visible}
-.thin .side .nav-grp-in > .nav-a{min-height:40px}
-.thin .side .nav-grp-in > .nav-a svg{width:19px; height:19px}
+/* Thin, only the menus show, as icons; their pages open in flyouts (.side-fly). */
+@media (min-width:901px){
+  .thin .side .nav-grp{display:none}
+  .thin .side .nav-menu{min-height:42px}
+  .thin .side .nav-menu svg{width:20px; height:20px}
+  .thin .side .nav-menu.flown{background:var(--hover); color:var(--ink)}
+}
 .cnt{margin-left:auto; min-width:22px; height:22px; border-radius:11px; background:var(--primary); color:var(--on-primary); font-size:12.5px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; padding:0 6px}
 .cnt.dim{background:var(--gray-soft); color:var(--gray-ink)}
 .me{flex:none; padding:10px 14px; border-top:1px solid var(--line)}
@@ -87,6 +88,11 @@
 .side-fly-a.on{background:var(--primary-soft); color:var(--ink); font-weight:700}
 .side-fly-a svg{flex:none; width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; color:var(--ink-3)}
 .side-fly-a.on svg{color:var(--primary)}
+.side-fly-a{width:100%; border:0; background:none; font:inherit; font-size:14px; text-align:left; cursor:pointer}
+.side-fly-a.flown{background:var(--hover)}
+.side-fly-a .cnt{margin-left:auto; padding-left:6px}
+.side-fly-chev{margin-left:auto}
+.side-fly a.side-fly-a .cnt + .side-fly-chev{margin-left:6px}
 .fly-enter-active,.fly-leave-active{transition:opacity .16s ease, transform .16s ease}
 .fly-enter-from,.fly-leave-to{opacity:0; transform:translateX(-6px)}
 @keyframes tip-in{from{opacity:0; transform:translate(-4px,-50%)}}

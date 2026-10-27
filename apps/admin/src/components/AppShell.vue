@@ -22,7 +22,7 @@ import ConfirmDialog from './ui/ConfirmDialog.vue'
 import FeedbackDialog from './account/FeedbackDialog.vue'
 import GlobalSearch, { type SearchPage } from './GlobalSearch.vue'
 import HiIcon from './ui/HiIcon.vue'
-import { SETTINGS_SECTIONS, sectionIcon, sectionLabel, settingsSection, visibleSections } from './settings/sections'
+import { sectionIcon, sectionLabel, settingsSection, visibleSections } from './settings/sections'
 
 // The demo's layout: sidebar navigation with counts and the plan pill,
 // top bar with search, language, theme and tracker sync.
@@ -101,13 +101,7 @@ const isTicketList = computed(() => route.name === 'tickets')
 const inSettings = computed(() => route.name === 'settings')
 const settingsAt = computed(() => (inSettings.value ? settingsSection(route.params.section) : ''))
 const settingsOpen = ref(inSettings.value)
-function toggleSettings(e: MouseEvent) {
-  // The thin sidebar shows the sections in a flyout instead (narrow screens excepted).
-  if (prefs.thin && !narrow.value) {
-    if (fly.value) closeFly()
-    else openFly(e.currentTarget as HTMLElement)
-    return
-  }
+function toggleSettings() {
   settingsOpen.value = !settingsOpen.value
 }
 
@@ -193,7 +187,7 @@ const tipBox = ref<{ text: string; top: number; left: number } | null>(null)
 function showTip(e: Event) {
   const thin = prefs.thin && !narrow.value
   const el = thin ? (e.target as HTMLElement).closest<HTMLElement>('[data-tip]') : null
-  if (!el || (fly.value && el.dataset.flyout)) {
+  if (!el) {
     tipBox.value = null
     return
   }
@@ -201,47 +195,95 @@ function showTip(e: Event) {
   tipBox.value = { text: el.dataset.tip ?? '', top: r.top + r.height / 2, left: r.right + 10 }
 }
 
-// In the thin sidebar, a click on Settings opens its sections in a flyout
-// to its right. Fixed like the tooltip, so the sidebar's overflow does not
-// clip it; it stays open until a click or focus lands elsewhere.
-const fly = ref<{ top: number; left: number } | null>(null)
-const FLY_HEIGHT = 44 + SETTINGS_SECTIONS.length * 41 // title and rows (38px + 3px gap), to keep it on screen
-function openFly(el: HTMLElement) {
+// The thin sidebar shows only the menus. Hovering one (or Enter, or the
+// right arrow) opens its pages in a flyout to its right, and Settings there
+// opens its sections in a second one. Both are fixed like the tooltip, so
+// the sidebar's overflow does not clip them; they close a moment after the
+// pointer leaves them, on a click or focus elsewhere, or on Escape.
+const thinFly = computed(() => prefs.thin && !narrow.value)
+type FlyAt = { top: number; left: number }
+const fly = ref<(FlyAt & { menu: string }) | null>(null)
+const fly2 = ref<FlyAt | null>(null)
+const flyMenu = computed(() => menus.value.find((m) => m.key === fly.value?.menu))
+const flyEl = ref<HTMLElement | null>(null)
+const fly2El = ref<HTMLElement | null>(null)
+let flyFrom: HTMLElement | null = null
+let fly2From: HTMLElement | null = null
+const ROW = 41 // a row of 38px and its 3px gap
+function place(el: HTMLElement, rows: number): FlyAt {
   const r = el.getBoundingClientRect()
-  fly.value = { top: Math.max(8, Math.min(r.top - 6, window.innerHeight - FLY_HEIGHT - 8)), left: r.right + 10 }
+  return { top: Math.max(8, Math.min(r.top - 6, window.innerHeight - 44 - rows * ROW - 8)), left: r.right + 10 }
+}
+let closeTimer: ReturnType<typeof setTimeout> | undefined
+const holdFly = () => clearTimeout(closeTimer)
+function leaveFly() {
+  clearTimeout(closeTimer)
+  closeTimer = setTimeout(closeFly, 250)
 }
 function closeFly() {
+  clearTimeout(closeTimer)
   fly.value = null
+  fly2.value = null
 }
-// Settings itself toggles the flyout, so a click or focus there is not "elsewhere".
-const inFly = (n: EventTarget | null) => !!n && (!!flyEl.value?.contains(n as Node) || !!(n as Element).closest?.('[data-flyout]'))
-const flyOutside = (e: PointerEvent) => !inFly(e.target) && closeFly()
-watch(fly, (v) => (v ? document.addEventListener('pointerdown', flyOutside) : document.removeEventListener('pointerdown', flyOutside)))
-// The flyout sits outside the sidebar in the page, so Tab does not reach
-// it: the arrow keys move into it, through it and back to Settings.
-const flyEl = ref<HTMLElement | null>(null)
-async function enterFly() {
-  if (!prefs.thin) return
-  if (!fly.value) {
-    const el = document.querySelector<HTMLElement>('[data-flyout="settings"]')
-    if (!el) return
-    openFly(el)
-  }
+function openMenuFly(m: NavMenu, el: HTMLElement) {
+  holdFly()
+  tipBox.value = null
+  if (fly.value?.menu === m.key) return
+  flyFrom = el
+  fly2.value = null
+  fly.value = { menu: m.key, ...place(el, m.items.length) }
+}
+function openSettingsFly(el: HTMLElement) {
+  holdFly()
+  fly2From = el
+  fly2.value = place(el, visibleSections(catalog.claudeOff.value).length)
+}
+function clickMenu(m: NavMenu, e: MouseEvent) {
+  if (!thinFly.value) return toggleMenu(m.key)
+  if (fly.value?.menu === m.key) closeFly()
+  else openMenuFly(m, e.currentTarget as HTMLElement)
+}
+async function focusFirst(panel: typeof flyEl) {
   await nextTick()
-  flyEl.value?.querySelector<HTMLElement>('.side-fly-a')?.focus()
+  panel.value?.querySelector<HTMLElement>('.side-fly-a')?.focus()
 }
-function flyKey(e: KeyboardEvent) {
-  const links = [...(flyEl.value?.querySelectorAll<HTMLElement>('.side-fly-a') ?? [])]
+function enterMenuFly(m: NavMenu, e: KeyboardEvent) {
+  if (!thinFly.value) return
+  e.preventDefault()
+  openMenuFly(m, e.currentTarget as HTMLElement)
+  void focusFirst(flyEl)
+}
+function enterSettingsFly(e: Event) {
+  openSettingsFly(e.currentTarget as HTMLElement)
+  void focusFirst(fly2El)
+}
+// The flyouts sit outside the sidebar, so Tab does not reach them: the
+// arrow keys move through one, and left or Escape go back a level.
+function flyKey(e: KeyboardEvent, second: boolean) {
+  const panel = second ? fly2El.value : flyEl.value
+  const links = [...(panel?.querySelectorAll<HTMLElement>('.side-fly-a') ?? [])]
   const i = links.indexOf(document.activeElement as HTMLElement)
   if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
     e.preventDefault()
     links[(i + (e.key === 'ArrowDown' ? 1 : -1) + links.length) % links.length]?.focus()
   } else if (e.key === 'Escape' || e.key === 'ArrowLeft') {
     e.preventDefault()
-    closeFly()
-    document.querySelector<HTMLElement>('[data-flyout="settings"]')?.focus()
+    e.stopPropagation()
+    if (second) {
+      fly2.value = null
+      fly2From?.focus()
+    } else {
+      closeFly()
+      flyFrom?.focus()
+    }
   }
 }
+const inFly = (n: EventTarget | null) =>
+  !!n && (!!flyEl.value?.contains(n as Node) || !!fly2El.value?.contains(n as Node) || !!(n as Element).closest?.('.nav-menu'))
+const flyOutside = (e: PointerEvent) => !inFly(e.target) && closeFly()
+watch(fly, (v) => (v ? document.addEventListener('pointerdown', flyOutside) : document.removeEventListener('pointerdown', flyOutside)))
+watch(thinFly, (v) => !v && closeFly())
+watch(() => route.fullPath, closeFly)
 
 const initials = computed(() => (session.user?.username ?? '?').slice(0, 2).toUpperCase())
 // The person's free credits from an Admin, under their name; shown only
@@ -320,13 +362,18 @@ onBeforeUnmount(() => {
           <button
             type="button"
             class="nav-a nav-menu"
-            :class="{ here: openMenu !== m.key && m.items.some((x) => x.on) }"
-            :aria-expanded="openMenu === m.key"
-            :aria-controls="`nav-${m.key}`"
-            @click="toggleMenu(m.key)"
+            :class="{ here: (thinFly || openMenu !== m.key) && m.items.some((x) => x.on), flown: fly?.menu === m.key }"
+            :aria-expanded="thinFly ? fly?.menu === m.key : openMenu === m.key"
+            :aria-controls="thinFly ? undefined : `nav-${m.key}`"
+            :aria-haspopup="thinFly ? 'menu' : undefined"
+            :aria-label="thinFly ? t(`nav.${m.key}`) : undefined"
+            @click="clickMenu(m, $event)"
+            @mouseenter="thinFly && openMenuFly(m, $event.currentTarget as HTMLElement)"
+            @mouseleave="thinFly && leaveFly()"
+            @keydown.right="enterMenuFly(m, $event)"
           >
             <HiIcon :name="m.icon" /><span class="lbl">{{ t(`nav.${m.key}`) }}</span>
-            <span v-if="openMenu !== m.key && urgent(m)" class="cnt">{{ urgent(m) }}</span>
+            <span v-if="(thinFly || openMenu !== m.key) && urgent(m)" class="cnt">{{ urgent(m) }}</span>
             <svg class="nav-chev" :class="{ open: openMenu === m.key }" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 7l5 5-5 5" /></svg>
           </button>
           <!-- Always rendered, so opening and closing can animate; closed, it is inert (out of the tab order). -->
@@ -338,12 +385,9 @@ onBeforeUnmount(() => {
                     type="button"
                     class="nav-a"
                     :class="{ on: x.on }"
-                    :aria-expanded="prefs.thin ? !!fly : settingsOpen"
-                    :data-flyout="prefs.thin ? 'settings' : undefined"
+                    :aria-expanded="settingsOpen"
                     v-bind="tip(t(x.label))"
                     @click="toggleSettings"
-                    @keydown.right.prevent="enterFly"
-                    @keydown.down="fly && ($event.preventDefault(), enterFly())"
                   >
                     <HiIcon :name="x.icon" /><span class="lbl">{{ t(x.label) }}</span>
                     <svg class="nav-chev" :class="{ open: settingsOpen }" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 7l5 5-5 5" /></svg>
@@ -422,13 +466,53 @@ onBeforeUnmount(() => {
   </div>
   <Transition name="fly">
     <nav
-      v-if="fly && prefs.thin"
+      v-if="fly && flyMenu && thinFly"
       ref="flyEl"
       class="side-fly"
-      :aria-label="t('nav.settings')"
+      :aria-label="t(`nav.${flyMenu.key}`)"
       :style="{ top: fly.top + 'px', left: fly.left + 'px' }"
+      @mouseenter="holdFly"
+      @mouseleave="leaveFly"
       @focusout="(e: FocusEvent) => e.relatedTarget && !inFly(e.relatedTarget) && closeFly()"
-      @keydown="flyKey"
+      @keydown="flyKey($event, false)"
+    >
+      <div class="side-fly-h">{{ t(`nav.${flyMenu.key}`) }}</div>
+      <template v-for="x in flyMenu.items" :key="x.key">
+        <button
+          v-if="x.kind === 'settings'"
+          type="button"
+          class="side-fly-a"
+          :class="{ on: x.on, flown: !!fly2 }"
+          aria-haspopup="menu"
+          :aria-expanded="!!fly2"
+          @mouseenter="openSettingsFly($event.currentTarget as HTMLElement)"
+          @click="fly2 ? (fly2 = null) : enterSettingsFly($event)"
+          @keydown.right.prevent="enterSettingsFly($event)"
+        >
+          <HiIcon :name="x.icon" />{{ t(x.label) }}
+          <svg class="side-fly-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 7l5 5-5 5" /></svg>
+        </button>
+        <button v-else-if="x.kind === 'feedback'" type="button" class="side-fly-a" @mouseenter="fly2 = null" @click="closeFly(); feedbackOpen = true">
+          <HiIcon :name="x.icon" />{{ t(x.label) }}
+        </button>
+        <RouterLink v-else-if="x.to" class="side-fly-a" :class="{ on: x.on }" :to="x.to" :aria-current="x.on ? 'page' : undefined" @mouseenter="fly2 = null" @click="closeFly">
+          <HiIcon :name="x.icon" />{{ t(x.label) }}
+          <span v-if="x.cnt" class="cnt" :class="{ dim: x.dim }">{{ x.cnt }}</span>
+        </RouterLink>
+      </template>
+    </nav>
+  </Transition>
+  <Transition name="fly">
+    <nav
+      v-if="fly && fly2 && thinFly"
+      ref="fly2El"
+      class="side-fly"
+      :aria-label="t('nav.settings')"
+      :style="{ top: fly2.top + 'px', left: fly2.left + 'px' }"
+      @mouseenter="holdFly"
+      @mouseleave="leaveFly"
+      @focusout="(e: FocusEvent) => e.relatedTarget && !inFly(e.relatedTarget) && closeFly()"
+      @keydown="flyKey($event, true)"
     >
       <div class="side-fly-h">{{ t('nav.settings') }}</div>
       <RouterLink
