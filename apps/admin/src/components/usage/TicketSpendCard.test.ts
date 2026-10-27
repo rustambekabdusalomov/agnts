@@ -61,7 +61,7 @@ describe('TicketSpendCard', () => {
 
   it('says so when the period has no runs', async () => {
     const { w } = await setup({ days: 30, total: sp(0, 0, 0), tickets: [] })
-    expect(w.text()).toContain('No Claude runs recorded in this period.')
+    expect(w.text()).toContain('No Muse runs recorded in this period.')
     expect(w.find('table').exists()).toBe(false)
   })
 })

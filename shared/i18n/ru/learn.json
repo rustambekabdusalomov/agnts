@@ -31,7 +31,7 @@
     "score": "Верно: {right} из {total}",
     "retry": "Пройти ещё раз",
     "readingTitle": "Что почитать",
-    "readingNote": "Ссылки предложил Claude. Проверьте их, прежде чем на них полагаться.",
+    "readingNote": "Ссылки предложил {agent}. Проверьте их, прежде чем на них полагаться.",
     "category_pattern": "Паттерн",
     "category_architecture": "Архитектура",
     "category_algorithm": "Алгоритм",

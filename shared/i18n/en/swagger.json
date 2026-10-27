@@ -55,7 +55,7 @@
     "created": "{key} created",
     "needSpec": "Read a spec first.",
     "needToken": "Enter the token.",
-    "claudeOnly": "Swagger tests always run on Claude (Sonnet), whatever model the workspace codes with.",
+    "claudeOnly": "Swagger tests always run on {agent}'s light model, whatever model the workspace codes with.",
     "tab": "API results",
     "requestsTab": "Requests",
     "noRun": "No results yet: the test is running or has not run.",

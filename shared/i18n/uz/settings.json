@@ -83,7 +83,7 @@
     "progressHelp": "Tahlil tayyor, kod yozildi. Faqat telefonga, ovozsiz, har bir tiket uchun bitta bildirishnoma",
     "lessons": "agnts oʻrganish uchun yangi narsa topganda",
     "reviewDone": "agnts kod sharhi tugaganda",
-    "secretsHelp": "Jira, GitHub va Claude tokenlari serveringizda shifrlangan holda saqlanadi. Bu sahifa ularni hech qachon koʻrsatmaydi.",
+    "secretsHelp": "Jira, GitHub va {agent} tokenlari serveringizda shifrlangan holda saqlanadi. Bu sahifa ularni hech qachon koʻrsatmaydi.",
     "saved": "Sozlamalar saqlandi",
     "parallelSlots": "Bir vaqtda {n} ta ish",
     "parallelSlotsHelp": "Ish maydoni slotlari. «Ish maydoni → To‘lov» bo‘limida o‘zgartiriladi.",

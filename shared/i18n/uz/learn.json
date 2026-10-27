@@ -31,7 +31,7 @@
     "score": "{total} tadan {right} tasi toʻgʻri",
     "retry": "Qaytadan",
     "readingTitle": "Qoʻshimcha oʻqish",
-    "readingNote": "Bu havolalarni Claude taklif qilgan. Ularga tayanishdan oldin tekshiring.",
+    "readingNote": "Bu havolalarni {agent} taklif qilgan. Ularga tayanishdan oldin tekshiring.",
     "category_pattern": "Pattern",
     "category_architecture": "Arxitektura",
     "category_algorithm": "Algoritm",

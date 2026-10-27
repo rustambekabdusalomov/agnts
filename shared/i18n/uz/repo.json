@@ -66,7 +66,7 @@
     "commit": "Commit",
     "open": "Ochish",
     "noEnvironments": "Git xostingida deploy muhitlari yoʻq.",
-    "deployHelp": "agnts tiket tekshiruvingizga kelishidan oldin tekshiruvlarni kutadi. Deploy har doim sizning qaroringiz va Claude chatidan mavjud emas.",
+    "deployHelp": "agnts tiket tekshiruvingizga kelishidan oldin tekshiruvlarni kutadi. Deploy har doim sizning qaroringiz va {agent} chatidan mavjud emas.",
     "deployBranch": "{branch} ni joylash",
     "deploy": "Joylash",
     "deployConfirm": "{sha} uchun {stage} ishga tushirilsinmi?",

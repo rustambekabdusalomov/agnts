@@ -59,7 +59,7 @@
     "statsRated": "Baholangan javoblar",
     "ratedEmpty": "Hali baholangan javoblar yoʻq.",
     "ratedShared": "Promptlarni sinash uchun saqlangan",
-    "statsParts": "Konteyner {start} · maʼlumot {snapshot} · Claude {claude}",
+    "statsParts": "Konteyner {start} · maʼlumot {snapshot} · {agent} {claude}",
     "statsWarm": "{total} tadan {n} tasi ishlab turgan konteynerda",
     "statsSeeRated": "Baholangan javoblar",
     "deleteTitle": "Bu suhbat oʻchirilsinmi?",

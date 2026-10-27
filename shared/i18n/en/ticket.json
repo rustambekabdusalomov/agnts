@@ -80,7 +80,7 @@
     "noChecks": "No checks configured",
     "checksSkipped": "Skipped for this ticket",
     "skipChecks": "Skip checks: go to review on the code alone",
-    "skipChecksHint": "For checks the run container can't run, such as a private dependency it can't fetch. Claude won't run the build, lint or tests either, so you review the code yourself. It stays on for this ticket until you untick it.",
+    "skipChecksHint": "For checks the run container can't run, such as a private dependency it can't fetch. {agent} won't run the build, lint or tests either, so you review the code yourself. It stays on for this ticket until you untick it.",
     "stopRun": "Stop run",
     "stopConfirm": "Stop the run on {key}? You can retry it later.",
     "reviewTitle": "Review the changes",

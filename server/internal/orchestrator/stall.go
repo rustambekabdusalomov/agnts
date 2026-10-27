@@ -149,7 +149,7 @@ func (o *Orchestrator) onStall(ctx context.Context, s domain.Settings, ws Worksp
 	noteTrouble(run, "the run looked stuck: "+st.Detail)
 	msg := "looks stuck: " + st.Detail
 	if st.Acted {
-		msg += "; agnts asked Claude to step back"
+		msg += "; agnts asked " + domain.ToolName() + " to step back"
 	}
 	o.noteTranscript(run.ID, "stall: "+st.Detail)
 	o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventStall, Level: domain.LevelWarn,

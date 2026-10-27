@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../api/client'
 import { FILTERS, TERMINAL, BOARD_GROUPS, ticketNo } from '../api/types'
 import PageHeader from '../components/PageHeader.vue'
+import PageNav from '../components/ui/PageNav.vue'
 import StateBadge from '../components/StateBadge.vue'
 import WaitBadge from '../components/WaitBadge.vue'
 import KindBadge from '../components/ticket/KindBadge.vue'
@@ -89,6 +90,18 @@ const rows = computed(() => {
       (!g || String(x.group?.id ?? '') === g),
   )
 })
+// The table shows a page of rows (?page=, from 1); the board shows them all.
+// Changing the list (tab, filters, search) goes back to the first page.
+const pageSize = ref(25)
+const pageCount = computed(() => Math.max(1, Math.ceil(rows.value.length / pageSize.value)))
+const page = computed<number>({
+  get: () => Math.min(pageCount.value, Math.max(1, Number(route.query.page) || 1)),
+  set: (v) => void router.replace({ query: { ...route.query, page: v > 1 ? String(v) : undefined } }),
+})
+const pageRows = computed(() => rows.value.slice((page.value - 1) * pageSize.value, page.value * pageSize.value))
+watch([() => filter.value.id, repo, group, () => ui.search], () => {
+  if (route.query.page) page.value = 1
+})
 // All tickets: a sync button per connected tracker (Jira, Plane), for
 // those who may change the workspace.
 const integrations = useIntegrations()
@@ -166,38 +179,41 @@ const columns = computed<BoardColumn[]>(() =>
     <p v-if="tickets.isPending.value" class="hint">{{ t('common.loading') }}</p>
     <p v-else-if="tickets.isError.value" class="ferr">{{ t('common.error') }}</p>
     <TicketBoard v-else-if="rows.length && view === 'board'" :items="rows" :columns="columns" show-source @open="open" />
-    <div v-else-if="rows.length" class="tw">
-      <table class="tbl">
-        <thead>
-          <tr>
-            <th>{{ t('tickets.colTicket') }}</th>
-            <th>{{ t('tickets.colSource') }}</th>
-            <th>{{ t('tickets.colRepo') }}</th>
-            <th>{{ t('tickets.colStatus') }}</th>
-            <th class="num">{{ t('spend.colTokens') }}</th>
-            <th>{{ t('tickets.colUpdated') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="tk in rows" :key="tk.key" tabindex="0" @click="open(tk.key)" @keydown.enter="open(tk.key)">
-            <td><div class="tkey">{{ ticketNo(tk) }} <KindBadge v-if="tk.kind !== 'code'" :ticket="tk" /> <span v-if="tk.openSuggestions" class="badge b-info">{{ t('followUps.openBadge', { count: tk.openSuggestions }) }}</span> <span v-if="tk.blockedBy?.length" class="badge b-warn" :title="tk.blockedBy.map((b) => b.key).join(', ')">{{ t('relations.waitingBadge') }}</span></div><div class="ttitle">{{ tk.title }}</div></td>
-            <td>
-              <span v-if="tk.source === 'local'" class="src local">{{ t('tickets.sourceTask') }}</span>
-              <span v-else class="src">{{ tk.source === 'plane' ? t('tickets.sourcePlane') : tk.source === 'git' ? t('tickets.sourceGit') : tk.source === 'ci' ? t('tickets.sourceCi') : t('tickets.sourceJira') }}</span>
-            </td>
-            <td class="muted"><RepoChip :ticket="tk" empty="—" /></td>
-            <td>
-              <StateBadge :state="tk.state" :kind="tk.kind" /> <WaitBadge :ticket="tk" />
-              <span v-if="tk.revision > 0 && !TERMINAL.includes(tk.state)" class="hint"> {{ t('tickets.rev', { n: tk.revision }) }}</span>
-            </td>
-            <td class="muted num" :title="tk.spend ? t('spend.tokens', { n: ioTokens(tk.spend).toLocaleString(locale) }) : undefined">
-              {{ tk.spend ? fmtTokens(ioTokens(tk.spend), locale) : '—' }}
-            </td>
-            <td class="muted">{{ ago(tk.updatedAt, locale) }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <template v-else-if="rows.length">
+      <div class="tw">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>{{ t('tickets.colTicket') }}</th>
+              <th>{{ t('tickets.colSource') }}</th>
+              <th>{{ t('tickets.colRepo') }}</th>
+              <th>{{ t('tickets.colStatus') }}</th>
+              <th class="num">{{ t('spend.colTokens') }}</th>
+              <th>{{ t('tickets.colUpdated') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="tk in pageRows" :key="tk.key" tabindex="0" @click="open(tk.key)" @keydown.enter="open(tk.key)">
+              <td><div class="tkey">{{ ticketNo(tk) }} <KindBadge v-if="tk.kind !== 'code'" :ticket="tk" /> <span v-if="tk.openSuggestions" class="badge b-info">{{ t('followUps.openBadge', { count: tk.openSuggestions }) }}</span> <span v-if="tk.blockedBy?.length" class="badge b-warn" :title="tk.blockedBy.map((b) => b.key).join(', ')">{{ t('relations.waitingBadge') }}</span></div><div class="ttitle">{{ tk.title }}</div></td>
+              <td>
+                <span v-if="tk.source === 'local'" class="src local">{{ t('tickets.sourceTask') }}</span>
+                <span v-else class="src">{{ tk.source === 'plane' ? t('tickets.sourcePlane') : tk.source === 'git' ? t('tickets.sourceGit') : tk.source === 'ci' ? t('tickets.sourceCi') : t('tickets.sourceJira') }}</span>
+              </td>
+              <td class="muted"><RepoChip :ticket="tk" empty="—" /></td>
+              <td>
+                <StateBadge :state="tk.state" :kind="tk.kind" /> <WaitBadge :ticket="tk" />
+                <span v-if="tk.revision > 0 && !TERMINAL.includes(tk.state)" class="hint"> {{ t('tickets.rev', { n: tk.revision }) }}</span>
+              </td>
+              <td class="muted num" :title="tk.spend ? t('spend.tokens', { n: ioTokens(tk.spend).toLocaleString(locale) }) : undefined">
+                {{ tk.spend ? fmtTokens(ioTokens(tk.spend), locale) : '—' }}
+              </td>
+              <td class="muted">{{ ago(tk.updatedAt, locale) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <PageNav v-model="page" v-model:size="pageSize" :total="rows.length" />
+    </template>
     <p v-else class="empty">
       {{ ui.search || repo || group ? t('tickets.noMatch') : filter.id === 'needs' ? t('tickets.emptyNeeds') : t('tickets.emptyOther') }}
     </p>

@@ -179,10 +179,10 @@ func (o *Orchestrator) collectGuard(ctx context.Context, ws Workspace, t domain.
 		parts = append(parts, fmt.Sprintf("refused %d %s (%s)", blocks, plural(blocks, "action", "actions"), countList(sum.Blocks)))
 	}
 	if fed > 0 {
-		parts = append(parts, fmt.Sprintf("sent %d check %s back while Claude worked (%s)", fed, plural(fed, "result", "results"), countList(sum.Feedback)))
+		parts = append(parts, fmt.Sprintf("sent %d check %s back while %s worked (%s)", fed, plural(fed, "result", "results"), domain.ToolName(), countList(sum.Feedback)))
 	}
 	if sum.Warnings > 0 {
-		parts = append(parts, fmt.Sprintf("reminded Claude of team rules %d %s", sum.Warnings, plural(sum.Warnings, "time", "times")))
+		parts = append(parts, fmt.Sprintf("reminded %s of team rules %d %s", domain.ToolName(), sum.Warnings, plural(sum.Warnings, "time", "times")))
 	}
 	level := domain.LevelInfo
 	if blocks > 0 {

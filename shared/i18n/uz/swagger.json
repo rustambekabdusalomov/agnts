@@ -55,7 +55,7 @@
     "created": "{key} yaratildi",
     "needSpec": "Avval spetsifikatsiyani oʻqing.",
     "needToken": "Tokenni kiriting.",
-    "claudeOnly": "Swagger testlari ish maydoni qaysi model bilan kod yozishidan qatʼi nazar, doim Claude'da (Sonnet) bajariladi.",
+    "claudeOnly": "Swagger testlari ish maydoni qaysi model bilan kod yozishidan qatʼi nazar, doim {agent}'ning yengil modelida bajariladi.",
     "tab": "API natijalari",
     "requestsTab": "Soʻrovlar",
     "noRun": "Hali natija yoʻq: test bajarilmoqda yoki hali ishga tushmagan.",

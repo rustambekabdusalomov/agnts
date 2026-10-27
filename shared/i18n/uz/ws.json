@@ -30,7 +30,7 @@
     "deleteBody": "Tasdiqlash uchun manzilni ({slug}) kiriting. Hamma kirish huquqini yo‘qotadi.",
     "deleted": "Ish maydoni o‘chirildi",
     "members": "A’zolar",
-    "membersSub": "Ish maydonidagi har bir a’zo uning tiketlarini ko‘radi, ularni yaratadi, javob beradi, tekshiradi va qayta ishga tushiradi. Egasi bundan tashqari sozlamalar, integratsiyalar, Claude, a’zolar va to‘lovni boshqaradi.",
+    "membersSub": "Ish maydonidagi har bir a’zo uning tiketlarini ko‘radi, ularni yaratadi, javob beradi, tekshiradi va qayta ishga tushiradi. Egasi bundan tashqari sozlamalar, integratsiyalar, {agent}, a’zolar va to‘lovni boshqaradi.",
     "you": "siz",
     "remove": "Chiqarish",
     "removeTitle": "{name} chiqarilsinmi?",

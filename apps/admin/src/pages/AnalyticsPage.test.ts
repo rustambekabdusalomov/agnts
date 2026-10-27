@@ -99,7 +99,7 @@ describe('AnalyticsPage', () => {
     const text = w.text()
     expect(text).toContain('75%') // 3 of 4 answered, and 3 of 4 helpful
     expect(text).toContain('12s')
-    expect(text).toContain('Container 0.9s · workspace 0.3s · Claude 11s')
+    expect(text).toContain('Container 0.9s · workspace 0.3s · Muse 11s')
     expect(text).toContain('2 of 3 reused a warm container')
     expect(text).toContain('Why is CI red?')
     expect(text).toContain('“it was the cache”')

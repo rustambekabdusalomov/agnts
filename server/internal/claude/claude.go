@@ -108,12 +108,7 @@ func muse() bool { return domain.PrimaryProvider() == domain.ProviderMuse }
 func isMuseKind(kind string) bool { return kind == postgres.MuseAPIKey || kind == postgres.MuseLogin }
 
 // toolName names the primary tool in messages.
-func toolName() string {
-	if muse() {
-		return "Muse"
-	}
-	return "Claude"
-}
+func toolName() string { return domain.ToolName() }
 
 // SubscriptionsAllowed reports whether subscription tokens are accepted.
 func (s *Service) SubscriptionsAllowed() bool { return s.cfg.Subscriptions }

@@ -216,7 +216,7 @@ func (o *Orchestrator) review(ctx context.Context, s domain.Settings, t domain.T
 			// waits for it to start reviewing the change themselves.
 			bg := context.WithoutCancel(ctx)
 			o.setReviewState(bg, t, domain.ReviewPending)
-			o.announceQuiet(bg, t.Key, run, "agnts's code review waits for the Claude limit")
+			o.announceQuiet(bg, t.Key, run, "agnts's code review waits for the "+domain.ToolName()+" limit")
 		}
 		return err
 	}

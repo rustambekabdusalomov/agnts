@@ -1,5 +1,10 @@
 {
   "common": {
+    "pagePrev": "Oldingi sahifa",
+    "pageNext": "Keyingi sahifa",
+    "pageRange": "{n} tadan {from}–{to}",
+    "perPage": "Sahifada",
+    "pager": "Sahifalar",
     "loading": "Yuklanmoqda…",
     "error": "Nimadir xato ketdi. Qayta urining.",
     "signedInAs": "{username} sifatida kirdingiz",

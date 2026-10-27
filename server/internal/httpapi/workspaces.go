@@ -552,7 +552,7 @@ func (s *Server) UpdateWorkspaceClaude(w http.ResponseWriter, r *http.Request) {
 		s.writeInternal(w, r, err)
 		return
 	}
-	s.workspaceChanged(r.Context(), wsp.ID, "Claude settings changed: mode "+string(wsp.ClaudeMode))
+	s.workspaceChanged(r.Context(), wsp.ID, domain.ToolName()+" settings changed: mode "+string(wsp.ClaudeMode))
 	out, err := s.workspaceClaude(r.Context(), wsp)
 	if err != nil {
 		s.writeInternal(w, r, err)
@@ -585,7 +585,7 @@ func (s *Server) SetWorkspaceClaudeConnection(w http.ResponseWriter, r *http.Req
 		s.claudeError(w, r, err)
 		return
 	}
-	s.workspaceChanged(r.Context(), m.w.ID, "the workspace's Claude account was connected")
+	s.workspaceChanged(r.Context(), m.w.ID, "the workspace's "+domain.ToolName()+" account was connected")
 	out, err := s.workspaceClaude(r.Context(), m.w)
 	if err != nil {
 		s.writeInternal(w, r, err)
@@ -604,7 +604,7 @@ func (s *Server) DeleteWorkspaceClaudeConnection(w http.ResponseWriter, r *http.
 		s.writeInternal(w, r, err)
 		return
 	}
-	s.workspaceChanged(r.Context(), m.w.ID, "the workspace's Claude account was disconnected")
+	s.workspaceChanged(r.Context(), m.w.ID, "the workspace's "+domain.ToolName()+" account was disconnected")
 	w.WriteHeader(http.StatusNoContent)
 }
 

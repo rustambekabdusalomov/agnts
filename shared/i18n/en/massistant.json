@@ -59,7 +59,7 @@
     "statsRated": "Rated answers",
     "ratedEmpty": "No rated answers yet.",
     "ratedShared": "Kept for prompt tests",
-    "statsParts": "Container {start} · workspace {snapshot} · Claude {claude}",
+    "statsParts": "Container {start} · workspace {snapshot} · {agent} {claude}",
     "statsWarm": "{n} of {total} reused a warm container",
     "statsSeeRated": "Rated answers",
     "deleteTitle": "Delete this conversation?",

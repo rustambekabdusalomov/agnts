@@ -124,7 +124,7 @@ func gitAuthHelp(repo domain.Repository, host, output string) string {
 	if user == "oauth2" {
 		b.WriteString("For a deploy token, put its username in place of oauth2. ")
 	}
-	b.WriteString("Claude can read the build environment while it works, so keep the token read-only. Then retry the ticket.")
+	b.WriteString(domain.ToolName() + " can read the build environment while it works, so keep the token read-only. Then retry the ticket.")
 	return b.String()
 }
 

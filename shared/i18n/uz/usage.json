@@ -1,7 +1,7 @@
 {
   "usage": {
     "title": "Tarif limitlari",
-    "lede": "agnts Claude obunangizda ishlaydi. Bu limitlar Claude va Claude Code'dan oʻzingiz foydalanishingiz bilan umumiy.",
+    "lede": "agnts {agent} rejangizda ishlaydi. Bu limitlar {agent}'dan oʻzingiz foydalanishingiz bilan umumiy.",
     "card": "Tarif limitlari",
     "updated": "Yangilandi {time}",
     "noReading": "Hali maʼlumot yoʻq",
@@ -23,7 +23,7 @@
     "status_allowed_warning": "Limitga yaqin",
     "status_rejected": "Limit tugagan",
     "status_unknown": "Nomaʼlum",
-    "source": "Claude Code limit hodisalaridan olinadi. Ushbu hisobdagi Claude'dan oʻzingiz foydalanishingizni ham oʻz ichiga oladi.",
+    "source": "{agent} limit hodisalaridan olinadi. Ushbu hisobdagi {agent}'dan oʻzingiz foydalanishingizni ham oʻz ichiga oladi.",
     "limitTitle": "Limitga yetilganda",
     "limitSub": "Limitga yaqin agnts qanday ishlaydi",
     "above": "Sessiyaning {pct}% dan yuqori",
@@ -35,6 +35,6 @@
     "resumeManual": "Siz davom ettirishingizni kutish",
     "idle": "Boʻsh vaqtda yangilash",
     "idleDo": "Har 30 daqiqada",
-    "help": "Raqamlar Claude Code har bir ish davomida yuboradigan limit hodisalaridan olinadi. agnts boʻsh turganda kichik yangilash ishi ularni dolzarb saqlaydi."
+    "help": "Raqamlar {agent} har bir ish davomida yuboradigan limit hodisalaridan olinadi. agnts boʻsh turganda kichik yangilash ishi ularni dolzarb saqlaydi."
   }
 }

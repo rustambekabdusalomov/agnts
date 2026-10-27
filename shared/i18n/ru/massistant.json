@@ -59,7 +59,7 @@
     "statsRated": "Оценённые ответы",
     "ratedEmpty": "Оценённых ответов пока нет.",
     "ratedShared": "Сохранён для проверки промптов",
-    "statsParts": "Контейнер {start} · данные {snapshot} · Claude {claude}",
+    "statsParts": "Контейнер {start} · данные {snapshot} · {agent} {claude}",
     "statsWarm": "{n} из {total} — в уже запущенном контейнере",
     "statsSeeRated": "Оценённые ответы",
     "deleteTitle": "Удалить этот разговор?",

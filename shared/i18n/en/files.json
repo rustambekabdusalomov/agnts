@@ -5,7 +5,7 @@
     "addPhoto": "Photo",
     "camera": "Camera",
     "addFile": "File",
-    "hint": "Pictures, PDFs, logs or text, up to 10 MB each. Claude reads them all.",
+    "hint": "Pictures, PDFs, logs or text, up to 10 MB each. {agent} reads them all.",
     "uploading": "Uploading {name}…",
     "remove": "Remove {name}",
     "open": "Open {name}",

@@ -1,6 +1,6 @@
 import { IntlMessageFormat } from 'intl-messageformat'
 import { describe, expect, it } from 'vitest'
-import { i18n, LOCALES } from '.'
+import { agentName, i18n, LOCALES } from '.'
 
 // Loosen the composer's types for tests; the app uses useI18n().
 const g = i18n.global as unknown as { t: (k: string, v?: Record<string, unknown>) => string; locale: { value: string } }
@@ -9,6 +9,14 @@ describe('i18n', () => {
   it('formats ICU placeholders', () => {
     g.locale.value = 'en'
     expect(g.t('common.signedInAs', { username: 'rustam' })).toBe('Signed in as rustam')
+  })
+
+  it('names the coding tool the server runs', () => {
+    g.locale.value = 'en'
+    expect(g.t('rules.failed', { error: 'x' })).toBe('Muse could not review this rule: x')
+    agentName.value = 'Claude'
+    expect(g.t('rules.failed', { error: 'x' })).toBe('Claude could not review this rule: x')
+    agentName.value = 'Muse'
   })
 
   it('applies Russian plural rules', () => {

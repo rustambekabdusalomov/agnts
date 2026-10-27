@@ -30,7 +30,7 @@
     "deleteBody": "Type the address ({slug}) to confirm. Everyone loses access.",
     "deleted": "Workspace deleted",
     "members": "Members",
-    "membersSub": "Everyone in the workspace sees its tickets and can create, answer, review and retry them. The owner also manages settings, integrations, Claude, members and billing.",
+    "membersSub": "Everyone in the workspace sees its tickets and can create, answer, review and retry them. The owner also manages settings, integrations, {agent}, members and billing.",
     "you": "you",
     "remove": "Remove",
     "removeTitle": "Remove {name}?",

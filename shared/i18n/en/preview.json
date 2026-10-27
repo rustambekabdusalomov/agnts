@@ -61,11 +61,11 @@
     "autoPreview": "Take screenshots of every UI change",
     "autoPreviewHelp": "While a change waits for you, agnts starts the app, opens the pages it touches and shows screenshots next to the diff. It never blocks approval.",
     "visualCheck": "Let coding runs look at the app",
-    "visualCheckHelp": "Claude may start the app and look at the pages it changed before it finishes, and fix what looks broken. Costs a few more turns.",
+    "visualCheckHelp": "{agent} may start the app and look at the pages it changed before it finishes, and fix what looks broken. Costs a few more turns.",
     "model_": "Preview model",
     "modelHelp": "Picks the pages and judges the screenshots.",
     "egress": "Allowed hosts",
-    "egressHelp": "Hosts run containers may reach besides the built-in list (Claude, git hosts, package registries), such as a staging API your app calls in a preview. .example.com allows its subdomains.",
+    "egressHelp": "Hosts run containers may reach besides the built-in list ({agent}, git hosts, package registries), such as a staging API your app calls in a preview. .example.com allows its subdomains.",
     "notify": "When preview screenshots are ready",
     "notifyPhotos": "Send phone screenshots to Telegram",
     "notifyPhotosHelp": "Up to four screenshots go with the Telegram message."

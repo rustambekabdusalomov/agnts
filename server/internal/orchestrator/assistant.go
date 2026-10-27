@@ -449,7 +449,7 @@ func assistantErrorText(err error) string {
 	case errors.As(err, &ae):
 		return ae.msg
 	case errors.Is(err, ErrPlanLimit):
-		return "Claude plan limit reached; ask again after it resets."
+		return domain.ToolName() + " plan limit reached; ask again after it resets."
 	case errors.Is(err, context.DeadlineExceeded):
 		return "The answer took too long. Ask again, or ask something narrower."
 	}
@@ -633,10 +633,10 @@ func (o *Orchestrator) assistantAccount(ctx context.Context, s domain.Settings, 
 	}
 	acct, ok, why, _ := o.accounts.Pick(ctx, w, member)
 	if !ok {
-		return ctx, &assistantError{msg: "The assistant cannot reach Claude: " + why + "."}
+		return ctx, &assistantError{msg: "The assistant cannot reach " + domain.ToolName() + ": " + why + "."}
 	}
 	if acct.Credits {
-		return ctx, &assistantError{msg: "The assistant needs a connected Claude account (Workspace settings → Claude); it does not run on credits."}
+		return ctx, &assistantError{msg: fmt.Sprintf("The assistant needs a connected %[1]s account (Workspace settings → %[1]s); it does not run on credits.", domain.ToolName())}
 	}
 	return domain.WithClaude(ctx, acct), nil
 }

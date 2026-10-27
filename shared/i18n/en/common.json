@@ -1,5 +1,10 @@
 {
   "common": {
+    "pagePrev": "Previous page",
+    "pageNext": "Next page",
+    "pageRange": "{from}–{to} of {n}",
+    "perPage": "Per page",
+    "pager": "Pages",
     "loading": "Loading…",
     "error": "Something went wrong. Try again.",
     "signedInAs": "Signed in as {username}",

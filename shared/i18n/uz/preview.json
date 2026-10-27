@@ -61,11 +61,11 @@
     "autoPreview": "Har bir interfeys oʻzgarishini suratga olish",
     "autoPreviewHelp": "Oʻzgarish sizni kutayotganda agnts ilovani ishga tushiradi, u tegadigan sahifalarni ochadi va skrinshotlarni diff yonida koʻrsatadi. Tasdiqlashni hech qachon toʻsmaydi.",
     "visualCheck": "Kod yozish jarayoniga ilovani koʻrishga ruxsat berish",
-    "visualCheckHelp": "Claude tugatishdan oldin ilovani ishga tushirib, oʻzgartirgan sahifalarini koʻrishi va buzilgan joylarni tuzatishi mumkin. Bir necha qoʻshimcha qadamga tushadi.",
+    "visualCheckHelp": "{agent} tugatishdan oldin ilovani ishga tushirib, oʻzgartirgan sahifalarini koʻrishi va buzilgan joylarni tuzatishi mumkin. Bir necha qoʻshimcha qadamga tushadi.",
     "model_": "Oldindan koʻrish modeli",
     "modelHelp": "Sahifalarni tanlaydi va skrinshotlarni baholaydi.",
     "egress": "Ruxsat etilgan hostlar",
-    "egressHelp": "Ichki roʻyxatdan (Claude, git xostinglar, paket reyestrlari) tashqari ishga tushirish konteynerlari murojaat qila oladigan hostlar, masalan oldindan koʻrishda ilova murojaat qiladigan staging API. .example.com uning subdomenlariga ruxsat beradi.",
+    "egressHelp": "Ichki roʻyxatdan ({agent}, git xostinglar, paket reyestrlari) tashqari ishga tushirish konteynerlari murojaat qila oladigan hostlar, masalan oldindan koʻrishda ilova murojaat qiladigan staging API. .example.com uning subdomenlariga ruxsat beradi.",
     "notify": "Oldindan koʻrish skrinshotlari tayyor boʻlganda",
     "notifyPhotos": "Telefon skrinshotlarini Telegramga yuborish",
     "notifyPhotosHelp": "Telegram xabariga toʻrttagacha skrinshot qoʻshiladi."

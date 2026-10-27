@@ -75,6 +75,15 @@ func EnabledProviders() []string {
 // PrimaryProvider is the default provider.
 func PrimaryProvider() string { return EnabledProviders()[0] }
 
+// ToolName names the primary tool in messages people read: "Muse" when
+// Muse Code is the default, else "Claude".
+func ToolName() string {
+	if PrimaryProvider() == ProviderMuse {
+		return "Muse"
+	}
+	return "Claude"
+}
+
 // ProviderEnabled reports whether p is offered here.
 func ProviderEnabled(p string) bool { return slices.Contains(EnabledProviders(), p) }
 

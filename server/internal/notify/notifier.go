@@ -722,7 +722,7 @@ func (n *Notifier) sendTelegram(ctx context.Context, v orchestrator.TicketView, 
 		}
 		return save(id, "notice", nil)
 	case domain.StateRateLimited:
-		_, err := b.Send(ctx, cfg.ChatID, fmt.Sprintf("%s paused at the Claude plan limit. It resumes after the limit resets.", t.Key), nil, false)
+		_, err := b.Send(ctx, cfg.ChatID, fmt.Sprintf("%s paused at the %s plan limit. It resumes after the limit resets.", t.Key, domain.ToolName()), nil, false)
 		return err
 	case domain.StateDone:
 		msg := t.Key + " is pushed."

@@ -148,7 +148,7 @@ func (o *Orchestrator) CreateRule(ctx context.Context, in RuleInput, origin doma
 		return r, err
 	}
 	r, err = o.rules.CreateRule(ctx, r, func(x domain.Rule) domain.Event {
-		return *ruleEvent(x, origin, "", fmt.Sprintf("rule %q added; Claude is reviewing it", x.Title))
+		return *ruleEvent(x, origin, "", fmt.Sprintf("rule %q added; %s is reviewing it", x.Title, domain.ToolName()))
 	})
 	if err == nil {
 		o.Wake()
@@ -181,9 +181,9 @@ func (o *Orchestrator) UpdateRule(ctx context.Context, id int64, in RuleInput, o
 		changed := x.Title != next.Title || x.Body != next.Body || !sameRepo(x.RepoID, in.RepoID) || x.Kind != kind
 		switch {
 		case changed:
-			msg = fmt.Sprintf("rule %q edited; Claude is reviewing it again", next.Title)
+			msg = fmt.Sprintf("rule %q edited; %s is reviewing it again", next.Title, domain.ToolName())
 			if x.Status == domain.RuleSuggested {
-				msg = fmt.Sprintf("suggested rule %q adopted with changes; Claude is reviewing it", next.Title)
+				msg = fmt.Sprintf("suggested rule %q adopted with changes; %s is reviewing it", next.Title, domain.ToolName())
 			}
 			x.Title, x.Body, x.RepoID, x.Kind = next.Title, next.Body, in.RepoID, kind
 			// The old answers and clarification were about the old text.
@@ -260,7 +260,7 @@ func (o *Orchestrator) AnswerRule(ctx context.Context, id int64, answers []RuleA
 		x.Requeue()
 		return nil
 	}, func(x domain.Rule) *domain.Event {
-		return ruleEvent(x, origin, "", fmt.Sprintf("answered the questions on rule %q; Claude is reviewing it again", x.Title))
+		return ruleEvent(x, origin, "", fmt.Sprintf("answered the questions on rule %q; %s is reviewing it again", x.Title, domain.ToolName()))
 	})
 	if err == nil {
 		o.Wake()
@@ -314,7 +314,7 @@ func (o *Orchestrator) ReviewRule(ctx context.Context, id int64, origin domain.O
 		return nil
 	}, func(x domain.Rule) *domain.Event {
 		if adopted {
-			return ruleEvent(x, origin, "", fmt.Sprintf("suggested rule %q adopted; Claude is reviewing it", x.Title))
+			return ruleEvent(x, origin, "", fmt.Sprintf("suggested rule %q adopted; %s is reviewing it", x.Title, domain.ToolName()))
 		}
 		return ruleEvent(x, origin, "", fmt.Sprintf("rule %q queued for another review", x.Title))
 	})

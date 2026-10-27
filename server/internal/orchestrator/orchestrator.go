@@ -776,12 +776,12 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 			// claimed once usage allows.
 			return res, &stopError{"rate limited"}
 		}
-		if err := o.transition(ctx, t, run, domain.StateRateLimited, "Claude plan limit reached; resumes after the limit resets", func(x *domain.Ticket) {
+		if err := o.transition(ctx, t, run, domain.StateRateLimited, domain.ToolName()+" plan limit reached; resumes after the limit resets", func(x *domain.Ticket) {
 			x.ResumeState = resumeStateFor(run.Stage)
 		}); err != nil {
 			return res, err
 		}
-		o.trackerComment(ctx, *t, CommentStatus, "agnts paused at the Claude plan limit and resumes after it resets.")
+		o.trackerComment(ctx, *t, CommentStatus, "agnts paused at the "+domain.ToolName()+" plan limit and resumes after it resets.")
 		return res, &stopError{"rate limited"}
 	}
 	if res.IsError && res.Subtype == "error_max_turns" && budget > 0 {
@@ -1964,7 +1964,7 @@ func prBody(ctx context.Context, store Store, t domain.Ticket) string {
 			b.WriteString("\n\n")
 		}
 	}
-	fmt.Fprintf(&b, "Ticket: %s\n\nWritten by agnts with Claude Code and reviewed before push.", t.Key)
+	fmt.Fprintf(&b, "Ticket: %s\n\nWritten by agnts with %s Code and reviewed before push.", t.Key, domain.ToolName())
 	return b.String()
 }
 

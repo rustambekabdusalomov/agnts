@@ -209,7 +209,7 @@ func (o *Orchestrator) TryEnforce(ctx context.Context, e domain.RuleEnforce, rep
 		return TryResult{}, invalid("trying rules on history is not available on this server")
 	}
 	if e.On == guard.OnBash {
-		return TryResult{Note: "command rules apply to the commands Claude runs, which agnts does not keep; they cannot be tried on past changes"}, nil
+		return TryResult{Note: "command rules apply to the commands " + domain.ToolName() + " runs, which agnts does not keep; they cannot be tried on past changes"}, nil
 	}
 	changes, err := hist.RecentChanges(ctx, repoID, historyTickets)
 	if err != nil {

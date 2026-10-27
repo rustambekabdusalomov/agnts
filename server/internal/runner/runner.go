@@ -468,7 +468,7 @@ func (w *workspace) Claude(ctx context.Context, req orchestrator.ClaudeRequest, 
 		return orchestrator.ClaudeResult{}, fmt.Errorf("claude token: %w", err)
 	}
 	if cred.Token == "" {
-		return orchestrator.ClaudeResult{}, errors.New("claude is not connected: connect an account in Workspace settings → Claude")
+		return orchestrator.ClaudeResult{}, fmt.Errorf("%[1]s is not connected: connect an account in Workspace settings → %[1]s", domain.ToolName())
 	}
 	if cred.Env == "" {
 		cred.Env = "CLAUDE_CODE_OAUTH_TOKEN"

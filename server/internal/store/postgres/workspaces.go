@@ -350,7 +350,7 @@ func (s *Workspaces) Update(ctx context.Context, ws int64, u WorkspaceUpdate) (d
 			return domain.Workspace{}, fmt.Errorf("the default member must be a member: %w", err)
 		}
 		if role == domain.RoleViewer {
-			return domain.Workspace{}, fmt.Errorf("%w: a viewer cannot run tickets on their Claude account", domain.ErrConflict)
+			return domain.Workspace{}, fmt.Errorf("%w: a viewer cannot run tickets on their %s account", domain.ErrConflict, domain.ToolName())
 		}
 	}
 	w, err := scanWorkspace(s.db.QueryRow(ctx, `UPDATE workspaces w SET

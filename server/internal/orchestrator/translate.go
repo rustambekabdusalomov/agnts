@@ -24,8 +24,8 @@ const (
 	translateTimeoutMin = 10
 )
 
-// ErrPlanLimit means Claude cannot be asked now: the plan limit is reached.
-var ErrPlanLimit = errors.New("the Claude plan limit is reached; try again after it resets")
+// ErrPlanLimit means the tool cannot be asked now: the plan limit is reached.
+var ErrPlanLimit = errors.New("the plan limit is reached; try again after it resets")
 
 // TranslatedText is a text of the ticket page and its translation.
 type TranslatedText struct {

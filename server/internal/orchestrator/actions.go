@@ -765,7 +765,7 @@ func (o *Orchestrator) Continue(ctx context.Context, key, note string, files []i
 	extra := note != "" || len(files) > 0
 	to := domain.ContinueState(info[key].From, extra)
 	if extra && !domain.ContinueTakesNote(to) {
-		return cur, invalid("%s goes back to %s, where no Claude run follows; continue without a note or files", key, strings.ReplaceAll(string(to), "_", " "))
+		return cur, invalid("%s goes back to %s, where no %s run follows; continue without a note or files", key, strings.ReplaceAll(string(to), "_", " "), domain.ToolName())
 	}
 	lost := o.restoreBranches(ctx, cur)
 	if lost && cur.Pushed() {
@@ -1500,7 +1500,7 @@ func (o *Orchestrator) RetryWithNote(ctx context.Context, key, note string, file
 		to = domain.StateNew
 	}
 	if (note != "" || len(files) > 0) && to == domain.StatePushing {
-		return t, invalid("this ticket resumes at pushing, which does not run Claude; retry without a note or files")
+		return t, invalid("this ticket resumes at pushing, which does not run %s; retry without a note or files", domain.ToolName())
 	}
 	feedback := ""
 	if note != "" || len(files) > 0 {

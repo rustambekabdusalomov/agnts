@@ -5,7 +5,7 @@
     "addPhoto": "Rasm",
     "camera": "Kamera",
     "addFile": "Fayl",
-    "hint": "Rasmlar, PDF, loglar yoki matn, har biri 10 MB gacha. Claude ularning barchasini oʻqiydi.",
+    "hint": "Rasmlar, PDF, loglar yoki matn, har biri 10 MB gacha. {agent} ularning barchasini oʻqiydi.",
     "uploading": "{name} yuklanmoqda…",
     "remove": "{name} ni olib tashlash",
     "open": "{name} ni ochish",

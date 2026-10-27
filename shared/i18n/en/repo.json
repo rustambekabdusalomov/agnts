@@ -66,7 +66,7 @@
     "commit": "Commit",
     "open": "Open",
     "noEnvironments": "No deployment environments on the git host.",
-    "deployHelp": "agnts waits for checks before a ticket reaches your review. Deploying is always your decision, and it is never available from Claude chat.",
+    "deployHelp": "agnts waits for checks before a ticket reaches your review. Deploying is always your decision, and it is never available from {agent} chat.",
     "deployBranch": "Deploy {branch}",
     "deploy": "Deploy",
     "deployConfirm": "Start {stage} for {sha}?",

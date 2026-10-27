@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/vue-query'
-import { computed } from 'vue'
+import { computed, watchEffect } from 'vue'
 import { api, unwrap } from '../api/client'
 import type { components } from '../api/schema.gen'
+import { agentName } from '../i18n'
 import { modelLabel } from '../api/types'
 
 export type ModelCatalog = components['schemas']['ModelCatalog']
@@ -24,6 +25,10 @@ export function useModels() {
   const has = (p: ModelProvider) => providers.value.includes(p)
   /** Muse Code is the default tool: Claude's plans, windows and wording do not apply. */
   const isMuse = computed(() => primary.value === 'muse')
+  // Messages name the tool as {agent}; keep it in step with the server.
+  watchEffect(() => {
+    if (primary.value) agentName.value = isMuse.value ? 'Muse' : 'Claude'
+  })
   /** Claude Code is not offered (known only once the catalog is in). */
   const claudeOff = computed(() => !!query.data.value && !providers.value.includes('claude'))
   const label = (id: string) => catalogLabel(models.value, id)

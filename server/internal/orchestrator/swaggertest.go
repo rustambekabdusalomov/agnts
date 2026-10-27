@@ -133,7 +133,7 @@ func (o *Orchestrator) swaggerRun(ctx context.Context, s domain.Settings, t doma
 	}
 	if domain.IsCodex(s.ModelFor(t, domain.ModelCoding)) {
 		o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventGuard,
-			Message: "Swagger tests always run on Claude: the credential and API protections depend on agnts-guard, which Codex runs do not have"})
+			Message: "Swagger tests always run on " + domain.ToolName() + ": the credential and API protections depend on agnts-guard, which Codex runs do not have"})
 	}
 	ws, err := o.openWorkspace(ctx, t, rs, run)
 	if err != nil {

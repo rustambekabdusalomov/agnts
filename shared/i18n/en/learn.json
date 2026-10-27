@@ -31,7 +31,7 @@
     "score": "{right} of {total} right",
     "retry": "Try again",
     "readingTitle": "Further reading",
-    "readingNote": "Claude suggested these links. Check them before relying on them.",
+    "readingNote": "{agent} suggested these links. Check them before relying on them.",
     "category_pattern": "Pattern",
     "category_architecture": "Architecture",
     "category_algorithm": "Algorithm",

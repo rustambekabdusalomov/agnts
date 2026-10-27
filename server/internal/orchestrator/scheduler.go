@@ -519,7 +519,7 @@ func (o *Orchestrator) pickAccount(q *wsQueue, it QueueItem) accountPick {
 		paused, until := o.usage.Paused(q.ctx, q.s)
 		p.ok, p.until = !paused, until
 		if paused {
-			p.why = "Claude limit reached"
+			p.why = domain.ToolName() + " limit reached"
 			if !until.IsZero() {
 				p.why += "; resumes at " + until.Format("15:04")
 			}
