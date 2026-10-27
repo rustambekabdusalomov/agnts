@@ -274,7 +274,7 @@ func (d *dockerExecutor) Start(ctx context.Context, cmd muse.Command) (muse.Proc
 		User:       agentUser,
 		WorkingDir: workDir,
 		Env: append([]string{"XDG_DATA_HOME=" + museHome + "/data", "XDG_STATE_HOME=" + museHome + "/state",
-			"MUSE_UPDATE_INTERVAL_SECONDS=31536000", "NO_COLOR=1"}, cmd.Env...),
+			"MUSE_UPDATE_INTERVAL_SECONDS=31536000", "NO_COLOR=1", museFileCredentials}, cmd.Env...),
 	}, &stderr)
 	if err != nil {
 		return nil, err

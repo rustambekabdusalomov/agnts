@@ -17,6 +17,14 @@ import (
 // that file out and keeps it as the person's Muse connection, so the login
 // is exactly what Muse itself made: its client, its scopes, its format.
 
+// museFileCredentials makes Muse keep its login in a file. Its default
+// backend on Linux is a keychain, which lives and dies with the container:
+// `muse login` then succeeds and leaves nothing behind to keep. Runs set
+// it too, so Muse reads the file it is given and writes a refreshed
+// token back into it. (Valid backends, from Muse 1.4.13: file, keychain,
+// keychain_fallback_file.)
+const museFileCredentials = "TBH_CREDENTIAL_BACKEND=file"
+
 // museLoginHome is the login container's home, on a tmpfs (the root
 // filesystem stays read-only).
 const museLoginHome = "/tmp/home"
@@ -74,7 +82,7 @@ func (r *Runner) MuseLogin(ctx context.Context, image string) (MuseLoginPrompt, 
 	a, err := r.docker.ExecAttach(bg, id, ExecConfig{
 		Cmd:  []string{"sh", "-c", `mkdir -p "$HOME" && exec muse login`},
 		User: agentUser,
-		Env:  []string{"HOME=" + museLoginHome, "NO_COLOR=1", "MUSE_UPDATE_INTERVAL_SECONDS=31536000"},
+		Env:  append([]string{"HOME=" + museLoginHome, "NO_COLOR=1", "MUSE_UPDATE_INTERVAL_SECONDS=31536000"}, museFileCredentials),
 	}, &stderr)
 	if err != nil {
 		cleanup()
