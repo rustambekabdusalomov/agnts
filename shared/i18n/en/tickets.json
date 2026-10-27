@@ -1,5 +1,6 @@
 {
   "tickets": {
+    "tabsLabel": "Ticket lists",
     "title": "Tickets",
     "needsYou": "Needs you",
     "running": "Running",

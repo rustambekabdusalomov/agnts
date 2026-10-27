@@ -7,6 +7,7 @@ import PageHeader from '../../components/PageHeader.vue'
 import ClaudeConnect from '../../components/account/ClaudeConnect.vue'
 import MuseConnect from '../../components/account/MuseConnect.vue'
 import FreeCreditsCard from '../../components/account/FreeCreditsCard.vue'
+import PrefsControls from '../../components/PrefsControls.vue'
 import { useModels } from '../../composables/useModels'
 import CfgRow from '../../components/form/CfgRow.vue'
 import TotpQr from '../../components/account/TotpQr.vue'
@@ -164,6 +165,11 @@ const subscriptions = useQuery({ queryKey: ['workspace-claude'], queryFn: () => 
     <FreeCreditsCard v-if="catalog.isMuse.value" always />
 
     <section class="card">
+      <div class="ch"><div><h2>{{ t('settings.appearance') }}</h2><p class="sub">{{ t('settings.appearanceSub') }}</p></div></div>
+      <PrefsControls class="pf-prefs" />
+    </section>
+
+    <section class="card">
       <div class="ch"><div><h2>{{ t('account.passwordTitle') }}</h2><p class="sub">{{ t('account.passwordSub') }}</p></div></div>
       <CfgRow :label="t('account.currentPassword')">
         <input v-model="current" class="cfg-in" type="password" autocomplete="current-password" :aria-label="t('account.currentPassword')">
@@ -214,3 +220,7 @@ const subscriptions = useQuery({ queryKey: ['workspace-claude'], queryFn: () => 
     </section>
   </div>
 </template>
+
+<style scoped>
+.pf-prefs { justify-content: flex-start; }
+</style>

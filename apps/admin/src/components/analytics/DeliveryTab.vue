@@ -153,7 +153,7 @@ const split = (x: AnalyticsDelivery['slowest'][number]) => {
       <div class="mini-kv"><span>{{ t('analytics.answerSlow') }}</span><b>{{ slowText(cur.answerMin) }}</b></div>
       <div class="mini-kv">
         <span>{{ t('analytics.unanswered') }}</span>
-        <b><RouterLink v-if="d.unanswered" :to="{ name: 'tickets' }">{{ d.unanswered }}</RouterLink><template v-else>0</template></b>
+        <b><RouterLink v-if="d.unanswered" :to="{ name: 'tickets', query: { f: 'needs' } }">{{ d.unanswered }}</RouterLink><template v-else>0</template></b>
       </div>
     </section>
 

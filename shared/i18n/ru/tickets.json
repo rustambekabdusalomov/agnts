@@ -1,5 +1,6 @@
 {
   "tickets": {
+    "tabsLabel": "Списки тикетов",
     "title": "Тикеты",
     "needsYou": "Ждёт вас",
     "running": "Выполняется",

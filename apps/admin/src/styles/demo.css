@@ -354,18 +354,6 @@ textarea:focus{border-color:var(--primary); box-shadow:0 0 0 3px var(--ring)}
 section[id]{scroll-margin-top:84px}
 .repo-ok{color:var(--ok-ink); font-weight:700} .repo-miss{color:var(--warn-ink); font-weight:700}
 
-.lang-menu{position:relative}
-.lang-btn{display:inline-flex; align-items:center; gap:6px; height:36px; padding:0 10px; border-radius:9px; border:1px solid var(--line); background:var(--surface); color:var(--ink-2); font-size:13px; font-weight:700; cursor:pointer; transition:background-color .15s, border-color .15s}
-.lang-btn:hover,.lang-btn[aria-expanded="true"]{background:var(--hover); border-color:var(--line-3); color:var(--ink)}
-.lang-btn svg{width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round}
-.lang-dd{position:absolute; top:calc(100% + 6px); right:0; z-index:30; min-width:180px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:6px; box-shadow:0 16px 36px -14px var(--shadow); animation:ddIn .14s ease both}
-@keyframes ddIn{from{opacity:0; transform:translateY(-4px)} to{opacity:1; transform:none}}
-.lang-opt{display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; min-height:38px; padding:0 10px; border:0; border-radius:8px; background:none; font-size:14.5px; color:var(--ink); cursor:pointer; text-align:left}
-.lang-opt:hover,.lang-opt:focus-visible{background:var(--hover); box-shadow:none}
-.lang-opt[aria-checked="true"]{font-weight:700}
-.lang-opt .code{font-size:12px; font-weight:700; color:var(--ink-3)}
-.lang-opt svg{width:16px; height:16px; stroke:var(--primary); fill:none; stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round}
-.theme-btn{color:var(--ink-2)} .theme-btn svg{width:18px; height:18px; stroke-width:1.9}
 
 
 .side-usage{display:flex; flex-direction:column; gap:6px; width:100%; margin-top:6px; padding:10px 10px 9px; border:1px solid var(--line-2); border-radius:10px; background:var(--field); text-align:left; cursor:pointer; transition:background-color .15s, border-color .15s}

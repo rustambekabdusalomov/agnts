@@ -90,11 +90,11 @@ export const NEEDS: TicketState[] = ['waiting_for_answers', 'waiting_for_review'
 
 /** Ticket list filters, as in the demo's sidebar. */
 export const FILTERS: { id: string; icon: string; states: TicketState[] }[] = [
+  { id: 'all', icon: 'all', states: [] },
   { id: 'needs', icon: 'needs', states: NEEDS },
   { id: 'running', icon: 'running', states: RUNNING },
   { id: 'queue', icon: 'queue', states: ['new'] },
   { id: 'done', icon: 'done', states: ['done', 'rejected'] },
-  { id: 'all', icon: 'all', states: [] },
 ]
 
 /** Board columns in workflow order: the sidebar groups, queue first. */

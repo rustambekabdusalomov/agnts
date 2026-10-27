@@ -6,6 +6,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../api/client'
 import { FILTERS, TERMINAL, BOARD_GROUPS, ticketNo } from '../api/types'
 import PageHeader from '../components/PageHeader.vue'
+import HiIcon from '../components/ui/HiIcon.vue'
 import PageNav from '../components/ui/PageNav.vue'
 import StateBadge from '../components/StateBadge.vue'
 import WaitBadge from '../components/WaitBadge.vue'
@@ -18,6 +19,7 @@ import SegButtons from '../components/form/SegButtons.vue'
 import { TRACKERS, type Tracker } from '../components/integrations/providers'
 import { useIntegrations } from '../components/integrations/useIntegrations'
 import { useListView } from '../composables/useListView'
+import { useOpenTickets } from '../composables/useOpenTickets'
 import { ago, fmtTokens, ioTokens, level, pct } from '../composables/format'
 import { livePoll } from '../composables/useLive'
 import { useUi } from '../stores/ui'
@@ -30,7 +32,13 @@ const ui = useUi()
 const workspace = useWorkspace()
 const qc = useQueryClient()
 
+// The tab (?f=, All by default), each with how many tickets are open in it.
 const filter = computed(() => FILTERS.find((f) => f.id === route.query.f) ?? FILTERS[0])
+function setFilter(id: string) {
+  void router.replace({ query: { ...route.query, f: id === 'all' ? undefined : id, page: undefined } })
+}
+const openTickets = useOpenTickets()
+const tabCount = (states: string[]) => (openTickets.data.value ?? []).filter((x) => states.includes(x.state)).length
 
 const tickets = useQuery({
   queryKey: computed(() => ['tickets', filter.value.id]),
@@ -131,13 +139,19 @@ const columns = computed<BoardColumn[]>(() =>
 </script>
 
 <template>
-  <PageHeader :title="t(`nav.${filter.id}`)" doc="list">
+  <PageHeader :title="t('nav.all')" doc="list">
     <div v-if="trackers.length" class="row-actions">
       <button v-for="p in trackers" :key="p" class="btn btn-s" :disabled="sync.isPending.value" @click="sync.mutate(p)">
         <span v-if="sync.isPending.value && sync.variables.value === p" class="spin" aria-hidden="true" />{{ t(p === 'plane' ? 'nav.syncPlane' : 'nav.syncJira') }}
       </button>
     </div>
   </PageHeader>
+
+  <div class="tabs tl-tabs" role="group" :aria-label="t('tickets.tabsLabel')">
+    <button v-for="f in FILTERS" :key="f.id" type="button" class="tab" :aria-pressed="filter.id === f.id" @click="setFilter(f.id)">
+      <HiIcon :name="f.icon" />{{ t(`nav.${f.id}`) }}<span v-if="['needs', 'running', 'queue'].includes(f.id) && tabCount(f.states)" class="tl-n">{{ tabCount(f.states) }}</span>
+    </button>
+  </div>
 
   <div v-if="filter.id === 'needs' && dash.data.value" class="g4">
     <div class="card stat">
@@ -223,4 +237,9 @@ const columns = computed<BoardColumn[]>(() =>
 <style scoped>
 .tk-filters { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .tk-repo { width: 220px; max-width: 100%; }
+.tl-tabs { margin: 0 0 16px; }
+.tl-tabs .tab { display: inline-flex; align-items: center; gap: 7px; }
+.tl-tabs svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.tl-n { min-width: 20px; padding: 0 6px; border-radius: 10px; background: var(--hover); font-size: 12.5px; font-weight: 700; line-height: 20px; text-align: center; font-variant-numeric: tabular-nums; }
+.tl-tabs .tab[aria-pressed="true"] .tl-n { background: rgba(255, 255, 255, 0.2); }
 </style>
